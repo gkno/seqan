@@ -169,7 +169,7 @@ inline typename Convert<TTarget, ProfileType<TSourceValue, TSourceCount, TSource
 convertImpl(Convert<TTarget, T> const,
 			ProfileType<TSourceValue, TSourceCount, TSourceSpec> const & source)
 {
-	return convertImpl(Convert<TTarget, T>(), TSourceValue(source));
+	return (_getMaxIndex(source) == ValueSize<TSourceValue>::VALUE) ? convertImpl(Convert<TTarget, T>(), '-') : convertImpl(Convert<TTarget, T>(), TSourceValue(_getMaxIndex(source)));
 }
 
 //////////////////////////////////////////////////////////////////////////////

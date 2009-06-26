@@ -162,9 +162,8 @@ _align_needleman_wunsch(TTrace & trace,
 	{
 		TScoreValue diagVal = value(column, 0);
 		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
-		TScoreValue vertiVal = value(column, 0);
-
 		TColIterator coit = begin(column, Standard());
+		TScoreValue vertiVal = *coit;
 		TSize col2 = 0;
 
 		while (true)
@@ -174,17 +173,15 @@ _align_needleman_wunsch(TTrace & trace,
 
 			TScoreValue max_hori_verti;
 			TTraceValue tv_hori_verti;
-			if (*coit >= vertiVal)
+			if (*coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2) >= vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2))
 			{
-				max_hori_verti = *coit;
+				max_hori_verti = *coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
 				tv_hori_verti = Horizontal;
-				max_hori_verti += scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
 			}
 			else
 			{
-				max_hori_verti = vertiVal;
+				max_hori_verti = vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2);
 				tv_hori_verti = Vertical;
-				max_hori_verti += scoreGapExtendVertical(_sc, col, col2, str1, str2);
 			}
 
 			// better: use position dependent scoring

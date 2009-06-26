@@ -111,7 +111,7 @@ _align_banded_nw(TColumn& mat,
 			maxVal = mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
 			if (verti_val > maxVal) 
 				maxVal = verti_val;
-			else if (hori_val > maxVal)
+			if (hori_val > maxVal)
 				maxVal = hori_val;
 			
 			// Store the maximum

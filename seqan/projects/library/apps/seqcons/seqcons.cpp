@@ -238,27 +238,67 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 //////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
+	/*
+	typedef unsigned int TSize;
+	typedef int TScore;
 
+	mtRandInit();
+	for(TSize i = 0; i < 100000; ++i) {
+		typedef Dna5Q TAlphabet;
+		typedef ProfileType<TAlphabet> TProfileChar;
+		typedef String<ProfileType<TAlphabet> > TSequence;
+		
+		TSize lenN = mtRand() % 3 + 1;
+		TSize lenM = mtRand() % 3 + 1;
+		TSequence dna1;
+		TSequence dna2;
+		for(TSize i = 0; i<lenN; ++i) {
+			TProfileChar tmp = TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE);
+			tmp.count[ValueSize<TAlphabet>::VALUE] = mtRand() % 10;
+			appendValue(dna1, tmp);
+		}
+		for(TSize j = 0; j<lenM; ++j) {
+			TProfileChar tmp;
+			tmp.count[0] = ordValue(TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+			appendValue(dna2, tmp);
+		}
+		
+		typedef String<ProfileType<TAlphabet> > TSequence;
+		typedef StringSet<TSequence, Dependent<> > TStringSet;
+		typedef Graph<Alignment<TStringSet, void> > TGraph;
 
-/*
-	typedef String<Dna> TSequence;
-	TSequence seq1 = "atcgaatgcgga";
-	TSequence seq2 = "actcgttgca";
-	Score<int> score(0, -1, -1, -1);
+		TStringSet str;
+		appendValue(str, dna1);
+		appendValue(str, dna2);
 
-	typedef StringSet<TSequence, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, void> > TAlignmentGraph;
-
-	TStringSet string_set;
-	appendValue(string_set, seq1);
-	appendValue(string_set, seq2);
-	TAlignmentGraph alignment_graph(string_set);
-
-	::std::cout << "Score = " << globalAlignment(alignment_graph, score, AlignConfig<>(), -1 * length(string_set[1]), length(string_set[0]), BandedNeedlemanWunsch()) << ::std::endl;
-	::std::cout << "Score = " << globalAlignment(alignment_graph, score, AlignConfig<>(), -1 * length(string_set[1]), length(string_set[0]), BandedGotoh()) << ::std::endl;
-	::std::cout << alignment_graph << ::std::endl;
+		//Score<int> score_type = Score<int>(4,-2,-3,-4);
+		//Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > score_type;
+		Score<int, FractionalScore> score_type;
+		TGraph g(str);
+		int sc1 = globalAlignment(g, score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+		int sc2 = globalAlignment(g, score_type, AlignConfig<true,false,false,true>(), -1 * length(str[1]), length(str[0]), BandedNeedlemanWunsch());
+		if (sc1 != sc2) {
+			std::cerr << "Randomized test failed:" << std::endl;
+			std::cerr << "Scores: " << sc1 << ',' << sc2 << std::endl;
+			std::cerr << "Seq1: " << str[0] << std::endl;
+			std::cerr << "Seq2: ";
+			for(TSize i = 0; i<length( str[1]); ++i) {
+				std::cerr << TAlphabet(str[1][i].count[0]);
+			}
+			std::cerr << std::endl;
+			for(TSize i = 0; i<length( str[0]); ++i) {
+				std::cerr << str[0][i] << std::endl;
+			}
+			std::cerr << "..............." << std::endl;
+			for(TSize i = 0; i<length( str[1]); ++i) {
+				std::cerr << str[1][i] << std::endl;
+			}
+			std::cerr << std::endl;
+			exit(0);
+		}
+	}
 	return 0;
-*/
+	*/
 
 
 

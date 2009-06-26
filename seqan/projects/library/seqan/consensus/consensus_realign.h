@@ -322,8 +322,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
 		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-		//::std::cout << "Score = " << globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() ) << ::std::endl;
-		//::std::cout << "Score = " << globalAlignment(matches, pairSet, consScore, AlignConfig<>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch()) << ::std::endl;
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
+
 
 		//// Debug code
 		//std::cout << pairSet[0] << std::endl;
