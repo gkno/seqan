@@ -68,36 +68,35 @@ template <typename TValue>
 class Score<TValue, ConsensusScore>
 {
 public:
-	int column;
-	String<TValue> consensus_set;		// Is the alphabet character part of the consensus set in the given column
-
-
+	String<TValue> consensus_set;		// Is the alphabet character part of the consensus set for each column
 
 public:
-	Score(): column(-1) {}
+	Score() {}
 
 };
 
-
-
-template <typename TValue, typename TPos1, typename TSeq1>
+template <typename TValue, typename TString>
 inline void
-_update(Score<TValue, ConsensusScore>& me,
-		TPos1 const pos1,
-		TSeq1 const& seq1)
+assignProfile(Score<TValue, ConsensusScore>& me,
+			  TString const& profile)
 {
-	typedef typename Value<TSeq1>::Type TProfileType;
-	typedef typename Size<TProfileType>::Type TSize;
-	TProfileType const& myC = value(seq1, pos1);
+	typedef typename Size<TString>::Type TSize;
+	TSize alphSize = ValueSize<typename Value<TString>::Type>::VALUE;
+	resize(me.consensus_set, alphSize * length(profile));
+
+	typedef typename Iterator<TString, Standard>::Type TIter;
+	typedef typename Iterator<String<TValue>, Standard>::Type TConsSetIter;
+	TConsSetIter itConsSet = begin(me.consensus_set, Standard());
+	TIter it = begin(profile, Standard());
+	TIter itEnd = end(profile, Standard());
 	TSize maxCount = 0;
-	TSize alphSize = ValueSize<TProfileType>::VALUE;
-	resize(me.consensus_set, alphSize);
-	for(TSize i = 0; i<alphSize; ++i) {
-		if (myC.count[i] > maxCount) maxCount = myC.count[i];
+	for(;it!=itEnd;++it) {
+		maxCount = 0;
+		for(TSize i = 0; i<alphSize; ++i)
+			if ((*it).count[i] > maxCount) maxCount = (*it).count[i];
+		for(TSize i = 0; i<alphSize; ++i, ++itConsSet)
+			*itConsSet = ((*it).count[i] == maxCount)? 0 : (-SEQAN_CONSENSUS_UNITY);
 	}
-	for(TSize i = 0; i<alphSize; ++i)
-		me.consensus_set[i] = (myC.count[i] == maxCount)? 0 : (-SEQAN_CONSENSUS_UNITY);
-	me.column = pos1;
 }
 
 
@@ -107,12 +106,10 @@ scoreGapExtendHorizontal(
 	Score<TValue, ConsensusScore> const & me,
 	TPos1 pos1,
 	TPos2 pos2,
-	TSeq1 const &seq1,
+	TSeq1 const &,
 	TSeq2 const &)
 {
-	if ((int) pos2 < 0) return -SEQAN_CONSENSUS_UNITY;
-	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	return me.consensus_set[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1];
+	return ((int) pos2 < 0) ? -SEQAN_CONSENSUS_UNITY : me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + (ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)];
 }
 
 
@@ -134,11 +131,10 @@ inline TValue
 score(Score<TValue, ConsensusScore> const & me,
 	  TPos1 pos1,
 	  TPos2 pos2,
-	  TSeq1 const &seq1,
+	  TSeq1 const &,
 	  TSeq2 const &seq2)
 {
-	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, ConsensusScore>&>(me), pos1, seq1);
-	return me.consensus_set[seq2[pos2].count[0]];
+	return me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + seq2[pos2].count[0]];
 }
 
 
@@ -160,26 +156,30 @@ template <typename TValue>
 class Score<TValue, FractionalScore>
 {
 public:
-	int sum;		// Total number of profile characters in the given column
-	int column;
-
+	String<int> sum;		// Total number of profile characters in each column
 
 public:
-	Score(): column(-1) {}
-
+	Score() {}
 };
 
 
-template <typename TValue, typename TPos1, typename TSeq1>
+template <typename TValue, typename TString>
 inline void
-_update(Score<TValue, FractionalScore>& me,
-		TPos1 const pos1,
-		TSeq1 const& seq1)
+assignProfile(Score<TValue, FractionalScore>& me,
+			  TString const& profile)
 {
-	typedef typename Size<TSeq1>::Type TSize;
-	me.sum = 0;
-	for(TSize i = 0; i < (TSize) ValueSize<typename Value<TSeq1>::Type>::VALUE; ++i) me.sum += seq1[pos1].count[i];
-	me.column = pos1;
+	typedef typename Size<TString>::Type TSize;
+	resize(me.sum, length(profile));
+	typedef typename Iterator<TString, Standard>::Type TIter;
+	typedef typename Iterator<String<int>, Standard>::Type TSumIter;
+	TSumIter itSum = begin(me.sum, Standard());
+	TIter it = begin(profile, Standard());
+	TIter itEnd = end(profile, Standard());
+	for(;it!=itEnd;++it, ++itSum) {
+		*itSum = 0;
+		for(TSize i = 0; i < (TSize) ValueSize<typename Value<TString>::Type>::VALUE; ++i) 
+			*itSum += (*it).count[i];
+	}
 }
 
 
@@ -192,10 +192,7 @@ scoreGapExtendHorizontal(
 	TSeq1 const &seq1,
 	TSeq2 const &)
 {
-	if ((int) pos2 < 0) return -SEQAN_CONSENSUS_UNITY;
-	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return (me.sum == 0) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
-	//return ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	return (( (int) pos2 < 0) || (!me.sum[pos1])) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum[pos1]) * SEQAN_CONSENSUS_UNITY) / me.sum[pos1]);
 }
 
 
@@ -220,9 +217,7 @@ score(Score<TValue, FractionalScore> const & me,
 	  TSeq1 const &seq1,
 	  TSeq2 const &seq2)
 {
-	if ((int) pos1 != me.column) _update(const_cast<Score<TValue, FractionalScore>&>(me), pos1, seq1);
-	return (me.sum == 0) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
-	//return ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum ) * SEQAN_CONSENSUS_UNITY) / me.sum);
+	return (!me.sum[pos1]) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (((int) seq1[pos1].count[seq2[pos2].count[0]] - me.sum[pos1]) * SEQAN_CONSENSUS_UNITY) / me.sum[pos1]);
 }
 
 
@@ -250,6 +245,17 @@ public:
 	Score() {}
 
 };
+
+
+template <typename TValue, typename TScore1, typename TScore2, typename TString>
+inline void
+assignProfile(Score<TValue, WeightedConsensusScore<TScore1, TScore2> >& me,
+			  TString const& profile)
+{
+	assignProfile(me.sc1, profile);
+	assignProfile(me.sc2, profile);
+}
+
 
 
 template <typename TValue, typename TScore1, typename TScore2, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>

@@ -503,8 +503,6 @@ int main(int argc, const char *argv[]) {
 
 		if (consOpt.realign) {
 			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
-			//Score<int, ConsensusScore> combinedScore;
-			//Score<int, FractionalScore> combinedScore;
 			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, false);
 		} else {
 			

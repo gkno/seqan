@@ -175,7 +175,7 @@ inline void
 reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		String<TAlignedRead, TSpec>& contigReads,
 		TConsensus& consensus,
-		TScore const& consScore,
+		TScore& consScore,
 		TBandwidth const bandwidth,
 		bool includeReference)
 {
@@ -321,6 +321,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
+		assignProfile(consScore, bandConsensus);
 		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
 		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
 
@@ -416,7 +417,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
-		TScore const& consScore,
+		TScore& consScore,
 		TId const contigId,
 		TBandwidth const bandwidth,
 		bool includeReference)

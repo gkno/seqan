@@ -77,12 +77,15 @@ _align_banded_nw(TColumn& mat,
 	//std::cout << std::endl;
 
 	// Classical DP with affine gap costs
+	TSize actualCol = 0;
+	TScoreValue verti_val = 0;
+	TScoreValue hori_val = 0;
 	for(TSize row = 0; row < height; ++row) {
 		TSize actualRow = row + lo_row;
 		if (lo_diag > 0) --lo_diag;
 		if (row + lo_row >= len1 - diagU) --hi_diag;
 		for(TSize col = lo_diag; col<hi_diag; ++col) {
-			TSize actualCol = col + diagL + actualRow;
+			actualCol = col + diagL + actualRow;
 			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			// Usual initialization for first row and column
@@ -97,14 +100,10 @@ _align_banded_nw(TColumn& mat,
 			}
 
 			// Get the new maximum for vertical
-			TScoreValue verti_val = infValue;
-			if (col < diagonalWidth - 1) 
-				verti_val = mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+			verti_val = (col < diagonalWidth - 1) ?	mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
 
 			// Get the new maximum for horizontal
-			TScoreValue hori_val = infValue;
-			if (col > 0) 
-				hori_val = mat[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);;
+			hori_val = (col > 0) ? mat[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
 
 			// Get the new maximum for mat
 			TScoreValue& maxVal = mat[row * diagonalWidth + col];
