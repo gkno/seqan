@@ -143,8 +143,8 @@ _align_needleman_wunsch(TTrace & trace,
 	TSize len2 = length(str2);
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
-	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), value(column, row), (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
-	value(column, 0) = 0;
+	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), column[row], (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
+	column[0] = 0;
 	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
@@ -157,50 +157,42 @@ _align_needleman_wunsch(TTrace & trace,
 
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator col_end = end(column, Standard());
-	
+	TScoreValue diagVal = 0;
+	TScoreValue vertiVal = 0;
+	TScoreValue max_verti = 0;
+	TScoreValue max_hori_verti = 0;
+	TTraceValue tv_hori_verti = Diagonal;
+	TSize col2 = 0;
 	for(TSize col = 0; col < len1; ++col) 
 	{
-		TScoreValue diagVal = value(column, 0);
-		_initFirstRow(TAlignConfig(), value(column, 0), (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
+		diagVal = column[0];
+		_initFirstRow(TAlignConfig(),column[0], (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
 		TColIterator coit = begin(column, Standard());
-		TScoreValue vertiVal = *coit;
-		TSize col2 = 0;
+		vertiVal = *coit;
+		col2 = 0;
 
-		while (true)
+		for(;++coit != col_end; ++it)
 		{
-			++coit;
-			if (coit == col_end) break;
-
-			TScoreValue max_hori_verti;
-			TTraceValue tv_hori_verti;
-			if (*coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2) >= vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2))
+			// Get max for vertical and horizontal
+			max_verti = vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2);
+			max_hori_verti = *coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
+			tv_hori_verti = Horizontal;
+			if (max_hori_verti < max_verti)
 			{
-				max_hori_verti = *coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
-				tv_hori_verti = Horizontal;
-			}
-			else
-			{
-				max_hori_verti = vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2);
+				max_hori_verti = max_verti;
 				tv_hori_verti = Vertical;
 			}
 
-			// better: use position dependent scoring
-			vertiVal = diagVal + score(_sc, col, col2, str1, str2); //compute the maximum in vertiVal 
-			++col2;
-
-			if (vertiVal >= max_hori_verti)
-			{
-				*it = Diagonal;
-				++it;
-			}
-			else
-			{
+			// Get the diagonal value
+			vertiVal = diagVal + score(_sc, col, col2++, str1, str2); //compute the maximum in vertiVal 
+			
+			// Choose the max
+			if (vertiVal >= max_hori_verti) *it = Diagonal;
+			else {
 				vertiVal = max_hori_verti;
-
 				*it = tv_hori_verti;
-				++it;
+				
 			}
-
 			diagVal = *coit;
 			*coit = vertiVal;
 		}
