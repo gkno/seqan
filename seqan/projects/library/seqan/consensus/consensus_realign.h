@@ -233,6 +233,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			bandOffset = alignIt->beginPos - bandwidth;
 			itCons += bandOffset; itConsPos += bandOffset;
 		}
+		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
+		int rightDiag = leftDiag + 2 * bandwidth;
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons;
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
@@ -322,9 +324,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
-		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
-
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag, -1 * (int) length(pairSet[1])), _min(rightDiag, (int) length(pairSet[0])), BandedNeedlemanWunsch());
 
 		//// Debug code
 		//std::cout << pairSet[0] << std::endl;

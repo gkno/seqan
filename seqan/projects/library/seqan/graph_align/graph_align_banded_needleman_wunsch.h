@@ -25,6 +25,160 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlign, typename TStringSet, typename TScore, typename TColumn, typename TValPair, typename TIndexPair, typename TDiagonal>
+inline void
+_align_banded_nw_trace(TAlign& align,
+					   TStringSet const& str,
+					   TScore const& sc,
+					   TColumn const& mat,
+					   TValPair const& overallMaxValue,
+					   TIndexPair const& overallMaxIndex,
+					   TDiagonal const diagL,
+					   TDiagonal const diagU)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Size<TColumn>::Type TSize;
+	typedef unsigned char TTraceValue;
+
+	// Gotoh back-trace values
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+
+	// Initialization
+	TScoreValue infValue = InfimumValue<TScoreValue>::VALUE;
+	TString const& str1 = str[0];
+	TString const& str2 = str[1];	
+	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
+	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
+	TSize len1 = length(str1) + 1;
+	TSize len2 = length(str2) + 1;
+	TSize lo_row = 0;
+	if (diagU <= 0) lo_row = -1 * diagU;
+	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
+	
+	//// Debug stuff
+	//TColumn originalMat;
+	//resize(originalMat, len1 * len2);
+	//TSize count = 0;
+	//for(TSize i=0; i<len2; ++i) {
+	//	for(TSize j=0; j<len1; ++j) {
+	//		value(originalMat, i * len1 + j) = count;
+	//		std::cout << count << ',';
+	//		++count;
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << std::endl;
+
+	// Start the trace from the cell with the max value
+	TSize row = 0;
+	TSize col = 0;
+	if (overallMaxValue.i1 > overallMaxValue.i2) {
+		row = overallMaxIndex.i1.i1;
+		col = overallMaxIndex.i1.i2;
+	} else {
+		row = overallMaxIndex.i2.i1;
+		col = overallMaxIndex.i2.i2;
+	}
+
+	// Handle the skipped sequence parts
+	TSize actualRow = row + lo_row;
+	TSize actualCol = col + diagL + actualRow;
+	if (actualCol + 1 < len1) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len1 - (actualCol + 1)),  Horizontal);
+	if (actualRow + 1 < len2) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len2 - (actualRow + 1)),  Vertical);
+
+	// Find initial direction
+	TTraceValue tv = Diagonal;
+	TScoreValue diag_val = mat[row * diagonalWidth + col];
+	TScoreValue verti_val = (col < diagonalWidth - 1) ?	mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
+	TScoreValue hori_val = (col > 0) ? mat[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
+	if (hori_val == diag_val) {
+		tv = Horizontal;
+		--col;
+	} else if (verti_val == diag_val) {
+		tv = Vertical;
+		--row; ++col;
+	} else {
+		--row;
+	}
+	
+	// Walk until we hit a border
+	TTraceValue oldTraceValue = tv;
+	TSize seqLen = 1;
+	while(true) {
+		actualRow = row + lo_row;
+		actualCol = col + diagL + actualRow;
+
+		diag_val = mat[row * diagonalWidth + col];
+
+		/*
+		// Direction changed, so make aligned segments
+		if (oldTraceValue != tv) {
+			_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+			seqLen = 0;
+		}
+		*/
+
+		// Check if we hit a border
+		if ((actualRow == 0) || (actualCol == 0)) break;
+		else {
+			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl; 
+			
+			// Last value was diagonal
+			oldTraceValue = tv;
+			if (tv == Diagonal) {
+				verti_val = (col < diagonalWidth - 1) ?	mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
+				hori_val = (col > 0) ? mat[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
+				if (hori_val == mat[row * diagonalWidth + col]) {
+					tv = Horizontal;
+					_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+					--col; seqLen = 1;
+				} else if (verti_val == mat[row * diagonalWidth + col]) {
+					tv = Vertical;
+					_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+					--row; ++col; seqLen = 1;
+				} else {
+					--row; ++seqLen;
+				}
+			} else {
+				diag_val = mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+				if (tv == Horizontal) { // Last value was horizontal
+					if (diag_val == mat[row * diagonalWidth + col]) {
+						tv = Diagonal;
+						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+						--row; seqLen = 1;
+					} else {
+						--col; ++seqLen;
+					}
+				} else { // Vertical
+					if (diag_val == mat[row * diagonalWidth + col]) {
+						tv = Diagonal;
+						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+						--row; seqLen = 1;
+					} else {
+						--row; ++col; ++seqLen;
+					}
+				}
+			}
+		}
+	}
+	
+	// Align left overs
+	if (seqLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+
+	// Handle the remaining sequence
+	if (actualCol != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
+	else if (actualRow != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow,  Vertical);
+
+}
+
+////////////////////////////////////////////////////////////////////////////
+
+
 template <typename TColumn, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TDiagonal, typename TAlignConfig>
 inline typename Value<TScore>::Type
 _align_banded_nw(TColumn& mat,
@@ -150,7 +304,7 @@ _globalAlignment(TAlign& align,
 	TScoreValue maxScore = _align_banded_nw(mat, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 	
 	// Follow the trace and create the graph
-	//_align_banded_gotoh_trace(align, str, sc, mat, horizontal, vertical, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
+	_align_banded_nw_trace(align, str, sc, mat, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
 
 	return maxScore;
 }

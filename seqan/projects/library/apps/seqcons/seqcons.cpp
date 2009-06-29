@@ -238,32 +238,22 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 //////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
-	/*
+/*
 	typedef unsigned int TSize;
 	typedef int TScore;
 
 	mtRandInit();
-	for(TSize i = 0; i < 100000; ++i) {
+	for(TSize i = 0; i < 1000000; ++i) {
 		typedef Dna5Q TAlphabet;
-		typedef ProfileType<TAlphabet> TProfileChar;
-		typedef String<ProfileType<TAlphabet> > TSequence;
+		typedef String<TAlphabet> TSequence;
 		
-		TSize lenN = mtRand() % 3 + 1;
-		TSize lenM = mtRand() % 3 + 1;
+		TSize lenN = mtRand() % 10 + 5;
+		TSize lenM = mtRand() % 10 + 5;
 		TSequence dna1;
 		TSequence dna2;
-		for(TSize i = 0; i<lenN; ++i) {
-			TProfileChar tmp = TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE);
-			tmp.count[ValueSize<TAlphabet>::VALUE] = mtRand() % 10;
-			appendValue(dna1, tmp);
-		}
-		for(TSize j = 0; j<lenM; ++j) {
-			TProfileChar tmp;
-			tmp.count[0] = ordValue(TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
-			appendValue(dna2, tmp);
-		}
-		
-		typedef String<ProfileType<TAlphabet> > TSequence;
+		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+				
 		typedef StringSet<TSequence, Dependent<> > TStringSet;
 		typedef Graph<Alignment<TStringSet, void> > TGraph;
 
@@ -271,37 +261,35 @@ int main(int argc, const char *argv[]) {
 		appendValue(str, dna1);
 		appendValue(str, dna2);
 
-		//Score<int> score_type = Score<int>(4,-2,-3,-4);
+		Score<int> score_type = Score<int>(4,-2,-3,-3);
 		//Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > score_type;
-		Score<int, FractionalScore> score_type;
-		TGraph g(str);
-		int sc1 = globalAlignment(g, score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-		int sc2 = globalAlignment(g, score_type, AlignConfig<true,false,false,true>(), -1 * length(str[1]), length(str[0]), BandedNeedlemanWunsch());
+		//Score<int, FractionalScore> score_type;
+		//assignProfile(score_type, dna1);
+		TGraph g1(str);
+		int sc1 = globalAlignment(g1, score_type, AlignConfig<false,false,false,false>(), 0, 5, BandedGotoh() );
+		TGraph g2(str);
+		int sc2 = globalAlignment(g2, score_type, AlignConfig<false,false,false,false>(), 0, 5, BandedNeedlemanWunsch());
+		std::cerr << g1 << std::endl;
+		std::cerr << g2 << std::endl;
 		if (sc1 != sc2) {
 			std::cerr << "Randomized test failed:" << std::endl;
 			std::cerr << "Scores: " << sc1 << ',' << sc2 << std::endl;
-			std::cerr << "Seq1: " << str[0] << std::endl;
-			std::cerr << "Seq2: ";
-			for(TSize i = 0; i<length( str[1]); ++i) {
-				std::cerr << TAlphabet(str[1][i].count[0]);
-			}
-			std::cerr << std::endl;
-			for(TSize i = 0; i<length( str[0]); ++i) {
-				std::cerr << str[0][i] << std::endl;
-			}
-			std::cerr << "..............." << std::endl;
-			for(TSize i = 0; i<length( str[1]); ++i) {
-				std::cerr << str[1][i] << std::endl;
-			}
-			std::cerr << std::endl;
+			std::cerr << "Seq1: " << dna1 << std::endl;
+			std::cerr << "Seq2: " << dna2 << std::endl;
+			std::cerr << g1 << std::endl;
+			std::cerr << g2 << std::endl;
+			clearVertices(g1);
+			globalAlignment(g1, score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+			clearVertices(g2);
+			globalAlignment(g2, score_type, AlignConfig<true,false,false,true>(), -1 * length(str[1]), length(str[0]), BandedNeedlemanWunsch());
+
 			exit(0);
 		}
 	}
 	return 0;
-	*/
 
 
-
+*/
 	
 	typedef unsigned int TSize;
 
