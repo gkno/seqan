@@ -239,6 +239,7 @@ updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
 
 int main(int argc, const char *argv[]) {
 /*
+
 	typedef unsigned int TSize;
 	typedef int TScore;
 
@@ -248,7 +249,7 @@ int main(int argc, const char *argv[]) {
 		typedef String<TAlphabet> TSequence;
 		
 		TSize lenN = mtRand() % 10 + 5;
-		TSize lenM = mtRand() % 10 + 5;
+		TSize lenM = mtRand() % 4 + 5;
 		TSequence dna1;
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
@@ -266,10 +267,12 @@ int main(int argc, const char *argv[]) {
 		//Score<int, FractionalScore> score_type;
 		//assignProfile(score_type, dna1);
 		TGraph g1(str);
-		int sc1 = globalAlignment(g1, score_type, AlignConfig<false,false,false,false>(), 0, 5, BandedGotoh() );
+		int sc1 = globalAlignment(g1, score_type, AlignConfig<true,false,false,true>(), 0, 5, BandedGotoh() );
 		TGraph g2(str);
-		int sc2 = globalAlignment(g2, score_type, AlignConfig<false,false,false,false>(), 0, 5, BandedNeedlemanWunsch());
+		int sc2 = globalAlignment(g2, score_type, AlignConfig<true,false,false,true>(), 0, 5, BandedNeedlemanWunsch());
+		std::cerr << sc1 << std::endl;
 		std::cerr << g1 << std::endl;
+		std::cerr << sc2 << std::endl;
 		std::cerr << g2 << std::endl;
 		if (sc1 != sc2) {
 			std::cerr << "Randomized test failed:" << std::endl;
@@ -287,9 +290,10 @@ int main(int argc, const char *argv[]) {
 		}
 	}
 	return 0;
-
-
 */
+
+
+
 	
 	typedef unsigned int TSize;
 

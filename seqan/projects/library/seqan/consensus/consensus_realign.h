@@ -235,6 +235,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
 		int rightDiag = leftDiag + 2 * bandwidth;
+		int increaseBand = 0;
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons;
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
@@ -271,13 +272,17 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
-				} else removeGap(contigReads, itConsPos);
+				} else {
+					removeGap(contigReads, itConsPos);
+					++increaseBand; // Only increase the band iff the column is deleted
+				}
 				(*myReadIt).count[0] = ordValue(*itRead); 
 				++myReadIt;
 				++itCons;
 			}
 			for(;diff < newDiff; ++diff) {
 				--(*itCons).count[gapPos];
+				++increaseBand; // Former gap in the read is removed so increase the band
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
 					++bandConsIt;
@@ -293,7 +298,10 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
-				} else removeGap(contigReads, itConsPos);
+				} else {
+					removeGap(contigReads, itConsPos);
+					++increaseBand;
+				}
 				(*myReadIt).count[0] = ordValue(*itRead); 
 				++myReadIt;
 				++itCons;
@@ -325,15 +333,24 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
 		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag, -1 * (int) length(pairSet[1])), _min(rightDiag, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
+		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
 
 		//// Debug code
 		//std::cout << pairSet[0] << std::endl;
 		//std::cout << pairSet[1] << std::endl;
+		//std::cout << increaseBand << ',';
+		//std::cout << _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])) << ',' <<  _min(rightDiag + increaseBand, (int) length(pairSet[0])) << std::endl;
 		//Graph<Alignment<TStringSet, void, WithoutEdgeId> > g(pairSet);
-		//std::cout << globalAlignment(g, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() ) << std::endl;
+		//int sc1 = globalAlignment(g, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
 		//std::cout << g << std::endl;
+		//clearVertices(g);
+		//int sc2 = globalAlignment(g, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		//std::cout << g << std::endl;
+		//if (sc1 != sc2) {
+		//	std::cerr << "Error" << std::endl;
+		//	exit(0);
+		//}
 
 		// Add the read back to the consensus and build the new consensus
 		resize(newConsensus, length(bandConsensus) + length(myRead));
