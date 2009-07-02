@@ -802,6 +802,10 @@ _pairWiseSumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		//std::cout << *seq1It << ',' << *seq2It << std::endl;
 		if ((*seq1It == gapChar) && (*seq2It == gapChar)) continue;
 		if (*seq1It == gapChar) {
+			if ((row == 0) && (initialTop)) {
+				initialTop = false;
+				totalScore = 0;
+			} 
 			if (seq1GapOpen) {
 				totalScore += scoreGapExtendHorizontal(sc, col, row, str1, str2);
 			} else {
@@ -815,6 +819,10 @@ _pairWiseSumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				totalScore = lastGap;
 			}
 		} else if (*seq2It == gapChar) {
+			if ((col == 0) && (initialLeft)) {
+				initialLeft = false;
+				totalScore = 0;
+			}
 			if (seq2GapOpen) {
 				totalScore += scoreGapExtendVertical(sc, col, row, str1, str2);
 			} else {
@@ -854,7 +862,7 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef int TScore;
 
 	mtRandInit();
-	for(TSize i = 0; i < 10; ++i) {
+	for(TSize i = 0; i < 100; ++i) {
 		typedef Dna5Q TAlphabet;
 		typedef String<TAlphabet> TSequence;
 		
@@ -864,8 +872,8 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
 		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
-		//dna1 = "TTAGC";
-		//dna2 = "AGCGA";
+		//dna1 = "AGGACAAAA";
+		//dna2 = "TTGTT";
 		
 		TSize len1 = length(dna1);
 		TSize len2 = length(dna2);
@@ -880,8 +888,8 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		int gapScore =  -1 * (int) (mtRand() % 5);
 		if (gapScore > misMatchScore) gapScore = misMatchScore;
 		//matchScore = 0;
-		//misMatchScore = -3;
-		//gapScore = -3;
+		//misMatchScore = -2;
+		//gapScore = -2;
 
 		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapScore);
 		typedef String<Fragment<> > TFragmentString;
@@ -914,6 +922,7 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TGraph g1(str);
 		globalAlignment(g1, score_type, ac, NeedlemanWunsch());
 		int sc1 = _pairWiseSumOfPairsScore(g1, score_type, ac);
+		//std::cerr << g1 << std::endl;
 		TGraph g2(str);
 		globalAlignment(g2, score_type, ac, lowDiag, highDiag, BandedNeedlemanWunsch());
 		int sc2 = _pairWiseSumOfPairsScore(g2, score_type, ac);
@@ -923,15 +932,16 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TGraph g4(str);
 		globalAlignment(g4, score_type, ac, Gotoh());
 		int sc4 = _pairWiseSumOfPairsScore(g4, score_type, ac);
+/*		
 		TGraph g5(str);
 		globalAlignment(g5, score_type, ac, lowDiag, highDiag, BandedGotoh());
 		int sc5 = _pairWiseSumOfPairsScore(g5, score_type, ac);
 		TGraph g6(str);
 		globalAlignment(g6, score_type, ac, -1 * length(dna2), length(dna1), BandedGotoh());
 		int sc6 = _pairWiseSumOfPairsScore(g6, score_type, ac);
-
-		sc6 = sc4;
-		sc5 = sc4;
+*/
+		int sc6 = sc4;
+		int sc5 = sc4;
 
 
 		if ((sc1 != sc2) || (sc2 != sc3) || (sc3 != sc4) || (sc4 != sc5) || (sc5 != sc6)) {
@@ -949,11 +959,11 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 			std::cerr << "Score: " << sc3 << std::endl;
 			std::cerr << g4 << std::endl;
 			std::cerr << "Score: " << sc4 << std::endl;
-			std::cerr << g5 << std::endl;
-			std::cerr << "Score: " << sc5 << std::endl;
-			std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
-			std::cerr << g6 << std::endl;
-			std::cerr << "Score: " << sc6 << std::endl;
+			//std::cerr << g5 << std::endl;
+			//std::cerr << "Score: " << sc5 << std::endl;
+			//std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
+			//std::cerr << g6 << std::endl;
+			//std::cerr << "Score: " << sc6 << std::endl;
 			exit(-1);
 		}
 	}
@@ -1046,14 +1056,14 @@ void Test_SmithWatermanClump() {
 
 void Test_GraphAlignment() {
 	// Global alignments
-	Test_NeedlemanWunsch();
-	Test_Gotoh();	
-	Test_Hirschberg();
+	//Test_NeedlemanWunsch();
+	//Test_Gotoh();	
+	//Test_Hirschberg();
 	Test_AllAgainstAll();
 
 	// Local alignments
-	Test_SmithWaterman();
-	Test_SmithWatermanClump();
+	//Test_SmithWaterman();
+	//Test_SmithWatermanClump();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_config.h");

@@ -51,8 +51,8 @@ _align_gotoh_trace(TAlign& align,
 
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
-	TSize len1 = overallMaxIndex.first;
-	TSize len2 = overallMaxIndex.second;
+	TSize len1 = overallMaxIndex[0];
+	TSize len2 = overallMaxIndex[1];
 	if (len1 < length(str[0])) {
 		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1,  Horizontal);
 	} else if (len2 < length(str[1])) {
@@ -165,9 +165,7 @@ _align_gotoh(TTrace& trace,
 	typedef typename Value<TTrace>::Type TTraceValue;
 
 	// TraceBack values for Gotoh
-	TTraceValue Diagonal = 0;
-	TTraceValue Horizontal = 1;
-	TTraceValue Vertical = 2;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
 	// The DP Matrix for diagonal walks
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -186,7 +184,6 @@ _align_gotoh(TTrace& trace,
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
-	TScoreValue tmp = 0;
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
@@ -195,122 +192,82 @@ _align_gotoh(TTrace& trace,
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	// Max values: overall.first = last column, overall.second = last row
-	TScoreValue infValue = -1 * _getInfinityDistance<TScoreValue>();
-	overallMaxValue = std::make_pair(infValue, infValue);
-	overallMaxIndex = std::make_pair(len1, len2);
-	assignValue(mat, 0, 0);
+	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxIndex[0] = len1;
+	overallMaxIndex[1] = len2;
+	mat[0] = 0;
+
+	TScoreValue a = 0;
+	TScoreValue b = 0;
+	TScoreValue max_val = 0;
 	for(TSize row = 1; row <= len2; ++row) {
-		_initFirstColumn(TAlignConfig(), value(mat, row), gapOpen + (row - 1) * gap);
-		assignValue(horizontal, row, value(mat, row) + gapOpen - gap);
+		_initFirstColumn(TAlignConfig(), mat[row], gapOpen + (row - 1) * gap);
+		horizontal[row] = mat[row] + gapOpen - gap;
 		//std::cout << getValue(mat, row) << std::endl;
 		//std::cout << getValue(horizontal, row) << std::endl;
 		//std::cout << "====" << std::endl;
 	}
 	for(TSize col = 1; col <= len1; ++col) {
-		TScoreValue diagValMat = value(mat, 0);
-		_initFirstRow(TAlignConfig(), value(mat, 0), gapOpen + (col - 1) * gap);
-		vert = value(mat, 0) + gapOpen - gap;
-		for(TSize row = 1; row <= len2; ++row) {
+		TScoreValue diagValMat = mat[0];
+		_initFirstRow(TAlignConfig(), mat[0], gapOpen + (col - 1) * gap);
+		vert = mat[0] + gapOpen - gap;
+		for(TSize row = 1; row <= len2; ++row, ++it) {
 			// Get the new maximum for vertical
-			if ((tmp = value(mat, row - 1) + gapOpen) > vert + gap) {
-				vert = tmp;
-				tvVertical = Diagonal;
-			} else {
-				vert = vert + gap;
-				tvVertical = Vertical;
-			}
+			a = mat[row - 1] + gapOpen;
+			b = vert + gap;
+			if (a > b) {vert = a;	tvVertical = Diagonal;}
+			else { vert = b; tvVertical = Vertical;}
 
 			// Get the new maximum for left
-			if ((tmp = value(mat, row) + gapOpen) > value(horizontal, row) + gap) {
-				assignValue(horizontal, row, tmp);
-				tvHorizontal = Diagonal;
-			} else {
-				assignValue(horizontal, row, value(horizontal, row) + gap);
-				tvHorizontal = Horizontal;
-			}
+			a = mat[row] + gapOpen;
+			b = horizontal[row] + gap;
+			if (a > b) {horizontal[row] = a; tvHorizontal = Diagonal;}
+			else {horizontal[row] = b; tvHorizontal = Horizontal;}
 
 			// Get the new maximum for mat
-			TScoreValue sc_ = score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
-			tmp = diagValMat + sc_;
+			max_val = diagValMat + score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
 			tvMat = Diagonal;
-			if (vert > tmp) {
-				tmp = vert;
+			if (vert > max_val) {
+				max_val = vert;
 				tvMat = Vertical;
 			}
-			if (value(horizontal, row) > tmp) {
-				tmp = value(horizontal,row);
+			if (horizontal[row] > max_val) {
+				max_val = horizontal[row];
 				tvMat = Horizontal;
 			}
 
 			// Assign the new diagonal values
-			diagValMat = value(mat, row);
-			assignValue(mat, row, tmp);
+			diagValMat = mat[row];
+			mat[row] = max_val;
 
 			// Assign the right trace value
 			if (tvMat == Diagonal) {
-				if (tvHorizontal == Diagonal) {
-					if (tvVertical == Diagonal) assignValue(it, 0);
-					else assignValue(it, 1);
-				} else if (tvHorizontal == Horizontal) {
-					if (tvVertical == Diagonal) assignValue(it, 2);
-					else assignValue(it, 3);
-				}
+				if (tvHorizontal == Diagonal) *it = (tvVertical == Diagonal) ? 0 : 1;
+				else if (tvHorizontal == Horizontal) *it = (tvVertical == Diagonal) ? 2 : 3;
 			} else if (tvMat ==  Horizontal) {
-				if (tvHorizontal ==  Diagonal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 4);
-					else assignValue(it, 5);
-				} else if (tvHorizontal ==  Horizontal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 6);
-					else assignValue(it, 7);
-				}
+				if (tvHorizontal ==  Diagonal) *it = (tvVertical ==  Diagonal) ? 4 : 5;
+				else if (tvHorizontal ==  Horizontal) *it = (tvVertical ==  Diagonal) ? 6 : 7;
 			} else if (tvMat ==  Vertical) {
-				if (tvHorizontal ==  Diagonal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 8);
-					else assignValue(it, 9);
-				} else if (tvHorizontal ==  Horizontal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 10);
-					else assignValue(it, 11);
-				}
+				if (tvHorizontal ==  Diagonal) *it = (tvVertical ==  Diagonal) ? 8 : 9;
+				else if (tvHorizontal ==  Horizontal) *it =  (tvVertical ==  Diagonal) ? 10 : 11;
 			}
-			goNext(it);
 		}
-		_processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, getValue(mat, len2), col);
+		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[len2], col);
 		// If we got a new index, store direction
-		if (overallMaxIndex.first == col) {
-			tmp = getValue(mat, len2);
-			initialDir =  Diagonal;
-			if (vert == tmp) {
-				initialDir =  Vertical;
-			}
-		}
+		if (overallMaxIndex[0] == col) initialDir = tvMat;
 	}
-	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, mat);
+	_lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, mat);
+	
 	// If we got a new index, store direction
-	if (overallMaxIndex.second != len2) {
-		if (overallMaxValue.second > overallMaxValue.first) {
-			overallMaxIndex.first = len1;
-			tmp = getValue(mat, overallMaxIndex.second);
-			initialDir =  Diagonal;
-			if (getValue(horizontal, overallMaxIndex.second) ==  tmp) {
-				initialDir =  Horizontal;
-			}
-		} else if (overallMaxIndex.first != len1) {
-			overallMaxIndex.second = len2;
-		}
-	}
+	if ((overallMaxIndex[1] != len2)  && (overallMaxValue[1] > overallMaxValue[0])) 
+		initialDir = (horizontal[overallMaxIndex[1]] == mat[overallMaxIndex[1]]) ? Horizontal : Diagonal;
 
 	// If we end up in the bottom right corner, get direction
-	if ((overallMaxIndex.first == len1) &&
-		(overallMaxIndex.second == len2)) {
-		tmp = getValue(mat, len2);
+	if ((overallMaxIndex[0] == len1) && (overallMaxIndex[1] == len2)) {
 		initialDir =  Diagonal;
-		if (getValue(horizontal, len2) ==  tmp) {
-			initialDir =  Horizontal;
-		}
-		else if (vert == tmp) {
-			initialDir =  Vertical;
-		}
+		if (horizontal[len2] == mat[len2]) initialDir =  Horizontal;
+		else if (vert == mat[len2]) initialDir =  Vertical;
 	}
 
 	//// Debug code
@@ -322,7 +279,7 @@ _align_gotoh(TTrace& trace,
 	//}
 	//std::cout << (TSize) initialDir << std::endl;
 
-	return _retrieveMaxOfAlignment(TAlignConfig(), overallMaxValue);
+	return _maxOfAlignment<TScoreValue>(TAlignConfig(), overallMaxValue, overallMaxIndex, len1, len2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -342,8 +299,8 @@ _globalAlignment(TAlign& align,
 	// Trace
 	String<TraceBackGotoh> trace;
 	TraceBackGotoh initialDir;
-	std::pair<TScoreValue, TScoreValue> overallMaxValue;
-	std::pair<TSize, TSize> overallMaxIndex;
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[2];
 
 	// Create the trace
 	TScoreValue maxScore = _align_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());
@@ -367,8 +324,8 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Size<TStringSet>::Type TSize;
 	TraceBackGotoh initialDir;
 	String<TraceBackGotoh> trace;
-	std::pair<TScoreValue, TScoreValue> overallMaxValue;
-	std::pair<TSize, TSize> overallMaxIndex;
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[2];
 	return _align_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());	
 }
 
