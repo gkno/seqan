@@ -90,7 +90,7 @@ _lastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
 	maxValue[1] = column[limit];
 	TColIter itCol = begin(column, Standard());
 	TColIter itColEnd = end(column, Standard());
-	for(TSize i = 1;++itCol != itColEnd; ++i) {
+	for(TSize i = 0;itCol != itColEnd; ++i, ++itCol) {
 		if (*itCol > maxValue[1]) {
 			maxValue[1] = *itCol;
 			maxIndex[1] = i;
@@ -187,47 +187,49 @@ _align_needleman_wunsch_trace(TAlign& align,
 	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
 	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
 	
-		
-	// Initialize everything
-	TTraceValue tv = trace[(len1-1)*numRows + (len2-1)];
-	TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
-
-	TSize segLen = 1;
-	if (tv == Diagonal) {
-		--len1; --len2;
-	}
-	else if (tv == Horizontal) --len1;
-	else if (tv == Vertical) --len2;
-
-	// Now follow the trace
 	if ((len1 != 0) && (len2 !=0)) {
-		do {
-			tv = value(trace, (len1-1)*numRows + (len2-1));
-			if (tv == Diagonal) {
-				if (tv != tvOld) {
-					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len1; --len2;
-			} else if (tv == Horizontal) {
-				//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
-				if (tv != tvOld) {
-					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len1;
-			} else if (tv == Vertical) {
-				//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
-				if (tv != tvOld) {
-					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-					tvOld = tv; segLen = 1;
-				} else ++segLen;
-				--len2;
-			}
-		} while ((len1 != 0) && (len2 !=0));
+	
+		// Initialize everything
+		TTraceValue tv = trace[(len1-1)*numRows + (len2-1)];
+		TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
+
+		TSize segLen = 1;
+		if (tv == Diagonal) {
+			--len1; --len2;
+		}
+		else if (tv == Horizontal) --len1;
+		else if (tv == Vertical) --len2;
+
+		// Now follow the trace
+		if ((len1 != 0) && (len2 !=0)) {
+			do {
+				tv = value(trace, (len1-1)*numRows + (len2-1));
+				if (tv == Diagonal) {
+					if (tv != tvOld) {
+						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						tvOld = tv; segLen = 1;
+					} else ++segLen;
+					--len1; --len2;
+				} else if (tv == Horizontal) {
+					//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
+					if (tv != tvOld) {
+						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						tvOld = tv; segLen = 1;
+					} else ++segLen;
+					--len1;
+				} else if (tv == Vertical) {
+					//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
+					if (tv != tvOld) {
+						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						tvOld = tv; segLen = 1;
+					} else ++segLen;
+					--len2;
+				}
+			} while ((len1 != 0) && (len2 !=0));
+		}
+		// Process left-overs
+		_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 	}
-	// Process left-overs
-	_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
 
 	// Handle the remaining sequence
 	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
@@ -267,20 +269,21 @@ _align_needleman_wunsch(TTrace & trace,
 	TString const& str2 = str[1];
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
+	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxIndex[0] = len1;
+	overallMaxIndex[1] = len2;
+
 	resize(column, len2 + 1);  
 	resize(trace, len1*len2);
 	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), column[row], (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
+	_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, column[len2], 0);
 	column[0] = 0;
 	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
-	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
-	overallMaxIndex[0] = len1;
-	overallMaxIndex[1] = len2;
-
 
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator col_end = end(column, Standard());

@@ -56,88 +56,89 @@ _align_gotoh_trace(TAlign& align,
 	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1,  Horizontal);
 	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2,  Vertical);
 	
-	
+	if ((len1 != 0) && (len2 !=0)) {
 
-	// Initialize everything	
-	TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
-	TTraceValue tv = 0;
-	if (initialDir == Diagonal) {
-		if ( ((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-		else if ( ((unsigned char) nextTraceValue >> 2) == 1) tv =  Horizontal;
-		else tv =  Vertical;
-	} else if (initialDir == Horizontal) {
-		if (((unsigned char) nextTraceValue >> 1) % (unsigned char) 2 == 0) {
-		  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
-		  tv =  Diagonal;
-		}
-		else tv =  Horizontal;
-	} else if (initialDir == Vertical) {
-		if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
-		  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
-		  tv =  Diagonal;
-		}
-		else tv =  Vertical;
-	}
-	TSize segLen = 0;
-	TTraceValue tvOld = tv;
-
-	// Now follow the trace
-	do {
-		nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
-		if (tv == Diagonal) {
-			if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-			else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
+		// Initialize everything	
+		TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+		TTraceValue tv = 0;
+		if (initialDir == Diagonal) {
+			if ( ((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+			else if ( ((unsigned char) nextTraceValue >> 2) == 1) tv =  Horizontal;
 			else tv =  Vertical;
-		} else if (tv == Horizontal) {
-			if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv =  Diagonal;
-		    else tv =  Horizontal;
-		} else if (tv == Vertical) {
-			if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) tv =  Diagonal;
-			else tv =  Vertical;
-		}
-		if (tv == Diagonal) {
-			if (tv != tvOld) {
-				if (tvOld ==  Vertical) --len2;
-				else --len1;
-				_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
-				tvOld = tv; segLen = 0;
-			} else {
-				++segLen;
-				--len1; --len2;
+		} else if (initialDir == Horizontal) {
+			if (((unsigned char) nextTraceValue >> 1) % (unsigned char) 2 == 0) {
+				_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
+				tv =  Diagonal;
 			}
-		} else if(tv == Horizontal) {
-			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
-					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
-					tv =  Diagonal; segLen = 0;
+			else tv =  Horizontal;
+		} else if (initialDir == Vertical) {
+			if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
+				_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
+				tv =  Diagonal;
+			}
+			else tv =  Vertical;
+		}
+		TSize segLen = 0;
+		TTraceValue tvOld = tv;
+
+		// Now follow the trace
+		do {
+			nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+			if (tv == Diagonal) {
+				if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
+				else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
+				else tv =  Vertical;
+			} else if (tv == Horizontal) {
+				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv =  Diagonal;
+			    else tv =  Horizontal;
+			} else if (tv == Vertical) {
+				if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) tv =  Diagonal;
+				else tv =  Vertical;
+			}
+			if (tv == Diagonal) {
+				if (tv != tvOld) {
+					if (tvOld ==  Vertical) --len2;
+					else --len1;
+					_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
+					tvOld = tv; segLen = 0;
 				} else {
-					tvOld = tv; segLen = 1;
+					++segLen;
+					--len1; --len2;
+				}
+			} else if(tv == Horizontal) {
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
+						_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
+						tv =  Diagonal; segLen = 0;
+					} else {
+						tvOld = tv; segLen = 1;
+						--len1;
+					}
+				} else {
+					++segLen;
 					--len1;
 				}
-			} else {
-				++segLen;
-				--len1;
-			}
-		} else if (tv == Vertical) {
-			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) {
-					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
-					tv =  Diagonal; segLen = 0;
+			} else if (tv == Vertical) {
+				if (tv != tvOld) {
+					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) {
+						_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
+						tv =  Diagonal; segLen = 0;
+					} else {
+						tvOld = tv; segLen = 1;
+						--len2;
+					}
 				} else {
-					tvOld = tv; segLen = 1;
+					++segLen;
 					--len2;
 				}
-			} else {
-				++segLen;
-				--len2;
 			}
-		}
-	} while ((len1 != 0) && (len2 !=0));
+		} while ((len1 != 0) && (len2 !=0));
 
-	// Process left-overs
-	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+		// Process left-overs
+		if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+	}
 
 	// Handle the remaining sequence
 	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1,  Horizontal);
@@ -203,6 +204,8 @@ _align_gotoh(TTrace& trace,
 		_initFirstColumn(TAlignConfig(), mat[row], scoreGapOpenVertical(sc, -1, 0, str1, str2) + (row - 1) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
 		horizontal[row] = mat[row] + scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
 	}
+	_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[len2], 0);
+	if (overallMaxIndex[0] == 0) initialDir = Vertical;
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = mat[0];
 		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, col-1, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));

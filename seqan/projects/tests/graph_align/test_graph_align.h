@@ -866,14 +866,14 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		typedef Dna5Q TAlphabet;
 		typedef String<TAlphabet> TSequence;
 		
-		TSize lenN = mtRand() % 10 + 5;
-		TSize lenM = mtRand() % 10 + 5;
+		TSize lenN = mtRand() % 10 + 1;
+		TSize lenM = mtRand() % 10 + 1;
 		TSequence dna1;
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
 		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
-		//dna1 = "AGGACAAAA";
-		//dna2 = "TTGTT";
+		//dna1 = "CCAAA";
+		//dna2 = "GA";
 		
 		TSize len1 = length(dna1);
 		TSize len2 = length(dna2);
@@ -887,9 +887,9 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		int misMatchScore =  -1 * (int) (mtRand() % 5);
 		int gapScore =  -1 * (int) (mtRand() % 5);
 		if (gapScore > misMatchScore) gapScore = misMatchScore;
-		//matchScore = 0;
-		//misMatchScore = -2;
-		//gapScore = -2;
+		//matchScore = 1;
+		//misMatchScore = -3;
+		//gapScore = -3;
 
 		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapScore);
 		typedef String<Fragment<> > TFragmentString;
@@ -932,18 +932,12 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TGraph g4(str);
 		globalAlignment(g4, score_type, ac, Gotoh());
 		int sc4 = _pairWiseSumOfPairsScore(g4, score_type, ac);
-/*		
 		TGraph g5(str);
 		globalAlignment(g5, score_type, ac, lowDiag, highDiag, BandedGotoh());
 		int sc5 = _pairWiseSumOfPairsScore(g5, score_type, ac);
 		TGraph g6(str);
 		globalAlignment(g6, score_type, ac, -1 * length(dna2), length(dna1), BandedGotoh());
 		int sc6 = _pairWiseSumOfPairsScore(g6, score_type, ac);
-*/
-		int sc6 = sc4;
-		int sc5 = sc4;
-
-
 		if ((sc1 != sc2) || (sc2 != sc3) || (sc3 != sc4) || (sc4 != sc5) || (sc5 != sc6)) {
 			std::cerr << "Randomized test failed:" << std::endl;
 			std::cerr << "Seq1: " << dna1 << std::endl;
@@ -959,11 +953,11 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 			std::cerr << "Score: " << sc3 << std::endl;
 			std::cerr << g4 << std::endl;
 			std::cerr << "Score: " << sc4 << std::endl;
-			//std::cerr << g5 << std::endl;
-			//std::cerr << "Score: " << sc5 << std::endl;
-			//std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
-			//std::cerr << g6 << std::endl;
-			//std::cerr << "Score: " << sc6 << std::endl;
+			std::cerr << g5 << std::endl;
+			std::cerr << "Score: " << sc5 << std::endl;
+			std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
+			std::cerr << g6 << std::endl;
+			std::cerr << "Score: " << sc6 << std::endl;
 			exit(-1);
 		}
 	}

@@ -142,57 +142,59 @@ _align_banded_nw_trace(TAlign& align,
 	if (actualCol + 1 < len1) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len1 - (actualCol + 1)),  Horizontal);
 	if (actualRow + 1 < len2) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len2 - (actualRow + 1)),  Vertical);
 
-	// Find initial direction
-	TTraceValue tv = trace[row * diagonalWidth + col];
-	if (tv == Horizontal) --col;
-	else if (tv == Vertical) {--row; ++col;} 
-	else --row;
+	if ((actualRow != 0) && (actualCol != 0)) {
+		// Find initial direction
+		TTraceValue tv = trace[row * diagonalWidth + col];
+		if (tv == Horizontal) --col;
+		else if (tv == Vertical) {--row; ++col;} 
+		else --row;
 	
-	// Walk until we hit a border
-	TSize seqLen = 1;
-	TTraceValue newTv = tv;
-	while(true) {
-		actualRow = row + lo_row;
-		actualCol = col + diagL + actualRow;
-		newTv = trace[row * diagonalWidth + col];
+		// Walk until we hit a border
+		TSize seqLen = 1;
+		TTraceValue newTv = tv;
+		while(true) {
+			actualRow = row + lo_row;
+			actualCol = col + diagL + actualRow;
+			newTv = trace[row * diagonalWidth + col];
 
-		// Check if we hit a border
-		if ((actualRow == 0) || (actualCol == 0)) break;
-		else {
-			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl; 
-			if (tv == Diagonal) {
-				if (newTv == Horizontal) {
-					_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
-					--col; seqLen = 1;
-				} else if (newTv == Vertical) {
-					_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
-					--row; ++col; seqLen = 1;
+			// Check if we hit a border
+			if ((actualRow == 0) || (actualCol == 0)) break;
+			else {
+				//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl; 
+				if (tv == Diagonal) {
+					if (newTv == Horizontal) {
+						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+						--col; seqLen = 1;
+					} else if (newTv == Vertical) {
+						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+						--row; ++col; seqLen = 1;
+					} else {
+						--row; ++seqLen;
+					}
 				} else {
-					--row; ++seqLen;
-				}
-			} else {
-				if (tv == Horizontal) { 
-					if (newTv == Diagonal) {
-						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
-						--row; seqLen = 1;
-					} else {
-						--col; ++seqLen;
-					}
-				} else { 
-					if (newTv == Diagonal) {
-						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
-						--row; seqLen = 1;
-					} else {
-						--row; ++col; ++seqLen;
+					if (tv == Horizontal) { 
+						if (newTv == Diagonal) {
+							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							--row; seqLen = 1;
+						} else {
+							--col; ++seqLen;
+						}
+					} else { 
+						if (newTv == Diagonal) {
+							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							--row; seqLen = 1;
+						} else {
+							--row; ++col; ++seqLen;
+						}
 					}
 				}
+				tv = newTv;
 			}
-			tv = newTv;
 		}
-	}
 	
-	// Align left overs
-	if (seqLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+		// Align left overs
+		if (seqLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+	}
 
 	// Handle the remaining sequence
 	if (actualCol != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
@@ -289,22 +291,20 @@ _align_banded_nw(TTrace& trace,
 					*matIt = hori_val;
 					*traceIt = Horizontal;
 				}
-				hori_val = *matIt;
-							
-				// Store the maximum
-				if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
-				if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
-				//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-			
-			} else {
-				
+				hori_val = *matIt;				
+			} else {			
 				// Usual initialization for first row and column
 				if (actualRow == 0) _initFirstRow(TAlignConfig(), *matIt, (TScoreValue) actualCol * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
 				else {
-					_initFirstColumn(TAlignConfig(), *matIt, (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));			
+					_initFirstColumn(TAlignConfig(), *matIt, (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
 					hori_val = *matIt;
 				}
 			}
+
+			// Store the maximum
+			if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
+			if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
+			//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
 		}
 	}
 	return (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxValue[0] : overallMaxValue[1];
