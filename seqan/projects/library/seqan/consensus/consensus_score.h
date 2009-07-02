@@ -112,10 +112,34 @@ scoreGapExtendHorizontal(
 	return ((int) pos2 < 0) ? -SEQAN_CONSENSUS_UNITY : me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + (ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)];
 }
 
+template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenHorizontal(
+	Score<TValue, ConsensusScore> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &,
+	TSeq2 const &)
+{
+	return ((int) pos2 < 0) ? -SEQAN_CONSENSUS_UNITY : me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + (ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)];
+}
+
 
 template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapExtendVertical(
+	Score<TValue, ConsensusScore> const &,
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
+{
+	return -SEQAN_CONSENSUS_UNITY;
+}
+
+template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenVertical(
 	Score<TValue, ConsensusScore> const &,
 	TPos1,
 	TPos2,
@@ -195,6 +219,17 @@ scoreGapExtendHorizontal(
 	return (( (int) pos2 < 0) || (!me.sum[pos1])) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum[pos1]) * SEQAN_CONSENSUS_UNITY) / me.sum[pos1]);
 }
 
+template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenHorizontal(
+	Score<TValue, FractionalScore> const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &)
+{
+	return (( (int) pos2 < 0) || (!me.sum[pos1])) ? -SEQAN_CONSENSUS_UNITY : ((TValue) (( (int) seq1[pos1].count[ValueSize<typename Value<TSeq1>::Type>::VALUE - 1] - me.sum[pos1]) * SEQAN_CONSENSUS_UNITY) / me.sum[pos1]);
+}
 
 template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
@@ -208,6 +243,17 @@ scoreGapExtendVertical(
 	return -SEQAN_CONSENSUS_UNITY;
 }
 
+template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenVertical(
+	Score<TValue, FractionalScore> const &,
+	TPos1,
+	TPos2,
+	TSeq1 const &,
+	TSeq2 const &)
+{
+	return -SEQAN_CONSENSUS_UNITY;
+}
 
 template <typename TValue, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
@@ -270,6 +316,18 @@ scoreGapExtendHorizontal(
 	return (scoreGapExtendHorizontal(me.sc1, pos1, pos2, seq1, seq2) + scoreGapExtendHorizontal(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
 }
 
+template <typename TValue, typename TScore1, typename TScore2, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenHorizontal(
+	Score<TValue, WeightedConsensusScore<TScore1, TScore2> > const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const &seq1,
+	TSeq2 const &seq2)
+{
+	return (scoreGapOpenHorizontal(me.sc1, pos1, pos2, seq1, seq2) + scoreGapOpenHorizontal(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
+}
+
 
 template <typename TValue, typename TScore1, typename TScore2, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
@@ -281,6 +339,18 @@ scoreGapExtendVertical(
 	TSeq2 const & seq2)
 {
 	return (scoreGapExtendVertical(me.sc1, pos1, pos2, seq1, seq2) + scoreGapExtendVertical(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
+}
+
+template <typename TValue, typename TScore1, typename TScore2, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
+inline TValue
+scoreGapOpenVertical(
+	Score<TValue, WeightedConsensusScore<TScore1, TScore2> > const & me,
+	TPos1 pos1,
+	TPos2 pos2,
+	TSeq1 const & seq1,
+	TSeq2 const & seq2)
+{
+	return (scoreGapOpenVertical(me.sc1, pos1, pos2, seq1, seq2) + scoreGapOpenVertical(me.sc2, pos1, pos2, seq1, seq2)) / (TValue) 2;
 }
 
 

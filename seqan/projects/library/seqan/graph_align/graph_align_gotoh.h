@@ -45,23 +45,21 @@ _align_gotoh_trace(TAlign& align,
 	typedef typename Id<TStringSet>::Type TId;
 
 	// TraceBack values for Gotoh
-	TTraceValue Diagonal = 0;
-	TTraceValue Horizontal = 1;
-	TTraceValue Vertical = 2;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
 	TSize len1 = overallMaxIndex[0];
 	TSize len2 = overallMaxIndex[1];
-	if (len1 < length(str[0])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1,  Horizontal);
-	} else if (len2 < length(str[1])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2,  Vertical);
-	}
+	TSize numCols = length(str[0]);
 	TSize numRows = length(str[1]);
+	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1,  Horizontal);
+	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2,  Vertical);
+	
+	
 
 	// Initialize everything	
-	TTraceValue nextTraceValue = value(trace, (len1 - 1)*numRows + (len2 - 1));
+	TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
 	TTraceValue tv = 0;
 	if (initialDir == Diagonal) {
 		if ( ((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
@@ -85,7 +83,7 @@ _align_gotoh_trace(TAlign& align,
 
 	// Now follow the trace
 	do {
-		nextTraceValue = value(trace, (len1 - 1)*numRows + (len2 - 1));
+		nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
 		if (tv == Diagonal) {
 			if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
 			else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
@@ -182,12 +180,12 @@ _align_gotoh(TTrace& trace,
 	TString const& str2 = str[1];		
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
-	TScoreValue gap = scoreGapExtend(sc);
-	TScoreValue gapOpen = scoreGapOpen(sc);
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
-	TTraceValue tvMat, tvHorizontal, tvVertical;
+	TTraceValue tvMat = 0;
+	TTraceValue tvHorizontal = 0;
+	TTraceValue tvVertical = 0;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
@@ -202,26 +200,23 @@ _align_gotoh(TTrace& trace,
 	TScoreValue b = 0;
 	TScoreValue max_val = 0;
 	for(TSize row = 1; row <= len2; ++row) {
-		_initFirstColumn(TAlignConfig(), mat[row], gapOpen + (row - 1) * gap);
-		horizontal[row] = mat[row] + gapOpen - gap;
-		//std::cout << getValue(mat, row) << std::endl;
-		//std::cout << getValue(horizontal, row) << std::endl;
-		//std::cout << "====" << std::endl;
+		_initFirstColumn(TAlignConfig(), mat[row], scoreGapOpenVertical(sc, -1, 0, str1, str2) + (row - 1) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
+		horizontal[row] = mat[row] + scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
 	}
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = mat[0];
-		_initFirstRow(TAlignConfig(), mat[0], gapOpen + (col - 1) * gap);
-		vert = mat[0] + gapOpen - gap;
+		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, col-1, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
+		vert = mat[0] + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
 			// Get the new maximum for vertical
-			a = mat[row - 1] + gapOpen;
-			b = vert + gap;
+			a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
+			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);;
 			if (a > b) {vert = a;	tvVertical = Diagonal;}
 			else { vert = b; tvVertical = Vertical;}
 
 			// Get the new maximum for left
-			a = mat[row] + gapOpen;
-			b = horizontal[row] + gap;
+			a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
+			b = horizontal[row] +  scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
 			if (a > b) {horizontal[row] = a; tvHorizontal = Diagonal;}
 			else {horizontal[row] = b; tvHorizontal = Horizontal;}
 
