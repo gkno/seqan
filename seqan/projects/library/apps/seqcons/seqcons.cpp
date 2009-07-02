@@ -549,7 +549,7 @@ int main(int argc, const char *argv[]) {
 
 		if (consOpt.realign) {
 			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
-			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, true);
+			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, false);
 		} else {
 			
 // Profiling
