@@ -692,10 +692,295 @@ void _Test_AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	}
 }
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TLeft, bool TRight, bool TBottom, typename TSpec>
+inline bool
+__myInitTop(AlignConfig<true, TLeft, TRight, TBottom, TSpec> const)
+{
+	return true;
+}
+
+template<bool TLeft, bool TRight, bool TBottom, typename TSpec>
+inline bool
+__myInitTop(AlignConfig<false, TLeft, TRight, TBottom, TSpec> const)
+{
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TRight, bool TBottom, typename TSpec>
+inline bool
+__myInitLeft(AlignConfig<TTop, true, TRight, TBottom, TSpec> const)
+{
+	return true;
+}
+
+template<bool TTop, bool TRight, bool TBottom, typename TSpec>
+inline bool
+__myInitLeft(AlignConfig<TTop, false, TRight, TBottom, TSpec> const)
+{
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec>
+inline bool
+__myInitRight(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const)
+{
+	return true;
+}
+
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec>
+inline bool
+__myInitRight(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const)
+{
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TRight, typename TSpec>
+inline bool
+__myInitBottom(AlignConfig<TTop, TLeft, TRight, true, TSpec> const)
+{
+	return true;
+}
+
+template<bool TTop, bool TLeft, bool TRight, typename TSpec>
+inline bool
+__myInitBottom(AlignConfig<TTop, TLeft, TRight, false, TSpec> const)
+{
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TAlignConfig> 
+inline typename Value<TScore>::Type
+_pairWiseSumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+						 TScore const& sc,
+						 TAlignConfig const)
+{
+	SEQAN_CHECKPOINT
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<TStringSet>::Type TString;
+
+	
+	TString const& str1 = stringSet(g)[0];
+	TString const& str2 = stringSet(g)[1];	
+
+	// Convert the graph
+	typedef String<char> TAlignmentMatrix;
+	TAlignmentMatrix mat;
+	convertAlignment(g, mat);
+	char gapChar = gapValue<char>();
+
+	TSize offset = length(mat) / 2;
+	typedef typename Iterator<TAlignmentMatrix, Standard>::Type TIter;
+	TIter seq1It = begin(mat, Standard() );
+	TIter seq2It = begin(mat, Standard() ) + offset;
+	TIter seqItEnd = end(mat, Standard() );
+	bool seq1GapOpen = false;
+	bool seq2GapOpen = false;
+	bool initialTop = __myInitTop(TAlignConfig());
+	bool initialLeft = __myInitLeft(TAlignConfig());
+	bool initialRight = __myInitRight(TAlignConfig());
+	bool initialBottom = __myInitBottom(TAlignConfig());
+	TSize col = 0;
+	TSize row = 0;
+	TScoreValue totalScore = 0;
+	TScoreValue lastGap = 0;
+	for(;seq2It != seqItEnd; ++seq2It, ++seq1It) {
+		//std::cout << *seq1It << ',' << *seq2It << std::endl;
+		if ((*seq1It == gapChar) && (*seq2It == gapChar)) continue;
+		if (*seq1It == gapChar) {
+			if (seq1GapOpen) {
+				totalScore += scoreGapExtendHorizontal(sc, col, row, str1, str2);
+			} else {
+				lastGap = totalScore;
+				totalScore += scoreGapOpenHorizontal(sc, col, row, str1, str2);
+				seq1GapOpen = true;
+				seq2GapOpen = false;
+			}
+			++row;
+			if ((seq2It + 1 == seqItEnd) && (initialRight)) {
+				totalScore = lastGap;
+			}
+		} else if (*seq2It == gapChar) {
+			if (seq2GapOpen) {
+				totalScore += scoreGapExtendVertical(sc, col, row, str1, str2);
+			} else {
+				lastGap = totalScore;
+				totalScore += scoreGapOpenVertical(sc, col, row, str1, str2);
+				seq2GapOpen = true;
+				seq1GapOpen = false;
+			}
+			++col;
+			if ((seq2It + 1 == seqItEnd) && (initialBottom)) {
+				totalScore = lastGap;
+			}
+		} else {
+			if ((row == 0) && (initialTop)) {
+				initialTop = false;
+				totalScore = 0;
+			} 
+			if ((col == 0) && (initialLeft)) {
+				initialLeft = false;
+				totalScore = 0;
+			}
+			seq1GapOpen = false; seq2GapOpen = false;
+			totalScore += score(const_cast<TScore&>(sc), col, row, str1, str2);
+			lastGap = totalScore;
+			++row; ++col;
+		}
+	}
+	return totalScore;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+template<bool TTop, bool TLeft, bool TRight, bool TBottom>
+void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
+	typedef unsigned int TSize;
+	typedef int TScore;
+
+	mtRandInit();
+	for(TSize i = 0; i < 10; ++i) {
+		typedef Dna5Q TAlphabet;
+		typedef String<TAlphabet> TSequence;
+		
+		TSize lenN = mtRand() % 10 + 5;
+		TSize lenM = mtRand() % 10 + 5;
+		TSequence dna1;
+		TSequence dna2;
+		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+		//dna1 = "TTAGC";
+		//dna2 = "AGCGA";
+		
+		TSize len1 = length(dna1);
+		TSize len2 = length(dna2);
+		typedef StringSet<TSequence, Dependent<> > TStringSet;
+		typedef Graph<Alignment<TStringSet, void> > TGraph;
+		TStringSet str;
+		appendValue(str, dna1);
+		appendValue(str, dna2);
+
+		int matchScore =  mtRand() % 5;
+		int misMatchScore =  -1 * (int) (mtRand() % 5);
+		int gapScore =  -1 * (int) (mtRand() % 5);
+		if (gapScore > misMatchScore) gapScore = misMatchScore;
+		//matchScore = 0;
+		//misMatchScore = -3;
+		//gapScore = -3;
+
+		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapScore);
+		typedef String<Fragment<> > TFragmentString;
+		TFragmentString matches;
+		globalAlignment(matches, str, score_type, ac, NeedlemanWunsch());
+		int lowDiag = length(dna1);
+		int highDiag = -1 * length(dna2);
+		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
+		TFragIter itFrag = begin(matches, Standard());
+		TFragIter itFragEnd = end(matches, Standard());
+		for(;itFrag != itFragEnd; ++itFrag) {
+			int newDiff = (int) itFrag->begin1 - (int) itFrag->begin2;
+			if (newDiff > highDiag) highDiag = newDiff;
+			if (newDiff < lowDiag) lowDiag = newDiff;
+		}
+		itFrag = begin(matches, Standard());
+		if (itFrag != itFragEnd) {
+			int pos1 = (int) itFrag->begin1 + (int) itFrag->len;
+			int pos2 = (int) itFrag->begin2 + (int) itFrag->len;
+			if (highDiag < ((int) len1 - pos2)) highDiag = ((int) len1 - pos2);
+			if (lowDiag > (pos1 - (int) len2)) lowDiag = (pos1 - (int) len2);
+			itFrag = itFragEnd;
+			--itFrag;
+			if (highDiag < (int) itFrag->begin1) highDiag = (int) itFrag->begin1;
+			if (lowDiag > -1 * (int) itFrag->begin2) lowDiag = -1 * (int) itFrag->begin2;
+		} else {
+			lowDiag = -1 * length(dna2);
+			highDiag = length(dna1);
+		}
+		TGraph g1(str);
+		globalAlignment(g1, score_type, ac, NeedlemanWunsch());
+		int sc1 = _pairWiseSumOfPairsScore(g1, score_type, ac);
+		TGraph g2(str);
+		globalAlignment(g2, score_type, ac, lowDiag, highDiag, BandedNeedlemanWunsch());
+		int sc2 = _pairWiseSumOfPairsScore(g2, score_type, ac);
+		TGraph g3(str);
+		globalAlignment(g3, score_type, ac, -1 * length(dna2), length(dna1), BandedNeedlemanWunsch());
+		int sc3 = _pairWiseSumOfPairsScore(g3, score_type, ac);
+		TGraph g4(str);
+		globalAlignment(g4, score_type, ac, Gotoh());
+		int sc4 = _pairWiseSumOfPairsScore(g4, score_type, ac);
+		TGraph g5(str);
+		globalAlignment(g5, score_type, ac, lowDiag, highDiag, BandedGotoh());
+		int sc5 = _pairWiseSumOfPairsScore(g5, score_type, ac);
+		TGraph g6(str);
+		globalAlignment(g6, score_type, ac, -1 * length(dna2), length(dna1), BandedGotoh());
+		int sc6 = _pairWiseSumOfPairsScore(g6, score_type, ac);
+
+		sc6 = sc4;
+		sc5 = sc4;
+
+
+		if ((sc1 != sc2) || (sc2 != sc3) || (sc3 != sc4) || (sc4 != sc5) || (sc5 != sc6)) {
+			std::cerr << "Randomized test failed:" << std::endl;
+			std::cerr << "Seq1: " << dna1 << std::endl;
+			std::cerr << "Seq2: " << dna2 << std::endl;
+			std::cerr << "AlignConfig: " << TTop << ',' << TLeft << ',' << TRight << ',' << TBottom << std::endl;
+			std::cerr << "Scores: (Matchscore: " << matchScore << ", Mismatchscore: " << misMatchScore << ", Gapscore: " << gapScore << ')' << std::endl;
+			std::cerr << g1 << std::endl;
+			std::cerr << "Score: " << sc1 << std::endl;
+			std::cerr << g2 << std::endl;
+			std::cerr << "Score: " << sc2 << std::endl;
+			std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
+			std::cerr << g3 << std::endl;
+			std::cerr << "Score: " << sc3 << std::endl;
+			std::cerr << g4 << std::endl;
+			std::cerr << "Score: " << sc4 << std::endl;
+			std::cerr << g5 << std::endl;
+			std::cerr << "Score: " << sc5 << std::endl;
+			std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
+			std::cerr << g6 << std::endl;
+			std::cerr << "Score: " << sc6 << std::endl;
+			exit(-1);
+		}
+	}
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_AllAgainstAll() {
-	_Test_AllAgainstAll(AlignConfig<false,false,false,false>() );
+	//_Test_AllAgainstAll(AlignConfig<false,false,false,false>() );
+
+	__AllAgainstAll(AlignConfig<false,false,false,false>() );
+	__AllAgainstAll(AlignConfig<false,false,false,true>() );
+	__AllAgainstAll(AlignConfig<false,false,true,false>() );
+	__AllAgainstAll(AlignConfig<false,false,true,true>() );
+	__AllAgainstAll(AlignConfig<false,true,false,false>() );
+	__AllAgainstAll(AlignConfig<false,true,false,true>() );
+	__AllAgainstAll(AlignConfig<false,true,true,false>() );
+	__AllAgainstAll(AlignConfig<false,true,true,true>() );
+	__AllAgainstAll(AlignConfig<true,false,false,false>() );
+	__AllAgainstAll(AlignConfig<true,false,false,true>() );
+	__AllAgainstAll(AlignConfig<true,false,true,false>() );
+	__AllAgainstAll(AlignConfig<true,false,true,true>() );
+	__AllAgainstAll(AlignConfig<true,true,false,false>() );
+	__AllAgainstAll(AlignConfig<true,true,false,true>() );
+	__AllAgainstAll(AlignConfig<true,true,true,false>() );
+	__AllAgainstAll(AlignConfig<true,true,true,true>() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
