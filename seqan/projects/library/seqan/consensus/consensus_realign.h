@@ -332,8 +332,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
-		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch());
+		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch());
 
 		/*
 		// Debug code

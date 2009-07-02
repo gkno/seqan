@@ -27,6 +27,68 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastColumn(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const,
+			TValue1& maxValue,
+			TIndex1& maxIndex,
+			TValue2 const val,	
+			TIndex2 const row,
+			TIndex2 const col)
+{
+	SEQAN_CHECKPOINT
+	maxValue[1] = val; maxIndex[2] = row; maxIndex[3] = col;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
+			TValue1& maxValue,
+			TIndex1& maxIndex,
+			TValue2 const val,
+			TIndex2 const row,
+			TIndex2 const col)
+{
+	SEQAN_CHECKPOINT
+	if (val > maxValue[1]) {maxValue[1] = val; maxIndex[2] = row; maxIndex[3] = col; }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastRow(AlignConfig<TTop, TLeft, TRight, false, TSpec> const,		
+		 TValue1& maxValue,
+		 TIndex1& maxIndex,
+		 TValue2 const val,
+		 TIndex2 const row,
+		 TIndex2 const col)
+{
+	SEQAN_CHECKPOINT
+	maxValue[0] = val; maxIndex[0] = row; maxIndex[1] = col;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastRow(AlignConfig<TTop, TLeft, TRight, true, TSpec> const,
+		 TValue1& maxValue,
+		 TIndex1& maxIndex,
+		 TValue2 const val,
+		 TIndex2 const row,
+		 TIndex2 const col)
+{
+	SEQAN_CHECKPOINT
+	if (val > maxValue[0]) {maxValue[0] = val; maxIndex[0] = row; maxIndex[1] = col; }
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TAlign, typename TStringSet, typename TScore, typename TColumn, typename TValPair, typename TIndexPair, typename TDiagonal>
 inline void
 _align_banded_nw_trace(TAlign& align,
@@ -56,8 +118,7 @@ _align_banded_nw_trace(TAlign& align,
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
 	TSize len1 = length(str1) + 1;
 	TSize len2 = length(str2) + 1;
-	TSize lo_row = 0;
-	if (diagU <= 0) lo_row = -1 * diagU;
+	TSize lo_row = (diagU <= 0) ? -1 * diagU : 0;
 	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
 	
 	//// Debug stuff
@@ -75,15 +136,8 @@ _align_banded_nw_trace(TAlign& align,
 	//std::cout << std::endl;
 
 	// Start the trace from the cell with the max value
-	TSize row = 0;
-	TSize col = 0;
-	if (overallMaxValue.i1 > overallMaxValue.i2) {
-		row = overallMaxIndex.i1.i1;
-		col = overallMaxIndex.i1.i2;
-	} else {
-		row = overallMaxIndex.i2.i1;
-		col = overallMaxIndex.i2.i2;
-	}
+	TSize row = (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxIndex[0] : overallMaxIndex[2];
+	TSize col = (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxIndex[1] : overallMaxIndex[3];
 
 	// Handle the skipped sequence parts
 	TSize actualRow = row + lo_row;
@@ -204,17 +258,16 @@ _align_banded_nw(TColumn& mat,
 	TSize hi_diag = diagonalWidth;
 	TSize lo_diag = 0;
 	if (diagL > 0) lo_diag = 0;
-	else if (diagU < 0) lo_diag = hi_diag;
-	else lo_diag = (TSize) (1-1 * diagL); 
-	TSize lo_row = 0;
-	if (diagU <= 0) lo_row = -1 * diagU;
+	else lo_diag = (diagU < 0) ? hi_diag : (TSize) (1-1 * diagL); 
+	TSize lo_row = (diagU <= 0) ? -1 * diagU : 0;
 	TSize hi_row = len2;
 	if (len1 - diagL < hi_row) hi_row = len1 - diagL;
 	TSize height = hi_row - lo_row;
-	TScoreValue infValue = InfimumValue<TScoreValue>::VALUE;
-	fill(mat, height * diagonalWidth, infValue);
-	overallMaxValue = Pair<TScoreValue, TScoreValue>(infValue, infValue);
-	overallMaxIndex = Pair<Pair<TSize,TSize>, Pair<TSize,TSize> >(Pair<TSize,TSize>(diagonalWidth, height), Pair<TSize,TSize>(diagonalWidth, height));
+	resize(mat, height * diagonalWidth);
+	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxIndex[0] = diagonalWidth;	overallMaxIndex[1] = height;
+	overallMaxIndex[2] = diagonalWidth;	overallMaxIndex[3] = height;
 	
 	//// Debug stuff
 	//TColumn originalMat;
@@ -231,50 +284,43 @@ _align_banded_nw(TColumn& mat,
 	//std::cout << std::endl;
 
 	// Classical DP with affine gap costs
+	typedef typename Iterator<TColumn, Standard>::Type TColIter;
 	TSize actualCol = 0;
+	TSize actualRow = 0;
 	TScoreValue verti_val = 0;
 	TScoreValue hori_val = 0;
 	for(TSize row = 0; row < height; ++row) {
-		TSize actualRow = row + lo_row;
+		actualRow = row + lo_row;
 		if (lo_diag > 0) --lo_diag;
 		if (row + lo_row >= len1 - diagU) --hi_diag;
-		for(TSize col = lo_diag; col<hi_diag; ++col) {
+		TColIter matIt = begin(mat, Standard()) + row * diagonalWidth + lo_diag;
+		TColIter matItVerti = begin(mat, Standard()) + (row - 1) * diagonalWidth + lo_diag + 1;
+		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++matItVerti) {
 			actualCol = col + diagL + actualRow;
 			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
-			// Usual initialization for first row and column
-			if (actualRow == 0) {
-				_initFirstRow(TAlignConfig(), value(mat, col), (TScoreValue) actualCol * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
-				//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-				continue;
-			} else if (actualCol == 0) {
-				_initFirstColumn(TAlignConfig(), value(mat, row * diagonalWidth + col), (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
-				//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-				continue;
-			}
-
-			// Get the new maximum for vertical
-			verti_val = (col < diagonalWidth - 1) ?	mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
-
-			// Get the new maximum for horizontal
-			hori_val = (col > 0) ? mat[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : infValue;
-
-			// Get the new maximum for mat
-			TScoreValue& maxVal = mat[row * diagonalWidth + col];
-			maxVal = mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
-			if (verti_val > maxVal) 
-				maxVal = verti_val;
-			if (hori_val > maxVal)
-				maxVal = hori_val;
+			if ((actualRow != 0) && (actualCol != 0)) {
+				// Get the new maximum for mat
+				*matIt = *(matItVerti - 1) + score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+				if ((verti_val = (col < diagonalWidth - 1) ?	*matItVerti + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt)
+					*matIt = verti_val;
+				if ((hori_val = (col > 0) ? *(matIt - 1) + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt)
+					*matIt = hori_val;
 			
-			// Store the maximum
-			if (actualCol == len1 - 1) __processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, value(mat, row * diagonalWidth + col), row, col);
-			if (actualRow == len2 - 1) __processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, value(mat, row * diagonalWidth + col), row, col);
-			//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
+				// Store the maximum
+				if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
+				if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
+				//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
+			
+			} else {
+				
+				// Usual initialization for first row and column
+				if (actualRow == 0) _initFirstRow(TAlignConfig(), *matIt, (TScoreValue) actualCol * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
+				else _initFirstColumn(TAlignConfig(), *matIt, (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));			
+			}
 		}
 	}
-	if (overallMaxValue.i1 > overallMaxValue.i2) return overallMaxValue.i1;
-	else return overallMaxValue.i2;
+	return (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxValue[0] : overallMaxValue[1];
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -294,9 +340,9 @@ _globalAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	// Maximum value
-	Pair<TScoreValue, TScoreValue> overallMaxValue;
-	Pair<Pair<TSize,TSize>, Pair<TSize,TSize> > overallMaxIndex;
-
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[4];
+	
 	// Create the trace
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TColumn;
@@ -325,9 +371,9 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	// Maximum value
-	Pair<TScoreValue, TScoreValue> overallMaxValue;
-	Pair<Pair<TSize,TSize>, Pair<TSize,TSize> > overallMaxIndex;
-
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[4];
+	
 	// Calculate the score
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef String<TScoreValue> TColumn;

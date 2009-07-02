@@ -244,7 +244,7 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef int TScore;
 
 	mtRandInit();
-	for(TSize i = 0; i < 10000; ++i) {
+	for(TSize i = 0; i < 100; ++i) {
 		typedef Dna5Q TAlphabet;
 		typedef String<TAlphabet> TSequence;
 		
@@ -345,8 +345,8 @@ int main(int argc, const char *argv[]) {
 	__AllAgainstAll(AlignConfig<true,true,true,true>() );
 	return 0;
 
-
 */
+
 
 	
 	typedef unsigned int TSize;
