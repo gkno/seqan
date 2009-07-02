@@ -203,10 +203,9 @@ _align_banded_nw_trace(TAlign& align,
 ////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TColumn, typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TDiagonal, typename TAlignConfig>
+template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TDiagonal, typename TAlignConfig>
 inline typename Value<TScore>::Type
-_align_banded_nw(TColumn& mat,
-				 TTrace& trace,
+_align_banded_nw(TTrace& trace,
 				 TStringSet const& str,
 				 TScore const & sc,
 				 TValPair& overallMaxValue,
@@ -219,7 +218,7 @@ _align_banded_nw(TColumn& mat,
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Size<TColumn>::Type TSize;
+	typedef typename Size<TTrace>::Type TSize;
 
 	// Initialization
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
@@ -236,7 +235,10 @@ _align_banded_nw(TColumn& mat,
 	TSize hi_row = len2;
 	if (len1 - diagL < hi_row) hi_row = len1 - diagL;
 	TSize height = hi_row - lo_row;
-	resize(mat, height * diagonalWidth);
+
+	typedef String<TScoreValue> TRow;
+	TRow mat;
+	resize(mat, diagonalWidth);
 	resize(trace, height * diagonalWidth);
 	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
 	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
@@ -258,7 +260,7 @@ _align_banded_nw(TColumn& mat,
 	//std::cout << std::endl;
 
 	// Classical DP with affine gap costs
-	typedef typename Iterator<TColumn, Standard>::Type TColIter;
+	typedef typename Iterator<TRow, Standard>::Type TRowIter;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TSize actualCol = 0;
 	TSize actualRow = 0;
@@ -269,25 +271,26 @@ _align_banded_nw(TColumn& mat,
 		if (lo_diag > 0) --lo_diag;
 		if (row + lo_row >= len1 - diagU) --hi_diag;
 		TTraceIter traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
-		TColIter matIt = begin(mat, Standard()) + row * diagonalWidth + lo_diag;
-		TColIter matItVerti = begin(mat, Standard()) + (row - 1) * diagonalWidth + lo_diag + 1;
-		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++matItVerti, ++traceIt) {
+		TRowIter matIt = begin(mat, Standard()) + lo_diag;
+		hori_val = InfimumValue<TScoreValue>::VALUE;
+		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt) {
 			actualCol = col + diagL + actualRow;
 			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
 				// Get the new maximum for mat
-				*matIt = *(matItVerti - 1) + score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+				*matIt += score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
 				*traceIt = Diagonal;
-				if ((verti_val = (col < diagonalWidth - 1) ?	*matItVerti + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+				if ((verti_val = (col < diagonalWidth - 1) ? *(matIt+1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
 					*matIt = verti_val;
 					*traceIt = Vertical;
 				}						
-				if ((hori_val = (col > 0) ? *(matIt - 1) + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+				if ((hori_val = (col > 0) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
 					*matIt = hori_val;
 					*traceIt = Horizontal;
 				}
-			
+				hori_val = *matIt;
+							
 				// Store the maximum
 				if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
 				if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
@@ -297,7 +300,10 @@ _align_banded_nw(TColumn& mat,
 				
 				// Usual initialization for first row and column
 				if (actualRow == 0) _initFirstRow(TAlignConfig(), *matIt, (TScoreValue) actualCol * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
-				else _initFirstColumn(TAlignConfig(), *matIt, (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));			
+				else {
+					_initFirstColumn(TAlignConfig(), *matIt, (TScoreValue) actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));			
+					hori_val = *matIt;
+				}
 			}
 		}
 	}
@@ -325,11 +331,8 @@ _globalAlignment(TAlign& align,
 	TSize overallMaxIndex[4];
 	
 	// Create the trace
-	typedef typename Value<TScore>::Type TScoreValue;
-	typedef String<TScoreValue> TColumn;
-	TColumn mat;
 	String<TraceBack> trace;
-	TScoreValue maxScore = _align_banded_nw(mat, trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
+	TScoreValue maxScore = _align_banded_nw(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 	
 	// Follow the trace and create the graph
 	_align_banded_nw_trace(align, str, trace, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
@@ -357,10 +360,8 @@ _globalAlignment(TStringSet const& str,
 	TSize overallMaxIndex[4];
 	
 	// Calculate the score
-	typedef typename Value<TScore>::Type TScoreValue;
-	typedef String<TScoreValue> TColumn;
-	TColumn mat;
-	return _align_banded_nw(mat, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
+	String<TraceBack> trace;
+	return _align_banded_nw(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 }
 
 
