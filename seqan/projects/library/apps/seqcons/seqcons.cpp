@@ -344,8 +344,8 @@ int main(int argc, const char *argv[]) {
 	__AllAgainstAll(AlignConfig<true,true,true,false>() );
 	__AllAgainstAll(AlignConfig<true,true,true,true>() );
 	return 0;
-
 */
+
 
 
 	
