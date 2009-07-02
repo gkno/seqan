@@ -166,6 +166,18 @@ sortAlignedReads(TAlign& alignStore, Tag<TSortSpec>)
 		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TAlign, typename TSortSpec>
+inline void
+sortAlignedReads(TAlign const& alignStore, Tag<TSortSpec>) 
+{
+	std::stable_sort(
+		begin(const_cast<TAlign&>(alignStore), Standard() ), 
+		end(const_cast<TAlign&>(alignStore), Standard() ), 
+		_LessAlignedRead<typename Value<TAlign>::Type, Tag<TSortSpec> const>() );
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TSearchValue>

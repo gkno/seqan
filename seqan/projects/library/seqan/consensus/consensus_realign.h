@@ -311,8 +311,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		// Go further up to the bandwidth
 		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
 				*bandConsIt = *itCons;
-		resize(bandConsensus, bandConsIt - begin(bandConsensus));
-		resize(myRead, myReadIt - begin(myRead));
+		resize(bandConsensus, bandConsIt - begin(bandConsensus, Standard()));
+		resize(myRead, myReadIt - begin(myRead, Standard()));
 
 		// ReAlign the consensus with the sequence
 		typedef StringSet<TConsensus, Dependent<> > TStringSet;
@@ -332,14 +332,43 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
-		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch());
 
+		/*
+		// Debug code
+		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
+		int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand - 10, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand + 10, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		std::cout << sc1 << std::endl;
+		std::cout << g1 << std::endl;
+
+		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g2(pairSet);
+		int sc2 = globalAlignment(g2, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
+		std::cout << sc2 << std::endl;
+		std::cout << g2 << std::endl;
+
+		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g3(pairSet);
+		int sc3 = globalAlignment(g3, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
+		std::cout << sc3 << std::endl;
+		std::cout << g3 << std::endl;
+		
+		if ((sc1 != sc2) || (sc2 != sc3)) {
+			for(TSize i = 0; i<length( pairSet[0]); ++i) {
+				std::cout <<  pairSet[0][i] << std::endl;
+			}
+			std::cout << "_______________" << std::endl;
+			for(TSize i = 0; i<length( pairSet[1]); ++i) {
+				std::cout <<   pairSet[1][i] << std::endl;
+			}
+			std::cout << "..............." << std::endl;
+			exit(0);
+		}
+		*/
 		//// Debug code
 		//std::cout << pairSet[0] << std::endl;
 		//std::cout << pairSet[1] << std::endl;
 		//std::cout << increaseBand << ',';
+		//std::cout << std::flush;
 		//std::cout << _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])) << ',' <<  _min(rightDiag + increaseBand, (int) length(pairSet[0])) << std::endl;
 		//Graph<Alignment<TStringSet, void, WithoutEdgeId> > g(pairSet);
 		//int sc1 = globalAlignment(g, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
@@ -452,35 +481,36 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename Value<TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadElement;
 
-	// Sort the reads according to the begin position
-	sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
-
-	// Stable-sort according to contigId
+	// Sort according to contigId
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
-
-	// Copy all reads belonging to this contig and reverse complement them if necessary
-	TAlignedReadStore contigReads;
+	
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
 	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+
+	// Sort the reads according to the begin position
+	sortAlignedReads(infix(fragStore.alignedReadStore, alignIt - begin(fragStore.alignedReadStore, Standard()), alignItEnd - begin(fragStore.alignedReadStore, Standard())), SortBeginPos());
+	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+
+	// Copy all reads belonging to this contig and reverse complement them if necessary
+	TAlignedReadStore contigReads;
 	TReadPos maxPos = 0;
 	TReadPos minPos = SupremumValue<TReadPos>::VALUE;
 	for(;alignIt != alignItEnd; ++alignIt) {
-		if ((TId) alignIt->contigId == contigId) {
-			if (alignIt->beginPos > alignIt->endPos) {
-				reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
-				TAlignedElement alignedEl = *alignIt;
-				TReadPos tmp = alignedEl.beginPos;
-				alignedEl.beginPos = alignedEl.endPos;
-				alignedEl.endPos = tmp;
-				if (alignedEl.beginPos < minPos) minPos = alignedEl.beginPos;
-				if (alignedEl.endPos > maxPos) maxPos = alignedEl.endPos;
-				appendValue(contigReads, alignedEl, Generous() );
-			} else {
-				if (alignIt->beginPos < minPos) minPos = alignIt->beginPos;
-				if (alignIt->endPos > maxPos) maxPos = alignIt->endPos;
-				appendValue(contigReads, value(alignIt), Generous() );
-			}
+		if (alignIt->beginPos > alignIt->endPos) {
+			reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
+			TAlignedElement alignedEl = *alignIt;
+			TReadPos tmp = alignedEl.beginPos;
+			alignedEl.beginPos = alignedEl.endPos;
+			alignedEl.endPos = tmp;
+			if (alignedEl.beginPos < minPos) minPos = alignedEl.beginPos;
+			if (alignedEl.endPos > maxPos) maxPos = alignedEl.endPos;
+			appendValue(contigReads, alignedEl, Generous() );
+		} else {
+			if (alignIt->beginPos < minPos) minPos = alignIt->beginPos;
+			if (alignIt->endPos > maxPos) maxPos = alignIt->endPos;
+			appendValue(contigReads, value(alignIt), Generous() );
 		}
 	}
 	if (includeReference) {
@@ -547,44 +577,52 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 
 
+#ifdef SEQAN_PROFILE
+			::std::cout << "ReAlign start: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
 	reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
 		std::cout << "Score: " << score << std::endl;
+#ifdef SEQAN_PROFILE
+		::std::cout << "Time: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
 		oldScore = score;
 		reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
 	std::cout << "Score: " << score << std::endl;
+#ifdef SEQAN_PROFILE
+	::std::cout << "Time: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
+
 
 	// Update all the aligned reads and the new consensus
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter contigReadIt = begin(contigReads);
 	for(;alignIt != alignItEnd; ++alignIt) {
-		if ((TId) alignIt->contigId == contigId) {
-			if (alignIt->beginPos > alignIt->endPos) {
-				reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
-				alignIt->beginPos = contigReadIt->endPos;
-				alignIt->endPos = contigReadIt->beginPos;
-			} else {
-				alignIt->beginPos = contigReadIt->beginPos;
-				alignIt->endPos = contigReadIt->endPos;
-			}
-			// Remove empty gap anchors
-			clear(alignIt->gaps);
-			typedef typename Iterator<TGapAnchor, Standard>::Type TGapIter;
-			TGapIter gapIt = begin(contigReadIt->gaps, Standard());
-			TGapIter gapItEnd = end(contigReadIt->gaps, Standard());
-			int diff = 0;
-			for(;gapIt != gapItEnd; ++gapIt) {
-				if ((int) gapIt->gapPos - (int) gapIt->seqPos != diff) {
-					diff = (int) gapIt->gapPos - (int) gapIt->seqPos;
-					appendValue(alignIt->gaps, *gapIt, Generous() );
-				}
-			}
-			++contigReadIt;
+		if (alignIt->beginPos > alignIt->endPos) {
+			reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
+			alignIt->beginPos = contigReadIt->endPos;
+			alignIt->endPos = contigReadIt->beginPos;
+		} else {
+			alignIt->beginPos = contigReadIt->beginPos;
+			alignIt->endPos = contigReadIt->endPos;
 		}
+		// Remove empty gap anchors
+		clear(alignIt->gaps);
+		typedef typename Iterator<TGapAnchor, Standard>::Type TGapIter;
+		TGapIter gapIt = begin(contigReadIt->gaps, Standard());
+		TGapIter gapItEnd = end(contigReadIt->gaps, Standard());
+		int diff = 0;
+		for(;gapIt != gapItEnd; ++gapIt) {
+			if ((int) gapIt->gapPos - (int) gapIt->seqPos != diff) {
+				diff = (int) gapIt->gapPos - (int) gapIt->seqPos;
+				appendValue(alignIt->gaps, *gapIt, Generous() );
+			}
+		}
+		++contigReadIt;
 	}
 	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
 	TContigElement& contigEl = fragStore.contigStore[contigId];

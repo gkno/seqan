@@ -38,15 +38,12 @@ class ProfileType {
 
 		TCount count[ValueSize<ProfileType>::VALUE];
 
-		inline
 		ProfileType() {
 			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
 		}
 
-		inline
 		~ProfileType() {}
 
-		inline
 		ProfileType(ProfileType const& other_data) {
 			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) 
 				count[i] = other_data.count[i];
@@ -54,13 +51,11 @@ class ProfileType {
 
 
 		template <typename TOther> 
-		inline
 		ProfileType(TOther const& other_data) {
 			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
 			count[ordValue(TValue(other_data))] = 1;
 		}
 
-		inline
 		ProfileType const& 
 		operator = (ProfileType const& other_data) 
 		{
@@ -71,7 +66,6 @@ class ProfileType {
 		}
 
 		template <typename TOther>
-		inline
 		ProfileType const& 
 		operator = (TOther const& other_data) {
 			memset<ValueSize<ProfileType>::VALUE * sizeof(TCount), (unsigned char) 0>(count);
@@ -79,7 +73,6 @@ class ProfileType {
 			return *this;
 		}
 
-		inline
 		operator char() { 
 			typedef typename Size<ProfileType>::Type TSize;
 			TSize maxIndex = 0;
@@ -93,7 +86,7 @@ class ProfileType {
 			return (maxIndex == ValueSize<ProfileType>::VALUE - 1) ? gapValue<char>() : (char) TValue(maxIndex);
 		}
 
-		inline bool 
+		bool
 		operator==(ProfileType const& other_data) const {
 			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) {
 				if (count[i] != other_data.count[i]) return false;
@@ -101,7 +94,7 @@ class ProfileType {
 			return true;
 		}
 
-		inline bool 
+		bool 
 		operator!=(ProfileType const& other_data) const {
 			for(TSize i = 0; i<ValueSize<ProfileType>::VALUE; ++i) {
 				if (count[i] != other_data.count[i]) return true;
@@ -175,7 +168,8 @@ convertImpl(Convert<TTarget, T> const,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStream, typename TValue, typename TCount, typename TSpec>
-TStream& operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
+inline TStream& 
+operator<<(TStream& os, ProfileType<TValue, TCount, TSpec> const& rhs) {
 	typedef ProfileType<TValue, TCount, TSpec> TProfileType;
 	typedef typename Size<TProfileType>::Type TSize;
 	for(TSize i = 0; i<ValueSize<TProfileType>::VALUE; ++i) {

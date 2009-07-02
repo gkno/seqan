@@ -29,8 +29,137 @@ namespace SEQAN_NAMESPACE_MAIN
 // Gap extension score is taken as the constant gap score!!!
 //////////////////////////////////////////////////////////////////////////////
 
+
 //////////////////////////////////////////////////////////////////////////////
 
+template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastRow(AlignConfig<TTop, TLeft, TRight, false, TSpec> const,
+		 TValue1&,
+		 TIndex1&,
+		 TValue2 const,
+		 TIndex2 const)
+{
+	SEQAN_CHECKPOINT
+	// Nop
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
+inline void
+_lastRow(AlignConfig<TTop, TLeft, TRight, true, TSpec> const,
+		 TValue1& maxValue,
+		 TIndex1& maxIndex,
+		 TValue2 const val,
+		 TIndex2 const index)
+{
+	SEQAN_CHECKPOINT
+	if (val > maxValue[0]) {
+		maxValue[0] = val;
+		maxIndex[0] = index;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TColumn>
+inline void
+_lastColumn(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const,
+			TValue1& maxValue,
+			TIndex1&,
+			TColumn const& column)
+{
+	SEQAN_CHECKPOINT
+	maxValue[1] = column[length(column) - 1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TColumn>
+inline void
+_lastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
+			TValue1& maxValue,
+			TIndex1& maxIndex,
+			TColumn const& column)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Size<TColumn>::Type TSize;
+	typedef typename Iterator<TColumn, Standard>::Type TColIter;
+	TSize limit = length(column) - 1;
+	maxValue[1] = column[limit];
+	TColIter itCol = begin(column, Standard());
+	TColIter itColEnd = end(column, Standard());
+	for(TSize i = 1;++itCol != itColEnd; ++i) {
+		if (*itCol > maxValue[1]) {
+			maxValue[1] = *itCol;
+			maxIndex[1] = i;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TScoreValue, bool TTop, bool TLeft, typename TSpec, typename TValue, typename TIndex, typename TSize>
+inline TScoreValue
+_maxOfAlignment(AlignConfig<TTop, TLeft, false, false, TSpec> const,
+				TValue& maxValue,
+				TIndex&,
+				TSize const,
+				TSize const)
+{
+	SEQAN_CHECKPOINT
+	return maxValue[1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TScoreValue, bool TTop, bool TLeft, typename TSpec, typename TValue, typename TIndex, typename TSize>
+inline TScoreValue
+_maxOfAlignment(AlignConfig<TTop, TLeft, true, false, TSpec> const,
+				TValue& maxValue,
+				TIndex& maxIndex,
+				TSize const len1,
+				TSize const)
+{
+	SEQAN_CHECKPOINT
+	maxIndex[0] = len1;
+	return maxValue[1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TScoreValue, bool TTop, bool TLeft, typename TSpec, typename TValue, typename TIndex, typename TSize>
+inline TScoreValue
+_maxOfAlignment(AlignConfig<TTop, TLeft, false, true, TSpec> const,
+				TValue& maxValue,
+				TIndex& maxIndex,
+				TSize const,
+				TSize const len2)
+{
+	SEQAN_CHECKPOINT
+	maxIndex[1] = len2;
+	return maxValue[0];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TScoreValue, bool TTop, bool TLeft, typename TSpec, typename TValue, typename TIndex, typename TSize>
+inline TScoreValue
+_maxOfAlignment(AlignConfig<TTop, TLeft, true, true, TSpec> const,
+				TValue& maxValue,
+				TIndex& maxIndex,
+				TSize const len1,
+				TSize const len2)
+{
+	SEQAN_CHECKPOINT
+	// Find the maximum
+	if (maxValue[1] > maxValue[0]) maxIndex[0] = len1;
+	else maxIndex[1] = len2;
+	return (maxValue[0] > maxValue[1]) ? maxValue[0] : maxValue[1];
+}
+
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
 void
@@ -46,24 +175,21 @@ _align_needleman_wunsch_trace(TAlign& align,
 
 
 	// TraceBack values
-	TTraceValue Diagonal = 0;
-	TTraceValue Horizontal = 1;
-	TTraceValue Vertical = 2;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 	
 	// Initialization
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
-	TSize len1 = overallMaxIndex.first;
-	TSize len2 = overallMaxIndex.second;
-	if (len1 < length(str[0])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, Horizontal);
-	} else if (len2 < length(str[1])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, Vertical);
-	}
+	TSize len1 = overallMaxIndex[0];
+	TSize len2 = overallMaxIndex[1];
+	TSize numCols = length(str[0]);
 	TSize numRows = length(str[1]);
+	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
+	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
+	
 		
 	// Initialize everything
-	TTraceValue tv = getValue(trace, (len1-1)*numRows + (len2-1));
+	TTraceValue tv = trace[(len1-1)*numRows + (len2-1)];
 	TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
 
 	TSize segLen = 1;
@@ -150,64 +276,50 @@ _align_needleman_wunsch(TTrace & trace,
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	TScoreValue infValue = InfimumValue<TScoreValue>::VALUE;
-	overallMaxValue = std::make_pair(infValue, infValue);
-	overallMaxIndex = std::make_pair(len1, len2);
+	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxIndex[0] = len1;
+	overallMaxIndex[1] = len2;
 
 
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator col_end = end(column, Standard());
 	TScoreValue diagVal = 0;
-	TScoreValue vertiVal = 0;
+	TScoreValue max_diag = 0;
 	TScoreValue max_verti = 0;
-	TScoreValue max_hori_verti = 0;
-	TTraceValue tv_hori_verti = Diagonal;
+	TScoreValue max_hori = 0;
 	TSize col2 = 0;
 	for(TSize col = 0; col < len1; ++col) 
 	{
 		diagVal = column[0];
 		_initFirstRow(TAlignConfig(),column[0], (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
 		TColIterator coit = begin(column, Standard());
-		vertiVal = *coit;
+		max_verti = *coit;
 		col2 = 0;
 
 		for(;++coit != col_end; ++it)
 		{
-			// Get max for vertical and horizontal
-			max_verti = vertiVal + scoreGapExtendVertical(_sc, col, col2, str1, str2);
-			max_hori_verti = *coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
-			tv_hori_verti = Horizontal;
-			if (max_hori_verti < max_verti)
-			{
-				max_hori_verti = max_verti;
-				tv_hori_verti = Vertical;
-			}
-
-			// Get the diagonal value
-			vertiVal = diagVal + score(_sc, col, col2++, str1, str2); //compute the maximum in vertiVal 
+			// Get max for vertical, horizontal and diagonal
+			max_verti += scoreGapExtendVertical(_sc, col, col2, str1, str2);
+			max_hori = *coit + scoreGapExtendHorizontal(_sc, col, col2, str1, str2);
+			max_diag = diagVal + score(_sc, col, col2++, str1, str2); //compute the maximum in vertiVal 
 			
-			// Choose the max
-			if (vertiVal >= max_hori_verti) *it = Diagonal;
-			else {
-				vertiVal = max_hori_verti;
-				*it = tv_hori_verti;
-				
-			}
 			diagVal = *coit;
-			*coit = vertiVal;
+			// Choose the max
+			if (max_diag >= _max(max_verti, max_hori)) {
+				*it = Diagonal;
+				max_verti = *coit = max_diag;
+			} else if (max_hori >= max_verti) {
+				*it = Horizontal;
+				max_verti = *coit = max_hori;
+			} else {
+				*it = Vertical;
+				*coit = max_verti;
+			}
 		}
-		_processLastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, vertiVal, col+1);
+		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, max_verti, col+1);
 	}
-	_processLastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
-
-	// Fix the indices
- 	if (overallMaxIndex.second != len2) {
-		if (overallMaxValue.second > overallMaxValue.first) {
-			overallMaxIndex.first = len1;
-		} else if (overallMaxIndex.first != len1) {
-			overallMaxIndex.second = len2;
- 		}
- 	}
+	_lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
 
 	//for(TSize i= 0; i<len2;++i) {
 	//	for(TSize j= 0; j<len1;++j) {
@@ -216,7 +328,7 @@ _align_needleman_wunsch(TTrace & trace,
 	//	std::cout << std::endl;
 	//}
 
-	return _retrieveMaxOfAlignment(TAlignConfig(), overallMaxValue);
+	return _maxOfAlignment<TScoreValue>(TAlignConfig(), overallMaxValue, overallMaxIndex, len1, len2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -236,8 +348,8 @@ _globalAlignment(TAlign& align,
 
 	// Create the trace
 	String<TraceBack> trace;
-	std::pair<TScoreValue, TScoreValue> overallMaxValue;
-	std::pair<TSize, TSize> overallMaxIndex;
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[2];
 	TScoreValue	maxScore = _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
 
 	// Follow the trace and create the graph
@@ -261,8 +373,8 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Size<TStringSet>::Type TSize;
 	
 	String<TraceBack> trace;
-	std::pair<TScoreValue, TScoreValue> overallMaxValue;
-	std::pair<TSize, TSize> overallMaxIndex;
+	TScoreValue overallMaxValue[2];
+	TSize overallMaxIndex[2];
 	return _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
 }
 
