@@ -45,8 +45,11 @@ link_directories (${SEQAN_BASE}/lib)
 #list (SORT HEADERS)
 #list (SORT RAZERS_HEADERS)
 
+add_executable (dfi apps/dfi/dfi.cpp)
+add_executable (paramChooser apps/razers/paramChooser.cpp ${HEADERS})
 add_executable (razers apps/razers/razers.cpp ${RAZERS_HEADERS})
-#add_executable (paramChooser paramChooser.cpp ${HEADERS})
+add_executable (seqan_tcoffee apps/seqan_tcoffee/seqan_tcoffee.cpp)
+add_executable (seqcons apps/seqcons/seqcons.cpp)
 
 #target_link_libraries (paramChooser rt)
 #target_link_libraries (razers tbb_debug pthread)

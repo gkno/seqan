@@ -206,7 +206,7 @@ void simulateReads(
 				}*/
 
 	int realNumReads = numReads;
-	int samplePosCounter = 0;
+	unsigned int samplePosCounter = 0;
 	int readCounter = 0;
 	while (readCounter < numReads) {
 		clear(modificationPattern);

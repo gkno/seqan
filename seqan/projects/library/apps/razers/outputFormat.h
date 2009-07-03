@@ -854,7 +854,7 @@ void dumpMatches(
 				gFile.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
 				if (!gFile.is_open())
 				{
-					std::cerr << "Couldn't open genoem file." << std::endl;
+					std::cerr << "Couldn't open genome file." << std::endl;
 					break;
 				}
 

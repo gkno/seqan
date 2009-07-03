@@ -31,8 +31,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct _DFIEntry
 	{
 		unsigned						lastSeqSeen;
-		String<unsigned, Array<2> >		freq;
-//		String<unsigned>				freq;
+//		String<unsigned, Array<2> >		freq;
+		String<unsigned>				freq;
 	};
 
 
@@ -155,7 +155,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typename TSpec
 	>
 	inline bool nodePredicate(
-		Iter<Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > >, TSpec> const &it)
+		Iter<Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > >, TSpec> &it)
 	{
 		typedef Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
 		return dirAt(value(it).node, container(it)) & TIndex::DFI_PRED;
@@ -168,7 +168,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typename TSpec
 	>
 	inline bool nodeHullPredicate(
-		Iter<Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > >, TSpec> const &it)
+		Iter<Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > >, TSpec> &it)
 	{
 		typedef Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
 		return dirAt(value(it).node, container(it)) & TIndex::DFI_PRED_HULL;
@@ -541,7 +541,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 			index.ds[1] = countSequences(index);
 		}
 		for(unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
-			resize(index.entry[i].freq, length(index.ds) - 1);
+			resize(index.entry[i].freq, length(index.ds) - 1, Exact());
 
 		_wotdCreateFirstLevel(index);
 		return true;
