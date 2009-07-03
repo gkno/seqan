@@ -1,0 +1,48 @@
+DFI - The Deferred Frequency Index
+
+This package contains the implementation of the DFI algorithm 
+published in "Efficient string mining under constraints via the 
+deferred frequency index".
+
+There are executables compiled for various platforms:
+  dfi_windows.exe  dfi for Windows
+  dfi_linux        dfi for GNU Linux x86
+  dfi_linux64      dfi for GNU Linux x86-64
+  dfi_darwin       dfi for Mac OS X on Intel
+
+
+For the "Frequent Pattern Mining Problem" (Problem 1) execute:
+  dfi -f <min_1> <max_2> [-p|-d] <database 1> <database 2>
+
+For the "Emerging Substring Mining Problem" (Problem 2) execute:
+  dfi -g <rho_s> <rho_g> [-p|-d] <database 1> <database 2>
+
+  <min_1>       minimum frequency threshold for <database 1>
+  <max_2>       maximum frequency threshold for <database 2>
+  <rho_s>       minimum support threshold for <database 1>
+  <rho_g>       growth rate threshold from <database 2> to <database 1>
+  <database 1>  positive (foreground) set in FASTA format
+  <database 2>  negative (background) set in FASTA format
+
+Optionally, you can append -p or -d to specify the database alphabet:
+  -p            AminoAcid alphabet (for proteomes)
+  -d            DNA alphabet (for genomes)
+  <nothing>     byte alphabet (for anything, e.g. texts)
+
+
+As an example run under Linux or Mac OS X:
+  ./dfi_linux  -g 1 2 data/database1.fa data/database2.fa
+  ./dfi_darwin -g 1 2 data/database1.fa data/database2.fa
+
+or under Windows:
+  dfi_windows.exe -g 1 2 data\database1.fa data\database2.fa
+
+
+To build your own executable you need to download the latest
+SeqAn snapshot and unzip it. Adjust the variable SEQAN_BASE in 
+the Makefile to the unzip path and run make.
+
+
+For questions or comments, contact:
+  David Weese <weese@inf.fu-berlin.de>
+  Marcel H. Schulz <marcel.schulz@molgen.mpg.de>
