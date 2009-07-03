@@ -22,6 +22,7 @@
 #define USE_LOGVALUES		// this is recommended when using probability values
 #define RUN_RAZERS
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
+#define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
 #define RAZERS_MEMOPT			// optimize memory consumption
 #define RAZERS_PRUNE_QGRAM_INDEX
 #define SEQAN_PROFILE

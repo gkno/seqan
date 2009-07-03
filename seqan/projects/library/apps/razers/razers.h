@@ -118,10 +118,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
-#ifdef RAZERS_MASK_READS
-		String<unsigned long> readMask;	// bit-string of bool (1..verify read, 0..ignore read)
-		enum { WORD_SIZE = BitsPerValue<unsigned long>::VALUE };
-#endif
 
 	// multi-threading
 
