@@ -6,19 +6,36 @@ ifeq ($(OS_NAME),Linux)
   LDFLAGS += -lrt
 endif
 
+tbb_root?=../extra/tbb
+
+#check, if tbb_root is not absolute path (the filter keeps only /* paths)
+ifeq ($(filter /% $(SLASH)%, $(subst :, ,$(tbb_root)) ),)
+    # also changes related variables like work_dir
+    override tbb_root := $(CWD)$(SLASH)..
+    export TBB21_INSTALL_DIR := $(tbb_root)
+endif
+
+# explicitly compile for a 32 or 64 bit platform
 #CXXFLAGS += -m32
 #CXXFLAGS += -m64
+
 CXXFLAGS += -I$(SEQAN_BASE)
 CXXFLAGS += -O9
-#CXXFLAGS += -O0 -g -pg
+#CXXFLAGS += -O0 -g
 CXXFLAGS += -pedantic -W -Wall
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
 
-TARGETS = razers/razers seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser
+# Intel Threading Building Blocks
+#CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
+#LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-all: check_seqan_base $(TARGETS)
-razers: check_seqan_base razers/razers 
-paramChooser: check_seqan_base razers/paramChooser 
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers
+
+all:           check_seqan_base $(TARGETS)
+dfi:           check_seqan_base dfi/dfi 
+razers:        check_seqan_base razers/razers razers/paramChooser
+seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee 
+seqcons:       check_seqan_base seqcons/seqcons 
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
@@ -27,4 +44,4 @@ check_seqan_base:
 	fi
 
 clean:
-	rm -f $(TARGETS)
+	rm -f $(TARGETS) $(TARGETS:=.o)
