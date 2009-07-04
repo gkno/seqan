@@ -25,66 +25,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
-inline void
-_lastColumn(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const,
-			TValue1& maxValue,
-			TIndex1& maxIndex,
-			TValue2 const val,	
-			TIndex2 const row,
-			TIndex2 const col)
-{
-	SEQAN_CHECKPOINT
-	maxValue[1] = val; maxIndex[2] = row; maxIndex[3] = col;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<bool TTop, bool TLeft, bool TBottom, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
-inline void
-_lastColumn(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const,
-			TValue1& maxValue,
-			TIndex1& maxIndex,
-			TValue2 const val,
-			TIndex2 const row,
-			TIndex2 const col)
-{
-	SEQAN_CHECKPOINT
-	if (val > maxValue[1]) {maxValue[1] = val; maxIndex[2] = row; maxIndex[3] = col; }
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
-inline void
-_lastRow(AlignConfig<TTop, TLeft, TRight, false, TSpec> const,		
-		 TValue1& maxValue,
-		 TIndex1& maxIndex,
-		 TValue2 const val,
-		 TIndex2 const row,
-		 TIndex2 const col)
-{
-	SEQAN_CHECKPOINT
-	maxValue[0] = val; maxIndex[0] = row; maxIndex[1] = col;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<bool TTop, bool TLeft, bool TRight, typename TSpec, typename TValue1, typename TIndex1, typename TValue2, typename TIndex2>
-inline void
-_lastRow(AlignConfig<TTop, TLeft, TRight, true, TSpec> const,
-		 TValue1& maxValue,
-		 TIndex1& maxIndex,
-		 TValue2 const val,
-		 TIndex2 const row,
-		 TIndex2 const col)
-{
-	SEQAN_CHECKPOINT
-	if (val > maxValue[0]) {maxValue[0] = val; maxIndex[0] = row; maxIndex[1] = col; }
-}
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -232,8 +172,8 @@ _align_banded_nw(TTrace& trace,
 	TSize hi_diag = diagonalWidth;
 	TSize lo_diag = 0;
 	if (diagL > 0) lo_diag = 0;
-	else lo_diag = (diagU < 0) ? hi_diag : (TSize) (1-1 * diagL); 
-	TSize lo_row = (diagU <= 0) ? -1 * diagU : 0;
+	else lo_diag = (diagU < 0) ? hi_diag : (TSize) (1 - diagL); 
+	TSize lo_row = (diagU <= 0) ? -diagU : 0;
 	TSize hi_row = len2;
 	if (len1 - diagL < hi_row) hi_row = len1 - diagL;
 	TSize height = hi_row - lo_row;
