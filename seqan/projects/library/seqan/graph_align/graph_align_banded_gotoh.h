@@ -91,10 +91,10 @@ _align_banded_gotoh_trace(TAlign& align,
 
 	// Find initial direction
 	TTraceValue tv = Diagonal;
-	TScoreValue horiOrigMax = value(horizontal, row * diagonalWidth + col);
-	TScoreValue vertMax = value(vertical, row * diagonalWidth + col);
-	if (horiOrigMax == value(mat, row * diagonalWidth + col)) tv = Horizontal;
-	else if (vertMax == value(mat, row * diagonalWidth + col)) tv = Vertical;
+	TScoreValue horiOrigMax = horizontal[row * diagonalWidth + col];
+	TScoreValue vertMax = vertical[row * diagonalWidth + col];
+	if (horiOrigMax == mat[row * diagonalWidth + col]) tv = Horizontal;
+	else if (vertMax == mat[row * diagonalWidth + col]) tv = Vertical;
 	else tv = Diagonal;
 	
 	// Walk until we hit a border
@@ -119,24 +119,16 @@ _align_banded_gotoh_trace(TAlign& align,
 			// Last value was diagonal
 			if (tv == Diagonal) {
 				oldTraceValue = Diagonal;
-				if ((value(horizontal, row * diagonalWidth + col)) == value(mat, row * diagonalWidth + col)) {
-					tv = Horizontal;
-				} else if ((value(vertical, row * diagonalWidth + col)) == value(mat, row * diagonalWidth + col)) {
-					tv = Vertical;
-				} else {
-					--row; ++seqLen;
-				}
+				if (horizontal[row * diagonalWidth + col] == mat[row * diagonalWidth + col]) tv = Horizontal;
+				else if (vertical[row * diagonalWidth + col] == mat[row * diagonalWidth + col]) tv = Vertical;
+				else {--row; ++seqLen;}
 			} else if (tv == Horizontal) { // Last value was horizontal
 				oldTraceValue = Horizontal;
-				if ((value(mat, row * diagonalWidth + (col - 1)) + gapOpen) == value(horizontal, row * diagonalWidth + col)) {
-					tv = Diagonal;
-				}
+				if ((col > 0) && (mat[row * diagonalWidth + (col - 1)] + gapOpen == horizontal[row * diagonalWidth + col])) tv = Diagonal;
 				--col; ++seqLen;
 			} else { // Vertical
 				oldTraceValue = Vertical;
-				if ((value(mat, (row - 1) * diagonalWidth + (col + 1)) + gapOpen) == value(vertical, row * diagonalWidth + col)) {
-					tv = Diagonal;
-				}
+				if ((col < diagonalWidth - 1) && (mat[(row - 1) * diagonalWidth + (col + 1)] + gapOpen == vertical[row * diagonalWidth + col])) tv = Diagonal;
 				--row; ++col; ++seqLen;
 			}	
 		}
@@ -189,10 +181,9 @@ _align_banded_gotoh(TColumn& mat,
 	TSize hi_row = len2;
 	if (len1 - diagL < hi_row) hi_row = len1 - diagL;
 	TSize height = hi_row - lo_row;
-	TScoreValue infValue = -1 * _getInfinityDistance<TScoreValue>();
-	fill(mat, height * diagonalWidth, infValue);
-	fill(horizontal, height * diagonalWidth, infValue);
-	fill(vertical, height * diagonalWidth, infValue);
+	resize(mat, height * diagonalWidth);
+	resize(horizontal, height * diagonalWidth);
+	resize(vertical, height * diagonalWidth);
 	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
 	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
 	overallMaxIndex[0] = diagonalWidth;
@@ -217,6 +208,9 @@ _align_banded_gotoh(TColumn& mat,
 	// Classical DP with affine gap costs
 	TSize actualRow = 0;
 	TSize actualCol = 0;
+	TScoreValue a = 0;
+	TScoreValue b = 0;
+	TScoreValue max_val = 0;
 	for(TSize row = 0; row < height; ++row) {
 		actualRow = row + lo_row;
 		if (lo_diag > 0) --lo_diag;
@@ -226,49 +220,39 @@ _align_banded_gotoh(TColumn& mat,
 			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
+				max_val =mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
 
 				// Get the new maximum for vertical
 				if (col < diagonalWidth - 1) {
-					if ((tmp = value(mat, (row - 1) * diagonalWidth + (col + 1)) + gapOpen) >  (value(vertical, (row - 1) * diagonalWidth + (col + 1)) + gap)) {
-						value(vertical, row * diagonalWidth + col) = tmp;
-					} else {
-						value(vertical, row * diagonalWidth + col) = (value(vertical, (row - 1) * diagonalWidth + (col + 1)) + gap);
-					}
+					a = mat[(row - 1) * diagonalWidth + (col + 1)] + gapOpen;
+					b = vertical[(row - 1) * diagonalWidth + (col + 1)] + gap;
+					vertical[row * diagonalWidth + col] = (a > b) ? a : b;
+					if (vertical[row * diagonalWidth + col] > max_val) max_val = vertical[row * diagonalWidth + col];
 				}
 
 				// Get the new maximum for horizontal
 				if (col > 0) {
-					if ((tmp = value(mat, row * diagonalWidth + (col - 1)) + gapOpen) > value(horizontal, row * diagonalWidth + (col - 1)) + gap) {
-						value(horizontal, row * diagonalWidth + col) = tmp;
-					} else {
-						value(horizontal, row * diagonalWidth + col) = value(horizontal, row * diagonalWidth + (col - 1)) + gap;
-					}
+					a = mat[row * diagonalWidth + (col - 1)] + gapOpen;
+					b = horizontal[row * diagonalWidth + (col - 1)] + gap;
+					horizontal[row * diagonalWidth + col] = (a > b) ? a : b;
+					if (horizontal[row * diagonalWidth + col] > max_val) max_val = horizontal[row * diagonalWidth + col];
 				}
 
 				// Get the new maximum for mat
-				TScoreValue sc_ = score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
-				tmp = value(mat, (row - 1) * diagonalWidth + col) + sc_;
-				if (value(vertical, row * diagonalWidth + col) > tmp) {
-					tmp = value(vertical, row * diagonalWidth + col);
-				}
-				if (value(horizontal, row * diagonalWidth + col) > tmp) {
-					tmp = value(horizontal, row * diagonalWidth + col);
-				}
-				value(mat, row * diagonalWidth + col) = tmp;
-
+				mat[row * diagonalWidth + col] = max_val;
 			} else {
 				// Usual initialization for first row and column
 				if (actualRow == 0) {
 					if (actualCol != 0) {
-						_initFirstRow(TAlignConfig(), value(mat, col), gapOpen + (actualCol - 1) * gap);
-						value(vertical, col) = value(mat, col) + gapOpen - gap;
-					} else value(mat, col) = 0;
+						_initFirstRow(TAlignConfig(), mat[col], gapOpen + (actualCol - 1) * gap);
+						vertical[col] = mat[col] + gapOpen - gap;
+					} else mat[col] = 0;
 					//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
 					//std::cout << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
 					//std::cout << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
-				} else if (actualCol == 0) {
-					_initFirstColumn(TAlignConfig(), value(mat, row * diagonalWidth + col), gapOpen + (actualRow - 1) * gap);
-					value(horizontal, row * diagonalWidth + col) = value(mat, row * diagonalWidth + col) + gapOpen - gap;
+				} else {
+					_initFirstColumn(TAlignConfig(), mat[row * diagonalWidth + col], gapOpen + (actualRow - 1) * gap);
+					horizontal[row * diagonalWidth + col] = mat[row * diagonalWidth + col] + gapOpen - gap;
 					//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
 					//std::cout << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
 					//std::cout << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
