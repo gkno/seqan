@@ -436,8 +436,8 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		TCntValue occ;
 		if (index.sentinelOcc != 0)
 		{
-			TDirValue orMask = (index.predHull(*itEntry))? index.DFI_PRED_HULL: 0;
-			if (index.pred(*itEntry)) orMask |= index.DFI_PRED;
+			TDirValue orMask = 0; //(index.predHull(*itEntry))? index.DFI_PRED_HULL: 0;
+			//if (index.pred(*itEntry)) orMask |= index.DFI_PRED;
 
 			if (index.sentinelOcc > 1) { // occurs on multiseqs
 				itPrev = itDir;

@@ -103,16 +103,42 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TSize			sentinelOcc;
 		TSize			sentinelBound;
+		bool			interSentinelNodes;	// should virtually one (true) $-sign or many (false) $_i-signs be appended to the strings in text 
 
-		Index() {}
+		Index():
+			interSentinelNodes(true) {}
+
+		Index(Index &other):
+			text(other.text),
+			sa(other.sa),
+			dir(other.dir),
+			cargo(other.cargo),
+			tempSA(other.tempSA),
+			tempBound(other.tempBound),
+			sentinelOcc(other.sentinelOcc),
+			sentinelBound(other.sentinelBound),
+			interSentinelNodes(other.interSentinelNodes) {}
+
+		Index(Index const &other):
+			text(other.text),
+			sa(other.sa),
+			dir(other.dir),
+			cargo(other.cargo),
+			tempSA(other.tempSA),
+			tempBound(other.tempBound),
+			sentinelOcc(other.sentinelOcc),
+			sentinelBound(other.sentinelBound),
+			interSentinelNodes(other.interSentinelNodes) {}
 
 		template <typename _TText>
 		Index(_TText &_text):
-			text(_text) {}
+			text(_text),
+			interSentinelNodes(true) {}
 
 		template <typename _TText>
 		Index(_TText const &_text):
-			text(_text) {}
+			text(_text),
+			interSentinelNodes(true) {}
 	};
 /*
     template < typename TText, typename TSpec >
@@ -394,9 +420,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
-	// parentEdgeLabel - ORIGINAL VERSION
+	// parentEdgeLabel - ORIGINAL VERSION (doesn't work if TText is a StringSet)
 	template < typename TText, typename TSpec >
-	inline typename Infix< typename Fibre<Index<TText, Index_Wotd<WotdOriginal> >, ESA_RawText>::Type const >::Type 
+	inline typename Infix< typename Fibre<Index<TText, Index_Wotd<WotdOriginal> >, ESA_Text>::Type const >::Type 
 	parentEdgeLabel(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > const &it) 
 	{
 		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
@@ -405,10 +431,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		TIndex const &index = container(it);
 
 		if (isRoot(it))
-			return infix(indexRawText(index), 0, 0);
+			return infix(indexText(index), 0, 0);
 		else {
 			TSize occ = _getNodeLP(index, value(it).node);
-			return infix(indexRawText(index), occ, occ + parentEdgeLength(it));
+			return infix(indexText(index), occ, occ + parentEdgeLength(it));
 		}
 	}
 
@@ -1023,8 +1049,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// 3. cumulative sum
 		TSize requiredSize = 0;
-		if (index.sentinelOcc != 0)
-			requiredSize = (index.sentinelOcc > 1)? 2: 1;
+
+		// actually, here sentinelOcc<=1 holds (this is the original wotd)
+		if (index.interSentinelNodes) {
+			if (index.sentinelOcc != 0)
+				requiredSize = (index.sentinelOcc > 1)? 2: 1;	// insert *one* $-edge for all $_i suffices
+		} else
+			requiredSize = index.sentinelOcc;					// insert each $_i suffix one-by-one
 
 		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
@@ -1131,8 +1162,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// 3. cumulative sum
 		TSize requiredSize = 0;
-		if (index.sentinelOcc != 0)
-			requiredSize = (index.sentinelOcc > 1)? 2: 1;
+		if (index.interSentinelNodes) {
+			if (index.sentinelOcc != 0)
+				requiredSize = (index.sentinelOcc > 1)? 2: 1;	// insert *one* $-edge for all $_i suffices
+		} else
+			requiredSize = index.sentinelOcc;					// insert each $_i suffix one-by-one
 
 		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
@@ -1199,8 +1233,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// 3. cumulative sum
 		TSize requiredSize = 0;
-		if (index.sentinelOcc != 0)
-			requiredSize = (index.sentinelOcc > 1)? 2: 1;
+		if (index.interSentinelNodes) {
+			if (index.sentinelOcc != 0)
+				requiredSize = (index.sentinelOcc > 1)? 2: 1;	// insert *one* $-edge for all $_i suffices
+		} else
+			requiredSize = index.sentinelOcc;					// insert each $_i suffix one-by-one
 
 		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
@@ -1556,7 +1593,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				w1 & index.BITMASK1, 
 				repLength(it));
 
-/*			if (globalDumpFlag) {
+/*			if (globalDumpFlag) 
+			{
 				::std::cerr << '"' << representative(it) << '"' << ::std::endl;
 				_dumpFreq(index);
 			}
