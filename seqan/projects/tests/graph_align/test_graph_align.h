@@ -601,8 +601,8 @@ void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		typedef Dna5Q TAlphabet;
 		typedef String<TAlphabet> TSequence;
 		
-		TSize lenN = mtRand() % 5 + 1;
-		TSize lenM = mtRand() % 5 + 1;
+		TSize lenN = mtRand() % 10 + 1;
+		TSize lenM = mtRand() % 10 + 1;
 		TSequence dna1;
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
@@ -718,8 +718,8 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		typedef Dna5Q TAlphabet;
 		typedef String<TAlphabet> TSequence;
 		
-		TSize lenN = mtRand() % 5 + 1;
-		TSize lenM = mtRand() % 5 + 1;
+		TSize lenN = mtRand() % 10 + 1;
+		TSize lenM = mtRand() % 10 + 1;
 		TSequence dna1;
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
