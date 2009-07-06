@@ -44,9 +44,10 @@ _align_gotoh_trace(TAlign& align,
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Id<TStringSet>::Type TId;
 
-	// TraceBack values for Gotoh
+	// Initialization
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
+	
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
 	TSize len1 = overallMaxIndex[0];
@@ -60,23 +61,14 @@ _align_gotoh_trace(TAlign& align,
 
 		// Initialize everything	
 		TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
-		TTraceValue tv = 0;
-		if (initialDir == Diagonal) {
-			if ( ((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-			else if ( ((unsigned char) nextTraceValue >> 2) == 1) tv =  Horizontal;
-			else tv =  Vertical;
-		} else if (initialDir == Horizontal) {
-			if (((unsigned char) nextTraceValue >> 1) % (unsigned char) 2 == 0) {
-				_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
-				tv =  Diagonal;
-			}
-			else tv =  Horizontal;
+		TTraceValue tv = Diagonal;
+		if (initialDir == Diagonal) tv = (nextTraceValue & 3);
+		else if (initialDir == Horizontal) {
+			if ((nextTraceValue >> 2) & 1) _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+			else tv = Horizontal;
 		} else if (initialDir == Vertical) {
-			if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
-				_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
-				tv =  Diagonal;
-			}
-			else tv =  Vertical;
+			if ((nextTraceValue >> 3) & 1) _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+			else tv = Vertical;
 		}
 		TSize segLen = 0;
 		TTraceValue tvOld = tv;
@@ -84,20 +76,17 @@ _align_gotoh_trace(TAlign& align,
 		// Now follow the trace
 		do {
 			nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
-			if (tv == Diagonal) {
-				if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-				else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
-				else tv =  Vertical;
-			} else if (tv == Horizontal) {
-				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv =  Diagonal;
-			    else tv =  Horizontal;
+			if (tv == Diagonal) tv = (nextTraceValue & 3);
+			else if (tv == Horizontal) {
+				if ((nextTraceValue >> 2) & 1) tv = Diagonal; 
+				else tv =  Horizontal;
 			} else if (tv == Vertical) {
-				if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) tv =  Diagonal;
+				if ((nextTraceValue >> 3) & 1) tv =  Diagonal; 
 				else tv =  Vertical;
 			}
 			if (tv == Diagonal) {
 				if (tv != tvOld) {
-					if (tvOld ==  Vertical) --len2;
+					if (tvOld == Vertical) --len2; 
 					else --len1;
 					_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
 					tvOld = tv; segLen = 0;
@@ -108,7 +97,7 @@ _align_gotoh_trace(TAlign& align,
 			} else if(tv == Horizontal) {
 				if (tv != tvOld) {
 					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-					if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
+					if ((nextTraceValue >> 2) & 1) {
 						_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
 						tv =  Diagonal; segLen = 0;
 					} else {
@@ -122,7 +111,7 @@ _align_gotoh_trace(TAlign& align,
 			} else if (tv == Vertical) {
 				if (tv != tvOld) {
 					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-					if (((unsigned char) nextTraceValue %  (unsigned char) 2) == 0) {
+					if ((nextTraceValue >> 3) & 1) {
 						_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
 						tv =  Diagonal; segLen = 0;
 					} else {
@@ -163,8 +152,9 @@ _align_gotoh(TTrace& trace,
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Value<TTrace>::Type TTraceValue;
 
-	// TraceBack values for Gotoh
+	// Traceback values
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+
 
 	// The DP Matrix for diagonal walks
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -185,8 +175,6 @@ _align_gotoh(TTrace& trace,
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
 	TTraceValue tvMat = 0;
-	TTraceValue tvHorizontal = 0;
-	TTraceValue tvVertical = 0;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
@@ -211,19 +199,22 @@ _align_gotoh(TTrace& trace,
 		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, col-1, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
 		vert = mat[0] + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
+
 			// Get the new maximum for vertical
 			a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
 			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);;
-			if (a > b) {vert = a;	tvVertical = Diagonal;}
-			else { vert = b; tvVertical = Vertical;}
+			if (a > b) {vert = a; *it = 1;}
+			else { vert = b; *it = 0;}
 
 			// Get the new maximum for left
+			*it <<= 1;
 			a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
 			b = horizontal[row] +  scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
-			if (a > b) {horizontal[row] = a; tvHorizontal = Diagonal;}
-			else {horizontal[row] = b; tvHorizontal = Horizontal;}
-
+			if (a > b) {horizontal[row] = a; *it |= 1;}
+			else horizontal[row] = b;
+			
 			// Get the new maximum for mat
+			*it <<= 2;
 			max_val = diagValMat + score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
 			tvMat = Diagonal;
 			if (vert > max_val) {
@@ -234,22 +225,11 @@ _align_gotoh(TTrace& trace,
 				max_val = horizontal[row];
 				tvMat = Horizontal;
 			}
+			*it |= tvMat;
 
 			// Assign the new diagonal values
 			diagValMat = mat[row];
 			mat[row] = max_val;
-
-			// Assign the right trace value
-			if (tvMat == Diagonal) {
-				if (tvHorizontal == Diagonal) *it = (tvVertical == Diagonal) ? 0 : 1;
-				else if (tvHorizontal == Horizontal) *it = (tvVertical == Diagonal) ? 2 : 3;
-			} else if (tvMat ==  Horizontal) {
-				if (tvHorizontal ==  Diagonal) *it = (tvVertical ==  Diagonal) ? 4 : 5;
-				else if (tvHorizontal ==  Horizontal) *it = (tvVertical ==  Diagonal) ? 6 : 7;
-			} else if (tvMat ==  Vertical) {
-				if (tvHorizontal ==  Diagonal) *it = (tvVertical ==  Diagonal) ? 8 : 9;
-				else if (tvHorizontal ==  Horizontal) *it =  (tvVertical ==  Diagonal) ? 10 : 11;
-			}
 		}
 		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[len2], col);
 		// If we got a new index, store direction
@@ -267,16 +247,6 @@ _align_gotoh(TTrace& trace,
 		if (horizontal[len2] == mat[len2]) initialDir =  Horizontal;
 		else if (vert == mat[len2]) initialDir =  Vertical;
 	}
-
-	//// Debug code
-	//for(TSize i= 0; i<len2;++i) {
-	//	for(TSize j= 0; j<len1;++j) {
-	//		std::cout << (TSize) getValue(trace, j*len2 + i) << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << (TSize) initialDir << std::endl;
-
 	return _maxOfAlignment<TScoreValue>(TAlignConfig(), overallMaxValue, overallMaxIndex, len1, len2);
 }
 
@@ -295,8 +265,8 @@ _globalAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	// Trace
-	String<TraceBackGotoh> trace;
-	TraceBackGotoh initialDir;
+	String<unsigned char> trace;
+	unsigned char initialDir;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
 
@@ -320,8 +290,9 @@ _globalAlignment(TStringSet const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
-	TraceBackGotoh initialDir;
-	String<TraceBackGotoh> trace;
+	// Trace
+	String<unsigned char> trace;
+	unsigned char initialDir;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
 	return _align_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());	
