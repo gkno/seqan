@@ -220,8 +220,6 @@ _align_smith_waterman(TTrace& trace,
 	TString const& str2 = str[1];		
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
-	TScoreValue gap = scoreGapExtend(sc);
-	TScoreValue gapOpen = scoreGapOpen(sc);
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
@@ -241,12 +239,12 @@ _align_smith_waterman(TTrace& trace,
 	mat[0] = 0;
 	for(TSize row = 1; row <= len2; ++row) {
 		mat[row] = 0;
-		horizontal[row] = gapOpen;
+		horizontal[row] = scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
 	}
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = mat[0];
 		mat[0] = 0;
-		vert = gapOpen;
+		vert = scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
 			if (_isClumping(forbidden, row, col, len2)) {
 				*it = Stop;
@@ -255,15 +253,15 @@ _align_smith_waterman(TTrace& trace,
 				horizontal[row] = 0;
 			} else {
 				// Get the new maximum for vertical
-				a = mat[row - 1] + gapOpen;
-				b = vert + gap;
+				a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
+				b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
 				if (a > b) { vert = a; *it = 1;} 
 				else {vert = b; *it = 0;}
 	
 				// Get the new maximum for horizontal
 				*it <<= 1;
-				a = mat[row] + gapOpen;
-				b = horizontal[row] + gap;
+				a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
+				b = horizontal[row] + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
 				if (a > b) {horizontal[row] = a; *it |= 1; } 
 				else horizontal[row] =  b;
 	

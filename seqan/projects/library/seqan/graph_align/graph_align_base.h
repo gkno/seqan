@@ -79,66 +79,6 @@ template <> struct ValueSize< TraceBack > { enum { VALUE = 3 }; };
 template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };
 
 //////////////////////////////////////////////////////////////////////////////
-// Alignment: Extended Traceback Alphabet (Gotoh)
-//////////////////////////////////////////////////////////////////////////////
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template <typename T = void>
-struct _Translate_Table_Byte_2_TraceBackGotoh
-{
-	static char const VALUE[256];
-};
-template <typename T>
-char const _Translate_Table_Byte_2_TraceBackGotoh<T>::VALUE[256] = 
-{
-	0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   10,   11,   12,   0,   0,   0, //0
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //2
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //3
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //4
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //5
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //6
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //7
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //8
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //9
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //10
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //11
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //12
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //13
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //14
-	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  //15
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Spec.TraceBackGotoh:
-..cat:Alphabets
-..summary: Trace back values for gotoh.
-..general:Class.SimpleType
-..signature:TraceBackGotoh
-..remarks:
-...text:The @Metafunction.ValueSize@ of $TraceBackGotoh$ is 12. 
-The values are defined in the following way: Move in Diagonal Matrix, Move in Horizontal Matrix, Move in Vertical Matrix
-The values are: 
-0=Diag, Diag, Diag; 1=Diag, Diag, Vert; 2=Diag, Hori, Diag; 3=Diag, Hori, Vert; 
-4=Hori, Diag, Diag; 5=Hori, Diag, Vert; 6=Hori, Hori, Diag; 7=Hori, Hori, Vert; 
-8=Vert, Diag, Diag; 9=Vert, Diag, Vert; 10=Vert, Hori, Diag; 11=Vert, Hori, Vert; 
-12 = Stop (For SmithWaterman Traceback)
-..see:Metafunction.ValueSize
-*/
-struct _TraceBackGotoh {};
-typedef SimpleType<unsigned char, _TraceBackGotoh> TraceBackGotoh;
-
-template <> struct ValueSize< TraceBackGotoh > { enum { VALUE = 13 }; };
-template <> struct BitsPerValue< TraceBackGotoh > { enum { VALUE = 4 }; };
-
-
-
-//////////////////////////////////////////////////////////////////////////////
 // Alignment: Trace-back, internal functions
 //////////////////////////////////////////////////////////////////////////////
 

@@ -42,7 +42,6 @@
 #include <seqan/graph_align/graph_align_hirschberg.h>
 #include <seqan/graph_align/graph_align_smith_waterman.h>
 #include <seqan/graph_align/graph_align_smith_waterman_clump.h>
-#include <seqan/graph_align/graph_align_smith_waterman_island.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -908,7 +908,6 @@ void Test_GraphAlignment() {
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_hirschberg.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman_clump.h");
-	//debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman_island.h");
 }
 
 }

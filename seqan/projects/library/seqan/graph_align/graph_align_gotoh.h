@@ -202,14 +202,14 @@ _align_gotoh(TTrace& trace,
 
 			// Get the new maximum for vertical
 			a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
-			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);;
+			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
 			if (a > b) {vert = a; *it = 1;}
 			else { vert = b; *it = 0;}
 
 			// Get the new maximum for left
 			*it <<= 1;
 			a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
-			b = horizontal[row] +  scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
+			b = horizontal[row] + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
 			if (a > b) {horizontal[row] = a; *it |= 1;}
 			else horizontal[row] = b;
 			
