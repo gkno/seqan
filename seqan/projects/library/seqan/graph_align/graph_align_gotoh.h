@@ -196,7 +196,7 @@ _align_gotoh(TTrace& trace,
 	if (overallMaxIndex[0] == 0) initialDir = Vertical;
 	for(TSize col = 1; col <= len1; ++col) {
 		TScoreValue diagValMat = mat[0];
-		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, col-1, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
+		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
 		vert = mat[0] + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
 
