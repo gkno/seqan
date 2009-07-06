@@ -60,7 +60,6 @@ _align_banded_gotoh_trace(TAlign& align,
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);
 	TSize len1 = length(str1) + 1;
 	TSize len2 = length(str2) + 1;
-	TScoreValue gapOpen = scoreGapOpen(sc);
 	TSize lo_row = 0;
 	if (diagU <= 0) lo_row = -1 * diagU;
 	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
@@ -124,11 +123,11 @@ _align_banded_gotoh_trace(TAlign& align,
 				else {--row; ++seqLen;}
 			} else if (tv == Horizontal) { // Last value was horizontal
 				oldTraceValue = Horizontal;
-				if ((col > 0) && (mat[row * diagonalWidth + (col - 1)] + gapOpen == horizontal[row * diagonalWidth + col])) tv = Diagonal;
+				if ((col > 0) && (mat[row * diagonalWidth + (col - 1)] + scoreGapOpenHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) == horizontal[row * diagonalWidth + col])) tv = Diagonal;
 				--col; ++seqLen;
 			} else { // Vertical
 				oldTraceValue = Vertical;
-				if ((col < diagonalWidth - 1) && (mat[(row - 1) * diagonalWidth + (col + 1)] + gapOpen == vertical[row * diagonalWidth + col])) tv = Diagonal;
+				if ((col < diagonalWidth - 1) && (mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapOpenVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) == vertical[row * diagonalWidth + col])) tv = Diagonal;
 				--row; ++col; ++seqLen;
 			}	
 		}

@@ -866,7 +866,6 @@ void Test_SmithWaterman() {
 	SEQAN_TASSERT(score == score2)
 	std::cout << g << std::endl;
 }
-	
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -892,14 +891,14 @@ void Test_SmithWatermanClump() {
 
 void Test_GraphAlignment() {
 	// Global alignments
-	//Test_NeedlemanWunsch();
-	//Test_Gotoh();	
-	//Test_Hirschberg();
+	Test_NeedlemanWunsch();
+	Test_Gotoh();	
+	Test_Hirschberg();
 	Test_AllAgainstAll();
 
 	// Local alignments
-	//Test_SmithWaterman();
-	//Test_SmithWatermanClump();
+	Test_SmithWaterman();
+	Test_SmithWatermanClump();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_config.h");

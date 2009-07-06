@@ -24,61 +24,51 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Smith Waterman Alignment, affine gap cost
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TSize, typename TForbidden>
+template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TIndexPair, typename TForbidden>
 inline void
 _align_smith_waterman_trace(TAlign& align,
 							TStringSet const& str,
 							TTrace const& trace,
 							TVal const initialDir,
-							TSize best_row,
-							TSize best_col,
+							TIndexPair const& indexPair,
 							TForbidden& forbidden)
 {
 	SEQAN_CHECKPOINT
-	
+	typedef typename Size<TTrace>::Type TSize;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	typedef typename Id<TStringSet>::Type TId;
 
 	// TraceBack values for Gotoh
-	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 12;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 3;
 
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
 	TId id2 = positionToId(const_cast<TStringSet&>(str), 1);	 
-	TSize len1 = best_col;
-	TSize len2 = best_row;
-	if ((best_col == 0) || (best_row == 0)) return;
-	if (len1 < length(str[0])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[0]) - len1, Horizontal);
-	}
-	if (len2 < length(str[1])) {
-		_align_trace_print(align, str, id1, len1, id2, len2, length(str[1]) - len2, Vertical);
-	}
+	TSize len1 = indexPair[1];
+	TSize len2 = indexPair[0];
+	if ((indexPair[0] == 0) || (indexPair[1] == 0)) return;
+	TSize numCols = length(str[0]);
 	TSize numRows = length(str[1]);
+	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
+	if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
+	
+	
 
 	// Initialize everything	
-	TTraceValue nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-	TTraceValue tv = 0;
-	if (initialDir == Diagonal) {
-		if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-		else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
-		else tv = Vertical;
-	} else if (initialDir == Horizontal) {
-		if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
-		  _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
-		  tv = Diagonal;
-		}
+	TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+	TTraceValue tv = Diagonal;
+	if (initialDir == Diagonal) tv = (nextTraceValue & 3);
+	else if (initialDir == Horizontal) {
+		if ((nextTraceValue >> 2) & 1) _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
 		else tv = Horizontal;
 	} else if (initialDir == Vertical) {
-		if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
-		  _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
-		  tv = Diagonal;
-		}
+		if ((nextTraceValue >> 3) & 1) _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
 		else tv = Vertical;
 	}
 	TSize segLen = 0;
@@ -86,19 +76,16 @@ _align_smith_waterman_trace(TAlign& align,
 
 	// Now follow the trace
 	do {
-		nextTraceValue = getValue(trace, (len1 - 1)*numRows + (len2 - 1));
-		if (nextTraceValue == Stop) break;
-		if (!empty(forbidden)) assignValue(forbidden, (len1 - 1)*numRows + (len2 - 1), true);
-		if (tv == Diagonal) {
-			if (((unsigned char) nextTraceValue >> 2) == 0) tv = Diagonal;
-			else if (((unsigned char) nextTraceValue >> 2) == 1) tv = Horizontal;
-			else tv = Vertical;
-		} else if (tv == Horizontal) {
-			if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) tv = Diagonal;
-			else tv = Horizontal;
+		nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+		if ((nextTraceValue & 3) == Stop) break;
+		if (!empty(forbidden)) forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
+		if (tv == Diagonal) tv = (nextTraceValue & 3);
+		else if (tv == Horizontal) {
+			if ((nextTraceValue >> 2) & 1) tv = Diagonal; 
+			else tv =  Horizontal;
 		} else if (tv == Vertical) {
-			if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) tv = Diagonal;
-			else tv = Vertical;
+			if ((nextTraceValue >> 3) & 1) tv =  Diagonal; 
+			else tv =  Vertical;
 		}
 		if (tv == Diagonal) {
 			if (tv != tvOld) {
@@ -113,7 +100,7 @@ _align_smith_waterman_trace(TAlign& align,
 		} else if (tv == Horizontal) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if ((((unsigned char) nextTraceValue >> 1) % (unsigned char) 2) == 0) {
+				if ((nextTraceValue >> 2) & 1) {
 					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
 					tv = Diagonal; segLen = 0;
 				} else {
@@ -127,7 +114,7 @@ _align_smith_waterman_trace(TAlign& align,
 		} else if (tv == Vertical) {
 			if (tv != tvOld) {
 				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
-				if ((unsigned char) nextTraceValue % (unsigned char) 2 == 0) {
+				if ((nextTraceValue >> 3) & 1) {
 					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
 					tv = Diagonal; segLen = 0;
 				} else {
@@ -150,21 +137,21 @@ _align_smith_waterman_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TTrace, typename TStringSet, typename TScore, typename TSize, typename TForbidden>
+template <typename TTrace, typename TStringSet, typename TScore, typename TIndexPair, typename TForbidden>
 inline typename Value<TScore>::Type
 _align_smith_waterman(TTrace& trace,
 					  TStringSet const& str,
 					  TScore const & sc,
 					  typename Value<TTrace>::Type& initialDir,
-					  TSize& best_row,
-					  TSize& best_col,
+					  TIndexPair& indexPair,
 					  TForbidden& forbidden)
 {
 	SEQAN_CHECKPOINT
+	typedef typename Size<TTrace>::Type TSize;
 	typedef typename Value<TTrace>::Type TTraceValue;
 	
 	// TraceBack values for Smith Waterman
-	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 12;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2; TTraceValue Stop = 3;
 
 	// The DP Matrix for diagonal walks
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -183,122 +170,83 @@ _align_smith_waterman(TTrace& trace,
 	TSize len2 = length(str2);
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
-	TScoreValue tmp = 0;
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
 	resize(trace, len1*len2);
-	TTraceValue tvMat=0, tvHorizontal=0, tvVertical=0;
+	TTraceValue tvMat= 0;
 
 	// Record the max score
 	TScoreValue score_max = 0;
-	best_row = 0;
-	best_col = 0;
+	indexPair[0] = 0; indexPair[1] = 0;
 	initialDir = Stop;
 	bool emptyForbidden = empty(forbidden);
 
 	
 	// Classical DP
+	TScoreValue max_val = 0;
+	TScoreValue a = 0;
+	TScoreValue b = 0;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	assignValue(mat, 0, 0);
+	mat[0] = 0;
 	for(TSize row = 1; row <= len2; ++row) {
-		assignValue(mat, row, 0);
-		assignValue(horizontal, row, gapOpen);
+		mat[row] = 0;
+		horizontal[row] = gapOpen;
 	}
 	for(TSize col = 1; col <= len1; ++col) {
-		TScoreValue diagValMat = getValue(mat, 0);
-		assignValue(mat, 0, 0);
+		TScoreValue diagValMat = mat[0];
+		mat[0] = 0;
 		vert = gapOpen;
-		for(TSize row = 1; row <= len2; ++row) {
-			if ((!emptyForbidden) && (getValue(forbidden, (col-1) * len2 + (row-1)) == true)) {
-				tmp = 0;
+		for(TSize row = 1; row <= len2; ++row, ++it) {
+			if ((!emptyForbidden) && (forbidden[(col-1) * len2 + (row-1)])) {
+				*it = 0;
+				max_val = 0;
 				vert = 0;
 				tvMat =  Stop;
-				assignValue(horizontal, row, 0);
+				horizontal[row] = 0;
 			} else {
 				// Get the new maximum for vertical
-				if ((tmp = getValue(mat, row - 1) + gapOpen) > vert + gap) {
-					vert = tmp;
-					tvVertical =  Diagonal;
-				} else {
-					vert = vert + gap;
-					tvVertical =  Vertical;
-				}
+				a = mat[row - 1] + gapOpen;
+				b = vert + gap;
+				if (a > b) { vert = a; *it = 1;} 
+				else {vert = b; *it = 0;}
 	
 				// Get the new maximum for horizontal
-				if ((tmp = getValue(mat, row) + gapOpen) > getValue(horizontal, row) + gap) {
-					assignValue(horizontal, row, tmp);
-					tvHorizontal =  Diagonal;
-				} else {
-					assignValue(horizontal, row, getValue(horizontal, row) + gap);
-					tvHorizontal =  Horizontal;
-				}
+				*it <<= 1;
+				a = mat[row] + gapOpen;
+				b = horizontal[row] + gap;
+				if (a > b) {horizontal[row] = a; *it |= 1; } 
+				else horizontal[row] =  b;
 	
 				// Get the new maximum for mat
-				TScoreValue sc_ = score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
-				tmp = diagValMat + sc_;
+				*it <<= 2;
+				max_val = diagValMat + score(const_cast<TScore&>(sc), col-1, row-1, str1, str2);
 				tvMat =  Diagonal;
-				if (vert > tmp) {
-					tmp = vert;
+				if (vert > max_val) {
+					max_val = vert;
 					tvMat =  Vertical;
 				}
-				if (getValue(horizontal, row) > tmp) {
-					tmp = getValue(horizontal,row);
+				if (horizontal[row] > max_val) {
+					max_val = horizontal[row];
 					tvMat =  Horizontal;
 				}
-				if (0 >= tmp) {
-					tmp = 0;
+				if (0 >= max_val) {
+					max_val = 0;
 					tvMat =  Stop;
 				}
 			}
 
+			*it |= tvMat;
 			// Assign the new diagonal values
-			diagValMat = getValue(mat, row);
-			assignValue(mat, row, tmp);
+			diagValMat = mat[row];
+			mat[row] = max_val;
 
 			// Record the new best score
-			if (tmp > score_max) {
-				best_row = row;
-				best_col = col;
-				score_max = tmp;
-				initialDir =  Diagonal;
-				if (getValue(horizontal, row) ==  tmp) {
-					initialDir =  Horizontal;
-				}
-				else if (vert == tmp) {
-					initialDir =  Vertical;
-				}
+			if (max_val > score_max) {
+				indexPair[0] = row; indexPair[1] = col;
+				score_max = max_val;
+				initialDir = tvMat;
 			}
-
-			// Assign the right trace value
-			if (tvMat ==  Stop) {
-				assignValue(it, 12);
-			} else if (tvMat ==  Diagonal) {
-				if (tvHorizontal ==  Diagonal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 0);
-					else assignValue(it, 1);
-				} else if (tvHorizontal ==  Horizontal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 2);
-					else assignValue(it, 3);
-				}
-			} else if (tvMat ==  Horizontal) {
-				if (tvHorizontal ==  Diagonal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 4);
-					else assignValue(it, 5);
-				} else if (tvHorizontal ==  Horizontal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 6);
-					else assignValue(it, 7);
-				}
-			} else if (tvMat ==  Vertical) {
-				if (tvHorizontal ==  Diagonal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 8);
-					else assignValue(it, 9);
-				} else if (tvHorizontal ==  Horizontal) {
-					if (tvVertical ==  Diagonal) assignValue(it, 10);
-					else assignValue(it, 11);
-				}
-			}
-			goNext(it);
 		}
 	}
 
@@ -328,18 +276,17 @@ _localAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	TScoreValue maxScore;
-	TSize best_row = 0;
-	TSize best_col = 0;
+	TSize indexPair[2];
 	String<bool> forbidden;
 
 	// Trace
-	String<TraceBackGotoh> trace;
-	TraceBackGotoh initialDir;
+	String<unsigned char> trace;
+	unsigned char initialDir;
 
 	// Create the trace
-	maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
+	maxScore = _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
 	// Follow the trace and create the graph
-	_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
+	_align_smith_waterman_trace(align, str, trace, initialDir, indexPair, forbidden);
 	
 	return maxScore;
 }
@@ -354,14 +301,13 @@ _localAlignment(TStringSet const& str,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
-	TraceBackGotoh initialDir;
-	TSize best_row = 0;
-	TSize best_col = 0;
+	TSize indexPair[2];
 	String<bool> forbidden;
-	String<TraceBackGotoh> trace;
-	return _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
+	// Trace
+	String<unsigned char> trace;
+	unsigned char initialDir;
+	return _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
 }
-
 
 
 }// namespace SEQAN_NAMESPACE_MAIN

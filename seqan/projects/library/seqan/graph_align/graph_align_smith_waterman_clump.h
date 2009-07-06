@@ -44,15 +44,14 @@ _localAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	  
 	TScoreValue maxScore;
-	TSize best_row = 0;
-	TSize best_col = 0;
+	TSize indexPair[2];
 	
 	// Trace
-	String<TraceBackGotoh> trace;
-	TraceBackGotoh initialDir;
+	String<unsigned char> trace;
+	unsigned char initialDir;
 
 	// Create the trace
-	maxScore = _align_smith_waterman(trace, str, sc, initialDir, best_row, best_col, forbidden);	
+	maxScore = _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
 
 	//// Debug code
 	//for(TSize i= 0; i<length(str[1]);++i) {
@@ -64,7 +63,7 @@ _localAlignment(TAlign& align,
 	//std::cout << std::endl;
 	
 	// Follow the trace and create the alignment
-	_align_smith_waterman_trace(align, str, trace, initialDir, best_row, best_col, forbidden);
+	_align_smith_waterman_trace(align, str, trace, initialDir, indexPair, forbidden);
 	
 	return maxScore;
 }
