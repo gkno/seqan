@@ -38,6 +38,7 @@ struct FragmentStoreConfig
 	
 	typedef double			TMean;
 	typedef double			TStd;
+	typedef unsigned char	TMappingQuality;
 		
 	typedef void					TReadStoreElementSpec;
 	typedef Owner<ConcatDirect<> >	TReadSeqStoreSpec;
@@ -45,6 +46,7 @@ struct FragmentStoreConfig
 	typedef void					TLibraryStoreElementSpec;
 	typedef void					TContigStoreElementSpec;
 	typedef void					TAlignedReadStoreElementSpec;
+	typedef Owner<ConcatDirect<> >	TAlignedReadTagStoreSpec;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -61,10 +63,12 @@ private:
 	typedef typename TConfig::TLibraryStoreElementSpec		TLibraryStoreElementSpec;
 	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
 	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
+	typedef typename TConfig::TAlignedReadTagStoreSpec		TAlignedReadTagStoreSpec;
 
 public:
 	typedef typename TConfig::TMean					TMean;
 	typedef typename TConfig::TStd					TStd;
+	typedef typename TConfig::TMappingQuality		TMappingQuality;
 	
 	typedef typename TConfig::TReadSeq				TReadSeq;
 	typedef typename TConfig::TContigSeq			TContigSeq;
@@ -92,6 +96,10 @@ public:
 
 	// we store the read sequences in a seperate stringset to reduce the memory overhead 
 	StringSet<TReadSeq, TReadSeqStoreSpec>	readSeqStore;
+
+	// extra SAM fields
+	String<TMappingQuality>	alignedReadQualityStore;
+	StringSet<CharString, TAlignedReadTagStoreSpec> alignedReadTagStore;
 
 	// retrieve the names of reads, mate-pairs, libraries, contigs by their ids
 	StringSet<CharString>	readNameStore;
