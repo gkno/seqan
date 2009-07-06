@@ -591,62 +591,6 @@ void Test_Hirschberg() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
-inline typename Value<TScore>::Type
-__sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				TScore const& score_type)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename Value<TScore>::Type TScoreValue;
-	typedef typename Value<typename Value<TStringSet>::Type>::Type TAlphabet;
-
-	// Convert the graph
-	String<char> mat;
-	convertAlignment(g, mat);
-	char gapChar = gapValue<char>();
-
-	TScoreValue gap = scoreGapExtend(score_type);
-	TScoreValue gapOpen = scoreGapOpen(score_type);
-	TSize nseq = length(stringSet(g));
-	TSize len = length(mat) / nseq;
-	
-	bool gapOpeni = false;
-	bool gapOpenj = false;
-	TScoreValue totalScore = 0;
-	for(TSize i = 0; i<nseq-1; ++i) {
-		for(TSize j=i+1; j<nseq; ++j) {
-			for(TSize k=0;k<len; ++k) {
-				if (value(mat, i*len+k) != gapChar) {
-					if (value(mat, j*len + k) != gapChar) {
-						gapOpeni = false;
-						gapOpenj = false;
-						totalScore += score(const_cast<TScore&>(score_type), TAlphabet(value(mat, i*len+k)), TAlphabet(value(mat, j*len + k)));
-					} else {
-						if (gapOpenj) {
-							totalScore += gap;
-						} else {
-							gapOpenj = true;
-							totalScore += gapOpen;
-						}
-					}
-				} else if (value(mat, j*len + k) != gapChar) {
-						if (gapOpeni) {
-							totalScore += gap;
-						} else {
-							gapOpeni = true;
-							totalScore += gapOpen;
-						}
-				}
-			}
-		}
-	}
-	return totalScore;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<bool TTop, bool TLeft, bool TRight, bool TBottom>
 void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef unsigned int TSize;
