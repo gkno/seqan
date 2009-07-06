@@ -172,7 +172,6 @@ _align_banded_gotoh(TColumn& mat,
 	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
 	TScoreValue gap = scoreGapExtend(sc);
 	TScoreValue gapOpen = scoreGapOpen(sc);
-	TScoreValue tmp = 0;
 	TSize hi_diag = diagonalWidth;
 	TSize lo_diag = 0;
 	if (diagL > 0) lo_diag = 0;
@@ -198,12 +197,12 @@ _align_banded_gotoh(TColumn& mat,
 	//for(TSize i=0; i<len2; ++i) {
 	//	for(TSize j=0; j<len1; ++j) {
 	//		value(originalMat, i * len1 + j) = count;
-	//		std::cout << count << ',';
+	//		std::cerr << count << ',';
 	//		++count;
 	//	}
-	//	std::cout << std::endl;
+	//	std::cerr << std::endl;
 	//}
-	//std::cout << std::endl;
+	//std::cerr << std::endl;
 
 	// Classical DP with affine gap costs
 	TSize actualRow = 0;
@@ -217,7 +216,7 @@ _align_banded_gotoh(TColumn& mat,
 		if (row + lo_row >= len1 - diagU) --hi_diag;
 		for(TSize col = lo_diag; col<hi_diag; ++col) {
 			actualCol = col + diagL + actualRow;
-			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
+			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
 				max_val =mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
@@ -225,18 +224,18 @@ _align_banded_gotoh(TColumn& mat,
 				// Get the new maximum for vertical
 				if (col < diagonalWidth - 1) {
 					a = mat[(row - 1) * diagonalWidth + (col + 1)] + gapOpen;
-					b = vertical[(row - 1) * diagonalWidth + (col + 1)] + gap;
+					b = (vertical[(row - 1) * diagonalWidth + (col + 1)] != InfimumValue<TScoreValue>::VALUE) ? vertical[(row - 1) * diagonalWidth + (col + 1)] + gap : InfimumValue<TScoreValue>::VALUE;
 					vertical[row * diagonalWidth + col] = (a > b) ? a : b;
 					if (vertical[row * diagonalWidth + col] > max_val) max_val = vertical[row * diagonalWidth + col];
-				}
+				} else vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
 
 				// Get the new maximum for horizontal
 				if (col > 0) {
 					a = mat[row * diagonalWidth + (col - 1)] + gapOpen;
-					b = horizontal[row * diagonalWidth + (col - 1)] + gap;
+					b = (horizontal[row * diagonalWidth + (col - 1)] != InfimumValue<TScoreValue>::VALUE) ? horizontal[row * diagonalWidth + (col - 1)] + gap : InfimumValue<TScoreValue>::VALUE;
 					horizontal[row * diagonalWidth + col] = (a > b) ? a : b;
 					if (horizontal[row * diagonalWidth + col] > max_val) max_val = horizontal[row * diagonalWidth + col];
-				}
+				} else horizontal[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
 
 				// Get the new maximum for mat
 				mat[row * diagonalWidth + col] = max_val;
@@ -246,28 +245,27 @@ _align_banded_gotoh(TColumn& mat,
 					if (actualCol != 0) {
 						_initFirstRow(TAlignConfig(), mat[col], gapOpen + (actualCol - 1) * gap);
 						vertical[col] = mat[col] + gapOpen - gap;
-					} else mat[col] = 0;
-					//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-					//std::cout << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
-					//std::cout << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
+						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
+					} else {
+						mat[col] = 0;
+						vertical[col] = InfimumValue<TScoreValue>::VALUE;
+						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
+					}
 				} else {
 					_initFirstColumn(TAlignConfig(), mat[row * diagonalWidth + col], gapOpen + (actualRow - 1) * gap);
 					horizontal[row * diagonalWidth + col] = mat[row * diagonalWidth + col] + gapOpen - gap;
-					//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-					//std::cout << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
-					//std::cout << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
+					vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
 				}
 			}
 
 			// Store the maximum
 			if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, value(mat, row * diagonalWidth + col), row, col);
 			if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, value(mat, row * diagonalWidth + col), row, col);
-			//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
-			//std::cout << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
-			//std::cout << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
+			//std::cerr << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
+			//std::cerr << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
+			//std::cerr << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
 		}
 	}
-
 	return (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxValue[0] : overallMaxValue[1];
 }
 

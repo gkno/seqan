@@ -315,6 +315,9 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 }
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TSourceValue, typename TType, typename TTargetValue, typename TSequenceValue, typename TSpec, typename TVal1, typename TVal2>
 inline void
 convertScoringMatrix(Score<TSourceValue, TType> const & in,
@@ -334,7 +337,7 @@ convertScoringMatrix(Score<TSourceValue, TType> const & in,
 
 }
 
-
+//////////////////////////////////////////////////////////////////////////////
 
 template <typename TSourceValue, typename TType, typename TTargetValue, typename TSequenceValue, typename TSpec>
 inline void

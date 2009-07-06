@@ -188,18 +188,18 @@ _align_banded_nw(TTrace& trace,
 	overallMaxIndex[2] = diagonalWidth;	overallMaxIndex[3] = height;
 	
 	//// Debug stuff
-	//TColumn originalMat;
+	//String<TScoreValue> originalMat;
 	//resize(originalMat, len1 * len2);
 	//TSize count = 0;
 	//for(TSize i=0; i<len2; ++i) {
 	//	for(TSize j=0; j<len1; ++j) {
 	//		value(originalMat, i * len1 + j) = count;
-	//		std::cout << count << ',';
+	//		std::cerr << count << ',';
 	//		++count;
 	//	}
-	//	std::cout << std::endl;
+	//	std::cerr << std::endl;
 	//}
-	//std::cout << std::endl;
+	//std::cerr << std::endl;
 
 	// Classical DP with affine gap costs
 	typedef typename Iterator<TRow, Standard>::Type TRowIter;
@@ -217,7 +217,7 @@ _align_banded_nw(TTrace& trace,
 		hori_val = InfimumValue<TScoreValue>::VALUE;
 		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt) {
 			actualCol = col + diagL + actualRow;
-			//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
+			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
 				// Get the new maximum for mat
@@ -244,7 +244,7 @@ _align_banded_nw(TTrace& trace,
 			// Store the maximum
 			if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
 			if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
-			//std::cout << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
+			//std::cerr << row << ',' << col << ':' << *matIt << std::endl;
 		}
 	}
 	return (overallMaxValue[0] > overallMaxValue[1]) ? overallMaxValue[0] : overallMaxValue[1];
