@@ -663,8 +663,8 @@ void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
 		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
-		//dna1 = "T";
-		//dna2 = "CAG";
+		//dna1 = "AAAT";
+		//dna2 = "CAA";
 		
 		TSize len1 = length(dna1);
 		TSize len2 = length(dna2);
@@ -681,14 +681,14 @@ void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		int gapOpenScore =  -1 * (int) (mtRand() % 10);
 		if (gapOpenScore > gapScore) gapOpenScore = gapScore;
 		//matchScore = 1;
-		//misMatchScore = -4;
-		//gapScore = -4;
+		//misMatchScore = -1;
+		//gapScore = -1;
 		//gapOpenScore = -4;
 
 		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapOpenScore);
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
-		globalAlignment(matches, str, score_type, ac, NeedlemanWunsch());
+		globalAlignment(matches, str, score_type, ac, Gotoh());
 		int lowDiag = length(dna1);
 		int highDiag = -1 * length(dna2);
 		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
