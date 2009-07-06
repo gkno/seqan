@@ -648,51 +648,117 @@ __sumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 //////////////////////////////////////////////////////////////////////////////
 
 template<bool TTop, bool TLeft, bool TRight, bool TBottom>
-void _Test_AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
+void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef unsigned int TSize;
 	typedef int TScore;
 
 	mtRandInit();
 	for(TSize i = 0; i < 10; ++i) {
-		typedef String<Dna> TDnaString;
-		typedef StringSet<TDnaString, Dependent<> > TStringSet;
+		typedef Dna5Q TAlphabet;
+		typedef String<TAlphabet> TSequence;
+		
+		TSize lenN = mtRand() % 5 + 1;
+		TSize lenM = mtRand() % 5 + 1;
+		TSequence dna1;
+		TSequence dna2;
+		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
+		//dna1 = "T";
+		//dna2 = "CAG";
+		
+		TSize len1 = length(dna1);
+		TSize len2 = length(dna2);
+		typedef StringSet<TSequence, Dependent<> > TStringSet;
 		typedef Graph<Alignment<TStringSet, void> > TGraph;
-		TSize lenN = mtRand() % 20 + 1;
-		TSize lenM = mtRand() % 20 + 1;
-		TDnaString dna1;
-		TDnaString dna2;
-		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, mtRand() % 4);
-		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, mtRand() % 4);
-		//dna1 = "TCG";
-		//dna2 = "GCGGAG";
 		TStringSet str;
 		appendValue(str, dna1);
 		appendValue(str, dna2);
-		Score<int> score_type = Score<int>(4,-3,-2,-2);
-		TGraph g(str);
-		globalAlignment(g, score_type, ac, Gotoh() );
-		// sumOfPairsScore with AlignConfig is missing!!!
-		TScore sc1 = __sumOfPairsScore(g, score_type);
-		//std::cerr << sc1 << std::endl;
-		//std::cerr << g << std::endl;
-		clear(g);
-		assignStringSet(g, str);
-		globalAlignment(g, score_type, ac, NeedlemanWunsch() );
-		// sumOfPairsScore with AlignConfig is missing!!!
-		TScore sc2 = __sumOfPairsScore(g, score_type);
-		//std::cerr << sc2 << std::endl;
-		//std::cerr << g << std::endl;
-		if (sc1 != sc2) {
+
+		int matchScore =  mtRand() % 10;
+		int misMatchScore =  -1 * (int) (mtRand() % 10);
+		int gapScore =  -1 * (int) (mtRand() % 10);
+		if (gapScore > misMatchScore) gapScore = misMatchScore;
+		int gapOpenScore =  -1 * (int) (mtRand() % 10);
+		if (gapOpenScore > gapScore) gapOpenScore = gapScore;
+		//matchScore = 1;
+		//misMatchScore = -4;
+		//gapScore = -4;
+		//gapOpenScore = -4;
+
+		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapOpenScore);
+		typedef String<Fragment<> > TFragmentString;
+		TFragmentString matches;
+		globalAlignment(matches, str, score_type, ac, NeedlemanWunsch());
+		int lowDiag = length(dna1);
+		int highDiag = -1 * length(dna2);
+		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
+		TFragIter itFrag = begin(matches, Standard());
+		TFragIter itFragEnd = end(matches, Standard());
+		for(;itFrag != itFragEnd; ++itFrag) {
+			int newDiff = (int) itFrag->begin1 - (int) itFrag->begin2;
+			if (newDiff > highDiag) highDiag = newDiff;
+			if (newDiff < lowDiag) lowDiag = newDiff;
+		}
+		itFrag = begin(matches, Standard());
+		if (itFrag != itFragEnd) {
+			int pos1 = (int) itFrag->begin1 + (int) itFrag->len;
+			int pos2 = (int) itFrag->begin2 + (int) itFrag->len;
+			if (highDiag < ((int) len1 - pos2)) highDiag = ((int) len1 - pos2);
+			if (lowDiag > (pos1 - (int) len2)) lowDiag = (pos1 - (int) len2);
+			itFrag = itFragEnd;
+			--itFrag;
+			if (highDiag < (int) itFrag->begin1) highDiag = (int) itFrag->begin1;
+			if (lowDiag > -1 * (int) itFrag->begin2) lowDiag = -1 * (int) itFrag->begin2;
+		} else {
+			lowDiag = -1 * length(dna2);
+			highDiag = length(dna1);
+		}
+		TGraph g1(str);
+		globalAlignment(g1, score_type, ac, Gotoh());
+		int sc1 = _pairWiseSumOfPairsScore(g1, score_type, ac);
+		TGraph g2(str);
+		globalAlignment(g2, score_type, ac, lowDiag, highDiag, BandedGotoh());
+		int sc2 = _pairWiseSumOfPairsScore(g2, score_type, ac);
+		TGraph g3(str);
+		globalAlignment(g3, score_type, ac, -1 * length(dna2), length(dna1), BandedGotoh());
+		int sc3 = _pairWiseSumOfPairsScore(g3, score_type, ac);
+		if ((sc1 != sc2) || (sc2 != sc3)) {
 			std::cerr << "Randomized test failed:" << std::endl;
 			std::cerr << "Seq1: " << dna1 << std::endl;
 			std::cerr << "Seq2: " << dna2 << std::endl;
 			std::cerr << "AlignConfig: " << TTop << ',' << TLeft << ',' << TRight << ',' << TBottom << std::endl;
-			exit(0);
+			std::cerr << "Scores: (Matchscore: " << matchScore << ", Mismatchscore: " << misMatchScore << ", Gapscore: " << gapScore << ", GapOpenscore: " << gapOpenScore << ')' << std::endl;
+			std::cerr << g1 << std::endl;
+			std::cerr << "Score: " << sc1 << std::endl;
+			std::cerr << g2 << std::endl;
+			std::cerr << "Score: " << sc2 << std::endl;
+			std::cerr << "Diagonals: " << lowDiag << ',' << highDiag << std::endl;
+			std::cerr << g3 << std::endl;
+			std::cerr << "Score: " << sc3 << std::endl;
+			exit(-1);
 		}
 	}
 }
 
 
+void Test_GotohVSBandedGotoh() {
+	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,false,true,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,false,true,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,true,false,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,true,false,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,true,true,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<false,true,true,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,false,false,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,false,false,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,false,true,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,false,true,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,true,false,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,true,false,true>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,true,true,false>() );
+	_Test_GotohVSBandedGotoh(AlignConfig<true,true,true,true>() );
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -725,9 +791,9 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		appendValue(str, dna1);
 		appendValue(str, dna2);
 
-		int matchScore =  mtRand() % 5;
-		int misMatchScore =  -1 * (int) (mtRand() % 5);
-		int gapScore =  -1 * (int) (mtRand() % 5);
+		int matchScore =  mtRand() % 10;
+		int misMatchScore =  -1 * (int) (mtRand() % 10);
+		int gapScore =  -1 * (int) (mtRand() % 10);
 		if (gapScore > misMatchScore) gapScore = misMatchScore;
 		//matchScore = 1;
 		//misMatchScore = -4;
@@ -809,8 +875,6 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_AllAgainstAll() {
-	//_Test_AllAgainstAll(AlignConfig<false,false,false,false>() );
-
 	__AllAgainstAll(AlignConfig<false,false,false,false>() );
 	__AllAgainstAll(AlignConfig<false,false,false,true>() );
 	__AllAgainstAll(AlignConfig<false,false,true,false>() );
@@ -828,6 +892,7 @@ void Test_AllAgainstAll() {
 	__AllAgainstAll(AlignConfig<true,true,true,false>() );
 	__AllAgainstAll(AlignConfig<true,true,true,true>() );
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -895,6 +960,7 @@ void Test_GraphAlignment() {
 	Test_Gotoh();	
 	Test_Hirschberg();
 	Test_AllAgainstAll();
+	Test_GotohVSBandedGotoh();
 
 	// Local alignments
 	Test_SmithWaterman();
