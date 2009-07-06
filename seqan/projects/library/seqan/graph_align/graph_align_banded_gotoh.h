@@ -170,8 +170,6 @@ _align_banded_gotoh(TColumn& mat,
 	TSize len1 = length(str1) + 1;
 	TSize len2 = length(str2) + 1;
 	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
-	TScoreValue gap = scoreGapExtend(sc);
-	TScoreValue gapOpen = scoreGapOpen(sc);
 	TSize hi_diag = diagonalWidth;
 	TSize lo_diag = 0;
 	if (diagL > 0) lo_diag = 0;
@@ -223,16 +221,16 @@ _align_banded_gotoh(TColumn& mat,
 
 				// Get the new maximum for vertical
 				if (col < diagonalWidth - 1) {
-					a = mat[(row - 1) * diagonalWidth + (col + 1)] + gapOpen;
-					b = (vertical[(row - 1) * diagonalWidth + (col + 1)] != InfimumValue<TScoreValue>::VALUE) ? vertical[(row - 1) * diagonalWidth + (col + 1)] + gap : InfimumValue<TScoreValue>::VALUE;
+					a = mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapOpenVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+					b = (vertical[(row - 1) * diagonalWidth + (col + 1)] != InfimumValue<TScoreValue>::VALUE) ? vertical[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
 					vertical[row * diagonalWidth + col] = (a > b) ? a : b;
 					if (vertical[row * diagonalWidth + col] > max_val) max_val = vertical[row * diagonalWidth + col];
 				} else vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
 
 				// Get the new maximum for horizontal
 				if (col > 0) {
-					a = mat[row * diagonalWidth + (col - 1)] + gapOpen;
-					b = (horizontal[row * diagonalWidth + (col - 1)] != InfimumValue<TScoreValue>::VALUE) ? horizontal[row * diagonalWidth + (col - 1)] + gap : InfimumValue<TScoreValue>::VALUE;
+					a = mat[row * diagonalWidth + (col - 1)] + scoreGapOpenHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+					b = (horizontal[row * diagonalWidth + (col - 1)] != InfimumValue<TScoreValue>::VALUE) ? horizontal[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
 					horizontal[row * diagonalWidth + col] = (a > b) ? a : b;
 					if (horizontal[row * diagonalWidth + col] > max_val) max_val = horizontal[row * diagonalWidth + col];
 				} else horizontal[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
@@ -243,8 +241,8 @@ _align_banded_gotoh(TColumn& mat,
 				// Usual initialization for first row and column
 				if (actualRow == 0) {
 					if (actualCol != 0) {
-						_initFirstRow(TAlignConfig(), mat[col], gapOpen + (actualCol - 1) * gap);
-						vertical[col] = mat[col] + gapOpen - gap;
+						_initFirstRow(TAlignConfig(), mat[col], scoreGapOpenHorizontal(sc, ((int) actualCol - 1), -1, str1, str2) + (actualCol - 1) * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
+						vertical[col] = mat[col] + scoreGapOpenVertical(sc, ((int) actualCol - 1), 0, str1, str2) - scoreGapExtendVertical(sc, ((int) actualCol - 1), 0, str1, str2);
 						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
 					} else {
 						mat[col] = 0;
@@ -252,8 +250,8 @@ _align_banded_gotoh(TColumn& mat,
 						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
 					}
 				} else {
-					_initFirstColumn(TAlignConfig(), mat[row * diagonalWidth + col], gapOpen + (actualRow - 1) * gap);
-					horizontal[row * diagonalWidth + col] = mat[row * diagonalWidth + col] + gapOpen - gap;
+					_initFirstColumn(TAlignConfig(), mat[row * diagonalWidth + col], scoreGapOpenVertical(sc, -1, ((int) actualRow - 1), str1, str2) + (actualRow - 1) * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
+					horizontal[row * diagonalWidth + col] = mat[row * diagonalWidth + col] + scoreGapOpenHorizontal(sc, 0, ((int) actualRow - 1), str1, str2) - scoreGapExtendHorizontal(sc, 0, ((int) actualRow - 1), str1, str2);
 					vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
 				}
 			}
