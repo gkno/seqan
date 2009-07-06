@@ -29,6 +29,31 @@ namespace SEQAN_NAMESPACE_MAIN
 // Alignment: Smith Waterman Alignment, affine gap cost
 //////////////////////////////////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TSize>
+inline void
+_setForbiddenCell(String<bool, TSpec>& forbidden,
+				  TSize len1,
+				  TSize len2,
+				  TSize numRows)
+{
+	//if (!empty(forbidden)) forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
+	forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize>
+inline void
+_setForbiddenCell(Nothing&,
+				  TSize,
+				  TSize,
+				  TSize)
+{
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TIndexPair, typename TForbidden>
@@ -78,7 +103,7 @@ _align_smith_waterman_trace(TAlign& align,
 	do {
 		nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
 		if ((nextTraceValue & 3) == Stop) break;
-		if (!empty(forbidden)) forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
+		_setForbiddenCell(forbidden, len1, len2, numRows);	
 		if (tv == Diagonal) tv = (nextTraceValue & 3);
 		else if (tv == Horizontal) {
 			if ((nextTraceValue >> 2) & 1) tv = Diagonal; 
@@ -135,6 +160,33 @@ _align_smith_waterman_trace(TAlign& align,
 	if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TSize>
+inline bool
+_isClumping(String<bool, TSpec> const& forbidden,
+			TSize row,
+			TSize col,
+			TSize len2)
+{
+	//return (!empty(forbidden) && (forbidden[(col-1) * len2 + (row-1)]));
+	return forbidden[(col-1) * len2 + (row-1)];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize>
+inline bool
+_isClumping(Nothing&,
+			TSize,
+			TSize,
+			TSize)
+{
+	return false;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TIndexPair, typename TForbidden>
@@ -179,8 +231,6 @@ _align_smith_waterman(TTrace& trace,
 	TScoreValue score_max = 0;
 	indexPair[0] = 0; indexPair[1] = 0;
 	initialDir = Stop;
-	bool emptyForbidden = empty(forbidden);
-
 	
 	// Classical DP
 	TScoreValue max_val = 0;
@@ -198,11 +248,10 @@ _align_smith_waterman(TTrace& trace,
 		mat[0] = 0;
 		vert = gapOpen;
 		for(TSize row = 1; row <= len2; ++row, ++it) {
-			if ((!emptyForbidden) && (forbidden[(col-1) * len2 + (row-1)])) {
-				*it = 0;
+			if (_isClumping(forbidden, row, col, len2)) {
+				*it = Stop;
 				max_val = 0;
 				vert = 0;
-				tvMat =  Stop;
 				horizontal[row] = 0;
 			} else {
 				// Get the new maximum for vertical
@@ -234,9 +283,9 @@ _align_smith_waterman(TTrace& trace,
 					max_val = 0;
 					tvMat =  Stop;
 				}
+				*it |= tvMat;
 			}
 
-			*it |= tvMat;
 			// Assign the new diagonal values
 			diagValMat = mat[row];
 			mat[row] = max_val;
@@ -277,7 +326,7 @@ _localAlignment(TAlign& align,
 	  
 	TScoreValue maxScore;
 	TSize indexPair[2];
-	String<bool> forbidden;
+	Nothing forbidden;
 
 	// Trace
 	String<unsigned char> trace;
@@ -302,7 +351,7 @@ _localAlignment(TStringSet const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
 	TSize indexPair[2];
-	String<bool> forbidden;
+	Nothing forbidden;
 	// Trace
 	String<unsigned char> trace;
 	unsigned char initialDir;
