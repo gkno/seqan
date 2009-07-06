@@ -107,14 +107,15 @@ using namespace seqan;
 			for (unsigned i = 0; i < length(entry.freq); ++i)
 				sum += entry.freq[i];
 			
-			double lSum = log((double)sum);		// sum cannot be zero
+			double lSum = log((double)sum);					// sum cannot be zero
 				
 			for (unsigned i = 0; i < length(entry.freq); ++i)
-			{
-				double freq = entry.freq[i];
-				H += freq * (log(freq) - lSum);
-			}
-			H /= -sum;
+				if (entry.freq[i])
+				{
+					double freq = entry.freq[i];
+					H += freq * (log(freq) - lSum);
+				}
+			H /= -sum * log((double)length(entry.freq));	// normalize by datasets (divide by log m)
 		
 			return H <= maxEntropy;
 		}
@@ -361,7 +362,7 @@ int main(int argc, const char *argv[])
 
 			if (strcmp(argv[arg], "-e") == 0 || strcmp(argv[arg], "--entropy") == 0) 
 			{
-				optionPredicate = 1;
+				optionPredicate = 2;
 				if (arg + 2 < argc) 
 				{
 					istringstream istr1(argv[++arg]);
