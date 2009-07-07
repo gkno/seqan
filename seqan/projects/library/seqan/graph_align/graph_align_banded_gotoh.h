@@ -168,11 +168,9 @@ _align_banded_gotoh(TTrace& trace,
 	TSize height = hi_row - lo_row;
 	typedef String<TScoreValue> TColumn;
 	TColumn mat;
-	TColumn horizontal;
 	TColumn vertical;
-	resize(mat, height * diagonalWidth);
-	resize(horizontal, height * diagonalWidth);
-	resize(vertical, height * diagonalWidth);
+	resize(mat, diagonalWidth);
+	resize(vertical, diagonalWidth);
 	resize(trace, height * diagonalWidth);
 	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
 	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
@@ -196,77 +194,80 @@ _align_banded_gotoh(TTrace& trace,
 	//std::cerr << std::endl;
 
 	// Classical DP with affine gap costs
-	TTraceValue tvAll = 0;
+	typedef typename Iterator<TColumn, Standard>::Type TColIter;
+	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceValue tvMat = 0;
 	TSize actualRow = 0;
 	TSize actualCol = 0;
 	TScoreValue a = 0;
 	TScoreValue b = 0;
-	TScoreValue max_val = 0;
+	TScoreValue hori_val = 0;
 	for(TSize row = 0; row < height; ++row) {
 		actualRow = row + lo_row;
 		if (lo_diag > 0) --lo_diag;
 		if (row + lo_row >= len1 - diagU) --hi_diag;
-		for(TSize col = lo_diag; col<hi_diag; ++col) {
+		TTraceIter traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
+		TColIter vertIt = begin(vertical, Standard()) + lo_diag;
+		TColIter matIt = begin(mat, Standard()) + lo_diag;
+		hori_val = InfimumValue<TScoreValue>::VALUE;
+		for(TSize col = lo_diag; col<hi_diag; ++col, ++vertIt, ++matIt, ++traceIt) {
 			actualCol = col + diagL + actualRow;
 			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
 				// Get the new maximum for vertical
-				tvAll = 0;
+				*traceIt = 0;
 				if (col < diagonalWidth - 1) {
-					a = mat[(row - 1) * diagonalWidth + (col + 1)] + scoreGapOpenVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
-					b = (vertical[(row - 1) * diagonalWidth + (col + 1)] != InfimumValue<TScoreValue>::VALUE) ? vertical[(row - 1) * diagonalWidth + (col + 1)] + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
-					if (a > b) {vertical[row * diagonalWidth + col] = a; tvAll = 1;}
-					else vertical[row * diagonalWidth + col] = b;
-				} else vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
+					a = *(matIt + 1) + scoreGapOpenVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+					b = (*(vertIt + 1) != InfimumValue<TScoreValue>::VALUE) ? *(vertIt + 1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
+					if (a > b) {*vertIt = a; *traceIt = 1;}
+					else *vertIt = b;
+				} else *vertIt = InfimumValue<TScoreValue>::VALUE;
 
 				// Get the new maximum for horizontal
-				tvAll <<= 1;
+				*traceIt <<= 1;
 				if (col > 0) {
-					a = mat[row * diagonalWidth + (col - 1)] + scoreGapOpenHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
-					b = (horizontal[row * diagonalWidth + (col - 1)] != InfimumValue<TScoreValue>::VALUE) ? horizontal[row * diagonalWidth + (col - 1)] + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
-					if (a > b) {horizontal[row * diagonalWidth + col] = a; tvAll |= 1;}
-					else horizontal[row * diagonalWidth + col] = b;
-				} else horizontal[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
+					a = *(matIt -1 ) + scoreGapOpenHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+					b = (hori_val != InfimumValue<TScoreValue>::VALUE) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
+					if (a > b) {hori_val = a; *traceIt |= 1;}
+					else hori_val = b;
+				} else hori_val = InfimumValue<TScoreValue>::VALUE;
 
-				tvAll <<= 2;
+				*traceIt <<= 2;
 				// Get the new maximum for mat
-				max_val =mat[(row - 1) * diagonalWidth + col] + score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
+				*matIt += score(const_cast<TScore&>(sc), actualCol-1, actualRow-1, str1, str2);
 				tvMat = Diagonal;
-				if (vertical[row * diagonalWidth + col] > max_val) {
-					max_val = vertical[row * diagonalWidth + col];
+				if (*vertIt > *matIt) {
+					*matIt = *vertIt;
 					tvMat = Vertical;
 				}
-				if (horizontal[row * diagonalWidth + col] > max_val) {
-					max_val = horizontal[row * diagonalWidth + col];
+				if (hori_val > *matIt) {
+					*matIt = hori_val;
 					tvMat = Horizontal;
 				}
-				tvAll |= tvMat;
-				trace[row * diagonalWidth + col] = tvAll;
-				mat[row * diagonalWidth + col] = max_val;
+				*traceIt |= tvMat;
 			} else {
 				// Usual initialization for first row and column
 				if (actualRow == 0) {
 					if (actualCol != 0) {
-						_initFirstRow(TAlignConfig(), mat[col], scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (actualCol - 1) * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
-						vertical[col] = mat[col] + scoreGapOpenVertical(sc, ((int) actualCol - 1), 0, str1, str2) - scoreGapExtendVertical(sc, ((int) actualCol - 1), 0, str1, str2);
-						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
+						_initFirstRow(TAlignConfig(), *matIt, scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (actualCol - 1) * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
+						*vertIt = *matIt + scoreGapOpenVertical(sc, ((int) actualCol - 1), 0, str1, str2) - scoreGapExtendVertical(sc, ((int) actualCol - 1), 0, str1, str2);
+						hori_val = InfimumValue<TScoreValue>::VALUE;
 					} else {
-						mat[col] = 0;
-						vertical[col] = InfimumValue<TScoreValue>::VALUE;
-						horizontal[col] = InfimumValue<TScoreValue>::VALUE;
+						*matIt = 0;
+						*vertIt = InfimumValue<TScoreValue>::VALUE;
+						hori_val = InfimumValue<TScoreValue>::VALUE;
 					}
 				} else {
-					_initFirstColumn(TAlignConfig(), mat[row * diagonalWidth + col], scoreGapOpenVertical(sc, -1, 0, str1, str2) + (actualRow - 1) * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
-					horizontal[row * diagonalWidth + col] = mat[row * diagonalWidth + col] + scoreGapOpenHorizontal(sc, 0, ((int) actualRow - 1), str1, str2) - scoreGapExtendHorizontal(sc, 0, ((int) actualRow - 1), str1, str2);
-					vertical[row * diagonalWidth + col] = InfimumValue<TScoreValue>::VALUE;
+					_initFirstColumn(TAlignConfig(), *matIt, scoreGapOpenVertical(sc, -1, 0, str1, str2) + (actualRow - 1) * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
+					hori_val = *matIt + scoreGapOpenHorizontal(sc, 0, ((int) actualRow - 1), str1, str2) - scoreGapExtendHorizontal(sc, 0, ((int) actualRow - 1), str1, str2);
+					*vertIt = InfimumValue<TScoreValue>::VALUE;
 				}
 			}
 
 			// Store the maximum
-			if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[row * diagonalWidth + col], row, col);
-			if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[row * diagonalWidth + col], row, col);
+			if (actualCol == len1 - 1) _lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
+			if (actualRow == len2 - 1) _lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, row, col);
 			//std::cerr << row << ',' << col << ':' << value(mat, row * diagonalWidth + col) << std::endl;
 			//std::cerr << row << ',' << col << ':' << value(horizontal, row * diagonalWidth + col) << std::endl;
 			//std::cerr << row << ',' << col << ':' << value(vertical, row * diagonalWidth + col) << std::endl;
