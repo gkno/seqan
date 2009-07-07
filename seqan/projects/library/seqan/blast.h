@@ -9,6 +9,7 @@
 
 #include <seqan/align.h>
 #include <seqan/graph_types.h>
+#include <seqan/misc/misc_parsing.h>
 #include <seqan/graph_algorithms.h>
 
 

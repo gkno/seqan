@@ -33,7 +33,7 @@
 #include "recognitionRateDP.h"
 #include "readSimulator.h"
 
-#include <seqan/graph_types/graph_utility_parsing.h>
+#include <seqan/misc/misc_parsing.h>
 
 
 
@@ -814,62 +814,6 @@ getParamsFilename(TSStr & paramsfile, ParamChooserOptions & pm_options)
 }
 
 
-
-template<typename TFile, typename TChar>
-inline void 
-_parse_skipBlanks(TFile& file, TChar& c)
-{
-	if ((c != ' ') && (c != '\t')) return;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if ((c != ' ') && (c != '\t')) break;
-	}
-}
-
-template<typename TFile, typename TChar>
-inline void 
-_parse_skipLine2(TFile& file, TChar& c)
-{
-	if (c != '\n' && c != '\r')
-		while (!_streamEOF(file)) {
-			c = _streamGet(file);
-			if (c == '\n' || c == '\r') break;
-		}
-	if (!_streamEOF(file))
-		c = _streamGet(file);
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-template<typename TFile, typename TChar>
-inline double
-_parse_readEValue(TFile & file, TChar& c)
-{
-SEQAN_CHECKPOINT
-
-	// Read number
-	String<char> str(c);
-	bool e = false;
-	double val1 = 0;
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if(!e && c == 'e'){
-			e = true;
-			val1 = atof(toCString(str));
-			c = _streamGet(file);
-			resize(str,0);
-		}
-		if (!_parse_isDigit(c) && c != '.' && c != '-' && c != '+') break;
-		append(str, c);
-	}
-	if(e)
-	{
-		return val1 * pow((double)10.0,(double)atof(toCString(str)));
-	}	
- 	else 
-		return (double)atof(toCString(str));
-}
 
 //////////////////////////////////////////////////////////////////////////////
 
