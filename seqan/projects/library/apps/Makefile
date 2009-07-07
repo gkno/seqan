@@ -35,7 +35,8 @@ all:           check_seqan_base $(TARGETS)
 dfi:           check_seqan_base dfi/dfi 
 razers:        check_seqan_base razers/razers razers/paramChooser
 seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee 
-seqcons:       check_seqan_base seqcons/seqcons 
+seqcons:       check_seqan_base seqcons/seqcons
+pair_align:    check_seqan_base pair_align/pair_align
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
