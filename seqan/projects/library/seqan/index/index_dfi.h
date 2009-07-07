@@ -100,7 +100,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typedef String<
 			TDFIEntry, 
 			Array<ValueSize<TValue>::VALUE> >	TDFIEntries;
-		typedef String<unsigned, Array<3> >		TDFIDatasets;
+		typedef String<unsigned>				TDFIDatasets;
 
 		// 1st word flags
 		static TSize const DFI_PRED_HULL = (TSize)1 << (BitsPerValue<TSize>::VALUE - 3); // this node fulfills all monotonic frequency predicates (e.g. min_freq)
