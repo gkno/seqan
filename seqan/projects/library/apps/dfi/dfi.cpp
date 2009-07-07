@@ -35,30 +35,52 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 // Custom frequency predicates
 
+	static const double DFI_EPSILON = 0.0000001;
+
 	// minfreq predicate for D0
 	struct PredMinFreq 
 	{	
 		unsigned minFreq;
 
-		PredMinFreq(unsigned _minFreq):
+		template <typename TDataSet>
+		PredMinFreq(unsigned _minFreq, TDataSet const &):
 			minFreq(_minFreq) {}
+			
+		template <typename TDataSet>
+		PredMinFreq(double _minSupp, TDataSet const &ds)
+		{
+			// emerging substring mode
+			if (_minSupp * ds[1] < 1.0) {
+				cerr << "Support must be at least 1/|db_1|... exit!" << endl;
+				exit(1);
+			}
+			// adapt parameters from support to frequency
+			minFreq = (unsigned) ceil((double) _minSupp * (ds[2] - ds[1]) - DFI_EPSILON);
+		}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
 			return entry.freq[0] >= minFreq;
 		}
 	};
 
-	// minfreq predicate for at least one dataset
-	struct PredMinAllFreq 
+	// minsupp predicate for at least one dataset
+	struct PredMinAllSupp
 	{	
-		unsigned minFreq;
+		double minSupp;
+		String<int> dsLen;
 
-		PredMinAllFreq(unsigned _minFreq):
-			minFreq(_minFreq) {}
+		template <typename TDataSet>
+		PredMinAllSupp(double _minSupp, TDataSet const &ds):
+			minSupp(_minSupp) 
+		{
+			resize(dsLen, length(ds) - 1, Exact());
+			for (unsigned i = 1; i < length(ds); ++i)
+				dsLen[i] = ds[i] - ds[i - 1];
+		}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
 			for (unsigned i = 0; i < length(entry.freq); ++i)
-				if (entry.freq[i] >= minFreq)
+				if (entry.freq[i] >= dsLen[i] * minSupp)
 					return true;
 			return false;
 		}
@@ -67,13 +89,14 @@ using namespace seqan;
 	// predicate for the Frequent Pattern Mining Problem
 	struct PredFrequent 
 	{	
-		unsigned optionMaxFreq;
+		unsigned maxFreq;
 
-		PredFrequent(unsigned _maxFreq):
-			optionMaxFreq(_maxFreq) {}
+		template <typename TDataSet>
+		PredFrequent(unsigned _maxFreq, TDataSet const &):
+			maxFreq(_maxFreq) {}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
-			return entry.freq[1] <= optionMaxFreq;
+			return entry.freq[1] <= maxFreq;
 		}
 	};
 
@@ -82,8 +105,10 @@ using namespace seqan;
 	{
 		double growthRate;
 
-		PredEmerging(double _growthRate):
-			growthRate(_growthRate) {}
+		template <typename TDataSet>
+		PredEmerging(double _growthRate, TDataSet const &ds) {
+			growthRate = _growthRate * ((double) ds[1] / (double) (ds[2] - ds[1]) - DFI_EPSILON);
+		}
 			
 		// HINT: here growthRate is frequency-related, not support-related
 		inline bool operator()(_DFIEntry const &entry) const {
@@ -96,7 +121,8 @@ using namespace seqan;
 	{
 		double maxEntropy;
 
-		PredEntropy(double _maxEntropy):
+		template <typename TDataSet>
+		PredEntropy(double _maxEntropy, TDataSet const &):
 			maxEntropy(_maxEntropy) {}
 			
 		inline bool operator()(_DFIEntry const &entry) const 
@@ -202,38 +228,22 @@ int runDFI(
 
 	String<unsigned>	ds;
 	TStringSet			mySet;
-	static const double epsilon = 0.0000001;
 
 	if (!loadDatasets(mySet, fileNames, ds)) {
 		cerr << "Database read error... exit!" << endl;
 		return 1;
 	}
-/*	
-	unsigned i=0;
+	
+/*	unsigned i=0;
 	for(unsigned j=1;j<length(ds);++j)
 	{
-		cout<<"dataset "<<j<<endl;
+		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
 		for(;i<ds[j];++i)
 			cout<<mySet[i]<<endl;
 	}
 */
-	unsigned minFreq;
-	if (TYPECMP<TParamPred, double>::VALUE)
-	{
-		// emerging substring mode
-		if (paramPredHull * ds[1] < 1.0) {
-			cerr << "Support must be at least 1/|db_1|... exit!" << endl;
-			return 1;
-		}
-		// adapt parameters from support to frequency
-		minFreq = (unsigned) ceil((double) paramPredHull * ds[1] - epsilon);
-		paramPred *= (TParamPred) ((double) (ds[1]) / (double) (ds[2]-ds[1]) - epsilon);
-	} else
-		// min/max frequency mode
-		minFreq = (unsigned) paramPredHull;
-
-	TPred			pred(paramPred);
-	TPredHull		predHull(minFreq);
+	TPred			pred(paramPred, ds);
+	TPredHull		predHull(paramPredHull, ds);
 	TIndex			index(mySet, predHull, pred);
 	Pair<unsigned>	lPos;
 
@@ -246,7 +256,9 @@ int runDFI(
 	{
         posLocalize(lPos, getOccurrence(it), stringSetLimits(container(it)));
 		unsigned len = repLength(it);
-		for(unsigned l = parentRepLength(it) + 1; l <= len; ++l) {
+//		for(unsigned l = parentRepLength(it) + 1; l <= len; ++l)
+		unsigned l = len; 
+		{
 			cout << infix(
 				mySet[getSeqNo(lPos)], 
 				getSeqOffset(lPos),
@@ -400,7 +412,7 @@ int main(int argc, const char *argv[])
 		} else
 			fileNames += argv[arg];
 	}
-		
+	
 	switch (optionPredicate)
 	{
 		case 0:
@@ -420,9 +432,9 @@ int main(int argc, const char *argv[])
 		case 2:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinAllFreq, PredEntropy, unsigned char> (fileNames, optionMinSupp, optionEntropy);
-				case 1: return runDFI<PredMinAllFreq, PredEntropy, AminoAcid> (fileNames, optionMinSupp, optionEntropy);
-				case 2: return runDFI<PredMinAllFreq, PredEntropy, Dna> (fileNames, optionMinSupp, optionEntropy);
+				case 0: return runDFI<PredMinAllSupp, PredEntropy, unsigned char> (fileNames, optionMinSupp, optionEntropy);
+				case 1: return runDFI<PredMinAllSupp, PredEntropy, AminoAcid> (fileNames, optionMinSupp, optionEntropy);
+				case 2: return runDFI<PredMinAllSupp, PredEntropy, Dna> (fileNames, optionMinSupp, optionEntropy);
 			}
 	}
 	printHelp(argc, argv);
