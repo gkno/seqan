@@ -78,6 +78,8 @@ typedef SimpleType<unsigned char, _TraceBack> TraceBack;
 template <> struct ValueSize< TraceBack > { enum { VALUE = 3 }; };
 template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };
 
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Trace-back, internal functions
 //////////////////////////////////////////////////////////////////////////////
@@ -252,39 +254,6 @@ _align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
 			--j;
 		}
 	}
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSourceValue, typename TType, typename TTargetValue, typename TSequenceValue, typename TSpec, typename TVal1, typename TVal2>
-inline void
-convertScoringMatrix(Score<TSourceValue, TType> const & in,
-					 Score<TTargetValue, ScoreMatrix<TSequenceValue, TSpec> > & out,
-					 TVal1 gapExtend,
-					 TVal2 gapOpen)
-{
-	typedef typename Size<Score<TSourceValue, TType> >::Type TSize;
-	out.data_gap_extend = (TTargetValue) gapExtend;
-	out.data_gap_open = (TTargetValue) gapOpen;
-	TSize alphSize = ValueSize<TSequenceValue>::VALUE;
-	for(TSize row = 0; row<alphSize; ++row) {
-		for(TSize col = 0; col<alphSize; ++col) {
-			setScore(out,  TSequenceValue(row), TSequenceValue(col), score(in, TSequenceValue(row), TSequenceValue(col)));
-		}
-	}
-
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSourceValue, typename TType, typename TTargetValue, typename TSequenceValue, typename TSpec>
-inline void
-convertScoringMatrix(Score<TSourceValue, TType> const & in,
-					 Score<TTargetValue, ScoreMatrix<TSequenceValue, TSpec> > & out)
-{
-	convertScoringMatrix(in, out, scoreGapExtend(in), scoreGapOpen(in));
 }
 
 

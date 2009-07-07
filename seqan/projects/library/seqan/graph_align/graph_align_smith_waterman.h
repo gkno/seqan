@@ -214,6 +214,8 @@ _align_smith_waterman(TTrace& trace,
 	// The DP Matrix for gaps from the top
 	TScoreValue vert = 0;
 
+	typedef typename Iterator<TColumn, Standard>::Type TMatIter;
+
 	// Initialization
 	typedef typename Value<TStringSet>::Type TString;
 	TString const& str1 = str[0];
@@ -236,34 +238,39 @@ _align_smith_waterman(TTrace& trace,
 	TScoreValue b = 0;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	mat[0] = 0;
+	TMatIter matIt = begin(mat, Standard() );
+	TMatIter horiIt = begin(horizontal, Standard() );
+	*matIt = 0;
 	for(TSize row = 1; row <= len2; ++row) {
-		mat[row] = 0;
-		horizontal[row] = scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
+		*(++matIt) = 0;
+		*(++horiIt) = scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
 	}
 	for(TSize col = 1; col <= len1; ++col) {
-		TScoreValue diagValMat = mat[0];
-		mat[0] = 0;
+		matIt = begin(mat, Standard() );
+		horiIt = begin(horizontal, Standard() );
+		TScoreValue diagValMat = *matIt;
+		*matIt = 0;
 		vert = scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
 			if (_isClumping(forbidden, row, col, len2)) {
 				*it = Stop;
 				max_val = 0;
 				vert = 0;
-				horizontal[row] = 0;
+				*(++horiIt) = 0;
+				++matIt;
 			} else {
 				// Get the new maximum for vertical
-				a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
+				a = *matIt + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
 				b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
 				if (a > b) { vert = a; *it = 1;} 
 				else {vert = b; *it = 0;}
 	
 				// Get the new maximum for horizontal
 				*it <<= 1;
-				a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
-				b = horizontal[row] + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
-				if (a > b) {horizontal[row] = a; *it |= 1; } 
-				else horizontal[row] =  b;
+				a = *(++matIt) + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
+				b = *(++horiIt) + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
+				if (a > b) {*horiIt = a; *it |= 1; } 
+				else *horiIt =  b;
 	
 				// Get the new maximum for mat
 				*it <<= 2;
@@ -273,8 +280,8 @@ _align_smith_waterman(TTrace& trace,
 					max_val = vert;
 					tvMat =  Vertical;
 				}
-				if (horizontal[row] > max_val) {
-					max_val = horizontal[row];
+				if (*horiIt > max_val) {
+					max_val = *horiIt;
 					tvMat =  Horizontal;
 				}
 				if (0 >= max_val) {
@@ -285,8 +292,8 @@ _align_smith_waterman(TTrace& trace,
 			}
 
 			// Assign the new diagonal values
-			diagValMat = mat[row];
-			mat[row] = max_val;
+			diagValMat = *matIt;
+			*matIt = max_val;
 
 			// Record the new best score
 			if (max_val > score_max) {

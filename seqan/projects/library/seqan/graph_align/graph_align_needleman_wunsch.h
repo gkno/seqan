@@ -143,19 +143,19 @@ _align_needleman_wunsch(TTrace & trace,
 	overallMaxIndex[0] = len1;
 	overallMaxIndex[1] = len2;
 
-	resize(column, len2 + 1);  
+	resize(column, len2 + 1);
 	resize(trace, len1*len2);
-	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), column[row], (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
+	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
+	TColIterator coit = begin(column, Standard());
+	TColIterator col_end = end(column, Standard());
+	*coit = 0;
+	for(TSize row = 1; row <= len2; ++row) _initFirstColumn(TAlignConfig(), *(++coit), (TScoreValue) (row) * scoreGapExtendVertical(_sc, -1, row - 1, str1, str2));
 	_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, column[len2], 0);
-	column[0] = 0;
 	//for(TSize i = 0; i <= len2; ++i) std::cout << value(column, i) << std::endl;
 	
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-
-	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
-	TColIterator col_end = end(column, Standard());
 	TScoreValue diagVal = 0;
 	TScoreValue max_diag = 0;
 	TScoreValue max_verti = 0;
@@ -163,9 +163,9 @@ _align_needleman_wunsch(TTrace & trace,
 	TSize col2 = 0;
 	for(TSize col = 0; col < len1; ++col) 
 	{
-		diagVal = column[0];
-		_initFirstRow(TAlignConfig(),column[0], (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
-		TColIterator coit = begin(column, Standard());
+		coit = begin(column, Standard());
+		diagVal = *coit;
+		_initFirstRow(TAlignConfig(), *coit, (TScoreValue) (col+1) * scoreGapExtendHorizontal(_sc, col, -1, str1, str2));
 		max_verti = *coit;
 		col2 = 0;
 

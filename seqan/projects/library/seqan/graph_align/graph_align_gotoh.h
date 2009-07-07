@@ -183,35 +183,41 @@ _align_gotoh(TTrace& trace,
 	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
 	overallMaxIndex[0] = len1;
 	overallMaxIndex[1] = len2;
-	mat[0] = 0;
-
+	
+	typedef typename Iterator<TColumn, Standard>::Type TColIter;
+	TColIter matIt = begin(mat, Standard());
+	*matIt = 0;
+	TColIter horiIt = begin(horizontal, Standard());
+	
 	TScoreValue a = 0;
 	TScoreValue b = 0;
 	TScoreValue max_val = 0;
 	for(TSize row = 1; row <= len2; ++row) {
-		_initFirstColumn(TAlignConfig(), mat[row], scoreGapOpenVertical(sc, -1, 0, str1, str2) + (row - 1) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
-		horizontal[row] = mat[row] + scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
+		_initFirstColumn(TAlignConfig(), *(++matIt), scoreGapOpenVertical(sc, -1, 0, str1, str2) + (row - 1) * scoreGapExtendVertical(sc, -1, row - 1, str1, str2));
+		*(++horiIt) = *matIt + scoreGapOpenHorizontal(sc, 0, row-1, str1, str2) - scoreGapExtendHorizontal(sc, 0, row-1, str1, str2);
 	}
-	_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[len2], 0);
+	_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, 0);
 	if (overallMaxIndex[0] == 0) initialDir = Vertical;
 	for(TSize col = 1; col <= len1; ++col) {
-		TScoreValue diagValMat = mat[0];
-		_initFirstRow(TAlignConfig(), mat[0], scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
-		vert = mat[0] + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
+		matIt = begin(mat, Standard());
+		horiIt = begin(horizontal, Standard());
+		TScoreValue diagValMat = *matIt;
+		_initFirstRow(TAlignConfig(), *matIt, scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
+		vert = *matIt + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
 		for(TSize row = 1; row <= len2; ++row, ++it) {
 
 			// Get the new maximum for vertical
-			a = mat[row - 1] + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
+			a = *matIt + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
 			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
 			if (a > b) {vert = a; *it = 1;}
 			else { vert = b; *it = 0;}
 
 			// Get the new maximum for left
 			*it <<= 1;
-			a = mat[row] + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
-			b = horizontal[row] + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
-			if (a > b) {horizontal[row] = a; *it |= 1;}
-			else horizontal[row] = b;
+			a = *(++matIt) + scoreGapOpenHorizontal(sc, col-1, row-1, str1, str2);
+			b = *(++horiIt) + scoreGapExtendHorizontal(sc, col-1, row-1, str1, str2);
+			if (a > b) {*horiIt = a; *it |= 1;}
+			else *horiIt = b;
 			
 			// Get the new maximum for mat
 			*it <<= 2;
@@ -221,17 +227,17 @@ _align_gotoh(TTrace& trace,
 				max_val = vert;
 				tvMat = Vertical;
 			}
-			if (horizontal[row] > max_val) {
-				max_val = horizontal[row];
+			if (*horiIt > max_val) {
+				max_val = *horiIt;
 				tvMat = Horizontal;
 			}
 			*it |= tvMat;
 
 			// Assign the new diagonal values
-			diagValMat = mat[row];
-			mat[row] = max_val;
+			diagValMat = *matIt;
+			*matIt = max_val;
 		}
-		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, mat[len2], col);
+		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, col);
 		// If we got a new index, store direction
 		if (overallMaxIndex[0] == col) initialDir = tvMat;
 	}
