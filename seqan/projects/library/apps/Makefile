@@ -29,7 +29,7 @@ CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
 #CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
 #LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers pair_align/pair_align
 
 all:           check_seqan_base $(TARGETS)
 dfi:           check_seqan_base dfi/dfi 
