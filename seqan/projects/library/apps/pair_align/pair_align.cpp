@@ -328,6 +328,7 @@ _initAlignParams(int argc, const char *argv[], TScore& sc) {
 			}
 		}
 	}
+	if (seqfile.empty()) { printHelp(); exit(1); }
 	if (low > high) banded = false;
 	if (length(bools) != 4) pairwise_align<TAlphabet, AlignConfig<false, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
 	else {
