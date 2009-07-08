@@ -116,6 +116,9 @@ _align_banded_nw_trace(TAlign& align,
 						if (newTv == Diagonal) {
 							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--row; seqLen = 1;
+						} else if (newTv == Vertical) {
+							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							--row; ++col; seqLen = 1;
 						} else {
 							--col; ++seqLen;
 						}
@@ -123,6 +126,9 @@ _align_banded_nw_trace(TAlign& align,
 						if (newTv == Diagonal) {
 							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--row; seqLen = 1;
+						} else if (newTv == Horizontal) {
+							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							--col; seqLen = 1;
 						} else {
 							--row; ++col; ++seqLen;
 						}

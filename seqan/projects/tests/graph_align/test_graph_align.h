@@ -724,8 +724,8 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TSequence dna2;
 		for(TSize i = 0; i<lenN; ++i) appendValue(dna1, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
 		for(TSize j = 0; j<lenM; ++j) appendValue(dna2, TAlphabet(mtRand() % ValueSize<TAlphabet>::VALUE));
-		//dna1 = "A";
-		//dna2 = "AC";
+		//dna1 = "AAGGTCA";
+		//dna2 = "AT";
 		
 		TSize len1 = length(dna1);
 		TSize len2 = length(dna2);
@@ -739,9 +739,9 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		int misMatchScore =  -1 * (int) (mtRand() % 10);
 		int gapScore =  -1 * (int) (mtRand() % 10);
 		if (gapScore > misMatchScore) gapScore = misMatchScore;
-		//matchScore = 6;
-		//misMatchScore = -5;
-		//gapScore = -5;
+		//matchScore = 0;
+		//misMatchScore = -4;
+		//gapScore = 0;
 
 		Score<int> score_type = Score<int>(matchScore,misMatchScore,gapScore,gapScore);
 		typedef String<Fragment<> > TFragmentString;
@@ -774,7 +774,6 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 		TGraph g1(str);
 		globalAlignment(g1, score_type, ac, NeedlemanWunsch());
 		int sc1 = _pairWiseSumOfPairsScore(g1, score_type, ac);
-		//std::cerr << g1 << std::endl;
 		TGraph g2(str);
 		globalAlignment(g2, score_type, ac, lowDiag, highDiag, BandedNeedlemanWunsch());
 		int sc2 = _pairWiseSumOfPairsScore(g2, score_type, ac);
