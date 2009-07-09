@@ -46,6 +46,7 @@ struct FragmentStoreConfig
 	typedef void					TLibraryStoreElementSpec;
 	typedef void					TContigStoreElementSpec;
 	typedef void					TAlignedReadStoreElementSpec;
+	typedef void					TAnnotationStoreElementSpec;
 	typedef Owner<ConcatDirect<> >	TAlignedReadTagStoreSpec;
 };
 
@@ -64,6 +65,7 @@ private:
 	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
 	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
 	typedef typename TConfig::TAlignedReadTagStoreSpec		TAlignedReadTagStoreSpec;
+	typedef typename TConfig::TAnnotationStoreElementSpec	TAnnotationStoreElementSpec;
 
 public:
 	typedef typename TConfig::TMean					TMean;
@@ -83,6 +85,7 @@ public:
 	typedef String< LibraryStoreElement< TMean, TStd, TLibraryStoreElementSpec > >							TLibraryStore;
 	typedef String< ContigStoreElement< TContigSeq, TContigGapAnchor, TContigStoreElementSpec > >			TContigStore;
 	typedef String< AlignedReadStoreElement< TContigPos, TReadGapAnchor, TAlignedReadStoreElementSpec > >	TAlignedReadStore;
+	typedef String< AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec > >						TAnnotationStore;
 	
 	// main containers
 	TReadStore			readStore;			// readId     -> matePairId
@@ -90,9 +93,15 @@ public:
 	TLibraryStore		libraryStore;		// libraryId  -> libSizeMean, libSizeStd
 	TContigStore		contigStore;		// contigId   -> contigSeq, contigGaps
 	TAlignedReadStore	alignedReadStore;	//            -> id, readId, contigId, pairMatchId (not matePairId!), beginPos, endPos, gaps
-											//
-											// The alignedReadStore can arbitrarily be resorted. The unique identifier id should
-											// be used to address additional information for each alignedRead in additional tables.
+	TAnnotationStore	annotationStore;	// annoId     -> parentId, contigId, beginPos, endPos
+
+											// REMARKS: 
+											// 1)
+											//    beginPos <= endPos     forward strand
+											//    beginPos >  endPos     backward strand (reverse complement)
+											// 2) 
+											//    The alignedReadStore can arbitrarily be resorted. The unique identifier id should
+											//    be used to address additional information for each alignedRead in additional tables.
 
 	// we store the read sequences in a seperate stringset to reduce the memory overhead 
 	StringSet<TReadSeq, TReadSeqStoreSpec>	readSeqStore;
@@ -101,11 +110,12 @@ public:
 	String<TMappingQuality>	alignedReadQualityStore;
 	StringSet<CharString, TAlignedReadTagStoreSpec> alignedReadTagStore;
 
-	// retrieve the names of reads, mate-pairs, libraries, contigs by their ids
+	// retrieve the names of reads, mate-pairs, libraries, contigs, annotations by their ids
 	StringSet<CharString>	readNameStore;
 	StringSet<CharString>	matePairNameStore;
 	StringSet<CharString>	libraryNameStore;
 	StringSet<CharString>	contigNameStore;
+	StringSet<CharString>	annotationNameStore;
 };
 
 //////////////////////////////////////////////////////////////////////////////
