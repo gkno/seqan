@@ -159,8 +159,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			repeatLength = 1000;
 			abundanceCut = 1;
 
-			libraryLength = 2000;
-			libraryError = 200;
+			libraryLength = 220;
+			libraryError = 50;
 			nextMatePairId = 1;
 			
 			for (unsigned i = 0; i < 4; ++i)

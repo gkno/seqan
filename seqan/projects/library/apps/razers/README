@@ -118,14 +118,14 @@ can be modified by adding the following options to the command line:
   
   [ -ll NUM ],  [ --library-length NUM ]
   
-  Set the mean library size, default is 2000. The library size is the outer
+  Set the mean library size, default is 220. The library size is the outer
   distance of the two reads of a mate-pair. This value is used only for
   paired-end read mapping.
   
   [ -le NUM ],  [ --library-error NUM ]
   
   Set the tolerated absolute deviation of the library size, default value is
-  200. This value is used only for paired-end read mapping.
+  50. This value is used only for paired-end read mapping.
   
   [ -m NUM ],  [ --max-hits NUM ]
   
@@ -282,13 +282,13 @@ can be modified by adding the following options to the command line:
 4. Output Formats
 ---------------------------------------------------------------------------
 
-RazerS supports currently 3 different output formats selectable via the
+RazerS supports currently 4 different output formats selectable via the
 "--output-format NUM" option. The following values for NUM are possible:
 
   0 = Razer Format
   1 = Enhanced Fasta Format
   2 = Eland Format
-  3 = GFF Format
+  3 = General Feature Format (GFF)
  
 ---------------------------------------------------------------------------
 4.1. Razer Format
@@ -372,7 +372,7 @@ Additional value description:
                (e.g. 12A: 12'th base was A in the genome)
 
 ---------------------------------------------------------------------------
-4.3. General Feature Format
+4.4. General Feature Format
 ---------------------------------------------------------------------------
 
 The General Feature Format is specified by the Sanger Institute as a tab-
@@ -380,8 +380,7 @@ delimited text format with the following columns:
 
 <seqname> <src> <feat> <start> <end> <score> <strand> <frame> [attr] [cmts]
 
-See also http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml
-
+See also: http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml
 Consistent with this specification razers GFF output looks as follows:
 
 GNAME razers read GBEGIN GEND PERCID GSTRAND . ATTRIBUTES
@@ -419,7 +418,6 @@ related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
 
 *http://may2005.archive.ensembl.org/Docs/wiki/html/EnsemblDocs/CigarFormat.html
 
-
 ---------------------------------------------------------------------------
 5. Example
 ---------------------------------------------------------------------------
@@ -429,7 +427,7 @@ related forward strand. It holds GBEGIN < GEND, regardless of GSTRAND.
 ---------------------------------------------------------------------------
 
 There are example read and genome files in the folder in snapshot/apps/
-razers/example containing 3 27bp reads and two short genome sequences. The 3
+razers/example containing 3 27bp reads and two short contigs. The 3
 reads and their reverse-complements were implanted with errors into the 
 genome. To map the example reads onto the genome do the following:
 
@@ -440,31 +438,56 @@ genome. To map the example reads onto the genome do the following:
 On success, RazerS dumped the resulting matches with their corresponding 
 semi-global alignments into the file example/reads.fa.result:
 
-read1	0	27	F	genome1	47	73	92.593
+read1   0   27  F   contig1 47  73  92.593
 #Read:   AATTGAATGAGGTCTTGCAGCCATGGC
 #Genome: AATTGAATGACGTC-TGCAGCCATGGC
-read1	0	27	R	genome2	180	208	92.593
+read1   0   27  R   contig2 300 328 92.593
 #Read:   AATTGAATGAGGTCTT-GCAGCCATGGC
 #Genome: AATTGAATGAGGTCTTCGCAGTCATGGC
-read2	0	27	R	genome2	108	135	96.296
+read2   0   27  R   contig2 228 255 96.296
 #Read:   CAGGAGATAAGCTGGATCGTTTACGGT
 #Genome: CAGGAGATAAGCTGGATCGTTTACAGT
-read3	0	27	F	genome2	215	242	100
+read3   0   27  F   contig2 335 362 100
 #Read:   GCCATTAGAGGCCACCACACCAGACGT
-#Genome: GCCATTAGAGGCCACCACACCAG----
+#Genome: GCCATTAGAGGCCACCACACCAGNNNN
 
 If alignments are not needed '-a' can be omited resulting in:
 
-read1	0	27	F	genome1	47	73	92.593
-read1	0	27	R	genome2	180	208	92.593
-read2	0	27	R	genome2	108	135	96.296
-read3	0	27	F	genome2	215	242	100
+read1   0   27  F   contig1 47  73  92.593
+read1   0   27  R   contig2 300 328 92.593
+read2   0   27  R   contig2 228 255 96.296
+read3   0   27  F   contig2 335 362 100
 
 ---------------------------------------------------------------------------
 5.2. Paired-end read mapping
 ---------------------------------------------------------------------------
 
-...
+To demonstrate how paired-end read mapping works, we provide a read file
+with mates of the reads in the example above. To run RazerS in paired-end
+mode you simply have to add the second read file to the command line.
+
+  1)  cd snapshot/apps/razers
+  2)  ./razers example/genome.fa example/reads.fa example/reads2.fa -id -mN
+  3)  less example/reads.fa.result
+  
+read1/L 0   27  F   contig1 47  73  92.593  1   -3  217
+read1/R 0   27  R   contig1 236 264 96.296  1   -3  -217
+read2/L 0   27  R   contig2 228 255 96.296  3   -1  -207
+read2/R 0   27  F   contig2 48  75  100     3   -1  207
+read3/L 0   27  F   contig2 335 362 100     2   0   221
+read3/R 0   27  R   contig2 529 556 100     2   0   -221
+
+In this short example the library sizes vary between 207bp and 221bp. The
+default library size of RazerS is 220bp with a tolerance of 50bp, i.e. all
+libraries between 170bp and 270bp are recognized. To alter the library size
+settings use the -ll and -le options.
+
+The pair score value in the second last column is the negative sum of 
+errors in both matches and the third last column is a unique number to 
+identify the two corresponding mate matches. Remember that RazerS can 
+output more than one match per mate-pair and two corresponding mate matches
+are not necessarily in consecutive lines in the output file, e.g. when 
+altering the sort-order with the -so option.
 
 ---------------------------------------------------------------------------
 6. Contact

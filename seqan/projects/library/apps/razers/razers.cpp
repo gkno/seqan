@@ -190,7 +190,7 @@ int mapReads(
 void printVersion() 
 {
 	string rev = "$Revision$";
-	cerr << "RazerS version 1.0 20090617 [" << rev.substr(11, 4) << "]" << endl;
+	cerr << "RazerS version 1.0 20090710 [" << rev.substr(11, 4) << "]" << endl;
 }
 
 template <typename TSpec>

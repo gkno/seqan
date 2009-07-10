@@ -90,7 +90,7 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Parse command line
 //	static const TFloat epsilon = 0.0000001;	
-	static const TFloat epsilon = 0.0000000000001;	
+	static const TFloat epsilon = (TFloat)0.0000000000001;	
 
         RazerSOptions<> r_options;
         ParamChooserOptions pm_options;

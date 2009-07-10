@@ -290,7 +290,7 @@ inline typename Size<Dequeue<TValue, TSpec> >::Type
 reserve(Dequeue<TValue, TSpec> &me, TSize_ new_capacity, Tag<TExpand> const tag)
 {
 	typedef typename Size<Dequeue<TValue, TSpec> >::Type TSize;
-	::std::cout << "resize to "<<new_capacity<<::std::endl;
+//	::std::cout << "resize to "<<new_capacity<<::std::endl;
 	TSize len = length(me);
 	if (len < new_capacity && length(me.data_string) != new_capacity)
 	{
@@ -934,7 +934,7 @@ int mapMatePairReads(
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
-	std::cout << "SIYE:" <<sizeof(typename SAValue<TIndex>::Type)<<std::endl;
+//	std::cout << "SA-TYPE:" <<sizeof(typename SAValue<TIndex>::Type)<<std::endl;
 
 	// split mate-pairs over two indices
 	TReadSet readSetL, readSetR;

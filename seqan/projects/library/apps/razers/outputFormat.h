@@ -694,6 +694,10 @@ void dumpMatches(
 				if (options.dumpAlignment) {
 					assignSource(row(align, 0), reads[(*it).rseqNo]);
 					assignSource(row(align, 1), infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd));
+#ifdef RAZERS_MATEPAIRS
+					if ((*it).pairId != 0 && ((*it).rseqNo & 1))
+						reverseComplementInPlace(source(row(align, 0)));
+#endif
 					if ((*it).orientation == 'R')
 						reverseComplementInPlace(source(row(align, 1)));
 					globalAlignment(align, scoreType);
