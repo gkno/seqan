@@ -711,7 +711,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	{
 		if(length(shapeStrings[i])>totalN) continue;
 		
-		unsigned maxT = totalN-length(shapeStrings[i])+1;
+		unsigned maxT = totalN-length(shapeStrings[i])+2;
 		
 		String<TFloat> found;
 		resize(found,maxT*maxErrors);

@@ -650,6 +650,9 @@ void dumpMatches(
 			{
 				unsigned	readLen = length(reads[(*it).rseqNo]);
 				double		percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
+#ifdef RAZERS_MICRO_RNA
+				percId = 100.0 * (1.0 - (double)(*it).editDist / (double) ((*it).mScore));
+#endif
 
 				switch (options.readNaming)
 				{
@@ -685,6 +688,10 @@ void dumpMatches(
 				}
 
 				file << _sep_ << ((*it).gBegin + options.positionFormat) << _sep_ << (*it).gEnd << _sep_ << ::std::setprecision(5) << percId;
+#ifdef RAZERS_MICRO_RNA
+				if(options.microRNA) file << _sep_ << (*it).mScore;
+#endif
+
 #ifdef RAZERS_MATEPAIRS
 				if ((*it).pairId != 0)
 					file << _sep_ << (*it).pairId << _sep_ << (*it).pairScore << _sep_ << (*it).mateDelta;
@@ -692,6 +699,11 @@ void dumpMatches(
 				file << ::std::endl;
 
 				if (options.dumpAlignment) {
+#ifdef RAZERS_MICRO_RNA
+					if(options.microRNA)
+						assignSource(row(align, 0), prefix(reads[(*it).rseqNo],(*it).mScore));
+					else
+#endif
 					assignSource(row(align, 0), reads[(*it).rseqNo]);
 					assignSource(row(align, 1), infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd));
 #ifdef RAZERS_MATEPAIRS
