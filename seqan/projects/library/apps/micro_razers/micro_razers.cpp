@@ -267,6 +267,7 @@ int main(int argc, const char *argv[])
 	options.reverse = false;
 	options.hammingOnly = true;
 	options.microRNA = true;
+	pm_options.optionLossRate = 0.0;
 
 	for(int arg = 1; arg < argc; ++arg) {
 		if (argv[arg][0] == '-') {
