@@ -56,11 +56,12 @@ _align_gotoh_trace(TAlign& align,
 	TSize numRows = length(str[1]);
 	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1,  Horizontal);
 	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2,  Vertical);
-	
+	numRows = (numRows >> 1) + (numRows & 1);
+
 	if ((len1 != 0) && (len2 !=0)) {
 
 		// Initialize everything	
-		TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+		TTraceValue nextTraceValue = (len2 & 1) ? trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)] >> 4 : trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)];
 		TTraceValue tv = Diagonal;
 		if (initialDir == Diagonal) tv = (nextTraceValue & 3);
 		else if (initialDir == Horizontal) {
@@ -75,7 +76,7 @@ _align_gotoh_trace(TAlign& align,
 
 		// Now follow the trace
 		do {
-			nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+			nextTraceValue = (len2 & 1) ? trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)] >> 4 : trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)];
 			if (tv == Diagonal) tv = (nextTraceValue & 3);
 			else if (tv == Horizontal) {
 				if ((nextTraceValue >> 2) & 1) tv = Diagonal; 
@@ -173,7 +174,7 @@ _align_gotoh(TTrace& trace,
 	TSize len2 = length(str2);
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
-	resize(trace, len1*len2);
+	fill(trace, len1 * ((len2 >> 1) + (len2 & 1)), 0);
 	TTraceValue tvMat = 0;
 	
 	// Classical DP
@@ -204,13 +205,13 @@ _align_gotoh(TTrace& trace,
 		TScoreValue diagValMat = *matIt;
 		_initFirstRow(TAlignConfig(), *matIt, scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (col - 1) * scoreGapExtendHorizontal(sc, col-1, -1, str1, str2));
 		vert = *matIt + scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
-		for(TSize row = 1; row <= len2; ++row, ++it) {
-
+		TSize row = 1; 
+		while(row <= len2) {
 			// Get the new maximum for vertical
 			a = *matIt + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
 			b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
-			if (a > b) {vert = a; *it = 1;}
-			else { vert = b; *it = 0;}
+			if (a > b) {vert = a; *it |= 1;}
+			else vert = b;
 
 			// Get the new maximum for left
 			*it <<= 1;
@@ -236,7 +237,11 @@ _align_gotoh(TTrace& trace,
 			// Assign the new diagonal values
 			diagValMat = *matIt;
 			*matIt = max_val;
+
+			if (row & 1) *it <<= 1; else ++it;
+			++row;
 		}
+		if (!(row & 1)) {*it <<= 3; ++it; }
 		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, *matIt, col);
 		// If we got a new index, store direction
 		if (overallMaxIndex[0] == col) initialDir = tvMat;
