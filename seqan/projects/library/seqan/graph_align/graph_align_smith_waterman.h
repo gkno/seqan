@@ -39,7 +39,6 @@ _setForbiddenCell(String<bool, TSpec>& forbidden,
 				  TSize len2,
 				  TSize numRows)
 {
-	//if (!empty(forbidden)) forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
 	forbidden[(len1 - 1)*numRows + (len2 - 1)] = true;
 }
 
@@ -55,6 +54,30 @@ _setForbiddenCell(Nothing&,
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TSize>
+inline bool
+_isClumping(String<bool, TSpec> const& forbidden,
+			TSize row,
+			TSize col,
+			TSize len2)
+{
+	return forbidden[(col-1) * len2 + (row-1)];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSize>
+inline bool
+_isClumping(Nothing&,
+			TSize,
+			TSize,
+			TSize)
+{
+	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TIndexPair, typename TForbidden>
 inline void
@@ -79,14 +102,15 @@ _align_smith_waterman_trace(TAlign& align,
 	TSize len2 = indexPair[0];
 	if ((indexPair[0] == 0) || (indexPair[1] == 0)) return;
 	TSize numCols = length(str[0]);
-	TSize numRows = length(str[1]);
+	TSize numRowsOrig = length(str[1]);
 	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
-	if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
+	if (len2 < numRowsOrig) _align_trace_print(align, str, id1, len1, id2, len2, numRowsOrig - len2, Vertical);
+	TSize numRows = (numRowsOrig >> 1) + (numRowsOrig & 1);
 	
 	
 
 	// Initialize everything	
-	TTraceValue nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+	TTraceValue nextTraceValue = (len2 & 1) ? trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)] >> 4 : trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)];
 	TTraceValue tv = Diagonal;
 	if (initialDir == Diagonal) tv = (nextTraceValue & 3);
 	else if (initialDir == Horizontal) {
@@ -101,9 +125,9 @@ _align_smith_waterman_trace(TAlign& align,
 
 	// Now follow the trace
 	do {
-		nextTraceValue = trace[(len1 - 1)*numRows + (len2 - 1)];
+		nextTraceValue = (len2 & 1) ? trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)] >> 4 : trace[(len1 - 1)*numRows + ((len2 - 1) >> 1)];
 		if ((nextTraceValue & 3) == Stop) break;
-		_setForbiddenCell(forbidden, len1, len2, numRows);	
+		_setForbiddenCell(forbidden, len1, len2, numRowsOrig);	
 		if (tv == Diagonal) tv = (nextTraceValue & 3);
 		else if (tv == Horizontal) {
 			if ((nextTraceValue >> 2) & 1) tv = Diagonal; 
@@ -163,30 +187,6 @@ _align_smith_waterman_trace(TAlign& align,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TSize>
-inline bool
-_isClumping(String<bool, TSpec> const& forbidden,
-			TSize row,
-			TSize col,
-			TSize len2)
-{
-	//return (!empty(forbidden) && (forbidden[(col-1) * len2 + (row-1)]));
-	return forbidden[(col-1) * len2 + (row-1)];
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSize>
-inline bool
-_isClumping(Nothing&,
-			TSize,
-			TSize,
-			TSize)
-{
-	return false;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TIndexPair, typename TForbidden>
@@ -224,7 +224,7 @@ _align_smith_waterman(TTrace& trace,
 	TSize len2 = length(str2);
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
-	resize(trace, len1*len2);
+	fill(trace, len1 * ((len2 >> 1) + (len2 & 1)), 0);
 	TTraceValue tvMat= 0;
 
 	// Record the max score
@@ -251,9 +251,11 @@ _align_smith_waterman(TTrace& trace,
 		TScoreValue diagValMat = *matIt;
 		*matIt = 0;
 		vert = scoreGapOpenVertical(sc, col-1, 0, str1, str2) - scoreGapExtendVertical(sc, col-1, 0, str1, str2);
-		for(TSize row = 1; row <= len2; ++row, ++it) {
+		TSize row = 1;
+		while(row <= len2) {
 			if (_isClumping(forbidden, row, col, len2)) {
-				*it = Stop;
+				*it <<= 3;
+				*it |= Stop;
 				max_val = 0;
 				vert = 0;
 				*(++horiIt) = 0;
@@ -262,8 +264,8 @@ _align_smith_waterman(TTrace& trace,
 				// Get the new maximum for vertical
 				a = *matIt + scoreGapOpenVertical(sc, col-1, row-1, str1, str2);
 				b = vert + scoreGapExtendVertical(sc, col-1, row-1, str1, str2);
-				if (a > b) { vert = a; *it = 1;} 
-				else {vert = b; *it = 0;}
+				if (a > b) { vert = a; *it |= 1;} 
+				else vert = b;
 	
 				// Get the new maximum for horizontal
 				*it <<= 1;
@@ -301,7 +303,11 @@ _align_smith_waterman(TTrace& trace,
 				score_max = max_val;
 				initialDir = tvMat;
 			}
+
+			if (row & 1) *it <<= 1; else ++it;
+			++row;
 		}
+		if (!(row & 1)) {*it <<= 3; ++it; }
 	}
 
 	//// Debug code
@@ -362,6 +368,7 @@ _localAlignment(TStringSet const& str,
 	unsigned char initialDir;
 	return _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
 }
+
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
