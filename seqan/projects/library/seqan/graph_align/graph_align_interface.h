@@ -364,7 +364,7 @@ multiLocalAlignment(strSet, matches, scores, scType, numAlign, tag)
 ...type:Class.Score
 ..param.numAlign:The desired number of local alignments to compute.
 ..param.tag:A tag indicating the alignment algorithm to use
-...remarks:SmithWatermanIsland or SmithWatermanClump
+...remarks:SmithWatermanClump
 ..returns:void
 */
 
