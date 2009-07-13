@@ -788,7 +788,12 @@ void compactMatches(TMatches &matches, TCounts &
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		cnts
 #endif
-	, RazerSOptions<TSpec> &options, TSwift &swift)
+	, RazerSOptions<TSpec> &options, 
+	TSwift &
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+		swift
+#endif
+	)
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) compactMatches(matches, cnts,options,swift,true);
@@ -808,6 +813,11 @@ void compactMatches(TMatches &matches, TCounts &
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
+#ifdef RAZERS_MICRO_RNA
+	if(options.microRNA && options.purgeAmbiguous)
+		++hitCountCutOff;	// we keep one more match than we actually want, so we can later decide
+							// whether the read mapped more than maxhits times 
+#endif
 	int editDistCutOff = SupremumValue<int>::VALUE;
 
 	TIterator it = begin(matches, Standard());
@@ -944,6 +954,57 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, TS
 
 
 #ifdef RAZERS_MICRO_RNA
+
+template < typename TMatches, typename TSpec >
+void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
+{
+	typedef typename Value<TMatches>::Type                          TMatch;
+	typedef typename Iterator<TMatches, Standard>::Type             TIterator;
+
+	::std::sort(begin(matches, Standard()),end(matches, Standard()),LessRNoEdistHLen<TMatch>());
+	int bestMScore = 0;
+
+	unsigned readNo = -1;
+	unsigned hitCount = 0;
+	unsigned hitCountCutOff = options.maxHits;
+	int editDistCutOff = SupremumValue<int>::VALUE;
+
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+	TIterator dit = it;
+	TIterator ditBeg = it;
+
+	for (; it != itEnd; ++it)
+	{
+		if ((*it).orientation == '-') continue;
+		if (readNo == (*it).rseqNo)
+		{
+			if ((*it).editDist >= editDistCutOff) continue;
+			if ( (*it).mScore < bestMScore) continue;
+			if (++hitCount >= hitCountCutOff)
+			{
+				if (hitCount == hitCountCutOff)
+					dit = ditBeg;
+				continue;
+			}
+		}
+		else
+		{
+			readNo = (*it).rseqNo;
+			hitCount = 0;
+			if (options.distanceRange > 0)
+				editDistCutOff = (*it).editDist + options.distanceRange;
+			bestMScore = (*it).mScore;
+			ditBeg = dit;
+		}
+		*dit = *it;
+		++dit;
+	}
+	resize(matches, dit - begin(matches, Standard()));
+}
+ 
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification recording sum of mismatching qualities in m.mScore
 template <

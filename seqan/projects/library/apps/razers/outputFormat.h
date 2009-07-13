@@ -616,6 +616,11 @@ void dumpMatches(
 	}
 	else	 
 #endif
+	
+#ifdef RAZERS_MICRO_RNA
+	if(options.microRNA)purgeAmbiguousRnaMatches(matches,options);
+	else
+#endif
 	compactMatches(matches, stats, options, nothing);
 
 	switch (options.sortOrder) {

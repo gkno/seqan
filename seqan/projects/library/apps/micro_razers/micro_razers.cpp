@@ -23,7 +23,7 @@
 #define RAZERS_PRUNE_QGRAM_INDEX
 #define RAZERS_CONCATREADS		// use <ConcatDirect> StringSet to store reads
 #define RAZERS_MEMOPT			// optimize memory consumption
-#define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
+//#define RAZERS_MASK_READS		// remove matches with max-hits optimal hits on-the-fly
 #define RAZERS_MICRO_RNA
 #define RAZERS_EXTENDED_MATCH
 
