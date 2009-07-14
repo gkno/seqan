@@ -243,7 +243,8 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		me.data_end = new_end;
-		*new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
+		if (new_end != NULL)
+			*new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
 	}
 
 //____________________________________________________________________________
@@ -793,15 +794,43 @@ SEQAN_CHECKPOINT
 ..remarks:Notational sugar.
 */
 
+template <typename TValue>
+inline TValue *
+toCString(TValue * me)
+{
+SEQAN_CHECKPOINT
+	return me;
+}
+
+template <typename TValue>
+inline TValue const *
+toCString(TValue const * me)
+{
+SEQAN_CHECKPOINT
+	return me;
+}
+
 template <typename T>
 inline typename Value<T>::Type *
 toCString(T & me)
 {
 SEQAN_CHECKPOINT
-	return String<typename Value<T>::Type, CStyle>(me);
+	typedef typename Value<T>::Type TValue;
+	typename Size<T>::Type len = length(me);
+	if (len >= capacity(me))
+		reserve(me, len + 1);
+	if (end(me) != NULL)
+		*end(me) = TValue();
+	return begin(me);
 }
 
-
+template <typename T>
+inline typename Value<T>::Type *
+toCString(T const & me)
+{
+SEQAN_CHECKPOINT
+	return toCString(const_cast<T&>(me));
+}
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
