@@ -576,8 +576,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			if (*it == '1')
 				++oneCount;
 
-		me.weight = oneCount;
-		if ((it = begin(bitmap, Standard())) == itEnd) {
+		if ((me.weight = oneCount) == 0) {
 			me.span = 0;
 			return false;
 		}
@@ -588,7 +587,11 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		me.span = 1;
 		TShapeIter itS = begin(me.diffs, Standard());
 
-		// first character must be '1'
+		it = begin(bitmap, Standard());
+		
+		// skip leading zeros
+		for(; it != itEnd && *it == '0' ; ++it) ;
+
 		if (*it != '1')
 			return false;
 
@@ -603,8 +606,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 			}
 			++diff;
 		}
-		// last character must be '1'
-		return diff == 1;
+
+		return true;
 	}
 
 	template <typename TShapeString, typename TValue, typename TSpec>

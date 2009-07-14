@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	maxHits;			// output at most maxHits many matches
 		unsigned	distanceRange;		// output only the best, second best, ..., distanceRange best matches
 		bool		purgeAmbiguous;		// true..remove reads with more than maxHits best matches, false..keep them
-		const char	*output;			// name of result file
+		CharString	output;				// name of result file
 		int			_debugLevel;		// level of verbosity
 		bool		printVersion;		// print version number
 		bool		hammingOnly;		// no indels
@@ -233,10 +233,12 @@ struct MicroRNA{};
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
 	
-	enum RAZERS_ERROR {
-		RAZERS_READS_FAILED = -1,
-		RAZERS_GENOME_FAILED = -2,
-		RAZERS_INVALID_SHAPE = -3
+	enum RAZERS_ERROR 
+	{
+		RAZERS_INVALID_OPTIONS = -1,
+		RAZERS_READS_FAILED    = -2,
+		RAZERS_GENOME_FAILED   = -3,
+		RAZERS_INVALID_SHAPE   = -4
 	};
 
 //////////////////////////////////////////////////////////////////////////////

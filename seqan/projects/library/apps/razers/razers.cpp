@@ -39,6 +39,7 @@
 	#define SEQAN_DEFAULT_TMPDIR "./"
 #endif
 
+#include "seqan/misc/misc_cmdparser.h"
 #include "razers.h"
 #include "outputFormat.h"
 #include "paramChooser.h"
@@ -60,12 +61,59 @@ using namespace seqan;
 
 
 //////////////////////////////////////////////////////////////////////////////
+// Read a list of genome file names
+template<typename TSpec>
+int getGenomeFileNameList(CharString filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
+{
+	ifstream file;
+	file.open(toCString(filename),ios_base::in | ios_base::binary);
+	if(!file.is_open())
+		return RAZERS_GENOME_FAILED;
+
+	clear(genomeFileNames);
+	char c = _streamGet(file);
+	if (c != '>' && c != '@')	//if file does not start with a fasta header --> list of multiple reference genome files
+	{
+		if(options._debugLevel >=1)
+			cout << endl << "Reading multiple genome files:" <<endl;
+		
+/*		//locations of genome files are relative to list file's location
+		string tempGenomeFile(filename);
+		size_t lastPos = tempGenomeFile.find_last_of('/') + 1;
+		if (lastPos == tempGenomeFile.npos) lastPos = tempGenomeFile.find_last_of('\\') + 1;
+		if (lastPos == tempGenomeFile.npos) lastPos = 0;
+		string filePrefix = tempGenomeFile.substr(0,lastPos);*/
+
+		unsigned i = 1;
+		while(!_streamEOF(file))
+		{ 
+			_parse_skipWhitespace(file, c);
+			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			//CharString currentGenomeFile(filePrefix);
+			//append(currentGenomeFile,_parse_readFilepath(file,c));
+			//appendValue(genomeFileNames,currentGenomeFile);
+			if(options._debugLevel >=2)
+				cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << endl;
+			++i;
+			_parse_skipWhitespace(file, c);
+		}
+		if(options._debugLevel >=1)
+			cout << i-1 << " genome files total." <<endl;
+	}
+	else		//if file starts with a fasta header --> regular one-genome-file input
+		appendValue(genomeFileNames, filename, Exact());
+	file.close();
+	return 0;
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Main read mapper function
 template <typename TSpec>
 int mapReads(
-	const char *genomeFileName,
-	const char *readFileNames[],	// NULL terminated list of one/two read files (single/mate-pairs)
-	const char *errorPrbFileName,
+	StringSet<CharString> & genomeFileNames,
+	StringSet<CharString> & readFileNames,	// NULL terminated list of one/two read files (single/mate-pairs)
+	CharString & errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
 	MultiFasta				genomeSet;
@@ -78,31 +126,34 @@ int mapReads(
 	// dump configuration in verbose mode
 	if (options._debugLevel >= 1) 
 	{
-//		CharString bitmap;
-//		shapeToString(bitmap, shape);
-		::std::cerr << "___SETTINGS____________" << ::std::endl;
-		::std::cerr << "Genome file:                     \t" << genomeFileName << ::std::endl;
+		CharString bitmap;
+		Shape<Dna, GenericShape> shape;
+		stringToShape(shape, options.shape);
+		shapeToString(bitmap, shape);
+		
+		cerr << "___SETTINGS____________" << endl;
+		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
 		if (empty(readFileNames[1]))
-			::std::cerr << "Read file:                       \t" << readFileNames[0] << ::std::endl;
+			cerr << "Read file:                       \t" << readFileNames[0] << endl;
 		else
 		{
-			::std::cerr << "Read files:                      \t" << readFileNames[0] << ::std::endl;
-			for (const char **i = readFileNames + 1; !empty(*i); ++i)
-				::std::cerr << "                                 \t" << *i << ::std::endl;
+			cerr << "Read files:                      \t" << readFileNames[0] << endl;
+			for (unsigned i = 1; i < length(readFileNames); ++i)
+				cerr << "                                 \t" << readFileNames[i] << endl;
 		}
-		::std::cerr << "Compute forward matches:         \t";
-		if (options.forward)	::std::cerr << "YES" << ::std::endl;
-		else				::std::cerr << "NO" << ::std::endl;
-		::std::cerr << "Compute reverse matches:         \t";
-		if (options.reverse)		::std::cerr << "YES" << ::std::endl;
-		else				::std::cerr << "NO" << ::std::endl;
-		::std::cerr << "Error rate:                      \t" << options.errorRate << ::std::endl;
-		::std::cerr << "Minimal threshold:               \t" << options.threshold << ::std::endl;
-		::std::cerr << "Shape:                           \t" << options.shape << ::std::endl;
-		::std::cerr << "Repeat threshold:                \t" << options.repeatLength << ::std::endl;
-		::std::cerr << "Overabundance threshold:         \t" << options.abundanceCut << ::std::endl;
-		::std::cerr << "Taboo length:                    \t" << options.tabooLength << ::std::endl;
-		::std::cerr << ::std::endl;
+		cerr << "Compute forward matches:         \t";
+		if (options.forward)	cerr << "YES" << endl;
+		else				cerr << "NO" << endl;
+		cerr << "Compute reverse matches:         \t";
+		if (options.reverse)		cerr << "YES" << endl;
+		else				cerr << "NO" << endl;
+		cerr << "Error rate:                      \t" << options.errorRate << endl;
+		cerr << "Minimal threshold:               \t" << options.threshold << endl;
+		cerr << "Shape:                           \t" << bitmap << endl;
+		cerr << "Repeat threshold:                \t" << options.repeatLength << endl;
+		cerr << "Overabundance threshold:         \t" << options.abundanceCut << endl;
+		cerr << "Taboo length:                    \t" << options.tabooLength << endl;
+		cerr << endl;
 	}
 	
 	// circumvent numerical obstacles
@@ -113,38 +164,39 @@ int mapReads(
 	SEQAN_PROTIMESTART(load_time);
 
 #ifdef RAZERS_MATEPAIRS
-	if (!empty(readFileNames[1]))
+	if (length(readFileNames) == 2)
 	{
-		if (!loadReads(readSet, readNames, readFileNames[0], readFileNames[1], options)) {
+		if (!loadReads(readSet, readNames, toCString(readFileNames[0]), toCString(readFileNames[1]), options)) {
 		//if (!loadReads(readSet, readQualities, readNames, readFileNames[0], readFileNames[1], options)) {
-			::std::cerr << "Failed to load reads" << ::std::endl;
+			cerr << "Failed to load reads" << endl;
 			return RAZERS_READS_FAILED;
 		}
 	}
 	else
 #endif
 	{
-		if (!loadReads(readSet, readNames, readFileNames[0], options)) {
+		if (!loadReads(readSet, readNames, toCString(readFileNames[0]), options)) {
 		//if (!loadReads(readSet, readQualities, readNames, readFileNames[0], readFileNames[1], options)) {
-			::std::cerr << "Failed to load reads" << ::std::endl;
+			cerr << "Failed to load reads" << endl;
 			return RAZERS_READS_FAILED;
 		}
 	} 
 
-	if (options._debugLevel >= 1) ::std::cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << ::std::endl;
+	if (options._debugLevel >= 1) cerr << lengthSum(readSet) << " bps of " << length(readSet) << " reads loaded." << endl;
 	options.timeLoadFiles = SEQAN_PROTIMEDIFF(load_time);
 
 	if (options._debugLevel >= 1)
-		::std::cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << ::std::endl;
+		cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << endl;
 
-	StringSet<CharString> genomeFileNameList;
-	int result = getGenomeFileNameList(genomeFileName, genomeFileNameList, options);
-	if (result == RAZERS_GENOME_FAILED)
+	if (length(genomeFileNames) == 1)
 	{
-		::std::cerr << "Failed to open genome file " << genomeFileName << ::std::endl;
-		return result;
+		int result = getGenomeFileNameList(genomeFileNames[0], genomeFileNames, options);
+		if (result == RAZERS_GENOME_FAILED)
+		{
+			cerr << "Failed to open genome file " << genomeFileNames[0] << endl;
+			return result;
+		}
 	}
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Find matches using SWIFT
@@ -153,18 +205,18 @@ int mapReads(
     options.patternMutex = new TMutex[length(readSet)];
 #endif
 
-	::std::map<unsigned,::std::pair< ::std::string,unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
-	int error = mapReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, stats, options);
+	map<unsigned,pair< string,unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
+	int error = mapReads(matches, genomeFileNames, genomeNames, gnoToFileMap, readSet, stats, options);
 	if (error != 0)
 	{
 		switch (error)
 		{
 			case RAZERS_GENOME_FAILED:
-				::std::cerr << "Failed to load genomes" << ::std::endl;
+				cerr << "Failed to load genomes" << endl;
 				break;
 			
 			case RAZERS_INVALID_SHAPE:
-				::std::cerr << "Invalid Shape" << endl << endl;
+				cerr << "Invalid Shape" << endl;
 				break;
 		}
 		return error;
@@ -177,680 +229,278 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(matches, genomeNames, genomeFileNameList, gnoToFileMap, readSet, stats, readNames, readFileNames[0], errorPrbFileName, options);
-
-
+		dumpMatches(matches, genomeNames, genomeFileNames, gnoToFileMap, readSet, stats, readNames, readFileNames[0], errorPrbFileName, options);
 
 	return 0;
 }	
 
-
 //////////////////////////////////////////////////////////////////////////////
-// Print usage
-void printVersion() 
-{
-	string rev = "$Revision$";
-	cerr << "RazerS version 1.0 20090710 [" << rev.substr(11, 4) << "]" << endl;
-}
-
-template <typename TSpec>
-void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserOptions &pm_options, bool longHelp = false) 
-{
-	if (options.printVersion)
-	{
-		printVersion();
-		return;
-	}
-
-	cerr << "***********************************************************" << endl;
-	cerr << "*** RazerS - Fast Read Mapping with Sensitivity Control ***" << endl;
-	cerr << "***          (c) Copyright 2009 by David Weese          ***" << endl;
-	cerr << "***********************************************************" << endl << endl;
-	cerr << "Usage: razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
-#ifdef RAZERS_MATEPAIRS
-	cerr << "       razers [OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>" << endl;
-#endif
-	if (longHelp) {
-		cerr << endl << "Main Options:" << endl;
-		cerr << "  -f,  --forward               \t" << "only compute forward matches" << endl;
-		cerr << "  -r,  --reverse               \t" << "only compute reverse complement matches" << endl;
-		cerr << "  -i,  --percent-identity NUM  \t" << "set the percent identity threshold (default " << 100 - (100.0 * options.errorRate) << ')' << endl;
-#ifndef NO_PARAM_CHOOSER
-		cerr << "  -rr, --recognition-rate NUM  \t" << "set the percent recognition rate (default " << 100 - (100.0 * pm_options.optionLossRate) << ')' << endl;
-		cerr << "  -pd, --param-dir STR         \t" << "folder containing user-computed parameter files (optional)" << endl;
-#endif
-		cerr << "  -id, --indels                \t" << "allow indels (default: mismatches only)" << endl;
-#ifdef RAZERS_MATEPAIRS
-		cerr << "  -ll, --library-length NUM    \t" << "mate-pair library length (default " << options.libraryLength << ')' << endl;
-		cerr << "  -le, --library-error NUM     \t" << "mate-pair library length tolerance (default " << options.libraryError << ')' << endl;
-#endif
-		cerr << "  -m,  --max-hits NUM          \t" << "output only NUM of the best hits (default " << options.maxHits << ')' << endl;
-		cerr << "       --unique                \t" << "output only unique best matches (-m 1 -dr 0 -pa)" << endl;
-		cerr << "  -tr, --trim-reads NUM        \t" << "trim reads to length NUM (default off)" << endl;
-		cerr << "  -o,  --output FILE           \t" << "change output filename (default <READS FILE>.result)" << endl;
-		cerr << "  -v,  --verbose               \t" << "verbose mode" << endl;
-		cerr << "  -vv, --vverbose              \t" << "very verbose mode" << endl;
-		cerr << "  -V,  --version               \t" << "print version number" << endl;
-		cerr << "  -h,  --help                  \t" << "print this help" << endl;
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-		cerr << "  -lm, --low-memory            \t" << "decrease memory usage at the expense of runtime" << endl;
-		cerr << endl << "Mapping Quality Options:" << endl;
-		cerr << "  -mq, --mapping-quality       \t" << "switch on mapping quality mode" << endl;
-		cerr << "  -nbi,--no-below-id           \t" << "do not report matches with seed identity < percent id (default off)" << endl;
-		cerr << "  -qsl,--mq-seed-length NUM    \t" << "seed length used for mapping quality assignment ("<<options.artSeedLength<<')' << endl;
-#endif
-		cerr << endl << "Output Format Options:" << endl;
-		cerr << "  -a,  --alignment             \t" << "dump the alignment for each match" << endl;
-#ifdef RAZERS_MASK_READS
-		cerr << "  -pa, --purge-ambiguous       \t" << "purge reads with more than max-hits best matches" << endl;
-#endif
-		cerr << "  -dr, --distance-range NUM    \t" << "only consider matches with at most NUM more errors compared to the best (default output all)" << endl;
-		cerr << "  -of, --output-format NUM     \t" << "set output format" << endl;
-		cerr << "                               \t" << "0 = Razer format (default, see README)" << endl;
-		cerr << "                               \t" << "1 = enhanced Fasta format" << endl;
-		cerr << "                               \t" << "2 = Eland format" << endl;
-		cerr << "                               \t" << "3 = GFF format" << endl;
-		cerr << "  -gn, --genome-naming NUM     \t" << "select how genomes are named" << endl;
-		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
-		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
-		cerr << "  -rn, --read-naming NUM       \t" << "select how reads are named" << endl;
-		cerr << "                               \t" << "0 = use Fasta id (default)" << endl;
-		cerr << "                               \t" << "1 = enumerate beginning with 1" << endl;
-		cerr << "                               \t" << "2 = use the read sequence (only for short reads!)" << endl;
-		cerr << "  -so, --sort-order NUM        \t" << "select how matches are sorted" << endl;
-		cerr << "                               \t" << "0 = 1. read number, 2. genome position (default)" << endl;
-		cerr << "                               \t" << "1 = 1. genome position, 2. read number" << endl;
-		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
-		cerr << "                               \t" << "1 = position space" << endl;
-		cerr << endl << "Filtration Options:" << endl;
-		cerr << "  -s,  --shape BITSTRING       \t" << "set k-mer shape (binary string, default " << options.shape << ')' << endl;
-		cerr << "  -t,  --threshold NUM         \t" << "set minimum k-mer threshold (default " << options.threshold << ')' << endl;
-		cerr << "  -oc, --overabundance-cut NUM \t" << "set k-mer overabundance cut ratio (default " << options.abundanceCut << ')' << endl;
-		cerr << "  -rl, --repeat-length NUM     \t" << "set simple-repeat length threshold (default " << options.repeatLength << ')' << endl;
-		cerr << "  -tl, --taboo-length NUM      \t" << "set taboo length (default " << options.tabooLength << ')' << endl;
-		cerr << endl << "Verification Options:" << endl;
-		cerr << "  -mN, --match-N               \t" << "\'N\' matches with all other characters" << endl;
-		cerr << "  -ed, --error-distr FILE      \t" << "write error distribution to FILE" << endl;
-	} else {
-		cerr << "Try 'razers --help' for more information." << endl;
-	}
-}
-
-
-template<typename TSpec>
-int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
-{
-	::std::ifstream file;
-	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
-	if(!file.is_open())
-		return RAZERS_GENOME_FAILED;
-
-	char c = _streamGet(file);
-	if (c != '>' && c != '@')	//if file does not start with a fasta header --> list of multiple reference genome files
-	{
-		if(options._debugLevel >=1)
-			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
-		
-/*		//locations of genome files are relative to list file's location
-		::std::string tempGenomeFile(filename);
-		size_t lastPos = tempGenomeFile.find_last_of('/') + 1;
-		if (lastPos == tempGenomeFile.npos) lastPos = tempGenomeFile.find_last_of('\\') + 1;
-		if (lastPos == tempGenomeFile.npos) lastPos = 0;
-		::std::string filePrefix = tempGenomeFile.substr(0,lastPos);*/
-		unsigned i = 1;
-		while(!_streamEOF(file))
-		{ 
-			_parse_skipWhitespace(file, c);
-			appendValue(genomeFileNames,_parse_readFilepath(file,c));
-			//CharString currentGenomeFile(filePrefix);
-			//append(currentGenomeFile,_parse_readFilepath(file,c));
-			//appendValue(genomeFileNames,currentGenomeFile);
-			if(options._debugLevel >=2)
-				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
-			++i;
-			_parse_skipWhitespace(file, c);
-		}
-		if(options._debugLevel >=1)
-			::std::cout << i-1 << " genome files total." <<::std::endl;
-	}
-	else		//if file starts with a fasta header --> regular one-genome-file input
-		appendValue(genomeFileNames,filename);
-	file.close();
-	return 0;
-
-}
-
-
+// Command line parsing and parameter choosing
 int main(int argc, const char *argv[]) 
 {
-	//////////////////////////////////////////////////////////////////////////////
-	// Parse command line
+	RazerSOptions<>			options;
+	ParamChooserOptions		pm_options;
 
-	RazerSOptions<>		options;
-	ParamChooserOptions	pm_options;
-
-	bool				paramChoosing = true;
-	unsigned			fnameCount = 0;
-	string				errorPrbFileName;
 #ifdef RAZERS_MATEPAIRS
-	const unsigned		maxFiles = 3;
+	const unsigned			maxFiles = 3;
 #else
-	const unsigned		maxFiles = 2;
+	const unsigned			maxFiles = 2;
 #endif
-	const char			*fname[maxFiles + 1] = { NULL, };
+	StringSet<CharString>	genomeFileNames;
+	StringSet<CharString>	readFileNames;
+	CharString				errorPrbFileName;
 
+	// Change defaults
 	options.forward = false;
 	options.reverse = false;
-	options.hammingOnly = true;
-
-
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			// parse options
-
-			if (strcmp(argv[arg], "-f") == 0 || strcmp(argv[arg], "--forward") == 0) {
-				options.forward = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-r") == 0 || strcmp(argv[arg], "--reverse") == 0) {
-				options.reverse = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-i") == 0 || strcmp(argv[arg], "--percent-identity") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.errorRate;
-					options.errorRate = (100.0 - options.errorRate) / 100.0;
-					if (!istr.fail()) 
-					{
-						if (options.errorRate < 0 || options.errorRate > 0.5)
-							cerr << "Percent identity threshold must be a value between 50 and 100" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-rr") == 0 || strcmp(argv[arg], "--recognition-rate") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> pm_options.optionLossRate;
-					if (!istr.fail())
-					{
-						if (pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100)
-							cerr << "Recognition rate must be a value between 80 and 100" << endl << endl;
-						else
-						{
-							pm_options.optionLossRate = 100.0-pm_options.optionLossRate;
-							pm_options.optionLossRate /= 100.0;
-							continue;
-						}
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-
-#ifdef RAZERS_MATEPAIRS
-			if (strcmp(argv[arg], "-ll") == 0 || strcmp(argv[arg], "--library-length") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.libraryLength;
-					if (!istr.fail())
-					{
-						if (options.libraryLength <= 0)
-							cerr << "Library length must be a value greater 0" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-le") == 0 || strcmp(argv[arg], "--library-error") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.libraryError;
-					if (!istr.fail())
-					{
-						if (options.libraryError <= 0)
-							cerr << "Library error must be a value greater or equal 0" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-#endif
-
-			if (strcmp(argv[arg], "-pa") == 0 || strcmp(argv[arg], "--purge-ambiguous") == 0) {
-				options.purgeAmbiguous = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-m") == 0 || strcmp(argv[arg], "--max-hits") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.maxHits;
-					if (!istr.fail()) 
-					{
-						if (options.maxHits < 1)
-							cerr << "Maximum hits threshold must be greater than 0" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "--unique") == 0) {
-				++arg;
-				options.maxHits = 1;
-				options.distanceRange = 1;
-				options.purgeAmbiguous = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-dr") == 0 || strcmp(argv[arg], "--distance-range") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.distanceRange;
-					if (!istr.fail()) 
-					{
-						options.distanceRange++;
-						continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-pd") == 0 || strcmp(argv[arg], "--param-dir") == 0) { //prefix for previously computed param files
-				if (arg + 1 < argc) {
-					++arg;
-					pm_options.paramFolder = argv[arg];
-					continue;
-//					cout << "Session id prefix specified\n";
-				}
-				else 
-				{
-					printHelp(argc, argv, options, pm_options);
-					return 0;
-				}
-			}
-
-			if (strcmp(argv[arg], "-id") == 0 || strcmp(argv[arg], "--indels") == 0) {
-				options.hammingOnly = false;
-				continue;
-			}
-			if (strcmp(argv[arg], "-a") == 0 || strcmp(argv[arg], "--alignment") == 0) {
-				options.dumpAlignment = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-o") == 0 || strcmp(argv[arg], "--output") == 0) {
-				if (arg + 1 == argc) {
-					printHelp(argc, argv, options, pm_options);
-					return 0;
-				}
-				++arg;
-				options.output = argv[arg];
-				continue;
-			}
-			if (strcmp(argv[arg], "-of") == 0 || strcmp(argv[arg], "--output-format") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.outputFormat;
-					if (!istr.fail())
-					{
-						if (options.outputFormat > 3)
-							cerr << "Invalid output format options." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-so") == 0 || strcmp(argv[arg], "--sort-order") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.sortOrder;
-					if (!istr.fail())
-					{
-						if (options.sortOrder > 1)
-							cerr << "Invalid sort order options." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-gn") == 0 || strcmp(argv[arg], "--genome-naming") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.genomeNaming;
-					if (!istr.fail())
-					{
-						if (options.genomeNaming > 1)
-							cerr << "Invalid genome naming options." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-rn") == 0 || strcmp(argv[arg], "--read-naming") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.readNaming;
-					if (!istr.fail())
-					{
-						if (options.readNaming > 2)
-							cerr << "Invalid read naming options." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-pf") == 0 || strcmp(argv[arg], "--position-format") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.positionFormat;
-					if (!istr.fail())
-					{
-						if (options.positionFormat > 1)
-							cerr << "Invalid position format options." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-s") == 0 || strcmp(argv[arg], "--shape") == 0){
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					paramChoosing = false;
-					istr >> options.shape;
-					if (istr.fail())
-						cerr << "Could not parse shape" << endl << endl;
-					else
-					{
-						unsigned ones = 0;
-						unsigned zeros = 0;
-						for(unsigned i = 0; i < length(options.shape); ++i)
-							switch (options.shape[i])
-							{
-								case '0':
-									++zeros;
-									break;
-								case '1':
-									++ones;
-									break;
-								default:
-									cerr <<	"Shape must be a binary string" << endl << endl;
-									printHelp(argc, argv, options, pm_options);
-									return 0;
-							}
-						if (ones == 0 || ones > 20) 
-						{
-							cerr <<	"Invalid Shape" << endl << endl;
-							printHelp(argc, argv, options, pm_options);
-							return 0;
-						}
-
-						if (ones < 7 || ones > 14)
-							cerr <<	"Warning: Shape should contain at least 7 and at most 14 '1's" << endl << endl;
-
-						continue;				
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-oc") == 0 || strcmp(argv[arg], "--overabundance-cut") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.abundanceCut;
-					if (!istr.fail())
-					{
-						if (options.abundanceCut <= 0 || options.abundanceCut > 1)
-							cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-rl") == 0 || strcmp(argv[arg], "--repeat-length") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.repeatLength;
-					if (!istr.fail())
-					{
-						if (options.repeatLength <= 1)
-							cerr << "Repeat length must be a value greater than 1" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-t") == 0 || strcmp(argv[arg], "--threshold") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					paramChoosing = false;
-					istringstream istr(argv[arg]);
-					istr >> options.threshold;
-					if (!istr.fail())
-					{
-						if (options.threshold < 1)
-							cerr << "Threshold must be a value greater than 0" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
-			if (strcmp(argv[arg], "--quality-in-header") == 0) {
-				options.fastaIdQual = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-mq") == 0 || strcmp(argv[arg], "--mapping-quality") == 0) {
-				options.maqMapping = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-nbi") == 0 || strcmp(argv[arg], "--no-below-id") == 0) {
-				options.noBelowIdentity = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-qsl") == 0 || strcmp(argv[arg], "--mq-seed-length") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.artSeedLength;
-					if (!istr.fail()) 
-					{
-						if (options.artSeedLength < 24)
-							cerr << "Minimum seed length is 24" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-smq") == 0 || strcmp(argv[arg], "--seed-mism-quality") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.maxMismatchQualSum;
-					if (!istr.fail()) 
-					{
-						if (options.maxMismatchQualSum < 0  )
-							cerr << "Max seed mismatch quality needs to be 0 or a positive value" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-tmq") == 0 || strcmp(argv[arg], "--total-mism-quality") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.absMaxQualSumErrors;
-					if (!istr.fail()) 
-					{
-						if (options.absMaxQualSumErrors < 0  )
-							cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-#endif
-			if (strcmp(argv[arg], "-lm") == 0 || strcmp(argv[arg], "--low-memory") == 0) {
-				options.lowMemory = true;
-				continue;
-			}
 	
-			if (strcmp(argv[arg], "-tr") == 0 || strcmp(argv[arg], "--trim-reads") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.trimLength;
-					if (!istr.fail()) 
-					{
-						if (options.trimLength < 14)
-							cerr << "Minimum read length is 14" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
+	CommandLineParser parser;
+	string rev = "$Revision$";
+	addVersionLine(parser, "RazerS version 1.0 20090710 [" + rev.substr(11, 4) + "]");
 
-			if (strcmp(argv[arg], "-tl") == 0 || strcmp(argv[arg], "--taboo-length") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					istringstream istr(argv[arg]);
-					istr >> options.tabooLength;
-					if (!istr.fail())
-					{
-						if (options.tabooLength < 1)
-							cerr << "Taboo length must be a value greater than 0" << endl << endl;
-						else
-							continue;
-					}
-				}
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
-				// print help
-				printHelp(argc, argv, options, pm_options, true);
-				return 0;
-			}
-			if (strcmp(argv[arg], "-v") == 0 || strcmp(argv[arg], "--verbose") == 0) {
-				options._debugLevel = max(options._debugLevel, 1);
-				continue;
-			}
-			if (strcmp(argv[arg], "-vv") == 0 || strcmp(argv[arg], "--vverbose") == 0) {
-				options._debugLevel = 3;
-				continue;
-			}
-			if (strcmp(argv[arg], "-V") == 0 || strcmp(argv[arg], "--version") == 0) {
-				options.printVersion = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-mN") == 0 || strcmp(argv[arg], "--match-N") == 0) {
-				options.matchN = true;
-				continue;
-			}
-			if (strcmp(argv[arg], "-ed") == 0 || strcmp(argv[arg], "--error-distr") == 0) {
-				if (arg + 1 == argc) {
-					printHelp(argc, argv, options, pm_options);
-					return 0;
-				}
-				++arg;
-				errorPrbFileName = argv[arg];
-				continue;
-			}
-			cerr << "Unknown option: " << argv[arg] << endl << endl;
-			printHelp(argc, argv, options, pm_options);
-			return 0;
-		} else {
-			// parse file name
-			if (fnameCount == maxFiles) {
-				cerr << "More than " << maxFiles << " input files specified." << endl << endl;
-				printHelp(argc, argv, options, pm_options);
-				return 0;
-			}
-			fname[fnameCount++] = argv[arg];
-		}
-	}
-	if (fnameCount < 2) {
-		if (argc > 1 && !options.printVersion)
-			cerr << "Less than 2 input files specified." << endl << endl;
-		printHelp(argc, argv, options, pm_options);
-		return 0;
-	}
-	if (!options.forward && !options.reverse) { // enable both per default
+	//////////////////////////////////////////////////////////////////////////////
+	// Define options
+	addTitleLine(parser, "***********************************************************");
+	addTitleLine(parser, "*** RazerS - Fast Read Mapping with Sensitivity Control ***");
+	addTitleLine(parser, "***          (c) Copyright 2009 by David Weese          ***");
+	addTitleLine(parser, "***********************************************************");
+	addUsageLine(parser, "[OPTION]... <GENOME FILE> <READS FILE>");
+#ifdef RAZERS_MATEPAIRS
+	addUsageLine(parser, "[OPTION]... <GENOME FILE> <MP-READS FILE1> <MP-READS FILE2>");
+#endif
+	addSection(parser, "Main Options:");
+	addOption(parser, CommandLineOption("f",  "forward",           "only compute forward matches", OptionType::Boolean));
+	addOption(parser, CommandLineOption("r",  "reverse",           "only compute reverse complement matches", OptionType::Boolean));
+	addOption(parser, CommandLineOption("i",  "percent-identity",  "set the percent identity threshold", OptionType::Double | OptionType::Label, 100 - (100.0 * options.errorRate)));
+#ifndef NO_PARAM_CHOOSER
+	addOption(parser, CommandLineOption("rr", "recognition-rate",  "set the percent recognition rate", OptionType::Double | OptionType::Label, 100 - (100.0 * pm_options.optionLossRate)));
+	addOption(parser, addArgumentText(CommandLineOption("pd", "param-dir",         "folder containing user-computed parameter files (optional)", OptionType::String | OptionType::Label), "DIR"));
+#endif
+	addOption(parser, CommandLineOption("id", "indels",            "allow indels (default: mismatches only)", OptionType::Boolean));
+#ifdef RAZERS_MATEPAIRS
+	addOption(parser, CommandLineOption("ll", "library-length",    "mate-pair library length", OptionType::Int | OptionType::Label, options.libraryLength));
+	addOption(parser, CommandLineOption("le", "library-error",     "mate-pair library length tolerance", OptionType::Int | OptionType::Label, options.libraryError));
+#endif
+	addOption(parser, CommandLineOption("m",  "max-hits",          "output only NUM of the best hits", OptionType::Int | OptionType::Label, options.maxHits));
+	addOption(parser, CommandLineOption("",   "unique",            "output only unique best matches (-m 1 -dr 0 -pa)", OptionType::Boolean));
+	addOption(parser, CommandLineOption("tr", "trim-reads",        "trim reads to given length (default off)", OptionType::Int | OptionType::Label));
+	addOption(parser, addArgumentText(CommandLineOption("o",  "output",            "change output filename (default <READS FILE>.result)", OptionType::String), "FILE"));
+	addOption(parser, CommandLineOption("v",  "verbose",           "verbose mode", OptionType::Boolean));
+	addOption(parser, CommandLineOption("vv", "vverbose",          "very verbose mode", OptionType::Boolean));
+	addSection(parser, "Output Format Options:");
+	addOption(parser, CommandLineOption("a",  "alignment",         "dump the alignment for each match", OptionType::Boolean));
+	addOption(parser, CommandLineOption("pa", "purge-ambiguous",   "purge reads with more than max-hits best matches", OptionType::Boolean));
+	addOption(parser, CommandLineOption("dr", "distance-range",    "only consider matches with at most NUM more errors compared to the best (default output all)", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("of", "output-format",     "set output format", OptionType::Int | OptionType::Label, options.outputFormat));
+	addHelpLine(parser, "0 = Razer format");
+	addHelpLine(parser, "1 = enhanced Fasta format");
+	addHelpLine(parser, "2 = Eland format");
+	addHelpLine(parser, "3 = GFF format");
+	addOption(parser, CommandLineOption("gn", "genome-naming",     "select how genomes are named", OptionType::Int | OptionType::Label, options.genomeNaming));
+	addHelpLine(parser, "0 = use Fasta id");
+	addHelpLine(parser, "1 = enumerate beginning with 1");
+	addOption(parser, CommandLineOption("rn", "read-naming",       "select how reads are named", OptionType::Int | OptionType::Label, options.readNaming));
+	addHelpLine(parser, "0 = use Fasta id");
+	addHelpLine(parser, "1 = enumerate beginning with 1");
+	addHelpLine(parser, "2 = use the read sequence (only for short reads!)");
+	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
+	addHelpLine(parser, "0 = 1. read number, 2. genome position");
+	addHelpLine(parser, "1 = 1. genome position, 2. read number");
+	addOption(parser, CommandLineOption("pf", "position-format",   "select begin/end position numbering", OptionType::Int | OptionType::Label, options.sortOrder));
+	addHelpLine(parser, "0 = gap space");
+	addHelpLine(parser, "1 = position space");
+	addSection(parser, "Filtration Options:");
+	addOption(parser, addArgumentText(CommandLineOption("s",  "shape",             "set k-mer shape", OptionType::String | OptionType::Label, options.shape), "BITSTRING"));
+	addOption(parser, CommandLineOption("t",  "threshold",         "set minimum k-mer threshold", OptionType::Int | OptionType::Label, options.threshold));
+	addOption(parser, CommandLineOption("oc", "overabundance-cut", "set k-mer overabundance cut ratio", OptionType::Int | OptionType::Label, options.abundanceCut));
+	addOption(parser, CommandLineOption("rl", "repeat-length",     "set simple-repeat length threshold", OptionType::Int | OptionType::Label, options.repeatLength));
+	addOption(parser, CommandLineOption("tl", "taboo-length",      "set taboo length", OptionType::Int | OptionType::Label, options.tabooLength));
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
+	addSection(parser, "Mapping Quality Options:");
+	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
+	addOption(parser, CommandLineOption("nbi","no-below-id",       "do not report matches with seed identity < percent id", OptionType::Boolean));
+	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
+#endif
+	addSection(parser, "Verification Options:");
+	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
+	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
+
+	bool stop = !parse(parser, argc, argv, cerr);
+	
+	//////////////////////////////////////////////////////////////////////////////
+	// Extract options
+	getOptionValueLong(parser, "forward", options.forward);
+	getOptionValueLong(parser, "reverse", options.reverse);
+	getOptionValueLong(parser, "percent-identity", options.errorRate);
+#ifndef NO_PARAM_CHOOSER
+	getOptionValueLong(parser, "recognition-rate", pm_options.optionLossRate);
+	getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
+#endif
+	getOptionValueLong(parser, "indels", options.hammingOnly);
+	options.hammingOnly = !options.hammingOnly;
+#ifdef RAZERS_MATEPAIRS
+	getOptionValueLong(parser, "library-length", options.libraryLength);
+	getOptionValueLong(parser, "library-error", options.libraryError);
+#endif
+	getOptionValueLong(parser, "max-hits", options.maxHits);
+	getOptionValueLong(parser, "purge-ambiguous", options.purgeAmbiguous);
+	getOptionValueLong(parser, "distance-range", options.distanceRange);
+	if (isSetLong(parser, "distance-range")) options.distanceRange++;
+	getOptionValueLong(parser, "alignment", options.dumpAlignment);
+	getOptionValueLong(parser, "output", options.output);
+	getOptionValueLong(parser, "output-format", options.outputFormat);
+	getOptionValueLong(parser, "sort-order", options.sortOrder);
+	getOptionValueLong(parser, "genome-naming", options.genomeNaming);
+	getOptionValueLong(parser, "read-naming", options.readNaming);
+	getOptionValueLong(parser, "position-format", options.positionFormat);
+	getOptionValueLong(parser, "shape", options.shape);
+	getOptionValueLong(parser, "threshold", options.threshold);
+	getOptionValueLong(parser, "overabundance-cut", options.abundanceCut);
+	getOptionValueLong(parser, "repeat-length", options.repeatLength);
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
+	getOptionValueLong(parser, "mapping-quality", options.maqMapping);
+	getOptionValueLong(parser, "no-below-id", options.noBelowIdentity);
+	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
+	getOptionValueLong(parser, "seed-mism-quality", options.maxMismatchQualSum);
+	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
+	getOptionValueLong(parser, "low-memory", options.lowMemory);
+#endif
+	getOptionValueLong(parser, "trim-reads", options.trimLength);
+	getOptionValueLong(parser, "taboo-length", options.tabooLength);
+	getOptionValueLong(parser, "match-N", options.matchN);
+	getOptionValueLong(parser, "error-distr", errorPrbFileName);
+	if (isSetLong(parser, "help")) return 0;	// print help and exit
+	if (isSetLong(parser, "verbose")) options._debugLevel = max(options._debugLevel, 1);
+	if (isSetLong(parser, "vverbose")) options._debugLevel = max(options._debugLevel, 3);
+	if (isSetLong(parser, "unique"))
+	{
+		options.maxHits = 1;
+		options.distanceRange = 1;
+		options.purgeAmbiguous = true;
+	}	
+	if (!options.forward && !options.reverse)  // enable both per default
+	{
 		options.forward = true;
 		options.reverse = true;
 	}
+	appendValue(genomeFileNames, getArgumentValue(parser, 0));
+	for (unsigned i = 1; i < argumentCount(parser) && i < maxFiles; ++i)
+		appendValue(readFileNames, getArgumentValue(parser, i), Generous());
 
-	if (fnameCount == 2)
-		options.libraryLength = -1;	// only 1 readset -> disable mate-pair mapping
-	
-	if (options.printVersion)
-		printVersion();
-		
+	//////////////////////////////////////////////////////////////////////////////
+	// Check options
+	if ((options.errorRate < 50 || options.errorRate > 100) && (stop = true))
+		cerr << "Percent identity threshold must be a value between 50 and 100" << endl;
+	if ((pm_options.optionLossRate < 80 || pm_options.optionLossRate > 100) && (stop = true))
+		cerr << "Recognition rate must be a value between 80 and 100" << endl;
+#ifdef RAZERS_MATEPAIRS
+	if ((options.libraryLength <= 0) && (stop = true))
+		cerr << "Library length must be a value greater 0" << endl;
+	if ((options.libraryError <= 0) && (stop = true))
+		cerr << "Library error must be a value greater or equal 0" << endl;
+#endif
+	if ((options.maxHits < 1) && (stop = true))
+		cerr << "Maximum hits threshold must be greater than 0" << endl;
+	if ((options.outputFormat > 3) && (stop = true))
+		cerr << "Invalid output format option." << endl;
+	if ((options.sortOrder > 1) && (stop = true))
+		cerr << "Invalid sort order options." << endl;
+	if ((options.genomeNaming > 1) && (stop = true))
+		cerr << "Invalid genome naming options." << endl;
+	if ((options.readNaming > 2) && (stop = true))
+		cerr << "Invalid read naming options." << endl;
+	if ((options.positionFormat > 1) && (stop = true))
+		cerr << "Invalid position format options." << endl;
+	if ((options.threshold < 1) && (stop = true))
+		cerr << "Threshold must be a value greater than 0" << endl;
+	if (isSetLong(parser, "shape"))
+	{
+		unsigned ones = 0;
+		unsigned zeros = 0;
+		for(unsigned i = 0; i < length(options.shape); ++i)
+			switch (options.shape[i])
+			{
+				case '0':
+					++zeros;
+					break;
+				case '1':
+					++ones;
+					break;
+				default:
+					cerr << "Shape must be a binary string" << endl;
+					stop = true;
+					i = length(options.shape);
+			}
+		if ((ones == 0 || ones > 20) && !stop) 
+		{
+			cerr << "Invalid Shape" << endl;
+			stop = true;
+		}
+
+		if ((ones < 7 || ones > 14) && !stop)
+			cerr << "Warning: Shape should contain at least 7 and at most 14 '1's" << endl;
+	}
+	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
+		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;
+	if ((options.repeatLength <= 1) && (stop = true))
+		cerr << "Repeat length must be a value greater than 1" << endl;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
+	if ((options.artSeedLength < 24) && (stop = true))
+		cerr << "Minimum seed length is 24" << endl;
+	if ((options.maxMismatchQualSum < 0) && (stop = true))
+		cerr << "Max seed mismatch quality needs to be 0 or a positive value" << endl;
+	if ((options.absMaxQualSumErrors < 0) && (stop = true))
+		cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl;
+#endif
+	if ((options.trimLength != 0 && options.trimLength < 14) && (stop = true))
+		cerr << "Minimum read length is 14" << endl;
+	if ((options.tabooLength < 1) && (stop = true))
+		cerr << "Taboo length must be a value greater than 0" << endl;
+	if (argumentCount(parser) == 2)
+		options.libraryLength = -1;		// only 1 readset -> disable mate-pair mapping
+	if ((argumentCount(parser) > maxFiles) && (stop = true))
+		cerr << "More than " << maxFiles << " input files specified." << endl;
+	if ((argumentCount(parser) < 2) && (stop = true))
+		if (argc > 1)
+			cerr << "Less than 2 input files specified." << endl;
+		else
+		{
+			shortHelp(parser, cerr);	// print short help and exit
+			return 0;
+		}
+
+	options.errorRate = (100.0 - options.errorRate) / 100.0;
+	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
+	if (stop)
+	{
+		cerr << "Exiting ..." << endl;
+		return RAZERS_INVALID_OPTIONS;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// get read length
-	int readLength = estimateReadLength(fname[1]);
+	int readLength = estimateReadLength(toCString(readFileNames[0]));
 	if (readLength == RAZERS_READS_FAILED)
 	{
-		::std::cerr << "Failed to open reads file " << fname[1] << ::std::endl;
-		return 0;
+		cerr << "Failed to open reads file " << readFileNames[0] << endl;
+		cerr << "Exiting ..." << endl;
+		return RAZERS_READS_FAILED;
 	}
 	if (readLength == 0) {
-		::std::cerr << "Failed to read the first read sequence.";
-		return 0;
+		cerr << "Failed to read the first read sequence." << endl;
+		cerr << "Exiting ..." << endl;
+		return RAZERS_READS_FAILED;
 	}
 
 	if (options.trimLength > readLength)
 		options.trimLength = readLength;
 	
 #ifndef NO_PARAM_CHOOSER
-	if (paramChoosing)
+	if (!(isSetLong(parser, "shape") || isSetLong(parser, "threshold")))
 	{
-		if(options.lowMemory) pm_options.maxWeight = 13;
+		if (options.lowMemory) pm_options.maxWeight = 13;
 		pm_options.verbose = (options._debugLevel >= 1);
 		pm_options.optionErrorRate = options.errorRate;
 		if (options.hammingOnly)
@@ -866,11 +516,12 @@ int main(int argc, const char *argv[])
 
 		if(length(pm_options.paramFolder) == 0) 
 		{
-			pm_options.paramFolderPath = argv[0];
-			size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-			if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-			if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
-			pm_options.paramFolderPath.erase(lastPos); 
+			string razersFolder = argv[0];
+			size_t lastPos = razersFolder.find_last_of('/') + 1;
+			if (lastPos == razersFolder.npos + 1) lastPos = razersFolder.find_last_of('\\') + 1;
+			if (lastPos == razersFolder.npos + 1) lastPos = 0;
+			razersFolder.erase(lastPos); 
+			pm_options.paramFolderPath = razersFolder;
 		}
 		if (options.trimLength > 0) readLength = options.trimLength;
 		if (readLength > 0)
@@ -891,7 +542,8 @@ int main(int argc, const char *argv[])
 		} else
 		{
 			cerr << "Failed to load reads" << endl;
-			return 0;
+			cerr << "Exiting ..." << endl;
+			return RAZERS_READS_FAILED;
 		}
 	}
 #endif	
@@ -900,11 +552,8 @@ int main(int argc, const char *argv[])
 	tbb::task_scheduler_init scheduler;
 #endif
 
-	int result = mapReads(fname[0], fname + 1, errorPrbFileName.c_str(), options);
-	if (result == RAZERS_INVALID_SHAPE) 
-	{
-		printHelp(argc, argv, options, pm_options);
-		return 0;
-	}
+	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
+	if (result != 0) 
+		cerr << "Exiting ..." << endl;
 	return result;
 }

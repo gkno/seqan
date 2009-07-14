@@ -88,16 +88,16 @@ struct ParamChooserOptions
 	TFloat optionProbINSERT;
 	TFloat optionProbDELETE;
 
-	::std::string fparams;
-	::std::string fgparams;
+	CharString fparams;
+	CharString fgparams;
 
 	bool fnameCount0;
 	bool fnameCount1;
 	bool prefixCount;
 	const char *fname[2];
 	const char *fprefix[1];
-	::std::string paramFolderPath;
-	const char *paramFolder;
+	CharString paramFolderPath;
+	CharString paramFolder;
 	const char *shapeFile;
 
 	int qualityCutoff;
@@ -1074,10 +1074,11 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 	}
 #endif
 
+	pm_options.fgparams = pm_options.paramFolderPath;
 	if( length(pm_options.paramFolder) > 0)
-		pm_options.fgparams = pm_options.paramFolderPath + pm_options.paramFolder;
+		append(pm_options.fgparams, pm_options.paramFolder);
 	else
-		pm_options.fgparams = pm_options.paramFolderPath + "gapped_params/";
+		append(pm_options.fgparams, "gapped_params/");
 
 	
 	if(pm_options.optionProbINSERT <= epsilon && pm_options.optionProbDELETE <= epsilon)

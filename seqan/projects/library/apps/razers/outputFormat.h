@@ -496,14 +496,14 @@ template <
 >
 void dumpMatches(
 	TMatches &matches,							// forward/reverse matches
-	TGenomeNames const &genomeIDs,				// Read names (read from Fasta file, currently unused)
+	TGenomeNames const &genomeIDs,				// Genome names (read from Fasta file, currently unused)
 	StringSet<CharString> &genomeFileNameList,	// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > &gnoToFileMap, //map to retrieve genome filename and sequence number within that file
 	TReads const &reads,
-	TCounts & stats,						// Match statistics (possibly empty)
+	TCounts & stats,							// Match statistics (possibly empty)
 	TReadNames const &readIDs,					// Read names (read from Fasta file, currently unused)
-	::std::string readFName,					// read name (e.g. "reads.fa"), used for file/read naming
-	::std::string errorPrbFileName,
+	CharString readFName,					// read name (e.g. "reads.fa"), used for file/read naming
+	CharString errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TMatches>::Type		TMatch;
@@ -545,7 +545,7 @@ void dumpMatches(
 
 	// load Genome sequences for alignment dumps
 	TGenomeSet genomes;
-	if (options.dumpAlignment || !errorPrbFileName.empty())
+	if (options.dumpAlignment || !empty(errorPrbFileName))
 		if (!loadGenomes(genomes, genomeFileNameList)) {
 			::std::cerr << "Failed to load genomes" << ::std::endl;
 			options.dumpAlignment = false;
@@ -561,10 +561,12 @@ void dumpMatches(
 		++gzeros;
 
 	// remove the directory prefix of readFName
-	size_t lastPos = readFName.find_last_of('/') + 1;
-	if (lastPos == readFName.npos) lastPos = readFName.find_last_of('\\') + 1;
-	if (lastPos == readFName.npos) lastPos = 0;
-	::std::string readName = readFName.substr(lastPos);
+	::std::string _readName;
+	assign(_readName, readFName);
+	size_t lastPos = _readName.find_last_of('/') + 1;
+	if (lastPos == _readName.npos) lastPos = _readName.find_last_of('\\') + 1;
+	if (lastPos == _readName.npos) lastPos = 0;
+	CharString readName = _readName.substr(lastPos);
 	
 
 	Align<String<Dna5>, ArrayGaps> align;
@@ -575,13 +577,14 @@ void dumpMatches(
 	resize(rows(align), 2);
 
 	::std::ofstream file;
-	::std::ostringstream fileName;
-	if (*options.output != 0)
-		fileName << options.output;
-	else
-		fileName << readFName << ".result";
+	CharString fileName = options.output;
+	if (empty(fileName))
+	{
+		fileName = readFName;
+		append(fileName, ".result");
+	}
 
-	file.open(fileName.str().c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::trunc);
 	if (!file.is_open()) {
 		::std::cerr << "Failed to open output file" << ::std::endl;
 		return;
@@ -1075,9 +1078,9 @@ void dumpMatches(
 	file.close();
 
 	// get empirical error distribution
-	if (!errorPrbFileName.empty() && maxReadLength > 0)
+	if (!empty(errorPrbFileName) && maxReadLength > 0)
 	{
-		file.open(errorPrbFileName.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
+		file.open(toCString(errorPrbFileName), ::std::ios_base::out | ::std::ios_base::trunc);
 		if (file.is_open())
 		{
 			String<long double> posError;

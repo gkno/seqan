@@ -627,12 +627,13 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		TIter itEnd = end(bitmap, Standard());
 
 		TSize ones = 0;
-		for(; it != itEnd && *it == '1' ; ++it)
-			++ones;
+		for(; it != itEnd && *it == '0' ; ++it) ;
+		for(; it != itEnd && *it == '1' ; ++it)	++ones;
+		for(; it != itEnd && *it == '0' ; ++it) ;
 
 		resize(me, ones);
 
-		return length(bitmap) == ones;
+		return it == itEnd;
 	}
 
 	template <typename TShapeString, typename TValue, unsigned q>

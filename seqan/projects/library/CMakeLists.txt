@@ -40,10 +40,11 @@ include_directories (${SEQAN_BASE})
 # Make sure the compiler can find object files from the TBB library. 
 link_directories (${SEQAN_BASE}/lib)
 
-#set (HEADERS recognitionRateDP.h readSimulator.h razers.h razers_matepairs.h paramChooser.h)
-#set (RAZERS_HEADERS razers_parallel.h outputFormat.h mmap_fasta.h ${HEADERS})
-#list (SORT HEADERS)
-#list (SORT RAZERS_HEADERS)
+set (RAZERS_PREFIX apps/razers/)
+set (HEADERS ${RAZERS_PREFIX}recognitionRateDP.h ${RAZERS_PREFIX}readSimulator.h ${RAZERS_PREFIX}razers.h ${RAZERS_PREFIX}razers_matepairs.h ${RAZERS_PREFIX}paramChooser.h)
+set (RAZERS_HEADERS ${RAZERS_PREFIX}razers_parallel.h ${RAZERS_PREFIX}outputFormat.h ${RAZERS_PREFIX}mmap_fasta.h ${HEADERS})
+list (SORT HEADERS)
+list (SORT RAZERS_HEADERS)
 
 add_executable (dfi apps/dfi/dfi.cpp)
 add_executable (paramChooser apps/razers/paramChooser.cpp ${HEADERS})

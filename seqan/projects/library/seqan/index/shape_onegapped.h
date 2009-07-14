@@ -277,6 +277,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		me.gapLen = 0;
 		me.blockLen2 = 0;
 
+		for(; it != itEnd && *it == '0' ; ++it) ;
+
 		for(; it != itEnd && *it == '1' ; ++it)
 			++me.blockLen1;
 
@@ -285,6 +287,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		for(; it != itEnd && *it == '1' ; ++it)
 			++me.blockLen2;
+
+		for(; it != itEnd && *it == '0' ; ++it) ;
 
 		me.factor1 = _intPow((THValue)ValueSize<TValue>::VALUE, weight(me) - 1);
 		me.factor2 = _intPow((THValue)ValueSize<TValue>::VALUE, me.blockLen2);

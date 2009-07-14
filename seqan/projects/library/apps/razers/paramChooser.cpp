@@ -314,7 +314,7 @@ int main(int argc, const char *argv[])
 			}
 		}
 	}
-        pm_options.optionErrorRate += epsilon;
+	pm_options.optionErrorRate += epsilon;
 	pm_options.optionLossRate += epsilon;
 	
 //	pm_options.verbose = true;
@@ -323,11 +323,12 @@ int main(int argc, const char *argv[])
 
 	if(length(pm_options.paramFolder) == 0) 
 	{
-		pm_options.paramFolderPath = argv[0];
-		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
-		pm_options.paramFolderPath.erase(lastPos);
+		string appFolder = argv[0];
+		size_t lastPos = appFolder.find_last_of('/') + 1;
+		if (lastPos == appFolder.npos + 1) lastPos = appFolder.find_last_of('\\') + 1;
+		if (lastPos == appFolder.npos + 1) lastPos = 0;
+		appFolder.erase(lastPos);
+		pm_options.paramFolderPath = appFolder;
 	}
 
 	pm_options.verbose = true;
