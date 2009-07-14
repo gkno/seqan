@@ -75,7 +75,7 @@ using namespace seqan;
 		{
 			resize(dsLen, length(ds) - 1, Exact());
 			for (unsigned i = 1; i < length(ds); ++i)
-				dsLen[i] = ds[i] - ds[i - 1];
+				dsLen[i - 1] = ds[i] - ds[i - 1];
 		}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
