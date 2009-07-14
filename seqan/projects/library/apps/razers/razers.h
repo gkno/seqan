@@ -792,7 +792,7 @@ void compactMatches(TMatches &matches, TCounts &
 #endif
 	, RazerSOptions<TSpec> &options, 
 	TSwift &
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
+#if defined RAZERS_DIRECT_MAQ_MAPPING || defined RAZERS_MASK_READS
 		swift
 #endif
 	)
