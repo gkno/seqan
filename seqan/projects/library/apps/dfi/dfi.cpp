@@ -31,6 +31,7 @@
 using namespace std;
 using namespace seqan;
 
+#define DEBUG_ENTROPY
 
 //////////////////////////////////////////////////////////////////////////////
 // Custom frequency predicates
@@ -125,7 +126,8 @@ using namespace seqan;
 		PredEntropy(double _maxEntropy, TDataSet const &):
 			maxEntropy(_maxEntropy) {}
 			
-		inline bool operator()(_DFIEntry const &entry) const 
+		static inline double
+		getEntropy(_DFIEntry const &entry)
 		{
 			int sum = 0;
 			double H = 0;
@@ -142,8 +144,12 @@ using namespace seqan;
 					H += freq * (log(freq) - lSum);
 				}
 			H /= -sum * log((double)length(entry.freq));	// normalize by datasets (divide by log m)
-		
-			return H <= maxEntropy;
+			return H;
+		}
+			
+		inline bool operator()(_DFIEntry const &entry) const 
+		{
+			return getEntropy(entry) <= maxEntropy;
 		}
 	};
 
@@ -249,7 +255,26 @@ int runDFI(
 
 	// set index partition of sequences into datasets
 	index.ds = ds;
+
+#ifdef DEBUG_ENTROPY	
+	// database lookup table
+	typedef typename Infix< typename Fibre<TIndex, Fibre_SA>::Type const >::Type TOccs;
+	typedef typename Iterator<TOccs, Standard>::Type TOccIter;
+	String<unsigned>	dbLookup;
+	String<bool>		seen;
+	_DFIEntry			entry;
+	PredEntropy			entrp(0, mySet);
+	
+	resize(dbLookup, length(mySet));
+	resize(seen, length(mySet));
+	resize(entry.freq, length(ds) - 1);
 	TIter it(index);
+	for (unsigned d = 0, i = 0; i < length(mySet); ++i)
+	{
+		while (ds[d + 1] == i) ++d;
+		dbLookup[i] = d;
+	}
+#endif
 
 	goBegin(it);
 	while (!atEnd(it)) 
@@ -259,6 +284,29 @@ int runDFI(
 //		for(unsigned l = parentRepLength(it) + 1; l <= len; ++l)
 		unsigned l = len; 
 		{
+#ifdef DEBUG_ENTROPY
+			// count frequencies (debug)
+			TOccs occs = getOccurrences(it);
+			TOccIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+			arrayFill(begin(seen, Standard()), end(seen, Standard()), false);
+			arrayFill(begin(entry.freq, Standard()), end(entry.freq, Standard()), 0);
+			for (; oc != ocEnd; ++oc)
+			{
+				unsigned seqNo = getSeqNo(*oc, stringSetLimits(index));
+				if (!seen[seqNo])
+				{
+					seen[seqNo] = true;
+					++entry.freq[dbLookup[seqNo]];
+				}
+			}
+				
+			double H = entrp.getEntropy(entry);
+			if (H <= 0.0) H = 0.0;
+			cout << left << setw(14) << H << "[";
+			for (unsigned i = 0; i < length(entry.freq); ++i)
+				cout << right << setw(6) << entry.freq[i];
+			cout << "]      ";
+#endif
 			cout << infix(
 				mySet[getSeqNo(lPos)], 
 				getSeqOffset(lPos),
