@@ -330,7 +330,7 @@ int main(int argc, const char *argv[])
 	double optionEntropy = 0;
 		
 	CommandLineParser parser;
-	string rev = "$Revision 0001 $";
+	string rev = "$Revision$";
 	addVersionLine(parser, "DFI version 2.0 20090715 [" + rev.substr(11, 4) + "]");
 
 	//////////////////////////////////////////////////////////////////////////////
