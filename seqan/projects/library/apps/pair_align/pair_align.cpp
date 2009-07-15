@@ -30,7 +30,7 @@ using namespace seqan;
 
 inline void
 _addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 4564 $";
+	::std::string rev = "$Revision: 4566 $";
 	addVersionLine(parser, "Version 1.0 (15. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
@@ -244,9 +244,10 @@ int main(int argc, const char *argv[]) {
 	CommandLineParser parser;
 	_addVersion(parser);
 	
-	addTitleLine(parser, "**********************************");
-	addTitleLine(parser, "* Pairwise alignment - PairAlign *");
-	addTitleLine(parser, "**********************************");
+	addTitleLine(parser, "***************************************");
+	addTitleLine(parser, "* Pairwise alignment - PairAlign      *");
+	addTitleLine(parser, "* (c) Copyright 2009 by Tobias Rausch *");
+	addTitleLine(parser, "***************************************");
 
 	addUsageLine(parser, "-s <FASTA sequence file> [Options]");
 
