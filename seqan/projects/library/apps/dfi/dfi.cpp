@@ -268,7 +268,6 @@ int runDFI(
 	resize(dbLookup, length(mySet));
 	resize(seen, length(mySet));
 	resize(entry.freq, length(ds) - 1);
-	TIter it(index);
 	for (unsigned d = 0, i = 0; i < length(mySet); ++i)
 	{
 		while (ds[d + 1] == i) ++d;
@@ -276,6 +275,7 @@ int runDFI(
 	}
 #endif
 
+	TIter it(index);
 	goBegin(it);
 	while (!atEnd(it)) 
 	{
