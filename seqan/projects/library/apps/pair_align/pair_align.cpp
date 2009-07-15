@@ -17,7 +17,9 @@ Lesser General Public License for more details.
 
 #include <seqan/basic.h>
 #include <seqan/graph_align.h>
+#include <seqan/modifier.h>
 #include "../seqan_tcoffee/rna_alphabet.h"
+#include "../razers/mmap_fasta.h"
 #include "seqan/misc/misc_cmdparser.h"
 
 #include <iostream>
@@ -33,6 +35,30 @@ _addVersion(CommandLineParser& parser) {
 	::std::string rev = "$Revision: 4566 $";
 	addVersionLine(parser, "Version 1.0 (15. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template <typename TSeqSet, typename TNameSet>
+bool _loadSequences(TSeqSet& sequences, 
+					TNameSet& fastaIDs,
+					const char *fileName)
+{
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
+	AutoSeqFormat format;
+	guessFormat(multiFasta.concat, format);	
+	split(multiFasta, format);
+	unsigned seqCount = length(multiFasta);
+	resize(sequences, seqCount, Exact());
+	resize(fastaIDs, seqCount, Exact());
+	for(unsigned i = 0; i < seqCount; ++i) 
+	{
+		assignSeqId(fastaIDs[i], multiFasta[i], format);
+		assignSeq(sequences[i], multiFasta[i], format);
+	}
+	return (seqCount > 0);
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +78,7 @@ pairwise_align(TScore const& sc,
 	typedef String<TAlphabet> TSequence;
 	StringSet<TSequence, Owner<> > sequenceSet;
 	StringSet<String<char> > sequenceNames;
-	_loadSequences(seqfile, sequenceSet, sequenceNames);
+	_loadSequences(sequenceSet, sequenceNames, seqfile.c_str());
 
 	// Fix low and high diagonal.
 	low = _max(low, -1 * (int) length(sequenceSet[1]));
