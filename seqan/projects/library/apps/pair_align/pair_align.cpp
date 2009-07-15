@@ -18,6 +18,7 @@ Lesser General Public License for more details.
 #include <seqan/basic.h>
 #include <seqan/graph_align.h>
 #include "../seqan_tcoffee/rna_alphabet.h"
+#include "seqan/misc/misc_cmdparser.h"
 
 #include <iostream>
 #include <fstream>
@@ -25,72 +26,12 @@ Lesser General Public License for more details.
 
 using namespace seqan;
 
-
 //////////////////////////////////////////////////////////////////////////////////
 
-void
-printVersion() {
-	::std::cerr << "*********************************************" << ::std::endl;
-	::std::cerr << "* Pairwise alignment                        *" << ::std::endl;
-	::std::cerr << "*                                           *" << ::std::endl;
-	::std::cerr << "* PairAlign                                 *" << ::std::endl;
-	::std::cerr << "* Version: 1.0   (07. July 2009)            *" << ::std::endl;
-	::std::cerr << "*********************************************" << ::std::endl;
-	::std::cerr << ::std::endl;
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-void 
-printHelp() {
-	::std::cerr <<  "Usage: pair_align -seq <FASTA Sequence File> [Options]\n" << ::std::endl;
-	// Main options
-	::std::cerr << "\nMain Options\n------------" << ::std::endl;
-	::std::cerr <<  "-seq <FASTA Sequence File>" << ::std::endl;
-	::std::cerr <<  "/* File with two sequences in FASTA format. */" << ::std::endl;
-	::std::cerr <<  "-alphabet [protein | dna | rna]" << ::std::endl;
-	::std::cerr <<  "/* Sequence alphabet, default is protein. */" << ::std::endl;
-	::std::cerr <<  "-h" << ::std::endl;
-	::std::cerr <<  "/* This help screen. */" << ::std::endl;
-	::std::cerr <<  "-method [nw | gotoh | sw]" << ::std::endl;
-	::std::cerr <<  "/* Alignment method, default is gotoh. */" << ::std::endl;
-	::std::cerr <<  "-outfile <Alignment Filename>" << ::std::endl;
-	::std::cerr <<  "/* Name of the output file, default is out.fasta. */" << ::std::endl;
-	::std::cerr <<  "-output [fasta | msf]" << ::std::endl;
-	::std::cerr <<  "/* Output format, default is fasta. */" << ::std::endl;
-	// Scoring
-	::std::cerr <<  "\nScoring Options\n------------" << ::std::endl;
-	::std::cerr <<  "-gop <Number>" << ::std::endl;
-	::std::cerr <<  "/* Gap open penalty, default is -11. */" << ::std::endl;
-	::std::cerr <<  "-gex <Number>" << ::std::endl;
-	::std::cerr <<  "/* Gap extension penalty, default is -1. */" << ::std::endl;
-	::std::cerr <<  "-matrix <Score-Matrix File>" << ::std::endl;
-	::std::cerr <<  "/* Specifies a score-matrix file, default is Blosum62. */" << ::std::endl;
-	::std::cerr <<  "-msc <Number>" << ::std::endl;
-	::std::cerr <<  "/* Match score for Dna / Rna alphabet, default is 5. */" << ::std::endl;
-	::std::cerr <<  "-mmsc <Number>" << ::std::endl;
-	::std::cerr <<  "/* Mismatch penalty for Dna / Rna alphabet, default is -4. */" << ::std::endl;
-	// Banded alignment
-	::std::cerr <<  "\nBanded Alignment Options (only nw and gotoh)\n------------" << ::std::endl;
-	::std::cerr <<  "-low <Number>" << ::std::endl;
-	::std::cerr <<  "/* Lower diagonal (has to be greater than the negative length of the second string). */" << ::std::endl;
-	::std::cerr <<  "-high <Number>" << ::std::endl;
-	::std::cerr <<  "/* Upper diagonal (has to be smaller than the length of the first string). */" << ::std::endl;
-	// Alignment configuration
-	::std::cerr <<  "\nAlignment configuration\n------------" << ::std::endl;
-	::std::cerr <<  "-config [true | false], [true | false], [true | false], [true | false]" << ::std::endl;
-	::std::cerr <<  "/* Firt value indicates whether the first row of the dynamic programming matrix is initialized with 0's. Second row indicates whether the left side is initialized with 0's. Third value indicates whether the maximum is searched in the whole last column. Fourth value indicates whether the maximum is searched in the whole last row. Default is false, false, false, false. */" << ::std::endl;
-	
-
-	::std::cerr <<  "\n\n\nExamples\n------------" << ::std::endl;
-	::std::cerr <<  "\nProtein Alignment:" << ::std::endl;
-	::std::cerr <<  "\t./pair_align -seq seq.fasta" << ::std::endl;
-	::std::cerr <<  "\t./pair_align -seq seq.fasta -method nw" << ::std::endl;
-	::std::cerr <<  "\nDna Alignment:" << ::std::endl;
-	::std::cerr <<  "\t./pair_align -seq seq.fasta -alphabet dna" << ::std::endl;
-	::std::cerr <<  "\nLocal Alignment:" << ::std::endl;
-	::std::cerr <<  "\t./pair_align -seq seq.fasta -method sw" << ::std::endl;
-
+inline void
+_addVersion(CommandLineParser& parser) {
+	::std::string rev = "$Revision: 4559 $";
+	addVersionLine(parser, "Version 1.0 (07. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
 
@@ -130,38 +71,6 @@ pairwise_align(TScore const& sc,
 		if (method == 0) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), low, high, BandedNeedlemanWunsch());
 		else if (method == 1) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), low, high, BandedGotoh());
 	}
-
-	
-	//// Debug options
-	//std::cout << "Seq1: " << sequenceSet[0] << std::endl;
-	//std::cout << "Seq2: " << sequenceSet[1] << std::endl;
-	//std::cout << "Scoring parameters:" << std::endl;
-	//std::cout << "*Gap opening: " << scoreGapOpen(sc) << std::endl;
-	//std::cout << "*Gap extension: " << scoreGapExtend(sc) << std::endl;
-	//std::cout << "*Scoring matrix: " << std::endl;
-	//unsigned int alphSize = ValueSize<TAlphabet>::VALUE;
-	//std::cout << "   ";
-	//for(unsigned int col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
-	//std::cout << std::endl;
-	//for(unsigned int row = 0; row<alphSize; ++row) {
-	//	for(unsigned int col = 0; col<alphSize; ++col) {
-	//		if (col == 0) std::cout << TAlphabet(row) << ": ";
-	//		std::cout << score(sc, TAlphabet(row), TAlphabet(col));
-	//		if (col < alphSize - 1) std::cout << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << std::endl;
-	//if (method == 0) std::cout << "Method: NeedlemanWunsch" << std::endl;
-	//if (method == 1) std::cout << "Method: Gotoh" << std::endl;
-	//if (method == 2) std::cout << "Method: SmithWaterman" << std::endl;
-	//std::cout << "Output file: " << outfile << std::endl;
-	//if (outputFormat == 0) std::cout << "Output format: Fasta" << std::endl;
-	//if (outputFormat == 1) std::cout << "Output format: Msf" << std::endl;
-	//if (banded) std::cout << "Alignment bands: " << low << ',' << high << std::endl;
-	//if ((method == 0) || (method == 1)) std::cout << "AlignConfig<" << __myInitTop(TAlignConfig()) << ',' << __myInitLeft(TAlignConfig()) << ',' << __myInitRight(TAlignConfig()) << ',' << __myInitBottom(TAlignConfig()) << '>' << std::endl;
-	//std::cout << "Alignment: " << std::endl;
-	//std::cout << gAlign << std::endl;
 	
 	// Alignment output
 	std::cout << "Alignment score: " << aliScore << std::endl;
@@ -215,184 +124,115 @@ _setMismatchScore(Score<int, Simple>& sc, TSc mmsc) {
 
 template<typename TAlphabet, typename TScore>
 inline void
-_initAlignParams(int argc, const char *argv[], TScore& sc) {
-	// Set default options
-	sc.data_gap_open = -11;
-	sc.data_gap_extend = -1;
-	_setMatchScore(sc, 5);
-	_setMismatchScore(sc, -4);
-	::std::string outfile = "out.fasta";
+_initAlignParams(CommandLineParser& parser, TScore& sc) {
+	// Set options
+	getOptionValueLong(parser, "gop", sc.data_gap_open);
+	getOptionValueLong(parser, "gex", sc.data_gap_extend);
+	int msc = 0;
+	getOptionValueLong(parser, "msc", msc);
+	_setMatchScore(sc, msc);
+	int mmsc = 0;
+	getOptionValueLong(parser, "mmsc", mmsc);
+	_setMismatchScore(sc, mmsc);
 	::std::string seqfile;
-	String<bool> bools;
+	getOptionValueLong(parser, "seq", seqfile);
+	::std::string outfile = "out.fasta";
+	getOptionValueLong(parser, "outfile", outfile);
+	unsigned int method = 0;
+	String<char> meth;
+	getOptionValueLong(parser, "method", meth);
+	if (meth == "nw") method = 0;
+	else if (meth == "gotoh") method = 1;
+	else if (meth == "sw") method = 2;
+	unsigned int outputFormat = 0;
+	String<char> format;
+	getOptionValueLong(parser, "format", format);
+	if (format == "fasta") outputFormat = 0;
+	else if (format == "msf") outputFormat = 1;
 	int low = 0;
 	int high = 0;
-	unsigned int method = 1;
-	unsigned int outputFormat = 0;
 	bool banded = false;
-	
-	// Command line parsing
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			if (strcmp(argv[arg], "-seq") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					seqfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-outfile") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					outfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-method") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::string meth = argv[arg];
-					if (meth == "nw") method = 0;
-					else if (meth == "gotoh") method = 1;
-					else if (meth == "sw") method = 2;
-				}
-			}
-			else if (strcmp(argv[arg], "-output") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::string output = argv[arg];
-					if (output == "fasta") outputFormat = 0;
-					else if (output == "msf") outputFormat = 1;
-				}
-			}
-			else if (strcmp(argv[arg], "-gop") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> sc.data_gap_open;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-gex") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> sc.data_gap_extend;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-msc") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					int msc;
-					::std::istringstream istr(argv[arg]);
-					istr >> msc;
-					if (istr.fail()) { printHelp(); exit(1); }
-					_setMatchScore(sc, msc);
-				}
-			}
-			else if (strcmp(argv[arg], "-mmsc") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					int mmsc;
-					::std::istringstream istr(argv[arg]);
-					istr >> mmsc;
-					if (istr.fail()) { printHelp(); exit(1); }
-					_setMismatchScore(sc, mmsc);
-				}
-			}
-			else if (strcmp(argv[arg], "-low") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> low;
-					if (istr.fail()) { printHelp(); exit(1); }
-					banded = true;
-				}
-			}
-			else if (strcmp(argv[arg], "-high") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> high;
-					if (istr.fail()) { printHelp(); exit(1); }
-					banded = true;
-				}
-			}
-			else if (strcmp(argv[arg], "-config") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string boolval = argv[arg];
-					::std::string::size_type pos = boolval.find(',');
-					if (pos != ::std::string::npos) boolval.erase(pos);
-					if (boolval == "true") appendValue(bools, true);
-					else appendValue(bools, false);
-				}
-			}
-		}
+	if (isSetLong(parser, "low")) {
+		getOptionValueLong(parser, "low", low);
+		banded = true;
 	}
-	if (seqfile.empty()) { printHelp(); exit(1); }
+	if (isSetLong(parser, "high")) {
+		getOptionValueLong(parser, "high", high);
+		banded = true;
+	}
+
+	// Check options
+	if (!isSetLong(parser, "seq")) { help(parser); exit(1); }
 	if (low > high) banded = false;
-	if (length(bools) != 4) pairwise_align<TAlphabet, AlignConfig<false, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-	else {
-		if ((bools[0]) && (bools[1]) && (bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<true, true, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (bools[1]) && (bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<true, true, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (bools[1]) && (!bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<true, true, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (bools[1]) && (!bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<true, true, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (!bools[1]) && (bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<true, false, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (!bools[1]) && (bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<true, false, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (!bools[1]) && (!bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<true, false, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((bools[0]) && (!bools[1]) && (!bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<true, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (bools[1]) && (bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<false, true, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (bools[1]) && (bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<false, true, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (bools[1]) && (!bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<false, true, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (bools[1]) && (!bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<false, true, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (!bools[1]) && (bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<false, false, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (!bools[1]) && (bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<false, false, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (!bools[1]) && (!bools[2]) && (bools[3])) pairwise_align<TAlphabet, AlignConfig<false, false, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-		else if ((!bools[0]) && (!bools[1]) && (!bools[2]) && (!bools[3])) pairwise_align<TAlphabet, AlignConfig<false, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
-	}
+	
+	// Do pairwise alignment
+	if (isSetLong(parser, "config")) {
+		String<char> config;
+		getOptionValueLong(parser, "config", config);
+		if (config == "tttt") pairwise_align<TAlphabet, AlignConfig<true, true, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "tttf") pairwise_align<TAlphabet, AlignConfig<true, true, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ttft") pairwise_align<TAlphabet, AlignConfig<true, true, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ttff") pairwise_align<TAlphabet, AlignConfig<true, true, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "tftt") pairwise_align<TAlphabet, AlignConfig<true, false, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "tftf") pairwise_align<TAlphabet, AlignConfig<true, false, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "tfft") pairwise_align<TAlphabet, AlignConfig<true, false, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "tfff") pairwise_align<TAlphabet, AlignConfig<true, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "fttt") pairwise_align<TAlphabet, AlignConfig<false, true, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "fttf") pairwise_align<TAlphabet, AlignConfig<false, true, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ftft") pairwise_align<TAlphabet, AlignConfig<false, true, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ftff") pairwise_align<TAlphabet, AlignConfig<false, true, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "fftt") pairwise_align<TAlphabet, AlignConfig<false, false, true, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "fftf") pairwise_align<TAlphabet, AlignConfig<false, false, true, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ffft") pairwise_align<TAlphabet, AlignConfig<false, false, false, true> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+		else if (config == "ffff") pairwise_align<TAlphabet, AlignConfig<false, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
+	} else pairwise_align<TAlphabet, AlignConfig<false, false, false, false> >(sc, seqfile, method, low, high, banded, outputFormat, outfile);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, Dna5 const) {
-	if (!empty(matrix)) {
+_initScoreMatrix(CommandLineParser& parser, Dna5 const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
 		Score<int, ScoreMatrix<> > sc;
 		loadScoreMatrix(sc, matrix);
-		_initAlignParams<Dna5>(argc, argv, sc);
+		_initAlignParams<Dna5>(parser, sc);
 	} else {
 		Score<int> sc;
-		_initAlignParams<Dna5>(argc, argv, sc);
+		_initAlignParams<Dna5>(parser, sc);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, Rna5 const) {
-	if (!empty(matrix)) {
+_initScoreMatrix(CommandLineParser& parser, Rna5 const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
 		Score<int, ScoreMatrix<> > sc;
 		loadScoreMatrix(sc, matrix);
-		_initAlignParams<Rna5>(argc, argv, sc);
+		_initAlignParams<Rna5>(parser, sc);
 	} else {
 		Score<int> sc;
-		_initAlignParams<Rna5>(argc, argv, sc);
+		_initAlignParams<Rna5>(parser, sc);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, AminoAcid const) {
-	if (!empty(matrix)) {
+_initScoreMatrix(CommandLineParser& parser, AminoAcid const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
 		Score<int, ScoreMatrix<> > sc;
 		loadScoreMatrix(sc, matrix);
-		_initAlignParams<AminoAcid>(argc, argv, sc);
+		_initAlignParams<AminoAcid>(parser, sc);
 	} else {
 		Blosum62 sc;
-		_initAlignParams<AminoAcid>(argc, argv, sc);
+		_initAlignParams<AminoAcid>(parser, sc);
 	}
 }
 
@@ -400,41 +240,56 @@ _initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, AminoAcid co
 
 int main(int argc, const char *argv[]) {
 
-	// Version
-	printVersion();
+	// Command line parsing
+	CommandLineParser parser;
+	_addVersion(parser);
+	
+	addTitleLine(parser, "**********************************");
+	addTitleLine(parser, "* Pairwise alignment - PairAlign *");
+	addTitleLine(parser, "**********************************");
 
-	// At least two arguments
-	if (argc < 2) {	printHelp(); return 1; }
+	addUsageLine(parser, "-s <FASTA sequence file> [Options]");
+
+	addSection(parser, "Main Options:");
+	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with 2 sequences", OptionType::String), "<FASTA Sequence File>"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", OptionType::String, "protein"), "[protein | dna | rna]"));
+	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", OptionType::String, "gotoh"), "[nw, gotoh, sw]"));
+	addHelpLine(parser, "nw = Needleman-Wunsch");
+	addHelpLine(parser, "gotoh = Gotoh");
+	addHelpLine(parser, "sw = Smith-Waterman");
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "out.fasta"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "fasta"), "[fasta | msf]"));
+	
+	addSection(parser, "Scoring Options:");
+	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", OptionType::Int, -11), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", OptionType::Int, -1), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", OptionType::String, "Blosum62"), "<Matrix file>"));
+	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", OptionType::Int, 5), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", OptionType::Int, -4), "<Int>"));
+	
+	addSection(parser, "Banded Alignment Options:");
+	addOption(parser, addArgumentText(CommandLineOption("lo", "low", "lower diagonal", OptionType::Int), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("hi", "high", "upper diagonal", OptionType::Int), "<Int>"));
+			
+	addSection(parser, "DP Matrix Configuration Options:");
+	addOption(parser, addArgumentText(CommandLineOption("c", "config", "alignment configuration", OptionType::String, "ffff"), "[ffff | ... | tttt]"));
+	addHelpLine(parser, "tfff = First row with 0's");
+	addHelpLine(parser, "ftff = First column with 0's");
+	addHelpLine(parser, "fftf = Search last column for max");
+	addHelpLine(parser, "ffft = Search last row for max");
+	addHelpLine(parser, "All combinations are allowed.");
+
+
+	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
 
 	// Basic command line options
-	String<char> alphabet = "protein";
-	String<char> matrix;
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			// Dna, Rna or AminoAcid alignment
-			if (strcmp(argv[arg], "-alphabet") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					alphabet = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-matrix") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					matrix = argv[arg];
-				}
-			}
-			else if ((strcmp(argv[arg], "-h") == 0) || (strcmp(argv[arg], "-help") == 0) || (strcmp(argv[arg], "-?") == 0)) {
-				printHelp(); 
-				return 0; 
-			}
-		}
-	}
-
+	String<char> alphabet;
+	getOptionValueLong(parser, "alphabet", alphabet);
+	
 	// Initialize scoring matrices
-	if (alphabet == "dna") _initScoreMatrix(argc, argv, matrix, Dna5());
-	else if (alphabet == "rna") _initScoreMatrix(argc, argv, matrix, Rna5());
-	else _initScoreMatrix(argc, argv, matrix, AminoAcid());
+	if (alphabet == "dna") _initScoreMatrix(parser, Dna5());
+	else if (alphabet == "rna") _initScoreMatrix(parser, Rna5());
+	else _initScoreMatrix(parser, AminoAcid());
 
 	return 0;
 }

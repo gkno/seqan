@@ -468,7 +468,7 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
 			me.short_width = width;
 		if (empty(longName(opt)))
 		{
-			unsigned width = width - 1 + length(argumentText(opt));
+			width = width - 1 + length(argumentText(opt));
 			if (me.full_width < width)
 				me.full_width = width;
 		}
