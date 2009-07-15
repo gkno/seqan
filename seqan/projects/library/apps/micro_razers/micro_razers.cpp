@@ -564,11 +564,12 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbINSERT = 0.01;	//this number is basically without meaning, any value > 0 will lead to
 			pm_options.optionProbDELETE = 0.01;	//edit distance parameter choosing
 		}
-		pm_options.paramFolderPath = argv[0];
-		size_t lastPos = pm_options.paramFolderPath.find_last_of('/') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = pm_options.paramFolderPath.find_last_of('\\') + 1;
-		if (lastPos == pm_options.paramFolderPath.npos + 1) lastPos = 0;
-		pm_options.paramFolderPath.erase(lastPos); 
+		string paramFolder = argv[0];
+		size_t lastPos = paramFolder.find_last_of('/') + 1;
+		if (lastPos == paramFolder.npos + 1) lastPos = paramFolder.find_last_of('\\') + 1;
+		if (lastPos == paramFolder.npos + 1) lastPos = 0;
+		paramFolder.erase(lastPos); 
+		pm_options.paramFolderPath = paramFolder;
 		pm_options.fprefix[0] = "uniform";
 		pm_options.prefixCount = true;
 		pm_options.totalN = options.rnaSeedLength;

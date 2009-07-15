@@ -363,7 +363,7 @@ int main(int argc, const char *argv[])
 	// Extract options
 	if (isSetLong(parser, "protein")) optionAlphabet = 1;
 	if (isSetLong(parser, "dna")) optionAlphabet = 2;
-	if (isSetLong(parser, "help")) return 0;	// print help and exit	
+	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Check options

@@ -371,7 +371,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
 	getOptionValueLong(parser, "error-distr", errorPrbFileName);
-	if (isSetLong(parser, "help")) return 0;	// print help and exit
+	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 	if (isSetLong(parser, "verbose")) options._debugLevel = max(options._debugLevel, 1);
 	if (isSetLong(parser, "vverbose")) options._debugLevel = max(options._debugLevel, 3);
 	if (isSetLong(parser, "unique"))
@@ -514,7 +514,7 @@ int main(int argc, const char *argv[])
 			pm_options.optionProbDELETE = (ParamChooserOptions::TFloat)0.01;	//edit distance parameter choosing
 		}
 
-		if(length(pm_options.paramFolder) == 0) 
+		if (empty(pm_options.paramFolder)) 
 		{
 			string razersFolder = argv[0];
 			size_t lastPos = razersFolder.find_last_of('/') + 1;
