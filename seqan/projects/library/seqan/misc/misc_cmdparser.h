@@ -63,13 +63,14 @@ _isInt(TString const s)
 
 struct OptionType{
     enum {
-        Boolean = 1,
-        String = 2,
-        Int = 4,
-        Double = 8,
-        Mandatory = 16,
-        Debug = 32,
-		Label = 64
+        Boolean = 1,		// option needs no argument, value is true iff given on command line
+        String = 2,			// argument is a string
+        Int = 4,			// ... an integer
+        Double = 8,			// ... a float
+        Mandatory = 16,		// option must be set
+		List = 32,			// option is a list of values
+        Debug = 64,			// <unused>
+		Label = 128			// automatically print a label for the argument(s) on the help screen
 	};
 };
 
@@ -81,16 +82,19 @@ struct OptionType{
 ..summary:Stores information for a specific Commandline Option
 ..signature:CommandLineOption
 */
-class CommandLineOption{
+class CommandLineOption
+{
 public:
-    CharString   _longName;
-    CharString   _shortName;
-	CharString   _arguments;
+    CharString			longName;			// long option name
+    CharString			shortName;			// short option name
+	CharString			arguments;			// argument names seperated by spaces
 
-    CharString   _helpText;
-    int          _optionType;
+    CharString			helpText;			// option description
+    int					optionType;			// option type
+	int					argumentsPerOption;	// number of arguments per option
 	
-	CharString   _defaultValue;
+	String<CharString>	defaultValue;
+	String<CharString>	value;
 	
     CommandLineOption() {}
 
@@ -100,12 +104,50 @@ public:
 		CharString const & _help,
 		int _type
 	) :
-		_longName(_long),
-		_shortName(_short),
-		_helpText(_help),
-		_optionType(_type),
-		_defaultValue("")
+		longName(_long),
+		shortName(_short),
+		helpText(_help),
+		optionType(_type),
+		argumentsPerOption(1)
 	{
+	}
+
+    CommandLineOption(
+		CharString const & _short,
+		CharString const & _long,
+		int _argumentsPerOption,
+		CharString const & _help,
+		int _type
+	) :
+		longName(_long),
+		shortName(_short),
+		helpText(_help),
+		optionType(_type),
+		argumentsPerOption(_argumentsPerOption)
+	{
+	}
+
+	template <typename TValue>
+    CommandLineOption(
+		CharString const & _short,
+		CharString const & _long,
+		int _argumentsPerOption,
+		CharString const & _help,
+		int _type,
+		TValue const & _default
+	) :
+		longName(_long),
+		shortName(_short),
+		helpText(_help),
+		optionType(_type),
+		argumentsPerOption(_argumentsPerOption)
+	{
+		std::stringstream strm;
+		strm << _default;
+		appendValue(defaultValue, strm.str());
+		append(helpText, " (default ");
+		append(helpText, strm.str());
+		appendValue(helpText, ')');
 	}
 
 	template <typename TValue>
@@ -116,18 +158,20 @@ public:
 		int _type,
 		TValue const & _default
 	) :
-		_longName(_long),
-		_shortName(_short),
-		_helpText(_help),
-		_optionType(_type)
+		longName(_long),
+		shortName(_short),
+		helpText(_help),
+		optionType(_type),
+		argumentsPerOption(1)
 	{
 		std::stringstream strm;
 		strm << _default;
-		_defaultValue = strm.str();
-		append(_helpText, " (default ");
-		append(_helpText, _defaultValue);
-		appendValue(_helpText, ')');
+		appendValue(defaultValue, strm.str());
+		append(helpText, " (default ");
+		append(helpText, strm.str());
+		appendValue(helpText, ')');
 	}
+
 /**.Memfunc.CommandLineOption#CommandLineOption:
 ..class:Class.CommandLineOption
 ..summary:Constructor
@@ -149,8 +193,8 @@ inline CommandLineOption
 addArgumentText(CommandLineOption const & opt, CharString const & text)
 {
 	CommandLineOption temp = opt;
-	temp._arguments = " ";
-	append(temp._arguments, text);
+	temp.arguments = " ";
+	append(temp.arguments, text);
 	return temp;
 }
 
@@ -168,12 +212,12 @@ addArgumentText(CommandLineOption const & opt, CharString const & text)
 */
 inline CharString &
 longName(CommandLineOption & me){
-    return me._longName;
+    return me.longName;
 }
 
 inline const CharString &
 longName(CommandLineOption const & me){
-    return me._longName;
+    return me.longName;
 }
 
 /**
@@ -188,7 +232,7 @@ longName(CommandLineOption const & me){
 */
 inline void
 setLongName(CommandLineOption & me, CharString const & newName){
-    me._longName = newName;
+    me.longName = newName;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -204,12 +248,12 @@ setLongName(CommandLineOption & me, CharString const & newName){
 */
 inline CharString &
 shortName(CommandLineOption & me){
-    return me._shortName;
+    return me.shortName;
 }
 
 inline const CharString &
 shortName(CommandLineOption const & me){
-    return me._shortName;
+    return me.shortName;
 }
 
 /**
@@ -223,7 +267,7 @@ shortName(CommandLineOption const & me){
 */
 inline void
 setShortName(CommandLineOption & me, CharString const & newName){
-    me._shortName = newName;
+    me.shortName = newName;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -239,12 +283,12 @@ setShortName(CommandLineOption & me, CharString const & newName){
 */
 inline CharString &
 helpText(CommandLineOption & me){
-    return me._helpText;
+    return me.helpText;
 }
 
 inline const CharString &
 helpText(CommandLineOption const & me){
-    return me._helpText;
+    return me.helpText;
 }
 
 /**
@@ -259,73 +303,84 @@ helpText(CommandLineOption const & me){
 */
 inline void
 setHelpText(CommandLineOption & me, CharString const & newHelp){
-    me._helpText = newHelp;
+    me.helpText = newHelp;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 inline const bool
 isStringOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::String) != 0);
+    return ((me.optionType & OptionType::String) != 0);
 }
 
 inline const bool
 isBooleanOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Boolean) != 0);
+    return ((me.optionType & OptionType::Boolean) != 0);
 }
 
 inline const bool
 isDoubleOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Double) != 0);
+    return ((me.optionType & OptionType::Double) != 0);
 }
 
 inline const bool
 isIntOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Int) != 0);
+    return ((me.optionType & OptionType::Int) != 0);
 }
 
 inline const bool
 isDebugOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Debug) != 0);
+    return ((me.optionType & OptionType::Debug) != 0);
 }
 
 inline const bool
 isOptionMandatory(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Mandatory) != 0);
+    return ((me.optionType & OptionType::Mandatory) != 0);
 }
 
 inline const bool
 isLabelOption(CommandLineOption const & me){
-    return ((me._optionType & OptionType::Label) != 0);
+    return ((me.optionType & OptionType::Label) != 0);
+}
+
+inline const bool
+isOptionList(CommandLineOption const & me){
+    return ((me.optionType & OptionType::List) != 0);
 }
 
 inline void
 setOptionType(CommandLineOption & me,const int _newOpt){
-    me._optionType = _newOpt;
+    me.optionType = _newOpt;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline const CharString &
+inline CharString
 argumentText(CommandLineOption const & me)
-{
-	static const CharString ARG_STR  = " STR";
-	static const CharString ARG_NUM  = " NUM";
-	static const CharString ARG_NONE = "";
-	
-	if (empty(me._arguments))
+{	
+	if (empty(me.arguments))
 	{
+		CharString label;
 		if (isLabelOption(me))
 		{
 			if (isStringOption(me))
-				return ARG_STR;
+				label = " STR";
 			else if (isIntOption(me) || isDoubleOption(me))
-				return ARG_NUM;
+				label = " NUM";
+			
+			if (me.argumentsPerOption >= 2)
+			{
+				std::stringstream strm;
+				if (!empty(label))
+					for (int i = 0; i < me.argumentsPerOption; ++i)
+						strm << label << (i + 1);
+				return strm.str();
+			}
 		}
-		return ARG_NONE;
+		return label;
     }
 	else
-		return me._arguments;
+		return me.arguments;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -353,7 +408,7 @@ write(TStream & target, CommandLineOption const & me){
     _writeOptName(target, me);
     _streamPut(target,'\t');
     _streamPut(target,'\t');
-    _streamWrite(target,me._helpText);
+    _streamWrite(target,me.helpText);
 }
 
 template <typename TStream>
@@ -381,17 +436,16 @@ public:
     typedef ::std::map<CharString, TSize>       TStringMap;
     typedef String<CharString>                  TValueMap;
 
-    TStringMap           _shortNameMap;
-    TStringMap           _longNameMap;
-    TValueMap            _valueMap;
-    TOptionMap           _optionMap;
+    TStringMap           shortNameMap;
+    TStringMap           longNameMap;
+    TOptionMap           optionMap;
     
-    unsigned             _required_arguments;
-    String<CharString>   _arguments;
-    CharString           _appName;
-	String<CharString>   _titleText;
-    String<CharString>   _usageText;
-	String<CharString>   _versionText;
+    unsigned             required_arguments;
+    String<CharString>   arguments;
+    CharString           appName;
+	String<CharString>   titleText;
+    String<CharString>   usageText;
+	String<CharString>   versionText;
 
 
     unsigned line_width;
@@ -410,12 +464,12 @@ public:
 */
 
     CommandLineParser()
-        : _required_arguments(0)
+        : required_arguments(0)
         {
             CommandLineOption opt("h","help","displays this help message",OptionType::Boolean);
-            appendValue(_optionMap,opt);
-            insert(_shortNameMap,"h",0);
-            insert(_longNameMap,"help",0);
+            appendValue(optionMap,opt);
+            insert(shortNameMap,"h",0);
+            insert(longNameMap,"help",0);
             //insert(_long2ShortMap,longName(opt),shortName(opt));
 
             line_width   = 32;
@@ -424,16 +478,16 @@ public:
 			long_width   = 0;
 			full_width   = 0;
 
-            _appName = "";
+            appName = "";
         }
 
     CommandLineParser(CharString appName)
-        : _required_arguments(0),_appName(appName)
+        : required_arguments(0),appName(appName)
         {
             CommandLineOption opt("h","help","displays this help message",OptionType::Boolean);
-            appendValue(_optionMap,opt);
-            insert(_shortNameMap,"h",0);
-            insert(_longNameMap,"help",0);
+            appendValue(optionMap,opt);
+            insert(shortNameMap,"h",0);
+            insert(longNameMap,"help",0);
 
             line_width   = 32;
             padding_left = 2;
@@ -459,30 +513,27 @@ inline void
 addOption(CommandLineParser & me, CommandLineOption const & opt)
 {
 	unsigned labelLen = length(argumentText(opt));
-    appendValue(me._optionMap, opt);
+    appendValue(me.optionMap, opt);
     if (!empty(shortName(opt)))
 	{
-		insert(me._shortNameMap,shortName(opt), length(me._optionMap) - 1);
+		insert(me.shortNameMap,shortName(opt), length(me.optionMap) - 1);
 		unsigned width = 3 + length(shortName(opt));
 		if (me.short_width < width)
 			me.short_width = width;
 		if (empty(longName(opt)))
 		{
-			width = width - 1 + length(argumentText(opt));
+			width += 1 + length(argumentText(opt));
 			if (me.full_width < width)
 				me.full_width = width;
 		}
 	}
     if (!empty(longName(opt)))
 	{
-		insert(me._longNameMap,longName(opt), length(me._optionMap) - 1);
+		insert(me.longNameMap,longName(opt), length(me.optionMap) - 1);
 		unsigned width = 3 + length(longName(opt)) + labelLen;
 		if (me.long_width < width)
 			me.long_width = width;
 	}
-
-    if (length(me._optionMap) > length(me._valueMap))
-		resize(me._valueMap, length(me._optionMap), Generous());
 }
 
 template <typename TString>
@@ -511,16 +562,16 @@ template <typename TString>
 inline void
 addTitleLine(CommandLineParser & me, TString const & line)
 {
-	appendValue(me._titleText, line);
+	appendValue(me.titleText, line);
 }
 
 template <typename TString>
 inline void
 addVersionLine(CommandLineParser & me, TString const & line)
 {
-	if (empty(me._versionText))
+	if (empty(me.versionText))
 		addOption(me, CommandLineOption("V", "version", "print version information", OptionType::Boolean));
-	appendValue(me._versionText, line);
+	appendValue(me.versionText, line);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -538,7 +589,7 @@ addVersionLine(CommandLineParser & me, TString const & line)
 inline void
 addUsageLine(CommandLineParser & me, CharString const & line)
 {
-    appendValue(me._usageText, line);
+    appendValue(me.usageText, line);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -555,7 +606,7 @@ addUsageLine(CommandLineParser & me, CharString const & line)
 inline bool 
 hasOptionLong(CommandLineParser const & me, CharString const & _long)
 {
-    return hasKey(me._longNameMap, _long);
+    return hasKey(me.longNameMap, _long);
 }
 
 
@@ -571,7 +622,7 @@ hasOptionLong(CommandLineParser const & me, CharString const & _long)
 inline bool 
 hasOptionShort(CommandLineParser const & me, CharString const & _short)
 {
-    return hasKey(me._shortNameMap, _short);
+    return hasKey(me.shortNameMap, _short);
 }
 
 
@@ -588,7 +639,7 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 */
 inline void
 requiredArguments(CommandLineParser & me, unsigned count){
-    me._required_arguments = count;
+    me.required_arguments = count;
 }	
 
 
@@ -609,12 +660,12 @@ template <typename TStream>
 inline void
 _usage(CommandLineParser & me, TStream & target)
 {
-	if (empty(me._usageText))
+	if (empty(me.usageText))
 	{
 		_streamWrite(target, "Usage: ");
-		_streamWrite(target, me._appName);
+		_streamWrite(target, me.appName);
 		_streamWrite(target, " [OPTION]... ");
-		for(unsigned r = 0; r < me._required_arguments; ++r)
+		for(unsigned r = 0; r < me.required_arguments; ++r)
 		{
 			_streamWrite(target, "<ARG");
 			_streamPutInt(target, r + 1);
@@ -624,15 +675,15 @@ _usage(CommandLineParser & me, TStream & target)
 	}
 	else
 	{
-		for(unsigned r = 0; r < length(me._usageText); ++r)
+		for(unsigned r = 0; r < length(me.usageText); ++r)
 		{
 			if (r == 0)
 				_streamWrite(target, "Usage: ");
 			else
 				_streamWrite(target, "       ");
-			_streamWrite(target, me._appName);
+			_streamWrite(target, me.appName);
 			_streamPut(target, ' ');
-			_streamWrite(target, me._usageText[r]);
+			_streamWrite(target, me.usageText[r]);
 			_streamPut(target,'\n');
 		}
 	}
@@ -642,7 +693,7 @@ template <typename TStream>
 inline void
 _title(CommandLineParser & me, TStream & target)
 {
-	_printStringSet(me._titleText, target);
+	_printStringSet(me.titleText, target);
 }
 
 /**
@@ -661,7 +712,7 @@ shortHelp(CommandLineParser & me, TStream & target)
 	_title(me, target);
     _usage(me, target);
     _streamWrite(target, "Try '");
-    _streamWrite(target, me._appName);
+    _streamWrite(target, me.appName);
     _streamWrite(target, " --help' for more information.\n");
 }
 
@@ -686,12 +737,12 @@ help(CommandLineParser & me, TStream & target)
     _usage(me,target);
     _streamPut(target, '\n');
 
-    for (unsigned o = 0; o < length(me._optionMap); ++o)
+    for (unsigned o = 0; o < length(me.optionMap); ++o)
     {
-        const CommandLineOption opt = value(me._optionMap,o);
+        const CommandLineOption opt = value(me.optionMap,o);
         if (isDebugOption(opt)) continue;    // do not print debug options .. these are not for the user
 		
-		if (opt._optionType > 0)
+		if (opt.optionType > 0)
 		{       
 			unsigned s = 0;
 			for (; s < me.padding_left; ++s)
@@ -772,7 +823,7 @@ template <typename TStream>
 inline void
 version(CommandLineParser & me, TStream & target)
 {
-	_printStringSet(me._versionText, target);
+	_printStringSet(me.versionText, target);
 }
 
 inline void
@@ -795,12 +846,11 @@ version(CommandLineParser & me)
 inline bool
 isSetShort(CommandLineParser & me,CharString const & shortName)
 {
-    if(!hasKey(me._shortNameMap,shortName)) return false; // this option does not exist
-    else
-    {
-        // if value != "" -> value was set
-        return !empty(value(me._valueMap,cargo(me._shortNameMap,shortName)));
-    }
+    if (!hasKey(me.shortNameMap, shortName))
+		return false; // this option does not exist
+
+	// if value != "" -> value was set
+	return !empty(me.optionMap[cargo(me.shortNameMap, shortName)].value);
 }
 
 /**
@@ -815,12 +865,11 @@ isSetShort(CommandLineParser & me,CharString const & shortName)
 inline bool
 isSetLong(CommandLineParser & me,CharString const & longName)
 {
-    if(!hasKey(me._longNameMap,longName)) return false; // this option does not exist
-    else
-    {
-        // if value != "" -> value was set
-        return !empty(value(me._valueMap,cargo(me._longNameMap,longName)));
-    }
+    if (!hasKey(me.longNameMap, longName))
+		return false; // this option does not exist
+
+	// if value != "" -> value was set
+	return !empty(me.optionMap[cargo(me.longNameMap, longName)].value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -828,8 +877,8 @@ isSetLong(CommandLineParser & me,CharString const & longName)
 inline bool
 _allMandatorySet(CommandLineParser & me)
 {
-    for(unsigned o = 0;o < length(me._optionMap);++o)
-        if(empty(value(me._valueMap,o)) && isOptionMandatory(value(me._optionMap,o))) return false;
+    for (unsigned o = 0; o < length(me.optionMap); ++o)
+        if (empty(me.optionMap[o].value) && isOptionMandatory(me.optionMap[o])) return false;
     return true;
 }
 
@@ -838,52 +887,63 @@ _allMandatorySet(CommandLineParser & me)
 inline CharString
 _parseAppName(CharString const & candidate)
 {
-    int l = length(candidate);
-    int i;
-
-    for(i = l - 1; l >= 0;--i)
-        if(value(candidate,i) == '\\' || value(candidate,i) == '/') 
+    int i = length(candidate) - 1;
+	
+    for(; i >= 0; --i)
+        if (candidate[i] == '\\' || candidate[i] == '/') 
             break;
-    ++i;
-    CharString ret = "";
-    for(int j = i;j < l;++j) append(ret,value(candidate,j));
-    return ret;
+
+    return suffix(candidate, i + 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TErrorStream>
-bool _assignOptionValue(CommandLineParser & me, unsigned option_index, CharString const & _val, TErrorStream & estream)
+bool
+_assignOptionValue(CommandLineParser & me, unsigned option_index, CharString const & val, unsigned argNo, TErrorStream & estream)
 {
     // get the option object
-    CommandLineOption opt = value(me._optionMap,option_index);
+    CommandLineOption & opt = me.optionMap[option_index];
     if(isDoubleOption(opt)){
-        if(!_isDouble(_val))
+        if(!_isDouble(val))
         {
-            _streamWrite(estream,me._appName);
+            _streamWrite(estream,me.appName);
             _streamWrite(estream,": ");
             _streamWrite(estream, "\"");
-            _streamWrite(estream, _val);
+            _streamWrite(estream, val);
             _streamWrite(estream, "\" is not a valid double value for '");
             _writeOptName(estream, opt);
             _streamWrite(estream, "'\n");
             return false;
         }
     }else if(isIntOption(opt)){
-        if(!_isInt(_val))
+        if(!_isInt(val))
         {
-            _streamWrite(estream,me._appName);
+            _streamWrite(estream,me.appName);
             _streamWrite(estream,": ");
             _streamWrite(estream, "\"");
-            _streamWrite(estream, _val);
+            _streamWrite(estream, val);
             _streamWrite(estream, "\" is not a valid integer value for '");
             _writeOptName(estream, opt);
             _streamWrite(estream, "'\n");
             return false;
         }
-    }    
-    value(me._valueMap,option_index) = _val;
+    }
+	if (isOptionList(opt))
+		appendValue(opt.value, val, Generous());
+	else
+	{
+		if (argNo == 0) clear(opt.value);
+		appendValue(opt.value, val, Exact());
+	}
     return true;
+}
+
+template<typename TErrorStream>
+inline bool 
+_assignOptionValue(CommandLineParser & me, unsigned option_index, CharString const & val, TErrorStream & estream)
+{
+	return _assignOptionValue(me, option_index, val, 0, estream);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -904,7 +964,7 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
 {
     typedef Size<String<CommandLineOption> >::Type TOptionPosition;
     // if the appName wasn't set .. parse from command line
-    if (empty(me._appName)) me._appName = _parseAppName(argv[0]);
+    if (empty(me.appName)) me.appName = _parseAppName(argv[0]);
 
     for (int i = 1; i < argc; ++i) 
     {
@@ -915,7 +975,7 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
             
             if (len == 1)
             {
-                _streamWrite(estream,me._appName);
+                _streamWrite(estream,me.appName);
                 _streamWrite(estream,": invalid option '-'\n");
                 return false;
             }
@@ -928,23 +988,26 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
 					{
 						if (hasOptionShort(me, infix(inParam, s, e)))
 						{
-							TOptionPosition option_index = cargo(me._shortNameMap, infix(inParam, s, e));
-							CommandLineOption const & opt = me._optionMap[option_index];
+							TOptionPosition option_index = cargo(me.shortNameMap, infix(inParam, s, e));
+							CommandLineOption const & opt = me.optionMap[option_index];
 							s = --e;
 							if (isBooleanOption(opt))
-								me._valueMap[option_index] = "true";
+								_assignOptionValue(me, option_index, "true", estream);
 							else
 							{
-								if (++i < argc)
+								if (i + opt.argumentsPerOption < argc)
 								{
-									if (!_assignOptionValue(me, option_index, argv[i], estream)) return false;
+									for (int t = 0; t < opt.argumentsPerOption; ++t)
+										if (!_assignOptionValue(me, option_index, argv[++i], t, estream)) return false;
 								}
 								else // no value available
 								{
-									_streamWrite(estream, me._appName);
+									_streamWrite(estream, me.appName);
 									_streamWrite(estream, ": \'");
 									_writeOptName(estream, opt);
-									_streamWrite(estream, "\' requires a value\n");
+									_streamWrite(estream, "\' requires ");
+									_streamPutInt(estream, opt.argumentsPerOption);
+									_streamWrite(estream, " value(s)\n");
 									return false;
 								}
 							}
@@ -952,7 +1015,7 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
 					}
 					if (s == e)
 					{
-                        _streamWrite(estream, me._appName);
+                        _streamWrite(estream, me.appName);
                         _streamWrite(estream, ": invalid option '-");
                         _streamWrite(estream, suffix(inParam, s));
                         _streamWrite(estream, "\'\n");
@@ -963,43 +1026,58 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
             else if (inParam[1] == '-') // this is a long option
             {
                 unsigned t = 2;
-                CharString longOpt, _val;
+                CharString longOpt, val;
                 for (; t < len && inParam[t] != '='; ++t)
 					appendValue(longOpt, inParam[t], Generous());
                 if (t < len) // this one is a --name=value option
-					_val = suffix(inParam, t + 1);
+					val = suffix(inParam, t + 1);
 				
                 // we may be got already a value
                 if (hasOptionLong(me, longOpt))
                 {
-                    TOptionPosition option_index = cargo(me._longNameMap, longOpt);
-                    CommandLineOption opt = me._optionMap[option_index];
+                    TOptionPosition option_index = cargo(me.longNameMap, longOpt);
+                    CommandLineOption opt = me.optionMap[option_index];
 
-                    if (!empty(_val))
+                    if (!empty(val))
                     {
-                        if (!_assignOptionValue(me, option_index, _val, estream)) return false;
+						if (opt.argumentsPerOption == 1)
+						{
+							if (!_assignOptionValue(me, option_index, val, estream)) return false;
+						}
+						else
+						{
+							_streamWrite(estream, me.appName);
+							_streamWrite(estream, ": \'");
+							_writeOptName(estream, opt);
+							_streamWrite(estream, "\' requires ");
+							_streamPutInt(estream, opt.argumentsPerOption);
+							_streamWrite(estream, " values\n");
+							return false;
+						}
                     }
                     else if(isBooleanOption(opt))
                     {
-                        value(me._valueMap, option_index) = "true";
+						_assignOptionValue(me, option_index, "true", estream);
                     }
-                    else if (++i < argc)
+                    else if (i + opt.argumentsPerOption < argc)
 					{
-                        _val = argv[i];
-                        if (!_assignOptionValue(me, option_index, _val, estream)) return false;
+						for (int t = 0; t < opt.argumentsPerOption; ++t)
+							if (!_assignOptionValue(me, option_index, argv[++i], t, estream)) return false;
 					}
 					else // no value available
-                    {
-                        _streamWrite(estream, me._appName);
-                        _streamWrite(estream, ": \'");
-                        _writeOptName(estream, opt);
-                        _streamWrite(estream, "\' requires a value\n");
-                        return false;
-                    }
+					{
+						_streamWrite(estream, me.appName);
+						_streamWrite(estream, ": \'");
+						_writeOptName(estream, opt);
+						_streamWrite(estream, "\' requires ");
+						_streamPutInt(estream, opt.argumentsPerOption);
+						_streamWrite(estream, " value(s)\n");
+						return false;
+					}
                 }
                 else
                 {
-                    _streamWrite(estream, me._appName);
+                    _streamWrite(estream, me.appName);
                     _streamWrite(estream, ": invalid option \'--");
                     _streamWrite(estream, longOpt);
                     _streamWrite(estream, "'\n");
@@ -1009,7 +1087,7 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
         }
         else
         { // this seems to be a normal argument
-            appendValue(me._arguments,argv[i] );
+            appendValue(me.arguments,argv[i] );
         }
     }
 	if (isSetLong(me, "version"))
@@ -1022,27 +1100,47 @@ parse(CommandLineParser & me,int argc, const char *argv[], TErrorStream & estrea
         help(me, estream);
         return true;
     }
-	return _allMandatorySet(me) && (length(me._arguments) >= me._required_arguments);
+	return _allMandatorySet(me) && (length(me.arguments) >= me.required_arguments);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 inline bool
-parse(CommandLineParser & me,int argc, const char *argv[])
+parse(CommandLineParser & me, int argc, const char *argv[])
 {
-    return parse(me,argc,argv,::std::cerr);
+    return parse(me, argc, argv, ::std::cerr);
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline CharString const &
-getOptionValue(CommandLineParser & me, int option_index)
+inline String<CharString> const &
+getOptionValues(CommandLineParser & me, unsigned option_index)
 {
-	if (empty(me._valueMap[option_index]))
-		return me._optionMap[option_index]._defaultValue;
+    CommandLineOption const & opt = me.optionMap[option_index];
+	if (empty(opt.value))
+		return opt.defaultValue;
 	else
-		return me._valueMap[option_index];
+		return opt.value;
+}
+
+inline CharString const &
+getOptionValue(CommandLineParser & me, unsigned option_index, unsigned argNo)
+{
+	const static CharString zero = "";
+    CommandLineOption const & opt = me.optionMap[option_index];
+	if (argNo < length(opt.value))
+		return opt.value[argNo];
+	else if (argNo < length(opt.defaultValue))
+		return opt.defaultValue[argNo];
+	else
+		return zero;
+}
+
+inline CharString const &
+getOptionValue(CommandLineParser & me, unsigned option_index)
+{
+	return getOptionValue(me, option_index, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1113,20 +1211,27 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 */
 template <typename TValue>
 inline bool
-getOptionValueShort(CommandLineParser & me,CharString const & shortName, TValue & val){
+getOptionValueShort(CommandLineParser & me, CharString const & shortName, unsigned argNo, TValue & val)
+{
     typedef Size<String<CommandLineOption> >::Type TOptionPosition;
 
     if (!hasOptionShort(me,shortName))
 	{
-		_streamWrite(std::cerr, me._appName);
+		_streamWrite(std::cerr, me.appName);
 		_streamWrite(std::cerr, ": \'");
 		_streamWrite(std::cerr, shortName);
 		_streamWrite(std::cerr, "\' is not an option\n");
 		return false;
 	}
-    TOptionPosition option_index = cargo(me._shortNameMap,shortName);
-    CommandLineOption const & opt = value(me._optionMap,option_index);
-	return _convertOptionValue(opt, val, getOptionValue(me, option_index));
+    TOptionPosition option_index = cargo(me.shortNameMap,shortName);
+	return _convertOptionValue(me.optionMap[option_index], val, getOptionValue(me, option_index, argNo));
+}
+
+template <typename TValue>
+inline bool
+getOptionValueShort(CommandLineParser & me, CharString const & shortName, TValue & val)
+{
+	return getOptionValueShort(me, shortName, val, 0);
 }
 
 /**
@@ -1143,21 +1248,27 @@ getOptionValueShort(CommandLineParser & me,CharString const & shortName, TValue 
 */
 template <typename TValue>
 inline bool
-getOptionValueLong(CommandLineParser & me,CharString const & longName, TValue & val){
+getOptionValueLong(CommandLineParser & me, CharString const & longName, unsigned argNo, TValue & val)
+{
     typedef Size<String<CommandLineOption> >::Type TOptionPosition;
 
     if (!hasOptionLong(me,longName))
 	{
-		_streamWrite(std::cerr, me._appName);
+		_streamWrite(std::cerr, me.appName);
 		_streamWrite(std::cerr, ": \'");
 		_streamWrite(std::cerr, longName);
 		_streamWrite(std::cerr, "\' is not an option\n");
 		return false;
 	}
-    TOptionPosition option_index = cargo(me._longNameMap,longName);
-    
-    CommandLineOption opt = value(me._optionMap,option_index);
-	return _convertOptionValue(opt, val, getOptionValue(me, option_index));
+    TOptionPosition option_index = cargo(me.longNameMap,longName);
+	return _convertOptionValue(me.optionMap[option_index], val, getOptionValue(me, option_index, argNo));
+}
+
+template <typename TValue>
+inline bool
+getOptionValueLong(CommandLineParser & me,CharString const & longName, TValue & val)
+{
+	return getOptionValueLong(me, longName, val, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1178,10 +1289,16 @@ inline CharString const &
 getArgumentValue(CommandLineParser & me, unsigned position)
 {
 	static const CharString null = "";
-    if (position < length(me._arguments))
-        return me._arguments[position];
+    if (position < length(me.arguments))
+        return me.arguments[position];
     else
 		return null;
+}
+
+inline String<CharString> const &
+getArgumentValues(CommandLineParser & me)
+{
+	return me.arguments;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1195,7 +1312,7 @@ getArgumentValue(CommandLineParser & me, unsigned position)
 */
 inline Size<String<CharString> >::Type
 argumentCount(CommandLineParser & me){
-    return length(me._arguments);
+    return length(me.arguments);
 }
 
 

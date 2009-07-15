@@ -32,14 +32,14 @@
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
-#include "seqan/platform.h"
+#include <seqan/platform.h>
 #ifdef PLATFORM_WINDOWS
 	#define SEQAN_DEFAULT_TMPDIR "C:\\TEMP\\"
 #else
 	#define SEQAN_DEFAULT_TMPDIR "./"
 #endif
 
-#include "seqan/misc/misc_cmdparser.h"
+#include <seqan/misc/misc_cmdparser.h>
 #include "razers.h"
 #include "outputFormat.h"
 #include "paramChooser.h"
@@ -553,7 +553,7 @@ int main(int argc, const char *argv[])
 #endif
 
 	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
-	if (result != 0) 
+	if (result != 0)
 		cerr << "Exiting ..." << endl;
 	return result;
 }

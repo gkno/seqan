@@ -23,6 +23,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
+#include <seqan/misc/misc_cmdparser.h>
 #include <seqan/index.h>
 #include <string>
 #include <iostream>
@@ -176,7 +177,7 @@ bool loadDatasets(
 	{
 		ds[s] = seqCount;
 		ifstream file;
-		file.open(fileNames[s], ios_base::in | ios_base::binary);
+		file.open(toCString(fileNames[s]), ios_base::in | ios_base::binary);
 		if (!file.is_open()) return false;
 		while (!_streamEOF(file)) {
 			goNext(file, Fasta());
@@ -190,7 +191,7 @@ bool loadDatasets(
 	for(unsigned i = 0, s = 0; s < length(fileNames); ++s)	// for each database
 	{
 		ifstream file;
-		file.open(fileNames[s], ios_base::in | ios_base::binary);
+		file.open(toCString(fileNames[s]), ios_base::in | ios_base::binary);
 		if (!file.is_open()) return false;
 
 		for(; (i < seqCount) && !_streamEOF(file); ++i)		// and each sequence
@@ -318,31 +319,6 @@ int runDFI(
 	return 0;
 }
 
-void printHelp(int, const char *[], bool longHelp = false)
-{
-	if (longHelp) {
-		cerr << "**************************************************************" << endl;
-		cerr << "***           DFI - The Deferred Frequency Index           ***" << endl;
-		cerr << "*** (c) Copyright 2009 by David Weese and Marcel H. Schulz ***" << endl;
-		cerr << "**************************************************************" << endl;
-		cerr << endl;
-		cerr << "Usage: dfi [OPTIONS] ... --minmax  <min_1> <max_2> <database 1> <database 2>" << endl;
-		cerr << "       dfi [OPTIONS] ... --growth  <rho_s> <rho_g> <database 1> <database 2>" << endl;
-		cerr << "       dfi [OPTIONS] ... --entropy <rho_s> <alpha> <database 1> <database 2> ... <database m>" << endl;
-		cerr << endl;
-		cerr << "Options:" << endl;
-		cerr << "-f,  --minmax  \tsolve Frequent Pattern Mining Problem" << endl;
-		cerr << "-g,  --growth  \tsolve Emerging Substring Mining Problem" << endl;
-		cerr << "-e,  --entropy \tsolve Emerging Substring Mining Problem" << endl;
-		cerr << endl;
-		cerr << "-p,  --protein \tuse AminoAcid alphabet (for proteomes)" << endl;
-		cerr << "-d,  --dna     \tuse DNA alphabet (for genomes)" << endl;
-		cerr << "               \tThe default is byte alphabet" << endl;
-	} else {
-		cerr << "Try 'dfi --help' for more information." << endl;
-	}
-}
-
 int main(int argc, const char *argv[])
 {
 	int optionAlphabet = 0;   // 0..char, 1..protein, 2..dna
@@ -352,139 +328,113 @@ int main(int argc, const char *argv[])
 	double optionMinSupp = 0;
 	double optionGrowthRate = 0;
 	double optionEntropy = 0;
-	
-	basic_string<const char*> fileNames;
+		
+	CommandLineParser parser;
+	string rev = "$Revision 0001 $";
+	addVersionLine(parser, "DFI version 2.0 20090715 [" + rev.substr(11, 4) + "]");
 
-	int arg = 1;
-	for(; arg < argc; ++arg) 
+	//////////////////////////////////////////////////////////////////////////////
+	// Define options
+	addTitleLine(parser, "**************************************************************");
+	addTitleLine(parser, "***           DFI - The Deferred Frequency Index           ***");
+	addTitleLine(parser, "*** (c) Copyright 2009 by David Weese and Marcel H. Schulz ***");
+	addTitleLine(parser, "**************************************************************");
+	addUsageLine(parser, "[OPTION]... --minmax  <min_1> <max_2> <database 1> <database 2>");
+	addUsageLine(parser, "[OPTION]... --growth  <rho_s> <rho_g> <database 1> <database 2>");
+	addUsageLine(parser, "[OPTION]... --entropy <rho_s> <alpha> <database 1> <database 2> ... <database m>");
+	
+	addOption(parser, CommandLineOption("f",  "minmax",  2, "solve Frequent Pattern Mining Problem", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("g",  "growth",  2, "solve Emerging Substring Mining Problem", OptionType::Double | OptionType::Label));
+	addOption(parser, CommandLineOption("e",  "entropy", 2, "solve Entropy Mining Problem", OptionType::Double | OptionType::Label));
+	addHelpLine(parser, "");
+	addOption(parser, CommandLineOption("p",  "protein",    "use AminoAcid alphabet (for proteomes)", OptionType::Boolean));
+	addOption(parser, CommandLineOption("d",  "dna",        "use DNA alphabet (for genomes)", OptionType::Boolean));
+	addHelpLine(parser, "The default is byte alphabet");
+
+	if (argc == 1)
 	{
-		if (argv[arg][0] == '-') 
-		{
-			// parse options
-
-			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
-				// print help
-				printHelp(argc, argv, true);
-				return 0;
-			}
-
-			if (strcmp(argv[arg], "-f") == 0 || strcmp(argv[arg], "--minmax") == 0) 
-			{
-				optionPredicate = 0;
-				if (arg + 2 < argc) 
-				{
-					istringstream istr1(argv[++arg]);
-					istringstream istr2(argv[++arg]);
-					istr1 >> optionMinFreq;
-					istr2 >> optionMaxFreq;
-					if (!istr1.fail() && !istr2.fail())
-					{
-						if (optionMinFreq < 1)
-							cerr << "Minimum frequency threshold must be at least 1. Exit." << endl;
-						else
-						{
-							if (optionMaxFreq < 1)
-								cerr << "Maximum frequency threshold must be greater than 0. Exit." << endl;
-							else
-								continue;
-						}
-					}
-				}
-				printHelp(argc, argv);
-				return 0;
-			}
-
-			if (strcmp(argv[arg], "-g") == 0 || strcmp(argv[arg], "--growth") == 0) 
-			{
-				optionPredicate = 1;
-				if (arg + 2 < argc) 
-				{
-					istringstream istr1(argv[++arg]);
-					istringstream istr2(argv[++arg]);
-					istr1 >> optionMinSupp;
-					istr2 >> optionGrowthRate;
-					if (!istr1.fail() && !istr2.fail())
-					{
-						if (optionMinSupp <= 0.0 || optionMinSupp > 1.0)
-							cerr << "Support threshold must be greater than 0 and less than or equal to 1. Exit." << endl;
-						else
-						{
-							if (optionGrowthRate < 1.0)
-								cerr << "Growth rate must not be less than 1. Exit." << endl;
-							else
-								continue;
-						}
-					}
-				}
-				printHelp(argc, argv);
-				return 0;
-			}
-
-			if (strcmp(argv[arg], "-e") == 0 || strcmp(argv[arg], "--entropy") == 0) 
-			{
-				optionPredicate = 2;
-				if (arg + 2 < argc) 
-				{
-					istringstream istr1(argv[++arg]);
-					istringstream istr2(argv[++arg]);
-					istr1 >> optionMinSupp;
-					istr2 >> optionEntropy;
-					if (!istr1.fail() && !istr2.fail())
-					{
-						if (optionMinSupp <= 0.0 || optionMinSupp > 1.0)
-							cerr << "Support threshold must be greater than 0 and less than or equal to 1. Exit." << endl;
-						else
-						{
-							if (optionEntropy <= 0.0 || optionEntropy > 1.0)
-								cerr << "Entropy must not be grater than 0 and less or equal to 1. Exit." << endl;
-							else
-								continue;
-						}
-					}
-				}
-				printHelp(argc, argv);
-				return 0;
-			}
-
-			if (strcmp(argv[arg], "-p") == 0 || strcmp(argv[arg], "--protein") == 0) 
-			{
-				optionAlphabet = 1;
-				continue;
-			}
-
-			if (strcmp(argv[arg], "-d") == 0 || strcmp(argv[arg], "--dna") == 0) 
-			{
-				optionAlphabet = 2;
-				continue;
-			}
-		} else
-			fileNames += argv[arg];
+		shortHelp(parser, cerr);	// print short help and exit
+		return 0;
 	}
+
+	bool stop = !parse(parser, argc, argv, cerr);
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Extract options
+	if (isSetLong(parser, "protein")) optionAlphabet = 1;
+	if (isSetLong(parser, "dna")) optionAlphabet = 2;
+	if (isSetLong(parser, "help")) return 0;	// print help and exit	
 	
+	//////////////////////////////////////////////////////////////////////////////
+	// Check options
+	if (isSetLong(parser, "minmax"))
+	{
+		optionPredicate = 0;
+		getOptionValueLong(parser, "minmax", 0, optionMinFreq);
+		getOptionValueLong(parser, "minmax", 1, optionMaxFreq);
+		if ((optionMinFreq < 1) && (stop = true))
+			cerr << "Minimum frequency threshold must be at least 1." << endl;
+		if ((optionMaxFreq < 1) && (stop = true))
+			cerr << "Maximum frequency threshold must be greater than 0." << endl;
+		if ((argumentCount(parser) != 2) && (stop = true))
+			cerr << "Please specify 2 databases." << endl;
+	}
+	if (isSetLong(parser, "growth"))
+	{
+		optionPredicate = 1;
+		getOptionValueLong(parser, "growth", 0, optionMinSupp);
+		getOptionValueLong(parser, "growth", 1, optionGrowthRate);
+		if ((optionMinSupp <= 0.0 || optionMinSupp > 1.0) && (stop = true))
+			cerr << "Support threshold must be greater than 0 and less than or equal to 1." << endl;
+		if ((optionGrowthRate < 1.0) && (stop = true))
+			cerr << "Growth rate must not be less than 1." << endl;
+		if ((argumentCount(parser) != 2) && (stop = true))
+			cerr << "Please specify 2 databases." << endl;
+	}
+	if (isSetLong(parser, "entropy"))
+	{
+		optionPredicate = 2;
+		getOptionValueLong(parser, "entropy", 0, optionMinSupp);
+		getOptionValueLong(parser, "entropy", 1, optionEntropy);
+		if ((optionMinSupp <= 0.0 || optionMinSupp > 1.0) && (stop = true))
+			cerr << "Support threshold must be greater than 0 and less than or equal to 1." << endl;
+		if ((optionEntropy <= 0.0 || optionEntropy > 1.0) && (stop = true))
+			cerr << "Entropy must not be grater than 0 and less or equal to 1." << endl;
+		if ((argumentCount(parser) < 2) && (stop = true))
+			cerr << "Please specify at least 2 databases." << endl;
+	}
+
+	if (stop)
+	{
+		cerr << "Exiting ..." << endl;
+		return -1;
+	}
+
 	switch (optionPredicate)
 	{
 		case 0:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinFreq, PredFrequent, unsigned char> (fileNames, optionMinFreq, optionMaxFreq);
-				case 1: return runDFI<PredMinFreq, PredFrequent, AminoAcid> (fileNames, optionMinFreq, optionMaxFreq);
-				case 2: return runDFI<PredMinFreq, PredFrequent, Dna> (fileNames, optionMinFreq, optionMaxFreq);	
+				case 0: return runDFI<PredMinFreq, PredFrequent, unsigned char> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);
+				case 1: return runDFI<PredMinFreq, PredFrequent, AminoAcid> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);
+				case 2: return runDFI<PredMinFreq, PredFrequent, Dna> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);	
 			}
 		case 1:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinFreq, PredEmerging, unsigned char> (fileNames, optionMinSupp, optionGrowthRate);
-				case 1: return runDFI<PredMinFreq, PredEmerging, AminoAcid> (fileNames, optionMinSupp, optionGrowthRate);
-				case 2: return runDFI<PredMinFreq, PredEmerging, Dna> (fileNames, optionMinSupp, optionGrowthRate);
+				case 0: return runDFI<PredMinFreq, PredEmerging, unsigned char> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
+				case 1: return runDFI<PredMinFreq, PredEmerging, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
+				case 2: return runDFI<PredMinFreq, PredEmerging, Dna> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
 			}
 		case 2:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinAllSupp, PredEntropy, unsigned char> (fileNames, optionMinSupp, optionEntropy);
-				case 1: return runDFI<PredMinAllSupp, PredEntropy, AminoAcid> (fileNames, optionMinSupp, optionEntropy);
-				case 2: return runDFI<PredMinAllSupp, PredEntropy, Dna> (fileNames, optionMinSupp, optionEntropy);
+				case 0: return runDFI<PredMinAllSupp, PredEntropy, unsigned char> (getArgumentValues(parser), optionMinSupp, optionEntropy);
+				case 1: return runDFI<PredMinAllSupp, PredEntropy, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionEntropy);
+				case 2: return runDFI<PredMinAllSupp, PredEntropy, Dna> (getArgumentValues(parser), optionMinSupp, optionEntropy);
 			}
 	}
-	printHelp(argc, argv);
-	return 0;
+	cerr << "Please choose a mining problem." << endl;
+	cerr << "Exiting ..." << endl;
+	return -1;
 }
