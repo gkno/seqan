@@ -810,6 +810,22 @@ SEQAN_CHECKPOINT
 	return me;
 }
 
+template <typename TValue>
+inline TValue *
+toCString(String<TValue, CStyle> & me)
+{
+SEQAN_CHECKPOINT
+	return me;
+}
+
+template <typename TValue>
+inline TValue const *
+toCString(String<TValue, CStyle> const & me)
+{
+SEQAN_CHECKPOINT
+	return me;
+}
+
 template <typename T>
 inline typename Value<T>::Type *
 toCString(T & me)
