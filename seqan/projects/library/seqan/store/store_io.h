@@ -303,7 +303,8 @@ read(TFile & file,
 								_parse_skipLine(file, c);
 							} else if (fdIdentifier == "off") {
 								c = _streamGet(file);
-								offsetPos = _parse_readNumber(file, c);
+								if (c != '-') offsetPos = _parse_readNumber(file, c);
+								else offsetPos = 0;
 								_parse_skipLine(file, c);
 							} else if (fdIdentifier == "clr") {
 								c = _streamGet(file);
@@ -381,7 +382,7 @@ read(TFile & file,
 							alignEl.beginPos = offsetPos + totalGapLen + (clr1 - clr2);
 							alignEl.endPos = offsetPos;
 						}
-
+		
 						// Append new align fragment, note: contigId must still be set
 						alignEl.id = length(fragStore.alignedReadStore);
 						appendValue(fragStore.alignedReadStore, alignEl, Generous() );
@@ -406,7 +407,7 @@ read(TFile & file,
 								do {
 									_parse_readSequenceData(file,c,contigSeq);
 								} while (c == '-');
-								_parse_skipLine(file, c);
+								_parse_skipWhitespace(file, c);
 							}
 						} else if (fieldIdentifier == "qlt") {
 							c = _streamGet(file);
