@@ -597,7 +597,7 @@ write(TFile & target,
 	// Get clear ranges
 	typedef Pair<typename TFragmentStore::TReadPos, typename TFragmentStore::TReadPos> TClrRange;
 	String<TClrRange> clrRange;
-	resize(clrRange, length(fragStore.readStore));
+	fill(clrRange, length(fragStore.readStore), TClrRange(0,0));
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
 	TAlignIter alignIt = begin(fragStore.alignedReadStore, Standard() );
 	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );
@@ -647,11 +647,13 @@ write(TFile & target,
 			_streamPutInt(target, readIt->matePairId + 1);
 			_streamPut(target, '\n');
 		}
-		_streamWrite(target,"clr:");
-		_streamPutInt(target, (value(clrRange, idCount)).i1);
-		_streamPut(target, ',');
-		_streamPutInt(target, (value(clrRange, idCount)).i2);
-		_streamPut(target, '\n');
+		if ((value(clrRange, idCount)).i1 != (value(clrRange, idCount)).i2) {
+			_streamWrite(target,"clr:");
+			_streamPutInt(target, (value(clrRange, idCount)).i1);
+			_streamPut(target, ',');
+			_streamPutInt(target, (value(clrRange, idCount)).i2);
+			_streamPut(target, '\n');
+		}
 		_streamWrite(target,"}\n");
 	}
 
