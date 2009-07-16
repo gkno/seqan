@@ -250,7 +250,7 @@ read(TFile & file,
 						_parse_skipWhitespace(file, c);
 						while (c != '.') {
 							_parse_readSequenceData(file,c,seq);
-							_parse_skipLine(file, c);
+							_parse_skipWhitespace(file, c);
 						}
 					} else if (fieldIdentifier == "qlt") {
 						clear(qual);
