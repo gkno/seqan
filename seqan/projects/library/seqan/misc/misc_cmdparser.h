@@ -1231,7 +1231,7 @@ template <typename TValue>
 inline bool
 getOptionValueShort(CommandLineParser & me, CharString const & shortName, TValue & val)
 {
-	return getOptionValueShort(me, shortName, val, 0);
+	return getOptionValueShort(me, shortName, 0, val);
 }
 
 /**
@@ -1268,7 +1268,7 @@ template <typename TValue>
 inline bool
 getOptionValueLong(CommandLineParser & me,CharString const & longName, TValue & val)
 {
-	return getOptionValueLong(me, longName, val, 0);
+	return getOptionValueLong(me, longName, 0, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////

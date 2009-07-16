@@ -20,7 +20,7 @@ Lesser General Public License for more details.
 #include <seqan/modifier.h>
 #include "../seqan_tcoffee/rna_alphabet.h"
 #include "../razers/mmap_fasta.h"
-#include "seqan/misc/misc_cmdparser.h"
+#include <seqan/misc/misc_cmdparser.h>
 
 #include <iostream>
 #include <fstream>
@@ -306,8 +306,14 @@ int main(int argc, const char *argv[]) {
 	addHelpLine(parser, "ffft = Search last row for max");
 	addHelpLine(parser, "All combinations are allowed.");
 
+	if (argc == 1)
+	{
+		shortHelp(parser, std::cerr);	// print short help and exit
+		return 0;
+	}
 
 	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
+	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 
 	// Basic command line options
 	String<char> alphabet;
