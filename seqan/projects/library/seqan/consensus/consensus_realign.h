@@ -342,10 +342,10 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		/*
 		// Debug code
 		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
-		int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand - 10, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand + 10, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
 		std::cout << sc1 << std::endl;
 		std::cout << g1 << std::endl;
-
+		
 		Graph<Alignment<TStringSet, void, WithoutEdgeId> > g2(pairSet);
 		int sc2 = globalAlignment(g2, consScore, AlignConfig<true,false,false,true>(), -1 * length(pairSet[1]), length(pairSet[0]), BandedNeedlemanWunsch());
 		std::cout << sc2 << std::endl;
@@ -403,44 +403,46 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			diff -= clippedBeginPos;
 		}
 		bool firstMatch = true;
-		do {
-			--fragIt;
-			int gapLen = fragIt->begin1 - consPos;
-			if (firstMatch) gapLen = 0;
-			while(consPos < fragIt->begin1) {
-				if (!firstMatch) ++(*bandIt).count[gapPos];
-				*newConsIt = *bandIt;
-				++newConsIt;
-				++bandIt; 
-				++consPos; 
-				++alignPos;
-			}
-			while(readPos < fragIt->begin2) {
-				if (gapLen) {
-					diff += gapLen;
-					appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
-					gapLen = 0;
+		if (fragIt != fragItEnd) {
+			do {
+				--fragIt;
+				int gapLen = fragIt->begin1 - consPos;
+				if (firstMatch) gapLen = 0;
+				while(consPos < fragIt->begin1) {
+					if (!firstMatch) ++(*bandIt).count[gapPos];
+					*newConsIt = *bandIt;
+					++newConsIt;
+					++bandIt; 
+					++consPos; 
+					++alignPos;
 				}
-				int numGaps = insertGap(contigReads, bandOffset + alignPos);
-				TProfileChar tmpChar;
-				++tmpChar.count[myRead[readPos].count[0]];
-				tmpChar.count[gapPos] += numGaps;
-				*newConsIt = tmpChar; ++newConsIt;
-				++readPos; ++alignPos;
-			}
-			for(TSize i = 0; i<fragIt->len; ++i, ++bandIt, ++consPos, ++readPos, ++alignPos, ++newConsIt) {
-				if (firstMatch) {
-					firstMatch = false;
-					alignIt->beginPos = bandOffset + consPos;
-				} else if (gapLen) {
-					diff += gapLen;
-					appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
-					gapLen = 0;
+				while(readPos < fragIt->begin2) {
+					if (gapLen) {
+						diff += gapLen;
+						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
+						gapLen = 0;
+					}
+					int numGaps = insertGap(contigReads, bandOffset + alignPos);
+					TProfileChar tmpChar;
+					++tmpChar.count[myRead[readPos].count[0]];
+					tmpChar.count[gapPos] += numGaps;
+					*newConsIt = tmpChar; ++newConsIt;
+					++readPos; ++alignPos;
 				}
-				++(*bandIt).count[myRead[readPos].count[0]];
-				*newConsIt = *bandIt; 
-			}
-		} while (fragIt != fragItEnd);
+				for(TSize i = 0; i<fragIt->len; ++i, ++bandIt, ++consPos, ++readPos, ++alignPos, ++newConsIt) {
+					if (firstMatch) {
+						firstMatch = false;
+						alignIt->beginPos = bandOffset + consPos;
+					} else if (gapLen) {
+						diff += gapLen;
+						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
+						gapLen = 0;
+					}
+					++(*bandIt).count[myRead[readPos].count[0]];
+					*newConsIt = *bandIt; 
+				}
+			} while (fragIt != fragItEnd);
+		}
 		for(; readPos < length(myRead); ++readPos) {
 			int numGaps = insertGap(contigReads, bandOffset + alignPos);
 			TProfileChar tmpChar;
@@ -449,6 +451,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			*newConsIt = tmpChar; ++newConsIt;
 			++alignPos;
 		}
+		if (end(matches, Standard() ) == fragItEnd) alignIt->beginPos = bandOffset;
 		alignIt->endPos = alignIt->beginPos + clippedBeginPos + readPos + diff;
 		if (clippedEndPos) {
 			diff -= clippedEndPos;
