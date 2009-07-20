@@ -121,7 +121,7 @@ scoreGapOpenHorizontal(
 	TSeq1 const &,
 	TSeq2 const &)
 {
-	return ((int) pos2 < 0) ? -SEQAN_CONSENSUS_UNITY : me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + (ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)];
+	return ((int) pos2 < 0) ? -3 * SEQAN_CONSENSUS_UNITY : 3 * me.consensus_set[pos1 * (ValueSize<typename Value<TSeq1>::Type>::VALUE) + (ValueSize<typename Value<TSeq1>::Type>::VALUE - 1)];
 }
 
 
@@ -146,7 +146,7 @@ scoreGapOpenVertical(
 	TSeq1 const &,
 	TSeq2 const &)
 {
-	return -SEQAN_CONSENSUS_UNITY;
+	return -3 * SEQAN_CONSENSUS_UNITY;
 }
 
 
