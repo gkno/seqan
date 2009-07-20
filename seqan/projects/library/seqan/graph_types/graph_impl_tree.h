@@ -412,10 +412,8 @@ addVertex(Graph<Tree<TCargo, TSpec> >& g)
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TVertexDescriptor vd;
-	if (empty(g)) {
-		vd = obtainId(g.data_id_managerV);
-		g.data_root = vd;
-	} else vd = obtainId(g.data_id_managerV);
+	if (empty(g)) g.data_root = vd = obtainId(g.data_id_managerV);
+	else vd = obtainId(g.data_id_managerV);
 	if (vd == length(g.data_vertex)) {
 		appendValue(g.data_vertex, (TEdgeStump*) 0);
 		fill(g.data_parent, vd + 1, nilVertex, Generous());
