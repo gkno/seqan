@@ -34,22 +34,57 @@ using namespace seqan;
 
 #define DEBUG_ENTROPY
 
-//////////////////////////////////////////////////////////////////////////////
-// Custom frequency predicates
-
 	static const double DFI_EPSILON = 0.0000001;
 
-	// minfreq predicate for D0
+
+//////////////////////////////////////////////////////////////////////////////
+// predicates for the Frequent Pattern Mining Problem
+
+	// minimal frequency predicate
 	struct PredMinFreq 
+	{	
+		String<unsigned> minFreq;
+
+		template <typename TDataSet>
+		PredMinFreq(String<unsigned> _minFreq, TDataSet const &):
+			minFreq(_minFreq) {}
+			
+		inline bool operator()(_DFIEntry const &entry) const {
+			for (unsigned i = 0; i < length(entry.freq); ++i)
+				if (entry.freq[i] < minFreq[i])
+					return false;
+			return true;
+		}
+	};
+
+	// maximal frequency predicate
+	struct PredMaxFreq 
+	{	
+		String<unsigned> maxFreq;
+
+		template <typename TDataSet>
+		PredMaxFreq(String<unsigned> _maxFreq, TDataSet const &):
+			maxFreq(_maxFreq) {}
+			
+		inline bool operator()(_DFIEntry const &entry) const {
+			for (unsigned i = 0; i < length(entry.freq); ++i)
+				if (entry.freq[i] > maxFreq[i])
+					return false;
+			return true;
+		}
+	};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// predicates for the Emerging Substring Mining Problem
+
+	// minimal support predicate for D0
+	struct PredMinSupp
 	{	
 		unsigned minFreq;
 
 		template <typename TDataSet>
-		PredMinFreq(unsigned _minFreq, TDataSet const &):
-			minFreq(_minFreq) {}
-			
-		template <typename TDataSet>
-		PredMinFreq(double _minSupp, TDataSet const &ds)
+		PredMinSupp(double _minSupp, TDataSet const &ds)
 		{
 			// emerging substring mode
 			if (_minSupp * ds[1] < 1.0) {
@@ -65,7 +100,27 @@ using namespace seqan;
 		}
 	};
 
-	// minsupp predicate for at least one dataset
+	// minimal growth predicate from D1->D0
+	struct PredEmerging
+	{
+		double growthRate;
+
+		template <typename TDataSet>
+		PredEmerging(double _growthRate, TDataSet const &ds) {
+			growthRate = _growthRate * ((double) ds[1] / (double) (ds[2] - ds[1]) - DFI_EPSILON);
+		}
+			
+		// HINT: here growthRate is frequency-related, not support-related
+		inline bool operator()(_DFIEntry const &entry) const {
+			return (double)entry.freq[0] >= (double)entry.freq[1] * growthRate;
+		}
+	};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// predicates for the Maximum Entropy Mining Problem
+
+	// minimal support predicate for at least one dataset
 	struct PredMinAllSupp
 	{	
 		double minSupp;
@@ -88,37 +143,7 @@ using namespace seqan;
 		}
 	};
 
-	// predicate for the Frequent Pattern Mining Problem
-	struct PredFrequent 
-	{	
-		unsigned maxFreq;
-
-		template <typename TDataSet>
-		PredFrequent(unsigned _maxFreq, TDataSet const &):
-			maxFreq(_maxFreq) {}
-			
-		inline bool operator()(_DFIEntry const &entry) const {
-			return entry.freq[1] <= maxFreq;
-		}
-	};
-
-	// predicate for the Emerging Substring Mining Problem
-	struct PredEmerging
-	{
-		double growthRate;
-
-		template <typename TDataSet>
-		PredEmerging(double _growthRate, TDataSet const &ds) {
-			growthRate = _growthRate * ((double) ds[1] / (double) (ds[2] - ds[1]) - DFI_EPSILON);
-		}
-			
-		// HINT: here growthRate is frequency-related, not support-related
-		inline bool operator()(_DFIEntry const &entry) const {
-			return (double)entry.freq[0] >= (double)entry.freq[1] * growthRate;
-		}
-	};
-
-	// predicate for the Maximum Entropy Problem
+	// maximum entropy predicate
 	struct PredEntropy
 	{
 		double maxEntropy;
@@ -153,6 +178,7 @@ using namespace seqan;
 			return getEntropy(entry) <= maxEntropy;
 		}
 	};
+
 
 
 
@@ -202,6 +228,65 @@ bool loadDatasets(
 }
 
 
+template <typename TSize>
+struct SubstringEntry
+{
+	Pair<unsigned>	lPos;
+	unsigned		len;
+	Pair<TSize>		range;
+};
+
+template <typename TSubstringEntry>
+struct LessSubstringEnd : public binary_function<TSubstringEntry, TSubstringEntry, bool >
+{
+	inline bool operator() (TSubstringEntry const &a, TSubstringEntry const &b) const 
+	{
+		// sequence number
+		if (a.lPos.i1 < b.lPos.i1) return true;
+		if (a.lPos.i1 > b.lPos.i1) return false;
+
+		// end position
+		if (a.lPos.i2 + a.len < b.lPos.i2 + b.len) return true;
+		if (a.lPos.i2 + a.len > b.lPos.i2 + b.len) return false;
+		
+		return a.len > b.len;
+	}
+};
+
+template <typename TSubstringEntry>
+struct LessLex : public binary_function<TSubstringEntry, TSubstringEntry, bool >
+{
+	inline bool operator() (TSubstringEntry const &a, TSubstringEntry const &b) const 
+	{
+		if (a.range.i1 < b.range.i1) return true;
+		if (a.range.i1 > b.range.i1) return false;
+		return a.len < b.len;
+	}
+};
+
+template <typename TMatchString>
+inline void compactMatches(TMatchString &matches)
+{
+	typedef typename Iterator<TMatchString, Standard>::Type TIter;
+	TIter src = begin(matches, Standard());
+	TIter dst = src;
+	TIter srcEnd = end(matches, Standard());
+	
+	unsigned lastSeq = ~0;
+	unsigned lastPos = 0;
+	
+	if (src == srcEnd) return;
+	for (; src != srcEnd; ++src)
+		if (((*src).lPos.i1 != lastSeq) || ((*src).lPos.i2 + (*src).len != lastPos))
+		{
+			lastSeq = (*src).lPos.i1;
+			lastPos = (*src).lPos.i2 + (*src).len;
+			*dst = *src;
+			++dst;
+		}
+	resize(matches, dst - begin(matches, Standard()));
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Create DFI and output substrings within constraints band
@@ -225,13 +310,15 @@ template <
 int runDFI(
 	TFileNames		const &fileNames,
 	TParamPredHull	paramPredHull,
-	TParamPred		paramPred)
+	TParamPred		paramPred,
+	bool			maximal)
 {
-	typedef String<TAlphabet, Alloc<> >						TString;
-	typedef StringSet<TString>								TStringSet;
+	typedef String<TAlphabet, Alloc<> >								TString;
+	typedef StringSet<TString>										TStringSet;
 	typedef Index<TStringSet, Index_Wotd<
-		WotdDFI<TPredHull, TPred> > >						TIndex;
-	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >	TIter;
+		WotdDFI<TPredHull, TPred> > >								TIndex;
+	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >			TIter;
+	typedef SubstringEntry<typename Size<TIndex>::Type>				TSubstringEntry;
 
 	String<unsigned>	ds;
 	TStringSet			mySet;
@@ -249,18 +336,19 @@ int runDFI(
 			cout<<mySet[i]<<endl;
 	}
 */
-	TPred			pred(paramPred, ds);
-	TPredHull		predHull(paramPredHull, ds);
-	TIndex			index(mySet, predHull, pred);
-	Pair<unsigned>	lPos;
+	TPred					pred(paramPred, ds);
+	TPredHull				predHull(paramPredHull, ds);
+	TIndex					index(mySet, predHull, pred);
+	Pair<unsigned>			lPos;
+	String<TSubstringEntry>	matches;
 
 	// set index partition of sequences into datasets
 	index.ds = ds;
 
 #ifdef DEBUG_ENTROPY	
 	// database lookup table
-	typedef typename Infix< typename Fibre<TIndex, Fibre_SA>::Type const >::Type TOccs;
-	typedef typename Iterator<TOccs, Standard>::Type TOccIter;
+	typedef typename Fibre<TIndex, Fibre_SA>::Type TSA;
+	typedef typename Iterator<TSA, Standard>::Type TSAIter;
 	String<unsigned>	dbLookup;
 	String<bool>		seen;
 	_DFIEntry			entry;
@@ -278,17 +366,31 @@ int runDFI(
 
 	TIter it(index);
 	goBegin(it);
-	while (!atEnd(it)) 
+	
+	if (maximal)
 	{
-        posLocalize(lPos, getOccurrence(it), stringSetLimits(container(it)));
-		unsigned len = repLength(it);
-//		for(unsigned l = parentRepLength(it) + 1; l <= len; ++l)
-		unsigned l = len; 
+		for (unsigned m = 0; !atEnd(it); goNext(it), ++m)
+		{
+			resize(matches, m + 1, Generous());
+			posLocalize(matches[m].lPos, getOccurrence(it), stringSetLimits(container(it)));
+			matches[m].range = range(it);
+			matches[m].len = repLength(it);
+		}
+		
+		sort(begin(matches, Standard()), end(matches, Standard()), LessSubstringEnd<TSubstringEntry>());
+		compactMatches(matches);
+		sort(begin(matches, Standard()), end(matches, Standard()), LessLex<TSubstringEntry>());
+		
+		typedef typename Iterator<String<TSubstringEntry>, Standard>::Type TMatchIter;
+		TMatchIter mit = begin(matches, Standard());
+		TMatchIter mitEnd = end(matches, Standard());
+		
+		for (; mit != mitEnd; ++mit)
 		{
 #ifdef DEBUG_ENTROPY
 			// count frequencies (debug)
-			TOccs occs = getOccurrences(it);
-			TOccIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+			TSAIter oc = begin(indexSA(index), Standard()) + (*mit).range.i1;
+			TSAIter ocEnd = begin(indexSA(index), Standard()) + (*mit).range.i2;
 			arrayFill(begin(seen, Standard()), end(seen, Standard()), false);
 			arrayFill(begin(entry.freq, Standard()), end(entry.freq, Standard()), 0);
 			for (; oc != ocEnd; ++oc)
@@ -309,13 +411,52 @@ int runDFI(
 			cout << "]      ";
 #endif
 			cout << infix(
-				mySet[getSeqNo(lPos)], 
-				getSeqOffset(lPos),
-				getSeqOffset(lPos) + l) << endl;
+				mySet[getSeqNo((*mit).lPos)], 
+				getSeqOffset((*mit).lPos),
+				getSeqOffset((*mit).lPos) + (*mit).len) << endl;
 		}
-		goNext(it);
+	} 
+	else 
+	{
+		for (; !atEnd(it); goNext(it))
+		{
+			posLocalize(lPos, getOccurrence(it), stringSetLimits(container(it)));
+			unsigned len = repLength(it);
+			for(unsigned l = parentRepLength(it) + 1; l <= len; ++l)
+			{
+#ifdef DEBUG_ENTROPY
+				// count frequencies (debug)
+				typedef typename Infix< typename Fibre<TIndex, Fibre_SA>::Type const >::Type TOccs;
+				typedef typename Iterator<TOccs, Standard>::Type TOccIter;
+	            TOccs occs = getOccurrences(it);
+	            TOccIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());
+				arrayFill(begin(seen, Standard()), end(seen, Standard()), false);
+				arrayFill(begin(entry.freq, Standard()), end(entry.freq, Standard()), 0);
+				for (; oc != ocEnd; ++oc)
+				{
+					unsigned seqNo = getSeqNo(*oc, stringSetLimits(index));
+					if (!seen[seqNo])
+					{
+						seen[seqNo] = true;
+						++entry.freq[dbLookup[seqNo]];
+					}
+				}
+					
+				double H = entrp.getEntropy(entry);
+				if (H <= 0.0) H = 0.0;
+				cout << left << setw(14) << H << "[";
+				for (unsigned i = 0; i < length(entry.freq); ++i)
+					cout << right << setw(6) << entry.freq[i];
+				cout << "]      ";
+#endif
+				cout << infix(
+	                mySet[getSeqNo(lPos)],
+	                getSeqOffset(lPos),
+	                getSeqOffset(lPos) + l) << endl;
+			}
+		}
 	}
-
+	
 	return 0;
 }
 
@@ -323,11 +464,12 @@ int main(int argc, const char *argv[])
 {
 	int optionAlphabet = 0;   // 0..char, 1..protein, 2..dna
 	int optionPredicate = -1; // 0..minmax, 1..growth, 2..entropy
-	unsigned optionMinFreq = 0;
-	unsigned optionMaxFreq = 0;
+	String<unsigned> optionMinFreq;
+	String<unsigned> optionMaxFreq;
 	double optionMinSupp = 0;
 	double optionGrowthRate = 0;
 	double optionEntropy = 0;
+	bool optionMaximal = false;
 		
 	CommandLineParser parser;
 	string rev = "$Revision$";
@@ -339,16 +481,17 @@ int main(int argc, const char *argv[])
 	addTitleLine(parser, "***           DFI - The Deferred Frequency Index           ***");
 	addTitleLine(parser, "*** (c) Copyright 2009 by David Weese and Marcel H. Schulz ***");
 	addTitleLine(parser, "**************************************************************");
-	addUsageLine(parser, "[OPTION]... --minmax  <min_1> <max_2> <database 1> <database 2>");
+	addUsageLine(parser, "[OPTION]... --minmax  <min_1> <max_1> <database 1> ... --minmax <min_m> <max_m> <database m>");
 	addUsageLine(parser, "[OPTION]... --growth  <rho_s> <rho_g> <database 1> <database 2>");
 	addUsageLine(parser, "[OPTION]... --entropy <rho_s> <alpha> <database 1> <database 2> ... <database m>");
 	
-	addOption(parser, CommandLineOption("f",  "minmax",  2, "solve Frequent Pattern Mining Problem", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("f",  "minmax",  2, "solve Frequent Pattern Mining Problem", OptionType::Int | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("g",  "growth",  2, "solve Emerging Substring Mining Problem", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("e",  "entropy", 2, "solve Entropy Mining Problem", OptionType::Double | OptionType::Label));
 	addHelpLine(parser, "");
 	addOption(parser, CommandLineOption("p",  "protein",    "use AminoAcid alphabet (for proteomes)", OptionType::Boolean));
 	addOption(parser, CommandLineOption("d",  "dna",        "use DNA alphabet (for genomes)", OptionType::Boolean));
+	addOption(parser, CommandLineOption("m",  "maximal",    "output only left and right maximal substrings", OptionType::Boolean));
 	addHelpLine(parser, "The default is byte alphabet");
 
 	if (argc == 1)
@@ -361,6 +504,7 @@ int main(int argc, const char *argv[])
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Extract options
+	getOptionValueLong(parser, "maximal", optionMaximal);
 	if (isSetLong(parser, "protein")) optionAlphabet = 1;
 	if (isSetLong(parser, "dna")) optionAlphabet = 2;
 	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
@@ -370,14 +514,22 @@ int main(int argc, const char *argv[])
 	if (isSetLong(parser, "minmax"))
 	{
 		optionPredicate = 0;
-		getOptionValueLong(parser, "minmax", 0, optionMinFreq);
-		getOptionValueLong(parser, "minmax", 1, optionMaxFreq);
-		if ((optionMinFreq < 1) && (stop = true))
-			cerr << "Minimum frequency threshold must be at least 1." << endl;
-		if ((optionMaxFreq < 1) && (stop = true))
-			cerr << "Maximum frequency threshold must be greater than 0." << endl;
-		if ((argumentCount(parser) != 2) && (stop = true))
-			cerr << "Please specify 2 databases." << endl;
+		unsigned cons = length(getOptionValuesLong(parser, "minmax")) / 2;
+		resize(optionMinFreq, cons);
+		resize(optionMaxFreq, cons);
+		for (unsigned d = 0; d < cons; ++d)
+		{
+			getOptionValueLong(parser, "minmax", 2*d,   optionMinFreq[d]);
+			getOptionValueLong(parser, "minmax", 2*d+1, optionMaxFreq[d]);
+			if ((optionMinFreq[d] < 1) && (stop = true))
+				cerr << "Minimum frequency threshold must be at least 1." << endl;
+			if ((optionMaxFreq[d] < 1) && (stop = true))
+				cerr << "Maximum frequency threshold must be greater than 0." << endl;
+		}
+		if ((argumentCount(parser) < cons) && (stop = true))
+			cerr << "Please specify " << cons << " databases." << endl;
+		if ((argumentCount(parser) > cons) && (stop = true))
+			cerr << "Please specify " << argumentCount(parser) << " min/max constraints." << endl;
 	}
 	if (isSetLong(parser, "growth"))
 	{
@@ -415,23 +567,23 @@ int main(int argc, const char *argv[])
 		case 0:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinFreq, PredFrequent, unsigned char> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);
-				case 1: return runDFI<PredMinFreq, PredFrequent, AminoAcid> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);
-				case 2: return runDFI<PredMinFreq, PredFrequent, Dna> (getArgumentValues(parser), optionMinFreq, optionMaxFreq);	
+				case 0: return runDFI<PredMinFreq, PredMaxFreq, unsigned char> (getArgumentValues(parser), optionMinFreq, optionMaxFreq, optionMaximal);
+				case 1: return runDFI<PredMinFreq, PredMaxFreq, AminoAcid> (getArgumentValues(parser), optionMinFreq, optionMaxFreq, optionMaximal);
+				case 2: return runDFI<PredMinFreq, PredMaxFreq, Dna> (getArgumentValues(parser), optionMinFreq, optionMaxFreq, optionMaximal);
 			}
 		case 1:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinFreq, PredEmerging, unsigned char> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
-				case 1: return runDFI<PredMinFreq, PredEmerging, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
-				case 2: return runDFI<PredMinFreq, PredEmerging, Dna> (getArgumentValues(parser), optionMinSupp, optionGrowthRate);
+				case 0: return runDFI<PredMinSupp, PredEmerging, unsigned char> (getArgumentValues(parser), optionMinSupp, optionGrowthRate, optionMaximal);
+				case 1: return runDFI<PredMinSupp, PredEmerging, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionGrowthRate, optionMaximal);
+				case 2: return runDFI<PredMinSupp, PredEmerging, Dna> (getArgumentValues(parser), optionMinSupp, optionGrowthRate, optionMaximal);
 			}
 		case 2:
 			switch (optionAlphabet)
 			{
-				case 0: return runDFI<PredMinAllSupp, PredEntropy, unsigned char> (getArgumentValues(parser), optionMinSupp, optionEntropy);
-				case 1: return runDFI<PredMinAllSupp, PredEntropy, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionEntropy);
-				case 2: return runDFI<PredMinAllSupp, PredEntropy, Dna> (getArgumentValues(parser), optionMinSupp, optionEntropy);
+				case 0: return runDFI<PredMinAllSupp, PredEntropy, unsigned char> (getArgumentValues(parser), optionMinSupp, optionEntropy, optionMaximal);
+				case 1: return runDFI<PredMinAllSupp, PredEntropy, AminoAcid> (getArgumentValues(parser), optionMinSupp, optionEntropy, optionMaximal);
+				case 2: return runDFI<PredMinAllSupp, PredEntropy, Dna> (getArgumentValues(parser), optionMinSupp, optionEntropy, optionMaximal);
 			}
 	}
 	cerr << "Please choose a mining problem." << endl;
