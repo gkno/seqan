@@ -757,13 +757,16 @@ write(TFile & target,
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
+	TIterConst it = begin(g.data_vertex, Standard());
+	TIterConst itEnd = end(g.data_vertex, Standard());
 	_streamWrite(target,"Adjacency list:\n");
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TVertexDescriptor sourceV = position(it);
+	TVertexDescriptor pos = 0;
+	for(;it != itEnd; ++it, ++pos) {
+		TVertexDescriptor sourceV = pos;
 		_streamPutInt(target, sourceV);
 		_streamWrite(target," -> ");
-		TEdgeStump* current = getValue(it);
+		TEdgeStump* current = *it;
 		while(current!=0) {
 			TVertexDescriptor adjV = getTarget(current);
 			if (adjV != sourceV) {
@@ -779,10 +782,12 @@ write(TFile & target,
 		}
 		_streamPut(target, '\n');
 	}
+	it = begin(g.data_vertex, Standard());
+	pos = 0;
 	_streamWrite(target,"Edge list:\n");
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		TVertexDescriptor sourceV = position(it);
-		TEdgeStump* current = getValue(it);
+	for(; it != itEnd; ++it, ++pos) {
+		TVertexDescriptor sourceV = pos;
+		TEdgeStump* current = *it;
 		while(current!=0) {
 			TVertexDescriptor targetV = getTarget(current);
 			if (sourceV != targetV) {
