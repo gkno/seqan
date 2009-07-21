@@ -145,7 +145,7 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 	TIdType id;
 	if (!empty(idm.data_freeIds)) {
 		id = getValue(idm.data_freeIds, length(idm.data_freeIds) - 1);
-		resize(idm.data_freeIds, length(idm.data_freeIds) - 1);
+		resize(idm.data_freeIds, length(idm.data_freeIds) - 1, Generous());
 		assignValue(idm.data_in_use, id, true);
 	} else {
 		if (empty(idm.data_in_use)) id = 0;
@@ -178,10 +178,10 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(idm,id) == true)
 	if (id == (TId) length(idm.data_in_use) - 1) {
-		resize(idm.data_in_use, length(idm.data_in_use) - 1);
+		resize(idm.data_in_use, length(idm.data_in_use) - 1, Generous());
 	} else {
 		assignValue(idm.data_in_use, id, false);
-		appendValue(idm.data_freeIds, id);
+		appendValue(idm.data_freeIds, id, Generous());
 	}
 	if (idCount(idm)==0) {
 		releaseAll(idm);
@@ -230,9 +230,7 @@ inline typename Value<IdManager<TIdType, TSpec> >::Type
 getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Value<IdManager<TIdType, TSpec> >::Type TReturnType;
-	if (empty(idm.data_in_use)) return 0;
-	else return (TReturnType) length(idm.data_in_use);
+	return (empty(idm.data_in_use)) ? 0 : (typename Value<IdManager<TIdType, TSpec> >::Type) length(idm.data_in_use);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -301,7 +299,7 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(id < (TId) length(idm.data_in_use))
-	return getValue(idm.data_in_use, id);
+	return idm.data_in_use[id];
 }
 
 
