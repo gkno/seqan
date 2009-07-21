@@ -39,11 +39,9 @@ public:
 	{
 		typedef typename VertexDescriptor<TEdge>::Type TVertexDescriptor;
 		typedef typename Size<TAlphabet>::Type TSize;
-		TSize table_length = ValueSize<TAlphabet>::VALUE;
 		TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-		for(TSize i=0;i<table_length;++i) {
+		for(TSize i=0;i < (TSize) ValueSize<TAlphabet>::VALUE;++i) 
 			assignTarget(&data_edge[i], nilVal);
-		}
 	}
 };
 
@@ -165,15 +163,18 @@ _copyGraph(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& source,
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Cargo<TEdge>::Type TCargoType;
 	typedef typename Size<TAlphabet>::Type TSize;
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
 	
 	clear(dest);
 	resize(dest.data_vertex, length(_getVertexString(source)));
 	dest.data_root = source.data_root;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	for(TIterConst it = begin(source.data_vertex);!atEnd(it);goNext(it)) {
+	TIterConst it = begin(source.data_vertex, Standard());
+	TIterConst itEnd = end(source.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd;++it, ++pos) {
 		TSize table_length = ValueSize<TAlphabet>::VALUE;
-		TVertexDescriptor sourceVertex = position(it);
+		TVertexDescriptor sourceVertex = pos;
 		for(TSize i=0;i<table_length;++i) {
 			TEdgeDescriptor const edSource = (TEdgeDescriptor) &source.data_vertex[sourceVertex].data_edge[i];
 			TVertexDescriptor targetVertex = getTarget(edSource);
@@ -309,11 +310,9 @@ outDegree(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
 	TSize count=0;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	for(TSize i=0;i<table_length;++i) {
+	for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE; ++i) 
 		if ( (TVertexDescriptor) getTarget(&g.data_vertex[vertex].data_edge[i])!=nilVal) ++count;
-	}
 	return count;
 }
 
@@ -329,18 +328,16 @@ inDegree(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeType<TGraph>::Type TEdge;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	TSize count=0;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
-	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (!idInUse(g.data_id_managerV, position(it))) continue;
-		for(TSize i=0;i<table_length;++i) {
-			TEdgeDescriptor ed = (TEdgeDescriptor) &(getValue(it)).data_edge[i];
-			if ( (TVertexDescriptor) getTarget(ed)==nilVal) continue;
-			if ( (TVertexDescriptor) getTarget(ed)==vertex) ++count;			
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
+	TIterConst it = begin(g.data_vertex, Standard());
+	TIterConst itEnd = end(g.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd; ++it, ++pos) {
+		if (idInUse(g.data_id_managerV, pos)) {
+			for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) 
+				if ( (TVertexDescriptor) getTarget(&(*it).data_edge[i]) == vertex) ++count;			
 		}
 	}
 	return count;
@@ -369,11 +366,8 @@ addVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 	typedef typename EdgeType<TGraph >::Type TEdge;
 
 	TVertexDescriptor vd = obtainId(g.data_id_managerV);
-	if (vd == length(g.data_vertex)) {
-		appendValue(g.data_vertex, AutomatonEdgeArray<TEdge, TAlphabet>()); 
-	} else {
-		value(g.data_vertex, vd) =  AutomatonEdgeArray<TEdge, TAlphabet>();
-	}
+	if (vd == length(g.data_vertex)) appendValue(g.data_vertex, AutomatonEdgeArray<TEdge, TAlphabet>()); 
+	else g.data_vertex[vd] =  AutomatonEdgeArray<TEdge, TAlphabet>();
 	return vd;
 }
 
@@ -408,8 +402,7 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	
-	TAlphabet letter(label);
-	TEdgeDescriptor e = findEdge(g, source, letter);
+	TEdgeDescriptor e = findEdge(g, source, (TAlphabet) label);
 	_assignId(e, obtainId(g.data_id_managerE));
 	assignTarget(e, target);
 	return e;
@@ -430,8 +423,7 @@ addEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
-	TAlphabet letter(label);
-	TEdgeDescriptor e = addEdge(g,source,target,label);
+	TEdgeDescriptor e = addEdge(g,source,target, (TAlphabet) label);
 	assignCargo(e,cargo);
 	TId id = obtainId(g.data_id_managerE);
 	_assignId(e, id);
@@ -450,11 +442,7 @@ removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
-	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-
-	TAlphabet letter(label);
-	removeEdge(g, &g.data_vertex[source].data_edge[ordValue(letter)]);
+	removeEdge(g, &g.data_vertex[source].data_edge[ordValue((TAlphabet) label)]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -487,9 +475,8 @@ removeOutEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	for(TSize i=0;i<table_length;++i) {
+	for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) {
 		TEdgeDescriptor ed = &g.data_vertex[vertex].data_edge[i];
 		if ( (TVertexDescriptor) getTarget(ed) == nilVal) continue;
 		assignTarget(ed, nilVal);
@@ -512,17 +499,19 @@ removeInEdges(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TId;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> >, Rooted>::Type TIter;
-	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (!idInUse(g.data_id_managerV, position(it))) continue;
-		for(TSize i=0;i<table_length;++i) {
-			TEdgeDescriptor ed = &(value(it)).data_edge[i];
-			if ( (TVertexDescriptor) getTarget(ed) == nilVal) continue;
-			if ( (TVertexDescriptor) getTarget(ed) != vertex) continue;
-			assignTarget(ed, nilVal);
-			releaseId(g.data_id_managerE, _getId(ed));	
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> >, Standard>::Type TIter;
+	TIter it = begin(g.data_vertex, Standard());
+	TIter itEnd = end(g.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd;++it, ++pos) {
+		if (idInUse(g.data_id_managerV, pos)) {
+			for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) {
+				TEdgeDescriptor ed = &(value(it)).data_edge[i];
+				if (( (TVertexDescriptor) getTarget(ed) == nilVal) ||  ( (TVertexDescriptor) getTarget(ed) != vertex)) continue;
+				assignTarget(ed, nilVal);
+				releaseId(g.data_id_managerE, _getId(ed));	
+			}
 		}
 	}
 }
@@ -555,13 +544,17 @@ sourceVertex(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 
 	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> >, Rooted>::Type TIter;
-	for(TIter it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (!idInUse(g.data_id_managerV, position(it))) continue;
-		for(TSize i=0;i<table_length;++i) {
-			TEdgeDescriptor ed = &(value(it)).data_edge[i];
-			if (getTarget(ed) == nilVal) continue;
-			if (ed==edge) return position(it);
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> >, Standard>::Type TIter;
+	TIter it = begin(g.data_vertex, Standard());
+	TIter itEnd = end(g.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd; ++it, ++pos) {
+		if (idInUse(g.data_id_managerV, pos)) {
+			for(TSize i=0;i<table_length;++i) {
+				TEdgeDescriptor ed = &(*it).data_edge[i];
+				if (getTarget(ed) == nilVal) continue;
+				if (ed==edge) return pos;
+			}
 		}
 	}
 	// We should never reach this point
@@ -584,19 +577,21 @@ getAdjacencyMatrix(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Size<TMatrix>::Type TMatrixSize;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TMatrixSize len = getIdUpperBound(g.data_id_managerV);
 	fill(mat, len*len, 0);
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (!idInUse(g.data_id_managerV, position(it))) continue;
-		for(TSize i=0;i<table_length;++i) {
-			if (((getValue(it)).data_edge[i].data_target!=nilVal))
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
+	TIterConst it = begin(g.data_vertex, Standard());
+	TIterConst itEnd = end(g.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd;++it, ++pos) {
+		if (!idInUse(g.data_id_managerV, pos)) continue;
+		for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) {
+			if (((*it).data_edge[i].data_target!=nilVal))
 			{
-				TVertexDescriptor const source = position(it);
-				TVertexDescriptor const target = (getValue(it)).data_edge[i].data_target;
-				assignValue(mat, source*len+target, getValue(mat, source*len+target)+1);
+				TVertexDescriptor const source = pos;
+				TVertexDescriptor const target = (*it).data_edge[i].data_target;
+				++mat[source*len+target];
 			}
 		}
 	}
@@ -612,12 +607,8 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-
-	TAlphabet label(c);
-	return &g.data_vertex[v].data_edge[ordValue(label)];
+	return &g.data_vertex[v].data_edge[ordValue((TAlphabet) c)];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -630,7 +621,6 @@ findEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, v) == true)
-	
 	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
 	TGraph* graph = const_cast<TGraph*>(&g);
 	return findEdge(*graph, v, c);
@@ -650,17 +640,19 @@ write(TFile & target,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdge;
 	typedef typename Size<TAlphabet>::Type TSize;
-	TSize table_length = ValueSize<TAlphabet>::VALUE;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 
 	_streamWrite(target,"Automaton - State: (Input / NextState)\n");
-	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Rooted>::Type TIterConst;
-	for(TIterConst it = begin(g.data_vertex);!atEnd(it);goNext(it)) {
-		if (!idInUse(g.data_id_managerV, position(it))) continue;
-		TVertexDescriptor sourceVertex = position(it);
+	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
+	TIterConst it = begin(g.data_vertex, Standard());
+	TIterConst itEnd = end(g.data_vertex, Standard());
+	TVertexDescriptor pos = 0;
+	for(;it!=itEnd;++it, ++pos) {
+		if (!idInUse(g.data_id_managerV, pos)) continue;
+		TVertexDescriptor sourceVertex = pos;
 		_streamPutInt(target, sourceVertex);
 		_streamWrite(target,": ");
-		for(TSize i=0;i<table_length;++i) {
+		for(TSize i=0;i< (TSize) ValueSize<TAlphabet>::VALUE;++i) {
 			_streamPut(target, ' ');
 			_streamPut(target, '(');
 			_streamPut(target, TAlphabet(i));
@@ -695,10 +687,7 @@ inline void
 createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 {
 	SEQAN_CHECKPOINT
-	typedef Graph<Automaton<TAlphabet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TVertexDescriptor r = addVertex(g);
-	g.data_root = r;
+	g.data_root = addVertex(g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -874,7 +863,7 @@ inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::
 parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 			TVertexDescriptor const vertex,
 			TIterator & beginIt,
-			TIterator endIt)
+			TIterator const & endIt)
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, vertex) == true)
@@ -894,7 +883,7 @@ inline typename VertexDescriptor<Graph<Automaton<TAlphabet, TCargo, TSpec> > >::
 parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 			TVertexDescriptor const vertex,
 			TIterator const & beginIt,
-			TIterator endIt)
+			TIterator const & endIt)
 {
 	SEQAN_CHECKPOINT
 	TIterator beginIt2 = beginIt;
@@ -980,6 +969,7 @@ canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g,
 	SEQAN_CHECKPOINT
 	return canParseString(g, root(g), chars);
 }
+
 template<typename TAlphabet, typename TCargo,  typename TSpec, typename TCharacters>
 inline bool 
 canParseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g,
