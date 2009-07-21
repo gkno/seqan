@@ -312,19 +312,16 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<String<TCargo>, Rooted>::Type TEmisIter;
+	typedef typename Iterator<String<TCargo>, Standard>::Type TEmisIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
 	TVertexDescriptor vd = addVertex(g.data_model);
 	if (length(g.data_emission) / alph_size <= vd) resize(g.data_emission, (vd + 1) * alph_size, Generous());
 	if (length(g.data_silent) <= vd) resize(g.data_silent, (vd + 1), Generous());
-	value(g.data_silent, vd) = silent;
-	TEmisIter it = begin(g.data_emission);
-	goFurther(it, vd * alph_size);
-	for(TSize counter = 0; counter < alph_size; ++counter) {
-		value(it) = (TCargo) 0.0;
-		++it;
-	}
+	g.data_silent[vd] = silent;
+	TEmisIter it = begin(g.data_emission, Standard());
+	it += vd * alph_size;
+	for(TSize counter = 0; counter < alph_size; ++counter, ++it) *it = (TCargo) 0.0;
 	return vd;
 }
 
@@ -349,20 +346,17 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<String<TCargo>, Rooted>::Type TEmisIter;
-	typedef typename Iterator<String<TEmission> >::Type TInputIter;
+	typedef typename Iterator<String<TCargo>, Standard>::Type TEmisIter;
+	typedef typename Iterator<String<TEmission>, Standard>::Type TInputIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
 	SEQAN_TASSERT(alph_size == length(emis))
 
 	TVertexDescriptor vd = addVertex(g);
-	TEmisIter it = begin(g.data_emission);
-	goFurther(it, vd * alph_size);
-	TInputIter itIn = begin(emis);
-	for(TSize counter = 0; counter < alph_size; ++counter) {
-		value(it) = *itIn;
-		++itIn; ++it;
-	}
+	TEmisIter it = begin(g.data_emission, Standard());
+	it += vd * alph_size;
+	TInputIter itIn = begin(emis, Standard());
+	for(TSize counter = 0; counter < alph_size; ++counter, ++itIn, ++it) *it = *itIn;
 	return vd;
 }
 
@@ -378,7 +372,7 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TVertexDescriptor vd = addVertex(g, emis);
-	value(g.data_silent, vd) = silent;
+	g.data_silent[vd] = silent;
 	return vd;
 }
 
@@ -521,12 +515,12 @@ write(TFile & target,
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> >::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*>, Standard>::Type TIterConst;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
 
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<String<TCargo> const, Rooted>::Type TEmisIter;
+	typedef typename Iterator<String<TCargo> const, Standard>::Type TEmisIter;
 	
 	
 	// Alphabet
@@ -543,8 +537,8 @@ write(TFile & target,
 	// States
 	_streamWrite(target,"States:\n");
 	_streamPut(target,'{');
-	TIterConst itEnd = end(_getVertexString(g));
-	TIterConst it = begin(_getVertexString(g));
+	TIterConst it = begin(_getVertexString(g), Standard());
+	TIterConst itEnd = end(_getVertexString(g), Standard());
 	bool first = true;
 	for(TSize pos = 0;it!=itEnd;goNext(it), ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
@@ -588,11 +582,11 @@ write(TFile & target,
 
 	// Emission probabilities
 	_streamWrite(target,"Emission probabilities:\n");
-	TEmisIter itEmis = begin(g.data_emission);
-	itEnd = end(_getVertexString(g));
-	it = begin(_getVertexString(g));	
+	TEmisIter itEmis = begin(g.data_emission, Standard());
+	itEnd = end(_getVertexString(g), Standard());
+	it = begin(_getVertexString(g), Standard());	
 	first = true;
-	for(TSize pos = 0;it!=itEnd;goNext(it), ++pos) {
+	for(TSize pos = 0;it!=itEnd;++it, ++pos) {
 		if (!idInUse(_getVertexIdManager(g), pos)) continue;
 		if (isSilent(g, pos)) continue;
 		if (!first) _streamPut(target,'\n');
@@ -600,7 +594,8 @@ write(TFile & target,
 		_streamPutInt(target, pos);
 		_streamWrite(target,": ");
 		bool my_first = true;
-		setPosition(itEmis, pos * alph_size);
+		itEmis = begin(g.data_emission, Standard());
+		itEmis += pos * alph_size;
 		for(TSize counter = 0; counter < alph_size; ++itEmis, ++counter) {
 			if (!my_first) _streamPut(target, ',');
 			else my_first = false;
@@ -637,7 +632,7 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
 
 	g.data_begin = vertex;
-	value(g.data_silent, vertex) = true;
+	g.data_silent[vertex] = true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -662,7 +657,7 @@ assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
 
 	g.data_end = vertex;
-	value(g.data_silent, vertex) = true;
+	g.data_silent[vertex] = true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -891,9 +886,7 @@ getEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
-	TSize alph_size = ValueSize<TAlphabet>::VALUE;
-
-	return getValue(g.data_emission, state * alph_size + ordValue(symbol));
+	return g.data_emission[state * (TSize) ValueSize<TAlphabet>::VALUE + ordValue(symbol)];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -921,9 +914,7 @@ emissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
-	TSize alph_size = ValueSize<TAlphabet>::VALUE;
-
-	return value(g.data_emission, state * alph_size + ordValue(symbol));
+	return g.data_emission[state * (TSize) ValueSize<TAlphabet>::VALUE + ordValue(symbol)];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -953,9 +944,7 @@ assignEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 
 	typedef Graph<Hmm<TAlphabet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TAlphabet>::Type TSize;
-	TSize alph_size = ValueSize<TAlphabet>::VALUE;
-
-	value(g.data_emission, state * alph_size + ordValue(symbol)) = (TCargo) eProb;
+	g.data_emission[state * (TSize) ValueSize<TAlphabet>::VALUE + ordValue(symbol)] = (TCargo) eProb;
 }
 
 
@@ -982,7 +971,7 @@ assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	SEQAN_ASSERT(idInUse(_getVertexIdManager(g), vertex) == true)
-	value(g.data_silent, vertex) = silent;
+	g.data_silent[vertex] = silent;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1004,7 +993,7 @@ silentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 			 TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	return (value(g.data_silent, vertex));
+	return g.data_silent[vertex];
 }
 
 
@@ -1027,7 +1016,7 @@ isSilent(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 		 TVertexDescriptor const vertex)
 {
 	SEQAN_CHECKPOINT
-	return (value(g.data_silent, vertex));
+	return g.data_silent[vertex];
 }
 
 
