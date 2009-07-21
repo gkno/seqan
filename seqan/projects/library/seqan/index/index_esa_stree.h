@@ -690,6 +690,16 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 			return value(it).range.i2 - value(it).range.i1;
 	}
 
+	template < typename TIndex, class TSpec >
+	inline Pair<typename Size<TIndex>::Type>
+	range(Iter< TIndex, VSTree<TSpec> > const &it)
+	{
+		if (_isSizeInval(value(it).range.i2))
+			return Pair<typename Size<TIndex>::Type>(value(it).range.i1, length(indexSA(container(it))));
+		else
+			return value(it).range;
+	}
+
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrences:
