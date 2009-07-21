@@ -1751,14 +1751,14 @@ rebuildGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 		while(pos != posEnd) {
 			if ((startMatch1 + len == pos->first) && (startMatch2 + len == pos->second)) ++len;
 			else {
-				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+				appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len), Generous());
 				startMatch1 = pos->first;
 				startMatch2 = pos->second;
 				len = 1;
 			}
 			++pos;
 		}
-		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len));
+		appendValue(matches, TFragment(seq1, startMatch1, seq2, startMatch2, len), Generous());
 	}
 	clearVertices(g);
 	matchRefinement(matches,stringSet(g),g);
@@ -1870,14 +1870,14 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& 
 			// Gaps in seq 2
 			while (i != posStr1) {
 				TVertexSetIter itVEnd = end(value(pointerStr1));
-				for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV));
+				for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV), Generous());
 				++pointerAlign;
 				++pointerStr1; ++posStr1;
 			}
 			// Gaps in seq 1
 			while (j != posStr2) {
 				TVertexSetIter itVEnd = end(value(pointerStr2));
-				for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV));
+				for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV), Generous());
 				++pointerAlign;
 				++pointerStr2; ++posStr2;
 			}
@@ -1885,14 +1885,14 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& 
 			// Gaps in seq 1
 			while (j != posStr2) {
 				TVertexSetIter itVEnd = end(value(pointerStr2));
-				for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV));
+				for(TVertexSetIter itV = begin(value(pointerStr2));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV), Generous());
 				++pointerAlign;
 				++pointerStr2; ++posStr2;
 			}
 			// Gaps in seq 2
 			while (i != posStr1) {
 				TVertexSetIter itVEnd = end(value(pointerStr1));
-				for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV));
+				for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV), Generous());
 				++pointerAlign;
 				++pointerStr1; ++posStr1;
 			}
@@ -1901,9 +1901,9 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& 
 		// Matches
 		if (p>=0) {
 			TVertexSetIter itVEnd = end(value(pointerStr1));
-			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV));
+			for(TVertexSetIter itV = begin(value(pointerStr1));itV != itVEnd;++itV) appendValue(value(pointerAlign), value(itV), Generous());
 			TVertexSetIter itVEnd2 = end(value(pointerStr2));
-			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) appendValue(value(pointerAlign), value(itV2));
+			for(TVertexSetIter itV2 = begin(value(pointerStr2));itV2 != itVEnd2;++itV2) appendValue(value(pointerAlign), value(itV2), Generous());
 			++pointerAlign;
 			++pointerStr1; ++posStr1;
 			++pointerStr2; ++posStr2;

@@ -264,7 +264,7 @@ clearEdges(Graph<Undirected<TCargo, TSpec> >& g)
 		TVertexDescriptor sourceVertex = pos;
 		while(current != (TEdgeStump*) 0) {
 			if (getTarget(current) != sourceVertex) {
-				appendValue(edges, current);
+				appendValue(edges, current, Generous());
 				current = getNextS(current);
 			}
 			// Do nothing here because we don't want to create edges twice!!!
@@ -363,7 +363,7 @@ addVertex(Graph<Undirected<TCargo, TSpec> >& g)
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	TVertexDescriptor vd = obtainId(g.data_id_managerV);
-	if (vd == length(g.data_vertex)) appendValue(g.data_vertex, (TEdgeStump*) 0); 
+	if (vd == length(g.data_vertex)) appendValue(g.data_vertex, (TEdgeStump*) 0, Generous()); 
 	else g.data_vertex[vd] = (TEdgeStump*) 0;
 	return vd;
 }
