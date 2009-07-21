@@ -32,7 +32,7 @@
 using namespace std;
 using namespace seqan;
 
-#define DEBUG_ENTROPY
+//#define DEBUG_ENTROPY
 
 	static const double DFI_EPSILON = 0.0000001;
 
@@ -92,7 +92,7 @@ using namespace seqan;
 				exit(1);
 			}
 			// adapt parameters from support to frequency
-			minFreq = (unsigned) ceil((double) _minSupp * (ds[2] - ds[1]) - DFI_EPSILON);
+			minFreq = (unsigned) ceil(_minSupp * (double)ds[1] - DFI_EPSILON);
 		}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
@@ -123,21 +123,20 @@ using namespace seqan;
 	// minimal support predicate for at least one dataset
 	struct PredMinAllSupp
 	{	
-		double minSupp;
-		String<int> dsLen;
+		String<unsigned> minFreq;
 
 		template <typename TDataSet>
-		PredMinAllSupp(double _minSupp, TDataSet const &ds):
-			minSupp(_minSupp) 
+		PredMinAllSupp(double _minSupp, TDataSet const &ds)
 		{
-			resize(dsLen, length(ds) - 1, Exact());
+			resize(minFreq, length(ds) - 1, Exact());
+			// adapt parameters from support to frequency
 			for (unsigned i = 1; i < length(ds); ++i)
-				dsLen[i - 1] = ds[i] - ds[i - 1];
+				minFreq[i - 1] = (unsigned) ceil(_minSupp * (double)(ds[i] - ds[i - 1]) - DFI_EPSILON);
 		}
 			
 		inline bool operator()(_DFIEntry const &entry) const {
 			for (unsigned i = 0; i < length(entry.freq); ++i)
-				if (entry.freq[i] >= dsLen[i] * minSupp)
+				if (entry.freq[i] >= minFreq[i])
 					return true;
 			return false;
 		}
@@ -150,7 +149,7 @@ using namespace seqan;
 
 		template <typename TDataSet>
 		PredEntropy(double _maxEntropy, TDataSet const &):
-			maxEntropy(_maxEntropy) {}
+			maxEntropy(_maxEntropy + DFI_EPSILON) {}
 			
 		static inline double
 		getEntropy(_DFIEntry const &entry)
@@ -337,14 +336,9 @@ int runDFI(
 		return 1;
 	}
 	
-/*	unsigned i=0;
-	for(unsigned j=1;j<length(ds);++j)
-	{
-		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
-		for(;i<ds[j];++i)
-			cout<<mySet[i]<<endl;
-	}
-*/
+//	for(unsigned j=1;j<length(ds);++j)
+//		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
+
 	TPred					pred(paramPred, ds);
 	TPredHull				predHull(paramPredHull, ds);
 	TIndex					index(mySet, predHull, pred);
