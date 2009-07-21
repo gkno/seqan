@@ -129,9 +129,7 @@ label(Fragment<TSize, TSpec> const& f,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
-
-	if ((TId) seqId == f.seqId1) return infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len);
-	else return infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
+	return ((TId) seqId == (f.seqId1)) ? infix(getValueById(str, (TId) seqId), f.begin1, f.begin1 + f.len) : infix(getValueById(str, (TId) seqId), f.begin2, f.begin2 + f.len);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -143,9 +141,7 @@ sequenceId(Fragment<TSize, TSpec> const& f,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
-
-	if ((TId) seqId == 0) return f.seqId1;
-	else return f.seqId2;
+	return ((TId) seqId == 0) ? f.seqId1 : f.seqId2;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -157,9 +153,7 @@ fragmentBegin(Fragment<TSize, TSpec> const& f,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
-
-	if ((TId) seqId == f.seqId1) return const_cast<TSize&>(f.begin1);
-	else return const_cast<TSize&>(f.begin2);
+	return ((TId) seqId == f.seqId1) ? const_cast<TSize&>(f.begin1) : const_cast<TSize&>(f.begin2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
