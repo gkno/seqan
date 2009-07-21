@@ -284,11 +284,12 @@ heaviestIncreasingSubsequence(TString const& str,
 	TGraph g;
 
 	// Walk through the sequence and build the decreasing covers
-	typedef typename Iterator<TString const>::Type TStringIter;
-	TStringIter endIt = end(str);
+	typedef typename Iterator<TString const, Standard>::Type TStringIter;
+	TStringIter it = begin(str, Standard());
+	TStringIter endIt = end(str, Standard());
 	TSize pos_of_iterator = 0;
-	for(TStringIter it = begin(str); it != endIt; ++it, ++pos_of_iterator) {
-		TWeight w = getValue(weights, pos_of_iterator);
+	for(; it != endIt; ++it, ++pos_of_iterator) {
+		TWeight w = weights[pos_of_iterator];
 		// Letters that do not contribute a weight (e.g., w = 0) are excluded!
 		// Weights must increase!
 		if (w <= 0) {
