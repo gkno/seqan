@@ -254,7 +254,7 @@ multireadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Value<TString>::Type TAlphabet;
 	typedef typename Infix<TString>::Type TInfix;
 	typedef typename Iterator<TInfix>::Type TInfixIter;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 	typedef std::map<TSize, TSize> TComponentLength;
 	
 	// Strongly Connected Components, topological sort, and length of each component

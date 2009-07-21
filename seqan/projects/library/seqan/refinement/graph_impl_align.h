@@ -198,7 +198,9 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 		typedef typename Id<Graph>::Type TIdType;
 		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
 		typedef typename Size<Graph>::Type TSize;
-		typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+		typedef std::pair<TIdType, TSize> TKey;
+		typedef std::map<TKey, TVertexDescriptor> TPosToVertexMap;
+		typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
 
 		// Alignment graph
 		Graph<Undirected<TCargo, TSpec> > data_align;
@@ -207,7 +209,7 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 		Holder<StringSet<TString, Dependent<TSpecial> > > data_sequence;
 		
 		// Alignment specific members
-		String<FragmentInfo<TIdType, TSize> > data_fragment;
+		String<TFragmentInfo> data_fragment;
 
 		// STL Map to retrieve a vertex given SeqId, Position
 		TPosToVertexMap data_pvMap;
@@ -224,9 +226,9 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 
 			// Cover all sequences with nil vertices
 			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-			for(TSize k=0; k<length(sSet);++k) {
-				data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sSet,k), length(sSet[k])), nilVertex));
-			}
+			TSize lenSet = length(sSet);
+			for(TSize k=0; k<lenSet;++k) 
+				data_pvMap.insert(std::make_pair(TKey(positionToId(sSet,k), length(sSet[k])), nilVertex));
 		}
 
 		template <typename TDefault>
@@ -237,9 +239,9 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 
 			// Cover all sequences with nil vertices
 			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-			for(TSize k=0; k<length(sSet);++k) {
-				data_pvMap.insert(std::make_pair(std::make_pair(positionToId(const_cast<StringSet<TString, Owner<TDefault> >&>(sSet),k), length(sSet[k])), nilVertex));
-			}
+			TSize lenSet = length(sSet);
+			for(TSize k=0; k<lenSet;++k) 
+				data_pvMap.insert(std::make_pair(TKey(positionToId(const_cast<StringSet<TString, Owner<TDefault> >&>(sSet),k), length(sSet[k])), nilVertex));
 		}
 
 
@@ -404,6 +406,7 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename TGraph::TKey TKey;
 
 	clear(g.data_fragment);
 	g.data_pvMap.clear();
@@ -413,9 +416,9 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	// Don't forget to cover the sequences with nil vertices again
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	if(!empty(value(g.data_sequence))) {
-		for(TSize k=0; k<length(stringSet(g));++k) {
-			g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(stringSet(g),k), length(stringSet(g)[k])), nilVertex));
-		}
+		TSize lenSet = length(stringSet(g));
+		for(TSize k=0; k<lenSet;++k) 
+			g.data_pvMap.insert(std::make_pair(TKey(positionToId(stringSet(g),k), length(stringSet(g)[k])), nilVertex));
 	}
 }
 
@@ -478,8 +481,9 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TFragmentInfo TFragmentInfo;
+	typedef typename TGraph::TKey TKey;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 
 	//for(TPosToVertexMap::const_iterator p = g.data_pvMap.begin(); p != g.data_pvMap.end(); ++p) {
 	//	std::cout << p->first.first << ',' << p->first.second << ':' << p->second << std::endl;
@@ -488,13 +492,13 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Store the new fragment
-	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(id, begin + len));
+	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(TKey(id, begin + len));
 	// Segment does not belong to Sequence anymore
 	SEQAN_TASSERT(interval != g.data_pvMap.end());
 	// Segment end must be assigned to nil so far
 	SEQAN_TASSERT(interval->second == nilVertex);
 	// Segment must belong to the whole old interval
-	SEQAN_TASSERT(*interval == *g.data_pvMap.upper_bound(std::make_pair(id, begin)));
+	SEQAN_TASSERT(*interval == *g.data_pvMap.upper_bound(TKey(id, begin)));
 
 	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
@@ -506,29 +510,29 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	if ( (TSize) begin + len == (TSize) interval->first.second) {
 		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
-			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
+			(g.data_pvMap.find(TKey(id, begin)) != g.data_pvMap.end())) {
 			// Replace interval
 			interval->second = vd;
 		} else {
 			// Split interval once
-			g.data_pvMap.insert(std::make_pair(std::make_pair(interval->first.first,begin), interval->second));
+			g.data_pvMap.insert(std::make_pair(TKey(interval->first.first,begin), interval->second));
 			g.data_pvMap.erase(interval);
-			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
 		}
 	} else {
 		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
-			(g.data_pvMap.find(std::make_pair(id, begin)) != g.data_pvMap.end())) {
+			(g.data_pvMap.find(TKey(id, begin)) != g.data_pvMap.end())) {
 			// Split interval once
 			// Just insert here because we store interval ends
-			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
 		} else {
 			// Split interval twice
 			TIdType tmp = interval->first.second;
-			g.data_pvMap.insert(std::make_pair(std::make_pair(interval->first.first,begin), interval->second));
+			g.data_pvMap.insert(std::make_pair(TKey(interval->first.first,begin), interval->second));
 			g.data_pvMap.erase(interval);
-			g.data_pvMap.insert(std::make_pair(std::make_pair(id,begin+len), vd));
-			g.data_pvMap.insert(std::make_pair(std::make_pair(id,tmp), nilVertex));
+			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey(id,tmp), nilVertex));
 		}
 	}
 	return vd;
@@ -545,12 +549,11 @@ removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TKey TKey;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 
 	// Clear the interval
-	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(std::make_pair(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v)));
-	SEQAN_TASSERT(interval != g.data_pvMap.end());
-	interval->second = getNil<TVertexDescriptor>();
+	(g.data_pvMap.lower_bound(TKey(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v))))->second = getNil<TVertexDescriptor>();
 
 	// Remove the vertex
 	removeVertex(g.data_align,v);
@@ -684,16 +687,19 @@ write(TFile & target,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef FragmentInfo<TIdType, TSize> TSegment;
+	typedef typename TGraph::TFragmentInfo TSegment;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename Iterator<String<TEdgeStump*> const, Rooted>::Type TIterConst;
+	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
 
 	String<char> align;
 	if (!convertAlignment(g, align)) {
 		_streamWrite(target,"Adjacency list:\n");
-		for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
-			TVertexDescriptor sourceV = position(it);
+		TIterConst it = begin(g.data_align.data_vertex, Standard());
+		TIterConst itEnd = end(g.data_align.data_vertex, Standard());
+		TVertexDescriptor pos = 0;
+		for(;it!=itEnd; ++it, ++pos) {
+			TVertexDescriptor sourceV = pos;
 			_streamPutInt(target, sourceV);
 			TSegment seg = getProperty(g.data_fragment, sourceV);
 			_streamWrite(target," (SeqId:");
@@ -703,7 +709,7 @@ write(TFile & target,
 			_streamWrite(target," ,Length:");
 			_streamPutInt(target, seg.data_length);
 			_streamWrite(target,") -> ");
-			TEdgeStump* current = getValue(it);
+			TEdgeStump* current = *it;
 			while(current!=0) {
 				TVertexDescriptor adjV = getTarget(current);
 				if (adjV != sourceV) {
@@ -720,9 +726,11 @@ write(TFile & target,
 			_streamPut(target, '\n');
 		}
 		_streamWrite(target,"Edge list:\n");
-		for(TIterConst it = begin(g.data_align.data_vertex);!atEnd(it);goNext(it)) {
-			TVertexDescriptor sourceV = position(it);
-			TEdgeStump* current = getValue(it);
+		it = begin(g.data_align.data_vertex, Standard());
+		pos = 0;
+		for(;it!=itEnd; ++it, ++pos) {
+			TVertexDescriptor sourceV = pos;
+			TEdgeStump* current = *it;
 			while(current!=0) {
 				TVertexDescriptor targetV = getTarget(current);
 				if (sourceV != targetV) {
@@ -758,9 +766,7 @@ write(TFile & target,
 			TSize offset=0;
 			// Larger numbers need to be further left
 			if (baseCount != 0) offset = (unsigned int) floor(log((double)baseCount) / log((double)10));
-			for(TSize j = 0;j<leftSpace-offset;++j) {
-				_streamPut(target, ' ');
-			}
+			for(TSize j = 0;j<leftSpace-offset;++j) _streamPut(target, ' ');
 			_streamPutInt(target, baseCount);
 			baseCount+=windowSize;
 			_streamPut(target, ' ');
@@ -776,18 +782,15 @@ write(TFile & target,
 			for(TSize row=0;row<2*nseq-1;++row) {
 				for(TSize col = 0;col<leftSpace+2;++col) _streamPut(target, ' ');
 				if ((row % 2)==0) {
-					for(TSize col = xPos;col<xPos+windowSize;++col) {
-						_streamPut(target, getValue(align, (row/2)*colLen+col));
-					}
+					for(TSize col = xPos;col<xPos+windowSize;++col) 
+						_streamPut(target, align[(row/2)*colLen+col]);
 				} else {
 					for(TSize col = xPos;col<xPos+windowSize;++col) {
-						if ((getValue(align,((row-1)/2)*colLen + col) != gapValue<char>()) &&
-							(getValue(align,((row+1)/2)*colLen + col) != gapValue<char>()) &&
-							(getValue(align,((row-1)/2)*colLen + col) == getValue(align,((row+1)/2)*colLen + col))) {
-								_streamPut(target, '|');
-						} else {
-							_streamPut(target, ' ');
-						}
+						if ((align[((row-1)/2)*colLen + col] != gapValue<char>()) &&
+							(align[((row+1)/2)*colLen + col] != gapValue<char>()) &&
+							(align[((row-1)/2)*colLen + col] == align[((row+1)/2)*colLen + col])) 
+							_streamPut(target, '|');
+						else _streamPut(target, ' ');
 					}
 				}
 				_streamPut(target, '\n');
@@ -816,20 +819,17 @@ write(TFile & file,
 	if (convertAlignment(g, align)) {	
 		TSize nseq = length(stringSet(g));
 		TSize colLen = length(align) / nseq;
-		
+		typedef typename Iterator<String<char>, Standard>::Type TIter;
+		TIter it = begin(align, Standard());
 		for(TSize i = 0; i<nseq; ++i) {
 			_streamPut(file, '>');
 			_streamWrite(file,names[i]);
 			_streamPut(file, '\n');
 			TSize col = 0;
 			while(col < colLen) {
-				TSize max = 0;
-				if ((colLen - col) < 60) max = colLen - col;
-				else max = 60;
-				for(TSize finger = col; finger<col+max; ++finger) {
-					_streamPut(file, getValue(align, i*colLen + finger));
-				}
-				col += max;
+				TSize max = ((colLen - col) < 60) ? colLen - col : 60;
+				for(TSize finger = 0; finger<max; ++finger, ++col, ++it) 
+					_streamPut(file, *it);
 				_streamPut(file, '\n');
 			}
 		}
@@ -855,7 +855,7 @@ write(TFile & file,
 	if (convertAlignment(g, align)) {	
 		TSize nseq = length(stringSet(g));
 		TSize colLen = length(align) / nseq;
-		
+	
 		_streamWrite(file,"PileUp\n");
 		_streamPut(file, '\n');
 		_streamWrite(file," MSF: ");
@@ -885,16 +885,14 @@ write(TFile & file,
 		while(col < colLen) {
 			TSize max = 0;
 			for(TSize i = 0; i<nseq; ++i) {
-				if ((colLen - col) < 50) max = colLen - col;
-				else max = 50;
+				max = ((colLen - col) < 50) ? colLen - col : 50;
 				_streamWrite(file,names[i]);
-				for(TSize j = 0; j<offset - length(names[i]); ++j) {
+				for(TSize j = 0; j<offset - length(names[i]); ++j) 
 					_streamPut(file, ' ');
-				}
 				for(TSize finger = col; finger<col+max; ++finger) {
 					if ((finger - col) % 10 == 0) _streamPut(file, ' ');
-					if (getValue(align, i*colLen + finger) == '-') _streamPut(file, '.');
-					else _streamPut(file, getValue(align, i*colLen + finger));
+					if (align[i*colLen + finger] == '-') _streamPut(file, '.');
+					else _streamPut(file, align[i*colLen + finger]);
 				}
 				_streamPut(file, '\n');
 			}
@@ -1188,13 +1186,15 @@ assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename TGraph::TKey TKey;
+	typedef typename Size<TGraph>::Type TSize;
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	clear(g);
 	g.data_sequence = (StringSet<TString, Dependent<TDefault> >) sStr;
-	for(unsigned k=0; k<length(sStr);++k) {
-		g.data_pvMap.insert(std::make_pair(std::make_pair(positionToId(sStr,k), length(sStr[k])), nilVertex));
-	}
+	TSize lenSet = length(sStr);
+	for(TSize k=0; k<lenSet;++k) 
+		g.data_pvMap.insert(std::make_pair(TKey(positionToId(sStr,k), length(sStr[k])), nilVertex));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1275,7 +1275,7 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef FragmentInfo<TIdType, TSize> TSegment;
+	typedef typename TGraph::TFragmentInfo TSegment;
 	TSegment seg = getProperty(g.data_fragment, v);
 	//std::cout << seg.data_seq_id << ",";
 	//std::cout << seg.data_begin << ",";
@@ -1373,10 +1373,10 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename TGraph::TKey TKey;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	if (pos >= (TPos) length(getValueById(stringSet(g),id))) return getNil<TVertexDescriptor>();
-	else return g.data_pvMap.upper_bound(std::make_pair(id, pos))->second;
+	return (pos >= (TPos) length(getValueById(stringSet(g),id))) ? getNil<TVertexDescriptor>() : g.data_pvMap.upper_bound(TKey(id, pos))->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1449,7 +1449,7 @@ getFirstCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 
 
 	typename TPosToVertexMap::const_iterator it = g.data_pvMap.upper_bound(std::make_pair(id, 0));
@@ -1492,7 +1492,7 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	typename TPosToVertexMap::const_iterator it = g.data_pvMap.lower_bound(std::make_pair(id, length(getValueById(stringSet(g), id))));
@@ -1527,7 +1527,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TComponentMap>::Type TComponent;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Check for empty graph
@@ -1563,7 +1563,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			String<TComponent> tmp;
 			value(orderedComponentsPerSeq, currentSeq) = tmp;
 		}
-		appendValue(value(orderedComponentsPerSeq, currentSeq), c);
+		appendValue(value(orderedComponentsPerSeq, currentSeq), c, Generous());
 		// If two components appear twice in the same sequence -> no alignment
 		if (!((value(componentsPerSeq,currentSeq)).insert(c)).second) return false;	
 	}
@@ -1636,7 +1636,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TIdType;
-	typedef std::map<std::pair<TIdType, TIdType>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 	typedef std::map<unsigned int, unsigned int> TComponentLength;
 	
 	// Strongly Connected Components, topological sort, and length of each component
@@ -1670,11 +1670,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		}
 		unsigned int c = getProperty(component, it->second);
 		while ((compIndex < compIndexLen) && (order[compIndex] != c)) {
-			for(TSize i=0;i<compLength[order[compIndex]];++i) {
-				//std::cout << gapValue<char>();
-				assignValue(mat, row*len + col, gapValue<char>() );
-				++col;
-			}
+			for(TSize i=0;i<compLength[order[compIndex]];++i, ++col) 
+				mat[row*len + col] = gapValue<char>();
 			++compIndex;
 		}
 		typedef typename Value<TStringSet>::Type TStringSetStr;
@@ -1682,9 +1679,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		typedef typename Iterator<TStringSetStr, Standard>::Type TStringSetStrIter;
 		TStringSetStrIter itStr = begin(str, Standard());
 		TStringSetStrIter itStrEnd = end(str, Standard());
-		for(;itStr != itStrEnd; goNext(itStr), ++col) {
-			value(mat, row*len + col) = (TValue) (value(itStr));
-		}
+		for(;itStr != itStrEnd; goNext(itStr), ++col) 
+			mat[row*len + col] = (TValue) (*itStr);
 		++compIndex;
 	}
 	SEQAN_TASSERT(row + 1 == nseq);

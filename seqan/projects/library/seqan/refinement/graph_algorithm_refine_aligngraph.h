@@ -182,7 +182,7 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	typedef std::map<std::pair<typename Id<TAlignment>::Type, typename Id<TAlignment>::Type>, TVertexDescriptor> TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 	typedef typename TPosToVertexMap::const_iterator TVertexMapIter;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
