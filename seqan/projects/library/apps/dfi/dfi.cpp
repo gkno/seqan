@@ -246,8 +246,15 @@ struct LessSubstringEnd : public binary_function<TSubstringEntry, TSubstringEntr
 		if (a.lPos.i1 > b.lPos.i1) return false;
 
 		// end position
-		if (a.lPos.i2 + a.len < b.lPos.i2 + b.len) return true;
-		if (a.lPos.i2 + a.len > b.lPos.i2 + b.len) return false;
+		unsigned x = a.lPos.i2 + a.len;
+		unsigned y = b.lPos.i2 + b.len;		
+		if (x < y) return true;
+		if (x > y) return false;
+		
+		x = a.range.i2 - a.range.i1;
+		y = b.range.i2 - b.range.i1;
+		if (x < y) return true;
+		if (x > y) return false;
 		
 		return a.len > b.len;
 	}
@@ -274,13 +281,15 @@ inline void compactMatches(TMatchString &matches)
 	
 	unsigned lastSeq = ~0;
 	unsigned lastPos = 0;
+	unsigned lastRange = 0;
 	
 	if (src == srcEnd) return;
 	for (; src != srcEnd; ++src)
-		if (((*src).lPos.i1 != lastSeq) || ((*src).lPos.i2 + (*src).len != lastPos))
+		if (((*src).lPos.i1 != lastSeq) || ((*src).lPos.i2 + (*src).len != lastPos) || ((*src).range.i2 - (*src).range.i1 != lastRange))
 		{
 			lastSeq = (*src).lPos.i1;
 			lastPos = (*src).lPos.i2 + (*src).len;
+			lastRange = (*src).range.i2 - (*src).range.i1;
 			*dst = *src;
 			++dst;
 		}
