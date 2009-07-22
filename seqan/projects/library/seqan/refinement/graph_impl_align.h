@@ -1957,8 +1957,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	for(;itStr1 != itStrEnd1;++itStr1, ++pos) {
 		itV = begin(*itStr1, Standard());
 		itVEnd = end(*itStr1, Standard());	
-		for(;itV != itVEnd;++itV) 
-			if (*itV != nilVertex) map[*itV] = pos;
+		for(;itV != itVEnd;++itV) map[*itV] = pos;
 	}
 
 	// We could create the full graph -> too expensive
