@@ -1,6 +1,6 @@
  /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -67,6 +67,8 @@
 
 //file formats for alignments
 #include <seqan/file/file_format_fasta_align.h>
+// TODO: include SAM file format specification
+#include <seqan/file/file_format_sam.h>
 
 //others
 #include <seqan/file/file_format_cgviz.h>
