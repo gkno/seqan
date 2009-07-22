@@ -1774,10 +1774,10 @@ rebuildGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TKey, typename TValue, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSize2, typename TSpec2, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
 inline void
 __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
-							std::map<TKey, TValue>&,
+							String<TSize2, TSpec2> const& slotToPos,
 							TPositions const&,
 							TSize const,
 							TSize const,
@@ -1791,10 +1791,10 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TKey, typename TValue, typename TPositions, typename TSize, typename TString, typename TOutString>
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSize2, typename TSpec2, typename TPositions, typename TSize, typename TString, typename TOutString>
 inline void
 __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-							std::map<TKey, TValue>& posToSlotMap,
+							String<TSize2, TSpec2> const& slotToPos,
 							TPositions const& positions,
 							TSize const m,
 							TSize const n,
@@ -1803,20 +1803,11 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& 
 							TOutString& align) 
 {
 	SEQAN_CHECKPOINT
-	typedef std::map<TKey, TValue> TPositionToSlotMap;
 	typedef typename Value<TString>::Type TVertexSet;
 	typedef typename Iterator<TString const, Standard>::Type TStringIter;
 	typedef typename Iterator<TString, Standard>::Type TSIter;
 	typedef typename Iterator<TVertexSet const, Standard>::Type TVertexSetIter;
 	typedef typename Iterator<TVertexSet, Standard>::Type TIter;	
-
-	// Reverse the map
-	String<TSize> slotToPos;
-	resize(slotToPos, posToSlotMap.size());
-	TSize counter = 0;
-	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter) 
-		slotToPos[counter] = mapIt->first;
-	posToSlotMap.clear();
 
 	// Create the alignment sequence
 	TSize numMatches = length(positions);
@@ -1968,6 +1959,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TStringIterConst itStr2 = begin(str2, Standard());
 	TStringIterConst itStrEnd2 = end(str2, Standard());
 	TSize posItStr2 = 0;
+	TSize pPos = 0;
 	for(;itStr2 != itStrEnd2;++itStr2, ++posItStr2) {
 		itV = begin(*itStr2, Standard());
 		itVEnd = end(*itStr2, Standard());
@@ -1976,7 +1968,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				TOutEdgeIterator itOut(g, *itV);
 				for(;!atEnd(itOut); ++itOut) {
 					// Target vertex must be in the map
-					TSize pPos = map[targetVertex(itOut)];
+					pPos = map[targetVertex(itOut)];
 					if (pPos != SupremumValue<TSize>::VALUE) 
 						appendValue(occupiedPositions, pPos * n + (TSize) (n - posItStr2 - 1), Generous());
 				}
@@ -1986,6 +1978,9 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	::std::sort(begin(occupiedPositions, Standard()), end(occupiedPositions, Standard()));
 	// Map the occupied positions to slots
 	typedef std::map<TSize, TSize> TPositionToSlotMap;
+	typedef String<TSize> TSlotToPos;
+	TSlotToPos slotToPos;
+	resize(slotToPos, length(occupiedPositions));
 	TPositionToSlotMap posToSlotMap;
 	TSize counter = 0;
 	TOccIter occIt = begin(occupiedPositions, Standard());
@@ -1994,17 +1989,17 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	for(;occIt != occItEnd; ++occIt) {
 		if (oldVal != *occIt) {
 			posToSlotMap.insert(std::make_pair(*occIt, counter));
-			oldVal = *occIt;
-			++counter;
+			oldVal = slotToPos[counter++] = *occIt;
 		}
 	}
 	clear(occupiedPositions);
+	resize(slotToPos, counter, Exact());
 
 	// Walk through str2 and fill in the weights of the actual edges
 	typedef String<TCargo> TWeights;
 	typedef typename Iterator<TWeights>::Type TWeightsIter;
 	TWeights weights;
-	fill(weights, posToSlotMap.size(),0);
+	fill(weights, length(slotToPos), 0);
 	itStr2 = begin(str2, Standard());
 	posItStr2 = 0;
 	for(;itStr2 != itStrEnd2;++itStr2, ++posItStr2) {
@@ -2015,30 +2010,34 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 				TOutEdgeIterator itOut(g, *itV);
 				for(;!atEnd(itOut); ++itOut) {
 					// Target vertex must be in the map
-					TSize pPos = map[targetVertex(itOut)];
+					pPos = map[targetVertex(itOut)];
 					if ( pPos != SupremumValue<TSize>::VALUE) 
-						weights[posToSlotMap[pPos * n + (TSize) (n - posItStr2 - 1) ]] += (TCargo) cargo(*itOut);
+						weights[posToSlotMap.find(pPos * n + (TSize) (n - posItStr2 - 1))->second] += (TCargo) cargo(*itOut);
 				}
 			}
 		}
 	}
 	clear(map);
+	posToSlotMap.clear();
 
 	// Now the tough part: Find the right number for a given position
 	typedef String<TSize> TSequenceString;
 	typedef typename Iterator<TSequenceString, Standard>::Type TSeqIter;
 	TSequenceString seq;
-	resize(seq, posToSlotMap.size());
+	resize(seq, length(slotToPos));
 	TSeqIter itSeq = begin(seq, Standard());
-	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt, ++counter, ++itSeq) 
-		*itSeq = n - 1 - (TSize) (mapIt->first % (TSize) n); 
+	typedef typename Iterator<TSlotToPos, Standard>::Type TSlotToPosIter;
+	TSlotToPosIter itSlotPos = begin(slotToPos, Standard());
+	TSlotToPosIter itSlotPosEnd = end(slotToPos, Standard());
+	for(;itSlotPos != itSlotPosEnd; ++itSlotPos, ++itSeq) 
+		*itSeq = n - 1 - (*itSlotPos % n); 
 
 	// Calculate the heaviest increasing subsequence
 	String<TSize> positions;
 	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, positions);
 
 	// Retrieve the alignment sequence
-	__heaviestCommonSubsequence(g, posToSlotMap, positions, m, n, str1, str2, align);
+	__heaviestCommonSubsequence(g, slotToPos, positions, m, n, str1, str2, align);
 
 	return score;
 

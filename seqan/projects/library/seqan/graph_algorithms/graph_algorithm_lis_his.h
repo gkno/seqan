@@ -279,7 +279,6 @@ heaviestIncreasingSubsequence(TString const& str,
 	
 	// The trace-back graph
 	typedef Graph<Directed<void, WithoutEdgeId> > TGraph;
-	typedef Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	TGraph g;
 
@@ -288,11 +287,12 @@ heaviestIncreasingSubsequence(TString const& str,
 	TStringIter it = begin(str, Standard());
 	TStringIter endIt = end(str, Standard());
 	TSize pos_of_iterator = 0;
+	TWeight w = 0;
 	for(; it != endIt; ++it, ++pos_of_iterator) {
-		TWeight w = weights[pos_of_iterator];
+		w = weights[pos_of_iterator];
 		// Letters that do not contribute a weight (e.g., w = 0) are excluded!
 		// Weights must increase!
-		if (w <= 0) {
+		if (w == 0) {
 			addVertex(g);  // Note: The vertex id corresponds to the position
 			continue;
 		}
@@ -329,22 +329,16 @@ heaviestIncreasingSubsequence(TString const& str,
 	}
 
 	// Trace-back
-	TWeight w = 0;
+	w = 0;
 	if (list.rbegin() == list.rend()) return 0;
 	else {
-		bool finished = false;
 		// Last vertex is end of heaviest increasing subsequence
 		TVertexDescriptor v = list.rbegin()->second.second;
-		while (!finished) {
-			// Exclude edges with weight 0 !!!
-			// Note: Very important, do not delete this check!!!
-			//if (getProperty(weights, v) > 0) {
-				appendValue(pos, v);
-				w+=getValue(weights, v);
-			//}
-			TOutEdgeIterator it(g, v);
-			if (atEnd(it)) finished = true;
-			else v = targetVertex(it);
+		while (true) {
+			appendValue(pos, v, Generous());
+			w+=weights[v];
+			if (g.data_vertex[v]) v = (*g.data_vertex[v]).data_target;
+			else break;
 		}
 	}
 	return w;
