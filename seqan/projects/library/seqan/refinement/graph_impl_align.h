@@ -1931,7 +1931,6 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 	// Size of the sequences
 	// Note for profile alignments every member of the sequence is a String!!! of vertex descriptors
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
 	// Fill the vertex to position map for str1
 	// Remember for each vertex descriptor the position in the sequence
@@ -1964,30 +1963,26 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		itV = begin(*itStr2, Standard());
 		itVEnd = end(*itStr2, Standard());
 		for(;itV != itVEnd;++itV) {
-			if (*itV != nilVertex) {
-				TOutEdgeIterator itOut(g, *itV);
-				for(;!atEnd(itOut); ++itOut) {
-					// Target vertex must be in the map
-					pPos = map[targetVertex(itOut)];
-					if (pPos != SupremumValue<TSize>::VALUE) 
-						appendValue(occupiedPositions, pPos * n + (TSize) (n - posItStr2 - 1), Generous());
-				}
+			TOutEdgeIterator itOut(g, *itV);
+			for(;!atEnd(itOut); ++itOut) {
+				// Target vertex must be in the map
+				pPos = map[targetVertex(itOut)];
+				if (pPos != SupremumValue<TSize>::VALUE) 
+					appendValue(occupiedPositions, pPos * n + (TSize) (n - posItStr2 - 1), Generous());
 			}
 		}
 	}
 	::std::sort(begin(occupiedPositions, Standard()), end(occupiedPositions, Standard()));
-	// Map the occupied positions to slots
-	typedef std::map<TSize, TSize> TPositionToSlotMap;
+	// Get all occupied positions
 	typedef String<TSize> TSlotToPos;
+	typedef typename Iterator<TSlotToPos, Standard>::Type TSlotToPosIter;
 	TSlotToPos slotToPos;
-	TPositionToSlotMap posToSlotMap;
 	TSize counter = 0;
+	TSize oldVal = SupremumValue<TSize>::VALUE;
 	TOccIter occIt = begin(occupiedPositions, Standard());
 	TOccIter occItEnd = end(occupiedPositions, Standard());
-	TSize oldVal = SupremumValue<TSize>::VALUE;
 	for(;occIt != occItEnd; ++occIt) {
 		if (oldVal != *occIt) {
-			posToSlotMap.insert(std::make_pair(*occIt, counter));
 			appendValue(slotToPos, *occIt, Generous());
 			oldVal = *occIt;
 			++counter;
@@ -2006,19 +2001,16 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		itV = begin(*itStr2, Standard());
 		itVEnd = end(*itStr2, Standard());
 		for(;itV != itVEnd;++itV) {
-			if (*itV != nilVertex) {
-				TOutEdgeIterator itOut(g, *itV);
-				for(;!atEnd(itOut); ++itOut) {
-					// Target vertex must be in the map
-					pPos = map[targetVertex(itOut)];
-					if ( pPos != SupremumValue<TSize>::VALUE) 
-						weights[posToSlotMap.find(pPos * n + (TSize) (n - posItStr2 - 1))->second] += (TCargo) cargo(*itOut);
-				}
+			TOutEdgeIterator itOut(g, *itV);
+			for(;!atEnd(itOut); ++itOut) {
+				// Target vertex must be in the map
+				pPos = map[targetVertex(itOut)];
+				if ( pPos != SupremumValue<TSize>::VALUE) 
+					weights[::std::distance(begin(slotToPos, Standard()), ::std::lower_bound(begin(slotToPos, Standard()), end(slotToPos, Standard()), pPos * n + (TSize) (n - posItStr2 - 1)))] += (TCargo) cargo(*itOut);
 			}
 		}
 	}
 	clear(map);
-	posToSlotMap.clear();
 
 	// Now the tough part: Find the right number for a given position
 	typedef String<TSize> TSequenceString;
@@ -2026,7 +2018,6 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSequenceString seq;
 	resize(seq, length(slotToPos));
 	TSeqIter itSeq = begin(seq, Standard());
-	typedef typename Iterator<TSlotToPos, Standard>::Type TSlotToPosIter;
 	TSlotToPosIter itSlotPos = begin(slotToPos, Standard());
 	TSlotToPosIter itSlotPosEnd = end(slotToPos, Standard());
 	for(;itSlotPos != itSlotPosEnd; ++itSlotPos, ++itSeq) 
