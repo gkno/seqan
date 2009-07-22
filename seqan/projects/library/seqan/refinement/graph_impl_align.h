@@ -1980,7 +1980,6 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef std::map<TSize, TSize> TPositionToSlotMap;
 	typedef String<TSize> TSlotToPos;
 	TSlotToPos slotToPos;
-	resize(slotToPos, length(occupiedPositions));
 	TPositionToSlotMap posToSlotMap;
 	TSize counter = 0;
 	TOccIter occIt = begin(occupiedPositions, Standard());
@@ -1989,11 +1988,12 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	for(;occIt != occItEnd; ++occIt) {
 		if (oldVal != *occIt) {
 			posToSlotMap.insert(std::make_pair(*occIt, counter));
-			oldVal = slotToPos[counter++] = *occIt;
+			appendValue(slotToPos, *occIt, Generous());
+			oldVal = *occIt;
+			++counter;
 		}
 	}
 	clear(occupiedPositions);
-	resize(slotToPos, counter, Exact());
 
 	// Walk through str2 and fill in the weights of the actual edges
 	typedef String<TCargo> TWeights;
