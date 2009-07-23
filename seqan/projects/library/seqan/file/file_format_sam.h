@@ -17,7 +17,7 @@
  ============================================================================
  $Id: file_format_sam.h 1283 2007-11-09 10:16:04Z doering@PCPOOL.MI.FU-BERLIN.DE $
  ==========================================================================*/
-#include <iostream>;
+#include <iostream>
 
 #ifndef SEQAN_HEADER_FILE_SAM_H
 #define SEQAN_HEADER_FILE_SAM_H
