@@ -68,9 +68,9 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 {
 	SEQAN_CHECKPOINT
 	typedef String<TFragment, TSpec1> TFragmentString;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
+	typedef typename Iterator<TFragmentString, Standard>::Type TFragmentStringIter;
 	typedef String<TScoreValue, TSpec2> TScoreValues;
-	typedef typename Iterator<TScoreValues>::Type TScoreValuesIter;
+	typedef typename Iterator<TScoreValues, Standard>::Type TScoreValuesIter;
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TOutGraph;
 	typedef typename Size<TFragmentString>::Type TSize;
 	typedef typename Id<TOutGraph>::Type TId;
@@ -93,23 +93,22 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	TFragmentStringIter it = begin(matches, Standard() );
 	TFragmentStringIter endIt = end(matches, Standard() );
 	TScoreValuesIter scoreIt = begin(scores, Standard() );
-	for(; it != endIt; goNext(it), goNext(scoreIt)) {
-		TId id1 = sequenceId(value(it),0);
-		TId id2 = sequenceId(value(it),1);
-		TSize pos1 = fragmentBegin(value(it), id1);
-		TSize pos2 = fragmentBegin(value(it), id2);
-		TSize fragLen = fragmentLength(value(it), id1);
-		TSize end1 = pos1 + fragmentLength(value(it), id1);
+	for(; it != endIt; ++it, ++scoreIt) {
+		TId id1 = sequenceId(*it,0);
+		TId id2 = sequenceId(*it,1);
+		TSize pos1 = fragmentBegin(*it, id1);
+		TSize pos2 = fragmentBegin(*it, id2);
+		TSize fragLen = fragmentLength(*it, id1);
+		TSize end1 = pos1 + fragLen;
 		while(pos1 < end1) {
 			TVertexDescriptor p1 = findVertex(outGraph, id1, pos1);
 			TVertexDescriptor p2 = findVertex(outGraph, id2, pos2);
-			TEdgeDescriptor e = findEdge(outGraph, p1, p2);
-			cargo(e) += (TCargo) (((double) fragmentLength(outGraph, p1) / (double) fragLen) * (double) value(scoreIt));
-			pos1 += fragmentLength(outGraph, p1);
-			pos2 += fragmentLength(outGraph, p2);
+			TSize vertexLen = fragmentLength(outGraph, p1);
+			cargo(findEdge(outGraph, p1, p2)) += (TCargo) ((vertexLen * (*scoreIt)) / fragLen);
+			pos1 += vertexLen;
+			pos2 += vertexLen;
 		}
 	}
-
 }
 
 
@@ -131,38 +130,6 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	TStringSet& strSet = stringSet(outGraph);
 	
 	// Segment-match refinement
-	/*
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
-	typedef typename Id<TOutGraph>::Type TId;
-	typedef typename EdgeDescriptor<TOutGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TOutGraph>::Type TVertexDescriptor;
-	typedef std::set<std::pair<TId, TId> > TSeqPairs;
-	TSize nseq = length(strSet);
-	String<TSeqPairs> edgesPerSeqPair;
-	resize(edgesPerSeqPair, nseq * nseq);
-	clearVertices(outGraph);
-	for(TSize i=0;i<nseq;++i) {
-		TId id = positionToId(strSet, i);
-		for(TSize k=0;k<length(value(strSet,i));++k) {
-			addVertex(outGraph, id, k, 1);
-		}
-	}
-	TFragmentStringIter endIt = end(matches);
-	for(TFragmentStringIter it = begin(matches); it != endIt; ++it) {
-		TId id1 = sequenceId(*it,0);
-		TSize pos1 = fragmentBegin(*it, id1);
-		TSize len = fragmentLength(*it, id1);
-		for(TSize p = 0; p < len; ++p) {
-			TSize pos2 = 0;
-			TId id2 = 0;
-			getProjectedPosition(*it, id1, pos1 + p, id2, pos2);
-			TVertexDescriptor v1 = findVertex(outGraph, id1, pos1 + p);
-			TVertexDescriptor v2 = findVertex(outGraph, id2, pos2);
-			TEdgeDescriptor e = findEdge(outGraph, v1, v2);
-			if (e == 0) addEdge(outGraph, v1, v2, 1);
-			else cargo(e) += 1;
-		}
-	}*/
 	matchRefinement(matches,strSet,outGraph);
 }
 
@@ -255,33 +222,32 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 			 TScoreValue offset)
 {
 	SEQAN_CHECKPOINT
-	clear(scores);
+	typedef String<Fragment<TSize, ExactFragment<> >, TSpec2> TFragmentString;
+	typedef typename Id<typename Value<TFragmentString>::Type>::Type TId;
+	typedef typename Iterator<TFragmentString, Standard>::Type TFragmentStringIter;
+	typedef typename Iterator<TString, Standard>::Type TStringIter;
+	typedef typename Iterator<TScoreString, Standard>::Type TScoreStringIter;
 	resize(scores, length(matches));
 
 	// Get the scores
-	typedef String<Fragment<TSize, ExactFragment<> >, TSpec2> TFragmentString;
-	typedef typename Value<TFragmentString>::Type TFragment;
-	typedef typename Id<TFragment>::Type TId;
-	typedef typename Iterator<TFragmentString>::Type TFragmentStringIter;
 	TFragmentStringIter itF = begin(matches, Standard() );
 	TFragmentStringIter itFEnd = end(matches, Standard() );
-	typedef typename Iterator<TScoreString>::Type TScoreStringIter;
 	TScoreStringIter itSc = begin(scores, Standard() );
-	for(; itF != itFEnd; goNext(itF), goNext(itSc)) {
-		TId id1 = sequenceId(value(itF),0);
-		TId id2 = sequenceId(value(itF),1);
-		TSize pos1 = fragmentBegin(value(itF), id1);
-		TSize pos2 = fragmentBegin(value(itF), id2);
-		TSize fragLen = fragmentLength(value(itF), id1);
-		typedef typename Iterator<TString>::Type TStringIter;
-		TStringIter itS1 = begin(value(seqSet, idToPosition(seqSet, id1)), Standard() );
-		goFurther(itS1, pos1);
-		TStringIter itS2 = begin(value(seqSet, idToPosition(seqSet, id2)), Standard() );
-		goFurther(itS2, pos2);
-		value(itSc) = 0;
-		for(TSize i = pos1; i<pos1+fragLen; ++i, goNext(itS1), goNext(itS2)) {
-			value(itSc) += offset + score(scType, value(itS1), value(itS2));
-		}
+	TId id1 = 0; TId id2 = 0;
+	TSize pos1 = 0; TSize pos2 = 0;	TSize fragLen = 0;
+	for(; itF != itFEnd; ++itF, ++itSc) {
+		id1 = sequenceId(*itF,0);
+		id2 = sequenceId(*itF,1);
+		pos1 = fragmentBegin(*itF, id1);
+		pos2 = fragmentBegin(*itF, id2);
+		fragLen = fragmentLength(*itF, id1);
+		TStringIter itS1 = begin(seqSet[idToPosition(seqSet, id1)], Standard() );
+		itS1 += pos1;
+		TStringIter itS2 = begin(seqSet[idToPosition(seqSet, id2)], Standard() );
+		itS2 += pos2;
+		*itSc = 0;
+		for(TSize i = 0; i<fragLen; ++i, ++itS1, ++itS2) 
+			*itSc += offset + score(scType, *itS1, *itS2);
 	}
 }
 

@@ -168,9 +168,8 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 		TInfixIter sIt1 = begin(inf1, Standard());
 		TInfixIter sIt2 = begin(inf2, Standard());
 		TInfixIter sIt1End = end(inf1, Standard());
-		TInfixIter sIt2End = end(inf2, Standard());
 		matchMismatch_length += fragLen;
-		for(;((sIt1 != sIt1End) && (sIt2 != sIt2End)); ++sIt1, ++sIt2) 
+		for(;sIt1 != sIt1End; ++sIt1, ++sIt2) 
 			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) ++matchLength;
 	}
 	alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
