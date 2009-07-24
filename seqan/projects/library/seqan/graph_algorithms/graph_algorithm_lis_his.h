@@ -215,7 +215,7 @@ longestCommonSubsequence(TString1 const& str1,
 	TResultIter itResult = begin(result, Standard());
 	TResultIter endResult = end(result, Standard());
 	for(; itResult != endResult; ++itResult) 
-		appendValue(pos, std::make_pair(mapping[*itResult], finalSeq[*itResult]));
+		appendValue(pos, std::make_pair(mapping[*itResult], finalSeq[*itResult]), Generous());
 }
 
 //////////////////////////////////////////////////////////////////////////////
