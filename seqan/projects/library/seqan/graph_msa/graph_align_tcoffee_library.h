@@ -131,38 +131,47 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 	typedef String<TFragment, TSpec1> TFragmentMatches;
 	typedef typename Size<TFragmentMatches>::Type TSize;
 	typedef typename Id<TFragmentMatches>::Type TId;
+	typedef typename Iterator<TFragmentMatches, Standard>::Type TFragIter;
 	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Infix<TString>::Type TInfix;
-
 	matchLength = 0;
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
 
-	typedef typename Iterator<TInfix, Rooted>::Type TInfixIter;
+	
 	TSize minId1 = len1 + len2;
 	TSize minId2 = len1 + len2;
 	TSize maxId1 = 0;
 	TSize maxId2 = 0;
 	TSize matchMismatch_length = 0;
 
-	for(TSize i = (TSize) from; i < (TSize) to; ++i) {
-		TId id1 = sequenceId(matches[i], 0);
-		TId id2 = sequenceId(matches[i], 1);
-		if (fragmentBegin(matches[i], id1) < minId1) minId1 = fragmentBegin(matches[i], id1);
-		if (fragmentBegin(matches[i], id2) < minId2) minId2 = fragmentBegin(matches[i], id2);
-		if (fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1) > maxId1) maxId1 = fragmentBegin(matches[i], id1) + fragmentLength(matches[i], id1);
-		if (fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2) > maxId2) maxId2 = fragmentBegin(matches[i], id2) + fragmentLength(matches[i], id2);
-		TInfix inf1 = label(matches[i], str, id1);
-		TInfix inf2 = label(matches[i], str, id2);
-		TInfixIter sIt1 = begin(inf1);
-		TInfixIter sIt2 = begin(inf2);
-		while((!atEnd(sIt1)) || (!atEnd(sIt2))) {
-			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) {
-				++matchLength;
-			}
-			goNext(sIt1); goNext(sIt2);
-			++matchMismatch_length;
-		}
+	TFragIter itFrag = begin(matches, Standard());
+	TFragIter itFragEnd = itFrag;
+	itFrag += from;
+	itFragEnd += to;
+	TId id1 = sequenceId(*itFrag, 0);
+	TId id2 = sequenceId(*itFrag, 1);
+	TSize fragLen = 0;
+	TSize beginI = 0;
+	TSize beginJ = 0;
+	for(;itFrag != itFragEnd; ++itFrag) {
+		fragLen = fragmentLength(*itFrag, id1);
+		beginI = fragmentBegin(*itFrag, id1);
+		beginJ = fragmentBegin(*itFrag, id2);
+		if (beginI < minId1) minId1 = beginI;
+		if (beginJ < minId2) minId2 = beginJ;
+		if (beginI + fragLen > maxId1) maxId1 = beginI + fragLen;
+		if (beginJ + fragLen > maxId2) maxId2 = beginJ + fragLen;
+		typedef typename Infix<TString>::Type TInfix;
+		typedef typename Iterator<TInfix, Standard>::Type TInfixIter;
+		TInfix inf1 = label(*itFrag, str, id1);
+		TInfix inf2 = label(*itFrag, str, id2);
+		TInfixIter sIt1 = begin(inf1, Standard());
+		TInfixIter sIt2 = begin(inf2, Standard());
+		TInfixIter sIt1End = end(inf1, Standard());
+		TInfixIter sIt2End = end(inf2, Standard());
+		matchMismatch_length += fragLen;
+		for(;((sIt1 != sIt1End) && (sIt2 != sIt2End)); ++sIt1, ++sIt2) 
+			if ( (TAlphabet) *sIt1  == (TAlphabet) *sIt2) ++matchLength;
 	}
 	alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
 	overlapLength = alignLength -  minId1 - minId2 - (len1 + len2 - maxId1 - maxId2);
@@ -416,8 +425,8 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 	TValue normalizedSimilarity = (matchLen / overlapLen) * (overlapLen / alignLen);
 
 	// Assign the values
-	assignValue(dist, i*nseq+j, 1 - normalizedSimilarity);
-	assignValue(dist, j*nseq+i, 1 - normalizedSimilarity);	
+	dist[i*nseq+j] = 1 - normalizedSimilarity;
+	dist[j*nseq+i] = 1 - normalizedSimilarity;	
 }
 
 //////////////////////////////////////////////////////////////////////////////
