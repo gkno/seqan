@@ -133,14 +133,12 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 	// Trace-back
 	if (list.rbegin() == list.rend()) return;
 	else {
-		bool finished = false;
 		// Start with the maximal position in the list == Vertex Descriptor
 		TVertexDescriptor v = list.rbegin()->second;
-		while (!finished) {
-			push_back(pos, v);
-			TOutEdgeIterator it(g, v);
-			if (atEnd(it)) finished = true;
-			else v = targetVertex(it);
+		while (true) {
+			appendValue(pos, v, Generous());
+			if (g.data_vertex[v]) v = (*g.data_vertex[v]).data_target;
+			else break;
 		}
 	}
 }
@@ -161,10 +159,10 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 ...type:Class.String
 ..param.str2:In-parameter: An arbitrary string.
 ...type:Class.String
+..param.nSize:In-paramert: Neighborhood size.
+...type:nolink:unsigned int
 ..param.pos:Out-parameter: A String with pairs of positions that indicate the longest common subsequence.
 ...remarks:
-The last pair of positions in pos indicates the first pair in the longest common subsequence.
-That's why pos should be a Block-String (Stack).
 */
 template<typename TString1, typename TString2, typename TNeighborhoodSize, typename TFinalPos>
 inline void
@@ -180,62 +178,104 @@ longestCommonSubsequence(TString1 const& str1,
 	TSize alphabet_size = ValueSize<TValue>::VALUE;
 
 	// The occurences of each letter in the second string
-	typedef String<TPos, Block<> > TPositions;
+	typedef String<TPos> TPositions;
 	String<TPositions> occ;
 	fill(occ, alphabet_size, TPositions());
-	typedef typename Iterator<TString2 const>::Type TStringIter;
-	TStringIter endIt = end(str2);
+	typedef typename Iterator<TString2 const, Standard>::Type TStringIter;
+	TStringIter itStr2 = begin(str2, Standard());
+	TStringIter endItStr2 = end(str2, Standard());
 	TPos current_pos = 0;
-	for(TStringIter it = begin(str2); it != endIt; ++it, ++current_pos) {
-		push_back(value(occ, ordValue(value(it))), current_pos);
-	}
+	for(; itStr2 != endItStr2; ++itStr2, ++current_pos) appendValue(occ[ordValue(*itStr2)], current_pos, Generous());
 
 	// Build the combined string
-	String<TPos, Block<> > finalSeq;
-	String<TPos, Block<> > mapping;
-	TStringIter endIt1 = end(str1);
+	String<TPos> finalSeq;
+	String<TPos> mapping;
+	TStringIter itStr1 = begin(str1, Standard());
+	TStringIter endItStr1 = end(str1, Standard());
 	current_pos = 0;
-	for(TStringIter it = begin(str1); it != endIt1; ++it, ++current_pos) {
-		TPositions& current_occ = occ[ordValue(value(it))];
+	TPos diff = 0;
+	for(; itStr1 != endItStr1; ++itStr1, ++current_pos) {
+		TPositions& current_occ = occ[ordValue(*itStr1)];
 		for(int i = length(current_occ)-1; i>=0; --i) {
 			// Do we have a neighborhood
-			if (nSize != 0) {
-				TPos diff = current_pos - current_occ[i];
-				if (current_pos < current_occ[i]) diff = current_occ[i] - current_pos;
-				if ((TPos) diff > (TPos) nSize) continue;
-			}
-			push_back(finalSeq, current_occ[i]);
-			push_back(mapping, current_pos);
+			diff = (current_pos < current_occ[i]) ? current_occ[i] - current_pos : current_pos - current_occ[i];
+			if (diff > (TPos) nSize) continue;
+			appendValue(finalSeq, current_occ[i], Generous());
+			appendValue(mapping, current_pos, Generous());
 		}
 	}
 
 	// Call longest increasing subsequence
-	typedef String<TSize, Block<> > TResult;
+	typedef String<TSize> TResult;
 	TResult result;
 	longestIncreasingSubsequence(finalSeq, result);
 	
 	// Insert the common pairs
-	typedef typename Iterator<TResult>::Type TResultIter;
-	TResultIter endResult = end(result);
-	for(TResultIter it = begin(result); it != endResult; ++it) {
-		push_back(pos, std::make_pair(mapping[*it], finalSeq[*it]));
-	}
-
-	//// Debug code
-	//for(TSize i=0; i<length(pos);++i) {
-	//	std::cout << pos[i].first << ',' << pos[i].second << ';';
-	//}
-	//std::cout << std::endl;
+	typedef typename Iterator<TResult, Standard>::Type TResultIter;
+	TResultIter itResult = begin(result, Standard());
+	TResultIter endResult = end(result, Standard());
+	for(; itResult != endResult; ++itResult) 
+		appendValue(pos, std::make_pair(mapping[*itResult], finalSeq[*itResult]));
 }
 
-template<typename TString1, typename TString2, typename TFinalPos>
-inline void
-longestCommonSubsequence(TString1 const& str1,
-						 TString2 const& str2,
-						 TFinalPos& pos) 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlign, typename TStringSet>
+inline int
+globalAlignment(TAlign& align,
+				TStringSet const& str,
+				Lcs)
 {
 	SEQAN_CHECKPOINT
-	longestCommonSubsequence(str1, str2, 0, pos);
+	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Size<TStringSet>::Type TSize;
+	TId id1 = positionToId(str, 0);
+	TId id2 = positionToId(str, 1);
+		
+	// Lcs between first and second string
+	String<std::pair<TSize, TSize> > pos1;
+	longestCommonSubsequence(str[0], str[1], 100, pos1);
+
+	// Extend the matches as long as possible
+	TSize oldI = 0;
+	TSize oldJ = 0;
+	TSize totalLen = 0;
+	if (length(pos1)) {
+		TSize lenMatch = 1;				
+		int last = length(pos1)-1;		
+		TSize iBegin = pos1[last].first;
+		TSize jBegin = pos1[last].second;
+		for(int z = last - 1; z>=0; --z) {
+			if ((pos1[z].first == pos1[z+1].first + 1) &&
+				(pos1[z].second == pos1[z+1].second + 1)) 
+			{
+				++lenMatch;
+			} else {
+				if (oldI < iBegin) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
+				if (oldJ < jBegin) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
+				oldI = iBegin + lenMatch;
+				oldJ = jBegin + lenMatch;
+			
+				_align_trace_print(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
+				totalLen += lenMatch;
+				lenMatch = 1;
+				iBegin = pos1[z].first;
+				jBegin = pos1[z].second;
+			}
+		}
+		// Process last match
+		if (oldI < iBegin) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
+		if (oldJ < jBegin) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
+		oldI = iBegin + lenMatch;
+		oldJ = jBegin + lenMatch;
+		_align_trace_print(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
+		totalLen += lenMatch;
+	}
+	// Process left overs
+	if (oldI < length(str[0])) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) length(str[0]) - oldI,  1);
+	if (oldJ < length(str[1])) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) length(str[1]) - oldJ, 2);
+	
+	return (int) totalLen;
 }
 
 

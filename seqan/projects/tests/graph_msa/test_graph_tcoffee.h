@@ -156,7 +156,7 @@ void Test_Distances() {
 	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 2 * length(strSet) + 3) == (unsigned int) ((double) (1.0 - 3.0 / 7.0) * 100.0))
 
 	clear(distanceMatrix);
-	String<Pair<unsigned int, unsigned int> > pList;
+	String<unsigned int> pList;
 	selectPairs(strSet, pList);
 	Blosum62 score_type(-1,-11);
 	String<Fragment<> > matches;
@@ -204,15 +204,17 @@ void Test_Libraries() {
 	TString str3 = "GARFIELDTHEVERYFASTCAT";
 	TString str4 = "THEFATCAT";
 	TStringSet strSet;
-	assignValueById(strSet, str1);
-	assignValueById(strSet, str2);
-	assignValueById(strSet, str3);
-	assignValueById(strSet, str4);
+	appendValue(strSet, str1);
+	appendValue(strSet, str2);
+	appendValue(strSet, str3);
+	appendValue(strSet, str4);
+	String<unsigned int> pList;
+	selectPairs(strSet, pList);
 	TGraph g(strSet);
 	Blosum62 score_type(-1,-11);
 	String<Fragment<> > matches;
 	String<int> scores;
-	appendSegmentMatches(strSet, matches, scores, Lcs_Library() );
+	appendSegmentMatches(strSet, pList, matches, scores, Lcs_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
 	clear(matches);
@@ -222,19 +224,18 @@ void Test_Libraries() {
 	__testquickAlign(g);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(strSet, score_type, matches, scores, LocalPairwise_Library() );
+	appendSegmentMatches(strSet, pList, score_type, matches, scores, LocalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(strSet, score_type, matches, scores, GlobalPairwise_Library() );
+	Nothing noth;
+	appendSegmentMatches(strSet, pList, score_type, matches, scores, noth, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
 	clear(matches);
 	clear(scores);
 	String<double> distanceMatrix;
-	String<Pair<unsigned int, unsigned int> > pList;
-	selectPairs(strSet, pList);
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	__testquickAlign(g);
@@ -257,6 +258,8 @@ void Test_ExternalLibraries() {
 	appendValue(seqSet, "GARFIELDTHEFASTCAT");
 	appendValue(seqSet, "GARFIELDTHEVERYFASTCAT");
 	appendValue(seqSet, "THEFATCAT");
+	String<unsigned int> pList;
+	selectPairs(seqSet, pList);
 	TNameSet nameSet;
 	appendValue(nameSet, "seq1");
 	appendValue(nameSet, "seq2");
@@ -268,9 +271,10 @@ void Test_ExternalLibraries() {
 	Blosum62 score_type(-1,-11);
 	String<Fragment<> > matches;
 	String<int> scores;
-	appendSegmentMatches(seqSet, score_type, matches, scores, GlobalPairwise_Library() );
+	Nothing noth;
+	appendSegmentMatches(stringSet(g), pList, score_type, matches, scores, noth, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	std::cout << g << std::endl;
+	//std::cout << g << std::endl;
 
 	// T-Coffee lib format
 
@@ -315,7 +319,7 @@ void Test_ExternalLibraries() {
 	assignStringSet(g, seqSet);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(seqSet, score_type, matches, scores, GlobalPairwise_Library() );
+	appendSegmentMatches(stringSet(g), pList, score_type, matches, scores, noth, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	// Blast lib format
 
@@ -398,7 +402,9 @@ void Test_SumOfPairsScore() {
 	String<double> distanceMatrix;
 	String<Fragment<> > matches;
 	String<int> scores;
-	appendSegmentMatches(seqSet, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	String<unsigned int> pList;
+	selectPairs(seqSet, pList);
+	appendSegmentMatches(stringSet(g), pList, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
@@ -414,7 +420,7 @@ void Test_SumOfPairsScore() {
 	clearVertices(g);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	appendSegmentMatches(stringSet(g), pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
@@ -431,7 +437,8 @@ void Test_SumOfPairsScore() {
 	assignStringSet(g, seqSet);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	selectPairs(seqSet, pList);
+	appendSegmentMatches(stringSet(g), pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
@@ -447,7 +454,8 @@ void Test_SumOfPairsScore() {
 	clearVertices(g);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	selectPairs(seqSet, pList);
+	appendSegmentMatches(stringSet(g), pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
@@ -462,7 +470,8 @@ void Test_SumOfPairsScore() {
 	clearVertices(g);
 	clear(matches);
 	clear(scores);
-	appendSegmentMatches(seqSet, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	selectPairs(seqSet, pList);
+	appendSegmentMatches(stringSet(g), pList, scType, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
@@ -505,7 +514,9 @@ void Test_Progressive() {
 	String<double> distanceMatrix;
 	String<Fragment<> > matches;
 	String<int> scores;
-	appendSegmentMatches(seqSet, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
+	String<unsigned int> pList;
+	selectPairs(seqSet, pList);
+	appendSegmentMatches(stringSet(g), pList, score_type, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;

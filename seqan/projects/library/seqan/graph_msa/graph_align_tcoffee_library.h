@@ -87,24 +87,23 @@ typedef Tag<Lcs_Library_> const Lcs_Library;
 //////////////////////////////////////////////////////////////////////////////
 
 // Dummy function selecting all pairs
-template<typename TString, typename TSpec, typename TPairList>
+template<typename TString, typename TSpec, typename TSize2, typename TSpec2>
 inline void 
 selectPairs(StringSet<TString, TSpec> const& str,
-								TPairList& pList)
+			String<TSize2, TSpec2>& pList)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, TSpec> TStringSet;
 	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Value<TPairList>::Type TPair;
-	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Iterator<String<TSize2, TSpec2>, Standard>::Type TPairIter;
 
 	TSize nseq = length(str);
-	resize(pList, nseq * (nseq - 1) / 2);
-	TPairIter itPair = begin(pList);
+	resize(pList, nseq * (nseq - 1));
+	TPairIter itPair = begin(pList, Standard());
 	for(TSize i=0; i<nseq-1; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
-			value(itPair) = TPair(positionToId(str, i), positionToId(str, j));
-			goNext(itPair);
+			*itPair = i; ++itPair;
+			*itPair = j; ++itPair;
 		}
 	}
 }
@@ -193,79 +192,49 @@ getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TSegmentMatches, typename TScores>
+template<typename TString, typename TSpec, typename TSize2, typename TSpec2, typename TSegmentMatches, typename TScores>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 String<Pair<TId, TId> > const& pList,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
+					 String<TSize2, TSpec2> const& pList,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 Lcs_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef String<Pair<TId, TId> > TPairList;
+	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
+	typedef String<TSize2, TSpec2> TPairList;
 	typedef typename Size<TStringSet>::Type TSize;
+	typedef typename Id<TStringSet>::Type TId;
 	typedef typename Value<TSegmentMatches>::Type TFragment;
 	typedef typename Value<TScores>::Type TScoreValue;
-	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Iterator<TPairList, Standard>::Type TPairIter;
 
 	// Pairwise longest common subsequence
-	TPairIter itPair = begin(pList);
-	TPairIter itPairEnd = end(pList);
-	for(;itPair != itPairEnd; goNext(itPair)) {
-		TSize i = idToPosition(str, (value(itPair)).i1);
-		TSize j = idToPosition(str, (value(itPair)).i2);
-		
+	TPairIter itPair = begin(pList, Standard());
+	TPairIter itPairEnd = end(pList, Standard());
+	for(;itPair != itPairEnd; ++itPair) {
+		TStringSet pairSet;
+		TId id1 = positionToId(str, *itPair); ++itPair;
+		TId id2 = positionToId(str, *itPair);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id1);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id2);
+
 		// Lcs between first and second string
-		String<std::pair<TSize, TSize>, Block<> > pos1;
-		longestCommonSubsequence(value(str, i), value(str, j), 1000, pos1);
+		TSize from = length(matches);
+		globalAlignment(matches, pairSet, Lcs());
+		TSize to = length(matches);
 
-		// Extend the matches as long as possible
-		TSize lenMatch = 1;						
-		int last = length(pos1)-1;		
-		TSize iBegin = pos1[last].first;
-		TSize jBegin = pos1[last].second;
-		for(int z = last - 1; z>=0; --z) {
-			if ((pos1[z].first == pos1[z+1].first + 1) &&
-				(pos1[z].second == pos1[z+1].second + 1)) 
-			{
-				++lenMatch;
-			} else {
-				//// Debug code
-				//typedef typename Infix<TString>::Type TInfix;
-				//TInfix inf1 = infix(str1,iBegin, iBegin + lenMatch);
-				//TInfix inf2 = infix(str2,jBegin, jBegin + lenMatch);
-				//std::cout << inf1 << std::endl;
-				//std::cout << inf2 << std::endl;
-						
-				appendValue(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
-				appendValue(scores, (TScoreValue) lenMatch);
-				lenMatch = 1;
-				iBegin = pos1[z].first;
-				jBegin = pos1[z].second;
-			}
-		}
-		// Process last match
-		appendValue(matches, TFragment(positionToId(str, i),iBegin,positionToId(str, j),jBegin,lenMatch));
-		appendValue(scores, (TScoreValue) lenMatch);
+		// Record the scores
+		resize(scores, to);
+		typedef typename Iterator<TSegmentMatches, Standard>::Type TMatchIter;
+		typedef typename Iterator<TScores, Standard>::Type TScoreIter;
+		TScoreIter itScore = begin(scores, Standard());
+		TScoreIter itScoreEnd = end(scores, Standard());
+		TMatchIter itMatch = begin(matches, Standard());
+		itScore+=from;
+		itMatch+=from;
+		for(;itScore != itScoreEnd; ++itScore, ++itMatch) *itScore = (*itMatch).len;
 	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores>
-inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 TSegmentMatches& matches,
-					 TScores& scores,
-					 Lcs_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairs(str, pList);
-	appendSegmentMatches(str, pList, matches, scores, Lcs_Library());
 }
 
 
@@ -273,7 +242,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores, typename TAlphabet, typename TSize>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 TSize ktup,
@@ -281,7 +250,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 					 Kmer_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
 	typedef typename Value<TScores>::Type TScoreValue;
 	typedef typename Value<TSegmentMatches>::Type TFragment;
 	typedef typename Id<TStringSet>::Type TId;
@@ -333,7 +302,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores, typename TSize>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 TSize ktup,
@@ -347,7 +316,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 template<typename TString, typename TSpec, typename TSegmentMatches, typename TScores>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 Kmer_Library)
@@ -359,31 +328,32 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScores>
+template<typename TString, typename TSpec, typename TSize2, typename TSpec2, typename TScore, typename TSegmentMatches, typename TScores>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 String<Pair<TId, TId> > const& pList,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
+					 String<TSize2, TSpec2> const& pList,
 					 TScore const& score_type,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 LocalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef String<Pair<TId, TId> > TPairList;
+	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
+	typedef String<TSize2, TSpec2> TPairList;
 	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Id<TStringSet>::Type TId;
+	typedef typename Iterator<TPairList, Standard>::Type TPairIter;
 
 	// Pairwise alignments
-	TPairIter itPair = begin(pList);
-	TPairIter itPairEnd = end(pList);
-	for(;itPair != itPairEnd; goNext(itPair)) {
+	TPairIter itPair = begin(pList, Standard());
+	TPairIter itPairEnd = end(pList, Standard());
+	for(;itPair != itPairEnd; ++itPair) {
 		// Make a pairwise string-set
 		TStringSet pairSet;
-		TId id1 = (value(itPair)).i1;
-		TId id2 = (value(itPair)).i2;
-		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
-		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
+		TId id1 = positionToId(str, *itPair); ++itPair;
+		TId id2 = positionToId(str, *itPair);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id1);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id2);
 
 		multiLocalAlignment(pairSet, matches, scores, score_type, 4, SmithWatermanClump() );
 	}
@@ -391,32 +361,13 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScores>
-inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 TScore const& score_type,
-					 TSegmentMatches& matches,
-					 TScores& scores,
-					 LocalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairs(str, pList);
-	appendSegmentMatches(str, pList, score_type, matches, scores, LocalPairwise_Library() );
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TValue, typename TSpec, typename TSize>
 inline void
-__resizeWithRespectToDistance(String<TValue, TSpec>& dist, TSize nseq)
+__resizeWithRespectToDistance(String<TValue, TSpec>& dist, 
+							  TSize nseq)
 {
 	SEQAN_CHECKPOINT
-	clear(dist);
-	TValue infDist = _getInfinity<TValue>(); 
-	fill(dist, nseq * nseq, infDist);
+	resize(dist, nseq * nseq);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -513,10 +464,10 @@ __getAlignmentStatistics(String<TFragment, TSpec>&,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance, typename TAlignConfig>
+template<typename TString, typename TSpec, typename TSize2, typename TSpec2, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance, typename TAlignConfig>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 String<Pair<TId, TId> > const& pList,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
+					 String<TSize2, TSpec2> const& pList,
 					 TScore const& score_type,
 					 TSegmentMatches& matches,
 					 TScoreValues& scores,
@@ -525,26 +476,26 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 					 GlobalPairwise_Library)
 {
 	SEQAN_CHECKPOINT
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef String<Pair<TId, TId> > TPairList;
-	typedef typename Value<TScoreValues>::Type TScoreValue;
+	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
+	typedef typename Id<TStringSet>::Type TId;
 	typedef typename Size<TStringSet>::Type TSize;
-	typedef typename Iterator<TPairList>::Type TPairIter;
+	typedef typename Value<TScoreValues>::Type TScoreValue;
+	typedef typename Iterator<String<TSize2, TSpec2>, Standard>::Type TPairIter;
 
 	// Initialization
 	TSize nseq = length(str);
 	__resizeWithRespectToDistance(dist, nseq);
 	
 	// Pairwise alignments
-	TPairIter itPair = begin(pList);
-	TPairIter itPairEnd = end(pList);
-	for(;itPair != itPairEnd; goNext(itPair)) {
+	TPairIter itPair = begin(pList, Standard());
+	TPairIter itPairEnd = end(pList, Standard());
+	for(;itPair != itPairEnd; ++itPair) {
 		// Make a pairwise string-set
 		TStringSet pairSet;
-		TId id1 = (value(itPair)).i1;
-		TId id2 = (value(itPair)).i2;
-		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id1);
-		assignValueById(pairSet, const_cast<StringSet<TString, TSpec>&>(str), id2);
+		TId id1 = positionToId(str, *itPair); ++itPair;
+		TId id2 = positionToId(str, *itPair);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id1);
+		assignValueById(pairSet, const_cast<TStringSet&>(str), id2);
 				
 		// Alignment
 		TSize from = length(matches);
@@ -553,24 +504,24 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 		// Record the scores
 		resize(scores, to);
-		typedef typename Iterator<TScoreValues>::Type TScoreIter;
-		TScoreIter itScore = begin(scores);
-		TScoreIter itScoreEnd = end(scores);
-		goFurther(itScore, from);
-		for(;itScore != itScoreEnd; ++itScore) value(itScore) = myScore;
+		typedef typename Iterator<TScoreValues, Standard>::Type TScoreIter;
+		TScoreIter itScore = begin(scores, Standard());
+		TScoreIter itScoreEnd = end(scores, Standard());
+		itScore+=from;
+		for(;itScore != itScoreEnd; ++itScore) *itScore = myScore;
 			
 		// Get the alignment statistics
-		__getAlignmentStatistics(matches, pairSet, dist, (TSize) idToPosition(str,id1), (TSize) idToPosition(str,id2), (TSize) nseq, (TSize) from);
+		__getAlignmentStatistics(matches, pairSet, dist, (TSize) *(itPair-1), (TSize) *itPair, (TSize) nseq, (TSize)from);
 	}
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TString, typename TSpec, typename TId, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance>
+template<typename TString, typename TSpec, typename TSize2, typename TSpec2, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance>
 inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 String<Pair<TId, TId> > const& pList,
+appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
+					 String<TSize2, TSpec2> const& pList,
 					 TScore const& score_type,
 					 TSegmentMatches& matches,
 					 TScoreValues& scores,
@@ -580,43 +531,6 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	SEQAN_CHECKPOINT
 	appendSegmentMatches(str, pList, score_type, matches, scores, dist, AlignConfig<>(), GlobalPairwise_Library() );
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScoreValues, typename TDistance>
-inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 TScore const& score_type,
-					 TSegmentMatches& matches,
-					 TScoreValues& scores,
-					 TDistance& dist,					 
-					 GlobalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Id<StringSet<TString, TSpec> >::Type TId;
-	String<Pair<TId, TId> > pList;
-	selectPairs(str, pList);
-	appendSegmentMatches(str, pList, score_type, matches, scores, dist, GlobalPairwise_Library() );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TScore, typename TSegmentMatches, typename TScoreValues>
-inline void 
-appendSegmentMatches(StringSet<TString, TSpec> const& str,
-					 TScore const& score_type,
-					 TSegmentMatches& matches,
-					 TScoreValues& scores, 
-					 GlobalPairwise_Library)
-{
-	SEQAN_CHECKPOINT
-	Nothing noth;
-	appendSegmentMatches(str, score_type, matches, scores, noth, GlobalPairwise_Library() );
-}
-
-
-
-
 
 
 

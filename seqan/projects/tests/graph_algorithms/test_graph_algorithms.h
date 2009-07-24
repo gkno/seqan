@@ -955,8 +955,8 @@ void Test_LongestIncreasingSubsequence() {
 void Test_LongestCommonSubsequence() {
 	String<char> seq1("abacx");
 	String<char> seq2("baabca");
-	String<std::pair<unsigned int, unsigned int>, Block<> > pos;
-	longestCommonSubsequence(seq1, seq2, pos);
+	String<std::pair<unsigned int, unsigned int> > pos;
+	longestCommonSubsequence(seq1, seq2, 100, pos);
 	SEQAN_TASSERT(seq1[pos[2].first] == 'b')
 	SEQAN_TASSERT(seq2[pos[2].second] == 'b')
 	SEQAN_TASSERT(seq1[pos[1].first] == 'a')

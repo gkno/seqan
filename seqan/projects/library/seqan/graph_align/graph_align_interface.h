@@ -288,6 +288,16 @@ globalAlignment(TAlign& file,
 	return _globalAlignment(file,str,sc, TAlignConfig(), diag1, diag2, BandedGotoh());
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec>
+inline int
+globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+				Lcs)
+{
+	return globalAlignment(g, stringSet(g), Lcs());
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -93,6 +93,7 @@ pairwise_align(TScore const& sc,
 		if (method == 0) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), NeedlemanWunsch());
 		else if (method == 1) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), Gotoh());
 		else if (method == 2) aliScore = localAlignment(gAlign, sc, SmithWaterman());
+		else if (method == 3) aliScore = globalAlignment(gAlign, Lcs());
 	} else {
 		if (method == 0) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), low, high, BandedNeedlemanWunsch());
 		else if (method == 1) aliScore = globalAlignment(gAlign, sc, TAlignConfig(), low, high, BandedGotoh());
@@ -170,6 +171,7 @@ _initAlignParams(CommandLineParser& parser, TScore& sc) {
 	if (meth == "nw") method = 0;
 	else if (meth == "gotoh") method = 1;
 	else if (meth == "sw") method = 2;
+	else if (meth == "lcs") method = 3;
 	unsigned int outputFormat = 0;
 	String<char> format;
 	getOptionValueLong(parser, "format", format);
@@ -280,10 +282,11 @@ int main(int argc, const char *argv[]) {
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with 2 sequences", OptionType::String), "<FASTA Sequence File>"));
 	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", OptionType::String, "protein"), "[protein | dna | rna]"));
-	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", OptionType::String, "gotoh"), "[nw, gotoh, sw]"));
+	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", OptionType::String, "gotoh"), "[nw, gotoh, sw, lcs]"));
 	addHelpLine(parser, "nw = Needleman-Wunsch");
 	addHelpLine(parser, "gotoh = Gotoh");
 	addHelpLine(parser, "sw = Smith-Waterman");
+	addHelpLine(parser, "lcs = Longest common subsequence");
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "out.fasta"), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "fasta"), "[fasta | msf]"));
 	

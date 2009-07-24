@@ -196,7 +196,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	TSize threshold = 30;
 
 	// Select all possible pairs for global and local alignments
-	String<Pair<TId, TId> > pList;
+	String<TSize> pList;
 	selectPairs(seqSet, pList);
 
 	// Set-up a distance matrix
@@ -254,7 +254,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 				AlignConfig<true,true,true, true> ac;
 				appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, noth, ac, GlobalPairwise_Library() );
 			} 
-			else if (*begIt == 3) appendSegmentMatches(seqSet, matches, scores, Lcs_Library() );
+			else if (*begIt == 3) appendSegmentMatches(seqSet, pList, matches, scores, Lcs_Library() );
 			else {
 #ifdef SEQAN_PROFILE
 				std::cout << "*Unknown method!!!" << std::endl;
