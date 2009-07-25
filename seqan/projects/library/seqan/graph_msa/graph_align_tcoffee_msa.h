@@ -383,7 +383,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		
 	// Triplet extension
 	if (nSeq < threshold) tripletLibraryExtension(g);
-	tripletLibraryExtension(g, guideTree, threshold / 2);
+	else tripletLibraryExtension(g, guideTree, threshold / 2);
 #ifdef SEQAN_PROFILE
 	std::cout << "Triplet extension done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
