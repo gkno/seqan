@@ -98,14 +98,7 @@ public:
 		return *this;
 	}
 
-	friend FrequencyDistribution 
-	operator + (FrequencyDistribution const & lhs_, FrequencyDistribution const & rhs_)
-	{
-		FrequencyDistribution ret(lhs_);
-		ret+=rhs_;
 
-		return ret;
-	}
 
 	FrequencyDistribution &
 	operator -= (FrequencyDistribution const & other_)
@@ -118,15 +111,6 @@ public:
 		return *this;
 	}
 
-	friend FrequencyDistribution 
-	operator - (FrequencyDistribution const & lhs_, FrequencyDistribution const & rhs_)
-	{
-		FrequencyDistribution ret(lhs_);
-		ret-=rhs_;
-
-		return ret;
-	}
-
 	template<typename TType>
 	FrequencyDistribution &
 	operator *= (TType value_)
@@ -137,16 +121,6 @@ public:
 		}
 
 		return *this;
-	}
-
-	template<typename TType>
-	friend FrequencyDistribution 
-	operator * (FrequencyDistribution const & fd_, TType value_)
-	{
-		FrequencyDistribution ret(fd_);
-		ret*=value_;
-
-		return ret;
 	}
 
 	template<typename TPos>
@@ -163,21 +137,55 @@ public:
 		return frequency_list[index_];
 	}
 
-    friend inline std::ostream & 
-	operator << (std::ostream & ostr, FrequencyDistribution & fd_) 
-	{ 
-		for(unsigned int i=0; i<SIZE; ++i)
-		{	
-			ostr.width(15);
-			ostr << std::left << fd_.frequency_list[i];
-		}
-		
-		return ostr;  
-	} 
 
 //____________________________________________________________________________________________
 
 };
+
+template <typename TValue, typename TSpec>
+FrequencyDistribution<TValue, TSpec> 
+operator + (FrequencyDistribution<TValue, TSpec> const & lhs_, FrequencyDistribution<TValue, TSpec> const & rhs_)
+{
+	FrequencyDistribution<TValue, TSpec> ret(lhs_);
+	ret+=rhs_;
+
+	return ret;
+}
+
+
+template <typename TValue, typename TSpec>
+FrequencyDistribution<TValue, TSpec> 
+operator - (FrequencyDistribution<TValue, TSpec> const & lhs_, FrequencyDistribution<TValue, TSpec> const & rhs_)
+{
+	FrequencyDistribution<TValue, TSpec> ret(lhs_);
+	ret-=rhs_;
+
+	return ret;
+}
+
+template <typename TValue, typename TSpec, typename TType>
+FrequencyDistribution<TValue, TSpec> 
+operator * (FrequencyDistribution<TValue, TSpec> const & fd_, TType value_)
+{
+	FrequencyDistribution<TValue, TSpec> ret(fd_);
+	ret*=value_;
+
+	return ret;
+}
+
+template <typename TValue, typename TSpec>
+inline std::ostream & 
+operator << (std::ostream & ostr, FrequencyDistribution<TValue, TSpec> & fd_) 
+{ 
+	for(unsigned int i=0; i<FrequencyDistribution<TValue, TSpec>::SIZE; ++i)
+	{	
+		ostr.width(15);
+		ostr << std::left << fd_.frequency_list[i];
+	}
+	
+	return ostr;  
+} 
+
 
 //////////////////////////////////////////////////////////////////////////////
 //Metafunctions
