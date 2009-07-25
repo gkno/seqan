@@ -236,15 +236,15 @@ pmsp(TStrings & result,
 				{
 					typename Iterator< String<TPos> >::Type l_iter = begin(L[i]);
 					typename Iterator< String<TPos> >::Type l_end = end(L[i]);
-					while(l_iter!=l_end & number<2)
+					while((l_iter!=l_end) && (number<2))
 					{
 						TPos pos = *l_iter;
-						if(is_exact & hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
+						if(is_exact && hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
 							                          begin(l_mer))==d)
 						{
 							++number;
 						}
-						else if(!(is_exact) & 
+						else if(!(is_exact) && 
 							      hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
 								                        begin(l_mer))<=d)                  
 						{
@@ -353,15 +353,15 @@ pmsp(TStrings & result,
 			{
 				typename Iterator< String<TPos> >::Type l_iter = begin(L[i]);
 				typename Iterator< String<TPos> >::Type l_end = end(L[i]);
-				while(l_iter!=l_end & number<1)
+				while((l_iter!=l_end) && (number<1))
 				{
 					TPos pos = *l_iter;
-					if(is_exact & hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
+					if(is_exact && hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l, 
 												  begin(l_mer))==d)
 					{
 						++number;
 					}
-					else if(!(is_exact) & 
+					else if(!(is_exact) && 
 							  hammingDistance<TType>(begin(dataset[i+1])+pos, begin(dataset[i+1])+pos+l,
 													begin(l_mer))<=d)                              
 					{
@@ -470,7 +470,7 @@ pmsp(TStrings & result,
 			{
 				TString l_mer = inverseHash<TValue>(*V_iter, ValueSize<TValue>::VALUE, l);
 				typename std::set<TString>::iterator iter = result_set.find(l_mer);
-				if( iter==result_set.end() &
+				if( (iter==result_set.end()) &&
 					hasExactOneOccurrence(begin(l_mer), 
 					                     begin(dataset[seq_nr]), 
 										 end(dataset[seq_nr]), l, d, is_exact) )
@@ -482,23 +482,25 @@ pmsp(TStrings & result,
 					{
 						typename Iterator< String<TPos2> >::Type L_iter = begin(L[i]);
 						typename Iterator< String<TPos2> >::Type L_end = end(L[i]);
-						while(L_iter!=L_end & number<2)
+						while((L_iter!=L_end) && (number<2))
 						{
 							TPos2 pos = *L_iter;
-							if(is_exact & 
+							if(is_exact && 
 								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
 												begin(dataset[relevant_pos_vect[i]])+pos+l, 
 												begin(l_mer))==d)
 							{
 								++number;
 							}
-							else if((!is_exact) & 
-								hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
-												begin(dataset[relevant_pos_vect[i]])+pos+l, 
-												begin(l_mer))<=d)
+							else
 							{
-								++number;
-							}
+								if((!is_exact) && 
+									hammingDistance<TType>(begin(dataset[relevant_pos_vect[i]])+pos, 
+													begin(dataset[relevant_pos_vect[i]])+pos+l, 
+													begin(l_mer))<=d)
+								{
+									++number;
+								}}
 
 							++L_iter;
 						}
@@ -517,7 +519,7 @@ pmsp(TStrings & result,
 						}
 						number = 0;
 					}
-					if(isMotif & lower_limit<=0)
+					if(isMotif && (lower_limit<=0))
 					{
 						result_set.insert(l_mer);
 					}

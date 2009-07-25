@@ -125,84 +125,92 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
-		friend inline typename Iterator<String, Standard>::Type
-		begin(String & me,
-			Standard)
-		{
-	SEQAN_CHECKPOINT
-			return me.data_begin;
-		}
-		friend inline typename Iterator<String const, Standard>::Type
-		begin(String const & me,
-			Standard)
-		{
-	SEQAN_CHECKPOINT
-			return me.data_begin;
-		}
-
-//____________________________________________________________________________
-
-		friend inline typename Iterator<String, Standard>::Type
-		end(String & me,
-			Standard)
-		{
-	SEQAN_CHECKPOINT
-			return me.data_end;
-		}
-		friend inline typename Iterator<String const, Standard>::Type
-		end(String const & me,
-			Standard)
-		{
-	SEQAN_CHECKPOINT
-			return me.data_end;
-		}
-
-//____________________________________________________________________________
-
-		friend inline typename Size<String>::Type
-		capacity(String & me) 
-		{
-	SEQAN_CHECKPOINT
-			return me.data_capacity;
-		}
-
-		friend inline typename Size<String>::Type
-		capacity(String const & me) 
-		{
-	SEQAN_CHECKPOINT
-			return me.data_capacity;
-		}
-
         inline operator bool() 
-		{
+   	{
             return file;
         }
-//____________________________________________________________________________
-
-		friend inline void 
-		_setLength(
-			String & me, 
-			size_t new_length)
-		{
-	SEQAN_CHECKPOINT
-			me.data_end = me.data_begin + new_length;
-		}
-
-//____________________________________________________________________________
-
-		friend inline void 
-		_setCapacity(
-			String & me, 
-			size_t new_capacity)
-		{
-	SEQAN_CHECKPOINT
-			me.data_capacity = new_capacity;
-		}
 
 //____________________________________________________________________________
 
 };
 
+   template < typename TValue, typename TConfig >
+	inline typename Iterator<String<TValue, MMap<TConfig> > , Standard>::Type
+	begin(String<TValue, MMap<TConfig> > & me,
+		Standard)
+	{
+SEQAN_CHECKPOINT
+		return me.data_begin;
+	}
+   template < typename TValue, typename TConfig >
+	inline typename Iterator<String<TValue, MMap<TConfig> >  const, Standard>::Type
+	begin(String<TValue, MMap<TConfig> > const & me,
+		Standard)
+	{
+SEQAN_CHECKPOINT
+		return me.data_begin;
+	}
+
+//____________________________________________________________________________
+
+   template < typename TValue, typename TConfig >
+   inline typename Iterator<String<TValue, MMap<TConfig> > , Standard>::Type
+	end(String<TValue, MMap<TConfig> > & me,
+		Standard)
+	{
+SEQAN_CHECKPOINT
+		return me.data_end;
+	}
+   template < typename TValue, typename TConfig >
+	inline typename Iterator<String<TValue, MMap<TConfig> >  const, Standard>::Type
+	end(String<TValue, MMap<TConfig> > const & me,
+		Standard)
+	{
+SEQAN_CHECKPOINT
+		return me.data_end;
+	}
+
+//____________________________________________________________________________
+
+   template < typename TValue, typename TConfig >
+	inline typename Size<String<TValue, MMap<TConfig> > >::Type
+	capacity(String<TValue, MMap<TConfig> > & me) 
+	{
+SEQAN_CHECKPOINT
+		return me.data_capacity;
+	}
+
+   template < typename TValue, typename TConfig >
+	inline typename Size<String<TValue, MMap<TConfig> > >::Type
+	capacity(String<TValue, MMap<TConfig> > const & me) 
+	{
+SEQAN_CHECKPOINT
+		return me.data_capacity;
+	}
+
+//____________________________________________________________________________
+
+   template < typename TValue, typename TConfig >
+	inline void 
+	_setLength(
+		String<TValue, MMap<TConfig> > & me, 
+		size_t new_length)
+	{
+SEQAN_CHECKPOINT
+		me.data_end = me.data_begin + new_length;
+	}
+
+//____________________________________________________________________________
+
+	template < typename TValue, typename TConfig >
+   inline void 
+	_setCapacity(
+		String<TValue, MMap<TConfig> > & me, 
+		size_t new_capacity)
+	{
+SEQAN_CHECKPOINT
+		me.data_capacity = new_capacity;
+	}
 
 
     //////////////////////////////////////////////////////////////////////////////

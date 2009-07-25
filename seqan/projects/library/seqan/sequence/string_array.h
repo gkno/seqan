@@ -46,7 +46,7 @@ struct Array;
 template <typename TValue, unsigned int ISize>
 class String<TValue, Array<ISize> >
 {
-protected:
+public:
 	mutable TValue data_begin[ISize];
 	TValue * data_end;
 
@@ -118,65 +118,76 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	begin(String & me,
-		Standard)
-	{
+
+};
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TValue, unsigned int ISize>
+inline typename Iterator<String<TValue, Array<ISize> >, Standard>::Type
+begin(String<TValue, Array<ISize> > & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	begin(String const & me,
-		Standard)
-	{
+	return me.data_begin;
+}
+template <typename TValue, unsigned int ISize>
+inline typename Iterator<String<TValue, Array<ISize> > const, Standard>::Type
+begin(String<TValue, Array<ISize> > const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
+	return me.data_begin;
+}
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	end(String & me,
-		Standard)
-	{
+template <typename TValue, unsigned int ISize>
+inline typename Iterator<String<TValue, Array<ISize> >, Standard>::Type
+end(String<TValue, Array<ISize> > & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_end;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	end(String const & me,
-		Standard)
-	{
+	return me.data_end;
+}
+template <typename TValue, unsigned int ISize>
+inline typename Iterator<String<TValue, Array<ISize> > const, Standard>::Type
+end(String<TValue, Array<ISize> > const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_end;
-	}
+	return me.data_end;
+}
 
 //____________________________________________________________________________
 
-	friend inline size_t
-	capacity(String &)
-	{
+template <typename TValue, unsigned int ISize>
+inline size_t
+capacity(String<TValue, Array<ISize> > &)
+{
 SEQAN_CHECKPOINT
-		return ISize;
-	}
+	return ISize;
+}
 
-	friend inline size_t
-	capacity(String const &)
-	{
+template <typename TValue, unsigned int ISize>
+inline size_t
+capacity(String<TValue, Array<ISize> > const &)
+{
 SEQAN_CHECKPOINT
-		return ISize;
-	}
+	return ISize;
+}
 //____________________________________________________________________________
 
-	template <typename TExpand>
-	friend inline size_t
-	reserve(
-		String & me, 
-		size_t,
-		Tag<TExpand> const)
-	{
+template <typename TValue, unsigned int ISize, typename TExpand>
+inline size_t
+reserve(
+	String<TValue, Array<ISize> > & me, 
+	size_t,
+	Tag<TExpand> const)
+{
 SEQAN_CHECKPOINT
-		return capacity(me);
-	}
+	return capacity(me);
+}
 
 
 //____________________________________________________________________________
@@ -184,19 +195,15 @@ SEQAN_CHECKPOINT
 /**
 .Internal._setLength.param.object.type:Spec.Array String
 */
-	friend inline void 
-	_setLength(
-		String & me, 
-		size_t new_length)
-	{
+template <typename TValue, unsigned int ISize>
+inline void 
+_setLength(
+	String<TValue, Array<ISize> > & me, 
+	size_t new_length)
+{
 SEQAN_CHECKPOINT
-		me.data_end = me.data_begin + new_length;
-	}
-
-//____________________________________________________________________________
-
-};
-
+	me.data_end = me.data_begin + new_length;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

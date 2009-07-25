@@ -33,6 +33,26 @@ template <typename TValue, typename TSpec = NDimensional>
 class Matrix;
 
 //////////////////////////////////////////////////////////////////////////////
+template <typename T> struct _SizeArr;
+
+template <typename TValue> 
+struct _SizeArr<Matrix<TValue, NDimensional> >
+{
+	typedef Matrix<TValue, NDimensional> TMatrix;
+	typedef typename Size<TMatrix>::Type TSize;
+	typedef String<TSize> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue>
+struct Host<Matrix<TValue, NDimensional> >
+{
+	typedef String<TValue> Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.Matrix
@@ -81,67 +101,7 @@ public:
 	}
 //____________________________________________________________________________
 
-	friend inline TSizeArr &
-	_dataLengths(Matrix & me)
-	{
-		return me.data_lengths;
-	}
-	friend inline TSizeArr const &
-	_dataLengths(Matrix const & me)
-	{
-		return me.data_lengths;
-	}
 
-	friend inline TSizeArr &
-	_dataFactors(Matrix & me)
-	{
-		return me.data_factors;
-	}
-
-//____________________________________________________________________________
-
-	friend inline bool
-	dependent(Matrix & me)
-	{
-		return dependent(me.data_host);
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	setHost(Matrix & me, THost & host_)
-	{
-		setValue(me.data_host, host_);
-	}
-
-//____________________________________________________________________________
-
-	friend inline THost &
-	host(Matrix & me)
-	{
-		return value(me.data_host);
-	}
-	friend inline THost const &
-	host(Matrix const & me)
-	{
-		return value(me.data_host);
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	assignHost(Matrix & me, THost const & value_)
-	{
-		assignValue(me.data_host, value_);
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	moveHost(Matrix & me, THost const & value_)
-	{
-		moveValue(me.data_host, value_);
-	}
 //____________________________________________________________________________
 
 	inline TValue & 
@@ -163,6 +123,76 @@ public:
 //____________________________________________________________________________
 };
 
+template <typename TValue>
+inline typename _SizeArr<Matrix<TValue, NDimensional> >::Type &
+_dataLengths(Matrix<TValue, NDimensional> & me)
+{
+	return me.data_lengths;
+}
+template <typename TValue>
+inline typename _SizeArr<Matrix<TValue, NDimensional> >::Type const &
+_dataLengths(Matrix<TValue, NDimensional> const & me)
+{
+	return me.data_lengths;
+}
+
+template <typename TValue>
+inline typename _SizeArr<Matrix<TValue, NDimensional> >::Type &
+_dataFactors(Matrix<TValue, NDimensional> & me)
+{
+	return me.data_factors;
+}
+
+//____________________________________________________________________________
+
+template <typename TValue>
+inline bool
+dependent(Matrix<TValue, NDimensional> & me)
+{
+	return dependent(me.data_host);
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename THost>
+inline void
+setHost(Matrix<TValue, NDimensional> & me, THost & host_)
+{
+	setValue(me.data_host, host_);
+}
+
+//____________________________________________________________________________
+
+template <typename TValue>
+inline typename Host<Matrix<TValue, NDimensional> >::Type &
+host(Matrix<TValue, NDimensional> & me)
+{
+	return value(me.data_host);
+}
+template <typename TValue>
+inline typename Host<Matrix<TValue, NDimensional> >::Type const &
+host(Matrix<TValue, NDimensional> const & me)
+{
+	return value(me.data_host);
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename THost>
+inline void
+assignHost(Matrix<TValue, NDimensional> & me, THost const & value_)
+{
+	assignValue(me.data_host, value_);
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename THost>
+inline void
+moveHost(Matrix<TValue, NDimensional> & me, THost const & value_)
+{
+	moveValue(me.data_host, value_);
+}
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 

@@ -100,11 +100,6 @@ struct ToStdAllocator
 ...type:Class.ToStdAllocator
 ..returns:The host object.
 */
-    friend THost & host(ToStdAllocator & me)
-    {
-        return *me.m_host;
-    }
-
 	pointer allocate(size_type count)
 	{
 		value_type * ptr;
@@ -156,6 +151,15 @@ struct ToStdAllocator
 	private:
 		THost * m_host;
 };
+
+template <typename THost, typename TValue>
+THost & 
+host(ToStdAllocator<THost, TValue> & me)
+{
+   return *me.m_host;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 

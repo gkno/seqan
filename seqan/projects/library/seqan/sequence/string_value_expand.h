@@ -77,20 +77,25 @@ public:
 
 //____________________________________________________________________________
 
-	friend inline Holder<THost> &
-	_dataHost(String & me)
-	{
-		return me.data_host;
-	}
-//____________________________________________________________________________
 
-	friend inline Holder<TMap> &
-	_dataMap(String & me)
-	{
-		return me.data_map;
-	}
 //____________________________________________________________________________
 };
+
+template <typename TValue, typename THost, typename TMap, typename TSpec>
+inline Holder<THost> &
+_dataHost(String<TValue, ValueExpand<THost, TMap, TSpec> > & me)
+{
+	return me.data_host;
+}
+//____________________________________________________________________________
+
+template <typename TValue, typename THost, typename TMap, typename TSpec>
+inline Holder<TMap> &
+_dataMap(String<TValue, ValueExpand<THost, TMap, TSpec> > & me)
+{
+	return me.data_map;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Metafunctions

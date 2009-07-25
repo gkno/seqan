@@ -38,7 +38,7 @@ namespace seqan
 template <typename TValue>
 class Score<TValue, Manhattan>
 {
-private:
+public:
 	TValue data_match;
 	TValue data_mismatch;
 	TValue data_gap;
@@ -77,43 +77,52 @@ public:
 		return *this;
 	}
 
-//____________________________________________________________________________
 
-	friend inline TValue 
-	scoreMatch(Score & me)
-	{
-		return me.data_match;
-	}
-	friend inline TValue
-	scoreMatch(Score const & me)
-	{
-		return me.data_match;
-	}
-
-	friend inline TValue 
-	scoreMismatch(Score & me)
-	{
-		return me.data_mismatch;
-	}
-	friend inline TValue
-	scoreMismatch(Score const & me)
-	{
-		return me.data_mismatch;
-	}
-
-	friend inline TValue 
-	scoreGap(Score & me)
-	{
-		return me.data_gap;
-	}
-	friend inline TValue const &
-	scoreGap(Score const & me)
-	{
-		return me.data_gap;
-	}
 
 //____________________________________________________________________________
 };
+
+
+//____________________________________________________________________________
+
+template <typename TValue>
+inline TValue 
+scoreMatch(Score<TValue, Manhattan> & me)
+{
+	return me.data_match;
+}
+template <typename TValue>
+inline TValue
+scoreMatch(Score<TValue, Manhattan> const & me)
+{
+	return me.data_match;
+}
+
+template <typename TValue>
+inline TValue 
+scoreMismatch(Score<TValue, Manhattan> & me)
+{
+	return me.data_mismatch;
+}
+template <typename TValue>
+inline TValue
+scoreMismatch(Score<TValue, Manhattan> const & me)
+{
+	return me.data_mismatch;
+}
+
+template <typename TValue>
+inline TValue 
+scoreGap(Score<TValue, Manhattan> & me)
+{
+	return me.data_gap;
+}
+template <typename TValue>
+inline TValue const &
+scoreGap(Score<TValue, Manhattan> const & me)
+{
+	return me.data_gap;
+}
 //////////////////////////////////////////////////////////////////////////////
 
 //Shortcut:

@@ -66,60 +66,7 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
-	friend inline unsigned int &
-	needle(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_pattern;
-	}
-	friend inline unsigned int const &
-	needle(Finder const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_pattern;
-	}
-//____________________________________________________________________________
 
-	friend inline void
-	setNeedle(Finder & me, unsigned int const needleIndex_)
-	{
-SEQAN_CHECKPOINT
-		me.data_pattern = needleIndex_;
-	}
-
-//____________________________________________________________________________
-
-	friend inline void
-	init(Finder & me)
-	{
-SEQAN_CHECKPOINT
-		me.data_pattern = 0;
-	}
-//____________________________________________________________________________
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename THaystack, typename TNeedle>
-friend inline bool
-find(Finder & me,
-	 THaystack & hstk,
-	 TNeedle const & ndl)
-{
-SEQAN_CHECKPOINT
-	while ( needle(me) < length(ndl) )
-	{
-		Finder<THaystack, Horspool> horspool(ndl[needle(me)]);
-		bool found = find(horspool, hstk, ndl[needle(me)]);
-		if (found)
-		{
-			return true;
-		}
-		setPosition(hstk, 0);
-		++needle(me);
-	}
-	return false;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 /*
@@ -138,6 +85,62 @@ SEQAN_CHECKPOINT
 
 };
 
+template <typename THaystack>
+inline unsigned int &
+needle(Finder<THaystack, MultipatternFinder> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_pattern;
+}
+template <typename THaystack>
+inline unsigned int const &
+needle(Finder<THaystack, MultipatternFinder> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_pattern;
+}
+//____________________________________________________________________________
+
+template <typename THaystack>
+inline void
+setNeedle(Finder<THaystack, MultipatternFinder> & me, unsigned int const needleIndex_)
+{
+SEQAN_CHECKPOINT
+	me.data_pattern = needleIndex_;
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack>
+inline void
+init(Finder<THaystack, MultipatternFinder> & me)
+{
+SEQAN_CHECKPOINT
+	me.data_pattern = 0;
+}
+//____________________________________________________________________________
+
+
+template <typename THaystack, typename THaystack2, typename TNeedle>
+inline bool
+find(Finder<THaystack, MultipatternFinder> & me,
+	 THaystack2 & hstk,
+	 TNeedle const & ndl)
+{
+SEQAN_CHECKPOINT
+	while ( needle(me) < length(ndl) )
+	{
+		Finder<THaystack2, Horspool> horspool(ndl[needle(me)]);
+		bool found = find(horspool, hstk, ndl[needle(me)]);
+		if (found)
+		{
+			return true;
+		}
+		setPosition(hstk, 0);
+		++needle(me);
+	}
+	return false;
+}
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...

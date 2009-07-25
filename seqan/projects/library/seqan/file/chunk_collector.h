@@ -49,7 +49,7 @@ struct ChunkLength
 template <typename THost>
 class _ChunkCollector
 {
-protected:
+public:
 	THost * data_host;
 	typename Size<THost>::Type data_length;
 
@@ -72,58 +72,66 @@ public:
 		clear(*this);
 	}
 
-public:
-
-	friend inline void
-	clear(_ChunkCollector & me)
-	{
-		typename Chunk_Holder::iterator it = me.data_chunks.begin();
-		typename Chunk_Holder::iterator it_end = me.data_chunks.end();
-
-		for (; it != it_end; ++it)
-		{
-			deallocate(me.data_host, *it, CHUNK_LENGTH);
-		}
-
-		me.data_chunks.clear();
-		me.data_length = 0;
-	}
-
-	friend inline typename Size<THost>::Type
-	length(_ChunkCollector const & me)
-	{
-		return me.data_length;
-	}
-
-	friend inline void
-	_setLength(_ChunkCollector & me, typename Size<THost>::Type new_length)
-	{
-		me.data_length = new_length;
-	}
-
-	friend inline int
-	chunkCount(_ChunkCollector const & me)
-	{
-		return me.data_chunks.size();
-	}
-
-	friend inline typename Value<THost>::Type *
-	getChunk(_ChunkCollector const & me, int chunk_number)
-	{
-		return me.data_chunks[chunk_number];
-	}
-
-	friend inline typename Value<THost>::Type *
-	createChunk(_ChunkCollector & me)
-	{
-		typename Value<THost>::Type * new_chunk;
-		allocate(me.data_host, new_chunk, CHUNK_LENGTH);
-		me.data_chunks.push_back(new_chunk);
-		return new_chunk;
-	}
 };
 
+template <typename THost>
+inline void
+clear(_ChunkCollector<THost> & me)
+{
+   typedef _ChunkCollector<THost> TChunkCollector;
+   typedef typename TChunkCollector::Chunk_Holder Chunk_Holder;
+      
+	typename Chunk_Holder::iterator it = me.data_chunks.begin();
+	typename Chunk_Holder::iterator it_end = me.data_chunks.end();
 
+	for (; it != it_end; ++it)
+	{
+		deallocate(me.data_host, *it, TChunkCollector::CHUNK_LENGTH);
+	}
+
+	me.data_chunks.clear();
+	me.data_length = 0;
+}
+
+template <typename THost>
+inline typename Size<THost>::Type
+length(_ChunkCollector<THost> const & me)
+{
+	return me.data_length;
+}
+
+template <typename THost>
+inline void
+_setLength(_ChunkCollector<THost> & me, typename Size<THost>::Type new_length)
+{
+	me.data_length = new_length;
+}
+
+template <typename THost>
+inline int
+chunkCount(_ChunkCollector<THost> const & me)
+{
+	return me.data_chunks.size();
+}
+
+template <typename THost>
+inline typename Value<THost>::Type *
+getChunk(_ChunkCollector<THost> const & me, int chunk_number)
+{
+	return me.data_chunks[chunk_number];
+}
+
+template <typename THost>
+inline typename Value<THost>::Type *
+createChunk(_ChunkCollector<THost> & me)
+{
+   typedef _ChunkCollector<THost> TChunkCollector;
+	typename Value<THost>::Type * new_chunk;
+	allocate(me.data_host, new_chunk, TChunkCollector::CHUNK_LENGTH);
+	me.data_chunks.push_back(new_chunk);
+	return new_chunk;
+}
+	
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>

@@ -156,83 +156,93 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	begin(String & me,
-		Standard)
-	{
+};
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec>
+inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
+begin(String<TValue, Alloc<TSpec> > & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	begin(String const & me,
-		Standard)
-	{
+	return me.data_begin;
+}
+template <typename TValue, typename TSpec>
+inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
+begin(String<TValue, Alloc<TSpec> > const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
+	return me.data_begin;
+}
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	end(String & me,
-		Standard)
-	{
+template <typename TValue, typename TSpec>
+inline typename Iterator<String<TValue, Alloc<TSpec> >, Standard>::Type
+end(String<TValue, Alloc<TSpec> > & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_end;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	end(String const & me,
-		Standard)
-	{
+	return me.data_end;
+}
+template <typename TValue, typename TSpec>
+inline typename Iterator<String<TValue, Alloc<TSpec> > const, Standard>::Type
+end(String<TValue, Alloc<TSpec> > const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_end;
-	}
+	return me.data_end;
+}
 
 //____________________________________________________________________________
 
-	friend inline size_t
-	capacity(String & me) 
-	{
+template <typename TValue, typename TSpec>
+inline size_t
+capacity(String<TValue, Alloc<TSpec> > & me) 
+{
 SEQAN_CHECKPOINT
-		return me.data_capacity;
-	}
+	return me.data_capacity;
+}
 
-	friend inline size_t
-	capacity(String const & me) 
-	{
+template <typename TValue, typename TSpec>
+inline size_t
+capacity(String<TValue, Alloc<TSpec> > const & me) 
+{
 SEQAN_CHECKPOINT
-		return me.data_capacity;
-	}
+	return me.data_capacity;
+}
 
 //____________________________________________________________________________
 /* Entwicklungsschrott?
-	inline void 
-	move(String & target, 
-		 String & source)
-	{
-		clear(target);
-		target.data_begin = source.data_begin;
-		target.data_end = source.data_end;
-		target.data_capacity = source.data_capacity;
+inline void 
+move(String & target, 
+	 String & source)
+{
+	clear(target);
+	target.data_begin = source.data_begin;
+	target.data_end = source.data_end;
+	target.data_capacity = source.data_capacity;
 
-		source.data_begin = 0;
-		source.data_end = 0;
-		source.data_capacity = 0;
-	}
+	source.data_begin = 0;
+	source.data_end = 0;
+	source.data_capacity = 0;
+}
 */
 //____________________________________________________________________________
 
 /**
 .Internal._setBegin:
 */
-	friend inline void 
-	_setBegin(
-		String & me, 
-		typename Value<String>::Type * new_begin)
-	{
+template <typename TValue, typename TSpec, typename TPtr>
+inline void 
+_setBegin(
+	String<TValue, Alloc<TSpec> > & me, 
+	TPtr * new_begin)
+{
 SEQAN_CHECKPOINT
-		me.data_begin = new_begin;
-	}
+	me.data_begin = new_begin;
+}
 
 //____________________________________________________________________________
 
@@ -245,28 +255,30 @@ SEQAN_CHECKPOINT
 ..param.object.type:Spec.Alloc String
 ..param.new_length:The new length.
 */
-	friend inline void 
-	_setLength(
-		String & me, 
-		size_t new_length)
-	{
+template <typename TValue, typename TSpec>
+inline void 
+_setLength(
+	String<TValue, Alloc<TSpec> > & me, 
+	size_t new_length)
+{
 SEQAN_CHECKPOINT
-		me.data_end = me.data_begin + new_length;
-	}
+	me.data_end = me.data_begin + new_length;
+}
 
 //____________________________________________________________________________
 
 /**
 .Internal._setCapacity:
 */
-	friend inline void 
-	_setCapacity(
-		String & me, 
-		size_t new_capacity)
-	{
+template <typename TValue, typename TSpec>
+inline void 
+_setCapacity(
+	String<TValue, Alloc<TSpec> > & me, 
+	size_t new_capacity)
+{
 SEQAN_CHECKPOINT
-		me.data_capacity = new_capacity;
-	}
+	me.data_capacity = new_capacity;
+}
 
 //____________________________________________________________________________
 
@@ -283,20 +295,21 @@ SEQAN_CHECKPOINT
 ..remarks:This function does not construct objects in the allocated buffer.
 ..see:Internal._reallocateStorage
 */
-	friend inline typename Value<String>::Type * 
-	_allocateStorage(
-		String & me, 
-		size_t new_capacity)
-	{
+template <typename TValue, typename TSpec>
+inline typename Value<String<TValue, Alloc<TSpec> > >::Type * 
+_allocateStorage(
+	String<TValue, Alloc<TSpec> > & me, 
+	size_t new_capacity)
+{
 SEQAN_CHECKPOINT
-		size_t size = _computeSize4Capacity(me, new_capacity);
-		typename Value<String>::Type * return_value = me.data_begin;
-		allocate(me, me.data_begin, size, TagAllocateStorage());
-		me.data_capacity = new_capacity;
-		return return_value;
-	}
+	size_t size = _computeSize4Capacity(me, new_capacity);
+	typename Value<String<TValue, Alloc<TSpec> > >::Type * return_value = me.data_begin;
+	allocate(me, me.data_begin, size, TagAllocateStorage());
+	me.data_capacity = new_capacity;
+	return return_value;
+}
 
-	//____________________________________________________________________________
+//____________________________________________________________________________
 
 /**
 .Internal._deallocateStorage:
@@ -311,21 +324,17 @@ SEQAN_CHECKPOINT
 ..see:Internal._allocateStorage
 ..see:Internal._reallocateStorage
 */
-	friend inline void 
-	_deallocateStorage(
-		String & me, 
-		typename Value<String>::Type * ptr, 
-		size_t capacity)
-	{
+template <typename TValue, typename TSpec, typename TPtr>
+inline void 
+_deallocateStorage(
+	String<TValue, Alloc<TSpec> > & me, 
+	TPtr * ptr, 
+	size_t capacity)
+{
 SEQAN_CHECKPOINT
-		size_t size = _computeSize4Capacity(me, capacity);
-		deallocate(me, ptr, size, TagAllocateStorage());
-	}
-
-//____________________________________________________________________________
-
-};
-
+	size_t size = _computeSize4Capacity(me, capacity);
+	deallocate(me, ptr, size, TagAllocateStorage());
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

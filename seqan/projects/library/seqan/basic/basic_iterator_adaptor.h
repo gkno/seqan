@@ -58,7 +58,7 @@ struct Iterator_Default_Imp<T, Rooted>
 template <typename TContainer, typename TIterator, typename TSpec>
 class Iter<TContainer, AdaptorIterator<TIterator, TSpec> >
 {
-private:
+public:
 	typename _Pointer<TContainer>::Type data_container;
 	TIterator data_iterator;
 //____________________________________________________________________________
@@ -151,50 +151,6 @@ SEQAN_CHECKPOINT
 */
 //____________________________________________________________________________
 
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-//____________________________________________________________________________
-
-	friend inline void
-	setContainer(Iter & me,	typename _Parameter<TContainer>::Type container_)
-	{
-SEQAN_CHECKPOINT
-		if (me.data_container && me.data_iterator != TIterator())
-		{
-			typename Position<Iter>::Type pos = position(me);
-			me.data_container = _toPointer(container_);
-			setPosition(me, pos);
-		}
-		else
-		{	
-			me.data_container = _toPointer(container_);
-		}
-	}
-
-//____________________________________________________________________________
-
-	friend inline TIterator &
-	hostIterator(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
-	friend inline TIterator const &
-	hostIterator(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
 
 //____________________________________________________________________________
 
@@ -207,6 +163,56 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 };
 
+template <typename TContainer, typename TIterator, typename TSpec>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+template <typename TContainer, typename TIterator, typename TSpec>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+//____________________________________________________________________________
+
+template <typename TContainer, typename TIterator, typename TSpec>
+inline void
+setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,	typename _Parameter<TContainer>::Type container_)
+{
+SEQAN_CHECKPOINT
+   typedef Iter<TContainer, AdaptorIterator<TIterator, TSpec> > TIter;
+	if (me.data_container && me.data_iterator != TIterator())
+	{
+		typename Position<TIter>::Type pos = position(me);
+		me.data_container = _toPointer(container_);
+		setPosition(me, pos);
+	}
+	else
+	{	
+		me.data_container = _toPointer(container_);
+	}
+}
+
+//____________________________________________________________________________
+
+template <typename TContainer, typename TIterator, typename TSpec>
+inline TIterator &
+hostIterator(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
+template <typename TContainer, typename TIterator, typename TSpec>
+inline TIterator const &
+hostIterator(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
 //////////////////////////////////////////////////////////////////////////////
 // METAFUNCTIONS
 //////////////////////////////////////////////////////////////////////////////

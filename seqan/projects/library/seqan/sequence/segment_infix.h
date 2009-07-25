@@ -48,7 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename THost_>
 class Segment<THost_, InfixSegment>
 {
-protected:
+public:
 	typedef typename Host<Segment>::Type THost;
 
 	typename _Pointer<THost>::Type data_host;
@@ -157,44 +157,6 @@ SEQAN_CHECKPOINT
 
 public:
 
-///Function.host.param.object.type:Class.Segment
-
-	friend inline typename _Parameter<THost>::Type 
-	host(Segment & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<THost>(me.data_host);
-	}
-
-	friend inline typename _Parameter<THost>::Type 
-	host(Segment const & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<THost>(me.data_host);
-	}
-
-//____________________________________________________________________________
-
-/**
-.Function.setHost:
-..summary:Sets the host of an object.
-..cat:Dependent Objects
-..signature:setHost(object, host)
-..param.object:The object that will get a new host.
-...type:Class.Segment
-..param.host:The new host.
-..remarks:After this operation, $object$ depends on $host$.
-...text:Note that setting the host can invalidate $object$.
-For example, if one changes the host of a @Class.Segment@ object, it is possible
-that begin- and end-position of the segment does not fit into the new host sequence.
-..see:Function.host
-*/
-	friend inline void 
-	setHost(Segment & me, typename _Parameter<THost>::Type _host)
-	{
-SEQAN_CHECKPOINT
-		me.data_host = _toPointer(_host);
-	}
 
 //____________________________________________________________________________
 
@@ -214,41 +176,70 @@ SEQAN_CHECKPOINT
 		return value(*this, pos);
 	}
 
+};
+//////////////////////////////////////////////////////////////////////////////
+
+
+
+
+///Function.host.param.object.type:Class.Segment
+
+template <typename THost_>
+inline typename _Parameter<THost_>::Type 
+host(Segment<THost_, InfixSegment> & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<THost_>(me.data_host);
+}
+
+template <typename THost_>
+inline typename _Parameter<THost_>::Type 
+host(Segment<THost_, InfixSegment> const & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<THost_>(me.data_host);
+}
+
+
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Segment
 
-	friend inline typename Iterator<Segment, Standard>::Type 
-	begin(Segment & me,
-		Standard)
-	{
+template <typename THost_>
+inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type 
+begin(Segment<THost_, InfixSegment> & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_begin_position;
-	}
-	friend inline typename Iterator<Segment const, Standard>::Type 
-	begin(Segment const & me,
-		Standard)
-	{
+	return begin(host(me), Standard()) + me.data_begin_position;
+}
+template <typename THost_>
+inline typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type 
+begin(Segment<THost_, InfixSegment> const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_begin_position;
-	}
+	return begin(host(me), Standard()) + me.data_begin_position;
+}
 
 //____________________________________________________________________________
 
 ///.Function.beginPosition.param.object.type:Class.Segment
 
-	friend inline typename Position<Segment>::Type 
-	beginPosition(Segment & me)
-	{
+template <typename THost_>
+inline typename Position<Segment<THost_, InfixSegment> >::Type 
+beginPosition(Segment<THost_, InfixSegment> & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin_position;
-	}
-	friend inline typename Position<Segment const>::Type 
-	beginPosition(Segment const & me)
-	{
+	return me.data_begin_position;
+}
+template <typename THost_>
+inline typename Position<Segment<THost_, InfixSegment> const>::Type 
+beginPosition(Segment<THost_, InfixSegment> const & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin_position;
-	}
+	return me.data_begin_position;
+}
 
 //____________________________________________________________________________
 
@@ -265,13 +256,13 @@ SEQAN_CHECKPOINT
 ..see:Function.begin
 ..see:Function.beginPosition
 */
-	template <typename TIterator>
-	friend inline void 
-	setBegin(Segment & me, TIterator new_begin)
-	{
+template <typename THost_, typename TIterator>
+inline void 
+setBegin(Segment<THost_, InfixSegment> & me, TIterator new_begin)
+{
 SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin - begin(host(me));//, Standard());
-	}
+	me.data_begin_position = new_begin - begin(host(me));//, Standard());
+}
 
 
 //____________________________________________________________________________
@@ -291,49 +282,53 @@ SEQAN_CHECKPOINT
 ..see:Function.setBegin
 */
 
-	template <typename TPosition>
-	friend inline void 
-	setBeginPosition(Segment & me, TPosition new_begin)
-	{
+template <typename THost_, typename TPosition>
+inline void 
+setBeginPosition(Segment<THost_, InfixSegment> & me, TPosition new_begin)
+{
 SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin;
-	}
+	me.data_begin_position = new_begin;
+}
 
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Class.Segment
 
-	friend inline typename Iterator<Segment, Standard>::Type 
-	end(Segment & me,
-		Standard)
-	{
+template <typename THost_>
+inline typename Iterator<Segment<THost_, InfixSegment>, Standard>::Type 
+end(Segment<THost_, InfixSegment> & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_end_position;
-	}
-	friend inline typename Iterator<Segment const, Standard>::Type 
-	end(Segment const & me,
-		Standard)
-	{
+	return begin(host(me), Standard()) + me.data_end_position;
+}
+template <typename THost_>
+inline typename Iterator<Segment<THost_, InfixSegment> const, Standard>::Type 
+end(Segment<THost_, InfixSegment> const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_end_position;
-	}
+	return begin(host(me), Standard()) + me.data_end_position;
+}
 
 //____________________________________________________________________________
 
 ///.Function.endPosition.param.object.type:Class.Segment
 
-	friend inline typename Position<Segment>::Type 
-	endPosition(Segment & me)
-	{
+template <typename THost_>
+inline typename Position<Segment<THost_, InfixSegment> >::Type 
+endPosition(Segment<THost_, InfixSegment> & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_end_position;
-	}
-	friend inline typename Position<Segment>::Type 
-	endPosition(Segment const & me)
-	{
+	return me.data_end_position;
+}
+template <typename THost_>
+inline typename Position<Segment<THost_, InfixSegment> >::Type 
+endPosition(Segment<THost_, InfixSegment> const & me)
+{
 SEQAN_CHECKPOINT
-		return me.data_end_position;
-	}
+	return me.data_end_position;
+}
 
 //____________________________________________________________________________
 
@@ -352,22 +347,14 @@ SEQAN_CHECKPOINT
 ..see:Function.setBegin
 */
 
-	template <typename TIterator>
-	friend inline void 
-	setEnd(Segment & me, TIterator new_end)
-	{
+template <typename THost_, typename TIterator>
+inline void 
+setEnd(Segment<THost_, InfixSegment> & me, TIterator new_end)
+{
 SEQAN_CHECKPOINT
-		me.data_end_position = new_end - begin(host(me));//, Standard());
-	}
+	me.data_end_position = new_end - begin(host(me));//, Standard());
+}
 
-/* //unnoetig
-	friend inline void 
-	setEnd(Segment & me)
-	{
-SEQAN_CHECKPOINT
-		setEnd(me, end(host(me)));
-	}
-*/
 //____________________________________________________________________________
 
 
@@ -387,29 +374,51 @@ SEQAN_CHECKPOINT
 ..see:Function.setEnd
 */
 
-	template <typename TPosition>
-	friend inline void 
-	setEndPosition(Segment & me, TPosition new_end)
-	{
+template <typename THost_, typename TPosition>
+inline void 
+setEndPosition(Segment<THost_, InfixSegment> & me, TPosition new_end)
+{
 SEQAN_CHECKPOINT
-		me.data_end_position = new_end;
-	}
+	me.data_end_position = new_end;
+}
 
 //____________________________________________________________________________
 
-	friend inline void 
-	_setLength(
-		Segment & me, 
-		typename Size<THost>::Type new_length)
-	{
+template <typename THost_>
+inline void 
+_setLength(
+	Segment<THost_, InfixSegment> & me, 
+	typename Size<THost_>::Type new_length)
+{
 SEQAN_CHECKPOINT
-		me.data_end_position = me.data_begin_position + new_length;
-	}
+	me.data_end_position = me.data_begin_position + new_length;
+}
+
 
 //____________________________________________________________________________
 
-};
-
+/**
+.Function.setHost:
+..summary:Sets the host of an object.
+..cat:Dependent Objects
+..signature:setHost(object, host)
+..param.object:The object that will get a new host.
+...type:Class.Segment
+..param.host:The new host.
+..remarks:After this operation, $object$ depends on $host$.
+...text:Note that setting the host can invalidate $object$.
+For example, if one changes the host of a @Class.Segment@ object, it is possible
+that begin- and end-position of the segment does not fit into the new host sequence.
+..see:Function.host
+*/
+template <typename THost_>
+inline void 
+setHost(Segment<THost_, InfixSegment> & me, typename _Parameter<THost_>::Type _host)
+{
+SEQAN_CHECKPOINT
+	me.data_host = _toPointer(_host);
+}
+	
 //////////////////////////////////////////////////////////////////////////////
 
 /**

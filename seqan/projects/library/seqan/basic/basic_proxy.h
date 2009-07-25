@@ -90,7 +90,7 @@ public:
 
 	typedef typename _RemoveConst<TAccessor>::Type TAccessor_NotConst;
 
-private:
+public:
 	TIterator data_iterator;
 
 public:
@@ -141,19 +141,22 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	//not documented
-	friend inline TIterator &
-	iter(Proxy & me)
-	{
-		return me.data_iterator;
-	}
-	friend inline TIterator const &
-	iter(Proxy const & me)
-	{
-		return me.data_iterator;
-	}
-
 //____________________________________________________________________________
 };
+
+template <typename TIterator>
+inline TIterator &
+iter(Proxy<IteratorProxy<TIterator> > & me)
+{
+	return me.data_iterator;
+}
+template <typename TIterator>
+inline TIterator const &
+iter(Proxy<IteratorProxy<TIterator> > const & me)
+{
+	return me.data_iterator;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Metafunctions

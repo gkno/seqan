@@ -59,7 +59,7 @@ struct Packed;
 template <typename TValue, typename THostspec>
 class String<TValue, Packed<THostspec> >
 {
-protected:
+public:
 	typedef typename Host<String>::Type THost;
 	typedef typename Size<String>::Type TSize;
 
@@ -138,50 +138,58 @@ SEQAN_CHECKPOINT
 
 ///.Function.host.param.object.type:Spec.Packed String
 
-	friend inline THost &
-	host(String & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_host;
-	}
-
-	friend inline THost const &
-	host(String const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_host;
-	}
-
-//____________________________________________________________________________
-
-	friend inline TSize
-	length(String & me) 
-	{
-SEQAN_CHECKPOINT
-		return me.data_length;
-	}
-
-	friend inline TSize
-	length(String const & me) 
-	{
-SEQAN_CHECKPOINT
-		return me.data_length;
-	}
-
-//____________________________________________________________________________
-
-	friend inline void 
-	_setLength(
-		String & me, 
-		TSize new_length)
-	{
-SEQAN_CHECKPOINT
-		me.data_length = new_length;
-		_setLength(host(me), _PackedConsts<String>::toHostLength(new_length));
-	}
 
 //____________________________________________________________________________
 };
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename THostspec>
+inline typename Host<String<TValue, Packed<THostspec> > >::Type &
+host(String<TValue, Packed<THostspec> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_host;
+}
+
+template <typename TValue, typename THostspec>
+inline typename Host<String<TValue, Packed<THostspec> > const>::Type const &
+host(String<TValue, Packed<THostspec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_host;
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename THostspec>
+inline typename Size<String<TValue, Packed<THostspec> > >::Type
+length(String<TValue, Packed<THostspec> > & me) 
+{
+SEQAN_CHECKPOINT
+	return me.data_length;
+}
+
+template <typename TValue, typename THostspec>
+inline typename Size<String<TValue, Packed<THostspec> > const>::Type
+length(String<TValue, Packed<THostspec> > const & me) 
+{
+SEQAN_CHECKPOINT
+	return me.data_length;
+}
+
+//____________________________________________________________________________
+
+template <typename TValue, typename THostspec, typename TSize>
+inline void 
+_setLength(
+	String<TValue, Packed<THostspec> > & me, 
+	TSize new_length)
+{
+SEQAN_CHECKPOINT
+	typedef String<TValue, Packed<THostspec> > TString;
+	me.data_length = new_length;
+	_setLength(host(me), _PackedConsts<TString>::toHostLength(new_length));
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -759,16 +767,36 @@ struct Iterator<String<TValue, Packed<THostspec> > const, TSpec>
 };
 
 //////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+struct HostIterator;
+
+template <typename TContainer, typename THostspec>
+struct HostIterator<Iter<TContainer, Packed<THostspec> > >
+{
+	typedef typename Host<TContainer>::Type THost;
+	typedef typename Iterator<THost, Standard>::Type Type;
+};
+template <typename TContainer, typename THostspec>
+struct HostIterator<Iter<TContainer, Packed<THostspec> > const>
+{
+	typedef typename Host<TContainer>::Type THost;
+	typedef typename Iterator<THost, Standard>::Type const Type;
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // Iterator for packed strings
 //////////////////////////////////////////////////////////////////////////////
 
+
+
 template <typename TContainer, typename THostspec>
 class Iter<TContainer, Packed<THostspec> >
 {
-private:
-	typedef typename Host<TContainer>::Type THost;
-	typedef typename Iterator<THost, Standard>::Type THostIterator;
+public:
+	typedef typename HostIterator<Iter>::Type THostIterator;
 	typedef typename Position<TContainer>::Type TPosition;
 
 	typename _Pointer<TContainer>::Type data_container;
@@ -817,61 +845,70 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-//____________________________________________________________________________
-
-	friend inline void
-	setContainer(Iter & me,	typename _Parameter<TContainer>::Type container_)
-	{
-SEQAN_CHECKPOINT
-		typename Position<Iter>::Type pos = position(me);
-		me.data_container = _toPointer(container_);
-		setPosition(me, pos);
-	}
-
-//____________________________________________________________________________
-
-	friend inline THostIterator &
-	hostIterator(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
-	friend inline THostIterator const &
-	hostIterator(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_iterator;
-	}
-
-//____________________________________________________________________________
-
-	friend inline unsigned char &
-	_bitpos(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_bitpos;
-	}
-	friend inline unsigned char
-	_bitpos(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_bitpos;
-	}
 
 //____________________________________________________________________________
 };
+
+template <typename TContainer, typename THostspec>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, Packed<THostspec> > & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+template <typename TContainer, typename THostspec>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, Packed<THostspec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+//____________________________________________________________________________
+
+template <typename TContainer, typename THostspec, typename TContainer2>
+inline void
+setContainer(Iter<TContainer, Packed<THostspec> > & me, TContainer2 container_)
+{
+SEQAN_CHECKPOINT
+   typedef Iter<TContainer, Packed<THostspec> > TIter;
+	typename Position<TIter>::Type pos = position(me);
+	me.data_container = _toPointer(container_);
+	setPosition(me, pos);
+}
+
+//____________________________________________________________________________
+
+template <typename TContainer, typename THostspec>
+inline typename HostIterator<Iter<TContainer, Packed<THostspec> > >::Type &
+hostIterator(Iter<TContainer, Packed<THostspec> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
+template <typename TContainer, typename THostspec>
+inline typename HostIterator<Iter<TContainer, Packed<THostspec> > const>::Type  &
+hostIterator(Iter<TContainer, Packed<THostspec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_iterator;
+}
+
+//____________________________________________________________________________
+
+template <typename TContainer, typename THostspec>
+inline unsigned char &
+_bitpos(Iter<TContainer, Packed<THostspec> > & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_bitpos;
+}
+template <typename TContainer, typename THostspec>
+inline unsigned char
+_bitpos(Iter<TContainer, Packed<THostspec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_bitpos;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // position

@@ -176,132 +176,140 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-	friend inline void 
-	move(
-		String & target,
-		String & source)
-	{
+
+};
+
+//////////////////////////////////////////////////////////////////////////////
+template <typename TValue>
+inline void 
+move(
+	String <TValue, CStyle > & target,
+	String <TValue, CStyle > & source)
+{
 SEQAN_CHECKPOINT
-		clear(target);
+	clear(target);
 
-		target.data_begin = source.data_begin;
-		target.data_end = source.data_end;
-		target.data_size = source.data_size;
+	target.data_begin = source.data_begin;
+	target.data_end = source.data_end;
+	target.data_size = source.data_size;
 
-		source.data_begin = 0;
-		source.data_end = 0;
-		source.data_size = 0;
-	}
+	source.data_begin = 0;
+	source.data_end = 0;
+	source.data_size = 0;
+}
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	begin(String & me,
-		Standard)
-	{
+template <typename TValue>
+inline typename Iterator<String<TValue, CStyle >, Standard>::Type
+begin(String <TValue, CStyle > & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	begin(String const & me,
-		Standard)
-	{
+	return me.data_begin;
+}
+template <typename TValue>
+inline typename Iterator<String<TValue, CStyle > const, Standard>::Type
+begin(String <TValue, CStyle > const & me,
+	Standard)
+{
 SEQAN_CHECKPOINT
-		return me.data_begin;
-	}
+	return me.data_begin;
+}
 
 //____________________________________________________________________________
 
-	friend inline void
-	_setBegin(String & me, TValue * new_begin)
-	{
+template <typename TValue, typename TValue2>
+inline void
+_setBegin(String <TValue, CStyle > & me, TValue2 new_begin)
+{
 SEQAN_CHECKPOINT
-		me.data_begin = new_begin;
-	}
+	me.data_begin = new_begin;
+}
+//____________________________________________________________________________
+
+template <typename TValue>
+inline typename Iterator<String <TValue, CStyle >, Standard>::Type
+end(String <TValue, CStyle > & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return me.data_end;
+}
+template <typename TValue>
+inline typename Iterator<String <TValue, CStyle > const, Standard>::Type
+end(String <TValue, CStyle > const & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return me.data_end;
+}
 
 //____________________________________________________________________________
 
-	friend inline typename Iterator<String, Standard>::Type
-	end(String & me,
-		Standard)
-	{
+template <typename TValue, typename TValue2>
+inline void
+_setEnd(String <TValue, CStyle > & me, TValue2 new_end)
+{
 SEQAN_CHECKPOINT
-		return me.data_end;
-	}
-	friend inline typename Iterator<String const, Standard>::Type
-	end(String const & me,
-		Standard)
-	{
-SEQAN_CHECKPOINT
-		return me.data_end;
-	}
+	me.data_end = new_end;
+	if (new_end != NULL)
+		*new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
+}
 
 //____________________________________________________________________________
 
-	friend inline void
-	_setEnd(String & me, TValue * new_end)
-	{
+template <typename TValue>
+inline size_t 
+capacity(String <TValue, CStyle > const & me)
+{
 SEQAN_CHECKPOINT
-		me.data_end = new_end;
-		if (new_end != NULL)
-			*new_end = TValue(); //??? ist das wirklich sinnvoll fuer typen, die weder char noch wchar_t sind?
-	}
-
-//____________________________________________________________________________
-
-	friend inline size_t 
-	capacity(String const & me)
-	{
-SEQAN_CHECKPOINT
-		if (me.data_size) return me.data_size -1;
-		else return me.data_end - me.data_begin;
-	}
-
-
-//____________________________________________________________________________
-
-//??? TODO: reserve
+	if (me.data_size) return me.data_size -1;
+	else return me.data_end - me.data_begin;
+}
 
 //____________________________________________________________________________
 
 ///.Internal._reallocateStorage.param.object.type:Spec.CStyle String
 ///.Internal._reallocateStorage.param.resize_tag.remarks:@Spec.CStyle String@ only supports @Tag.Overflow Strategy.exact@.
 //this function works also for dependent buffers
-	friend inline TValue *
-	_reallocateStorage(
-		String & me, 
-		size_t new_capacity,
-		Exact)
-	{
+template <typename TValue>
+inline TValue *
+_reallocateStorage(
+	String <TValue, CStyle > & me, 
+	size_t new_capacity,
+	Exact)
+{
 SEQAN_CHECKPOINT
-		TValue * return_value;
-		if (me.data_size)
-		{//dependent
-			return_value = me.data_begin;
-		}
-		else
-		{//not dependent
-			return_value = 0;
-		}
-
-		me.data_size = new_capacity + 1; //+1 for zero termination
-		allocate(me, me.data_begin, me.data_size, TagAllocateStorage());
-		return return_value;
+	TValue * return_value;
+	if (me.data_size)
+	{//dependent
+		return_value = me.data_begin;
 	}
+	else
+	{//not dependent
+		return_value = 0;
+	}
+
+	me.data_size = new_capacity + 1; //+1 for zero termination
+	allocate(me, me.data_begin, me.data_size, TagAllocateStorage());
+	return return_value;
+}
 //____________________________________________________________________________
 
 ///.Internal._deallocateStorage.param.object.type:Spec.CStyle String
 
-	friend inline void 
-	_deallocateStorage(
-		String & me, 
-		TValue * ptr, 
-		size_t capacity)
-	{
+template <typename TValue>
+inline void 
+_deallocateStorage(
+	String <TValue, CStyle > & me, 
+	TValue * ptr, 
+	size_t capacity)
+{
 SEQAN_CHECKPOINT
-		size_t size = capacity + 1;
-		deallocate(me, ptr, size, TagAllocateStorage());
-	}
+	size_t size = capacity + 1;
+	deallocate(me, ptr, size, TagAllocateStorage());
+}
 
 //____________________________________________________________________________
 
@@ -316,28 +324,28 @@ SEQAN_CHECKPOINT
 ..remarks:An object "$a$" depends on another object "$b$", if changing "$b$" can invalidate "$a$";
 especially the destruction of "$b$" invalidates "$a$".
 */
-	friend inline bool
-	dependent(String & me)
-	{
+template <typename TValue>
+inline bool
+dependent(String <TValue, CStyle > & me)
+{
 SEQAN_CHECKPOINT
-		return (me.data_size == 0);
-	}
+	return (me.data_size == 0);
+}
 //____________________________________________________________________________
 
 //special implementation for char array sources
-	friend inline void
-	assign(String & target,
-		TValue * source)
-	{
-	SEQAN_CHECKPOINT
-		clear(target);
-		target.data_begin = source;
-		target.data_end = end(source);
-	}
+template <typename TValue>
+inline void
+assign(String <TValue, CStyle > & target,
+	TValue * source)
+{
+SEQAN_CHECKPOINT
+	clear(target);
+	target.data_begin = source;
+	target.data_end = end(source);
+}
 
 //____________________________________________________________________________
-
-};
 
 //////////////////////////////////////////////////////////////////////////////
 // Define the static member
@@ -477,8 +485,10 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		clear(target);
-		_setBegin(target, begin(source));
-		_setEnd(target, end(source));
+		typedef String<char, CStyle> TTarget;
+		typedef typename Iterator<TTarget>::Type TIterator;
+		_setBegin(target, TIterator(begin(source)));
+		_setEnd(target, TIterator(end(source)));
 	}
 };
 
@@ -569,7 +579,8 @@ SEQAN_CHECKPOINT
 		{
 			assignValue(begin(target, Standard()), 0); //set target length to 0
 			assign(begin(target, Standard()), source, Insist());
-			_setEnd(target, begin(target) + source_length);
+			typedef typename Iterator<TTarget>::Type TTargetIterator;
+			_setEnd(target, TTargetIterator( begin(target) + source_length));
 		}
 	}
 

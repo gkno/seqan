@@ -105,55 +105,64 @@ SEQAN_CHECKPOINT
 		data_position = other_.data_position;
 		return *this;
 	}
-//____________________________________________________________________________
 
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-	friend inline typename _Parameter<TContainer>::Type 
-	container(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<TContainer>(me.data_container);
-	}
-//____________________________________________________________________________
-
-	friend inline void
-	setContainer(Iter & me,	typename _Parameter<TContainer>::Type container_)
-	{
-SEQAN_CHECKPOINT
-		typename Position<Iter>::Type pos = position(me);
-		me.data_container = _toPointer(container_);
-		setPosition(me, pos);
-	}
-
-//____________________________________________________________________________
-
-	friend inline TPosition &
-	position(Iter & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_position;
-	}
-	friend inline TPosition const &
-	position(Iter const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_position;
-	}
-//____________________________________________________________________________
-
-	friend inline void
-	setPosition(Iter & me, TPosition position_)
-	{
-SEQAN_CHECKPOINT
-		me.data_position = position_;
-	}
 //____________________________________________________________________________
 };
+
+//____________________________________________________________________________
+
+template <typename TContainer>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, PositionIterator> & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+template <typename TContainer>
+inline typename _Parameter<TContainer>::Type 
+container(Iter<TContainer, PositionIterator> const & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<TContainer>(me.data_container);
+}
+//____________________________________________________________________________
+
+template <typename TContainer>
+inline void
+setContainer(Iter<TContainer, PositionIterator> & me, typename _Parameter<TContainer>::Type container_)
+{
+SEQAN_CHECKPOINT
+	typedef Iter<TContainer, PositionIterator> TIter;
+	typename Position<TIter>::Type pos = position(me);
+	me.data_container = _toPointer(container_);
+	setPosition(me, pos);
+}
+
+//____________________________________________________________________________
+
+template <typename TContainer>
+inline typename Position<TContainer>::Type &
+position(Iter<TContainer, PositionIterator> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_position;
+}
+template <typename TContainer>
+inline typename Position<TContainer>::Type const &
+position(Iter<TContainer, PositionIterator> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_position;
+}
+//____________________________________________________________________________
+
+template <typename TContainer, typename TPosition>
+inline void
+setPosition(Iter<TContainer, PositionIterator> & me, TPosition position_)
+{
+SEQAN_CHECKPOINT
+	me.data_position = position_;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // value

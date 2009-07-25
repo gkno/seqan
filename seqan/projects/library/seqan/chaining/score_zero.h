@@ -59,42 +59,47 @@ public:
 	}
 
 //____________________________________________________________________________
-
-	friend inline TValue 
-	scoreMatch(Score &)
-	{
-		return 0;
-	}
-	friend inline TValue const 
-	scoreMatch(Score const &)
-	{
-		return 0;
-	}
-
-	friend inline TValue 
-	scoreMismatch(Score & me)
-	{
-		return 0;
-	}
-	friend inline TValue const 
-	scoreMismatch(Score const &)
-	{
-		return 0;
-	}
-
-	friend inline TValue 
-	scoreGap(Score &)
-	{
-		return 0;
-	}
-	friend inline TValue const 
-	scoreGap(Score const &)
-	{
-		return 0;
-	}
-
-//____________________________________________________________________________
 };
+
+template <typename TValue>
+inline TValue 
+scoreMatch(Score<TValue, Zero> &)
+{
+	return 0;
+}
+template <typename TValue>
+inline TValue const 
+scoreMatch(Score<TValue, Zero> const &)
+{
+	return 0;
+}
+
+template <typename TValue>
+inline TValue 
+scoreMismatch(Score<TValue, Zero> & me)
+{
+	return 0;
+}
+template <typename TValue>
+inline TValue const 
+scoreMismatch(Score<TValue, Zero> const &)
+{
+	return 0;
+}
+
+template <typename TValue>
+inline TValue 
+scoreGap(Score<TValue, Zero> &)
+{
+	return 0;
+}
+template <typename TValue>
+inline TValue const 
+scoreGap(Score<TValue, Zero> const &)
+{
+	return 0;
+}
+	
 //////////////////////////////////////////////////////////////////////////////
 
 //Shortcut:

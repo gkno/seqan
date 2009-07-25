@@ -149,166 +149,6 @@ public:
 	{
 	}
 
-	 /**
-.Memfunc.~Score:
-..class:Class.Score
-..summary:Destructor
-*/
-	friend inline TValue *
-		_getDataPam(Score & _score){
-        return & _score.data_pam[0][0];
-    }
-
-	
-	friend inline const TValue *
-		_getDataPam(const Score & _score){
-        return & _score.data_pam[0][0];
-    }
-	
-	/**
-.Internal._getDataPam:
-..class:Class.Score
-..cat:Functions
-..summary:Access function returning address of the array containing the scoring matrix.
-..signature:_getDataPam(Score & _score)
-..param._score:Score class instance containing scoring matrix as a member.
-..returns:Address of array containing scoring matrix.
-...type:TValue *
-
-*/
-
-/*
-	friend inline TValue &
-		scoreGapExtend(Score & _score)
-	{
-		return _score.data_gap_extend;
-	}
-	friend inline TValue const &
-		scoreGapExtend(Score const & _score)
-	{
-		return _score.data_gap_extend;
-	}
-
-	
-	friend inline TValue
-		scoreGapOpen(Score & _score)
-	{
-		return _score.data_gap_open;
-	}
-	friend inline TValue const &
-		scoreGapOpen(Score const & _score)
-	{
-		return _score.data_gap_open;
-	}
-
-*/
-	friend inline double
-		getScale(Score & _score) {
-			return _score.scaling_factor;
-		}
-
- 	friend inline double
-		getScale(Score const & _score) {
-			return _score.scaling_factor;
-		}
-
-
-/**
-.Function.getScale:
-..class:Class.Score
-..summary:Access function returning the distance dependent $scaling factor$ used for PAM matrix computation
-..signature:getScale(score)
-..param.score:Score class instance containing scoring matrix as a member.
-..returns:Scaling factor used for current PAM matrix computation (double).
-*/	
-		
-	friend inline void
-		_setScale(Score & _score, double _scale) {
-			_score.scaling_factor = _scale;
-		}
-
-
-/**
-.Internal._setScale:
-..class:Class.Score
-..cat:Functions
-..summary:assigns given value to $scaling_factor$
-..signature:_setScale(& _score, _scale)
-..param._score:Score class instance in which Pam computation is to be performed.
-..param._scale:Is assigned to the member attribute $scaling_factor$ (double).
-*/	
-		
-	friend inline int
-		getDist(Score & _score) {
-			return _score.dist;
-		}
-
-	friend inline int
-		getDist(Score const & _score) {
-			return _score.dist;
-		}
-
-
-/**
-.Function.getDist:
-..cat:Scoring
-..class:Class.Score
-..summary:returns the distance on which PAM matrix computation is based.
-..signature:getDist(& _score)
-..signature:getDist(const & _score)
-..param._score:Score class instance containing scoring matrix as a member.
-..returns:Distance used for current PAM matrix computation.
-*/	
-		
-	friend inline void
-		_setDist(Score & _score, int _givenDist) {
-			_score.dist = _givenDist;
-		}
-
-/**
-.Internal._setDist:
-..class:Class.Score
-..cat:Functions
-..summary:assigns given value to $dist$
-..signature:_setDist(& _score, _givenDist)
-..param._score:Score class instance in which Pam computation is to be performed.
-..param._givenDist:Is assigned to the member attribute $dist$.
-*/
-	friend inline double
-		getEntropy(Score & _score) {
-			return _score.entropy;
-		}
-
-
-	friend inline double
-		getEntropy(Score const & _score) {
-			return _score.entropy;
-		}
-
-/**
-.Function.getEntropy:
-..cat:Scoring
-..class:Class.Score
-..summary:returns entropy of the PAM matrix.
-..signature:getEntropy(& _score)
-..signature:getEntropy(const & _score)
-..param._score:Score class instance containing scoring matrix as a member.
-..returns:Entropy of the matrix currently hold in Score $_score$ (double).
-*/
-	friend inline void
-		_setEntropy(Score & _score, double H) {
-			_score.entropy = H;
-		}
-/**
-.Internal._setEntropy:
-..class:Class.Score
-..cat:Functions
-..summary:assigns given value to $entropy$.
-..signature:_setEntropy(Score & _score, double H)
-..param._score:Score class instance containing scoring matrix as a member.
-..param.H:Is assigned to the member attribute $entropy$ (double).
-*/
-
 
 
 /*
@@ -377,6 +217,181 @@ public:
 
 
 };
+
+
+
+	 /**
+.Memfunc.~Score:
+..class:Class.Score
+..summary:Destructor
+*/
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline TValue *
+		_getDataPam(Score<TValue, Pam<TSequenceValue, TSource> > & _score){
+        return & _score.data_pam[0][0];
+    }
+
+	
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline const TValue *
+		_getDataPam(const Score<TValue, Pam<TSequenceValue, TSource> > & _score){
+        return & _score.data_pam[0][0];
+    }
+	
+	/**
+.Internal._getDataPam:
+..class:Class.Score
+..cat:Functions
+..summary:Access function returning address of the array containing the scoring matrix.
+..signature:_getDataPam(Score & _score)
+..param._score:Score class instance containing scoring matrix as a member.
+..returns:Address of array containing scoring matrix.
+...type:TValue *
+
+*/
+
+/*
+	friend inline TValue &
+		scoreGapExtend(Score & _score)
+	{
+		return _score.data_gap_extend;
+	}
+	friend inline TValue const &
+		scoreGapExtend(Score const & _score)
+	{
+		return _score.data_gap_extend;
+	}
+
+	
+	friend inline TValue
+		scoreGapOpen(Score & _score)
+	{
+		return _score.data_gap_open;
+	}
+	friend inline TValue const &
+		scoreGapOpen(Score const & _score)
+	{
+		return _score.data_gap_open;
+	}
+
+*/
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline double
+		getScale(Score<TValue, Pam<TSequenceValue, TSource> > & _score) {
+			return _score.scaling_factor;
+		}
+
+template <typename TValue, typename TSequenceValue, typename TSource> 
+ 	inline double
+		getScale(Score<TValue, Pam<TSequenceValue, TSource> > const & _score) {
+			return _score.scaling_factor;
+		}
+
+
+/**
+.Function.getScale:
+..class:Class.Score
+..summary:Access function returning the distance dependent $scaling factor$ used for PAM matrix computation
+..signature:getScale(score)
+..param.score:Score class instance containing scoring matrix as a member.
+..returns:Scaling factor used for current PAM matrix computation (double).
+*/	
+		
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline void
+		_setScale(Score<TValue, Pam<TSequenceValue, TSource> > & _score, double _scale) {
+			_score.scaling_factor = _scale;
+		}
+
+
+/**
+.Internal._setScale:
+..class:Class.Score
+..cat:Functions
+..summary:assigns given value to $scaling_factor$
+..signature:_setScale(& _score, _scale)
+..param._score:Score class instance in which Pam computation is to be performed.
+..param._scale:Is assigned to the member attribute $scaling_factor$ (double).
+*/	
+		
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline int
+		getDist(Score<TValue, Pam<TSequenceValue, TSource> > & _score) {
+			return _score.dist;
+		}
+
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline int
+		getDist(Score<TValue, Pam<TSequenceValue, TSource> > const & _score) {
+			return _score.dist;
+		}
+
+
+/**
+.Function.getDist:
+..cat:Scoring
+..class:Class.Score
+..summary:returns the distance on which PAM matrix computation is based.
+..signature:getDist(& _score)
+..signature:getDist(const & _score)
+..param._score:Score class instance containing scoring matrix as a member.
+..returns:Distance used for current PAM matrix computation.
+*/	
+		
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline void
+		_setDist(Score<TValue, Pam<TSequenceValue, TSource> > & _score, int _givenDist) {
+			_score.dist = _givenDist;
+		}
+
+/**
+.Internal._setDist:
+..class:Class.Score
+..cat:Functions
+..summary:assigns given value to $dist$
+..signature:_setDist(& _score, _givenDist)
+..param._score:Score class instance in which Pam computation is to be performed.
+..param._givenDist:Is assigned to the member attribute $dist$.
+*/
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline double
+		getEntropy(Score<TValue, Pam<TSequenceValue, TSource> > & _score) {
+			return _score.entropy;
+		}
+
+
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline double
+		getEntropy(Score<TValue, Pam<TSequenceValue, TSource> > const & _score) {
+			return _score.entropy;
+		}
+
+/**
+.Function.getEntropy:
+..cat:Scoring
+..class:Class.Score
+..summary:returns entropy of the PAM matrix.
+..signature:getEntropy(& _score)
+..signature:getEntropy(const & _score)
+..param._score:Score class instance containing scoring matrix as a member.
+..returns:Entropy of the matrix currently hold in Score $_score$ (double).
+*/
+template <typename TValue, typename TSequenceValue, typename TSource> 
+	inline void
+		_setEntropy(Score<TValue, Pam<TSequenceValue, TSource> > & _score, double H) {
+			_score.entropy = H;
+		}
+/**
+.Internal._setEntropy:
+..class:Class.Score
+..cat:Functions
+..summary:assigns given value to $entropy$.
+..signature:_setEntropy(Score & _score, double H)
+..param._score:Score class instance containing scoring matrix as a member.
+..param.H:Is assigned to the member attribute $entropy$ (double).
+*/
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Define some types for easier instantiation of PAM matrix
 //////////////////////////////////////////////////////////////////////////////

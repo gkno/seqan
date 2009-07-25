@@ -51,7 +51,7 @@ struct SuffixSegment;
 template <typename THost_>
 class Segment<THost_, SuffixSegment>
 {
-protected:
+public:
 	typedef typename Host<Segment>::Type THost;
 
 	typename _Pointer<THost>::Type data_host;
@@ -158,28 +158,6 @@ SEQAN_CHECKPOINT
 
 public:
 
-	friend inline typename _Parameter<THost>::Type 
-	host(Segment & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<THost>(me.data_host);
-	}
-
-	friend inline typename _Parameter<THost>::Type 
-	host(Segment const & me)
-	{
-SEQAN_CHECKPOINT
-		return _toParameter<THost>(me.data_host);
-	}
-
-//____________________________________________________________________________
-
-	friend inline void 
-	setHost(Segment & me, typename _Parameter<THost>::Type _host)
-	{
-SEQAN_CHECKPOINT
-		me.data_host = _toPointer(_host);
-	}
 
 //____________________________________________________________________________
 
@@ -200,112 +178,151 @@ SEQAN_CHECKPOINT
 	}
 
 //____________________________________________________________________________
-
-	friend inline typename Iterator<Segment, Standard>::Type 
-	begin(Segment & me,
-		Standard)
-	{
-SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_begin_position;
-	}
-	friend inline typename Iterator<Segment const, Standard>::Type 
-	begin(Segment const & me,
-		Standard)
-	{
-SEQAN_CHECKPOINT
-		return begin(host(me), Standard()) + me.data_begin_position;
-	}
-
-//____________________________________________________________________________
-
-	friend inline typename Position<Segment const>::Type 
-	beginPosition(Segment const & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_begin_position;
-	}
-	friend inline typename Position<Segment>::Type 
-	beginPosition(Segment & me)
-	{
-SEQAN_CHECKPOINT
-		return me.data_begin_position;
-	}
-//____________________________________________________________________________
-
-	template <typename TIterator>
-	friend inline void 
-	setBegin(Segment & me, TIterator new_begin)
-	{
-SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin - begin(host(me));//, Standard());
-	}
-
-	friend inline void 
-	setBegin(typename Iterator<Segment, Rooted>::Type new_begin)
-	{
-SEQAN_CHECKPOINT
-		container(new_begin).data_begin_position = hostIterator(new_begin) - begin(host(container(new_begin)));//, Standard());
-	}
-
-//____________________________________________________________________________
-
-	template <typename TPosition>
-	friend inline void 
-	setBeginPosition(Segment & me, TPosition new_begin)
-	{
-SEQAN_CHECKPOINT
-		me.data_begin_position = new_begin;
-	}
-
-//____________________________________________________________________________
-
-	friend inline typename Iterator<Segment, Standard>::Type 
-	end(Segment & me,
-		Standard)
-	{
-SEQAN_CHECKPOINT
-		return end(host(me), Standard());
-	}
-	friend inline typename Iterator<Segment const, Standard>::Type 
-	end(Segment const & me,
-		Standard)
-	{
-SEQAN_CHECKPOINT
-		return end(host(me), Standard());
-	}
-
-//____________________________________________________________________________
-
-
-	friend inline typename Position<Segment>::Type 
-	endPosition(Segment & me)
-	{
-SEQAN_CHECKPOINT
-		return length(host(me));
-	}
-
-	friend inline typename Position<Segment const>::Type 
-	endPosition(Segment const & me)
-	{
-SEQAN_CHECKPOINT
-		return length(host(me));
-	}
-
-//____________________________________________________________________________
-
-	template <typename TIterator>
-	friend inline void
-	setEnd(Segment &, TIterator)
-	{
-	}
-
-	friend inline void 
-	_setLength(Segment &, typename Size<THost>::Type)
-	{
-	}
-
-//____________________________________________________________________________
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost_>
+inline typename _Parameter<THost_>::Type 
+host(Segment<THost_, SuffixSegment> & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<THost_>(me.data_host);
+}
+
+template <typename THost_>
+inline typename _Parameter<THost_>::Type 
+host(Segment<THost_, SuffixSegment> const & me)
+{
+SEQAN_CHECKPOINT
+	return _toParameter<THost_>(me.data_host);
+}
+
+//____________________________________________________________________________
+
+template <typename THost_>
+inline void 
+setHost(Segment<THost_, SuffixSegment> & me, typename _Parameter<THost_>::Type _host)
+{
+SEQAN_CHECKPOINT
+	me.data_host = _toPointer(_host);
+}
+
+
+//____________________________________________________________________________
+
+template <typename THost_>
+inline typename Iterator<Segment<THost_, SuffixSegment>, Standard>::Type 
+begin(Segment<THost_, SuffixSegment> & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return begin(host(me), Standard()) + me.data_begin_position;
+}
+template <typename THost_>
+inline typename Iterator<Segment<THost_, SuffixSegment> const, Standard>::Type 
+begin(Segment<THost_, SuffixSegment> const & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return begin(host(me), Standard()) + me.data_begin_position;
+}
+
+//____________________________________________________________________________
+
+template <typename THost_>
+inline typename Position<Segment<THost_, SuffixSegment> const>::Type 
+beginPosition(Segment<THost_, SuffixSegment> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_begin_position;
+}
+template <typename THost_>
+inline typename Position<Segment<THost_, SuffixSegment> >::Type 
+beginPosition(Segment<THost_, SuffixSegment> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_begin_position;
+}
+//____________________________________________________________________________
+
+template <typename THost_, typename TIterator>
+inline void 
+setBegin(Segment<THost_, SuffixSegment> & me, TIterator new_begin)
+{
+SEQAN_CHECKPOINT
+	me.data_begin_position = new_begin - begin(host(me));//, Standard());
+}
+
+template <typename THost_>
+inline void 
+setBegin(typename Iterator<Segment<THost_, SuffixSegment>, Rooted>::Type new_begin)
+{
+SEQAN_CHECKPOINT
+	container(new_begin).data_begin_position = hostIterator(new_begin) - begin(host(container(new_begin)));//, Standard());
+}
+
+//____________________________________________________________________________
+
+template <typename THost_, typename TPosition>
+inline void 
+setBeginPosition(Segment<THost_, SuffixSegment> & me, TPosition new_begin)
+{
+SEQAN_CHECKPOINT
+	me.data_begin_position = new_begin;
+}
+
+//____________________________________________________________________________
+
+template <typename THost_>
+inline typename Iterator<Segment<THost_, SuffixSegment>, Standard>::Type 
+end(Segment<THost_, SuffixSegment> & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return end(host(me), Standard());
+}
+template <typename THost_>
+inline typename Iterator<Segment<THost_, SuffixSegment> const, Standard>::Type 
+end(Segment<THost_, SuffixSegment> const & me,
+	Standard)
+{
+SEQAN_CHECKPOINT
+	return end(host(me), Standard());
+}
+
+//____________________________________________________________________________
+
+
+template <typename THost_>
+inline typename Position<Segment<THost_, SuffixSegment> >::Type 
+endPosition(Segment<THost_, SuffixSegment> & me)
+{
+SEQAN_CHECKPOINT
+	return length(host(me));
+}
+
+template <typename THost_>
+inline typename Position<Segment<THost_, SuffixSegment> const>::Type 
+endPosition(Segment<THost_, SuffixSegment> const & me)
+{
+SEQAN_CHECKPOINT
+	return length(host(me));
+}
+
+//____________________________________________________________________________
+
+template <typename TIterator, typename THost_>
+inline void
+setEnd(Segment<THost_, SuffixSegment> &, TIterator)
+{
+}
+
+template <typename THost_, typename TSize>
+inline void 
+_setLength(Segment<THost_, SuffixSegment> &, TSize)
+{
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

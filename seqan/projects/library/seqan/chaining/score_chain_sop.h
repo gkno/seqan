@@ -128,6 +128,47 @@ public:
 */
 //____________________________________________________________________________
 };
+
+
+template <typename TValue>
+inline TValue &
+scoreMatch(Score<TValue, ChainSoP> & me)
+{
+	return me.data_match;
+}
+template <typename TValue>
+inline TValue const &
+scoreMatch(Score<TValue, ChainSoP> const & me)
+{
+	return me.data_match;
+}
+
+template <typename TValue>
+inline TValue &
+scoreMismatch(Score<TValue, ChainSoP> & me)
+{
+	return me.data_mismatch;
+}
+template <typename TValue>
+inline TValue const &
+scoreMismatch(Score<TValue, ChainSoP> const & me)
+{
+	return me.data_mismatch;
+}
+
+template <typename TValue>
+inline TValue &
+scoreGap(Score<TValue, ChainSoP> & me)
+{
+	return me.data_gap;
+}
+
+template <typename TValue>
+inline TValue const &
+scoreGap(Score<TValue, ChainSoP> const & me)
+{
+	return me.data_gap;
+}
 //////////////////////////////////////////////////////////////////////////////
 
 //Shortcut:
