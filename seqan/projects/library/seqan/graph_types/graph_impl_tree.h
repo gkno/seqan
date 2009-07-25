@@ -1049,13 +1049,14 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 ...type:Spec.Tree
 ..param.subtree_root:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
-..param.set:A set of vertex descriptors (STL set).
+..param.group:A group of vertex descriptors
+...type:Class.String
 */
-template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TSet>
+template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TGroup>
 inline void
 collectLeaves(Graph<Tree<TCargo, TSpec> > const& g,
 			  TVertexDescriptor const root,
-			  TSet& set1)
+			  TGroup& group)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
@@ -1063,11 +1064,11 @@ collectLeaves(Graph<Tree<TCargo, TSpec> > const& g,
 	typedef typename Id<TGraph>::Type TId;
 	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 
-	if (isLeaf(g, root)) set1.insert(root);
+	if (isLeaf(g, root)) appendValue(group, root, Generous());
 	else {
 		TAdjacencyIterator adjIt(g, root);
 		for(;!atEnd(adjIt);goNext(adjIt)) {
-			collectLeaves(g, *adjIt, set1);
+			collectLeaves(g, *adjIt, group);
 		}
 	}
 }

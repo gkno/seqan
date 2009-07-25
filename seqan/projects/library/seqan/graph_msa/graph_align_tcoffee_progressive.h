@@ -205,7 +205,7 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Iterator<TGuideTree, BfsIterator>::Type TBfsIterator;
 	typedef String<TVertexDescriptor> TVertexString;
 	typedef String<TVertexString> TSegmentString;
-	typedef std::set<TSize> TChildrenSet;
+	typedef String<TSize> TChildrenSet;
 
 	// Build groups of sequences
 	TGuideTree copy_tree(tree);
@@ -216,11 +216,13 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 		for(;!atEnd(bfsIt);goNext(bfsIt)) {
 			TChildrenSet sequenceSet;
 			collectLeaves(copy_tree, *bfsIt, sequenceSet);
-			if ((TSize) sequenceSet.size() <= (TSize) seqPerGroup) {
+			if ((TSize) length(sequenceSet) <= (TSize) seqPerGroup) {
 				TChildrenSet finalSequenceSet;
-				for(typename TChildrenSet::iterator pos = sequenceSet.begin(); pos != sequenceSet.end(); ++pos) {
-					finalSequenceSet.insert(positionToId(stringSet(g), *pos));
-				}
+				typedef typename Iterator<TChildrenSet, Standard>::Type TChildIter;
+				TChildIter itC = begin(sequenceSet, Standard());
+				TChildIter itCEnd = end(sequenceSet, Standard());
+				for(; itC != itCEnd; ++itC) 
+					appendValue(finalSequenceSet, positionToId(stringSet(g), *itC), Generous());
 				appendValue(sequenceGroups, finalSequenceSet);
 				// Find the proper root
 				TDfsPreorderIterator dfsItRootFinder(copy_tree, *bfsIt);
@@ -255,7 +257,7 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	for(TSize i = 0;i<numGroups;++i) {
 		// Perform progressive alignment
 		TGraph copy_graph(g);
-		if ((sequenceGroups[i]).size() > 1) tripletLibraryExtension(copy_graph, sequenceGroups[i]);
+		if (length(sequenceGroups[i]) > 1) tripletLibraryExtension(copy_graph, sequenceGroups[i]);
 		TSegmentString alignSeq;
 		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq);
 		value(profileStrings, i) = alignSeq;

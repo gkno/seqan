@@ -274,16 +274,48 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 //////////////////////////////////////////////////////////////////////////////
 
 
+
+template<typename TVertexDescriptor, typename TCargo>
+struct __EdgeCargo {
+ public:
+	 TVertexDescriptor v1;
+	 TVertexDescriptor v2;
+	 TCargo c;
+
+	 __EdgeCargo() {}
+
+	
+	 __EdgeCargo(TVertexDescriptor vert1, TVertexDescriptor vert2, TCargo carg) :
+	 v1(vert1), v2(vert2), c(carg) {}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TVertexDescriptor, typename TCargo>
+struct __LessEdgeCargo :
+	public ::std::binary_function<TVertexDescriptor, TCargo, bool>
+{
+	inline bool 
+	operator() (__EdgeCargo<TVertexDescriptor, TCargo> const& a1, 
+				__EdgeCargo<TVertexDescriptor, TCargo> const& a2) const 
+	{
+		return (a1.v1 == a2.v1) ? (a1.v2 < a2.v2) : (a1.v1 < a2.v1);
+	}
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.tripletLibraryExtension:
-..summary:Performs the consistency extension proposed in T-Coffee.
+..summary:Performs a full or group-based consistency extension.
 ..cat:Graph
 ..signature:
-tripletLibraryExtension(graph, [,set1])
+tripletLibraryExtension(graph, [,guideTree, minMembers])
 ..param.graph:An alignment graph.
 ...type:Spec.Alignment Graph
-..param.set1:A STL set of sequences.
-...remarks:The triplet extension is limited to this set of sequences.
+..param.guideTree:A guide tree.
+..param.minMembers:Minimum number of sequences per group.
+...remarks:If a guide tree and a minimum number of memebers is given, the triplet extension is limited to groups of sequences.
 ..returns:void
 */
 template<typename TStringSet, typename TCargo, typename TSpec>
@@ -297,110 +329,69 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	
 	// Store all edges
-	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
-	typedef std::map<TEdge, TCargo> TEdgeMap;
+	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TNewEdge;
+	typedef std::map<TNewEdge, TCargo> TEdgeMap;
+	typedef typename TEdgeMap::iterator TEdgeMapIter;
 	TEdgeMap newEMap;
+	typedef __EdgeCargo<TVertexDescriptor, TCargo> TEdge;
+	typedef String<TEdge> TEdgeString;
+	TEdgeString fullEdges;
 	TEdgeIterator itE(g);
-	for(;!atEnd(itE);goNext(itE)) newEMap.insert(std::make_pair(TEdge(sourceVertex(itE), targetVertex(itE)), cargo(*itE)));
+	for(;!atEnd(itE);goNext(itE)) {
+		TVertexDescriptor sV = sourceVertex(itE);
+		TVertexDescriptor tV = targetVertex(itE);
+		TCargo c = cargo(*itE);
+		appendValue(fullEdges, TEdge(sV, tV, c), Generous());
+		appendValue(fullEdges, TEdge(tV, sV, c), Generous());
+		newEMap.insert(std::make_pair(TNewEdge(sV, tV), c));
+	}
 	clearEdges(g);
+	::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), __LessEdgeCargo<TVertexDescriptor, TCargo>() );
 	
 	// Perform triplet extension
-	TEdgeMap eMap = newEMap;
-	typedef typename TEdgeMap::iterator TEdgeMapIter;
-	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
-		eMap.insert(std::make_pair(TEdge((*itE).first.second, (*itE).first.first), (*itE).second));
-	}
-	for(TEdgeMapIter it1 = eMap.begin(); it1 != eMap.end(); ++it1) {
-		for(TEdgeMapIter it2 = it1; ++it2 != eMap.end();) {
-			if ((*it1).first.first != (*it2).first.first) break;
-			if (sequenceId(g, (*it1).first.second) == sequenceId(g, (*it2).first.second)) continue;
-			TCargo weight = (*it2).second;
-			if ((*it1).second < weight) weight = (*it1).second;
-			if ((*it1).first.second < (*it2).first.second) {
-				TEdgeMapIter pos = newEMap.find(TEdge((*it1).first.second, (*it2).first.second));
-				if (pos != newEMap.end()) (*pos).second += weight;
-				else newEMap.insert(std::make_pair(TEdge((*it1).first.second, (*it2).first.second), weight));
-			} else {
-				TEdgeMapIter pos = newEMap.find(TEdge((*it2).first.second, (*it1).first.second));
-				if (pos != newEMap.end()) (*pos).second += weight;
-				else newEMap.insert(std::make_pair(TEdge((*it2).first.second, (*it1).first.second), weight));
+	typedef typename Iterator<TEdgeString, Standard>::Type TEdgeIter;
+	TEdgeIter itEdges1 = begin(fullEdges, Standard());
+	TEdgeIter itEdgesEnd = end(fullEdges, Standard());
+	for(; itEdges1 != itEdgesEnd; ++itEdges1) {
+		for(TEdgeIter itEdges2 = itEdges1; ++itEdges2 != itEdgesEnd;) {
+			if ((*itEdges1).v1 != (*itEdges2).v1) break;
+			if (sequenceId(g, (*itEdges1).v2) != sequenceId(g, (*itEdges2).v2)) {
+				TCargo weight = ((*itEdges1).c < (*itEdges2).c) ? (*itEdges1).c : (*itEdges2).c;
+				if ((*itEdges1).v2 < (*itEdges2).v2) {
+					TEdgeMapIter pos = newEMap.find(TNewEdge((*itEdges1).v2, (*itEdges2).v2));
+					if (pos != newEMap.end()) (*pos).second += weight;
+					else newEMap.insert(std::make_pair(TNewEdge((*itEdges1).v2, (*itEdges2).v2), weight));
+				} else {
+					TEdgeMapIter pos = newEMap.find(TNewEdge((*itEdges2).v2, (*itEdges1).v2));
+					if (pos != newEMap.end()) (*pos).second += weight;
+					else newEMap.insert(std::make_pair(TNewEdge((*itEdges2).v2, (*itEdges1).v2), weight));
+				}	
 			}
 		}
 	}
-	eMap.clear();
+	clear(fullEdges);
 
 	// Insert edges
-	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
+	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) 
 		addEdge(g, (*itE).first.first, (*itE).first.second, (*itE).second);
-	}
-}
-
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TSet>
-inline void 
-tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-						TSet const& set1)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	
-	// Store all edges
-	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
-	typedef std::map<TEdge, TCargo> TEdgeMap;
-	TEdgeMap newEMap;
-	TEdgeIterator itE(g);
-	for(;!atEnd(itE);goNext(itE)) newEMap.insert(std::make_pair(TEdge(sourceVertex(itE), targetVertex(itE)), cargo(*itE)));
-	clearEdges(g);
-	
-	// Perform triplet extension
-	TEdgeMap eMap;
-	typedef typename TEdgeMap::iterator TEdgeMapIter;
-	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
-		if ((set1.find(sequenceId(g, (*itE).first.first)) != set1.end()) && (set1.find(sequenceId(g, (*itE).first.second)) != set1.end())) {
-			eMap.insert(std::make_pair(TEdge((*itE).first.first, (*itE).first.second), (*itE).second));
-			eMap.insert(std::make_pair(TEdge((*itE).first.second, (*itE).first.first), (*itE).second));
-		}
-	}
-	for(TEdgeMapIter it1 = eMap.begin(); it1 != eMap.end(); ++it1) {
-		for(TEdgeMapIter it2 = it1; ++it2 != eMap.end();) {
-			if ((*it1).first.first != (*it2).first.first) break;
-			if (sequenceId(g, (*it1).first.second) == sequenceId(g, (*it2).first.second)) continue;
-			TCargo weight = (*it2).second;
-			if ((*it1).second < weight) weight = (*it1).second;
-			if ((*it1).first.second < (*it2).first.second) {
-				TEdgeMapIter pos = newEMap.find(TEdge((*it1).first.second, (*it2).first.second));
-				if (pos != newEMap.end()) (*pos).second += weight;
-				else newEMap.insert(std::make_pair(TEdge((*it1).first.second, (*it2).first.second), weight));
-			} else {
-				TEdgeMapIter pos = newEMap.find(TEdge((*it2).first.second, (*it1).first.second));
-				if (pos != newEMap.end()) (*pos).second += weight;
-				else newEMap.insert(std::make_pair(TEdge((*it2).first.second, (*it1).first.second), weight));
-			}
-		}
-	}
-	eMap.clear();
-
-	// Insert edges
-	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
-		addEdge(g, (*itE).first.first, (*itE).first.second, (*itE).second);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TGuideTree, typename TSeqSets, typename TGroupRoot, typename TSize>
+template<typename TGuideTree, typename TSeqGroups, typename TGroupRoot, typename TSize>
 inline void 
 _subTreeSearch(TGuideTree& guideTree, 
-			   TSeqSets& seqSets,
+			   TSeqGroups& seqGroups,
 			   TGroupRoot& groupRoot,
 			   TSize minMembers) 
 {
-	typedef typename Value<TSeqSets>::Type TSeqSet;
+	typedef typename Value<TSeqGroups>::Type TSeqGroup;
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
+	
+	// Initialization
 	TVertexDescriptor rootVertex = getRoot(guideTree);
+	TSize nVertices = numVertices(guideTree);
+	TSize nSeq = (nVertices / 2) + 1;
 
 	// Number of subsequent leaves for each node
 	typedef typename Iterator<TGuideTree, BfsIterator>::Type TBfsIterator;
@@ -410,7 +401,7 @@ _subTreeSearch(TGuideTree& guideTree,
 	// All vertices in reversed bfs order
 	typedef String<TVertexDescriptor> TVertexString;
 	TVertexString vertices;
-	resize(vertices, numVertices(guideTree));
+	resize(vertices, nVertices);
 	
 	// Walk through the tree in bfs order	
 	TBfsIterator bfsIt(guideTree, getRoot(guideTree));
@@ -437,10 +428,10 @@ _subTreeSearch(TGuideTree& guideTree,
 	itVert = begin(vertices, Standard());
 	for(;itVert != itVertEnd; ++itVert) {
 		if (property(numLeaves, *itVert) >= minMembers) {
-			appendValue(seqSets, TSeqSet());
-			appendValue(groupRoot, *itVert);
-			TSize elem = length(seqSets) - 1;
-			collectLeaves(guideTree, *itVert, value(seqSets, elem));
+			appendValue(seqGroups, TSeqGroup(), Generous());
+			appendValue(groupRoot, *itVert, Generous());
+			TSize elem = length(seqGroups) - 1;
+			collectLeaves(guideTree, *itVert, seqGroups[elem]);
 			property(numLeaves, *itVert) = 0;
 			// Do not take any parent of the group root
 			if (*itVert != rootVertex) {
@@ -453,10 +444,10 @@ _subTreeSearch(TGuideTree& guideTree,
 			}
 		}
 	}
-	if (!length(seqSets)) {
-		appendValue(seqSets, TSeqSet());
+	if (!length(seqGroups)) {
+		appendValue(seqGroups, TSeqGroup());
 		appendValue(groupRoot, rootVertex);
-		collectLeaves(guideTree, rootVertex, value(seqSets, 0));
+		collectLeaves(guideTree, rootVertex, seqGroups[0]);
 	}
 
 	// Label all internal vertices with the closest root node
@@ -464,7 +455,7 @@ _subTreeSearch(TGuideTree& guideTree,
 	String<TDistGroup> closestRoot;  
 	fill(closestRoot, getIdUpperBound(_getVertexIdManager(guideTree)), TDistGroup(0,0), Exact());
 	for(TSize i=0; i< (TSize) length(groupRoot); ++i) {
-		TVertexDescriptor v = value(groupRoot, i);
+		TVertexDescriptor v = groupRoot[i];
 		TSize dist = 0;
 		while(v != rootVertex) {
 			++dist;
@@ -477,109 +468,144 @@ _subTreeSearch(TGuideTree& guideTree,
 	}
 
 	// Find ungrouped vertices
-	TSeqSet allGroupedLeaves;
-	for(TSize i=0; i< (TSize) length(seqSets); ++i) allGroupedLeaves.insert((value(seqSets, i)).begin(), (value(seqSets, i)).end());
-	TSeqSet ungroupedLeaves;
-	for(TSize i=0; i< (TSize) ((numVertices(guideTree) / 2) + 1); ++i) {
-		if (allGroupedLeaves.find(i) == allGroupedLeaves.end()) ungroupedLeaves.insert(i);
+	typedef typename Iterator<TSeqGroup, Standard>::Type TSeqGroupIter;
+	TSeqGroup allGroupedLeaves;
+	for(TSize i=0; i< (TSize) length(seqGroups); ++i) {
+		TSeqGroupIter itSeqGroup = begin(seqGroups[i], Standard());
+		TSeqGroupIter itSeqGroupEnd = end(seqGroups[i], Standard());
+		for(;itSeqGroup != itSeqGroupEnd; ++itSeqGroup) 
+			appendValue(allGroupedLeaves, *itSeqGroup, Generous());
 	}
-	allGroupedLeaves.clear();
+	appendValue(allGroupedLeaves, nSeq);
+	::std::sort(begin(allGroupedLeaves, Standard()), end(allGroupedLeaves, Standard()));
+	TSeqGroupIter itSeqGroup = begin(allGroupedLeaves, Standard());
+	TSeqGroupIter itSeqGroupEnd = end(allGroupedLeaves, Standard());
+	TSize leftover = 0;
+	TSeqGroup ungroupedLeaves;
+	for(;itSeqGroup != itSeqGroupEnd; ++itSeqGroup, ++leftover) {
+		while (leftover<*itSeqGroup) {
+			appendValue(ungroupedLeaves, leftover, Generous());
+			++leftover;
+		}
+	}
+	
 
 	//std::cout << guideTree << std::endl;
-	//std::cout << "Groups: " << length(groupRoot) << std::endl;
-	//std::cout << "Ungrouped seqs: " << ungroupedLeaves.size() << std::endl;
+	//std::cout << nSeq << std::endl;
+	//std::cout << length(groupRoot) << std::endl;
+	//std::cout << length(allGroupedLeaves) << std::endl;
+	//std::cout << length(ungroupedLeaves) << std::endl;
 
 	// Group the ungrouped vertices to the closest group
-	for(typename TSeqSet::iterator itSeq = ungroupedLeaves.begin(); itSeq != ungroupedLeaves.end(); ++itSeq) {
-		TVertexDescriptor v = *itSeq;
+	clear(allGroupedLeaves);
+	itSeqGroup = begin(ungroupedLeaves, Standard());
+	itSeqGroupEnd = end(ungroupedLeaves, Standard());
+	for(; itSeqGroup != itSeqGroupEnd; ++itSeqGroup) {
+		TVertexDescriptor v = *itSeqGroup;
 		while(v != rootVertex) {
 			v = parentVertex(guideTree, v);
 			if (property(closestRoot,v).i1 != 0) {
-				(value(seqSets, property(closestRoot,v).i2)).insert(*itSeq);
+				appendValue(seqGroups[property(closestRoot,v).i2], *itSeqGroup, Generous());
 				break;
 			}
 		}
 	}
-
-	//// Debug code
-	//for(TSize i=0; i< (TSize) length(seqSets); ++i) {
-	//	TSeqSet& thisSet = value(seqSets, i);
-	//	std::cout << value(groupRoot, i) << std::endl;
-	//	for(TSeqSet::iterator itSet = thisSet.begin(); itSet != thisSet.end(); ++itSet) {
-	//		std::cout << *itSet << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TSize>
 inline void 
-groupBasedTripletExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-						   TGuideTree& guideTree,
-						   TSize minMembers)
+tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+						TGuideTree& guideTree,
+						TSize minMembers)
 {
 	SEQAN_CHECKPOINT
-	typedef typename VertexDescriptor<TGuideTree>::Type TTreeVertex;
-	typedef typename Id<TGuideTree>::Type TId;
-	typedef std::set<TTreeVertex> TTreeVertexSet;
-
-	// Identify large subtrees
-	typedef std::set<TId> TSeqSet;
-	String<TSeqSet> seqSets;
-	typedef String<TTreeVertex> TGroupRoot;
-	TGroupRoot groupRoot;
-	_subTreeSearch(guideTree, seqSets, groupRoot, minMembers);
-
-	// Perform the triplet extension on each set	
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+	typedef typename VertexDescriptor<TGuideTree>::Type TTreeVertex;
+	TStringSet& strSet = stringSet(g);
+	TSize nSeq = length(strSet);
+
+	// Identify large subtrees
+	typedef String<TSize> TSequenceGroups;
+	String<TSequenceGroups> seqGroup;
+	typedef String<TTreeVertex> TGroupRoot;
+	TGroupRoot groupRoot;
+	_subTreeSearch(guideTree, seqGroup, groupRoot, minMembers);
+	
+	// Label the subtree sequences
+	String<TSize> seqLabels;
+	resize(seqLabels, nSeq);
+	typedef typename Iterator<TSequenceGroups, Standard>::Type TSeqSetIter;
+	for(TSize i=0; i< (TSize) length(seqGroup); ++i) {
+		TSeqSetIter itSeqGroup = begin(seqGroup[i], Standard());
+		TSeqSetIter itSeqGroupEnd = end(seqGroup[i], Standard());
+		for(;itSeqGroup != itSeqGroupEnd; ++itSeqGroup) 
+			seqLabels[*itSeqGroup] = i;
+	}
 
 	// Store all edges
-	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
-	typedef std::map<TEdge, TCargo> TEdgeMap;
+	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TNewEdge;
+	typedef std::map<TNewEdge, TCargo> TEdgeMap;
+	typedef typename TEdgeMap::iterator TEdgeMapIter;
 	TEdgeMap newEMap;
+	typedef __EdgeCargo<TVertexDescriptor, TCargo> TEdge;
+	typedef String<TEdge> TEdgeString;
+	TEdgeString initialEdges;
 	TEdgeIterator itE(g);
-	for(;!atEnd(itE);goNext(itE)) newEMap.insert(std::make_pair(TEdge(sourceVertex(itE), targetVertex(itE)), cargo(*itE)));
+	for(;!atEnd(itE);goNext(itE)) {
+		TVertexDescriptor sV = sourceVertex(itE);
+		TVertexDescriptor tV = targetVertex(itE);
+		TCargo c = cargo(*itE);
+		appendValue(initialEdges, TEdge(sV, tV, c), Generous());
+		newEMap.insert(std::make_pair(TNewEdge(sV, tV), c));
+	}
 	clearEdges(g);
 
+	
 	// Perform triplet extension
-	TEdgeMap eMap;
-	typedef typename TEdgeMap::iterator TEdgeMapIter;
-	for(TSize i=0; i< (TSize) length(seqSets); ++i) {
-		TSeqSet& set1 = value(seqSets, i);
-		for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
-			if ((set1.find(idToPosition(stringSet(g), sequenceId(g, (*itE).first.first))) != set1.end()) && (set1.find(idToPosition(stringSet(g), sequenceId(g, (*itE).first.second))) != set1.end())) {
-				eMap.insert(std::make_pair(TEdge((*itE).first.first, (*itE).first.second), (*itE).second));
-				eMap.insert(std::make_pair(TEdge((*itE).first.second, (*itE).first.first), (*itE).second));
+	typedef typename Iterator<TEdgeString, Standard>::Type TEdgeIter;
+	TEdgeString fullEdges;
+	for(TSize i=0; i< (TSize) length(seqGroup); ++i) {
+		TEdgeIter itInitial = begin(initialEdges, Standard());
+		TEdgeIter itInitialEnd = end(initialEdges, Standard());
+		for(; itInitial != itInitialEnd; ++itInitial) {
+			TSize seq1 = idToPosition(strSet, sequenceId(g, (*itInitial).v1));
+			TSize seq2 = idToPosition(strSet, sequenceId(g, (*itInitial).v2));
+			if ((seqLabels[seq1] == i) && (seqLabels[seq2] == i)) {
+				appendValue(fullEdges, *itInitial, Generous());
+				appendValue(fullEdges, TEdge((*itInitial).v2, (*itInitial).v1, (*itInitial).c), Generous());
 			}
 		}
-		for(TEdgeMapIter it1 = eMap.begin(); it1 != eMap.end(); ++it1) {
-			for(TEdgeMapIter it2 = it1; ++it2 != eMap.end();) {
-				if ((*it1).first.first != (*it2).first.first) break;
-				if (sequenceId(g, (*it1).first.second) == sequenceId(g, (*it2).first.second)) continue;
-				TCargo weight = (*it2).second;
-				if ((*it1).second < weight) weight = (*it1).second;
-				if ((*it1).first.second < (*it2).first.second) {
-					TEdgeMapIter pos = newEMap.find(TEdge((*it1).first.second, (*it2).first.second));
-					if (pos != newEMap.end()) (*pos).second += weight;
-					else newEMap.insert(std::make_pair(TEdge((*it1).first.second, (*it2).first.second), weight));
-				} else {
-					TEdgeMapIter pos = newEMap.find(TEdge((*it2).first.second, (*it1).first.second));
-					if (pos != newEMap.end()) (*pos).second += weight;
-					else newEMap.insert(std::make_pair(TEdge((*it2).first.second, (*it1).first.second), weight));
+		::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), __LessEdgeCargo<TVertexDescriptor, TCargo>() );
+		typedef typename Iterator<TEdgeString, Standard>::Type TEdgeIter;
+		TEdgeIter itEdges1 = begin(fullEdges, Standard());
+		TEdgeIter itEdgesEnd = end(fullEdges, Standard());
+		for(; itEdges1 != itEdgesEnd; ++itEdges1) {
+			for(TEdgeIter itEdges2 = itEdges1; ++itEdges2 != itEdgesEnd;) {
+				if ((*itEdges1).v1 != (*itEdges2).v1) break;
+				if (sequenceId(g, (*itEdges1).v2) != sequenceId(g, (*itEdges2).v2)) {
+					TCargo weight = ((*itEdges1).c < (*itEdges2).c) ? (*itEdges1).c : (*itEdges2).c;
+					if ((*itEdges1).v2 < (*itEdges2).v2) {
+						TEdgeMapIter pos = newEMap.find(TNewEdge((*itEdges1).v2, (*itEdges2).v2));
+						if (pos != newEMap.end()) (*pos).second += weight;
+						else newEMap.insert(std::make_pair(TNewEdge((*itEdges1).v2, (*itEdges2).v2), weight));
+					} else {
+						TEdgeMapIter pos = newEMap.find(TNewEdge((*itEdges2).v2, (*itEdges1).v2));
+						if (pos != newEMap.end()) (*pos).second += weight;
+						else newEMap.insert(std::make_pair(TNewEdge((*itEdges2).v2, (*itEdges1).v2), weight));
+					}
 				}
 			}
 		}
-		eMap.clear();
+		clear(fullEdges);
 	}
 
 	// Insert edges
-	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) {
+	for(TEdgeMapIter itE = newEMap.begin(); itE != newEMap.end(); ++itE) 
 		addEdge(g, (*itE).first.first, (*itE).first.second, (*itE).second);
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -610,7 +636,8 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 	// Remember the old cargo
 	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
 	TEdgeIterator it(g);
-	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+	for(;!atEnd(it);++it) 
+		property(newCargoMap, *it) = cargo(*it);
 
 	// Iterate over all vertices
 	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
@@ -626,17 +653,16 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 					TEdgeDescriptor e = findEdge(g, tV1, tV2);
 					if (e == 0) {
 						// New edge
-						TCargo val = cargo(*outIt1);
-						if (val > cargo(*outIt2)) val = cargo(*outIt2);
+						TCargo val = (cargo(*outIt1) < cargo(*outIt2)) ? cargo(*outIt1) : cargo(*outIt2);
 						
 						// Remember the edge with cargo
-						appendValue(edges_vertices, tV1);
-						appendValue(edges_vertices, tV2);
-						appendValue(edges_cargo, val);
+						appendValue(edges_vertices, tV1, Generous());
+						appendValue(edges_vertices, tV2, Generous());
+						appendValue(edges_cargo, val, Generous());
 					} else {
 						// Increase weight of existing edge
-						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
-						else property(newCargoMap, e) += getCargo(*outIt2);	
+						if (cargo(*outIt2) > cargo(*outIt1)) property(newCargoMap, e) += cargo(*outIt1);
+						else property(newCargoMap, e) += cargo(*outIt2);	
 					}
 				}
 				goNext(outIt2);
@@ -648,26 +674,25 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 
 	// Assign the new weights and clean-up the cargo map
 	TEdgeIterator itE(g);
-	for(;!atEnd(itE);++itE) cargo(*itE) = getProperty(newCargoMap, *itE);
+	for(;!atEnd(itE);++itE) cargo(*itE) = property(newCargoMap, *itE);
 	clear(newCargoMap);
 
 	// Add edges
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Iterator<TVertexString>::Type TVertexStringIter;
-	typedef typename Iterator<TCargoString>::Type TCargoStringIter;
+	typedef typename Iterator<TVertexString, Standard>::Type TVertexStringIter;
+	typedef typename Iterator<TCargoString, Standard>::Type TCargoStringIter;
 
 	// Finally add the new edges created by the triplet approach
-	TVertexStringIter itV = begin(edges_vertices);
-	TVertexStringIter endIt = end(edges_vertices);
-	TCargoStringIter itC = begin(edges_cargo);
-	while(itV != endIt) {
-		TVertexStringIter itVNext = itV; ++itVNext;
+	TVertexStringIter itV = begin(edges_vertices, Standard());
+	TVertexStringIter itVNext = begin(edges_vertices, Standard());
+	++itVNext;
+	TVertexStringIter endIt = end(edges_vertices, Standard());
+	TCargoStringIter itC = begin(edges_cargo, Standard());
+	for(;itV != endIt; itV += 2, itVNext +=2, ++itC) {
 		// The same edge could have been created multiple times, so check if it exists
 		TEdgeDescriptor e = findEdge(g, *itV, *itVNext);
 		if (e == 0) addEdge(g, *itV, *itVNext, *itC);
 		else cargo(e) += *itC;
-		++itV; ++itV;
-		++itC;
 	}
 	SEQAN_TASSERT(itC == end(edges_cargo))
 }
