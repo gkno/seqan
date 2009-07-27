@@ -50,6 +50,12 @@ typedef Tag<FractionalScore_> const FractionalScore;
 struct FrequencyCounting_;
 typedef Tag<FrequencyCounting_> const FrequencyCounting;
 
+/**
+.Tag.Alignment Graph Combination.value.ReScore:
+	Rescores the matches after segment-match refinement.
+*/
+struct ReScore_;
+typedef Tag<ReScore_> const ReScore;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,21 +151,15 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 	buildAlignmentGraph(matches, outGraph, FrequencyCounting() );
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Scoring of matches
-//////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TString, typename TSpec, typename TScoreType, typename TSize, typename TSpec2, typename TScoreString, typename TScoreValue> 
 inline void
-scoreMatches(StringSet<TString, TSpec> const& seqSet,
-			 TScoreType const& scType,
-			 String<Fragment<TSize, ExactFragment<> >, TSpec2> const& matches,
-			 TScoreString& scores,
-			 TScoreValue offset)
+_scoreMatches(StringSet<TString, TSpec> const& seqSet,
+			  TScoreType const& scType,
+			  String<Fragment<TSize, ExactFragment<> >, TSpec2> const& matches,
+			  TScoreString& scores,
+			  TScoreValue offset)
 {
 	SEQAN_CHECKPOINT
 	typedef String<Fragment<TSize, ExactFragment<> >, TSpec2> TFragmentString;
@@ -195,13 +195,31 @@ scoreMatches(StringSet<TString, TSpec> const& seqSet,
 
 template<typename TString, typename TSpec, typename TScoreType, typename TFragment, typename TSpec2, typename TScoreString> 
 inline void
-scoreMatches(StringSet<TString, TSpec> const& seqSet,
-			 TScoreType const& scType,
-			 String<TFragment, TSpec2> const& matches,
-			 TScoreString& scores)
+_scoreMatches(StringSet<TString, TSpec> const& seqSet,
+			  TScoreType const& scType,
+			  String<TFragment, TSpec2> const& matches,
+			  TScoreString& scores)
 {
 	SEQAN_CHECKPOINT
-	scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10);
+	_scoreMatches(seqSet, scType, matches, scores, (typename Value<TScoreString>::Type) 10);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFragment, typename TSpec1, typename TScoreValue, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
+inline void
+buildAlignmentGraph(String<TFragment, TSpec1>& matches,
+					String<TScoreValue, TSpec2>& scores,
+					Graph<Alignment<TStringSet, TCargo, TSpec> >& outGraph,
+					TScore const& scType,
+					ReScore)
+{
+	// ReScore
+	_scoreMatches(stringSet(outGraph), scType, matches, scores);
+	
+	// Use fractinal score
+	buildAlignmentGraph(matches, scores, outGraph, FractionalScore() );
 }
 
 

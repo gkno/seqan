@@ -335,24 +335,11 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #ifdef SEQAN_PROFILE
 	std::cout << "Total number of segment matches: " << length(matches) << std::endl;
 #endif
-	// Score the matches
-	if (msaOpt.rescore) {
-#ifdef SEQAN_PROFILE	
-		std::cout << "Scoring method: Re-Score" << std::endl;
-#endif
-		scoreMatches(seqSet, msaOpt.sc, matches, scores);
-#ifdef SEQAN_PROFILE
-		std::cout << "Scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-	}
-
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
-#ifdef SEQAN_PROFILE
-	std::cout << "Construction of alignment graph: FractionalScore" << std::endl;
-#endif
-	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	if (!msaOpt.rescore) buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	else buildAlignmentGraph(matches, scores, g, msaOpt.sc, ReScore() );
 	clear(matches);
 	clear(scores);
 #ifdef SEQAN_PROFILE
@@ -400,7 +387,6 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #ifdef SEQAN_PROFILE
 	std::cout << "Clean-up done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
-
 }
 
 
