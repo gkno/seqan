@@ -43,21 +43,21 @@ _buildLeafString(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Value<TSequence>::Type TVertexString;
 
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
+	//TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TStringSet& str = stringSet(g);
 	TId seqId = positionToId(str, pos);
-	TSize lenRoot = length(value(str, pos));
+	TSize lenRoot = length(str[pos]);
 	TSize i = 0;
 	while(i<lenRoot) {
 		TVertexDescriptor nextVertex = findVertex(const_cast<TGraph&>(g), seqId, i);
-		SEQAN_TASSERT(nextVertex != nilVertex)
-		if (nextVertex == nilVertex) {
-			std::cout << "Warning: Nil Vertex" << std::endl;
-			TSize j = i + 1;
-			while ((j < lenRoot) && (findVertex(const_cast<TGraph&>(g), seqId, j) == nilVertex)) ++j;
-			nextVertex = addVertex(const_cast<TGraph&>(g), seqId, i, j-i);
-		}
-		appendValue(alignSeq, TVertexString(nextVertex));
+		//SEQAN_TASSERT(nextVertex != nilVertex)
+		//if (nextVertex == nilVertex) {
+		//	std::cout << "Warning: Nil Vertex" << std::endl;
+		//	TSize j = i + 1;
+		//	while ((j < lenRoot) && (findVertex(const_cast<TGraph&>(g), seqId, j) == nilVertex)) ++j;
+		//	nextVertex = addVertex(const_cast<TGraph&>(g), seqId, i, j-i);
+		//}
+		appendValue(alignSeq, TVertexString(nextVertex), Generous());
 		i += fragmentLength(g, nextVertex);
 	}
 }
@@ -76,17 +76,13 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef String<TVertexDescriptor> TVertexString;
 
-	// Initialization
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-
 	// Create the alignment graph
 	TSize alignSeqLen = length(alignSeq);
 	for(TSize i = 0; i<alignSeqLen;++i) {
-		TVertexString& alignSeq_i = value(alignSeq, i);
+		TVertexString& alignSeq_i = alignSeq[i];
 		TSize len_i = length(alignSeq_i);
 		for(TSize j=0; j<len_i; ++j) {
-			TVertexDescriptor v = getValue(alignSeq_i, j);
-			if (v == nilVertex) continue;
+			TVertexDescriptor v = alignSeq_i[j];
 			SEQAN_TASSERT(fragmentBegin(g,v) < length(getValueById(stringSet(g), sequenceId(g,v))))
 			SEQAN_TASSERT(fragmentLength(g,v) > 0)
 			SEQAN_TASSERT(fragmentBegin(g,v) + fragmentLength(g,v) <= length(getValueById(stringSet(g), sequenceId(g,v))))
@@ -94,11 +90,9 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			//std::cout << l << label(gOut, l) << ',';
 			TSize count = 1;
 			for(TSize k = j; k>0; --k) {
-				if (getValue(alignSeq_i, k - 1) != nilVertex) {
-					SEQAN_TASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count))
-					addEdge(gOut, (TVertexDescriptor) (l - count), (TVertexDescriptor) l);
-					++count;
-				}
+				SEQAN_TASSERT(fragmentLength(gOut,l) == fragmentLength(gOut,l - count))
+				addEdge(gOut, (TVertexDescriptor) (l - count), (TVertexDescriptor) l);
+				++count;
 			}
 		}
 		//std::cout << std::endl;
@@ -107,61 +101,18 @@ _createAlignmentGraph(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSegmentString>
-inline void 
-_recursiveProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-							   TGuideTree& tree,
-							   TVertexDescriptor const root,
-							   TSegmentString& alignSeq)
-{
-	SEQAN_CHECKPOINT
-	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
-
-	if(isLeaf(tree, root)) {
-		_buildLeafString(g, root, alignSeq);
-	} else {
-		// Align the two children (Binary tree)
-		TSegmentString seq1;
-		TSegmentString seq2;
-		TAdjacencyIterator adjIt(tree, root);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq1);
-		goNext(adjIt);
-		_recursiveProgressiveAlignment(g,tree, *adjIt, seq2);
-		heaviestCommonSubsequence(g,seq1,seq2,alignSeq);
-		clear(seq1);
-		clear(seq2);
-
-		//// Debug Code
-		//for(TSize i = 0; i<length(alignSeq);++i) {
-		//	std::cout << '(';
-		//	for(TSize j=0; j<length(alignSeq[i]);++j) {
-		//		std::cout << getValue(alignSeq[i], j) << ',';
-		//	}
-		//	std::cout << ')' << ',';
-		//}
-		//std::cout << std::endl;
-	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.progressiveAlignment:
 ..summary:Performs a progressive alignment.
 ..cat:Graph
 ..signature:
-progressiveAlignment(inputGraph, guideTree, outputGraph [,seqsPerGroup])
+progressiveAlignment(inputGraph, guideTree, outputGraph)
 ..param.inputGraph:The alignment graph with multiple sequence information.
 ...type:Spec.Alignment Graph
 ..param.guideTree:A guide tree.
 ...type:Spec.Tree
-..param.outputGraph:An alignment graph for final MSA.
+..param.outputGraph:An alignment graph for the final MSA.
 ...type:Spec.Alignment Graph
-..param.seqsPerGroup:Integer indicating the amount of sequences per group.
-...remarks:The sequence set is split into groups of seqsPerGroup members.
-Then a triplet extension is performed solely on the group members.
-Thus, you do not need to do a separate triplet extension if you use this option!
 ..returns:void
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TOutGraph>
@@ -173,357 +124,57 @@ progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef String<TVertexDescriptor> TVertexString;
-	typedef String<TVertexString> TSegmentString;
-
-	// Perform progressive alignment
-	TSegmentString alignSeq;
-	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
-
-	// Create the alignment graph
-	_createAlignmentGraph(g, alignSeq, gOut);
-}
-
-
-				
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TOutGraph, typename TSize>
-inline void
-progressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-					 TGuideTree& tree,
-					 TOutGraph& gOut,
-					 TSize seqPerGroup)			 
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Id<TStringSet>::Type TId;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGuideTree, DfsPreorder>::Type TDfsPreorderIterator;
-	typedef typename Iterator<TGuideTree, BfsIterator>::Type TBfsIterator;
-	typedef String<TVertexDescriptor> TVertexString;
-	typedef String<TVertexString> TSegmentString;
-	typedef String<TSize> TChildrenSet;
-
-	// Build groups of sequences
-	TGuideTree copy_tree(tree);
-	String<std::set<TSize> > sequenceGroups;
-	String<TId> sequenceGroupRoots;
-	while (numChildren(copy_tree, getRoot(copy_tree)) > 0) {
-		TBfsIterator bfsIt(copy_tree, getRoot(copy_tree));
-		for(;!atEnd(bfsIt);goNext(bfsIt)) {
-			TChildrenSet sequenceSet;
-			collectLeaves(copy_tree, *bfsIt, sequenceSet);
-			if ((TSize) length(sequenceSet) <= (TSize) seqPerGroup) {
-				TChildrenSet finalSequenceSet;
-				typedef typename Iterator<TChildrenSet, Standard>::Type TChildIter;
-				TChildIter itC = begin(sequenceSet, Standard());
-				TChildIter itCEnd = end(sequenceSet, Standard());
-				for(; itC != itCEnd; ++itC) 
-					appendValue(finalSequenceSet, positionToId(stringSet(g), *itC), Generous());
-				appendValue(sequenceGroups, finalSequenceSet);
-				// Find the proper root
-				TDfsPreorderIterator dfsItRootFinder(copy_tree, *bfsIt);
-				for(;!atEnd(dfsItRootFinder);goNext(dfsItRootFinder)) {
-					if (numChildren(copy_tree, *dfsItRootFinder) == 1) continue;
-					appendValue(sequenceGroupRoots, *dfsItRootFinder);
-					break;
-				}
-				// Cut the tree
-				if (getRoot(copy_tree) != *bfsIt) {
-					removeChild(copy_tree, parentVertex(tree, *bfsIt), *bfsIt);
-				} else {
-					removeAllChildren(copy_tree, *bfsIt);
-				}
-				break;
-			}
-		}
-	}
-	clear(copy_tree);
-
-	//// Debug code
-	//for(TSize i = 0;i<length(sequenceGroups);++i) {
-	//	std::cout << "Sequences: ";
-	//	copy((sequenceGroups[i]).begin(), (sequenceGroups[i]).end(), std::ostream_iterator<int>(std::cout, " "));
-	//	std::cout << std::endl;
-	//}
-
-	// Align the sequence groups and flip the order for profile alignment
-	String<TSegmentString> profileStrings;
-	resize(profileStrings, length(sequenceGroups));
-	TSize numGroups = length(sequenceGroups);
-	for(TSize i = 0;i<numGroups;++i) {
-		// Perform progressive alignment
-		TGraph copy_graph(g);
-		if (length(sequenceGroups[i]) > 1) tripletLibraryExtension(copy_graph, sequenceGroups[i]);
-		TSegmentString alignSeq;
-		_recursiveProgressiveAlignment(copy_graph,tree,sequenceGroupRoots[i],alignSeq);
-		value(profileStrings, i) = alignSeq;
-		//std::cout << "One mini tree finished " << (sequenceGroups[i]).size() << std::endl;
-		clear(copy_graph);
-	}
-
-	// Align the profiles
-	TSize lastIndex = numGroups - 1;
-	for(TSize y = 1; y < numGroups;++y) {
-		//TGraph copy_graph(g);
-		//restrictedTripletLibraryExtension(copy_graph, sequenceGroups[lastIndex], sequenceGroups[lastIndex-y]);
-		TSegmentString alignSeq;
-		//heaviestCommonSubsequence(copy_graph,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
-		heaviestCommonSubsequence(g,profileStrings[lastIndex],profileStrings[lastIndex-y],alignSeq);
-		profileStrings[lastIndex] = alignSeq;
-		(sequenceGroups[lastIndex]).insert((sequenceGroups[lastIndex-y]).begin(),(sequenceGroups[lastIndex-y]).end());
-		//std::cout << "Two mini trees joined " << (sequenceGroups[lastIndex]).size() << std::endl;
-		//clear(copy_graph);
-	}
-
-	// Create the alignment graph
-	_createAlignmentGraph(g, profileStrings[lastIndex], gOut);
-}
-
-
-/*
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TString, typename TSpec, typename TGuideTree, typename TMatches, typename TScores, typename TSize>
-inline void 
-__subTreeAlignment(StringSet<TString, TSpec> const& seqSet,
-				   TGuideTree& guideTree, 
-				   TMatches& matches,
-				   TScores& scores,
-				   TSize minMembers)
-{
 	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
-	typedef typename Value<TMatches>::Type TFragmentMatch;
-	typedef std::set<TVertexDescriptor> TVertexSet;
-
-	// Identifie large subtrees
-	String<TVertexSet> vertexSets;
-	typedef String<TVertexDescriptor> TGroupRoot;
-	TGroupRoot groupRoot;
-	__subTreeSearch(guideTree, vertexSets, groupRoot, minMembers);
-
-	// Align each subtree
-	TMatches newMatches;
-	TScores newScores;
-	typedef StringSet<TString, Dependent<> > TStringSet;
-	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
-	typedef typename Id<TGraph>::Type TId;
-	std::set<TId> allIds;
-	for(TSize i=0; i< (TSize) length(vertexSets); ++i) {
-		TVertexSet& thisSet = value(vertexSets, i);
-		std::set<TId> ids;
-		for(typename TVertexSet::iterator itSet = thisSet.begin(); itSet != thisSet.end(); ++itSet) {
-			ids.insert(positionToId(seqSet, *itSet));
-			allIds.insert(positionToId(seqSet, *itSet));
-		}
-		TGraph g(seqSet);
-		TMatches localMatches;
-		TScores localScores;
-		typedef typename Iterator<TMatches, Standard>::Type TMatchIter;
-		typedef typename Iterator<TScores, Standard>::Type TScoreIter;
-		TMatchIter itMatch = begin(matches, Standard());
-		TMatchIter itMatchEnd = end(matches, Standard());
-		TScoreIter itScore = begin(scores);
-		for(;itMatch!=itMatchEnd;goNext(itMatch), goNext(itScore)) {
-			if ((ids.find(sequenceId(*itMatch,0)) != ids.end()) && 
-				(ids.find(sequenceId(*itMatch,1)) != ids.end())) {
-					appendValue(localMatches, *itMatch);
-					appendValue(localScores, *itScore);
-			}
-		}
-		buildAlignmentGraph(localMatches, localScores, g, FractionalScore() );
-		clear(localMatches);
-		clear(localScores);
-		tripletLibraryExtension(g);
-		typedef String<TVertexDescriptor> TVertexString;
-		typedef String<TVertexString> TSegmentString;
-		TSegmentString alignSeq;
-		_recursiveProgressiveAlignment(g,guideTree,value(groupRoot,i),alignSeq);
-		
-
-		TSize alignSeqLen = length(alignSeq);
-		for(TSize i = 0; i<alignSeqLen;++i) {
-			TVertexString& alignSeq_i = value(alignSeq, i);
-			TSize len_i = length(alignSeq_i);
-			TVertexDescriptor v1 = getValue(alignSeq_i, 0);
-			for(TSize j=1; j<len_i; ++j) {
-				TVertexDescriptor v2 = getValue(alignSeq_i, j);
-				appendValue(newMatches, TFragmentMatch(sequenceId(g, v1), fragmentBegin(g,v1), sequenceId(g, v2), fragmentBegin(g,v2), fragmentLength(g,v1)));
-				appendValue(newScores, 1);
-				v1 = v2;
-			}
-		}
-	}
-	std::cout << allIds.size() << ',' << length(seqSet) << std::endl;
-
-	// Do the triplet extension for the remaining matches
-	//TMatches localMatches;
-	//TScores localScores;
-	//TGraph g(seqSet);
-	typedef typename Iterator<TMatches, Standard>::Type TMatchIter;
-	typedef typename Iterator<TScores, Standard>::Type TScoreIter;
-	TMatchIter itMatch = begin(matches, Standard());
-	TMatchIter itMatchEnd = end(matches, Standard());
-	TScoreIter itScore = begin(scores);
-	for(;itMatch!=itMatchEnd;goNext(itMatch), goNext(itScore)) {
-		if ((allIds.find(sequenceId(*itMatch,0)) == allIds.end()) || 
-			(allIds.find(sequenceId(*itMatch,1)) == allIds.end())) {
-				//appendValue(localMatches, *itMatch);
-				//appendValue(localScores, *itScore);
-				appendValue(newMatches, *itMatch);
-				appendValue(newScores, *itScore);
-		}
-	}
-	//buildAlignmentGraph(localMatches, localScores, g, FractionalScore() );
-	//tripletLibraryExtension(g);
-	//typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	//TEdgeIterator it_tmp(g);
-	//for(;!atEnd(it_tmp);++it_tmp) {
-	//	appendValue(newMatches, TFragmentMatch(sequenceId(g,sourceVertex(it_tmp)), fragmentBegin(g,sourceVertex(it_tmp)), sequenceId(g,targetVertex(it_tmp)), fragmentBegin(g,targetVertex(it_tmp)), fragmentLength(g,sourceVertex(it_tmp))));
-	//	appendValue(newScores, 1);
-	//}
-
-	matches = newMatches;
-	scores = newScores;
-}
-
-*/
-
-
-
-
-// Testing stuff
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TScore, typename TOutGraph>
-inline TCargo 
-iterativeProgressiveAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-							  TGuideTree& tree,
-							  TScore const& score_type,
-							  TOutGraph& gOut)			 
-{
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename Size<TGraph>::Type TSize;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Iterator<TGuideTree, BfsIterator>::Type TBfsIterator;
 	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjacencyIterator;
 	typedef String<TVertexDescriptor> TVertexString;
 	typedef String<TVertexString> TSegmentString;
+	
+	// Initialization
+	TVertexDescriptor rootVertex = getRoot(tree);
+	TSize nVertices = numVertices(tree);
 
-	// Perform initial progressive alignment
-	TSegmentString alignSeq;
-	_recursiveProgressiveAlignment(g,tree,getRoot(tree),alignSeq);
-	clearVertices(gOut);
-	_createAlignmentGraph(g, alignSeq, gOut);
-	TScoreValue maxSumScore = sumOfPairsScore(gOut, score_type);
-	std::cout << maxSumScore << std::endl;
+	// Vertices in reversed bfs order
+	TVertexString vertices;
+	resize(vertices, nVertices);
 
-	// Build cutting order of edges
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-	String<TVertexDescriptor, Block<> > finalOrder;
-	std::deque<TVertexDescriptor> toDoList;
-	toDoList.push_back(getRoot(tree));
-	while(!toDoList.empty()) {
-		TVertexDescriptor v = toDoList[0];
-		toDoList.pop_front();
-		push_back(finalOrder, v);
-		if (!isLeaf(tree, v)) {
-			TAdjacencyIterator adjIt(tree, v);
-			toDoList.push_back(*adjIt);
-			goNext(adjIt);
-			toDoList.push_back(*adjIt);
-		}
-	}
+	// All Strings of Strings of vertices for each node of the guide tree
+	String<TSegmentString> segString;
+	resize(segString, nVertices);
+	
+	// Walk through the tree in bfs order	
+	typedef typename Iterator<TVertexString, Standard>::Type TVertexIter;
+	TVertexIter itVert = begin(vertices, Standard());
+	TVertexIter itVertEnd = end(vertices, Standard());
+	--itVertEnd;
+	TBfsIterator bfsIt(tree, rootVertex);
+	for(;!atEnd(bfsIt);goNext(bfsIt), --itVertEnd) 
+		*itVertEnd = *bfsIt;
 
-	// Iterative alignment of profiles
-	TSize nseq = length(stringSet(g));
-	TSize len = length(finalOrder) - 1;  // Don't touch the root again
-	TSize iterationsWithoutImprovement = 0;
-	for(TSize edge_count=0; ((edge_count<len) && (iterationsWithoutImprovement<5));++edge_count) {
-		TVertexDescriptor subtree_root = top(finalOrder);
-		pop(finalOrder);
-
-		// Collect all vertex descriptors that belong to the subtree
-		std::set<TVertexDescriptor> subtree;
-		toDoList.clear();
-		toDoList.push_back(subtree_root);
-		TSize numSeqs2 = 0;
-		while(!toDoList.empty()) {
-			TVertexDescriptor v = toDoList[0];
-			toDoList.pop_front();
-			if (!isLeaf(tree, v)) {
-				TAdjacencyIterator adjIt(tree, v);
-				toDoList.push_back(*adjIt);
-				goNext(adjIt);
-				toDoList.push_back(*adjIt);
-			} else {
-				// Insert the sequence id into the subtree set
-				subtree.insert(positionToId(stringSet(g), v));
-				++numSeqs2;
-			}
-		}
-
-		// Build the 2 profile strings
-		TSegmentString seq1;
-		TSegmentString seq2;
-		TSize numSeqs1 = nseq - numSeqs2;
-		TSize alignSeqLen = length(alignSeq);
-		for(TSize i = 0; i<alignSeqLen;++i) {
-			TVertexString set1; TVertexString set2;
-			TSize count1 = 0; TSize count2 = 0;
-			TVertexString& alignSeq_i = alignSeq[i];
-			TSize vertexSetLen = length(alignSeq_i);
-			for(TSize j=0; j<vertexSetLen; ++j) {
-				fill(set1, numSeqs1, nilVertex);
-				fill(set2, numSeqs2, nilVertex);
-				TVertexDescriptor v = getValue(alignSeq_i, j);
-				if (v ==nilVertex) continue;
-				else if (subtree.find(sequenceId(g,v)) == subtree.end()) set1[count1++] = v;
-				else set2[count2++] = v;
-			}
-			if (count1 != 0) appendValue(seq1, set1);
-			if (count2 != 0) appendValue(seq2, set2);
-		}
-
-		// Align profile strings
-		TSegmentString localAlignSeq;
-		heaviestCommonSubsequence(g,seq1,seq2,localAlignSeq);
-		clearVertices(gOut);
-		_createAlignmentGraph(g, localAlignSeq, gOut);
-		TScoreValue localSumScore = sumOfPairsScore(gOut, score_type);
-		std::cout << localSumScore << std::endl;
-
-		// New maximum?
-		if (localSumScore > maxSumScore) {
-			iterationsWithoutImprovement = 0;
-			maxSumScore = localSumScore;
-			alignSeq = localAlignSeq;
-		} else {
-			++iterationsWithoutImprovement;
+	// Progressive alignment
+	itVert = begin(vertices, Standard());
+	itVertEnd = end(vertices, Standard());
+	for(;itVert != itVertEnd; ++itVert) {
+		if(isLeaf(tree, *itVert)) _buildLeafString(g, *itVert, segString[*itVert]);
+		else {
+			// Align the two children (Binary tree)
+			TAdjacencyIterator adjIt(tree, *itVert);
+			TVertexDescriptor child1 = *adjIt; goNext(adjIt);
+			heaviestCommonSubsequence(g, segString[child1], segString[*adjIt], segString[*itVert]);
+			clear(segString[child1]);
+			clear(segString[*adjIt]);
 		}
 	}
 
 	// Create the alignment graph
-	clearVertices(gOut);
-	_createAlignmentGraph(g, alignSeq, gOut);
-	maxSumScore = sumOfPairsScore(gOut, score_type);
-	std::cout << maxSumScore << std::endl;
-
-	// Return alignment score
-	return (TCargo) maxSumScore;
+	_createAlignmentGraph(g, segString[rootVertex], gOut);
 }
 
 
 
-
-
+//////////////////////////////////////////////////////////////////////////////
+// Progressive Matching, just for testing purposes
+//////////////////////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -754,6 +405,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return val;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TVertexDescriptor, typename TSequence>
 inline void 
@@ -794,6 +446,7 @@ _recursiveProgressiveMatching(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TEdgeMap, typename TOutGraph>
 inline void 
