@@ -183,16 +183,10 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	std::cout << "Overlap done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 
-	// Re-Score the matches
-	scoreMatches(seqSet, consOpt.sc, matches, scores);
-#ifdef SEQAN_PROFILE
-	std::cout << "Re-scoring done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
 	// Use these segment matches for the initial alignment graph
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	TGraph g(seqSet);
-	buildAlignmentGraph(matches, scores, g, FractionalScore() );
+	buildAlignmentGraph(matches, scores, g, consOpt.sc, ReScore() );
 	clear(matches);
 	clear(scores);
 #ifdef SEQAN_PROFILE

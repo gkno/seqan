@@ -26,21 +26,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TSize>
-inline void 
-getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-					   TStringSet& str,
-					   TSize& from,
-					   TSize& matchLength,
-					   TSize& overlapLength,
-					   TSize& alignLength)
-{
-	SEQAN_CHECKPOINT
-	getAlignmentStatistics(matches, str, (TSize) from, (TSize) length(matches), matchLength, overlapLength, alignLength, typename Value<TStringSet>::Type() );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 template<typename TSize>
 inline void 
 __getAlignmentStatistics(Nothing&,
@@ -479,7 +464,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		TSize matchLen = 0;
 		TSize overlapLen = 0;
 		TSize alignLen = 0;
-		getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+		getAlignmentStatistics(matches, pairSet, from, to, matchLen, overlapLen, alignLen);
 		double quality = (double) matchLen / (double) overlapLen;
 
 		// Get only the good overlap alignments
@@ -596,7 +581,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			TSize matchLen = 0;
 			TSize overlapLen = 0;
 			TSize alignLen = 0;
-			getAlignmentStatistics(matches, pairSet, from, matchLen, overlapLen, alignLen);
+			getAlignmentStatistics(matches, pairSet, from, to, matchLen, overlapLen, alignLen);
 			double quality = (double) matchLen / (double) overlapLen;
 
 			if ((quality >= 0.8) && (matchLen >= 5)) {
