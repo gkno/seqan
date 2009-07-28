@@ -116,7 +116,7 @@ selectPairs(StringSet<TString, TSpec> const& str,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize1, typename TAlphabet>
+template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize1>
 inline void 
 getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 					   TStringSet& str,
@@ -124,8 +124,7 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 					   TPos const to,
 					   TSize1& matchLength,	// Number of identical characters
 					   TSize1& overlapLength,	// Number of character in overlapping segments (with mismatches and gaps)
-					   TSize1& alignLength,	// Length of the alignment
-					   TAlphabet)
+					   TSize1& alignLength)	// Length of the alignment
 {
 	SEQAN_CHECKPOINT
 	typedef String<TFragment, TSpec1> TFragmentMatches;
@@ -133,6 +132,7 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 	typedef typename Id<TFragmentMatches>::Type TId;
 	typedef typename Iterator<TFragmentMatches, Standard>::Type TFragIter;
 	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Value<TString>::Type TAlphabet; 
 	matchLength = 0;
 	TSize len1 = length(str[0]);
 	TSize len2 = length(str[1]);
@@ -175,23 +175,6 @@ getAlignmentStatistics(String<TFragment, TSpec1> const& matches,
 	alignLength = matchMismatch_length + (len1 - matchMismatch_length) + (len2 - matchMismatch_length);
 	overlapLength = alignLength -  minId1 - minId2 - (len1 + len2 - maxId1 - maxId2);
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFragment, typename TSpec1, typename TStringSet, typename TPos, typename TSize>
-inline void 
-getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-					   TStringSet& str,
-					   TPos from,
-					   TPos to,
-					   TSize& matchLength,
-					   TSize& overlapLength,
-					   TSize& alignLength)
-{
-	SEQAN_CHECKPOINT
-	getAlignmentStatistics(matches, str, from, to, matchLength, overlapLength, alignLength, typename Value<typename Value<TStringSet>::Type>::Type() );
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Segment Match Generation
