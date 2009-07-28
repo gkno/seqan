@@ -165,8 +165,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
-	typedef typename _MakeSigned<TSize>::Type TDistanceValue;
-	//typedef double TDistanceValue;
+	typedef double TDistanceValue;
 	
 	
 	// Initialize alignment object

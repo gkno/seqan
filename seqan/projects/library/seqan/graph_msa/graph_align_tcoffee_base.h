@@ -28,8 +28,8 @@ namespace SEQAN_NAMESPACE_MAIN
 // Distance unity
 //////////////////////////////////////////////////////////////////////////////
 
-static const int SEQAN_DISTANCE_UNITY = 1 << 20;
-//static const int SEQAN_DISTANCE_UNITY = 1;
+//static const int SEQAN_DISTANCE_UNITY = 1 << 20;
+static const int SEQAN_DISTANCE_UNITY = 1;
 
 
 //////////////////////////////////////////////////////////////////////////////

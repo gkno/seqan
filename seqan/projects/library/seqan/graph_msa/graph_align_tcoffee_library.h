@@ -403,13 +403,13 @@ __resizeWithRespectToDistance(Nothing&, TSize)
 
 template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TValue,  typename TSpec, typename TSize>
 inline void 
-__getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-						 StringSet<TString, TSpec2>& pairSet,
-						 String<TValue, TSpec>& dist,
-						 TSize i,
-						 TSize j,
-						 TSize nseq,
-						 TSize from)
+__setDistanceValue(String<TFragment, TSpec1>& matches,
+				   StringSet<TString, TSpec2>& pairSet,			
+				   String<TValue, TSpec>& dist,
+				   TSize i,
+				   TSize j,
+				   TSize nseq,
+				   TSize from)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Position<String<TFragment, TSpec1> >::Type TPos;
@@ -429,13 +429,13 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TCargo,  typename TSpec, typename TSize>
 inline void 
-__getAlignmentStatistics(String<TFragment, TSpec1>& matches,
-						 StringSet<TString, TSpec2>& pairSet,
-						 Graph<Undirected<TCargo, TSpec> >& dist,
-						 TSize i,
-						 TSize j,
-						 TSize,
-						 TSize from)
+__setDistanceValue(String<TFragment, TSpec1>& matches,
+				   StringSet<TString, TSpec2>& pairSet,
+				   Graph<Undirected<TCargo, TSpec> >& dist,
+				   TSize i,
+				   TSize j,
+				   TSize,
+				   TSize from)
 {
 	SEQAN_CHECKPOINT
 		
@@ -446,9 +446,9 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 	getAlignmentStatistics(matches, pairSet, (TSize) from, (TSize) length(matches),  matchLen, overlapLen, alignLen);
 			
 	// Calculate sequence similarity
-	TCargo normalizedSimilarity = (matchLen / overlapLen) * (overlapLen / alignLen);
+	TCargo normalizedSimilarity = SEQAN_DISTANCE_UNITY - (TCargo) (((double) matchLen / (double) overlapLen) * ((double) overlapLen / (double) alignLen) * (double) SEQAN_DISTANCE_UNITY);
 
-	addEdge(dist, i, j, 1 - normalizedSimilarity);
+	addEdge(dist, i, j, normalizedSimilarity);
 }
 
 
@@ -456,13 +456,13 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 
 template<typename TFragment, typename TSpec, typename TString, typename TSpec2, typename TSize>
 inline void 
-__getAlignmentStatistics(String<TFragment, TSpec>&,
-						 StringSet<TString, TSpec2>&,
-						 Nothing&,
-						 TSize,
-						 TSize,
-						 TSize,
-						 TSize)
+__setDistanceValue(String<TFragment, TSpec>&,
+				   StringSet<TString, TSpec2>&,
+				   Nothing&,
+				   TSize,
+				   TSize,
+				   TSize,
+				   TSize)
 {
 	SEQAN_CHECKPOINT
 }
@@ -516,7 +516,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 		for(;itScore != itScoreEnd; ++itScore) *itScore = myScore;
 			
 		// Get the alignment statistics
-		__getAlignmentStatistics(matches, pairSet, dist, (TSize) *(itPair-1), (TSize) *itPair, (TSize) nseq, (TSize)from);
+		__setDistanceValue(matches, pairSet, dist, (TSize) *(itPair-1), (TSize) *itPair, (TSize) nseq, (TSize)from);
 	}
 }
 
