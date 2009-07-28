@@ -126,6 +126,7 @@ void Test_GuideTree() {
 //____________________________________________________________________________
 // UPGMA
 	Test_UpgmaGuideTree<UpgmaWeightAvg>();
+	Test_UpgmaGuideTree<UpgmaAvg>();
 	Test_UpgmaGuideTree<UpgmaMin>();
 	Test_UpgmaGuideTree<UpgmaMax>();
 }
