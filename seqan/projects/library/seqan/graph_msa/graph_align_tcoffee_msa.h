@@ -165,6 +165,9 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	typedef typename Id<TGraph>::Type TId;
+	typedef typename _MakeSigned<TSize>::Type TDistanceValue;
+	//typedef double TDistanceValue;
+	
 	
 	// Initialize alignment object
 	clear(gAlign);
@@ -200,8 +203,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	selectPairs(seqSet, pList);
 
 	// Set-up a distance matrix
-	typedef String<double> TDistanceMatrix;
-	typedef typename Value<TDistanceMatrix>::Type TDistanceValue;
+	typedef String<TDistanceValue> TDistanceMatrix;
 	TDistanceMatrix distanceMatrix;
 
 	// Containers for segment matches and corresponding scores 
@@ -347,14 +349,14 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #endif
 
 	// Guide tree
-	Graph<Tree<double> > guideTree;
+	Graph<Tree<TDistanceValue> > guideTree;
 	if (!msaOpt.treefile.empty()) {
 #ifdef SEQAN_PROFILE
 		std::cout << "Guide Tree: " << msaOpt.treefile << std::endl;
 #endif
 		std::fstream strm_tree;
 		strm_tree.open(msaOpt.treefile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
-		read(strm_tree,guideTree,sequenceNames,NewickFormat());	// Read newick tree
+		read(strm_tree, guideTree, sequenceNames, NewickFormat());	// Read newick tree
 		strm_tree.close();
 	} else {
 #ifdef SEQAN_PROFILE
@@ -362,8 +364,9 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #endif
 		// Check if we have a valid distance matrix
 		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, KmerDistance());
-		slowNjTree(distanceMatrix, guideTree);
+		njTree(distanceMatrix, guideTree);
 	}
+	clear(distanceMatrix);
 #ifdef SEQAN_PROFILE
 	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
@@ -382,7 +385,6 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #endif
 
 	clear(guideTree);
-	clear(distanceMatrix);
 	clear(g);
 #ifdef SEQAN_PROFILE
 	std::cout << "Clean-up done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;

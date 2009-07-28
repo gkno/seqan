@@ -88,11 +88,11 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 	// Number of sequences
 	TSize nseq = length(strSet);
 	TSize alphabet_size = ValueSize<TAlphabet>::VALUE;
+	TWord qIndexSize = (TWord) std::pow((double)alphabet_size, (double)ktup);
 
 	// Initialization
 	// Matrix for common k-tupels between sequence i and j
-	clear(mat);
-	fill(mat, nseq*nseq, 0);
+	resize(mat, nseq*nseq);
 
 	// Transform the set of strings into a set of strings of k-tupels
 	TTupelStringSet tupSet;
@@ -104,7 +104,6 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 	String<TWord> compareIndex;
 	for(TSize k=0;k<nseq;++k) {
 		clear(qIndex);
-		TWord qIndexSize = (TWord) std::pow((double)alphabet_size, (double)ktup);
 		fill(qIndex, qIndexSize, (TWord) 0, Exact());
 		for(TSize i = 0;i < (TSize) length(tupSet[k]);++i) ++qIndex[ tupSet[k][i] ];
 		TWord value;
@@ -117,35 +116,21 @@ getKmerSimilarityMatrix(StringSet<TString, TSpec> const& strSet,
 				if (compareIndex[ tupSet[k2][i] ] < qIndex[ tupSet[k2][i] ]) ++value;
 				++compareIndex[ tupSet[k2][i] ];
 			}
-			assignValue(mat, k*nseq+k2, (TValue) value);
+			mat[k*nseq+k2] = value;
 		}
 	}
 
-	// Copy upper triangle to lower triangle and scale
+	// Scale counts
 	for(TWord row = 0; row < (TWord) nseq; ++row) {
 		for(TWord col = row+1; col < (TWord) nseq; ++col) {
 			// Fractional common kmer count
 			// = Number of common q-grams / Number of possible common q-grams
-			TValue val = getValue(mat, row*nseq+col);
-			TValue minVal = getValue(mat, row*nseq+row);
-			if (getValue(mat, col*nseq+col) < minVal) minVal = getValue(mat, col*nseq+col);
-			val /= minVal;
-
-			// Assign the values
-			assignValue(mat, row*nseq+col, val);
-			assignValue(mat, col*nseq+row, val);
+			TValue minVal = (mat[col*nseq+col] < mat[row*nseq+row]) ? mat[col*nseq+col] : mat[row*nseq+row];
+			mat[row*nseq+col] = (mat[row*nseq+col] * SEQAN_DISTANCE_UNITY) / minVal;
+			//std::cout << mat[row*nseq+col] << ",";
 		}
-		assignValue(mat, row*nseq+row, 1);
+		//std::cout << std::endl;
 	}
-
-	//// Debug code
-	//for (TSize row=0;row<nseq;++row) {
-	//	for(TSize col=0;col<nseq;++col) {
-	//		std::cout << getValue(mat, row*nseq+col) << ",";
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << std::endl;
 }
 
 

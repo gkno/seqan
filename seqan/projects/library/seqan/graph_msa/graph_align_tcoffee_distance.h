@@ -28,7 +28,6 @@ namespace SEQAN_NAMESPACE_MAIN
 // Distance matrix calculation
 //////////////////////////////////////////////////////////////////////////////
 
-
 /**
 .Tag.Distance Calculation:
 ..summary:A tag to specify how to calculate distance matrices.
@@ -102,18 +101,14 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 			if (score > maxScore) maxScore = score;
 			
 			// Remember the value
-			assignValue(distanceMatrix, i*nseq+j, score);
+			distanceMatrix[i*nseq+j] = score;
 		}
 	}
 
 	// Normalize values
-	for(TSize i=0; i<nseq; ++i) {
-		for(TSize j=i+1; j<nseq; ++j) {
-			TValue normalizedScore = (TValue) 100 - (TValue) ( ( (double) value(distanceMatrix, i*nseq+j) / (double) maxScore ) * 100);
-			value(distanceMatrix, i*nseq+j) = normalizedScore;
-			value(distanceMatrix, j*nseq+i) = normalizedScore;
-		}
-	}
+	for(TSize i=0; i<nseq; ++i) 
+		for(TSize j=i+1; j<nseq; ++j) 
+			distanceMatrix[i*nseq+j] = SEQAN_DISTANCE_UNITY - ((distanceMatrix[i*nseq+j] * SEQAN_DISTANCE_UNITY) / maxScore );
 }
 
 
@@ -134,23 +129,15 @@ getDistanceMatrix(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Value<TMatrix>::Type TValue;
-	typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
 
 	getKmerSimilarityMatrix(stringSet(g), distanceMatrix, ktup, TAlphabet());
 	
 	// Similarity to distance conversion
-	TMatrixIterator matIt = begin(distanceMatrix);
-	TMatrixIterator endMatIt = end(distanceMatrix);
-	for(;matIt != endMatIt;++matIt) value(matIt) = (1 - (*matIt)) * 100;
-
-	//// Debug code
-	//for (TSize row=0;row<nseq;++row) {
-	//	for(TSize col=0;col<nseq;++col) {
-	//		std::cout << getValue(distanceMatrix, row*nseq+col) << ",";
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << std::endl;
+	TMatrixIterator matIt = begin(distanceMatrix, Standard());
+	TMatrixIterator endMatIt = end(distanceMatrix, Standard());
+	for(;matIt != endMatIt;++matIt) 
+		*matIt = SEQAN_DISTANCE_UNITY - (*matIt);
 }
 
 //////////////////////////////////////////////////////////////////////////////

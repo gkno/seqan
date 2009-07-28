@@ -824,8 +824,8 @@ read(TFile & file,
 		TVertexDescriptor v1 = addVertex(guideTree);
 		TVertexDescriptor v2 = addVertex(guideTree);
 		TVertexDescriptor internalVertex = addVertex(guideTree);
-		addEdge(guideTree, internalVertex, v1, 1.0);
-		addEdge(guideTree, internalVertex, v2, 1.0);
+		addEdge(guideTree, internalVertex, v1, (TCargo) 1 * SEQAN_DISTANCE_UNITY);
+		addEdge(guideTree, internalVertex, v2, (TCargo) 1 * SEQAN_DISTANCE_UNITY);
 		assignRoot(guideTree, internalVertex);
 		return;
 	}
@@ -870,7 +870,7 @@ read(TFile & file,
 			_parse_skipWhitespace(file, c);
 		} else if (c==':') {
 			c = _streamGet(file);
-			cargo(findEdge(guideTree, lastVertex, lastChild)) = _parse_readDouble(file,c);
+			cargo(findEdge(guideTree, lastVertex, lastChild)) = (TCargo) (_parse_readDouble(file,c) * SEQAN_DISTANCE_UNITY);
 		} else if (c==';') {
 			c = _streamGet(file);
 			_parse_skipWhitespace(file, c);

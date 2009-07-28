@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Computes a guide tree from a distance matrix.
 ..cat:Graph
 ..signature:
-slowNjTree(mat, graph)
+njTree(mat, graph)
 ..param.mat:A string of pairwise distance values, representing a square matrix.
 ...type:Class.String
 ...remarks: String must use double values because the algorithm recycles this string to store intermediate possibly fractional results.
@@ -52,18 +52,18 @@ slowNjTree(mat, graph)
 ...type:Spec.Tree
 ..returns:void
 */
-template<typename TStringSpec, typename TCargo, typename TSpec>
+template<typename TValue, typename TStringSpec, typename TCargo, typename TSpec>
 inline void
-slowNjTree(String<double, TStringSpec>& mat, 
-		   Graph<Tree<TCargo, TSpec> >& g) 
+njTree(String<TValue, TStringSpec>& mat, 
+	   Graph<Tree<TCargo, TSpec> >& g) 
 {
 	SEQAN_CHECKPOINT
-	
-	typedef typename Size<String<double, TStringSpec> >::Type TSize;
+	typedef String<TValue, TStringSpec> TMatrix;
+	typedef typename Size<TMatrix>::Type TSize;
 	typedef Graph<Tree<TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	
+	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	TSize nseq = (TSize) std::sqrt((double)length(mat));
 
 	//for(TSize i=0;i<nseq;++i) {
@@ -82,58 +82,59 @@ slowNjTree(String<double, TStringSpec>& mat,
 		TVertexDescriptor v1 = addVertex(g);
 		TVertexDescriptor v2 = addVertex(g);
 		TVertexDescriptor internalVertex = addVertex(g);
-		addEdge(g, internalVertex, v1, (TCargo) getValue(mat, 1) / 2);
-		addEdge(g, internalVertex, v2, (TCargo) getValue(mat, 1) / 2);
+		addEdge(g, internalVertex, v1, (TCargo) mat[1] / 2);
+		addEdge(g, internalVertex, v2, (TCargo) mat[1] / 2);
 		g.data_root = internalVertex;
 		return;
 	}
-	String<double> av;    // Average branch length to a combined node
-	fill(av,nseq,0.0);
+	String<TCargo> av;    // Average branch length to a combined node
+	fill(av,nseq,0);
 
 	String<TVertexDescriptor> connector;   // Nodes that need to be connected
 	resize(connector, nseq);
 
 	for(TSize i=0;i<nseq;++i) {
 		addVertex(g);  // Add all the nodes that correspond to sequences
-		assignValue(connector, i, i);
-		assignValue(mat, i*nseq+i, 0.0);
+		connector[i] = i;
+		mat[i*nseq+i] = 0;
 	}
 
 	// Main cycle
-	double fnseqs=(double) nseq;
+	TCargo fnseqs=(TCargo) nseq;
 	for(TSize nc=0; nc<(nseq-3); ++nc) {
-		double sumOfBranches = 0.0;
+		TCargo sumOfBranches = 0;
 
-		// Copy upper triangle matrix to lower triangle
-		for(TSize col=1; col<nseq; ++col) {
-			for(TSize row=0; row<col; ++row) {
-				assignValue(mat, col*nseq+row, getValue(mat, row*nseq+col));
-				// Determine the sum of all branches
-				sumOfBranches = sumOfBranches + getValue(mat, row*nseq+col);
-			}
-		}
+		// Determine the sum of all branches and
+		// copy upper triangle matrix to lower triangle
+		for(TSize col=1; col<nseq; ++col) 
+			for(TSize row=0; row<col; ++row) 
+				sumOfBranches += mat[col*nseq+row] = mat[row*nseq+col];
 
 		// Compute the sum of branch lengths for all possible pairs
-		double tmin = 0.0;	
+		bool notFound = true;
+		TCargo tmin = 0;	
 		TSize mini = 0;  // Next pair of seq i and j to join
 		TSize minj = 0;
+		TCargo diToAllOthers = 0;
+		TCargo djToAllOthers = 0;
+		TCargo total = 0;
 		for(TSize col=1; col<nseq; ++col)  {
-			if (getValue(connector,col) != nilVertex) {
+			if (connector[col] != nilVertex) {
 				for(TSize row=0; row<col; ++row) {
-					if (getValue(connector,row) != nilVertex) {
-						double diToAllOthers = 0.0;
-						double djToAllOthers = 0.0;
+					if (connector[row] != nilVertex) {
+						diToAllOthers = 0;
+						djToAllOthers = 0;
 						
 						for(TSize i=0; i<nseq; ++i) {
-							diToAllOthers += getValue(mat, i*nseq+row);
-							djToAllOthers += getValue(mat, i*nseq+col);
+							diToAllOthers += mat[i*nseq+row];
+							djToAllOthers += mat[i*nseq+col];
 						}
 
-						double dij = getValue(mat, row*nseq+col);
-						double total = diToAllOthers + djToAllOthers + (fnseqs - 2.0)*dij +2.0*(sumOfBranches - diToAllOthers - djToAllOthers);
-						total /= (2.0*(fnseqs - 2.0));
+						total = diToAllOthers + djToAllOthers + (fnseqs - 2) * mat[row*nseq+col] + 2 * (sumOfBranches - diToAllOthers - djToAllOthers);
+						total /= (2*(fnseqs - 2));
 
-						if ((tmin == 0) || (total < tmin)) {
+						if ((notFound) || (total < tmin)) {
+							notFound = false;
 							tmin = total;
 							mini = row;
 							minj = col;
@@ -150,23 +151,23 @@ slowNjTree(String<double, TStringSpec>& mat,
 		//std::cout << std::endl;
 		
 		// Compute branch lengths
-		double dMinIToOthers = 0.0;
-		double dMinJToOthers = 0.0;
+		TCargo dMinIToOthers = 0;
+		TCargo dMinJToOthers = 0;
 		for(TSize i=0; i<nseq; ++i) {
-			dMinIToOthers += getValue(mat, i*nseq + mini);
-			dMinJToOthers += getValue(mat, i*nseq + minj);
+			dMinIToOthers += mat[i*nseq + mini];
+			dMinJToOthers += mat[i*nseq + minj];
 		}
-		double dmin = getValue(mat, mini*nseq + minj);
-		dMinIToOthers = dMinIToOthers / (fnseqs - 2.0);
-		dMinJToOthers = dMinJToOthers / (fnseqs - 2.0);
-		double iBranch = (dmin + dMinIToOthers - dMinJToOthers) * 0.5;
-		double jBranch = dmin - iBranch;
+		TCargo dmin = mat[mini*nseq + minj];
+		dMinIToOthers = dMinIToOthers / (fnseqs - 2);
+		dMinJToOthers = dMinJToOthers / (fnseqs - 2);
+		TCargo iBranch = (dmin + dMinIToOthers - dMinJToOthers) / 2;
+		TCargo jBranch = dmin - iBranch;
 		iBranch -= av[mini];
 		jBranch -= av[minj];
 		
 		// Set negative branch length to zero
-		if( fabs(iBranch) < 0.0001) iBranch = 0.0;
-		if( fabs(jBranch) < 0.0001) jBranch = 0.0;
+		if( iBranch < 0) iBranch = 0;
+		if( jBranch < 0) jBranch = 0;
 	
 		// Print branch lengths
 		//std::cout << iBranch << std::endl;
@@ -175,33 +176,30 @@ slowNjTree(String<double, TStringSpec>& mat,
 		
 		// Build tree
 		TVertexDescriptor internalVertex = addVertex(g);
-		addEdge(g, internalVertex, getValue(connector, mini), (TCargo) iBranch);
-		addEdge(g, internalVertex, getValue(connector, minj), (TCargo) jBranch);
+		addEdge(g, internalVertex, connector[mini], (TCargo) iBranch);
+		addEdge(g, internalVertex, connector[minj], (TCargo) jBranch);
 
 		// Remember the average branch length for the new combined node
 		// Must be subtracted from all branches that include this node
-		if(dmin <= 0.0) dmin = 0.000001;
-		av[mini] = dmin * 0.5;
+		if(dmin < 0) dmin = 0;
+		av[mini] = dmin / 2;
 
 
 		// Re-initialisation
 		// mini becomes the new combined node, minj is killed
-		fnseqs = fnseqs - 1.0;
-		assignValue(connector, minj, nilVertex);
-		assignValue(connector, mini, internalVertex);
+		--fnseqs;
+		connector[minj] = nilVertex;
+		connector[mini] = internalVertex;
 
 		for(TSize j=0; j<nseq; ++j) {
-			if( getValue(connector, j) != nilVertex ) {
-				double minIminJToOther = ( getValue(mat, mini*nseq+j) + getValue(mat, minj*nseq+j)) * 0.5;
+			if( connector[j] != nilVertex ) {
 				// Use upper triangle
-				if((TSize) mini < j) assignValue(mat, mini*nseq+j, minIminJToOther);
-				if((TSize) mini > j) assignValue(mat, j*nseq+mini, minIminJToOther);
+				if((TSize) mini < j) mat[mini*nseq+j] = (TValue) ((mat[mini*nseq+j] + mat[minj*nseq+j]) / 2);
+				if((TSize) mini > j) mat[j*nseq+mini] = (TValue) ((mat[mini*nseq+j] + mat[minj*nseq+j]) / 2);
 			}
 		}
-		for(TSize j=0; j<nseq; ++j) {
-			assignValue(mat, minj*nseq+j, 0.0);
-			assignValue(mat, j*nseq+minj, 0.0);
-		}
+		for(TSize j=0; j<nseq; ++j)
+			mat[j*nseq+minj] = mat[minj*nseq+j] = 0;
 	}
 
 	// Only three nodes left
@@ -211,7 +209,7 @@ slowNjTree(String<double, TStringSpec>& mat,
 	fill(l,3,0);
 	TSize count = 0;
 	for(TSize i=0; i<nseq; ++i) {
-		if(getValue(connector, i) != nilVertex) {
+		if(connector[i] != nilVertex) {
 			l[count] = i;
 			++count;
 		}
@@ -223,11 +221,11 @@ slowNjTree(String<double, TStringSpec>& mat,
 	//std::cout << l[2] << std::endl;
 	//std::cout << std::endl;
 
-	String<double> branch;
+	String<TCargo> branch;
 	resize(branch, 3);
-	branch[0] = (getValue(mat, l[0]*nseq+l[1]) + getValue(mat, l[0]*nseq+l[2]) - getValue(mat, l[1]*nseq+l[2])) * 0.5;
-	branch[1] = (getValue(mat, l[1]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[0]*nseq+l[2])) * 0.5;
-	branch[2] =  (getValue(mat, l[0]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[1]*nseq+l[2])) * 0.5;
+	branch[0] = (getValue(mat, l[0]*nseq+l[1]) + getValue(mat, l[0]*nseq+l[2]) - getValue(mat, l[1]*nseq+l[2])) / 2;
+	branch[1] = (getValue(mat, l[1]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[0]*nseq+l[2])) / 2;
+	branch[2] =  (getValue(mat, l[0]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[1]*nseq+l[2])) / 2;
     
 	branch[0] -= av[l[0]];
 	branch[1] -= av[l[1]];
@@ -240,9 +238,9 @@ slowNjTree(String<double, TStringSpec>& mat,
 	//std::cout << std::endl;
     
 	// Reset tiny negative and positive branch lengths to zero
-	if( fabs(branch[0]) < 0.0001) branch[0] = 0.0;
-	if( fabs(branch[1]) < 0.0001) branch[1] = 0.0;
-	if( fabs(branch[2]) < 0.0001) branch[2] = 0.0;
+	if( branch[0] < 0) branch[0] = 0;
+	if( branch[1] < 0) branch[1] = 0;
+	if( branch[2] < 0) branch[2] = 0;
     
 	// Build tree
 	TVertexDescriptor internalVertex = addVertex(g);
