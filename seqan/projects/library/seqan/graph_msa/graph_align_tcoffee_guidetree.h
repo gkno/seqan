@@ -237,7 +237,7 @@ njTree(String<TValue, TStringSpec>& mat,
 	//std::cout << branch[2] << std::endl;
 	//std::cout << std::endl;
     
-	// Reset tiny negative and positive branch lengths to zero
+	// Reset negative branch lengths to zero
 	if( branch[0] < 0) branch[0] = 0;
 	if( branch[1] < 0) branch[1] = 0;
 	if( branch[2] < 0) branch[2] = 0;

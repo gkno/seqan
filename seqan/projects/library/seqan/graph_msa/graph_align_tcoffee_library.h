@@ -421,8 +421,8 @@ __getAlignmentStatistics(String<TFragment, TSpec1>& matches,
 	getAlignmentStatistics(matches, pairSet, (TPos) from, (TPos) length(matches),  matchLen, overlapLen, alignLen);
 			
 	// Calculate sequence similarity
-	if (i < j) dist[i*nseq+j] = SEQAN_DISTANCE_UNITY - (TValue) (((double) matchLen / (double) overlapLen) * ((double) overlapLen / (double) alignLen) * SEQAN_DISTANCE_UNITY);
-	else dist[j*nseq+i] = SEQAN_DISTANCE_UNITY - (TValue) (((double) matchLen / (double) overlapLen) * ((double) overlapLen / (double) alignLen) * SEQAN_DISTANCE_UNITY);
+	if (i < j) dist[i*nseq+j] = SEQAN_DISTANCE_UNITY - (TValue) (((double) matchLen / (double) overlapLen) * ((double) overlapLen / (double) alignLen) * (double) SEQAN_DISTANCE_UNITY);
+	else dist[j*nseq+i] = SEQAN_DISTANCE_UNITY - (TValue) (((double) matchLen / (double) overlapLen) * ((double) overlapLen / (double) alignLen) * (double) SEQAN_DISTANCE_UNITY);
 }
 
 //////////////////////////////////////////////////////////////////////////////
