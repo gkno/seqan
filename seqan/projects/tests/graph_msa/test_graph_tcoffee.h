@@ -101,7 +101,7 @@ void Test_GuideTree() {
 	
 	typedef Graph<Tree<double> > TGraph;
 	TGraph guideTreeOut;
-	slowNjTree(mat, guideTreeOut);
+	njTree(mat, guideTreeOut);
 	//std::cout << guideTreeOut << std::endl;
 
 	SEQAN_TASSERT(numVertices(guideTreeOut) == 15)
@@ -125,7 +125,7 @@ void Test_GuideTree() {
 
 //____________________________________________________________________________
 // UPGMA
-	Test_UpgmaGuideTree<UpgmaAvg>();
+	Test_UpgmaGuideTree<UpgmaWeightAvg>();
 	Test_UpgmaGuideTree<UpgmaMin>();
 	Test_UpgmaGuideTree<UpgmaMax>();
 }
@@ -151,10 +151,9 @@ void Test_Distances() {
 
 	String<double> distanceMatrix;
 	getDistanceMatrix(g,distanceMatrix);
-	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 3) == (unsigned int) ((double) (1.0 - 5.0 / 7.0) * 100.0))
-	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 1 * length(strSet) + 3) == (unsigned int) ((double) (1.0 - 5.0 / 7.0) * 100.0))
-	SEQAN_TASSERT((unsigned int) getValue(distanceMatrix, 2 * length(strSet) + 3) == (unsigned int) ((double) (1.0 - 3.0 / 7.0) * 100.0))
-
+	SEQAN_TASSERT(distanceMatrix[3] ==  1.0 - 5.0 / 7.0)
+	SEQAN_TASSERT(distanceMatrix[1 * length(strSet) + 3] == 1.0 - 5.0 / 7.0)
+	SEQAN_TASSERT(distanceMatrix[2 * length(strSet) + 3] == 1.0 - 3.0 / 7.0)
 	clear(distanceMatrix);
 	String<unsigned int> pList;
 	selectPairs(strSet, pList);
@@ -180,7 +179,7 @@ __testquickAlign(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, uns
 	String<double> distForGuideTree;
 	getDistanceMatrix(g,distForGuideTree,LibraryDistance());
 	Graph<Tree<double> > guideTree;
-	slowNjTree(distForGuideTree, guideTree);
+	njTree(distForGuideTree, guideTree);
 	progressiveAlignment(g, guideTree, gOut);
 	//std::cout << gOut << std::endl;
 	String<char> alignMat;	
@@ -408,7 +407,7 @@ void Test_SumOfPairsScore() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
 	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == -8)
@@ -424,7 +423,7 @@ void Test_SumOfPairsScore() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
 	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 20)
@@ -442,7 +441,7 @@ void Test_SumOfPairsScore() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	clear(gOut);
 	assignStringSet(gOut, seqSet);
 	progressiveAlignment(g, guideTree, gOut);
@@ -459,7 +458,7 @@ void Test_SumOfPairsScore() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
 	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 7)
@@ -475,7 +474,7 @@ void Test_SumOfPairsScore() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	clear(guideTree);
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
 	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 18)
@@ -520,7 +519,7 @@ void Test_Progressive() {
 	buildAlignmentGraph(matches, scores, g, FractionalScore() );
 	tripletLibraryExtension(g);
 	Graph<Tree<double> > guideTree;
-	slowNjTree(distanceMatrix, guideTree);
+	njTree(distanceMatrix, guideTree);
 	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
 	sumOfPairsScore(gOut, score_type);

@@ -523,7 +523,7 @@ _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph,
 template<typename TCargo, typename TSpec, typename TActive, typename TEdgeDescriptor>
 inline void
 _upgmaTreeMerge(Graph<Undirected<TCargo, TSpec> >& pairGraph, 
-				TActive const& active,
+				TActive const&,
 				TEdgeDescriptor best,
 				UpgmaAvg) 
 {
@@ -738,13 +738,11 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	typedef typename Iterator<TMinValues, Standard>::Type TMinIter;
 	TMinIter itMin = begin(minValues, Standard() );
 	TMinIter itMinEnd = end(minValues, Standard() );
-	bool notFound = true;
-	TValue minVal = 0;
+	TValue minVal = maxVal;
 	TVD sourceBest = 0;
 	TVD targetBest = 0;
 	for(TVD index=0;itMin != itMinEnd; goNext(itMin), ++index) {
-		if ((notFound) || ((*itMin).i1 < minVal)) {
-			notFound = false;
+		if ((*itMin).i1 < minVal) {
 			minVal = (*itMin).i1;
 			sourceBest = index;
 			targetBest = (*itMin).i2;
@@ -794,8 +792,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 		// Find the new minimum value
 		itMin = begin(minValues, Standard() );
 		itMinEnd = end(minValues, Standard() );
-		notFound = true;
-		minVal = 0;
+		minVal = maxVal;
 		TVD oldSourceBest = sourceBest;
 		sourceBest = 0;
 		targetBest = 0;
@@ -811,8 +808,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 					if (cargo(value(itOutLocal)) < (*itMin).i1) *itMin = TWeightEdgePair(cargo(value(itOutLocal)), targ);
 				}
 			}
-			if ((notFound) || ((*itMin).i1 < minVal)) {
-				notFound = false;
+			if ((*itMin).i1 < minVal) {
 				minVal = (*itMin).i1;
 				sourceBest = index;
 				targetBest = (*itMin).i2;
