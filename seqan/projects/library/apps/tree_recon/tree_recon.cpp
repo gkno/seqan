@@ -30,8 +30,8 @@ using namespace seqan;
 
 inline void
 _addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 4566 $";
-	addVersionLine(parser, "Version 1.0 (15. July 2009) Revision: " + rev.substr(11, 4) + "");
+	::std::string rev = "$Revision: 4635 $";
+	addVersionLine(parser, "Version 1.0 (29. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
