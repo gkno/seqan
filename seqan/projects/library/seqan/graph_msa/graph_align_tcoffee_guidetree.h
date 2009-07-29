@@ -206,7 +206,7 @@ njTree(String<TValue, TStringSpec>& mat,
 
 	// Find the remaining nodes
 	String<TSize> l;
-	fill(l,3,0);
+	resize(l,3);
 	TSize count = 0;
 	for(TSize i=0; i<nseq; ++i) {
 		if(connector[i] != nilVertex) {
@@ -223,9 +223,9 @@ njTree(String<TValue, TStringSpec>& mat,
 
 	String<TCargo> branch;
 	resize(branch, 3);
-	branch[0] = (getValue(mat, l[0]*nseq+l[1]) + getValue(mat, l[0]*nseq+l[2]) - getValue(mat, l[1]*nseq+l[2])) / 2;
-	branch[1] = (getValue(mat, l[1]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[0]*nseq+l[2])) / 2;
-	branch[2] =  (getValue(mat, l[0]*nseq+l[2]) + getValue(mat, l[0]*nseq+l[1]) - getValue(mat, l[1]*nseq+l[2])) / 2;
+	branch[0] = (mat[l[0]*nseq+l[1]] + mat[l[0]*nseq+l[2]] - mat[l[1]*nseq+l[2]]) / 2;
+	branch[1] = (mat[l[1]*nseq+l[2]] + mat[l[0]*nseq+l[1]] - mat[l[0]*nseq+l[2]]) / 2;
+	branch[2] = (mat[l[1]*nseq+l[2]] + mat[l[0]*nseq+l[2]] - mat[l[0]*nseq+l[1]]) / 2;
     
 	branch[0] -= av[l[0]];
 	branch[1] -= av[l[1]];
@@ -247,8 +247,8 @@ njTree(String<TValue, TStringSpec>& mat,
 	addEdge(g, internalVertex, getValue(connector, l[0]), (TCargo) branch[0]);
 	addEdge(g, internalVertex, getValue(connector, l[1]), (TCargo) branch[1]);
 	TVertexDescriptor the_root = addVertex(g);
-	addEdge(g, the_root, getValue(connector, l[2]), (TCargo) branch[2]);
-	addEdge(g, the_root, internalVertex, (TCargo) 0);
+	addEdge(g, the_root, getValue(connector, l[2]), (TCargo) branch[2] / 2);
+	addEdge(g, the_root, internalVertex, (TCargo) branch[2] / 2);
 	g.data_root = the_root;
 }
 

@@ -129,11 +129,11 @@ inline void
 _parse_readIdentifier(TFile & file, TString& str, TChar& c)
 {
 	// Read identifier
-	append(str, c);
+	append(str, c, Generous());
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
 		if (!_parse_isAlphanumericChar(c)) break;
-		append(str, c);
+		append(str, c, Generous());
 	}
 }
 

@@ -495,6 +495,21 @@ write(TFile & file,
 	_streamWrite(file, "}\n");
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFile, typename TSpec, typename TNodeAttributes>
+inline void
+write(TFile & file,
+	  Graph<TSpec> const& g, 
+	  TNodeAttributes const& nodeMap,
+	  DotDrawing) 
+{
+	SEQAN_CHECKPOINT
+	String<String<char> > edgeMap;
+	_createEdgeAttributes(g,edgeMap);
+	write(file,g,nodeMap,edgeMap,DotDrawing());
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 

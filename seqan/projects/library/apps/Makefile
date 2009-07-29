@@ -29,7 +29,7 @@ CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
 #CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
 #LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers pair_align/pair_align micro_razers/micro_razers
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon
 
 all:           check_seqan_base $(TARGETS)
 dfi:           check_seqan_base dfi/dfi 
@@ -38,6 +38,7 @@ micro_razers:  check_seqan_base micro_razers/micro_razers
 seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee 
 seqcons:       check_seqan_base seqcons/seqcons
 pair_align:    check_seqan_base pair_align/pair_align
+tree_recon:    check_seqan_base tree_recon/tree_recon
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
