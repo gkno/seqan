@@ -102,15 +102,13 @@ pairwise_align(TScore const& sc,
 	// Alignment output
 	std::cout << "Alignment score: " << aliScore << std::endl;
 	if (outputFormat == 0) {
-		std::fstream strm;
-		strm.open(outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		write(strm, gAlign, sequenceNames, FastaFormat());
-		strm.close();
+		FILE* strmWrite = fopen(outfile.c_str(), "w");
+		write(strmWrite, gAlign, sequenceNames, FastaFormat());
+		fclose(strmWrite);
 	} else if (outputFormat == 1) {
-		std::fstream strm;
-		strm.open(outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		write(strm, gAlign, sequenceNames, MsfFormat());
-		strm.close();
+		FILE* strmWrite = fopen(outfile.c_str(), "w");
+		write(strmWrite, gAlign, sequenceNames, MsfFormat());
+		fclose(strmWrite);
 	}
 }
 

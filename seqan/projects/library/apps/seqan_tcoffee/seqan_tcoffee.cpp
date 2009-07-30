@@ -26,99 +26,45 @@ SEQAN_PROTIMESTART(__myProfileTime);
 
 #include <seqan/graph_msa.h>
 #include "rna_alphabet.h"
+#include <seqan/modifier.h>
+#include "../razers/mmap_fasta.h"
+#include <seqan/misc/misc_cmdparser.h>
 
 #include <iostream>
-#include <fstream>
-
 
 using namespace seqan;
 
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void
-printVersion() {
-	::std::cerr << "*********************************************" << ::std::endl;
-	::std::cerr << "* Segment-based multiple sequence alignment *" << ::std::endl;
-	::std::cerr << "*                                           *" << ::std::endl;
-	::std::cerr << "* SeqAn::T-Coffee                           *" << ::std::endl;
-	::std::cerr << "* Version: 1.101 (20. May 2009)             *" << ::std::endl;
-	::std::cerr << "*********************************************" << ::std::endl;
-	::std::cerr << ::std::endl;
+inline void
+_addVersion(CommandLineParser& parser) {
+	::std::string rev = "$Revision: 4637 $";
+	addVersionLine(parser, "Version 1.11 (30. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void 
-printHelp() {
-	::std::cerr <<  "Usage: seqan_tcoffee -seq <FASTA Sequence File> [Options]\n" << ::std::endl;
-	::std::cerr << "\nOptions\n" << ::std::endl;
-	// Main options
-	::std::cerr << "\nMain Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-seq <FASTA Sequence File>\n" << ::std::endl;
-	::std::cerr <<  "\tFile with multiple sequences in FASTA format.\n\n" << ::std::endl;
-	::std::cerr <<  "-alphabet [protein | dna | rna]\n" << ::std::endl;
-	::std::cerr <<  "\tSequence alphabet, default is protein.\n\n" << ::std::endl;
-	::std::cerr <<  "-h\n" << ::std::endl;
-	::std::cerr <<  "\tThis help screen.\n\n" << ::std::endl;
-	::std::cerr <<  "-outfile <Alignment Filename>\n" << ::std::endl;
-	::std::cerr <<  "\tName of the output file, default is out.fasta.\n\n" << ::std::endl;
-	::std::cerr <<  "-output [fasta | msf]\n" << ::std::endl;
-	::std::cerr <<  "\tOutput format, default is fasta.\n\n" << ::std::endl;
-	// Segment match generation options
-	::std::cerr <<  "\nSegment-Match Generation Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-method [global], [local], [overlap], [lcs]\n" << ::std::endl;
-	::std::cerr <<  "\tMethods to generate segment matches, default is global, local.\n\n" << ::std::endl;
-	::std::cerr <<  "-blast <BLAST matches>, <BLAST matches>, ...\n" << ::std::endl;
-	::std::cerr <<  "\tFiles with gapless segment matches in BLAST tabular format (-m 8 -g F).\n\n" << ::std::endl;
-	::std::cerr <<  "-mummer <MUMmer matches>, <MUMmer matches>, ...\n" << ::std::endl;
-	::std::cerr <<  "\tFiles with gapless segment matches in MUMmer format.\n\n" << ::std::endl;
-	::std::cerr <<  "-aln <FASTA Alignment File>, <FASTA Alignment File>, ...\n" << ::std::endl;
-	::std::cerr <<  "\tSegment-matches are extracted from given alignments (Meta-Alignment).\n\n" << ::std::endl;
-	::std::cerr <<  "-lib <T-Coffee library>, <T-Coffee library>, ...\n" << ::std::endl;
-	::std::cerr <<  "\tSegment-matches are extracted from T-Coffee libraries.\n\n" << ::std::endl;
-	// Scoring
-	::std::cerr <<  "\nScoring Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-gop <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tGap open penalty, default is -11.\n\n" << ::std::endl;
-	::std::cerr <<  "-gex <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tGap extension penalty, default is -1.\n\n" << ::std::endl;
-	::std::cerr <<  "-matrix <Score-Matrix File>\n" << ::std::endl;
-	::std::cerr <<  "\tSpecifies a score-matrix file, default is Blosum62.\n\n" << ::std::endl;
-	::std::cerr <<  "-msc <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tMatch score for Dna / Rna alphabet, default is 5.\n\n" << ::std::endl;
-	::std::cerr <<  "-mmsc <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tMismatch penalty for Dna / Rna alphabet, default is -4.\n\n" << ::std::endl;
-	::std::cerr <<  "-rescore [ true | false ]\n" << ::std::endl;
-	::std::cerr <<  "\tRe-score all segment-matches, default is true.\n\n" << ::std::endl;
-	// Guide Tree
-	::std::cerr <<  "Guide Tree Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-usetree <Newick Guide Tree>\n" << ::std::endl;
-	::std::cerr <<  "\tA guide tree in newick format.\n\n" << ::std::endl;
-	// Alignment evaluation
-	::std::cerr <<  "Alignment Evaluation Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-infile <FASTA Alignment File>\n" << ::std::endl;
-	::std::cerr <<  "\tEvaluate the given multiple alignment.\n\n" << ::std::endl;
-
-
-	::std::cerr <<  "\n\n\nExamples\n" << ::std::endl;
-	::std::cerr <<  "\nProtein Alignment:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta -method global, local\n" << ::std::endl;
-	::std::cerr <<  "\nDna Alignment:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta -alphabet dna\n" << ::std::endl;
-	::std::cerr <<  "\nGenome Alignment:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta -method lcs -alphabet dna\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta -mummer my.mums -blast my1, my2 -alphabet dna\n" << ::std::endl;
-	::std::cerr <<  "\nMeta-Alignment:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -seq seq.fasta -aln sub1.fasta, sub2.fasta\n" << ::std::endl;
-	::std::cerr <<  "\nAlignment Evaluation:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -infile align.fasta\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -infile align.fasta -gop -5 -gex -4 -alphabet dna\n" << ::std::endl;
-	::std::cerr <<  "\nAlignment from a T-Coffee Library:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqan_tcoffee -lib tcoffee.tc_lib\n" << ::std::endl;
+template <typename TSeqSet, typename TNameSet>
+bool _loadSequences(TSeqSet& sequences, 
+					TNameSet& fastaIDs,
+					const char *fileName)
+{
+	MultiFasta multiFasta;
+	if (!open(multiFasta.concat, fileName, OPEN_RDONLY)) return false;
+	AutoSeqFormat format;
+	guessFormat(multiFasta.concat, format);	
+	split(multiFasta, format);
+	unsigned seqCount = length(multiFasta);
+	resize(sequences, seqCount, Exact());
+	resize(fastaIDs, seqCount, Exact());
+	for(unsigned i = 0; i < seqCount; ++i) 
+	{
+		assignSeqId(fastaIDs[i], multiFasta[i], format);
+		assignSeq(sequences[i], multiFasta[i], format);
+	}
+	return (seqCount > 0);
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -128,21 +74,8 @@ customizedMsaAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
 	typedef String<TAlphabet> TSequence;
 	StringSet<TSequence, Owner<> > sequenceSet;
 	StringSet<String<char> > sequenceNames;
-
-	// Read the sequences from a T-Coffee library file or a regular sequence file in FASTA format
-	if ((msaOpt.seqfile.empty()) && (!empty(msaOpt.libfiles))) {
-		std::fstream strm;
-		strm.open(value(msaOpt.libfiles, 0).c_str(), ::std::ios_base::in | ::std::ios_base::binary);
-		read(strm, sequenceSet, sequenceNames, TCoffeeLib());	
-		strm.close();			
-	} else if (!msaOpt.seqfile.empty()) {
-		_loadSequences(msaOpt.seqfile, sequenceSet, sequenceNames);
-	} else {
-		::std::cerr << "No input sequences!" << ::std::endl;
-		exit(1);
-	}
+	_loadSequences(sequenceSet, sequenceNames, msaOpt.seqfile.c_str());
 	
-
 #ifdef SEQAN_PROFILE
 	std::cout << "Number of sequences: " << length(sequenceSet) << std::endl;
 	std::cout << "Import of sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
@@ -156,15 +89,13 @@ customizedMsaAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
 		
 	// Alignment output
 	if (msaOpt.outputFormat == 0) {
-		std::fstream strm;
-		strm.open(msaOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		write(strm, gAlign, sequenceNames, FastaFormat());
-		strm.close();
+		FILE* strmWrite = fopen(msaOpt.outfile.c_str(), "w");
+		write(strmWrite, gAlign, sequenceNames, FastaFormat());
+		fclose(strmWrite);
 	} else if (msaOpt.outputFormat == 1) {
-		std::fstream strm;
-		strm.open(msaOpt.outfile.c_str(), ::std::ios_base::out | ::std::ios_base::trunc);
-		write(strm, gAlign, sequenceNames, MsfFormat());
-		strm.close();
+		FILE* strmWrite = fopen(msaOpt.outfile.c_str(), "w");
+		write(strmWrite, gAlign, sequenceNames, MsfFormat());
+		fclose(strmWrite);
 	}
 
 #ifdef SEQAN_PROFILE
@@ -210,144 +141,110 @@ _setMismatchScore(MsaOptions<TAlphabet, Score<int, Simple> >& msaOpt, TSc mmsc) 
 template<typename TAlphabet, typename TScore>
 inline void
 _initMsaParams(int argc, const char *argv[], MsaOptions<TAlphabet, TScore>& msaOpt) {
-	// Set default options
-	msaOpt.sc.data_gap_open = -11;
-	msaOpt.sc.data_gap_extend = -1;
-	_setMatchScore(msaOpt, 5);
-	_setMismatchScore(msaOpt, -4);
-	msaOpt.outfile = "out.fasta";
+
+
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TAlphabet, typename TScore>
+inline void
+_initMsaParams(CommandLineParser& parser, TScore& scMat) {
 	
-	// Command line parsing
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			if (strcmp(argv[arg], "-seq") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					msaOpt.seqfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-aln") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string aln = argv[arg];
-					::std::string::size_type pos = aln.find(',');
-					if (pos != ::std::string::npos) aln.erase(pos);
-					appendValue(msaOpt.alnfiles, aln);
-				}
-			}
-			else if (strcmp(argv[arg], "-lib") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string lib = argv[arg];
-					::std::string::size_type pos = lib.find(',');
-					if (pos != ::std::string::npos) lib.erase(pos);
-					appendValue(msaOpt.libfiles, lib);
-				}
-			}
-			else if (strcmp(argv[arg], "-blast") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string blast = argv[arg];
-					::std::string::size_type pos = blast.find(',');
-					if (pos != ::std::string::npos) blast.erase(pos);
-					appendValue(msaOpt.blastfiles, blast);
-				}
-			}
-			else if (strcmp(argv[arg], "-mummer") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string mummer = argv[arg];
-					::std::string::size_type pos = mummer.find(',');
-					if (pos != ::std::string::npos) mummer.erase(pos);
-					appendValue(msaOpt.mummerfiles, mummer);
-				}
-			}
-			else if (strcmp(argv[arg], "-usetree") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					msaOpt.treefile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-outfile") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					assign(msaOpt.outfile, argv[arg]);
-				}
-			}
-			else if (strcmp(argv[arg], "-method") == 0) {
-				while ((arg+1 < argc) && (argv[arg+1][0] != '-')) {
-					++arg;
-					::std::string method = argv[arg];
-					::std::string::size_type pos = method.find(',');
-					if (pos != ::std::string::npos) method.erase(pos);
-					if (method == "global") appendValue(msaOpt.method, 0);
-					else if (method == "local") appendValue(msaOpt.method, 1);
-					else if (method == "overlap") appendValue(msaOpt.method, 2);
-					else if (method == "lcs") appendValue(msaOpt.method, 3);
-				}
-			}
-			else if (strcmp(argv[arg], "-output") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::string output = argv[arg];
-					if (output == "fasta") msaOpt.outputFormat = 0;
-					else if (output == "msf") msaOpt.outputFormat = 1;
-				}
-			}
-			else if (strcmp(argv[arg], "-infile") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					msaOpt.infile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-gop") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> msaOpt.sc.data_gap_open;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-gex") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> msaOpt.sc.data_gap_extend;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-msc") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					int msc;
-					::std::istringstream istr(argv[arg]);
-					istr >> msc;
-					if (istr.fail()) { printHelp(); exit(1); }
-					_setMatchScore(msaOpt, msc);
-				}
-			}
-			else if (strcmp(argv[arg], "-mmsc") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					int mmsc;
-					::std::istringstream istr(argv[arg]);
-					istr >> mmsc;
-					if (istr.fail()) { printHelp(); exit(1); }
-					_setMismatchScore(msaOpt, mmsc);
-				}
-			}
-			else if (strcmp(argv[arg], "-rescore") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "false") == 0) {
-						msaOpt.rescore = false;
-					} else {
-						msaOpt.rescore = true;
-					}
-				}
-			}
+	// Msa configuration
+	MsaOptions<TAlphabet, TScore> msaOpt;
+	
+	// Set main options
+	getOptionValueLong(parser, "seq", msaOpt.seqfile);
+	getOptionValueLong(parser, "outfile", msaOpt.outfile);
+	String<char> optionVal;
+	getOptionValueLong(parser, "format", optionVal);
+	if (optionVal == "fasta") msaOpt.outputFormat = 0;
+	else if (optionVal == "msf") msaOpt.outputFormat = 1;
+
+	// Set segment match generation options
+	::std::string tmpVal;
+	getOptionValueLong(parser, "method", tmpVal);
+	unsigned int beg = 0;
+	for(unsigned int i = 0; i<tmpVal.length(); ++i) {
+		if (tmpVal[i] == ',') {
+			if (tmpVal.substr(beg, i - beg) == "global") appendValue(msaOpt.method, 0);
+			else if (tmpVal.substr(beg, i - beg) == "local") appendValue(msaOpt.method, 1);
+			else if (tmpVal.substr(beg, i - beg) == "overlap") appendValue(msaOpt.method, 2);
+			else if (tmpVal.substr(beg, i - beg) == "lcs") appendValue(msaOpt.method, 3);
+			beg = i + 1;
 		}
 	}
+	if (beg != tmpVal.length()) {
+			if (tmpVal.substr(beg, tmpVal.length() - beg) == "global") appendValue(msaOpt.method, 0);
+			else if (tmpVal.substr(beg, tmpVal.length() - beg) == "local") appendValue(msaOpt.method, 1);
+			else if (tmpVal.substr(beg, tmpVal.length() - beg) == "overlap") appendValue(msaOpt.method, 2);
+			else if (tmpVal.substr(beg, tmpVal.length() - beg) == "lcs") appendValue(msaOpt.method, 3);
+	}
+	getOptionValueLong(parser, "blast", tmpVal);
+	beg = 0;
+	for(unsigned int i = 0; i<tmpVal.length(); ++i) {
+		if (tmpVal[i] == ',') {
+			appendValue(msaOpt.blastfiles, tmpVal.substr(beg, i - beg));
+			beg = i + 1;
+		}
+	}
+	if (beg != tmpVal.length())
+		appendValue(msaOpt.blastfiles, tmpVal.substr(beg, tmpVal.length() - beg));
+	getOptionValueLong(parser, "mummer", tmpVal);
+	beg = 0;
+	for(unsigned int i = 0; i<tmpVal.length(); ++i) {
+		if (tmpVal[i] == ',') {
+			appendValue(msaOpt.mummerfiles, tmpVal.substr(beg, i - beg));
+			beg = i + 1;
+		}
+	}
+	if (beg != tmpVal.length())
+		appendValue(msaOpt.mummerfiles, tmpVal.substr(beg, tmpVal.length() - beg));	
+	getOptionValueLong(parser, "lib", tmpVal);
+	beg = 0;
+	for(unsigned int i = 0; i<tmpVal.length(); ++i) {
+		if (tmpVal[i] == ',') {
+			appendValue(msaOpt.libfiles, tmpVal.substr(beg, i - beg));
+			beg = i + 1;
+		}
+	}
+	if (beg != tmpVal.length())
+		appendValue(msaOpt.libfiles, tmpVal.substr(beg, tmpVal.length() - beg));	
+	getOptionValueLong(parser, "aln", tmpVal);
+	beg = 0;
+	for(unsigned int i = 0; i<tmpVal.length(); ++i) {
+		if (tmpVal[i] == ',') {
+			appendValue(msaOpt.alnfiles, tmpVal.substr(beg, i - beg));
+			beg = i + 1;
+		}
+	}
+	if (beg != tmpVal.length())
+		appendValue(msaOpt.alnfiles, tmpVal.substr(beg, tmpVal.length() - beg));
+
+	// Set scoring options
+	msaOpt.sc = scMat;
+	getOptionValueLong(parser, "gop", msaOpt.sc.data_gap_open);
+	getOptionValueLong(parser, "gex", msaOpt.sc.data_gap_extend);
+	int msc = 0;
+	getOptionValueLong(parser, "msc", msc);
+	_setMatchScore(msaOpt, msc);
+	int mmsc = 0;
+	getOptionValueLong(parser, "mmsc", mmsc);
+	_setMismatchScore(msaOpt, mmsc);
+
+	// Set guide tree options
+	getOptionValueLong(parser, "usetree", msaOpt.treefile);
+	getOptionValueLong(parser, "build", optionVal);
+	if (optionVal == "nj") msaOpt.build = 0;
+	else if (optionVal == "min") msaOpt.build = 1;
+	else if (optionVal == "max") msaOpt.build = 2;
+	else if (optionVal == "avg") msaOpt.build = 3;
+	else if (optionVal == "wavg") msaOpt.build = 4;
+
+	// Set alignment evaluation	options
+	getOptionValueLong(parser, "infile", msaOpt.infile);
 
 	// Check if any segment-match generation procedure is selected, otherwise set the default
 	if ((empty(msaOpt.blastfiles)) && (empty(msaOpt.mummerfiles)) && (empty(msaOpt.libfiles)) && (empty(msaOpt.alnfiles)) && (empty(msaOpt.method))) {
@@ -356,12 +253,16 @@ _initMsaParams(int argc, const char *argv[], MsaOptions<TAlphabet, TScore>& msaO
 	}
 
 	// Evaluation mode?
-	if (!empty(msaOpt.infile)) {
+	if (isSetLong(parser, "infile")) {
 #ifdef SEQAN_PROFILE
 		::std::cout << "Alignment evaluation" << ::std::endl;
 #endif
 		evaluateAlignment(msaOpt);
 	} else { // or alignment mode?
+		if (!isSetLong(parser, "seq")) { 
+			shortHelp(parser, std::cerr);	// print short help and exit
+			exit(0);
+		}
 #ifdef SEQAN_PROFILE
 		::std::cout << "Multiple Sequence Alignment" << ::std::endl;
 #endif
@@ -369,92 +270,131 @@ _initMsaParams(int argc, const char *argv[], MsaOptions<TAlphabet, TScore>& msaO
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, Dna5 const) {
-	if (!empty(matrix)) {
-		MsaOptions<Dna5, Score<int, ScoreMatrix<> > > msaOpt;
-		loadScoreMatrix(msaOpt.sc, matrix);
-		_initMsaParams(argc, argv, msaOpt);
+_initScoreMatrix(CommandLineParser& parser, Dna5 const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
+		Score<int, ScoreMatrix<> > sc;
+		loadScoreMatrix(sc, matrix);
+		_initMsaParams<Dna5>(parser, sc);
 	} else {
-		MsaOptions<Dna5, Score<int> > msaOpt;
-		_initMsaParams(argc, argv, msaOpt);
+		Score<int> sc;
+		_initMsaParams<Dna5>(parser, sc);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, Rna5 const) {
-	if (!empty(matrix)) {
-		MsaOptions<Rna5, Score<int, ScoreMatrix<> > > msaOpt;
-		loadScoreMatrix(msaOpt.sc, matrix);
-		_initMsaParams(argc, argv, msaOpt);
+_initScoreMatrix(CommandLineParser& parser, Rna5 const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
+		Score<int, ScoreMatrix<> > sc;
+		loadScoreMatrix(sc, matrix);
+		_initMsaParams<Rna5>(parser, sc);
 	} else {
-		MsaOptions<Rna5, Score<int> > msaOpt;
-		_initMsaParams(argc, argv, msaOpt);
+		Score<int> sc;
+		_initMsaParams<Rna5>(parser, sc);
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TMatrixFile>
 inline void
-_initScoreMatrix(int argc, const char *argv[], TMatrixFile& matrix, AminoAcid const) {
-	if (!empty(matrix)) {
-		MsaOptions<AminoAcid, Score<int, ScoreMatrix<> > > msaOpt;
-		loadScoreMatrix(msaOpt.sc, matrix);
-		_initMsaParams(argc, argv, msaOpt);
+_initScoreMatrix(CommandLineParser& parser, AminoAcid const) {
+	String<char> matrix;
+	getOptionValueLong(parser, "matrix", matrix);
+	if (isSetLong(parser, "matrix")) {
+		Score<int, ScoreMatrix<> > sc;
+		loadScoreMatrix(sc, matrix);
+		_initMsaParams<AminoAcid>(parser, sc);
 	} else {
-		MsaOptions<AminoAcid, Blosum62> msaOpt;
-		_initMsaParams(argc, argv, msaOpt);
+		Blosum62 sc;
+		_initMsaParams<AminoAcid>(parser, sc);
 	}
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
+	// Command line parsing
+	CommandLineParser parser;
+	_addVersion(parser);
+	
+	addTitleLine(parser, "*************************************************");
+	addTitleLine(parser, "* Multiple sequence alignment - SeqAn::T-Coffee *");
+	addTitleLine(parser, "* (c) Copyright 2009 by Tobias Rausch           *");
+	addTitleLine(parser, "*************************************************");
 
-	// Version
-#ifdef SEQAN_PROFILE
-	printVersion();
-#endif
+	addUsageLine(parser, "-s <FASTA sequence file> [Options]");
 
-	// At least two arguments
-	if (argc < 2) {	printHelp(); return 1; }
+	addSection(parser, "Main Options:");
+	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with sequences", OptionType::String), "<FASTA Sequence File>"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", OptionType::String, "protein"), "[protein | dna | rna]"));
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "out.fasta"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "fasta"), "[fasta | msf]"));
+	
+	addSection(parser, "Segment Match Generation Options:");
+	addOption(parser, CommandLineOption("m", "method", "list of match generation methods", OptionType::String));
+	addHelpLine(parser, "global = Global alignments");
+	addHelpLine(parser, "local = Local alignments");
+	addHelpLine(parser, "overlap = Overlap alignments");
+	addHelpLine(parser, "lcs = Longest common subsequence");
+	addHelpLine(parser, "Default: global,local");
+	addHelpLine(parser, "/*No spaces in-between.*/");
+	addOption(parser, addArgumentText(CommandLineOption("bl", "blast", "list of BLAST match files", OptionType::String), "<File1>,<File2>,..."));
+	addOption(parser, addArgumentText(CommandLineOption("mu", "mummer", "list of MUMmer match files", OptionType::String), "<File1>,<File2>,..."));
+	addOption(parser, addArgumentText(CommandLineOption("al", "aln", "list of FASTA align files", OptionType::String), "<File1>,<File2>,..."));
+	addOption(parser, addArgumentText(CommandLineOption("li", "lib", "list of T-Coffee libraries", OptionType::String), "<File1>,<File2>,..."));
 
-	// Basic command line options
-	String<char> alphabet = "protein";
-	String<char> matrix;
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			// Dna, Rna or AminoAcid alignment
-			if (strcmp(argv[arg], "-alphabet") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					assign(alphabet, argv[arg]);
-				}
-			}
-			else if (strcmp(argv[arg], "-matrix") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					assign(matrix, argv[arg]);
-				}
-			}
-			else if ((strcmp(argv[arg], "-h") == 0) || (strcmp(argv[arg], "-help") == 0) || (strcmp(argv[arg], "-?") == 0)) {
-				printHelp(); 
-				return 0; 
-			}
-		}
+	addSection(parser, "Scoring Options:");
+	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", OptionType::Int, -11), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", OptionType::Int, -1), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", OptionType::String, "Blosum62"), "<Matrix file>"));
+	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", OptionType::Int, 5), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", OptionType::Int, -4), "<Int>"));
+	
+	addSection(parser, "Guide Tree Options:");
+	addOption(parser, addArgumentText(CommandLineOption("u", "usetree", "tree filename", OptionType::String), "<Newick guide tree>"));
+	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
+	addHelpLine(parser, "nj = Neighbor-joining");
+	addHelpLine(parser, "min = UPGMA single linkage");
+	addHelpLine(parser, "max = UPGMA complete linkage");
+	addHelpLine(parser, "avg = UPGMA average linkage");
+	addHelpLine(parser, "wavg = UPGMA weighted average linkage");
+	addHelpLine(parser, "/*Neighbor-joining creates an");
+	addHelpLine(parser, "  unrooted tree. We root that tree");
+	addHelpLine(parser, "  at the last joined pair.*/");
+
+	// Alignment evaluation	
+	addSection(parser, "Alignment Evaluation Options:");
+	addOption(parser, addArgumentText(CommandLineOption("i", "infile", "alignment file", OptionType::String), "<FASTA alignment file>"));
+
+	if (argc == 1)
+	{
+		shortHelp(parser, std::cerr);	// print short help and exit
+		return 0;
 	}
 
+	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
+	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
+
+
+	// Basic command line options
+	String<char> alphabet;
+	getOptionValueLong(parser, "alphabet", alphabet);
+	
 	// Initialize scoring matrices
-	if (alphabet == "dna") _initScoreMatrix(argc, argv, matrix, Dna5());
-	else if (alphabet == "rna") _initScoreMatrix(argc, argv, matrix, Rna5());
-	else _initScoreMatrix(argc, argv, matrix, AminoAcid());
+	if (alphabet == "dna") _initScoreMatrix(parser, Dna5());
+	else if (alphabet == "rna") _initScoreMatrix(parser, Rna5());
+	else _initScoreMatrix(parser, AminoAcid());
 
 	return 0;
 }

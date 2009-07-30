@@ -38,13 +38,21 @@ public:
 	// Scoring object
 	TScore sc;
 
+	// All methods to compute a guide tree
+	// 0: Neighbor-joining
+	// 1: UPGMA single linkage
+	// 2: UPGMA complete linkage
+	// 3: UPGMA average linkage
+	// 4: UPGMA weighted average linkage
+	unsigned int build;
+
 	// All methods to compute segment matches
 	// 0: global alignment
 	// 1: local alignments
 	// 2: overlap alignments
 	// 3: longest common subsequence
 	String<unsigned int> method;
-	
+
 	// Various input and output file names
 	String<std::string> alnfiles;		// External alignment files
 	String<std::string> libfiles;		// T-Coffee library files
@@ -56,7 +64,7 @@ public:
 	std::string treefile;				// Guide tree file
 	
 	// Initialization
-	MsaOptions() : rescore(true), outputFormat(0) {}
+	MsaOptions() : rescore(true), outputFormat(0), build(0) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -349,7 +357,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 
 	// Guide tree
 	Graph<Tree<TDistanceValue> > guideTree;
-	if (!msaOpt.treefile.empty()) {
+	if (!empty(msaOpt.treefile)) {
 #ifdef SEQAN_PROFILE
 		std::cout << "Guide Tree: " << msaOpt.treefile << std::endl;
 #endif
@@ -359,11 +367,19 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		strm_tree.close();
 	} else {
 #ifdef SEQAN_PROFILE
-		std::cout << "Guide Tree: Neighbor Joining" << std::endl;
+		if (msaOpt.build == 0) std::cout << "Guide Tree: Neighbor Joining" << std::endl;
+		else if (msaOpt.build == 1) std::cout << "Guide Tree: UPGMA single linkage" << std::endl;
+		else if (msaOpt.build == 2) std::cout << "Guide Tree: UPGMA complete linkage" << std::endl;
+		else if (msaOpt.build == 3) std::cout << "Guide Tree: UPGMA average linkage" << std::endl;
+		else if (msaOpt.build == 4) std::cout << "Guide Tree: UPGMA weighted average linkage" << std::endl;
 #endif
 		// Check if we have a valid distance matrix
 		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, KmerDistance());
-		njTree(distanceMatrix, guideTree);
+		if (msaOpt.build == 0) njTree(distanceMatrix, guideTree);
+		else if (msaOpt.build == 1) upgmaTree(distanceMatrix, guideTree, UpgmaMin());
+		else if (msaOpt.build == 2) upgmaTree(distanceMatrix, guideTree, UpgmaMax());
+		else if (msaOpt.build == 3) upgmaTree(distanceMatrix, guideTree, UpgmaAvg());
+		else if (msaOpt.build == 4) upgmaTree(distanceMatrix, guideTree, UpgmaWeightAvg());
 	}
 	clear(distanceMatrix);
 #ifdef SEQAN_PROFILE
