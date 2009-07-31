@@ -139,6 +139,51 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////
 
+template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
+inline void 
+_loadContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
+				 String<TPosPair, TStringSpec>& startEndPos,
+				 FragmentStore<TSpec, TConfig> const& fragStore,
+				 TId const contigId)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+
+	// All fragment store element types
+	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+
+	// Sort aligned reads according to contig id
+	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+	resize(strSet, length(fragStore.alignedReadStore));
+
+	// Retrieve all reads, limit them to the clear range and if required reverse complement them
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TSize numRead = 0;
+	TReadPos begClr = 0;
+	TReadPos endClr = 0;
+	TSize lenRead = 0;
+	TSize offset = 0;
+	for(;alignIt != alignItEnd; ++alignIt) {
+		offset = _min(alignIt->beginPos, alignIt->endPos);
+		getClrRange(fragStore, *alignIt, begClr, endClr);
+		strSet[numRead] = infix(fragStore.readSeqStore[alignIt->readId], begClr, endClr);
+		lenRead = endClr - begClr;
+		if (alignIt->beginPos < alignIt->endPos) appendValue(startEndPos, TPosPair(offset, offset + lenRead), Generous());
+		else {
+			reverseComplementInPlace(strSet[numRead]);
+			appendValue(startEndPos, TPosPair(offset + lenRead, offset), Generous());
+		}
+		++numRead;
+	}
+	resize(strSet, numRead, Exact());
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize, typename TConfigOptions>
 inline void

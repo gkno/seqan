@@ -46,52 +46,6 @@ _addVersion(CommandLineParser& parser) {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TValue, typename TStrSpec, typename TPosPair, typename TStringSpec, typename TSpec, typename TConfig, typename TId>
-inline void 
-getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
-			   String<TPosPair, TStringSpec>& startEndPos,
-			   FragmentStore<TSpec, TConfig> const& fragStore,
-			   TId const contigId)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Size<TFragmentStore>::Type TSize;
-	typedef typename TFragmentStore::TReadPos TReadPos;
-
-	// All fragment store element types
-	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
-	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
-
-	// Sort aligned reads according to contig id
-	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
-	resize(strSet, length(fragStore.alignedReadStore));
-
-	// Retrieve all reads, limit them to the clear range and if required reverse complement them
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	TSize numRead = 0;
-	for(;alignIt != alignItEnd; goNext(alignIt)) {
-		TSize offset = _min(alignIt->beginPos, alignIt->endPos);
-		TReadPos begClr = 0;
-		TReadPos endClr = 0;
-		getClrRange(fragStore, value(alignIt), begClr, endClr);
-		value(strSet, numRead) = infix(fragStore.readSeqStore[alignIt->readId], begClr, endClr);
-		TSize lenRead = length(value(strSet, numRead));
-		if (alignIt->beginPos < alignIt->endPos) {
-			appendValue(startEndPos, TPosPair(offset, offset + lenRead), Generous());
-		} else {
-			reverseComplementInPlace(value(strSet, numRead));
-			appendValue(startEndPos, TPosPair(offset + lenRead, offset), Generous());
-		}
-		++numRead;
-	}
-	resize(strSet, numRead, Exact());
-}
-
-
-
-//////////////////////////////////////////////////////////////////////////////////
-
 int main(int argc, const char *argv[]) {
 	// Command line parsing
 	CommandLineParser parser;
@@ -246,13 +200,10 @@ int main(int argc, const char *argv[]) {
 
 				// Import all reads of the given contig
 				typedef TFragmentStore::TReadSeq TReadSeq;
-				typedef Id<TFragmentStore>::Type TId;
 				StringSet<TReadSeq, Owner<> > readSet;
 				String<Pair<TSize, TSize> > begEndPos;
-	
-				getContigReads(readSet, begEndPos, fragStore, currentContig);
-				TSize nseq = length(readSet);
-				if (nseq == 0) continue;
+				_loadContigReads(readSet, begEndPos, fragStore, currentContig);
+				if (!length(readSet)) continue;
 
 #ifdef SEQAN_PROFILE
 				::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;

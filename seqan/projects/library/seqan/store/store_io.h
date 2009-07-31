@@ -65,8 +65,8 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename Iterator<String<TGapAnchor>, Standard>::Type TGapIter;
+	
 	TSize lenRead = length(fragStore.readSeqStore[alignEl.readId]);
-
 	TGapIter itGap = begin(alignEl.gaps, Standard() );
 	TGapIter itGapEnd = end(alignEl.gaps, Standard() );
 	
@@ -74,24 +74,16 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 	if (itGap == itGapEnd) {
 		begClr = 0;
 		endClr = lenRead;
-		return;
-	}
-
-	// Begin clear range
-	if (itGap->gapPos == 0) begClr = itGap->seqPos;
-	else begClr = 0;
-
-	TSize lenGaps = length(alignEl.gaps);
-	if ((value(alignEl.gaps, lenGaps - 1)).seqPos != lenRead) {
-		endClr = lenRead;
 	} else {
-		int diff = 0;
-		if (lenGaps > 1) diff = (value(alignEl.gaps, lenGaps - 2)).gapPos - (value(alignEl.gaps, lenGaps - 2)).seqPos;
-		int newDiff = (value(alignEl.gaps, lenGaps - 1)).gapPos - (value(alignEl.gaps, lenGaps - 1)).seqPos;
-		if (newDiff < diff) {
-			endClr = lenRead - (diff - newDiff);
-		} else {
-			endClr = lenRead;
+		// Begin clear range
+		begClr = (itGap->gapPos == 0) ? itGap->seqPos : 0;
+		// End clear range
+		--itGapEnd;
+		if (itGapEnd->seqPos != lenRead) endClr = lenRead;
+		else {
+			int diff = (itGap != itGapEnd) ? (*(itGapEnd - 1)).gapPos - (*(itGapEnd-1)).seqPos : 0;
+			int newDiff = itGapEnd->gapPos - itGapEnd->seqPos;
+			endClr = (newDiff < diff) ? lenRead - (diff - newDiff) : lenRead;	
 		}
 	}
 
