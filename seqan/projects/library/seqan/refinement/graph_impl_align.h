@@ -69,24 +69,12 @@ typedef Tag<FastaFormat_> const FastaFormat;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Alignment Graph Format.value.FastaReadFormat:
-	Fasta read format to write an alignment graph.
-*/
-
-struct FastaReadFormat_;
-typedef Tag<FastaReadFormat_> const FastaReadFormat;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/**
 .Tag.Alignment Graph Format.value.CgVizFormat:
 	Cgviz format to write an alignment graph.
 */
 
 struct CgVizFormat_;
 typedef Tag<CgVizFormat_> const CgVizFormat;
-
-
 
 
 
@@ -1042,125 +1030,6 @@ write(TFile & file,
 			}
 			_streamWrite(file,"}\n");	
 		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-template <typename TFile, typename TStringSet, typename TAlignmentMatrix, typename TOldBegEndPos, typename TReadBegEndPos, typename TGappedConsensus, typename TCoverage>
-inline void
-write(TFile & file,
-	  TStringSet const& str,
-	  TAlignmentMatrix const& mat,
-	  TOldBegEndPos const& oldBegEndPos,
-	  TReadBegEndPos const& readBegEndPos,
-	  TGappedConsensus const& gappedConsensus,
-	  TCoverage const& coverage,
-	  FastaReadFormat) 
-{
-	typedef typename Size<TAlignmentMatrix>::Type TSize;
-	typedef typename Value<TAlignmentMatrix>::Type TValue;
-
-	// Initialization
-	TSize nseq = length(str);
-	TSize len = length(gappedConsensus);
-	TSize maxCoverage = length(mat) / len;
-	TValue gapChar = gapValue<TValue>();
-	
-	// Print the alignment matrix
-	TSize winSize = 60;
-	int offset = 2;
-	TSize column = 0;
-	while (column<len) {
-		TSize window_end = column + winSize;
-		if (window_end >= len) window_end = len;
-		// Position
-		for(int i = 0; i<offset - 2; ++i) _streamPut(file,' ');
-		_streamWrite(file,"Pos: ");
-		_streamPutInt(file,column);
-		_streamPut(file,'\n');
-		// Ruler
-		for(int i = 0; i<offset + 3; ++i) _streamPut(file,' ');
-		for(TSize local_col = 1; local_col<window_end - column + 1; ++local_col) {
-			if ((local_col % 10)==0) _streamPut(file, ':');
-			else if ((local_col % 5)==0) _streamPut(file, '.');
-			else _streamPut(file, ' ');
-		}
-		_streamPut(file,'\n');
-		// Reads
-		for(TSize row = 0; row<maxCoverage; ++row) {
-			TSize tmp = row;
-			int off = 0;
-			while (tmp / 10 != 0) {
-				tmp /= 10;
-				++off;
-			}
-			for(int i = 0; i<offset - off; ++i) _streamPut(file,' ');
-			_streamPutInt(file, row);
-			_streamPut(file,':');
-			_streamPut(file,' ');
-			for(TSize local_col = column; local_col<window_end; ++local_col) {
-				_streamPut(file, getValue(mat, row*len+local_col));
-			}
-			_streamPut(file,'\n');
-		}
-		_streamPut(file,'\n');
-		// Consensus
-		for(int i = 0; i<offset; ++i) _streamPut(file,' ');
-		_streamWrite(file,"C: ");
-		for(unsigned int local_col = column; local_col<window_end; ++local_col) _streamPut(file, gappedConsensus[local_col]);
-		_streamPut(file,'\n');
-		for(int i = 0; i<offset-1; ++i) _streamPut(file,' ');
-		_streamWrite(file,">2: ");
-		for(unsigned int local_col = column; local_col<window_end; ++local_col) {
-			if (value(coverage, local_col) > 2) _streamPut(file, gappedConsensus[local_col]);
-			else _streamPut(file, gapChar);
-		}
-		_streamPut(file,'\n');
-		_streamPut(file,'\n');
-		column+=winSize;
-	}
-	_streamPut(file,'\n');
-	_streamPut(file,'\n');
-
-	// Print all reads
-	for(TSize i = 0; i<nseq; ++i) {
-		_streamWrite(file,"typ:R");
-		_streamPutInt(file, i);
-		_streamPut(file,'\n');
-		_streamWrite(file,"seq:");
-		if ((oldBegEndPos[i]).i1 > (oldBegEndPos[i]).i2) reverseComplementInPlace(str[i]);
-		_streamWrite(file,str[i]);
-		_streamPut(file,'\n');
-		_streamWrite(file,"Pos:");
-		if ((oldBegEndPos[i]).i1 > (oldBegEndPos[i]).i2) {
-			_streamPutInt(file, (readBegEndPos[i]).i2);
-			_streamPut(file,',');
-			_streamPutInt(file, (readBegEndPos[i]).i1);
-		} else {
-			_streamPutInt(file, (readBegEndPos[i]).i1);
-			_streamPut(file,',');
-			_streamPutInt(file, (readBegEndPos[i]).i2);
-		}
-		_streamPut(file,'\n');
-		
-		std::stringstream gapCoords;
-		TSize letterCount = 0;
-		TSize gapCount = 0;
-		for(TSize column = (readBegEndPos[i]).i1; column<(readBegEndPos[i]).i2; ++column) {
-			if (value(mat, (readBegEndPos[i]).i3 * len + column) == gapChar) {
-				++gapCount;
-				gapCoords << letterCount << ' ';
-			} else ++letterCount;
-		}
-		_streamWrite(file,"dln:");
-		_streamPutInt(file, gapCount);
-		_streamPut(file,'\n');
-		_streamWrite(file,"del:");
-		_streamWrite(file, gapCoords.str().c_str());
-		_streamPut(file,'\n');
-		_streamPut(file,'\n');
 	}
 }
 

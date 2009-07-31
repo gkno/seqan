@@ -76,6 +76,16 @@ typedef Tag<Bayesian_> const Bayesian;
 
 struct ConsensusOptions {
 public:
+	// Method
+	// 0: graph-based multiple sequence alignment
+	// 1: realign
+	int method;
+
+	// ReAlign Method
+	// 0: Needleman-Wunsch
+	// 1: Gotoh
+	int rmethod;
+
 	// Bandwidth of overlap alignment
 	int bandwidth;
 
@@ -92,28 +102,24 @@ public:
 	// If window == 0, no insert sequencing is assumed
 	int window;
 	
-	// SNP calling
+	// Consensus calling
 	// 0: majority
 	// 1: bayesian
-	int snp;
+	int consensus;
 
 	// Output
 	// 0: seqan style
 	// 1: afg output format
 	int output;
 
-	// Conversion option
-	// 0: No conversion, regular consensus computation
-	// 1: Creates an afg file
-	// 2: Creates a Celera frg file
-	// 3: Creates a Celera cgb file
-	int convert;
+	// Multi-read alignment
+	bool noalign;
 
 	// Offset all reads, so the first read starts at position 0
 	bool moveToFront;
 
-	// Realign mode;
-	bool realign;
+	// Include reference genome
+	bool include;
 
 	// Scoring object for overlap alignments
 	Score<int> sc;
@@ -121,11 +127,10 @@ public:
 	// Various input and output files
 	std::string readsfile;				// File of reads in FASTA format
 	std::string afgfile;				// AMOS afg file input
-	std::string source;					// Reference genome
 	std::string outfile;				// Output file name
 	
 	// Initialization
-	ConsensusOptions() : bandwidth(8), overlaps(3), matchlength(15), quality(80), window(0), snp(0), output(0), convert(0), moveToFront(false), realign(false), outfile("readAlign.txt") 
+	ConsensusOptions() 
 	{
 		sc = Score<int>(2,-6,-4,-9);
 	}
@@ -146,7 +151,6 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 
 	// Initialization
 	TStringSet& seqSet = stringSet(gOut);
-	TSize nseq = length(seqSet);
 
 	// Select all overlapping reads and record the diagonals of the band
 	String<Pair<TId, TId> > pList;
@@ -156,13 +160,6 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 
 	// Estimate the number of overlaps we want to compute
 #ifdef SEQAN_PROFILE
-	if (consOpt.window == 0) ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Bandwidth: " << consOpt.bandwidth << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
-	else ::std::cout << "Matchlength: " << consOpt.matchlength << ", " << "Quality: " << consOpt.quality << ", " << "Window: " << consOpt.window << ", " << "Overlaps: " << consOpt.overlaps << ::std::endl;
-	std::cout << "Number of reads: " << nseq << std::endl;
-	if (consOpt.window == 0) {
-		TSize covEstim = length(pList) / nseq;
-		std::cout << "Estimated coverage: " << covEstim << std::endl;
-	}
 	std::cout << "Pair selection done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
 
@@ -232,114 +229,127 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TStringSet, typename TCargo, typename TSpec, typename TValue, typename TBegEndRowPos, typename TSize>
+template <typename TFragSpec, typename TConfig, typename TStringSet, typename TCargo, typename TSpec, typename TContigId>
 inline void
-multireadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
-				   String<TValue>& mat,
-				   TBegEndRowPos& readBegEndRowPos,
-				   TSize& maxCoverage)
+updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
+			 Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+			 TContigId contigId)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	typedef typename Id<TGraph>::Type TIdType;
+	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TStringSet>::Type TString;
-	typedef typename Value<TString>::Type TAlphabet;
-	typedef typename Infix<TString>::Type TInfix;
-	typedef typename Iterator<TInfix>::Type TInfixIter;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef std::map<TSize, TSize> TComponentLength;
-	
+	typedef char TValue;
+
+	// Initialization
+	TStringSet& strSet = stringSet(g);
+	TSize nseq = length(strSet);
+	TValue gapChar = gapValue<TValue>();
+	TValue specialGap = '.';
+	TSize maxCoverage = 0;
+	TSize len = 0;
+	String<TValue> mat;
+
+	// Store for each read the begin position, the end position and the row in the alignment matrix
+	String<TSize> readBegEndRowPos;
+	resize(readBegEndRowPos, 3*nseq);
+
 	// Strongly Connected Components, topological sort, and length of each component
 	String<TSize> component;
 	String<TSize> order;
 	TComponentLength compLength;
 	if (convertAlignment(g, component, order, compLength)) {
 		TSize numOfComponents = length(order);
-		TStringSet& strSet = stringSet(g);
-		TSize nseq = length(strSet);
-		clear(readBegEndRowPos);
-		resize(readBegEndRowPos, nseq);
 		
 		// Assign to each sequence the start and end (in terms of component ranks)
-		typedef std::map<TSize, TSize> TComponentToRank;
+		typedef String<std::pair<TSize, TSize> > TComponentToRank;
 		TComponentToRank compToRank;
-		for(TSize compIndex = 0; compIndex < numOfComponents; ++compIndex) {
-			compToRank.insert(std::make_pair(order[compIndex], compIndex));
-		}
+		for(TSize compIndex = 0; compIndex < numOfComponents; ++compIndex) 
+			appendValue(compToRank, std::make_pair(order[compIndex], compIndex), Generous());
+		::std::sort(begin(compToRank, Standard()), end(compToRank, Standard()));
+
 		typedef Pair<TSize, TSize> TRankPair;
 		typedef String<TRankPair> TSequenceToRanks;
 		TSequenceToRanks seqToRank;
-		fill(seqToRank, nseq, TRankPair(0, 0));	
+		resize(seqToRank, nseq);
+		typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 		TVertexIterator itVertex(g);
 		for(;!atEnd(itVertex);++itVertex) {
 			TVertexDescriptor vert = value(itVertex);
 			TSize seq = idToPosition(strSet, sequenceId(g, vert));
-			if (fragmentBegin(g, vert) == 0) {
-				(value(seqToRank, seq)).i1 = (compToRank.find(getProperty(component,vert)))->second;
-			}
-			if (fragmentBegin(g, vert) + fragmentLength(g, vert) == length(value(strSet, seq))) {
-				(value(seqToRank, seq)).i2 = (compToRank.find(getProperty(component,vert)))->second;
-			}
+			if (fragmentBegin(g, vert) == 0) 
+				seqToRank[seq].i1 = ::std::lower_bound(begin(compToRank, Standard()), end(compToRank, Standard()), ::std::make_pair((TSize) component[vert], (TSize) 0))->second;
+			if (fragmentBegin(g, vert) + fragmentLength(g, vert) == length(strSet[seq]))
+				seqToRank[seq].i2 = ::std::lower_bound(begin(compToRank, Standard()), end(compToRank, Standard()), ::std::make_pair((TSize) component[vert], (TSize) 0))->second;
 		}
-		compToRank.clear();
+		clear(compToRank);
 
 		// Assign the sequences to rows
 		String<TSize> seqToRow;
 		resize(seqToRow, nseq);
 		maxCoverage = 0;
-		typedef std::set<TSize> TLeftOver;
+		typedef String<bool> TLeftOver;
+		typedef typename Iterator<TLeftOver, Standard>::Type TLeftOverIter;
 		TLeftOver leftOver;
-		for(TSize i=0;i<nseq; ++i) {
-			leftOver.insert(i);
-		}
-		while(!leftOver.empty()) {
-			typedef std::set<std::pair<TSize, TSize> > TSeqToBegin;
-			TSeqToBegin seqToBegin;
-			for(typename TLeftOver::const_iterator pos = leftOver.begin(); pos != leftOver.end(); ++pos) {
-				seqToBegin.insert(std::make_pair((seqToRank[*pos]).i1, *pos));
-			}
+		fill(leftOver, nseq, true);
+		typedef String<std::pair<TSize, TSize> > TSeqToBegin;
+		typedef typename Iterator<TSeqToBegin, Standard>::Type TSeqToBeginIter;
+		TSeqToBegin seqToBegin;
+		TSize finishedSeq = 0;
+		while(finishedSeq < nseq) {
+			TLeftOverIter itL = begin(leftOver, Standard());
+			TLeftOverIter itLEnd = end(leftOver, Standard());
+			for(TSize pos = 0; itL != itLEnd; ++itL, ++pos) 
+				if (*itL) appendValue(seqToBegin, std::make_pair((seqToRank[pos]).i1, pos), Generous());
+			::std::sort(begin(seqToBegin, Standard()), end(seqToBegin, Standard()));
+			
 			TSize endPos = 0;
-			for(typename TSeqToBegin::const_iterator s = seqToBegin.begin(); s != seqToBegin.end();++s) {
-				if (endPos <= (*s).first) {
-					TSize currentSeq = (*s).second;
+			TSeqToBeginIter itSB = begin(seqToBegin, Standard());
+			TSeqToBeginIter itSBEnd = end(seqToBegin, Standard());
+			for(;itSB != itSBEnd;++itSB) {
+				if (endPos <= (*itSB).first) {
+					TSize currentSeq = (*itSB).second;
 					seqToRow[currentSeq] = maxCoverage;
 					endPos = (seqToRank[currentSeq]).i2 + 2;
-					leftOver.erase(currentSeq);
+					leftOver[currentSeq] = false;
+					++finishedSeq;
 				}	
 			}
+			clear(seqToBegin);
 			++maxCoverage;
 		}
-
+		clear(leftOver);
 
 		// Create the matrix
-		TSize len = 0;
+		len = 0;
 		String<TSize> compOffset;
-		fill(compOffset, numOfComponents, 0);
+		resize(compOffset, numOfComponents);
 		for(TSize compIndex = 0; compIndex < numOfComponents; ++compIndex) {
 			compOffset[order[compIndex]] = len;
 			len+=compLength[order[compIndex]];
 		}
-		TValue gapChar = gapValue<TValue>();
-		TValue specialGap = '.';
 		fill(mat, len * maxCoverage, gapChar);
 
 		// Fill in the segments
+		typedef typename Infix<TString>::Type TInfix;
+		typedef typename Iterator<TInfix, Standard>::Type TInfixIter;
+		typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
 		for(typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();it != g.data_pvMap.end(); ++it) {
 			TInfix str = label(g,it->second);
 			TSize c = property(component, it->second);
-			TSize strPos = idToPosition(strSet, it->first.first);
-			TSize row = seqToRow[strPos];
+			TSize row = seqToRow[idToPosition(strSet, it->first.first)];
 			//if (row == 0) {
 			//	std::cout << sequenceId(g, it->second) << ':' << str << ',' << strSet[sequenceId(g, it->second)] << std::endl;
 			//	std::cout << getProperty(component, it->second) << ',' << order[compIndex] << std::endl;
 			//	std::cout << (seqToRank[sequenceId(g, it->second)]).i1 << ',' << (seqToRank[sequenceId(g, it->second)]).i2 << std::endl;
 			//}
-			TInfixIter sIt = begin(str);
-			TInfixIter sItEnd = end(str);
+			TInfixIter sIt = begin(str, Standard());
+			TInfixIter sItEnd = end(str, Standard());
 			TSize i = compOffset[c];
-			for(TSize pCol = i;sIt!=sItEnd;goNext(sIt), ++pCol, ++i) assignValue(mat, row * len + pCol, *sIt);
+			for(TSize pCol = i;sIt!=sItEnd;++sIt, ++pCol, ++i) 
+				mat[row * len + pCol] = *sIt;
 		}
 		String<bool> active;
 		for(TSize compIndex = 0; compIndex < numOfComponents; ++compIndex) {
@@ -351,16 +361,17 @@ multireadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 
 			// Find the empty rows
 			for(TSize i=0;i<nseq; ++i) {
-				if (((seqToRank[i]).i1 <= compIndex) && ((seqToRank[i]).i2 >= compIndex)) active[(seqToRow[i])] = true;
+				if (((seqToRank[i]).i1 <= compIndex) && ((seqToRank[i]).i2 >= compIndex)) 
+					active[(seqToRow[i])] = true;
 			}
 			
 			// Substitute false gaps with special gap character
 			for(TSize i = 0; i < maxCoverage; ++i) {
 				if (!(active[i])) {
-					for(TSize pCol = offset;pCol < offset + currentCompLength;++pCol) assignValue(mat, i * len + pCol, specialGap);
+					for(TSize pCol = offset;pCol < offset + currentCompLength;++pCol) 
+						mat[i * len + pCol] = specialGap;
 				}
 			}
-
 		}
 
 		// Get the new begin and end positions
@@ -368,12 +379,112 @@ multireadAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			TVertexDescriptor lastVertex = findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), length(strSet[i]) - 1);
 			TSize readBegin = compOffset[getProperty(component, findVertex(const_cast<TGraph&>(g), positionToId(strSet, i), 0))];
 			TSize readEnd = compOffset[getProperty(component, lastVertex)] + fragmentLength(const_cast<TGraph&>(g), lastVertex);
-			readBegEndRowPos[i].i1 = readBegin;
-			readBegEndRowPos[i].i2 = readEnd;
-			readBegEndRowPos[i].i3 = seqToRow[i];
+			readBegEndRowPos[3*i] = readBegin;
+			readBegEndRowPos[3*i+1] = readEnd;
+			readBegEndRowPos[3*i+2] = seqToRow[i];
+		}
+
+	}
+	clear(component);
+	clear(order);
+	compLength.clear();
+
+	
+	//// Debug code
+	//for(TSize row = 0; row<maxCoverage; ++row) {
+	//	for(TSize col = 0; col<len; ++col) {
+	//		std::cout << mat[row * len + col];			
+	//	}
+	//	std::cout << std::endl;
+	//}
+
+	// Update the contig
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElement;
+	TContigStoreElement& contigEl = fragStore.contigStore[contigId];
+	clear(contigEl.gaps);
+	clear(contigEl.seq);
+
+
+	typedef typename Value<TString>::Type TAlphabet;
+	String<TAlphabet> consensus;
+	String<TValue> gappedCons;
+	String<TSize> coverage;
+	consensusCalling(mat, consensus, gappedCons, coverage, maxCoverage, Majority_Vote());
+
+	// Create the gap anchors
+	typedef typename Iterator<String<TValue>, Standard>::Type TStringIter;
+	TStringIter seqIt = begin(gappedCons, Standard());
+	TStringIter seqItEnd = end(gappedCons, Standard());
+	typedef typename TFragmentStore::TReadPos TReadPos;
+	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
+	TReadPos ungappedPos = 0;
+	TReadPos gappedPos = 0;
+	bool gapOpen = false;
+	for(;seqIt != seqItEnd; goNext(seqIt), ++gappedPos) {
+		if (value(seqIt) == gapChar) gapOpen = true;				
+		else {
+			if (gapOpen) {
+				appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+				gapOpen = false;
+			}
+			Dna5Q letter = value(seqIt);
+			assignQualityValue(letter, 'D');
+			appendValue(contigEl.seq, letter);
+			++ungappedPos;
+		}
+	}
+	if (gapOpen) 
+		appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+
+
+	// Update all aligned reads
+	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
+	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	for(TSize i = 0;alignIt != alignItEnd; ++alignIt, ++i) {
+		TSize lenRead = length(fragStore.readSeqStore[alignIt->readId]);
+		TReadPos begClr = 0;
+		TReadPos endClr = 0;
+		getClrRange(fragStore, *alignIt, begClr, endClr);
+		clear(alignIt->gaps);
+		ungappedPos = begClr;
+		if (alignIt->beginPos > alignIt->endPos) ungappedPos = lenRead - endClr;
+		if (ungappedPos != 0) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, 0));
+		gappedPos = 0;
+		gapOpen = false;
+		for(TSize column = readBegEndRowPos[3*i]; column<readBegEndRowPos[3*i + 1]; ++column, ++gappedPos) {
+			if (mat[readBegEndRowPos[3*i + 2] * len + column] == gapChar) gapOpen = true;				
+			else {
+				if (gapOpen) {
+					appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+					gapOpen = false;
+				}
+				++ungappedPos;
+			}
+		}
+		if (gapOpen) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+		if (alignIt->beginPos < alignIt->endPos) {
+			if (endClr != lenRead) 
+				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - (lenRead - endClr)), Generous());
+		} else {
+			if (begClr != 0) 
+				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - begClr), Generous());
+		}
+
+		// Set new begin and end position
+		if (alignIt->beginPos < alignIt->endPos) {
+			alignIt->beginPos = readBegEndRowPos[3*i];
+			alignIt->endPos = readBegEndRowPos[3*i+1];
+		} else {
+			alignIt->beginPos = readBegEndRowPos[3*i+1];
+			alignIt->endPos = readBegEndRowPos[3*i];
 		}
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 

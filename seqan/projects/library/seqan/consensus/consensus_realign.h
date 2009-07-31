@@ -170,12 +170,13 @@ scoreConsensus(TConsensus& consensus)
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TFragSpec, typename TConfig, typename TAlignedRead, typename TSpec, typename TConsensus, typename TScore, typename TBandwidth>
+template<typename TFragSpec, typename TConfig, typename TAlignedRead, typename TSpec, typename TConsensus, typename TScore, typename TMethod, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		String<TAlignedRead, TSpec>& contigReads,
 		TConsensus& consensus,
 		TScore& consScore,
+		TMethod const rmethod,
 		TBandwidth const bandwidth,
 		bool includeReference)
 {
@@ -332,8 +333,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<Fragment<> > TFragmentString;
 		TFragmentString matches;
 		assignProfile(consScore, bandConsensus);
-		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
-		globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
+		if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		
 		
 		//globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), NeedlemanWunsch());
@@ -471,11 +472,12 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 //////////////////////////////////////////////////////////////////////////////////
 
-template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TBandwidth>
+template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TMethod, typename TBandwidth>
 inline void 
 reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		TScore& consScore,
 		TId const contigId,
+		TMethod const rmethod,
 		TBandwidth const bandwidth,
 		bool includeReference)
 {
@@ -587,9 +589,9 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 
 #ifdef SEQAN_PROFILE
-			::std::cout << "ReAlign start: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+			::std::cout << "ReAlign iteration start: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
 #endif
-	reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
+	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
@@ -598,7 +600,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		::std::cout << "Time: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
 #endif
 		oldScore = score;
-		reAlign(fragStore, contigReads, consensus, consScore, bandwidth, includeReference);
+		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
 	std::cout << "Score: " << score << std::endl;
@@ -660,6 +662,19 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
 
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TConfig, typename TScore, typename TId, typename TBandwidth>
+inline void 
+reAlign(FragmentStore<TSpec, TConfig>& fragStore,
+		TScore& consScore,
+		TId const contigId,
+		TBandwidth const bandwidth,
+		bool includeReference)
+{
+	reAlign(fragStore, consScore, contigId, 0, bandwidth, includeReference);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

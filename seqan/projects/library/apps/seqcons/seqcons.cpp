@@ -25,6 +25,8 @@ Lesser General Public License for more details.
 #endif
 
 #include <seqan/consensus.h>
+#include <seqan/modifier.h>
+#include <seqan/misc/misc_cmdparser.h>
 
 #include <iostream>
 #include <fstream>
@@ -34,64 +36,12 @@ using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void
-printVersion() {
-	::std::cerr << "**************************************************" << ::std::endl;
-	::std::cerr << "* Consensus Computation                          *" << ::std::endl;
-	::std::cerr << "*                                                *" << ::std::endl;
-	::std::cerr << "* SeqCons                                        *" << ::std::endl;
-	::std::cerr << "* Version: 0.204 (22. May 2009)                  *" << ::std::endl;
-	::std::cerr << "**************************************************" << ::std::endl;
-	::std::cerr << ::std::endl;
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 
-
-void 
-printHelp() {
-	::std::cerr <<  "Usage: ./seqcons -reads <FASTA File with Reads> [Options]\n" << ::std::endl;
-	::std::cerr <<  "\nOptions\n" << ::std::endl;
-
-	// Main options
-	::std::cerr <<  "\nMain Options\n------------\n" << ::std::endl;
-	::std::cerr <<  "-reads <FASTA File with Reads>\n" << ::std::endl;
-	::std::cerr <<  "\tReads in FASTA format and approximate layout positions.\n\n" << ::std::endl;
-	::std::cerr <<  "-afg <AMOS message file>\n" << ::std::endl;
-	::std::cerr <<  "\tInput is read from an AMOS message file instead of a fasta file.\n\n" << ::std::endl;
-	::std::cerr <<  "-matchlength <Length>\n" << ::std::endl;
-	::std::cerr <<  "\tMinimum match-length for an overlap, default is 15.\n\n" << ::std::endl;
-	::std::cerr <<  "-quality <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tMinimum quality of an overlap, default is 80 (for 80% identity).\n\n" << ::std::endl;
-	::std::cerr <<  "-overlaps <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tNumber of overlaps that are computed per read, default is 3.\n\n" << ::std::endl;
-	::std::cerr <<  "-bandwidth <Number>\n" << ::std::endl;
-	::std::cerr <<  "\tSpecifies the bandwidth, default is 8.\n\n" << ::std::endl;
-	::std::cerr <<  "-snp [majority | bayesian]\n" << ::std::endl;
-	::std::cerr <<  "\tHow to call consensus bases, default is majority.\n\n" << ::std::endl;
-	::std::cerr <<  "-outfile <Alignment Filename>\n" << ::std::endl;
-	::std::cerr <<  "\tThe name of the output file, default is readAlign.txt.\n\n" << ::std::endl;
-	::std::cerr <<  "-output [seqan | afg]\n" << ::std::endl;
-	::std::cerr <<  "\tThe output format, default is seqan.\n\n" << ::std::endl;
-	::std::cerr <<  "-h\n" << ::std::endl;
-	::std::cerr <<  "\tThis help screen.\n\n" << ::std::endl;
-
-	// Insert Sequencing
-	::std::cerr <<  "\nInsert Sequencing\n------------\n" << ::std::endl;	
-	::std::cerr <<  "-window <Window-Size>\n" << ::std::endl;
-	::std::cerr <<  "\tIf this parameter is given all overlaps within a given window are computed (no banded alignment).\n\n" << ::std::endl;
-
-	// Examples
-	::std::cerr <<  "\n\n\nExamples\n" << ::std::endl;
-	::std::cerr <<  "\nMulti-Read Alignment:\n" << ::std::endl;
-	::std::cerr <<  "\t./seqcons -reads reads.fasta\n" << ::std::endl;
-	::std::cerr <<  "\t./seqcons -reads reads.fasta -matchlength 15 -quality 80 -outfile align.txt\n" << ::std::endl;
-	::std::cerr <<  "\nInsert Sequencing (Reads of length 35):\n" << ::std::endl;
-	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 200 -overlaps 100\n" << ::std::endl;
-	::std::cerr <<  "\nInsert Sequencing (Reads of length 200):\n" << ::std::endl;
-	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 300 -overlaps 100\n" << ::std::endl;
-	::std::cerr <<  "\nInsert Sequencing (Reads of length 800):\n" << ::std::endl;
-	::std::cerr <<  "\t./seqcons -reads reads.fasta -window 1000 -overlaps 100\n" << ::std::endl;
+inline void
+_addVersion(CommandLineParser& parser) {
+	::std::string rev = "$Revision: 4637 $";
+	addVersionLine(parser, "Version 0.21 (31. July 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -138,366 +88,190 @@ getContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 	resize(strSet, numRead, Exact());
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TConfig, typename TPosTriple, typename TAlignMatrix, typename TGappedCons, typename TId>
-inline void 
-updateContigReads(FragmentStore<TSpec, TConfig>& fragStore,
-				  TPosTriple& readBegEndRowPos,
-				  TAlignMatrix& alignmentMatrix,
-				  TGappedCons& gappedCons,
-				  TId const contigId)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Size<TFragmentStore>::Type TSize;
-	typedef typename TFragmentStore::TReadPos TReadPos;
-	char gapChar = gapValue<char>();
-	TSize len = length(alignmentMatrix) / length(readBegEndRowPos);
-
-	// Fragment store typedefs
-	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElement;
-	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
-	
-	// Update the contig
-	TContigStoreElement& contigEl = value(fragStore.contigStore, contigId);
-	clear(contigEl.gaps);
-	clear(contigEl.seq);
-
-	// Create the gap anchors
-	typedef typename Iterator<String<char> >::Type TStringIter;
-	TStringIter seqIt = begin(gappedCons);
-	TStringIter seqItEnd = end(gappedCons);
-	typedef typename TFragmentStore::TReadPos TPos;
-	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
-	TPos ungappedPos = 0;
-	TPos gappedPos = 0;
-	bool gapOpen = false;
-	for(;seqIt != seqItEnd; goNext(seqIt), ++gappedPos) {
-		if (value(seqIt) == gapChar) gapOpen = true;				
-		else {
-			if (gapOpen) {
-				appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
-				gapOpen = false;
-			}
-			Dna5Q letter = value(seqIt);
-			assignQualityValue(letter, 'D');
-			appendValue(contigEl.seq, letter);
-			++ungappedPos;
-		}
-	}
-	if (gapOpen) appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos));
-
-
-	// Update all aligned reads
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
-	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	for(TSize i = 0;alignIt != alignItEnd; goNext(alignIt), ++i) {
-		TSize lenRead = length(fragStore.readSeqStore[alignIt->readId]);
-		TReadPos begClr = 0;
-		TReadPos endClr = 0;
-		getClrRange(fragStore, value(alignIt), begClr, endClr);
-		clear(alignIt->gaps);
-		ungappedPos = begClr;
-		if (alignIt->beginPos > alignIt->endPos) ungappedPos = lenRead - endClr;
-		if (ungappedPos != 0) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, 0));
-		gappedPos = 0;
-		gapOpen = false;
-		for(TSize column = (readBegEndRowPos[i]).i1; column<(readBegEndRowPos[i]).i2; ++column, ++gappedPos) {
-			if (value(alignmentMatrix, (readBegEndRowPos[i]).i3 * len + column) == gapChar) gapOpen = true;				
-			else {
-				if (gapOpen) {
-					appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos));
-					gapOpen = false;
-				}
-				++ungappedPos;
-			}
-		}
-		if (gapOpen) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos));
-		if (alignIt->beginPos < alignIt->endPos) {
-			if (endClr != lenRead) {
-				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - (lenRead - endClr)));
-			}
-		} else {
-			if (begClr != 0) {
-				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - begClr));
-			}
-		}
-
-		// Set new begin and end position
-		if (alignIt->beginPos < alignIt->endPos) {
-			alignIt->beginPos = (readBegEndRowPos[i]).i1;
-			alignIt->endPos = (readBegEndRowPos[i]).i2;
-		} else {
-			alignIt->beginPos = (readBegEndRowPos[i]).i2;
-			alignIt->endPos = (readBegEndRowPos[i]).i1;
-		}
-	}
-}
 
 
 //////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
-	typedef unsigned int TSize;
-
-	// Version
-#ifdef SEQAN_PROFILE
-	printVersion();
-#endif
-
-	// At least two arguments
-	if (argc < 2) {	printHelp(); return 1; }
-
-	// Set default consensus options
-	ConsensusOptions consOpt;
-#ifdef CELERA_OFFSET
-	consOpt.bandwidth = 15;
-	consOpt.overlaps = 5;
-#else
-	consOpt.bandwidth = 8;
-	consOpt.overlaps = 3;
-#endif
-
 	// Command line parsing
-	for(int arg = 1; arg < argc; ++arg) {
-		if (argv[arg][0] == '-') {
-			if (strcmp(argv[arg], "-reads") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					consOpt.readsfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-afg") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					consOpt.afgfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-bandwidth") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> consOpt.bandwidth;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-overlaps") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> consOpt.overlaps;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-matchlength") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> consOpt.matchlength;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-quality") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> consOpt.quality;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-window") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					::std::istringstream istr(argv[arg]);
-					istr >> consOpt.window;
-					if (istr.fail()) { printHelp(); exit(1); }
-				}
-			}
-			else if (strcmp(argv[arg], "-snp") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "bayesian") == 0) {
-						consOpt.snp = 1;
-					} 
-					else if (strcmp(argv[arg], "majority") == 0) {
-						consOpt.snp = 0;
-					}
-				}
-			}
-			else if (strcmp(argv[arg], "-output") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "afg") == 0) {
-						consOpt.output = 1;
-					} 
-					else if (strcmp(argv[arg], "seqan") == 0) {
-						consOpt.output = 0;
-					}
-				}
-			}
-			else if (strcmp(argv[arg], "-outfile") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					consOpt.outfile = argv[arg];
-				}
-			}
-			else if (strcmp(argv[arg], "-convert") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "afg") == 0) {
-						consOpt.convert = 1;
-					} 
-					else if (strcmp(argv[arg], "frg") == 0) {
-						consOpt.convert = 2;
-					}
-					else if (strcmp(argv[arg], "cgb") == 0) {
-						consOpt.convert = 3;
-					}
-				}
-			}
-			else if (strcmp(argv[arg], "-moveToFront") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "false") == 0) {
-						consOpt.moveToFront = false;
-					} 
-					else if (strcmp(argv[arg], "true") == 0) {
-						consOpt.moveToFront = true;
-					}
-				}
-			}
-			else if (strcmp(argv[arg], "-realign") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					if (strcmp(argv[arg], "false") == 0) {
-						consOpt.realign = false;
-					} 
-					else if (strcmp(argv[arg], "true") == 0) {
-						consOpt.realign = true;
-					}
-				}
-			}
-			else if (strcmp(argv[arg], "-source") == 0) {
-				if (arg + 1 < argc) {
-					++arg;
-					consOpt.source = argv[arg];
-				}
-			}
-			else if ((strcmp(argv[arg], "-h") == 0) || (strcmp(argv[arg], "-help") == 0) || (strcmp(argv[arg], "-?") == 0)) {
-				printHelp(); 
-				return 0; 
-			}
-		}
+	CommandLineParser parser;
+	_addVersion(parser);
+
+	addTitleLine(parser, "***************************************");
+	addTitleLine(parser, "* Multi-read alignment - SeqCons      *");
+	addTitleLine(parser, "* (c) Copyright 2009 by Tobias Rausch *");
+	addTitleLine(parser, "***************************************");
+
+	addUsageLine(parser, "-r <FASTA file with reads> [Options]");
+	addUsageLine(parser, "-a <AMOS message file> [Options]");
+
+	addSection(parser, "Main Options:");
+	addOption(parser, addArgumentText(CommandLineOption("r", "reads", "file with reads", OptionType::String), "<FASTA reads file>"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "afg", "message file", OptionType::String), "<AMOS afg file>"));
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "align.txt"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "seqan"), "[seqan | afg]"));
+	addOption(parser, addArgumentText(CommandLineOption("m", "method", "multi-read alignment method", OptionType::String, "realign"), "[realign | msa]"));
+	addOption(parser, addArgumentText(CommandLineOption("b", "bandwidth", "bandwidth", OptionType::Int, 8), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("c", "consensus", "consensus calling", OptionType::String, "majority"), "[majority | bayesian]"));
+	addOption(parser, CommandLineOption("n", "noalign", "no align, only convert input", OptionType::Boolean));
+
+	addSection(parser, "MSA Method Options:");
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matchlength", "minimum overlap length", OptionType::Int, 15), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("qu", "quality", "minimum overlap precent identity", OptionType::Int, 80), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ov", "overlaps", "minimum number of overlaps per read", OptionType::Int, 3), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("wi", "window", "window size", OptionType::Int, 0), "<Int>"));
+	addHelpLine(parser, "/*If this parameter is > 0 then all");
+	addHelpLine(parser, "  overlaps within a given window");
+	addHelpLine(parser, "  are computed.*/");
+
+	addSection(parser, "ReAlign Method Options:");
+	addOption(parser, CommandLineOption("in", "include", "include contig sequence", OptionType::Boolean));
+	addOption(parser, addArgumentText(CommandLineOption("rm", "rmethod", "realign method", OptionType::String, "nw"), "[nw | gotoh]"));
+
+	if (argc == 1)
+	{
+		shortHelp(parser, std::cerr);	// print short help and exit
+		return 0;
 	}
 
+	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
+	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 
-	// Fragment store
+
+	// Get all command line options
+	ConsensusOptions consOpt;
+
+	// Main options
+	getOptionValueLong(parser, "reads", consOpt.readsfile);
+	getOptionValueLong(parser, "afg", consOpt.afgfile);
+	getOptionValueLong(parser, "outfile", consOpt.outfile);
+	String<char> optionVal;
+	getOptionValueLong(parser, "format", optionVal);
+	if (optionVal == "seqan") consOpt.output = 0;
+	else if (optionVal == "afg") consOpt.output = 1;
+	else if (optionVal == "frg") consOpt.output = 2;
+	else if (optionVal == "cgb") consOpt.output = 3;
+	getOptionValueLong(parser, "method", optionVal);
+	if (optionVal == "realign") consOpt.method = 0;
+	else if (optionVal == "msa") consOpt.method = 1;
+	getOptionValueLong(parser, "bandwidth", consOpt.bandwidth);
+#ifdef CELERA_OFFSET
+	if (!isSetLong(parser, "bandwidth") consOpt.bandwidth = 15;	
+#endif
+	getOptionValueLong(parser, "consensus", optionVal);
+	if (optionVal == "majority") consOpt.consensus = 0;
+	else if (optionVal == "bayesian") consOpt.consensus = 1;
+	getOptionValueLong(parser, "noalign", consOpt.noalign);
+
+	// Msa options
+	getOptionValueLong(parser, "matchlength", consOpt.matchlength);
+	getOptionValueLong(parser, "quality", consOpt.quality);
+	getOptionValueLong(parser, "overlaps", consOpt.overlaps);
+#ifdef CELERA_OFFSET
+	if (!isSetLong(parser, "overlaps") consOpt.overlaps = 5;	
+#endif
+	getOptionValueLong(parser, "window", consOpt.window);
+	
+	// ReAlign options
+	getOptionValueLong(parser, "include", consOpt.include);
+	getOptionValueLong(parser, "rmethod", optionVal);
+	if (optionVal == "nw") consOpt.rmethod = 0;
+	else if (optionVal == "gotoh") consOpt.rmethod = 1;
+
+
+	// Create a new fragment store
 	typedef FragmentStore<> TFragmentStore;
+	typedef Size<TFragmentStore>::Type TSize;
 	TFragmentStore fragStore;
 
 	// Load the reads and layout positions
 	TSize numberOfContigs = 0;
-	if (!consOpt.readsfile.empty()) {
+	if (!empty(consOpt.readsfile)) {
 		// Load simple read file
 		FILE* strmReads = fopen(consOpt.readsfile.c_str(), "rb");
-		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, consOpt.moveToFront);
+		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, true);
 		fclose(strmReads);
-		if (!success) { printHelp(); exit(1); }
+		if (!success) { 
+			shortHelp(parser, std::cerr);
+			return 0;
+		}
 		numberOfContigs = 1;
-	} else if (!consOpt.afgfile.empty()) {
+	} else if (!empty(consOpt.afgfile)) {
 		// Load Amos message file
 		FILE* strmReads = fopen(consOpt.afgfile.c_str(), "rb");
 		read(strmReads, fragStore, Amos());	
 		fclose(strmReads);
 		numberOfContigs = length(fragStore.contigStore);
 	} else {
-		printHelp();
-		exit(1);
-	}
-
-	// Just convert the input file
-	if (consOpt.convert != 0) {
-		if (consOpt.convert == 1) {
-			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-			write(strmWrite, fragStore, Amos());	
-			fclose(strmWrite);
-		} else if (consOpt.convert == 2) {
-			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-			_writeCeleraFrg(strmWrite, fragStore);	
-			fclose(strmWrite);
-		} else if (consOpt.convert == 3) {
-			FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-			_writeCeleraCgb(strmWrite, fragStore);	
-			fclose(strmWrite);
-		}
+		shortHelp(parser, std::cerr);
 		return 0;
 	}
 
-	// Iterate over all contigs
-	for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 
-		if (consOpt.realign) {
-			Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
-			reAlign(fragStore, combinedScore, currentContig, consOpt.bandwidth, false);
-		} else {
+
+	// Multi-realignment desired or just conversion of the input
+	if (!consOpt.noalign) {
+	
+		// Profiling
+#ifdef SEQAN_PROFILE
+				SEQAN_PROTIMEUPDATE(__myProfileTime); 
+#endif
+	
+		// Iterate over all contigs
+		for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
+
+			if (consOpt.method == 0) {
+#ifdef SEQAN_PROFILE
+				::std::cout << "ReAlign method" << ::std::endl;
+				if (consOpt.rmethod == 0) ::std::cout << "Realign algorithm: Needleman-Wunsch" << ::std::endl;
+				else if (consOpt.rmethod == 1) ::std::cout << "Realign algorithm: Gotoh" << ::std::endl;
+				::std::cout << "Bandwidth: " << consOpt.bandwidth << ::std::endl;
+				::std::cout << "Include reference: " << consOpt.include << ::std::endl;
+#endif
+				Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
+				reAlign(fragStore, combinedScore, currentContig, consOpt.rmethod, consOpt.bandwidth, consOpt.include);
+
+#ifdef SEQAN_PROFILE
+				::std::cout << "ReAlignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
+			} else {
+
+#ifdef SEQAN_PROFILE
+				::std::cout << "MSA method" << ::std::endl;
+				::std::cout << "Bandwidth: " << consOpt.bandwidth << ::std::endl;
+				::std::cout << "Matchlength: " << consOpt.matchlength << ::std::endl;
+				::std::cout << "Quality: " << consOpt.quality << ::std::endl;
+				::std::cout << "Window: " << consOpt.window << ::std::endl;
+#endif
+
+				// Import all reads of the given contig
+				typedef TFragmentStore::TReadSeq TReadSeq;
+				typedef Id<TFragmentStore>::Type TId;
+				StringSet<TReadSeq, Owner<> > readSet;
+				String<Pair<TSize, TSize> > begEndPos;
+	
+				getContigReads(readSet, begEndPos, fragStore, currentContig);
+				TSize nseq = length(readSet);
+				if (nseq == 0) continue;
+
+#ifdef SEQAN_PROFILE
+				::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
+#endif
+
+				// Align the reads
+				Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
+				consensusAlignment(gOut, begEndPos, consOpt);
+#ifdef SEQAN_PROFILE
+				std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif
+
 			
-// Profiling
+				// Update the contig in the fragment store
+				updateContig(fragStore, gOut, currentContig);
+				clear(gOut);
 #ifdef SEQAN_PROFILE
-			SEQAN_PROTIMEUPDATE(__myProfileTime); 
+				std::cout << "Update contig done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif
-
-			// Import all reads of the given contig
-			typedef TFragmentStore::TReadSeq TReadSeq;
-			typedef Id<TFragmentStore>::Type TId;
-			StringSet<TReadSeq, Owner<> > readSet;
-			String<Pair<TSize, TSize> > begEndPos;
-	
-			// No just get begin and end pointers
-			getContigReads(readSet, begEndPos, fragStore, currentContig);
-			TSize nseq = length(readSet);
-			if (nseq == 0) continue;
-	
-			//for(TSize i = 0; i<nseq; ++i) {
-			//	std::cout << value(readSet, i) << std::endl;
-			//	std::cout << value(begEndPos, i).i1 << ',' << value(begEndPos, i).i2 << std::endl;
-			//}
-#ifdef SEQAN_PROFILE
-			::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
-
-			// Align the reads
-			Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
-			consensusAlignment(gOut, begEndPos, consOpt);
-	
-			// Build the read alignment matrix
-			TSize alignDepth;
-			String<char> alignmentMatrix;
-			String<Triple<unsigned int, unsigned int, unsigned int> > readBegEndRowPos;
-			multireadAlignment(gOut, alignmentMatrix, readBegEndRowPos, alignDepth);
-			clear(gOut);
-#ifdef SEQAN_PROFILE
-			std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
-			// Call the consensus
-			// ToDo: Qualtiy-based consensus calling
-			String<unsigned int> coverage;
-			String<char> gappedConsensus;
-			String<Dna> consensusSequence;
-			if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
-			else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
-#ifdef SEQAN_PROFILE		
-			std::cout << "Consensus done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
-			// Output of aligned reads
-			if (consOpt.output == 0) {
-				FILE* strm;
-				if (currentContig == 0) strm = fopen(consOpt.outfile.c_str(), "w");
-				else strm = fopen(consOpt.outfile.c_str(), "a");
-				write(strm, readSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
-				fclose(strm);
 
 				//// Debug code for CA
 				//mtRandInit();
@@ -518,25 +292,36 @@ int main(int argc, const char *argv[]) {
 				//	if (value(begEndPos, i).i1 > value(begEndPos, i).i2) reverseComplementInPlace(origStrSet[i]);
 				//}
 				//strm3.close();
-				//std::fstream strm2;
-				//strm2.open(toCString(fileTmp1), std::ios_base::out | std::ios_base::trunc);
-				//write(strm2, seqSet, alignmentMatrix, begEndPos, readBegEndRowPos, gappedConsensus, coverage, FastaReadFormat());
-				//strm2.close();
-			} 
-			else if (consOpt.output == 1) {
-				updateContigReads(fragStore, readBegEndRowPos, alignmentMatrix, gappedConsensus, currentContig);
 			}
-#ifdef SEQAN_PROFILE
-			std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-		}
+
+			// ToDo: Consensus calling methods go here
+			//String<unsigned int> coverage;
+			//		String<char> gappedConsensus;
+			//		String<Dna> consensusSequence;
+			//		if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
+			//		else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
+		
+		} // end loop over all contigs
 	}
 	
-	// Write the AMOS message file
-	if (consOpt.output == 1) {
+	// Output
+	if (consOpt.output == 0) {
+		// Write old SeqAn multi-read alignment format
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		write(strmWrite, fragStore, FastaReadFormat());	
+		fclose(strmWrite);
+	} else if (consOpt.output == 1) {
 		// Write Amos
 		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 		write(strmWrite, fragStore, Amos());	
+		fclose(strmWrite);
+	} else if (consOpt.output == 2) {
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		_writeCeleraFrg(strmWrite, fragStore);	
+		fclose(strmWrite);
+	} else if (consOpt.output == 3) {
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		_writeCeleraCgb(strmWrite, fragStore);	
 		fclose(strmWrite);
 	}
 
