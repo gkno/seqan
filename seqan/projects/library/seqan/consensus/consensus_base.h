@@ -330,9 +330,9 @@ convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
 
 template<typename TSpec, typename TConfig, typename TGappedConsensus, typename TSize> 
 inline void
-getGappedConsensusSeq(FragmentStore<TSpec, TConfig>& fragStore,
-					  TGappedConsensus& gappedConsensus,
-					  TSize contigId)
+getGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
+				   TGappedConsensus& gappedConsensus,
+				   TSize contigId)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Value<TGappedConsensus>::Type TValue;
@@ -358,6 +358,50 @@ getGappedConsensusSeq(FragmentStore<TSpec, TConfig>& fragStore,
 		appendValue(gappedConsensus, *seqContigIt, Generous());
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSpec, typename TConfig, typename TGappedConsensus, typename TSize> 
+inline void
+assignGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
+					  TGappedConsensus& gappedCons,
+					  TSize contigId)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<TGappedConsensus>::Type TValue;
+	TValue gapChar = gapValue<TValue>();
+
+	// Update the contig
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElement;
+	TContigStoreElement& contigEl = fragStore.contigStore[contigId];
+	clear(contigEl.gaps);
+	clear(contigEl.seq);
+
+	// Create the sequence and the gap anchors
+	typedef typename Iterator<TGappedConsensus, Standard>::Type TStringIter;
+	TStringIter seqIt = begin(gappedCons, Standard());
+	TStringIter seqItEnd = end(gappedCons, Standard());
+	typedef typename TFragmentStore::TReadPos TReadPos;
+	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
+	TReadPos ungappedPos = 0;
+	TReadPos gappedPos = 0;
+	bool gapOpen = false;
+	for(;seqIt != seqItEnd; ++seqIt, ++gappedPos) {
+		if (*seqIt == gapChar) gapOpen = true;				
+		else {
+			if (gapOpen) {
+				appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+				gapOpen = false;
+			}
+			Dna5Q letter = *seqIt;
+			assignQualityValue(letter, 'D');
+			appendValue(contigEl.seq, letter);
+			++ungappedPos;
+		}
+	}
+	if (gapOpen) 
+		appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
+}
 
 
 
@@ -622,52 +666,26 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 	//	std::cout << std::endl;
 	//}
 
-	// Update the contig
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElement;
-	TContigStoreElement& contigEl = fragStore.contigStore[contigId];
-	clear(contigEl.gaps);
-	clear(contigEl.seq);
-
-
+	// Create the new consensus
 	typedef typename Value<TString>::Type TAlphabet;
-	String<TAlphabet> consensus;
 	String<TValue> gappedCons;
-	String<TSize> coverage;
-	consensusCalling(mat, consensus, gappedCons, coverage, maxCoverage, Majority_Vote());
+	consensusCalling(mat, gappedCons, maxCoverage, TAlphabet(), Majority_Vote());
 
-	// Create the gap anchors
-	typedef typename Iterator<String<TValue>, Standard>::Type TStringIter;
-	TStringIter seqIt = begin(gappedCons, Standard());
-	TStringIter seqItEnd = end(gappedCons, Standard());
-	typedef typename TFragmentStore::TReadPos TReadPos;
-	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
-	TReadPos ungappedPos = 0;
-	TReadPos gappedPos = 0;
-	bool gapOpen = false;
-	for(;seqIt != seqItEnd; goNext(seqIt), ++gappedPos) {
-		if (value(seqIt) == gapChar) gapOpen = true;				
-		else {
-			if (gapOpen) {
-				appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
-				gapOpen = false;
-			}
-			Dna5Q letter = value(seqIt);
-			assignQualityValue(letter, 'D');
-			appendValue(contigEl.seq, letter);
-			++ungappedPos;
-		}
-	}
-	if (gapOpen) 
-		appendValue(contigEl.gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
-
+	// Assign new consensus
+	assignGappedConsensus(fragStore, gappedCons, contigId);
 
 	// Update all aligned reads
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename TFragmentStore::TReadPos TReadPos;
+	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
 	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
 	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
 	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
+	TReadPos ungappedPos = 0;
+	TReadPos gappedPos = 0;
+	bool gapOpen;
 	for(TSize i = 0;alignIt != alignItEnd; ++alignIt, ++i) {
 		TSize lenRead = length(fragStore.readSeqStore[alignIt->readId]);
 		TReadPos begClr = 0;
@@ -712,115 +730,103 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TCounters, typename TCoverage, typename TSize, typename TAlphabet>
+template <typename TValue, typename TSpec, typename TCounters, typename TSize, typename TAlphabet>
 inline void
 __countLetters(String<TValue, TSpec> const& mat,
 			   TCounters& counterValues,
-			   TCoverage& coverage,
 			   TSize alignDepth,
 			   TAlphabet)
 {
 	SEQAN_CHECKPOINT
 	typedef String<TValue, TSpec> TMatrix;
-	typedef typename Iterator<TMatrix>::Type TMatIter;
-	typedef typename Iterator<TCoverage>::Type TCovIter;
+	typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
 
 	// Initialization
 	TSize len = length(mat) / alignDepth;
 	TValue gapChar = gapValue<TValue>();
 	TValue specialGap = '.';
 	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
-	clear(coverage);
-	fill(coverage, len, 0);
-
 
 	// Set-up counter values
 	typedef typename Value<TCounters>::Type TCounter;
-	typedef typename Iterator<TCounters>::Type TCounterIt;
-	clear(counterValues);
+	typedef typename Iterator<TCounters, Standard>::Type TCounterIt;
 	resize(counterValues, len);
 	for(TSize i=0;i<len; ++i) {
 		TCounter counter;
 		fill(counter, alphabetSize + 1, 0);
-		value(counterValues, i) = counter;
+		counterValues[i] = counter;
 	}
 
 	// Count all 
-	TMatIter matIt = begin(mat);
-	TMatIter matItEnd = end(mat);
-	TCounterIt countIt = begin(counterValues);
-	TCovIter covIt = begin(coverage);
+	TMatIter matIt = begin(mat, Standard());
+	TMatIter matItEnd = end(mat, Standard());
+	TCounterIt countIt = begin(counterValues, Standard());
 	TSize pos = 0;
-	for(; matIt != matItEnd; goNext(matIt), goNext(countIt), goNext(covIt), ++pos) {
-		if (pos % len == 0) {
-			countIt = begin(counterValues);
-			covIt = begin(coverage);
-		}
-		TValue c = value(matIt);
-		if (c == specialGap) continue;
-		else {
-			++value(covIt);
-			if (c == gapChar) ++value(value(countIt), alphabetSize);
-			else ++value(value(countIt), ordValue(TAlphabet(c)));
+	for(; matIt != matItEnd; ++matIt, ++countIt, ++pos) {
+		if (pos % len == 0) countIt = begin(counterValues, Standard());
+		if (*matIt != specialGap) {
+			if (*matIt == gapChar) ++value(*countIt, alphabetSize);
+			else ++value(*countIt, ordValue((TAlphabet) *matIt));
 		}
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TAlphabet, typename TSpec2, typename TGappedConsensus, typename TCoverage, typename TSize>
+template <typename TValue, typename TSpec, typename TGappedCons, typename TAlignDepth, typename TAlphabet>
 inline void
 consensusCalling(String<TValue, TSpec> const& mat,
-				 String<TAlphabet, TSpec2>& consensus,
-				 TGappedConsensus& gappedConsensus,
-				 TCoverage& coverage,
-				 TSize alignDepth,
+				 TGappedCons& gappedConsensus,
+				 TAlignDepth maxCoverage,
+				 TAlphabet,
 				 Bayesian)
 {
-	SEQAN_CHECKPOINT
 	typedef double TProbability;
 	typedef String<TProbability> TProbabilityDistribution;
 	typedef String<TProbabilityDistribution> TPositionalPrDist;
-	typedef typename Iterator<TPositionalPrDist>::Type TPosPrDistIter;
+	typedef typename Iterator<TPositionalPrDist, Standard>::Type TPosPrDistIter;
 
-	// Initialization
-	TSize len = length(mat) / alignDepth;
+	typedef typename Size<String<TValue, TSpec> >::Type TSize;
+	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
 	TValue gapChar = gapValue<TValue>();
 	TValue specialGap = '.';
-	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
-	TProbabilityDistribution backroundDist;
-	fill(backroundDist, alphabetSize + 1, (1.0 / (TProbability) (alphabetSize + 1)));
-	
+
 	// Set-up the counters
 	typedef String<TSize> TCounter;
 	typedef String<TCounter> TCounters;
 	TCounters counterValues;
-	__countLetters(mat, counterValues, coverage, alignDepth, TAlphabet() );
+	__countLetters(mat, counterValues, maxCoverage, TAlphabet() );
 
+
+	// Initialization
+	TSize len = length(mat) / maxCoverage;
+	TProbabilityDistribution backroundDist;
+	fill(backroundDist, alphabetSize + 1, ((TProbability) 1 / (TProbability) (alphabetSize + 1)));
+	
 	// Get an initial consensus
-	typedef typename Iterator<TCounters>::Type TCounterIt;
-	TCounterIt countIt = begin(counterValues);
-	TCounterIt countItEnd = end(counterValues);
+	typedef typename Iterator<TCounters, Standard>::Type TCounterIt;
+	TCounterIt countIt = begin(counterValues, Standard());
+	TCounterIt countItEnd = end(counterValues, Standard());
 	TPositionalPrDist posPrDist;
-	for(;countIt != countItEnd; goNext(countIt)) {
+	TValue c = TAlphabet();
+	for(;countIt != countItEnd; ++countIt) {
 		TSize max = 0;
-		TValue c = TValue();
-		typedef typename Iterator<TCounter>::Type TCIt;
-		TCIt cIt = begin(value(countIt));
-		TCIt cItEnd = end(value(countIt));
+		typedef typename Iterator<TCounter, Standard>::Type TCIt;
+		TCIt cIt = begin(*countIt, Standard());
+		TCIt cItEnd = end(*countIt, Standard());
 		TSize pos = 0;
-		for(;cIt != cItEnd; goNext(cIt), ++pos) {
-			if (value(cIt) > max) {
-				max = value(cIt);
-				if (pos == alphabetSize) c = gapChar;
-				else c = TAlphabet(pos);
+		for(;cIt != cItEnd; ++cIt, ++pos) {
+			if (*cIt > max) {
+				max = *cIt;
+				c = (pos == alphabetSize) ? gapChar : (TValue) TAlphabet(pos);
 			}
 		}
 		TProbabilityDistribution prDist;
 		fill(prDist, alphabetSize + 1, 0);
-		if (c == gapChar) value(prDist, alphabetSize) = 1;
-		else value(prDist, ordValue(TAlphabet(c))) = 1;
-		appendValue(posPrDist, prDist);
+		if (c == gapChar) prDist[alphabetSize] = 1;
+		else prDist[ordValue((TAlphabet) c)] = 1;
+		appendValue(posPrDist, prDist, Generous());
 	}
 
 	bool run = false;
@@ -828,7 +834,6 @@ consensusCalling(String<TValue, TSpec> const& mat,
 	TProbabilityDistribution pIJ;
 	TProbabilityDistribution pIOld;
 	TProbabilityDistribution pIJOld;
-	std::cout << "Bayesian Consensus";
 	while((run) || (empty(pIOld))) {
 		// Store the values from the last iteration
 		pIOld = pI;
@@ -856,18 +861,15 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		TProbabilityDistribution nIJ;
 		fill(nIJ, (alphabetSize + 1) * (alphabetSize + 1), 0);
 		typedef String<TValue, TSpec> TMatrix;
-		typedef typename Iterator<TMatrix>::Type TMatIter;
-		TMatIter matIt = begin(mat);
-		TMatIter matItEnd = end(mat);
-		itPosPrDist = begin(posPrDist);
+		typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
+		TMatIter matIt = begin(mat, Standard());
+		TMatIter matItEnd = end(mat, Standard());
+		itPosPrDist = begin(posPrDist, Standard());
 		TSize pos = 0;
-		for(; matIt != matItEnd; goNext(matIt), goNext(itPosPrDist), ++pos) {
-			if (pos % len == 0) {
-				itPosPrDist = begin(posPrDist);
-			}
-			TValue c = value(matIt);
-			if (c == specialGap) continue;
-			else {
+		for(; matIt != matItEnd; ++matIt, ++itPosPrDist, ++pos) {
+			if (pos % len == 0) itPosPrDist = begin(posPrDist);
+			TValue c = *matIt;
+			if (c != specialGap) {
 				TSize fragJ = alphabetSize;
 				if (c != gapChar) fragJ = ordValue(TAlphabet(c));
 				for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
@@ -920,9 +922,9 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		//std::cout << "-- " << value(pIJ, 24) << std::endl;
 
 		// Recompute positional probability distribution
-		itPosPrDist = begin(posPrDist);
+		itPosPrDist = begin(posPrDist, Standard());
 		TSize col = 0;
-		for(;itPosPrDist!=itPosPrDistEnd; goNext(itPosPrDist), ++col) {
+		for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist, ++col) {
 			TProbabilityDistribution prDist;
 			resize(prDist, alphabetSize + 1);
 			for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
@@ -930,7 +932,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 				TProbability denominator = 0;
 				for(TSize allI = 0; allI<(alphabetSize + 1); ++allI) {
 					TProbability denominatorSub = value(pI, allI);
-					for(TSize row = 0; row < alignDepth; ++row) {
+					for(TSize row = 0; row < maxCoverage; ++row) {
 						TValue c = value(mat, row * len + col);
 						if (c == specialGap) continue;
 						TSize fragJ = alphabetSize;
@@ -985,14 +987,11 @@ consensusCalling(String<TValue, TSpec> const& mat,
 				}
 			}
 		}
-		std::cout << '.';
 	}
-	std::cout << std::endl;
 	
 	// Compute the most likely consensus
 	TPosPrDistIter itPosPrDist = begin(posPrDist);
 	TPosPrDistIter itPosPrDistEnd = end(posPrDist);
-	clear(consensus);
 	clear(gappedConsensus);
 	for(;itPosPrDist!=itPosPrDistEnd; goNext(itPosPrDist)) {
 		TProbability max = 0;
@@ -1004,57 +1003,114 @@ consensusCalling(String<TValue, TSpec> const& mat,
 			}
 		}
 		if (ind == alphabetSize) appendValue(gappedConsensus, gapChar);
-		else {
-			appendValue(consensus, TAlphabet(ind));
-			appendValue(gappedConsensus, TAlphabet(ind));
-		}
+		else appendValue(gappedConsensus, TAlphabet(ind));
 	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, typename TSpec, typename TAlphabet, typename TSpec2, typename TGappedConsensus, typename TCoverage, typename TSize>
+
+template <typename TFragSpec, typename TConfig, typename TContigId>
+inline void
+consensusCalling(FragmentStore<TFragSpec, TConfig>& fragStore,
+				 TContigId contigId,
+				 Bayesian)
+{
+	SEQAN_CHECKPOINT
+
+	typedef FragmentStore<TFragSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadSeq TReadSeq;
+	typedef typename Value<TReadSeq>::Type TAlphabet;
+	typedef char TValue;
+
+	// Convert the contig to an alignment matrix
+	typedef String<TValue> TAlignMat;
+	TAlignMat mat;
+	TSize maxCoverage;
+	convertAlignment(fragStore, mat, contigId, maxCoverage);
+
+	// Call the consensus
+	String<TValue> gappedConsensus;
+	consensusCalling(mat, gappedConsensus, maxCoverage, TAlphabet(), Bayesian());
+
+	// Assign the new consensus
+	assignGappedConsensus(fragStore, gappedConsensus, contigId);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TSpec, typename TGappedCons, typename TAlignDepth, typename TAlphabet>
 inline void
 consensusCalling(String<TValue, TSpec> const& mat,
-				 String<TAlphabet, TSpec2>& consensus,
-				 TGappedConsensus& gappedConsensus,
-				 TCoverage& coverage,
-				 TSize alignDepth,
+				 TGappedCons& gappedConsensus,
+				 TAlignDepth maxCoverage,
+				 TAlphabet,
 				 Majority_Vote)
 {
-	// Initialization
+	typedef typename Size<String<TValue, TSpec> >::Type TSize;
 	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
 	TValue gapChar = gapValue<TValue>();
-
+	
 	// Set-up the counters
 	typedef String<TSize> TCounter;
 	typedef String<TCounter> TCounters;
 	TCounters counterValues;
-	__countLetters(mat, counterValues, coverage, alignDepth, TAlphabet() );
-
+	__countLetters(mat, counterValues, maxCoverage, TAlphabet() );
+	
 	// Get the consensus
-	typedef typename Iterator<TCounters>::Type TCounterIt;
-	TCounterIt countIt = begin(counterValues);
-	TCounterIt countItEnd = end(counterValues);
-	clear(consensus);
+	typedef typename Iterator<TCounters, Standard>::Type TCounterIt;
+	TCounterIt countIt = begin(counterValues, Standard());
+	TCounterIt countItEnd = end(counterValues, Standard());
 	clear(gappedConsensus);
-	for(;countIt != countItEnd; goNext(countIt)) {
-		TSize max = 0;
-		TValue c = TValue();
-		typedef typename Iterator<TCounter>::Type TCIt;
-		TCIt cIt = begin(value(countIt));
-		TCIt cItEnd = end(value(countIt));
-		TSize pos = 0;
-		for(;cIt != cItEnd; goNext(cIt), ++pos) {
-			if (value(cIt) > max) {
-				max = value(cIt);
-				if (pos == alphabetSize) c = gapChar;
-				else c = TAlphabet(pos);
+	TSize max = 0;
+	TValue c;
+	TSize pos = 0;
+	for(;countIt != countItEnd; ++countIt) {
+		max = 0;	
+		typedef typename Iterator<TCounter, Standard>::Type TCIt;
+		TCIt cIt = begin(*countIt, Standard());
+		TCIt cItEnd = end(*countIt, Standard());
+		pos = 0;
+		for(;cIt != cItEnd; ++cIt, ++pos) {
+			if (*cIt > max) {
+				max = *cIt;
+				c = (pos == alphabetSize) ? gapChar : (TValue) TAlphabet(pos);
 			}
 		}
-		if (c != gapChar) appendValue(consensus, c);
 		appendValue(gappedConsensus, c);
 	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+template <typename TFragSpec, typename TConfig, typename TContigId>
+inline void
+consensusCalling(FragmentStore<TFragSpec, TConfig>& fragStore,
+				 TContigId contigId,
+				 Majority_Vote)
+{
+	typedef FragmentStore<TFragSpec, TConfig> TFragmentStore;
+	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TReadSeq TReadSeq;
+	typedef typename Value<TReadSeq>::Type TAlphabet;
+	typedef char TValue;
+
+	// Convert the contig to an alignment matrix
+	typedef String<TValue> TAlignMat;
+	TAlignMat mat;
+	TSize maxCoverage;
+	convertAlignment(fragStore, mat, contigId, maxCoverage);
+
+	// Call the consensus
+	String<TValue> gappedConsensus;
+	consensusCalling(mat, gappedConsensus, maxCoverage, TAlphabet(), Majority_Vote());
+
+	// Assign the new consensus
+	assignGappedConsensus(fragStore, gappedConsensus, contigId);
 }
 
 

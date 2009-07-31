@@ -247,13 +247,16 @@ int main(int argc, const char *argv[]) {
 				//strm3.close();
 			}
 
-			// ToDo: Consensus calling methods go here
-			//String<unsigned int> coverage;
-			//		String<char> gappedConsensus;
-			//		String<Dna> consensusSequence;
-			//		if (consOpt.snp == 0) consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Majority_Vote() );
-			//		else consensusCalling(alignmentMatrix, consensusSequence, gappedConsensus, coverage, alignDepth, Bayesian() );
-		
+#ifdef SEQAN_PROFILE
+			if (consOpt.consensus == 0) ::std::cout << "Consensus calling: Majority vote" << ::std::endl;
+			else if (consOpt.consensus == 1) ::std::cout << "Consensus calling: Bayesian" << ::std::endl;
+#endif
+
+			if (consOpt.consensus == 0) consensusCalling(fragStore, currentContig, Majority_Vote() );
+			else if (consOpt.consensus == 1) consensusCalling(fragStore, currentContig, Bayesian() );
+#ifdef SEQAN_PROFILE
+				std::cout << "Consensus calling done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
+#endif	
 		} // end loop over all contigs
 	}
 	

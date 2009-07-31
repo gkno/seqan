@@ -1202,7 +1202,7 @@ write(TFile & file,
 		// Gapped consensus sequence
 		typedef String<TMultiReadChar> TGappedConsensus;
 		TGappedConsensus gappedConsensus;
-		getGappedConsensusSeq(fragStore, gappedConsensus, idCount);
+		getGappedConsensus(fragStore, gappedConsensus, idCount);
 
 		// Print the alignment matrix
 		String<TSize> coverage;
