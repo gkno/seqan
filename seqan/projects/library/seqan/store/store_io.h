@@ -1171,180 +1171,6 @@ _convertSimpleReadFile(TFile& file,
 //////////////////////////////////////////////////////////////////////////////
 
 
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TConfig, typename TMatrix, typename TSize2, typename TSize, typename TReadSlot> 
-inline bool
-convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
-				 TMatrix& mat,
-				 TSize2 contigId,
-				 TSize& coverage,
-				 TReadSlot& slot)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Value<TMatrix>::Type TValue;
-
-	// Gap char
-	TValue gapChar = gapValue<TValue>();
-
-	// Sort according to contigId
-	sortAlignedReads(fragStore.alignedReadStore, SortContigId());
-	
-	// Find range of the given contig
-	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
-	TAlignIter alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	TAlignIter alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-
-	// Sort the reads according to the begin position
-	sortAlignedReads(infix(fragStore.alignedReadStore, alignIt - begin(fragStore.alignedReadStore, Standard()), alignItEnd - begin(fragStore.alignedReadStore, Standard())), SortBeginPos());
-	TAlignIter alignItBegin = alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	alignItEnd = upperBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-
-	// Get the maximum coverage and the slot for each read
-	typedef String<TSize> TFirstFreePos;
-	typedef typename Iterator<TFirstFreePos, Standard>::Type TPosIter;
-	TFirstFreePos freePos;
-	TSize pos = 0;
-	TSize maxTmp = 0;
-	TSize numCol = 0;
-	reserve(slot, alignItEnd - alignIt);
-	for(;alignIt != alignItEnd; ++alignIt) {
-		TPosIter itPos = begin(freePos, Standard());
-		TPosIter itPosEnd = end(freePos, Standard());
-		pos = 0;
-		for(;itPos != itPosEnd; ++itPos, ++pos) 
-			if (*itPos < _min(alignIt->beginPos, alignIt->endPos)) break;
-		if (pos + 1 > length(freePos)) resize(freePos, pos+1, Generous());
-		maxTmp = _max(alignIt->beginPos, alignIt->endPos);
-		freePos[pos] = maxTmp;
-		if (maxTmp > numCol) numCol = maxTmp;
-		appendValue(slot, pos);
-	}
-	coverage = length(freePos);
-	clear(freePos);
-
-	// Fill the matrix
-	typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
-	fill(mat, coverage * numCol, '.');
-	alignIt = alignItBegin;
-	TSize readPos = 0;
-	TMatIter matIt = begin(mat, Standard());
-	typename TFragmentStore::TReadSeq myRead;
-	for(;alignIt != alignItEnd; ++alignIt, ++readPos) {
-		typedef typename Iterator<String<typename TFragmentStore::TReadGapAnchor>, Standard>::Type TReadGapsIter;
-		TReadGapsIter itGaps = begin(alignIt->gaps, Standard());
-		TReadGapsIter itGapsEnd = end(alignIt->gaps, Standard());
-		
-		// Place each read inside the matrix
-		myRead = fragStore.readSeqStore[alignIt->readId];
-		TSize lenRead = length(myRead);
-		TSize offset = alignIt->beginPos;
-		if (alignIt->beginPos > alignIt->endPos) {
-			reverseComplementInPlace(myRead);
-			offset = alignIt->endPos;
-		}
-		matIt = begin(mat, Standard());
-		matIt += (slot[readPos] * numCol + offset);
-
-		typedef typename Iterator<typename TFragmentStore::TReadSeq, Standard>::Type TReadIter;
-		TReadIter seqReadIt = begin(myRead, Standard());
-
-		// First clear range
-		TSize mySeqPos = 0;
-		int diff = 0;
-		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
-			mySeqPos = itGaps->seqPos;
-			diff = -1 * mySeqPos;
-			seqReadIt += mySeqPos;
-		}
-		TSize clr2 = lenRead;
-		TSize stop = 0;
-		for(;itGaps != itGapsEnd; ++itGaps) {
-			// Any clipped sequence at the end
-			stop =  itGaps->seqPos;
-			if (diff - ((int) itGaps->gapPos - (int) itGaps->seqPos) > 0) 
-				clr2 = stop = lenRead - (diff - ((int) itGaps->gapPos - (int) itGaps->seqPos));
-			
-			for(;mySeqPos < stop; ++matIt, ++seqReadIt, ++mySeqPos) 
-				*matIt = *seqReadIt;
-
-			for(int i = 0; i < ((int) itGaps->gapPos - (int) itGaps->seqPos) - diff; ++i, ++matIt) 
-				*matIt = gapChar;
-	
-			diff = (itGaps->gapPos - itGaps->seqPos);
-		}
-		for(;mySeqPos < clr2; ++mySeqPos, ++seqReadIt, ++matIt) 
-			*matIt = *seqReadIt;
-	}
-	//for(TSize row = 0; row < coverage; ++row) {
-	//	for(TSize col = 0; col<numCol; ++col) {
-	//		std::cout << mat[row * numCol + col];
-	//	}
-	//	std::cout << std::endl;
-	//}
-	return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TConfig, typename TMatrix, typename TSize2, typename TSize> 
-inline bool
-convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
-				 TMatrix& mat,
-				 TSize2 contigId,
-				 TSize& coverage)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	String<TSize> slot;
-	return convertAlignment(fragStore, mat, contigId, coverage, slot);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TConfig, typename TMatrix> 
-inline bool
-convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
-				 TMatrix& mat)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Size<TFragmentStore>::Type TSize;
-	TSize coverage;
-	return convertAlignment(fragStore, mat, 0, coverage);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TSpec, typename TConfig, typename TGappedConsensus, typename TSize> 
-inline void
-_getGappedConsensusSeq(FragmentStore<TSpec, TConfig>& fragStore,
-					   TGappedConsensus& gappedConsensus,
-					   TSize contigId)
-{
-	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-	typedef typename Value<TGappedConsensus>::Type TValue;
-	
-	TValue gapChar = gapValue<TValue>();
-	typedef typename Iterator<typename TFragmentStore::TContigSeq, Standard>::Type TContigIter;
-	TContigIter seqContigIt = begin(fragStore.contigStore[contigId].seq, Standard());
-	TContigIter seqContigItEnd = end(fragStore.contigStore[contigId].seq, Standard());
-	typedef typename Iterator<String<typename TFragmentStore::TContigGapAnchor>, Standard>::Type TGapsIter;
-	TGapsIter itGaps = begin(fragStore.contigStore[contigId].gaps, Standard());
-	TGapsIter itGapsEnd = end(fragStore.contigStore[contigId].gaps, Standard());
-	int diff = 0;
-	TSize mySeqPos = 0;
-	for(;itGaps != itGapsEnd; goNext(itGaps)) {
-		for(;mySeqPos < itGaps->seqPos; ++seqContigIt, ++mySeqPos) 
-			appendValue(gappedConsensus, *seqContigIt, Generous());
-			
-		for(int i = 0; i < ((int) itGaps->gapPos - (int) itGaps->seqPos) - diff; ++i) 
-			appendValue(gappedConsensus, gapChar, Generous());
-			diff = (itGaps->gapPos - itGaps->seqPos);
-	}
-	for(;seqContigIt != seqContigItEnd; ++seqContigIt) 
-		appendValue(gappedConsensus, *seqContigIt, Generous());
-}
-
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TSpec, typename TConfig>
@@ -1376,7 +1202,7 @@ write(TFile & file,
 		// Gapped consensus sequence
 		typedef String<TMultiReadChar> TGappedConsensus;
 		TGappedConsensus gappedConsensus;
-		_getGappedConsensusSeq(fragStore, gappedConsensus, idCount);
+		getGappedConsensusSeq(fragStore, gappedConsensus, idCount);
 
 		// Print the alignment matrix
 		String<TSize> coverage;
@@ -1485,6 +1311,14 @@ write(TFile & file,
 			_streamPut(file,',');
 			_streamPutInt(file, alignIt->endPos);
 			_streamPut(file,'\n');
+			TSize begClr = 0;
+			TSize endClr = 0;
+			getClrRange(fragStore, *alignIt, begClr, endClr);
+			_streamWrite(file,"clr:");
+			_streamPutInt(file, begClr);
+			_streamPut(file,',');
+			_streamPutInt(file, endClr);
+			_streamPut(file,'\n');
 
 			std::stringstream gapCoords;
 			TSize letterCount = 0;
@@ -1502,6 +1336,7 @@ write(TFile & file,
 			_streamWrite(file, gapCoords.str().c_str());
 			_streamPut(file,'\n');
 			_streamPut(file,'\n');
+
 		}
 	}
 }

@@ -210,7 +210,9 @@ int main(int argc, const char *argv[]) {
 #endif
 
 				// Align the reads
-				Graph<Alignment<StringSet<TReadSeq, Dependent<> >, void, WithoutEdgeId> > gOut(readSet);
+				typedef StringSet<TReadSeq, Dependent<> > TStringSet;
+				typedef Graph<Alignment<TStringSet, void, WithoutEdgeId> > TAlignGraph;
+				TAlignGraph gOut(readSet);
 				consensusAlignment(gOut, begEndPos, consOpt);
 #ifdef SEQAN_PROFILE
 				std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
