@@ -195,6 +195,7 @@ int main(int argc, const char *argv[]) {
 				::std::cout << "Bandwidth: " << consOpt.bandwidth << ::std::endl;
 				::std::cout << "Matchlength: " << consOpt.matchlength << ::std::endl;
 				::std::cout << "Quality: " << consOpt.quality << ::std::endl;
+				::std::cout << "Overlaps: " << consOpt.overlaps << ::std::endl;
 				::std::cout << "Window: " << consOpt.window << ::std::endl;
 #endif
 

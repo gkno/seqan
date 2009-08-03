@@ -829,12 +829,12 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		appendValue(posPrDist, prDist, Generous());
 	}
 
-	bool run = false;
+	TSize run = 1;
 	TProbabilityDistribution pI;
 	TProbabilityDistribution pIJ;
 	TProbabilityDistribution pIOld;
 	TProbabilityDistribution pIJOld;
-	while((run) || (empty(pIOld))) {
+	while (run) {
 		// Store the values from the last iteration
 		pIOld = pI;
 		pIJOld = pIJ;
@@ -842,20 +842,19 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		// Count all letters in the consensus
 		TProbabilityDistribution nI;
 		fill(nI, alphabetSize + 1, 0);
-		TPosPrDistIter itPosPrDist = begin(posPrDist);
-		TPosPrDistIter itPosPrDistEnd = end(posPrDist);
-		for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist) {
-			for(TSize i = 0; i<(alphabetSize + 1); ++i) {
-				value(nI, i) += value(value(itPosPrDist), i);
-			}
-		}
+		TPosPrDistIter itPosPrDist = begin(posPrDist, Standard());
+		TPosPrDistIter itPosPrDistEnd = end(posPrDist, Standard());
+		for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist) 
+			for(TSize i = 0; i<(alphabetSize + 1); ++i) 
+				nI[i] += (*itPosPrDist)[i];
 	
 		// Composition probabilities
 		clear(pI);
 		resize(pI, alphabetSize + 1);
-		for(TSize i = 0; i<length(pI); ++i) {
-			value(pI, i) = (TProbability) value(nI, i) / (TProbability) length(posPrDist);
-		}
+		TProbability lenPosPrDist = (TProbability) length(posPrDist);
+		for(TSize i = 0; i<length(pI); ++i) 
+			pI[i] = nI[i] / lenPosPrDist;
+		
 
 		// Count all letters that agree / disagree with the consensus
 		TProbabilityDistribution nIJ;
@@ -867,14 +866,12 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		itPosPrDist = begin(posPrDist, Standard());
 		TSize pos = 0;
 		for(; matIt != matItEnd; ++matIt, ++itPosPrDist, ++pos) {
-			if (pos % len == 0) itPosPrDist = begin(posPrDist);
+			if (pos % len == 0) itPosPrDist = begin(posPrDist, Standard());
 			TValue c = *matIt;
 			if (c != specialGap) {
-				TSize fragJ = alphabetSize;
-				if (c != gapChar) fragJ = ordValue(TAlphabet(c));
-				for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
-					value(nIJ, consI * (alphabetSize + 1) + fragJ) += 1.0 * value(value(itPosPrDist), consI);
-				}
+				TSize fragJ = (c != gapChar) ? ordValue(TAlphabet(c)) : alphabetSize;
+				for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) 
+					nIJ[consI * (alphabetSize + 1) + fragJ] += (*itPosPrDist)[consI];	
 			}
 		}
 
@@ -882,45 +879,11 @@ consensusCalling(String<TValue, TSpec> const& mat,
 		clear(pIJ);
 		resize(pIJ, (alphabetSize + 1) * (alphabetSize + 1));
 		TProbability sumIJ = 0;
-		for(TSize diag = 0; diag<(alphabetSize + 1); ++diag) sumIJ += value(nIJ, diag * (alphabetSize + 1) + diag);
-		for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
-			for(TSize fragJ = 0; fragJ<(alphabetSize + 1); ++fragJ) {
-				value(pIJ, consI * (alphabetSize + 1) + fragJ) = value(nIJ, consI * (alphabetSize + 1) + fragJ) / sumIJ;
-			}
-		}
+		for(TSize diag = 0; diag<(alphabetSize + 1); ++diag) sumIJ += nIJ[diag * (alphabetSize + 1) + diag];
+		for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) 
+			for(TSize fragJ = 0; fragJ<(alphabetSize + 1); ++fragJ)
+				pIJ[consI * (alphabetSize + 1) + fragJ] = nIJ[consI * (alphabetSize + 1) + fragJ] / sumIJ;
 	
-		//// Debug Code
-		//std::cout << "A " << value(pI, 0) << std::endl;
-		//std::cout << "C " << value(pI, 1) << std::endl;
-		//std::cout << "G " << value(pI, 2) << std::endl;
-		//std::cout << "T " << value(pI, 3) << std::endl;
-		//std::cout << "- " << value(pI, 4) << std::endl;
-		//std::cout << "AA " << value(pIJ, 0) << std::endl;
-		//std::cout << "AC " << value(pIJ, 1) << std::endl;
-		//std::cout << "AG " << value(pIJ, 2) << std::endl;
-		//std::cout << "AT " << value(pIJ, 3) << std::endl;
-		//std::cout << "A- " << value(pIJ, 4) << std::endl;
-		//std::cout << "CA " << value(pIJ, 5) << std::endl;
-		//std::cout << "CC " << value(pIJ, 6) << std::endl;
-		//std::cout << "CG " << value(pIJ, 7) << std::endl;
-		//std::cout << "CT " << value(pIJ, 8) << std::endl;
-		//std::cout << "C- " << value(pIJ, 9) << std::endl;
-		//std::cout << "GA " << value(pIJ, 10) << std::endl;
-		//std::cout << "GC " << value(pIJ, 11) << std::endl;
-		//std::cout << "GG " << value(pIJ, 12) << std::endl;
-		//std::cout << "GT " << value(pIJ, 13) << std::endl;
-		//std::cout << "G- " << value(pIJ, 14) << std::endl;
-		//std::cout << "TA " << value(pIJ, 15) << std::endl;
-		//std::cout << "TC " << value(pIJ, 16) << std::endl;
-		//std::cout << "TG " << value(pIJ, 17) << std::endl;
-		//std::cout << "TT " << value(pIJ, 18) << std::endl;
-		//std::cout << "T- " << value(pIJ, 19) << std::endl;
-		//std::cout << "-A " << value(pIJ, 20) << std::endl;
-		//std::cout << "-C " << value(pIJ, 21) << std::endl;
-		//std::cout << "-G " << value(pIJ, 22) << std::endl;
-		//std::cout << "-T " << value(pIJ, 23) << std::endl;
-		//std::cout << "-- " << value(pIJ, 24) << std::endl;
-
 		// Recompute positional probability distribution
 		itPosPrDist = begin(posPrDist, Standard());
 		TSize col = 0;
@@ -928,77 +891,81 @@ consensusCalling(String<TValue, TSpec> const& mat,
 			TProbabilityDistribution prDist;
 			resize(prDist, alphabetSize + 1);
 			for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
-				TProbability numerator = value(pI, consI);
+				TProbability numerator = pI[consI];
 				TProbability denominator = 0;
 				for(TSize allI = 0; allI<(alphabetSize + 1); ++allI) {
 					TProbability denominatorSub = value(pI, allI);
 					for(TSize row = 0; row < maxCoverage; ++row) {
-						TValue c = value(mat, row * len + col);
-						if (c == specialGap) continue;
-						TSize fragJ = alphabetSize;
-						if (c != gapChar) fragJ = ordValue(TAlphabet(c));
-						if (allI == consI) {
-							numerator *= value(pIJ, allI * (alphabetSize + 1) + fragJ); 
+						TValue c = mat[row * len + col];
+						if (c != specialGap) {
+							TSize fragJ = (c != gapChar) ? ordValue(TAlphabet(c)) : alphabetSize;
+							if (allI == consI) 
+								numerator *= pIJ[allI * (alphabetSize + 1) + fragJ]; 
+							denominatorSub *= pIJ[allI * (alphabetSize + 1) + fragJ]; 
 						}
-						denominatorSub *= value(pIJ, allI * (alphabetSize + 1) + fragJ); 
 					}
 					denominator += denominatorSub;
 				}
-				value(prDist, consI) = numerator / denominator;
+				prDist[consI] = numerator / denominator;
 			}
-			value(itPosPrDist) = prDist;
+			*itPosPrDist = prDist;
 		}	
 
 		// Check termination criterion
 		TProbability eps = 0.00001;
-		typedef typename Iterator<TProbabilityDistribution>::Type TProbIter;
-		TProbIter pIter = begin(pIOld);
-		TProbIter pIterCompare = begin(pI);
-		TProbIter pIterEnd = end(pIOld);
-		run = false;
-		for(;pIter != pIterEnd; goNext(pIter), goNext(pIterCompare)) {
-			if (value(pIter) > value(pIterCompare)) {
-				if (value(pIter) - value(pIterCompare) > eps) {
-					run = true;
+		typedef typename Iterator<TProbabilityDistribution, Standard>::Type TProbIter;
+		TProbIter pIter = begin(pIOld, Standard());
+		TProbIter pIterCompare = begin(pI, Standard());
+		TProbIter pIterEnd = end(pIOld, Standard());
+		TSize runOld = run;
+		for(;pIter != pIterEnd; ++pIter, ++pIterCompare) {
+			if (*pIter > *pIterCompare) {
+				if (*pIter - *pIterCompare > eps) {
+					++run;
 					break;
 				}
 			} else {
-				if (value(pIterCompare) - value(pIter) > eps) {
-					run = true;
+				if (*pIterCompare - *pIter > eps) {
+					++run;
 					break;
 				}
 			}
 		}
-		if (!run) {
-			pIter = begin(pIJOld);
-			pIterCompare = begin(pIJ);
-			pIterEnd = end(pIJOld);
-			for(;pIter != pIterEnd; goNext(pIter), goNext(pIterCompare)) {
-				if (value(pIter) > value(pIterCompare)) {
-					if (value(pIter) - value(pIterCompare) > eps) {
-						run = true;
+		if (runOld == run) {
+			pIter = begin(pIJOld, Standard());
+			pIterCompare = begin(pIJ, Standard());
+			pIterEnd = end(pIJOld, Standard());
+			for(;pIter != pIterEnd; ++pIter, ++pIterCompare) {
+				if (*pIter > *pIterCompare) {
+					if (*pIter - *pIterCompare > eps) {
+						++run;
 						break;
 					}
 				} else {
-					if (value(pIterCompare) - value(pIter) > eps) {
-						run = true;
+					if (*pIterCompare - *pIter > eps) {
+						++run;
 						break;
 					}
 				}
 			}
+		}
+
+		if (runOld == run) {
+			std::cout << "Iterations: " << run << std::endl;
+			run = 0;
 		}
 	}
 	
 	// Compute the most likely consensus
-	TPosPrDistIter itPosPrDist = begin(posPrDist);
-	TPosPrDistIter itPosPrDistEnd = end(posPrDist);
+	TPosPrDistIter itPosPrDist = begin(posPrDist, Standard());
+	TPosPrDistIter itPosPrDistEnd = end(posPrDist, Standard());
 	clear(gappedConsensus);
-	for(;itPosPrDist!=itPosPrDistEnd; goNext(itPosPrDist)) {
+	for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist) {
 		TProbability max = 0;
 		TSize ind = 0;
 		for(TSize consI = 0; consI<(alphabetSize + 1); ++consI) {
-			if (value(value(itPosPrDist), consI) > max) {
-				max = value(value(itPosPrDist), consI);
+			if ((*itPosPrDist)[consI] > max) {
+				max = (*itPosPrDist)[consI];
 				ind = consI;
 			}
 		}
