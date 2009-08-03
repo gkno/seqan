@@ -110,7 +110,7 @@ int main(int argc, const char *argv[]) {
 	else if (optionVal == "msa") consOpt.method = 1;
 	getOptionValueLong(parser, "bandwidth", consOpt.bandwidth);
 #ifdef CELERA_OFFSET
-	if (!isSetLong(parser, "bandwidth") consOpt.bandwidth = 15;	
+	if (!isSetLong(parser, "bandwidth")) consOpt.bandwidth = 15;	
 #endif
 	getOptionValueLong(parser, "consensus", optionVal);
 	if (optionVal == "majority") consOpt.consensus = 0;
@@ -122,7 +122,7 @@ int main(int argc, const char *argv[]) {
 	getOptionValueLong(parser, "quality", consOpt.quality);
 	getOptionValueLong(parser, "overlaps", consOpt.overlaps);
 #ifdef CELERA_OFFSET
-	if (!isSetLong(parser, "overlaps") consOpt.overlaps = 5;	
+	if (!isSetLong(parser, "overlaps")) consOpt.overlaps = 5;	
 #endif
 	getOptionValueLong(parser, "window", consOpt.window);
 	
