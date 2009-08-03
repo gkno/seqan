@@ -113,8 +113,11 @@ selectPairs(StringSet<TString, TSpec> const& str,
 	typedef StringSet<TString, TSpec> TStringSet;
 	typedef Pair<TPos, TPos> TDiagPair;
 	typedef typename Value<TPairList>::Type TPair;
-	typedef typename Iterator<TPairList>::Type TPairIter;
-	typedef typename Iterator<TBegEndPos>::Type TBegEndIter;
+	typedef typename Iterator<TPairList, Standard>::Type TPairIter;
+	typedef typename Iterator<TBegEndPos, Standard>::Type TBegEndIter;
+
+	// Initialization
+	TSize nseq = length(str);
 
 	// Workaround for strange celera behaviour (just for contained reads)
 #ifdef CELERA_OFFSET
@@ -124,21 +127,17 @@ selectPairs(StringSet<TString, TSpec> const& str,
 #endif
 	
 	// Sort the reads by their first index position
-	TBegEndIter begEndIt = begin(begEndPos);
-	TBegEndIter begEndItEnd = end(begEndPos);
+	TBegEndIter begEndIt = begin(begEndPos, Standard());
+	TBegEndIter begEndItEnd = end(begEndPos, Standard());
 	typedef Triple<TSize, TSize, TSize> TInfo;
 	typedef String<Pair<TSize, TInfo> > TPosIndexList;
-	typedef typename Iterator<TPosIndexList>::Type TPosIter;
+	typedef typename Iterator<TPosIndexList, Standard>::Type TPosIter;
 	TPosIndexList posIndex;
 	resize(posIndex, length(begEndPos));
-	TPosIter posIndexIt = begin(posIndex);
-	TPosIter posIndexItEnd = end(posIndex);
-	for(TSize index = 0;begEndIt != begEndItEnd; goNext(begEndIt), goNext(posIndexIt), ++index) {
-		TSize pos1 = (value(begEndIt)).i1;
-		TSize pos2 = (value(begEndIt)).i2;
-		if (pos1 < pos2) value(posIndexIt) = Pair<TSize, TInfo>(pos1,TInfo(index, pos1, pos2));
-		else value(posIndexIt) = Pair<TSize, TInfo>(pos2,TInfo(index, pos1, pos2));
-	}
+	TPosIter posIndexIt = begin(posIndex, Standard());
+	TPosIter posIndexItEnd = end(posIndex, Standard());
+	for(TSize index = 0;begEndIt != begEndItEnd; ++begEndIt, ++posIndexIt, ++index) 
+		*posIndexIt = ((*begEndIt).i1 < (*begEndIt).i2) ? Pair<TSize, TInfo>((*begEndIt).i1,TInfo(index, (*begEndIt).i1, (*begEndIt).i2)) : Pair<TSize, TInfo>((*begEndIt).i2,TInfo(index, (*begEndIt).i1, (*begEndIt).i2));
 	std::sort(begin(posIndex, Standard() ), end(posIndex, Standard() ), _LessTripel<TSize>() );
 
 	// The expected overlap by a pair of reads (represented by its index)
@@ -149,42 +148,31 @@ selectPairs(StringSet<TString, TSpec> const& str,
 	TPos const lengthDivider = 5;	// Overlap / 2^lengthDivider is added to the radius
 
 	// Find all overlapping reads
-	TSize nseq = length(str);
 	TDistanceList preDList;
 	TPairList prePList;
 	reserve(preDList, nseq * 40);
 	reserve(prePList, nseq * 40);
 	reserve(ovlIndex, nseq * 40);
-	posIndexIt = begin(posIndex);
-	posIndexItEnd = end(posIndex);
-	for(;posIndexIt != posIndexItEnd; goNext(posIndexIt)) {
-		TSize index1 = ((value(posIndexIt)).i2).i1;
-		TPos posIi1 = ((value(posIndexIt)).i2).i2;
-		TPos posIi2 = ((value(posIndexIt)).i2).i3;
-		TSize lenI = 0;
-		bool forwardI = true;
-		if (posIi1 < posIi2) lenI = posIi2 - posIi1;
-		else {
-			lenI = posIi1 - posIi2;
-			forwardI = false;
-		}
+	posIndexIt = begin(posIndex, Standard());
+	posIndexItEnd = end(posIndex, Standard());
+	for(;posIndexIt != posIndexItEnd; ++posIndexIt) {
+		TSize index1 = ((*posIndexIt).i2).i1;
+		TPos posIi1 = ((*posIndexIt).i2).i2;
+		TPos posIi2 = ((*posIndexIt).i2).i3;
+		bool forwardI = (posIi1 < posIi2) ? true : false;
+		TSize lenI = (posIi1 < posIi2) ? posIi2 - posIi1 : posIi1 - posIi2;
 		TPosIter posIndexIt2 = posIndexIt;
-		goNext(posIndexIt2);
-		for(;posIndexIt2 != posIndexItEnd; goNext(posIndexIt2)) {
-			if ((value(posIndexIt)).i1 + lenI <= (value(posIndexIt2)).i1) break;
-			TSize index2 = ((value(posIndexIt2)).i2).i1;
-			TPos posJi1 = ((value(posIndexIt2)).i2).i2;
-			TPos posJi2 = ((value(posIndexIt2)).i2).i3;
+		++posIndexIt2;
+		for(;posIndexIt2 != posIndexItEnd; ++posIndexIt2) {
+			if ((*posIndexIt).i1 + lenI <= (*posIndexIt2).i1) break;
+			TSize index2 = ((*posIndexIt2).i2).i1;
+			TPos posJi1 = ((*posIndexIt2).i2).i2;
+			TPos posJi2 = ((*posIndexIt2).i2).i3;
 
 			// Diagonal boundaries of the band
 			// Initialization values are used if one read is contained in the other 
-			TSize lenJ = 0;
-			bool forwardJ = true;
-			if (posJi1 < posJi2) lenJ = posJi2 - posJi1;
-			else {
-				forwardJ = false;
-				lenJ = posJi1 - posJi2;
-			}
+			TSize lenJ = (posJi1 < posJi2) ? posJi2 - posJi1 : posJi1 - posJi2;
+			bool forwardJ = (posJi1 < posJi2) ? true : false;
 			TPos diagLow = -1 * (TPos) lenJ;
 			TPos diagHigh = (TPos) lenI;
 			TPos radius = initialRadius;		// Increased by overlap length
@@ -300,37 +288,31 @@ selectPairs(StringSet<TString, TSpec> const& str,
 
 			// Append this pair of reads
 			if (index1 < index2) {
-				appendValue(prePList, TPair(positionToId(str, index1), positionToId(str, index2)));
-				appendValue(preDList, TDiagPair(diagLow, diagHigh));
+				appendValue(prePList, TPair(positionToId(str, index1), positionToId(str, index2)), Generous());
+				appendValue(preDList, TDiagPair(diagLow, diagHigh), Generous());
 			} else {
-				appendValue(prePList, TPair(positionToId(str, index2), positionToId(str, index1)));
-				appendValue(preDList, TDiagPair(-1 * diagHigh, -1 * diagLow));
+				appendValue(prePList, TPair(positionToId(str, index2), positionToId(str, index1)), Generous());
+				appendValue(preDList, TDiagPair(-1 * diagHigh, -1 * diagLow), Generous());
 			}
 			// Estimate the overlap quality
 			TPos avgDiag = (diagLow + diagHigh) / 2;
 			if (avgDiag < 0) avgDiag *= -1;
-			appendValue(ovlIndex, Pair<TSize, TSize>((TSize) (avgDiag), pairLen)); 
+			appendValue(ovlIndex, Pair<TSize, TSize>((TSize) (avgDiag), pairLen), Generous()); 
 			++pairLen;
 		}
 	}
 
 	// Sort the pairs, better expected overlaps come first
 	std::sort(begin(ovlIndex, Standard() ), end(ovlIndex, Standard() ), _LessPair<TSize>() );
-	typedef typename Iterator<TOverlapIndexList>::Type TOVLIter;
-	TOVLIter itOvl = begin(ovlIndex);
-	TOVLIter itOvlEnd = end(ovlIndex);
+	typedef typename Iterator<TOverlapIndexList, Standard>::Type TOVLIter;
+	TOVLIter itOvl = begin(ovlIndex, Standard());
+	TOVLIter itOvlEnd = end(ovlIndex, Standard());
 	reserve(dList, pairLen);
 	reserve(pList, pairLen);
-	for(;itOvl != itOvlEnd; goNext(itOvl)) {
-		TSize count = (value(itOvl)).i2;
-		//// Debug Code
-		//std::cout << "Pair: " << count << ',' << "Priority: " << (value(itOvl)).i1 << std::endl;
-		//std::cout << "First read: " << value(prePList, count).i1 << ',' <<  "Second read: " << value(prePList, count).i2 << std::endl;
-		//std::cout << "Low Diag: " << value(preDList, count).i1 << ',' << "High Diag: " << value(preDList, count).i2 << std::endl;
-		//std::cout << value(begEndPos, value(prePList, count).i1).i1 << ',' << value(begEndPos, value(prePList, count).i1).i2 << std::endl;
-		//std::cout << value(begEndPos, value(prePList, count).i2).i1 << ',' << value(begEndPos, value(prePList, count).i2).i2 << std::endl;
-		appendValue(dList, value(preDList, count));
-		appendValue(pList, value(prePList, count));
+	for(;itOvl != itOvlEnd; ++itOvl) {
+		TSize count = (*itOvl).i2;
+		appendValue(dList, preDList[count], Generous());
+		appendValue(pList, prePList[count], Generous());
 	}
 }
 
