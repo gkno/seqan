@@ -663,56 +663,56 @@ graphBasedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& 
 	SEQAN_TASSERT(itC == end(edges_cargo))
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec>
-inline void 
-reducedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
-{
-	SEQAN_CHECKPOINT
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-
-
-	// Just augment existing edges
-	String<TCargo> newCargoMap;
-	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
-	TEdgeIterator it(g);
-	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
-
-	// Iterate over all vertices
-	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
-		TOutEdgeIterator outIt1(g, *itVertex);
-		while (!atEnd(outIt1)) {
-			TOutEdgeIterator outIt2 = outIt1;
-			goNext(outIt2);
-			// Consider always 2 neighbors
-			while (!atEnd(outIt2)) {
-				TVertexDescriptor tV1 = targetVertex(outIt1);
-				TVertexDescriptor tV2 = targetVertex(outIt2);
-				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
-					TEdgeDescriptor e = findEdge(g, tV1, tV2);
-					if (e != 0) {
-						// Increase weight of existing edge
-						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
-						else property(newCargoMap, e) += getCargo(*outIt2);	
-					}
-				}
-				goNext(outIt2);
-			}
-			goNext(outIt1);
-		}
-	}
-
-	// Assign the new weights and clean-up the cargo map
-	TEdgeIterator itE(g);
-	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = property(newCargoMap, value(itE));
-	clear(newCargoMap);
-}
+////////////////////////////////////////////////////////////////////////////////
+//
+//template<typename TStringSet, typename TCargo, typename TSpec>
+//inline void 
+//reducedTripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
+//{
+//	SEQAN_CHECKPOINT
+//	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+//	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
+//	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
+//	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
+//	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+//
+//
+//	// Just augment existing edges
+//	String<TCargo> newCargoMap;
+//	resize(newCargoMap, getIdUpperBound(_getEdgeIdManager(g)), Exact());
+//	TEdgeIterator it(g);
+//	for(;!atEnd(it);++it) assignProperty(newCargoMap, *it, cargo(*it));
+//
+//	// Iterate over all vertices
+//	for(TVertexIterator itVertex(g);!atEnd(itVertex);++itVertex) {
+//		TOutEdgeIterator outIt1(g, *itVertex);
+//		while (!atEnd(outIt1)) {
+//			TOutEdgeIterator outIt2 = outIt1;
+//			goNext(outIt2);
+//			// Consider always 2 neighbors
+//			while (!atEnd(outIt2)) {
+//				TVertexDescriptor tV1 = targetVertex(outIt1);
+//				TVertexDescriptor tV2 = targetVertex(outIt2);
+//				if (sequenceId(g, tV1) != sequenceId(g,tV2)) {
+//					TEdgeDescriptor e = findEdge(g, tV1, tV2);
+//					if (e != 0) {
+//						// Increase weight of existing edge
+//						if (getCargo(*outIt2) > getCargo(*outIt1)) property(newCargoMap, e) += getCargo(*outIt1);
+//						else property(newCargoMap, e) += getCargo(*outIt2);	
+//					}
+//				}
+//				goNext(outIt2);
+//			}
+//			goNext(outIt1);
+//		}
+//	}
+//
+//	// Assign the new weights and clean-up the cargo map
+//	TEdgeIterator itE(g);
+//	for(;!atEnd(itE);goNext(itE)) cargo(value(itE)) = property(newCargoMap, value(itE));
+//	clear(newCargoMap);
+//}
 
 //////////////////////////////////////////////////////////////////////////////
 // Sum of Pairs Scoring

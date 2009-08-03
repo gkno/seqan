@@ -467,8 +467,7 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	clear(pairGraph);
 
 	// Triplet library extension
-	if ( ((2 * numEdges(g)) / numVertices(g) ) < 50 ) graphBasedTripletLibraryExtension(g);
-	else reducedTripletLibraryExtension(g);
+	graphBasedTripletLibraryExtension(g);
 #ifdef SEQAN_PROFILE
 	std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
 #endif

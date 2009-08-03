@@ -80,7 +80,7 @@ int main(int argc, const char *argv[]) {
 
 	addSection(parser, "ReAlign Method Options:");
 	addOption(parser, CommandLineOption("in", "include", "include contig sequence", OptionType::Boolean));
-	addOption(parser, addArgumentText(CommandLineOption("rm", "rmethod", "realign method", OptionType::String, "nw"), "[nw | gotoh]"));
+	addOption(parser, addArgumentText(CommandLineOption("rm", "rmethod", "realign method", OptionType::String, "gotoh"), "[nw | gotoh]"));
 
 	if (argc == 1)
 	{
