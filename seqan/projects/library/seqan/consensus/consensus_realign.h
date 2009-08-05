@@ -237,6 +237,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
 		int rightDiag = leftDiag + 2 * bandwidth;
+		int increaseBand = 0;
 		typedef String<bool> TAlignPic;
 		TAlignPic alignPic;
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
@@ -285,6 +286,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				++itCons;
 			}
 			for(;diff < newDiff; ++diff) {
+				++increaseBand;
 				--(*itCons).count[gapPos];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -331,10 +333,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		bool isBegin1 = true;
 		TSize removedBeginPos = 0;
 		TSize removedEndPos = 0;
-		int removedInternal = 0;
 		for(;itAPic != itAPicEnd; ++itAPic) {
 			if (*itAPic) {
-				++removedInternal;
+				++increaseBand;
 				++removedEndPos;
 				if (isBegin1) ++removedBeginPos;
 			} else {
@@ -342,8 +343,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				removedEndPos = 0;
 			}
 		}
-		if (isBegin1) removedBeginPos = removedEndPos = removedInternal = 0;
-		else removedInternal -= (removedBeginPos + removedEndPos);
+		if (isBegin1) removedBeginPos = removedEndPos = 0;
+		increaseBand -= (removedBeginPos + removedEndPos);
 
 		//for(TSize i = 0; i<length( pairSet[0]); ++i) {
 		//	std::cout <<  pairSet[0][i] << std::endl;
@@ -366,12 +367,12 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			leftDiag += offset;
 			rightDiag += offset;
 		}
-		if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - removedInternal, -1 * (int) length(pairSet[1])), _min(rightDiag + removedInternal, (int) length(pairSet[0])), BandedNeedlemanWunsch());
-		else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - removedInternal, -1 * (int) length(pairSet[1])), _min(rightDiag + removedInternal, (int) length(pairSet[0])), BandedGotoh());
+		if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+		else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		
 		//// Debug code
 		//Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
-		//int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - removedInternal, -1 * (int) length(pairSet[1])), _min(rightDiag + removedInternal, (int) length(pairSet[0])), BandedGotoh());
+		//int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		//std::cout << sc1 << std::endl;
 		//std::cout << g1 << std::endl;
 		
