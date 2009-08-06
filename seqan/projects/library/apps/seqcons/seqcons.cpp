@@ -63,10 +63,9 @@ int main(int argc, const char *argv[]) {
 	addOption(parser, addArgumentText(CommandLineOption("r", "reads", "file with reads", OptionType::String), "<FASTA reads file>"));
 	addOption(parser, addArgumentText(CommandLineOption("a", "afg", "message file", OptionType::String), "<AMOS afg file>"));
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "align.txt"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "seqan"), "[seqan | afg]"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "afg"), "[seqan | afg]"));
 	addOption(parser, addArgumentText(CommandLineOption("m", "method", "multi-read alignment method", OptionType::String, "realign"), "[realign | msa]"));
 	addOption(parser, addArgumentText(CommandLineOption("b", "bandwidth", "bandwidth", OptionType::Int, 8), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("c", "consensus", "consensus calling", OptionType::String, "majority"), "[majority | bayesian]"));
 	addOption(parser, CommandLineOption("n", "noalign", "no align, only convert input", OptionType::Boolean));
 
 	addSection(parser, "MSA Method Options:");
@@ -112,9 +111,6 @@ int main(int argc, const char *argv[]) {
 #ifdef CELERA_OFFSET
 	if (!isSetLong(parser, "bandwidth")) consOpt.bandwidth = 15;	
 #endif
-	getOptionValueLong(parser, "consensus", optionVal);
-	if (optionVal == "majority") consOpt.consensus = 0;
-	else if (optionVal == "bayesian") consOpt.consensus = 1;
 	getOptionValueLong(parser, "noalign", consOpt.noalign);
 
 	// Msa options
@@ -143,7 +139,9 @@ int main(int argc, const char *argv[]) {
 	if (!empty(consOpt.readsfile)) {
 		// Load simple read file
 		FILE* strmReads = fopen(consOpt.readsfile.c_str(), "rb");
-		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, true);
+		bool moveToFront = false;
+		if ((consOpt.output == 2) || (consOpt.output == 3)) moveToFront = true;
+		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, moveToFront);
 		fclose(strmReads);
 		if (!success) { 
 			shortHelp(parser, std::cerr);
@@ -247,17 +245,6 @@ int main(int argc, const char *argv[]) {
 				//}
 				//strm3.close();
 			}
-
-#ifdef SEQAN_PROFILE
-			if (consOpt.consensus == 0) ::std::cout << "Consensus calling: Majority vote" << ::std::endl;
-			else if (consOpt.consensus == 1) ::std::cout << "Consensus calling: Bayesian" << ::std::endl;
-#endif
-
-			if (consOpt.consensus == 0) consensusCalling(fragStore, currentContig, Majority_Vote() );
-			else if (consOpt.consensus == 1) consensusCalling(fragStore, currentContig, Bayesian() );
-#ifdef SEQAN_PROFILE
-				std::cout << "Consensus calling done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif	
 		} // end loop over all contigs
 	}
 	

@@ -225,9 +225,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TConsIter itConsEnd = end(consensus, Standard() );
 
 		// Initialize the consensus of the band
-		TSize lenRead = length(fragStore.readSeqStore[alignIt->readId]);
-		fill(myRead, lenRead, TProfileChar());
-		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos));
+		fill(myRead, length(fragStore.readSeqStore[alignIt->readId]), TProfileChar());
+		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos), Generous());
 		TConsIter bandConsIt = begin(bandConsensus);
 		TConsIter myReadIt = begin(myRead);
 		TReadPos bandOffset = 0;
@@ -238,10 +237,11 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
 		int rightDiag = leftDiag + 2 * bandwidth;
 		int increaseBand = 0;
-		typedef String<bool> TAlignPic;
-		TAlignPic alignPic;
+		int removedBeginPos = 0;
+		int removedEndPos = 0;
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons;
+		TSize itConsPosBegin = itConsPos;
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
 
@@ -273,12 +273,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			for(;old < limit; ++old, ++itRead) {
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
-					appendValue(alignPic, false, Generous());
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
+					removedEndPos = 0;
 				} else {
-					appendValue(alignPic, true, Generous());
+					if (itConsPosBegin != itConsPos) {
+						++increaseBand;
+						++removedEndPos;
+					} else ++removedBeginPos;
 					removeGap(contigReads, itConsPos);
 				}
 				(*myReadIt).count[0] = ordValue(*itRead); 
@@ -300,12 +303,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			for(;itRead!=itReadEnd; ++itRead) {
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
-					appendValue(alignPic, false, Generous());
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
+					removedEndPos = 0;
 				} else {
-					appendValue(alignPic, true, Generous());
+					if (itConsPosBegin != itConsPos) {
+						++increaseBand;
+						++removedEndPos;
+					} else ++removedBeginPos;
 					removeGap(contigReads, itConsPos);
 				}
 				(*myReadIt).count[0] = ordValue(*itRead); 
@@ -313,38 +319,20 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				++itCons;
 			}
 		}
+		bool singleton = (itConsPosBegin == itConsPos);
+		increaseBand -= removedEndPos;
 
 		// Go further up to the bandwidth
 		for(TReadPos iPos = 0; ((itCons != itConsEnd) && (iPos < (TReadPos) bandwidth)); ++itCons, ++iPos, ++bandConsIt)
 				*bandConsIt = *itCons;
-		resize(bandConsensus, bandConsIt - begin(bandConsensus, Standard()));
-		resize(myRead, myReadIt - begin(myRead, Standard()));
+		resize(bandConsensus, bandConsIt - begin(bandConsensus, Standard()), Generous());
+		resize(myRead, myReadIt - begin(myRead, Standard()), Generous());
 
 		// ReAlign the consensus with the sequence
 		typedef StringSet<TConsensus, Dependent<> > TStringSet;
 		TStringSet pairSet;
 		appendValue(pairSet, bandConsensus);
 		appendValue(pairSet, myRead);
-
-		// Do we have to shift or increase the band due to deleted consensus positions
-		typedef typename Iterator<TAlignPic, Standard>::Type TAlignPicIter;
-		TAlignPicIter itAPic = begin(alignPic, Standard());
-		TAlignPicIter itAPicEnd = end(alignPic, Standard());
-		bool isBegin1 = true;
-		TSize removedBeginPos = 0;
-		TSize removedEndPos = 0;
-		for(;itAPic != itAPicEnd; ++itAPic) {
-			if (*itAPic) {
-				++increaseBand;
-				++removedEndPos;
-				if (isBegin1) ++removedBeginPos;
-			} else {
-				isBegin1 = false;
-				removedEndPos = 0;
-			}
-		}
-		if (isBegin1) removedBeginPos = removedEndPos = 0;
-		increaseBand -= (removedBeginPos + removedEndPos);
 
 		//for(TSize i = 0; i<length( pairSet[0]); ++i) {
 		//	std::cout <<  pairSet[0][i] << std::endl;
@@ -362,14 +350,11 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		
 		leftDiag -= removedBeginPos;
 		rightDiag -= removedBeginPos;
-		if (removedEndPos) {
-			int offset = (rightDiag - leftDiag) / 2;
-			leftDiag += offset;
-			rightDiag += offset;
+		if (!singleton) {
+			if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
+			else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
 		}
-		if (rmethod == 0) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedNeedlemanWunsch());
-		else if (rmethod == 1) globalAlignment(matches, pairSet, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
-		
+
 		//// Debug code
 		//Graph<Alignment<TStringSet, void, WithoutEdgeId> > g1(pairSet);
 		//int sc1 = globalAlignment(g1, consScore, AlignConfig<true,false,false,true>(), _max(leftDiag - increaseBand, -1 * (int) length(pairSet[1])), _min(rightDiag + increaseBand, (int) length(pairSet[0])), BandedGotoh());
@@ -377,8 +362,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		//std::cout << g1 << std::endl;
 		
 		// Add the read back to the consensus and build the new consensus
-		resize(newConsensus, length(bandConsensus) + length(myRead));
-		TConsIter newConsIt = begin(newConsensus);
+		resize(newConsensus, length(bandConsensus) + length(myRead), Generous());
+		TConsIter newConsIt = begin(newConsensus, Standard());
 		TConsIter bandIt = begin(bandConsensus, Standard());
 		TConsIter bandItEnd = end(bandConsensus, Standard());
 		typedef typename Iterator<TFragmentString, Standard>::Type TFragIter;
@@ -442,7 +427,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			*newConsIt = tmpChar; ++newConsIt;
 			++alignPos;
 		}
-		if (end(matches, Standard() ) == fragItEnd) alignIt->beginPos = bandOffset;
+		if (singleton) alignIt->beginPos = bandOffset;
 		alignIt->endPos = alignIt->beginPos + clippedBeginPos + readPos + diff;
 		if (clippedEndPos) {
 			diff -= clippedEndPos;
@@ -450,9 +435,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		for(;bandIt != bandItEnd; ++bandIt, ++newConsIt) 
 			*newConsIt = *bandIt;
-		resize(newConsensus, newConsIt - begin(newConsensus));
+		resize(newConsensus, newConsIt - begin(newConsensus, Standard()), Generous());
 
-		// Replace the old consensus with the new one
 		infix(consensus, bandOffset, itCons - begin(consensus)) = newConsensus;
 	}
 }
@@ -599,7 +583,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 	// Update all the aligned reads and the new consensus
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
-	TAlignIter contigReadIt = begin(contigReads);
+	TAlignIter contigReadIt = begin(contigReads, Standard());
 	for(;alignIt != alignItEnd; ++alignIt) {
 		if (alignIt->beginPos > alignIt->endPos) {
 			reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
