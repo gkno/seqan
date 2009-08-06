@@ -140,7 +140,7 @@ int main(int argc, const char *argv[]) {
 		// Load simple read file
 		FILE* strmReads = fopen(consOpt.readsfile.c_str(), "rb");
 		bool moveToFront = false;
-		if ((consOpt.output == 2) || (consOpt.output == 3)) moveToFront = true;
+		if (consOpt.noalign) moveToFront = true;
 		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, moveToFront);
 		fclose(strmReads);
 		if (!success) { 
