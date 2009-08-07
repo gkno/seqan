@@ -64,14 +64,14 @@ int main(int argc, const char *argv[]) {
 	addOption(parser, addArgumentText(CommandLineOption("a", "afg", "message file", OptionType::String), "<AMOS afg file>"));
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "align.txt"), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "afg"), "[seqan | afg]"));
-	addOption(parser, addArgumentText(CommandLineOption("m", "method", "multi-read alignment method", OptionType::String, "realign"), "[realign | msa]"));
+	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", OptionType::String, "realign"), "[realign | msa]"));
 	addOption(parser, addArgumentText(CommandLineOption("b", "bandwidth", "bandwidth", OptionType::Int, 8), "<Int>"));
 	addOption(parser, CommandLineOption("n", "noalign", "no align, only convert input", OptionType::Boolean));
 
 	addSection(parser, "MSA Method Options:");
-	addOption(parser, addArgumentText(CommandLineOption("ma", "matchlength", "minimum overlap length", OptionType::Int, 15), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("qu", "quality", "minimum overlap precent identity", OptionType::Int, 80), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("ov", "overlaps", "minimum number of overlaps per read", OptionType::Int, 3), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matchlength", "min. overlap length", OptionType::Int, 15), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("qu", "quality", "min. overlap precent identity", OptionType::Int, 80), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ov", "overlaps", "min. number of overlaps per read", OptionType::Int, 3), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("wi", "window", "window size", OptionType::Int, 0), "<Int>"));
 	addHelpLine(parser, "/*If this parameter is > 0 then all");
 	addHelpLine(parser, "  overlaps within a given window");
