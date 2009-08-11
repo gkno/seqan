@@ -200,6 +200,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			edgeLen(0),
 			range(0,0),
 			parentRight(0) {}
+		_VertexWotdModified(Pair<TSize> const &otherRange, TSize otherParentRight):
+			node(0),
+			parentRepLen(0),
+			edgeLen(0),
+			range(otherRange),
+			parentRight(otherParentRight) {}
 	};
 
 	template < typename TText >

@@ -349,7 +349,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (!empty(indexSA(_index))) 
 			{
-				_dfsOnPush(*this, TStackEntry(0,0));
+				TStackEntry e;
+				e.range.i1 = 0;
+				e.range.i2 = 0;
+				_dfsOnPush(*this, e);
 				goNext(*this);
 			}
 		}
@@ -369,7 +372,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (!empty(indexSA(_index))) 
 			{
-				_dfsOnPush(*this, TStackEntry(0,0));
+				TStackEntry e;
+				e.range.i1 = 0;
+				e.range.i2 = 0;
+				_dfsOnPush(*this, e);
 				goNext(*this);
 			}
 		}
@@ -552,7 +558,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (empty(it.history))
 			return it.vDesc;
 		typedef typename VertexDescriptor<TSTree>::Type TDesc;
-		return TDesc(top(it.history).i1, it.vDesc.range.i2, 0);
+		return TDesc(top(it.history).range.i1, it.vDesc.range.i2, 0);
 	}
 //____________________________________________________________________________
 
@@ -560,7 +566,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Size<TSTree>::Type 
 	repLength(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
 	{
-		return top(it.history).i2;
+		return top(it.history).range.i2;
 	}
 //____________________________________________________________________________
 

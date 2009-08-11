@@ -178,7 +178,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (!empty(indexSA(_index))) 
 			{
-				_dfsOnPush(*this, TStackEntry(0,0));
+				TStackEntry e;
+				e.range.i1 = 0;
+				e.range.i2 = 0;
+				_dfsOnPush(*this, e);
 				goNext(*this);
 			}
 		}
@@ -200,7 +203,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			if (!empty(indexSA(_index))) 
 			{
-				_dfsOnPush(*this, TStackEntry(0,0));
+				TStackEntry e;
+				e.range.i1 = 0;
+				e.range.i2 = 0;
+				_dfsOnPush(*this, e);
 				goNext(*this);
 			}
 		}

@@ -138,10 +138,19 @@ This interval is the @Function.value@ of the iterator.
 	template < typename TVSTreeIter >
 	struct _HistoryStackEntry;
 	
+	template <typename TSize>
+	struct _HistoryStackESA
+	{
+		Pair<TSize> range;		// current SA interval of hits
+		_HistoryStackESA() {}
+		template <typename _TSize>
+		_HistoryStackESA(Pair<_TSize> const &_range): range(_range) {}
+	};
+
 	template < typename TIndex, typename TSpec >
 	struct _HistoryStackEntry< Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > >
 	{
-		typedef Pair<typename Size<TIndex>::Type>	Type;
+		typedef _HistoryStackESA<typename Size<TIndex>::Type>	Type;
 	};
 
 	template < typename TIndex, class TSpec >
@@ -196,13 +205,19 @@ This interval is the @Function.value@ of the iterator.
 */
 
 	template < typename TIndex, typename TSpec >
+	struct _HistoryStackEntry< Iter< TIndex, VSTree< BottomUp<TSpec> > > >
+	{
+		typedef _HistoryStackESA<typename Size<TIndex>::Type>	Type;
+	};
+
+	template < typename TIndex, typename TSpec >
 	class Iter< TIndex, VSTree< BottomUp<TSpec> > > 
 	{
 	public:
 
 		typedef typename VertexDescriptor<TIndex>::Type	TVertexDesc;
 		typedef typename Size<TIndex>::Type				TSize;
-		typedef	Pair<TSize>								TStackEntry;
+		typedef	typename _HistoryStackEntry<Iter>::Type	TStackEntry;
 		typedef String<TStackEntry, Block<> >			TStack;
 		typedef Iter									iterator;
 
@@ -268,7 +283,7 @@ This interval is the @Function.value@ of the iterator.
 	template < typename TIndex, typename TSpec >
 	inline void _dumpHistoryStack(Iter<TIndex, VSTree<TSpec> > &it) {
 		for(typename Size<TIndex>::Type i = 0; i < length(it.history); ++i)
-			::std::cerr << it.history[i] << '\t';
+			::std::cerr << it.history[i].range << '\t';
 		::std::cerr << value(it) << ::std::endl;
 	}
 
@@ -296,14 +311,14 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TIndex, typename TSpec >
 	inline bool _dfsReversedOrder(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it) {
-        return lcpAt(_dfsRange(it).i2 - 1, container(it)) > top(it.history).i2;
+        return lcpAt(_dfsRange(it).i2 - 1, container(it)) > top(it.history).range.i2;
 	}
 
 	// standard push/pop handlers of lcp-dfs-traversal
 	template < typename TIndex, typename TSpec, typename TSize >
 	inline void _dfsOnPop(Iter<TIndex, VSTree< BottomUp<TSpec> > > &it, TSize const) {
-        _dfsRange(it).i1 = top(it.history).i1;
-		_dfsLCP(it) = top(it.history).i2;
+        _dfsRange(it).i1 = top(it.history).range.i1;
+		_dfsLCP(it) = top(it.history).range.i2;
 		pop(it.history);
 	}
 
@@ -341,15 +356,15 @@ This interval is the @Function.value@ of the iterator.
 				TStackEntry	_top_ = top(it.history);
 				TSize		lcp_i = lcpAt(_dfsRange(it).i2 - 1, index);
 
-				if (lcp_i < _top_.i2) {
+				if (lcp_i < _top_.range.i2) {
 					_dfsOnPop(it, lcp_i);
 					if (nodePredicate(it)) return;
 					else continue;
 				}
 
-				if (lcp_i > _top_.i2) {
-					_top_.i1 = _dfsRange(it).i1;
-					_top_.i2 = lcp_i;
+				if (lcp_i > _top_.range.i2) {
+					_top_.range.i1 = _dfsRange(it).i1;
+					_top_.range.i2 = lcp_i;
 					_dfsOnPush(it, _top_);
 				}
 
@@ -359,8 +374,8 @@ This interval is the @Function.value@ of the iterator.
 	// wenn Pop, aber kein Push -> verlasse Wurzel des mind. 2.Teilbaums
 	// wenn Pop und Push        -> verlasse ersten Teilbaum (sieht Vater zum ersten Mal und pusht jenen)
 
-	// wenn nach Pop ein Pop folgen würde	-> Vater ist Top of Stack
-	// wenn nach Pop ein Push folgen würde	-> Vater erst beim Push auf Stack (-> zwischenspeichern)
+	// wenn nach Pop ein Pop folgen wÂ¸rde	-> Vater ist Top of Stack
+	// wenn nach Pop ein Push folgen wÂ¸rde	-> Vater erst beim Push auf Stack (-> zwischenspeichern)
 			}
 
 			// last lcp entry (== 0) causes removal of toplevel interval
@@ -504,30 +519,34 @@ This interval is the @Function.value@ of the iterator.
 		Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec2> > > > &b, 
 		Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > > &_lca)
 	{
-		typename Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > >::TStack::const_iterator iA;
-		typename Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec2> > > >::TStack::const_iterator iB;
+		typedef Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > > TIter;
+		typename TIter::TStack::const_iterator iA;
+		typename TIter::TStack::const_iterator iB;
 
 		typedef typename Size<TIndex>::Type TSize;
 
-		// push current intervals
-		push(a.history, value(a).range);
-		push(b.history, value(b).range);
+		typename _HistoryStackEntry<TIter>::Type hA, hB;
 
-		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
+		// push current intervals
+		hA = value(a).range;
+		hB = value(b).range;
+		push(a.history, hA);
+		push(b.history, hB);
+
+		TSize s = min(length(a.history), length(b.history)), i0 = 0;
 		
 		while (s) {
 			TSize m = s / 2;
-			iA = a.history.begin() + i0 + m;
-			iB = b.history.begin() + i0 + m;
-			if ((*iA).i1 == (*iB).i1 && (*iA).i2 == (*iB).i2) {
+			iA = begin(a.history, Standard()) + i0 + m;
+			iB = begin(b.history, Standard()) + i0 + m;
+			if ((*iA).range == (*iB).range) {
 				i0 += m + 1;
 				s -= m + 1;
 			} else
 				s = m;
 		}
 
-		_lca.history.resize(i0);
-		copy(a.history.begin(), a.history.begin() + i0, _lca.history.begin());
+		_lca.history = prefix(a.history, i0);
 
 		// pop current intervals
 		pop(a.history);
@@ -556,23 +575,27 @@ This interval is the @Function.value@ of the iterator.
 		Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > > &a, 
 		Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec2> > > > &b) 
 	{
-		typename Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > >::TStack::const_iterator iA;
-		typename Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec2> > > >::TStack::const_iterator iB;
+		typedef Iter<TIndex, VSTree< TopDown< ParentLinks<TSpec1> > > > TIter;
+		typename TIter::TStack::const_iterator iA;
+		typename TIter::TStack::const_iterator iB;
 
-		typedef typename Size<TIndex>::Type				TSize;
-		typedef typename VertexDescriptor<TIndex>::Type	TDesc;
+		typedef typename Size<TIndex>::Type TSize;
+
+		typename _HistoryStackEntry<TIter>::Type hA, hB;
 
 		// push current intervals
-		push(a.history, value(a).range);
-		push(b.history, value(b).range);
+		hA = value(a).range;
+		hB = value(b).range;
+		push(a.history, hA);
+		push(b.history, hB);
 
-		TSize s = min(a.history.size(), b.history.size()), i0 = 0;
+		TSize s = min(length(a.history), length(b.history)), i0 = 0;
 		
 		while (s) {
 			TSize m = s / 2;
-			iA = a.history.begin() + i0 + m;
-			iB = b.history.begin() + i0 + m;
-			if ((*iA).i1 == (*iB).i1 && (*iA).i2 == (*iB).i2) {
+			iA = begin(a.history, Standard()) + i0 + m;
+			iB = begin(b.history, Standard()) + i0 + m;
+			if ((*iA).range == (*iB).range) {
 				i0 += m + 1;
 				s -= m + 1;
 			} else
@@ -688,6 +711,16 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 			return length(indexSA(container(it))) - value(it).range.i1;
 		else
 			return value(it).range.i2 - value(it).range.i1;
+	}
+
+	template < typename TText, typename TSpec, typename TDesc >
+	inline Pair<typename Size<Index<TText, TSpec> >::Type>
+	range(Index<TText, TSpec> const &index, TDesc const &desc)
+	{
+		if (_isSizeInval(desc.range.i2))
+			return Pair<typename Size<Index<TText, TSpec> >::Type>(desc.range.i1, length(indexSA(index)));
+		else
+			return desc.range;
 	}
 
 	template < typename TIndex, class TSpec >
@@ -1091,26 +1124,34 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 
 	template < typename TIndex, class TSpec >
 	inline void 
-	_historyClear(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
+	_historyClear(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	{
 		clear(it.history);
 	}
 /*
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) {
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > &it) 
+	{
 		value(it).parentRight = value(it).range.i2;
 	}
 */	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) {
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) 
+	{
 		it._parentDesc = value(it);
 		value(it).parentRight = value(it).range.i2;
 	}
 	template < typename TText, class TIndexSpec, class TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) {
+	_historyPush(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	{
+		typedef Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > TIter;
+		typename _HistoryStackEntry<TIter>::Type h;
+		h.range = value(it).range;
+
 		value(it).parentRight = value(it).range.i2;
-		push(it.history, value(it).range);
+		push(it.history, h);
 	}
 
 
@@ -1331,10 +1372,10 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	_goUp(Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
 		if (!empty(it.history)) {
-			value(it).range = top(it.history);
+			value(it).range = top(it.history).range;
 			pop(it.history);
 			if (!empty(it.history))
-				value(it).parentRight = top(it.history).i2;	// copy right boundary of parent's range
+				value(it).parentRight = top(it.history).range.i2;	// copy right boundary of parent's range
 			return true;
 		}
 		return false;
@@ -1358,8 +1399,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		if (!empty(it.history)) {
 			typename Size<TIndex>::Type parentRight = 0;
 			if (length(it.history) > 2)
-				parentRight = topPrev(it.history).i2;
-			return typename VertexDescriptor<TIndex>::Type(top(it.history), parentRight);
+				parentRight = topPrev(it.history).range.i2;
+			return typename VertexDescriptor<TIndex>::Type(top(it.history).range, parentRight);
 		} else
 			return value(it);
 	}

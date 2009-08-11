@@ -103,13 +103,15 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typedef String<unsigned>				TDFIDatasets;
 
 		// 1st word flags
-		static TSize const DFI_PRED_HULL = (TSize)1 << (BitsPerValue<TSize>::VALUE - 3); // this node fulfills all monotonic frequency predicates (e.g. min_freq)
-		static TSize const DFI_PRED      = (TSize)1 << (BitsPerValue<TSize>::VALUE - 4); // this node fulfills all frequency predicates (e.g. emerging, minmax_freq)
+		static TSize const DFI_PRED_HULL	= (TSize)1 << (BitsPerValue<TSize>::VALUE - 3); // this node fulfills all monotonic frequency predicates (e.g. min_freq)
+		static TSize const DFI_PRED			= (TSize)1 << (BitsPerValue<TSize>::VALUE - 4); // this node fulfills all frequency predicates (e.g. emerging, minmax_freq)
+		static TSize const DFI_PARENT_FREQ	= (TSize)1 << (BitsPerValue<TSize>::VALUE - 5); // this node has the same frequency as its parent
 
-		static TSize const BITMASK0      = ~(LEAF | LAST_CHILD | DFI_PRED_HULL | DFI_PRED);
-		static TSize const BITMASK1      = ~(UNEVALUATED | SENTINELS);
+		static TSize const BITMASK0			= ~(LEAF | LAST_CHILD | DFI_PRED_HULL | DFI_PRED | DFI_PARENT_FREQ);
+		static TSize const BITMASK1			= ~(UNEVALUATED | SENTINELS);
 
-		TDFIEntries		entry;
+		TDFIEntry		nodeEntry;			// current nodes frequencies
+		TDFIEntries		childEntry;			// child frequencies for each first letter of outgoing edges
 		TDFIDatasets	ds;
 
 		TPredHull		predHull;
@@ -119,14 +121,14 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 
 		Index(Index &other):
 			TBase((TBase &)other),
-			entry(other.entry),
+			childEntry(other.childEntry),
 			ds(other.ds),
 			predHull(other.predHull),
 			pred(other.pred) {}
 
 		Index(Index const &other):
 			TBase((TBase const &)other),
-			entry(other.entry),
+			childEntry(other.childEntry),
 			ds(other.ds),
 			predHull(other.predHull),
 			pred(other.pred) {}
@@ -205,11 +207,15 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		// 1. clear counters and copy SA to temporary SA
 		arrayFill(begin(occ, Standard()), end(occ, Standard()), 0);
 
-		for(unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i) {
-			TDFIEntry &entry = index.entry[i];
-			entry.lastSeqSeen = -1;
-			for(unsigned  j = 0; j < length(entry.freq); ++j)
-				entry.freq[j] = 0;
+		index.nodeEntry.lastSeqSeen = -1;
+		for(unsigned j = 0; j < length(index.nodeEntry.freq); ++j)
+			index.nodeEntry.freq[j] = 0;
+		for(unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i) 
+		{
+			TDFIEntry &childEntry = index.childEntry[i];
+			childEntry.lastSeqSeen = -1;
+			for(unsigned j = 0; j < length(childEntry.freq); ++j)
+				childEntry.freq[j] = 0;
 		}
 
 		// 2. count characters
@@ -243,13 +249,13 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 			for(; itText != itTextEnd; ++itText) 
 			{
 				unsigned ord = ordValue(*itText);
-				TDFIEntry &entry = index.entry[ord];
+				TDFIEntry &childEntry = index.childEntry[ord];
 				// new sequence is seen for <ord> character
 				// -> increment frequency of current dataset
-				if (entry.lastSeqSeen != seqNo) 
+				if (childEntry.lastSeqSeen != seqNo) 
 				{
-					entry.lastSeqSeen = seqNo;
-					++entry.freq[dsNo];
+					childEntry.lastSeqSeen = seqNo;
+					++childEntry.freq[dsNo];
 				}
 
 				*(saBeg + (*(boundBeg + ord))++) = localPos;
@@ -299,11 +305,14 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		arrayFill(occBeg, end(occ, Standard()), 0);
 		index.tempSA = infix(indexSA(index), left, right);
 
+		index.nodeEntry.lastSeqSeen = -1;
+		for(unsigned j = 0; j < length(index.nodeEntry.freq); ++j)
+			index.nodeEntry.freq[j] = 0;
 		for(unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i) {
-			TDFIEntry &entry = index.entry[i];
-			entry.lastSeqSeen = -1;
-			for(unsigned  j = 0; j < length(entry.freq); ++j)
-				entry.freq[j] = 0;
+			TDFIEntry &childEntry = index.childEntry[i];
+			childEntry.lastSeqSeen = -1;
+			for(unsigned  j = 0; j < length(childEntry.freq); ++j)
+				childEntry.freq[j] = 0;
 		}
 
 		index.sentinelOcc = 0;
@@ -327,24 +336,27 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 					lastSeqSeen = getSeqNo(lPos);
 
 					// search for surrounding dataset
-					while (lastSeqSeen >= *currentDS) {
+					while (lastSeqSeen >= *currentDS) 
+					{
 						++dsNo;
 						++currentDS;
 					}
+					++index.nodeEntry.freq[dsNo];
 
 					// shift textBegin and textLength by prefixLen
 					textLength = length(stringSet[lastSeqSeen]) - prefixLen;
 					itText = begin(stringSet[lastSeqSeen], Standard()) + prefixLen;
 				}
-				if (textLength > getSeqOffset(lPos)) {
+				if (textLength > getSeqOffset(lPos)) 
+				{
 					unsigned ord = ordValue(*(itText + getSeqOffset(lPos)));
-					TDFIEntry &entry = index.entry[ord];
+					TDFIEntry &childEntry = index.childEntry[ord];
 					// new sequence is seen for <ord> character
 					// -> increment frequency of current dataset
-					if (entry.lastSeqSeen != lastSeqSeen) 
+					if (childEntry.lastSeqSeen != lastSeqSeen) 
 					{
-						entry.lastSeqSeen = lastSeqSeen;
-						++entry.freq[dsNo];
+						childEntry.lastSeqSeen = lastSeqSeen;
+						++childEntry.freq[dsNo];
 					}
 					++*(occBeg + ord);
 				} else
@@ -431,7 +443,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		TCntIterator it = begin(index.tempOcc, Standard());
 		TCntIterator bit = begin(index.tempBound, Standard());
 		TCntIterator itEnd = end(index.tempOcc, Standard());
-		TEntriesIterator itEntry = begin(index.entry, Standard());
+		TEntriesIterator itEntry = begin(index.childEntry, Standard());
 
 		TCntValue occ;
 		if (index.sentinelOcc != 0)
@@ -456,6 +468,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 
 			TDirValue orMask = (index.predHull(*itEntry))? index.DFI_PRED_HULL: 0;
 			if (index.pred(*itEntry)) orMask |= index.DFI_PRED;
+			if ((*itEntry).freq == index.nodeEntry.freq) orMask |= index.DFI_PARENT_FREQ;
 
 			if (occ > 1) {
 				itPrev = itDir;
@@ -495,6 +508,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 			if (d & index.LAST_CHILD)		::std::cout << "  (LastChild/SENTINELS)";
 			if (d & index.DFI_PRED_HULL)	::std::cout << "  (PRED_HULL)";
 			if (d & index.DFI_PRED)			::std::cout << "  (PRED)";
+			if (d & index.DFI_PARENT_FREQ)	::std::cout << "  (PARENT_FREQ)";
 			::std::cout << ::std::endl;
 		}
 
@@ -513,12 +527,19 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typedef Index<TText, Index_Wotd<TSpec> >				TIndex;
 		typedef typename Value<TIndex>::Type					TValue;
 
+		::std::cout << "  ParentF = (";
+		for(unsigned d=0; d<length(index.nodeEntry.freq); ++d) {
+			if (d>0) ::std::cout << ",";
+			::std::cout << index.nodeEntry.freq[d];
+		}
+		::std::cout << ")" << ::std::endl;
+
 		for(unsigned i=0; i<length(index.tempOcc); ++i)
 			if (index.tempOcc[i] != 0) {
 				::std::cout << "  Freq[" << (TValue)i << "] = (";
-				for(unsigned d=0; d<length(index.entry[i].freq); ++d) {
+				for(unsigned d=0; d<length(index.childEntry[i].freq); ++d) {
 					if (d>0) ::std::cout << ",";
-					::std::cout << index.entry[i].freq[d];
+					::std::cout << index.childEntry[i].freq[d];
 				}
 				::std::cout << ")" << ::std::endl;
 			}
@@ -534,14 +555,15 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typedef typename Value<TIndex>::Type							TValue;
 		typedef typename TIndex::TBase									TBase;
 
-		resize(index.entry, (unsigned) ValueSize<TValue>::VALUE);
+		resize(index.childEntry, (unsigned) ValueSize<TValue>::VALUE);
 		if (empty(index.ds)) {
 			resize(index.ds, 2);
 			index.ds[0] = 0;
 			index.ds[1] = countSequences(index);
 		}
+		resize(index.nodeEntry.freq, length(index.ds) - 1, Exact());
 		for(unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
-			resize(index.entry[i].freq, length(index.ds) - 1, Exact());
+			resize(index.childEntry[i].freq, length(index.ds) - 1, Exact());
 
 		_wotdCreateFirstLevel(index);
 		return true;
