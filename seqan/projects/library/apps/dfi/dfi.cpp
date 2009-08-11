@@ -32,7 +32,7 @@
 using namespace std;
 using namespace seqan;
 
-//#define DEBUG_ENTROPY
+#define DEBUG_ENTROPY
 
 	static const double DFI_EPSILON = 0.0000001;
 
@@ -231,7 +231,7 @@ template <typename TSize>
 struct SubstringEntry
 {
 	Pair<unsigned>	lPos;
-	unsigned		len;
+	unsigned		len, freqSum;
 	Pair<TSize>		range;
 };
 
@@ -255,6 +255,23 @@ struct LessSubstringEnd : public binary_function<TSubstringEntry, TSubstringEntr
 		if (x < y) return true;
 		if (x > y) return false;
 		
+		return a.len > b.len;
+	}
+};
+
+template <typename TSubstringEntry>
+struct LessRange : public binary_function<TSubstringEntry, TSubstringEntry, bool >
+{
+	inline bool operator() (TSubstringEntry const &a, TSubstringEntry const &b) const 
+	{
+		// left border
+		if (a.range.i1 < b.range.i1) return true;
+		if (a.range.i1 > b.range.i1) return false;
+
+		// right border
+		if (a.range.i2 < b.range.i2) return true;
+		if (a.range.i2 > b.range.i2) return false;
+
 		return a.len > b.len;
 	}
 };
@@ -284,14 +301,91 @@ inline void compactMatches(TMatchString &matches)
 	
 	if (src == srcEnd) return;
 	for (; src != srcEnd; ++src)
-		if (((*src).lPos.i1 != lastSeq) || ((*src).lPos.i2 + (*src).len != lastPos) || ((*src).range.i2 - (*src).range.i1 != lastRange))
+	{
+		if ((*src).len == ~0u)
 		{
-			lastSeq = (*src).lPos.i1;
-			lastPos = (*src).lPos.i2 + (*src).len;
-			lastRange = (*src).range.i2 - (*src).range.i1;
+			*dst = *src;
+			++dst;
+			continue;
+		}
+		if (((*src).lPos.i1 == lastSeq) && ((*src).lPos.i2 + (*src).len == lastPos) && ((*src).range.i2 - (*src).range.i1 == lastRange))
+			continue;
+		lastSeq = (*src).lPos.i1;
+		lastPos = (*src).lPos.i2 + (*src).len;
+		lastRange = (*src).range.i2 - (*src).range.i1;
+		*dst = *src;
+		++dst;
+	}
+	resize(matches, dst - begin(matches, Standard()));
+}
+
+template <typename TMatchString>
+inline void compactSameParentFreqMatches(TMatchString &matches)
+{
+	typedef typename Iterator<TMatchString, Standard>::Type TIter;
+	TIter src = begin(matches, Standard());
+	TIter dst = src;
+	TIter srcEnd = end(matches, Standard());
+	
+	unsigned r1 = ~0;
+	unsigned r2 = ~0;
+	
+	if (src == srcEnd) return;
+	for (; src != srcEnd; ++src)
+	{
+		if (((*src).range.i1 == r1) && ((*src).range.i2 == r2))
+			continue;
+		r1 = (*src).range.i1;
+		r2 = (*src).range.i2;
+		if ((*src).len != ~0u)
+		{
 			*dst = *src;
 			++dst;
 		}
+	}
+	resize(matches, dst - begin(matches, Standard()));
+}
+
+template <typename TMatchString, typename TIndex, typename TDBLookup, typename TSeen, typename TEntry>
+inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &index, TDBLookup const &dbLookup, TSeen &seen, TEntry &entry)
+{
+	typedef typename Iterator<TMatchString, Standard>::Type TIter;
+	typedef typename Fibre<TIndex, Fibre_SA>::Type TSA;
+	typedef typename Iterator<TSA, Standard>::Type TSAIter;
+
+	TIter src = begin(matches, Standard());
+	TIter dst = src;
+	TIter srcEnd = end(matches, Standard());
+	unsigned lastSeq = ~0;
+	unsigned lastPos = 0;
+	unsigned lastFreqSum = ~0;
+	
+	for (; src != srcEnd; ++src)
+	{
+		// count frequencies (debug)
+		TSAIter oc = begin(indexSA(index), Standard()) + (*src).range.i1;
+		TSAIter ocEnd = begin(indexSA(index), Standard()) + (*src).range.i2;
+		arrayFill(begin(seen, Standard()), end(seen, Standard()), false);
+		arrayFill(begin(entry.freq, Standard()), end(entry.freq, Standard()), 0);
+		unsigned freqSum = 0;
+		for (; oc != ocEnd; ++oc)
+		{
+			unsigned seqNo = getSeqNo(*oc, stringSetLimits(index));
+			if (!seen[seqNo])
+			{
+				seen[seqNo] = true;
+				++entry.freq[dbLookup[seqNo]];
+				++freqSum;
+			}
+		}
+		if (((*src).lPos.i1 == lastSeq) && ((*src).lPos.i2 + (*src).len == lastPos) && (lastFreqSum == freqSum))
+			continue;
+		lastSeq = (*src).lPos.i1;
+		lastPos = (*src).lPos.i2 + (*src).len;
+		lastFreqSum = freqSum;
+		*dst = *src;
+		++dst;
+	}
 	resize(matches, dst - begin(matches, Standard()));
 }
 
@@ -348,14 +442,12 @@ int runDFI(
 	// set index partition of sequences into datasets
 	index.ds = ds;
 
-#ifdef DEBUG_ENTROPY	
 	// database lookup table
 	typedef typename Fibre<TIndex, Fibre_SA>::Type TSA;
 	typedef typename Iterator<TSA, Standard>::Type TSAIter;
 	String<unsigned>	dbLookup;
 	String<bool>		seen;
 	_DFIEntry			entry;
-	PredEntropy			entrp(0, mySet);
 	
 	resize(dbLookup, length(mySet));
 	resize(seen, length(mySet));
@@ -365,10 +457,14 @@ int runDFI(
 		while (ds[d + 1] == i) ++d;
 		dbLookup[i] = d;
 	}
+#ifdef DEBUG_ENTROPY	
+	PredEntropy			entrp(0, mySet);
+	unsigned			freqSumLast = ~0;
 #endif
 
 	TIter it(index);
 	goBegin(it);
+	
 	
 	if (maximal)
 	{
@@ -378,10 +474,23 @@ int runDFI(
 			posLocalize(matches[m].lPos, getOccurrence(it), stringSetLimits(container(it)));
 			matches[m].range = range(it);
 			matches[m].len = repLength(it);
+			if (dirAt(value(it).node, index) & TIndex::DFI_PARENT_FREQ)
+			{
+				++m;
+				resize(matches, m + 1, Generous());
+				matches[m].lPos.i1 = 0;
+				matches[m].lPos.i2 = 0;
+				matches[m].range = range(index, nodeUp(it));
+				matches[m].len = ~0u;
+			}
 		}
 		
 		sort(begin(matches, Standard()), end(matches, Standard()), LessSubstringEnd<TSubstringEntry>());
 		compactMatches(matches);
+		sort(begin(matches, Standard()), end(matches, Standard()), LessRange<TSubstringEntry>());
+		compactSameParentFreqMatches(matches);
+		sort(begin(matches, Standard()), end(matches, Standard()), LessSubstringEnd<TSubstringEntry>());
+		compactSameSuffLinkFreqMatches(matches, index, dbLookup, seen, entry);
 		sort(begin(matches, Standard()), end(matches, Standard()), LessLex<TSubstringEntry>());
 		
 		typedef typename Iterator<String<TSubstringEntry>, Standard>::Type TMatchIter;
@@ -396,6 +505,7 @@ int runDFI(
 			TSAIter ocEnd = begin(indexSA(index), Standard()) + (*mit).range.i2;
 			arrayFill(begin(seen, Standard()), end(seen, Standard()), false);
 			arrayFill(begin(entry.freq, Standard()), end(entry.freq, Standard()), 0);
+			unsigned freqSum = 0;
 			for (; oc != ocEnd; ++oc)
 			{
 				unsigned seqNo = getSeqNo(*oc, stringSetLimits(index));
@@ -403,20 +513,31 @@ int runDFI(
 				{
 					seen[seqNo] = true;
 					++entry.freq[dbLookup[seqNo]];
+					++freqSum;
 				}
 			}
 				
 			double H = entrp.getEntropy(entry);
 			if (H <= 0.0) H = 0.0;
-			cout << left << setw(14) << H << "[";
-			for (unsigned i = 0; i < length(entry.freq); ++i)
-				cout << right << setw(6) << entry.freq[i];
-			cout << "]      ";
+//			if (freqSum != freqSumLast)
 #endif
-			cout << infix(
-				mySet[getSeqNo((*mit).lPos)], 
-				getSeqOffset((*mit).lPos),
-				getSeqOffset((*mit).lPos) + (*mit).len) << endl;
+			{
+#ifdef DEBUG_ENTROPY
+				cout << left << setw(14) << H << "[";
+				for (unsigned i = 0; i < length(entry.freq); ++i)
+					cout << right << setw(6) << entry.freq[i];
+				cout << "]      \"";
+#endif
+				cout << infix(
+					mySet[getSeqNo((*mit).lPos)], 
+					getSeqOffset((*mit).lPos),
+					getSeqOffset((*mit).lPos) + (*mit).len);
+#ifdef DEBUG_ENTROPY
+				cout << "\"";
+				freqSumLast = freqSum;
+#endif
+				cout << endl;
+			}
 		}
 	} 
 	else 
@@ -450,12 +571,16 @@ int runDFI(
 				cout << left << setw(14) << H << "[";
 				for (unsigned i = 0; i < length(entry.freq); ++i)
 					cout << right << setw(6) << entry.freq[i];
-				cout << "]      ";
+				cout << "]      \"";
 #endif
 				cout << infix(
 	                mySet[getSeqNo(lPos)],
 	                getSeqOffset(lPos),
-	                getSeqOffset(lPos) + l) << endl;
+	                getSeqOffset(lPos) + l);
+#ifdef DEBUG_ENTROPY
+			cout << "\"";
+#endif
+			cout << endl;
 			}
 		}
 	}
