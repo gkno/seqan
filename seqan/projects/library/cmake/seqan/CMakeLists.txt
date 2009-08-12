@@ -11,12 +11,13 @@ set (CMAKE_BUILD_TYPE Debug)
 
 set (SEQAN_BASE ../..)
 set (SEQAN_TARGET "SEQAN")
+set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 ################################################################################
 # Library sources
 ################################################################################
 
-if (NOT TARGET ${SEQAN_TARGET})
+#if (NOT TARGET ${SEQAN_TARGET})
 
 	# Find all library headers
 	get_filename_component (SEQAN_BASE_ABS ${SEQAN_BASE}/seqan ABSOLUTE)
@@ -31,7 +32,7 @@ if (NOT TARGET ${SEQAN_TARGET})
 		source_group (${SEQAN_MODULE} FILES ${SEQAN_HEADER})
 	endforeach (SEQAN_HEADER)
 
-endif (NOT TARGET ${SEQAN_TARGET})
+#endif (NOT TARGET ${SEQAN_TARGET})
 
 
 # Make sure the compiler can find include files from the SeqAn library. 
