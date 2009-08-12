@@ -11,13 +11,14 @@ add_subdirectory (../seqan ../seqan)
 ################################################################################
 
 set (SEQAN_BASE ../..)
+include_directories (${SEQAN_BASE})
 
 ################################################################################
 # Tests
 ################################################################################
 
 get_filename_component (SEQAN_TESTS_ABS ${SEQAN_BASE}/../tests ABSOLUTE)
-if (EXISTS SEQAN_TESTS_ABS)
+#if (EXISTS SEQAN_TESTS_ABS)
 	file(GLOB SEQAN_TESTS ${SEQAN_TESTS_ABS}/[A-z]*)
 	foreach (TEST_DIR ${SEQAN_TESTS})
 		file (RELATIVE_PATH TEST_DIR_REL ${SEQAN_TESTS_ABS} ${TEST_DIR})
@@ -27,4 +28,4 @@ if (EXISTS SEQAN_TESTS_ABS)
 			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
 		endif (TEST_SOURCES)
 	endforeach (TEST_DIR)
-endif (EXISTS SEQAN_TESTS_ABS)
+#endif (EXISTS SEQAN_TESTS_ABS)
