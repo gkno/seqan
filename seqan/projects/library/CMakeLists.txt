@@ -51,6 +51,8 @@ add_executable (paramChooser apps/razers/paramChooser.cpp ${HEADERS})
 add_executable (razers apps/razers/razers.cpp ${RAZERS_HEADERS})
 add_executable (seqan_tcoffee apps/seqan_tcoffee/seqan_tcoffee.cpp)
 add_executable (seqcons apps/seqcons/seqcons.cpp)
+add_executable (pair_align apps/pair_align/pair_align.cpp)
+add_executable (tree_recon apps/tree_recon/tree_recon.cpp)
 
 #target_link_libraries (paramChooser rt)
 #target_link_libraries (razers tbb_debug pthread)
