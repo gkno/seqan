@@ -12,19 +12,22 @@ if (NOT SEQAN_BASE)
 endif (NOT SEQAN_BASE)
 
 set (SEQAN_TARGET "SEQAN")
-set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
+#set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 ################################################################################
 # Library sources
 ################################################################################
 
 #if (NOT TARGET ${SEQAN_TARGET})
-
+#get_property(IS_DEFINED GLOBAL PROPERTY SEQAN_TARGET_DEFINED)
+#if (NOT ${IS_DEFINED})
+#	set_property(GLOBAL PROPERTY SEQAN_TARGET_DEFINED TRUE)
+	
 	# Find all library headers
 	get_filename_component (SEQAN_BASE_ABS ${SEQAN_BASE}/seqan ABSOLUTE)
 	file (GLOB SEQAN_HEADERS ${SEQAN_BASE_ABS}/[A-z]*/[A-z]*.h)
 	list (SORT SEQAN_HEADERS)
-	add_custom_target (${SEQAN_TARGET} SOURCES ${SEQAN_HEADERS})
+#	add_custom_target (${SEQAN_TARGET} SOURCES ${SEQAN_HEADERS})
 	
 	# Group library headers into modules
 	foreach (SEQAN_HEADER ${SEQAN_HEADERS})
@@ -34,6 +37,7 @@ set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 	endforeach (SEQAN_HEADER)
 
 #endif (NOT TARGET ${SEQAN_TARGET})
+#endif (NOT ${IS_DEFINED})
 
 ################################################################################
 # Set compiler flags

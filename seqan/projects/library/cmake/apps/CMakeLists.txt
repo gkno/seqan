@@ -4,7 +4,7 @@ project (Seqan_Apps CXX)
 set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
 
-add_subdirectory (../seqan ../seqan)
+add_subdirectory (../seqan seqan)
 
 ################################################################################
 # Set path variables
