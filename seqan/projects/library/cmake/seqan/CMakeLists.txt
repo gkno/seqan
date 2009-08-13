@@ -1,15 +1,16 @@
 cmake_minimum_required (VERSION 2.6) 
 project (Seqan CXX)
 
-set (CMAKE_BUILD_TYPE Debug)
-#set (CMAKE_BUILD_TYPE Release)
 #set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 ################################################################################
 # Set path variables
 ################################################################################
 
-set (SEQAN_BASE ../..)
+if (NOT SEQAN_BASE)
+	set (SEQAN_BASE ../.. PARENT_SCOPE)
+endif (NOT SEQAN_BASE)
+
 set (SEQAN_TARGET "SEQAN")
 set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
@@ -34,16 +35,15 @@ set_property (GLOBAL PROPERTY ALLOW_DUPLICATE_CUSTOM_TARGETS TRUE)
 
 #endif (NOT TARGET ${SEQAN_TARGET})
 
-
-# Make sure the compiler can find include files from the SeqAn library. 
-include_directories (${SEQAN_BASE})
-
 ################################################################################
 # Set compiler flags
 ################################################################################
 
+# Make sure the compiler can find include files from the SeqAn library. 
+include_directories (${SEQAN_BASE})
+
 if (CMAKE_COMPILER_IS_GNUCXX)
-	set (CMAKE_CXX_WARNING_LEVEL 4)
+	set (CMAKE_CXX_WARNING_LEVEL 4 PARENT_SCOPE)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
