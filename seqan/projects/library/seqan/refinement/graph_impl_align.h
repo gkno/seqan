@@ -1110,12 +1110,23 @@ getStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 ..signature:stringSet(g)
 ..param.g:An alignment graph.
 ...type:Spec.Alignment Graph
-..returns:A reference to a string set.
+..returns:A reference or temporary of @Class.StringSet.string set@ type.
 ..see:Function.assignStringSet
 ..see:Function.getStringSet
 */
+
+template <typename T>
+struct StringSetType;
+
+template <typename TStringSet, typename TCargo, typename TSpec>
+struct StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > >
+{
+	typedef typename Host<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type & Type;
+};
+
+
 template<typename TStringSet, typename TCargo, typename TSpec>
-inline typename Host<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
+inline typename StringSetType<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type
 stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 {
 	SEQAN_CHECKPOINT

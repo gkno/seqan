@@ -245,6 +245,47 @@ struct Source<Align<TSource, TSpec> const >
 	typedef TSource Type;
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Metafunction.StringSetType:
+..summary:Return type of @Function.stringSet@ function. 
+..signature:StringSetType<T>::Type
+..param.T:Alignment data structure.
+..param.T.Type:Spec.Alignment Graph
+..param.T.Type:Class.Align
+..returns.param.Type:A @Class.StringSet.string set@ type of a reference to a string set type.
+..see:Function.stringSet
+*/
+template <typename T>
+struct StringSetType;
+
+template <typename TSource, typename TSpec>
+struct StringSetType<Align<TSource, TSpec> >
+{
+	typedef StringSet<TSource, Dependent<> > Type;
+};
+template <typename TSource, typename TSpec>
+struct StringSetType<Align<TSource, TSpec> const >
+{
+	typedef StringSet<TSource, Dependent<> > Type;
+};
+
+
+//Use StringSet<Owner> for SequenceGaps to store temporary source strings
+template <typename TSource>
+struct StringSetType<Align<TSource, SequenceGaps> >
+{
+	typedef StringSet<TSource, Owner<> > Type;
+};
+template <typename TSource>
+struct StringSetType<Align<TSource, SequenceGaps> const>
+{
+	typedef StringSet<TSource, Owner<> > Type;
+};
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////////
@@ -554,14 +595,15 @@ clearGaps(Align<TSource, TSpec> & me)
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.align#stringSet
+..param.g.type:Class.Align
 */
 template <typename TSource, typename TSpec>
-inline StringSet<TSource, Dependent<> >
+inline typename StringSetType<Align<TSource, TSpec> >::Type 
 stringSet(Align<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
-	typedef StringSet<TSource, Dependent<> > TStringSet;
+	typedef typename StringSetType<TAlign>::Type TStringSet;
 
 	typedef typename Rows<TAlign>::Type TRows;
 	typedef typename Iterator<TRows>::Type TRowsIterator;
