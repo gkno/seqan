@@ -559,7 +559,7 @@ def pageIndex(fl, path, cat, subcat, entries, subcats):
                     if is_super: image = 'dddoc_minus.gif'
                     else: image = 'dddoc_plus.gif'
                         
-                    fl.write('<div class=index_subcat>' + indent + '<img src="' + image + '" border=0><a class=index_link href="' + getIndexname(cat, subcat2) + '">' + display_text + '</div>')
+                    fl.write('<div class=index_subcat>' + indent + '<img src="' + image + '" border=0><a class=index_link href="' + getIndexname(cat, subcat2) + '">' + display_text + '</a></div>')
                     
             if not members_printed:
                 pageIndexPrintMembers(fl, entries[subcat]) 
