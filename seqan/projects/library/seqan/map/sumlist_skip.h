@@ -1085,7 +1085,7 @@ inline bool
 operator == (Iter<TSumList, SkipSumListIterator> const & left,
 			 Iter<TSumList2, SkipSumListIterator> const & right)
 {
-	return left.iter == right.iter;
+	return ((left.element == 0) && (right.element == 0)) || ((left.element == right.element) && (left.iter == right.iter));
 }
 
 template <typename TSumList, typename TSumList2>
@@ -1093,7 +1093,7 @@ inline bool
 operator != (Iter<TSumList, SkipSumListIterator> const & left,
 			 Iter<TSumList2, SkipSumListIterator> const & right)
 {
-	return left.iter != right.iter;
+	return !(left == right);
 }
 
 
