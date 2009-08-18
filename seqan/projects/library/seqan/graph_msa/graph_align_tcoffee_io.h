@@ -897,22 +897,129 @@ read(TFile & file,
 		assignRoot(guideTree, myRoot);
 		typedef typename Iterator<TGuideTree, OutEdgeIterator>::Type TOutEdgeIterator;
 		TOutEdgeIterator it(guideTree, lastChild);
+		goNext(it); goNext(it);
 		TVertexDescriptor tV = targetVertex(it);
 		TCargo c = cargo(*it);
 		removeEdge(guideTree, lastChild, tV);
-		addEdge(guideTree, myRoot, tV, c);
-		addEdge(guideTree, myRoot, lastChild, (TCargo) 0);
+		addEdge(guideTree, myRoot, tV, (TCargo) (c / 2));
+		addEdge(guideTree, myRoot, lastChild, (TCargo) (c / 2));
 	}
 
 	//std::fstream strm1; // Alignment graph as dot
-	//strm1.open("D:\\matches\\test\\tree.dot", std::ios_base::out | std::ios_base::trunc);
+	//strm1.open("tree23.dot", std::ios_base::out | std::ios_base::trunc);
 	//write(strm1,guideTree,DotDrawing());
 	//strm1.close();
-
 
 	//std::cout << guideTree << std::endl;
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TCargo, typename TSpec, typename TNames, typename TNewickString, typename TVertexDescriptor>
+void 
+_buildNewickString(Graph<Tree<TCargo, TSpec> >& guideTree,
+				   TNames& names,
+				   TNewickString& str,
+				   TVertexDescriptor v,
+				   bool collapseRoot) 
+{
+	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
+	typedef typename EdgeDescriptor<TGuideTree>::Type TEdgeDescriptor;
+	typedef typename Iterator<TGuideTree, AdjacencyIterator>::Type TAdjIter;
+	if (isLeaf(guideTree, v)) {
+		append(str, names[v], Generous());
+	} else {
+		if ((collapseRoot) && (isRoot(guideTree, v))) {
+			TAdjIter adjIterRoot(guideTree, v);
+			TVertexDescriptor v1 = *adjIterRoot;
+			goNext(adjIterRoot);
+			TVertexDescriptor v2 = *adjIterRoot;
+			if (isLeaf(guideTree, v2)) {
+				TVertexDescriptor tmp = v1;
+				v1 = v2;
+				v2 = tmp;
+			}
+			String<char> subStr;
+			appendValue(subStr, '(', Generous());
+			_buildNewickString(guideTree, names, subStr, v1, collapseRoot);
+			TEdgeDescriptor e1 = findEdge(guideTree, v, v1);
+			TEdgeDescriptor e2 = findEdge(guideTree, v, v2);
+			appendValue(subStr, ':', Generous());
+			::std::ostringstream weight;
+			weight << (cargo(e1) + cargo(e2));
+			append(subStr, weight.str().c_str(), Generous());
+			TAdjIter adjIter(guideTree, v2);
+			for(;!atEnd(adjIter); goNext(adjIter)) {
+				appendValue(subStr, ',', Generous());
+				_buildNewickString(guideTree, names, subStr, *adjIter, collapseRoot);
+				TEdgeDescriptor e = findEdge(guideTree, v2, *adjIter);
+				appendValue(subStr, ':', Generous());
+				::std::ostringstream weight;
+				weight << cargo(e);
+				append(subStr, weight.str().c_str(), Generous());
+			}
+			appendValue(subStr, ')', Generous());
+			append(str, subStr, Generous());
+		} else {
+			TAdjIter adjIter(guideTree, v);
+			String<char> subStr;
+			appendValue(subStr, '(', Generous());
+			_buildNewickString(guideTree, names, subStr, *adjIter, collapseRoot);
+			TEdgeDescriptor e = findEdge(guideTree, v, *adjIter);
+			appendValue(subStr, ':', Generous());
+			::std::ostringstream weight;
+			weight << cargo(e);
+			append(subStr, weight.str().c_str(), Generous());
+			goNext(adjIter);
+			for(;!atEnd(adjIter); goNext(adjIter)) {
+				appendValue(subStr, ',', Generous());
+				_buildNewickString(guideTree, names, subStr, *adjIter, collapseRoot);
+				TEdgeDescriptor e = findEdge(guideTree, v, *adjIter);
+				appendValue(subStr, ':', Generous());
+				::std::ostringstream weight;
+				weight << cargo(e);
+				append(subStr, weight.str().c_str(), Generous());
+			}
+			appendValue(subStr, ')', Generous());
+			append(str, subStr, Generous());
+		}
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TCargo, typename TSpec, typename TNames>
+void 
+write(TFile & file,
+	  Graph<Tree<TCargo, TSpec> >& guideTree,
+	  TNames& names,
+	  bool collapseRoot,
+	  NewickFormat) 
+{
+	typedef Graph<Tree<TCargo, TSpec> > TGuideTree;
+	typedef typename Size<TGuideTree>::Type TSize;
+	typedef typename VertexDescriptor<TGuideTree>::Type TVertexDescriptor;
+	
+	String<char> myNewickString;
+	_buildNewickString(guideTree, names, myNewickString, getRoot(guideTree), collapseRoot);
+	_streamWrite(file, myNewickString);
+	_streamPut(file, ';');	
+	_streamPut(file, '\n');	
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TFile, typename TCargo, typename TSpec, typename TNames>
+void 
+write(TFile & file,
+	  Graph<Tree<TCargo, TSpec> >& guideTree,
+	  TNames& names,
+	  NewickFormat) 
+{
+	write(file,guideTree, names, false, NewickFormat());
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

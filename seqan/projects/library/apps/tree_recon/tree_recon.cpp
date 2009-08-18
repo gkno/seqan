@@ -30,8 +30,8 @@ using namespace seqan;
 
 inline void
 _addVersion(CommandLineParser& parser) {
-	::std::string rev = "$Revision: 4635 $";
-	addVersionLine(parser, "Version 1.0 (29. July 2009) Revision: " + rev.substr(11, 4) + "");
+	::std::string rev = "$Revision: 4692 $";
+	addVersionLine(parser, "Version 1.01 (18. August 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -61,9 +61,7 @@ _readPhylipMatrix(TFile& file,
 		resize(names, nseq);
 		TMatIter it = begin(matrix, Standard());
 		for(TSize row = 0; row<nseq; ++row) {
-			names[row] = "label = \"";
 			_parse_readIdentifier(file, names[row], c);
-			append(names[row], '"');
 			_parse_skipWhitespace(file, c);
 			for(TSize col = 0; col<nseq; ++col, ++it) {
 				*it = _parse_readDouble(file, c);
@@ -90,6 +88,7 @@ int main(int argc, const char *argv[]) {
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("m", "matrix", "file with distance matrix", OptionType::String), "<Phylip distance matrix>"));
+	addHelpLine(parser, "At least 3 species required.");
 	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
 	addHelpLine(parser, "nj = Neighbor-joining");
 	addHelpLine(parser, "min = UPGMA single linkage");
@@ -100,6 +99,7 @@ int main(int argc, const char *argv[]) {
 	addHelpLine(parser, "  unrooted tree. We root that tree");
 	addHelpLine(parser, "  at the last joined pair.*/");
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "tree.dot"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "dot"), "[dot | newick]"));
 		
 	if (argc == 1)
 	{
@@ -128,6 +128,8 @@ int main(int argc, const char *argv[]) {
 	else if (meth == "max") build = 2;
 	else if (meth == "avg") build = 3;
 	else if (meth == "wavg") build = 4;
+	String<char> format;
+	getOptionValueLong(parser, "format", format);
 
 	// Read the distance matrix
 	String<TName> names;
@@ -144,18 +146,33 @@ int main(int argc, const char *argv[]) {
 	else if (build == 3) upgmaTree(matrix, tree, UpgmaAvg());
 	else if (build == 4) upgmaTree(matrix, tree, UpgmaWeightAvg());
 	
-	// Append emty names for internal vertices
-	TSize nameLen = length(names);
-	resize(names, numVertices(tree));
-	for(;nameLen < length(names); ++nameLen) {
-		names[nameLen] = "label = \"\"";
+	if (format == "dot") {
+		TSize nameLen = length(names);
+		resize(names, numVertices(tree));
+		// Add the label prefix for leaves
+		for(TSize i = 0;i < nameLen; ++i) {
+			TName tmpName = "label = \"";
+			append(tmpName, names[i], Generous());
+			append(tmpName, '"');
+			names[i] = tmpName;
+		}
+		// Append emty names for internal vertices
+		for(;nameLen < length(names); ++nameLen) {
+			names[nameLen] = "label = \"\"";
+		}
+
+		// Write the result
+		FILE* strmDot;
+		strmDot = fopen(outfile.c_str(), "w");
+		write(strmDot, tree, names, DotDrawing());
+		fclose(strmDot);
+	} else if (format == "newick") {
+		FILE* strmDot;
+		strmDot = fopen(outfile.c_str(), "w");
+		// If nj tree collapse the root
+		if (build == 0) write(strmDot, tree, names, true, NewickFormat());
+		else write(strmDot, tree, names, false, NewickFormat());
+		fclose(strmDot);
 	}
-
-	// Write the result
-	FILE* strmDot;
-	strmDot = fopen(outfile.c_str(), "w");
-	write(strmDot, tree, names, DotDrawing());
-	fclose(strmDot);
-
 	return 0;
 }
