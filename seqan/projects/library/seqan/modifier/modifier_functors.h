@@ -139,7 +139,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <>
-	struct FunctorComplement<DnaQ> : public ::std::unary_function<Dna5,Dna5> 
+	struct FunctorComplement<DnaQ> : public ::std::unary_function<DnaQ,DnaQ> 
 	{
 		inline DnaQ operator()(DnaQ x) const {
 			int qual = getQualityValue(x);
@@ -151,7 +151,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <>
-	struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5,Dna5> 
+	struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5Q,Dna5Q> 
 	{
 		inline Dna5Q operator()(Dna5Q x) const {
 			int qual = getQualityValue(x);

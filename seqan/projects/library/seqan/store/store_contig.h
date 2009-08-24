@@ -30,11 +30,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TContigSeq, typename TGapAnchor, typename TSpec = void>
+template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec = void>
 struct ContigStoreElement
 {
-	TContigSeq			seq;
-	String<TGapAnchor>	gaps;
+	typedef _TContigSeq			TContigSeq;
+	typedef _TGapAnchor			TGapAnchor;
+	typedef _TSpec				TSpec;
+	typedef String<TGapAnchor>	TGapAnchors;
+
+	TContigSeq	seq;
+	TGapAnchors	gaps;
 };
 
 //////////////////////////////////////////////////////////////////////////////

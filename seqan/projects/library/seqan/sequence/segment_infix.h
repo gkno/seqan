@@ -89,6 +89,7 @@ the first character of $host$ is constructed.
 This is the same segment that is returned by @Function.goBegin@.
 */
 	Segment():
+		data_host(NULL),
 		data_begin_position(0),
 		data_end_position(0)
 	{

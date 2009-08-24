@@ -15,9 +15,10 @@
  Lesser General Public License for more details.
  
  ============================================================================
- $Id: file_format_sam.h 1283 2007-11-09 10:16:04Z doering@PCPOOL.MI.FU-BERLIN.DE $
+ $Id$
  ==========================================================================*/
 #include <iostream>
+#include <sstream>
 
 #ifndef SEQAN_HEADER_FILE_SAM_H
 #define SEQAN_HEADER_FILE_SAM_H
@@ -53,6 +54,65 @@ namespace SEQAN_NAMESPACE_MAIN {
 	struct _BAM;
 	typedef Tag<TagSBAM_<_BAM> > const BAM;
 	
+	/**
+	 .Class.SAMFileMeta
+	 ..cat:Input/Output
+	 ..summary:Data structure to store information of header in the SAM of BAM file format.
+	 
+	 */
+	class SAMFileMeta {
+		
+	};
+	
+	/**
+	 .Class.SAMMeta
+	 ..cat:Input/Output
+	 ..summary:Data structure to store information belonging to one sequence. Needed for output in SAM and BAM file format.
+	 */
+	class SAMMeta {
+			
+	public:
+		CharString qName;	
+        unsigned int flag;
+        CharString rName;
+        // Position can be extracted from the alignment
+        unsigned int mapQ;
+        // CIGAR is calculated from the Alignment
+        CharString MRNM;
+        unsigned int mPos;
+        unsigned int iSize;
+        CharString qual;
+        String<Triple<CharString, char, CharString> > additional;
+        
+	public:
+		SAMMeta(){
+			SEQAN_CHECKPOINT
+            setData();
+		}
+		SAMMeta(CharString const &name){
+            SEQAN_CHECKPOINT
+            setData();
+			qName = name;
+		}
+		operator == (SAMMeta const &other)
+		{
+			return qName == other.qName;
+		}
+	
+    private:
+        void setData(){
+            flag = 0;
+            rName = "*";
+            mapQ = 0;
+            MRNM = "*";
+            mPos = 0;
+            iSize = 0;
+            qual = "*";
+        }
+	};
+	//TODO: qName + rName + Position should be unique
+    // or the adress of the align
+
 	template<typename TFile, typename TGapsSpec, typename TIDString, typename TSAMSpec>
 	inline void write(TFile & target,
 					  Align<DnaString, TGapsSpec> const & source,
@@ -78,25 +138,21 @@ namespace SEQAN_NAMESPACE_MAIN {
         String<unsigned int> IDs;
         resize(IDs, nrOfReads, Generous());
 		
-		const CharString readDummy = "Read_";
-		
 		for (int i = 0; i < refPosition; ++i){			
             assignValue(IDs, i, i);
             
-            CharString readName = readDummy;
-			append(readName, _intToStr(i + 1));
-            
-            SAMMeta meta(readName);
+			std::stringstream ss("Read_");
+			ss << (i + 1);
+            SAMMeta meta(ss.str());
             assignProperty(metas, i, meta);
 		}
 		
 		for (int i = (refPosition + 1); i < nrOfReads; ++i){			
             assignValue(IDs, i, i);
             
-            CharString readName = readDummy;
-			append(readName, _intToStr(i));
-            
-            SAMMeta meta(readName);
+			std::stringstream ss("Read_");
+			ss << (i + 1);
+            SAMMeta meta(ss.str());
             assignProperty(metas, i, meta);
 		}
         write(target, source, refPosition, metas, IDs, myId, Tag<TagSBAM_<TSAMSpec> >());
@@ -108,8 +164,8 @@ namespace SEQAN_NAMESPACE_MAIN {
 	inline void write(TFile & target,
 					  Align<DnaString, TGapsSpec> const & source,
 					  const int refPosition,
-					  const String<TMeta> metas,
-					  const String<unsigned int> IDs,
+					  const String<TMeta> & metas,
+					  const String<unsigned int> & IDs,
 					  TIDString const &,
 					  Tag<TagSBAM_<TSAMSpec> > ) {
 
@@ -162,7 +218,7 @@ namespace SEQAN_NAMESPACE_MAIN {
             Align<DnaString,TGapsSpec> const & source,
             const int ref_row_pos_int,
             const int read_row_pos_int,
-            const TMeta meta,
+            const TMeta & meta,
             Tag<TagSBAM_<_SAM> > ) {
 		
 		typedef Align<DnaString, TGapsSpec> const TAlign;
@@ -316,94 +372,13 @@ namespace SEQAN_NAMESPACE_MAIN {
 		Align<DnaString, TGapsSpec> const & source,
 		int ref,
 		int read,
-		const CharString refName,
-		const CharString readName,
+		const CharString & refName,
+		const CharString & readName,
 		BAM)
 	{
 		//TODO: binaeres Format implementieren
 	}
-
-	//TODO: documentation
-	// convertes an integer to a string
-	CharString _intToStr(const int &i){
-		char buff[5];
-		sprintf(buff, "%d", i);
-		CharString res(buff);
-		return res;
-	}
-		
-	/**
-	 .Class.SAMFileMeta
-	 ..cat:Input/Output
-	 ..summary:Data structure to store information of header in the SAM of BAM file format.
-	 
-	 */
-	class SAMFileMeta {
-		
-	};
-	
-	/**
-	 .Class.SAMMeta
-	 ..cat:Input/Output
-	 ..summary:Data structure to store information belonging to one sequence. Needed for output in SAM and BAM file format.
-	 */
-	class SAMMeta {
-			
-	public:
-		CharString qName;	
-        unsigned int flag;
-        CharString rName;
-        // Position can be extracted from the alignment
-        unsigned int mapQ;
-        // CIGAR is calculated from the Alignment
-        CharString MRNM;
-        unsigned int mPos;
-        unsigned int iSize;
-        CharString qual;
-        String<Triple<CharString, char, CharString> > additional;
-        
-	public:
-		SAMMeta(){
-			SEQAN_CHECKPOINT
-            setData();
-		}
-		SAMMeta(CharString name){
-            SEQAN_CHECKPOINT
-            setData();
-			qName = name;
-		}
-    private:
-        void setData(){
-            flag = 0;
-            rName = "*";
-            mapQ = 0;
-            MRNM = "*";
-            mPos = 0;
-            iSize = 0;
-            qual = "*";
-        }
-	};
-	//TODO: qName + rName + Position should be unique
-    // or the adress of the align
-	bool operator == (SAMMeta first, SAMMeta second){
-		bool temp = (first.qName == second.qName);
-		return temp;
-	}
-	
-	//TODO: documentation
-	CharString getName(const SAMMeta meta){
-		return meta.qName;
-	}
-	
-    CharString getRName(const SAMMeta meta){
-		return meta.rName;
-	}
-    
-	//TODO: documentation
-	void setName(SAMMeta meta, CharString name){
-		meta.qName = name;
-	}
-    
+/*
     int _pack(CharString key){
         // String key should have the lenth 2
         // write the character values of the string in the lower 2 bytes of i
@@ -424,7 +399,7 @@ namespace SEQAN_NAMESPACE_MAIN {
         
         return str;
     }
-    
+*/    
     template <typename TFile, typename TGapsSpec>
     void
     read(TFile & file,

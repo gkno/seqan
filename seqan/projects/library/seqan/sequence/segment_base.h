@@ -312,6 +312,18 @@ operation_2_set(Segment<THost, TSpec> & target,
 	}
 	return false;
 }
+template <typename THost, typename TSpec, typename TSpec2>
+inline bool 
+operation_2_set(Segment<THost, TSpec> & target, 
+				Segment<THost, TSpec2> const & source)
+{
+	if (hasNoHost(target))
+	{
+		set(target, host(source), beginPosition(source), endPosition(source));
+		return true;
+	}
+	return false;
+}
 template <typename THost, typename TSpec>
 inline bool 
 operation_2_set(Segment<THost, TSpec> & target, 
