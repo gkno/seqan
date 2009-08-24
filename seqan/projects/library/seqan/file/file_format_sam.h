@@ -94,7 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN {
             setData();
 			qName = name;
 		}
-		operator == (SAMMeta const &other)
+		bool operator == (SAMMeta const &other)
 		{
 			return qName == other.qName;
 		}
