@@ -23,6 +23,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
+#include <seqan/align.h>
 #include <seqan/file.h>
 
 #include <sstream>

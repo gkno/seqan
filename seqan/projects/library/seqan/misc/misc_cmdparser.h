@@ -327,49 +327,49 @@ setHelpText(CommandLineOption & me, CharString const & newHelp){
 
 //////////////////////////////////////////////////////////////////////////////
 
-inline const bool
+inline bool
 isStringOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::String) != 0;
 }
 
-inline const bool
+inline bool
 isBooleanOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Boolean) != 0;
 }
 
-inline const bool
+inline bool
 isDoubleOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Double) != 0;
 }
 
-inline const bool
+inline bool
 isIntOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Int) != 0;
 }
 
-inline const bool
+inline bool
 isHiddenOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Hidden) != 0;
 }
 
-inline const bool
+inline bool
 isOptionMandatory(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Mandatory) != 0;
 }
 
-inline const bool
+inline bool
 isLabelOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Label) != 0;
 }
 
-inline const bool
+inline bool
 isOptionList(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::List) != 0;
