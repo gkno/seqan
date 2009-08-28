@@ -938,8 +938,13 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gAlign,
 		typedef typename Size<TAlign>::Type TSize;
 		typedef typename Row<TAlign>::Type TRow;
 		typedef typename Iterator<TRow>::Type TRowIterator;
+		TStringSet& sourceSet = stringSet(gAlign);
+		TSize nseq = length(sourceSet);
 		clearGaps(align);
-		TSize nseq = length(stringSet(gAlign));
+		if (empty(rows(align))) {
+			resize(rows(align), nseq);
+			for(TSize i = 0; i<nseq; ++i) assignSource(row(align, i), sourceSet[i]);
+		}
 		String<TRowIterator> rowIter;
 		resize(rowIter, nseq);
 		for(TSize i = 0; i<nseq; ++i) value(rowIter, i) = begin(row(align, i));
