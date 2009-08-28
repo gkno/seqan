@@ -924,6 +924,100 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	return totalScore;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TStringSet, typename TCargo, typename TSpec, typename TSource, typename TSpec2> 
+inline bool
+convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& gAlign,
+				 Align<TSource, TSpec2>& align)
+{
+	// Pipe into Align data structure
+	String<char> mat;
+	if (convertAlignment(gAlign, mat)) {
+		typedef Align<TSource, TSpec2> TAlign;
+		typedef typename Size<TAlign>::Type TSize;
+		typedef typename Row<TAlign>::Type TRow;
+		typedef typename Iterator<TRow>::Type TRowIterator;
+		clearGaps(align);
+		TSize nseq = length(stringSet(gAlign));
+		String<TRowIterator> rowIter;
+		resize(rowIter, nseq);
+		for(TSize i = 0; i<nseq; ++i) value(rowIter, i) = begin(row(align, i));
+		TSize lenMat = length(mat);
+		TSize colLen = lenMat / nseq;
+		TSize gapCount = 0;
+		char gapChar = gapValue<char>();
+		for(TSize alignRow = 0; alignRow < nseq; ++alignRow) {
+			for(TSize pos = alignRow * colLen; pos < (alignRow + 1) * colLen; ++pos) {
+				if (value(mat, pos) != gapChar) {
+					if (gapCount) {
+						insertGaps(value(rowIter, alignRow), gapCount);
+						goFurther(value(rowIter, alignRow), gapCount);
+						gapCount = 0;
+					}
+					goNext(value(rowIter,alignRow));
+				} else ++gapCount;
+			}
+			if (gapCount) {
+				insertGaps(value(rowIter, alignRow), gapCount);
+				goFurther(value(rowIter, alignRow), gapCount);
+				gapCount = 0;
+			}
+		}
+	} else return false;
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TSource, typename TSpec2, typename TStringSet, typename TCargo, typename TSpec> 
+inline bool
+convertAlignment(Align<TSource, TSpec2> const& align,
+				 Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign)
+{
+	typedef Align<TSource, TSpec2> const TAlign;
+	typedef typename Value<TSource>::Type TAlphabet;
+	typedef typename Size<TAlign>::Type TSize;
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow, Standard>::Type TRowIterator;
+	clear(gAlign);
+	TStringSet strSet = stringSet(const_cast<Align<TSource, TSpec2>&>(align));
+	assignStringSet(gAlign, strSet);
+	TSize nseq = length(rows(align));
+	String<TRowIterator> rowIter;
+	String<TRowIterator> rowIterEnd;
+	resize(rowIter, nseq);
+	resize(rowIterEnd, nseq);
+	for(TSize i = 0; i<nseq; ++i) {
+		value(rowIter, i) = begin(row(align, i), Standard());
+		value(rowIterEnd, i) = end(row(align, i), Standard());
+	}
+	String<Fragment<> > matches;
+	for(TSize alignRow1 = 0; alignRow1 < nseq; ++alignRow1) {
+		for(TSize alignRow2 = alignRow1 + 1; alignRow2 < nseq; ++alignRow2) {
+			TRowIterator pos1 = value(rowIter,alignRow1);
+			TRowIterator pos2 = value(rowIter,alignRow2);
+			TSize alignPos = 0;
+			TSize length = 0;
+			TSize offset1 = 0;
+			TSize offset2 = 0;
+			for(;pos1 != value(rowIterEnd, alignRow1); ++pos1, ++pos2, ++alignPos) {
+				if ((isGap(pos1)) || (isGap(pos2))) {
+					if (length) {
+						appendValue(matches, Fragment<>(alignRow1, alignPos - offset1 - length, alignRow2, alignPos - offset2 - length, length));
+						length = 0;
+					}
+					if (isGap(pos1)) ++offset1;
+					if (isGap(pos2)) ++offset2;
+				} else ++length;
+			}
+			if (length) appendValue(matches, Fragment<>(alignRow1, alignPos - offset1 - length, alignRow2, alignPos - offset2 - length, length));
+		}
+	}
+	matchRefinement(matches,strSet,gAlign);
+	return true;
+}
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
