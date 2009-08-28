@@ -986,9 +986,11 @@ convertAlignment(Align<TSource, TSpec2> const& align,
 	typedef typename Size<TAlign>::Type TSize;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TRowIterator;
-	clear(gAlign);
-	TStringSet strSet = stringSet(const_cast<Align<TSource, TSpec2>&>(align));
-	assignStringSet(gAlign, strSet);
+	clearVertices(gAlign);
+	if (!length(stringSet(gAlign))) {
+		TStringSet sourceSet = stringSet(const_cast<Align<TSource, TSpec2>&>(align));
+		assignStringSet(gAlign, sourceSet);
+	}
 	TSize nseq = length(rows(align));
 	String<TRowIterator> rowIter;
 	String<TRowIterator> rowIterEnd;
@@ -1020,7 +1022,7 @@ convertAlignment(Align<TSource, TSpec2> const& align,
 			if (length) appendValue(matches, Fragment<>(alignRow1, alignPos - offset1 - length, alignRow2, alignPos - offset2 - length, length));
 		}
 	}
-	matchRefinement(matches,strSet,gAlign);
+	matchRefinement(matches,stringSet(gAlign),gAlign);
 	return true;
 }
 
