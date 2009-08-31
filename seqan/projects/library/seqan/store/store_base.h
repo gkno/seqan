@@ -40,6 +40,14 @@ struct GapAnchor {
 	GapAnchor() : seqPos(0), gapPos(0) {}
 	GapAnchor(TPos sP, TPos gP) : seqPos(sP), gapPos(gP) {}
 	
+	template <typename TPos_>
+	inline void
+	operator = (GapAnchor<TPos_> const &other)
+	{
+		seqPos = other.seqPos;
+		gapPos = other.gapPos;
+	} 
+
 	template <typename TOther>
 	inline bool
 	operator == (TOther const &other) const
@@ -51,7 +59,7 @@ struct GapAnchor {
 	inline bool
 	operator != (TOther const &other) const
 	{
-		return !(seqPos == other.seqPos);
+		return !(*this == other);
 	} 
 
 	template <typename TOther>
@@ -90,10 +98,19 @@ struct Size< GapAnchor<TPos> >
 };
 
 template <typename TPos>
+struct Size< GapAnchor<TPos> const>:
+	public Size< GapAnchor<TPos> > {};
+
+template <typename TPos>
 struct Position< GapAnchor<TPos> >
 {
 	typedef TPos Type;
 };
+
+template <typename TPos>
+struct Position< GapAnchor<TPos> const>:
+	public Position< GapAnchor<TPos> > {};
+
 
 //////////////////////////////////////////////////////////////////////////////
 

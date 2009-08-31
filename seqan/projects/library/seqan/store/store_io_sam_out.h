@@ -29,9 +29,9 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // write
     
-    template<typename TFile, typename TFragmentStore>
+    template<typename TFile, typename TSpec, typename TConfig>
     inline void write(TFile & target,
-                      TFragmentStore const & store,
+                      FragmentStore<TSpec, TConfig> & store,
                       SAM)
     {
         // write header
@@ -43,53 +43,128 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // _writeAlignments
 
-    template<typename TFile, typename TFragmentStore>
-    inline void _writeAlignments(TFile & target,
-                                 TFragmentStore const & store,
+    template<typename TFile, typename TSpec, typename TConfig>
+	inline void _writeAlignments(TFile & target,
+                                 FragmentStore<TSpec, TConfig> & store,
                                  SAM)
     {
-        typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
-        typedef typename Iterator<String<TAlignedElement> >::Type TAlignIter;
-        typedef typename Id<TFragmentStore>::Type TId;
+		typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
-        TAlignIter it = begin(store.alignedReadStore);
+		typedef typename TFragmentStore::TReadStore						TReadStore;
+		typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
+		typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+		typedef typename TFragmentStore::TContigStore					TContigStore;
 
-        for(; it != end(store.alignedReadStore); ++it){
-            TId alignedId = value(it).id;
-            _streamWrite(target, value(store.readNameStore, alignedId));
+        typedef typename Value<TReadStore>::Type						TRead;
+        typedef typename Value<TContigStore>::Type						TContig;
+        typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+
+        typedef typename Value<TReadSeqStore>::Type						TReadSeq;
+		typedef typename TContig::TContigSeq							TContigSeq;
+        typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignIter;
+        typedef typename Id<TAlignedRead>::Type							TId;
+
+		typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
+		typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+
+		String<int> mateIndex;	// store outer library size for each pair match (indexed by pairMatchId)
+		calculateMateIndices(mateIndex, store);
+		
+        TAlignIter it = begin(store.alignedReadStore, Standard());
+        TAlignIter itEnd = end(store.alignedReadStore, Standard());
+		TAlignIter mit;
+		CharString cigar;
+
+        for(; it != itEnd; ++it)
+		{
+            TId alignedId = (*it).id;
+			TId readId = (*it).readId;
+			TId mateIdx = mateIndex[2*(*it).pairMatchId + getMateNo(store, (*it).readId)];
+
+			__int64 mpos = 0;
+			int isize = 0;
+			unsigned short flag = 0;
+
+			if ((*it).beginPos > (*it).endPos)
+				flag |= 0x0010;
+			
+			if (mateIdx < length(store.alignedReadStore))
+			{
+				mit = begin(store.alignedReadStore, Standard()) + mateIdx;
+				mpos = min((*mit).beginPos, (*mit).endPos);
+				isize = (*mit).beginPos - (*it).beginPos;
+				flag |= 0x0002;
+				if ((*mit).beginPos > (*mit).endPos)
+					flag |= 0x0020;				
+			}
+			unsigned char mateNo = getMateNo(store, readId);
+			if (mateNo == 0) flag |= 0x0040;
+			if (mateNo == 1) flag |= 0x0080;
+
+			if (readId < length(store.readStore))
+			{
+				TRead &read = store.readStore[readId];
+				if (read.matePairId != TRead::INVALID_ID)
+					flag |= 0x0001;
+			}
+
+			// qname
+			if (readId < length(store.readNameStore))
+				_streamWrite(target, store.readNameStore[readId]);
             _streamPut(target, '\t');
             
-            //flag
+            // flag
+            _streamPutInt(target, flag);
             _streamPut(target, '\t');
             
-            _streamWrite(target, value(store.contigNameStore, value(it).contigId));
+			// rname
+			if ((*it).contigId < length(store.contigNameStore))
+				_streamWrite(target, store.contigNameStore[(*it).contigId]);
             _streamPut(target, '\t');
             
-            _streamPutInt(target, min(value(it).beginPos, value(it).endPos));
+			// begin
+            _streamPutInt(target, min((*it).beginPos, (*it).endPos));
             _streamPut(target, '\t');
             
-            _streamPutInt(target, value(store.alignedReadQualityStore, alignedId));
+			if (alignedId < length(store.alignQualityStore))
+				_streamPutInt(target, store.alignQualityStore[alignedId].score);
             _streamPut(target, '\t');
             
             // cigar
+			TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
+			TReadGaps	readGaps(store.readSeqStore[readId], store.alignedReadStore[alignedId].gaps);
+			setBeginPosition(contigGaps, (*it).beginPos);
+			setEndPosition(contigGaps, (*it).endPos);
+			getCigarString(cigar, contigGaps, readGaps);
+			_streamWrite(target, cigar);
             _streamPut(target, '\t');
             
             // mrnm
+			if ((*it).contigId == (*mit).contigId)
+				_streamWrite(target, '=');
+			else
+				if ((*mit).contigId < length(store.contigNameStore))
+					_streamWrite(target, store.contigNameStore[(*mit).contigId]);
             _streamPut(target, '\t');
             
             // mpos
+			_streamPutInt(target, mpos);
             _streamPut(target, '\t');
             
             // isize
+			_streamPutInt(target, isize);
             _streamPut(target, '\t');
+
             
-            _streamWrite(target, value(store.readSeqStore, value(it).readId));
+			if (readId < length(store.readSeqStore))
+				_streamWrite(target, store.readSeqStore[readId]);
             _streamPut(target, '\t');
             
             // qual
             _streamPut(target, '\t');
             
-            _streamWrite(target, value(store.alignedReadTagStore, alignedId));
+			if (alignedId < length(store.alignedReadTagStore))
+				_streamWrite(target, store.alignedReadTagStore[alignedId]);
             
             _streamPut(target, '\n');
         }
