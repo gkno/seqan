@@ -133,6 +133,15 @@ SEQAN_CHECKPOINT
 	return supremumValueImpl(_tag);
 }
 
+template <typename T>
+inline T const &
+supremumValue(T)
+{
+SEQAN_CHECKPOINT
+	T * _tag = 0;
+	return supremumValueImpl(_tag);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // infimumValue, infimumValueImpl
 //////////////////////////////////////////////////////////////////////////////
@@ -176,6 +185,15 @@ Do not specialize $infimumValue$, specialize @Function.infimumValueImpl@ instead
 template <typename T>
 inline T const &
 infimumValue()
+{
+SEQAN_CHECKPOINT
+	T * _tag = 0;
+	return infimumValueImpl(_tag);
+}
+
+template <typename T>
+inline T const &
+infimumValue(T)
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;

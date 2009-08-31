@@ -166,7 +166,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TContainer, typename TSpec>
-inline Iter<TContainer, TSpec> const
+inline Iter<TContainer, TSpec>
 operator ++ (Iter<TContainer, TSpec> & me, int)
 {
 SEQAN_CHECKPOINT
@@ -189,13 +189,79 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TContainer, typename TSpec>
-inline Iter<TContainer, TSpec> const
+inline Iter<TContainer, TSpec>
 operator -- (Iter<TContainer, TSpec> & me, int)
 {
 SEQAN_CHECKPOINT
 	Iter<TContainer, TSpec> temp_(me);
 	goPrevious(me);
 	return temp_;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator + / +=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec>
+operator + (Iter<TContainer, TSpec> & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	Iter<TContainer, TSpec> temp_(me);
+	goFurther(temp_, size);
+	return temp_;
+}
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec>
+operator + (Iter<TContainer, TSpec> const & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	Iter<TContainer, TSpec> temp_(me);
+	goFurther(temp_, size);
+	return temp_;
+}
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec> const &
+operator += (Iter<TContainer, TSpec> & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	goFurther(me, size);
+	return me;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// operator - / -=
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec>
+operator - (Iter<TContainer, TSpec> & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	Iter<TContainer, TSpec> temp_(me);
+	goFurther(temp_, -size);
+	return temp_;
+}
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec>
+operator - (Iter<TContainer, TSpec> const & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	Iter<TContainer, TSpec> temp_(me);
+	goFurther(temp_, -size);
+	return temp_;
+}
+
+template <typename TContainer, typename TSpec, typename TSize>
+inline Iter<TContainer, TSpec> const &
+operator -= (Iter<TContainer, TSpec> & me, TSize size)
+{
+SEQAN_CHECKPOINT
+	goFurther(me, -size);
+	return me;
 }
 
 //////////////////////////////////////////////////////////////////////////////
