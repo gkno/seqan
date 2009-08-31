@@ -461,7 +461,7 @@ This interval is the @Function.value@ of the iterator.
 ..signature:parentRepLength(iterator)
 ..param.iterator:An iterator of a Suffix Tree.
 ...type:Spec.VSTree Iterator
-..returns:The length of the sequence returned by @Function.parentRepresentative@
+..returns:The length of the sequence returned by @Function.representative@ of the parent node.
 ...type:Metafunction.Size|Size type of the underlying index
 */
 

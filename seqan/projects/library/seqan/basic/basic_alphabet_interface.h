@@ -887,7 +887,7 @@ struct BytesPerValue
 	since there exists no integral type that provides sufficient space to store types of this size.
 ..see:Metafunction.ValueSize
 ..see:Metafunction.BitsPerValue
-..see:Metafunction.BytsPerValue
+..see:Metafunction.BytesPerValue
 */
 
 
