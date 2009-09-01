@@ -33,9 +33,11 @@ add_executable (seqcons ${SEQAN_BASE}/apps/seqcons/seqcons.cpp)
 add_executable (pair_align ${SEQAN_BASE}/apps/pair_align/pair_align.cpp)
 add_executable (tree_recon ${SEQAN_BASE}/apps/tree_recon/tree_recon.cpp)
 
-#target_link_libraries (paramChooser rt)
-#target_link_libraries (razers tbb_debug pthread)
-#target_link_libraries (razers tbb_debug)
-target_link_libraries (razers)
-
-
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	target_link_libraries (razers rt)
+	target_link_libraries (paramChooser rt)
+	target_link_libraries (seqan_tcoffee rt)
+	target_link_libraries (seqcons rt)
+	#target_link_libraries (razers tbb_debug pthread)
+	#target_link_libraries (razers tbb_debug)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
