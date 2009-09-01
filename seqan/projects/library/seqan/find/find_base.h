@@ -165,24 +165,32 @@ public:
 	bool _beginFind_called;					// if false, then findBegin was not yet called for this match position (see findBegin default implementation)
 
 	Finder()
-		: _needReinit(true) 
+		: data_endPos(0)
+		, data_length(0)
+		, _needReinit(true)
 		, _beginFind_called(false)
 	{}
 
 	Finder(THaystack & haystack)
 		: data_iterator(begin(haystack, Rooted()))
+		, data_endPos(0)
+		, data_length(0)
 		, _needReinit(true) 
 		, _beginFind_called(false)
 	{}
 
 	Finder(TIterator &iter)
 		: data_iterator(iter)
+		, data_endPos(0)
+		, data_length(0)
 		, _needReinit(true) 
 		, _beginFind_called(false)
 	{}
 
 	Finder(TIterator const &iter)
 		: data_iterator(iter)
+		, data_endPos(0)
+		, data_length(0)
 		, _needReinit(true) 
 		, _beginFind_called(false)
 	{}
