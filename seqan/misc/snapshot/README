@@ -8,11 +8,12 @@ Read "docs/Page_Installation.html" for detailed installation instructions.
 Folders:
 ========
 
+"apps":  SeqAn applications
+"cmake": CMake files to create your own project files
+"demos": SeqAn demos, see also "docs/INDEXPAGE_Demo.html"
+"docs":  HTML-Documentation
 "seqan": SeqAn library (add the folder that contains "seqan" to 
          your include path)
-"demos": SeqAn demos, see also "docs/INDEXPAGE_Demo.html"
-"apps":  SeqAn applications
-"docs":  HTML-Documentation
 
 
 Files:
