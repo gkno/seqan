@@ -463,6 +463,7 @@ int main(int argc, const char *argv[])
 	if ((argumentCount(parser) > maxFiles) && (stop = true))
 		cerr << "More than " << maxFiles << " input files specified." << endl;
 	if ((argumentCount(parser) < 2) && (stop = true))
+	{
 		if (argc > 1)
 			cerr << "Less than 2 input files specified." << endl;
 		else
@@ -470,6 +471,7 @@ int main(int argc, const char *argv[])
 			shortHelp(parser, cerr);	// print short help and exit
 			return 0;
 		}
+	}
 
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
 	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
