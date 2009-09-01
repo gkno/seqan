@@ -44,7 +44,8 @@ def createApp(name, path):
             if pos < 0: ext = ""
             else: ext = file[pos+1:]
             if ext in ["cpp", "CPP"]:
-                source_files += "<File RelativePath=\".\\" + file + "\"></File>"
+                if file != "paramChooser.cpp":
+                    source_files += "<File RelativePath=\".\\" + file + "\"></File>"
             else:
                 if ext in ["h", "H", "hpp", "HPP"]:
                     header_files += "<File RelativePath=\".\\" + file + "\"></File>"

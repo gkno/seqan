@@ -49,7 +49,7 @@ to select "$iterator.cpp$" for compiling.
 ..text:You can also build a project file for the IDE of your choice using @http://www.cmake.org|CMake@ version 2.6 or later.
 After installing cmake you can generate project files for e.g. Xcode (only Mac OSX) run:
 ..output:
-cd seqan/cmake
+cd cmake
 cmake -G Xcode
 
 ..text:To see the list of possible project files supported by cmake type:
