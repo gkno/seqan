@@ -15,15 +15,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 ==========================================================================*/
 
-#define SEQAN_PROFILE
 
 #include <seqan/basic.h>
-
-// Profiling
-#ifdef SEQAN_PROFILE
-SEQAN_PROTIMESTART(__myProfileTime); 
-#endif
-
 #include <seqan/graph_msa.h>
 #include "rna_alphabet.h"
 #include <seqan/modifier.h>
@@ -76,11 +69,6 @@ customizedMsaAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
 	StringSet<String<char> > sequenceNames;
 	_loadSequences(sequenceSet, sequenceNames, msaOpt.seqfile.c_str());
 	
-#ifdef SEQAN_PROFILE
-	std::cout << "Number of sequences: " << length(sequenceSet) << std::endl;
-	std::cout << "Import of sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
 	// Alignment of the sequences
 	Graph<Alignment<StringSet<TSequence, Dependent<> >, void, WithoutEdgeId> > gAlign;
 	
@@ -98,9 +86,6 @@ customizedMsaAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
 		fclose(strmWrite);
 	}
 
-#ifdef SEQAN_PROFILE
-	std::cout << "Output done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -244,18 +229,12 @@ _initMsaParams(CommandLineParser& parser, TScore& scMat) {
 
 	// Evaluation mode?
 	if (isSetLong(parser, "infile")) {
-#ifdef SEQAN_PROFILE
-		::std::cout << "Alignment evaluation" << ::std::endl;
-#endif
 		evaluateAlignment(msaOpt);
 	} else { // or alignment mode?
 		if (!isSetLong(parser, "seq")) { 
 			shortHelp(parser, std::cerr);	// print short help and exit
 			exit(0);
 		}
-#ifdef SEQAN_PROFILE
-		::std::cout << "Multiple Sequence Alignment" << ::std::endl;
-#endif
 		customizedMsaAlignment(msaOpt);
 	}
 }

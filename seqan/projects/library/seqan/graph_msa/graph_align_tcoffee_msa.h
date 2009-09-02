@@ -180,26 +180,6 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	clear(gAlign);
 	assignStringSet(gAlign, sequenceSet);
 
-#ifdef SEQAN_PROFILE
-	std::cout << "Scoring parameters:" << std::endl;
-	std::cout << "*Gap opening: " << msaOpt.sc.data_gap_open << std::endl;
-	std::cout << "*Gap extension: " << msaOpt.sc.data_gap_extend << std::endl;
-	//std::cout << "*Scoring matrix: " << std::endl;
-	//TSize alphSize = ValueSize<TAlphabet>::VALUE;
-	//std::cout << "   ";
-	//for(TSize col = 0; col<alphSize; ++col) std::cout << TAlphabet(col) << ',';
-	//std::cout << std::endl;
-	//for(TSize row = 0; row<alphSize; ++row) {
-	//	for(TSize col = 0; col<alphSize; ++col) {
-	//		if (col == 0) std::cout << TAlphabet(row) << ": ";
-	//		std::cout << score(msaOpt.sc, TAlphabet(row), TAlphabet(col));
-	//		if (col < alphSize - 1) std::cout << ',';
-	//	}
-	//	std::cout << std::endl;
-	//}
-	//std::cout << std::endl;
-#endif
-
 	// Some alignment constants
 	TStringSet& seqSet = stringSet(gAlign);
 	TSize nSeq = length(seqSet);
@@ -221,125 +201,71 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 
 	// Include segment matches from subalignments
 	if (!empty(msaOpt.alnfiles)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing external alignment files:" << std::endl;
-#endif
 		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
 		TIter begIt = begin(msaOpt.alnfiles, Standard() );
 		TIter begItEnd = end(msaOpt.alnfiles, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
-#ifdef SEQAN_PROFILE
-			std::cout << "*External file " << (*begIt) << std::endl;
-#endif
 			std::ifstream strm_lib;
 			strm_lib.open((*begIt).c_str(), ::std::ios_base::in | ::std::ios_base::binary);
 			read(strm_lib, matches, scores, sequenceNames, FastaAlign());
 			strm_lib.close();
 		}
-#ifdef SEQAN_PROFILE
-		std::cout << "External segment matches done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 	}
 
 	// Include computed segment matches
 	if (!empty(msaOpt.method)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Computing segment matches:" << std::endl;
-#endif
 		typedef typename Iterator<String<unsigned int>, Standard>::Type TIter;
 		TIter begIt = begin(msaOpt.method, Standard() );
 		TIter begItEnd = end(msaOpt.method, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
-#ifdef SEQAN_PROFILE
-			if (*begIt == 0) std::cout << "*Method: global" << std::endl;
-			else if (*begIt == 1) std::cout << "*Method: local" << std::endl;
-			else if (*begIt == 2) std::cout << "*Method: overlap" << std::endl;
-			else if (*begIt == 3) std::cout << "*Method: lcs" << std::endl;
-#endif
 			if (*begIt == 0) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 			else if (*begIt == 1) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, LocalPairwise_Library() );
-			else if (*begIt == 2) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, Nothing(), AlignConfig<true,true,true, true>(), GlobalPairwise_Library() );
-			else if (*begIt == 3) appendSegmentMatches(seqSet, pList, matches, scores, Lcs_Library() );
-			else {
-#ifdef SEQAN_PROFILE
-				std::cout << "*Unknown method!!!" << std::endl;
-#endif
+			else if (*begIt == 2) {
+				Nothing noth;
+				appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, noth, AlignConfig<true,true,true, true>(), GlobalPairwise_Library() );
 			}
-#ifdef SEQAN_PROFILE
-			std::cout << "*Done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
+			else if (*begIt == 3) appendSegmentMatches(seqSet, pList, matches, scores, Lcs_Library() );
 		}	
 	}
 
 	// Include a T-Coffee library
 	if (!empty(msaOpt.libfiles)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing a T-Coffee Library:" << std::endl;
-#endif
 		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
 		TIter begIt = begin(msaOpt.libfiles, Standard() );
 		TIter begItEnd = end(msaOpt.libfiles, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
-#ifdef SEQAN_PROFILE
-			std::cout << "*T-Coffee library: " << (*begIt) << std::endl;
-#endif
 			std::ifstream strm_lib;
 			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
 			read(strm_lib, matches, scores, sequenceNames, TCoffeeLib());
 			strm_lib.close();
 		}
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 	}
 
 	// Include MUMmer segment matches
 	if (!empty(msaOpt.mummerfiles)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing MUMmer segment matches:" << std::endl;
-#endif
 		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
 		TIter begIt = begin(msaOpt.mummerfiles, Standard() );
 		TIter begItEnd = end(msaOpt.mummerfiles, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
-#ifdef SEQAN_PROFILE
-			std::cout << "*MUMmer file: " << (*begIt) << std::endl;
-#endif
 			std::ifstream strm_lib;
 			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
 			read(strm_lib, matches, scores, seqSet, sequenceNames, MummerLib());		
 			strm_lib.close();
 		}
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 	}
 
 	// Include BLAST segment matches
 	if (!empty(msaOpt.blastfiles)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing BLAST segment matches:" << std::endl;
-#endif
 		typedef typename Iterator<String<std::string>, Standard>::Type TIter;
 		TIter begIt = begin(msaOpt.blastfiles, Standard() );
 		TIter begItEnd = end(msaOpt.blastfiles, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
-#ifdef SEQAN_PROFILE
-			std::cout << "*BLAST file: " << (*begIt) << std::endl;
-#endif
 			std::ifstream strm_lib;
 			strm_lib.open((*begIt).c_str(), std::ios_base::in | std::ios_base::binary);
 			read(strm_lib, matches, scores, sequenceNames, BlastLib());
 			strm_lib.close();
 		}
-#ifdef SEQAN_PROFILE
-		std::cout << "Parsing done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 	}
-
-#ifdef SEQAN_PROFILE
-	std::cout << "Total number of segment matches: " << length(matches) << std::endl;
-#endif
 
 	// Use these segment matches for the initial alignment graph
 	TGraph g(seqSet);
@@ -347,28 +273,15 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	else buildAlignmentGraph(matches, scores, g, msaOpt.sc, ReScore() );
 	clear(matches);
 	clear(scores);
-#ifdef SEQAN_PROFILE
-	std::cout << "Alignment graph construction done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	// Guide tree
 	Graph<Tree<TDistanceValue> > guideTree;
 	if (!empty(msaOpt.treefile)) {
-#ifdef SEQAN_PROFILE
-		std::cout << "Guide Tree: " << msaOpt.treefile << std::endl;
-#endif
 		std::fstream strm_tree;
 		strm_tree.open(msaOpt.treefile.c_str(), ::std::ios_base::in | ::std::ios_base::binary);
 		read(strm_tree, guideTree, sequenceNames, NewickFormat());	// Read newick tree
 		strm_tree.close();
 	} else {
-#ifdef SEQAN_PROFILE
-		if (msaOpt.build == 0) std::cout << "Guide Tree: Neighbor Joining" << std::endl;
-		else if (msaOpt.build == 1) std::cout << "Guide Tree: UPGMA single linkage" << std::endl;
-		else if (msaOpt.build == 2) std::cout << "Guide Tree: UPGMA complete linkage" << std::endl;
-		else if (msaOpt.build == 3) std::cout << "Guide Tree: UPGMA average linkage" << std::endl;
-		else if (msaOpt.build == 4) std::cout << "Guide Tree: UPGMA weighted average linkage" << std::endl;
-#endif
 		// Check if we have a valid distance matrix
 		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, KmerDistance());
 		if (msaOpt.build == 0) njTree(distanceMatrix, guideTree);
@@ -378,28 +291,16 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		else if (msaOpt.build == 4) upgmaTree(distanceMatrix, guideTree, UpgmaWeightAvg());
 	}
 	clear(distanceMatrix);
-#ifdef SEQAN_PROFILE
-	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 		
 	// Triplet extension
 	if (nSeq < threshold) tripletLibraryExtension(g);
 	else tripletLibraryExtension(g, guideTree, threshold / 2);
-#ifdef SEQAN_PROFILE
-	std::cout << "Triplet extension done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	// Progressive Alignment
 	progressiveAlignment(g, guideTree, gAlign);
-#ifdef SEQAN_PROFILE
-	std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	clear(guideTree);
 	clear(g);
-#ifdef SEQAN_PROFILE
-	std::cout << "Clean-up done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 }
 
 
