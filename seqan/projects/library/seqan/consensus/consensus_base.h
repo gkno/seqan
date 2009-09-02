@@ -421,11 +421,6 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	if (consOpt.window == 0) selectPairs(seqSet, begEndPos, consOpt.bandwidth, pList, diagList);
 	else selectPairsIndel(seqSet, begEndPos, consOpt.window, pList, diagList);
 
-	// Estimate the number of overlaps we want to compute
-#ifdef SEQAN_PROFILE
-	std::cout << "Pair selection done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
 	// Set-up a sparse distance matrix
 	Graph<Undirected<double> > pairGraph;
 	
@@ -439,9 +434,6 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	appendSegmentMatches(seqSet, pList, diagList, begEndPos, consOpt.sc, consOpt.matchlength, consOpt.quality, consOpt.overlaps, matches, scores, pairGraph, Overlap_Library() );
 	clear(pList);
 	clear(diagList);
-#ifdef SEQAN_PROFILE
-	std::cout << "Overlap done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	// Use these segment matches for the initial alignment graph
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
@@ -449,31 +441,19 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	buildAlignmentGraph(matches, scores, g, consOpt.sc, ReScore() );
 	clear(matches);
 	clear(scores);
-#ifdef SEQAN_PROFILE
-	std::cout << "Construction of Alignment Graph done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	// Guide Tree
 	Graph<Tree<double> > guideTree;
 	upgmaTree(pairGraph, guideTree);
-#ifdef SEQAN_PROFILE
-	std::cout << "Guide tree done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 	clear(pairGraph);
 
 	// Triplet library extension
 	graphBasedTripletLibraryExtension(g);
-#ifdef SEQAN_PROFILE
-	std::cout << "Triplet done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 	// Perform a progressive alignment
 	progressiveAlignment(g, guideTree, gOut);
 	clear(g);
 	clear(guideTree);
-#ifdef SEQAN_PROFILE
-	std::cout << "Progressive alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////

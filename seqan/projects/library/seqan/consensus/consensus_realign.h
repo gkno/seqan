@@ -560,25 +560,17 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	}
 
 
-#ifdef SEQAN_PROFILE
-			::std::cout << "ReAlign iteration start: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
 	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
-		std::cout << "Score: " << score << std::endl;
-#ifdef SEQAN_PROFILE
-		::std::cout << "Time: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
+		//std::cout << "Score: " << score << std::endl;
 		oldScore = score;
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
-	std::cout << "Score: " << score << std::endl;
-#ifdef SEQAN_PROFILE
-	::std::cout << "Time: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
+	//std::cout << "Score: " << score << std::endl;
+
 
 
 	// Update all the aligned reads and the new consensus

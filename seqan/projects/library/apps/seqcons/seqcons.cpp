@@ -15,15 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 Lesser General Public License for more details.
 ==========================================================================*/
 
-#define SEQAN_PROFILE
-
 #include <seqan/basic.h>
-
-// Profiling
-#ifdef SEQAN_PROFILE
-		SEQAN_PROTIMESTART(__myProfileTime); 
-#endif
-
 #include <seqan/consensus.h>
 #include <seqan/modifier.h>
 #include <seqan/misc/misc_cmdparser.h>
@@ -164,39 +156,13 @@ int main(int argc, const char *argv[]) {
 	// Multi-realignment desired or just conversion of the input
 	if (!consOpt.noalign) {
 	
-		// Profiling
-#ifdef SEQAN_PROFILE
-				SEQAN_PROTIMEUPDATE(__myProfileTime); 
-#endif
-	
 		// Iterate over all contigs
 		for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
 
 			if (consOpt.method == 0) {
-#ifdef SEQAN_PROFILE
-				::std::cout << "ReAlign method" << ::std::endl;
-				if (consOpt.rmethod == 0) ::std::cout << "Realign algorithm: Needleman-Wunsch" << ::std::endl;
-				else if (consOpt.rmethod == 1) ::std::cout << "Realign algorithm: Gotoh" << ::std::endl;
-				::std::cout << "Bandwidth: " << consOpt.bandwidth << ::std::endl;
-				::std::cout << "Include reference: " << consOpt.include << ::std::endl;
-#endif
 				Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
 				reAlign(fragStore, combinedScore, currentContig, consOpt.rmethod, consOpt.bandwidth, consOpt.include);
-
-#ifdef SEQAN_PROFILE
-				::std::cout << "ReAlignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
 			} else {
-
-#ifdef SEQAN_PROFILE
-				::std::cout << "MSA method" << ::std::endl;
-				::std::cout << "Bandwidth: " << consOpt.bandwidth << ::std::endl;
-				::std::cout << "Matchlength: " << consOpt.matchlength << ::std::endl;
-				::std::cout << "Quality: " << consOpt.quality << ::std::endl;
-				::std::cout << "Overlaps: " << consOpt.overlaps << ::std::endl;
-				::std::cout << "Window: " << consOpt.window << ::std::endl;
-#endif
-
 				// Import all reads of the given contig
 				typedef TFragmentStore::TReadSeq TReadSeq;
 				StringSet<TReadSeq, Owner<> > readSet;
@@ -204,26 +170,15 @@ int main(int argc, const char *argv[]) {
 				_loadContigReads(readSet, begEndPos, fragStore, currentContig);
 				if (!length(readSet)) continue;
 
-#ifdef SEQAN_PROFILE
-				::std::cout << "Import sequences done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << ::std::endl;
-#endif
-
 				// Align the reads
 				typedef StringSet<TReadSeq, Dependent<> > TStringSet;
 				typedef Graph<Alignment<TStringSet, void, WithoutEdgeId> > TAlignGraph;
 				TAlignGraph gOut(readSet);
 				consensusAlignment(gOut, begEndPos, consOpt);
-#ifdef SEQAN_PROFILE
-				std::cout << "Multi-read Alignment done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
-
 			
 				// Update the contig in the fragment store
 				updateContig(fragStore, gOut, currentContig);
 				clear(gOut);
-#ifdef SEQAN_PROFILE
-				std::cout << "Update contig done: " << SEQAN_PROTIMEUPDATE(__myProfileTime) << " seconds" << std::endl;
-#endif
 
 				//// Debug code for CA
 				//mtRandInit();
