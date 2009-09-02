@@ -140,16 +140,6 @@ _setMismatchScore(MsaOptions<TAlphabet, Score<int, Simple> >& msaOpt, TSc mmsc) 
 
 template<typename TAlphabet, typename TScore>
 inline void
-_initMsaParams(int argc, const char *argv[], MsaOptions<TAlphabet, TScore>& msaOpt) {
-
-
-
-}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-template<typename TAlphabet, typename TScore>
-inline void
 _initMsaParams(CommandLineParser& parser, TScore& scMat) {
 	
 	// Msa configuration

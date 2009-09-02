@@ -39,7 +39,6 @@
 // Consensus tool
 #include <seqan/consensus/consensus_base.h>
 #include <seqan/consensus/consensus_score.h>
-#include <seqan/consensus/consensus_profile.h>
 #include <seqan/consensus/consensus_realign.h>
 #include <seqan/consensus/consensus_library.h>
 

@@ -18,8 +18,8 @@
   $Id$
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SEQAN_CONSENSUS_PROFILE_H
-#define SEQAN_HEADER_SEQAN_CONSENSUS_PROFILE_H
+#ifndef SEQAN_HEADER_SEQAN_BASIC_PROFCHAR_H
+#define SEQAN_HEADER_SEQAN_BASIC_PROFCHAR_H
 
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -112,6 +112,21 @@ template<typename TValue, typename TCount, typename TSpec>
 struct ValueSize<ProfileType<TValue, TCount, TSpec> >
 {
 	enum { VALUE = ValueSize<TValue>::VALUE + 1};
+};
+
+template<typename T>
+struct SourceValue;
+
+template<typename TValue, typename TCount, typename TSpec>
+struct SourceValue<ProfileType<TValue, TCount, TSpec> >
+{
+	typedef TValue Type;
+};
+
+template<typename TValue, typename TCount, typename TSpec>
+struct SourceValue<ProfileType<TValue, TCount, TSpec> const>
+{
+	typedef TValue const Type;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

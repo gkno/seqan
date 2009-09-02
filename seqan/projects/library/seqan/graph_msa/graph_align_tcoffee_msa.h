@@ -258,11 +258,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 #endif
 			if (*begIt == 0) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, distanceMatrix, GlobalPairwise_Library() );
 			else if (*begIt == 1) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, LocalPairwise_Library() );
-			else if (*begIt == 2) {
-				Nothing noth;
-				AlignConfig<true,true,true, true> ac;
-				appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, noth, ac, GlobalPairwise_Library() );
-			} 
+			else if (*begIt == 2) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, Nothing(), AlignConfig<true,true,true, true>(), GlobalPairwise_Library() );
 			else if (*begIt == 3) appendSegmentMatches(seqSet, pList, matches, scores, Lcs_Library() );
 			else {
 #ifdef SEQAN_PROFILE

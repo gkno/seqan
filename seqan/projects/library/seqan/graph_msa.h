@@ -42,5 +42,6 @@
 #include <seqan/graph_msa/graph_align_tcoffee_io.h>
 #include <seqan/graph_msa/graph_align_tcoffee_library.h>
 #include <seqan/graph_msa/graph_align_tcoffee_progressive.h>
+#include <seqan/graph_msa/graph_align_tcoffee_refinement.h>
 
 #endif //#ifndef SEQAN_HEADER_...

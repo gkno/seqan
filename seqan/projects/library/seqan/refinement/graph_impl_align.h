@@ -1570,6 +1570,55 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 }
 
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TSpec1, typename TStringSet, typename TCargo, typename TSpec2> 
+inline bool
+convertAlignment(String<TValue, TSpec1> const& mat,
+				 Graph<Alignment<TStringSet, TCargo, TSpec2> >& g)
+{
+	typedef String<TValue, TSpec1> TMatrix;
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec2> > TGraph;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Value<TStringSet>::Type TSequence;
+	typedef typename Value<TSequence>::Type TAlphabet;
+	typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
+	clearVertices(g);
+	TValue gapChar = gapValue<TValue>();
+	TSize nseq = length(stringSet(g));
+	TSize alignLen = length(mat) / nseq;
+	String<Fragment<> > matches;
+	for(TSize seq1 = 0; seq1<nseq; ++seq1) {
+		for(TSize seq2 = seq1 + 1; seq2<nseq; ++seq2) {
+			TMatIter seq1It = begin(mat);
+			seq1It += seq1 * alignLen;
+			TMatIter seq2It = begin(mat);
+			seq2It += seq2 * alignLen;
+			TSize alignPos = 0;
+			TSize length = 0;
+			TSize offset1 = 0;
+			TSize offset2 = 0;
+			for(TSize col = 0; col<alignLen; ++col, ++seq1It, ++seq2It, ++alignPos) {
+				if ((*seq1It == gapChar) || (*seq2It == gapChar)) {
+					if (length) {
+						appendValue(matches, Fragment<>(seq1, alignPos - offset1 - length, seq2, alignPos - offset2 - length, length));
+						length = 0;
+					}
+					if (*seq1It == gapChar) ++offset1;
+					if (*seq2It == gapChar) ++offset2;
+				} else ++length;
+			}
+			if (length) appendValue(matches, Fragment<>(seq1, alignPos - offset1 - length, seq2, alignPos - offset2 - length, length));
+		}
+	}
+	//_debugMatches(stringSet(g), matches);
+	matchRefinement(matches,stringSet(g),g);
+	return true;
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 

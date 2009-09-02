@@ -107,6 +107,8 @@
 
 #include <seqan/basic/basic_sse2.h>
 
+#include <seqan/basic/basic_profchar.h>
+
 //____________________________________________________________________________
 
 #include <seqan/basic/basic_holder_dynamic.h>
