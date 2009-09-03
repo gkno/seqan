@@ -161,7 +161,7 @@ struct _WuManber_Imp
 		resize(me.verify, (unsigned) DIR_SIZE+1);
 		resize(me.shift, (unsigned) DIR_SIZE);
 
-		arrayFill(begin(me.shift), begin(me.shift) + DIR_SIZE, me.lmin-Q+1); //maximal shift width is me.lmin-B+1
+		arrayFill(begin(me.shift), begin(me.shift) + (unsigned) DIR_SIZE, me.lmin-Q+1); //maximal shift width is me.lmin-B+1
 
 		//init counters
 		unsigned int verify_count[DIR_SIZE];
