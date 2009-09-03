@@ -47,14 +47,27 @@
 #include <seqan/file/cstream.h>
 #include <seqan/file/stream.h>
 
-#include <seqan/file/file_filereaderiterator.h>
-#include <seqan/file/file_filereader.h>
-
 #include <seqan/file/chunk_collector.h>
 #include <seqan/file/meta.h>
 
 //____________________________________________________________________________
+// files
+
+#include <seqan/file/file_base.h>
+#include <seqan/file/file_cstyle.h>
+#include <seqan/file/file_array.h>
+
+#include <seqan/system.h>	// async file (default file type of File<>)
+/*#include <seqan/system/file_sync.h>
+#include <seqan/system/system_event.h>
+#include <seqan/system/file_async.h>
+*/
+
+//____________________________________________________________________________
 // file formats
+
+#include <seqan/file/file_filereaderiterator.h>
+#include <seqan/file/file_filereader.h>
 
 #include <seqan/file/file_format.h>
 
@@ -78,18 +91,6 @@
 
 //#include <seqan/file/file_format_guess.h>
 
-//____________________________________________________________________________
-// files
-
-#include <seqan/file/file_base.h>
-#include <seqan/file/file_cstyle.h>
-#include <seqan/file/file_array.h>
-
-#include <seqan/system.h>	// async file (default file type of File<>)
-/*#include <seqan/system/file_sync.h>
-#include <seqan/system/system_event.h>
-#include <seqan/system/file_async.h>
-*/
 //____________________________________________________________________________
 // external strings
 

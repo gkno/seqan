@@ -24,6 +24,8 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+template <typename TFormat, typename TFile, typename TSpec>
+struct FileReader;
 
 //////////////////////////////////////////////////////////////////////////////
 // FileReader String
@@ -64,7 +66,8 @@ public:
 
 	typedef String<TValue> TBuf;
 
-	Holder<TFile, Tristate> data_file;
+	TFile *data_file;
+	bool data_file_owner;
 	TFilePosition data_file_begin;		//file pointer to begin of data in file
 	TABL data_abl;						//accumulated block lengths
 	TABLPosition data_active_block;		//number of active block
@@ -82,7 +85,8 @@ public:
 	{
 		reserve(data_buf, (size_t) BLOCK_SIZE, Exact());
 
-		setValue(data_file, fl_);
+		data_file = &fl_;
+		data_file_owner = false;
 		_FileReaderString_construct(*this);
 	}
 	template <typename TString>
@@ -91,7 +95,8 @@ public:
 	{
 		reserve(data_buf, (size_t) BLOCK_SIZE, Exact());
 
-		create(data_file);
+		data_file = new TFile();
+		data_file_owner = true;
 		if (!_streamOpen(value(data_file), str_))
 		{
 			clear(data_file);
@@ -103,10 +108,11 @@ public:
 	}
 	~String()
 	{
-		if (!dependent(data_file) && !empty(data_file))
+		if (data_file_owner && data_file != NULL)
 		{
 			_streamClose(value(data_file));
-			clear(data_file);
+			delete data_file;
+			data_file = NULL;
 		}
 	}
 };
