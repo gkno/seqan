@@ -511,7 +511,10 @@ TValue
 _calcIntervalTreeNodeCenterLeft(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
 {
 SEQAN_CHECKPOINT
-	return (center - (abs(center-last_center)/(TValue)2.0));
+	if (center > last_center)
+		return (center - (center-last_center)/(TValue)2.0);
+	else
+		return (center - (last_center-center)/(TValue)2.0);
 }
 
 //the MidCenter spec way of chosing center values:
@@ -522,7 +525,10 @@ TValue
 _calcIntervalTreeNodeCenterRight(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
 {
 SEQAN_CHECKPOINT
-	return (center + (abs(center-last_center)/(TValue)2.0));
+	if (center > last_center)
+		return (center + (center-last_center)/(TValue)2.0);
+	else
+		return (center + (last_center-center)/(TValue)2.0);
 }
 
 
