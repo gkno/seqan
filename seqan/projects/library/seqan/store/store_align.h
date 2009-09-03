@@ -643,59 +643,72 @@ template <typename TSource, typename TGapAnchors, typename TPosition>
 inline TPosition
 positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition pos)
 {
-	typedef typename Value<TGapAnchors>::Type TGapAnchor;
-	typedef typename Position<TGapAnchor>::Type TAnchorPos;
+	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;	
 
-	typename Iterator<TGapAnchors const, Standard>::Type it;
-	TGapAnchors const &anchors = _dataAnchors(me);
-	TGapAnchor	prevAnchor, nextAnchor;
-	TAnchorPos	seqPos;
-	TAnchorPos	seqLength = length(source(me));
+	GapAnchor<int>	prevAnchor, nextAnchor;
+	TPosition		seqPos;
+	int				anchorIdx;
 
-	if (!empty(anchors))
+	if (pos < 0)
+		anchorIdx = -1;
+	else
 	{
-		// differentiate between 0 (first alignment pos) and the rest because of soft-clipping at the beginning/end
-		if (pos == 0)
-			it = upperBoundGapAnchor(anchors, 0, SortGapPos());
-		else
-			it = lowerBoundGapAnchor(anchors, pos, SortGapPos());
-		if (it != end(anchors, Standard()))
+		TGapAnchors const & anchors = _dataAnchors(me);
+		TAnchorPos seqLength = length(source(me));
+		if (!empty(anchors))
 		{
-			if ((*it).gapPos == (TAnchorPos)pos && (*it).seqPos != seqLength)
-			{
-				prevAnchor = *it;
-				++it;
-			} else
-			{
-				if (it != begin(anchors, Standard()))
-					prevAnchor = *(it - 1);
-				else
-					prevAnchor = TGapAnchor(0, 0);
-			}
-		} else
-		{
-			if (!empty(anchors))
-				prevAnchor = back(anchors);
-			else
-				prevAnchor = TGapAnchor(0, 0);
+			anchorIdx = upperBoundGapAnchor(anchors, pos, SortGapPos()) - begin(anchors, Standard());
+			if (anchorIdx < (int)length(anchors))
+				if (anchors[anchorIdx].gapPos == (TAnchorPos)pos && anchors[anchorIdx].seqPos != seqLength)
+					++anchorIdx;
 		}
-		if (it != end(anchors, Standard()))
-			nextAnchor = *it;
-		else
-		{
-			nextAnchor.gapPos = prevAnchor.gapPos + (seqLength - prevAnchor.seqPos);
-			nextAnchor.seqPos = seqLength;
-		}
-	} else 
-	{
-		prevAnchor = TGapAnchor(0, 0);
-		nextAnchor = TGapAnchor(seqLength, seqLength);
+		else 
+			anchorIdx = ((TAnchorPos)pos < seqLength)? 0: 1;
 	}
-	if (nextAnchor.seqPos - prevAnchor.seqPos > pos - prevAnchor.gapPos)
+	_getAnchor(prevAnchor, me, anchorIdx);
+	_getAnchor(nextAnchor, me, anchorIdx + 1);
+
+	if (nextAnchor.seqPos - prevAnchor.seqPos > (int)pos - prevAnchor.gapPos)
 		seqPos = prevAnchor.seqPos + (pos - prevAnchor.gapPos);
 	else
 		seqPos = nextAnchor.seqPos;
 	return seqPos;
+}
+
+template <typename TSource, typename TGapAnchors, typename TPosition>
+inline TPosition
+positionSeqToGap(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition pos)
+{
+	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;	
+
+	GapAnchor<int>	prevAnchor, nextAnchor;
+	TPosition		gapPos;
+	int				anchorIdx;
+
+	if (pos < 0)
+		anchorIdx = -1;
+	else
+	{
+		TGapAnchors const & anchors = _dataAnchors(me);
+		TAnchorPos seqLength = length(source(me));
+		if (!empty(anchors))
+		{
+			anchorIdx = upperBoundGapAnchor(anchors, pos, SortSeqPos()) - begin(anchors, Standard());
+			if (anchorIdx < (int)length(anchors))
+				if (anchors[anchorIdx].seqPos == (TAnchorPos)pos)
+					++anchorIdx;
+		}
+		else 
+			anchorIdx = ((TAnchorPos)pos < seqLength)? 0: 1;
+	}
+	_getAnchor(prevAnchor, me, anchorIdx);
+	_getAnchor(nextAnchor, me, anchorIdx + 1);
+
+	if (nextAnchor.gapPos - prevAnchor.gapPos > (int)pos - prevAnchor.seqPos)
+		gapPos = prevAnchor.gapPos + (pos - prevAnchor.seqPos);
+	else
+		gapPos = nextAnchor.gapPos;
+	return gapPos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -830,6 +843,21 @@ inline bool
 isClipped(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 	return me.current.gapPos == me.nextAnchor.gapPos;
+}
+
+//____________________________________________________________________________
+
+template <typename TGaps, typename TGapAnchors>
+inline typename Size<TGaps>::Type
+countGaps(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
+{
+	typedef typename Size<TGaps>::Type TGapsSize;
+	
+SEQAN_CHECKPOINT
+	if (isGap(me))
+		return me.nextAnchor.gapPos - me.current.gapPos;
+	else
+		return 0;
 }
 
 //____________________________________________________________________________
@@ -1058,14 +1086,14 @@ _goTo_gapAnchorIterator(T & me, TPos pos)
 					++me.anchorIdx;
 		}
 		else 
-			me.anchorIdx = (pos < me.seqLength)? 0: 1;
+			me.anchorIdx = (pos < (TPos)me.seqLength)? 0: 1;
 	}
 	_getAnchor(me.prevAnchor, *me.data_container, me.anchorIdx);
 	_getAnchor(me.nextAnchor, *me.data_container, me.anchorIdx + 1);
 
 	me.current.gapPos = pos;
-	if (me.nextAnchor.seqPos - me.prevAnchor.seqPos > pos - me.prevAnchor.gapPos)
-		me.current.seqPos = me.prevAnchor.seqPos + (pos - me.prevAnchor.gapPos);
+	if (me.nextAnchor.seqPos - me.prevAnchor.seqPos > (int)pos - me.prevAnchor.gapPos)
+		me.current.seqPos = me.prevAnchor.seqPos + ((int)pos - me.prevAnchor.gapPos);
 	else
 		me.current.seqPos = me.nextAnchor.seqPos;
 }
@@ -1112,6 +1140,9 @@ getCigarString(
 	clear(cigar);
 	char op, lastOp = ' ';
 	unsigned numOps = 0;
+
+//	std::cout << gaps1 << std::endl;
+//	std::cout << gaps2 << std::endl;
 	for (; !atEnd(it1) && !atEnd(it2); goNext(it1), goNext(it2))
 	{
 		if (isGap(it1))
@@ -1142,10 +1173,10 @@ getCigarString(
 				lastOp = 'N';
 			if (numOps > 0)
 			{
-				appendValue(cigar, lastOp);
 				std::stringstream num;
 				num << numOps;
 				append(cigar, num.str());
+				appendValue(cigar, lastOp);
 			}
 			numOps = 0;
 			lastOp = op;
@@ -1156,10 +1187,10 @@ getCigarString(
 		lastOp = 'N';
 	if (numOps > 0)
 	{
-		appendValue(cigar, lastOp);
 		std::stringstream num;
 		num << numOps;
 		append(cigar, num.str());
+		appendValue(cigar, lastOp);
 	}
 }
 

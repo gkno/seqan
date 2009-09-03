@@ -41,11 +41,19 @@ struct GapAnchor {
 	GapAnchor(TPos sP, TPos gP) : seqPos(sP), gapPos(gP) {}
 	
 	template <typename TPos_>
-	inline void
+	GapAnchor(GapAnchor<TPos_> const &other)
+	{
+		seqPos = other.seqPos;
+		gapPos = other.gapPos;
+	} 
+
+	template <typename TPos_>
+	inline GapAnchor const &
 	operator = (GapAnchor<TPos_> const &other)
 	{
 		seqPos = other.seqPos;
 		gapPos = other.gapPos;
+		return *this;
 	} 
 
 	template <typename TOther>

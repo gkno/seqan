@@ -773,6 +773,47 @@ write(TFile & target,
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences from multiple files
+template <typename TFSSpec, typename TFSConfig>
+bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString> const &fileNameList)
+{
+	unsigned seqOfs = length(store.contigStore);
+	for (unsigned filecount = 0; filecount < length(fileNameList); ++filecount)
+	{
+		MultiFasta multiFasta;
+		if (!open(multiFasta.concat, toCString(fileNameList[filecount]), OPEN_RDONLY))
+			return false;
+
+		AutoSeqFormat format;
+		guessFormat(multiFasta.concat, format);					// guess file format
+		split(multiFasta, format);								// divide into single sequences
+
+		unsigned seqCount = length(multiFasta);
+		resize(store.contigStore, seqOfs + seqCount, Generous());
+		resize(store.contigNameStore, seqOfs + seqCount, Generous());
+		for(unsigned i = 0; i < seqCount; ++i)
+		{
+			assignSeq(store.contigStore[seqOfs + i].seq, multiFasta[i], format);			// read Genome sequence
+			assignSeqId(store.contigNameStore[seqOfs + i], multiFasta[i], format);
+		}
+		seqOfs += seqCount;
+	}
+	reserve(store.contigStore, seqOfs, Exact());
+	return seqOfs > 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences from a single file
+template <typename TFSSpec, typename TFSConfig>
+bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, CharString const &fileName)
+{
+	StringSet<CharString> fileNames;
+	appendValue(fileNames, fileName);
+	return loadContigs(store, fileNames);
+}
+
+
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
