@@ -33,6 +33,7 @@
 #include <cmath>
 
 #include <seqan/sequence.h>
+#include <seqan/modifier.h>
 
 
 //____________________________________________________________________________
@@ -96,5 +97,6 @@
 #include <seqan/file/file_page_raid0.h>
 #include <seqan/file/string_external.h>
 #include <seqan/file/string_mmap.h>
+#include <seqan/file/file_format_mmap.h>
 
 #endif //#ifndef SEQAN_HEADER_...

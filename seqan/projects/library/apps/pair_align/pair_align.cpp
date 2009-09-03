@@ -19,7 +19,6 @@ Lesser General Public License for more details.
 #include <seqan/graph_align.h>
 #include <seqan/modifier.h>
 #include "../seqan_tcoffee/rna_alphabet.h"
-#include "../razers/mmap_fasta.h"
 #include <seqan/misc/misc_cmdparser.h>
 
 #include <iostream>
@@ -279,28 +278,28 @@ int main(int argc, const char *argv[]) {
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with 2 sequences", OptionType::String), "<FASTA Sequence File>"));
-	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", OptionType::String, "protein"), "[protein | dna | rna]"));
-	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", OptionType::String, "gotoh"), "[nw, gotoh, sw, lcs]"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", (int)OptionType::String, "protein"), "[protein | dna | rna]"));
+	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", (int)OptionType::String, "gotoh"), "[nw, gotoh, sw, lcs]"));
 	addHelpLine(parser, "nw = Needleman-Wunsch");
 	addHelpLine(parser, "gotoh = Gotoh");
 	addHelpLine(parser, "sw = Smith-Waterman");
 	addHelpLine(parser, "lcs = Longest common subsequence");
-	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "out.fasta"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "fasta"), "[fasta | msf]"));
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "out.fasta"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "fasta"), "[fasta | msf]"));
 	
 	addSection(parser, "Scoring Options:");
-	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", OptionType::Int, -11), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", OptionType::Int, -1), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", OptionType::String, "Blosum62"), "<Matrix file>"));
-	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", OptionType::Int, 5), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", OptionType::Int, -4), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", (int)OptionType::Int, -11), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", (int)OptionType::Int, -1), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", (int)OptionType::String, "Blosum62"), "<Matrix file>"));
+	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", (int)OptionType::Int, 5), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", (int)OptionType::Int, -4), "<Int>"));
 	
 	addSection(parser, "Banded Alignment Options:");
 	addOption(parser, addArgumentText(CommandLineOption("lo", "low", "lower diagonal", OptionType::Int), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("hi", "high", "upper diagonal", OptionType::Int), "<Int>"));
 			
 	addSection(parser, "DP Matrix Configuration Options:");
-	addOption(parser, addArgumentText(CommandLineOption("c", "config", "alignment configuration", OptionType::String, "ffff"), "[ffff | ... | tttt]"));
+	addOption(parser, addArgumentText(CommandLineOption("c", "config", "alignment configuration", (int)OptionType::String, "ffff"), "[ffff | ... | tttt]"));
 	addHelpLine(parser, "tfff = First row with 0's");
 	addHelpLine(parser, "ftff = First column with 0's");
 	addHelpLine(parser, "fftf = Search last column for max");

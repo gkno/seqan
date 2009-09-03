@@ -89,7 +89,7 @@ int main(int argc, const char *argv[]) {
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("m", "matrix", "file with distance matrix", OptionType::String), "<Phylip distance matrix>"));
 	addHelpLine(parser, "At least 3 species required.");
-	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
+	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", (int)OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
 	addHelpLine(parser, "nj = Neighbor-joining");
 	addHelpLine(parser, "min = UPGMA single linkage");
 	addHelpLine(parser, "max = UPGMA complete linkage");
@@ -98,8 +98,8 @@ int main(int argc, const char *argv[]) {
 	addHelpLine(parser, "/*Neighbor-joining creates an");
 	addHelpLine(parser, "  unrooted tree. We root that tree");
 	addHelpLine(parser, "  at the last joined pair.*/");
-	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "tree.dot"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "dot"), "[dot | newick]"));
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "tree.dot"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "dot"), "[dot | newick]"));
 		
 	if (argc == 1)
 	{

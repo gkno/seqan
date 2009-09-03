@@ -20,7 +20,6 @@ Lesser General Public License for more details.
 #include <seqan/graph_msa.h>
 #include "rna_alphabet.h"
 #include <seqan/modifier.h>
-#include "../razers/mmap_fasta.h"
 #include <seqan/misc/misc_cmdparser.h>
 
 #include <iostream>
@@ -306,9 +305,9 @@ int main(int argc, const char *argv[]) {
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s", "seq", "file with sequences", OptionType::String), "<FASTA Sequence File>"));
-	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", OptionType::String, "protein"), "[protein | dna | rna]"));
-	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", OptionType::String, "out.fasta"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", OptionType::String, "fasta"), "[fasta | msf]"));
+	addOption(parser, addArgumentText(CommandLineOption("a", "alphabet", "sequence alphabet", (int)OptionType::String, "protein"), "[protein | dna | rna]"));
+	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "out.fasta"), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "fasta"), "[fasta | msf]"));
 	
 	addSection(parser, "Segment Match Generation Options:");
 	addOption(parser, CommandLineOption("m", "method", "list of match generation methods", OptionType::String));
@@ -324,15 +323,15 @@ int main(int argc, const char *argv[]) {
 	addOption(parser, addArgumentText(CommandLineOption("li", "lib", "list of T-Coffee libraries", OptionType::String), "<File1>,<File2>,..."));
 
 	addSection(parser, "Scoring Options:");
-	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", OptionType::Int, -11), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", OptionType::Int, -1), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", OptionType::String, "Blosum62"), "<Matrix file>"));
-	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", OptionType::Int, 5), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", OptionType::Int, -4), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", (int)OptionType::Int, -11), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", (int)OptionType::Int, -1), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", (int)OptionType::String, "Blosum62"), "<Matrix file>"));
+	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", (int)OptionType::Int, 5), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("mm", "mmsc", "mismatch penalty", (int)OptionType::Int, -4), "<Int>"));
 	
 	addSection(parser, "Guide Tree Options:");
 	addOption(parser, addArgumentText(CommandLineOption("u", "usetree", "tree filename", OptionType::String), "<Newick guide tree>"));
-	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
+	addOption(parser, addArgumentText(CommandLineOption("b", "build", "tree building method", (int)OptionType::String, "nj"), "[nj, min, max, avg, wavg]"));
 	addHelpLine(parser, "nj = Neighbor-joining");
 	addHelpLine(parser, "min = UPGMA single linkage");
 	addHelpLine(parser, "max = UPGMA complete linkage");
