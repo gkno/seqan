@@ -92,19 +92,20 @@ _localAlignment(StringSet<TString, Dependent<> > const& str,
 
 	// Stop looking for local alignments, if there score is too low
 	TScoreValue local_score = 0;
-	TScoreValue maxScore = 0;
-	TSize count = 0;
-	do {
+	TScoreValue last_score = 0;
+	for(TSize count = 0; count < (TSize) numAlignments; ++count) {
 		// Create the local alignment
 		TSize from = length(matches);
 		local_score = _localAlignment(matches, str, forbidden, sc, SmithWatermanClump());
 		TSize to = length(matches);
-		if (local_score > maxScore) maxScore = local_score;
-
+		if (2 * local_score < last_score) {
+			resize(matches, from, Generous());
+			break;
+		} 
+		last_score = local_score;
 		resize(scores, to);
-		for(TSize k = from; k<to; ++k) value(scores, k) = local_score;
-		++count;
-	} while ((local_score > 0.5 * maxScore) && (count < (TSize) numAlignments));
+		for(TSize k = from; k<to; ++k) scores[k] = local_score;
+	}
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
