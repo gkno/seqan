@@ -323,7 +323,7 @@ int main(int argc, const char *argv[]) {
 	addOption(parser, addArgumentText(CommandLineOption("li", "lib", "list of T-Coffee libraries", OptionType::String), "<File1>,<File2>,..."));
 
 	addSection(parser, "Scoring Options:");
-	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", (int)OptionType::Int, -11), "<Int>"));
+	addOption(parser, addArgumentText(CommandLineOption("g", "gop", "gap open penalty", (int)OptionType::Int, -13), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("e", "gex", "gap extension penalty", (int)OptionType::Int, -1), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("ma", "matrix", "score matrix", (int)OptionType::String, "Blosum62"), "<Matrix file>"));
 	addOption(parser, addArgumentText(CommandLineOption("ms", "msc", "match score", (int)OptionType::Int, 5), "<Int>"));

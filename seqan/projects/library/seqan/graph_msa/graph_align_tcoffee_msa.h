@@ -161,6 +161,33 @@ evaluateAlignment(MsaOptions<TAlphabet, TScore> const& msaOpt) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TStrSpec, typename TSpec, typename TList, typename TScore, typename TSegmentMatches, typename TScores>
+inline void 
+__appendSegmentMatches(StringSet<String<AminoAcid, TStrSpec>, Dependent<TSpec> > const& str,
+					   TList const& pList,
+					   TScore const&,
+					   TSegmentMatches& matches,
+					   TScores& scores)
+{
+	Blosum62 local_score(-1,-8);
+	appendSegmentMatches(str, pList, local_score, matches, scores, LocalPairwise_Library() );
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template<typename TValue, typename TStrSpec, typename TSpec, typename TList, typename TScore, typename TSegmentMatches, typename TScores>
+inline void 
+__appendSegmentMatches(StringSet<String<TValue, TStrSpec>, Dependent<TSpec> > const& str,
+					   TList const& pList,
+					   TScore const& score_type,
+					   TSegmentMatches& matches,
+					   TScores& scores)
+{
+	appendSegmentMatches(str, pList, score_type, matches, scores, LocalPairwise_Library() );
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet1, typename TNames, typename TAlphabet, typename TScore>
 inline void
@@ -219,7 +246,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		TIter begItEnd = end(msaOpt.method, Standard() );
 		for(;begIt != begItEnd; goNext(begIt)) {
 			if (*begIt == 0) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, distanceMatrix, GlobalPairwise_Library() );
-			else if (*begIt == 1) appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, LocalPairwise_Library() );
+			else if (*begIt == 1) __appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores);
 			else if (*begIt == 2) {
 				Nothing noth;
 				appendSegmentMatches(seqSet, pList, msaOpt.sc, matches, scores, noth, AlignConfig<true,true,true, true>(), GlobalPairwise_Library() );
