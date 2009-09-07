@@ -2046,6 +2046,10 @@ end(StringSet< TString, TSpec > const & me,
         inline operator obj_iterator() {
             return _cur;
         }
+
+        inline operator void * () {
+        	return _cur;        
+        }
 //____________________________________________________________________________
 
 		inline bool _atEndOfSequence() {
