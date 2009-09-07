@@ -1,6 +1,6 @@
  /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -138,14 +138,14 @@ struct Host<Iter<TContainer, TSpec> const>:
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TContainer, typename TSpec>
-inline typename Reference<Iter<TContainer, TSpec> >::Type 
+inline typename Reference<Iter<TContainer, TSpec> >::Type
 operator * (Iter<TContainer, TSpec> & me)
 {
 SEQAN_CHECKPOINT
 	return value(me);
 }
 template <typename TContainer, typename TSpec>
-inline typename Reference<Iter<TContainer, TSpec> const>::Type 
+inline typename Reference<Iter<TContainer, TSpec> const>::Type
 operator * (Iter<TContainer, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
@@ -201,7 +201,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // operator + / +=
 //////////////////////////////////////////////////////////////////////////////
-
+/*
 template <typename TContainer, typename TSpec, typename TSize>
 inline Iter<TContainer, TSpec>
 operator + (Iter<TContainer, TSpec> & me, TSize size)
@@ -211,7 +211,7 @@ SEQAN_CHECKPOINT
 	goFurther(temp_, size);
 	return temp_;
 }
-
+*/
 template <typename TContainer, typename TSpec, typename TSize>
 inline Iter<TContainer, TSpec>
 operator + (Iter<TContainer, TSpec> const & me, TSize size)
@@ -271,7 +271,7 @@ SEQAN_CHECKPOINT
 //most Iter classes are rooted strings
 
 template <typename TContainer, typename TSpec, typename TContainer2>
-inline typename Position<Iter<TContainer, TSpec> const>::Type 
+inline typename Position<Iter<TContainer, TSpec> const>::Type
 position(Iter<TContainer, TSpec> const & me,
 		 TContainer2 const &)
 {
