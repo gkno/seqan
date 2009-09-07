@@ -1,6 +1,6 @@
  /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	// *** COMPARATORS & MAPS ***
-        
+
     template <typename InType, typename Result = int>
     struct skew3_ncomp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
@@ -92,7 +92,7 @@ namespace SEQAN_NAMESPACE_MAIN
             o1(N - (N + 2) % 3),
             o2(N - (N + 1) % 3),
             n2((N + 1) / 3) { }
-        
+
         inline Result operator()(const InType& x) const
         { return (x < n2) ? o2 - x * 3 : o1 - (x - n2) * 3; }
     };
@@ -147,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
         typedef Pipe< TUnslicer, Counter > TRenamer;
         typedef Pool< _TypeOf(TRenamer), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TRenamer) > > > TNames_Linear;
-        
+
         // step 2
         typedef Pipe< Bundle2< TInput, TNames_Linear >, Extender3 > TExtender;
                                         typedef skew3_extend_comp<_TypeOf(typename TExtender::Out0)> extend_comp_t;
@@ -157,20 +157,20 @@ namespace SEQAN_NAMESPACE_MAIN
                                         typedef skew3_nmap_extended<_TypeOf(typename TExtender::Out12)> nmap_extended_t;
 		typedef Pool< _TypeOf(typename TExtender::Out12), MapperSpec< MapperConfigSize< nmap_extended_t, _TSizeOf(typename TExtender::Out12) > > > TSorterS12;
         typedef Pipe< Bundle2< TSorterS0, TSorterS12 >, Merger3 > TMerger;
-        
+
         TSorterS0   sortedS0;
         TSorterS12  sortedS12;
         TMerger     in;
-            
+
         Pipe() :
 			in(bundle2(sortedS0, sortedS12)) {}
 
         Pipe(TInput& _textIn) :
-			in(bundle2(sortedS0, sortedS12)) 
+			in(bundle2(sortedS0, sortedS12))
 		{
 			process(_textIn);
 		}
-        
+
 	    template < typename _TInput >
         bool process(_TInput &textIn) {
 
@@ -248,12 +248,12 @@ namespace SEQAN_NAMESPACE_MAIN
                 names_linear << renamer;
 				clear(renamer);
                 SEQAN_PROMARK("Mapper (10) - ISA12 konstruieren");
-               
+
                 // step 2
                 #ifdef SEQAN_DEBUG_INDEX
                     ::std::cerr << "  prepare merge" << ::std::endl;
                 #endif
-				skew3_extend(textIn, names_linear, sortedS0, sortedS12);            
+				skew3_extend(textIn, names_linear, sortedS0, sortedS12);
                 SEQAN_PROMARK("Mapper (12), Sorter (13) - SA12 und SA0 verschmelzen");
             }
 
@@ -271,11 +271,11 @@ namespace SEQAN_NAMESPACE_MAIN
         inline typename Value<Pipe>::Type const & operator*() {
             return *in;
         }
-        
+
         inline Pipe& operator++() {
             ++in;
             return *this;
-        }        
+        }
     };
 
     // not sure which interface is more intuitive, we support both
@@ -286,9 +286,9 @@ namespace SEQAN_NAMESPACE_MAIN
         return me.process(textIn);
     }
 
-	template < 
-		typename TSA, 
-		typename TValue, 
+	template <
+		typename TSA,
+		typename TValue,
 		typename TConfig >
 	inline void createSuffixArray(
 		TSA &SA,
@@ -360,7 +360,7 @@ namespace SEQAN_NAMESPACE_MAIN
         resize(s12, n12, Exact());
 		// we use SA[n0..n-1] as a temporary buffer instead of allocating one;
 		typename Suffix<TSA>::Type SA12 = suffix(SA, n0);
-   
+
 
 		// generate positions of mod 1 and mod 2 suffixes
 		{
@@ -383,7 +383,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			radixPass(SA12, s12, s, cnt, K);
 		}
         SEQAN_PROMARK("Triplets sortiert");
-
 
         // find lexicographic names of triples
 		TSize name = 0;
@@ -440,7 +439,6 @@ namespace SEQAN_NAMESPACE_MAIN
 				radixPass(SA0, s0, s, cnt, K);
 			}
             SEQAN_PROMARK("SA0 konstruiert");
-
 
 			// merge sorted SA0 suffixes and sorted SA12 suffixes
 			#define SEQAN_GET_ISKEW3(ii) (ii < n2 ? ii * 3 + o2 : (ii - n2) * 3 + o1)
