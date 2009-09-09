@@ -462,9 +462,9 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
-	template < typename TValue, typename TConfig, typename TSize >
+	template < typename TValue, typename TConfig >
     inline bool 
-    _map(String<TValue, MMap<TConfig> > &me, TSize new_capacity) 
+    _map(String<TValue, MMap<TConfig> > &me, size_t new_capacity) 
 	{
 		if (new_capacity > 0) 
 		{
