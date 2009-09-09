@@ -423,7 +423,7 @@ isLess(Lexical<TSpec> const & _lex,
 	   TagPrefixLess)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::LEFT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::LEFT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -431,7 +431,7 @@ isLess(Lexical<TSpec> const & _lex,
 	   TagPrefixGreater)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::RIGHT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::RIGHT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool

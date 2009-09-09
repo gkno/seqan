@@ -1201,7 +1201,7 @@ inline bool
 _convertOptionValue(CommandLineOption const & opt, float & dst, CharString const & src)
 {
     if (!isDoubleOption(opt)) return false;
-	dst = atof(toCString(src));
+	dst = (float)atof(toCString(src));
 	return length(src) > 0;
 }
 

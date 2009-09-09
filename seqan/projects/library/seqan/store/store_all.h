@@ -21,6 +21,8 @@
 #ifndef SEQAN_HEADER_STORE_ALL_H
 #define SEQAN_HEADER_STORE_ALL_H
 
+//#include <stdio.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -289,7 +291,7 @@ compactAlignedReads(FragmentStore<TSpec, TConfig> &me)
 	TAlignedReadIter itAR = begin(me.alignedReadStore, Standard());
 	TAlignedReadIter itARend = end(me.alignedReadStore, Standard());
 	TAlignQualityIter itAQ = begin(me.alignQualityStore, Standard());
-	TAlignQualityIter itAQbegin = itAQbegin;
+	TAlignQualityIter itAQbegin = itAQ;
 	TAQSize aqSize = length(me.alignQualityStore);
 	TId newId = 0;
 	
@@ -428,6 +430,161 @@ calculateMateIndices(TMateIndexString &mateIndex, FragmentStore<TSpec, TConfig> 
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId>
+void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, TContigId contigId)
+{
+	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
+
+	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
+
+	typedef typename Id<TAlignedRead>::Type							TId;
+	typedef typename TFragmentStore::TContigPos						TContigPos;
+	
+	typedef typename Value<TLayoutStringSet>::Type					TLayoutString;
+	typedef typename Iterator<TLayoutStringSet>::Type				TLayoutStringSetIter;
+	
+	// sort matches by increasing begin positions
+//	sortAlignedReads(store.alignedReadStore, SortBeginPos());
+//	sortAlignedReads(store.alignedReadStore, SortContigId());
+
+	clear(layout);
+	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
+	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
+
+	for (TId id = 0; it != itEnd; ++it, ++id)
+	{
+		if ((*it).contigId != (TId)contigId) continue;
+		
+		TLayoutStringSetIter lit = begin(layout, Standard());
+		TLayoutStringSetIter litEnd = end(layout, Standard());
+		
+		TContigPos beginPos = _min((*it).beginPos, (*it).endPos);
+		
+		for (; lit != litEnd; ++lit)
+		{
+			if (empty(*lit)) break;
+			TAlignedRead &align = store.alignedReadStore[back(*lit)];
+			if (_max(align.beginPos, align.endPos) < beginPos)			// maybe <= would be better
+				break;													// but harder to differ between reads borders
+		}
+			
+		if (lit == litEnd)
+		{
+			TLayoutString s;
+			appendValue(s, id);
+			appendValue(layout, s);
+		} else
+			appendValue(*lit, id);
+	}
+}
+	
+template <typename TStream, typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
+void printAlignment(
+	TStream &stream, 
+	TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, 
+	TContigId contigId,
+	TPos posBegin, TPos posEnd,
+	TNum lineBegin, TNum lineEnd,
+	unsigned lastRead)
+{
+	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
+
+	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename TFragmentStore::TContigStore					TContigStore;
+
+	typedef typename Value<TContigStore>::Type						TContig;
+	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename TFragmentStore::TReadSeq						TReadSeq;
+	typedef typename Id<TAlignedRead>::Type							TId;
+	typedef typename TFragmentStore::TContigPos						TContigPos;
+	typedef typename TContig::TContigSeq							TContigSeq;
+
+	typedef typename Value<TLayoutStringSet>::Type					TLayoutString;
+	typedef typename Size<TLayoutStringSet>::Type					TLayoutStringSize;
+	typedef typename Iterator<TLayoutStringSet>::Type				TLayoutStringSetIter;
+	typedef typename Iterator<TLayoutString>::Type					TLayoutStringIter;
+
+	typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+	typedef Gaps<CharString, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
+	
+	if ((TId)contigId < length(store.contigStore))
+	{
+		TContigGaps	contigGaps(store.contigStore[contigId].seq, store.contigStore[contigId].gaps);
+		setBeginPosition(contigGaps, posBegin);
+		setEndPosition(contigGaps, posEnd);
+		stream << contigGaps << '\n';
+	} else
+		stream << '\n';
+		
+	if ((TLayoutStringSize)lineEnd > length(layout)) lineEnd = length(layout);
+	if ((TLayoutStringSize)lineBegin >= (TLayoutStringSize)lineEnd) return;
+
+	TLayoutStringSetIter lit = begin(layout, Standard()) + lineBegin;
+	TLayoutStringSetIter litEnd = begin(layout, Standard()) + lineEnd;
+	TReadSeq readSeq;
+	CharString readSeqString;
+
+	for (; lit < litEnd; ++lit)
+	{
+		TLayoutStringIter itEnd = end(*lit, Standard());
+		TLayoutStringIter left = begin(*lit, Standard());
+		TLayoutStringIter right = itEnd;
+		TLayoutStringIter mid;
+
+		while (left < right)
+		{
+			mid = left + (right - left) / 2;
+			TAlignedRead &align = store.alignedReadStore[*mid];
+
+			if (align.contigId < contigId || (align.contigId == contigId && (TPos)_max(align.beginPos, align.endPos) <= posBegin))
+				left = mid + 1;	// what we search is in the right part
+			else
+				right = mid;	//            ...           left part
+		}
+		
+		TPos cursor = posBegin;
+		for (; mid < itEnd; ++mid)
+		{
+			if (*mid >= lastRead) continue;
+			TAlignedRead &align = store.alignedReadStore[*mid];
+			if (align.contigId != contigId) break;
+
+			TReadGaps readGaps(readSeqString, align.gaps);
+			TContigPos	left = align.beginPos;
+			TContigPos	right = align.endPos;
+			TContigPos	cBegin = _min(left, right);
+			TContigPos	cEnd = _max(left, right);
+			
+			if ((TPos)cEnd <= posBegin) continue; // shouldn't occur
+			if (posEnd <= (TPos)cBegin) break;
+			
+			readSeq = store.readSeqStore[align.readId];
+			if (left > right)
+			{
+				reverseComplementInPlace(readSeq);
+				readSeqString = readSeq;
+				toLowerInPlace(readSeqString);
+			} else
+				readSeqString = readSeq;
+			
+			if ((TPos)cBegin < posBegin)
+				setBeginPosition(readGaps, posBegin - (TPos)cBegin);
+			else
+				for (; cursor < (TPos)cBegin; ++cursor)
+					stream << ' ';
+			
+			if (posEnd < (TPos)cEnd)
+				setEndPosition(readGaps, posEnd - (TPos)cBegin);
+			
+			stream << readGaps;
+			cursor = cEnd;
+		}
+		stream << '\n';
+	}
+}
+
 template <typename TSpec, typename TConfig, typename TScore>
 void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore &score)
 {
@@ -444,7 +601,6 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 
 	typedef typename TFragmentStore::TReadSeq						TReadSeq;
-	typedef typename Value<TReadSeqStore>::Type						TReadSeqStored;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
 	typedef typename Id<TAlignedRead>::Type							TId;
 	typedef typename GetValue<TAlignQualityStore>::Type				TQuality;
@@ -470,24 +626,29 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 	TAlignedReadIter firstOverlap = begin(store.alignedReadStore, Standard());
 	for (; it != itEnd; ++it)
 	{
-		// 1. Calculate pairwise alignment
-		TContigPos left = (*it).beginPos;
-		TContigPos right = (*it).endPos;
-		TContigPos cBegin = _min(left, right);
-		TContigPos cEnd = _max(left, right);
+		TContigPos	left = (*it).beginPos;
+		TContigPos	right = (*it).endPos;
+		TContigPos	cBegin = _min(left, right);
+		TContigPos	cEnd = _max(left, right);
+		TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
+		TReadGaps	readGaps(readSeq, (*it).gaps);
 		
 		readSeq = store.readSeqStore[(*it).readId];
 		if (left > right)
 			reverseComplementInPlace(readSeq);
-		
+				
+		// 1. Calculate pairwise alignment
 		TAlign align;
 		resize(rows(align), 2);
 		assignSource(row(align, 0), infix(store.contigStore[(*it).contigId].seq, cBegin, cEnd));
 		assignSource(row(align, 1), readSeq);
-		globalAlignment(align, score);		
-		std::cout << align << std::endl;
+		globalAlignment(align, score);
+
+//	if (store.readNameStore[(*it).readId] == "read3305")
+//		std::cout << align << std::endl;
 
 		// 2. Skip non-overlapping matches
+		cBegin = positionSeqToGap(contigGaps, cBegin);
 		if (lastContigId != (*it).contigId)
 		{
 			firstOverlap = it;
@@ -497,94 +658,98 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				++firstOverlap;
 
 		// 3. Iterate over alignment
-		TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
-		TReadGaps	readGaps(readSeq, (*it).gaps);
-		setBeginPosition(contigGaps, positionSeqToGap(contigGaps, cBegin));
-		setEndPosition(contigGaps, positionSeqToGap(contigGaps, cEnd));
+		setBeginPosition(contigGaps, cBegin);
 		
 		TContigIter cIt = begin(contigGaps);
 		TReadIter rIt = begin(readGaps);
 		typename Iterator<TGaps>::Type it1 = begin(row(align, 0));
 		typename Iterator<TGaps>::Type it2 = begin(row(align, 1));
+
+//	bool interesting = false;		
+//	setEndPosition(contigGaps, positionSeqToGap(contigGaps, cBegin)+50);
+//	std::cout << contigGaps << std::endl;
+
 		for (; !atEnd(cIt) && !atEnd(it1); goNext(cIt), goNext(rIt))
 		{
+//	if (store.readNameStore[(*it).readId] == "read3305")
+//		std::cout << (cIt.current.gapPos - cBegin) << '\t' << rIt.current.gapPos << '\t' << rIt.current.seqPos << '\t'<< readGaps << std::endl;
 			bool isGapContig = isGap(cIt);
 			bool isGapLocalContig = isGap(it1);
-			if (isGap(it2))
-			{
-				// copy gaps from alignment
-				insertGaps(rIt, 1);
-			}
 			if (isGapContig != isGapLocalContig)
 			{
 				if (isGapContig)
 				{
-					// copy exisiting contig gaps
+					// *** gap in contig of the global alignment ***
+					// copy exisiting contig gap
 					insertGaps(rIt, 1);
-					goNext(rIt);
 					continue;
 				} else
 				{
+					// *** gap in contig of the pairwise alignment ***
 					// insert padding gaps in contig and reads
-					TContigPos cPos = cIt.current.seqPos;
+					TContigPos insPos = cIt.current.gapPos;
 					insertGaps(cIt, 1);
 					for (TAlignedReadIter j = firstOverlap; j != it; ++j)
 					{
 						TContigPos rBegin = _min((*j).beginPos, (*j).endPos);
 						TContigPos rEnd = _max((*j).beginPos, (*j).endPos);
-						if (rBegin < cPos && cPos < rEnd)
+						if (rBegin < insPos && insPos < rEnd)
 						{
-							TReadGaps gaps(store.readSeqStore[(*j).readId], (*j).gaps);
-							insertGap(gaps, positionSeqToGap(gaps, cPos - rBegin));
+							if (rBegin < insPos)
+							{
+								TReadGaps gaps(store.readSeqStore[(*j).readId], (*j).gaps);
+								insertGap(gaps, insPos - rBegin);
+							} else
+							{
+								// shift beginPos if insertion was at the front of the read
+								if ((*j).beginPos < (*j).endPos)
+									++(*j).beginPos;
+								else
+									++(*j).endPos;
+							}
+							// shift endPos as the alignment was elongated or shifted
+							if ((*j).beginPos < (*j).endPos)
+								++(*j).endPos;
+							else
+								++(*j).beginPos;
 						}
 					}
 				}
 			}
+			if (isGap(it2))
+			{
+				// *** gap in read of pairwise alignment ***
+				// copy gaps from alignment
+				insertGaps(rIt, 1);
+			}
 			goNext(it1);
 			goNext(it2);
 		}
-		{
-			TAlignedReadIter j = it + 1;
-			TAlignedReadIter jBegin = begin(store.alignedReadStore, Standard());
-			TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
-			std::cout << contigGaps << std::endl;
-			while (j != jBegin)
-			{
-				goPrevious(j);
-				TReadGaps gaps(store.readSeqStore[(*j).readId], (*j).gaps);
-				if ((*j).beginPos > (*j).endPos)
-					reverseComplementInPlace(source(gaps));
-				int rBegin = _min((*j).beginPos, (*j).endPos);
-				setBeginPosition(gaps, -rBegin);
-				setEndPosition(gaps, _unclippedLength(contigGaps) - rBegin);
-				std::cout << gaps << std::endl << std::endl;
-			}
-		}
 
-/*			if (isGap(it1))
-			{
-				TContigPos cGapPos = positionSeqToGap(contigGaps, cPos);
-				cIt = TContigiter(contigGaps, cGapPos);
-			}
-			if (!isGap(it1)) ++cPos;
-			if (!isGap(it2)) ++rPos;
-			insertGap(readGaps, 
-			dequeue.pushBack(TDequeueValue(cBegin, cEnd))
-		}
-*/	}
-	it = begin(store.alignedReadStore, Standard());
-	for(; it != itEnd; ++it)
-	{
-		TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
-		if ((*it).beginPos < (*it).endPos)
+		// store new gap-space alignment borders
+		cEnd = cBegin + length(readGaps);
+		if (left < right)
 		{
-			(*it).beginPos = positionSeqToGap(contigGaps, (*it).beginPos);
-			(*it).endPos = positionSeqToGap(contigGaps, (*it).endPos - 1) + 1;
+			(*it).beginPos = cBegin;
+			(*it).endPos = cEnd;
 		} else
 		{
-			(*it).beginPos = positionSeqToGap(contigGaps, (*it).beginPos - 1) + 1;
-			(*it).endPos = positionSeqToGap(contigGaps, (*it).endPos);
+			(*it).beginPos = cEnd;
+			(*it).endPos = cBegin;
 		}
+/*		
+//		if (interesting)
+		{
+			String<String<unsigned> > layout;
+			layoutAlignment(layout, store, (*it).contigId);
+			std::cout << store.readNameStore[(*it).readId] << std::endl;
+			std::cout << readGaps << '\t' << cBegin << '\t' << cEnd << std::endl << std::endl;
+			printAlignment(std::cout, layout, store, (*it).contigId, (int)cBegin-20, (int)cEnd+20, 0, 40, 1 + (it - begin(store.alignedReadStore, Standard())));
+//			getc(stdin);
+		}
+*/
+//		if (store.readNameStore[(*it).readId] == "read3305")
+//			return;
 	}
 }
 

@@ -830,7 +830,8 @@ template <typename THaystack, typename TSpec>
 inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
 positionRange(Finder<THaystack, Swift<TSpec> > &finder)
 {
-	typedef Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type> TPair;
+	typedef typename Position<Finder<THaystack, Swift<TSpec> > >::Type TPosition;
+	typedef Pair<TPosition> TPair;
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
 
 	__int64 hitBegin = hit.hstkPos;
@@ -839,14 +840,15 @@ positionRange(Finder<THaystack, Swift<TSpec> > &finder)
 
 	if (hitBegin < 0) hitBegin = 0;
 	if (hitEnd > textEnd) hitEnd = textEnd;
-	return TPair(hitBegin, hitEnd);
+	return TPair((TPosition)hitBegin, (TPosition)hitEnd);
 }
 
 template <typename THaystack, typename TSpec>
 inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
 positionRange(Finder<THaystack, Swift<TSpec> > const &finder)
 {
-	typedef Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type> TPair;
+	typedef typename Position<Finder<THaystack, Swift<TSpec> > >::Type TPosition;
+	typedef Pair<TPosition> TPair;
 	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
 
 	__int64 hitBegin = hit.hstkPos;
@@ -855,7 +857,7 @@ positionRange(Finder<THaystack, Swift<TSpec> > const &finder)
 
 	if (hitBegin < 0) hitBegin = 0;
 	if (hitEnd > textEnd) hitEnd = textEnd;
-	return TPair(hitBegin, hitEnd);
+	return TPair((TPosition)hitBegin, (TPosition)hitEnd);
 }
 
 //____________________________________________________________________________

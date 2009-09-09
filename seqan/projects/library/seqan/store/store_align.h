@@ -639,6 +639,20 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+// to remove '... < 0 is always false' warning
+template <typename T>
+inline bool
+_helperIsNegative(T, False)
+{
+	return false;
+}
+template <typename T>
+inline bool
+_helperIsNegative(T t, True)
+{
+	return t < 0;
+}
+
 template <typename TSource, typename TGapAnchors, typename TPosition>
 inline TPosition
 positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition pos)
@@ -649,7 +663,7 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 	TPosition		seqPos;
 	int				anchorIdx;
 
-	if (pos < 0)
+	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
@@ -685,7 +699,7 @@ positionSeqToGap(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 	TPosition		gapPos;
 	int				anchorIdx;
 
-	if (pos < 0)
+	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
@@ -1065,6 +1079,7 @@ _goPrevious_gapAnchorIterator(T & me)
 		me.current.seqPos = me.nextAnchor.seqPos;
 }
 
+
 template <typename T, typename TPos>
 inline void 
 _goTo_gapAnchorIterator(T & me, TPos pos)
@@ -1073,7 +1088,7 @@ _goTo_gapAnchorIterator(T & me, TPos pos)
 	typedef typename T::TGapAnchor	TGapAnchor;
 	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;
 
-	if (pos < 0)
+	if (_helperIsNegative(pos, typename TYPECMP<TPos, typename _MakeSigned<TPos>::Type>::Type()))
 		me.anchorIdx = -1;
 	else
 	{

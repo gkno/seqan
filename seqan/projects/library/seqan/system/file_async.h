@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
 			SEQAN_PROADD(SEQAN_PROOPENFILES, 1);
-            noBuffering = getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED);
+            noBuffering = (getExtraFlags(openMode | OPEN_ASYNC) & (FILE_FLAG_NO_BUFFERING | FILE_FLAG_OVERLAPPED)) != 0;
             handleAsync = CreateFileA(fileName,
                                 getFileAccess(openMode | OPEN_ASYNC),
                                 FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -120,7 +120,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            BOOL result = true;
+            BOOL result = TRUE;
             #ifdef SEQAN_VERBOSE
                 ::std::cerr << "files closed handles " << ::std::hex << handleAsync << " and " << handle << ::std::dec << ::std::endl;
             #endif
@@ -130,7 +130,7 @@ namespace SEQAN_NAMESPACE_MAIN
             handleAsync = INVALID_HANDLE_VALUE;
             handle = INVALID_HANDLE_VALUE;
 			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
-            return result;
+            return result != FALSE;
         }
 
         inline bool read(void *memPtr, _SizeType count) const {
@@ -176,7 +176,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool setEOF() const {
-            return SetEndOfFile(handle);
+            return SetEndOfFile(handle) != FALSE;
         }
 
 		inline static DWORD error() {

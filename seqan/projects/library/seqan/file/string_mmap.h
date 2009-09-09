@@ -297,9 +297,9 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 
-	template < typename TValue, typename TConfig, typename TSize >
+	template < typename TValue, typename TConfig >
     inline bool 
-    _map(String<TValue, MMap<TConfig> > &me, TSize new_capacity) 
+    _map(String<TValue, MMap<TConfig> > &me, size_t new_capacity) 
 	{
 		if (new_capacity > 0) 
 		{
@@ -433,7 +433,7 @@ SEQAN_CHECKPOINT
 			} else
 				return _unmap(me);
 		} else
-			return _allocateStorage(me, new_capacity);
+			return _allocateStorage(me, new_capacity) != NULL;
 	}
 
 #else
@@ -610,7 +610,7 @@ SEQAN_CHECKPOINT
 		if ((me._ownFile = open(me.file, fileName, openMode))) 
 		{
 			me._openMode = openMode;
-			return _map(me, size(me.file) / sizeof(TValue));
+			return _map(me, (size_t)(size(me.file) / sizeof(TValue)));
 		}
 
 		return false;

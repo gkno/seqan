@@ -313,7 +313,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
 		TIndex const &index = container(it);
-		return dirAt(value(it).node, index) & index.LEAF;
+		return (dirAt(value(it).node, index) & index.LEAF) != 0;
 	}
 
 	// is this a leaf? (excluding empty $-edges)

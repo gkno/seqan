@@ -116,6 +116,63 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringS
 		reverseComplementInPlace(stringSet[seqNo]);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template < typename TSequence >
+inline void toLowerInPlace(TSequence & sequence) 
+{
+	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
+} 
+
+template < typename TSequence >
+inline void toLowerInPlace(TSequence const & sequence) 
+{
+	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
+} 
+
+template < typename TSequence, typename TSpec >
+inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		toLowerInPlace(stringSet[seqNo]);
+}
+
+template < typename TSequence, typename TSpec >
+inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		toLowerInPlace(stringSet[seqNo]);
+}
+
+template < typename TSequence >
+inline void toUpperInPlace(TSequence & sequence) 
+{
+	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
+} 
+
+template < typename TSequence >
+inline void toUpperInPlace(TSequence const & sequence) 
+{
+	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
+} 
+
+template < typename TSequence, typename TSpec >
+inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		toUpperInPlace(stringSet[seqNo]);
+}
+
+template < typename TSequence, typename TSpec >
+inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
+{
+	unsigned seqCount = length(stringSet);
+	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
+		toUpperInPlace(stringSet[seqNo]);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
