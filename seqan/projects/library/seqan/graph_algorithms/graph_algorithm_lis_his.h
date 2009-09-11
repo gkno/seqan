@@ -235,6 +235,7 @@ globalAlignment(TAlign& align,
 	// Lcs between first and second string
 	String<std::pair<TSize, TSize> > pos1;
 	longestCommonSubsequence(str[0], str[1], 100, pos1);
+	//longestCommonSubsequence(str[0], str[1], 800, pos1);
 
 	// Extend the matches as long as possible
 	TSize oldI = 0;
