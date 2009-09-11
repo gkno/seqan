@@ -177,6 +177,13 @@ namespace seqan{
          std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
         }*/
 
+        // BEGIN: Debug Output
+		/*std::cout << "Suffix array state initial:" << std::endl;
+        for( size_t i = 0; i < length( fibre_sa ); ++i ){
+         std::cout << "\t>" << i << "\t: " << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+        }*/
+		// END: Debug Output
+
         unsigned int last_lcp = 0;
         size_t len = length( fibre_sa ); //minimize computational effort of loop
         Operation* op;                   //dito
@@ -236,25 +243,94 @@ namespace seqan{
          std::cout << indices[i].i1 << ", " << indices[i].i2 << "\t: " << suffix( stringset, indices[i] ) << "..." << std::endl;
         }*/
 
-        typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index = begin( indices );
-        size_t remaining_indices = length( indices );
+        // BEGIN: Debug Output
+		/*std::cout << "Suffix array state before:" << std::endl;
+        for( size_t i = 0; i < length( fibre_sa ); ++i ){
+         std::cout << "\t>" << i << "\t: " << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+        }*/
+		// END: Debug Output
 
-        typename Iterator< TSA >::Type it_sa = begin( fibre_sa );
-        typename Iterator< TSA >::Type it_sa_end = end( fibre_sa );
-        typename Iterator< String< size_t > >::Type it_dels = begin( dels );
+		typename Iterator< String< size_t > >::Type it_dels = begin( dels );
         typename Iterator< String< size_t > >::Type it_dels_end = end( dels );
 
         size_t pos_begin = *it_dels;
-        size_t pos_end = *(++it_dels);
+        size_t pos_end = *it_dels;
+		size_t correctional_factor = 0;
+		size_t local_min;
 
+		// BEGIN: Deleting modified and removed suffixes block-wise
         while( it_dels != it_dels_end ){
             if( *(++it_dels) != ++pos_end ){
-                erase( fibre_sa, pos_begin, pos_end );
-                erase( fibre_lcp, pos_begin, pos_end );
-                pos_begin = it_dels;
-                pos_end = it_dels;
+				//std::cout << "Deleting " << pos_begin << " to " << pos_end << " with cf " << correctional_factor << std::endl;
+                erase( fibre_sa, pos_begin - correctional_factor, pos_end - correctional_factor );
+				// TODO: std::min for intervals?
+				local_min = fibre_lcp[pos_begin - correctional_factor - 1];
+				for( size_t i = pos_begin - correctional_factor; i < pos_end - correctional_factor - 1; ++i ){
+					if( fibre_lcp[i] < local_min ){
+						local_min = fibre_lcp[i];
+					}
+				}
+				fibre_lcp[pos_begin - correctional_factor - 1] = local_min;
+                erase( fibre_lcp, pos_begin - correctional_factor, pos_end - correctional_factor );
+                correctional_factor += pos_end - pos_begin;
+                pos_begin = *it_dels;
+                pos_end = *it_dels;
             }
         }
+		// END: Deleting modified and removed suffixes block-wise
+
+		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index = begin( indices );
+		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index_tmp = begin( indices );
+		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index_end = end( indices );
+		typename Iterator< TSA >::Type it_sa = begin( fibre_sa );
+		typename Iterator< TSA >::Type it_sa_end = end( fibre_sa );
+		typename Iterator< TSA >::Type it_sa_begin = begin( fibre_sa );
+        typename Iterator< TLCP >::Type it_lcp = begin( fibre_lcp );
+        typename Iterator< TLCP >::Type it_lcp_begin = begin( fibre_lcp );
+        size_t remaining_indices = length( indices );
+        typename Suffix< StringSet< TString, TSpec > >::Type current_suffix = suffix( stringset, *it_index );
+        String< TLCP > templcp;
+        resize( templcp, length( indices ) );
+        len = length( fibre_sa );
+
+
+		// BEGIN: Inserting modified indices block-wise
+		for( size_t i = 0; i < len; ++i ){
+            if( suffix( stringset, fibre_sa[i] ) > current_suffix ){
+                current_suffix = suffix( stringset, fibre_sa[i] );
+			    it_index_tmp = it_index;
+			    while( suffix( stringset, *(++it_index) ) <= current_suffix && it_index < it_index_end ){}
+			    insert( i, fibre_sa, it_index_tmp, it_index - it_index_tmp );
+			    insert( i, fibre_lcp, begin(templcp), it_index - it_index_tmp );
+			    for( size_t j = i - 1; j < i + it_index - it_index_tmp; ++j ){
+                    fibre_lcp[j] = lcpLength( suffix( stringset, fibre_sa[j] ), suffix( stringset, fibre_sa[j + 1] ) );
+                }
+                if( it_index >= it_index_end ){
+                    break;
+                }
+                current_suffix = suffix( stringset, *it_index );
+                len = length( fibre_sa );
+            }
+        }
+
+        if( it_index < it_index_end ){
+            size_t i = length( fibre_sa ) - 1;
+            append( fibre_sa, suffix( indices, it_index - begin( indices ) ) );
+            append( fibre_lcp, suffix( templcp, it_index - begin( indices ) ) );
+            len = length( fibre_sa ) - 1;
+            while( i < len ){
+                fibre_lcp[i] = lcpLength( suffix( stringset, fibre_sa[i] ), suffix( stringset, fibre_sa[i + 1] ) );
+            }
+            fibre_lcp[++len] = 0;
+        }
+		// END: Inserting modified indices block-wise
+
+		// BEGIN: Debug Output
+		/*std::cout << "Suffix array state after:" << std::endl;
+        for( size_t i = 0; i < length( fibre_sa ); ++i ){
+         std::cout << "\t>" << i << "\t: " << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+        }*/
+		// END: Debug Output
 
         /*
         resize( fibre_sa, len + remaining_indices );

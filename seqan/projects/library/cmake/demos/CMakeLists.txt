@@ -11,6 +11,7 @@ add_subdirectory (../seqan seqan)
 ################################################################################
 
 include_directories (${SEQAN_BASE})
+link_directories (${SEQAN_BASE}/lib)
 
 ################################################################################
 # Demos
@@ -21,6 +22,6 @@ foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	add_executable (${DEMO} ${DEMOFILE})
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		target_link_libraries (${DEMO} rt)
+		target_link_libraries (${DEMO} rt shawarma)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endforeach (DEMOFILE)
