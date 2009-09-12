@@ -7,7 +7,7 @@
 struct Node{
 
    inline Node() : is_internal( true ), position( 0 ), index( 0 ), tree_index( 0 ), parent( 0 ), leftChild( 0 ), rightChild( 0 ), length( 0 ), operation( new Operation){};
-   
+
    inline Node( bool is_internal, std::size_t position, std::size_t index, std::size_t tree_index, std::size_t parent, std::size_t leftChild, std::size_t rightChild, std::size_t length, Operation* op = new Operation )
    :  is_internal( is_internal ),
       position( position ),
@@ -18,7 +18,7 @@ struct Node{
       rightChild( rightChild ),
       length( length ),
       operation( op ){};
-   
+
    inline Node( Node const & other ) :
       is_internal( other.is_internal ),
       position( other.position ),
@@ -29,7 +29,7 @@ struct Node{
       rightChild( other.rightChild ),
       length( other.length ),
       operation( other.operation->copy() ) { }
-      
+
    inline ~Node(){
       delete operation;
    }
@@ -57,16 +57,16 @@ struct Node{
    inline bool left_of( std::size_t pos ) const{
       return ( pos < position );
    }
-   
+
    inline bool operator==( Node &other ){
-      return ( 
-               ( this->position == other.position )       && 
-               ( this->is_internal == other.is_internal ) && 
-               ( this->length == other.length )           && 
+      return (
+               ( this->position == other.position )       &&
+               ( this->is_internal == other.is_internal ) &&
+               ( this->length == other.length )           &&
                ( this->index == other.index )             &&
                ( this->parent == other.parent )           &&
                ( this->leftChild == other.leftChild )     &&
-               ( this->rightChild == other.rightChild ) 
+               ( this->rightChild == other.rightChild )
               );
    }
 
@@ -77,7 +77,7 @@ struct Node{
    inline bool operator>( Node &other ){
       return this->position > other.position;
    }
-   
+
    inline void synchronize_operation(){
       operation->set_by( length );
    }
@@ -85,7 +85,7 @@ struct Node{
    inline std::size_t offset( std::size_t pos ){
       return pos - position;
    }
-   
+
    inline Operation* op(){
       return operation;
    }
@@ -93,6 +93,10 @@ struct Node{
    inline void print_debug(){
 	   std::cout << ( is_internal ? "Internal " : "External " ) << "Node( #" << (int)this << " ): Position: " << position << " Length: " << length << " Indices: " << parent << "|" << tree_index << "|" << leftChild << "|" << rightChild << " !";
    }
+
+    inline void print_info(){
+        std::cout << ( is_internal ? " <Int " : " <Ext " ) << position << " | " << length << " - " << operation->info() << " " << operation->by() << " >" << std::endl;
+    }
 
    bool is_internal;
    std::size_t position;
@@ -113,7 +117,7 @@ namespace seqan {
       virtual void acc(Node & ) { }
       virtual void post(Node const& ) { }
 
-       virtual ~tree_visitor() = 0;   
+       virtual ~tree_visitor() = 0;
    };
 
    tree_visitor::~tree_visitor() { }

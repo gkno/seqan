@@ -14,6 +14,32 @@ namespace seqan{
       TString & m_string;
    };
 
+    template< typename TIteratorA, typename TIteratorB >
+    inline bool _suffix_bigger( TIteratorA it_a, TIteratorB it_b ){
+        //std::cout << "Bigger?" << std::endl;
+        while( *it_a == *it_b ){
+            //std::cout << *it_a << "==" << *it_b << std::endl;
+            ++it_a;
+            ++it_b;
+        }
+        //std::cout << *it_a << "> " << *it_b << " ?" << std::endl;
+        return *it_a > *it_b;
+    }
+
+    template< typename TIteratorA, typename TIteratorB >
+    inline size_t _lcp_length( TIteratorA it_a, TIteratorB it_b ){
+        size_t lcplength = 0;
+        //std::cout << "LCP ";
+        while( *it_a == *it_b ){
+            ++it_a;
+            ++it_b;
+            ++lcplength;
+            //std::cout << '.';
+        }
+        //std::cout << lcplength << std::endl;
+        return lcplength;
+    }
+
    inline int get_shift( String< Pair< int, int > > const & limits, int position ){   //TODO: implement binary search variant
       int shift = 0;
       for( unsigned int i = 0; i < length( limits ); ++i ){
@@ -101,7 +127,6 @@ namespace seqan{
 
       Iterator< String< Node, Alloc<> > >::Type it_tree = string.getjournal().get_tree_begin();
 
-
       while( j_goDownLeft( it_tree ) ) {}; //go to first node; TODO:check why making string a const-Ref causes segfault and messes up get_tree_begin's returned Node
 
       do{
@@ -113,7 +138,7 @@ namespace seqan{
             }else if( p.i1 == back( shifts ).i1 ){
                back( shifts ).i2 = p.i2;
             }
-            deletions += Pair<TPos, TPos>( (*it_tree).position, abs( (*it_tree).operation->by() ) );
+            deletions += Pair<TPos, TPos>( p.i1 + (*it_tree).operation->by(), abs( (*it_tree).operation->by() ) );
 
          }else if( (*it_tree).operation->by() > 0 && (*it_tree).operation->insertion() ){
 
@@ -146,12 +171,12 @@ namespace seqan{
 
         StringSet< String< Pair< TPos, TPos > > > shiftset;
         StringSet< String< Pair< TPos, TPos > > > deletionset;
-        String< Journal< char, Alloc<>, Alloc<>, Sloppy > > journalset;
+        //String< Journal< char, Alloc<>, Alloc<>, Sloppy > > journalset;
         String< Pair< unsigned int, unsigned int > > indices;
 
         resize( shiftset, length( stringset ) );
         resize( deletionset, length( stringset ) );
-        resize( journalset, length( stringset ) );
+        //resize( journalset, length( stringset ) );
 
 
         for( unsigned int i = 0; i < length( stringset ); ++i ){
@@ -160,7 +185,9 @@ namespace seqan{
             for( unsigned int j = 0; j < length( tmpindex ); ++j ){
                 indices += Pair< unsigned int, unsigned int >( i, tmpindex[j] );
             }
-            journalset[i] = stringset[i].getjournal();
+            //journalset[i] = stringset[i].getjournal();
+            /*print_pairs( shiftset[i] );
+            print_pairs( deletionset[i] );*/
         }
 
         String< size_t > dels; //Stores the positions of indices that need to be removed
@@ -172,47 +199,51 @@ namespace seqan{
 
         assert( length( fibre_sa ) == length( fibre_lcp ) && "Length mismatch in LCP-Table / SuffixArray, successfull synchronization not possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
 
-        /*std::cout << "Suffix array initial state:" << std::endl;
-        for( size_t i = 0; i < length( fibre_sa ); ++i ){
-         std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
-        }*/
-
         // BEGIN: Debug Output
 		/*std::cout << "Suffix array state initial:" << std::endl;
         for( size_t i = 0; i < length( fibre_sa ); ++i ){
          std::cout << "\t>" << i << "\t: " << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
         }*/
-		// END: Debug Output
+		// END: Debug Output+
+
+		/*std::cout << "\nIndices:" << std::endl;
+        for( size_t i = 0; i < length( indices ); ++i ){
+         std::cout << indices[i].i1 << ", " << indices[i].i2 << "\t: " << suffix( stringset, indices[i] ) << "..." << std::endl;
+        }*/
 
         unsigned int last_lcp = 0;
         size_t len = length( fibre_sa ); //minimize computational effort of loop
         Operation* op;                   //dito
 
-         if( deleted_b( deletionset[ fibre_sa[0].i1 ], fibre_sa[0].i2 ) ){ //TODO: use std::binary_search instead
+        if( deleted_b( deletionset[ fibre_sa[0].i1 ], fibre_sa[0].i2 ) ){ //TODO: use std::binary_search instead
             appendValue( dels, 0, Generous() ); //Is fibre_sa[i] a Pair?
-         }else{
+        }else{
             fibre_sa[0].i2 += get_shift( shiftset[ fibre_sa[0].i1 ], fibre_sa[0].i2 ); //TODO: use std::binary_search instead
             for( unsigned int j = 0; j <= _max( value( fibre_lcp, 0 ), last_lcp ); ++j ){
-             op = journalset[ fibre_sa[0].i1 ].find_operation( fibre_sa[0].i2 + j );
-             if( op->insertion() || op->deletion() && op->by() != 0 ){
-                appendValue( indices, fibre_sa[0], Generous() ); // i-th Suffix is influenced by an operation and needs recalculation
-                appendValue( dels, 0, Generous() );
-             }
+                op = stringset[ fibre_sa[0].i1 ].getjournal().find_operation( fibre_sa[0].i2 + j );
+                if( op->insertion() || op->deletion() && op->by() != 0 ){
+                    appendValue( indices, fibre_sa[0], Generous() ); // i-th Suffix is influenced by an operation and needs recalculation
+                    appendValue( dels, 0, Generous() );
+                }
             }
-         }
+        }
+
+        last_lcp = fibre_lcp[0];
 
         for( size_t i = 1; i < len; ++i ){
           if( deleted_b( deletionset[ fibre_sa[i].i1 ], fibre_sa[i].i2 ) ){ //TODO: use std::binary_search instead
              appendValue( dels, i, Generous() ); //Is fibre_sa[i] a Pair?
              last_lcp = fibre_lcp[i];
-             fibre_lcp[i - 1] = _min( fibre_lcp[i - 1], last_lcp ); //TODO: localize fibre_lcp[i-1] for performance
+             /*fibre_lcp[i - 1] = _min( fibre_lcp[i - 1], last_lcp ); //TODO: localize fibre_lcp[i-1] for performance*/
              continue;
           }
 
+          //std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t-- " << get_shift( shiftset[ fibre_sa[i].i1 ], fibre_sa[i].i2 ) << " ->\t";
           fibre_sa[i].i2 += get_shift( shiftset[ fibre_sa[i].i1 ], fibre_sa[i].i2 ); //TODO: use std::binary_search instead
+          //std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << std::endl;
 
           for( unsigned int j = 0; j <= _max( fibre_lcp[i], last_lcp ); ++j ){
-             op = journalset[ fibre_sa[i].i1 ].find_operation( fibre_sa[i].i2 + j );
+             op = stringset[ fibre_sa[i].i1 ].getjournal().find_operation( fibre_sa[i].i2 + j );
              if( op->insertion() || op->deletion() && op->by() != 0 ){
                 appendValue( indices, fibre_sa[i], Generous() ); // i-th Suffix is influenced by an operation and needs recalculation
                 last_lcp = fibre_lcp[i];
@@ -237,6 +268,9 @@ namespace seqan{
         suffix_compare_functor< StringSet< TString, TSpec > > cmp( stringset );
 
         std::sort( begin( indices ), end( indices ), cmp );
+
+        //indices = prefix( indices, std::unique( begin( indices ), end( indices ) ) );
+
 
         /*std::cout << "\nIndices:" << std::endl;
         for( size_t i = 0; i < length( indices ); ++i ){
@@ -265,7 +299,7 @@ namespace seqan{
                 erase( fibre_sa, pos_begin - correctional_factor, pos_end - correctional_factor );
 				// TODO: std::min for intervals?
 				local_min = fibre_lcp[pos_begin - correctional_factor - 1];
-				for( size_t i = pos_begin - correctional_factor; i < pos_end - correctional_factor - 1; ++i ){
+				for( size_t i = pos_begin - correctional_factor; i < pos_end - correctional_factor; ++i ){
 					if( fibre_lcp[i] < local_min ){
 						local_min = fibre_lcp[i];
 					}
@@ -279,36 +313,54 @@ namespace seqan{
         }
 		// END: Deleting modified and removed suffixes block-wise
 
+		/*std::cout << "\nSuffix array after deletions:" << std::endl;
+        for( size_t i = 0; i < length( fibre_sa ); ++i ){
+         std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+        }
+
+        std::cout << "\nIndices:" << std::endl;
+        for( size_t i = 0; i < length( indices ); ++i ){
+         std::cout << indices[i].i1 << ", " << indices[i].i2 << std::endl; //"\t: " << infix( stringset, indices[i] ) << "..." << std::endl;
+        }*/
+
+        flatten( fibre_sa );
+        flatten( fibre_lcp );
+
 		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index = begin( indices );
 		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index_tmp = begin( indices );
 		typename Iterator< String< Pair< unsigned int, unsigned int > > >::Type it_index_end = end( indices );
-		typename Iterator< TSA >::Type it_sa = begin( fibre_sa );
-		typename Iterator< TSA >::Type it_sa_end = end( fibre_sa );
-		typename Iterator< TSA >::Type it_sa_begin = begin( fibre_sa );
-        typename Iterator< TLCP >::Type it_lcp = begin( fibre_lcp );
-        typename Iterator< TLCP >::Type it_lcp_begin = begin( fibre_lcp );
-        size_t remaining_indices = length( indices );
-        typename Suffix< StringSet< TString, TSpec > >::Type current_suffix = suffix( stringset, *it_index );
-        String< TLCP > templcp;
+        String< size_t > templcp;
         resize( templcp, length( indices ) );
         len = length( fibre_sa );
-
+        typename Iterator< TString >::Type it_text = begin( stringset[(*it_index).i1] ) + (*it_index).i2;
 
 		// BEGIN: Inserting modified indices block-wise
 		for( size_t i = 0; i < len; ++i ){
-            if( suffix( stringset, fibre_sa[i] ) > current_suffix ){
-                current_suffix = suffix( stringset, fibre_sa[i] );
+            if( _suffix_bigger( begin( stringset[ fibre_sa[i].i1 ] ) + fibre_sa[i].i2, it_text ) ){
 			    it_index_tmp = it_index;
-			    while( suffix( stringset, *(++it_index) ) <= current_suffix && it_index < it_index_end ){}
+
+			    while( _suffix_bigger( begin( stringset[ fibre_sa[i].i1 ] ) + fibre_sa[i].i2, begin( stringset[(*it_index).i1] ) + (*it_index).i2 ) && ++it_index < it_index_end ){}
+
+                //std::cout << "Inserting into SA of length: " << length(fibre_sa) << " at i = " << i << " length: " << it_index - it_index_tmp << std::endl;
+
 			    insert( i, fibre_sa, it_index_tmp, it_index - it_index_tmp );
 			    insert( i, fibre_lcp, begin(templcp), it_index - it_index_tmp );
+
 			    for( size_t j = i - 1; j < i + it_index - it_index_tmp; ++j ){
-                    fibre_lcp[j] = lcpLength( suffix( stringset, fibre_sa[j] ), suffix( stringset, fibre_sa[j + 1] ) );
+			        //std::cout << "\t< " << fibre_sa[j].i1 << ", " << fibre_sa[j].i2 << " >\t< " << fibre_sa[j+1].i1 << ", " << fibre_sa[j+1].i2 << " >" << std::endl;
+                    fibre_lcp[j] = _lcp_length( begin( stringset[fibre_sa[j].i1] ) + fibre_sa[j].i2, begin( stringset[fibre_sa[j + 1].i1] ) + fibre_sa[j + 1].i2 );
                 }
+
                 if( it_index >= it_index_end ){
                     break;
                 }
-                current_suffix = suffix( stringset, *it_index );
+
+                /*std::cout << "\nSuffix array intermediate:" << std::endl;
+                    for( size_t i = 0; i < length( fibre_sa ); ++i ){
+                    std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+                }*/
+
+                it_text = begin( stringset[(*it_index).i1] ) + (*it_index).i2;
                 len = length( fibre_sa );
             }
         }
@@ -320,9 +372,12 @@ namespace seqan{
             len = length( fibre_sa ) - 1;
             while( i < len ){
                 fibre_lcp[i] = lcpLength( suffix( stringset, fibre_sa[i] ), suffix( stringset, fibre_sa[i + 1] ) );
+                ++i;
             }
             fibre_lcp[++len] = 0;
         }
+
+
 		// END: Inserting modified indices block-wise
 
 		// BEGIN: Debug Output
@@ -399,13 +454,12 @@ namespace seqan{
 
         /*std::cout << "Suffix array:" << std::endl;
         for( size_t i = 0; i < length( fibre_sa ); ++i ){
-         std::cout << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
+         std::cout << "\t> " << i << "\t: " << fibre_sa[i].i1 << ", " << fibre_sa[i].i2 << "\t: " << suffix( stringset, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
         }
 
-        std::cout << stringset[0] << " " << stringset[1] << " " << stringset[2] << std::endl;
+        std::cout << stringset[0] << "(" << length( stringset[0] ) << ")" << std::endl;//<< stringset[1] << "(" << length( stringset[1] ) << ")"  << " " << stringset[2] << "(" << length( stringset[2] ) << ")"  << std::endl;
 
-        std::cout << "The End!" << std::endl;
-        */
+        std::cout << "The End!" << std::endl;*/
     }
 
    template< typename TIndex, typename TString >

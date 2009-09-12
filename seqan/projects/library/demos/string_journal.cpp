@@ -4,13 +4,16 @@
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/index.h>
+#include <seqan/file.h>
 #include <seqan/sequence_journal/string_journal_base.h>
-#include "/home/paul/Resources/seqan/projects/tests/index/test_index_creation.h"
+#include "/home/dethecor/Resources/seqan/projects/tests/index/test_index_creation.h"
 
 using namespace std;
 using namespace seqan;
 
 int main(){
+
+   /*
    String< char > str_alloc = "tobeornottobe";
 
    Index< String< char > > testindex_alloc( str_alloc );
@@ -23,7 +26,7 @@ int main(){
    String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > str = "tobeornottobe";
    String< char > ins = "wakkawakka";
 
-   timespec start,finish;
+
 
    Index< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > testindex( str );
 
@@ -43,11 +46,11 @@ int main(){
    indexCreate( testindex, ESA_LCP() );
 
    StringSet< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > set;
-   resize( set, 4 );
+   resize( set, 3 );
 
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s1 = "tobeornottobe";
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s2 = "theplacetogo";
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s3 = "yyyyyyaaaaaa";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s1 = "tobeornottobefsagfcvjsdabcvikonhweroifhasjhcgiusagfdseahfsdzhfnoasdhfk";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s2 = "theplacetogojfsdhajhfsakudefdsjhihkkkwkwwppakhifkgsaoiuhhdkjdjfnklsuchiuhsuerfjsdfkjbnsdjfbskjfzazrjbdsmnfbslahbfls";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s3 = "yyyyyyaaaaaasdafhiiiejjjdfhduckjdjofiwmfgsdhipgsa";
 
    set[0] = s1;
    set[1] = s2;
@@ -57,7 +60,6 @@ int main(){
    while( it_set != end( set ) ){
     cout << *it_set << endl;
     ++it_set;
-    it_set += 0;
    }
 
 
@@ -84,30 +86,66 @@ int main(){
     ++it_set;
     it_set += 0;
    }
+   */
 
-   cout << "Starting measurement!" << endl;
+    StringSet< String< Dna, Journal< Dna, Alloc<>, Alloc<>, Sloppy > > > set;
+    resize( set, 2 );
 
-   clock_gettime(CLOCK_REALTIME, &start);
+    fstream fstrm;
+    fstrm.open("/home/dethecor/Resources/Sequences/dmel_pangolin_iso_E.fasta", ios_base::in | ios_base::binary);
 
-   synchronize_index( myIndex, set );
+    String< char > fasta_tag;
 
-   clock_gettime(CLOCK_REALTIME, &finish);
+    readMeta(fstrm, fasta_tag, Fasta());
+    cout << fasta_tag << "\n";	//prints "a test file"
 
-   std::cout << "Execution time for synchronization" << std::endl << "\tFrom: " << start.tv_nsec << "ns\tTo: " << finish.tv_nsec << "ns"<< std::endl << "\tDifference: " << ( (double)( finish.tv_nsec - start.tv_nsec ) / 1000000.0 ) << "ms" << std::endl;
+    read(fstrm, set[0], Fasta());
 
-   String< SAValue< Index< StringSet< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > > >::Type, Alloc< > > ds_sa;
+    fstrm.close();
 
-   String< char > foo = concat( set );
-   resize( ds_sa, length( foo ) );
+    fstrm.open("/home/dethecor/Resources/Sequences/dmel_pangolin_iso_G.fasta", ios_base::in | ios_base::binary);
 
-   clock_gettime(CLOCK_REALTIME, &start);
+    readMeta(fstrm, fasta_tag, Fasta());
+    cout << fasta_tag << "\n";	//prints "a test file"
 
-   createSuffixArray( ds_sa, foo, Shawarma< DeepShallow >() );
+    read(fstrm, set[1], Fasta());
 
-   clock_gettime(CLOCK_REALTIME, &finish);
+    fstrm.close();
 
-   std::cout << "Execution time for rebuild with Shawarma< DeepShallow >" << std::endl << "\tFrom: " << start.tv_nsec << "ns\tTo: " << finish.tv_nsec << "ns"<< std::endl << "\tDifference: " << ( (double)( finish.tv_nsec - start.tv_nsec ) / 1000000.0 ) << "ms" << std::endl;
+    Index< StringSet< String< Dna, Journal< Dna, Alloc<>, Alloc<>, Sloppy > > > > myIndex( set );
 
-   return 0;
+    indexRequire( myIndex, ESA_SA() );
+    indexRequire( myIndex, ESA_LCP() );
+    timespec start,finish;
+
+    String< Dna > ins = "gattaca";
+
+    insert( 256, set[0], begin(ins), 2 );
+    //insert( 512, set[1], begin(ins), 1 );
+
+    cout << "Starting measurement!" << endl;
+
+    clock_gettime(CLOCK_REALTIME, &start);
+
+    synchronize_index( myIndex, set );
+
+    clock_gettime(CLOCK_REALTIME, &finish);
+
+    std::cout << "Execution time for synchronization" << std::endl << "\tFrom: " << start.tv_nsec << "ns\tTo: " << finish.tv_nsec << "ns"<< std::endl << "\tDifference: " << ( (double)( finish.tv_nsec - start.tv_nsec ) / 1000000.0 ) << "ms" << std::endl;
+
+    String< SAValue< Index< StringSet< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > > >::Type, Alloc< > > ds_sa;
+
+    String< char > foo = concat( set );
+    resize( ds_sa, length( foo ) );
+
+    clock_gettime(CLOCK_REALTIME, &start);
+
+    createSuffixArray( ds_sa, foo, Shawarma< DeepShallow >() );
+
+    clock_gettime(CLOCK_REALTIME, &finish);
+
+    std::cout << "Execution time for rebuild with Shawarma< DeepShallow >" << std::endl << "\tFrom: " << start.tv_nsec << "ns\tTo: " << finish.tv_nsec << "ns"<< std::endl << "\tDifference: " << ( (double)( finish.tv_nsec - start.tv_nsec ) / 1000000.0 ) << "ms" << std::endl;
+
+    return 0;
 }
 

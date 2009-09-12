@@ -409,6 +409,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TText &s = concat(sset);
 		TSize n = length(s);
+		
         if (n < 2) return;
 
         #ifdef SEQAN_DEBUG_INDEX

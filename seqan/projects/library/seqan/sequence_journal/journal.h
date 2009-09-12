@@ -19,19 +19,21 @@ namespace seqan {
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 0, 0 ) );
          m_length = 0;
       }
-      
+
       template< typename TText >
       inline Journal( TText & underlying_string ):
          m_holder( underlying_string )
       {
          assert( !empty(m_holder) );
-         appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 0, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) ) );
+         appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) ) );
+         appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
+
       }
 
       ~Journal(){
       }
-      
+
       inline size_t resize_me( size_t new_length ){
          flatten();
          resize( value( m_holder ), new_length );
@@ -53,7 +55,7 @@ namespace seqan {
          m_length = seqan::length( value( m_holder ) );
       }
 
-      inline TValue const & operator[]( size_t position ) const{ 
+      inline TValue const & operator[]( size_t position ) const{
          return get( position );
       }
 
@@ -65,7 +67,7 @@ namespace seqan {
             return m_insertion_string[ (*it).index + (*it).offset( position ) ];
          }
       }
-      
+
       inline TValue & get( size_t position ){
          typename Iterator< String< Node, TStringSpec > >::Type it = find_node( position );
          if( !(*it).is_internal ){
@@ -74,7 +76,7 @@ namespace seqan {
             return value( m_insertion_string, (*it).index + (*it).offset( position ));
          }
       }
-      
+
       inline void set( size_t position, TValue const & value ){
          typename Iterator< String< Node, TStringSpec > >::Type it = find_node( position );
          if( !(*it).is_internal ){
@@ -135,7 +137,7 @@ namespace seqan {
             return find_node( position, m_tree[parent.rightChild] );
          }
       }
-      
+
       inline typename Iterator< String< Node, TStringSpec > >::Type find_node( size_t position ) const{
          typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree, Standard() );
          if( (*it_tree).left_of( position ) ){
@@ -217,13 +219,18 @@ namespace seqan {
       template< typename TIterator >
       inline void append( TIterator array_start, size_t number ){
          typename Iterator< String<Node, TStringSpec> >::Type it_tree = begin( m_tree, Standard() );
-         
+
          while( j_goUp( it_tree ) ){}; // go to Root Node
-         while( j_goDownRight( it_tree ) ){}; // go to last Node
-         
+         while( j_goDownRight( it_tree ) ){}; // go to last Node (dummy block)
+         Node & dummy = *it_tree;
+         j_goUp( it_tree ); //last data-containing node
          Node & parent = *it_tree;
-         
-         Node rightChild( true, m_length, seqan::length( m_insertion_string ), seqan::length( m_tree ) , parent.tree_index, 0, 0, number, new Insertion( number ) );
+
+         Node rightChild( true, m_length, seqan::length( m_insertion_string ), seqan::length( m_tree ) , parent.tree_index, 0, dummy.tree_index , number, new Insertion( number ) );
+
+         dummy.parent = seqan::length( m_tree ); //dummy block has appended node as parent
+         dummy.index += number; //have dumy point to new end of m_insertion_string
+
          parent.rightChild = seqan::length( m_tree );
          appendValue( m_tree, rightChild, Generous() );
          for( size_t i = 0; i < number; ++i, ++array_start ){
@@ -264,6 +271,13 @@ namespace seqan {
          inorder( io, right_index );
          up_and_right( io, parent_index );
          m_length += number;
+
+         typename Iterator< String<Node, TStringSpec> >::Type it_tree = begin( m_tree, Standard() );
+
+         while( j_goUp( it_tree ) ){}; // go to Root Node
+         while( j_goDownRight( it_tree ) ){}; // go to last Node (dummy block)
+         (*it_tree).index += number; //have dumy point to new end of m_insertion_string
+
       }
 
       inline void nodes_inorder( std::vector<Node> &the_vector, size_t node_pos = 0 ){
@@ -280,16 +294,16 @@ namespace seqan {
       inline void print_nodes_inorder(){
          typename Iterator< String< Node, TStringSpec > >::Type it = get_first_node();
          DEBUG_OUT(">>");
-#ifndef NDEBUG
-            (*it).print_debug();
+#ifdef NDEBUG
+            (*it).print_info();
 #else
             std::cout << ">> " << (*it).position;
-#endif         
+#endif
          while( j_goNext( it ) ){
-#ifndef NDEBUG
-            (*it).print_debug();
+#ifdef NDEBUG
+            (*it).print_info();
 #else
-            std::cout << " ," << (*it).position ; 
+            std::cout << " ," << (*it).position ;
 #endif
          }
          std::cout << " !" << std::endl;
@@ -303,7 +317,7 @@ namespace seqan {
          std::vector< Node >::reverse_iterator vit;
          typename Iterator< String< TValue, TSpec > >::Type sit;
          sit = begin( the_string, Standard() ) + seqan::length( the_string );
-         for( vit = vec.rbegin(); vit < vec.rend(); ++vit ){
+         for( vit = vec.rbegin() - 1; vit < vec.rend(); ++vit ){
             Node node = *vit;
             if( node.op()->deletion() ){
                continue;
@@ -321,8 +335,9 @@ namespace seqan {
          }
          clear( m_tree );
          seqan::erase( the_string, (size_t)0, seqan::length(the_string) - m_length );
-         Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( the_string ), new Operation );
+         Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( the_string ), new Operation( m_length ) );
          m_tree += root;
+         appendValue( m_tree, Node( true, seqan::length( value( m_holder ) ), seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          vec.clear();
          clear( m_insertion_string );
       }
@@ -345,7 +360,7 @@ namespace seqan {
          }
          size_t left_index = seqan::length( m_tree );
          size_t right_index = seqan::length( m_tree ) + 1;
-         
+
          Node leftChild( parent.is_internal, parent.position, parent.index, left_index, parent_index, parent.leftChild, 0, parent.offset( position ), parent.operation->copy() );
          Node rightChild( parent.is_internal, position + number, parent.index + parent.offset( position + number ), right_index, parent_index, 0, parent.rightChild, parent.length - parent.offset( position + number ), parent.operation->copy() );
          leftChild.synchronize_operation();
@@ -353,7 +368,7 @@ namespace seqan {
          if( parent.op()->insertion() ){
             overlap_correction = (int)parent.length - (int)leftChild.length - (int)rightChild.length;
          }
-         
+
          appendValue( m_tree, leftChild );
          if( parent.leftChild != 0 )
             m_tree[parent.leftChild].parent = left_index;
@@ -380,7 +395,7 @@ namespace seqan {
             del( position, remaining_length );
          }
       }
-      
+
       template< typename TIterator >
       inline void replace( size_t position, TIterator array_start, int number ){
          del( position, number );
@@ -422,7 +437,7 @@ namespace seqan {
       inline typename Iterator< String< Node, TStringSpec > >::Type get_zero_node_iterator() const{
          return begin( m_tree, Standard() ) + find_node_index( 0 );
       }
-      
+
       inline String< TValue, TSpec > get_outer() const{
          return value( m_holder );
       }
