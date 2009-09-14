@@ -6,14 +6,15 @@
 #include <seqan/index.h>
 #include <seqan/file.h>
 #include <seqan/sequence_journal/string_journal_base.h>
-#include "/home/dethecor/Resources/seqan/projects/tests/index/test_index_creation.h"
+#include "../../tests/index/test_index_creation.h"
 
 using namespace std;
 using namespace seqan;
 
 int main(){
 
-   /*
+   timespec start,finish;
+
    String< char > str_alloc = "tobeornottobe";
 
    Index< String< char > > testindex_alloc( str_alloc );
@@ -28,7 +29,7 @@ int main(){
 
 
 
-   Index< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > testindex( str );
+   /*Index< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > testindex( str );
 
    std::cout << "\nrequire SA  . . ." << std::endl;
    indexCreate( testindex, ESA_SA(), Skew7() );
@@ -43,14 +44,14 @@ int main(){
    String< size_t > bar = indexSA( testindex_alloc );
 
    std::cout << "\nrequire LCP . . ." << std::endl;
-   indexCreate( testindex, ESA_LCP() );
+   indexCreate( testindex, ESA_LCP() );*/
 
    StringSet< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > set;
    resize( set, 3 );
 
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s1 = "tobeornottobefsagfcvjsdabcvikonhweroifhasjhcgiusagfdseahfsdzhfnoasdhfk";
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s2 = "theplacetogojfsdhajhfsakudefdsjhihkkkwkwwppakhifkgsaoiuhhdkjdjfnklsuchiuhsuerfjsdfkjbnsdjfbskjfzazrjbdsmnfbslahbfls";
-   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s3 = "yyyyyyaaaaaasdafhiiiejjjdfhduckjdjofiwmfgsdhipgsa";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s1 = "tobeornottobe";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s2 = "theplacetogo";
+   String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > s3 = "yyyyyyaaaaaa";
 
    set[0] = s1;
    set[1] = s2;
@@ -86,42 +87,6 @@ int main(){
     ++it_set;
     it_set += 0;
    }
-   */
-
-    StringSet< String< Dna, Journal< Dna, Alloc<>, Alloc<>, Sloppy > > > set;
-    resize( set, 2 );
-
-    fstream fstrm;
-    fstrm.open("/home/dethecor/Resources/Sequences/dmel_pangolin_iso_E.fasta", ios_base::in | ios_base::binary);
-
-    String< char > fasta_tag;
-
-    readMeta(fstrm, fasta_tag, Fasta());
-    cout << fasta_tag << "\n";	//prints "a test file"
-
-    read(fstrm, set[0], Fasta());
-
-    fstrm.close();
-
-    fstrm.open("/home/dethecor/Resources/Sequences/dmel_pangolin_iso_G.fasta", ios_base::in | ios_base::binary);
-
-    readMeta(fstrm, fasta_tag, Fasta());
-    cout << fasta_tag << "\n";	//prints "a test file"
-
-    read(fstrm, set[1], Fasta());
-
-    fstrm.close();
-
-    Index< StringSet< String< Dna, Journal< Dna, Alloc<>, Alloc<>, Sloppy > > > > myIndex( set );
-
-    indexRequire( myIndex, ESA_SA() );
-    indexRequire( myIndex, ESA_LCP() );
-    timespec start,finish;
-
-    String< Dna > ins = "gattaca";
-
-    insert( 256, set[0], begin(ins), 2 );
-    //insert( 512, set[1], begin(ins), 1 );
 
     cout << "Starting measurement!" << endl;
 
