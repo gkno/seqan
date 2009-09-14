@@ -6,7 +6,6 @@
 #include <seqan/index.h>
 #include <seqan/file.h>
 #include <seqan/sequence_journal/string_journal_base.h>
-#include "../../tests/index/test_index_creation.h"
 
 using namespace std;
 using namespace seqan;
@@ -26,8 +25,6 @@ int main(){
 
    String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > str = "tobeornottobe";
    String< char > ins = "wakkawakka";
-
-
 
    /*Index< String< char, Journal< char, Alloc<>, Alloc<>, Sloppy > > > testindex( str );
 
