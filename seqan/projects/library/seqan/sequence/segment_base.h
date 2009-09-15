@@ -82,6 +82,14 @@ struct Spec<Segment<THost, TSpec> const>
 
 //////////////////////////////////////////////////////////////////////////////
 
+///.Metafunction.DeepestSpec.param.T.type:Class.Segment
+
+template <typename THost, typename TSpec>
+struct DeepestSpec<Segment<THost, TSpec> >:
+	public DeepestSpec<THost> {};
+
+//////////////////////////////////////////////////////////////////////////////
+
 ///.Metafunction.Value.param.T.type:Class.Segment
 
 template <typename THost, typename TSpec>

@@ -9,7 +9,7 @@ int main ()
 ///The following code creates an @Class.Index@ of $"tobeornottobe"$. 
 ///As there is no second template parameter given to $Index<..>$,
 ///the default index based on an enhanced suffix array is used.
-    Index< String<char> > index_esa("tobeornottobe");
+	Index< String<char> > index_esa("tobeornottobe");
 	Finder< Index< String<char> > > finder_esa(index_esa);
 
 	::std::cout << "hit at ";
@@ -21,7 +21,7 @@ int main ()
 ///Instead of this @Spec.UngappedShape.fixed-size shape@ you can use arbitrary 
 ///@Class.Shape.shapes@ and assign them before calling @Function.find@ via @Function.indexShape@.
 	typedef Index< String<char>, Index_QGram< UngappedShape<2> > > TQGramIndex;
-    TQGramIndex index_2gram("tobeornottobe");
+	TQGramIndex index_2gram("tobeornottobe");
 	Finder< TQGramIndex > finder_2gram(index_2gram);
 
 	::std::cout << "hit at ";

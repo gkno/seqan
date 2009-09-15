@@ -580,8 +580,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		{
 			typename Infix<TSA>::Type s3 = infix(SA, 0, _n[3]), s5 = infix(SA, _n[3], _n[3] + _n[5]);
-			//String<TSize, Alloc<> > SA0, SA3, SA5, SA6;
-			TSA SA0, SA3, SA5, SA6;
+			String<TSize, typename DeepestSpec<TSA>::Type> SA0, SA3, SA5, SA6;
+
 			resize(SA0, _n[0], Exact());
 			resize(SA3, _n[3], Exact());
 			resize(SA5, _n[5], Exact());
