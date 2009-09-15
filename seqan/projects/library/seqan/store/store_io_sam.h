@@ -849,9 +849,15 @@ namespace SEQAN_NAMESPACE_MAIN
         // create dummy entries in SAM specific aligned read quality store and aligned read tag store
         // is needed so the ID in the aligned store can be use to access the other stores
         // even if there exists previous entries without
-        int diff = length(fragStore.alignedReadStore) - length(fragStore.alignedReadQualityStore);
+		typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+		typedef typename TFragmentStore::TAlignQualityStore TAlignQualityStore;
+		typedef typename Value<TAlignQualityStore>::Type TAlignQuality;
+		
+        int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
         for(int i = 0; i < diff; ++i){
-            append(fragStore.alignedReadQualityStore, 255, Generous());
+			TAlignQuality q;
+			q.score = 255;
+            append(fragStore.alignQualityStore, q, Generous());
         }
         diff = length(fragStore.alignedReadStore) - length(fragStore.alignedReadTagStore);
         for(int i = 0; i < diff; ++i){
@@ -894,6 +900,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
         typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
         typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
+        typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignQualityElement;
         
         // Type for sequence in readstore
         typedef typename TFragmentStore::TReadSeq TReadSeq2;
@@ -933,10 +940,10 @@ namespace SEQAN_NAMESPACE_MAIN
         std::cout << "pos: \t" << beginPos << std::endl;
                 
         // read map quality
-        int mapQ;
-        mapQ = _parse_readNumber(file, c);
+        TAlignQualityElement mapQ;
+        mapQ.score = _parse_readNumber(file, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "mapQ: \t" << mapQ << std::endl;
+        std::cout << "mapQ: \t" << mapQ.score << std::endl;
         // read CIGAR
         Cigar<> cigar = Cigar<>();
         _parse_readCigar(file, cigar, c);
@@ -1005,7 +1012,7 @@ namespace SEQAN_NAMESPACE_MAIN
         appendAlignment(fragStore, readId, contigId, beginPos, endPos, readGaps);
         
         // create entries in SAM specific stores
-        append(fragStore.alignedReadQualityStore, mapQ, Generous());
+        append(fragStore.alignQualityStore, mapQ, Generous());
         appendValue(fragStore.alignedReadTagStore, tags, Generous());
         
         // store additional data about match mate temporarily

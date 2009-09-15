@@ -1263,11 +1263,11 @@ getOptionValueShort(CommandLineParser & me, CharString const & shortName, TValue
 }
 
 inline String<CharString> const &
-getOptionValueShort(CommandLineParser & me,CharString const & shortName)
+getOptionValuesShort(CommandLineParser & me,CharString const & shortName)
 {
     typedef Size<String<CommandLineOption> >::Type TOptionPosition;
 
-    if (!hasOptionLong(me, shortName))
+    if (!hasOptionShort(me, shortName))
 	{
 		_streamWrite(std::cerr, me.appName);
 		_streamWrite(std::cerr, ": \'");
