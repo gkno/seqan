@@ -1104,7 +1104,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		appendValue(me.strings, const_cast<TString*>(&obj));
 		TPos last = me.lastId++;
 		appendValue(me.ids, last);
-		me.id_pos_map.insert(std::make_pair(last, length(me.strings) - 1));
+		me.id_pos_map.insert(std::make_pair(last, (TPos)(length(me.strings) - 1)));
         appendValue(me.limits, lengthSum(me) + length(obj));
 	}
   

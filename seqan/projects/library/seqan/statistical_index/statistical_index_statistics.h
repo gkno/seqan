@@ -139,7 +139,7 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 
 			String<TAlphabet> Wj =getValueById(W, j);
 
-			TFloat q = n-(2*length(Wj))+2;
+			TFloat q = (TFloat)(n-(2*length(Wj))+2);
 
 			for(unsigned int k=0; k<sizeW; k++){
 

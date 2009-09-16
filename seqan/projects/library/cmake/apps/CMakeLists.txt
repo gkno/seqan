@@ -11,6 +11,10 @@ add_subdirectory (../seqan seqan)
 ################################################################################
 
 include_directories (${SEQAN_BASE})
+link_directories (${SEQAN_BASE}/lib)
+if (MSVC)
+        add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
+endif (MSVC)
 
 ################################################################################
 # Applications

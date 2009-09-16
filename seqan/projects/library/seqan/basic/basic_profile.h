@@ -453,7 +453,8 @@
 
 
 
-    inline void _proSet(_proValueIndex valNum, _proFloat value) {
+	template <typename TValue>
+    inline void _proSet(_proValueIndex valNum, TValue value) {
         _proFloat now = sysTime();
         _proData<>::_proLastUpdate[valNum] = now;
         if (_proData<>::_proValue[valNum] < value) {
@@ -464,7 +465,8 @@
         _proSignalDumpTest(now);
     }
 
-    inline void _proAdd(_proValueIndex valNum, _proFloat value) {
+	template <typename TValue>
+    inline void _proAdd(_proValueIndex valNum, TValue value) {
         _proFloat now = sysTime();
         _proData<>::_proValue[valNum] += value;
         _proData<>::_proLastUpdate[valNum] = now;
@@ -473,7 +475,8 @@
         _proSignalDumpTest(now);
     }
 
-    inline void _proSub(_proValueIndex valNum, _proFloat value) {
+	template <typename TValue>
+    inline void _proSub(_proValueIndex valNum, TValue value) {
         _proFloat now = sysTime();
         _proData<>::_proValue[valNum] -= value;
         _proData<>::_proLastUpdate[valNum] = now;
