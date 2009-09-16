@@ -12,6 +12,9 @@ add_subdirectory (../seqan seqan)
 
 include_directories (${SEQAN_BASE})
 link_directories (${SEQAN_BASE}/lib)
+if (MSVC)
+	add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
+endif (MSVC)
 
 ################################################################################
 # Demos
@@ -22,6 +25,6 @@ foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	add_executable (${DEMO} ${DEMOFILE})
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-		target_link_libraries (${DEMO} rt shawarma)
+		target_link_libraries (${DEMO} rt)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endforeach (DEMOFILE)

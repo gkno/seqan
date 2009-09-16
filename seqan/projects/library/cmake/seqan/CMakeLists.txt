@@ -51,5 +51,5 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
-	add_definitions (/W2 /wd4996)
+	add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
