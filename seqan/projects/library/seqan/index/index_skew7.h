@@ -168,6 +168,23 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Size<TInput>::Type Type;
     };
 
+    template <typename T>
+    struct _Skew7_StringSpec:
+        public Spec<T> {};
+
+    template <typename T, typename TStringSpec>
+    struct _Skew7_StringSpec<String<T, TStringSpec> >
+	{
+        typedef TStringSpec Type;
+	};
+
+    template <typename T, typename TSegmentSpec>
+    struct _Skew7_StringSpec<Segment<T, TSegmentSpec> >:
+        public _Skew7_StringSpec<T> {};
+
+    template <typename T>
+    struct _Skew7_StringSpec<T const>:
+        public _Skew7_StringSpec<T> {};
 
     //////////////////////////////////////////////////////////////////////////////
     // skew7 class
@@ -580,7 +597,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		{
 			typename Infix<TSA>::Type s3 = infix(SA, 0, _n[3]), s5 = infix(SA, _n[3], _n[3] + _n[5]);
-			String<TSize, typename DeepestSpec<TSA>::Type> SA0, SA3, SA5, SA6;
+			String<TSize, typename _Skew7_StringSpec<TSA>::Type> SA0, SA3, SA5, SA6;
 
 			resize(SA0, _n[0], Exact());
 			resize(SA3, _n[3], Exact());
