@@ -300,9 +300,8 @@ _createNodeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		std::ostringstream outs; 
 		outs << "label = \"";
 		outs << label(g, *it);
-		outs << "\", group = \"";
+		outs << "\", group = ";
 		outs << id;
-		outs << "\"";
 		append(property(nodeMap, *it), outs.str().c_str());		
 		//std::cout << property(nodeMap, *it) << std::endl;
 	}
@@ -336,7 +335,8 @@ _createEdgeAttributes(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		std::ostringstream outs; 
 		outs << "label = \"";
 		outs << (TCargo) c;
-		outs << "\"";
+		outs << "\",";
+		outs << "len = 10.0";
 		append(property(edgeMap, *itEd), outs.str().c_str());
 	}
 }
@@ -373,7 +373,7 @@ _writeGraphFooter(TFile & file,
 				_streamWrite(file, " -- ");
 				_streamPutInt(file, nextVertex);
 				_streamWrite(file, " [");
-				_streamWrite(file, "weight=100.0, len=4.0, arrowhead=vee");
+				_streamWrite(file, "len=3.0, arrowhead=vee");
 				_streamWrite(file, "];\n");
 			}
 			previousVertex = nextVertex;
