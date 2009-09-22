@@ -21,6 +21,8 @@
 #ifndef SEQAN_HEADER_STORE_IO_H
 #define SEQAN_HEADER_STORE_IO_H
 
+#include <seqan/misc/misc_parsing.h>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
