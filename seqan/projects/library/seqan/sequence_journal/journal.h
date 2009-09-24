@@ -16,7 +16,8 @@ namespace seqan {
 
       inline Journal(): m_holder( "" ){ //TODO: check for behavior
          assert( !empty(m_holder) );
-         appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 0, 0 ) );
+         appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, 0 ) );
+         appendValue( m_tree, Node( true, 0, seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = 0;
       }
 
@@ -28,7 +29,6 @@ namespace seqan {
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) ) );
          appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
-
       }
 
       ~Journal(){
@@ -43,6 +43,19 @@ namespace seqan {
       }
 
       inline void assign_string( String< TValue, TSpec > &underlying_string ){
+         Holder<String< TValue, TSpec > > holder;
+         assign( m_holder, holder );
+         setValue( m_holder, underlying_string );
+         assert( !empty(m_holder) );
+         assert( dependent(m_holder) );
+         Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) );
+         String<Node, TStringSpec> tree;
+         tree += root;
+         assign( m_tree, tree );
+         m_length = seqan::length( value( m_holder ) );
+      }
+
+      inline void assign_string( String< TValue, TSpec > const &underlying_string ){
          Holder<String< TValue, TSpec > > holder;
          assign( m_holder, holder );
          setValue( m_holder, underlying_string );
@@ -420,6 +433,12 @@ namespace seqan {
          it += (*get_last_node()).length;
          it.add_one();
          return it;
+      }
+
+      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_at_pos( size_t pos ) const{
+          typename Iterator< String< Node, TStringSpec > >::Type it_node = find_node( pos );
+          typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_node , it_node->offset( pos ) );
+          return it;
       }
 
       inline typename Iterator< String< TValue, TSpec > >::Type get_outer_begin() const{

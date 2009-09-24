@@ -34,6 +34,15 @@ namespace seqan{
          m_recalc = ( *m_it_tree ).length;
       }
 
+      inline jiter( Journal< TValue, TSpec, TStringSpec, TSloppySpec > const *journal, typename Iterator< String< Node, TStringSpec > >::Type it, size_t offset )
+       : m_journal( journal )
+       , m_it_tree( it )
+       {
+         m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index + offset;
+         m_it_inner = m_journal->get_inner_begin() + ( *m_it_tree ).index + offset;
+         m_recalc = ( *m_it_tree ).length - offset;
+      }
+
       inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > operator=( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const &other ){
          m_journal = other.journal();
          m_recalc = other.recalc();

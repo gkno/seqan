@@ -14,7 +14,7 @@ namespace seqan{
       return this->getjournal().get_r( position );
    }
    */
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TPosition >
    TValue const & value( String< TValue, Journal< TValue, TSpec, TStringSpec, Strict > > const & string, TPosition position ) {
       return string.getjournal().get( position );
@@ -29,7 +29,7 @@ namespace seqan{
    void assignValue( String< Journal< TValue, TSpec, TStringSpec, Sloppy > > & string, size_t position, TValue const & value ){
       string.getjournal().set( position, value );
    }*/
-   
+
 
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    struct Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, Standard > {
@@ -40,7 +40,7 @@ namespace seqan{
    struct Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const, Standard > {
       typedef jiter< TValue, TSpec, TStringSpec, TSloppySpec > Type;
    };
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    struct Value< jiter< TValue, TSpec, TStringSpec, TSloppySpec > > {
       typedef TValue Type;
@@ -50,7 +50,7 @@ namespace seqan{
    struct Value< jiter< TValue, TSpec, TStringSpec, TSloppySpec > const > {
       typedef TValue Type;
    };
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    struct Reference< String<TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > > {
       typedef TValue const & Type;
@@ -72,7 +72,7 @@ namespace seqan{
    struct IsContiguous<String<TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const> {
       enum { VALUE = false };
    };
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    struct DefaultIteratorSpec< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > > {
       typedef Standard Type;
@@ -82,7 +82,7 @@ namespace seqan{
    struct DefaultIteratorSpec< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const > {
       typedef Standard Type;
    };
-   
+
    //////////////////////////////////////////////////////////////////////////////
    // suffix array type
 
@@ -91,29 +91,40 @@ namespace seqan{
       typedef typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type Type;
    };
 
-	template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
+    template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
+    struct Fibre< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >, Fibre_SA> {
+        typedef String< typename SAValue< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, TSpec> >::Type, Alloc<> > Type;
+    };
+
+    template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
+    struct Fibre< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >, Fibre_LCP> {
+        typedef String< typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type, Alloc<> > Type;
+    };
+
+
+	/*template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
 	struct Fibre< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >, Fibre_SA> {
 		typedef String<
 			typename SAValue< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, TSpec> >::Type,
-			Journal< typename SAValue< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, TSpec> >::Type, TSpec, TStringSpec, Sloppy > 
-		> Type;		
+			Journal< typename SAValue< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, TSpec> >::Type, TSpec, TStringSpec, Sloppy >
+		> Type;
 	};
-	
+
 	template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
 	struct Fibre< Index< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >, Fibre_LCP> {
 		typedef String<
 			typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type,
-			Journal< typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type, TSpec, TStringSpec, Sloppy > 
-		> Type;		
-	};
-	
+			Journal< typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type, TSpec, TStringSpec, Sloppy >
+		> Type;
+	};*/
+
    //////////////////////////////////////////////////////////////////////////////
 
    template< typename TValue, typename TSpec, typename TStringSpec, typename TString, typename TSloppySpec >
    void insert( size_t position, String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string, TString &insert_string ){
       journal_string.insert( position, insert_string );
    }
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    void insert( size_t position, String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string, TValue value ){
       String<TValue> tmpstr;              // create temporary string
@@ -136,7 +147,7 @@ namespace seqan{
    void append( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & target, TSource & source ){
       target.append( begin( source ), length( source ) );
    }
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TString, typename TSloppySpec >
    void replace( size_t position, String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string, TString &insert_string ){
       journal_string.getjournal().replace( position, begin( insert_string ), length( insert_string ) );
@@ -151,40 +162,40 @@ namespace seqan{
    void erase( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string, TPosition position ){
       journal_string.del( position, 1 );
    }
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TPosition >
    void erase( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string, TPosition position, TPosition position_end ){
       journal_string.del( position, position_end - position );
    }
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    void flatten( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &journal_string ){
       journal_string.flatten();
    }
 
    template<typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec>
-   inline typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type resizeSpace( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &me, 
-	      		size_t size, 
-			      size_t pos_begin, 
+   inline typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type resizeSpace( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &me,
+	      		size_t size,
+			      size_t pos_begin,
 			      size_t pos_end,
                size_t limit = 0 )
    {
       SEQAN_CHECKPOINT
 	   return me.resizeSpace( size, pos_begin, pos_end, limit );
    }
-   
+
    template<typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TPosition, typename TExpand>
-   inline typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type 
-   resizeSpace( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & me, 
-			   typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type size, 
-			   TPosition pos_begin, 
-			   TPosition pos_end, 
+   inline typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type
+   resizeSpace( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & me,
+			   typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type size,
+			   TPosition pos_begin,
+			   TPosition pos_end,
 			   Tag<TExpand> const)
 	{
 		SEQAN_CHECKPOINT
 	   return me.resizeSpace( size, pos_begin, pos_end );
 	}
-   
+
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TLength, typename TExpand >
    inline typename Size< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type resize( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & me, TLength new_length, Tag<TExpand> const ){
       std::cout << "Resizing JournalString: " << &me << " to length:" << new_length << std::endl;
@@ -195,22 +206,22 @@ namespace seqan{
       }
       return new_length;
    }
-   
+
    template <typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TPos >
    inline typename IndexOperatorValue< TValue, TSloppySpec >::Type getValue( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & me, TPos pos ){
       return me[pos];
    }
-   
+
    template <typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TPos >
    inline TValue const & getValue( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const & me, TPos pos ){
       return me[pos];
    }
-   
-   template <typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TSize, typename TExpand> 
+
+   template <typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TSize, typename TExpand>
    inline typename Size< String<TValue, Journal < TSpec, TStringSpec, TSloppySpec > > >::Type reserve( String<TValue, Journal < TSpec, TStringSpec, TSloppySpec > > & me, TSize new_capacity, Tag<TExpand> const tag){
       return length( me );
    }
-   
+
    template<typename TValue, typename TSpec, typename TStringSpec, typename TSourceSpec, typename TSloppySpec >
    void assign( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &target, String< TValue, TSourceSpec > &source ){
       target.assign_string( source );
@@ -261,7 +272,7 @@ namespace seqan{
    typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, Standard >::Type end( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > &me, Standard ){
       return me.it_end();
    }
-   
+
    template<typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > >, Standard >::Type begin( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const &me, Standard ){
       return me.it_begin();
@@ -295,7 +306,7 @@ namespace seqan{
    SEQAN_CHECKPOINT
    	me.del( new_length, length( me ) - new_length );
    }
-   
+
    /*template<typename TValue, typename TSpec, typename TStringSpec >
    inline void _allocateStorage(seqan::String<TValue, seqan::Journal<TValue, TSpec, TStringSpec, Sloppy> > & me, size_t & size){
       resize( me, size, Exact() );
