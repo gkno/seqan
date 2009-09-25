@@ -166,11 +166,12 @@ namespace seqan{
             if( (*m_it_tree).length == 0 ){
                next_node_forward();
             }else{
-               //if( (*m_it_tree).is_internal ){
+               if( (*m_it_tree).is_internal ){
                   m_it_inner = m_journal->get_inner_begin() + ( *m_it_tree ).index;
-               //}else{
-                  m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index;
-               //}
+               }else{
+                  ++m_it_outer;
+                  //m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index;
+               }
                m_recalc = ( *m_it_tree ).length;
             }
          }else{
@@ -192,11 +193,12 @@ namespace seqan{
             if( (*m_it_tree).length == 0 ){
                next_node_backward();
             }else{
-               //if( (*m_it_tree).is_internal ){
+               if( (*m_it_tree).is_internal ){
                   m_it_inner = m_journal->get_inner_begin() + ( *m_it_tree ).index + ( *m_it_tree ).length - 1;
-               //}else{
-                  m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index + ( *m_it_tree ).length - 1;
-               //}
+               }else{
+                  --m_it_outer;
+                  //m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index + ( *m_it_tree ).length - 1;
+               }
                m_recalc = 1;
             }
          }else{
@@ -205,19 +207,19 @@ namespace seqan{
       }
 
       inline void add_one( ){
-//         if( (*m_it_tree).is_internal ){
+         if( (*m_it_tree).is_internal ){
             ++m_it_inner;
- //        }else{
+         }else{
             ++m_it_outer;
-   //      }
+         }
       }
 
       inline void minus_one( ){
-     //    if( (*m_it_tree).is_internal ){
+         if( (*m_it_tree).is_internal ){
             --m_it_inner;
-       //  }else{
+         }else{
             --m_it_outer;
-         //}
+         }
       }
 
       inline bool is_journal( Journal< TValue > const &jrn ) const{
