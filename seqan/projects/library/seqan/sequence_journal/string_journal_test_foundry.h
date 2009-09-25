@@ -1,11 +1,16 @@
 #include <cstdlib>
 
-namespace seqan{
+/*namespace seqan{
 
    struct TagGeneric{};
    struct TagLength{};
    struct TagErase{
       TagErase( size_t p ) : pos( p ) {};
+   size_t pos;
+   };
+   
+   struct TagValue{
+      TagValue( size_t p ) : pos( p ) {};
    size_t pos;
    };
 
@@ -90,14 +95,18 @@ namespace seqan{
    template< typename TClass >
    inline bool run( TestFunctor< TClass, TagLength > &, TClass & instance ){
       length( instance );
-//      std::cout << "length" << std::endl;
       return true;
    }
    
    template< typename TClass >
    inline bool run( TestFunctor< TClass, TagErase > & functor , TClass & instance ){
       erase( instance, functor.tag.pos );
-//      std::cout << "erase" << std::endl;
+      return true;
+   }
+   
+   template< typename TClass >
+   inline bool run( TestFunctor< TClass, TagValue > & functor , TClass & instance ){
+      value( instance, functor.tag.pos );
       return true;
    }
 
@@ -122,7 +131,7 @@ namespace seqan{
       }
    }
 
-}
+}*/
 
 
 
