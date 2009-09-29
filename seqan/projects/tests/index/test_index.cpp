@@ -478,6 +478,7 @@ void dumpStatus(bool status) {
 void testShapes();
 void testQGramIndex();
 bool testIndexCreation();
+void testBWTWalk(const char*);
 
 int main()
 {
@@ -518,6 +519,11 @@ int main()
 	cout << "===================================" << endl;
 	cout << "----Shapes-------------------------" << endl;
 	testShapes();
+	cout << "===================================" << endl;
+	cout << endl;
+	cout << "===================================" << endl;
+	cout << "----BWTWalk SA Creation------------" << endl;
+	testBWTWalk("projects/tests/index/m_tuberculosis_h37rv.fa");
 	cout << "===================================" << endl;
 	cout << endl;
 
