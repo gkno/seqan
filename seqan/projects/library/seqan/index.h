@@ -62,6 +62,7 @@
 #include <seqan/index/index_sa_lss.h>
 #include <seqan/index/index_sa_mm.h>
 #include <seqan/index/index_sa_qsort.h>
+#include <seqan/index/index_sa_bwtwalk.h>
 
 #include <seqan/index/pump_extender3.h>
 #include <seqan/index/pipe_merger3.h>

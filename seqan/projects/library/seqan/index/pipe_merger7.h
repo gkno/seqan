@@ -93,20 +93,6 @@ namespace SEQAN_NAMESPACE_MAIN
                                       SkewDCStream<TValue>,
                                       bool >
     {
-		template <typename TSize>
-		inline static bool crossBoarderCompare(TSize const a, TSize const b) {
-			return a < b;
-		}
-
-		template <typename T1, typename T2, typename TCompression>
-		inline static bool crossBoarderCompare(
-			Pair<T1, T2, TCompression> const &a,
-			Pair<T1, T2, TCompression> const &b)
-		{
-			return (getValueI1(a) >  getValueI1(b)) ||
-				  ((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
-		}
-
         inline bool operator()(const SkewDCStream<TValue> &a,
 			                   const SkewDCStream<TValue> &b) const 
         {
@@ -121,10 +107,9 @@ namespace SEQAN_NAMESPACE_MAIN
             if (na < nb) return false;
             if (na > nb) return true;
 
-			// we get here, only if a septet crosses the boarder of
-			// 1) the single text (a/b.i.i1 is an ordinal number)
-			// 2) a sequence in a multiple sequence text (a/b.i.i1 is a Pair)
-			return crossBoarderCompare(getValueI1(a.i), getValueI1(b.i));
+			// we get here, only if a septet crosses the border of
+			// the single text or a sequence in a multiple sequence text
+			return a.stream - 1 > b.stream - 1; // this is NOT the same as a.stream > b.stream, 0 should be bigger than 6
         }
     };
 
@@ -136,20 +121,6 @@ namespace SEQAN_NAMESPACE_MAIN
                                       SkewDCStream<Triple<T1,T2,Tuple<T,_size,Compressed>,Compressed> >,
                                       bool >
     {
-		template <typename TSize>
-		inline static bool crossBoarderCompare(TSize const a, TSize const b) {
-			return a < b;
-		}
-
-		template <typename _T1, typename _T2, typename _TCompression>
-		inline static bool crossBoarderCompare(
-			Pair<_T1, _T2, _TCompression> const &a,
-			Pair<_T1, _T2, _TCompression> const &b)
-		{
-			return (getValueI1(a) >  getValueI1(b)) ||
-				  ((getValueI1(a) == getValueI1(b)) && (getValueI2(a) < getValueI2(b)));
-		}
-
         typedef Tuple<T,_size,Compressed> T3;
         inline bool operator()(const SkewDCStream<Triple<T1,T2,T3,Compressed> > &a,
 			                   const SkewDCStream<Triple<T1,T2,T3,Compressed> > &b) const 
@@ -165,10 +136,9 @@ namespace SEQAN_NAMESPACE_MAIN
             if (na < nb) return false;
             if (na > nb) return true;
 
-			// we get here, only if a septet crosses the boarder of
-			// 1) the single text (a/b.i.i1 is an ordinal number)
-			// 2) a sequence in a multiple sequence text (a/b.i.i1 is a Pair)
-			return crossBoarderCompare(getValueI1(a.i), getValueI1(b.i));
+			// we get here, only if a septet crosses the border of
+			// the single text or a sequence in a multiple sequence text
+			return a.stream - 1 > b.stream - 1; // this is NOT the same as a.stream > b.stream, 0 should be bigger than 6
 		}
     };
 

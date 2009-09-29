@@ -67,7 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (i0.i3[1] < i12.i3[1]) return true;
             if (i0.i3[1] > i12.i3[1]) return false;
             if (i0.i2[1] < i12.i2[1]) return true;
-            return false;
+            return false; // is also false if the names are equal (cross-border compare)
         }
 
         inline void getMin() {
