@@ -1,3 +1,5 @@
+#include <util/test_foundry.h>
+
 namespace seqan{
 
     unsigned int randomNumber( int upper_bound )
@@ -24,12 +26,44 @@ namespace seqan{
         }
         
     }
+    
+/*template< typename TString1, typename TString2 >
+    Test< TString1, TString2 > string_performance_matchup( TString1 & string_one, TString2 & string_two, size_t runs, size_t max_length ){
+        Test< TString1, TString2 > test_return( TestFunctor< TString1 >(), string_one, TestFunctor< TString2 >(), string_two ); //generic test to store results
+        return test_return;
+    }*/
 
     struct TagLength{};
 
     struct TagErase{
         TagErase( size_t p ) : pos( p ) {};
         size_t pos;
+    };
+    
+    struct TagEraseMany{
+        TagEraseMany( String< size_t > p ) : positions( p ) {
+            i = 0;
+        };
+        String< size_t > positions;
+        
+        size_t next_pos(){
+            return positions[i++]; //TODO: beware of pos range, maybe use circular string kind of thing
+        }
+        
+        size_t i;
+    };
+
+    struct TagValueMany{
+        TagValueMany( String< size_t > p ) : positions( p ) {
+            i = 0;
+        };
+        String< size_t > positions;
+        
+        size_t next_pos(){
+            return positions[i++]; //TODO: beware of pos range, maybe use circular string kind of thing
+        }
+        
+        size_t i;
     };
 
     struct TagValue{
@@ -58,11 +92,57 @@ namespace seqan{
         erase( instance, functor.tag.pos );
         return true;
     }
+    
+    template< typename TClass >
+    inline bool run( TestFunctor< TClass, TagEraseMany > & functor , TClass & instance ){
+        erase( instance, functor.tag.next_pos() );
+        return true;
+    }
 
     template< typename TClass >
     inline bool run( TestFunctor< TClass, TagValue > & functor , TClass & instance ){
         value( instance, functor.tag.pos );
         return true;
     }
+    
+    template< typename TClass >
+    inline bool run( TestFunctor< TClass, TagValueMany > & functor , TClass & instance ){
+        value( instance, functor.tag.next_pos() );
+        return true;
+    }
+    
+    template< typename TString >
+    class JournalTest{
+
+    public:
+    JournalTest( TString& string ): the_holder( string ) {
+      srand( time(NULL) );
+    };
+
+    void random_insertions( unsigned int number, unsigned int length, seqan::String< char > const & alphabet_string ){
+      if( number > 0 ){
+         seqan::String< char > insertion_string;
+         seqan::resize( insertion_string, length );
+         for( unsigned int i = 0; i < length; ++i ){
+            insertion_string[i] = alphabet_string[ randomNumber( seqan::length( alphabet_string ) - 1 ) ];
+         }
+         seqan::insert( randomNumber( seqan::length( seqan::value( the_holder ) ) - 1 ), seqan::value( the_holder ), insertion_string ); //insert teh shit into teh string
+         random_insertions( --number, length, alphabet_string );
+      }
+      return; //TODO: best practice, is that useful / necessary
+    }
+
+    void random_deletions( unsigned int number, int length = 10 ){
+      if( number > 0 ){
+         int position = randomNumber( seqan::length( seqan::value( the_holder ) ) - length );
+         seqan::erase( seqan::value( the_holder ), position, position + length ); //erase some stuff from teh string
+         random_deletions( --number, length );
+      }
+      return; //TODO: best practice, is that useful / necessary
+    }
+
+    private:
+    seqan::Holder< TString > the_holder;
+    };
     
 }

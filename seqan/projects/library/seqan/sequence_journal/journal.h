@@ -17,7 +17,7 @@ namespace seqan {
       inline Journal(): m_holder( "" ){ //TODO: check for behavior
          assert( !empty(m_holder) );
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, 0 ) );
-         appendValue( m_tree, Node( true, 0, seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
+         appendValue( m_tree, Node( true, 0, seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = 0;
       }
 
@@ -27,7 +27,7 @@ namespace seqan {
       {
          assert( !empty(m_holder) );
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) ) );
-         appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
+         appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
       }
 
@@ -330,7 +330,7 @@ namespace seqan {
          std::vector< Node >::reverse_iterator vit;
          typename Iterator< String< TValue, TSpec > >::Type sit;
          sit = begin( the_string, Standard() ) + seqan::length( the_string );
-         for( vit = vec.rbegin() - 1; vit < vec.rend(); ++vit ){
+         for( vit = vec.rbegin() + 1; vit < vec.rend(); ++vit ){
             Node node = *vit;
             if( node.op()->deletion() ){
                continue;
