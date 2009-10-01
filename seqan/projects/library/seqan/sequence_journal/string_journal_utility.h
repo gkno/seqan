@@ -476,6 +476,7 @@ namespace seqan{
         String< Pair< TPos, TPos > > shifts;
         String< Pair< TPos, TPos > > deletions;
         String< TPos > indices;
+        resize( indices, 0 );
 
         String< unsigned int > tmpindex;
         generate_shifts_and_deletions( string, tmpindex, shifts, deletions );
@@ -627,77 +628,39 @@ namespace seqan{
             std::cout << "\t> " << i << "\t: " << fibre_sa[i] << "\t" << suffix( string, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
         }*/
 
-
-		typename Iterator< String< TPos > >::Type it_index = begin( indices );
-		typename Iterator< String< TPos > >::Type it_index_tmp = begin( indices );
-		typename Iterator< String< TPos > >::Type it_index_end = end( indices );
-        String< TPos > templcp;
-        resize( templcp, length( indices ) );
-        len = length( fibre_sa );
-        typename Iterator< TString >::Type it_text = begin( string ) + (*it_index);
-        it_string = begin( string );
-        size_t insert_length = 0;
-
-		// BEGIN: Inserting modified indices block-wise
-        if( _suffix_bigger( it_string + fibre_sa[0], it_text ) ){
-            it_index_tmp = it_index;
-
-            while( _suffix_bigger( it_string + fibre_sa[0], it_string + (*it_index) ) && ++it_index < it_index_end ){}
-
-            insert_length = it_index - it_index_tmp;
-
-            /*std::cout << "Inserting into SA of length: " << length(fibre_sa) << " at i = " << 0 << " length: " << insert_length << std::endl;
-
-            for( size_t j = 0; j < length( fibre_sa ); ++j ){
-                std::cout << fibre_sa[j] << " ";
-            }
-            std::cout << std::endl;*/
-            resizeSpace( fibre_sa, insert_length, 0, 0 );
-            resizeSpace( fibre_lcp, insert_length, 0, 0 );
-            /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
-                std::cout << fibre_sa[j] << " ";
-            }
-            std::cout << std::endl;*/
-
-            for( size_t j = 0; j < insert_length ; ++j, ++it_index_tmp ){
-                fibre_sa[j] = *it_index_tmp;
-            }
-            /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
-                std::cout << fibre_sa[j] << " ";
-            }
-            std::cout << "\n- - -" << std::endl;*/
-
-            for( size_t j = 0; j < insert_length; ++j ){
-                //std::cout << "\t< " << fibre_sa[j].i1 << ", " << fibre_sa[j].i2 << " >\t< " << fibre_sa[j+1].i1 << ", " << fibre_sa[j+1].i2 << " >" << std::endl;
-                fibre_lcp[j] = _lcp_length( it_string + fibre_sa[j], it_string + fibre_sa[j + 1] );
-            }
-
-            it_text = it_string + (*it_index);
+        if( length( indices ) > 0 ){
+            typename Iterator< String< TPos > >::Type it_index = begin( indices );
+		    typename Iterator< String< TPos > >::Type it_index_tmp = begin( indices );
+		    typename Iterator< String< TPos > >::Type it_index_end = end( indices );
+            String< TPos > templcp;
+            resize( templcp, length( indices ) );
             len = length( fibre_sa );
-        }
+            typename Iterator< TString >::Type it_text = begin( string ) + (*it_index);
+            it_string = begin( string );
+            size_t insert_length = 0;
 
-		for( size_t i = 1; i < len; ++i ){
-            if( _suffix_bigger( it_string + fibre_sa[i], it_text ) ){
-			    it_index_tmp = it_index;
+		    // BEGIN: Inserting modified indices block-wise
+            if( _suffix_bigger( it_string + fibre_sa[0], it_text ) ){
+                it_index_tmp = it_index;
 
-			    while( _suffix_bigger( it_string + fibre_sa[i], it_string + (*it_index) ) && ++it_index < it_index_end ){}
+                while( _suffix_bigger( it_string + fibre_sa[0], it_string + (*it_index) ) && ++it_index < it_index_end ){}
 
-			    insert_length = it_index - it_index_tmp;
+                insert_length = it_index - it_index_tmp;
 
-                /*std::cout << "Inserting into SA of length: " << length(fibre_sa) << " at i = " << i << " length: " << insert_length << std::endl;
+                /*std::cout << "Inserting into SA of length: " << length(fibre_sa) << " at i = " << 0 << " length: " << insert_length << std::endl;
 
                 for( size_t j = 0; j < length( fibre_sa ); ++j ){
                     std::cout << fibre_sa[j] << " ";
                 }
                 std::cout << std::endl;*/
-                resizeSpace( fibre_sa, insert_length, i, i );
-			    resizeSpace( fibre_lcp, insert_length, i, i );
+                resizeSpace( fibre_sa, insert_length, 0, 0 );
+                resizeSpace( fibre_lcp, insert_length, 0, 0 );
                 /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
                     std::cout << fibre_sa[j] << " ";
                 }
                 std::cout << std::endl;*/
 
-                for( size_t j = i; j < i + insert_length ; ++j, ++it_index_tmp ){
+                for( size_t j = 0; j < insert_length ; ++j, ++it_index_tmp ){
                     fibre_sa[j] = *it_index_tmp;
                 }
                 /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
@@ -705,31 +668,71 @@ namespace seqan{
                 }
                 std::cout << "\n- - -" << std::endl;*/
 
-			    for( size_t j = i - 1; j < i + insert_length; ++j ){
-			        //std::cout << "\t< " << fibre_sa[j].i1 << ", " << fibre_sa[j].i2 << " >\t< " << fibre_sa[j+1].i1 << ", " << fibre_sa[j+1].i2 << " >" << std::endl;
+                for( size_t j = 0; j < insert_length; ++j ){
+                    //std::cout << "\t< " << fibre_sa[j].i1 << ", " << fibre_sa[j].i2 << " >\t< " << fibre_sa[j+1].i1 << ", " << fibre_sa[j+1].i2 << " >" << std::endl;
                     fibre_lcp[j] = _lcp_length( it_string + fibre_sa[j], it_string + fibre_sa[j + 1] );
-                }
-
-                if( it_index >= it_index_end ){
-                    break;
                 }
 
                 it_text = it_string + (*it_index);
                 len = length( fibre_sa );
             }
-        }
 
-        if( it_index < it_index_end ){
-            size_t i = length( fibre_sa ) - 1;
-            append( fibre_sa, suffix( indices, it_index - begin( indices ) ) );
-            append( fibre_lcp, suffix( templcp, it_index - begin( indices ) ) );
-            len = length( fibre_sa ) - 1;
-            while( i < len ){
-                fibre_lcp[i] = _lcp_length( it_string + fibre_sa[i], it_string + fibre_sa[i + 1] );
-                ++i;
+		    for( size_t i = 1; i < len; ++i ){
+                if( _suffix_bigger( it_string + fibre_sa[i], it_text ) ){
+			        it_index_tmp = it_index;
+
+			        while( _suffix_bigger( it_string + fibre_sa[i], it_string + (*it_index) ) && ++it_index < it_index_end ){}
+
+			        insert_length = it_index - it_index_tmp;
+
+                    /*std::cout << "Inserting into SA of length: " << length(fibre_sa) << " at i = " << i << " length: " << insert_length << std::endl;
+
+                    for( size_t j = 0; j < length( fibre_sa ); ++j ){
+                        std::cout << fibre_sa[j] << " ";
+                    }
+                    std::cout << std::endl;*/
+                    resizeSpace( fibre_sa, insert_length, i, i );
+			        resizeSpace( fibre_lcp, insert_length, i, i );
+                    /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
+                        std::cout << fibre_sa[j] << " ";
+                    }
+                    std::cout << std::endl;*/
+
+                    for( size_t j = i; j < i + insert_length ; ++j, ++it_index_tmp ){
+                        fibre_sa[j] = *it_index_tmp;
+                    }
+                    /*for( size_t j = 0; j < length( fibre_sa ); ++j ){
+                        std::cout << fibre_sa[j] << " ";
+                    }
+                    std::cout << "\n- - -" << std::endl;*/
+
+			        for( size_t j = i - 1; j < i + insert_length; ++j ){
+			            //std::cout << "\t< " << fibre_sa[j].i1 << ", " << fibre_sa[j].i2 << " >\t< " << fibre_sa[j+1].i1 << ", " << fibre_sa[j+1].i2 << " >" << std::endl;
+                        fibre_lcp[j] = _lcp_length( it_string + fibre_sa[j], it_string + fibre_sa[j + 1] );
+                    }
+
+                    if( it_index >= it_index_end ){
+                        break;
+                    }
+
+                    it_text = it_string + (*it_index);
+                    len = length( fibre_sa );
+                }
             }
-            fibre_lcp[++len] = 0;
+
+            if( it_index < it_index_end ){
+                size_t i = length( fibre_sa ) - 1;
+                append( fibre_sa, suffix( indices, it_index - begin( indices ) ) );
+                append( fibre_lcp, suffix( templcp, it_index - begin( indices ) ) );
+                len = length( fibre_sa ) - 1;
+                while( i < len ){
+                    fibre_lcp[i] = _lcp_length( it_string + fibre_sa[i], it_string + fibre_sa[i + 1] );
+                    ++i;
+                }
+                fibre_lcp[++len] = 0;
+            }
         }
+		
 
         /*std::cout << "Suffix array:" << std::endl;
         for( size_t i = 0; i < length( fibre_sa ); ++i ){

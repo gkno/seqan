@@ -70,6 +70,14 @@ namespace seqan{
         TagValue( size_t p ) : pos( p ) {};
         size_t pos;
     };
+    
+    template< typename TIndex >
+    struct TagSync{
+        TagSync( TIndex & i ) : index( i ) {};
+        TIndex & index;
+    };
+    
+    struct TagBuildSkew7{ };
 
     template< typename TSpec >
         seqan::String< char > info( String< TSpec > & ){
@@ -108,6 +116,20 @@ namespace seqan{
     template< typename TClass >
     inline bool run( TestFunctor< TClass, TagValueMany > & functor , TClass & instance ){
         value( instance, functor.tag.next_pos() );
+        return true;
+    }
+    
+    template< typename TClass, typename TIndex >
+    inline bool run( TestFunctor< TClass, TagSync<TIndex> > & functor, TClass & instance ){
+        synchronize_index( functor.tag.index, instance );
+        return true;
+    }
+    
+    template< typename TClass >
+    inline bool run( TestFunctor< TClass, TagBuildSkew7 > &, TClass & instance ){
+        Index< TClass > index( instance );
+        indexCreate( instance, ESA_SA(), Skew7() );
+        indexCreate( instance, ESA_LCP() );
         return true;
     }
     
