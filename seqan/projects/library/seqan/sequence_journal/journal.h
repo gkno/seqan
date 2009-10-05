@@ -452,6 +452,10 @@ namespace seqan {
       inline typename Iterator< String< Node, TStringSpec > >::Type get_tree_begin() const{
          return begin( m_tree, Standard() );
       }
+      
+      inline typename Iterator< String< Node, TStringSpec > >::Type get_tree_end() const{
+         return end( m_tree, Standard() ) - 1;
+      }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_zero_node_iterator() const{
          return begin( m_tree, Standard() ) + find_node_index( 0 );

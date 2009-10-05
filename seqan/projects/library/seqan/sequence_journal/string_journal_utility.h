@@ -1,18 +1,18 @@
 namespace seqan{
 
-   template< typename TString > //TODO: rewrite to encompass general Container functionality
-   struct suffix_compare_functor{
+    template< typename TString > //TODO: rewrite to encompass general Container functionality
+    struct suffix_compare_functor{
 
-      suffix_compare_functor( TString & string ) : m_string( string ){}
+        suffix_compare_functor( TString & string ) : m_string( string ){}
 
-      template< typename TPos1, typename TPos2 >
-      bool operator()( TPos1 & first, TPos2 & second ){
-         return suffix( m_string, first ) < suffix( m_string, second );
-      }
+        template< typename TPos1, typename TPos2 >
+        bool operator()( TPos1 & first, TPos2 & second ){
+            return suffix( m_string, first ) < suffix( m_string, second );
+        }
 
-   private:
-      TString & m_string;
-   };
+    private:
+        TString & m_string;
+    };
 
     template< typename TIteratorA, typename TIteratorB >
     inline bool _suffix_bigger( TIteratorA it_a, TIteratorB it_b ){
@@ -121,7 +121,7 @@ namespace seqan{
    }
 
    template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TIndex, typename TPos >  //TString needs to be String< TValue, Journal< TValue, ... > >
-   inline void generate_shifts_and_deletions( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & string, String< TIndex > & indices, String< Pair< TPos, TPos > > & shifts, String< Pair< TPos, TPos > > & deletions ){
+   inline void generate_shifts_and_deletions( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & string, String< TIndex > & indices, String< Pair< TPos, int > > & shifts, String< Pair< TPos, TPos > > & deletions ){
 
       shifts += Pair< TPos, TPos >( 0, 0 );
 
@@ -134,22 +134,22 @@ namespace seqan{
 
             Pair< TPos, TPos > p( (*it_tree).position - back( shifts ).i2 + abs( (*it_tree).operation->by() ), back( shifts ).i2 + (*it_tree).operation->by() );
             if( p.i1 > back( shifts ).i1 ){
-               shifts += p;
+               appendValue( shifts, p, Generous() );
             }else if( p.i1 == back( shifts ).i1 ){
                back( shifts ).i2 = p.i2;
             }
-            deletions += Pair<TPos, TPos>( p.i1 + (*it_tree).operation->by(), abs( (*it_tree).operation->by() ) );
+            appendValue( deletions, Pair<TPos, TPos>( p.i1 + (*it_tree).operation->by(), abs( (*it_tree).operation->by() ) ), Generous() );
 
          }else if( (*it_tree).operation->by() > 0 && (*it_tree).operation->insertion() ){
 
             Pair< TPos, TPos > p( (*it_tree).position - back( shifts ).i2, back( shifts ).i2 + (*it_tree).operation->by() );
             if( p.i1 > back( shifts ).i1 ){
-               shifts += p;
+               appendValue( shifts, p, Generous() );
             }else if( p.i1 == back( shifts ).i1 ){
                back( shifts ).i2 = p.i2;
             }
             for( int i = 0; i < (*it_tree).operation->by(); ++i ){
-               indices += (*it_tree).position + i; //TODO: adapt this to (global)pairs as position
+               appendValue( indices, (*it_tree).position + i, Generous() ); //TODO: adapt this to (global)pairs as position
             }
          }
       }while( j_goNext( it_tree ) ); //iterate over the nodes inorder
@@ -734,14 +734,188 @@ namespace seqan{
         }
 		
 
-        /*std::cout << "Suffix array:" << std::endl;
+        flatten(string);
+        std::cout << "Suffix array:" << std::endl;
         for( size_t i = 0; i < length( fibre_sa ); ++i ){
          std::cout << "\t> " << i << "\t: " << fibre_sa[i] << "\t" << suffix( string, fibre_sa[i] ) << "...\t" << fibre_lcp[i] << std::endl;
         }
 
         std::cout << string << std::endl;//<< stringset[1] << "(" << length( stringset[1] ) << ")"  << " " << stringset[2] << "(" << length( stringset[2] ) << ")"  << std::endl;
 
-        std::cout << "The End!" << std::endl;*/
+        std::cout << "The End!" << std::endl;
+    }
+    
+    template< typename TIndex, typename TString >
+    inline void synchronize_index_1( TIndex & index, TString & string, String< size_t > & sa_inv ){
+
+        typedef typename Position< TString >::Type TPos;
+        typedef String< typename SAValue< TIndex >::Type > TSA;
+        typedef String< TPos > TLCP;
+
+        assert( indexSupplied( index, ESA_SA() ) && "No SuffixArray supplied for this index. No synchronization necessary!");
+        assert( indexSupplied( index, ESA_LCP() ) && "No LCP-Table supplied for this index. No synchronization possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
+
+        TSA fibre_sa = indexSA( index );
+        TLCP fibre_lcp = indexLCP( index );
+
+        assert( length( fibre_sa ) == length( fibre_lcp ) && "Length mismatch in LCP-Table / SuffixArray, successfull synchronization not possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
+
+        String< Pair< TPos, int > > shifts;
+        String< Pair< TPos, TPos > > deletions;
+        String< TPos > indices;
+        resize( indices, 0 );
+        generate_shifts_and_deletions( string, indices, shifts, deletions );
+
+        String< size_t > dels; //Stores the positions of indices that need to be removed
+//        reserve( dels, 200 ); //TODO: Guesswork for avg number of recomputes dependent on Tree Size needed!!!
+        
+//        print_pairs( deletions );
+//        print_pairs( shifts );
+        
+        for( size_t i = 0; i < length( deletions ); ++i ){
+            for( size_t j = 0; j < deletions[i].i2; ++j ){
+                appendValue( dels, sa_inv[ deletions[i].i1 + j ], Generous() );
+            }
+        }
+        
+        /*for( unsigned int i = 0; i < length( value( string.getjournal().get_holder() ) ); ++i ){
+            std::cout << i << "\t: " << fibre_sa[i] << "\t - " << suffix( value( string.getjournal().get_holder() ), fibre_sa[i] ) << std::endl;
+        }*/
+        
+//        std::cout << std::endl << "String:\t" << string << std::endl;
+//        std::cout << "Origin:\t" << value( string.getjournal().get_holder() ) << std::endl;
+//        std::cout << "Insert:\t" << string.getjournal().get_inner() << std::endl << std::endl;
+        
+//        std::cout << "inserted indices" << std::endl;
+//        for( size_t i = 0; i < length( indices ); ++i ){
+//            std::cout << i << "\t: " << indices[i] << "\t- " << suffix( string, indices[i] ) << std::endl;
+//        }
+                
+        {
+            //std::cout << std::endl;
+            //string.getjournal().print_nodes_inorder();
+            typename Iterator< String< Node > >::Type it_nodes = string.getjournal().get_tree_begin();
+            unsigned int i = 0;
+            unsigned int suf_idx = 0;
+            do{
+//                std::cout << "Node ";
+//                (*it_nodes).print_debug();
+//                std::cout << std::endl;
+                if( (*it_nodes).op()->insertion() || (*it_nodes).op()->deletion() ){
+                    i = 0;
+//                    std::cout << "at pos = " << (*it_nodes).position << std::endl;
+                    while( ++i <= (*it_nodes).position ){
+//                        std::cout << "checking i = " << i << std::endl;
+                    	suf_idx = value( sa_inv, (*it_nodes).position - i - get_shift( shifts, (*it_nodes).position - i ) );
+	                    if( value( fibre_lcp, suf_idx ) <= i - 1 ){
+//	                        std::cout << "break!" << std::endl;
+	                    	break;
+	                    }else{
+	                    	appendValue( dels, suf_idx, Generous() );
+//	                    	std::cout << fibre_sa[suf_idx] << " -> " << fibre_sa[suf_idx] + get_shift( shifts, fibre_sa[suf_idx] ) << std::endl;
+	                    	appendValue( indices, fibre_sa[suf_idx] + get_shift( shifts, fibre_sa[suf_idx] ), Generous() );
+	                    }
+                    }
+                }
+            }while(j_goNext(it_nodes) );
+        }
+        
+        flatten( string );
+        
+//        std::cout << "Dels" << std::endl;
+//        for( size_t i = 0; i < length( dels ); ++i ){
+//            std::cout << i << "\t: " << dels[i] << " : " << fibre_sa[dels[i]] << "\t- " << suffix( string, fibre_sa[dels[i]] ) << std::endl;
+//        }
+//        
+//        std::cout << "indices" << std::endl;
+//        for( size_t i = 0; i < length( indices ); ++i ){
+//            std::cout << i << "\t: " << indices[i] << "\t- " << suffix( string, indices[i] ) << std::endl;
+//        }
+//        
+//        std::cout << "Merging!" << std::endl;
+        
+        suffix_compare_functor< TString > cmp( string );
+
+        std::sort( begin( indices ), end( indices ), cmp );
+
+        indices = prefix( indices, std::unique( begin( indices ), end( indices ) ) );
+        
+        std::sort( begin( dels ), end( dels ) );
+
+        dels = prefix( dels, std::unique( begin( dels ), end( dels ) ) );
+        
+//        std::cout << "Dels" << std::endl;
+//        for( size_t i = 0; i < length( dels ); ++i ){
+//            std::cout << i << "\t: " << dels[i] << " : " << fibre_sa[dels[i]] << "\t- " << suffix( string, fibre_sa[dels[i]] ) << std::endl;
+//        }
+//        
+//        std::cout << "indices" << std::endl;
+//        for( size_t i = 0; i < length( indices ); ++i ){
+//            std::cout << i << "\t: " << indices[i] << "\t- " << suffix( string, indices[i] ) << std::endl;
+//        }
+        
+        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > temp_sa( fibre_sa );
+        
+        for( size_t i = 0; i < length( dels ); ++i ){
+            erase( temp_sa, dels[i] - i );
+        }
+        
+//        flatten( temp_sa );
+        
+        for( size_t i = 0; i < length( temp_sa ); ++i ){
+//            std::cout << fibre_sa[i] << " -> " << fibre_sa[i] + get_shift( shifts, fibre_sa[i] ) << std::endl;
+            temp_sa[i] += get_shift( shifts, temp_sa[i] );
+        }
+        
+        typename Iterator< TSA >::Type it_sa = begin( fibre_sa );
+        typename Iterator< String< TPos > >::Type it_index = begin( indices );
+        
+        size_t insert_pos = 0;
+        
+        while( it_sa != end( fibre_sa ) && it_index != end( indices ) ){
+            if( suffix( string, *it_sa ) < suffix( string, *it_index ) ){
+                ++it_sa;
+                ++insert_pos;
+            }else{
+                size_t blocklength = 1;
+                while( ++it_index != end( indices )  && suffix( string, *it_index ) < suffix( string, *it_sa )){
+                    ++blocklength;
+                }
+                insert( insert_pos, temp_sa, it_index - blocklength, blocklength );
+                insert_pos += blocklength;
+            }
+        }
+        
+        if( it_index != end( indices ) ){
+            append( temp_sa, suffix( indices, it_index ) );
+        }
+        
+        flatten( temp_sa );
+        
+        /*
+        typename Iterator< TSA >::Type it_sa = end( fibre_sa ) - 1;
+        typename Iterator< String< TPos > >::Type it_idx = end( indices ) - 1;
+        
+        for( int i = length( fibre_sa ) - length( indices ) - 1; i >= 0; --i ){
+            if( suffix( string, fibre_sa[i] ) > suffix( string, *it_idx ) ){
+                *it_sa = fibre_sa[i];
+                --it_sa;
+            }else{
+               *it_sa = *it_idx;
+               --it_idx;
+               --it_sa;
+               ++i;
+            }
+        }*/
+        
+        //erase( fibre_sa, (size_t)0, length( deletions ) );
+        
+//        std::cout << "The New SA:" << std::endl;
+//        for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
+//            std::cout << i << "\t| " << fibre_sa[i] << "|\t" << suffix( string, fibre_sa[i] ) << std::endl;
+//        }
+//        
+//        std::cout << "The End!" << std::endl;
     }
 
     template< typename TIndex, typename TString >
