@@ -424,14 +424,16 @@ namespace seqan {
       }
 
       inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_begin() const{
-         typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, get_first_node() );
+         typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
+         while( j_goDownLeft( it_tree ) );
+         typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_tree );
          return it;
       }
 
       inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_end() const{
-         typename Iterator<String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, get_last_node() );
-         it += (*get_last_node()).length;
-         it.add_one();
+         typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
+         while( j_goDownRight( it_tree ) );
+         typename Iterator<String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_tree );
          return it;
       }
 

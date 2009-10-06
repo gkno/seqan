@@ -169,8 +169,8 @@ namespace seqan{
                if( (*m_it_tree).is_internal ){
                   m_it_inner = m_journal->get_inner_begin() + ( *m_it_tree ).index;
                }else{
-                  ++m_it_outer;
-                  //m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index;
+                  //++m_it_outer;
+                  m_it_outer = m_journal->get_outer_begin() + ( *m_it_tree ).index;
                }
                m_recalc = ( *m_it_tree ).length;
             }
