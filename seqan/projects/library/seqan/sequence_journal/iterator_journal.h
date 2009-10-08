@@ -58,13 +58,15 @@ namespace seqan{
          std::cout << std::endl;
       }
 #endif
-      inline TValue & operator*() const{
+      inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() const{
          if( ( *m_it_tree ).is_internal ){
-            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_inner );
-            return *jip;
+//            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_inner );
+//            return *jip;
+            return *m_it_inner;
          }else{
-            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_outer );
-            return *jip;
+//            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_outer );
+//            return *jip;
+            return *m_it_outer;
          }
       }
 
@@ -78,8 +80,6 @@ namespace seqan{
 
       inline void operator+=( size_t by ){
          size_t new_pos = abs_pos() + by;
-         /*std::cout << "JIter+=(" << by << "):\n" << "> current position: " << abs_pos() << "\n> desired position: " << new_pos << std::endl;
-         std::cout << "> current interval:" << std::endl;*/
          while( new_pos >= (*m_it_tree).position + (*m_it_tree).length && j_goNext( m_it_tree ) ){}
          m_recalc = (*m_it_tree).length - ( new_pos - (*m_it_tree).position );
          if( (*m_it_tree).is_internal ){
@@ -90,9 +90,13 @@ namespace seqan{
       }
 
       inline void operator-=( size_t by ){
-         while( by != 0 ){
-            operator--();
-            --by;
+         size_t new_pos = abs_pos() - by;
+         while( new_pos < (*m_it_tree).position && j_goPrev( m_it_tree ) ){}
+         m_recalc = (*m_it_tree).length - ( new_pos - (*m_it_tree).position );
+         if( (*m_it_tree).is_internal ){
+            m_it_inner = m_journal->get_inner_begin() + ( ( *m_it_tree ).index + ( new_pos - (*m_it_tree).position ));
+         }else{
+            m_it_outer = m_journal->get_outer_begin() + ( ( *m_it_tree ).index + ( new_pos - (*m_it_tree).position ));
          }
       }
 

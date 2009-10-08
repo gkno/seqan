@@ -15,7 +15,7 @@ namespace seqan{
     };
 
     template< typename TIteratorA, typename TIteratorB >
-    inline bool _suffix_bigger( TIteratorA it_a, TIteratorB it_b ){
+    inline bool _suffix_bigger( TIteratorA & it_a, TIteratorB & it_b ){
         std::cout << "Bigger?" << std::endl;
         while( *it_a == *it_b ){
             std::cout << *it_a << "==" << *it_b << std::endl;
@@ -757,7 +757,6 @@ namespace seqan{
     
     template< typename TIndex, typename TString >
     inline void synchronize_index_1( TIndex & index, TString & string, String< size_t > & sa_inv ){
-
         typedef typename Position< TString >::Type TPos;
         typedef String< typename SAValue< TIndex >::Type > TSA;
         typedef String< TPos > TLCP;
@@ -765,8 +764,10 @@ namespace seqan{
         assert( indexSupplied( index, ESA_SA() ) && "No SuffixArray supplied for this index. No synchronization necessary!");
         assert( indexSupplied( index, ESA_LCP() ) && "No LCP-Table supplied for this index. No synchronization possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
 
-        TSA fibre_sa = indexSA( index );
-        TLCP fibre_lcp = indexLCP( index );
+//        TSA & fibre_sa = indexSA( index );
+        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > temp_sa( indexSA( index ) );
+        TLCP & fibre_lcp = indexLCP( index );
+        String< TPos, Journal< TPos, Alloc<>, Alloc<>, Sloppy > > temp_lcp( indexLCP( index ) );
 
         assert( length( fibre_sa ) == length( fibre_lcp ) && "Length mismatch in LCP-Table / SuffixArray, successfull synchronization not possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
 
@@ -777,7 +778,10 @@ namespace seqan{
         generate_shifts_and_deletions( string, indices, shifts, deletions );
 
         String< size_t > dels; //Stores the positions of indices that need to be removed
-        
+#ifndef NDEBUG        
+        print_pairs( deletions );
+        print_pairs( shifts );
+#endif        
         for( size_t i = 0; i < length( deletions ); ++i ){
             for( size_t j = 0; j < deletions[i].i2; ++j ){
                 appendValue( dels, sa_inv[ deletions[i].i1 + j ], Generous() );
@@ -789,17 +793,21 @@ namespace seqan{
             unsigned int i = 0;
             unsigned int suf_idx = 0;
             do{
-
                 if( (*it_nodes).op()->insertion() || (*it_nodes).op()->deletion() ){
                     i = 0;
                     while( ++i <= (*it_nodes).position ){
                     	suf_idx = value( sa_inv, (*it_nodes).position - i - get_shift_b( shifts, (*it_nodes).position - i ) );
 	                    if( value( fibre_lcp, suf_idx ) <= i - 1 ){
-	                    	break;
-	                    }else{
-	                    	appendValue( dels, suf_idx, Generous() );
-	                    	appendValue( indices, fibre_sa[suf_idx] + get_shift_b( shifts, fibre_sa[suf_idx] ), Generous() );
+	                    	if( suf_idx != 0 ){
+	                    	    if( value( fibre_lcp, suf_idx - 1 ) <= i - 1 ){
+	                    	    	break;
+	                    	    }
+	                    	}else{
+	                    	    break;
+	                    	}
 	                    }
+	                    appendValue( dels, suf_idx, Generous() );
+	                    appendValue( indices, temp_sa[suf_idx] + get_shift_b( shifts, temp_sa[suf_idx] ), Generous() );
                     }
                 }
             }while(j_goNext(it_nodes) );
@@ -814,66 +822,262 @@ namespace seqan{
         std::sort( begin( dels ), end( dels ) );
 
         dels = prefix( dels, std::unique( begin( dels ), end( dels ) ) );
-        
-        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > temp_sa( fibre_sa );
-        
+#ifndef NDEBUG        
+        std::cout << "Dels:" << std::endl;
+        for( unsigned int i = 0; i < length( dels ); ++i ){
+            std::cout << i << "\t: " << dels[i] << "\t[ " << temp_sa[dels[i]] << " ] " << suffix( string, temp_sa[dels[i]] ) << std::endl;
+        }
+#endif       
         for( size_t i = 0; i < length( dels ); ++i ){
+            if( dels[i] - i != 0 ){
+                temp_lcp[ dels[i] - i - 1 ] = _min( temp_lcp[ dels[i] - i - 1 ], temp_lcp[ dels[i] - i ] );
+            }
+            erase( temp_lcp, dels[i] - i );
             erase( temp_sa, dels[i] - i );
         }
         
-        typename Iterator< TSA >::Type it_sa = begin( fibre_sa );
-        typename Iterator< String< TPos > >::Type it_index = begin( indices );
-        typename Iterator< TSA >::Type it_sa_end = end( fibre_sa );
-        typename Iterator< String< TPos > >::Type it_index_end = end( indices );
-        
-        //typename Iterator< TString >::Type it_string_begin = begin( string );
-        
-        size_t insert_pos = 0;
-        size_t blocklength = 1; 
-        /*
-        while( it_sa < it_sa_end && it_index < it_index_end ){
-            *it_sa += get_shift( shifts, *it_sa );
-            if( _suffix_bigger( it_string_begin + *it_sa, it_string_begin + *it_index ) ){
-                blocklength = 1;
-                while( ++it_index < end( indices ) && _suffix_bigger( it_string_begin + *it_sa, it_string_begin + *it_index ) ){
-                    ++blocklength;
-                }
-                insert( insert_pos, temp_sa, it_index - blocklength, blocklength );
-                insert_pos += blocklength;
-                if( !(it_index < it_index_end) ){
-                    break;
-                }
-            }
-            ++it_sa;
-            ++insert_pos;
-        }*/
-        
-        while( it_sa < it_sa_end && it_index < it_index_end ){
-            *it_sa += get_shift_b( shifts, *it_sa );
-            if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
-                blocklength = 1;
-                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
-                    ++blocklength;
-                }
-                insert( insert_pos, temp_sa, it_index - blocklength, blocklength );
-                insert_pos += blocklength;
-                if( !(it_index < it_index_end) ){
-                    break;
-                }
-            }
-            ++it_sa;
-            ++insert_pos;
+        String< TPos > index_lcp;
+        resize( index_lcp, length( indices ) );
+        for( unsigned int i = 0; i < length( index_lcp ) - 1; ++i ){
+            index_lcp[i] = lcpLength( suffix( string, indices[i]), suffix( string, indices[i + 1] ) );
+        }
+        if( length( index_lcp ) != 0 ){
+            index_lcp[ length( index_lcp ) - 1 ] = 0;
+        }
+#ifndef NDEBUG       
+        std::cout << "Indices:" << std::endl;
+        for( unsigned int i = 0; i < length( indices ); ++i ){
+            std::cout << i << "\t: " << indices[i] << "\t[ " << index_lcp[i] << " ] " << suffix( string, indices[i] ) << std::endl;
         }
         
-        for( ; it_sa < it_sa_end; ++it_sa ){
+        std::cout << "Temp SA:" << std::endl;
+        for( unsigned int i = 0; i < length( temp_sa ); ++i ){
+            std::cout << i << "\t: " << temp_sa[i] + get_shift_b( shifts, temp_sa[i] ) << "\t[ " << temp_lcp[i] << " ] " << suffix( string, temp_sa[i] + get_shift_b( shifts, temp_sa[i] ) ) << std::endl;
+        }
+#endif        
+        typename Iterator< TSA >::Type it_sa = temp_sa.getjournal().get_outer_begin();
+        typename Iterator< String< TPos > >::Type it_index = begin( indices );
+        typename Iterator< TSA >::Type it_sa_end = temp_sa.getjournal().get_outer_end();
+        typename Iterator< String< TPos > >::Type it_index_end = end( indices );
+        typename Iterator< TLCP >::Type it_index_lcp = begin( index_lcp );
+
+        size_t insert_pos = 0;
+        size_t blocklength = 1;
+        
+//        std::cout << "Reconstruction!" << std::endl;
+        for( ;it_sa < it_sa_end; ++it_sa ){
             *it_sa += get_shift_b( shifts, *it_sa );
+        }
+        
+        it_sa = temp_sa.getjournal().get_outer_begin();
+        
+        while( it_sa < it_sa_end && it_index < it_index_end ){
+            if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
+//            if( _suffix_bigger( begin( string ) + *it_sa, begin( string ) + *it_index ) ){
+                blocklength = 1;
+                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
+//                while( ++it_index < end( indices ) && _suffix_bigger( begin( string ) + *it_sa, begin( string ) + *it_index )){
+                    ++blocklength;
+                }
+                insert( insert_pos, temp_sa, it_index - blocklength, blocklength );
+                insert( insert_pos, temp_lcp, it_index_lcp, blocklength );
+                if( insert_pos + blocklength != length( temp_lcp ) ){
+                    temp_lcp[ insert_pos + blocklength - 1 ] = lcpLength( suffix( string, temp_sa[ insert_pos + blocklength - 1 ]), suffix( string, temp_sa[ insert_pos + blocklength ] ) );
+                }
+                if( insert_pos != 0 ){
+                    temp_lcp[ insert_pos - 1 ] = lcpLength( suffix( string, temp_sa[ insert_pos - 1 ] ), suffix( string, temp_sa[ insert_pos ] ) );
+                }
+                
+                insert_pos += blocklength;
+                if( !(it_index < it_index_end) ){
+                    break;
+                }
+            }
+            ++it_sa;
+            ++insert_pos;
         }
         
         if( it_index < it_index_end ){
             append( temp_sa, suffix( indices, it_index ) );
+            append( temp_lcp, suffix( index_lcp, it_index_lcp ) );
         }
         
+//        std::cout << "Temp SA:" << std::endl;
+//        for( unsigned int i = 0; i < length( temp_sa ); ++i ){
+//            std::cout << i << "\t: " << temp_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, temp_sa[i] ) << std::endl;
+//        }
+#ifndef NDEBUG
+        std::cout << "Temp SA lcp final:" << std::endl;
+        for( unsigned int i = 0; i < length( temp_sa ); ++i ){
+            std::cout << i << "\t: " << temp_sa[i] << "\t[ " << temp_lcp[i] << " ] " << suffix( string, temp_sa[i] ) << std::endl;
+        }
+#endif
         flatten( temp_sa );
+        flatten( temp_lcp );
+        
+//        std::cout << "The End!" << std::endl;
+    }
+    
+    template< typename TIndex, typename TString, typename TSAInv >
+    inline void synchronize_index_2( TIndex & index, TString & string, TSAInv & sa_inv ){
+        typedef typename Position< TString >::Type TPos;
+        typedef String< typename SAValue< TIndex >::Type > TSA;
+        typedef String< TPos > TLCP;
+
+        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > fibre_sa( indexSA( index ) );
+        String< TPos, Journal< TPos, Alloc<>, Alloc<>, Sloppy > > fibre_lcp( indexLCP( index ) );
+
+        String< TPos > indices; //Stores the positions of indices that need to be inserted
+
+        String< size_t > dels; //Stores the positions of indices that need to be removed                
+
+        typename Iterator< String< Node > >::Type it_nodes = string.getjournal().get_first_node();
+        typename Iterator< String< Node > >::Type it_nodes_end = string.getjournal().get_dummy_node();
+        
+        unsigned int k = 0;
+        unsigned int suf_idx = 0;
+        unsigned int current_shift = 0;
+        
+        do{
+            std::cout << "Processing Node:" << std::endl;
+            it_nodes->print_info();
+            
+            if( !it_nodes->op()->insertion() && !it_nodes->op()->deletion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
+                    fibre_sa[ sa_inv[ j - current_shift ] ] += current_shift;
+                }
+                j_goNext(it_nodes);
+                continue; //nothing else to do
+            }
+            
+            if( it_nodes->op()->deletion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position - it_nodes->op()->by(); ++j ){
+                    appendValue( dels, sa_inv[ j - current_shift ], Generous() );
+                }
+            }
+            
+            if( (*it_nodes).op()->insertion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
+                    appendValue( indices, j, Generous() ); //Adding inserted indices
+                }
+            }
+
+            k = 0;
+            while( ++k <= it_nodes->position ){
+            	suf_idx = value( sa_inv, it_nodes->position - k - current_shift );
+                if( value( fibre_lcp, suf_idx ) <= k - 1 ){
+                	if( suf_idx != 0 ){
+                	    if( value( fibre_lcp, suf_idx - 1 ) <= k - 1 ){
+                	    	break;
+                	    }
+                	}else{
+                	    break;
+                	}
+                }
+                
+                appendValue( dels, suf_idx, Generous() );
+                appendValue( indices, fibre_sa[suf_idx], Generous() );
+            }
+            current_shift += it_nodes->op()->by();
+            j_goNext(it_nodes);
+        }while( it_nodes != it_nodes_end );
+        
+        std::sort( begin( dels ), end( dels ) );
+        dels = prefix( dels, std::unique( begin( dels ), end( dels ) ) );
+        suffix_compare_functor< TString > cmp( string );
+        std::sort( begin( indices ), end( indices ), cmp );
+        indices = prefix( indices, std::unique( begin( indices ), end( indices ) ) );
+        
+        String< TPos > index_lcp;
+        resize( index_lcp, length( indices ) );
+        for( unsigned int i = 0; i < length( index_lcp ) - 1; ++i ){
+            index_lcp[i] = lcpLength( suffix( string, indices[i]), suffix( string, indices[i + 1] ) );
+        }
+        if( length( index_lcp ) != 0 ){
+            index_lcp[ length( index_lcp ) - 1 ] = 0;
+        }
+        
+        std::cout << "Status( shifted ):" << std::endl;
+        std::cout << "SA+LCP:" << std::endl;
+        for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
+            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
+        }
+        std::cout << "Indices:" << std::endl;
+        for( unsigned int i = 0; i < length( indices ); ++i ){
+            std::cout << i << "\t: " << indices[i] << "\t[ " << index_lcp[i] << " ] " << suffix( string, indices[i] ) << std::endl;
+        }
+        std::cout << "Deletions:" << std::endl;
+        for( unsigned int i = 0; i < length( dels ); ++i ){
+            std::cout << dels[i] << "\t: " << fibre_sa[dels[i]] << "\t[ " << fibre_lcp[dels[i]] << " ] " << suffix( string, fibre_sa[dels[i]] ) << std::endl;
+        }
+        
+        for( size_t i = 0; i < length( dels ); ++i ){
+            if( dels[i] - i != 0 ){
+                fibre_lcp[ dels[i] - i - 1 ] = _min( fibre_lcp[ dels[i] - i - 1 ], fibre_lcp[ dels[i] - i ] );
+            }
+            erase( fibre_lcp, dels[i] - i );
+            erase( fibre_sa, dels[i] - i );
+        }
+
+        std::cout << "Status( shifted + deleted ):" << std::endl;
+        std::cout << "SA+LCP:" << std::endl;
+        for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
+            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
+        }
+        
+        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > >::Type it_sa = begin( fibre_sa );
+        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > >::Type it_sa_end = end( fibre_sa );
+        typename Iterator< String< TPos > >::Type it_index = begin( indices );
+        typename Iterator< String< TPos > >::Type it_index_end = end( indices );
+        typename Iterator< String< TPos > >::Type it_index_lcp = begin( index_lcp );
+        
+        unsigned int insert_pos = 0;
+        unsigned int blocklength = 1;
+        
+        while( it_sa < it_sa_end && it_index < it_index_end ){
+            std::cout << "Processing suffix " << *it_sa << " and " << *it_index << std::endl;
+            if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
+                blocklength = 1;
+
+                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
+                    ++blocklength;
+                }
+                
+                insert( insert_pos, fibre_sa, it_index - blocklength, blocklength );
+                insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
+
+                if( insert_pos + blocklength != length( fibre_lcp ) ){
+                    fibre_lcp[ insert_pos + blocklength - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos + blocklength - 1 ]), suffix( string, fibre_sa[ insert_pos + blocklength ] ) );
+                }
+                if( insert_pos != 0 ){
+                    fibre_lcp[ insert_pos - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos - 1 ] ), suffix( string, fibre_sa[ insert_pos ] ) );
+                }
+                
+                insert_pos += blocklength;
+                
+                it_sa = begin( fibre_sa ) + insert_pos - 1;
+                it_sa_end = end( fibre_sa );
+                if( !(it_index < it_index_end) ){
+                    break;
+                }
+            }
+            ++it_sa;
+            ++insert_pos;
+        }
+        
+        if( it_index < it_index_end ){
+            append( fibre_sa, suffix( indices, it_index ) );
+            append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
+        }
+        
+        flatten( fibre_lcp );
+        flatten( fibre_sa );
+        
+        std::cout << "Status( final ):" << std::endl;
+        std::cout << "SA+LCP:" << std::endl;
+        for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
+            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
+        }
     }
 
     template< typename TIndex, typename TString >

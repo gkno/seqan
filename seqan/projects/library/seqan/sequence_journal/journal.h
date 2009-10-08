@@ -323,13 +323,12 @@ namespace seqan {
       }
 
       inline void flatten(){
-         String< TValue, TSpec > & the_string = value( m_holder );
+         String< TValue, TSpec > & the_string = value( m_holder );         
          resize( the_string, seqan::length(the_string) + seqan::length(m_insertion_string) );
          std::vector< Node > vec;
          nodes_inorder( vec );
          std::vector< Node >::reverse_iterator vit;
-         typename Iterator< String< TValue, TSpec > >::Type sit;
-         sit = begin( the_string, Standard() ) + seqan::length( the_string );
+         typename Iterator< String< TValue, TSpec > >::Type sit = end( the_string );
          for( vit = vec.rbegin() + 1; vit < vec.rend(); ++vit ){
             Node node = *vit;
             if( node.op()->deletion() ){
@@ -347,12 +346,12 @@ namespace seqan {
             }
          }
          clear( m_tree );
-         seqan::erase( the_string, (size_t)0, seqan::length(the_string) - m_length );
+         the_string = suffix( the_string, seqan::length(the_string) - m_length );
          Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( the_string ), new Operation( m_length ) );
-         m_tree += root;
+         appendValue( m_tree, root, Generous() );
+         clear( m_insertion_string );
          appendValue( m_tree, Node( true, seqan::length( value( m_holder ) ), seqan::length( m_insertion_string ), 1, 0, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          vec.clear();
-         clear( m_insertion_string );
       }
 
       inline void del( size_t position, int number ){
@@ -396,7 +395,8 @@ namespace seqan {
          parent.index = 0;
          inorder_offset io( -number );
          inorder( io, right_index );
-         up_and_right( io, parent_index );
+         if( parent_index != 0 )
+            up_and_right( io, parent_index );
          m_length -= number;
          delete parent.operation; //TODO: is this necessary, possible memory leak?
          parent.operation = new Deletion( overlap_correction - number );
@@ -446,6 +446,10 @@ namespace seqan {
       inline typename Iterator< String< TValue, TSpec > >::Type get_outer_begin() const{
          return begin( value( m_holder ), Standard() );
       }
+      
+      inline typename Iterator< String< TValue, TSpec > >::Type get_outer_end() const{
+         return end( value( m_holder ), Standard() );
+      }
 
       inline typename Iterator< String< TValue, TStringSpec > >::Type get_inner_begin() const{
          return begin( m_insertion_string, Standard() );
@@ -457,6 +461,10 @@ namespace seqan {
       
       inline typename Iterator< String< Node, TStringSpec > >::Type get_tree_end() const{
          return end( m_tree, Standard() ) - 1;
+      }
+      
+      inline typename Iterator< String< Node, TStringSpec > >::Type get_dummy_node() const{
+         return begin( m_tree, Standard() ) + 1;
       }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_zero_node_iterator() const{
