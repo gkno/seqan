@@ -146,11 +146,23 @@ using namespace seqan;
 	struct PredEntropy
 	{
 		double maxEntropy;
+		String<double> dsLengths;
 
 		template <typename TDataSet>
+		PredEntropy(double _maxEntropy, TDataSet const &ds):
+			maxEntropy(_maxEntropy + DFI_EPSILON)
+		{
+			resize(dsLengths, length(ds) - 1, Exact());
+			for (unsigned i = 1; i < length(ds); ++i)
+				dsLengths[i - 1] = ds[i] - ds[i - 1];
+		}
+
+/*		template <typename TDataSet>
 		PredEntropy(double _maxEntropy, TDataSet const &):
 			maxEntropy(_maxEntropy + DFI_EPSILON) {}
-			
+ 
+		// frequency based entropy
+
 		static inline double
 		getEntropy(_DFIEntry const &entry)
 		{
@@ -169,6 +181,29 @@ using namespace seqan;
 					H += freq * (log(freq) - lSum);
 				}
 			H /= -sum * log((double)length(entry.freq));	// normalize by datasets (divide by log m)
+			return H;
+		}
+*/
+		// support based entropy
+		
+		inline double
+		getEntropy(_DFIEntry const &entry) const
+		{
+			double sum = 0;
+			double H = 0;
+
+			for (unsigned i = 0; i < length(entry.freq); ++i)
+				sum += entry.freq[i] / dsLengths[i];
+			
+			double lSum = log((double)sum);					// sum cannot be zero
+				
+			for (unsigned i = 0; i < length(entry.freq); ++i)
+				if (entry.freq[i])
+				{
+					double freq = entry.freq[i] / dsLengths[i];
+					H += freq * (log(freq) - lSum);
+				}
+			H /= -sum * log((double)length(dsLengths));		// normalize by datasets (divide by log m)
 			return H;
 		}
 			
@@ -389,6 +424,36 @@ inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &
 	resize(matches, dst - begin(matches, Standard()));
 }
 
+namespace seqan {
+/*
+	template < typename TObject, typename TPredHull, typename TPred >
+	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_SA> 
+	{
+		typedef Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
+		typedef String< 
+			typename SAValue<TIndex>::Type,
+			MMap<>
+		> Type;
+	};
+	template < typename TObject, typename TPredHull, typename TPred >
+	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > const, Fibre_SA>:
+		public struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_SA> {};
+*/
+
+/*	template < typename TObject, typename TPredHull, typename TPred >
+	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_Dir> 
+	{
+		typedef Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
+		typedef String< 
+			typename Size<TIndex>::Type,
+			MMap<>
+		> Type;
+	};
+	template < typename TObject, typename TPredHull, typename TPred >
+	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > const, Fibre_Dir>: 
+		public struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_Dir> {};
+*/
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // Create DFI and output substrings within constraints band
@@ -458,7 +523,7 @@ int runDFI(
 		dbLookup[i] = d;
 	}
 #ifdef DEBUG_ENTROPY	
-	PredEntropy			entrp(0, mySet);
+	PredEntropy			entrp(0, ds);
 	unsigned			freqSumLast = ~0;
 #endif
 
