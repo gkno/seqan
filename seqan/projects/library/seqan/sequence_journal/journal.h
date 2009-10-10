@@ -416,16 +416,23 @@ namespace seqan {
       }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_first_node() const{
-         return begin( m_tree, Standard() ) + find_node_index( 0 );
+         typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
+         while( j_goDownLeft( it_tree ) );
+         return it_tree;
       }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_last_node() const{
-         return begin( m_tree, Standard() ) + find_node_index( m_length - 1 );
+         typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
+         while( j_goDownRight( it_tree ) );
+         return it_tree;
       }
 
       inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_begin() const{
          typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
          while( j_goDownLeft( it_tree ) );
+         while( it_tree->length == 0 ){
+            j_goNext( it_tree );
+         }
          typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_tree );
          return it;
       }
@@ -468,7 +475,7 @@ namespace seqan {
       }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_zero_node_iterator() const{
-         return begin( m_tree, Standard() ) + find_node_index( 0 );
+         return get_first_node();
       }
 
       inline String< TValue, TSpec > get_outer() const{
