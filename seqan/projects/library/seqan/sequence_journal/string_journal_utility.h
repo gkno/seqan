@@ -950,14 +950,12 @@ namespace seqan{
                 for( unsigned int j = it_nodes->position; j < it_nodes->position - it_nodes->op()->by(); ++j ){
                     appendValue( dels, sa_inv[ j - current_shift ], Generous() );
                 }
-                erase( fibre_sa_inv, it_nodes->position, it_nodes->position + it_nodes->op()->by() );
             }
             
             if( (*it_nodes).op()->insertion() ){
                 for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
                     appendValue( indices, j, Generous() ); //Adding inserted indices
                 }
-                insert( it_nodes->position, fibre_sa_inv, begin( sa_inv ), it_nodes->length );
             }
 
             k = 0;
@@ -1019,6 +1017,7 @@ namespace seqan{
             erase( fibre_lcp, dels[i] - i );
             erase( fibre_sa, dels[i] - i );
         }
+        
 #ifndef NDEBUG_SYNC
         std::cout << "Status( shifted + deleted ):" << std::endl;
         std::cout << "SA+LCP:" << std::endl;
@@ -1056,10 +1055,6 @@ namespace seqan{
                     fibre_lcp[ insert_pos - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos - 1 ] ), suffix( string, fibre_sa[ insert_pos ] ) );
                 }
                 
-                for( unsigned int k = 0; k < blocklength; ++k ){
-                    fibre_sa_inv[ *( it_index - blocklength + k ) ] = insert_pos + k;
-                }
-                
                 insert_pos += blocklength;
                 
                 it_sa = begin( fibre_sa ) + insert_pos - 1;
@@ -1074,13 +1069,40 @@ namespace seqan{
         }
         
         if( it_index < it_index_end ){
-            unsigned int len = length( fibre_sa );
+            std::cout << "Appending remaining indices" << std::endl;
             append( fibre_sa, suffix( indices, it_index ) );
             append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
-            for( int k = 0; k < it_index_end - it_index; ++k ){
-                fibre_sa_inv[ *( it_index + k ) ] = len + k;
-            }
         }
+        
+        it_nodes = fibre_sa.getjournal().get_first_node();
+        it_nodes_end = fibre_sa.getjournal().get_dummy_node();
+        
+        current_shift = 0;
+        
+        do{
+      
+            if( !it_nodes->op()->insertion() && !it_nodes->op()->deletion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
+                    fibre_sa_inv[ fibre_sa[ j ] ] += current_shift;
+                }
+                j_goNext(it_nodes);
+                continue; //nothing else to do
+            }
+            
+            if( it_nodes->op()->insertion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
+                    insert( fibre_sa[j], fibre_sa_inv, j );
+                }
+            }
+            
+            if( it_nodes->op()->deletion() ){
+                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
+                    erase( fibre_sa_inv, fibre_sa[j] );
+                }
+            }
+            current_shift += it_nodes->op()->by();
+            j_goNext(it_nodes);
+        }while( it_nodes != it_nodes_end );
         
         flatten( fibre_lcp );
         flatten( fibre_sa );
