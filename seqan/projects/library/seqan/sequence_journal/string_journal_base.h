@@ -25,4 +25,24 @@
 #include "string_journal_utility.h"
 #include "string_journal_test_foundry.h"
 
+namespace seqan {
+    template< typename TValue, typename TSpec >
+    class ShiftString{
+    typedef size_t TPos; //TODO: use Position metafunction
+    public:
+        ShiftString( String< TValue, TSpec > & string, String< Pair< TPos, TValue > > & shifts ) : m_holder( string ), m_shifts( shifts ) {};
+        
+        inline TValue value( TPos & pos ){
+            return value( value( m_holder ), pos ) + get_shift( m_shifts, pos );
+        }
+    private:
+        String< TPos, TValue > m_shifts;
+        Holder< String< TValue, TSpec > > m_holder;
+    };
+    
+    template< typename TValue, typename TSpec, typename TPos >
+    TValue value( ShiftString< TValue, TSpec > & sstring, TPos & position ){
+        return sstring.value( position );
+    }
+}
 #endif // ndef(SEQAN_STRING_JOURNAL_BASE_H)
