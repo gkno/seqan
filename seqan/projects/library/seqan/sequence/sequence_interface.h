@@ -87,7 +87,7 @@ e.g. @Function.assign@, @Function.append@, and @Function.replace@.
 template <typename T>
 struct DefaultOverflowImplicit
 {
-	typedef Exact Type;
+	typedef Generous Type;
 };
 
 //____________________________________________________________________________
