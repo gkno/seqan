@@ -10,8 +10,16 @@
 
 namespace seqan {
 
-   template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
+   //template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
+   template< typename TConfig >
    class Journal{
+   public:
+      typedef typename TConfig::Type TValue;
+      typedef typename TConfig::TSloppy TSloppySpec;
+//      static bool const ShiftSpec = TConfig::Shift;
+      typedef typename TConfig::TSpec TSpec;
+      typedef typename TConfig::TStringSpec TStringSpec;
+   
    public:
 
       inline Journal(): m_holder( "" ){ //TODO: check for behavior
@@ -427,26 +435,26 @@ namespace seqan {
          return it_tree;
       }
 
-      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_begin() const{
+      inline typename Iterator< String< TValue, Journal< TConfig > > >::Type it_begin() const{
          typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
          while( j_goDownLeft( it_tree ) );
          while( it_tree->length == 0 ){
             j_goNext( it_tree );
          }
-         typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_tree );
+         typename Iterator< String< TValue, Journal< TConfig > > >::Type it( this, it_tree );
          return it;
       }
 
-      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_end() const{
+      inline typename Iterator< String< TValue, Journal< TConfig > > >::Type it_end() const{
          typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
          while( j_goDownRight( it_tree ) );
-         typename Iterator<String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_tree );
+         typename Iterator<String< TValue, Journal< TConfig > > >::Type it( this, it_tree );
          return it;
       }
 
-      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_at_pos( size_t pos ) const{
+      inline typename Iterator< String< TValue, Journal< TConfig > > >::Type it_at_pos( size_t pos ) const{
           typename Iterator< String< Node, TStringSpec > >::Type it_node = find_node( pos );
-          typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it( this, it_node , it_node->offset( pos ) );
+          typename Iterator< String< TValue, Journal< TConfig > > >::Type it( this, it_node , it_node->offset( pos ) );
           return it;
       }
 
@@ -498,11 +506,11 @@ namespace seqan {
          return m_length;
       }
 
-      inline bool operator!=( Journal< TValue, TSpec, TStringSpec, TSloppySpec > const &other ) const{
+      inline bool operator!=( Journal< TConfig > const &other ) const{
          return !operator==( other );
       }
 
-      inline bool operator==( Journal< TValue, TSpec, TStringSpec, TSloppySpec > const &other ) const{
+      inline bool operator==( Journal< TConfig > const &other ) const{
          return get_tree() == other.get_tree() && get_inner() == other.get_inner() && get_outer() == other.get_outer();
       }
 

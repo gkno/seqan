@@ -3,8 +3,14 @@
 
 namespace seqan{
 
-   template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec = Strict >
+   template< typename TConfig >
    class jiter{
+
+      typedef typename TConfig::Type TValue;
+      typedef typename TConfig::TSloppy TSloppySpec;
+      static bool const TShiftSpec = TConfig::TShift;
+      typedef typename TConfig::TSpec TSpec;
+      typedef typename TConfig::TStringSpec TStringSpec;
 
    public:
       inline jiter() :
@@ -16,7 +22,7 @@ namespace seqan{
       {
       }
 
-      inline jiter( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const & other ) :
+      inline jiter( jiter< TConfig > const & other ) :
          m_journal( other.journal() ),
          m_recalc( other.recalc() ),
          m_it_tree( other.it_tree() ),
@@ -25,7 +31,7 @@ namespace seqan{
       {
       }
 
-      inline jiter( Journal< TValue, TSpec, TStringSpec, TSloppySpec > const *journal, typename Iterator< String< Node, TStringSpec > >::Type it )
+      inline jiter( Journal< TConfig > const *journal, typename Iterator< String< Node, TStringSpec > >::Type it )
        : m_journal( journal )
        , m_it_tree( it )
        {
@@ -34,7 +40,7 @@ namespace seqan{
          m_recalc = ( *m_it_tree ).length;
       }
 
-      inline jiter( Journal< TValue, TSpec, TStringSpec, TSloppySpec > const *journal, typename Iterator< String< Node, TStringSpec > >::Type it, size_t offset )
+      inline jiter( Journal< TConfig > const *journal, typename Iterator< String< Node, TStringSpec > >::Type it, size_t offset )
        : m_journal( journal )
        , m_it_tree( it )
        {
@@ -43,7 +49,7 @@ namespace seqan{
          m_recalc = ( *m_it_tree ).length - offset;
       }
 
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > operator=( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const &other ){
+      inline jiter< TConfig > operator=( jiter< TConfig > const &other ){
          m_journal = other.journal();
          m_recalc = other.recalc();
          m_it_tree = other.it_tree();
@@ -100,53 +106,53 @@ namespace seqan{
          }
       }
 
-      inline bool operator!=( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const &other ) const{
+      inline bool operator!=( jiter< TConfig > const &other ) const{
          return !operator==( other );
       }
 
-      inline bool operator==( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const &other ) const{
+      inline bool operator==( jiter< TConfig > const &other ) const{
          return ( other.journal() == m_journal ) && ( other.abs_pos() == this->abs_pos() );
       }
 
 //      template< typename TIntegral >
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > operator-( int by ) const{
+      inline jiter< TConfig > operator-( int by ) const{
          jiter new_iter = *this;
          new_iter -= by;
          return new_iter;
       }
 
 //      template< typename TIntegral >
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > operator+( int by ) const{
+      inline jiter< TConfig > operator+( int by ) const{
          jiter new_iter = *this;
          new_iter += by;
          return new_iter;
       }
 
-      inline size_t operator-( jiter<TValue, TSpec, TStringSpec, TSloppySpec> & other ) const{
+      inline size_t operator-( jiter< TConfig > & other ) const{
          return this->abs_pos() - other.abs_pos();
       }
 
-      inline size_t operator-( jiter<TValue, TSpec, TStringSpec, TSloppySpec> const & other ) const{
+      inline size_t operator-( jiter< TConfig > const & other ) const{
          return this->abs_pos() - other.abs_pos();
       }
 
-      inline bool operator>(jiter<TValue, TSpec, TStringSpec, TSloppySpec> const & other ) const{
+      inline bool operator>( jiter< TConfig > const & other ) const{
          return this->abs_pos() > other.abs_pos();
       }
 
-      inline bool operator<(jiter<TValue, TSpec, TStringSpec, TSloppySpec> const & other ) const{
+      inline bool operator<( jiter< TConfig > const & other ) const{
          return this->abs_pos() < other.abs_pos();
       }
 
-      inline bool operator>=(jiter<TValue, TSpec, TStringSpec, TSloppySpec> const & other ) const{
+      inline bool operator>=( jiter< TConfig > const & other ) const{
          return this->abs_pos() >= other.abs_pos();
       }
 
-      inline bool operator<=(jiter<TValue, TSpec, TStringSpec, TSloppySpec> const & other ) const{
+      inline bool operator<=( jiter< TConfig > const & other ) const{
          return this->abs_pos() <= other.abs_pos();
       }
 
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > & operator++(){
+      inline jiter< TConfig > & operator++(){
          if( --m_recalc <= 0 ){
             next_node_forward();
          }else{
@@ -155,8 +161,8 @@ namespace seqan{
          return *this;
       }
 
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > operator++(int){
-         jiter< TValue, TSpec, TStringSpec, TSloppySpec > tmp = *this;
+      inline jiter< TConfig > operator++(int){
+         jiter< TConfig > tmp = *this;
          if( --m_recalc <= 0 ){
             next_node_forward();
          }else{
@@ -183,7 +189,7 @@ namespace seqan{
          }
       }
 
-      inline jiter< TValue, TSpec, TStringSpec, TSloppySpec > & operator--(){
+      inline jiter< TConfig > & operator--(){
          if( ++m_recalc > ( *m_it_tree ).length ){
             next_node_backward();
          }else{
@@ -226,7 +232,7 @@ namespace seqan{
          }
       }
 
-      inline bool is_journal( Journal< TValue > const &jrn ) const{
+      inline bool is_journal( Journal< TConfig > const &jrn ) const{
          return jrn == *m_journal;
       }
 
@@ -240,7 +246,7 @@ namespace seqan{
 
       // BEGIN Getters
 
-      inline Journal< TValue, TSpec, TStringSpec, TSloppySpec > const *journal() const{
+      inline Journal< TConfig > const *journal() const{
          return m_journal;
       }
 
@@ -267,20 +273,20 @@ namespace seqan{
       // END Getters
 
    private:
-      Journal<TValue, TSpec, TStringSpec, TSloppySpec> const *m_journal;
+      Journal< TConfig > const *m_journal;
       int m_recalc;
       typename Iterator< String< Node, TStringSpec > >::Type m_it_tree;
       typename Iterator< String< TValue, TSpec > >::Type m_it_outer;
       typename Iterator< String< TValue, TStringSpec > >::Type m_it_inner;
    };
 
-   template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
-   inline TValue const & value( jiter< TValue, TSpec, TStringSpec, TSloppySpec > const & me ){
+   template< typename TConfig >
+   inline typename TConfig::Type const & value( jiter< TConfig > const & me ){
       return *me;
    }
 
-   template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
-   inline TValue const & value( jiter< TValue, TSpec, TStringSpec, TSloppySpec > & me ){
+   template< typename TConfig >
+   inline typename TConfig::Type const & value( jiter< TConfig > & me ){
       return *me;
    }
 

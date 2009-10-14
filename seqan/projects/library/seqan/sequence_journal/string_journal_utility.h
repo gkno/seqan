@@ -118,8 +118,8 @@ namespace seqan{
       std::cout << std::endl;
    }
 
-   template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec, typename TIndex, typename TPos >  //TString needs to be String< TValue, Journal< TValue, ... > >
-   inline void generate_shifts_and_deletions( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & string, String< TIndex > & indices, String< Pair< TPos, int > > & shifts, String< Pair< TPos, TPos > > & deletions ){
+   template< typename TConfig, typename TIndex, typename TPos >  //TString needs to be String< TValue, Journal< TValue, ... > >
+   inline void generate_shifts_and_deletions( String< typename TConfig::Type, Journal< TConfig > > & string, String< TIndex > & indices, String< Pair< TPos, int > > & shifts, String< Pair< TPos, TPos > > & deletions ){
 
       shifts += Pair< TPos, TPos >( 0, 0 );
 
@@ -157,8 +157,8 @@ namespace seqan{
     inline void synchronize_index( TIndex & index, StringSet< TString, TSpec > & stringset ){
 
         typedef typename Position< StringSet< TString, TSpec > >::Type TPos;
-        typedef String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > TSA;
-        typedef String< size_t, Journal< size_t, Alloc<>, Alloc<>, Sloppy > > TLCP;
+        typedef String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > TSA;
+        typedef String< size_t, Journal< JournalConfig< size_t > > > TLCP;
 
         assert( indexSupplied( index, ESA_SA() ) && "No SuffixArray supplied for this index. No synchronization necessary!");
         assert( indexSupplied( index, ESA_LCP() ) && "No LCP-Table supplied for this index. No synchronization possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
@@ -753,9 +753,9 @@ namespace seqan{
         assert( indexSupplied( index, ESA_LCP() ) && "No LCP-Table supplied for this index. No synchronization possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
 
 //        TSA & fibre_sa = indexSA( index );
-        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > temp_sa( indexSA( index ) );
+        String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > temp_sa( indexSA( index ) );
         TLCP & fibre_lcp = indexLCP( index );
-        String< TPos, Journal< TPos, Alloc<>, Alloc<>, Sloppy > > temp_lcp( indexLCP( index ) );
+        String< TPos, Journal< JournalConfig< TPos > > > temp_lcp( indexLCP( index ) );
 
         assert( length( fibre_sa ) == length( fibre_lcp ) && "Length mismatch in LCP-Table / SuffixArray, successfull synchronization not possible!\nUse 'indexCreate( index, ESA_SA() )' to recreate the SuffixArray!" );
 
@@ -913,9 +913,9 @@ namespace seqan{
         typedef String< typename SAValue< TIndex >::Type > TSA;
         typedef String< TPos > TLCP;
 
-        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > fibre_sa( indexSA( index ) );
-        String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > fibre_sa_inv( sa_inv );
-        String< TPos, Journal< TPos, Alloc<>, Alloc<>, Sloppy > > fibre_lcp( indexLCP( index ) );
+        String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa( indexSA( index ) );
+        String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa_inv( sa_inv );
+        String< TPos, Journal< JournalConfig< TPos > > > fibre_lcp( indexLCP( index ) );
 
         String< TPos > indices; //Stores the positions of indices that need to be inserted
 
@@ -1027,8 +1027,8 @@ namespace seqan{
             std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
         }
 #endif        
-        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > >::Type it_sa = begin( fibre_sa );
-        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > >::Type it_sa_end = end( fibre_sa );
+        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > >::Type it_sa = begin( fibre_sa );
+        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > >::Type it_sa_end = end( fibre_sa );
         typename Iterator< String< TPos > >::Type it_index = begin( indices );
         typename Iterator< String< TPos > >::Type it_index_end = end( indices );
         typename Iterator< String< TPos > >::Type it_index_lcp = begin( index_lcp );
@@ -1322,11 +1322,11 @@ namespace seqan{
 
       generate_shifts_and_deletions( string, indices, shifts, deletions );
 
-      String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > fibre_sa( indexSA( index ) );
+      String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa( indexSA( index ) );
 
       indexRequire( index, ESA_LCP() );
 
-      String< size_t, Journal< size_t, Alloc<>, Alloc<>, Sloppy > > fibre_lcp( indexLCP( index ) );
+      String< size_t, Journal< JournalConfig< size_t > > > fibre_lcp( indexLCP( index ) );
 
       unsigned int last_lcp = 0;
 #ifndef NDEBUG
@@ -1472,7 +1472,7 @@ template< typename TIndex, typename TString >
    void synchronize_SA_LCP( TIndex & index, TString & string, std::vector<Entry>& entries ){
 
       typename Fibre< TIndex, ESA_SA >::Type &string_sa = indexSA( index );
-      String< typename SAValue< TIndex >::Type, Journal< typename SAValue< TIndex >::Type, Alloc<>, Alloc<>, Sloppy > > fibre_sa( string_sa );
+      String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa( string_sa );
 
       if( !indexSupplied( index, ESA_LCP() ) ){
          indexRequire( index, ESA_LCP() );
@@ -1573,7 +1573,7 @@ template< typename TIndex, typename TString >
       }
 
       size_t last_pos = length( fibre_sa );
-      appen( fibre_sa, suffix( indices, it_index - begin( indices ) ) );
+      append( fibre_sa, suffix( indices, it_index - begin( indices ) ) );
       DEBUG_OUT( length( fibre_sa ) );
       Iterator< String< size_t> >::Type it_stop = end( indices ) - 1;
       while( it_index < it_stop ){

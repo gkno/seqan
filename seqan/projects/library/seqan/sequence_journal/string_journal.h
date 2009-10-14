@@ -17,11 +17,15 @@ namespace seqan{
       typedef TValue const & Type;
    };
 
-   template < typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
-   class String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > {
+   template < typename TValue, typename TConfig >
+   class String< TValue, Journal< TConfig > > {
    public:
       //typedef TValue* TIter;
-
+      typedef typename TConfig::TSloppy TSloppySpec;
+      //static bool const ShiftSpec = TConfig::Shift;
+      typedef typename TConfig::TSpec TSpec;
+      typedef typename TConfig::TStringSpec TStringSpec;
+      
       String(){ };
       
       template< typename _TText >
@@ -114,7 +118,7 @@ namespace seqan{
          m_journal.assign_string( source );
       }
 
-      inline void assign_journal( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > const & source ){
+      inline void assign_journal( String< TValue, Journal< TConfig > > const & source ){
          m_journal = source.getjournal();
       };
 
@@ -122,15 +126,15 @@ namespace seqan{
          m_journal.assign_string( source );
       }
 
-      inline void assign_journal( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & source ){
+      inline void assign_journal( String< TValue, Journal< TConfig > > & source ){
          m_journal = source.getjournal();
       };
 
-      inline Journal< TValue, TSpec, TStringSpec, TSloppySpec> & getjournal(){
+      inline Journal< TConfig > & getjournal(){
          return m_journal;
       };
 
-      inline Journal< TValue, TSpec, TStringSpec, TSloppySpec > getjournal() const{
+      inline Journal< TConfig > getjournal() const{
          return m_journal;
       };
       
@@ -143,11 +147,11 @@ namespace seqan{
          return value( m_journal.get_holder() );
       }
 
-      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_begin( ) const{
+      inline typename Iterator< String< TValue, Journal< TConfig > > >::Type it_begin( ) const{
          return m_journal.it_begin();
       }
 
-      inline typename Iterator< String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > >::Type it_end( ) const{
+      inline typename Iterator< String< TValue, Journal< TConfig > > >::Type it_end( ) const{
          return m_journal.it_end();
       }
 
@@ -156,7 +160,7 @@ namespace seqan{
       }
 
    private:
-      Journal< TValue, TSpec, TStringSpec, TSloppySpec > m_journal;
+      Journal< TConfig > m_journal;
    };
 
 }
