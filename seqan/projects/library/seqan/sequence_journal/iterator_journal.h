@@ -3,6 +3,24 @@
 
 namespace seqan{
 
+   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
+   inline TValue & value_impl_pyl( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > const & iter ){
+      if( iter.it_tree()->is_internal ){
+         return *(iter.it_inner());
+      }else{
+         return *(iter.it_outer());
+      }
+   }
+   
+   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
+   inline TValue & value_impl_pyl( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > const & iter ){
+      if( iter.it_tree()->is_internal ){
+         return *(iter.it_inner());
+      }else{
+         return *(iter.it_outer());
+      }
+   }
+
    template< typename TConfig >
    class jiter{
 
@@ -65,15 +83,7 @@ namespace seqan{
       }
 #endif
       inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() const{
-         if( ( *m_it_tree ).is_internal ){
-//            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_inner );
-//            return *jip;
-            return *m_it_inner;
-         }else{
-//            journal_iterator_proxy< TValue, TSloppySpec > jip( *m_it_outer );
-//            return *jip;
-            return *m_it_outer;
-         }
+         return value_impl_pyl( *this );
       }
 
       inline operator void * () {
@@ -280,15 +290,15 @@ namespace seqan{
       typename Iterator< String< TValue, TStringSpec > >::Type m_it_inner;
    };
 
-   template< typename TConfig >
-   inline typename TConfig::Type const & value( jiter< TConfig > const & me ){
-      return *me;
-   }
+//   template< typename TConfig >
+//   inline typename TConfig::Type const & value( jiter< TConfig > const & me ){
+//      return *me;
+//   }
 
-   template< typename TConfig >
-   inline typename TConfig::Type const & value( jiter< TConfig > & me ){
-      return *me;
-   }
+//   template< typename TConfig >
+//   inline typename TConfig::Type const & value( jiter< TConfig > & me ){
+//      return *me;
+//   }
 
    template< typename TIter >
    inline bool j_goNext( TIter &it ){

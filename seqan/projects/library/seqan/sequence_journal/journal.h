@@ -16,7 +16,7 @@ namespace seqan {
    public:
       typedef typename TConfig::Type TValue;
       typedef typename TConfig::TSloppy TSloppySpec;
-//      static bool const ShiftSpec = TConfig::Shift;
+      typedef typename TConfig::TShift TShiftSpec;
       typedef typename TConfig::TSpec TSpec;
       typedef typename TConfig::TStringSpec TStringSpec;
    
