@@ -353,7 +353,7 @@ _arrayConstructCopy_Default(TSource1 source_begin,
 SEQAN_CHECKPOINT
 	while (source_begin != source_end)
 	{
-		valueConstruct(target_begin, *source_begin);
+		valueConstruct(target_begin, getValue(source_begin));
 		++source_begin;
 		++target_begin;
 	}
@@ -401,7 +401,7 @@ _arrayConstructMove_Default(TSource1 source_begin,
 SEQAN_CHECKPOINT
 	while (source_begin < source_end)
 	{
-		valueConstructMove(target_begin, *source_begin);
+		valueConstructMove(target_begin, getValue(source_begin));
 		++source_begin;
 		++target_begin;
 	}

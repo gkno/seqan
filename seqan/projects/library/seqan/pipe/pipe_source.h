@@ -48,6 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
 		TInput const &in;
 		typename Iterator<TInput const, Rooted>::Type cur;
+		typename Value<TInput>::Type val;
 
 		Pipe(typename _RemoveConst<TInput>::Type &_cont):
 			in(_cont) {}
@@ -55,8 +56,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		Pipe(TInput const &_cont):
 			in(_cont) {}
 
-        inline typename Value<TInput>::Type const & operator*() const {
-            return *cur;
+        inline typename Value<TInput>::Type const & operator*() {
+            return val = getValue(cur);
         }
     
         inline Pipe& operator++() {
