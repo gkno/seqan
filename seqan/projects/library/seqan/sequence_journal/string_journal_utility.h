@@ -906,7 +906,7 @@ namespace seqan{
 //        std::cout << "The End!" << std::endl;
     }
 
-#define NDEBUG_SYNC    
+//#define NDEBUG_SYNC    
     template< typename TIndex, typename TString, typename TSAInv >
     inline void synchronize_index_2( TIndex & index, TString & string, TSAInv & sa_inv ){
         typedef typename Position< TString >::Type TPos;
@@ -1041,12 +1041,14 @@ namespace seqan{
             std::cout << "Processing suffix " << *it_sa << " and " << *it_index << std::endl;
 #endif
             if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
+                std::cout << *it_sa << " > " << *it_index << std::endl;
                 blocklength = 1;
 
                 while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
                     ++blocklength;
                 }
                 
+                std::cout << "Inserting Block of Length: " << blocklength << " at Position " << insert_pos << std::endl;
                 insert( insert_pos, fibre_sa, it_index - blocklength, blocklength );
                 insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
                 
@@ -1063,10 +1065,11 @@ namespace seqan{
                 
                 insert_pos += blocklength;
                 
-                it_sa = begin( fibre_sa ) + insert_pos - 1;
+                it_sa = begin( fibre_sa ) + insert_pos;
                 it_sa_end = end( fibre_sa );
 
                 if( !(it_index < it_index_end) ){
+                    std::cout << "Breaking!" << std::endl;
                     break;
                 }
             }
@@ -1075,11 +1078,16 @@ namespace seqan{
         }
         
         if( it_index < it_index_end ){
+            unsigned int pos = length( fibre_sa );
 #ifndef NDEBUG_SYNC
             std::cout << "Appending remaining indices" << std::endl;
 #endif
             append( fibre_sa, suffix( indices, it_index ) );
             append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
+            
+            for( ; it_index < it_index_end; ++it_index, ++pos ){
+                fibre_sa_inv[ *it_index ] = pos;
+            }
         }
 
         current_shift = 0;
@@ -1122,7 +1130,7 @@ namespace seqan{
 #endif
     }
 
-#undef NDEBUG_SYNC
+//#undef NDEBUG_SYNC
 
     template< typename TIndex, typename TString >
     inline void synchronize_index_2( TIndex & index, TString & string ){
