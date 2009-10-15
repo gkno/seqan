@@ -3,14 +3,24 @@
 
 namespace seqan{
 
-   template< typename TValue, typename TPosition >
-   TValue const & value( String< TValue, Journal< JournalConfig< TValue, Strict > > > const & string, TPosition position ) {
+   template< typename TValue, typename TPosition, typename TShiftSpec >
+   TValue & value( String< TValue, Journal< JournalConfig< TValue, Sloppy, False > > > & string, TPosition position ) {
       return string.getjournal().get( position );
+   }
+   
+   template< typename TValue, typename TPosition, typename TShiftSpec >
+   TValue const & value( String< TValue, Journal< JournalConfig< TValue, Strict, False > > > & string, TPosition position ) {
+      return string.getjournal().get( position );
+   }
+   
+   template< typename TValue, typename TPosition >
+   TValue value( String< TValue, Journal< JournalConfig< TValue, Sloppy, True > > > & string, TPosition position ) {
+      return string.getjournal().get( position ) + string.getjournal().shift( position );
    }
 
    template< typename TValue, typename TPosition >
-   TValue & value( String< TValue, Journal< JournalConfig< TValue, Sloppy > > > & string, TPosition position ) {
-      return string.getjournal().get( position );
+   TValue value( String< TValue, Journal< JournalConfig< TValue, Strict, True > > > & string, TPosition position ) {
+      return string.getjournal().get( position ) + string.getjournal().shift( position );
    }
 
    template< typename TConfig >
@@ -122,6 +132,11 @@ namespace seqan{
    void replace( TPosition position, String< typename TConfig::Type, Journal< TConfig > > &journal_string, TIterator it, size_t number ){
       journal_string.getjournal().replace( position, it, number );
    }
+   
+   template< typename TConfig, typename TPosition >
+   void replace( String< typename TConfig::Type, Journal< TConfig > > & journal_string, TPosition position, typename TConfig::Type value ){
+      journal_string.getjournal().replace( position, value );
+   }
 
    template< typename TConfig, typename TPosition >
    void erase( String< typename TConfig::Type, Journal< TConfig > > &journal_string, TPosition position ){
@@ -173,7 +188,7 @@ namespace seqan{
    }
 
    template< typename TConfig, typename TPos >
-   inline typename IndexOperatorValue< typename TConfig::Type, typename TConfig::TSloppy >::Type getValue( String< typename TConfig::Type, Journal< TConfig > > & me, TPos pos ){
+   inline typename IndexOperatorValue< typename TConfig::Type, typename TConfig::TSloppy, typename TConfig::TShift >::Type getValue( String< typename TConfig::Type, Journal< TConfig > > & me, TPos pos ){
       return me[pos];
    }
 

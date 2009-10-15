@@ -9,6 +9,29 @@
 #include <seqan/sequence.h>
 
 namespace seqan {
+   
+   template< typename TString, typename TPos >
+   inline int get_shift( TString const & limits, TPos position ){
+      size_t low = 0;
+      size_t high = length( limits );
+      size_t mid = (size_t)floor( high / 2 );
+      bool seeking = true;
+      while( seeking ){
+        if( limits[mid].i1 > position ){
+            high = mid;
+            mid = low + (size_t)floor( ( high - low ) / 2 );
+        }else{
+            if( limits[mid + 1].i1 > position || mid + 1 == high ){
+                seeking = false;
+            }else{
+                low = mid;
+                mid = low + (size_t)floor( ( high - low ) / 2 );
+            }
+        }
+      }
+      return limits[mid].i2;
+   }
+
 
    //template< typename TValue, typename TSpec, typename TStringSpec, typename TSloppySpec >
    template< typename TConfig >
@@ -27,6 +50,7 @@ namespace seqan {
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, 0 ) );
          appendValue( m_tree, Node( true, 0, seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = 0;
+         appendValue( m_shifts, Pair< size_t, int >( 0, 0 ), Generous() );
       }
 
       template< typename TText >
@@ -37,6 +61,7 @@ namespace seqan {
          appendValue( m_tree, Node( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) ) );
          appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
+         appendValue( m_shifts, Pair< size_t, int >( 0, 0 ), Generous() );
       }
 
       ~Journal(){
@@ -76,18 +101,18 @@ namespace seqan {
          m_length = seqan::length( value( m_holder ) );
       }
 
-      inline TValue const & operator[]( size_t position ) const{
-         return get( position );
-      }
+//      inline TValue const & operator[]( size_t position ) const{
+//         return get( position );
+//      }
 
-      inline TValue const & get( size_t position ) const{
-         typename Iterator< String< Node, TStringSpec > >::Type it = find_node( position );
-         if( !(*it).is_internal ){
-            return value( m_holder )[ (*it).index + (*it).offset( position ) ];
-         }else{
-            return m_insertion_string[ (*it).index + (*it).offset( position ) ];
-         }
-      }
+//      inline TValue const & get( size_t position ) const{
+//         typename Iterator< String< Node, TStringSpec > >::Type it = find_node( position );
+//         if( !(*it).is_internal ){
+//            return value( m_holder )[ (*it).index + (*it).offset( position ) ];
+//         }else{
+//            return m_insertion_string[ (*it).index + (*it).offset( position ) ];
+//         }
+//      }
 
       inline TValue & get( size_t position ){
          typename Iterator< String< Node, TStringSpec > >::Type it = find_node( position );
@@ -422,6 +447,11 @@ namespace seqan {
          del( position, number );
          insert( position, array_start, number );
       }
+      
+      inline void replace( size_t position, TValue const & value ){
+         del( position, 1 );
+         insert( position, begin( String< TValue >( value ) ), 1 );
+      }
 
       inline typename Iterator< String< Node, TStringSpec > >::Type get_first_node() const{
          typename Iterator< String< Node, TStringSpec > >::Type it_tree = begin( m_tree );
@@ -517,12 +547,25 @@ namespace seqan {
       inline void const * get_id(){
          return id( value( m_holder ) );
       }
+      
+      inline int shift( size_t pos ) const{
+         return get_shift( m_shifts, pos );
+      }
+      
+      inline void add_shift( Pair< size_t, int > p ){
+         if( back( m_shifts ).i1 != p.i1 ){
+            appendValue( m_shifts, p );
+         }else{
+            back( m_shifts ).i2 = p.i2;
+         }
+      }
 
    private:
       Holder< String<TValue, TSpec> > m_holder;
       String<TValue, TStringSpec> m_insertion_string;
       String<Node, TStringSpec> m_tree;
       size_t m_length;
+      String< Pair< size_t, int > > m_shifts;
    };
 } // namespace seqan
 #endif // ndef(SEQAN_JOURNAL_H)

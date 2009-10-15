@@ -4,7 +4,7 @@
 namespace seqan{
 
    template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue & value_impl_pyl( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > const & iter ){
+   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > const & iter ){
       if( iter.it_tree()->is_internal ){
          return *(iter.it_inner());
       }else{
@@ -13,11 +13,29 @@ namespace seqan{
    }
    
    template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue & value_impl_pyl( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > const & iter ){
+   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > & iter ){
       if( iter.it_tree()->is_internal ){
          return *(iter.it_inner());
       }else{
          return *(iter.it_outer());
+      }
+   }
+   
+   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
+   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > const & iter ){
+      if( iter.it_tree()->is_internal ){
+         return *(iter.it_inner()) + iter.get_shift();
+      }else{
+         return *(iter.it_outer()) + iter.get_shift();
+      }
+   }
+   
+   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
+   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > & iter ){
+      if( iter.it_tree()->is_internal ){
+         return *iter.it_inner() + iter.get_shift();
+      }else{
+         return *iter.it_outer() + iter.get_shift();
       }
    }
 
@@ -82,8 +100,12 @@ namespace seqan{
          std::cout << std::endl;
       }
 #endif
-      inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() const{
-         return value_impl_pyl( *this );
+      inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() {
+         return value( *this );
+      }
+      
+      inline TValue operator*() const{
+         return value( *this );
       }
 
       inline operator void * () {
@@ -278,6 +300,10 @@ namespace seqan{
 
       inline int abs_pos() const{
          return (*m_it_tree).position + (*m_it_tree).length - m_recalc;
+      }
+      
+      inline int get_shift() const{
+         return m_journal->shift( abs_pos() );
       }
 
       // END Getters

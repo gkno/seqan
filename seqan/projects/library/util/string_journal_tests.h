@@ -84,8 +84,8 @@ namespace seqan{
         return "Instance of String";
     }
 
-    template< typename TSpec, typename TStringSpec, typename TSloppySpec, typename TValue >
-        seqan::String< char > info( String< TValue, Journal< TValue, TSpec, TStringSpec, TSloppySpec > > & ){
+    template< typename TConfig >
+        seqan::String< char > info( String< typename TConfig::Type, Journal< TConfig > > & ){
         return "Instance of String< Journal >";
     }
     

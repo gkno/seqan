@@ -7,14 +7,24 @@
 
 namespace seqan{
 
-   template <typename TValue, typename TSloppySpec>
+   template< typename TValue, typename TSloppySpec, typename TShiftSpec >
    struct IndexOperatorValue {
       typedef TValue & Type;
    };
    
-   template <typename TValue>
-   struct IndexOperatorValue<TValue, Strict> {
+   template< typename TValue >
+   struct IndexOperatorValue< TValue, Strict, False > {
       typedef TValue const & Type;
+   };
+   
+   template< typename TValue >
+   struct IndexOperatorValue< TValue, Sloppy, False > {
+      typedef TValue & Type;
+   };
+
+   template< typename TValue, typename TSloppySpec >
+   struct IndexOperatorValue< TValue, TSloppySpec, True > {
+      typedef TValue Type;
    };
 
    template < typename TValue, typename TConfig >
@@ -33,21 +43,21 @@ namespace seqan{
       {
          SEQAN_CHECKPOINT //TODO: check why this doesn't work with fibres?
       }
+     
+      template< typename TSize >
+      inline typename IndexOperatorValue< TValue, TSloppySpec, TShiftSpec >::Type operator[]( TSize pos ){
+          return value( *this, pos );
+      }
 
-      /*String( String< TValue, TSpec > &other ) : m_journal( other )
-      {
-         SEQAN_CHECKPOINT
-      }*/
-      
       template< typename TSize >
-      inline typename IndexOperatorValue< TValue, TSloppySpec >::Type operator[]( TSize pos ){
-         return m_journal.get( pos );      
+      inline typename IndexOperatorValue< TValue, TSloppySpec, TShiftSpec >::Type operator[]( TSize pos ) const{
+          return value( *this, pos );
       }
       
-      template< typename TSize >
-      inline TValue const & operator[]( TSize pos ) const{
-         return m_journal.get( pos );
-      }
+//      template< typename TSize >
+//      inline TValue const & operator[]( TSize pos ) const{
+//         return m_journal.get( pos );
+//      }
 
       template< typename TString >
       inline void insert( size_t position, TString &insert_string ){

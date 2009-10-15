@@ -40,28 +40,6 @@ namespace seqan{
         return lcplength;
     }
 
-   template< typename TString, typename TPos >
-   inline int get_shift( TString const & limits, TPos position ){
-      size_t low = 0;
-      size_t high = length( limits );
-      size_t mid = (size_t)floor( high / 2 );
-      bool seeking = true;
-      while( seeking ){
-        if( limits[mid].i1 > position ){
-            high = mid;
-            mid = low + (size_t)floor( ( high - low ) / 2 );
-        }else{
-            if( limits[mid + 1].i1 > position || mid + 1 == high ){
-                seeking = false;
-            }else{
-                low = mid;
-                mid = low + (size_t)floor( ( high - low ) / 2 );
-            }
-        }
-      }
-      return limits[mid].i2;
-   }
-
    template< typename TValue1, typename TValue2, typename TTag >
    void print_pairs( String< Pair< TValue1, TValue2, TTag > > const & string ){
       for( unsigned int i = 0; i < length( string ); ++i ){
@@ -70,7 +48,7 @@ namespace seqan{
       std::cout << std::endl;
    }
    
-//#define NDEBUG_SYNC    
+#define NDEBUG_SYNC    
         template< typename TIndex, typename TValue, typename TSloppySpec, typename TSAInv >
     inline void synchronize_index( TIndex & index, String< TValue, Journal< JournalConfig< TValue, TSloppySpec, False > > > & string, TSAInv & sa_inv ){
         typedef String< TValue, Journal< JournalConfig< TValue, TSloppySpec, False > > > TString;
@@ -207,14 +185,12 @@ namespace seqan{
             std::cout << "Processing suffix " << *it_sa << " and " << *it_index << std::endl;
 #endif
             if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
-                std::cout << *it_sa << " > " << *it_index << std::endl;
                 blocklength = 1;
 
                 while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
                     ++blocklength;
                 }
                 
-                std::cout << "Inserting Block of Length: " << blocklength << " at Position " << insert_pos << std::endl;
                 insert( insert_pos, fibre_sa, it_index - blocklength, blocklength );
                 insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
                 
@@ -235,7 +211,6 @@ namespace seqan{
                 it_sa_end = end( fibre_sa );
 
                 if( !(it_index < it_index_end) ){
-                    std::cout << "Breaking!" << std::endl;
                     break;
                 }
             }
@@ -296,25 +271,26 @@ namespace seqan{
 #endif
     }
 
-//#undef NDEBUG_SYNC
+#undef NDEBUG_SYNC
 //#define NDEBUG_SYNC    
-    template< typename TIndex, typename TValue, typename TSloppySpec, typename TSAInv >
-    inline void synchronize_index( TIndex & index, String< TValue, Journal< JournalConfig< TValue, TSloppySpec, True > > > & string, TSAInv & sa_inv ){
+    template< typename TIndex, typename TConfig, typename TSAInv >
+    inline void synchronize_index_s( TIndex & index, String< typename TConfig::Type, Journal< TConfig > > & string, TSAInv & sa_inv ){
     
-        typedef String< TValue, Journal< JournalConfig< TValue, TSloppySpec, False > > > TString;
-               
+        typedef String< typename TConfig::Type, Journal< TConfig > > TString;               
         typedef typename Position< TString >::Type TPos;
         typedef String< typename SAValue< TIndex >::Type > TSA;
         typedef String< TPos > TLCP;
-
-        String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa( indexSA( index ) );
-        String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > fibre_sa_inv( sa_inv );
+        typedef String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type, Sloppy, True > > > TSA_J;
+        
+        TSA_J fibre_sa( indexSA( index ) );
+        TSA_J fibre_sa_inv( sa_inv );
+        
         String< TPos, Journal< JournalConfig< TPos > > > fibre_lcp( indexLCP( index ) );
 
         String< TPos > indices; //Stores the positions of indices that need to be inserted
 
         String< size_t > dels; //Stores the positions of indices that need to be removed                
-
+        
         typename Iterator< String< Node > >::Type it_nodes = string.getjournal().get_first_node();
         typename Iterator< String< Node > >::Type it_nodes_end = string.getjournal().get_dummy_node();
         
@@ -329,12 +305,10 @@ namespace seqan{
             it_nodes->print_info();
 #endif            
             if( !it_nodes->op()->insertion() && !it_nodes->op()->deletion() ){
-                for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
-                    fibre_sa[ sa_inv[ j - current_shift ] ] += current_shift; //TODO: modify to save rather than apply
-                }
 #ifndef NDEBUG_SYNC
                 std::cout << "Processing block of length: " << it_nodes->length << std::endl;
 #endif
+                fibre_sa.getjournal().add_shift( Pair< TPos, int >( it_nodes->position, current_shift ) );
                 verify_length = it_nodes->length;
                 j_goNext(it_nodes);
                 continue; //nothing else to do
@@ -388,8 +362,10 @@ namespace seqan{
         if( length( index_lcp ) != 0 ){
             for( unsigned int i = 0; i < length( index_lcp ) - 1; ++i ){
                 index_lcp[i] = lcpLength( suffix( string, indices[i]), suffix( string, indices[i + 1] ) );
+//                replace( index_lcp, i, lcpLength( suffix( string, indices[i]), suffix( string, indices[i + 1] ) ) );
             }
             index_lcp[ length( index_lcp ) - 1 ] = 0;
+//            replace( index_lcp, length( index_lcp ) - 1, 0 );
         }
 #ifndef NDEBUG_SYNC        
         std::cout << "Status( shifted ):" << std::endl;
@@ -418,11 +394,11 @@ namespace seqan{
         std::cout << "Status( shifted + deleted ):" << std::endl;
         std::cout << "SA+LCP:" << std::endl;
         for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
-            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
+            std::cout << i << "\t: " <<  fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
         }
 #endif        
-        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > >::Type it_sa = begin( fibre_sa );
-        typename Iterator< String< typename SAValue< TIndex >::Type, Journal< JournalConfig< typename SAValue< TIndex >::Type > > > >::Type it_sa_end = end( fibre_sa );
+        typename Iterator< TSA_J >::Type it_sa = begin( fibre_sa );
+        typename Iterator< TSA_J >::Type it_sa_end = end( fibre_sa );
         typename Iterator< String< TPos > >::Type it_index = begin( indices );
         typename Iterator< String< TPos > >::Type it_index_end = end( indices );
         typename Iterator< String< TPos > >::Type it_index_lcp = begin( index_lcp );
@@ -432,13 +408,13 @@ namespace seqan{
         
         while( it_sa < it_sa_end && it_index < it_index_end ){
 #ifndef NDEBUG_SYNC
-            std::cout << "Processing suffix " << *it_sa << " and " << *it_index << std::endl;
+            std::cout << "Processing suffix " << value( it_sa ) << " and " << *it_index << std::endl;
 #endif
-            if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
-                std::cout << *it_sa << " > " << *it_index << std::endl;
+            if( suffix( string, value( it_sa ) ) > suffix( string, *it_index ) ){
+                std::cout << value( it_sa ) << " > " << *it_index << std::endl;
                 blocklength = 1;
 
-                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa )){
+                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, value( it_sa ) ) ){
                     ++blocklength;
                 }
                 
@@ -447,14 +423,14 @@ namespace seqan{
                 insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
                 
                 if( insert_pos + blocklength != length( fibre_lcp ) ){
-                    fibre_lcp[ insert_pos + blocklength - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos + blocklength - 1 ]), suffix( string, fibre_sa[ insert_pos + blocklength ] ) );
+                    replace( fibre_lcp, insert_pos + blocklength - 1, lcpLength( suffix( string, fibre_sa[insert_pos + blocklength - 1] ), suffix( string, fibre_sa[insert_pos + blocklength] ) ) );
                 }
                 if( insert_pos != 0 ){
-                    fibre_lcp[ insert_pos - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos - 1 ] ), suffix( string, fibre_sa[ insert_pos ] ) );
+                    replace( fibre_lcp, insert_pos - 1, lcpLength( suffix( string, fibre_sa[insert_pos - 1] ), suffix( string, fibre_sa[insert_pos] ) ) );
                 }
                 
                 for( unsigned int k = 0; k < blocklength; ++k ){
-                    fibre_sa_inv[ fibre_sa[ insert_pos + k ] ] = insert_pos + k;
+                    replace( fibre_sa_inv, fibre_sa[insert_pos + k], insert_pos + k );
                 }
                 
                 insert_pos += blocklength;
@@ -480,7 +456,8 @@ namespace seqan{
             append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
             
             for( ; it_index < it_index_end; ++it_index, ++pos ){
-                fibre_sa_inv[ *it_index ] = pos;
+//                fibre_sa_inv[ *it_index ] = pos;
+                replace( fibre_sa_inv, *it_index, pos );
             }
         }
 
@@ -495,16 +472,14 @@ namespace seqan{
 #ifndef NDEBUG_SYNC
                 std::cout << "Shifting by: " << current_shift << std::endl;
 #endif
+                fibre_sa_inv.getjournal().add_shift( Pair< TPos, int >( it_nodes->position, current_shift ) );
+
+#ifndef NDEBUG_SYNC                
                 for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
-#ifndef NDEBUG_SYNC
                     std::cout << fibre_sa[ j ] << "th Suffix: ";
-                    std::cout << fibre_sa_inv[ fibre_sa[ j ] ] << " -> ";
-#endif
-                    fibre_sa_inv[ fibre_sa[ j ] ] += current_shift; //TODO: modify to save rather than apply
-#ifndef NDEBUG_SYNC
-                    std::cout << fibre_sa_inv[ fibre_sa[ j ] ] << std::endl;
-#endif
+                    std::cout << fibre_sa_inv[ fibre_sa[ j ] ] << " -> " << fibre_sa_inv[ fibre_sa[ j ] ] + current_shift << std::endl;
                 }
+#endif
                 j_goNext(it_nodes);
                 continue; //nothing else to do
             }
@@ -513,15 +488,15 @@ namespace seqan{
             j_goNext(it_nodes);
         }while( it_nodes != it_nodes_end );
 
-        flatten( fibre_lcp );
-        flatten( fibre_sa );
-#ifndef NDEBUG_SYNC        
+        //flatten( fibre_lcp );
+        //flatten( fibre_sa );
+//#ifndef NDEBUG_SYNC        
         std::cout << "Status( final ):" << std::endl;
         std::cout << "SA+LCP:" << std::endl;
         for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
-            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << "\t| " << fibre_sa_inv[i] <<  std::endl;
+            std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << "\t| " << fibre_sa_inv[i] << std::endl;
         }
-#endif
+//#endif
     }
 
 //#undef NDEBUG_SYNC
