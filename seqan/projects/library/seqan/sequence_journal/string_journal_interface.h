@@ -3,25 +3,46 @@
 
 namespace seqan{
 
-   template< typename TValue, typename TPosition, typename TShiftSpec >
+   template< typename TValue, typename TPosition >
    TValue & value( String< TValue, Journal< JournalConfig< TValue, Sloppy, False > > > & string, TPosition position ) {
       return string.getjournal().get( position );
    }
    
-   template< typename TValue, typename TPosition, typename TShiftSpec >
+   template< typename TValue, typename TPosition >
    TValue const & value( String< TValue, Journal< JournalConfig< TValue, Strict, False > > > & string, TPosition position ) {
       return string.getjournal().get( position );
    }
    
    template< typename TValue, typename TPosition >
    TValue value( String< TValue, Journal< JournalConfig< TValue, Sloppy, True > > > & string, TPosition position ) {
-      return string.getjournal().get( position ) + string.getjournal().shift( position );
+      return string.getjournal().get( position ) + string.getjournal().shift( string.getjournal().get( position ) );
    }
 
    template< typename TValue, typename TPosition >
    TValue value( String< TValue, Journal< JournalConfig< TValue, Strict, True > > > & string, TPosition position ) {
-      return string.getjournal().get( position ) + string.getjournal().shift( position );
+      return string.getjournal().get( position ) + string.getjournal().shift( string.getjournal().get( position ) );
    }
+
+   template< typename TValue, typename TPosition >
+   TValue & value( String< TValue, Journal< JournalConfig< TValue, Sloppy, False > > > const & string, TPosition position ) {
+      return string.getjournal().get( position );
+   }
+   
+   template< typename TValue, typename TPosition >
+   TValue const & value( String< TValue, Journal< JournalConfig< TValue, Strict, False > > > const & string, TPosition position ) {
+      return string.getjournal().get( position );
+   }
+   
+   template< typename TValue, typename TPosition >
+   TValue value( String< TValue, Journal< JournalConfig< TValue, Sloppy, True > > > const & string, TPosition position ) {
+      return string.getjournal().get( position ) + string.getjournal().shift( string.getjournal().get( position ) );
+   }
+
+   template< typename TValue, typename TPosition >
+   TValue value( String< TValue, Journal< JournalConfig< TValue, Strict, True > > > const & string, TPosition position ) {
+      return string.getjournal().get( position ) + string.getjournal().shift( string.getjournal().get( position ) );
+   }
+
 
    template< typename TConfig >
    struct Iterator< String< typename TConfig::Type, Journal< TConfig > >, Standard > {
@@ -79,7 +100,7 @@ namespace seqan{
    // suffix array type
 
    template < typename TConfig >
-   struct SAValue< Index< String< typename TConfig::Type, Journal< TConfig > >, typename TConfig::TUnderlyingSpec > >{
+   struct SAValue< Index< String< typename TConfig::Type, Journal< TConfig > >, typename TConfig::TSpec > >{
       typedef typename Size< String< typename TConfig::Type, Journal< TConfig > > >::Type Type;
    };
 

@@ -14,18 +14,18 @@ namespace seqan {
    inline int get_shift( TString const & limits, TPos position ){
       size_t low = 0;
       size_t high = length( limits );
-      size_t mid = (size_t)floor( high / 2 );
+      size_t mid = high / 2;
       bool seeking = true;
       while( seeking ){
         if( limits[mid].i1 > position ){
             high = mid;
-            mid = low + (size_t)floor( ( high - low ) / 2 );
+            mid = low + ( ( high - low ) / 2 );
         }else{
             if( limits[mid + 1].i1 > position || mid + 1 == high ){
                 seeking = false;
             }else{
                 low = mid;
-                mid = low + (size_t)floor( ( high - low ) / 2 );
+                mid = low + ( ( high - low ) / 2 );
             }
         }
       }
@@ -558,6 +558,10 @@ namespace seqan {
          }else{
             back( m_shifts ).i2 = p.i2;
          }
+      }
+
+      inline String< Pair< size_t, int > > const & shifts(){
+         return m_shifts;
       }
 
    private:

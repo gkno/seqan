@@ -10,7 +10,7 @@ namespace seqan{
             value = 0;
         }
         
-        return (unsigned int)floor(value);
+        return value;
     }
 
     template< typename TSpec >

@@ -3,8 +3,8 @@
 
 namespace seqan{
 
-   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > const & iter ){
+   template< typename TValue, typename TSloppySpec >
+   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False > > const & iter ){
       if( iter.it_tree()->is_internal ){
          return *(iter.it_inner());
       }else{
@@ -12,8 +12,8 @@ namespace seqan{
       }
    }
    
-   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False, TUnderlyingSpec, TInsertSpec > > & iter ){
+   template< typename TValue, typename TSloppySpec >
+   inline TValue & value( jiter< JournalConfig< TValue, TSloppySpec, False > > & iter ){
       if( iter.it_tree()->is_internal ){
          return *(iter.it_inner());
       }else{
@@ -21,8 +21,8 @@ namespace seqan{
       }
    }
    
-   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > const & iter ){
+   template< typename TValue, typename TSloppySpec >
+   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True > > const & iter ){
       if( iter.it_tree()->is_internal ){
          return *(iter.it_inner()) + iter.get_shift();
       }else{
@@ -30,8 +30,8 @@ namespace seqan{
       }
    }
    
-   template< typename TValue, typename TSloppySpec, typename TUnderlyingSpec, typename TInsertSpec >
-   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True, TUnderlyingSpec, TInsertSpec > > & iter ){
+   template< typename TValue, typename TSloppySpec >
+   inline TValue value( jiter< JournalConfig< TValue, TSloppySpec, True > > & iter ){
       if( iter.it_tree()->is_internal ){
          return *iter.it_inner() + iter.get_shift();
       }else{
@@ -44,7 +44,7 @@ namespace seqan{
 
       typedef typename TConfig::Type TValue;
       typedef typename TConfig::TSloppy TSloppySpec;
-      static bool const TShiftSpec = TConfig::TShift;
+      typedef typename TConfig::TShift TShiftSpec;
       typedef typename TConfig::TSpec TSpec;
       typedef typename TConfig::TStringSpec TStringSpec;
 
@@ -100,11 +100,18 @@ namespace seqan{
          std::cout << std::endl;
       }
 #endif
-      inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() {
+      //inline typename SloppyValue< TValue, TSloppySpec >::Type operator*() {
+      //   return value( *this );
+      //}
+      //
+      //inline TValue operator*() const{
+      //   return value( *this );
+      //}
+      inline typename IndexOperatorValue< TValue, TSloppySpec, TShiftSpec >::Type operator*(){
          return value( *this );
       }
-      
-      inline TValue operator*() const{
+
+      inline typename IndexOperatorValue< TValue, TSloppySpec, TShiftSpec >::Type operator*() const{
          return value( *this );
       }
 
@@ -303,7 +310,12 @@ namespace seqan{
       }
       
       inline int get_shift() const{
-         return m_journal->shift( abs_pos() );
+         if( m_it_tree->is_internal ){
+            return m_journal->shift( *m_it_inner );
+         }else{
+            return m_journal->shift( *m_it_outer );
+         }
+         
       }
 
       // END Getters
