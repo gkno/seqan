@@ -914,7 +914,7 @@ namespace SEQAN_NAMESPACE_MAIN
         _parse_skipWhitespace(file, c);
 
 		// read iSize
-        int iSize = _parse_readNumber(file, c);
+        _parse_readNumber(file, c);
         _parse_skipWhitespace(file, c);
 
 		// read in sequence
