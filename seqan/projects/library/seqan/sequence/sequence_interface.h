@@ -107,7 +107,7 @@ struct DefaultOverflowImplicit
 template <typename T>
 struct DefaultOverflowExplicit
 {
-	typedef Exact Type;
+	typedef Generous Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

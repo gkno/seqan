@@ -942,6 +942,19 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	struct Infix< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
 		Infix< TString const > {};
 
+//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TString, typename TSpec >
+	struct DefaultOverflowImplicit< StringSet< TString, TSpec > >
+	{
+		typedef Generous Type;
+	};
+
+	template < typename TString, typename TSpec >
+	struct DefaultOverflowImplicit< StringSet< TString, TSpec > const >
+	{
+		typedef Generous Type;
+	};
 
 //////////////////////////////////////////////////////////////////////////////
 // validStringSetLimits
@@ -981,7 +994,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		typename Size<TStringSet>::Type	i = 0;
 
 //		SEQAN_ASSERT(length(me.limits) == len + 1);
-		resize(me.limits, len + 1);
+		resize(me.limits, len + 1, Generous());
 		for(; i < len; ++i) {
 			me.limits[i] = sum;
 			sum += length(me[i]);
@@ -1073,11 +1086,11 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline void appendValue(
 		StringSet< TString, Owner<ConcatDirect<TDelimiter> > > &me, 
 		TString2 const &obj,
-		Tag<TExpand> const) 
+		Tag<TExpand> const &tag) 
 	{
         append(me.concat, obj);
-        appendValue(me.concat, TDelimiter());
-        appendValue(me.limits, lengthSum(me) + length(obj) + 1);
+        appendValue(me.concat, TDelimiter(), tag);
+        appendValue(me.limits, lengthSum(me) + length(obj) + 1, tag);
     }
 
 	// Generous
@@ -1085,11 +1098,11 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	inline void appendValue(
 		StringSet<TString, Dependent<Generous> > &me,
 		TString const &obj, 
-		Tag<TExpand> const) 
+		Tag<TExpand> const &tag) 
 	{
 		SEQAN_CHECKPOINT
-		appendValue(me.strings, const_cast<TString*>(&obj));
-        appendValue(me.limits, lengthSum(me) + length(obj));
+		appendValue(me.strings, const_cast<TString*>(&obj), tag);
+        appendValue(me.limits, lengthSum(me) + length(obj), tag);
 	}
 
 	// Tight
@@ -1097,15 +1110,15 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	inline void appendValue(
 		StringSet<TString, Dependent<Tight> > &me, 
 		TString const &obj,
-		Tag<TExpand> const) 
+		Tag<TExpand> const &tag) 
 	{
 		SEQAN_CHECKPOINT
 		typedef typename Position<StringSet<TString, Dependent<Tight> > >::Type TPos;
 		appendValue(me.strings, const_cast<TString*>(&obj));
 		TPos last = me.lastId++;
-		appendValue(me.ids, last);
+		appendValue(me.ids, last, tag);
 		me.id_pos_map.insert(std::make_pair(last, (TPos)(length(me.strings) - 1)));
-        appendValue(me.limits, lengthSum(me) + length(obj));
+        appendValue(me.limits, lengthSum(me) + length(obj), tag);
 	}
   
 /*
@@ -1124,7 +1137,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
-		resize(me.limits, 1);
+		resize(me.limits, 1, Exact());
 		me.limitsValid = true;
     }
 
@@ -1133,7 +1146,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 	SEQAN_CHECKPOINT
 		clear(me.concat);
-		resize(me.limits, 1);
+		resize(me.limits, 1, Exact());
     }
 
     template < typename TString >
@@ -1141,7 +1154,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 	SEQAN_CHECKPOINT
 		clear(me.strings);
-		resize(me.limits, 1);
+		resize(me.limits, 1, Exact());
 		me.limitsValid = true;
 	}
 
@@ -1151,7 +1164,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	SEQAN_CHECKPOINT
 		clear(me.strings);
 		me.id_pos_map.clear();
-		resize(me.limits, 1);
+		resize(me.limits, 1, Exact());
 		me.limitsValid = true;
 
 		clear(me.ids);
@@ -1181,8 +1194,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template < typename TString, typename TSpec, typename TSize, typename TExpand >
     inline typename Size< StringSet< TString, TSpec > >::Type 
-	resize(StringSet< TString, TSpec > &me, TSize new_size, Tag<TExpand> const tag) {
-		resize(me.limits, new_size + 1);
+	resize(StringSet< TString, TSpec > &me, TSize new_size, Tag<TExpand> const tag) 
+	{
+		resize(me.limits, new_size + 1, tag);
 		me.limitsValid = (new_size == 0);
 //		me.limitsValid = (new_size == length(me.limits));
 		return resize(me.strings, new_size, tag);
@@ -1190,7 +1204,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template < typename TString, typename TSpec, typename TSize, typename TExpand >
     inline typename Size< StringSet< TString, Owner<ConcatDirect<TSpec> > > >::Type 
-	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size, Tag<TExpand> const tag) {
+	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size, Tag<TExpand> const tag) 
+	{
 		return resize(me.limits, new_size + 1, tag) - 1;
     }
 
@@ -1464,9 +1479,10 @@ end(StringSet< TString, TSpec > const & me,
 					TId id) 
 	{
 	SEQAN_CHECKPOINT
-		if (id >= (TId) length(me.strings)) {
+		if (id >= (TId) length(me.strings)) 
+		{
 			fill(me.strings, id+1, TString());
-			resize(me.limits, length(me.limits) + 1);
+			resize(me.limits, length(me.limits) + 1, Generous());
 		}
 		assignValue(me, id, obj);
 		me.limitsValid = false;
@@ -1483,7 +1499,7 @@ end(StringSet< TString, TSpec > const & me,
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
 		if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
 		if ((TString*) me.strings[id] == (TString*) 0)
-			resize(me.limits, length(me.limits) + 1);
+			resize(me.limits, length(me.limits) + 1, Generous());
 		me.strings[id] = &obj;
 		me.limitsValid = false;
 		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
@@ -1551,7 +1567,7 @@ end(StringSet< TString, TSpec > const & me,
 	{
 	SEQAN_CHECKPOINT
 		erase(me.strings, id);
-		resize(me.limits, length(me.limits) - 1);
+		resize(me.limits, length(me.limits) - 1, Generous());
 		me.limitsValid = empty(me);
 	}
 
@@ -1560,13 +1576,14 @@ end(StringSet< TString, TSpec > const & me,
 	removeValueById(StringSet<TString, Dependent<Generous> >& me, TId const id) 
 	{
 	SEQAN_CHECKPOINT
-		if (me.strings[id] != (TString*) 0) {
-			resize(me.limits, length(me.limits) - 1);
+		if (me.strings[id] != (TString*) 0) 
+		{
+			resize(me.limits, length(me.limits) - 1, Generous());
 			me.limitsValid = empty(me);
 		}
 		me.strings[id] = 0;
 		while (!empty(me.strings) && !me.strings[length(me.strings) - 1])
-			resize(me.strings, length(me.strings) - 1);
+			resize(me.strings, length(me.strings) - 1, Generous());
 	}
 
 	template<typename TString, typename TId>
@@ -1585,7 +1602,7 @@ end(StringSet< TString, TSpec > const & me,
 			erase(me.strings, remPos);
 			erase(me.ids, remPos);
 			me.id_pos_map.erase(pos);
-			resize(me.limits, length(me.limits) - 1);
+			resize(me.limits, length(me.limits) - 1, Generous());
 
 			for(TIter itChange = me.id_pos_map.begin(); itChange != me.id_pos_map.end(); ++itChange) {
 				if (itChange->second > remPos) --(itChange->second);
