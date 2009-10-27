@@ -67,6 +67,17 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 	}
 }
 
+template<typename TFile, typename TChar>
+inline void 
+_parse_skipSpace(TFile& file, TChar& c)
+{
+	if (c != '\t' && c != ' ') return;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (c != '\t' && c != ' ') break;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>
