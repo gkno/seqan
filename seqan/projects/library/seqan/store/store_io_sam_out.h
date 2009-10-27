@@ -108,7 +108,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Id<TAlignedRead>::Type							TId;
 
 		typedef Gaps<TReadSeq, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
-		typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+		typedef Gaps<Nothing, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
 
 		String<int> mateIndex;	// store outer library size for each pair match (indexed by pairMatchId)
 		calculateMateIndices(mateIndex, store);
@@ -124,10 +124,11 @@ namespace SEQAN_NAMESPACE_MAIN
             TId alignedId = (*it).id;
 			TId readId = (*it).readId;
 			TId mateIdx = TRead::INVALID_ID;
+
 			if ((*it).pairMatchId != TRead::INVALID_ID)
 				mateIdx = mateIndex[2*(*it).pairMatchId + getMateNo(store, (*it).readId)];
 
-			TContigGaps	contigGaps(store.contigStore[(*it).contigId].seq, store.contigStore[(*it).contigId].gaps);
+			TContigGaps	contigGaps(/*store.contigStore[(*it).contigId].seq, */store.contigStore[(*it).contigId].gaps);
 			__int64 pos = positionGapToSeq(contigGaps, _min((*it).beginPos, (*it).endPos)) + 1;
 			__int64 mpos = 0;
 			int isize = 0;
@@ -152,9 +153,12 @@ namespace SEQAN_NAMESPACE_MAIN
 				if ((*mit).beginPos > (*mit).endPos)
 					flag |= 0x0020;				
 			}
-			unsigned char mateNo = getMateNo(store, readId);
-			if (mateNo == 0) flag |= 0x0040;
-			if (mateNo == 1) flag |= 0x0080;
+			else
+				flag |= 0x0008;					// mate is unmapped (actually we should check if the mate has no match at all)
+			
+			signed char mateNo = getMateNo(store, readId);
+			if (mateNo == 0) flag |= 0x0040;	// this read is the first in the pair
+			if (mateNo == 1) flag |= 0x0080;	// this read is the second in the pair
 
 			if (readId < length(store.readStore))
 			{

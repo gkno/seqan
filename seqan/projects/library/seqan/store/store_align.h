@@ -48,6 +48,23 @@ struct AlignedReadStoreElement
 	TGapAnchors	gaps;
 
 	AlignedReadStoreElement() : id(INVALID_ID), readId(INVALID_ID), contigId(INVALID_ID), pairMatchId(INVALID_ID), beginPos(0), endPos(0) {}
+
+	AlignedReadStoreElement(TId _id, TId _readId, TId _contigId, TPos _beginPos, TPos _endPos) :
+		id(_id), 
+		readId(_readId), 
+		contigId(_contigId), 
+		pairMatchId(INVALID_ID), 
+		beginPos(_beginPos), 
+		endPos(_endPos) {}
+
+	AlignedReadStoreElement(TId _id, TId _readId, TId _contigId, TPos _beginPos, TPos _endPos, TGapAnchors const &_gaps) :
+		id(_id), 
+		readId(_readId), 
+		contigId(_contigId), 
+		pairMatchId(INVALID_ID), 
+		beginPos(_beginPos), 
+		endPos(_endPos),
+		gaps(_gaps) {}
 };
 
 template <typename TScore, typename TSpec = void>
@@ -455,6 +472,11 @@ public:
 		data_viewCutBegin(0),
 		data_viewCutEnd(0) {}
 
+	Gaps(TGapAnchors &anchors):
+		data_gaps(anchors),
+		data_viewCutBegin(0),
+		data_viewCutEnd(0) {}
+
 	Gaps(TSource &source, TGapAnchors &anchors):
 		data_source(source),
 		data_gaps(anchors),
@@ -487,6 +509,19 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSize, typename TSource, typename TGapAnchors>
+inline void
+_assignSourceLength(TSize & size, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me)
+{
+SEQAN_CHECKPOINT
+	if (_IsSameType<TSource, Nothing>::VALUE)
+		size = supremumValue(size);
+	else
+		size = length(value(me.data_source));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename TSource, typename TGapAnchors>
 inline TGapAnchors &
 _dataAnchors(Gaps<TSource, AnchorGaps<TGapAnchors> > & me)
@@ -512,11 +547,17 @@ _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, 
 SEQAN_CHECKPOINT
 	if (idx > (TIdx)length(_dataAnchors(me)))
 	{
-		anchor.seqPos = length(source(me));
+		_assignSourceLength(anchor.seqPos, me);
 		if (empty(_dataAnchors(me)) && idx == 1)
 			anchor.gapPos = anchor.seqPos;
 		else
-			anchor.gapPos = supremumValue(anchor.gapPos);
+		{
+			// for the sick case that an anchor seq position is beyond the sequence end
+/*			if (!empty(_dataAnchors(me)))
+				if (anchor.seqPos < back(_dataAnchors(me)).seqPos)
+					anchor.seqPos = back(_dataAnchors(me)).seqPos;
+*/			anchor.gapPos = supremumValue(anchor.gapPos);
+		}
 	}
 	else if (idx > 0)
 		anchor = _dataAnchors(me)[idx - 1];
@@ -538,7 +579,8 @@ _unclippedLength(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me)
 {
 	typedef typename Size<Gaps<TSource, AnchorGaps<TGapAnchors> > >::Type TSize;
 	typedef typename Value<TGapAnchors>::Type TAnchor;
-	TSize len = length(source(me));
+	TSize len;
+	_assignSourceLength(len, me);
 	if (!empty(_dataAnchors(me)))
 	{
 		TAnchor const &last = back(_dataAnchors(me));
@@ -659,16 +701,17 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 {
 	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;	
 
-	GapAnchor<int>	prevAnchor, nextAnchor;
-	TPosition		seqPos;
-	int				anchorIdx;
+	GapAnchor<__int64>	prevAnchor, nextAnchor;
+	TPosition			seqPos;
+	int					anchorIdx;
 
 	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
 		TGapAnchors const & anchors = _dataAnchors(me);
-		TAnchorPos seqLength = length(source(me));
+		TAnchorPos seqLength;
+		_assignSourceLength(seqLength, me);
 		if (!empty(anchors))
 		{
 			anchorIdx = upperBoundGapAnchor(anchors, pos, SortGapPos()) - begin(anchors, Standard());
@@ -695,16 +738,17 @@ positionSeqToGap(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 {
 	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;	
 
-	GapAnchor<int>	prevAnchor, nextAnchor;
-	TPosition		gapPos;
-	int				anchorIdx;
+	GapAnchor<__int64>	prevAnchor, nextAnchor;
+	TPosition			gapPos;
+	int					anchorIdx;
 
 	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
 		TGapAnchors const & anchors = _dataAnchors(me);
-		TAnchorPos seqLength = length(source(me));
+		TAnchorPos seqLength;
+		_assignSourceLength(seqLength, me);
 		if (!empty(anchors))
 		{
 			anchorIdx = upperBoundGapAnchor(anchors, pos, SortSeqPos()) - begin(anchors, Standard());
@@ -767,20 +811,20 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 	}
 */	Iter(TGaps & container_):
-		data_container(&container_),
-		seqLength(length(source(container_)))
+		data_container(&container_)
 	{
 SEQAN_CHECKPOINT
+		_assignSourceLength(seqLength, container_);
 		_goTo_gapAnchorIterator(*this, data_container->data_viewCutBegin);
 		viewBegin = current;
 		viewEnd.gapPos = _unclippedLength(*data_container) - data_container->data_viewCutEnd;
 		viewEnd.seqPos = positionGapToSeq(*data_container, viewEnd.gapPos);
 	}
 	Iter(TGaps & container_, TGapSize position):
-		data_container(&container_),
-		seqLength(length(source(container_)))
+		data_container(&container_)
 	{
 SEQAN_CHECKPOINT
+		_assignSourceLength(seqLength, container_);
 		_goTo_gapAnchorIterator(*this, position + data_container->data_viewCutBegin);
 		viewBegin.gapPos = data_container->data_viewCutBegin;
 		viewEnd.gapPos   = _unclippedLength(*data_container) - data_container->data_viewCutEnd;
@@ -831,6 +875,7 @@ getValue(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me)
 SEQAN_CHECKPOINT
 	typedef typename Value<Iter<TGaps, GapsIterator<ArrayGaps> > >::Type TValue;
 	if (isGap(me)) return gapValue<TValue>();
+	else if (isUnknown(me)) return unknownValue<TValue>();
 	else return getValue(source(me));
 }
 template <typename TGaps, typename TGapAnchors>
@@ -840,6 +885,7 @@ getValue(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 SEQAN_CHECKPOINT
 	typedef typename Value<Iter<TGaps, GapsIterator<ArrayGaps> > const>::Type TValue;
 	if (isGap(me)) return gapValue<TValue>();
+	else if (isUnknown(me)) return unknownValue<TValue>();
 	else return getValue(source(me));
 }
 
@@ -850,6 +896,15 @@ inline bool
 isGap(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 	return me.current.seqPos == me.nextAnchor.seqPos;
+}
+
+template <typename TGaps, typename TGapAnchors>
+inline bool 
+isUnknown(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
+{
+	int len;
+	_assignSourceLength(len, *me.data_container);
+	return me.current.seqPos < 0 || me.current.seqPos >= len;
 }
 
 template <typename TGaps, typename TGapAnchors>
@@ -881,14 +936,14 @@ inline bool
 atBegin(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me)
 {
 //	return me.current.seqPos == 0 && me.current.gapPos == 0;
-	return me.current == me.viewBegin;
+	return me.current <= me.viewBegin;
 }
 template <typename TGaps, typename TGapAnchors>
 inline bool 
 atBegin(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 //	return me.current.seqPos == 0 && me.current.gapPos == 0;
-	return me.current == me.viewBegin;
+	return me.current <= me.viewBegin;
 }
 
 template <typename TGaps, typename TGapAnchors>
@@ -896,14 +951,14 @@ inline bool
 atEnd(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me)
 {
 //	return me.current == me.nextAnchor;
-	return me.current == me.viewEnd;
+	return me.current >= me.viewEnd;
 }
 template <typename TGaps, typename TGapAnchors>
 inline bool 
 atEnd(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me)
 {
 //	return me.current == me.nextAnchor;
-	return me.current == me.viewEnd;
+	return me.current >= me.viewEnd;
 }
 
 //____________________________________________________________________________

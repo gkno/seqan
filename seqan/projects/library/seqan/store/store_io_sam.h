@@ -42,53 +42,75 @@ namespace SEQAN_NAMESPACE_MAIN
 // Cigar struct
 //////////////////////////////////////////////////////////////////////////////
     
-    template<typename TChar = char, typename TNum = unsigned int>
-    struct Cigar
-    {
-        String<TChar> operationType;
-        String<TNum> operationCount;
-        
-        Cigar(){}
-    };
+    template <typename _TOperation = char, typename _TCount = unsigned>
+	struct CigarElement
+	{
+		typedef _TOperation TOperation;
+		typedef _TCount		TCount;
 
-//////////////////////////////////////////////////////////////////////////////
-// append
-    
-    template<typename TChar, typename TNum>
-    inline void append(Cigar<TChar, TNum> & cigar, TChar const c, TNum const i)
-    {
-        append(cigar.operationType, c);
-        append(cigar.operationCount, i);
-    }
-
+		TOperation			operation;
+		TCount				count;
+		
+		CigarElement(TOperation o, TCount c):
+			operation(o),
+			count(c) {}
+	};
+	
 //////////////////////////////////////////////////////////////////////////////
 // _getClippedLength
     
-    template<typename TChar, typename TNum, typename TNum2>
-    inline void _getClippedLength(Cigar<TChar, TNum> const & cigar, TNum2 & sum)
+    template <typename TCigarString, typename TNum>
+    inline void _getClippedLength(TCigarString const & cigar, TNum & sum)
     {
-        typedef typename Iterator< String<TNum> >::Type TNumIter;
-        typedef typename Iterator< String<TChar> >::Type TCharIter;
+        typedef typename Iterator<TCigarString, Standard>::Type TCigarIter;
         
-        TNumIter it_c = begin(cigar.operationCount);
-        TCharIter it_t = begin(cigar.operationType);
+        TCigarIter it = begin(cigar, Standard());
+        TCigarIter itEnd = end(cigar, Standard());
         
-        sum = 0;
-        
-        while(it_c != end(cigar.operationCount)){
-            if(value(it_t) != 'S' && value(it_t) != 's' && value(it_t) != 'H' && value(it_t) != 'h'){
-                sum += value(it_c);
-            }
-            
-            ++it_c;
-            ++it_t;
-        }
-
+        sum = 0;        
+        for (; it != itEnd; ++it)
+            if (getValue(it).operation != 'S' && getValue(it).operation != 'H')
+                sum += getValue(it).count;
     }
 
 //////////////////////////////////////////////////////////////////////////////
 // cigarToGapAnchorRead
-    
+    template<typename TCigarString, typename TGaps>
+    inline void cigarToGapAnchorRead(TCigarString const & cigar, TGaps & gaps)
+    {
+		typename Iterator<TGaps>::Type it = begin(gaps);
+		for (unsigned i = 0; i < length(cigar); ++i)
+		{
+			switch (cigar[i].operation)
+			{
+				case 'P':
+				case 'D':
+					insertGaps(it, cigar[i].count);
+				case 'M':
+				case 'I':
+					it += cigar[i].count;
+			}
+		}
+	}
+
+    template<typename TCigarString, typename TGaps>
+    inline void cigarToGapAnchorContig(TCigarString const & cigar, TGaps & gaps)
+    {
+		typename Iterator<TGaps>::Type it = begin(gaps);
+		for (unsigned i = 0; i < length(cigar); ++i)
+		{
+			switch (cigar[i].operation)
+			{
+				case 'P':
+				case 'I':
+					insertGaps(it, cigar[i].count);
+				case 'M':
+				case 'D':
+					it += cigar[i].count;
+			}
+		}
+	}
+/*
     template<typename TChar, typename TNum, typename TGapAnchor>
     inline void cigarToGapAnchorRead(Cigar<TChar, TNum> const & cigar, String<TGapAnchor> & gaps)
     {
@@ -130,7 +152,7 @@ namespace SEQAN_NAMESPACE_MAIN
         while(it_c != end(cigar.operationCount)){
             
             // If the operation type is match/mismatch or a Deletion in the reference there is no gap in the read sequence.
-            if(value(it_t) == 'M' || value(it_t) == 'D' || value(it_t) == 'm' || value(it_t) == 'd'){
+            if(value(it_t) == 'M' || value(it_t) == 'I' || value(it_t) == 'm' || value(it_t) == 'i'){
                 
                 // If this is the first m/i operation after a d/p operation (first one after a gap)
                 if(!was_mi){
@@ -149,7 +171,7 @@ namespace SEQAN_NAMESPACE_MAIN
             }
             
             // If the operation type is insertion or skipped in the reference or padding there is a gap in the read sequence.
-            if(value(it_t) == 'I' || value(it_t) == 'P' || value(it_t) == 'N' || value(it_t) == 'i' || value(it_t) == 'p' || value(it_t) == 'n'){
+            if(value(it_t) == 'D' || value(it_t) == 'P' || value(it_t) == 'N' || value(it_t) == 'd' || value(it_t) == 'p' || value(it_t) == 'n'){
 
                 // switch operation type to deletion or padding
                 was_mi = false;
@@ -165,236 +187,113 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // following (soft) klipped characters are encode by the exceeding length of the sequence
     }
+*/
     //////////////////////////////////////////////////////////////////////////////
     // cigarToContigGaps
     
-    template<typename TChar, typename TNum, typename TPos, typename TFlag, typename TGap>
-    inline void cigarToContigGaps(Cigar<TChar, TNum> const & cigar, TPos beginPos, TFlag flag, String<Pair<TGap, TGap> > & gaps)
+    template <typename TCigarString, typename TPos, typename TGapString>
+    inline void 
+	cigarToContigGaps (
+		TCigarString const & cigar, 
+		TPos beginPos, 
+		bool reverse, 
+		TGapString & gaps)
     {
-        typedef typename Iterator< String<TNum> >::Type TNumIter;
-        typedef typename Iterator< String<TChar> >::Type TCharIter;
-        typedef Pair<TGap, TGap> TPair;
+        typedef typename Iterator<TCigarString, Standard>::Type TCigarIter;
+        typedef typename Value<TGapString>::Type TPair;
         
         // Iterators on cigar
-        TNumIter it_c = begin(cigar.operationCount);
-        TCharIter it_t = begin(cigar.operationType);
-        
-        TNumIter stop = end(cigar.operationCount);
-        
-        int direction = 1;
-        
-        if (flag & (1 << 4) == (1 << 4)){
-            it_c = end(cigar.operationCount);
-            it_t = end(cigar.operationType);
-            stop = begin(cigar.operationCount);
-            direction = -1;
-        }
-        
-        // boolean that keeps track on type of the last cigar operation
-        // is true if it was one introducing a gap
-        // if false otherwise
-        bool was_gap = false;
-        
-        // positions and length of the current gap
-        int gapLength = 0;
-        int pos = beginPos;
+        TCigarIter it;
+		TCigarIter itEnd;        
+        int direction;
         
         // if the CIGAR is empty
-        if(length(cigar.operationCount) == 0){
+        if (empty(cigar))
             return;
+        
+        if (reverse)
+		{
+            it = end(cigar, Standard()) - 1;
+            itEnd = begin(cigar, Standard()) - 1;
+            direction = -1;
+        } else
+		{
+            it = begin(cigar, Standard());
+            itEnd = end(cigar, Standard());
+            direction = 1;
         }
+                
+        // positions and length of the current gap
+        unsigned gapLength = 0;
+		// the gap is inserted after pos later
+		// here we insert gaps before pos
+        TPos pos = beginPos - 1;
         
         // check if there is a (soft) clipped sequence in the begining
-        if(value(it_t) == 'S' || value(it_t) == 's'){
-            
+        if (getValue(it).operation == 'S')
+		{ 
             // skip first 'count' characters
-            pos += value(it_c);
+            pos += getValue(it).count;
         }
         
-        while(it_c != stop){
-            
-            // If the operation type is insertion in the reference, match/mismatch or skipped there is no gap in the read sequence.
-            if(value(it_t) == 'I' || value(it_t) == 'M' || value(it_t) == 'N' || value(it_t) == 'i' || value(it_t) == 'm' || value(it_t) == 'n'){
-                
+			std::cout<<std::endl;
+        for (; it != itEnd; it += direction)
+		{
+			char op = getValue(it).operation;
+			std::cout<< op<<':'<<getValue(it).count<<"  ";
+
+            // If the operation type is deletion or padding there is a gap in the reference sequence.
+            if (op == 'P' || op == 'I')
+			{                
+                // Increment only the gap length
+                gapLength += getValue(it).count;
+            } else
+			{
                 // If this is the first i/p/n operation after a m/d operation (first one after a gap)
-                if(was_gap){
-                    
+                if (gapLength != 0)
+				{
                     // insert in gap pair
-                    TPair pair;
-                    pair.i1 = pos; pair.i2 = gapLength;
-                    append(gaps, pair);
+					append(gaps, TPair(pos, gapLength), Generous());
+					std::cout<<" p:"<<pos<<" l:"<<gapLength<<" r:"<<reverse;
                     
                     // set gap length back to 0
                     gapLength = 0;
-                    
-                    // switch operation type to does not introduce gap
-                    was_gap = false;
                 }
-                
-                // Increment positions
-                pos += value(it_c);
-            }
-            
-            // If the operation type is deletion or padding there is a gap in the reference sequence.
-            if(value(it_t) == 'P' || value(it_t) == 'D' || value(it_t) == 'p' || value(it_t) == 'd'){
-                
-                // switch operation type to introduc gap
-                was_gap = true;
-                
-                // Increment only the position and gap length
-                pos += value(it_c);
-                gapLength  += value(it_c);
-            }
-            
-            // Iterate.
-            it_c += direction;
-            it_t += direction;
+				
+				// Increment position
+				pos += getValue(it).count;
+			}
         }
         
         // following (soft) klipped characters are encode by the exceeding length of the sequence
-    }
-    
-//////////////////////////////////////////////////////////////////////////////
-// some helping functions
-//////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////
-// _print_gapAnchor
-    
-    template<typename TChar, typename TGapAnchor>
-    inline void _print_gapAnchor(String<TChar> seq, String<TGapAnchor> gaps)
-    {
-        typedef typename Iterator< String<TChar> >::Type TCharIter;
-        typedef typename Iterator< String<TGapAnchor> >::Type TGapIter;
-        
-        // create iterators and set them on the begining of the strings
-        TCharIter it_c = begin(seq);
-        TGapIter  it_g = begin(gaps);
-        
-        //
-        int gapped = value(it_g).gapPos, last_gapped = gapped;
-        int ungapped = value(it_g).seqPos, last_ungapped = ungapped;
-        
-        for(int i = 0; i < ungapped; ++i)
-            ++it_c;
-        
-        while(it_g != end(gaps)){
-            gapped = value(it_g).gapPos;
-            ungapped = value(it_g).seqPos;
-            //std::cout << "(" << ungapped << ", " << gapped << ")";
-            
-            int count_chars = ungapped - last_ungapped;
-            int count_gaps = (gapped - last_gapped) - count_chars;
-            
-            for(int i = 0; i < count_chars && it_c != end(seq); ++i, ++it_c){
-                _streamPut(std::cout, value(it_c));
-            }
-            
-            for(int i = 0; i < count_gaps; ++i){
-                _streamPut(std::cout, '-');
-            }
-            
-            // iterate
-            last_gapped = gapped;
-            last_ungapped = ungapped;
-            ++it_g;
-        }
-        
-        while(it_c != end(seq)){
-            _streamPut(std::cout, value(it_c));
-            ++it_c;
-        }
-    }
-
-//////////////////////////////////////////////////////////////////////////////
-// _getMate
-//
-// checks if a read name is already in read name store and if corresponding 
-// begin position in the aligned read strore fits the mate position
-// returns the ID or -1 otherwise
-    
-    template<typename TSpec, typename TConfig, typename TPos, typename TID>
-    inline void 
-    _getMate(FragmentStore<TSpec, TConfig> & fragStore, String<char> & readName, TPos & mPos, TID & mateID)
-    {
-        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
-        
-        // set mate ID = -1. Will be replaced if mate is found
-        mateID = -1;
-        
-        // Iterator over read names
-        TNameStoreIter it_rm = begin(fragStore.readNameStore);
-        
-        while (it_rm != end(fragStore.readNameStore)){
-            // if the read name was found
-            if(readName == value(it_rm)){
-                // check in the aligned read store if the begin position is correct
-                int suggestedID = position(it_rm);
-                
-                if(value(fragStore.alignedReadStore, suggestedID).beginPos == mPos){
-                    mateID = suggestedID;
-                    return;
-                }                
-            }
-            
-            ++it_rm;
-        }
-        
-    }
-    
-//////////////////////////////////////////////////////////////////////////////
-// _getID
-    
-    template<typename TType, typename TID>
-    inline bool 
-    _getID(StringSet<TType> & store, TType & elem, TID & elem_id)
-    {
-        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
-        
-        // Iterator over read names
-        TNameStoreIter iter = begin(store);
-        
-        while (iter != end(store)){
-            // if the element was found
-            if(elem == value(iter)){
-                // set the ID
-                elem_id = position(iter);
-                // and break the loop
-                return true;               
-            }
-            
-            ++iter;
-        }
-        return false;
+		if (gapLength != 0)
+		{
+			// insert in gap pair
+			append(gaps, TPair(pos, gapLength), Generous());
+		}
     }
     
 //////////////////////////////////////////////////////////////////////////////
 // appendAlignment
     
     template<typename TSpec, typename TConfig, typename TId, typename TPos, typename TGaps>
-    inline void
-    appendAlignment(
-                    FragmentStore<TSpec, TConfig> & fragStore, 
-                    TId & readId, 
-                    TId & contigId, 
-                    TPos & beginPos, 
-                    TPos & endPos, 
-                    TGaps & gaps){
-        
+    inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
+	appendAlignment (
+		FragmentStore<TSpec, TConfig> & fragStore, 
+		TId readId, 
+		TId contigId, 
+		TPos beginPos, 
+		TPos endPos, 
+		TGaps const & gaps)
+	{
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
         
-        TId alignId = length(fragStore.alignedReadStore);
-        
-        TAlignedElement alignedElem = TAlignedElement();
-        alignedElem.id = alignId;
-        alignedElem.readId = readId;
-        alignedElem.contigId = contigId;
-        alignedElem.beginPos = beginPos;
-        alignedElem.endPos = endPos;
-        alignedElem.gaps = gaps;
-        
+        TId id = length(fragStore.alignedReadStore);
+        TAlignedElement alignedElem = TAlignedElement(id, readId, contigId, beginPos, endPos, gaps);
         append(fragStore.alignedReadStore, alignedElem);
+		
+		return id;
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -404,65 +303,70 @@ namespace SEQAN_NAMESPACE_MAIN
 // correct Id in the variable using to qname to identify it
 // If needed a mate pair entry is created
     
-    template<typename TSpec, typename TConfig, typename TId, typename TName, typename TString, typename TFlag>
-    inline void
-    _appendRead(FragmentStore<TSpec, TConfig> & fragStore, 
-                TId & readId, 
-                TName & qname,
-                TString & readSeq,
-                TFlag & flag){
-        
+    template<typename TSpec, typename TConfig, typename TId, typename TName, typename TString, typename TFlag, typename TContext>
+    inline void 
+	_appendRead (
+		FragmentStore<TSpec, TConfig> & fragStore, 
+		TId & readId, 
+		TName & qname,
+		TString & readSeq,
+		TFlag & flag,
+		TContext & context)
+	{
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 
-        if(_getID(fragStore.readNameStore, qname, readId)){
-            // if the read is paired
-            if((flag & 1) == 1){
-                // check the mate pair store if it is the same mate of the pair
-                // assuming that only one flag 0x040 or 0x0080 is 1
-                int inPair = ((flag & (1 << 7)) >> 7);
-                
-                TId matePairId = value(fragStore.readStore, readId).matePairId;
-                
-                readId = value(fragStore.matePairStore, matePairId).readId[inPair];
-                
-                if(readId == TMatePairElement::INVALID_ID){
-                    // create new entry in read and read name store
-                    readId = length(fragStore.readStore);
-                    // set sequence and mate pair ID in new read store element
-                    appendRead(fragStore, readSeq, matePairId);
-                    
-                    // add the identifyer to the read name store
-                    appendValue(fragStore.readNameStore, qname);
-                    
-                    // set the ID in the mate pair store
-                    value(fragStore.matePairStore, matePairId).readId[inPair] = readId;
-                }
-            }
-        } else { // if the read name is not in the store
-            // create new entry in read and read name store
-            
-            
-            // if the read is paired
-            if((flag & 1) == 1){
-                TMatePairElement mateElem = TMatePairElement();
-                // set the first or second read ID in the mate pair element
-                readId = length(fragStore.readStore);
-                mateElem.readId[((flag & (1 << 7)) >> 7)] = readId;
-                // get a new mate pair ID and add the new mate pair element
-                TId matePairId = length(fragStore.matePairStore);
-                append(fragStore.matePairStore, mateElem);
-                // set the new mate pair ID in the read element
-                appendRead(fragStore, readSeq, matePairId);
-            } 
-            // if read is not paired
-            else {
-                appendRead(fragStore, readSeq);
-            }
-            
-            appendValue(fragStore.readNameStore, qname);
+		// search for readId by name
+        if (_getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
+		{
+			if ((flag & 1) == 1)
+			{
+				// if the read is in the store and paired
+				// check the mate pair store if it is the same mate of the pair
+				// assuming that only one flag 0x040 or 0x0080 is 1
+				int inPair = (flag & 0x80) >> 7;
+				
+				TId matePairId = fragStore.readStore[readId].matePairId;
+				if (matePairId != TMatePairElement::INVALID_ID)
+				{
+					readId = fragStore.matePairStore[matePairId].readId[inPair];
+					if (readId == TMatePairElement::INVALID_ID)
+					{
+						// create new entry in read and read name store
+						// set sequence and mate pair ID in new read store element
+						readId = appendRead(fragStore, readSeq, matePairId);
+						// add the identifier to the read name store
+						appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
+						// set the ID in the mate pair store
+						fragStore.matePairStore[matePairId].readId[inPair] = readId;
+						return;
+					}
+				}
+			} else 
+				return;
         }
-        
+
+		// if the read name is not in the store
+		// create new entry in read and read name store
+		readId = length(fragStore.readStore);
+
+		// if the read is paired
+		if ((flag & 1) == 1)
+		{
+			TMatePairElement mateElem;
+			// set the first or second read ID in the mate pair element
+			TId matePairId = length(fragStore.matePairStore);
+			mateElem.readId[(flag & 0x80) >> 7] = readId;
+			// get a new mate pair ID and add the new mate pair element
+			appendValue(fragStore.matePairStore, mateElem);
+			// set the new mate pair ID in the read element
+			appendRead(fragStore, readSeq, matePairId);
+		} 
+		// if read is not paired
+		else
+			appendRead(fragStore, readSeq);
+		
+		appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -472,32 +376,24 @@ namespace SEQAN_NAMESPACE_MAIN
 // correct Id in the variable using to qname to identify it
 // If needed a mate pair entry is created
     
-    template<typename TSpec, typename TConfig, typename TId, typename TName, typename TContigGaps>
-    inline void
-    _appendContig(FragmentStore<TSpec, TConfig> & fragStore, 
-                TId & contigId, 
-                TName & rName,
-                TContigGaps & contigGap)
+    template<typename TSpec, typename TConfig, typename TId, typename TName>
+    inline void 
+	_appendContig (
+		FragmentStore<TSpec, TConfig> & fragStore, 
+		TId & contigId, 
+		TName & rName)
     {
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
-        typedef typename Value<TContigGaps>::Type TContigGap;
         
-        contigId = 0;
-        
-        // if the contig already exsists
-        if(_getID(fragStore.contigNameStore, rName, contigId)){
-            
-        } 
-        // if the contig is not in the store yet
-        else {
+        if (!_getIdByName(fragStore.contigNameStore, rName, contigId, fragStore.contigNameStoreCache))
+        {
+			// if the contig is not in the store yet
             // set the ID on the last entry after appending
             contigId = length(fragStore.contigStore);
             // append contig store
-            appendValue(fragStore.contigNameStore, rName);
-            append(fragStore.contigStore, TContigElement());
-            // append temp contig gaps
-            appendValue(contigGap, TContigGap());
+            appendName(fragStore.contigNameStore, rName, fragStore.contigNameStoreCache);
+            appendValue(fragStore.contigStore, TContigElement());
         }
     }
 
@@ -507,57 +403,92 @@ namespace SEQAN_NAMESPACE_MAIN
 // shift is the first ID for which mateInfo contains information about a aligned read
 // the function generates new pair match IDs for these entries. It uses the ID of the first found mate for this.
     
-    template<typename TSpec, typename TConfig, typename TMateInfo, typename TSize>
-    inline void
-    _generatePairMatchIds(FragmentStore<TSpec, TConfig> & fragStore,
-                          TMateInfo mateInfos,
-                          TSize shift)
+	template <typename TPos, typename TId>
+	struct _MatchMateInfo
+	{
+		TId		readId;
+		TId		contigId;
+		TId		pairMatchId;
+		TPos	beginPos;
+	};
+    
+    struct _MatchMateInfoLess
+	{
+        template <typename TMInfo>
+        inline bool 
+        operator() (TMInfo const &a, TMInfo const &b) const 
+		{
+            return (a.contigId < b.contigId) || (a.contigId == b.contigId && a.beginPos < b.beginPos);
+        }
+    };
+
+    template<typename TSpec, typename TConfig, typename TMatchMateInfos>
+    inline void 
+	_generatePairMatchIds (
+		FragmentStore<TSpec, TConfig> & fragStore,
+		TMatchMateInfos & matchMateInfos)
     {
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         
-        typedef typename TFragmentStore::TAlignedReadStore TAligned;
-        typedef typename Iterator<TAligned>::Type TIter;
-        
-        typedef typename Id<TFragmentStore>::Type TId;
-        typedef typename TFragmentStore::TContigPos TContigPos;
-        
-        typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
-        typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
-        
+        typedef typename TFragmentStore::TReadStore			TReadStore;
+        typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
+        typedef typename TFragmentStore::TContigPos			TContigPos;
+
+        typedef typename Value<TReadStore>::Type						TRead;
+        typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+        typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIter;    
+		typedef typename Iterator<TMatchMateInfos, Standard>::Type		TMIter;    
+        typedef typename Id<TFragmentStore>::Type						TId;
+                
+        TIter it = begin(fragStore.alignedReadStore, Standard());
+		TIter itEnd = end(fragStore.alignedReadStore, Standard());
+		TMIter mit = begin(matchMateInfos, Standard());
+		TMIter mitEnd = end(matchMateInfos, Standard());
+
+		if (it == itEnd || mit == mitEnd) return;
+
         // sort the aligned read store by: begin position, contig name
         sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
-        
-        // Iterate over all entries in the aligned read store
-        // for each new entry (ID >= shift) check if it is paired
-        // if search for the mate and get its ID
-        TIter alignIt = begin(fragStore.alignedReadStore);
-        
-        for(; alignIt != end(fragStore.alignedReadStore); ++alignIt){
-            if(value(alignIt).id >= shift){
-                TId shiftedId = value(alignIt).id - shift;
-                
-                // if the aligned read is paired and the pair match ID is not set yet
-                if(value(fragStore.readStore, shiftedId).matePairId != TReadStoreElement::INVALID_ID & value(alignIt).pairMatchId != TAlignedElement::INVALID_ID){
-                    
-                    // get mates position
-                    TContigPos & mpos = value(mateInfos, shiftedId).i1;
-                    TId & mrnm = value(mateInfos, shiftedId).i2;
-                    
-                    // search for the mate
-                    TIter mateIt = lowerBoundAlignedReads(fragStore.alignedReadStore, mpos, SortBeginPos());
-                    while(value(mateIt).beginPos == mpos & value(mateIt).contigId != mrnm) ++mateIt;
-                    
-                    if(value(mateIt).beginPos == mpos){
-                        // set the pair match IDs
-                        value(alignIt).pairMatchId = value(alignIt).id;
-                        value(mateIt).pairMatchId = value(alignIt).id;
-                    }
-                    
-                }
-            }
-        }
-    }    
+        sortAlignedReads(fragStore.alignedReadStore, SortContigId());
+		std::sort(mit, mitEnd, _MatchMateInfoLess());
 
+		TMIter mitNext = mit;
+		while (mitNext != mitEnd && (*mit).beginPos == (*mitNext).beginPos)
+			++mitNext;
+        
+//		if (qname == "EAS54_61:4:143:69:578")
+//		readId =0;
+
+		TContigPos pos = _min((*it).beginPos, (*it).endPos);
+		typename Size<TReadStore>::Type readStoreLength = length(fragStore.readStore);
+
+		while (mit != mitEnd)
+		{
+			int cmp = 0;
+			if ((*it).contigId < (*mit).contigId) cmp = -1;
+			else if ((*it).contigId > (*mit).contigId) cmp = 1;
+			else if (pos < (*mit).beginPos) cmp = -1;
+			else if (pos > (*mit).beginPos) cmp = 1;
+
+			if (cmp == 1)
+			{
+				mit = mitNext;
+				while (mitNext != mitEnd && (*mit).beginPos == (*mitNext).beginPos)
+					++mitNext;
+				continue;
+			}
+			if (cmp == 0)
+			{
+				for (TMIter m = mit; m != mitNext; ++m)
+					if ((*it).readId != (*m).readId && (*it).readId < readStoreLength && (*m).readId < readStoreLength)		// correct position found
+						if (fragStore.readStore[(*it).readId].matePairId == fragStore.readStore[(*m).readId].matePairId)	// correct mate found
+							(*it).pairMatchId = (*m).pairMatchId;															// link mate
+			}
+			if (++it == itEnd) break;
+			pos = _min((*it).beginPos, (*it).endPos);
+		}
+    }    
+/*
 //////////////////////////////////////////////////////////////////////////////
 // comparePosLengthPair
     
@@ -572,62 +503,46 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // _writeContigGapInStore
     
-    template<typename TFragmentStore, typename TContigPos>
+    template<typename TFragmentStore, typename TContigsGapPairs>
     inline void
-    _writeContigsGapsInStore(TFragmentStore & fragStore, StringSet<String<Pair<TContigPos, TContigPos> > > const & contigsGaps)
+    _writeContigsGapsInStore(TFragmentStore & fragStore, TContigsGapPairs & contigsGaps)
     {
-        
-        typedef Pair<TContigPos, TContigPos> TPosLengthPair;
-        typedef String<TPosLengthPair> TContigGaps;
-        typedef typename Iterator<TContigGaps>::Type TGapsIter;
-        typedef StringSet<TContigGaps> TContigsGaps;
-        typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigStoreElem;
-        typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
-        typedef typename Iterator<String<TContigGapAnchor> >::Type TContigGapAnchorIter;
+        typedef typename Value<TContigsGapPairs>::Type							TContigGapPairs;
+		typedef typename Value<TContigGapPairs>::Type							TGapPair;
+        typedef typename Iterator<TContigGapPairs, Standard>::Type				TGapsIter;
+		
+		typedef typename TFragmentStore::TContigStore							TContigStore;
+        typedef typename Value<TContigStore>::Type								TContig;
+        typedef typename TContig::TContigSeq									TContigSeq;
+        typedef typename TContig::TGapAnchors									TGapAnchors;
+
+		typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+		typedef typename Iterator<TContigGaps>::Type							TContigGapsIter;
         
         // for all contigs
-        for(int i = 0; i < length(contigsGaps); ++i){
-            TContigGaps gaps = value(contigsGaps, i);
+        for (unsigned i = 0; i < length(contigsGaps); ++i)
+		{
+			TContigGaps contigGaps(fragStore.contigStore[i].seq, fragStore.contigStore[i].gaps);
+            TContigGapPairs	& minGapLengths = contigsGaps[i];
             
             // Sort the contig gaps according to their start position
-            sort(begin(gaps), end(gaps), comparePosLengthPair());
+            std::sort(begin(minGapLengths, Standard()), end(minGapLengths, Standard()), comparePosLengthPair());
             
             // create iterator over contigGaps
-            TGapsIter gapIt = begin(gaps);
-            
-            // get corresponding gapAnchor and iterator on it
-            TContigStoreElem contigStoreElem = value(fragStore.contigStore, i);
-            TContigGapAnchorIter gapAnchorIt = begin(contigStoreElem.gaps);
-            int anchorCount = 0;
-            
-            TContigPos shift = 0;
-            TContigPos pos = 0;
-            TContigPos length = 0;
-            
-            // for all pos-length-pairs
-            for(; gapIt != end(gaps); ++gapIt){
-                pos = value(gapIt).i1;
-                length = value(gapIt).i2;
-                
-                // while position is not reached yet and not last position
-                for(; value(gapAnchorIt).gapPos < pos & gapAnchorIt != end(contigStoreElem.gaps); ++gapAnchorIt, ++anchorCount){
-                    // gapped position += shift
-                    value(gapAnchorIt).gapPos += shift;                    
-                }
-                
-                // difference between position and gapped postion in last gap anchors
-                TContigPos diff = pos - value(gapAnchorIt).gapPos;
-                TContigGapAnchor anchor((value(gapAnchorIt).seqPos + diff), (pos + length));
-                insertValue(contigStoreElem.gaps, anchorCount, anchor, Generous());
-                ++gapAnchorIt; // because the insertion effects the iterator
-                
-                shift += length;
-            }
-            
+			TGapsIter gapItEnd = end(minGapLengths, Standard());
+			for (TGapsIter gapIt = begin(minGapLengths, Standard()); gapIt != gapItEnd; ++gapIt)
+			{
+				// get corresponding gapAnchor and iterator on it
+				TContigGapsIter gapsIter(contigGaps, positionSeqToGap(contigGaps, (*gapIt).i1));
+				++gapsIter;
+				unsigned gapsCount = countGaps(gapsIter);
+				std::cout << "c:"<<i<<"p:"<<(*gapIt).i1<<"  soll:"<<(*gapIt).i2<<"  ist:"<<gapsCount<<std::endl;
+				if (gapsCount < (*gapIt).i2)
+					insertGaps(gapsIter, (*gapIt).i2 - gapsCount);				
+			}
         }
-        
     }
-    
+*/
 //////////////////////////////////////////////////////////////////////////////
 // parsing functions
 //////////////////////////////////////////////////////////////////////////////
@@ -635,26 +550,32 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // _parse_readCigar
     
-    template<typename TFile, typename TChar, typename TNum>
+    template <typename TFile, typename TCigarString, typename TChar>
     inline void
-    _parse_readCigar(TFile & file, Cigar<TChar, TNum> & cigar, TChar& c)
+    _parse_readCigar(TFile & file, TCigarString & cigar, TChar & c)
     {
-        TChar type;
-        TNum count;
-        
+		typedef typename Value<TCigarString>::Type	TCigarElement;
+		typedef typename TCigarElement::TOperation	TOperation;
+		typedef typename TCigarElement::TCount		TCount;
+
+		clear(cigar);
+		
         // if the CIGAR is not set and '*'
-        if(c == '*'){
+        if (c == '*')
+		{
             c = _streamGet(file);
             return;
         }
         
-        while (!_streamEOF(file)) {
-            count = _parse_readNumber(file, c);
-            type = c;
-            append(cigar, type, count);
+        while (!_streamEOF(file)) 
+		{
+            TCount count = _parse_readNumber(file, c);
+			if (c >= 'a' && c <= 'z')
+				c = c + 'A' - 'a';
+            append(cigar, TCigarElement(c, count));
             
             c = _streamGet(file);
-            if (c== ' ' || c== '\t' || c == '\n') break;
+            if (c == ' ' || c == '\t' || c == '\n') break;
         }
     }
     
@@ -666,12 +587,12 @@ namespace SEQAN_NAMESPACE_MAIN
     _parse_readSamIdentifier(TFile & file, TString & str, TChar& c)
     {
         append(str, c);
-        while (!_streamEOF(file)) {
+        while (!_streamEOF(file)) 
+		{
             c = _streamGet(file);
             if (c== ' ' || c== '\t' || c == '\n') break;
             append(str, c);
         }
-
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -681,7 +602,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool
     _parse_is_dna(TChar const & c)
     {
-        return ((c == 'a') || (c == 'c') || (c == 'g') || (c == 't') || (c == 'n') || (c == 'A') || (c == 'C') || (c == 'G') || (c == 'T') || (c == 'N'));
+        return c == (TChar)(Dna5)c;
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -689,55 +610,62 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template<typename TFile, typename TString, typename TChar>
     inline void
-    _parse_readDnaSeq(TFile & file, TString & str, TChar& c)
+    _parse_readDnaSeq(TFile & file, TString & str, TChar & c)
     {
-        if (!_parse_is_dna(c)) return;
-        append(str, c, Generous());
+		TChar first = c;
+		if (!_streamEOF(file)) 
+			c = _streamGet(file);
+
+        if (!_parse_is_dna(first))
+			return;
+        append(str, first, Generous());
         
-        while (!_streamEOF(file)) {
-            c = _streamGet(file);
-            if (!_parse_is_dna(c)) break;
+        for (; !_streamEOF(file) && _parse_is_dna(c); c = _streamGet(file))
             append(str, c, Generous());
-        }
-        
     }
         
 //////////////////////////////////////////////////////////////////////////////
 // _parse_is_PhredQual
     
-    template<typename TChar>
+    template <typename TChar>
     inline bool
-    _parse_is_PhredQual(TChar const & c)
+    _parse_is_PhredQual(TChar c)
     {
-        return ( ((unsigned) c > 32) && ((unsigned) c < 127) );
+        return c >= '!' && c <= '~';
     }
     
 //////////////////////////////////////////////////////////////////////////////
 // _parse_readSeqQual
 //
-// As the DNA5Q data structure can only store quality values till 40, all
-// qualities over this threshold are changed to 40
     
-    template<typename TFile, typename TChar>
+    template<typename TFile, typename TQualString, typename TChar>
     inline void
-    _parse_readSeqQual(TFile & file, String<Dna5Q> & str, TChar& c)
+    _parse_readSeqQual(TFile & file, TQualString & str, TChar & c)
     {
-        typedef typename Iterator< String<Dna5Q> >::Type TIter;
+        typedef typename Size<TQualString>::Type				TSize;
+        typedef typename Iterator<TQualString, Standard>::Type	TIter;
         
-        TIter it = begin(str);
+        TIter itBegin = begin(str, Standard());
+        TSize rest = length(str);
+        
         int q = 0;
-        
-        do
+        for (TIter it = itBegin; rest != 0 && _parse_is_PhredQual(c); --rest, ++it)
         {
-            if (!_parse_is_PhredQual(c)) break;
-            
-            q = c - 32;
-            if (q > 39) q = 40;
-            assignQualityValue(value(it), q);
-            
-            c = _streamGet(file);
+            q = c - 33;
+			if (!_streamEOF(file)) 
+				c = _streamGet(file);
+			else
+				if (rest > 1)
+					rest = 1;
+			
+			if (q == '*' - 33 && !_parse_is_PhredQual(c) && it == itBegin)
+				return;
+			
+			// As the DNA5Q data structure can only store quality values till 60, all
+			// qualities over this threshold are changed to 60
+            if (q > 60) q = 60;
+            assignQualityValue(*it, q);
         }
-        while (!_streamEOF(file) && it != end(str));
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -751,18 +679,19 @@ namespace SEQAN_NAMESPACE_MAIN
     _parse_readCharsTillEndOfLine(TFile & file, String<char> & str, TChar& c)
     {
         // read all chars till '\n'
-        do
+        while (c != '\n')
         {
-            if (c == '\n') break;
             append(str, c, Generous());
-            c = _streamGet(file);
+			if (_streamEOF(file)) return;
+	        c = _streamGet(file);
         }
-        while (!_streamEOF(file));
         
         // read the first char after the '\n'
-        c = _streamGet(file);
+		if (!_streamEOF(file))
+	        c = _streamGet(file);
     }
-    
+	
+	
 //////////////////////////////////////////////////////////////////////////////
 // read functions for SAM
 //////////////////////////////////////////////////////////////////////////////
@@ -772,47 +701,43 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void 
-    read(TFile& file,
-         FragmentStore<TSpec, TConfig>& fragStore,
-         SAM)
+    read (
+		TFile & file,
+		FragmentStore<TSpec, TConfig> & fragStore,
+		SAM)
     {
         typedef Value<FILE>::Type TValue;
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+		typedef typename TFragmentStore::TContigPos TContigPos;
+        typedef typename Id<TFragmentStore>::Type TId;
         
         // data structure to temporarily store the gaps that need to be inserted in the contig sequences
-        typedef Pair<typename TFragmentStore::TContigPos, typename TFragmentStore::TContigPos> TPosLengthPair;
-        typedef String<TPosLengthPair> TContigGaps;
-        typedef StringSet<TContigGaps> TContigsGaps;
-        TContigsGaps contigsGaps;
-        resize(contigsGaps, length(fragStore.contigStore));
-        
-        // data structure to temporarily store information about match mates
-        typedef typename Id<TFragmentStore>::Type TId;
-        typedef Pair<typename TFragmentStore::TContigPos, TId> TMatchMateInfo;
+        typedef _MatchMateInfo<TContigPos, TId> TMatchMateInfo;
         typedef String<TMatchMateInfo> TMatchMateInfos;
+        typedef StringSet<String<typename TFragmentStore::TContigGapAnchor> > TContigAnchorGaps;
+
+        // data structure to temporarily store information about match mates
         TMatchMateInfos matchMateInfos;
+		TContigAnchorGaps contigAnchorGaps;
         
-        // if the aligned store already contains data sets
-        // save their number so the temporarily saved information
-        // can be assiciated with the correct entry
-        typename TFragmentStore::TContigPos shift = length(fragStore.alignedReadStore);
-                
-        if (!_streamEOF(file)){
-            // get first character from the stream
-            char c = _streamGet(file);
-            
-            // Read in header section
-            _readHeader(file, fragStore, c, SAM());
-            
-            // Read in alignments section
-            _readAlignments(file, fragStore, contigsGaps, matchMateInfos, c, SAM());
-            
-            // set the match mate IDs using the information stored in matchMateInfos
-            _generatePairMatchIds(fragStore, matchMateInfos, shift);
-            
-            // insert gaps in the contigs using the information stored in contigsGaps
-            _writeContigsGapsInStore(fragStore, contigsGaps);
-        }
+        if (_streamEOF(file)) return;
+
+		// get first character from the stream
+        char c = _streamGet(file);
+        
+        // Read in header section
+        _readHeader(file, fragStore, c, SAM());
+        
+        // Read in alignments section
+        _readAlignments(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM());
+        
+        // set the match mate IDs using the information stored in matchMateInfos
+        _generatePairMatchIds(fragStore, matchMateInfos);
+        
+        // insert gaps in the contigs using the information stored in contigsGaps
+//            _writeContigsGapsInStore(fragStore, contigsGaps);
+
+		convertPairWiseToGlobalAlignment(fragStore, contigAnchorGaps);
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -820,10 +745,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template<typename TFile, typename TSpec, typename TConfig, typename TChar>
     inline void 
-    _readHeader(TFile& file,
-                FragmentStore<TSpec, TConfig>& fragStore,
-                TChar & c,
-                SAM)
+    _readHeader (
+		TFile & file,
+		FragmentStore<TSpec, TConfig> & fragStore,
+		TChar & c,
+		SAM)
     {
         // skip header for now
         while(c == '@'){
@@ -837,12 +763,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //
 // reads in alignement sections from a SAM file
     
-    template<typename TFile, typename TSpec, typename TConfig, typename TContigGaps, typename TMateInfo, typename TChar>
+    template<typename TFile, typename TSpec, typename TConfig, typename TContigAnchorGaps, typename TMatchMateInfos, typename TChar>
     inline void 
-    _readAlignments(TFile& file,
-        FragmentStore<TSpec, TConfig>& fragStore,
-        TContigGaps & contigGaps,
-        TMateInfo & mateInfos,
+    _readAlignments (
+		TFile & file,
+        FragmentStore<TSpec, TConfig> & fragStore,
+        TContigAnchorGaps & contigAnchorGaps,	
+        TMatchMateInfos & matchMateInfos,
         TChar & c,
         SAM)
     {
@@ -851,6 +778,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // even if there exists previous entries without
 		typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 		typedef typename TFragmentStore::TAlignQualityStore TAlignQualityStore;
+		typedef typename TFragmentStore::TNameStore TNameStore;
 		typedef typename Value<TAlignQualityStore>::Type TAlignQuality;
 		
         int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
@@ -866,10 +794,16 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // read in alignments
         int k = 0;
+		Nothing contextSAM;
+		
+		refresh(fragStore.contigNameStoreCache);
+		refresh(fragStore.readNameStoreCache);
+
         while(!_streamEOF(file)){
-            std::cout << k << std::endl;
-            _readOneAlignment(file, fragStore, contigGaps, mateInfos, c, SAM());
+//            std::cout << k << std::endl;
+            _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM(), contextSAM);
             ++k;
+//			if (k%1000==0) std::cout <<'.'<<std::flush;
         }
     }
     
@@ -879,14 +813,16 @@ namespace SEQAN_NAMESPACE_MAIN
 //
 // reads in one alignement section from a SAM file
     
-    template<typename TFile, typename TSpec, typename TConfig, typename TContigGaps, typename TMateInfo, typename TChar>
+    template<typename TFile, typename TSpec, typename TConfig, typename TContigAnchorGaps, typename TMatchMateInfos, typename TChar, typename TContextSAM>
     inline void 
-    _readOneAlignment(TFile& file,
-                    FragmentStore<TSpec, TConfig>& fragStore,
-                    TContigGaps & contigsGaps,
-                    TMateInfo & mateInfos,
-                    TChar & c,
-                    SAM)
+    _readOneAlignment (
+		TFile & file,
+		FragmentStore<TSpec, TConfig> & fragStore,
+		TContigAnchorGaps & contigAnchorGaps,
+		TMatchMateInfos & matchMateInfos,
+		TChar & c,
+		SAM,
+		TContextSAM & contextSAM)
     {
         SEQAN_CHECKPOINT
         // Basic types
@@ -901,51 +837,51 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadStoreElement;
         typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
         typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignQualityElement;
-        
+        typedef typename TAlignedElement::TGapAnchors TReadGapAnchors;
+		
         // Type for sequence in readstore
         typedef typename TFragmentStore::TReadSeq TReadSeq2;
         
         // Type for gap anchor
-        typedef typename TFragmentStore::TReadGapAnchor TReadGapAnchor2;
+//        typedef typename TFragmentStore::TReadGapAnchor TReadGapAnchor2;
         typedef typename TFragmentStore::TContigPos TContigPos;
-        
-        // Types to temporarily store the gaps that need to be inserted in the contig sequences
-        typedef Pair<TContigPos, TContigPos> TPosLengthPair;
+		typedef Gaps<TReadSeq2, AnchorGaps<TReadGapAnchors> >	TReadGaps;
+		typedef Gaps<Nothing, AnchorGaps<typename Value<TContigAnchorGaps>::Type> >	TContigGapsPW;
         
         // Type to temporarily store information about match mates
-        typedef Pair<TContigPos, TId> TMatchMateInfo;
+        typedef typename Value<TMatchMateInfos>::Type TMatchMateInfo;
         
         // read fields of alignments line
         
-        // read teh query name
+        // read the query name
         String<char> qname;
         _parse_readSamIdentifier(file, qname, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "qname: \t" << qname << std::endl;
-        // read the flag
+
+		// read the flag
         int flag;
         flag = _parse_readNumber(file, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "flag: \t" << flag << ":"<< (flag & 1) << (flag & (1 << 4))  << (flag & (1 << 7)) << std::endl;
-        // read reference name
+		bool reverse = (flag & (1 << 4)) == (1 << 4);
+
+		// read reference name
         String<char> rname;
         _parse_readSamIdentifier(file, rname, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "rname: \t" << rname << std::endl;
-        // read begin position
+
+		// read begin position
         TContigPos beginPos;
         beginPos = _parse_readNumber(file, c);
         --beginPos; // SAM stores positions starting at 1 the fragment store starting at 0
         _parse_skipWhitespace(file, c);
-        std::cout << "pos: \t" << beginPos << std::endl;
-                
+
         // read map quality
         TAlignQualityElement mapQ;
         mapQ.score = _parse_readNumber(file, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "mapQ: \t" << mapQ.score << std::endl;
-        // read CIGAR
-        Cigar<> cigar = Cigar<>();
+
+		// read CIGAR
+        String<CigarElement<> > cigar;
         _parse_readCigar(file, cigar, c);
         _parse_skipWhitespace(file, c);
         
@@ -954,42 +890,48 @@ namespace SEQAN_NAMESPACE_MAIN
         _getClippedLength(cigar, endPos);
         endPos = beginPos + endPos;
         // if the read is on the antisense strand switch begin and end position
-        if((flag & (1 << 4)) == (1 << 4)){
+        if (reverse)
+		{
             TContigPos temp = beginPos;
             beginPos = endPos;
             endPos = temp;
         }
-        std::cout << "end pos:" << endPos << std::endl;
-        // generate gap anchor string for the read
-        String<TReadGapAnchor2 > readGaps;
-        cigarToGapAnchorRead(cigar, readGaps);
+
+		// generate gap anchor string for the read
+        TReadGapAnchors readGapAnchors;
         
         // read mate reference name
         String<char> mrnm;
         _parse_readSamIdentifier(file, mrnm, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "mrnm: \t" << mrnm << std::endl;
-        // read mate position
+
+		// read mate position
         TContigPos mPos;
         mPos = _parse_readNumber(file, c);
         --mPos; // SAM stores positions starting at 1 the fragment store starting at 0
         _parse_skipWhitespace(file, c);
-        std::cout << "mPos: \t" << mPos << std::endl;
-        // read iSizs
-        int iSize;
-        iSize = _parse_readNumber(file, c);
+
+		// read iSize
+        int iSize = _parse_readNumber(file, c);
         _parse_skipWhitespace(file, c);
-        std::cout << "iSize: \t" << iSize << std::endl;
-        // read in sequence
+
+		// read in sequence
         TReadSeq2 readSeq;
         _parse_readDnaSeq(file, readSeq, c);
+		if (reverse)
+			reverseComplementInPlace(readSeq);
         _parse_skipWhitespace(file, c);
-        std::cout << "seq: \t" << readSeq << std::endl;
-        // and associated qualities
+
+		// and associated qualities
         _parse_readSeqQual(file, readSeq, c);
+
+		// insert alignment gaps
+		TReadGaps readGaps(readSeq, readGapAnchors);
+        cigarToGapAnchorRead(cigar, readGaps);
         
         // read in SAM tags
         String<char> tags;
+        _parse_skipSpace(file, c);
         _parse_readCharsTillEndOfLine(file, tags, c);
         
         
@@ -998,35 +940,43 @@ namespace SEQAN_NAMESPACE_MAIN
         // read, read name and mate pair store
         
         TId readId = 0;
-        _appendRead(fragStore, readId, qname, readSeq, flag);
+        _appendRead(fragStore, readId, qname, readSeq, flag, contextSAM);
         
         // check if the contig is already in the store
         // get its ID or create a new one otherwise
         TId contigId = 0;
-        _appendContig(fragStore, contigId, rname, contigsGaps);
+        _appendContig(fragStore, contigId, rname);
 
+		if (empty(cigar)) return;
+		
         // insert gaps in the contigGaps
-        cigarToContigGaps(cigar, beginPos, flag, value(contigsGaps, contigId));
-        
+//        cigarToContigGaps(cigar, beginPos, reverse, value(contigsGaps, contigId));
+
         // create a new entry in the aligned read store
-        appendAlignment(fragStore, readId, contigId, beginPos, endPos, readGaps);
-        
-        // create entries in SAM specific stores
-        append(fragStore.alignQualityStore, mapQ, Generous());
+        TId pairMatchId = appendAlignment(fragStore, readId, contigId, beginPos, endPos, readGapAnchors);
+		resize(contigAnchorGaps, length(fragStore.alignedReadStore), Generous());
+		TContigGapsPW contigGaps(back(contigAnchorGaps));
+        cigarToGapAnchorContig(cigar, contigGaps);
+		
+		// create entries in SAM specific stores
+        appendValue(fragStore.alignQualityStore, mapQ, Generous());
         appendValue(fragStore.alignedReadTagStore, tags, Generous());
         
         // store additional data about match mate temporarily
         // used in the end of the read function to generate match mate IDs
-        TMatchMateInfo mateInfo;
-        mateInfo.i1 = mPos;
-        if(mrnm != "="){
-            _appendContig(fragStore, contigId, mrnm, contigsGaps);
-        }
-        mateInfo.i2 = contigId;
-        append(mateInfos, mateInfo);
-        
-        std::cout << "======================================" << std::endl;
-        
+		TId mcontigId = contigId;
+        if (mrnm != "*")
+		{
+			if (mrnm != "=")
+				_appendContig(fragStore, mcontigId, mrnm);
+
+			if (flag & 0x40)	// store mate info only for the first read in the pair
+			{
+				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, mPos};
+				append(matchMateInfos, matchMateInfo);
+				back(fragStore.alignedReadStore).pairMatchId = pairMatchId;
+			}
+		}
     }
     
 }// namespace SEQAN_NAMESPACE_MAIN
