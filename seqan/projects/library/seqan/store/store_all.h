@@ -139,6 +139,7 @@ public:
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
 	
 	typedef AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec >	TAnnotationStoreElement;
+	typedef typename TAnnotationStoreElement::TId								TAnnotationStoreElementId;
 
 	typedef String< ReadStoreElement< TReadSeq, TReadPos, TReadStoreElementSpec > >							TReadStore;
 	typedef String< MatePairStoreElement< TMatePairStoreElementSpec > >										TMatePairStore;
@@ -148,11 +149,9 @@ public:
 	typedef String< AlignQualityStoreElement< TMappingQuality >	>											TAlignQualityStore;
 	typedef StringSet<CharString, TAlignedReadTagStoreSpec>													TAlignedReadTagStore;
 	typedef String< TAnnotationStoreElement >																TAnnotationStore;
+	typedef String< IntervalTree< TContigPos, TAnnotationStoreElementId > >									TIntervalTreeStore;
 	typedef StringSet<TReadSeq, TReadSeqStoreSpec>															TReadSeqStore;
 	typedef StringSet<CharString>																			TNameStore;
-
-	typedef typename TAnnotationStoreElement::TId															TAnnotationStoreElementId;
-	typedef String< IntervalTree< TContigPos, TAnnotationStoreElementId > >									TIntervalTreeStore;
 	
 	// main containers
 	TReadStore			readStore;			// readId     -> matePairId
@@ -241,7 +240,7 @@ public:
     
     template<typename TNameStore, typename TName, typename TPos>
     inline bool 
-    _getIdByName(TNameStore &store, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
+    _getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
     {
         typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
 		typedef typename Position<TNameStore>::Type TId;

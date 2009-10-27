@@ -311,7 +311,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TName & qname,
 		TString & readSeq,
 		TFlag & flag,
-		TContext & context)
+		TContext &)
 	{
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
@@ -748,15 +748,13 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void 
     _readHeader (
 		TFile & file,
-		FragmentStore<TSpec, TConfig> & fragStore,
+		FragmentStore<TSpec, TConfig> &,
 		TChar & c,
 		SAM)
     {
         // skip header for now
-        while(c == '@'){
+        while (c == '@')
             _parse_skipLine(file, c);
-        }
-        
     }
     
 //////////////////////////////////////////////////////////////////////////////
