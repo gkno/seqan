@@ -41,6 +41,7 @@ seqcons:       check_seqan_base seqcons/seqcons
 pair_align:    check_seqan_base pair_align/pair_align
 tree_recon:    check_seqan_base tree_recon/tree_recon
 #transquant:    check_seqan_base transquant/transquant
+insegt:        check_seqan_base insegt/insegt
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
