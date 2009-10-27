@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <typename TIt, typename ST>
     bool __sleq(TIt s1, TIt s2, ST n1, ST n2) {
-        ST n = min(n1, n2);
+        ST n = _min(n1, n2);
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return 1;
             if (lexLess(*s2,*s1)) {
@@ -207,7 +207,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <typename TIt, typename ST>
     bool __sleqLCP(TIt s1, TIt s2, ST n1, ST n2, ST lcp) {
-        ST n = min(n1, n2);
+        ST n = _min(n1, n2);
         for(ST i = 0; i < n; i++, ++s1, ++s2) {
             if (lexLess(*s1,*s2)) return (i == lcp);
             if (lexLess(*s2,*s1)) {
