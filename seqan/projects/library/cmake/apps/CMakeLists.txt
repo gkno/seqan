@@ -48,6 +48,7 @@ add_executable (seqcons ${SEQAN_BASE}/apps/seqcons/seqcons.cpp)
 add_executable (pair_align ${SEQAN_BASE}/apps/pair_align/pair_align.cpp)
 add_executable (tree_recon ${SEQAN_BASE}/apps/tree_recon/tree_recon.cpp)
 #add_executable (transquant ${SEQAN_BASE}/apps/transquant/transquant.cpp)
+add_executable (insegt ${SEQAN_BASE}/apps/insegt/insegt.cpp)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	target_link_libraries (razers rt)
