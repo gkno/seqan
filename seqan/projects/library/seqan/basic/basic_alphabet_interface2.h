@@ -51,6 +51,13 @@ SEQAN_CHECKPOINT
 	return _gap;
 }
 
+template <typename T>
+inline T
+unknownValueImpl(T *)
+{
+SEQAN_CHECKPOINT
+	return 'N';
+}
 
 /**
 .Function.gapValue:
@@ -82,6 +89,15 @@ gapValue()
 SEQAN_CHECKPOINT
 	static T * _tag = 0;
 	return gapValueImpl(_tag);
+}
+
+template <typename T>
+inline T
+unknownValue()
+{
+SEQAN_CHECKPOINT
+	static T * _tag = 0;
+	return unknownValueImpl(_tag);
 }
 
 

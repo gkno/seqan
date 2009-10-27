@@ -36,6 +36,7 @@
 #endif
 
 #include <seqan/sequence/sequence_interface.h>
+#include <seqan/sequence/sequence_stream.h>
 #include <seqan/sequence/lexical.h>
 
 //____________________________________________________________________________

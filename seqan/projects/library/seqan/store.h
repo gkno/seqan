@@ -27,6 +27,8 @@
 #include <seqan/file.h>
 
 #include <sstream>
+#include <algorithm>
+#include <set>
 
 //////////////////////////////////////////////////////////////////////////////
 // FRAGMENT STORE SUB-CONTAINERS

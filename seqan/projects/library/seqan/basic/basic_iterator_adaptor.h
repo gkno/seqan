@@ -509,6 +509,14 @@ SEQAN_CHECKPOINT
 	return atEnd(me, container(me));
 }
 
+template <typename TContainer, typename TIterator, typename TSpec>
+inline bool
+atEnd(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
+{
+SEQAN_CHECKPOINT
+	return atEnd(me, container(me));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // assign (Conversion)
 //////////////////////////////////////////////////////////////////////////////

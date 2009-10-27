@@ -422,6 +422,21 @@ SEQAN_CHECKPOINT
 	return _gap;
 }
 
+inline char const &
+unknownValueImpl(char *)
+{
+SEQAN_CHECKPOINT
+	static char const _unknown = 'N';
+	return _unknown;
+}
+inline char const &
+unknownValueImpl(char const *)
+{
+SEQAN_CHECKPOINT
+	static char const _unknown = 'N';
+	return _unknown;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // generic extreme values
 //////////////////////////////////////////////////////////////////////////////

@@ -487,7 +487,7 @@
     inline void *_proMalloc(size_t size) {
     	size_t *ptr = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
     	if (ptr) {
-    		_proAdd(SEQAN_PROMEMORY, *ptr = size);
+    		_proAdd(SEQAN_PROMEMORY, (_proFloat)(*ptr = size));
 //			printf("_proMalloc %x size %d\n", ptr, size);
     		++ptr;
     	}
@@ -499,7 +499,7 @@
     	if (ptr) {
     		--ptr;
 //			printf("_proFree   %x size %d\n", _ptr, *ptr);
-    		_proSub(SEQAN_PROMEMORY, *ptr);
+    		_proSub(SEQAN_PROMEMORY, (_proFloat)*ptr);
     	}
     	free(ptr);
     }

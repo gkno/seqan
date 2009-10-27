@@ -782,9 +782,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TAlignQualityStore>::Type TAlignQuality;
 		
         int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
-        for(int i = 0; i < diff; ++i){
+        for(int i = 0; i < diff; ++i)
+		{
 			TAlignQuality q;
-			q.score = 255;
+			q.score = supremumValue(q.score);
             append(fragStore.alignQualityStore, q, Generous());
         }
         diff = length(fragStore.alignedReadStore) - length(fragStore.alignedReadTagStore);
