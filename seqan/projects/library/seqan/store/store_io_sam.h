@@ -324,7 +324,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				// if the read is in the store and paired
 				// check the mate pair store if it is the same mate of the pair
 				// assuming that only one flag 0x040 or 0x0080 is 1
-				int inPair = (flag & 0x80) >> 7;
+				int inPair = 1 - ((flag & 0x40) >> 6);	// bit 7 is set => inPair = 0
+														// else inPair = 1 (even if bits 6 and 7 are not set)
 				
 				TId matePairId = fragStore.readStore[readId].matePairId;
 				if (matePairId != TMatePairElement::INVALID_ID)
