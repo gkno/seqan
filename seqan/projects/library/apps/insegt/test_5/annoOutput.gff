@@ -1,0 +1,12 @@
+test_chromosome	Annotation_Count	region	.	.	1	+	.	ID=ENS1;651890.500000;
+test_chromosome	Annotation_Count	region	150	374	1	+	.	ID=ENSG-1;ParentID=ENS1;2222222.250000;
+test_chromosome	Annotation_Count	region	150	230	1	+	.	ID=ENSG-2;ParentID=ENS1;6172839.500000;
+test_chromosome	Annotation_Count	region	290	374	1	+	.	ID=ENSG-3;ParentID=ENS1;5882353.000000;
+test_chromosome	Annotation_Count	region	150	350	1	+	.	ID=ENSG-4;ParentID=ENS1;2487562.250000;
+test_chromosome	Annotation_Count	region	200	374	1	+	.	ID=ENSG-5;ParentID=ENS1;2857142.750000;
+test_chromosome	Annotation_Count	region	.	.	1	-	.	ID=ENS2;651890.500000;
+test_chromosome	Annotation_Count	region	150	374	1	-	.	ID=ENSG-10;ParentID=ENS2;2222222.250000;
+test_chromosome	Annotation_Count	region	150	230	1	-	.	ID=ENSG-11;ParentID=ENS2;6172839.500000;
+test_chromosome	Annotation_Count	region	290	374	1	-	.	ID=ENSG-12;ParentID=ENS2;5882353.000000;
+test_chromosome	Annotation_Count	region	150	350	1	-	.	ID=ENSG-13;ParentID=ENS2;2487562.250000;
+test_chromosome	Annotation_Count	region	200	374	1	-	.	ID=ENSG-14;ParentID=ENS2;2857142.750000;

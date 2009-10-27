@@ -1,0 +1,12 @@
+test_chromosome	Output	region	.	.	.	.	.	ID=ENS1	1	
+test_chromosome	Output	region	150	374	.	+	.	ID=ENSG-1;ParentID=ENS1	1	
+test_chromosome	Output	region	150	230	.	+	.	ID=ENSG-2;ParentID=ENS1	1	
+test_chromosome	Output	region	290	374	.	+	.	ID=ENSG-3;ParentID=ENS1	1	
+test_chromosome	Output	region	150	350	.	+	.	ID=ENSG-4;ParentID=ENS1	1	
+test_chromosome	Output	region	200	374	.	+	.	ID=ENSG-5;ParentID=ENS1	1	
+test_chromosome	Output	region	.	.	.	.	.	ID=ENS2	1	
+test_chromosome	Output	region	150	374	.	-	.	ID=ENSG-10;ParentID=ENS2	1	
+test_chromosome	Output	region	150	230	.	-	.	ID=ENSG-11;ParentID=ENS2	1	
+test_chromosome	Output	region	290	374	.	-	.	ID=ENSG-12;ParentID=ENS2	1	
+test_chromosome	Output	region	150	350	.	-	.	ID=ENSG-13;ParentID=ENS2	1	
+test_chromosome	Output	region	200	374	.	-	.	ID=ENSG-14;ParentID=ENS2	1	

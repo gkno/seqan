@@ -1,0 +1,3 @@
+test_chromosome	Output	region	.	.	.	.	.	ID=ENSG	2	
+test_chromosome	Output	region	75	374	.	+	.	ID=ENSG-1;ParentID=ENSG	1	
+test_chromosome	Output	region	1500	1649	.	+	.	ID=ENSG-5;ParentID=ENSG	1	

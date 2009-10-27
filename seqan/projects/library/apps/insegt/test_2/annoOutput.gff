@@ -1,0 +1,5 @@
+test_chromosome	Annotation_Count	region	.	.	2	+	.	ID=ENSG;606060.625000;
+test_chromosome	Annotation_Count	region	75	374	1	+	.	ID=ENSG-1;ParentID=ENSG;833333.312500;
+test_chromosome	Annotation_Count	region	525	599	2	+	.	ID=ENSG-2;ParentID=ENSG;6666666.500000;
+test_chromosome	Annotation_Count	region	750	1049	2	+	.	ID=ENSG-3;ParentID=ENSG;1666666.625000;
+test_chromosome	Annotation_Count	region	1500	1649	0	+	.	ID=ENSG-5;ParentID=ENSG;0.000000;

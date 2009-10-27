@@ -1,0 +1,5 @@
+test_chromosome	ENSG	+	ENSG-1:ENSG-2	1	3333333.250000
+test_chromosome	ENSG	+	ENSG-1:ENSG-2^ENSG-3	1	666666.687500
+test_chromosome	ENSG	+	ENSG-1^ENSG-3	1	833333.312500
+test_chromosome	ENSG	+	ENSG-2:ENSG-3	1	833333.312500
+test_chromosome	ENSG	+	ENSG-2^ENSG-3	2	1666666.625000

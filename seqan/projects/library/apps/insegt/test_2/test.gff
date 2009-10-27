@@ -1,0 +1,4 @@
+test_chromosome	HsAbstractV46	region	75	374	.	+	.	ID=ENSG-1;ParentID=ENSG
+test_chromosome	HsAbstractV46	region	525	599	.	+	.	ID=ENSG-2;ParentID=ENSG
+test_chromosome	HsAbstractV46	region	750	1049	.	+	.	ID=ENSG-3;ParentID=ENSG
+test_chromosome	HsAbstractV46	region	1500	1649	.	+	.	ID=ENSG-5;ParentID=ENSG
