@@ -114,6 +114,21 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals);
 	}
 
+	template <typename TTagSpec>
+	IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
+	{
+SEQAN_CHECKPOINT
+		interval_counter = length(intervals);
+		createIntervalTree(g,pm,intervals,tag);
+	}
+
+	IntervalTree(String<TInterval> intervals, TValue center)	
+	{
+SEQAN_CHECKPOINT
+		interval_counter = length(intervals);
+		createIntervalTree(g,pm,intervals,center);
+	}
+
 	IntervalTree(IntervalTree const & other):
 		g(other.g),
 		pm(other.pm),
@@ -355,7 +370,7 @@ SEQAN_CHECKPOINT
 	{
 		if((**it).i2<=center)
 		{
-			appendValue(S_left,*it);
+			appendValue(S_left,*it, Generous());
 			if((**it).i2 > max1)
 				max1 = (**it).i2;
 			if((**it).i1 < min1)
@@ -365,7 +380,7 @@ SEQAN_CHECKPOINT
 		{
 			if((**it).i1>center)
 			{
-				appendValue(S_right,(*it));
+				appendValue(S_right,(*it), Generous());
 				if((**it).i2 > max2)
 					max2 = (**it).i2;
 				if ((**it).i1 < min2)
@@ -440,13 +455,13 @@ SEQAN_CHECKPOINT
 	{
 		if((**it).i2<=center)
 		{
-			appendValue(S_left,*it);
+			appendValue(S_left,*it, Generous());
 		}
 		else
 		{
 			if((**it).i1>center)
 			{
-				appendValue(S_right,(*it));
+				appendValue(S_right,(*it), Generous());
 			}
 			else
 			{
@@ -730,7 +745,7 @@ SEQAN_CHECKPOINT
 			unsigned int i = 0;
 			while(i < length(act_prop.list2) && rightBoundary(value(act_prop.list2,i)) > query)
 			{
-				appendValue(result,cargo(value(act_prop.list2,i)));
+				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
 				++i;	
 			}
 			if(atEnd(it)) break;
@@ -750,7 +765,7 @@ SEQAN_CHECKPOINT
 				unsigned int i = 0;
 				while(i < length(act_prop.list1) && leftBoundary(value(act_prop.list1,i)) <= query)
 				{
-					appendValue(result,cargo(value(act_prop.list1,i)));
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
 					++i;
 				}
 				if(atEnd(it)) break;
@@ -767,7 +782,7 @@ SEQAN_CHECKPOINT
 			}
 			else{
 				for(unsigned int i = 0; i < length(act_prop.list1); ++i)
-                    appendValue(result, cargo(value(act_prop.list1,i)));
+                    appendValue(result, cargo(value(act_prop.list1,i)), Generous());
 				break;
 			}
 		}
@@ -815,7 +830,7 @@ SEQAN_CHECKPOINT
 			int i = 0;
 			while(i < (int) length(act_prop.list2) && (TValue) rightBoundary(value(act_prop.list2,i)) > query)
 			{
-				appendValue(result,cargo(value(act_prop.list2,i)));
+				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
 				++i;	
 			}
 			if(atEnd(it)) break;
@@ -835,7 +850,7 @@ SEQAN_CHECKPOINT
 				int i = 0;
 				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
 				{
-					appendValue(result,cargo(value(act_prop.list1,i)));
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
 					++i;
 				}
 				if(atEnd(it)) break;
@@ -854,7 +869,7 @@ SEQAN_CHECKPOINT
 				int i = 0;
 				while(i < (int) length(act_prop.list1) && (TValue) leftBoundary(value(act_prop.list1,i)) < query)
 				{
-					appendValue(result,cargo(value(act_prop.list1,i)));
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
 					++i;
 				}
 				break;
