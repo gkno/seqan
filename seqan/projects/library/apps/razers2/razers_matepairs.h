@@ -635,7 +635,10 @@ void mapMatePairReads(
 							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
 //									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 							compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
-							options.compactThresh += (options.compactThresh >> 1);
+							
+							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+								options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
+							
 							if (options._debugLevel >= 2)
 								::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 						}

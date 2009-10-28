@@ -413,7 +413,8 @@ struct MicroRNA{};
 					else	
 	#endif
 						compactMatches(store, cnts, options, swiftPattern);
-					options.compactThresh += (options.compactThresh >> 1);
+					if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 					if (options._debugLevel >= 2)
 						::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 				}
