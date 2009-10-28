@@ -42,8 +42,11 @@
 #include <seqan/store/store_align.h>
 #include <seqan/store/store_annotation.h>
 #include <seqan/store/store_all.h>
+
+#include <seqan/store/store_align_intervals.h>
+#include <seqan/store/store_intervaltree.h>
+
 #include <seqan/store/store_io.h>
 #include <seqan/store/store_io_sam.h>
-#include <seqan/store/store_io_sam_out.h>
 
 #endif //#ifndef SEQAN_HEADER_...
