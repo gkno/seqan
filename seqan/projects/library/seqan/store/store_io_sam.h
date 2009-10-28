@@ -780,29 +780,28 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename TFragmentStore::TNameStore TNameStore;
 		typedef typename Value<TAlignQualityStore>::Type TAlignQuality;
 		
+		TAlignQuality q;
+		q.score = supremumValue(q.score);
         int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
         for(int i = 0; i < diff; ++i)
-		{
-			TAlignQuality q;
-			q.score = supremumValue(q.score);
             append(fragStore.alignQualityStore, q, Generous());
-        }
+		
         diff = length(fragStore.alignedReadStore) - length(fragStore.alignedReadTagStore);
-        for(int i = 0; i < diff; ++i){
+        for(int i = 0; i < diff; ++i)
             appendValue(fragStore.alignedReadTagStore, "", Generous());
-        }
         
         // read in alignments
-        int k = 0;
+//		int k = 0;
 		Nothing contextSAM;
 		
 		refresh(fragStore.contigNameStoreCache);
 		refresh(fragStore.readNameStoreCache);
 
-        while(!_streamEOF(file)){
-//            std::cout << k << std::endl;
+        while(!_streamEOF(file))
+		{
+//			std::cout << k << std::endl;
             _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM(), contextSAM);
-            ++k;
+//			++k;
 //			if (k%1000==0) std::cout <<'.'<<std::flush;
         }
     }

@@ -53,7 +53,7 @@ operator < (Interval<TValue> const & interval1, Interval<TValue> const & interva
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-template <typename TInterval = Interval<int>, typename TSpec = void>         
+template <typename TInterval = Interval<unsigned>, typename TSpec = void>         
 struct AlignIntervalsStoreElement
 {
 	typedef  String<TInterval> 	TIntervals;
@@ -158,8 +158,8 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 		// with gaps at the beginning
 		else resize(readIntervals, length(align.gaps) -1, Generous());
 		
-		TContigPos seqPos1; 
-		TContigPos gapPos1;
+		TContigPos seqPos1 = 0;
+		TContigPos gapPos1 = 0;
 		TContigPos seqPos2 = firstSeqPos;
 		TContigPos gapPos2 = firstGapPos;
 		goNext(itGap);
@@ -233,10 +233,10 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 		{
 			readInterval = getValue(itI);
 		
-			if ((TGapPos)readInterval.i2 < getValue(it1Gap).gapPos) continue;    		// interval-positions are smaller than first-position of contig: read-interval mappt in contig gaps
+			if (readInterval.i2 < getValue(it1Gap).gapPos) continue;    		// interval-positions are smaller than first-position of contig: read-interval mappt in contig gaps
 		
 			// interval i1:
-			while ( (it2Gap != it2GapEnd) && ((TGapPos)readInterval.i1 >= getValue(it2Gap).gapPos) )   // iterate over 2 contig gap-anchors, until gapPos2 is behind start of read-interval
+			while ( (it2Gap != it2GapEnd) && (readInterval.i1 >= getValue(it2Gap).gapPos) )   // iterate over 2 contig gap-anchors, until gapPos2 is behind start of read-interval
 			{
 				goNext(it1Gap);
 				goNext(it2Gap);
@@ -246,15 +246,15 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 			{
 				lastGapPosBeforeGap1 = getValue(it2Gap).seqPos + getValue(it1Gap).gapPos - getValue(it1Gap).seqPos -1;  // last position in gapped sequence before gap 
 			
-				if ((TGapPos)readInterval.i1 < getValue(it1Gap).gapPos)  				// occurs, if interval.i1 position is smaller than start-postion of contig
+				if (readInterval.i1 < getValue(it1Gap).gapPos)  				// occurs, if interval.i1 position is smaller than start-postion of contig
 				{
 					contigInterval.i1 = getValue(it1Gap).gapPos;
 				}
-				else if ((TGapPos)readInterval.i1 <= lastGapPosBeforeGap1)				// read-interval starts in contig-interval between the 2 gaps		
+				else if (readInterval.i1 <= lastGapPosBeforeGap1)				// read-interval starts in contig-interval between the 2 gaps		
 				{
 					contigInterval.i1 = readInterval.i1 - (getValue(it1Gap).gapPos - getValue(it1Gap).seqPos);  // project position onto ungapped sequence
 				}
-				else if ((TGapPos)readInterval.i2 < getValue(it2Gap).gapPos)				// whole read-interval lies in gaps of contig
+				else if (readInterval.i2 < getValue(it2Gap).gapPos)				// whole read-interval lies in gaps of contig
 				{
 					continue;
 				}
@@ -271,7 +271,7 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 			}
 		
 			// interval i2:	
-			while ( (it2Gap != it2GapEnd) && ((TGapPos)readInterval.i2 >= getValue(it2Gap).gapPos) )		// iterate over 2 contig gap-anchors, until gapPos2 is behind end of read-interval
+			while ( (it2Gap != it2GapEnd) && (readInterval.i2 >= getValue(it2Gap).gapPos) )		// iterate over 2 contig gap-anchors, until gapPos2 is behind end of read-interval
 			{
 				goNext(it1Gap);
 				goNext(it2Gap);
@@ -281,7 +281,7 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 			{
 				lastGapPosBeforeGap2 = getValue(it2Gap).seqPos + getValue(it1Gap).gapPos - getValue(it1Gap).seqPos -1;  // last position in gapped sequence before gap 
 				
-				if ((TContigPos)readInterval.i2 <= lastGapPosBeforeGap2)					// read-interval ends in contig-interval between the 2 gaps	
+				if (readInterval.i2 <= lastGapPosBeforeGap2)					// read-interval ends in contig-interval between the 2 gaps	
 				{
 					contigInterval.i2 = readInterval.i2 - (getValue(it1Gap).gapPos - getValue(it1Gap).seqPos);    // project position onto ungapped sequence
 				}
@@ -301,6 +301,7 @@ extractAlignIntervals(TIntervals & contigIntervals, TAlignedReadStoreElement & a
 		}
 	}
 	mergeIntervals(contigIntervals, thresholdGaps);
+	
 }
 
 
@@ -311,8 +312,8 @@ template<typename TIntervals>
 inline void
 mergeIntervals(TIntervals & intervals, const unsigned & thresholdGaps)
 {
-	typedef typename Position<TIntervals>::Type TPos;
-	typedef typename Value<TIntervals>::Type	TInterval;
+	typedef typename Position<TIntervals>::Type 	TPos;
+	typedef typename Value<TIntervals>::Type 	TInterval;
 	
 	TPos j;
 	TInterval newInterval;
@@ -320,7 +321,9 @@ mergeIntervals(TIntervals & intervals, const unsigned & thresholdGaps)
 	{
 		j = i;
 		while ( (j < length(intervals) - 1) && (getValue(intervals, j).i2 + thresholdGaps >= getValue(intervals, j + 1).i1 - 1) )		// merges intervals, if the no. of gaps inbetween is smaller than threshold 
+		{
 			++j;
+		}
 		
 		if ( j != i)
 		{

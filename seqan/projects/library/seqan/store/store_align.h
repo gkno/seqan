@@ -73,6 +73,11 @@ struct AlignQualityStoreElement
 	TScore				pairScore;		// score of the mate-pair alignment (this read is part of)
 	TScore				score;			// score of the single read alignment
 	unsigned char		errors;			// absolute number of errors (Hamming or edit distance)
+	
+	AlignQualityStoreElement():
+		pairScore(0),
+		score(0),
+		errors(0) {}
 };
 
 
