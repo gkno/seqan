@@ -124,7 +124,7 @@ int main( int argc, const char *argv[] )
 	unsigned offsetInterval;
 	unsigned thresholdGaps;
 	unsigned thresholdCount;
-	double thresholdRPKM;
+	double thresholdRPKM = 0.0;
 	bool maxTuple = 0;
 	bool exact_nTuple = 0;
 	bool unknownO = 0;
@@ -132,18 +132,18 @@ int main( int argc, const char *argv[] )
 	CommandLineParser parser;
 	
 	addSection(parser, "Main Options:");
-	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM-file with aligned reads", OptionType::String), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "fa", "FASTA-file with contig sequence (only names, sequences should be empty)", OptionType::String), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("g", "gff", "GFF_file with annotations", OptionType::String), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM-file with aligned reads", (int)OptionType::String), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "fa", "FASTA-file with contig sequence (only names, sequences should be empty)", (int)OptionType::String), "<Filename>"));
+	addOption(parser, addArgumentText(CommandLineOption("g", "gff", "GFF_file with annotations", (int)OptionType::String), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("p", "outputPath", "path for output-files", (int)OptionType::String, ""), "<String>"));
 	addOption(parser, addArgumentText(CommandLineOption("n", "nTuple", "nTuple", (int)OptionType::Int, 2), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("o", "offsetInterval", "offset to short alignment-intervals for search", (int)OptionType::Int, 5), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("t", "thresholdGaps", "threshold for allowed gaps in alignment (not introns)", (int)OptionType::Int, 5), "<Int>"));
 	addOption(parser, addArgumentText(CommandLineOption("c", "thresholdCount", "threshold for min. count of tuple for output", (int)OptionType::Int, 1), "<Int>"));
-	addOption(parser, addArgumentText(CommandLineOption("r", "thresholdRPKM", "threshold for min. RPKM of tuple for output", (double)OptionType::Double, 0.0), "<Double>"));
-	addOption(parser, CommandLineOption("m", "maxTuple", "create only maxTuple", OptionType::Boolean));
-	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", OptionType::Boolean));
-	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", OptionType::Boolean));
+	addOption(parser, addArgumentText(CommandLineOption("r", "thresholdRPKM", "threshold for min. RPKM of tuple for output", (int)OptionType::Double, 0.0), "<Double>"));
+	addOption(parser, CommandLineOption("m", "maxTuple", "create only maxTuple", (int)OptionType::Boolean));
+	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", (int)OptionType::Boolean));
+	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", (int)OptionType::Boolean));
 	
 	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
 	

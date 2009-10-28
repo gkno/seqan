@@ -300,7 +300,7 @@ createAnnoCountGFF(TFile & annoOutput, TAnnoCountStore & annoCountStore, TAnnoNo
 
 template<typename TFile, typename TTupleCountStore, typename TSpec, typename TConfig>
 inline void
-createTupleCountGFF(TFile & tupleOutput, TTupleCountStore & tupleCountStore, FragmentStore<TSpec, TConfig> & me, const unsigned & thresholdCount, const unsigned &thresholdRPKM)
+createTupleCountGFF(TFile & tupleOutput, TTupleCountStore & tupleCountStore, FragmentStore<TSpec, TConfig> & me, unsigned thresholdCount, double thresholdRPKM)
 {
 	typedef typename FragmentStore<TSpec, TConfig>::TAnnotationStore 	TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type 				TAnnotationStoreElement;
