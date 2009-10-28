@@ -1,8 +1,0 @@
-test_mRNA_1_-374_525-+750-824	test_chromosome	+	ENSG-1:ENSG-2	ENSG
-test_mRNA_2_-599_750-+825-899	test_chromosome	+	ENSG-2:ENSG-3	ENSG
-test_mRNA_1_-374_525-+750-824	test_chromosome	+	ENSG-3	ENSG
-test_mRNA_2_-599_750-+825-899	test_chromosome	+	ENSG-3	ENSG
-test_mRNA_3_-1049-1200-+1275-1349	test_chromosome	+	ENSG-3:UNKNOWN_REGION	ENSG
-test_mRNA_3_-1049-1200-+1275-1349	INVALID_ID	.	UNKNOWN_REGION	UNKNOWN_REGION
-test_mRNA_4_-1349_1500-+1575-1649	test_chromosome	+	UNKNOWN_REGION:ENSG-5	ENSG
-test_mRNA_4_-1349_1500-+1575-1649	test_chromosome	+	ENSG-5	ENSG

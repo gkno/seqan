@@ -2,30 +2,23 @@
 #include <iostream>
 #include <sstream>
 
-
-#include <seqan/basic/basic_debug.h> 	
 #define SEQAN_PROFILE
 #ifndef RELEASE	
-			
 //#define SEQAN_DEBUG			
 //#define SEQAN_TEST	
-	
-					
 #endif
 
 #include <string>
+#include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/map.h>
 #include <seqan/refinement.h>
 #include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
-#include <seqan/basic/basic_profile.h>
 
 #include "base.h"
-#include <seqan/store/store_align_intervals.h>
 #include "read_gff.h"
-#include <seqan/store/store_intervaltree.h>
 #include "create_gff.h"
 #include "overlap_module.h"
 
@@ -80,7 +73,6 @@ test_createCombinations()
 inline void
 test_interSec()
 {
-	
 	String<int> list1;
 	String<int> list2;
 	
@@ -176,10 +168,6 @@ int main( int argc, const char *argv[] )
 	}
 	
 	ngsOverlapper(nameSAM, nameFASTA, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO);
-	
-
 	return 0;
 }
-
-
 
