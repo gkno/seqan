@@ -27,9 +27,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 //needleman wunsch alignment
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TSpecSeed>
 TScoreValue
-_banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
+_banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 						 Seed<TValue, TSpecSeed> const &seed,
 						 TValue k,
 						 TString const & str1_,
@@ -37,7 +37,7 @@ _banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
 						 Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
@@ -197,15 +197,15 @@ SEQAN_CHECKPOINT
 
 
 //Position berechnen!
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
 _banded_needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
-						Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -277,11 +277,11 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////
 //Gotoh
 //Banded alignment with affine gap costs
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TSpecSeed>
 TScoreValue
-_banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-	   Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-	   Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+_banded_gotoh(Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+	   Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+	   Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 	   Seed<TValue, TSpecSeed> const &seed,
 	   TValue k,
 	   TString const & str1_,
@@ -291,7 +291,7 @@ _banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
 SEQAN_CHECKPOINT
 
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Rooted>::Type TMatrixIterator;
@@ -536,16 +536,16 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //gotoh trace
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec, typename TValue>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue>
 void
 _banded_gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
-					Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-					Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-					Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+					Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+					Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+					Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 					TValue position_)
 {
 SEQAN_CHECKPOINT
-	typedef typename Position<Matrix<TScoreValue, TMatrixSpec> >::Type TPosition;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;

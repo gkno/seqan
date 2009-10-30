@@ -500,18 +500,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //traceback
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
-typename Iterator<Matrix<TScoreValue, TSourceSpec>, Standard >::Type
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
+typename Iterator<Matrix<TScoreValue, DIMENSION>, Standard >::Type
 smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
-					 Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 					 Score<TScoreValue, Simple> const &)
 {
 SEQAN_CHECKPOINT
 
 	//typedefs
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
-	typedef typename Position<Matrix<TScoreValue, TSourceSpec> >::Type TPosition;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 //	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 	typedef typename Iterator<TTargetSource, Standard>::Type TStringIterator;

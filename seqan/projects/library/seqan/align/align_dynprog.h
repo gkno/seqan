@@ -26,16 +26,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 //needleman wunsch alignment
-template <typename TScoreValue, typename TMatrixSpec, typename TString>
+template <typename TScoreValue, unsigned DIMENSION, typename TString>
 TScoreValue
-_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
+_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 				  TString const & str1_,
 				  TString const & str2_,
 				  Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
@@ -127,20 +127,20 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //traceback through needleman wunsch matrix
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
 _needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
-						Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
+	typedef Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
 
-	typedef typename Position<Matrix<TScoreValue, TSourceSpec> >::Type TPosition;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 	TPosition pos_0 = coordinate(source_, 0);
 	TPosition pos_1 = coordinate(source_, 1);
 
@@ -218,11 +218,11 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////////////
 //Gotoh
 //Global alignment with affine gap costs
-template <typename TScoreValue, typename TMatrixSpec, typename TString>
+template <typename TScoreValue, unsigned DIMENSION, typename TString>
 TScoreValue
-_gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-	   Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-	   Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+_gotoh(Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+	   Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+	   Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 	   TString const & str1_,
 	   TString const & str2_,
 	   Score<TScoreValue, Simple> const & score_)
@@ -230,7 +230,7 @@ _gotoh(Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
 SEQAN_CHECKPOINT
 
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Rooted>::Type TMatrixIterator;
@@ -363,17 +363,17 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 //gotoh trace
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
 _gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
-			 Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-			 Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-			 Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
+			 Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+			 Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+			 Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 			 Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
-	typedef Iter<Matrix<TScoreValue, TMatrixSpec>, PositionIterator > TMatrixIterator;
-	typedef typename Position<Matrix<TScoreValue, TMatrixSpec> >::Type TPosition;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;

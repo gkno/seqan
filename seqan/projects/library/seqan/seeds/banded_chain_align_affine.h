@@ -103,11 +103,11 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	return score_str_diag[0];
 }
 
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
-_banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
-			  Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
-			  Matrix<TScoreValue, TMatrixSpec> & matrix_hori,
+_banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
+			  Matrix<TScoreValue, DIMENSION> & matrix_vert,
+			  Matrix<TScoreValue, DIMENSION> & matrix_hori,
 			  Seed<TValue, TSpecSeed> const &seed,
 			  TValue2 k,
 			  TString const & str1_,
@@ -117,7 +117,7 @@ _banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
 			  String<TScoreValue> & init_vert,
 			  String<TScoreValue> & init_hori)
 {
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Rooted>::Type TMatrixIterator;
@@ -373,18 +373,18 @@ _banded_gotoh(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
 
 
 //Position berechnen!
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec>
-typename Size<Matrix<TScoreValue, TMatrixSpec> >::Type
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
+typename Size<Matrix<TScoreValue, DIMENSION> >::Type
 _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
-					 Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-					 Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-					 Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
-					 Iter< Matrix<TScoreValue, TMatrixSpec>, PositionIterator > source_
+					 Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+					 Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+					 Matrix<TScoreValue, DIMENSION> & hori_matrix_,
+					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_
 					)
 {
 	SEQAN_CHECKPOINT
 	
-	typedef typename Position<Matrix<TScoreValue, TMatrixSpec> >::Type TPosition;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
@@ -445,16 +445,16 @@ _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
 
 
 //changed version of usual trace-back
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 TScoreValue
 _gotoh_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
-						Matrix<TScoreValue, TMatrixSpec> & diag_matrix_,
-						Matrix<TScoreValue, TMatrixSpec> & vert_matrix_,
-						Matrix<TScoreValue, TMatrixSpec> & hori_matrix_,
-						Iter< Matrix<TScoreValue, TMatrixSpec>, PositionIterator > source_)
+						Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+						Matrix<TScoreValue, DIMENSION> & vert_matrix_,
+						Matrix<TScoreValue, DIMENSION> & hori_matrix_,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_)
 {
 	SEQAN_CHECKPOINT
-	typedef typename Position<Matrix<TScoreValue, TMatrixSpec> >::Type TPosition;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
@@ -852,11 +852,11 @@ _calculateRectangleGotoh(TSeed const &seed,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_gotoh_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
-				 Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
-				 Matrix<TScoreValue, TMatrixSpec> & matrix_hori,	//edit matrix
+_gotoh_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_diag,
+				 Matrix<TScoreValue, DIMENSION> & matrix_vert,
+				 Matrix<TScoreValue, DIMENSION> & matrix_hori,	//edit matrix
 				 Seed<TValue, TSpecSeed> const &seed1,				//Seed nearer to the end
 				 Seed<TValue, TSpecSeed> const &seed2,				//Seed nearer to the start
 				 TValue2 k_begin,									//upper diagonal extension
@@ -871,7 +871,7 @@ _gotoh_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,
 SEQAN_CHECKPOINT
 
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, PositionIterator>::Type TMatrixIterator;
@@ -1164,18 +1164,18 @@ SEQAN_CHECKPOINT
 }
 
 
-template <typename TScoreValue, typename TMatrixSpec, typename TString>
+template <typename TScoreValue, unsigned DIMENSION, typename TString>
 void
-_gotoh2(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,		//edit matrix
-		Matrix<TScoreValue, TMatrixSpec> & matrix_vert,		//edit matrix
-		Matrix<TScoreValue, TMatrixSpec> & matrix_hori,		//edit matrix
+_gotoh2(Matrix<TScoreValue, DIMENSION> & matrix_diag,		//edit matrix
+		Matrix<TScoreValue, DIMENSION> & matrix_vert,		//edit matrix
+		Matrix<TScoreValue, DIMENSION> & matrix_hori,		//edit matrix
 		TString const & str1_,								//first sequence
 		TString const & str2_,								//secondSequence
 		Score<TScoreValue, Simple> const & score_)			//score matrix
 {
 	SEQAN_CHECKPOINT
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 	typedef typename Size<TMatrix> ::Type TValue;
 
 	typedef typename Size<TMatrix>::Type TSize;
@@ -1331,17 +1331,17 @@ _gotoh2(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,		//edit matrix
 }
 
 //changed version of usual trace-back
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TMatrixSpec, typename TValue, typename TMatrix>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue, typename TMatrix>
 TValue
 _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
-						Iter< Matrix<TScoreValue, TMatrixSpec>, PositionIterator > & diag_source,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > & diag_source,
 						TMatrix & diag_matrix_, 
 						TMatrix & vert_matrix_, 
 						TMatrix & hori_matrix_, 
 						TValue width_stop, 
 						TValue height_stop)
 {
-	typedef typename Position<Matrix<TScoreValue, TMatrixSpec> >::Type TPosition;
+	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
@@ -1403,11 +1403,11 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_banded_gotoh_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,	//edit matrix
-							  Matrix<TScoreValue, TMatrixSpec> & matrix_vert,
-							  Matrix<TScoreValue, TMatrixSpec> & matrix_hori,
+_banded_gotoh_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//edit matrix
+							  Matrix<TScoreValue, DIMENSION> & matrix_vert,
+							  Matrix<TScoreValue, DIMENSION> & matrix_hori,
 							  Seed<TValue, TSpecSeed> const &seed,				//Seed
 							  TValue2 k,											//diagonal extension
 							  TString const & str1_,							//first sequence
@@ -1420,7 +1420,7 @@ _banded_gotoh_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matrix_diag,	//
 SEQAN_CHECKPOINT
 
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, PositionIterator>::Type TMatrixIterator;

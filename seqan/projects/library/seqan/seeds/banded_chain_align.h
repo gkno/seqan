@@ -175,9 +175,9 @@ _constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > >con
 	}
 }
 
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
-_banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
+_banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 						 Seed<TValue, TSpecSeed> const &seed,
 						 TValue2 k,
 						 TString const & str1_,
@@ -186,7 +186,7 @@ _banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
 						 String<TScoreValue> init)
 {
 	SEQAN_CHECKPOINT
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
@@ -345,15 +345,15 @@ _banded_needleman_wunsch(Matrix<TScoreValue, TMatrixSpec> & matrix_,
 
 
 //Position berechnen!
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
-typename Size<Matrix<TScoreValue, TSourceSpec> >::Type
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
+typename Size<Matrix<TScoreValue, DIMENSION> >::Type
 _banded_needleman_wunsch_trace2(Align<TTargetSource, TTargetSpec> & target_,
-								Matrix<TScoreValue, TSourceSpec> & matrix,
-								Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+								Matrix<TScoreValue, DIMENSION> & matrix,
+								Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 								Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -436,14 +436,14 @@ SEQAN_CHECKPOINT
 
 
 //changed version of usual trace-back
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 int
 _needleman_wunsch_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
-						Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
 SEQAN_CHECKPOINT
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -882,9 +882,9 @@ _calculateRectangle(TSeed const &seed,
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_needleman_wunsch_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_,			//edit matrix
+_needleman_wunsch_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_,			//edit matrix
 							Seed<TValue, TSpecSeed> const &seed1,		//Seed nearer to the end
 							Seed<TValue, TSpecSeed> const &seed2,		//Seed nearer to the start
 							TValue2 k_begin,							//upper diagonal extension
@@ -895,7 +895,7 @@ _needleman_wunsch_rectangle(Matrix<TScoreValue, TMatrixSpec> & matrix_,			//edit
 							String<TScoreValue> init)//Values for initialisation
 {
 SEQAN_CHECKPOINT
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, PositionIterator>::Type TMatrixIterator;
@@ -1052,17 +1052,17 @@ SEQAN_CHECKPOINT
 }
 
 //changed version of usual trace-back
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, typename TSourceSpec, typename TValue, typename TMatrix>
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue, typename TMatrix>
 TValue
 _needleman_wunsch_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
-						Iter< Matrix<TScoreValue, TSourceSpec>, PositionIterator > source_,
+						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_,
 						TMatrix matrix, 
 						TValue width_stop, 
 						TValue height_stop)
 {
 SEQAN_CHECKPOINT
-	typedef Iter<Matrix<TScoreValue, TSourceSpec>, PositionIterator > TMatrixIterator;
+	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -1149,9 +1149,9 @@ SEQAN_CHECKPOINT
 
 
 //Rectangle calculation between two seeds
-template <typename TScoreValue, typename TMatrixSpec, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
+template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_banded_needleman_wunsch_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matrix_,	//edit matrix
+_banded_needleman_wunsch_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_,	//edit matrix
 								   Seed<TValue, TSpecSeed> const &seed,		//Seed
 								   TValue2 k,									//diagonal extension
 								   TString const & str1_,						//first sequence
@@ -1161,7 +1161,7 @@ _banded_needleman_wunsch_rectangle_first(Matrix<TScoreValue, TMatrixSpec> & matr
 {
 SEQAN_CHECKPOINT
 
-	typedef Matrix<TScoreValue, TMatrixSpec> TMatrix;
+	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;

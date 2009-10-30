@@ -26,6 +26,7 @@
 
 #include <cmath>
 #include <stack>
+#include <ostream>
 
 #include <seqan/sequence.h>
 #include <seqan/score.h>
