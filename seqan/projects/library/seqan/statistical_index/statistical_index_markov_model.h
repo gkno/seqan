@@ -187,8 +187,8 @@ public:
 	///////////////////////////////////////////////////////////////
 
 
-	template <typename TStringSet>
-	TFloat emittedProbability(TStringSet &string)
+	template <typename TString, typename TSetSpec>
+	TFloat emittedProbability(StringSet<TString, TSetSpec> const &string)
 	{
 		TFloat p = 0;
 
@@ -201,7 +201,8 @@ public:
 	}
 
 
-    TFloat emittedProbability(String<TAlphabet> &string)
+	template <typename TString>
+    TFloat emittedProbability(TString const &string)
 	{
 		Shape<TAlphabet, SimpleShape> orderShape;
 		resize(orderShape, order);
@@ -858,17 +859,17 @@ void setMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
 
 ///////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TFloat, typename TSpec, typename TStringSet>
+template <typename TAlphabet, typename TFloat, typename TSpec, typename TString, typename TSetSpec>
 TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-						  TStringSet &string)
+						  StringSet<TString, TSetSpec> const &string)
 {
 	return mm.emittedProbability(string);
 }
 
 
-template <typename TAlphabet, typename TFloat, typename TSpec>
+template <typename TAlphabet, typename TFloat, typename TSpec, typename TString>
 TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-						  String<TAlphabet> &string)
+						  TString const &string)
 {
 	return mm.emittedProbability(string);
 }
