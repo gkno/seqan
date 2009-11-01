@@ -1480,7 +1480,11 @@ void mapSingleReads(
 					else	
 #endif
 						compactMatches(matches, cnts, options, swiftPattern);
+#ifdef RAZERS_MICRO_RNA
+					options.compactThresh += length(matches);
+#else
 					options.compactThresh += (options.compactThresh >> 1);
+#endif
 					if (options._debugLevel >= 2)
 						::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
 				}

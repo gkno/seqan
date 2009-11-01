@@ -173,7 +173,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 
 	cerr << "********************************************************" << endl;
 	cerr << "*** MicroRazerS - Rapid Alignment of Small RNA Reads ***" << endl;
-	cerr << "***    written by Anne-Katrin Emde (c) Apr 2009    ´ ***" << endl;
+	cerr << "***    written by Anne-Katrin Emde (c) Apr 2009    ï¿½ ***" << endl;
 	cerr << "********************************************************" << endl << endl;
 	cerr << "Usage: micro_razers [OPTION]... <GENOME FILE> <READS FILE>" << endl;
 	if (longHelp) {
@@ -208,7 +208,7 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 		cerr << "  -pf, --position-format       \t" << "0 = gap space (default)" << endl;
 		cerr << "                               \t" << "1 = position space" << endl;
 	} else {
-		cerr << "Try 'razers --help' for more information." << endl;
+		cerr << "Try 'micro_razers --help' for more information." << endl;
 	}
 }
 
@@ -597,6 +597,10 @@ int main(int argc, const char *argv[])
 		if(options.exactSeed)
 		{
 			//shapes are designed such that span = seedLength-1 --> t = 2 for 0 errors
+			if(options.rnaSeedLength==10)
+				options.shape = "1111111111";
+			if(options.rnaSeedLength==11)
+				options.shape = "11111111111";
 			if(options.rnaSeedLength==12)
 				options.shape = "111111111111";
 			if(options.rnaSeedLength==13)
@@ -623,7 +627,15 @@ int main(int argc, const char *argv[])
 		else
 		{
 			//best shape found by bestShape.R with t=1
-			if(options.rnaSeedLength<15)
+			if(options.rnaSeedLength==10)
+				options.shape = "11011011";
+			if(options.rnaSeedLength==11)
+				options.shape = "110110101";
+			if(options.rnaSeedLength==12)
+				options.shape = "1101101101";
+			if(options.rnaSeedLength==13)
+				options.shape = "11011011011";
+			if(options.rnaSeedLength==14)
 				options.shape = "11101110111";
 			if(options.rnaSeedLength==15)
 				options.shape = "1101101101101"; //fuer n=15: 13  1  2  4  5  7  8 10 11
