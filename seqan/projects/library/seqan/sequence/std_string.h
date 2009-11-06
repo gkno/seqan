@@ -146,7 +146,10 @@ inline void const *
 id(::std::basic_string<TChar, TCharTraits, TAlloc> const & me)
 {
 SEQAN_CHECKPOINT
-	return (& *(me.end() - 1)) + 1;
+	if (me.empty())
+		return NULL;
+	else
+		return (& *(me.end() - 1)) + 1;
 }
 
 //////////////////////////////////////////////////////////////////////////////
