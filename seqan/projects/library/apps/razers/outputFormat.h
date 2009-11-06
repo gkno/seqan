@@ -1078,7 +1078,7 @@ void dumpMatches(
 							else
 							{
 								std::stringstream cigar, mutations;
-								getCigarLine(align,cigar,mutations,viewPosReadFirst,viewPosReadLast);
+								getCigarLine(align,cigar,mutations,viewPosReadFirst,viewPosReadLast + 1);
 								file << ";cigar="<<cigar.str();
 
 								if(length(mutations.str())>0)
