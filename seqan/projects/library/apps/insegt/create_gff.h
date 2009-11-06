@@ -288,7 +288,8 @@ createAnnoCountGFF(TFile & annoOutput, TAnnoCountStore & annoCountStore, TAnnoNo
 			_streamWrite(annoOutput, getValue(me.annotationNameStore, getValue(itAnno).parentId));
 			_streamPut(annoOutput, ';');
 		}
-		_streamPutFloat(annoOutput, getValue(itNorm));
+		//_streamPutFloat(annoOutput, getValue(itNorm));
+		_streamPutDouble(annoOutput, getValue(itNorm));
 		_streamWrite(annoOutput, ";\n");
 	}
 }
@@ -380,7 +381,8 @@ createTupleCountGFF(TFile & tupleOutput, TTupleCountStore & tupleCountStore, Fra
 					_streamPutInt(tupleOutput, getValue(itC));
 					_streamPut(tupleOutput, '\t');
 					// normalized tuple count
-					_streamPutFloat(tupleOutput, getValue(itN));
+					//_streamPutFloat(tupleOutput, getValue(itN));
+					_streamPutDouble(tupleOutput, getValue(itN));
 					_streamPut(tupleOutput, '\n');
 				}
 			}
@@ -440,7 +442,8 @@ createTupleCountGFF(TFile & tupleOutput, TTupleCountStore & tupleCountStore, Fra
 					_streamPutInt(tupleOutput, getValue(itC));
 					_streamPut(tupleOutput, '\t');
 					// normalized tuple count
-					_streamPutFloat(tupleOutput, getValue(itN));
+					//_streamPutFloat(tupleOutput, getValue(itN));
+					_streamPutDouble(tupleOutput, getValue(itN));
 					_streamPut(tupleOutput, '\n');
 				}
 			}
