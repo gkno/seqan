@@ -61,6 +61,22 @@ _parse_skipWord(TFile& file, TChar& c)
 
 
 //////////////////////////////////////////////////////////////////////////////
+// Converts a double to a character and writes it to stream
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TStream>
+inline void
+_streamPutDouble(TStream & target,
+			  double number)
+{
+SEQAN_CHECKPOINT
+	char str[BitsPerValue<double>::VALUE];
+	sprintf(str, "%f", number);
+	_streamWrite(target, str);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // create possible tuples with length n:
 //////////////////////////////////////////////////////////////////////////////
 template<typename TStringSet, typename TSpec, typename TConfig, typename TId>
