@@ -86,11 +86,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			switch (cigar[i].operation)
 			{
-				case 'P':
 				case 'D':
+				case 'N':
+				case 'P':
 					insertGaps(it, cigar[i].count);
-				case 'M':
 				case 'I':
+				case 'M':
 					it += cigar[i].count;
 			}
 		}
@@ -104,11 +105,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			switch (cigar[i].operation)
 			{
-				case 'P':
 				case 'I':
+				case 'P':
 					insertGaps(it, cigar[i].count);
-				case 'M':
 				case 'D':
+				case 'M':
+				case 'N':
 					it += cigar[i].count;
 			}
 		}
