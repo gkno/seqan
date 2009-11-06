@@ -205,10 +205,13 @@ struct _IsTellSeekStream< ::std::basic_fstream<TValue, TTraits> >
 */
 template <typename TValue, typename TTraits>
 inline bool 
-_streamEOF(::std::basic_ios<TValue, TTraits> const & me)
+_streamEOF(::std::basic_istream<TValue, TTraits> const & me)
 {
 SEQAN_CHECKPOINT
-	return me.eof() || me.fail();
+	// Andreas missed the fact that eof() of a stream is true after reading the eof character
+	// So reading the last character eof() is false, reading beyond eof() is true
+	// To fix that we use peek() to get the next character and compare it with the eof character
+	return me.fail() || const_cast<::std::basic_istream<TValue, TTraits> &>(me).peek() == TTraits::eof();
 }
 
 //////////////////////////////////////////////////////////////////////////////
