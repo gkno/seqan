@@ -162,11 +162,12 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void
     _parse_readSamIdentifier(TFile & file, TString & str, TChar& c)
     {
+        if (c == ' ' || c == '\t' || c == '\n') return;
         append(str, c);
         while (!_streamEOF(file)) 
 		{
             c = _streamGet(file);
-            if (c== ' ' || c== '\t' || c == '\n') break;
+            if (c == ' ' || c == '\t' || c == '\n') return;
             append(str, c);
         }
     }
@@ -583,19 +584,12 @@ namespace SEQAN_NAMESPACE_MAIN
             appendValue(fragStore.alignedReadTagStore, "", Generous());
         
         // read in alignments
-//		int k = 0;
-		Nothing contextSAM;
-		
+		Nothing contextSAM;		
 		refresh(fragStore.contigNameStoreCache);
 		refresh(fragStore.readNameStoreCache);
 
-        while(!_streamEOF(file))
-		{
-//			std::cout << k << std::endl;
+        while (!_streamEOF(file))
             _readOneAlignment(file, fragStore, contigAnchorGaps, matchMateInfos, c, SAM(), contextSAM);
-//			++k;
-//			if (k%1000==0) std::cout <<'.'<<std::flush;
-        }
     }
     
     
@@ -640,9 +634,10 @@ namespace SEQAN_NAMESPACE_MAIN
         // Type to temporarily store information about match mates
         typedef typename Value<TMatchMateInfos>::Type								TMatchMateInfo;
         
-        // read fields of alignments line
-        
-        // read the query name
+        // read fields of alignments line        
+        _parse_skipWhitespace(file, c);
+
+		// read the query name
         String<char> qname;
         _parse_readSamIdentifier(file, qname, c);
         _parse_skipWhitespace(file, c);
@@ -722,7 +717,9 @@ namespace SEQAN_NAMESPACE_MAIN
         String<char> tags;
         _parse_skipSpace(file, c);
         _parse_readCharsTillEndOfLine(file, tags, c);
-        
+		
+		if (empty(qname) || empty(rname))
+			return;
         
         // check if read sequence is already in the store.
         // if so get the ID, otherwise create new entries in the
