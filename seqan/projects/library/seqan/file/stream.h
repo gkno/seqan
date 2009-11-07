@@ -211,7 +211,8 @@ SEQAN_CHECKPOINT
 	// Andreas missed the fact that eof() of a stream is true after reading the eof character
 	// So reading the last character eof() is false, reading beyond eof() is true
 	// To fix that we use peek() to get the next character and compare it with the eof character
-	return me.fail() || const_cast<::std::basic_istream<TValue, TTraits> &>(me).peek() == TTraits::eof();
+	typedef ::std::basic_istream<TValue, TTraits> TStream;
+	return me.fail() || const_cast<TStream &>(me).peek() == TTraits::eof();
 }
 
 //////////////////////////////////////////////////////////////////////////////
