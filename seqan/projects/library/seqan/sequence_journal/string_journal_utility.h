@@ -1,10 +1,25 @@
 namespace seqan{
 
-    template< typename TString > //TODO: rewrite to encompass general Container functionality
+    template< typename TString, typename TShifts = Default > //TODO: rewrite to encompass general Container functionality
     struct suffix_compare_functor{
 
-        suffix_compare_functor( TString & string ) : m_string( string ){}
+        suffix_compare_functor( TString & string, TShifts const & shifts ) : m_string( string ), m_shifts( shifts ){}
+        
+        template< typename TPos1, typename TPos2 >
+        bool operator()( TPos1 & first, TPos2 & second ){
+            return suffix( m_string, first + get_shift( m_shifts, first ) ) < suffix( m_string, second + get_shift( m_shifts, second ) );
+        }
 
+    private:
+        TString & m_string;
+        String< Pair< size_t, int> > const & m_shifts;
+    };
+    
+    template< typename TString > //TODO: rewrite to encompass general Container functionality
+    struct suffix_compare_functor< TString, Default >{
+
+        suffix_compare_functor( TString & string ) : m_string( string ){}
+        
         template< typename TPos1, typename TPos2 >
         bool operator()( TPos1 & first, TPos2 & second ){
             return suffix( m_string, first ) < suffix( m_string, second );
@@ -48,7 +63,7 @@ namespace seqan{
       std::cout << std::endl;
    }
    
-#define NDEBUG_SYNC    
+//#define NDEBUG_SYNC    
         template< typename TIndex, typename TValue, typename TSloppySpec, typename TSAInv >
     inline void synchronize_index( TIndex & index, String< TValue, Journal< JournalConfig< TValue, TSloppySpec, False > > > & string, TSAInv & sa_inv ){
         typedef String< TValue, Journal< JournalConfig< TValue, TSloppySpec, False > > > TString;
@@ -194,6 +209,8 @@ namespace seqan{
                 insert( insert_pos, fibre_sa, it_index - blocklength, blocklength );
                 insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
                 
+                it_index_lcp += blocklength;
+                
                 if( insert_pos + blocklength != length( fibre_lcp ) ){
                     fibre_lcp[ insert_pos + blocklength - 1 ] = lcpLength( suffix( string, fibre_sa[ insert_pos + blocklength - 1 ]), suffix( string, fibre_sa[ insert_pos + blocklength ] ) );
                 }
@@ -225,7 +242,7 @@ namespace seqan{
 #endif
             append( fibre_sa, suffix( indices, it_index ) );
             append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
-            
+            fibre_lcp[ pos - 1 ] = lcpLength( suffix( string, fibre_sa[ pos - 1 ] ), suffix( string, fibre_sa[ pos ] ) );
             for( ; it_index < it_index_end; ++it_index, ++pos ){
                 fibre_sa_inv[ *it_index ] = pos;
             }
@@ -269,9 +286,10 @@ namespace seqan{
             std::cout << i << "\t: " << fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << "\t| " << fibre_sa_inv[i] <<  std::endl;
         }
 #endif
+        std::cout << "The End!" << std::endl;
     }
 
-#undef NDEBUG_SYNC
+//#undef NDEBUG_SYNC
 #define NDEBUG_SYNC    
     template< typename TIndex, typename TConfig, typename TSAInv >
     inline void synchronize_index_s( TIndex & index, String< typename TConfig::Type, Journal< TConfig > > & string, TSAInv & sa_inv ){
@@ -322,7 +340,7 @@ namespace seqan{
                 for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
                     appendValue( indices, j - current_shift, Generous() ); //Adding inserted indices
                 }
-                insert( it_nodes->position, fibre_sa_inv, begin( sa_inv ), it_nodes->length ); //TODO: not safe, create insert stirng as (TValue)0
+                insert( it_nodes->position, fibre_sa_inv, begin( sa_inv ), it_nodes->length ); //TODO: not safe, create insert string as (TValue)0
             }
 
             k = 0;
@@ -343,22 +361,26 @@ namespace seqan{
                 
                 appendValue( dels, suf_idx, Generous() );
                 appendValue( indices, fibre_sa[suf_idx] - current_shift, Generous() );
+                
             }
             current_shift += it_nodes->op()->by();
             j_goNext(it_nodes);
         }while( it_nodes != it_nodes_end );
-        
+
         std::sort( begin( dels ), end( dels ) );
         dels = prefix( dels, std::unique( begin( dels ), end( dels ) ) );
-        suffix_compare_functor< TString > cmp( string );
+        String< Pair< size_t, int > > const & shifts = fibre_sa.getjournal().shifts();
+//        print_pairs( shifts );
+        suffix_compare_functor< TString, String< Pair< size_t, int > > > cmp( string, shifts );
         std::sort( begin( indices ), end( indices ), cmp );
         indices = prefix( indices, std::unique( begin( indices ), end( indices ) ) );
         
         String< TPos > index_lcp;
         resize( index_lcp, length( indices ) );
+
         if( length( index_lcp ) != 0 ){
             for( unsigned int i = 0; i < length( index_lcp ) - 1; ++i ){
-                index_lcp[i] = lcpLength( suffix( string, indices[i]), suffix( string, indices[i + 1] ) );
+                index_lcp[i] = lcpLength( suffix( string, indices[i] + get_shift( shifts, indices[i] ) ), suffix( string, indices[i + 1] + get_shift( shifts, indices[i + 1] ) ) );
             }
             index_lcp[ length( index_lcp ) - 1 ] = 0;
         }
@@ -371,7 +393,7 @@ namespace seqan{
         }
         std::cout << "Indices:" << std::endl;
         for( unsigned int i = 0; i < length( indices ); ++i ){
-            std::cout << i << "\t: " << indices[i] << "\t[ " << index_lcp[i] << " ] " << suffix( string, indices[i] ) << std::endl;
+            std::cout << i << "\t: " << indices[i] + get_shift( shifts, indices[i] ) << "\t[ " << index_lcp[i] << " ] " << suffix( string, indices[i] + get_shift( shifts, indices[i] ) ) << std::endl;
         }
         std::cout << "Deletions:" << std::endl;
         for( unsigned int i = 0; i < length( dels ); ++i ){
@@ -402,22 +424,26 @@ namespace seqan{
         unsigned int insert_pos = 0;
         unsigned int blocklength = 1;
         
+        String< TPos > insert_positions;
+        resize( insert_positions, length( indices ) );
+        
         while( it_sa < it_sa_end && it_index < it_index_end ){
 #ifndef NDEBUG_SYNC
-            std::cout << "Processing suffix " << *it_sa << " and " << *it_index << std::endl;
+            std::cout << "Processing suffix " << *it_sa << " and " << *it_index + get_shift( shifts, *it_index ) << std::endl;
 #endif
-            if( suffix( string, *it_sa ) > suffix( string, *it_index ) ){
-                //std::cout << *it_sa << " > " << *it_index << std::endl;
+            if( suffix( string, *it_sa ) > suffix( string, *it_index + get_shift( shifts, *it_index ) ) ){
+//                std::cout << *it_sa << " > " << *it_index + get_shift( shifts, *it_index ) << std::endl;
                 blocklength = 1;
 
-                while( ++it_index < end( indices ) && suffix( string, *it_index ) < suffix( string, *it_sa ) ){
+                while( ++it_index < end( indices ) && suffix( string, *it_index + get_shift( shifts, *it_index ) ) < suffix( string, *it_sa ) ){
                     ++blocklength;
                 }
                 
                 //std::cout << "Inserting Block of Length: " << blocklength << " at Position " << insert_pos << std::endl;
                 insert( insert_pos, fibre_sa, it_index - blocklength, blocklength );
                 insert( insert_pos, fibre_lcp, it_index_lcp, blocklength );
-                
+                it_index_lcp += blocklength;
+                                
                 if( insert_pos + blocklength != length( fibre_lcp ) ){
                    /*std::cout << fibre_sa[insert_pos + blocklength - 1] << " and " << fibre_sa[insert_pos + blocklength] << std::endl;
                    std::cout << suffix( string, fibre_sa[insert_pos + blocklength - 1] ) << std::endl;
@@ -429,6 +455,7 @@ namespace seqan{
                 }
                 
                 for( unsigned int k = 0; k < blocklength; ++k ){
+                    //appendValue( insert_positions, insert_pos + k, Generous() );
                     replace( fibre_sa_inv, fibre_sa[insert_pos + k], insert_pos + k );
                 }
                 
@@ -450,9 +477,10 @@ namespace seqan{
         it_nodes_end = fibre_sa.getjournal().get_dummy_node();
 #ifndef NDEBUG_SYNC
         fibre_sa.getjournal().print_nodes_inorder();
+        print_pairs( fibre_sa_inv.getjournal().shifts() );
 #endif
         do{
-            if( !it_nodes->op()->insertion() && !it_nodes->op()->deletion() ){
+            if( !it_nodes->op()->insertion() && !it_nodes->op()->deletion() && it_nodes->length != 0 ){
 #ifndef NDEBUG_SYNC
                 std::cout << "Shifting by: " << current_shift << std::endl;
 #endif
@@ -460,8 +488,7 @@ namespace seqan{
 
 #ifndef NDEBUG_SYNC                
                 for( unsigned int j = it_nodes->position; j < it_nodes->position + it_nodes->length; ++j ){
-                    std::cout << fibre_sa[ j ] << "th Suffix: ";
-                    std::cout << fibre_sa_inv[ fibre_sa[ j ] ] << " -> " << fibre_sa_inv[ fibre_sa[ j ] ] + current_shift << std::endl;
+                    std::cout << fibre_sa[ j ] << "th Suffix!" << std::endl;
                 }
 #endif
                 j_goNext(it_nodes);
@@ -472,6 +499,21 @@ namespace seqan{
             j_goNext(it_nodes);
         }while( it_nodes != it_nodes_end );
 
+        String< Pair< size_t, int > > shifts_inv;
+        appendValue( shifts_inv, Pair< size_t, int >( 0, 0 ) );
+        append( shifts_inv, fibre_sa_inv.getjournal().shifts() );
+//        print_pairs( shifts_inv );
+        for( unsigned int k = 0; k < length( shifts_inv ); ++k ){
+            shifts_inv[k].i1 += shifts_inv[k].i2;
+            shifts_inv[k].i2 = -shifts_inv[k].i2;
+        }
+//        print_pairs( shifts_inv );
+//        for( unsigned int k = 0; k < length( insert_positions ); ++k ){
+//            std::cout << fibre_sa[ k ] << "(" << k << ") : " << fibre_sa_inv[fibre_sa[ k ]] << " -> ";
+//            replace( fibre_sa_inv, fibre_sa[ k ], k + get_shift( shifts_inv, k ) );
+//            std::cout << fibre_sa_inv[fibre_sa[ k ]] << std::endl;
+//        }
+
         if( it_index < it_index_end ){
             unsigned int pos = length( fibre_sa );
 #ifndef NDEBUG_SYNC
@@ -481,13 +523,11 @@ namespace seqan{
             append( fibre_lcp, suffix( index_lcp, it_index_lcp ) );
             replace( fibre_lcp, pos - 1, lcpLength( suffix( string, fibre_sa[ pos - 1 ] ), suffix( string, fibre_sa[ pos ] ) ) );
             for( ; it_index < it_index_end; ++it_index, ++pos ){
-                replace( fibre_sa_inv, *it_index, pos - fibre_sa_inv.getjournal().shift( pos ) );
+                replace( fibre_sa_inv, *it_index + get_shift( shifts, *it_index ), pos + get_shift( shifts_inv, pos ) );
             }
         }
 
-        //flatten( fibre_lcp );
-        //flatten( fibre_sa );
-#ifndef NDEBUG_SYNC        
+#ifndef NDEBUG_SYNC     
         std::cout << "Status( final ):" << std::endl;
         std::cout << "SA+LCP:" << std::endl;
         for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
