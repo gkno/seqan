@@ -178,7 +178,10 @@ assignToReadAnnoStore(TReadAnnoStore &readAnnoStore, FragmentStore<TSpec, TConfi
 							break;
 					}
 					if (itId == itIdEnd)			 // if not, delete parentId
+					{
 						erase(value(readAnnoStore, readId).parentIds, i);
+						--i;
+					}
 				}
 			}
 		}
