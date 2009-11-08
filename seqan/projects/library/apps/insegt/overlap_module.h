@@ -484,15 +484,21 @@ buildAnnoCountStore(TAnnoCountStore & annoCountStore, FragmentStore<TSpec, TConf
 							if ( interSec(interSecIds, back(getValue(itRead).annoIds), front(getValue(readAnnoStore, secReadId).annoIds)) ) 
 							{
 								for (unsigned i = 0; i < length(interSecIds); ++i)
-									--value(annoCountStore, getValue(interSecIds, i));						 	
+								{
+									if (getValue(me.annotationStore, getValue(interSecIds, i) ).parentId ==  getValue(itP))
+										--value(annoCountStore, getValue(interSecIds, i));
 									// decrement the corresponding count
+								}
 							}
 							// or if the start of the current read mapped in a same annotation as the end of the second read: 
 							else if ( interSec(interSecIds, front(getValue(itRead).annoIds), 
 								  back(getValue(readAnnoStore, secReadId).annoIds)) )	
 							{
 								for (unsigned i = 0; i < length(interSecIds); ++i)
-									--value(annoCountStore, getValue(interSecIds, i));
+								{
+									if (getValue(me.annotationStore, getValue(interSecIds, i) ).parentId ==  getValue(itP))
+										--value(annoCountStore, getValue(interSecIds, i));
+								}
 							}	
 							if (getValue(itP) != INVALID_ANNO_ID) --value(annoCountStore, getValue(itP));
 						}
