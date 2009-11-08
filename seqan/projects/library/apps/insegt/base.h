@@ -197,9 +197,7 @@ createCombinations(TStringSet &tupleSet, TStringSet &annoIds)
 		for (unsigned i = 0; i < length(annoIds); ++i)
 		{
 			unsigned m = length(getValue(annoIds, i));
-			if (m == 0) continue;
 			help = help / m;
-			if (help == 0) break;
 			for (unsigned j = 0; j< length(getValue(annoIds, i)); ++j)
 			{
 				id = getValue(getValue(annoIds, i), j);
