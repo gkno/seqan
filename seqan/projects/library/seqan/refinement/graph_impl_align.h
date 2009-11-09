@@ -539,9 +539,26 @@ removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename TGraph::TKey TKey;
 	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typename TPosToVertexMap::iterator interval = (g.data_pvMap.lower_bound(TKey(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v))));
 
 	// Clear the interval
-	(g.data_pvMap.lower_bound(TKey(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v))))->second = getNil<TVertexDescriptor>();
+	interval->second = getNil<TVertexDescriptor>();
+	typename TPosToVertexMap::iterator interval_iter = interval;
+	if (interval_iter != g.data_pvMap.begin()) {
+		--interval_iter;
+		if ((interval_iter->second == getNil<TVertexDescriptor>()) &&
+			(interval_iter->first.first == interval->first.first)) {
+			g.data_pvMap.erase(interval_iter);
+		}
+	}
+	interval_iter = interval;
+	++interval_iter;
+	if (interval_iter != g.data_pvMap.end()) {
+		if ((interval_iter->second == getNil<TVertexDescriptor>()) &&
+			(interval_iter->first.first == interval->first.first)) {
+			g.data_pvMap.erase(interval);
+		}
+	}
 
 	// Remove the vertex
 	removeVertex(g.data_align,v);
@@ -687,6 +704,7 @@ write(TFile & target,
 		TIterConst itEnd = end(g.data_align.data_vertex, Standard());
 		TVertexDescriptor pos = 0;
 		for(;it!=itEnd; ++it, ++pos) {
+			if (!idInUse(g.data_align.data_id_managerV, pos)) continue;
 			TVertexDescriptor sourceV = pos;
 			_streamPutInt(target, sourceV);
 			TSegment seg = getProperty(g.data_fragment, sourceV);
