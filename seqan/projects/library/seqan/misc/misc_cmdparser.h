@@ -82,9 +82,11 @@ _isInt(TString const s)
 
 struct OptionType{
     enum {
+        Bool = 1,		    // option needs no argument, value is true iff given on command line
         Boolean = 1,		// option needs no argument, value is true iff given on command line
         String = 2,			// argument is a string
         Int = 4,			// ... an integer
+        Integer = 4,		// ... an integer
         Double = 8,			// ... a float
         Mandatory = 16,		// option must be set
 		Label = 32,			// automatically print a label for the argument(s) on the help screen

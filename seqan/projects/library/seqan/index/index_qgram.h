@@ -1771,7 +1771,7 @@ It sums up the minimum number of q-gram occurrences between both sequences for e
 						++itSetA;
 					else 
 					{
-						TSizeMat ofs = (*itA).i1 * seqNoLength;
+						TSizeMat ofs = (itSetA - itSetBegin) * seqNoLength;
 						TSize countA = (*itA).i2;
 						TIterCounts itB = itA;
 						TIterSeqNo itSetB = itSetA;
@@ -1786,9 +1786,9 @@ It sums up the minimum number of q-gram occurrences between both sequences for e
 							{
 								TSize countB = (*itB).i2;
 								if (countA < countB)
-									distMat[ofs + (*itB).i1] += countA;
+									distMat[ofs + (itSetB - itSetBegin)] += countA;
 								else
-									distMat[ofs + (*itB).i1] += countB;
+									distMat[ofs + (itSetB - itSetBegin)] += countB;
 								++itB;
 								++itSetB;
 							}
