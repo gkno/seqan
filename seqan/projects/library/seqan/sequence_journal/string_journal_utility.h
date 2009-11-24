@@ -418,7 +418,10 @@ namespace seqan{
         for( unsigned int i = 0; i < length( fibre_sa ); ++i ){
             std::cout << i << "\t: " <<  fibre_sa[i] << "\t[ " << fibre_lcp[i] << " ] " << suffix( string, fibre_sa[i] ) << std::endl;
         }
-#endif        
+#endif
+
+        std::cout << length(indices) << "\t";
+
         typename Iterator< TSA_J >::Type it_sa = begin( fibre_sa );
         typename Iterator< TSA_J >::Type it_sa_end = end( fibre_sa );
         typename Iterator< String< TPos > >::Type it_index = begin( indices );
