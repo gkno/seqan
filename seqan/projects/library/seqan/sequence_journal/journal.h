@@ -81,11 +81,13 @@ namespace seqan {
          setValue( m_holder, underlying_string );
          assert( !empty(m_holder) );
          assert( dependent(m_holder) );
-         Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) );
+         Node root( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) );
          String<Node, TStringSpec> tree;
-         tree += root;
+         appendValue( tree, root, Generous() );
          assign( m_tree, tree );
+         appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
+         appendValue( m_shifts, Pair< size_t, int >( 0, 0 ), Generous() );
       }
 
       inline void assign_string( String< TValue, TSpec > const &underlying_string ){
@@ -94,11 +96,13 @@ namespace seqan {
          setValue( m_holder, underlying_string );
          assert( !empty(m_holder) );
          assert( dependent(m_holder) );
-         Node root( false, 0, 0, 0, 0, 0, 0, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) );
+         Node root( false, 0, 0, 0, 0, 0, 1, seqan::length( underlying_string ), new Operation( seqan::length( underlying_string ) ) );
          String<Node, TStringSpec> tree;
-         tree += root;
+         appendValue( tree, root, Generous() );
          assign( m_tree, tree );
+         appendValue( m_tree, Node( true, seqan::length( underlying_string ), seqan::length( m_insertion_string ), 1, 1, 0, 0, 1, new Operation( 1 ) ) ); //Dummy trail-node to catch iterator overflow
          m_length = seqan::length( value( m_holder ) );
+         appendValue( m_shifts, Pair< size_t, int >( 0, 0 ), Generous() );
       }
 
 //      inline TValue const & operator[]( size_t position ) const{

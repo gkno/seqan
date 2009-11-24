@@ -317,6 +317,8 @@ namespace seqan{
         int current_shift = 0;
         unsigned int verify_length = 0;
         
+//        string.getjournal().print_nodes_inorder();
+        
         do{
 #ifndef NDEBUG_SYNC
             std::cout << "Processing Node:" << std::endl;
@@ -326,6 +328,8 @@ namespace seqan{
                 fibre_sa.getjournal().add_shift( Pair< TPos, int >( it_nodes->position - current_shift, current_shift ) );
                 verify_length = it_nodes->length;
                 j_goNext(it_nodes);
+//                std::cout << "Step to: ";
+//                it_nodes->print_info();
                 continue; //nothing else to do
             }
             
