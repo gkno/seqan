@@ -666,7 +666,7 @@ normalizeAnnoCounts(TAnnoNormStore &annoNormStore, TMapO &mapO, TAnnoCountStore 
 				else
 					length = getValue(itA).beginPos - getValue(itA).endPos + 1;
 		
-				value(itN) = (double)(1000000000 * getValue(itC))/(double)(readNo * length);		// calculate normalized expression-value
+				value(itN) = ((double)1000000000 * (double)getValue(itC))/((double)readNo * (double)length);		// calculate normalized expression-value
 		
 				if (getValue(itA).parentId != INVALID_ID)					// append length to gene/parent lengths
 				{
@@ -692,7 +692,7 @@ normalizeAnnoCounts(TAnnoNormStore &annoNormStore, TMapO &mapO, TAnnoCountStore 
 			itLEnd = end(value(itM).i2);
 			for ( ; itL != itLEnd; goNext(itL))
 				length += getValue(itL);
-			value(annoNormStore, value(itM).i1) = (double)(1000000000 * getValue(annoCountStore, value(itM).i1) )/(double)(readNo * length);
+			value(annoNormStore, value(itM).i1) = ((double)1000000000 * (double)getValue(annoCountStore, value(itM).i1) )/((double)readNo * (double)length);
 		}
 	}
 }
@@ -760,7 +760,7 @@ normalizeTupleCounts(TTupleCountStore &tupleCountStore, FragmentStore<TSpec, TCo
 						else
 							tupleLength += getValue(me.annotationStore, getValue(itId)).beginPos - getValue(me.annotationStore, getValue(itId)).endPos + 1;
 					}
-					value(itN) = (double)(1000000000 * getValue(itC)) / (double)(readNo * tupleLength);
+					value(itN) = ((double)1000000000 * (double)getValue(itC)) / ((double)readNo * (double)tupleLength);
 				}
 			}
 			// matePairConnections:
@@ -786,7 +786,7 @@ normalizeTupleCounts(TTupleCountStore &tupleCountStore, FragmentStore<TSpec, TCo
 								tupleLength += getValue(me.annotationStore, getValue(itId)).beginPos - getValue(me.annotationStore, getValue(itId)).endPos + 1;
 						}
 					}
-					value(itN) = (double)(1000000000 * getValue(itC)) / (double)(readNo * tupleLength);
+					value(itN) = ((double)1000000000 * (double)getValue(itC)) / ((double)readNo * (double)tupleLength);
 				}
 			}
 		}
