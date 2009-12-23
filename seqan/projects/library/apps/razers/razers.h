@@ -408,6 +408,13 @@ bool loadReads(
 // low qual. reads are empty to output them and their id later as LQ reads
 //			if (count > cutoffCount) continue;
 		}
+#ifdef RAZERS_MICRO_RNA
+		if(options.microRNA && length(seq)<options.rnaSeedLength) 
+		{
+			clear(seq);
+			clear(qual);
+		}			
+#endif
 
 		// store dna and quality together
 		for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
@@ -419,7 +426,6 @@ bool loadReads(
 */
 		if (options.trimLength > 0 && length(seq) > (unsigned)options.trimLength)
 			resize(seq, options.trimLength);
-
 #ifdef RAZERS_CONCATREADS
 		appendValue(reads, seq, Generous());
 #else
