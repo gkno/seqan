@@ -109,11 +109,11 @@ entropy can also be printed.
 ---------------------------------------------------------------------------
 
 As an example run under Linux or Mac OS X:
-  ./dfi_linux  -g 1 2 data/database1.fa data/database2.fa
-  ./dfi_darwin -g 1 2 data/database1.fa data/database2.fa
+  ./dfi32  -g 1 2 data/database1.fa data/database2.fa
+  ./dfiOSX -g 1 2 data/database1.fa data/database2.fa
 
 or under Windows:
-  dfi_windows.exe -g 1 2 data\database1.fa data\database2.fa
+  dfi.exe -g 1 2 data\database1.fa data\database2.fa
 
 The solution set of this example is:
 ba
