@@ -32,7 +32,7 @@
 using namespace std;
 using namespace seqan;
 
-#define DEBUG_ENTROPY
+//#define DEBUG_ENTROPY
 
 	static const double DFI_EPSILON = 0.0000001;
 
