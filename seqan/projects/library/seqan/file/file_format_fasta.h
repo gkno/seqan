@@ -147,36 +147,29 @@ SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
 	TSize count = 0;
+	typename Value<TFile>::Type c;
 
-	while (true)
+	do
 	{
-		typename Value<TFile>::Type c = _streamGet(file);
-
-		if (_streamEOF(file))
+		c = _streamGet(file);
+		if (c == '\n' || c == '\r')
 		{
-			count_valid += count;
-			count_all += count;
-			return c;
-		}
-
-		if ((c == '\n') || (c == '\r'))
-		{
-			do
+			while (!_streamEOF(file))
 			{
 				++count_all;
 				c = _streamGet(file);
-			} while ((c == '\n') || (c == '\r'));
-
-			count_valid += count;
-			count_all += count;
-			return c;
+				if (c != '\n' && c != '\r')
+					break;
+			}
+			break;
 		}
 
-		if (c != '\r')
-		{
-			++count;
-		}
-	}
+		++count;
+	} while (!_streamEOF(file));
+	
+	count_valid += count;
+	count_all += count;
+	return c;
 }
 
 
@@ -263,14 +256,11 @@ SEQAN_CHECKPOINT
 	//reserve space
 	typename Size<TData>::Type count = count_valid;
 	if (count > limit)
-	{
 		count = limit;
-	}
+	
 	resize(data, count);
-	if (length(data) < count)
-	{
+	if (count > length(data))
 		count = length(data);
-	}
 
 	//read sequence
 	_streamSeekG(file, begin_pos);
@@ -286,7 +276,7 @@ SEQAN_CHECKPOINT
 		}
 		if (pos >= count) break;
 
-		c =  _streamGet(file);
+		c = _streamGet(file);
 		--count_all;
 	}
 
