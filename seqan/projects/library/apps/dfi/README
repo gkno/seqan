@@ -1,34 +1,112 @@
-DFI - The Deferred Frequency Index
+                 Fast String Mining of Multiple Databases
+                        under Frequency Constraints
 
-This package contains the implementation of the DFI algorithm 
-published in "Efficient string mining under constraints via the 
-deferred frequency index".
+                   http://www.seqan.de/projects/dfi.html
 
-There are executables compiled for various platforms:
+---------------------------------------------------------------------------
+Table of Contents
+---------------------------------------------------------------------------
+  1.   Overview
+  2.   Installation
+  3.   Usage
+  4.   Output Format
+  5.   Example
+  6.   Contact
+  
+---------------------------------------------------------------------------
+1. Overview
+---------------------------------------------------------------------------
+
+The Deferred Frequency Index (DFI) is a tool for string mining under
+frequency constraints, i.e., predicates that evaluate solely the frequency
+of a pattern occurrence in the data. The frequency of a pattern is defined
+as the number of distinct sequences in a database that contain the pattern
+at least once. Currently the implementation contains 3 different predicates
+and can easily be extended by user-defined frequency predicates.
+The frequencies are calculated during the construction of a suffix tree
+over all databases, which enables to limit the index construction to a
+problem-specific minimum referred to as the optimal monotonic hull.
+
+---------------------------------------------------------------------------
+2. Installation
+---------------------------------------------------------------------------
+
+There are precompiled executables for various platforms:
+
   dfi_windows.exe  dfi for Windows
   dfi_linux        dfi for GNU Linux x86
   dfi_linux64      dfi for GNU Linux x86-64
   dfi_darwin       dfi for Mac OS X on Intel
+  
+DFI is distributed with SeqAn - The C++ Sequence Analysis Library (see 
+http://www.seqan.de). To compile DFI on your system do the following:
 
+  1)  Download the latest snapshot of SeqAn
+  2)  Unzip it to a directory of your choice (e.g. snapshot)
+  3)  cd snapshot/apps
+  4)  make dfi
+  5)  cd dfi
+  6)  ./dfi --help
 
-For the "Frequent Pattern Mining Problem" (Problem 1) execute:
-  dfi -f <min_1> <max_2> [-p|-d] <database 1> <database 2>
+Alternatively you can check out the latest SVN version of DFI and SeqAn
+with:
 
-For the "Emerging Substring Mining Problem" (Problem 2) execute:
-  dfi -g <rho_s> <rho_g> [-p|-d] <database 1> <database 2>
+  1)  svn co http://svn.mi.fu-berlin.de/seqan/trunk/seqan
+  2)  cd seqan
+  3)  make forwards
+  4)  cd projects/library/apps
+  5)  make dfi
+  6)  cd dfi
+  7)  ./dfi --help
 
-  <min_1>       minimum frequency threshold for <database 1>
-  <max_2>       maximum frequency threshold for <database 2>
-  <rho_s>       minimum support threshold for <database 1>
-  <rho_g>       growth rate threshold from <database 2> to <database 1>
-  <database 1>  positive (foreground) set in FASTA format
-  <database 2>  negative (background) set in FASTA format
+On success, an executable file dfi was build and a brief usage description
+was dumped.
 
-Optionally, you can append -p or -d to specify the database alphabet:
-  -p            AminoAcid alphabet (for proteomes)
-  -d            DNA alphabet (for genomes)
-  <nothing>     byte alphabet (for anything, e.g. texts)
+---------------------------------------------------------------------------
+3. Usage
+---------------------------------------------------------------------------
 
+To get a short usage description of DFI, you can execute dfi -h or 
+dfi --help.
+
+Usage: dfi [OPTION]... --minmax  <min_1> <max_1> <database 1> ...
+                       --minmax  <min_m> <max_m> <database m>
+       dfi [OPTION]... --growth  <rho_s> <rho_g> <database 1> <database 2>
+       dfi [OPTION]... --entropy <rho_s> <alpha> <database 1> <database 2>
+                       ... <database m>
+
+DFI implements 3 different frequency string mining problems:
+
+  1) Frequent Pattern Mining Problem (--minmax)
+  2) Emerging Substring Mining Problem (--growth)
+  3) Entropy Substring Mining Problem (--entropy)
+
+To choose between these problems the corresponding option must be given
+with associated parameters. For problem 1 the --minmax option must be given
+multiple times with the minimum and maximum frequency for each database.
+Problem 2 expects the minimum support in database 1 (rho_s) and the minimum
+growth rate from database 2 to database 1 (rho_g). Problem 3 expects the
+minimum support in at least one database (rho_s) and the maximum entropy
+(alpha).
+As arguments the names of the databases in Fasta format must be given.
+To speed up the suffix tree construction additional options can be used to
+specify the alphabet, e.g. DNA, AminoAcid or text (default).
+By default, DFI outputs every substring that satisfies the frequency
+predicate. If the -m option is given only maximal substrings are output,
+i.e. substrings that satisfy the predicate and are not part of a longer
+substring with the same frequencies.
+
+---------------------------------------------------------------------------
+4. Output Format
+---------------------------------------------------------------------------
+
+The solution set is printed to standard out, one string per line. By
+defining the DEBUG_ENTROPY symbol during compilation, the frequencies and
+entropy can also be printed.
+
+---------------------------------------------------------------------------
+5. Example
+---------------------------------------------------------------------------
 
 As an example run under Linux or Mac OS X:
   ./dfi_linux  -g 1 2 data/database1.fa data/database2.fa
@@ -37,12 +115,14 @@ As an example run under Linux or Mac OS X:
 or under Windows:
   dfi_windows.exe -g 1 2 data\database1.fa data\database2.fa
 
+The solution set of this example is:
+ba
+bab
 
-To build your own executable you need to download the latest
-SeqAn snapshot and unzip it. Adjust the variable SEQAN_BASE in 
-the Makefile to the unzip path and run make.
-
+---------------------------------------------------------------------------
+6. Contact
+---------------------------------------------------------------------------
 
 For questions or comments, contact:
-  David Weese <weese@inf.fu-berlin.de>
+  David Weese <david.weese@fu-berlin.de>
   Marcel H. Schulz <marcel.schulz@molgen.mpg.de>
