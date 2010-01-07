@@ -33,10 +33,10 @@ problem-specific minimum referred to as the optimal monotonic hull.
 
 There are precompiled executables for various platforms:
 
-  dfi_windows.exe  dfi for Windows
-  dfi_linux        dfi for GNU Linux x86
-  dfi_linux64      dfi for GNU Linux x86-64
-  dfi_darwin       dfi for Mac OS X on Intel
+  dfi.exe  dfi for Windows
+  dfi32    dfi for GNU Linux x86
+  dfi      dfi for GNU Linux x86-64
+  dfiOSX   dfi for Mac OS X on Intel
   
 DFI is distributed with SeqAn - The C++ Sequence Analysis Library (see 
 http://www.seqan.de). To compile DFI on your system do the following:

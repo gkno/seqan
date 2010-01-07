@@ -494,10 +494,15 @@ int runDFI(
 		cerr << "Database read error... exit!" << endl;
 		return 1;
 	}
-	
-//	for(unsigned j=1;j<length(ds);++j)
-//		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
-
+/*
+	for(unsigned j=1;j<length(ds);++j)
+	{
+		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
+		for(unsigned k=0;k<ds[j]-ds[j-1];++k)
+			cout<<'\t'<<mySet[ds[j-1]+k];
+		cout<<endl;
+	}
+*/
 	TPred					pred(paramPred, ds);
 	TPredHull				predHull(paramPredHull, ds);
 	TIndex					index(mySet, predHull, pred);
