@@ -157,35 +157,7 @@ using namespace seqan;
 				dsLengths[i - 1] = ds[i] - ds[i - 1];
 		}
 
-/*		template <typename TDataSet>
-		PredEntropy(double _maxEntropy, TDataSet const &):
-			maxEntropy(_maxEntropy + DFI_EPSILON) {}
- 
-		// frequency based entropy
-
-		static inline double
-		getEntropy(_DFIEntry const &entry)
-		{
-			int sum = 0;
-			double H = 0;
-
-			for (unsigned i = 0; i < length(entry.freq); ++i)
-				sum += entry.freq[i];
-			
-			double lSum = log((double)sum);					// sum cannot be zero
-				
-			for (unsigned i = 0; i < length(entry.freq); ++i)
-				if (entry.freq[i])
-				{
-					double freq = entry.freq[i];
-					H += freq * (log(freq) - lSum);
-				}
-			H /= -sum * log((double)length(entry.freq));	// normalize by datasets (divide by log m)
-			return H;
-		}
-*/
 		// support based entropy
-		
 		inline double
 		getEntropy(_DFIEntry const &entry) const
 		{
@@ -494,15 +466,7 @@ int runDFI(
 		cerr << "Database read error... exit!" << endl;
 		return 1;
 	}
-/*
-	for(unsigned j=1;j<length(ds);++j)
-	{
-		cout<<"dataset "<<j<<':'<<ds[j]-ds[j-1]<<endl;
-		for(unsigned k=0;k<ds[j]-ds[j-1];++k)
-			cout<<'\t'<<mySet[ds[j-1]+k];
-		cout<<endl;
-	}
-*/
+
 	TPred					pred(paramPred, ds);
 	TPredHull				predHull(paramPredHull, ds);
 	TIndex					index(mySet, predHull, pred);
@@ -671,13 +635,13 @@ int main(int argc, const char *argv[])
 		
 	CommandLineParser parser;
 	string rev = "$Revision$";
-	addVersionLine(parser, "DFI version 2.0 20090715 [" + rev.substr(11, 4) + "]");
+	addVersionLine(parser, "DFI version 2.0 20100107 [" + rev.substr(11, 4) + "]");
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	addTitleLine(parser, "**************************************************************");
 	addTitleLine(parser, "***           DFI - The Deferred Frequency Index           ***");
-	addTitleLine(parser, "*** (c) Copyright 2009 by David Weese and Marcel H. Schulz ***");
+	addTitleLine(parser, "*** (c) Copyright 2010 by David Weese and Marcel H. Schulz ***");
 	addTitleLine(parser, "**************************************************************");
 	addUsageLine(parser, "[OPTION]... --minmax  <min_1> <max_1> <database 1> ... --minmax <min_m> <max_m> <database m>");
 	addUsageLine(parser, "[OPTION]... --growth  <rho_s> <rho_g> <database 1> <database 2>");
