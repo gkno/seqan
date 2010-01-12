@@ -232,7 +232,7 @@ getErrorDistribution(
 
 	Align<Dna5String, ArrayGaps> align;
 	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
-	if (options.hammingOnly)
+	if (options.gapMode == RAZERS_UNGAPPED)
 		scoreType.data_mismatch = -1;
 	resize(rows(align), 2);
 
@@ -318,10 +318,17 @@ dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
 	}
 }
 
-template<typename TMatches, typename TCounts, typename TOptions>
+template <typename TFSSpec, typename TFSConfig, typename TCounts, typename TOptions>
 void
-countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
+countCoocurrences(
+	FragmentStore<TFSSpec, TFSConfig> & store,
+	TCounts & cooc, 
+	TOptions & options)
 {
+	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
+	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
+
 	clear(cooc);
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength) + 1;
 	fill(cooc,maxSeedErrors+1,0);
@@ -331,8 +338,8 @@ countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
 	int count = 0;
 	unsigned readNo = -1;
 	int preEditDist = -1;
-	typename Iterator<TMatches>::Type it = begin(matches,Standard());
-	typename Iterator<TMatches>::Type itEnd = end(matches,Standard());
+	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
+	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
 	
 	for(; it != itEnd; ++it)
 	{
@@ -433,11 +440,16 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations)
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 //////////////////////////////////////////////////////////////////////////////
 // Assign mapping quality and remove suboptimal matches
-template < typename TMatches, typename TReads, typename TCooc, typename TCounts, typename TSpec >
-void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCounts &cnts, RazerSOptions<TSpec> & options)
+template < typename TFSSpec, typename TFSConfig, typename TCooc, typename TCounts, typename TSpec >
+void assignMappingQuality(
+	FragmentStore<TFSSpec, TFSConfig> & store,
+	TCooc & cooc,
+	TCounts &cnts,
+	RazerSOptions<TSpec> & options)
 {
-	typedef typename Value<TMatches>::Type				TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
+	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
+	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
 
 	//matches are already sorted	
 	//std::sort(
@@ -449,9 +461,9 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 	int maxSeedErrors = (int)(options.errorRate*options.artSeedLength)+1;
 	unsigned readNo = -1;
 	
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-	TIterator dit = it;
+	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
+	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
+	TAlignedReadIter dit = it;
 
 	int bestQualSum, secondBestQualSum;
 	int secondBestDist = -1 ,secondBestMatches = -1;
@@ -519,7 +531,7 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 	//	if(secondBestQualSum != -1000) ++it;
 		++dit;
 	}
-	resize(matches, dit - begin(matches, Standard()));
+	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 }
 #endif
 
@@ -529,28 +541,32 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 template <
 	typename TFSSpec,
 	typename TFSConfig,
-	typename TGNoToFile,
 	typename TCounts,
-	typename TSpec
+	typename TSpec,
+	typename RazerSMode
 >
-void dumpMatches(
+bool dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
-	StringSet<CharString> &genomeFileNameList,		// list of genome names (e.g. {"hs_ref_chr1.fa","hs_ref_chr2.fa"})
-	String<TGNoToFile> &gnoToFileMap,				// map to retrieve genome filename and sequence number within that file
 	TCounts & stats,								// Match statistics (possibly empty)
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
 	CharString errorPrbFileName,
-	RazerSOptions<TSpec> &options)
+	RazerSOptions<TSpec> &options,
+	RazerSMode const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
+	typedef typename TFragmentStore::TContigStore					TContigStore;
+	typedef typename TFragmentStore::TContigFileStore				TContigFileStore;
 	typedef typename TFragmentStore::TContigPos						TContigPos;
+
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename Value<TContigStore>::Type						TContig;
+	typedef typename Value<TContigFileStore>::Type					TContigFile;
+
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
 	typedef typename Id<TAlignedRead>::Type							TId;
 	typedef typename GetValue<TAlignQualityStore>::Type				TQuality;
-	typedef typename Value<TGenomeSet>::Type						TGenome;
 	typedef typename TFragmentStore::TContigPos						TGPos;
 
 	if (options.outputFormat == 2)
@@ -563,7 +579,7 @@ void dumpMatches(
 		options.maxHits = 1;		// Eland outputs at most one match
 		options.sortOrder = 0;		// read numbers are increasing
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
-		options.dumpAlignment = options.hammingOnly;
+		options.dumpAlignment = (options.gapMode == RAZERS_UNGAPPED);
 	}
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if (options.maqMapping) options.outputFormat = 3;
@@ -586,9 +602,8 @@ void dumpMatches(
 	SEQAN_PROTIMESTART(dump_time);
 
 	// load Genome sequences for alignment dumps
-	TGenomeSet genomes;
 	if (options.dumpAlignment || options.outputFormat == 4 || options.outputFormat == 5 || !empty(errorPrbFileName))
-		if (!loadContigs(store, genomeFileNameList)) {
+		if (!lockContigs(store)) {
 			std::cerr << "Failed to load genomes" << std::endl;
 			options.dumpAlignment = false;
 		}
@@ -614,7 +629,7 @@ void dumpMatches(
 	Align<String<Dna5>, ArrayGaps> align;
 	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
 
-	if (options.hammingOnly)
+	if (options.gapMode == RAZERS_UNGAPPED)
 		scoreType.data_mismatch = -1;
 	resize(rows(align), 2);
 
@@ -629,7 +644,7 @@ void dumpMatches(
 	file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc);
 	if (!file.is_open()) {
 		std::cerr << "Failed to open output file" << std::endl;
-		return;
+		return false;
 	}
 
 	
@@ -650,14 +665,13 @@ void dumpMatches(
 	}
 
 	Nothing nothing;
-	unsigned curreadId = 0;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping)
 	{
 		String<int> cooc;
-		compactMatches(matches, stats, options, nothing, false); //only best two matches per read are kept
-		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
-		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
+		compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);	//only best two matches per read are kept
+		countCoocurrences(store,cooc,options);	//coocurrence statistics are filled
+		assignMappingQuality(store,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
 	}
 	else	 
 #endif
@@ -666,7 +680,7 @@ void dumpMatches(
 	if(options.microRNA)purgeAmbiguousRnaMatches(store,options);
 	else
 #endif
-	compactMatches(store, stats, options, nothing);
+	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateLibSizes(libSize, store);
@@ -727,15 +741,17 @@ void dumpMatches(
 
 				switch (options.genomeNaming)
 				{
-					// 0..filename is the read's Fasta id
+					// 0..filename is the genome's Fasta id
 					case 0:
 						file << store.contigNameStore[(*it).contigId];
 						break;
 
-					// 1..filename is the read filename + seqNo
+					// 1..filename is the genome filename + seqNo
 					case 1:
+						TContig &contig = store.contigStore[(*it).contigId];
+						TContigFile &contigFile = store.contigFileStore[contig.fileId];
 						file.fill('0');
-						file << gnoToFileMap[(*it).contigId].i1 << '#' << std::setw(gzeros) << gnoToFileMap[(*it).contigId].i2 + 1;
+						file << contigFile.fileName << '#' << std::setw(gzeros) << ((*it).contigId - contigFile.firstContigId + 1);
 				}
 
 				if ((*it).beginPos < (*it).endPos)
@@ -902,8 +918,10 @@ void dumpMatches(
 
 							// 1..filename is the read filename + seqNo
 							case 1:
+								TContig &contig = store.contigStore[(*it).contigId];
+								TContigFile &contigFile = store.contigFileStore[contig.fileId];
 								file.fill('0');
-								file << gnoToFileMap[(*it).contigId].i1 << '#' << std::setw(gzeros) << gnoToFileMap[(*it).contigId].i2 + 1;
+								file << contigFile.fileName << '#' << std::setw(gzeros) << ((*it).contigId - contigFile.firstContigId + 1);
 						}
 						
 						if ((*it).beginPos < (*it).endPos)
@@ -911,7 +929,7 @@ void dumpMatches(
 						else
 							file << _sep_ << (*it).beginPos << _sep_ << 'R' << _sep_ << "..";
 
-						if (qual.errors > 0 && options.dumpAlignment && options.hammingOnly) 
+						if (qual.errors > 0 && options.dumpAlignment && options.gapMode == RAZERS_UNGAPPED) 
 						{
 							TContigPos left = (*it).beginPos;
 							TContigPos right = (*it).endPos;
@@ -934,7 +952,8 @@ void dumpMatches(
 				}
 			}
 			break;
-		case 3: // GFF:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
+/*		case 3: // GFF:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
+			unsigned curreadId = 0;
 			for (unsigned filecount = 0; filecount < length(genomeFileNameList); ++filecount)
 			{
 				TQuality	qual = getValue(store.alignQualityStore, (*it).id);
@@ -1067,7 +1086,7 @@ void dumpMatches(
 						}
 						if (qual.errors > 0)
 						{
-							if (options.hammingOnly)
+							if (options.gapMode == RAZERS_UNGAPPED)
 							{
 								TContigPos left = (*it).beginPos;
 								TContigPos right = (*it).endPos;
@@ -1156,7 +1175,7 @@ void dumpMatches(
 				++filecount;
 			}
 			break;
-		case 4: // SAM
+*/		case 4: // SAM
 			convertMatchesToGlobalAlignment(store, scoreType);
 //			String<String<unsigned> > layout;
 //			layoutAlignment(layout, store, 0);
@@ -1173,6 +1192,10 @@ void dumpMatches(
 
 	file.close();
 
+	// free no longer required contigs
+	if (options.dumpAlignment || options.outputFormat == 4 || options.outputFormat == 5 || !empty(errorPrbFileName))
+		unlockAndFreeContigs(store);
+
 	// get empirical error distribution
 	if (!empty(errorPrbFileName) && maxReadLength > 0)
 	{
@@ -1185,7 +1208,7 @@ void dumpMatches(
 			unsigned deletions = 0;
 			fill(posError, maxReadLength, 0);
 			
-			if (options.hammingOnly)
+			if (options.gapMode == RAZERS_UNGAPPED)
 				unique = getErrorDistribution(posError, store, options);
 			else
 			{
@@ -1204,11 +1227,71 @@ void dumpMatches(
 	}
 
 	options.timeDumpResults = SEQAN_PROTIMEDIFF(dump_time);
-
 	if (options._debugLevel >= 1)
 		std::cerr << "Dumping results took             \t" << options.timeDumpResults << " seconds" << std::endl;
+	return true;
 }
 
+template <
+	typename TFSSpec,
+	typename TFSConfig,
+	typename TCounts,
+	typename TSpec,
+	typename TAlignMode,
+	typename TGapMode
+>
+bool dumpMatches(
+	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
+	TCounts & stats,								// Match statistics (possibly empty)
+	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
+	CharString errorPrbFileName,
+	RazerSOptions<TSpec> &options,
+	RazerSMode<TAlignMode, TGapMode, Nothing> const)
+{
+	if (options.scoreMode == RAZERS_ERRORS)
+		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors>());
+	if (options.scoreMode == RAZERS_SCORE)
+		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSScore>());
+	if (options.scoreMode == RAZERS_QUALITY)
+		if (options.maqMapping)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
+		else
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ> >());
+	return RAZERS_INVALID_OPTIONS;
+}
+
+template <
+	typename TFSSpec,
+	typename TFSConfig,
+	typename TCounts,
+	typename TSpec
+>
+bool dumpMatches(
+	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
+	TCounts & stats,								// Match statistics (possibly empty)
+	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
+	CharString errorPrbFileName,
+	RazerSOptions<TSpec> &options)
+{
+	if (options.gapMode == RAZERS_GAPPED)
+	{
+		if (options.alignMode == RAZERS_LOCAL)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing>());
+		if (options.alignMode == RAZERS_PREFIX)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing>());
+		if (options.alignMode == RAZERS_GLOBAL)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing>());
+	} else 
+	{
+		if (options.alignMode == RAZERS_LOCAL)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing>());
+		if (options.alignMode == RAZERS_PREFIX)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing>());
+		if (options.alignMode == RAZERS_GLOBAL)
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing>());
+	}
+	return RAZERS_INVALID_OPTIONS;
+}
 
 }
 

@@ -28,8 +28,8 @@
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 //#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
-#define RAZERS_MATEPAIRS				// enable paired-end matching
-//#define RAZERS_DIRECT_MAQ_MAPPING
+  //#define RAZERS_MATEPAIRS				// enable paired-end matching
+#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
 #include <seqan/platform.h>
@@ -159,8 +159,8 @@ int mapReads(
     options.patternMutex = new TMutex[length(readSet)];
 #endif
 
-	String< Pair<CharString, unsigned> > gnoToFileMap; //map to retrieve genome filename and sequence number within that file
-	int error = mapReads(store, genomeFileNames, gnoToFileMap, stats, options);
+	loadContigs(store, genomeFileNames, false); // add filenames to the contig store (they are loaded on-demand)
+	int error = _mapReads(store, stats, options);
 	if (error != 0)
 	{
 		switch (error)
@@ -183,7 +183,7 @@ int mapReads(
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 4: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
-		dumpMatches(store, genomeFileNames, gnoToFileMap, stats, readFileNames[0], errorPrbFileName, options);
+		dumpMatches(store, stats, readFileNames[0], errorPrbFileName, options);
 
 	return 0;
 }	
@@ -276,8 +276,9 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
 	addSection(parser, "Mapping Quality Options:");
 	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
-	addOption(parser, CommandLineOption("nbi","no-below-id",       "do not report matches with seed identity < percent id", OptionType::Boolean));
 	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
+	addOption(parser, CommandLineOption("mmq","total-mism-quality","total sum of qualities at mismatching bases", OptionType::Int | OptionType::Label, options.absMaxQualSumErrors));
+
 #endif
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
@@ -294,8 +295,9 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "recognition-rate", pm_options.optionLossRate);
 	getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
 #endif
-	getOptionValueLong(parser, "indels", options.hammingOnly);
-	options.hammingOnly = !options.hammingOnly;
+	bool _indels;
+	getOptionValueLong(parser, "indels", _indels);
+	options.gapMode = (_indels)? RAZERS_GAPPED: RAZERS_UNGAPPED;
 #ifdef RAZERS_MATEPAIRS
 	getOptionValueLong(parser, "library-length", options.libraryLength);
 	getOptionValueLong(parser, "library-error", options.libraryError);
@@ -318,9 +320,7 @@ int main(int argc, const char *argv[])
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
 	getOptionValueLong(parser, "mapping-quality", options.maqMapping);
-	getOptionValueLong(parser, "no-below-id", options.noBelowIdentity);
 	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
-	getOptionValueLong(parser, "seed-mism-quality", options.maxMismatchQualSum);
 	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
 	getOptionValueLong(parser, "low-memory", options.lowMemory);
 #endif
@@ -406,8 +406,6 @@ int main(int argc, const char *argv[])
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if ((options.artSeedLength < 24) && (stop = true))
 		cerr << "Minimum seed length is 24" << endl;
-	if ((options.maxMismatchQualSum < 0) && (stop = true))
-		cerr << "Max seed mismatch quality needs to be 0 or a positive value" << endl;
 	if ((options.absMaxQualSumErrors < 0) && (stop = true))
 		cerr << "Max total mismatch quality needs to be 0 or a positive value" << endl;
 #endif
@@ -462,7 +460,7 @@ int main(int argc, const char *argv[])
 		if (options.lowMemory) pm_options.maxWeight = 13;
 		pm_options.verbose = (options._debugLevel >= 1);
 		pm_options.optionErrorRate = options.errorRate;
-		if (options.hammingOnly)
+		if (options.gapMode == RAZERS_UNGAPPED)
 		{
 			pm_options.optionProbINSERT = (ParamChooserOptions::TFloat)0.0;
 			pm_options.optionProbDELETE = (ParamChooserOptions::TFloat)0.0;
