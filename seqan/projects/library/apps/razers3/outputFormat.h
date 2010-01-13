@@ -327,7 +327,9 @@ countCoocurrences(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
+	typedef typename Iterator<TAlignQualityStore, Standard>::Type	TAlignQualityIter;
 
 	clear(cooc);
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength) + 1;
@@ -340,13 +342,14 @@ countCoocurrences(
 	int preEditDist = -1;
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
 	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
+	TAlignQualityIter qit = begin(store.alignQualityStore, Standard());
 	
-	for(; it != itEnd; ++it)
+	for(; it != itEnd; ++it, ++qit)
 	{
 		if ((*it).readId == readNo)
 		{
 			if(preEditDist > 1) continue;// || dist > options.errorRate * maxReadLength + 1) continue;
-			int dist = (*it).seedEditDist - preEditDist;
+			int dist = (*qit).errors - preEditDist;
 			if(dist > maxSeedErrors) continue;
 			if(dist < 0) ++cooc[0];
 			else ++cooc[dist];
@@ -354,7 +357,7 @@ countCoocurrences(
 		else
 		{
 			readNo = (*it).readId;
-			preEditDist = (*it).seedEditDist;
+			preEditDist = (*qit).errors;
 			if(preEditDist <= 1) ++count;
 		}
 	}
@@ -449,7 +452,10 @@ void assignMappingQuality(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TAlignedReadIter;
+	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename Value<TAlignQualityStore>::Type				TQuality;
 
 	//matches are already sorted	
 	//std::sort(
@@ -469,30 +475,31 @@ void assignMappingQuality(
 	int secondBestDist = -1 ,secondBestMatches = -1;
 	for (; it != itEnd; ++it) 
 	{
-		if ((*it).orientation == '-') continue;
+		if ((*it).id == TAlignedRead::INVALID_ID) continue;
 		bool mappingQualityFound = false;
 		int mappingQuality = 0;
 		int qualTerm1,qualTerm2;
 
 		readNo = (*it).readId;
-		bestQualSum = (*it).mScore;
+		TQuality &qual = store.alignQualityStore[(*it).id];
+		bestQualSum = qual.score;
 		
 		if(++it!=itEnd && (*it).readId==readNo)
 		{
-			secondBestQualSum = (*it).mScore;
-			secondBestDist = (*it).editDist;
-			secondBestDist = (*it).editDist;
+			TQuality &qual2 = store.alignQualityStore[(*it).id];
+			secondBestQualSum = qual2.score;
+			secondBestDist = qual2.errors;
 			secondBestMatches = cnts[1][readNo] >> 5;
 //CHECKcnts		secondBestMatches = cnts[secondBestDist][readNo];
 //			secondBestMatches = cnts[secondBestDist][readNo];
-			(*it).orientation = '-';
+			(*it).id = TAlignedRead::INVALID_ID;
 		//	if(secondBestDist<=bestDist) unique=0;
 		}
 		else secondBestQualSum = -1000;
 		--it; //it is now at best match of current readId
 
-		int bestDist = (*it).editDist;
-		int kPrime = (*it).seedEditDist;
+		int bestDist = qual.errors;
+		int kPrime = 0/*(*it).errors*/;
 		if((bestQualSum==secondBestQualSum) || (kPrime>maxSeedErrors))
 			mappingQualityFound = true;   //mq=0
 		else{
@@ -525,7 +532,7 @@ void assignMappingQuality(
 		}
 		if (!mappingQualityFound) mappingQuality = (qualTerm1<qualTerm2) ? qualTerm1:qualTerm2;
 		if (mappingQuality < 0) mappingQuality = 0;
-		(*it).mScore = mappingQuality;
+		qual.score = mappingQuality;
 		
 		*dit = *it;
 	//	if(secondBestQualSum != -1000) ++it;
