@@ -234,12 +234,6 @@ struct _MakeUnsigned<short>
 };
 
 template <>
-struct _MakeSigned<long>
-{
-	typedef unsigned long Type;
-};
-
-template <>
 struct _MakeUnsigned<__int64>
 {
 	typedef __uint64 Type;
@@ -297,12 +291,6 @@ template <>
 struct _MakeSigned<unsigned short>
 {
 	typedef signed short Type;
-};
-
-template <>
-struct _MakeSigned<unsigned long>
-{
-	typedef signed long Type;
 };
 
 template <>
