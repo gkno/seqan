@@ -141,8 +141,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeMapReads;		// time for mapping reads
 		double		timeDumpResults;	// time for dumping the results
 		
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
 		bool		maqMapping;
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 		int			mutationRateQual;
 		int			absMaxQualSumErrors;
 		int			artSeedLength;
@@ -218,7 +218,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			maqMapping = false;
 			mutationRateQual = 30;		// (28bp is maq default)
 			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
-			artSeedLength = 28;
+			maqSeedLength = 28;
 #endif
 
 #ifdef RAZERS_MICRO_RNA
@@ -435,29 +435,33 @@ struct MicroRNA{};
 				m.beginPos = genomeLength - m.beginPos;
 				m.endPos = genomeLength - m.endPos;
 			}
-#pragma omp critical section
-			if (!options.spec.DONT_DUMP_RESULTS)
+#pragma omp critical
+// begin of critical section
 			{
-				m.id = length(store.alignedReadStore);
-				appendValue(store.alignedReadStore, m, Generous());
-				appendValue(store.alignQualityStore, q, Generous());
-				if (length(store.alignedReadStore) > options.compactThresh)
+				if (!options.spec.DONT_DUMP_RESULTS)
 				{
-					typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
+					m.id = length(store.alignedReadStore);
+					appendValue(store.alignedReadStore, m, Generous());
+					appendValue(store.alignQualityStore, q, Generous());
+					if (length(store.alignedReadStore) > options.compactThresh)
+					{
+						typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
 
-					if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-						maskDuplicates(store);	// overlapping parallelograms cause duplicates
-	
-					compactMatches(store, cnts, options, TRazerSMode(), swiftPattern, COMPACT);
+						if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+							maskDuplicates(store);	// overlapping parallelograms cause duplicates
+		
+						compactMatches(store, cnts, options, TRazerSMode(), swiftPattern, COMPACT);
+							
+						if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+							options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 						
-					if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
-					
-					if (options._debugLevel >= 2)
-						::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+						if (options._debugLevel >= 2)
+							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+					}
 				}
+				++options.countVerification;
 			}
-			++options.countVerification;
+// end of critical section
 		}
 	};
  
@@ -917,7 +921,7 @@ template <
 >
 void compactMatches(
 	TFragmentStore &store,
-	TCounts & cnts, 
+	TCounts &, 
 	RazerSOptions<TSpec> &options, 
 	RazerSMode<RazerSGlobal, TGapMode, TScoreMode> const,
 	TSwift & swift, 
@@ -1187,12 +1191,12 @@ template <
 	typename TSwift 
 >
 void compactMatches(
-	TFragmentStore &store,
-	TCounts & cnts, 
-	RazerSOptions<TSpec> &options, 
+	TFragmentStore &,
+	TCounts &, 
+	RazerSOptions<TSpec> &, 
 	RazerSMode<TAlignMode, TGapMode, TScoreMode> const,
-	TSwift & swift, 
-	CompactMatchesMode compactMode)
+	TSwift &, 
+	CompactMatchesMode)
 {
 }
 
@@ -1651,10 +1655,10 @@ template <
 	typename TScoreMode >
 inline bool
 matchVerify(
-	TMatchVerifier &verifier,
-	Segment<TGenome, InfixSegment> inf,							// potential match genome region
-	unsigned readId,											// read number
-	TReadSet &readSet,											// reads
+	TMatchVerifier &,
+	Segment<TGenome, InfixSegment>,								// potential match genome region
+	unsigned,													// read number
+	TReadSet &,													// reads
 	RazerSMode<TAlignMode, TGapMode, TScoreMode> const)
 {
 	std::cerr << "Verification not implemenented!" << std::endl;
@@ -1742,15 +1746,13 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-	typename TReadIndex,
-	typename TShape>
+	typename TReadIndex>
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
-	TReadIndex											& readIndex,
-	TShape const										& shape)
+	TReadIndex											& readIndex)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename IF<
@@ -1796,7 +1798,7 @@ int _mapSingleReads(
 	
 	// iterate over genome sequences
 #pragma omp parallel for private(swiftPattern)
-	for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId)
+	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
 		if (options.forward)
 			_mapSingleReads(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
@@ -1845,7 +1847,7 @@ int _mapSingleReads(
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 
-	return _mapSingleReads(store, cnts, options, mode, swiftIndex, shape);
+	return _mapSingleReads(store, cnts, options, mode, swiftIndex);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1885,7 +1887,7 @@ int _mapSingleReads(
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 	
-	return _mapSingleReads(store, cnts, options, mode, swiftIndex, shape);
+	return _mapSingleReads(store, cnts, options, mode, swiftIndex);
 }
 
 
@@ -1953,10 +1955,12 @@ int _mapReads(
 	if (options.scoreMode == RAZERS_SCORE)
 		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSScore>());
 	if (options.scoreMode == RAZERS_QUALITY)
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 		if (options.maqMapping)
-			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
-		else
 			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ> >());
+		else
+#endif
+			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
 	return RAZERS_INVALID_OPTIONS;
 }
 

@@ -29,7 +29,7 @@
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 //#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
   //#define RAZERS_MATEPAIRS				// enable paired-end matching
-#define RAZERS_DIRECT_MAQ_MAPPING
+//#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
 #include <seqan/platform.h>
@@ -295,7 +295,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "recognition-rate", pm_options.optionLossRate);
 	getOptionValueLong(parser, "param-dir", pm_options.paramFolder);
 #endif
-	bool _indels;
+	bool _indels = false;
 	getOptionValueLong(parser, "indels", _indels);
 	options.gapMode = (_indels)? RAZERS_GAPPED: RAZERS_UNGAPPED;
 #ifdef RAZERS_MATEPAIRS

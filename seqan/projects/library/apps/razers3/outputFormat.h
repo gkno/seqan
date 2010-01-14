@@ -1260,10 +1260,12 @@ bool dumpMatches(
 	if (options.scoreMode == RAZERS_SCORE)
 		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSScore>());
 	if (options.scoreMode == RAZERS_QUALITY)
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 		if (options.maqMapping)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
-		else
 			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ> >());
+		else
+#endif
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
 	return RAZERS_INVALID_OPTIONS;
 }
 
