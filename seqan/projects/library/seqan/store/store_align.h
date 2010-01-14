@@ -520,7 +520,7 @@ _assignSourceLength(TSize & size, Gaps<TSource, AnchorGaps<TGapAnchors> > const 
 {
 SEQAN_CHECKPOINT
 	if (_IsSameType<TSource, Nothing>::VALUE)
-		size = supremumValue(size);
+		size = supremumValue<TSize>();
 	else
 		size = length(value(me.data_source));
 }

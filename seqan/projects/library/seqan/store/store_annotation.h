@@ -38,10 +38,11 @@ struct AnnotationStoreElement
 	
 	TId					parentId;
 	TId					contigId;
+	TId					countId;
 	TPos				beginPos;		// begin position of the gapped sequence in gapped contig sequence
 	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
 
-	AnnotationStoreElement() : parentId(INVALID_ID), contigId(INVALID_ID), beginPos(INVALID_POS), endPos(INVALID_POS) {}
+	AnnotationStoreElement() : parentId(INVALID_ID), contigId(INVALID_ID), countId(INVALID_ID), beginPos(INVALID_POS), endPos(INVALID_POS) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////

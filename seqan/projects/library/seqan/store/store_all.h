@@ -103,6 +103,7 @@ struct FragmentStoreConfig
 	typedef void					TMatePairStoreElementSpec;
 	typedef void					TLibraryStoreElementSpec;
 	typedef void					TContigStoreElementSpec;
+	typedef void					TContigFileSpec;
 	typedef void					TAlignedReadStoreElementSpec;
 	typedef Owner<ConcatDirect<> >	TAlignedReadTagStoreSpec;
 	typedef void					TAnnotationStoreElementSpec;
@@ -121,6 +122,7 @@ private:
 	typedef typename TConfig::TMatePairStoreElementSpec		TMatePairStoreElementSpec;
 	typedef typename TConfig::TLibraryStoreElementSpec		TLibraryStoreElementSpec;
 	typedef typename TConfig::TContigStoreElementSpec		TContigStoreElementSpec;
+	typedef typename TConfig::TContigFileSpec				TContigFileSpec;
 	typedef typename TConfig::TAlignedReadStoreElementSpec	TAlignedReadStoreElementSpec;
 	typedef typename TConfig::TAlignedReadTagStoreSpec		TAlignedReadTagStoreSpec;
 	typedef typename TConfig::TAnnotationStoreElementSpec	TAnnotationStoreElementSpec;
@@ -145,6 +147,7 @@ public:
 	typedef String< MatePairStoreElement< TMatePairStoreElementSpec > >										TMatePairStore;
 	typedef String< LibraryStoreElement< TMean, TStd, TLibraryStoreElementSpec > >							TLibraryStore;
 	typedef String< ContigStoreElement< TContigSeq, TContigGapAnchor, TContigStoreElementSpec > >			TContigStore;
+	typedef String< ContigFile< TContigFileSpec > >															TContigFileStore;
 	typedef String< AlignedReadStoreElement< TContigPos, TReadGapAnchor, TAlignedReadStoreElementSpec > >	TAlignedReadStore;
 	typedef String< AlignQualityStoreElement< TMappingQuality >	>											TAlignQualityStore;
 	typedef StringSet<CharString, TAlignedReadTagStoreSpec>													TAlignedReadTagStore;
@@ -154,12 +157,13 @@ public:
 	typedef StringSet<CharString>																			TNameStore;
 	
 	// main containers
-	TReadStore			readStore;			// readId     -> matePairId
-	TMatePairStore		matePairStore;		// matePairId -> readId0, readId1, libraryId
-	TLibraryStore		libraryStore;		// libraryId  -> libSizeMean, libSizeStd
-	TContigStore		contigStore;		// contigId   -> contigSeq, contigGaps
-	TAlignedReadStore	alignedReadStore;	//            -> id, readId, contigId, pairMatchId (not matePairId!), beginPos, endPos, gaps
-	TAnnotationStore	annotationStore;	// annoId     -> parentId, contigId, beginPos, endPos
+	TReadStore			readStore;			// readId       -> matePairId
+	TMatePairStore		matePairStore;		// matePairId   -> readId0, readId1, libraryId
+	TLibraryStore		libraryStore;		// libraryId    -> libSizeMean, libSizeStd
+	TContigStore		contigStore;		// contigId     -> contigSeq, contigGaps, contigFileId
+	TContigFileStore	contigFileStore;	// contigFileId -> fileName, firstContigId
+	TAlignedReadStore	alignedReadStore;	//              -> id, readId, contigId, pairMatchId (not matePairId!), beginPos, endPos, gaps
+	TAnnotationStore	annotationStore;	// annoId       -> parentId, contigId, beginPos, endPos
 	TIntervalTreeStore	intervalTreeStore_F;		// treeId (same as contigId)	-> intervalTree (F: forward strand)
 	TIntervalTreeStore	intervalTreeStore_R;		// 						(R: reverse complement strand)
 
