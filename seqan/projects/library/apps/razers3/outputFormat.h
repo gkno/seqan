@@ -552,7 +552,7 @@ template <
 	typename TSpec,
 	typename RazerSMode
 >
-bool dumpMatches(
+int dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
 	TCounts & stats,								// Match statistics (possibly empty)
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
@@ -1247,7 +1247,7 @@ template <
 	typename TAlignMode,
 	typename TGapMode
 >
-bool dumpMatches(
+int dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
 	TCounts & stats,								// Match statistics (possibly empty)
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
@@ -1275,7 +1275,7 @@ template <
 	typename TCounts,
 	typename TSpec
 >
-bool dumpMatches(
+int dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
 	TCounts & stats,								// Match statistics (possibly empty)
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
