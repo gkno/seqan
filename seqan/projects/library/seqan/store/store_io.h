@@ -778,26 +778,41 @@ write(TFile & target,
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences from multiple files
 template <typename TFSSpec, typename TFSConfig>
-bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString> const &fileNameList)
+bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString> const &fileNameList, bool loadSeqs)
 {
+	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
+	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
+	typedef typename Value<TContigFileStore>::Type		TContigFile;
+	
 	unsigned seqOfs = length(store.contigStore);
 	for (unsigned filecount = 0; filecount < length(fileNameList); ++filecount)
 	{
-		MultiFasta multiFasta;
-		if (!open(multiFasta.concat, toCString(fileNameList[filecount]), OPEN_RDONLY))
+		MultiSeqFile multiSeqFile;
+		if (!open(multiSeqFile.concat, toCString(fileNameList[filecount]), OPEN_RDONLY))
 			return false;
 
-		AutoSeqFormat format;
-		guessFormat(multiFasta.concat, format);					// guess file format
-		split(multiFasta, format);								// divide into single sequences
+		TContigFile contigFile;
+		guessFormat(multiSeqFile.concat, contigFile.format);		// guess file format
+		split(multiSeqFile, contigFile.format);						// divide into single sequences
 
-		unsigned seqCount = length(multiFasta);
+		contigFile.fileName = fileNameList[filecount];
+		contigFile.firstContigId = seqOfs;
+		appendValue(store.contigFileStore, contigFile, Generous());
+
+		unsigned seqCount = length(multiSeqFile);
 		resize(store.contigStore, seqOfs + seqCount, Generous());
+		resize(store.contigFileStore, seqOfs + seqCount, Generous());
 		resize(store.contigNameStore, seqOfs + seqCount, Generous());
-		for(unsigned i = 0; i < seqCount; ++i)
+		for (unsigned i = 0; i < seqCount; ++i)
 		{
-			assignSeq(store.contigStore[seqOfs + i].seq, multiFasta[i], format);			// read Genome sequence
-			assignSeqId(store.contigNameStore[seqOfs + i], multiFasta[i], format);
+			store.contigStore[seqOfs + i].usage = 0;
+			store.contigStore[seqOfs + i].fileBeginPos = beginPosition(multiSeqFile[i]);
+			store.contigStore[seqOfs + i].fileEndPos = endPosition(multiSeqFile[i]);
+			if (loadSeqs)
+				assignSeq(store.contigStore[seqOfs + i].seq, multiSeqFile[i], contigFile.format);	// read Genome sequence
+			else
+				clear(store.contigStore[seqOfs + i].seq);
+			assignSeqId(store.contigNameStore[seqOfs + i], multiSeqFile[i], contigFile.format);
 		}
 		seqOfs += seqCount;
 	}
@@ -808,13 +823,111 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString>
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences from a single file
 template <typename TFSSpec, typename TFSConfig>
-bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, CharString const &fileName)
+bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, CharString const &fileName, bool loadSeqs)
 {
 	StringSet<CharString> fileNames;
 	appendValue(fileNames, fileName);
-	return loadContigs(store, fileNames);
+	return loadContigs(store, fileNames, loadSeqs);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TFSSpec, typename TFSConfig, typename TFileNames>
+bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, TFileNames const &fileNames)
+{
+	return loadContigs(store, fileNames, true);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec, typename TConfig, typename TId>
+bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
+{
+	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
+	typedef typename TFragmentStore::TContigStore		TContigStore;
+	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
+	typedef typename Value<TContigStore>::Type			TContig;
+	typedef typename Value<TContigFileStore>::Type		TContigFile;
+
+	if (length(store.contigStore) <= id) return false;
+	TContig &contig = store.contigStore[id];
+
+	if (contig.fileId >= length(store.contigFileStore)) return false;
+	
+	TContigFile &contigFile = store.contigFileStore[contig.fileId];
+	String<char, MMap<> > fileString(toCString(contigFile.fileName), OPEN_RDONLY);
+	assignSeq(contig.seq, infix(fileString, contig.fileBeginPos, contig.fileEndPos), contigFile.format);			// read Read sequence
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec, typename TConfig, typename TId>
+bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
+{
+	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
+	typedef typename TFragmentStore::TContigStore		TContigStore;
+	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
+	typedef typename Value<TContigStore>::Type			TContig;
+	typedef typename Value<TContigFileStore>::Type		TContigFile;
+	
+	if (length(store.contigStore) <= id) return false;
+	TContig &contig = store.contigStore[id];
+	
+	if (contig.usage++ > 0 || !empty(contig.seq)) return true;
+	return loadContig(store, id);
+}
+
+template <typename TSpec, typename TConfig, typename TId>
+bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
+{
+	if (length(store.contigStore) <= id) return false;
+	--store.contigStore[id].usage;
+	return true;
+}
+
+template <typename TSpec, typename TConfig, typename TId>
+bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId id)
+{
+	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
+	typedef typename TFragmentStore::TContigStore		TContigStore;
+	typedef typename Value<TContigStore>::Type			TContig;
+
+	if (length(store.contigStore) <= id) return false;
+	TContig &contig = store.contigStore[id];
+
+	if (--contig.usage == 0 && contig.fileId < length(store.contigFileStore))
+		clear(contig.seq);
+	return true;
+}
+
+template <typename TSpec, typename TConfig>
+bool lockContigs(FragmentStore<TSpec, TConfig> &store)
+{
+	bool result = true;
+	for (unsigned id = 0; id < length(store.contigStore); ++id)
+		result &= lockContig(store, id);
+	return result;
+}
+
+template <typename TSpec, typename TConfig>
+bool unlockContigs(FragmentStore<TSpec, TConfig> &store)
+{
+	bool result = true;
+	for (unsigned id = 0; id < length(store.contigStore); ++id)
+		result &= unlockContig(store, id);
+	return result;
+}
+
+template <typename TSpec, typename TConfig>
+bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
+{
+	bool result = true;
+	for (unsigned id = 0; id < length(store.contigStore); ++id)
+		result &= unlockAndFreeContig(store, id);
+	return result;
+}
 
 
 }// namespace SEQAN_NAMESPACE_MAIN
