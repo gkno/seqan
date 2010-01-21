@@ -271,7 +271,6 @@ int main( int argc, const char *argv[] )
 	addUsageLine(parser, "[OPTION]... <transcript annotation GFF file>");
 	
 	addOption(parser, CommandLineOption("r",  "reference",        "reference sequence file", OptionType::String | OptionType::Label | OptionType::List));
-	addOption(parser, CommandLineOption("t",  "transcripts",      "transcripts file", OptionType::String | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("o",  "output",           "rectified annotation output file", OptionType::String | OptionType::Label));
 	addOption(parser, CommandLineOption("md", "minimal-distance", "minimal distance between adjacent exons", OptionType::Int | OptionType::Label, 20));
 
@@ -286,10 +285,6 @@ int main( int argc, const char *argv[] )
 	FragmentStore<> fragStore;
 	for (unsigned i = 0; i < length(getOptionValuesShort(parser, "r")); ++i)
 		loadContigs(fragStore, getOptionValuesShort(parser, "r")[i]);
-		
-	FragmentStore<> transStore;
-	for (unsigned i = 0; i < length(getOptionValuesShort(parser, "r")); ++i)
-		loadContigs(transStore, getOptionValuesShort(parser, "r")[i]);
 		
 	CharString dstFileName;
 	int minDistance = 20;
