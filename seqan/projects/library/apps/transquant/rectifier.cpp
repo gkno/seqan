@@ -106,10 +106,21 @@ int rectify(TExons &lines, int beginExon, int endExon, TFragStore &fragStore, in
 	}
 	else 
 	{
+		int changed = 0;
 		char orientation = (forwardIntrons > reverseIntrons)? '+': '-';
 		for (int j = beginExon; j < endExon; ++j)
-			lines[j].orientation = orientation;
-		std::cerr << "good (fwd:" << forwardIntrons << " bwd:" << reverseIntrons << ") for transcript:" << lines[beginExon].ids << std::endl;
+		{
+			if (lines[j].orientation != orientation) 
+			{
+				++changed;
+				lines[j].orientation = orientation;
+			}
+		}
+		if (changed == 0)
+			std::cerr << "good (" << orientation << ')';
+		else
+			std::cerr << "modified (" << ((orientation=='+')? '-':'+') << " -> " << orientation << ')';
+		std::cerr << " (fwd:" << forwardIntrons << " bwd:" << reverseIntrons << ") for transcript:" << lines[beginExon].ids << std::endl;
 		if (orientation == '+')
 			return 1;
 		else

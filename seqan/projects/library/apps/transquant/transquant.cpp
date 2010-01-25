@@ -44,7 +44,7 @@ struct Stats
 // stats directly taken from the result file
 	unsigned long	matches;	
 	unsigned long	reads;
-	unsigned long	matepairs;	
+	unsigned long	matepairs;
 };
 
 Stats stats;
@@ -61,6 +61,9 @@ String<String<Count> >		counts;			// node[0] -> ((node[1..],count), (node[1..],c
 String<int>					nodeToMContig;	// node number -> MContig id (compact renumeration)
 String<int>					mContigToNode;	// MContig id -> node number (reverse map)
 int							lastMContig = 0;
+	
+typedef std::map<string,int>	TTransName2Num;
+TTransName2Num					transName2Num;
 
 bool disablePairedEnds;
 boost::math::normal fragmentDistr;
@@ -173,6 +176,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 	typename Value<TFile>::Type c = _streamGet(file);
 	CharString header_;
 	std::string header;
+	std::string transName;
 
 	unsigned contigId = 0;
 	if (!empty(transToDContig))
@@ -189,23 +193,31 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		c = _streamGet(file);
 		header_ = _parse_readIdentifier(file, c);
 		assign(header, suffix(header_, 6));
+		size_t confPos = header.find("_Confidence_");
+		if (confPos != header.npos)
+			header.erase(confPos);		
+
 		std::istringstream iss(header);
 		_parse_skipLine(file, c);
 
 		char d;
 		int locusNum = -1;
 		int transNum = -1;
-		double confidence = 0;
+//		double confidence = 0;
 
 		iss >> locusNum >> d >> d;
 		if (d != 'T') continue;
 		for (int i = 0; i < 10; ++i) iss >> d;
-		iss >> transNum >> d;
-		for (int i = 0; i < 11; ++i) iss >> d;
-		iss >> confidence;
+		iss >> transName;
+//		for (int i = 0; i < 12; ++i) iss >> d;
+//		iss >> confidence;
 
 		if (locusNum >= (int)length(transToDContig))
 			resize(transToDContig, locusNum + 1, Generous());
+
+		// next 2 lines patched
+		transNum = length(transToDContig[locusNum]);
+		transName2Num[transName] = transNum;
 		if (transNum >= (int)length(transToDContig[locusNum]))
 			fill(transToDContig[locusNum], transNum + 1, 0, Generous());
 
@@ -220,7 +232,9 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 				std::cerr<<"HUH1?"<<std::endl;
 
 			c = _streamGet(file);	// :
-			int endPos = _parse_readNumber(file, c);
+			// quick fix for Hugues' bug
+			//int endPos = _parse_readNumber(file, c);
+			int endPos = pos + _parse_readNumber(file, c);
 			if (nodeId < 0) nodeId = -nodeId;
 
 			// rename nodeIds
@@ -472,7 +486,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 	file.open(toCString(fileName), ios_base::in | ios_base::binary);
 
 	CharString header_;
-	std::string line, readName, lastReadName;
+	std::string line, readName, lastReadName, transName;
 	
 	String<Match> matches[2];
 	Match m;
@@ -491,7 +505,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		int transNum = -1;
 		int ambig = -1;
 		unsigned errors = 0;
-		double confidence = 0;
+//		double confidence = 0;
 		m.posBegin = -1;
 		m.posEnd = -1;
 
@@ -502,7 +516,8 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		size_t posContigId = line.find("contigId=");
 		size_t posAmbig = line.find("ambiguity=");
 		size_t posErrors = line.find("errors=");
-		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos)
+		size_t posConf = line.find("_Confidence_");
+		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos || posConf == line.npos)
 		{
 			std::cerr << "Error parsing: " << line << std::endl;
 			break;
@@ -520,12 +535,12 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 			readName.resize(readName.length() - 2);
 		}
 		
-		std::istringstream iss2(line.substr(posContigId + 9 + 6));	// skip "contigId=" and "Locus_"
+		std::istringstream iss2(line.substr(posContigId + 9 + 6, posConf - (posContigId + 9 + 6)));	// skip "contigId=" and "Locus_"
 		iss2 >> locusNum >> d;
 		for (int i = 0; i < 11; ++i) iss2 >> d;
-		iss2 >> transNum >> d;
-		for (int i = 0; i < 11; ++i) iss2 >> d;
-		iss2 >> confidence;
+		iss2 >> transName;
+		for (int i = 0; i < 12; ++i) iss2 >> d;
+//		iss2 >> confidence;
 
 		std::istringstream iss3(line.substr(posAmbig + 10));		// skip "ambiguity="
 		iss3 >> ambig;
@@ -545,6 +560,15 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 			m.forward = false;
 		} else
 			m.forward = true;
+		
+		TTransName2Num::iterator it = transName2Num.find(transName);
+		if (it == transName2Num.end())
+		{
+			std::cerr << "ERROR: No annotation for transcript: " << transName << std::endl;
+			continue;
+		}
+		
+		transNum = it->second;
 		
 		if (locusNum >= (int)length(transToDContig) || transNum >= (int)length(transToDContig[locusNum]))
 		{
