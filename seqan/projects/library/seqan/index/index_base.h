@@ -659,6 +659,36 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 //////////////////////////////////////////////////////////////////////////////
 
+	template <typename TText, typename TSpec>
+	struct GetSequenceByNo< Index<TText, TSpec> >
+	{
+		typedef typename GetSequenceByNo<TText>::Type Type;
+	};
+
+	template <typename TText, typename TSpec>
+	struct GetSequenceByNo< Index<TText, TSpec> const>
+	{
+		typedef typename GetSequenceByNo<TText const>::Type Type;
+	};
+
+//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSeqNo, typename TText, typename TSpec>
+	inline typename GetSequenceByNo< Index<TText, TSpec> >::Type
+	getSequenceByNo(TSeqNo seqNo, Index<TText, TSpec> &index)
+	{
+		return getSequenceByNo(seqNo, indexText(index));
+	}
+
+	template <typename TSeqNo, typename TText, typename TSpec>
+	inline typename GetSequenceByNo< Index<TText, TSpec> const>::Type
+	getSequenceByNo(TSeqNo seqNo, Index<TText, TSpec> const &index)
+	{
+		return getSequenceByNo(seqNo, indexText(index));
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TSeqNo, typename TText, typename TSpec>
 	inline typename Size<Index<TText, TSpec> >::Type 
 	sequenceLength(TSeqNo seqNo, Index<TText, TSpec> const &index) {

@@ -368,6 +368,10 @@ template <typename THost, typename TSpec>
 struct Suffix< Segment<THost, TSpec> const >:
 	Suffix< Segment<THost, TSpec> > {};
 
+template <typename THost>
+struct Suffix<THost &>:
+	Suffix<THost> {};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost, typename TPosition>

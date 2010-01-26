@@ -448,6 +448,10 @@ template <typename THost, typename TSpec>
 struct Infix< Segment<THost, TSpec> const >:
 	Infix< Segment<THost, TSpec> > {};
 
+template <typename THost>
+struct Infix<THost &>:
+	Infix<THost> {};
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost, typename TPosition1, typename TPosition2>

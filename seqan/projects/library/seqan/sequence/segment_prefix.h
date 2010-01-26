@@ -370,6 +370,9 @@ template <typename THost, typename TSpec>
 struct Prefix< Segment<THost, TSpec> const >:
 	Prefix< Segment<THost, TSpec> > {};
 
+template <typename THost>
+struct Prefix<THost &>:
+	Prefix<THost> {};
 
 //////////////////////////////////////////////////////////////////////////////
 

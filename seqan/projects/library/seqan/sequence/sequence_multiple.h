@@ -629,16 +629,54 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	//////////////////////////////////////////////////////////////////////////////
 
+	template <typename TString>
+	struct GetSequenceByNo
+	{
+		typedef TString & Type;
+	};
+
+	template <typename TString, typename TSpec>
+	struct GetSequenceByNo< StringSet<TString, TSpec> >
+	{
+		typedef typename Reference< StringSet<TString, TSpec> >::Type Type;
+	};
+
+	template <typename TString, typename TSpec>
+	struct GetSequenceByNo< StringSet<TString, TSpec> const>
+	{
+		typedef typename Reference< StringSet<TString, TSpec> const>::Type Type;
+	};
+
+	//////////////////////////////////////////////////////////////////////////////
+
 	template <typename TSeqNo, typename TString>
-	inline typename Size<TString>::Type 
-	sequenceLength(TSeqNo /*seqNo*/, TString const &string) {
-		return length(string);
+	inline typename GetSequenceByNo<TString>::Type
+	getSequenceByNo(TSeqNo /*seqNo*/, TString &string) 
+	{
+		return string;
 	}
 
 	template <typename TSeqNo, typename TString, typename TSpec>
-	inline typename Size<StringSet<TString, TSpec> >::Type 
-	sequenceLength(TSeqNo seqNo, StringSet<TString, TSpec> const &stringSet) {
-		return length(stringSet[seqNo]);
+	inline typename GetSequenceByNo< StringSet<TString, TSpec> >::Type
+	getSequenceByNo(TSeqNo seqNo, StringSet<TString, TSpec> &stringSet)
+	{
+		return stringSet[seqNo];
+	}
+
+	template <typename TSeqNo, typename TString, typename TSpec>
+	inline typename GetSequenceByNo< StringSet<TString, TSpec> const>::Type
+	getSequenceByNo(TSeqNo seqNo, StringSet<TString, TSpec> const &stringSet)
+	{
+		return stringSet[seqNo];
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TSeqNo, typename TText>
+	inline typename Size< typename GetSequenceByNo<TText const>::Type>::Type 
+	sequenceLength(TSeqNo seqNo, TText const &text) 
+	{
+		return length(getSequenceByNo(seqNo, text));
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
