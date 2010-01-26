@@ -849,7 +849,7 @@ bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	typedef typename Value<TContigStore>::Type			TContig;
 	typedef typename Value<TContigFileStore>::Type		TContigFile;
 
-	if (length(store.contigStore) <= id) return false;
+	if ((TId)length(store.contigStore) <= id) return false;
 	TContig &contig = store.contigStore[id];
 
 	if (contig.fileId >= length(store.contigFileStore)) return false;
@@ -872,7 +872,7 @@ bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	typedef typename Value<TContigStore>::Type			TContig;
 	typedef typename Value<TContigFileStore>::Type		TContigFile;
 	
-	if (length(store.contigStore) <= id) return false;
+	if ((TId)length(store.contigStore) <= id) return false;
 	TContig &contig = store.contigStore[id];
 	
 	if (contig.usage++ > 0 || !empty(contig.seq)) return true;
@@ -882,7 +882,7 @@ bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 template <typename TSpec, typename TConfig, typename TId>
 bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 {
-	if (length(store.contigStore) <= id) return false;
+	if ((TId)length(store.contigStore) <= id) return false;
 	--store.contigStore[id].usage;
 	return true;
 }
@@ -894,12 +894,15 @@ bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	typedef typename TFragmentStore::TContigStore		TContigStore;
 	typedef typename Value<TContigStore>::Type			TContig;
 
-	if (length(store.contigStore) <= id) return false;
+	if ((TId)length(store.contigStore) <= id) return false;
 	TContig &contig = store.contigStore[id];
 
 	if (--contig.usage == 0 && contig.fileId < length(store.contigFileStore))
+	{
 		clear(contig.seq);
-	return true;
+		return true;
+	}
+	return false;
 }
 
 template <typename TSpec, typename TConfig>
