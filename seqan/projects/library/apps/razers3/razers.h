@@ -1668,7 +1668,7 @@ matchVerify(
 
 #ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
-// Find read matches in one genome sequence
+// Find read matches in a single genome sequence
 template <
 	typename TFragmentStore, 
 	typename TReadIndex, 
@@ -1677,7 +1677,7 @@ template <
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode >
-void _mapSingleReads(
+void _mapSingleReadsToContig(
 	TFragmentStore							& store,
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPattern,
@@ -1737,7 +1737,7 @@ void _mapSingleReads(
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Find read matches in many genome sequences (import from Fasta)
+// Find read matches in many genome sequences
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 
@@ -1801,10 +1801,10 @@ int _mapSingleReads(
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
 		if (options.forward)
-			_mapSingleReads(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
 
 		if (options.reverse)
-			_mapSingleReads(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
 	}
 	
 	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
@@ -1821,7 +1821,7 @@ int _mapSingleReads(
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Wrapper for SWIFT
+// Wrapper for SWIFT (default)
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 
@@ -1942,7 +1942,7 @@ int _mapReads(
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Wrapper for different template specializations
+// Wrapper for different score modes
 template <typename TFSSpec, typename TFSConfig, typename TCounts, typename TSpec, typename TAlignMode, typename TGapMode>
 int _mapReads(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
@@ -1965,7 +1965,7 @@ int _mapReads(
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Wrapper for different template specializations
+// Wrapper for different gap and align modes
 template <typename TFSSpec, typename TFSConfig, typename TCounts, typename TSpec>
 int _mapReads(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
