@@ -145,7 +145,7 @@ int mapReads(
 	if (length(genomeFileNames) == 1)
 	{
 		int result = getGenomeFileNameList(genomeFileNames[0], genomeFileNames, options);
-		if (result == RAZERS_GENOME_FAILED || !loadContigs(store, genomeFileNames, false))
+		if (result == RAZERS_GENOME_FAILED)
 		{
 			cerr << "Failed to open genome file " << genomeFileNames[0] << endl;
 			return result;

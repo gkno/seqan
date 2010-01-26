@@ -1813,8 +1813,8 @@ int _mapSingleReads(
 	if (options._debugLevel >= 2) {
 		::std::cerr << ::std::endl;
 		::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-		::std::cerr << "Filtration counter:  " << options.countFiltration << ::std::endl;
-		::std::cerr << "Verfication counter: " << options.countVerification << ::std::endl;
+		::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
+		::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
 	}
 	return 0;
 }
