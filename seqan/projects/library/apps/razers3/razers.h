@@ -1730,8 +1730,8 @@ void _mapSingleReadsToContig(
 			matchVerify(verifier, range(swiftFinder, contigSeq), verifier.m.readId, readSet, mode);
 		++options.countFiltration;
 	}
-	if (orientation == 'R')	reverseComplementInPlace(contigSeq);
-	unlockAndFreeContig(store, contigId);
+	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
+		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
 }
 #endif
 
@@ -1800,11 +1800,15 @@ int _mapSingleReads(
 #pragma omp parallel for private(swiftPattern)
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
+		// lock to prevent releasing and loading the same contig twice
+		// (once per _mapSingleReadsToContig call)
+		lockContig(store, contigId);
 		if (options.forward)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
 
 		if (options.reverse)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+		unlockAndFreeContig(store, contigId);
 	}
 	
 	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
