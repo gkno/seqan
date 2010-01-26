@@ -801,13 +801,13 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString>
 
 		unsigned seqCount = length(multiSeqFile);
 		resize(store.contigStore, seqOfs + seqCount, Generous());
-		resize(store.contigFileStore, seqOfs + seqCount, Generous());
 		resize(store.contigNameStore, seqOfs + seqCount, Generous());
 		for (unsigned i = 0; i < seqCount; ++i)
 		{
 			store.contigStore[seqOfs + i].usage = 0;
 			store.contigStore[seqOfs + i].fileBeginPos = beginPosition(multiSeqFile[i]);
 			store.contigStore[seqOfs + i].fileEndPos = endPosition(multiSeqFile[i]);
+			store.contigStore[seqOfs + i].fileId = length(store.contigFileStore) - 1;
 			if (loadSeqs)
 				assignSeq(store.contigStore[seqOfs + i].seq, multiSeqFile[i], contigFile.format);	// read Genome sequence
 			else
