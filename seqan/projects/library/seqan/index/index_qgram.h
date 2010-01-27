@@ -85,12 +85,14 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	struct _Fibre_Shape;		// underlying shape
 	struct _Fibre_Counts;		// counts each q-gram
 	struct _Fibre_CountsDir;	// directory for counts buckets
+	struct _Fibre_BucketMap;	// stores a q-gram hash value for each directory entry (-1 if empty)
 
 	typedef Tag<_Fibre_Dir> const		Fibre_Dir;
 	typedef Tag<_Fibre_SADir> const		Fibre_SADir;
 	typedef Tag<_Fibre_Shape> const		Fibre_Shape;
 	typedef Tag<_Fibre_Counts> const	Fibre_Counts;
 	typedef Tag<_Fibre_CountsDir> const	Fibre_CountsDir;
+	typedef Tag<_Fibre_BucketMap> const	Fibre_BucketMap;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +105,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	typedef Fibre_Shape		QGram_Shape;
 	typedef Fibre_Counts	QGram_Counts;
 	typedef Fibre_CountsDir	QGram_CountsDir;
+	typedef Fibre_BucketMap	QGram_BucketMap;
 
 //////////////////////////////////////////////////////////////////////////////
 // q-gram index
@@ -121,7 +124,6 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	template < typename TShapeSpec, typename TSpec = Default >
 	struct Index_QGram;
 
-
 	// use the index value type as shape value type
 	template < typename TObject, typename TShapeSpec, typename TSpec >
 	struct Fibre< Index<TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_Shape> 
@@ -135,6 +137,12 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	struct Fibre< Index<TObject, Index_QGram<Shape<TShapeValue, TShapeSpec>, TSpec> >, Fibre_Shape> 
 	{
 		typedef Shape<TShapeValue, TShapeSpec>	Type;
+	};
+
+	template < typename TObject, typename TShapeSpec, typename TSpec >
+	struct Fibre< Index<TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_BucketMap>
+	{
+		typedef Nothing Type;
 	};
 
 	template < typename TObject, typename TShapeSpec, typename TSpec >
@@ -155,6 +163,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 		TCountsDir		countsDir;	// directory for count buckets
 		TShape			shape;		// underlying shape
 		TCargo			cargo;		// user-defined cargo
+		Nothing			bucketMap;	// empty bucketMap table (used by open-addressing index)
 
 		Index() {}
 
@@ -703,12 +712,29 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	//////////////////////////////////////////////////////////////////////////////
 	// Counting sort - little helpers
 	//
+	
+	// map hashes 1:1 to directory
+	template < typename THashValue >
+	inline THashValue
+	getBucket(Nothing &, THashValue hash)
+	{
+		return hash;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+	// Counting sort - Step 1: Clear directory
+	template < typename TDir >
+	inline void
+	_qgramClearDir(TDir &dir, Nothing &)
+	{
+		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Counting sort - Step 2: Count q-grams
-	template < typename TDir, typename TText, typename TShape >
+	template < typename TDir, typename TBucketMap, typename TText, typename TShape >
 	inline void
-	_qgramCountQGrams(TDir &dir, TText const &text, TShape &shape)
+	_qgramCountQGrams(TDir &dir, TBucketMap &bucketMap, TText const &text, TShape &shape)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
@@ -718,17 +744,17 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TSize num_qgrams = length(text) - length(shape) + 1;
 
 		TIterator itText = begin(text, Standard());
-		++dir[hash(shape, itText)];
+		++dir[getBucket(bucketMap, hash(shape, itText))];
 		for(TSize i = 1; i < num_qgrams; ++i)
 		{
 			++itText;
-			++dir[hashNext(shape, itText)];
+			++dir[getBucket(bucketMap, hashNext(shape, itText))];
 		}
 	}
 
-	template < typename TDir, typename TString, typename TSpec, typename TShape >
+	template < typename TDir, typename TBucketMap, typename TString, typename TSpec, typename TShape >
 	inline void
-	_qgramCountQGrams(TDir &dir, StringSet<TString, TSpec> const &stringSet, TShape &shape)
+	_qgramCountQGrams(TDir &dir, TBucketMap &bucketMap, StringSet<TString, TSpec> const &stringSet, TShape &shape)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
@@ -741,11 +767,11 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
 			TIterator itText = begin(sequence, Standard());
-			++dir[hash(shape, itText)];
+			++dir[getBucket(bucketMap, hash(shape, itText))];
 			for(TSize i = 1; i < num_qgrams; ++i)
 			{
 				++itText;
-				++dir[hashNext(shape, itText)];
+				++dir[getBucket(bucketMap, hashNext(shape, itText))];
 			}
 		}
 	}
@@ -814,32 +840,31 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	//////////////////////////////////////////////////////////////////////////////
 	// Counting sort - Step 4: Fill suffix array
 	// w/o constraints
-	template < typename TSA, typename TText, typename TShape, typename TDir, typename TWithConstraints >
+	template < typename TSA, typename TText, typename TShape, typename TDir, typename TBucketMap, typename TWithConstraints >
 	inline void
-	_qgramFillSuffixArray(TSA &sa, TText const &text, TShape &shape, TDir &dir, TWithConstraints const)
+	_qgramFillSuffixArray(TSA &sa, TText const &text, TShape &shape, TDir &dir, TBucketMap const &bucketMap, TWithConstraints const)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type						TSize;
-		typedef typename Value<TShape>::Type					THash;
 
 		TSize num_qgrams = length(text) - length(shape) + 1;
 		TIterator itText = begin(text, Standard());
 
 		if (TWithConstraints::VALUE) {
-			THash h = hash(shape, itText) + 1;					// first hash
-			if (dir[h] != (TSize)-1) sa[dir[h]++] = 0;			// if bucket is enabled
+			TSize bktNo = getBucket(bucketMap, hash(shape, itText)) + 1;			// first hash
+			if (dir[bktNo] != (TSize)-1) sa[dir[bktNo]++] = 0;						// if bucket is enabled
 		} else
-			sa[dir[hash(shape, itText) + 1]++] = 0;				// first hash
+			sa[dir[getBucket(bucketMap, hash(shape, itText)) + 1]++] = 0;			// first hash
 
 		for(TSize i = 1; i < num_qgrams; ++i)
 		{
 			++itText;
 			if (TWithConstraints::VALUE) {
-				THash h = hashNext(shape, itText) + 1;			// next hash
-				if (dir[h] != (TSize)-1) sa[dir[h]++] = i;		// if bucket is enabled
+				TSize bktNo = getBucket(bucketMap, hashNext(shape, itText)) + 1;	// next hash
+				if (dir[bktNo] != (TSize)-1) sa[dir[bktNo]++] = i;					// if bucket is enabled
 			} else
-                sa[dir[hashNext(shape, itText) + 1]++] = i;		// next hash
+                sa[dir[getBucket(bucketMap, hashNext(shape, itText)) + 1]++] = i;	// next hash
 		}
 	}
 
@@ -849,7 +874,8 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		typename TString, 
 		typename TSpec, 
 		typename TShape, 
-		typename TDir, 
+		typename TDir,
+		typename TBucketMap,
 		typename TWithConstraints
 	>
 	inline void
@@ -858,12 +884,12 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		StringSet<TString, TSpec> const &stringSet,
 		TShape &shape, 
 		TDir &dir,
+		TBucketMap const &bucketMap,
 		TWithConstraints const)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
-		typedef typename Value<TShape>::Type						THash;
 
 		for(unsigned seqNo = 0; seqNo < length(stringSet); ++seqNo) 
 		{
@@ -877,20 +903,20 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 
 			TIterator itText = begin(sequence, Standard());
 			if (TWithConstraints::VALUE) {
-				THash h = hash(shape, itText) + 1;						// first hash
-				if (dir[h] != (TSize)-1) sa[dir[h]++] = localPos;		// if bucket is enabled
+				TSize bktNo = getBucket(bucketMap, hash(shape, itText)) + 1;					// first hash
+				if (dir[bktNo] != (TSize)-1) sa[dir[bktNo]++] = localPos;						// if bucket is enabled
 			} else
-				sa[dir[hash(shape, itText) + 1]++] = localPos;			// first hash
+				sa[dir[getBucket(bucketMap, hash(shape, itText)) + 1]++] = localPos;			// first hash
 
 			for(TSize i = 1; i < num_qgrams; ++i)
 			{
 				++itText;
 				assignValueI2(localPos, i);
 				if (TWithConstraints::VALUE) {
-					THash h = hashNext(shape, itText) + 1;				// next hash
-					if (dir[h] != (TSize)-1) sa[dir[h]++] = localPos;	// if bucket is enabled
+					TSize bktNo = getBucket(bucketMap, hashNext(shape, itText)) + 1;			// next hash
+					if (dir[bktNo] != (TSize)-1) sa[dir[bktNo]++] = localPos;					// if bucket is enabled
 				} else
-					sa[dir[hashNext(shape, itText) + 1]++] = localPos;	// next hash
+					sa[dir[getBucket(bucketMap, hashNext(shape, itText)) + 1]++] = localPos;	// next hash
 			}
 		}
 	}
@@ -944,12 +970,13 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		typename Fibre<TIndex, QGram_SA>::Type         &sa    = indexSA(index);
 		typename Fibre<TIndex, QGram_Dir>::Type        &dir   = indexDir(index);
 		typename Fibre<TIndex, QGram_Shape>::Type      &shape = indexShape(index);
+		typename Fibre<TIndex, QGram_BucketMap>::Type  &bucketMap = index.bucketMap;
 		
 		// 1. clear counters
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		_qgramClearDir(dir, bucketMap);
 
 		// 2. count q-grams
-		_qgramCountQGrams(dir, text, shape);
+		_qgramCountQGrams(dir, bucketMap, text, shape);
 
 		if (_qgramDisableBuckets(index))
 		{
@@ -957,7 +984,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 			_qgramCummulativeSum(dir, True());
 			
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, True());
+			_qgramFillSuffixArray(sa, text, shape, dir, bucketMap, True());
 
 			// 5. correct disabled buckets
 			_qgramPostprocessBuckets(dir);
@@ -968,7 +995,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 			_qgramCummulativeSum(dir, False());
 			
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, False());
+			_qgramFillSuffixArray(sa, text, shape, dir, bucketMap, False());
 		} 
 	}
 
@@ -977,27 +1004,29 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	template <
         typename TSA,
 		typename TDir,
+		typename TBucketMap,
 		typename TText,
 		typename TShape >
 	void createQGramIndex(
 		TSA &sa,
 		TDir &dir,
+		TBucketMap &bucketMap,
 		TText const &text,
 		TShape &shape)	
 	{
 	SEQAN_CHECKPOINT
 		
 		// 1. clear counters
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		_qgramClearDir(dir, bucketMap);
 
 		// 2. count q-grams
-		_qgramCountQGrams(dir, text, shape);
+		_qgramCountQGrams(dir, bucketMap, text, shape);
 
 		// 3. cumulative sum
 		SEQAN_DO(_qgramCummulativeSum(dir, False()) == length(sa));
 		
 		// 4. fill suffix array
-		_qgramFillSuffixArray(sa, text, shape, dir, False());
+		_qgramFillSuffixArray(sa, text, shape, dir, bucketMap, False());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1154,20 +1183,22 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 
 	template <
 		typename TDir,
+		typename TBucketMap,
 		typename TText,
 		typename TShape >
 	void createQGramIndexDirOnly(
 		TDir &dir,
+		TBucketMap &bucketMap,
 		TText const &text,
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
 
 		// 1. clear counters
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		_qgramClearDir(dir, bucketMap);
 
 		// 2. count q-grams
-		_qgramCountQGrams(dir, text, shape);
+		_qgramCountQGrams(dir, bucketMap, text, shape);
 
 		// 3. cumulative sum (Step 4 is ommited)
 		_qgramCummulativeSumAlt(dir, False());
@@ -1175,21 +1206,23 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 
 	template < 
 		typename TDir,
+		typename TBucketMap,
 		typename TString,
 		typename TSpec,
 		typename TShape >
 	void createQGramIndexDirOnly(
 		TDir &dir,
+		TBucketMap &bucketMap,
 		StringSet<TString, TSpec> const &stringSet,
 		TShape &shape)
 	{
 	SEQAN_CHECKPOINT
 
 		// 1. clear counters
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		_qgramClearDir(dir, bucketMap);
 
 		// 2. count q-grams
-		_qgramCountQGrams(dir, stringSet, shape);
+		_qgramCountQGrams(dir, bucketMap, stringSet, shape);
 
 		// 3. cumulative sum (Step 4 is ommited)
 		_qgramCummulativeSumAlt(dir, False());
@@ -1213,12 +1246,14 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	template < 
 		typename TCounts, 
 		typename TDir,
+		typename TBucketMap,
 		typename TString,
 		typename TSpec,
 		typename TShape >
 	void createCountsArray(
 		TCounts &counts,
 		TDir &dir,
+		TBucketMap &bucketMap,
 		StringSet<TString, TSpec> const &stringSet,
 		TShape &shape)
 	{
@@ -1232,7 +1267,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		resize(lastSeqSeen, length(dir));
 		
 		// 1. clear counters
-		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
+		_qgramClearDir(dir, bucketMap);
 		arrayFill(begin(lastSeqSeen, Standard()), end(lastSeqSeen, Standard()), -1);
 
 		// 2. count distinct sequences for each q-gram
@@ -1526,23 +1561,29 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 // interface for automatic index creation 
 
 	template <typename TText, typename TShapeSpec, typename TSpec>
-	inline bool indexCreate(
-		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
-		Fibre_SADir, 
-		Default const) 
+	inline typename Size<Index<TText, Index_QGram<TShapeSpec, TSpec> > >::Type
+	_qgramQGramCount(Index<TText, Index_QGram<TShapeSpec, TSpec> > const &index)
 	{
 		typedef Index<TText, Index_QGram<TShapeSpec, TSpec> >	TIndex;
 		typedef typename Fibre<TIndex, QGram_Shape>::Type		TShape;
 
-		TShape &shape = indexShape(index);
+		TShape const &shape = indexShape(index);
 
 		// count all overlapping q-grams
 		typename Size<TIndex>::Type qgram_count = 0;
 		for(unsigned i = 0; i < countSequences(index); ++i)
 			if (sequenceLength(i, index) >= length(shape))
 				qgram_count += sequenceLength(i, index) - (length(shape) - 1);
+		return qgram_count;
+	}
 
-		resize(indexSA(index), qgram_count, Exact());
+	template <typename TText, typename TShapeSpec, typename TSpec>
+	inline bool indexCreate(
+		Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, 
+		Fibre_SADir, 
+		Default const) 
+	{		
+		resize(indexSA(index), _qgramQGramCount(index), Exact());
 		resize(indexDir(index), _fullDirLength(index), Exact());
 		createQGramIndex(index);
 		return true;
