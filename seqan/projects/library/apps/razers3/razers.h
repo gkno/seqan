@@ -293,8 +293,8 @@ struct MicroRNA{};
 	typedef String<TMatch>								TMatches;	// array of matches
 */
 
-	template <typename TReadSet, typename TShape>
-	struct Cargo< Index<TReadSet, Index_QGram<TShape> > > {
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct Cargo< Index<TReadSet, Index_QGram<TShape, TSpec> > > {
 		typedef struct {
 			double		abundanceCut;
 			int			_debugLevel;
@@ -306,8 +306,8 @@ struct MicroRNA{};
 
 #ifdef RAZERS_MEMOPT
 
-	template <typename TReadSet, typename TShape>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape> > > 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,				
@@ -318,8 +318,8 @@ struct MicroRNA{};
 	
 #else
 
-	template <typename TReadSet, typename TShape>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape> > > 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,			// many reads
@@ -341,19 +341,25 @@ struct MicroRNA{};
 	{
 		typedef unsigned Type;
 	};
+
+	template <typename TReadSet, typename TShape>
+	struct Size< Index<TReadSet, Index_QGram<TShape, OpenAddressing> > >
+	{
+		typedef unsigned Type;
+	};
 	
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
-	template <typename TReadSet, typename TShape>
-	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape> > &index) 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape, TSpec> > &index) 
 	{
-		typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
-		typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
-		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
-		typedef typename Value<TDir>::Type					TSize;
+		typedef Index<TReadSet, Index_QGram<TShape, TSpec> >	TReadIndex;
+		typedef typename Fibre<TReadIndex, QGram_Dir>::Type		TDir;
+		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
+		typedef typename Value<TDir>::Type						TSize;
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
@@ -1341,6 +1347,13 @@ matchVerify(
 }	
 
 
+	// Score mode
+	struct RazerSErrors;
+	struct RazerSScore;
+	struct RazerSMAQ;
+
+//inline _errorsPerMismatch
+
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
 template <
@@ -1386,6 +1399,7 @@ matchVerify(
 		TGenomeIterator g = git;
 		for (TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
 			if ((verifier.options.compMask[ordValue(*g)] & verifier.options.compMask[ordValue(*r)]) == 0)
+//				if (
 				if (++errors > maxErrors)	// doesn't work for islands with errorThresh > maxErrors
 					break;
 		
@@ -1844,7 +1858,7 @@ int _mapSingleReads(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
-	typedef Index<TReadSeqStore, Index_QGram<TShape> >	TIndex;			// q-gram index
+	typedef Index<TReadSeqStore, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 
 	// configure q-gram index
 	TIndex swiftIndex(store.readSeqStore, shape);
