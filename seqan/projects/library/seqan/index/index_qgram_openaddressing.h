@@ -171,7 +171,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Host<TShape>::Type									TTextValue;
 		
 		unsigned long qgrams = _qgramQGramCount(index);
-		double max_qgrams = pow((double)ValueSize<TTextValue>::VALUE, weight(indexShape(index)));
+		double max_qgrams = pow((double)ValueSize<TTextValue>::VALUE, (double)weight(indexShape(index)));
 		if (max_qgrams <= qgrams)
 			qgrams = ceil(max_qgrams);
 		
