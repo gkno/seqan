@@ -717,7 +717,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	// map hashes 1:1 to directory
 	template < typename THashValue >
 	inline THashValue
-	getBucket(Nothing &, THashValue hash)
+	getBucket(Nothing const &, THashValue hash)
 	{
 		return hash;
 	}

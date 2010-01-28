@@ -124,7 +124,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THashValue, typename THashValue2 >
 	inline THashValue
-	getBucket(BucketMap<THashValue> &bucketMap, THashValue2 hash)
+	getBucket(BucketMap<THashValue> const &bucketMap, THashValue2 hash)
 	{
 		long unsigned hlen = length(bucketMap.qgramHash) - 1;
 		long unsigned h1 = hash % hlen;
