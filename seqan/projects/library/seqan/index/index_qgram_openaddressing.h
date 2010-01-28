@@ -53,8 +53,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Fibre<Index, QGram_Counts>::Type		TCounts;
 		typedef typename Fibre<Index, QGram_CountsDir>::Type	TCountsDir;
 		typedef typename Fibre<Index, QGram_Shape>::Type		TShape;
-		typedef typename Cargo<Index>::Type						TCargo;
 		typedef typename Fibre<Index, QGram_BucketMap>::Type	TBucketMap;
+		typedef typename Cargo<Index>::Type						TCargo;
 
 		Holder<TText>	text;		// underlying text
 		TSA				sa;			// suffix array sorted by the first q chars
@@ -63,9 +63,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		TCountsDir		countsDir;	// directory for count buckets
 		TShape			shape;		// underlying shape
 		TCargo			cargo;		// user-defined cargo
+		TBucketMap		bucketMap;	// bucketMap table (used by open-addressing index)
 
 		double			alpha;
-		TBucketMap		bucketMap;
 
 		Index():
 			alpha(1.5) {}

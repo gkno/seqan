@@ -154,6 +154,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 		typedef typename Fibre<Index, QGram_Counts>::Type		TCounts;
 		typedef typename Fibre<Index, QGram_CountsDir>::Type	TCountsDir;
 		typedef typename Fibre<Index, QGram_Shape>::Type		TShape;
+		typedef typename Fibre<Index, QGram_BucketMap>::Type	TBucketMap;
 		typedef typename Cargo<Index>::Type						TCargo;
 
 		Holder<TText>	text;		// underlying text
@@ -163,7 +164,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 		TCountsDir		countsDir;	// directory for count buckets
 		TShape			shape;		// underlying shape
 		TCargo			cargo;		// user-defined cargo
-		Nothing			bucketMap;	// empty bucketMap table (used by open-addressing index)
+		TBucketMap		bucketMap;	// bucketMap table (used by open-addressing index)
 
 		Index() {}
 
@@ -842,7 +843,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	// w/o constraints
 	template < typename TSA, typename TText, typename TShape, typename TDir, typename TBucketMap, typename TWithConstraints >
 	inline void
-	_qgramFillSuffixArray(TSA &sa, TText const &text, TShape &shape, TDir &dir, TBucketMap const &bucketMap, TWithConstraints const)
+	_qgramFillSuffixArray(TSA &sa, TText const &text, TShape &shape, TDir &dir, TBucketMap &bucketMap, TWithConstraints const)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TIterator;
@@ -884,7 +885,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		StringSet<TString, TSpec> const &stringSet,
 		TShape &shape, 
 		TDir &dir,
-		TBucketMap const &bucketMap,
+		TBucketMap &bucketMap,
 		TWithConstraints const)
 	{
 	SEQAN_CHECKPOINT

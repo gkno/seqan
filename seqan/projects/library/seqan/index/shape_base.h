@@ -140,8 +140,13 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.shape:Other Shape object. (copy constructor)
 ..param.q:Length of the ungapped q-gram.
 */
-		Shape() {}
-
+		Shape():
+			span(0),
+			hValue(0),
+			XValue(0),
+			leftFactor(0),
+			leftFactor2(0) {}
+		
 		Shape(unsigned _span)
 		{
 			resize(*this, _span);
@@ -198,7 +203,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Value<Shape>::Type	XValue;		// Sum_{i=0..q-1} (x_i + 1)
 		TValue						leftChar;	// leftmost character
 //____________________________________________________________________________
-		
+		Shape():
+			hValue(0),
+			XValue(0) {}
 	};
 
 
