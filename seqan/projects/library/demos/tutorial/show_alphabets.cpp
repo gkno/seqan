@@ -1,4 +1,3 @@
-// part 1
 #include <iostream>
 #include <seqan/sequence.h>
 #include <seqan/basic.h>
@@ -15,7 +14,7 @@ showAllLetterOfMyAlphabet(TAlphabet const&) {
 	}
 	::std::cout << ::std::endl;
 }
-//part 3
+// part 3
 int main()
 {
 	showAllLetterOfMyAlphabet(AminoAcid());
