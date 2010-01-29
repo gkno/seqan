@@ -66,6 +66,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
+        // Returns true iff value is a whitespace.
+	template <typename TValue>
+	inline bool
+	_isWhiteSpace(TValue value)
+	{
+		return (value == ' ' || value == '\t' || value == '\r' || value == '\n');
+	}
+
+        // Increment iterator until end of sequence or *it is a whitespace.
+	template <typename TIterator>
+	inline bool
+	_seekWhiteSpace(TIterator &it, TIterator itEnd)
+	{
+		while (!_isWhiteSpace(*it))
+			if (++it == itEnd) return false;
+		return true;
+	}
+
 	template <typename TIterator>
 	inline bool
 	_seekTab(TIterator& it, TIterator itEnd)
@@ -206,7 +224,30 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+        // Assign sequence id up to first whitespace.
 	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignCroppedSeqId(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		Fasta)
+	{
+		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
+
+		TIterator itBeg = begin(fasta, Standard());
+		TIterator itEnd = end(fasta, Standard());
+		TIterator it = itBeg;
+		
+		clear(dst);
+		if (it == itEnd) return;
+		if (*it == '>')
+		{
+			_seekWhiteSpace(it, itEnd);
+			assign(dst, infix(fasta, 1, it - itBeg));
+		}
+	}
+
+  	template <typename TSeq, typename TFastaSeq>
 	inline void
 	assignQual(
 		TSeq & dst,
@@ -362,6 +403,29 @@ typedef Tag<TagFastq_> const Fastq;
 		if (*it == '@')
 		{
 			_seekLineBreak(it, itEnd);
+			assign(dst, infix(fasta, 1, it - itBeg));
+		}
+	}
+
+        // Assign sequence id up to first whitespace.
+	template <typename TSeq, typename TFastaSeq>
+	inline void
+	assignCroppedSeqId(
+		TSeq & dst,
+		TFastaSeq const & fasta,
+		Fastq)
+	{
+		typedef typename Iterator<TFastaSeq const, Standard>::Type	TIterator;
+
+		TIterator itBeg = begin(fasta, Standard());
+		TIterator itEnd = end(fasta, Standard());
+		TIterator it = itBeg;
+		
+		clear(dst);
+		if (it == itEnd) return;
+		if (*it == '@')
+		{
+			_seekWhiteSpace(it, itEnd);
 			assign(dst, infix(fasta, 1, it - itBeg));
 		}
 	}
@@ -623,6 +687,21 @@ typedef Tag<TagFastq_> const Fastq;
 		assign(dst, infix(fasta, front, length(fasta)));
 	}
 
+        // Assign sequence id up to first whitespace.
+	template <typename TSeq, typename TQSeqSeq>
+	inline void
+	assignCroppedSeqId(
+		TSeq & dst,
+		TQSeqSeq const & fasta,
+		QSeq)
+	{
+		// For now: just return the whole line.
+		typename Position<TQSeqSeq const>::Type front = 0;
+		while (_isWhiteSpace(fasta[front]))
+			++front;
+		assign(dst, infix(fasta, front, length(fasta)));
+	}
+
 	template <typename TSeq, typename TQSeqSeq>
 	inline void
 	assignQual(
@@ -787,6 +866,31 @@ typedef Tag<TagFastq_> const Fastq;
 			assignSeqId(dst, seq, typename TTagList::Type());
 		else
 			assignSeqId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
+	}
+
+//____________________________________________________________________________
+// assignCroppedSeqId
+
+	template <typename TSeqId, typename TFileSeq>
+	inline void
+	assignCroppedSeqId(
+		TSeqId &,
+		TFileSeq const &,
+		TagSelector<> const &)
+	{
+	}
+
+	template <typename TSeqId, typename TFileSeq, typename TTagList>
+	inline void
+	assignCroppedSeqId(
+		TSeqId & dst,
+		TFileSeq const & seq,
+		TagSelector<TTagList> const &format)
+	{
+		if (format.tagId == Length<TTagList>::VALUE)
+			assignCroppedSeqId(dst, seq, typename TTagList::Type());
+		else
+			assignCroppedSeqId(dst, seq, static_cast<typename TagSelector<TTagList>::Base const &>(format));
 	}
 
 //____________________________________________________________________________

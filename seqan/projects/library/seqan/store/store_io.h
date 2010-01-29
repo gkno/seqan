@@ -812,7 +812,7 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString>
 				assignSeq(store.contigStore[seqOfs + i].seq, multiSeqFile[i], contigFile.format);	// read Genome sequence
 			else
 				clear(store.contigStore[seqOfs + i].seq);
-			assignSeqId(store.contigNameStore[seqOfs + i], multiSeqFile[i], contigFile.format);
+			assignCroppedSeqId(store.contigNameStore[seqOfs + i], multiSeqFile[i], contigFile.format);
 		}
 		seqOfs += seqCount;
 	}
