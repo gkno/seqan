@@ -16,22 +16,22 @@ indexonly = not buildfull and (sys.argv[2] == 'indexonly')
 if buildfull or indexonly:
     print("Scanning " + inpath + "...")
     os.path.normpath(inpath)
-    dddoc.loadFiles(inpath)
+    dddoc.LoadFiles(inpath)
 else:
     i = 2;
     while (i < len(sys.argv)):
         modulepath = inpath + "/seqan/" + sys.argv[i]
         os.path.normpath(modulepath)
         print("Scanning " + modulepath + "...")
-        dddoc.loadFiles(modulepath)
+        dddoc.LoadFiles(modulepath)
         i += 1
 
 
 print("Scanning pages...")
-dddoc.loadFiles("pages")
+dddoc.LoadFiles("pages")
 
 print("Scanning concepts...")
-dddoc.loadFiles("concepts")
+dddoc.LoadFiles("concepts")
 
 
 dddoc.DATA.init()
