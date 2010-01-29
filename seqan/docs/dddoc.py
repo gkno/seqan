@@ -1,6 +1,25 @@
 import os
+import os.path
 import copy
 import string
+
+
+# Constant for C++ files.
+FILETYPE_CPP = 2
+# Constant for DDDOC files.
+FILETYPE_DDDOC = 1
+# Constant for none of the above.
+FILETYPE_OTHER = 0
+
+# Extension of C++ files.
+CPP_EXTS = ['c', 'C', 'cpp', 'CPP', 'c++', 'C++', 'h', 'H', 'hpp', 'HPP',
+            'h++', 'H++']
+# Extensions of DDDOC files.
+DDDOC_EXTS = ['dddoc', 'DDDOC']
+
+# List of ignored directory names.
+IGNORED_DIRS = ['CSV', '.svn']
+
 
 ################################################################################
 
@@ -31,6 +50,7 @@ class Data:
     def __init__ (self, _lines, _level):
         self.lines = _lines
         self.level = _level
+        self.cache = {}
         
     def __repr__(self):
         return "Data(" + str(self.lines) + ", " + str(self.level) + ")"
@@ -51,6 +71,10 @@ class Data:
         return self.find(str)
         
     def find(self, str):
+        # If possible, return from cache.
+        if self.cache.has_key(str):
+            return self.cache[str]
+        
         arr = splitName(str)
         lines = []
         maxi = 0
@@ -67,6 +91,8 @@ class Data:
             maxi = i
             
         data = Data(lines, self.level + len(arr))
+        # Cache result.
+        self.cache[str] = data
         return data
 
     def at_level(self, level = 0):
@@ -310,20 +336,41 @@ def loadCPPFile(filename):
 
 ################################################################################
 
-def testFileType(filename):
-    pos = filename.rfind(".")
-    if (pos >= 0): ext = filename[pos+1:]
-    else: ext = ""
+def GetFileType(filename):
+    """Determines file type from filename.
 
-    if (ext in ["c", "C", "cpp", "CPP", "c++", "C++", "h", "H", "hpp", "HPP", "h++", "H++"]): return 2
-    elif (ext in ["dddoc", "DDDOC"]): return 1
-    else: return 0
+    Determines the file type from the extension of the given filename.
+
+    >>> GetFileType('test.cpp') == FILETYPE_CPP
+    True
+    >>> GetFileType('path/file.h') == FILETYPE_CPP
+    True
+    >>> GetFileType('test.dddoc') == FILETYPE_DDDOC
+    True
+
+    Args:
+    
+      filename  Filename to parse.
+
+    Returns:
+    
+      One of {FILETYPE_CPP, FILETYPE_DDDOC, FILETYPE_OTHER}, depending
+      on the extension of filename.
+    """
+    # Get file extension.
+    base, ext = os.path.splitext(filename)
+    if ext[1:] in CPP_EXTS:
+        return FILETYPE_CPP
+    elif ext[1:] in DDDOC_EXTS:
+        return FILETYPE_DDDOC
+    else:
+        return FILETYPE_OTHER
 
 
 ################################################################################
     
 def loadFile(filename):
-    file_type = testFileType(filename)
+    file_type = GetFileType(filename)
     if (file_type == 2): return loadCPPFile(filename)
     elif (file_type == 1): return loadDDDOCFile(filename)
     else: raise "unknown file type"
@@ -442,9 +489,26 @@ def splitName(line):
     return li
 
 
-################################################################################
-
 def splitUrl(line):
+    """Splits a tuple at separator characters.
+
+    The separator character is '|'.  These characters can be escaped
+    using the backslash sign '\', entries can also be quoted.
+
+    >>> splitUrl('a|b|c')
+    ['a', 'b', 'c']
+    >>> splitUrl('a\|b|c')
+    ['a|b', 'c']
+    >>> splitUrl('"a|b"|c')
+    ['a|b', 'c']
+
+    Args:
+      line  String to split.
+
+    Returns
+      List with strings, split at | symbols, excluding these symbols
+      themselves.
+    """
     pos = 0
     key = ""
     c_quoted = ""
@@ -471,19 +535,27 @@ def splitUrl(line):
         pos += 1    
     
     if key != "": li.append(key)
-    
+
     return li
 
 
-################################################################################
+def LoadFiles(search_path):
+    """Call parseFile() on files.
 
-def loadFiles(search_path):
+    All files below search_path will be searched that have file type
+    FILETYPE_CPP or FILETYPE_DOC as determined by GetFileType().
+    Directories with names of IGNORED_DIRS are skipped.
+
+    Args:
+      search_path  String, path to search files under.
+    """
     for root, dirs, files in os.walk(search_path):
+        # Parse all files.
         for file in files:
             path = os.path.join(root, file)
-            if testFileType(path):
+            if GetFileType(path) in [FILETYPE_CPP, FILETYPE_DDDOC]:
                 parseFile(path)
-        if 'CVS' in dirs:
-            dirs.remove('CVS')
-
-################################################################################
+        # Exclude ignored diretories.
+        for ignored in IGNORED_DIRS:
+            if ignored in dirs:
+                dirs.remove(ignored)
