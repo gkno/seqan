@@ -505,7 +505,7 @@ typename Iterator<Matrix<TScoreValue, DIMENSION>, Standard >::Type
 smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
 					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
-					 Score<TScoreValue, Simple> const &)
+					 Score<TScoreValue, Simple> const & scoring_)
 {
 SEQAN_CHECKPOINT
 
@@ -537,6 +537,8 @@ SEQAN_CHECKPOINT
 	TStringIterator it_1 = iter(str_1, pos_1, Standard());
 	TStringIterator it_1_end = end(str_1);
 
+	TScoreValue score_mismatch = scoreMismatch(scoring_);
+	TScoreValue score_gap = scoreGapExtend(scoring_);
 
 	//-------------------------------------------------------------------------
 	//follow the trace until 0 is reached
@@ -555,19 +557,19 @@ SEQAN_CHECKPOINT
 			TMatrixIterator it_ = source_;
 
 			goNext(it_, 0);
-			TScoreValue v = *it_;
+			TScoreValue v = *it_ + score_gap;
 
 			TScoreValue d;
 			if(forbidden)
 				d = 0;
 			else{
 				goNext(it_, 1);
-				d = *it_;
+				d = *it_ + score_mismatch;
 			}
 
 			it_ = source_;
 			goNext(it_, 1);
-			TScoreValue h = *it_;
+			TScoreValue h = *it_ + score_gap;
 
 			gv = (v >= h) | (d >= h);
 			gh = (h >  v) | (d >= v);
