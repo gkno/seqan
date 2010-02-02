@@ -783,6 +783,7 @@ setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 	int minT = _qgramLemma(swift, readNo, maxErrors);
 	if (minT > 1)
 	{
+		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
 //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
 		setMinThreshold(swift, readNo, (unsigned)minT);
 	}
