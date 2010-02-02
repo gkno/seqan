@@ -618,10 +618,8 @@ inline bool _swiftMultiProcessQGram(
 	TIndex const &index = host(pattern);
 	
 	TSAIter saBegin = begin(indexSA(index), Standard());
-	// TSAIter occ = saBegin + indexDir(index)[hash];
-	// TSAIter occEnd = saBegin + indexDir(index)[hash + 1];
 	TSAIter occ = saBegin + indexDir(index)[getBucket(index.bucketMap, hash)];
-    TSAIter occEnd = saBegin + indexDir(index)[getBucket(index.bucketMap, hash + 1)];
+    TSAIter occEnd = saBegin + indexDir(index)[getBucket(index.bucketMap, hash) + 1];
     TBucketIter bktBegin = begin(pattern.buckets, Standard());
 	Pair<unsigned> ndlPos;
 	
