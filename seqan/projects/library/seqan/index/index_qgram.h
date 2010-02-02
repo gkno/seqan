@@ -717,6 +717,13 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	// map hashes 1:1 to directory
 	template < typename THashValue >
 	inline THashValue
+	requestBucket(Nothing &, THashValue hash)
+	{
+		return hash;
+	}
+
+	template < typename THashValue >
+	inline THashValue
 	getBucket(Nothing const &, THashValue hash)
 	{
 		return hash;
@@ -745,11 +752,11 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TSize num_qgrams = length(text) - length(shape) + 1;
 
 		TIterator itText = begin(text, Standard());
-		++dir[getBucket(bucketMap, hash(shape, itText))];
+		++dir[requestBucket(bucketMap, hash(shape, itText))];
 		for(TSize i = 1; i < num_qgrams; ++i)
 		{
 			++itText;
-			++dir[getBucket(bucketMap, hashNext(shape, itText))];
+			++dir[requestBucket(bucketMap, hashNext(shape, itText))];
 		}
 	}
 
@@ -768,11 +775,11 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 			TSize num_qgrams = length(sequence) - length(shape) + 1;
 
 			TIterator itText = begin(sequence, Standard());
-			++dir[getBucket(bucketMap, hash(shape, itText))];
+			++dir[requestBucket(bucketMap, hash(shape, itText))];
 			for(TSize i = 1; i < num_qgrams; ++i)
 			{
 				++itText;
-				++dir[getBucket(bucketMap, hashNext(shape, itText))];
+				++dir[requestBucket(bucketMap, hashNext(shape, itText))];
 			}
 		}
 	}

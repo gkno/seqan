@@ -124,20 +124,49 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename THashValue, typename THashValue2 >
 	inline THashValue
+	requestBucket(BucketMap<THashValue> &bucketMap, THashValue2 hash)
+	{
+		long unsigned hlen = length(bucketMap.qgramHash) - 1;
+		long unsigned h1 = hash % hlen;
+		// -1 is the undefiend value, hence the method works not for the largest word of length 32
+		if (bucketMap.qgramHash[h1] == (THashValue)-1)
+		{
+			bucketMap.qgramHash[h1] = hash;
+			return h1;
+		}
+		else
+		{
+			if (bucketMap.qgramHash[h1] == hash)
+				return h1;
+			else 
+			{
+//				long unsigned step = 1 + (hash % bucketMap.prime);
+				long unsigned step = bucketMap.prime;
+				do {
+					h1 = (h1 + step) % hlen;
+				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
+				bucketMap.qgramHash[h1] = hash;
+				return h1;
+			}
+		}
+	}
+
+	template < typename THashValue, typename THashValue2 >
+	inline THashValue
 	getBucket(BucketMap<THashValue> const &bucketMap, THashValue2 hash)
 	{
 		long unsigned hlen = length(bucketMap.qgramHash) - 1;
 		long unsigned h1 = hash % hlen;
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
-		if (bucketMap.qgramHash[h1] == (THashValue)-1) 
+		if (bucketMap.qgramHash[h1] == (THashValue)-1)
 			return h1;
 		else
 		{
-			if (bucketMap.qgramHash[h1] == hash) 
+			if (bucketMap.qgramHash[h1] == hash)
 				return h1;
 			else 
 			{
-				long unsigned step = 1 + (hash % bucketMap.prime);
+				long unsigned step = bucketMap.prime;
 				do {
 					h1 = (h1 + step) % hlen;
 				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
