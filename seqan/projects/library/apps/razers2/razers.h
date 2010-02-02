@@ -409,10 +409,10 @@ struct MicroRNA{};
 					maskDuplicates(store);	// overlapping parallelograms cause duplicates
 	#ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if (options.maqMapping)
-						compactMatches(store, cnts, options, swiftPattern, true);
+						compactMatches(store, cnts, options, false, swiftPattern, true);
 					else	
 	#endif
-						compactMatches(store, cnts, options, swiftPattern);
+						compactMatches(store, cnts, options, false, swiftPattern);
 					if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 					if (options._debugLevel >= 2)
@@ -861,7 +861,8 @@ void compactMatches(TFragmentStore &store, TCounts &
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		cnts
 #endif
-	, RazerSOptions<TSpec> &options, 
+	, RazerSOptions<TSpec> &options
+	, bool compactFinal,
 	TSwift &
 #if defined RAZERS_DIRECT_MAQ_MAPPING || defined RAZERS_MASK_READS
 		swift
@@ -874,7 +875,7 @@ void compactMatches(TFragmentStore &store, TCounts &
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
 
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if(options.maqMapping) compactMatches(store, cnts,options,swift,true);
+	if(options.maqMapping) compactMatches(store, cnts,options,compactFinal,swift,true);
 #endif
 	
 #ifdef RAZERS_MICRO_RNA
@@ -926,8 +927,16 @@ void compactMatches(TFragmentStore &store, TCounts &
 					if (maxErrors == -1 && options._debugLevel >= 2)
 						::std::cerr << "(read #" << readNo << " disabled)";
 
-					if (options.purgeAmbiguous && (options.distanceRange == 0 || errors < options.distanceRange))
-						dit = ditBeg;
+					if (options.purgeAmbiguous)
+					{
+						if (options.distanceRange == 0 || errors < options.distanceRange || compactFinal)
+							dit = ditBeg;
+						else {
+							*dit = *it;
+							++dit;
+						}
+
+					}
 				}
 #endif
 				continue;
@@ -956,7 +965,7 @@ void compactMatches(TFragmentStore &store, TCounts &
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec, typename TSwift >
-void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, TSwift &, bool dontCountFirstTwo)
+void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bool, TSwift &, bool dontCountFirstTwo)
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;

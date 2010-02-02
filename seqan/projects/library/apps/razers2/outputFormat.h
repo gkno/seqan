@@ -655,7 +655,7 @@ void dumpMatches(
 	if(options.maqMapping)
 	{
 		String<int> cooc;
-		compactMatches(matches, stats, options, nothing, false); //only best two matches per read are kept
+		compactMatches(matches, stats, options, true, nothing, false); //only best two matches per read are kept
 		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
 		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
 	}
@@ -666,7 +666,7 @@ void dumpMatches(
 	if(options.microRNA)purgeAmbiguousRnaMatches(store,options);
 	else
 #endif
-	compactMatches(store, stats, options, nothing);
+	compactMatches(store, stats, options, true, nothing);
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateLibSizes(libSize, store);
