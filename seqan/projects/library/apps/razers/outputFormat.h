@@ -610,7 +610,7 @@ void dumpMatches(
 	if(options.maqMapping)
 	{
 		String<int> cooc;
-		compactMatches(matches, stats, options, nothing, false); //only best two matches per read are kept
+		compactMatches(matches, stats, options, true, nothing, false); //only best two matches per read are kept
 		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
 		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
 	}
@@ -621,7 +621,7 @@ void dumpMatches(
 	if(options.microRNA)purgeAmbiguousRnaMatches(matches,options);
 	else
 #endif
-	compactMatches(matches, stats, options, nothing);
+	compactMatches(matches, stats, options, true, nothing);
 
 	switch (options.sortOrder) {
 		case 0:

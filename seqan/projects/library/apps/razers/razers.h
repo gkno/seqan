@@ -796,7 +796,8 @@ void compactMatches(TMatches &matches, TCounts &
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		cnts
 #endif
-	, RazerSOptions<TSpec> &options, 
+	, RazerSOptions<TSpec> &options
+	, bool compactFinal ,
 	TSwift &
 #if defined RAZERS_DIRECT_MAQ_MAPPING || defined RAZERS_MASK_READS
 		swift
@@ -804,7 +805,7 @@ void compactMatches(TMatches &matches, TCounts &
 	)
 {
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-	if(options.maqMapping) compactMatches(matches, cnts,options,swift,true);
+	if(options.maqMapping) compactMatches(matches, cnts,options,compactFinal,swift,true);
 #endif
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -861,8 +862,15 @@ void compactMatches(TMatches &matches, TCounts &
 					if (maxErrors == -1 && options._debugLevel >= 2)
 						::std::cerr << "(read #" << readNo << " disabled)";
 
-					if (options.purgeAmbiguous && (options.distanceRange == 0 || (*it).editDist < options.distanceRange))
-						dit = ditBeg;
+					if (options.purgeAmbiguous)
+					{
+						if (options.distanceRange == 0 || (*it).editDist < options.distanceRange || compactFinal)
+							dit = ditBeg;
+						else {
+							*dit = *it;
+							++dit;
+						}
+					}
 				}
 #endif
 				continue;
@@ -890,7 +898,7 @@ void compactMatches(TMatches &matches, TCounts &
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
 template < typename TMatches, typename TCounts, typename TSpec, typename TSwift >
-void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, TSwift &, bool dontCountFirstTwo)
+void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bool, TSwift &, bool dontCountFirstTwo)
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -1483,10 +1491,10 @@ void mapSingleReads(
 					maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if(options.maqMapping)
-						compactMatches(matches, cnts, options, swiftPattern, true);
+						compactMatches(matches, cnts, options, false, swiftPattern, true);
 					else	
 #endif
-						compactMatches(matches, cnts, options, swiftPattern);
+						compactMatches(matches, cnts, options, false, swiftPattern);
 #ifdef RAZERS_MICRO_RNA
 					options.compactThresh += length(matches);
 #else
