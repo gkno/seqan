@@ -152,8 +152,6 @@ int mapReads(
 		}
 	}
 
-	cerr << "number of reference files: " << length(genomeFileNames) << endl;
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Find matches using SWIFT
 #ifdef RAZERS_PARALLEL
@@ -162,14 +160,6 @@ int mapReads(
 #endif
 
 	loadContigs(store, genomeFileNames, false); // add filenames to the contig store (they are loaded on-demand)
-
-	cerr << "number of references: " << length(store.contigStore) << endl;
-
-	for(int i = 0; i < length(store.contigStore); ++i ){
-		cerr << "ref names = " << value(store.contigNameStore, i) << endl;
-
-	}
-
 	int error = _mapReads(store, stats, options);
 	if (error != 0)
 	{
