@@ -321,6 +321,33 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// local -> global conversions
+	//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.posLocalToX:
+..cat:Sequences
+..summary:Converts a local to a local/global position.
+..signature:posGlobalize(dst, localPos, limits)
+..param.dst:Destination value. A local or global position (pair or integer value).
+...type:Class.Pair
+..param.localPos:A local position (pair).
+...type:Class.Pair
+..param.limits:The limits string returned by @Function.stringSetLimits@.
+*/
+	template <typename TDest, typename TLimitsString, typename T1, typename T2, typename TCompression>
+	inline void
+	posLocalToX(TDest &dst, Pair<T1, T2, TCompression> const &localPos, TLimitsString const &limits) {
+		dst = posGlobalize(localPos, limits);
+	}
+
+	template <typename TD1, typename TD2, typename TDCompression, typename TLimitsString, typename T1, typename T2, typename TCompression>
+	inline void
+	posLocalToX(Pair<TD1, TD2, TDCompression> &dst, Pair<T1, T2, TCompression> const &localPos, TLimitsString const &limits) {
+		dst = localPos;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// global -> local position
 	//////////////////////////////////////////////////////////////////////////////
 
