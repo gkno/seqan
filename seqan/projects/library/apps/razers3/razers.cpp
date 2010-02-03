@@ -304,8 +304,8 @@ int main(int argc, const char *argv[])
 #endif
 	getOptionValueLong(parser, "max-hits", options.maxHits);
 	getOptionValueLong(parser, "purge-ambiguous", options.purgeAmbiguous);
-	getOptionValueLong(parser, "distance-range", options.distanceRange);
-	if (isSetLong(parser, "distance-range")) options.distanceRange++;
+	getOptionValueLong(parser, "distance-range", options.scoreDistanceRange);
+	if (isSetLong(parser, "distance-range")) options.scoreDistanceRange++;
 	getOptionValueLong(parser, "alignment", options.dumpAlignment);
 	getOptionValueLong(parser, "output", options.output);
 	getOptionValueLong(parser, "output-format", options.outputFormat);
@@ -334,7 +334,7 @@ int main(int argc, const char *argv[])
 	if (isSetLong(parser, "unique"))
 	{
 		options.maxHits = 1;
-		options.distanceRange = 1;
+		options.scoreDistanceRange = 1;
 		options.purgeAmbiguous = true;
 	}	
 	if (!options.forward && !options.reverse)  // enable both per default

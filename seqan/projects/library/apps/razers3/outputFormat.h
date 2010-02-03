@@ -122,16 +122,16 @@ score(Score<TValue, Quality<TQualityString> > const & me,
 // Less-operators ...
 
 	// ... to sort matches and remove duplicates with equal beginPos
-	template <typename TAlignedReadStore, typename TAlignedReadQualityStore>
+	template <typename TAlignedReadStore, typename TLessScore>
 	struct LessGPosRNo : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
-		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;		
-		TAlignedReadQualityStore &qualStore;
+		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;
+		TLessScore lessScore;
 		
-		LessGPosRNo(TAlignedReadQualityStore &_qualStore):
-			qualStore(_qualStore) {}
-		
+		LessGPosRNo(TLessScore const &_lessScore):
+			lessScore(_lessScore) {}
+
 		inline bool operator() (TAlignedRead const &a, TAlignedRead const &b) const 
 		{
 			// contig
@@ -154,13 +154,7 @@ score(Score<TValue, Quality<TQualityString> > const & me,
 			if (a.readId > b.readId) return false;
 
 			// qualities
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
-			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
-			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
-			if (qa.pairScore > qb.pairScore) return true;
-			if (qa.pairScore < qb.pairScore) return false;
-			return qa.score > qb.score;
+			return lessScore(a, b);
 		}
 	};
 
@@ -550,7 +544,7 @@ template <
 	typename TFSConfig,
 	typename TCounts,
 	typename TSpec,
-	typename RazerSMode
+	typename TRazerSMode
 >
 int dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
@@ -558,7 +552,7 @@ int dumpMatches(
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
 	CharString errorPrbFileName,
 	RazerSOptions<TSpec> &options,
-	RazerSMode const & mode)
+	TRazerSMode const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
@@ -655,7 +649,7 @@ int dumpMatches(
 	}
 
 	
-	maskDuplicates(store);
+	maskDuplicates(store, mode);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
@@ -669,7 +663,7 @@ int dumpMatches(
 		resize(stats, maxErrors + 1);
 		for (unsigned i = 0; i <= maxErrors; ++i)
 			fill(stats[i], length(store.readStore), 0);
-		countMatches(store, stats);
+		countMatches(store, stats, mode);
 	}
 
 	Nothing nothing;
@@ -683,29 +677,23 @@ int dumpMatches(
 	}
 	else	 
 #endif
-	
-#ifdef RAZERS_MICRO_RNA
-	if(options.microRNA)purgeAmbiguousRnaMatches(store,options);
-	else
-#endif
 	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateLibSizes(libSize, store);
 
+	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
 	switch (options.sortOrder) {
-		case 0: 
+		case 0:
 			sortAlignedReads(
 				store.alignedReadStore, 
-				LessRNoGPos<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+				LessRNoGPos<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
 			break;
-
 		case 1:
 			sortAlignedReads(
 				store.alignedReadStore, 
-				LessGPosRNo<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+				LessGPosRNo<TAlignedReadStore, TLess>(TLess(store.alignQualityStore)));
 			break;
-			
 	}
 	
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());

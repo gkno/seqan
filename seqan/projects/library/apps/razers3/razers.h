@@ -94,7 +94,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		reverse;			// compute reverse oriented read matches
 		double		errorRate;			// Criteria 1 threshold
 		unsigned	maxHits;			// output at most maxHits many matches
-		unsigned	distanceRange;		// output only the best, second best, ..., distanceRange best matches
+		unsigned	scoreDistanceRange;	// output only the best, second best, ..., scoreDistanceRange best matches
+		unsigned	errorDistanceRange;	// output only matches with errors in [e..e+errorDistanceRange) according 
+										// to a best match with e errors
 		bool		purgeAmbiguous;		// true..remove reads with more than maxHits best matches, false..keep them
 		CharString	output;				// name of result file
 		int			_debugLevel;		// level of verbosity
@@ -180,7 +182,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			reverse = true;
 			errorRate = 0.08;
 			maxHits = 100;
-			distanceRange = 0;	// disabled
+			scoreDistanceRange = 0;	// disabled
+			errorDistanceRange = 0; // disabled
 			purgeAmbiguous = false;
 			output = "";
 			_debugLevel = 0;
@@ -212,7 +215,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
 
-			compactThresh = 1024;
+//			compactThresh = 1024;
+			compactThresh = 1;
 
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 			maqMapping = false;
@@ -454,12 +458,12 @@ struct MicroRNA{};
 						typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
 
 						if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-							maskDuplicates(store);	// overlapping parallelograms cause duplicates
+							maskDuplicates(store, TRazerSMode());	// overlapping parallelograms cause duplicates
 		
 						compactMatches(store, cnts, options, TRazerSMode(), swiftPattern, COMPACT);
 							
-						if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-							options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
+//						if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+//							options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 						
 						if (options._debugLevel >= 2)
 							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
@@ -623,31 +627,15 @@ inline int estimateReadLength(char const *fileName)
 }
 
 
-	template <typename TReadMatch>
-	struct LessRNoEdistHLen : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.readId < b.readId) return true;
-			if (a.readId > b.readId) return false;
-
-			if(a.editDist < b.editDist) return true;
-			if(a.editDist > b.editDist) return false;
-			return (a.mScore > b.mScore);
-
-		}
-	};
-	
-	template <typename TAlignedReadStore, typename TAlignedReadQualityStore>
+	template <typename TAlignedReadStore, typename TLessScore>
 	struct LessRNoGPos : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
 		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;		
-		TAlignedReadQualityStore &qualStore;
+		TLessScore lessScore;
 		
-		LessRNoGPos(TAlignedReadQualityStore &_qualStore):
-			qualStore(_qualStore) {}
+		LessRNoGPos(TLessScore const &_lessScore):
+			lessScore(_lessScore) {}
 		
 		inline bool operator() (TAlignedRead const &a, TAlignedRead const &b) const 
 		{
@@ -669,32 +657,27 @@ inline int estimateReadLength(char const *fileName)
 			bool oa = a.beginPos < a.endPos;
 			bool ob = b.beginPos < b.endPos;
 			if (oa != ob) return oa;
-
-			// qualities
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
-			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
-			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
-			if (qa.pairScore > qb.pairScore) return true;
-			if (qa.pairScore < qb.pairScore) return false;
-			if (qa.score > qb.score) return true;
-			if (qb.score > qa.score) return false;
 			
-			// prefer reads that support more of the reference
-			return _max(a.beginPos, a.endPos) > _max(b.beginPos, b.endPos);
+			int result = lessScore.compare(a, b);
+			if (result == 0)
+			{
+				// prefer reads that support more of the reference
+				return _max(a.beginPos, a.endPos) > _max(b.beginPos, b.endPos);
+			}
+			return result == -1;
 		}
 	};
 
 	// ... to sort matches and remove duplicates with equal gEnd
-	template <typename TAlignedReadStore, typename TAlignedReadQualityStore>
+	template <typename TAlignedReadStore, typename TLessScore>
 	struct LessRNoGEndPos : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
 		typedef typename Value<TAlignedReadStore>::Type TAlignedRead;		
-		TAlignedReadQualityStore &qualStore;
+		TLessScore lessScore;
 		
-		LessRNoGEndPos(TAlignedReadQualityStore &_qualStore):
-			qualStore(_qualStore) {}
+		LessRNoGEndPos(TLessScore const &_lessScore):
+			lessScore(_lessScore) {}
 		
 		inline bool operator() (
 			typename Value<TAlignedReadStore>::Type const &a, 
@@ -719,76 +702,102 @@ inline int estimateReadLength(char const *fileName)
 			bool ob = b.beginPos < b.endPos;
 			if (oa != ob) return oa;
 
-			// qualities
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
-			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
-			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
-			if (qa.pairScore > qb.pairScore) return true;
-			if (qa.pairScore < qb.pairScore) return false;
-			if (qa.score > qb.score) return true;
-			if (qb.score > qa.score) return false;
-			
-			// prefer reads that support more of the reference
-			return _min(a.beginPos, a.endPos) < _min(b.beginPos, b.endPos);
+			int result = lessScore.compare(a, b);
+			if (result == 0)
+			{
+				// prefer reads that support more of the reference
+				return _min(a.beginPos, a.endPos) < _min(b.beginPos, b.endPos);
+			}
+			return result == -1;
 		}
 	};
 
-	template <typename TAlignedReadStore, typename TAlignedReadQualityStore>
-	struct LessErrors : 
+	template <typename TAlignedReadStore, typename TAlignedReadQualityStore, typename TRazerSMode>
+	struct LessScore : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
 		TAlignedReadQualityStore &qualStore;
 		
-		LessErrors(TAlignedReadQualityStore &_qualStore):
+		LessScore(TAlignedReadQualityStore &_qualStore):
 			qualStore(_qualStore) {}
 		
-		inline bool operator() (
+		inline int compare(
 			typename Value<TAlignedReadStore>::Type const &a, 
 			typename Value<TAlignedReadStore>::Type const &b) const 
 		{
 			typedef typename Value<TAlignedReadStore>::Type TAlignedRead;
 
 			// read number
-			if (a.readId < b.readId) return true;
-			if (a.readId > b.readId) return false;
+			if (a.readId < b.readId) return -1;
+			if (a.readId > b.readId) return 1;
 
 			// quality
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
-			return qualStore[a.id].errors < qualStore[b.id].errors;
+			if (a.id == TAlignedRead::INVALID_ID) return 1;
+			if (b.id == TAlignedRead::INVALID_ID) return -1;
+
+			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
+			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
+			if (qa.pairScore > qb.pairScore) return -1;
+			if (qa.pairScore < qb.pairScore) return 1;
+			if (qa.score > qb.score) return -1;
+			if (qb.score > qa.score) return 1;
+			return 0;
+		}
+		
+		inline bool operator() (
+			typename Value<TAlignedReadStore>::Type const &a, 
+			typename Value<TAlignedReadStore>::Type const &b) const 
+		{
+			return compare(a, b) == -1;
 		}
 	};
 	
-	template <typename TReadMatch>
-	struct LessRNoMQ : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+	// longest prefix mapping
+	template <typename TAlignedReadStore, typename TAlignedReadQualityStore, typename TGapMode, typename TScoreMode>
+	struct LessScore<TAlignedReadStore, TAlignedReadQualityStore, RazerSMode<RazerSPrefix, TGapMode, TScoreMode> > : 
+		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
+		TAlignedReadQualityStore &qualStore;
+		
+		LessScore(TAlignedReadQualityStore &_qualStore):
+			qualStore(_qualStore) {}
+		
+		inline int compare(
+			typename Value<TAlignedReadStore>::Type const &a, 
+			typename Value<TAlignedReadStore>::Type const &b) const 
 		{
+			typedef typename Value<TAlignedReadStore>::Type TAlignedRead;
+
 			// read number
-			if (a.readId < b.readId) return true;
-			if (a.readId > b.readId) return false;
-			
+			if (a.readId < b.readId) return -1;
+			if (a.readId > b.readId) return 1;
+
 			// quality
-			if (a.mScore < b.mScore) return true; // sum of quality values of mismatches (the smaller the better)
-			if (a.mScore > b.mScore) return false;
-			
-			return (a.editDist < b.editDist); // seedEditDist?
-			// genome position and orientation
-	/*		if (a.contigId < b.contigId) return true;
-			if (a.contigId > b.contigId) return false;
-			if (a.beginPos < b.beginPos) return true;
-			if (a.beginPos > b.beginPos) return false;
-			if (a.orientation < b.orientation) return true;
-			if (a.orientation > b.orientation) return false;
-	*/		
+			if (a.id == TAlignedRead::INVALID_ID) return 1;
+			if (b.id == TAlignedRead::INVALID_ID) return -1;
+
+			typename GetValue<TAlignedReadQualityStore>::Type qa = getValue(qualStore, a.id);
+			typename GetValue<TAlignedReadQualityStore>::Type qb = getValue(qualStore, b.id);
+			if (qa.errors < qb.errors) return -1;
+			if (qa.errors > qb.errors) return 1;
+			if (qa.score > qb.score) return -1;
+			if (qb.score > qa.score) return 1;
+			return 0;
+		}
+
+		inline bool operator() (
+			typename Value<TAlignedReadStore>::Type const &a, 
+			typename Value<TAlignedReadStore>::Type const &b) const 
+		{
+			return compare(a, b) == -1;
 		}
 	};
 
+
 //////////////////////////////////////////////////////////////////////////////
 // Mark duplicate matches for deletion
-template <typename TFragmentStore>
-void maskDuplicates(TFragmentStore &store)
+template <typename TFragmentStore, typename TRazerSMode>
+void maskDuplicates(TFragmentStore &store, TRazerSMode)
 {
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
@@ -800,7 +809,11 @@ void maskDuplicates(TFragmentStore &store)
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal ends
 
-	sortAlignedReads(store.alignedReadStore, LessRNoGEndPos<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>	TLessScore;
+	typedef LessRNoGPos<TAlignedReadStore, TLessScore>						TLessBeginPos;
+	typedef LessRNoGEndPos<TAlignedReadStore, TLessScore>					TLessEndPos;
+	
+	sortAlignedReads(store.alignedReadStore, TLessEndPos(TLessScore(store.alignQualityStore)));
 
 	TContigPos	beginPos = -1;
 	TContigPos	endPos = -1;
@@ -830,7 +843,7 @@ void maskDuplicates(TFragmentStore &store)
 	//////////////////////////////////////////////////////////////////////////////
 	// remove matches with equal begins
 
-	sortAlignedReads(store.alignedReadStore, LessRNoGPos<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
+	sortAlignedReads(store.alignedReadStore, TLessBeginPos(TLessScore(store.alignQualityStore)));
 
 	contigId = TAlignedRead::INVALID_ID;
 	it = begin(store.alignedReadStore, Standard());
@@ -852,14 +865,12 @@ void maskDuplicates(TFragmentStore &store)
 		beginPos = itBeginPos;
 		orientation = (*it).beginPos < (*it).endPos;
 	}
-
-	sortAlignedReads(store.alignedReadStore, LessErrors<TAlignedReadStore, TAlignQualityStore>(store.alignQualityStore));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Count matches for each number of errors
-template <typename TFragmentStore, typename TCounts>
-void countMatches(TFragmentStore &store, TCounts &cnt)
+template <typename TFragmentStore, typename TCounts, typename TRazerSMode>
+void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode)
 {
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
@@ -876,6 +887,8 @@ void countMatches(TFragmentStore &store, TCounts &cnt)
 	short errors = -1;
 	__int64 count = 0;
 	__int64 maxVal = SupremumValue<TValue>::VALUE;
+
+	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
 	for (; it != itEnd; ++it) 
 	{
@@ -911,6 +924,7 @@ setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 	if (minT > 1)
 	{
 //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
+		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
 		setMinThreshold(swift, readNo, (unsigned)minT);
 	}
 }
@@ -921,6 +935,7 @@ template <
 	typename TFragmentStore,
 	typename TCounts,
 	typename TSpec,
+	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
 	typename TSwift 
@@ -929,7 +944,7 @@ void compactMatches(
 	TFragmentStore &store,
 	TCounts &, 
 	RazerSOptions<TSpec> &options, 
-	RazerSMode<RazerSGlobal, TGapMode, TScoreMode> const,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode> const,
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
@@ -937,12 +952,17 @@ void compactMatches(
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-// TODO sortieren
+	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode>			TRazerSMode;
+
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreCutOff = InfimumValue<int>::VALUE;
-	unsigned errorsRangeBest = (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.distanceRange: 0;
+	int errorCutOff = SupremumValue<int>::VALUE;
+	unsigned errorRangeBest = options.errorDistanceRange;// (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
+	int scoreRangeBest = (TYPECMP<TScoreMode, RazerSScore>::VALUE || TYPECMP<TScoreMode, RazerSScore>::VALUE)? SupremumValue<int>::VALUE : -(int)options.scoreDistanceRange;
+
+	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
@@ -953,9 +973,10 @@ void compactMatches(
 	{
 		if ((*it).id == TAlignedRead::INVALID_ID) continue;
 		int score = store.alignQualityStore[(*it).id].score;
+		int errors = store.alignQualityStore[(*it).id].errors;
 		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
 		{ 
-			if (score <= scoreCutOff) continue;
+			if (score <= scoreCutOff || errors >= errorCutOff) continue;
 			if (++hitCount >= hitCountCutOff)
 			{
 #ifdef RAZERS_MASK_READS
@@ -964,13 +985,14 @@ void compactMatches(
 					unsigned errors = store.alignQualityStore[(*it).id].errors;
 					
 					// we have enough, now look for better matches
-					if (options.purgeAmbiguous && (options.distanceRange == 0 || errors < errorsRangeBest))
+					if (options.purgeAmbiguous && (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest))
 					{
 						setMaxErrors(swift, readNo, -1);
 						if (options._debugLevel >= 2)
 							::std::cerr << "(read #" << readNo << " disabled)";
 					}
 					else
+						// we only need better matches
 						if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
 						{
 							setMaxErrors(swift, readNo, errors - 1);
@@ -980,7 +1002,7 @@ void compactMatches(
 
 					if (options.purgeAmbiguous)
 					{
-						if ((options.distanceRange == 0 || errors < errorsRangeBest) || compactMode == COMPACT_FINAL)
+						if (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest || compactMode == COMPACT_FINAL)
 							dit = ditBeg;
 						else {
 							*dit = *it;
@@ -996,8 +1018,8 @@ void compactMatches(
 		{
 			readNo = (*it).readId;
 			hitCount = 0;
-			if (options.distanceRange > 0)
-				scoreCutOff = score - options.distanceRange;
+			if (options.scoreDistanceRange > 0)	scoreCutOff = score - options.scoreDistanceRange;
+			if (options.errorDistanceRange > 0)	errorCutOff = errors + options.errorDistanceRange;
 			ditBeg = dit;
 		}
 		*dit = *it;
@@ -1006,102 +1028,6 @@ void compactMatches(
 	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 	compactAlignedReads(store);
 }
-// TODO
-/*
-template <
-	typename TFragmentStore,
-	typename TCounts,
-	typename TSpec,
-	typename TGapMode,
-	typename TScoreMode,
-	typename TSwift 
->
-void compactMatches(
-	TFragmentStore &store,
-	TCounts & cnts, 
-	RazerSOptions<TSpec> &options, 
-	RazerSMode<RazerSPrefix, TGapMode, TScoreMode> const,
-	TSwift & swift, 
-	CompactMatchesMode compactMode)
-{
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-
-	if (options.microRNA)
-		sortAlignedReads(store.alignedReadStore, LessRNoEdistHLen<TAlignedRead>());
-
-	int bestMScore = 0;	
-	unsigned readNo = -1;
-	unsigned hitCount = 0;
-	unsigned hitCountCutOff = options.maxHits;
-	unsigned errorsCutOff = SupremumValue<unsigned>::VALUE;
-	unsigned errorsRangeBest = (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.distanceRange: 0;
-
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
-	TIterator dit = it;
-	TIterator ditBeg = it;
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).id == TAlignedRead::INVALID_ID) continue;
-		unsigned errors = store.alignQualityStore[(*it).id].errors;
-		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
-		{ 
-			if (errors >= errorsCutOff) continue;
-			if ((*it).mScore < bestMScore) continue;
-			if (++hitCount >= hitCountCutOff)
-			{
-#ifdef RAZERS_MASK_READS
-				if (hitCount == hitCountCutOff)
-				{
-					// we have enough, now look for better matches
-					if (options.purgeAmbiguous && (options.distanceRange == 0 || errors < errorsRangeBest))
-					{
-						setMaxErrors(swift, readNo, -1);
-						if (options._debugLevel >= 2)
-							::std::cerr << "(read #" << readNo << " disabled)";
-					}
-					else
-						if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
-						{
-							setMaxErrors(swift, readNo, errors - 1);
-							if (errors == 0 && options._debugLevel >= 2)
-								::std::cerr << "(read #" << readNo << " disabled)";
-						}
-
-					if (options.purgeAmbiguous)
-					{
-						if ((options.distanceRange == 0 || errors < errorsRangeBest) || compactMode == COMPACT_FINAL)
-							dit = ditBeg;
-						else {
-							*dit = *it;
-							++dit;
-						}
-					}
-				}
-#endif
-				continue;
-			}
-		}
-		else
-		{
-			readNo = (*it).readId;
-			hitCount = 0;
-			if (options.distanceRange > 0)
-				errorsCutOff = errors + options.distanceRange;
-			bestMScore = (*it).mScore;
-			ditBeg = dit;
-		}
-		*dit = *it;
-		++dit;
-	}
-	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
-	compactAlignedReads(store);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////
 // Remove low quality matches
@@ -1120,15 +1046,16 @@ void compactMatches(
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-	
-	sortAlignedReads(store.alignedReadStore, LessRNoMQ<TAlignedRead>());
+	typedef typename TFragmentStore::TAlignedReadStore						TAlignedReadStore;
+	typedef typename TFragmentStore::TAlignQualityStore						TAlignQualityStore;
+	typedef typename Value<TAlignedReadStore>::Type							TAlignedRead;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type			TIterator;
+	typedef RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ> >	TRazerSMode;
 	
 	unsigned readNo = -1;
-	
+
+	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
+		
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
 	TIterator dit = it;
@@ -1186,7 +1113,8 @@ void compactMatches(
 	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
 	resize(store.alignQualityStore, length(store.alignedReadStore));
 }
-*/
+
+/* // fallback
 template <
 	typename TFragmentStore,
 	typename TCounts,
@@ -1205,61 +1133,7 @@ void compactMatches(
 	CompactMatchesMode)
 {
 }
-
-#ifdef RAZERS_MICRO_RNA
-
-template < typename TMatches, typename TSpec >
-void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
-{
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-
-	sortAlignedReads(store.alignedReadStore, LessRNoEdistHLen<TAlignedRead>());
-
-	int bestMScore = 0;
-
-	unsigned readNo = -1;
-	unsigned hitCount = 0;
-	unsigned hitCountCutOff = options.maxHits;
-	int errorsCutOff = SupremumValue<int>::VALUE;
-
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
-	TIterator dit = it;
-	TIterator ditBeg = it;
-
-	for (; it != itEnd; ++it)
-	{
-		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).readId)
-		{
-			if ((*it).editDist >= errorsCutOff) continue;
-			if ( (*it).mScore < bestMScore) continue;
-			if (++hitCount >= hitCountCutOff)
-			{
-				if (hitCount == hitCountCutOff)
-					dit = ditBeg;
-				continue;
-			}
-		}
-		else
-		{
-			readNo = (*it).readId;
-			hitCount = 0;
-			if (options.distanceRange > 0)
-				errorsCutOff = (*it).editDist + options.distanceRange;
-			bestMScore = (*it).mScore;
-			ditBeg = dit;
-		}
-		*dit = *it;
-		++dit;
-	}
-	resize(matches, dit - begin(matches, Standard()));
-}
-#endif
-
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // Best Hamming prefix verification
