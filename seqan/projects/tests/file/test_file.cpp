@@ -532,7 +532,7 @@ void Test_Raw()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Fasta_Read(char * path)
+void Test_Fasta_Read(const char * path)
 {
 //____________________________________________________________________________
 // FASTA from C stream
@@ -822,7 +822,7 @@ void Test_CGViz() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Embl(char * fl_path, char *fl_out_path)
+void Test_Embl(const char * fl_path, const char *fl_out_path)
 {
 	FILE * fl = fopen(fl_path, "rb");
 	SEQAN_TASSERT(fl);
@@ -868,7 +868,7 @@ void Test_Embl(char * fl_path, char *fl_out_path)
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Genbank(char * fl_path, char * fl_out_path)
+void Test_Genbank(const char * fl_path, const char * fl_out_path)
 {
 	FILE * fl = fopen(fl_path, "rb");
 	SEQAN_TASSERT(fl);

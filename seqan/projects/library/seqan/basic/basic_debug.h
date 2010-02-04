@@ -115,7 +115,7 @@
 
 // compare two files, do not translate linebreaks
 inline bool 
-_compareBinaryFiles(char * file1, char * file2)
+_compareBinaryFiles(const char * file1, const char * file2)
 {
 	bool ret = false;
 
@@ -181,7 +181,7 @@ _compareTextFiles_readChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 
 // compare two files, translate linebreaks
 inline bool 
-_compareTextFiles(char * file1, char * file2)
+_compareTextFiles(const char * file1, const char * file2)
 {
 	FILE * fl1 = fopen(file1, "rb");
 	if (!fl1) return false;
