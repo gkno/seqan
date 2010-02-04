@@ -215,7 +215,7 @@ struct SwiftParameters {
 
 		operator TIterator () const	{ return data_iterator;	}
         
-        Finder & operator = (Finder const &orig) const 
+        Finder & operator = (Finder const &orig) 
         {
             data_iterator = orig.data_iterator;
             haystackEnd = orig.haystackEnd;
@@ -862,27 +862,10 @@ positionRange(Finder<THaystack, Swift<TSpec> > const &finder)
 
 //____________________________________________________________________________
 
-template <typename THaystack, typename TSpec>
-inline typename Infix<THaystack>::Type
-range(Finder<THaystack, Swift<TSpec> > &finder)
-{
-	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-
-	__int64 hitBegin = hit.hstkPos;
-	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
-	__int64 textEnd = length(haystack(finder));
-
-	if (hitBegin < 0) hitBegin = 0;
-	if (hitEnd > textEnd) hitEnd = textEnd;
-	return infix(haystack(finder), hitBegin, hitEnd);
-}
-
-template <typename THaystack, typename TSpec, typename TText>
+template <typename TSwiftHit, typename TText>
 inline typename Infix<TText>::Type
-range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
+getSwiftRange(TSwiftHit const &hit, TText &text)
 {
-	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
-
 	__int64 hitBegin = hit.hstkPos;
 	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
 	__int64 textEnd = length(text);
@@ -892,11 +875,41 @@ range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 	return infix(text, hitBegin, hitEnd);
 }
 
+template <typename THaystack, typename TSpec>
+inline typename Infix<THaystack>::Type
+range(Finder<THaystack, Swift<TSpec> > &finder)
+{
+	return getSwiftRange(*finder.curHit, haystack(finder));
+}
+
+template <typename THaystack, typename TSpec, typename TText>
+inline typename Infix<TText>::Type
+range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
+{
+	return getSwiftRange(*finder.curHit, text);
+}
+
 template <typename TNeedle, typename TIndexSpec, typename TSpec>
 inline typename Value<TNeedle>::Type &
 range(Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern)
 {
 	return indexText(needle(pattern))[pattern.curSeqNo];
+}
+
+template <typename THaystack, typename TSpec>
+inline void 
+_printDots(Finder<THaystack, Swift<TSpec> > &finder)
+{
+	while (finder.curPos >= finder.dotPos) 
+	{
+		finder.dotPos += 100000;
+		if (finder.dotPos >= finder.dotPos2)
+		{
+			::std::cerr << (finder.dotPos2 / 1000000) << "M" << ::std::flush;
+			finder.dotPos2 += 1000000;
+		} else
+			::std::cerr << "." << ::std::flush;
+	}
 }
 
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
@@ -1011,18 +1024,7 @@ find(
 
 	do {
 
-		if (printDots)
-			while (finder.curPos >= finder.dotPos) 
-			{
-				finder.dotPos += 100000;
-				if (finder.dotPos >= finder.dotPos2)
-				{
-					::std::cerr << (finder.dotPos2 / 1000000) << "M" << ::std::flush;
-					finder.dotPos2 += 1000000;
-				} else
-					::std::cerr << "." << ::std::flush;
-			}
-
+		if (printDots) _printDots(finder);
 		if (atEnd(++finder)) 
 		{
 			if (!_nextNonRepeatRange(finder, pattern, printDots)) 
@@ -1095,21 +1097,87 @@ find(
 			return false;
 		}
 		finder.curPos = (*finder.in).i1;
-		if (printDots)
-			while (finder.curPos >= finder.dotPos) 
-			{
-				finder.dotPos += 100000;
-				if (finder.dotPos >= finder.dotPos2)
-				{
-					::std::cerr << (finder.dotPos2 / 1000000) << "M" << ::std::flush;
-					finder.dotPos2 += 1000000;
-				} else
-					::std::cerr << "." << ::std::flush;
-			}
+		if (printDots) _printDots(finder);
+
 	} while (!_swiftMultiProcessQGram(finder, pattern, hash(pattern.shape, (*finder.in).i2)));
 
 	pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
 	return true;
+}
+
+
+
+
+template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
+inline bool 
+windowFindBegin(
+	Finder<THaystack, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
+	double errorRate,
+	bool printDots)
+{
+	_patternInit(pattern, errorRate, 0);
+	_finderSetNonEmpty(finder);
+	finder.dotPos = 100000;
+	finder.dotPos2 = 10 * finder.dotPos;
+
+	if (!_firstNonRepeatRange(finder, pattern, printDots)) return false;
+}
+
+template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec, typename TSize>
+inline bool 
+windowFindNext(
+	Finder<THaystack, Swift<TSpec> > &finder,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
+	TSize finderWindowLength,
+	bool printDots)
+{
+	typedef Index<TNeedle, TIndexSpec>					TIndex;
+	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
+	typedef	typename Value<TShape>::Type				THashValue;
+	
+	typedef Finder<THaystack, Swift<TSpec> >			TFinder;
+	typedef typename TFinder::THstkPos					THstkPos;
+
+
+	// all previous matches reported -> search new ones
+	clear(finder.hits);
+	
+	THstkPos windowEnd = finder.curPos + finderWindowLength;
+	// iterate over all non-repeat regions within the window
+	for (; finder.curPos < windowEnd; )
+	{
+		THstkPos localEnd = finder.curEnd;
+		if (localEnd > windowEnd) localEnd = windowEnd;
+
+		// filter a non-repeat region within the window
+		TShape &shape = pattern.shape;
+		_swiftMultiProcessQGram(finder, pattern, hash(shape, hostIterator(hostIterator(finder))));
+		for (++finder.curPos, ++finder; finder.curPos < localEnd; ++finder.curPos, ++finder)
+			_swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));
+			
+		if (printDots) _printDots(finder);
+
+		if (finder.curPos == finder.curEnd)
+			if (!_nextNonRepeatRange(finder, pattern, printDots)) return false;
+	}
+	return true;
+}
+
+template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
+inline void 
+windowFindEnd(
+	Finder<THaystack, Swift<TSpec> > &,
+	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern)
+{
+	_swiftMultiFlushBuckets(pattern);
+}
+
+template <typename THaystack, typename TSpec>
+inline typename Finder<THaystack, Swift<TSpec> >::THitString &
+getSwiftHits(Finder<THaystack, Swift<TSpec> > &finder)
+{
+	return finder.hitString;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
