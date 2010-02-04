@@ -751,6 +751,7 @@ def writePage(fl, data):
     printConcept(fl, data)
 
     printSignature(fl, data, "signature")
+    printList(fl, data, "include")
     printTable(fl, data, "param")
     printTextblock(fl, data, "returns")
     printLink(fl, data, "class")
@@ -780,7 +781,6 @@ def writePage(fl, data):
     printTextblock(fl, data, "output")
     
     printLink(fl, data, "concept")
-    printList(fl, data, "include")
     printLink(fl, data, "demofor")
     printLink(fl, data, "see")
 
