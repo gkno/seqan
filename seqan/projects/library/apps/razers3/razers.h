@@ -402,7 +402,7 @@ struct MicroRNA{};
 	{
 		typedef _TFragmentStore									TFragmentStore;
 		typedef _TRazerSOptions									TOptions;
-		typedef _TRazerSMode										TRazerSMode;
+		typedef _TRazerSMode									TRazerSMode;
 		typedef _TPreprocessing									TPreprocessing;
 		typedef _TSwiftPattern									TSwiftPattern;
 		typedef _TCounts										TCounts;
@@ -413,11 +413,11 @@ struct MicroRNA{};
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
 
-		TFragmentStore	&store;
-		TOptions		&options;			// RazerS options
-		TPreprocessing	&preprocessing;
-		TSwiftPattern	&swiftPattern;
-		TCounts			&cnts;
+		TFragmentStore	*store;
+		TOptions		*options;			// RazerS options
+		TPreprocessing	*preprocessing;
+		TSwiftPattern	*swiftPattern;
+		TCounts			*cnts;
 		
 		TAlignedRead	m;
 		TAlignQuality	q;
@@ -425,12 +425,26 @@ struct MicroRNA{};
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
 		
+        MatchVerifier() {}
+        
+/*        MatchVerifier(MatchVerifier const & other):            
+            store(other.store),
+            options(other.options),
+            preprocessing(other.preprocessing),
+            swiftPattern(other.swiftPattern),
+            cnts(other.cnts),
+            m(other.m),
+            q(other.q),
+            onReverseComplement(other.onReverseComplement),
+            genomeLength(other.genomeLength),
+            oneMatchPerBucket(other.oneMatchPerBucket) {}
+*/        
 		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
-			store(_store),
-			options(_options),
-			preprocessing(_preprocessing),
-			swiftPattern(_swiftPattern),
-			cnts(_cnts)
+			store(&_store),
+			options(&_options),
+			preprocessing(&_preprocessing),
+			swiftPattern(&_swiftPattern),
+			cnts(&_cnts)
 		{
 			onReverseComplement = false;
 			genomeLength = 0;
@@ -448,28 +462,28 @@ struct MicroRNA{};
 #pragma omp critical
 // begin of critical section
 			{
-				if (!options.spec.DONT_DUMP_RESULTS)
+				if (!options->spec.DONT_DUMP_RESULTS)
 				{
-					m.id = length(store.alignedReadStore);
-					appendValue(store.alignedReadStore, m, Generous());
-					appendValue(store.alignQualityStore, q, Generous());
-					if (length(store.alignedReadStore) > options.compactThresh)
+					m.id = length(store->alignedReadStore);
+					appendValue(store->alignedReadStore, m, Generous());
+					appendValue(store->alignQualityStore, q, Generous());
+					if (length(store->alignedReadStore) > options->compactThresh)
 					{
-						typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
+						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
 
 						if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-							maskDuplicates(store, TRazerSMode());	// overlapping parallelograms cause duplicates
+							maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
 		
-						compactMatches(store, cnts, options, TRazerSMode(), swiftPattern, COMPACT);
+						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
 							
 //						if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 //							options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 						
-						if (options._debugLevel >= 2)
-							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+						if (options->_debugLevel >= 2)
+							::std::cerr << '(' << oldSize - length(store->alignedReadStore) << " matches removed)";
 					}
 				}
-				++options.countVerification;
+				++options->countVerification;
 			}
 // end of critical section
 		}
@@ -1164,7 +1178,7 @@ matchVerify(
 	TGenomeIterator git		= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
 	
-	unsigned maxErrors = (unsigned)(verifier.options.prefixSeedLength * verifier.options.errorRate);
+	unsigned maxErrors = (unsigned)(verifier.options->prefixSeedLength * verifier.options->errorRate);
 	unsigned minErrors = maxErrors + 2;
 	unsigned errorThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: maxErrors;
 	int bestHitLength = 0;
@@ -1175,9 +1189,9 @@ matchVerify(
 		TReadIterator r = ritBeg;
 		TGenomeIterator g = git;
 		for (; r != ritEnd; ++r, ++g)
-			if ((verifier.options.compMask[ordValue(*g)] & verifier.options.compMask[ordValue(*r)]) == 0)
+			if ((verifier.options->compMask[ordValue(*g)] & verifier.options->compMask[ordValue(*r)]) == 0)
 			{
-				if (r - ritBeg < (int)verifier.options.prefixSeedLength)	// seed
+				if (r - ritBeg < (int)verifier.options->prefixSeedLength)	// seed
 				{
 					if (++errors > maxErrors)				// doesn't work for islands with errorThresh > maxErrors
 						break;
@@ -1263,7 +1277,7 @@ matchVerify(
 	TGenomeIterator git		= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
 	
-	unsigned maxErrors = (unsigned)(ndlLength * verifier.options.errorRate);
+	unsigned maxErrors = (unsigned)(ndlLength * verifier.options->errorRate);
 	unsigned minErrors = maxErrors + 1;
 	unsigned errorThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: maxErrors;
 
@@ -1272,7 +1286,7 @@ matchVerify(
 		unsigned errors = 0;
 		TGenomeIterator g = git;
 		for (TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
-			if ((verifier.options.compMask[ordValue(*g)] & verifier.options.compMask[ordValue(*r)]) == 0)
+			if ((verifier.options->compMask[ordValue(*g)] & verifier.options->compMask[ordValue(*r)]) == 0)
 //				if (
 				if (++errors > maxErrors)	// doesn't work for islands with errorThresh > maxErrors
 					break;
@@ -1337,7 +1351,7 @@ matchVerify(
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
 
 	TMyersFinder myersFinder(inf);
-	TMyersPattern &myersPattern = verifier.preprocessing[readId];
+	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
@@ -1347,7 +1361,7 @@ matchVerify(
 
     unsigned ndlLength = sequenceLength(readId, readSet);
 	int maxScore = InfimumValue<int>::VALUE;
-	int minScore = -(int)(ndlLength * verifier.options.errorRate);
+	int minScore = -(int)(ndlLength * verifier.options->errorRate);
 	TPosition maxPos = 0;
 	TPosition lastPos = length(inf);
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
@@ -1382,8 +1396,8 @@ matchVerify(
 					TMyersFinderRev		myersFinderRev(infRev);
 					TMyersPatternRev	myersPatternRev(readRev);
 
-					_patternMatchNOfPattern(myersPatternRev, verifier.options.matchN);
-					_patternMatchNOfFinder(myersPatternRev, verifier.options.matchN);
+					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
+					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
 					while (find(myersFinderRev, myersPatternRev, maxScore))
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
@@ -1423,8 +1437,8 @@ matchVerify(
 			TMyersFinderRev		myersFinderRev(infRev);
 			TMyersPatternRev	myersPatternRev(readRev);
 
-			_patternMatchNOfPattern(myersPatternRev, verifier.options.matchN);
-			_patternMatchNOfFinder(myersPatternRev, verifier.options.matchN);
+			_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
+			_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
 			while (find(myersFinderRev, myersPatternRev, maxScore))
 				verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 		}
@@ -1467,10 +1481,10 @@ matchVerify(
 	TGenomeIterator git		= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
 	
-	unsigned maxErrors = (unsigned)(verifier.options.prefixSeedLength * verifier.options.errorRate);
+	unsigned maxErrors = (unsigned)(verifier.options->prefixSeedLength * verifier.options->errorRate);
 	unsigned minErrors = 0;
-	unsigned minQualSum = verifier.options.absMaxQualSumErrors + 1;
-	unsigned qualSumThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: verifier.options.absMaxQualSumErrors;
+	unsigned minQualSum = verifier.options->absMaxQualSumErrors + 1;
+	unsigned qualSumThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: verifier.options->absMaxQualSumErrors;
 	unsigned bestHitLength = 0;
 
 	for (; git < gitEnd; ++git)
@@ -1481,23 +1495,23 @@ matchVerify(
 		TReadIterator r = ritBeg;
 		TGenomeIterator g = git;
 		for (; r != ritEnd; ++r, ++g)
-			if ((verifier.options.compMask[ordValue(*g)] & verifier.options.compMask[ordValue(*r)]) == 0)
+			if ((verifier.options->compMask[ordValue(*g)] & verifier.options->compMask[ordValue(*r)]) == 0)
 			{
-				if (r - ritBeg < verifier.options.prefixSeedLength)		// seed
+				if (r - ritBeg < verifier.options->prefixSeedLength)		// seed
 				{
 					if (++seedErrors > maxErrors)
 					{
-						qualSum = verifier.options.absMaxQualSumErrors + 1;
+						qualSum = verifier.options->absMaxQualSumErrors + 1;
 						break;
 					}
 				}
-				qualSum += (getQualityValue(*r) < verifier.options.mutationRateQual) ? getQualityValue(*r) : verifier.options.mutationRateQual;
-				if (qualSum > verifier.options.absMaxQualSumErrors)
+				qualSum += (getQualityValue(*r) < verifier.options->mutationRateQual) ? getQualityValue(*r) : verifier.options->mutationRateQual;
+				if (qualSum > verifier.options->absMaxQualSumErrors)
 					break;
 				++errors;
 			}
 			
-		if (verifier.options.prefixSeedLength != 0) errors = seedErrors;
+		if (verifier.options->prefixSeedLength != 0) errors = seedErrors;
 		if (qualSum < minQualSum)
 		{
 			minQualSum = qualSum;
@@ -1509,13 +1523,13 @@ matchVerify(
 			verifier.m.beginPos = git - begin(host(inf), Standard());
 		} else if (qualSumThresh < qualSum)
 		{
-			if (minQualSum <= verifier.options.absMaxQualSumErrors)
+			if (minQualSum <= verifier.options->absMaxQualSumErrors)
 			{
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
 				verifier.q.pairScore = verifier.q.score = -(int)minQualSum;
 				verifier.q.errors = minErrors;
 				verifier.push();
-				minQualSum = verifier.options.absMaxQualSumErrors + 1;
+				minQualSum = verifier.options->absMaxQualSumErrors + 1;
 			}
 		}
 	}
@@ -1804,7 +1818,8 @@ int _mapReads(
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else
 #endif
-		return _mapSingleReads(store, cnts, options, shape, mode);
+        return _mapSingleReads(store, cnts, options, shape, mode);
+        //return _mapSingleReadsParallel(store, cnts, options, shape, mode);
 }
 
 
