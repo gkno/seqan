@@ -177,7 +177,8 @@ void testUngappedQGramIndex()
 	pos_size += 1;	
 	resize(pos, pos_size);
 
-	createQGramIndex(index, pos, text, shape);
+        Nothing nothing;
+        createQGramIndex(index, pos, nothing, text, shape);
 	
 	
 	SEQAN_ASSERT(pos[0] == 0);
