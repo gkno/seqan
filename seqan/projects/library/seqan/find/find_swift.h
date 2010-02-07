@@ -83,7 +83,7 @@ struct SwiftParameters {
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
+	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short, bool __WITH_FIRSTINC = (Swift<TSpec>::SEMIGLOBAL == 0)>
 	struct _SwiftBucket 
 	{
 		typedef _TSize			TSize;
@@ -98,8 +98,8 @@ struct SwiftParameters {
 #endif
 	};
 
-	template <typename _TSize, typename _TShortSize>
-	struct _SwiftBucket<SwiftSemiGlobal, _TSize, _TShortSize> 
+	template <typename TSpec, typename _TSize, typename _TShortSize>
+	struct _SwiftBucket<TSpec, _TSize, _TShortSize, false> 
 	{
 		typedef _TSize			TSize;
 		typedef _TShortSize		TShortSize;
@@ -416,8 +416,8 @@ setMinThreshold(Pattern<TIndex, Swift<TSpec> > & pattern, TSeqNo seqNo, TThresho
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
 
 	TBucketParams &bucketParams = _swiftBucketParams(pattern, seqNo);
-	TBucketIterator it = begin(pattern.buckets, Standard()) + bucketParams.firstBucket;
-	TBucketIterator itEnd = it + bucketParams.reuseMask;
+	TBucketIterator it = begin(pattern.buckets, Standard()) + _swiftBucketNo(pattern, bucketParams, seqNo);
+	TBucketIterator itEnd = it + (bucketParams.reuseMask + 1);
 
 	for (; it != itEnd; ++it)
 		if ((*it).threshold < thresh)
