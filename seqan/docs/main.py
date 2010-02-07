@@ -95,6 +95,10 @@ class DDDocRunner(object):
           base_path  Path to build the modules below.
           modules    List of module names to build.  If empty then all
                      modules will be built.
+
+        Returns:
+          Return code of the application.  Is 0 for no problem, and 1 on
+          errors and warnings.
         """
         print 'Scanning modules...'
         app = dddoc.App()
@@ -127,6 +131,7 @@ class DDDocRunner(object):
             print 'Documentation created.'
         else:
             print 'Documentation updated.'
+        return dddoc_html.WARNING_COUNT > 0
     
     
 def main(argv):
@@ -157,8 +162,7 @@ def main(argv):
     app = DDDocRunner(index_only=False, doc_dirs=options.doc_dirs,
                       out_dir=options.out_dir,
                       demos_dir=options.demos_dir)
-    app.run(args[1], args[2:])
-    return 0
+    return app.run(args[1], args[2:])
     
 
 if __name__ == '__main__':

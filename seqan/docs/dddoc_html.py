@@ -8,6 +8,9 @@ import sys
 from os import F_OK
 
 
+# Number of warnings.
+WARNING_COUNT = 0
+
 
 ################################################################################
 
@@ -263,6 +266,8 @@ def brokenLinkText(text):
     return '<span class=broken_link>' + text + '</span>'
 
 def brokenLink(text):
+    global WARNING_COUNT
+    WARNING_COUNT += 1
     print
     print '    WARNING: broken link "' + text + '"'
     return brokenLinkText(text)
@@ -405,6 +410,8 @@ def translateImage(text):
         in_fl.close()
         out_fl.close()
     else:
+        global WARNING_COUNT
+        WARNING_COUNT += 1
         print
         print "\n!!  WARNING: image not found: \"" + text + ".png\""
 
@@ -1107,6 +1114,8 @@ def printFile(fl, data, category):
     
     if (filename != ''):
         if (not os.access(filename, F_OK)):
+            global WARNING_COUNT
+            WARNING_COUNT += 1
             print
             print '!   WARNING: unknown file "' + filename + '"'
         else:
@@ -1655,9 +1664,13 @@ def warningPage(cat, key, data):
     if globalBuildFull: #only if full documentation is built
         desc = data["summary"]
         if desc.empty():
+            global WARNING_COUNT
+            WARNING_COUNT += 1
             print
             print "\n!!  WARNING: no summary field for \"" + cat + "." + key + "\""
         elif len(desc.lines) > 1:
+            global WARNING_COUNT
+            WARNING_COUNT += 1
             print
             print "\n!!  WARNING: multiple summary fields for \"" + cat + "." + key + "\""
 
@@ -1668,12 +1681,18 @@ def warningPage(cat, key, data):
     title = getPageTitle(data)
     
     if (convention == 'bigsmall' and ((title[0] < 'A') or (title[0] > 'Z'))):
+        global WARNING_COUNT
+        WARNING_COUNT += 1
         print
         print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
     elif (convention == 'smallbig' and ((title[0] < 'a') or (title[0] > 'z'))):
+        global WARNING_COUNT
+        WARNING_COUNT += 1
         print
         print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with lower case."
     elif (title[len(title)-1] == '_'):
+        global WARNING_COUNT
+        WARNING_COUNT += 1
         print
         print "\n!   WARNING: \"" + title + "\" breaks naming convention: public identifiers must not end with \"_\"." # and private identifiers should not be documented
 
@@ -1688,6 +1707,8 @@ def warningPage(cat, key, data):
             if len(keys) > 0:         
                 for k in keys:
                     if sigs.find(k) < 0:
+                        global WARNING_COUNT
+                        WARNING_COUNT += 1
                         print
                         print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
                         
