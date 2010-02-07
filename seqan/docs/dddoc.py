@@ -20,8 +20,51 @@ DDDOC_EXTS = ['dddoc', 'DDDOC']
 # List of ignored directory names.
 IGNORED_DIRS = ['CSV', '.svn']
 
+DATA = None
+ID = 0
 
-################################################################################
+class App(object):
+    """Application object for DDDoc.
+
+    Provides a facade to the functionality of the core module.
+
+    Usage:
+       app = App()
+       app.loadFiles([<files>])
+       app.loadFiles([<files>])
+       app.loadingComplete()
+
+    Attrs:
+      data       The global state Data object.
+    """
+
+    def __init__(self):
+        """Initialize object members."""
+        global DATA
+        DATA = Data([], 0)
+        self.data = DATA
+        self.next_id = ID
+
+    def loadFiles(self, filenames):
+        """Load the files with the given file name."""
+        loadFiles(filenames)
+
+    def loadingComplete(self):
+        """Initialize data object.
+
+        This method is called after all calls to LoadFiles().
+        """
+        self.data.init()
+
+    def getNextId(self):
+        """Returns an identifier.
+
+        Each id is only returned once.
+        """
+        assert False, "For future use."
+        self.next_id += 1
+        return self.next_id - 1
+    
 
 
 class Line:
@@ -216,11 +259,6 @@ def findRelation(data, arr, to):
 
 ################################################################################
 
-DATA = Data([], 0)
-ID = 0
-
-################################################################################
-
 def clearData():
     global DATA
     DATA = Data([], 0)
@@ -336,16 +374,16 @@ def loadCPPFile(filename):
 
 ################################################################################
 
-def GetFileType(filename):
+def getFileType(filename):
     """Determines file type from filename.
 
     Determines the file type from the extension of the given filename.
 
-    >>> GetFileType('test.cpp') == FILETYPE_CPP
+    >>> getFileType('test.cpp') == FILETYPE_CPP
     True
-    >>> GetFileType('path/file.h') == FILETYPE_CPP
+    >>> getFileType('path/file.h') == FILETYPE_CPP
     True
-    >>> GetFileType('test.dddoc') == FILETYPE_DDDOC
+    >>> getFileType('test.dddoc') == FILETYPE_DDDOC
     True
 
     Args:
@@ -370,7 +408,7 @@ def GetFileType(filename):
 ################################################################################
     
 def loadFile(filename):
-    file_type = GetFileType(filename)
+    file_type = getFileType(filename)
     if (file_type == 2): return loadCPPFile(filename)
     elif (file_type == 1): return loadDDDOCFile(filename)
     else: raise "unknown file type"
@@ -539,11 +577,11 @@ def splitUrl(line):
     return li
 
 
-def LoadFiles(search_path):
+def loadFiles(search_path):
     """Call parseFile() on files.
 
     All files below search_path will be searched that have file type
-    FILETYPE_CPP or FILETYPE_DOC as determined by GetFileType().
+    FILETYPE_CPP or FILETYPE_DOC as determined by getFileType().
     Directories with names of IGNORED_DIRS are skipped.
 
     Args:
@@ -553,7 +591,7 @@ def LoadFiles(search_path):
         # Parse all files.
         for file in files:
             path = os.path.join(root, file)
-            if GetFileType(path) in [FILETYPE_CPP, FILETYPE_DDDOC]:
+            if getFileType(path) in [FILETYPE_CPP, FILETYPE_DDDOC]:
                 parseFile(path)
         # Exclude ignored diretories.
         for ignored in IGNORED_DIRS:

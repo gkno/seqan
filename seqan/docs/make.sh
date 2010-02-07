@@ -1,2 +1,2 @@
 #!/bin/sh
-python main.py ../projects/library $@
+./main.py ../projects/library -d concepts -d pages $@
