@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
@@ -18,11 +18,11 @@
   $Id$
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_ALIGN_H
-#define SEQAN_HEADER_ALIGN_H
+#ifndef SEQAN_ALIGN_H_
+#define SEQAN_ALIGN_H_
 
-//____________________________________________________________________________
-// prerequisites
+// ----------------------------------------------------------------------
+// Prerequisites.
 
 #include <cmath>
 #include <stack>
@@ -35,7 +35,8 @@
 #include <seqan/graph_align.h>
 #include <seqan/modifier.h>
 
-//____________________________________________________________________________
+// ----------------------------------------------------------------------
+// The module's headers.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/align/align_generated_forwards.h>
@@ -63,5 +64,4 @@
 #include <seqan/align/align_myers.h>
 #include <seqan/align/align_hirschberg.h>
 
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // SEQAN_ALIGN_H_
