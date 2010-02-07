@@ -262,9 +262,14 @@ displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 }
 
 /////////////////////////////////////////////////////////////////////////
-/**.Metafunction.Motif:
-*/
-
+/**
+.Metafunction.Motif:
+..summary:The string type of the finder.
+..signature:Motif<T>::Type
+..param.T:Finder for which the string type is determined.
+...type:Class.String
+..returns.param.Type:Underlying sequence type of finder $T$.
+ */
 template <typename T>
 struct Motif;
 
@@ -275,7 +280,14 @@ struct Motif< MotifFinder<TValue,TSpec> >
 };
 
 /////////////////////////////////////////////////////////////////////////
-/**.Function.getMotif:
+/**
+.Function.getMotif:
+..summary:Gets the motif out of a @Class.MotifFinder@.  If pos is given, the pos-th motif is returned, otherwise the first motif is returned.
+..cat:Motif Search
+..signature:getMotif(motifFinder, pos)
+..param.motifFinder:
+...type:Class.MotifFinder
+..param.pos:Position 
 */
 
 template <typename TValue, typename TSpec, typename TPosition>
@@ -285,6 +297,8 @@ getMotif(MotifFinder<TValue, TSpec> & me,
 {
 	return me.set_of_motifs[pos];
 }
+
+///.Function.getMotif.signature:getMotif(motifFinder)
 template <typename TValue, typename TSpec>
 inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
 getMotif(MotifFinder<TValue, TSpec> & me)
@@ -293,7 +307,13 @@ getMotif(MotifFinder<TValue, TSpec> & me)
 }
 
 /////////////////////////////////////////////////////////////////////////
-/**.Function.motifCount:
+/**
+.Function.motifCount:
+..summary:Gets number of motifs in the @Class.MotifFinder@.
+..cat:Motif Search
+..signature:motifCount(motifFinder)
+..param.motifFinder:
+...type:Class.MotifFinder
 */
 
 template <typename TValue, typename TSpec>

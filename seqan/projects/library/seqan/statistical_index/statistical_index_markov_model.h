@@ -39,15 +39,15 @@ unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigne
 .Memvar.MarkovModel#order:
 ..class:Class.MarkovModel
 ..summary:The MarkovModel order
-...type:nolink:int
+..type:nolink:int
 .Memvar.MarkovModel#transition:
 ..class:Class.MarkovModel
 ..summary:The transition matrix
-...type:Class.String
+..type:Class.String
 .Memvar.MarkovModel#stationaryDistribution:
 ..class:Class.MarkovModel
 ..summary:The vector of character distribution
-...type:Class.String
+..type:Class.String
 .Memfunc.MarkovModel#MarkovModel:
 ..class:Class.MarkovModel
 ..summary:Constructor
@@ -64,7 +64,7 @@ unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigne
 ..class:Class.MarkovModel
 ..summary: Given e transition matrix, sets it as transition matrix of the MarkovModel and computes (if it is not available) the  vector of character distributions and the auxiliary information
 ..signature:set(iTransition)
-..set(iTransition, iStationaryDistribution)
+..signature:set(iTransition, iStationaryDistribution)
 ..param.iTransition:The transition matrix.
 ...type:Class.String
 ..param.iStationaryDistribution:The vector of character distributions.

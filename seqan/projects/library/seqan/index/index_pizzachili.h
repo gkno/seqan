@@ -56,7 +56,7 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ..param.TText:The text type.
 ...type:Class.String
 ..param.TSpec:Tag specifying the Pizza & Chili index library to use.
-...type.Tag.Pizza & Chili Index Tags
+...type:Tag.Pizza & Chili Index Tags
 ..see:Spec.Pizza & Chili String
 ..see:Tag.Pizza & Chili Index Fibres
 ..see:Tag.Index Find Algorithm

@@ -374,7 +374,8 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**.Function.finder#infix:
+/**
+.Function.infix:
 ..description:Segment of the last found match in haystack.
 ..signature:Infix infix(finder)
 ..param.finder:An online finder.

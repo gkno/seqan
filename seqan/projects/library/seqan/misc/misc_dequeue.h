@@ -29,7 +29,17 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-
+/**
+.Class.Dequeue:
+..cat:Miscellaneous
+..summary:A double-ended queue implementation on top of a @Class.String@.
+..signature:Dequeue<TValue, TSpec>
+..param.TValue:Type of the ungapped sequences.
+...metafunction:Metafunction.Value
+..param.TSpec:The specializing type of the underlying @Class.String@.
+...metafunction:Metafunction.Spec
+...default:$Alloc<>$, see @Spec.Alloc String@
+*/
 template <typename TValue, typename TSpec = Alloc<> >
 class Dequeue
 {
@@ -59,7 +69,7 @@ public:
 // Iterators
 //////////////////////////////////////////////////////////////////////////////
 
-///.Metafunction.Iterator.param.T.type:Spec.Dequeue
+///.Metafunction.Iterator.param.T.type:Class.Dequeue
 
 template<typename TValue, typename TSpec>
 struct Iterator<Dequeue<TValue, TSpec>, Standard> 

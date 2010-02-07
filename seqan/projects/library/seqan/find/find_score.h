@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<TScore>::Type>
 struct DPSearch;
 
-/*
+/**
 .Spec.DPSearch:
 ..cat:Searching
 ..general:Class.Pattern

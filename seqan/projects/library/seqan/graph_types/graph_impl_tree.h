@@ -1044,7 +1044,7 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 .Function.collectLeaves:
 ..cat:Graph
 ..summary:Returns all leaves underneath a given vertex.
-..signature:collectLeaves(g, subtree_root, set)
+..signature:collectLeaves(g, subtree_root, group)
 ..param.g:A tree.
 ...type:Spec.Tree
 ..param.subtree_root:A vertex descriptor.

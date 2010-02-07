@@ -83,8 +83,18 @@ struct _MapValue_Impl<TMap, Nothing>
 	typedef bool Type;
 };
 
+/**
+.Metafunction.MapValue:
+..cat:Map
+..summary:Type of the map value type.
+..signature:MapValue<T>::Type
+..param.T:A map type.
+...type:Class.Map
+..returns.param.Type:The type of the value of T.
+..see:Metafunction.Cols
+ */
 template <typename TMap>
-struct MapValue:
+struct MapValue :
 	_MapValue_Impl< TMap, typename Cargo<TMap>::Type >
 {
 };

@@ -42,12 +42,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TFindBeginPatternSpec:Specialization of @Class.Pattern@ used to find the begin of matches.
 ...default:@Metafunction.DefaultFindBeginPatternSpec@
 ...metafunctin:@Metafunction.FindBeginPatternSpec@
-...remarks:This must be a finder for prefix search, e.g. @DPSearch<TScore, FindPrefix>@ or @Myers<FindPrefix>@.
+...remarks:This must be a finder for prefix search, e.g. @Spec.DPSearch|$DPSearch<TScore, FindPrefix>$@ or @Spec.Myers|$Myers<FindPrefix>$@.
 Specify $void$ to suppress prefix searching.
 ..remarks.text:The needle-length must be smaller than the highest number that can be stored in an unsigned int.
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.MyersUkkonen
+///.Class.Pattern.param.TSpec.type:Spec.Myers
 
 template <typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<>::Type>
 struct Myers;
@@ -55,11 +55,49 @@ struct Myers;
 //FindInfix and FindPrefix are defined int find_base.h
 struct AlignTextBanded; // search query in a parallelogram
 
+// TODO(holtgrew): Really deprecated?
 //deprecated shortcuts:
-typedef Myers<FindInfix, void>  MyersUkkonen;		// search semi-global (query-global, text-local)
-typedef Myers<FindPrefix, void> MyersUkkonenGlobal;	// search global (query-global, text-global)
-typedef Myers<AlignTextBanded, void> MyersUkkonenBanded;		// search query in a parallelogram
 
+/**
+.Shortcut.MyersUkkonen:
+..cat:Pattern Matching
+..summary:Semin-global (query-global, text-local) pattern matching.
+..signature:MyersUkkonen
+..shortcutfor:Spec.Myers
+...signature:Myers<FindInfix, void>
+..see:Spec.Myers
+..see:Shortcut.MyersUkkonenGlobal
+..see:Shortcut.MyersUkkonenBanded
+*/
+typedef Myers<FindInfix, void> MyersUkkonen;
+
+
+/**
+.Shortcut.MyersUkkonenGlobal:
+..cat:Pattern Matching
+..summary:Global (query-global, text-global) pattern matching.
+..signature:MyersUkkonen
+..shortcutfor:Spec.Myers
+...signature:Myers<FindPrefix, void>
+..see:Spec.Myers
+..see:Shortcut.MyersUkkonen
+..see:Shortcut.MyersUkkonenBanded
+*/
+typedef Myers<FindPrefix, void> MyersUkkonenGlobal;
+
+
+/**
+.Shortcut.MyersUkkonenBanded:
+..cat:Pattern Matching
+..summary:Semin-global (query-global, text-local) pattern matching.
+..signature:MyersUkkonen
+..shortcutfor:Spec.Myers
+...signature:Myers<AlignedTextBanded, void>
+..see:Spec.Myers
+..see:Shortcut.MyersUkkonen
+..see:Shortcut.MyersUkkonenGlobal
+*/
+typedef Myers<AlignTextBanded, void> MyersUkkonenBanded;
 
 
 //____________________________________________________________________________
@@ -487,7 +525,7 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
+///.Function.scoreLimit.param.pattern.type:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 
@@ -499,7 +537,7 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-///.Function.scoreLimit.param.pattern.type:Spec.MyersUkkonen
+///.Function.scoreLimit.param.pattern.type:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TScoreValue>
 inline void 
@@ -512,7 +550,7 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-///.Function.getScore.param.pattern.type:Spec.MyersUkkonen
+///.Function.getScore.param.pattern.type:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 int getScore(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me) 

@@ -816,11 +816,12 @@ matricialProduct(Matrix<TValue, 2> &matrix1,
 	return result;
 }
 */
+// TODO(holtgrew): Should work as the graph-transpose.
 /**
 .Function.transpose:
-..summary:Transposes matrix
+..Xsummary:Transposes matrix
 ..signature:Matrix transpose(matrix)
-..param.matrix1:The first matrix (mxn).
+..param.matrix:The matrix (mxn) to transpose.
 ...type:Class.Matrix
 ...remarks: must be of type Matrix<TValue,2> (two dimensional)
 ..returns:Transposed matrix

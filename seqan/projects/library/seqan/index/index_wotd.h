@@ -28,6 +28,32 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // wotd tree index fibres
 
+/**
+.Tag.WOTD Index Fibres
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_Wotd@ index.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an WOTD based @Spec.Index_Wotd@.
+..remarks:TODO(holtgrew): Ask David.
+..cat:Index
+
+..tag.Wotd_Text:The original text the index should be based on.
+...remarks:TODO(holtgrew): Ask David.
+
+..tag.Wotd_RawText:The raw text the index is really based on.
+...remarks:TODO(holtgrew): Ask David.
+
+..tag.Wotd_SA:The suffix array.
+...remarks:TODO(holtgrew): Ask David.
+
+..tag.Wotd_RawSA:The raw suffix array.
+...remarks:TODO(holtgrew): Ask David.
+
+..tag.Wotd_Dir:The child table.
+...remarks:TODO(holtgrew): Ask David.
+
+..see:Metafunction.Fibre
+..see:Function.getFibre
+..see:Spec.Index_Wotd
+*/
 	typedef Fibre_Text		Wotd_Text;
 	typedef Fibre_RawText	Wotd_RawText;
 	typedef Fibre_SA		Wotd_SA;
@@ -46,7 +72,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Index<TText, Index_Wotd<> >
 ..param.TText:The text type.
 ...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.Wotd_SA@) and the wotd tree (see @Tag.Wotd_Dir@).
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.WOTD Index Fibres.Wotd_SA@) and the wotd tree (see @Tag.WOTD Index Fibres.Wotd_Dir@).
 */
 
 	struct WotdOriginal_;

@@ -26,7 +26,7 @@
 *
 */
 
-//SEQAN_NO_DDDOC: do not generate documentation for this file
+//SEQAN_NO_ DDDOC: do not generate documentation for this file
 
 #ifndef SEQAN_HEADER_SKIP_ELEMENT_H
 #define SEQAN_HEADER_SKIP_ELEMENT_H
@@ -226,12 +226,13 @@ namespace seqan
 		return _getHeight( * _getDown( me ) );
 	}
 
-/**.Function.key:
+/**
+.Function.key:
 ..summary:Get the the key of the element.
-..cat:SkipList
+..cat:Map
 ..signature:key(element)
 ..param.element:The desired object.
-..returns:The the key of the element. Type is @Metafunction.Key.$Key< "element-type" >::Type$@.
+..returns:The the key of the element.  Type is @Metafunction.Key.$Key< "element-type" >::Type$@.
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > __inline 

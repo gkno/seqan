@@ -1460,7 +1460,7 @@ _reallocateStorage(
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.reserve.param.object.type:Spec.String
+///.Function.reserve.param.object.type:Class.String
 
 template <typename TValue, typename TSpec, typename _TSize>
 inline void

@@ -154,13 +154,11 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 .Function.longestCommonSubsequence:
 ..summary:Computes the longest common subsequence.
 ..cat:Alignments
-..signature:longestCommonSubsequence(str1, str2, pos)
+..signature:longestCommonSubsequence(str1, str2, nSize, pos)
 ..param.str1:In-parameter: An arbitrary string.
 ...type:Class.String
 ..param.str2:In-parameter: An arbitrary string.
 ...type:Class.String
-..param.nSize:In-paramert: Neighborhood size.
-...type:nolink:unsigned int
 ..param.pos:Out-parameter: A String with pairs of positions that indicate the longest common subsequence.
 ...remarks:
 */

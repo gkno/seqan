@@ -594,7 +594,7 @@ clearGaps(Align<TSource, TSpec> & me)
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.align#stringSet
+.Function.stringSet:
 ..param.g.type:Class.Align
 */
 template <typename TSource, typename TSpec>

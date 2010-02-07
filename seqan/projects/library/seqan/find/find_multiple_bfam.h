@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.MultiBFAM:
+.Class.MultiBFAM:
 ..general:Class.Pattern
 ..cat:Searching
 ..summary:Multi-Pattern Backward Factor Automaton Matching.
@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..param.TAutomaton:A tag that specifies the used automaton.
 ...default:@Spec.MultiBFAM<Oracle>@
-..see:Spec.BFAM
+..see:Class.BFAM
 */
 /**
 .Spec.MultiBFAM<Oracle>:

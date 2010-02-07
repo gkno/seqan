@@ -41,6 +41,15 @@ struct DPSearch;
 
 //____________________________________________________________________________
 
+// TODO(holtgrew): Difference to DefaultPattern?
+/**
+.Metafunction.DefaultFindBeginPatternSpec:
+..summary:Type of the default findBegin pattern specialization, given a score.
+..signature:DefaultBeginPatternSpec<TScore>
+..param.TScore:A score type.
+...type:Class.Score
+..returns.param.Type:The pattern specialization to use as a default.
+ */
 template <typename TScore = EditDistanceScore>
 struct DefaultFindBeginPatternSpec
 {

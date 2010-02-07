@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.BFAM:
+.Class.BFAM:
 ..summary:Backward Factor Automaton Matching algorithm.
 ..general:Class.Pattern
 ..cat:Searching
@@ -50,6 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
+..see:Spec.BFAM<Trie>
 */
 /**
 .Spec.BFAM<Trie>:
@@ -60,6 +61,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
+..see:Spec.BFAM<Oracle>
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.BFAM
