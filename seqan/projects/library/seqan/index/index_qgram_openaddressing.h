@@ -42,10 +42,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TShape>::Type	THashValue;
 		typedef BucketMap<THashValue>			Type;
 	};
-
+    
 	template < typename TObject, typename TShapeSpec >
 	class Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >
 	{
+    private:
+        static const double default_alpha;
 	public:
 		typedef typename Fibre<Index, QGram_Text>::Type			TText;
 		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
@@ -65,10 +67,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		TCargo			cargo;		// user-defined cargo
 		TBucketMap		bucketMap;	// bucketMap table (used by open-addressing index)
 
-		double			alpha;
+		double alpha;
 
 		Index():
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		Index(Index &other):
 			text(other.text),
@@ -78,7 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			countsDir(other.countsDir),
 			shape(other.shape),
 			cargo(other.cargo),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		Index(Index const &other):
 			text(other.text),
@@ -88,30 +90,33 @@ namespace SEQAN_NAMESPACE_MAIN
 			countsDir(other.countsDir),
 			shape(other.shape),
 			cargo(other.cargo),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		template <typename _TText>
 		Index(_TText &_text):
 			text(_text),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		template <typename _TText>
 		Index(_TText const &_text):
 			text(_text),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		template <typename _TText, typename _TShape>
 		Index(_TText &_text, _TShape const &_shape):
 			text(_text),
 			shape(_shape),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 
 		template <typename _TText, typename _TShape>
 		Index(_TText const &_text, _TShape const &_shape):
 			text(_text),
 			shape(_shape),
-			alpha(1.5) {}
+			alpha(default_alpha) {}
 	};
+    
+    template < typename TObject, typename TShapeSpec >
+    const double Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >::default_alpha = 1.6;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Counting sort - Step 1: Clear directory
