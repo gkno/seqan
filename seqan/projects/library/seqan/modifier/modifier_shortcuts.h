@@ -86,6 +86,18 @@ inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 		complementInPlace(stringSet[seqNo]);
 }
 
+/**
+.Function.reverseComplementInPlace:
+..cat:Modifier
+..summary:Reverse and complement a sequence or a @Class.StringSet@ in-place.
+..signature:reverseComplementInPlace(sequence)
+..param.sequence:The sequence to complement.
+...type:Class.String
+...type:Class.Segment
+..include:seqan/modifier.h
+..see:Function.toLowerInPlace
+..see:Function.toUpperInPlace
+ */
 template < typename TSequence >
 inline void reverseComplementInPlace(TSequence & sequence) 
 {
@@ -93,6 +105,7 @@ inline void reverseComplementInPlace(TSequence & sequence)
 	reverseInPlace(sequence);
 } 
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
 inline void reverseComplementInPlace(TSequence const & sequence) 
 {
@@ -100,6 +113,12 @@ inline void reverseComplementInPlace(TSequence const & sequence)
 	reverseInPlace(sequence);
 } 
 
+/**
+.Function.reverseComplementInPlace:
+..signature:reverseComplementInPlace(stringSet)
+..param.stringSet:The @Class.StringSet@ to complement.
+...type:Class.StringSet
+ */
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
@@ -108,6 +127,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 		reverseComplementInPlace(stringSet[seqNo]);
 }
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
@@ -118,18 +138,37 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringS
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.toLowerInPlace:
+..cat:Modifier
+..summary:Convert characters in sequence or @Class.StringSet@ to lower case in-place.
+..signature:toLowerInPlace(sequence)
+..param.sequence:The sequence to convert into lowercase.
+...type:Class.String
+...type:Class.Segment
+..include:seqan/modifier.h
+..see:Function.toUpperInPlace
+..see:Function.reverseComplementInPlace
+ */
 template < typename TSequence >
 inline void toLowerInPlace(TSequence & sequence) 
 {
 	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
 inline void toLowerInPlace(TSequence const & sequence) 
 {
 	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
+/**
+.Function.toLowerInPlace:
+..signature:toLowerInPlace(stringSet)
+..param.stringSet:The @Class.StringSet@ to convert into lowercase.
+...type:Class.StringSet
+ */	
 template < typename TSequence, typename TSpec >
 inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
@@ -138,6 +177,7 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
 		toLowerInPlace(stringSet[seqNo]);
 }
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
 inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
@@ -146,18 +186,37 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 		toLowerInPlace(stringSet[seqNo]);
 }
 
+/**
+.Function.toUpperInPlace:
+..cat:Modifier
+..summary:Convert characters in sequence or @Class.StringSet@ to lower case in-place.
+..signature:toUpperInPlace(sequence)
+..param.sequence:The sequence to convert into uppercase.
+...type:Class.String
+...type:Class.Segment
+..include:seqan/modifier.h
+..see:Function.toLowerInPlace
+..see:Function.reverseComplementInPlace
+ */
 template < typename TSequence >
 inline void toUpperInPlace(TSequence & sequence) 
 {
 	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
 inline void toUpperInPlace(TSequence const & sequence) 
 {
 	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
+/**
+.Function.toUpperInPlace:
+..signature:toUpperInPlace(stringSet)
+..param.stringSet:The @Class.StringSet@ to convert into uppercase.
+...type:Class.StringSet
+ */	
 template < typename TSequence, typename TSpec >
 inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
@@ -166,6 +225,7 @@ inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
 		toUpperInPlace(stringSet[seqNo]);
 }
 
+// TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
 inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
