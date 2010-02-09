@@ -58,6 +58,19 @@ typedef ModifiedString<
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.complementInPlace:
+..cat:Modifier
+..summary:Complement a sequence or a @Class.StringSet@ in-place.
+..signature:complementInPlace(sequence)
+..param.sequence:The sequence to complement.
+...type:Class.String
+...type:Class.Segment
+..include:seqan/modifier.h
+..see:Function.reverseComplementInPlace
+..see:Function.toLowerInPlace
+..see:Function.toUpperInPlace
+ */
 template < typename TSequence >
 inline void complementInPlace(TSequence & sequence) 
 {
@@ -70,6 +83,12 @@ inline void complementInPlace(TSequence const & sequence)
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
+/**
+.Function.complementInPlace:
+..signature:complementInPlace(stringSet)
+..param.stringSet:The @Class.StringSet@ to complement.
+...type:Class.StringSet
+ */
 template < typename TSequence, typename TSpec >
 inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
@@ -95,6 +114,7 @@ inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 ...type:Class.String
 ...type:Class.Segment
 ..include:seqan/modifier.h
+..see:Function.complementInPlace
 ..see:Function.toLowerInPlace
 ..see:Function.toUpperInPlace
  */
@@ -149,6 +169,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringS
 ..include:seqan/modifier.h
 ..see:Function.toUpperInPlace
 ..see:Function.reverseComplementInPlace
+..see:Function.complementInPlace
  */
 template < typename TSequence >
 inline void toLowerInPlace(TSequence & sequence) 
@@ -197,6 +218,7 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 ..include:seqan/modifier.h
 ..see:Function.toLowerInPlace
 ..see:Function.reverseComplementInPlace
+..see:Function.complementInPlace
  */
 template < typename TSequence >
 inline void toUpperInPlace(TSequence & sequence) 
