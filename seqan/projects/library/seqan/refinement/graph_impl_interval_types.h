@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: graph_impl_interval_types.h 1757 2008-02-27 16:26:20Z emde@PCPOOL.MI.FU-BERLIN.DE $
+ Author: Anne-Katrin Emde <emde@fu-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_GRAPH_IMPL_INTERVALTREE_TYPES_H
@@ -27,63 +27,76 @@ namespace SEQAN_NAMESPACE_MAIN
 // Graph - Interval Tree Types
 //////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-
-	
-
 ///---------------------------------------------------------------///
 
 //////////////////// Interval and ID type ///////////////////
+/**
+.Class.IntervalAndCargo:
+..cat:Miscellaneous
+..summary:A simple record type that stores an interval and a cargo value.
+..signature:IntervalAndCargo<TValue, TCargo>
+..param.TValue:The value type, that is the type of the interval borders.
+...default:int.
+...metafunction:Metafunction.Value
+..param.TCargo:The cargo type.
+...default:int.
+...metafunction:Metafunction.Cargo
+..include:seqan/refinement.h
+*/
 template<typename TValue = int, typename TCargo = int>
 class IntervalAndCargo
 {
 public:
+    /**
+.Memvar.PointAndCargo#i1:
+..class:Class.PointAndCargo
+..summary:The first element in the interval of type i1.
+     */
 	TValue i1;
+
+    /**
+.Memvar.PointAndCargo#i2:
+..class:Class.PointAndCargo
+..summary:The last element in the interval of type i2.
+     */
 	TValue i2;
+
+    /**
+.Memvar.PointAndCargo#cargo:
+..class:Class.PointAndCargo
+..summary:The stored cargo of type TCargo.
+     */
 	TCargo cargo;
 
-	IntervalAndCargo()
-	{
-SEQAN_CHECKPOINT
-	}
-	
+    /**
+.Memfunc.IntervalAndCargo#IntervalAndCargo:
+..class:Class.IntervalAndCargo
+..summary:Constructor.
+..signature:IntervalAndCargo(i1, i2, cargo)
+..param.i1:The first element in the interval, of type TValue.
+..param.i2:The last element in the interval of type TValue.
+..param.cargo:The cargo value of type TCargo.
+     */
 	IntervalAndCargo(TValue i1, TValue i2, TCargo cargo):
-		i1(i1),
-		i2(i2),
-		cargo(cargo)
-	{
-SEQAN_CHECKPOINT
-	}
-
-	IntervalAndCargo(IntervalAndCargo const & other):
-		i1(other.i1),
-		i2(other.i2),
-		cargo(other.cargo)
-	{
-SEQAN_CHECKPOINT
-	}
-	
-	IntervalAndCargo & operator = (IntervalAndCargo const & other)
-	{
-SEQAN_CHECKPOINT
-		i1 = other.i1;
-		i2 = other.i2;
-		cargo = other.cargo;
-		return *this;
-	}
-
-
-
-	~IntervalAndCargo()
+		i1(i1), i2(i2), cargo(cargo)
 	{
 SEQAN_CHECKPOINT
 	}
 };
 
-//get by reference functions
+
+/**
+.Function.leftBoundary:
+..cat:Miscellaneous
+..summary:Access to the right boundary.
+..signature:leftBoundary(interval)
+..param.object:The interval to return the left boundary for.
+...type:Class.IntervalAndCargo
+..returns:The reference to the left boundary of the interval of type TValue&.
+..see:Function.getLeftBoundary
+..see:Function.rightBoundary
+..see:Function.getRightBoundary
+*/
 template<typename TValue, typename TCargo>
 TValue &
 leftBoundary(IntervalAndCargo<TValue,TCargo> & interval)
@@ -92,6 +105,19 @@ SEQAN_CHECKPOINT
 	return interval.i1;
 }
 
+
+/**
+.Function.rightBoundary:
+..cat:Miscellaneous
+..summary:Access to the right boundary.
+..signature:leftBoundary(interval)
+..param.object:The interval to return the left boundary for.
+...type:Class.IntervalAndCargo
+..returns:The reference to the right boundary of the interval of type TValue&.
+..see:Function.getRightBoundary
+..see:Function.leftBoundary
+..see:Function.getLeftBoundary
+*/
 template<typename TValue, typename TCargo>
 TValue &
 rightBoundary(IntervalAndCargo<TValue,TCargo> & interval)
@@ -100,6 +126,19 @@ SEQAN_CHECKPOINT
 	return interval.i2;
 }
 
+
+/**
+.Function.getLeftBoundary:
+..cat:Miscellaneous
+..summary:Get method for the left boundary.
+..signature:leftBoundary(interval)
+..param.object:The interval to return the left boundary for.
+...type:Class.IntervalAndCargo
+..returns:The copy of the left boundary of the interval of type TValue.
+..see:Function.leftBoundary
+..see:Function.getRightBoundary
+..see:Function.rightBoundary
+*/
 template<typename TValue, typename TCargo>
 TValue
 getLeftBoundary(IntervalAndCargo<TValue,TCargo> & interval)
@@ -108,6 +147,19 @@ SEQAN_CHECKPOINT
 	return interval.i1;
 }
 
+
+/**
+.Function.getRightBoundary:
+..cat:Miscellaneous
+..summary:Get method for the right boundary.
+..signature:leftBoundary(interval)
+..param.interval:The interval to return the right boundary for.
+...type:Class.IntervalAndCargo
+..returns:The copy of the right boundary of the interval of type TValue.
+..see:Function.rightBoundary
+..see:Function.getLeftBoundary
+..see:Function.leftBoundary
+*/
 template<typename TValue, typename TCargo>
 TValue
 getRightBoundary(IntervalAndCargo<TValue,TCargo> & interval)
@@ -116,6 +168,14 @@ SEQAN_CHECKPOINT
 	return interval.i2;
 }
 
+
+// TODO(holtgrew): Parameter name should not be es for EdgeStump, correct there!
+/**
+.Function.cargo:
+..param.es:
+...type:Class.IntervalAndCargo
+..see:Function.getCargo
+*/
 template<typename TValue, typename TCargo>
 TCargo &
 cargo(IntervalAndCargo<TValue,TCargo> & interval)
@@ -124,6 +184,12 @@ SEQAN_CHECKPOINT
 	return interval.cargo;
 }
 
+/**
+.Function.getCargo:
+..param.es:
+...type:Class.IntervalAndCargo
+..see:Function.cargo
+*/
 template<typename TValue, typename TCargo>
 TCargo
 getCargo(IntervalAndCargo<TValue,TCargo> & interval)
@@ -134,6 +200,8 @@ SEQAN_CHECKPOINT
 
 
 /////////////////// Metafunctions //////////////////////
+    
+///.Metafunction.Value.param.T.type:Class.IntervalAndCargo
 template<typename TValue,typename TCargo>
 struct Value<IntervalAndCargo<TValue,TCargo> >
 {
@@ -141,6 +209,7 @@ struct Value<IntervalAndCargo<TValue,TCargo> >
 };
 
 
+///.Metafunction.Cargo.param.T.type:Class.IntervalAndCargo
 template<typename TValue,typename TCargo>
 struct Cargo<IntervalAndCargo<TValue,TCargo> >
 {
@@ -148,50 +217,56 @@ struct Cargo<IntervalAndCargo<TValue,TCargo> >
 };
 
 
-
 /////////////////////// Point and ID type ////////////////
-template<typename TValue = int, typename TCargo = int>
-class PointAndCargo{
+/**
+.Class.PointAndCargo:
+..cat:Miscellaneous
+..summary:Simple record class storing a point (one-value interval) and a cargo.
+..signature:PointAndCargo<TValue, TCargo>
+..param.TValue:
+...default:int.
+...metafunction:Metafunction.Value
+..param.TCargo:
+...default:int.
+...metafunction:Metafunction.Value
+..include:seqan/refinement.h
+*/
+template<typename TValue=int, typename TCargo=int>
+class PointAndCargo {
 public:
+    /**
+.Memvar.PointAndCargo#point:
+..class:Class.PointAndCargo
+..summary:The stored point of type TValue.
+     */
 	TValue point;
+
+    /**
+.Memvar.PointAndCargo#cargo:
+..class:Class.PointAndCargo
+..summary:The stored cargo of type TCargo.
+     */
 	TCargo cargo;
 
-	PointAndCargo()
-	{
-SEQAN_CHECKPOINT
-	}
-	
+    /**
+.Memfunc.PointAndCargo#PointAndCargo
+..class:Class.PointAndCargo
+..summary:Constructor.
+..signature:PointAndCargo(point, cargo)
+..param.point:
+...summary:The point to store of type TValue.
+..param.cargo:
+...summary:The cargo to store of type TCargo.
+    */
 	PointAndCargo(TValue point, TCargo cargo):
-		point(point),
-		cargo(cargo)
-	{
-SEQAN_CHECKPOINT
-	}
-
-	PointAndCargo(PointAndCargo const & other):
-		point(other.point),
-		cargo(other.cargo)
-	{
-SEQAN_CHECKPOINT
-	}
-	PointAndCargo & operator = (PointAndCargo const & other)
-	{
-SEQAN_CHECKPOINT
-		point = other.point;
-		cargo = other.cargo;
-		return *this;
-	}
-
-	
-
-	~PointAndCargo()
+		point(point), cargo(cargo)
 	{
 SEQAN_CHECKPOINT
 	}
 };
 
 
-//get by reference
+///.Function.leftBoundary.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TValue &
 leftBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -200,6 +275,8 @@ SEQAN_CHECKPOINT
 	return point.point;
 }
 
+
+///.Function.rightBoundary.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TValue &
 rightBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -208,6 +285,8 @@ SEQAN_CHECKPOINT
 	return point.point;
 }
 
+
+///.Function.getLeftBoundary.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TValue
 getLeftBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -216,6 +295,8 @@ SEQAN_CHECKPOINT
 	return point.point;
 }
 
+
+///.Function.getRightBoundary.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TValue
 getRightBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -224,6 +305,8 @@ SEQAN_CHECKPOINT
 	return point.point;
 }
 
+
+///.Function.cargo.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TCargo &
 cargo(PointAndCargo<TValue,TCargo> & point)
@@ -232,6 +315,8 @@ SEQAN_CHECKPOINT
 	return point.cargo;
 }
 
+
+///.Function.getCargo.param.point.type:Class.PointAndCargo
 template<typename TValue, typename TCargo>
 TCargo
 getCargo(PointAndCargo<TValue,TCargo> & point)
@@ -243,12 +328,15 @@ SEQAN_CHECKPOINT
 
 
 ////////////////// Metafunctions //////////////////
+///.Metafunction.Value.param.T.type:Class.PointAndCargo
 template<typename TValue,typename TCargo>
 struct Value<PointAndCargo<TValue,TCargo> >
 {
 	typedef TValue Type;
 };
 
+
+///.Metafunction.Cargo.param.T.type:Class.PointAndCargo
 template<typename TValue,typename TCargo>
 struct Cargo<PointAndCargo<TValue,TCargo> >
 {
@@ -263,6 +351,7 @@ SEQAN_CHECKPOINT
   return (leftBoundary(const_cast<TPair&>(p1)) < leftBoundary(const_cast<TPair&>(p2)));
 }
 
+
 template <typename TPair>
 bool _greater_compI2_ITree(TPair const& p1, TPair const& p2){
 SEQAN_CHECKPOINT
@@ -270,79 +359,79 @@ SEQAN_CHECKPOINT
 }
 
 
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////
 /////////////////////////// IntervalTreeNode	///////////////////////////
 
-struct StorePointsOnly{};
-struct StoreIntervals{};
+/**
+.Tag.IntervalTree Node Types
+..summary:Tags to select the node type for @Class.IntervalTree@.
+..cat:Miscellaneous
+
+..tag.StorePointsOnly:The tree nodes store points.
+*/
+struct StorePointsOnly {};
 
 
-template<typename TInterval, typename TSpec = StorePointsOnly>
+///..tag.StoreIntervals:The tree nodes store intervals.
+struct StoreIntervals {};
+
+
+/**
+.Class.IntervalTreeNode:
+..cat:Miscellaneous
+..summary:Element of @Class.IntervalTree@.
+..signature:IntervalTreeNode<TInterval, TSpec>
+..param.TInterval:The type of interval to store.
+..param.TSpec:The type of interval to store.
+...default:StorePointsOnly.
+...metafunction:
+..include: seqan/refinement.h
+
+.Memvar.IntervalTreeNode#center:
+..class:Class.IntervalTreeNode
+..summary:The center of the interval of type TValue.
+
+.Memvar.IntervalTreeNode#list1
+..class:Class.IntervalTreeNode
+..summary:TODO
+
+.Memvar.IntervalTreeNode#list2
+..class:Class.IntervalTreeNode
+..summary:TODO
+ */
+template<typename TInterval, typename TSpec=StorePointsOnly>
 class IntervalTreeNode;
 
 
-//Spec for IntervalTreeNode that stores the intervals explicitly in each node
+/**
+.Spec.Interval Tree Node
+..cat:Miscellaneous
+..general:Class.IntervalTreeNode
+..summary:An Interval Tree Node that stores intervals explicitely in each node.
+..signature:IntervalTreeNode<TInterval, StoreIntervals>
+..param.TInterval:The interval type to store in the node.
+ */
 template<typename TInterval>
-class IntervalTreeNode<TInterval,StoreIntervals>{
-
+class IntervalTreeNode<TInterval, StoreIntervals> {
 public:
 	typedef typename Value<TInterval>::Type TValue;
 
 	TValue center;
 	String<TInterval> list1;
 	String<TInterval> list2;
-
-	IntervalTreeNode()
-	{
-SEQAN_CHECKPOINT
-	}
-
-//	IntervalTreeNode(TValue & center, String<TInterval> & list1, String<TInterval> & list2):
-//		center(center),
-//		list1(list1),
-//		list2(list2)
-//	{
-//	}
-
-	IntervalTreeNode(IntervalTreeNode const & other):
-		center(other.center),
-		list1(other.list1),
-		list2(other.list2)
-	{
-SEQAN_CHECKPOINT
-	}
-
-	IntervalTreeNode & operator = (IntervalTreeNode const & other)
-	{
-SEQAN_CHECKPOINT
-		center = other.center;
-		list1 = other.list1;
-		list2 = other.list2;
-		return *this;
-	}
-
-
-	~IntervalTreeNode()
-	{
-SEQAN_CHECKPOINT
-	}
-	
 };
 
 
-
-
-
-//Spec for IntervalTreeNode that stores only the relevant point in each node
-//meaning the endpoint of the interval in the list sorted by endpoints (list2) and 
-//only the beginpoint of the interval in the list sorted by beginpoints (list1)
+/**
+.Spec.Points Only Tree Node
+..cat:Miscellaneous
+..general:Class.IntervalTreeNode
+..summary:Spec for IntervalTreeNode that stores only the relevant point in each node meaning the endpoint of the interval in the list sorted by endpoints (list2) and only the beginpoint of the interval in the list sorted by beginpoints (list1).
+..signature:IntervalTreeNode<TInterval, StorePointsOnly>
+..param.TInterval:The interval type to store in the node.
+ */
 template<typename TInterval>
-class IntervalTreeNode<TInterval,StorePointsOnly>{
-
+class IntervalTreeNode<TInterval, StorePointsOnly> {
 public:
 	typedef typename Cargo<TInterval>::Type TCargo;
 	typedef typename Value<TInterval>::Type TValue;
@@ -351,20 +440,6 @@ public:
 	String<PointAndCargo<TValue,TCargo> > list1;
 	String<PointAndCargo<TValue,TCargo> > list2;
 
-	IntervalTreeNode()
-	{
-SEQAN_CHECKPOINT
-	}
-
-//	IntervalTreeNode(TValue center, 
-//		String<PointAndCargo<TValue,TCargo> > & list1, 
-//		String<PointAndCargo<TValue,TCargo> > & list2):
-//			center(center),
-//			list1(list1),
-//			list2(list2)
-//	{
-//	}
-
 	IntervalTreeNode(IntervalTreeNode const & other):
 		center(other.center),
 		list1(other.list1),
@@ -372,25 +447,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 	}
-
-	IntervalTreeNode & operator = (IntervalTreeNode const & other)
-	{
-SEQAN_CHECKPOINT
-		center = other.center;
-		list1 = other.list1;
-		list2 = other.list2;
-		return *this;
-	}
-
-
-	~IntervalTreeNode()
-	{
-SEQAN_CHECKPOINT
-	}
-	
 };
-
-
 
 
 //internal set functions
@@ -446,22 +503,35 @@ SEQAN_CHECKPOINT
 }
 
 /////////////////// Metafunctions ///////////////////////
+///.Metafunction.Value.param.T.type:Class.IntervalTreeNode
 template<typename TInterval, typename TSpec>
 struct Value<IntervalTreeNode<TInterval,TSpec> >
 {
 	typedef typename Value<TInterval>::Type Type;
 };
 
+
+///.Metafunction.Cargo.param.T.type:Class.IntervalTreeNode
 template<typename TInterval, typename TSpec>
 struct Cargo<IntervalTreeNode<TInterval,TSpec> >
 {
 	typedef typename Cargo<TInterval>::Type Type;
 };
 
+
+/**
+.Metafunction.ListType:
+..cat:Miscellaneous
+..signature:ListType<T>::ListType
+..summary:Type of lists in tree nodes.
+..param.T:The type to retrieve the list type for.
+..returns:Returns the type of the the lists in @Class.IntervalTreeNode@ objects.
+ */
 template<typename T>
 struct ListType;
 
 
+///.Metafunction.ListType.param.T.type:Class.IntervalTreeNode
 template<typename TInterval>
 struct ListType<IntervalTreeNode<TInterval,StorePointsOnly> >
 {
@@ -469,6 +539,8 @@ struct ListType<IntervalTreeNode<TInterval,StorePointsOnly> >
 
 };
 
+
+///.Metafunction.ListType.param.T.type:Class.IntervalTreeNode
 template<typename TInterval>
 struct ListType<IntervalTreeNode<TInterval,StoreIntervals> >
 {
@@ -476,13 +548,6 @@ struct ListType<IntervalTreeNode<TInterval,StoreIntervals> >
 
 };
 
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-
-
-
-
-
-
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_HEADER_GRAPH_IMPL_INTERVALTREE_TYPES_H

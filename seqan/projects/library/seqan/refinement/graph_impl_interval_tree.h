@@ -15,18 +15,19 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: graph_impl_interval_tree.h 1757 2008-02-27 16:26:20Z emde@PCPOOL.MI.FU-BERLIN.DE $
+ Author: Anne-Katrin Emde <emde@fu-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_GRAPH_IMPL_INTERVALTREE_H
 #define SEQAN_HEADER_GRAPH_IMPL_INTERVALTREE_H
+
+// TODO(holtgrew): Remove crufty code?
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 //////////////////////////////////////////////////////////////////////////////
 // Graph - Interval Tree
 //////////////////////////////////////////////////////////////////////////////
-
 
 /**
 .Class.IntervalTree:
@@ -37,8 +38,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TCargo:The cargo/id type.
 ...default:int
 ...remarks:If the intervals are not associated with cargos/IDs, they will be numbered consecutively.
+..include:seqan/refinement.h
 */
-template<typename TValue = int, typename TCargo = unsigned int>
+template<typename TValue=int, typename TCargo=unsigned int>
 class IntervalTree
 {
 public:
@@ -58,7 +60,18 @@ SEQAN_CHECKPOINT
 		interval_counter = 0;
 	}
 	
-	
+	/**
+.Memfunc.IntervalTree#IntervalTree
+..class:Class.IntervalTree
+..summary:Constructor
+..signature:IntervalTree(intervalBegins, intervalEnds, intervalCargos, len)
+..param.intervalBegins:Interval beginnings.
+..param.intervalEnds:Interval endings.
+..param.intervalCargos:Cargos for intervals.
+..param.len:Lenght of something.
+..remarks:
+...text:I have no idea what this does.
+     */
 	template<typename TIterator,typename TCargoIterator>
 	IntervalTree(TIterator interval_begins,
 				 TIterator interval_ends, 
@@ -84,6 +97,9 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals);
 	}
 
+	/**
+..signature:IntervalTree(intervalBegins, intervalEnds, len)
+     */
 	template<typename TIterator>
 	IntervalTree(TIterator interval_begins,
 				 TIterator interval_ends,
@@ -106,7 +122,9 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals);
 	}
 	
-
+	/**
+..signature:IntervalTree(String<TInterval> intervals)
+     */
 	IntervalTree(String<TInterval> intervals)	
 	{
 SEQAN_CHECKPOINT
@@ -114,6 +132,9 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals);
 	}
 
+	/**
+..signature:IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
+     */
 	template <typename TTagSpec>
 	IntervalTree(String<TInterval> intervals, Tag<TTagSpec> const tag)
 	{
@@ -122,38 +143,15 @@ SEQAN_CHECKPOINT
 		createIntervalTree(g,pm,intervals,tag);
 	}
 
+    /**
+..signature:IntervalTree(String<TInterval> intervals, TValue center)
+    */
 	IntervalTree(String<TInterval> intervals, TValue center)	
 	{
 SEQAN_CHECKPOINT
 		interval_counter = length(intervals);
 		createIntervalTree(g,pm,intervals,center);
 	}
-
-	IntervalTree(IntervalTree const & other):
-		g(other.g),
-		pm(other.pm),
-		interval_counter(other.interval_counter)
-	{
-SEQAN_CHECKPOINT
-	}
-
-
-	IntervalTree & operator = (IntervalTree const & other)
-	{
-SEQAN_CHECKPOINT
-		g = other.g;
-		pm = other.pm;
-		interval_counter = other.interval_counter;
-		return *this;
-	}
-
-
-	~IntervalTree()
-	{
-SEQAN_CHECKPOINT
-		
-	}
-
 };
 
 
@@ -183,25 +181,50 @@ SEQAN_CHECKPOINT
 
 
 
-
-	
 ///////Specs for the way interval centers are determined
-//center = minbegin + (maxend-minbegin)/2
+// TODO(holtgrew): Underscore should be at the beginning.
+/**
+.Tag.IntervalTree Centers
+..cat:Miscellaneous
+..summary:Tag to select a specific way to compute the center of an interval. (TODO: Whatever that is good for).
+..see:Class.IntervalTree
+ */
+
+
+/*
+..tag.ComputeCenter
+...summary:TODO
+...signature:ComputeCenter
+...remarks:center = minbegin + (maxend-minbegin)/2, TODO
+ */
 //template <typename TSpec = SpecPointAndCargo>
 struct TagComputeCenter_;
 typedef Tag<TagComputeCenter_> const ComputeCenter;
 
-//center = length(sequence)/2
+
+/**
+..tag.MidCenter
+...summary:TODO
+...signature:MidCenter
+...remarks:center = length(sequence)/2,TODO
+ */
 //template <typename TSpec = SpecPointAndCargo>
 struct TagMidCenter_;
 typedef Tag<TagMidCenter_> const MidCenter;
 
-//center = center of random interval
+
+/**
+..tag.RandomCenter
+...summary:TODO
+...signature:RandomCenter
+...remarks:center = center of random interval, TODO
+ */
 //template <typename TSpec = SpecPointAndCargo>
 struct TagRandomCenter_;
 typedef Tag<TagRandomCenter_> const RandomCenter;
 
 
+// TODO: Internal documentation
 template<typename TIntervals, typename TIntervalPointers>
 void
 _makePointerInterval(TIntervals & intervals,TIntervalPointers & interval_pointers)
@@ -222,8 +245,20 @@ SEQAN_CHECKPOINT
 }
 
 
-//
-//center of root node is computed by _calcIntervalTreeRootCenter
+/**
+.Function.createIntervalTree
+..cat:Miscellaneous
+..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, Tag<TSpec> const tag)
+..param.g:Graph to create interval tree in.
+...type:TODO
+..param.pm:Property map to use for the created interval tree.
+...type:TODO
+..param.intervals:Container of intervals.
+...type:TODO
+..param.tag:TODO
+..remark:center of root node is computed by _calcIntervalTreeRootCenter
+..include:seqan/refinement.h
+ */
 template<typename TGraph, typename TPropertyMap, typename TIntervals, typename TSpec>
 void 
 createIntervalTree(TGraph & g, 
@@ -259,6 +294,10 @@ SEQAN_CHECKPOINT
 }
 
 
+/**
+..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals)
+..param.tag.default:Tag.IntervalTree Centers.tag.ComputeCenter
+ */
 // most user friendly interval tree construction for the moment...
 // CompCenter tag as default construction method
 template<typename TGraph, typename TPropertyMap, typename TIntervals>
@@ -272,7 +311,9 @@ SEQAN_CHECKPOINT
 }
 
 
-//center of root is specified by user
+/**
+..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, center, tag)
+ */
 template<typename TGraph, typename TPropertyMap, typename TIntervals, typename TSpec>
 void 
 createIntervalTree(TGraph & g,
@@ -312,6 +353,9 @@ SEQAN_CHECKPOINT
 
 }
 
+/**
+..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, center)
+ */
 // CompCenter tag as default construction method
 template<typename TGraph, typename TPropertyMap, typename TIntervals>
 void 
@@ -577,7 +621,16 @@ SEQAN_CHECKPOINT
 
 
 
-
+/**
+.Function.addInterval
+..cat:Miscellaneous
+..signature:addInterval(graph, propertyMap, interval)
+..param.graph:The graph to add the interval tree for.
+..param.propertyMap:The property map to use.
+..param.interval:The interval to add to the tree of type TInterval.
+..summary:TODO
+..include:seqan/refinement.h
+*/
 template<typename TGraph, typename TPropertyMap, typename TInterval>
 void
 addInterval(TGraph & g, TPropertyMap & pm, TInterval interval)
@@ -663,6 +716,12 @@ SEQAN_CHECKPOINT
 
 }
 
+
+/**
+..signature:addInterval(intervalTree, interval)
+..param.intervalTree:The tree to add the trees to.
+...type:Class.IntervalTree
+ */
 template<typename TValue, typename TCargo, typename TInterval>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TInterval interval)
@@ -674,6 +733,14 @@ SEQAN_CHECKPOINT
 
 }
 
+
+// TODO(holtgrewe): Is this begin/end in C++ style or is it first/last?
+/**
+..signature:addInterval(intervalTree, begin, end, cargo)
+..param.begin:First value of interval of type TValue.
+..param.end:Last value of interval of type TValue.
+..param.cargo:Cargo to attach to the interval.
+ */
 template<typename TValue, typename TCargo>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end, TCargo cargo)
@@ -689,6 +756,10 @@ SEQAN_CHECKPOINT
 
 }
 
+
+/**
+..signature:addInterval(intervalTree, begin, end)
+ */
 template<typename TValue, typename TCargo>
 void
 addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end)
@@ -704,6 +775,7 @@ SEQAN_CHECKPOINT
 
 }
 
+
 //template<typename TValue, typename TCargo>
 //void
 //addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end)
@@ -718,7 +790,13 @@ SEQAN_CHECKPOINT
 //
 //}
 
-//
+
+/**
+.Function.findIntervals
+..summary:TODO
+..signature:findIntervals(graph, propertyMap, query, result)
+..include:seqan/refinement.h
+*/
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
 void
 findIntervals(TGraph & g, TPropertyMap & pm, TValue query, String<TCargo> & result)
@@ -790,6 +868,11 @@ SEQAN_CHECKPOINT
 
 }
 
+
+/**
+..signature:findIntervals(intervalTree, query, result)
+...param.intervalTree:TODO
+*/
 template<typename TValue,typename TCargo>
 void
 findIntervals(IntervalTree<TValue,TCargo> & it, TValue query, String<TCargo> & result)
@@ -801,9 +884,18 @@ SEQAN_CHECKPOINT
 }
 
 
-
-
-//
+/**
+.Function.findIntervalsExcludeTouching
+..cat:Miscellaneous
+..summary:TODO
+..signature:findIntervalsExcludeTouching(graph, propertyMap, query, result)
+..param.graph:Graph to use.
+..param.propertyMap:Property map to use.
+..param.query:The TValue to query here.
+..param.result:The result is written here.
+...type:String<TCargo>
+..include:seqan/refinement.h
+ */
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
 void
 findIntervalsExcludeTouching(TGraph & g, TPropertyMap & pm, TValue query, String<TCargo> & result)
@@ -880,6 +972,12 @@ SEQAN_CHECKPOINT
 }
 
 
+/**
+..signature:findIntervalsExcludeTouching(intervalTree, query, result)
+..param.intervalTree:TODO
+..param.query:TODO
+..param.result:TODO
+*/
 template<typename TValue,typename TCargo>
 void
 findIntervalsExcludeTouching(IntervalTree<TValue,TCargo> & it, TValue query, String<TCargo> & result)
@@ -960,29 +1058,23 @@ SEQAN_CHECKPOINT
 //}
 
 
-
-
-
-
 /////////////////// Metafunctions ///////////////////////
+
+///.Metafunction.Value.param.T.type:Class.IntervalTree
 template<typename TValue, typename TCargo>
 struct Value<IntervalTree<TValue,TCargo> >
 {
 	typedef TValue Type;
 };
 
+
+///.Metafunction.Cargo.param.T.type:Class.IntervalTree
 template<typename TValue, typename TCargo>
 struct Cargo<IntervalTree<TValue,TCargo> >
 {
 	typedef TCargo Type;
 };
 
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-
-
-
-
-
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  //#ifndef SEQAN_HEADER_GRAPH_IMPL_INTERVALTREE_H
