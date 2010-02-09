@@ -3,6 +3,7 @@
 
 #include <seqan/align.h>
 
+#include "basic_testing.h"
 
 using namespace std;
 using namespace seqan;
@@ -12,6 +13,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): Is this a helper? What does it do?
 int Test_ConvertSequences(String<char> const in_path, String<char> const in_file, String<char> const path, String<char> const file_prefix) {
 	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
 	
@@ -52,6 +54,7 @@ int Test_ConvertSequences(String<char> const in_path, String<char> const in_file
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): Is this a helper? What does it do?
 template<typename TStringSet, typename TVal1, typename TVal2>
 inline bool 
 Test_ReadSequences(String<char> const path, String<char> const file_prefix, TStringSet& str, TVal1 const start, TVal2 const nseq) {
@@ -66,7 +69,9 @@ Test_ReadSequences(String<char> const path, String<char> const file_prefix, TStr
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GraphMatchRefine() {
+SEQAN_DEFINE_TEST(GraphMatchRefine)
+{
+    SEQAN_SKIP_TEST;
 	// Sequences
 	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
 	typedef StringSet<TString, Owner<> > TStringSet;
@@ -279,9 +284,9 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 }
 
 
-void 
-Test_RefineAlign(){
-
+SEQAN_DEFINE_TEST(RefineAlign)
+{
+    SEQAN_SKIP_TEST;
 	typedef String<char> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Align<TString, ArrayGaps> TAlign;
@@ -687,7 +692,8 @@ Test_RefineAlign(){
 //}
 
 
-void Test_Problem() 
+// TODO(holtgrew): This seems to be an artefact from debugging. Remove?
+SEQAN_DEFINE_TEST(GraphMatchRefinement_Problem)
 {
 	typedef String<char> TString;
 	typedef StringSet<TString> TStringSet;

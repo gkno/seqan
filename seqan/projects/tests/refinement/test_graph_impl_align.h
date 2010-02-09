@@ -1,13 +1,15 @@
+#include "basic_testing.h"
+
 #ifndef SEQAN_HEADER_TEST_GRAPH_IMPL_ALIGN_H
 #define SEQAN_HEADER_TEST_GRAPH_IMPL_ALIGN_H
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace SEQAN_NAMESPACE_MAIN {
 
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_AlignmentGraphFunctions() {
+SEQAN_DEFINE_TEST(AlignmentGraphFunctions)
+{
 //____________________________________________________________________________
 // Alignment without edge weights
 	typedef String<Dna> TString;
@@ -411,7 +413,8 @@ void Test_AlignmentGraphFunctions() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_HeaviestCommonSubsequence() {
+SEQAN_DEFINE_TEST(HeaviestCommonSubsequence)
+{
 	typedef String<AminoAcid> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, int> > TGraph;
@@ -470,7 +473,8 @@ void Test_HeaviestCommonSubsequence() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_OutEdgeIteratorAlignment() {
+SEQAN_DEFINE_TEST(OutEdgeIteratorAlignment)
+{
 //____________________________________________________________________________
 // Graph AlignmentOutEdgeIterator
 	typedef String<Dna> TString;
@@ -529,20 +533,7 @@ void Test_OutEdgeIteratorAlignment() {
 	SEQAN_TASSERT(&g == &hostGraph(it))
 }
 
-
-void Test_AlignmentGraph() 
-{
-	// Alignment Graph
-	Test_AlignmentGraphFunctions();
-
-	Test_HeaviestCommonSubsequence();
-	Test_OutEdgeIteratorAlignment();
-
-	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_align.h");
-	debug::verifyCheckpoints("projects/library/seqan/refinement/graph_impl_align_adapt.h");
-}
-
-}
+}  // namespace SEQAN_NAMESPACE_MAIN
 
 #endif
 

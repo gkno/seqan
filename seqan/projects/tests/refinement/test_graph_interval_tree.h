@@ -1,322 +1,403 @@
+/*==========================================================================
+  SeqAn - The Library for Sequence Analysis
+  http://www.seqan.de
+  ===========================================================================
+  Copyright (C) 2007-2010
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  ===========================================================================
+  Author: Anne-Katrin Emde <emde@fu-berlin.de>
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ===========================================================================
+  Tests for refinement/graph_impl_interval_tree.h.
+  ===========================================================================*/
+
 #ifndef SEQAN_HEADER_TEST_GRAPH_INTERVAL_TREE_H
 #define SEQAN_HEADER_TEST_GRAPH_INTERVAL_TREE_H
 
+// TODO(holtgrew): Are the static_casts<> to TValue necessary?
+// TODO(holtgrew): Split up large tests into one setup and multiple test functions.
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#include <seqan/refinement.h>  // Header under test.
 
-	
-	
+// TODO(holtgrew): Full include to seqan once it is in place.
+#include "basic_testing.h"  // Test support.
+
+namespace SEQAN_NAMESPACE_MAIN {
+
+// Build an IntervalTree from constant data.  The perform some queries
+// and check the results.
 template<typename TValue, typename TConstructSpec, typename TStoreSpec>
 void IntervalTreeTest() {
-//____________________________________________________________________________
-	
-	typedef int TCargo;
-	typedef IntervalAndCargo<TValue,TCargo> TInterval;
-	
-	typedef IntervalTreeNode<TInterval,TStoreSpec> TNode;
-	typedef Graph< > TGraph;
-	typedef String<TNode> TPropertyMap;
-	
-	String<TInterval> intervals;
-	resize(intervals,10);
-	intervals[0].i1 = (TValue)5.0;
-	intervals[0].i2 = (TValue)20.0;
-	intervals[1].i1 = (TValue)6.0;
-	intervals[1].i2 = (TValue)13.0;
-	intervals[2].i1 = (TValue)8.0;
-	intervals[2].i2 = (TValue)10.0;
-	intervals[3].i1 = (TValue)9.0;
-	intervals[3].i2 = (TValue)18.0;
-	intervals[4].i1 = (TValue)15.0;
-	intervals[4].i2 = (TValue)23.0;
-	intervals[5].i1 = (TValue)21.0;
-	intervals[5].i2 = (TValue)25.0;
-    intervals[6].i1 = (TValue)29.0;
-	intervals[6].i2 = (TValue)42.0;
-	intervals[7].i1 = (TValue)20.0;
-	intervals[7].i2 = (TValue)36.0;
-	intervals[8].i1 = (TValue)38.0;
-	intervals[8].i2 = (TValue)42.0;
-	intervals[9].i1 = (TValue)36.0;
-	intervals[9].i2 = (TValue)48.0;
-	for(unsigned int i = 0; i < length(intervals); ++i) intervals[i].cargo = i;
-	
-	//construct interval tree graph and its corresponding property map
-	TGraph g;
-	TPropertyMap pm;
-	
-	createIntervalTree(g,pm,intervals,(TValue)26.0,TConstructSpec());
-	
-	TValue query = (TValue)25.0;
-	String<TCargo> result;
-	findIntervals(g, pm, query, result);
-	
-	SEQAN_TASSERT(length(result)==1);
-	SEQAN_TASSERT(result[0]==7);
+    // Define some types to test.
+    typedef int                                     TCargo;
+    typedef IntervalAndCargo<TValue, TCargo>        TInterval;
+    typedef IntervalTreeNode<TInterval, TStoreSpec> TNode;
+    typedef Graph<>                                 TGraph;
+    typedef String<TNode>                           TPropertyMap;
 
-	query = (TValue)7.0;
-	resize(result,0);
-	findIntervals(g, pm, query, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==0 && result[1]==1) ||(result[0]==1 && result[1]==0));
-	
-	query = (TValue)37.0;
-	resize(result,0);
-	findIntervals(g, pm, query, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==9 && result[1]==6) ||(result[0]==6 && result[1]==9));
-	
+    // Constant test fixture data.
+    const size_t kValuesLen = 10;
+    const double kValues[kValuesLen][2] = {
+        { 5.0, 20.0}, { 6.0, 13.0}, { 8.0, 10.0}, { 9.0, 18.0}, {15.0, 23.0},
+        {21.0, 25.0}, {29.0, 42.0}, {20.0, 36.0}, {38.0, 42.0}, {36.0, 48.0}
+    };
+
+    // Fill intervals with the intervals from kValues and a cargo that
+    // is equal to its index.
+    String<TInterval> intervals;
+    resize(intervals, kValuesLen);
+    for (int i = 0; i < kValuesLen; ++i) {
+        intervals[i].i1 = static_cast<TValue>(kValues[i][0]);
+        intervals[i].i2 = static_cast<TValue>(kValues[i][1]);
+        intervals[i].cargo = i;
+    }
+
+    // Construct interval tree graph and its corresponding property map.
+    TGraph g;
+    TPropertyMap pm;
+    createIntervalTree(g, pm, intervals, static_cast<TValue>(26.0),
+                       TConstructSpec());
+
+    // Query for 25.0 and check for the expected result.
+    {
+        TValue query = static_cast<TValue>(25.0);
+        String<TCargo> result;
+        findIntervals(g, pm, query, result);
+
+        SEQAN_ASSERT_EQ(length(result), 1);
+        SEQAN_ASSERT_EQ(result[0], 7);
+    }
+
+    // Query for 7.0 and check for the expected result.
+    {
+        TValue query = static_cast<TValue>(7.0);
+        String<TCargo> result;
+        findIntervals(g, pm, query, result);
+
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE((result[0] == 0 and result[1] == 1) or
+                          (result[0] == 1 and result[1] == 0));
+    }
+
+    // Query for 37.0 and check for the expected result.
+    {
+        TValue query = static_cast<TValue>(37.0);
+        String<TCargo> result;
+        findIntervals(g, pm, query, result);
+
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE((result[0] == 9 and result[1] == 6) or
+                          (result[0] == 6 and result[1] == 9));
+    }
 }
 
-template<typename TValue>
+
+// Build an IntervalTree from constant data.  The, perform extensive
+// checks on its structure and also test some query results against
+// expected results.
+template <typename TValue>
 void IntervalTreeRestTest() {
-//____________________________________________________________________________
+    typedef int TCargo;
+    typedef IntervalAndCargo<TValue, TCargo> TInterval;
 
-//	std::cout <<"\nIntervalTreeRestTest\n";
-	typedef int TCargo;
-	typedef IntervalAndCargo<TValue,TCargo> TInterval;
-
-	typedef IntervalTreeNode<TInterval,StoreIntervals> TNode;
-	typedef Graph< > TGraph;
-	typedef String<TNode> TPropertyMap;
+    typedef IntervalTreeNode<TInterval, StoreIntervals> TNode;
+    typedef Graph< > TGraph;
+    typedef String<TNode> TPropertyMap;
 
 
-	String<TInterval> intervals;
-	resize(intervals,8);
-	intervals[0].i1 = (TValue)1.0;
-	intervals[0].i2 = (TValue)5.0;
-	intervals[1].i1 = (TValue)3.0;
-	intervals[1].i2 = (TValue)8.0;
-	intervals[2].i1 = (TValue)2.0;
-	intervals[2].i2 = (TValue)10.0;
-	intervals[3].i1 = (TValue)21.0;
-	intervals[3].i2 = (TValue)23.0;
-	intervals[4].i1 = (TValue)22.0;
-	intervals[4].i2 = (TValue)29.0;
-	intervals[5].i1 = (TValue)23.0;
-	intervals[5].i2 = (TValue)25.0;
-	intervals[6].i1 = (TValue)25.0;
-	intervals[6].i2 = (TValue)31.0;
-	intervals[7].i1 = (TValue)26.0;
-	intervals[7].i2 = (TValue)35.0;
-	for(unsigned int i = 0; i < length(intervals); ++i) intervals[i].cargo = i;
-	
-	TGraph g;
-	TPropertyMap pm;
-	
-	createIntervalTree(g, pm, intervals);
+    // Constant test fixture data.
+    const size_t kValuesLen = 8;
+    const double kValues[kValuesLen][2] = {
+        { 1.0,  5.0}, { 3.0,  8.0}, { 2.0, 10.0}, {21.0, 23.0}, {22.0, 29.0},
+        {23.0, 25.0}, {25.0, 31.0}, {26.0, 35.0}
+    };
 
+    // Fill intervals with the intervals from kValues and a cargo that
+    // is equal to its index.
+    String<TInterval> intervals;
+    resize(intervals, kValuesLen);
+    for (int i = 0; i < kValuesLen; ++i) {
+        intervals[i].i1 = static_cast<TValue>(kValues[i][0]);
+        intervals[i].i2 = static_cast<TValue>(kValues[i][1]);
+        intervals[i].cargo = i;
+    }
 
-	SEQAN_TASSERT(length(pm)==(TValue)6.0);
-	SEQAN_TASSERT(pm[0].center==(TValue)18.0);
-	SEQAN_TASSERT(pm[1].center==(TValue)5.5);
-	SEQAN_TASSERT(pm[2].center==(TValue)3.0);
-	SEQAN_TASSERT(pm[3].center==(TValue)28.0);
-	SEQAN_TASSERT(pm[4].center==(TValue)23.0);
-	SEQAN_TASSERT(pm[5].center==(TValue)22.0);
+    // Create interval tree from the intervals.
+    TGraph g;
+    TPropertyMap pm;
+    createIntervalTree(g, pm, intervals);
 
-	SEQAN_TASSERT(length(pm[0].list1)==0);
-	SEQAN_TASSERT(length(pm[1].list2)==2);
-	SEQAN_TASSERT(length(pm[2].list1)==1);
-	SEQAN_TASSERT(length(pm[3].list2)==3);
-	SEQAN_TASSERT(length(pm[4].list1)==1);
-	SEQAN_TASSERT(length(pm[5].list2)==1);
+    // Perform extensives checks on the interval tree's structure.
+    {
+        SEQAN_ASSERT_EQ(length(pm), static_cast<TValue>(6.0));
+        SEQAN_ASSERT_EQ(pm[0].center, static_cast<TValue>(18.0));
+        SEQAN_ASSERT_EQ(pm[1].center, static_cast<TValue>(5.5));
+        SEQAN_ASSERT_EQ(pm[2].center, static_cast<TValue>(3.0));
+        SEQAN_ASSERT_EQ(pm[3].center, static_cast<TValue>(28.0));
+        SEQAN_ASSERT_EQ(pm[4].center, static_cast<TValue>(23.0));
+        SEQAN_ASSERT_EQ(pm[5].center, static_cast<TValue>(22.0));
 
-	SEQAN_TASSERT(leftBoundary(pm[1].list1[0])==(TValue)2.0);
-	SEQAN_TASSERT(leftBoundary(pm[1].list1[1])==(TValue)3.0);
-	SEQAN_TASSERT(rightBoundary(pm[1].list2[0])==(TValue)10.0);
-	SEQAN_TASSERT(rightBoundary(pm[1].list2[1])==(TValue)8.0);
-	SEQAN_TASSERT(cargo(pm[1].list1[0])==2);
-	SEQAN_TASSERT(cargo(pm[1].list2[0])==2);
-	SEQAN_TASSERT(cargo(pm[1].list1[1])==1);
-	SEQAN_TASSERT(cargo(pm[1].list2[1])==1);
+        SEQAN_ASSERT_EQ(length(pm[0].list1), 0);
+        SEQAN_ASSERT_EQ(length(pm[1].list2), 2);
+        SEQAN_ASSERT_EQ(length(pm[2].list1), 1);
+        SEQAN_ASSERT_EQ(length(pm[3].list2), 3);
+        SEQAN_ASSERT_EQ(length(pm[4].list1), 1);
+        SEQAN_ASSERT_EQ(length(pm[5].list2), 1);
 
-	SEQAN_TASSERT(getLeftBoundary(pm[1].list1[0])==(TValue)2.0);
-	SEQAN_TASSERT(getLeftBoundary(pm[1].list1[1])==(TValue)3.0);
-	SEQAN_TASSERT(getRightBoundary(pm[1].list2[0])==(TValue)10.0);
-	SEQAN_TASSERT(getRightBoundary(pm[1].list2[1])==(TValue)8.0);
-	SEQAN_TASSERT(getCargo(pm[1].list1[0])==2);
-	SEQAN_TASSERT(getCargo(pm[1].list2[0])==2);
-	SEQAN_TASSERT(getCargo(pm[1].list1[1])==1);
-	SEQAN_TASSERT(getCargo(pm[1].list2[1])==1);
+        SEQAN_ASSERT_EQ(leftBoundary(pm[1].list1[0]), static_cast<TValue>(2.0));
+        SEQAN_ASSERT_EQ(leftBoundary(pm[1].list1[1]), static_cast<TValue>(3.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[1].list2[0]), static_cast<TValue>(10.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[1].list2[1]), static_cast<TValue>(8.0));
+        SEQAN_ASSERT_EQ(cargo(pm[1].list1[0]), 2);
+        SEQAN_ASSERT_EQ(cargo(pm[1].list2[0]), 2);
+        SEQAN_ASSERT_EQ(cargo(pm[1].list1[1]), 1);
+        SEQAN_ASSERT_EQ(cargo(pm[1].list2[1]), 1);
 
-	SEQAN_TASSERT(leftBoundary(pm[2].list1[0])==(TValue)1.0);
-	SEQAN_TASSERT(rightBoundary(pm[2].list2[0])==(TValue)5.0);
-	SEQAN_TASSERT(cargo(pm[2].list1[0])==0);
-	SEQAN_TASSERT(getCargo(pm[2].list2[0])==0);
+        SEQAN_ASSERT_EQ(getLeftBoundary(pm[1].list1[0]), static_cast<TValue>(2.0));
+        SEQAN_ASSERT_EQ(getLeftBoundary(pm[1].list1[1]), static_cast<TValue>(3.0));
+        SEQAN_ASSERT_EQ(getRightBoundary(pm[1].list2[0]), static_cast<TValue>(10.0));
+        SEQAN_ASSERT_EQ(getRightBoundary(pm[1].list2[1]), static_cast<TValue>(8.0));
+        SEQAN_ASSERT_EQ(getCargo(pm[1].list1[0]), 2);
+        SEQAN_ASSERT_EQ(getCargo(pm[1].list2[0]), 2);
+        SEQAN_ASSERT_EQ(getCargo(pm[1].list1[1]), 1);
+        SEQAN_ASSERT_EQ(getCargo(pm[1].list2[1]), 1);
 
-	SEQAN_TASSERT(leftBoundary(pm[3].list1[0])==(TValue)22.0);
-	SEQAN_TASSERT(leftBoundary(pm[3].list1[1])==(TValue)25.0);
-	SEQAN_TASSERT(leftBoundary(pm[3].list1[2])==(TValue)26.0);
-	SEQAN_TASSERT(rightBoundary(pm[3].list2[0])==(TValue)35.0);
-	SEQAN_TASSERT(rightBoundary(pm[3].list2[1])==(TValue)31.0);
-	SEQAN_TASSERT(rightBoundary(pm[3].list2[2])==(TValue)29.0);
+        SEQAN_ASSERT_EQ(leftBoundary(pm[2].list1[0]), static_cast<TValue>(1.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[2].list2[0]), static_cast<TValue>(5.0));
+        SEQAN_ASSERT_EQ(cargo(pm[2].list1[0]), 0);
+        SEQAN_ASSERT_EQ(getCargo(pm[2].list2[0]), 0);
 
-	SEQAN_TASSERT(leftBoundary(pm[4].list1[0])==(TValue)23.0);
-	SEQAN_TASSERT(rightBoundary(pm[4].list2[0])==(TValue)25.0);
+        SEQAN_ASSERT_EQ(leftBoundary(pm[3].list1[0]), static_cast<TValue>(22.0));
+        SEQAN_ASSERT_EQ(leftBoundary(pm[3].list1[1]), static_cast<TValue>(25.0));
+        SEQAN_ASSERT_EQ(leftBoundary(pm[3].list1[2]), static_cast<TValue>(26.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[3].list2[0]), static_cast<TValue>(35.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[3].list2[1]), static_cast<TValue>(31.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[3].list2[2]), static_cast<TValue>(29.0));
 
-	SEQAN_TASSERT(leftBoundary(pm[5].list1[0])==(TValue)21.0);
-	SEQAN_TASSERT(rightBoundary(pm[5].list2[0])==(TValue)23.0);
+        SEQAN_ASSERT_EQ(leftBoundary(pm[4].list1[0]), static_cast<TValue>(23.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[4].list2[0]), static_cast<TValue>(25.0));
 
-	//suche nach allen intervallen die query enthalten 
-	TValue query = (TValue)13.0;
-	String<TCargo> result;
-	findIntervals(g, pm, query, result);
+        SEQAN_ASSERT_EQ(leftBoundary(pm[5].list1[0]), static_cast<TValue>(21.0));
+        SEQAN_ASSERT_EQ(rightBoundary(pm[5].list2[0]), static_cast<TValue>(23.0));
+    }
 
-	SEQAN_TASSERT(length(result)==0);
+    // There should be no interval containing 13.0.
+    {
+        TValue query = static_cast<TValue>(13.0);
+        String<TCargo> result;
+        findIntervals(g, pm, query, result);
+        SEQAN_ASSERT_EQ(length(result), 0);
+    }
 
-	//suche nach allen intervallen die query enthalten
-	query = (TValue)23.0;
-	findIntervalsExcludeTouching(g, pm, query, result);
-	SEQAN_TASSERT(length(result)==1);
-	SEQAN_TASSERT(result[0]==4);
-
-
-	
-
+    // Query for all interval containing 23.0.
+    {
+        TValue query = static_cast<TValue>(23.0);
+        String<TCargo> result;
+        findIntervalsExcludeTouching(g, pm, query, result);
+        SEQAN_ASSERT_EQ(length(result), 1);
+        SEQAN_ASSERT_EQ(result[0], 4);
+    }
 }
 
 
-template<typename TValue>
-void
-testEasyIntervalTree()
-{
-	typedef IntervalAndCargo<TValue,int> TInterval;
-	typedef IntervalTree<TValue,int> TIntervalTree;
-	String<TValue> begins;
-	String<TValue> ends;
-	resize(begins,5);
-	resize(ends,5);
-	begins[0] = 2;
-	begins[1] = 5;
-	begins[2] = 3;
-	begins[3] = 7;
-	begins[4] = 1;
-	ends[0] = 7;
-	ends[1] = 8;
-	ends[2] = 5;
-	ends[3] = 10;
-	ends[4] = 5;
+template <typename TValue>
+void testEasyIntervalTree() {
+    typedef IntervalAndCargo<TValue, int> TInterval;
+    typedef IntervalTree<TValue, int> TIntervalTree;
+    typedef typename Cargo<TIntervalTree>::Type TCargo;
 
-	TIntervalTree itree(begin(begins),begin(ends),length(begins));
+    // Define test fixture data.
+    const size_t kIntervalCount = 5;
+    const TValue kBeginValues[kIntervalCount] = {2, 5, 3, 7, 1};
+    const TValue kEndValues[kIntervalCount] = {7, 8, 5, 10, 5};
+    const TCargo kCargoValues[kIntervalCount] = {2, 7, 1, 5, 8};
 
-	TValue query = 7;
+    // Build begin/end value and intervals vectors.
+    String<TValue> begins;
+    String<TValue> ends;
+    String<TInterval> intervals;
+    String<TCargo> cargos;
+    resize(begins, kIntervalCount);
+    resize(ends, kIntervalCount);
+    resize(intervals, kIntervalCount);
+    resize(cargos, kIntervalCount);
+    for (size_t i = 0; i < kIntervalCount; ++i) {
+        begins[i] = kBeginValues[i];
+        ends[i] = kEndValues[i];
+        cargos[i] = kCargoValues[i];
 
-	typedef typename Cargo<TIntervalTree>::Type TCargo;
-	String<TCargo > result;
-	findIntervals(itree, query, result);
-	
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT(result[0]==1);
-	SEQAN_TASSERT(result[1]==3);
-	
+        intervals[i].i1 = kBeginValues[i];
+        intervals[i].i2 = kEndValues[i];
+        intervals[i].cargo = i;
+    }
 
-	String<TInterval> intervals;
-	resize(intervals,length(begins));
-	typename Iterator<String<TValue> >::Type interval_begins = begin(begins);
-	typename Iterator<String<TValue> >::Type interval_ends = begin(ends);
-	size_t i = 0;
-	while(i<length(begins))
-	{
-		intervals[i].i1 = value(interval_begins);
-		++interval_begins;
-		intervals[i].i2 = value(interval_ends);
-		++interval_ends;
-		intervals[i].cargo = (TCargo) i;
-		++i;
-	}
+    // Construct IntervalTree from begin/end iterators.  Then, perform
+    // a query and check the result.
+    {
+        TIntervalTree itree(begin(begins), begin(ends), length(begins));
+        TValue query = 7;
+        String<TCargo> result;
 
-	TIntervalTree itree2(intervals);
-	findIntervals(itree2, query, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT(result[0]==1);
-	SEQAN_TASSERT(result[1]==3);
-	//SEQAN_TASSERT(itree == itree2);
-	
-	String<TCargo> cargos;
-	resize(cargos,5);
-	cargos[0] = 2;
-	cargos[1] = 7;
-	cargos[2] = 1;
-	cargos[3] = 5;
-	cargos[4] = 8;
-	TIntervalTree itree3(begin(begins),begin(ends),begin(cargos),4);
-	findIntervals(itree3, 1, result);
-	SEQAN_TASSERT(length(result)==0);
-	findIntervals(itree3, 4, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
-	
+        findIntervals(itree, query, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_EQ(result[0], 1);
+        SEQAN_ASSERT_EQ(result[1], 3);
+    }
 
-	TIntervalTree itree4(itree3);
-	findIntervals(itree4, 1, result);
-	SEQAN_TASSERT(length(result)==0);
-	findIntervals(itree4, 4, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
-	
-	itree2 = itree3;
-	findIntervals(itree2, 1, result);
-	SEQAN_TASSERT(length(result)==0);
-	findIntervals(itree2, 4, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==2 && result[1]==1) || (result[0]==1 && result[1]==2));
-	addInterval(itree2,intervals[4]);
-	SEQAN_TASSERT(itree2.interval_counter==5);
-	
-	TInterval iv; 
-	iv.i1 = 100;
-	iv.i2 = 100;
-	iv.cargo = 100;
-	addInterval(itree2,iv);
-	SEQAN_TASSERT(itree2.interval_counter==6);
-	findIntervals(itree2, 100, result);
-	SEQAN_TASSERT(length(result)==1);
-	SEQAN_TASSERT(result[0]==100);
-	findIntervalsExcludeTouching(itree2,100,result);
-	SEQAN_TASSERT(length(result)==0);
+    // Construct IntervalTree from intervals vector, perform query on
+    // it.
+    // TODO(holtgrew): Duplicate of test IntervalTreeTest?
+    {
+        TIntervalTree itree(intervals);
+        TValue query = 7;
+        String<TCargo> result;
 
-	addInterval(itree2, 44, 88, 100);
-	SEQAN_TASSERT(itree2.interval_counter==7);
-	findIntervals(itree2, 77, result);
-	SEQAN_TASSERT(length(result)==1);
-	SEQAN_TASSERT(result[0]==100);
+        findIntervals(itree, query, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_EQ(result[0], 1);
+        SEQAN_ASSERT_EQ(result[1], 3);
+    }
 
+    // Construct IntervalTree from begins/ends/cargo vectors of
+    // non-full length.  Then, perform a query on it that should yield
+    // no result and a query that should yield a result.
+    {
+        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
+        String<TCargo> result;
 
-	addInterval(itree2, 30,50);
-	SEQAN_TASSERT(itree2.interval_counter==8);
-	findIntervals(itree2, 48, result);
-	SEQAN_TASSERT(length(result)==2);
-	SEQAN_TASSERT((result[0]==100 && result[1]==7)||(result[1]==100 && result[0]==7));
+        findIntervals(itree, 1, result);
+        SEQAN_ASSERT_EQ(length(result), 0);
 
-		
+        findIntervals(itree, 4, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
+                          result[0] == 1 and result[1] == 2);
+    }
+
+    // TODO(holtgrew): Superflous, using generated copy constructor?
+    // Construct IntervalTree by copy constructor.
+    {
+        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
+        TIntervalTree itree2(itree);
+        String<TCargo> result;
+
+        findIntervals(itree2, 1, result);
+        SEQAN_ASSERT_EQ(length(result), 0);
+
+        findIntervals(itree2, 4, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
+                          result[0] == 1 and result[1] == 2);
+    }
+
+    // TODO(holtgrew): Superflous, using generated assignment operator?
+    // Construct IntervalTree by assignment operator.  Then, perform
+    // some queries and check the resutls.
+    {
+        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
+        TIntervalTree itree2 = itree;
+        String<TCargo> result;
+
+        findIntervals(itree2, 1, result);
+        SEQAN_ASSERT_EQ(length(result), 0);
+
+        findIntervals(itree2, 4, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
+                          result[0] == 1 and result[1] == 2);
+    }
+
+    // Add intervals to a tree, then perform some queries and check
+    // the results.
+    {
+        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
+        String<TCargo> result;
+
+        // Add the "missing" interval to the tree.
+        addInterval(itree, intervals[4]);
+        SEQAN_ASSERT_EQ(itree.interval_counter, 5);
+
+        // Add interval to interval tree.
+        TInterval iv;
+        iv.i1 = 100;
+        iv.i2 = 100;
+        iv.cargo = 100;
+        addInterval(itree, iv);
+        SEQAN_ASSERT_EQ(itree.interval_counter, 6);
+
+        findIntervals(itree, 100, result);
+        SEQAN_ASSERT_EQ(length(result), 1);
+        SEQAN_ASSERT_EQ(result[0], 100);
+
+        findIntervalsExcludeTouching(itree, 100, result);
+        SEQAN_ASSERT_EQ(length(result), 0);
+
+        addInterval(itree, 44, 88, 100);
+        SEQAN_ASSERT_EQ(itree.interval_counter, 7);
+
+        findIntervals(itree, 77, result);
+        SEQAN_ASSERT_EQ(length(result), 1);
+        SEQAN_ASSERT_EQ(result[0], 100);
+
+        addInterval(itree, 30, 50);
+        SEQAN_ASSERT_EQ(itree.interval_counter, 8);
+
+        findIntervals(itree, 48, result);
+        SEQAN_ASSERT_EQ(length(result), 2);
+        SEQAN_ASSERT_TRUE(result[0] == 100 and result[1] == 7 or
+                          result[1] == 100 and result[0] == 7);
+    }
 }
 
 
-void Test_GraphIntervalTree() 
-{
-	srand((unsigned)time(NULL)); 
-
-	testEasyIntervalTree<int>();
-
-//	std::cout << "RandomCenter ";
-	IntervalTreeTest<int,RandomCenter,StorePointsOnly>();
-
-//	std::cout << "\nMidCenter ";
-	IntervalTreeTest<unsigned,MidCenter,StoreIntervals>();
-	
-//	std::cout << "\nComputeCenter ";
-	IntervalTreeTest<int,ComputeCenter,StoreIntervals>();
-	
-//	std::cout << "\nRest ";
-	IntervalTreeRestTest<int>();
-
+// Call testEasyIntervalTree with <int> parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__testEasyIntervalTree__int) {
+    srand(static_cast<unsigned>(time(NULL)));
+    testEasyIntervalTree<int>();
 }
 
 
-
-
+// Call IntervalTreeTests with <int, RandomCenter, StorePointsOnly>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest__int_RandomCenter_StorePointsOnly) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeTest<int, RandomCenter, StorePointsOnly>();
 }
+
+
+// Call IntervalTreeTests with <int, MidCenter, StorePointsOnly>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest__unsigned_MidCenter_StoreIntervals) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeTest<unsigned, MidCenter, StoreIntervals>();
+}
+
+
+// Call IntervalTreeTests with <int, ComputeCenter, StoreIntervals>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest__int_ComputeCenter_StoreIntervals) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeTest<int, ComputeCenter, StoreIntervals>();
+}
+
+
+// Call IntervalTreeRestTest with <int>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeRestTest__IntervalTreeRestTest__int) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeRestTest<int>();
+}
+
+}  // SEQAN_NAMESPACE_MAIN
 
 #endif

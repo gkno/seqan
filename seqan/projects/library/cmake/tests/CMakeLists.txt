@@ -21,6 +21,16 @@ endif (MSVC)
 # Tests
 ################################################################################
 
+#-----------------------------------------------------------------------------
+# Configure Dart testing support.  This should be done before any
+# MESSAGE(FATAL_ERROR ...) commands are invoked.
+INCLUDE(CTest)
+ENABLE_TESTING()
+IF(BUILD_TESTING)
+  SET(BUILDNAME "${BUILDNAME}" CACHE STRING "Name of build on the dashboard")
+  MARK_AS_ADVANCED(BUILDNAME)
+ENDIF(BUILD_TESTING)
+
 get_filename_component (SEQAN_TESTS_ABS ${SEQAN_BASE}/../tests ABSOLUTE)
 #if (EXISTS SEQAN_TESTS_ABS)
 	file(GLOB SEQAN_TESTS ${SEQAN_TESTS_ABS}/[A-z]*)
