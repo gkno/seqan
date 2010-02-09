@@ -77,7 +77,7 @@ class Line:
         ID += 1
         
     def __repr__(self):
-        return "\nNode(" + str(self.nodes) + ",'" + self._text + "')"
+        return 'Line(%s, %s)' % (repr(self.nodes), repr(self._text))
         
     def name(self, index = 0):
         if len(self.nodes) > index:
@@ -96,7 +96,7 @@ class Data:
         self.cache = {}
         
     def __repr__(self):
-        return "Data(" + str(self.lines) + ", " + str(self.level) + ")"
+        return 'Data(\n  %s,\n%d)' % (',\n  '.join(map(repr, self.lines)), self.level)
 
     def init(self):
         self.lines.sort(sortLineCompare)
@@ -114,24 +114,65 @@ class Data:
         return self.find(str)
         
     def find(self, str):
+        """Find all lines below the given path.
+
+        Args:
+          str  String with a dot separated path to the lines to find.
+
+        Returns:
+          Data object with the lines below the given path.
+        """
         # If possible, return from cache.
         if self.cache.has_key(str):
             return self.cache[str]
         
         arr = splitName(str)
         lines = []
-        maxi = 0
-        for line in self.lines:
-            i = 0
-            while (i < len(arr)) and (i + self.level < len(line.nodes)) and (arr[i] == line.nodes[i + self.level]):
-                i += 1
-            if i == len(arr):
-                lines.append(line)
-                
-            elif maxi > i:
-                break    
-                
-            maxi = i
+
+        # TODO(holtgrew): Keeping linear code for linear search to be able to fix things quickly.
+        if True:
+            # Use binary search for finding the first hit.
+            def isHit(line, arr, level):
+                """Return True iff arr matches the key of line, from the given level on."""
+                i = 0
+                while (i < len(arr)) and (i + level < len(line.nodes)) and (arr[i] == line.nodes[i + level]):
+                    i += 1
+                return i == len(arr)
+
+            # Use binary search to find the first hit.
+            query = arr
+            lo = 0
+            hi = len(self.lines)
+            while lo < hi:
+                mid = (lo + hi) // 2
+                slice = self.lines[mid].nodes[self.level:self.level + len(query)]
+                if slice < query:
+                    lo = mid + 1
+                else:
+                    hi = mid
+            result = lo
+
+            # Output all consecutive hits, if any.
+            if result < len(self.lines) and isHit(self.lines[result], arr, self.level):
+                for line in self.lines[result:]:
+                    if isHit(line, arr, self.level):
+                        lines.append(line)
+                    else:
+                        break
+        else:
+            # Use linear search for finding the first hit.  Deactivated for now.
+            maxi = 0
+            for line in self.lines:
+                i = 0
+                while (i < len(arr)) and (i + self.level < len(line.nodes)) and (arr[i] == line.nodes[i + self.level]):
+                    i += 1
+                if i == len(arr):
+                    lines.append(line)
+
+                elif maxi > i:
+                    break    
+                maxi = i
+
             
         data = Data(lines, self.level + len(arr))
         # Cache result.
