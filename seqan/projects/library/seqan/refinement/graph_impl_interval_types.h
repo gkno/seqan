@@ -70,6 +70,15 @@ public:
 
     /**
 .Memfunc.IntervalAndCargo#IntervalAndCargo:
+..signature:IntervalAndCargo()
+     */
+    IntervalAndCargo()
+    {
+SEQAN_CHECKPOINT
+    }
+
+    /**
+.Memfunc.IntervalAndCargo#IntervalAndCargo:
 ..class:Class.IntervalAndCargo
 ..summary:Constructor.
 ..signature:IntervalAndCargo(i1, i2, cargo)
@@ -247,6 +256,15 @@ public:
 ..summary:The stored cargo of type TCargo.
      */
 	TCargo cargo;
+
+    /**
+.Memfunc.PointAndCargo#PointAndCargo
+..class:Class.PointAndCargo
+..signature:PointAndCargo(point, cargo)
+    */
+	PointAndCargo() {
+SEQAN_CHECKPOINT
+	}
 
     /**
 .Memfunc.PointAndCargo#PointAndCargo
@@ -439,6 +457,15 @@ public:
 	TValue center;
 	String<PointAndCargo<TValue,TCargo> > list1;
 	String<PointAndCargo<TValue,TCargo> > list2;
+
+    /**
+.Memfunc.IntervalTreeNode#IntervalTreeNode:
+..signature:IntervalAndCargo()
+     */
+    IntervalTreeNode()
+    {
+SEQAN_CHECKPOINT
+    }
 
 	IntervalTreeNode(IntervalTreeNode const & other):
 		center(other.center),
