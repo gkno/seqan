@@ -29,35 +29,42 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-    /*
+    
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in a single genome sequence
     template <
-	typename TFragmentStore, 
-	typename TReadIndex, 
-	typename TSwiftSpec, 
-	typename TPreprocessing,
-	typename TCounts,
-	typename TRazerSOptions,
-	typename TRazerSMode >
+        typename TFragmentStore, 
+        typename TReadIndex, 
+        typename TSwiftSpec, 
+        typename TPreprocessing,
+        typename TCounts,
+        typename TRazerSOptions,
+        typename TRazerSMode >
     void _mapSingleReadsToContig(
-             TFragmentStore							& store,
-             unsigned								  contigId,				// ... and its sequence number
-             Pattern<TReadIndex, Swift<TSwiftSpec> >& swiftPattern,
-             TPreprocessing							& preprocessing,
-             TCounts								& cnts,
-             char                                     orientation,			// q-gram index of reads
-             TRazerSOptions							& options,
-             TRazerSMode const                      & mode)
+             TFragmentStore                                     & store,
+             unsigned                                             contigId,				// ... and its sequence number
+             String<Pattern<TReadIndex, Swift<TSwiftSpec> > >   & swiftPatterns,
+             TPreprocessing                                     & preprocessingBlocks,
+             TCounts                                            & cnts,
+             char                                                 orientation,			// q-gram index of reads
+             TRazerSOptions                                     & options,
+             TRazerSMode const                                  & mode)
     {
         // FILTRATION
         typedef typename TFragmentStore::TContigSeq				TContigSeq;
         typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
         typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
+        typedef typename Size<TSwiftFinder>::Type               TSwiftFinderSize;
+
+        // HITS
+        typedef typename TSwiftFinder::THitString               THitString;
+		typedef typename Value<THitString>::Type                TSwiftHit;
+        typedef typename Size<THitString>::Type               THitStringSize;
         
         // VERIFICATION
-        typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessing, TSwiftPattern, TCounts >    TVerifier;
-        typedef typename Fibre<TReadIndex, Fibre_Text>::Type                                                            TReadSet;
+        typedef typename Value<TPreprocessing>::Type                                                                        TPreprocessingBlock;
+        typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessingBlock, TSwiftPattern, TCounts >   TVerifier;
+        typedef typename Fibre<TReadIndex, Fibre_Text>::Type                                                                TReadSet;
         
         if (options._debugLevel >= 1)
         {
@@ -67,30 +74,79 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         lockContig(store, contigId);
         TContigSeq &contigSeq = store.contigStore[contigId].seq;
-        
-        TReadSet		&readSet = host(host(swiftPattern));
-        TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
-        // ???: can I use an infix of preprocessing here?
-        TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
-        
-        // initialize verifier
-        verifier.onReverseComplement = (orientation == 'R');
-        verifier.genomeLength = length(contigSeq);
-        verifier.m.contigId = contigId;
-        
-        // iterate all verification regions returned by SWIFT
         if (orientation == 'R')	reverseComplementInPlace(contigSeq);
-        while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
+        
+        // Finder and verifier strings of the same size as there are swift patterns
+        // One Swift finder, Swift pattern and verifier work together
+        String<TSwiftFinder> swiftFinders;
+        resize(swiftFinders, length(swiftPatterns), Exact());
+        TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
+        
+        String<TVerifier> verifier;
+        resize(verifier, length(swiftPatterns), Exact());
+        
+        for(unsigned i = 0; i < length(swiftPatterns); ++i){
+            // initialize finders
+            swiftFinders[i] = swiftFinder;
+            
+            // initialize verifier
+            TVerifier oneVerifier(store, options, preprocessingBlocks[i], swiftPatterns[i], cnts);
+            oneVerifier.onReverseComplement = (orientation == 'R');
+            oneVerifier.genomeLength = length(contigSeq);
+            oneVerifier.m.contigId = contigId;
+            
+            verifier[i] = oneVerifier;
+        }
+        
+        // set up finder
+        for (unsigned i = 0; i < length(swiftFinders); ++i)
+            windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
+        
+        // FIXME: razerSoption
+        unsigned windowSize = 5000;
+        unsigned offSet = 0;
+        
+        // go over contig sequence
+        while(offSet < length(contigSeq))
+        {
+            // each filter runs over the window separately
+            // FIXME: Parallelize
+# pragma omp parallel for shared(i)
+            for (TSwiftFinderSize i = 0; i < length(swiftFinders); ++i){
+                
+                // filter window and save hits
+                windowFindNext(swiftFinders[i], swiftPatterns[i], windowSize, options._debugLevel);
+
+                // verify hits
+                THitString hits = getSwiftHits(swiftFinders[i]);
+                for(THitStringSize h = 0; h < length(hits); ++h)
+                    verifier[i].m.readId = hits[h].ndlSeqNo;
+                    // FIXME: arguments are not correct
+                    matchVerify(verifier[i], range(swiftFinders[i], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                
+            }
+            
+            // move window
+            offSet += windowSize;
+        }
+        
+        // clear finders
+        for (unsigned i = 0; i < length(swiftFinders); ++i)
+            windowFindEnd(swiftFinders[i], swiftPatterns[i]);
+        
+        
+        /*while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
         {
             verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
             if (!options.spec.DONT_VERIFY)
                 matchVerify(verifier, range(swiftFinder, contigSeq), verifier.m.readId, readSet, mode);
             ++options.countFiltration;
-        }
+        }*/
+        
         if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
     }
-    */
+    
     
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in many genome sequences
@@ -124,7 +180,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         // configure Swift patterns
         String<TSwiftPattern> swiftPatterns;
-        resize(swiftPatterns, length(readIndices));
+        resize(swiftPatterns, length(readIndices), Exact());
         for (TPos i = 0; i < length(readIndices); ++i) {
             TSwiftPattern swiftPattern(readIndices[i]);
             swiftPattern.params.minThreshold = options.threshold;
@@ -133,9 +189,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
         
         // init edit distance verifiers
-        unsigned readCount = countSequences(readIndices); // FIXME: function for String of StringSets
+        unsigned readCount = length(store.readSeqStore);//countSequences(readIndices); // FIXME: function for String of StringSets has the return the total number of reads
         String<TMyersPattern> forwardPatterns;
-        resize(forwardPatterns, length(readIndices), Exact());
+        resize(forwardPatterns, length(store.readSeqStore), Exact()); // FIXME:
         
         options.compMask[4] = (options.matchN)? 15: 0;
         if (options.gapMode == RAZERS_GAPPED)
@@ -143,7 +199,7 @@ namespace SEQAN_NAMESPACE_MAIN
             resize(forwardPatterns, readCount, Exact());
             for(unsigned i = 0; i < readCount; ++i)
             {
-                setHost(forwardPatterns[i], indexText(readIndex)[i]); // FIXME: index?
+                setHost(forwardPatterns[i], store.readSeqStore[i]); // FIXME: store.readSeqStore insead of indexText(...)
                 _patternMatchNOfPattern(forwardPatterns[i], options.matchN);
                 _patternMatchNOfFinder(forwardPatterns[i], options.matchN);
             }
@@ -182,10 +238,10 @@ namespace SEQAN_NAMESPACE_MAIN
             // (once per _mapSingleReadsToContig call)
             lockContig(store, contigId);
             if (options.forward)
-//                _mapSingleReadsToContig(store, contigId, swiftPatterns, forwardPatternsBlocks, cnts, 'F', options, mode);
+                _mapSingleReadsToContig(store, contigId, swiftPatterns, forwardPatternsBlocks, cnts, 'F', options, mode);
             
             if (options.reverse)
-//                _mapSingleReadsToContig(store, contigId, swiftPatterns, forwardPatternsBlocks, cnts, 'R', options, mode);
+                _mapSingleReadsToContig(store, contigId, swiftPatterns, forwardPatternsBlocks, cnts, 'R', options, mode);
             unlockAndFreeContig(store, contigId);
         }
         

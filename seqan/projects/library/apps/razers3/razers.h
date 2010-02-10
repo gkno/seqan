@@ -426,19 +426,7 @@ struct MicroRNA{};
 		bool			oneMatchPerBucket;
 		
         MatchVerifier() {}
-        
-/*        MatchVerifier(MatchVerifier const & other):            
-            store(other.store),
-            options(other.options),
-            preprocessing(other.preprocessing),
-            swiftPattern(other.swiftPattern),
-            cnts(other.cnts),
-            m(other.m),
-            q(other.q),
-            onReverseComplement(other.onReverseComplement),
-            genomeLength(other.genomeLength),
-            oneMatchPerBucket(other.oneMatchPerBucket) {}
-*/        
+               
 		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
@@ -1699,8 +1687,10 @@ int _mapSingleReads(
 	SEQAN_PROTIMESTART(find_time);
 	
 	// iterate over genome sequences
-#pragma omp parallel for private(swiftPattern)
-	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
+    #ifdef RAZERS_PARALLEL_CONTIGS
+    #pragma omp parallel for private(swiftPattern)
+    #endif
+    for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
 		// lock to prevent releasing and loading the same contig twice
 		// (once per _mapSingleReadsToContig call)
@@ -1746,7 +1736,7 @@ int _mapSingleReads(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
-	typedef Index<TReadSeqStore, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
+	typedef Index<TReadSeqStore, Index_QGram<TShape> >	TIndex;			// q-gram index
 
 	// configure q-gram index
 	TIndex swiftIndex(store.readSeqStore, shape);
@@ -1818,8 +1808,11 @@ int _mapReads(
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else
 #endif
+#ifndef RAZERS_PARALLEL_READS
         return _mapSingleReads(store, cnts, options, shape, mode);
-        //return _mapSingleReadsParallel(store, cnts, options, shape, mode);
+#else
+        return _mapSingleReadsParallel(store, cnts, options, shape, mode);
+#endif
 }
 
 

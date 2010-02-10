@@ -27,7 +27,10 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
-//#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
+//#define RAZERS_PARALLEL				// parallelize razerS
+//#define RAZERS_PARALLEL_CONTIGS       // parallelize by contigs
+//#define RAZERS_PARALLEL_READS         // parallelize by reads
+
   //#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
@@ -46,8 +49,11 @@
 #include <seqan/file.h>
 #include <seqan/store.h>
 
-#ifdef RAZERS_PARALLEL
+#ifdef RAZERS_PARALLEL_HYBRID
 #include "razers_parallel.h"
+#endif
+#ifdef RAZERS_PARALLEL_READS
+#include "razers_parallel_2.h"
 #endif
 
 #ifdef RAZERS_MATEPAIRS
@@ -154,7 +160,7 @@ int mapReads(
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Find matches using SWIFT
-#ifdef RAZERS_PARALLEL
+#ifdef RAZERS_PARALLEL_HYBRID
     typedef typename RazerSOptions<TSpec>::TMutex TMutex;
     options.patternMutex = new TMutex[length(readSet)];
 #endif
@@ -176,7 +182,7 @@ int mapReads(
 		return error;
 	}
 
-#ifdef RAZERS_PARALLEL
+#ifdef RAZERS_PARALLEL_HYBRID
     delete[] options.patternMutex;
 #endif
 
@@ -505,7 +511,7 @@ int main(int argc, const char *argv[])
 	}
 #endif	
 
-#ifdef RAZERS_PARALLEL
+#ifdef RAZERS_PARALLEL_HYBRID
 	tbb::task_scheduler_init scheduler;
 #endif
 

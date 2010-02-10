@@ -1122,6 +1122,8 @@ windowFindBegin(
 	finder.dotPos2 = 10 * finder.dotPos;
 
 	if (!_firstNonRepeatRange(finder, pattern, printDots)) return false;
+    
+    return true;
 }
 
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec, typename TSize>
@@ -1147,7 +1149,7 @@ windowFindNext(
 	// iterate over all non-repeat regions within the window
 	for (; finder.curPos < windowEnd; )
 	{
-		THstkPos localEnd = finder.curEnd;
+		THstkPos localEnd = finder.endPos;
 		if (localEnd > windowEnd) localEnd = windowEnd;
 
 		// filter a non-repeat region within the window
@@ -1158,7 +1160,7 @@ windowFindNext(
 			
 		if (printDots) _printDots(finder);
 
-		if (finder.curPos == finder.curEnd)
+		if (finder.curPos == finder.endPos)
 			if (!_nextNonRepeatRange(finder, pattern, printDots)) return false;
 	}
 	return true;
@@ -1177,7 +1179,7 @@ template <typename THaystack, typename TSpec>
 inline typename Finder<THaystack, Swift<TSpec> >::THitString &
 getSwiftHits(Finder<THaystack, Swift<TSpec> > &finder)
 {
-	return finder.hitString;
+	return finder.hits;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
