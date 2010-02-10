@@ -198,51 +198,51 @@ namespace ClassTest {
 }  // namespace ClassTest
 
 
-// This macro expands to startup code for a test file.
-#define SEQAN_BEGIN_TESTSUITE(suite_name)       \
-    int main(int argc, char **argv) {           \
-    ::ClassTest::beginTestSuite(#suite_name);
+    // This macro expands to startup code for a test file.
+#define SEQAN_BEGIN_TESTSUITE(suite_name)               \
+    int main(int argc, char **argv) {                   \
+    ::seqan::ClassTest::beginTestSuite(#suite_name);
 
 
-// This macro expands to shutdown code for a test file.
+    // This macro expands to shutdown code for a test file.
 #define SEQAN_END_TESTSUITE                     \
-    return ::ClassTest::endTestSuite();         \
-    }
+    return ::seqan::ClassTest::endTestSuite();  \
+}
 
 
-// This macro expands to function header for one test.
-#define SEQAN_DEFINE_TEST(test_name)            \
-    void SEQAN_TEST_ ## test_name ()            \
-
-
-// This macro expands to code to call a given test.
-#define SEQAN_CALL_TEST(test_name)              \
-    do {                                        \
-        ::ClassTest::beginTest(#test_name);     \
-        SEQAN_TEST_ ## test_name();             \
-        ::ClassTest::endTest();                 \
+    // This macro expands to function header for one test.
+#define SEQAN_DEFINE_TEST(test_name)                    \
+    void SEQAN_TEST_ ## test_name ()                    \
+                                                        \
+                                                        \
+    // This macro expands to code to call a given test.
+#define SEQAN_CALL_TEST(test_name)                      \
+    do {                                                \
+        ::seqan::ClassTest::beginTest(#test_name);      \
+        SEQAN_TEST_ ## test_name();                     \
+        ::seqan::ClassTest::endTest();                  \
     } while (false)
 
 
-// This macro returns from the current function and logs a "skipped"
-// event for the current test.
+                                  // This macro returns from the current function and logs a "skipped"
+                                  // event for the current test.
 #define SEQAN_SKIP_TEST                         \
     do {                                        \
-        ::ClassTest::skipCurrentTest();         \
+        ::seqan::ClassTest::skipCurrentTest();  \
         return;                                 \
     } while (false)
 
 
-// Equality assertion with an optional comment.
-//
-// Usage:  SEQAN_ASSERT_EQ(4, 4);
-// Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
+                                  // Equality assertion with an optional comment.
+                                  //
+                                  // Usage:  SEQAN_ASSERT_EQ(4, 4);
+                                  // Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
 #define SEQAN_ASSERT_EQ(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (not ::ClassTest::testEqual(__FILE__, __LINE__,              \
-                                       (_arg1), #_arg1,                 \
-                                       (_arg2), #_arg2,                 \
-                                       ## __VA_ARGS__)) {               \
+        if (not ::seqan::ClassTest::testEqual(__FILE__, __LINE__,       \
+                                              (_arg1), #_arg1,          \
+                                              (_arg2), #_arg2,          \
+                                              ## __VA_ARGS__)) {        \
         }                                                               \
     } while (false)
 
@@ -253,10 +253,10 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_NEQ(4, 4, "Wheee...");
 #define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (not ::ClassTest::testNotEqual(__FILE__, __LINE__,           \
-                                          (_arg1), #_arg1,              \
-                                          (_arg2), #_arg2,              \
-                                          ## __VA_ARGS__)) {            \
+        if (not ::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,    \
+                                                 (_arg1), #_arg1,       \
+                                                 (_arg2), #_arg2,       \
+                                                 ## __VA_ARGS__)) {     \
         }                                                               \
     } while (false)
 
@@ -266,12 +266,12 @@ namespace ClassTest {
 //
 // Usage:  SEQAN_ASSERT_TRUE(true, "Yay!");
 // Usage:  SEQAN_ASSERT_TRUE(false);
-#define SEQAN_ASSERT_TRUE(_arg1, ...)                         \
-    do {                                                      \
-        if (not ::ClassTest::testTrue(__FILE__, __LINE__,     \
-                                      (_arg1), #_arg1,        \
-                                      ##__VA_ARGS__)) {       \
-        }                                                     \
+#define SEQAN_ASSERT_TRUE(_arg1, ...)                                   \
+    do {                                                                \
+        if (not ::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
+                                             (_arg1), #_arg1,           \
+                                             ##__VA_ARGS__)) {          \
+        }                                                               \
     } while (false)
 
 
@@ -279,12 +279,12 @@ namespace ClassTest {
 //
 // Usage:  SEQAN_ASSERT_NOT(true, "Yay!");
 // Usage:  SEQAN_ASSERT_NOT(false);
-#define SEQAN_ASSERT_NOT(_arg1, ...)                           \
-    do {                                                       \
-        if (not ::ClassTest::testFalse(__FILE__, __LINE__,     \
-                                       (_arg1), #_arg1,        \
-                                       ##__VA_ARGS__)) {       \
-        }                                                      \
+#define SEQAN_ASSERT_NOT(_arg1, ...)                                  \
+    do {                                                              \
+        if (not ::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
+                                              (_arg1), #_arg1,        \
+                                              ##__VA_ARGS__)) {       \
+        }                                                             \
     } while (false)
 
 }  // namespace seqan
