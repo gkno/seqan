@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_SCORE_MATRIX_H
@@ -303,6 +303,13 @@ read(TFile & fl,
 
 //____________________________________________________________________________
 
+/**
+.Function.loadScoreMatrix
+..cat:Scoring
+..summary:Load a score matrix from a file.
+..signature:loadScoreMatrix(score, filename)
+..remark:TODO, comment this better/at all.
+**/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString>
 inline void
 loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
@@ -313,6 +320,14 @@ loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
 		read(fl, sc);
 		_streamClose(fl);
 }
+
+
+/**
+.Function.loadScoreMatrix
+..cat:Scoring
+..signature:loadScoreMatrix(score, filename, meta)
+..remark:TODO, comment this better/at all.
+**/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString, typename TMeta>
 inline void
 loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
@@ -437,6 +452,12 @@ _writeScoringMatrix(TFile & fl,
 
 //____________________________________________________________________________
 
+/**
+.Function.write:
+..cat:Scoring
+..signature:write(file, scoreMatrix, meta)
+..remark:TODO, comment better/at all.
+ */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec, typename TMeta>
 inline void
 write(TFile & fl,
@@ -446,6 +467,13 @@ write(TFile & fl,
 	_writeScoringMatrix<TSequenceValue>(fl, sc.data_tab, meta);
 }
 
+
+/**
+.Function.write:
+..cat:Scoring
+..signature:write(file, scoreMatrix)
+..remark:TODO, comment better/at all.
+ */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void
 write(TFile & fl,
