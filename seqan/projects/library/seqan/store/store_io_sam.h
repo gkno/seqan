@@ -498,7 +498,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void 
-    read (
+    read(
 		TFile & file,
 		FragmentStore<TSpec, TConfig> & fragStore,
 		SAM)
