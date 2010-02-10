@@ -187,7 +187,7 @@ def getDemoFilename(sourcefile):
     
 ################################################################################
     
-def translateText(text):
+def translateText(text, line=None):
     ret = ''
     str = ''
     in_code = False
@@ -210,7 +210,7 @@ def translateText(text):
             else: str += c
         elif in_link:
             if c == '@': 
-                ret += translateLink(str)
+                ret += translateLink(str, line=line)
                 str = ''
                 in_link = False
             else: str += c
@@ -263,13 +263,42 @@ def translateTooltip(text):
 ################################################################################
 
 def brokenLinkText(text):
-    return '<span class=broken_link>' + text + '</span>'
+    """Returns the HTML for a broken link.
 
-def brokenLink(text):
+    Args:
+      text  String to format.
+
+    Returns:
+      String, formatted as broken link in HTML.
+    """
+    return '<span class="broken_link">' + text + '</span>'
+
+
+def brokenLink(text, line=None):
+    """Format the given text as a broken link and print warning.
+
+    If line is not None then the warning includes the source of the
+    line to help debugging.
+
+    Args:
+      text  String, text to format as broken link.
+      line  dddoc.Line object to use as the source.
+
+    Returns:
+      String with the HTML for the broken link.
+    """
     global WARNING_COUNT
     WARNING_COUNT += 1
     print
-    print '    WARNING: broken link "' + text + '"'
+    print '!!  WARNING: broken link "' + text + '"'
+    if line:
+        print '        Location: %s:%d' % (line.file_name, line.line_no)
+    # The following is here to debug the source of broken link tags.
+    # If you get a broken link message without a source, uncomment the
+    # following two lines and add enough "line" parameters to the code
+    # so these errors are printed with source the next time.
+    #import traceback
+    #traceback.print_stack()
     return brokenLinkText(text)
 
 
@@ -332,7 +361,7 @@ def translateLinkDisplaytext(text):
 ################################################################################
 
 
-def translateLink(text, attribs = ""):
+def translateLink(text, attribs = "", line=None):
     global globalDocsPath
     
     pos = text.find(':')
@@ -351,9 +380,9 @@ def translateLink(text, attribs = ""):
     #Glossary Link
     if protocol == 'glos':
         arr = dddoc.splitName(rest)
-        if len(arr) == 0: return brokenLink(text)
+        if len(arr) == 0: return brokenLink(text, line=line)
         glos = findGlossary(arr[0])
-        if not glos: return brokenLink(text)
+        if not glos: return brokenLink(text, line=line)
         if len(arr) == 1: t = arr[0]
         else: t = arr[1]
         return '<a class=glossary_link ' + glos[2] + t + '</a>'
@@ -362,22 +391,21 @@ def translateLink(text, attribs = ""):
     if (protocol == 'nolink'):
         return translateID(rest)
 
-
     arr = dddoc.splitName(text)
-    if len(arr) == 0: return brokenLink(text)
+    if len(arr) == 0: return brokenLink(text, line=line)
     
-    if (dddoc.DATA["globals.categories"][arr[0]].empty()): return brokenLink(text)
+    if (dddoc.DATA["globals.categories"][arr[0]].empty()): return brokenLink(text, line=line)
     
     #Link to Indexpage
     if text.find('.') < 0:
-        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text)
+        if (dddoc.DATA["globals.indexes"][arr[0]].empty()): return brokenLink(text, line=line)
         if len(arr) == 1: t = getCategoryTitle(arr[0])
         else: t = arr[1]
         return '<a href="' + getIndexpage(arr[0]) + '" ' + attribs + '>' + t + '</a>'
 
 
     #Link to Page
-    if (len(arr) < 2): return brokenLink(text)
+    if (len(arr) < 2): return brokenLink(text, line=line)
 
     href = getFilename(arr[0], arr[1])
 
@@ -386,7 +414,7 @@ def translateLink(text, attribs = ""):
         #test existing file
         doc_path = os.path.join(globalDocsPath, href)
         if not os.access(doc_path, os.F_OK): 
-            return brokenLink(text);
+            return brokenLink(text, line=line)
         summary = '';
     else:
         summary = translateTooltip(obj["summary"].text());
@@ -424,14 +452,14 @@ def translateImage(text):
 
 ################################################################################
     
-def translateID(text):
+def translateID(text, line=None):
     i = text.find('#');
     if (i >= 0):
         text = text[i + 1:]
     i = text.find('|');
     if (i >= 0):
         text = text[i + 1:]
-    return translateText(text)
+    return translateText(text, line)
 
 ################################################################################
          
@@ -458,7 +486,7 @@ def getAfterColon(text):
 
 def getPageTitle(data):
 	s = data["title"].text()
-	if (s == ''): 
+	if not s:
 		return translateID(data.name(1))
 	else:
 		return s
@@ -507,6 +535,7 @@ def collectIndexEntries(cat):
 ################################################################################
 
 def pageIndexPrintMembers(fl, data):
+    # Note that data is not a dddoc.Data object!
     entrs = data.keys()
     entrs.sort()
     for entr in entrs:
@@ -921,33 +950,29 @@ def findDataRek(data, field, lines, map):
 
 def printMemberOut(fl, data, category, lines, derivedfrom, highlight, showheadline = True):
     if len(lines) > 0:
-        fl.write('<div class=section id=' + category + '>')
+        fl.write('<div class="section" id="' + category + '">')
 
         if showheadline:
             s = dddoc.DATA["globals.sections"][category].text()
-            if s: fl.write('<div class=section_headline>' + s + '</div>')
+            if s: fl.write('<div class="section_headline">' + s + '</div>')
         
-        fl.write('<table class=value_tab cellspacing=0 cellpadding=0>')
-        
-        map = {}
-        for line in lines:
-            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
-        
-        texts = map.keys()
-        texts.sort()
-        for key in texts:
-            text = map[key]
+        fl.write('<table class="value_tab" cellspacing="0" cellpadding="0">')
+
+        # Sort lines by their display link text and iterate over them.
+        keyed_lines = [(translateLinkDisplaytext(line.text()).lower(), line) for line in lines]
+        for key, line in sorted(keyed_lines):
+            text = line.text()
             origin = ''
             do_highlight = highlight
             if derivedfrom.has_key(text) and len(derivedfrom[text]) > 0: 
-                origin = ' (' + translateLink(derivedfrom[text]) + ')'
+                origin = ' (' + translateLink(derivedfrom[text], line=line) + ')'
                 do_highlight = False
                 
             if do_highlight: tag_class = 'value_key_high'
             else: tag_class = 'value_key'
 
-            link = translateLink(text)        
-            fl.write('<tr><td class=' + tag_class + ' valign=top><nobr>' + link + '</nobr></td><td class=value_text valign=top>')
+            link = translateLink(text, line=line)
+            fl.write('<tr><td class="' + tag_class + '" valign="top"><nobr>' + link + '</nobr></td><td class="value_text" valign="top">')
                 
             summary = translateText(dddoc.DATA[text]["summary"].text()) + origin
             if summary: fl.write(summary)
@@ -978,41 +1003,37 @@ def printMemberRek(fl, data, category, showheadline = True):
 ################################################################################
 
 def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline = True):
-    if len(lines) > 0:
-        fl.write('<div class=section id=' + category + '>')
+    if not lines:
+        return  # Nothing to do if no lines are given.
+    fl.write('<div class=section id=' + category + '>')
 
-        if showheadline:
-            s = dddoc.DATA["globals.sections"][category].text()
-            if s: fl.write('<div class=section_headline>' + s + '</div>')
+    if showheadline:
+        s = dddoc.DATA["globals.sections"][category].text()
+        if s: fl.write('<div class=section_headline>' + s + '</div>')
 
-        map = {}
-        for line in lines:
-            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
-        
-        str = ''
-        keys = map.keys()
-        keys.sort()
-        for key in keys:
-            link = map[key]
-            if (link == ''): continue
-            origin = ''
-            do_highlight = highlight
-            if derivedfrom.has_key(link) and len(derivedfrom[link]) > 0: 
-                origin = ' (' + translateLink(derivedfrom[link]) + ')'
-                do_highlight = False
-                
-            if do_highlight: tag_class = 'link_text_high'
-            else: tag_class = 'link_text'
+    pairs = [(translateLinkDisplaytext(line.text()).lower(), line) for line in lines]
+    str = ''
+    for key, line in sorted(pairs):
+        link = line.text()
+        if (link == ''): continue
+        origin = ''
+        do_highlight = highlight
+        if derivedfrom.has_key(link) and len(derivedfrom[link]) > 0: 
+            origin = ' (' + translateLink(derivedfrom[link], line=line) + ')'
+            do_highlight = False
 
-            s = translateLink(link)
-            if s:
-                if (str != ''): str += ', '
-                str += '<span class=' + tag_class + '>' + s + '</span>'
-                
-        if (str != ''):
-            fl.write('<div class=text_block>' + str + '</div>');
-            
-        fl.write('</div>');
+        if do_highlight: tag_class = 'link_text_high'
+        else: tag_class = 'link_text'
+
+        s = translateLink(link, line=line)
+        if s:
+            if (str != ''): str += ', '
+            str += '<span class=' + tag_class + '>' + s + '</span>'
+
+    if (str != ''):
+        fl.write('<div class=text_block>' + str + '</div>')
+
+    fl.write('</div>')
 
 ################################################################################
 
@@ -1105,82 +1126,90 @@ def printGlossary(fl, data, category):
 ################################################################################
 
 def printFile(fl, data, category):
+    # Note: This somehow works on the demos page.
     global globalDocsPath
     
     filename = data[category].text()
     
     filename = filename.replace("\n", "")
     filename = filename.replace("\\", "/")
-    
-    if (filename != ''):
-        if (not os.access(filename, F_OK)):
-            global WARNING_COUNT
-            WARNING_COUNT += 1
-            print
-            print '!   WARNING: unknown file "' + filename + '"'
-        else:
-            f = open(filename)
-            lines = f.readlines()
-            f.close()
-            
-            linenumber = 0
-            codemode = False
 
-            pos = filename.rfind("/")
-            if (pos >= 0): 
-                s = filename[pos+1:]
-            else: 
-                s = filename
+    # Return if the file name is empty.
+    if not filename:
+        return
 
-            #copy file
-            f_out = open(os.path.join(globalDocsPath, s), "w")
-            
-            fl.write('<div class=section_headline>File "<a href="' + s + '">' + s + '</a>"</div>')
-        
-            fl.write('<div class=codefile >')
-            for line in lines:
-                is_comment = (line[0:3] == '///')
-                
-                if is_comment:
-                    if codemode:
-                        fl.write('</table><div class=comment>')    
-                        codemode = False
-                    fl.write(translateText(line[3:]))
-                    
-                else:
-                    if not codemode:
-                        if (len(line) <= 1): continue
-                        if linenumber: fl.write('</div>')
-                        fl.write('<table cellspacing=0 cellpadding=0 class=codefiletab>')
-                        codemode = True
-                        
-                    linenumber += 1
-                           
-                    fl.write('<tr>')
-                    fl.write('<td align=right class=linenumber>')
-                    fl.write(str(linenumber))
-                    fl.write('</td>')
-                    
-                    text = escapeHTML(line)
-                    text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
-                    text = text.replace(" ", "&nbsp;")
-                    text = text.replace("\n", "<br >")
-                    fl.write('<td class=content><nobr>')
-                    fl.write(text)
-                    fl.write('</nobr></td>')        
-                    
-                    fl.write('</tr>')
-                    
-                    f_out.write(line)
-                
+    # Return if we cannot open the file.
+    if (not os.access(filename, F_OK)):
+        global WARNING_COUNT
+        WARNING_COUNT += 1
+        print
+        print '!!  WARNING: unknown file "' + filename + '"'
+        return
+
+    # Read in file...
+    f = open(filename)
+    lines = f.readlines()
+    f.close()
+
+    linenumber = 0
+    codemode = False
+
+    pos = filename.rfind("/")
+    if (pos >= 0): 
+        s = filename[pos+1:]
+    else: 
+        s = filename
+
+    #copy file
+    f_out = open(os.path.join(globalDocsPath, s), "w")
+
+    fl.write('<div class=section_headline>File "<a href="' + s + '">' + s + '</a>"</div>')
+
+    fl.write('<div class=codefile >')
+    for line in lines:
+        is_comment = (line[0:3] == '///')
+
+        if is_comment:
             if codemode:
-                fl.write('</table>')
-            else:
-                fl.write('</div>')
-            
-            fl.write('</div>')    
+                fl.write('</table><div class=comment>')    
+                codemode = False
+            line_obj = dddoc.Line([], line, filename, linenumber)
+            fl.write(translateText(line[3:], line_obj))
 
-            f_out.close
+        else:
+            if not codemode:
+                if (len(line) <= 1): continue
+                if linenumber: fl.write('</div>')
+                fl.write('<table cellspacing=0 cellpadding=0 class=codefiletab>')
+                codemode = True
+
+            linenumber += 1
+
+            fl.write('<tr>')
+            fl.write('<td align=right class=linenumber>')
+            fl.write(str(linenumber))
+            fl.write('</td>')
+
+            text = escapeHTML(line)
+            text = text.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+            text = text.replace(" ", "&nbsp;")
+            text = text.replace("\n", "<br >")
+            fl.write('<td class=content><nobr>')
+            fl.write(text)
+            fl.write('</nobr></td>')        
+
+            fl.write('</tr>')
+
+            f_out.write(line)
+
+    if codemode:
+        fl.write('</table>')
+    else:
+        fl.write('</div>')
+
+    fl.write('</div>')    
+
+    f_out.close
 
 
 ################################################################################
@@ -1214,7 +1243,7 @@ def subprintText(fl, data, subcategory = False):
         if (name == 'table') or (name == 'tableheader'):
             if not in_table:
                 fl.write('<table class=table_explicite cellspacing=0 cellpadding=0>')
-            subprintTableLine(fl, line.text(), (name == 'tableheader'))
+            subprintTableLine(fl, line.text(), (name == 'tableheader'), line)
             in_table = True
         else:
             if in_table:
@@ -1248,7 +1277,7 @@ def subprintText(fl, data, subcategory = False):
             headline = ''
             
         elif name == 'text': 
-            s = translateText(line.text())
+            s = translateText(line.text(), line=line)
             fl.write('<div class=text_sub_block>' + headline + ' ' + s + '</div>')
             headline = ''
             
@@ -1309,18 +1338,14 @@ def translateSubsection(text, section_count, subsection_count):
 ################################################################################
 
 def getLinkList(data_lines, not_name_types = {}):
-    map = {}
-    for line in data_lines:
-        map[translateLinkDisplaytext(line.text()).lower()] = line.text()
+    pairs = [(translateLinkDisplaytext(line.text()).lower(), line) for line in data_lines]
     
     str = ''
     
-    keys = map.keys()
-    keys.sort()
-    for key in keys:
-        link = map[key]
+    for key, line in sorted(pairs):
+        link = line.text()
         if not_name_types.has_key(link): continue
-        s = translateLink(link)
+        s = translateLink(link, line=line)
         if s:
             if (str != ''): str += ', '
             str += s
@@ -1363,16 +1388,10 @@ def subprintConceptAndType(fl, data):
         title = dddoc.DATA["globals.subsections.concept"].text()
         if title: fl.write('<' + tag + ' class=section_sub_headline>' + title + '</' + tag + '> ')
         
-        
-        map = {}
-        for line in c_data.lines:
-            map[translateLinkDisplaytext(line.text()).lower()] = line.text()
-        
-        keys = map.keys()
-        keys.sort()
-        for key in keys:
-            link = map[key]
-            str_concept = translateLink(link)
+        pairs = [(translateLinkDisplaytext(line.text()).lower(), line) for line in c_data.lines]
+        for key, line in sorted(pairs):
+            link = line.text()
+            str_concept = translateLink(link, line=line)
             if str_concept:
                 lines = []
                 findDataRek(dddoc.DATA[link], "conceptimplements", lines, {})
@@ -1408,7 +1427,7 @@ def subprintType(fl, data, headline, not_name_types):
 
 ################################################################################
 
-def subprintTableLine(fl, text, is_header):
+def subprintTableLine(fl, text, is_header, line=None):
     fl.write('<tr>')
 
     t = ''
@@ -1432,7 +1451,7 @@ def subprintTableLine(fl, text, is_header):
             text = ''
         
         if len(t) > 0: 
-            t = translateText(t)
+            t = translateText(t, line=line)
         else: 
             t = '&nbsp;'
 
@@ -1659,42 +1678,42 @@ def pushSearchResult(db, title, cat, name):
 ################################################################################
 
 def warningPage(cat, key, data):
-    #warning for multiple or no summary field
-    global globalBuildFull    
-    if globalBuildFull: #only if full documentation is built
+    # Warning for multiple or no summary field.
+    global globalBuildFull
+    global WARNING_COUNT
+    if globalBuildFull: # only if full documentation is built
         desc = data["summary"]
         if desc.empty():
-            global WARNING_COUNT
             WARNING_COUNT += 1
             print
             print "\n!!  WARNING: no summary field for \"" + cat + "." + key + "\""
+            print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
         elif len(desc.lines) > 1:
-            global WARNING_COUNT
             WARNING_COUNT += 1
             print
             print "\n!!  WARNING: multiple summary fields for \"" + cat + "." + key + "\""
+            for line in desc.lines:
+                print '        Location: %s:%d' % (line.file_name, line.line_no)
 
-
-
-    #warning for break of naming convention
+    # Warning for break of naming convention.
     convention = dddoc.DATA["globals.namingconventions"][cat].text()
     title = getPageTitle(data)
     
     if (convention == 'bigsmall' and ((title[0] < 'A') or (title[0] > 'Z'))):
-        global WARNING_COUNT
         WARNING_COUNT += 1
         print
-        print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
+        print "\n!!  WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
+        print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
     elif (convention == 'smallbig' and ((title[0] < 'a') or (title[0] > 'z'))):
-        global WARNING_COUNT
         WARNING_COUNT += 1
         print
-        print "\n!   WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with lower case."
+        print "\n!!  WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with lower case."
+        print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
     elif (title[len(title)-1] == '_'):
-        global WARNING_COUNT
         WARNING_COUNT += 1
         print
-        print "\n!   WARNING: \"" + title + "\" breaks naming convention: public identifiers must not end with \"_\"." # and private identifiers should not be documented
+        print "\n!!  WARNING: \"" + title + "\" breaks naming convention: public identifiers must not end with \"_\"." # and private identifiers should not be documented
+        print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
 
 
     #warning for unknown params
@@ -1707,10 +1726,11 @@ def warningPage(cat, key, data):
             if len(keys) > 0:         
                 for k in keys:
                     if sigs.find(k) < 0:
-                        global WARNING_COUNT
                         WARNING_COUNT += 1
                         print
                         print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
+                        line = params.find(k).lines[0]
+                        print '        Location: %s:%d' % (line.file_name, line.line_no)
                         
                         
 ################################################################################

@@ -68,16 +68,18 @@ class App(object):
 
 
 class Line:
-    def __init__(self, _nodes, _text):
+    def __init__(self, _nodes, _text, file_name, line_no):
         global ID
         
         self.nodes = _nodes
         self._text = _text.rstrip()
         self.id = ID
+        self.file_name = file_name
+        self.line_no = line_no
         ID += 1
         
     def __repr__(self):
-        return 'Line(%s, %s)' % (repr(self.nodes), repr(self._text))
+        return 'Line(%s, %s, %s, %s)' % (repr(self.nodes), repr(self._text), repr(self.file_name), repr(self.line_no))
         
     def name(self, index = 0):
         if len(self.nodes) > index:
@@ -296,7 +298,7 @@ def findRelation(data, arr, to):
             text = line.name(0) + '.' + line.name(1)
             entry = splitName(line.text())
             entry = entry[:2] + [to]
-            DATA.lines.append(Line(entry, text))
+            DATA.lines.append(Line(entry, text, '<through-relation>', 0))
 
 ################################################################################
 
@@ -463,11 +465,13 @@ def parseFile(filename):
     
     context = [[]]
     str = False
-    
+
+    line_no = 0
     for line in text:
+        line_no += 1
         if line != '': 
             if line[0] == '.':
-                parseString(str, context)
+                parseString(str, context, filename, line_no)
                 str = line
             elif str:
                 if str[len(str)-1] != '\n': str += '\n'
@@ -475,7 +479,7 @@ def parseFile(filename):
                 
 ################################################################################
                 
-def parseString(str, context):
+def parseString(str, context, file_name, line_no):
     global DATA
     
     if not str or (str == '.'):
@@ -524,7 +528,7 @@ def parseString(str, context):
         pos += 1    
         
     entry += splitName(key)
-    DATA.lines.append(Line(entry, text))
+    DATA.lines.append(Line(entry, text, file_name, line_no))
     context.append(entry)
 
 
