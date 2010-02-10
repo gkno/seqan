@@ -28,9 +28,7 @@
 // TODO(holtgrew): Split up large tests into one setup and multiple test functions.
 
 #include <seqan/refinement.h>  // Header under test.
-
-// TODO(holtgrew): Full include to seqan once it is in place.
-#include "basic_testing.h"  // Test support.
+#include <seqan/basic/basic_testing.h>
 
 namespace SEQAN_NAMESPACE_MAIN {
 

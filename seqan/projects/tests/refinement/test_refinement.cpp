@@ -39,13 +39,12 @@
 
 // SeqAn Includes
 #include <seqan/refinement.h>
+#include <seqan/basic/basic_testing.h>
 
 // Test files
 #include "test_graph_impl_align.h"
 #include "test_graph_match_refinement.h"
 #include "test_graph_interval_tree.h"
-
-#include "basic_testing.h"
 
 using namespace seqan;
 
