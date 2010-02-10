@@ -64,7 +64,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.BFAM<Oracle>
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.BFAM
+///.Class.Pattern.param.TSpec.type:Class.BFAM
 
 struct Oracle; //Oracle Tag => "BOM"
 struct Trie; //Trie Tag => "BTM"

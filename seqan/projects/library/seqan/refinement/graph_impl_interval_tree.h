@@ -247,14 +247,16 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.createIntervalTree
+..summary:Create an interval tree.
 ..cat:Miscellaneous
 ..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, Tag<TSpec> const tag)
 ..param.g:Graph to create interval tree in.
-...type:TODO
+...type:Class.Graph
 ..param.pm:Property map to use for the created interval tree.
-...type:TODO
+...type:Class.PropertyMap
 ..param.intervals:Container of intervals.
-...type:TODO
+...type:Class.String
+...remark:Should be a String of @Class.Interval@ or @Class.IntervalAndCargo@ objects.
 ..param.tag:TODO
 ..remark:center of root node is computed by _calcIntervalTreeRootCenter
 ..include:seqan/refinement.h
@@ -893,7 +895,8 @@ SEQAN_CHECKPOINT
 ..param.propertyMap:Property map to use.
 ..param.query:The TValue to query here.
 ..param.result:The result is written here.
-...type:String<TCargo>
+...type:Class.String
+...remark:Should be a string of TCargo.
 ..include:seqan/refinement.h
  */
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>

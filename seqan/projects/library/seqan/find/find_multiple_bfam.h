@@ -51,7 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.BFAM<Oracle>
 */
 
-///.Class.Pattern.param.TSpec.type:Spec.MultiBFAM
+///.Class.Pattern.param.TSpec.type:Class.MultiBFAM
 
 //struct Oracle //defined in find_bom.h
 

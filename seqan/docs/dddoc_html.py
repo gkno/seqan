@@ -1151,7 +1151,7 @@ def printFile(fl, data, category):
     lines = f.readlines()
     f.close()
 
-    linenumber = 0
+    linenumber = 0  # Of code, non-comment.
     codemode = False
 
     pos = filename.rfind("/")
@@ -1166,14 +1166,16 @@ def printFile(fl, data, category):
     fl.write('<div class=section_headline>File "<a href="' + s + '">' + s + '</a>"</div>')
 
     fl.write('<div class=codefile >')
+    line_no = 0  # Absolute in file.
     for line in lines:
+        line_no += 1
         is_comment = (line[0:3] == '///')
 
         if is_comment:
             if codemode:
                 fl.write('</table><div class=comment>')    
                 codemode = False
-            line_obj = dddoc.Line([], line, filename, linenumber)
+            line_obj = dddoc.Line([], line, filename, line_no)
             fl.write(translateText(line[3:], line_obj))
 
         else:

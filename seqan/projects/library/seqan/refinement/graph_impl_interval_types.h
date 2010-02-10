@@ -48,21 +48,21 @@ class IntervalAndCargo
 {
 public:
     /**
-.Memvar.PointAndCargo#i1:
+.Memvar.IntervalAndCargo#i1:
 ..class:Class.PointAndCargo
 ..summary:The first element in the interval of type i1.
      */
 	TValue i1;
 
     /**
-.Memvar.PointAndCargo#i2:
+.Memvar.IntervalAndCargo#i2:
 ..class:Class.PointAndCargo
 ..summary:The last element in the interval of type i2.
      */
 	TValue i2;
 
     /**
-.Memvar.PointAndCargo#cargo:
+.Memvar.IntervalAndCargo#cargo:
 ..class:Class.PointAndCargo
 ..summary:The stored cargo of type TCargo.
      */
@@ -99,7 +99,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 ..summary:Access to the right boundary.
 ..signature:leftBoundary(interval)
-..param.object:The interval to return the left boundary for.
+..param.interval:The interval to return the left boundary for.
 ...type:Class.IntervalAndCargo
 ..returns:The reference to the left boundary of the interval of type TValue&.
 ..see:Function.getLeftBoundary
@@ -120,7 +120,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 ..summary:Access to the right boundary.
 ..signature:leftBoundary(interval)
-..param.object:The interval to return the left boundary for.
+..param.interval:The interval to return the left boundary for.
 ...type:Class.IntervalAndCargo
 ..returns:The reference to the right boundary of the interval of type TValue&.
 ..see:Function.getRightBoundary
@@ -141,7 +141,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 ..summary:Get method for the left boundary.
 ..signature:leftBoundary(interval)
-..param.object:The interval to return the left boundary for.
+..param.interval:The interval to return the left boundary for.
 ...type:Class.IntervalAndCargo
 ..returns:The copy of the left boundary of the interval of type TValue.
 ..see:Function.leftBoundary
@@ -284,7 +284,11 @@ SEQAN_CHECKPOINT
 };
 
 
-///.Function.leftBoundary.param.point.type:Class.PointAndCargo
+/**
+.Function.leftBoundary:
+..signature:leftBoundary(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TValue &
 leftBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -294,7 +298,11 @@ SEQAN_CHECKPOINT
 }
 
 
-///.Function.rightBoundary.param.point.type:Class.PointAndCargo
+/**
+.Function.rightBoundary:
+..signature:rightBoundary(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TValue &
 rightBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -304,7 +312,11 @@ SEQAN_CHECKPOINT
 }
 
 
-///.Function.getLeftBoundary.param.point.type:Class.PointAndCargo
+/**
+.Function.getLeftBoundary:
+..signature:getLeftBoundary(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TValue
 getLeftBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -314,7 +326,11 @@ SEQAN_CHECKPOINT
 }
 
 
-///.Function.getRightBoundary.param.point.type:Class.PointAndCargo
+/**
+.Function.getRightBoundary:
+..signature:getRightBoundary(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TValue
 getRightBoundary(PointAndCargo<TValue,TCargo> & point)
@@ -324,7 +340,11 @@ SEQAN_CHECKPOINT
 }
 
 
-///.Function.cargo.param.point.type:Class.PointAndCargo
+/**
+.Function.cargo:
+..signature:cargo(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TCargo &
 cargo(PointAndCargo<TValue,TCargo> & point)
@@ -334,7 +354,11 @@ SEQAN_CHECKPOINT
 }
 
 
-///.Function.getCargo.param.point.type:Class.PointAndCargo
+/**
+.Function.getCargo:
+..signature:getCargo(point)
+..param.point.type:Class.PointAndCargo
+ */
 template<typename TValue, typename TCargo>
 TCargo
 getCargo(PointAndCargo<TValue,TCargo> & point)
@@ -402,7 +426,7 @@ struct StoreIntervals {};
 ..param.TInterval:The type of interval to store.
 ..param.TSpec:The type of interval to store.
 ...default:StorePointsOnly.
-...metafunction:
+...metafunction:Metafunction.Spec
 ..include: seqan/refinement.h
 
 .Memvar.IntervalTreeNode#center:
@@ -460,7 +484,9 @@ public:
 
     /**
 .Memfunc.IntervalTreeNode#IntervalTreeNode:
-..signature:IntervalAndCargo()
+..class:Class.IntervalTreeNode
+..summary:Default constructor.
+..signature:IntervalTreeNode()
      */
     IntervalTreeNode()
     {

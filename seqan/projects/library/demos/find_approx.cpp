@@ -4,7 +4,7 @@
 
 using namespace seqan;
 
-///Example 1: This program finds all occurrences of $CCT$ in $AACTTAACCTAA$ with $\leq 1$ error using the @Spec.MyersUkkonen@ approximate search algorithm.
+///Example 1: This program finds all occurrences of $CCT$ in $AACTTAACCTAA$ with $\leq 1$ error using the @Shortcut.MyersUkkonen@ approximate search algorithm.
 int main() 
 {
 	String<char> haystk("AACTTAACCTAA");
