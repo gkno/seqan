@@ -24,6 +24,7 @@
 #define SEQAN_BASIC_BASIC_TESTING_H_
 
 #include <iostream>  // stdout, stderr
+#include <cstring>   // strrpos
 
 namespace seqan {
 
@@ -50,13 +51,29 @@ namespace ClassTest {
     // Name of the current test.
     const char *currentTestName;
 
+    // Base path to the binary.  Extrapolated from argv[0].
+    char *basePath;
+
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
-    void beginTestSuite(const char *testName) {
+    void beginTestSuite(const char *testName, const char *argv0) {
         testCount = 0;
         skippedCount = 0;
         errorCount = 0;
+        // Get path to argv0.
+        char *end = 0;
+        for (char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
+            end = ptr;
+        int rpos = end - argv0;
+        if (rpos <= 0) {
+            basePath = new char[1];
+            strcpy(basePath, ".");
+        } else {
+            int len = rpos;
+            basePath = new char[len];
+            strncpy(basePath, argv0, len);
+        }
     }
 
     // Run test suite finalization.
@@ -66,6 +83,8 @@ namespace ClassTest {
     // Prints a bottom banner with the error count and returns the
     // program's return code.
     int endTestSuite() {
+        delete basePath;
+
         std::cout << "**************************************" << std::endl;
         std::cout << " Total Tests: " << testCount << std::endl;
         std::cout << " Skipped:     " << skippedCount << std::endl;
@@ -199,9 +218,9 @@ namespace ClassTest {
 
 
     // This macro expands to startup code for a test file.
-#define SEQAN_BEGIN_TESTSUITE(suite_name)               \
-    int main(int argc, char **argv) {                   \
-    ::seqan::ClassTest::beginTestSuite(#suite_name);
+#define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
+    int main(int argc, char **argv) {                           \
+    ::seqan::ClassTest::beginTestSuite(#suite_name, argv[0]);
 
 
     // This macro expands to shutdown code for a test file.
@@ -286,6 +305,19 @@ namespace ClassTest {
                                               ##__VA_ARGS__)) {       \
         }                                                             \
     } while (false)
+
+
+// Returns a string (of type char*) with the path to the called binary.
+//
+// Use this to locate files relative to the test binary.
+#define SEQAN_PROGRAM_PATH                      \
+    ::seqan::ClassTest::basePath
+
+
+// Returns the path to a temporary file with the given name.
+// TODO(holtgrew): This is very crude, should be portable!
+#define SEQAN_TEMP_FILENAME(filename)           \
+    ("/tmp/" filename)
 
 }  // namespace seqan
 
