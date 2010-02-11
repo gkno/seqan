@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
@@ -15,7 +15,9 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Definition of the class Finder and supporting tags and metafunctions.
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FIND_BASE_H

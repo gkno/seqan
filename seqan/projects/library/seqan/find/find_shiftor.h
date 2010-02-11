@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FIND_SHIFTOR_H

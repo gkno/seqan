@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
@@ -15,7 +15,9 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: find_base.h 2377 2008-06-07 08:10:34Z weese@PCPOOL.MI.FU-BERLIN.DE $
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Definition of the class Pattern and supporting functions and metafunctions.
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FIND_PATTERN_BASE_H

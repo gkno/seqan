@@ -1,4 +1,4 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: find_bndm.h 2416 2008-06-17 15:30:38Z doering@PCPOOL.MI.FU-BERLIN.DE $
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FIND_SIMPLE_H
