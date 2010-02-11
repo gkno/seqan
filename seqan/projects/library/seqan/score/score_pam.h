@@ -115,9 +115,8 @@ public:
 	}
 
 	/**	
-.Memfunc.Score:
+.Memfunc.Score#Score:
 ..class:Class.Score
-..summary:Constructor
 ..signature:Score(const & other)
 ..signature:Score(distance, gap [, gap_open])
 ..param.distance: desired evolutionary distance (int).

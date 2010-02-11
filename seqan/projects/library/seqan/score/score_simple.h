@@ -52,6 +52,7 @@ public:
 		data_gap_open(-1)
 	{
 	}
+
 	Score(TValue _match, TValue _mismatch, TValue _gap):
 		data_match(_match),
 		data_mismatch(_mismatch),
@@ -67,7 +68,8 @@ public:
 	{
 	}
 
-/**.Memfunc.Score#Score:
+/**
+.Memfunc.Score#Score:
 ..class:Class.Score
 ..summary:Constructor
 ..signature:Score<TValue, Simple> ()

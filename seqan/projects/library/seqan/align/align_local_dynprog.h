@@ -760,6 +760,16 @@ SEQAN_CHECKPOINT
 
 //1. only Align object
 
+/**
+.Function.localAlignment:
+..cat:Alignments
+..signature:localAlignment(align, score, tag)
+..param.align:Alignment object to use.
+...type:Class.Align
+..param.tag:
+...type:Tag.Local Alignment Algorithms.value.SmithWaterman
+.remarks:TODO
+ */
 template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
@@ -770,6 +780,14 @@ localAlignment(Align<TSource, TSpec> & align_,
 
 	return smithWaterman(align_, sw_finder, score_, 0);
 }
+
+
+/**
+.Function.localAlignment:
+..cat:Alignments
+..signature:localAlignment(align, score)
+..remarks:TODO
+ */	
 template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
@@ -781,6 +799,14 @@ localAlignment(Align<TSource, TSpec> & align_,
 
 //2. Align, LocalAlignmentFinder, and cutoff arguments
 
+/**
+.Function.localAlignment:
+..cat:Alignments
+..signature:localAlignment(align, sw_finder, score, cutoff, tag)
+..param.tag:
+...type:Tag.Local Alignment Algorithms.value.WatermanEggert
+.remarks:TODO
+ */	
 template <typename TSource, typename TSpec, typename TScoreValue1, typename TScoreValue2, typename TScoreValue3>
 inline TScoreValue1
 localAlignment(Align<TSource, TSpec> & align_,

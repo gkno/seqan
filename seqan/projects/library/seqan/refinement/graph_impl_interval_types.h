@@ -181,7 +181,8 @@ SEQAN_CHECKPOINT
 // TODO(holtgrew): Parameter name should not be es for EdgeStump, correct there!
 /**
 .Function.cargo:
-..param.es:
+..signature:cargo(interval)
+..param.interval:
 ...type:Class.IntervalAndCargo
 ..see:Function.getCargo
 */
@@ -355,10 +356,12 @@ SEQAN_CHECKPOINT
 
 
 /**
-.Function.getCargo:
+.Function.cargo:
 ..signature:getCargo(point)
-..param.point.type:Class.PointAndCargo
- */
+..param.point:
+...type:Class.IntervalAndCargo
+..see:Function.getCargo
+*/
 template<typename TValue, typename TCargo>
 TCargo
 getCargo(PointAndCargo<TValue,TCargo> & point)
