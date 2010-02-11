@@ -23,6 +23,8 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+    
+// TODO(bkehr): large parts of this file are identical to banded_chain_align.h
 
 template<typename TContainer, typename TValue, typename TScore, typename TAlign>
 TScore
@@ -31,8 +33,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 						TAlign & whole_alignment, 
 						Score< TScore, Simple> const &scoreMatrix)
 {
-	typedef typename Value<TAlign>::Type TChar;
-	typedef  String<TChar> TString;											//Sequence in an align object
+    typedef typename Infix<typename Source<TAlign>::Type>::Type TString;    //Sequence in an align object
 	typedef typename Size<TString>::Type TSize;								//Size of the string
 	typedef typename Iterator<const TContainer, Standard>::Type TIterator;	//Iterator for the seed chain
 	typedef typename Value<TContainer>::Type TSeed;							//Type of Seed
@@ -47,8 +48,8 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	TScoreString score_str_vert;
 	TScoreString score_str_hori;
 	TAlignVector alignmentVector;
-	TString *p_seq1 = &source(row(whole_alignment,0));
-	TString *p_seq2 = &source(row(whole_alignment,1));
+	TString *p_seq1 = &sourceSegment(row(whole_alignment,0));
+	TString *p_seq2 = &sourceSegment(row(whole_alignment,1));
 	
 	TValue score_length = 0;
 	TMatrix matrix_diag;
@@ -525,8 +526,9 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-	Segment<TString, InfixSegment> seg1_align(*p_seq1, leftDim0(seed), rightDim0(seed)+1);
-	Segment<TString, InfixSegment> seg2_align(*p_seq2, leftDim1(seed), rightDim1(seed)+1);
+    typedef typename Infix<TString>::Type TSegment;
+	TSegment seg1_align = infix(host(*p_seq1), leftDim0(seed), rightDim0(seed)+1);
+	TSegment seg2_align = infix(host(*p_seq2), leftDim1(seed), rightDim1(seed)+1);
 	_banded_gotoh(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1_align, seg2_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
 	//printMatrix(matrix_diag);
@@ -553,8 +555,8 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 	{
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, rightDim0(seed)+1);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align,rightDim1(seed)+1);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, rightDim0(seed)+1);
+		TSegment seg2_align = infix(host(*p_seq2), height_align,rightDim1(seed)+1);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
@@ -578,8 +580,8 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 		goNext(matr_it,1);
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, rightDim0(seed)+1);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align,rightDim1(seed)+1);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, rightDim0(seed)+1);
+		TSegment seg2_align = infix(host(*p_seq2), height_align,rightDim1(seed)+1);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
@@ -621,8 +623,9 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	TValue new_connect;
-	Segment<TString, InfixSegment> seg1b_align(*p_seq1, 0, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
-	Segment<TString, InfixSegment> seg2b_align(*p_seq2, 0, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k);
+    typedef typename Infix<TString>::Type TSegment;
+	TSegment seg1b_align = infix(host(*p_seq1), beginPosition(*p_seq1), leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
+	TSegment seg2b_align = infix(host(*p_seq2), beginPosition(*p_seq2), leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k);
 
 	_banded_gotoh_rectangle_first(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
@@ -637,13 +640,13 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 
 	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 
-	TValue width_stop = leftDim0(seed);
-	TValue height_stop = leftDim1(seed);
+	TValue width_stop = leftDim0(seed) - beginPosition(*p_seq1);
+	TValue height_stop = leftDim1(seed) - beginPosition(*p_seq2);
 
 	alignmentVector.back().insert(std::make_pair(0,Pair<TValue, TAlign> ()));
 	TMapIterator mapIt = --(alignmentVector.back().end());
-	Segment<TString, InfixSegment> seg1_align(*p_seq1, 0, leftDim0(seed) + w_d2);
-	Segment<TString, InfixSegment> seg2_align(*p_seq2, 0, leftDim1(seed)+ h_d2);
+	TSegment seg1_align = infix(host(*p_seq1), beginPosition(*p_seq1), leftDim0(seed) + w_d2);
+	TSegment seg2_align = infix(host(*p_seq2), beginPosition(*p_seq2), leftDim1(seed)+ h_d2);
 	
 	resize(rows(mapIt->second.i2),2);
 	assignSource(row(mapIt->second.i2,0), seg1_align);
@@ -676,27 +679,27 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 
-	TValue seq1_length = length(*p_seq1);
-	TValue seq2_length = length(*p_seq2);
+	TValue seq1_end = endPosition(*p_seq1);
+	TValue seq2_end = endPosition(*p_seq2);
 	TValue width_diag=leftDiagonal(seed) - endDiagonal(seed)+k;
-	TValue width =  width_diag + seq1_length - rightDim0(seed);
+	TValue width =  width_diag + seq1_end - rightDim0(seed);
 	TValue height_diag = endDiagonal(seed) - rightDiagonal(seed)+k;
-	TValue height = height_diag + seq2_length - rightDim1(seed);
+	TValue height = height_diag + seq2_end - rightDim1(seed);
 	
 	resize(score_str_diag, width_diag+height_diag+1);
 	resize(score_str_vert, width_diag+height_diag+1);
 	resize(score_str_hori, width_diag+height_diag+1);
 	
-	Segment<TString, InfixSegment> seg1(*p_seq1,seq1_length-width+1,seq1_length);
-	Segment<TString, InfixSegment> seg2(*p_seq2,seq2_length-height+1,seq2_length);
+	TSegment seg1 = infix(host(*p_seq1),seq1_end-width+1,seq1_end);
+	TSegment seg2 = infix(host(*p_seq2),seq2_end-height+1,seq2_end);
 
 	//_gotoh(matrix_diag, matrix_vert, matrix_hori, seg1, seg2, scoreMatrix);
 	_gotoh2(matrix_diag, matrix_vert, matrix_hori, seg1, seg2, scoreMatrix);
 
 
 
-	TValue width_align = seq1_length - width  + width_diag +1;
-	TValue height_align = seq2_length - height+1;
+	TValue width_align = seq1_end - width  + width_diag +1;
+	TValue height_align = seq2_end - height+1;
 
 	TMatrixIterator iter_ = begin(matrix_diag);
 
@@ -708,8 +711,8 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	{
 		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --alignmentVector[0].end();
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, seq1_length);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, seq2_length);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, seq1_end);
+		TSegment seg2_align = infix(host(*p_seq2), height_align, seq2_end);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0),seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
@@ -729,8 +732,8 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 	{
 		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --alignmentVector[0].end();
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, seq1_length);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, seq2_length);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, seq1_end);
+	    TSegment seg2_align = infix(host(*p_seq2), height_align, seq2_end);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0),seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
@@ -767,8 +770,9 @@ _calculateRectangleGotoh(TSeed const &seed,
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-	Segment<TString, InfixSegment> seg1b_align(*p_seq1, rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
-	Segment<TString, InfixSegment> seg2b_align(*p_seq2, rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
+    typedef typename Infix<TString>::Type TSegment;
+	TSegment seg1b_align = infix(host(*p_seq1), rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
+	TSegment seg2b_align = infix(host(*p_seq2), rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
 
 	_gotoh_rectangle(matrix_diag, matrix_vert, matrix_hori, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
@@ -803,8 +807,8 @@ _calculateRectangleGotoh(TSeed const &seed,
 	{
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, leftDim0(seed) + w_d2);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, leftDim1(seed)+ h_d2);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, leftDim0(seed) + w_d2);
+		TSegment seg2_align = infix(host(*p_seq2), height_align, leftDim1(seed)+ h_d2);
 
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
@@ -828,8 +832,8 @@ _calculateRectangleGotoh(TSeed const &seed,
 	{
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		Segment<TString, InfixSegment> seg1_align(*p_seq1, width_align, leftDim0(seed) + w_d2);
-		Segment<TString, InfixSegment> seg2_align(*p_seq2, height_align, leftDim1(seed)+ h_d2);
+		TSegment seg1_align = infix(host(*p_seq1), width_align, leftDim0(seed) + w_d2);
+		TSegment seg2_align = infix(host(*p_seq2), height_align, leftDim1(seed)+ h_d2);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
@@ -1435,7 +1439,7 @@ SEQAN_CHECKPOINT
 	TValue diag_height1 = leftDiagonal(seed) - startDiagonal(seed) + k;
 	TValue diag_width1 = startDiagonal(seed) - rightDiagonal(seed) + k;
 
-	TValue rectangle_height = leftDim1(seed);
+	TValue rectangle_height = leftDim1(seed) - beginPosition(str1_);
 	TValue rectangle_width = length(str1_);
 
 	TScoreValue score_match = scoreMatch(score_);

@@ -105,38 +105,71 @@ void test_banded_chain_align()
 	String<Seed<int, SimpleSeed> > seedChain1;
 
 	appendValue(seedChain1, Seed<int, SimpleSeed>(12,10,18,18));
-	appendValue(seedChain1, Seed<int, SimpleSeed>(0,1,5,7));
+	appendValue(seedChain1, Seed<int, SimpleSeed>(1,2,5,7));
 	
 	Align<String<char>,ArrayGaps> alignment1;
 	resize(rows(alignment1), 2);
 	assignSource(row(alignment1, 0), query);
 	assignSource(row(alignment1, 1), database);
 
+    //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix) << endl;
 	SEQAN_TASSERT(bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix)==11);
 
+	//cout << alignment1 << endl;
 	SEQAN_TASSERT(row(alignment1,0) == "ACGTCCTCGTACACCGTCTTAA" );
 	SEQAN_TASSERT(row(alignment1,1) == "TACGATC-C--ACACCG-CGTCT");
 
-	Score<int, Simple> scoreMatrix2(3,-2,-1, -3);
+
+    //------ on infixes -> only parts of the source object are used ------------
+
+	Align<String<char>,ArrayGaps> alignment2;
+	resize(rows(alignment2), 2);
+	assignSource(row(alignment2, 0), query, 1, length(query));
+	assignSource(row(alignment2, 1), database, 2, length(database));
+
+    //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
+	SEQAN_TASSERT(bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix)==11);
+
+	//cout << alignment2 << endl;
+	SEQAN_TASSERT(row(alignment2,0) == "CGTCCTCGTACACCGTCTTAA" );
+	SEQAN_TASSERT(row(alignment2,1) == "CGATC-C--ACACCG-CGTCT");
+
+
+    // ------------------- affine gap costs --------------------------------
+
+    Score<int, Simple> scoreMatrix2(3,-2,-1, -3);
 
 	String<Seed<int, SimpleSeed> > seedChain2;
 
 	appendValue(seedChain2, Seed<int, SimpleSeed>(12,10,18,18));
-	appendValue(seedChain2, Seed<int, SimpleSeed>(0,1,5,7));
+	appendValue(seedChain2, Seed<int, SimpleSeed>(1,2,5,7));
 	
-	Align<String<char>,ArrayGaps> alignment2;
-	resize(rows(alignment2), 2);
-	assignSource(row(alignment2, 0), query);
-	assignSource(row(alignment2, 1), database);
+	Align<String<char>,ArrayGaps> alignment3;
+	resize(rows(alignment3), 2);
+	assignSource(row(alignment3, 0), query);
+	assignSource(row(alignment3, 1), database);
 
-	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment2, scoreMatrix2) << endl;
-	SEQAN_TASSERT(bandedChainAlignment(seedChain2, 2, alignment2, scoreMatrix2)==24);
+	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2) << endl;
+	SEQAN_TASSERT(bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2)==24);
 
-	//cout << alignment2 << endl;
-	SEQAN_TASSERT(row(alignment2,0) == "ACG-TCCTCGTACAC--CGTCTTAA");
-	SEQAN_TASSERT(row(alignment2,1) == "TACGATCC----ACACCGCGTCT");
+	//cout << alignment3 << endl;
+	SEQAN_TASSERT(row(alignment3,0) == "ACG-TCCTCGTACAC--CGTCTTAA");
+	SEQAN_TASSERT(row(alignment3,1) == "TACGATCC----ACACCGCGTCT");
 
+
+	// -------------------- affine gap costs and on infixes ----------------
 	
+    Align<String<char>,ArrayGaps> alignment4;
+	resize(rows(alignment4), 2);
+	assignSource(row(alignment4, 0), query, 1, length(query));
+	assignSource(row(alignment4, 1), database, 2, length(database));
+
+	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2) << endl;
+	SEQAN_TASSERT(bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2)==21);
+
+	//cout << alignment4 << endl;
+	SEQAN_TASSERT(row(alignment4,0) == "CG-TCCTCGTACAC--CGTCTTAA");
+	SEQAN_TASSERT(row(alignment4,1) == "CGATCC----ACACCGCGTCT");
 	
 }
 
