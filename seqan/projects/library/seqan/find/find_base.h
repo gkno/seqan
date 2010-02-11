@@ -29,8 +29,24 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Tags
 
-struct FindInfix; //find needle as a substring of haystack. This is the default
-struct FindPrefix; //find needle as a prefix of haystack. (prefix search)
+/**
+.Tag.FindInfix:
+..summary:Find needle as a substring of haystack (infix search).
+..see:Tag.FindPrefix
+..see:Spec.Myers
+..see:Spec.DPSearch
+ */
+struct FindInfix;
+
+	
+/**
+.Tag.FindPrefix:
+..summary:Find needle as a prefix of the haystack (prefix serach)
+..see:Tag.FindInfix
+..see:Spec.Myers
+..see:Spec.DPSearch
+*/
+struct FindPrefix;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -164,6 +180,12 @@ public:
 	bool _needReinit;					// if true, the Pattern needs to be reinitialized
 	bool _beginFind_called;					// if false, then findBegin was not yet called for this match position (see findBegin default implementation)
 
+/**
+.Memfunc.Finder#Finder:
+..class:Class.Finder
+..summary:Constructor
+..signature:Finder()
+ */
 	Finder()
 		: data_endPos(0)
 		, data_length(0)
@@ -171,6 +193,11 @@ public:
 		, _beginFind_called(false)
 	{}
 
+	/**
+.Memfunc.Finder#Finder:
+..signature:Finder(haystack)
+..param.haystack:The haystack to work on, $THaystack$.
+	 */
 	Finder(THaystack & haystack)
 		: data_iterator(begin(haystack, Rooted()))
 		, data_endPos(0)
@@ -179,6 +206,11 @@ public:
 		, _beginFind_called(false)
 	{}
 
+	/**
+.Memfunc.Finder#Finder:
+..signature:Finder(iter)
+..param.iter:The iterator to work on, either const or non-const.
+	 */
 	Finder(TIterator &iter)
 		: data_iterator(iter)
 		, data_endPos(0)
@@ -194,7 +226,13 @@ public:
 		, _needReinit(true) 
 		, _beginFind_called(false)
 	{}
-
+	
+	/**
+.Memfunc.Finder#Finder:
+..signature:Finder(orig)
+..param.orig:Finder object to copy from (copy constructor).
+...type:Class.Finder
+	 */
 	Finder(Finder const &orig)
 		: data_iterator(orig.data_iterator)
 		, data_endPos(orig.data_endPos)
@@ -534,6 +572,11 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
+/**
+.Function.goBegin
+..signature:goBegin(finder)
+...param.finder:Finder object to go to beginning in.
+ */
 template <typename THaystack, typename TSpec>
 inline void
 goBegin(Finder<THaystack, TSpec> & me)
@@ -543,6 +586,11 @@ SEQAN_CHECKPOINT
 	goBegin(hostIterator(me));
 }
 
+/**
+.Function.goEnd
+..signature:goEnd(finder)
+...param.finder:Finder object to go to end in.
+ */
 template <typename THaystack, typename TSpec>
 inline void
 goEnd(Finder<THaystack, TSpec> & me)
@@ -723,7 +771,7 @@ haystack(TObject const &obj) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-
+///.Metafunction.Container.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Container< Finder<THaystack, TSpec> > {
 	typedef THaystack Type;
@@ -734,6 +782,8 @@ struct Container< Finder<THaystack, TSpec> const> {
 	typedef THaystack const Type;
 };
 
+
+///.Metafunction.Host.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Host< Finder<THaystack, TSpec> > {
 	typedef THaystack Type;
@@ -745,6 +795,7 @@ struct Host< Finder<THaystack, TSpec> const> {
 };
 
 
+///.Metafunction.Value.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Value< Finder<THaystack, TSpec> > {
 	typedef typename Value<THaystack>::Type Type;
@@ -754,6 +805,8 @@ template <typename THaystack, typename TSpec>
 struct Position< Finder<THaystack, TSpec> >:
 	Position<THaystack> {};
 
+
+///.Metafunction.Difference.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec>
 struct Difference< Finder<THaystack, TSpec> > {
 	typedef typename Difference<THaystack>::Type Type;
@@ -764,11 +817,14 @@ struct Size< Finder<THaystack, TSpec> > {
 	typedef typename Size<THaystack>::Type Type;
 };
 
+
+///.Metafunction.Iterator.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec, typename TIteratorSpec>
 struct Iterator< Finder<THaystack, TSpec>, TIteratorSpec >
 {
 	typedef typename Iterator<THaystack>::Type Type;
 };
+
 template <typename THaystack, typename TSpec, typename TIteratorSpec>
 struct Iterator< Finder<THaystack, TSpec> const, TIteratorSpec >
 {
@@ -776,11 +832,14 @@ struct Iterator< Finder<THaystack, TSpec> const, TIteratorSpec >
 };
 
 
+// TODO(holtgrew): Document DefaultGetIterator at main location, first.
+// .Metafunction.DefaultGetIterator.param.T.type:Class.Finder
 template <typename THaystack, typename TSpec>
 struct DefaultGetIteratorSpec< Finder<THaystack, TSpec> >:
 	DefaultGetIteratorSpec< THaystack >
 {
 };
+
 template <typename THaystack, typename TSpec>
 struct DefaultGetIteratorSpec< Finder<THaystack, TSpec> const>:
 	DefaultGetIteratorSpec< THaystack const>

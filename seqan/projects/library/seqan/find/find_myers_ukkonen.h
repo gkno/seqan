@@ -37,8 +37,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TSpec:Specialization tag.
-...default:$FindInfix$
-...remarks:This could be $FindInfix$ for infix search or $FindPrefix$ for prefix search.
+...default:Tag.FindInfix
+...remarks:This could be @Tag.FindInfix@ for infix search or $FindPrefix$ for prefix search.
 ..param.TFindBeginPatternSpec:Specialization of @Class.Pattern@ used to find the begin of matches.
 ...default:@Metafunction.DefaultFindBeginPatternSpec@
 ...metafunctin:@Metafunction.FindBeginPatternSpec@
