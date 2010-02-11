@@ -6,7 +6,7 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/modifier.h>
-#include "../library/apps/razers/mmap_fasta.h"
+//#include "../library/apps/razers/mmap_fasta.h"
 
 using namespace std;
 using namespace seqan;
