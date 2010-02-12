@@ -65,12 +65,10 @@ SEQAN_CHECKPOINT
 ..class:Class.IntervalTree
 ..summary:Constructor
 ..signature:IntervalTree(intervalBegins, intervalEnds, intervalCargos, len)
-..param.intervalBegins:Interval beginnings.
-..param.intervalEnds:Interval endings.
-..param.intervalCargos:Cargos for intervals.
-..param.len:Lenght of something.
-..remarks:
-...text:I have no idea what this does.
+..param.intervalBegins:Iterator pointing to begin position of first interval.
+..param.intervalEnds:Iterator pointing to end position of first interval.
+..param.intervalCargos:Iterator pointing to cargos/ids for intervals.
+..param.len:Number of intervals to store in tree.
      */
 	template<typename TIterator,typename TCargoIterator>
 	IntervalTree(TIterator interval_begins,
@@ -155,76 +153,39 @@ SEQAN_CHECKPOINT
 };
 
 
-//template<typename TValue, typename TIterator,typename TCargoIterator, typename TCargo>
-//IntervalTree<TValue,TCargo>::IntervalTree<TValue,TCargo>(TIterator interval_begins,
-//				 TIterator interval_ends, 
-//				 TCargoIterator interval_cargos, 
-//				 size_t len)
-//	{
-//		String<TInterval> intervals;
-//		resize(intervals,len);
-//		size_t i = 0;
-//		while(i<len)
-//		{
-//			intervals[i].i1 = value(interval_begins);
-//			++interval_begins;
-//			intervals[i].i2 = value(interval_ends);
-//			++interval_ends;
-//			intervals[i].cargo = value(interval_cargos);
-//			++interval_cargos;
-//			++i;
-//		}
-//		interval_counter = len;
-//		createIntervalTree(g,pm,intervals);
-//	}
-// 
-
-
 
 ///////Specs for the way interval centers are determined
-// TODO(holtgrew): Underscore should be at the beginning.
 /**
 .Tag.IntervalTree Centers
 ..cat:Miscellaneous
-..summary:Tag to select a specific way to compute the center of an interval. (TODO: Whatever that is good for).
+..summary:Tag to select a specific way to compute the center of an interval tree node.
 ..see:Class.IntervalTree
  */
 
 
-/*
-..tag.ComputeCenter
-...summary:TODO
-...signature:ComputeCenter
-...remarks:center = minbegin + (maxend-minbegin)/2, TODO
- */
-//template <typename TSpec = SpecPointAndCargo>
-struct TagComputeCenter_;
-typedef Tag<TagComputeCenter_> const ComputeCenter;
-
-
 /**
-..tag.MidCenter
-...summary:TODO
-...signature:MidCenter
-...remarks:center = length(sequence)/2,TODO
+..tag.ComputeCenter
+...summary:For intervals that are more or less uniformly distributed in the value range, using the ComputeCenter tag may result in a more balanced tree compared to using the RandomCenter tag.
+...signature:ComputeCenter
+...remarks:center = minbegin + (maxend-minbegin)/2
  */
 //template <typename TSpec = SpecPointAndCargo>
-struct TagMidCenter_;
-typedef Tag<TagMidCenter_> const MidCenter;
+struct _TagComputeCenter;
+typedef Tag<_TagComputeCenter> const ComputeCenter;
 
 
 /**
 ..tag.RandomCenter
-...summary:TODO
+...summary:The RandomCenter tag guarantees that each node contains at least one interval, therefore the size of the tree is limited by the nummer of intervals. This may lead to an unbalanced tree, but is the most space-efficient and in practice the fastest method.
 ...signature:RandomCenter
-...remarks:center = center of random interval, TODO
+...remarks:center = center of random interval
  */
 //template <typename TSpec = SpecPointAndCargo>
-struct TagRandomCenter_;
-typedef Tag<TagRandomCenter_> const RandomCenter;
+struct _TagRandomCenter;
+typedef Tag<_TagRandomCenter> const RandomCenter;
 
-
-// TODO: Internal documentation
+// fill the container interval_pointers with pointers to the corresponding objects in intervals.
+// this is done to avoid copying and passing the whole IntervalAndCargo objects during interval tree construction
 template<typename TIntervals, typename TIntervalPointers>
 void
 _makePointerInterval(TIntervals & intervals,TIntervalPointers & interval_pointers)
@@ -250,14 +211,14 @@ SEQAN_CHECKPOINT
 ..summary:Create an interval tree.
 ..cat:Miscellaneous
 ..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, Tag<TSpec> const tag)
-..param.g:Graph to create interval tree in.
+..param.g:DirectedGraph to create interval tree in.
 ...type:Class.Graph
 ..param.pm:Property map to use for the created interval tree.
 ...type:Class.PropertyMap
 ..param.intervals:Container of intervals.
 ...type:Class.String
 ...remark:Should be a String of @Class.Interval@ or @Class.IntervalAndCargo@ objects.
-..param.tag:TODO
+..param.tag:Tag for tree construction method. @tag.RandomCenter@ or @tag.ComputeCenter@
 ..remark:center of root node is computed by _calcIntervalTreeRootCenter
 ..include:seqan/refinement.h
  */
@@ -301,7 +262,7 @@ SEQAN_CHECKPOINT
 ..param.tag.default:Tag.IntervalTree Centers.tag.ComputeCenter
  */
 // most user friendly interval tree construction for the moment...
-// CompCenter tag as default construction method
+// RandomCenter tag as default construction method
 template<typename TGraph, typename TPropertyMap, typename TIntervals>
 void 
 createIntervalTree(TGraph & g, 
@@ -309,7 +270,7 @@ createIntervalTree(TGraph & g,
 				   TIntervals & intervals)
 {
 SEQAN_CHECKPOINT
-	createIntervalTree(g,pm,intervals,ComputeCenter());
+	createIntervalTree(g,pm,intervals,RandomCenter());
 }
 
 
@@ -358,7 +319,7 @@ SEQAN_CHECKPOINT
 /**
 ..signature:createIntervalTree(TGraph &g, TPropertyMap &pm, TIntervals &intervals, center)
  */
-// CompCenter tag as default construction method
+// RandomCenter tag as default construction method
 template<typename TGraph, typename TPropertyMap, typename TIntervals>
 void 
 createIntervalTree(TGraph & g, TPropertyMap & pm, 
@@ -366,7 +327,7 @@ createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   typename Value<typename Value<TIntervals>::Type>::Type center)
 {
 SEQAN_CHECKPOINT
-	createIntervalTree(g,pm,intervals,center,ComputeCenter());
+	createIntervalTree(g,pm,intervals,center,RandomCenter());
 }
 
 
@@ -382,11 +343,10 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   TValue, 
 				   TValue center, 
 				   typename VertexDescriptor<TGraph>::Type len,
-				   Tag<TagComputeCenter_> const tag)
+				   Tag<_TagComputeCenter> const tag)
 {
 SEQAN_CHECKPOINT
-	//IntervalAndCargo<int,Fragment<>* >* checkOne = getValue(intervals,0); 
-	//std::cout <<leftBoundary(*checkOne)<<"->\n";
+	//  Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*intervals[0]);
 		return;
@@ -397,13 +357,15 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef String<TIntervalPointer*> TIntervalPointers;
 
+	// one list of interval pointers for the intervals to the left of center
 	TIntervalPointers S_left;
+	// one list of interval pointers for the intervals to the right of center
 	TIntervalPointers S_right;
 
-	TValue min1 = 300000000;
-	TValue min2 = 300000000;
-	TValue max1 = 0;
-	TValue max2 = 0;
+	TValue min1 = supremumValue<TValue>();
+	TValue min2 = supremumValue<TValue>();
+	TValue max1 = infimumValue<TValue>();
+	TValue max2 = infimumValue<TValue>();
 
 	value(pm,knot).center = center;
 	
@@ -412,11 +374,14 @@ SEQAN_CHECKPOINT
 	TIntervalIterator it = begin(intervals,Standard());
 	TIntervalIterator it_end = end(intervals,Standard());
 	
+	// walk through intervals
 	while(it != it_end)
 	{
+		// interval belongs to the left list
 		if((**it).i2<=center)
 		{
 			appendValue(S_left,*it, Generous());
+			 //remember right most and left most point in left list
 			if((**it).i2 > max1)
 				max1 = (**it).i2;
 			if((**it).i1 < min1)
@@ -424,15 +389,17 @@ SEQAN_CHECKPOINT
 		}
 		else
 		{
+			// interval belongs to the right list
 			if((**it).i1>center)
 			{
 				appendValue(S_right,(*it), Generous());
+				 //remember right most and left most point in right list
 				if((**it).i2 > max2)
 					max2 = (**it).i2;
 				if ((**it).i1 < min2)
 					min2 = (**it).i1;
 			}
-			else
+			else // interval belongs to this node
 			{
 				_appendIntervalTreeNodeLists(value(pm,knot),**it);
 			}
@@ -443,7 +410,7 @@ SEQAN_CHECKPOINT
 //	std::sort(begin(value(pm,knot).list1),end(value(pm,knot).list1),_less_compI1_ITree<typename Value<TList>::Type>);
 	std::sort(begin(value(pm,knot).list2),end(value(pm,knot).list2),_greater_compI2_ITree<typename Value<TList>::Type>);
 
-	
+	// build subtree to the left
 	if(!empty(S_left))
 	{
 		TVertexDescriptor vd = addVertex(g);
@@ -451,6 +418,7 @@ SEQAN_CHECKPOINT
 		addEdge(g,knot,vd);
 		_createIntervalTree(g,pm,S_left,vd,center,min1+(max1-min1)/2,length(S_left),tag);
 	}
+	// build subtree to the right
 	if(!empty(S_right))
 	{
 		TVertexDescriptor vd = addVertex(g);
@@ -477,7 +445,7 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   Tag<TSpec> const tag)
 {
 SEQAN_CHECKPOINT
-
+	// Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*value(intervals,0));
 		return;
@@ -488,7 +456,9 @@ SEQAN_CHECKPOINT
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef String<TInterval*> TIntervalPointers;
 	
+	// one list of interval pointers for the intervals to the left of center
 	TIntervalPointers S_left;
+	// one list of interval pointers for the intervals to the right of center
 	TIntervalPointers S_right;
 		
 	value(pm,knot).center = center;
@@ -497,20 +467,23 @@ SEQAN_CHECKPOINT
 	TIntervalIterator it = begin(intervals,Standard());
 	TIntervalIterator it_end = end(intervals,Standard());
 	
+	// walk through intervals
 	while(it != it_end)
 	{
+		// interval belongs to the left list
 		if((**it).i2<=center)
 		{
 			appendValue(S_left,*it, Generous());
 		}
 		else
-		{
+		{	// interval belongs to the right list
 			if((**it).i1>center)
 			{
 				appendValue(S_right,(*it), Generous());
 			}
 			else
 			{
+				// interval belongs to the current node
 				_appendIntervalTreeNodeLists(value(pm,knot),**it);
 			}
 		}
@@ -520,6 +493,7 @@ SEQAN_CHECKPOINT
 //	std::sort(begin(value(pm,knot).list1),end(value(pm,knot).list1),_less_compI1_ITree<typename Value<TList>::Type>);
 	std::sort(begin(value(pm,knot).list2),end(value(pm,knot).list2),_greater_compI2_ITree<typename Value<TList>::Type>);
 
+	// build subtree to the left
 	if(!empty(S_left))
 	{
 		TVertexDescriptor vd = addVertex(g);
@@ -528,6 +502,7 @@ SEQAN_CHECKPOINT
 		TValue next_center = _calcIntervalTreeNodeCenterLeft(S_left,last_center,center,tag);
 		_createIntervalTree(g,pm,S_left,vd,center,next_center,length(S_left),tag);
 	}
+	// build subtree to the right
 	if(!empty(S_right))
 	{
 		TVertexDescriptor vd = addVertex(g);
@@ -546,7 +521,7 @@ SEQAN_CHECKPOINT
 //for the left child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
+_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue &, TValue &, Tag<_TagRandomCenter> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  
@@ -558,43 +533,16 @@ SEQAN_CHECKPOINT
 //for the right child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
+_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue &, TValue &, Tag<_TagRandomCenter> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  
 	return (rightBoundary(*value(intervals,rand_index))+leftBoundary(*value(intervals,rand_index)))/(TValue)2.0;
 }
 
-//the MidCenter spec way of chosing center values:
-//simply take the middle 
-template<typename TIntervals, typename TValue>
-TValue
-_calcIntervalTreeNodeCenterLeft(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
-{
-SEQAN_CHECKPOINT
-	if (center > last_center)
-		return (center - (center-last_center)/(TValue)2.0);
-	else
-		return (center - (last_center-center)/(TValue)2.0);
-}
 
-//the MidCenter spec way of chosing center values:
-//picks a random interval from the list and takes its center as the center value 
-//for the right child node (during interval tree construction)
-template<typename TIntervals, typename TValue>
-TValue
-_calcIntervalTreeNodeCenterRight(TIntervals &, TValue & last_center, TValue & center, Tag<TagMidCenter_> const)
-{
-SEQAN_CHECKPOINT
-	if (center > last_center)
-		return (center + (center-last_center)/(TValue)2.0);
-	else
-		return (center + (last_center-center)/(TValue)2.0);
-}
-
-
-
-
+// if the center of the root is not given, it is placed in the "ComputeCenter way": in the middle of minValue and maxValue
+// where minValue is the minimum left boundary and maxValue is the maximum right boundary of all intervals
 template<typename TIntervals>
 typename Value<typename Value<TIntervals>::Type>::Type
 _calcIntervalTreeRootCenter(TIntervals & intervals)
@@ -607,8 +555,8 @@ SEQAN_CHECKPOINT
 	TIntervalIterator it = begin(intervals);
 	TIntervalIterator it_end = end(intervals);
 
-	TValue min = (TValue)300000000.0;//maxTValue;
-	TValue max = 0;
+	TValue min = supremumValue<TValue>();
+	TValue max = infimumValue<TValue>();
 
 	while(it != it_end)
 	{
@@ -627,10 +575,10 @@ SEQAN_CHECKPOINT
 .Function.addInterval
 ..cat:Miscellaneous
 ..signature:addInterval(graph, propertyMap, interval)
-..param.graph:The graph to add the interval tree for.
-..param.propertyMap:The property map to use.
-..param.interval:The interval to add to the tree of type TInterval.
-..summary:TODO
+..param.graph:The directed graph that contains the topography of the interval tree.
+..param.propertyMap:The property map containing the node properties of the interval tree.
+..param.interval:The interval to be added to the interval tree.
+..summary:Adds an interval to an interval tree.
 ..include:seqan/refinement.h
 */
 template<typename TGraph, typename TPropertyMap, typename TInterval>
@@ -721,7 +669,7 @@ SEQAN_CHECKPOINT
 
 /**
 ..signature:addInterval(intervalTree, interval)
-..param.intervalTree:The tree to add the trees to.
+..param.intervalTree:The interval tree to add the interval to.
 ...type:Class.IntervalTree
  */
 template<typename TValue, typename TCargo, typename TInterval>
@@ -739,8 +687,8 @@ SEQAN_CHECKPOINT
 // TODO(holtgrewe): Is this begin/end in C++ style or is it first/last?
 /**
 ..signature:addInterval(intervalTree, begin, end, cargo)
-..param.begin:First value of interval of type TValue.
-..param.end:Last value of interval of type TValue.
+..param.begin:Begin position of interval of type TValue.
+..param.end:End position of interval of type TValue.
 ..param.cargo:Cargo to attach to the interval.
  */
 template<typename TValue, typename TCargo>
@@ -778,24 +726,9 @@ SEQAN_CHECKPOINT
 }
 
 
-//template<typename TValue, typename TCargo>
-//void
-//addInterval(IntervalTree<TValue,TCargo> & itree, TValue begin, TValue end)
-//{
-//
-//	IntervalAndCargo<TValue,TCargo> interval;
-//	interval.i1 = begin;
-//	interval.i2 = end;
-//	interval.cargo = itree.interval_counter;
-//	++itree.interval_counter;
-//	addInterval(itree.g,itree.pm,interval);
-//
-//}
-
-
 /**
 .Function.findIntervals
-..summary:TODO
+..summary:Find all intervals that contain the query point.
 ..signature:findIntervals(graph, propertyMap, query, result)
 ..include:seqan/refinement.h
 */
@@ -873,7 +806,8 @@ SEQAN_CHECKPOINT
 
 /**
 ..signature:findIntervals(intervalTree, query, result)
-...param.intervalTree:TODO
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
 */
 template<typename TValue,typename TCargo>
 void
@@ -889,12 +823,12 @@ SEQAN_CHECKPOINT
 /**
 .Function.findIntervalsExcludeTouching
 ..cat:Miscellaneous
-..summary:TODO
+..summary::Find all intervals that contain the query point, exclude intervals that touch the query, i.e. where the query point equals the start or end point.
 ..signature:findIntervalsExcludeTouching(graph, propertyMap, query, result)
-..param.graph:Graph to use.
-..param.propertyMap:Property map to use.
+..param.graph:The directed graph that contains the topography of the interval tree.
+..param.propertyMap:The property map containing the node properties of the interval tree
 ..param.query:The TValue to query here.
-..param.result:The result is written here.
+..param.result:The resulting string of cargos/ids of the intervals that contain the query point.
 ...type:Class.String
 ...remark:Should be a string of TCargo.
 ..include:seqan/refinement.h
@@ -977,9 +911,8 @@ SEQAN_CHECKPOINT
 
 /**
 ..signature:findIntervalsExcludeTouching(intervalTree, query, result)
-..param.intervalTree:TODO
-..param.query:TODO
-..param.result:TODO
+..param.intervalTree:An interval tree
+...type:Class.IntervalTree
 */
 template<typename TValue,typename TCargo>
 void
@@ -990,76 +923,6 @@ SEQAN_CHECKPOINT
 	findIntervalsExcludeTouching(it.g,it.pm,query,result);
 
 }
-
-
-//find overlapping intervals... under construction and far from being done
-//template<typename TGraph, typename TPropertyMap, typename TValue,typename TInterval>
-//void
-//findIntervals(TGraph & g, TPropertyMap & pm, TInterval query, String<TInterval> & result)
-//{
-//
-//	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-//	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-//	typedef typename Value<TPropertyMap>::Type TProperty;
-//	
-//	// start at root
-//	TVertexDescriptor act_knot = 0;
-//	TProperty act_prop = property(pm,act_knot);
-//	TProperty next_prop;
-//	
-//	while(true)
-//	{
-//		TOutEdgeIterator it(g, act_knot);
-//		act_prop = property(pm,act_knot);
-//		if(act_prop.center < leftBoundary(query))
-//		{
-//			int i = 0;
-//			while(i < length(act_prop.list2) && rightBoundary(act_prop.list2[i]) > leftBoundary(query))
-//			{
-//				appendValue(result,act_prop.list2[i]);
-//				++i;	
-//			}
-//			if(atEnd(it)) break;
-//			else{
-//				next_prop = property(pm,targetVertex(it));
-//				if(next_prop.center <= act_prop.center)
-//				{
-//					goNext(it);
-//					if(atEnd(it)) break;
-//				}
-//			}
-//			act_knot = targetVertex(it);
-//		}
-//		else{
-//			if(query < act_prop.center)
-//			{
-//				int i = 0;
-//				while(i < length(act_prop.list1) && leftBoundary(act_prop.list1[i]) < rightBoundary(query))
-//				{
-//					appendValue(result,act_prop.list1[i]);
-//					++i;
-//				}
-//				if(atEnd(it)) break;
-//				else
-//				{
-//					next_prop = property(pm,targetVertex(it));
-//					if(next_prop.center >= act_prop.center)
-//					{
-//						goNext(it);
-//						if(atEnd(it)) break;
-//					}
-//				}
-//				act_knot = targetVertex(it);
-//			}
-//			else{
-//				append(result, act_prop.list1);
-//				break;
-//			}
-//		}
-//	}
-//
-//}
-
 
 /////////////////// Metafunctions ///////////////////////
 

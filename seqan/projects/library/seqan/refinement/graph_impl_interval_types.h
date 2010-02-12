@@ -178,11 +178,10 @@ SEQAN_CHECKPOINT
 }
 
 
-// TODO(holtgrew): Parameter name should not be es for EdgeStump, correct there!
 /**
 .Function.cargo:
-..signature:cargo(interval)
-..param.interval:
+..signature:cargo(me)
+..param.me:
 ...type:Class.IntervalAndCargo
 ..see:Function.getCargo
 */
@@ -196,7 +195,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.getCargo:
-..param.es:
+..param.me:
 ...type:Class.IntervalAndCargo
 ..see:Function.cargo
 */
@@ -438,11 +437,11 @@ struct StoreIntervals {};
 
 .Memvar.IntervalTreeNode#list1
 ..class:Class.IntervalTreeNode
-..summary:TODO
+..summary:Sorted list of pointers to intervals, sorted in ascending according to their left boundary points.
 
 .Memvar.IntervalTreeNode#list2
 ..class:Class.IntervalTreeNode
-..summary:TODO
+..summary:Sorted list of pointers to intervals, sorted in descending according to their right boundary points.
  */
 template<typename TInterval, typename TSpec=StorePointsOnly>
 class IntervalTreeNode;
