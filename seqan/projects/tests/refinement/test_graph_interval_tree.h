@@ -28,14 +28,74 @@
 // TODO(holtgrew): Split up large tests into one setup and multiple test functions.
 
 #include <seqan/refinement.h>  // Header under test.
+
 #include <seqan/basic/basic_testing.h>
 
 namespace SEQAN_NAMESPACE_MAIN {
+
+
+
+
+// Build an IntervalTree from randomly generated intervals.
+// Query IntervalTree with randomly generated points and compare result with naive
+// algorithm (walk through intervals and collect intervals containing the point)
+template<typename TValue, typename TConstructSpec, typename TStoreSpec>
+void IntervalTreeTestRandom(TValue minValue, TValue maxValue) {
+
+    // Define some types to test.
+    typedef int                                     TCargo;
+    typedef IntervalTree<TValue,TCargo>             TIntervalTree;
+
+    String<TValue> intervalBegins;
+    String<TValue> intervalEnds;
+    String<TCargo> intervalCargos;
+
+    //generate random intervals
+    unsigned numIntervals = rand() % 1000 +1;
+    for(unsigned i = 0; i < numIntervals; ++i)
+    {
+        TValue iBegin = (rand() % maxValue) + 1 + minValue;
+        TValue iEnd = (rand() % maxValue) + 1 + minValue;
+	if(iEnd < iBegin)
+	{
+	     TValue tmp = iEnd;
+	     iEnd = iBegin;
+	     iBegin = tmp;
+	}
+	appendValue(intervalBegins,iBegin);
+	appendValue(intervalEnds,iEnd);
+	appendValue(intervalCargos,i);
+    }
+
+    // create interval tree
+    TIntervalTree itree(begin(intervalBegins),begin(intervalEnds),begin(intervalCargos),numIntervals);
+
+    // generate query points and test
+    unsigned numQueries = rand() % 10 + 1;
+    for(unsigned i = 0; i < numQueries; ++i)
+    {
+	TValue query = (rand() % maxValue) + 1 + minValue;
+	String<TCargo> itreeResult;
+	findIntervals(itree,query,itreeResult);
+	String<TCargo> naiveResult;
+	for(unsigned j = 0; j < numIntervals; ++j)
+	{
+	    if(intervalBegins[j] <= query && intervalEnds[j] > query)
+		appendValue(naiveResult,intervalCargos[j]);
+	}
+	std::sort(begin(itreeResult),end(itreeResult));
+	std::sort(begin(naiveResult),end(naiveResult));
+	SEQAN_ASSERT_EQ(length(itreeResult),length(naiveResult));
+	for(unsigned j = 0; j < length(naiveResult); ++j)
+		SEQAN_ASSERT_EQ(itreeResult[j],naiveResult[j]);
+    }
+}
 
 // Build an IntervalTree from constant data.  The perform some queries
 // and check the results.
 template<typename TValue, typename TConstructSpec, typename TStoreSpec>
 void IntervalTreeTest() {
+
     // Define some types to test.
     typedef int                                     TCargo;
     typedef IntervalAndCargo<TValue, TCargo>        TInterval;
@@ -100,6 +160,8 @@ void IntervalTreeTest() {
 }
 
 
+
+
 // Build an IntervalTree from constant data.  The, perform extensive
 // checks on its structure and also test some query results against
 // expected results.
@@ -133,7 +195,7 @@ void IntervalTreeRestTest() {
     // Create interval tree from the intervals.
     TGraph g;
     TPropertyMap pm;
-    createIntervalTree(g, pm, intervals);
+    createIntervalTree(g, pm, intervals,ComputeCenter());
 
     // Perform extensives checks on the interval tree's structure.
     {
@@ -282,38 +344,6 @@ void testEasyIntervalTree() {
                           result[0] == 1 and result[1] == 2);
     }
 
-    // TODO(holtgrew): Superflous, using generated copy constructor?
-    // Construct IntervalTree by copy constructor.
-    {
-        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
-        TIntervalTree itree2(itree);
-        String<TCargo> result;
-
-        findIntervals(itree2, 1, result);
-        SEQAN_ASSERT_EQ(length(result), 0);
-
-        findIntervals(itree2, 4, result);
-        SEQAN_ASSERT_EQ(length(result), 2);
-        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
-                          result[0] == 1 and result[1] == 2);
-    }
-
-    // TODO(holtgrew): Superflous, using generated assignment operator?
-    // Construct IntervalTree by assignment operator.  Then, perform
-    // some queries and check the resutls.
-    {
-        TIntervalTree itree(begin(begins), begin(ends), begin(cargos), 4);
-        TIntervalTree itree2 = itree;
-        String<TCargo> result;
-
-        findIntervals(itree2, 1, result);
-        SEQAN_ASSERT_EQ(length(result), 0);
-
-        findIntervals(itree2, 4, result);
-        SEQAN_ASSERT_EQ(length(result), 2);
-        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
-                          result[0] == 1 and result[1] == 2);
-    }
 
     // Add intervals to a tree, then perform some queries and check
     // the results.
@@ -358,6 +388,8 @@ void testEasyIntervalTree() {
 }
 
 
+
+
 // Call testEasyIntervalTree with <int> parametrization.
 SEQAN_DEFINE_TEST(Graph_Interval_Tree__testEasyIntervalTree__int) {
     srand(static_cast<unsigned>(time(NULL)));
@@ -372,13 +404,6 @@ SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest__int_RandomCenter_StoreP
     IntervalTreeTest<int, RandomCenter, StorePointsOnly>();
 }
 
-
-// Call IntervalTreeTests with <int, MidCenter, StorePointsOnly>
-// parametrization.
-SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest__unsigned_MidCenter_StoreIntervals) {
-    srand(static_cast<unsigned>(time(NULL)));
-    IntervalTreeTest<unsigned, MidCenter, StoreIntervals>();
-}
 
 
 // Call IntervalTreeTests with <int, ComputeCenter, StoreIntervals>
@@ -395,6 +420,17 @@ SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeRestTest__IntervalTreeRestTes
     srand(static_cast<unsigned>(time(NULL)));
     IntervalTreeRestTest<int>();
 }
+
+
+
+// Call IntervalTreeTests with <int, RandomCenter, StorePointsOnly>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTestRandom__int_RandomCenter_StorePointsOnly) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeTestRandom<int, RandomCenter, StorePointsOnly>(0,100000);
+}
+
+
 
 }  // SEQAN_NAMESPACE_MAIN
 

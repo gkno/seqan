@@ -67,14 +67,13 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
 //     SEQAN_CALL_TEST(OutEdgeIteratorAlignment);
 
     // Test Match Refinement.
-    SEQAN_CALL_TEST(GraphMatchRefinement_Problem);  // TODO(holtgrew): Artefact? Remove?
     SEQAN_CALL_TEST(GraphMatchRefine);
     SEQAN_CALL_TEST(RefineAlign);
 
     // Test IntervalTree class.
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTestRandom__int_RandomCenter_StorePointsOnly);
     SEQAN_CALL_TEST(Graph_Interval_Tree__testEasyIntervalTree__int);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest__int_RandomCenter_StorePointsOnly);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest__unsigned_MidCenter_StoreIntervals);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest__int_ComputeCenter_StoreIntervals);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeRestTest__IntervalTreeRestTest__int);
 
