@@ -671,7 +671,8 @@ inline bool _swiftMultiProcessQGram(
 			std::cerr<<*(hostIterator(hostIterator(finder))+i);
 	}
 */	
-	for(; occ != occEnd; ++occ) 
+	__int64 curPos = finder.curPos + pattern.finderPosOffset;
+	for(; occ != occEnd; ++occ)
 	{
 		posLocalize(ndlPos, *occ, stringSetLimits(index));
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, getSeqNo(ndlPos));
@@ -688,8 +689,7 @@ inline bool _swiftMultiProcessQGram(
 
 		do 
 		{
-			__int64 lastIncrement = (__int64)(*bkt).lastIncrement - pattern.finderPosOffset;
-			if (lastIncrement < bktBeginHstk)
+			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset)
 			{
 				// last increment was before the beginning of the current bucket
 				// (we must ensure that bucketIdx doesn't collide)
@@ -697,12 +697,12 @@ inline bool _swiftMultiProcessQGram(
 			}
 			else
 			{
-				if (lastIncrement + bucketParams.tabooLength > finder.curPos) 
+				if ((*bkt).lastIncrement + bucketParams.tabooLength > curPos) 
 					goto checkOverlap;	// increment only once per sequence			
 				hitCount = (*bkt).counter + 1;
 			}
 
-			(*bkt).lastIncrement = finder.curPos + pattern.finderPosOffset;
+			(*bkt).lastIncrement = curPos;
 			(*bkt).counter = hitCount;
 #ifdef SEQAN_DEBUG_SWIFT
 			(*bkt)._lastIncDiag = diag;
