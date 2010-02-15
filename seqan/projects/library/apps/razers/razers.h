@@ -39,6 +39,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Default options
 
+#ifdef RAZERS_OPENADDRESSING
+	typedef OpenAddressing	TQGramIndexSpec;
+#else
+	typedef Default	TQGramIndexSpec;
+#endif
+
 	template < bool _DONT_VERIFY = false, bool _DONT_DUMP_RESULTS = false >
 	struct RazerSSpec 
 	{
@@ -257,21 +263,21 @@ struct MicroRNA{};
 	typedef String<TMatch/*, MMap<>*/ >					TMatches;	// array of matches
 
 
-	template <typename TShape>
-	struct Cargo< Index<TReadSet, TShape> > {
+	template <typename TSpec>
+	struct Cargo< Index<TReadSet, TSpec> > {
 		typedef struct {
 			double		abundanceCut;
 			int			_debugLevel;
 		} Type;
 	};
-
+	
 //////////////////////////////////////////////////////////////////////////////
 // Memory tuning
 
 #ifdef RAZERS_MEMOPT
 
-	template <typename TShape>
-	struct SAValue< Index<TReadSet, TShape> > {
+	template <typename TSpec>
+	struct SAValue< Index<TReadSet, TSpec> > {
 		typedef Pair<
 			unsigned,				
 			unsigned,
@@ -281,8 +287,8 @@ struct MicroRNA{};
 	
 #else
 
-	template <typename TShape>
-	struct SAValue< Index<TReadSet, TShape> > {
+	template <typename TSpec>
+	struct SAValue< Index<TReadSet, TSpec> > {
 		typedef Pair<
 			unsigned,			// many reads
 			unsigned,			// of arbitrary length
@@ -298,8 +304,8 @@ struct MicroRNA{};
 		typedef unsigned Type;
 	};
 
-	template <typename TShape>
-	struct Size< Index<TReadSet, Index_QGram<TShape> > >
+	template <typename TShape, typename TSpec>
+	struct Size< Index<TReadSet, Index_QGram<TShape, TSpec> > >
 	{
 		typedef unsigned Type;
 	};
@@ -309,13 +315,13 @@ struct MicroRNA{};
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
-	template <typename TShape>
-	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape> > &index) 
+	template <typename TShape, typename TSpec>
+	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape, TSpec> > &index) 
 	{
-		typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
-		typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
-		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
-		typedef typename Value<TDir>::Type					TSize;
+		typedef Index<TReadSet, Index_QGram<TShape, TSpec>	>	TReadIndex;
+		typedef typename Fibre<TReadIndex, QGram_Dir>::Type		TDir;
+		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
+		typedef typename Value<TDir>::Type						TSize;
 
 		TDir &dir    = indexDir(index);
 		bool result  = false;
@@ -1455,7 +1461,12 @@ void mapSingleReads(
 		0
 	};
 
+	SEQAN_PROTIMESTART(map_contig_time);
+
 	// iterate all verification regions returned by SWIFT
+	TSize gLength = length(genome);
+	__int64 localTP = 0;
+	__int64 localFP = 0;
 #ifdef RAZERS_MICRO_RNA
 	while (find(swiftFinder, swiftPattern, 0.2, options._debugLevel)) 
 #else
@@ -1469,7 +1480,6 @@ void mapSingleReads(
 			// transform coordinates to the forward strand
 			if (orientation == 'R') 
 			{
-				TSize gLength = length(genome);
 				TSize temp = m.gBegin;
 				m.gBegin = gLength - m.gEnd;
 				m.gEnd = gLength - temp;
@@ -1505,17 +1515,27 @@ void mapSingleReads(
 				}
 			}
 
-			++options.TP;
+			++localTP;
 //			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
 //			::std::cerr << hstkPos << " + ";
 //			::std::cerr << ::std::endl;
 		} else {
-			++options.FP;
+			++localFP;
 //			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
 //			::std::cerr << rseqNo << " : ";
 //			::std::cerr << hstkPos << " + ";
 //			::std::cerr << bucketWidth << "  " << TP << ::std::endl;
 		}
+	}
+	options.TP += localTP;
+	options.FP += localFP;
+	if (options._debugLevel >= 2)
+	{
+		double spec = 100;
+		double time = SEQAN_PROTIMEDIFF(map_contig_time);
+		if (localFP+localTP != 0)
+			spec = (1000*localTP/(localFP+localTP))/10.0;
+		::std::cerr << " [" << (gLength / time) << "bp/s " << time << "s] [" << spec << "%SP " << localFP+localTP << "V]";
 	}
 }
 #endif
@@ -1665,10 +1685,10 @@ int mapSingleReads(
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
-	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
-	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+	typedef typename Value<TReadSet>::Type							TRead;
+	typedef Index<TReadSet, Index_QGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
+	typedef Pattern<TIndex, Swift<TSwiftSpec> >						TSwiftPattern;	// filter
+	typedef Pattern<TRead, MyersUkkonen>							TMyersPattern;	// verifier
 
 /*	// try opening each genome file once before running the whole mapping procedure
 	int filecount = 0;
@@ -1686,6 +1706,9 @@ int mapSingleReads(
 
 	// configure q-gram index
 	TIndex swiftIndex(readSet, shape);
+#ifdef RAZERS_OPENADDRESSING
+	swiftIndex.alpha = 2;
+#endif
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 
@@ -1822,10 +1845,10 @@ int mapSingleReads(
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
-	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >			TIndex;			// q-gram index
-	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+	typedef typename Value<TReadSet>::Type							TRead;
+	typedef Index<TReadSet, Index_QGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
+	typedef Pattern<TIndex, Swift<TSwiftSpec> >						TSwiftPattern;	// filter
+	typedef Pattern<TRead, MyersUkkonen>							TMyersPattern;	// verifier
 
 	// configure q-gram index
 	TIndex swiftIndex(readSet, shape);
