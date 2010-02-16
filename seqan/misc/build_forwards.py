@@ -42,6 +42,8 @@ def buildProject(project_path):
         if '.svn' in dirs:
             dirs.remove('.svn')
         for file in files:
+            if file.startswith('.'):
+              continue  # Skip hidden files.
             if file == forwardFilename(project):
                 continue
             path = os.path.join(root, file)
@@ -564,6 +566,8 @@ def buildAllForwards(project_path, force_recreate = False):
     
     for f in os.listdir(project_path):
         if (f == 'CVS') or (f == '.svn'): continue
+        if f.startswith('.'):
+          continue  # Skip hidden files.
         p = project_path + "/" + f
         m = os.stat(p)[ST_MODE]
         if S_ISDIR(m):
