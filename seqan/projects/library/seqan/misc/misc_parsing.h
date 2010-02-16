@@ -78,6 +78,27 @@ _parse_skipSpace(TFile& file, TChar& c)
 	}
 }
 
+
+/**
+.Internal._parse_skipUntilChar:
+..summary:Skip to the next ocurrence of x in file.
+..cat:Miscenalleous
+..signature:_parse_skipUntilChar(file, x, c)
+..param.file:The file to read from.
+..param.x:The character to skip to.
+..param.c:Parser state character.
+ */
+template<typename TFile, typename TChar>
+inline void 
+_parse_skipUntilChar(TFile& file, const TChar &x, TChar& c)
+{
+	if (c == x) return;
+	while (!_streamEOF(file)) {
+		c = _streamGet(file);
+		if (c == x) break;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TChar>

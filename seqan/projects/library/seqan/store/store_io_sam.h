@@ -637,10 +637,12 @@ namespace SEQAN_NAMESPACE_MAIN
         // read fields of alignments line        
         _parse_skipWhitespace(file, c);
 
-		// read the query name
+		// Read the query name.  The letters until the first
+		// whitespace will be read into qname.  Then, we skip until we
+		// hit the first tab character.
         String<char> qname;
         _parse_readSamIdentifier(file, qname, c);
-        _parse_skipWhitespace(file, c);
+        _parse_skipUntilChar(file, '\t', c);
 
 		// read the flag
         int flag;
