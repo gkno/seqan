@@ -828,6 +828,7 @@ void compactMatches(TMatches &matches, TCounts &
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
+	__int64 disabled = 0;
 #ifdef RAZERS_MICRO_RNA
 	if(options.microRNA && options.purgeAmbiguous)
 		++hitCountCutOff;	// we keep one more match than we actually want, so we can later decide
@@ -866,7 +867,8 @@ void compactMatches(TMatches &matches, TCounts &
 					setMaxErrors(swift, readNo, maxErrors);
 
 					if (maxErrors == -1 && options._debugLevel >= 2)
-						::std::cerr << "(read #" << readNo << " disabled)";
+						++disabled;
+//						::std::cerr << "(read #" << readNo << " disabled)";
 
 					if (options.purgeAmbiguous)
 					{
@@ -896,6 +898,12 @@ void compactMatches(TMatches &matches, TCounts &
 		*dit = *it;
 		++dit;
 	}
+	if (options._debugLevel >= 2)
+	{
+		std::cerr << " [" << length(matches) - (dit - begin(matches, Standard())) << " matches removed]";
+		std::cerr << " [" << disabled << " reads disabled]";
+	}
+	
 	resize(matches, dit - begin(matches, Standard()));
 }
 
@@ -1508,10 +1516,9 @@ void mapSingleReads(
 #ifdef RAZERS_MICRO_RNA
 					options.compactThresh += length(matches);
 #else
-					options.compactThresh += (options.compactThresh >> 1);
+					if (length(matches) * 4 > oldSize)			// the threshold should not be raised
+						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 #endif
-					if (options._debugLevel >= 2)
-						::std::cerr << '(' << oldSize - length(matches) << " matches removed)";
 				}
 			}
 
@@ -1535,7 +1542,7 @@ void mapSingleReads(
 		double time = SEQAN_PROTIMEDIFF(map_contig_time);
 		if (localFP+localTP != 0)
 			spec = (1000*localTP/(localFP+localTP))/10.0;
-		::std::cerr << " [" << (gLength / time) << "bp/s " << time << "s] [" << spec << "%SP " << localFP+localTP << "V]";
+		::std::cerr << " [" << (int)((gLength / time)/100.0)/10.0 << "kbp/s " << time << "s] [" << spec << "%SP " << localFP+localTP << "V]";
 	}
 }
 #endif
