@@ -21,6 +21,7 @@
 #ifndef SEQAN_HEADER_SEGMENT_INFIX_H
 #define SEQAN_HEADER_SEGMENT_INFIX_H
 
+#include <cassert>  // assert()
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -59,6 +60,12 @@ public:
 //____________________________________________________________________________
 
 public:
+    // Check member variables with assertions.  This is called in the
+    // constructors.
+    void _checkMemberVariables() const {
+        // TODO(holtgrew): Should use SEQAN_ASSERT_*.
+        assert( data_begin_position <= data_end_position );
+    }
 
 /**
 .Memfunc.InfixSegment#Segment:
@@ -87,6 +94,7 @@ of the host object.
 If $begin$ und $end$ are omitted, the infix segment corresponding to
 the first character of $host$ is constructed.
 This is the same segment that is returned by @Function.goBegin@.
+...text:The predicate $begin <= end$ must be true.
 */
 	Segment():
 		data_host(NULL),
@@ -94,6 +102,7 @@ This is the same segment that is returned by @Function.goBegin@.
 		data_end_position(0)
 	{
 SEQAN_CHECKPOINT
+        _checkMemberVariables();
 	}
 
 	Segment(typename _Parameter<THost>::Type _host):
@@ -102,6 +111,7 @@ SEQAN_CHECKPOINT
 		data_end_position(1)
 	{
 SEQAN_CHECKPOINT
+        _checkMemberVariables();
 	}
 
 	Segment(typename _Parameter<THost>::Type _host, typename Position<THost>::Type _begin_index, typename Position<THost>::Type _end_index):
@@ -110,6 +120,7 @@ SEQAN_CHECKPOINT
 		data_end_position(_end_index)
 	{
 SEQAN_CHECKPOINT
+        _checkMemberVariables();
 	}
 /*
 	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin, typename Iterator<THost, Rooted>::Type _end):
@@ -126,6 +137,7 @@ SEQAN_CHECKPOINT
 		data_end_position(position(_end, _host))
 	{
 SEQAN_CHECKPOINT
+        _checkMemberVariables();
 	}
 	template <typename THost2, typename TSpec2>
 	Segment(Segment<THost2, TSpec2> const & _other):
@@ -134,6 +146,7 @@ SEQAN_CHECKPOINT
 		data_end_position(endPosition(_other))
 	{
 SEQAN_CHECKPOINT
+        _checkMemberVariables();
 	}
 
 	~ Segment() 
