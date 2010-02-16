@@ -22,13 +22,21 @@
 #ifndef SEQAN_HEADER_RAZERS_PARALLEL_2_H
 #define SEQAN_HEADER_RAZERS_PARALLEL_2_H
 
+#include <iostream>
 //#include "tbb/pipeline.h"
 //#include "tbb/spin_mutex.h"
 //#include "tbb/task_scheduler_init.h"
-#include <omp.h>
+//#include <omp.h>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+    template<
+        typename TReadSet,
+        typename TShape>
+    void intiIndex(Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index, TReadSet & _text, TShape const & _shape){
+        value(index.text) = _text;
+        index.shape = _shape;
+    }
     
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in a single genome sequence
@@ -72,6 +80,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (orientation == 'F') ::std::cerr << "[fwd]";
             else                    ::std::cerr << "[rev]";
         }
+        
         lockContig(store, contigId);
         TContigSeq &contigSeq = store.contigStore[contigId].seq;
         if (orientation == 'R')	reverseComplementInPlace(contigSeq);
@@ -98,50 +107,55 @@ namespace SEQAN_NAMESPACE_MAIN
             verifier[i] = oneVerifier;
         }
         
+        bool beginOk = true;
+        
         // set up finder
         for (unsigned i = 0; i < length(swiftFinders); ++i)
-            windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
+            // FIXME: break after first one is false
+            beginOk = beginOk & windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
         
-        // FIXME: razerSoption
-        unsigned windowSize = 5000;
-        unsigned offSet = 0;
-        
-        // go over contig sequence
-        while(offSet < length(contigSeq))
-        {
-            // each filter runs over the window separately
-            // FIXME: Parallelize
-# pragma omp parallel for shared(i)
-            for (TSwiftFinderSize i = 0; i < length(swiftFinders); ++i){
+        // if started correctly
+        if(beginOk){
+            
+            // FIXME: razerSoption
+            unsigned windowSize = 5000;
+            unsigned offSet = 0;
+            
+            // go over contig sequence
+            while(offSet < length(contigSeq))
+            {
+                bool stop = false;
                 
-                // filter window and save hits
-                windowFindNext(swiftFinders[i], swiftPatterns[i], windowSize, options._debugLevel);
-
-                // verify hits
-                THitString hits = getSwiftHits(swiftFinders[i]);
-                for(THitStringSize h = 0; h < length(hits); ++h)
-                    verifier[i].m.readId = hits[h].ndlSeqNo;
-                    // FIXME: arguments are not correct
-                    matchVerify(verifier[i], range(swiftFinders[i], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                // each filter runs over the window separately
+                // FIXME: Parallelize
+                for (TSwiftFinderSize i = 0; i < length(swiftFinders); ++i){
+                    
+                    // filter window and save hits
+                    stop = !windowFindNext(swiftFinders[i], swiftPatterns[i], windowSize, (options._debugLevel & (i == 0)));
+                    
+                    // verify hits
+                    THitString hits = getSwiftHits(swiftFinders[i]);
+                    for(THitStringSize h = 0; h < length(hits); ++h){
+                        verifier[i].m.readId = hits[h].ndlSeqNo;
+                        matchVerify(verifier[i], range(swiftFinders[i], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                    }                    
+                    
+                }
                 
+                if(stop) break;
+                
+                // move window
+                offSet += windowSize;
             }
             
-            // move window
-            offSet += windowSize;
-        }
+            // clear finders
+            for (unsigned i = 0; i < length(swiftFinders); ++i)
+                windowFindEnd(swiftFinders[i], swiftPatterns[i]);
+            
+        } // end: if started correctly
         
-        // clear finders
-        for (unsigned i = 0; i < length(swiftFinders); ++i)
-            windowFindEnd(swiftFinders[i], swiftPatterns[i]);
-        
-        
-        /*while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
-        {
-            verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
-            if (!options.spec.DONT_VERIFY)
-                matchVerify(verifier, range(swiftFinder, contigSeq), verifier.m.readId, readSet, mode);
-            ++options.countFiltration;
-        }*/
+
+
         
         if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
@@ -182,11 +196,19 @@ namespace SEQAN_NAMESPACE_MAIN
         String<TSwiftPattern> swiftPatterns;
         resize(swiftPatterns, length(readIndices), Exact());
         for (TPos i = 0; i < length(readIndices); ++i) {
-            TSwiftPattern swiftPattern(readIndices[i]);
-            swiftPattern.params.minThreshold = options.threshold;
-            swiftPattern.params.tabooLength = options.tabooLength;
-            swiftPatterns[i] = swiftPattern;
+            assign(swiftPatterns[i].data_host, readIndices[i]);
+            swiftPatterns[i].params.minThreshold = options.threshold;
+            swiftPatterns[i].params.tabooLength = options.tabooLength;
         }
+        
+        /*
+         for (TPos i = 0; i < length(readIndices); ++i) {
+         TSwiftPattern swiftPattern(readIndices[i]);
+         swiftPattern.params.minThreshold = options.threshold;
+         swiftPattern.params.tabooLength = options.tabooLength;
+         swiftPatterns[i] = swiftPattern;
+         }
+         */
         
         // init edit distance verifiers
         unsigned readCount = length(store.readSeqStore);//countSequences(readIndices); // FIXME: function for String of StringSets has the return the total number of reads
@@ -295,7 +317,7 @@ namespace SEQAN_NAMESPACE_MAIN
         else {
             // number of reads per thread
             unsigned perBlock = length(store.readSeqStore) / noOfBlocks;
-            unsigned perBlockRemainder = length(store.readSeqStore) / noOfBlocks;
+            unsigned perBlockRemainder = length(store.readSeqStore) % noOfBlocks;
             
             String<TIndex> indices;
             resize(indices, noOfBlocks, Exact());
@@ -318,12 +340,18 @@ namespace SEQAN_NAMESPACE_MAIN
                 }
                 
                 // configure q-gram index
-                TIndex swiftIndex(readSet, shape);
-                cargo(swiftIndex).abundanceCut = options.abundanceCut;
-                cargo(swiftIndex)._debugLevel = options._debugLevel;
+                intiIndex(indices[b], readSet, shape);
+                cargo(indices[b]).abundanceCut = options.abundanceCut;
+                cargo(indices[b])._debugLevel = options._debugLevel;
+//                TIndex swiftIndex(readSet, shape);
+//                cargo(swiftIndex).abundanceCut = options.abundanceCut;
+//                cargo(swiftIndex)._debugLevel = options._debugLevel;
+//                indices[b] = swiftIndex;
                 
-                indices[b] = swiftIndex;
+                std::cerr << host(indices[b])[0] << std::endl;
             }
+            
+            std::cerr << host(indices[0])[0] << std::endl;
             
             return _mapSingleReadsParallel(store, cnts, options, mode, indices);
         }
