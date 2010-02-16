@@ -71,11 +71,15 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_CALL_TEST(RefineAlign);
 
     // Test IntervalTree class.
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTestRandom__int_RandomCenter_StorePointsOnly);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__testEasyIntervalTree__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest__int_RandomCenter_StorePointsOnly);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest__int_ComputeCenter_StoreIntervals);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeRestTest__IntervalTreeRestTest__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_IntervalTree__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_IntervalTreeFromIterator__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_NonFullLength__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_AddInterval__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_TreeStructure__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalExcludeTouching__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindNoInterval__int);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_GraphMap__int_ComputeCenter_StoreIntervals);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_Random__int_RandomCenter_StorePointsOnly);
 
     // Restore std::cout
 //      std::cout.rdbuf(strm_puffer);
