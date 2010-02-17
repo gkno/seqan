@@ -6,12 +6,12 @@ from setuptools import setup
 
 setup(
     name = 'TracIncludeMacro',
-    version = '2.1',
+    version = '2.1fub',
     packages = ['includemacro'],
 
-    author = 'Noah Kantrowitz',
-    author_email = 'noah@coderanger.net',
-    description = 'Include the contents of external URLs and other Trac objects in a wiki page.',
+    author = 'Manuel Holtgrewe',
+    author_email = 'manuel.holtgrewe@fu-berlin.de',
+    description = 'Include the contents of external URLs and other Trac objects in a wiki page.  Extended version that supports fragments.',
     long_description = open(os.path.join(os.path.dirname(__file__), 'README')).read(),
     license = 'BSD',
     keywords = 'trac 0.11 plugin wiki include macro',
