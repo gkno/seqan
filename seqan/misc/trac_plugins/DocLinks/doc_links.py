@@ -123,17 +123,16 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
         [1] http://trac.edgewall.org/wiki/TracDev/IWikiSyntaxProviderExample
         """
         # Get the <Category>.<Name> into symbol.
-        if ":" in target:
-            domain, symbol = target.split(':')
-        else:
-            symbol = target
-        symbol = symbol.strip()
-        if len(symbol.split('.', 1)) != 2:
-            return self.prefix + ':' + target
+        print >>sys.stderr, '%s, %s, %s, %s' % (formatter, ns, target, label)
+        # The following is a heuristic for "no alternative label".
+        if ns in label and target in label:
+          if '.' in target:
+            label = '%s %s (SeqAn)' % tuple(target.split('.', 1))
+          else:
+            label = '%s (SeqAn)' % target
         # Now, use dddoc's logic to generate the appropriate file name for
-        file_name = getFilename(*symbol.split('.', 1))
-        span = [gb.tag.span(' ', class_='icon'),
-                symbol.split('.', 1)[1], ' (SeqAn)']
-        title = ' Documentation for "%s" in SeqAn documentation.' % symbol
+        file_name = getFilename(*target.split('.', 1))
+        span = [gb.tag.span(' ', class_='icon'), label]
+        title = ' "%s" in SeqAn documentation.' % target
         return gb.tag.a(span, class_='ext-link',
                         href=self.base_url + file_name, title=title)
