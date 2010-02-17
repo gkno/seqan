@@ -26,6 +26,19 @@ import trac.wiki
 import genshi.builder as gb
 
 
+# Map categories to better names.
+CATEGORY_NAME_MAP = {
+  'Concept': 'concept',
+  'Class' : 'class',
+  'Spec' : 'specialization',
+  'Shortcut': 'shortcut',
+  'Function': 'function',
+  'Metafunction': 'metafunction',
+  'Tag': 'tag',
+  'Adaption': 'adaption',
+  }
+
+
 def getFilename(cat, item):
     """Get the filename that dddoc would create.
 
@@ -127,9 +140,10 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
         # The following is a heuristic for "no alternative label".
         if ns in label and target in label:
           if '.' in target:
-            label = '%s %s (SeqAn)' % tuple(target.split('.', 1))
+            category, item = tuple(target.split('.', 1))
+            label = '%s %s' % (CATEGORY_NAME_MAP.get(category, category), item)
           else:
-            label = '%s (SeqAn)' % target
+            label = '%s' % target
         # Now, use dddoc's logic to generate the appropriate file name for
         file_name = getFilename(*target.split('.', 1))
         span = [gb.tag.span(' ', class_='icon'), label]
