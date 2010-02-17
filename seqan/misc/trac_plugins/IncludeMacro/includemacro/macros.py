@@ -1,4 +1,5 @@
 # TracIncludeMacro macros
+import re
 import urllib2
 from StringIO import StringIO
 
@@ -31,8 +32,22 @@ class IncludeMacro(WikiMacroBase):
         args = [x.strip() for x in content.split(',')]
         if len(args) == 1:
             args.append(None)
+        elif len(args) == 3:
+            return system_message('args == %s' % args)
+            if not args[2].startswith('fragment='):
+                msg = ('If three arguments are given, the last one must'
+                       ' start with fragment=, but tag content was %s')
+                return system_message(msg % content)
         elif len(args) != 2:
             return system_message('Invalid arguments "%s"'%content)
+
+        # Parse out fragment name.
+        fragment_name = None
+        if args[-1] and args[-1].startswith('fragment='):
+            fragment_name = args[-1][len('fragment='):]
+            args.pop()
+        if len(args) == 1:
+            args.append(None)
             
         # Pull out the arguments
         source, dest_format = args
@@ -86,6 +101,19 @@ class IncludeMacro(WikiMacroBase):
         # RFE: Add attachment: source. <NPK>
         else:
             return system_message('Unsupported include source %s'%source)
+
+        # If there was a fragment name given then find the fragment.
+        fragment = []
+        current_fragment_name = None
+        if fragment_name:
+            for line in out.splitlines():
+                res = re.search(r'FRAGMENT\(([^)]*)\)', line)
+                if res:
+                    current_fragment_name = res.groups()[0]
+                else:
+                    if current_fragment_name == fragment_name:
+                        fragment.append(line)
+            out = '\n'.join(fragment)
             
         # If we have a preview format, use it
         if dest_format:

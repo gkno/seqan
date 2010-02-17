@@ -55,3 +55,20 @@ __ http://docutils.sf.net/rst.html
 .. tip::
     If you set the ``svn:mime-type`` property on the file, you can  
     leave off the explicit MIME type.
+
+You can also specify a a fragment to be included::
+
+    [[Include(source:trunk/test.cpp, fragment=main]]
+
+If the file trunk/test.cpp looks like this:
+
+    // The lines that contain FRAGMENT(fragment-name) define a fragment
+    // from the line AFTER their occurence up to before the next line
+    // containing such a fragment marker.
+    // FRAGMENT(includes)
+    #include <cstdio>
+
+    // FRAGMENT(main)
+    int main(int argc, char **argv) {
+        return 0;
+    }
