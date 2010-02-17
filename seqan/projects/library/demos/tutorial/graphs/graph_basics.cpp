@@ -1,13 +1,16 @@
+// The lines FRAGMENT(fragment-name) mark the begin of fragments for being
+// included in the documentation.  You can ignore them.
+// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/graph_types.h>
 using namespace seqan;
-// part 2
+// FRAGMENT(main-typedefs)
 int main ()
 {
 	typedef unsigned int TCargo;
 	typedef Graph<Undirected<TCargo> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
-// part 3
+// FRAGMENT(main-graph-construction)
 	TGraph g;
 
 	TVertexDescriptor vertBerlin = addVertex(g);
@@ -22,7 +25,7 @@ int main ()
 	addEdge(g, vertBerlin, vertMuenchen, 586);
 	addEdge(g, vertHannover, vertMuenchen, 572);
 	addEdge(g, vertHamburg, vertMainz, 521);
-// part 4
+// FRAGMENT(main-graph-io)
 	FILE* strmWrite = fopen("graph.dot", "w");
 	write(strmWrite, g, DotDrawing());
 	fclose(strmWrite);
