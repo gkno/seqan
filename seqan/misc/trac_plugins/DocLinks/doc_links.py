@@ -135,15 +135,13 @@ class SeqanDocsSyntaxProvider(trac.core.Component):
 
         [1] http://trac.edgewall.org/wiki/TracDev/IWikiSyntaxProviderExample
         """
-        # Get the <Category>.<Name> into symbol.
-        print >>sys.stderr, '%s, %s, %s, %s' % (formatter, ns, target, label)
         # The following is a heuristic for "no alternative label".
         if ns in label and target in label:
           if '.' in target:
             category, item = tuple(target.split('.', 1))
-            label = '%s %s' % (CATEGORY_NAME_MAP.get(category, category), item)
+            label = item
           else:
-            label = '%s' % target
+            label = target
         # Now, use dddoc's logic to generate the appropriate file name for
         file_name = getFilename(*target.split('.', 1))
         span = [gb.tag.span(' ', class_='icon'), label]
