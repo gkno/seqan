@@ -709,11 +709,11 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 */
 
 
-template<typename TPosition, typename TSpecSeed, typename TText>
+template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase>
 void 
 extendSeed(Seed<TPosition, TSpecSeed> &seed, 
-		   String<TText> const &query, 
-		   String<TText> const &database, 
+		   TQuery const &query, 
+		   TDatabase const &database, 
 		   TPosition direction, 
 		   MatchExtend)
 {
@@ -748,13 +748,13 @@ extendSeed(Seed<TPosition, TSpecSeed> &seed,
 }
 
 
-template<typename TPosition, typename TSpecSeed, typename TText, typename TScore>
+template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase, typename TScore>
 void 
 extendSeed(Seed<TPosition,TSpecSeed> &seed, 
 		   TScore scoreDropOff, 
 		   Score<TScore, Simple> const &scoreMatrix,
-		   String<TText> const &query,
-		   String<TText> const &database,
+		   TQuery const &query,
+		   TDatabase const &database,
 		   TPosition direction, 
 		   UngappedXDrop)
 {
@@ -814,13 +814,13 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 }
 
 
-template<typename TPosition, typename TText, typename TScore>
+template<typename TPosition, typename TQuery, typename TDatabase, typename TScore>
 void 
 extendSeed(Seed<TPosition,SimpleSeed> &seed, 
 		   TScore scoreDropOff, 
 		   Score<TScore, Simple> const &scoreMatrix, 
-		   String<TText> &query, 
-		   String<TText> &database, 
+		   TQuery const &query, 
+		   TDatabase const &database, 
 		   TPosition direction, 
 		   GappedXDrop)
 {
@@ -830,25 +830,36 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 	TPosition infimum = infimumValue<TPosition>()+1-gapCost;
 	
 	//left extension
-	if ((direction != 1)&&(leftDim0(seed)!=0)&&(leftDim1(seed)!=0)){
+	if ((direction != 1) && (leftDim0(seed)!= 0) && (leftDim1(seed) != 0))
+    {
 		TPosition upperBound = 0;
 		TPosition lowerBound = 0;
-		Segment<String<TText>,PrefixSegment> dataSeg(database,leftDim1(seed));
-		Segment<String<TText>,PrefixSegment> querySeg(query,leftDim0(seed));
+        typename Prefix<TDatabase const>::Type dataSeg = prefix(database, leftDim1(seed));
+        typename Prefix<TQuery const>::Type querySeg = prefix(query, leftDim0(seed));
 		TPosition xLength = length(querySeg);
 		TPosition yLength = length(dataSeg);
 
-		std::vector<TPosition> *antiDiag1 = new std::vector<TPosition>(1,0);		//smallest diagonal
-		std::vector<TPosition> *antiDiag2 = new std::vector<TPosition>(2,infimum);
-		std::vector<TPosition> *antiDiag3 = new std::vector<TPosition>(3,infimum);	//current diagonal
-		std::vector<TPosition> *tmpDiag;
+        String<TPosition> antiDiagonal1;
+        String<TPosition> antiDiagonal2;
+        String<TPosition> antiDiagonal3;
+
+        fill(antiDiagonal1, 1, 0);
+        fill(antiDiagonal2, 2, infimum);
+        fill(antiDiagonal3, 3, infimum);
+
+		String<TPosition> *antiDiag1 = &antiDiagonal1;		//smallest diagonal
+		String<TPosition> *antiDiag2 = &antiDiagonal2;
+		String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
+		String<TPosition> *tmpDiag;
 
 		//Matrix initialization
-		if (gapCost >= (-1)*scoreDropOff){
+		if (gapCost >= (-1)*scoreDropOff)
+        {
 			(*antiDiag2)[0] = gapCost;
 			(*antiDiag2)[1] = gapCost;
 		}
-		if (2*gapCost >= (-1)*scoreDropOff){
+		if (2*gapCost >= (-1)*scoreDropOff)
+        {
 			(*antiDiag3)[0] = 2*gapCost;
 			(*antiDiag3)[2] = 2*gapCost;
 		}
@@ -861,35 +872,39 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		TPosition tmpMax2 = 0;
 		
 		//Extension as proposed by Zhang et al
-		while(b<=u+1){
+		while(b <= u+1)
+        {
 			++k;
-			for (int i = b; i<= (u+1);++i){
+			for (TPosition i = b; i <= (u+1); ++i)
+            {
 				tmp = infimum;
 
-				tmp = ::std::max<TPosition>((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = ::std::max<TPosition>(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
-				tmpMax2 = ::std::max<TPosition>(tmpMax2,tmp);
+				tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i])+gapCost;
+				tmp = _max(tmp, (*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
+				tmpMax2 = _max(tmpMax2, tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
 					(*antiDiag3)[i] = tmp;
 			}
-			while (((*antiDiag3)[b]  < tmpMax1-scoreDropOff) && (b < static_cast<TPosition>((*antiDiag3).size())-1))
+			while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1))
 			{
 				++b;
 			}
 			++u;
-			while (((*antiDiag3)[u]  < tmpMax1-scoreDropOff) && (u>0)){
-				--u;}
+			while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u > 0))
+            {
+				--u;
+            }
 			
 			//borders for lower triangle of edit matrix
-			b = ::std::max<TPosition>(b,k-yLength+1);
-			u = ::std::min<TPosition>(u, xLength-1);
+			b = _max(b, k-yLength+1);
+			u = _min(u, xLength-1);
 			
-			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
-				lowerBound = (k+1)/2-b;
-			if ((u > k/2)&&(u-k/2>upperBound))
-				upperBound = u-k/2;
+			if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
+				lowerBound = (k+1)/2 - b;
+			if ((u > k/2) && (u - k/2 > upperBound))
+				upperBound = u - k/2;
 
 			tmpDiag = antiDiag1;
 			antiDiag1 = antiDiag2;
@@ -897,17 +912,18 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			antiDiag3 = tmpDiag;
 
 			int d = 0;
-			while ((d<3) &&(static_cast<TPosition>((*antiDiag3).size())<=xLength)){
-				(*antiDiag3).push_back(0);
+			while ((d < 3) &&((TPosition)length(*antiDiag3) <= xLength))
+            {
+				appendValue(*antiDiag3, 0);
 				++d;
 			}
-			for (unsigned int eu = 0; eu < (*antiDiag3).size();++eu)
+			for (unsigned int eu = 0; eu < length(*antiDiag3);++eu)
 				(*antiDiag3)[eu] = infimum;
 
 			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
-			if ((*antiDiag2)[(*antiDiag2).size()-1]+ gapCost >=tmpMax1-scoreDropOff)
-				(*antiDiag3)[(*antiDiag3).size()-1]=(*antiDiag2)[(*antiDiag2).size()-1]+ gapCost;
+				(*antiDiag3)[0] = (*antiDiag2)[0] + gapCost;
+			if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
+				(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
 				
 			tmpMax1 = tmpMax2;
 		}
@@ -924,11 +940,13 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		// Find seed start
 		TPosition tmpPos = 0;
 		TPosition tmpMax = infimum;
-		if ((k==xLength+yLength) &&((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)){
+		if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff))
+        {
 			tmpPos = xLength;
-			tmpMax =0;
-		} else{
-			for (unsigned int eu = 0; eu < (*antiDiag1).size();++eu){
+			tmpMax = 0;
+		} else
+        {
+			for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu){
 				if ((*antiDiag1)[eu] > tmpMax){
 					tmpMax = (*antiDiag1)[eu];
 					tmpPos = eu;		
@@ -936,34 +954,36 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			}
 			--k;
 		}
-		if(tmpMax != infimum){
-			setLeftDim0(seed,leftDim0(seed)-tmpPos);
-			setLeftDim1(seed,leftDim1(seed)-(k-tmpPos));
+		if(tmpMax != infimum)
+        {
+			setLeftDim0(seed, leftDim0(seed)-tmpPos);
+			setLeftDim1(seed, leftDim1(seed)-(k-tmpPos));
 		}
-
-		//free memory
-		(*antiDiag1).clear();
-		(*antiDiag2).clear();
-		(*antiDiag3).clear();
-		delete antiDiag1;
-		delete antiDiag2;
-		delete antiDiag3;
 	}
 
 	//right extension
 	
-	if ((direction != 0)&&(rightDim0(seed)<static_cast<TPosition>(length(query))-1)&&(rightDim1(seed)<static_cast<TPosition>(length(database))-1)){
+	if ((direction != 0) && (rightDim0(seed) < (TPosition)length(query)-1) && (rightDim1(seed) < (TPosition)length(database)-1))
+    {
 		TPosition upperBound = 0;
 		TPosition lowerBound = 0;
-		Segment<String<TText>,SuffixSegment> dataSeg(database,rightDim1(seed)+1);
-		Segment<String<TText>,SuffixSegment> querySeg(query,rightDim0(seed)+1);
+        typename Suffix<TDatabase const>::Type dataSeg = suffix(database, rightDim1(seed)+1);
+        typename Suffix<TQuery const>::Type querySeg = suffix(query, rightDim0(seed)+1);
 		TPosition xLength = length(querySeg);
 		TPosition yLength = length(dataSeg);
 
-		std::vector<TPosition> *antiDiag1 = new std::vector<TPosition>(1,0);	//smallest diagonal
-		std::vector<TPosition> *antiDiag2 = new std::vector<TPosition>(2,infimum);
-		std::vector<TPosition> *antiDiag3 = new std::vector<TPosition>(3,infimum);	//current diagonal
-		std::vector<TPosition> *tmpDiag;
+        String<TPosition> antiDiagonal1;
+        String<TPosition> antiDiagonal2;
+        String<TPosition> antiDiagonal3;
+
+        fill(antiDiagonal1, 1, 0);
+        fill(antiDiagonal2, 2, infimum);
+        fill(antiDiagonal3, 3, infimum);
+
+		String<TPosition> *antiDiag1 = &antiDiagonal1;		//smallest diagonal
+		String<TPosition> *antiDiag2 = &antiDiagonal2;
+		String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
+		String<TPosition> *tmpDiag;
 		
 		//Matrix initialization
 		if (gapCost >= (-1)*scoreDropOff){
@@ -983,37 +1003,44 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		TPosition tmpMax2 = 0;
 	
 		//Extension as proposed by Zhang
-		while(b<=u+1){
+		while(b <= u+1)
+        {
 			++k;
-			for (int i = b; i<= (u+1);++i){
+			for (TPosition i = b; i <= u+1; ++i)
+            {
 				tmp = infimum;
-				tmp = ::std::max<TPosition>((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = ::std::max<TPosition>(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
-				tmpMax2 = ::std::max<TPosition>(tmpMax2,tmp);
+				tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i]) + gapCost;
+				tmp = _max(tmp, (*antiDiag1)[i-1] + score(scoreMatrix, i-1, k-i-1, querySeg, dataSeg));
+				tmpMax2 = _max(tmpMax2, tmp);
 				if (tmp < tmpMax1-scoreDropOff)
 					(*antiDiag3)[i] = infimum;
 				else
 					(*antiDiag3)[i] = tmp;
 			}
 		
-			while (((*antiDiag3)[b]  < tmpMax1-scoreDropOff) && (b<static_cast<TPosition>((*antiDiag3).size())-1)){
+			while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1))
+            {
 				++b;
 			}
 			++u;
-			while (((*antiDiag3)[u]  < tmpMax1-scoreDropOff) && (u>0)){
-				--u;}
+			while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u > 0))
+            {
+				--u;
+            }
 			
 			//borders for lower triangle of edit matrix
-			b = ::std::max<TPosition>(b,k-yLength+1);
-			u = ::std::min<TPosition>(u, xLength-1);
+			b = _max(b, k-yLength+1);
+			u = _min(u, xLength-1);
 			
 
-			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
-				lowerBound = (k+1)/2-b;
+			if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
+            {
+				lowerBound = (k+1)/2 - b;
 			}
 		
-			if ((u >= k/2)&&(u-k/2>=upperBound)){
-				upperBound = u-k/2;
+			if ((u >= k/2) && (u-k/2 >= upperBound))
+            {
+				upperBound = u - k/2;
 			}
 			tmpDiag = antiDiag1;
 			antiDiag1 = antiDiag2;
@@ -1022,17 +1049,18 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 
 			int d = 0;
 
-			while ((d<3) &&(static_cast<TPosition>((*antiDiag3).size())<=xLength)){
-				(*antiDiag3).push_back(0);
+			while ((d < 3) &&((TPosition)length(*antiDiag3) <= xLength))
+            {
+				appendValue(*antiDiag3, 0);
 				++d;
 			}
-			for (size_t eu = 0; eu < (*antiDiag3).size();++eu)
+			for (size_t eu = 0; eu < length(*antiDiag3); ++eu)
 				(*antiDiag3)[eu] = infimum;
 
 			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
 				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
-			if ((*antiDiag2)[(*antiDiag2).size()-1]+ gapCost >=tmpMax1-scoreDropOff)
-				(*antiDiag3)[(*antiDiag3).size()-1]=(*antiDiag2)[(*antiDiag2).size()-1]+ gapCost;
+			if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
+				(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
 			tmpMax1 = tmpMax2;
 		}
 		
@@ -1046,12 +1074,16 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		//Find seed end
 		TPosition tmpPos = 0;
 		TPosition tmpMax = infimum;
-		if ((k==xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)){
+		if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff))
+        {
 			tmpPos = xLength;
 			tmpMax =0;
-		} else{
-			for (unsigned int eu = 0; eu < (*antiDiag1).size();++eu){
-				if ((*antiDiag1)[eu] > tmpMax){
+		} else
+        {
+			for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu)
+            {
+				if ((*antiDiag1)[eu] > tmpMax)
+                {
 					tmpMax = (*antiDiag1)[eu];
 					tmpPos = eu;
 					
@@ -1060,21 +1092,13 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 			--k;
 		}
 
-		if(tmpMax != infimum){
-			setRightDim0(seed,rightDim0(seed)+tmpPos);
-			setRightDim1(seed,rightDim1(seed)+k-tmpPos);
+		if(tmpMax != infimum)
+        {
+			setRightDim0(seed, rightDim0(seed)+tmpPos);
+			setRightDim1(seed, rightDim1(seed)+k-tmpPos);
 		}
-		//free memory
-		(*antiDiag1).clear();
-		(*antiDiag2).clear();
-		(*antiDiag3).clear();
-		delete antiDiag1;
-		delete antiDiag2;
-		delete antiDiag3;
 	}
 }
-
-
 
 
 
