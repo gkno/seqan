@@ -69,8 +69,8 @@ namespace SEQAN_NAMESPACE_MAIN
 vertices. It also produces a breath-first tree where each node has a predecessor / parent.
 ..signature:breadth_first_search(g, source, predecessor, distance)
 ..param.g:In-parameter:A graph.
-...type:Spec.Undirected graph
-...type:Spec.Directed graph
+...type:Spec.Undirected Graph
+...type:Spec.Directed Graph
 ..param.source:In-parameter:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ...remarks:The breadth-first search is started from this vertex.
@@ -181,8 +181,8 @@ Hence, depth-first search produces a depth-first forest. To ensure each vertex e
 discovery and finishing time.
 ..signature:depth_first_search(g, predecessor, discovery, finish)
 ..param.g:In-parameter:A graph.
-...type:Spec.Undirected graph
-...type:Spec.Directed graph
+...type:Spec.Undirected Graph
+...type:Spec.Directed Graph
 ..param.predecessor:Out-parameter:A property map.
 ...remarks:Predecessor subgraph produced by the depth-first search.
 ..param.discovery:Out-parameter:A property map.
@@ -246,7 +246,7 @@ depth_first_search(Graph<TSpec> const& g,
 ..remarks:A topological sort is a linear ordering of all its vertices such that if the graph contains an edge (u,v) then u appears before v in the ordering.
 ..signature:topological_sort(g, topSort)
 ..param.g:In-parameter:A directed acyclic graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.topSort:Out-parameter:A linear ordering of the vertices.
 ...type:Class.String
 ..returns:void.
@@ -298,7 +298,7 @@ topological_sort(Graph<TSpec> const& g,
 ..summary:Decomposes a directed graph into its strongly connected components.
 ..signature:strongly_connected_components(g, components)
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.components:Out-parameter:A property map.
 ...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
 ..returns:void.
@@ -411,7 +411,7 @@ _cc_visit(Graph<TSpec> const& g,
 ..summary:Decomposes an undirected graph into its connected components.
 ..signature:connected_components(g, components)
 ..param.g:In-parameter:An undirected graph.
-...type:Spec.Undirected graph
+...type:Spec.Undirected Graph
 ..param.components:Out-parameter:A property map.
 ...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
 ..returns: The number of components.
@@ -469,7 +469,7 @@ connected_components(Graph<TSpec> const& g_source,
 ..summary:Computes a minimum spanning tree on a graph.
 ..signature:prims_algorithm(g, source, weight, predecessor)
 ..param.g:In-parameter:An undirected graph.
-...type:Spec.Undirected graph
+...type:Spec.Undirected Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:Edge weights.
@@ -611,7 +611,7 @@ struct __callLessPair :
 ..summary:Computes a minimum spanning tree on a graph.
 ..signature:kruskals_algorithm(g, source, weight, edges)
 ..param.g:In-parameter:An undirected graph.
-...type:Spec.Undirected graph
+...type:Spec.Undirected Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:Edge weights.
@@ -836,7 +836,7 @@ _relax(Graph<TSpec> const& g,
 ..summary:Computes shortest paths from a single source in a directed acyclic graph (DAG).
 ..signature:dag_shortest_path(g, source, weight, predecessor, distance)
 ..param.g:In-parameter:A directed acyclic graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:A weight map.
@@ -899,7 +899,7 @@ dag_shortest_path(Graph<TSpec> const& g,
 The out parameters are only valid if the algorithm returns true.
 ..signature:bellman_ford_algorithm(g, source, weight, predecessor, distance)
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:A weight map.
@@ -971,7 +971,7 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 ..remarks:Edge weights have to be nonnegative.
 ..signature:dijkstra(g, source, weight, predecessor, distance)
 ..param.g:In-parameter:A graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.weight:In-parameter:A weight map.
@@ -1222,7 +1222,7 @@ _extend_shortest_paths(TMatrix& local,
 ..summary:Finds shortest paths between all pairs of vertices in a graph.
 ..signature:all_pairs_shortest_path(g, weight, distance, predecessor)
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.weight:In-parameter:A weight map.
 ...remarks:A property map with edge weights. Edge weights may be negative.
 ..param.distance:Out-parameter:A matrix with distances.
@@ -1271,7 +1271,7 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 ..signature:floyd_warshall(g, weight, distance, predecessor)
 ..remarks:The graph must be free of negative-weight cycles.
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.weight:In-parameter:A weight map.
 ...remarks:A property map with edge weights. Edge weights may be negative.
 ..param.distance:Out-parameter:A matrix with distances.
@@ -1330,7 +1330,7 @@ floyd_warshall(Graph<TSpec> const& g,
 ..summary:Determines whether there is a path between any two given vertices or not.
 ..signature:transitive_closure(g, closure)
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.closure:Out-parameter:A matrix which indicates the closure.
 ...type:Class.Matrix
 ...remarks:Entry (i,j) in this matrix indicates whether there is a path from i to j in the graph or not.
@@ -1469,7 +1469,7 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 ..summary:Computes a maximum flow in a directed graph.
 ..signature:ford_fulkerson(g, source, sink, capacity, flow)
 ..param.g:In-parameter:A directed graph.
-...type:Spec.Directed graph
+...type:Spec.Directed Graph
 ..param.source:In-parameter:A source vertex.
 ...type:Metafunction.VertexDescriptor
 ..param.sink:In-parameter:A sink vertex.

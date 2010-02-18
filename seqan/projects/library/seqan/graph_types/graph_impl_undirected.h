@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.Undirected graph:
+.Spec.Undirected Graph:
 ..cat:Graph
 ..general:Class.Graph
 ..summary:An undirected graph that stores the edges in an adjacency list.

@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Spec.Directed graph:
+.Spec.Directed Graph:
 ..cat:Graph
 ..general:Class.Graph
 ..summary:A directed graph that stores the edges in an adjacency list.

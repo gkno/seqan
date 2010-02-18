@@ -20,7 +20,7 @@ All graphs can be exported in dot format for visualization.
 ...image:directedGraph|A directed graph.
 
 ...text:
-A @Spec.Directed graph@ has an optional cargo template argument. 
+A @Spec.Directed Graph@ has an optional cargo template argument. 
 A cargo is some kind of object attached to the edges of the graph. 
 A typical example are distances in flight network graphs.
 Cargos and edges are handled as one unit: If you add an edge you have to provide a cargo, 
@@ -39,7 +39,7 @@ $TCargo$ is any kind of data type, e.g. a double.
 ...image:undirectedGraph|An undirected graph with multiple components.
 
 ...text:
-An @Spec.Undirected graph@ has, of course, undirected edges. In all other respects, 
+An @Spec.Undirected Graph@ has, of course, undirected edges. In all other respects, 
 it can be used in the same way as a directed graph.
 ...code:Graph<Undirected<void> > undirectedGraph;
 ...text:

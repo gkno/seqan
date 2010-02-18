@@ -839,7 +839,7 @@ upgmaTree(sparse_mat, graph [,tag])
 ...type:Class.String
 ...remarks: String must use double values because the algorithm recycles this string to store intermediate possibly fractional results.
 ..param.sparse_mat:An undirected graph where each edge corresponds to the distance between sequence i and sequence j.
-...type:Spec.Undirected graph
+...type:Spec.Undirected Graph
 ..param.graph:Out-parameter:The guide tree.
 ...type:Spec.Tree
 ..param.tag:Tag that indicates how to calculate cluster distances.
