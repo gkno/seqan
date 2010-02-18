@@ -1,5 +1,6 @@
 #include <iostream>
 #include <seqan/graph_types.h>
+#include <seqan/graph_algorithms.h>
 using namespace seqan;
 
 int main ()
@@ -20,19 +21,19 @@ int main ()
 	addEdge(g, vertBerlin, vertMuenchen, 586);
 	addEdge(g, vertHannover, vertMuenchen, 572);
 	addEdge(g, vertHamburg, vertMainz, 521);
-// part 2
+// FRAGMENT(definition-property-map)
 	typedef String<char> TCityName;
 	typedef String<TCityName> TProperties;
 
 	TProperties cityNames;
 	resizeVertexMap(g, cityNames);
-// part 3
+// FRAGMENT(enter-properties)
 	assignProperty(cityNames, vertBerlin, "Berlin");
 	assignProperty(cityNames, vertHamburg, "Hamburg");
 	assignProperty(cityNames, vertMuenchen, "Munich");
 	assignProperty(cityNames, vertMainz, "Mainz");
 	assignProperty(cityNames, vertHannover, "Hannover");
-// part 4
+// FRAGMENT(iterate-and-output)
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itV(g);
 
