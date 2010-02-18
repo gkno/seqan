@@ -390,7 +390,7 @@ _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TStringIterator;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -460,7 +460,7 @@ _gotoh_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TStringIterator;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
@@ -678,6 +678,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 {
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
+    typedef typename Infix<TString>::Type TSegment;
 
 	TValue seq1_end = endPosition(*p_seq1);
 	TValue seq2_end = endPosition(*p_seq2);
@@ -1350,7 +1351,7 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TStringIterator;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
