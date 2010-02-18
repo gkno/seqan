@@ -94,8 +94,11 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 	
 	TScoreString score_str;
 	TAlignVector alignmentVector;
-	TString *p_seq1 = &sourceSegment(row(whole_alignment,0));
-	TString *p_seq2 = &sourceSegment(row(whole_alignment,1));
+
+	TString seq1 = sourceSegment(row(whole_alignment,0));
+	TString seq2 = sourceSegment(row(whole_alignment,1));
+    TString *p_seq1 = &seq1;
+	TString *p_seq2 = &seq2;
 	
 	TValue score_length = 0;
 	TMatrix matrix_;
