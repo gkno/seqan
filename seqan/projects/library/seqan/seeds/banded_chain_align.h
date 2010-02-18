@@ -353,7 +353,7 @@ _banded_needleman_wunsch_trace2(Align<TTargetSource, TTargetSpec> & target_,
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
@@ -443,7 +443,7 @@ _needleman_wunsch_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
@@ -1065,7 +1065,7 @@ _needleman_wunsch_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 {
 SEQAN_CHECKPOINT
 	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
