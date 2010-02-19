@@ -27,7 +27,7 @@ int main() {
     typedef Iterator<TGraph, DfsPreorder>::Type TDfsIterator;
     TDfsIterator dfsIt(g, start);
 
-    ::std::cout << "Iterate from " << getProperty(nameMap, start) << " in depth-first-search ordering: ";
+    ::std::cout << "Iterate from '" << getProperty(nameMap, start) << "' in depth-first-search ordering: ";
     while(!atEnd(dfsIt)) {
         ::std::cout << getProperty(nameMap, getValue(dfsIt)) << ", ";
         goNext(dfsIt);
