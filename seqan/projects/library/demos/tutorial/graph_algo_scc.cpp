@@ -22,6 +22,18 @@ int main() {
 	char names[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 	resizeVertexMap(g,nameMap, names);
 
+// FRAGMENT(iterate-dfs)
+    TVertexDescriptor start = 0;
+    typedef Iterator<TGraph, DfsPreorder>::Type TDfsIterator;
+    TDfsIterator dfsIt(g, start);
+
+    ::std::cout << "Iterate from " << getProperty(nameMap, start) << " in depth-first-search ordering: ";
+    while(!atEnd(dfsIt)) {
+        ::std::cout << getProperty(nameMap, getValue(dfsIt)) << ", ";
+        goNext(dfsIt);
+    }
+    ::std::cout << ::std::endl;
+
 // FRAGMENT(connected-components)
 	String<unsigned int> component;
 	strongly_connected_components(g, component);
