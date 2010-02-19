@@ -136,10 +136,11 @@ namespace SEQAN_NAMESPACE_MAIN
                     // verify hits
                     THitString hits = getSwiftHits(swiftFinders[i]);
                     for(THitStringSize h = 0; h < length(hits); ++h){
+                        std::cerr << hits[h].hstkPos << ', ' << hits[h].ndlSeqNo << std::endl;
                         verifier[i].m.readId = hits[h].ndlSeqNo;
-                        matchVerify(verifier[i], range(swiftFinders[i], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
-                    }                    
-                    
+                        matchVerify(verifier[i], getSwiftRange(hits[h], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                    }
+
                 }
                 
                 if(stop) break;
@@ -279,7 +280,6 @@ namespace SEQAN_NAMESPACE_MAIN
         return 0;
     }
     
-    
     template <
         typename TFSSpec, 
         typename TFSConfig, 
@@ -307,11 +307,11 @@ namespace SEQAN_NAMESPACE_MAIN
         // a block is a subset of reads that is filtered and verified in a row
         // depending on how long it takes to process the individual blocks a single
         // thread might work through more than otheres
-        unsigned cores = 2; //omp_get_num_procs();
-        unsigned noOfBlocks = cores * 5; // TODO: razerSoption
+        unsigned cores = 1;//2; //omp_get_num_procs();
+        unsigned noOfBlocks = cores;// * 5; // TODO: razerSoption
         
         // if there are not enough reads that the parallel version use the normal one
-        if(length(store.readSeqStore) < 1000){ // TODO: razerSoption
+        if(length(store.readSeqStore) < 1){ // TODO: razerSoption, compare with noOfBlocks, there needs to be at least one read per block
             return _mapSingleReads(store, cnts, options, shape, mode);
         } 
         else {
@@ -347,11 +347,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //                cargo(swiftIndex).abundanceCut = options.abundanceCut;
 //                cargo(swiftIndex)._debugLevel = options._debugLevel;
 //                indices[b] = swiftIndex;
-                
-                std::cerr << host(indices[b])[0] << std::endl;
             }
-            
-            std::cerr << host(indices[0])[0] << std::endl;
             
             return _mapSingleReadsParallel(store, cnts, options, mode, indices);
         }
