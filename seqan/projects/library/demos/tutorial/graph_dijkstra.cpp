@@ -1,3 +1,4 @@
+// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
