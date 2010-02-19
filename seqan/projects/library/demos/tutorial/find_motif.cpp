@@ -7,32 +7,33 @@ using namespace seqan;
 // FRAGMENT(typedefs)
 int main() 
 {
-    typedef MotifFinder<Dna, EPatternBranching> TMotifFinder;
-    typedef String<DnaString> TString;
+    typedef MotifFinder<char, Projection> TMotifFinder;
+    typedef String<CharString > TString;
     typedef Size<TString>::Type TSize;
 
 // FRAGMENT(sequences)
 	TString dataset;
-	appendValue(dataset, DnaString("ACAGCA"));
-	appendValue(dataset, DnaString("AGGCAG"));
-	appendValue(dataset, DnaString("TCAGTC"));
+	appendValue(dataset, CharString("hatpins"));
+	appendValue(dataset, CharString("low-fat"));
+	appendValue(dataset, CharString("habitat"));
     TSize seqCount = length(dataset);
 
 // FRAGMENT(initialization)
 	::std::srand((unsigned) time(NULL));
 
-	unsigned int motifLength = 2;		//length of motif
-	unsigned int mm = 1;	        	//number of mismatches
-	bool is_exact = false;	            //occurences of motif need to have exactly mm mismatches
-	unsigned int h = 0;                 //size of the neighborhood considering at first 
+    TSize seqLength = length(dataset[0]); // length of sequences
+	TSize motifLength = 3;		          // length of motif
+	TSize mm = 1;	                	  // number of mismatches
+	bool is_exact = true;	              // occurences of motif need to have exactly mm mismatches
+    TSize numPos = seqCount * (seqLength - motifLength + 1);
 
-	TMotifFinder finder_epb1(seqCount, motifLength, mm, is_exact, h);
+	TMotifFinder finder_proj(seqCount, motifLength, numPos, mm, is_exact);
 
 // FRAGMENT(search)
-	findMotif(finder_epb1,dataset,OMOPS());
+	findMotif(finder_proj, dataset, OOPS());
 
-	for (int i = 0; i < (int) motifCount(finder_epb1); ++i)
-		::std::cout << i << ": " << getMotif(finder_epb1, i) << ::std::endl;
+	for (int i = 0; i < (int) motifCount(finder_proj); ++i)
+		::std::cout << i << ": " << getMotif(finder_proj, i) << ::std::endl;
 
 	return 0;
 }

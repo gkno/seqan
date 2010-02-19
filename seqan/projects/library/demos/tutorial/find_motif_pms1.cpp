@@ -19,14 +19,14 @@ int main()
     TSize seqCount = length(dataset);
 
 // FRAGMENT(initialization)
-	unsigned int motifLength = 2;		//length of motif
-	unsigned int mm = 1;	        	//number of mismatches
+	TSize motifLength = 4;		//length of motif
+	TSize mm = 1;	        	//number of mismatches
 	bool is_exact = false;	            //occurences of motif need to have exactly mm mismatches
 
-	TMotifFinder finder_pms1(motifLength,mm,is_exact);
+	TMotifFinder finder_pms1(motifLength, mm, is_exact);
 
 // FRAGMENT(search)
-	findMotif(finder_pms1,dataset,ZOOPS());
+	findMotif(finder_pms1, dataset, OMOPS());
 
 	for (int i = 0; i < (int) motifCount(finder_pms1); ++i)
 		::std::cout << i << ": " << getMotif(finder_pms1, i) << ::std::endl;
