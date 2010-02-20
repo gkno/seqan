@@ -5,8 +5,7 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 
-int main()
-{
+int main() {
 // FRAGMENT(metafunctions)
 	seqan::String<char> str = "admn";
 	seqan::Iterator<seqan::String<char> >::Type it = begin(str);
