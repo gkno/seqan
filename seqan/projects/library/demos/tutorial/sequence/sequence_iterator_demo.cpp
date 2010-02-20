@@ -18,7 +18,7 @@ int main() {
 	::std::cout << ::std::endl;
 // FRAGMENT(rooted-iterators)
 	seqan::Iterator<seqan::String<char>, seqan::Rooted >::Type it2 = begin(str);
-	for (goBegin(it2); !atEnd(it2); goNext(it2)){
+	for (goBegin(it2); !atEnd(it2); goNext(it2)) {
 		++value(it2);
 	}
 // FRAGMENT(iterator-reverse)
