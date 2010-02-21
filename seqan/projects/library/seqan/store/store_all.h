@@ -811,7 +811,7 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 			firstOverlap = it;
 			lastContigId = (*it).contigId;
 		} else
-			while (firstOverlap != itEnd && _max((*firstOverlap).beginPos, (*firstOverlap).endPos) <= cBegin)
+			while (firstOverlap != it && _max((*firstOverlap).beginPos, (*firstOverlap).endPos) <= cBegin)
 				++firstOverlap;
 
 		// 3. Iterate over alignment
