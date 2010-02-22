@@ -57,7 +57,8 @@ namespace ClassTest {
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
-    void beginTestSuite(const char *testName, const char *argv0) {
+    void beginTestSuite(const char *testSuiteName, const char *argv0) {
+        (void)testSuiteName;
         testCount = 0;
         skippedCount = 0;
         errorCount = 0;
@@ -144,6 +145,15 @@ namespace ClassTest {
     }
 
 
+    // Same as testEqual above, but with comment set to 0.
+    template <typename T1, typename T2>
+    bool testEqual(const char *file, int line,
+                   const T1 &value1, const char *expression1,
+                   const T2 &value2, const char *expression2) {
+        return testEqual(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
     // Called by the macro SEQAN_ASSERT_NEQ.
     //
     // Tests that the given two value are not equal.  Returns true iff
@@ -170,13 +180,162 @@ namespace ClassTest {
     }
 
 
+    // Same as testNotEqual above, but with comment set to 0.
+    template <typename T1, typename T2>
+    bool testNotEqual(const char *file, int line,
+                      const T1 &value1, const char *expression1,
+                      const T2 &value2, const char *expression2) {
+        return testNotEqual(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
+    // Called by the macro SEQAN_ASSERT_GEQ.
+    //
+    // Tests that the first value is greater than or equal to the
+    // second one.  Returns true iff the test yields true.
+    template <typename T1, typename T2>
+    bool testGeq(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2,
+                 const char *comment) {
+        if (not (value1 >= value2)) {
+            // Increase global error count.
+            thisTestOk = false;
+            errorCount += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " >= " << expression2 << " was: " << value1
+                      << " < " << value2;
+            if (comment)
+                std::cerr << " (" << comment << ")";
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Same as testGeq above, but with comment set to 0.
+    template <typename T1, typename T2>
+    bool testGeq(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2) {
+        return testGeq(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
+    // Called by the macro SEQAN_ASSERT_GT.
+    //
+    // Tests that the first value is greater than the second one.
+    // Returns true iff the test yields true.
+    template <typename T1, typename T2>
+    bool testGt(const char *file, int line,
+                const T1 &value1, const char *expression1,
+                const T2 &value2, const char *expression2,
+                const char *comment) {
+        if (not (value1 > value2)) {
+            // Increase global error count.
+            thisTestOk = false;
+            errorCount += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " > " << expression2 << " was: " << value1
+                      << " >= " << value2;
+            if (comment)
+                std::cerr << " (" << comment << ")";
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Same as testGt above, but with comment set to 0.
+    template <typename T1, typename T2>
+    bool testGt(const char *file, int line,
+                const T1 &value1, const char *expression1,
+                const T2 &value2, const char *expression2) {
+        return testGt(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
+    // Called by the macro SEQAN_ASSERT_LEQ.
+    //
+    // Tests that the first value is less than or equal to the second
+    // one.  Returns true iff the test yields true.
+    template <typename T1, typename T2>
+    bool testLeq(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2,
+                 const char *comment) {
+        if (not (value1 <= value2)) {
+            // Increase global error count.
+            thisTestOk = false;
+            errorCount += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " <= " << expression2 << " was: " << value1
+                      << " > " << value2;
+            if (comment)
+                std::cerr << " (" << comment << ")";
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Same as testLeq above, but with comment set to 0.
+    template <typename T1, typename T2>
+    bool testLeq(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2) {
+        return testLeq(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
+    // Called by the macro SEQAN_ASSERT_LT.
+    //
+    // Tests that the first value is greater than the second one.
+    // Returns true iff the test yields true.
+    template <typename T1, typename T2>
+    bool testLt(const char *file, int line,
+                const T1 &value1, const char *expression1,
+                const T2 &value2, const char *expression2,
+                const char *comment = 0) {
+        if (not (value1 < value2)) {
+            // Increase global error count.
+            thisTestOk = false;
+            errorCount += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " < " << expression2 << " was: " << value1
+                      << " > " << value2;
+            if (comment)
+                std::cerr << " (" << comment << ")";
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Same as testLt above, but comment is 0.
+    template <typename T1, typename T2>
+    bool testLt(const char *file, int line,
+                const T1 &value1, const char *expression1,
+                const T2 &value2, const char *expression2) {
+        return testLt(file, line, value1, expression1, value2, expression2, 0);
+    }
+
+
     // Called by the macro SEQAN_ASSERT.
     //
     // Test that the given argument evaluates to true.
     template <typename T>
     bool testTrue(const char *file, int line,
                   const T &value_, const char *expression_,
-                  const char *comment = 0) {
+                  const char *comment) {
         if (not (value_)) {
             // Increase global error count.
             thisTestOk = false;
@@ -193,13 +352,22 @@ namespace ClassTest {
     }
 
 
+    // Same as testTrue above, but comment will automatically be set to 0.
+    template <typename T>
+    bool testTrue(const char *file, int line,
+                  const T &value_, const char *expression_)
+    {
+        return testTrue(file, line, value_, expression_, 0);
+    }
+
+
     // Called by the macro SEQAN_ASSERT.
     //
     // Test that the given argument evaluates to false.
     template <typename T>
     bool testFalse(const char *file, int line,
                    const T &value_, const char *expression_,
-                   const char *comment = 0) {
+                   const char *comment) {
         if (value_) {
             // Increase global error count.
             thisTestOk = false;
@@ -213,6 +381,14 @@ namespace ClassTest {
             return false;
         }
         return true;
+    }
+
+
+    // Same as testFalse above, but comment will automatically be set to 0.
+    template <typename T>
+    bool testFalse(const char *file, int line,
+                   const T &value_, const char *expression_) {
+        return testFalse(file, line, value_, expression_, 0);
     }
 }  // namespace ClassTest
 
@@ -243,8 +419,8 @@ namespace ClassTest {
     } while (false)
 
 
-                                  // This macro returns from the current function and logs a "skipped"
-                                  // event for the current test.
+// This macro returns from the current function and logs a "skipped"
+// event for the current test.
 #define SEQAN_SKIP_TEST                         \
     do {                                        \
         ::seqan::ClassTest::skipCurrentTest();  \
@@ -252,10 +428,10 @@ namespace ClassTest {
     } while (false)
 
 
-                                  // Equality assertion with an optional comment.
-                                  //
-                                  // Usage:  SEQAN_ASSERT_EQ(4, 4);
-                                  // Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
+// Equality assertion with an optional comment.
+//
+// Usage:  SEQAN_ASSERT_EQ(4, 4);
+// Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
 #define SEQAN_ASSERT_EQ(_arg1, _arg2, ...)                              \
     do {                                                                \
         if (not ::seqan::ClassTest::testEqual(__FILE__, __LINE__,       \
@@ -277,6 +453,46 @@ namespace ClassTest {
                                                  (_arg2), #_arg2,       \
                                                  ## __VA_ARGS__)) {     \
         }                                                               \
+    } while (false)
+
+
+// Less-than-or-equal assertion with an optional comment.
+#define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...)                             \
+    do {                                                                \
+        ::seqan::ClassTest::testLeq(__FILE__, __LINE__,                 \
+                                    (_arg1), #_arg1,                    \
+                                    (_arg2), #_arg2,                    \
+                                    ## __VA_ARGS__);                    \
+    } while (false)
+
+
+// Less-than assertion with an optional comment.
+#define SEQAN_ASSERT_LT(_arg1, _arg2, ...)                              \
+    do {                                                                \
+        ::seqan::ClassTest::testLt(__FILE__, __LINE__,                  \
+                                   (_arg1), #_arg1,                     \
+                                   (_arg2), #_arg2,                     \
+                                   ## __VA_ARGS__);                     \
+    } while (false)
+
+
+// Greater-than-or-equal assertion with an optional comment.
+#define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...)                             \
+    do {                                                                \
+        ::seqan::ClassTest::testGeq(__FILE__, __LINE__,                 \
+                                    (_arg1), #_arg1,                    \
+                                    (_arg2), #_arg2,                    \
+                                    ## __VA_ARGS__);                    \
+    } while (false)
+
+
+// Greater-than assertion with an optional comment.
+#define SEQAN_ASSERT_GT(_arg1, _arg2, ...)                              \
+    do {                                                                \
+        ::seqan::ClassTest::testGt(__FILE__, __LINE__,                  \
+                                   (_arg1), #_arg1,                     \
+                                   (_arg2), #_arg2,                     \
+                                   ## __VA_ARGS__);                     \
     } while (false)
 
 
