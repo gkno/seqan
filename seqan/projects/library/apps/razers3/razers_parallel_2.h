@@ -136,9 +136,9 @@ namespace SEQAN_NAMESPACE_MAIN
                     // verify hits
                     THitString hits = getSwiftHits(swiftFinders[i]);
                     for(THitStringSize h = 0; h < length(hits); ++h){
-                        std::cerr << hits[h].hstkPos << ', ' << hits[h].ndlSeqNo << std::endl;
                         verifier[i].m.readId = hits[h].ndlSeqNo;
                         matchVerify(verifier[i], getSwiftRange(hits[h], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                        ++options.countFiltration;
                     }
 
                 }
@@ -201,16 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
             swiftPatterns[i].params.minThreshold = options.threshold;
             swiftPatterns[i].params.tabooLength = options.tabooLength;
         }
-        
-        /*
-         for (TPos i = 0; i < length(readIndices); ++i) {
-         TSwiftPattern swiftPattern(readIndices[i]);
-         swiftPattern.params.minThreshold = options.threshold;
-         swiftPattern.params.tabooLength = options.tabooLength;
-         swiftPatterns[i] = swiftPattern;
-         }
-         */
-        
+                
         // init edit distance verifiers
         unsigned readCount = length(store.readSeqStore);//countSequences(readIndices); // FIXME: function for String of StringSets has the return the total number of reads
         String<TMyersPattern> forwardPatterns;
@@ -234,10 +225,10 @@ namespace SEQAN_NAMESPACE_MAIN
         TPos offSet = 0;
         for (TPos i = 0; i < length(readIndices); ++i){
             // block of the same size as the corresponding index (number of reads in this index)
-            TVerifierBlock block = infix(forwardPatterns, offSet, length(host(readIndices[i])));
-            offSet += length(host(readIndices[i]));
-            
+            unsigned blockSize = length(host(readIndices[i]));
+            TVerifierBlock block = infix(forwardPatterns, offSet, blockSize);            
             forwardPatternsBlocks[i] = block;
+            offSet += blockSize;
         }
         
         if (options.maqMapping)
@@ -310,12 +301,12 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned cores = 1;//2; //omp_get_num_procs();
         unsigned noOfBlocks = cores;// * 5; // TODO: razerSoption
         
-        // if there are not enough reads that the parallel version use the normal one
+        // if there are not enough reads that the parallel version makes sence use the normal one
         if(length(store.readSeqStore) < 1){ // TODO: razerSoption, compare with noOfBlocks, there needs to be at least one read per block
             return _mapSingleReads(store, cnts, options, shape, mode);
         } 
         else {
-            // number of reads per thread
+            // number of reads per block
             unsigned perBlock = length(store.readSeqStore) / noOfBlocks;
             unsigned perBlockRemainder = length(store.readSeqStore) % noOfBlocks;
             
@@ -326,11 +317,12 @@ namespace SEQAN_NAMESPACE_MAIN
             // create swift indices that can work in parallel
             for (unsigned b = 0; b < noOfBlocks; ++b) {
                 TReadSet readSet;
-                resize(readSet, perBlock, Exact());
                 
                 // the last one gets some extra
                 if((b == noOfBlocks - 1) && (perBlockRemainder != 0)){
                     resize(readSet, perBlock + perBlockRemainder, Exact());
+                } else {
+                    resize(readSet, perBlock, Exact());
                 }
                 
                 // get a subset of reads from the store
@@ -343,17 +335,11 @@ namespace SEQAN_NAMESPACE_MAIN
                 intiIndex(indices[b], readSet, shape);
                 cargo(indices[b]).abundanceCut = options.abundanceCut;
                 cargo(indices[b])._debugLevel = options._debugLevel;
-//                TIndex swiftIndex(readSet, shape);
-//                cargo(swiftIndex).abundanceCut = options.abundanceCut;
-//                cargo(swiftIndex)._debugLevel = options._debugLevel;
-//                indices[b] = swiftIndex;
             }
             
             return _mapSingleReadsParallel(store, cnts, options, mode, indices);
         }
-        
-
-        
+                
     }
     
 }
