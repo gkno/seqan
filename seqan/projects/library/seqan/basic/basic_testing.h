@@ -127,7 +127,7 @@ namespace ClassTest {
     bool testEqual(const char *file, int line,
                    const T1 &value1, const char *expression1,
                    const T2 &value2, const char *expression2,
-                   const char *comment = 0) {
+                   const char *comment) {
         if (not (value1 == value2)) {
             // Increase global error count.
             thisTestOk = false;
@@ -162,7 +162,7 @@ namespace ClassTest {
     bool testNotEqual(const char *file, int line,
                    const T1 &value1, const char *expression1,
                    const T2 &value2, const char *expression2,
-                   const char *comment = 0) {
+                   const char *comment) {
         if (not (value1 != value2)) {
             // Increase global error count.
             thisTestOk = false;
@@ -302,7 +302,7 @@ namespace ClassTest {
     bool testLt(const char *file, int line,
                 const T1 &value1, const char *expression1,
                 const T2 &value2, const char *expression2,
-                const char *comment = 0) {
+                const char *comment) {
         if (not (value1 < value2)) {
             // Increase global error count.
             thisTestOk = false;
