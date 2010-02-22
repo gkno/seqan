@@ -458,6 +458,16 @@ _writeEdgeType(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.write:
+..signature:write(file, graph, nodeMap, edgeMap, tag)
+..param.graph:The graph to write out.
+...type:Class.Graph
+..param.nodeMap:A mapping from vertex descriptor to vertex label.
+..param.edgeMap:A mapping from edge descriptor to edge label.
+..param.tag:A tag to select the output format.
+...type:Tag.DotDrawing
+ */
 template <typename TFile, typename TSpec, typename TNodeAttributes, typename TEdgeAttributes>
 void 
 write(TFile & file, 
@@ -517,6 +527,10 @@ write(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.write:
+..signature:write(file, graph, nodeMap, tag)
+ */
 template <typename TFile, typename TSpec, typename TNodeAttributes>
 inline void
 write(TFile & file,
@@ -533,6 +547,10 @@ write(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.write:
+..signature:write(file, graph, tag)
+ */
 template <typename TFile, typename TSpec>
 inline void
 write(TFile & file,
