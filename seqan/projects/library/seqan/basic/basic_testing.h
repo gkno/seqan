@@ -25,6 +25,7 @@
 
 #include <iostream>  // stdout, stderr
 #include <cstring>   // strrpos
+#include <cstdlib>   // exit()
 #include <set>
 
 namespace seqan {
