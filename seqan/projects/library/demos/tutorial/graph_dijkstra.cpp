@@ -11,13 +11,17 @@ int main ()
 	typedef Graph<Undirected<TCargo> > TGraph;
 	typedef VertexDescriptor<TGraph>::Type TVertexDescriptor;
 
-// FRAGMENT(main-graph-construction)
+// FRAGMENT(create-g)
 	TGraph g;
+
+// FRAGMENT(create-vertices)
 	TVertexDescriptor vertBerlin = addVertex(g);
 	TVertexDescriptor vertHamburg = addVertex(g);
 	TVertexDescriptor vertHannover = addVertex(g);
 	TVertexDescriptor vertMainz = addVertex(g);
 	TVertexDescriptor vertMuenchen = addVertex(g);
+
+// FRAGMENT(create-edges)
 	addEdge(g, vertBerlin, vertHamburg, 289);
 	addEdge(g, vertBerlin, vertHannover, 286);
 	addEdge(g, vertBerlin, vertMainz, 573);
@@ -56,7 +60,7 @@ int main ()
 	typedef Size<TGraph>::Type TSize;
 	InternalMap<TCargo> cargoMap;
 	resizeEdgeMap(g,cargoMap);
-	String<TSize> predMap;
+	String<TVertexDescriptor> predMap;
 	String<TSize> distMap;
 // FRAGMENT(dijkstra)
 	dijkstra(g,vertHannover,cargoMap,predMap,distMap);
