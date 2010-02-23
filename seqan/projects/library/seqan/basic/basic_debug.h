@@ -354,7 +354,16 @@ verifyCheckpoints(char const* file)
 	if (!file_name) file_name = file;
 	else ++file_name;
 
-	FILE * fl = ::std::fopen(file, "r");
+        int len = strlen(::seqan::ClassTest::pathToProjects) +
+            strlen("/") + strlen(file) + 1;
+        char *absolutePath = new char[len];
+        absolutePath[0] = '\0';
+        strcat(absolutePath, ::seqan::ClassTest::pathToProjects);
+        strcat(absolutePath, "/");
+        strcat(absolutePath, file);
+
+	FILE * fl = ::std::fopen(absolutePath, "r");
+        delete[] absolutePath;
 	if (!fl)
 	{
 		Error< Report >(file, 0, "verifyCheckpoints could not find this file.");	

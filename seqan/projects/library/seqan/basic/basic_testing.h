@@ -57,6 +57,10 @@ namespace ClassTest {
     // Base path to the binary.  Extrapolated from argv[0].
     char *basePath;
 
+    // Base path to the "projects" directory, extrapolated from
+    // __FILE__.
+    char *pathToProjects;
+
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
@@ -78,6 +82,22 @@ namespace ClassTest {
             basePath = new char[len];
             strncpy(basePath, argv0, len);
         }
+        // Get path to projects.
+        const char *file = __FILE__;
+        int pos = -1;
+        for (int i = 0; i < strlen(file) - strlen("projects"); ++i) {
+            if (strncmp(file + i, "projects", strlen("projects")) == 0) {
+                pos = i;
+            }
+        }
+        if (pos == -1) {
+            std::cerr << "Could not extrapolate path to projects from __FILE__ == \""
+                      << __FILE__ << "\"" << std::endl;
+            exit(1);
+        }
+        pathToProjects = new char[pos];
+        strncpy(pathToProjects, file, pos);
+        pathToProjects[pos-1] = '\0';
     }
 
     // Run test suite finalization.
@@ -88,6 +108,7 @@ namespace ClassTest {
     // program's return code.
     int endTestSuite() {
         delete basePath;
+        delete pathToProjects;
 
         std::cout << "**************************************" << std::endl;
         std::cout << " Total Tests: " << testCount << std::endl;
