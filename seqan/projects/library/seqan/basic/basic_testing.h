@@ -33,6 +33,9 @@ namespace seqan {
 // This namespace contains the variables and functions that are used
 // in the macros below to perform the tests.
 namespace ClassTest {
+    // Raised when an assertion fails in test mode.
+    struct AssertionFailedException {};
+    
     // Number of tests that were run.
     int testCount;
 
@@ -411,11 +414,15 @@ namespace ClassTest {
                                                         \
                                                         \
     // This macro expands to code to call a given test.
-#define SEQAN_CALL_TEST(test_name)                      \
-    do {                                                \
-        ::seqan::ClassTest::beginTest(#test_name);      \
-        SEQAN_TEST_ ## test_name();                     \
-        ::seqan::ClassTest::endTest();                  \
+#define SEQAN_CALL_TEST(test_name)                                      \
+    do {                                                                \
+        ::seqan::ClassTest::beginTest(#test_name);                      \
+        try {                                                           \
+            SEQAN_TEST_ ## test_name();                                 \
+        } catch(::seqan::ClassTest::AssertionFailedException e) {       \
+            /* Swallow exception, go on with next test. */              \
+        }                                                               \
+        ::seqan::ClassTest::endTest();                                  \
     } while (false)
 
 
@@ -438,6 +445,7 @@ namespace ClassTest {
                                               (_arg1), #_arg1,          \
                                               (_arg2), #_arg2,          \
                                               ## __VA_ARGS__)) {        \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
         }                                                               \
     } while (false)
 
@@ -452,6 +460,7 @@ namespace ClassTest {
                                                  (_arg1), #_arg1,       \
                                                  (_arg2), #_arg2,       \
                                                  ## __VA_ARGS__)) {     \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
         }                                                               \
     } while (false)
 
@@ -459,40 +468,48 @@ namespace ClassTest {
 // Less-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        ::seqan::ClassTest::testLeq(__FILE__, __LINE__,                 \
-                                    (_arg1), #_arg1,                    \
-                                    (_arg2), #_arg2,                    \
-                                    ## __VA_ARGS__);                    \
+        if (not ::seqan::ClassTest::testLeq(__FILE__, __LINE__,         \
+                                            (_arg1), #_arg1,            \
+                                            (_arg2), #_arg2,            \
+                                            ## __VA_ARGS__)) {          \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
+        }                                                               \
     } while (false)
 
 
 // Less-than assertion with an optional comment.
 #define SEQAN_ASSERT_LT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        ::seqan::ClassTest::testLt(__FILE__, __LINE__,                  \
-                                   (_arg1), #_arg1,                     \
-                                   (_arg2), #_arg2,                     \
-                                   ## __VA_ARGS__);                     \
+        if (not ::seqan::ClassTest::testLt(__FILE__, __LINE__,          \
+                                           (_arg1), #_arg1,             \
+                                           (_arg2), #_arg2,             \
+                                           ## __VA_ARGS__)) {           \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
+        }                                                               \
     } while (false)
 
 
 // Greater-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        ::seqan::ClassTest::testGeq(__FILE__, __LINE__,                 \
-                                    (_arg1), #_arg1,                    \
-                                    (_arg2), #_arg2,                    \
-                                    ## __VA_ARGS__);                    \
+        if (not ::seqan::ClassTest::testGeq(__FILE__, __LINE__,         \
+                                            (_arg1), #_arg1,            \
+                                            (_arg2), #_arg2,            \
+                                            ## __VA_ARGS__)) {          \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
+        }                                                               \
     } while (false)
 
 
 // Greater-than assertion with an optional comment.
 #define SEQAN_ASSERT_GT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        ::seqan::ClassTest::testGt(__FILE__, __LINE__,                  \
-                                   (_arg1), #_arg1,                     \
-                                   (_arg2), #_arg2,                     \
-                                   ## __VA_ARGS__);                     \
+        if (not ::seqan::ClassTest::testGt(__FILE__, __LINE__,          \
+                                           (_arg1), #_arg1,             \
+                                           (_arg2), #_arg2,             \
+                                           ## __VA_ARGS__)) {           \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
+        }                                                               \
     } while (false)
 
 
@@ -506,6 +523,7 @@ namespace ClassTest {
         if (not ::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
                                              (_arg1), #_arg1,           \
                                              ##__VA_ARGS__)) {          \
+            throw ::seqan::ClassTest::AssertionFailedException();       \
         }                                                               \
     } while (false)
 
@@ -519,6 +537,7 @@ namespace ClassTest {
         if (not ::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
                                               (_arg1), #_arg1,        \
                                               ##__VA_ARGS__)) {       \
+            throw ::seqan::ClassTest::AssertionFailedException();     \
         }                                                             \
     } while (false)
 
