@@ -1349,25 +1349,21 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_CALL_TEST(test_approx_edit_dist_pex_non_hierarchical_aho_corasick);
     SEQAN_CALL_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam);
 
-
-    // TODO(holtgrew): Enable checkpoints again.
-    /*
-    //      debug::verifyCheckpoints("projects/library/seqan/find/find_myers_ukkonen.h");
-
-    debug::verifyCheckpoints("projects/library/seqan/find/find_wild_shiftand.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_horspool.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_base.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_shiftand.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_shiftor.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_bndm.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_bom.h");
-    //debug::verifyCheckpoints("projects/library/seqan/find/find_quasar.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_ahocorasick.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_multiple_shiftand.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_set_horspool.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_wumanber.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_abndm.h");
-    debug::verifyCheckpoints("projects/library/seqan/find/find_pex.h");
-    */
+    // Verify checkpoints in all files in this module.
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_myers_ukkonen.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wild_shiftand.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_horspool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftand.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftor.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_bndm.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_bom.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_quasar.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_ahocorasick.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_multiple_shiftand.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_set_horspool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wumanber.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_abndm.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_pex.h");
 }
 SEQAN_END_TESTSUITE

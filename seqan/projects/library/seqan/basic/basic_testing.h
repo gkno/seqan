@@ -25,6 +25,7 @@
 
 #include <iostream>  // stdout, stderr
 #include <cstring>   // strrpos
+#include <set>
 
 namespace seqan {
 
@@ -61,6 +62,12 @@ namespace ClassTest {
     // __FILE__.
     char *pathToProjects;
 
+    // Total number of checkpoints in header file.
+    int totalCheckPointCount;
+
+    // Total number of checkpoints found in binary files.
+    int foundCheckPointCount;
+
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
@@ -69,6 +76,8 @@ namespace ClassTest {
         testCount = 0;
         skippedCount = 0;
         errorCount = 0;
+        totalCheckPointCount = 0;
+        foundCheckPointCount = 0;
         // Get path to argv0.
         char *end = 0;
         for (char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
@@ -111,11 +120,15 @@ namespace ClassTest {
         delete pathToProjects;
 
         std::cout << "**************************************" << std::endl;
+        std::cout << " Total Check Points : " << totalCheckPointCount << std::endl;
+        std::cout << " Found Check Points : " << foundCheckPointCount << std::endl;
+        std::cout << " Lost Check Points  : " << totalCheckPointCount - foundCheckPointCount << std::endl;
+        std::cout << "--------------------------------------" << std::endl;
         std::cout << " Total Tests: " << testCount << std::endl;
         std::cout << " Skipped:     " << skippedCount << std::endl;
         std::cout << " Errors:      " << errorCount << std::endl;
         std::cout << "**************************************" << std::endl;
-        return errorCount > 0;
+        return not (errorCount > 0 and totalCheckPointCount == foundCheckPointCount);
     }
 
     // Run test initialization.
@@ -414,6 +427,99 @@ namespace ClassTest {
                    const T &value_, const char *expression_) {
         return testFalse(file, line, value_, expression_, 0);
     }
+
+    // Represents a check point in a file.
+    struct CheckPoint {
+        // Path to the file.
+        const char *file;
+        // Line in the file.
+        unsigned int line;
+
+        // Less-than comparator for check points.
+        bool operator<(const CheckPoint &other) const {
+            int c = strcmp(file, other.file);
+            if (c < 0)
+                return true;
+            if (c == 0 and line < other.line)
+                return true;
+            return false;
+        }
+    };
+
+    // Wrapper for a set of check points.
+    // TODO(holtgrew): Simply store the set?
+    struct CheckPointStore {
+        static ::std::set<CheckPoint> data;
+    };
+
+    // Allocate memory for the checkpoint store's data.
+    ::std::set<CheckPoint> CheckPointStore::data;
+
+    // Puts the given check point into the CheckPointStore's data.
+    inline bool
+    registerCheckPoint(unsigned int line, const char *file) {
+        const char *file_name = strrchr(file, '/');
+        const char *file_name_2 = strrchr(file, '\\');
+        if (file_name_2 > file_name)
+            file_name = file_name_2;
+        if (!file_name)
+            file_name = file;
+        else ++file_name;
+
+        CheckPoint cp = {file_name, line};
+        CheckPointStore::data.insert(cp);
+        return true;
+    }
+
+    // Test whether the given check point exists in the check point
+    // store.
+    inline void 
+    testCheckPoint(const char *file, unsigned int line) {
+        totalCheckPointCount += 1;
+        CheckPoint cp = {file, line};
+        if (CheckPointStore::data.find(cp) == CheckPointStore::data.end()) {
+            std::cerr << file << ":" << line << "  -- Check point lost."
+                      << std::endl;
+            return;
+        }
+        foundCheckPointCount += 1;
+    }
+
+    // Verify the check points for the given file.
+    inline void 
+    verifyCheckPoints(const char *file) {
+        char const* file_name = strrchr(file, '/');
+        char const* file_name_2 = strrchr(file, '\\');
+        if (file_name_2 > file_name) file_name = file_name_2;
+        if (!file_name) file_name = file;
+        else ++file_name;
+
+        int len = strlen(pathToProjects) +
+            strlen("/") + strlen(file) + 1;
+        char *absolutePath = new char[len];
+        absolutePath[0] = '\0';
+        strcat(absolutePath, pathToProjects);
+        strcat(absolutePath, "/");
+        strcat(absolutePath, file);
+
+	FILE * fl = ::std::fopen(absolutePath, "r");
+        delete[] absolutePath;
+        if (!fl) {
+            std::cerr << file << " -- verifyCheckPoints could not find this file." << std::endl;
+        }
+        unsigned int line_number = 1;
+        char buf[1<<16];
+
+        while (::std::fgets(buf, sizeof(buf), fl)) {
+            if (::std::strstr(buf, "SEQAN_CHECKPOINT")) {
+                testCheckPoint(file_name, line_number);
+            }
+            ++line_number;
+        }
+
+        ::std::fclose(fl);
+    }
+
 }  // namespace ClassTest
 
 
@@ -575,6 +681,17 @@ namespace ClassTest {
 #define SEQAN_TEMP_FILENAME(filename)           \
     ("/tmp/" filename)
 
+
+// Create a check point at the point where the macro is placed.
+// TODO(holtgrew): Should be called SEQAN_CHECK_POINT to be consistent.
+#define SEQAN_CHECKPOINT                                        \
+    ::seqan::ClassTest::registerCheckPoint(__LINE__, __FILE__);
+
+
+// Call the check point verification code for the given file.
+#define SEQAN_VERIFY_CHECKPOINTS(filename)              \
+    ::seqan::ClassTest::verifyCheckPoints(filename)
+    
 }  // namespace seqan
 
 #endif  // SEQAN_BASIC_BASIC_TESTING_H_

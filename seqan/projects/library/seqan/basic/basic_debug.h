@@ -333,8 +333,8 @@ checkpoint(unsigned int line, char const* file)
 	CheckpointStore<>::data.insert(cp);
 	return true;
 }
-#define SEQAN_CHECKPOINT \
-	::SEQAN_NAMESPACE_MAIN::debug::checkpoint(__LINE__, __FILE__);
+    //#define SEQAN_CHECKPOINT                                          \
+    //	::SEQAN_NAMESPACE_MAIN::debug::checkpoint(__LINE__, __FILE__);
 
 
 inline void 
@@ -389,7 +389,7 @@ verifyCheckpoints(char const* file)
 
 #else //#ifdef SEQAN_TEST
 
-#define SEQAN_CHECKPOINT
+//#define SEQAN_CHECKPOINT
 
 #endif //#ifdef SEQAN_TEST
 
