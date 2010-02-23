@@ -72,6 +72,7 @@ namespace ClassTest {
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
+    inline
     void beginTestSuite(const char *testSuiteName, const char *argv0) {
         (void)testSuiteName;
         testCount = 0;
@@ -116,6 +117,7 @@ namespace ClassTest {
     //
     // Prints a bottom banner with the error count and returns the
     // program's return code.
+    inline
     int endTestSuite() {
         delete basePath;
         delete pathToProjects;
@@ -133,6 +135,7 @@ namespace ClassTest {
     }
 
     // Run test initialization.
+    inline
     void beginTest(const char *testName) {
         currentTestName = testName;
         thisTestOk = true;
@@ -141,6 +144,7 @@ namespace ClassTest {
     }
 
     // Run test finalization.
+    inline
     void endTest() {
         if (thisTestSkipped) {
             std::cout << currentTestName << " SKIPPED" << std::endl;
@@ -152,6 +156,7 @@ namespace ClassTest {
     }
 
     // Marks the current test as "skipped".
+    inline
     void skipCurrentTest() {
         thisTestSkipped = true;
         skippedCount += 1;
