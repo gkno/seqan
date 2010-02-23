@@ -967,7 +967,7 @@ void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TCon
 			firstOverlap = it;
 			lastContigId = (*it).contigId;
 		} else
-			while (firstOverlap != itEnd && _max((*firstOverlap).beginPos, (*firstOverlap).endPos) <= cBegin)
+			while (firstOverlap != it && _max((*firstOverlap).beginPos, (*firstOverlap).endPos) <= cBegin)
 				++firstOverlap;
 
 		// 3. Iterate over alignment
@@ -997,6 +997,7 @@ void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TCon
 					insertGaps(cIt, 1);
 					for (TAlignedReadIter j = firstOverlap; j != it; ++j)
 					{
+                        
 						TContigPos rBegin = _min((*j).beginPos, (*j).endPos);
 						TContigPos rEnd = _max((*j).beginPos, (*j).endPos);
 						if (rBegin < insPos && insPos < rEnd)
