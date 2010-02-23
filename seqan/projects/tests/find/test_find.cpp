@@ -1292,7 +1292,34 @@ SEQAN_DEFINE_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam) {
 }
 
 
+SEQAN_DEFINE_TEST(test_regression_rmbench) {
+    // The data to test with:  Needle, haystack and score limit.
+    const char *kCharNeedle = "CCATATGCTTGTGTCGCGGGTTTATTTGCATTCGACCCAGTTGACTCGGAAGTCGAAATGTTCCTGCCCCGTTTCTGCGTTCCGTGCAGTTGCGCGGTCTGGTTGGGCGGGTCCCCCCCTGA";
+    const char *kCharHaystack = "ATTCCATATGCTTGTGTCGCGGGTTTATTTGCATTCGACCCAGTTGACTCGGAAGTCGAAATGTTCCTGCCCCGTTTCTGCGTTCCGTGCAGTTGCGCGGTCTGGTTGGGCGGGTCCCCCGCCTACGGATGCACGTTCTCCCGGGCTCGTAAATCC";
+    const int kScoreLimit = -100000;
+
+    // Build actual DNA needle and haystack, the pattern and the
+    // finder.
+    DnaString needle(kCharNeedle);
+    DnaString haystack(kCharHaystack);
+    Finder<DnaString> finder(haystack);
+    Pattern<DnaString, MyersUkkonen> pattern(needle);
+    setScoreLimit(pattern, kScoreLimit);
+
+    // The following invariant should always hold: The pattern score
+    // should be smaller than the needle size.
+    SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
+    while (find(finder, pattern)) {
+        SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
+    }
+    SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
+    // Testing MyersUkkonen with large needle and manual score limit.
+    SEQAN_CALL_TEST(test_regression_rmbench);
+
     // Call all tests.
     SEQAN_CALL_TEST(test_find_online_Simple);
     SEQAN_CALL_TEST(test_find_online_Horspool);
