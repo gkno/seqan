@@ -5,14 +5,12 @@ enable_testing()
 set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
 
-add_subdirectory (../seqan seqan)
-
 ################################################################################
 # Set path variables
 ################################################################################
 
-include_directories (${SEQAN_BASE})
-link_directories (${SEQAN_BASE}/lib)
+include_directories (${SEQAN_LIBRARY})
+link_directories (${SEQAN_LIBRARY}/lib)
 if (MSVC)
         add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
@@ -31,7 +29,7 @@ IF(BUILD_TESTING)
   MARK_AS_ADVANCED(BUILDNAME)
 ENDIF(BUILD_TESTING)
 
-get_filename_component (SEQAN_TESTS_ABS ${SEQAN_BASE}/../tests ABSOLUTE)
+get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 #if (EXISTS SEQAN_TESTS_ABS)
 	file(GLOB SEQAN_TESTS ${SEQAN_TESTS_ABS}/[A-z]*)
 	foreach (TEST_DIR ${SEQAN_TESTS})
@@ -40,7 +38,8 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_BASE}/../tests ABSOLUTE)
 		list (SORT TEST_SOURCES)
 		if (TEST_SOURCES)
 			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
-                        add_test (test_${TEST_DIR_REL} test_${TEST_DIR_REL})
+			add_dependencies (test_${TEST_DIR_REL} ${SEQAN_TARGET})
+			add_test (test_${TEST_DIR_REL} test_${TEST_DIR_REL})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (test_${TEST_DIR_REL} rt)
 			endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
