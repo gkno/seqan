@@ -354,11 +354,11 @@ verifyCheckpoints(char const* file)
 	if (!file_name) file_name = file;
 	else ++file_name;
 
-        int len = strlen(::seqan::ClassTest::pathToProjects) +
+        int len = strlen(::seqan::ClassTest::StaticData::pathToProjects()) +
             strlen("/") + strlen(file) + 1;
         char *absolutePath = new char[len];
         absolutePath[0] = '\0';
-        strcat(absolutePath, ::seqan::ClassTest::pathToProjects);
+        strcat(absolutePath, ::seqan::ClassTest::StaticData::pathToProjects());
         strcat(absolutePath, "/");
         strcat(absolutePath, file);
 

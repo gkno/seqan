@@ -37,37 +37,73 @@ namespace seqan {
 namespace ClassTest {
     // Raised when an assertion fails in test mode.
     struct AssertionFailedException {};
-    
-    // Number of tests that were run.
-    int testCount;
 
-    // Number of errors that occured.
-    int errorCount;
+    // Container for static global data for the tests.
+    struct StaticData {
+        // Number of tests that were run.
+        static int &testCount() {
+            static int result = 0;
+            return result;
+        }
 
-    // Number of skipped tests.
-    int skippedCount;
+        // Number of errors that occured.
+        static int &errorCount() {
+            static int result = 0;
+            return result;
+        }
 
-    // Flag whether there was an error in this test.
-    bool thisTestOk;
+        // Number of skipped tests.
+        static int &skippedCount() {
+            static int result = 0;
+            return result;
+        }
 
-    // Flag whether this test was skipped.
-    bool thisTestSkipped;
+        // Flag whether there was an error in this test.
+        static bool &thisTestOk() {
+            static bool result = 0;
+            return result;
+        }
 
-    // Name of the current test.
-    const char *currentTestName;
+        // Flag whether this test was skipped.
+        static bool &thisTestSkipped() {
+            static bool result = 0;
+            return result;
+        }
 
-    // Base path to the binary.  Extrapolated from argv[0].
-    char *basePath;
+        // Name of the current test.
+        static const char *&currentTestName() {
+            const char *defaultValue = "";
+            static const char *result = const_cast<char*>(defaultValue);
+            return result;
+        }
 
-    // Base path to the "projects" directory, extrapolated from
-    // __FILE__.
-    char *pathToProjects;
+        // Base path to the binary.  Extrapolated from argv[0].
+        static char *&basePath() {
+            const char *defaultValue = ".";
+            static char *result = const_cast<char*>(defaultValue);
+            return result;
+        }
+        
+        // Base path to the "projects" directory, extrapolated from
+        // __FILE__.
+        static char *&pathToProjects() {
+            const char *defaultValue = ".";
+            static char *result = const_cast<char*>(defaultValue);
+            return result;
+        }
 
-    // Total number of checkpoints in header file.
-    int totalCheckPointCount;
+        // Total number of checkpoints in header file.
+        static int &totalCheckPointCount() {
+            static int result = 0;
+            return result;
+        }
 
-    // Total number of checkpoints found in binary files.
-    int foundCheckPointCount;
+        // Total number of checkpoints found in binary files.
+        static int &foundCheckPointCount() {
+            static int result = 0;
+            return result;
+        }
+    };
 
     // Initialize the testing infrastructure.
     //
@@ -75,23 +111,23 @@ namespace ClassTest {
     inline
     void beginTestSuite(const char *testSuiteName, const char *argv0) {
         (void)testSuiteName;
-        testCount = 0;
-        skippedCount = 0;
-        errorCount = 0;
-        totalCheckPointCount = 0;
-        foundCheckPointCount = 0;
+        StaticData::testCount() = 0;
+        StaticData::skippedCount() = 0;
+        StaticData::errorCount() = 0;
+        StaticData::totalCheckPointCount() = 0;
+        StaticData::foundCheckPointCount() = 0;
         // Get path to argv0.
         char *end = 0;
         for (char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
             end = ptr;
         int rpos = end - argv0;
         if (rpos <= 0) {
-            basePath = new char[1];
-            strcpy(basePath, ".");
+            StaticData::basePath() = new char[1];
+            strcpy(StaticData::basePath(), ".");
         } else {
             int len = rpos;
-            basePath = new char[len];
-            strncpy(basePath, argv0, len);
+            StaticData::basePath() = new char[len];
+            strncpy(StaticData::basePath(), argv0, len);
         }
         // Get path to projects.
         const char *file = __FILE__;
@@ -106,9 +142,9 @@ namespace ClassTest {
                       << __FILE__ << "\"" << std::endl;
             exit(1);
         }
-        pathToProjects = new char[pos];
-        strncpy(pathToProjects, file, pos);
-        pathToProjects[pos-1] = '\0';
+        StaticData::pathToProjects() = new char[pos];
+        strncpy(StaticData::pathToProjects(), file, pos);
+        StaticData::pathToProjects()[pos-1] = '\0';
     }
 
     // Run test suite finalization.
@@ -119,47 +155,47 @@ namespace ClassTest {
     // program's return code.
     inline
     int endTestSuite() {
-        delete basePath;
-        delete pathToProjects;
+        delete StaticData::basePath();
+        delete StaticData::pathToProjects();
 
         std::cout << "**************************************" << std::endl;
-        std::cout << " Total Check Points : " << totalCheckPointCount << std::endl;
-        std::cout << " Found Check Points : " << foundCheckPointCount << std::endl;
-        std::cout << " Lost Check Points  : " << totalCheckPointCount - foundCheckPointCount << std::endl;
+        std::cout << " Total Check Points : " << StaticData::totalCheckPointCount() << std::endl;
+        std::cout << " Found Check Points : " << StaticData::foundCheckPointCount() << std::endl;
+        std::cout << " Lost Check Points  : " << StaticData::totalCheckPointCount() - StaticData::foundCheckPointCount() << std::endl;
         std::cout << "--------------------------------------" << std::endl;
-        std::cout << " Total Tests: " << testCount << std::endl;
-        std::cout << " Skipped:     " << skippedCount << std::endl;
-        std::cout << " Errors:      " << errorCount << std::endl;
+        std::cout << " Total Tests: " << StaticData::testCount() << std::endl;
+        std::cout << " Skipped:     " << StaticData::skippedCount() << std::endl;
+        std::cout << " Errors:      " << StaticData::errorCount() << std::endl;
         std::cout << "**************************************" << std::endl;
-        return not (errorCount > 0 and totalCheckPointCount == foundCheckPointCount);
+        return not (StaticData::errorCount() > 0 and StaticData::totalCheckPointCount() == StaticData::foundCheckPointCount());
     }
 
     // Run test initialization.
     inline
     void beginTest(const char *testName) {
-        currentTestName = testName;
-        thisTestOk = true;
-        thisTestSkipped = false;
-        testCount += 1;
+        StaticData::currentTestName() = testName;
+        StaticData::thisTestOk() = true;
+        StaticData::thisTestSkipped() = false;
+        StaticData::testCount() += 1;
     }
 
     // Run test finalization.
     inline
     void endTest() {
-        if (thisTestSkipped) {
-            std::cout << currentTestName << " SKIPPED" << std::endl;
-        } else if (thisTestOk) {
-            std::cout << currentTestName << " OK" << std::endl;
+        if (StaticData::thisTestSkipped()) {
+            std::cout << StaticData::currentTestName() << " SKIPPED" << std::endl;
+        } else if (StaticData::thisTestOk()) {
+            std::cout << StaticData::currentTestName() << " OK" << std::endl;
         } else {
-            std::cerr << currentTestName << " FAILED" << std::endl;
+            std::cerr << StaticData::currentTestName() << " FAILED" << std::endl;
         }
     }
 
     // Marks the current test as "skipped".
     inline
     void skipCurrentTest() {
-        thisTestSkipped = true;
-        skippedCount += 1;
+        StaticData::thisTestSkipped() = true;
+        StaticData::skippedCount() += 1;
     }
 
     // Called by the macro SEQAN_ASSERT_EQ.
@@ -173,8 +209,8 @@ namespace ClassTest {
                    const char *comment) {
         if (not (value1 == value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " == " << expression2 << " was: " << value1
@@ -208,8 +244,8 @@ namespace ClassTest {
                    const char *comment) {
         if (not (value1 != value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " != " << expression2 << " was: " << value1
@@ -243,8 +279,8 @@ namespace ClassTest {
                  const char *comment) {
         if (not (value1 >= value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " >= " << expression2 << " was: " << value1
@@ -278,8 +314,8 @@ namespace ClassTest {
                 const char *comment) {
         if (not (value1 > value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " > " << expression2 << " was: " << value1
@@ -313,8 +349,8 @@ namespace ClassTest {
                  const char *comment) {
         if (not (value1 <= value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " <= " << expression2 << " was: " << value1
@@ -348,8 +384,8 @@ namespace ClassTest {
                 const char *comment) {
         if (not (value1 < value2)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " < " << expression2 << " was: " << value1
@@ -381,8 +417,8 @@ namespace ClassTest {
                   const char *comment) {
         if (not (value_)) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression_ << " should be true but was " << (value_);
@@ -413,8 +449,8 @@ namespace ClassTest {
                    const char *comment) {
         if (value_) {
             // Increase global error count.
-            thisTestOk = false;
-            errorCount += 1;
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression_ << " should be false but was " << (value_);
@@ -455,11 +491,11 @@ namespace ClassTest {
     // Wrapper for a set of check points.
     // TODO(holtgrew): Simply store the set?
     struct CheckPointStore {
-        static ::std::set<CheckPoint> data;
+        static ::std::set<CheckPoint> &data() {
+            static ::std::set<CheckPoint> result;
+            return result;
+        }
     };
-
-    // Allocate memory for the checkpoint store's data.
-    ::std::set<CheckPoint> CheckPointStore::data;
 
     // Puts the given check point into the CheckPointStore's data.
     inline bool
@@ -473,7 +509,7 @@ namespace ClassTest {
         else ++file_name;
 
         CheckPoint cp = {file_name, line};
-        CheckPointStore::data.insert(cp);
+        CheckPointStore::data().insert(cp);
         return true;
     }
 
@@ -481,14 +517,14 @@ namespace ClassTest {
     // store.
     inline void 
     testCheckPoint(const char *file, unsigned int line) {
-        totalCheckPointCount += 1;
+        StaticData::totalCheckPointCount() += 1;
         CheckPoint cp = {file, line};
-        if (CheckPointStore::data.find(cp) == CheckPointStore::data.end()) {
+        if (CheckPointStore::data().find(cp) == CheckPointStore::data().end()) {
             std::cerr << file << ":" << line << "  -- Check point lost."
                       << std::endl;
             return;
         }
-        foundCheckPointCount += 1;
+        StaticData::foundCheckPointCount() += 1;
     }
 
     // Verify the check points for the given file.
@@ -500,11 +536,13 @@ namespace ClassTest {
         if (!file_name) file_name = file;
         else ++file_name;
 
-        int len = strlen(pathToProjects) +
+        
+
+        int len = strlen(StaticData::pathToProjects()) +
             strlen("/") + strlen(file) + 1;
         char *absolutePath = new char[len];
         absolutePath[0] = '\0';
-        strcat(absolutePath, pathToProjects);
+        strcat(absolutePath, StaticData::pathToProjects());
         strcat(absolutePath, "/");
         strcat(absolutePath, file);
 
@@ -679,7 +717,7 @@ namespace ClassTest {
 //
 // Use this to locate files relative to the test binary.
 #define SEQAN_PROGRAM_PATH                      \
-    ::seqan::ClassTest::basePath
+    ::seqan::ClassTest::StaticData::basePath()
 
 
 // Returns the path to a temporary file with the given name.
