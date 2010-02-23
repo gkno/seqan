@@ -49,6 +49,10 @@ public:
 	typename Value<String>::Type * data_end;
 	size_t data_capacity;
 
+    void _checkMembers() const {
+        assert(data_begin <= data_end);
+    }
+
 //____________________________________________________________________________
 
 public:
@@ -58,6 +62,7 @@ public:
 		data_capacity(0)
 	{
 SEQAN_CHECKPOINT
+                _checkMembers();
 	}
 
 	template <typename TSource>
@@ -68,6 +73,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
+                _checkMembers();
 	}
 	template <typename TSource>
 	String(TSource const & source):
@@ -77,6 +83,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
+                _checkMembers();
 	}
 	String(String const & source):
 		data_begin(0),
@@ -85,6 +92,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
+                _checkMembers();
 	}
 	String(String const & source, Move):
 		data_begin(0),
@@ -93,6 +101,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		move(*this, source);
+                _checkMembers();
 	}
 	template <typename TSource, typename TSize>
 	String(TSource & source, TSize limit):
@@ -102,6 +111,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source, limit);
+                _checkMembers();
 	}
 	template <typename TSource, typename TSize>
 	String(TSource const & source, TSize limit):
@@ -111,6 +121,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source, limit);
+                _checkMembers();
 	}
 
 
@@ -120,12 +131,14 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		assign(*this, source);
 		return *this;
+                _checkMembers();
 	}
 	String & operator =(String const & source)
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
 		return *this;
+                _checkMembers();
 	}
 
 	~String()
