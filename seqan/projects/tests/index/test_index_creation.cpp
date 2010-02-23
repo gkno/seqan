@@ -36,7 +36,7 @@ bool testIndexCreation()
 		TArray	child, childExt;
 		TText	bwt;
 
-		const int runs = 10;					// conduct 10 test runs 
+		const int runs = 2;					// conduct 10 test runs 
 		const int maxSize = 20 * 1024 * 1024;	// max text size is 20 megabyte
 		bool result = true;
 
