@@ -1433,8 +1433,15 @@ matchVerify(
 
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
+        
+#ifdef RAZERS_DEBUG
+        std::cout << "OK" << std::endl; 
+#endif
 		return true;
 	}
+#ifdef RAZERS_DEBUG
+    std::cout << "FAILED" << std::endl; 
+#endif
 	return false;
 }
 
@@ -1601,18 +1608,18 @@ void _mapSingleReadsToContig(
 	}
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
+	if (orientation == 'R')	reverseComplementInPlace(contigSeq);
 
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
 	TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
-	
+    
 	// initialize verifier
 	verifier.onReverseComplement = (orientation == 'R');
 	verifier.genomeLength = length(contigSeq);
 	verifier.m.contigId = contigId;
 	
 	// iterate all verification regions returned by SWIFT
-	if (orientation == 'R')	reverseComplementInPlace(contigSeq);
 	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;

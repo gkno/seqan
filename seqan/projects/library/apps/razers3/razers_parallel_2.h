@@ -30,12 +30,37 @@
 
 namespace SEQAN_NAMESPACE_MAIN
 {
+    
+    template <typename TSwiftPatterns>
+    struct ParallelSwiftPatternHandler
+    {
+        TSwiftPatterns &swiftPatterns;
+        ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
+            swiftPatterns(_swiftPatterns) {}
+    };
+     
     template<
         typename TReadSet,
         typename TShape>
     void intiIndex(Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index, TReadSet & _text, TShape const & _shape){
         value(index.text) = _text;
         index.shape = _shape;
+    }
+
+    template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
+    inline void 
+    setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
+    {
+        int indexNo = 0;
+        int localReadNo = 0;
+        
+        int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
+        if (minT > 1)
+        {
+            //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
+            if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+            setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
+        }
     }
     
     //////////////////////////////////////////////////////////////////////////////
@@ -71,14 +96,16 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // VERIFICATION
         typedef typename Value<TPreprocessing>::Type                                                                        TPreprocessingBlock;
-        typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessingBlock, TSwiftPattern, TCounts >   TVerifier;
+        typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                                                            TSwiftPatterns;
+        typedef ParallelSwiftPatternHandler<TSwiftPatterns>                                                                 TSwiftPatternHandler;
+        typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessingBlock, TSwiftPatternHandler, TCounts >   TVerifier;
         typedef typename Fibre<TReadIndex, Fibre_Text>::Type                                                                TReadSet;
         
         if (options._debugLevel >= 1)
         {
             ::std::cerr << ::std::endl << "Process genome seq #" << contigId;
-            if (orientation == 'F') ::std::cerr << "[fwd]";
-            else                    ::std::cerr << "[rev]";
+            if (orientation == 'F') ::std::cerr << "[fwd]" << std::endl;
+            else                    ::std::cerr << "[rev]" << std::endl;
         }
         
         lockContig(store, contigId);
@@ -91,6 +118,7 @@ namespace SEQAN_NAMESPACE_MAIN
         resize(swiftFinders, length(swiftPatterns), Exact());
         TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
         
+        TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
         String<TVerifier> verifier;
         resize(verifier, length(swiftPatterns), Exact());
         
@@ -99,7 +127,7 @@ namespace SEQAN_NAMESPACE_MAIN
             swiftFinders[i] = swiftFinder;
             
             // initialize verifier
-            TVerifier oneVerifier(store, options, preprocessingBlocks[i], swiftPatterns[i], cnts);
+            TVerifier oneVerifier(store, options, preprocessingBlocks[i], swiftPatternHandler, cnts);
             oneVerifier.onReverseComplement = (orientation == 'R');
             oneVerifier.genomeLength = length(contigSeq);
             oneVerifier.m.contigId = contigId;
@@ -110,16 +138,18 @@ namespace SEQAN_NAMESPACE_MAIN
         bool beginOk = true;
         
         // set up finder
-        for (unsigned i = 0; i < length(swiftFinders); ++i)
+        for (unsigned i = 0; i < length(swiftFinders); ++i){
             // FIXME: break after first one is false
             beginOk = beginOk & windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
+        }
         
         // if started correctly
         if(beginOk){
             
             // FIXME: razerSoption
-            unsigned windowSize = 5000;
+            unsigned windowSize = 1000;
             unsigned offSet = 0;
+            unsigned blockSize = length(host(host(swiftPatterns[0])));
             
             // go over contig sequence
             while(offSet < length(contigSeq))
@@ -136,8 +166,8 @@ namespace SEQAN_NAMESPACE_MAIN
                     // verify hits
                     THitString hits = getSwiftHits(swiftFinders[i]);
                     for(THitStringSize h = 0; h < length(hits); ++h){
-                        verifier[i].m.readId = hits[h].ndlSeqNo;
-                        matchVerify(verifier[i], getSwiftRange(hits[h], contigSeq), verifier[i].m.readId, host(host(swiftPatterns[i])), mode);
+                        verifier[i].m.readId = (i * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+                        matchVerify(verifier[i], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatterns[i])), mode);
                         ++options.countFiltration;
                     }
 
@@ -194,7 +224,9 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Position<TReadIndexString>::Type           TPos;
 
         // configure Swift patterns
-        String<TSwiftPattern> swiftPatterns;
+        typedef String<TSwiftPattern> TSwiftPatterns;
+        TSwiftPatterns swiftPatterns;
+        
         resize(swiftPatterns, length(readIndices), Exact());
         for (TPos i = 0; i < length(readIndices); ++i) {
             assign(swiftPatterns[i].data_host, readIndices[i]);
@@ -299,7 +331,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // depending on how long it takes to process the individual blocks a single
         // thread might work through more than otheres
         unsigned cores = 1;//2; //omp_get_num_procs();
-        unsigned noOfBlocks = cores;// * 5; // TODO: razerSoption
+        unsigned noOfBlocks = cores * 2; // TODO: razerSoption
         
         // if there are not enough reads that the parallel version makes sence use the normal one
         if(length(store.readSeqStore) < 1){ // TODO: razerSoption, compare with noOfBlocks, there needs to be at least one read per block
