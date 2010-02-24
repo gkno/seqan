@@ -1154,10 +1154,12 @@ void Test_Approx_Prefix_EditDist() {
     SEQAN_ASSERT_EQ(infix(finder_6), "this is a text that is a bit longer than one machine word of 32 or 64 bits. AAXYX");
     SEQAN_ASSERT_NOT(find(finder_6, pattern_6));
 
-    // Test with large needles and very high maximum scores.
+    // The very high score limit with short needle all-mismatching the
+    // pattern.  This is used to mirror the test below that use a long
+    // needle.
     {
-        const char *kHaystackStr = "CTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCT";
-        const char *kNeedleStr = "CTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCT";
+        const char *kHaystackStr = "CTCT";
+        const char *kNeedleStr =   "AAAA";
         const int kNeedleLen = strlen(kNeedleStr);
         const int kScoreLimit = -1000;
         // Haystack has a length of 100, needle of 80.
@@ -1166,10 +1168,28 @@ void Test_Approx_Prefix_EditDist() {
         Finder<String<char> > finder(haystack);
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
-        // TODO(holtgrew): Make assertions about the actual scores.
-        SEQAN_ASSERT_LEQ(getScore(pattern), length(needle));
+        SEQAN_ASSERT_LEQ(-getScore(pattern), length(needle));
         while (find(finder, pattern)) {
-            SEQAN_ASSERT_LEQ(getScore(pattern), length(needle));
+            SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
+        }
+    }
+
+    // Test very high score limit with large needles and very high
+    // maximum scores.
+    {
+        const char *kHaystackStr = "CTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCT";
+        const char *kNeedleStr =   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        const int kNeedleLen = strlen(kNeedleStr);
+        const int kScoreLimit = -1000;
+        // Haystack has a length of 100, needle of 80.
+        String<char> haystack(kHaystackStr);
+        String<char> needle(kNeedleStr);
+        Finder<String<char> > finder(haystack);
+        Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
+
+        SEQAN_ASSERT_LEQ(-getScore(pattern), length(needle));
+        while (find(finder, pattern)) {
+            SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
         }
     }
 }
@@ -1250,6 +1270,8 @@ SEQAN_DEFINE_TEST(test_find_online_multi_MultiBFAM_Trie) {
 
 
 SEQAN_DEFINE_TEST(test_find_approx_prefix_edit_dist_dpsearch) {
+    SEQAN_ASSERT_TRUE(false, "TODO(holtgrew): Fix test_find_approx_prefix_edit_dist_dpsearch, segfaults.");
+    return;
     Test_Approx_Prefix_EditDist<DPSearch<Score<>, FindPrefix> >();
 }
 

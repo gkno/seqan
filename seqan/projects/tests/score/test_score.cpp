@@ -130,6 +130,8 @@ SEQAN_DEFINE_TEST(test_score_pam) {
     SEQAN_ASSERT_EQ(scoreGapOpen(pam), scoreGapExtend(pam));
     SEQAN_ASSERT_EQ(scoreGap(pam), scoreGapExtend(pam));
 
+    write(stdout, pam);
+
     // Store and load built-in matrix.
     FILE * fl = fopen(SEQAN_TEMP_FILENAME("testfile.txt"), "wb");
     write(fl, pam);

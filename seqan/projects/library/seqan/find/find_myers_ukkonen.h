@@ -185,7 +185,11 @@ public:
 //____________________________________________________________________________
 
 	Pattern(int _limit = -1):
+        needleSize(0),
+        score(0),
 		k(- _limit),
+        VP0(0),
+        VN0(0),
 		large(NULL)
 	{}
 
@@ -206,16 +210,12 @@ public:
 	}
 
 	template <typename TNeedle2>
-	Pattern(TNeedle2 & ndl, int _limit = -1):
-		k(- _limit),
-		large(NULL)
-	{
-		setHost(*this, ndl);
-	}
-
-	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl, int _limit = -1):
+        needleSize(0),
+        score(0),
 		k(- _limit),
+        VP0(0),
+        VN0(0),
 		large(NULL)
 	{
 		setHost(*this, ndl);
@@ -580,9 +580,14 @@ SEQAN_CHECKPOINT
 	else 
 	{
 		_MyersLargePattern &large = *me.large;
-		me.score = me.k + 1;
-		large.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
-		large.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
+                // local_k either stores the score limit (me.k) or the
+                // needle size minus one.  It is used for the mask
+                // computation and setting the initial score (the
+                // minus one is there because of the Ukkonen trick).
+                int local_k = std::min(me.k, me.needleSize - 1);
+                me.score = local_k + 1;
+		large.scoreMask = (TWord)1 << (local_k % me.MACHINE_WORD_SIZE);
+		large.lastBlock = local_k / me.MACHINE_WORD_SIZE; 
 		if (large.lastBlock >= large.blockCount)
 			large.lastBlock = large.blockCount - 1;
 
