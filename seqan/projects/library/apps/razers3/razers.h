@@ -164,6 +164,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// multi-threading
 
+#ifdef RAZERS_PARALLEL_READS
+        unsigned    windowSize;
+        unsigned    blocksPerCore;
+#endif
+
 #ifdef RAZERS_PARALLEL
 		typedef ::tbb::spin_mutex	TMutex;
 
@@ -232,6 +237,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
+            
+#ifdef RAZERS_PARALLEL_READS
+            windowSize = 1000;
+            blocksPerCore = 7;
+#endif
+            
 		}
 	};
 

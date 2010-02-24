@@ -31,6 +31,7 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
     
+    // TODO: doc
     template <typename TSwiftPatterns>
     struct ParallelSwiftPatternHandler
     {
@@ -38,7 +39,8 @@ namespace SEQAN_NAMESPACE_MAIN
         ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
             swiftPatterns(_swiftPatterns) {}
     };
-     
+    
+    // TODO: doc
     template<
         typename TReadSet,
         typename TShape>
@@ -47,12 +49,14 @@ namespace SEQAN_NAMESPACE_MAIN
         index.shape = _shape;
     }
 
+    // TODO: doc
     template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
     inline void 
     setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
     {
-        int indexNo = 0;
-        int localReadNo = 0;
+        int blockSize = length(host(host(swift.swiftPatterns[0])));
+        int indexNo = readNo / blockSize;
+        int localReadNo = readNo % blockSize;
         
         int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
         if (minT > 1)
@@ -63,6 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     }
     
+    // TODO: doc
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in a single genome sequence
     template <
@@ -145,23 +150,23 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // if started correctly
         if(beginOk){
-            
-            // FIXME: razerSoption
-            unsigned windowSize = 1000;
-            unsigned offSet = 0;
             unsigned blockSize = length(host(host(swiftPatterns[0])));
             
             // go over contig sequence
-            while(offSet < length(contigSeq))
+            while(true)
             {
                 bool stop = false;
                 
-                // each filter runs over the window separately
-                // FIXME: Parallelize
-                for (TSwiftFinderSize i = 0; i < length(swiftFinders); ++i){
+                // Parallelize loop body each thread gets one at a time
+                // As the data structures are split up alread and each thread works on only one element of
+                // the strings (finder, patterns) at a time the variables can be shared
+                // TODO: maybe try schedule(guided)
+                int numberOfBlocks = length(swiftFinders);
+                #pragma omp parallel for schedule(dynamic, 1) //private(options)
+                for (int i = 0; i < numberOfBlocks; ++i){ //TSwiftFinderSize
                     
                     // filter window and save hits
-                    stop = !windowFindNext(swiftFinders[i], swiftPatterns[i], windowSize, (options._debugLevel & (i == 0)));
+                    stop = !windowFindNext(swiftFinders[i], swiftPatterns[i], options.windowSize, (options._debugLevel & (i == 0)));
                     
                     // verify hits
                     THitString hits = getSwiftHits(swiftFinders[i]);
@@ -174,9 +179,6 @@ namespace SEQAN_NAMESPACE_MAIN
                 }
                 
                 if(stop) break;
-                
-                // move window
-                offSet += windowSize;
             }
             
             // clear finders
@@ -192,7 +194,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
     }
     
-    
+    // TODO: doc
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in many genome sequences
     template <
@@ -258,7 +260,7 @@ namespace SEQAN_NAMESPACE_MAIN
         for (TPos i = 0; i < length(readIndices); ++i){
             // block of the same size as the corresponding index (number of reads in this index)
             unsigned blockSize = length(host(readIndices[i]));
-            TVerifierBlock block = infix(forwardPatterns, offSet, blockSize);            
+            TVerifierBlock block = infix(forwardPatterns, offSet, offSet + blockSize);            
             forwardPatternsBlocks[i] = block;
             offSet += blockSize;
         }
@@ -303,6 +305,7 @@ namespace SEQAN_NAMESPACE_MAIN
         return 0;
     }
     
+    // TODO: doc
     template <
         typename TFSSpec, 
         typename TFSConfig, 
@@ -331,7 +334,10 @@ namespace SEQAN_NAMESPACE_MAIN
         // depending on how long it takes to process the individual blocks a single
         // thread might work through more than otheres
         unsigned cores = 1;//2; //omp_get_num_procs();
-        unsigned noOfBlocks = cores * 2; // TODO: razerSoption
+        unsigned noOfBlocks = cores * options.blocksPerCore;
+        
+        if(length(store.readSeqStore) < noOfBlocks)
+            noOfBlocks = length(store.readSeqStore);
         
         // if there are not enough reads that the parallel version makes sence use the normal one
         if(length(store.readSeqStore) < 1){ // TODO: razerSoption, compare with noOfBlocks, there needs to be at least one read per block
