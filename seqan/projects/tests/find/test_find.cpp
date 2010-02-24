@@ -24,6 +24,7 @@
 #include <fstream>
 #include <typeinfo>
 #include <time.h>
+#include <cstring>
 #include <cstdio>
 #include <vector>
 #include <time.h>
@@ -1153,6 +1154,24 @@ void Test_Approx_Prefix_EditDist() {
     SEQAN_ASSERT_EQ(infix(finder_6), "this is a text that is a bit longer than one machine word of 32 or 64 bits. AAXYX");
     SEQAN_ASSERT_NOT(find(finder_6, pattern_6));
 
+    // Test with large needles and very high maximum scores.
+    {
+        const char *kHaystackStr = "CTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCT";
+        const char *kNeedleStr = "CTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCTCT";
+        const int kNeedleLen = strlen(kNeedleStr);
+        const int kScoreLimit = -1000;
+        // Haystack has a length of 100, needle of 80.
+        String<char> haystack(kHaystackStr);
+        String<char> needle(kNeedleStr);
+        Finder<String<char> > finder(haystack);
+        Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
+
+        // TODO(holtgrew): Make assertions about the actual scores.
+        SEQAN_ASSERT_LEQ(getScore(pattern), length(needle));
+        while (find(finder, pattern)) {
+            SEQAN_ASSERT_LEQ(getScore(pattern), length(needle));
+        }
+    }
 }
 
 
@@ -1292,6 +1311,9 @@ SEQAN_DEFINE_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam) {
 }
 
 
+// Test that shows the problem with Myers-Ukkonen approximate search
+// when large needles were used and the maximum score limit was set
+// higher than needle length.
 SEQAN_DEFINE_TEST(test_regression_rmbench) {
     // The data to test with:  Needle, haystack and score limit.
     const char *kCharNeedle = "CCATATGCTTGTGTCGCGGGTTTATTTGCATTCGACCCAGTTGACTCGGAAGTCGAAATGTTCCTGCCCCGTTTCTGCGTTCCGTGCAGTTGCGCGGTCTGGTTGGGCGGGTCCCCCCCTGA";
