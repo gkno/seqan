@@ -184,12 +184,8 @@ public:
 
 //____________________________________________________________________________
 
-	Pattern(int _limit = -1) :
-        needleSize(0),
-        score(0),
-		k(-_limit),
-        VP0(0),
-        VN0(0),
+	Pattern(int _limit = -1):
+		k(- _limit),
 		large(NULL)
 	{}
 
@@ -202,7 +198,6 @@ public:
 		, bitMasks(other.bitMasks)
 		, large(NULL)
 	{
-        // TODO(holtgrew): Why not use a pointer with reference counting here?
 		if (other.large)
 		{
 			large = new _MyersLargePattern;
@@ -212,15 +207,20 @@ public:
 
 	template <typename TNeedle2>
 	Pattern(TNeedle2 & ndl, int _limit = -1):
-        needleSize(0),
-        score(0),
-		k(-_limit),
-        VP0(0),
-        VN0(0),
+		k(- _limit),
 		large(NULL)
 	{
 		setHost(*this, ndl);
 	}
+
+	template <typename TNeedle2>
+	Pattern(TNeedle2 const & ndl, int _limit = -1):
+		k(- _limit),
+		large(NULL)
+	{
+		setHost(*this, ndl);
+	}
+
 
 	~Pattern()
 	{
@@ -261,7 +261,6 @@ public:
 #endif
 
 	typedef typename Iterator<TNeedle, Standard>::Type TIter;
-    // TODO(holtgrew): The following could break if a char is not 8 bits.
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
 	unsigned needleSize;
@@ -556,7 +555,6 @@ SEQAN_CHECKPOINT
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 int getScore(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me) 
 {
-SEQAN_CHECKPOINT
 	return -(int)me.score;
 }
 //////////////////////////////////////////////////////////////////////////////
@@ -582,7 +580,7 @@ SEQAN_CHECKPOINT
 	else 
 	{
 		_MyersLargePattern &large = *me.large;
-		me.score = std::min(me.k + 1, me.needleSize + 1);
+		me.score = me.k + 1;
 		large.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
 		large.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
 		if (large.lastBlock >= large.blockCount)
