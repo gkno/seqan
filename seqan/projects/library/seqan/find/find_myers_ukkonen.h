@@ -582,7 +582,7 @@ SEQAN_CHECKPOINT
 	else 
 	{
 		_MyersLargePattern &large = *me.large;
-		me.score = std::min(me.k + 1, me.needleSize);
+		me.score = std::min(me.k + 1, me.needleSize + 1);
 		large.scoreMask = (TWord)1 << (me.k % me.MACHINE_WORD_SIZE);
 		large.lastBlock = me.k / me.MACHINE_WORD_SIZE; 
 		if (large.lastBlock >= large.blockCount)
