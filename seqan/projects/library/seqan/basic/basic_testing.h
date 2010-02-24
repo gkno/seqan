@@ -155,8 +155,8 @@ namespace ClassTest {
     // program's return code.
     inline
     int endTestSuite() {
-        delete StaticData::basePath();
-        delete StaticData::pathToProjects();
+        delete[] StaticData::basePath();
+        delete[] StaticData::pathToProjects();
 
         std::cout << "**************************************" << std::endl;
         std::cout << " Total Check Points : " << StaticData::totalCheckPointCount() << std::endl;
