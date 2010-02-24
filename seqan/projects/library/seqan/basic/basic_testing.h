@@ -167,7 +167,7 @@ namespace ClassTest {
         std::cout << " Skipped:     " << StaticData::skippedCount() << std::endl;
         std::cout << " Errors:      " << StaticData::errorCount() << std::endl;
         std::cout << "**************************************" << std::endl;
-        return not (StaticData::errorCount() > 0 and StaticData::totalCheckPointCount() == StaticData::foundCheckPointCount());
+        return !(StaticData::errorCount() > 0 && StaticData::totalCheckPointCount() == StaticData::foundCheckPointCount());
     }
 
     // Run test initialization.
@@ -207,7 +207,7 @@ namespace ClassTest {
                    const T1 &value1, const char *expression1,
                    const T2 &value2, const char *expression2,
                    const char *comment) {
-        if (not (value1 == value2)) {
+        if (!(value1 == value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -242,7 +242,7 @@ namespace ClassTest {
                    const T1 &value1, const char *expression1,
                    const T2 &value2, const char *expression2,
                    const char *comment) {
-        if (not (value1 != value2)) {
+        if (!(value1 != value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -277,7 +277,7 @@ namespace ClassTest {
                  const T1 &value1, const char *expression1,
                  const T2 &value2, const char *expression2,
                  const char *comment) {
-        if (not (value1 >= value2)) {
+        if (!(value1 >= value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -312,7 +312,7 @@ namespace ClassTest {
                 const T1 &value1, const char *expression1,
                 const T2 &value2, const char *expression2,
                 const char *comment) {
-        if (not (value1 > value2)) {
+        if (!(value1 > value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -347,7 +347,7 @@ namespace ClassTest {
                  const T1 &value1, const char *expression1,
                  const T2 &value2, const char *expression2,
                  const char *comment) {
-        if (not (value1 <= value2)) {
+        if (!(value1 <= value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -382,7 +382,7 @@ namespace ClassTest {
                 const T1 &value1, const char *expression1,
                 const T2 &value2, const char *expression2,
                 const char *comment) {
-        if (not (value1 < value2)) {
+        if (!(value1 < value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -415,7 +415,7 @@ namespace ClassTest {
     bool testTrue(const char *file, int line,
                   const T &value_, const char *expression_,
                   const char *comment) {
-        if (not (value_)) {
+        if (!(value_)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
             StaticData::errorCount() += 1;
@@ -482,7 +482,7 @@ namespace ClassTest {
             int c = strcmp(file, other.file);
             if (c < 0)
                 return true;
-            if (c == 0 and line < other.line)
+            if (c == 0 && line < other.line)
                 return true;
             return false;
         }
@@ -612,7 +612,7 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
 #define SEQAN_ASSERT_EQ(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (not ::seqan::ClassTest::testEqual(__FILE__, __LINE__,       \
+    if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,       \
                                               (_arg1), #_arg1,          \
                                               (_arg2), #_arg2,          \
                                               ## __VA_ARGS__)) {        \
@@ -627,7 +627,7 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_NEQ(4, 4, "Wheee...");
 #define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (not ::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,    \
+        if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,    \
                                                  (_arg1), #_arg1,       \
                                                  (_arg2), #_arg2,       \
                                                  ## __VA_ARGS__)) {     \
@@ -639,7 +639,7 @@ namespace ClassTest {
 // Less-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (not ::seqan::ClassTest::testLeq(__FILE__, __LINE__,         \
+        if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,         \
                                             (_arg1), #_arg1,            \
                                             (_arg2), #_arg2,            \
                                             ## __VA_ARGS__)) {          \
@@ -651,7 +651,7 @@ namespace ClassTest {
 // Less-than assertion with an optional comment.
 #define SEQAN_ASSERT_LT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (not ::seqan::ClassTest::testLt(__FILE__, __LINE__,          \
+        if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,          \
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                            ## __VA_ARGS__)) {           \
@@ -663,7 +663,7 @@ namespace ClassTest {
 // Greater-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (not ::seqan::ClassTest::testGeq(__FILE__, __LINE__,         \
+        if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,         \
                                             (_arg1), #_arg1,            \
                                             (_arg2), #_arg2,            \
                                             ## __VA_ARGS__)) {          \
@@ -675,7 +675,7 @@ namespace ClassTest {
 // Greater-than assertion with an optional comment.
 #define SEQAN_ASSERT_GT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (not ::seqan::ClassTest::testGt(__FILE__, __LINE__,          \
+        if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,          \
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                            ## __VA_ARGS__)) {           \
@@ -691,7 +691,7 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_TRUE(false);
 #define SEQAN_ASSERT_TRUE(_arg1, ...)                                   \
     do {                                                                \
-        if (not ::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
+        if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
                                              (_arg1), #_arg1,           \
                                              ##__VA_ARGS__)) {          \
             throw ::seqan::ClassTest::AssertionFailedException();       \
@@ -705,7 +705,7 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_NOT(false);
 #define SEQAN_ASSERT_NOT(_arg1, ...)                                  \
     do {                                                              \
-        if (not ::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
+        if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
                                               (_arg1), #_arg1,        \
                                               ##__VA_ARGS__)) {       \
             throw ::seqan::ClassTest::AssertionFailedException();     \
