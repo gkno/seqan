@@ -173,8 +173,8 @@ namespace ClassTest {
         StaticData::foundCheckPointCount() = 0;
         // Get path to argv0.
         const char *end = 0;
-        for (char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
-            const end = ptr;
+        for (const char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
+            end = ptr;
         int rpos = end - argv0;
         if (rpos <= 0) {
             StaticData::basePath() = new char[1];
