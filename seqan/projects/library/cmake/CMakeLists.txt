@@ -42,7 +42,7 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 # the SOURCE command in add_custom_target is not
 # recognized there
 if (NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-  set (SEQAN_GUI_SOURCES SOURCES ${SEQAN_HEADERS)
+  set (SEQAN_GUI_SOURCES SOURCES ${SEQAN_HEADERS})
 endif (NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
 
 add_custom_target (${SEQAN_TARGET}
