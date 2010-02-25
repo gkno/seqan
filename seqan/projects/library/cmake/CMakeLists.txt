@@ -62,11 +62,13 @@ endforeach (SEQAN_HEADER)
 # Set compiler flags
 ################################################################################
 
-# Make sure the compiler can find include files from the SeqAn library. 
+# Make sure the compiler can find include files from the SeqAn library.
 include_directories (${SEQAN_LIBRARY})
 
+# For the GCC, we disable testing and debugging in release mode.
 if (CMAKE_COMPILER_IS_GNUCXX)
 	set (CMAKE_CXX_WARNING_LEVEL 4)
+	set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
@@ -77,7 +79,7 @@ endif (MSVC)
 # Include sub-projects
 ################################################################################
 
-set (CMAKE_BUILD_TYPE Debug)
+#set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
 
 add_subdirectory (apps)

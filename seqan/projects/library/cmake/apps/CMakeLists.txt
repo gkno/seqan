@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6) 
 project (Seqan_Apps CXX)
 
-set (CMAKE_BUILD_TYPE Debug)
+#set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
 set (TBB_BASE ${SEQAN_LIBRARY}/extra/tbb CACHE FILEPATH "Path to the TBB library folder")
 set (BOOST /usr/include/ CACHE FILEPATH "Path to the folder containing the Boost includes")
