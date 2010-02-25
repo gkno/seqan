@@ -28,7 +28,60 @@
 #include <cstdlib>   // exit()
 #include <set>
 
+// SeqAn's has three global debug/testing levels: testing, debug and
+// release.  Depending on the level, the SEQAN_ASSERT_* and
+// SEQAN_CHECKPOINT macros will be enabled.
+//
+// Note that this is independent of the <cassert> assertions and
+// NDEBUG being defined.
+//
+// The levels are enabled by the values of the macros
+// SEQAN_ENABLE_TESTING and SEQAN_ENABLE_DEBUG.  By setting a macro to
+// 0, one disables the level and by setting the macro to 1, one
+// enables a level.  Enabling testing also enables debug, overriding a
+// value of 0 for SEQAN_ENABLE_DEBUG.
+//
+// If the level is release (both the macros for debug and testing are
+// 0), the assertions will be disabled.  If the level is debug then
+// the assertions will be enabled.  If the level is testing then the
+// checkpoint macros will also be enabled.
+//
+// The default is to enable debugging but disable testing.
+//
+// You can print the current level using the function seqan::printDebugLevel().
+
+// Set default for SEQAN_ENABLE_TESTING.
+#ifndef SEQAN_ENABLE_TESTING
+#define SEQAN_ENABLE_TESTING 0
+#endif  // #ifndef SEQAN_ENABLE_TESTING
+
+// Set default for SEQAN_ENABLE_DEBUG.
+#ifndef SEQAN_ENABLE_DEBUG
+#define SEQAN_ENABLE_DEBUG 1
+#endif  // #ifndef SEQAN_ENABLE_DEBUG
+
+// Force-enable debugging if testing is enabled.
+#if SEQAN_ENABLE_TESTING
+#udnef SEQAN_ENABLE_DEBUG
+#define SEQAN_ENABLE_DEBUG 1
+#endif  // #if SEQAN_ENABLE_TESTING
+
+
 namespace seqan {
+
+/**
+.Function.printDebugLevel:
+..cat:Miscellaneous:
+..summary:Print the current SeqAn debug level to the given stream.
+..signature:printDebugLevel(stream)
+..param.stream:The stream to print to, e.g. $std::cout$.
+ */
+template <typename TStream>
+void printDebugLevel(TStream &stream) {
+    stream << "SEQAN_ENABLE_DEBUG == " << SEQAN_ENABLE_DEBUG << std::endl;
+    stream << "SEQAN_ENABLE_TESTING == " << SEQAN_ENABLE_TESTING << std::endl;
+}
+
 
 // Namespace for the testing infrastructure.
 //
@@ -83,7 +136,7 @@ namespace ClassTest {
             static char *result = const_cast<char*>(defaultValue);
             return result;
         }
-        
+
         // Base path to the "projects" directory, extrapolated from
         // __FILE__.
         static char *&pathToProjects() {
@@ -110,6 +163,8 @@ namespace ClassTest {
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
     inline
     void beginTestSuite(const char *testSuiteName, const char *argv0) {
+        // First things first: Print the current debug level.
+        printDebugLevel(std::cout);
         (void)testSuiteName;
         StaticData::testCount() = 0;
         StaticData::skippedCount() = 0;
@@ -515,7 +570,7 @@ namespace ClassTest {
 
     // Test whether the given check point exists in the check point
     // store.
-    inline void 
+    inline void
     testCheckPoint(const char *file, unsigned int line) {
         StaticData::totalCheckPointCount() += 1;
         CheckPoint cp = {file, line};
@@ -528,7 +583,7 @@ namespace ClassTest {
     }
 
     // Verify the check points for the given file.
-    inline void 
+    inline void
     verifyCheckPoints(const char *file) {
         char const* file_name = strrchr(file, '/');
         char const* file_name_2 = strrchr(file, '\\');
@@ -536,7 +591,7 @@ namespace ClassTest {
         if (!file_name) file_name = file;
         else ++file_name;
 
-        
+
 
         int len = strlen(StaticData::pathToProjects()) +
             strlen("/") + strlen(file) + 1;
@@ -564,27 +619,40 @@ namespace ClassTest {
         ::std::fclose(fl);
     }
 
+#if SEQAN_ENABLE_TESTING
+    // If in testing mode then raise an AssertionException.
+    void fail() {
+        raise AssertionException();
+    }
+#else
+    // If not in testing mode then quit with an abort.
+    void fail() {
+        abort();
+    }
+#endif  // #if SEQAN_ENABLE_TESTING
+    
 }  // namespace ClassTest
 
+#if SEQAN_ENABLE_DEBUG
 
-    // This macro expands to startup code for a test file.
+// This macro expands to startup code for a test file.
 #define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
     int main(int argc, char **argv) {                           \
     ::seqan::ClassTest::beginTestSuite(#suite_name, argv[0]);
 
 
-    // This macro expands to shutdown code for a test file.
+// This macro expands to shutdown code for a test file.
 #define SEQAN_END_TESTSUITE                     \
     return ::seqan::ClassTest::endTestSuite();  \
 }
 
 
-    // This macro expands to function header for one test.
+// This macro expands to function header for one test.
 #define SEQAN_DEFINE_TEST(test_name)                    \
     void SEQAN_TEST_ ## test_name ()                    \
                                                         \
                                                         \
-    // This macro expands to code to call a given test.
+// This macro expands to code to call a given test.
 #define SEQAN_CALL_TEST(test_name)                                      \
     do {                                                                \
         ::seqan::ClassTest::beginTest(#test_name);                      \
@@ -616,7 +684,7 @@ namespace ClassTest {
                                               (_arg1), #_arg1,          \
                                               (_arg2), #_arg2,          \
                                               ## __VA_ARGS__)) {        \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -631,7 +699,7 @@ namespace ClassTest {
                                                  (_arg1), #_arg1,       \
                                                  (_arg2), #_arg2,       \
                                                  ## __VA_ARGS__)) {     \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -643,7 +711,7 @@ namespace ClassTest {
                                             (_arg1), #_arg1,            \
                                             (_arg2), #_arg2,            \
                                             ## __VA_ARGS__)) {          \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -655,7 +723,7 @@ namespace ClassTest {
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                            ## __VA_ARGS__)) {           \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -667,7 +735,7 @@ namespace ClassTest {
                                             (_arg1), #_arg1,            \
                                             (_arg2), #_arg2,            \
                                             ## __VA_ARGS__)) {          \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -679,7 +747,7 @@ namespace ClassTest {
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                            ## __VA_ARGS__)) {           \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -694,7 +762,7 @@ namespace ClassTest {
         if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
                                              (_arg1), #_arg1,           \
                                              ##__VA_ARGS__)) {          \
-            throw ::seqan::ClassTest::AssertionFailedException();       \
+            ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
@@ -708,9 +776,28 @@ namespace ClassTest {
         if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
                                               (_arg1), #_arg1,        \
                                               ##__VA_ARGS__)) {       \
-            throw ::seqan::ClassTest::AssertionFailedException();     \
+            ::seqan::ClassTest::fail();                               \
         }                                                             \
     } while (false)
+
+
+#else  // #if SEQAN_ENABLE_DEBUG
+
+#define SEQAN_BEGIN_TESTSUITE(suite_name) do {} while (false)
+#define SEQAN_END_TESTSUITE do {} while (false)
+#define SEQAN_DEFINE_TEST(test_name) do {} while (false)
+#define SEQAN_CALL_TEST(test_name) do {} while (false)
+#define SEQAN_SKIP_TEST do {} while (false)
+#define SEQAN_ASSERT_EQ(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_LT(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_GT(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_TRUE(_arg1, ...) do {} while (false)
+#define SEQAN_ASSERT_NOT(_arg1, ...) do {} while (false)
+
+#endif  // #if SEQAN_ENABLE_DEBUG
 
 
 // Returns a string (of type char*) with the path to the called binary.
@@ -726,6 +813,8 @@ namespace ClassTest {
     ("/tmp/" filename)
 
 
+#if SEQAN_ENABLE_TESTING
+
 // Create a check point at the point where the macro is placed.
 // TODO(holtgrew): Should be called SEQAN_CHECK_POINT to be consistent.
 #define SEQAN_CHECKPOINT                                        \
@@ -735,7 +824,22 @@ namespace ClassTest {
 // Call the check point verification code for the given file.
 #define SEQAN_VERIFY_CHECKPOINTS(filename)              \
     ::seqan::ClassTest::verifyCheckPoints(filename)
-    
+
+#else  // #if SEQAN_ENABLE_TESTING
+
+#define SEQAN_CHECKPOINT
+
+// If checkpoints are to be verified if testing is disabled then print
+// a warning.
+#define SEQAN_VERIFY_CHECKPOINTS(filename)                              \
+    do {                                                                \
+        fprintf(stderr, ("WARNING: Check point verification is "        \
+                         "disabled. Trying to verify %s from %s:%d."),  \
+                filename, __FILE__, __LINE__);                          \
+    } while(false)
+
+#endif  // #if SEQAN_ENABLE_TESTING
+
 }  // namespace seqan
 
 #endif  // SEQAN_BASIC_BASIC_TESTING_H_
