@@ -62,7 +62,7 @@
 
 // Force-enable debugging if testing is enabled.
 #if SEQAN_ENABLE_TESTING
-#udnef SEQAN_ENABLE_DEBUG
+#undef SEQAN_ENABLE_DEBUG
 #define SEQAN_ENABLE_DEBUG 1
 #endif  // #if SEQAN_ENABLE_TESTING
 
@@ -620,13 +620,13 @@ namespace ClassTest {
     }
 
 #if SEQAN_ENABLE_TESTING
-    // If in testing mode then raise an AssertionException.
-    void fail() {
-        raise AssertionException();
+    // If in testing mode then raise an AssertionFailedException.
+    inline void fail() {
+        throw AssertionFailedException();
     }
 #else
     // If not in testing mode then quit with an abort.
-    void fail() {
+    inline void fail() {
         abort();
     }
 #endif  // #if SEQAN_ENABLE_TESTING
