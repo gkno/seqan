@@ -115,11 +115,13 @@ inline void _printMask(String <unsigned> const &  mask,unsigned line,String <cha
 //____________________________________________________________________________
 //								VALIDATION
 
-inline bool _isInt(String<char> const & number)
+template <typename TString>
+inline bool _isInt(TString const & number)
 {
-	unsigned int len = length(number);
-	for(unsigned int i = 0;i < len;++i){
-		if(!(convert<unsigned int>(getValue(number,i)) <= 57 && convert<unsigned int>(getValue(number,i)) >= 47))
+	typename Size<TString>::Type len = length(number);
+	for(typename Position<TString>::Type i = 0; i < len; ++i)
+	{
+		if (number[i] < '0' || number[i] > '9')
 			return false;
 	}
 	return true;
