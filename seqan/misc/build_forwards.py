@@ -1,18 +1,42 @@
+#!/usr/bin/env python2.5
+"""SeqAn Automatic Forwards Generator.
+
+Usage: build_forwards.py BASE_PATH [all]
+
+The program is given the project base path.  All directories in this
+base path contain one module which consists of all header files
+(ending in ".h") in this module directory.
+
+For each module, a module generated forwards header can be created.
+The file name is the name of the module, followed by
+"_generated_forwards.h".  If the module generated forward header does
+not exist or is older than any file in the module, it is recreated.
+
+Original Author: Andreas Gogol Doering <andreas.doering@mdc-berlin.de>
+"""
+
+__author__ = 'Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>'
+
 import os
+import os.path
 import copy
 import string
 import sys
-from stat import *
 
-
-################################################################################
 
 FUNCS = {}
 CLASSES = {}
 TYPEDEFS = {}
 
+PROGRAM_USAGE = """
+SeqAn Automatic Forwards Generator
 
-################################################################################
+USAGE: build_forwards.py BASE_PATH [all]
+
+BASE_PATH is the path up to and including "seqan".  The option "all"
+forces a rebuild.
+""".strip()
+
 
 def buildProject(project_path):
     if not os.path.exists(project_path):
@@ -55,12 +79,11 @@ def buildProject(project_path):
         
     print
 
-################################################################################
 
-def forwardFilename(project):
-    return project + "_generated_forwards.h"
+def forwardFilename(module):
+    """Returns the generated forwards header filename for a module name."""
+    return module + "_generated_forwards.h"
 
-################################################################################
 
 def testFileType(filename):
     pos = filename.rfind(".")
@@ -69,7 +92,6 @@ def testFileType(filename):
 
     return ext in ["c", "C", "cpp", "CPP", "c++", "C++", "h", "H", "hpp", "HPP", "h++", "H++"]
   
-################################################################################
     
 def parseFile(filename):
     f = open(filename)
@@ -87,17 +109,15 @@ def parseFile(filename):
     
     createEntries(sigs)
 
-################################################################################
-# returns True if line ends with '\'
 
 def isMultiLine(line):
+    """Returns true iff line ends with '\'."""
     if (len(line) == 0): return False
     return line[len(line)-1] == '\\'
     
-################################################################################
-# removes comments, linebreaks, and macro definitions returns a string
 
 def preprocess(lines, filename):
+    """Removes comments, linebreaks, and macro definitions returns a string."""
     ret = []
     
     inComment = False
@@ -216,10 +236,9 @@ def preprocess(lines, filename):
     
     return ret
 
-################################################################################
-# shrinks to the interesing part of the signature
 
 def process2(str):
+    """Shrinks to the interesing part of the signature."""
     str = str.replace('\t', ' ')
     str = str.replace('  ', ' ')
     
@@ -237,11 +256,11 @@ def process2(str):
     return str;
 
 
-################################################################################
-# determines whether a signature is a namespace
-# returns the namespace name or "" if it is no namespace
-
 def isNamespace(str):
+    """Determines whether a signature is a namespace.
+
+    Returns the namespace name or "" if it is no namespace
+    """
     pos1 = str.rfind(' ')
     if pos1 < 0: return ""
     while (pos1 > 0) and (str[pos1] == ' '): pos1 -= 1
@@ -251,10 +270,8 @@ def isNamespace(str):
         return ""
 
 
-################################################################################
-# determines whether a signature is a struct declaration
-
 def isStuctDeclaration(str):
+    """Determines whether a signature is a struct declaration."""
     str = removeBases(str)
     
     pos1 = str.rfind(' ')
@@ -262,17 +279,15 @@ def isStuctDeclaration(str):
     while (pos1 > 0) and (str[pos1] == ' '): pos1 -= 1
     return ((pos1 >= 5) and (str[pos1-5:pos1+1] == 'struct')) or ((pos1 >= 4) and (str[pos1-4:pos1+1] == 'class'))
    
-################################################################################
-# determines whether a signature is typedef
 
 def isTypedef(str):
+    """Determines whether a signature is typedef."""
     str = str.strip()
     return (str[:7] == "typedef") and (str.find('::') < 0)
 
-################################################################################
-# removes list of base class 
 
 def removeBases(str):
+    """Removes list of base class."""
     pos1 = -2
     while pos1 < len(str):
         pos1 = str.find(':', pos1 + 2)
@@ -281,11 +296,12 @@ def removeBases(str):
         
     return str.strip()
     
-################################################################################
-# gets a list of [filename, lineNumber, signature, namespaces] tupels
-# analyse signature and adds entries in FUNCS and CLASSES
 
 def createEntries(sigs):
+    """Gets a list of [filename, lineNumber, signature, namespaces] tupels.
+
+    Analyse signature and adds entries in FUNCS and CLASSES.
+    """
     for data in sigs:
         filename = data[0]
         lineNumber = data[1]
@@ -307,11 +323,11 @@ def createEntries(sigs):
                     addEntry(FUNCS, name, deleteDefaultArguments(entry, '('), namespaces)
 
 
-################################################################################
-# deletes all default arguments from argument lists
-# use delim = '>' for template argument lists and ')' for function argument lists
-
 def deleteDefaultArguments(str, start_delim):
+    """Deletes all default arguments from argument lists.
+    
+    Use delim = '>' for template argument lists and ')' for function argument lists.
+    """
     ret = ""
 
     start = str.find(start_delim);
@@ -337,12 +353,13 @@ def deleteDefaultArguments(str, start_delim):
             
     return ret
 
-################################################################################
-# returns position of the first occurence of "char", or the position of the
-# first closing bracket, whatever comes first.
-# areas in brackets are ignored
 
 def findCharOutsideBrackets(str, start_pos, char, verbose = False):
+    """Returns position of the first occurence of "char", or the position of the
+    first closing bracket, whatever comes first.
+    
+    Areas in brackets are ignored.
+    """
     pos = start_pos
     edge_count = 0
     while pos < len(str):
@@ -380,33 +397,28 @@ def findCharOutsideBrackets(str, start_pos, char, verbose = False):
         else:
             return -1
 
-################################################################################
-# returns the string that is inserted into the header
 
 def makeEntry(filename, lineNumber, sig):
+    """Returns the string that is inserted into the header."""
     text = sig + ";       \t// \"" + filename + "\"(" + str(lineNumber) + ")"
     return text
 
-################################################################################
-# returns the key the functions and structs are sorted for
 
 def getSortKey(name, namespaces):
+    """Returns the key the functions and structs are sorted for."""
     return str(namespaces) + name
 
-################################################################################
-# adds a signature to FUNCS or CLASSES
 
 def addEntry(arr, name, entry, namespaces):
+    """Adds a signature to FUNCS or CLASSES."""
     key = getSortKey(name, namespaces)
     if not arr.has_key(key):
         arr[key] = []
     arr[key] += [[name, entry, namespaces]]
     
 
-################################################################################
-# get the function name from a signature or '', if signature is not a function
-
 def getFuncName(sig):
+    """Get the function name from a signature or '', if signature is not a function."""
     sig = sig.strip()
     pos1 = sig.rfind('(')
     if pos1 < 0:
@@ -419,10 +431,8 @@ def getFuncName(sig):
         pos2 = sig.rfind(' ', 0, pos1)
         return sig[pos2 + 1: pos1 + 1]
 
-################################################################################
-# get the class name from a signature or '', if signature is not a class
-
 def getStructName(sig):
+    """Get the class name from a signature or '', if signature is not a class."""
     sig = sig.strip()
 
     pos1 = sig.rfind(' ')
@@ -438,10 +448,8 @@ def getStructName(sig):
     return ""
 
 
-################################################################################
-# get the typedef name from a signature or '', if signature is not a typedef
-
 def getTypedefName(sig):
+    """Get the typedef name from a signature or '', if signature is not a typedef."""
     sig = sig.strip()
     if not isTypedef(sig): return ""
     pos1 = sig.rfind(' ')
@@ -449,10 +457,9 @@ def getTypedefName(sig):
     return sig[pos1+1:].strip()
 
 
-################################################################################
-# main Function for output of forward header
 
 def outAll(path, project):
+    """Main Function for output of forward header."""
     
     header_switch = "SEQAN_HEADER_" + project + "_GENERATED_FORWARDS_H"
 
@@ -503,9 +510,6 @@ def outAll(path, project):
     fl.write(str + "\n")
     fl.close()
 
-################################################################################
-# 
-
 def outList(lst):
     keys = lst.keys()
     keys.sort()
@@ -530,10 +534,8 @@ def outList(lst):
     return str
     
 
-################################################################################
-# if old_namespaces != new_namespaces, close old namespace and open new one
-
 def outChangeNamespaces(old_namespaces, new_namespaces):
+    """If old_namespaces != new_namespaces, close old namespace and open new one."""
     str = ""
     if old_namespaces != new_namespaces:
         if len(old_namespaces) > 0: 
@@ -553,41 +555,63 @@ def outChangeNamespaces(old_namespaces, new_namespaces):
     return str + "\n"
 
 
-################################################################################
-# searches for projects without generated forward and build forward file
-# if force_recreate is True, all forward files are rebuilt
-# returns True if one or more files were built
+def forwardsNeedsRebuild(module_path, forwards_filename):
+    """Determine whether the given forwards header needs rebuild.
 
-def buildAllForwards(project_path, force_recreate = False):
-    pos1 = project_path.rfind('/')
-    if (pos1 >= 0): project_path = project_path[:pos1]
+    Args:
+      module_path        String, path to the module.
+      forwards_filename  String, path to the forwards header.
+    """
+    forwards_mtime = os.path.getmtime(forwards_filename)
+    for f in os.listdir(module_path):
+        f_mtime = os.path.getmtime(os.path.join(module_path,f))
+        if f_mtime > forwards_mtime:
+            return True  # There is a newer file!
+    return False
+
+
+def buildAllForwards(project_path, force_recreate=False):
+    """Build forwards for all modules below project_path.
+
+    Searches for projects without generated forward and build forward
+    file if force_recreate is True, all forward files are rebuilt
+    returns True if one or more files were built.
+    """
+    # Strip trailing slash from project_path.
+    if project_path[-1] == '/':
+        project_path = project_path[:-1]
     
     ret = False
     
     for f in os.listdir(project_path):
-        if (f == 'CVS') or (f == '.svn'): continue
+        if (f == 'CVS') or (f == '.svn'):
+            continue  # Skip CVS and .svn directories.
         if f.startswith('.'):
-          continue  # Skip hidden files.
-        p = project_path + "/" + f
-        m = os.stat(p)[ST_MODE]
-        if S_ISDIR(m):
-            file = p + "/" + forwardFilename(f)
-            if force_recreate or not os.path.exists(file):
+            continue  # Skip hidden files.
+        # All directories below the project are module directories.
+        module_name = f
+        module_path = project_path + "/" + module_name
+        if os.path.isdir(module_path):
+            file = module_path + "/" + forwardFilename(module_name)
+            if force_recreate or not os.path.exists(file) or \
+                    forwardsNeedsRebuild(module_path, file):
                 ret = True
-                buildProject(p)
+                buildProject(module_path)
     return ret
 
-################################################################################
 
-#buildProject("../projects/library/seqan")
+def main():
+  """Main entry point for the forwards generator."""
+  if len(sys.argv) < 2: 
+    print >>sys.stderr, 'ERROR: Too few arguments.'
+    print >>sys.stderr, PROGRAM_USAGE
+    return 1
 
+  force_rebuild = len(sys.argv) >= 3 and sys.argv[2].lower() == 'all'
 
-if len(sys.argv) < 2: 
-    exit ('too few arguments');
+  buildAllForwards(sys.argv[1], force_rebuild)
 
-#if (os.path.exists("V:/seqan2/" + sys.argv[1])):
+  return 0
 
-force_rebuild = (len(sys.argv) >= 3) and  ((sys.argv[2] == 'all') or (sys.argv[2] == 'ALL'))
-if not buildAllForwards(sys.argv[1], force_rebuild):
-    buildProject (sys.argv[1]);
-
+if __name__ == '__main__':
+  sys.exit(main())
