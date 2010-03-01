@@ -1,9 +1,10 @@
+// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/sequence.h>
 #include <seqan/basic.h>
 
 using namespace seqan;
-// part 2
+// FRAGMENT(showAllLetterOfMyAlphabet)
 template<typename TAlphabet>
 void
 showAllLetterOfMyAlphabet(TAlphabet const&) {
@@ -14,7 +15,7 @@ showAllLetterOfMyAlphabet(TAlphabet const&) {
 	}
 	::std::cout << ::std::endl;
 }
-// part 3
+// FRAGMENT(main)
 int main()
 {
 	showAllLetterOfMyAlphabet(AminoAcid());

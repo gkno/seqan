@@ -1,3 +1,4 @@
+// FRAGMENT(create-string)
 #include <iostream>
 #include <seqan/basic.h>
 #include <seqan/file.h>
@@ -8,7 +9,7 @@ int main()
 {
 	typedef String<AminoAcid> TAminoAcidString;
 	TAminoAcidString sourceSeq = "MQDRVKRPMNAFIVWSRDQRRKMALEN";
-// part 2
+// FRAGMENT(iterate-and-replace)
 	typedef Iterator<TAminoAcidString>::Type TIter;
 
 	TIter it = begin(sourceSeq);
@@ -18,7 +19,7 @@ int main()
 		::std::cout << value(it) << ',';
 	}
 	::std::cout << ::std::endl;
-// part 3
+// FRAGMENT(count-occurences)
 	typedef Size<TAminoAcidString>::Type TSize;
 	typedef String<TSize> TCounterString;
 	TCounterString counter;
@@ -28,7 +29,7 @@ int main()
 	for(;it != itEnd; goNext(it)) {
 		value(counter, ordValue(value(it))) += 1;
 	}
-// part 4
+// FRAGMENT(frequency-table)
 	typedef Iterator<TCounterString>::Type TCounterIter;
 	TCounterIter countIt = begin(counter);
 	TCounterIter countItEnd = end(counter);
