@@ -1,18 +1,31 @@
 cmake_minimum_required (VERSION 2.6) 
 project (Seqan_Apps CXX)
 
+# For the apps, use assertions in debug mode, no assertions in
+# release mode and never go into testing mode.
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_CXX_FLAGS_RELEASE "-DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
+  set (CMAKE_CXX_FLAGS_DEBUG "-DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=0")
+endif (CMAKE_COMPILER_IS_GNUCXX)
+
 #set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
-set (TBB_BASE ${SEQAN_LIBRARY}/extra/tbb CACHE FILEPATH "Path to the TBB library folder")
-set (BOOST /usr/include/ CACHE FILEPATH "Path to the folder containing the Boost includes")
+
+# Use CMake's package location functionality to find the directories of
+# TBB and Boost.
+find_package (TBB REQUIRED)
+find_package (Boost REQUIRED)
 
 ################################################################################
 # Set path variables
 ################################################################################
 
-# Make sure the compiler can find include files from the SeqAn and TBB library.
-include_directories (${SEQAN_LIBRARY} ${TBB_BASE}/include ${BOOST})
-link_directories (${SEQAN_LIBRARY}/lib)
+# Make sure the compiler can find include files from the SeqAn, Boost and TBB library.
+include_directories (${SEQAN_LIBRARY}
+                     ${TBB_INCLUDE_DIRS}
+                     ${Boost_INCLUDE_DIRS})
+link_directories (${SEQAN_LIBRARY}/lib
+                  ${TBB_LIBRARY_DIRS})
 if (MSVC)
         add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
 endif (MSVC)
@@ -27,6 +40,8 @@ endif (MSVC)
 ################################################################################
 # Applications
 ################################################################################
+
+# TODO(holtgrew): Disable apps if dependencies are missing.  This would mean removing the automatic generation of targets but this invites errors anyway.
 
 # Find targets automatically
 get_filename_component (SEQAN_APPS_ABS ${SEQAN_LIBRARY}/apps ABSOLUTE)

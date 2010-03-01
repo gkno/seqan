@@ -5,7 +5,7 @@ enable_testing()
 #set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
 
-# In the tests directory, we switch SeqAn into testing mode.
+# For the tests, we switch SeqAn into testing mode.
 if (CMAKE_COMPILER_IS_GNUCXX)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
 endif (CMAKE_COMPILER_IS_GNUCXX)
