@@ -24,7 +24,6 @@ int main()
 	insertGap(gaps1,2);
 	insertGap(gaps1,5);
 
-// FRAGMENT(printing)
 	::std::cout << (TSequence)gaps1 << ::std::endl;
 	::std::cout << (TSequence)gaps2 << ::std::endl;
 
@@ -32,24 +31,21 @@ int main()
 	::std::cout << ::std::endl << "ViewToSource1: ";
 	for(unsigned i = 0; i < length(gaps1); ++i)
 		::std::cout << toSourcePosition(gaps1, i) << ",";
-	::std::cout << "\n";
-
-	::std::cout << "ViewToSource2: ";
+	
+	::std::cout << ::std::endl << "ViewToSource2: ";
 	for(unsigned i = 0; i < length(gaps2); ++i)
 		::std::cout << toSourcePosition(gaps2, i) << ",";
-	::std::cout << "\n";
-
+	::std::cout << ::std::endl;
 
 // FRAGMENT(printingSourcePos)
 	::std::cout << ::std::endl << "SourceToView1: ";
 	for(unsigned i = 0; i < length(source(gaps1)); ++i)
 		::std::cout << toViewPosition(gaps1, i) << ",";
-	::std::cout << "\n";
 
-	::std::cout << "SourceToView2: ";
+	::std::cout << ::std::endl << "SourceToView2: ";
 	for(unsigned i = 0; i < length(source(gaps2)); ++i)
 		::std::cout << toViewPosition(gaps2, i) << ",";
-	::std::cout << "\n";
+	::std::cout << ::std::endl;
 
 
 
