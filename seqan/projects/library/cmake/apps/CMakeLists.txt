@@ -13,8 +13,8 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 # Use CMake's package location functionality to find the directories of
 # TBB and Boost.
-find_package (TBB REQUIRED)
-find_package (Boost REQUIRED)
+find_package (TBB)
+find_package (Boost)
 
 ################################################################################
 # Set path variables
@@ -63,7 +63,11 @@ set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEAD
 set (APP_micro_razers_SOURCES ${SEQAN_LIBRARY}/apps/micro_razers/micro_razers.cpp ${RAZERS_HEADERS})
 set (APP_paramChooser_SOURCES ${SEQAN_LIBRARY}/apps/razers/paramChooser.cpp ${RAZERS_HEADERS})
 set (APP_insegt_SOURCES ${SEQAN_LIBRARY}/apps/insegt/insegt.cpp ${INSEGT_HEADERS})
-set (APP_transquant_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transquant.cpp)
+if (Boost_FOUND)
+  set (APP_transquant_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transquant.cpp)
+else (Boost_FOUND)
+  message (WARNING "Boost not found, not building transquant!")
+endif (Boost_FOUND)
 set (APP_rectifier_SOURCES ${SEQAN_LIBRARY}/apps/transquant/rectifier.cpp)
 
 # Make sure the compiler can find object files from the TBB library. 
