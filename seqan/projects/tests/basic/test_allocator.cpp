@@ -93,8 +93,7 @@ void test()
 */
 //____________________________________________________________________________
 
-void testSimpleAllocator()
-{
+SEQAN_DEFINE_TEST(testSimpleAllocator) {
 	int * dat1;
 	int * dat2;
 
@@ -113,8 +112,7 @@ void testSimpleAllocator()
 }
 //____________________________________________________________________________
 
-void testPoolAllocator()
-{
+SEQAN_DEFINE_TEST(testPoolAllocator) {
 	int * dat1;
 	int * dat2;
 
@@ -143,8 +141,7 @@ void testPoolAllocator()
 
 //____________________________________________________________________________
 
-void testMultiPoolAllocator()
-{
+SEQAN_DEFINE_TEST(testMultiPoolAllocator) {
 	int * dat1;
 	int * dat2;
 
@@ -172,20 +169,3 @@ void testMultiPoolAllocator()
 }
 
 //____________________________________________________________________________
-
-void Main_Test_Allocator() 
-{ 
-	SEQAN_TREPORT("TEST ALLOCATOR BEGIN")
-
-	testSimpleAllocator();
-	testPoolAllocator();
-	testMultiPoolAllocator();
-
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_allocator_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_allocator_to_std.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_allocator_simple.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_allocator_singlepool.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_allocator_multipool.h");
-
-	SEQAN_TREPORT("TEST ALLOCATOR END")
-}

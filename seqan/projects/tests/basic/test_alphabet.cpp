@@ -84,8 +84,7 @@ move(Test1 const & target, Test1 const & source)
 //////////////////////////////////////////////////////////////////////////////
 //Test value array function for a class type
 
-void TestAlphabetInterface()
-{
+SEQAN_DEFINE_TEST(TestAlphabetInterface) {
 	{
 		Test1 a; //1 ctor
 		a.x = 0xbeef;
@@ -99,33 +98,33 @@ void TestAlphabetInterface()
 		arrayConstruct(a_buf1, a_buf1 + 100); //100 ctor
 		for (int i=0; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == 0xfade)
+			SEQAN_ASSERT_EQ(a_buf1[i].x, 0xfade);
 		}
 
 		arrayConstruct(a_buf2, a_buf2 + 100, a); //100 ctor, 100 copy
 		for (int i=0; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf2[i].x == 0xbeef)
+			SEQAN_ASSERT_EQ(a_buf2[i].x, 0xbeef);
 		}
 
 		arrayConstruct(a_buf1, a_buf1+ 100); //100 ctor
 		arrayDestruct(a_buf1, a_buf1 + 100); //100 dtor
 		for (int i=0; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == 0xdead)
+			SEQAN_ASSERT_EQ(a_buf1[i].x, 0xdead);
 		}
 
 		arrayConstructCopy(a_buf1, a_buf1 + 100, a_buf2); //100 ctor, 100 copy
 		arrayDestruct(a_buf1, a_buf1 + 100); //100 dtor
 		for (int i=0; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf2[i].x == 0xdead)
+			SEQAN_ASSERT_EQ(a_buf2[i].x, 0xdead);
 		}
 
 		arrayFill(a_buf1, a_buf1 + 100, a); //100 copy
 		for (int i=0; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == 0xbeef)
+			SEQAN_ASSERT_EQ(a_buf1[i].x, 0xbeef);
 		}
 
 		arrayCopyForward(a_buf1, a_buf1 + 100, a_buf2); //100 copy
@@ -135,13 +134,13 @@ void TestAlphabetInterface()
 		arrayCopy(a_buf1, a_buf1 + 50, a_buf1 + 20); //50 copy
 		for (int i=0; i < 50; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i+20].x == i)
+			SEQAN_ASSERT_EQ(a_buf1[i+20].x, i);
 		}
 
 		arrayCopy(a_buf1 + 80, a_buf1 + 100, a_buf1 + 75); //20 copy
 		for (int i=80; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i-5].x == i)
+			SEQAN_ASSERT_EQ(a_buf1[i-5].x, i);
 		}
 
 		for (int i=0; i < 100; ++i) a_buf1[i].x = i;
@@ -149,14 +148,14 @@ void TestAlphabetInterface()
 		arrayClearSpace(a_buf1, 100, 50, 70); //20 ctor, 70 dtor, 50 copy
 		for (int i=50; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i+20].x == i)
+			SEQAN_ASSERT_EQ(a_buf1[i+20].x, i);
 		}
 		arrayConstruct(a_buf1, a_buf1 + 70, a); //70 ctor, 70 copy
 
 		arrayClearSpace(a_buf1, 120, 70, 50); //70 dtor, 50 copy
 		for (int i=50; i < 100; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == i)
+			SEQAN_ASSERT_EQ(a_buf1[i].x, i);
 		}
 
 		arrayConstruct(a_buf1, a_buf1 + 50, a); //70 ctor, 70 copy
@@ -166,7 +165,7 @@ void TestAlphabetInterface()
 		arrayClearSpace(a_buf1, 100, 90, 110); //10 ctor, 90 dtor, 10 copy
 		for (int i=110; i < 120; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == i-20)
+			SEQAN_ASSERT_EQ(a_buf1[i].x, i-20);
 		}
 
 		arrayDestruct(a_buf1 + 110, a_buf1 + 120);	//10 dtor
@@ -177,18 +176,18 @@ void TestAlphabetInterface()
 		arrayConstructMove(a_buf2, a_buf2 + 23, a_buf1); // 23 move 
 		for (int i = 0; i < 23; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == 0xfade);
-			SEQAN_TASSERT(a_buf2[i].x == 0x105e);
+			SEQAN_ASSERT_EQ(a_buf1[i].x, 0xfade);
+			SEQAN_ASSERT_EQ(a_buf2[i].x, 0x105e);
 		}
 
 		arrayMove(a_buf1, a_buf1 + 23, a_buf1 + 5); // 23 move 
 		for (int i = 0; i < 23; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i + 5].x == 0xfade);
+			SEQAN_ASSERT_EQ(a_buf1[i + 5].x, 0xfade);
 		}
 		for (int i = 0; i < 5; ++i)
 		{
-			SEQAN_TASSERT(a_buf1[i].x == 0x105e);
+			SEQAN_ASSERT_EQ(a_buf1[i].x, 0x105e);
 		}
 
 		arrayMove(a_buf1 + 5, a_buf1 + 28, a_buf1); // 23 move 
@@ -198,14 +197,14 @@ void TestAlphabetInterface()
 		//1 dtor for a
 	}
 
-	SEQAN_TASSERT(Test1::m_ctor_count == 574)
-	SEQAN_TASSERT(Test1::m_dtor_count == 574)
-	SEQAN_TASSERT(Test1::m_copy_count == 700)
-	SEQAN_TASSERT(Test1::m_move_count == 69)
+	SEQAN_ASSERT_EQ(Test1::m_ctor_count, 574);
+	SEQAN_ASSERT_EQ(Test1::m_dtor_count, 574);
+	SEQAN_ASSERT_EQ(Test1::m_copy_count, 700);
+	SEQAN_ASSERT_EQ(Test1::m_move_count, 69);
 
 
-	SEQAN_TASSERT(gapValue<char>() == '-');
-	SEQAN_TASSERT(gapValue<int>() == int());
+	SEQAN_ASSERT_EQ(gapValue<char>(), '-');
+	SEQAN_ASSERT_EQ(gapValue<int>(), int());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -228,7 +227,7 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 	arrayConstruct(a_buf2, a_buf2 + 100, a);
 	for (int i=0; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf2[i] == val1)
+		SEQAN_ASSERT_EQ(a_buf2[i], val1);
 	}
 
 	arrayDestruct(a_buf1, a_buf1 + 100); //nothing happens
@@ -236,7 +235,7 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 	arrayConstructCopy(a_buf2, a_buf2 + 100, a_buf1); 
 	for (int i=0; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i] == val1)
+		SEQAN_ASSERT_EQ(a_buf1[i], val1);
 	}
 
 	a = val2;
@@ -244,13 +243,13 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 	arrayFill(a_buf1, a_buf1 + 100, a); 
 	for (int i=0; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i] == val2)
+		SEQAN_ASSERT_EQ(a_buf1[i], val2);
 	}
 
 	arrayCopyForward(a_buf1, a_buf1 + 100, a_buf2);
 	for (int i=0; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf2[i] == val2)
+		SEQAN_ASSERT_EQ(a_buf2[i], val2);
 	}
 	
 	for (int i=0; i < 100; ++i) a_buf1[i] = (T) i;
@@ -258,13 +257,13 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 	arrayCopy(a_buf1, a_buf1 + 50, a_buf1 + 20); 
 	for (int i=0; i < 50; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i+20] == (T)i)
+		SEQAN_ASSERT_EQ(a_buf1[i+20], (T)i);
 	}
 
 	arrayCopy(a_buf1 + 80, a_buf1 + 100, a_buf1 + 75); 
 	for (int i=80; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i-5] == (T)i)
+		SEQAN_ASSERT_EQ(a_buf1[i-5], (T)i);
 	}
 
 	for (int i=0; i < 100; ++i) a_buf1[i] = (T) i;
@@ -272,13 +271,13 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 	arrayClearSpace(a_buf1, 100, 50, 70); 
 	for (int i=50; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i+20] == (T)i)
+		SEQAN_ASSERT_EQ(a_buf1[i+20], (T)i);
 	}
 
 	arrayClearSpace(a_buf1, 120, 70, 50); 
 	for (int i=50; i < 100; ++i)
 	{
-		SEQAN_TASSERT(a_buf1[i] == (T)i)
+		SEQAN_ASSERT_EQ(a_buf1[i], (T)i);
 	}
 
 }
@@ -323,8 +322,8 @@ void TestConversion()
 	static TSource source;
 	TTarget target = source;
 
-	SEQAN_ASSERT(target == source)
-	SEQAN_ASSERT(source == target)
+	SEQAN_ASSERT_EQ(target, source);
+	SEQAN_ASSERT_EQ(source, target);
 	SEQAN_ASSERT(!(target != source))
 	SEQAN_ASSERT(!(source != target))
 	SEQAN_ASSERT(!(target < source))
@@ -353,8 +352,7 @@ void TestConversion()
 	arrayMoveBackward(a_source_1, a_source_1 + 100, a_target);
 }
 
-void TestSimpleTypeConversions()
-{
+SEQAN_DEFINE_TEST(TestSimpleTypeConversions) {
 	TestConversion<Ascii, Dna>();
 	TestConversion<Ascii, Dna5>();
 	TestConversion<Ascii, Iupac>();
@@ -417,8 +415,8 @@ void TestExtremeValuesSigned()
 	bool isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE;
 	SEQAN_ASSERT(isSigned);
 
-	SEQAN_ASSERT(supremumValue<T>() == SupremumValue<T>::VALUE);
-	SEQAN_ASSERT(infimumValue<T>()  == InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(supremumValue<T>(), SupremumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(infimumValue<T>(), InfimumValue<T>::VALUE);
 
 	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
 	long double minDelta = minVal - (long double)InfimumValue<T>::VALUE;
@@ -445,17 +443,16 @@ void TestExtremeValuesUnsigned()
 	bool isUnsigned = TYPECMP< typename _MakeUnsigned<T>::Type, T >::VALUE;
 	SEQAN_ASSERT(isUnsigned);
 
-	SEQAN_ASSERT(supremumValue<T>() == SupremumValue<T>::VALUE);
-	SEQAN_ASSERT(infimumValue<T>()  == InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(supremumValue<T>(), SupremumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(infimumValue<T>(), InfimumValue<T>::VALUE);
 
 	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
-	SEQAN_ASSERT(maxDelta <= maxVal/1000);
-	SEQAN_ASSERT(-maxVal/1000 <= maxDelta);
-	SEQAN_ASSERT(0 == InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_LEQ(maxDelta, maxVal/1000);
+	SEQAN_ASSERT_LEQ(-maxVal/1000, maxDelta);
+	SEQAN_ASSERT_EQ(0, InfimumValue<T>::VALUE);
 }
 
-void TestExtremeValues()
-{
+SEQAN_DEFINE_TEST(TestExtremeValues) {
 	TestExtremeValuesSigned<signed char>();
 	TestExtremeValuesSigned<signed short>();
 	TestExtremeValuesSigned<signed int>();
@@ -475,34 +472,23 @@ void TestExtremeValues()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Main_Test_Alphabet() 
-{   
-	SEQAN_TREPORT("TEST ALPHABET BEGIN")
+SEQAN_DEFINE_TEST(Test_Simple_Types) {
+    TestSimpleType<Dna>();
+    TestSimpleType<Dna5>();
+    TestSimpleType<Iupac>();
+    TestSimpleType<AminoAcid>();
+    TestSimpleType<bool>();
+}
 
-	TestAlphabetInterface();
-
-	TestSimpleType<Dna>();
-	TestSimpleType<Dna5>();
-	TestSimpleType<Iupac>();
-	TestSimpleType<AminoAcid>();
-	TestSimpleTypeConversions();
-	TestExtremeValues();
-  
-	TestSimpleType<bool>();
-	TestArrayFunctions<char>(0xde, 0xad);
-	TestArrayFunctions<signed char>(0xde, 0xad);
-	TestArrayFunctions<unsigned char>(0xde, 0xad);
-	TestArrayFunctions<short>(0xdead, 0xbeef);
-	TestArrayFunctions<unsigned short>(0xdead, 0xbeef);
-	TestArrayFunctions<int>(0xdead, 0xbeef);
-	TestArrayFunctions<unsigned int>(0xdead, 0xbeef);
-	TestArrayFunctions<float>(3.1, 1.2);
-	TestArrayFunctions<double>(3.1, 1.2);
-	TestArrayFunctions<long double>(3.1, 1.2);
-
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alphabet_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alphabet_simple.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_alphabet_trait_basic.h");
-
-	SEQAN_TREPORT("TEST ALPHABET END")
+SEQAN_DEFINE_TEST(Test_Array_Functions) {
+    TestArrayFunctions<char>(0xde, 0xad);
+    TestArrayFunctions<signed char>(0xde, 0xad);
+    TestArrayFunctions<unsigned char>(0xde, 0xad);
+    TestArrayFunctions<short>(0xdead, 0xbeef);
+    TestArrayFunctions<unsigned short>(0xdead, 0xbeef);
+    TestArrayFunctions<int>(0xdead, 0xbeef);
+    TestArrayFunctions<unsigned int>(0xdead, 0xbeef);
+    TestArrayFunctions<float>(3.1, 1.2);
+    TestArrayFunctions<double>(3.1, 1.2);
+    TestArrayFunctions<long double>(3.1, 1.2);
 }

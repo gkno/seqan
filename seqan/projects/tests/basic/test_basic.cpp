@@ -15,30 +15,29 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 //test iterator proxy
 
-void Test_Proxy_Iterator()
-{
+SEQAN_DEFINE_TEST(Test_Proxy_Iterator) {
 	int i1[] = {10, 20, 30};
 	int * pi1 = i1;
 	Proxy<IteratorProxy<int *> > px(pi1);
-	SEQAN_TASSERT(px == 10);
+	SEQAN_ASSERT_EQ(px, 10);
 
 //assign
 	px = 11;
-	SEQAN_TASSERT(i1[0] == 11);
+	SEQAN_ASSERT_EQ(i1[0], 11);
 
 	int i2 = 12;
 	px = i2;
-	SEQAN_TASSERT(i1[0] == 12);
+	SEQAN_ASSERT_EQ(i1[0], 12);
 
 	int * pi2 = i1 + 1;
 	Proxy<IteratorProxy<int *> > px2(pi2);
 	px = px2;
-	SEQAN_TASSERT(i1[0] == 20);
-	SEQAN_TASSERT(px == 20);
+	SEQAN_ASSERT_EQ(i1[0], 20);
+	SEQAN_ASSERT_EQ(px, 20);
 
 //copy ctor
 	Proxy<IteratorProxy<int *> > px3(px2);
-	SEQAN_TASSERT(px3 == 20);
+	SEQAN_ASSERT_EQ(px3, 20);
 
 
 //assign
@@ -47,11 +46,11 @@ void Test_Proxy_Iterator()
 	Proxy<IteratorProxy<char *> > px4(it1);
 
 	assign(px4, 'X');
-	SEQAN_TASSERT(px4 == 'X');
+	SEQAN_ASSERT_EQ(px4, 'X');
 
 	char c1 = 'a';
 	assign(px4, c1);
-	SEQAN_TASSERT(px4 == 'a');
+	SEQAN_ASSERT_EQ(px4, 'a');
 
 }
 
@@ -88,7 +87,7 @@ struct RefCountObj
 	}
 	~RefCountObj()
 	{
-SEQAN_TASSERT(data_addrefs == data_releaserefs);
+SEQAN_ASSERT_EQ(data_addrefs, data_releaserefs);
 
 		++static_dtors;
 	}
@@ -129,79 +128,78 @@ void releaseRef(RefCountObj const & me)
 //____________________________________________________________________________
 // test for holder class
 
-void Test_Holder()
-{
+SEQAN_DEFINE_TEST(Test_Holder) {
 	{
 //ctors
 		Holder<RefCountObj> ho1;
-		SEQAN_TASSERT(empty(ho1));
-		SEQAN_TASSERT(!dependent(ho1));
+		SEQAN_ASSERT_TRUE(empty(ho1));
+		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
 		create(ho1);
-		SEQAN_TASSERT(!empty(ho1));
-		SEQAN_TASSERT(!dependent(ho1));
+		SEQAN_ASSERT_TRUE(!empty(ho1));
+		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
 		Holder<RefCountObj> ho2(ho1);
 
 		Holder<RefCountObj> ho3(value(ho1));
-		SEQAN_TASSERT(value(ho1).data_addrefs == 1);
-		SEQAN_TASSERT(value(ho1).data_releaserefs == 0);
-		SEQAN_TASSERT(!dependent(ho1));
+		SEQAN_ASSERT_EQ(value(ho1).data_addrefs, 1);
+		SEQAN_ASSERT_EQ(value(ho1).data_releaserefs, 0);
+		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
 
 //create
 		RefCountObj rco1;
 		create(ho3, rco1);
-		SEQAN_TASSERT(value(ho3).data_addrefs == 0);
-		SEQAN_TASSERT(value(ho1).data_addrefs == 1);
-		SEQAN_TASSERT(value(ho1).data_releaserefs == 1);
+		SEQAN_ASSERT_EQ(value(ho3).data_addrefs, 0);
+		SEQAN_ASSERT_EQ(value(ho1).data_addrefs, 1);
+		SEQAN_ASSERT_EQ(value(ho1).data_releaserefs, 1);
 
 //setValue
 		setValue(ho3, rco1);
-		SEQAN_TASSERT(dependent(ho3));
-		SEQAN_TASSERT(value(ho3).data_addrefs == 1);
+		SEQAN_ASSERT_TRUE(dependent(ho3));
+		SEQAN_ASSERT_EQ(value(ho3).data_addrefs, 1);
 
 		rco1.data_value = 10;
 		create(ho3);
-		SEQAN_TASSERT(value(ho3).data_value == 10);
+		SEQAN_ASSERT_EQ(value(ho3).data_value, 10);
 
 		RefCountObj rco2;
 		rco2.data_value = 20;
 
 //operator = (value) => assignValue
 		ho2 = rco2;
-		SEQAN_TASSERT(value(ho2).data_value == 20);
-		SEQAN_TASSERT(rco2.data_addrefs == 0);
-		SEQAN_TASSERT(!dependent(ho2));
+		SEQAN_ASSERT_EQ(value(ho2).data_value, 20);
+		SEQAN_ASSERT_EQ(rco2.data_addrefs, 0);
+		SEQAN_ASSERT_TRUE(!dependent(ho2));
 
 		rco2.data_value = 30;
-		SEQAN_TASSERT(value(ho2).data_value == 20);
+		SEQAN_ASSERT_EQ(value(ho2).data_value, 20);
 
 //operator = (holder) => assign
 		setValue(ho1, rco1);
 		ho1 = ho2;
-		SEQAN_TASSERT(value(ho1).data_value == 20);
-		SEQAN_TASSERT(rco2.data_addrefs == 0);
+		SEQAN_ASSERT_EQ(value(ho1).data_value, 20);
+		SEQAN_ASSERT_EQ(rco2.data_addrefs, 0);
 
 //clear
 		clear(ho3);
-		SEQAN_TASSERT(empty(ho3));
+		SEQAN_ASSERT_TRUE(empty(ho3));
 
 		assign(ho2, ho3);
-		SEQAN_TASSERT(empty(ho2));
+		SEQAN_ASSERT_TRUE(empty(ho2));
 
 //conversion operator
 		rco1 = ho1;
-		SEQAN_TASSERT(rco1.data_value == 20);
+		SEQAN_ASSERT_EQ(rco1.data_value, 20);
 
 //moveValue
 		moveValue(ho1, rco2);
-		SEQAN_TASSERT(rco1.data_value == 30);
+		SEQAN_ASSERT_EQ(rco1.data_value, 30);
 
 	}
 
-	SEQAN_TASSERT(RefCountObj::static_addrefs == RefCountObj::static_releaserefs);
-	SEQAN_TASSERT(RefCountObj::static_ctors == RefCountObj::static_dtors);
+	SEQAN_ASSERT_EQ(RefCountObj::static_addrefs, RefCountObj::static_releaserefs);
+	SEQAN_ASSERT_EQ(RefCountObj::static_ctors, RefCountObj::static_dtors);
 
 
 //test default implementations of addRef and releaseRef
@@ -272,35 +270,34 @@ struct Value<Test_Iterator_1>
 //____________________________________________________________________________
 
 
-void Test_Iterator_Basic()
-{
+SEQAN_DEFINE_TEST(Test_Iterator_Basic) {
 //test default iterator functions
 
 	//value, getValue, operator *
 	int i1 = 10;
 	int * it1 = & i1;
-	SEQAN_TASSERT(value(it1) == 10);
-	SEQAN_TASSERT(getValue(it1) == 10);
+	SEQAN_ASSERT_EQ(value(it1), 10);
+	SEQAN_ASSERT_EQ(getValue(it1), 10);
 
 	Test_Iterator_1 it2(10);
-	SEQAN_TASSERT(value(it2) == 11);
-	SEQAN_TASSERT(getValue(it2) == 11);
+	SEQAN_ASSERT_EQ(value(it2), 11);
+	SEQAN_ASSERT_EQ(getValue(it2), 11);
 /*
 	Test_Iterator_1 const it3(10);
-	SEQAN_TASSERT(value(it3) == 12);
-	SEQAN_TASSERT(getValue(it3) == 12);
+	SEQAN_ASSERT_EQ(value(it3), 12);
+	SEQAN_ASSERT_EQ(getValue(it3), 12);
 
 	//assign to value reference
 	value(it2) = 15;
-	SEQAN_TASSERT(getValue(it2) == 15);
+	SEQAN_ASSERT_EQ(getValue(it2), 15);
 
 	//moveValue
 	moveValue(it2, 50);
-	SEQAN_TASSERT(value(it2) == 50);
+	SEQAN_ASSERT_EQ(value(it2), 50);
 
 	//defaults of some advanced functions
-	SEQAN_TASSERT(position(it1) == 0);
-	SEQAN_TASSERT(container(it1) == *it1);
+	SEQAN_ASSERT_EQ(position(it1), 0);
+	SEQAN_ASSERT_EQ(container(it1), *it1);
 */
 }
 
@@ -315,74 +312,73 @@ void Test_Iter()
 	char arr2[] = "abcdefg";
 
 	TIterator it1 = begin(arr1);
-	SEQAN_TASSERT(container(it1) == arr1);
-	SEQAN_TASSERT(*it1 == 'X')
+	SEQAN_ASSERT_EQ(container(it1), arr1);
+	SEQAN_ASSERT_EQ(*it1, 'X');
 
 	setContainer(it1, arr2);
-	SEQAN_TASSERT(*it1 == 'a')
+	SEQAN_ASSERT_EQ(*it1, 'a');
 
 	TIterator it2(it1);
-	SEQAN_TASSERT(*it2 == 'a')
+	SEQAN_ASSERT_EQ(*it2, 'a');
 
 	TIterator it3;
 	it3 = it2 + 1;
-	SEQAN_TASSERT(*it3 == 'b')
+	SEQAN_ASSERT_EQ(*it3, 'b');
 
 	++it3;
-	SEQAN_TASSERT(*it3 == 'c')
+	SEQAN_ASSERT_EQ(*it3, 'c');
 
 	it3++;
-	SEQAN_TASSERT(*it3 == 'd')
+	SEQAN_ASSERT_EQ(*it3, 'd');
 
-	SEQAN_TASSERT(position(it3) == 3)
+	SEQAN_ASSERT_EQ(position(it3), 3);
 
 	setPosition(it3, 2);
-	SEQAN_TASSERT(*it3 == 'c')
+	SEQAN_ASSERT_EQ(*it3, 'c');
 
 	--it3;
-	SEQAN_TASSERT(*it3 == 'b')
+	SEQAN_ASSERT_EQ(*it3, 'b');
 
 	it3--;
-	SEQAN_TASSERT(*it3 == 'a')
-	SEQAN_TASSERT(it3 == it2)
-	SEQAN_TASSERT(!(it3 != it2))
+	SEQAN_ASSERT_EQ(*it3, 'a');
+	SEQAN_ASSERT_TRUE(it3 == it2);
+	SEQAN_ASSERT_TRUE(!(it3 != it2));
 
 	++it3;
 	assignValue(it3, 'z');
-	SEQAN_TASSERT(*it3 == 'z')
+	SEQAN_ASSERT_EQ(*it3, 'z');
 
 	moveValue(it3, 'y');
-	SEQAN_TASSERT(*it3 == 'y')
+	SEQAN_ASSERT_EQ(*it3, 'y');
 
 	TIterator const it4 = it3;
 	assignValue(it4, 'x');
-	SEQAN_TASSERT(*it4 == 'x')
-	SEQAN_TASSERT(*it3 == 'x')
+	SEQAN_ASSERT_EQ(*it4, 'x');
+	SEQAN_ASSERT_EQ(*it3, 'x');
 
 	moveValue(it4, 'w');
-	SEQAN_TASSERT(*it4 == 'w')
-	SEQAN_TASSERT(*it3 == 'w')
+	SEQAN_ASSERT_EQ(*it4, 'w');
+	SEQAN_ASSERT_EQ(*it3, 'w');
 
 
 	it3 = 1 + it4;
-	SEQAN_TASSERT(*it3 == 'c')
+	SEQAN_ASSERT_EQ(*it3, 'c');
 
 	it3 = it4 - 1;
-	SEQAN_TASSERT(*it3 == 'a')
+	SEQAN_ASSERT_EQ(*it3, 'a');
 
 	it3 += 4;
-	SEQAN_TASSERT(*it3 == 'e')
+	SEQAN_ASSERT_EQ(*it3, 'e');
 
 	it3 -= 2;
-	SEQAN_TASSERT(*it3 == 'c')
+	SEQAN_ASSERT_EQ(*it3, 'c');
 
-	SEQAN_TASSERT(it3 - it4 == 1)
+	SEQAN_ASSERT_EQ(it3 - it4, 1);
 
 }
 
 
-void Test_Iterator_Adaptor()
-{
+SEQAN_DEFINE_TEST(Test_Iterator_Adaptor) {
 	typedef AdaptorIterator<char *> TSpec;
 	typedef Iter<char *, TSpec> TIterator;
 
@@ -391,11 +387,10 @@ void Test_Iterator_Adaptor()
 	char arr1[] = "abc";
 	TIterator it1 = begin(arr1);
 	char * ptr1 = it1;
-	SEQAN_TASSERT(*ptr1 == 'a');
+	SEQAN_ASSERT_EQ(*ptr1, 'a');
 }
 
-void Test_Iterator_Position()
-{
+SEQAN_DEFINE_TEST(Test_Iterator_Position) {
 	Test_Iter<PositionIterator>();
 }
 
@@ -422,66 +417,114 @@ struct MoveObj
 
 //____________________________________________________________________________
 
-void Test_Transport()
-{
+SEQAN_DEFINE_TEST(Test_Transport) {
 	MoveObj o1(10);
 	MoveObj o2;
 	move(o2, o1);
-	SEQAN_TASSERT(o1.data_dat == 0);
-	SEQAN_TASSERT(o2.data_dat == 10);
+	SEQAN_ASSERT_EQ(o1.data_dat, 0);
+	SEQAN_ASSERT_EQ(o2.data_dat, 10);
 
 	MoveObj const o3;
 	move(o3, o2);
-	SEQAN_TASSERT(o2.data_dat == 0);
-	SEQAN_TASSERT(o3.data_dat == 10);
+	SEQAN_ASSERT_EQ(o2.data_dat, 0);
+	SEQAN_ASSERT_EQ(o3.data_dat, 10);
 
 	MoveObj const o4;
 	move(o4, o3);
-	SEQAN_TASSERT(o3.data_dat == 0);
-	SEQAN_TASSERT(o4.data_dat == 10);
+	SEQAN_ASSERT_EQ(o3.data_dat, 0);
+	SEQAN_ASSERT_EQ(o4.data_dat, 10);
 
 	move(o1, o4);
-	SEQAN_TASSERT(o4.data_dat == 0);
-	SEQAN_TASSERT(o1.data_dat == 10);
+	SEQAN_ASSERT_EQ(o4.data_dat, 0);
+	SEQAN_ASSERT_EQ(o1.data_dat, 10);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Main_Test_Common();
-void Main_Test_Allocator();
-void Main_Test_Alphabet();
+// TODO(holtgrew): This is highly temporary!
+// Forward-declarations of tests defined elsewhere.
+void SEQAN_TEST_Test_Definition();
+void SEQAN_TEST_Test_Type();
+void SEQAN_TEST_Test_Iterator_Adapt_Std();
+
+void SEQAN_TEST_TestAlphabetInterface();
+void SEQAN_TEST_TestSimpleTypeConversions();
+void SEQAN_TEST_TestExtremeValues();
+void SEQAN_TEST_Test_Simple_Types();
+void SEQAN_TEST_Test_Array_Functions();
+
+void SEQAN_TEST_testSimpleAllocator();
+void SEQAN_TEST_testPoolAllocator();
+void SEQAN_TEST_testMultiPoolAllocator();
+
 
 //////////////////////////////////////////////////////////////////////////////
 
-int main() 
-{
-	SEQAN_TREPORT("TEST BEGIN")
+SEQAN_BEGIN_TESTSUITE(test_basic) {
+	SEQAN_CALL_TEST(Test_Proxy_Iterator);
+	SEQAN_CALL_TEST(Test_Holder);
+	SEQAN_CALL_TEST(Test_Iterator_Basic);
+	SEQAN_CALL_TEST(Test_Iterator_Adaptor);
+	SEQAN_CALL_TEST(Test_Iterator_Position);
+	SEQAN_CALL_TEST(Test_Transport);
 
-	Test_Proxy_Iterator();
-	Test_Holder();
-	Test_Iterator_Basic();
+    // Tests from test_common.cpp.
+    SEQAN_CALL_TEST(Test_Definition);
+    SEQAN_CALL_TEST(Test_Type);
+    SEQAN_CALL_TEST(Test_Iterator_Adapt_Std);
+    // Tests from test_alphabet.cpp.
+    SEQAN_CALL_TEST(TestAlphabetInterface);
+    SEQAN_CALL_TEST(TestSimpleTypeConversions);
+    SEQAN_CALL_TEST(TestExtremeValues);
+    SEQAN_CALL_TEST(Test_Simple_Types);
+    SEQAN_CALL_TEST(Test_Array_Functions);
+    // Tests from test_allocator.cpp.
+    SEQAN_CALL_TEST(testSimpleAllocator);
+    SEQAN_CALL_TEST(testPoolAllocator);
+    SEQAN_CALL_TEST(testMultiPoolAllocator);
 
-	Test_Iterator_Adaptor();
-	Test_Iterator_Position();
-
-	Test_Transport();
-
-	Main_Test_Common();
-	Main_Test_Allocator();
-	Main_Test_Alphabet();
-
-//	Test_Alterator_Iterator_Converter();
-
-//	debug::verifyCheckpoints("projects/library/seqan/basic/basic_operator.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_transport.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_proxy.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_holder.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_adaptor.h");
-	debug::verifyCheckpoints("projects/library/seqan/basic/basic_iterator_position.h");
-
-	SEQAN_TREPORT("TEST END")
-
-	return 0;
+    // Verify all check points.
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_aggregates.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_chunkpool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_interface.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_multipool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_simple.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_singlepool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_allocator_to_std.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_interface.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_interface2.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_simple.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_simple_tabs.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_alphabet_trait_basic.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_compare.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_converter.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_counted_ptr.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_debug.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_definition.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_generated_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder_dynamic.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_host.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_adapt_std.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_adaptor.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_position.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_iterator_simple.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_logvalue.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_metaprogramming.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_operator.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_pointer.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_profchar.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_profile.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_proxy.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_sse2.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_tag.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_testing.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_transport.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_type.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_volatile_ptr.h");
 }
+SEQAN_END_TESTSUITE
+
