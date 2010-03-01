@@ -1,0 +1,52 @@
+## general purpose nightly testing script for SeqAn
+## call this using
+## e.g. ctest -S ../Nightly.cmake -VV > ../CTEST_release.log
+## TODO
+##   * add initial checkout
+##   * maybe we should read arguments from cmd line to be more generic
+
+CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
+
+# ------------------------------------------------------------
+# Set Variables
+# ------------------------------------------------------------
+# Variables describing the build.
+SET (CTEST_SITE       "<SITE NAME>")
+SET (CTEST_BUILD_NAME "<BUILD NAME>")
+
+# Variables describing the build environments.
+SET (CTEST_SOURCE_MAIN_DIRECTORY "$ENV{HOME}/Nightly/seqan-trunk/projects/library/cmake")
+SET (CTEST_BINARY_MAIN_DIRECTORY "$ENV{HOME}/Nightly/seqan-trunk_build/projects/library/cmake")
+SET (CTEST_BINARY_TEST_DIRECTORY "${CTEST_BINARY_MAIN_DIRECTORY}/tests")
+
+SET (CTEST_SOURCE_DIRECTORY ${CTEST_SOURCE_MAIN_DIRECTORY})
+SET (CTEST_BINARY_DIRECTORY ${CTEST_BINARY_MAIN_DIRECTORY})
+
+# General ctest/cmake/other programs.
+SET (CTEST_CMAKE_COMMAND   "cmake")
+SET (CTEST_UPDATE_COMMAND  "svn")
+
+# Define generator.
+SET (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+
+# Clear the binary directory to avoid problems.
+CTEST_EMPTY_BINARY_DIRECTORY (${CTEST_BINARY_DIRECTORY})
+
+## this is the initial cache to use for the binary tree, be careful to escape
+## any quotes inside of this string if you use it
+FILE(WRITE "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt" "
+CMAKE_GENERATOR:INTERNAL=${CTEST_CMAKE_GENERATOR}
+")
+
+# ------------------------------------------------------------
+# Perform the dashboard/testings steps.
+# ------------------------------------------------------------
+CTEST_START     (Nightly)
+CTEST_UPDATE    (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
+CTEST_BUILD     (BUILD "${CTEST_BINARY_DIRECTORY}")
+SET (CTEST_PROJECT_NAME "SeqAn_tests")
+CTEST_BUILD     (BUILD "${CTEST_BINARY_TEST_DIRECTORY}")
+SET (CTEST_PROJECT_NAME "SeqAn")
+CTEST_TEST      (BUILD "${CTEST_BINARY_TEST_DIRECTORY}")
+CTEST_SUBMIT    ()
