@@ -973,7 +973,18 @@ template < typename T >
 const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
 
 
-
+// TODO(holtgrew): Mathematically, "maximum" would be more specific.
+// TODO(holtgrew): What about std::numeric_limits<T>::max()?
+/**
+.Metafunction.SupremumValue:
+..cat:Miscellaneous
+..summary:Supremum for a given type.
+..signature:SupremumValue<T>::VALUE
+..param.T:An ordered type.
+..returns.param.VALUE:A value $sup$ for which holds: $sup >= i$ for all values $i$ of type $T$.
+..remarks:Note tat
+..see:Function.supremumValue
+ */
 template < 
 	typename T, 
 	typename TParent = typename IF<
@@ -985,6 +996,18 @@ struct SupremumValue:
 {
 };
 
+// TODO(holtgrew): Mathematically, "minimum" would be more specific.
+// TODO(holtgrew): What about std::numeric_limits<T>::min()?
+/**
+.Metafunction.InfimumValue:
+..cat:Miscellaneous
+..summary:Infimum for a given type.
+..signature:Infimum<T>::VALUE
+..param.T:An ordered type.
+..returns.param.VALUE:A value $inf$ for which holds: $inf <= i$ for all values $i$ of type $T$.
+..remarks:Note tat
+..see:Function.infimumValue
+ */
 template < 
 	typename T, 
 	typename TParent = typename IF<
