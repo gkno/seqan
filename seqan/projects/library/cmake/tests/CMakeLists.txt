@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
 project (Seqan_Tests CXX)
-enable_testing()
 
 #set (CMAKE_BUILD_TYPE Debug)
 #set (CMAKE_BUILD_TYPE Release)
