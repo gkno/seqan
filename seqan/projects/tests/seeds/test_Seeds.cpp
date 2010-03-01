@@ -142,10 +142,24 @@ void Test_SimpleSeeds()
 
 	Seed<int, SimpleSeed> seed9(4,4,3);
 	extendSeed(seed9, 1, matrix, query, database, 2, GappedXDrop());
+    std::cout << infix(query, leftDim0(seed9), rightDim0(seed9)+1) << std::endl;
+    std::cout << infix(database, leftDim1(seed9), rightDim1(seed9)+1) << std::endl;
 	SEQAN_TASSERT(leftDim0(seed9)==0);
 	SEQAN_TASSERT(rightDim0(seed9)==12);
 	SEQAN_TASSERT(leftDim1(seed9)==0);
 	SEQAN_TASSERT(rightDim1(seed9)==13);
+
+    
+	String<Dna> query1 =	"aaaacgatcgatgc";
+	String<Dna> database1 = "ttttcgatcgatgcttt";
+	Seed<int, SimpleSeed> seed99(4,4,9);
+	extendSeed(seed99, 1, matrix, query1, database1, 2, GappedXDrop());
+    std::cout << infix(query1, leftDim0(seed99), rightDim0(seed99)+1) << std::endl;
+    std::cout << infix(database1, leftDim1(seed99), rightDim1(seed99)+1) << std::endl;
+	SEQAN_TASSERT(leftDim0(seed99)==3);
+	SEQAN_TASSERT(rightDim0(seed99)==13);
+	SEQAN_TASSERT(leftDim1(seed99)==3);
+	SEQAN_TASSERT(rightDim1(seed99)==14);
 }
 
 void Test_MultiSeeds(){

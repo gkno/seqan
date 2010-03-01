@@ -813,6 +813,156 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 	}
 }
 
+template<typename DatabaseInfix, typename QueryInfix, typename TPosition, typename TScore>
+void
+extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
+                       DatabaseInfix const & dataSeg,
+                       QueryInfix const & querySeg, 
+                       TScore scoreDropOff,
+                       Score<TScore, Simple> const & scoreMatrix,
+                       TPosition direction) {
+    TScore gapCost = scoreGap(scoreMatrix);
+    TPosition infimum = infimumValue<TPosition>()+1-gapCost;
+
+    TPosition upperBound = 0;
+    TPosition lowerBound = 0;
+
+    TPosition xLength = length(querySeg);
+    TPosition yLength = length(dataSeg);
+
+    // set variables for calculating the sequence positions
+    int factor, xSummand, ySummand;
+    if(direction == 0) {
+        factor = -1;
+        xSummand = xLength;
+        ySummand = yLength;
+    } else {
+        factor = 1;
+        xSummand = -1;
+        ySummand = -1;
+    }
+
+    String<TPosition> antiDiagonal1;
+    String<TPosition> antiDiagonal2;
+    String<TPosition> antiDiagonal3;
+
+    fill(antiDiagonal1, 1, 0);
+    fill(antiDiagonal2, 2, infimum);
+    fill(antiDiagonal3, _min(3, xLength+1), infimum);
+
+    String<TPosition> *antiDiag1 = &antiDiagonal1;	//smallest diagonal
+	String<TPosition> *antiDiag2 = &antiDiagonal2;
+	String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
+	String<TPosition> *tmpDiag;
+
+	//Matrix initialization
+	if (gapCost >= (-1)*scoreDropOff) {
+		(*antiDiag2)[0] = gapCost;
+		(*antiDiag2)[1] = gapCost;
+	}
+	if (2*gapCost >= (-1)*scoreDropOff) {
+		(*antiDiag3)[0] = 2*gapCost;
+		(*antiDiag3)[2] = 2*gapCost;
+	}
+		
+	TPosition b = 1; // lower bound for i
+	TPosition u = 0; // upper bound for i
+	TPosition k = 1; // current antidiagonal
+	TPosition tmp;   // for calculating the maximum for a single matrix entry
+	TPosition tmpMax1 = 0; // maximum score without the current diagonal
+	TPosition tmpMax2 = 0; // maximum score including the current diagonal
+
+	//Extension as proposed by Zhang et al
+	while(b <= u+1) {
+		++k;
+		for (TPosition i = b; i <= u+1; ++i) {
+            // calculate matrix entry
+			tmp = infimum;
+			tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i]) + gapCost;
+			tmp = _max(tmp, (*antiDiag1)[i-1] + score(scoreMatrix, xSummand + factor*i, ySummand + factor*(k-i), querySeg, dataSeg));
+
+			tmpMax2 = _max(tmpMax2, tmp);
+			if (tmp < tmpMax1-scoreDropOff)
+				(*antiDiag3)[i] = infimum;
+			else
+				(*antiDiag3)[i] = tmp;
+		}
+
+		while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1)) {
+			++b;
+		}
+		++u;
+		while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u >= 0)) {
+			--u;
+        }
+			
+		//borders for lower triangle of edit matrix
+		b = _max(b, k-yLength+1);
+		u = _min(u, xLength-1);
+
+		if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
+			lowerBound = (k+1)/2 - b;
+		if ((u > k/2) && (u - k/2 > upperBound))
+			upperBound = u - k/2;
+
+        // swap diagonals
+		tmpDiag = antiDiag1;
+		antiDiag1 = antiDiag2;
+		antiDiag2 = antiDiag3;
+		antiDiag3 = tmpDiag;
+
+        // extend last diagonal diagonal to be the new longest and initialize
+		int d = 0;
+		while ((d < 3) && ((TPosition)length(*antiDiag3) <= xLength)) {
+			appendValue(*antiDiag3, 0);
+			++d;
+		}
+		for (unsigned int eu = 0; eu < length(*antiDiag3); ++eu)
+			(*antiDiag3)[eu] = infimum;
+
+		if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
+			(*antiDiag3)[0] = (*antiDiag2)[0] + gapCost;
+		if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
+			(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
+
+		tmpMax1 = tmpMax2;
+	}
+		
+	//Calculate upper/lower bound for diagonals
+	if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
+		setRightDiagonal(seed, endDiagonal(seed)-upperBound);
+	
+    if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
+		setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
+
+	//Find seed start/end
+	TPosition tmpPos = 0;
+	TPosition tmpMax = infimum;
+	if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)) {
+		tmpPos = xLength;
+		tmpMax = 0;
+    } else {
+		for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
+			if ((*antiDiag1)[eu] > tmpMax) {
+				tmpMax = (*antiDiag1)[eu];
+				tmpPos = eu;
+			}
+		}
+		--k;
+	}
+
+    // set new start/end position of seed
+    if(tmpMax != infimum) {
+        if(direction == 0) {
+            setLeftDim0(seed, leftDim0(seed)-tmpPos);
+            setLeftDim1(seed, leftDim1(seed)-(k-tmpPos));
+        } else {
+            setRightDim0(seed, rightDim0(seed)+tmpPos);
+            setRightDim1(seed, rightDim1(seed)+k-tmpPos);
+        }
+    }
+}
+
 
 template<typename TPosition, typename TQuery, typename TDatabase, typename TScore>
 void 
@@ -825,282 +975,27 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		   GappedXDrop)
 {
 	SEQAN_CHECKPOINT
-	TPosition gapCost = scoreGap(scoreMatrix);
-	//TPosition tmpScore = 0;
+	TScore gapCost = scoreGap(scoreMatrix);
 	TPosition infimum = infimumValue<TPosition>()+1-gapCost;
 	
 	//left extension
 	if ((direction != 1) && (leftDim0(seed)!= 0) && (leftDim1(seed) != 0))
     {
-		TPosition upperBound = 0;
-		TPosition lowerBound = 0;
         typename Prefix<TDatabase const>::Type dataSeg = prefix(database, leftDim1(seed));
         typename Prefix<TQuery const>::Type querySeg = prefix(query, leftDim0(seed));
-		TPosition xLength = length(querySeg);
-		TPosition yLength = length(dataSeg);
-
-        String<TPosition> antiDiagonal1;
-        String<TPosition> antiDiagonal2;
-        String<TPosition> antiDiagonal3;
-
-        fill(antiDiagonal1, 1, 0);
-        fill(antiDiagonal2, 2, infimum);
-        fill(antiDiagonal3, 3, infimum);
-
-		String<TPosition> *antiDiag1 = &antiDiagonal1;		//smallest diagonal
-		String<TPosition> *antiDiag2 = &antiDiagonal2;
-		String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
-		String<TPosition> *tmpDiag;
-
-		//Matrix initialization
-		if (gapCost >= (-1)*scoreDropOff)
-        {
-			(*antiDiag2)[0] = gapCost;
-			(*antiDiag2)[1] = gapCost;
-		}
-		if (2*gapCost >= (-1)*scoreDropOff)
-        {
-			(*antiDiag3)[0] = 2*gapCost;
-			(*antiDiag3)[2] = 2*gapCost;
-		}
 		
-		TPosition b = 1; 
-		TPosition u = 0;
-		TPosition k = 1;
-		TPosition tmp;
-		TPosition tmpMax1 = 0;
-		TPosition tmpMax2 = 0;
-		
-		//Extension as proposed by Zhang et al
-		while(b <= u+1)
-        {
-			++k;
-			for (TPosition i = b; i <= (u+1); ++i)
-            {
-				tmp = infimum;
-
-				tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i])+gapCost;
-				tmp = _max(tmp, (*antiDiag1)[i-1]+ score(scoreMatrix, xLength-i, yLength-(k-i), querySeg, dataSeg));
-				tmpMax2 = _max(tmpMax2, tmp);
-				if (tmp < tmpMax1-scoreDropOff)
-					(*antiDiag3)[i] = infimum;
-				else
-					(*antiDiag3)[i] = tmp;
-			}
-			while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1))
-			{
-				++b;
-			}
-			++u;
-			while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u > 0))
-            {
-				--u;
-            }
-			
-			//borders for lower triangle of edit matrix
-			b = _max(b, k-yLength+1);
-			u = _min(u, xLength-1);
-			
-			if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
-				lowerBound = (k+1)/2 - b;
-			if ((u > k/2) && (u - k/2 > upperBound))
-				upperBound = u - k/2;
-
-			tmpDiag = antiDiag1;
-			antiDiag1 = antiDiag2;
-			antiDiag2 = antiDiag3;
-			antiDiag3 = tmpDiag;
-
-			int d = 0;
-			while ((d < 3) &&((TPosition)length(*antiDiag3) <= xLength))
-            {
-				appendValue(*antiDiag3, 0);
-				++d;
-			}
-			for (unsigned int eu = 0; eu < length(*antiDiag3);++eu)
-				(*antiDiag3)[eu] = infimum;
-
-			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[0] = (*antiDiag2)[0] + gapCost;
-			if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
-				
-			tmpMax1 = tmpMax2;
-		}
-		
-		//Calculate upper/lower bound for diagonals
-		if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-			setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-	
-		if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-			setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
-		
-
-
-		// Find seed start
-		TPosition tmpPos = 0;
-		TPosition tmpMax = infimum;
-		if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff))
-        {
-			tmpPos = xLength;
-			tmpMax = 0;
-		} else
-        {
-			for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu){
-				if ((*antiDiag1)[eu] > tmpMax){
-					tmpMax = (*antiDiag1)[eu];
-					tmpPos = eu;		
-				}
-			}
-			--k;
-		}
-		if(tmpMax != infimum)
-        {
-			setLeftDim0(seed, leftDim0(seed)-tmpPos);
-			setLeftDim1(seed, leftDim1(seed)-(k-tmpPos));
-		}
+        extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 0 /*left*/);
 	}
 
 	//right extension
-	
-	if ((direction != 0) && (rightDim0(seed) < (TPosition)length(query)-1) && (rightDim1(seed) < (TPosition)length(database)-1))
+	if ((direction != 0) && (rightDim0(seed)+1 < (TPosition)endPosition(query)) && (rightDim1(seed)+1 < (TPosition)endPosition(database)))
     {
-		TPosition upperBound = 0;
-		TPosition lowerBound = 0;
         typename Suffix<TDatabase const>::Type dataSeg = suffix(database, rightDim1(seed)+1);
         typename Suffix<TQuery const>::Type querySeg = suffix(query, rightDim0(seed)+1);
-		TPosition xLength = length(querySeg);
-		TPosition yLength = length(dataSeg);
 
-        String<TPosition> antiDiagonal1;
-        String<TPosition> antiDiagonal2;
-        String<TPosition> antiDiagonal3;
-
-        fill(antiDiagonal1, 1, 0);
-        fill(antiDiagonal2, 2, infimum);
-        fill(antiDiagonal3, 3, infimum);
-
-		String<TPosition> *antiDiag1 = &antiDiagonal1;		//smallest diagonal
-		String<TPosition> *antiDiag2 = &antiDiagonal2;
-		String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
-		String<TPosition> *tmpDiag;
-		
-		//Matrix initialization
-		if (gapCost >= (-1)*scoreDropOff){
-			(*antiDiag2)[0] = gapCost;
-			(*antiDiag2)[1] = gapCost;
-		}
-		if (2*gapCost >= (-1)*scoreDropOff){
-			(*antiDiag3)[0] = 2*gapCost;
-			(*antiDiag3)[2] = 2*gapCost;
-		}
-		
-		TPosition b = 1; 
-		TPosition u = 0;
-		TPosition k = 1;
-		TPosition tmp;
-		TPosition tmpMax1 = 0;
-		TPosition tmpMax2 = 0;
-	
-		//Extension as proposed by Zhang
-		while(b <= u+1)
-        {
-			++k;
-			for (TPosition i = b; i <= u+1; ++i)
-            {
-				tmp = infimum;
-				tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i]) + gapCost;
-				tmp = _max(tmp, (*antiDiag1)[i-1] + score(scoreMatrix, i-1, k-i-1, querySeg, dataSeg));
-				tmpMax2 = _max(tmpMax2, tmp);
-				if (tmp < tmpMax1-scoreDropOff)
-					(*antiDiag3)[i] = infimum;
-				else
-					(*antiDiag3)[i] = tmp;
-			}
-		
-			while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1))
-            {
-				++b;
-			}
-			++u;
-			while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u > 0))
-            {
-				--u;
-            }
-			
-			//borders for lower triangle of edit matrix
-			b = _max(b, k-yLength+1);
-			u = _min(u, xLength-1);
-			
-
-			if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
-            {
-				lowerBound = (k+1)/2 - b;
-			}
-		
-			if ((u >= k/2) && (u-k/2 >= upperBound))
-            {
-				upperBound = u - k/2;
-			}
-			tmpDiag = antiDiag1;
-			antiDiag1 = antiDiag2;
-			antiDiag2 = antiDiag3;
-			antiDiag3 = tmpDiag;
-
-			int d = 0;
-
-			while ((d < 3) &&((TPosition)length(*antiDiag3) <= xLength))
-            {
-				appendValue(*antiDiag3, 0);
-				++d;
-			}
-			for (size_t eu = 0; eu < length(*antiDiag3); ++eu)
-				(*antiDiag3)[eu] = infimum;
-
-			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
-			if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
-			tmpMax1 = tmpMax2;
-		}
-		
-		//Calculate upper/lower bound for diagonals
-		if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-			setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-	
-		if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-			setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
-
-		//Find seed end
-		TPosition tmpPos = 0;
-		TPosition tmpMax = infimum;
-		if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff))
-        {
-			tmpPos = xLength;
-			tmpMax =0;
-		} else
-        {
-			for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu)
-            {
-				if ((*antiDiag1)[eu] > tmpMax)
-                {
-					tmpMax = (*antiDiag1)[eu];
-					tmpPos = eu;
-					
-				}
-			}
-			--k;
-		}
-
-		if(tmpMax != infimum)
-        {
-			setRightDim0(seed, rightDim0(seed)+tmpPos);
-			setRightDim1(seed, rightDim1(seed)+k-tmpPos);
-		}
+        extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 1 /*right*/);
 	}
 }
-
-
 
 } //end of Seqan namespace
 
