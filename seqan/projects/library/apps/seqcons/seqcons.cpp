@@ -177,7 +177,7 @@ int main(int argc, const char *argv[]) {
 				consensusAlignment(gOut, begEndPos, consOpt);
 			
 				// Update the contig in the fragment store
-				updateContig(fragStore, gOut, currentContig);
+				if (!empty(gOut)) updateContig(fragStore, gOut, currentContig);
 				clear(gOut);
 
 				//// Debug code for CA

@@ -422,12 +422,11 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		TSize matchLen = 0;
 		TSize overlapLen = 0;
 		TSize alignLen = 0;
-		getAlignmentStatistics(matches, pairSet, from, to, matchLen, overlapLen, alignLen);
+		if (from != to) getAlignmentStatistics(matches, pairSet, from, to, matchLen, overlapLen, alignLen);
 
 
 		// Get only the good overlap alignments
-		if (((matchLen * 100) / overlapLen >= thresholdQuality) && 
-			(matchLen >= thresholdMatchlength)) {
+		if ((overlapLen) && ((matchLen * 100) / overlapLen >= thresholdQuality) && (matchLen >= thresholdMatchlength)) {
 
 			//// Debug Code
 			//Graph<Alignment<TStringSet, TSize> > tmp(pairSet);
@@ -529,11 +528,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 		
 			// Overlap alignment
 			TSize from = length(matches);
-#ifdef CELERA_OFFSET
 			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), Gotoh() );
-#else
-			TScoreValue myScore = globalAlignment(matches, pairSet, score_type, AlignConfig<true,true,true,true>(), itDiag->i1, itDiag->i2, BandedGotoh() );
-#endif
 			TSize to = length(matches);
 
 			// Determine a sequence weight

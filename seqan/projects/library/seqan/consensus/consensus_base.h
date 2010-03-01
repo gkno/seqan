@@ -435,6 +435,9 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	clear(pList);
 	clear(diagList);
 
+	// If there are no alignment matches, return
+	if (!length(matches)) return;
+
 	// Use these segment matches for the initial alignment graph
 	typedef Graph<Alignment<TStringSet, TSize> > TGraph;
 	TGraph g(seqSet);
