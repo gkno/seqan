@@ -20,10 +20,16 @@ find_package (Boost)
 # Set path variables
 ################################################################################
 
+# If Boost is not found then Boost_INCLUDE_DIRS will be set
+# to "NOTFOUND" which will make CMake complain on Windows.
+if (BOOST_FOUND)
+  set (BOOST_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
+endif (BOOST_FOUND)
+
 # Make sure the compiler can find include files from the SeqAn, Boost and TBB library.
 include_directories (${SEQAN_LIBRARY}
                      ${TBB_INCLUDE_DIRS}
-                     ${Boost_INCLUDE_DIRS})
+                     ${BOOST_INCLUDE_DIRS})
 link_directories (${SEQAN_LIBRARY}/lib
                   ${TBB_LIBRARY_DIRS})
 if (MSVC)
