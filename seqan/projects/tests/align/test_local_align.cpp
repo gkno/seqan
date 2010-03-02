@@ -13,8 +13,7 @@ using namespace std;
 using namespace seqan;
 
 
-void testLocalAlign(){
-
+SEQAN_DEFINE_TEST(testLocalAlign) {
 	//align two sequences using Smith-Waterman-algorithm
 	String<char> str0 = "ataagcgtctcg";
 	String<char> str1 = "tcatagagttgc";
@@ -166,9 +165,7 @@ void testLocalAlign(){
 }
 
 
-void testLocalAlign2()
-{
-
+SEQAN_DEFINE_TEST(testLocalAlign2) {
 //new interface
 
 	String<char> str0 = "ataagcgtctcg";
@@ -194,24 +191,4 @@ void testLocalAlign2()
 
 	score = localAlignment(ali, sw_finder, score_type, 4, WatermanEggert());
 	SEQAN_TASSERT(score == 0);
-}
-
-
-
-void Main_TestLocalAlign() 
-{
-
-	SEQAN_TREPORT("TEST LOCAL ALIGN BEGIN")
-
-	testLocalAlign();
-	testLocalAlign2();
-
-
-
-	debug::verifyCheckpoints("projects/library/seqan/misc/priority_type_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/misc/priority_type_heap.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/align_local_dynprog.h");
-
-		 
-	SEQAN_TREPORT("TEST LOCAL ALIGN END")
 }

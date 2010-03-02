@@ -2,18 +2,14 @@
 #include <cstdio>
 #include <vector>
 
-#define SEQAN_TEST
 
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 #include <seqan/align.h>
 
-
-
 using namespace std;
 using namespace seqan;
 
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign>
 void testAlignBasics()
@@ -236,8 +232,6 @@ void testAlignColsBase()
 
 
 	SEQAN_TASSERT(length(cols(ali1)) == 11);
-
-//____________________________________________________________________________
 }
 
 
@@ -276,7 +270,6 @@ void testGotohAlign()
 
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlign>
 void testAlignBasics2()
@@ -295,8 +288,6 @@ void testAlignBasics2()
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-
 template <typename TAlign>
 void _TestAlign()
 {
@@ -307,36 +298,23 @@ void _TestAlign()
 }
 
 
-void Main_TestAlign() 
-{
-	SEQAN_TREPORT("TEST ALIGN BEGIN")
-
-	_TestAlign<Align<String<char>, ArrayGaps> >();
-	_TestAlign<Align<String<Dna>, ArrayGaps> >();
-
-	_TestAlign<Align<String<char>, SumlistGaps> >();
-	_TestAlign<Align<String<Dna>, SumlistGaps> >();
-
-
-/*
-	typedef Align< String<char>, ArrayGaps> TAlign;
-	TAlign a;
-	resize(rows(a), 2);
-	assignSource(row(a, 0), "CAACTTAC");
-	assignSource(row(a, 1), "GAATTA");
-
-	int score = globalAlignment(a, SimpleScore(), NeedlemanWunsch() );
-
-	cout << a;
-*/
-
-
-	debug::verifyCheckpoints("projects/library/seqan/align/align_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/align_cols_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/align_iterator_base.h");
-	//debug::verifyCheckpoints("projects/library/seqan/align/align_dynprog.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/align_trace.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/matrix_base.h");
-
-	SEQAN_TREPORT("TEST ALIGN END")
+SEQAN_DEFINE_TEST(test_align_align_char_string_array_gaps) {
+    _TestAlign<Align<String<char>, ArrayGaps> >();
 }
+
+
+SEQAN_DEFINE_TEST(test_align_align_dna_array_gaps) {
+    _TestAlign<Align<String<Dna>, ArrayGaps> >();
+}
+
+
+SEQAN_DEFINE_TEST(test_align_align_char_string_sumlist_gaps) {
+    _TestAlign<Align<String<char>, SumlistGaps> >();
+}
+
+
+SEQAN_DEFINE_TEST(test_align_align_dna_sumlist_gaps) {
+	_TestAlign<Align<String<Dna>, SumlistGaps> >();
+}
+
+

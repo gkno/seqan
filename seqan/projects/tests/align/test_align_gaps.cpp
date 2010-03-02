@@ -399,23 +399,32 @@ void TestSequenceGapsBase()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Main_TestGaps() 
-{
-	SEQAN_TREPORT("TEST GAPS BEGIN")
-
-
-	TestGapsBase<String<char>, ArrayGaps>();
-	TestGapsIterator<String<char>, ArrayGaps>();
-	TestGapManipulation<String<char>, ArrayGaps>();
-
-	TestGapsBase<String<char>, SumlistGaps>();
-	TestGapManipulation<String<char>, SumlistGaps>(); 
-
-	TestSequenceGapsBase<String<char>, SequenceGaps>();
-
-
-	debug::verifyCheckpoints("projects/library/seqan/align/gaps_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/align/gaps_array.h");
-
-	SEQAN_TREPORT("TEST GAPS END")
+SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_array_gaps) {
+    TestGapsBase<String<char>, ArrayGaps>();
 }
+
+
+SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_sumlist_gaps) {
+    TestGapsBase<String<char>, SumlistGaps>();
+}
+
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_gaps_iterator) {
+    TestGapsIterator<String<char>, ArrayGaps>();
+}
+
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps) {
+	TestGapManipulation<String<char>, ArrayGaps>();
+}
+
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps) {
+    TestGapManipulation<String<char>, SumlistGaps>(); 
+}
+
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_sequence_gaps_base) {
+    TestSequenceGapsBase<String<char>, SequenceGaps>();
+}
+
