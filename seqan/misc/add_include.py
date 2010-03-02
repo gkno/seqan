@@ -48,7 +48,7 @@ def processHeaderFile(base_path, relative_path):
   has_include = False  # State: Have we seen a .include line?
   for line in contents:
     if in_doc:
-      if line.startswith('.include:'):
+      if line.startswith('..include:'):
         has_include = True
       elif '*/' in line:
         # End of the comment block, maybe insert '.include' line.
@@ -60,7 +60,7 @@ def processHeaderFile(base_path, relative_path):
         in_doc = False
         has_include = False
     else:
-      if line.startswith('.Function') or line.startswith('.Metafunction') or \
+      if line.startswith('.Functionma') or line.startswith('.Metafunction') or \
             line.startswith('.Tag') or line.startswith('.Spec'):
         in_doc = True
     result.append(line)
