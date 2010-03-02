@@ -633,8 +633,7 @@ namespace ClassTest {
     
 }  // namespace ClassTest
 
-#if SEQAN_ENABLE_DEBUG
-
+#if SEQAN_ENABLE_TESTING
 // This macro expands to startup code for a test file.
 #define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
     int main(int argc, char **argv) {                           \
@@ -672,7 +671,10 @@ namespace ClassTest {
         ::seqan::ClassTest::skipCurrentTest();  \
         return;                                 \
     } while (false)
+#endif  // #if SEQAN_ENABLE_TESTING
 
+
+#if SEQAN_ENABLE_DEBUG
 
 // Equality assertion with an optional comment.
 //
