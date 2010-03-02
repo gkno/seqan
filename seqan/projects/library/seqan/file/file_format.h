@@ -29,6 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format:
 ..summary:A file format.
+..include:seqan/file.h
 */
 
 

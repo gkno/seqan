@@ -58,6 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TText:The given text type.
 ..returns:Can be @Spec.Index_ESA@ or $Index_QGram$, etc.
 ..remarks:Currently @Spec.Index_ESA@ is default if $TText$ is a @Class.String@.
+..include:seqan/index.h
 */
     template < typename TObject >
     struct DefaultIndexSpec {
@@ -73,6 +74,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TIndex:An @Class.Index@ Type.
 ..returns:If the underlying text is a @Class.String@ or a set of Strings (see @Class.StringSet@) the String's spec. type is returned.
 ..remarks:Most of the @Class.Index@ fibres are strings. The @Class.String@ specialization type is chosen by this meta-function.
+..include:seqan/index.h
 */
     template < typename TIndex >
     struct DefaultIndexStringSpec {
@@ -139,6 +141,7 @@ namespace SEQAN_NAMESPACE_MAIN
 The fibre interface was designed to unify the access to the members of different index data structures.
 To get a reference or the type of a specific fibre use @Function.getFibre@ or @Metafunction.Fibre@.		
 ..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.ESA_RawText@).
+..include:seqan/index.h
 */
 	// meta function to get the type of a bundle fibre
 	template < typename TIndex, typename TSpec >
@@ -175,6 +178,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 ..param.TIndex:An @Class.Index@ Type.
 ..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A tag specifying the default algorithm to create the fibre with.
+..include:seqan/index.h
 */
     // standard algorithm for indices creation
     template < typename TIndex, typename TFibre >
@@ -286,6 +290,7 @@ You should always use the type of this meta-function to store the return values.
 If you want to write algorithms for both variants (local and global positions) you 
 should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Function.getSeqNo@ and @Function.getSeqOffset@.
 ..remarks.note:If $TObject$ is an @Class.Index@, @Metafunction.Position@ returns the same value as $SAValue$. You can change the position type of an index by overloading $SAValue$, not @Metafunction.Position@.
+..include:seqan/index.h
 */
 	template <typename TObject>
 	struct SAValue:

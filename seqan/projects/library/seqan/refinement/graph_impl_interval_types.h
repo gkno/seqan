@@ -412,6 +412,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 
 ..tag.StorePointsOnly:The tree nodes store points.
+..include:seqan/refinement.h
 */
 struct StorePointsOnly {};
 
@@ -454,6 +455,7 @@ class IntervalTreeNode;
 ..summary:An Interval Tree Node that stores intervals explicitely in each node.
 ..signature:IntervalTreeNode<TInterval, StoreIntervals>
 ..param.TInterval:The interval type to store in the node.
+..include:seqan/refinement.h
  */
 template<typename TInterval>
 class IntervalTreeNode<TInterval, StoreIntervals> {
@@ -473,6 +475,7 @@ public:
 ..summary:Spec for IntervalTreeNode that stores only the relevant point in each node meaning the endpoint of the interval in the list sorted by endpoints (list2) and only the beginpoint of the interval in the list sorted by beginpoints (list1).
 ..signature:IntervalTreeNode<TInterval, StorePointsOnly>
 ..param.TInterval:The interval type to store in the node.
+..include:seqan/refinement.h
  */
 template<typename TInterval>
 class IntervalTreeNode<TInterval, StorePointsOnly> {
@@ -581,6 +584,7 @@ struct Cargo<IntervalTreeNode<TInterval,TSpec> >
 ..summary:Type of lists in tree nodes.
 ..param.T:The type to retrieve the list type for.
 ..returns:Returns the type of the the lists in @Class.IntervalTreeNode@ objects.
+..include:seqan/refinement.h
  */
 template<typename T>
 struct ListType;

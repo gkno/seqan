@@ -51,6 +51,7 @@ It solely provides create functions where based upon a string an oracle is creat
 ...remarks:Use WithoutEdgeId here to omit edge ids.
 Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 
 //////////////////////////////////////////////////////////////////////////////

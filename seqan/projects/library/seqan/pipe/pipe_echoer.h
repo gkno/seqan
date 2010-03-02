@@ -75,6 +75,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.omitFirst:If $false$, the lengths are identical and the tuple is filled with blanks (default constructed elements) for undefined entries.
 ..remarks:The output type is a @Class.Tuple@ of input elements and length $echoRepeats$ (i.e. $Tuple<Value<TInput>::Type, echoRepeats>$).
 ..remarks:The tuples are sequences of the form $in[i]in[i-1]in[i-2]..in[i-echoRepeats+1]$. For $omitFirst=false$ $i$ begins with 0 and for $omitFirst=true$ $i$ begins with $echoRepeats-1$.
+..include:seqan/pipe.h
 */
 
     //////////////////////////////////////////////////////////////////////////////

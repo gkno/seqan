@@ -30,6 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.File Format.tag.Embl:EMBL format for sequences.
+..include:seqan/file.h
 */
 struct TagEmbl_;
 typedef Tag<TagEmbl_> const Embl;

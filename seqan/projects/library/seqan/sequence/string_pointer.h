@@ -117,6 +117,7 @@ struct IsContiguous< TValue const [SIZE] >
 
 /*DISABLED 
 .Metafunction.IsString.param.T.type:Adaption.char array
+..include:seqan/sequence.h
 */
 
 template <typename TValue>

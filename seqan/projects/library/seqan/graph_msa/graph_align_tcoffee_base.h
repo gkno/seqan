@@ -41,11 +41,13 @@ static const int SEQAN_DISTANCE_UNITY = 1;
 /**
 .Tag.Alignment Graph Combination:
 ..summary:A tag to specify how to combine alignment graphs.
+..include:seqan/graph_msa.h
 */
 
 /**
 .Tag.Alignment Graph Combination.value.FractionalScore:
 	Rescores matches with the appropriate fractional score.
+..include:seqan/graph_msa.h
 */
 struct FractionalScore_;
 typedef Tag<FractionalScore_> const FractionalScore;
@@ -54,6 +56,7 @@ typedef Tag<FractionalScore_> const FractionalScore;
 /**
 .Tag.Alignment Graph Combination.value.FrequencyCount:
 	Rescores matches with the frequency count for this edge.
+..include:seqan/graph_msa.h
 */
 struct FrequencyCounting_;
 typedef Tag<FrequencyCounting_> const FrequencyCounting;
@@ -61,6 +64,7 @@ typedef Tag<FrequencyCounting_> const FrequencyCounting;
 /**
 .Tag.Alignment Graph Combination.value.ReScore:
 	Rescores the matches after segment-match refinement.
+..include:seqan/graph_msa.h
 */
 struct ReScore_;
 typedef Tag<ReScore_> const ReScore;

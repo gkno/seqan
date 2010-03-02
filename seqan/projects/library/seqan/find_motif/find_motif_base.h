@@ -269,6 +269,7 @@ displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 ..param.T:Finder for which the string type is determined.
 ...type:Class.String
 ..returns.param.Type:Underlying sequence type of finder $T$.
+..include:seqan/find_motif.h
  */
 template <typename T>
 struct Motif;

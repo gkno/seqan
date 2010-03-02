@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TBlastReport:A Blast report.
 ...type:Class.BlastReport
 ..general:Class.Iter
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 class Iter<TBlastReport, SimpleBlastIterator<HitIterator> > 

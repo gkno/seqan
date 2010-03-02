@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.T:An alignment type.
 ...type:Class.Align
 ..returns.param.Type:The type of the container that allows access to the columns of $T$.
+..include:seqan/align.h
 */
 template <typename T> struct Cols;
 
@@ -50,6 +51,7 @@ template <typename T> struct Cols;
 ..remarks:The returned type is equivalent to $Value<Cols<T>::Type>::Type$.
 ..see:Metafunction.Cols
 ..see:Metafunction.Value
+..include:seqan/align.h
 */
 template <typename T>
 struct Col:
@@ -67,6 +69,7 @@ struct Col:
 ...type:Class.Align
 ..returns.param.Type:The type of the container that allows access to the rows of $T$.
 ..see:Metafunction.Cols
+..include:seqan/align.h
 */
 template <typename T> struct Rows;
 
@@ -82,6 +85,7 @@ template <typename T> struct Rows;
 ..remarks:The returned type is equivalent to $Value<Rows<T>::Type>::Type$.
 ..see:Metafunction.Rows
 ..see:Metafunction.Value
+..include:seqan/align.h
 */
 template <typename T>
 struct Row:
@@ -257,6 +261,7 @@ struct Source<Align<TSource, TSpec> const >
 ..param.T.Type:Class.Align
 ..returns.param.Type:A @Class.StringSet.string set@ type of a reference to a string set type.
 ..see:Function.stringSet
+..include:seqan/align.h
 */
 template <typename T>
 struct StringSetType;

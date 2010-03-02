@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.Adjacency Iterator
 ..see:Spec.Bfs Iterator
 ..see:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 
 

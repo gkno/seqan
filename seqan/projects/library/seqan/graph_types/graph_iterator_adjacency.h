@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.Out-Edge Iterator
 ..see:Spec.Edge Iterator
 ..see:Spec.Bfs Iterator
+..include:seqan/graph_types.h
 */
 template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalAdjacencyIterator<TSpec> > > 

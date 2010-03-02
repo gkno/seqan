@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The @Spec.PMSP|PMSP algorithm@ is an improvement of the @Spec.PMS1|PMS1 algorithm@.
           It examines each possible l-mer of the first input sequence, explores its neighborhood
 		  and finally checks whether an l-mer in the neighborhood is a motif instance.
+..include:seqan/find_motif.h
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMSP

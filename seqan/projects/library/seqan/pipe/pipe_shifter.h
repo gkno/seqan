@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.omitBlank:If $false$, the lengths are equal and blanks (default constructed elements) are inserted on the cut-off-opposite side.
 ...default:$false$
 ..remarks:The output type equals the input type.
+..include:seqan/pipe.h
 */
 
     //////////////////////////////////////////////////////////////////////////////

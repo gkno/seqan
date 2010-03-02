@@ -46,6 +46,7 @@ namespace seqan{
 ..remarks:$key( obj, dim )$: returns the key of the object for dimension $dim$.
 ..remarks:$setKey( obj, dim, k )$: set the key of the object to $k$ for dimension $dim$.
 ..remarks:In contrast to STL-like containers, the objects are not cloned by the RangeTree. It only supports searching operations on a set of objects. This set must be handled by the user.
+..include:seqan/chaining.h
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,7 @@ namespace seqan{
 ..param.T:Type for which the weight type is determined.
 ..returns.param.Type:Weight type of $T$.
 ..remarks.text:The weight type of an item $T$ is the type which is used by $T$ for scores or priorities.
+..include:seqan/chaining.h
 */
 
 	template< typename T >

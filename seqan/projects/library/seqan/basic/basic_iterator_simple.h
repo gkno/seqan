@@ -37,6 +37,7 @@ struct SimpleIterator;
 ..param.TContainer:Type of the container that can be iterated.
 ...metafunction:Metafunction.Container
 ..general:Class.Iter
+..include:seqan/basic.h
 */
 template <typename TContainer>
 class Iter<TContainer, SimpleIterator>

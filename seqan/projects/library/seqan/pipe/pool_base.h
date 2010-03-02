@@ -34,6 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TFile:The underlying @Class.File@ type.
 ...default:$File<>$, see @Class.File@.
 ..see:Spec.PoolConfig
+..include:seqan/pipe.h
 */
 
 	template < typename TSize,
@@ -53,6 +54,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:$File<>$, see @Class.File@.
 ..remarks:Using this configuration spec., the Pool's size type is $Size<TFile>::Type$. To use a custom size type @Spec.PoolConfigSize@ should be used.
 ..see:Spec.PoolConfigSize
+..include:seqan/pipe.h
 */
 
 	template < typename TFile = File<> >						// default file type
@@ -72,6 +74,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.PoolConfig
 ...type:Spec.PoolConfigSize
 ..remarks:The Pool's input/output type is $TValue$ and the size type is determined by the $TConfig$.
+..include:seqan/pipe.h
 */
 
     template < typename TConfig = PoolConfig<> >

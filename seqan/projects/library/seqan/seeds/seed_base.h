@@ -43,12 +43,14 @@ typedef Tag<_Seed_simple> const SimpleSeed;
 	Ungapped extension of a seed until score drops below a Value.
 ..tag.GappedXDrop:
 	Gapped extension of a seed until score drops below a Value. Only @Spec.SimpleSeed@s.
+..include:seqan/seeds.h
 */
 
 
 /**
 .Tag.Seed Adding.tag.Merge:
 	Merging of Seeds.
+..include:seqan/seeds.h
 */
 struct _Chain_Merge;
 typedef Tag<_Chain_Merge> const Merge;
@@ -96,6 +98,7 @@ typedef Tag<_extendSeed_GappedXDrop> const GappedXDrop;
 ..param.qEndPos: End in query sequence.
 ..param.dEndPos: End in database sequence.
 ..param.length: Length of the seed.
+..include:seqan/seeds.h
 */
 template<typename TPosition = int, typename TSpecSeed = SimpleSeed> 
 class Seed{

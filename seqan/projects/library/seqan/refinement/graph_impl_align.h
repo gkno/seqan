@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Alignment Graph Format:
 ..summary:A file format to write an alignment graph.
+..include:seqan/refinement.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -51,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Alignment Graph Format.value.MsfFormat:
 	Msf format to write an alignment graph.
+..include:seqan/refinement.h
 */
 
 struct MsfFormat_;
@@ -61,6 +63,7 @@ typedef Tag<MsfFormat_> const MsfFormat;
 /**
 .Tag.Alignment Graph Format.value.FastaFormat:
 	Fasta format to write an alignment graph.
+..include:seqan/refinement.h
 */
 
 struct FastaFormat_;
@@ -71,6 +74,7 @@ typedef Tag<FastaFormat_> const FastaFormat;
 /**
 .Tag.Alignment Graph Format.value.CgVizFormat:
 	Cgviz format to write an alignment graph.
+..include:seqan/refinement.h
 */
 
 struct CgVizFormat_;
@@ -178,6 +182,7 @@ public:
 ...remarks:Use WithoutEdgeId here to omit edge ids.
 Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/refinement.h
 */
 template<typename TString, typename TSpecial, typename TCargo, typename TSpec>
 class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> > 

@@ -39,12 +39,14 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Segment Match Generation:
 ..summary:A tag that specifies how to generate segment matches.
+..include:seqan/graph_msa.h
 */
 
 
 /**
 .Tag.Segment Match Generation.value.GlobalPairwise_Library:
 	Segment matches from pairwise global alignments.
+..include:seqan/graph_msa.h
 */
 
 struct GlobalPairwise_Library_;
@@ -54,6 +56,7 @@ typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
 /**
 .Tag.Segment Match Generation.value.LocalPairwise_Library:
 	Segment matches from pairwise local alignments.
+..include:seqan/graph_msa.h
 */
 
 struct LocalPairwise_Library_;
@@ -62,6 +65,7 @@ typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
 /**
 .Tag.Segment Match Generation.value.Kmer_Library:
 	Segment matches from pairwise kmer alignments.
+..include:seqan/graph_msa.h
 */
 
 struct Kmer_Library_;
@@ -71,6 +75,7 @@ typedef Tag<Kmer_Library_> const Kmer_Library;
 /**
 .Tag.Segment Match Generation.value.Lcs_Library:
 	Segment matches from pairwise longest common subsequence comparisons.
+..include:seqan/graph_msa.h
 */
 
 struct Lcs_Library_;

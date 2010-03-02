@@ -32,6 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.CGViz:
 	CGViz file format for sequences. Only output.
+..include:seqan/file.h
 */
 struct TagCGViz_;
 typedef Tag<TagCGViz_> const CGViz;

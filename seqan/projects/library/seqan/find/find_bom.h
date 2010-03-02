@@ -51,6 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
 ..see:Spec.BFAM<Trie>
+..include:seqan/find.h
 */
 /**
 .Spec.BFAM<Trie>:
@@ -62,6 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..remarks.text:To be used in combination with the default specialization of @Class.Finder@.
 ..see:Spec.BFAM<Oracle>
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Class.BFAM

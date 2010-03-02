@@ -31,6 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.Genbank:
 	Genbank format for sequences from the Genbank database.
+..include:seqan/file.h
 */
 struct TagGenbank_;
 typedef Tag<TagGenbank_> const Genbank;

@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..tag.TagPrefixGreater:A prefix is greater.
 ...text:For example: $"abc" > "abcde"$.
 ..remarks:The default for all comparison functions is $TagPrefixLess$.
+..include:seqan/sequence.h
 */
 struct TagPrefixLess_ {};
 typedef Tag<TagPrefixLess_> const TagPrefixLess;
@@ -52,6 +53,7 @@ typedef Tag<TagPrefixGreater_> const TagPrefixGreater;
 ..param.T:Type for which the prefix order is determined.
 ..returns.param.Type:Prefix order tag for type of $T$.
 ..see:Tag.Prefix Order
+..include:seqan/sequence.h
 */
 template <typename T>
 struct DefaultPrefixOrder
@@ -174,6 +176,7 @@ SEQAN_CHECKPOINT
 ..returns.param.Type:Comparator type
 ..remarks:Comparators are objects that can be used to compare other objects and store the
 result of comparisons.
+..include:seqan/sequence.h
 */
 template <typename T>
 struct Comparator

@@ -31,6 +31,7 @@ struct _PizzaChiliFinder;
 ..tag.PizzaChiliFinder:Finds an occurrence in a @Spec.Pizza & Chili Index@ index.
 ...remarks:The actual algorithm used for searching depends on the @Tag.Pizza & Chili Index Tags@ used.
 ..see:Spec.Pizza & Chili Index
+..include:seqan/index.h
 */
 
 typedef Tag<_PizzaChiliFinder> const PizzaChiliFinder;

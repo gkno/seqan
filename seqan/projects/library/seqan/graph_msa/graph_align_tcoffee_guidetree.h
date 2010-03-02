@@ -265,6 +265,7 @@ njTree(String<TValue, TStringSpec>& mat,
 /**
 .Tag.Upgma Configurator:
 ..summary:A tag to configure the guide tree construction.
+..include:seqan/graph_msa.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -272,6 +273,7 @@ njTree(String<TValue, TStringSpec>& mat,
 /**
 .Tag.Upgma Configurator.value.UpgmaMin:
 	Uses the min operation in the upgma algorithm
+..include:seqan/graph_msa.h
 */
 
 struct UpgmaMin_;
@@ -282,6 +284,7 @@ typedef Tag<UpgmaMin_> const UpgmaMin;
 /**
 .Tag.Upgma Configurator.value.UpgmaMax:
 	Uses the max operation in the upgma algorithm
+..include:seqan/graph_msa.h
 */
 
 struct UpgmaMax_;
@@ -292,6 +295,7 @@ typedef Tag<UpgmaMax_> const UpgmaMax;
 /**
 .Tag.Upgma Configurator.value.UpgmaAvg:
 	Uses the average operation in the upgma algorithm
+..include:seqan/graph_msa.h
 */
 
 struct UpgmaAvg_;
@@ -302,6 +306,7 @@ typedef Tag<UpgmaAvg_> const UpgmaAvg;
 /**
 .Tag.Upgma Configurator.value.UpgmaWeightAvg:
 	Uses the weighted average operation in the upgma algorithm
+..include:seqan/graph_msa.h
 */
 
 struct UpgmaWeightAvg_;

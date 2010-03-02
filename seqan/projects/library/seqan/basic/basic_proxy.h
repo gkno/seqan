@@ -74,6 +74,7 @@ struct Spec< Proxy<TSpec> const>
 ..param.TIterator:Iterator type.
 ..remarks.text:The value type of an iterator proxy is the value type of the
 iterator $TIterator$.
+..include:seqan/basic.h
 */
 
 template <typename TIterator>

@@ -45,6 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Spec.InfixSegment
 ..see:Spec.SuffixSegment
 ..see:Metafunction.Prefix
+..include:seqan/sequence.h
 */
 
 struct PrefixSegment;
@@ -339,6 +340,7 @@ SEQAN_CHECKPOINT
 ..returns.param.Type:The prefix type.
 ..see:Spec.PrefixSegment
 ..see:Metafunction.Infix
+..include:seqan/sequence.h
 */
 
 struct InfixSegment;

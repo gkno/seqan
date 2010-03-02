@@ -52,6 +52,7 @@ By default, it is guaranteed not to exceed about
 ..remarks:Changing the capacity of a container can invalidate the iterators of this container.
 ..remarks:If no overflow tag is specified, most operations use the default overflow strategy given by @Metafunction.DefaultOverflowImplicit@
 or @Metafunction.DefaultOverflowExplicit@, depending on the kind of operation.
+..include:seqan/sequence.h
 */
 struct TagInsist_;
 typedef Tag<TagInsist_> const Insist;
@@ -83,6 +84,7 @@ typedef Tag<TagExact_> const Exact;
 ..remarks:This function is used for functions that cause an implicit change of a container's size, like
 e.g. @Function.assign@, @Function.append@, and @Function.replace@.
 ..see:Tag.Overflow Strategy
+..include:seqan/sequence.h
 */
 template <typename T>
 struct DefaultOverflowImplicit
@@ -103,6 +105,7 @@ struct DefaultOverflowImplicit
 ..remarks:This function is used for functions that change a container's size explicit, like e.g. @Function.resize@.
 ..see:Tag.Overflow Strategy
 ..see:Metafunction.DefaultOverflowImplicit
+..include:seqan/sequence.h
 */
 template <typename T>
 struct DefaultOverflowExplicit
@@ -124,6 +127,7 @@ struct DefaultOverflowExplicit
 	Examples for contiguous sequences are @Spec.Alloc String@ or @Adaption.char array@.
 ..remarks:If an object $obj$ is a contiguous sequence, then $begin(obj)$ can be
 	converted to a pointer to the first element of the content array.
+..include:seqan/sequence.h
 */
 template <typename T>
 struct IsContiguous
@@ -145,6 +149,7 @@ struct IsContiguous<T const>:
 ..param.T:Type that is tested for being a sequence.
 ..returns.param.VALUE:$true$ if $T$ is a sequence, $false$ otherwise.
 ..remarks:For example @Class.String@ and @Class.Segment@ return $true$.
+..include:seqan/sequence.h
 */
 template <typename T>
 struct IsSequence
@@ -166,6 +171,7 @@ struct IsSequence<T const>:
 ..param.T:Type that is tested for fast random access.
 ..returns.param.VALUE:$true$ if $T$ supports fast random access, $false$ otherwise.
 ..remarks:For example @Spec.Alloc String@, @Class.Segment@, and @Spec.Block String@ return $true$.
+..include:seqan/sequence.h
 */
 template <typename T>
 struct AllowsFastRandomAccess

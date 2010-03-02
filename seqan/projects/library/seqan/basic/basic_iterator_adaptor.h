@@ -53,6 +53,7 @@ struct Iterator_Default_Imp<T, Rooted>
 ...remarks:Use @Metafunction.Container@ to get the container type for a given iterator.
 ..param.TIterator:Type of the iterator that is adapted to @Concept.Rooted Iterator@.
 ..remarks.text:Adaptor iterators can implicitly converted to $TIterator$.
+..include:seqan/basic.h
 */
 
 template <typename TContainer, typename TIterator, typename TSpec>

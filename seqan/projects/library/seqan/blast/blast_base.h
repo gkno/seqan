@@ -89,6 +89,7 @@ struct StreamReport;
 ..param.T:A Blast report object.
 ...type:Class.BlastReport
 ..returns.param.Type:BlastHit type.
+..include:seqan/blast.h
 */
 template<typename T>
 struct Hit;
@@ -101,6 +102,7 @@ struct Hit;
 ...type:Class.BlastReport
 ...type:Class.BlastHit
 ..returns.param.Type:BlastHsp type.
+..include:seqan/blast.h
 */
 template<typename T>
 struct Hsp;

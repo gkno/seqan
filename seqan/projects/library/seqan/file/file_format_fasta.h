@@ -31,6 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.Fasta:
 	FASTA file format for sequences.
+..include:seqan/file.h
 */
 struct TagFasta_;
 typedef Tag<TagFasta_> const Fasta;

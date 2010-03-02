@@ -272,6 +272,7 @@ struct Size<FrequencyDistribution<TValue, TSpec> const>
 .Metafunction.Value:
 ..summary:Returns the sequence type of a @Class.FrequencyDistribution@ type
 	     (TValue for FrequencyDistribution<TValue, TSpec>).
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>

@@ -31,6 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Tag.DotDrawing
 ..summary:Switch to trigger drawing in dot format.
 ..value.DotDrawing:Graphs in dot format.
+..include:seqan/basic.h
 */
 
 struct DotDrawing_;
@@ -40,6 +41,7 @@ typedef Tag<DotDrawing_> const DotDrawing;
 /**
 .Tag.HammingDistance
 ..summary:Switch to trigger Hamming distance, which is a measure of character substitutions.
+..include:seqan/basic.h
 */
 
 /**
@@ -47,6 +49,7 @@ typedef Tag<DotDrawing_> const DotDrawing;
 ..summary:Switch to trigger Levenshtein distance, which is a measure of edit operations (character substitutions, deletions or insertions).
 ..remarks:$EditDistance$ is a synonym for $LevenshteinDistance$.
 ..see:Spec.EditDistance
+..include:seqan/basic.h
 */
 
 struct _HammingDistance;
@@ -71,6 +74,7 @@ typedef Tag<_LevenshteinDistance>	EditDistance;
 ..summary:Global alignment algorithm used by globalAlignment.
 ..see:Function.globalAlignment
 ..see:Tag.Local Alignment Algorithms
+..include:seqan/basic.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -78,6 +82,7 @@ typedef Tag<_LevenshteinDistance>	EditDistance;
 /**
 .Tag.Global Alignment Algorithms.value.NeedlemanWunsch:
 	Dynamic programming algorithm for alignments by Needleman and Wunsch.
+..include:seqan/basic.h
 */
 
 struct NeedlemanWunsch_;
@@ -88,6 +93,7 @@ typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
 /**
 .Tag.Global Alignment Algorithms.value.BandedNeedlemanWunsch:
 	The Needleman-Wunsch alignment algorithm in a banded version.
+..include:seqan/basic.h
 */
 struct BandedNeedlemanWunsch_;
 typedef Tag<BandedNeedlemanWunsch_> const BandedNeedlemanWunsch;
@@ -98,6 +104,7 @@ typedef Tag<BandedNeedlemanWunsch_> const BandedNeedlemanWunsch;
 /**
 .Tag.Global Alignment Algorithms.value.Gotoh:
 	Gotoh's affine gap cost alignment algorithm.
+..include:seqan/basic.h
 */
 struct Gotoh_;
 typedef Tag<Gotoh_> const Gotoh;
@@ -107,6 +114,7 @@ typedef Tag<Gotoh_> const Gotoh;
 /**
 .Tag.Global Alignment Algorithms.value.BandedGotoh:
 	Gotoh's affine gap cost alignment algorithm in a banded version.
+..include:seqan/basic.h
 */
 struct BandedGotoh_;
 typedef Tag<BandedGotoh_> const BandedGotoh;
@@ -117,6 +125,7 @@ typedef Tag<BandedGotoh_> const BandedGotoh;
 .Tag.Global Alignment Algorithms.value.MyersBitVector:
 	Myers' bit vector alignment algorithm for edit distance.
 	Note that this algorithm does not returns the alignment itself, but only computes the score.
+..include:seqan/basic.h
 */
 struct MyersBitVector_;
 typedef Tag<MyersBitVector_> const MyersBitVector;
@@ -126,6 +135,7 @@ typedef Tag<MyersBitVector_> const MyersBitVector;
 /**
 .Tag.Global Alignment Algorithms.value.MyersHirschberg:
 	Myers' bit vector algorithm for edit distance combined with Hirschberg's linear space alignment algorithm.
+..include:seqan/basic.h
 */
 struct MyersHirschberg_;
 typedef Tag<MyersHirschberg_> const MyersHirschberg;
@@ -135,6 +145,7 @@ typedef Tag<MyersHirschberg_> const MyersHirschberg;
 /**
 .Tag.Global Alignment Algorithms.value.Hirschberg:
 	Hirschberg's linear space global alignment algorithm.
+..include:seqan/basic.h
 */
 struct Hirschberg_;
 typedef Tag<Hirschberg_> const Hirschberg;
@@ -144,6 +155,7 @@ typedef Tag<Hirschberg_> const Hirschberg;
 /**
 .Tag.Global Alignment Algorithms.value.Lcs:
 	Longest common subsequence algorithm.
+..include:seqan/basic.h
 */
 struct Lcs_;
 typedef Tag<Lcs_> const Lcs;
@@ -155,6 +167,7 @@ typedef Tag<Lcs_> const Lcs;
 .Tag.Local Alignment Algorithms:
 ..summary:Local alignment algorithm used by localAlignment.
 ..see:Function.localAlignment
+..include:seqan/basic.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -162,6 +175,7 @@ typedef Tag<Lcs_> const Lcs;
 /**
 .Tag.Local Alignment Algorithms.value.SmithWaterman:
 	Triggers a Smith Waterman local alignment algorithm.
+..include:seqan/basic.h
 */
 struct SmithWaterman_;
 typedef Tag<SmithWaterman_> const SmithWaterman;
@@ -173,6 +187,7 @@ typedef Tag<SmithWaterman_> const SmithWaterman;
 	Local alignment algorithm by Waterman and Eggert with "declumping" (i.e. only non-overlapping local alignments are computed).
 .Tag.Local Alignment Algorithms.value.SmithWatermanClump:
 	Same as $WatermanEggert$.
+..include:seqan/basic.h
 */
 struct SmithWatermanClump_;
 typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
@@ -183,6 +198,7 @@ typedef Tag<SmithWatermanClump_> const WatermanEggert;
 /*DISABLED
 .Tag.RNA Folding Algorithms.value.Nussinov:
 	Nussinov style RNA folding algorithm
+..include:seqan/basic.h
 */
 struct Nussinov_;
 typedef Tag<Nussinov_> const Nussinov;

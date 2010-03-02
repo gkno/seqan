@@ -31,6 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..general:Class.PriorityType
 ..summary:Stores the priority data on a heap.
 ..signature:PriorityType<TValue, TLess, PriorityHeap> >
+..include:seqan/misc.h
 */
 template < typename TValue, typename TLess>
 class PriorityType<TValue,TLess,PriorityHeap>

@@ -43,6 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		  In each trial, @Spec.Projection@ makes a preselection of sets of length-l patterns called l-mers
 		  which are likely to be a collection of motif instances (filtering step) and 
 		  refines them by some local searching techniques, e.g. @Function.em|EM algorithm@, Gibbs Sampling etc (refinement step).
+..include:seqan/find_motif.h
 */
 
 struct _Projection;

@@ -74,6 +74,7 @@ struct Spec<Allocator<TSpec> >
 ..tag.TagAllocateStorage:Memory for storing container content. 
 ..see:Function.allocate
 ..see:Function.deallocate
+..include:seqan/basic.h
 */
 struct TagAllocateUnspecified_; //< usage not specified
 typedef Tag<TagAllocateUnspecified_> const TagAllocateUnspecified;

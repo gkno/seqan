@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:This iterator is a pointer to a node in the Suffix Tree (given by the Enhanced Suffix Array @Spec.Index_ESA@).
 Every node can uniquely be mapped to an interval of the Suffix Array containing all suffixes of the node's subtree.
 This interval is the @Function.value@ of the iterator.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -65,6 +66,7 @@ This interval is the @Function.value@ of the iterator.
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..param.TSpec:The specialization type.
+..include:seqan/index.h
 */
 
 
@@ -133,6 +135,7 @@ This interval is the @Function.value@ of the iterator.
 ...metafunction:Metafunction.Container
 ..implements:Concept.Iterator
 ..param.TSpec:The specialization type.
+..include:seqan/index.h
 */
 
 	template < typename TVSTreeIter >
@@ -202,6 +205,7 @@ This interval is the @Function.value@ of the iterator.
 ...metafunction:Metafunction.Container
 ..implements:Concept.Iterator
 ..param.TSpec:The specialization type.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >

@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:File structure supporting synchronous input/output access.
 ..signature:File<Sync<> >
 ..remarks:This class suports pseudo-asynchronous access methods, i.e. the methods to initiate a I/O request return after request completion.
+..include:seqan/file.h
 */
 
 	template <typename TSpec = void>
@@ -52,6 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..general:Class.File
 ..summary:File structure supporting synchronous and asynchronous input/output access.
 ..signature:File<Async<> >
+..include:seqan/file.h
 */
 
 	template <typename TSpec = void>
@@ -83,6 +85,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:This file type uses a chain of $TFile$ files, whose file sizes are at most $FileSize$ bytes.
 Chained Files should be used for file systems or $TFile$ types that don't support large files (e.g. FAT32, C-style FILE*).
 ..remarks:The chain can be used as if it were one contiguous file.
+..include:seqan/file.h
 */
 
 	// chained file's default filesize is 2gb-1byte (fat16 filesize limitation)
@@ -101,6 +104,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ...default:$File<>$, see @Class.File@.
 ..remarks:This file type uses a software striping without redundance (see RAID0) to accelerate I/O access when using more than one disks.
 ..remarks:Striped files should only be used in @Class.Pool@s or external Strings as they only support block operations and no random accesses.
+..include:seqan/file.h
 */
 
 	template < unsigned _FileCount = 2, typename TFile = File<> >

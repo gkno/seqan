@@ -33,6 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.SAM:
 	SAM mapping file.
+..include:seqan/store.h
 */
 //struct TagSAM_;
 //typedef Tag<TagSAM_> const SAM;

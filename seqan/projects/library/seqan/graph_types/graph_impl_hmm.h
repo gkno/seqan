@@ -52,6 +52,7 @@ Vertices correspond to states in an HMM.
 ...remarks:Use WithoutEdgeId here to omit edge ids.
 Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec>
 class Graph<Hmm<TAlphabet, TCargo, TSpec> > 

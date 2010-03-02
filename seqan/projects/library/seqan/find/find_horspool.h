@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Pattern<TNeedle, Horspool>
 ..param.TNeedle:The needle type.
 ...type:Class.String
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.Horspool

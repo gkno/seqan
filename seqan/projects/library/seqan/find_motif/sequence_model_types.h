@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Motif Search
 ..remarks:The @Tag.OOPS@ model, which was introduced by Lawrence and Reilly permits 
           exactly one motif occurrence in each sequence.
+..include:seqan/find_motif.h
 */
 
 struct OOPS
@@ -50,6 +51,7 @@ struct OOPS
 ..cat:Motif Search
 ..remarks:The @Tag.OMOPS@ model is comparable with the @Tag.TCM@ model with the one difference
           that zero occurrence in a sample sequence is not permitted.
+..include:seqan/find_motif.h
 */
 
 struct OMOPS
@@ -65,6 +67,7 @@ struct OMOPS
 ..cat:Motif Search
 ..remarks:The @Tag.ZOOPS@ model formulated by Bailey and Elkan permits at most one
           motif occurrence in each sequence.
+..include:seqan/find_motif.h
 */
 
 struct ZOOPS
@@ -93,6 +96,7 @@ struct ZOOPS
 ..cat:Motif Search
 ..remarks:The @Tag.TCM@ model formulated by Bailey and Elkan permits any number pf
           non-overlapping motif occurrences per sequence.
+..include:seqan/find_motif.h
 */
 
 struct TCM

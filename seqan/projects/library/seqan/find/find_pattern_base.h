@@ -125,6 +125,7 @@ struct Size< Pattern<TPattern, TSpec> > {
 ...type:Class.Pattern
 ..returns:The scoring scheme.
 ...default:@Shortcut.EditDistanceScore@
+..include:seqan/find.h
 */
 
 template <typename TNeedle>

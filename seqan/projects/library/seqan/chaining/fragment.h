@@ -35,6 +35,7 @@ namespace seqan
 ..general:Class.Seed
 ..signature:Seed<TPosition, MultiSeed>
 ..param.TPosition:Type of the class which represents the limits (multidimensional point) of a seed.
+..include:seqan/chaining.h
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

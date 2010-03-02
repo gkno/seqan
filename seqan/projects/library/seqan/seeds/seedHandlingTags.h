@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	Chaining of seeds. One gap is introduced at the best position.
 ..tag.SimpleChain:
 	Chaining of seeds.
+..include:seqan/seeds.h
 */
 struct _addSeeding_Single;
 typedef Tag<_addSeeding_Single> const Single;
@@ -72,6 +73,7 @@ struct BLOCK_SIZE
 	Enables scoring of seeds in a SeedSet.
 ..tag.DefaultNoScore:
 	Disables scoring of seeds in a SeedSet.
+..include:seqan/seeds.h
 */
 
 

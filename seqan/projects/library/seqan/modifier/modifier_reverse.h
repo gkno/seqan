@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:ModifiedString<THost, ModReverse>
 ..param.THost:Original string/iterator.
 ...type:Concept.Iterator
+..include:seqan/modifier.h
 */
 
 	struct ModReverse {};

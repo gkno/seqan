@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Tag.FindPrefix
 ..see:Spec.Myers
 ..see:Spec.DPSearch
+..include:seqan/find.h
  */
 struct FindInfix;
 
@@ -47,6 +48,7 @@ struct FindInfix;
 ..see:Tag.FindInfix
 ..see:Spec.Myers
 ..see:Spec.DPSearch
+..include:seqan/find.h
 */
 struct FindPrefix;
 
@@ -59,6 +61,7 @@ struct FindPrefix;
 ..signature:DefaultFinder<THaystack>::Type
 ..param.THaystack:The given haystack type.
 ..returns:Is $void$ by default and @Tag.Index Find Algorithm.ESA_FIND_MLR@ if $THaystack$ is an @Class.Index@.
+..include:seqan/find.h
 */
 template < typename TObject >
 struct DefaultFinder 
@@ -73,6 +76,7 @@ struct DefaultFinder
 ..signature:DefaultPattern<TNeedle>::Type
 ..param.TNeedle:The given needle type.
 ..returns:Is $void$ by default.
+..include:seqan/find.h
 */
 template < typename TObject >
 struct DefaultPattern 
@@ -88,6 +92,7 @@ struct DefaultPattern
 ..param.TFinder:A @Class.Finder@ type.
 ...type:Class.Finder
 ..returns:The haystack type of $TFinder$, i.e. $THaystack$ for $Finder<THaystack, TSpec>$.
+..include:seqan/find.h
 */
 
 template <typename TFinder>
@@ -104,6 +109,7 @@ struct Haystack
 ..param.TPattern:A @Class.Pattern@ type.
 ...type:Class.Pattern
 ..returns:The needle type of $TPattern$, i.e. $TNeedle$ for $Pattern<TNeedle, TSpec>$.
+..include:seqan/find.h
 */
 
 template <typename TPattern>

@@ -43,6 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type for the dependent string set.
 ...remarks:Possible values are $Tight$ or $Generous$
 ...remarks:$Tight$ is very space efficient whereas $Generous$ provides fast access to the strings in the container via ids.
+..include:seqan/sequence.h
 */
 
 	// Default id holder string set
@@ -61,6 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The strings are internally stored in a $TString$ object and the character position type is a 
 a single integer value between 0 and the sum of string lengths minus 1.
 ..remarks:The position type can be returned or modified by the meta-function @Metafunction.SAValue@ called with the @Class.StringSet@ type.
+..include:seqan/sequence.h
 */
 
 	template < typename TDelimiter = void >
@@ -79,6 +81,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ..remarks:The strings are internally stored in a $String<TString>$ object and the character position type is a 
 @Class.Pair@ $(seqNo,seqOfs)$ where seqNo identifies the string within the stringset and seqOfs identifies the position within this string.
 ..remarks:The position type can be returned or modified by the meta-function @Metafunction.SAValue@ called with the @Class.StringSet@ type.
+..include:seqan/sequence.h
 */
 	template < typename TSpec = Default >
 	struct Owner;							// owns its elements

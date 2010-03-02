@@ -42,6 +42,7 @@ struct ArrayGaps;
 ..signature:Gaps<TSource, ArrayGaps >
 ..param.TSource:Type of the ungapped sequence.
 ...metafunction:Metafunction.Source
+..include:seqan/align.h
 */
 template <typename TSource>
 class Gaps<TSource, ArrayGaps>

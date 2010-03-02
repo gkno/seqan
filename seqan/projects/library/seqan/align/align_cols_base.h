@@ -139,6 +139,7 @@ struct Host<AlignCols<TAlign> const>
 ..param.TSpec:Specialization tag.
 ..general:Class.Iter
 ..see:Class.AlignCols
+..include:seqan/align.h
 */
 
 

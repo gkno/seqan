@@ -78,6 +78,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
 ..see:Spec.Index_QGram
+..include:seqan/index.h
 */
 
 	struct _Fibre_Dir;			// directory/hash table, contains start indices of buckets
@@ -119,6 +120,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.TText:The text type.
 ...type:Class.String
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGram_SA@) and a q-gram directory (see @Tag.QGram Index Fibres.QGram_Dir@).
+..include:seqan/index.h
 */
 
 	template < typename TShapeSpec, typename TSpec = Default >

@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks.text:The value type of a container $T$ is the type of the elements in $T$.
     For example, the value type of a sequence of $int$ is $int$.
 ..example.code:Value<String<char> >::Type c; //c has type char
+..include:seqan/basic.h
 */
 
 template <typename T, const int i = 0>
@@ -63,6 +64,7 @@ struct Value<T const>
 Do not confuse it with @Function.value@ that returns a @Metafunction.Reference.reference@ to the value.
 ..see:Metafunction.Value
 ..see:Function.getValue
+..include:seqan/basic.h
 */
 template <typename T>
 struct GetValue
@@ -85,6 +87,7 @@ struct GetValue<T const>:
 ..returns.param.Type:Either $T &$ or a proxy object @Class.Proxy@ for $T$.
 ..see:Metafunction.Value
 ..see:Metafunction.GetValue
+..include:seqan/basic.h
 */
 template <typename T>
 struct Reference
@@ -107,6 +110,7 @@ struct Reference<T const>
 ..param.T:Type for which the size type is determined.
 ..returns.param.Type:Size type of $T$.
 ..remarks.text:In most cases this type is $size_t$.
+..include:seqan/basic.h
 */
 template <typename T>
 struct Size
@@ -131,6 +135,7 @@ struct Size<T const>:
 ..returns.param.Type:Difference type of $T$.
 ..remarks.text:In most cases this type is $ptrdiff_t$.
 ..see:Metafunction.Size
+..include:seqan/basic.h
 */
 template <typename T>
 struct Difference
@@ -155,6 +160,7 @@ struct Difference<T const>:
 ...type:Class.String
 ..returns.param.Type:Position type of $T$.
 ..see:Metafunction.Iterator
+..include:seqan/basic.h
 */
 template <typename T>
 struct Position
@@ -175,6 +181,7 @@ struct Position<T const>:
 ..signature:Host<T>::Type
 ..param.T:Type for which the host type is determined.
 ..returns.param.Type:Host type of $T$.
+..include:seqan/basic.h
 */
 template <typename T>
 struct Host
@@ -193,6 +200,7 @@ struct Host
 ..remarks:The spec of a SeqAn type is the class that is used in template subclassing 
  to specify the specialization. 
  For example, the spec of $String<char, Alloc<> >$ is $Alloc<>$.
+..include:seqan/basic.h
 */
 
 // default case
@@ -222,6 +230,7 @@ struct Spec<T const>:
 ..returns.param.Type:Deepest spec of $T$.
 ..remarks:The spec of a SeqAn type is the innermost class that is used in nested subclassing.
  For example, the deepest spec of $Iter<..., VSTree<BottomUp<MUMs> > >$ is $MUMs$.
+..include:seqan/basic.h
 */
 
 // default case
@@ -284,6 +293,7 @@ struct DeepestSpec<T const>:
 ..param.T:Type for which the cargo tyoe is determined.
 ..returns.param.Type:Cargo of $T$.
 ..remarks:The definition of Cargo allows the addition of user specific data to existing data structures.
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -307,6 +317,7 @@ struct Cargo<T const> {
 It is used in various graph functions, e.g., to add edges, to create OutEdge Iterators or to remove a vertex.
 It is also used to attach properties to vertices.
 ..example.code:VertexDescriptor<Graph<> >::Type vD; //vD is a vertex descriptor
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -330,6 +341,7 @@ struct VertexDescriptor<T const>:
 ..remarks.text:The id type of a container is the type that is used to uniquely identify its elements.
 In most cases this type is unsigned int.
 ..example.code:Id<Graph<> >::Type id; //id has type unsigned int
+..include:seqan/basic.h
 */
 template<typename T>
 struct Id {
@@ -352,6 +364,7 @@ struct Id<T const> {
 ..param.T:Type for which a key type is determined.
 ..returns.param.Type:Key type.
 ...default:The type $T$ itself.
+..include:seqan/basic.h
 */
 template< typename T >
 struct Key
@@ -371,6 +384,7 @@ struct Key<T const>:
 ..signature:Object<T>::Type
 ..param.T:Type for which a object type is determined.
 ..returns.param.Type:Object type.
+..include:seqan/basic.h
 */
 
 template<typename T>
@@ -385,6 +399,7 @@ struct Object<T const>:
 
 /**
 .Metafunction.Source
+..include:seqan/basic.h
 */
 
 template < typename TSpec = void >
@@ -593,6 +608,7 @@ SEQAN_CHECKPOINT
 ..param.T:Type for which the number of elements is determined.
 ..returns.param.VALUE:Number of elements.
 ..remarks.text:The default return value is 1 for dynamic-size containers.
+..include:seqan/basic.h
 */
 template <typename T>
 struct LENGTH
@@ -614,6 +630,7 @@ struct LENGTH<T const>:
 ..returns.param.VALUE:Number of relevant positions.
 ..remarks.text:The default return value is the result of the @Metafunction.LENGTH@ function.
 For gapped shapes this is the number of '1's.
+..include:seqan/basic.h
 */
 template <typename T>
 struct WEIGHT:

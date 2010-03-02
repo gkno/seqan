@@ -110,6 +110,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..remarks:A SimpleShape must be resized first to a valid length. To do so, call @Function.resize@.
 ..see:Spec.UngappedShape
+..include:seqan/index.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -186,6 +187,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, UngappedShape<q> >
 ..param.TValue:The @Metafunction.Value@ type of the sequence the shape is applied to (e.g. $Dna$).
 ..param.q:The length of the shape.
+..include:seqan/index.h
 */
 
 	template <typename TValue, unsigned q>

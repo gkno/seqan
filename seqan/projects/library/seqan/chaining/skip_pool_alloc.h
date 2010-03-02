@@ -55,6 +55,7 @@ struct Limited
 Freed blocks are not immediately deallocated but recycled in subsequential allocations.
 This way, the number of calls to the heap allocator is reduced and that speeds up memory management. The Class Pool Allocator
 pools only memory blocks of a fixed size, namely $sizeof(Class)$. The Class Pool Allocator only pools the memory, constructor and destructor have to be called manually.
+..include:seqan/chaining.h
 */
 
 template< typename TClass, typename TType, typename TParentAllocator = SimpleAllocator >

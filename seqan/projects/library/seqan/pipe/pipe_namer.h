@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The output type is a @Class.Pair@ of input type and size type (i.e. $Pair<Value<TInput>::Type, Size<TInput>::Type>$).
 ..remarks:The first output field is the original input stream.
 ..remarks:The second output field is the name. This field begins with 0 and increases by 1 for every distinct element. Two elements gets the same name, if and only if they are equal.
+..include:seqan/pipe.h
 */
 
     //////////////////////////////////////////////////////////////////////////////

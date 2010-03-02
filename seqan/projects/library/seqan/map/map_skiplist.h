@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type.
 ..remarks:The skiplist takes in average an oberhead of only two pointers per value stored in the map.
 ...default:$Default$
+..include:seqan/map.h
 */
 
 //////////////////////////////////////////////////////////////////////////////

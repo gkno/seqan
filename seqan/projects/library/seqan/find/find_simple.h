@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..remarks:This specialization should only be used if no other is applicable.
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.Simple Finder

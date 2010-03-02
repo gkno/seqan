@@ -45,6 +45,7 @@ the target vertex of each edge is the child. Trees provide fast access to child 
 ..param.TSpec:The specializing type for the graph.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 template<typename TCargo, typename TSpec>
 class Graph<Tree<TCargo, TSpec> > 

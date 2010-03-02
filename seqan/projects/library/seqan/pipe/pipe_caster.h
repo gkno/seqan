@@ -45,6 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TInput:The type of the pipeline module this module reads from.
 ..param.TValue:The new output type.
 ..remarks: The input stream is casted using $reinterpret_cast<TValue>$.
+..include:seqan/pipe.h
 */
 
     //////////////////////////////////////////////////////////////////////////////

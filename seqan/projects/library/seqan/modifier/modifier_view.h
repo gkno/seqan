@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TFunctor:A unary function (see STL's $unary_function$).
 ...remarks:The argument type of $TFunctor$ must be $VALUE<THost>::Type$.
 ..remarks:The @Metafunction.Value@ type of this modifier is the result type of $TFunctor$.
+..include:seqan/modifier.h
 */
 
 	template <typename TFunctor>

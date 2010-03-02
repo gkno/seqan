@@ -34,6 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:int
 ..general:Class.Score
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
+..include:seqan/score.h
 */
 template <typename TValue>
 class Score<TValue, Simple>

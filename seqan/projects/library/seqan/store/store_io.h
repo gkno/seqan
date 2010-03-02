@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.Amos message file:
 	Amos message file.
+..include:seqan/store.h
 */
 struct TagAmos_;
 typedef Tag<TagAmos_> const Amos;

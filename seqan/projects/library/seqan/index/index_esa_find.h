@@ -43,6 +43,7 @@ for @Class.Index@ based substring searches.
 ..see:Class.Finder
 ..see:Spec.Index_ESA
 ..see:Spec.Index_QGram
+..include:seqan/index.h
 */
 
 	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic

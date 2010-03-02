@@ -70,6 +70,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The output type is a @Class.Pair@ of size type and @Class.Tuple@ of input elements and length m (i.e. $Pair<Size<TInput>::Type, Tuple<Value<TInput>::Type, m, TCompression> >$).
 ..remarks:The first output field contains the number of remaining pipe elements. The m-tuple in the second field contains the first m elements of them.
 The m-tuples are substrings of the input stream beginning at positions $i$, with $(n-i) mod m$ is element of the set DC (n is the input stream length).
+..include:seqan/pipe.h
 */
 
     //////////////////////////////////////////////////////////////////////////////

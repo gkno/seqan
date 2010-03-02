@@ -32,6 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	The file contains data in a raw format.
 ..remark:It is supposed that the file contains one single piece of data, 
 that is the file cannot store multiple records.
+..include:seqan/file.h
 */
 
 struct TagRaw_;

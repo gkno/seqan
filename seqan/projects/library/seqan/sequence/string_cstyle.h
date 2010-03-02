@@ -62,6 +62,7 @@ strcmp(c_style, "compare it to this string");
 ...text:If the c-style string is needed only temporarily, the function $toCString$ can be used:
 ...code:String<char> str = "this is a test string";
 strcmp(toCString(str), "compare it to this string");
+..include:seqan/sequence.h
 */
 
 struct CStyle;

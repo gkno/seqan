@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		  The neighbor sets for each sequence are then intersected so that at the end of the process
 		  we get a group of l-mers or a single l-mer that occur(s) in each input sequence with $d$
 		  substitutions.
+..include:seqan/find_motif.h
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMS1

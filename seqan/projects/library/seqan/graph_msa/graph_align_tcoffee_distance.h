@@ -31,11 +31,13 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Distance Calculation:
 ..summary:A tag to specify how to calculate distance matrices.
+..include:seqan/graph_msa.h
 */
 
 /**
 .Tag.Distance Calculation.value.LibraryDistance:
 	Using the library itself and heaviest common subsequence to determine a distance matrix
+..include:seqan/graph_msa.h
 */
 struct LibraryDistance_;
 typedef Tag<LibraryDistance_> const LibraryDistance;
@@ -44,6 +46,7 @@ typedef Tag<LibraryDistance_> const LibraryDistance;
 /**
 .Tag.Distance Calculation.value.KmerDistance:
 	Using a simple kmer count to determine a distance matrix
+..include:seqan/graph_msa.h
 */
 struct KmerDistance_;
 typedef Tag<KmerDistance_> const KmerDistance;

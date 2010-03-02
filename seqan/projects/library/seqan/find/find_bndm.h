@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..remarks.text:The types of the needle and the haystack have to match.
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.BndmAlgo

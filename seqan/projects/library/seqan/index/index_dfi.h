@@ -65,6 +65,7 @@ deferred frequency index").
 ..remarks:This index is based on a lazy suffix tree (see @Spec.Index_Wotd@).
 All $TPredHull$ sufficing nodes can be iterated using a @Spec.TopDown Iterator@.
 To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterator$ of this index.
+..include:seqan/index.h
 */
 
 	template < 

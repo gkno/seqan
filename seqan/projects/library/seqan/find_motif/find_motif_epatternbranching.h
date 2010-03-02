@@ -47,6 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		  called bestNeighbors. At the end of each step, it selects those patterns from the set
 		  of best neighbors that fulfill a particular condition and that are therefore qualified
 		  for being a motif instance.
+..include:seqan/find_motif.h
 */
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.EPatternBranching

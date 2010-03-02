@@ -108,6 +108,7 @@ class SeedSet;
 ..param.TScoringScheme:The scoring sheme to use.
 ..param.TQualityFactor: The quality factor to use.
 ..param.TGapCosts: The kind of GapCosts to use.
+..include:seqan/seeds.h
 */
 
 /**

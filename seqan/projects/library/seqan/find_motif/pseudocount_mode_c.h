@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Dna
 ...type:Spec.AminoAcid
 ..remarks:The pseudocount is identical for each residue (pseudocount = epsilon/alphabet_size).
+..include:seqan/find_motif.h
 */
 
 ///.Class.Pseudocount.param.TSpec.type:Spec.CMode

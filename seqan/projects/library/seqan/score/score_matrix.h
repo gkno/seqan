@@ -38,6 +38,7 @@ struct ScoreMatrix;
 /**
 .Tag.File Format.tag.Fasta:
 	FASTA file format for sequences.
+..include:seqan/score.h
 */
 struct TagScoreMatrixFile_;
 typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
@@ -55,6 +56,7 @@ typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
 ...default:$int$
 ..param.TSequenceValue:Type of alphabet underlying the matrix.
 ...default:$AminoAcid$
+..include:seqan/score.h
 */
 
 template <typename TValue, typename TSequenceValue, typename TSpec>

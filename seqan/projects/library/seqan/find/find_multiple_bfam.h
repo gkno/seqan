@@ -49,6 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..see:Spec.BFAM<Oracle>
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Class.MultiBFAM

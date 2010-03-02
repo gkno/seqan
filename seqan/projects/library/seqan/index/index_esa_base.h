@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Preorder
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a preorder fashion (visit the node before its children).
 ..see:Tag.Postorder
+..include:seqan/index.h
 */
 
 /**
@@ -50,6 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Postorder
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a postorder fashion (visit the node after its children).
 ..see:Tag.Preorder
+..include:seqan/index.h
 */
 
 /**
@@ -61,6 +63,7 @@ namespace SEQAN_NAMESPACE_MAIN
 Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
 ..see:Tag.PostorderEmptyEdges
 ..see:Tag.Preorder
+..include:seqan/index.h
 */
 
 /**
@@ -71,6 +74,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..remarks:When given as a second parameter in @Function.goNext@ the Suffix Tree is traversed in a postorder fashion (visit the node after its children).
 Empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
 ..see:Tag.Postorder
+..include:seqan/index.h
 */
 
 /**
@@ -80,6 +84,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..signature:EmptyEdges
 ..remarks:When given as a second parameter in @Function.goDown@, empty edges are traversed also, i.e. for every suffix there is a leaf node representing it.
 ..see:Tag.HideEmptyEdges
+..include:seqan/index.h
 */
 
 /**
@@ -89,6 +94,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..signature:HideEmptyEdges
 ..remarks:When given as a second parameter in @Function.goDown@, only non-empty edges are traversed.
 ..see:Tag.EmptyEdges
+..include:seqan/index.h
 */
 
 	// predefined iterator traits
@@ -141,6 +147,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 ..signature:GetVSTreeIteratorTraits<TIterator>::Type
 ..param.TIterator:A @Spec.VSTree Iterator@.
 ..returns:$Tag.Postorder$ by default and $Tag.Preorder$ if $TIterator$ is $VSTree<TopDown<ParentLinks<> > >$ or $VSTree<TopDown<ParentLinks<Preorder> > >$.
+..include:seqan/index.h
 */
 
 	template <typename TIterator>
@@ -224,6 +231,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
 ..see:Spec.Index_ESA
+..include:seqan/index.h
 */
 
 ///.Metafunction.Fibre.param.TSpec.type:Tag.ESA Index Fibres
@@ -252,6 +260,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 ...type:Class.String
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA Index Fibres.ESA_SA@), a lcp table (see @Tag.ESA Index Fibres.ESA_LCP@), etc.
 ..remarks:This index can be accessed as a Suffix Tree using the @Spec.VSTree Iterator@ classes.
+..include:seqan/index.h
 */
 
 /*

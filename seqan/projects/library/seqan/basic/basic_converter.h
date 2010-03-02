@@ -42,6 +42,7 @@ If instances of $Source: /cvsroot/ag-bio/seqan/version7/projects/library/seqan/b
 than this metafunction returns a reference, otherwise it returns $Target$, 
 that is @Function.convert@ returns a temporary.
 ..remarks:A constant instance of $Convert$ is (ab)used as tag argument of @Function.convertImpl@.
+..include:seqan/basic.h
 */
 template <typename TTarget, typename TSource = void>
 struct Convert

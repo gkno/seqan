@@ -45,6 +45,7 @@ struct Packed;
 ..param.THostspec:The specializing type.
 ...remarks:This is the specialization of the host string that is used for storing the packed values.
 ...default:@Spec.Alloc String.Alloc<>@
+..include:seqan/sequence.h
 */
 
 /*???TODO Optimierungsmöglichkeiten:

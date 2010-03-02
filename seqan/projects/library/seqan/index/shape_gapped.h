@@ -187,6 +187,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TValue:The @Metafunction.Value@ type of the string the shape is applied to (e.g. $Dna$).
 ..remarks:A GenericShape must be initialized first with a valid shape. To do so, call @Function.stringToShape@.
 ..see:Spec.GappedShape
+..include:seqan/index.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -314,6 +315,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:There are predefined shapes in $index/shape_predefined.h$.
 You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 ..see:Class.HardwiredShape
+..include:seqan/index.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////

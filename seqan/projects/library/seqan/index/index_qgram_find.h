@@ -33,6 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Tag.Index Find Algorithm
 ..tag.QGram_FIND_Lookup:q-gram search.
 Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
+..include:seqan/index.h
 */
 
 	typedef Tag<_Finder_QGramLookup> const QGram_FIND_Lookup;

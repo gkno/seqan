@@ -62,6 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TFunctor:A unary function (see STL's $unary_function$).
 ...remarks:The argument type of $TFunctor$ must be $VALUE<TInput>::Type$.
 ..remarks: The output type of this pipe is the result type of $TFunctor$.
+..include:seqan/pipe.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////

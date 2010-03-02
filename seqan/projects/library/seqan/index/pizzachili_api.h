@@ -59,6 +59,7 @@ struct PizzaChiliCodeProvider {
 ...remarks:The index cannot be saved and loaded.
 ..see:Spec.Pizza & Chili Index
 ..see:Spec.Pizza & Chili String
+..include:seqan/index.h
 */
 
 // We need to declare these explicitly instead through macro expansion in order

@@ -40,6 +40,7 @@ struct Rows;
 /**
 .Tag.File Format.tag.Fasta alignment:
 	FASTA alignment file format for sequences.
+..include:seqan/file.h
 */
 struct TagFastaAlign_;
 typedef Tag<TagFastaAlign_> const FastaAlign;

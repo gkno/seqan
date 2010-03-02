@@ -316,6 +316,7 @@ idInUse(IdManager<TIdType, TSpec> const& idm,
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 template<typename TSpec>
 class IdManager<void, TSpec> 

@@ -41,6 +41,7 @@ a destructor to be destroyed, and copy assignment operators or copy constructors
 to be copied. All POD ("plain old data") types are simple, but some
 non-POD types could be simple too, e.g. some specializations of @Class.SimpleType@.
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -834,6 +835,7 @@ void arrayClearSpace(TIterator array_begin,
 ..returns.param.VALUE:Number of bits needed to store $T$.
 ...default:$sizeof<T> * 8$
 ..see:Metafunction.ValueSize
+..include:seqan/basic.h
 */
 template <typename TValue>
 struct BitsPerValue
@@ -858,6 +860,7 @@ struct BitsPerValue<TValue const>:
 ...default:$BitsPerValue / 8$, rounded up. For built-in types, this is the same as $sizeof(T)$.
 ..see:Metafunction.ValueSize
 ..see:Metafunction.BitsPerValue
+..include:seqan/basic.h
 */
 
 template <typename TValue>
@@ -888,6 +891,7 @@ struct BytesPerValue
 ..see:Metafunction.ValueSize
 ..see:Metafunction.BitsPerValue
 ..see:Metafunction.BytesPerValue
+..include:seqan/basic.h
 */
 
 
@@ -935,6 +939,7 @@ struct IntegralForValue:
 ..remarks
 ...text:This function is only defined for integral types like $unsigned int$, $double$ or @Spec.Dna@.
 ..see:Metafunction.Value
+..include:seqan/basic.h
 */
 template <typename T>
 struct ValueSize
@@ -984,6 +989,7 @@ const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
 ..returns.param.VALUE:A value $sup$ for which holds: $sup >= i$ for all values $i$ of type $T$.
 ..remarks:Note tat
 ..see:Function.supremumValue
+..include:seqan/basic.h
  */
 template < 
 	typename T, 
@@ -1007,6 +1013,7 @@ struct SupremumValue:
 ..returns.param.VALUE:A value $inf$ for which holds: $inf <= i$ for all values $i$ of type $T$.
 ..remarks:Note tat
 ..see:Function.infimumValue
+..include:seqan/basic.h
  */
 template < 
 	typename T, 

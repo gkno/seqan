@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:$TSpec$ is used as specialization for the @Class.String@ type that is used to store the values.
 ..remarks:The memory needed is linear to the number different values the @Metafunction.Key.key type@ of $TValue$ can get.
 So do not use this map for large key types.
+..include:seqan/map.h
 */
 //////////////////////////////////////////////////////////////////////////////
 // 

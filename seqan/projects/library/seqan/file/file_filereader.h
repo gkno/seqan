@@ -45,6 +45,7 @@ struct FileReader;
 ..param.TFile:A file.
 ..param.TSpec:A further specializing type.
 ...default:@Tag.Default@
+..include:seqan/file.h
 */
 
 

@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Use WithoutEdgeId here to omit edge ids.
 Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 template<typename TCargo,typename TSpec>
 class Graph<Undirected<TCargo, TSpec> > 

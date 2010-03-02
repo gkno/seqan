@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	it is recommended to use the metafunction @Metafunction.Infix@ instead of explicitely 
 	choose a specialization of @Class.Segment@.
 ..see:Metafunction.Infix
+..include:seqan/sequence.h
 */
 
 template <typename THost_>
@@ -443,6 +444,7 @@ SEQAN_CHECKPOINT
 ...type:Class.String
 ..returns.param.Type:The infix type.
 ..see:Spec.InfixSegment
+..include:seqan/sequence.h
 */
 
 template <typename THost>

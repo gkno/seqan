@@ -41,6 +41,7 @@ needed, this string tries to query only a substring.
 ...remarks:This type must be a simple type and it must hold that $sizeof(TValue) == 1$.
 ..param.TSpec:Tag specifying the Pizza & Chili index library to use.
 ...type:Tag.Pizza & Chili Index Tags
+..include:seqan/index.h
 */
 
 template <typename TSpec>

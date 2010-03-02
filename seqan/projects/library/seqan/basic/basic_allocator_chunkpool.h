@@ -46,6 +46,7 @@ Freed blocks are not immediately deallocated but recycled in subsequential alloc
 This way, the number of calls to the heap manager is reduced, and that speeds up memory management.
 ...text:Note that memory blocks of size different than $SIZE$, $2*SIZE$, $3*SIZE$, ..., $MAX_COUNT * SIZE$ 
 are not pooled but immediately allocated and deallocated using $ParentAllocator$.
+..include:seqan/basic.h
 */
 
 

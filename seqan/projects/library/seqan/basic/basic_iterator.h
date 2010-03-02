@@ -43,6 +43,7 @@ that are available for rooted iterators.
 ..remarks.text:The default iterator spec is given by @Metafunction.DefaultIteratorSpec@.
 ..see:Metafunction.DefaultIteratorSpec
 ..see:Concept.Iterator
+..include:seqan/basic.h
 */
 
 struct TagRooted_;
@@ -65,6 +66,7 @@ typedef Tag<TagStandard_> const Standard;
 ...concept:Concept.Container
 ..returns.param.Type:Iterator spec of $T$.
 ..see:Metafunction.Iterator
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -87,6 +89,7 @@ struct DefaultIteratorSpec
 @Function.begin@, @Function.end@, or @Function.iter@.
 ..see:Metafunction.Iterator
 ..see:Metafunction.DefaultIteratorSpec
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -111,6 +114,7 @@ struct DefaultGetIteratorSpec
  For example, you can use $*it$ to access the value object the iterator $it$ points to.
  But note that $Iterator<T>::Type$ can differ from $T *$, depending on $T$.
 ..see:Metafunction.Position
+..include:seqan/basic.h
 */
 
 //____________________________________________________________________________
@@ -140,6 +144,7 @@ struct Iterator:
 ...type:Class.Iter
 ...concept:Concept.Iterator
 ..returns.param.Type:The container type to $T$.
+..include:seqan/basic.h
 */
 
 template <typename T>

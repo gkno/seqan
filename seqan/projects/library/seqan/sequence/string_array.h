@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
 ..param.size:A positive integer that specifies the capacity of the string.
 ...remarks:Note that the capacity of a stack string cannot be changed later.
+..include:seqan/sequence.h
 */
 //////////////////////////////////////////////////////////////////////////////
 

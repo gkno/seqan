@@ -34,6 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.T:Type for which the key type is determined.
 ..returns.param.Type:Key type of $T$.
 ..remarks.text:The theKeytype of an object is used for sorting and searching.
+..include:seqan/chaining.h
 */
 
 /* moved to basic_h, see #6

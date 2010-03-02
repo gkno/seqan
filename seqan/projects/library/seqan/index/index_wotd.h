@@ -53,6 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
 ..see:Spec.Index_Wotd
+..include:seqan/index.h
 */
 	typedef Fibre_Text		Wotd_Text;
 	typedef Fibre_RawText	Wotd_RawText;
@@ -73,6 +74,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TText:The text type.
 ...type:Class.String
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.WOTD Index Fibres.Wotd_SA@) and the wotd tree (see @Tag.WOTD Index Fibres.Wotd_Dir@).
+..include:seqan/index.h
 */
 
 	struct WotdOriginal_;

@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 It is used in various graph functions, e.g., to remove edges, to assign a cargo to an edge or to get the endpoints of an edge.
 It is also used to attach properties to edges.
 ..example.code:EdgeDescriptor<Graph<> >::Type eD; //eD is an edge descriptor
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct EdgeDescriptor;
@@ -49,6 +50,7 @@ struct EdgeDescriptor;
 /**
 .Metafunction.Cargo
 ..example.code:Cargo<Graph<Directed<int> > >::Type c; //c has type int
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct Cargo;
@@ -64,6 +66,7 @@ struct Cargo;
 ..returns.param.Type:Edge type.
 ..remarks.text:The specific edge stump type that is used in a graph.
 ..example.code:EdgeType<TGraph>::Type e; //e is an edge in TGraph
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct EdgeType;
@@ -78,6 +81,7 @@ struct EdgeType;
 ..returns.param.Type:Alphabet type.
 ..remarks.text:Type T can be for example an automaton where the alphabet type describes the domain of the transition labels.
 ..example.code:Alphabet<Graph<Automaton<Dna> > >::Type alph; //alph is of type Dna
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct Alphabet;
@@ -95,6 +99,7 @@ struct Alphabet;
 ..remarks.text:The exact IdManager type depends on the edge stump.
 If the edge stump is id-free the IdManager simply counts edge ids, 
 otherwise it manages a list of free and used ids.
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct EdgeIdHandler;
@@ -108,6 +113,7 @@ struct EdgeIdHandler;
 ..signature:VertexIdHandler<T>::Type
 ..param.T:A graph.
 ..returns.param.Type:IdManager type.
+..include:seqan/graph_types.h
 */
 template<typename T>
 struct VertexIdHandler;
@@ -137,6 +143,7 @@ typedef Tag<TreeTag_> const TreeTag;
 /**
 .Tag.Graph Iterator:
 ..summary:A specification of the iterator to traverse a graph.
+..include:seqan/graph_types.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,6 +152,7 @@ typedef Tag<TreeTag_> const TreeTag;
 /**
 .Tag.Graph Iterator.value.VertexIterator:
 	Traverses all vertices of a graph.
+..include:seqan/graph_types.h
 */
 struct VertexIterator_;
 typedef Tag<VertexIterator_> const VertexIterator;
@@ -153,6 +161,7 @@ typedef Tag<VertexIterator_> const VertexIterator;
 /**
 .Tag.Graph Iterator.value.EdgeIterator:
 	Traverses all edges of a graph.
+..include:seqan/graph_types.h
 */
 struct EdgeIterator_;
 typedef Tag<EdgeIterator_> const EdgeIterator;
@@ -161,6 +170,7 @@ typedef Tag<EdgeIterator_> const EdgeIterator;
 /**
 .Tag.Graph Iterator.value.OutEdgeIterator:
 	Traverses all edges of a graph given a vertex.
+..include:seqan/graph_types.h
 */
 struct OutEdgeIterator_;
 typedef Tag<OutEdgeIterator_> const OutEdgeIterator;
@@ -169,6 +179,7 @@ typedef Tag<OutEdgeIterator_> const OutEdgeIterator;
 /**
 .Tag.Graph Iterator.value.AdjacencyIterator:
 	Traverses all neighbors of a graph given a vertex.
+..include:seqan/graph_types.h
 */
 struct AdjacencyIterator_;
 typedef Tag<AdjacencyIterator_> const AdjacencyIterator;
@@ -177,6 +188,7 @@ typedef Tag<AdjacencyIterator_> const AdjacencyIterator;
 /**
 .Tag.Graph Iterator.value.BfsIterator:
 	Traverses all vertices of a graph in Bfs order.
+..include:seqan/graph_types.h
 */
 struct BfsIterator_;
 typedef Tag<BfsIterator_> const BfsIterator;
@@ -185,6 +197,7 @@ typedef Tag<BfsIterator_> const BfsIterator;
 /**
 .Tag.Graph Iterator.value.DfsPreorder:
 	Traverses all vertices of a graph in Dfs order.
+..include:seqan/graph_types.h
 */
 struct DfsPreorder_;
 typedef Tag<DfsPreorder_> const DfsPreorder;

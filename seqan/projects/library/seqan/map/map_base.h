@@ -92,6 +92,7 @@ struct _MapValue_Impl<TMap, Nothing>
 ...type:Class.Map
 ..returns.param.Type:The type of the value of T.
 ..see:Metafunction.Cols
+..include:seqan/map.h
  */
 template <typename TMap>
 struct MapValue :

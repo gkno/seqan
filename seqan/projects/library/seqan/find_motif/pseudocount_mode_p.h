@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.AminoAcid
 ..remarks:The P mode computation scheme distributes the pseudocounts among the various residue
           according to their background probabilities.
+..include:seqan/find_motif.h
 */
 
 ///.Class.Pseudocount.param.TSpec.type:Spec.PMode

@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:Optional specialization tag.
 ...default:$Default$
 ...remarks:This modifier is intended to expand @Class.SimpleType@ classes.
+..include:seqan/modifier.h
 */
 
 template <char CHAR, typename TSpec = Default>

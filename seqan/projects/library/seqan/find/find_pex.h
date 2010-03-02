@@ -56,6 +56,7 @@ struct FindBeginPatternSpec< Pattern<TNeedle, Pex<TVerification , TMultiFinder >
 ..see:Spec.Pex
 ..remarks: For a description of Pattern usage see @Class.Pattern@.
 ..remarks: Overload this Metafunction if you want to use something else for verification then $Pattern<String<Segment<TNeedle> > , TMultiFinder>$.
+..include:seqan/find.h
 */
 
 template<typename T>
@@ -90,6 +91,7 @@ struct _PexRange{
 ..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
 ...type:Spec.AhoCorasick
 ..remarks: There are two defaults available $PexHierarchical$ and $PexNonHierarchical$ (e.g. $Pattern<String<char> ,PexHierarchical> $) that both use the @Spec.AhoCorasick@ algorithm for the multiple exact string matching.
+..include:seqan/find.h
 */
 ///.Class.Pattern.param.TSpec.type:Spec.Pex
 
@@ -102,6 +104,7 @@ struct _PexRange{
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
+..include:seqan/find.h
 */
 ///.Spec.Pex.param.TVerification.type:Spec.Hierarchical
 /**
@@ -113,6 +116,7 @@ struct _PexRange{
 ..param.TNeedle:The needle type.
 ...type:Class.String
 ..param.TMultiFinder: Specifies the algorithm for the multiple exact string matching algorithm
+..include:seqan/find.h
 */
 ///.Spec.Pex.param.TVerification.type:Spec.NonHierarchical
 

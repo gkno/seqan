@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Pipelining adaptor for arbitrary containers or iterators.
 ..signature:Pipe<TInput, Source<> >
 ..param.TInput:The type of container or iterator this module reads from.
+..include:seqan/pipe.h
 */
 
 

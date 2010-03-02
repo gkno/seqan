@@ -55,6 +55,7 @@ page table with information for each page (e.g. resides in memory or was swapped
 Besides the page table the String also contains a size-limited list of page frames. A page frame is reserved internal
 memory for a page. When accessing values of a page that is stored in external memory, the page is loaded to a page frame
 first. In case that there is no page frame free, another page is swapped out before to free a page frame.
+..include:seqan/file.h
 */
 
 /**
@@ -74,6 +75,7 @@ first. In case that there is no page frame free, another page is swapped out bef
 ..remarks:When using this configuration, the @Metafunction.Size@ type of the @Spec.External String@ is $unsigned int$.
 Thus, with this configuration at most 4.294.967.296 values can be stored in an @Spec.External String@ on a 32bit system.
 For a larger size type, use @Tag.ExternalConfigLarge@.
+..include:seqan/file.h
 */
     // standard external string
     // size is uint32
@@ -105,6 +107,7 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
 type of $TFile$. Normally this is a 64bit integer. For a smaller size type, use @Tag.ExternalConfig@.
 ..remarks:Some data structures store size type values (e.g. suffix arrays in @Class.Index@). To save memory,
 you should think of using @Tag.ExternalConfig@.
+..include:seqan/file.h
 */
     // the same as ExternalConfig
     // but size type is size type of _TFile (i.e. uint64)
@@ -141,6 +144,7 @@ you should think of using @Tag.ExternalConfig@.
 type of $TFile$. Normally this is a 64bit integer. For a smaller size type, use @Tag.ExternalConfig@.
 ..remarks:Some data structures store size type values (e.g. suffix arrays in @Class.Index@). To save memory,
 you should think of using @Tag.ExternalConfig@.
+..include:seqan/file.h
 */
     // custom size type
     template < typename _TSize,

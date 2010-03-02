@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:@Tag.Default@
 ...remarks:@Tag.Default@ used as allocator means that the default implementations
 of @Function.allocate@ and @Function.deallocate@ are used.
+..include:seqan/basic.h
 */
 
 template <typename TParentAllocator = Default>

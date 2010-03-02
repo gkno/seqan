@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
 ..param.TSpec:The specializing type.
 ...default:$void$
+..include:seqan/sequence.h
 */
 //////////////////////////////////////////////////////////////////////////////
 //expandable string

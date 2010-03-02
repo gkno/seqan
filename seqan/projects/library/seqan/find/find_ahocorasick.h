@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks.text:The types of the keywords in the needle container and the haystack have to match.
 ..remarks.text:Matching positions do not come in order because we report beginning positions of matches.
 ..remarks.text:Likewise, if multiple keywords match at a given position no pre-specified order is guaranteed.
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.AhoCorasick

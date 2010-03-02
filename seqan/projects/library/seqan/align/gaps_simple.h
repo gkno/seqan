@@ -57,6 +57,7 @@ struct SequenceGaps;
 ..signature:Gaps<TSource, SequenceGaps>
 ..param.TSource:Type of the ungapped sequence.
 ...metafunction:Metafunction.Source
+..include:seqan/align.h
 */
 
 template <typename TSource>

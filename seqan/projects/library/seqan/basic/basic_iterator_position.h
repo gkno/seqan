@@ -43,6 +43,7 @@ struct PositionIterator;
 ..remarks
 ...text:Position Iterators provide the concept @Concept.Rooted Iterator@.
 ..see:Metafunction.Position
+..include:seqan/basic.h
 */
 
 template <typename TContainer>

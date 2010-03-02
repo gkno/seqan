@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
 ..see:Spec.Pizza & Chili Index
+..include:seqan/index.h
 */
 
 struct _Fibre_PizzaChili_Compressed;
@@ -60,6 +61,7 @@ typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
 ..see:Spec.Pizza & Chili String
 ..see:Tag.Pizza & Chili Index Fibres
 ..see:Tag.Index Find Algorithm
+..include:seqan/index.h
 */
 
 template <typename TText, typename TSpec>

@@ -82,6 +82,7 @@ struct TagSelector< TagList<TTag, TSubList> >:
 .Tag.Default:
 ..summary:Tag that specifies default behavior.
 ..tag.Default:Use default behavior. 
+..include:seqan/basic.h
 */
 struct Default_;
 typedef Tag<Default_> const Default;
@@ -101,6 +102,7 @@ String target(source, Move()); // source is moved to target
 std::cout << source; //nothing printed since source lost content
 std::cout << target; //"hello"
 ..see:Function.move
+..include:seqan/basic.h
 */
 
 struct Move_;
@@ -129,6 +131,7 @@ typedef Tag<NonMinimalCtor_> const NonMinimalCtor;
 ..summary:Tag that represents true and false.
 ..tag.True:The logical value "true".
 ..tag.False:The logical value "false".
+..include:seqan/basic.h
 */
 struct True { enum { VALUE = true }; };
 struct False { enum { VALUE = false }; };
@@ -140,6 +143,7 @@ struct False { enum { VALUE = false }; };
 .Tag.Nothing:
 ..summary:Tag that represents an absent parameter or an absent type.
 ..tag.Nothing:Omit parameter.
+..include:seqan/basic.h
 */
 ///Empty Data Class.
 struct Nothing {};

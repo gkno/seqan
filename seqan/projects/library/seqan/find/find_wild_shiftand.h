@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks.text:After the find-Method returned the Finder will point to the last position of the occurence
 ..remarks.text:We encourage the user to intialize the Pattern with a $String<char>$ (@Function.setHost@ or the C'tor).
 If you use for instance $String <Dna>$ instead you won't be able to specify wildcards
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.WildShiftAnd

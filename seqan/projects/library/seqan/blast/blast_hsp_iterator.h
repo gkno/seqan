@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TBlastHit:A Blast hit.
 ...type:Class.BlastHit
 ..general:Class.Iter
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TStoreSpec>
 class Iter<BlastHit<TBlastHsp, TStoreSpec> , SimpleBlastIterator<HspIterator> > 

@@ -53,6 +53,7 @@ It solely provides create functions where based upon a set of strings a keyword 
 ...remarks:Use WithoutEdgeId here to omit edge ids.
 Note: If edges do not store ids external property maps do not work.
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 
 

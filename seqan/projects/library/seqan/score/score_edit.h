@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..general:Class.Score
 ..remarks:Semantically equivalent to a default contructed @Spec.Simple Score.Score<int, Simple>@.
 ..remarks:$EditDistance$ is a synonym for @Tag.LevenshteinDistance@.
+..include:seqan/score.h
 */
 
 //EditDistance is defined in basic_tag.h

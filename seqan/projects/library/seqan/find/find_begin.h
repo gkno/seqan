@@ -49,6 +49,7 @@ struct DPSearch;
 ..param.TScore:A score type.
 ...type:Class.Score
 ..returns.param.Type:The pattern specialization to use as a default.
+..include:seqan/find.h
  */
 template <typename TScore = EditDistanceScore>
 struct DefaultFindBeginPatternSpec

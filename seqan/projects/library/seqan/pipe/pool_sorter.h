@@ -67,6 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TFile:The underlying @Class.File@ type.
 ...default:$File<>$, see @Class.File@.
 ..see:Spec.SorterConfig
+..include:seqan/pipe.h
 */
 
 	template < typename TCompare,
@@ -92,6 +93,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:$File<>$, see @Class.File@.
 ..remarks:Using this configuration spec., the Sorter's size type is $Size<TFile>::Type$. To use a custom size type @Spec.SorterConfigSize@ should be used.
 ..see:Spec.SorterConfigSize
+..include:seqan/pipe.h
 */
 
     template < typename TCompare, typename TFile = File<> >
@@ -113,6 +115,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.SorterConfigSize
 ..remarks:The Pool's input/output type is $TValue$ and the size type is determined by the $TConfig$.
 ...note:If there exists an explicit function mapping input elements to their destined positions in the output stream, @Spec.MapperSpec@ should be preferred.
+..include:seqan/pipe.h
 */
 
     template < typename TConfig >

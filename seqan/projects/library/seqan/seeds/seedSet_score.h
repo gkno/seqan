@@ -147,6 +147,7 @@ struct ScoringScheme<SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> >
 ...remarks: Positive and negative values are needed.
 ..param.TSeedSpec:The @Class.Seed@ specialization.
 ..param.TScoringScheme:The scoring sheme to use.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpec, typename TScoringSpec> 
 class SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec>

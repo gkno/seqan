@@ -71,6 +71,7 @@ char const _Translate_Table_Byte_2_TraceBack<T>::VALUE[256] =
 ...text:The @Metafunction.ValueSize@ of $TraceBack$ is 3. 
 The values are defined in the following way: 0=Diagonal Move, 1=Horizontal Move, 2=Vertical Move
 ..see:Metafunction.ValueSize
+..include:seqan/graph_align.h
 */
 struct _TraceBack {};
 typedef SimpleType<unsigned char, _TraceBack> TraceBack;

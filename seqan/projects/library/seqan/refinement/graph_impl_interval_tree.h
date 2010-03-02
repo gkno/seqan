@@ -160,6 +160,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 ..summary:Tag to select a specific way to compute the center of an interval tree node.
 ..see:Class.IntervalTree
+..include:seqan/refinement.h
  */
 
 

@@ -32,6 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.Segment Match Generation.value.Overlap_Library:
 	Segment matches from overlap alignments.
+..include:seqan/consensus.h
 */
 
 struct Overlap_Library_;
@@ -46,12 +47,14 @@ typedef Tag<Overlap_Library_> const Overlap_Library;
 /**
 .Tag.Consensus Calling:
 ..summary:A tag that specifies how to call the consensus.
+..include:seqan/consensus.h
 */
 
 
 /**
 .Tag.Consensus Calling.value.Majority_Vote:
 	A consensus based on the most common character.
+..include:seqan/consensus.h
 */
 
 struct Majority_Vote_;
@@ -60,6 +63,7 @@ typedef Tag<Majority_Vote_> const Majority_Vote;
 /**
 .Tag.Consensus Calling.value.Bayesian:
 	A consensus based on bayesian probability.
+..include:seqan/consensus.h
 */
 
 struct Bayesian_;
@@ -1070,6 +1074,7 @@ consensusCalling(FragmentStore<TFragSpec, TConfig>& fragStore,
 /**
 .Tag.Alignment Graph Format.value.FastaReadFormat:
 	Fasta read format to write a multi-read alignment.
+..include:seqan/consensus.h
 */
 
 struct FastaReadFormat_;

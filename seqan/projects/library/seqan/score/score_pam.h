@@ -75,6 +75,7 @@ For the usabilty in alignemt alogrithms gap penaltys are stored and externally a
 ..remarks.text:- Pam_Data_Jones_All_Membrane: Generated from SWISSPROT Release 23., restricted to transmembranal segments (Jones D.T. et al., 1992)
 ..remarks.text:- Pam_Data_Jones_Single_Membrane: Generated from SWISSPROT Release 23., restricted to single-spanning transmembranal segments (Jones D.T. et al., 1992)
 ..remarks.text:- Pam_Data_Jones_Single_Membrane: Generated from SWISSPROT Release 23., restricted to multi-spanning transmembranal segments (Jones D.T. et al., 1992)
+..include:seqan/score.h
 */
 
 

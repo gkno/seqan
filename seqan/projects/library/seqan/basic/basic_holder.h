@@ -186,6 +186,7 @@ struct Reference< Holder<TValue *, TSpec> const>
 ..remarks.text:- dependent: $A$ depends on $B$. $B$ should not be destroyed as long as $A$ is used.
 ..remarks.text:- empty: there is currently no object reference stored in the holder $A$.
 ..remarks.text:The state of the holder can be determined by @Function.empty@ and @Function.dependent@.
+..include:seqan/basic.h
 */
 
 /**

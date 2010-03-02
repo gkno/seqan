@@ -45,6 +45,7 @@ struct DPSearch;
 ..remarks.text:The algorithm is based on the Sellers/Needleman-Wunsch dynamic progamming algorithm. 
 The $Pattern$ object only contains the right-most column of the dynamic programming matrix.
 ...note:At the moment, the algorithm only works on linear gap costs.
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Class.Score

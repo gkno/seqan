@@ -140,6 +140,7 @@ struct Position<Gaps<TSource, TSpec> const>:
 ..param.T:Type for which the source type is determined.
 ...type:Class.Gaps
 ..returns.param.Type:Source type of $T$.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec>
@@ -161,6 +162,7 @@ struct Source<Gaps<TSource, TSpec> >
 ...remarks:This type is a reference to @Metafunction.Source@ by default,
 with the exception of @Spec.SequenceGaps@ data structure, which returns
 a temporary.
+..include:seqan/align.h
 */
 template <typename T>
 struct GetSource

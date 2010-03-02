@@ -1045,6 +1045,7 @@ An object that has a value not in ${'A', 'C', 'G', 'T'}$ is converted to $'A'$.
 specialization tag class.
 ..see:Metafunction.ValueSize
 ..see:Spec.Dna5
+..include:seqan/basic.h
 */
 struct _Dna {};
 typedef SimpleType<unsigned char,_Dna> Dna;
@@ -1069,6 +1070,7 @@ An object that has a value not in ${'A', 'C', 'G', 'T'}$ is converted to $'N'$.
 ...text:$Dna5$ is typedef for $SimpleType<char,_Dna5>$, while $_Dna5$ is a helper
 specialization tag class.
 ..see:Metafunction.ValueSize
+..include:seqan/basic.h
 */
 struct _Dna5 {};
 typedef SimpleType<unsigned char, _Dna5> Dna5;
@@ -1093,6 +1095,7 @@ Unkown values are converted to $'N'$.
 ...text:$Iupac$ is typedef for $SimpleType<char,_Iupac>$, while $_Iupac$ is a helper
 specialization tag class.
 ..see:Metafunction.ValueSize
+..include:seqan/basic.h
 */
 struct _Iupac {};
 typedef SimpleType<unsigned char, _Iupac> Iupac;
@@ -1120,6 +1123,7 @@ Unkown values are converted to $'X'$.
 ...text:$AminoAcid$ is typedef for $SimpleType<char,_AminoAcid>$, while $_AminoAcid$ is a helper
 specialization tag class.
 ..see:Metafunction.ValueSize
+..include:seqan/basic.h
 */
 struct _AminoAcid {};
 typedef SimpleType<unsigned char, _AminoAcid> AminoAcid;
@@ -1139,6 +1143,7 @@ template <> struct BitsPerValue< AminoAcid > { enum { VALUE = 5 }; };
 ...default:$char$
 ..param.SIZE:The @Metafunction.ValueSize@ of the alphabet.
 ..see:Metafunction.ValueSize
+..include:seqan/basic.h
 */
 template <unsigned SIZE>
 struct Finite;

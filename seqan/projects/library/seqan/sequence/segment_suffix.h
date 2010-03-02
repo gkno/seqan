@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	choose a specialization of @Class.Segment@.
 ..see:Spec.InfixSegment
 ..see:Metafunction.Suffix
+..include:seqan/sequence.h
 */
 
 struct SuffixSegment;
@@ -337,6 +338,7 @@ _setLength(Segment<THost_, SuffixSegment> &, TSize)
 ..see:Spec.SuffixSegment
 ..see:Metafunction.Infix
 ..see:Metafunction.Prefix
+..include:seqan/sequence.h
 */
 
 struct PrefixSegment;

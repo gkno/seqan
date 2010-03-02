@@ -45,6 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:This must be a finder for prefix search, e.g. @Spec.DPSearch|$DPSearch<TScore, FindPrefix>$@ or @Spec.Myers|$Myers<FindPrefix>$@.
 Specify $void$ to suppress prefix searching.
 ..remarks.text:The needle-length must be smaller than the highest number that can be stored in an unsigned int.
+..include:seqan/find.h
 */
 
 ///.Class.Pattern.param.TSpec.type:Spec.Myers

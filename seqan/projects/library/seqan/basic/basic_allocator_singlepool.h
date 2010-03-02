@@ -44,6 +44,7 @@ This way, the number of calls to the heap manager is reduced, and that speeds up
 ...text:The single pool allocator only pools memory blocks of size $SIZE$.
 Blocks of other sizes are allocated and deallocated using an allocator of type $ParentAllocator$.
 ...text:Using the single pool allocator for blocksizes larger than some KB is not advised.
+..include:seqan/basic.h
 */
 
 template <size_t SIZE, typename TParentAllocator = SimpleAllocator>

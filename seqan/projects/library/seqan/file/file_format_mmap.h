@@ -274,6 +274,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Tag.File Format.tag.Fastq:
 	FASTQ file format for sequences.
+..include:seqan/file.h
 */
 struct TagFastq_;
 typedef Tag<TagFastq_> const Fastq;
