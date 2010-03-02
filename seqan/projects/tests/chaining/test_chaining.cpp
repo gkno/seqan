@@ -114,49 +114,100 @@ void testChainer(int count,
 	//build chain
 	int chain_score = globalChaining(fragments, ch, scoring);
 
-std::cout << chain_score << "\n";
+    //std::cout << chain_score << "\n";
 //_showChain(ch, scoring);
 
 	//verify validity of chain
-	SEQAN_TASSERT(length(ch) > 0)
+    SEQAN_ASSERT_GT(length(ch), 0);
 	int sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i)
 	{
-		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
+		SEQAN_ASSERT_TRUE(_chain_generic_chainable(ch[i-1], ch[i]));
 		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
 	//verify score of chain
-	SEQAN_TASSERT(sum == chain_score)
+	SEQAN_ASSERT_EQ(sum, chain_score);
 
 	//build generic chain
 	int chain_score2 = globalChaining(fragments, ch, scoring, GenericChaining());
-std::cout << chain_score2 << "\n";
+    //std::cout << chain_score2 << "\n";
 //_showChain(ch, scoring);
 
 	//verify validity of generic chain
-	SEQAN_TASSERT(length(ch) > 0)
+    SEQAN_ASSERT_GT(length(ch), 0);
 	sum = weight(ch[0]);
-	for (unsigned int i = 1; i < length(ch); ++i)
-	{
-		SEQAN_TASSERT(_chain_generic_chainable(ch[i-1], ch[i]))
-		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
+	for (unsigned int i = 1; i < length(ch); ++i) {
+            SEQAN_ASSERT_TRUE(_chain_generic_chainable(ch[i-1], ch[i]));
+            sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
 	//verify score of generic chain
-	SEQAN_TASSERT(sum == chain_score2)
+	SEQAN_ASSERT_EQ(sum, chain_score2);
 
 	//compare results of two chaining algorithms
-	SEQAN_TASSERT(chain_score2 == chain_score)
+	SEQAN_ASSERT_EQ(chain_score2, chain_score);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-int main()
-{
-
-	testChainer(1000, 2, Score<int, Zero>());
-	testChainer(1000, 2, Score<int, Manhattan>());
-	testChainer(1000, 2, Score<int, ChainSoP>());
-
-	return 0;
+SEQAN_DEFINE_TEST(test_chaining_test_chainer_zero_score) {
+    testChainer(1000, 2, Score<int, Zero>());
 }
 
+
+SEQAN_DEFINE_TEST(test_chaining_test_chainer_manhattan_score) {
+    testChainer(1000, 2, Score<int, Manhattan>());
+}
+
+
+SEQAN_DEFINE_TEST(test_chaining_test_chainer_chain_sop_score) {
+    testChainer(1000, 2, Score<int, ChainSoP>());
+}
+
+SEQAN_BEGIN_TESTSUITE(test_chaining) {
+    SEQAN_CALL_TEST(test_chaining_test_chainer_zero_score);
+    SEQAN_CALL_TEST(test_chaining_test_chainer_manhattan_score);
+    SEQAN_CALL_TEST(test_chaining_test_chainer_chain_sop_score);
+
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chain_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chain_generic.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chain_meta_fragment.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chain_point.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chain_wrapper_point.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/chaining_generated_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/fragment.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/geom_distribution.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/range_max_tree.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/range_tree.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_common_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_compl_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_def_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_skip_base_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rmt_skip_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_common_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_impl.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_skip_base_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_skip_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_sl_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_sl_compl_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_sl_def_algos.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/rt_sl_impl.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/score_chain.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/score_chain_sop.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/score_manhattan.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/score_zero.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_base_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_element.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list_dynamic.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list_impl.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list_iterator.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_list_type.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/skip_pool_alloc.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/tree_chain.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/tree_chain_sop.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/chaining/tree_chain_utils.h");
+}
+SEQAN_END_TESTSUITE
