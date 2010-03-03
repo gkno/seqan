@@ -82,7 +82,7 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
 {
 	typedef typename Size<TNeedle>::Type TSize;
 	typedef typename Value<TNeedle>::Type TValue;
-	typename typename Iterator<TNeedle2 const, Standard>::Type TNeedle2Iterator;
+	typedef typename Iterator<TNeedle2 const, Standard>::Type TNeedle2Iterator;
 
 	SEQAN_ASSERT(!empty(ndl));
 
@@ -144,7 +144,7 @@ inline void _finderInit (Pattern<TNeedle, HammingHorspool> & me)
 //____________________________________________________________________________
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, HammingHorspool>const>::Type & 
+inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type & 
 host(Pattern<TNeedle, HammingHorspool> & me)
 {
 SEQAN_CHECKPOINT
@@ -152,7 +152,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, HammingHorspool>const>::Type & 
+inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type & 
 host(Pattern<TNeedle, HammingHorspool> const & me)
 {
 SEQAN_CHECKPOINT
