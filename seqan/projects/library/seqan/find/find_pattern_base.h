@@ -82,6 +82,7 @@ struct Container< Pattern<TNeedle, TSpec> const > {
 	typedef TNeedle const Type;
 };
 
+///.Metafunction.Host.param.T.type:Class.Pattern
 template <typename TNeedle, typename TSpec>
 struct Host< Pattern<TNeedle, TSpec> > {
 	typedef TNeedle Type;
