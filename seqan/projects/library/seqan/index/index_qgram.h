@@ -286,6 +286,17 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	}
 
 	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Fibre_BucketMap>::Type & 
+	getFibre(Index<TText, TSpec> &index, Fibre_BucketMap) {
+		return index.bucketMap;
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_BucketMap>::Type & 
+	getFibre(Index<TText, TSpec> const &index, Fibre_BucketMap) {
+		return index.bucketMap;
+	}
+
+	template <typename TText, typename TSpec>
 	inline typename Fibre<Index<TText, TSpec>, Fibre_Shape>::Type & 
 	getFibre(Index<TText, TSpec> &index, Fibre_Shape) {
 		return index.shape;
@@ -384,6 +395,27 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 	inline typename Fibre<Index<TText, TSpec> const, Fibre_CountsDir>::Type & 
 	indexCountsDir(Index<TText, TSpec> const &index) {
 		return getFibre(index, Fibre_CountsDir()); 
+	}
+
+/**
+.Function.indexBucketMap:
+..summary:Shortcut for $getFibre(.., QGram_BucketMap)$.
+..cat:Index
+..signature:indexBucketMap(index)
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.Index_QGram
+..returns:A reference to the @Tag.QGram Index Fibres.QGram_BucketMap@ fibre (maps q-gram hashes to buckets).
+*/
+
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec>, Fibre_BucketMap>::Type & 
+	indexBucketMap(Index<TText, TSpec> &index) {
+		return getFibre(index, Fibre_BucketMap()); 
+	}
+	template <typename TText, typename TSpec>
+	inline typename Fibre<Index<TText, TSpec> const, Fibre_BucketMap>::Type & 
+	indexBucketMap(Index<TText, TSpec> const &index) {
+		return getFibre(index, Fibre_BucketMap()); 
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1781,7 +1813,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		Default const) 
 	{
 		resize(indexCountsDir(index), _fullDirLength(index), Exact());
-		createCountsArray(indexCounts(index), indexCountsDir(index), indexText(index), indexShape(index));
+		createCountsArray(indexCounts(index), indexCountsDir(index), indexBucketMap(index), indexText(index), indexShape(index), getStepSize(index));
 		return true;
 	}
 
