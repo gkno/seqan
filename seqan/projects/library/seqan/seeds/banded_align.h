@@ -206,7 +206,7 @@ _banded_needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
 SEQAN_CHECKPOINT
 
 	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
 	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
@@ -550,7 +550,7 @@ SEQAN_CHECKPOINT
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	typedef Segment<TTargetSource, InfixSegment> TTargetSourceSegment;
+    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
 	typedef typename Iterator<TTargetSource, Standard>::Type TStringIterator;
 
 	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
