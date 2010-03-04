@@ -76,7 +76,8 @@
 #include <seqan/find/find_abndm.h>
 #include <seqan/find/find_pex.h>
 
-//#include <seqan/find/find_hamming_horspool.h>
+#include <seqan/find/find_hamming_horspool.h>
+#include <seqan/find/find_hamming_simple.h>
 
 //____________________________________________________________________________
 //filtering

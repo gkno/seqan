@@ -24,7 +24,7 @@
 #include <fstream>
 #include <typeinfo>
 #include <time.h>
-#include <cstring>
+#include <cstring>  // size_t
 #include <cstdio>
 #include <vector>
 #include <time.h>
@@ -64,9 +64,9 @@ void Test_OnlineAlg() {
 
     SEQAN_ASSERT_EQ(host(pattern), needle);
     SEQAN_ASSERT_EQ(host(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)), needle);
-    SEQAN_ASSERT_EQ(pos[0], 5);
-    SEQAN_ASSERT_EQ(pos[1], 31);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 5u);
+    SEQAN_ASSERT_EQ(pos[1], 31u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test2 - large needle
@@ -89,9 +89,9 @@ void Test_OnlineAlg() {
         SEQAN_ASSERT_EQ(infix(finder), needle);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 26);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 26u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test3 - different alphabet, small needle
@@ -113,14 +113,14 @@ void Test_OnlineAlg() {
         SEQAN_ASSERT_EQ(infix(finderDna), ndl);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 1);
-    SEQAN_ASSERT_EQ(pos[2], 2);
-    SEQAN_ASSERT_EQ(pos[3], 3);
-    SEQAN_ASSERT_EQ(pos[4], 4);
-    SEQAN_ASSERT_EQ(pos[5], 5);
-    SEQAN_ASSERT_EQ(pos[6], 8);
-    SEQAN_ASSERT_EQ(length(pos), 7);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 1u);
+    SEQAN_ASSERT_EQ(pos[2], 2u);
+    SEQAN_ASSERT_EQ(pos[3], 3u);
+    SEQAN_ASSERT_EQ(pos[4], 4u);
+    SEQAN_ASSERT_EQ(pos[5], 5u);
+    SEQAN_ASSERT_EQ(pos[6], 8u);
+    SEQAN_ASSERT_EQ(length(pos), 7u);
 
     //____________________________________________________________________________
     // Test3b - different alphabet, small needle, jumping finder
@@ -141,12 +141,12 @@ void Test_OnlineAlg() {
         }
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 2);
-    SEQAN_ASSERT_EQ(pos[1], 3);
-    SEQAN_ASSERT_EQ(pos[2], 4);
-    SEQAN_ASSERT_EQ(pos[3], 5);
-    SEQAN_ASSERT_EQ(pos[4], 8);
-    SEQAN_ASSERT_EQ(length(pos), 5);
+    SEQAN_ASSERT_EQ(pos[0], 2u);
+    SEQAN_ASSERT_EQ(pos[1], 3u);
+    SEQAN_ASSERT_EQ(pos[2], 4u);
+    SEQAN_ASSERT_EQ(pos[3], 5u);
+    SEQAN_ASSERT_EQ(pos[4], 8u);
+    SEQAN_ASSERT_EQ(length(pos), 5u);
 
     //____________________________________________________________________________
     // Test4 - different alphabet, large needle
@@ -167,13 +167,13 @@ void Test_OnlineAlg() {
         SEQAN_ASSERT_EQ(infix(finderText), query);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 5);
-    SEQAN_ASSERT_EQ(pos[2], 10);
-    SEQAN_ASSERT_EQ(pos[3], 15);
-    SEQAN_ASSERT_EQ(pos[4], 20);
-    SEQAN_ASSERT_EQ(pos[5], 25);
-    SEQAN_ASSERT_EQ(length(pos), 6);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 5u);
+    SEQAN_ASSERT_EQ(pos[2], 10u);
+    SEQAN_ASSERT_EQ(pos[3], 15u);
+    SEQAN_ASSERT_EQ(pos[4], 20u);
+    SEQAN_ASSERT_EQ(pos[5], 25u);
+    SEQAN_ASSERT_EQ(length(pos), 6u);
 }
 
 
@@ -203,9 +203,9 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
 
     SEQAN_ASSERT_EQ(host(pattern), keywords);
     SEQAN_ASSERT_EQ(host(reinterpret_cast<Pattern<TNeedle, TAlgorithmSpec> const &>(pattern)), keywords);
-    SEQAN_ASSERT_EQ(pos[0], 5);
-    SEQAN_ASSERT_EQ(pos[1], 31);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 5u);
+    SEQAN_ASSERT_EQ(pos[1], 31u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     haystack = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefgaabcdef";
     setHost(finder, haystack);
@@ -226,9 +226,9 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(finder), keywords[position(pattern)]);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 26);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 26u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
 
     String<Dna> hstk = "aaaaaaacaa";
@@ -252,14 +252,14 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(finderDna), dna_keywords[position(pattern_dna)]);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 1);
-    SEQAN_ASSERT_EQ(pos[2], 2);
-    SEQAN_ASSERT_EQ(pos[3], 3);
-    SEQAN_ASSERT_EQ(pos[4], 4);
-    SEQAN_ASSERT_EQ(pos[5], 5);
-    SEQAN_ASSERT_EQ(pos[6], 8);
-    SEQAN_ASSERT_EQ(length(pos), 7);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 1u);
+    SEQAN_ASSERT_EQ(pos[2], 2u);
+    SEQAN_ASSERT_EQ(pos[3], 3u);
+    SEQAN_ASSERT_EQ(pos[4], 4u);
+    SEQAN_ASSERT_EQ(pos[5], 5u);
+    SEQAN_ASSERT_EQ(pos[6], 8u);
+    SEQAN_ASSERT_EQ(length(pos), 7u);
 
     String<Dna> text = "taaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaataaaat";
     Finder<String<Dna> > finderText(text);
@@ -279,13 +279,13 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(finderText), dna_keywords[position(pattern_dna)]);
     }
 
-    SEQAN_ASSERT_EQ(pos[0], 0);
-    SEQAN_ASSERT_EQ(pos[1], 5);
-    SEQAN_ASSERT_EQ(pos[2], 10);
-    SEQAN_ASSERT_EQ(pos[3], 15);
-    SEQAN_ASSERT_EQ(pos[4], 20);
-    SEQAN_ASSERT_EQ(pos[5], 25);
-    SEQAN_ASSERT_EQ(length(pos), 6);
+    SEQAN_ASSERT_EQ(pos[0], 0u);
+    SEQAN_ASSERT_EQ(pos[1], 5u);
+    SEQAN_ASSERT_EQ(pos[2], 10u);
+    SEQAN_ASSERT_EQ(pos[3], 15u);
+    SEQAN_ASSERT_EQ(pos[4], 20u);
+    SEQAN_ASSERT_EQ(pos[5], 25u);
+    SEQAN_ASSERT_EQ(length(pos), 6u);
 
     //____________________________________________________________________________
     // Test2 - Multiple keywords
@@ -312,16 +312,16 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(fd), kyw[position(pt)]);
     }
 
-    SEQAN_ASSERT_EQ(length(finderPos), 4);
-    SEQAN_ASSERT_EQ(length(keywordIndex), 4);
-    SEQAN_ASSERT_EQ(finderPos[0], 0);
-    SEQAN_ASSERT_EQ(keywordIndex[0], 1);
-    SEQAN_ASSERT_EQ(finderPos[1], 7);
-    SEQAN_ASSERT_EQ(keywordIndex[1], 0);
-    SEQAN_ASSERT_EQ(finderPos[2], 20);
-    SEQAN_ASSERT_EQ(keywordIndex[2], 1);
-    SEQAN_ASSERT_EQ(finderPos[3], 20);
-    SEQAN_ASSERT_EQ(keywordIndex[3], 2);
+    SEQAN_ASSERT_EQ(length(finderPos), 4u);
+    SEQAN_ASSERT_EQ(length(keywordIndex), 4u);
+    SEQAN_ASSERT_EQ(finderPos[0], 0u);
+    SEQAN_ASSERT_EQ(keywordIndex[0], 1u);
+    SEQAN_ASSERT_EQ(finderPos[1], 7u);
+    SEQAN_ASSERT_EQ(keywordIndex[1], 0u);
+    SEQAN_ASSERT_EQ(finderPos[2], 20u);
+    SEQAN_ASSERT_EQ(keywordIndex[2], 1u);
+    SEQAN_ASSERT_EQ(finderPos[3], 20u);
+    SEQAN_ASSERT_EQ(keywordIndex[3], 2u);
 
     String<Dna> hstDna("AGATACGATATATAC");
     Finder<String<Dna> > fdDna(hstDna);
@@ -346,22 +346,22 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(fdDna), kywDna[position(ptDna)]);
     }
 
-    SEQAN_ASSERT_EQ(length(finderPos), 3);
-    SEQAN_ASSERT_EQ(length(keywordIndex), 3);
+    SEQAN_ASSERT_EQ(length(finderPos), 3u);
+    SEQAN_ASSERT_EQ(length(keywordIndex), 3u);
     if (order_by_begin_position) {
-        SEQAN_ASSERT_EQ(finderPos[0], 4);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 2);
-        SEQAN_ASSERT_EQ(finderPos[1], 7);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 0);
-        SEQAN_ASSERT_EQ(finderPos[2], 8);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 1);
+        SEQAN_ASSERT_EQ(finderPos[0], 4u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 2u);
+        SEQAN_ASSERT_EQ(finderPos[1], 7u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 0u);
+        SEQAN_ASSERT_EQ(finderPos[2], 8u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 1u);
     } else {
-        SEQAN_ASSERT_EQ(finderPos[0], 4);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 2);
-        SEQAN_ASSERT_EQ(finderPos[1], 8);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 1);
-        SEQAN_ASSERT_EQ(finderPos[2], 7);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 0);
+        SEQAN_ASSERT_EQ(finderPos[0], 4u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 2u);
+        SEQAN_ASSERT_EQ(finderPos[1], 8u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 1u);
+        SEQAN_ASSERT_EQ(finderPos[2], 7u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 0u);
     }
     //____________________________________________________________________________
     // Test2 - Multiple keywords that do not fit into a machine word
@@ -392,70 +392,70 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
         SEQAN_ASSERT_EQ(infix(my_finder), my_keywords[position(my_pattern)]);
     }
 
-    SEQAN_ASSERT_EQ(length(finderPos), 15);
-    SEQAN_ASSERT_EQ(length(keywordIndex), 15);
+    SEQAN_ASSERT_EQ(length(finderPos), 15u);
+    SEQAN_ASSERT_EQ(length(keywordIndex), 15u);
     if (order_by_begin_position) {
-        SEQAN_ASSERT_EQ(finderPos[0], 4);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 4);
-        SEQAN_ASSERT_EQ(finderPos[1], 7);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 0);
-        SEQAN_ASSERT_EQ(finderPos[2], 8);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 2);
-        SEQAN_ASSERT_EQ(finderPos[3], 19);
-        SEQAN_ASSERT_EQ(keywordIndex[3], 4);
-        SEQAN_ASSERT_EQ(finderPos[4], 22);
-        SEQAN_ASSERT_EQ(keywordIndex[4], 0);
-        SEQAN_ASSERT_EQ(finderPos[5], 23);
-        SEQAN_ASSERT_EQ(keywordIndex[5], 2);
-        SEQAN_ASSERT_EQ(finderPos[6], 34);
-        SEQAN_ASSERT_EQ(keywordIndex[6], 4);
-        SEQAN_ASSERT_EQ(finderPos[7], 37);
-        SEQAN_ASSERT_EQ(keywordIndex[7], 0);
-        SEQAN_ASSERT_EQ(finderPos[8], 38);
-        SEQAN_ASSERT_EQ(keywordIndex[8], 2);
-        SEQAN_ASSERT_EQ(finderPos[9], 49);
-        SEQAN_ASSERT_EQ(keywordIndex[9], 4);
-        SEQAN_ASSERT_EQ(finderPos[10], 52);
-        SEQAN_ASSERT_EQ(keywordIndex[10], 0);
-        SEQAN_ASSERT_EQ(finderPos[11], 53);
-        SEQAN_ASSERT_EQ(keywordIndex[11], 2);
-        SEQAN_ASSERT_EQ(finderPos[12], 64);
-        SEQAN_ASSERT_EQ(keywordIndex[12], 4);
-        SEQAN_ASSERT_EQ(finderPos[13], 67);
-        SEQAN_ASSERT_EQ(keywordIndex[13], 0);
-        SEQAN_ASSERT_EQ(finderPos[14], 68);
-        SEQAN_ASSERT_EQ(keywordIndex[14], 2);
+        SEQAN_ASSERT_EQ(finderPos[0], 4u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 4u);
+        SEQAN_ASSERT_EQ(finderPos[1], 7u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 0u);
+        SEQAN_ASSERT_EQ(finderPos[2], 8u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 2u);
+        SEQAN_ASSERT_EQ(finderPos[3], 19u);
+        SEQAN_ASSERT_EQ(keywordIndex[3], 4u);
+        SEQAN_ASSERT_EQ(finderPos[4], 22u);
+        SEQAN_ASSERT_EQ(keywordIndex[4], 0u);
+        SEQAN_ASSERT_EQ(finderPos[5], 23u);
+        SEQAN_ASSERT_EQ(keywordIndex[5], 2u);
+        SEQAN_ASSERT_EQ(finderPos[6], 34u);
+        SEQAN_ASSERT_EQ(keywordIndex[6], 4u);
+        SEQAN_ASSERT_EQ(finderPos[7], 37u);
+        SEQAN_ASSERT_EQ(keywordIndex[7], 0u);
+        SEQAN_ASSERT_EQ(finderPos[8], 38u);
+        SEQAN_ASSERT_EQ(keywordIndex[8], 2u);
+        SEQAN_ASSERT_EQ(finderPos[9], 49u);
+        SEQAN_ASSERT_EQ(keywordIndex[9], 4u);
+        SEQAN_ASSERT_EQ(finderPos[10], 52u);
+        SEQAN_ASSERT_EQ(keywordIndex[10], 0u);
+        SEQAN_ASSERT_EQ(finderPos[11], 53u);
+        SEQAN_ASSERT_EQ(keywordIndex[11], 2u);
+        SEQAN_ASSERT_EQ(finderPos[12], 64u);
+        SEQAN_ASSERT_EQ(keywordIndex[12], 4u);
+        SEQAN_ASSERT_EQ(finderPos[13], 67u);
+        SEQAN_ASSERT_EQ(keywordIndex[13], 0u);
+        SEQAN_ASSERT_EQ(finderPos[14], 68u);
+        SEQAN_ASSERT_EQ(keywordIndex[14], 2u);
     } else {
-        SEQAN_ASSERT_EQ(finderPos[0], 4);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 4);
-        SEQAN_ASSERT_EQ(finderPos[1], 8);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 2);
-        SEQAN_ASSERT_EQ(finderPos[2], 7);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 0);
-        SEQAN_ASSERT_EQ(finderPos[3], 19);
-        SEQAN_ASSERT_EQ(keywordIndex[3], 4);
-        SEQAN_ASSERT_EQ(finderPos[4], 23);
-        SEQAN_ASSERT_EQ(keywordIndex[4], 2);
-        SEQAN_ASSERT_EQ(finderPos[5], 22);
-        SEQAN_ASSERT_EQ(keywordIndex[5], 0);
-        SEQAN_ASSERT_EQ(finderPos[6], 34);
-        SEQAN_ASSERT_EQ(keywordIndex[6], 4);
-        SEQAN_ASSERT_EQ(finderPos[7], 38);
-        SEQAN_ASSERT_EQ(keywordIndex[7], 2);
-        SEQAN_ASSERT_EQ(finderPos[8], 37);
-        SEQAN_ASSERT_EQ(keywordIndex[8], 0);
-        SEQAN_ASSERT_EQ(finderPos[9], 49);
-        SEQAN_ASSERT_EQ(keywordIndex[9], 4);
-        SEQAN_ASSERT_EQ(finderPos[10], 53);
-        SEQAN_ASSERT_EQ(keywordIndex[10], 2);
-        SEQAN_ASSERT_EQ(finderPos[11], 52);
-        SEQAN_ASSERT_EQ(keywordIndex[11], 0);
-        SEQAN_ASSERT_EQ(finderPos[12], 64);
-        SEQAN_ASSERT_EQ(keywordIndex[12], 4);
-        SEQAN_ASSERT_EQ(finderPos[13], 68);
-        SEQAN_ASSERT_EQ(keywordIndex[13], 2);
-        SEQAN_ASSERT_EQ(finderPos[14], 67);
-        SEQAN_ASSERT_EQ(keywordIndex[14], 0);
+        SEQAN_ASSERT_EQ(finderPos[0], 4u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 4u);
+        SEQAN_ASSERT_EQ(finderPos[1], 8u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 2u);
+        SEQAN_ASSERT_EQ(finderPos[2], 7u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 0u);
+        SEQAN_ASSERT_EQ(finderPos[3], 19u);
+        SEQAN_ASSERT_EQ(keywordIndex[3], 4u);
+        SEQAN_ASSERT_EQ(finderPos[4], 23u);
+        SEQAN_ASSERT_EQ(keywordIndex[4], 2u);
+        SEQAN_ASSERT_EQ(finderPos[5], 22u);
+        SEQAN_ASSERT_EQ(keywordIndex[5], 0u);
+        SEQAN_ASSERT_EQ(finderPos[6], 34u);
+        SEQAN_ASSERT_EQ(keywordIndex[6], 4u);
+        SEQAN_ASSERT_EQ(finderPos[7], 38u);
+        SEQAN_ASSERT_EQ(keywordIndex[7], 2u);
+        SEQAN_ASSERT_EQ(finderPos[8], 37u);
+        SEQAN_ASSERT_EQ(keywordIndex[8], 0u);
+        SEQAN_ASSERT_EQ(finderPos[9], 49u);
+        SEQAN_ASSERT_EQ(keywordIndex[9], 4u);
+        SEQAN_ASSERT_EQ(finderPos[10], 53u);
+        SEQAN_ASSERT_EQ(keywordIndex[10], 2u);
+        SEQAN_ASSERT_EQ(finderPos[11], 52u);
+        SEQAN_ASSERT_EQ(keywordIndex[11], 0u);
+        SEQAN_ASSERT_EQ(finderPos[12], 64u);
+        SEQAN_ASSERT_EQ(keywordIndex[12], 4u);
+        SEQAN_ASSERT_EQ(finderPos[13], 68u);
+        SEQAN_ASSERT_EQ(keywordIndex[13], 2u);
+        SEQAN_ASSERT_EQ(finderPos[14], 67u);
+        SEQAN_ASSERT_EQ(keywordIndex[14], 0u);
     }
 
     //____________________________________________________________________________
@@ -487,47 +487,47 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
     }
 
     if (order_by_begin_position) {
-        SEQAN_ASSERT_EQ(finderPos[0], 0);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 0);
-        SEQAN_ASSERT_EQ(finderPos[1], 0);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 1);
-        SEQAN_ASSERT_EQ(finderPos[2], 1);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 0);
-        SEQAN_ASSERT_EQ(finderPos[3], 1);
-        SEQAN_ASSERT_EQ(keywordIndex[3], 1);
-        SEQAN_ASSERT_EQ(finderPos[4], 2);
-        SEQAN_ASSERT_EQ(keywordIndex[4], 0);
-        SEQAN_ASSERT_EQ(finderPos[5], 2);
-        SEQAN_ASSERT_EQ(keywordIndex[5], 3);
-        SEQAN_ASSERT_EQ(finderPos[6], 3);
-        SEQAN_ASSERT_EQ(keywordIndex[6], 2);
-        SEQAN_ASSERT_EQ(finderPos[7], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[7], 0);
-        SEQAN_ASSERT_EQ(finderPos[8], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[8], 1);
-        SEQAN_ASSERT_EQ(finderPos[9], 6);
-        SEQAN_ASSERT_EQ(keywordIndex[9], 0);
-    } else{
-        SEQAN_ASSERT_EQ(finderPos[0], 0);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 0);
-        SEQAN_ASSERT_EQ(finderPos[1], 1);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 0);
-        SEQAN_ASSERT_EQ(finderPos[2], 0);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 1);
-        SEQAN_ASSERT_EQ(finderPos[3], 2);
-        SEQAN_ASSERT_EQ(keywordIndex[3], 0);
-        SEQAN_ASSERT_EQ(finderPos[4], 1);
-        SEQAN_ASSERT_EQ(keywordIndex[4], 1);
-        SEQAN_ASSERT_EQ(finderPos[5], 3);
-        SEQAN_ASSERT_EQ(keywordIndex[5], 2);
-        SEQAN_ASSERT_EQ(finderPos[6], 2);
-        SEQAN_ASSERT_EQ(keywordIndex[6], 3);
-        SEQAN_ASSERT_EQ(finderPos[7], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[7], 0);
-        SEQAN_ASSERT_EQ(finderPos[8], 6);
-        SEQAN_ASSERT_EQ(keywordIndex[8], 0);
-        SEQAN_ASSERT_EQ(finderPos[9], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[9], 1);
+        SEQAN_ASSERT_EQ(finderPos[0], 0u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 0u);
+        SEQAN_ASSERT_EQ(finderPos[1], 0u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 1u);
+        SEQAN_ASSERT_EQ(finderPos[2], 1u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 0u);
+        SEQAN_ASSERT_EQ(finderPos[3], 1u);
+        SEQAN_ASSERT_EQ(keywordIndex[3], 1u);
+        SEQAN_ASSERT_EQ(finderPos[4], 2u);
+        SEQAN_ASSERT_EQ(keywordIndex[4], 0u);
+        SEQAN_ASSERT_EQ(finderPos[5], 2u);
+        SEQAN_ASSERT_EQ(keywordIndex[5], 3u);
+        SEQAN_ASSERT_EQ(finderPos[6], 3u);
+        SEQAN_ASSERT_EQ(keywordIndex[6], 2u);
+        SEQAN_ASSERT_EQ(finderPos[7], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[7], 0u);
+        SEQAN_ASSERT_EQ(finderPos[8], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[8], 1u);
+        SEQAN_ASSERT_EQ(finderPos[9], 6u);
+        SEQAN_ASSERT_EQ(keywordIndex[9], 0u);
+    } else{                 
+        SEQAN_ASSERT_EQ(finderPos[0], 0u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 0u);
+        SEQAN_ASSERT_EQ(finderPos[1], 1u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 0u);
+        SEQAN_ASSERT_EQ(finderPos[2], 0u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 1u);
+        SEQAN_ASSERT_EQ(finderPos[3], 2u);
+        SEQAN_ASSERT_EQ(keywordIndex[3], 0u);
+        SEQAN_ASSERT_EQ(finderPos[4], 1u);
+        SEQAN_ASSERT_EQ(keywordIndex[4], 1u);
+        SEQAN_ASSERT_EQ(finderPos[5], 3u);
+        SEQAN_ASSERT_EQ(keywordIndex[5], 2u);
+        SEQAN_ASSERT_EQ(finderPos[6], 2u);
+        SEQAN_ASSERT_EQ(keywordIndex[6], 3u);
+        SEQAN_ASSERT_EQ(finderPos[7], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[7], 0u);
+        SEQAN_ASSERT_EQ(finderPos[8], 6u);
+        SEQAN_ASSERT_EQ(keywordIndex[8], 0u);
+        SEQAN_ASSERT_EQ(finderPos[9], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[9], 1u);
     }
 
     //____________________________________________________________________________
@@ -539,7 +539,7 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
 
     unsigned int hits = 0;
     while (find(my2_finder, my2_pattern)) {
-        if (hits, 2) break;
+        if (hits < 2) break;
         //std::cout << position(my2_finder) << ":" << position(my2_pattern) << ::std::endl;
         append(finderPos,position(my2_finder));
         append(keywordIndex,position(my2_pattern));
@@ -557,19 +557,19 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
     }
 
     if (order_by_begin_position) {
-        SEQAN_ASSERT_EQ(finderPos[0], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 0);
-        SEQAN_ASSERT_EQ(finderPos[1], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 1);
-        SEQAN_ASSERT_EQ(finderPos[2], 6);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 0);
-    } else {
-        SEQAN_ASSERT_EQ(finderPos[0], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[0], 0);
-        SEQAN_ASSERT_EQ(finderPos[1], 6);
-        SEQAN_ASSERT_EQ(keywordIndex[1], 0);
-        SEQAN_ASSERT_EQ(finderPos[2], 5);
-        SEQAN_ASSERT_EQ(keywordIndex[2], 1);
+        SEQAN_ASSERT_EQ(finderPos[0], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 0u);
+        SEQAN_ASSERT_EQ(finderPos[1], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 1u);
+        SEQAN_ASSERT_EQ(finderPos[2], 6u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 0u);
+    } else {                  
+        SEQAN_ASSERT_EQ(finderPos[0], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[0], 0u);
+        SEQAN_ASSERT_EQ(finderPos[1], 6u);
+        SEQAN_ASSERT_EQ(keywordIndex[1], 0u);
+        SEQAN_ASSERT_EQ(finderPos[2], 5u);
+        SEQAN_ASSERT_EQ(keywordIndex[2], 1u);
     }
 }
 
@@ -589,8 +589,8 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
 
-    SEQAN_ASSERT_EQ(pos[0], 7);
-    SEQAN_ASSERT_EQ(pos[1], 33);
+    SEQAN_ASSERT_EQ(pos[0], 7u);
+    SEQAN_ASSERT_EQ(pos[1], 33u);
     SEQAN_ASSERT_EQ(host(pattern), needle);
     SEQAN_ASSERT_EQ(host(reinterpret_cast<Pattern<String<char>, TAlgorithmSpec> const &>(pattern)), needle);
 
@@ -642,13 +642,13 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(length(pos), 0);
+    SEQAN_ASSERT_EQ(length(pos), 0u);
 
     //____________________________________________________________________________
     // Test - handle needles with wildcards
     // to produce two \ in the pattern you need to escape both of them
     needle = "aa+c*[a-z]xx?aa\\\\";
-    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 9);
+    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 9u);
         
     //____________________________________________________________________________
     // Test - optional characters (?)
@@ -663,9 +663,9 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 2);
-    SEQAN_ASSERT_EQ(pos[1], 6);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 2u);
+    SEQAN_ASSERT_EQ(pos[1], 6u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test - repeatable characters (+)
@@ -680,9 +680,9 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 2);
-    SEQAN_ASSERT_EQ(pos[1], 11);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 2u);
+    SEQAN_ASSERT_EQ(pos[1], 11u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test - repeatable characters (*)
@@ -697,11 +697,11 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 2);
-    SEQAN_ASSERT_EQ(pos[1], 11);
-    SEQAN_ASSERT_EQ(pos[2], 14);
+    SEQAN_ASSERT_EQ(pos[0], 2u);
+    SEQAN_ASSERT_EQ(pos[1], 11u);
+    SEQAN_ASSERT_EQ(pos[2], 14u);
         
-    SEQAN_ASSERT_EQ(length(pos), 3);
+    SEQAN_ASSERT_EQ(length(pos), 3u);
 
     //____________________________________________________________________________
     // Test - wildcard matching
@@ -716,8 +716,8 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 12);
-    SEQAN_ASSERT_EQ(length(pos), 1);
+    SEQAN_ASSERT_EQ(pos[0], 12u);
+    SEQAN_ASSERT_EQ(length(pos), 1u);
 
     //____________________________________________________________________________
     // Test - wildcard matching (hard case)
@@ -732,8 +732,8 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 15);
-    SEQAN_ASSERT_EQ(length(pos), 1);
+    SEQAN_ASSERT_EQ(pos[0], 15u);
+    SEQAN_ASSERT_EQ(length(pos), 1u);
 
 
     //____________________________________________________________________________
@@ -749,10 +749,10 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
         
-    SEQAN_ASSERT_EQ(pos[0], 5);
-    SEQAN_ASSERT_EQ(pos[1], 12);
-    SEQAN_ASSERT_EQ(pos[2], 19);
-    SEQAN_ASSERT_EQ(length(pos), 3);
+    SEQAN_ASSERT_EQ(pos[0], 5u);
+    SEQAN_ASSERT_EQ(pos[1], 12u);
+    SEQAN_ASSERT_EQ(pos[2], 19u);
+    SEQAN_ASSERT_EQ(length(pos), 3u);
 
     //____________________________________________________________________________
     // Test - long needles
@@ -767,9 +767,9 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
 
-    SEQAN_ASSERT_EQ(pos[0], 32);
-    SEQAN_ASSERT_EQ(pos[1], 58);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 32u);
+    SEQAN_ASSERT_EQ(pos[1], 58u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test - long needles with character classes
@@ -786,9 +786,9 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
 
-    SEQAN_ASSERT_EQ(pos[0], 37);
-    SEQAN_ASSERT_EQ(pos[1], 63);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 37u);
+    SEQAN_ASSERT_EQ(pos[1], 63u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
 
     //____________________________________________________________________________
@@ -806,9 +806,9 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern))
         append(pos,position(finder));
 
-    SEQAN_ASSERT_EQ(pos[0], 41);
-    SEQAN_ASSERT_EQ(pos[1], 86);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 41u);
+    SEQAN_ASSERT_EQ(pos[1], 86u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
     //____________________________________________________________________________
     // Test - handle .
@@ -822,10 +822,10 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern)) {
         append(pos,position(finder));
     }
-    SEQAN_ASSERT_EQ(pos[0], 5);
-    SEQAN_ASSERT_EQ(pos[1], 12);
-    SEQAN_ASSERT_EQ(pos[2], 19);
-    SEQAN_ASSERT_EQ(length(pos), 3);
+    SEQAN_ASSERT_EQ(pos[0], 5u);
+    SEQAN_ASSERT_EQ(pos[1], 12u);
+    SEQAN_ASSERT_EQ(pos[2], 19u);
+    SEQAN_ASSERT_EQ(length(pos), 3u);
 
     //____________________________________________________________________________
     // Test - handle backslash 
@@ -839,8 +839,8 @@ void Test_OnlineAlgWildcards() {
     while (find(finder, pattern)){
         append(pos,position(finder));
     }
-    SEQAN_ASSERT_EQ(pos[0], 19);
-    SEQAN_ASSERT_EQ(length(pos), 1);
+    SEQAN_ASSERT_EQ(pos[0], 19u);
+    SEQAN_ASSERT_EQ(length(pos), 1u);
 
 
 
@@ -852,16 +852,16 @@ void Test_OnlineAlgWildcards() {
 
     needle = "a{2,5}n{2}ual";       
         
-    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 10);
+    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 10u);
         
     setHost(pattern, needle);
     clear(pos);
     while (find(finder, pattern)) {
         append(pos,position(finder));
     }
-    SEQAN_ASSERT_EQ(pos[0], 6);
-    SEQAN_ASSERT_EQ(pos[1], 16);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 6u);
+    SEQAN_ASSERT_EQ(pos[1], 16u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
 
     //____________________________________________________________________________
@@ -876,9 +876,9 @@ void Test_OnlineAlgWildcards() {
     while (find(dna_finder, dna_pattern))
         append(pos,position(dna_finder));
 
-    SEQAN_ASSERT_EQ(pos[0], 7);
-    SEQAN_ASSERT_EQ(pos[1], 23);
-    SEQAN_ASSERT_EQ(length(pos), 2);
+    SEQAN_ASSERT_EQ(pos[0], 7u);
+    SEQAN_ASSERT_EQ(pos[1], 23u);
+    SEQAN_ASSERT_EQ(length(pos), 2u);
 
 }
 
@@ -893,13 +893,13 @@ void Test_Approx_EditDist() {
 
     Pattern<String<char>, TPatternSpec> pt(nl, -2);
     SEQAN_ASSERT_TRUE(find(fd, pt));
-    SEQAN_ASSERT_EQ(position(fd), 8);
+    SEQAN_ASSERT_EQ(position(fd), 8u);
     SEQAN_ASSERT_EQ(getScore(pt), -2);
     SEQAN_ASSERT_TRUE(find(fd, pt));
-    SEQAN_ASSERT_EQ(position(fd), 9);
+    SEQAN_ASSERT_EQ(position(fd), 9u);
     SEQAN_ASSERT_EQ(getScore(pt), -1);
     SEQAN_ASSERT_TRUE(find(fd, pt));
-    SEQAN_ASSERT_EQ(position(fd), 10);
+    SEQAN_ASSERT_EQ(position(fd), 10u);
     SEQAN_ASSERT_EQ(getScore(pt), -2);
 
     SEQAN_ASSERT_NOT(find(fd,pt));
@@ -918,35 +918,35 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_EQ(scoreLimit(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 3);
+    SEQAN_ASSERT_EQ(position(fnd), 3u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 10);
+    SEQAN_ASSERT_EQ(position(fnd), 10u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 11);
+    SEQAN_ASSERT_EQ(position(fnd), 11u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 23);
+    SEQAN_ASSERT_EQ(position(fnd), 23u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 24);
+    SEQAN_ASSERT_EQ(position(fnd), 24u);
     SEQAN_ASSERT_EQ(getScore(pat), 0);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 25);
+    SEQAN_ASSERT_EQ(position(fnd), 25u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 28);
+    SEQAN_ASSERT_EQ(position(fnd), 28u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
-    SEQAN_ASSERT_EQ(position(fnd), 39);
+    SEQAN_ASSERT_EQ(position(fnd), 39u);
     SEQAN_ASSERT_EQ(getScore(pat), -1);
 
     SEQAN_ASSERT_NOT(find(fnd, pat));
@@ -960,27 +960,27 @@ void Test_Approx_EditDist() {
     Pattern<String<Dna>, TPatternSpec> long_pat(long_ndl, -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 44);
+    SEQAN_ASSERT_EQ(position(long_fnd), 44u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 45);
+    SEQAN_ASSERT_EQ(position(long_fnd), 45u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -1);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 46);
+    SEQAN_ASSERT_EQ(position(long_fnd), 46u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 60);
+    SEQAN_ASSERT_EQ(position(long_fnd), 60u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 65);
+    SEQAN_ASSERT_EQ(position(long_fnd), 65u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
-    SEQAN_ASSERT_EQ(position(long_fnd), 70);
+    SEQAN_ASSERT_EQ(position(long_fnd), 70u);
     SEQAN_ASSERT_EQ(getScore(long_pat), -2);
 
     SEQAN_ASSERT_NOT(find(long_fnd,long_pat));
@@ -993,7 +993,7 @@ void Test_Approx_EditDist() {
     Pattern<String<char>, TPatternSpec> pattern_1(needle_1, -2);
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 7);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 7u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXXa");
@@ -1001,7 +1001,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 8);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 8u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -1);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXab");
@@ -1015,7 +1015,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 9);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 9u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "Xaba");
@@ -1035,7 +1035,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 10);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 10u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -1);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXabaX");
@@ -1049,7 +1049,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 11);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 11u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXXabaXX");
@@ -1057,7 +1057,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 15);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 15u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXX45a");
@@ -1065,7 +1065,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 17);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 17u);
     SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "X45aba");
@@ -1090,21 +1090,21 @@ void Test_Approx_Prefix_EditDist() {
     Finder<String<char> > finder_1(haystack_1);
     Pattern<String<char>, TPatternSpec> pattern_1(needle_1, -2);
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(position(finder_1), 3);
-    SEQAN_ASSERT_EQ(length(finder_1), 4);
-    SEQAN_ASSERT_EQ(beginPosition(finder_1), 0);
-    SEQAN_ASSERT_EQ(endPosition(finder_1), 4);
+    SEQAN_ASSERT_EQ(position(finder_1), 3u);
+    SEQAN_ASSERT_EQ(length(finder_1), 4u);
+    SEQAN_ASSERT_EQ(beginPosition(finder_1), 0u);
+    SEQAN_ASSERT_EQ(endPosition(finder_1), 4u);
     SEQAN_ASSERT_EQ(infix(finder_1), "miss");
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(position(finder_1), 4);
+    SEQAN_ASSERT_EQ(position(finder_1), 4u);
     SEQAN_ASSERT_EQ(infix(finder_1), "missi");
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(position(finder_1), 5);
+    SEQAN_ASSERT_EQ(position(finder_1), 5u);
     SEQAN_ASSERT_EQ(infix(finder_1), "missis");
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(position(finder_1), 6);
+    SEQAN_ASSERT_EQ(position(finder_1), 6u);
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
-    SEQAN_ASSERT_EQ(position(finder_1), 7);
+    SEQAN_ASSERT_EQ(position(finder_1), 7u);
     SEQAN_ASSERT_NOT(find(finder_1, pattern_1));
 
 
@@ -1113,10 +1113,10 @@ void Test_Approx_Prefix_EditDist() {
     Finder<String<char> > finder_2(haystack_2);
     Pattern<String<char>, TPatternSpec> pattern_2(needle_2, -2);
     SEQAN_ASSERT_TRUE(find(finder_2, pattern_2));
-    SEQAN_ASSERT_EQ(position(finder_2), 5);
+    SEQAN_ASSERT_EQ(position(finder_2), 5u);
     SEQAN_ASSERT_EQ(infix(finder_2), "yyyXXa");
     SEQAN_ASSERT_TRUE(find(finder_2, pattern_2));
-    SEQAN_ASSERT_EQ(position(finder_2), 7);
+    SEQAN_ASSERT_EQ(position(finder_2), 7u);
     SEQAN_ASSERT_EQ(infix(finder_2), "yyyXXaba");
     SEQAN_ASSERT_NOT(find(finder_2, pattern_2));
 
@@ -1140,7 +1140,7 @@ void Test_Approx_Prefix_EditDist() {
     Finder<String<char> > finder_5(haystack_5);
     Pattern<String<char>, TPatternSpec> pattern_5(needle_5, 0);
     SEQAN_ASSERT_TRUE(find(finder_5, pattern_5));
-    SEQAN_ASSERT_EQ(position(finder_5), 4);
+    SEQAN_ASSERT_EQ(position(finder_5), 4u);
     SEQAN_ASSERT_NOT(find(finder_5, pattern_5));
 
 
@@ -1168,7 +1168,7 @@ void Test_Approx_Prefix_EditDist() {
         Finder<String<char> > finder(haystack);
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
-        SEQAN_ASSERT_LEQ(-getScore(pattern), length(needle));
+        SEQAN_ASSERT_LEQ(static_cast<size_t>(-getScore(pattern)), length(needle));
         while (find(finder, pattern)) {
             SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
         }
@@ -1187,7 +1187,7 @@ void Test_Approx_Prefix_EditDist() {
         Finder<String<char> > finder(haystack);
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
-        SEQAN_ASSERT_LEQ(-getScore(pattern), length(needle));
+        SEQAN_ASSERT_LEQ(static_cast<size_t>(-getScore(pattern)), length(needle));
         while (find(finder, pattern)) {
             SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
         }
@@ -1360,6 +1360,54 @@ SEQAN_DEFINE_TEST(test_regression_rmbench) {
 }
 
 
+// Tests for the Simple Hamming Finder.
+SEQAN_DEFINE_TEST(test_find_hamming_simple) {
+    // Test for distance 0;
+    {
+        // TODO(holtgrew): Should be const, but finder does not allow this.
+        // Define haystack and needle.
+        DnaString haystack("ACA");
+        DnaString needle("AA");
+        // Define finder and pattern.
+        Finder<DnaString> finder(haystack);
+        Pattern<DnaString, HammingSimple> pattern(needle, 0);
+        // Perform the searches;
+        bool res;
+
+        res = find(finder, pattern);
+        SEQAN_ASSERT_NOT(res);
+    }
+
+    // Test for distance -1, -2, -3.  Should yield the same results,
+    // as tested for below.  The numbers are interesting since they
+    // are the first > 0, length of pattern, first greater than length
+    // of pattern.
+    for (int i = 1; i < 3; ++i) {
+        // TODO(holtgrew): Should be const, but finder does not allow this.
+        // Define haystack and needle.
+        DnaString haystack("ACA");
+        DnaString needle("AA");
+        // Define finder and pattern.
+        Finder<DnaString> finder(haystack);
+        Pattern<DnaString, HammingSimple> pattern(needle, -i);
+        // Perform the searches;
+        bool res;
+
+        res = find(finder, pattern);
+        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT_EQ(0u, position(finder));
+        SEQAN_ASSERT_EQ(2u, endPosition(finder));
+        SEQAN_ASSERT_EQ(-1, score(pattern));
+
+        res = find(finder, pattern);
+        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT_EQ(1u, position(finder));
+        SEQAN_ASSERT_EQ(3u, endPosition(finder));
+        SEQAN_ASSERT_EQ(-1, score(pattern));
+    }
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
     // Testing MyersUkkonen with large needle and manual score limit.
     SEQAN_CALL_TEST(test_regression_rmbench);
@@ -1392,8 +1440,12 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     // Tests with different multifinder.
     SEQAN_CALL_TEST(test_approx_edit_dist_pex_non_hierarchical_aho_corasick);
     SEQAN_CALL_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam);
+    // Test for hamming distance approximate matching.
+    SEQAN_CALL_TEST(test_find_hamming_simple);
 
     // Verify checkpoints in all files in this module.
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_horspool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_myers_ukkonen.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wild_shiftand.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_horspool.h");

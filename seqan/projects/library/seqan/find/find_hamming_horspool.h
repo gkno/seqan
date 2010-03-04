@@ -1,6 +1,6 @@
 /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -15,20 +15,22 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+  This header defines a Finder specialization that implements the Horspool
+  algorithm for approximate string searching with the Hamming distance as
+  described in:
+
+    J. Tarhio and E. Ukkonen.  Boyer-moore approach to approximate
+    string matching. SWAT '90, pages 348–359, 1990.
+ ============================================================================
+  Status: The code compiles but does NOT WORK CORRECTLY.
+ ============================================================================
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_FIND_HAMMING_HORSPOOL_H
-#define SEQAN_HEADER_FIND_HAMMING_HORSPOOL_H
+#ifndef SEQAN_FIND_HAMMING_HORSPOOL_H_
+#define SEQAN_FIND_HAMMING_HORSPOOL_H_
 
-
-
-namespace SEQAN_NAMESPACE_MAIN
-{
-
-//////////////////////////////////////////////////////////////////////////////
-// approximate Boyer-Moore-Horspool
-//////////////////////////////////////////////////////////////////////////////
+namespace SEQAN_NAMESPACE_MAIN {
 
 /**
 .Spec.HammingHorspool:
@@ -46,225 +48,246 @@ namespace SEQAN_NAMESPACE_MAIN
 struct _HammingHorspool;
 typedef Tag<_HammingHorspool> HammingHorspool;
 
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle>
-class Pattern<TNeedle, HammingHorspool>
-{
-//____________________________________________________________________________
-public:
-	typedef typename Size<TNeedle>::Type TSize;
+struct Pattern<TNeedle, HammingHorspool> {
+    typedef typename Size<TNeedle>::Type TSize;
 
-	Holder<TNeedle>	data_host; 
-	String<TSize>	shift_table; 	// c x (k+1) shift table (c = alphabet size)   
-	TSize			shift;			// current shift
-	unsigned int	k;				// maximal number of allowed mismatches
-	
-//____________________________________________________________________________
+    // Holder of the pattern's needle.
+    Holder<TNeedle> data_host;
 
-public:
-	Pattern() {}
+    // Shift table d_k[i,a].
+    String<TSize> shift_table;
 
-	template <typename TNeedle2>
-	Pattern(TNeedle2 const & ndl, int const k)
-	{
-		setHost(*this, ndl, k);
-	}
+    // The current end position
+    TSize _currentEndPos;
 
-//____________________________________________________________________________
+    // Maximal number of allowed mismatches.
+    unsigned int k; // maximal number of allowed mismatches
+
+    // The score at the current position.
+    int score;
+
+    Pattern() {
+        SEQAN_CHECKPOINT;
+    }
+
+    template <typename TNeedle2>
+    Pattern(TNeedle2 const & ndl, int k = -1) {
+        SEQAN_CHECKPOINT;
+        setHost(*this, ndl, k);
+    }
 };
 
-template <typename TNeedle, typename TNeedle2>
-void
-setHost(Pattern<TNeedle, HammingHorspool> & me, 
-		TNeedle2 const & ndl, 
-		int const k)
-{
-	typedef typename Size<TNeedle>::Type TSize;
-	typedef typename Value<TNeedle>::Type TValue;
-	typedef typename Iterator<TNeedle2 const, Standard>::Type TNeedle2Iterator;
-
-	SEQAN_ASSERT(!empty(ndl));
-
-	me.k = k;
-	me.shift = 0;
-	TSize m = length(ndl);
-	TSize s = m - me.k;
-
-	String<TSize> ready; // keep last updates
-
-	TSize alphabet_size = ValueSize<TValue>::VALUE;
-	TSize shift_size = alphabet_size * (me.k + 1);
-
-	// get Space for ready-table and shift table
-	resize(ready, alphabet_size);
-	resize(me.shift_table, shift_size); // c x (k+1)
-
-	// initialize shift table and ready table
-	arrayFill(begin(ready), begin(ready) + alphabet_size, length(ndl)+1);
-    arrayFill(begin(me.shift_table), begin(me.shift_table) + shift_size, length(ndl));
-
-	// fill shift table by scanning the needle
-	TNeedle2Iterator it = begin(ndl, Standard())+ length(ndl)-1;
-	
-	for (TValue i = m; i >= 1; --i)
-	{
-		--it;  
-		TValue pos = ordValue(*it); //conversion value type to unsigned int
-		TValue v = (i > s) ? i : s;
-
-		for (TValue j = ready[pos]-1; j >= v ; --j)
-		{
-			me.shift_table[pos*(me.k+1)+j-s]= j-i+1;
-		}
-		ready[pos]= v;
-
-	}
-
-	me.data_host = ndl;
-}
-
-
 
 template <typename TNeedle, typename TNeedle2>
 void
-setHost(Pattern<TNeedle, HammingHorspool> & horsp, TNeedle2 & ndl, unsigned int k)
-{
-	setHost(horsp, reinterpret_cast<TNeedle2 const &>(ndl),k);
+setHost(Pattern<TNeedle, HammingHorspool> & me,
+        TNeedle2 const & needle,
+        int const k_) {
+    SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_NOT(empty(needle));
+    SEQAN_ASSERT_LEQ(k_, 0, "Are you confusing distances and scores?");
+
+    typedef typename Position<TNeedle>::Type TPosition;
+    typedef typename Size<TNeedle>::Type TSize;
+    typedef typename Value<TNeedle>::Type TValue;
+    typedef typename Iterator<TNeedle, Standard>::Type TNeedleIterator;
+
+    // Initialize pattern.
+    me.k = -k_;
+
+    // Perform precomputation.  The notation roughly follows Algorithm
+    // 3 from Tahio and Ukkonen, 1990.  However, me.k corresponds to k
+    // and me.shift_table corresponds to d_k (we add a helper macro
+    // SEQAN_d_k for this).
+    const TSize &m = length(needle);  // Needle length.
+    const TSize &c = ValueSize<TValue>::VALUE;  // Alphabet size.
+
+    // Define and initialize the temporary "ready" table.  Note that
+    // seqan::fill() also resizes containers.  This corresponds to lines
+    // 2-4, but we fill me.shift_table a bit more than there.
+    String<TSize> ready;
+    fill(ready, c, m + 1);
+    // Initialize the shift table (== d_k[i,a]).
+    fill(me.shift_table, c * (me.k + 1), m);
+
+    // Lines 5-8.  However, we use 0-based arrays.
+    for (TPosition i = m - 1; i >= 1; --i) {
+        const TPosition v = std::max(i, m - me.k);  // Shortcut.
+        const TPosition p_i = ordValue(needle[i - 1]);
+        for (TPosition j = ready[p_i] - 1; j >= v; --j) {
+            //if (i == j)
+            //    std::cout << "needle[i-1] == " << needle[i - 1] << " " << std::endl;
+            int idx = p_i * (me.k + 1) + j - (m - me.k);
+            // The actual value we set differs from the paper's algorithm
+            // description but fits with the text.
+            int d = (j == i) ? 1 : j - i;
+            me.shift_table[idx] = d;
+        }
+        ready[p_i] = v;
+    }
+    // Undefine helper macro.
+    #undef SEQAN_d_k
+    // Done with precomputation.
+
+#if SEQAN_ENABLE_DEBUG
+    // Validate precomputation.  All shifts should be > 0 and <= needle length.
+    for (TPosition i = 0; i <= me.k; ++i) {
+        std::cout << "i = " << i + (m - me.k) << " -- ";
+        for (TPosition a = 0; a < c; ++a) {
+            SEQAN_ASSERT_GT(me.shift_table[a * (me.k + 1) + i], 0u);
+            SEQAN_ASSERT_LEQ(me.shift_table[a * (me.k + 1) + i], m);
+            std::cout << me.shift_table[a * (me.k + 1) + i] << " ";
+        }
+        std::cout << std::endl;
+    }
+#endif  // SEQAN_DEBUG
+
+    // In the beginning the first tentative end position is m.
+    me._currentEndPos = m;
+
+    // Actually assign the needle as the host.
+    me.data_host = needle;
 }
 
-//____________________________________________________________________________
+
+template <typename TNeedle, typename TNeedle2>
+void
+setHost(Pattern<TNeedle, HammingHorspool> & horsp, TNeedle2 & ndl, unsigned int k) {
+    SEQAN_CHECKPOINT;
+    setHost(horsp, reinterpret_cast<TNeedle2 const &>(ndl),k);
+}
 
 
 template <typename TNeedle>
-inline void _finderInit (Pattern<TNeedle, HammingHorspool> & me) 
-{
+inline void _finderInit(Pattern<TNeedle, HammingHorspool> & me) {
+    SEQAN_CHECKPOINT;
+    (void) me;  // Suppress unused variable warning.
 }
 
-//____________________________________________________________________________
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type & 
+inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type &
 host(Pattern<TNeedle, HammingHorspool> & me)
 {
-SEQAN_CHECKPOINT
-	return value(me.data_host);
+    SEQAN_CHECKPOINT;
+    return value(me.data_host);
 }
 
 template <typename TNeedle>
-inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type & 
+inline typename Host<Pattern<TNeedle, HammingHorspool> >::Type &
 host(Pattern<TNeedle, HammingHorspool> const & me)
 {
-SEQAN_CHECKPOINT
-	return value(me.data_host);
+    SEQAN_CHECKPOINT;
+    return value(me.data_host);
 }
 
-//____________________________________________________________________________
 
 template <typename TFinder, typename TNeedle>
-bool
-find(TFinder & finder, Pattern<TNeedle, HammingHorspool> & me)
-{
-SEQAN_CHECKPOINT
-	typedef typename Haystack<TFinder>::Type THaystack;
-	THaystack & haystack = container(finder);
-	typename Position<TFinder>::Type pos = position(finder);
-	typename Size<THaystack>::Type hstk_size = length(haystack);
-	typename Size<TNeedle>::Type ndl_size = length(host(me));
+bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
+    SEQAN_CHECKPOINT;
 
-	if (ndl_size > hstk_size)
-	{//needle larger than haystack: nothing to find
-		return false;
-	}
+    typedef typename Position<TFinder>::Type TPos;
+    typedef typename Haystack<TFinder>::Type THaystack;
+    typedef typename Size<TNeedle>::Type TSize;
 
-	typename Position<THaystack>::Type pos_max = hstk_size - ndl_size; 
-	SEQAN_ASSERT2(pos <= pos_max, "invalid search position");
+    THaystack &haystack = container(finder);
+    TNeedle &needle = host(me);
 
-	//helper variables
-	typename Position<TFinder>::Type new_pos;
-	TFinder h = finder + ndl_size -1;
+    //std::cout << "haystack = " << haystack << std::endl;
+    //std::cout << "needle = " << needle << std::endl;
 
-	typename Iterator<TNeedle const, Standard>::Type it;
-	it = begin(host(me), Standard())+ ndl_size -1;
-	unsigned int s = ndl_size - me.k;
+    // Guard: Cannot find anything if needle longer than haystack.
+    if (length(me) > length(haystack))
+        return false;
 
-	if (empty(finder))
-	{
-		_finderInit(me);
-		_setFinderLength(finder, length(needle(me)));
-		_finderSetNonEmpty(finder);
-	}
-	
-	while(true){
-	
-		//move to next position: shift to the right in text
-		finder += me.shift;
-		pos +=  me.shift;
+    // If the finder is empty then initialize it.
+    if (empty(finder)) {
+        _finderInit(me);
+        _setFinderLength(finder, length(needle));
+        _finderSetNonEmpty(finder);
+    }
 
-		if (pos > pos_max)
-		{//pos out of text: found nothing
-			return false;
-		}
-		// h scans the text, it scans the pattern
-		h = finder + ndl_size - 1;		
-		it = begin(host(me), Standard())+ ndl_size -1 ; 
+    // Actually run the finder.  The notation follows Algorithm 4 from
+    // Tahio and Ukkonen, 1990.
+    TPos n = length(haystack);
+    TPos m = length(needle);
+    // Helper macro d_k allows us to access me.shift_table the way it is
+    // accessed in the paper.
+    const TSize offset = m - me.k;  // Offset for d_k[i,a]
+    #define SEQAN_d_k(i, a) (me.shift_table[(a) * (me.k + 1) + (i) - offset])
 
-		unsigned int neq = 0;			// # mismatches
-		unsigned int i = ndl_size;
-		me.shift = s;				    // initialize shift
+    // Match with pattern ends at position j.
+    TSize &j = me._currentEndPos;
+    while (j <= n) {
+        //std::cout << "beginning of loop" << std::endl;
+        // Algorithm 4, lines 4-5.
+        // h scans the text, i scans the text, both are indices.
+        TPos h = j - 1;
+        TPos i = m - 1;
+        // neq is the number of mismatches.
+        size_t neq = 0;
+        // d is the current shift, set its initial value.
+        TPos d = (m > me.k) ? m - me.k : 1;  // Shift must be > 0.
+        // Algorithm 4, lines 6-9.
+        // Compare needle and haystack from right to left, starting at h and i.
+        // This could read "while (i >= 0 && neq <= me.k)" if i was signed.
+        while (true) {  // We will break out of loop below.
+            unsigned t_h = ordValue(haystack[h]);
+            unsigned p_i = ordValue(needle[i]);
+            if (i >= m - me.k)  // Minimize d over component shifts.
+                d = std::min(d, SEQAN_d_k(i, t_h));
+            //SEQAN_ASSERT_GT(d, 0);  // We have to make progress!
+            //std::cout << "  h = " << h << ", i == " << i << std::endl;
+            if (t_h != p_i) {  // Count mismatches.
+                //std::cout << "  mismatch " << t_h << " != " << p_i << std::endl;
+                neq += 1;
+            } else {
+                //std::cout << "  hit " << t_h << " == " << p_i << std::endl;
+            }
+            // We break out of this loop here because i is unsigned
+            // and cannot become < 0.
+            if (i == 0 || neq > me.k)
+                break;
+            // Proceed to the left.
+            i -= 1;
+            h -= 1;
+        }
+        // Algorithm 4, line 10.
+        //std::cout << "  neq = " << neq << ", me.k = " << me.k << std::endl;
+        if (neq <= me.k) {
+            me.score = -neq;  // Set current score.
+            // Report match at position j, begins at j - m.
+            _setFinderEnd(finder, j);
+            setPosition(finder, j - m);
+            // Algorithm 4, line 11.
+            j += d;  // Shift to the right.
+            return true;
+        }
+        //std::cout << "  j = " << j << ", d = " << d <<  std::endl;
+        // Algorithm 4, line 11.
+        j += d;  // Shift to the right.
+    }
+    // Undefine the helper macro again.
+    #undef SEQAN_d_k
 
-		while(i > 0 && neq <= me.k){
-			// alignment of pattern and text
-			// right-to-left-scan over the pattern 
-			unsigned int char_t = *h;   // char in text
-			unsigned int char_p = *it;  // char in pattern
-			if(i >= s)
-			{	// minimize over all component shifts
-				unsigned int d_k = me.shift_table[char_t*(me.k+1)+i-s];
-				me.shift = (d_k < me.shift) ? d_k : me.shift;
-			} 
-
-			if(char_t != char_p)
-			{   // count mismatches
-				neq+=1; 
-			}
-			--i;
-			--it;  // proceed to left in pattern 
-			--h;   // proceed to left in text
-		
-		}
-		if(neq <= me.k)	{
-			//found a hit
-			return true;
-		}
-	
-	}
-	
-
-
+    return false;
 }
 
 
-
-//////////////////////////////////////////////////////////////////////////////
-// Host
-//////////////////////////////////////////////////////////////////////////////
-
 template <typename TNeedle>
-struct Host< Pattern<TNeedle, HammingHorspool> >
-{
-	typedef TNeedle Type;
-};
-
-template <typename TNeedle>
-struct Host< Pattern<TNeedle, HammingHorspool> const>
-{
-	typedef TNeedle const Type;
+struct Host<Pattern<TNeedle, HammingHorspool> > {
+    typedef TNeedle Type;
 };
 
 
-//////////////////////////////////////////////////////////////////////////////
+template <typename TNeedle>
+struct Host<const Pattern<TNeedle, HammingHorspool> > {
+    typedef TNeedle const Type;
+};
 
-}// namespace SEQAN_NAMESPACE_MAIN
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // SEQAN_FIND_HAMMING_HORSPOOL_H_
