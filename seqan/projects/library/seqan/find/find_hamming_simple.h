@@ -105,6 +105,14 @@ inline int score(const Pattern<TNeedle, HammingSimple> &me) {
 }
 
 
+template <typename TNeedle>
+inline void setScoreLimit(Pattern<TNeedle, HammingSimple> & me, int _limit) {
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LEQ(_limit, 0);
+    me.maxDistance = -_limit;
+}
+
+
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder &finder, 
                  Pattern<TNeedle, HammingSimple> &me) {

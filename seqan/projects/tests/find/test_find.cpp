@@ -1405,6 +1405,29 @@ SEQAN_DEFINE_TEST(test_find_hamming_simple) {
         SEQAN_ASSERT_EQ(3u, endPosition(finder));
         SEQAN_ASSERT_EQ(-1, score(pattern));
     }
+
+    // Test setting the score limit.
+    {
+        // TODO(holtgrew): Should be const, but finder does not allow this.
+        // Define haystack and needle.
+        DnaString haystack("AAC");
+        DnaString needle("AA");
+        // Define finder and pattern.
+        Finder<DnaString> finder(haystack);
+        Pattern<DnaString, HammingSimple> pattern(needle, 0);
+        // Perform the searches;
+        bool res;
+
+        res = find(finder, pattern);
+        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT_EQ(0u, position(finder));
+
+        setScoreLimit(pattern, -1);
+
+        res = find(finder, pattern);
+        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT_EQ(1u, position(finder));
+    }
 }
 
 
