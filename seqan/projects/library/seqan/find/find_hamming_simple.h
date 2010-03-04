@@ -106,6 +106,13 @@ inline int score(const Pattern<TNeedle, HammingSimple> &me) {
 
 
 template <typename TNeedle>
+inline int getScore(const Pattern<TNeedle, HammingSimple> &me) {
+    SEQAN_CHECKPOINT;
+    return -me.distance;
+}
+
+
+template <typename TNeedle>
 inline void setScoreLimit(Pattern<TNeedle, HammingSimple> & me, int _limit) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_LEQ(_limit, 0);

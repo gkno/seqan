@@ -1362,6 +1362,23 @@ SEQAN_DEFINE_TEST(test_regression_rmbench) {
 
 // Tests for the Simple Hamming Finder.
 SEQAN_DEFINE_TEST(test_find_hamming_simple) {
+    // Test that the interface works.
+    {
+        DnaString haystack("AC");
+        DnaString needle("AA");
+        // Define finder and pattern.
+        Finder<DnaString> finder(haystack);
+        Pattern<DnaString, HammingSimple> pattern(needle, -1);
+
+        // Perform a search, run all functions defined on the pattern.
+        bool res = find(finder, pattern);
+        SEQAN_ASSERT_TRUE(res);
+        SEQAN_ASSERT_EQ(0u, position(finder));
+        SEQAN_ASSERT_EQ(2u, endPosition(finder));
+        SEQAN_ASSERT_EQ(-1, score(pattern));
+        SEQAN_ASSERT_EQ(-1, getScore(pattern));
+    }
+    
     // Test for distance 0;
     {
         // TODO(holtgrew): Should be const, but finder does not allow this.
