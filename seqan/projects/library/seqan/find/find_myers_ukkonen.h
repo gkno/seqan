@@ -163,6 +163,8 @@ class Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >:
 {
 //____________________________________________________________________________
 public:
+	typedef _FindBegin<Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > > TBase;
+	typedef typename TBase::HasHost	HasHost;
 
 #ifdef SEQAN_SSE2_INT128
 	typedef SSE2_int128 TWord;
@@ -585,7 +587,7 @@ SEQAN_CHECKPOINT
                 // needle size minus one.  It is used for the mask
                 // computation and setting the initial score (the
                 // minus one is there because of the Ukkonen trick).
-                int local_k = std::min(me.k, me.needleSize - 1);
+                int local_k = _min(me.k, me.needleSize - 1);
                 me.score = local_k + 1;
 		large.scoreMask = (TWord)1 << (local_k % me.MACHINE_WORD_SIZE);
 		large.lastBlock = local_k / me.MACHINE_WORD_SIZE; 

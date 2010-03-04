@@ -133,7 +133,7 @@ SEQAN_CHECKPOINT
 		return getValue(data_iterator);
 	}
 
-	operator const TAccessor_NotConst() const
+	operator TAccessor_NotConst() const
 	{
 SEQAN_CHECKPOINT
 		return getValue(data_iterator);
