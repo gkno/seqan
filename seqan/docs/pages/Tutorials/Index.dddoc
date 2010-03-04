@@ -281,7 +281,8 @@ As $TText$ is a @Class.StringSet@, $position(finder)$ returns a @Class.Pair@ $(s
 The following index implementations are currently part of SeqAn:
 ...tableheader:Index specialization|Implementation|Reference
 ...table:@Spec.Index_ESA@|Enhanced suffix array|Kurtz et al., "Replacing Suffix Trees with Enhanced Suffix Arrays", 2004
-...table:Index_Wotd|Lazy suffix tree (work in progress)|Giegerich et al., "Efficient Implementation of Lazy Suffix Trees", 2003
+...table:Index_Wotd|Lazy suffix tree|Giegerich et al., "Efficient Implementation of Lazy Suffix Trees", 2003
+...table:Index_DFI|Deferred Frequency Index|@http://www.seqan.de/projects/dfi.html|Weese and Schulz, "Efficient String Mining under Constraints via the Deferred Frequency Index"@, 2008
 ...table:@Spec.Index_QGram@|Simple q-gram index (aka k-mer index)|
 ...table:Index_QGram_Nested|Nested q-gram index (work in progress)|
 
