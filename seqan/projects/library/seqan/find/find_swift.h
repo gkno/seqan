@@ -1136,9 +1136,22 @@ find(
 	return true;
 }
 
-
-
-
+/**
+.Function.windowFindBegin:
+..cat:Searching
+..summary:Initializes the pattern. Sets the finder on the begin position.
+ Gets the first non-repeat range and sets it in the finder.
+ Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
+..signature:windowFindBegin(finder, pattern, errorRate, printDots)
+..param.finder:A SWIFT finder.
+..param.pattern: A SWIFT pattern.
+..param.errorRate:Error rate that is allowed between reads and reference.
+ Schould be the same in as in @Function.windowFindNext@.
+...type:Class.Double
+..param.printDots:A dot is printed for every 100,000 bases scanned.
+...type:Class.Boolean
+..returns:true, if there are bases that can be scanned with @Function.windowFindNext@. false, otherwise
+*/
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline bool 
 windowFindBegin(
@@ -1147,6 +1160,8 @@ windowFindBegin(
 	double errorRate,
 	bool printDots)
 {
+	SEQAN_CHECKPOINT
+	
 	pattern.finderLength = pattern.params.tabooLength + length(container(finder));
 	_patternInit(pattern, errorRate, 0);
 	_finderSetNonEmpty(finder);
@@ -1158,8 +1173,26 @@ windowFindBegin(
     return true;
 }
 
-// returns true if there is more to find
-// returns false if the finder is at the end and the function does not need to be called again
+
+/**
+.Function.windowFindNext:
+..cat:Searching
+..summary:Searches over the next window with the finder. The found hits can be retrieved with @Function.getSwiftHits@
+ Used together with @Function.windowFindBegin@ and @Function.windowFindEnd@.
+..signature:windowFindNext(finder, pattern, finderWindowLength, printDots)
+..param.finder:A SWIFT finder.
+..param.pattern: A SWIFT pattern.
+..param.finderWindowLength:Number of bases that are scanned beginning from the position the finder is at.
+ Including bases that are marked as repeats and that are skipped.
+...type:nolink:unsigned int
+..param.printDots:A dot is printed for every 100,000 bases scanned.
+ Schould be the same in as in @Function.windowFindBegin@.
+...type:nolink:bool
+..returns:true, if there are bases that can be scanned. false, otherwise
+..see:Function.windowFindBegin
+..see:Function.windowFindEnd
+..see:Function.getSwiftHits
+*/
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec, typename TSize>
 inline bool 
 windowFindNext(
@@ -1173,6 +1206,8 @@ windowFindNext(
 #endif
                )
 {
+	SEQAN_CHECKPOINT
+	
 	typedef Index<TNeedle, TIndexSpec>					TIndex;
 	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
 	typedef	typename Value<TShape>::Type				THashValue;
@@ -1215,19 +1250,41 @@ windowFindNext(
 	return true;
 }
 
+/**
+.Function.windowFindEnd:
+..cat:Searching
+..summary:Flushes the pattern. Used together with @Function.windowFindBegin@ and @Function.windowFindNext@.
+..signature:windowFindNext(finder, pattern)
+..param.finder:A SWIFT finder.
+..param.pattern: A SWIFT pattern.
+..see:Function.windowFindBegin
+*/
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline void 
 windowFindEnd(
 	Finder<THaystack, Swift<TSpec> > &,
 	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern)
 {
+	SEQAN_CHECKPOINT
+	
 	_swiftMultiFlushBuckets(pattern);
 }
 
+
+/**
+.Function.getSwiftHits:
+..cat:Searching
+..summary:Gets the string of hits from the finder
+..signature:getSwiftHits(finder)
+..param.finder:A SWIFT finder.
+..returns:@Class.String@ of Hits (use Finder<...>::THitString as Type).
+*/
 template <typename THaystack, typename TSpec>
 inline typename Finder<THaystack, Swift<TSpec> >::THitString &
 getSwiftHits(Finder<THaystack, Swift<TSpec> > &finder)
 {
+	SEQAN_CHECKPOINT
+	
 	return finder.hits;
 }
 
