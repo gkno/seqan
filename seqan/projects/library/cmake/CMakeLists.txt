@@ -8,6 +8,7 @@ project (Seqan CXX)
 # Add FindTBB directory to CMake's module path
 set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindTBB/")
+find_package (PythonInterp)
 
 ################################################################################
 # Set Path Variables
@@ -58,11 +59,13 @@ list (REMOVE_DUPLICATES SEQAN_MODULES)
 # CMake Bug Workarounds
 ################################################################################
 
-# For Non-GUI Makefiles there is a bug in cmake: The SOURCE command in
+# For Non-GUI generators there is a bug in cmake: The SOURCE command in
 # add_custom_target is not recognized there
-if (NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+set (NONGUI_GENERATORS "Unix Makefiles" "MinGW Makefiles")
+list (FIND NONGUI_GENERATORS ${CMAKE_GENERATOR} FOUND)
+if (FOUND EQUAL -1)
   set (SEQAN_GUI_SOURCES SOURCES ${SEQAN_HEADERS})
-endif (NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+endif (FOUND EQUAL -1)
 
 ################################################################################
 # Forwards Generation For g++ Version >= 4.0
@@ -79,7 +82,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # build_forwards.py
   add_custom_command (
     OUTPUT ${SEQAN_FORWARDS}
-    COMMAND python ${SEQAN_LIBRARY}/../../misc/build_forwards.py
+    COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_LIBRARY}/../../misc/build_forwards.py
             ${SEQAN_BASE_ABS}
     DEPENDS ${SEQAN_HEADERS})
 endif (CMAKE_COMPILER_IS_GNUCXX)
@@ -122,7 +125,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
-  add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
+  set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} /EHsc /W2 /wd4996 -D_CRT_SECURE_NO_WARNINGS)
 endif (MSVC)
 
 ################################################################################

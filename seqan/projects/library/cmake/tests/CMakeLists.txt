@@ -1,14 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
 project (Seqan_Tests CXX)
 
-#set (CMAKE_BUILD_TYPE Debug)
-#set (CMAKE_BUILD_TYPE Release)
-
+################################################################################
 # For the tests, we switch SeqAn into testing mode.
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+################################################################################
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
 
 ################################################################################
 # Set path variables
@@ -16,9 +13,6 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 include_directories (${SEQAN_LIBRARY})
 link_directories (${SEQAN_LIBRARY}/lib)
-if (MSVC)
-        add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
-endif (MSVC)
 
 ################################################################################
 # Tests

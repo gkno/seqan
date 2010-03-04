@@ -1,15 +1,13 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.6)
 project (Seqan_Apps CXX)
 
+################################################################################
 # For the apps, use assertions in debug mode, no assertions in
 # release mode and never go into testing mode.
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS_RELEASE "-DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
-  set (CMAKE_CXX_FLAGS_DEBUG "-DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=0")
-endif (CMAKE_COMPILER_IS_GNUCXX)
+################################################################################
 
-#set (CMAKE_BUILD_TYPE Debug)
-#set (CMAKE_BUILD_TYPE Release)
+set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
+set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} "-DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=0")
 
 # Use CMake's package location functionality to find the directories of
 # TBB and Boost.
@@ -32,16 +30,10 @@ include_directories (${SEQAN_LIBRARY}
                      ${BOOST_INCLUDE_DIRS})
 link_directories (${SEQAN_LIBRARY}/lib
                   ${TBB_LIBRARY_DIRS})
-if (MSVC)
-        add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
-endif (MSVC)
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
 
-if (MSVC)
-        add_definitions (/W2 /wd4996 /D "_CRT_SECURE_NO_WARNINGS")
-endif (MSVC)
 
 ################################################################################
 # Applications
@@ -81,13 +73,13 @@ link_directories (${SEQAN_LIBRARY}/lib)
 
 foreach (APP_DIR ${SEQAN_APPS})
 	file (RELATIVE_PATH APP_DIR_REL ${SEQAN_APPS_ABS} ${APP_DIR})
-	
+
 	# if there is no predefined set of files for this target
 	# find the source files automatically
 	if (NOT APP_${APP_DIR_REL}_SOURCES)
 		file (GLOB APP_${APP_DIR_REL}_SOURCES ${APP_DIR}/[A-z]*.h ${APP_DIR}/[A-z]*.cpp)
 	endif (NOT APP_${APP_DIR_REL}_SOURCES)
-	
+
 	# add target, dependencies and linked libraries
 	if (APP_${APP_DIR_REL}_SOURCES)
 		list (SORT APP_${APP_DIR_REL}_SOURCES)
