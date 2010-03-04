@@ -20,6 +20,9 @@
   The SeqAn testing infrastructure.  Based on ideas from the OpenMS
   "ClassTest.h".
   ===========================================================================*/
+
+// SEQAN_NO_GENERATED_FORWARDS
+
 #ifndef SEQAN_BASIC_BASIC_TESTING_H_
 #define SEQAN_BASIC_BASIC_TESTING_H_
 
@@ -187,7 +190,7 @@ namespace ClassTest {
         // Get path to projects.
         const char *file = __FILE__;
         int pos = -1;
-        for (int i = 0; i < strlen(file) - strlen("projects"); ++i) {
+        for (size_t i = 0; i < strlen(file) - strlen("projects"); ++i) {
             if (strncmp(file + i, "projects", strlen("projects")) == 0) {
                 pos = i;
             }
@@ -261,7 +264,7 @@ namespace ClassTest {
     bool testEqual(const char *file, int line,
                    const T1 &value1, const char *expression1,
                    const T2 &value2, const char *expression2,
-                   const char *comment) {
+                   const char *comment, ...) {
         if (!(value1 == value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -270,8 +273,14 @@ namespace ClassTest {
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " == " << expression2 << " was: " << value1
                       << " != " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -294,9 +303,9 @@ namespace ClassTest {
     // the two values are equal.
     template <typename T1, typename T2>
     bool testNotEqual(const char *file, int line,
-                   const T1 &value1, const char *expression1,
-                   const T2 &value2, const char *expression2,
-                   const char *comment) {
+                      const T1 &value1, const char *expression1,
+                      const T2 &value2, const char *expression2,
+                      const char *comment, ...) {
         if (!(value1 != value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -305,8 +314,14 @@ namespace ClassTest {
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " != " << expression2 << " was: " << value1
                       << " == " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -331,7 +346,7 @@ namespace ClassTest {
     bool testGeq(const char *file, int line,
                  const T1 &value1, const char *expression1,
                  const T2 &value2, const char *expression2,
-                 const char *comment) {
+                 const char *comment, ...) {
         if (!(value1 >= value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -340,8 +355,14 @@ namespace ClassTest {
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " >= " << expression2 << " was: " << value1
                       << " < " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -366,7 +387,7 @@ namespace ClassTest {
     bool testGt(const char *file, int line,
                 const T1 &value1, const char *expression1,
                 const T2 &value2, const char *expression2,
-                const char *comment) {
+                const char *comment, ...) {
         if (!(value1 > value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -374,9 +395,15 @@ namespace ClassTest {
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " > " << expression2 << " was: " << value1
-                      << " >= " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+                      << " <= " << value2;
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -401,7 +428,7 @@ namespace ClassTest {
     bool testLeq(const char *file, int line,
                  const T1 &value1, const char *expression1,
                  const T2 &value2, const char *expression2,
-                 const char *comment) {
+                 const char *comment, ...) {
         if (!(value1 <= value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -410,8 +437,14 @@ namespace ClassTest {
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " <= " << expression2 << " was: " << value1
                       << " > " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -436,7 +469,7 @@ namespace ClassTest {
     bool testLt(const char *file, int line,
                 const T1 &value1, const char *expression1,
                 const T2 &value2, const char *expression2,
-                const char *comment) {
+                const char *comment, ...) {
         if (!(value1 < value2)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -445,8 +478,14 @@ namespace ClassTest {
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " < " << expression2 << " was: " << value1
                       << " > " << value2;
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -469,7 +508,7 @@ namespace ClassTest {
     template <typename T>
     bool testTrue(const char *file, int line,
                   const T &value_, const char *expression_,
-                  const char *comment) {
+                  const char *comment, ...) {
         if (!(value_)) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -477,8 +516,14 @@ namespace ClassTest {
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression_ << " should be true but was " << (value_);
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -501,7 +546,7 @@ namespace ClassTest {
     template <typename T>
     bool testFalse(const char *file, int line,
                    const T &value_, const char *expression_,
-                   const char *comment) {
+                   const char *comment, ...) {
         if (value_) {
             // Increase global error count.
             StaticData::thisTestOk() = false;
@@ -509,8 +554,14 @@ namespace ClassTest {
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression_ << " should be false but was " << (value_);
-            if (comment)
-                std::cerr << " (" << comment << ")";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
             std::cerr << std::endl;
             return false;
         }
@@ -637,6 +688,7 @@ namespace ClassTest {
 // This macro expands to startup code for a test file.
 #define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
     int main(int argc, char **argv) {                           \
+    (void) argc;                                                \
     ::seqan::ClassTest::beginTestSuite(#suite_name, argv[0]);
 
 
