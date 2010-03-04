@@ -288,7 +288,7 @@ void TestArrayFunctions(_T const _val1, _T const _val2)
 template <typename T>
 void TestSimpleType()
 {
-	T a;
+	T a = T();
 	T b(a);
 	b = a;
 

@@ -134,8 +134,8 @@ void IntervalTreeTest_GraphMap() {
         findIntervals(g, pm, query, result);
 
         SEQAN_ASSERT_EQ(length(result), 2);
-        SEQAN_ASSERT_TRUE((result[0] == 9 and result[1] == 6) or
-                          (result[0] == 6 and result[1] == 9));
+        SEQAN_ASSERT_TRUE((result[0] == 9 && result[1] == 6) ||
+                          (result[0] == 6 && result[1] == 9));
     }
 }
 
@@ -467,8 +467,8 @@ void IntervalTreeTest_NonFullLength() {
 
         findIntervals(itree, 4, result);
         SEQAN_ASSERT_EQ(length(result), 2);
-        SEQAN_ASSERT_TRUE(result[0] == 2 and result[1] == 1 or
-                          result[0] == 1 and result[1] == 2);
+        SEQAN_ASSERT_TRUE(result[0] == 2 && result[1] == 1 ||
+                          result[0] == 1 && result[1] == 2);
     }
 
 
@@ -547,8 +547,8 @@ void IntervalTreeTest_AddInterval() {
 
         findIntervals(itree, 48, result);
         SEQAN_ASSERT_EQ(length(result), 2);
-        SEQAN_ASSERT_TRUE(result[0] == 100 and result[1] == 7 or
-                          result[1] == 100 and result[0] == 7);
+        SEQAN_ASSERT_TRUE(result[0] == 100 && result[1] == 7 ||
+                          result[1] == 100 && result[0] == 7);
     }
 }
 
