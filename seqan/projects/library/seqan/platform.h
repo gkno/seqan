@@ -22,7 +22,6 @@
 #define SEQAN_PLATFORM_H
 
 #ifdef __MINGW32__
-#error MINGW
 	#include "platform/platform_mingw.h"
 #elif _MSC_VER
 	#include "platform/platform_windows.h"
