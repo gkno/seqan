@@ -29,6 +29,7 @@
 #include <iostream>  // stdout, stderr
 #include <cstring>   // strrpos
 #include <cstdlib>   // exit()
+#include <cstdarg>   // va_start, va_list, va_end
 #include <set>
 
 // SeqAn's has three global debug/testing levels: testing, debug and
