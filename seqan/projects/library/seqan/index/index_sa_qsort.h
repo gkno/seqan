@@ -65,6 +65,47 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+	// compare two suffices of a given text
+    template < typename TSAValue, typename TText, typename TSetSpec >
+	struct _SuffixLess<TSAValue, StringSet<TText, TSetSpec> > : 
+		public ::std::binary_function < TSAValue, TSAValue, bool >
+    {
+		typename Size<TText>::Type _offset;
+		TText const &_text;
+
+		_SuffixLess(TText &text): 
+			_text(text) {}
+			
+		// skip the first <offset> characters
+		template <typename TSize>
+		_SuffixLess(TText &text, TSize offset):
+			_text(text),
+			_offset(offset) {}
+		
+		inline bool operator() (TSAValue const a, TSAValue const b) const 
+		{
+			typedef typename Iterator<TText>::Type TIter;
+			if (a == b) return false;
+			TIter itA = begin(getValue(_text, getSeqNo(a)), Standard()) + getSeqOffset(a);
+			TIter itB = begin(getValue(_text, getSeqNo(b)), Standard()) + getSeqOffset(b);
+			TIter itAEnd = end(getValue(_text, getSeqNo(a)), Standard());
+			TIter itBEnd = end(getValue(_text, getSeqNo(b)), Standard());
+			if (itAEnd - itA <= itBEnd - itB) {
+				for(; itA != itAEnd; ++itA, ++itB) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return false;
+			} else {
+				for(; itB != itBEnd; ++itB, ++itA) {
+					if (lexLess(*itA, *itB)) return true;
+					if (lexLess(*itB, *itA)) return false;
+				}
+				return true;
+			}
+		}	
+	};
+
 	// compare two suffices of a given text and skip the first <lcp> characters
     template < typename TSAValue, typename TText >
 	struct _SuffixLessOffset: _SuffixLess<TSAValue, TText> 
@@ -109,6 +150,35 @@ namespace SEQAN_NAMESPACE_MAIN
 		TIter itEnd = end(SA, Standard());
 		for(TSize i = 0; it != itEnd; ++it, ++i)
 			*it = i;
+
+		// 2. Sort suffix array with quicksort
+		::std::sort(
+			begin(SA, Standard()), 
+			end(SA, Standard()), 
+			_SuffixLess<typename Value<TSA>::Type, TText const>(s));
+	}
+
+	template < typename TSA,
+               typename TText,
+			   typename TSSetSpec >
+    inline void createSuffixArray(
+		TSA &SA,
+		StringSet< TText, TSSetSpec > const &s,
+		SAQSort const &)
+	{
+	SEQAN_CHECKPOINT
+		typedef typename Size<TSA>::Type TSize;
+		typedef typename Iterator<TSA, Standard>::Type TIter;
+
+		// 1. Fill suffix array with a permutation (the identity)
+		TIter it = begin(SA, Standard());
+		TIter itEnd = end(SA, Standard());
+		for(unsigned j = 0; j < length(s); ++j)
+		{
+			TSize len = length(s[j]);
+			for(TSize i = 0; i < len; ++i)
+				*it = Pair<unsigned, TSize>(j, i);
+		}
 
 		// 2. Sort suffix array with quicksort
 		::std::sort(

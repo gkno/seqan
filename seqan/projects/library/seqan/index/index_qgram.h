@@ -1052,13 +1052,18 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 .Function.createQGramIndex:
 ..summary:Builds a q-gram index on a sequence. 
 ..cat:Index
-..signature:createQGramIndex(sa, dir, text, shape)
+..signature:createQGramIndex(index)
+..signature:createQGramIndex(sa, dir, bucketMap, text, shape[, stepSize]) (DEPRECATED)
+..param.index:The q-gram index.
+...type:Spec.Index_QGram
 ..param.text:The sequence.
 ..param.shape:The shape to be used.
 ...type:Class.Shape
+..param.stepSize:Store every $stepSize$'th q-gram in the index.
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
 ..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
-..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps. If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
+..returns:Index contains the sorted list of qgrams. For each q-gram $dir$ contains the first position in index that corresponds to this q-gram.
 */
 
 	template < typename TIndex >
@@ -1134,6 +1139,25 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		
 		// 4. fill suffix array
 		_qgramFillSuffixArray(sa, text, shape, dir, bucketMap, stepSize, False());
+	}
+
+	// DEPRECATED
+	// better use createQGramIndex(index) (above)
+	template <
+        typename TSA,
+		typename TDir,
+		typename TBucketMap,
+		typename TText,
+		typename TShape,
+		typename TStepSize >
+	void createQGramIndex(
+		TSA &sa,
+		TDir &dir,
+		TBucketMap &bucketMap,
+		TText const &text,
+		TShape &shape)	
+	{
+		createQGramIndex(sa, dir, bucketMap, text, shape);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
