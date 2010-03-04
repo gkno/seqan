@@ -6,8 +6,8 @@ project (Seqan_Demos CXX)
 # release mode and never go into testing mode.
 ################################################################################
 
-set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
-set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG} "-DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=0")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=0")
 
 ################################################################################
 # Set path variables
