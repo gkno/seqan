@@ -1713,10 +1713,17 @@ int _mapSingleReads(
 		// lock to prevent releasing and loading the same contig twice
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
+#ifndef RAZERS_WINDOW
 		if (options.forward)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
 		if (options.reverse)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+#else
+		if (options.forward)
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
+		if (options.reverse)
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+#endif
 		unlockAndFreeContig(store, contigId);
 	}
 	

@@ -27,10 +27,13 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
+
 //#define RAZERS_PARALLEL				// parallelize razerS
-//#define RAZERS_PARALLEL_CONTIGS       // parallelize by contigs
-//#define RAZERS_PARALLEL_READS         // parallelize by reads
-//#define RAZERS_TIMER
+//#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
+//#define RAZERS_PARALLEL_READS			// parallelize by reads
+//#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
+//#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
+
 //#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
@@ -54,6 +57,9 @@
 #endif
 #ifdef RAZERS_PARALLEL_READS
 #include "razers_parallel_2.h"
+#endif
+#ifdef RAZERS_WINDOW
+#include "razers_window.h"
 #endif
 
 #ifdef RAZERS_MATEPAIRS
