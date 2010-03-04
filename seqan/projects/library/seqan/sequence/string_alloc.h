@@ -51,7 +51,7 @@ public:
 	size_t data_capacity;
 
     void _checkMembers() const {
-        assert(data_begin <= data_end);
+        SEQAN_ASSERT_LEQ(data_begin, data_end, "String end is before begin!");
     }
 
 //____________________________________________________________________________
