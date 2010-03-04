@@ -1041,7 +1041,7 @@ find(
 			pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
 			return true;
 		}
-
+    
 	// all previous matches reported -> search new ones
 	clear(finder.hits);
 
@@ -1158,13 +1158,20 @@ windowFindBegin(
     return true;
 }
 
+// returns true if there is more to find
+// returns false if the finder is at the end and the function does not need to be called again
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec, typename TSize>
 inline bool 
 windowFindNext(
 	Finder<THaystack, Swift<TSpec> > &finder,
 	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern, 
 	TSize finderWindowLength,
-	bool printDots)
+	bool printDots
+#ifdef RAZERS_TIMER
+    ,
+    Pair<int, int>& posLength
+#endif
+               )
 {
 	typedef Index<TNeedle, TIndexSpec>					TIndex;
 	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
@@ -1172,11 +1179,14 @@ windowFindNext(
 	
 	typedef Finder<THaystack, Swift<TSpec> >			TFinder;
 	typedef typename TFinder::THstkPos					THstkPos;
-
-
+    
 	// all previous matches reported -> search new ones
 	clear(finder.hits);
-	
+
+#ifdef RAZERS_TIMER
+    posLength.i1 = finder.curPos;
+#endif
+    
 	THstkPos windowEnd = finder.curPos + finderWindowLength;
 	// iterate over all non-repeat regions within the window
 	for (; finder.curPos < windowEnd; )
@@ -1184,16 +1194,23 @@ windowFindNext(
 		THstkPos localEnd = finder.endPos;
 		if (localEnd > windowEnd) localEnd = windowEnd;
 
+#ifdef RAZERS_TIMER
+        posLength.i2 += localEnd - finder.curPos;
+#endif
+        
 		// filter a non-repeat region within the window
 		TShape &shape = pattern.shape;
 		_swiftMultiProcessQGram(finder, pattern, hash(shape, hostIterator(hostIterator(finder))));
-		for (++finder.curPos, ++finder; finder.curPos < localEnd; ++finder.curPos, ++finder)
-			_swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));
-			
+        
+		for (++finder.curPos, ++finder; finder.curPos < localEnd; ++finder.curPos, ++finder){
+			_swiftMultiProcessQGram(finder, pattern, hashNext(shape, hostIterator(hostIterator(finder))));			
+        }
+            
 		if (printDots) _printDots(finder);
 
 		if (finder.curPos == finder.endPos)
-			if (!_nextNonRepeatRange(finder, pattern, printDots)) return false;
+			if (!_nextNonRepeatRange(finder, pattern, printDots))
+                return false;
 	}
 	return true;
 }

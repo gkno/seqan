@@ -165,8 +165,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// multi-threading
 
 #ifdef RAZERS_PARALLEL_READS
-        unsigned    windowSize;
-        unsigned    blocksPerCore;
+        unsigned            windowSize;
+        unsigned            blocksPerCore;
 #endif
 
 #ifdef RAZERS_PARALLEL
@@ -240,7 +240,7 @@ namespace SEQAN_NAMESPACE_MAIN
             
 #ifdef RAZERS_PARALLEL_READS
             windowSize = 1000;
-            blocksPerCore = 7;
+            blocksPerCore = 5;
 #endif
             
 		}
@@ -1715,7 +1715,6 @@ int _mapSingleReads(
 		lockContig(store, contigId);
 		if (options.forward)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
-
 		if (options.reverse)
 			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
 		unlockAndFreeContig(store, contigId);

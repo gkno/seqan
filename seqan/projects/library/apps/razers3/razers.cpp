@@ -30,8 +30,8 @@
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS       // parallelize by contigs
 //#define RAZERS_PARALLEL_READS         // parallelize by reads
-
-  //#define RAZERS_MATEPAIRS				// enable paired-end matching
+//#define RAZERS_TIMER
+//#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
@@ -284,12 +284,14 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
 	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
 	addOption(parser, CommandLineOption("mmq","total-mism-quality","total sum of qualities at mismatching bases", OptionType::Int | OptionType::Label, options.absMaxQualSumErrors));
-
 #endif
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
-
+#ifdef RAZERS_PARALLEL_READS
+    addOption(parser, CommandLineOption("ws", "window-size",        "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
+    addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Int | OptionType::Label, options.blocksPerCore));
+#endif
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -329,6 +331,10 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "mq-seed-length", options.artSeedLength);
 	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
 	getOptionValueLong(parser, "low-memory", options.lowMemory);
+#endif
+#ifdef RAZERS_PARALLEL_READS
+    getOptionValueLong(parser, "window-size", options.windowSize);
+    getOptionValueLong(parser, "blocks-per-thread", options.blocksPerCore);
 #endif
 	getOptionValueLong(parser, "trim-reads", options.trimLength);
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
