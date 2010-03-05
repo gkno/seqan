@@ -1237,27 +1237,27 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
+template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(String<TTargetValue, TTargetSpec> & target,
-		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
-		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
-		 TSource const & source,
-		 Tag<TExpand> const)
+		TPositionBegin pos_begin,
+		TPositionEnd pos_end,
+		TSource const & source,
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
-template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
+template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(String<TTargetValue, TTargetSpec> & target,
-		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
-		 typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
-		 TSource const & source,
-		 typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-		 Tag<TExpand> const)
+		TPositionBegin pos_begin,
+		TPositionEnd pos_end,
+		TSource const & source,
+		typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
+		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
@@ -1267,11 +1267,11 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 //this variant is a workaround for the "const array"-bug of VC++
 
-template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TExpand>
+template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
 inline void 
 replace(String<TTargetValue, TTargetSpec> & target,
-		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
-		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
+		TPositionBegin pos_begin,
+		TPositionEnd pos_end,
 		TSourceValue const * source,
 		Tag<TExpand> const)
 {
@@ -1280,11 +1280,11 @@ SEQAN_CHECKPOINT
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
-template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TExpand>
+template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
 inline void 
 replace(String<TTargetValue, TTargetSpec> & target,
-		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
-		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
+		TPositionBegin pos_begin,
+		TPositionEnd pos_end,
 		TSourceValue const * source,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 		Tag<TExpand> const)
@@ -1293,34 +1293,6 @@ SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
 	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
-
-//////////////////////////////////////////////////////////////////////////////
-// handling of iterators as begin and end
-
-/*
-template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
-inline void 
-replace(String<TTargetValue, TTargetSpec> & target,
-		typename Iterator< String<TTargetValue, TTargetSpec>, Rooted >::Type pos_begin,
-		typename Iterator< String<TTargetValue, TTargetSpec>, Rooted >::Type pos_end,
-		TSource & source,
-		Tag<TExpand> const tag)
-{
-	replace(target, position(pos_begin), position(pos_end), source, tag);
-}
-
-template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
-inline void 
-replace(String<TTargetValue, TTargetSpec> & target,
-		typename Iterator< String<TTargetValue, TTargetSpec>, Rooted >::Type pos_begin,
-		typename Iterator< String<TTargetValue, TTargetSpec>, Rooted >::Type pos_end,
-		TSource & source,
-		typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-		Tag<TExpand> const tag)
-{
-	replace(target, position(pos_begin), position(pos_end), source, limit, tag);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 /**

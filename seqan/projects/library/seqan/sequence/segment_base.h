@@ -314,6 +314,30 @@ operation_2_set(Segment<THost, TSpec> & target,
 }
 template <typename THost, typename TSpec, typename TSpec2>
 inline bool 
+operation_2_set(Segment<THost const, TSpec> & target, 
+				Segment<THost, TSpec2> & source)
+{
+	if (hasNoHost(target))
+	{
+		set(target, host(source), beginPosition(source), endPosition(source));
+		return true;
+	}
+	return false;
+}
+template <typename THost, typename TSpec, typename TSpec2>
+inline bool 
+operation_2_set(Segment<THost const, TSpec> & target, 
+				Segment<THost, TSpec2> const & source)
+{
+	if (hasNoHost(target))
+	{
+		set(target, host(source), beginPosition(source), endPosition(source));
+		return true;
+	}
+	return false;
+}
+template <typename THost, typename TSpec, typename TSpec2>
+inline bool 
 operation_2_set(Segment<THost, TSpec> & target, 
 				Segment<THost, TSpec2> const & source)
 {
@@ -444,6 +468,27 @@ SEQAN_CHECKPOINT
 template <typename TExpand>
 struct _Assign_Segment
 {
+	template <typename THost, typename TSpec, typename TSource>
+	static inline void 
+	assign_(
+		Segment<THost const, TSpec> & target, 
+		TSource & source)
+	{
+SEQAN_CHECKPOINT
+		set(target, source);
+	}
+
+	template <typename THost, typename TSpec, typename TSource>
+	static inline void 
+	assign_(
+		Segment<THost const, TSpec> & target, 
+		TSource & source, 
+		typename Size< Segment<THost const, TSpec> >::Type limit)
+	{
+SEQAN_CHECKPOINT
+		set(target, source);
+	}
+
 	template <typename THost, typename TSpec, typename TSource>
 	static inline void 
 	assign_(
@@ -995,24 +1040,24 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(
 	Segment<THost, TSpec> & target, 
-	typename Position< Segment<THost, TSpec> >::Type pos_begin,
-	typename Position< Segment<THost, TSpec> >::Type pos_end,
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
 	TSource & source, 
 	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(
 	Segment<THost, TSpec> & target, 
-	typename Position< Segment<THost, TSpec> >::Type pos_begin,
-	typename Position< Segment<THost, TSpec> >::Type pos_end,
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
 	TSource const & source, 
 	Tag<TExpand> const)
 {
@@ -1020,12 +1065,12 @@ SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(
 	Segment<THost, TSpec> & target, 
-	typename Position< Segment<THost, TSpec> >::Type pos_begin,
-	typename Position< Segment<THost, TSpec> >::Type pos_end,
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
 	TSource & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
 	Tag<TExpand> const)
@@ -1033,64 +1078,12 @@ replace(
 SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
 replace(
 	Segment<THost, TSpec> & target, 
-	typename Position< Segment<THost, TSpec> >::Type pos_begin,
-	typename Position< Segment<THost, TSpec> >::Type pos_end,
-	TSource const & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
-}
-
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> const & target, 
-	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-	typename Position< Segment<THost, TSpec> const>::Type pos_end,
-	TSource & source, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
-}
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> const & target, 
-	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-	typename Position< Segment<THost, TSpec> const>::Type pos_end,
-	TSource const & source, 
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
-}
-
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> const & target, 
-	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-	typename Position< Segment<THost, TSpec> const>::Type pos_end,
-	TSource & source, 
-	typename Size< Segment<THost, TSpec> >::Type limit, 
-	Tag<TExpand> const )
-{
-SEQAN_CHECKPOINT
-	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
-}
-template <typename THost, typename TSpec, typename TSource, typename TExpand>
-inline void 
-replace(
-	Segment<THost, TSpec> const & target, 
-	typename Position< Segment<THost, TSpec> const>::Type pos_begin,
-	typename Position< Segment<THost, TSpec> const>::Type pos_end,
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
 	TSource const & source, 
 	typename Size< Segment<THost, TSpec> >::Type limit, 
 	Tag<TExpand> const)
@@ -1099,60 +1092,58 @@ SEQAN_CHECKPOINT
 	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// handling of iterators as begin and end
-
-/*
-template<typename THost, typename TTargetSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
-replace(Segment<THost, TTargetSpec> & target,
-		typename Iterator< Segment<THost, TTargetSpec>, Rooted>::Type pos_begin,
-		typename Iterator< Segment<THost, TTargetSpec>, Rooted>::Type pos_end,
-		TSource & source,
-		Tag<TExpand> const tag)
+replace(
+	Segment<THost, TSpec> const & target, 
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
+	TSource & source, 
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	replace(target, position(pos_begin), position(pos_end), source, tag);
+	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
-
-template<typename THost, typename TTargetSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
-replace(Segment<THost, TTargetSpec> & target,
-		typename Iterator< Segment<THost, TTargetSpec>, Rooted>::Type pos_begin,
-		typename Iterator< Segment<THost, TTargetSpec>, Rooted>::Type pos_end,
-		TSource & source,
-		typename Size< Segment<THost, TTargetSpec> >::Type limit,
-		Tag<TExpand> const tag)
+replace(
+	Segment<THost, TSpec> const & target, 
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
+	TSource const & source, 
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	replace(target, position(pos_begin), position(pos_end), source, limit, tag);
+	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
-template<typename THost, typename TTargetSpec, typename TSource, typename TExpand>
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
 inline void 
-replace(Segment<THost, TTargetSpec> const & target,
-		typename Iterator< Segment<THost, TTargetSpec> const, Rooted>::Type pos_begin,
-		typename Iterator< Segment<THost, TTargetSpec> const, Rooted>::Type pos_end,
-		TSource & source,
-		Tag<TExpand> const tag)
+replace(
+	Segment<THost, TSpec> const & target, 
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
+	TSource & source, 
+	typename Size< Segment<THost, TSpec> >::Type limit, 
+	Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	replace(target, position(pos_begin), position(pos_end), source, tag);
+	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+}
+template <typename THost, typename TSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
+inline void 
+replace(
+	Segment<THost, TSpec> const & target, 
+	TPositionBegin pos_begin,
+	TPositionEnd pos_end,
+	TSource const & source, 
+	typename Size< Segment<THost, TSpec> >::Type limit, 
+	Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+	_Replace_Sequence_2_Segment<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
-template<typename THost, typename TTargetSpec, typename TSource, typename TExpand>
-inline void 
-replace(Segment<THost, TTargetSpec> const & target,
-		typename Iterator< Segment<THost, TTargetSpec> const, Rooted>::Type pos_begin,
-		typename Iterator< Segment<THost, TTargetSpec> const, Rooted>::Type pos_end,
-		TSource & source,
-		typename Size< Segment<THost, TTargetSpec> >::Type limit,
-		Tag<TExpand> const tag)
-{
-SEQAN_CHECKPOINT
-	replace(target, position(pos_begin), position(pos_end), source, limit, tag);
-}
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.resize.param.object.type:Class.Segment

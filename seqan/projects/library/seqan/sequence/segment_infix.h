@@ -434,6 +434,14 @@ SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);
 }
 	
+template <typename THost_>
+inline void 
+setHost(Segment<THost_ const, InfixSegment> & me, typename _Parameter<THost_>::Type _host)
+{
+SEQAN_CHECKPOINT
+	me.data_host = _toPointer(_host);
+}
+	
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -518,7 +526,27 @@ SEQAN_CHECKPOINT
 }
 template <typename THost, typename TSpec>
 inline void
+set(Segment<THost const, InfixSegment> & me,
+	Segment<THost, TSpec> & source)
+{
+SEQAN_CHECKPOINT
+	setHost(me, host(source));
+	setBeginPosition(me, beginPosition(source));
+	setEndPosition(me, endPosition(source));
+}
+template <typename THost, typename TSpec>
+inline void
 set(Segment<THost, InfixSegment> & me,
+	Segment<THost, TSpec> const & source)
+{
+SEQAN_CHECKPOINT
+	setHost(me, host(source));
+	setBeginPosition(me, beginPosition(source));
+	setEndPosition(me, endPosition(source));
+}
+template <typename THost, typename TSpec>
+inline void
+set(Segment<THost const, InfixSegment> & me,
 	Segment<THost, TSpec> const & source)
 {
 SEQAN_CHECKPOINT

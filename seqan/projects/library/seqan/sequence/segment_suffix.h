@@ -210,6 +210,13 @@ SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);
 }
 
+template <typename THost_>
+inline void 
+setHost(Segment<THost_ const, SuffixSegment> & me, typename _Parameter<THost_>::Type _host)
+{
+SEQAN_CHECKPOINT
+	me.data_host = _toPointer(_host);
+}
 
 //____________________________________________________________________________
 
