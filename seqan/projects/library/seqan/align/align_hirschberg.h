@@ -446,7 +446,7 @@ SEQAN_CHECKPOINT
 
 					s = c_score[j];
 					sg = pointer[j];
-					if(sd >= max(sg1,sg2))
+					if(sd >= _max(sg1,sg2))
 					{
 						c_score[j] = sd;
 						pointer[j] = dp;
