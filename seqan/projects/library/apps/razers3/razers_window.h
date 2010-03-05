@@ -29,6 +29,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in a single genome sequence
+	// 
+	// Creates finder on the contig given by the ID and a verifier.
+	// Searches through the contig using the findWindowNext() function.
+	// The results are dumped in the (aligned) store.
     template <
 	typename TFragmentStore, 
 	typename TReadIndex, 
@@ -67,18 +71,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<THitString>::Type                TSwiftHit;
         typedef typename Size<THitString>::Type               THitStringSize;
         
-        // iterate all genomic sequences
+		// output what is done if verbous
         if (options._debugLevel >= 1)
         {
             ::std::cerr << ::std::endl << "Process genome seq #" << contigId;
             if (orientation == 'F') ::std::cerr << "[fwd]";
             else                    ::std::cerr << "[rev]";
         }
+		// lock contig
         lockContig(store, contigId);
         TContigSeq &contigSeq = store.contigStore[contigId].seq;
         if (orientation == 'R')	reverseComplementInPlace(contigSeq);
         
-        //TReadSet		&readSet = host(host(swiftPattern));
+		// Create finder and verifier
         TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
         TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
         
@@ -87,12 +92,14 @@ namespace SEQAN_NAMESPACE_MAIN
         verifier.genomeLength = length(contigSeq);
         verifier.m.contigId = contigId;
         
+		// if the pattern can be initialized and there is a non-repeat region in the contig that fits a qgram.
         if(windowFindBegin(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)){
             
+			// while there is more contig sequence to search through
             while(windowFindNext(swiftFinder, swiftPattern, 1000, options._debugLevel)){
-                // verify hits
+                // get the found hits from the finder
                 THitString hits = getSwiftHits(swiftFinder);
-                
+                // verifiy them
                 for(THitStringSize h = 0; h < length(hits); ++h){
                     verifier.m.readId = hits[h].ndlSeqNo;         //array oder jedesmal berechnen
                     matchVerify(verifier, getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPattern)), mode);
