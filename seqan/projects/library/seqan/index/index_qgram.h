@@ -457,20 +457,20 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	}
 
 	template <typename TIndex>
-	inline int _fullDirLength(TIndex const &index) 
+	inline __int64 _fullDirLength(TIndex const &index) 
 	{
 		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
 		typedef typename Host<TShape>::Type					TTextValue;
-		return _intPow((unsigned)ValueSize<TTextValue>::VALUE, weight(indexShape(index))) + 1;
+		return _intPow((__int64)ValueSize<TTextValue>::VALUE, weight(indexShape(index))) + 1;
 	}
 
 	template <typename TIndex>
-	inline int _fullDir2Length(TIndex const &index) 
+	inline __int64 _fullDir2Length(TIndex const &index) 
 	{
 		typedef typename Fibre<TIndex, Fibre_Shape>::Type	TShape;
 		typedef typename Host<TShape>::Type					TTextValue;
 		return (_intPow(
-					(unsigned)ValueSize<TTextValue>::VALUE,
+					(__int64)ValueSize<TTextValue>::VALUE,
 					weight(indexShape(index)) + 1) - 1)
 				/ ((unsigned)ValueSize<TTextValue>::VALUE - 1) + 1;
 	}

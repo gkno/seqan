@@ -219,7 +219,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TObject, typename TShapeSpec>
-	inline int _fullDirLength(Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> > const &index) 
+	inline __int64 _fullDirLength(Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> > const &index) 
 	{
 		typedef Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >	TIndex;
 		typedef typename Fibre<TIndex, QGram_Dir>::Type						TDir;
@@ -230,16 +230,16 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		double num_qgrams = _qgramQGramCount(index) * index.alpha;
 		double max_qgrams = pow((double)ValueSize<TTextValue>::VALUE, (double)weight(indexShape(index)));
-		long qgrams;
+		__int64	qgrams;
 		
 		// compare size of open adressing with 1-1 mapping and use the smaller one
 		if (num_qgrams * (sizeof(TDirValue) + sizeof(THashValue)) < max_qgrams * sizeof(TDirValue))
 		{
-			qgrams = ceil(num_qgrams);
+			qgrams = (__int64)ceil(num_qgrams);
 			resize(const_cast<TIndex &>(index).bucketMap.qgramHash, qgrams + 1, Exact());
 		} else
 		{
-			qgrams = ceil(max_qgrams);
+			qgrams = (__int64)ceil(max_qgrams);
 			clear(const_cast<TIndex &>(index).bucketMap.qgramHash);	// 1-1 mapping, no bucket map needed
 		}
 		
