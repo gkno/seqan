@@ -136,32 +136,45 @@ namespace SEQAN_NAMESPACE_MAIN
 		arrayFill(begin(bucketMap.qgramHash, Standard()), end(bucketMap.qgramHash, Standard()), (THashValue)-1);
 	}
 
+	// looks up the bucket for the hash
+	// allocates a new bucket if non for this hash exsits yet
+	// returns the position of the bucket
 	template < typename THashValue, typename THashValue2 >
 	inline THashValue
 	requestBucket(BucketMap<THashValue> &bucketMap, THashValue2 hash)
 	{
 		typedef unsigned long TSize;
+		// get size of the index
 		TSize hlen = length(bucketMap.qgramHash) - 1;
 		
 		// check whether bucket map is disabled
 		if (hlen == (TSize)-1)
 			return hash;
 		
+		// where the hash should be found if no collision took place before
 		TSize h1 = hash % hlen;
+		
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
+		// if there is no collision with another hash value
+		// the bucket is still empty
 		if (bucketMap.qgramHash[h1] == (THashValue)-1)
 		{
 			bucketMap.qgramHash[h1] = hash;
 			return h1;
 		}
+		// if there is a collision
 		else
 		{
+			// the bucket for this hash was requestet before
+			// return the same bucket
 			if (bucketMap.qgramHash[h1] == hash)
 				return h1;
+			// another hash is occupying this bucket already
 			else 
 			{
-//				TSize step = 1 + (hash % bucketMap.prime);
+				// TSize step = 1 + (hash % bucketMap.prime);
 				TSize step = bucketMap.prime;
+				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
 					h1 = (h1 + step) % hlen;
 				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
@@ -171,28 +184,41 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+	
+	// looks up the bucket for the hash
+	// returns the position of the bucket
 	template < typename THashValue, typename THashValue2 >
 	inline THashValue
 	getBucket(BucketMap<THashValue> const &bucketMap, THashValue2 hash)
 	{
 		typedef unsigned long TSize;
+		// get size of the index
 		TSize hlen = length(bucketMap.qgramHash) - 1;
 
 		// check whether bucket map is disabled
 		if (hlen == (TSize)-1)
 			return hash;
-
+		
+		// where the hash should be found if no collision took place before
 		TSize h1 = hash % hlen;
+		
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
+		// if there is no collision with another hash value
+		// the bucket is still empty
 		if (bucketMap.qgramHash[h1] == (THashValue)-1)
 			return h1;
+		// if there is a collision
 		else
 		{
+			// the bucket for this hash was requestet before
+			// return the same bucket
 			if (bucketMap.qgramHash[h1] == hash)
 				return h1;
+			// another hash is occupying this bucket already
 			else 
 			{
 				TSize step = bucketMap.prime;
+				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
 					h1 = (h1 + step) % hlen;
 				} while (bucketMap.qgramHash[h1] != (THashValue)-1 && bucketMap.qgramHash[h1] != hash);
@@ -230,7 +256,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		double num_qgrams = _qgramQGramCount(index) * index.alpha;
 		double max_qgrams = pow((double)ValueSize<TTextValue>::VALUE, (double)weight(indexShape(index)));
-		__int64	qgrams;
+		__int64 qgrams;
 		
 		// compare size of open adressing with 1-1 mapping and use the smaller one
 		if (num_qgrams * (sizeof(TDirValue) + sizeof(THashValue)) < max_qgrams * sizeof(TDirValue))
