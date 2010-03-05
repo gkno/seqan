@@ -36,6 +36,7 @@ get_filename_component (SEQAN_BASE_ABS ${SEQAN_LIBRARY}/seqan ABSOLUTE)
 # A sorted list of all SeqAn headers goes into SEQAN_HEADERS.  We
 # exclude the generated headers.
 file (GLOB SEQAN_HEADERS_TMP ${SEQAN_BASE_ABS}/[A-z]*/[A-z]*.h)
+file (GLOB SEQAN_SUPER_HEADERS ${SEQAN_BASE_ABS}/[A-z]*.h)
 foreach (HEADER ${SEQAN_HEADERS_TMP})
   if (NOT ${HEADER} MATCHES ".*generated.*")
     list (APPEND SEQAN_HEADERS ${HEADER})
@@ -64,7 +65,7 @@ list (REMOVE_DUPLICATES SEQAN_MODULES)
 set (NONGUI_GENERATORS "Unix Makefiles" "MinGW Makefiles")
 list (FIND NONGUI_GENERATORS ${CMAKE_GENERATOR} FOUND)
 if (FOUND EQUAL -1)
-  set (SEQAN_GUI_SOURCES SOURCES ${SEQAN_HEADERS})
+  set (SEQAN_GUI_SOURCES SOURCES ${SEQAN_HEADERS} ${SEQAN_SUPER_HEADERS})
 endif (FOUND EQUAL -1)
 
 ################################################################################
@@ -83,7 +84,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   add_custom_command (
     OUTPUT ${SEQAN_FORWARDS}
     COMMAND ${PYTHON_EXECUTABLE} ${SEQAN_LIBRARY}/../../misc/build_forwards.py
-            ${SEQAN_BASE_ABS}
+            ${SEQAN_BASE_ABS} all
     DEPENDS ${SEQAN_HEADERS})
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
@@ -121,6 +122,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # For the GCC, enable warnings.
   set (CMAKE_CXX_WARNING_LEVEL 4)
   # TODO(holtgrew): Add -pedantic.
+  #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-variadic-macros -pedantic")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
@@ -129,11 +131,18 @@ if (MSVC)
 endif (MSVC)
 
 ################################################################################
-# Include Sub-Projects
+# Set Default Build Type
 ################################################################################
 
-#set (CMAKE_BUILD_TYPE Debug)
-#set (CMAKE_BUILD_TYPE Release)
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Debug CACHE STRING
+      "Choose the type of build, options are: Debug Release."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
+################################################################################
+# Include Sub-Projects
+################################################################################
 
 add_subdirectory (apps)
 add_subdirectory (demos)
