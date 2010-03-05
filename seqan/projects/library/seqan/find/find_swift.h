@@ -482,7 +482,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 				// n..next length that could decrease threshold
 				TSize n = (TSize) ceil((floor(errorRate * minLength) + 1) / errorRate);
 				// minimal threshold is minimum errors of minLength and n
-				int threshold = (TSize) min(
+				int threshold = (TSize) std::min(
 					(n + 1) - span * (floor(errorRate * n) + 1),
 					(minLength + 1) - span * (floor(errorRate * minLength) + 1));
 
