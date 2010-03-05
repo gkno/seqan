@@ -685,6 +685,10 @@ namespace ClassTest {
     
 }  // namespace ClassTest
 
+// This macro expands to function header for one test.
+#define SEQAN_DEFINE_TEST(test_name)                    \
+    void SEQAN_TEST_ ## test_name ()
+
 #if SEQAN_ENABLE_TESTING
 // This macro expands to startup code for a test file.
 #define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
@@ -699,11 +703,6 @@ namespace ClassTest {
 }
 
 
-// This macro expands to function header for one test.
-#define SEQAN_DEFINE_TEST(test_name)                    \
-    void SEQAN_TEST_ ## test_name ()                    \
-                                                        \
-                                                        \
 // This macro expands to code to call a given test.
 #define SEQAN_CALL_TEST(test_name)                                      \
     do {                                                                \
@@ -838,11 +837,6 @@ namespace ClassTest {
 
 #else  // #if SEQAN_ENABLE_DEBUG
 
-#define SEQAN_BEGIN_TESTSUITE(suite_name) do {} while (false)
-#define SEQAN_END_TESTSUITE do {} while (false)
-#define SEQAN_DEFINE_TEST(test_name) do {} while (false)
-#define SEQAN_CALL_TEST(test_name) do {} while (false)
-#define SEQAN_SKIP_TEST do {} while (false)
 #define SEQAN_ASSERT_EQ(_arg1, _arg2, ...) do {} while (false)
 #define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...) do {} while (false)
 #define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...) do {} while (false)
@@ -883,6 +877,13 @@ namespace ClassTest {
 #else  // #if SEQAN_ENABLE_TESTING
 
 #define SEQAN_CHECKPOINT
+#define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
+    int main(int argc, char **argv) {                           \
+    (void) argc;                                                \
+    (void) argv;
+#define SEQAN_END_TESTSUITE }
+#define SEQAN_CALL_TEST(test_name) do { SEQAN_TEST_ ## test_name(); } while (false)
+#define SEQAN_SKIP_TEST do {} while (false)
 
 // If checkpoints are to be verified if testing is disabled then print
 // a warning.

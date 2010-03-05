@@ -205,56 +205,20 @@ struct _RemoveConst<T const [I]>
 template <typename T>
 struct _MakeUnsigned
 {
-	typedef T Type;
+	typedef
+		typename IF< TYPECMP<T, char>::VALUE,         unsigned char,
+		typename IF< TYPECMP<T, signed char>::VALUE,  unsigned char,
+		typename IF< TYPECMP<T, signed short>::VALUE, unsigned short,
+		typename IF< TYPECMP<T, signed int>::VALUE,   unsigned int,
+		typename IF< TYPECMP<T, signed long>::VALUE,  unsigned long,
+		typename IF< TYPECMP<T, __int64>::VALUE,      __uint64, T
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
 };
 
 template <typename T>
 struct _MakeUnsigned<T const> {
 	typedef typename _MakeUnsigned<T>::Type const Type;
 };
-
-template <>
-struct _MakeUnsigned<char>
-{
-	typedef unsigned char Type;
-};
-
-template <>
-struct _MakeUnsigned<signed char>
-{
-	typedef unsigned char Type;
-};
-
-template <>
-struct _MakeUnsigned<int>
-{
-	typedef unsigned int Type;
-};
-
-template <>
-struct _MakeUnsigned<short>
-{
-	typedef unsigned short Type;
-};
-
-template <>
-struct _MakeUnsigned<__int64>
-{
-	typedef __uint64 Type;
-};
-
-/*template <>
-struct _MakeUnsigned<long>
-{
-	typedef unsigned long Type;
-};
-
-template <>
-struct _MakeUnsigned<long long>
-{
-	typedef unsigned long long Type;
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -265,56 +229,20 @@ struct _MakeUnsigned<long long>
 template <typename T>
 struct _MakeSigned
 {
-	typedef T Type;
+	typedef
+		typename IF< TYPECMP<T, char>::VALUE,           signed char,
+		typename IF< TYPECMP<T, unsigned char>::VALUE,  signed char,
+		typename IF< TYPECMP<T, unsigned short>::VALUE, signed short,
+		typename IF< TYPECMP<T, unsigned int>::VALUE,   signed int,
+		typename IF< TYPECMP<T, unsigned long>::VALUE,  signed long,
+		typename IF< TYPECMP<T, __uint64>::VALUE,       __int64, T
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
 };
 
 template <typename T>
 struct _MakeSigned<T const> {
 	typedef typename _MakeSigned<T>::Type const Type;
 };
-
-template <>
-struct _MakeSigned<char>
-{
-	typedef signed char Type;
-};
-
-template <>
-struct _MakeSigned<unsigned char>
-{
-	typedef signed char Type;
-};
-
-template <>
-struct _MakeSigned<unsigned int>
-{
-	typedef signed int Type;
-};
-
-template <>
-struct _MakeSigned<unsigned short>
-{
-	typedef signed short Type;
-};
-
-template <>
-struct _MakeSigned<__uint64>
-{
-	typedef __int64 Type;
-};
-
-/*template <>
-struct _MakeSigned<unsigned long>
-{
-	typedef signed long Type;
-};
-
-template <>
-struct _MakeSigned<unsigned long long>
-{
-	typedef signed long long Type;
-};
-*/
 
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -459,5 +387,4 @@ _isSameType()
 } //namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
-
 
