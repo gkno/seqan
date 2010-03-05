@@ -21,12 +21,12 @@ int main()
 	assignSource(row(align,1),seq2);
 
 // FRAGMENT(manipulation)
+	::std::cout << align;
 	TRow &row1 = row(align,0);
 	TRow &row2 = row(align,1);
 	insertGap(row1,2);
 	insertGap(row1,5);
-
-	::std::cout << align << ::std::endl;
+	::std::cout << align;
 	
 // FRAGMENT(printingViewPos)
 	::std::cout << ::std::endl << "ViewToSource1: ";
