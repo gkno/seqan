@@ -126,18 +126,6 @@ struct NonMinimalCtor_;
 typedef Tag<NonMinimalCtor_> const NonMinimalCtor;
 
 //////////////////////////////////////////////////////////////////////////////
-/**
-.Tag.Logical Values:
-..summary:Tag that represents true and false.
-..tag.True:The logical value "true".
-..tag.False:The logical value "false".
-..include:seqan/basic.h
-*/
-struct True { enum { VALUE = true }; };
-struct False { enum { VALUE = false }; };
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Tag.Nothing:

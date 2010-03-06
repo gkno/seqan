@@ -24,6 +24,19 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.Logical Values:
+..summary:Tag that represents true and false.
+..tag.True:The logical value "true".
+..tag.False:The logical value "false".
+..include:seqan/basic.h
+*/
+
+	struct True { enum { VALUE = true }; };
+	struct False { enum { VALUE = false }; };
+
+
 	//////////////////////////////////////////////////////////////////////////////
 	// generic "if" (using meta-programming)
 	// if Flag is true,  the resulting type is Type1
