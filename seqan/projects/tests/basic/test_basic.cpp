@@ -331,7 +331,7 @@ void Test_Iter()
 	it3++;
 	SEQAN_ASSERT_EQ(*it3, 'd');
 
-	SEQAN_ASSERT_EQ(position(it3), 3);
+	SEQAN_ASSERT_EQ((int)position(it3), 3);
 
 	setPosition(it3, 2);
 	SEQAN_ASSERT_EQ(*it3, 'c');

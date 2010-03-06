@@ -449,7 +449,7 @@ void TestExtremeValuesUnsigned()
 	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
 	SEQAN_ASSERT_LEQ(maxDelta, maxVal/1000);
 	SEQAN_ASSERT_LEQ(-maxVal/1000, maxDelta);
-	SEQAN_ASSERT_EQ(0, InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ((T)0, InfimumValue<T>::VALUE);
 }
 
 SEQAN_DEFINE_TEST(TestExtremeValues) {
