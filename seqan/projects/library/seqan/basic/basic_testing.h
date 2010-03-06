@@ -852,8 +852,6 @@ namespace ClassTest {
 
 #else // no variadic macros
 
-#warning Compiler doesn't support variadic macros
-
 #if SEQAN_ENABLE_DEBUG
 template <typename T1, typename T2>
 void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
