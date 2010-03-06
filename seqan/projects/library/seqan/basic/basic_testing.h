@@ -725,6 +725,8 @@ namespace ClassTest {
     } while (false)
 #endif  // #if SEQAN_ENABLE_TESTING
 
+// variadic macros are not supported by VS 2003 and before
+#if !defined(_MSC_VER) || (_MSC_VER > 1400)
 
 #if SEQAN_ENABLE_DEBUG
 
@@ -848,6 +850,153 @@ namespace ClassTest {
 
 #endif  // #if SEQAN_ENABLE_DEBUG
 
+#else // no variadic macros
+
+#warning Compiler doesn't support variadic macros
+
+#if SEQAN_ENABLE_DEBUG
+template <typename T1, typename T2>
+void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testEqual("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testNotEqual("", _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testLeq("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testLt("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testGeq("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testGt("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1>
+void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testTrue("", 0, _arg1, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1>
+void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testFalse("", 0, _arg1, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+#else // #if SEQAN_ENABLE_DEBUG
+
+template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1> void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comment, ...) {}
+template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...) {}
+
+#endif // #if SEQAN_ENABLE_DEBUG
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_EQ(_arg1, _arg2, "");
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_NEQ(_arg1, _arg2, "");
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_LEQ(_arg1, _arg2, "");
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_LT(_arg1, _arg2, "");
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_GEQ(_arg1, _arg2, "");
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2)
+{
+	SEQAN_ASSERT_GT(_arg1, _arg2, "");
+}
+
+template <typename T1>
+void SEQAN_ASSERT_TRUE(T1 const &_arg1)
+{
+	SEQAN_ASSERT_TRUE(_arg1, "");
+}
+
+template <typename T1>
+void SEQAN_ASSERT_NOT(T1 const &_arg1)
+{
+	SEQAN_ASSERT_NOT(_arg1, "");
+}
+
+#endif // no variadic macros
 
 // Returns a string (of type char*) with the path to the called binary.
 //
