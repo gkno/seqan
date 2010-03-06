@@ -726,7 +726,7 @@ namespace ClassTest {
 #endif  // #if SEQAN_ENABLE_TESTING
 
 // variadic macros are not supported by VS 2003 and before
-#if !defined(_MSC_VER) || (_MSC_VER > 1400)
+#if !defined(_MSC_VER) || (_MSC_VER >= 1400)
 
 #if SEQAN_ENABLE_DEBUG
 
