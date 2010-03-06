@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (Seqan_Tests CXX)
+project (Seqan_Tests)
 
 ################################################################################
 # For the tests, we switch SeqAn into testing mode.

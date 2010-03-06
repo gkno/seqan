@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (Seqan_Apps CXX)
+project (Seqan_Apps)
 
 ################################################################################
 # For the apps, use assertions in debug mode, no assertions in

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6) 
-project (Seqan_Demos CXX)
+project (Seqan_Demos)
 
 ################################################################################
 # For the demos, use assertions in debug mode, no assertions in
