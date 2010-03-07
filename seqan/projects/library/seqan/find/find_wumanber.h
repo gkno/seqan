@@ -196,15 +196,14 @@ struct _WuManber_Imp
 		}
 
 		//3: second scan: fill verify and shift
-		unsigned int i = 0;
-		for (pit = begin(needle(me)); pit != pit_end; ++pit)
+		pit = begin(needle(me));
+		for (unsigned int i = 0; pit != pit_end; ++i, ++pit)
 		{
 			unsigned short hash_plus_1;
 			hash_plus_1 = _WuManber_Hash<TNeedle, Q>::hash(begin(*pit) + me.lmin-Q) + 1;
 
 			//write into verify_tab
 			*(me.verify[hash_plus_1]) = i;
-			++i;			
 
 			//update verify
 			++me.verify[hash_plus_1];

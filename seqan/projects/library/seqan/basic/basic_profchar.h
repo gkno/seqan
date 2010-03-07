@@ -33,6 +33,11 @@ namespace SEQAN_NAMESPACE_MAIN
 template<typename TValue, typename TCount = unsigned int, typename TSpec = Default>
 class ProfileType;
 
+template<typename TValue, typename TCount, typename TSpec>
+struct ValueSize<ProfileType<TValue, TCount, TSpec> >
+{
+	enum { VALUE = ValueSize<TValue>::VALUE + 1};
+};
 
 template<typename TValue, typename TCount, typename TSpec>
 class ProfileType {
@@ -107,12 +112,6 @@ class ProfileType {
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
-template<typename TValue, typename TCount, typename TSpec>
-struct ValueSize<ProfileType<TValue, TCount, TSpec> >
-{
-	enum { VALUE = ValueSize<TValue>::VALUE + 1};
-};
 
 template<typename T>
 struct SourceValue;

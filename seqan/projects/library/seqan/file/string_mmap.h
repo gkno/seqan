@@ -581,11 +581,11 @@ SEQAN_CHECKPOINT
 		return NULL;
 	}
 
-	template < typename TValue, typename TConfig >
+	template < typename TValue, typename TConfig, typename TSize >
     inline typename Value<String<TValue, MMap<TConfig> > >::Type * 
     _reallocateStorage(
 		String<TValue, MMap<TConfig> > &me,
-		typename Size< String<TValue, MMap<TConfig> > >::Type new_capacity) 
+		TSize new_capacity) 
 	{
 		typedef typename Size< String<TValue, MMap<TConfig> > >::Type TSize;
 		TSize size = _computeSize4Capacity(me, new_capacity);

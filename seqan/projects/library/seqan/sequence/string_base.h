@@ -1311,21 +1311,21 @@ A new buffer is not filled with any content, all copy operations must be done by
 the returned pointer is 0.
 */
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
-	typename Size< String<TValue, TSpec> >::Type new_capacity)
+	TSize new_capacity)
 {
 SEQAN_CHECKPOINT
 	return _allocateStorage(me, new_capacity);
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
-	typename Size< String<TValue, TSpec> >::Type new_capacity,
+	TSize new_capacity,
 	Exact)
 {
 //	if (new_capacity == capacity(me)) return 0;
@@ -1337,12 +1337,12 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize, typename TSize2>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
-	typename Size< String<TValue, TSpec> >::Type new_capacity, 
-	typename Size< String<TValue, TSpec> >::Type limit,
+	TSize new_capacity, 
+	TSize2 limit,
 	Exact)
 {
 //	if (new_capacity == capacity(me)) return 0;
@@ -1355,11 +1355,11 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
-	typename Size< String<TValue, TSpec> >::Type new_capacity,
+	TSize new_capacity,
 	Generous)
 {
 	if (new_capacity <= capacity(me)) return 0;
@@ -1371,12 +1371,12 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize, typename TSize2>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> & me, 
-	typename Size< String<TValue, TSpec> >::Type new_capacity, 
-	typename Size< String<TValue, TSpec> >::Type limit,
+	TSize new_capacity, 
+	TSize2 limit,
 	Generous)
 {
 	if (new_capacity <= capacity(me)) return 0;
@@ -1389,43 +1389,43 @@ SEQAN_CHECKPOINT
 	}
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> &, 
-	typename Size< String<TValue, TSpec> >::Type, 
+	TSize, 
 	Insist)
 {
 	return 0;
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize, typename TSize2>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> &, 
-	typename Size< String<TValue, TSpec> >::Type,
-	typename Size< String<TValue, TSpec> >::Type,
+	TSize,
+	TSize2,
 	Insist)
 {
 	return 0;
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> &, 
-	typename Size< String<TValue, TSpec> >::Type, 
+	TSize, 
 	Limit)
 {
 	return 0;
 }
 
-template <typename TValue, typename TSpec>
+template <typename TValue, typename TSpec, typename TSize, typename TSize2>
 inline typename Value<String<TValue, TSpec> >::Type *
 _reallocateStorage(
 	String<TValue, TSpec> &, 
-	typename Size< String<TValue, TSpec> >::Type, 
-	typename Size< String<TValue, TSpec> >::Type,
+	TSize, 
+	TSize2,
 	Limit)
 {
 	return 0;

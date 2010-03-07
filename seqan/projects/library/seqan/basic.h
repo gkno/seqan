@@ -33,11 +33,13 @@
 
 #include <cstddef>	// size_t
 #include <cstdio>	// FILE, basic_debug
+#include <cstdlib>	// posix_memalign
 #include <ctime>
 #include <iterator>
 #include <algorithm>
 #include <cstring>  // memset, memcpy
 #include <string>	// basic_profile
+#include <malloc.h>	// _aligned_malloc
 
 #define SEQAN_NAMESPACE_MAIN seqan
 
