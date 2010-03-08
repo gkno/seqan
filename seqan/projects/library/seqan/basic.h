@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <cstring>  // memset, memcpy
 #include <string>	// basic_profile
-#if PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
 #include <malloc.h>	// _aligned_malloc
 #else
 #include <sys/malloc.h>	// _aligned_malloc
