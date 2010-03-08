@@ -39,7 +39,11 @@
 #include <algorithm>
 #include <cstring>  // memset, memcpy
 #include <string>	// basic_profile
+#if PLATFORM_WINDOWS
 #include <malloc.h>	// _aligned_malloc
+#else
+#include <sys/malloc.h>	// _aligned_malloc
+#endif  // _MSC_VER
 
 #define SEQAN_NAMESPACE_MAIN seqan
 
