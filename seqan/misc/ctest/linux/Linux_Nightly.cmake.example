@@ -10,21 +10,26 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 # ------------------------------------------------------------
 # Set Variables
 # ------------------------------------------------------------
+# General CTest settings.
+SET (CTEST_TIMEOUT "7200")
+SET ($ENV{LC_MESSAGES} "en_EN")
+
 # Variables describing the build.
 SET (CTEST_SITE       "<SITE NAME>")
 SET (CTEST_BUILD_NAME "<BUILD NAME>")
 
 # Variables describing the build environments.
-SET (CTEST_SOURCE_MAIN_DIRECTORY "$ENV{HOME}/Nightly/seqan-trunk/projects/library/cmake")
-SET (CTEST_BINARY_MAIN_DIRECTORY "$ENV{HOME}/Nightly/seqan-trunk_build/projects/library/cmake")
-SET (CTEST_BINARY_TEST_DIRECTORY "${CTEST_BINARY_MAIN_DIRECTORY}/tests")
-
-SET (CTEST_SOURCE_DIRECTORY ${CTEST_SOURCE_MAIN_DIRECTORY})
-SET (CTEST_BINARY_DIRECTORY ${CTEST_BINARY_MAIN_DIRECTORY})
+SET (CTEST_DIRECTORY "$ENV{HOME}/Nightly")
+SET (CTEST_SOURCE_ROOT_DIRECTORY "${CTEST_DIRECTORY}/seqan-trunk")
+SET (CTEST_SOURCE_DIRECTORY "${CTEST_SOURCE_ROOT_DIRECTORY}/projects/library/cmake")
+SET (CTEST_BINARY_DIRECTORY "${CTEST_DIRECTORY}/seqan-build-${CTEST_BUILD_NAME}/projects/library/cmake")
+SET (CTEST_BINARY_TEST_DIRECTORY "${CTEST_BINARY_DIRECTORY}/tests")
 
 # General ctest/cmake/other programs.
 SET (CTEST_CMAKE_COMMAND   "cmake")
-SET (CTEST_UPDATE_COMMAND  "svn")
+FIND_PROGRAM (CTEST_SVN_COMMAND NAMES svn)
+SET (CTEST_CHECKOUT_COMMAND "${CTEST_SVN_COMMAND} co http://svn.mi.fu-berlin.de/seqan/trunk/seqan ${CTEST_SOURCE_ROOT_DIRECTORY}")
+SET (CTEST_UPDATE_COMMAND "${CTEST_SVN_COMMAND}")
 
 # Define generator.
 SET (CTEST_CMAKE_GENERATOR "Unix Makefiles")
@@ -41,8 +46,9 @@ CMAKE_GENERATOR:INTERNAL=${CTEST_CMAKE_GENERATOR}
 # ------------------------------------------------------------
 # Perform the dashboard/testings steps.
 # ------------------------------------------------------------
-CTEST_START     (Nightly)
-CTEST_UPDATE    (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+CTEST_START     (Nightly ${CTEST_SOURCE_DIRECTORY}/projects/library/cmake)
+CONFIGURE_FILE  (${CTEST_SOURCE_DIRECTORY}/CTestConfig.cmake ${CTEST_SOURCE_ROOT_DIRECTORY}/CTestConfig.cmake COPYONLY)
+CTEST_UPDATE    (SOURCE "${CTEST_SOURCE_ROOT_DIRECTORY}")
 CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
 CTEST_BUILD     (BUILD "${CTEST_BINARY_DIRECTORY}")
 SET (CTEST_PROJECT_NAME "SeqAn_tests")
