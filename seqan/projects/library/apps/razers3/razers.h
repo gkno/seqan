@@ -165,8 +165,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	// multi-threading
 
 #ifdef RAZERS_PARALLEL_READS
-        unsigned            windowSize;
-        unsigned            blocksPerCore;
+        unsigned	windowSize;
+        unsigned	blocksPerCore;
+#endif
+#ifdef RAZERS_OPENADDRESSING
+		double		loadFactor;
 #endif
 
 #ifdef RAZERS_PARALLEL
@@ -204,7 +207,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			runID = "s"; 	//
 
 			matchN = false;
-
 			shape = "11111111111";
 			threshold = 1;
 			tabooLength = 1;
@@ -242,7 +244,9 @@ namespace SEQAN_NAMESPACE_MAIN
             windowSize = 1000;
             blocksPerCore = 5;
 #endif
-            
+#ifdef RAZERS_OPENADDRESSING
+            loadFactor = 1.6;
+#endif
 		}
 	};
 
@@ -1760,10 +1764,17 @@ int _mapSingleReads(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+#ifndef RAZERS_OPENADDRESSING
 	typedef Index<TReadSeqStore, Index_QGram<TShape> >	TIndex;			// q-gram index
-
+#else
+	typedef Index<TReadSeqStore, Index_QGram<TShape, OpenAddressing> >	TIndex;
+#endif
+	
 	// configure q-gram index
 	TIndex swiftIndex(store.readSeqStore, shape);
+#ifdef RAZERS_OPENADDRESSING
+	swiftIndex.alpha = options.loadFactor;
+#endif
 	cargo(swiftIndex).abundanceCut = options.abundanceCut;
 	cargo(swiftIndex)._debugLevel = options._debugLevel;
 

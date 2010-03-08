@@ -27,6 +27,7 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
+//#define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
@@ -298,6 +299,9 @@ int main(int argc, const char *argv[])
     addOption(parser, CommandLineOption("ws", "window-size",        "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
     addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Int | OptionType::Label, options.blocksPerCore));
 #endif
+#ifdef RAZERS_OPENADDRESSING
+	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
+#endif
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -342,6 +346,9 @@ int main(int argc, const char *argv[])
     getOptionValueLong(parser, "window-size", options.windowSize);
     getOptionValueLong(parser, "blocks-per-thread", options.blocksPerCore);
 #endif
+#ifdef RAZERS_OPENADDRESSING
+	getOptionValueLong(parser, "load-factor", options.loadFactor);
+#endif 
 	getOptionValueLong(parser, "trim-reads", options.trimLength);
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
