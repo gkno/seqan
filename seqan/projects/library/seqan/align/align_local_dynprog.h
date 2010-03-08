@@ -684,12 +684,13 @@ SEQAN_CHECKPOINT
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
 
+	sw_finder.best_end_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
+	sw_finder.best_begin_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
+	
 	TScoreValue ret = smith_waterman_get_matrix(sw_finder, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_,cutoff);
 	
 	if(ret==0)
 		return ret;
-	sw_finder.best_end_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
-	sw_finder.best_begin_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
 	sw_finder._needReinit = false;
 
 	typedef Iter<typename LocalAlignmentFinder<TScoreValue>::TMatrix,PositionIterator > TMatrixIterator;
