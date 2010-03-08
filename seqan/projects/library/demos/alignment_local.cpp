@@ -30,5 +30,18 @@ int main()
 		::std::cout << " and Seq2[" << sourceBeginPosition(row(ali2, 1)) << ":" <<  (sourceEndPosition(row(ali2, 1))-1) << "]" << ::std::endl << ::std::endl;
 	}
 
+///Example 3
+    Align< String<Dna> > ali3;
+	appendValue(rows(ali3), "cccccc");
+	appendValue(rows(ali3), "tttttggccccccgg");
+	LocalAlignmentFinder<> finder3(ali3);
+	Score<int> scoring3(1, -1, -1, -1);
+    while (localAlignment(ali3, finder3, scoring3, 5, WatermanEggert())) {
+        ::std::cout << "Score = " << getScore(finder3) << ::std::endl;
+	    ::std::cout << ali3;
+	    ::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali3, 0)) << ":" << (sourceEndPosition(row(ali3, 0))-1) << "]";
+	    ::std::cout << " and Seq2[" << sourceBeginPosition(row(ali3, 1)) << ":" <<  (sourceEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
+    }
+
 	return 0;
 }
