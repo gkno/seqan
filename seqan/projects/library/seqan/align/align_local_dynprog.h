@@ -148,6 +148,8 @@ SEQAN_CHECKPOINT
 		setLength(matrix_, 0, str0_length + 1);
 		setLength(matrix_, 1, str1_length + 1);
 		resize(matrix_);
+		best_end_pos_ = infimumValue<TMatrixPosition>();
+		best_begin_pos_ = infimumValue<TMatrixPosition>();
 
 		fill(forbidden_,(str0_length + 1)*(str1_length + 1),false);
 	}
@@ -172,14 +174,10 @@ void clear(LocalAlignmentFinder<TScoreValue> & sw_finder)
 template <typename TScoreValue>
 TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
 {
-	if(!empty(sw.pq_))
-	{
-		return getValue(sw.matrix_, sw.best_end_pos_);
-	}
-	else 
-	{
-		return 0;
-	}
+	typedef LocalAlignmentFinder<TScoreValue> TFinder;
+	if(sw.best_end_pos_ !=  infimumValue<typename TFinder::TMatrixPosition>())
+		return getValue(sw.matrix_,sw.best_end_pos_);
+	return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -682,6 +680,7 @@ smithWaterman(Align<TSource, TSpec> & align_,
 			  TScoreValue cutoff)
 {
 SEQAN_CHECKPOINT
+	typedef LocalAlignmentFinder<TScoreValue> TFinder;
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
 
@@ -689,7 +688,8 @@ SEQAN_CHECKPOINT
 	
 	if(ret==0)
 		return ret;
-
+	sw_finder.best_end_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
+	sw_finder.best_begin_pos_ = infimumValue<typename TFinder::TMatrixPosition>();
 	sw_finder._needReinit = false;
 
 	typedef Iter<typename LocalAlignmentFinder<TScoreValue>::TMatrix,PositionIterator > TMatrixIterator;
