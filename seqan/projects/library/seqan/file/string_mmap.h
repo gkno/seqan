@@ -587,7 +587,6 @@ SEQAN_CHECKPOINT
 		String<TValue, MMap<TConfig> > &me,
 		TSize new_capacity) 
 	{
-		typedef typename Size< String<TValue, MMap<TConfig> > >::Type TSize;
 		TSize size = _computeSize4Capacity(me, new_capacity);
 		_remap(me, size);
 		return NULL;
