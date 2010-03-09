@@ -349,6 +349,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		operator=(Shape const &other)
 		{
 			hValue = other.hValue;
+      return *this;
 		}
 	};
 
