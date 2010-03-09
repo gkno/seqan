@@ -123,8 +123,8 @@ public:
 
 	Seed(TPosition leftDim0, TPosition leftDim1, TPosition rightDim0, TPosition rightDim1):leftDim0(leftDim0),leftDim1(leftDim1),rightDim0(rightDim0), rightDim1(rightDim1){
 		SEQAN_CHECKPOINT
-		leftDiagonal = max(leftDim1 - leftDim0, rightDim1-rightDim0);
-		rightDiagonal = min(leftDim1 - leftDim0, rightDim1-rightDim0);
+		leftDiagonal = _max(leftDim1 - leftDim0, rightDim1-rightDim0);
+		rightDiagonal = _min(leftDim1 - leftDim0, rightDim1-rightDim0);
 	}
 
 
