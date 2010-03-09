@@ -41,9 +41,7 @@
 #include <string>	// basic_profile
 #ifdef PLATFORM_WINDOWS
 #include <malloc.h>	// _aligned_malloc
-#else
-#include <sys/malloc.h>	// _aligned_malloc
-#endif  // _MSC_VER
+#endif  // PLATFORM_WINDOWS
 
 #define SEQAN_NAMESPACE_MAIN seqan
 
