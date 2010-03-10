@@ -11,7 +11,7 @@ import sys
 # String for one level of indentation.n
 INDENT = "    ";
 # Start level of indentation.
-INDENT_LEVEL = 1;
+INDENT_LEVEL = 2;
 
 
 def main():
@@ -26,14 +26,14 @@ def main():
       first_data = False
       continue
     data = line.strip().split()[1:]
-    formatted_data = ['%2d' % int(d) for d in data]
+    formatted_data = ['%3d' % int(d) for d in data]
     data_lines.append(INDENT + ', '.join(formatted_data) + ',')
     
 
   print '\n'.join([INDENT_LEVEL * INDENT + l for l in comments])
-  print INDENT + 'static int const _data[TAB_SIZE] = {'
+  print INDENT_LEVEL * INDENT + 'static int const _data[TAB_SIZE] = {'
   print '\n'.join([INDENT_LEVEL * INDENT + l for l in data_lines])
-  print INDENT + '};'
+  print INDENT_LEVEL * INDENT + '};'
   return 0
 
 

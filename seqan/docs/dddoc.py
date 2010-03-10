@@ -635,6 +635,8 @@ def loadFiles(search_path):
     for root, dirs, files in os.walk(search_path):
         # Parse all files.
         for file in files:
+            if os.path.basename(file).startswith('.'):
+                continue  # Skipp hidden files.
             path = os.path.join(root, file)
             if getFileType(path) in [FILETYPE_CPP, FILETYPE_DDDOC]:
                 parseFile(path)
