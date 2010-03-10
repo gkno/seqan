@@ -1615,7 +1615,7 @@ _copySwiftHit(
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline void 
 _copySwiftHit(
-	Finder<THaystack, Swift<TSpec> > &finder,
+	Finder<THaystack, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > &finder,
 	Pattern<Index<TNeedle, TIndexSpec>, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > &pattern)
 {
 	pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
