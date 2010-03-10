@@ -54,6 +54,10 @@ bool isCandidate(FragmentStore<TSpec, TConfig> const& fragStore,
            TCandidateColumn & candidate,
            SimpleColumn const algo_spec)
 {
+    // Get rid of unused variable warnings.
+    (void)fragStore;
+    (void)contigId;
+
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename TFragmentStore::TReadPos TReadPos;

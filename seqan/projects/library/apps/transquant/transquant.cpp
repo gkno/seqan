@@ -8,6 +8,7 @@
 #include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
 
+// TODO(holtgrew): This raises a warning with Boost 1.42. Deactivate warnings, activate again afterwards. The correct #pragma has to be used for each supported compiler.
 #include <boost/math/distributions/normal.hpp>
 
 using namespace seqan;

@@ -11,7 +11,7 @@ int main(int argc, const char *argv[])
 	typedef StringSet<TSequence> TSequenceSet;
 	
 	TSequenceSet seqs;
-	for(unsigned i = 1; i < argc; ++i)
+	for(int i = 1; i < argc; ++i)
 		appendValue(seqs, String<Dna, FileReader<Fasta> >(argv[i]));
 	
 	typedef Fragment<> TMatch;

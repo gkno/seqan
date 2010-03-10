@@ -243,12 +243,12 @@ _FileReaderString_findblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 {
 	typedef typename Size<TFile>::Type TFileSize;
 
-	while (!me.data_scanned && (me.data_abl[length(me.data_abl) - 1] <= pos))
+	while (!me.data_scanned && (me.data_abl[length(me.data_abl) - 1] <= static_cast<TFileSize>(pos)))
 	{
 		_FileReaderString_loadblock(me, length(me.data_abl));
 	}
 
-	if (pos >= me.data_abl[length(me.data_abl) - 1])
+	if (static_cast<TFileSize>(pos) >= me.data_abl[length(me.data_abl) - 1])
 	{//pos greater than file length
 		return length(me.data_abl);
 	}
@@ -621,9 +621,10 @@ inline void
 setPosition(Iter<TContainer, FileReaderIterator> & it,
 			TPos pos)
 {
+    typedef typename Size<TContainer>::Type TSize;
 	TContainer & cont = *(it.data_container);
 	it.data_abl_pos = _FileReaderString_findblock(cont, pos);
-	it.data_atEnd = (cont.data_scanned && (pos >= length(cont)));
+	it.data_atEnd = (cont.data_scanned && (static_cast<TSize>(pos) >= length(cont)));
 	if (it.data_atEnd)
 	{
 		it.data_buf_pos = 0;

@@ -88,6 +88,10 @@ void testLocalSwift(Finder<DnaString, Swift<SwiftLocal> > & finder,
 }
 
 int main(int argc, const char *argv[]) {
+    // Get rid of warnings for unused variables.
+    (void)argc;
+    (void)argv;
+    
     typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;

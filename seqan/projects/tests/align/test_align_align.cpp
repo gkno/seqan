@@ -138,7 +138,9 @@ void testAlignColsBase()
 	TColsIterator col_it3(ali1);				//special c'tor
 
 	TColsIterator const & c_col_it1 = col_it1;	// (const version, dont confuse with const_col_it1)
+        // Test copying, but do not use further.
 	TColsIterator const & c_col_it2 = col_it2;
+        (void)c_col_it2;
 
 	SEQAN_TASSERT(&host(col_it1) == &ali1);		//host
 	SEQAN_TASSERT(&host(c_col_it1) == &ali1);

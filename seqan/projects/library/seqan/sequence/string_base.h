@@ -1328,8 +1328,8 @@ _reallocateStorage(
 	TSize new_capacity,
 	Exact)
 {
-//	if (new_capacity == capacity(me)) return 0;
-	if (new_capacity <= capacity(me)) return 0;
+    typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
+	if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1345,8 +1345,8 @@ _reallocateStorage(
 	TSize2 limit,
 	Exact)
 {
-//	if (new_capacity == capacity(me)) return 0;
-	if (new_capacity <= capacity(me)) return 0;
+    typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
+	if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1362,7 +1362,8 @@ _reallocateStorage(
 	TSize new_capacity,
 	Generous)
 {
-	if (new_capacity <= capacity(me)) return 0;
+    typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
+	if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT
@@ -1379,7 +1380,8 @@ _reallocateStorage(
 	TSize2 limit,
 	Generous)
 {
-	if (new_capacity <= capacity(me)) return 0;
+    typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
+	if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
 	else
 	{
 SEQAN_CHECKPOINT

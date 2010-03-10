@@ -270,7 +270,8 @@ searchSumList(Iter<TSumList, _DummySumListIterator> & it,
 {
 	goBegin(it);
 	TValue sum = 0;
-	while (!atEnd(it) && ((sum + getValue(it, dim))<= val)) // SEARCH SEMANTICS
+	SEQAN_ASSERT_GEQ(getValue(it, dim), 0u);  // The cast below only works in this case.
+	while (!atEnd(it) && ((sum + static_cast<TValue>(getValue(it, dim))) <= val)) // SEARCH SEMANTICS
 	{
 		sum += getValue(it, dim);
 		goNext(it);

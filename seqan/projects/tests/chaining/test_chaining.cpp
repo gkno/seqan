@@ -118,7 +118,7 @@ void testChainer(int count,
 //_showChain(ch, scoring);
 
 	//verify validity of chain
-    SEQAN_ASSERT_GT(length(ch), 0);
+    SEQAN_ASSERT_GT(length(ch), 0u);
 	int sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i)
 	{
@@ -134,7 +134,7 @@ void testChainer(int count,
 //_showChain(ch, scoring);
 
 	//verify validity of generic chain
-    SEQAN_ASSERT_GT(length(ch), 0);
+    SEQAN_ASSERT_GT(length(ch), 0u);
 	sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i) {
             SEQAN_ASSERT_TRUE(_chain_generic_chainable(ch[i-1], ch[i]));

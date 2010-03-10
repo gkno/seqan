@@ -120,12 +120,17 @@ void construct(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & m
 //////////////////////////////////////////////////////////////////////////////
 // add mate pairs
 // TODO: need to be implemented
+
 template<typename TColumnAlphabet, typename TAlignedReadStoreElement, typename TPosition, typename TSpec, typename TConfig, typename TId>
 void add_mate_pairs(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> & me,
           FragmentStore<TSpec, TConfig> const& fragStore,
-          TId const contigId)
+          const TId contigId)
 {
-
+    // Get rid of unused variable warnings.
+    (void)me;
+    (void)fragStore;
+    (void)contigId;
+    /*
     typedef FragmentStore<TSpec, TConfig> TFragmentStore;
     typedef typename Size<TFragmentStore>::Type TSize;
     typedef typename TFragmentStore::TReadPos TReadPos;
@@ -133,8 +138,7 @@ void add_mate_pairs(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition
     typedef typename Graph_< ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> >::Type TGraphInternal;
     
     typedef typename Iterator<TGraphInternal, VertexIterator>::Type TVertexIterator;
-
-
+    */
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -145,6 +149,9 @@ void scoreGraph_(ReadGraph<TColumnAlphabet,TAlignedReadStoreElement,TPosition> &
           TId const contigId,
           GraphScoring const& scoring)
 {
+    // Get rid of unused variable warnings.
+    (void)fragStore;
+    (void)contigId;
 
     typedef FragmentStore<TSpec, TConfig> TFragmentStore;
     typedef typename Size<TFragmentStore>::Type TSize;

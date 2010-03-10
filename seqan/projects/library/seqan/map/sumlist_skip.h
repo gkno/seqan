@@ -178,7 +178,7 @@ _skipsumlistFindGoNext(TNext const & _next,
 					   unsigned int _dim,
 					   TValue const & _value)
 {
-	return ((_sum[_dim] + _next.values[_dim]) <= _value); // SEARCH SEMANTICS
+	return (static_cast<TValue>((_sum[_dim] + _next.values[_dim])) <= _value); // SEARCH SEMANTICS
 }
 //find an element, given (sum, element_pointer)-pair
 template <typename TNext, typename THere, typename TValues, typename TValue, typename TElementPtr>
@@ -1039,7 +1039,8 @@ _searchSumList_Skip(Iter<TSumList, SkipSumListIterator > & it,
 
 	TPath path;
 
-	if (val >= getSum(*it.container, dim))
+  // The assumpiton here is that val is signed and getSum() fits into it.
+	if (val >= static_cast<TValue2>(getSum(*it.container, dim)))
 	{
 		goEnd(it);
 		return;

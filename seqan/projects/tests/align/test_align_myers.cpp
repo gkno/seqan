@@ -183,7 +183,7 @@ SEQAN_DEFINE_TEST(test_align_myers_test_long) {
 
 
 SEQAN_DEFINE_TEST(test_align_hirschberger) {
-    int nw_score,m_score,hm_score;
+    int nw_score, hm_score;
     int test_repeat = 1;
     int test_count = 0;
 

@@ -1139,10 +1139,11 @@ template <
 	typename _TSpec
 >
 inline bool _swiftMultiFlushBuckets(
-	Finder<THaystack, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &finder, 
-	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &pattern)
+	Finder<THaystack, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &, 
+	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &)
 {
     // there is nothing to be done here as we dump matches immediately after reaching the threshold
+    return false;
 }
 
 template <typename TNeedle, typename TIndexSpec, typename TSpec>

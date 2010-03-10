@@ -978,7 +978,8 @@ extendSeed(Seed<TPosition,SimpleSeed> &seed,
 		   GappedXDrop)
 {
 	SEQAN_CHECKPOINT
-	TScore gapCost = scoreGap(scoreMatrix);
+// 	TScore gapCost = scoreGap(scoreMatrix);
+// 	TPosition infimum = infimumValue<TPosition>()+1-gapCost;
 	
 	//left extension
 	if ((direction != 1) && (leftDim0(seed)!= 0) && (leftDim1(seed) != 0))

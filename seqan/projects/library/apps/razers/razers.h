@@ -810,6 +810,9 @@ void compactMatches(TMatches &matches, TCounts &
 #endif
 	)
 {
+    // Get rid of "unused variable" warnings.  This is hard to read
+    // and should not be done anywhere else. Better not use ifdefs.
+    (void)compactFinal;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	if(options.maqMapping) compactMatches(matches, cnts,options,compactFinal,swift,true);
 #endif
@@ -1505,7 +1508,9 @@ void mapSingleReads(
 				appendValue(matches, m, Generous());
 				if (length(matches) > options.compactThresh)
 				{
+#ifndef RAZERS_MICRO_RNA
 					typename Size<TMatches>::Type oldSize = length(matches);
+#endif
 					maskDuplicates(matches);	// overlapping parallelograms cause duplicates
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if(options.maqMapping)
