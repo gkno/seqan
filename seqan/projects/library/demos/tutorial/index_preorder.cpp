@@ -15,7 +15,7 @@ int main ()
 // FRAGMENT(iteration)
 	Iterator< TMyIndex, TopDown< ParentLinks<Preorder> > >::Type myIterator(myIndex);
 
-	while (!atEnd(myIterator)) 
+	while (!atEnd(myIterator))
 	{
 		std::cout << representative(myIterator) << std::endl;
 		++myIterator;

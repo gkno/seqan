@@ -8,9 +8,9 @@ using namespace seqan;
 int main ()
 {
 	StringSet<CharString> myStringSet;
-  appendValue(myStringSet, "tobeornottobe");
-  appendValue(myStringSet, "thebeeonthecomb");
-  appendValue(myStringSet, "beingjohnmalkovich");
+	appendValue(myStringSet, "tobeornottobe");
+	appendValue(myStringSet, "thebeeonthecomb");
+	appendValue(myStringSet, "beingjohnmalkovich");
 
 	typedef Index< StringSet<CharString> > TMyIndex;
 	TMyIndex myIndex(myStringSet);
@@ -18,9 +18,9 @@ int main ()
 // FRAGMENT(iteration1)
 	Iterator< TMyIndex, TopDown< ParentLinks<Postorder> > >::Type myIterator(myIndex);
 
-  // top-down iterators start in the root node which is the first node of a postorder DFS
-  // thus we have to manually go the DFS start with goBegin
-  goBegin(myIterator);
+	// top-down iterators start in the root node which is the first node of a postorder DFS
+	// thus we have to manually go the DFS start with goBegin
+	goBegin(myIterator);
 	while (!atEnd(myIterator))
 	{
 		std::cout << representative(myIterator) << std::endl;
