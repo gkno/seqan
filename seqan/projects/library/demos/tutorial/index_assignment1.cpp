@@ -18,8 +18,8 @@ int main ()
 // FRAGMENT(iteration1)
 	Iterator< TMyIndex, TopDown< ParentLinks<Postorder> > >::Type myIterator(myIndex);
 
-	// top-down iterators start in the root node which is the first node of a postorder DFS
-	// thus we have to manually go the DFS start with goBegin
+	// top-down iterators start in the root node which is not the first node
+	// of a postorder DFS thus we have to manually go the DFS start with goBegin
 	goBegin(myIterator);
 	while (!atEnd(myIterator))
 	{
