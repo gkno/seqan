@@ -1,6 +1,6 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -15,16 +15,15 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id:  $
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Edit distance score class and supporting code.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SCORE_EDIT_H
-#define SEQAN_HEADER_SCORE_EDIT_H
+#ifndef SEQAN_SCORE_SCORE_EDIT_H_
+#define SEQAN_SCORE_SCORE_EDIT_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-
-//////////////////////////////////////////////////////////////////////////////
+namespace SEQAN_NAMESPACE_MAIN {
 
 /**
 .Spec.EditDistance
@@ -39,31 +38,13 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/score.h
 */
 
-//EditDistance is defined in basic_tag.h
-
+// TODO(holtgrew): Should EditDistance better live here instead of basic_tag.h?
+// EditDistance is defined in basic_tag.h
 template <typename TValue>
-class Score<TValue, EditDistance>
-{
-public:
-	Score()
-	{
-	}
-
-	Score(Score const &)
-	{
-	}
-	~Score()
-	{
-	}
-
-	Score & operator = (Score const &)
-	{
-		return *this;
-	}
-
-//____________________________________________________________________________
+struct Score<TValue, EditDistance> {
+    Score() {}
 };
-//////////////////////////////////////////////////////////////////////////////
+
 
 /**
 .Shortcut.EditDistanceScore:
@@ -73,72 +54,74 @@ public:
 ..shortcutfor:Spec.EditDistance
 ...signature:Score<int, EditDistance>
 ..see:Spec.EditDistance
+..include:seqan/score.h
 */
 
 typedef Score<int, EditDistance> EditDistanceScore;
 
-//////////////////////////////////////////////////////////////////////////////
-
 template <typename TValue>
 inline TValue
-scoreMatch(Score<TValue, EditDistance> &)
-{
-	return 0;
-}
-
-template <typename TValue>
-inline TValue
-scoreMatch(Score<TValue, EditDistance> const &)
-{
-	return 0;
-}
-
-template <typename TValue>
-inline TValue
-scoreMismatch(Score<TValue, EditDistance> &)
-{
-	return -1;
-}
-
-template <typename TValue>
-inline TValue
-scoreMismatch(Score<TValue, EditDistance> const &)
-{
-	return -1;
-}
-
-template <typename TValue>
-inline TValue
-scoreGapExtend(Score<TValue, EditDistance> &)
-{
-	return -1;
-}
-
-template <typename TValue>
-inline TValue
-scoreGapExtend(Score<TValue, EditDistance> const &)
-{
-	return -1;
-}
-
-template <typename TValue>
-inline TValue
-scoreGapOpen(Score<TValue, EditDistance> &)
-{
-	return -1;
-}
-
-template <typename TValue>
-inline TValue
-scoreGapOpen(Score<TValue, EditDistance> const &)
-{
-	return -1;
+scoreMatch(Score<TValue, EditDistance> &) {
+    SEQAN_CHECKPOINT;
+    return 0;
 }
 
 
+template <typename TValue>
+inline TValue
+scoreMatch(Score<TValue, EditDistance> const &) {
+    SEQAN_CHECKPOINT;
+    return 0;
+}
 
-//////////////////////////////////////////////////////////////////////////////
 
-}// namespace SEQAN_NAMESPACE_MAIN
+template <typename TValue>
+inline TValue
+scoreMismatch(Score<TValue, EditDistance> &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
 
-#endif //#ifndef SEQAN_HEADER_...
+
+template <typename TValue>
+inline TValue
+scoreMismatch(Score<TValue, EditDistance> const &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
+
+
+template <typename TValue>
+inline TValue
+scoreGapExtend(Score<TValue, EditDistance> &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
+
+
+template <typename TValue>
+inline TValue
+scoreGapExtend(Score<TValue, EditDistance> const &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
+
+
+template <typename TValue>
+inline TValue
+scoreGapOpen(Score<TValue, EditDistance> &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
+
+
+template <typename TValue>
+inline TValue
+scoreGapOpen(Score<TValue, EditDistance> const &) {
+    SEQAN_CHECKPOINT;
+    return -1;
+}
+
+}  // namespace SEQAN_NAMESPACE_MAIN
+
+#endif  // SEQAN_SCORE_SCORE_EDIT_H_

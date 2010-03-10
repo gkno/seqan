@@ -1,6 +1,6 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -16,34 +16,33 @@
 
  ============================================================================
   Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Code for score matrices with data from files or built-in data.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SCORE_MATRIX_H
-#define SEQAN_HEADER_SCORE_MATRIX_H
+#ifndef SEQAN_SCORE_SCORE_MATRIX_H_
+#define SEQAN_SCORE_SCORE_MATRIX_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#include <seqan/file.h>
 
-//////////////////////////////////////////////////////////////////////////////
+// TODO(holtgrew): If the complex type conversions are necessary, a static_cast<> is more C++ and explicit.
+
+
+namespace SEQAN_NAMESPACE_MAIN {
 
 template <typename TValue, typename TSequenceValue, typename TSpec>
 struct _ScoringMatrixData;
 
-//////////////////////////////////////////////////////////////////////////////
 
 template <typename TSequenceValue = AminoAcid, typename TSpec = Default>
 struct ScoreMatrix;
 
 
 /**
-.Tag.File Format.tag.Fasta:
-	FASTA file format for sequences.
-..include:seqan/score.h
+.Tag.File Format.tag.ScoreMatrixFile:Score matrix file.
 */
 struct TagScoreMatrixFile_;
 typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
-
-//////////////////////////////////////////////////////////////////////////////
 
 
 /**
@@ -57,435 +56,514 @@ typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
 ..param.TSequenceValue:Type of alphabet underlying the matrix.
 ...default:$AminoAcid$
 ..include:seqan/score.h
-*/
-
+ */
 template <typename TValue, typename TSequenceValue, typename TSpec>
-class Score<TValue, ScoreMatrix<TSequenceValue, TSpec> >
-{
-public:
-	enum
-	{
-		VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,
-		TAB_SIZE = VALUE_SIZE * VALUE_SIZE
-	};
+struct Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > {
+    // Static computation of the required array size.
+    enum {
+        VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,
+        TAB_SIZE = VALUE_SIZE * VALUE_SIZE
+    };
 
-	TValue data_tab[TAB_SIZE];
-	TValue data_gap_extend;
-	TValue data_gap_open;
+    // The data table.
+    TValue data_tab[TAB_SIZE];
 
-public:
-	Score(TValue _gap_extend = -1):
-		data_gap_extend(_gap_extend),
-		data_gap_open(_gap_extend)
-	{
-		setDefaultScoreMatrix(*this, TSpec());
-	}
-	Score(TValue _gap_extend, TValue _gap_open):
-		data_gap_extend(_gap_extend),
-		data_gap_open(_gap_open)
-	{
-		setDefaultScoreMatrix(*this, TSpec());
-	}
-	template <typename TString>
-	Score(TString const & filename, TValue _gap_extend = -1):
-		data_gap_extend(_gap_extend),
-		data_gap_open(_gap_extend)
-	{
-		loadScoreMatrix(*this, filename);
-	}
-	template <typename TString>
-	Score(TString const & filename, TValue _gap_extend, TValue _gap_open):
-		data_gap_extend(_gap_extend),
-		data_gap_open(_gap_open)
-	{
-		loadScoreMatrix(*this, filename);
-	}
+    // The gap extension score.
+    TValue data_gap_extend;
+
+    // The gap open score.
+    TValue data_gap_open;
+
+    /**
+.Memfunc.Score Matrix#Score
+..cat:Scoring
+..summary:Constructor.
+..class:Spec.Score Matrix
+..signature:Score(gapExtend)
+..param.gapExtend:The gap extension penalty.
+...remark:TValue
+     */
+    explicit Score(TValue _gap_extend = -1)
+        : data_gap_extend(_gap_extend),
+          data_gap_open(_gap_extend) {
+        SEQAN_CHECKPOINT;
+        setDefaultScoreMatrix(*this, TSpec());
+    }
+
+    /**
+.Memfunc.Score Matrix#Score
+..signature:Score(gapExtend, gapOpen)
+..param.gapOpen:The gap open penalty.
+...remark:TValue
+     */
+    Score(TValue _gap_extend, TValue _gap_open)
+        : data_gap_extend(_gap_extend), data_gap_open(_gap_open) {
+        SEQAN_CHECKPOINT;
+        setDefaultScoreMatrix(*this, TSpec());
+    }
+
+    /**
+.Memfunc.Score Matrix#Score
+..signature:Score(filename, gapExtend)
+..param.filename:The path to the file to load.
+...type:Class.String
+..see:Function.loadScoreMatrix
+     */
+    template <typename TString>
+    Score(TString const & filename, TValue _gap_extend = -1)
+        : data_gap_extend(_gap_extend), data_gap_open(_gap_extend) {
+        SEQAN_CHECKPOINT;
+        loadScoreMatrix(*this, filename);
+    }
+
+    /**
+.Memfunc.Score Matrix#Score
+..signature:Score(filename, gapExtend, gapOpen)
+     */
+    template <typename TString>
+    Score(TString const & filename, TValue _gap_extend, TValue _gap_open)
+        : data_gap_extend(_gap_extend), data_gap_open(_gap_open) {
+        SEQAN_CHECKPOINT;
+        loadScoreMatrix(*this, filename);
+    }
 };
 
-//////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): Does it make sense to document each Score specialization?  Should dddoc show a list of all specializations of a class?
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TVal1, typename TVal2>
 inline TValue
-score(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc,
-	  TVal1 val1,
-	  TVal2 val2)
-{
-	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	unsigned int i = (TSequenceValue) val1; // conversion TVal1 => TSequenceValue => integral
-	unsigned int j = (TSequenceValue) val2; // conversion TVal2 => TSequenceValue => integral
-	return sc.data_tab[i * TScore::VALUE_SIZE + j];
+score(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc, TVal1 val1, TVal2 val2) {
+    SEQAN_CHECKPOINT;
+    typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
+    // TODO(holtgrew): Why not implicit cast?
+    unsigned int i = (TSequenceValue) val1;  // conversion TVal1 => TSequenceValue => integral
+    unsigned int j = (TSequenceValue) val2;  // conversion TVal2 => TSequenceValue => integral
+    return sc.data_tab[i * TScore::VALUE_SIZE + j];
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.setScore:
+..cat:Scoring
+..summary:Set the substitution score between two values.
+..signature:setScore(scoreMatrix, val1, val2, score)
+..param.scoreMatrix:
+...type:Spec.Score Matrix
+..param.val1:First value.
+..param.val2:Second value.
+..param.score:The value to set the score to.
+ */
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TVal1, typename TVal2, typename T>
 inline void
-setScore(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-	  TVal1 val1,
-	  TVal2 val2,
-	  T score)
-{
-	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	unsigned int i = (TSequenceValue) val1; // conversion TVal1 => TSequenceValue => integral
-	unsigned int j = (TSequenceValue) val2; // conversion TVal2 => TSequenceValue => integral
-	sc.data_tab[i * TScore::VALUE_SIZE + j] = score;
+setScore(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TVal1 val1, TVal2 val2, T score) {
+    SEQAN_CHECKPOINT;
+    typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
+    // TODO(holtgrew): Why not implicit cast?
+    unsigned int i = (TSequenceValue) val1;  // conversion TVal1 => TSequenceValue => integral
+    unsigned int j = (TSequenceValue) val2;  // conversion TVal2 => TSequenceValue => integral
+    sc.data_tab[i * TScore::VALUE_SIZE + j] = score;
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.setDefaultScoreMatrix:
+..cat:Scoring
+..summary:Set the value of the given matrix to the default value.
+..signature:setDefaultScoreMatrix(scoreMatrix, tag)
+..param.scoreMatrix:The @Spec.Score Matrix@ to set.
+...type:Spec.Score Matrix
+..param.tag:The tag to specify the matrix.
+...type:Shortcut.Blosum30
+...type:Shortcut.Blosum62
+...type:Shortcut.Blosum80
+ */
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TTag>
 inline void
-setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-					  TTag)
-{
-	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	TValue const * tab = _ScoringMatrixData<TValue, TSequenceValue, TTag>::getData();
-	arrayCopy(tab, tab + TScore::TAB_SIZE, sc.data_tab);
+setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TTag) {
+    SEQAN_CHECKPOINT;
+    typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
+    TValue const * tab = _ScoringMatrixData<TValue, TSequenceValue, TTag>::getData();
+    arrayCopy(tab, tab + TScore::TAB_SIZE, sc.data_tab);
 }
+
+
+/**
+.Function.setDefaultScoreMatrix
+..param.tag:
+...type:Tag.Default
+...remark:If @Tag.Default@, then the matrix will be filled with default constructed $TValue$ values.
+ */
 template <typename TValue, typename TSequenceValue, typename TSpec>
 inline void
-setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-					  Default)
-{
-	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	arrayFill(sc.data_tab, sc.data_tab + TScore::TAB_SIZE, TValue());
+setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, Default) {
+    SEQAN_CHECKPOINT;
+    typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
+    arrayFill(sc.data_tab, sc.data_tab + TScore::TAB_SIZE, TValue());
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
-//helper: wrapper for sscanf
+/*
+.Function._sscanfValue:
+..cat:Input/Output
+..summary:Use sscanf to parse a value from a $char *$ buffer.
+..signature:_sscanfValue(buffer, value)
+..param.buffer:Buffer to parse into.
+...type:const char *
+..param.value:Variable to parse the value from $buffer$ to.
+...type:unsigned int
+ */
 inline void
-_sscanfValue(char * buf, unsigned int & val)
-{
-	std::sscanf(buf, "%u", & val);
-}
-inline void
-_sscanfValue(char * buf, int & val)
-{
-	std::sscanf(buf, "%i", & val);
-}
-inline void
-_sscanfValue(char * buf, float & val)
-{
-	std::sscanf(buf, "%f", & val);
-}
-inline void
-_sscanfValue(char * buf, double & val)
-{
-	float f;
-	std::sscanf(buf, "%f", & f);
-	val = f;
+_sscanfValue(const char * buf, unsigned int & val) {
+    SEQAN_CHECKPOINT;
+    std::sscanf(buf, "%u", & val);
 }
 
-//____________________________________________________________________________
+
+/*
+.Function._sscanfValue.param.value.type:int
+ */
+inline void
+_sscanfValue(const char * buf, int & val) {
+    SEQAN_CHECKPOINT;
+    std::sscanf(buf, "%i", & val);
+}
+
+
+/*
+.Function._sscanfValue.param.value.type:float
+ */
+inline void
+_sscanfValue(const char * buf, float & val) {
+    SEQAN_CHECKPOINT;
+    std::sscanf(buf, "%f", & val);
+}
+
+
+/*
+.Function._sscanfValue.param.value.type:double
+ */
+inline void
+_sscanfValue(const char * buf, double & val) {
+    SEQAN_CHECKPOINT;
+    std::sscanf(buf, "%lf", & val);
+}
+
 
 template <typename TFile, typename TMeta>
 void
-readMeta(TFile & fl,
-		 TMeta & meta,
-		 ScoreMatrixFile)
-{
-	clear(meta);
-	if (_streamEOF(fl)) return;
+readMeta(TFile & fl, TMeta & meta, ScoreMatrixFile) {
+    SEQAN_CHECKPOINT;
+    clear(meta);
+    if (_streamEOF(fl)) return;
 
-	typedef typename Value<TMeta>::Type TValue;
-	TValue c = _streamGet(fl);
+    typedef typename Value<TMeta>::Type TValue;
+    TValue c = _streamGet(fl);
 
-	while (!_streamEOF(fl) && (c == '#'))
-	{
-		c = _streamGet(fl);
-		_stream_appendLine(fl, meta, c);
-		appendValue(meta, '\n');
-	}
-	_streamUnget(fl);
+    while (!_streamEOF(fl) && (c == '#')) {
+        c = _streamGet(fl);
+        _stream_appendLine(fl, meta, c);
+        appendValue(meta, '\n');
+    }
+    _streamUnget(fl);
 }
 
-//____________________________________________________________________________
 
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 void
-read(TFile & fl,
-	 Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-	 ScoreMatrixFile)
-{
-	typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-	typedef typename Value<TFile>::Type TFileValue;
+read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreMatrixFile) {
+    // TODO(holtgrew): The following is not very stable, does not interpret lines as whitespace separated numbers but infers column widths from the labels.  Should be fixed.
+    SEQAN_CHECKPOINT;
+    typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
+    typedef typename Value<TFile>::Type TFileValue;
 
-	//clears the matrix
-	arrayFill(sc.data_tab, sc.data_tab + TScore::TAB_SIZE, TValue());
+    // Clear the matrix.
+    arrayFill(sc.data_tab, sc.data_tab + TScore::TAB_SIZE, TValue());
 
+    // Start reading.
+    if (_streamEOF(fl)) return;
 
-	//start reading
-	if (_streamEOF(fl)) return;
+    TFileValue c = _streamGet(fl);
+    String<TFileValue> s;
 
-	TFileValue c = _streamGet(fl);
-	String<TFileValue> s;
+    // Search for alphabet line, the first line that does not start
+    // with '#', e.g.
+    // " A R N D C Q E G H I L K M F P S T W Y V B Z X *"
+    do {
+        clear(s);
+        _stream_appendLine(fl, s, c);
+    } while (!_streamEOF(fl) && (empty(s) || (s[0] == '#')));
 
+    if (_streamEOF(fl)) return;
 
-	//search for alphabet line 
-	//this is the first line that does not start with '#'
-	//e.g.: "   A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  Z  X  *"
-	do
-	{
-		clear(s);
-		_stream_appendLine(fl, s, c);
-	} while (!_streamEOF(fl) && (empty(s) || (s[0] == '#')));
+    // Build table to map the alphabet line to the TSequenceValue values.
+    typedef typename Iterator<String<TFileValue>, Standard>::Type TIterator;
+    TIterator it = begin(s);
+    TIterator it_end = end(s);
+    String<unsigned int> mapping_;
+    String<unsigned int> column_;
+    for (unsigned int i = 0; it != it_end; ++i) {
+        if ((*it) != ' ') {
+        // TODO(holtgrew): This kind of type conversion really necessary?
+            unsigned int pos = (TSequenceValue) *it;  // Conversion TFileValue => TSequenceValue => integral
+            appendValue(mapping_, pos);
+            appendValue(column_, i);  // This marks the end of the column
+        }
+        ++it;
+    }
 
-	if (_streamEOF(fl)) return;
+    // Read the matrix itself.
+    while (not _streamEOF(fl)) {
+        clear(s);
+        _stream_appendLine(fl, s, c);
 
+        if (empty(s) || (s[0] == '#')) continue;  // Skip empty lines and comments.
 
-	//build table to map the alphabet line to the TSequenceValue values
-	typedef typename Iterator<String<TFileValue>, Standard>::Type TIterator;
-	TIterator it = begin(s);
-	TIterator it_end = end(s);
-	String<unsigned int> mapping_;
-	String<unsigned int> column_;
-	for (unsigned int i = 0; it != it_end; ++i)
-	{
-		if ((*it) != ' ')
-		{
-			unsigned int pos = (TSequenceValue) *it;		//conversion TFileValue => TSequenceValue => integral
-			appendValue(mapping_, pos);
-			appendValue(column_, i);						//this marks the end of the column
-		}
-		++it;
-	}
+        // Read first character = alphabet column.
+        // TODO(holtgrew): This kind of type conversion really necessary?
+        unsigned int row = (TSequenceValue) s[0];  // Conversion TFileValue => TSequenceValue => integral
+        unsigned int offset = row * TScore::VALUE_SIZE;
 
-	//read the matrix itself
-	while (!_streamEOF(fl))
-	{
-		clear(s);
-		_stream_appendLine(fl, s, c);
+        // Read rest of the line.
+        unsigned int right;
+        unsigned int left = 0;
 
-		if (empty(s) || (s[0] == '#')) continue; //skip empty lines and comments
+        TFileValue buf[100];  // 100 is enough, believe me!
+        buf[99] = 0;
 
-		//read first character = alphabet column
-		unsigned int row = (TSequenceValue) s[0]; //conversion TFileValue => TSequenceValue => integral
-		unsigned int offset = row * TScore::VALUE_SIZE;
+        for (unsigned int ii = 0; ii < length(column_); ++ii) {
+            // Read column ii.
+            //
+            // Scan cell into buffer.
+            right = column_[ii];
+            TFileValue * it;
+            for (it = buf + 99; it >= buf; --right) {
+                if (right <= left) break;
+                if (s[right] == ' ') break;
+                --it;
+                *it = s[right];
+            }
 
-		//read rest of line
-		unsigned int right;
-		unsigned int left = 0;
+            // Parse buffer.
+            TValue val;
+            _sscanfValue(it, val);
 
-		TFileValue buf[100]; //100 is enough, believe me!
-		buf[99] = 0;
+            sc.data_tab[offset + mapping_[ii]] = val;
 
-		for (unsigned int i = 0; i < length(column_); ++i)
-		{//read column i
-
-			//scan cell into buffer
-			right = column_[i];
-			TFileValue * it;
-			for (it = buf + 99; it >= buf; --right)
-			{
-				if (right <= left) break;
-				if (s[right] == ' ') break;
-				--it;
-				*it = s[right];
-			}
-
-			//parse buffer
-			TValue val;
-			_sscanfValue(it, val);
-
-			sc.data_tab[offset + mapping_[i]] = val;
-
-			left = column_[i];
-		}
-	}
+            left = column_[ii];
+        }
+    }
 }
+
 
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void
-read(TFile & fl,
-	 Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc)
-{
-	read(fl, sc, ScoreMatrixFile());
+read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc) {
+    SEQAN_CHECKPOINT;
+    read(fl, sc, ScoreMatrixFile());
 }
 
-//____________________________________________________________________________
 
 /**
 .Function.loadScoreMatrix
-..cat:Scoring
+..cat:Input/Output
 ..summary:Load a score matrix from a file.
 ..signature:loadScoreMatrix(score, filename)
 ..remark:TODO, comment this better/at all.
+..includes:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString>
 inline void
-loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-				TString & filename)
-{
-		FILE * fl;
-		_streamOpen(fl, filename);
-		read(fl, sc);
-		_streamClose(fl);
+loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TString & filename) {
+    SEQAN_CHECKPOINT;
+    FILE * fl;
+    _streamOpen(fl, filename);
+    read(fl, sc);
+    _streamClose(fl);
 }
 
 
 /**
 .Function.loadScoreMatrix
-..cat:Scoring
 ..signature:loadScoreMatrix(score, filename, meta)
 ..remark:TODO, comment this better/at all.
+..includes:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString, typename TMeta>
 inline void
-loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc,
-				TString & filename,
-				TMeta & meta)
-{
-		FILE * fl;
-		_streamOpen(fl, filename);
-		readMeta(fl, meta, ScoreMatrixFile());
-		read(fl, sc, ScoreMatrixFile());
-		_streamClose(fl);
+loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TString & filename, TMeta & meta) {
+    SEQAN_CHECKPOINT;
+    FILE * fl;
+    _streamOpen(fl, filename);
+    readMeta(fl, meta, ScoreMatrixFile());
+    read(fl, sc, ScoreMatrixFile());
+    _streamClose(fl);
 }
 
-//____________________________________________________________________________
 
-//wrapper for sprintf
+/*
+.Function._sprintfValue:
+..cat:Input/Output
+..summary:Use sprintf to print a value into a $const char *$ buffer.
+..signature:_sprintf(buffer, value)
+..param.buffer:Buffer to write to.
+...type:char *
+...remark:Must be of sufficient size.
+..param.value:Variable for which to write the string value to $buffer$.
+...type:unsigned int
+..includes:seqan/score.h
+ */
 inline void
-_sprintfValue(char * buf, unsigned int val)
-{
-	std::sprintf(buf, "%u", val);
-}
-inline void
-_sprintfValue(char * buf, int val)
-{
-	std::sprintf(buf, "%d", val);
-}
-inline void
-_sprintfValue(char * buf, float val)
-{
-	double d = val;
-	std::sprintf(buf, "%G", d);
-}
-inline void
-_sprintfValue(char * buf, double val)
-{
-	std::sprintf(buf, "%G", val);
+_sprintfValue(char * buf, unsigned int val) {
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): sprintf is unsafe, the C++ idiom is to use a std::string, we should probably use String.
+    std::sprintf(buf, "%u", val);
 }
 
-//____________________________________________________________________________
 
+/*
+.Function._sprintfValue.param.value.type:int
+ */
+inline void
+_sprintfValue(char * buf, int val) {
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): sprintf is unsafe, the C++ idiom is to use a std::string, we should probably use String.
+    std::sprintf(buf, "%d", val);
+}
+
+
+/*
+.Function._sprintfValue.param.value.type:float
+ */
+inline void
+_sprintfValue(char * buf, float val) {
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): sprintf is unsafe, the C++ idiom is to use a std::string, we should probably use String.
+    double d = val;
+    std::sprintf(buf, "%G", d);
+}
+
+
+/*
+.Function._sprintfValue.param.value.type:float
+ */
+inline void
+_sprintfValue(char * buf, double val) {
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): sprintf is unsafe, the C++ idiom is to use a std::string, we should probably use String.
+    std::sprintf(buf, "%G", val);
+}
+
+
+/*
+.Function._writeScoringMatrix:
+..cat:Input/Output
+..summary:Write the data of a scoring matrix to a file.
+..signature:_writeScoringMatrix(file, table, meta)
+..remark:TODO(holtgrew):More documentation.
+*/
 template <typename TSequenceValue, typename TFile, typename TValue, typename TMeta>
 void
-_writeScoringMatrix(TFile & fl,
-					TValue * tab,
-					TMeta & meta)
-{
-	typedef typename Value<TFile>::Type TFileValue;
+_writeScoringMatrix(TFile & fl, TValue * tab, TMeta & meta) {
+    SEQAN_CHECKPOINT;
+    typedef typename Value<TFile>::Type TFileValue;
 
-	enum
-	{
-		VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,
-		TAB_SIZE = VALUE_SIZE * VALUE_SIZE
-	};
+    enum {
+        VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,
+        TAB_SIZE = VALUE_SIZE * VALUE_SIZE
+    };
 
-	typedef typename Value<TFile>::Type TFileValue;
+    typedef typename Value<TFile>::Type TFileValue;
 
-	//write meta
-	if (!empty(meta))
-	{
-		bool line_begin = true;
-		for (unsigned int i = 0; i < length(meta); ++i)
-		{
-			if (line_begin)
-			{//escape each line with a starting #
-				_streamPut(fl, '#');
-				line_begin = false;
-			}
-			if (meta[i] == '\r') continue;
-			if (meta[i] == '\n') line_begin = true;
-			_streamPut(fl, meta[i]);
-		}
-		if (!line_begin) _streamPut(fl, '\n');
-	}
+    // Write meta data.
+    if (!empty(meta)) {
+        bool line_begin = true;
+        for (unsigned int i = 0; i < length(meta); ++i) {
+            if (line_begin) {
+                // Escape each line with a starting '#'.
+                _streamPut(fl, '#');
+                line_begin = false;
+            }
+            if (meta[i] == '\r') continue;
+            if (meta[i] == '\n') line_begin = true;
+            _streamPut(fl, meta[i]);
+        }
+        if (!line_begin) _streamPut(fl, '\n');
+    }
 
-	//determine column width
-	unsigned int col_width = 1;
-	char buf[100]; //100 is enough, believe me!
-	for (unsigned int i = 0; i < TAB_SIZE; ++i)
-	{
-		_sprintfValue(buf, tab[i]);
-		unsigned int cell_width = std::strlen(buf);
-		if (cell_width > col_width) col_width = cell_width; //compute maximum
-	}
-	
-	++col_width; //increase col_width for an additional blank 
+    // Determine column width.
+    unsigned int col_width = 1;
+    char buf[100];  // 100 is enough, believe me!
+    for (unsigned int i = 0; i < TAB_SIZE; ++i) {
+        _sprintfValue(buf, tab[i]);
+        unsigned int cell_width = std::strlen(buf);
+        if (cell_width > col_width)
+            col_width = cell_width;  // Compute maximum.
+    }
 
-	//write alphabet line
-	_streamPut(fl, ' '); // a blank for alphabet column
-	for (unsigned int j = 0; j < VALUE_SIZE; ++j)
-	{
-		TFileValue val = (TSequenceValue) j; //conversion integral => TSequenceValue => TFileValue
-		//leading blanks for column j
-		for (unsigned int k = 1; k < col_width; ++k) _streamPut(fl, ' ');
-		_streamPut(fl, val);
-	}
-	_streamPut(fl, '\n');
+    ++col_width;  // Increase col_width for an additional blank.
 
-	//write rest of matrix
-	for (unsigned int i = 0; i < VALUE_SIZE; ++i)
-	{
-		//write alphabet column cell
-		TFileValue val = (TSequenceValue) i; //conversion integral => TSequenceValue => TFileValue
-		_streamPut(fl, val);
+    // Write alphabet line.
+    _streamPut(fl, ' ');  // A blank for alphabet column.
+    for (unsigned int j = 0; j < VALUE_SIZE; ++j) {
+        TFileValue val = (TSequenceValue) j;  // Conversion integral => TSequenceValue => TFileValue.
+        // Leading blanks for column j.
+        for (unsigned int k = 1; k < col_width; ++k) _streamPut(fl, ' ');
+        _streamPut(fl, val);
+    }
+    _streamPut(fl, '\n');
 
-		//write rest of line i
-		unsigned int offset = i * VALUE_SIZE;
-		for (unsigned int j = 0; j < VALUE_SIZE; ++j)
-		{
-			_sprintfValue(buf, tab[offset + j]);
-			unsigned int len = strlen(buf);
+    // Write rest of matrix.
+    for (unsigned int i = 0; i < VALUE_SIZE; ++i) {
+        // Write alphabet column cell.
+        TFileValue val = (TSequenceValue) i;  // Conversion integral => TSequenceValue => TFileValue
+        _streamPut(fl, val);
 
-			//leading blanks
-			for (unsigned int k = 0; k < col_width - len; ++k) _streamPut(fl, ' ');
+        // Write rest of line i.
+        unsigned int offset = i * VALUE_SIZE;
+        for (unsigned int j = 0; j < VALUE_SIZE; ++j) {
+            _sprintfValue(buf, tab[offset + j]);
+            unsigned int len = strlen(buf);
 
-			//write cell
-			for (unsigned int k = 0; k < len; ++k) _streamPut(fl, buf[k]);
-//			_streamPut(fl, ',');
-		}
-		_streamPut(fl, '\n');
-	}
+            // Leading blanks.
+            for (unsigned int k = 0; k < col_width - len; ++k) _streamPut(fl, ' ');
+
+            // Write cell.
+            for (unsigned int k = 0; k < len; ++k) _streamPut(fl, buf[k]);
+        }
+        _streamPut(fl, '\n');
+    }
 }
 
-//____________________________________________________________________________
 
 /**
 .Function.write:
-..cat:Scoring
+..cat:Input/Output
 ..signature:write(file, scoreMatrix, meta)
 ..remark:TODO, comment better/at all.
+..includes:seqan/score.h
  */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec, typename TMeta>
 inline void
-write(TFile & fl,
-	  Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc,
-	  TMeta & meta)
-{
-	_writeScoringMatrix<TSequenceValue>(fl, sc.data_tab, meta);
+write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc, TMeta & meta) {
+    SEQAN_CHECKPOINT;
+    _writeScoringMatrix<TSequenceValue>(fl, sc.data_tab, meta);
 }
 
 
 /**
 .Function.write:
-..cat:Scoring
+..cat:Input/Output
 ..signature:write(file, scoreMatrix)
 ..remark:TODO, comment better/at all.
+..includes:seqan/score.h
  */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void
-write(TFile & fl,
-	  Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc)
-{
-	write(fl, sc, "");
+write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc) {
+    SEQAN_CHECKPOINT;
+    write(fl, sc, "");
 }
 
-//////////////////////////////////////////////////////////////////////////////
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // SEQAN_SCORE_SCORE_MATRIX_H_

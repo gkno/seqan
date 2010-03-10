@@ -1,6 +1,6 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -15,21 +15,15 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SCORE_BASE_H
-#define SEQAN_HEADER_SCORE_BASE_H
+// TODO(holtgrew): Should the public interface for the class Score not be defined here?
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#ifndef SEQAN_SCORE_SCORE_BASE_H_
+#define SEQAN_SCORE_SCORE_BASE_H_
 
-//////////////////////////////////////////////////////////////////////////////
-
-struct Simple;
-
-//////////////////////////////////////////////////////////////////////////////
-
+namespace SEQAN_NAMESPACE_MAIN {
 
 /**
 .Class.Score:
@@ -39,135 +33,161 @@ struct Simple;
 ..param.TValue:The value type.
 ...default:int
 ..param.TSpec:The specializing type.
-...default:@Spec.Simple Score@
+...default:@Tag.Simple@
+..include:seqan/score.h
 */
 template <typename TValue = int, typename TSpec = Simple>
 class Score;
 
-//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Metafunction.Value.param.T.type:Class.Score
+ */
 template <typename TValue, typename TSpec>
-struct Value< Score<TValue, TSpec> >
-{
-	typedef TValue Type;
+struct Value<Score<TValue, TSpec> > {
+    typedef TValue Type;
 };
 
-//////////////////////////////////////////////////////////////////////////////
 
-//DEPRECATED
-///*
-//.Metafunction.ScoreValue:
-//..summary:The ScoreValue type of a scoring scheme.
-//..signature:Key<T>::Type
-//..param.T:A type that holds a scoring scheme.
-//...type:Class.Score
-//..returns.param.Type:The value type of the scoring scheme.
-//...default:$int$.
-//*/
-//
-//template <typename T>
-//struct ScoreValue
-//{
-//	typedef int Type;
-//};
-//template <typename TValue, typename TSpec>
-//struct ScoreValue< Score<TValue, TSpec> >
-//{
-//	typedef TValue Type;
-//};
-
-//////////////////////////////////////////////////////////////////////////////
-
-// ATTENTION: scoreGap...(TScore) is deprecated
-// Better use the following functions:
-
+/**
+.Function.scoreGapOpenHorizontal
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapOpenHorizontal(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapOpenHorizontal(
-	Score<TValue, TSpec> const & me,
-	TPos1,
-	TPos2,
-	TSeq1 const &,
-	TSeq2 const &)
-{
-	return scoreGapOpen(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGapOpen(me);
 }
 
+
+/**
+.Function.scoreGapOpenVertical
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapOpenVertical(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapOpenVertical(
-	Score<TValue, TSpec> const & me,
-	TPos1,
-	TPos2,
-	TSeq1 const &,
-	TSeq2 const &)
-{
-	return scoreGapOpen(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGapOpen(me);
 }
 
+
+/**
+.Function.scoreGapExtendHorizontal
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapExtendHorizontal(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapExtendHorizontal(
-	Score<TValue, TSpec> const & me,
-	TPos1,
-	TPos2,
-	TSeq1 const &,
-	TSeq2 const &)
-{
-	return scoreGapExtend(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGapExtend(me);
 }
 
+
+/**
+.Function.scoreGapExtendVertical
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapExtendVertical(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapExtendVertical(
-	Score<TValue, TSpec> const & me,
-	TPos1,
-	TPos2,
-	TSeq1 const &,
-	TSeq2 const &)
-{
-	return scoreGapExtend(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGapExtend(me);
 }
 
+
+/**
+.Function.scoreGapHorizontal
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapHorizontal(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapHorizontal(
-	Score<TValue, TSpec> const & me,
-	TPos1,
-	TPos2,
-	TSeq1 const &,
-	TSeq2 const &)
-{
-	return scoreGap(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGap(me);
 }
 
+
+/**
+.Function.scoreGapVertical
+..cat:Scoring
+..summary:TODO(holtgrew): David wrote this, he should comment it.
+..signature:scoreGapVertical(score, pos1, pos2, seq1, seq2)
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 scoreGapVertical(
-	Score<TValue, TSpec> const & me,
-	TPos1 pos1,
-	TPos2 pos2,
-	TSeq1 const &seq1,
-	TSeq2 const &seq2)
-{
-	return scoreGap(me);
+    Score<TValue, TSpec> const & me,
+    TPos1,
+    TPos2,
+    TSeq1 const &,
+    TSeq2 const &) {
+    SEQAN_CHECKPOINT;
+    return scoreGap(me);
 }
 
-// ATTENTION: score(TScore, TVal1, TVal2) is deprecated
-// Better use the following function:
 
+/**
+.Function.score
+..cat:Scoring
+..signature:score(score, pos1, pos2, seq1, seq2)
+..remark:ATTENTION -- score(TScore, TVal1, TVal2) is deprecated.  Better use this function.
+..remark:TODO(holtgrew): David wrote this, he should comment it.
+..include:seqan/score.h
+ */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
 inline TValue
 score(Score<TValue, TSpec> const & me,
-	  TPos1 pos1,
-	  TPos2 pos2,
-	  TSeq1 const &seq1,
-	  TSeq2 const &seq2)
-{
-	return score(me, seq1[pos1], seq2[pos2]);
+      TPos1 pos1,
+      TPos2 pos2,
+      TSeq1 const &seq1,
+      TSeq2 const &seq2) {
+    SEQAN_CHECKPOINT;
+    return score(me, seq1[pos1], seq2[pos2]);
 }
 
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // SEQAN_SCORE_SCORE_BASE_H_

@@ -1,6 +1,6 @@
- /*==========================================================================
+/*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007
 
@@ -15,16 +15,23 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Code for the Simple Scoring Schema.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SCORE_SIMPLE_H
-#define SEQAN_HEADER_SCORE_SIMPLE_H
+#ifndef SEQAN_SCORE_SCORE_SIMPLE_H_
+#define SEQAN_SCORE_SCORE_SIMPLE_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace SEQAN_NAMESPACE_MAIN {
 
-//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.Simple:
+..cat:Scoring
+..summary:Tag for the @Class.Score@ to mark it as a simple score.
+ */
+struct Simple;
+
 
 /**
 .Spec.Simple Score
@@ -34,48 +41,40 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:int
 ..general:Class.Score
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
-..include:seqan/score.h
 */
 template <typename TValue>
-class Score<TValue, Simple>
-{
-public:
-	TValue data_match;
-	TValue data_mismatch;
-	TValue data_gap_extend;
-	TValue data_gap_open;
+struct Score<TValue, Simple> {
+    // The score for a match.
+    TValue data_match;
 
-public:
-	Score():
-		data_match(0),
-		data_mismatch(-1),
-		data_gap_extend(-1),
-		data_gap_open(-1)
-	{
-	}
+    // The score for a mismatch.
+    TValue data_mismatch;
 
-	Score(TValue _match, TValue _mismatch, TValue _gap):
-		data_match(_match),
-		data_mismatch(_mismatch),
-		data_gap_extend(_gap),
-		data_gap_open(_gap)
-	{
-	}
-	Score(TValue _match, TValue _mismatch, TValue _gap_extend, TValue _gap_open):
-		data_match(_match),
-		data_mismatch(_mismatch),
-		data_gap_extend(_gap_extend),
-		data_gap_open(_gap_open)
-	{
-	}
+    // The gap extension score.
+    TValue data_gap_extend;
+
+    // The gap open score.
+    TValue data_gap_open;
+
+    Score()
+        : data_match(0), data_mismatch(-1), data_gap_extend(-1),
+          data_gap_open(-1) {
+        SEQAN_CHECKPOINT;
+    }
+
+    Score(TValue _match, TValue _mismatch, TValue _gap)
+        : data_match(_match), data_mismatch(_mismatch),
+          data_gap_extend(_gap), data_gap_open(_gap) {
+        SEQAN_CHECKPOINT;
+    }
 
 /**
 .Memfunc.Score#Score:
 ..class:Class.Score
 ..summary:Constructor
-..signature:Score<TValue, Simple> ()
-..signature:Score<TValue, Simple> (score)
-..signature:Score<TValue, Simple> (match, mismatch, gap [, gap_open])
+..signature:Score<TValue, Simple>()
+..signature:Score<TValue, Simple>(score)
+..signature:Score<TValue, Simple>(match, mismatch, gap [, gap_open])
 ..param.score:Other Score object. (copy constructor)
 ..param.match:TValue object.
 ...default:0
@@ -88,32 +87,16 @@ public:
 ...remarks:The score for the first blank in a gap (affine gap costs).
 ...default:$gap$
 ..remarks:
-...text:If both gap and gap_open are specified, the total score of a length $n$ gap is $gap_open + (n-1)*gap$.
+...text:If both gap and gap_open are specified, the total score of a length $n$ gap is $gap_open (n-1)*gap$.
 ...note:Usually $mismatch$, $gap$, and $gap_open$ are negative values.
-*/
-	Score(Score const & other):
-		data_match(other.data_match),
-		data_mismatch(other.data_mismatch),
-		data_gap_extend(other.data_gap_extend),
-		data_gap_open(other.data_gap_open)
-	{
-	}
-	~Score()
-	{
-	}
-
-	Score & operator = (Score const & other)
-	{
-		data_match = other.data_match;
-		data_mismatch = other.data_mismatch;
-		data_gap_extend = other.data_gap_extend;
-		data_gap_open = other.data_gap_open;
-		return *this;
-	}
-
-//____________________________________________________________________________
+ */
+    Score(TValue _match, TValue _mismatch, TValue _gap_extend, TValue _gap_open)
+        : data_match(_match), data_mismatch(_mismatch),
+          data_gap_extend(_gap_extend), data_gap_open(_gap_open) {
+        SEQAN_CHECKPOINT;
+    }
 };
-//////////////////////////////////////////////////////////////////////////////
+
 
 /**
 .Shortcut.SimpleScore:
@@ -124,18 +107,16 @@ public:
 ...signature:Score<int, Simple>
 ..see:Spec.Simple Score
 */
-
 typedef Score<int, Simple> SimpleScore;
 
-//////////////////////////////////////////////////////////////////////////////
 
-//____________________________________________________________________________
-/**.Function.scoreMatch:
+/**
+.Function.scoreMatch:
 ..class:Class.Score
 ..cat:Alignments
 ..summary:Match score.
 ..signature:scoreMatch(object)
-..param.object.type:Spec.Simple Score 
+..param.object.type:Spec.Simple Score
 ..returns:Match score.
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
@@ -143,18 +124,23 @@ typedef Score<int, Simple> SimpleScore;
 */
 template <typename TValue, typename TSpec>
 inline TValue &
-scoreMatch(Score<TValue, TSpec> & me)
-{
-	return me.data_match;
-}
-template <typename TValue, typename TSpec>
-inline TValue const &
-scoreMatch(Score<TValue, TSpec> const & me)
-{
-	return me.data_match;
+scoreMatch(Score<TValue, TSpec> & me) {
+    SEQAN_CHECKPOINT;
+    return me.data_match;
 }
 
-/**.Function.scoreMismatch:
+
+// TODO(holtgrew): Why is this not a get* function?
+template <typename TValue, typename TSpec>
+inline TValue const &
+scoreMatch(Score<TValue, TSpec> const & me) {
+    SEQAN_CHECKPOINT;
+    return me.data_match;
+}
+
+
+/**
+.Function.scoreMismatch:
 ..class:Class.Score
 ..cat:Alignments
 ..summary:Mismatch score.
@@ -168,18 +154,23 @@ scoreMatch(Score<TValue, TSpec> const & me)
 */
 template <typename TValue, typename TSpec>
 inline TValue &
-scoreMismatch(Score<TValue, TSpec> & me)
-{
-	return me.data_mismatch;
-}
-template <typename TValue, typename TSpec>
-inline TValue const &
-scoreMismatch(Score<TValue, TSpec> const & me)
-{
-	return me.data_mismatch;
+scoreMismatch(Score<TValue, TSpec> & me) {
+    SEQAN_CHECKPOINT;
+    return me.data_mismatch;
 }
 
-/**.Function.scoreGapExtend:
+
+// TODO(holtgrew): Why is this not a get* function?
+template <typename TValue, typename TSpec>
+inline TValue const &
+scoreMismatch(Score<TValue, TSpec> const & me) {
+    SEQAN_CHECKPOINT;
+    return me.data_mismatch;
+}
+
+
+/**
+.Function.scoreGapExtend:
 ..class:Class.Score
 ..cat:Alignments
 ..summary:Score for extending gaps.
@@ -193,17 +184,23 @@ scoreMismatch(Score<TValue, TSpec> const & me)
 */
 template <typename TValue, typename TSpec>
 inline TValue &
-scoreGapExtend(Score<TValue, TSpec> & me)
-{
-	return me.data_gap_extend;
+scoreGapExtend(Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return me.data_gap_extend;
 }
+
+
+// TODO(holtgrew): Why is this not a get* function?
 template <typename TValue, typename TSpec>
 inline TValue const &
-scoreGapExtend(Score<TValue, TSpec> const & me)
-{
-	return me.data_gap_extend;
+scoreGapExtend(const Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return me.data_gap_extend;
 }
-/**.Function.scoreGapOpen:
+
+
+/**
+.Function.scoreGapOpen:
 ..class:Class.Score
 ..cat:Alignments
 ..summary:Score for opening a gap.
@@ -217,18 +214,23 @@ scoreGapExtend(Score<TValue, TSpec> const & me)
 */
 template <typename TValue, typename TSpec>
 inline TValue &
-scoreGapOpen(Score<TValue, TSpec> & me)
-{
-	return me.data_gap_open;
-}
-template <typename TValue, typename TSpec>
-inline TValue const &
-scoreGapOpen(Score<TValue, TSpec> const & me)
-{
-	return me.data_gap_open;
+scoreGapOpen(Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return me.data_gap_open;
 }
 
-/**.Function.scoreGap:
+
+// TODO(holtgrew): Why is this not a get* function?
+template <typename TValue, typename TSpec>
+inline TValue const &
+scoreGapOpen(const Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return me.data_gap_open;
+}
+
+
+/**
+.Function.scoreGap:
 ..class:Class.Score
 ..cat:Alignments
 ..summary:Score for gaps.
@@ -242,20 +244,24 @@ scoreGapOpen(Score<TValue, TSpec> const & me)
 ..see:Function.scoreGapOpen
 ..see:Function.scoreGapExtend
 */
+// TODO(holtgrew): This shortcut/forward should live in score_base.h.
 template <typename TValue, typename TSpec>
 inline TValue &
-scoreGap(Score<TValue, TSpec> & me)
-{
-	return scoreGapExtend(me);
+scoreGap(Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return scoreGapExtend(me);
 }
+
+
+// TODO(holtgrew): Why is this not a get* function?
 template <typename TValue, typename TSpec>
-inline TValue const &
-scoreGap(Score<TValue, TSpec> const & me)
-{
-	return scoreGapExtend(me);
+inline const TValue &
+scoreGap(const Score<TValue, TSpec> &me) {
+    SEQAN_CHECKPOINT;
+    return scoreGapExtend(me);
 }
-//////////////////////////////////////////////////////////////////////////////
-	
+
+
 /**
 .Function.score:
 ..cat:Scoring
@@ -268,20 +274,16 @@ scoreGap(Score<TValue, TSpec> const & me)
 ..param.value2:second value.
 ..returns:The score for comparing the two values.
 */
-
 template <typename TValue, typename TSpec, typename TVal1, typename TVal2>
 inline TValue
-score(Score<TValue, TSpec> const & me,
-	  TVal1 left,
-	  TVal2 right)
-{
-	if (left == right) return scoreMatch(me);
-	else return scoreMismatch(me);
+score(Score<TValue, TSpec> const & me, TVal1 left, TVal2 right) {
+    SEQAN_CHECKPOINT;
+    if (left == right)
+        return scoreMatch(me);
+    else
+        return scoreMismatch(me);
 }
 
+}  // namespace SEQAN_NAMESPACE_MAIN
 
-//////////////////////////////////////////////////////////////////////////////
-
-}// namespace SEQAN_NAMESPACE_MAIN
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // SEQAN_SCORE_SCORE_SIMPLE_H_
