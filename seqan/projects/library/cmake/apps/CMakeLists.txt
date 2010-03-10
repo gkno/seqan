@@ -22,9 +22,9 @@ find_package (Boost)
 
 # If Boost is not found then Boost_INCLUDE_DIRS will be set
 # to "NOTFOUND" which will make CMake complain on Windows.
-if (BOOST_FOUND)
+if (Boost_FOUND)
   set (BOOST_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
-endif (BOOST_FOUND)
+endif (Boost_FOUND)
 
 # Make sure the compiler can find include files from the SeqAn, Boost and TBB library.
 include_directories (${SEQAN_LIBRARY}
