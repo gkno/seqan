@@ -9,7 +9,7 @@ endif
 CPPFLAGS += -I$(SEQAN)
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CPPFLAGS += -O3
-CPPFLAGS += -pedantic
+CPPFLAGS += -pedantic -W -Wall
 
 all: $(basename $(wildcard *.cpp))
 index: $(basename $(wildcard index_*.cpp))
