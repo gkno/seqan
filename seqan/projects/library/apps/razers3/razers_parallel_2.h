@@ -161,7 +161,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if(beginOk){
             unsigned blockSize = length(host(host(swiftPatterns[0])));
             int numberOfBlocks = length(swiftFinders);
-            // FIXME: int cores = omp_get_num_procs();
+            unsigned cores = omp_get_num_procs();
 #ifdef RAZERS_TIMER
             CharString contigAndDirection;
             append(contigAndDirection, store.contigNameStore[contigId]);
@@ -171,9 +171,12 @@ namespace SEQAN_NAMESPACE_MAIN
             // for waiting times
             String<_proFloat> waitingTimes;
             resize(waitingTimes, cores, Exact());
+			for(unsigned k = 0; k < cores; ++k){
+				waitingTimes[k] = sysTime();
+			}
 #endif
             // use only core many threads
-            // FIXME: omp_set_num_threads(cores);
+            omp_set_num_threads(cores);
             
             // go over contig sequence
             while(true)
@@ -184,10 +187,10 @@ namespace SEQAN_NAMESPACE_MAIN
                 // As the data structures are split up alread and each thread works on only one element of
                 // the strings (finder, patterns) at a time the variables can be shared
                 // TODO: maybe try schedule(guided)
-                // FIXME: #pragma omp parallel for schedule(dynamic, 1) //private(options)
+                #pragma omp parallel for schedule(dynamic, 1) //private(options)
                 for (int i = 0; i < numberOfBlocks; ++i){ //TSwiftFinderSize
 
-#ifdef RAZERS_TIMER
+#ifdef RAZERS_TIMER					
                     // start time for filtering
                     _proFloat startTime = sysTime();
 
@@ -235,11 +238,9 @@ namespace SEQAN_NAMESPACE_MAIN
                 _proFloat now = sysTime();
                 #pragma omp critical
                 {
-                    std::cout << "waiting>";
                     for(unsigned k = 0; k < length(waitingTimes); ++k){
-                        std::cout << "\t" << (now - waitingTimes[k]);
-                    }
-                    std::cout << "\n";
+                        std::cout << "waiting>\t"  << k << "\t" << (now - waitingTimes[k]) << "\n";
+					}
                 }
 #endif
                 
@@ -345,8 +346,9 @@ namespace SEQAN_NAMESPACE_MAIN
         
 
 #ifdef RAZERS_TIMER
-                // print header line for timer
-                std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\n";
+		// print header line for timer
+		std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\n";
+		std::cout << "waiting>\tthread\ttime\n";
 #endif
         
         // iterate over genome sequences
@@ -405,7 +407,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // a block is a subset of reads that is filtered and verified in a row
         // depending on how long it takes to process the individual blocks a single
         // thread might work through more than otheres
-        unsigned cores = 1;//omp_get_num_procs();
+        unsigned cores = omp_get_num_procs();
         unsigned noOfBlocks = cores * options.blocksPerCore;
         
         if (options._debugLevel >= 1){
@@ -448,6 +450,9 @@ namespace SEQAN_NAMESPACE_MAIN
                 
                 // configure q-gram index
                 intiIndex(indices[b], readSet, shape);
+#ifdef RAZERS_OPENADDRESSING
+				indices[b].alpha = options.loadFactor;
+#endif
                 cargo(indices[b]).abundanceCut = options.abundanceCut;
                 cargo(indices[b])._debugLevel = options._debugLevel;
             }

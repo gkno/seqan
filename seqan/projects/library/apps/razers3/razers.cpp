@@ -32,6 +32,9 @@
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
 //#define RAZERS_PARALLEL_READS			// parallelize by reads
+#ifdef RAZERS_PARALLEL_READS
+#define RAZERS_OPENADDRESSING	
+#endif
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
