@@ -226,7 +226,7 @@ namespace ClassTest {
         std::cout << " Skipped:     " << StaticData::skippedCount() << std::endl;
         std::cout << " Errors:      " << StaticData::errorCount() << std::endl;
         std::cout << "**************************************" << std::endl;
-        return !(StaticData::errorCount() > 0 && StaticData::totalCheckPointCount() == StaticData::foundCheckPointCount());
+        return !(StaticData::errorCount() == 0 && StaticData::totalCheckPointCount() == StaticData::foundCheckPointCount());
     }
 
     // Run test initialization.
@@ -682,7 +682,7 @@ namespace ClassTest {
         abort();
     }
 #endif  // #if SEQAN_ENABLE_TESTING
-    
+
 }  // namespace ClassTest
 
 // This macro expands to function header for one test.
