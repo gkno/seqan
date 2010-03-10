@@ -649,6 +649,50 @@ struct WEIGHT<T const>:
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Metafunction.IsIntegral:
+..summary:Tests for a type to be of integral value.
+..signature:IsIntegral<T>::Type
+..param.T:Type that is tested.
+..returns.param.Type:@Tag.Logical Values.True@, if $T$ is a simple type, @Tag.Logical Values.False@ otherwise.
+...default:@Tag.Logical Values.False@
+..includes:seqan/basic/basic_types.h, seqan/basic.h
+ */
+template <typename T>
+struct IsIntegral {
+    typedef False Type;
+};
+
+
+template <>
+struct IsIntegral<char> {
+    typedef True Type;
+};
+
+
+template <>
+struct IsIntegral<int> {
+    typedef True Type;
+};
+
+
+template <>
+struct IsIntegral<long int> {
+    typedef True Type;
+};
+
+
+template <>
+struct IsIntegral<unsigned> {
+    typedef True Type;
+};
+
+
+template <>
+struct IsIntegral<long unsigned> {
+    typedef True Type;
+};
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
