@@ -12,7 +12,7 @@ int main ()
 	Iterator< TIndex, TopDown<> >::Type it(index);
 // FRAGMENT(iteration)
 
-	CharString pattern = "wood";
+	CharString pattern = "wooud";
 	while (repLength(it) < length(pattern))
 	{
 		// go down edge starting with the next pattern character
@@ -24,11 +24,13 @@ int main ()
 			infix(pattern, parentRepLength(it) + 1, endPos)) break;
 	}
 
+// FRAGMENT(output)
 	// output match positions if pattern was found
-
 	if (repLength(it) >= length(pattern))
 		for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
 			std::cout << getOccurrences(it)[i] << std::endl;
+	else
+		std::cout << pattern << " not found." << std::endl;
 
 	return 0;
 }
