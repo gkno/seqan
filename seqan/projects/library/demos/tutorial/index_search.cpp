@@ -29,8 +29,6 @@ int main ()
 	if (repLength(it) >= length(pattern))
 		for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
 			std::cout << getOccurrences(it)[i] << std::endl;
-	else
-		std::cout << pattern << " not found." << std::endl;
 
 	return 0;
 }
