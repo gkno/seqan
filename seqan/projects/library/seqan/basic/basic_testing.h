@@ -711,6 +711,7 @@ namespace ClassTest {
             SEQAN_TEST_ ## test_name();                                 \
         } catch(::seqan::ClassTest::AssertionFailedException e) {       \
             /* Swallow exception, go on with next test. */              \
+            (void) e;  /* Get rid of unused variable warning. */        \
         }                                                               \
         ::seqan::ClassTest::endTest();                                  \
     } while (false)
