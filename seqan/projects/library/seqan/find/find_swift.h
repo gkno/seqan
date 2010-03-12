@@ -1111,7 +1111,7 @@ inline bool _swiftMultiFlushBuckets(
             if ((*bkt).counter >= (*bkt).threshold)
             {
 		    	// hstkPos / delta: gives the number of the bucket that is at the top of this column (modulo reuseMask missing)
-			    TSize topBucket = hstkLength >> bucketParams.logDelta;
+			    TSize topBucket = (TSize)(hstkLength >> bucketParams.logDelta);
     			// number of buckets in last column above the bucket with the number bktNo
 	    		TSize bucketNoInCol = (topBucket + bucketParams.reuseMask + 1 - bktNo) & bucketParams.reuseMask;
 		    	// begin position of lower diagonal of this bucket in haystack (possibly negative)
@@ -1261,7 +1261,7 @@ beginPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 	if(hitBegin < 0) hitBegin = 0;
 	
 	typename SAValue<TIndex >::Type pos;
-	posLocalToX(pos, TPair(pattern.curSeqNo, hitBegin), stringSetLimits(host(pattern)));
+	posLocalToX(pos, TPair(pattern.curSeqNo, (int)hitBegin), stringSetLimits(host(pattern)));
 	return pos;
 }
 
@@ -1274,7 +1274,7 @@ beginPosition(Pattern<TIndex, Swift<TSpec> > const & pattern)
 	if(hitBegin < 0) hitBegin = 0;
 	
 	typename SAValue<TIndex >::Type pos;
-	posLocalToX(pos, TPair(pattern.curSeqNo, hitBegin), stringSetLimits(host(pattern)));
+	posLocalToX(pos, TPair(pattern.curSeqNo, (int)hitBegin), stringSetLimits(host(pattern)));
 	return pos;
 }
 
@@ -1328,7 +1328,7 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 	if(hitEnd > textLength) hitEnd = textLength;
 
 	typename SAValue<TIndex >::Type pos;
-	posLocalToX(pos, TPair(pattern.curSeqNo, hitEnd), stringSetLimits(host(pattern)));
+	posLocalToX(pos, TPair(pattern.curSeqNo, (int)hitEnd), stringSetLimits(host(pattern)));
 	return pos;
 }
 
@@ -1342,7 +1342,7 @@ endPosition(Pattern<TIndex, Swift<TSpec> > const & pattern)
 	if(hitEnd > textLength) hitEnd = textLength;
 
 	typename SAValue<TIndex >::Type pos;
-	posLocalToX(pos, TPair(pattern.curSeqNo, hitEnd), stringSetLimits(host(pattern)));
+	posLocalToX(pos, TPair(pattern.curSeqNo, (int)hitEnd), stringSetLimits(host(pattern)));
 	return pos;
 }
 
