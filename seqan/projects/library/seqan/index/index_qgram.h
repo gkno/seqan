@@ -1802,7 +1802,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		Default const)
 	{
 		resize(indexSA(index), _qgramQGramCount(index), Exact());
-		createQGramIndexSAOnly(indexSA(index), indexText(index), indexShape(index));
+		createQGramIndexSAOnly(indexSA(index), indexText(index), indexShape(index), getStepSize(index));
 		return true;
 	}
 
