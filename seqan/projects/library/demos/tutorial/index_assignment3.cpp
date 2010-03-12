@@ -7,12 +7,12 @@ using namespace seqan;
 int main ()
 {
 	typedef Index<CharString> TIndex;
-	TIndex index("How many wood would a woodchuck chuck.");
+	TIndex index("tobeornottobe");
 	Iterator< TIndex, TopDown<ParentLinks<> > >::Type it(index);
 // FRAGMENT(iteration)
 
 	do {
-		std::cout << '"' << representative(it) << '"' << std::endl;
+		std::cout << representative(it) << std::endl;
 		if (!goDown(it) && !goRight(it))
 			while (goUp(it) && !goRight(it)) ;
 	} while (!isRoot(it));

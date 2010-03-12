@@ -1,6 +1,7 @@
 // FRAGMENT(includes)
 #include <iostream>
 #include <seqan/index.h>
+#include <typeinfo>
 
 using namespace seqan;
 
@@ -9,17 +10,18 @@ template < typename TIndexSpec >
 void constrainedDFS ()
 {
 	typedef Index<CharString, TIndexSpec> TIndex;
-	TIndex index("How many wood would a woodchuck chuck.");
+	TIndex index("tobeornottobe");
 	typename Iterator< TIndex, TopDown<ParentLinks<> > >::Type it(index);
 // FRAGMENT(iteration)
 
 	do {
-		std::cout << '"' << representative(it) << '"' << std::endl;
+		std::cout << representative(it) << std::endl;
 		do {
-			if (!(goDown(it) && repLength(it) <= 4) && !goRight(it))
+			if (!(goDown(it) && repLength(it) <= 3) && !goRight(it))
 				while (goUp(it) && !goRight(it)) ;
-		} while (repLength(it) > 4); 
+		} while (repLength(it) > 3); 
 	} while (!isRoot(it));
+	std::cout << std::endl;
 }
 
 
