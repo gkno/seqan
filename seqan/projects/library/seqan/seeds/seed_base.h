@@ -816,14 +816,14 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 	}
 }
 
-template<typename DatabaseInfix, typename QueryInfix, typename TPosition, typename TScore>
+template<typename DatabaseInfix, typename QueryInfix, typename TPosition, typename TScore, typename TSize>
 void
-extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
+extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
                        DatabaseInfix const & dataSeg,
                        QueryInfix const & querySeg, 
                        TScore scoreDropOff,
                        Score<TScore, Simple> const & scoreMatrix,
-                       TPosition direction) {
+                       TSize direction) {
     TScore gapCost = scoreGap(scoreMatrix);
     TPosition infimum = infimumValue<TPosition>()+1-gapCost;
 
@@ -845,6 +845,7 @@ extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
         ySummand = -1;
     }
 
+    // antidiagonals of DP matrix
     String<TPosition> antiDiagonal1;
     String<TPosition> antiDiagonal2;
     String<TPosition> antiDiagonal3;
@@ -876,7 +877,7 @@ extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
 	TPosition tmpMax2 = 0; // maximum score including the current diagonal
 
 	//Extension as proposed by Zhang et al
-	while(b <= u+1) {
+	while(true) {
 		++k;
 		for (TPosition i = b; i <= u+1; ++i) {
             // calculate matrix entry
@@ -890,18 +891,21 @@ extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
 			else
 				(*antiDiag3)[i] = tmp;
 		}
-
-		while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (b < (TPosition)length(*antiDiag3)-1)) {
+        
+        // narrow the relevant matrix region
+		while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (*antiDiag2)[b-1] < tmpMax1-scoreDropOff && (b < (TPosition)length(*antiDiag3)-1)) {
 			++b;
 		}
 		++u;
-		while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (u >= 0)) {
+		while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (*antiDiag2)[u] < tmpMax1-scoreDropOff && (u >= 0)) {
 			--u;
         }
 			
 		//borders for lower triangle of edit matrix
 		b = _max(b, k-yLength+1);
 		u = _min(u, xLength-1);
+
+        if (b > u+1) break;
 
 		if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
 			lowerBound = (k+1)/2 - b;
@@ -930,6 +934,20 @@ extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
 
 		tmpMax1 = tmpMax2;
 	}
+
+    //// print anti diagonals
+    //for(int ii = length(*antiDiag1)-1; ii >= 0 ; --ii) {
+    //    for(int jj = ii; jj > 0 ; --jj) std::cout << "  ";
+    //    std::cout << " ";
+    //    if ((*antiDiag1)[ii] == infimum ) std::cout << "i" << " ";
+    //    else std::cout << (*antiDiag1)[ii] << " ";
+    //    if (length(*antiDiag2) <= ii+1 ) std::cout << " ";
+    //    else if ((*antiDiag2)[ii+1] == infimum ) std::cout << "i" << " ";
+    //    else std::cout << (*antiDiag2)[ii+1] << " ";
+    //    if (length(*antiDiag3) <= ii+2 ) cout << std::endl;
+    //    else if ((*antiDiag3)[ii+2] == infimum ) std::cout << "i" << std::endl;
+    //    else std::cout << (*antiDiag3)[ii+2] << std::endl;
+    //}
 		
 	//Calculate upper/lower bound for diagonals
 	if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
@@ -939,50 +957,62 @@ extendSeedOneDirection(Seed<TPosition,SimpleSeed> & seed,
 		setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
 
 	//Find seed start/end
-	TPosition tmpPos = 0;
+	TPosition extLengthQuery = 0; // length of extension in query
+    TPosition extLengthDatabase = 0; // length of extension in database
 	TPosition tmpMax = infimum;
-	if ((k == xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)) {
-		tmpPos = xLength;
+	if ((k == xLength+yLength) && ((*antiDiag3)[xLength] >= tmpMax1-scoreDropOff)) {
+        // extension ends at end of sequences
+		extLengthQuery = xLength;
+        extLengthDatabase = yLength;
 		tmpMax = 0;
     } else {
-		for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
-			if ((*antiDiag1)[eu] > tmpMax) {
-				tmpMax = (*antiDiag1)[eu];
-				tmpPos = eu;
+		for (unsigned int eu = 0; eu < length(*antiDiag2); ++eu) {
+			if ((*antiDiag2)[eu] > tmpMax) {
+                // extension ends with indel
+				tmpMax = (*antiDiag2)[eu];
+				extLengthQuery = eu;
+                extLengthDatabase = k - (eu+1);
 			}
 		}
+        if (tmpMax == infimum) {
+            for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
+                if ((*antiDiag1)[eu] > tmpMax) {
+                    // extension ends with mismatch
+				    tmpMax = (*antiDiag1)[eu];
+				    extLengthQuery = eu;
+                    extLengthDatabase = k - (eu+2);
+			    }
+		    }
+        }
 		--k;
 	}
 
     // set new start/end position of seed
     if(tmpMax != infimum) {
         if(direction == 0) {
-            setLeftDim0(seed, leftDim0(seed)-tmpPos);
-            setLeftDim1(seed, leftDim1(seed)-(k-tmpPos));
+            setLeftDim0(seed, leftDim0(seed)-extLengthQuery);
+            setLeftDim1(seed, leftDim1(seed)-extLengthDatabase);
         } else {
-            setRightDim0(seed, rightDim0(seed)+tmpPos);
-            setRightDim1(seed, rightDim1(seed)+k-tmpPos);
+            setRightDim0(seed, rightDim0(seed)+extLengthQuery);
+            setRightDim1(seed, rightDim1(seed)+extLengthDatabase);
         }
     }
 }
 
 
-template<typename TPosition, typename TQuery, typename TDatabase, typename TScore>
+template<typename TPosition, typename TQuery, typename TDatabase, typename TScore, typename TSize>
 void 
-extendSeed(Seed<TPosition,SimpleSeed> &seed, 
+extendSeed(Seed<TPosition, SimpleSeed> &seed, 
 		   TScore scoreDropOff, 
 		   Score<TScore, Simple> const &scoreMatrix, 
 		   TQuery const &query, 
 		   TDatabase const &database, 
-		   TPosition direction, 
+		   TSize direction, 
 		   GappedXDrop)
 {
 	SEQAN_CHECKPOINT
-// 	TScore gapCost = scoreGap(scoreMatrix);
-// 	TPosition infimum = infimumValue<TPosition>()+1-gapCost;
-	
 	//left extension
-	if ((direction != 1) && (leftDim0(seed)!= 0) && (leftDim1(seed) != 0))
+	if ((direction != 1) && (leftDim0(seed)!= (TPosition)beginPosition(query)) && (leftDim1(seed) != (TPosition)beginPosition(database)))
     {
         typename Prefix<TDatabase const>::Type dataSeg = prefix(database, leftDim1(seed));
         typename Prefix<TQuery const>::Type querySeg = prefix(query, leftDim0(seed));
