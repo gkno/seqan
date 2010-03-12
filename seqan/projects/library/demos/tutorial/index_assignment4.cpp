@@ -16,10 +16,11 @@ void constrainedDFS ()
 
 	do {
 		std::cout << representative(it) << std::endl;
-		do {
-			if (!(goDown(it) && repLength(it) <= 3) && !goRight(it))
-				while (goUp(it) && !goRight(it)) ;
-		} while (repLength(it) > 3); 
+		if (!goDown(it) || repLength(it) > 3)
+			do {
+				if (!goRight(it))
+					while (goUp(it) && !goRight(it)) ;
+			} while (repLength(it) > 3);
 	} while (!isRoot(it));
 	std::cout << std::endl;
 }
