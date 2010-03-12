@@ -142,24 +142,63 @@ void Test_SimpleSeeds()
 
 	Seed<int, SimpleSeed> seed9(4,4,3);
 	extendSeed(seed9, 1, matrix, query, database, 2, GappedXDrop());
-    std::cout << infix(query, leftDim0(seed9), rightDim0(seed9)+1) << std::endl;
-    std::cout << infix(database, leftDim1(seed9), rightDim1(seed9)+1) << std::endl;
+    //std::cout << infix(query, leftDim0(seed9), rightDim0(seed9)+1) << std::endl;
+    //std::cout << infix(database, leftDim1(seed9), rightDim1(seed9)+1) << std::endl << std::endl;
 	SEQAN_TASSERT(leftDim0(seed9)==0);
 	SEQAN_TASSERT(rightDim0(seed9)==12);
 	SEQAN_TASSERT(leftDim1(seed9)==0);
 	SEQAN_TASSERT(rightDim1(seed9)==13);
-
     
 	String<Dna> query1 =	"aaaacgatcgatgc";
 	String<Dna> database1 = "ttttcgatcgatgcttt";
-	Seed<int, SimpleSeed> seed99(4,4,9);
-	extendSeed(seed99, 1, matrix, query1, database1, 2, GappedXDrop());
-    std::cout << infix(query1, leftDim0(seed99), rightDim0(seed99)+1) << std::endl;
-    std::cout << infix(database1, leftDim1(seed99), rightDim1(seed99)+1) << std::endl;
-	SEQAN_TASSERT(leftDim0(seed99)==3);
-	SEQAN_TASSERT(rightDim0(seed99)==13);
-	SEQAN_TASSERT(leftDim1(seed99)==3);
-	SEQAN_TASSERT(rightDim1(seed99)==14);
+	Seed<int, SimpleSeed> seed9a(4,4,9);
+	extendSeed(seed9a, 1, matrix, query1, database1, 2, GappedXDrop());
+    //std::cout << infix(query1, leftDim0(seed9a), rightDim0(seed9a)+1) << std::endl;
+    //std::cout << infix(database1, leftDim1(seed9a), rightDim1(seed9a)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9a)==3);
+	SEQAN_TASSERT(rightDim0(seed9a)==13);
+	SEQAN_TASSERT(leftDim1(seed9a)==3);
+	SEQAN_TASSERT(rightDim1(seed9a)==14);
+
+	Seed<int, SimpleSeed> seed9b(5,5,7);
+	extendSeed(seed9b, 1, matrix, query1, database1, 2, GappedXDrop());
+    //std::cout << infix(query1, leftDim0(seed9b), rightDim0(seed9b)+1) << std::endl;
+    //std::cout << infix(database1, leftDim1(seed9b), rightDim1(seed9b)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9b)==3);
+	SEQAN_TASSERT(rightDim0(seed9b)==13);
+	SEQAN_TASSERT(leftDim1(seed9b)==3);
+	SEQAN_TASSERT(rightDim1(seed9b)==14);
+
+	Seed<int, SimpleSeed> seed9c(6,6,6);
+	extendSeed(seed9c, 0, matrix, query1, database1, 2, GappedXDrop());
+    //std::cout << infix(query1, leftDim0(seed9c), rightDim0(seed9c)+1) << std::endl;
+    //std::cout << infix(database1, leftDim1(seed9c), rightDim1(seed9c)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9c)==4);
+	SEQAN_TASSERT(rightDim0(seed9c)==13);
+	SEQAN_TASSERT(leftDim1(seed9c)==4);
+	SEQAN_TASSERT(rightDim1(seed9c)==13);
+    
+	String<Dna> query2 =        "cgatcgatgcaaaaaaaaa";
+	String<Dna> database2 = "ttttcgatcgatgc";
+	Seed<int, SimpleSeed> seed9d(1,5,5);
+	extendSeed(seed9d, 1, matrix, query2, database2, 2, GappedXDrop());
+    //std::cout << infix(query2, leftDim0(seed9d), rightDim0(seed9d)+1) << std::endl;
+    //std::cout << infix(database2, leftDim1(seed9d), rightDim1(seed9d)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9d)==0);
+	SEQAN_TASSERT(rightDim0(seed9d)==10);
+	SEQAN_TASSERT(leftDim1(seed9d)==3);
+	SEQAN_TASSERT(rightDim1(seed9d)==13);
+    
+	String<Dna> query3 = "aaaaaaaaacgatcgatgcaaaaaaaaa";
+	String<Dna> database3 =       "cgatcgatgccaact";
+	Seed<int, SimpleSeed> seed9e(11,2,4);
+	extendSeed(seed9e, 1, matrix, query3, database3, 2, GappedXDrop());
+    //std::cout << infix(query3, leftDim0(seed9e), rightDim0(seed9e)+1) << std::endl;
+    //std::cout << infix(database3, leftDim1(seed9e), rightDim1(seed9e)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9e)==8);
+	SEQAN_TASSERT(rightDim0(seed9e)==22);
+	SEQAN_TASSERT(leftDim1(seed9e)==0);
+	SEQAN_TASSERT(rightDim1(seed9e)==13);
 }
 
 void Test_MultiSeeds(){
@@ -296,7 +335,7 @@ void Main_Seeds(){
 	SEQAN_TREPORT("TEST BEGIN")
 	Test_SimpleSeeds();
 	Test_MultiSeeds();
-	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_multi.h");
+	//debug::verifyCheckpoints("projects/library/seqan/seeds/seed_base.h");
+	//debug::verifyCheckpoints("projects/library/seqan/seeds/seed_multi.h");
 	SEQAN_TREPORT("TEST END")
 }
