@@ -184,13 +184,13 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Se
 	for (TSeedSetIterator it = begin(source); it != it_end; ++it)
 	{
 		pElement = new TChainElement(it, seedScore(it)+ (rightDim0(*it) + rightDim1(*it) - leftDim0(*it) - leftDim1(*it)+2-total)*gapCost, 0);
-		pointArray.insert(make_pair(leftDim0(*it), Pair<bool, TChainElement*>(true, pElement)));
-		test.insert(make_pair(rightDim0(*it), Pair<bool, TChainElement*>(false, pElement)));
+        pointArray.insert(std::make_pair(leftDim0(*it), Pair<bool, TChainElement*>(true, pElement)));
+        test.insert(std::make_pair(rightDim0(*it), Pair<bool, TChainElement*>(false, pElement)));
 	}
 
 	TMapIterator it_map_end2 = test.end();
 	for (TMapIterator it = test.begin(); it != it_map_end2; ++it)
-		pointArray.insert(make_pair(it->first, it->second));
+        pointArray.insert(std::make_pair(it->first, it->second));
 	
 	TSkiplistIterator it_test = begin(list);
 	TMapIterator it_map_end = pointArray.end();
