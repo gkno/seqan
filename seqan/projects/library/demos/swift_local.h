@@ -8,9 +8,6 @@ using namespace seqan;
 template<typename TSource, typename TPosition, typename TSize, typename TFloat>
 bool
 isEpsMatch(Align<TSource> & align, TPosition left, TPosition right, TSize minLength, TFloat eps) {
-    // check length
-    if (length(row(align, 0)) < minLength) return false;
-
     // count mismatches
     TSize mismatches = 0;
     for (TPosition i = left; i < right; ++i) {
@@ -20,7 +17,8 @@ isEpsMatch(Align<TSource> & align, TPosition left, TPosition right, TSize minLen
     }
     
     // check error rate
-    if (mismatches/(TFloat)length(align) <= eps) return true;
+    if (mismatches/(TFloat)(right-left) <= eps)
+        return true;
     return false;
 }
 
@@ -49,7 +47,7 @@ shrinkToMaxEpsMatch(Align<TSource> & align, TSize matchMinLength, TFloat epsilon
                 } else {
                     // check for new longest epsilon match
                     if (isEpsMatch(align, left, right, matchMinLength, epsilon)) {
-                        if (right - left > minLength) {
+                        if ((TSize)(right - left) > minLength) {
                             begin = left;
                             end = right;
                             minLength = right - left;
@@ -68,12 +66,12 @@ shrinkToMaxEpsMatch(Align<TSource> & align, TSize matchMinLength, TFloat epsilon
     }
     
     // set view positions to the alignment
-	setSourceBeginPosition(row(align, 0), begin);
-	setSourceBeginPosition(row(align, 1), begin);
-	setBeginPosition(row(align, 0),0);
-	setBeginPosition(row(align, 1),0);
-	setSourceEndPosition(row(align, 0),end);
-	setSourceEndPosition(row(align, 1),end);
+	setSourceBeginPosition(row(align, 0), toSourcePosition(row(align, 0), begin));
+	setSourceBeginPosition(row(align, 1), toSourcePosition(row(align, 1), begin));
+	setBeginPosition(row(align, 0), 0);//begin); // TODO: ask David what this function is needed for!
+	setBeginPosition(row(align, 1), 0);//begin);
+	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), end));
+	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), end));
     //std::cout << "begin:" << begin << " end:" << end << std::endl;
     //std::cout << align << std::endl;
 }
@@ -92,7 +90,7 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = -1;
+    TScore mismatchIndel = (int)(-1/eps) + 1;
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
     
     // create alignment object for the infixes
@@ -101,17 +99,21 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     assignSource(row(alignment, 0), a);
     assignSource(row(alignment, 1), b);
 
-    LocalAlignmentFinder<> finder(alignment);
-    TSize minScore = minLength - 2*(TSize)(eps*minLength) - 1;  // mininmal score
+    // calculate minimal score for local alignments
+    TSize minLength1 = (TSize)ceil((floor(eps*minLength)+1) / eps);
+    TSize minScore = (TSize)ceil((minLength - floor(eps*minLength)) / (floor(eps*minLength)+1));
+    minScore = _min(minScore, (TSize)ceil((minLength1 - floor(eps*minLength1)) / (floor(eps*minLength1)+1)));
 
-    while (localAlignment(alignment, finder, scoreMatrix, minScore)) {
+    // local alignment
+    LocalAlignmentFinder<> finder(alignment);
+    while (localAlignment(alignment, finder, scoreMatrix, minScore-1)) {
         // gapped X-drop extension
         TSeed seed(sourceBeginPosition(row(alignment, 0)) + beginPosition(a),
                    sourceBeginPosition(row(alignment, 1)) + beginPosition(b),
                    sourceEndPosition(row(alignment, 0)) + beginPosition(a),
                    sourceEndPosition(row(alignment, 1)) + beginPosition(b));
-        TSize errors = (length(row(alignment, 0)) - getScore(finder)) / 2;
-        TSize scoreDropOff = (int)(length(row(alignment, 0)) * eps) - errors;
+        TSize errors = (getScore(finder) - length(row(alignment, 0)) * match) / (mismatchIndel - match);
+        TSize scoreDropOff = (int)(2 * length(row(alignment, 0)) * eps)*match - errors*mismatchIndel;
         extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), 2, GappedXDrop());
 
         // banded alignment
@@ -120,9 +122,13 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
         assignSource(row(extAlign, 0), infix(host(a), leftDim0(seed), rightDim0(seed)));
         assignSource(row(extAlign, 1), infix(host(b), leftDim1(seed), rightDim1(seed)));
         bandedAlignment(extAlign, seed, errors, scoreMatrix);
+
+        if ((TSize)length(row(extAlign, 0)) < minLength) continue;
         
         // cut ends to obtain longest contained epsilon-match
         shrinkToMaxEpsMatch(extAlign, minLength, eps);
+
+        if ((TSize)length(row(extAlign, 0)) < minLength) continue;
 
         // insert e-match in matches string
         typename Iterator<String<Align<TInfixB> > >::Type iter = begin(matches);
@@ -135,7 +141,7 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
             }
             ++iter;
         }
-        if (iter == end(matches)) {
+        if (iter == end(matches) && (TSize)length(row(extAlign,0)) >= minLength) {
             appendValue(matches, extAlign);
         }
     }
@@ -224,7 +230,7 @@ qGramChains(String< String<TSeed> > & outputChains,
 // banded chain alignment and gapped X-drop extension for all chains of threshold q-grams
 template<typename TInfixA, typename TInfixB, typename TFloat, typename TSize, typename TShortSize, typename TMatches>
 void 
-verifySwiftHit(TInfixA const & a,
+verifySwiftHitByChains(TInfixA const & a,
                TInfixB const & b,
                TFloat eps,
                TSize minLength,
@@ -281,14 +287,14 @@ verifySwiftHit(TInfixA const & a,
                    rightDim0(*(end(*oIt)-1)),
                    rightDim1(*(end(*oIt)-1)));
         TSize errors = (length(seed) - totalSeedLength) / 2;
-        TScore scoreDropOff = (TScore)(length(seed) * eps) - errors;
+        TScore scoreDropOff = (TScore)(2* length(seed) * eps) - errors;/*
         std::cout << host(a) << "  " << leftDim0(seed) << "  " << rightDim0(seed) << std::endl;
         std::cout << host(b) << "  " <<  leftDim1(seed) << "  " << rightDim1(seed) << std::endl;
-        std::cout << scoreDropOff << "  " << errors << std::endl;
+        std::cout << scoreDropOff << "  " << errors << std::endl;*/
         extendSeed(seed, scoreDropOff, scoreMatrix, 
-                   host(a), host(b), 2, GappedXDrop());
+                   host(a), host(b), 2, GappedXDrop());/*
         std::cout << host(a) << "  " << leftDim0(seed) << "  " << rightDim0(seed) << std::endl;
-        std::cout << host(b) << "  " <<  leftDim1(seed) << "  " << rightDim1(seed) << std::endl;
+        std::cout << host(b) << "  " <<  leftDim1(seed) << "  " << rightDim1(seed) << std::endl;*/
 
         // create alignment object for the infixes
         Align<TInfixB> alignment;
@@ -320,5 +326,57 @@ verifySwiftHit(TInfixA const & a,
         }
 
         oIt++;
+    }
+}
+
+// banded chain alignment and gapped X-drop extension for all maximal chains of q-grams
+template<typename TInfixA, typename TInfixB, typename TFloat, typename TSize, typename TShortSize, typename TMatches>
+void 
+verifySwiftHitByMaxChain(TInfixA const & a,
+               TInfixB const & b,
+               TFloat eps,
+               TSize minLength,
+               TShortSize q,
+               TShortSize threshold,
+               TShortSize distanceCut,
+               TSize bandwidth,
+               TMatches & matches) {
+    typedef Seed<int, SimpleSeed> TSeed;
+    SeedSet<int, SimpleSeed, DefaultScore> seeds(1, q);
+    String<TSeed> chain;//, seeds;
+
+    typedef Index<DnaString, Index_QGram<SimpleShape> > TQGramIndex;
+	TQGramIndex index_qgram(b); 
+    resize(indexShape(index_qgram), q);
+
+    // create seed set of all common q-grams
+	typedef Finder<TQGramIndex> TFinder;
+    for (unsigned i = beginPosition(a); i < endPosition(a)-q+1; i++) {
+        TFinder finder(index_qgram);
+        while (find(finder, infix(host(a), i, i+q))) {
+            //TSeed newSeed(i, beginPosition(b) + position(finder), q);
+            //appendValue(seeds, newSeed);
+            unsigned begin = beginPosition(b) + position(finder);
+            std::cout << i << "  " << i+q << "    " << begin << "  " << begin+q << std::endl;
+            //if(!addSeed(seeds, i, begin, i+q, begin+q, 0, Merge())) {
+                addSeed(seeds, i, begin, q, q, Single());
+            //}
+        }
+    }
+    
+    // compute chain of q-grams from seed set
+    int score = globalChaining(seeds, chain, -1, length(a), length(b));
+
+    if (score > -10/*TODO: score???*/) {
+        Iterator<String<TSeed> >::Type it = begin(chain);
+        while (it != end(chain)) {
+            std::cout << rightDim0(*it) << "  " << leftDim0(*it) << "    " << rightDim1(*it) << "  " << leftDim1(*it) << std::endl;
+            ++it;
+        }
+        // TODO:
+        // seed extension
+        // bandedAlignment
+        // cutEnds
+        // insert into matches
     }
 }
