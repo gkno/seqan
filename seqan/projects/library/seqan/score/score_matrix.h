@@ -312,7 +312,7 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreM
     }
 
     // Read the matrix itself.
-    while (not _streamEOF(fl)) {
+    while (!_streamEOF(fl)) {
         clear(s);
         _stream_appendLine(fl, s, c);
 
