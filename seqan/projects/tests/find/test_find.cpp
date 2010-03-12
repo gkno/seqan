@@ -35,6 +35,8 @@
 #include <seqan/basic/basic_testing.h>
 #include <seqan/find.h>
 
+#include "test_find_hamming.h"
+
 using namespace std;
 using namespace seqan;
 
@@ -1448,7 +1450,112 @@ SEQAN_DEFINE_TEST(test_find_hamming_simple) {
 }
 
 
+// Tests for a regression found in read mapper benchmark.
+SEQAN_DEFINE_TEST(test_find_hamming_simple_regression_rmbench) {
+    // TODO(holtgrew): Should be const, but finder does not allow this.
+    // Define haystack and needle.
+    DnaString haystack("CCCCCCCCCCCCCCCCCCCCA");
+    DnaString needle("CCCCCCCCCCCCCCCCCCCC");
+    // Define finder and pattern.
+    Finder<DnaString> finder(haystack);
+    Pattern<DnaString, HammingSimple> pattern(needle);
+    setScoreLimit(pattern, -1000);
+    // Perform the searches;
+    bool res;
+    res = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(res);
+    SEQAN_ASSERT_EQ(0u, position(finder));
+    SEQAN_ASSERT_EQ(length(needle), endPosition(finder));
+    SEQAN_ASSERT_EQ(0, getScore(pattern));
+
+    res = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(res);
+    SEQAN_ASSERT_EQ(1u, position(finder));
+    SEQAN_ASSERT_EQ(length(needle) + 1, endPosition(finder));
+    SEQAN_ASSERT_EQ(-1, getScore(pattern));
+}
+
+
+SEQAN_DEFINE_TEST(test_find_hamming_horspool) {
+    testFindApproximateHamming<HammingHorspool, Dna>();
+}
+
+
+/*SEQAN_DEFINE_TEST(test_find_hamming_simple) {
+    testFindApproximateHamming<HammingSimple, Dna>();
+}*/
+
+SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_at_start) {
+    String<char> haystack = "___AAA___AAA";
+    String<char> needle = "___AAA";
+    Finder<String<char> > finder(haystack);
+    Pattern<String<char>, Myers<FindInfix> > pattern(needle, -2);
+
+    // Find match: ___AAA___AAA
+    //             ___A
+    bool ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+
+    // Find match: ___AAA___AAA
+    //             ___AA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(5u, endPosition(finder));
+    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+
+    // Find match: ___AAA___AAA
+    //             ___AAA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, endPosition(finder));
+    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+}
+
+
+SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_within) {
+    String<char> haystack = "A___AAA___AAA";
+    String<char> needle = "___AAA";
+    Finder<String<char> > finder(haystack);
+    Pattern<String<char>, Myers<FindInfix> > pattern(needle, -1);
+
+    // Find match: A___AAA___AAA
+    //              ___AA
+    bool ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, endPosition(finder));
+    ret = findBegin(finder, pattern, getScore(pattern));  // getScore(pattern) is in book but should not be necessary
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+
+    // Find match: A___AAA___AAA
+    //              ___AAA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    ret = findBegin(finder, pattern, getScore(pattern));  // getScore(pattern) is in book but should not be necessary
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
+    // Testing Myers<FindInfix> with findBegin().
+    SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
+    SEQAN_CALL_TEST(test_myers_find_infix_find_begin_within);
+
+    SEQAN_CALL_TEST(test_find_hamming_horspool);
+    SEQAN_CALL_TEST(test_find_hamming_simple);
+
+    SEQAN_CALL_TEST(test_find_hamming_simple_regression_rmbench);
+
     // Testing MyersUkkonen with large needle and manual score limit.
     SEQAN_CALL_TEST(test_regression_rmbench);
 
