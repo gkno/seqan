@@ -1,10 +1,9 @@
-// FRAGMENT(includes)
+// FRAGMENT(initialization)
 #include <iostream>
 #include <seqan/index.h>
 
 using namespace seqan;
 
-// FRAGMENT(initialization)
 int main ()
 {
 	typedef Index<CharString> TIndex;
