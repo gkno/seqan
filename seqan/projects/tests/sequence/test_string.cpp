@@ -1147,6 +1147,9 @@ int mainTestString()
 {
 	SEQAN_TREPORT("TEST STRING BEGIN")
 
+        // Use the constant EMPTY_STRING once to get rid of linker error in Visual Studio.
+        (void)seqan::String<char const ,struct seqan::CStyle>::EMPTY_STRING;
+
 	Test_Sequence_Interface();
 	Test_String_Base();
 	Test_String_Alloc();
