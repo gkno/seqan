@@ -51,7 +51,7 @@ Specify $void$ to suppress prefix searching.
 ///.Class.Pattern.param.TSpec.type:Spec.Myers
 
 template <typename TSpec = FindInfix, typename TFindBeginPatternSpec = typename DefaultFindBeginPatternSpec<>::Type>
-struct Myers;
+struct Myers {};
 
 //FindInfix and FindPrefix are defined int find_base.h
 struct AlignTextBanded; // search query in a parallelogram
@@ -62,7 +62,7 @@ struct AlignTextBanded; // search query in a parallelogram
 /**
 .Shortcut.MyersUkkonen:
 ..cat:Pattern Matching
-..summary:Semin-global (query-global, text-local) pattern matching.
+..summary:Semin-global (query-global, text-local) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
 ..shortcutfor:Spec.Myers
 ...signature:Myers<FindInfix, void>
@@ -76,7 +76,7 @@ typedef Myers<FindInfix, void> MyersUkkonen;
 /**
 .Shortcut.MyersUkkonenGlobal:
 ..cat:Pattern Matching
-..summary:Global (query-global, text-global) pattern matching.
+..summary:Global (query-global, text-global) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
 ..shortcutfor:Spec.Myers
 ...signature:Myers<FindPrefix, void>
@@ -90,7 +90,7 @@ typedef Myers<FindPrefix, void> MyersUkkonenGlobal;
 /**
 .Shortcut.MyersUkkonenBanded:
 ..cat:Pattern Matching
-..summary:Semin-global (query-global, text-local) pattern matching.
+..summary:Semin-global (query-global, text-local) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
 ..shortcutfor:Spec.Myers
 ...signature:Myers<AlignedTextBanded, void>
