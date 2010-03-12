@@ -586,7 +586,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 				    bucketParams.overlap = errors;
     
 	    			// delta must be a power of 2 and greater than errors
-		    		bucketParams.logDelta = (TSize) ceil(log((double)errors) / log(2.0));
+		    		bucketParams.logDelta = (TSize) ceil(log((double)errors + 1) / log(2.0));
 			    	if (bucketParams.logDelta < pattern.params.minLog2Delta) 
 				    	bucketParams.logDelta = pattern.params.minLog2Delta;
     				bucketParams.delta = 1 << bucketParams.logDelta;
@@ -774,7 +774,7 @@ inline void _createHit(
 {
 	typedef typename Finder<THaystack, Swift<TSpec> >::TSwiftHit	THit;
 
-    if(diag > (*bkt).lastIncrement) 
+    if(diag > (__int64)(*bkt).lastIncrement) 
 	{
 		// bucket is reused since last increment 
 		TSize reusePos = (bucketParams.reuseMask + 1) << bucketParams.logDelta;
@@ -868,7 +868,7 @@ inline bool _swiftMultiProcessQGram(
 		TShortSize hitCount;
 
 		do{
-			if( (__int64)((*bkt).lastIncrement + bktOfs) < diag  // TODO: Is this the same as (__int64)(*bkt).lastIncrement < bktBeginHstk ?
+			if((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset
 				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < finder.curPos + length(pattern.shape) )
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused
