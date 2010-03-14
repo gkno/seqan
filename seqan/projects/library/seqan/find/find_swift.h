@@ -1919,12 +1919,12 @@ windowFindNext(
 template <typename THaystack, typename TNeedle, typename TIndexSpec, typename TSpec>
 inline void 
 windowFindEnd(
-	Finder<THaystack, Swift<TSpec> > &,
+	Finder<THaystack, Swift<TSpec> > & finder,
 	Pattern<Index<TNeedle, TIndexSpec>, Swift<TSpec> > &pattern)
 {
 	SEQAN_CHECKPOINT
 	
-	_swiftMultiFlushBuckets(pattern);
+	_swiftMultiFlushBuckets(finder, pattern);
 }
 
 
