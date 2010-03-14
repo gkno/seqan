@@ -71,8 +71,127 @@ namespace SEQAN_NAMESPACE_MAIN
             setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
         }
     }
+	
+	// iterates over the aligned read store and look for a certain begin position. should set break point in if clause
+	template <typename TFragmentStore>
+	inline void containsRead(TFragmentStore const & store)
+	{
+		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
+		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
+		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
+		
+		for(unsigned i = 0; i < length(store.alignedReadStore); ++i){
+			if(store.alignedReadStore[i].beginPos == 28927578){
+				TAlignedReadStoreElem a = store.alignedReadStore[i];
+				TAlignedQualStoreElem q = store.alignQualityStore[a.id];
+				int k = 0; k = 1;
+			}
+		}
+	}
+	
+	// checks if the IDs in the alignedReadStore are continuously increasing
+	// prints the two values and the position in the store if not
+	template <typename TFragmentStore>
+	inline void consistencyTest(TFragmentStore const & store)
+	{
+		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
+		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
+		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
+		
+		for(unsigned i = 1; i < length(store.alignedReadStore); ++i){
+			if(store.alignedReadStore[i-1].id != (store.alignedReadStore[i].id -1)){
+				std::cout << i <<  ": " << store.alignedReadStore[i-1].id << " , " << store.alignedReadStore[i].id << "(i-1, i)\n";
+				int k = 0; k = 1;
+			}
+		}
+	}
+	
+	
+	// BLOCK_STORE
+/**
+.Function.appendBlockStores:
+..cat:Razers
+..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
+..param.store:@Class.FragmentStore@
+..param.blockStores:@Class.String@ of @Class.FragmentStore@
+..param.swiftPatternHandler:
+..param.cnts:Counts
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
+	template <
+		typename TFragmentStore,
+		typename TPatternHandler,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TRazerSMode >
+	inline void
+	appendBlockStores(
+		TFragmentStore			& store,
+		String<TFragmentStore>	& blockStores,
+		TPatternHandler			& swiftPatternHandler,
+		TCounts					& cnts,
+		TRazerSOptions			& options,
+		TRazerSMode				& mode
+	){
+		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
+		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
+		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
+		
+		unsigned noOfBlocks = length(blockStores);
+
+		// first: update the IDs and calculate new size
+		TAlignedReadStoreSize oldSize = length(store.alignedReadStore);
+		// so the prefix increment can be used in the loops
+		TAlignedReadStoreSize sizeSum = --oldSize;
+
+		for(unsigned i = 0; i < noOfBlocks; ++i)
+			for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j)
+				blockStores[i].alignedReadStore[j].id = ++sizeSum;
+		++sizeSum;
+		
+		// second: resize first so copying happens at most once and not every for each block in the worst case
+		resize(store.alignedReadStore, sizeSum, Generous());
+		resize(store.alignQualityStore, sizeSum, Generous());			
+
+		// third: append single block stores
+		for(unsigned i = 0; i < noOfBlocks; ++i){
+			for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j){
+				store.alignedReadStore[++oldSize] = blockStores[i].alignedReadStore[j];
+				store.alignQualityStore[oldSize] = blockStores[i].alignQualityStore[j];
+			}
+		}
+		
+		// fourth: compact matches
+		if (length(store.alignedReadStore) > options.compactThresh)
+		{
+			oldSize = length(store.alignedReadStore);
+			
+			if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+				maskDuplicates(store, TRazerSMode());	// overlapping parallelograms cause duplicates
+			
+			compactMatches(store, cnts, options, TRazerSMode(), swiftPatternHandler, COMPACT);
+			
+			if (options._debugLevel >= 2)
+				::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+		}
+		
+	}
     
-    // TODO: doc
+/**
+.Function._mapSingleReadsToContig:
+..cat:Razers
+..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+..signature:_mapSingleReadsToContig(store, contigId, swiftPatterns, preprocessingBlocks, cnts, orientation, options, mode)
+..param.store:@Class.FragmentStore@
+..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
+..param.swiftPatternHandler: Handler for swift pattern
+..param.preprocessingBlocks: String of infixes of a string with bit vector patterns for each read
+..param.cnts:Counts for statistics
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in a single genome sequence
     template <
@@ -112,6 +231,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef ParallelSwiftPatternHandler<TSwiftPatterns>                                                                 TSwiftPatternHandler;
         typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessingBlock, TSwiftPatternHandler, TCounts >   TVerifier;
         typedef typename Fibre<TReadIndex, Fibre_Text>::Type                                                                TReadSet;
+		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type												TAlignedReadStoreSize;
         
         if (options._debugLevel >= 1)
         {
@@ -132,16 +252,24 @@ namespace SEQAN_NAMESPACE_MAIN
         resize(swiftFinders, noOfBlocks, Exact());
         TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
         
+		// use pattern handler instead of pattern to have access to the global read ID
         TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
+		
         String<TVerifier> verifier;
         resize(verifier, noOfBlocks, Exact());
+		
+		// BLOCK_STORE
+		// a temporary store for every block. reduces the critical region in pushing verified hit to an atomic ID increment
+		String<TFragmentStore> blockStores;
+		resize(blockStores, noOfBlocks, Exact());
         
         for(unsigned i = 0; i < noOfBlocks; ++i){
             // initialize finders
             swiftFinders[i] = swiftFinder;
-            
+			
+			// BLOCK_STORE
             // initialize verifier
-            TVerifier oneVerifier(store, options, preprocessingBlocks[i], swiftPatternHandler, cnts);
+			TVerifier oneVerifier(blockStores[i], options, preprocessingBlocks[i], swiftPatternHandler, cnts);
             oneVerifier.onReverseComplement = (orientation == 'R');
             oneVerifier.genomeLength = length(contigSeq);
             oneVerifier.m.contigId = contigId;
@@ -153,8 +281,8 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // set up finder
         for (unsigned i = 0; i < noOfBlocks; ++i){
-            // FIXME: break after first one is false
             beginOk = beginOk & windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
+			if(not beginOk) break;
         }
         
         // if started correctly
@@ -252,7 +380,11 @@ namespace SEQAN_NAMESPACE_MAIN
                 windowFindEnd(swiftFinders[i], swiftPatterns[i]);
             
         } // end: if started correctly
-                
+		
+		// BLOCK_STORE
+		// append the alignedReadStore and the alignQualityStore from the blocks to the main store
+		appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
+		
         if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
     }
@@ -407,7 +539,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // a block is a subset of reads that is filtered and verified in a row
         // depending on how long it takes to process the individual blocks a single
         // thread might work through more than otheres
-        unsigned cores = omp_get_num_procs();
+        unsigned cores = options.numberOfCores;
         unsigned noOfBlocks = cores * options.blocksPerCore;
         
         if (options._debugLevel >= 1){

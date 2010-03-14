@@ -30,6 +30,10 @@
 #include <seqan/find/find_swift.h>
 #include <seqan/store.h>
 
+#ifdef RAZERS_PARALLEL_READS
+#include <omp.h>
+#endif
+
 #ifdef RAZERS_PARALLEL
 #include "tbb/spin_mutex.h"
 #endif
@@ -166,6 +170,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #ifdef RAZERS_PARALLEL_READS
         unsigned	windowSize;
+		unsigned	numberOfCores;
         unsigned	blocksPerCore;
 #endif
 #ifdef RAZERS_OPENADDRESSING
@@ -242,6 +247,7 @@ namespace SEQAN_NAMESPACE_MAIN
             
 #ifdef RAZERS_PARALLEL_READS
             windowSize = 1000;
+			numberOfCores = omp_get_num_procs();
             blocksPerCore = 5;
 #endif
 #ifdef RAZERS_OPENADDRESSING
@@ -433,7 +439,7 @@ struct MicroRNA{};
 		TPreprocessing	*preprocessing;
 		TSwiftPattern	*swiftPattern;
 		TCounts			*cnts;
-		
+
 		TAlignedRead	m;
 		TAlignQuality	q;
 		bool			onReverseComplement;
@@ -453,7 +459,7 @@ struct MicroRNA{};
 			genomeLength = 0;
 			oneMatchPerBucket = false;
 		}
-		
+
 		inline void push()
 		{
 			if (onReverseComplement) 
@@ -462,7 +468,7 @@ struct MicroRNA{};
 				m.beginPos = genomeLength - m.beginPos;
 				m.endPos = genomeLength - m.endPos;
 			}
-#pragma omp critical
+//#pragma omp critical
 // begin of critical section
 			{
 				if (!options->spec.DONT_DUMP_RESULTS)

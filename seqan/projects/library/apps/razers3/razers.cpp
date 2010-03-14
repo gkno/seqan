@@ -31,7 +31,7 @@
 
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
-//#define RAZERS_PARALLEL_READS			// parallelize by reads
+#define RAZERS_PARALLEL_READS			// parallelize by reads
 #ifdef RAZERS_PARALLEL_READS
 #define RAZERS_OPENADDRESSING	
 #endif
@@ -88,7 +88,6 @@ int mapReads(
 	RazerSOptions<TSpec> &options)
 {
 	FragmentStore<>			store;			// stores all of the tables
-
 	MultiFasta				genomeSet;
 	String<String<unsigned short> > 	stats;		// needed for mapping quality calculation 
 
@@ -299,7 +298,8 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
 #ifdef RAZERS_PARALLEL_READS
-    addOption(parser, CommandLineOption("ws", "window-size",        "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
+    addOption(parser, CommandLineOption("ws", "window-size",       "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
+	addOption(parser, CommandLineOption("nc", "number-of-cores",   "set the number of cores that is available (this many threads will be started)", OptionType::Int | OptionType::Label, options.numberOfCores));
     addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Int | OptionType::Label, options.blocksPerCore));
 #endif
 #ifdef RAZERS_OPENADDRESSING
@@ -347,6 +347,7 @@ int main(int argc, const char *argv[])
 #endif
 #ifdef RAZERS_PARALLEL_READS
     getOptionValueLong(parser, "window-size", options.windowSize);
+    getOptionValueLong(parser, "number-of-cores", options.numberOfCores);
     getOptionValueLong(parser, "blocks-per-thread", options.blocksPerCore);
 #endif
 #ifdef RAZERS_OPENADDRESSING

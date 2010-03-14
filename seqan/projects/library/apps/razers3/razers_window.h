@@ -112,7 +112,8 @@ namespace SEQAN_NAMESPACE_MAIN
             
         }
         
-
+		std::cout << "store length: " << length(store.alignedReadStore) << std::endl;
+		
         if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
     }
