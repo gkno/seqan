@@ -18,6 +18,10 @@ SET ($ENV{LC_MESSAGES} "en_EN")
 SET (CTEST_SITE       "<SITE NAME>")
 SET (CTEST_BUILD_NAME "<BUILD NAME>")
 
+# Increase reported warning and error count.
+SET (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS 1000000)
+SET (CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 1000000)
+
 # Variables describing the build environments.
 SET (CTEST_DIRECTORY "$ENV{HOME}/Nightly")
 SET (CTEST_SOURCE_ROOT_DIRECTORY "${CTEST_DIRECTORY}/seqan-trunk")
@@ -46,13 +50,13 @@ CMAKE_GENERATOR:INTERNAL=${CTEST_CMAKE_GENERATOR}
 # ------------------------------------------------------------
 # Perform the dashboard/testings steps.
 # ------------------------------------------------------------
-CTEST_START     (Nightly ${CTEST_SOURCE_DIRECTORY}/projects/library/cmake)
+CTEST_START     (${MODEL} ${CTEST_SOURCE_DIRECTORY}/projects/library/cmake)
 CONFIGURE_FILE  (${CTEST_SOURCE_DIRECTORY}/CTestConfig.cmake ${CTEST_SOURCE_ROOT_DIRECTORY}/CTestConfig.cmake COPYONLY)
 CTEST_UPDATE    (SOURCE "${CTEST_SOURCE_ROOT_DIRECTORY}")
 CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
 CTEST_BUILD     (BUILD "${CTEST_BINARY_DIRECTORY}")
-SET (CTEST_PROJECT_NAME "SeqAn_tests")
-CTEST_BUILD     (BUILD "${CTEST_BINARY_TEST_DIRECTORY}")
+#SET (CTEST_PROJECT_NAME "SeqAn_tests")
+#CTEST_BUILD     (BUILD "${CTEST_BINARY_TEST_DIRECTORY}")
 SET (CTEST_PROJECT_NAME "SeqAn")
 CTEST_TEST      (BUILD "${CTEST_BINARY_TEST_DIRECTORY}")
 CTEST_SUBMIT    ()
