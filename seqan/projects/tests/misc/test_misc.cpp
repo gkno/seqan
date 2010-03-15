@@ -8,11 +8,15 @@
 
 #include <seqan/basic.h>
 
-#include <seqan/misc/misc_random.h>
 #include <seqan/map.h>
 
+#include <seqan/misc/edit_environment.h>
+#include <seqan/misc/misc_base.h>
+#include <seqan/misc/misc_cmdparser.h>
+#include <seqan/misc/misc_dequeue.h>
+#include <seqan/misc/misc_map.h>
+#include <seqan/misc/misc_random.h>
 #include <seqan/misc/misc_set.h>
-//#include <seqan/misc/misc_map.h>
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
 
@@ -45,7 +49,6 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_cmdparser.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_dequeue.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_map.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_parsing.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_random.h");
