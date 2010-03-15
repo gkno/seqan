@@ -14,7 +14,16 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 # TBB and Boost.
 find_package (TBB)
 find_package (OpenMP QUIET)
-find_package (Boost)
+find_package (Boost 1.35.0)  # >= 1.35 for math/distributions, however broken?
+
+# We need Boost >= 1.35.0.  However, the FindBoost module seems to be
+# broken in this respect, so we will set Boost_FOUND to FALSE if the version
+# is not large enough on our own.
+if (Boost_FOUND)
+  if (Boost_VERSION LESS 103500 )
+    set (Boost_FOUND FALSE)
+  endif (Boost_VERSION LESS 103500 )
+endif (Boost_FOUND)
 
 ################################################################################
 # Set path variables
@@ -66,7 +75,7 @@ set (APP_insegt_SOURCES ${SEQAN_LIBRARY}/apps/insegt/insegt.cpp ${INSEGT_HEADERS
 if (Boost_FOUND)
   set (APP_transquant_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transquant.cpp)
 else (Boost_FOUND)
-  message (WARNING "Boost not found, not building transquant!")
+  message ("WARNING Boost not found, not building transquant!")
 endif (Boost_FOUND)
 set (APP_rectifier_SOURCES ${SEQAN_LIBRARY}/apps/transquant/rectifier.cpp)
 
