@@ -62,11 +62,14 @@ struct Pattern<TNeedle, HammingHorspool> {
     // The current end position
     TSize _currentEndPos;
 
-    // Maximal number of allowed mismatches.
-    unsigned int k; // maximal number of allowed mismatches
+    // The shift to apply in the next iteration;
+    TSize _nextShift;
 
-    // The score at the current position.
-    int score;
+    // Maximal number of allowed mismatches.
+    unsigned int k;
+
+    // The distance at the current position, i.e. -score.
+    int distance;
 
     Pattern() {
         SEQAN_CHECKPOINT;
@@ -78,6 +81,21 @@ struct Pattern<TNeedle, HammingHorspool> {
         setHost(*this, ndl, k);
     }
 };
+
+
+template <typename TNeedle>
+inline int score(const Pattern<TNeedle, HammingHorspool> &me) {
+    SEQAN_CHECKPOINT;
+    return -me.distance;
+}
+
+
+template <typename TNeedle>
+inline int getScore(const Pattern<TNeedle, HammingHorspool> &me) {
+    SEQAN_CHECKPOINT;
+    return -me.distance;
+}
+
 
 
 template <typename TNeedle, typename TNeedle2>
@@ -115,16 +133,11 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
 
     // Lines 5-8.  However, we use 0-based arrays.
     for (TPosition i = m - 1; i >= 1; --i) {
-        const TPosition v = std::max(i, m - me.k);  // Shortcut.
+        const TPosition v = std::max(i + 1, m - me.k);  // Shortcut.
         const TPosition p_i = ordValue(needle[i - 1]);
         for (TPosition j = ready[p_i] - 1; j >= v; --j) {
-            //if (i == j)
-            //    std::cout << "needle[i-1] == " << needle[i - 1] << " " << std::endl;
             int idx = p_i * (me.k + 1) + j - (m - me.k);
-            // The actual value we set differs from the paper's algorithm
-            // description but fits with the text.
-            int d = (j == i) ? 1 : j - i;
-            me.shift_table[idx] = d;
+            me.shift_table[idx] = j - i;
         }
         ready[p_i] = v;
     }
@@ -147,6 +160,8 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
 
     // In the beginning the first tentative end position is m.
     me._currentEndPos = m;
+    // The shift is 0 then.
+    me._nextShift = 0;
 
     // Actually assign the needle as the host.
     me.data_host = needle;
@@ -202,6 +217,9 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
     // Guard: Cannot find anything if needle longer than haystack.
     if (length(me) > length(haystack))
         return false;
+    // Guard: If we are already at the end then return false.
+    if (me._currentEndPos + me._nextShift > length(haystack))
+        return false;
 
     // If the finder is empty then initialize it.
     if (empty(finder)) {
@@ -217,11 +235,15 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
     // Helper macro d_k allows us to access me.shift_table the way it is
     // accessed in the paper.
     const TSize offset = m - me.k;  // Offset for d_k[i,a]
-    #define SEQAN_d_k(i, a) (me.shift_table[(a) * (me.k + 1) + (i) - offset])
+    //std::cout << "m = " << m << ", me.k = " << me.k << std::endl;
+    #define SEQAN_d_k(i, a) (me.shift_table[(a) * (me.k + 1) + (i) - m + me.k + 1])
 
     // Match with pattern ends at position j.
     TSize &j = me._currentEndPos;
+    TPos &d = me._nextShift;
     while (j <= n) {
+        // Algorithm 4, line 11 (need to emulate coroutines).
+        j += d;  // Shift to the right.
         //std::cout << "beginning of loop" << std::endl;
         // Algorithm 4, lines 4-5.
         // h scans the text, i scans the text, both are indices.
@@ -230,15 +252,16 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
         // neq is the number of mismatches.
         size_t neq = 0;
         // d is the current shift, set its initial value.
-        TPos d = (m > me.k) ? m - me.k : 1;  // Shift must be > 0.
+        d = m - me.k;
         // Algorithm 4, lines 6-9.
         // Compare needle and haystack from right to left, starting at h and i.
         // This could read "while (i >= 0 && neq <= me.k)" if i was signed.
         while (true) {  // We will break out of loop below.
             unsigned t_h = ordValue(haystack[h]);
             unsigned p_i = ordValue(needle[i]);
-            if (i >= m - me.k)  // Minimize d over component shifts.
+            if (i + 1 >= m - me.k) { // Minimize d over component shifts.
                 d = std::min(d, SEQAN_d_k(i, t_h));
+            }
             //SEQAN_ASSERT_GT(d, 0);  // We have to make progress!
             //std::cout << "  h = " << h << ", i == " << i << std::endl;
             if (t_h != p_i) {  // Count mismatches.
@@ -258,17 +281,12 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
         // Algorithm 4, line 10.
         //std::cout << "  neq = " << neq << ", me.k = " << me.k << std::endl;
         if (neq <= me.k) {
-            me.score = -neq;  // Set current score.
+            me.distance = neq;  // Set current score.
             // Report match at position j, begins at j - m.
             _setFinderEnd(finder, j);
             setPosition(finder, j - m);
-            // Algorithm 4, line 11.
-            j += d;  // Shift to the right.
             return true;
         }
-        //std::cout << "  j = " << j << ", d = " << d <<  std::endl;
-        // Algorithm 4, line 11.
-        j += d;  // Shift to the right.
     }
     // Undefine the helper macro again.
     #undef SEQAN_d_k
