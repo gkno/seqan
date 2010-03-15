@@ -42,8 +42,7 @@ using namespace seqan;
 
 
 
-void testViewIterator()
-{
+SEQAN_DEFINE_TEST(test_modifier_view_iterator) {
 		String<char> origin = "Vjku ku qwt qtkikpcn uvtkpi";
 
 	//____________________________________________________________________________
@@ -91,8 +90,8 @@ void testViewIterator()
 	}
 }
 
-void testViewString()
-{
+
+SEQAN_DEFINE_TEST(test_modifier_view_string) {
 		String<char> origin = "This is our original string";
 
 	//____________________________________________________________________________
@@ -174,8 +173,8 @@ void testViewString()
 
 }
 
-void testReverseString()
-{
+
+SEQAN_DEFINE_TEST(test_modifier_reverse_string) {
 		String<char> origin = "A man, a plan, a canal-Panama";
 
 	//____________________________________________________________________________
@@ -224,8 +223,7 @@ void testReverseString()
 
 //////////////////////////////////////////////////////////////////////////////
 
-void testAlphabetModifier()
-{
+SEQAN_DEFINE_TEST(test_modifier_alphabet_modifier) {
 	typedef ModifiedAlphabet<Dna, ModExpand<'-'> > TDnaGap;
 	typedef String<TDnaGap> TString;
 
@@ -239,15 +237,20 @@ void testAlphabetModifier()
 //////////////////////////////////////////////////////////////////////////////
 
 
-int main()
-{
-	SEQAN_TREPORT("TEST BEGIN")
+SEQAN_BEGIN_TESTSUITE(test_modifier) {
+    SEQAN_CALL_TEST(test_modifier_view_string);
+    SEQAN_CALL_TEST(test_modifier_view_iterator);
+    SEQAN_CALL_TEST(test_modifier_reverse_string);
+    SEQAN_CALL_TEST(test_modifier_alphabet_modifier);
 
-		testViewString();
-		testViewIterator();
-		testReverseString();
-		testAlphabetModifier();
-
-	SEQAN_TREPORT("TEST END")
-		return 0;
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet_expansion.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_functors.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_generated_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_iterator.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_reverse.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_shortcuts.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_string.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_view.h");
 }
+SEQAN_END_TESTSUITE
