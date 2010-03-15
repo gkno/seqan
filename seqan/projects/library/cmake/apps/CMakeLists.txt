@@ -76,10 +76,12 @@ if (Boost_FOUND)
   set (APP_transquant_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transquant.cpp)
 else (Boost_FOUND)
   message ("WARNING Boost not found, not building transquant!")
+  # Disable building of transquant.
+  set (APP_transquant_NOBUILD TRUE)
 endif (Boost_FOUND)
 set (APP_rectifier_SOURCES ${SEQAN_LIBRARY}/apps/transquant/rectifier.cpp)
 
-# Make sure the compiler can find object files from the TBB library. 
+# Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
 
 foreach (APP_DIR ${SEQAN_APPS})
@@ -93,11 +95,15 @@ foreach (APP_DIR ${SEQAN_APPS})
 
 	# add target, dependencies and linked libraries
 	if (APP_${APP_DIR_REL}_SOURCES)
-		list (SORT APP_${APP_DIR_REL}_SOURCES)
-		add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
-		add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
-		if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-			target_link_libraries (${APP_DIR_REL} rt)
-		endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	  if (APP_${APP_DIR_REL}_NOBUILD)
+      message ("Not building ${APP_DIR_REL} -- it is deactivated.")
+    else (APP_${APP_DIR_REL}_NOBUILD)
+      list (SORT APP_${APP_DIR_REL}_SOURCES)
+      add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+      add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
+      if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+        target_link_libraries (${APP_DIR_REL} rt)
+      endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	  endif (APP_${APP_DIR_REL}_NOBUILD)
 	endif (APP_${APP_DIR_REL}_SOURCES)
 endforeach (APP_DIR)
