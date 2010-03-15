@@ -12,17 +12,16 @@
 #include <seqan/map.h>
 
 #include <seqan/misc/misc_set.h>
-//#include <seqan/misc/misc_map.h> geht nicht
+//#include <seqan/misc/misc_map.h>
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
+
 
 using namespace std;
 using namespace seqan;
 
-//////////////////////////////////////////////////////////////////////////////
 
-void testRandom()
-{
+SEQAN_DEFINE_TEST(test_misc_random) {
 	mtRandInit();
 
 	for (unsigned int i=0; i<100; ++i)
@@ -38,18 +37,21 @@ void testRandom()
 
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
-int main() 
-{
-	SEQAN_TREPORT("TEST BEGIN")
-//____________________________________________________________________________
+SEQAN_BEGIN_TESTSUITE(test_misc) {
+    SEQAN_CALL_TEST(test_misc_random);
 
-	testRandom();
-
-//____________________________________________________________________________
-
-	SEQAN_TREPORT("TEST END")
-
-	return 0;
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/edit_environment.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_cmdparser.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_dequeue.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_generated_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_map.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_parsing.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_random.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_set.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_heap.h");
 }
+SEQAN_END_TESTSUITE
+
