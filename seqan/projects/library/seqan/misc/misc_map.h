@@ -15,6 +15,12 @@
   Lesser General Public License for more details.
 
  ============================================================================
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Note that this file originally did not compile.  Me (holtgrew) change it
+  it it compiled.  However, it might not make sense to fix it so it actually
+  works.
+ ============================================================================
   $Id$
  ==========================================================================*/
 
@@ -80,7 +86,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct SequenceMap< String< Pair<TKey, TObject>, TSpec >, TLess > {
 		typedef Pair<TKey, TObject>						TValue;
 		typedef String< Pair<TKey, TObject>, TSpec >	TSequence;
-		typedef typename TVector::size_type				TSize;
+		typedef typename TSequence::size_type				TSize;
 
 		TKey				maxKey;
 		TLess				comp;
@@ -98,10 +104,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	//
 
-	template <typename TKey>
-	struct Map {
+//	template <typename TKey>
+//	struct Map {
 //		typedef ::std::map<TKey> Type;
-	};
+//	};
 	template <typename TKey, typename TObject>
 	struct Map< Pair<TKey, TObject> > {
 //		typedef ::std::set< Pair<TKey, TObject>, SetLess< Pair<TKey, TObject> > > Type;
@@ -114,13 +120,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TString, typename TLess>
 	struct Iterator< SequenceMap<TString, TLess> > {
-		typedef Iterator<TString>::Type	Type;
-	}
+		typedef typename Iterator<TString>::Type	Type;
+	};
 
 	template <typename TString, typename TLess>
 	struct Iterator< SequenceMap<TString, TLess> const > {
-		typedef Iterator<TString const>::Type	Type;
-	}
+		typedef typename Iterator<TString const>::Type	Type;
+	};
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -176,11 +182,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 
-
-
 	template <typename TKey, typename TString>
 	inline void erase(TKey const &key, SequenceMap<TString> &map)
 	{
+            // TODO(holtgrew): Commented out the following, no idea how to make it work.
+            /* 
 		if (!max.comp(map.maxKey, key) && !max.comp(key, map.maxKey)) {
 			// delete last element
 			if (length(map.string))
@@ -192,8 +198,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator< SequenceMap<TString, TLess> >::Type	TIter;
 		TIter iter = find(pair.i1, map);
 		delete iter;
+            */
 	}
-
 }
 
 #endif
