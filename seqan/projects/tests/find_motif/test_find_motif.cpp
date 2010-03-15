@@ -181,8 +181,7 @@ isTCMMotif(TIter ds_iter, TIter ds_end, TString const & motif, TType const & d, 
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_exactAlgorithms()
-{
+SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	//Testing PMS1 & PMSP algorithm
 
 	unsigned int t = 0;      //number of sequences
@@ -306,8 +305,8 @@ void Test_exactAlgorithms()
 
 }
 
-void Test_approximationAlgorithms()
-{
+
+SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
 	//Testing Projection & ePatternBranching algorithm
 	
 	unsigned int t = 0;      //number of sequences
@@ -425,14 +424,22 @@ void Test_approximationAlgorithms()
 				  is_exact)==true);
 }
 
-int main() 
-{
-	SEQAN_TREPORT("TEST FIND MOTIF BEGIN")
+SEQAN_BEGIN_TESTSUITE(test_find_motif) {
+    SEQAN_CALL_TEST(test_find_motif_exact_algorithms);
+    SEQAN_CALL_TEST(test_find_motif_approximation_algorithms);
 
-	Test_exactAlgorithms();
-	Test_approximationAlgorithms();
-
-	SEQAN_TREPORT("TEST FIND MOTIF END");
-
-	return 0;
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/em_algorithm.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_epatternbranching.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_generated_forwards.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_pms1.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_pmsp.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/find_motif_projection.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/frequency_distribution.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/profile.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/pseudocount_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/pseudocount_mode_c.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/pseudocount_mode_p.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find_motif/sequence_model_types.h");
 }
+SEQAN_END_TESTSUITE
