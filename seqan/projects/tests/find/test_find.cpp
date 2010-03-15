@@ -1546,10 +1546,47 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_within) {
 }
 
 
+template <typename TString, typename TSegmentOrString>
+void test_find_on_segments_Helper(TString &haystack, TSegmentOrString &needle) {
+    Finder<TString> finder(haystack);
+    Pattern<TSegmentOrString, Myers<FindInfix> > pattern(needle);
+
+    bool didFind = false;
+    while (find(finder, pattern))
+        didFind = true;
+    SEQAN_ASSERT_TRUE(didFind);
+
+    // TODO(holtgrew): Some kind of assertion on the results.
+}
+
+
+// Test string search code on segments.  At the moment, this only
+// tests whether the code compiles and runs through without any
+// obvious errors.  No checks are done on the results.
+SEQAN_DEFINE_TEST(test_find_on_segments) {
+    // TODO(holtgrew): Should be const.
+    CharString kHaystack = "CGATCGAT";
+    CharString kNeedle = "GATC";
+    
+    test_find_on_segments_Helper<>(kHaystack, kNeedle);
+    // TODO(holtgrew): We should give the prefix() call to the function but we cannot make the arguments const because the finder code does not compile in this case.  The same is true for the calls below.
+    Segment<CharString, PrefixSegment> myPrefix(prefix(kNeedle, 1));
+    // TODO(holtgrew): FIXME, the following line makes the program not compile any more.
+    //test_find_on_segments_Helper<>(kHaystack, myPrefix);
+    Segment<CharString, InfixSegment> myInfix(infix(kNeedle, 1, 2));
+    test_find_on_segments_Helper<>(kHaystack, myInfix);
+    Segment<CharString, SuffixSegment> mySuffix(suffix(kNeedle, 1));
+    // TODO(holtgrew): FIXME, the following line makes the program not compile any more.
+    //test_find_on_segments_Helper<>(kHaystack, mySuffix);
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_within);
+
+    SEQAN_CALL_TEST(test_find_on_segments);
 
     SEQAN_CALL_TEST(test_find_hamming_horspool);
     SEQAN_CALL_TEST(test_find_hamming_simple);
