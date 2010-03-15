@@ -84,15 +84,17 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     // Restore std::cout
 //      std::cout.rdbuf(strm_puffer);
 
-    // TODO(holtgrew): Enable checkpoint system again.
-//      debug::verifyCheckpoints(LIB_PATH "graph_impl_interval_types.h");
-//      debug::verifyCheckpoints(LIB_PATH "graph_impl_interval_tree.h");
-//      debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_scoring.h");
-//      debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_fragment.h");
-//      debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_exact.h");
-//  debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_aligngraph.h");
-//  debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_align.h");
-//  debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_annotation.h");
-//  debug::verifyCheckpoints(LIB_PATH "graph_algorithm_refine_inexact.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_align.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_aligngraph.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_annotation.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_exact.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_exact_iterative.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_fragment.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_inexact.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_scoring.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align_adapt.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_tree.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_types.h");
 }
 SEQAN_END_TESTSUITE
