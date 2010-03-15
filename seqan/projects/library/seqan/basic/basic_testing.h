@@ -257,6 +257,23 @@ namespace ClassTest {
         StaticData::skippedCount() += 1;
     }
 
+    // Called by the macro SEQAN_ASSERT_FAIL.
+    void forceFail(const char *comment, ...) {
+        if (comment) {
+            std::cerr << " (";
+            va_list args;
+            va_start(args, comment);
+            vfprintf(stderr, comment, args);
+            va_end(args);
+            std::cerr << ")";
+        }
+    }
+
+    // Same as forceFail above, but with comment set to 0.
+    void forceFail() {
+        forceFail(0);
+    }
+
     // Called by the macro SEQAN_ASSERT_EQ.
     //
     // Tests that the given two value are equal.  Returns true iff the
@@ -731,6 +748,18 @@ namespace ClassTest {
 
 #if SEQAN_ENABLE_DEBUG
 
+// Force a test failure.
+//
+// Usage:  SEQAN_ASSERT_FAIL();
+// Usage:  SEQAN_ASSERT_FAIL("Failed at position %d", pos);
+#define SEQAN_ASSERT_FAIL(...)                                          \
+    do {                                                                \
+        ::seqan::ClassTest::forceFail(__FILE__, __LINE__,               \
+                                      ## __VA_ARGS__);                  \
+        ::seqan::ClassTest::fail();                                     \
+    } while (false)
+
+
 // Equality assertion with an optional comment.
 //
 // Usage:  SEQAN_ASSERT_EQ(4, 4);
@@ -848,12 +877,23 @@ namespace ClassTest {
 #define SEQAN_ASSERT_GT(_arg1, _arg2, ...) do {} while (false)
 #define SEQAN_ASSERT_TRUE(_arg1, ...) do {} while (false)
 #define SEQAN_ASSERT_NOT(_arg1, ...) do {} while (false)
+#define SEQAN_FAIL() do {} while (false)
 
 #endif  // #if SEQAN_ENABLE_DEBUG
 
 #else // no variadic macros
 
 #if SEQAN_ENABLE_DEBUG
+template <typename T1, typename T2>
+void SEQAN_ASSERT_FAIL(const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::forceFail(comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
 template <typename T1, typename T2>
 void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
@@ -936,6 +976,7 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...)
 
 #else // #if SEQAN_ENABLE_DEBUG
 
+template <typename T1, typename T2> void SEQAN_ASSERT_FAIL(const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
@@ -946,6 +987,11 @@ template <typename T1> void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comme
 template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...) {}
 
 #endif // #if SEQAN_ENABLE_DEBUG
+
+inline void SEQAN_ASSERT_FAIL()
+{
+	SEQAN_ASSERT_FAIL("");
+}
 
 template <typename T1, typename T2>
 void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
