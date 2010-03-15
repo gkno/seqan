@@ -1547,13 +1547,15 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_within) {
 
 
 template <typename TString, typename TSegmentOrString>
-void test_find_on_segments_Helper(TString &haystack, TSegmentOrString &needle) {
+void test_find_on_segments_Helper(TString &haystack, const TSegmentOrString &needle) {
     Finder<TString> finder(haystack);
     Pattern<TSegmentOrString, Myers<FindInfix> > pattern(needle);
 
     bool didFind = false;
-    while (find(finder, pattern))
+    while (find(finder, pattern)) {
+        findBegin(finder, pattern);
         didFind = true;
+    }
     SEQAN_ASSERT_TRUE(didFind);
 
     // TODO(holtgrew): Some kind of assertion on the results.
