@@ -258,7 +258,7 @@ namespace ClassTest {
     }
 
     // Called by the macro SEQAN_ASSERT_FAIL.
-    void forceFail(const char *comment, ...) {
+    inline void forceFail(const char *comment, ...) {
         if (comment) {
             std::cerr << " (";
             va_list args;
@@ -270,7 +270,7 @@ namespace ClassTest {
     }
 
     // Same as forceFail above, but with comment set to 0.
-    void forceFail() {
+    inline void forceFail() {
         forceFail(0);
     }
 
