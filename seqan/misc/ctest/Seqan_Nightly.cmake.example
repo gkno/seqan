@@ -47,6 +47,12 @@ FILE(WRITE "${CTEST_BINARY_DIRECTORY}/CMakeCache.txt" "
 CMAKE_GENERATOR:INTERNAL=${CTEST_CMAKE_GENERATOR}
 ")
 
+# Set the default model to Nightly.
+IF (MODEL)
+ELSE (MODEL)
+  SET(MODEL "Nightly")
+ENDIF (MODEL)
+
 # ------------------------------------------------------------
 # Perform the dashboard/testings steps.
 # ------------------------------------------------------------
