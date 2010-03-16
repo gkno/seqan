@@ -1,7 +1,6 @@
 // FRAGMENT(includes)
 #include <iostream>
 #include <seqan/index.h>
-#include <typeinfo>
 
 using namespace seqan;
 
