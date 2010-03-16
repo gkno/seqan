@@ -346,7 +346,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template <typename TD1, typename TD2, typename TDCompression, typename TLimitsString, typename T1, typename T2, typename TCompression>
 	inline void
-	posLocalToX(Pair<TD1, TD2, TDCompression> &dst, Pair<T1, T2, TCompression> const &localPos, TLimitsString const &limits) {
+	posLocalToX(Pair<TD1, TD2, TDCompression> &dst, Pair<T1, T2, TCompression> const &localPos, TLimitsString const &) {
 		dst = localPos;
 	}
 
