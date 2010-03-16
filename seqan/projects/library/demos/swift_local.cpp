@@ -344,14 +344,14 @@ int main(int argc, const char *argv[]) {
     testLocalSwiftTwoPatterns();
     testLocalSwiftLongPatterns();
     
-	time_t startTime = time(0);
-	unsigned iterations = 1;
-	for(unsigned t = 0; t < iterations; t++) {
-        testLocalSwiftArgSeqs(argv);
-	}
-	double runningTime = (time(0)-startTime)/(double)iterations;
+	//time_t startTime = time(0);
+	//unsigned iterations = 1;
+	//for(unsigned t = 0; t < iterations; t++) {
+ //       testLocalSwiftArgSeqs(argv);
+	//}
+	//double runningTime = (time(0)-startTime)/(double)iterations;
 
-    std::cout << "Running time: " << runningTime << "s" << std::endl;
+ //   std::cout << "Running time: " << runningTime << "s" << std::endl;
 
     testShrink1();
     testShrink2();
