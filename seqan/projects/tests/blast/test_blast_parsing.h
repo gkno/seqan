@@ -37,9 +37,9 @@ void Test_BlastStoreReport() {
 		getNext(strm,blast);   // complete report is now parsed and all the hits (and hsps) are stored
 		SEQAN_TASSERT(queryName(blast)==getQueryName(blast))
 		SEQAN_TASSERT(databaseName(blast)==getDatabaseName(blast))
-		SEQAN_TASSERT(repcount!= 0 || repcount==0 && databaseName(blast)=="ecoliKurz.aa ")
-		SEQAN_TASSERT(repcount!= 0 || repcount==0 && queryName(blast)=="gi|1786182|gb|AAC73112.1| (AE000111) thr operon leader peptide")
-		SEQAN_TASSERT(repcount!= 5 || repcount==5 && queryName(blast)=="gi|1786187|gb|AAC73117.1| (AE000111) orf, hypothetical protein")
+		SEQAN_TASSERT(repcount!= 0 || (repcount==0 && databaseName(blast)=="ecoliKurz.aa "))
+		SEQAN_TASSERT(repcount!= 0 || (repcount==0 && queryName(blast)=="gi|1786182|gb|AAC73112.1| (AE000111) thr operon leader peptide"))
+		SEQAN_TASSERT(repcount!= 5 || (repcount==5 && queryName(blast)=="gi|1786187|gb|AAC73117.1| (AE000111) orf, hypothetical protein"))
 		
 
 		//std::cout << "Query  : " << queryName(blast)<<" = "<<	getQueryName(blast) <<"\n";
@@ -71,7 +71,7 @@ void Test_BlastStoreReport() {
 			SEQAN_TASSERT(hit_it==hit_it2)
 			TBlastHit hit = *hit_it2;
 			SEQAN_TASSERT(getName(hit) == name(hit))
-			SEQAN_TASSERT((repcount != 3 || !atBegin(hit_it)) || repcount==3 && getName(hit) == "gb|AAC73114.1| (AE000111) homoserine kinase [Escherichia coli]")
+			SEQAN_TASSERT((repcount != 3 || !atBegin(hit_it)) || (repcount==3 && getName(hit) == "gb|AAC73114.1| (AE000111) homoserine kinase [Escherichia coli]"))
 			
 			THspIterator hsp_it2(hit);
 			THspIterator hsp_it(hit);
@@ -171,9 +171,9 @@ void Test_BlastStoreReportBasic() {
 		read(strm,blast,Blast());   // complete report is now parsed and all the hits (and hsps) are stored
 		SEQAN_TASSERT(queryName(blast)==getQueryName(blast))
 		SEQAN_TASSERT(databaseName(blast)==getDatabaseName(blast))
-		SEQAN_TASSERT(repcount!= 0 || repcount==0 && databaseName(blast)=="ecoliKurz.aa ")
-		SEQAN_TASSERT(repcount!= 0 || repcount==0 && queryName(blast)=="gi|1786182|gb|AAC73112.1| (AE000111) thr operon leader peptide")
-		SEQAN_TASSERT(repcount!= 5 || repcount==5 && queryName(blast)=="gi|1786187|gb|AAC73117.1| (AE000111) orf, hypothetical protein")
+		SEQAN_TASSERT(repcount!= 0 || (repcount==0 && databaseName(blast)=="ecoliKurz.aa "))
+		SEQAN_TASSERT(repcount!= 0 || (repcount==0 && queryName(blast)=="gi|1786182|gb|AAC73112.1| (AE000111) thr operon leader peptide"))
+		SEQAN_TASSERT(repcount!= 5 || (repcount==5 && queryName(blast)=="gi|1786187|gb|AAC73117.1| (AE000111) orf, hypothetical protein"))
 		
 
 		//std::cout << "Query  : " << queryName(blast)<<" = "<<	getQueryName(blast) <<"\n";
@@ -381,7 +381,7 @@ void Test_BlastParsing(BlastP) {
 					++alicount;
 				}
 				SEQAN_TASSERT((hspcount != 1) ||(hspcount == 1 && getBitScore(hsp)== 20 && getDatabaseAlignmentString(hsp)=="MKRISTTITTTITITTGNGAG"))
-				SEQAN_TASSERT((hspcount != 3) ||(hspcount == 3 && getPercentIdentity(hsp)== 34 && getPercentPositives(hsp)==46) && getQueryAlignmentString(hsp)=="LSYFGAKVLHPRTITPIAQFQIPCLIKNTGNP")
+				SEQAN_TASSERT((hspcount != 3) ||(hspcount == 3 && getPercentIdentity(hsp)== 34 && getPercentPositives(hsp)==46 && getQueryAlignmentString(hsp)=="LSYFGAKVLHPRTITPIAQFQIPCLIKNTGNP"))
 				SEQAN_TASSERT((hspcount != 11) ||(hspcount == 11 && queryBegin(hsp)== 216 && databaseBegin(hsp)==151 && getNumGaps(hsp)==2))
 				SEQAN_TASSERT((hspcount != 18) ||(hspcount == 18 && (databaseAlignmentString(hsp) == "PGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQD") && eValue(hsp) == 0.032))
 				SEQAN_TASSERT((hspcount != 20) ||(hspcount == 20 && bitScore(hsp) == 19.6f && eValue(hsp) == 2.3))
