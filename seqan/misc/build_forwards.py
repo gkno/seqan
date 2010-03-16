@@ -564,6 +564,8 @@ def forwardsNeedsRebuild(module_path, forwards_filename):
     """
     forwards_mtime = os.path.getmtime(forwards_filename)
     for f in os.listdir(module_path):
+        if f.startswith('.'):
+            continue  # Ignore hidden files.
         f_mtime = os.path.getmtime(os.path.join(module_path,f))
         if f_mtime > forwards_mtime:
             return True  # There is a newer file!
