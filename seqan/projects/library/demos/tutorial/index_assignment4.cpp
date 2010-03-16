@@ -5,14 +5,13 @@
 
 using namespace seqan;
 
-// FRAGMENT(initialization)
+// FRAGMENT(iteration)
 template < typename TIndexSpec >
 void constrainedDFS ()
 {
 	typedef Index<CharString, TIndexSpec> TIndex;
 	TIndex index("tobeornottobe");
 	typename Iterator< TIndex, TopDown<ParentLinks<> > >::Type it(index);
-// FRAGMENT(iteration)
 
 	do {
 		std::cout << representative(it) << std::endl;
