@@ -80,26 +80,31 @@ public:
 
 	MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & l_, TSize const & d_, bool const & is_exact_):
 		motif_size(l_),
 		num_of_substitutions(d_),
 		has_exact_substitutions(is_exact_)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(MotifFinder const & other_):
 		motif_size(other_.motif_size),
 		num_of_substitutions(other_.num_of_substitutions),
 		has_exact_substitutions(other_.has_exact_substitutions)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	~MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 
 	MotifFinder const &
 	operator = (MotifFinder const & other_)
 	{
+    SEQAN_CHECKPOINT;
 		if(this!=&other_)
 		{
 			motif_size = other_.motif_size;
@@ -123,6 +128,7 @@ findMotif(MotifFinder<TSeqType, PMS1> & finder,
 		  TStrings & dataset, 
 		  TModel seq_model)
 {
+    SEQAN_CHECKPOINT;
 	pms1(finder.set_of_motifs,
 		 dataset, 
 		 finder.motif_size, 
@@ -170,6 +176,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 OOPS const & /*model_type*/)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
@@ -286,6 +294,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 OMOPS const & /*model_type*/)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
@@ -374,6 +384,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 ZOOPS const & model_type)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
@@ -481,6 +493,8 @@ pms1(TStrings & result_set,
 	 bool const & is_exact,
 	 TCM const & model_type)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	Shape<TValue> shape(l);
@@ -606,6 +620,8 @@ createDVariants(TIntVect & variants,
 				bool is_exact,
 				TShape & shape)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<int> TIntArray;
 	String<TIntArray> bitsets;
 	if(is_exact)
@@ -668,6 +684,8 @@ _getVariantsOfBitset(TStrings & bitsets,
 					 TType const & l, 
 					 TType const & d)
 {
+    SEQAN_CHECKPOINT;
+
 	unsigned int num_of_bitsets = binomialCoefficient(l, d);
 	resize(bitsets, num_of_bitsets);
 
@@ -725,6 +743,8 @@ _buildVariants(TIntVect & variants,
 			   TBitset const & bitset,
 			   Shape<TValue, TSpec> & shape)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TValue> TString;
 	typedef typename Position<TString>::Type TPos;
 

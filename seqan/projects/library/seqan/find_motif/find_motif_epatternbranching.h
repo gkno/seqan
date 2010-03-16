@@ -87,6 +87,7 @@ public:
 
 	MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & t_, 
 		        TSize const & l_, 
@@ -99,6 +100,7 @@ public:
 		has_exact_substitutions(is_exact_),
 		neighborhood_size(h_)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & t_, 
 		        TSize const & l_, 
@@ -111,6 +113,7 @@ public:
 		has_exact_substitutions(is_exact_),
 		neighborhood_size(0)
 	{
+    SEQAN_CHECKPOINT;
 		neighborhood_size = 
 			computeH(dataset_size, motif_size, num_of_substitutions, is_exact_, n_ar_); 
 	}
@@ -121,14 +124,17 @@ public:
 		has_exact_substitutions(other_.has_exact_substitutions),
 		neighborhood_size(other_.neighborhood_size)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	~MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 
 	MotifFinder const &
 	operator = (MotifFinder const & other_)
 	{
+    SEQAN_CHECKPOINT;
 		if(this!=&other_)
 		{
 			dataset_size = other_.dataset_size;
@@ -167,6 +173,8 @@ template<typename TType, typename TIntAr>
 TType
 computeH(TType const & t, TType const & l, TType const & d, bool const & is_exact, TIntAr & n_ar) 
 {
+    SEQAN_CHECKPOINT;
+
 	TType d_bar = d-1;
 	double sum = 0; //probability p_d
 	double prob_P = 1;
@@ -224,6 +232,7 @@ findMotif(MotifFinder<TSeqType ,EPatternBranching> & epb2,
 		  TStrings & dataset, 
 		  TModel seq_model)
 {
+    SEQAN_CHECKPOINT;
 	ePatternBranching(epb2.set_of_motifs,
 		               dataset,
 					   epb2.motif_size,
@@ -272,6 +281,8 @@ ePatternBranching(TStrings & result_set,
 				   TType & h,
 				   OMOPS const & /*omops*/)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef String<int> TIntAr;
@@ -492,6 +503,8 @@ bestNeighbors(TIntSet & neighbors,
 			   TType const & d,
 			   TStrings & dataset) 
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef String<int> TIntArray;
@@ -707,6 +720,8 @@ hasAtLeastOneOccurrence(TStringIter l_mer_begin,
 		 TType const & d,
 		 bool const & is_exact)
 {
+    SEQAN_CHECKPOINT;
+
 	bool result = false;
 	TType counter = 0;
 	while( (seq_begin!=(seq_end-l+1)) &&  (counter<1))

@@ -104,6 +104,8 @@ struct Value< MotifFinder<TValue, TSpec> const>
 template<typename TType>
 TType factorial(TType n)
 {
+    SEQAN_CHECKPOINT;
+
 	TType result = 0;
 
 	if(n==0)
@@ -136,6 +138,8 @@ TType factorial(TType n)
 template<typename TType>
 TType binomialCoefficient(TType n, TType k)
 {
+    SEQAN_CHECKPOINT;
+
 	//SEQAN_ASSERT(!(n<0) & !(k<0));
 	TType result = 1;
 	for(TType i=(n-k+1); i<=n; ++i)
@@ -175,6 +179,8 @@ TType binomialCoefficient(TType n, TType k)
 template<typename TType, typename TStringIterator>
 TType hammingDistance(TStringIterator start1, TStringIterator end1, TStringIterator start2)
 {
+    SEQAN_CHECKPOINT;
+
 	TType num_of_mismatches = 0;
 	while(start1!=end1)
 	{
@@ -208,6 +214,8 @@ inverseHash(TType const & hash_value,
 			typename Size<TValue>::Type const & alp_size, 
 			typename Size< String<TValue> >::Type const & seq_size)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TValue> TString;
 	TString seq;
 	resize(seq, seq_size);
@@ -241,6 +249,8 @@ template<typename TValue, typename TAlgorithm>
 void
 displayResult(MotifFinder<TValue, TAlgorithm> & finder)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TValue> TString;
 	typedef String<TString> TStrings;
 
@@ -296,6 +306,7 @@ inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
 getMotif(MotifFinder<TValue, TSpec> & me,
 		 TPosition pos)
 {
+    SEQAN_CHECKPOINT;
 	return me.set_of_motifs[pos];
 }
 
@@ -304,6 +315,7 @@ template <typename TValue, typename TSpec>
 inline typename Motif<MotifFinder<TValue, TSpec> >::Type &
 getMotif(MotifFinder<TValue, TSpec> & me)
 {
+    SEQAN_CHECKPOINT;
 	return me.set_of_motifs[0];
 }
 
@@ -321,6 +333,7 @@ template <typename TValue, typename TSpec>
 inline size_t
 motifCount(MotifFinder<TValue, TSpec> const & me)
 {
+    SEQAN_CHECKPOINT;
 	return length(me.set_of_motifs);
 }
 

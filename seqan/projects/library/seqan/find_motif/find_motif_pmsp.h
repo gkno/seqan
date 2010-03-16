@@ -76,26 +76,31 @@ public:
 
 	MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & l_, TSize const & d_, bool const & is_exact_):
 		motif_size(l_),
 		num_of_substitutions(d_),
 		has_exact_substitutions(is_exact_)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(MotifFinder const & other_):
 		motif_size(other_.motif_size),
 		num_of_substitutions(other_.num_of_substitutions),
 		has_exact_substitutions(other_.has_exact_substitutions)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	~MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 
 	MotifFinder const &
 	operator = (MotifFinder const & other_)
 	{
+    SEQAN_CHECKPOINT;
 		if(this!=&other_)
 		{
 			motif_size = other_.motif_size;
@@ -120,6 +125,7 @@ findMotif(MotifFinder<TSeqType ,PMSP> & finder,
 		  TStrings & dataset, 
 		  TModel seq_model)
 {
+    SEQAN_CHECKPOINT;
 	pmsp(finder.set_of_motifs,
 		 dataset, 
 		 finder.motif_size, 
@@ -171,6 +177,8 @@ pmsp(TStrings & result,
 	  bool const & is_exact,
 	  OOPS const & /*model_type*/)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
@@ -292,6 +300,8 @@ pmsp(TStrings & result,
 	  bool const & is_exact,
 	  OMOPS const & /*model_type*/)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
@@ -409,6 +419,8 @@ pmsp(TStrings & result,
 	 bool const & is_exact,
 	 ZOOPS const & model_type)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TStrings>::Type TPos1;
@@ -556,6 +568,8 @@ pmsp(TStrings & result,
 	 bool const & is_exact,
 	 TCM const & model_type)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TStrings>::Type TPos1;
@@ -733,6 +747,8 @@ hasExactOneOccurrence(TStringIter l_mer_begin,
 					 TType const & d,
 					 bool const & is_exact)
 {
+    SEQAN_CHECKPOINT;
+
 	bool result = false;
 	TType counter = 0;
 	while( (seq_begin!=(seq_end-l+1)) )

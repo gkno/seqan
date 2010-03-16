@@ -104,6 +104,7 @@ public:
 		bucket_threshold(0),
 		num_of_trials(0)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & t_, 
 				TSize const & l_, 
@@ -122,6 +123,7 @@ public:
 		bucket_threshold(s_),
 		num_of_trials(tr_)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	MotifFinder(TSize const & t_, 
 				TSize const & l_, 
@@ -137,6 +139,8 @@ public:
 		bucket_threshold(0),
 		num_of_trials(0)
 	{
+    SEQAN_CHECKPOINT;
+
 		projection_size = 
 			_computeProjectionSize<TSize>(ALPHABET_SIZE,
 			                                     motif_size,
@@ -168,14 +172,17 @@ public:
 		bucket_threshold(other_.bucket_threshold),
 		num_of_trials(other_.num_of_trials)
 	{
+    SEQAN_CHECKPOINT;
 	}
 	~MotifFinder()
 	{
+    SEQAN_CHECKPOINT;
 	}
 
 	MotifFinder const &
 	operator = (MotifFinder const & other_)
 	{
+    SEQAN_CHECKPOINT;
 		if(this!=&other_)
 		{
 			this->dataset_size = other_.dataset_size;
@@ -219,6 +226,8 @@ _computeProjectionSize(TType const & alp_size,
 					   TType const & d,
 					   TType const & m_total)
 {
+    SEQAN_CHECKPOINT;
+
 	TType result = static_cast<TType>(0);
 	double numerator = log(static_cast<double>(m_total));
 	double denominator = log(static_cast<double>(alp_size));
@@ -259,6 +268,8 @@ _computeBucketThreshold(TType const & alp_size,
 					    TType const & m_total, 
 						TType const & k)
 {
+    SEQAN_CHECKPOINT;
+
 	TType result = 3; // or 4
 	double numerator = log(static_cast<double>(m_total));
 	double denominator = log(static_cast<double>(alp_size));
@@ -309,6 +320,8 @@ _computeNumOfTrials(TType const & t,
 					TType const & s,
 					double const & prob_q)
 {
+    SEQAN_CHECKPOINT;
+
 	double prob_p =
 		static_cast<double>(binomialCoefficient( (l-d), k ))
 	   /static_cast<double>(binomialCoefficient(l,k));
@@ -364,6 +377,8 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		  TStrings & dataset,
 		  TModel seq_model)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Position<TString>::Type TPos;
 	typedef String<int> TArray; 
@@ -490,6 +505,8 @@ _filteringStep(TBucketAr & buckets,
 			   TType const & l,
 			   TType const & s)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Value<TBucketAr>::Type TBucket;
@@ -556,6 +573,8 @@ _refinementStep(TString & consensus_seq,
 				bool const & is_exact,
 				OOPS const & oops)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
@@ -715,6 +734,8 @@ _refinementStep(TString & consensus_seq,
 				bool const & is_exact,
 				ZOOPS const & zoops)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
@@ -815,6 +836,8 @@ _refinementStep(TString & consensus_seq,
 				bool const & is_exact,
 				TCM const & tcm)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef String<TString> TStrings;
 	typedef typename Value<TString>::Type TValue;
 	typedef typename Position<TString>::Type TPos;
@@ -914,6 +937,7 @@ template<typename TAssociativeContainer, typename TType>
 void
 choosePositions(TAssociativeContainer & positions, TType const & l, TType const & k)
 {
+    SEQAN_CHECKPOINT;
 	while(positions.size()<k)
 	{
 		int position = rand() % l;
@@ -938,6 +962,8 @@ template<typename TValue, typename TIter>
 inline std::set<int>::value_type
 projectLMer(std::set<int> & positions, TIter it)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef std::set<int>::value_type THValue;
 	THValue prev_pos; //, cur_pos;
 
@@ -986,6 +1012,8 @@ _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
 									   TProfile const & profile,
 								       TType const & l)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TStrings>::Type TString;
 	typedef typename Position<TStrings>::Type TPos1;
 	typedef typename Position<TString>::Type TPos2;
@@ -1051,6 +1079,8 @@ _computeLikelihoodRatioOfLMer(TStrIter l_mer_begin,
 							  TStrIter l_mer_end,
 							  TProfile const & profile)
 {
+    SEQAN_CHECKPOINT;
+
 	double result = 0;
 	unsigned int l = (unsigned int)(l_mer_end-l_mer_begin);
 	typedef typename Position<TProfile>::Type TPos;
@@ -1090,6 +1120,8 @@ double
 _computeLikelihoodRatioOfLMers(TStrings const & l_mers, 
 							   TProfile const & profile)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Position<TStrings>::Type TPos;
 	double score = 1;
 	typename Size<TStrings>::Type num_of_l_mers = length(l_mers);
@@ -1123,6 +1155,8 @@ determineConsensusSeq(TString & consensus_seq,
 					  TProfile & profile,
 					  typename Size<TString>::Type const & l)
 {
+    SEQAN_CHECKPOINT;
+
 	typedef typename Value<TString>::Type TValue;
 	typename Position<TString>::Type i;
 
@@ -1165,6 +1199,8 @@ template<typename TValue>
 void
 displayResult(MotifFinder<TValue, Projection> & projection)
 {
+    SEQAN_CHECKPOINT;
+
 	if(length(projection.set_of_motifs)!=0)
 	{
 		std::cout << projection.set_of_motifs[0] << "\n";
@@ -1183,6 +1219,7 @@ template <typename TValue>
 inline int
 getScore(MotifFinder<TValue, Projection> & me)
 {
+    SEQAN_CHECKPOINT;
 	return me.score;
 }
 
