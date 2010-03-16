@@ -1437,6 +1437,7 @@ SEQAN_CHECKPOINT
 ...default:$pos + 1$
 ...remarks:If $pos_end$ is omitted, only one element in $object$ at position $pos$ is destroyed.
 ..remarks:$erase(object, pos, pos_end)$ is semantically the same as @Function.resizeSpace.resizeSpace(object, 0, pos, pos_end)@.
+..see:Function.eraseBack
 */
 
 template<typename T, typename TPosition>
@@ -1456,6 +1457,25 @@ erase(T & me,
 {
 SEQAN_CHECKPOINT
 	resizeSpace(me, 0, pos, pos + 1);
+}
+
+/**
+.Function.eraseBack:
+..summary:Deletes the last item of a container and reduces its size by 1.  The container must have a size greater than or equal to 1.
+..cat:Containers
+..signature:eraseBack(object)
+..param.object:The container.
+...type:Class.String
+..remarks:$erase(object)$ is semantically the same as @Function.erase.erase(me, length(me) - 1)@.
+..see:Function.erase
+*/
+
+template <typename T>
+inline void eraseBack(T & me)
+{
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GT(length(me), 0u);
+    erase(me, length(me) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
