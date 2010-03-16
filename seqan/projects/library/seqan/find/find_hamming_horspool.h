@@ -133,7 +133,7 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
 
     // Lines 5-8.  However, we use 0-based arrays.
     for (TPosition i = m - 1; i >= 1; --i) {
-        const TPosition v = std::max(i + 1, m - me.k);  // Shortcut.
+        const TPosition v = _max(i + 1, m - me.k);  // Shortcut.
         const TPosition p_i = ordValue(needle[i - 1]);
         for (TPosition j = ready[p_i] - 1; j >= v; --j) {
             int idx = p_i * (me.k + 1) + j - (m - me.k);
@@ -260,7 +260,7 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
             unsigned t_h = ordValue(haystack[h]);
             unsigned p_i = ordValue(needle[i]);
             if (i + 1 >= m - me.k) { // Minimize d over component shifts.
-                d = std::min(d, SEQAN_d_k(i, t_h));
+                d = _min(d, SEQAN_d_k(i, t_h));
             }
             //SEQAN_ASSERT_GT(d, 0);  // We have to make progress!
             //std::cout << "  h = " << h << ", i == " << i << std::endl;
