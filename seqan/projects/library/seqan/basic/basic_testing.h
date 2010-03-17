@@ -976,7 +976,7 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...)
 
 #else // #if SEQAN_ENABLE_DEBUG
 
-template <typename T1, typename T2> void SEQAN_ASSERT_FAIL(const char *comment, ...) {}
+inline void SEQAN_ASSERT_FAIL(const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
