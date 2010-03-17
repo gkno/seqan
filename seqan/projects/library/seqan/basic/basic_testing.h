@@ -1052,8 +1052,7 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1)
 
 // Returns the path to a temporary file with the given name.
 // TODO(holtgrew): This is very crude, should be portable!
-#define SEQAN_TEMP_FILENAME(filename)           \
-    ("/tmp/" filename)
+#define SEQAN_TEMP_FILENAME() (tmpnam(NULL))
 
 
 #if SEQAN_ENABLE_TESTING
