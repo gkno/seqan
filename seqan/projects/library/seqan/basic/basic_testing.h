@@ -134,7 +134,7 @@ namespace ClassTest {
             return result;
         }
 
-        // Base path to the binary.  Extrapolated from argv[0].
+        // Base path to the binary.  Extrapolated from __FILE__.
         static char *&basePath() {
             const char *defaultValue = ".";
             static char *result = const_cast<char*>(defaultValue);
@@ -1048,6 +1048,10 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1)
 // Use this to locate files relative to the test binary.
 #define SEQAN_PROGRAM_PATH                      \
     ::seqan::ClassTest::StaticData::basePath()
+
+// Returns a const char * string with the path to the projects directory.
+#define SEQAN_PATH_TO_PROJECTS() \
+    ::seqan::ClassTest::StaticData::pathToProjects()
 
 
 // Returns the path to a temporary file with the given name.

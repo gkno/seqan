@@ -510,8 +510,8 @@ SEQAN_DEFINE_TEST(test_score_matrix_data) {
     typedef Score<TValue, ScoreMatrix<AminoAcid, ScoreMatrixFile> > TScore;
 
     // TODO(holtgrew): It should be easier to construct these paths.
-    String<char> pathToTestSrc = SEQAN_PROGRAM_PATH;
-    append(pathToTestSrc, "/../../../tests/score/");
+    String<char> pathToTestSrc = SEQAN_PATH_TO_PROJECTS();
+    append(pathToTestSrc, "/projects/tests/score/");
 
     // Test with BLOSUM30.
     {
