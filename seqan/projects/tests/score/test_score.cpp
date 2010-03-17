@@ -247,25 +247,27 @@ SEQAN_DEFINE_TEST(test_score_matrix_file) {
 
     // Store and load the fixture BLOSUM62 matrix again.
     {
-        FILE *fl = fopen(SEQAN_TEMP_FILENAME("testfile.txt"), "wb");
+        const char *temp_filename = SEQAN_TEMP_FILENAME();
+        FILE *fl = fopen(temp_filename, "wb");
         write(fl, sc, meta);
         fclose(fl);
 
         Score<int, ScoreMatrix<> > sc2;
         String<char> meta2;
-        loadScoreMatrix(sc2, SEQAN_TEMP_FILENAME("testfile.txt"), meta2);
+        loadScoreMatrix(sc2, temp_filename, meta2);
         assertAminoAcidMatricesAreEqual(sc, sc2);
         SEQAN_ASSERT_EQ(meta, meta2);
     }
 
     // Store and load the built-in matrix again.
     {
-        FILE *fl = fopen(SEQAN_TEMP_FILENAME("testfile.txt"), "wb");
+        const char *temp_filename = SEQAN_TEMP_FILENAME();
+        FILE *fl = fopen(temp_filename, "wb");
         write(fl, Blosum62());
         fclose(fl);
 
         Score<int, ScoreMatrix<> > sc2;
-        loadScoreMatrix(sc2, SEQAN_TEMP_FILENAME("testfile.txt"));
+        loadScoreMatrix(sc2, temp_filename);
         assertAminoAcidMatricesAreEqual(sc2, Blosum62());
     }
 
