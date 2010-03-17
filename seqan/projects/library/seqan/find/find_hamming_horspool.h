@@ -234,7 +234,7 @@ bool find(TFinder &finder, Pattern<TNeedle, HammingHorspool> &me) {
     TPos m = length(needle);
     // Helper macro d_k allows us to access me.shift_table the way it is
     // accessed in the paper.
-    const TSize offset = m - me.k;  // Offset for d_k[i,a]
+    //const TSize offset = m - me.k;  // Offset for d_k[i,a]
     //std::cout << "m = " << m << ", me.k = " << me.k << std::endl;
     #define SEQAN_d_k(i, a) (me.shift_table[(a) * (me.k + 1) + (i) - m + me.k + 1])
 
