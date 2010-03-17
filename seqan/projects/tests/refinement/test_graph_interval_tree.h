@@ -467,8 +467,8 @@ void IntervalTreeTest_NonFullLength() {
 
         findIntervals(itree, 4, result);
         SEQAN_ASSERT_EQ(length(result), 2u);
-        SEQAN_ASSERT_TRUE(result[0] == 2 && result[1] == 1 ||
-                          result[0] == 1 && result[1] == 2);
+        SEQAN_ASSERT_TRUE((result[0] == 2 && result[1] == 1) ||
+                          (result[0] == 1 && result[1] == 2));
     }
 
 
@@ -547,8 +547,8 @@ void IntervalTreeTest_AddInterval() {
 
         findIntervals(itree, 48, result);
         SEQAN_ASSERT_EQ(length(result), 2u);
-        SEQAN_ASSERT_TRUE(result[0] == 100 && result[1] == 7 ||
-                          result[1] == 100 && result[0] == 7);
+        SEQAN_ASSERT_TRUE((result[0] == 100 && result[1] == 7) ||
+                          (result[1] == 100 && result[0] == 7));
     }
 }
 
