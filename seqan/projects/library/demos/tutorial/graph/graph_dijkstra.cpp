@@ -59,11 +59,6 @@ int main ()
 // FRAGMENT(dijkstra-containers)
 	typedef Size<TGraph>::Type TSize;
 	InternalMap<TCargo> cargoMap;
-    Iterator<TGraph, EdgeIterator>::Type itE(g);
-    while(!atEnd(itE)) {
-        ::std::cout << property(cargoMap, value(itE)) << std::endl;
-        ++itE;
-    }
 	String<TVertexDescriptor> predMap;
 	String<TSize> distMap;
 // FRAGMENT(dijkstra)
