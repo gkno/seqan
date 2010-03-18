@@ -651,12 +651,38 @@ This interval is the @Function.value@ of the iterator.
 //////////////////////////////////////////////////////////////////////////////
 // property map interface
 
+/**
+.Function.resizeVertexMap:
+..cat:Index
+..signature:resizeVertexMap(index, pm)
+..param.index:An index with a suffix tree interface.
+...type:Spec.ESA_Index
+*/
+
 	template < typename TText, typename TSpec, typename TPropertyMap >
 	inline void
 	resizeVertexMap(Index<TText, TSpec> const& index, TPropertyMap& pm)
 	{
 		resize(pm, 2 * length(index), Generous());
 	}
+
+/**
+.Function.assignProperty:
+..cat:Index
+..signature:assignProperty(index, d, val)
+..param.index:An index with a suffix tree interface.
+...type:Spec.ESA_Index
+.Function.property:
+..cat:Index
+..signature:property(index, d)
+..param.index:An index with a suffix tree interface.
+...type:Spec.ESA_Index
+.Function.getProperty:
+..cat:Index
+..signature:getProperty(index, d)
+..param.index:An index with a suffix tree interface.
+...type:Spec.ESA_Index
+*/
 
 	template < typename TSize >
 	inline typename Id< VertexESA<TSize> const >::Type
@@ -683,18 +709,19 @@ This interval is the @Function.value@ of the iterator.
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrence:
-..summary:Returns an occurence of the @Function.representative@ substring in the index text.
+..summary:Returns an occurence of the @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:getOccurrence(iterator)
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:A position where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
-...metafunction:Metafunction.SAValue.<TIndex>
+If $iterator$'s container type is $TIndex$ the return type is $SAValue<TIndex>::Type$.
 */
 
 	template < typename TIndex, class TSpec >
 	inline typename SAValue<TIndex>::Type 
-	getOccurrence(Iter< TIndex, VSTree<TSpec> > const &it) {
+	getOccurrence(Iter< TIndex, VSTree<TSpec> > const &it)
+	{
 		return saAt(value(it).range.i1, container(it));
 	}
 
@@ -702,7 +729,7 @@ This interval is the @Function.value@ of the iterator.
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.countOccurrences:
-..summary:Returns the number of occurences of @Function.representative@ in the index text.
+..summary:Returns the number of occurences of @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:countOccurrences(iterator)
 ..param.iterator:An iterator of a suffix tree.
@@ -720,6 +747,20 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 		else
 			return value(it).range.i2 - value(it).range.i1;
 	}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.range:
+..summary:Returns the suffix array interval borders of occurences of @Function.representative@ substring or a q-gram in the index text.
+..cat:Index
+..signature:range(iterator)
+..param.iterator:An iterator of a suffix tree.
+...type:Spec.VSTree Iterator
+..returns:All positions where a substring occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@) 
+are stored in a contiguous range of the suffix array.
+$range$ returns begin and end position of this range for occurrences of @Function.representative@.
+If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>::Type>.
+*/
 
 	template < typename TText, typename TSpec, typename TDesc >
 	inline Pair<typename Size<Index<TText, TSpec> >::Type>
@@ -744,7 +785,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOccurrences:
-..summary:Returns all occurences of the @Function.representative@ substring in the index text.
+..summary:Returns all occurences of the @Function.representative@ substring or a q-gram in the index text.
 ..cat:Index
 ..signature:getOccurrences(iterator)
 ..param.iterator:An iterator of a suffix tree.
@@ -1001,6 +1042,15 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	}
 
 //____________________________________________________________________________
+
+/**
+.Function.goRoot:
+..summary:Move iterator to the root node.
+..cat:Index
+..signature:goRoot(iterator)
+..param.iterator:An iterator of a suffix tree.
+...type:Spec.TopDown Iterator
+*/
 
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline void goRoot(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 

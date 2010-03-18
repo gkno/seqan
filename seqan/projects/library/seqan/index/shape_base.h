@@ -222,6 +222,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		return me.hValue;
 	}
 
+	template <typename TValue, typename TSpec>
+	inline typename Value< Shape<TValue, TSpec> >::Type
+	value(Shape<TValue, TSpec> const &me)
+	{
+		return me.hValue;
+	}
+
+
 //____________________________________________________________________________
 
 ///.Function.length.param.object.type:Class.Shape

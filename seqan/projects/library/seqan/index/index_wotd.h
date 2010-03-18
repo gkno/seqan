@@ -61,6 +61,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Fibre_RawSA		Wotd_RawSA;
 	typedef Fibre_Dir		Wotd_Dir;
 
+///.Spec.VSTree Iterator.param.TContainer.type:Spec.Index_Wotd
+///.Spec.TopDown Iterator.param.TContainer.type:Spec.Index_Wotd
+///.Spec.TopDownHistory Iterator.param.TContainer.type:Spec.Index_Wotd
 
 //////////////////////////////////////////////////////////////////////////////
 // wotd tree index

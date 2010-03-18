@@ -48,6 +48,10 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
+///.Spec.VSTree Iterator.param.TContainer.type:Spec.Index_DFI
+///.Spec.TopDown Iterator.param.TContainer.type:Spec.Index_DFI
+///.Spec.TopDownHistory Iterator.param.TContainer.type:Spec.Index_DFI
+
 //////////////////////////////////////////////////////////////////////////////
 // DFI - The Deferred Frequency Index
 
