@@ -116,9 +116,14 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..summary:An index based on an array of sorted q-grams.
 ..cat:Index
 ..general:Class.Index
-..signature:Index<TText, Index_QGram<> >
+..signature:Index<TText, Index_QGram<TShapeSpec[, TSpec]> >
 ..param.TText:The text type.
 ...type:Class.String
+..param.TShapeSpec:The @Class.Shape@ specialization type.
+...note:This can be either a $TSpec$ argument (e.g. $SimpleShape$) or a complete @Class.Shape@ class (e.g. Shape<Dna, SimpleShape>).
+..param.TSpec:The specializing type.
+...default:Default
+...type:Spec.OpenAddressing
 ..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array sorted by the first q characters (see @Tag.QGram Index Fibres.QGram_SA@) and a q-gram directory (see @Tag.QGram Index Fibres.QGram_Dir@).
 ..include:seqan/index.h
 */
