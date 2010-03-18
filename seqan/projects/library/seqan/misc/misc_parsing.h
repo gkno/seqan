@@ -23,6 +23,7 @@
 #ifndef SEQAN_HEADER_MISC_PARSING_H
 #define SEQAN_HEADER_MISC_PARSING_H
 
+#include <cmath>
 
 
 //////////////////////////////////////////////////////////////////////////////
