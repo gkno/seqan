@@ -29,14 +29,6 @@ namespace SEQAN_NAMESPACE_MAIN
     struct _Compressed;
 	typedef Tag<_Compressed> Compressed;
 
-	// for Pairs with small i1-values
-	// store i1 and i2 in one word of type i2
-	// use the upper bits for i1 and the lower bits for i2
-	template <unsigned valueSizeI1 = 16>
-	struct CutCompressed {
-		enum { bitSizeI1 = Log2<valueSizeI1>::VALUE };
-	};
-
 	template <unsigned BITSIZE1 = 16, unsigned BITSIZE2 = 16>
 	struct BitCompressed;
 
@@ -44,18 +36,18 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.Pair:
 ..cat:Aggregates
 ..summary:Stores two arbitrary objects.
-..signature:Pair<T1, T2[, Compression]>
+..signature:Pair<T1[, T2[, TSpec]]>
 ..param.T1:The type of the first object.
 ..param.T2:The type of the second object.
-..param.Compression:If $Compressed$, the pair is stored in a more space efficient way (useful for external storage).
-...note:When compression is enabled, referring to members is not allowed.
+...default:$T1$
+..param.TSpec:The specializing type.
 ...default:$void$, no compression (faster access).
 .Memfunc.Pair#Pair:
 ..class:Class.Pair
 ..summary:Constructor
-..signature:Pair<T1, T2> ()	
-..signature:Pair<T1, T2> (pair)
-..signature:Pair<T1, T2> (i1, i2)
+..signature:Pair<T1, T2[, TSpec]> ()	
+..signature:Pair<T1, T2[, TSpec]> (pair)
+..signature:Pair<T1, T2[, TSpec]> (i1, i2)
 ..param.pair:Other Pair object. (copy constructor)
 ..param.i1:T1 object.
 ..param.i2:T2 object.
@@ -68,7 +60,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T1, typename _T2 = _T1, typename TCompression = void>
+	template <typename _T1, typename _T2 = _T1, typename TSpec = void>
     struct Pair {
         typedef _T1 T1;
         typedef _T2 T2;
@@ -78,12 +70,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+		template <typename __T1, typename __T2, typename __TSpec>
+		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
     };
 
-
+/**
+.Spec.Packed Pair:
+..cat:Aggregates
+..general:Class.Pair
+..summary:Stores two arbitrary objects. Saves memory by disabling memory alignment.
+..signature:Pair<T1, T2, Compressed>
+..param.T1:The type of the first object.
+..param.T2:The type of the second object.
+..notes:Useful for external storage.
+..remarks:Memory access could be slower. Direct access to members by pointers is not allowed on all platforms.
+.Memfunc.Pair#Pair.class:Spec.Packed Pair
+.Memvar.Pair#i1.class:Spec.Packed Pair
+.Memvar.Pair#i2.class:Spec.Packed Pair
+*/
 
 	// unaligned and unpadded storage (space efficient)
 #ifdef PLATFORM_WINDOWS
@@ -99,8 +104,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+		template <typename __T1, typename __T2, typename __TSpec>
+		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	}
 #ifndef PLATFORM_WINDOWS
@@ -112,40 +117,22 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 
 
-
-#ifdef PLATFORM_WINDOWS
-    #pragma pack(push,1)
-#endif
-    template <typename _T1, typename _T2, unsigned valueSizeI1>
-    struct Pair<_T1, _T2, CutCompressed<valueSizeI1> > {
-        typedef _T1 T1;
-        typedef _T2 T2;
-
-		typedef _T2 T12;
-
-        T12 i12;
-
-		enum { bitSizeI1 = CutCompressed<valueSizeI1>::bitSizeI1 };
-        enum { bitShiftI1 = BitsPerValue<T12>::VALUE - bitSizeI1 };
-
-		inline Pair() {}
-		inline Pair(Pair const &_p): i12(_p.i12) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2):
-			i12(((T12)_i1 << bitShiftI1) + (T12)_i2) {}
-
-		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
-			i12(((T12)getValueI1(_p) << bitShiftI1) + (T12)getValueI2(_p)) {}
-	}
-#ifndef PLATFORM_WINDOWS
-	__attribute__((packed))
-#endif
-	;
-#ifdef PLATFORM_WINDOWS
-    #pragma pack(pop)
-#endif
-
-
+/**
+.Spec.Bit Compressed Pair:
+..cat:Aggregates
+..general:Class.Pair
+..summary:Stores two arbitrary objects. Saves memory by packing bits with bit fields.
+..signature:Pair<T1, T2, BitCompressed<BITSIZE1, BITSIZE2> >
+..param.T1:The type of the first object.
+..param.T2:The type of the second object.
+..param.BITSIZE1:Number of bits to store $T1$.
+..param.BITSIZE2:Number of bits to store $T2$.
+..notes:Useful for external storage.
+..remarks:Memory access could be slower. Direct access to members by pointers is not allowed.
+.Memfunc.Pair#Pair.class:Spec.Bit Compressed Pair
+.Memvar.Pair#i1.class:Spec.Bit Compressed Pair
+.Memvar.Pair#i2.class:Spec.Bit Compressed Pair
+*/
 
     template <typename _T1, typename _T2, unsigned BITSIZE1, unsigned BITSIZE2>
     struct Pair<_T1, _T2, BitCompressed<BITSIZE1, BITSIZE2> > {
@@ -157,32 +144,32 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
 		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TCompression>
-		inline Pair(Pair<__T1, __T2, __TCompression> const &_p):
+		template <typename __T1, typename __T2, typename __TSpec>
+		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	};
 
 
 
-    template <typename _T1, typename _T2, typename TCompression>
-	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TCompression> const &p) {
+    template <typename _T1, typename _T2, typename TSpec>
+	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TSpec> const &p) {
 		out << "< " << getValueI1(p) << " , " << getValueI2(p) << " >";
 		return out;
 	}
 
-	template <typename T1, typename T2, typename TCompression>
-	struct Value< Pair<T1, T2, TCompression>, 1 > {
+	template <typename T1, typename T2, typename TSpec>
+	struct Value< Pair<T1, T2, TSpec>, 1 > {
 		typedef T1 Type;
 	};
 
-	template <typename T1, typename T2, typename TCompression>
-	struct Value< Pair<T1, T2, TCompression>, 2 > {
+	template <typename T1, typename T2, typename TSpec>
+	struct Value< Pair<T1, T2, TSpec>, 2 > {
 		typedef T2 Type;
 	};
 
-	template <typename T1, typename T2, typename TCompression>
-	struct Spec< Pair<T1, T2, TCompression> > {
-		typedef TCompression Type;
+	template <typename T1, typename T2, typename TSpec>
+	struct Spec< Pair<T1, T2, TSpec> > {
+		typedef TSpec Type;
 	};
 
 
@@ -205,19 +192,20 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.Triple:
 ..cat:Aggregates
 ..summary:Stores three arbitrary objects.
-..signature:Triple<T1, T2, T3[, Compression]>
+..signature:Triple<T1[, T2[, T3[, TSpec]]]>
 ..param.T1:The type of the first object.
 ..param.T2:The type of the second object.
+...default:$T1$
 ..param.T3:The type of the third object.
-..param.Compression:If $Compressed$, the triple is stored in a more space efficient way (useful for external storage).
-...note:When compression is enabled, referring to members is not allowed.
+...default:$T2$
+..param.TSpec:The specializing type.
 ...default:$void$, no compression (faster access).
 .Memfunc.Triple#Triple:
 ..class:Class.Triple
 ..summary:Constructor
-..signature:Triple<T1, T2, T3> ()
-..signature:Triple<T1, T2, T3> (triple)
-..signature:Triple<T1, T2, T3> (i1, i2, i3)
+..signature:Triple<T1, T2, T3[, TSpec]> ()
+..signature:Triple<T1, T2, T3[, TSpec]> (triple)
+..signature:Triple<T1, T2, T3[, TSpec]> (i1, i2, i3)
 ..param.triple:Other Triple object. (copy constructor)
 ..param.i1:T1 object.
 ..param.i2:T2 object.
@@ -234,7 +222,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TCompression = void>
+	template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TSpec = void>
     struct Triple {
         typedef _T1 T1;
         typedef _T2 T2;
@@ -248,10 +236,27 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
 			i1(_i1), i2(_i2), i3(_i3) {}
 
-		template <typename __T1, typename __T2, typename __T3, typename __TCompression>
-		inline Triple(Triple<__T1, __T2, __T3, __TCompression> const &_p):
+		template <typename __T1, typename __T2, typename __T3, typename __TSpec>
+		inline Triple(Triple<__T1, __T2, __T3, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 	};
+	
+/**
+.Spec.Packed Triple:
+..cat:Aggregates
+..general:Class.Triple
+..summary:Stores three arbitrary objects. Saves memory by disabling memory alignment.
+..signature:Triple<T1, T2, T3, Compressed>
+..param.T1:The type of the first object.
+..param.T2:The type of the second object.
+..param.T3:The type of the third object.
+..notes:Useful for external storage.
+..remarks:Memory access could be slower. Direct access to members by pointers is not allowed on all platforms.
+.Memfunc.Triple#Triple.class:Spec.Packed Triple
+.Memvar.Triple#i1.class:Spec.Packed Triple
+.Memvar.Triple#i2.class:Spec.Packed Triple
+.Memvar.Triple#i3.class:Spec.Packed Triple
+*/
 
 	// unaligned and unpadded storage (space efficient)
 #ifdef PLATFORM_WINDOWS
@@ -271,8 +276,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
 			i1(_i1), i2(_i2), i3(_i3) {}
 
-		template <typename __T1, typename __T2, typename __T3, typename __TCompression>
-		inline Triple(Triple<__T1, __T2, __T3, __TCompression> const &_p):
+		template <typename __T1, typename __T2, typename __T3, typename __TSpec>
+		inline Triple(Triple<__T1, __T2, __T3, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 	}
 #ifndef PLATFORM_WINDOWS
@@ -283,30 +288,30 @@ namespace SEQAN_NAMESPACE_MAIN
     #pragma pack(pop)
 #endif
 
-	template <typename _T1, typename _T2, typename _T3, typename TCompression>
-	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TCompression> const &t) {
+	template <typename _T1, typename _T2, typename _T3, typename TSpec>
+	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TSpec> const &t) {
 		out << "< " << getValueI1(t) << " , " << getValueI2(t) << " , " << getValueI3(t) << " >";
 		return out;
 	}
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	struct Value< Triple<T1, T2, T3, TCompression>, 1 > {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	struct Value< Triple<T1, T2, T3, TSpec>, 1 > {
 		typedef T1 Type;
 	};
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	struct Value< Triple<T1, T2, T3, TCompression>, 2 > {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	struct Value< Triple<T1, T2, T3, TSpec>, 2 > {
 		typedef T2 Type;
 	};
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	struct Value< Triple<T1, T2, T3, TCompression>, 3 > {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	struct Value< Triple<T1, T2, T3, TSpec>, 3 > {
 		typedef T3 Type;
 	};
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	struct Spec< Triple<T1, T2, T3, TCompression> > {
-		typedef TCompression Type;
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	struct Spec< Triple<T1, T2, T3, TSpec> > {
+		typedef TSpec Type;
 	};
 
 
@@ -316,20 +321,16 @@ namespace SEQAN_NAMESPACE_MAIN
 .Class.Tuple:
 ..cat:Aggregates
 ..summary:A plain fixed-length string.
-..signature:Tuple<T, size[, compress]>
+..signature:Tuple<T, SIZE[, TSpec]>
 ..param.T:The value type, that is the type of characters stored in the tuple.
-..param.size:The size/length of the tuple.
+..param.SIZE:The size/length of the tuple.
 ...remarks:In contrast to @Class.String@ the length of Tuple is fixed.
-..param.compress:Enable/Disable compression.
-..param.compress:If $void$, no compression is used.
-..param.compress:If $Compressed$, the characters are stored as a bit sequence in an ordinal type (char, ..., __int64)
-...remarks:Only useful for small alphabets and small tuple sizes (|Sigma|^size <= 2^64) as for DNA or protein m-grams)
-...default:void.
-..see:Spec.Sampler
+..param.TSpec:The specializing type.
+...default:$void$, no compression (faster access).
 */
 
 	// standard storage 
-	template <typename _T, unsigned _size, typename TCompression = void>
+	template <typename _T, unsigned _size, typename TSpec = void>
     struct Tuple {
         typedef _T T;
         enum { size = _size };
@@ -366,6 +367,20 @@ namespace SEQAN_NAMESPACE_MAIN
     template <> struct _BitVector<32> { typedef unsigned int Type; };
     template <> struct _BitVector<64> { typedef __int64 Type; };
     template <> struct _BitVector<255> { typedef __int64 Type; };
+
+/**
+.Spec.Bit Packed Tuple:
+..cat:Aggregates
+..general:Class.Tuple
+..summary:A plain fixed-length string. Saves memory by packing bits.
+..signature:Tuple<T, SIZE, Compressed>
+..param.T:The value type, that is the type of characters stored in the tuple.
+..param.SIZE:The size/length of the tuple.
+...remarks:In contrast to @Class.String@ the length of Tuple is fixed.
+..notes:The characters are stored as a bit sequence in an ordinal type (char, ..., __int64).
+..remarks:Only useful for small alphabets and small tuple sizes (|Sigma|^size <= 2^64) as for @Spec.Dna@ or @Spec.AminoAcid@ m-grams)
+..see:Spec.Sampler
+*/
 
 	// bit-compressed storage (space efficient)
 #ifdef PLATFORM_WINDOWS
@@ -444,12 +459,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // length
 
-    template <typename _T, unsigned _size, typename TCompression>
-	inline unsigned length(Tuple<_T, _size, TCompression> const &) { return _size; }
+    template <typename _T, unsigned _size, typename TSpec>
+	inline unsigned length(Tuple<_T, _size, TSpec> const &) { return _size; }
 
 	///.Metafunction.LENGTH.param.T.type:Class.Tuple
-    template <typename _T, unsigned _size, typename TCompression>
-	struct LENGTH< Tuple<_T, _size, TCompression> >
+    template <typename _T, unsigned _size, typename TSpec>
+	struct LENGTH< Tuple<_T, _size, TSpec> >
 	{
 		enum { VALUE = _size };
 	};
@@ -495,8 +510,8 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // clear
 
-	template <typename _T, unsigned _size, typename TCompression>
-	inline void clear(Tuple<_T, _size, TCompression> &me) {
+	template <typename _T, unsigned _size, typename TSpec>
+	inline void clear(Tuple<_T, _size, TSpec> &me) {
         memset<sizeof(me.i), 0>(&(me.i));
 	}
     template <typename _T, unsigned _size>
@@ -541,13 +556,13 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
-	template <typename _T, unsigned _size, typename TCompression>
-	inline void shiftLeft(Tuple<_T, _size, TCompression> &me) {
+	template <typename _T, unsigned _size, typename TSpec>
+	inline void shiftLeft(Tuple<_T, _size, TSpec> &me) {
 		LOOP<_TupleShiftLeftWorker, _size - 1>::run(me);
 	}
 
-	template <typename _T, unsigned _size, typename TCompression>
-	inline void shiftRight(Tuple<_T, _size, TCompression> &me) {
+	template <typename _T, unsigned _size, typename TSpec>
+	inline void shiftRight(Tuple<_T, _size, TSpec> &me) {
 		LOOP_REVERSE<_TupleShiftRightWorker, _size - 1>::run(me);
 	}
 
@@ -564,8 +579,8 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // standard output
 
-	template <typename _T, unsigned _size, typename TCompression>
-	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TCompression> const &a) {
+	template <typename _T, unsigned _size, typename TSpec>
+	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TSpec> const &a) {
 		out << "[";
 		if (a.size > 0)
 			out << a[0];
@@ -575,97 +590,73 @@ namespace SEQAN_NAMESPACE_MAIN
 		return out;
 	}
 
-	template <typename _T, unsigned _size, typename TCompression>
-	struct Value< Tuple<_T, _size, TCompression> > {
+	template <typename _T, unsigned _size, typename TSpec>
+	struct Value< Tuple<_T, _size, TSpec> > {
 		typedef _T Type;
 	};
 
-	template <typename _T, unsigned _size, typename TCompression>
-	struct Spec< Tuple<_T, _size, TCompression> > {
-		typedef TCompression Type;
+	template <typename _T, unsigned _size, typename TSpec>
+	struct Spec< Tuple<_T, _size, TSpec> > {
+		typedef TSpec Type;
 	};
 
 //////////////////////////////////////////////////////////////////////////////
 // getValueIx
 
-	template <typename T1, typename T2, typename TCompression>
-	inline T1 getValueI1(Pair<T1, T2, TCompression> const &pair) {
+	template <typename T1, typename T2, typename TSpec>
+	inline T1 getValueI1(Pair<T1, T2, TSpec> const &pair) {
 		return pair.i1;
 	}
 
-	template <typename T1, typename T2, typename TCompression>
-	inline T2 getValueI2(Pair<T1, T2, TCompression> const &pair) {
+	template <typename T1, typename T2, typename TSpec>
+	inline T2 getValueI2(Pair<T1, T2, TSpec> const &pair) {
 		return pair.i2;
 	}
 
-	template <typename T1, typename T2, unsigned valueSizeI1>
-	inline T1 getValueI1(Pair<T1, T2, CutCompressed<valueSizeI1> > const &pair) {
-		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
-		return pair.i12 >> TPair::bitShiftI1;
-	}
-
-	template <typename T1, typename T2, unsigned valueSizeI1>
-	inline T2 getValueI2(Pair<T1, T2, CutCompressed<valueSizeI1> > const &pair) {
-		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;		 
-		return pair.i12 & (((typename TPair::T12)1 << TPair::bitShiftI1) - 1);
-	}
 //____________________________________________________________________________
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	inline T1 getValueI1(Triple<T1, T2, T3, TCompression> const &triple) {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	inline T1 getValueI1(Triple<T1, T2, T3, TSpec> const &triple) {
 		return triple.i1;
 	}
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	inline T2 getValueI2(Triple<T1, T2, T3, TCompression> const &triple) {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	inline T2 getValueI2(Triple<T1, T2, T3, TSpec> const &triple) {
 		return triple.i2;
 	}
 
-	template <typename T1, typename T2, typename T3, typename TCompression>
-	inline T3 getValueI3(Triple<T1, T2, T3, TCompression> const &triple) {
+	template <typename T1, typename T2, typename T3, typename TSpec>
+	inline T3 getValueI3(Triple<T1, T2, T3, TSpec> const &triple) {
 		return triple.i3;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // assignValueIx
 
-	template <typename T1, typename T2, typename TCompression, typename T>
-	inline void assignValueI1(Pair<T1, T2, TCompression> &pair, T const &_i) {
+	template <typename T1, typename T2, typename TSpec, typename T>
+	inline void assignValueI1(Pair<T1, T2, TSpec> &pair, T const &_i) {
 		pair.i1 = _i;
 	}
 
-	template <typename T1, typename T2, typename TCompression, typename T>
-	inline void assignValueI2(Pair<T1, T2, TCompression> &pair, T const &_i) {
+	template <typename T1, typename T2, typename TSpec, typename T>
+	inline void assignValueI2(Pair<T1, T2, TSpec> &pair, T const &_i) {
 		pair.i2 = _i;
 	}
 
-	template <typename T1, typename T2, unsigned valueSizeI1, typename T>
-	inline void assignValueI1(Pair<T1, T2, CutCompressed<valueSizeI1> > &pair, T const &_i) 
-	{
-		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
-		pair.i12 = ((typename TPair::T12)_i << TPair::bitShiftI1) |
-		           (pair.i12 & (((typename TPair::T12)1 << TPair::bitShiftI1) - 1));
-	}
-
-	template <typename T1, typename T2, unsigned valueSizeI1, typename T>
-	inline void assignValueI2(Pair<T1, T2, CutCompressed<valueSizeI1> > &pair, T const &_i) {
-		typedef Pair<T1, T2, CutCompressed<valueSizeI1> > TPair;
-		pair.i12 = (pair.i12 & ~(((typename TPair::T12)1 << TPair::bitShiftI1) - 1)) | _i;
-	}
 //____________________________________________________________________________
 
-	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
-	inline T const assignValueI1(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+	template <typename T1, typename T2, typename T3, typename TSpec, typename T>
+	inline T const assignValueI1(Triple<T1, T2, T3, TSpec> &triple, T const &_i) {
 		return triple.i1 = _i;
 	}
 
-	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
-	inline T const assignValueI2(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+	template <typename T1, typename T2, typename T3, typename TSpec, typename T>
+	inline T const assignValueI2(Triple<T1, T2, T3, TSpec> &triple, T const &_i) {
 		return triple.i2 = _i;
 	}
 
-	template <typename T1, typename T2, typename T3, typename TCompression, typename T>
-	inline T const assignValueI3(Triple<T1, T2, T3, TCompression> &triple, T const &_i) {
+	template <typename T1, typename T2, typename T3, typename TSpec, typename T>
+	inline T const assignValueI3(Triple<T1, T2, T3, TSpec> &triple, T const &_i) {
 		return triple.i3 = _i;
 	}
 
@@ -681,14 +672,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _left.i1 != _right.i1 || _left.i2 != _right.i2;
 	}
 
-	template <typename L1, typename L2, unsigned LSizeI1, typename R1, typename R2, unsigned RSizeI1>
-	inline bool operator==(Pair<L1, L2, CutCompressed<LSizeI1> > const &_left, Pair<R1, R2, CutCompressed<RSizeI1> > const &_right) {
-		return _left.i12 == _right.i12;
-	}
-	template <typename L1, typename L2, unsigned LSizeI1, typename R1, typename R2, unsigned RSizeI1>
-	inline bool operator!=(Pair<L1, L2, CutCompressed<LSizeI1> > const &_left, Pair<R1, R2, CutCompressed<RSizeI1> > const &_right) {
-		return _left.i12 != _right.i12;
-	}
 //____________________________________________________________________________
 
 	template <
