@@ -569,6 +569,7 @@ int dumpMatches(
 	typedef typename Id<TAlignedRead>::Type							TId;
 	typedef typename GetValue<TAlignQualityStore>::Type				TQuality;
 	typedef typename TFragmentStore::TContigPos						TGPos;
+	typedef BinFunctorDefault<TAlignQualityStore, TRazerSMode>		TBinFunctor;
 
 	if (options.outputFormat == 2)
 	{
@@ -648,7 +649,7 @@ int dumpMatches(
 		return false;
 	}
 
-	
+	TBinFunctor binFunctor(store.alignQualityStore);
 	maskDuplicates(store, mode);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -657,12 +658,6 @@ int dumpMatches(
 	)
 	{
 		// match statistics
-		unsigned maxErrors = (int)(options.errorRate * maxReadLength);
-		if (maxErrors > 10) maxErrors = 10;
-		if (maxErrors < 2 && options.outputFormat == 2) maxErrors = 2;
-		resize(stats, maxErrors + 1);
-		for (unsigned i = 0; i <= maxErrors; ++i)
-			fill(stats[i], length(store.readStore), 0);
 		countMatches(store, stats, mode);
 	}
 

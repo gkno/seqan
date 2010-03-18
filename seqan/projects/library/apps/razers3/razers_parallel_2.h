@@ -133,7 +133,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TPatternHandler			& swiftPatternHandler,
 		TCounts					& cnts,
 		TRazerSOptions			& options,
-		TRazerSMode				& mode
+		TRazerSMode const		& mode
 	){
 		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
@@ -169,9 +169,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			oldSize = length(store.alignedReadStore);
 			
 			if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-				maskDuplicates(store, TRazerSMode());	// overlapping parallelograms cause duplicates
+				maskDuplicates(store, mode);	// overlapping parallelograms cause duplicates
 			
-			compactMatches(store, cnts, options, TRazerSMode(), swiftPatternHandler, COMPACT);
+			compactMatches(store, cnts, options, mode, swiftPatternHandler, COMPACT);
 			
 			if (options._debugLevel >= 2)
 				::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";

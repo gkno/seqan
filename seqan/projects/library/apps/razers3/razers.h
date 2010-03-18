@@ -139,6 +139,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	prefixSeedLength;	// length of the prefix seed
 		bool		matchN;				// false..N is always a mismatch, true..N matches with all
 		unsigned char compMask[5];
+		Score<int, Simple> scoringScheme;
+		int			minScore;			// minimal alignment score
 
 	// statistics
 		__int64		countFiltration;	// matches returned by the filter
@@ -148,9 +150,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		double		timeDumpResults;	// time for dumping the results
 		
 		bool		maqMapping;
+		int			absMaxQualSumErrors;
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		int			mutationRateQual;
-		int			absMaxQualSumErrors;
 		int			artSeedLength;
 #endif
 
@@ -228,12 +230,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			compMask[4] = 0;
 
 //			compactThresh = 1024;
-			compactThresh = 1;
+			compactThresh = 40;
 
+			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 			maqMapping = false;
 			mutationRateQual = 30;		// (28bp is maq default)
-			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
 			maqSeedLength = 28;
 #endif
 
@@ -484,12 +486,12 @@ struct MicroRNA{};
 							maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
 		
 						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
-							
-//						if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-//							options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 						
-						if (options->_debugLevel >= 2)
-							::std::cerr << '(' << oldSize - length(store->alignedReadStore) << " matches removed)";
+						if (length(store->alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+							options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
+						
+//						if (options._debugLevel >= 2)
+//							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 					}
 				}
 				++options->countVerification;
@@ -816,6 +818,23 @@ inline int estimateReadLength(char const *fileName)
 		}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TAlignedReadQualityStore, typename TRazerSMode>
+	struct BinFunctorDefault
+	{
+		TAlignedReadQualityStore &qualStore;
+		
+		BinFunctorDefault(TAlignedReadQualityStore &_qualStore):
+			qualStore(_qualStore) {}
+		
+		template <typename TAlignedRead>
+		inline int operator() (TAlignedRead &alignedRead) const
+		{
+			return qualStore[alignedRead.id].errors;
+		}
+	};
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Mark duplicate matches for deletion
@@ -889,7 +908,62 @@ void maskDuplicates(TFragmentStore &store, TRazerSMode)
 		orientation = (*it).beginPos < (*it).endPos;
 	}
 }
+/*
+//////////////////////////////////////////////////////////////////////////////
+// Count matches for each number of errors
+template <typename TFragmentStore, typename TCounts, typename TBinFunctor, typename TRazerSMode>
+void countMatches(TFragmentStore &store, TCounts &cnt, TBinFunctor &binF, TRazerSMode)
+{
+	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
+	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
+	
+	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
+	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
+	typedef typename Value<TCounts>::Type							TRow;
+	typedef typename Value<TRow>::Type								TValue;
+	
+	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
+	TIterator it = begin(store.alignedReadStore, Standard());
+	TIterator itEnd = end(store.alignedReadStore, Standard());
+	
+	unsigned readId = TAlignedRead::INVALID_ID;
+	int lastBin = -1;
+	__int64 count = 0;
+	
+	String<TValue> row, empty;
+	for (; it != itEnd; ++it) 
+	{
+		if ((*it).id == TAlignedRead::INVALID_ID) continue;
+		int bin = binF((*it).id);
+		
+		if (readId == (*it).readId)
+		{
+			if (lastBin == bin)
+				++count;
+			else
+			{
+				appendValue(row, TValue(bin, count), Generous());
+				lastBin = bin;
+				count = 1;
+			}
+		}
+		else
+		{
+			while (length(cnt) < readId)
+				appendValue(cnt, empty, Generous());
+			appendValue(cnt, row, Generous());
+			clear(row);
+			readId = (*it).readId;
+			lastBin = bin;
+			count = 1;
+		}
+	}
+	while (length(cnt) < readId)
+		appendValue(cnt, empty, Generous());
+	appendValue(cnt, row, Generous());
+}
+*/
 //////////////////////////////////////////////////////////////////////////////
 // Count matches for each number of errors
 template <typename TFragmentStore, typename TCounts, typename TRazerSMode>
@@ -943,6 +1017,8 @@ template < typename TSwift, typename TReadNo, typename TMaxErrors >
 inline void 
 setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 {
+	if (readNo==643)
+		std::cout<<"dman"<<std::endl;
 	int minT = _qgramLemma(swift, readNo, maxErrors);
 	if (minT > 1)
 	{
@@ -982,8 +1058,8 @@ void compactMatches(
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreCutOff = InfimumValue<int>::VALUE;
 	int errorCutOff = SupremumValue<int>::VALUE;
-	unsigned errorRangeBest = options.errorDistanceRange;// (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
-	int scoreRangeBest = (TYPECMP<TScoreMode, RazerSScore>::VALUE || TYPECMP<TScoreMode, RazerSScore>::VALUE)? SupremumValue<int>::VALUE : -(int)options.scoreDistanceRange;
+	int errorRangeBest = options.errorDistanceRange;// (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
+	int scoreRangeBest = (TYPECMP<TAlignMode, RazerSGlobal>::VALUE && !TYPECMP<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : SupremumValue<int>::VALUE;
 
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
@@ -997,6 +1073,7 @@ void compactMatches(
 		if ((*it).id == TAlignedRead::INVALID_ID) continue;
 		int score = store.alignQualityStore[(*it).id].score;
 		int errors = store.alignQualityStore[(*it).id].errors;
+										if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
 		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
 		{ 
 			if (score <= scoreCutOff || errors >= errorCutOff) continue;
@@ -1005,8 +1082,6 @@ void compactMatches(
 #ifdef RAZERS_MASK_READS
 				if (hitCount == hitCountCutOff)
 				{
-					unsigned errors = store.alignQualityStore[(*it).id].errors;
-					
 					// we have enough, now look for better matches
 					if (options.purgeAmbiguous && (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest))
 					{
@@ -1244,31 +1319,31 @@ matchVerify(
 }	
 
 
-	// Score mode
-	struct RazerSErrors;
-	struct RazerSScore;
-	struct RazerSMAQ;
-
-//inline _errorsPerMismatch
+template <typename TRazerSMode>
+struct __UseQualityValues { enum { VALUE = false }; };
+template <typename TAlignMode, typename TGapMode, typename TSpec>
+struct __UseQualityValues<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec> > > {  enum { VALUE = true }; };
 
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet >
+	typename TReadSet,
+	typename TScoreMode >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
-	Segment<TGenome, InfixSegment> inf,									// potential match genome region
-	unsigned readId,														// read number
-	TReadSet &readSet,													// reads
-	RazerSMode<RazerSGlobal, RazerSUngapped, RazerSErrors> const)	// Hamming only
+	Segment<TGenome, InfixSegment> inf,								// potential match genome region
+	unsigned readId,												// read number
+	TReadSet &readSet,												// reads
+	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode> const)		// Semi-global, no gaps
 {
-	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
-	typedef typename Value<TReadSet>::Type const			TRead;
-	typedef typename Iterator<TGenomeInfix, Standard>::Type	TGenomeIterator;
-	typedef typename Iterator<TRead, Standard>::Type		TReadIterator;
+	typedef Segment<TGenome, InfixSegment>							TGenomeInfix;
+	typedef typename Value<TReadSet>::Type const					TRead;
+	typedef typename Iterator<TGenomeInfix, Standard>::Type			TGenomeIterator;
+	typedef typename Iterator<TRead, Standard>::Type				TReadIterator;
+	typedef RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode>	TRazerSMode;
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
@@ -1286,42 +1361,82 @@ matchVerify(
 	TGenomeIterator git		= begin(inf, Standard());
 	TGenomeIterator gitEnd	= end(inf, Standard()) - (ndlLength - 1);
 	
-	unsigned maxErrors = (unsigned)(ndlLength * verifier.options->errorRate);
-	unsigned minErrors = maxErrors + 1;
-	unsigned errorThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: maxErrors;
-
+	int mismatchDelta, scoreInit;
+	int minScore;
+	if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+		minScore = -(int)(ndlLength * verifier.options->errorRate);
+	else if (__UseQualityValues<TRazerSMode>::VALUE)
+		minScore = -verifier.options->absMaxQualSumErrors;
+	else if (TYPECMP<TScoreMode, RazerSScore>::VALUE)
+	{
+		minScore = verifier.options->minScore;
+		mismatchDelta = scoreMatch(verifier.options->scoringScheme) - scoreMismatch(verifier.options->scoringScheme);
+		scoreInit = scoreMatch(verifier.options->scoringScheme) * ndlLength;
+	}
+	
+	int maxScore = minScore - 1;
+	int scoreThresh = (verifier.oneMatchPerBucket)? SupremumValue<int>::VALUE: minScore;
+	int score, errors;
+	
 	for (; git < gitEnd; ++git)
 	{
-		unsigned errors = 0;
+		if (!TYPECMP<TScoreMode, RazerSScore>::VALUE)
+			score = 0;
+		else
+			score = scoreInit;
+		
+		if (!TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+			errors = 0;
+		
 		TGenomeIterator g = git;
 		for (TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
 			if ((verifier.options->compMask[ordValue(*g)] & verifier.options->compMask[ordValue(*r)]) == 0)
-//				if (
-				if (++errors > maxErrors)	// doesn't work for islands with errorThresh > maxErrors
-					break;
-		
-		if (errors < minErrors)
-		{
-			minErrors = errors;
-			verifier.m.beginPos = git - begin(host(inf), Standard());
-		} else if (errorThresh < errors)
-		{
-			if (minErrors <= maxErrors)
 			{
+				if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+				{
+					// A. Count mismatches only
+					--score;
+				} else
+				{
+					++errors;
+					if (__UseQualityValues<TRazerSMode>::VALUE)
+						// B. Count mismatches and mismatch qualities
+						score -= getQualityValue(*g);
+					else if (TYPECMP<TScoreMode, RazerSScore>::VALUE)
+						// C. Count mismatches and alignment score
+						score -= mismatchDelta;
+					else
+						std::cerr << "Unsupported score mode" << std::endl;
+				}
+				if (score < minScore)	// doesn't work for islands with errorThresh > maxErrors
+					break;
+			}
+		
+		if (score > maxScore)
+		{
+			maxScore = score;
+			if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+				verifier.q.errors = -score;
+			else
+				verifier.q.errors = errors;
+			verifier.m.beginPos = git - begin(host(inf), Standard());
+		} else if (scoreThresh > score)
+		{
+			if (maxScore >= minScore)
+			{
+				// for RazerSErrors bestErrors == -maxScore
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
-				verifier.q.pairScore = verifier.q.score = -(int)minErrors;
-				verifier.q.errors = minErrors;
+				verifier.q.pairScore = verifier.q.score = maxScore;
 				verifier.push();
-				minErrors = maxErrors + 1;
+				maxScore = minScore - 1;
 			}
 		}
 	}
 
-	if (minErrors <= maxErrors)
+	if (maxScore >= minScore)
 	{
 		verifier.m.endPos = verifier.m.beginPos + ndlLength;
-		verifier.q.pairScore = verifier.q.score = -(int)minErrors;
-		verifier.q.errors = minErrors;
+		verifier.q.pairScore = verifier.q.score = maxScore;
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
 		return true;
