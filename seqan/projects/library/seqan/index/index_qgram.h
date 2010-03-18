@@ -2124,7 +2124,7 @@ If the type of $index$ is $TIndex$ the return type is $SAValue<TIndex>::Type$.
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
 	inline typename SAValue< Index< TObject, Index_QGram<TShapeSpec, TSpec> > >::Type
 	getOccurrence(
-		Index< TObject, Index_QGram<TShapeSpec, TSpec> > const &index,
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index,
 		Shape< TValue, TShapeSpec2 > const &shape) 
 	{
 		indexRequire(index, QGram_SADir());
