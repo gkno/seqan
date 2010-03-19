@@ -53,7 +53,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.gapLen:Number of '0's in the second block.
 ..param.blockLen2:Number of '1's in the third block.
 */
-*/
 
 	struct OneGappedShape;
 
