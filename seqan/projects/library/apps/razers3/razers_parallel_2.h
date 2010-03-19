@@ -289,7 +289,6 @@ namespace SEQAN_NAMESPACE_MAIN
         if(beginOk){
             unsigned blockSize = length(host(host(swiftPatterns[0])));
             int numberOfBlocks = length(swiftFinders);
-            unsigned cores = omp_get_num_procs();
 #ifdef RAZERS_TIMER
             CharString contigAndDirection;
             append(contigAndDirection, store.contigNameStore[contigId]);
@@ -298,13 +297,13 @@ namespace SEQAN_NAMESPACE_MAIN
             
             // for waiting times
             String<_proFloat> waitingTimes;
-            resize(waitingTimes, cores, Exact());
-			for(unsigned k = 0; k < cores; ++k){
+            resize(waitingTimes, options.numberOfCores, Exact());
+			for(unsigned k = 0; k < options.numberOfCores; ++k){
 				waitingTimes[k] = sysTime();
 			}
 #endif
             // use only core many threads
-            omp_set_num_threads(cores);
+            omp_set_num_threads(options.numberOfCores);
             
             // go over contig sequence
             while(true)
