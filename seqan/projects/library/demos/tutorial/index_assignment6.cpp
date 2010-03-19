@@ -8,7 +8,7 @@ using namespace seqan;
 
 // FRAGMENT(matrix_init)
 template <typename TStringSet, typename TIndexSpec>
-void kmerCounting(TStringSet &set, TIndexSpec)
+void qgramCounting(TStringSet &set, TIndexSpec)
 {
 	typedef Index<TStringSet, TIndexSpec> TIndex;
 	typedef typename Fibre<TIndex, QGram_Counts>::Type TCounts;
@@ -73,8 +73,8 @@ int main ()
 		std::cout << ">Seq" << seqNo << std::endl << tmp << std::endl;
 	}
 
-	kmerCounting(stringSet, Index_QGram<UngappedShape<5> >());
-	kmerCounting(stringSet, Index_QGram<UngappedShape<5>, OpenAddressing>());
+	qgramCounting(stringSet, Index_QGram<UngappedShape<5> >());
+	qgramCounting(stringSet, Index_QGram<UngappedShape<5>, OpenAddressing>());
 	return 0;
 }
 
