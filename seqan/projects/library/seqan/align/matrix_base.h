@@ -368,9 +368,9 @@ resize(Matrix<TValue, DIMENSION> & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TValue, unsigned DIMENSION>
+template <typename TValue, unsigned DIMENSION, typename TFillValue>
 inline void
-fill(Matrix<TValue, DIMENSION> & me, TValue myValue)	//resize the matrix and fill with value
+fill(Matrix<TValue, DIMENSION> & me, TFillValue myValue)	//resize the matrix and fill with value
 {
 	typedef Matrix<TValue, DIMENSION> TMatrix;
 	typedef typename Size<TMatrix>::Type TSize;

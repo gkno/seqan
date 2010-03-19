@@ -143,7 +143,7 @@ assignProperty(TPropertyMap& pm,
 .Function.property:
 ..cat:Graph
 ..summary:Accesses the property of an item in the property map.
-..signature:assignProperty(pm, d)
+..signature:property(pm, d)
 ..param.pm:An External or Internal Property Map.
 ...type:Class.External Property Map
 ...type:Class.InternalMap

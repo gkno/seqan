@@ -78,6 +78,17 @@ bool _MersenneBuffer<T>::is_initialized = false;
 // NOTE: mtRandInit() must have been called at least once before mtRand() is used.
 // Can also be called several times since it is protected against multiple initalizations. 
 
+/**
+.Function.mtRandInit:
+..summary:Initialize the Mersenne-Twister random number generator.
+..cat:Misc
+..signature:mtRandInit()
+..signature:mtRandInit(doSRand)
+..param.doSRand:If $true$, the Mersenne-Twister is initialized with a random number from $std::rand$.
+...type:nolink:bool
+..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
+*/
+
 inline void 
 mtRandInit(bool 
 #ifndef SEQAN_NOSRAN
@@ -110,6 +121,18 @@ mtRandInit()
 
 //////////////////////////////////////////////////////////////////////////////
 // NOTE: mtRandInit() must be called once before mtRand() is used.
+
+
+/**
+.Function.mtRand:
+..summary:Return a Mersenne-Twister random number.
+..cat:Misc
+..signature:mtRand()
+..returns:A random number between 0 and $SupremumValue<unsigned long>::VALUE$.
+...type:nolink:unsigned long
+..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
+..see:Function.mtRandInit
+*/
 
 inline unsigned long 
 mtRand()
