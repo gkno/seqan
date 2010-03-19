@@ -25,7 +25,7 @@ int main ()
 	}
 
 // FRAGMENT(output)
-	// if get here the pattern was found
+	// if we get here the pattern was found
 	// output match positions
 	for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
 		std::cout << getOccurrences(it)[i] << std::endl;
