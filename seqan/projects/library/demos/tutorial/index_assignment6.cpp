@@ -1,4 +1,4 @@
-// FRAGMENT(includes)                                                           
+// FRAGMENT(includes)
 #include <iostream>
 #include <seqan/align.h>
 #include <seqan/index.h>
@@ -8,7 +8,7 @@ using namespace seqan;
 
 // FRAGMENT(matrix_init)
 template <typename TStringSet, typename TIndexSpec>
-void kmerCounting(TStringSet &set, TIndexSpec) 
+void kmerCounting(TStringSet &set, TIndexSpec)
 {
 	typedef Index<TStringSet, TIndexSpec> TIndex;
 	typedef typename Fibre<TIndex, QGram_Counts>::Type TCounts;
