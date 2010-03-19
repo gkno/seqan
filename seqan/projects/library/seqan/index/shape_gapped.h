@@ -214,9 +214,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, GenericShape> ()
 ..signature:Shape<TValue, GenericShape> (q)
 ..signature:Shape<TValue, GenericShape> (shape)
+..signature:Shape<TValue, GenericShape> (bitmap)
 ..signature:Shape<TValue, GenericShape> (predefined)
 ..param.q:Creates an ungapped q-gram.
 ..param.shape:Any other gapped/ungapped shape.
+..param.bitmap:Bitmap string. Sequence of '0's and '1's.
+...see:Function.stringToShape
 ..param.predefined:Any instance of a predefined shape spec (e.g. $ShapePatternHunter$).
 ..see:Class.HardwiredShape
 */
@@ -549,18 +552,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 
 
 //____________________________________________________________________________
-
-/**.Function.stringToShape:
-..cat:Index
-..summary:Takes a shape given as a string of '1' (relevant position) and '0' 
-(irrelevant position) and converts it into a Shape object.
-..signature:stringToShape(shape, bitmap)
-..param.shape:Shape object that is manipulated.
-...type:Spec.GenericShape
-..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
-...remarks:This string must begin with a '1'. Trailing '0's are ignored.
-...type:Class.String
-*/
+///.Function.stringToShape.param.shape.type:Spec.GenericShape
 
 	template <typename TValue, typename TSpec, typename TShapeString>
 	inline bool
@@ -613,6 +605,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 		return true;
 	}
 
+//____________________________________________________________________________
+
 	template <typename TShapeString, typename TValue, typename TSpec>
 	inline void
 	shapeToString(
@@ -633,6 +627,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	}
 
 //____________________________________________________________________________
+///.Function.reverse.param.shape.type:Spec.GenericShape
 
 	template <typename TValue, typename TSpec>
 	inline void

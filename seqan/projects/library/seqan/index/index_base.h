@@ -317,7 +317,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		typedef Pair<
 			typename Size< StringSet<TString, TSpec> >::Type,
 			typename SAValue<TString>::Type,
-			CutCompressed<4>						// max. 4 sequences 
+			BitCompressed<2,30>						// max. 4 sequences 
 		> Type;										// max. 2^30 characters each
 	};
 */

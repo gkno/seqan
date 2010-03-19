@@ -288,6 +288,9 @@ For gapped shapes this is the number of '1's.
 ..param.charsLeft:The distance of $it$ to the string end. 
 If $charsLeft$ is smaller than the shape's span, the hash value corresponds to the smallest shape beginning with $charsLeft$ characters.
 ..returns:Hash value of the shape.
+..see:Function.hashNext
+..see:Function.hashUpper
+..see:Function.hash2
 */
 
 	template <typename TValue, typename TIter>
@@ -437,8 +440,9 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
 ..param.charsLeft:The distance of $it$ to the string end. 
-If $charsLeft$ is smaller than the shape's span, the hash value corresponds to the biggest shape beginning with $charsLeft$ characters + 1.
 ..returns:Upper hash value of the shape.
+The hash value corresponds to the maximal @Function.hash@ value of a shape beginning with $min(charsLeft,length(shape))$ characters + 1.
+..remarks:This function in conjunction with @Function.hash@ is useful to search a q-gram index for p-grams with p<q.
 */
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
@@ -501,13 +505,15 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 
 /**.Function.hash2:
 ..cat:Index
-..summary:Computes a unique hash value of a shape, even if it is shorter than its span.
+..summary:Computes an unique hash value of a shape applied to a sequence, even if the sequence is shorter than the shape span
 ..signature:hash2(shape, it, charsLeft)
 ..param.shape:Shape to be used for hashing.
 ...type:Class.Shape
 ..param.it:Sequence iterator pointing to the first character of the shape.
 ..param.charsLeft:The distance of $it$ to the string end. 
 ..returns:Hash value of the shape.
+..see:Function.hash2Next
+..see:Function.hash2Upper
 */
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
@@ -538,6 +544,19 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 			me.hValue = me.hValue * ValueSize<TValue>::VALUE + me.XValue;
 		return me.hValue += iEnd;
 	}
+
+/**.Function.hash2Upper:
+..cat:Index
+..summary:Computes an upper unique hash value of a shape applied to a sequence, even if the sequence is shorter than the shape span.
+..signature:hash2Upper(shape, it, charsLeft)
+..param.shape:Shape to be used for hashing.
+...type:Class.Shape
+..param.it:Sequence iterator pointing to the first character of the shape.
+..param.charsLeft:The distance of $it$ to the string end. 
+..returns:Upper hash value of the shape.
+The hash value corresponds to the maximal @Function.hash2@ value of a shape beginning with the $min(charsLeft,length(shape))$ characters + 1
+..remarks:This function in conjunction with @Function.hash2@ is useful to search a q-gram index for p-grams with p<q.
+*/
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
 	inline typename Value< Shape<TValue, TSpec> >::Type
@@ -630,6 +649,21 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 
 //____________________________________________________________________________
 
+/**.Function.stringToShape:
+..cat:Index
+..summary:Takes a shape given as a string of '1' (relevant position) and '0' 
+(irrelevant position) and converts it into a Shape object.
+..signature:stringToShape(shape, bitmap)
+..param.shape:Shape object that is manipulated.
+...type:Spec.SimpleShape
+..param.bitmap:A character string of '1' and '0' representing relevant and irrelevant positions (blanks) respectively.
+...remarks:This string must begin with a '1'. Trailing '0's are ignored.
+...remarks:If $shape$ is a @Spec.SimpleShape@ at most one contiguous sequences of $1$s is allowed.
+...type:Class.String
+..see:Function.shapeToString
+..see:Function.reverse
+*/
+
 	template <typename TValue, typename TShapeString>
 	inline bool
 	stringToShape(
@@ -653,6 +687,20 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 		return it == itEnd;
 	}
 
+//____________________________________________________________________________
+
+/**.Function.shapeToString:
+..cat:Index
+..summary:Converts a given shape into a sequence of '1' (relevant position) and '0' 
+(irrelevant position).
+..signature:shapeToString(bitmap, shape)
+..param.bitmap:The resulting sequence object.
+...type:Class.String
+..param.shape:Shape object.
+...type:Class.Shape
+..see:Function.stringToShape
+*/
+
 	template <typename TShapeString, typename TValue, unsigned q>
 	inline void
 	shapeToString(
@@ -667,6 +715,15 @@ If $charsLeft$ is smaller than the shape's span, the hash value corresponds to t
 
 //____________________________________________________________________________
 	
+/**.Function.reverse:
+..cat:Index
+..summary:Reverses a given shape.
+..signature:reverse(shape)
+..param.shape:Shape object.
+...type:Spec.SimpleShape
+..see:Function.stringToShape
+*/
+
 	template <typename TValue, typename TSpec>
 	inline void
 	reverse(Shape<TValue, TSpec> &)
