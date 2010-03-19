@@ -36,7 +36,7 @@ int main() {
 
 // FRAGMENT(banded-alignment)
     Align<DnaString> align;
-    resize(rows(alignment), 2);
+    resize(rows(align), 2);
     assignSource(row(align, 0), seq0);
     assignSource(row(align, 1), seq1);
     
