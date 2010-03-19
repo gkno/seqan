@@ -129,7 +129,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 */
 
 	template < typename TShapeSpec, typename TSpec = Default >
-	struct Index_QGram;
+	struct Index_QGram {};
 
 	// use the index value type as shape value type
 	template < typename TObject, typename TShapeSpec, typename TSpec >
