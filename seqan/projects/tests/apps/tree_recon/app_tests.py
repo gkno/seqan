@@ -1,0 +1,185 @@
+#!/usr/bin/env python
+"""Helper code for app tests.
+
+This module contains helper functions and classes for making app tests easy.
+The advantage of using Python for this is easier portability instead of relying
+on Unix tools such as bash and diff which are harder to install on Windows than
+Python.
+
+App tests are performed by executing the programs on test data and comparing
+their output to previously generated "golden" output files.
+
+Classes/Functions:
+
+  class TestConf -- stores configuration of a test.
+  class TestPathHelper -- helps with constructing paths.
+  function runTest -- runs a test configured by a TestConf object.
+"""
+
+from __future__ import with_statement
+
+__author__ = 'Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>'
+
+import difflib
+import logging
+import os
+import os.path
+import subprocess
+import sys
+import tempfile
+
+
+class TestConf(object):
+    """Configuration for one tests.
+
+    A test configuration consists of the parameters to give to the
+    program and the expected result.
+
+    Attrs:
+      program -- string, path to binary to execute.
+      args -- list of strings with arguments to the program.
+      to_diff -- optional list of pairs with (output-file, expected-file) paths
+                 diff, the contents of output-file should be equal to the
+                 contents of expected-file.
+      name -- optional string, name of the test.
+      redir_stdout -- optional string that gives the path to redirect stdout to
+                      if the variable is not None.
+    """
+
+    def __init__(self, program, args, to_diff=[], name=None,
+                 redir_stdout=None):
+        """Constructor, args correspond to attrs."""
+        self.program = program
+        self.args = args
+        self.to_diff = to_diff
+        self.name = name
+        self.redir_stdout = redir_stdout
+
+    def __str__(self):
+        fmt = 'TestConf(%s, %s, %s, %s, %s)'
+        return fmt % (repr(self.program), self.args, self.to_diff, self.name,
+                      self.redir_stdout)
+
+
+class TestPathHelper(object):
+    """Helper class for paths.
+
+    TestPathHelper objects are configured with the appropriate paths.  The
+    provide functions to construct when executing tests.
+    """
+
+    def __init__(self, source_base_path, binary_base_path,
+                 tests_dir):
+        self.temp_dir = None
+        self.source_base_path = source_base_path
+        self.binary_base_path = binary_base_path
+        self.tests_dir = tests_dir
+
+    def inFile(self, path):
+        """Convert the path of a test file.
+
+        The given path, relative to the test directory, will be transformed into an
+        absolute path to the file.
+
+        Args:
+          path -- relative path to a file in the test directory.
+
+        Returns:
+          Absolute to the file.
+        """
+        result = os.path.join(self.source_base_path, self.tests_dir, path)
+        logging.debug('inFile(%s) = %s', path, result)
+        return result
+
+    def outFile(self, path):
+        """Convert the path of an output file.
+
+        The given path will be converted to a path to a temporary file.  The path
+        to this file will be created.
+        """
+        if not self.temp_dir:
+            self.temp_dir = tempfile.mkdtemp()
+            if not os.path.isdir(self.temp_dir):
+                os.path.makedirs(self.temp_dir)
+        logging.debug('outFile(%s) = %s', path, self.temp_dir)
+        return os.path.join(self.temp_dir, path)
+
+
+def runTest(test_conf):
+    """Run the test configured in test_conf.
+
+    Args:
+      test_conf -- TestConf object to run test for.
+
+    Returns:
+      True on success, False on any errors.
+
+    Side Effects:
+      Errors are printed to stderr.
+    """
+    # Execute the program.
+    logging.debug('runTest(%s)', test_conf)
+    args = [test_conf.program] + test_conf.args
+    logging.debug('Executing "%s"', ' '.join(args))
+    stdout_file = subprocess.PIPE
+    if test_conf.redir_stdout:
+        logging.debug('  Redirecting stout to "%s".' % test_conf.redir_stdout)
+        stdout_file = open(test_conf.redir_stdout, 'w+')
+    try:
+        process = subprocess.Popen(args, stdout=stdout_file,
+                                   stderr=subprocess.PIPE)
+        retcode = process.wait()
+        logging.debug('  return code is %d', retcode)
+    except Exception, e:
+        fmt = 'ERROR (when executing "%s"): %s'
+        if stdout_file is not subprocess.PIPE:
+            stdout_file.close()
+        print >>sys.stderr, fmt % (' '.join(args), e)
+        return False
+    # Handle error of program, indicated by return code != 0.
+    if retcode != 0:
+        print >>sys.stderr, 'Error when executing "%s".' % ' '.join(args)
+        print >>sys.stderr, 'Return code is %d' % retcode
+        if stdout_file is not subprocess.PIPE:
+            stdout_file.seek(0)
+        stdout_contents = process.stdout.read()
+        if stdout_contents:
+            print >>sys.stderr, '-- stdout begin --'
+            print >>sys.stderr, stdout_contents
+            print >>sys.stderr, '-- stdout end --'
+        else:
+            print >>sys.stderr, '-- stdout is empty --'
+        stderr_contents = process.stderr.read()
+        if stderr_contents:
+            print >>sys.stderr, '-- stderr begin --'
+            print >>sys.stderr, stderr_contents
+            print >>sys.stderr, '-- stderr end --'
+        else:
+            print >>sys.stderr, '-- stderr is empty --'
+    # Close standard out file if necessary.
+    if stdout_file is not subprocess.PIPE:
+        stdout_file.close()
+    # Compare results with expected results, if the expected and actual result
+    # are not equal then print diffs.
+    result = True
+    for expected_path, result_path in test_conf.to_diff:
+        try:
+            with open(expected_path, 'r') as f:
+                expected_str = f.read()
+            with open(result_path, 'r') as f:
+                result_str = f.read()
+            if expected_str == result_str:
+                continue
+            fmt = 'Comparing %s against %s'
+            print >>sys.stderr, fmt % (expected_path, result_path)
+            differ = difflib.Differ()
+            diff = differ.compare(expected_str.splitlines() + ['asdf', 'qwez'],
+                                  result_str.splitlines() + ['qwe', 'qwe'])
+            print >>sys.stderr, '\n'.join(list(diff))
+            result = False
+        except Exception, e:
+            fmt = 'Error when trying to compare %s to %s: %s'
+            print >>sys.stderr, fmt % (expected_path, result_path, e)
+            result = False
+    return result
+
