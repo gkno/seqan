@@ -150,7 +150,7 @@ void Test_SimpleSeeds()
 	SEQAN_TASSERT(rightDim1(seed9)==13);
     
 	String<Dna> query1 =	"aaaacgatcgatgc";
-	String<Dna> database1 = "ttttcgatcgatgcttt";
+	String<Dna> database1 = "ttttcgatcgatgcttttt";
 	Seed<int, SimpleSeed> seed9a(4,4,9);
 	extendSeed(seed9a, 1, matrix, query1, database1, 2, GappedXDrop());
     //std::cout << infix(query1, leftDim0(seed9a), rightDim0(seed9a)+1) << std::endl;
@@ -159,6 +159,8 @@ void Test_SimpleSeeds()
 	SEQAN_TASSERT(rightDim0(seed9a)==13);
 	SEQAN_TASSERT(leftDim1(seed9a)==3);
 	SEQAN_TASSERT(rightDim1(seed9a)==14);
+    SEQAN_TASSERT(rightDiagonal(seed9a)==0);
+    SEQAN_TASSERT(leftDiagonal(seed9a)==2);
 
 	Seed<int, SimpleSeed> seed9b(5,5,7);
 	extendSeed(seed9b, 1, matrix, query1, database1, 2, GappedXDrop());
@@ -188,6 +190,8 @@ void Test_SimpleSeeds()
 	SEQAN_TASSERT(rightDim0(seed9d)==10);
 	SEQAN_TASSERT(leftDim1(seed9d)==3);
 	SEQAN_TASSERT(rightDim1(seed9d)==13);
+    SEQAN_TASSERT(rightDiagonal(seed9d)==2);
+    SEQAN_TASSERT(leftDiagonal(seed9d)==5);
     
 	String<Dna> query3 = "aaaaaaaaacgatcgatgcaaaaaaaaa";
 	String<Dna> database3 =       "cgatcgatgccaact";
@@ -199,6 +203,48 @@ void Test_SimpleSeeds()
 	SEQAN_TASSERT(rightDim0(seed9e)==22);
 	SEQAN_TASSERT(leftDim1(seed9e)==0);
 	SEQAN_TASSERT(rightDim1(seed9e)==13);
+    SEQAN_TASSERT(rightDiagonal(seed9e)==-10);
+    SEQAN_TASSERT(leftDiagonal(seed9e)==-7);
+        
+	String<Dna> query4 =      "ttttagtgacgttttaaaaaa";
+	String<Dna> database4 = "ccccagctgatcgtttgcccccc";
+	Seed<int, SimpleSeed> seed9f(9,11,5);
+	Score<int,Simple> matrix1(1,-5,-5);
+	extendSeed(seed9f, 7, matrix1, query4, database4, 2, GappedXDrop());
+    //std::cout << infix(query4, leftDim0(seed9f), rightDim0(seed9f)+1) << std::endl;
+    //std::cout << infix(database4, leftDim1(seed9f), rightDim1(seed9f)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9f)==4);
+	SEQAN_TASSERT(rightDim0(seed9f)==14);
+	SEQAN_TASSERT(leftDim1(seed9f)==4);
+	SEQAN_TASSERT(rightDim1(seed9f)==16);
+    SEQAN_TASSERT(rightDiagonal(seed9f)==0);
+    SEQAN_TASSERT(leftDiagonal(seed9f)==2);
+        
+	String<Dna> query5 =    "aaaaaattttgcagtgatttt";
+	String<Dna> database5 = "ccccccgtttgctagtcgacccc";
+	Seed<int, SimpleSeed> seed9g(7,7,5);
+	extendSeed(seed9g, 7, matrix1, query5, database5, 2, GappedXDrop());
+    //std::cout << infix(query5, leftDim0(seed9g), rightDim0(seed9g)+1) << std::endl;
+    //std::cout << infix(database5, leftDim1(seed9g), rightDim1(seed9g)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9g)==6);
+	SEQAN_TASSERT(rightDim0(seed9g)==16);
+	SEQAN_TASSERT(leftDim1(seed9g)==6);
+	SEQAN_TASSERT(rightDim1(seed9g)==18);
+    SEQAN_TASSERT(rightDiagonal(seed9g)==0);
+    SEQAN_TASSERT(leftDiagonal(seed9g)==2);
+        
+	String<Dna> query6 =  "ccccagctgatcgtttgcccccc";
+	String<Dna> database6 = "ttttagtgacgttttaaaaaa";
+	Seed<int, SimpleSeed> seed9h(11,9,5);
+	extendSeed(seed9h, 7, matrix1, query6, database6, 2, GappedXDrop());
+    //std::cout << infix(query6, leftDim0(seed9h), rightDim0(seed9h)+1) << std::endl;
+    //std::cout << infix(database6, leftDim1(seed9h), rightDim1(seed9h)+1) << std::endl << std::endl;
+	SEQAN_TASSERT(leftDim0(seed9h)==4);
+	SEQAN_TASSERT(rightDim0(seed9h)==16);
+	SEQAN_TASSERT(leftDim1(seed9h)==4);
+	SEQAN_TASSERT(rightDim1(seed9h)==14);
+    SEQAN_TASSERT(rightDiagonal(seed9h)==-2);
+    SEQAN_TASSERT(leftDiagonal(seed9h)==0);
 }
 
 void Test_MultiSeeds(){
@@ -335,7 +381,7 @@ void Main_Seeds(){
 	SEQAN_TREPORT("TEST BEGIN")
 	Test_SimpleSeeds();
 	Test_MultiSeeds();
-	//debug::verifyCheckpoints("projects/library/seqan/seeds/seed_base.h");
-	//debug::verifyCheckpoints("projects/library/seqan/seeds/seed_multi.h");
+	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_base.h");
+	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_multi.h");
 	SEQAN_TREPORT("TEST END")
 }
