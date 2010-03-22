@@ -258,7 +258,9 @@ namespace ClassTest {
     }
 
     // Called by the macro SEQAN_ASSERT_FAIL.
-    inline void forceFail(const char *comment, ...) {
+    inline void forceFail(const char *file, int line,
+                          const char *comment, ...) {
+        std::cerr << file << ":" << line << " FAILED! ";
         if (comment) {
             std::cerr << " (";
             va_list args;
@@ -267,11 +269,12 @@ namespace ClassTest {
             va_end(args);
             std::cerr << ")";
         }
+        std::cerr << std::endl;
     }
 
     // Same as forceFail above, but with comment set to 0.
-    inline void forceFail() {
-        forceFail(0);
+    inline void forceFail(const char *file, int line) {
+        forceFail(file, line, 0);
     }
 
     // Called by the macro SEQAN_ASSERT_EQ.
