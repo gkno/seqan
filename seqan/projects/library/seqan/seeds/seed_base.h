@@ -893,11 +893,11 @@ extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
 		}
         
         // narrow the relevant matrix region
-		while (((*antiDiag3)[b] < tmpMax1-scoreDropOff) && (*antiDiag2)[b-1] < tmpMax1-scoreDropOff && (b < (TPosition)length(*antiDiag3)-1)) {
+		while (((*antiDiag3)[b] == infimum) && (*antiDiag2)[b-1] == infimum && (b < (TPosition)length(*antiDiag3)-1)) {
 			++b;
 		}
 		++u;
-		while (((*antiDiag3)[u] < tmpMax1-scoreDropOff) && (*antiDiag2)[u] < tmpMax1-scoreDropOff && (u >= 0)) {
+		while (((*antiDiag3)[u] == infimum) && (*antiDiag2)[u] == infimum && (u >= 0)) {
 			--u;
         }
 			
@@ -907,10 +907,13 @@ extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
 
         if (b > u+1) break;
 
-		if ((b < (k+1)/2) && ((k+1)/2 - b > lowerBound))
-			lowerBound = (k+1)/2 - b;
-		if ((u > k/2) && (u - k/2 > upperBound))
-			upperBound = u - k/2;
+	    //calculate upper/lower bound for diagonals
+        if (2*((k+1)/2 - b) - (k%2) > lowerBound) {
+			lowerBound = 2*((k+1)/2 - b) - (k%2);
+        }
+        if (2*(u - k/2) - (k%2) > upperBound) {
+            upperBound = 2*(u - k/2) - (k%2);
+        }
 
         // swap diagonals
 		tmpDiag = antiDiag1;
@@ -948,51 +951,56 @@ extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
     //    else if ((*antiDiag3)[ii+2] == infimum ) std::cout << "i" << std::endl;
     //    else std::cout << (*antiDiag3)[ii+2] << std::endl;
     //}
-		
-	//Calculate upper/lower bound for diagonals
-	if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-		setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-	
-    if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-		setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
 
 	//Find seed start/end
 	TPosition extLengthQuery = 0; // length of extension in query
     TPosition extLengthDatabase = 0; // length of extension in database
 	TPosition tmpMax = infimum;
 	if ((k == xLength+yLength) && ((*antiDiag3)[xLength] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of sequences
+        // extension ends at end of both sequences
 		extLengthQuery = xLength;
         extLengthDatabase = yLength;
 		tmpMax = 0;
+    } else if (((k+1) / 2 > xLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)) {
+        // extension ends at end of query
+        tmpMax = (*antiDiag2)[xLength];
+        extLengthQuery = xLength;
+        extLengthDatabase = k-(xLength+1);
+    } else if (((k+1) / 2 > yLength) && ((*antiDiag2)[k-yLength-1] >= tmpMax1-scoreDropOff)) {
+        // extension ends at end of database
+        tmpMax = (*antiDiag2)[k-yLength-1];
+        extLengthQuery = k-yLength-1;
+        extLengthDatabase = yLength;
     } else {
-		for (unsigned int eu = 0; eu < length(*antiDiag2); ++eu) {
-			if ((*antiDiag2)[eu] > tmpMax) {
-                // extension ends with indel
-				tmpMax = (*antiDiag2)[eu];
-				extLengthQuery = eu;
-                extLengthDatabase = k - (eu+1);
-			}
-		}
-        if (tmpMax == infimum) {
-            for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
-                if ((*antiDiag1)[eu] > tmpMax) {
-                    // extension ends with mismatch
-				    tmpMax = (*antiDiag1)[eu];
-				    extLengthQuery = eu;
-                    extLengthDatabase = k - (eu+2);
-			    }
+        for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
+            if ((*antiDiag1)[eu] > tmpMax) {
+                // extension ends with mismatch
+		        tmpMax = (*antiDiag1)[eu];
+		        extLengthQuery = eu;
+                extLengthDatabase = k - (eu+2);
 		    }
         }
-		--k;
 	}
 
-    // set new start/end position of seed
     if(tmpMax != infimum) {
         if(direction == 0) {
+	        // set left and right diagonals
+            if (leftDiagonal(seed) < startDiagonal(seed)+upperBound)
+		        setLeftDiagonal(seed, startDiagonal(seed)+upperBound);
+	        if (rightDiagonal(seed) > startDiagonal(seed)-lowerBound)
+	        	setRightDiagonal(seed, startDiagonal(seed)-lowerBound);
+
+            // set new start position of seed
             setLeftDim0(seed, leftDim0(seed)-extLengthQuery);
             setLeftDim1(seed, leftDim1(seed)-extLengthDatabase);
         } else {
+	        // set left and right diagonals
+	        if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
+		        setRightDiagonal(seed, endDiagonal(seed)-upperBound);
+            if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
+		        setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
+
+            // set new end position of seed
             setRightDim0(seed, rightDim0(seed)+extLengthQuery);
             setRightDim1(seed, rightDim1(seed)+extLengthDatabase);
         }
