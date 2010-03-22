@@ -1,5 +1,5 @@
 // FRAGMENT(header)
-#include <seqan/chaining.h>
+#include <seqan/seeds.h>
 
 using namespace seqan;
 
