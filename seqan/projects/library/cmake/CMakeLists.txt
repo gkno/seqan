@@ -21,6 +21,10 @@ if (NOT SEQAN_LIBRARY)
        "Path to SeqAn's parent folder (contains apps,demos,seqan)")
 endif (NOT SEQAN_LIBRARY)
 
+# Path to and not including the "projects" directory.
+get_filename_component (SEQAN_SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../.. ABSOLUTE)
+get_filename_component (SEQAN_BINARY_ROOT ${CMAKE_CURRENT_BINARY_DIR}/../../.. ABSOLUTE)
+
 set (SEQAN_TARGET "Seqan")
 
 ################################################################################
@@ -146,6 +150,6 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 add_subdirectory (apps)
 add_subdirectory (demos)
-#add_subdirectory (tests_apps)
+add_subdirectory (tests_apps)
 add_subdirectory (tests_seqan)
 #add_subdirectory (tests_demos)

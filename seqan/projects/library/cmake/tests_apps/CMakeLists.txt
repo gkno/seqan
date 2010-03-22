@@ -1,0 +1,39 @@
+cmake_minimum_required (VERSION 2.6)
+project (Seqan_TestsApps)
+
+################################################################################
+# For the app tests, we enable debugging.
+################################################################################
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1")
+
+################################################################################
+# Set path variables
+################################################################################
+
+include_directories (${SEQAN_LIBRARY})
+link_directories (${SEQAN_LIBRARY}/lib)
+
+################################################################################
+# Tests
+################################################################################
+
+#-----------------------------------------------------------------------------
+# Configure Dart testing support.  This should be done before any
+# MESSAGE(FATAL_ERROR ...) commands are invoked.
+INCLUDE(CTest)
+ENABLE_TESTING()
+IF(BUILD_TESTING)
+  SET(BUILDNAME "${BUILDNAME}" CACHE STRING "Name of build on the dashboard")
+  MARK_AS_ADVANCED(BUILDNAME)
+ENDIF(BUILD_TESTING)
+
+get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
+set (SEQAN_TESTS_APPS_DIR "${SEQAN_TESTS_ABS}/apps")
+
+file(GLOB SEQAN_TESTS ${SEQAN_TESTS_APPS_DIR}/[A-z]*)
+foreach (TEST_DIR ${SEQAN_TESTS})
+  file (RELATIVE_PATH TEST_DIR_REL ${SEQAN_TESTS_APPS_DIR} ${TEST_DIR})
+  add_test(test_apps_${TEST_DIR_REL} ${PYTHON_EXECUTABLE} ${TEST_DIR}/run_tests.py ${SEQAN_SOURCE_ROOT} ${SEQAN_BINARY_ROOT})
+endforeach (TEST_DIR)
+
