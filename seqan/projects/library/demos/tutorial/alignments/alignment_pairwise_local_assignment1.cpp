@@ -19,8 +19,6 @@ int main()
 	while (localAlignment(ali, finder, sc, 0, WatermanEggert()) && count < 3) {
 		::std::cout << "Score = " << getScore(finder) << ::std::endl;
 		::std::cout << ali;
-		::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali, 0)) << ":" << (sourceEndPosition(row(ali, 0))-1) << "]";
-		::std::cout << " and Seq2[" << sourceBeginPosition(row(ali, 1)) << ":" <<  (sourceEndPosition(row(ali, 1))-1) << "]" << ::std::endl << ::std::endl;
 		++count;
 	}
 	return 0;
