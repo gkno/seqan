@@ -1,11 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
-project (Seqan_TestsApps)
+project (Seqan_Tests)
 
 ################################################################################
-# For the app tests, we enable debugging.
+# For the tests, we switch SeqAn into testing mode.
 ################################################################################
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
 
 ################################################################################
 # Set path variables
@@ -29,6 +29,23 @@ IF(BUILD_TESTING)
 ENDIF(BUILD_TESTING)
 
 get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
+#if (EXISTS SEQAN_TESTS_ABS)
+	file(GLOB SEQAN_TESTS ${SEQAN_TESTS_ABS}/[A-z]*)
+	foreach (TEST_DIR ${SEQAN_TESTS})
+		file (RELATIVE_PATH TEST_DIR_REL ${SEQAN_TESTS_ABS} ${TEST_DIR})
+		file (GLOB TEST_SOURCES ${TEST_DIR}/[A-z]*.h ${TEST_DIR}/test_[A-z]*.cpp)
+		list (SORT TEST_SOURCES)
+		if (TEST_SOURCES)
+			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
+			add_dependencies (test_${TEST_DIR_REL} ${SEQAN_TARGET})
+			add_test (test_${TEST_DIR_REL} test_${TEST_DIR_REL})
+			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+				target_link_libraries (test_${TEST_DIR_REL} rt)
+			endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		endif (TEST_SOURCES)
+	endforeach (TEST_DIR)
+#endif (EXISTS SEQAN_TESTS_ABS)
+
 set (SEQAN_TESTS_APPS_DIR "${SEQAN_TESTS_ABS}/apps")
 
 file(GLOB SEQAN_TESTS ${SEQAN_TESTS_APPS_DIR}/[A-z]*)
