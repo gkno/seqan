@@ -1,10 +1,9 @@
-// FRAGMENT(includes)
+// FRAGMENT(initialization)
 #include <iostream>
 #include <seqan/find.h>
 
 using namespace seqan;
 
-// FRAGMENT(initialization)
 int main()
 {
 	CharString haystack = "send more money!";
