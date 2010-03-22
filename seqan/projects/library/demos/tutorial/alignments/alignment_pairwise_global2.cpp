@@ -24,12 +24,11 @@ int main()
 	::std::cout << align;
 	
 //FRAGMENT(typedef2)
-	typedef StringSet<TSequence, Dependent<> > TDepStringSet;
-	typedef Graph<Alignment<TDepStringSet> > TAlignGraph;
-//FRAGMENT(init2)
 	StringSet<TSequence> sequences;
 	appendValue(sequences,seq1);
 	appendValue(sequences,seq2);
+	typedef StringSet<TSequence, Dependent<> > TDepStringSet;
+	typedef Graph<Alignment<TDepStringSet> > TAlignGraph;
 	TAlignGraph alignG(sequences);
 	
 //FRAGMENT(alignment2)
