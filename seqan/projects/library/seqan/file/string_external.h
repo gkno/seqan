@@ -32,6 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Strings
 ..general:Class.String
 ..summary:String that is stored in external memory.
+..signature:String<TValue, External<> >
 ..signature:String<TValue, External<TConfig> >
 ..param.TValue:The value type, that is the type of the items/characters stored in the string.
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
@@ -40,9 +41,10 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Tag.ExternalConfigLarge
 ...type:Tag.ExternalConfigSize
 ...default:@Tag.ExternalConfig@
-..remarks:The External String enables to access sequences larger than the available internal memory (RAM) by using
-external memory (e.g. Hard disk, Network storage, ...) via a @Class.File@ object.
-Sequences of nearly arbitrary size can be accessed, they can in particular contain more than 2^32 elements on a 32bit system (see Tag.ExternalConfigLarge).
+..remarks:The External String enables to access sequences larger than the available internal memory (RAM)
+by using external memory (e.g. Hard disk, Network storage, ...) via a @Class.File@ object.
+Sequences of nearly arbitrary size can be accessed even larger than the logically addressable memory,
+i.e. they can in particular contain more than 2^32 elements on a 32bit system (see Tag.ExternalConfigLarge).
 See the @Memfunc.ExtString#String.constructor@ for more details.
 ..remarks:This String also supports fast appending and removing of values at the end (see @Spec.Block String@, @Function.appendValue@)
 ..remarks:The External String implements a LRU mechanism to swap out pages.

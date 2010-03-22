@@ -35,6 +35,28 @@ namespace SEQAN_NAMESPACE_MAIN
     // Memory Mapped String
     //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.MMap String:
+..cat:Strings
+..general:Class.String
+..summary:String that is stored in external memory. Uses memory mapping.
+..signature:String<TValue, MMap<> >
+..signature:String<TValue, MMap<TConfig> >
+..param.TValue:The value type, that is the type of the items/characters stored in the string.
+...remarks:Use @Metafunction.Value@ to get the value type for a given class.
+..param.TConfig:A structure to configure the memory mapped string.
+...type:Tag.ExternalConfig
+...type:Tag.ExternalConfigLarge
+...type:Tag.ExternalConfigSize
+...default:@Tag.ExternalConfig@
+..remarks:The MMap String enables to access sequences larger than the available physical memory (RAM) by using
+external memory (e.g. Hard disk, Network storage, ...) mapped into memory.
+The size of the string is limited by external memory and the logical address space (4GB on a 32bit OS).
+See the @Memfunc.ExtString#String.constructor@ for more details.
+..remarks:This String also supports fast appending and removing of values at the end (see @Spec.Block String@, @Function.appendValue@)
+..include:seqan/file.h
+*/
+
     template < typename TValue,
                typename TConfig >
 	class String<TValue, MMap<TConfig> >

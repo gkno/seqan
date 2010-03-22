@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	// define memory mapped stringset
-	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated
+	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated (use MultiSeqFile instead)
 	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiSeqFile;
 
 
