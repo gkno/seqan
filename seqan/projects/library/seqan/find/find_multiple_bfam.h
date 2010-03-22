@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Class.MultiBFAM:
+.Spec.MultiBFAM:
 ..general:Class.Pattern
 ..cat:Searching
 ..summary:Multi-Pattern Backward Factor Automaton Matching.
@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 /**
 .Spec.MultiBFAM<Oracle>:
-..general:Class.MultiBFAM
+..general:Spec.MultiBFAM
 ..cat:Searching
 ..summary:Multi-Pattern Backward Factor Automaton Matching using an oracle automaton.
 ..signature:Pattern<TNeedle, MultiBFAM<Oracle> >
@@ -52,7 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/find.h
 */
 
-///.Class.Pattern.param.TSpec.type:Class.MultiBFAM
+///.Class.Pattern.param.TSpec.type:Spec.MultiBFAM
 
 //struct Oracle //defined in find_bom.h
 
