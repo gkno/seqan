@@ -1,4 +1,5 @@
 // FRAGMENT(includes)
+#define SEQAN_PROFILE
 #include <seqan/file.h>
 #include <iostream>
 
@@ -7,6 +8,8 @@ using namespace seqan;
 // FRAGMENT(open_file)
 int main (int argc, char const * argv[])
 {
+	SEQAN_PROTIMESTART(loadTime);
+
 	MultiSeqFile multiSeqFile;
 	if (argc < 2 || !open(multiSeqFile.concat, argv[1], OPEN_RDONLY))
 		return 1;
@@ -16,7 +19,7 @@ int main (int argc, char const * argv[])
 	guessFormat(multiSeqFile.concat, format);
 	split(multiSeqFile, format);
 
-// FRAGMENT(read_sequences)
+// FRAGMENT(reserve)
 	unsigned seqCount = length(multiSeqFile);
 	StringSet<String<Dna5Q> > seqs;
 	StringSet<CharString> seqIDs;
@@ -24,6 +27,7 @@ int main (int argc, char const * argv[])
 	reserve(seqs, seqCount, Exact());
 	reserve(seqIDs, seqCount, Exact());
 
+// FRAGMENT(read_sequences)
 	String<Dna5Q> seq;
 	CharString qual;
 	CharString id;
@@ -42,13 +46,15 @@ int main (int argc, char const * argv[])
 		// we use reserve and append, as assign is not supported
 		// by StringSet<..., Owner<ConcatDirect<> > >
 		appendValue(seqs, seq, Generous());
-		appendValue(ids, id, Generous());
+		appendValue(seqIDs, id, Generous());
 	}
 
 // FRAGMENT(output)
+	std::cout << "Loading " << seqCount << " sequences took " << SEQAN_PROTIMEDIFF(loadTime);
+	std::cout << " seconds." << std::endl << std::endl;
 	for (unsigned i = 0; i < seqCount && i < 10; ++i)
 	{
-		std::cout << '>' << ids[i] << std::endl;
+		std::cout << '>' << seqIDs[i] << std::endl;
 		std::cout << seqs[i] << std::endl;
 	}
 
