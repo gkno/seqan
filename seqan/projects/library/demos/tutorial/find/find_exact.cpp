@@ -6,7 +6,7 @@ using namespace seqan;
 
 int main()
 {
-	CharString haystack = "send more money!";
+	CharString haystack = "Simon, send more money!";
 	CharString needle = "mo";
 
 // FRAGMENT(output)
