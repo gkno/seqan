@@ -17,45 +17,31 @@
  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
-  Umbrella header for the find module.
+  Basic definitions and types for the find module.
  ==========================================================================*/
 
-#ifndef SEQAN_SEQAN_FIND_H_
-#define SEQAN_SEQAN_FIND_H_
+#ifndef SEQAN_FIND2_FIND_BASE_H_
+#define SEQAN_FIND2_FIND_BASE_H_
 
-// Prerequisites.
-#include <cmath>
+namespace seqan {
 
-#include <deque>
+// Contains the state for finder and patterns.
+struct _FindState {
+    enum TState {
+        STATE_INITIAL,
+        STATE_FOUND,
+        STATE_NOTFOUND,
+        STATE_BEGIN_FOUND,
+        STATE_BEGIN_NOTFOUND
+    };
+};
 
-#include <seqan/sequence.h>
-#include <seqan/modifier.h>
-#include <seqan/score.h>
-#include <seqan/graph_types.h>
-#include <seqan/graph_algorithms.h>
-#include <seqan/map.h>
-#include <seqan/find.h>
+template <typename TNeedle, typename TSpec>
+struct Pattern2;
 
-#ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/find2/find2_generated_forwards.h>
-#endif
+template <typename THaystack, typename TSpec = void>
+struct Finder2;
 
-#include <seqan/find2/find_base.h>
-#include <seqan/find2/find_finder_default.h>
-
-// Exact pattern matching.
-#include <seqan/find2/find_exact_simple.h>
-
-// Complex pattern matching.
-#include <seqan/find2/find_pattern_wild_shiftand.h>
-
-// Multiple exact pattern search.
-#include <seqan/find2/find_multiple_exact_shiftand.h>
-
-// Approximate pattern matching with Hamming distance.
-#include <seqan/find2/find_hamming_simple.h>
-
-// Approximate matching with linear/affine gap costs, edit distance etc.
-#include <seqan/find2/find_approx_dpsearch.h>
-
-#endif  // SEQAN_SEQAN_FIND_H_
+}  // namespace seqan
+          
+#endif  // SEQAN_FIND2_FIND_BASE_H_

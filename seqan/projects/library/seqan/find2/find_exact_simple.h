@@ -25,69 +25,69 @@
 
 namespace seqan {
 
-
-
 template <typename TNeedle>
-struct Pattern2<TNeedle, Simple> {
+struct Pattern2<TNeedle, Simple> : _FindState {
+    // The pattern's state.
+    TState _state;
+
+    // The needle we store.
     Holder<TNeedle> _host;
 
-    Pattern2() {}
+    Pattern2() { SEQAN_CHECKPOINT; }
+
+    Pattern2(TNeedle & ndl)
+        : _state(STATE_INITIAL),
+          _host(ndl)
+    {}
 };
 
 
 template <typename TNeedle>
-TNeedle const & host(Pattern2<TNeedle, Simple> const & pattern) {
+TNeedle & needle2(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-}
-
-
-template <typename TNeedle>
-TNeedle const & needle(Pattern2<TNeedle, Simple> const & pattern) {
-    SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return value(pattern._host);
 }
 
 
 template <typename TNeedle>
 typename Position<TNeedle>::Type length(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return length(needle2(pattern));
 }
 
 
 template <typename TNeedle>
 Segment<TNeedle, InfixSegment> infix(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return infix(pattern, 0u, length(needle2(pattern)));
 }
 
 
 template <typename TNeedle>
 typename Iterator<TNeedle>::Type begin(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return begin(needle2(pattern));
 }
 
 
 template <typename TNeedle>
 typename Iterator<TNeedle>::Type end(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return end(needle2(pattern));
 }
 
 
 template <typename TNeedle>
 typename Position<TNeedle>::Type beginPosition(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return 0u;
 }
 
 
 template <typename TNeedle>
 typename Position<TNeedle>::Type endPosition(Pattern2<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    return length(needle2(pattern));
 }
 
 
@@ -95,7 +95,39 @@ template <typename THaystack, typename TNeedle>
 bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
           Pattern2<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    typedef Pattern2<THaystack, Simple> TFinder;
+    typedef Pattern2<TNeedle, Simple> TPattern;
+    typedef typename Position<TNeedle>::Type TPosition;
+
+    // State of finder and pattern should be in sync.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+
+    // Do not continue if the state is "not found".
+    if (finder._state == TPattern::STATE_NOTFOUND)
+        return false;
+    // Initialize finder if state is "initial".
+    if (finder._state == TPattern::STATE_INITIAL) {
+        finder._beginPosition = 0u;
+        finder._endPosition = length(needle(pattern));
+    }
+
+    // Search the needle in the haystack naively.
+    while (finder._beginPosition < length(haystack2(finder)) - length(needle2(pattern))) {
+        for (TPosition i = 0u; i < length(needle2(pattern)); ++i) {
+            if (needle2(pattern)[i] != haystack2(finder)[finder._beginPosition + i]) {
+                finder._beginPosition += 1;
+                i = 0u;
+                continue;
+            }
+        }
+        finder._endPosition = finder._beginPosition + length(needle2(pattern));
+        finder._state = TFinder::STATE_BEGIN_FOUND;
+        pattern._state = TPattern::STATE_BEGIN_FOUND;
+        return true;
+    }
+
+    finder._state = TFinder::STATE_NOTFOUND;
+    pattern._state = TPattern::STATE_NOTFOUND;
     return false;
 }
 
@@ -104,8 +136,10 @@ template <typename THaystack, typename TNeedle>
 bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
                Pattern2<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return false;
+    // State of finder and pattern should be in sync.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    typedef Pattern2<TNeedle, Simple> TPattern;
+    return finder._state == TPattern::STATE_BEGIN_FOUND;
 }
 
 
