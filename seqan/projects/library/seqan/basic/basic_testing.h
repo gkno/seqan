@@ -246,6 +246,7 @@ namespace ClassTest {
         } else if (StaticData::thisTestOk()) {
             std::cout << StaticData::currentTestName() << " OK" << std::endl;
         } else {
+            StaticData::errorCount() += 1;
             std::cerr << StaticData::currentTestName() << " FAILED" << std::endl;
         }
     }
@@ -694,6 +695,7 @@ namespace ClassTest {
 #if SEQAN_ENABLE_TESTING
     // If in testing mode then raise an AssertionFailedException.
     inline void fail() {
+        StaticData::thisTestOk() = false;
         throw AssertionFailedException();
     }
 #else
