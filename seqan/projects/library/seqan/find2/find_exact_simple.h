@@ -25,6 +25,8 @@
 
 namespace seqan {
 
+
+
 template <typename TNeedle>
 struct Pattern2<TNeedle, Simple> {
     Holder<TNeedle> _host;
@@ -94,6 +96,7 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
           Pattern2<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
@@ -102,15 +105,17 @@ bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" 
                Pattern2<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
 template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
-bool alignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, Simple> &pattern,
-               Align<TAlignSeq, TAlignSpec> &outAlignment) {
+bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern2<TNeedle, Simple> &pattern,
+                  Align<TAlignSeq, TAlignSpec> &outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 }  // namespace seqan

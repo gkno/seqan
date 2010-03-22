@@ -94,6 +94,7 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
           Pattern2<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
@@ -102,15 +103,17 @@ bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" 
                Pattern2<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
 template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
-bool alignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, WildShiftAnd> &pattern,
-               Align<TAlignSeq, TAlignSpec> &outAlignment) {
+bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern2<TNeedle, WildShiftAnd> &pattern,
+                  Align<TAlignSeq, TAlignSpec> &outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 }  // namespace seqan

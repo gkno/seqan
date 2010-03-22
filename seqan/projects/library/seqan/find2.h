@@ -40,22 +40,22 @@
 #include <seqan/find2/find2_generated_forwards.h>
 #endif
 
-// #include <seqan/find/find_base.h>
+#include <seqan/find2/find_base.h>
 // #include <seqan/find/find_pattern_base.h>
 
 // Exact pattern matching.
 #include <seqan/find2/find_exact_simple.h>
 
 // Complex pattern matching.
-#include <seqan/find/find_pattern_wild_shiftand.h>
+#include <seqan/find2/find_pattern_wild_shiftand.h>
 
 // Multiple exact pattern search.
-#include <seqan/find/find_multiple_exact_shiftand.h>
+#include <seqan/find2/find_multiple_exact_shiftand.h>
 
 // Approximate pattern matching with Hamming distance.
-#include <seqan/find/find_hamming_simple.h>
+#include <seqan/find2/find_hamming_simple.h>
 
 // Approximate matching with linear/affine gap costs, edit distance etc.
-#include <seqan/find/find_approx_dpsearch.h>
+#include <seqan/find2/find_approx_dpsearch.h>
 
 #endif  // SEQAN_SEQAN_FIND_H_

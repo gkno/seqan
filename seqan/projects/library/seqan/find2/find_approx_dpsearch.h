@@ -26,9 +26,13 @@
 
 namespace seqan {
 
+template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = True>
+struct DPSearch2;
+
+
 // TODO(holtgrew): Rename TScore to TScoringScheme?  Also: Rename Score class to ScoringScheme?
 template <typename TNeedle, typename TScore, typename TSpec, typename TSupportFindBegin>
-struct Pattern2<TNeedle, DPSearch<TScore, TSpec = FindInfix, TSupportFindBegin = True> > {
+struct Pattern2<TNeedle, DPSearch2<TScore, TSpec, TSupportFindBegin> > {
     typedef typename Value<TScore>::Value TScoreValue;
 
     // The needle we work on.
@@ -48,119 +52,119 @@ struct Pattern2<TNeedle, DPSearch<TScore, TSpec = FindInfix, TSupportFindBegin =
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-int score(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
+int score(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_FAIL("Implement me!");
+    return pattern._score;
+}
+
+
+template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+int getScoreLimit(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_FAIL("Implement me!");
+    return pattern._scoreLimit;
+}
+
+
+template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
+TScore getScoringScheme(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> >  const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-int getScoreLimit(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
+TScore const & scoringScheme(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> >  const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-TScore getScoringScheme(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >  const & pattern) {
+TNeedle const & host(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-TScore const & scoringScheme(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> >  const & pattern) {
-    SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-}
-
-
-template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-int getScoreLimit(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
-    SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-
-
-template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-TNeedle const & host(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
-    SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-}
-
-
-template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-TNeedle const & needle(Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
+TNeedle const & needle(Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-typename Position<TNeedle>::Type length(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+typename Position<TNeedle>::Type length(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-Segment<TNeedle, InfixSegment> infix(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+Segment<TNeedle, InfixSegment> infix(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-typename Iterator<TNeedle>::Type begin(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+typename Iterator<TNeedle>::Type begin(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-typename Iterator<TNeedle>::Type end(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+typename Iterator<TNeedle>::Type end(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-typename Position<TNeedle>::Type beginPosition(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+typename Position<TNeedle>::Type beginPosition(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
-typename Position<TNeedle>::Type endPosition(Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > const & pattern) {
+typename Position<TNeedle>::Type endPosition(Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-          Pattern2<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & pattern) {
+          Pattern2<TNeedle, DPSearch2<TScore, TSpec, TFindBeginPatternSpec> > & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
 // The function "findBegin" is only supported if the TFindBeginPatternSpec is True.
 template <typename THaystack, typename TNeedle, typename TScore, typename TSpec>
 bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > & pattern) {
+               Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 
 // The function "alignment" is only supported if the TFindBeginPatternSpec is True.
 template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec, typename TScore, typename TSpec>
-bool alignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, DPSearch<TScore, TSpec, True> > & pattern,
-               Align<TAlignSeq, TAlignSpec> & outAlignment) {
+bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern2<TNeedle, DPSearch2<TScore, TSpec, True> > & pattern,
+                  Align<TAlignSeq, TAlignSpec> & outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
+    return false;
 }
 
 }  // namespace seqan
