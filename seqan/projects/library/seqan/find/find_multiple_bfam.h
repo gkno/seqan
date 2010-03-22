@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.String
 ..param.TAutomaton:A tag that specifies the used automaton.
 ...default:@Spec.MultiBFAM<Oracle>@
-..see:Class.BFAM
+..see:Spec.BFAM
 */
 /**
 .Spec.MultiBFAM<Oracle>:

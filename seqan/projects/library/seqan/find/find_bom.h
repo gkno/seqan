@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Class.BFAM:
+.Spec.BFAM:
 ..summary:Backward Factor Automaton Matching algorithm.
 ..general:Class.Pattern
 ..cat:Searching
@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.BFAM<Oracle>:
 ..summary:Backward Oracle Matching algorithm.
-..general:Class.BFAM
+..general:Spec.BFAM
 ..cat:Searching
 ..signature:Pattern<TNeedle, BFAM<Oracle> >
 ..param.TNeedle:The needle type.
@@ -56,7 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
 /**
 .Spec.BFAM<Trie>:
 ..summary:Backward Suffix Trie Matching algorithm.
-..general:Class.BFAM
+..general:Spec.BFAM
 ..cat:Searching
 ..signature:Pattern<TNeedle, BFAM<Trie> >
 ..param.TNeedle:The needle type.
@@ -66,7 +66,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/find.h
 */
 
-///.Class.Pattern.param.TSpec.type:Class.BFAM
+///.Class.Pattern.param.TSpec.type:Spec.BFAM
 
 struct Oracle; //Oracle Tag => "BOM"
 struct Trie; //Trie Tag => "BTM"
