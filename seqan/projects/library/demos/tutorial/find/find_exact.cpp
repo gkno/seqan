@@ -13,7 +13,7 @@ int main()
 	Finder<CharString> finder(haystack);
 	Pattern<CharString, Horspool> pattern(needle);
 	while (find(finder, pattern))
-		std::cout << position(finder) << std::endl;
+		std::cout << '[' << beginPosition(finder) << "," << endPosition(finder) << ')' << std::endl;
 
 	return 0;
 }
