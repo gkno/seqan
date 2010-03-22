@@ -146,4 +146,6 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 
 add_subdirectory (apps)
 add_subdirectory (demos)
-add_subdirectory (tests)
+#add_subdirectory (tests-apps)
+add_subdirectory (tests-seqan)
+#add_subdirectory (tests-demos)
