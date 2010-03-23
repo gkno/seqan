@@ -74,12 +74,14 @@ typedef ModifiedString<
 template < typename TSequence >
 inline void complementInPlace(TSequence & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
 template < typename TSequence >
 inline void complementInPlace(TSequence const & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
@@ -92,6 +94,7 @@ inline void complementInPlace(TSequence const & sequence)
 template < typename TSequence, typename TSpec >
 inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		complementInPlace(stringSet[seqNo]);
@@ -100,6 +103,7 @@ inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
 template < typename TSequence, typename TSpec >
 inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		complementInPlace(stringSet[seqNo]);
@@ -121,6 +125,7 @@ inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 template < typename TSequence >
 inline void reverseComplementInPlace(TSequence & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverseInPlace(sequence);
 } 
@@ -129,6 +134,7 @@ inline void reverseComplementInPlace(TSequence & sequence)
 template < typename TSequence >
 inline void reverseComplementInPlace(TSequence const & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 	reverseInPlace(sequence);
 } 
@@ -142,6 +148,7 @@ inline void reverseComplementInPlace(TSequence const & sequence)
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		reverseComplementInPlace(stringSet[seqNo]);
@@ -151,6 +158,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		reverseComplementInPlace(stringSet[seqNo]);
@@ -174,6 +182,7 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringS
 template < typename TSequence >
 inline void toLowerInPlace(TSequence & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
@@ -181,6 +190,7 @@ inline void toLowerInPlace(TSequence & sequence)
 template < typename TSequence >
 inline void toLowerInPlace(TSequence const & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorLowcase<typename Value<TSequence>::Type>());
 } 
 
@@ -193,6 +203,7 @@ inline void toLowerInPlace(TSequence const & sequence)
 template < typename TSequence, typename TSpec >
 inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		toLowerInPlace(stringSet[seqNo]);
@@ -202,6 +213,7 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
 template < typename TSequence, typename TSpec >
 inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		toLowerInPlace(stringSet[seqNo]);
@@ -223,6 +235,7 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 template < typename TSequence >
 inline void toUpperInPlace(TSequence & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
@@ -230,6 +243,7 @@ inline void toUpperInPlace(TSequence & sequence)
 template < typename TSequence >
 inline void toUpperInPlace(TSequence const & sequence) 
 {
+    SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorUpcase<typename Value<TSequence>::Type>());
 } 
 
@@ -242,6 +256,7 @@ inline void toUpperInPlace(TSequence const & sequence)
 template < typename TSequence, typename TSpec >
 inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		toUpperInPlace(stringSet[seqNo]);
@@ -251,6 +266,7 @@ inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)
 template < typename TSequence, typename TSpec >
 inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
 {
+    SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
 		toUpperInPlace(stringSet[seqNo]);

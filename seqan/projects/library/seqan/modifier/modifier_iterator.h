@@ -46,23 +46,31 @@ namespace SEQAN_NAMESPACE_MAIN
 		Holder<THost, Simple>					data_host;
 		typename Cargo<ModifiedIterator>::Type	data_cargo;
 
-		ModifiedIterator() {}
+		ModifiedIterator() {
+            SEQAN_CHECKPOINT;
+        }
 
 		ModifiedIterator(ModifiedIterator &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		ModifiedIterator(ModifiedIterator const &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		template <typename T>
 		ModifiedIterator(T & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 		}
 
 		template <typename T>
 		ModifiedIterator(T const & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 		}
 //____________________________________________________________________________
@@ -70,6 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename T>
 		inline ModifiedIterator const &
 		operator = (T & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 			return *this;
 		}
@@ -77,6 +86,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename T>
 		inline ModifiedIterator const &
 		operator = (T const & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 			return *this;
 		}
@@ -181,7 +191,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline Holder<THost, Simple> &
 	_dataHost(ModifiedIterator<THost, TSpec> & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return me.data_host;
 	}
 	
@@ -189,7 +199,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline Holder<THost, Simple> const &
 	_dataHost(ModifiedIterator<THost, TSpec> const & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return me.data_host;
 	}
 
@@ -197,7 +207,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference< typename Cargo<ModifiedIterator<THost, TSpec> >::Type >::Type
 	cargo(ModifiedIterator<THost, TSpec> & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return me.data_cargo;
 	}
 
@@ -205,7 +215,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference< typename Cargo<ModifiedIterator<THost, TSpec> const>::Type >::Type
 	cargo(ModifiedIterator<THost, TSpec> const & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return me.data_cargo;
 	}
 
@@ -217,7 +227,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Container<ModifiedIterator<THost, TSpec> >::Type //no reference
 	container(ModifiedIterator<THost, TSpec> & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		typedef typename Container<ModifiedIterator<THost, TSpec> >::Type TContainer;
 		TContainer temp_(container(host(me)));
 		_copyCargo(temp_, me);
@@ -228,7 +238,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Container<ModifiedIterator<THost, TSpec> const>::Type //no reference
 	container(ModifiedIterator<THost, TSpec> const & me) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		typedef typename Container<ModifiedIterator<THost, TSpec> const>::Type TContainer;
 		TContainer temp_(container(host(me)));
 		_copyCargo(temp_, me);
@@ -243,7 +253,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		ModifiedIterator<TIteratorHost, TSpec> & me, 
 		ModifiedString<TStringHost, TSpec> & cont) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setContainer(host(me), host(cont));
 		_copyCargo(me, cont);
 	}
@@ -253,7 +263,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		ModifiedIterator<TIteratorHost, TSpec> & me, 
 		ModifiedString<TStringHost, TSpec> const & cont) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setContainer(host(me), host(const_cast<ModifiedString<TStringHost, TSpec> &>(cont)));
 		_copyCargo(me, cont);
 	}
@@ -261,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	setContainer(ModifiedIterator<THost, TSpec> & me, TContainer & cont) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		setContainer(host(me), cont);
 	}
 /*	template <typename THost, typename TSpec, typename TContainer>
@@ -281,6 +291,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename THost2>
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> & _origin) {
+        SEQAN_CHECKPOINT;
 		host(me) = host(_origin);
 		cargo(me) = cargo(_origin);
 		return me;
@@ -289,6 +300,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename THost2>
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> const & _origin) {
+        SEQAN_CHECKPOINT;
 		host(me) = host(_origin);
 		cargo(me) = cargo(_origin);
 		return me;
@@ -297,6 +309,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename T>
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, T & _origin) {
+        SEQAN_CHECKPOINT;
 		host(me) = _origin;
 		return me;
 	}
@@ -304,6 +317,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename T>
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, T const & _origin) {
+        SEQAN_CHECKPOINT;
 		host(me) = _origin;
 		return me;
 	}
@@ -317,7 +331,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, TSpec> >::Type 
 	value(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return value(host(me));
 	}
 
@@ -326,7 +340,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, TSpec> const>::Type 
 	value(ModifiedIterator<THost, TSpec> const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return value(host(me));
 	}
 
@@ -334,7 +348,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, TSpec> >::Type 
 	operator * (ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return value(me);
 	}
 
@@ -342,7 +356,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, TSpec> const>::Type 
 	operator * (ModifiedIterator<THost, TSpec> const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return value(me);
 	}
 
@@ -388,7 +402,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	goPrevious(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		goPrevious(host(me));
 	}
 
@@ -396,7 +410,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedIterator<THost, TSpec> const &
 	operator -- (ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		goPrevious(me);
 		return me;
 	}
@@ -405,7 +419,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedIterator<THost, TSpec>
 	operator -- (ModifiedIterator<THost, TSpec> & me, int)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		ModifiedIterator<THost, TSpec> temp_(me);
 		goPrevious(me);
 		return temp_;
@@ -419,6 +433,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename TDelta>
 	inline ModifiedIterator<THost, TSpec> &
 	operator += (ModifiedIterator<THost, TSpec> & me, TDelta delta) {
+        SEQAN_CHECKPOINT;
 		host(me) += delta;
 		return me;
 	}
@@ -426,6 +441,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename TDelta>
 	inline ModifiedIterator<THost, TSpec>
 	operator + (ModifiedIterator<THost, TSpec> const & me, TDelta delta) {
+        SEQAN_CHECKPOINT;
 		ModifiedIterator<THost, TSpec> temp_(me);
 		temp_ += delta;
 		return temp_;
@@ -439,6 +455,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename TDelta>
 	inline ModifiedIterator<THost, TSpec> &
 	operator -= (ModifiedIterator<THost, TSpec> & me, TDelta delta) {
+        SEQAN_CHECKPOINT;
 		host(me) -= delta;
 		return me;
 	}
@@ -446,6 +463,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec, typename TDelta>
 	inline ModifiedIterator<THost, TSpec>
 	operator - (ModifiedIterator<THost, TSpec> const & me, TDelta delta) {
+        SEQAN_CHECKPOINT;
 		ModifiedIterator<THost, TSpec> temp_(me);
 		temp_ -= delta;
 		return temp_;
@@ -455,6 +473,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec>
 	inline typename Difference< ModifiedIterator<THost, TSpec> >::Type
 	operator - (ModifiedIterator<THost, TSpec> const & a, ModifiedIterator<THost, TSpec> const & b) {
+        SEQAN_CHECKPOINT;
 		return host(a) - host(b);
 	}
 
@@ -467,7 +486,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	goBegin(ModifiedIterator<THost, TSpec> & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		host(me) = begin(container);
 	}
 
@@ -475,7 +494,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	goBegin(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		goBegin(me, container(me));
 	}
 
@@ -488,7 +507,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	goEnd(ModifiedIterator<THost, TSpec> & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		host(me) = end(container);
 	}
 
@@ -496,7 +515,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	goEnd(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		goEnd(me, container(me));
 	}
 
@@ -509,7 +528,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Position<ModifiedIterator<THost, TSpec> const>::Type 
 	position(ModifiedIterator<THost, TSpec> const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return position(host(me));
 	}
 
@@ -518,7 +537,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Position<ModifiedIterator<THost, TSpec> const>::Type 
 	position(ModifiedIterator<THost, TSpec> const & me, TContainer const &cont)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return position(host(me), cont);
 	}
 
@@ -547,12 +566,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TSpec>
 	inline bool
 	operator < (ModifiedIterator<THost, TSpec> const & a, ModifiedIterator<THost, TSpec> const & b) {
+        SEQAN_CHECKPOINT;
 		return host(a) < host(b);
 	}
 
 	template <typename THost, typename TSpec>
 	inline bool
 	operator > (ModifiedIterator<THost, TSpec> const & a, ModifiedIterator<THost, TSpec> const & b) {
+        SEQAN_CHECKPOINT;
 		return b < a;
 	}
 
@@ -565,7 +586,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	atBegin(ModifiedIterator<THost, TSpec> & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atBegin(const_cast<ModifiedIterator<THost, TSpec> const &>(me), container);
 	}
 
@@ -575,7 +596,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	atBegin(ModifiedIterator<THost, TSpec> const & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atBegin(host(me), container);
 	}
 
@@ -583,7 +604,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	atBegin(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atBegin(const_cast<ModifiedIterator<THost, TSpec> const &>(me));
 	}
 
@@ -592,7 +613,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	atBegin(ModifiedIterator<THost, TSpec> const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atBegin(host(me));
 	}
 
@@ -605,7 +626,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	atEnd(ModifiedIterator<THost, TSpec> & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atEnd(const_cast<ModifiedIterator<THost, TSpec> const &>(me), container);
 	}
 
@@ -615,7 +636,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	atEnd(ModifiedIterator<THost, TSpec> const & me,
 			TContainer const & container)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atEnd(host(me), container);
 	}
 
@@ -623,7 +644,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	atEnd(ModifiedIterator<THost, TSpec> & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atEnd(const_cast<ModifiedIterator<THost, TSpec> const &>(me));
 	}
 
@@ -632,7 +653,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool
 	atEnd(ModifiedIterator<THost, TSpec> const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return atEnd(host(me));
 	}
 

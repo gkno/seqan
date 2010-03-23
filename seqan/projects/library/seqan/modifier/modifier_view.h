@@ -76,28 +76,36 @@ namespace SEQAN_NAMESPACE_MAIN
 		ModifiedIterator() {}
 
 		explicit ModifiedIterator(TFunctor &_func) {
+            SEQAN_CHECKPOINT;
 			assignModViewFunctor(*this, _func);
 		}
 
 		explicit ModifiedIterator(TFunctor const &_func) {
+            SEQAN_CHECKPOINT;
 			assignModViewFunctor(*this, _func);
 		}
 
 		ModifiedIterator(ModifiedIterator &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		ModifiedIterator(ModifiedIterator const &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		template <typename T>
 		ModifiedIterator(T & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 		}
 
 		template <typename T>
 		ModifiedIterator(T const & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 		}
 //____________________________________________________________________________
@@ -105,6 +113,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename T>
 		inline ModifiedIterator const &
 		operator = (T & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 			return *this;
 		}
@@ -112,6 +121,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename T>
 		inline ModifiedIterator const &
 		operator = (T const & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 			return *this;
 		}
@@ -141,7 +151,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, ModView<TFunctor> > >::Type 
 	value(ModifiedIterator<THost, ModView<TFunctor> > & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		me.tmp_value = cargo(me).func(getValue(host(me)));
 		return me.tmp_value;
 	}
@@ -150,7 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedIterator<THost, ModView<TFunctor> > const>::Type 
 	value(ModifiedIterator<THost, ModView<TFunctor> > const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		me.tmp_value = cargo(me).func(getValue(host(me)));
 		return me.tmp_value;
 	}
@@ -164,7 +174,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename GetValue<ModifiedIterator<THost, ModView<TFunctor> > >::Type 
 	getValue(ModifiedIterator<THost, ModView<TFunctor> > & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return cargo(me).func(getValue(host(me)));
 	}
 
@@ -172,7 +182,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename GetValue<ModifiedIterator<THost, ModView<TFunctor> > const>::Type 
 	getValue(ModifiedIterator<THost, ModView<TFunctor> > const & me)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return cargo(me).func(getValue(host(me)));
 	}
 
@@ -185,7 +195,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	assignModViewFunctor(ModifiedIterator<THost, ModView<TFunctor> > & me, TFunctor const & _func) 
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		cargo(me).func = _func;
 	}
 
@@ -214,44 +224,55 @@ namespace SEQAN_NAMESPACE_MAIN
 		ModifiedString() {}
 
 		explicit ModifiedString(TFunctor &_func) {
+            SEQAN_CHECKPOINT;
 			cargo(*this).func = _func;
 		}
 
 		explicit ModifiedString(TFunctor const &_func) {
+            SEQAN_CHECKPOINT;
 			cargo(*this).func = _func;
 		}
 
 		explicit ModifiedString(ModifiedString const &_origin, TFunctor const &_func):
 			data_host(_origin.data_host)
 		{
+            SEQAN_CHECKPOINT;
 			cargo(*this).func = _func;
 		}
 
 		ModifiedString(ModifiedString &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		ModifiedString(ModifiedString const &_origin):
 			data_host(_origin.data_host),
-			data_cargo(_origin.data_cargo) {}
+			data_cargo(_origin.data_cargo) {
+            SEQAN_CHECKPOINT;
+        }
 
 		ModifiedString(THost &_origin) {
+            SEQAN_CHECKPOINT;
 			setHost(*this, _origin);
 		}
 
 		template <typename T>
 		ModifiedString(T & _origin) {
+            SEQAN_CHECKPOINT;
 			setValue(*this, _origin);
 		}
 
 		template <typename T>
 		ModifiedString(T const & _origin) {
+            SEQAN_CHECKPOINT;
 			setValue(*this, _origin);
 		}
 
 		template <typename T>
 		inline ModifiedString const &
 		operator = (T & _origin) {
+            SEQAN_CHECKPOINT;
 			assign(*this, _origin);
 			return *this;
 		}
@@ -260,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<ModifiedString>::Type 
 		operator [] (TPos pos)
 		{
-		SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
 			return value(*this, pos);
 		}
 
@@ -268,7 +289,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline typename Reference<ModifiedString const>::Type 
 		operator [] (TPos pos) const
 		{
-		SEQAN_CHECKPOINT
+            SEQAN_CHECKPOINT;
 			return value(*this, pos);
 		}
 	};
@@ -282,7 +303,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedString<THost, ModView<TFunctor> > >::Type 
 	value(ModifiedString<THost, ModView<TFunctor> > & me, TPos pos)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		me.tmp_value = cargo(me).func(getValue(host(me), pos));
 		return me.tmp_value;
 	}
@@ -291,7 +312,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename Reference<ModifiedString<THost, ModView<TFunctor> > const>::Type 
 	value(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		me.tmp_value = cargo(me).func(getValue(host(me), pos));
 		return me.tmp_value;
 	}
@@ -305,7 +326,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename GetValue<ModifiedString<THost, ModView<TFunctor> > >::Type 
 	getValue(ModifiedString<THost, ModView<TFunctor> > & me, TPos pos)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return cargo(me).func(getValue(host(me), pos));
 	}
 
@@ -313,7 +334,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline typename GetValue<ModifiedString<THost, ModView<TFunctor> > const>::Type 
 	getValue(ModifiedString<THost, ModView<TFunctor> > const & me, TPos pos)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		return cargo(me).func(getValue(host(me), pos));
 	}
 
@@ -326,7 +347,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	assignModViewFunctor(ModifiedString<THost, ModView<TFunctor> > & me, TFunctor const & _func)
 	{
-	SEQAN_CHECKPOINT
+        SEQAN_CHECKPOINT;
 		cargo(me).func = _func;
 	}
 
@@ -342,6 +363,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	convertInPlace(TSequence & sequence, TFunctor const &F)
 	{
+        SEQAN_CHECKPOINT;
 		typedef typename Iterator<TSequence, Standard>::Type	TIter;
 
 		TIter it = begin(sequence, Standard());
@@ -354,6 +376,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	convertInPlace(TSequence const & sequence, TFunctor const &F)
 	{
+        SEQAN_CHECKPOINT;
 		typedef typename Iterator<TSequence, Standard>::Type	TIter;
 
 		TIter it = begin(sequence, Standard());

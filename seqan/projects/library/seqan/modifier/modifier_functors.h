@@ -45,6 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct FunctorUpcase : public ::std::unary_function<InType,Result> 
 	{
         inline Result operator()(InType x) const {
+            SEQAN_CHECKPOINT;
 			if (('a' <= x) && (x <= 'z')) return (x + ('A' - 'a'));
 			return x; 
 		}
@@ -63,6 +64,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct FunctorLowcase : public ::std::unary_function<InType,Result> 
 	{
         inline Result operator()(InType x) const {
+            SEQAN_CHECKPOINT;
 			if (('A' <= x) && (x <= 'Z')) return (x + ('a' - 'A'));
 			return x; 
 		}
@@ -87,6 +89,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct FunctorConvert : public ::std::unary_function<InType,OutType> 
 	{
         inline OutType operator()(InType x) const {
+            SEQAN_CHECKPOINT;
 			return x; 
 		}
     };
@@ -126,6 +129,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna> 
 	{
         inline Dna operator()(Dna x) const {
+            SEQAN_CHECKPOINT;
 			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
 		}
     };
@@ -134,6 +138,7 @@ namespace SEQAN_NAMESPACE_MAIN
     struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5> 
 	{
         inline Dna5 operator()(Dna5 x) const {
+            SEQAN_CHECKPOINT;
 			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
 		}
     };
@@ -142,6 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct FunctorComplement<DnaQ> : public ::std::unary_function<DnaQ,DnaQ> 
 	{
 		inline DnaQ operator()(DnaQ x) const {
+            SEQAN_CHECKPOINT;
 			int qual = getQualityValue(x);
 			x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna)x)];
 			assignQualityValue(x, qual);
@@ -154,6 +160,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5Q,Dna5Q> 
 	{
 		inline Dna5Q operator()(Dna5Q x) const {
+            SEQAN_CHECKPOINT;
 			int qual = getQualityValue(x);
 			x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna5)x)];
 			assignQualityValue(x, qual);
