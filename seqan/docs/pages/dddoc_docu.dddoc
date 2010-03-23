@@ -246,7 +246,7 @@ Consider to use a link to that item instead.
 ...table:"param"|list of parameters. Is used in conjunction with "returns" to list different return values.
 
 ...subsection:#.# Link subfields
-Link subfields link to other pages. 
+...text:Link subfields link to other pages. 
 To disable linking, use "nolink:" as a prefix.
 For example, write "..type:nolink:unsinged int" to state that the type for a given param or return field is $unsigned int$.
 ...table:"metafunktion"|link to a meta function. For "param" or "return" fields e.g. to the meta function 
@@ -265,7 +265,7 @@ In this manner also european special characters can be inserted.
 One can also use command characters reserved in dddoc. For example
 \\dot, \\quote, \\at, \\pipe, \\dollar and \\backslash produce \dot, \quote, \at, \pipe, \dollar and \backslash.
 A list with all available characters can be found in dddoc_html_trans.py.
-...text:Other possibilities to speical characters: \\\\ stands for \\, \dollar\dollar for \dollar.
+...text:Other possibilities to special characters: \\\\ stands for \\, \dollar\dollar for \dollar.
 ...text:\\br inserts a manual line break.
 ...text:
 If C++ code should be displayed within a text field or subfield, it should be placed between \dollar, e.g.: \dollarint x\dollar yields: $int x$.
