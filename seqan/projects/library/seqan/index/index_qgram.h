@@ -54,6 +54,11 @@ Each suffix in this interval begins with the same q-gram.
 The end index is the start index of the next bucket.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
 
+..tag.QGram_BucketMap:Maps q-gram hashes to buckets.
+This fibre is used by the @Spec.OpenAddressing@ index and stores all parameters of the open addressing hash function and hash value occupancy in the QGram_Dir fibre.
+In contrast to @Spec.OpenAddressing@, @Spec.Index_QGram@ uses a trivial 1-to-1 mapping from q-gram hash values to buckets.
+For that index the fibre is of type @Tag.Nothing@.
+
 ..tag.QGram_Counts:The counts array.
 ...remarks:Contains the numbers of occurrences per sequence of each q-gram, s.t. the numbers of the same q-gram are stored in a contiguous block (q-gram count bucket).
 A bucket contains entries (seqNo,count) of sequences with at least one q-gram occurrence. q-grams exceeding the end of the text are ignored.
@@ -314,7 +319,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexDir:
+.Function.indexDir
 ..summary:Shortcut for $getFibre(.., QGram_Dir)$.
 ..cat:Index
 ..signature:indexDir(index)
@@ -336,7 +341,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.dirAt:
+.Function.dirAt
 ..summary:Shortcut for $value(indexDir(..), ..)$.
 ..cat:Index
 ..signature:dirAt(position, index)
@@ -360,7 +365,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexCounts:
+.Function.indexCounts
 ..summary:Shortcut for $getFibre(.., QGram_Counts)$.
 ..cat:Index
 ..signature:indexCounts(index)
@@ -382,7 +387,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexCountsDir:
+.Function.indexCountsDir
 ..summary:Shortcut for $getFibre(.., QGram_CountsDir)$.
 ..cat:Index
 ..signature:indexCountsDir(index)
@@ -402,8 +407,9 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 		return getFibre(index, Fibre_CountsDir()); 
 	}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexBucketMap:
+.Function.indexBucketMap
 ..summary:Shortcut for $getFibre(.., QGram_BucketMap)$.
 ..cat:Index
 ..signature:indexBucketMap(index)
@@ -425,7 +431,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexShape:
+.Function.indexShape
 ..summary:Shortcut for $getFibre(.., QGram_Shape)$.
 ..cat:Index
 ..signature:indexShape(index)
@@ -446,7 +452,18 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 	indexShape(Index<TText, TSpec> const &index) { 
 		return getFibre(index, Fibre_Shape()); 
 	}
-	
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.getStepSize
+..summary:Return the q-gram step size used for index creation.
+..cat:Index
+..signature:getStepSize(index)
+..param.index:A q-gram index.
+...type:Spec.Index_QGram
+..returns:The step size. If $x$ is returned every $x$'th q-gram is stored in the index.
+*/
+
 	template <typename TText, typename TShapeSpec, typename TSpec>
 	inline typename Size<TText>::Type 
 	getStepSize(Index<TText, Index_QGram<TShapeSpec, TSpec> > const &index)
@@ -454,12 +471,29 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		return (index.stepSize != 0)? index.stepSize: length(indexShape(index));
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.setStepSize
+..summary:Change the q-gram step size used for index creation.
+..cat:Index
+..signature:setStepSize(index, stepSize)
+..param.index:A q-gram index.
+...type:Spec.Index_QGram
+..param.stepSize:Store every $stepSize$'th q-gram in the index.
+..remarks:The default step size of a q-gram index is 1, which corresponds to all overlapping q-grams.
+To take effect of changing the $stepSize$ the q-gram index should be empty or recreated. 
+..remarks:A $stepSize$ of 0 corresponds to $stepSize=length(indexShape(index))$, i.e. all non-overlapping q-grams.
+..see:Function.getStepSize
+*/
+
 	template <typename TText, typename TShapeSpec, typename TSpec, typename TSize>
 	inline void
 	setStepSize(Index<TText, Index_QGram<TShapeSpec, TSpec> > &index, TSize stepSize)
 	{
 		index.stepSize = stepSize;
 	}
+
+//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TIndex>
 	inline __int64 _fullDirLength(TIndex const &index) 
@@ -2219,7 +2253,45 @@ If the type of $index$ is $TIndex$ the return type is $Size<TIndex>::Type$.
 	{
 		indexRequire(index, QGram_Dir());
 		return countOccurrences(const_cast<Index< TObject, Index_QGram<TShapeSpec, TSpec> > const &>(index), shape);
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.countOccurrencesMultiple:
+..summary:Returns the number of occurences of a q-gram for every sequence of a @Class.StringSet@ .
+..signature:countOccurrencesMultiple(index, shape)
+..param.index:A q-gram index of a @Class.StringSet@.
+...type:Spec.Index_QGram
+..param.shape:A shape object.
+...note:The shape stores the q-gram of the last call to @Function.hash@ or @Function.hashNext@.
+...type:Class.Shape
+..returns:A sequence of @Class.Pair.pairs@ (seqNo,count), count>0.
+For every @Class.StringSet@ sequence the q-gram occurs in, seqNo is the sequence number and count the number of occurrences.
+If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram_Counts>::Type const>::Type$.
+..remarks:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
+..see:Function.countOccurrences
+*/
+
+	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
+	inline typename Infix< typename Fibre< Index< TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_Counts>::Type const >::Type 
+	countOccurrencesMultiple(
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > const &index,
+		Shape< TValue, TShapeSpec2 > const &shape) 
+	{
+		typedef typename Size<typename Fibre< Index< TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_CountsDir>::Type>::Type TDirSize;
+		TDirSize bucket = getBucket(indexBucketMap(index), value(shape));
+		return infix(indexCounts(index), indexCountsDir(index)[bucket], indexCountsDir(index)[bucket + 1]);
 	}	
+
+	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
+	inline typename Infix< typename Fibre< Index< TObject, Index_QGram<TShapeSpec, TSpec> >, Fibre_Counts>::Type const >::Type 
+	countOccurrencesMultiple(
+		Index< TObject, Index_QGram<TShapeSpec, TSpec> > &index,
+		Shape< TValue, TShapeSpec2 > const &shape) 
+	{
+		indexRequire(index, QGram_Counts());
+		return countOccurrencesMultiple(const_cast<Index< TObject, Index_QGram<TShapeSpec, TSpec> > const &>(index), shape);
+	}
 
 
 //////////////////////////////////////////////////////////////////////////////
