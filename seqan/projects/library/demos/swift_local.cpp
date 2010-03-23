@@ -17,7 +17,7 @@ void printOutput(String<String<char> > & positions,
 	::std::cout << "hits at " << ::std::endl;
 	for (unsigned i = 0; i < length(positions); i++) {
 		::std::cout << value(positions, i) << ::std::endl;
-		::std::cout << value(ranges, i) << ::std::endl;
+		//::std::cout << value(ranges, i) << ::std::endl;
 	}
 	::std::cout << length(positions) << " hits found." << ::std::endl;
 }
@@ -152,7 +152,6 @@ void testShrink3() {
 
 void testOneLocalSwiftHit1() {
     typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
 	// a single pattern and a single hit 
@@ -173,7 +172,6 @@ void testOneLocalSwiftHit1() {
 
 void testOneLocalSwiftHit2() {
     typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
     // a single pattern and a single hit 2
@@ -193,7 +191,6 @@ void testOneLocalSwiftHit2() {
 }
 
 void testOneLocalSwiftHitStringSet() {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
@@ -215,7 +212,6 @@ void testOneLocalSwiftHitStringSet() {
 }
 
 void testOneLocalSwiftHitBucketBorder() {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
@@ -238,7 +234,6 @@ void testOneLocalSwiftHitBucketBorder() {
 }
 
 void testOneLocalSwiftHitNegDiag() {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
@@ -261,7 +256,6 @@ void testOneLocalSwiftHitNegDiag() {
 }
 
 void testLocalSwiftTwoPatterns() {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
@@ -286,7 +280,6 @@ void testLocalSwiftTwoPatterns() {
 }
 
 void testLocalSwiftLongPatterns() {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
 	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
@@ -312,8 +305,7 @@ void testLocalSwiftLongPatterns() {
 }
 
 void testLocalSwiftArgSeqs(const char *argv[]) {
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<5> > > TQGramIndex;
     typedef Finder<DnaString, Swift<SwiftLocal> > TFinder;
 
 	// adenovirus sequences
@@ -322,13 +314,13 @@ void testLocalSwiftArgSeqs(const char *argv[]) {
 	DnaString text = String<Dna, FileReader<Fasta> >(argv[1]);
 	TFinder finder_swift(text);
 
-	TQGramIndex index_4gram;
-	appendValue(indexText(index_4gram), String<Dna, FileReader<Fasta> >(argv[2]));
-	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
+	TQGramIndex index_qgram;
+	appendValue(indexText(index_qgram), String<Dna, FileReader<Fasta> >(argv[2]));
+	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
 
     String<String<char> > expectedPositions; 
 
-	testLocalSwift(finder_swift, pattern_swift, 0.15, 20, expectedPositions);
+	testLocalSwift(finder_swift, pattern_swift, 0.1, 30, expectedPositions);
 }
 
 int main(int argc, const char *argv[]) {
@@ -337,21 +329,21 @@ int main(int argc, const char *argv[]) {
     (void)argv;
 
     testOneLocalSwiftHit1();
-    testOneLocalSwiftHit2();
-    testOneLocalSwiftHitStringSet();
-    testOneLocalSwiftHitBucketBorder();
-    testOneLocalSwiftHitNegDiag();
-    testLocalSwiftTwoPatterns();
-    testLocalSwiftLongPatterns();
-    
-	//time_t startTime = time(0);
-	//unsigned iterations = 1;
-	//for(unsigned t = 0; t < iterations; t++) {
- //       testLocalSwiftArgSeqs(argv);
-	//}
-	//double runningTime = (time(0)-startTime)/(double)iterations;
+ //   testOneLocalSwiftHit2();
+ //   testOneLocalSwiftHitStringSet();
+ //   testOneLocalSwiftHitBucketBorder();
+ //   testOneLocalSwiftHitNegDiag();
+ //   testLocalSwiftTwoPatterns();
+ //   testLocalSwiftLongPatterns();
+ //   
+	time_t startTime = time(0);
+	unsigned iterations = 1;
+	for(unsigned t = 0; t < iterations; t++) {
+        testLocalSwiftArgSeqs(argv);
+	}
+	double runningTime = (time(0)-startTime)/(double)iterations;
 
- //   std::cout << "Running time: " << runningTime << "s" << std::endl;
+    std::cout << "Running time: " << runningTime << "s" << std::endl;
 
     testShrink1();
     testShrink2();

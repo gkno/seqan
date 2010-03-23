@@ -28,7 +28,7 @@ _fillGapsString(Align<TSource> const & align,
     TPos gapBegin = beginPosition(row(align, 0));
     TPos i = gapBegin;
 
-    // append starting gap also if its length is 0
+    // append gap starting at beginPosition (also if its length is 0!)
     while(i < endPosition(row(align, 0)) && !isMatch(align, i)) {
         ++i;
         ++totalErrors;
@@ -60,7 +60,7 @@ inline bool
 _isEpsMatch(Triple<TPos, TPos, TPos> const & left,
            Triple<TPos, TPos, TPos> const & right,
            TFloat eps) {
-    // compute mismatches and length
+    // compute mismatches/indels and length
     TPos errors = right.i3 - left.i3 - (right.i2 - right.i1);
     TPos length = right.i1 - left.i2;
 
@@ -118,7 +118,7 @@ shrinkToMaxEpsMatch(Align<TSource> & align,
 template<typename TSource, typename TPosition, typename TFloat>
 inline bool
 _isEpsMatch(Align<TSource> & align, TPosition left, TPosition right, TFloat eps) {
-    // count mismatches
+    // count mismatches/indels
     typename Size<Align<TSource> >::Type errors = 0;
     for (TPosition i = left; i < right; ++i) {
         if (!isMatch(align, i)) {
@@ -193,7 +193,7 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
                TSize minLength,
                TMatches & matches) {
     typedef Seed<int, SimpleSeed> TSeed;
-        
+
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
@@ -207,9 +207,10 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     assignSource(row(alignment, 1), b);
 
     // calculate minimal score for local alignments
-    TSize minLength1 = (TSize)ceil((floor(eps*minLength)+1) / eps);
-    TSize minScore = (TSize)ceil((minLength - floor(eps*minLength)) / (floor(eps*minLength)+1));
-    minScore = _min(minScore, (TSize)ceil((minLength1 - floor(eps*minLength1)) / (floor(eps*minLength1)+1)));
+    TEpsilon e = floor(eps*minLength);
+    TSize minLength1 = (TSize)ceil((e+1) / eps);
+    TEpsilon e1 = floor(eps*minLength1);
+    TSize minScore = _min((TSize)ceil((minLength-e) / (e+1)), (TSize)ceil((minLength1-e1) / (e1+1)));
 
     // local alignment
     LocalAlignmentFinder<> finder(alignment);
@@ -217,17 +218,26 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
         // gapped X-drop extension
         TSeed seed(sourceBeginPosition(row(alignment, 0)) + beginPosition(a),
                    sourceBeginPosition(row(alignment, 1)) + beginPosition(b),
-                   sourceEndPosition(row(alignment, 0)) + beginPosition(a),
-                   sourceEndPosition(row(alignment, 1)) + beginPosition(b));
+                   sourceEndPosition(row(alignment, 0)) + beginPosition(a)-1,
+                   sourceEndPosition(row(alignment, 1)) + beginPosition(b)-1);
+        //std::cout << alignment << std::endl;
+        //std::cout << infix(host(a), leftDim0(seed), rightDim0(seed)+1) << std::endl;
+        //std::cout << infix(host(b), leftDim1(seed), rightDim1(seed)+1) << std::endl;
+        //if(infix(host(a), leftDim0(seed), rightDim0(seed)+1) == "CGTTT") {
+        //    int ier = 0;
+        //}
         TSize errors = (getScore(finder) - length(row(alignment, 0)) * match) / (mismatchIndel - match);
         TSize scoreDropOff = -(int)(2 * length(row(alignment, 0)) * eps * mismatchIndel) + errors * mismatchIndel;
         extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), 2, GappedXDrop());
+        //std::cout << infix(host(a), leftDim0(seed), rightDim0(seed)+1) << std::endl;
+        //std::cout << infix(host(b), leftDim1(seed), rightDim1(seed)+1) << std::endl;
 
         // banded alignment
         Align<TInfixB> extAlign;
         resize(rows(extAlign), 2);
         assignSource(row(extAlign, 0), infix(host(a), leftDim0(seed), rightDim0(seed)+1));
         assignSource(row(extAlign, 1), infix(host(b), leftDim1(seed), rightDim1(seed)+1));
+
         bandedAlignment(extAlign, seed, errors, scoreMatrix);
 
         if ((TSize)length(row(extAlign, 0)) < minLength) continue;
