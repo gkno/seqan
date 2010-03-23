@@ -58,7 +58,8 @@ void qgramCounting(TStringSet &set, TIndexSpec)
 // FRAGMENT(initialization)
 int main ()
 {
-	mtRandInit();
+	//  for the sake of reproducibility
+	mtRandInit(false);
 
 	// create StringSet of 3 random sequences
 	StringSet<DnaString> stringSet;

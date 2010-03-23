@@ -32,7 +32,7 @@ int main (int argc, char const * argv[])
 	CharString qual;
 	CharString id;
 
-	for(unsigned i = 0; i < seqCount; ++i)
+	for (unsigned i = 0; i < seqCount; ++i)
 	{
 		assignSeq(seq, multiSeqFile[i], format);    // read sequence
 		assignQual(qual, multiSeqFile[i], format);  // read ascii quality values

@@ -5,11 +5,11 @@ OS_NAME=$(shell uname)
 ifeq ($(OS_NAME),Linux)
   LDFLAGS += -lrt
 endif
-
 CPPFLAGS += -I$(SEQAN)
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CPPFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
 CPPFLAGS += -O3
-CPPFLAGS += -pedantic -W -Wall
+CPPFLAGS += -W -Wall -pedantic -Wno-variadic-macros
 
 all: $(basename $(wildcard *.cpp))
 index: $(basename $(wildcard index_*.cpp))
