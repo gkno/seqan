@@ -185,13 +185,13 @@ shrinkToMaxEpsMatchSimple(Align<TSource> & align,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
-template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TMatches>
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize>
 void 
 verifySwiftHitByLocalAlign(TInfixA const & a,
-               TInfixB const & b,
-               TEpsilon eps,
-               TSize minLength,
-               TMatches & matches) {
+                           TInfixB const & b,
+                           TEpsilon eps,
+                           TSize minLength,
+                           String<Align<TInfixB> > & matches) {
     typedef Seed<int, SimpleSeed> TSeed;
 
     // define a scoring scheme
@@ -220,17 +220,9 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
                    sourceBeginPosition(row(alignment, 1)) + beginPosition(b),
                    sourceEndPosition(row(alignment, 0)) + beginPosition(a)-1,
                    sourceEndPosition(row(alignment, 1)) + beginPosition(b)-1);
-        //std::cout << alignment << std::endl;
-        //std::cout << infix(host(a), leftDim0(seed), rightDim0(seed)+1) << std::endl;
-        //std::cout << infix(host(b), leftDim1(seed), rightDim1(seed)+1) << std::endl;
-        //if(infix(host(a), leftDim0(seed), rightDim0(seed)+1) == "CGTTT") {
-        //    int ier = 0;
-        //}
         TSize errors = (getScore(finder) - length(row(alignment, 0)) * match) / (mismatchIndel - match);
         TSize scoreDropOff = -(int)(2 * length(row(alignment, 0)) * eps * mismatchIndel) + errors * mismatchIndel;
         extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), 2, GappedXDrop());
-        //std::cout << infix(host(a), leftDim0(seed), rightDim0(seed)+1) << std::endl;
-        //std::cout << infix(host(b), leftDim1(seed), rightDim1(seed)+1) << std::endl;
 
         // banded alignment
         Align<TInfixB> extAlign;

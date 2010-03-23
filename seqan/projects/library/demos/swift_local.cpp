@@ -329,13 +329,13 @@ int main(int argc, const char *argv[]) {
     (void)argv;
 
     testOneLocalSwiftHit1();
- //   testOneLocalSwiftHit2();
- //   testOneLocalSwiftHitStringSet();
- //   testOneLocalSwiftHitBucketBorder();
- //   testOneLocalSwiftHitNegDiag();
- //   testLocalSwiftTwoPatterns();
- //   testLocalSwiftLongPatterns();
- //   
+    testOneLocalSwiftHit2();
+    testOneLocalSwiftHitStringSet();
+    testOneLocalSwiftHitBucketBorder();
+    testOneLocalSwiftHitNegDiag();
+    testLocalSwiftTwoPatterns();
+    testLocalSwiftLongPatterns();
+    
 	time_t startTime = time(0);
 	unsigned iterations = 1;
 	for(unsigned t = 0; t < iterations; t++) {
