@@ -112,10 +112,6 @@ class IncludeMacro(WikiMacroBase):
                     current_fragment_name = res.groups()[0]
                 else:
                     if current_fragment_name == fragment_name:
-                        # Convert empty lines to ' ', so the lines appear in
-                        # appear in the output.
-                        if not line:
-                            line = ' '
                         fragment.append(line)
             out = '\n'.join(fragment)
             
