@@ -27,6 +27,7 @@
 #define RAZERS_MEMOPT					// optimize memory consumption
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
+
 //#define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
 //#define RAZERS_PARALLEL				// parallelize razerS
@@ -60,7 +61,7 @@
 #include "razers_parallel.h"
 #endif
 #ifdef RAZERS_PARALLEL_READS
-#include "razers_parallel_2.h"
+#include "razers_parallel_reads.h"
 #endif
 #ifdef RAZERS_WINDOW
 #include "razers_window.h"

@@ -174,6 +174,7 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned	windowSize;
 		unsigned	numberOfCores;
         unsigned	blocksPerCore;
+		unsigned	numberOfBlocks;
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -251,6 +252,7 @@ namespace SEQAN_NAMESPACE_MAIN
             windowSize = 1000;
 			numberOfCores = omp_get_num_procs();
             blocksPerCore = 5;
+			numberOfBlocks = numberOfCores * blocksPerCore;
 #endif
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
@@ -1754,7 +1756,7 @@ void _mapSingleReadsToContig(
 	verifier.onReverseComplement = (orientation == 'R');
 	verifier.genomeLength = length(contigSeq);
 	verifier.m.contigId = contigId;
-	
+		
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinder, swiftPattern, options.errorRate)) 
 	{
@@ -1799,7 +1801,7 @@ int _mapSingleReads(
 	TSwiftPattern swiftPattern(readIndex);
 	swiftPattern.params.minThreshold = options.threshold;
 	swiftPattern.params.tabooLength = options.tabooLength;
-	swiftPattern.params.printDots = options._debugLevel > 0;
+	swiftPattern.params.printDots = options._debugLevel > 0; 
 
 	// init edit distance verifiers
 	unsigned readCount = countSequences(readIndex);
