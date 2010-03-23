@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 	
 /**
-.Spec.OpenAddressing:
+.Spec.OpenAddressing
 ..summary:An index based on an array of sorted q-grams.
 ..cat:Index
 ..general:Spec.Index_QGram
@@ -55,10 +55,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ...note:This can be either a $TSpec$ argument (e.g. $SimpleShape$) or a complete @Class.Shape@ class (e.g. Shape<Dna, SimpleShape>).
 ..remarks:This index uses a non-trivial hashing for mapping q-gram hash values to buckets.
 This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres) from |\Sigma|^q to min(\alpha*n,|\Sigma|^q), for a load factor \alpha>1.
-.Memvar.OpenAddressing#alpha:
+.Memvar.OpenAddressing#alpha
+..summary:Load factor. Controls space/time-tradeoff and must be greater 1. Default value is 1.6.
 ..class:Spec.OpenAddressing
-..summary:Load factor. Controls space/time-tradeoff and must be greater 1.
-..default:1.6
 */	
 
 	template < typename TObject, typename TShapeSpec >
