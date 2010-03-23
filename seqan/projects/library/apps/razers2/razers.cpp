@@ -31,6 +31,7 @@
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
+//#define RAZERS_DONTMASKDUPLICATES
 
 #include <seqan/platform.h>
 #ifdef PLATFORM_WINDOWS

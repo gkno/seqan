@@ -437,7 +437,7 @@ void mapMatePairReads(
 //	unsigned const preFetchMatches = 2048;
 
 	// iterate all verification regions returned by SWIFT
-	while (find(swiftFinderR, swiftPatternR, options.errorRate, options._debugLevel)) 
+	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
@@ -713,6 +713,8 @@ int mapMatePairReads(
 	swiftPatternR.params.minThreshold = options.threshold;
 	swiftPatternL.params.tabooLength = options.tabooLength;
 	swiftPatternR.params.tabooLength = options.tabooLength;
+	swiftPatternL.params.printDots = options._debugLevel > 0;
+	swiftPatternR.params.printDots = options._debugLevel > 0;
 
 	// init edit distance verifiers
 	String<TMyersPattern> forwardPatternsL;

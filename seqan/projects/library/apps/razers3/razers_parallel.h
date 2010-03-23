@@ -91,7 +91,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		void * operator () (void * /*_token*/)
 		{
-			if (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel))
+			if (find(swiftFinder, swiftPattern, options.errorRate))
 			{
 				TToken &token = tokens[nextToken];
 				nextToken = (nextToken + 1) % nTokens;

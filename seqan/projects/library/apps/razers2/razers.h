@@ -258,8 +258,8 @@ struct MicroRNA{};
 	typedef String<TMatch>								TMatches;	// array of matches
 */
 
-	template <typename TReadSet, typename TShape>
-	struct Cargo< Index<TReadSet, Index_QGram<TShape> > > {
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct Cargo< Index<TReadSet, Index_QGram<TShape, TSpec> > > {
 		typedef struct {
 			double		abundanceCut;
 			int			_debugLevel;
@@ -271,8 +271,8 @@ struct MicroRNA{};
 
 #ifdef RAZERS_MEMOPT
 
-	template <typename TReadSet, typename TShape>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape> > > 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,				
@@ -283,8 +283,8 @@ struct MicroRNA{};
 	
 #else
 
-	template <typename TReadSet, typename TShape>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape> > > 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,			// many reads
@@ -306,14 +306,20 @@ struct MicroRNA{};
 	{
 		typedef unsigned Type;
 	};
+
+	template <typename TReadSet, typename TShape>
+	struct Size< Index<TReadSet, Index_QGram<TShape, OpenAddressing> > >
+	{
+		typedef unsigned Type;
+	};
 	
 
 #ifdef RAZERS_PRUNE_QGRAM_INDEX
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
-	template <typename TReadSet, typename TShape>
-	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape> > &index) 
+	template <typename TReadSet, typename TShape, typename TSpec>
+	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape, TSpec> > &index) 
 	{
 		typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
 		typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
@@ -406,12 +412,14 @@ struct MicroRNA{};
 				if (length(store.alignedReadStore) > options.compactThresh)
 				{
 					typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
+#ifndef RAZERS_DONTMASKDUPLICATES
 					maskDuplicates(store);	// overlapping parallelograms cause duplicates
-	#ifdef RAZERS_DIRECT_MAQ_MAPPING
+#endif
+#ifdef RAZERS_DIRECT_MAQ_MAPPING
 					if (options.maqMapping)
 						compactMatches(store, cnts, options, false, swiftPattern, true);
 					else	
-	#endif
+#endif
 						compactMatches(store, cnts, options, false, swiftPattern);
 					if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
@@ -1003,10 +1011,10 @@ void compactMatches(TMatches &matches, TCounts &cnts, RazerSOptions<TSpec> &, bo
 			}
 			else
 			{
-				if ((*it).editDist <= (cnts[0][(*it).readId] & 31) )
+				if ((*it).editDist <= (cnts[0][(*it).readId] & 31))
 					if(cnts[0][(*it).readId]>>5 != 2047)
 						cnts[0][(*it).readId] +=32;
-				if ((*it).editDist <= (cnts[1][(*it).readId] & 31) )
+				if ((*it).editDist <= (cnts[1][(*it).readId] & 31))
 					if((cnts[1][(*it).readId]>>5) != 2047)
 						cnts[1][(*it).readId] +=32;
 				continue;
@@ -1150,7 +1158,7 @@ matchVerify(
 			++count;
 		}
 		if (hit) hitLength = count;
-		if (hitLength > bestHitLength ) //simply take the longest hit
+		if (hitLength > bestHitLength) //simply take the longest hit
 		{
 			minSeedErrors = seedErrors;
 			bestHitLength = hitLength;
@@ -1471,13 +1479,13 @@ matchVerify(
 					if(qualSumErrors > options.maxMismatchQualSum)
 					{
 						hit = false;
-						break;							
+						break;
 					}// discard match, if 'seed' is bad (later calculations are done with the quality sum over the whole read)
 				}
 			}
 			++count;
 		}
-//		if (hit && (qualSumErrors < minQualSumErrors && seedErrors <=maxErrorsSeed) ) //oder (seedErrors < minSeedErrors)
+//		if (hit && (qualSumErrors < minQualSumErrors && seedErrors <=maxErrorsSeed)) //oder (seedErrors < minSeedErrors)
 		if (hit && (qualSumErrors < minQualSumErrors))
 		{
 			minErrors = errors;
@@ -1579,12 +1587,15 @@ void mapSingleReads(
 	
 	// iterate all verification regions returned by SWIFT
 #ifdef RAZERS_MICRO_RNA
-	while (find(swiftFinder, swiftPattern, 0.2, options._debugLevel)) 
+	while (find(swiftFinder, swiftPattern, 0.2)) 
 #else
-	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
+	while (find(swiftFinder, swiftPattern, options.errorRate)) 
 #endif
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
+		//-i 98 -vv -id -rr 100    -of 4 -o razers100_02.sam data/saccharomyces/genome.fasta.cut    data/saccharomyces/reads_454/SRR001317.1k.fasta
+		if (store.readNameStore[verifier.m.readId] == "SRR001317.770.1")
+			std::cout<<"gotit"<<std::endl;
 		if (!options.spec.DONT_VERIFY)
 			matchVerify(verifier, range(swiftFinder, genome), verifier.m.readId, readSet, TSwiftSpec());
 		++options.countFiltration;
@@ -1738,7 +1749,7 @@ int mapSingleReads(
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
-	typedef Index<TReadSeqStore, Index_QGram<TShape> >	TIndex;			// q-gram index
+	typedef Index<TReadSeqStore, Index_QGram<TShape,OpenAddressing> >	TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -1765,6 +1776,7 @@ int mapSingleReads(
 	TSwiftPattern swiftPattern(swiftIndex);
 	swiftPattern.params.minThreshold = options.threshold;
 	swiftPattern.params.tabooLength = options.tabooLength;
+	swiftPattern.params.printDots = options._debugLevel > 0;
 
 	// init edit distance verifiers
 	unsigned readCount = countSequences(swiftIndex);
@@ -1895,7 +1907,7 @@ int mapSingleReads(
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type				TRead;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, Index_QGram<TShape,OpenAddressing> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 

@@ -1756,7 +1756,7 @@ void _mapSingleReadsToContig(
 	verifier.m.contigId = contigId;
 	
 	// iterate all verification regions returned by SWIFT
-	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
+	while (find(swiftFinder, swiftPattern, options.errorRate)) 
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
@@ -1799,6 +1799,7 @@ int _mapSingleReads(
 	TSwiftPattern swiftPattern(readIndex);
 	swiftPattern.params.minThreshold = options.threshold;
 	swiftPattern.params.tabooLength = options.tabooLength;
+	swiftPattern.params.printDots = options._debugLevel > 0;
 
 	// init edit distance verifiers
 	unsigned readCount = countSequences(readIndex);

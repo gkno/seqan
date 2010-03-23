@@ -869,7 +869,7 @@ void compactMatches(TMatches &matches, TCounts &
 
 					setMaxErrors(swift, readNo, maxErrors);
 
-					if (maxErrors == -1 && options._debugLevel >= 2)
+					if (maxErrors == -1)
 						++disabled;
 //						::std::cerr << "(read #" << readNo << " disabled)";
 
@@ -1479,9 +1479,9 @@ void mapSingleReads(
 	__int64 localTP = 0;
 	__int64 localFP = 0;
 #ifdef RAZERS_MICRO_RNA
-	while (find(swiftFinder, swiftPattern, 0.2, options._debugLevel)) 
+	while (find(swiftFinder, swiftPattern, 0.2)) 
 #else
-	while (find(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)) 
+	while (find(swiftFinder, swiftPattern, options.errorRate)) 
 #endif
 	{
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
@@ -1728,6 +1728,7 @@ int mapSingleReads(
 	TSwiftPattern swiftPattern(swiftIndex);
 	swiftPattern.params.minThreshold = options.threshold;
 	swiftPattern.params.tabooLength = options.tabooLength;
+	swiftPattern.params.printDots = options._debugLevel > 0;
 
 	// init edit distance verifiers
 	unsigned readCount = countSequences(swiftIndex);

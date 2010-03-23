@@ -93,10 +93,10 @@ namespace SEQAN_NAMESPACE_MAIN
         verifier.m.contigId = contigId;
         
 		// if the pattern can be initialized and there is a non-repeat region in the contig that fits a qgram.
-        if(windowFindBegin(swiftFinder, swiftPattern, options.errorRate, options._debugLevel)){
+        if(windowFindBegin(swiftFinder, swiftPattern, options.errorRate)){
             
 			// while there is more contig sequence to search through
-            while(windowFindNext(swiftFinder, swiftPattern, 1000, options._debugLevel)){
+            while(windowFindNext(swiftFinder, swiftPattern, 1000)){
                 // get the found hits from the finder
                 THitString hits = getSwiftHits(swiftFinder);
                 // verifiy them

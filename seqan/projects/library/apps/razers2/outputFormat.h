@@ -1158,11 +1158,12 @@ void dumpMatches(
 			break;
 		case 4: // SAM
 			convertMatchesToGlobalAlignment(store, scoreType);
-//			String<String<unsigned> > layout;
-//			layoutAlignment(layout, store, 0);
-//			printAlignment(std::cout, layout, store, 0, 0, 2000, 0, 100);
-//			printAlignment(std::cout, layout, store, 1, 0, 2000, 0, 100);
-			
+			/*{
+			String<String<unsigned> > layout;
+			layoutAlignment(layout, store, 0);
+			for (unsigned i=0;i<length(store.contigStore);++i)
+				printAlignment(std::cout, layout, store, i, 0, 2000, 0, 100, -1);
+			}*/
 			write(file, store, SAM());
 			break;
 		case 5: // AFG

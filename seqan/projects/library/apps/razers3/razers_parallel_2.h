@@ -281,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // set up finder
         for (unsigned i = 0; i < noOfBlocks; ++i){
-            beginOk = beginOk & windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate, options._debugLevel);
+            beginOk = beginOk & windowFindBegin(swiftFinders[i], swiftPatterns[i], options.errorRate);
 			if(not beginOk) break;
         }
         
@@ -430,6 +430,7 @@ namespace SEQAN_NAMESPACE_MAIN
             assign(swiftPatterns[i].data_host, readIndices[i]);
             swiftPatterns[i].params.minThreshold = options.threshold;
             swiftPatterns[i].params.tabooLength = options.tabooLength;
+			swiftPatterns[i].params.printDots = options._debugLevel > 0;
         }
                 
         // init edit distance verifiers
