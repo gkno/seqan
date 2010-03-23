@@ -188,7 +188,18 @@ __appendSegmentMatches(StringSet<String<TValue, TStrSpec>, Dependent<TSpec> > co
 
 
 //////////////////////////////////////////////////////////////////////////////
-
+/**
+.Function.globalMsaAlignment:
+..summary:Computes a global multiple alignment.
+..cat:Alignments
+..signature:globalMsaAlignment(align, score)
+..param.align:An alignment data structure containing two or more sequences.
+...type:Spec.Alignment Graph
+..param.score:The score values to be used for computing the alignment.
+...type:Class.Score
+..returns:void
+...remarks:The resulting alignment is stored in $align$.
+*/
 template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet1, typename TNames, typename TAlphabet, typename TScore>
 inline void
 globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign, 

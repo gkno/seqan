@@ -199,6 +199,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.sourceBeginPosition:
+..summary:Begin position of the source segment.
+..cat:Alignments
+..signature:sourceBeginPosition(object)
+..param.object:An object that has a source
+...type:Class.Gaps
+..returns:The position of the first item in @Function.source.source(object)@ that is used in object.
+..see:Function.begin
+..see:Function.source
+..see:Function.sourceEndPosition
+*/
 template <typename TSource>
 inline typename Position<TSource>::Type
 sourceBeginPosition(Gaps<TSource, ArrayGaps> const & me)
@@ -219,6 +231,18 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.sourceEndPosition:
+..summary:Position of the end of the source segment.
+..cat:Alignments
+..signature:sourceEndPosition(object)
+..param.object:An object that has a source
+...type:Class.Gaps
+..returns:The position behind the last element of the source segment.
+..see:Function.end
+..see:Function.sourceEnd
+..see:Function.sourceBeginPosition
+*/
 template <typename TSource>
 inline typename Position<TSource>::Type
 sourceEndPosition(Gaps<TSource, ArrayGaps> const & me)
