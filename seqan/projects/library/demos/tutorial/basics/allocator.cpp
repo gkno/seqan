@@ -27,14 +27,14 @@ int main()
 			allocate(mpa,buf,bs[i],TagAllocateTemp());
 		}
 		clear(mpa);
-		std::cout << "Allocating " << runs << " times blocks of size " 
+		std::cout << "Allocating and clearing " << runs << " times blocks of size " 
 					<< bs[i] << " with MultiPool Allocator took " << SEQAN_PROTIMEDIFF(timeAlloc) << std::endl;	
-	// the PROTIMEDIFF macro sets the internal timer clock to zero
+		// the PROTIMEDIFF macro sets the internal timer clock to zero
 		for (int j=0; j<runs; ++j) {
 			allocate(sa,buf,bs[i],TagAllocateTemp());
 		}
 		clear(sa);
-		std::cout << "Allocating " << runs << " times blocks of size " 
+		std::cout << "Allocating and clearing " << runs << " times blocks of size " 
 		<< bs[i] << " with Standard Allocator took " << SEQAN_PROTIMEDIFF(timeAlloc) << std::endl;	
 	}
 
