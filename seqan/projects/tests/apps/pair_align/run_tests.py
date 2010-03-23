@@ -132,7 +132,7 @@ def main(source_base, binary_base):
         conf = app_tests.TestConf(
             program=os.path.join(ph.binary_base_path, BINARY),
             redir_stdout=ph.outFile('%s.maVTML200.stdout' % fname),
-            args=['-ma', 'VTML200I',
+            args=['-ma', ph.inFile('VTML200I'),
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.maVTML200.out' % fname)],
             to_diff=[(ph.inFile('%s.maVTML200.out' % fname),
