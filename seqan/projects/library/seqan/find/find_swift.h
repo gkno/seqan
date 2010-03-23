@@ -622,9 +622,9 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
     			} else
 	    			count += bucketsPerCol2;
 		
-/*		    	if (seqNo<3)
+		    	if (seqNo<3)
 			    	_printSwiftParams(bucketParams);
-*/		    }
+		    }
 		} else
 			for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 
 			{
@@ -867,9 +867,9 @@ inline bool _swiftMultiProcessQGram(
 		
 		TShortSize hitCount;
 
-		do{
-			if((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset
-				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < finder.curPos + length(pattern.shape) )
+		do {
+			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset
+				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < (__int64)(finder.curPos + length(pattern.shape)))
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused
 				// OR last increment was in the same bucket but lies more than distanceCut away
@@ -1432,14 +1432,14 @@ range(Pattern<TIndex, Swift<TSpec> > const & pattern)
 }
 
 template <typename TIndex, typename TSpec>
-inline typename GetSequenceByNo< TIndex const >::Type
+inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
 range(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
 {
-	return getSequenceByNo(pattern.curSeqNo, needle(pattern));
+	return infix(getSequenceByNo(pattern.curSeqNo, needle(pattern)), 0, sequenceLength(pattern.curSeqNo, needle(pattern)));
 }
 
 template <typename TIndex, typename TSpec>
-inline typename GetSequenceByNo< TIndex const >::Type
+inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
 range(Pattern<TIndex, Swift<TSpec> > & pattern)
 {
 	return range(const_cast<Pattern<TIndex, Swift<TSpec> > const &>(pattern));
