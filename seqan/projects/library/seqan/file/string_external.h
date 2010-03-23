@@ -1531,7 +1531,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 /**
 .Function.flush:
 ..signature:flush(string)
-..param.string:An external string.
+..param.string:An external string. All dirty pages are flushed to disk.
 ...type:Spec.External String
 */
     template < typename TValue, typename TConfig >

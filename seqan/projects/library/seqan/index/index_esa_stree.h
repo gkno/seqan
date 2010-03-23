@@ -656,7 +656,7 @@ This interval is the @Function.value@ of the iterator.
 ..cat:Index
 ..signature:resizeVertexMap(index, pm)
 ..param.index:An index with a suffix tree interface.
-...type:Spec.ESA_Index
+...type:Spec.Index_ESA
 */
 
 	template < typename TText, typename TSpec, typename TPropertyMap >
@@ -671,17 +671,17 @@ This interval is the @Function.value@ of the iterator.
 ..cat:Index
 ..signature:assignProperty(index, d, val)
 ..param.index:An index with a suffix tree interface.
-...type:Spec.ESA_Index
+...type:Spec.Index_ESA
 .Function.property:
 ..cat:Index
 ..signature:property(index, d)
 ..param.index:An index with a suffix tree interface.
-...type:Spec.ESA_Index
+...type:Spec.Index_ESA
 .Function.getProperty:
 ..cat:Index
 ..signature:getProperty(index, d)
 ..param.index:An index with a suffix tree interface.
-...type:Spec.ESA_Index
+...type:Spec.Index_ESA
 */
 
 	template < typename TSize >

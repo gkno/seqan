@@ -460,6 +460,8 @@ SEQAN_CHECKPOINT
 
 #else
 
+///.Function.flush.param.string.type:Spec.MMap String
+
     template < typename TValue, typename TConfig >
     inline void 
 	flush(String<TValue, MMap<TConfig> > &me) 
@@ -620,6 +622,7 @@ SEQAN_CHECKPOINT
 	{
 	}
 //____________________________________________________________________________
+///.Function.open.param.string.type:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 
@@ -662,6 +665,8 @@ SEQAN_CHECKPOINT
 
 		return false;
     }
+
+///.Function.openTemp.param.string.type:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 
@@ -711,6 +716,7 @@ SEQAN_CHECKPOINT
 		return true;
 	}
 //____________________________________________________________________________
+///.Function.flush.close.string.type:Spec.MMap String
 
 	template < typename TValue, typename TConfig >
     inline bool 
