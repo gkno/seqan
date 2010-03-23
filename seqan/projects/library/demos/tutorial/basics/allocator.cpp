@@ -14,7 +14,7 @@ int main()
 	unsigned runs = 100000;
 	char *buf;
 // FRAGMENT(time-measurements)
-	// block size 10
+	// store blocksizes in an array
 	unsigned bs[3];
 	bs[0] = 10;
 	bs[1] = 100;
