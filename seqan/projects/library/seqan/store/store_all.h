@@ -693,7 +693,7 @@ void printAlignment(
 		TLayoutStringIter itEnd = end(*lit, Standard());
 		TLayoutStringIter left = begin(*lit, Standard());
 		TLayoutStringIter right = itEnd;
-		TLayoutStringIter mid;
+		TLayoutStringIter mid = itEnd;
 
 		while (left < right)
 		{
