@@ -13,8 +13,8 @@ import logging
 import os.path
 import sys
 
-import app_tests
- 
+import seqan.app_tests as app_tests
+
 # Path of the binary under test, relative to the checkout.
 BINARY = 'projects/library/cmake/apps/pair_align'
 
