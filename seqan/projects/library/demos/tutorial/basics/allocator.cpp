@@ -1,4 +1,4 @@
-// FRAGMENT(defintions)
+// FRAGMENT(definitions)
 #define SEQAN_PROFILE // enable time measurements
 
 #include <iostream>
