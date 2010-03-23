@@ -105,10 +105,11 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Creates a suffix array from a given text.
 ..cat:Index
 ..signature:createSuffixArray(suffixArray, text[, algo_tag])
-..param.suffixArray:A reference to the resulting suffix array.
+..param.suffixArray:The resulting suffix array.
 ..param.text:A given text.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $suffixArray$ must be at least $length(text)$ before calling this function.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The size of $suffixArray$ must be at least $length(text)$ before calling this function.
 */
 
     template < typename TSA,
@@ -237,11 +238,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Creates a lcp table from a given text and suffix array.
 ..cat:Index
 ..signature:createLCPTable(lcp, text, suffixArray[, algo_tag])
-..param.lcp:A reference to the resulting lcp table.
+..param.lcp:The resulting lcp table.
 ..param.text:A given text.
 ..param.suffixArray:The suffix array of $text$.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $lcp$ must be at least $length(text)$ before calling this function.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The size of $lcp$ must be at least $length(text)$ before calling this function.
 */
 
 	template < 
@@ -411,11 +413,12 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Creates a Burrows-Wheeler table from a given text and suffix array.
 ..cat:Index
 ..signature:createBWTable(bwt, text, suffixArray[, algo_tag])
-..param.bwt:A reference to the resulting Burrows-Wheeler table.
+..param.bwt:The resulting Burrows-Wheeler table.
 ..param.text:A given text.
 ..param.suffixArray:The suffix array of $text$.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
-..remarks:The size of $bwt$ must be at least $length(text)$ before calling this function.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The size of $bwt$ must be at least $length(text)$ before calling this function.
 */
 
 	// default

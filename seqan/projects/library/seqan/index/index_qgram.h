@@ -1090,17 +1090,20 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 ..summary:Builds a q-gram index on a sequence. 
 ..cat:Index
 ..signature:createQGramIndex(index)
-..signature:createQGramIndex(sa, dir, bucketMap, text, shape[, stepSize]) (DEPRECATED)
+..signature:createQGramIndex(sa, dir, bucketMap, text, shape, stepSize) (DEPRECATED)
 ..param.index:The q-gram index.
 ...type:Spec.Index_QGram
+..param.sa:The resulting list in which all q-grams are sorted alphabetically.
+..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
+..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps, see @Function.indexBucketMap@.
+If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
 ..param.text:The sequence.
 ..param.shape:The shape to be used.
 ...type:Class.Shape
 ..param.stepSize:Store every $stepSize$'th q-gram in the index.
-..param.sa:The resulting list in which all q-grams are sorted alphabetically.
-..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
-..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps. If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
 ..returns:Index contains the sorted list of qgrams. For each q-gram $dir$ contains the first position in index that corresponds to this q-gram.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The resulting tables must have appropriate size before calling this function.
 */
 
 	template < typename TIndex >
@@ -1194,7 +1197,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 		TText const &text,
 		TShape &shape)	
 	{
-		createQGramIndex(sa, dir, bucketMap, text, shape);
+		createQGramIndex(sa, dir, bucketMap, text, shape, 1);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1202,11 +1205,14 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 .Function.createQGramIndexSAOnly:
 ..summary:Builds the suffix array of a q-gram index on a sequence. 
 ..cat:Index
-..signature:createQGramIndexSAOnly(sa, text, shape)
+..signature:createQGramIndexSAOnly(sa, text, shape, stepSize)
+..param.sa:The resulting list in which all q-grams are sorted alphabetically.
 ..param.text:The sequence.
 ..param.shape:The shape to be used. q is the length of this shape
 ...type:Class.Shape
-..param.sa:The resulting list in which all q-grams are sorted alphabetically.
+..param.stepSize:Store every $stepSize$'th q-gram in the index.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The resulting tables must have appropriate size before calling this function.
 */
 
 	template < 
@@ -1344,13 +1350,17 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 .Function.createQGramIndexDirOnly:
 ..summary:Builds the directory of a q-gram index on a sequence. 
 ..cat:Index
-..signature:createQGramIndexDirOnly(sa, dir, text, shape)
+..signature:createQGramIndexDirOnly(dir, bucketMap, text, shape, stepSize)
+..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
+..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps, see @Function.indexBucketMap@.
+If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
 ..param.text:The sequence.
 ..param.shape:The shape to be used.
 ...type:Class.Shape
-..param.sa:The resulting list in which all q-grams are sorted alphabetically.
-..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
+..param.stepSize:Store every $stepSize$'th q-gram in the index.
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The resulting tables must have appropriate size before calling this function.
 */
 
 	template <
@@ -1410,13 +1420,18 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 .Function.createCountArray:
 ..summary:Builds an index on a StringSet storing how often a q-gram occurs in each sequence.
 ..cat:Index
-..signature:createCountsArray(counts, dir, stringSet, shape)
+..signature:createCountsArray(counts, dir, bucketMap, stringSet, shape, stepSize)
+..param.counts:The resulting list of pairs (seqNo,count).
+..param.dir:The resulting array that indicates at which position in the count table the corresponding a certain q-gram can be found.
+..param.bucketMap:Stores the q-gram hashes for the openaddressing hash maps, see @Function.indexBucketMap@.
+If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket address in the index.
 ..param.stringSet:The StringSet.
 ...type:Class.StringSet
 ..param.shape:The shape to be used.
 ...type:Class.Shape
-..returns.param.counts:The resulting list of pairs (seqNo,count).
-..returns.param.dir:The resulting array that indicates at which position in the count table the corresponding a certain q-gram can be found.
+..param.stepSize:Store every $stepSize$'th q-gram in the index.
+..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
+The resulting tables must have appropriate size before calling this function.
 */
 
 	template < 
