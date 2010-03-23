@@ -98,7 +98,8 @@ void testQGramIndexSchnell()
 	resize(pos, pos_size);
 
 	start = clock();
-	createQGramIndex(index, pos, text, shape);
+	Nothing nothing;
+	createQGramIndex(index, pos, nothing, text, shape, 1);
 	finish = clock();
 	duration = (double)(finish - start) / CLOCKS_PER_SEC;
 	//cout << "\nQGramIndex bauen dauert: " << duration << " Sekunden.\n\n";
@@ -124,7 +125,8 @@ void testGappedQGramIndex()
 	pos_size += 1;	
 	resize(pos, pos_size);
 
-	createQGramIndex(index, pos, text, shape);
+	Nothing nothing;
+	createQGramIndex(index, pos, nothing, text, shape, 1);
 	
 	SEQAN_ASSERT(pos[0] == 0);
 	SEQAN_ASSERT(pos[1] == 1);
@@ -177,8 +179,8 @@ void testUngappedQGramIndex()
 	pos_size += 1;	
 	resize(pos, pos_size);
 
-        Nothing nothing;
-        createQGramIndex(index, pos, nothing, text, shape, 1);
+	Nothing nothing;
+	createQGramIndex(index, pos, nothing, text, shape, 1);
 	
 	
 	SEQAN_ASSERT(pos[0] == 0);
