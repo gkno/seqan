@@ -29,6 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // - semi-global alignments of one/multiple short sequences
 // - local epsilon matches of one/multiple short sequences
 //////////////////////////////////////////////////////////////////////////////
+
 // TODO(bkehr): Is this documentatin right? Should the Specializations be Tags?
 // weese: of minimal length?
 /**
@@ -36,7 +37,9 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Provides a fast filter alogrithm that guarantees to find all regions overlapping with potential \epsilon-matches.
 An \epsilon-match is a matching region of minimal length and an error rate of at most \epsilon.
 ..general:Class.Pattern
+..general:Class.Finder
 ..cat:Searching
+..signature:Finder<TIndex, Swift<TSpec> >
 ..signature:Pattern<TIndex, Swift<TSpec> >
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
@@ -49,10 +52,10 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..summary:The specialization for the general swift filter that finds epsilon matches between haystack and needle.
 ..general:Spec.Swift
 ..cat:Searching
+..signature:Finder<TIndex, Swift<SwiftLocal> >
 ..signature:Pattern<TIndex, Swift<SwiftLocal> >
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
-..param.TSpec: Specifies the type of Swift filter.
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftLocal
 /**
@@ -60,10 +63,10 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..summary:The specialization for the semi-global swift filter that finds regions of the haystack where a needle matches with an error rate less than \epsilon.
 ..general:Spec.Swift
 ..cat:Searching
+..signature:Finder<TIndex, Swift<SwiftSemiGlobal> >
 ..signature:Pattern<TIndex, Swift<SwiftSemiGlobal> >
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
-..param.TSpec: Specifies the type of Swift filter.
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftSemiGlobal
 
@@ -1315,10 +1318,8 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 ..summary:Returns a pair of the begin and end position in the haystack or needle for the last hit found.
 ..signature:positionRange(finder)
 ..signature:positionRange(pattern)
-..param.finder:A @Spec.Finder@ object.
-...type:Spec.Finder
-..param.pattern:A @Spec.Pattern@ object.
-...type:Spec.Pattern
+..param.finder:A @Class.Finder@ object.
+..param.pattern:A @Class.Pattern@ object.
 ..returns:A pair of the begin and end position in the haystack or needle for the last hit found.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
 ...remarks:If no swift hit was found, the value is undefined.
@@ -1380,16 +1381,18 @@ getSwiftRange(TSwiftHit const &hit, TText &text)
 // TODO(bkehr): Is this documentation right?
 /**.Function.range
 ..cat:Searching
-..summary:Returns the haystack or needle infix of the last swift hit found.
+..summary:Returns the haystack or needle infix of the last hit found.
 ..signature:range(finder)
-..param.finder:A @Concept.Finder|finder@ or @Concept.Pattern|pattern@ that can be used for the @Spec.Swift@ filter.
-...type:Spec.Finder
-...type:Spec.Pattern
+..signature:range(pattern)
+..param.finder:A @Class.Finder@ object.
+..param.pattern:A @Class.Pattern@ object.
 ..returns:The haystack or needle infix of the last swift hit found.
-...remarks:If no swift hit was found, the value is undefined.
+...remarks:The return type is $Infix<THost>$ if $THost$ is the type of haystack or needle.
+...remarks:If no hit was found, the value is undefined.
 ..see:Function.positionRange
 */
 ///.Function.range.param.finder.type:Spec.Swift
+///.Function.range.param.pattern.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
