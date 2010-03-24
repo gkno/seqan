@@ -700,7 +700,7 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 ..param.query: The database sequence.
 ...type:Class.String
 ..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
-..param.scoreDropOff: The score drop after which the extension should stop.
+..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
 ...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
 ..param.scoreMatrix: The scoring scheme.
 ...type:Spec.Simple Score
@@ -816,9 +816,41 @@ extendSeed(Seed<TPosition,TSpecSeed> &seed,
 	}
 }
 
-template<typename DatabaseInfix, typename QueryInfix, typename TPosition, typename TScore, typename TSize>
+// Sets the begin and end position as well as the left and right diagonal of a SimpleSeed after seed extension
+template<typename TPosition, typename TBound, typename TExtension, typename TSize>
 void
-extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
+_setExtendedSeedDimensions(Seed<TPosition, SimpleSeed> & seed,
+                           TBound lowerBound,
+                           TBound upperBound,
+                           TExtension extLengthQuery,
+                           TExtension extLengthDatabase,
+                           TSize direction) {
+    if(direction == 0) {
+	    // set left and right diagonals
+        if (leftDiagonal(seed) < startDiagonal(seed)+upperBound)
+	        setLeftDiagonal(seed, startDiagonal(seed)+upperBound);
+	    if (rightDiagonal(seed) > startDiagonal(seed)-lowerBound)
+	       	setRightDiagonal(seed, startDiagonal(seed)-lowerBound);
+
+        // set new start position of seed
+        setLeftDim0(seed, leftDim0(seed)-extLengthQuery);
+        setLeftDim1(seed, leftDim1(seed)-extLengthDatabase);
+    } else {
+	    // set left and right diagonals
+	    if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
+	        setRightDiagonal(seed, endDiagonal(seed)-upperBound);
+        if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
+            setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
+
+        // set new end position of seed
+        setRightDim0(seed, rightDim0(seed)+extLengthQuery);
+        setRightDim1(seed, rightDim1(seed)+extLengthDatabase);
+    }
+}
+
+template<typename TSeedSpec, typename TPosition, typename DatabaseInfix, typename QueryInfix, typename TScore, typename TSize>
+TPosition
+_extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
                        DatabaseInfix const & dataSeg,
                        QueryInfix const & querySeg, 
                        TScore scoreDropOff,
@@ -960,7 +992,7 @@ extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
         // extension ends at end of both sequences
 		extLengthQuery = xLength;
         extLengthDatabase = yLength;
-		tmpMax = 0;
+		tmpMax = (*antiDiag3)[xLength];
     } else if (((k+1) / 2 > xLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)) {
         // extension ends at end of query
         tmpMax = (*antiDiag2)[xLength];
@@ -983,34 +1015,16 @@ extendSeedOneDirection(Seed<TPosition, SimpleSeed> & seed,
 	}
 
     if(tmpMax != infimum) {
-        if(direction == 0) {
-	        // set left and right diagonals
-            if (leftDiagonal(seed) < startDiagonal(seed)+upperBound)
-		        setLeftDiagonal(seed, startDiagonal(seed)+upperBound);
-	        if (rightDiagonal(seed) > startDiagonal(seed)-lowerBound)
-	        	setRightDiagonal(seed, startDiagonal(seed)-lowerBound);
-
-            // set new start position of seed
-            setLeftDim0(seed, leftDim0(seed)-extLengthQuery);
-            setLeftDim1(seed, leftDim1(seed)-extLengthDatabase);
-        } else {
-	        // set left and right diagonals
-	        if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-		        setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-            if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-		        setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
-
-            // set new end position of seed
-            setRightDim0(seed, rightDim0(seed)+extLengthQuery);
-            setRightDim1(seed, rightDim1(seed)+extLengthDatabase);
-        }
+        _setExtendedSeedDimensions(seed, lowerBound, upperBound, extLengthQuery, extLengthDatabase, direction);
     }
+
+    return tmpMax;
 }
 
 
-template<typename TPosition, typename TQuery, typename TDatabase, typename TScore, typename TSize>
+template<typename TSeedSpec, typename TPosition, typename TQuery, typename TDatabase, typename TScore, typename TSize>
 void 
-extendSeed(Seed<TPosition, SimpleSeed> &seed, 
+extendSeed(Seed<TPosition, TSeedSpec> &seed, 
 		   TScore scoreDropOff, 
 		   Score<TScore, Simple> const &scoreMatrix, 
 		   TQuery const &query, 
@@ -1025,7 +1039,7 @@ extendSeed(Seed<TPosition, SimpleSeed> &seed,
         typename Prefix<TDatabase const>::Type dataSeg = prefix(database, leftDim1(seed));
         typename Prefix<TQuery const>::Type querySeg = prefix(query, leftDim0(seed));
 		
-        extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 0 /*left*/);
+        _extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 0 /*left*/);
 	}
 
 	//right extension
@@ -1034,7 +1048,7 @@ extendSeed(Seed<TPosition, SimpleSeed> &seed,
         typename Suffix<TDatabase const>::Type dataSeg = suffix(database, rightDim1(seed)+1);
         typename Suffix<TQuery const>::Type querySeg = suffix(query, rightDim0(seed)+1);
 
-        extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 1 /*right*/);
+        _extendSeedOneDirection(seed, dataSeg, querySeg, scoreDropOff, scoreMatrix, 1 /*right*/);
 	}
 }
 

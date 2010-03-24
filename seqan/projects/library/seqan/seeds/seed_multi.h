@@ -509,254 +509,36 @@ _mergeTwoSeedsScore(Seed<TPosition, ChainedSeed> &firstSeed,
 	}
 }
 
-template<typename TPosition, typename TText, typename TTPosition>
-void 
-extendSeed(Seed<TPosition,ChainedSeed> &seed, TPosition scoreDropOff, Score<TTPosition, Simple> const &scoreMatrix, String<TText> &query, String<TText> &database, TPosition direction, GappedXDrop){
-	SEQAN_CHECKPOINT
-	TPosition gapCost = scoreGap(scoreMatrix);
-	//TPosition tmpScore = 0;
-	TPosition infimum = infimumValue<TPosition>()+1-gapCost;
-	
-	//left extension
-	if ((direction != 1)&&(leftDim0(seed)!=0)&&(leftDim1(seed)!=0)){
-		TPosition upperBound = 0;
-		TPosition lowerBound = 0;
-		Segment<String<Dna>,PrefixSegment> dataSeg(database,leftDim1(seed));
-		Segment<String<Dna>,PrefixSegment> querySeg(query,leftDim0(seed));
-		TPosition xLength = length(querySeg);
-		TPosition yLength = length(dataSeg);
+// Sets the begin and end position as well as the left and right diagonal of a ChainedSeed after seed extension
+template<typename TPosition, typename TBound, typename TExtension, typename TSize>
+void
+_setExtendedSeedDimensions(Seed<TPosition, ChainedSeed> & seed,
+                           TBound lowerBound,
+                           TBound upperBound,
+                           TExtension extLengthQuery,
+                           TExtension extLengthDatabase,
+                           TSize direction) {
+    if(direction == 0) {
+	    // set left and right diagonals
+        if (leftDiagonal(seed) < startDiagonal(seed)+upperBound)
+	        setLeftDiagonal(seed, startDiagonal(seed)+upperBound);
+	    if (rightDiagonal(seed) > startDiagonal(seed)-lowerBound)
+	       	setRightDiagonal(seed, startDiagonal(seed)-lowerBound);
 
-		std::vector<TPosition> *antiDiag1 = new std::vector<TPosition>(1,0);		//smallest diagonal
-		std::vector<TPosition> *antiDiag2 = new std::vector<TPosition>(2,infimum);
-		std::vector<TPosition> *antiDiag3 = new std::vector<TPosition>(3,infimum);	//current diagonal
-		std::vector<TPosition> *tmpDiag;
+        // set new start position of seed
+        seed.seedSet.push_front(Triple<TPosition, TPosition, TPosition>
+                                       (leftDim0(seed)-extLengthQuery, leftDim1(seed)-extLengthDatabase, 1));
+    } else {
+	    // set left and right diagonals
+	    if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
+	        setRightDiagonal(seed, endDiagonal(seed)-upperBound);
+        if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
+            setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
 
-		//Matrix initialization
-		if (gapCost >= (-1)*scoreDropOff){
-			(*antiDiag2)[0] = gapCost;
-			(*antiDiag2)[1] = gapCost;
-		}
-		if (2*gapCost >= (-1)*scoreDropOff){
-			(*antiDiag3)[0] = 2*gapCost;
-			(*antiDiag3)[2] = 2*gapCost;
-		}
-		
-		TPosition b = 1; 
-		TPosition u = 0;
-		TPosition k = 1;
-		TPosition tmp;
-		TPosition tmpMax1 = 0;
-		TPosition tmpMax2 = 0;
-		
-		//Extension as proposed by Zhang et al
-		while(b<=u+1){
-			++k;
-			for (int i = b; i<= (u+1);++i){
-				tmp = infimum;
-
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,xLength-i,yLength-(k-i),querySeg,dataSeg));
-				tmpMax2 = max(tmpMax2,tmp);
-				if (tmp < tmpMax1-scoreDropOff)
-					(*antiDiag3)[i] = infimum;
-				else
-					(*antiDiag3)[i] = tmp;
-			}
-			while (((*antiDiag3)[b]  < tmpMax1-scoreDropOff) && (b<static_cast<TPosition>((*antiDiag3).size())-1)){
-				
-				++b;}
-			++u;
-			while (((*antiDiag3)[u]  < tmpMax1-scoreDropOff) && (u>0)){
-				--u;}
-			
-			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
-			
-			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound))
-				lowerBound = (k+1)/2-b;
-			if ((u > k/2)&&(u-k/2>upperBound))
-				upperBound = u-k/2;
-
-			tmpDiag = antiDiag1;
-			antiDiag1 = antiDiag2;
-			antiDiag2 = antiDiag3;
-			antiDiag3 = tmpDiag;
-
-			int d = 0;
-			while ((d<3) &&(static_cast<TPosition>((*antiDiag3).size())<=xLength)){
-				(*antiDiag3).push_back(0);
-				++d;
-			}
-			for (unsigned int eu = 0; eu < (*antiDiag3).size();++eu)
-				(*antiDiag3)[eu] = infimum;
-
-			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
-			if ((*antiDiag2)[(*antiDiag2).size()-1]+ gapCost >=tmpMax1-scoreDropOff)
-				(*antiDiag3)[(*antiDiag3).size()-1]=(*antiDiag2)[(*antiDiag2).size()-1]+ gapCost;
-				tmpMax1 = tmpMax2;
-		}
-		
-		//Calculate upper/lower bound for diagonals
-		if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-			setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-	
-		if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-			setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
-		
-
-
-		// Find seed start
-		TPosition tmpPos = 0;
-		TPosition tmpMax = infimum;
-		if ((k==xLength+yLength) &&((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)){
-			tmpPos = xLength;
-			tmpMax =0;
-		} else{
-			for (unsigned int eu = 0; eu < (*antiDiag1).size();++eu){
-				if ((*antiDiag1)[eu] > tmpMax){
-					tmpMax = (*antiDiag1)[eu];
-					tmpPos = eu;		
-				}
-			}
-			--k;
-		}
-		if(tmpMax != infimum){
-			seed.seedSet.push_front(Triple<TPosition, TPosition, TPosition>(leftDim0(seed)-tmpPos,leftDim1(seed)-(k-tmpPos),1));
-		}
-
-
-		//free memory
-		(*antiDiag1).clear();
-		(*antiDiag2).clear();
-		(*antiDiag3).clear();
-		delete antiDiag1;
-		delete antiDiag2;
-		delete antiDiag3;
-	}
-
-	//right extension
-	
-	if ((direction != 0)&&(rightDim0(seed)< static_cast<TPosition>(length(query))-1)&&(rightDim1(seed)<static_cast<TPosition>(length(database))-1)){
-		TPosition upperBound = 0;
-		TPosition lowerBound = 0;
-		Segment<String<Dna>,SuffixSegment> dataSeg(database,rightDim1(seed)+1);
-		Segment<String<Dna>,SuffixSegment> querySeg(query,rightDim0(seed)+1);
-		TPosition xLength = length(querySeg);
-		TPosition yLength = length(dataSeg);
-
-		std::vector<TPosition> *antiDiag1 = new std::vector<TPosition>(1,0);	//smallest diagonal
-		std::vector<TPosition> *antiDiag2 = new std::vector<TPosition>(2,infimum);
-		std::vector<TPosition> *antiDiag3 = new std::vector<TPosition>(3,infimum);	//current diagonal
-		std::vector<TPosition> *tmpDiag;
-		
-		//Matrix initialization
-		if (gapCost >= (-1)*scoreDropOff){
-			(*antiDiag2)[0] = gapCost;
-			(*antiDiag2)[1] = gapCost;
-		}
-		if (2*gapCost >= (-1)*scoreDropOff){
-			(*antiDiag3)[0] = 2*gapCost;
-			(*antiDiag3)[2] = 2*gapCost;
-		}
-		
-		TPosition b = 1; 
-		TPosition u = 0;
-		TPosition k = 1;
-		TPosition tmp;
-		TPosition tmpMax1 = 0;
-		TPosition tmpMax2 = 0;
-	
-		//Extension as proposed by Zhang
-		while(b<=u+1){
-			++k;
-			for (int i = b; i<= (u+1);++i){
-				tmp = infimum;
-				tmp = max((*antiDiag2)[i-1],(*antiDiag2)[i])+gapCost;
-				tmp = max(tmp,(*antiDiag1)[i-1]+ score(scoreMatrix,i-1,k-i-1,querySeg,dataSeg));
-				tmpMax2 = max(tmpMax2,tmp);
-				if (tmp < tmpMax1-scoreDropOff)
-					(*antiDiag3)[i] = infimum;
-				else
-					(*antiDiag3)[i] = tmp;
-			}
-		
-			while (((*antiDiag3)[b]  < tmpMax1-scoreDropOff) && (b< static_cast<TPosition>((*antiDiag3).size())-1)){
-				++b;
-			}
-			++u;
-			while (((*antiDiag3)[u]  < tmpMax1-scoreDropOff) && (u>0)){
-				--u;}
-			
-			//borders for lower triangle of edit matrix
-			b = max(b,k-yLength+1);
-			u = min(u, xLength-1);
-			
-
-			if ((b < (k+1)/2)&&((k+1)/2-b>lowerBound)){
-				lowerBound = (k+1)/2-b;
-			}
-		
-			if ((u >= k/2)&&(u-k/2>=upperBound)){
-				upperBound = u-k/2;
-			}
-			tmpDiag = antiDiag1;
-			antiDiag1 = antiDiag2;
-			antiDiag2 = antiDiag3;
-			antiDiag3 = tmpDiag;
-
-			int d = 0;
-
-			while ((d<3) &&(static_cast<TPosition>((*antiDiag3).size())<=xLength)){
-				(*antiDiag3).push_back(0);
-				++d;
-			}
-			for (unsigned int eu = 0; eu < (*antiDiag3).size();++eu)
-				(*antiDiag3)[eu] = infimum;
-
-			if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-				(*antiDiag3)[0] = (*antiDiag2)[0]+ gapCost;
-			if ((*antiDiag2)[(*antiDiag2).size()-1]+ gapCost >=tmpMax1-scoreDropOff)
-				(*antiDiag3)[(*antiDiag3).size()-1]=(*antiDiag2)[(*antiDiag2).size()-1]+ gapCost;
-			tmpMax1 = tmpMax2;
-		}
-		
-		//Calculate upper/lower bound for diagonals
-		if (rightDiagonal(seed) > endDiagonal(seed)-upperBound)
-			setRightDiagonal(seed, endDiagonal(seed)-upperBound);
-	
-		if (leftDiagonal(seed) < endDiagonal(seed)+lowerBound)
-			setLeftDiagonal(seed, endDiagonal(seed)+lowerBound);
-
-		//Find seed end
-		TPosition tmpPos = 0;
-		TPosition tmpMax = infimum;
-		if ((k==xLength+yLength) && ((*antiDiag2)[xLength] >= tmpMax1-scoreDropOff)){
-			tmpPos = xLength;
-			tmpMax =0;
-		} else{
-			for (size_t eu = 0; eu < antiDiag1->size(); ++eu){
-				if ((*antiDiag1)[eu] > tmpMax){
-					tmpMax = (*antiDiag1)[eu];
-					tmpPos = eu;
-					
-				}
-			}
-			--k;
-		}
-
-		if(tmpMax != infimum){
-			seed.seedSet.push_back(Triple<TPosition, TPosition, TPosition>(rightDim0(seed)+tmpPos,rightDim1(seed)+k-tmpPos,1));
-		}
-		//free memory
-		(*antiDiag1).clear();
-		(*antiDiag2).clear();
-		(*antiDiag3).clear();
-		delete antiDiag1;
-		delete antiDiag2;
-		delete antiDiag3;
-	}
+        // set new end position of seed
+        seed.seedSet.push_back(Triple<TPosition, TPosition, TPosition>
+                                      (rightDim0(seed)+extLengthQuery, rightDim1(seed)+extLengthDatabase, 1));
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

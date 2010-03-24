@@ -607,14 +607,14 @@ void Test_SeedSet_seedScore()
 	seedScores[0] = 5;
 	SeedSet<int,SimpleSeed,DefaultScore, void> setSimple2(100,0,matrix);
 	addSeed(setSimple2,5,5,3,5,Single());
-	extendSeedsScore(begin(setSimple2), end(setSimple2), begin(seedScores), 1, matrix, query, database, 2, GappedXDrop());
-	SEQAN_ASSERT_EQ(seedScores[0], 20);
+	extendSeedsScore(begin(setSimple2), end(setSimple2), begin(seedScores), 0, matrix, query, database, 2, GappedXDrop());
+	SEQAN_ASSERT_EQ(seedScores[0], 21);
 
 	seedScores[0] = 5;
 	SeedSet<int,ChainedSeed,DefaultScore, void> setSimple3(100,0,matrix);
 	addSeed(setSimple3,5,5,3,5,Single());
 	extendSeedsScore(begin(setSimple3), end(setSimple3), begin(seedScores), 1, matrix, query, database, 2, GappedXDrop());
-	SEQAN_ASSERT_EQ(seedScores[0], 20);
+	SEQAN_ASSERT_EQ(seedScores[0], 32);
 }
 
 void Main_SeedSet(){
