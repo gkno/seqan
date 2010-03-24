@@ -26,9 +26,9 @@ void test_banded_alignment()
 	assignSource(row(alignment, 0), seg1);
 	assignSource(row(alignment, 1), seg2);
 	//bandedAlignment(alignment, seed, 1, scoreMatrix);
-	SEQAN_TASSERT(bandedAlignment(alignment, seed, 1, scoreMatrix)==6);
-	SEQAN_TASSERT(row(alignment,0) == "cgtacgtga" );
-	SEQAN_TASSERT(row(alignment,1) == "cg-at-t-a");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment, seed, 1, scoreMatrix), 6);
+	SEQAN_ASSERT_TRUE(row(alignment,0) == "cgtacgtga" );
+	SEQAN_ASSERT_TRUE(row(alignment,1) == "cg-at-t-a");
 
 	setLeftDiagonal(seed, 1);
 	Align<String<char>,ArrayGaps> alignment1b;
@@ -37,9 +37,9 @@ void test_banded_alignment()
 	resize(rows(alignment1b), 2);
 	assignSource(row(alignment1b, 0), seg1x);
 	assignSource(row(alignment1b, 1), seg2x);
-	SEQAN_TASSERT(bandedAlignment(alignment1b, seed, 1, scoreMatrix)==6);
-	SEQAN_TASSERT(row(alignment1b,0) == "cgtacgtga" );
-	SEQAN_TASSERT(row(alignment1b,1) == "cg-at-t-a");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment1b, seed, 1, scoreMatrix), 6);
+	SEQAN_ASSERT_TRUE(row(alignment1b,0) == "cgtacgtga" );
+	SEQAN_ASSERT_TRUE(row(alignment1b,1) == "cg-at-t-a");
 	
 	String<char> query2 = "ACTTTCATTTT";
 	String<char> database2 = "ACTGTTCAGGG";
@@ -51,9 +51,9 @@ void test_banded_alignment()
 	resize(rows(alignment2), 2);
 	assignSource(row(alignment2, 0), seg1b);
 	assignSource(row(alignment2, 1), seg2b);
-	SEQAN_TASSERT(bandedAlignment(alignment2, seed2, 2, scoreMatrix2)==7);
-	SEQAN_TASSERT(row(alignment2,0) == "ACT-T" );
-	SEQAN_TASSERT(row(alignment2,1) == "ACTGT");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment2, seed2, 2, scoreMatrix2), 7);
+	SEQAN_ASSERT_TRUE(row(alignment2,0) == "ACT-T" );
+	SEQAN_ASSERT_TRUE(row(alignment2,1) == "ACTGT");
 
 
 	//Gotoh
@@ -68,9 +68,9 @@ void test_banded_alignment()
 	resize(rows(alignment3), 2);
 	assignSource(row(alignment3, 0), seg1c);
 	assignSource(row(alignment3, 1), seg2c);
-	SEQAN_TASSERT(bandedAlignment(alignment3, seed, 1, scoreMatrix3)==6);
-	SEQAN_TASSERT(row(alignment3,0) == "cgtacgtga" );
-	SEQAN_TASSERT(row(alignment3,1) == "cg-a--tta");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment3, seed, 1, scoreMatrix3), 6);
+	SEQAN_ASSERT_TRUE(row(alignment3,0) == "cgtacgtga" );
+	SEQAN_ASSERT_TRUE(row(alignment3,1) == "cg-a--tta");
 
 	setRightDiagonal(seed, -4);
 	Align<String<char>,ArrayGaps> alignment3b;
@@ -79,9 +79,9 @@ void test_banded_alignment()
 	resize(rows(alignment3b), 2);
 	assignSource(row(alignment3b, 0), seg1y);
 	assignSource(row(alignment3b, 1), seg2y);
-	SEQAN_TASSERT(bandedAlignment(alignment3b, seed, 1, scoreMatrix3)==6);
-	SEQAN_TASSERT(row(alignment3b,0) == "cgtacgtga" );
-	SEQAN_TASSERT(row(alignment3b,1) == "cg-a--tta");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment3b, seed, 1, scoreMatrix3), 6);
+	SEQAN_ASSERT_TRUE(row(alignment3b,0) == "cgtacgtga" );
+	SEQAN_ASSERT_TRUE(row(alignment3b,1) == "cg-a--tta");
 
 	Align<String<char>,ArrayGaps> alignment4;
 	Segment<String<char>, InfixSegment> seg1d(query2, leftDim0(seed2), rightDim0(seed2)+1);
@@ -89,9 +89,9 @@ void test_banded_alignment()
 	resize(rows(alignment4), 2);
 	assignSource(row(alignment4, 0), seg1d);
 	assignSource(row(alignment4, 1), seg2d);
-	SEQAN_TASSERT(bandedAlignment(alignment4, seed2,2, scoreMatrix3)==9);
-	SEQAN_TASSERT(row(alignment4,0) == "ACT-T" );
-	SEQAN_TASSERT(row(alignment4,1) == "ACTGT");
+	SEQAN_ASSERT_EQ(bandedAlignment(alignment4, seed2,2, scoreMatrix3), 9);
+	SEQAN_ASSERT_TRUE(row(alignment4,0) == "ACT-T" );
+	SEQAN_ASSERT_TRUE(row(alignment4,1) == "ACTGT");
 
 }
 
@@ -113,11 +113,11 @@ void test_banded_chain_align()
 	assignSource(row(alignment1, 1), database);
 
     //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix) << endl;
-	SEQAN_TASSERT(bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix)==11);
+	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix), 11);
 
 	//cout << alignment1 << endl;
-	SEQAN_TASSERT(row(alignment1,0) == "ACGTCCTCGTACACCGTCTTAA" );
-	SEQAN_TASSERT(row(alignment1,1) == "TACGATC-C--ACACCG-CGTCT");
+	SEQAN_ASSERT_TRUE(row(alignment1,0) == "ACGTCCTCGTACACCGTCTTAA" );
+	SEQAN_ASSERT_TRUE(row(alignment1,1) == "TACGATC-C--ACACCG-CGTCT");
 
 
     //------ on infixes -> only parts of the source object are used ------------
@@ -128,11 +128,11 @@ void test_banded_chain_align()
 	assignSource(row(alignment2, 1), database, 2, length(database));
 
     //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
-	SEQAN_TASSERT(bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix)==11);
+	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix), 11);
 
 	//cout << alignment2 << endl;
-	SEQAN_TASSERT(row(alignment2,0) == "CGTCCTCGTACACCGTCTTAA" );
-	SEQAN_TASSERT(row(alignment2,1) == "CGATC-C--ACACCG-CGTCT");
+	SEQAN_ASSERT_TRUE(row(alignment2,0) == "CGTCCTCGTACACCGTCTTAA" );
+	SEQAN_ASSERT_TRUE(row(alignment2,1) == "CGATC-C--ACACCG-CGTCT");
 
 
     // ------------------- affine gap costs --------------------------------
@@ -150,11 +150,11 @@ void test_banded_chain_align()
 	assignSource(row(alignment3, 1), database);
 
 	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2) << endl;
-	SEQAN_TASSERT(bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2)==24);
+	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2), 24);
 
 	//cout << alignment3 << endl;
-	SEQAN_TASSERT(row(alignment3,0) == "ACG-TCCTCGTACAC--CGTCTTAA");
-	SEQAN_TASSERT(row(alignment3,1) == "TACGATCC----ACACCGCGTCT");
+	SEQAN_ASSERT_TRUE(row(alignment3,0) == "ACG-TCCTCGTACAC--CGTCTTAA");
+	SEQAN_ASSERT_TRUE(row(alignment3,1) == "TACGATCC----ACACCGCGTCT");
 
 
 	// -------------------- affine gap costs and on infixes ----------------
@@ -165,11 +165,11 @@ void test_banded_chain_align()
 	assignSource(row(alignment4, 1), database, 2, length(database));
 
 	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2) << endl;
-	SEQAN_TASSERT(bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2)==21);
+	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2), 21);
 
 	//cout << alignment4 << endl;
-	SEQAN_TASSERT(row(alignment4,0) == "CG-TCCTCGTACAC--CGTCTTAA");
-	SEQAN_TASSERT(row(alignment4,1) == "CGATCC----ACACCGCGTCT");
+	SEQAN_ASSERT_TRUE(row(alignment4,0) == "CG-TCCTCGTACAC--CGTCTTAA");
+	SEQAN_ASSERT_TRUE(row(alignment4,1) == "CGATCC----ACACCGCGTCT");
 	
 }
 
@@ -180,8 +180,8 @@ void Main_BandedAlign(){
 	SEQAN_TREPORT("TEST BEGIN")
 	test_banded_alignment();
 	test_banded_chain_align();
-	debug::verifyCheckpoints("projects/library/seqan/seeds/banded_align.h");
-	debug::verifyCheckpoints("projects/library/seqan/seeds/banded_chain_align.h");
-	debug::verifyCheckpoints("projects/library/seqan/seeds/banded_chain_align_affine.h");
+	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_align.h");
+	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_chain_align.h");
+	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_chain_align_affine.h");
 	SEQAN_TREPORT("TEST END")
 }

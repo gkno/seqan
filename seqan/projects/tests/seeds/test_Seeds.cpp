@@ -382,7 +382,7 @@ void Main_Seeds(){
 	SEQAN_TREPORT("TEST BEGIN")
 	Test_SimpleSeeds();
 	Test_MultiSeeds();
-	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/seeds/seed_multi.h");
+	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_base.h");
+	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_multi.h");
 	SEQAN_TREPORT("TEST END")
 }
