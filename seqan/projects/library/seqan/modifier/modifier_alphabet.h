@@ -677,6 +677,7 @@ inline void
 _initializeAlphabetConversionTable(TTarget *,
 								   TSource const &)
 {
+    SEQAN_CHECKPOINT;
 	//default: do nothing (because this array is not used)
 	//define this function for each conversion table
 }
@@ -692,6 +693,7 @@ public:
 	static TTarget * table;
 	static TTarget * initialize()
 	{
+        SEQAN_CHECKPOINT;
 		static bool _is_initialized = false;
 		if (! _is_initialized)
 		{
