@@ -771,7 +771,7 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
 #define SEQAN_ASSERT_EQ(_arg1, _arg2, ...)                              \
     do {                                                                \
-    if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,       \
+        if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,          \
                                               (_arg1), #_arg1,          \
                                               (_arg2), #_arg2,          \
                                               ## __VA_ARGS__)) {        \
@@ -786,10 +786,10 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_NEQ(4, 4, "Wheee...");
 #define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,    \
-                                                 (_arg1), #_arg1,       \
-                                                 (_arg2), #_arg2,       \
-                                                 ## __VA_ARGS__)) {     \
+        if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,       \
+                                              (_arg1), #_arg1,          \
+                                              (_arg2), #_arg2,          \
+                                              ## __VA_ARGS__)) {        \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -798,10 +798,10 @@ namespace ClassTest {
 // Less-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,         \
-                                            (_arg1), #_arg1,            \
-                                            (_arg2), #_arg2,            \
-                                            ## __VA_ARGS__)) {          \
+        if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,            \
+                                         (_arg1), #_arg1,               \
+                                         (_arg2), #_arg2,               \
+                                         ## __VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -810,7 +810,7 @@ namespace ClassTest {
 // Less-than assertion with an optional comment.
 #define SEQAN_ASSERT_LT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,          \
+        if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,             \
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                            ## __VA_ARGS__)) {           \
@@ -822,10 +822,10 @@ namespace ClassTest {
 // Greater-than-or-equal assertion with an optional comment.
 #define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...)                             \
     do {                                                                \
-        if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,         \
-                                            (_arg1), #_arg1,            \
-                                            (_arg2), #_arg2,            \
-                                            ## __VA_ARGS__)) {          \
+        if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,            \
+                                         (_arg1), #_arg1,               \
+                                         (_arg2), #_arg2,               \
+                                         ## __VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -834,10 +834,10 @@ namespace ClassTest {
 // Greater-than assertion with an optional comment.
 #define SEQAN_ASSERT_GT(_arg1, _arg2, ...)                              \
     do {                                                                \
-        if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,          \
-                                           (_arg1), #_arg1,             \
-                                           (_arg2), #_arg2,             \
-                                           ## __VA_ARGS__)) {           \
+        if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,             \
+                                        (_arg1), #_arg1,                \
+                                        (_arg2), #_arg2,                \
+                                        ## __VA_ARGS__)) {              \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -850,9 +850,9 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_TRUE(false);
 #define SEQAN_ASSERT_TRUE(_arg1, ...)                                   \
     do {                                                                \
-        if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,        \
-                                             (_arg1), #_arg1,           \
-                                             ##__VA_ARGS__)) {          \
+        if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
+                                          (_arg1), #_arg1,              \
+                                          ##__VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -864,9 +864,9 @@ namespace ClassTest {
 // Usage:  SEQAN_ASSERT_NOT(false);
 #define SEQAN_ASSERT_NOT(_arg1, ...)                                  \
     do {                                                              \
-        if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,     \
-                                              (_arg1), #_arg1,        \
-                                              ##__VA_ARGS__)) {       \
+        if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,        \
+                                           (_arg1), #_arg1,           \
+                                           ##__VA_ARGS__)) {          \
             ::seqan::ClassTest::fail();                               \
         }                                                             \
     } while (false)
@@ -1055,7 +1055,7 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1)
     ::seqan::ClassTest::StaticData::basePath()
 
 // Returns a const char * string with the path to the projects directory.
-#define SEQAN_PATH_TO_PROJECTS() \
+#define SEQAN_PATH_TO_PROJECTS()                        \
     ::seqan::ClassTest::StaticData::pathToProjects()
 
 
@@ -1073,7 +1073,7 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1)
 
 
 // Call the check point verification code for the given file.
-#define SEQAN_VERIFY_CHECKPOINTS(filename)              \
+#define SEQAN_VERIFY_CHECKPOINTS(filename)          \
     ::seqan::ClassTest::verifyCheckPoints(filename)
 
 #else  // #if SEQAN_ENABLE_TESTING
