@@ -12,20 +12,37 @@ void Main_MemoryManager();
 void Main_Seeds();
 void Main_SeedSet();
 
+SEQAN_DEFINE_TEST(test_seed_banded_align) {
+    Main_BandedAlign();
+}
+
+
+SEQAN_DEFINE_TEST(test_seed_global_seed_chain) {
+    Main_GlobalSeedChain();
+}
+
+
+SEQAN_DEFINE_TEST(test_seed_memory_manager) {
+    Main_MemoryManager();
+}
+
+
+SEQAN_DEFINE_TEST(test_seed_seeds) {
+    Main_Seeds();
+}
+
+
+SEQAN_DEFINE_TEST(test_seed_seed_set) {
+    Main_SeedSet();
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
-int main() 
-{
-	SEQAN_TREPORT("TEST BEGIN")
-
-	Main_BandedAlign();
-	Main_GlobalSeedChain();
-	Main_MemoryManager();
-	Main_Seeds();
-	Main_SeedSet();
-
-
-	SEQAN_TREPORT("TEST END");
-
-	return 0;
+SEQAN_BEGIN_TESTSUITE(test_seed) {
+    SEQAN_CALL_TEST(test_seed_banded_align);
+    SEQAN_CALL_TEST(test_seed_global_seed_chain);
+    SEQAN_CALL_TEST(test_seed_memory_manager);
+    SEQAN_CALL_TEST(test_seed_seeds);
+    SEQAN_CALL_TEST(test_seed_seed_set);
 }
+SEQAN_END_TESTSUITE
