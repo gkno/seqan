@@ -13,7 +13,9 @@
 #include <seqan/file.h>
 #include <seqan/modifier.h>
 
+#include "helpers.h"
 #include "test_modifier_alphabet.h"
+#include "test_modifier_view.h"
 
 using namespace std;
 using namespace seqan;
@@ -21,30 +23,7 @@ using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 
-	// custom functor (Caesar chiffre)
-    template <typename InType, typename Result = InType>
-    struct CaesarChiffre : public unary_function<InType,Result> 
-	{
-		InType delta;
-
-		CaesarChiffre():delta(1) {}
-		CaesarChiffre(InType _delta) {
-			if (_delta < 0)
-				delta = ('z' - 'a' + 1) - (-_delta) % ('z' - 'a' + 1);
-			else
-				delta = _delta;
-		}
-
-        inline Result operator()(InType x) const {
-			if (('a' <= x) && (x <= 'z')) return (x - 'a' + delta) % ('z' - 'a' + 1) + 'a';
-			if (('A' <= x) && (x <= 'Z')) return (x - 'A' + delta) % ('Z' - 'A' + 1) + 'A';
-			return x; 
-		}
-    };
-
-
-
-SEQAN_DEFINE_TEST(test_modifier_view_iterator) {
+SEQAN_DEFINE_TEST(test_modifier_view_iteratorXX) {
 		String<char> origin = "Vjku ku qwt qtkikpcn uvtkpi";
 
 	//____________________________________________________________________________
@@ -166,8 +145,8 @@ SEQAN_DEFINE_TEST(test_modifier_view_string) {
 		assignModViewFunctor(host(nested), enc3);
 //		assignModViewFunctor(host(host(nested)), enc_5);
 		
-		cout << (int) (begin(nested)).data_cargo.func.delta << "  ";
-		cout << (int) host((begin(nested))).data_cargo.func.delta << "  ";
+		cout << (int) (begin(nested)).data_cargo.func._delta << "  ";
+		cout << (int) host((begin(nested))).data_cargo.func._delta << "  ";
 //		cout << (int) host(host(nested)).data_cargo.func.delta << "  ";
 		
 		cout << "*** Test5: nested modifiers ***" << endl;
@@ -247,16 +226,21 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_leq);
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_geq);
 
-    /*
+    // Tests for modifier_view.h.
+    SEQAN_CALL_TEST(test_modifier_view_iterator_metafunctions);
+    SEQAN_CALL_TEST(test_modifier_view_iterator);
+    SEQAN_CALL_TEST(test_modifier_view_const_iterator);
+    SEQAN_CALL_TEST(test_modifier_convert_in_place);
+
+    // Older tests...
     SEQAN_CALL_TEST(test_modifier_view_string);
     SEQAN_CALL_TEST(test_modifier_view_iterator);
     SEQAN_CALL_TEST(test_modifier_reverse_string);
     SEQAN_CALL_TEST(test_modifier_alphabet_modifier);
-    */
 
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet.h");
-    /*
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet_expansion.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_view.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_functors.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_iterator.h");
@@ -264,6 +248,5 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_shortcuts.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_string.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_view.h");
-    */
 }
 SEQAN_END_TESTSUITE

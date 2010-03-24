@@ -174,10 +174,10 @@ void test_banded_chain_align()
 }
 
 void Main_BandedAlign(){
-
 	//Fragment<unsigned int, Default()> x();
 
 	SEQAN_TREPORT("TEST BEGIN")
+    SEQAN_ASSERT_EQ(4, 5);
 	test_banded_alignment();
 	test_banded_chain_align();
 	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/banded_align.h");
