@@ -1,158 +1,13 @@
-#include <iostream>
-#include <fstream>
-#include <functional>
-#include <typeinfo>
-#include <time.h>
-#include <cstdio>
-#include <vector>
-#include <time.h>
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
 #include <seqan/file.h>
 #include <seqan/modifier.h>
 
 #include "helpers.h"
 #include "test_modifier_alphabet.h"
 #include "test_modifier_view.h"
+#include "test_modifier_functors.h"
 
 using namespace std;
 using namespace seqan;
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-SEQAN_DEFINE_TEST(test_modifier_view_iteratorXX) {
-		String<char> origin = "Vjku ku qwt qtkikpcn uvtkpi";
-
-	//____________________________________________________________________________
-	// Test1 - no modification (default)
-	{
-
-		typedef ModifiedIterator< Iterator<String<char>, Rooted>::Type > TModIterDefault;
-
-		TModIterDefault it, itEnd(end(origin));
-
-		setContainer(it, container(itEnd));		// test setContainer
-
-		cout << "*** Iterator Test: Caesar chiffre ***" << endl;
-		cout << "chiffre:  ";
-		
-		it = begin(origin);
-		while (it != itEnd) {
-			cout << *it;
-			++it;
-		}
-		cout << endl;
-
-	}
-	//____________________________________________________________________________
-	// Test2 - Caesar chiffre
-	{
-
-		typedef CaesarChiffre<char> TEncode;
-		typedef ModifiedIterator< Iterator<String<char>, Rooted>::Type, ModView<TEncode> > TModIterCaesar;
-
-		TEncode encode(-2);
-		TModIterCaesar it(encode), itEnd(end(origin));
-
-		setContainer(it, container(itEnd));		// test setContainer
-
-		cout << "original: ";
-
-		it = begin(origin);
-		while (it != itEnd) {
-			cout << *it;
-			it = it + 1;
-		}
-		cout << endl << endl;
-
-	}
-}
-
-
-SEQAN_DEFINE_TEST(test_modifier_view_string) {
-		String<char> origin = "This is our original string";
-
-	//____________________________________________________________________________
-	// Test1 - no modification (default)
-
-		typedef ModifiedString< String<char> > TModStringDefault;
-
-		TModStringDefault nomod(origin);
-
-		cout << "*** Test1/2: Caesar chiffre ***" << endl;
-		cout << "origin:  " << nomod << endl;
-		
-	//____________________________________________________________________________
-	// Test2 - Caesar chiffre
-
-		typedef CaesarChiffre<char> TEncode;
-		typedef ModifiedString< String<char>, ModView<TEncode> > TModStringCaesar;
-
-		TEncode encode(2);
-		TModStringCaesar chiffre(origin);
-		assignModViewFunctor(chiffre, encode);
-
-		cout << "chiffre: " << chiffre << endl << endl;
-
-	//____________________________________________________________________________
-	// Test3 - upcase/lowcase
-
-		typedef ModifiedString< String<char>, ModView< FunctorUpcase<char> > > TModStringUp;
-		typedef ModifiedString< String<char>, ModView< FunctorLowcase<char> > > TModStringLow;
-
-		TModStringUp	up(origin);
-		TModStringLow	low(origin);
-
-		cout << "*** Test3: upcase/lowcase ***" << endl;
-		cout << "upcase:   " << up << endl;
-		cout << "lowcase: " << low << endl << endl;
-
-	//____________________________________________________________________________
-	// Test4 - alphabet conversion
-
-		String<char> originDNA = "acgtnACGTN";
-		typedef ModifiedString< String<char>, ModView< FunctorConvert<char, Dna5> > > TModStringDNA;
-
-		TModStringDNA	dna(originDNA);
-
-		cout << "*** Test4: alphabet conversion ***" << endl;
-		cout << "origin: " << originDNA << endl;
-		cout << "Dna5:   " << dna << endl << endl;
-
-	//____________________________________________________________________________
-	// Test5 - nested modifiers
-
-		typedef CaesarChiffre<char> TEncode;
-		typedef ModifiedString< 
-		//			ModifiedString< 
-						ModifiedString< 
-							String<char>, 
-							ModView<TEncode> 
-						>, 
-						ModView<TEncode> 
-		//			>, 
-		//			ModView<TEncode>
-				> TModStringNested;
-
-		TModStringNested nested(origin);
-
-		TEncode enc2(2), enc3(-2), enc_5(-5);
-
-		assignModViewFunctor(nested, enc2);
-		assignModViewFunctor(host(nested), enc3);
-//		assignModViewFunctor(host(host(nested)), enc_5);
-		
-		cout << (int) (begin(nested)).data_cargo.func._delta << "  ";
-		cout << (int) host((begin(nested))).data_cargo.func._delta << "  ";
-//		cout << (int) host(host(nested)).data_cargo.func.delta << "  ";
-		
-		cout << "*** Test5: nested modifiers ***" << endl;
-		cout << "nested: " << nested << endl << endl;
-
-}
 
 
 SEQAN_DEFINE_TEST(test_modifier_reverse_string) {
@@ -200,22 +55,9 @@ SEQAN_DEFINE_TEST(test_modifier_reverse_string) {
 
 }
 
-//____________________________________________________________________________
-
-SEQAN_DEFINE_TEST(test_modifier_alphabet_modifier) {
-	typedef ModifiedAlphabet<Dna, ModExpand<'-'> > TDnaGap;
-	typedef String<TDnaGap> TString;
-
-	TString str = "aCgT-AcGt";
-	cout << str << endl;
-
-	SEQAN_TASSERT(str == "aCgT-AcGt");
-	SEQAN_TASSERT(str == "AcGt-aCgT");
-}
-
 
 SEQAN_BEGIN_TESTSUITE(test_modifier) {
-    // Tests for modifier_alphabet.h.
+    // Tests for modifier_alphabet.h and modifier_alphabet_expansion.h.
     SEQAN_CALL_TEST(test_modifier_alphabet_size_metafunctions);
     SEQAN_CALL_TEST(test_modifier_alphabet_convert);
     SEQAN_CALL_TEST(test_modifier_alphabet_ord_value);
@@ -226,23 +68,44 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_leq);
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_geq);
 
+    // Tests for modifier_functors.h.
+    SEQAN_CALL_TEST(test_modifier_functors_functor_upcase);
+    SEQAN_CALL_TEST(test_modifier_functors_functor_lowcase);
+    SEQAN_CALL_TEST(test_modifier_functors_dna_complement);
+
+    // Tests for modifier_iterator.h.
+    // TODO(holtgrew): Write me!
+
+    // Tests for modifier_reverse.h.
+    // TODO(holtgrew): Write me!
+
+    // Tests for modifier_shortcuts.h.
+    // TODO(holtgrew): Write me!
+
+    // Tests for modifier_string.h.
+    // TODO(holtgrew): Write me!
+
     // Tests for modifier_view.h.
     SEQAN_CALL_TEST(test_modifier_view_iterator_metafunctions);
     SEQAN_CALL_TEST(test_modifier_view_iterator);
     SEQAN_CALL_TEST(test_modifier_view_const_iterator);
     SEQAN_CALL_TEST(test_modifier_convert_in_place);
 
-    // Older tests...
-    SEQAN_CALL_TEST(test_modifier_view_string);
-    SEQAN_CALL_TEST(test_modifier_view_iterator);
-    SEQAN_CALL_TEST(test_modifier_reverse_string);
-    SEQAN_CALL_TEST(test_modifier_alphabet_modifier);
+    SEQAN_CALL_TEST(test_modifier_view_string_caesar_chiffre);
+    SEQAN_CALL_TEST(test_modifier_view_string_upper_case);
+    SEQAN_CALL_TEST(test_modifier_view_string_low_case);
+    SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
+    SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
+    SEQAN_CALL_TEST(test_modifier_view_string_nested_modifier);
 
+    // Older tests...
+    // TODO(holtgrew): Remove.
+    SEQAN_CALL_TEST(test_modifier_reverse_string);
+
+    // Verify check points for all headers in the module modifier.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet_expansion.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_view.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_functors.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_iterator.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_reverse.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_shortcuts.h");
