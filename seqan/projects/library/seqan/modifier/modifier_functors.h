@@ -16,21 +16,19 @@
 
  ============================================================================
   Author: David Weese <david.weese@fu-berlin.de>
+ ============================================================================
+  Some useful functors for modified strings.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_MODIFIER_FUNCTORS_H
-#define SEQAN_HEADER_MODIFIER_FUNCTORS_H
+#ifndef SEQAN_MODIFIER_MODIFIER_FUNCTORS_H_
+#define SEQAN_MODIFIER_MODIFIER_FUNCTORS_H_
 
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-
 //////////////////////////////////////////////////////////////////////////////
-
-
-	//////////////////////////////////////////////////////////////////////////////
-	// text transformation
-	//////////////////////////////////////////////////////////////////////////////
+// text transformation
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.FunctorUpcase:
@@ -40,16 +38,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TValue:The input value type.
 ..remarks:This Functor is a derivation of the STL unary function.
 */
+template <typename InType, typename Result = InType>
+struct FunctorUpcase : public ::std::unary_function<InType,Result> 
+{
+    inline Result operator()(InType x) const {
+        SEQAN_CHECKPOINT;
+        if (('a' <= x) && (x <= 'z')) return (x + ('A' - 'a'));
+        return x; 
+    }
+};
 
-    template <typename InType, typename Result = InType>
-	struct FunctorUpcase : public ::std::unary_function<InType,Result> 
-	{
-        inline Result operator()(InType x) const {
-            SEQAN_CHECKPOINT;
-			if (('a' <= x) && (x <= 'z')) return (x + ('A' - 'a'));
-			return x; 
-		}
-    };
 
 /**
 .Class.FunctorLowcase:
@@ -59,21 +57,20 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TValue:The input value type.
 ..remarks:This Functor is a derivation of the STL unary function.
 */
+template <typename InType, typename Result = InType>
+struct FunctorLowcase : public ::std::unary_function<InType,Result> 
+{
+    inline Result operator()(InType x) const {
+        SEQAN_CHECKPOINT;
+        if (('A' <= x) && (x <= 'Z')) return (x + ('a' - 'A'));
+        return x; 
+    }
+};
 
-    template <typename InType, typename Result = InType>
-    struct FunctorLowcase : public ::std::unary_function<InType,Result> 
-	{
-        inline Result operator()(InType x) const {
-            SEQAN_CHECKPOINT;
-			if (('A' <= x) && (x <= 'Z')) return (x + ('a' - 'A'));
-			return x; 
-		}
-    };
 
-
-	//////////////////////////////////////////////////////////////////////////////
-	// alphabet transformation
-	//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// alphabet transformation
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.FunctorConvert:
@@ -84,19 +81,19 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TOutValue:The output value type.
 ..remarks:This Functor is a derivation of the STL unary function.
 */
+template <typename InType, typename OutType>
+struct FunctorConvert : public ::std::unary_function<InType,OutType> 
+{
+    inline OutType operator()(InType x) const {
+        SEQAN_CHECKPOINT;
+        return x; 
+    }
+};
 
-    template <typename InType, typename OutType>
-    struct FunctorConvert : public ::std::unary_function<InType,OutType> 
-	{
-        inline OutType operator()(InType x) const {
-            SEQAN_CHECKPOINT;
-			return x; 
-		}
-    };
 
-	//////////////////////////////////////////////////////////////////////////////
-	// DNA complement
-	//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// DNA complement
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.FunctorComplement:
@@ -108,66 +105,66 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Dna5
 ..remarks:This Functor is a derivation of the STL unary function.
 */
-
-    template <typename TValue>
-    struct FunctorComplement;
-	
-//____________________________________________________________________________
-
-	template <typename T = void>
-	struct _Translate_Table_Dna5_2_Dna5Complement
-	{
-		static char const VALUE[5];
-	};
-	template <typename T>
-	char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
-
-//____________________________________________________________________________
+template <typename TValue>
+struct FunctorComplement;
 
 
-    template <>
-    struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna> 
-	{
-        inline Dna operator()(Dna x) const {
-            SEQAN_CHECKPOINT;
-			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
-		}
-    };
-
-    template <>
-    struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5> 
-	{
-        inline Dna5 operator()(Dna5 x) const {
-            SEQAN_CHECKPOINT;
-			return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
-		}
-    };
-
-	template <>
-	struct FunctorComplement<DnaQ> : public ::std::unary_function<DnaQ,DnaQ> 
-	{
-		inline DnaQ operator()(DnaQ x) const {
-            SEQAN_CHECKPOINT;
-			int qual = getQualityValue(x);
-			x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna)x)];
-			assignQualityValue(x, qual);
-			return x;
-		}
-	};
+template <typename T = void>
+struct _Translate_Table_Dna5_2_Dna5Complement
+{
+    static char const VALUE[5];
+};
 
 
-	template <>
-	struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5Q,Dna5Q> 
-	{
-		inline Dna5Q operator()(Dna5Q x) const {
-            SEQAN_CHECKPOINT;
-			int qual = getQualityValue(x);
-			x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna5)x)];
-			assignQualityValue(x, qual);
-			return x;
-		}
-	};
+template <typename T>
+char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
 
-}
 
-#endif
+template <>
+struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna> 
+{
+    inline Dna operator()(Dna x) const {
+        SEQAN_CHECKPOINT;
+        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+    }
+};
+
+
+template <>
+struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5> 
+{
+    inline Dna5 operator()(Dna5 x) const {
+        SEQAN_CHECKPOINT;
+        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+    }
+};
+
+
+template <>
+struct FunctorComplement<DnaQ> : public ::std::unary_function<DnaQ,DnaQ> 
+{
+    inline DnaQ operator()(DnaQ x) const {
+        SEQAN_CHECKPOINT;
+        int qual = getQualityValue(x);
+        x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna)x)];
+        assignQualityValue(x, qual);
+        return x;
+    }
+};
+
+
+template <>
+struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5Q,Dna5Q> 
+{
+    inline Dna5Q operator()(Dna5Q x) const {
+        SEQAN_CHECKPOINT;
+        int qual = getQualityValue(x);
+        x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna5)x)];
+        assignQualityValue(x, qual);
+        return x;
+    }
+};
+
+}  // namespace seqan
+
+#endif  // SEQAN_MODIFIER_MODIFIER_FUNCTORS_H_
