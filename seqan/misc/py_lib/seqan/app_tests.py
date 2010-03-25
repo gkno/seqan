@@ -14,6 +14,8 @@ Classes/Functions:
   class TestConf -- stores configuration of a test.
   class TestPathHelper -- helps with constructing paths.
   function runTest -- runs a test configured by a TestConf object.
+  function autolocateBinary -- locates a binary, possibly in an intermediary
+                               directory.
 """
 
 from __future__ import with_statement
@@ -103,6 +105,32 @@ class TestPathHelper(object):
                 os.path.makedirs(self.temp_dir)
         logging.debug('outFile(%s) = %s', path, self.temp_dir)
         return os.path.join(self.temp_dir, path)
+
+
+def autolocateBinary(base_path, relative_path, binary_name):
+  """Autolocates a binary, possibly in an intermediary path.
+
+  When building applications with CMake, they do not always have the same
+  relative path from the binary build directory.  For Unix Makefiles, the
+  path could be 'projects/library/cmake/apps/tree_recon' whereas for
+  Visual Studio, it could be 'projects/librar/cmake/apps/Release/tree_recon'.
+
+  This function tries to automatically guess the name of the file and return
+  the first one it finds.
+  """
+  # Names of intermediary directories and possible file extensions.
+  intermediary_dir_names = ['', 'Debug', 'Release']
+  extensions = ['', '.exe']
+  # Try all possible paths.
+  for dir_name in intermediary_dir_names:
+    for ext in extensions:
+      res_list = [base_path, relative_path, dir_name, binary_name, ext]
+      filtered_list = [x for x in res_list if x]  # Filter out empty strings.
+      path = os.path.join(filtered_list)
+      if os.path.isfile(path):
+        return path
+  # Fall back ot Unix default.
+  return os.path.join(base_path, relative_path, binary_name)
 
 
 def runTest(test_conf):

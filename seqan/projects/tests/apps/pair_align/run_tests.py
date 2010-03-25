@@ -15,10 +15,6 @@ import sys
 
 import seqan.app_tests as app_tests
 
-# Path of the binary under test, relative to the checkout.
-BINARY = 'projects/library/cmake/apps/pair_align'
-
-
 def main(source_base, binary_base):
     """Main entry point of the script."""
 
@@ -29,6 +25,17 @@ def main(source_base, binary_base):
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
         'projects/tests/apps/pair_align')  # tests dir
+
+    # ============================================================
+    # Auto-detect the binary path.
+    # ============================================================
+
+    path_to_program = app_tests.autolocateBinary(
+      binary_base, 'projects/library/cmake/apps', 'pair_align')
+
+    # ============================================================
+    # Built TestConf list.
+    # ============================================================
 
     # Build list with TestConf objects, analoguely to how the output
     # was generated in generate_outputs.sh.

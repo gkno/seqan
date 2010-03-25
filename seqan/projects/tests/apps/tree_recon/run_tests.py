@@ -14,10 +14,6 @@ import sys
 
 import seqan.app_tests as app_tests
 
-# Path of the binary under test, relative to the checkout.
-BINARY = 'projects/library/cmake/apps/tree_recon'
-
-
 def main(source_base, binary_base):
     """Main entry point of the script."""
 
@@ -28,6 +24,17 @@ def main(source_base, binary_base):
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
         'projects/tests/apps/tree_recon')  # tests dir
+
+    # ============================================================
+    # Auto-detect the binary path.
+    # ============================================================
+
+    path_to_program = app_tests.autolocateBinary(
+      binary_base, 'projects/library/cmake/apps', 'tree_recon')
+
+    # ============================================================
+    # Built TestConf list.
+    # ============================================================
 
     # Build list with TestConf objects, analoguely to how the output
     # was generated in generate_outputs.sh.

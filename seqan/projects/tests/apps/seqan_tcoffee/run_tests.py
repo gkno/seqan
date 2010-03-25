@@ -15,20 +15,27 @@ import sys
 
 import seqan.app_tests as app_tests
 
-# Path of the binary under test, relative to the checkout.
-BINARY = 'projects/library/cmake/apps/seqan_tcoffee'
-
-
 def main(source_base, binary_base):
     """Main entry point of the script."""
 
     print 'Executing test for seqan_tcoffee'
     print '================================'
     print
-    
+
     ph = app_tests.TestPathHelper(
         source_base, binary_base,
         'projects/tests/apps/seqan_tcoffee')  # tests dir
+
+    # ============================================================
+    # Auto-detect the binary path.
+    # ============================================================
+
+    path_to_program = app_tests.autolocateBinary(
+      binary_base, 'projects/library/cmake/apps', 'seqan_tcoffee')
+
+    # ============================================================
+    # Built TestConf list.
+    # ============================================================
 
     # Build list with TestConf objects, analoguely to how the output
     # was generated in generate_outputs.sh.
@@ -41,7 +48,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.out' % fname)],
             to_diff=[(ph.inFile('%s.out' % fname),
@@ -51,7 +58,7 @@ def main(source_base, binary_base):
     # Run with explicit alphabet.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'protein',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.protein.out' % fname)],
@@ -65,7 +72,7 @@ def main(source_base, binary_base):
         for m in ['global', 'local', 'overlap', 'lcs', 'global,local',
                   'local,overlap', 'overlap,lcs', 'global,lcs']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 args=['-m', m,
                       '-s', ph.inFile('%s.fa' % fname),
                       '-o', ph.outFile('%s.m%s.out' % (fname, m))],
@@ -79,7 +86,7 @@ def main(source_base, binary_base):
     # Run with different scoring options.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-g', '-20',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.g-20.out' % fname)],
@@ -87,7 +94,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.g-20.out' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-e', '-5',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.e-5.out' % fname)],
@@ -95,7 +102,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.e-5.out' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-ms', '10',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.ms10.out' % fname)],
@@ -103,7 +110,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.ms10.out' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-mm', '-8',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.mm-8.out' % fname)],
@@ -114,7 +121,7 @@ def main(source_base, binary_base):
     # Run with matrix file.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-ma', ph.inFile('VTML200I'),
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.maVTML200.out' % fname)],
@@ -125,7 +132,7 @@ def main(source_base, binary_base):
     # Run with manual guide tree.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-u', ph.inFile('%s.newick' % fname),
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.u.out' % fname)],
@@ -137,7 +144,7 @@ def main(source_base, binary_base):
     for fname in ['1aab', '1ad2', '2trx']:
         for b in ['nj', 'min', 'max', 'avg', 'wavg']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 args=['-b', b,
                       '-s', ph.inFile('%s.fa' % fname),
                       '-o', ph.outFile('%s.b%s.out' % (fname, b))],
@@ -148,7 +155,7 @@ def main(source_base, binary_base):
     # Run alignment evaluation.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-i', ph.inFile('%s.out' % fname)],
             redir_stdout=ph.outFile('%s.i.out' % fname),
             to_diff=[(ph.inFile('%s.i.out' % fname),
@@ -162,7 +169,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for i in [2, 3, 4]:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'dna',
                   '-s', ph.inFile('adeno%d.fa' % i),
                   '-o', ph.outFile('adeno%d.out' % i)],
@@ -177,7 +184,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for i in [2, 3, 4]:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'rna',
                   '-s', ph.inFile('adeno%d-rna.fa' % i),
                   '-o', ph.outFile('adeno%d-rna.out' % i)],
