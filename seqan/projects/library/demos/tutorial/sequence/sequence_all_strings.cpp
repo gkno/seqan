@@ -1,10 +1,11 @@
+//FRAGMENT(includes)
 #include <iostream>
 
-#include <seqan/file.h>
 #include <seqan/sequence.h>
 
 using namespace seqan;
 
+// FRAGMENT(print-strings-rec)
 // Helper function for printPermutations().
 void printStringsRec(String<char> &current, int pos) {
   if (pos < length(current)) {
@@ -20,6 +21,7 @@ void printStringsRec(String<char> &current, int pos) {
 }
 
 
+// FRAGMENT(print-strings)
 // Print all strings of the alphabet {a, ..., z} of length len.
 void printStrings(int len) {
   String<char> current;
@@ -33,6 +35,7 @@ void printStrings(int len) {
 }
 
 
+//FRAGMENT(main)
 int main(int argc, char **argv) {
   printStrings(3);
   return 0;
