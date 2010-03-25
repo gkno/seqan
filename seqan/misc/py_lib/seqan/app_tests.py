@@ -124,7 +124,7 @@ def autolocateBinary(base_path, relative_path, binary_name):
   # Try all possible paths.
   for dir_name in intermediary_dir_names:
     for ext in extensions:
-      res_list = [base_path, relative_path, dir_name, binary_name, ext]
+      res_list = [base_path, relative_path, dir_name, binary_name + ext]
       filtered_list = [x for x in res_list if x]  # Filter out empty strings.
       res_path = os.path.join(*filtered_list)
       print >>sys.stderr, 'Trying path %s' % res_path
