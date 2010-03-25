@@ -1,5 +1,4 @@
 // FRAGMENT(includes)
-#define SEQAN_PROFILE // enable time measurements
 #include <seqan/file.h>
 #include <seqan/index.h>
 #include <seqan/store.h>
