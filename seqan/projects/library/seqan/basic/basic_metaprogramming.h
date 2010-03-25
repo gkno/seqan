@@ -177,18 +177,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < __int64 numerus >
 	struct Log2 {
-		enum { VALUE = Log2<(numerus + 1) / 2>::VALUE + 1 };		// ceil(log_2(n))
+		static const __uint64 VALUE = Log2<(numerus + 1) / 2>::VALUE + 1;		// ceil(log_2(n))
 	};
 
 	template < __int64 numerus >
 	struct Log2Floor {
-		enum { VALUE = Log2Floor<numerus / 2>::VALUE + 1 };		// floor(log_2(n))
+		static const __uint64 VALUE = Log2Floor<numerus / 2>::VALUE + 1;		// floor(log_2(n))
 	};
 
-	template <> struct Log2<1> { enum { VALUE = 0 }; };
-	template <> struct Log2<0> { enum { VALUE = 0 }; };
-	template <> struct Log2Floor<1> { enum { VALUE = 0 }; };
-	template <> struct Log2Floor<0> { enum { VALUE = 0 }; };
+	template <> struct Log2<1> { static const __uint64 VALUE = 0; };
+	template <> struct Log2<0> { static const __uint64 VALUE = 0; };
+	template <> struct Log2Floor<1> { static const __uint64 VALUE = 0; };
+	template <> struct Log2Floor<0> { static const __uint64 VALUE = 0; };
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -197,15 +197,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < __int64 base, __int64 exponent >
 	struct Power {
-		enum { 
-			VALUE = 
+		static const __uint64 VALUE =
 				Power<base, exponent / 2>::VALUE * 
-				Power<base, exponent - (exponent / 2)>::VALUE 
-		};
+				Power<base, exponent - (exponent / 2)>::VALUE;
 	};
 
-	template < __int64 base > struct Power<base, 1> { enum { VALUE = base }; };
-	template < __int64 base > struct Power<base, 0> { enum { VALUE = 1 }; };
+	template < __int64 base > struct Power<base, 1> { static const __uint64 VALUE = base; };
+	template < __int64 base > struct Power<base, 0> { static const __uint64 VALUE = 1; };
 
 
 	//////////////////////////////////////////////////////////////////////////////
