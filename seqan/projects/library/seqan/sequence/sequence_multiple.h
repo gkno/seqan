@@ -965,7 +965,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	template < typename TString, typename TSpec >
 	struct Value< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
 		Infix<TString> {};
-
+		
+/* // we had a problem with constructing a Finder<GetValue<TConcatStringSet>::Type>
     template < typename TString, typename TSpec >
 	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
 		Infix<TString> {};
@@ -973,6 +974,18 @@ a single integer value between 0 and the sum of string lengths minus 1.
     template < typename TString, typename TSpec >
 	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >:
 		Infix<TString const> {};
+*/
+    template < typename TString, typename TSpec >
+	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > >
+	{
+		typedef typename Infix<TString>::Type const Type;
+	};
+	
+    template < typename TString, typename TSpec >
+	struct GetValue< StringSet< TString, Owner<ConcatDirect<TSpec> > > const >
+	{
+		typedef typename Infix<TString const>::Type const Type;
+	};
 
     template < typename TString, typename TSpec >
 	struct Reference< StringSet< TString, Owner<ConcatDirect<TSpec> > > >:
