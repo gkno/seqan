@@ -126,9 +126,9 @@ def autolocateBinary(base_path, relative_path, binary_name):
     for ext in extensions:
       res_list = [base_path, relative_path, dir_name, binary_name, ext]
       filtered_list = [x for x in res_list if x]  # Filter out empty strings.
-      path = os.path.join(filtered_list)
-      if os.path.isfile(path):
-        return path
+      res_path = os.path.join(*filtered_list)
+      if os.path.isfile(res_path):
+        return res_path
   # Fall back ot Unix default.
   return os.path.join(base_path, relative_path, binary_name)
 

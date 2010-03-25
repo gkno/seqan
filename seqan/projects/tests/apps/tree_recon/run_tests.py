@@ -41,7 +41,7 @@ def main(source_base, binary_base):
     conf_list = []
     for i in [1, 2, 3]:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-m', ph.inFile('example%d.dist' % i),
                   '-o', ph.outFile('example%d.out' % i)],
             to_diff=[(ph.inFile('example%d.out' % i),
@@ -50,7 +50,7 @@ def main(source_base, binary_base):
     for i in [1, 2, 3]:
         for b in ['nj', 'min', 'max', 'avg', 'wavg']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 args=['-b', b,
                       '-m', ph.inFile('example%d.dist' % i),
                       '-o', ph.outFile('example%d.%s.out' % (i, b))],
@@ -60,7 +60,7 @@ def main(source_base, binary_base):
     for i in [1, 2, 3]:
         for f in ['dot', 'newick']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 args=['-f', f,
                       '-m', ph.inFile('example%d.dist' % i),
                       '-o', ph.outFile('example%d.%s.out' % (i, f))],

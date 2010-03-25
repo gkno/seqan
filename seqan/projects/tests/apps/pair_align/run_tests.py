@@ -48,7 +48,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.stdout' % fname),
             args=['-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.out' % fname)],
@@ -61,7 +61,7 @@ def main(source_base, binary_base):
     # Run with explicit alphabet.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'protein',
                   '-s', ph.inFile('%s.fa' % fname),
                   '-o', ph.outFile('%s.protein.out' % fname)],
@@ -76,7 +76,7 @@ def main(source_base, binary_base):
     for fname in ['1aab', '1ad2', '2trx']:
         for m in ['nw', 'gotoh', 'sw', 'lcs']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 redir_stdout=ph.outFile('%s.m%s.stdout' % (fname, m)),
                 args=['-m', m,
                       '-s', ph.inFile('%s.fa' % fname),
@@ -90,7 +90,7 @@ def main(source_base, binary_base):
     # Run with different scoring options.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.g-20.stdout' % fname),
             args=['-g', '-20',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -101,7 +101,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.g-20.stdout' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.e-5.stdout' % fname),
             args=['-e', '-5',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -112,7 +112,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.e-5.stdout' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.ms10.stdout' % fname),
             args=['-ms', '10',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -123,7 +123,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.ms10.stdout' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.mm-8.stdout' % fname),
             args=['-mm', '-8',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -137,7 +137,7 @@ def main(source_base, binary_base):
     # Run with matrix file.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.maVTML200.stdout' % fname),
             args=['-ma', ph.inFile('VTML200I'),
                   '-s', ph.inFile('%s.fa' % fname),
@@ -151,7 +151,7 @@ def main(source_base, binary_base):
     # Run with different banded alignment options.
     for fname in ['1aab', '1ad2', '2trx']:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.lo5.stdout' % fname),
             args=['-lo', '5',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -162,7 +162,7 @@ def main(source_base, binary_base):
                       ph.outFile('%s.lo5.stdout' % fname))])
         conf_list.append(conf)
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             redir_stdout=ph.outFile('%s.hi5.stdout' % fname),
             args=['-hi', '5',
                   '-s', ph.inFile('%s.fa' % fname),
@@ -178,7 +178,7 @@ def main(source_base, binary_base):
         for c in ['ffff', 'tttt', 'ffft', 'fftf', 'ftff', 'tfff', 'fftt',
                   'fttf', 'ttff', 'tfft']:
             conf = app_tests.TestConf(
-                program=os.path.join(ph.binary_base_path, BINARY),
+                program=path_to_program,
                 redir_stdout=ph.outFile('%s.c%s.stdout' % (fname, c)),
                 args=['-c', c,
                       '-s', ph.inFile('%s.fa' % fname),
@@ -196,7 +196,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for i in [1, 2, 3]:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'dna',
                   '-s', ph.inFile('adeno%d.fa' % i),
                   '-o', ph.outFile('adeno%d.out' % i)],
@@ -211,7 +211,7 @@ def main(source_base, binary_base):
     # Run with defaults for all non-mandatory options.
     for i in [1, 2, 3]:
         conf = app_tests.TestConf(
-            program=os.path.join(ph.binary_base_path, BINARY),
+            program=path_to_program,
             args=['-a', 'rna',
                   '-s', ph.inFile('adeno%d-rna.fa' % i),
                   '-o', ph.outFile('adeno%d-rna.out' % i)],
