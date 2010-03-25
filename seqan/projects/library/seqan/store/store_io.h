@@ -934,6 +934,54 @@ bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
 }
 
 
+//////////////////////////////////////////////////////////////////////////////
+// Load multi-Fasta sequences from multiple files
+template <typename TFSSpec, typename TFSConfig, typename TFileName>
+bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
+{
+	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
+	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
+	typedef typename Value<TContigFileStore>::Type		TContigFile;
+
+	MultiSeqFile multiSeqFile;
+	if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY))
+		return false;
+
+	// guess file format and split into sequence fractions
+	AutoSeqFormat format;
+	guessFormat(multiSeqFile.concat, format);
+	split(multiSeqFile, format);
+
+	// reserve space in fragment store
+	unsigned seqOfs = length(store.readStore);
+	unsigned seqCount = length(multiSeqFile);
+	reserve(store.readStore, seqOfs + seqCount);
+	reserve(store.readSeqStore, seqOfs + seqCount);
+	reserve(store.readNameStore, seqOfs + seqCount);
+
+	// read sequences
+	String<Dna5Q> seq;
+	CharString qual;
+	CharString id;
+
+	for (unsigned i = 0; i < seqCount; ++i)
+	{
+		assignSeq(seq, multiSeqFile[i], format);    // read sequence
+		assignQual(qual, multiSeqFile[i], format);  // read ascii quality values
+		assignSeqId(id, multiSeqFile[i], format);   // read sequence id
+
+		// convert ascii to values from 0..62
+		// store dna and quality together in Dna5Q
+		// TODO: support different ASCII represenations of quality values
+		for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
+			assignQualityValue(seq[j], (int)(ordValue(qual[j]) - 33));
+
+		appendRead(store, seq, id);
+	}
+	return true;
+}
+
+
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
