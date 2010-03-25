@@ -80,9 +80,5 @@
 #include <seqan/find/find_hamming_simple.h>
 
 //____________________________________________________________________________
-//filtering
-#include <seqan/find/find_quasar.h>
-
-//____________________________________________________________________________
 
 #endif //#ifndef SEQAN_HEADER_...

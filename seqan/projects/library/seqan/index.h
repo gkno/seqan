@@ -103,9 +103,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <seqan/index/index_shims.h>
-#include <seqan/index/index_esa_find.h>
-#include <seqan/index/index_qgram_find.h>
-#include <seqan/index/index_find.h>
 
 //____________________________________________________________________________
 // (virtual) suffix trees
@@ -133,5 +130,19 @@
 // Shawarma interface (suffix array creators)
 
 #include <seqan/index/index_shawarma.h>
+
+
+//////////////////////////////////////////////////////////////////////////////
+// FINDER INTERFACE
+//////////////////////////////////////////////////////////////////////////////
+
+//____________________________________________________________________________
+// index based finders
+
+#include <seqan/index/find_index_esa.h>
+#include <seqan/index/find_index_qgram.h>
+#include <seqan/index/find_index.h>
+#include <seqan/index/find_quasar.h>
+#include <seqan/index/find_swift.h>
 
 #endif //#ifndef SEQAN_HEADER_...
