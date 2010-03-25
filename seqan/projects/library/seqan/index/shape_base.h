@@ -59,7 +59,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TValue, typename TSpec>
 	struct Value<Shape<TValue,TSpec> >
 	{
-		typedef unsigned long Type;
+		typedef __uint64 Type;
 	};
 
 ///.Metafunction.Size.param.T.type:Class.Shape
@@ -85,10 +85,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Metafunction.ValueSize.param.T.type:Class.Shape
 	template <typename TValue, typename TSpec>
-	struct ValueSize< Shape<TValue, TSpec> > {
-		enum { VALUE = Power<
+	struct ValueSize< Shape<TValue, TSpec> > 
+	{
+		typedef typename Value<Shape<TValue, TSpec> >::Type THashValue;
+		static const THashValue VALUE = Power<
 						ValueSize<TValue>::VALUE, 
-						WEIGHT< Shape<TValue, TSpec> >::VALUE >::VALUE };
+						WEIGHT< Shape<TValue, TSpec> >::VALUE >::VALUE;
 	};
 
 ///.Metafunction.Host.param.T.type:Class.Shape
@@ -194,16 +196,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	class Shape<TValue, UngappedShape<q> >
 	{
 	public:
+		typedef typename Value<Shape>::Type THashValue;
 //____________________________________________________________________________
 
-		enum { span = q };
-		enum { leftFactor = Power<ValueSize<TValue>::VALUE, q - 1>::VALUE };
-		enum { leftFactor2 = (Power<ValueSize<TValue>::VALUE, q>::VALUE - 1) / (ValueSize<TValue>::VALUE - 1) };
+		static const unsigned span = q;
+		static const THashValue leftFactor = Power<ValueSize<TValue>::VALUE, q - 1>::VALUE;
+		static const THashValue leftFactor2 = (Power<ValueSize<TValue>::VALUE, q>::VALUE - 1) / (ValueSize<TValue>::VALUE - 1);
 		// Sigma^(q-1) + Sigma^(q-2) + ... + Sigma + 1
 
-		typename Value<Shape>::Type	hValue;		// current hash value
-		typename Value<Shape>::Type	XValue;		// Sum_{i=0..q-1} (x_i + 1)
-		TValue						leftChar;	// leftmost character
+		THashValue	hValue;		// current hash value
+		THashValue	XValue;		// Sum_{i=0..q-1} (x_i + 1)
+		TValue		leftChar;	// leftmost character
 //____________________________________________________________________________
 		Shape():
 			hValue(0),

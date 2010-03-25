@@ -1001,7 +1001,7 @@ inline bool _swiftMultiProcessQGram(
 			}
 			else
 			{
-				if ((*bkt).lastIncrement + bucketParams.tabooLength > curPos) 
+				if ((__int64)(*bkt).lastIncrement + bucketParams.tabooLength > curPos)
 					goto checkOverlap;	// increment only once per sequence			
 				hitCount = (*bkt).counter + 1;
 			}
