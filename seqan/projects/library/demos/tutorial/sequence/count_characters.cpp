@@ -4,7 +4,6 @@
 
 using namespace seqan;
 
-//FRAGMENT(count-one-mers-begin)
 void countOneMers(CharString const & str) {
 	//FRAGMENT(count-one-mers-initialize-table)
 	String<int> table;
