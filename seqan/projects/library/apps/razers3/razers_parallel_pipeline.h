@@ -23,3 +23,56 @@
 #define SEQAN_HEADER_RAZERS_PARALLEL_PIPELINE_H
 
 #include <iostream>
+
+namespace SEQAN_NAMESPACE_MAIN
+{
+	// Filter that writes each buffer to a file.
+	class FilterFilter: public tbb::filter {
+		public:
+			FilterFilter();
+			/*override*/void* operator()( void* item );
+	};
+	
+	FilterFilter::FilterFilter(): tbb::filter(serial_in_order) {}
+	
+	void* MyOutputFilter::operator()( void* item ) {
+		return NULL;
+	}
+	
+	class MyInputFilter: public tbb::filter {
+		public:
+			static const size_t n_buffer = 8;
+			MyInputFilter( FILE* input_file_ );
+		private:
+			FILE* input_file;
+			size_t next_buffer;
+			char last_char_of_previous_buffer;
+			MyBuffer buffer[n_buffer];
+			/*override*/ void* operator()(void*);
+	};
+	
+	MyInputFilter::MyInputFilter( FILE* input_file_ ) :
+		filter(serial_in_order),
+		next_buffer(0),
+		input_file(input_file_),
+		last_char_of_previous_buffer(' ')
+	{}
+	
+	void* MyInputFilter::operator()(void*) {
+		MyBuffer& b = buffer[next_buffer];
+		next_buffer = (next_buffer+1) % n_buffer;
+		size_t n = fread( b.begin(), 1, b.max_size(), input_file );
+		if( !n ) {
+			// end of file
+			return NULL;
+		} else {
+			b.begin()[-1] = last_char_of_previous_buffer;
+			last_char_of_previous_buffer = b.begin()[n-1];
+			b.set_end( b.begin()+n );
+			return &b;
+		}
+	}
+	
+}
+
+#endif

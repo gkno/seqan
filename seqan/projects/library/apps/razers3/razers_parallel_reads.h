@@ -23,11 +23,12 @@
 #define SEQAN_HEADER_RAZERS_PARALLEL_2_H
 
 #include <iostream>
-#include <omp.h>
-
+#ifdef _OPENMP
+	#include <omp.h>
+#endif
 //#define RAZERS_PARALLEL_READS_WHOLE_GENOME
 #ifdef RAZERS_PARALLEL_READS_WHOLE_GENOME
-#include "razers_window.h"
+	#include "razers_window.h"
 #endif
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -180,6 +181,195 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		
 	}
+	
+	
+	///////////////////////////////////////
+	//
+	//
+	template <
+	typename TContigSeq, 
+	typename TReadIndex, 
+	typename TSwiftSpec,
+	typename TVerifier,
+	typename TRazerSOptions,
+	typename TRazerSMode >
+    void _goOverContigPipe(
+		TContigSeq										& contigSeq,
+		ParallelSwiftPatternHandler<String<
+		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
+		String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+		TVerifier										& verifier,
+		TRazerSOptions									& options,
+		TRazerSMode const                               & mode)
+    {
+		
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
+		typedef typename TSwiftFinder::THitString		THitString;
+		typedef typename Value<THitString>::Type        TSwiftHit;
+        typedef typename Size<THitString>::Type         THitStringSize;
+		
+		unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
+
+		// use only core many threads
+		#pragma omp parallel num_threads((int)options.numberOfBlocks)
+		
+		// go over contig sequence
+		#pragma omp for schedule(static, 1)
+		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+		{
+
+			#pragma omp parallel num_threads(2)
+			
+			while(true){
+				
+				bool stop = false;
+				THitString hits = getSwiftHits(swiftFinders[blockId]);				
+				#pragma omp sections
+				{
+					#pragma omp section
+					{
+						stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);		
+					}
+					#pragma omp section
+					{
+						// verify hits
+						for(THitStringSize h = 0; h < length(hits); ++h){
+							verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+							matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+							++options.countFiltration;
+						}						
+					}
+					
+				}
+				
+				if(stop) break;
+			}
+			
+			// TODO: final verification round
+			
+			// clear finders			
+			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+		}
+		
+	}
+	
+/*	///////////////////////////////////////
+	//
+	//
+	template <
+		typename TContigSeq, 
+		typename TReadIndex, 
+		typename TSwiftSpec,
+		typename TVerifier,
+		typename TRazerSOptions,
+		typename TRazerSMode >
+    void _goOverContig(
+			TContigSeq										& contigSeq,
+			ParallelSwiftPatternHandler<String<
+				Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+			TVerifier										& verifier,
+			TRazerSOptions									& options,
+			TRazerSMode const                               & mode)
+    {
+		
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
+		typedef typename TSwiftFinder::THitString		THitString;
+		typedef typename Value<THitString>::Type        TSwiftHit;
+        typedef typename Size<THitString>::Type         THitStringSize;
+		
+		unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
+#ifdef RAZERS_TIMER
+		CharString contigAndDirection;
+		append(contigAndDirection, store.contigNameStore[contigId]);
+		append(contigAndDirection, "-");
+		append(contigAndDirection, orientation);
+		
+		// for waiting times
+		String<_proFloat> waitingTimes;
+		resize(waitingTimes, options.numberOfCores, Exact());
+		for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
+			waitingTimes[coreId] = sysTime();
+#endif
+		// use only core many threads		
+		// go over contig sequence
+		#pragma omp parallel num_threads((int)options.numberOfCores)
+		while(true)
+		{
+			bool stop = false;
+			
+			// Parallelize loop body each thread gets one at a time
+			// As the data structures are split up alread and each thread works on only one element of
+			// the strings (finder, patterns) at a time the variables can be shared
+			// TODO: maybe try schedule(guided)
+#pragma omp for schedule(dynamic, 1)
+			for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){ //TSwiftFinderSize
+				
+#ifdef RAZERS_TIMER					
+				// start time for filtering
+				_proFloat startTime = sysTime();
+				
+				Pair<int, int> posLength(0, 0);
+				// filter window and save hits
+				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+				
+				// get time for filtering
+				_proFloat filteringTime = sysTime() - startTime;
+				// start time for verification
+				startTime = sysTime();
+#else
+				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+#endif
+				// verify hits
+				THitString hits = getSwiftHits(swiftFinders[blockId]);
+				for(THitStringSize h = 0; h < length(hits); ++h){
+					verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+					matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+					++options.countFiltration;
+				}
+#ifdef RAZERS_TIMER
+				// get time for filtering
+				_proFloat verificationTime = sysTime() - startTime;
+				
+				#pragma omp critical
+				{
+					std::cout << "timing>\t";
+#ifdef _OPENMP
+					std::cout << omp_get_thread_num() << "\t";
+#endif
+					std::cout << blockId << "\t";
+					std::cout << contigAndDirection << "\t";
+					std::cout << posLength.i1 << "\t";
+					std::cout << posLength.i2 << "\t";
+					std::cout << filteringTime << "\t";
+					std::cout << length(hits) << "\t";
+					std::cout << verificationTime << "\n";
+				}
+				// set waiting time
+#ifdef _OPENMP
+				waitingTimes[omp_get_thread_num()] = sysTime();
+#endif	
+#endif
+			}
+			
+#ifdef RAZERS_TIMER
+			_proFloat now = sysTime();
+			#pragma omp critical
+			{
+				for(unsigned k = 0; k < length(waitingTimes); ++k){
+					std::cout << "waiting>\t"  << k << "\t" << (now - waitingTimes[k]) << "\n";
+				}
+			}
+#endif
+			
+			if(stop) break;
+		}
+		
+		// clear finders
+		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
+			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+	}*/
+	
     
 /**
 .Function._mapSingleReadsToContig:
@@ -194,8 +384,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.options:RazerSOptions
 ..param.mode:RazerSMode
 */
-    //////////////////////////////////////////////////////////////////////////////
-    // Find read matches in a single genome sequence
     template <
         typename TFragmentStore, 
         typename TReadIndex, 
@@ -228,12 +416,14 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Size<THitString>::Type                 THitStringSize;
         
         // VERIFICATION
-        typedef typename Value<TPreprocessing>::Type                                                                        TPreprocessingBlock;
-        typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                                                            TSwiftPatterns;
-        typedef ParallelSwiftPatternHandler<TSwiftPatterns>                                                                 TSwiftPatternHandler;
-        typedef MatchVerifier <TFragmentStore, TRazerSOptions, TRazerSMode, TPreprocessingBlock, TSwiftPatternHandler, TCounts >   TVerifier;
-        typedef typename Fibre<TReadIndex, Fibre_Text>::Type                                                                TReadSet;
-		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type												TAlignedReadStoreSize;
+        typedef typename Value<TPreprocessing>::Type                                TPreprocessingBlock;
+        typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                    TSwiftPatterns;
+        typedef ParallelSwiftPatternHandler<TSwiftPatterns>                         TSwiftPatternHandler;
+        typedef MatchVerifier <TFragmentStore, TRazerSOptions,
+					TRazerSMode, TPreprocessingBlock,
+					TSwiftPatternHandler, TCounts >									TVerifier;
+        typedef typename Fibre<TReadIndex, Fibre_Text>::Type                        TReadSet;
+		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type		TAlignedReadStoreSize;
         
         if (options._debugLevel >= 1)
         {
@@ -284,101 +474,12 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // if started correctly
         if(beginOk){
-            unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
-#ifdef RAZERS_TIMER
-            CharString contigAndDirection;
-            append(contigAndDirection, store.contigNameStore[contigId]);
-            append(contigAndDirection, "-");
-            append(contigAndDirection, orientation);
+			_goOverContigPipe(contigSeq, swiftPatternHandler, swiftFinders, verifier, options, mode);
             
-            // for waiting times
-            String<_proFloat> waitingTimes;
-            resize(waitingTimes, options.numberOfCores, Exact());
-			for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
-				waitingTimes[coreId] = sysTime();
-#endif
-            // use only core many threads
-            omp_set_num_threads(options.numberOfCores);
-            
-            // go over contig sequence
-			#pragma omp parallel 
-            while(true)
-            {
-                bool stop = false;
-                
-                // Parallelize loop body each thread gets one at a time
-                // As the data structures are split up alread and each thread works on only one element of
-                // the strings (finder, patterns) at a time the variables can be shared
-                // TODO: maybe try schedule(guided)
-                #pragma omp for schedule(dynamic, 1)
-                for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){ //TSwiftFinderSize
-
-#ifdef RAZERS_TIMER					
-                    // start time for filtering
-                    _proFloat startTime = sysTime();
-
-                    Pair<int, int> posLength(0, 0);
-                    // filter window and save hits
-                    stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-
-                    // get time for filtering
-                    _proFloat filteringTime = sysTime() - startTime;
-                    // start time for verification
-                    startTime = sysTime();
-#else
-                    stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-#endif
-                    // verify hits
-                    THitString hits = getSwiftHits(swiftFinders[blockId]);
-                    for(THitStringSize h = 0; h < length(hits); ++h){
-                        verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-                        matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
-                        ++options.countFiltration;
-                    }
-#ifdef RAZERS_TIMER
-                    // get time for filtering
-                    _proFloat verificationTime = sysTime() - startTime;
-                    
-                    #pragma omp critical
-                    {
-                        std::cout << "timing>\t";
-                        std::cout << omp_get_thread_num() << "\t";
-                        std::cout << blockId << "\t";
-                        std::cout << contigAndDirection << "\t";
-                        std::cout << posLength.i1 << "\t";
-                        std::cout << posLength.i2 << "\t";
-                        std::cout << filteringTime << "\t";
-                        std::cout << length(hits) << "\t";
-                        std::cout << verificationTime << "\n";
-                    }
-                    // set waiting time
-                    waitingTimes[omp_get_thread_num()] = sysTime();
-                    
-#endif
-                }
-                
-#ifdef RAZERS_TIMER
-                _proFloat now = sysTime();
-                #pragma omp critical
-                {
-                    for(unsigned k = 0; k < length(waitingTimes); ++k){
-                        std::cout << "waiting>\t"  << k << "\t" << (now - waitingTimes[k]) << "\n";
-					}
-                }
-#endif
-                
-                if(stop) break;
-            }
-            
-            // clear finders
-            for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
-                windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
-            
-        } // end: if started correctly
-		
-		// BLOCK_STORE
-		// append the alignedReadStore and the alignQualityStore from the blocks to the main store
-		appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
+			// BLOCK_STORE
+			// append the alignedReadStore and the alignQualityStore from the blocks to the main store
+			appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
+        }
 		
         if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
             if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation

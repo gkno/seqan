@@ -204,10 +204,41 @@ int mapReads(
 	return 0;
 }	
 
+inline void whichMacros(){
+#ifdef RAZERS_OPENADDRESSING
+	std::cerr << "Index:   Open addressing" << std::endl;
+#else
+	std::cerr << "Index:   Normal" << std::endl;
+#endif
+	
+#ifdef RAZERS_PARALLEL_READS
+	std::cerr << "Version: Parallel by reads" << std::endl;
+#else
+	std::cerr << "Version: Serial" << std::endl;
+#endif
+	
+#ifdef RAZERS_TIMER
+	std::cerr << "Timer:   ON" << std::endl;
+#else
+	std::cerr << "Timer:   OFF" << std::endl;
+#endif
+
+#ifdef _OPENMP
+	std::cerr << "OpenMP:  ON" << std::endl;
+#else
+	std::cerr << "OpenMP:  OFF" << std::endl;
+#endif
+	
+	std::cerr << std::endl;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Command line parsing and parameter choosing
 int main(int argc, const char *argv[]) 
 {
+	whichMacros();
+	
 	RazerSOptions<>			options;
 	ParamChooserOptions		pm_options;
 

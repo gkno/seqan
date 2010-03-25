@@ -31,7 +31,9 @@
 #include <seqan/store.h>
 
 #ifdef RAZERS_PARALLEL_READS
-#include <omp.h>
+	#ifdef _OPENMP
+		#include <omp.h>
+	#endif
 #endif
 
 #ifdef RAZERS_PARALLEL
@@ -250,7 +252,9 @@ namespace SEQAN_NAMESPACE_MAIN
             
 #ifdef RAZERS_PARALLEL_READS
             windowSize = 1000;
+#ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
+#endif
             blocksPerCore = 5;
 			numberOfBlocks = numberOfCores * blocksPerCore;
 #endif
