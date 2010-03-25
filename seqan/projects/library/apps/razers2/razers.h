@@ -27,7 +27,6 @@
 
 #include <seqan/find.h>
 #include <seqan/index.h>
-#include <seqan/find/find_swift.h>
 #include <seqan/store.h>
 
 #ifdef RAZERS_PARALLEL

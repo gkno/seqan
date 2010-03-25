@@ -27,7 +27,6 @@
 
 #include <seqan/find.h>
 #include <seqan/index.h>
-#include <seqan/find/find_swift.h>
 
 #ifdef RAZERS_PARALLEL
 #include "tbb/spin_mutex.h"
