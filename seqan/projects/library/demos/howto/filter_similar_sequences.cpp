@@ -13,7 +13,7 @@ int main (int argc, char const * argv[])
 	if (argc < 2 ||	!loadReads(fragStore, argv[1]))
 		return 1;
 
-// FRAGMENT(output)
+// FRAGMENT(filter)
 
 	typedef FragmentStore<>::TReadSeqStore TReadSeqStore;
 	typedef GetValue<TReadSeqStore>::Type TReadSeq;
