@@ -1771,6 +1771,61 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 //										Extension Algorithms														//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/**
+.Function.extendSeedScore
+..summary:Extends a seed and increases the score.
+..cat:Seed Handling
+..signature:extendSeedScore(seed, score, query, database, direction, tag)
+..signature:extendSeedScore(seed, score, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..param.seed: The seed to extend.
+...type:Class.Seed
+..param.score: A reference to the score of the seed. This will be increased by the score of the extension.
+..param.query: The query sequence.
+...type:Class.String
+..param.query: The database sequence.
+...type:Class.String
+..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
+..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
+...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
+..param.scoreMatrix: The scoring scheme.
+...type:Spec.Simple Score
+...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
+..param.tag: The algorithm to use.
+...type:Tag.Seed Extension.MatchExtend
+...type:Tag.Seed Extension.UngappedXDrop
+...type:Tag.Seed Extension.GappedXDrop
+*/
+
+/**
+.Function.extendSeedsScore
+..summary: Extension of seeds with score calculation.
+..cat:Seed Handling
+..signature:extendSeedsScore(container, scores, query, database, direction, MatchExtend)
+..signature:extendSeedsScore(begin, end, itScore query, database, direction, MatchExtend)
+..signature:extendSeedsScore(container, scores, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..signature:extendSeedsScore(begin, end, itScores, scoreDropOff, scoreMatrix, query, database, direction, tag)
+..param.container: The container with the @Class.Seed@ objects to extend.
+...type:Concept.Container
+..param.scores: A container with the scores of the seeds. The scores will be increased by the score of the extension. It can be omitted if the seeds container is a @Class.SeedSet@ with scores.
+...type:Concept.Container
+..param.itScore: Iterator pointing to the first seeds score. The scores will be increased by the score of the extension.
+..param.begin: Iterator pointing to the first value to add.
+..param.end: Iterator pointing just behind the last value to add.
+..param.query: The query sequence.
+...type:Class.String
+..param.query: The database sequence.
+...type:Class.String
+..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
+..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
+..param.scoreMatrix: The scoring sheme.
+...type:Spec.Simple Score
+..param.tag: The algorithm to use.
+...type:Tag.Seed Extension.MatchExtend
+...type:Tag.Seed Extension.tag.UngappedXDrop
+...type:Tag.Seed Extension.tag.GappedXDrop
+*/
+
 template<typename TContainer, typename TContainer2, typename TText, typename TValue>
 void
 extendSeedsScore(TContainer &seedSet, 

@@ -37,6 +37,8 @@ typedef Tag<_Seed_simple> const SimpleSeed;
 ..summary:The algorithms used to extend a seed.
 ..see:Function.extendSeed
 ..see:Function.extendSeeds
+..see:Function.extendSeedScore
+..see:Function.extendSeedsScore
 ..tag.MatchExtend:
 	Extends a seed until a mismatch occurs.
 ..tag.UngappedXDrop:

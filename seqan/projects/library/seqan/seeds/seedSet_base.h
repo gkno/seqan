@@ -1572,7 +1572,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 
 /**
 .Function.extendSeeds
-..summary: Extenstion of seeds.
+..summary: Extension of seeds.
 ..cat:Seed Handling
 ..signature:extendSeeds(container, query, database, direction, MatchExtend)
 ..signature:extendSeeds(begin, end, query, database, direction, MatchExtend)
@@ -1587,10 +1587,11 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 ..param.query: The database sequence.
 ...type:Class.String
 ..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
-..param.scoreDropOff: The score drop after which the extension should stop.
+..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
 ..param.scoreMatrix: The scoring sheme.
 ...type:Spec.Simple Score
 ..param.tag: The algorithm to use.
+...type:Tag.Seed Extension.MatchExtend
 ...type:Tag.Seed Extension.tag.UngappedXDrop
 ...type:Tag.Seed Extension.tag.GappedXDrop
 */
