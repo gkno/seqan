@@ -18,14 +18,11 @@ Lesser General Public License for more details.
 Author: David Weese <david.weese@fu-berlin.de>
 ==========================================================================*/
 
-#ifndef SEQAN_HEADER_MODIFIER_STRING_H
-#define SEQAN_HEADER_MODIFIER_STRING_H
+#ifndef SEQAN_MODIFIER_MODIFIER_STRING_H_
+#define SEQAN_MODIFIER_MODIFIER_STRING_H_
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.ModifiedString:
@@ -46,33 +43,43 @@ public:
     Holder<THost>							data_host;
     typename Cargo<ModifiedString>::Type	data_cargo;
 
-    ModifiedString() {}
+    ModifiedString() {
+        SEQAN_CHECKPOINT;
+    }
 
     ModifiedString(ModifiedString &_origin):
-        data_host(_origin.data_host),
-        data_cargo(_origin.data_cargo) {}
+            data_host(_origin.data_host),
+            data_cargo(_origin.data_cargo) {
+        SEQAN_CHECKPOINT;
+    }
 
     ModifiedString(ModifiedString const &_origin):
-        data_host(_origin.data_host),
-        data_cargo(_origin.data_cargo) {}
-
+            data_host(_origin.data_host),
+            data_cargo(_origin.data_cargo) {
+        SEQAN_CHECKPOINT;
+    }
+    
     ModifiedString(THost &_origin) {
+        SEQAN_CHECKPOINT;
         setHost(*this, _origin);
     }
 
     template <typename T>
     ModifiedString(T & _origin) {
+        SEQAN_CHECKPOINT;
         setValue(*this, _origin);
     }
 
     template <typename T>
     ModifiedString(T const & _origin) {
+        SEQAN_CHECKPOINT;
         setValue(*this, _origin);
     }
 
     template <typename T>
     inline ModifiedString const &
-    operator = (T & _origin) {
+    operator=(T & _origin) {
+        SEQAN_CHECKPOINT;
         assign(*this, _origin);
         return *this;
     }
@@ -187,7 +194,7 @@ template <typename THost, typename TSpec>
 inline Holder<THost> &
 _dataHost(ModifiedString<THost, TSpec> & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_host;
 }
 
@@ -195,7 +202,7 @@ template <typename THost, typename TSpec>
 inline Holder<THost> const &
 _dataHost(ModifiedString<THost, TSpec> const & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_host;
 }
 
@@ -203,7 +210,7 @@ template <typename THost, typename TSpec>
 inline typename Reference< typename Cargo<ModifiedString<THost, TSpec> >::Type >::Type
 cargo(ModifiedString<THost, TSpec> & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_cargo;
 }
 
@@ -211,7 +218,7 @@ template <typename THost, typename TSpec>
 inline typename Reference< typename Cargo<ModifiedString<THost, TSpec> const>::Type >::Type
 cargo(ModifiedString<THost, TSpec> const & me) 
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return me.data_cargo;
 }
 
@@ -224,11 +231,13 @@ inline void _copyCargoImpl(TDest &, TSource &, False const) {}
 
 template <typename TDest, typename TSource>
 inline void _copyCargoImpl(TDest & me, TSource & _origin, True const) {
+    SEQAN_CHECKPOINT;
     cargo(me) = cargo(_origin);
 }
 
 template <typename TDest, typename TSource>
 inline void _copyCargo(TDest & me, TSource & _origin) {
+    SEQAN_CHECKPOINT;
     _copyCargoImpl(me, _origin, typename _IsSameType<
             typename Cargo<TDest>::Type, 
             typename Cargo<TSource>::Type >::Type());
@@ -238,7 +247,8 @@ inline void _copyCargo(TDest & me, TSource & _origin) {
 template <typename THost, typename TSpec, typename THost2>
 inline ModifiedString<THost, TSpec> const &
 assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> & _origin) {
-    host(me) = host(_origin);
+    SEQAN_CHECKPOINT;
+   host(me) = host(_origin);
     _copyCargo(me, _origin);
     return me;
 }
@@ -246,6 +256,7 @@ assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> & _origi
 template <typename THost, typename TSpec, typename THost2>
 inline ModifiedString<THost, TSpec> const &
 assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> const & _origin) {
+    SEQAN_CHECKPOINT;
     host(me) = host(_origin);
     _copyCargo(me, _origin);
     return me;
@@ -254,6 +265,7 @@ assign(ModifiedString<THost, TSpec> & me, ModifiedString<THost2, TSpec> const & 
 template <typename THost, typename TSpec, typename T>
 inline ModifiedString<THost, TSpec> const &
 assign(ModifiedString<THost, TSpec> & me, T & _origin) {
+    SEQAN_CHECKPOINT;
     host(me) = _origin;
     return me;
 }
@@ -261,6 +273,7 @@ assign(ModifiedString<THost, TSpec> & me, T & _origin) {
 template <typename THost, typename TSpec, typename T>
 inline ModifiedString<THost, TSpec> const &
 assign(ModifiedString<THost, TSpec> & me, T const & _origin) {
+    SEQAN_CHECKPOINT;
     host(me) = _origin;
     return me;
 }
@@ -273,6 +286,7 @@ template <typename THost, typename TSpec, typename TPos>
 inline typename Reference<ModifiedString<THost, TSpec> >::Type 
 value(ModifiedString<THost, TSpec> & me, TPos pos)
 {
+    SEQAN_CHECKPOINT;
     return value(begin(me, Standard()) + pos);
 }
 
@@ -280,7 +294,7 @@ template <typename THost, typename TSpec, typename TPos>
 inline typename Reference<ModifiedString<THost, TSpec> const >::Type 
 value(ModifiedString<THost, TSpec> const & me, TPos pos)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     return value(begin(me, Standard()) + pos);
 }
 
@@ -291,6 +305,7 @@ SEQAN_CHECKPOINT
 template <typename THost, typename TSpec>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> const & _origin) {
+    SEQAN_CHECKPOINT;
     setHost(me, host(_origin));
     _copyCargo(me, _origin);
     return me;
@@ -299,6 +314,7 @@ setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> const &
 template <typename THost, typename TSpec>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, ModifiedString<THost, TSpec> & _origin) {
+    SEQAN_CHECKPOINT;
     setHost(me, host(_origin));
     _copyCargo(me, _origin);
     return me;
@@ -311,6 +327,7 @@ setValue(
     ModifiedString< ModifiedString<THost, THostSpec>, TSpec> & me, 
     THost2 const & _origin) 
 {
+    SEQAN_CHECKPOINT;
     setValue(host(me), _origin);
     return me;
 }
@@ -321,6 +338,7 @@ setValue(
     ModifiedString< ModifiedString<THost, THostSpec>, TSpec> & me, 
     THost2 & _origin) 
 {
+    SEQAN_CHECKPOINT;
     setValue(host(me), _origin);
     return me;
 }
@@ -329,6 +347,7 @@ setValue(
 template <typename THost, typename TSpec>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, THost const & _origin) {
+    SEQAN_CHECKPOINT;
     assignHost(me, _origin);
     return me;
 }
@@ -336,6 +355,7 @@ setValue(ModifiedString<THost, TSpec> & me, THost const & _origin) {
 template <typename THost, typename TSpec>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, THost & _origin) {
+    SEQAN_CHECKPOINT;
     setHost(me, _origin);
     return me;
 }
@@ -344,6 +364,7 @@ setValue(ModifiedString<THost, TSpec> & me, THost & _origin) {
 template <typename THost, typename TSpec, typename THost2>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, THost2 & _origin) {
+    SEQAN_CHECKPOINT;
     assignHost(me, _origin);
     return me;
 }
@@ -351,6 +372,7 @@ setValue(ModifiedString<THost, TSpec> & me, THost2 & _origin) {
 template <typename THost, typename TSpec, typename THost2>
 inline ModifiedString<THost, TSpec> const &
 setValue(ModifiedString<THost, TSpec> & me, THost2 const & _origin) {
+    SEQAN_CHECKPOINT;
     assignHost(me, _origin);
     return me;
 }
@@ -362,6 +384,7 @@ setValue(ModifiedString<THost, TSpec> & me, THost2 const & _origin) {
 template < typename THost, typename TSpec >
 inline typename Size< ModifiedString<THost, TSpec> >::Type 
 length(ModifiedString<THost, TSpec> const & me) {
+    SEQAN_CHECKPOINT;
     return length(host(me));
 }
 
@@ -372,6 +395,7 @@ length(ModifiedString<THost, TSpec> const & me) {
 template < typename THost, typename TSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> const >::Type 
 begin(ModifiedString<THost, TSpec> const & me) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec> const >::Type temp_(begin(host(me)));
     _copyCargo(temp_, me);
     return temp_;
@@ -380,6 +404,7 @@ begin(ModifiedString<THost, TSpec> const & me) {
 template < typename THost, typename TSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> >::Type 
 begin(ModifiedString<THost, TSpec> & me) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec> >::Type temp_(begin(host(me)));
     _copyCargo(temp_, me);
     return temp_;
@@ -388,6 +413,7 @@ begin(ModifiedString<THost, TSpec> & me) {
 template < typename THost, typename TSpec, typename TTagSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type 
 begin(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
+    SEQAN_CHECKPOINT;
     typename Iterator< 
         ModifiedString<THost, TSpec> const, 
         Tag<TTagSpec> const 
@@ -399,6 +425,7 @@ begin(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
 template < typename THost, typename TSpec, typename TTagSpec >
 inline typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type 
 begin(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
+    SEQAN_CHECKPOINT;
     typename Iterator< 
         ModifiedString<THost, TSpec>, 
         Tag<TTagSpec> const 
@@ -414,6 +441,7 @@ begin(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
 template < typename THost, typename TSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> const >::Type 
 end(ModifiedString<THost, TSpec> const & me) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec> const >::Type temp_(end(host(me)));
     _copyCargo(temp_, me);
     return temp_;
@@ -422,6 +450,7 @@ end(ModifiedString<THost, TSpec> const & me) {
 template < typename THost, typename TSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> >::Type 
 end(ModifiedString<THost, TSpec> & me) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec> >::Type temp_(end(host(me)));
     _copyCargo(temp_, me);
     return temp_;
@@ -430,6 +459,7 @@ end(ModifiedString<THost, TSpec> & me) {
 template < typename THost, typename TSpec, typename TTagSpec >
 inline typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type 
 end(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec> const, Tag<TTagSpec> const >::Type temp_(end(host(me), tag_));
     _copyCargo(temp_, me);
     return temp_;
@@ -438,6 +468,7 @@ end(ModifiedString<THost, TSpec> const & me, Tag<TTagSpec> const tag_) {
 template < typename THost, typename TSpec, typename TTagSpec >
 inline typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type 
 end(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
+    SEQAN_CHECKPOINT;
     typename Iterator< ModifiedString<THost, TSpec>, Tag<TTagSpec> const >::Type temp_(end(host(me), tag_));
     _copyCargo(temp_, me);
     return temp_;
@@ -451,7 +482,7 @@ template < typename TStream, typename THost, typename TSpec >
 inline TStream &
 operator << (TStream & target, ModifiedString<THost, TSpec> const & source)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     write(target, source);
     return target;
 }
@@ -462,7 +493,7 @@ template < typename TStream, typename THost, typename TSpec >
 inline TStream &
 operator >> (TStream & source, ModifiedString<THost, TSpec> & target)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
     read(source, target);
     return source;
 }
@@ -473,17 +504,17 @@ template <typename THost, typename TSpec>
 inline void const *
 id(ModifiedString<THost, TSpec> & me) 
 {
-SEQAN_CHECKPOINT
-return id(host(me));
+    SEQAN_CHECKPOINT;
+    return id(host(me));
 }
 template <typename THost, typename TSpec>
 inline void const *
 id(ModifiedString<THost, TSpec> const & me) 
 {
-SEQAN_CHECKPOINT
-return id(host(me));
+    SEQAN_CHECKPOINT;
+    return id(host(me));
 }
 
-}
+}  // namespace seqan
 
-#endif
+#endif  // SEQAN_MODIFIER_MODIFIER_STRING_H_
