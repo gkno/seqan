@@ -1,6 +1,6 @@
 // FRAGMENT(includes)
 #include <iostream>
-#include "seqan/find_motif.h"
+#include <seqan/find_motif.h>
 
 using namespace seqan;
 
@@ -29,7 +29,7 @@ int main()
 	findMotif(finder_pms1, dataset, OMOPS());
 
 	for (int i = 0; i < (int) motifCount(finder_pms1); ++i)
-		::std::cout << i << ": " << getMotif(finder_pms1, i) << ::std::endl;
+		std::cout << i << ": " << getMotif(finder_pms1, i) << ::std::endl;
 
 	return 0;
 }
