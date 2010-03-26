@@ -5,55 +5,10 @@
 #include "test_modifier_alphabet.h"
 #include "test_modifier_view.h"
 #include "test_modifier_functors.h"
+#include "test_modifier_shortcuts.h"
 
 using namespace std;
 using namespace seqan;
-
-
-SEQAN_DEFINE_TEST(test_modifier_reverse_string) {
-		String<char> origin = "A man, a plan, a canal-Panama";
-
-	//____________________________________________________________________________
-	// Test1 - reverse string
-
-		typedef ModifiedString< String<char>, ModReverse> TModString;
-
-		TModString reverse(origin);
-
-		cout << "*** Test1: Reverse String ***" << endl;
-		cout << "origin:  " << origin << endl;
-		cout << "reverse: " << reverse << endl << endl;
-
-	//____________________________________________________________________________
-	// Test2 - complement string
-
-		DnaString dna = "attacgg";
-
-		cout << "*** Test2: DNA symmetry ***" << endl;
-		cout << "origin:             " << dna << endl;
-		cout << "reverse:            " << DnaStringReverse(dna) << endl;
-		cout << "complement:         " << DnaStringComplement(dna) << endl;
-		cout << "reverse complement: " << DnaStringReverseComplement(dna) << endl << endl;
-
-	//____________________________________________________________________________
-	// Test3 - in-place conversions
-
-		DnaString dna2 = dna;
-		cout << "*** Test3: in-place conversions ***" << endl;
-		cout << "origin:             " << dna2 << endl;
-
-		reverseInPlace(dna2);
-		cout << "reverse:            " << dna2 << endl;
-
-		dna2 = dna; 
-		complementInPlace(dna2);
-		cout << "complement:         " << dna2 << endl;
-
-		dna2 = dna; 
-		reverseComplementInPlace(dna2);
-		cout << "reverse complement: " << dna2 << endl << endl;
-
-}
 
 
 SEQAN_BEGIN_TESTSUITE(test_modifier) {
@@ -80,7 +35,22 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     // TODO(holtgrew): Write me!
 
     // Tests for modifier_shortcuts.h.
-    // TODO(holtgrew): Write me!
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_reverse);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_reverse);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_reverse_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_reverse_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_complement_in_place_string);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_complement_in_place_string_set);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_reverse_in_place_string);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_reverse_in_place_string_set);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_reverse_complement_in_place_string);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_reverse_complement_in_place_string_set);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_to_lower_in_place_string);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_to_lower_in_place_string_set);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_to_upper_in_place_string);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_to_upper_in_place_string_set);
 
     // Tests for modifier_string.h.
     // TODO(holtgrew): Write me!
@@ -97,10 +67,6 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
     SEQAN_CALL_TEST(test_modifier_view_string_alphabet_conversion);
     SEQAN_CALL_TEST(test_modifier_view_string_nested_modifier);
-
-    // Older tests...
-    // TODO(holtgrew): Remove.
-    SEQAN_CALL_TEST(test_modifier_reverse_string);
 
     // Verify check points for all headers in the module modifier.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/modifier/modifier_alphabet.h");
