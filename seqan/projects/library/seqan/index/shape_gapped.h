@@ -223,12 +223,14 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.predefined:Any instance of a predefined shape spec (e.g. $ShapePatternHunter$).
 ..see:Class.HardwiredShape
 */
-		Shape()	{}
+		Shape():
+			hValue(0) {}
 
 		// c'tor for ungapped shapes
 		Shape(unsigned _span):
 			span(_span),
-			weight(_span)
+			weight(_span),
+			hValue(0)
 		{
 		SEQAN_CHECKPOINT
 			resize(diffs, _span);
@@ -341,7 +343,8 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 //____________________________________________________________________________
 
 		Shape():
-			diffs(TSpec::DIFFS) {}
+			diffs(TSpec::DIFFS),
+			hValue(0) {}
 
 		Shape(Shape const &other):
 			diffs(other.diffs),	

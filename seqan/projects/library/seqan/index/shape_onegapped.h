@@ -74,13 +74,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
-		Shape()	{}
+		Shape():
+			hValue(0) {}
 
 		// c'tor for ungapped shapes
 		Shape(unsigned _blockLen1, unsigned _gapLen, unsigned _blockLen2):
 			blockLen1(_blockLen1),
 			gapLen(_gapLen),
-			blockLen2(_blockLen2)
+			blockLen2(_blockLen2),
+			hValue(0)
 		{
 		SEQAN_CHECKPOINT
 			typedef typename Value< Shape<TValue, OneGappedShape> >::Type	THValue;

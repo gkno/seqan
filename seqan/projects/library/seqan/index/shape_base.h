@@ -150,7 +150,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			leftFactor(0),
 			leftFactor2(0) {}
 		
-		Shape(unsigned _span)
+		Shape(unsigned _span):
+			hValue(0),
+			XValue(0)
 		{
 			resize(*this, _span);
 		}
