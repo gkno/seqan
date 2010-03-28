@@ -399,31 +399,31 @@ inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &
 namespace seqan {
 /*
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_SA> 
+	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_SA> 
 	{
-		typedef Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename SAValue<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > const, Fibre_SA>:
-		public struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_SA> {};
+	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > const, Fibre_SA>:
+		public struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_SA> {};
 */
 
 /*	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_Dir> 
+	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_Dir> 
 	{
-		typedef Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename Size<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > > const, Fibre_Dir>: 
-		public struct Fibre< Index<TObject, Index_Wotd< WotdDFI<TPredHull, TPred> > >, Fibre_Dir> {};
+	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > const, Fibre_Dir>: 
+		public struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_Dir> {};
 */
 }
 
@@ -455,7 +455,7 @@ int runDFI(
 	typedef String<TAlphabet, Alloc<> >								TString;
 	typedef StringSet<TString>										TStringSet;
 	typedef Index<TStringSet, Index_Wotd<
-		WotdDFI<TPredHull, TPred> > >								TIndex;
+		DFI<TPredHull, TPred> > >								TIndex;
 	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >			TIter;
 	typedef SubstringEntry<typename Size<TIndex>::Type>				TSubstringEntry;
 
