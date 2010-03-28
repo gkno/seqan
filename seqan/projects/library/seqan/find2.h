@@ -28,13 +28,15 @@
 
 #include <deque>
 
+#include <seqan/align.h>
+#include <seqan/basic.h>
 #include <seqan/sequence.h>
-#include <seqan/modifier.h>
-#include <seqan/score.h>
-#include <seqan/graph_types.h>
-#include <seqan/graph_algorithms.h>
-#include <seqan/map.h>
-#include <seqan/find.h>
+//#include <seqan/modifier.h>
+//#include <seqan/score.h>
+//#include <seqan/graph_types.h>
+//#include <seqan/graph_algorithms.h>
+//#include <seqan/map.h>
+//#include <seqan/find.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/find2/find2_generated_forwards.h>

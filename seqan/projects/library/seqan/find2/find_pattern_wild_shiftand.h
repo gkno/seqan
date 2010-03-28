@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007-2010
+  Copyright (C) 207-010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -25,73 +25,76 @@
 
 namespace seqan {
 
+struct _WildShiftAnd;
+typedef Tag<_WildShiftAnd> WildShiftAnd;
+
 template <typename TNeedle>
-struct Pattern2<TNeedle, WildShiftAnd> {
+struct Pattern<TNeedle, WildShiftAnd> {
     Holder<TNeedle> _host;
 
-    Pattern2() {}
+    Pattern() {}
 };
 
 
 template <typename TNeedle>
-TNeedle const & host(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+TNeedle const & host(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-TNeedle const & needle(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+TNeedle const & needle(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type length(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+typename Position<TNeedle>::Type length(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-Segment<TNeedle, InfixSegment> infix(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+Segment<TNeedle, InfixSegment> infix(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-typename Iterator<TNeedle>::Type begin(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+typename Iterator<TNeedle>::Type begin(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-typename Iterator<TNeedle>::Type end(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+typename Iterator<TNeedle>::Type end(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type beginPosition(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type endPosition(Pattern2<TNeedle, WildShiftAnd> const & pattern) {
+typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedle>
-bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-          Pattern2<TNeedle, WildShiftAnd> & pattern) {
+bool find(Finder<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
+          Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
     return false;
@@ -99,8 +102,8 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
 
 
 template <typename THaystack, typename TNeedle>
-bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, WildShiftAnd> & pattern) {
+bool findBegin(Finder<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
+               Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
     return false;
@@ -108,8 +111,8 @@ bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" 
 
 
 template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
-bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-                  Pattern2<TNeedle, WildShiftAnd> &pattern,
+bool getAlignment(Finder<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern<TNeedle, WildShiftAnd> &pattern,
                   Align<TAlignSeq, TAlignSpec> &outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");

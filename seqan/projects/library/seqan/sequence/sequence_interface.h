@@ -406,6 +406,7 @@ SEQAN_CHECKPOINT
 ...text:For most classes $beginPosition$ always returns 0. Exceptions are e.g. @Spec.InfixSegment@ and @Spec.SuffixSegment@.
 ..see:Function.begin
 */
+/*
 template <typename T>
 inline typename Position<T>::Type 
 beginPosition(T &)
@@ -413,6 +414,7 @@ beginPosition(T &)
 SEQAN_CHECKPOINT
 	return 0;
 }
+*/
 template <typename T>
 inline typename Position<T>::Type 
 beginPosition(T const &)
@@ -442,6 +444,7 @@ SEQAN_CHECKPOINT
 ..see:Function.begin
 ..see:Metafunction.Iterator
 */
+/*
 template <typename T>
 inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
 end(T & me)
@@ -449,6 +452,7 @@ end(T & me)
 SEQAN_CHECKPOINT
 	return end(me, typename DefaultGetIteratorSpec<T>::Type()) ;
 }
+*/
 template <typename T>
 inline typename Iterator<T const, typename DefaultGetIteratorSpec<T>::Type>::Type 
 end(T const & me)
@@ -535,18 +539,20 @@ SEQAN_CHECKPOINT
 ..see:Function.end
 ..see:Function.beginPosition
 */
+/*
 template <typename T>
 inline typename Position<T>::Type 
 endPosition(T & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return length(me);
 }
+*/
 template <typename T>
 inline typename Position<T>::Type 
 endPosition(T const & me)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	return length(me);
 }
 

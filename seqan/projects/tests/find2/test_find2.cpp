@@ -9,8 +9,8 @@ SEQAN_DEFINE_TEST(test_find2_exact_simple_interface) {
     CharString kHaystack = "he is a hero";
     CharString kNeedle = "her";
 
-    typedef Finder2<CharString, void> TFinder;
-    typedef Pattern2<CharString, Simple> TPattern;
+    typedef Finder<CharString> TFinder;
+    typedef Pattern<CharString, Simple> TPattern;
 
     // Default constructor.
     {
@@ -21,9 +21,32 @@ SEQAN_DEFINE_TEST(test_find2_exact_simple_interface) {
     TPattern pattern(kNeedle);
     TFinder finder(kHaystack);
 
+    // Function length().
+    SEQAN_ASSERT_EQ(3u, length(pattern));
+
+    // Function infix().
+    CharString const kExpectedInfixStr = "her";
+    CharString const kInfixStr = infix(pattern);
+    SEQAN_ASSERT_EQ(kExpectedInfixStr, kInfixStr);
+
+    // Function begin().
+    {
+        typedef Iterator<TPattern::TNeedle, Standard>::Type TConstIterator;
+        TConstIterator kExpectedBegin = begin(kNeedle);
+        TConstIterator kBegin = begin(pattern, Standard());
+        SEQAN_ASSERT_EQ(kExpectedBegin, kBegin);
+    }
+
+    // Function end().
+    {
+        typedef Iterator<TPattern::TNeedle, Standard>::Type TConstIterator;
+        TConstIterator kExpectedBegin = end(kNeedle);
+        TConstIterator kBegin = end(pattern, Standard());
+        SEQAN_ASSERT_EQ(kExpectedBegin, kBegin);
+    }
+
     // Function needle().
-    // TODO(holtgrew): Should be needle().
-    CharString & patternNeedle = needle2(pattern);
+    CharString & patternNeedle = needle(pattern);
     SEQAN_ASSERT_EQ(kNeedle, patternNeedle);
     SEQAN_ASSERT_EQ(3u, length(patternNeedle));
 
@@ -54,6 +77,7 @@ SEQAN_DEFINE_TEST(test_find2_exact_simple_interface) {
     SEQAN_ASSERT_EQ(8u, finderBeginPosition);
 }
 
+
 SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_exact_simple_interface);
 
@@ -63,3 +87,4 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_multiple_exact_shiftand.h");
 }
 SEQAN_END_TESTSUITE
+

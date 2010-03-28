@@ -28,6 +28,7 @@ namespace seqan {
 // Contains the state for finder and patterns.
 struct _FindState {
     enum TState {
+        STATE_EMPTY,
         STATE_INITIAL,
         STATE_FOUND,
         STATE_NOTFOUND,
@@ -37,10 +38,10 @@ struct _FindState {
 };
 
 template <typename TNeedle, typename TSpec>
-struct Pattern2;
+struct Pattern;
 
-template <typename THaystack, typename TSpec = void>
-struct Finder2;
+template <typename THaystack, typename TSpec = Default>
+struct Finder;
 
 }  // namespace seqan
           

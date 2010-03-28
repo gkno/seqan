@@ -20,83 +20,89 @@
   Exact pattern matching using a naive implementation.
  ==========================================================================*/
 
-#ifndef SEQAN_FIND2_FIND_SIMPLE_H_
-#define SEQAN_FIND2_FIND_SIMPLE_H_
+#ifndef SEQAN_FIND2_FIND_EXACT_SIMPLE_H_
+#define SEQAN_FIND2_FIND_EXACT_SIMPLE_H_
 
 namespace seqan {
 
-template <typename TNeedle>
-struct Pattern2<TNeedle, Simple> : _FindState {
+template <typename _TNeedle>
+struct Pattern<_TNeedle, Simple> : _FindState {
+    typedef _TNeedle TNeedle;
+
     // The pattern's state.
     TState _state;
 
     // The needle we store.
     Holder<TNeedle> _host;
 
-    Pattern2() { SEQAN_CHECKPOINT; }
+    Pattern() : _state(STATE_EMPTY) {
+        SEQAN_CHECKPOINT;
+    }
 
-    Pattern2(TNeedle & ndl)
+    explicit
+    Pattern(TNeedle & ndl)
         : _state(STATE_INITIAL),
-          _host(ndl)
-    {}
+          _host(ndl) {
+        SEQAN_CHECKPOINT;
+    }
 };
 
 
 template <typename TNeedle>
-TNeedle & needle2(Pattern2<TNeedle, Simple> const & pattern) {
+TNeedle & needle(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
     return value(pattern._host);
 }
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type length(Pattern2<TNeedle, Simple> const & pattern) {
+typename Position<TNeedle>::Type length(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    return length(needle2(pattern));
+    return length(needle(pattern));
 }
 
 
 template <typename TNeedle>
-Segment<TNeedle, InfixSegment> infix(Pattern2<TNeedle, Simple> const & pattern) {
+Segment<TNeedle, InfixSegment> infix(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    return infix(pattern, 0u, length(needle2(pattern)));
+    return infix(needle(pattern), 0u, length(needle(pattern)));
+}
+
+
+template <typename TNeedle, typename TTag>
+    typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    return begin(needle(pattern), spec);
+}
+
+
+template <typename TNeedle, typename TTag>
+typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    return end(needle(pattern), spec);
 }
 
 
 template <typename TNeedle>
-typename Iterator<TNeedle>::Type begin(Pattern2<TNeedle, Simple> const & pattern) {
-    SEQAN_CHECKPOINT;
-    return begin(needle2(pattern));
-}
-
-
-template <typename TNeedle>
-typename Iterator<TNeedle>::Type end(Pattern2<TNeedle, Simple> const & pattern) {
-    SEQAN_CHECKPOINT;
-    return end(needle2(pattern));
-}
-
-
-template <typename TNeedle>
-typename Position<TNeedle>::Type beginPosition(Pattern2<TNeedle, Simple> const & pattern) {
+typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> const &) {
     SEQAN_CHECKPOINT;
     return 0u;
 }
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type endPosition(Pattern2<TNeedle, Simple> const & pattern) {
+typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
-    return length(needle2(pattern));
+    return length(needle(pattern));
 }
 
 
 template <typename THaystack, typename TNeedle>
-bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-          Pattern2<TNeedle, Simple> & pattern) {
+bool find(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default" better than void?
+          Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
-    typedef Pattern2<THaystack, Simple> TFinder;
-    typedef Pattern2<TNeedle, Simple> TPattern;
+    typedef Pattern<THaystack, Simple> TFinder;
+    typedef Pattern<TNeedle, Simple> TPattern;
     typedef typename Position<TNeedle>::Type TPosition;
 
     // State of finder and pattern should be in sync.
@@ -112,15 +118,15 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
     }
 
     // Search the needle in the haystack naively.
-    while (finder._beginPosition < length(haystack2(finder)) - length(needle2(pattern))) {
-        for (TPosition i = 0u; i < length(needle2(pattern)); ++i) {
-            if (needle2(pattern)[i] != haystack2(finder)[finder._beginPosition + i]) {
+    while (finder._beginPosition < length(haystack(finder)) - length(needle(pattern))) {
+        for (TPosition i = 0u; i < length(needle(pattern)); ++i) {
+            if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
                 finder._beginPosition += 1;
                 i = 0u;
                 continue;
             }
         }
-        finder._endPosition = finder._beginPosition + length(needle2(pattern));
+        finder._endPosition = finder._beginPosition + length(needle(pattern));
         finder._state = TFinder::STATE_BEGIN_FOUND;
         pattern._state = TPattern::STATE_BEGIN_FOUND;
         return true;
@@ -133,19 +139,19 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
 
 
 template <typename THaystack, typename TNeedle>
-bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedle, Simple> & pattern) {
+bool findBegin(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default" better than void?
+               Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
     // State of finder and pattern should be in sync.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    typedef Pattern2<TNeedle, Simple> TPattern;
+    typedef Pattern<TNeedle, Simple> TPattern;
     return finder._state == TPattern::STATE_BEGIN_FOUND;
 }
 
 
 template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
-bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-                  Pattern2<TNeedle, Simple> &pattern,
+bool getAlignment(Finder<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern<TNeedle, Simple> &pattern,
                   Align<TAlignSeq, TAlignSpec> &outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
@@ -154,4 +160,4 @@ bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default
 
 }  // namespace seqan
           
-#endif  // SEQAN_FIND2_FIND_SIMPLE_H_
+#endif  // SEQAN_FIND2_FIND_EXACT_SIMPLE_H_

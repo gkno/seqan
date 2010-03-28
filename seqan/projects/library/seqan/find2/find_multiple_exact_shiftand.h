@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007-2010
+  Copyright (C) 207-010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,83 +26,87 @@
 
 namespace seqan {
 
+struct _MultipleShiftAnd;
+typedef Tag<_MultipleShiftAnd> MultipleShiftAnd;
+
+
 template <typename TNeedleContainer>
-struct Pattern2<TNeedleContainer, MultipleShiftAnd> {
+struct Pattern<TNeedleContainer, MultipleShiftAnd> {
     typedef int TScoreValue;
 
     // The needle set we work on.
     Holder<TNeedleContainer> _host;
 
-    Pattern2() {}
+    Pattern() {}
 };
 
 
 template <typename TNeedleSet>
-TNeedleSet const & host(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+TNeedleSet const & host(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-TNeedleSet const & needles(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+TNeedleSet const & needles(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Position<TNeedleSet>::Type needleIdentifier(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Position<TNeedleSet>::Type needleIdentifier(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Position<typename Value<TNeedleSet>::Type>::Type length(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Position<typename Value<TNeedleSet>::Type>::Type length(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-Segment<typename Value<TNeedleSet>::Type, InfixSegment> infix(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+Segment<typename Value<TNeedleSet>::Type, InfixSegment> infix(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Iterator<typename Value<TNeedleSet>::Type>::Type begin(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Iterator<typename Value<TNeedleSet>::Type>::Type begin(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Iterator<typename Value<TNeedleSet>::Type>::Type end(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Iterator<typename Value<TNeedleSet>::Type>::Type end(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Position<typename Value<TNeedleSet>::Type>::Type beginPosition(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Position<typename Value<TNeedleSet>::Type>::Type beginPosition(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename TNeedleSet>
-typename Position<typename Value<TNeedleSet>::Type>::Type endPosition(Pattern2<TNeedleSet, MultipleShiftAnd> const & pattern) {
+typename Position<typename Value<TNeedleSet>::Type>::Type endPosition(Pattern<TNeedleSet, MultipleShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
 }
 
 
 template <typename THaystack, typename TNeedleSet>
-bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-          Pattern2<TNeedleSet, MultipleShiftAnd> & pattern) {
+bool find(Finder<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
+          Pattern<TNeedleSet, MultipleShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
     return false;
@@ -110,8 +114,8 @@ bool find(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" bette
 
 
 template <typename THaystack, typename TNeedleSet>
-bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
-               Pattern2<TNeedleSet, MultipleShiftAnd> & pattern) {
+bool findBegin(Finder<THaystack, void> & finder,  // TODO(holtgrew): "Default" better than void?
+               Pattern<TNeedleSet, MultipleShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");
     return false;
@@ -119,8 +123,8 @@ bool findBegin(Finder2<THaystack, void> & finder,  // TODO(holtgrew): "Default" 
 
 
 template <typename THaystack, typename TNeedleSet, typename TAlignSeq, typename TAlignSpec>
-bool getAlignment(Finder2<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-                  Pattern2<TNeedleSet, MultipleShiftAnd> &pattern,
+bool getAlignment(Finder<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
+                  Pattern<TNeedleSet, MultipleShiftAnd> &pattern,
                   Align<TAlignSeq, TAlignSpec> &outAlignment) {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_FAIL("Implement me!");

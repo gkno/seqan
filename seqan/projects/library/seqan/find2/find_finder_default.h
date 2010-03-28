@@ -26,7 +26,7 @@
 namespace seqan {
 
 template <typename THaystack>
-struct Finder2<THaystack, void> : _FindState {
+struct Finder<THaystack, Default> : _FindState {
     typedef typename Position<THaystack>::Type TPosition;
     typedef typename Iterator<THaystack>::Type TIterator;
 
@@ -38,7 +38,7 @@ struct Finder2<THaystack, void> : _FindState {
     TPosition _beginPosition;
     TPosition _endPosition;
 
-    Finder2(THaystack & hstck)
+    Finder(THaystack & hstck)
         : _state(STATE_INITIAL),
           _holder(hstck) {
         SEQAN_CHECKPOINT;
@@ -47,21 +47,21 @@ struct Finder2<THaystack, void> : _FindState {
 
 
 template <typename THaystack>
-typename Position<THaystack>::Type & beginPosition(const Finder2<THaystack, void> & finder) {
+typename Position<THaystack>::Type const & beginPosition(const Finder<THaystack, Default> & finder) {
     SEQAN_CHECKPOINT;
     return finder._beginPosition;
 }
 
 
 template <typename THaystack>
-typename Position<THaystack>::Type & endPosition(const Finder2<THaystack, void> & finder) {
+typename Position<THaystack>::Type const & endPosition(const Finder<THaystack, Default> & finder) {
     SEQAN_CHECKPOINT;
     return finder._endPosition;
 }
 
 
 template <typename THaystack>
-THaystack & haystack2(Finder2<THaystack, void> & finder) {
+THaystack & haystack(Finder<THaystack, Default> & finder) {
     SEQAN_CHECKPOINT;
     return value(finder._holder);
 }
