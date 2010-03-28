@@ -60,7 +60,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:The Deferred Frequency Index (see Weese and Schulz, "Efficient string mining under constraints via the
 deferred frequency index").
 ..cat:Index
-..general:Class.Index
+..general:Spec.Index_Wotd
 ..signature:Index<TText, Index_Wotd< WotdDFI<TPredHull, TPred> > >
 ..param.TText:The text type.
 ...type:Class.String

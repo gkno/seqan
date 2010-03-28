@@ -35,7 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specialization type.
 ..remarks:This iterator is a pointer to a node in the suffix tree (given by the enhanced suffix array @Spec.Index_ESA@).
 Every node can uniquely be mapped to an interval of the suffix array containing all suffixes of the node's subtree.
-This interval is the @Function.value@ of the iterator.
+This interval and some extra information constitute the @Metafunction.VertexDescriptor@ returned by the @Function.value@ function of the iterator.
 ..include:seqan/index.h
 */
 
@@ -66,7 +66,21 @@ This interval is the @Function.value@ of the iterator.
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..param.TSpec:The specialization type.
+..remarks:If not copy-constructed the @Spec.TopDown Iterator@ starts in the root node of the suffix tree.
 ..include:seqan/index.h
+
+.Memfunc.TopDown Iterator#Iterator
+..class:Spec.TopDown Iterator
+..summary:Constructor
+..signature:Iterator(index[, vertexDesc])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.vertexDesc:The vertex descriptor of a node the iterator should start in.
+The iterator starts in the root node by default.
+..param.iterator:Another TopDown iterator. (copy constructor)
+...type:Spec.TopDown Iterator
+...type:Spec.TopDownHistory Iterator
+..remarks:If not copy-constructed the @Spec.TopDown Iterator@ starts in the root node of the suffix tree.
 */
 
 
@@ -139,7 +153,19 @@ This interval is the @Function.value@ of the iterator.
 ...type:Tag.PreorderEmptyEdges
 ...type:Tag.Postorder
 ...type:Tag.PostorderEmptyEdges
+..remarks:If not copy-constructed the @Spec.TopDownHistory Iterator@ starts in the root node of the suffix tree.
+Depending on the depth-first search mode the root is not the first DFS node. To go to the first DFS node use @Function.goBegin@.
 ..include:seqan/index.h
+
+.Memfunc.TopDownHistory Iterator#Iterator
+..class:Spec.TopDownHistory Iterator
+..summary:Constructor
+..signature:Iterator(index)
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.iterator:Another TopDownHistory iterator. (copy constructor)
+...type:Spec.TopDownHistory Iterator
+..remarks:If not copy-constructed the @Spec.TopDownHistory Iterator@ starts in the root node of the suffix tree.
 */
 
 	template < typename TVSTreeIter >
@@ -210,6 +236,16 @@ This interval is the @Function.value@ of the iterator.
 ..implements:Concept.Iterator
 ..param.TSpec:The specialization type.
 ..include:seqan/index.h
+
+.Memfunc.BottomUp Iterator#Iterator
+..class:Spec.BottomUp Iterator
+..summary:Constructor
+..signature:Iterator(index)
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.iterator:Another BottomUp iterator. (copy constructor)
+...type:Spec.BottomUp Iterator
+..remarks:If not copy-constructed the @Spec.BottomUp Iterator@ starts in the first DFS node, which is the left-most leaf of the suffix tree.
 */
 
 	template < typename TIndex, typename TSpec >
@@ -454,6 +490,17 @@ This interval is the @Function.value@ of the iterator.
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.nodeDepth:
+..summary:Returns the zero-based node depth of the $iterator$ node.
+..cat:Index
+..signature:nodeDepth(iterator)
+..param.iterator:An iterator of a suffix tree.
+...type:Spec.TopDownHistory Iterator
+..returns:The length of the path from root to $iterator$ node, e.g. 0 is returned for the root node.
+...type:Metafunction.Size|Size type of the underlying index
+*/
+
 	template < typename TIndex, typename TSpec >
 	inline typename Size<TIndex>::Type
 	nodeDepth(Iter< TIndex, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
@@ -468,7 +515,7 @@ This interval is the @Function.value@ of the iterator.
 ..cat:Index
 ..signature:parentRepLength(iterator)
 ..param.iterator:An iterator of a suffix tree.
-...type:Spec.VSTree Iterator
+...type:Spec.TopDown Iterator
 ..returns:The length of the sequence returned by @Function.representative@ of the parent node.
 ...type:Metafunction.Size|Size type of the underlying index
 */
@@ -488,7 +535,7 @@ This interval is the @Function.value@ of the iterator.
 ..cat:Index
 ..signature:bool emptyParentEdge(iterator)
 ..param.iterator:An iterator of a suffix tree.
-...type:Spec.TopDownHistory Iterator
+...type:Spec.TopDown Iterator
 ..returns:$true$ if @Function.parentEdgeLength@$ returns 0, otherwise $false$.
 ...type:Metafunction.Size|Size type of the underlying index
 */
@@ -661,29 +708,23 @@ This interval is the @Function.value@ of the iterator.
 
 	template < typename TText, typename TSpec, typename TPropertyMap >
 	inline void
-	resizeVertexMap(Index<TText, TSpec> const& index, TPropertyMap& pm)
+	resizeVertexMap(
+		Index<TText, TSpec> const& index, 
+		TPropertyMap & pm)
 	{
 		resize(pm, 2 * length(index), Generous());
 	}
-
-/**
-.Function.assignProperty:
-..cat:Index
-..signature:assignProperty(index, d, val)
-..param.index:An index with a suffix tree interface.
-...type:Spec.Index_ESA
-.Function.property:
-..cat:Index
-..signature:property(index, d)
-..param.index:An index with a suffix tree interface.
-...type:Spec.Index_ESA
-.Function.getProperty:
-..cat:Index
-..signature:getProperty(index, d)
-..param.index:An index with a suffix tree interface.
-...type:Spec.Index_ESA
+/* // different interface compared to resizeVertexMap(graph, ...)
+	template < typename TText, typename TSpec, typename TPropertyMap, typename TProperty >
+	inline void
+	resizeVertexMap(
+		Index<TText, TSpec> const& index, 
+		TPropertyMap & pm,
+		TProperty const & prop)
+	{
+		fill(pm, 2 * length(index), prop, Generous());
+	}
 */
-
 	template < typename TSize >
 	inline typename Id< VertexESA<TSize> const >::Type
 	_getId(VertexESA<TSize> const &desc) 
@@ -1073,7 +1114,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		>::Type (index);
 	}
 
-///.Function.goBegin.param.iterator.type:Spec.VSTree Iterator
+///.Function.goBegin.param.iterator.type:Spec.BottomUp Iterator
+///.Function.goBegin.param.iterator.type:Spec.TopDownHistory Iterator
 	template < typename TText, typename TIndexSpec, class TSpec >
 	inline void goBegin(Iter<Index<TText, TIndexSpec>, VSTree<TSpec> > &it) 
 	{
@@ -1448,6 +1490,18 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		} else
 			return false;
 	}
+
+/**
+.Function.nodeUp:
+..summary:Returns the vertex descriptor of the parent node.
+..cat:Index
+..signature:nodeUp(iterator)
+..param.iterator:An iterator of a suffix tree.
+...type:Spec.TopDown Iterator
+..returns:The vertex descriptor of the parent node. The type is $VertexDescriptor<TIndex>::Type$.
+If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($value(iterator)$) is returned.
+...type:Metafunction.VertexDescriptor
+*/
 
 	// return vertex descriptor of parent's node
 	template < typename TIndex, class TSpec >

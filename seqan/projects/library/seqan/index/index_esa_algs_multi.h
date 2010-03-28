@@ -41,6 +41,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
+
+.Memfunc.MUMs Iterator#Iterator
+..class:Spec.MUMs Iterator
+..summary:Constructor
+..signature:Iterator(index[, minLength])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.minLength:Minimum length of the maximal unique matches, default value is 1.
+..param.iterator:Another MUMs iterator. (copy constructor)
+...type:Spec.MUMs Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -122,6 +132,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
+
+.Memfunc.MultiMEMs Iterator#Iterator
+..class:Spec.MultiMEMs Iterator
+..summary:Constructor
+..signature:Iterator(index[, minLength])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.minLength:Minimum length of the multiple maximal exact matches, default value is 1.
+..param.iterator:Another MultiMEMs iterator. (copy constructor)
+...type:Spec.MultiMEMs Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////

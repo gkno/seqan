@@ -180,6 +180,9 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 			parentRight(other.parentRight) {}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+///.Metafunction.VertexDescriptor.param.T.type:Spec.Index_ESA
+
 	template < typename TText, typename TSpec >
 	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {
 		typedef typename Size< Index<TText, Index_ESA<TSpec> > >::Type TSize;

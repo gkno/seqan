@@ -239,6 +239,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			parentRight(otherParentRight) {}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+///.Metafunction.VertexDescriptor.param.T.type:Spec.Index_Wotd
+
 	template < typename TText >
 	struct VertexDescriptor< Index<TText, Index_Wotd<WotdOriginal> > > {
 		typedef typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type TSize;
@@ -322,6 +325,57 @@ namespace SEQAN_NAMESPACE_MAIN
 		push(it.history, entry);
 		value(it).parentRepLen += edgeLen;
 		value(it).parentRight = value(it).range.i2;
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+///.Function.resizeVertexMap.type:Spec.Index_Wotd
+
+	template < typename TText, typename TIndexSpec, typename TPropertyMap >
+	inline void
+	resizeVertexMap(
+		Index<TText, Index_Wotd<TIndexSpec> > const& index,
+		TPropertyMap & pm)
+	{
+		resize(pm, length(indexDir(index)), Generous());
+	}
+
+/* // different interface compared to resizeVertexMap(graph, ...)
+	template < typename TText, typename TIndexSpec, typename TPropertyMap, typename TProperty >
+	inline void
+	resizeVertexMap(
+		Index<TText, Index_Wotd<TIndexSpec> > const& index,
+		TPropertyMap & pm,
+		TProperty const & prop)
+	{
+		fill(pm, length(indexDir(index)), prop, Generous());
+	}
+*/
+	template < typename TSize >
+	inline typename Id< _VertexWotdOriginal<TSize> const >::Type
+	_getId(_VertexWotdOriginal<TSize> const &desc) 
+	{
+		return desc.node;
+	}
+
+	template < typename TSize >
+	inline typename Id< _VertexWotdOriginal<TSize> >::Type
+	_getId(_VertexWotdOriginal<TSize> &desc) 
+	{
+		return _getId(const_cast<_VertexWotdOriginal<TSize> const &>(desc));
+	}
+
+	template < typename TSize >
+	inline typename Id< _VertexWotdModified<TSize> const >::Type
+	_getId(_VertexWotdModified<TSize> const &desc) 
+	{
+		return desc.node;
+	}
+
+	template < typename TSize >
+	inline typename Id< _VertexWotdModified<TSize> >::Type
+	_getId(_VertexWotdModified<TSize> &desc) 
+	{
+		return _getId(const_cast<_VertexWotdModified<TSize> const &>(desc));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -752,6 +806,51 @@ namespace SEQAN_NAMESPACE_MAIN
 		return false;
 	}
 
+	// return vertex descriptor of parent's node
+	template < typename TText, typename TSpec >
+	inline typename VertexDescriptor< Index<TText, Index_Wotd<WotdOriginal> > >::Type
+	nodeUp(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	{
+		typedef Index<TText, Index_Wotd<WotdOriginal> > TIndex;
+		typedef typename Size<TIndex>::Type TSize;
+
+		if (!empty(it.history))
+		{
+			_HistoryStackWotdModified<TSize> const &entry = top(it.history);
+			typename VertexDescriptor<TIndex>::Type desc;
+
+			desc.node = entry.node;
+			desc.parentRepLen = value(it).parentRepLen - entry.edgeLen;
+			desc.edgeLen = entry.edgeLen;
+			desc.range = entry.range;
+			TSize h = length(it.history) - 1;
+			if (h != 0) --h;
+			desc.parentRight = it.history[h].range.i2;	// copy right boundary of parent's range
+			return desc;
+		} else
+			return value(it);
+	}
+
+	// return vertex descriptor of parent's node
+	template < typename TText, typename TIndexSpec, typename TSpec >
+	inline typename VertexDescriptor< Index<TText, Index_Wotd<TIndexSpec> > >::Type
+	nodeUp(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	{
+		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+		typedef typename Size<TIndex>::Type TSize;
+
+		if (!empty(it.history))
+		{
+			_HistoryStackWotdModified<TSize> const &entry = top(it.history);
+			typename VertexDescriptor<TIndex>::Type desc;
+
+			desc.node = entry.node;
+			desc.parentRepLen = value(it).parentRepLen - entry.edgeLen;
+			desc.edgeLen = entry.edgeLen;
+			return desc;
+		} else
+			return value(it);
+	}
 
 //////////////////////////////////////////////////////////////////////////////
 

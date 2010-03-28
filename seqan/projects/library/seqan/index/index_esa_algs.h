@@ -41,6 +41,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
+
+.Memfunc.SuperMaxRepeats Iterator#Iterator
+..class:Spec.SuperMaxRepeats Iterator
+..summary:Constructor
+..signature:Iterator(index[, minLength])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.minLength:Minimum length of the supermaximal repeats, default value is 1.
+..param.iterator:Another SuperMaxRepeats iterator. (copy constructor)
+...type:Spec.SuperMaxRepeats Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -115,6 +125,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
+
+.Memfunc.SuperMaxRepeatsFast Iterator#Iterator
+..class:Spec.SuperMaxRepeatsFast Iterator
+..summary:Constructor
+..signature:Iterator(index[, minLength])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.minLength:Minimum length of the supermaximal repeats, default value is 1.
+..param.iterator:Another SuperMaxRepeatsFast iterator. (copy constructor)
+...type:Spec.SuperMaxRepeatsFast Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -231,6 +251,16 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Index_ESA
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
+
+.Memfunc.MaxRepeats Iterator#Iterator
+..class:Spec.MaxRepeats Iterator
+..summary:Constructor
+..signature:Iterator(index[, minLength])
+..signature:Iterator(iterator)
+..param.index:An index object.
+..param.minLength:Minimum length of the maximal repeats, default value is 1.
+..param.iterator:Another MaxRepeats iterator. (copy constructor)
+...type:Spec.MaxRepeats Iterator
 */
 
 	//////////////////////////////////////////////////////////////////////////////

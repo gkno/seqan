@@ -80,7 +80,8 @@ _isInt(TString const s)
 
 //////////////////////////////////////////////////////////////////////////////
 
-struct OptionType{
+struct OptionType
+{
     enum {
         Bool = 1,		    // option needs no argument, value is true iff given on command line
         Boolean = 1,		// option needs no argument, value is true iff given on command line
@@ -96,13 +97,14 @@ struct OptionType{
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Class.CommandLineOption:
 ..cat:Miscellaneous
-..summary:Stores information for a specific Commandline Option
+..summary:Stores information for a specific command line option.
 ..signature:CommandLineOption
+..remarks:A @Class.CommandLineOption@ object can be added to a @Class.CommandLineParser@ via @Function.addOption@.
 */
+
 class CommandLineOption
 {
 public:
@@ -193,22 +195,51 @@ public:
 		appendValue(helpText, ')');
 	}
 
-/**.Memfunc.CommandLineOption#CommandLineOption:
+/**
+.Memfunc.CommandLineOption#CommandLineOption:
 ..class:Class.CommandLineOption
 ..summary:Constructor
 ..signature:CommandLineOption ()
-..signature:CommandLineOption (shortName,longName,helpText,type)
-..param.shortName:A @Shortcut.CharString@ containing the short option identifier (e.g. $"h"$ for the $-h/--help$ option).
+..signature:CommandLineOption (shortName, longName[, argumentsPerOption], helpText, optionType[, defaultValue])
+..param.shortName:A @Shortcut.CharString@ containing the short-name option identifier (e.g. $"h"$ for the $-h/--help$ option).
+Although not suggested the short-name can contain more than 1 character.
 ...remarks:Note that the leading "-" is not passed.
-..param.longName:A @Shortcut.CharString@ containing the long option identifier (e.g. $"help"$ for the $-h/--help$ option).
+..param.longName:A @Shortcut.CharString@ containing the long-name option identifier (e.g. $"help"$ for the $-h/--help$ option).
 ...type:Shortcut.CharString
 ...remarks:Note that the leading "--" is not passed.
+..param.argumentsPerOption:The number of required arguments per option (e.g. if set to 3 then 3 arguments must follow the option: "-foo x1 x2 x3").
+...default:0 for boolean options and 1 for the rest.
 ..param.helpText:A @Shortcut.CharString@ containing the help text associated with this option.
 ...type:Shortcut.CharString
+..param.optionType:Option type. This can be the sum of the some of the following values:
+...tableheader:Flag|Value|Description
+...table:$OptionType::Bool$ or $OptionType::Boolean$|1|Option needs no argument, value is true iff given on command line
+...table:$OptionType::String$|2|Argument is a string
+...table:$OptionType::Int$ or $OptionType::Integer$|4|An integer
+...table:$OptionType::Double$|8|A float
+...table:$OptionType::Mandatory$|16|Option must be set
+...table:$OptionType::Label$|32|Automatically print a label for the argument(s) on the help screen
+...table:$OptionType::List$|64|Option is a list of values
+...table:$OptionType::Hidden$|128|Hide this option from the help screen
+..param.defaultValue:The default value of this option.
+...default:No default value.
 */
 };
 
 //////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addArgumentText:
+..summary:Return a @Class.CommandLineOption@ object extended by an argument text.
+..cat:Miscellaneous
+..signature:addArgumentText(option, text)
+..param.option:A @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..param.text:A @Shortcut.CharString@ containing the argument text.
+...type:Shortcut.CharString
+..returns:The option extended by the argument text.
+Instead of using $option$, the return value can be used as argument for @Function.addOption@.
+..remarks:The result type is a @Class.CommandLineOption@ object.
+*/
 
 inline CommandLineOption
 addArgumentText(CommandLineOption const & opt, CharString const & text)
@@ -220,10 +251,9 @@ addArgumentText(CommandLineOption const & opt, CharString const & text)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.longName:
-..summary:Returns the long option name of a @Class.CommandLineOption@ object
+..summary:Returns the long-name of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
 ..signature:longName(option)
 ..param.option:The @Class.CommandLineOption@ object.
@@ -231,6 +261,7 @@ addArgumentText(CommandLineOption const & opt, CharString const & text)
 ..returns:A @Shortcut.CharString@ holding the long name of the CommandLine Option (e.g. $help$ in case of $-h/--help$)
 ..remarks:The result type is @Shortcut.CharString@.
 */
+
 inline CharString &
 longName(CommandLineOption & me){
     return me.longName;
@@ -243,14 +274,15 @@ longName(CommandLineOption const & me){
 
 /**
 .Function.setLongName:
-..summary:Sets the long option name of a @Class.CommandLineOption@ object
+..summary:Sets the long-name of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
-..signature:setLongName(option,newName)
+..signature:setLongName(option, newName)
 ..param.option:The @Class.CommandLineOption@ object.
 ...type:Class.CommandLineOption
 ..param.newName:A @Shortcut.CharString@ containing the new long name of the option.
 ...type:Shortcut.CharString
 */
+
 inline void
 setLongName(CommandLineOption & me, CharString const & newName){
     me.longName = newName;
@@ -259,7 +291,7 @@ setLongName(CommandLineOption & me, CharString const & newName){
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.shortName:
-..summary:Returns the short option name of a @Class.CommandLineOption@ object
+..summary:Returns the short-name of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
 ..signature:shortName(option)
 ..param.option:The @Class.CommandLineOption@ object.
@@ -267,6 +299,7 @@ setLongName(CommandLineOption & me, CharString const & newName){
 ..returns:A @Shortcut.CharString@ holding the short name of the CommandLine Option (e.g. $h$ in case of $-h/--help$)
 ..remarks:The result type is @Shortcut.CharString@.
 */
+
 inline CharString &
 shortName(CommandLineOption & me){
     return me.shortName;
@@ -279,13 +312,14 @@ shortName(CommandLineOption const & me){
 
 /**
 .Function.setShortName:
-..summary:Sets the short option name of a @Class.CommandLineOption@ object
+..summary:Sets the short-name of a @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
 ..signature:setShortName(option,newName)
 ..param.option:The @Class.CommandLineOption@ object.
 ...type:Class.CommandLineOption
 ..param.newName:A @Shortcut.CharString@ containing the new short name of the option.
 */
+
 inline void
 setShortName(CommandLineOption & me, CharString const & newName){
     me.shortName = newName;
@@ -294,7 +328,7 @@ setShortName(CommandLineOption & me, CharString const & newName){
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.helpText:
-..summary:Returns the help text associated with the @Class.CommandLineOption@ object
+..summary:Returns the help text associated with the @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
 ..signature:helpText(option)
 ..param.option:The @Class.CommandLineOption@ object.
@@ -314,9 +348,9 @@ helpText(CommandLineOption const & me){
 
 /**
 .Function.setHelpText:
-..summary:Sets the help text associated with the @Class.CommandLineOption@ object
+..summary:Sets the help text associated with the @Class.CommandLineOption@ object.
 ..cat:Miscellaneous
-..signature:setHelpText(option,newHelpText)
+..signature:setHelpText(option, newHelpText)
 ..param.option:The @Class.CommandLineOption@ object.
 ...type:Class.CommandLineOption
 ..param.newHelpText:A @Shortcut.CharString@ containing the new help text.
@@ -328,6 +362,16 @@ setHelpText(CommandLineOption & me, CharString const & newHelp){
 }
 
 //////////////////////////////////////////////////////////////////////////////
+/**
+.Function.isStringOption:
+..summary:Returns whether option argument can be a string.
+..cat:Miscellaneous
+..signature:isStringOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option argument can be a string.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
 
 inline bool
 isStringOption(CommandLineOption const & me)
@@ -335,11 +379,33 @@ isStringOption(CommandLineOption const & me)
     return (me.optionType & OptionType::String) != 0;
 }
 
+/**
+.Function.isBooleanOption:
+..summary:Returns whether option is a switch.
+..cat:Miscellaneous
+..signature:isBooleanOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option is a switch.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
+
 inline bool
 isBooleanOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Boolean) != 0;
 }
+
+/**
+.Function.isDoubleOption:
+..summary:Returns whether option argument can be a double.
+..cat:Miscellaneous
+..signature:isDoubleOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option argument can be a double.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
 
 inline bool
 isDoubleOption(CommandLineOption const & me)
@@ -347,11 +413,33 @@ isDoubleOption(CommandLineOption const & me)
     return (me.optionType & OptionType::Double) != 0;
 }
 
+/**
+.Function.isIntOption:
+..summary:Returns whether option argument can be an integer.
+..cat:Miscellaneous
+..signature:isIntOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option argument can be an integer.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
+
 inline bool
 isIntOption(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Int) != 0;
 }
+
+/**
+.Function.isHiddenOption:
+..summary:Returns whether option is hidden on the help screen.
+..cat:Miscellaneous
+..signature:isHiddenOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option is hidden on the help screen.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
 
 inline bool
 isHiddenOption(CommandLineOption const & me)
@@ -359,11 +447,33 @@ isHiddenOption(CommandLineOption const & me)
     return (me.optionType & OptionType::Hidden) != 0;
 }
 
+/**
+.Function.isOptionMandatory:
+..summary:Returns whether option is mandatory.
+..cat:Miscellaneous
+..signature:isOptionMandatory(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option is mandatory.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
+
 inline bool
 isOptionMandatory(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::Mandatory) != 0;
 }
+
+/**
+.Function.isLabelOption:
+..summary:Returns whether an option label should be printed on the help screen.
+..cat:Miscellaneous
+..signature:isLabelOption(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if an option label should be printed on the help screen.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
 
 inline bool
 isLabelOption(CommandLineOption const & me)
@@ -371,19 +481,51 @@ isLabelOption(CommandLineOption const & me)
     return (me.optionType & OptionType::Label) != 0;
 }
 
+/**
+.Function.isOptionList:
+..summary:Returns whether the option can be given multiple times.
+..cat:Miscellaneous
+..signature:isOptionList(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:$true$ if the option can be given multiple times on command line.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
+
 inline bool
 isOptionList(CommandLineOption const & me)
 {
     return (me.optionType & OptionType::List) != 0;
 }
 
+/**
+.Function.setOptionType:
+..summary:Set the option type.
+..cat:Miscellaneous
+..signature:setOptionType(option, newOptionType)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..param.newOptionType:Option Type.
+..see:Memfunc.CommandLineOption#CommandLineOption.param.optionType
+*/
+
 inline void
-setOptionType(CommandLineOption & me, const int _newOpt)
+setOptionType(CommandLineOption & me, const int _newOptionType)
 {
-    me.optionType = _newOpt;
+    me.optionType = _newOptionType;
 }
 
 //////////////////////////////////////////////////////////////////////////////
+/**
+.Function.argumentText:
+..summary:Returns the argument text of a @Class.CommandLineOption@ object.
+..cat:Miscellaneous
+..signature:argumentText(option)
+..param.option:The @Class.CommandLineOption@ object.
+...type:Class.CommandLineOption
+..returns:A text consisting of label and help text of the option.
+...type:Shortcut.CharString
+*/
 
 inline CharString
 argumentText(CommandLineOption const & me)
@@ -451,20 +593,20 @@ operator << (TStream & target, CommandLineOption const & source)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Class.CommandLineParser:
 ..cat:Miscellaneous
-..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line arguments for these options
+..summary:Stores multiple @Class.CommandLineOption@ objects and parses the command line arguments for these options.
 ..signature:CommandLineParser
 */
+
 class CommandLineParser
 {
 public:
     typedef String<CommandLineOption>           TOptionMap;
     typedef Size<TOptionMap>::Type              TSize;
     
-    typedef ::std::map<CharString, TSize>       TStringMap;
+    typedef std::map<CharString, TSize>       TStringMap;
     typedef String<CharString>                  TValueMap;
 
     TStringMap           shortNameMap;
@@ -487,7 +629,8 @@ public:
 	const CharString			null;			// empty return values
 	const String<CharString>	nullSet;
 	
-/**.Memfunc.CommandLineParser#CommandLineParser:
+/**
+.Memfunc.CommandLineParser#CommandLineParser:
 ..class:Class.CommandLineParser
 ..summary:Constructor
 ..signature:CommandLineParser ()
@@ -531,17 +674,17 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.addOption:
-..summary:adds an instance of @Class.CommandLineOption@ to the @Class.CommandLineParser@
+..summary:Adds a @Class.CommandLineOption@ object to the @Class.CommandLineParser@.
 ..cat:Miscellaneous
-..signature:addOption(parser,option)
+..signature:addOption(parser, option)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.option:The new @Class.CommandLineOption@ object that should be added.
 ...type:Class.CommandLineOption
 */
+
 inline void
 addOption(CommandLineParser & me, CommandLineOption const & opt)
 {
@@ -569,6 +712,18 @@ addOption(CommandLineParser & me, CommandLineOption const & opt)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addLine:
+..summary:Adds a line of text to the help output of the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addLine(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:A line of text that will be added to the help output.
+...type:Shortcut.CharString
+*/
+
 template <typename TString>
 inline void
 addLine(CommandLineParser & me, TString const & line)
@@ -576,12 +731,36 @@ addLine(CommandLineParser & me, TString const & line)
 	addOption(me, CommandLineOption("", "", line, 0));
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addHelpLine:
+..summary:Adds an extra line of text below the help text of an option.
+..cat:Miscellaneous
+..signature:addHelpLine(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:A line of text that will be added below the help text of an option.
+...type:Shortcut.CharString
+*/
+
 template <typename TString>
 inline void
 addHelpLine(CommandLineParser & me, TString const & line)
 {
 	addOption(me, CommandLineOption("", "", line, 1));
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addSection:
+..summary:Adds a new section the help output of the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addSection(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:A section header that will be added to the help output.
+...type:Shortcut.CharString
+*/
 
 template <typename TString>
 inline void
@@ -591,12 +770,36 @@ addSection(CommandLineParser & me, TString const & line)
 	addLine(me, line);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addTitleLine:
+..summary:Adds a line of text to the title output of the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addTitleLine(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:A text line that will be added to the title output.
+...type:Shortcut.CharString
+*/
+
 template <typename TString>
 inline void
 addTitleLine(CommandLineParser & me, TString const & line)
 {
 	appendValue(me.titleText, line);
 }
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.addVersionLine:
+..summary:Adds a line of text to the version output of the @Class.CommandLineParser@.
+..cat:Miscellaneous
+..signature:addVersionLine(parser, text)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.text:A text line that will be added to the version output.
+...type:Shortcut.CharString
+*/
 
 template <typename TString>
 inline void
@@ -608,17 +811,17 @@ addVersionLine(CommandLineParser & me, TString const & line)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
-.Function.appendCmdLine:
-..summary:adds a line of text to the help output of the @Class.CommandLineParser@
+.Function.addUsageLine:
+..summary:Adds a line of text to the usage output of the @Class.CommandLineParser@.
 ..cat:Miscellaneous
-..signature:appendCmdLine(parser,text)
+..signature:addUsageLine(parser, text)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.text:A text line that will be added to the help output.
+..param.text:A text line that will be added to the usage output.
 ...type:Shortcut.CharString
 */
+
 inline void
 addUsageLine(CommandLineParser & me, CharString const & line)
 {
@@ -626,32 +829,34 @@ addUsageLine(CommandLineParser & me, CharString const & line)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.hasOptionLong:
-..summary:Returns true if the there is an option registered in the parser, that has the passed optionIdentifier
+..summary:Returns whether a certain long-name option is registered in the parser.
 ..cat:Miscellaneous
 ..signature:hasOptionLong(parser, optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long option.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
+..returns:$true$ if the option is registered.
 */
+
 inline bool 
 hasOptionLong(CommandLineParser const & me, CharString const & _long)
 {
     return hasKey(me.longNameMap, _long);
 }
 
-
 /**
 .Function.hasOptionShort:
-..summary:Returns true if the there is an option registered in the parser, that has the passed optionIdentifier
+..summary:Returns whether a certain short-name option is registered in the parser.
 ..cat:Miscellaneous
 ..signature:hasOptionShort(parser, optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short option.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
+..returns:$true$ if the option is registered.
 */
+
 inline bool 
 hasOptionShort(CommandLineParser const & me, CharString const & _short)
 {
@@ -660,16 +865,16 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.requiredArguments:
-..summary:using this option you can define how many non parameterized options are required by your program.
+..summary:Sets the number of arguments (non-parameterized options) are required by the program.
 ..cat:Miscellaneous
 ..signature:requireRemainder(parser, count)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by your program.
+..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by the program.
 */
+
 inline void
 requiredArguments(CommandLineParser & me, unsigned count)
 {
@@ -727,15 +932,17 @@ _title(CommandLineParser const & me, TStream & target)
 	_printStringSet(me.titleText, target);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.shortHelp:
-..summary:Prints a short help message for your parser to the stream
+..summary:Prints a short help message for the parser to a stream
 ..cat:Miscellaneous
-..signature:shortHelp(parser,stream)
+..signature:shortHelp(parser[, stream])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 */
+
 template <typename TStream>
 inline void
 shortHelp(CommandLineParser const & me, TStream & target)
@@ -747,18 +954,25 @@ shortHelp(CommandLineParser const & me, TStream & target)
     _streamWrite(target, " --help' for more information.\n");
 }
 
-//////////////////////////////////////////////////////////////////////////////
+template <typename TStream>
+inline void
+shortHelp(CommandLineParser const & me)
+{
+	shortHelp(me, std::cerr);
+}
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.help:
-..summary:Prints the complete help message for your parser to the stream.
+..summary:Prints the complete help message for the parser to a stream.
 ..cat:Miscellaneous
-..signature:help(parser[,stream])
+..signature:help(parser[, stream])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
 */
+
 template <typename TStream>
 inline void
 help(CommandLineParser const & me, TStream & target)
@@ -837,19 +1051,21 @@ help(CommandLineParser const & me, TStream & target)
 inline void
 help(CommandLineParser const & me)
 {
-    help(me,::std::cerr);
+    help(me, std::cerr);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.version:
-..summary:Prints a version text to the stream.
+..summary:Prints a version text to a stream.
 ..cat:Miscellaneous
-..signature:version(parser[,stream])
+..signature:version(parser[, stream])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.stream:Target stream (e.g. $std::cerr$).
 ...default: $std::cerr$
 */
+
 template <typename TStream>
 inline void
 version(CommandLineParser const & me, TStream & target)
@@ -860,20 +1076,21 @@ version(CommandLineParser const & me, TStream & target)
 inline void
 version(CommandLineParser const & me)
 {
-    version(me,::std::cerr);
+    version(me,std::cerr);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.isSetShort:
-..summary:Returns true if the option was set on the parsed command line.
+..summary:Returns whether a short-name option was set on the parsed command line.
 ..cat:Miscellaneous
 ..signature:isSetShort(parser,optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short option.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name option.
+..returns:$true$ if the option was set.
 */
+
 inline bool
 isSetShort(CommandLineParser & me, CharString const & shortName)
 {
@@ -884,15 +1101,18 @@ isSetShort(CommandLineParser & me, CharString const & shortName)
 	return !empty(me.optionMap[cargo(me.shortNameMap, shortName)].value);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.isSetLong:
-..summary:Returns true if the option was set on the parsed command line.
+..summary:Returns whether a long-name option was set on the parsed command line.
 ..cat:Miscellaneous
-..signature:isSetLong(parser,optionIdentifier)
+..signature:isSetLong(parser, optionIdentifier)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long option.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name option.
+..returns:$true$ if the option was set.
 */
+
 inline bool
 isSetLong(CommandLineParser & me,CharString const & longName)
 {
@@ -980,15 +1200,18 @@ _assignOptionValue(CommandLineParser & me, unsigned option_index, CharString con
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.parse:
-..summary:Returns true if the option was set on the parsed command line.
+..summary:Parses the command line.
 ..cat:Miscellaneous
-..signature:parse(parser,argc,argv[,errorStream])
+..signature:parse(parser, argc, argv[, errorStream])
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.argc:Count of the objects on the command line.
 ..param.argv:Array of the different command line arguments ($const char *argv[]$). 
-..param.errorStream:A stream where error messages are send too.
+..param.errorStream:A stream where error messages are sent to.
+..remarks:Must be called before retrieving options or arguments.
+..returns:$true$ on success.
 */
+
 template<typename TErrorStream>
 bool
 parse(CommandLineParser & me, int argc, const char *argv[], TErrorStream & estream)
@@ -1134,19 +1357,17 @@ parse(CommandLineParser & me, int argc, const char *argv[], TErrorStream & estre
 	return _allMandatorySet(me) && (length(me.arguments) >= me.required_arguments);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 inline bool
 parse(CommandLineParser & me, int argc, const char *argv[])
 {
-    return parse(me, argc, argv, ::std::cerr);
+    return parse(me, argc, argv, std::cerr);
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 
 inline String<CharString> const &
-getOptionValues(CommandLineParser const & me, unsigned option_index)
+_getOptionValues(CommandLineParser const & me, unsigned option_index)
 {
     CommandLineOption const & opt = me.optionMap[option_index];
 	if (empty(opt.value))
@@ -1156,7 +1377,7 @@ getOptionValues(CommandLineParser const & me, unsigned option_index)
 }
 
 inline CharString const &
-getOptionValue(CommandLineParser const & me, unsigned option_index, unsigned argNo)
+_getOptionValue(CommandLineParser const & me, unsigned option_index, unsigned argNo)
 {
     CommandLineOption const & opt = me.optionMap[option_index];
 	if (argNo < length(opt.value))
@@ -1168,9 +1389,9 @@ getOptionValue(CommandLineParser const & me, unsigned option_index, unsigned arg
 }
 
 inline CharString const &
-getOptionValue(CommandLineParser const & me, unsigned option_index)
+_getOptionValue(CommandLineParser const & me, unsigned option_index)
 {
-	return getOptionValue(me, option_index, 0);
+	return _getOptionValue(me, option_index, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1226,19 +1447,20 @@ _convertOptionValue(CommandLineOption const & opt, TObject & dst, CharString con
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.getOptionValueShort:
-..summary:Fills the passed variable $value$ with the value set for the option on the command line.
+..summary:Retrieves the value of a short-name option given on the command line.
 ..cat:Miscellaneous
-..signature:getOptionValueShort(parser,optionIdentifier,value)
+..signature:getOptionValueShort(parser, optionIdentifier[, argNo], value)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short option.
-..param.value:The variable where the value is stored.
-...remarks: The variable type ($int$, $double$, $bool$ or @Shortcut.CharString@) depends on the OptionTyp.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name of the option.
+..param.argNo:If the option is list, the $argNo$-th list element is returned.
+..param.value:The variable where the resulting value should be stored.
+...remarks:The type of $value$ must be compatible the option type.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
 */
+
 template <typename TValue>
 inline bool
 getOptionValueShort(CommandLineParser & me, CharString const & shortName, unsigned argNo, TValue & val)
@@ -1254,7 +1476,7 @@ getOptionValueShort(CommandLineParser & me, CharString const & shortName, unsign
 		return false;
 	}
     TOptionPosition option_index = cargo(me.shortNameMap, shortName);
-	return _convertOptionValue(me.optionMap[option_index], val, getOptionValue(me, option_index, argNo));
+	return _convertOptionValue(me.optionMap[option_index], val, _getOptionValue(me, option_index, argNo));
 }
 
 template <typename TValue>
@@ -1263,6 +1485,17 @@ getOptionValueShort(CommandLineParser & me, CharString const & shortName, TValue
 {
 	return getOptionValueShort(me, shortName, 0, val);
 }
+
+/**
+.Function.getOptionValuesShort:
+..summary:Returns all values of a short-name option given on the command line.
+..cat:Miscellaneous
+..signature:getOptionValuesShort(parser, optionIdentifier)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short-name of the option.
+..returns: A $String<CharString>$ of option values.
+*/
 
 inline String<CharString> const &
 getOptionValuesShort(CommandLineParser & me,CharString const & shortName)
@@ -1278,22 +1511,24 @@ getOptionValuesShort(CommandLineParser & me,CharString const & shortName)
 		return me.nullSet;
 	}
     TOptionPosition option_index = cargo(me.shortNameMap, shortName);
-	return getOptionValues(me, option_index);
+	return _getOptionValues(me, option_index);
 }
 
-
+//////////////////////////////////////////////////////////////////////////////
 /**
 .Function.getOptionValueLong:
-..summary:Fills the passed variable $value$ with the value set for the option on the command line.
+..summary:Retrieves the value of a long-name option given on the command line.
 ..cat:Miscellaneous
-..signature:getOptionValueLong(parser,optionIdentifier,value)
+..signature:getOptionValueLong(parser, optionIdentifier[, argNo], value)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
-..param.optionIdentifier:A @Shortcut.CharString@ that identifies the short option.
-..param.value:The variable where the value is stored.
-...remarks: The variable type ($int$, $double$, $bool$ or @Shortcut.CharString@) depends on the OptionTyp.
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name of the option.
+..param.argNo:If the option is list, the $argNo$-th list element is returned.
+..param.value:The variable where the resulting value should be stored.
+...remarks:The type of $value$ must be compatible the option type.
 ..returns: $true$ if the requested option is set and has the requested type, $false$ otherwise.
 */
+
 template <typename TValue>
 inline bool
 getOptionValueLong(CommandLineParser & me, CharString const & longName, unsigned argNo, TValue & val)
@@ -1309,7 +1544,7 @@ getOptionValueLong(CommandLineParser & me, CharString const & longName, unsigned
 		return false;
 	}
     TOptionPosition option_index = cargo(me.longNameMap, longName);
-	return _convertOptionValue(me.optionMap[option_index], val, getOptionValue(me, option_index, argNo));
+	return _convertOptionValue(me.optionMap[option_index], val, _getOptionValue(me, option_index, argNo));
 }
 
 template <typename TValue>
@@ -1318,6 +1553,17 @@ getOptionValueLong(CommandLineParser & me,CharString const & longName, TValue & 
 {
 	return getOptionValueLong(me, longName, 0, val);
 }
+
+/**
+.Function.getOptionValuesLong:
+..summary:Returns all values of a long-name option given on the command line.
+..cat:Miscellaneous
+..signature:getOptionValuesLong(parser, optionIdentifier)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..param.optionIdentifier:A @Shortcut.CharString@ that identifies the long-name of the option.
+..returns: A $String<CharString>$ of option values.
+*/
 
 inline String<CharString> const &
 getOptionValuesLong(CommandLineParser & me, CharString const & longName)
@@ -1333,23 +1579,22 @@ getOptionValuesLong(CommandLineParser & me, CharString const & longName)
 		return me.nullSet;
 	}
     TOptionPosition option_index = cargo(me.longNameMap, longName);
-	return getOptionValues(me, option_index);
+	return _getOptionValues(me, option_index);
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
 /**
 .Function.getArgumentValue:
-..summary:Fills the passed variable $value$ with the argument set on the command line.
+..summary:Returns an argument set on the command line.
 ..cat:Miscellaneous
-..signature:getArgumentValue(parser,position,value)
+..signature:getArgumentValue(parser, position)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.position:A zero based $int$ indicating which argument you want to get.
-..param.value:The variable where the value is stored.
+..returns:The command line argument or an empty string if it doesn't exist.
 ...type:Shortcut.CharString
-..returns: $true$ if the requested argument exists, $false$ otherwise.
 */
+
 inline CharString const &
 getArgumentValue(CommandLineParser const & me, unsigned position)
 {
@@ -1358,6 +1603,17 @@ getArgumentValue(CommandLineParser const & me, unsigned position)
     else
 		return me.null;
 }
+
+/**
+.Function.getArgumentValues:
+..summary:Returns all arguments set on the command line.
+..cat:Miscellaneous
+..signature:getArgumentValues(parser)
+..param.parser:The @Class.CommandLineParser@ object.
+...type:Class.CommandLineParser
+..returns:All command line arguments as a $String<CharString>$.
+..see:Function.getArgumentValue
+*/
 
 inline String<CharString> const &
 getArgumentValues(CommandLineParser const & me)
@@ -1374,6 +1630,7 @@ getArgumentValues(CommandLineParser const & me)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 */
+
 inline Size<String<CharString> >::Type
 argumentCount(CommandLineParser const & me)
 {
