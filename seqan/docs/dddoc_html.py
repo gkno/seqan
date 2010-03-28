@@ -726,7 +726,7 @@ def pageContent(fl, data):
     
     cat = "Class"
     item = ""
-    if ((data.name(0) == 'Memfunc') or (data.name(0) == 'Memvar')):
+    if ((data.name(0) == 'Memfunc') or (data.name(0) == 'Memvar') or (data.name(0) == 'Typedef')):
         arr = dddoc.splitName(data["class"].text())
         if (len(arr) > 2): item = arr[1]
 #    elif data.name(0) == 'Spec':
@@ -801,6 +801,7 @@ def writePage(fl, data):
 
     printMember(fl, data, "spec")
     printMemberRek(fl, data, "type")
+    printMemberRek(fl, data, "typedef")
     printMemberRek(fl, data, "memvar")
     printMemberRek(fl, data, "memfunc")
     printMemberRek(fl, data, "function")
@@ -824,7 +825,7 @@ def writePage(fl, data):
 
 def printConcept(fl, data):
     
-    if data["baseconcept"].empty() and data["childconcept"].empty() and data["conceptmetafunc"].empty() and data["conceptmemvar"].empty() and data["conceptmemfunc"].empty() and data["conceptfunc"].empty(): return
+    if data["baseconcept"].empty() and data["childconcept"].empty() and data["conceptmetafunc"].empty() and data["conceptmemvar"].empty() and data["conceptmemfunc"].empty() and data["conceptfunc"].empty() and data["concepttypedef"].empty(): return
     
     fl.write('<div id=define_concept>')
     
@@ -833,6 +834,7 @@ def printConcept(fl, data):
     
     printLink(fl, data, "baseconcept")
     printMemberRek(fl, data, "conceptmetafunc")
+    printMemberRek(fl, data, "concepttypedef")
     printMemberRek(fl, data, "conceptmemvar")
     printMemberRek(fl, data, "conceptmemfunc")
     printMemberRek(fl, data, "conceptfunc")
@@ -1561,6 +1563,7 @@ def subprintField(fl, text):
     elif (field == "spec"): printMember(fl, data, "spec", False)
     elif (field == "shortcut"): printMember(fl, data, "shortcut", False)
     elif (field == "type"): printMemberRek(fl, data, "type", False)
+    elif (field == "typedef"): printMemberRek(fl, data, "typedef", False)
     elif (field == "memvar"): printMemberRek(fl, data, "memvar", False)
     elif (field == "memfunc"): printMemberRek(fl, data, "memfunc", False)
     elif (field == "function"): printMemberRek(fl, data, "function", False)
@@ -1568,6 +1571,7 @@ def subprintField(fl, text):
     elif (field == "childconcept"): printMember(fl, data, "childconcept", False)
     elif (field == "conceptimplements"): printMemberRek(fl, data, "conceptimplements", False)
     elif (field == "conceptmetafunc"): printMemberRek(fl, data, "conceptmetafunc", False)
+    elif (field == "concepttypedef"): printMemberRek(fl, data, "concepttypedef", False)
     elif (field == "conceptmemvar"): printMemberRek(fl, data, "conceptmemvar", False)
     elif (field == "conceptmemfunc"): printMemberRek(fl, data, "conceptmemfunc", False)
     elif (field == "conceptfunc"): printMemberRek(fl, data, "conceptfunc", False)

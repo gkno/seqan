@@ -7,6 +7,7 @@
 ..Function:Function
 ..Memvar:Data Member
 ..Memfunc:Member Function
+..Typedef:Typedef
 ..Metafunction:Metafunction
 ..Tag:Tag
 ..Adaption:Adaption
@@ -36,6 +37,7 @@
 ..tag:Tags
 ..memvar:Data Members
 ..memfunc:Member Functions
+..typedef:Typedefs
 ..function:Functions
 ..remarks:Remarks
 ..example:Examples
@@ -48,6 +50,7 @@
 ..concept:Part of Concept
 ..conceptmemvar:Required Member Variables
 ..conceptmemfunc:Required Member Functions
+..concepttypedef:Required Typedefs
 ..conceptfunc:Required Functions
 ..conceptmetafunc:Required Metafunctions
 ..conceptusedbymeta:Used By Metafunction
@@ -85,6 +88,7 @@
 .globals.relations:
 ..memfunc:Memfunc.*.class
 ..memvar:Memvar.*.class
+..typedef:Typedef.*.class
 ..function:Function.*.param.*.type
 ..function:Function.*.returns.*.type
 ..function:Function.*.returns.type
@@ -96,6 +100,7 @@
 ..see:*.*.see
 ..conceptmemvar:Memvar.*.concept
 ..conceptmemfunc:Memfunc.*.concept
+..concepttypedef:Typedef.*.concept
 ..conceptfunc:Function.*.concept
 ..conceptmetafunc:Metafunction.*.concept
 ..conceptusedbyfunc:Function.*.param.*.concept
@@ -112,6 +117,7 @@
 ..type.implements:conceptusedbymeta
 ..type.baseconcept:conceptusedbymeta
 ..memvar.base
+..typedef.base
 ..function.general
 ..function.implements:conceptusedbyfunc
 ..function.baseconcept:conceptusedbyfunc
@@ -119,6 +125,7 @@
 ..conceptmetafunc.baseconcept
 ..conceptmemvar.baseconcept
 ..conceptmemfunc.baseconcept
+..concepttypedef.baseconcept
 ..conceptfunc.baseconcept
 ..conceptusedbyfunc.baseconcept
 ..conceptusedbymeta.baseconcept
