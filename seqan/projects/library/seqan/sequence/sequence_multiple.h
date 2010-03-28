@@ -1894,7 +1894,21 @@ end(StringSet< TString, TSpec > const & me,
 //////////////////////////////////////////////////////////////////////////////
 
 
-
+/**
+.Class.ConcatenatorNto1:
+..summary:A sequence class that virtually concatenates all sequences in a @Class.StringSet@.
+..cat:Sequences
+..signature:ConcatenatorNto1<TStringSet>
+..param.TStringSet:The @Class.StringSet@ type.
+...type:Class.StringSet
+..remarks:This container can be iterated like the concatenation string of all sequences in a @Class.StringSet@.
+..include:seqan/sequence.h
+.Memfunc.ConcatenatorNto1#ConcatenatorNto1
+..summary:Constructor
+..signature:ConcatenatorNto1<TStringSet> (stringSet)
+..param.stringSet:The @Class.StringSet@ object to be concatenated.
+..class:Class.ConcatenatorNto1
+*/
 
 	//////////////////////////////////////////////////////////////////////////////
 	// ConcatenatorNto1 - a StringSet to String converter
@@ -2020,8 +2034,16 @@ end(StringSet< TString, TSpec > const & me,
 			(*concat.set, length(*concat.set), 0);
 	}
 
-//////////////////////////////////////////////////////////////////////////////
-// Concatenator metafunction
+/**
+.Metafunction.Concatenator:
+..summary:Returns the type of the concatenation sequence of all sequences in a @Class.StringSet@.
+..cat:Sequences
+..signature:Concatenator<TStringSet>::Type
+..param.TStringSet:The @Class.StringSet@ type.
+...type:Class.StringSet
+..returns:The type of a container that can be iterated like the concatenation string of all sequences in a @Class.StringSet@.
+..include:seqan/sequence.h
+*/
 
 	template < typename TString, typename TSpec >
 	struct Concatenator< StringSet<TString, TSpec> > {
@@ -2033,8 +2055,19 @@ end(StringSet< TString, TSpec > const & me,
 		typedef TString Type;
 	};
 
-//////////////////////////////////////////////////////////////////////////////
-// concat
+/**
+.Function.concat:
+..summary:Returns the concatenation sequence of all sequences in a @Class.StringSet@.
+..cat:Sequences
+..signature:concat(stringSet)
+..param.stringSet:A @Class.StringSet@ object.
+...type:Class.StringSet
+..returns:A container that can be iterated like the concatenation string of all sequences in a @Class.StringSet@.
+..remarks:If $stringSet$ is a @Spec.ConcatDirect@ StringSet a reference to $stringSet.concat$ is returned.
+For all other StringSets a @Class.ConcatenatorNto1@ object is returned.
+...type:Metafunction.Concatenator
+..include:seqan/sequence.h
+*/
 
 	template <typename TString>
 	inline typename Concatenator<TString>::Type & 
