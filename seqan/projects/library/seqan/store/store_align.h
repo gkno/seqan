@@ -28,6 +28,78 @@ namespace SEQAN_NAMESPACE_MAIN
 // Aligned Read Store
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.AlignedReadStoreElement
+..summary:Represents an alignment between read and contig.
+..cat:Fragment Store
+..signature:AlignedReadStoreElement<>
+..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]>
+..param.TPos:Type to store gap-space positions.
+..param.TGapAnchor:Type of a read gap anchor.
+...type:Class.GapAnchor
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#alignedReadStore@ string.
+
+.Typedef.AlignedReadStoreElement#TPos
+..summary:Type of the $beginPos$ and $endPos$ members.
+..class:Class.AlignedReadStoreElement
+.Typedef.AlignedReadStoreElement#TGapAnchors
+..summary:Type of the $gaps$ member.
+..class:Class.AlignedReadStoreElement
+.Typedef.AlignedReadStoreElement#TSpec
+..summary:The specialization type.
+..class:Class.AlignedReadStoreElement
+
+.Memfunc.AlignedReadStoreElement#AlignedReadStoreElement
+..summary:Constructor
+..signature:AlignedReadStoreElement<> ()
+..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]> ()
+..signature:AlignedReadStoreElement<TPos[, TGapAnchor[, TSpec]]> (id, readId, contigId, beginPos, endPos[, gaps])
+..param.id:The alignment id refers to associated alignment information in @Memvar.FragmentStore#alignQualityStore@ or @Memvar.FragmentStore#alignedReadTagStore@.
+..param.readId:Refers to the aligned read in the @Memvar.FragmentStore#readStore@.
+..param.contigId:Refers to the contig in the @Memvar.FragmentStore#contigStore@ the read is aligned with.
+..param.beginPos:Begin position of the alignment in gap-space.
+..param.endPos:End position of the alignment in gap-space.
+..param.gaps:Read gap anchors.
+..remarks:The default constructor sets all ids to $INVALID_ID$ and $beginPos$ and $endPos$ to $0$.
+
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#id
+..summary:The alignment id refers to associated alignment information in @Memvar.FragmentStore#alignQualityStore@ or @Memvar.FragmentStore#alignedReadTagStore@.
+..type:Metafunction.Id
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#readId
+..summary:Refers to the aligned read in the @Memvar.FragmentStore#readStore@.
+..type:Metafunction.Id
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#contigId
+..summary:Refers to the contig in the @Memvar.FragmentStore#contigStore@ the read is aligned with.
+..type:Metafunction.Id
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#pairMatchId
+..summary:Two read alignments having the same $pairMatchId$ form a valid pair match.
+If $INVALID_ID$ the read is either not paired or could not be aligned as part of a pair match.
+..type:Metafunction.Id
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#beginPos
+..summary:Begin position of the alignment in gap-space.
+..type:Typedef.AlignedReadStoreElement#TPos
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#endPos
+..summary:End position of the alignment in gap-space.
+..type:Typedef.AlignedReadStoreElement#TPos
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#gaps
+..summary:String of read gap anchors. Can be used to create a $Spec.AnchorGaps$ alignment row.
+..type:Typedef.AlignedReadStoreElement#TGapAnchors
+..class:Class.AlignedReadStoreElement
+.Memvar.AlignedReadStoreElement#INVALID_ID
+..summary:Constant to represent an invalid id.
+..type:Metafunction.Id
+..class:Class.AlignedReadStoreElement
+*/
+
 template <typename _TPos, typename _TGapAnchor, typename _TSpec = void>
 struct AlignedReadStoreElement
 {
@@ -37,7 +109,7 @@ struct AlignedReadStoreElement
 	typedef _TSpec										TSpec;
 	typedef String<TGapAnchor>							TGapAnchors;
 
-	static const TId INVALID_ID;
+	static const TId INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement>::Type>::VALUE;
 	
 	TId			id;
 	TId			readId;
@@ -67,6 +139,34 @@ struct AlignedReadStoreElement
 		gaps(_gaps) {}
 };
 
+/**
+.Class.AlignQualityStoreElement
+..summary:Stores alignment qualities.
+..cat:Fragment Store
+..signature:AlignQualityStoreElement<TScore[, TSpec]>
+..param.TScore:Type to store align and pair score values.
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#alignQualityStore@ string.
+
+.Memfunc.AlignQualityStoreElement#AlignQualityStoreElement
+..summary:Constructor
+..signature:AlignQualityStoreElement<TScore[, TSpec]> ()
+..remarks:Sets all members to $0$.
+
+..class:Class.AlignQualityStoreElement
+.Memvar.AlignQualityStoreElement#pairScore
+..summary:Combined score of both alignments of a pair match.
+..class:Class.AlignQualityStoreElement
+.Memvar.AlignQualityStoreElement#score
+..summary:Score of the alignment.
+..class:Class.AlignQualityStoreElement
+.Memvar.AlignQualityStoreElement#errors
+..summary:Absolute number of errors in the alignment.
+..type:nolink:unsigned char
+..class:Class.AlignQualityStoreElement
+*/
+
 template <typename TScore, typename TSpec = void>
 struct AlignQualityStoreElement
 {
@@ -80,24 +180,39 @@ struct AlignQualityStoreElement
 		errors(0) {}
 };
 
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TPos, typename TGapAnchor, typename TSpec>
-const typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type
-AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type>::VALUE;
-
-
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // Sorting tags
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.sortAlignedRead Tags
+..summary:Tag to select a specific field to stably sort the @Memvar.FragmentStore#alignedReadStore@ by.
+..cat:Fragment Store
+..see:Function.sortAlignedReads
+..tag.SortContigId:
+...summary:Sort alignedReads by $contigId$.
+...signature:SortContigId
+..tag.SortId:
+...summary:Sort alignedReads by $id$.
+...signature:SortId
+..tag.SortBeginPos:
+...summary:Sort alignedReads by $beginPos$.
+...signature:SortBeginPos
+..tag.SortEndPos:
+...summary:Sort alignedReads by $endPos$.
+...signature:SortEndPos
+..tag.SortPairMatchId:
+...summary:Sort alignedReads by $pairMatchId$.
+...signature:SortPairMatchId
+..tag.SortReadId:
+...summary:Sort alignedReads by $readId$.
+...signature:SortReadId
+*/
 
 struct _SortContigId;
 typedef Tag<_SortContigId> const SortContigId;
-
 
 struct _SortId;
 typedef Tag<_SortId> const SortId;
@@ -190,6 +305,19 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.sortAlignedReads
+..summary:Stably sort aligned reads.
+..cat:Fragment Store
+..signature:sortAlignedReads(alignStore, sortTag)
+..signature:sortAlignedReads(alignStore, lessFunctor)
+..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
+..param.sortTag:Selects the field to sort by.
+...type:Tag.sortAlignedRead Tags
+..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
+..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
+*/
 
 template <typename TAlign, typename TSortSpec>
 inline void
@@ -453,6 +581,25 @@ upperBoundAlignedReads(TAlign const& alignStore,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Spec.AnchorGaps:
+..cat:Alignments
+..general:Class.Gaps
+..summary:Stores gaps anchors of the first characters behind gaps.
+..signature:Gaps<TSource, AnchorGaps<TGapAnchors> >
+..param.TSource:Type of the ungapped sequence.
+...metafunction:Metafunction.Source
+..param.TGapAnchors:Type of the sequence of gap anchors, e.g. a string of $Class.GapAnchor$.
+..include:seqan/store.h
+
+.Memfunc.Gaps#Gaps
+..summary:Constructor
+..signature:Gaps<TSource, AnchorGaps<TGapAnchors> > ()
+..signature:Gaps<TSource, AnchorGaps<TGapAnchors> > (source[, anchors])
+..signature:Gaps<TSource, AnchorGaps<TGapAnchors> > (anchors)
+..param.source:The underlying ungapped sequence.
+..param.anchors:The sequence of gap anchors, e.g. the $gaps$ members in $Class.ReadStoreElement$ or $Class.ContigStoreElement$.
+*/
 
 template <typename TGapAnchors = String<GapAnchor<unsigned> > >
 struct AnchorGaps;

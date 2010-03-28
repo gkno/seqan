@@ -28,14 +28,44 @@ namespace SEQAN_NAMESPACE_MAIN
 // Mate Store
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
+/**
+.Class.MatePairStoreElement
+..summary:Represents a mate-pair.
+..cat:Fragment Store
+..signature:MatePairStoreElement<>
+..signature:MatePairStoreElement<TSpec>
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:A mate-pair consists of two reads sequenced from opposite ends and strands of the same fragment.
+The insert size of a mate-pair is the size of the fragment.
+..remarks:Value type of the @Memvar.FragmentStore#matePairStore@ string.
+
+.Memfunc.MatePairStoreElement#MatePairStoreElement
+..summary:Constructor
+..signature:MatePairStoreElement<> ()
+..signature:MatePairStoreElement<TSpec> ()
+..remarks:Sets $readId[0]$, $readId[1]$ and $libId$ to $INVALID_ID$.
+..class:Class.MatePairStoreElement
+.Memvar.MatePairStoreElement#readId[2]
+..summary:Refers to two paired reads in the @Memvar.FragmentStore#readStore@ or contains $INVALID_ID$ values.
+..type:Metafunction.Id
+..class:Class.MatePairStoreElement
+.Memvar.MatePairStoreElement#libId
+..summary:Refers to a library in the @Memvar.FragmentStore#libraryStore@ or is $INVALID_ID$ if the mate-pair has no library.
+..type:Metafunction.Id
+..class:Class.MatePairStoreElement
+.Memvar.MatePairStoreElement#INVALID_ID
+..summary:Constant to represent an invalid id.
+..type:Metafunction.Id
+..class:Class.MatePairStoreElement
+*/
 
 template <typename TSpec = void>
 struct MatePairStoreElement
 {
 	typedef typename Id<MatePairStoreElement>::Type TId;
 
-	static const TId INVALID_ID;
+	static const TId INVALID_ID = SupremumValue<typename Id<MatePairStoreElement<TSpec> >::Type>::VALUE;
 	
 	TId		readId[2];	// refers to the two reads of a mate-pair, INVALID_ID if this is a singleton fragment (e.g. in afg: reads refer to fragments (mate pairs) and these refer to libraries, singletons refer to an empty fragment)
 	TId		libId;
@@ -46,14 +76,6 @@ struct MatePairStoreElement
 		readId[1] = INVALID_ID;
 	}
 };
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSpec>
-const typename Id<MatePairStoreElement<TSpec> >::Type
-MatePairStoreElement<TSpec>::INVALID_ID = SupremumValue<typename Id<MatePairStoreElement<TSpec> >::Type>::VALUE;
-
 
 //////////////////////////////////////////////////////////////////////////////
 

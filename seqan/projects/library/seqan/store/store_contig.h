@@ -28,7 +28,67 @@ namespace SEQAN_NAMESPACE_MAIN
 // Contig Store
 //////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////
+/**
+.Class.ContigStoreElement
+..summary:Represents a single contig.
+..cat:Fragment Store
+..signature:ContigStoreElement<>
+..signature:ContigStoreElement<TContigSeq[, TGapAnchor[, TSpec]]>
+..param.TContigSeq:Type to store the contig sequence.
+..param.TGapAnchor:Type of a contig gap anchor.
+...type:Class.GapAnchor
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#contigStore@ string.
+
+.Typedef.ContigStoreElement#TContigSeq
+..summary:Type of the $seq$ member.
+..class:Class.ContigStoreElement
+.Typedef.ContigStoreElement#TGapAnchors
+..summary:Type of the $gaps$ member.
+..class:Class.ContigStoreElement
+.Typedef.ContigStoreElement#TPos
+..summary:Type of the $fileBeginPos$ and $fileEndPos$ members.
+..class:Class.ContigStoreElement
+.Typedef.ContigStoreElement#TSpec
+..summary:The specialization type.
+..class:Class.ContigStoreElement
+
+
+.Memfunc.ContigStoreElement#ContigStoreElement
+..summary:Constructor
+..signature:ContigStoreElement<> ()
+..signature:ContigStoreElement<TContigSeq[, TGapAnchor[, TSpec]]> ()
+..remarks:Sets $fileId$ to $INVALID_ID$ and $usage$, $fileBeginPos$ and $fileEndPos$ to $0$.
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#seq
+..summary:Contig sequence.
+..type:Typedef.ContigStoreElement#TContigSeq
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#gaps
+..summary:String of contig gap anchors. Can be used to create a $Spec.AnchorGaps$ alignment row.
+..type:Typedef.ContigStoreElement#TGapAnchors
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#usage
+..summary:Counts the number of locks, see @Function.lockContigs@.
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#fileId
+..summary:Refers to a file in the @Memvar.FragmentStore#contigFileStore@ or is $INVALID_ID$ if the contig has no file association.
+..type:Metafunction.Id
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#fileBeginPos
+..summary:Begin position of the contig sequence fragment in the file.
+..type:Typedef.ContigStoreElement#TPos
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#fileEndPos
+..summary:End position of the contig sequence fragment in the file.
+..type:Typedef.ContigStoreElement#TPos
+..class:Class.ContigStoreElement
+.Memvar.ContigStoreElement#INVALID_ID
+..summary:Constant to represent an invalid id.
+..type:Metafunction.Id
+..class:Class.ContigStoreElement
+*/
 
 template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec = void>
 struct ContigStoreElement
@@ -41,7 +101,7 @@ struct ContigStoreElement
 	typedef __int64				TPos;
 	typedef String<TGapAnchor>	TGapAnchors;
 
-	static const TId INVALID_ID;
+	static const TId INVALID_ID = SupremumValue<typename Id<ContigStoreElement>::Type>::VALUE;
 
 	TContigSeq	seq;
 	TGapAnchors	gaps;
@@ -51,29 +111,45 @@ struct ContigStoreElement
 	TId			fileId;
 	TPos		fileBeginPos;
 	TPos		fileEndPos;
+
+	ContigStoreElement() : usage(0), fileId(INVALID_ID), fileBeginPos(0), fileEndPos(0) {}
 };
+
+/**
+.Class.ContigFile
+..summary:Represents a file containing contigs.
+..cat:Fragment Store
+..signature:ContigFile<>
+..signature:ContigFile<TSpec>
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#contigFileStore@ string.
+
+.Memvar.ContigFile#fileName
+..summary:Contig file name.
+..type:Shortcut.CharString
+..class:Class.ContigFile
+.Memvar.ContigFile#format
+..summary:Stores the contig file format, auto-detected in $Function.loadContigs$.
+..type:Class.AutoSeqFormat
+..class:Class.ContigFile
+.Memvar.ContigFile#firstContigId
+..summary:The $contigId$ of the first sequence in the file. Subsequent contig sequences have an increasing $contigId$.
+..type:Metafunction.Id
+..class:Class.ContigFile
+*/
 
 template <typename _TSpec = void>
 struct ContigFile
 {
 	typedef typename Id<ContigFile>::Type	TId;
 
-	static const TId INVALID_ID;
+	static const TId INVALID_ID = SupremumValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE;
 
 	CharString		fileName;
 	AutoSeqFormat	format;
 	TId				firstContigId;	// first sequence of the file corresponds to this contigId
 };
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec>
-const typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type
-ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = SupremumValue<typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type>::VALUE;
-
-template <typename _TSpec>
-const typename Id<ContigFile<_TSpec> >::Type
-ContigFile<_TSpec>::INVALID_ID = SupremumValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE;
 
 //////////////////////////////////////////////////////////////////////////////
 

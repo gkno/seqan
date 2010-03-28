@@ -98,6 +98,14 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.read
+..cat:Fragment Store
+..signature:read(file, fragStore, tag)
+..param.fragStore:A fragment store. Currently @Tag.File Format.tag.Amos message file@ and @Tag.File Format.tag.SAM@ formats are supported.
+...type:Class.FragmentStore
+..param.tag.type:Tag.File Format.tag.Amos message file
+*/
 
 template<typename TFile, typename TSpec, typename TConfig>
 inline void 
@@ -513,6 +521,15 @@ read(TFile & file,
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.write
+..cat:Fragment Store
+..signature:write(file, fragStore, tag)
+..param.fragStore:A fragment store.
+...type:Class.FragmentStore
+..param.tag.type:Tag.File Format.tag.Amos message file
+*/
+
 template<typename TFile, typename TSpec, typename TConfig>
 inline void 
 write(TFile & target,
@@ -777,7 +794,26 @@ write(TFile & target,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences from multiple files
+
+/**
+.Function.loadContigs
+..summary:Loads contigs into fragment store.
+..cat:Fragment Store
+..signature:loadContigs(store, fileName[, loadSeqs])
+..signature:loadContigs(store, fileNameList[, loadSeqs])
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.fileName:A sequence file name.
+...type:Shortcut.CharString
+..param.fileNameList:A @Class.StringSet@ of sequence file names.
+...type:Class.StringSet
+..param.loadSeqs:If $true$, sequences are loaded immediately. 
+If $false$, an empty contig with a reference to the file is created. Its sequence can be loaded on-demand by @Function.lockContig@ or @Function.loadContig@.
+...default:$true$
+...type:nolink:bool
+..returns:A $bool$ which is $true$ on success.
+*/
+
 template <typename TFSSpec, typename TFSConfig>
 bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString> const &fileNameList, bool loadSeqs)
 {
@@ -822,7 +858,7 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, StringSet<CharString>
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences from a single file
+
 template <typename TFSSpec, typename TFSConfig>
 bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, CharString const &fileName, bool loadSeqs)
 {
@@ -840,6 +876,17 @@ bool loadContigs(FragmentStore<TFSSpec, TFSConfig> &store, TFileNames const &fil
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.loadContig
+..summary:Manually loads a contig sequence.
+..cat:Fragment Store
+..signature:loadContig(store, contigId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:Id of the contig which was created earlier by @Function.loadContigs@.
+..returns:A $bool$ which is $true$ on success.
+*/
 
 template <typename TSpec, typename TConfig, typename TId>
 bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
@@ -864,6 +911,18 @@ bool loadContig(FragmentStore<TSpec, TConfig> &store, TId id)
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.lockContig
+..summary:Locks a contig sequence from being removed.
+..cat:Fragment Store
+..signature:lockContig(store, contigId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:Id of the contig which was created earlier by @Function.loadContigs@.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function increases the contig usage counter by 1 and ensures that the contig sequence is loaded.
+*/
+
 template <typename TSpec, typename TConfig, typename TId>
 bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 {
@@ -880,6 +939,18 @@ bool lockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	return loadContig(store, id);
 }
 
+/**
+.Function.unlockContig
+..summary:Removes a previous contig lock.
+..cat:Fragment Store
+..signature:unlockContig(store, contigId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:Id of the contig which was created earlier by @Function.loadContigs@.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function decreases the contig usage counter by 1.
+*/
+
 template <typename TSpec, typename TConfig, typename TId>
 bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 {
@@ -887,6 +958,18 @@ bool unlockContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	--store.contigStore[id].usage;
 	return true;
 }
+
+/**
+.Function.unlockAndFreeContig
+..summary:Removes a previous contig lock and clears sequence no further lock exist.
+..cat:Fragment Store
+..signature:unlockAndFreeContig(store, contigId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:Id of the contig which was created earlier by @Function.loadContigs@.
+..returns:A $bool$ which is $true$ on success.
+..remarks:This function decreases contig usage counter by 1 and clears contig sequence if counter is 0.
+*/
 
 template <typename TSpec, typename TConfig, typename TId>
 bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId id)
@@ -906,6 +989,17 @@ bool unlockAndFreeContig(FragmentStore<TSpec, TConfig> &store, TId id)
 	return false;
 }
 
+/**
+.Function.lockContigs
+..summary:Locks all contig sequences from being removed. 
+..cat:Fragment Store
+..signature:lockContigs(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..returns:A $bool$ which is $true$ on success.
+..remarks:Calls @Function.lockContig@ for all contigs.
+*/
+
 template <typename TSpec, typename TConfig>
 bool lockContigs(FragmentStore<TSpec, TConfig> &store)
 {
@@ -915,6 +1009,17 @@ bool lockContigs(FragmentStore<TSpec, TConfig> &store)
 	return result;
 }
 
+/**
+.Function.unlockContigs
+..summary:Removes a previous lock for all contigs.
+..cat:Fragment Store
+..signature:unlockContigs(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..returns:A $bool$ which is $true$ on success.
+..remarks:Calls @Function.unlockContig@ for all contigs.
+*/
+
 template <typename TSpec, typename TConfig>
 bool unlockContigs(FragmentStore<TSpec, TConfig> &store)
 {
@@ -923,6 +1028,17 @@ bool unlockContigs(FragmentStore<TSpec, TConfig> &store)
 		result &= unlockContig(store, id);
 	return result;
 }
+
+/**
+.Function.unlockAndFreeContigs
+..summary:Removes a previous lock for all contigs and clears sequences without lock.
+..cat:Fragment Store
+..signature:unlockAndFreeContigs(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..returns:A $bool$ which is $true$ on success.
+..remarks:Calls @Function.unlockAndFreeContigs@ for all contigs.
+*/
 
 template <typename TSpec, typename TConfig>
 bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
@@ -935,7 +1051,19 @@ bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences from multiple files
+
+/**
+.Function.loadReads
+..summary:Loads reads into fragment store.
+..cat:Fragment Store
+..signature:loadReads(store, fileName)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.fileName:A sequence file name.
+...type:Shortcut.CharString
+..returns:A $bool$ which is $true$ on success.
+*/
+
 template <typename TFSSpec, typename TFSConfig, typename TFileName>
 bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
 {

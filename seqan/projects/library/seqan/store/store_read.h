@@ -28,24 +28,43 @@ namespace SEQAN_NAMESPACE_MAIN
 // Read Store
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TReadSeq, typename TPos, typename TSpec = void>
+/**
+.Class.ReadStoreElement
+..summary:Represents a single read (without sequence).
+..cat:Fragment Store
+..signature:ReadStoreElement<>
+..signature:ReadStoreElement<TSpec>
+..param.TSpec:The specialization type.
+...default:$void$
+..remarks:Value type of the @Memvar.FragmentStore#readStore@ string.
+
+.Memfunc.ReadStoreElement#ReadStoreElement
+..summary:Constructor
+..signature:ReadStoreElement<>()
+..signature:ReadStoreElement<TSpec> ()
+..remarks:Sets $matePairId$ to $INVALID_ID$.
+..class:Class.ReadStoreElement
+.Memvar.ReadStoreElement#matePairId
+..summary:Refers to a mate-pair in the @Memvar.FragmentStore#matePairStore@ or is $INVALID_ID$ if the read is not paired.
+..type:Metafunction.Id
+..class:Class.ReadStoreElement
+.Memvar.ReadStoreElement#INVALID_ID
+..summary:Constant to represent an invalid id.
+..type:Metafunction.Id
+..class:Class.ReadStoreElement
+*/
+
+template <typename TSpec = void>
 struct ReadStoreElement
 {
 	typedef typename Id<ReadStoreElement>::Type TId;
 	
-	static const TId INVALID_ID;
-	
-	
+	static const TId INVALID_ID = SupremumValue<typename Id<ReadStoreElement<TSpec> >::Type>::VALUE;
+
 	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
 
 	ReadStoreElement() : matePairId(INVALID_ID) {}
 };
-
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TReadSeq, typename TPos, typename TSpec>
-const typename Id<ReadStoreElement<TReadSeq, TPos, TSpec> >::Type
-ReadStoreElement<TReadSeq, TPos, TSpec>::INVALID_ID = SupremumValue<typename Id<ReadStoreElement<TReadSeq, TPos, TSpec> >::Type>::VALUE;
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -62,8 +62,28 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 	};
+
+/**
+.Class.NameStoreCache
+..summary:Stores a mapping from names to ids.
+..cat:Fragment Store
+..signature:FragmentStore<>
+..signature:NameStoreCache<TNameStore[, TName]>
+..param.TNameStore:The name store to be cached.
+...see:Class.FragmentStore
+..param.TName:The name type.
+...default:$Value<TNameStore>::Type$
+...type:Shortcut.CharString
+
+.Memvar.NameStoreCache#NameStoreCache
+..summary:Constructor
+..signature:NameStoreCache<TNameStore, TName> (nameStore)
+..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
+...see:Class.FragmentStore
+..class:Class.NameStoreCache
+*/
 	
-	template <typename TNameStore, typename TName>
+	template <typename TNameStore, typename TName = typename Value<TNameStore>::Type>
 	struct NameStoreCache
 	{
 		typedef typename Position<TNameStore>::Type TId;
@@ -113,8 +133,134 @@ struct FragmentStoreConfig
 // Fragment Store
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.FragmentStore
+..summary:Multi-Container to store contigs, reads and a multiple alignment between them.
+..cat:Fragment Store
+..signature:FragmentStore<>
+..signature:FragmentStore<TSpec[, TConfig]>
+..param.TSpec:The specializing type.
+...default:$void$
+..param.TConfig:The configuration struct.
+...default:$FragmentStoreConfig<TSpec>$
+
+.Typedef.FragmentStore#TReadStore
+..summary:Type of the $readStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TReadSeqStore
+..summary:Type of the $readSeqStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TMatePairStore
+..summary:Type of the $matePairStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TLibraryStore
+..summary:Type of the $libraryStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TContigFileStore
+..summary:Type of the $contigFileStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TContigStore
+..summary:Type of the $contigStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAlignedReadStore
+..summary:Type of the $alignedReadStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAnnotationStore
+..summary:Type of the $annotationStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAlignQualityStore
+..summary:Type of the $alignQualityStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAlignedReadTagStore
+..summary:Type of the $alignedReadTagStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TReadNameStore
+..summary:Type of the $readNameStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TMatePairNameStore
+..summary:Type of the $matePairNameStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TLibraryNameStore
+..summary:Type of the $libraryNameStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TContigNameStore
+..summary:Type of the $contigNameStore$ member.
+..class:Class.FragmentStore
+.Typedef.FragmentStore#TAnnotationNameStore
+..summary:Type of the $annotationNameStore$ member.
+..class:Class.FragmentStore
+
+.Memvar.FragmentStore#readStore
+..summary:String that maps from $readId$ to $<matePairId>$.
+..remarks:Value type is @Class.ReadStoreElement@.
+..type:Typedef.FragmentStore#TReadStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#readSeqStore
+..summary:String that maps from $readId$ to $readSeq$.
+..type:Typedef.FragmentStore#TReadSeqStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#matePairStore
+..summary:String that maps from $matePairId$ to $<readId[2], libId>$.
+..type:Typedef.FragmentStore#TMatePairStore
+..remarks:Value type is @Class.MatePairStoreElement@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#libraryStore
+..summary:String that maps from $libId$ to $<mean, std>$.
+..type:Typedef.FragmentStore#TLibraryStore
+..remarks:Value type is @Class.LibraryStoreElement@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#contigFileStore
+..summary:String that maps from $contigFileId$ to $<fileName, firstContigId>$.
+..type:Typedef.FragmentStore#TContigFileStore
+..remarks:Value type is @Class.ContigFile@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#contigStore
+..summary:String that maps from $contigId$ to $<contigSeq, contigGaps, contigFileId>$.
+..type:Typedef.FragmentStore#TContigStore
+..remarks:Value type is @Class.ContigStoreElement@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#alignedReadStore
+..summary:String that stores $<alignId, readId, contigId, pairMatchId, beginPos, endPos, gaps>$.
+..type:Typedef.FragmentStore#TAlignedReadStore
+..remarks:Value type is @Class.AlignedReadStoreElement@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#annotationStore
+..summary:String that maps from $annoId$ to $<parentId, contigId, beginPos, endPos>$.
+..type:Typedef.FragmentStore#TAnnotationStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#alignQualityStore
+..summary:String that maps from $alignId$ to $<pairScore, score, errors>$.
+..type:Typedef.FragmentStore#TAlignQualityStore
+..remarks:Value type is @Class.AlignQualityStoreElement@.
+..class:Class.FragmentStore
+.Memvar.FragmentStore#alignedReadTagStore
+..summary:String that maps from $alignId$ to $alignTag$.
+..type:Typedef.FragmentStore#TAlignedReadTagStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#readNameStore
+..summary:String that maps from $readId$ to $readName$.
+..type:Typedef.FragmentStore#TReadNameStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#matePairNameStore
+..summary:String that maps from $contigId$ to $contigName$.
+..type:Typedef.FragmentStore#TMatePairNameStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#libraryNameStore
+..summary:String that maps from $libId$ to $libName$.
+..type:Typedef.FragmentStore#TLibraryNameStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#contigNameStore
+..summary:String that maps from $contigId$ to $contigName$.
+..type:Typedef.FragmentStore#TContigNameStore
+..class:Class.FragmentStore
+.Memvar.FragmentStore#annotationNameStore
+..summary:String that maps from $annoId$ to $annoName$.
+..type:Typedef.FragmentStore#TAnnotationNameStore
+..class:Class.FragmentStore
+*/
+
 template <typename TSpec = void, typename TConfig = FragmentStoreConfig<TSpec> >
-struct FragmentStore
+class FragmentStore
 {
 private:
 	typedef typename TConfig::TReadStoreElementSpec			TReadStoreElementSpec;
@@ -143,7 +289,7 @@ public:
 	typedef AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec >	TAnnotationStoreElement;
 	typedef typename TAnnotationStoreElement::TId								TAnnotationStoreElementId;
 
-	typedef String< ReadStoreElement< TReadSeq, TReadPos, TReadStoreElementSpec > >							TReadStore;
+	typedef String< ReadStoreElement< TReadStoreElementSpec > >												TReadStore;
 	typedef String< MatePairStoreElement< TMatePairStoreElementSpec > >										TMatePairStore;
 	typedef String< LibraryStoreElement< TMean, TStd, TLibraryStoreElementSpec > >							TLibraryStore;
 	typedef String< ContigStoreElement< TContigSeq, TContigGapAnchor, TContigStoreElementSpec > >			TContigStore;
@@ -199,6 +345,16 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 // refresh
+
+/**
+.Function.refresh:
+..summary:Recreate a name store cache.
+..cat:Fragment Store
+..signature:refresh(cache)
+..param.cache:A @Class.NameStoreCache@ object.
+...type:Class.NameStoreCache
+..see:Function.getIdByName
+*/
     
     template <typename TNameStore, typename TName>
     inline void
@@ -211,11 +367,28 @@ public:
 		
 
 //////////////////////////////////////////////////////////////////////////////
-// _getIdByName
+// getIdByName
     
+/**
+.Function.getIdByName:
+..summary:Appends a name to a name store.
+..cat:Fragment Store
+..signature:getIdByName(nameStore, name, id[, cache])
+..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
+...see:Class.FragmentStore
+..param.name:The name to be searched.
+...type:Shortcut.CharString
+..param.id:The resulting id.
+..param.cache:A structure to efficiently retrieve the id for a given name. If ommited a brute force method is used to search.
+...default:Tag.Nothing
+...type:Class.NameStoreCache
+..returns:$true$ if the name was found and $false$ if not.
+..see:Function.getIdByName
+*/
+
     template <typename TNameStore, typename TName, typename TPos>
     inline bool 
-    _getIdByName(TNameStore &store, TName &name, TPos &pos)
+    getIdByName(TNameStore &store, TName &name, TPos &pos)
     {
         typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
         
@@ -236,15 +409,14 @@ public:
 	
     template <typename TNameStore, typename TName, typename TPos, typename TContext>
     inline bool 
-    _getIdByName(TNameStore &store, TName &name, TPos &pos, TContext &)
+    getIdByName(TNameStore &store, TName &name, TPos &pos, TContext &)
 	{
-		Nothing nothing;
-		return _getIdByName(store, name, pos);
+		return getIdByName(store, name, pos);
 	}
     
     template<typename TNameStore, typename TName, typename TPos>
     inline bool 
-    _getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
+    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
     {
         typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
 		typedef typename Position<TNameStore>::Type TId;
@@ -264,6 +436,21 @@ public:
     }
 	
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.appendName:
+..summary:Appends a name to a name store.
+..cat:Fragment Store
+..signature:appendRead(nameStore, name[, cache])
+..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
+...see:Class.FragmentStore
+..param.name:The name to be appended.
+...type:Shortcut.CharString
+..param.cache:A structure to efficiently retrieve the id for a given name. See @Function.getIdByName@.
+...default:Tag.Nothing
+...type:Class.NameStoreCache
+..see:Function.getIdByName
+*/
 
     template<typename TNameStore, typename TName>
     inline void
@@ -292,13 +479,43 @@ public:
 // Read Store Accessors
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.clearReads
+..summary:Removes all reads from a fragment store.
+..cat:Fragment Store
+..signature:clearReads(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..remarks:This function clears the @Memvar.FragmentStore#readStore@, @Memvar.FragmentStore#readSeqStore@ and @Memvar.FragmentStore#readNameStore@.
+*/
+
 template <typename TSpec, typename TConfig>
 inline void
 clearReads(FragmentStore<TSpec, TConfig> &me)
 {
 	clear(me.readStore);
 	clear(me.readSeqStore);
+	clear(me.readNameStore);
 }
+
+/**
+.Function.appendRead:
+..summary:Appends a read to a fragment store.
+..cat:Fragment Store
+..signature:appendRead(store, read[, matePairId])
+..signature:appendRead(store, read, name[, matePairId])
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.read:The read sequence.
+..param.name:The read name.
+...type:Shortcut.CharString
+..param.matePairId:Id of mate-pair this read is part of.
+...default:$INVALID_ID$, which corresponds to an unmated read.
+..returns:The $readId$ of the newly appended read.
+..remarks:This function appends a single read to the @Memvar.FragmentStore#readStore@ and @Memvar.FragmentStore#readSeqStore@.
+If name is given, it is appended to the @Memvar.FragmentStore#readNameStore@.
+..see:Function.getRead
+*/
 
 template <typename TSpec, typename TConfig, typename TRead, typename TId>
 inline typename Size<typename FragmentStore<TSpec, TConfig>::TReadStore>::Type
@@ -363,6 +580,17 @@ appendRead(
 	return appendRead(me, read, name, TReadStoreElement::INVALID_ID);
 }
 
+/**
+.Function.getRead
+..summary:Returns the read with the given $readId$.
+..cat:Fragment Store
+..signature:getRead(store, readId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.readId:The read id.
+..returns:The sequence of the read with id $readId$ from the @Memvar.FragmentStore#readSeqStore@.
+*/
+
 template <typename TSpec, typename TConfig, typename TId>
 inline typename Value<typename FragmentStore<TSpec, TConfig>::TReadSeqStore>::Type
 getRead(
@@ -373,6 +601,25 @@ getRead(
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.appendMatePair
+..summary:Appends two paired-end reads to a fragment store.
+..cat:Fragment Store
+..signature:appendMatePair(store, readId1, readId2)
+..signature:appendMatePair(store, readId1, readId2, name1, name2)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.readId1:The read sequence of the first read.
+..param.readId2:The read sequence of the second read.
+..param.name1:The read name of the first read.
+..param.name2:The read name of the second read.
+..returns:The $matePairId$ of the newly appended mate-pair.
+..remarks:This function appends two reads to the @Memvar.FragmentStore#readStore@ and @Memvar.FragmentStore#readSeqStore@ 
+and a mate-pair entry between both of them to the @Memvar.FragmentStore#matePairStore@.
+If names are given, they are appended to the @Memvar.FragmentStore#readNameStore@.
+..see:Function.appendRead
+*/
 
 template <typename TSpec, typename TConfig, typename TRead>
 inline typename Size<typename FragmentStore<TSpec, TConfig>::TMatePairStore>::Type
@@ -432,6 +679,20 @@ appendMatePair(
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.compactAlignedReads
+..summary:Removes invalid aligned reads and rename $alignId$ sequentially beginning with 0.
+..cat:Fragment Store
+..signature:compactAlignedReads(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..returns:The new size of the @Memvar.FragmentStore#alignedReadStore@.
+..remarks:This function removes all entries from @Memvar.FragmentStore#alignedReadStore@ whose $alignId$ equals to $INVALID_ID$ as well as orphan entries
+in @Memvar.FragmentStore#alignQualityStore@.
+Afterwards the alignIds are renamed sequentially beginning with 0.
+This function can be used to remove alignments which are selected by previously setting their id to $INVALID_ID$.
+*/
+
 // 1. remove aligned reads with invalid ids
 // 2. rename ids beginning with 0
 template <typename TSpec, typename TConfig>
@@ -474,6 +735,20 @@ compactAlignedReads(FragmentStore<TSpec, TConfig> &me)
 	return newId;
 }
 
+/**
+.Function.compactPairMatchIds
+..summary:Renames $pairMatchId$ sequentially beginning with 0.
+..cat:Fragment Store
+..signature:compactPairMatchIds(store)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..returns:The number of pair matches.
+..remarks:This function renames the $pairMatchId$ in the @Memvar.FragmentStore#alignedReadStore@ sequentially beginning with 0.
+Two read alignments can be identified to be a pair match if they have the same $pairMatchId$.
+Please note that paired reads not necessarily have to mapped as a pair match, 
+e.g. if they are on different contigs or have the same orientation or a wrong insert size.
+*/
+
 // rename pair match ids beginning with 0, returns the number of pair matches
 template <typename TSpec, typename TConfig>
 inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
@@ -508,10 +783,22 @@ compactPairMatchIds(FragmentStore<TSpec, TConfig> &me)
 	return newId + 1;
 }
 
-// calculate outer library size for each pair match
+/**
+.Function.calculateInsertSizes
+..summary:Calculates a string with insert sizes for each pair match.
+..cat:Fragment Store
+..signature:compactPairMatchIds(insertSizes, store)
+..param.insertSizes:The resulting string of insert sizes.
+...remarks:This string is accordingly resized and can be addressed by the $pairMatchId$.
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..remarks:This function calls @Function.compactPairMatchIds@ first and calculate the insert size for every pair match.
+The insert size of a pair match is the outer distance between the two matches.
+*/
+
 template <typename TLibSizeString, typename TSpec, typename TConfig>
 inline void
-calculateLibSizes(TLibSizeString &libSize, FragmentStore<TSpec, TConfig> &me)
+calculateInsertSizes(TLibSizeString &insertSizes, FragmentStore<TSpec, TConfig> &me)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
@@ -524,7 +811,7 @@ calculateLibSizes(TLibSizeString &libSize, FragmentStore<TSpec, TConfig> &me)
 	TAlignedReadIter it = begin(me.alignedReadStore, Standard());
 	TAlignedReadIter itEnd = end(me.alignedReadStore, Standard());
 
-	resize(libSize, compactPairMatchIds(me), Exact());
+	resize(insertSizes, compactPairMatchIds(me), Exact());
 	TId lastId = TAlignedRead::INVALID_ID;
 	TGPos leftMatePos = 0;
 	for (; it != itEnd; ++it)
@@ -536,11 +823,21 @@ calculateLibSizes(TLibSizeString &libSize, FragmentStore<TSpec, TConfig> &me)
 			leftMatePos = (*it).beginPos;
 			lastId = id;
 		} else
-			libSize[id] = (*it).beginPos - leftMatePos;
+			insertSizes[id] = (*it).beginPos - leftMatePos;
 	}
 }
 
-// returns mate number (0..left mate, 1..right mate, -1..no mate pair) for a read
+/**
+.Function.getMateNo
+..summary:Returns the mate number of read for a given $readId$.
+..cat:Fragment Store
+..signature:getMateNo(store, readId)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.readId:The read id.
+..returns:The mate number (0..first mate, 1..second mate) of the read in its mate-pair or -1 if the read is not paired.
+*/
+
 template <typename TSpec, typename TConfig, typename TId>
 inline signed char
 getMateNo(FragmentStore<TSpec, TConfig> const &me, TId readId)
@@ -565,10 +862,23 @@ getMateNo(FragmentStore<TSpec, TConfig> const &me, TId readId)
 	return -1;
 }
 
+
+/**
+.Function.calculateMateIndices
+..summary:Calculates a string that maps the $readId$ of a read to the $readId$ of its mate.
+..cat:Fragment Store
+..signature:calculateMateIndices(mateIndices, store)
+..param.mateIndices:The resulting string of mate indices.
+...remarks:This string is accordingly resized and can be addressed by the $readId$.
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..remarks:Entries of reads without a mate contain $INVALID_ID$.
+*/
+
 // calculate index of the other mate for each pair match
 template <typename TMateIndexString, typename TSpec, typename TConfig>
 inline void
-calculateMateIndices(TMateIndexString &mateIndex, FragmentStore<TSpec, TConfig> &me)
+calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig> &me)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
@@ -584,13 +894,29 @@ calculateMateIndices(TMateIndexString &mateIndex, FragmentStore<TSpec, TConfig> 
 	{
 		TId id = (*it).pairMatchId;
 		if (id == TAlignedRead::INVALID_ID) continue;
-		if (length(mateIndex) < 2*id + 2)
-			fill(mateIndex, 2*id + 2, TAlignedRead::INVALID_ID, Generous());
-		mateIndex[2*id + 1 - getMateNo(me, (*it).readId)] = idx;
+		if (length(mateIndices) < 2*id + 2)
+			fill(mateIndices, 2*id + 2, TAlignedRead::INVALID_ID, Generous());
+		mateIndices[2*id + 1 - getMateNo(me, (*it).readId)] = idx;
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.layoutAlignment
+..summary:Calculates a visible layout of reads aligned to a contig.
+..cat:Fragment Store
+..signature:layoutAlignment(layout, store, contigId)
+..param.layout:The resulting layout string. Must be a $String<String<unsigned> >$.
+...remarks:This string is accordingly resized and can be addressed by the $readId$.
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:The $contigId$ of the affected contig.
+..remarks:This function layouts all reads aligned to a contig in rows from up to down reusing empty row spaces.
+$layout[row][gappedPos]$ stores the $alignId$ of the alignment beginning at position $gappedPos$ in gap-space.
+$row$ is the row of the alignment in the multiple sequence alignment.
+..see:Function.printAlignment
+*/
 
 template <typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId>
 void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, TContigId contigId)
@@ -641,15 +967,34 @@ void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &st
 			appendValue(*lit, id);
 	}
 }
-	
+
+/**
+.Function.printAlignment
+..summary:Prints a window of the visible layout of reads into a outstream.
+..cat:Fragment Store
+..signature:layoutAlignment(stream, layout, store, contigId, posBegin, posEnd, lineBegin, lineEnd)
+..param.stream:A C++ outstream, e.g. std::cout.
+..param.layout:A layout string created by a previous call of @Function.layoutAlignment@.
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:The $contigId$ of the affected contig.
+..param.posBegin:Window begin position in gap-space.
+..param.posEnd:Window end position in gap-space.
+..param.lineBegin:Begin line of the window.
+..param.lineEnd:End line of the window.
+..remarks:The window coordinates ($beginPos$, ...) may be chosen bigger than the layout.
+The empty space is then filled with whitespaces.
+..see:Function.layoutAlignment
+*/
+
 template <typename TStream, typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
 void printAlignment(
 	TStream &stream, 
 	TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, 
 	TContigId contigId,
 	TPos posBegin, TPos posEnd,
-	TNum lineBegin, TNum lineEnd,
-	unsigned lastRead)
+	TNum lineBegin, TNum lineEnd)
+//	unsigned lastRead)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
@@ -709,7 +1054,7 @@ void printAlignment(
 		TPos cursor = posBegin;
 		for (; mid < itEnd; ++mid)
 		{
-			if (*mid >= lastRead) continue;
+//			if (*mid >= lastRead) continue;
 			TAlignedRead &align = store.alignedReadStore[*mid];
 			if (align.contigId != contigId) break;
 
@@ -746,6 +1091,20 @@ void printAlignment(
 		stream << '\n';
 	}
 }
+
+/**
+.Function.convertMatchesToGlobalAlignment
+..summary:Converts all matches to a multiple global alignment in gap-space.
+..cat:Fragment Store
+..signature:convertMatchesToGlobalAlignment(store, score)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.score:A score object used by @Function.globalAlignment@ in this function.
+..remarks:Before calling this function all $gaps$ structures in @Memvar.FragmentStore#alignedReadStore@ and @Memvar.FragmentStore#contigStore@ must be empty, i.e. there are no gaps in the alignments.
+This function iterates over entries in the @Memvar.FragmentStore#alignedReadStore@ and semi-global aligns each read to its contig segments given by begin and end position.
+Gaps introduced by these pair-wise alignments are then inserted to the affected contig and reads correspondingly.
+..remarks:The invariant that positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space holds before (there were no gaps in alignments) and after calling this functions.
+*/
 
 template <typename TSpec, typename TConfig, typename TScore>
 void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore &score)
@@ -903,6 +1262,19 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 //			return;
 	}
 }
+
+/**
+.Function.convertPairWiseToGlobalAlignment
+..summary:Converts pair-wise alignments to a multiple global alignment.
+..cat:Fragment Store
+..signature:convertPairWiseToGlobalAlignment(store, pairwiseContigGaps)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.pairwiseContigGaps:A string of anchored contig gaps for every pairwise alignment.
+..remarks:Before calling this function the $gaps$ structures in the @Memvar.FragmentStore#contigStore@ must be empty, i.e. there are no gaps in the contig.
+The pairwise alignment gaps of the reads are stored in the $gaps$ structure in the @Memvar.FragmentStore#alignedReadStore@, whereas the pairwise alignment gaps of the contig are stored in the $pairwiseContigGaps$ string.
+..remarks:After calling this functions all positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space.
+*/
 
 template <typename TSpec, typename TConfig, typename TContigGapsString>
 void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TContigGapsString &gaps)

@@ -320,7 +320,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
 
 		// search for readId by name
-        if (_getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
+        if (getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
 		{
 			if ((flag & 1) == 1)
 			{
@@ -390,7 +390,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef FragmentStore<TSpec, TConfig> TFragmentStore;
         typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
         
-        if (!_getIdByName(fragStore.contigNameStore, rName, contigId, fragStore.contigNameStoreCache))
+        if (!getIdByName(fragStore.contigNameStore, rName, contigId, fragStore.contigNameStoreCache))
         {
 			// if the contig is not in the store yet
             // set the ID on the last entry after appending
@@ -496,6 +496,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 // read
+
+///.Function.read.param.tag.type:Tag.File Format.tag.SAM
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void 
@@ -1003,6 +1005,8 @@ namespace SEQAN_NAMESPACE_MAIN
     
 //////////////////////////////////////////////////////////////////////////////
 // write
+
+///.Function.write.param.tag.type:Tag.File Format.tag.SAM
     
     template<typename TFile, typename TSpec, typename TConfig>
     inline void write(TFile & target,
