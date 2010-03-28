@@ -675,7 +675,7 @@ int dumpMatches(
 	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
-	calculateLibSizes(libSize, store);
+	calculateInsertSizes(libSize, store);
 
 	typedef LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode> TLess;
 	switch (options.sortOrder) {

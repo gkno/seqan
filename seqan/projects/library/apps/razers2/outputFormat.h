@@ -669,7 +669,7 @@ void dumpMatches(
 	compactMatches(store, stats, options, true, nothing);
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
-	calculateLibSizes(libSize, store);
+	calculateInsertSizes(libSize, store);
 
 	switch (options.sortOrder) {
 		case 0: 
