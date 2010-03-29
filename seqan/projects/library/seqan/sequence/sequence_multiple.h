@@ -63,6 +63,9 @@ namespace SEQAN_NAMESPACE_MAIN
 a single integer value between 0 and the sum of string lengths minus 1.
 ..remarks:The position type can be returned or modified by the meta-function @Metafunction.SAValue@ called with the @Class.StringSet@ type.
 ..include:seqan/sequence.h
+.Memvar.ConcatDirect#concat:
+..class:Spec.ConcatDirect
+..summary:The concatenation string. Concatenates all sequences of the StringSet without gaps.
 */
 
 	template < typename TDelimiter = void >

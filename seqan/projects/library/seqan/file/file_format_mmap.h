@@ -26,6 +26,16 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+/**
+.Shortcut.MultiSeqFile
+..summary:A sequence file mapped in memory as a StringSet of concatenated sequence file fragments.
+..cat:Input/Output
+..signature:MultiSeqFile
+..shortcutfor:Spec.ConcatDirect
+..shortcutfor:Spec.MMap String
+...signature:StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >
+*/
+
 	// define memory mapped stringset
 	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiFasta;	//deprecated (use MultiSeqFile instead)
 	typedef StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >	MultiSeqFile;
@@ -98,6 +108,20 @@ namespace SEQAN_NAMESPACE_MAIN
 // File Formats - Fasta
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.guessFormat:
+..summary:Guesses a file format from the contents of a sequence file.
+..cat:Input/Output
+..signature:guessFormat(text, formatTag)
+..param.text:A string storing the contents of a sequence file.
+...see:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..returns:$true$ if the format represented by $formatTag$ was recognized in $text$.
+..see:Function.guessFormatFromFilename
+*/
+
 	// test for Fasta format
 	template < typename TSeq >
 	inline bool
@@ -108,6 +132,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		return seq[0] == '>';
 	}
 	
+/**
+.Function.guessFormatFromFilename:
+..summary:Guesses a file format from a sequence file name.
+..cat:Input/Output
+..signature:guessFormatFromFilename(fileName, formatTag)
+..param.fileName:A filename of a sequence file.
+...see:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..returns:$true$ if the format represented by $formatTag$ was recognized in $fileName$.
+..see:Function.guessFormatFromFilename
+*/
+
 	template < typename TFilename >
 	inline bool
 	guessFormatFromFilename(
@@ -139,6 +177,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		return false;
 	}
 	
+/**
+.Function.split:
+..summary:Divides the contents of a sequence file into sequence file fragments separated by a file format specific delimiter.
+..cat:Input/Output
+..signature:split(stringSet, formatTag)
+..param.stringSet:A @Spec.ConcatDirect@ StringSet. The concat member (concatenation string) contains the contents of a sequence file.
+...type:Spec.ConcatDirect
+...type:Shortcut.MultiSeqFile
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:The @Memvar.ConcatDirect#concat@ member should contain the contents of the sequence file by a prior call of @Function.open@.
+..remarks:This function expects a @Spec.ConcatDirect@ StringSet and divides the underlying concatenation string into 
+sequence fragments separated by a file format specific delimiter.
+After calling this function, the StringSet length is the number of sequence fragments and each fragment can be retrieved by @Function.value@ or @Function.getValue@.
+..see:Function.guessFormat
+*/
+
 	// split stringset into single Fasta sequences
 	template < typename TValue, typename TConfig, typename TDelimiter >
 	inline void
@@ -166,6 +222,23 @@ namespace SEQAN_NAMESPACE_MAIN
 			appendValue(me.limits, 0);
 		appendValue(me.limits, itEnd - itBeg);
 	}
+	
+/**
+.Function.assignSeq:
+..summary:Extracts the sequence part of a sequence file fragment.
+..cat:Input/Output
+..signature:assignSeq(sequence, seqFragment, formatTag)
+..param.sequence:The resulting sequence of the fragment.
+...type:Class.String
+..param.seqFragment:A sequence file fragment.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
+this function can be used to extract the sequence of every fragment in the StringSet.
+..see:Function.split
+*/
 
 	template <typename TSeq, typename TFastaSeq>
 	inline void
@@ -202,6 +275,23 @@ namespace SEQAN_NAMESPACE_MAIN
 		resize(dst, dit - begin(dst, Standard()));
 	}
 
+/**
+.Function.assignSeqId:
+..summary:Extracts the sequence id of a sequence file fragment.
+..cat:Input/Output
+..signature:assignSeqId(id, seqFragment, formatTag)
+..param.id:The resulting sequence id of the fragment (e.g. Fasta Id).
+...type:Shortcut.CharString
+..param.seqFragment:A sequence file fragment.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
+this function can be used to extract the sequence id of every fragment in the StringSet.
+..see:Function.split
+*/
+
 	template <typename TSeq, typename TFastaSeq>
 	inline void
 	assignSeqId(
@@ -224,7 +314,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
-        // Assign sequence id up to first whitespace.
+/**
+.Function.assignCroppedSeqId:
+..summary:Extracts the sequence id up to the first whitespace of a sequence file fragment.
+..cat:Input/Output
+..signature:assignCroppedSeqId(id, seqFragment, formatTag)
+..param.id:The resulting cropped sequence id of the fragment (e.g. Fasta Id).
+...note:The resulting id contains no whitespaces.
+...type:Shortcut.CharString
+..param.seqFragment:A sequence file fragment.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
+this function can be used to extract the sequence id up to the first whitespace of every fragment in the StringSet.
+..see:Function.split
+*/
+
+	// Assign sequence id up to first whitespace.
 	template <typename TSeq, typename TFastaSeq>
 	inline void
 	assignCroppedSeqId(
@@ -247,6 +355,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	}
 
+/**
+.Function.assignQual:
+..summary:Extracts the quality values of a sequence file fragment.
+..cat:Input/Output
+..signature:assignQual(qualities, seqFragment, formatTag)
+..param.qualities:The resulting quality values encoded in ASCII.
+...remarks:The quality values are encoded in ASCII and must be manually converted into zero-based values.
+...type:Shortcut.CharString
+..param.seqFragment:A sequence file fragment.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
+this function can be used to extract the sequence quality values of every fragment in the StringSet.
+..see:Function.split
+*/
+
   	template <typename TSeq, typename TFastaSeq>
 	inline void
 	assignQual(
@@ -256,6 +382,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		clear(dst);
 	}
+	
+/**
+.Function.assignQualId:
+..summary:Extracts the quality value id of a sequence file fragment.
+..cat:Input/Output
+..signature:assignQualId(id, seqFragment, formatTag)
+..param.id:The resulting quality value id of a sequence (e.g. Fastq Quality Id).
+...type:Shortcut.CharString
+..param.seqFragment:A sequence file fragment.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
+this function can be used to extract the quality value id of every fragment in the StringSet.
+..see:Function.split
+*/
 
 	template <typename TSeq, typename TFastaSeq>
 	inline void
@@ -503,6 +646,11 @@ typedef Tag<TagFastq_> const Fastq;
 // File Formats - QSeq (used by Illumina for most of their read files)
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.File Format.tag.QSeq:
+	QSeq format, used for most of the Illumina read files.
+..include:seqan/file.h
+*/
 	struct _QSeq;
 	typedef Tag<_QSeq> const QSeq;
 
@@ -727,6 +875,20 @@ typedef Tag<TagFastq_> const Fastq;
 // File Formats - Auto-Format
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.AutoSeqFormat
+..summary:Auto-detects and stores a file format.
+..cat:Input/Output
+..general:Class.TagSelector
+..signature:AutoSeqFormat
+..remarks:Currently, it is defined as $TagSelector<SeqFormats>$, with:
+...code:
+	typedef
+		TagList<Fastq,
+		TagList<Fasta,
+		TagList<QSeq> > >  SeqFormats;
+*/
+
 	typedef
 		TagList<Fastq,
 		TagList<Fasta,
@@ -948,6 +1110,24 @@ typedef Tag<TagFastq_> const Fastq;
 // Directory import
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.appendSeqs:
+..summary:Appends all sequences stored in files of directory to a StringSet.
+..cat:Input/Output
+..signature:appendSeqs(seqSet, dirName, formatTag)
+..param.seqSet:A @Class.StringSet@ of sequences to append to.
+...type:Class.StringSet
+..param.dirName:A path to a directory or single file.
+...type:Class.String
+..param.formatTag:A file format tag.
+...type:Tag.File Format
+...type:Class.AutoSeqFormat
+..remarks:This function scans a directory and searches for filenames corresponding to the sequence format store in $formatTag$, 
+opens them and append their contained sequences to the $seqSet$.
+If $formatTag$ is a @Class.AutoSeqFormat@ object, the file format is set to the first known sequence format guessed from a file name.
+..see:Function.assignSeq
+*/
+
 	template <typename TSeqSet, typename TFilename, typename TSeqFormat>
 	inline void
 	appendSeqs(
@@ -977,7 +1157,6 @@ typedef Tag<TagFastq_> const Fastq;
 				assign(suffix(fname, len), value(dir));
 				if (guessFormatFromFilename(fname, format))
 				{
-				std::cout << fname<<std::endl;
 					if (!open(multiSeqFile.concat, toCString(fname), OPEN_RDONLY)) continue;
 
 					split(multiSeqFile, format);

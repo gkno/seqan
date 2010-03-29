@@ -42,6 +42,19 @@ struct Length<void>
 	enum { VALUE = 0 };
 };
 
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Tag.TagList:
+..summary:A structure to represent a list of tags.
+..signature:TagList<TTag1>
+..signature:TagList<TTag1, TagList<TTag2> >
+..signature:TagList<TTag1, TagList<TTag2, TagList<TTag3[...]> > >
+..param.TTag1:The first tag of the list.
+..param.TTag2:The second tag of the list.
+..param.TTag3:The third tag of the list.
+..include:seqan/basic.h
+*/
+
 template <typename TTag = void, typename TSubList = void>
 struct TagList
 {
@@ -68,6 +81,21 @@ struct TagSelector
 		tagId = 0;
 	}
 };
+
+/**
+.Class.TagSelector:
+..summary:A structure to select a tag from a @Tag.TagList@.
+..signature:TagSelector<TTagList>
+..param.TTagList:A tag list.
+...type:Tag.TagList
+.Memvar.TagSelector#tagId:
+..class:Class.TagSelector
+..type:nolink:int
+..summary:Stores the index of a @Page.Glossary.Tag@ in the tag list.
+..include:seqan/basic.h
+*/
+
+///
 
 template <typename TTag, typename TSubList>
 struct TagSelector< TagList<TTag, TSubList> >:

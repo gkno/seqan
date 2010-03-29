@@ -187,7 +187,7 @@ struct AlignQualityStoreElement
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.sortAlignedRead Tags
+.Tag.Sort Aligned Reads Tags
 ..summary:Tag to select a specific field to stably sort the @Memvar.FragmentStore#alignedReadStore@ by.
 ..cat:Fragment Store
 ..see:Function.sortAlignedReads
@@ -314,7 +314,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..signature:sortAlignedReads(alignStore, lessFunctor)
 ..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
 ..param.sortTag:Selects the field to sort by.
-...type:Tag.sortAlignedRead Tags
+...type:Tag.Sort Aligned Reads Tags
 ..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
 ..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
 */
