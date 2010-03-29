@@ -14,8 +14,7 @@ int main()
 	Pattern<CharString, DPSearch<SimpleScore> > pattern(needle, SimpleScore(0, -2, -1));
 	while (find(finder, pattern, -2))
 		while (findBegin(finder, pattern, getScore(pattern)))
-			std::cout << '[' << beginPosition(finder) << "," << endPosition(finder) << ")\t" << infix(finder) << std::endl;
+			std::cout << '[' << beginPosition(finder) << ',' << endPosition(finder) << ")\t" << infix(finder) << std::endl;
 
 	return 0;
 }
-
