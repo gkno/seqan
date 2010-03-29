@@ -176,8 +176,13 @@ namespace ClassTest {
         StaticData::totalCheckPointCount() = 0;
         StaticData::foundCheckPointCount() = 0;
         // Get path to argv0.
-        const char *end = 0;
-        for (const char *ptr = strchr(argv0, '/'); ptr != 0; ptr = strchr(ptr+1, '/'))
+        const char *end = argv0;
+#ifdef PLATFORM_WINDOWS
+        const char pathSeparator = '\\';
+#else  // PLATFORM_WINDOWS
+        const char pathSeparator = '/';
+#endif  // PLATFORM_WINDOWS
+        for (const char *ptr = strchr(argv0, pathSeparator); ptr != 0; ptr = strchr(ptr+1, pathSeparator))
             end = ptr;
         int rpos = end - argv0;
         if (rpos <= 0) {
