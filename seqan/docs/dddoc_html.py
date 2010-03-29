@@ -1732,6 +1732,12 @@ def warningPage(cat, key, data):
             if len(keys) > 0:         
                 for k in keys:
                     if sigs.find(k) < 0:
+                        # Maybe ignore the "unknown param" warning for this
+                        # parameter if the "nowarn" child includes "unknown
+                        # param".
+                        print '>>>', data['%s.nowarn' % k].text(), '<<<'
+                        if "unknown param" in data["%s.nowarn" % k].text():
+                            continue
                         WARNING_COUNT += 1
                         print
                         print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
