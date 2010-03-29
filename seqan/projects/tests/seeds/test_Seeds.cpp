@@ -379,10 +379,6 @@ void Test_MultiSeeds(){
 }
 
 void Main_Seeds(){
-	SEQAN_TREPORT("TEST BEGIN")
 	Test_SimpleSeeds();
 	Test_MultiSeeds();
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seed_multi.h");
-	SEQAN_TREPORT("TEST END")
 }

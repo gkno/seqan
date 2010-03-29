@@ -618,10 +618,6 @@ void Test_SeedSet_seedScore()
 }
 
 void Main_SeedSet(){
-	SEQAN_TREPORT("TEST BEGIN")
 	Test_SeedSet_base();
 	Test_SeedSet_seedScore();
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seedSet_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/seedSet_score.h");
-	SEQAN_TREPORT("TEST END")
 }

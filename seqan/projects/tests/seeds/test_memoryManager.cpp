@@ -138,12 +138,7 @@ void Test_MemoryManager_FreeMemoryInt()
         clear(manager2);
 }
 
-void Main_MemoryManager(){
-	SEQAN_TREPORT("TEST BEGIN")
-	
+void Main_MemoryManager(){	
 	Test_MemoryManager_FreeMemoryPointer();
 	Test_MemoryManager_FreeMemoryInt();
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/memoryManager_base.h");
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/memoryManager_int.h");
-	SEQAN_TREPORT("TEST END")
 }

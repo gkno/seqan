@@ -51,14 +51,6 @@ void test_global_seed_chain()
 }
 
 
-
-
 void Main_GlobalSeedChain(){
-
-	//Fragment<unsigned int, Default()> x();
-	
-	SEQAN_TREPORT("TEST BEGIN")
 	test_global_seed_chain();
-	SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds/global_seed_chain.h");
-	SEQAN_TREPORT("TEST END")
 }
