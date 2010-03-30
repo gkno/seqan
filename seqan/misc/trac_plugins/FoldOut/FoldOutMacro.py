@@ -48,7 +48,7 @@ class FoldOutMacro(trac.wiki.macros.WikiMacroBase):
     body_html = self.format_wiki(formatter, '\n'.join(body))
     hidden = tag.div(genshi.core.Markup(body_html), id=hidden_id, style='display:none;')
     toggle_class = uuid.uuid4()
-    toggle_js = genshi.core.Markup(u'$(\'#%s\').toggle();$(\'.%s\').toggle();') % (hidden_id, toggle_class)
+    toggle_js = genshi.core.Markup(u'$(\'#%s\').toggle();$(\'.%s\').toggle();return false;') % (hidden_id, toggle_class)
     toggle_link = tag.a(tag.span(ARROW_RIGHT + ' more...', class_=toggle_class) + tag.span(ARROW_DOWN + ' less...', class_=toggle_class, style='display:none;'), onclick=toggle_js, href='#')
     summary_html = self.format_wiki(formatter, '\n'.join(summary))
     return genshi.core.Markup(summary_html) + toggle_link + genshi.core.Markup(hidden)
