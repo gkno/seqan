@@ -251,7 +251,6 @@ namespace ClassTest {
         } else if (StaticData::thisTestOk()) {
             std::cout << StaticData::currentTestName() << " OK" << std::endl;
         } else {
-            StaticData::errorCount() += 1;
             std::cerr << StaticData::currentTestName() << " FAILED" << std::endl;
         }
     }
@@ -266,6 +265,7 @@ namespace ClassTest {
     // Called by the macro SEQAN_ASSERT_FAIL.
     inline void forceFail(const char *file, int line,
                           const char *comment, ...) {
+        StaticData::errorCount() += 1;
         std::cerr << file << ":" << line << " FAILED! ";
         if (comment) {
             std::cerr << " (";
