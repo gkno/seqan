@@ -351,6 +351,17 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 		SAValue< Index<TText, TSpec> > {};
 
 //////////////////////////////////////////////////////////////////////////////
+// infix of an index
+
+	template < typename TText, typename TSpec >
+    struct Infix< Index<TText, TSpec> >:
+		public Infix<TText> {};
+
+	template < typename TText, typename TSpec >
+    struct Infix< Index<TText, TSpec> const >:
+		public Infix<TText> {};
+
+//////////////////////////////////////////////////////////////////////////////
 // default table type
 
 	template < typename TObject, typename TSpec, typename TFibre >
@@ -730,6 +741,23 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 			typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
 		return value(value(getFibre(index, Fibre_Text()), getValueI1(locPos)), getValueI2(locPos));
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// infix
+
+	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+	inline typename Infix<TText>::Type
+	infix(Index<TText, TSpec> &index, TPosBegin pos_begin, TPosEnd pos_end)
+	{
+		return infix(indexText(index), pos_begin, pos_end);
+	}
+
+	template <typename TText, typename TSpec, typename TPosBegin, typename TPosEnd>
+	inline typename Infix<TText>::Type
+	infix(Index<TText, TSpec> const &index, TPosBegin pos_begin, TPosEnd pos_end)
+	{
+		return infix(indexText(index), pos_begin, pos_end);
 	}
 
 //////////////////////////////////////////////////////////////////////////////

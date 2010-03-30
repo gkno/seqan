@@ -72,7 +72,7 @@ SEQAN_CHECKPOINT
 	}
 
 	Pattern(TNeedle & _needle, 
-			TScore & _score_func, 
+			TScore const & _score_func, 
 			TScoreValue _limit = 0): 
 		data_score(_score_func),
 		data_limit(_limit)

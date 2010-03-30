@@ -538,6 +538,54 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+	// infix (requires posBegin and posEnd to be in the same sequence)
+	//////////////////////////////////////////////////////////////////////////////
+
+	template < typename TString, typename TSpec, typename TPosBegin, typename TPosEnd >
+	inline typename Infix<TString>::Type 
+	infix(StringSet< TString, TSpec > & me, TPosBegin posBegin, TPosEnd posEnd)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair localPosBegin, localPosEnd;
+		posLocalize(localPosBegin, posBegin, stringSetLimits(me));
+		posLocalize(localPosEnd, posEnd, stringSetLimits(me));
+		return infix(me[getSeqNo(localPosBegin)], getSeqOffset(localPosBegin), getSeqOffset(localPosEnd));
+	}
+
+	template < typename TString, typename TSpec, typename TPosBegin, typename TPosEnd >
+	inline typename Infix<TString const>::Type 
+	infix(StringSet< TString, TSpec > const & me, TPosBegin posBegin, TPosEnd posEnd)
+	{
+		typedef StringSet<TString, TSpec>				TStringSet;
+		typedef typename Size<TStringSet>::Type			TSetSize;
+		typedef typename Size<TString>::Type			TStringSize;
+		typedef Pair<TSetSize, TStringSize, Compressed>	TPair;
+
+		TPair localPosBegin, localPosEnd;
+		posLocalize(localPosBegin, posBegin, stringSetLimits(me));
+		posLocalize(localPosEnd, posEnd, stringSetLimits(me));
+		return infix(me[getSeqNo(localPosBegin)], getSeqOffset(localPosBegin), getSeqOffset(localPosEnd));
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
+	inline typename Infix<TString>::Type 
+	infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, TPosBegin posBegin, TPosEnd posEnd)
+	{
+		return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
+	}
+
+	template < typename TString, typename TDelimiter, typename TPosBegin, typename TPosEnd >
+	inline typename Infix<TString const>::Type 
+	infix(StringSet< TString, Owner<ConcatDirect<TDelimiter> > > const & me, TPosBegin posBegin, TPosEnd posEnd)
+	{
+		return infix(me.concat, posGlobalize(posBegin, stringSetLimits(me)), posGlobalize(posEnd, stringSetLimits(me)));
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// position arithmetics
 	//////////////////////////////////////////////////////////////////////////////
 

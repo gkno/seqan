@@ -56,11 +56,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, TSpec>								TIndex;
 		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
 		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
+		typedef typename Size<TIndex>::Type						TSize;
 
 	public:
 		Holder<TIndex>	index;
 		Pair<TIterator>	range;
 		TIterator		data_iterator;
+		TSize			data_length;
 
 		Finder() 
 		{
@@ -170,6 +172,7 @@ SEQAN_CHECKPOINT
 		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
 		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
 		me.range.i1 = me.range.i2 = TIterator();
+		me.data_length = 0;
 	}
 
 //____________________________________________________________________________
@@ -209,20 +212,10 @@ SEQAN_CHECKPOINT
 	}
 
 //____________________________________________________________________________
-/*
-	template < typename TText, typename TSpec, typename TSpecFinder, typename TPosition >
-	inline void 
-	setPosition(Finder< Index<TText, TSpec>, TSpecFinder > & me, TPosition pos_)
-	{
-SEQAN_CHECKPOINT
-		hostIterator(me) = me.range.i1 + pos_;
-	}
-*/
-//____________________________________________________________________________
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
 	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
-	position(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	beginPosition(Finder< Index<TText, TSpec>, TSpecFinder > & me)
 	{
 SEQAN_CHECKPOINT
 		SEQAN_ASSERT(!empty(me))
@@ -231,13 +224,48 @@ SEQAN_CHECKPOINT
 
 	template < typename TText, typename TSpec, typename TSpecFinder >
 	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
-	position(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	beginPosition(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
 	{
 SEQAN_CHECKPOINT
 		SEQAN_ASSERT(!empty(me))
-		return hostIterator(me) - begin(container(me), Rooted());
+		return *me.data_iterator;
 	}
 
+//____________________________________________________________________________
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	endPosition(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
+SEQAN_CHECKPOINT
+		return posAdd(beginPosition(me), me.data_length);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	endPosition(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
+SEQAN_CHECKPOINT
+		return posAdd(beginPosition(me), me.data_length);
+	}
+
+//____________________________________________________________________________
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	position(Finder< Index<TText, TSpec>, TSpecFinder > & me)
+	{
+SEQAN_CHECKPOINT
+		return beginPosition(me);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder >
+	inline typename Position< Finder< Index<TText, TSpec>, TSpecFinder > >::Type
+	position(Finder< Index<TText, TSpec>, TSpecFinder > const & me)
+	{
+SEQAN_CHECKPOINT
+		return beginPosition(me);
+	}
 
 //////////////////////////////////////////////////////////////////////////////
 // find
@@ -247,8 +275,10 @@ SEQAN_CHECKPOINT
 		Finder<Index<TText, TSpec>, TSpecFinder> &finder,
 		TPattern const &pattern)
 	{
-		if (empty(finder)) {
+		if (empty(finder)) 
+		{
 			_findFirstIndex(finder, needle(pattern), TSpecFinder());
+			_setFinderLength(finder, length(needle(pattern)));
 			hostIterator(finder) = finder.range.i1;
 		} else
 			++hostIterator(finder);

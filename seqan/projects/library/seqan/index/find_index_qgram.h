@@ -71,8 +71,8 @@ Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
 		TDir const &dir = indexDir(index);
 		TShape &shape = indexShape(index);
 
-		finder.range.i1 = saIt + dir[hash(shape, pIt, length(pattern))];
-		finder.range.i2 = saIt + dir[hashUpper(shape, pIt, length(pattern))];
+		finder.range.i1 = saIt + dir[getBucket(index.bucketMap, hash(shape, pIt, length(pattern)))];
+		finder.range.i2 = saIt + dir[getBucket(index.bucketMap, hashUpper(shape, pIt, length(pattern)))];
 	}
 
 
