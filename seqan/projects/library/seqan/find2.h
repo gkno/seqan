@@ -52,7 +52,7 @@
 #include <seqan/find2/find_pattern_wild_shiftand.h>
 
 // Multiple exact pattern search.
-#include <seqan/find2/find_multiple_exact_shiftand.h>
+#include <seqan/find2/find_multiple_exact_simple.h>
 
 // Approximate pattern matching with Hamming distance.
 #include <seqan/find2/find_hamming_simple.h>

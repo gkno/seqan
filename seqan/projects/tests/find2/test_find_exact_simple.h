@@ -1,8 +1,8 @@
 /*
   Test the find2/find_exact_simple.h header.
 */
-#ifndef TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
-#define TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+#ifndef TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_
+#define TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_
 
 #include <seqan/basic.h>
 #include <seqan/find2.h>
@@ -246,10 +246,6 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     //  GAA
     ret = setEndPosition(finder, pattern, 5);
     SEQAN_ASSERT_NOT(ret);
-    SEQAN_ASSERT_EQ(2u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 
     // Continue to search from here.
     // AGAAGAAGAGGAAGAAGA
@@ -266,14 +262,10 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     //                GAA
     ret = setEndPosition(finder, pattern, 18);
     SEQAN_ASSERT_NOT(ret);
-    SEQAN_ASSERT_EQ(15u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(18u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
 
     // No more hit.
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
 }
 
-#endif  // TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+#endif  // TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_

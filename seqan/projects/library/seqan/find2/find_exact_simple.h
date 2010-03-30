@@ -74,6 +74,8 @@ TNeedle const & needle(Pattern<TNeedle, Simple> const & pattern) {
 template <typename TNeedle>
 typename Position<TNeedle>::Type length(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return length(needle(pattern));
 }
 
@@ -81,10 +83,13 @@ typename Position<TNeedle>::Type length(Pattern<TNeedle, Simple> const & pattern
 template <typename TNeedle>
 Segment<TNeedle const, InfixSegment> infix(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return infix(needle(pattern), 0u, length(needle(pattern)));
 }
 
 
+// TODO(holtgrew): Workaround for default infix implementation for non-const type.
 template <typename TNeedle>
 Segment<TNeedle const, InfixSegment> infix(Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
@@ -96,6 +101,8 @@ Segment<TNeedle const, InfixSegment> infix(Pattern<TNeedle, Simple> & pattern) {
 template <typename TNeedle, typename TTag>
 typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return begin(needle(pattern), spec);
 }
 
@@ -112,6 +119,8 @@ typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, S
 template <typename TNeedle, typename TTag>
 typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return end(needle(pattern), spec);
 }
 
@@ -126,8 +135,10 @@ typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Sim
 
 
 template <typename TNeedle>
-typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> const &) {
+typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return 0u;
 }
 
@@ -144,6 +155,8 @@ typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> & patter
 template <typename TNeedle>
 typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
     return length(needle(pattern));
 }
 
