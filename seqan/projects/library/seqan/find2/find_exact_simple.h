@@ -49,7 +49,23 @@ struct Pattern<_TNeedle, Simple> : _FindState {
 
 
 template <typename TNeedle>
-TNeedle & needle(Pattern<TNeedle, Simple> const & pattern) {
+TNeedle const & host(Pattern<TNeedle, Simple> const & pattern) {
+    SEQAN_CHECKPOINT;
+    return value(pattern._host);
+}
+
+
+// TODO(holtgrew): Workaround for default host implementation for non-const type.
+template <typename TNeedle>
+TNeedle const & host(Pattern<TNeedle, Simple> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return host(const_cast<TPattern const &>(pattern));
+}
+
+
+template <typename TNeedle>
+TNeedle const & needle(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
     return value(pattern._host);
 }
@@ -63,16 +79,33 @@ typename Position<TNeedle>::Type length(Pattern<TNeedle, Simple> const & pattern
 
 
 template <typename TNeedle>
-Segment<TNeedle, InfixSegment> infix(Pattern<TNeedle, Simple> const & pattern) {
+Segment<TNeedle const, InfixSegment> infix(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
     return infix(needle(pattern), 0u, length(needle(pattern)));
 }
 
 
+template <typename TNeedle>
+Segment<TNeedle const, InfixSegment> infix(Pattern<TNeedle, Simple> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return infix(const_cast<TPattern const &>(pattern));
+}
+
+
 template <typename TNeedle, typename TTag>
-    typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
+typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     return begin(needle(pattern), spec);
+}
+
+
+// TODO(holtgrew): Workaround for default begin implementation for non-const type.
+template <typename TNeedle, typename TTag>
+typename Iterator<TNeedle const, Tag<TTag> const>::Type begin(Pattern<TNeedle, Simple> & pattern, Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return begin(const_cast<TPattern const &>(pattern), spec);
 }
 
 
@@ -83,10 +116,28 @@ typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Sim
 }
 
 
+// TODO(holtgrew): Workaround for default end implementation for non-const type.
+template <typename TNeedle, typename TTag>
+typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Simple> & pattern, Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return end(const_cast<TPattern const &>(pattern), spec);
+}
+
+
 template <typename TNeedle>
 typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> const &) {
     SEQAN_CHECKPOINT;
     return 0u;
+}
+
+
+// TODO(holtgrew): Workaround for default beginPosition implementation for non-const type.
+template <typename TNeedle>
+typename Position<TNeedle>::Type beginPosition(Pattern<TNeedle, Simple> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return beginPosition(const_cast<TPattern const &>(pattern));
 }
 
 
@@ -97,11 +148,20 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, Simple> const & pa
 }
 
 
+// TODO(holtgrew): Workaround for default endPosition implementation for non-const type.
+template <typename TNeedle>
+typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, Simple> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    return endPosition(const_cast<TPattern const &>(pattern));
+}
+
+
 template <typename THaystack, typename TNeedle>
-bool find(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default" better than void?
+bool find(Finder<THaystack, Default> & finder,
           Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
-    typedef Pattern<THaystack, Simple> TFinder;
+    typedef Finder<THaystack, Default> TFinder;
     typedef Pattern<TNeedle, Simple> TPattern;
     typedef typename Position<TNeedle>::Type TPosition;
 
@@ -111,35 +171,43 @@ bool find(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default" bet
     // Do not continue if the state is "not found".
     if (finder._state == TPattern::STATE_NOTFOUND)
         return false;
-    // Initialize finder if state is "initial".
+    // Initialize finder if state is "initial".  Otherwise advance at
+    // least by one (if not set to of haystack with setEndPosition()).
     if (finder._state == TPattern::STATE_INITIAL) {
         finder._beginPosition = 0u;
         finder._endPosition = length(needle(pattern));
+    } else if (finder._state == TPattern::STATE_NO_HIT) {
+        if (finder._endPosition == length(haystack(finder)))
+            return false;
+        finder._beginPosition += 1;
+    } else {
+        finder._beginPosition += 1;
     }
 
     // Search the needle in the haystack naively.
-    while (finder._beginPosition < length(haystack(finder)) - length(needle(pattern))) {
-        for (TPosition i = 0u; i < length(needle(pattern)); ++i) {
-            if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
-                finder._beginPosition += 1;
-                i = 0u;
-                continue;
-            }
+    for (TPosition i = 0u; i < length(needle(pattern)); ++i) {
+        // Break out of loop if no more match is possible.
+        if (finder._beginPosition >= length(haystack(finder)) - length(needle(pattern))) {
+            finder._state = TFinder::STATE_NOTFOUND;
+            pattern._state = TPattern::STATE_NOTFOUND;
+            return false;
         }
-        finder._endPosition = finder._beginPosition + length(needle(pattern));
-        finder._state = TFinder::STATE_BEGIN_FOUND;
-        pattern._state = TPattern::STATE_BEGIN_FOUND;
-        return true;
+        // Otherwise, go on searching.
+        if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
+            finder._beginPosition += 1;
+            i = 0u;
+            continue;
+        }
     }
-
-    finder._state = TFinder::STATE_NOTFOUND;
-    pattern._state = TPattern::STATE_NOTFOUND;
-    return false;
+    finder._endPosition = finder._beginPosition + length(needle(pattern));
+    finder._state = TFinder::STATE_BEGIN_FOUND;
+    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    return true;
 }
 
 
 template <typename THaystack, typename TNeedle>
-bool findBegin(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default" better than void?
+bool findBegin(Finder<THaystack, Default> & finder,
                Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
     // State of finder and pattern should be in sync.
@@ -149,13 +217,68 @@ bool findBegin(Finder<THaystack, Default> & finder,  // TODO(holtgrew): "Default
 }
 
 
-template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
-bool getAlignment(Finder<THaystack, void> &finder,  // TODO(holtgrew): "Default" better than void?
-                  Pattern<TNeedle, Simple> &pattern,
-                  Align<TAlignSeq, TAlignSpec> &outAlignment) {
+template <typename THaystack, typename TNeedle, typename TPosition>
+bool setEndPosition(Finder<THaystack, Default> & finder,
+                    Pattern<TNeedle, Simple> & pattern,
+                    TPosition const & pos) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return false;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    // State of finder and pattern should be in sync.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    // End position must not be right of the end of the haystack.
+    SEQAN_ASSERT_LEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(haystack(finder)));
+    // Begin position must not be left of the beginning of the haystack.
+    SEQAN_ASSERT_GEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(needle(pattern)));
+
+    // Set the end position.
+    finder._endPosition = pos;
+    finder._beginPosition = pos - length(needle(pattern));
+
+    // Check whether there is a hit at this position and update the
+    // state accordingly.
+    typedef typename Position<THaystack>::Type THaystackPos;
+    for (THaystackPos i = 0u; i < length(needle(pattern)); ++i) {
+        if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
+            finder._state = TPattern::STATE_NO_HIT;
+            pattern._state = TFinder::STATE_NO_HIT;
+            return false;
+        }
+    }
+    finder._state = TPattern::STATE_BEGIN_FOUND;
+    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    return true;
+}
+
+
+/*
+  Build the alignment resulting from the search result as specified by the
+  finder and the pattern.  If the state is not "begin found" then no alignment
+  is built and false is returned.
+*/
+template <typename THaystack, typename TNeedle, typename TAlignSeq, typename TAlignSpec>
+bool buildAlignment(Finder<THaystack, Default> &finder,
+                    Pattern<TNeedle, Simple> &pattern,
+                    Align<TAlignSeq, TAlignSpec> &outAlignment) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, Simple> TPattern;
+    typedef Align<TAlignSeq, TAlignSpec> TAlign;
+    typedef typename Row<TAlign>::Type TRow;
+
+    // Both finder and pattern must be in the "found begin position" state.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    // Can only build alignment if the state is "begin found".
+    if (finder._state != TFinder::STATE_BEGIN_FOUND)
+        return false;
+
+    // Initialize alignment with the two sequences.
+    resize(rows(outAlignment), 2);
+    assignSource(row(outAlignment, 0), haystack(finder));
+    assignSource(row(outAlignment, 1), needle(pattern));
+    insertGaps(row(outAlignment, 1), 0, beginPosition(finder));
+
+    return true;
 }
 
 }  // namespace seqan

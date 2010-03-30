@@ -28,12 +28,13 @@ namespace seqan {
 // Contains the state for finder and patterns.
 struct _FindState {
     enum TState {
-        STATE_EMPTY,
-        STATE_INITIAL,
-        STATE_FOUND,
-        STATE_NOTFOUND,
-        STATE_BEGIN_FOUND,
-        STATE_BEGIN_NOTFOUND
+        STATE_EMPTY,           // Finder/pattern is empty.
+        STATE_INITIAL,         // Finer/pattern has just been initialized.
+        STATE_FOUND,           // Found the end position of a hit.
+        STATE_NOTFOUND,        // No hit found, no more hits possible.
+        STATE_BEGIN_FOUND,     // Found begin position.
+        STATE_BEGIN_NOTFOUND,  // Found end but not begin, should not happen.
+        STATE_NO_HIT           // Set manually to non-hit.
     };
 };
 

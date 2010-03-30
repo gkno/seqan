@@ -25,8 +25,9 @@
 
 namespace seqan {
 
-template <typename THaystack>
-struct Finder<THaystack, Default> : _FindState {
+template <typename _THaystack>
+struct Finder<_THaystack, Default> : _FindState {
+    typedef _THaystack THaystack;
     typedef typename Position<THaystack>::Type TPosition;
     typedef typename Iterator<THaystack>::Type TIterator;
 
@@ -47,23 +48,83 @@ struct Finder<THaystack, Default> : _FindState {
 
 
 template <typename THaystack>
-typename Position<THaystack>::Type const & beginPosition(const Finder<THaystack, Default> & finder) {
+THaystack const & haystack(Finder<THaystack, Default> const & finder) {
+    SEQAN_CHECKPOINT;
+    return value(finder._holder);
+}
+
+
+template <typename THaystack, typename TTag>
+typename Iterator<THaystack const>::Type begin(Finder<THaystack, Default> const & finder,
+                                               Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    return begin(haystack(finder), spec) + finder._beginPosition;
+}
+
+
+// TODO(holtgrew): Workaround for default begin implementation for non-const type.
+template <typename THaystack, typename TTag>
+typename Iterator<THaystack const>::Type begin(Finder<THaystack, Default> & finder,
+                                               Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    return begin(const_cast<TFinder const &>(finder), spec);
+}
+
+
+template <typename THaystack, typename TTag>
+typename Iterator<THaystack const>::Type end(Finder<THaystack, Default> const & finder,
+                                             Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    return begin(haystack(finder), spec) + finder._endPosition;
+}
+
+
+// TODO(holtgrew): Workaround for default end implementation for non-const type.
+template <typename THaystack, typename TTag>
+typename Iterator<THaystack const>::Type end(Finder<THaystack, Default> & finder,
+                                             Tag<TTag> const & spec) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    return end(const_cast<TFinder const &>(finder), spec);
+}
+
+
+template <typename THaystack>
+typename Position<THaystack const>::Type beginPosition(Finder<THaystack, Default> const & finder) {
     SEQAN_CHECKPOINT;
     return finder._beginPosition;
 }
 
 
+// TODO(holtgrew): Workaround for default beginPosition implementation for non-const type.
 template <typename THaystack>
-typename Position<THaystack>::Type const & endPosition(const Finder<THaystack, Default> & finder) {
+typename Position<THaystack>::Type beginPosition(Finder<THaystack, Default> & finder) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    return beginPosition(const_cast<TFinder const &>(finder));
+}
+
+
+template <typename THaystack>
+typename Position<THaystack>::Type endPosition(Finder<THaystack, Default> const & finder) {
     SEQAN_CHECKPOINT;
     return finder._endPosition;
 }
 
 
+// TODO(holtgrew): Workaround for default endPosition implementation for non-const type.
 template <typename THaystack>
-THaystack & haystack(Finder<THaystack, Default> & finder) {
+typename Position<THaystack>::Type endPosition(Finder<THaystack, Default> & finder) {
     SEQAN_CHECKPOINT;
-    return value(finder._holder);
+    typedef Finder<THaystack, Default> TFinder;
+    return endPosition(const_cast<TFinder const &>(finder));
+}
+
+
+template <typename THaystack>
+Segment<THaystack const, InfixSegment> infix(Finder<THaystack, Default> & finder) {
+    return infix(haystack(finder), beginPosition(finder), endPosition(finder));
 }
 
 }  // namespace seqan
