@@ -4,22 +4,21 @@
 
 using namespace seqan;
 
-// FRAGMENT(index_esa)
+// FRAGMENT(initialization)
 int main()
 {
-	Index<CharString> index_esa("tobeornottobe");
-	Finder< Index<CharString> > finder_esa(index_esa);
+	Index<CharString> index("tobeornottobe");
+	CharString needle = "be";
+	Finder<Index<CharString> > finder(index);
+// FRAGMENT(output)
+	Pattern<CharString> pattern(needle);
+	while (find(finder, pattern))
+		std::cout << '[' << beginPosition(finder) << ',' << endPosition(finder) << ")\t" << infix(finder) << std::endl;
 
-	while (find(finder_esa, "be"))
-		std::cout << position(finder_esa) << std::endl;
-
-// FRAGMENT(index_qgram)
-	typedef Index<CharString, Index_QGram< UngappedShape<2> > > TQGramIndex;
-	TQGramIndex index_2gram("tobeornottobe");
-	Finder< TQGramIndex > finder_2gram(index_2gram);
-
-	while (find(finder_2gram, "be"))
-		std::cout << position(finder_2gram) << std::endl;
+// FRAGMENT(output_short)
+	clear(finder);
+	while (find(finder, "be"))
+		std::cout << '[' << beginPosition(finder) << ',' << endPosition(finder) << ")\t" << infix(finder) << std::endl;
 
 	return 0;
 }
