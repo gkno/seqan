@@ -150,6 +150,17 @@
 	inline _proFile* & _proPFile()			{ return _proData<>::_proPFile; }
 	inline _proFile* & _proPFileStream()	{ return _proData<>::_proPFileStream; }
 
+/**
+.Function.cpuTime:
+..cat:Misc
+..summary:Returns the cpu time in seconds.
+..signature:cpuTime()
+..returns:A cpu time stamp in seconds.
+...type:nolink:double
+..remarks:Calls $clock$ to retrieve the processor time used by the running thread.
+..see:Function.sysTime
+*/
+
 
 // HINT: The unit of all time functions is second.
     inline _proFloat cpuTime() {
@@ -162,6 +173,20 @@
    		_proData<>::_proCpuTimeLast = now;
     	return (_proData<>::_proCpuTimeOffset + now) / (_proFloat)CLOCKS_PER_SEC;
    	}
+
+
+/**
+.Function.sysTime:
+..cat:Misc
+..summary:Returns the system time in seconds.
+..signature:sysTime()
+..returns:A system time stamp in seconds.
+...type:nolink:double
+..remarks:In contrast to @Function.cpuTime@, the system time corresponds to the wall clock time under Linux and Mac OS X.
+Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
+..remarks:Calls $clock_gettime$ under Linux and $gettimeofday$ under Mac OS X.
+..see:Function.cpuTime
+*/
 
     #ifdef PLATFORM_WINDOWS
 //        inline _proFloat sysTime() { return GetTickCount() * 1e-3; }
