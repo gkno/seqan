@@ -277,6 +277,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 //* ???Anti Default Sequences
+// TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
 inline typename Iterator<T, Standard>::Type 
 _begin_default(T & me,
@@ -285,6 +286,7 @@ _begin_default(T & me,
 SEQAN_CHECKPOINT
 	return & me;
 }
+// TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
 inline typename Iterator<T const, Standard>::Type 
 _begin_default(T const & me,
