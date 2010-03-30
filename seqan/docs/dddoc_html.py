@@ -1007,15 +1007,15 @@ def printMemberRek(fl, data, category, showheadline = True):
 def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline = True):
     if not lines:
         return  # Nothing to do if no lines are given.
-    fl.write('<div class=section id=' + category + '>')
+    fl.write('<div class="section" id="%s">' % category)
 
     if showheadline:
         s = dddoc.DATA["globals.sections"][category].text()
-        if s: fl.write('<div class=section_headline>' + s + '</div>')
+        if s: fl.write('<div class="section_headline">' + s + '</div>')
 
-    pairs = [(translateLinkDisplaytext(line.text()).lower(), line) for line in lines]
+    my_dict = dict([(translateLinkDisplaytext(line.text()).lower(), line) for line in lines])
     str = ''
-    for key, line in sorted(pairs):
+    for key, line in my_dict.iteritems():
         link = line.text()
         if (link == ''): continue
         origin = ''
@@ -1030,10 +1030,10 @@ def printLinkOut(fl, data, category, lines, derivedfrom, highlight, showheadline
         s = translateLink(link, line=line)
         if s:
             if (str != ''): str += ', '
-            str += '<span class=' + tag_class + '>' + s + '</span>'
+            str += '<span class="' + tag_class + '">' + s + '</span>'
 
     if (str != ''):
-        fl.write('<div class=text_block>' + str + '</div>')
+        fl.write('<div class="text_block">' + str + '</div>')
 
     fl.write('</div>')
 
