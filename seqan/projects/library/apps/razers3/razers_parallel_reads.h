@@ -24,11 +24,11 @@
 
 #include <iostream>
 #ifdef _OPENMP
-	#include <omp.h>
+#include <omp.h>
 #endif
 //#define RAZERS_PARALLEL_READS_WHOLE_GENOME
 #ifdef RAZERS_PARALLEL_READS_WHOLE_GENOME
-	#include "razers_window.h"
+#include "razers_window.h"
 #endif
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -42,13 +42,13 @@ namespace SEQAN_NAMESPACE_MAIN
         
         TSwiftPatterns &swiftPatterns;
         ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
-            swiftPatterns(_swiftPatterns) {}
+		swiftPatterns(_swiftPatterns) {}
     };
     
     // TODO: doc
     template<
-        typename TReadSet,
-        typename TShape>
+	typename TReadSet,
+	typename TShape>
     void intiIndex(Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index, TReadSet & _text, TShape const & _shape)
     {
         SEQAN_CHECKPOINT
@@ -56,7 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
         value(index.text) = _text;
         index.shape = _shape;
     }
-
+	
     // TODO: doc
     template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
     inline void 
@@ -113,33 +113,33 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 	
 	// BLOCK_STORE
-/**
-.Function.appendBlockStores:
-..cat:Razers
-..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
-..param.store:@Class.FragmentStore@
-..param.blockStores:@Class.String@ of @Class.FragmentStore@
-..param.swiftPatternHandler:
-..param.cnts:Counts
-..param.options:RazerSOptions
-..param.mode:RazerSMode
-*/
+	/**
+	 .Function.appendBlockStores:
+	 ..cat:Razers
+	 ..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+	 ..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
+	 ..param.store:@Class.FragmentStore@
+	 ..param.blockStores:@Class.String@ of @Class.FragmentStore@
+	 ..param.swiftPatternHandler:
+	 ..param.cnts:Counts
+	 ..param.options:RazerSOptions
+	 ..param.mode:RazerSMode
+	 */
 	template <
-		typename TFragmentStore,
-		typename TPatternHandler,
-		typename TCounts,
-		typename TRazerSOptions,
-		typename TRazerSMode >
+	typename TFragmentStore,
+	typename TPatternHandler,
+	typename TCounts,
+	typename TRazerSOptions,
+	typename TRazerSMode >
 	inline void
 	appendBlockStores(
-		TFragmentStore			& store,
-		String<TFragmentStore>	& blockStores,
-		TPatternHandler			& swiftPatternHandler,
-		TCounts					& cnts,
-		TRazerSOptions			& options,
-		TRazerSMode const		& mode
-	){
+					  TFragmentStore			& store,
+					  String<TFragmentStore>	& blockStores,
+					  TPatternHandler			& swiftPatternHandler,
+					  TCounts					& cnts,
+					  TRazerSOptions			& options,
+					  TRazerSMode const		& mode
+					  ){
 		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
@@ -148,7 +148,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TAlignedReadStoreSize oldSize = length(store.alignedReadStore);
 		// so the prefix increment can be used in the loops
 		TAlignedReadStoreSize sizeSum = --oldSize;
-
+		
 		for(unsigned i = 0; i < options.numberOfBlocks; ++i)
 			for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j)
 				blockStores[i].alignedReadStore[j].id = ++sizeSum;
@@ -157,7 +157,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// second: resize first so copying happens at most once and not every for each block in the worst case
 		resize(store.alignedReadStore, sizeSum, Generous());
 		resize(store.alignQualityStore, sizeSum, Generous());			
-
+		
 		// third: append single block stores
 		for(unsigned i = 0; i < options.numberOfBlocks; ++i){
 			for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j){
@@ -182,7 +182,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 	}
 	
-	
+	/*
 	///////////////////////////////////////
 	//
 	//
@@ -194,13 +194,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	typename TRazerSOptions,
 	typename TRazerSMode >
     void _goOverContigPipe(
-		TContigSeq										& contigSeq,
-		ParallelSwiftPatternHandler<String<
-		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
-		String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
-		TVerifier										& verifier,
-		TRazerSOptions									& options,
-		TRazerSMode const                               & mode)
+						   TContigSeq										& contigSeq,
+						   ParallelSwiftPatternHandler<String<
+						   Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
+						   String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+						   TVerifier										& verifier,
+						   TRazerSOptions									& options,
+						   TRazerSMode const                               & mode)
     {
 		
 		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
@@ -209,28 +209,30 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Size<THitString>::Type         THitStringSize;
 		
 		unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
-
+		
+		omp_set_nested(1);
 		// use only core many threads
-		#pragma omp parallel num_threads((int)options.numberOfBlocks)
+#pragma omp parallel num_threads((int)options.numberOfBlocks)
 		
 		// go over contig sequence
-		#pragma omp for schedule(static, 1)
+#pragma omp for schedule(static, 1)
 		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 		{
-
-			#pragma omp parallel num_threads(2)
+			
+#pragma omp parallel num_threads(2)
 			
 			while(true){
 				
 				bool stop = false;
 				THitString hits = getSwiftHits(swiftFinders[blockId]);				
-				#pragma omp sections
+#pragma omp sections
 				{
-					#pragma omp section
+#pragma omp section
 					{
-						stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);		
+						stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+						printf("filter: thread %d\n", omp_get_thread_num());
 					}
-					#pragma omp section
+#pragma omp section
 					{
 						// verify hits
 						for(THitStringSize h = 0; h < length(hits); ++h){
@@ -238,6 +240,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
 							++options.countFiltration;
 						}						
+						printf("verification: thread %d\n", omp_get_thread_num());
 					}
 					
 				}
@@ -245,32 +248,117 @@ namespace SEQAN_NAMESPACE_MAIN
 				if(stop) break;
 			}
 			
-			// TODO: final verification round
+			// verify hits
+			THitString hits = getSwiftHits(swiftFinders[blockId]);
+			for(THitStringSize h = 0; h < length(hits); ++h){
+				verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+				matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+				++options.countFiltration;
+			}
 			
 			// clear finders			
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 		}
 		
-	}
+	}*/
+	/*
+	 template<typename THitString, typename TVerifier>
+	 void verifyHitString(THitString & hits, TVerifier & verifier){
+	 
+	 // verify hits
+	 for(THitStringSize h = 0; h < length(hits); ++h){
+	 verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+	 matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+	 ++options.countFiltration;
+	 }						
+	 }
+	 
+	 }
+	 
+	 ///////////////////////////////////////
+	 //
+	 //
+	 
+	 template <
+	 typename TContigSeq, 
+	 typename TReadIndex, 
+	 typename TSwiftSpec,
+	 typename TVerifier,
+	 typename TRazerSOptions,
+	 typename TRazerSMode >
+	 void _goOverContigPipe2(
+	 TContigSeq										& contigSeq,
+	 ParallelSwiftPatternHandler<String<
+	 Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
+	 String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+	 TVerifier										& verifier,
+	 TRazerSOptions									& options,
+	 TRazerSMode const                               & mode)
+	 {
+	 
+	 typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
+	 typedef typename TSwiftFinder::THitString		THitString;
+	 typedef typename Value<THitString>::Type        TSwiftHit;
+	 typedef typename Size<THitString>::Type         THitStringSize;
+	 
+	 unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
+	 
+	 omp_set_nested(1);
+	 
+	 // use only core many threads
+	 #pragma omp parallel num_threads((int)options.numberOfCores)
+	 
+	 // go over contig sequence
+	 #pragma omp for schedule(static, 1)
+	 for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+	 {
+	 while(true){
+	 
+	 bool stop = false;
+	 THitString hits = getSwiftHits(swiftFinders[blockId]);
+	 
+	 stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+	 
+	 #pragma omp task 
+	 {
+	 
+	 
+	 
+	 if(stop) break;
+	 }
+	 
+	 // clear finders			
+	 windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+	 }
+	 
+	 }*/
 	
-/*	///////////////////////////////////////
+	///////////////////////////////////////
 	//
 	//
 	template <
-		typename TContigSeq, 
-		typename TReadIndex, 
-		typename TSwiftSpec,
-		typename TVerifier,
-		typename TRazerSOptions,
-		typename TRazerSMode >
+	typename TContigSeq, 
+	typename TReadIndex, 
+	typename TSwiftSpec,
+	typename TVerifier,
+	typename TRazerSOptions,
+#ifdef RAZERS_TIMER
+	typename TFragmentStore,
+#endif
+	typename TRazerSMode >
     void _goOverContig(
-			TContigSeq										& contigSeq,
-			ParallelSwiftPatternHandler<String<
-				Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
-			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
-			TVerifier										& verifier,
-			TRazerSOptions									& options,
-			TRazerSMode const                               & mode)
+					   TContigSeq										& contigSeq,
+					   ParallelSwiftPatternHandler<String<
+					   Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+					   String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+					   TVerifier										& verifier,
+					   TRazerSOptions									& options,
+#ifdef RAZERS_TIMER
+					   TFragmentStore									& store,
+					   unsigned										  contigId,
+					   char											  orientation,
+#endif
+					   TRazerSMode const                               & mode)
     {
 		
 		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
@@ -291,6 +379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
 			waitingTimes[coreId] = sysTime();
 #endif
+		
 		// use only core many threads		
 		// go over contig sequence
 		#pragma omp parallel num_threads((int)options.numberOfCores)
@@ -302,7 +391,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// As the data structures are split up alread and each thread works on only one element of
 			// the strings (finder, patterns) at a time the variables can be shared
 			// TODO: maybe try schedule(guided)
-#pragma omp for schedule(dynamic, 1)
+			#pragma omp for schedule(dynamic, 1)
 			for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){ //TSwiftFinderSize
 				
 #ifdef RAZERS_TIMER					
@@ -311,15 +400,49 @@ namespace SEQAN_NAMESPACE_MAIN
 				
 				Pair<int, int> posLength(0, 0);
 				// filter window and save hits
-				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize, posLength);
 				
 				// get time for filtering
 				_proFloat filteringTime = sysTime() - startTime;
 				// start time for verification
 				startTime = sysTime();
+				// number of matches
+				int matches = 0;
+				
+				// verify hits
+				THitString hits = getSwiftHits(swiftFinders[blockId]);
+				for(THitStringSize h = 0; h < length(hits); ++h){
+					verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+					matches += matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+					++options.countFiltration;
+				}
+
+				// get time for filtering
+				_proFloat verificationTime = sysTime() - startTime;
+				
+				#pragma omp critical
+				{
+					std::cout << "timing>\t";
+					#ifdef _OPENMP
+					std::cout << omp_get_thread_num() << "\t";
+					#endif
+					std::cout << blockId << "\t";
+					std::cout << contigAndDirection << "\t";
+					std::cout << posLength.i1 << "\t";
+					std::cout << posLength.i2 << "\t";
+					std::cout << filteringTime << "\t";
+					std::cout << length(hits) << "\t";
+					std::cout << verificationTime << "\t";
+					std::cout << matches << "\n";
+				}
+				// set waiting time
+				#ifdef _OPENMP
+				waitingTimes[omp_get_thread_num()] = sysTime();
+				#endif
+// in not RAZERS_TIMER
 #else
 				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-#endif
+				
 				// verify hits
 				THitString hits = getSwiftHits(swiftFinders[blockId]);
 				for(THitStringSize h = 0; h < length(hits); ++h){
@@ -327,31 +450,8 @@ namespace SEQAN_NAMESPACE_MAIN
 					matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
 					++options.countFiltration;
 				}
-#ifdef RAZERS_TIMER
-				// get time for filtering
-				_proFloat verificationTime = sysTime() - startTime;
-				
-				#pragma omp critical
-				{
-					std::cout << "timing>\t";
-#ifdef _OPENMP
-					std::cout << omp_get_thread_num() << "\t";
 #endif
-					std::cout << blockId << "\t";
-					std::cout << contigAndDirection << "\t";
-					std::cout << posLength.i1 << "\t";
-					std::cout << posLength.i2 << "\t";
-					std::cout << filteringTime << "\t";
-					std::cout << length(hits) << "\t";
-					std::cout << verificationTime << "\n";
-				}
-				// set waiting time
-#ifdef _OPENMP
-				waitingTimes[omp_get_thread_num()] = sysTime();
-#endif	
-#endif
-			}
-			
+			}			
 #ifdef RAZERS_TIMER
 			_proFloat now = sysTime();
 			#pragma omp critical
@@ -368,39 +468,39 @@ namespace SEQAN_NAMESPACE_MAIN
 		// clear finders
 		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
-	}*/
+	}
 	
     
-/**
-.Function._mapSingleReadsToContig:
-..cat:Razers
-..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-..signature:_mapSingleReadsToContig(store, contigId, swiftPatterns, preprocessingBlocks, cnts, orientation, options, mode)
-..param.store:@Class.FragmentStore@
-..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
-..param.swiftPatternHandler: Handler for swift pattern
-..param.preprocessingBlocks: String of infixes of a string with bit vector patterns for each read
-..param.cnts:Counts for statistics
-..param.options:RazerSOptions
-..param.mode:RazerSMode
-*/
+	/**
+	 .Function._mapSingleReadsToContig:
+	 ..cat:Razers
+	 ..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+	 ..signature:_mapSingleReadsToContig(store, contigId, swiftPatterns, preprocessingBlocks, cnts, orientation, options, mode)
+	 ..param.store:@Class.FragmentStore@
+	 ..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
+	 ..param.swiftPatternHandler: Handler for swift pattern
+	 ..param.preprocessingBlocks: String of infixes of a string with bit vector patterns for each read
+	 ..param.cnts:Counts for statistics
+	 ..param.options:RazerSOptions
+	 ..param.mode:RazerSMode
+	 */
     template <
-        typename TFragmentStore, 
-        typename TReadIndex, 
-        typename TSwiftSpec, 
-        typename TPreprocessing,
-        typename TCounts,
-        typename TRazerSOptions,
-        typename TRazerSMode >
+	typename TFragmentStore, 
+	typename TReadIndex, 
+	typename TSwiftSpec, 
+	typename TPreprocessing,
+	typename TCounts,
+	typename TRazerSOptions,
+	typename TRazerSMode >
     void _mapSingleReadsToContig(
-             TFragmentStore                                     & store,
-             unsigned                                             contigId,				// ... and its sequence number
-             ParallelSwiftPatternHandler<String<Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
-             TPreprocessing                                     & preprocessingBlocks,
-             TCounts                                            & cnts,
-             char                                                 orientation,			// q-gram index of reads
-             TRazerSOptions                                     & options,
-             TRazerSMode const                                  & mode)
+			TFragmentStore                                     & store,
+			unsigned                                             contigId,				// ... and its sequence number
+			ParallelSwiftPatternHandler<String<Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+			TPreprocessing                                     & preprocessingBlocks,
+			TCounts                                            & cnts,
+			char                                                 orientation,			// q-gram index of reads
+			TRazerSOptions                                     & options,
+			TRazerSMode const                                  & mode)
     {
         SEQAN_CHECKPOINT
         
@@ -409,7 +509,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
         typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
         typedef typename Size<TSwiftFinder>::Type               TSwiftFinderSize;
-
+		
         // HITS
         typedef typename TSwiftFinder::THitString               THitString;
 		typedef typename Value<THitString>::Type                TSwiftHit;
@@ -420,8 +520,8 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                    TSwiftPatterns;
         typedef ParallelSwiftPatternHandler<TSwiftPatterns>                         TSwiftPatternHandler;
         typedef MatchVerifier <TFragmentStore, TRazerSOptions,
-					TRazerSMode, TPreprocessingBlock,
-					TSwiftPatternHandler, TCounts >									TVerifier;
+		TRazerSMode, TPreprocessingBlock,
+		TSwiftPatternHandler, TCounts >									TVerifier;
         typedef typename Fibre<TReadIndex, Fibre_Text>::Type                        TReadSet;
 		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type		TAlignedReadStoreSize;
         
@@ -441,7 +541,7 @@ namespace SEQAN_NAMESPACE_MAIN
         String<TSwiftFinder> swiftFinders;
         resize(swiftFinders, options.numberOfBlocks, Exact());
         TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
-        		
+		
         String<TVerifier> verifier;
         resize(verifier, options.numberOfBlocks, Exact());
 		
@@ -474,9 +574,12 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // if started correctly
         if(beginOk){
-			_goOverContigPipe(contigSeq, swiftPatternHandler, swiftFinders, verifier, options, mode);
-            
-			// BLOCK_STORE
+#ifndef RAZERS_TIMER
+			_goOverContig(contigSeq, swiftPatternHandler, swiftFinders, verifier, options, mode);
+#else
+			_goOverContig(contigSeq, swiftPatternHandler, swiftFinders, verifier, options, store, contigId, orientation, mode);		
+#endif
+			
 			// append the alignedReadStore and the alignQualityStore from the blocks to the main store
 			appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
         }
@@ -489,20 +592,20 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // Find read matches in many genome sequences
     template <
-        typename TFSSpec, 
-        typename TFSConfig, 
-        typename TCounts,
-        typename TSpec, 
-        typename TAlignMode,
-        typename TGapMode,
-        typename TScoreMode,
-        typename TReadIndexString>
+	typename TFSSpec, 
+	typename TFSConfig, 
+	typename TCounts,
+	typename TSpec, 
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode,
+	typename TReadIndexString>
     int _mapSingleReadsParallel(
-                        FragmentStore<TFSSpec, TFSConfig>					& store,
-                        TCounts												& cnts,
-                        RazerSOptions<TSpec>								& options,
-                        RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
-                        TReadIndexString									& readIndices)
+			FragmentStore<TFSSpec, TFSConfig>					& store,
+			TCounts												& cnts,
+			RazerSOptions<TSpec>								& options,
+			RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
+			TReadIndexString									& readIndices)
     {
         SEQAN_CHECKPOINT
         
@@ -519,7 +622,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Pattern<TRead, MyersUkkonen>                        TMyersPattern;
         typedef typename Infix<String<TMyersPattern> >::Type        TVerifierBlock;
         typedef typename Position<TReadIndexString>::Type           TPos;
-
+		
         // configure Swift patterns
         TSwiftPatterns swiftPatterns;
         
@@ -532,11 +635,11 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 		// use pattern handler instead of pattern to have access to the global read ID
         TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
-                
+		
         // init edit distance verifiers
-        unsigned readCount = length(store.readSeqStore);//countSequences(readIndices); // FIXME: function for String of StringSets has the return the total number of reads
+        unsigned readCount = length(store.readSeqStore);
         String<TMyersPattern> forwardPatterns;
-        resize(forwardPatterns, length(store.readSeqStore), Exact()); // FIXME:
+        resize(forwardPatterns, readCount, Exact());
         
         options.compMask[4] = (options.matchN)? 15: 0;
         if (options.gapMode == RAZERS_GAPPED)
@@ -544,7 +647,7 @@ namespace SEQAN_NAMESPACE_MAIN
             resize(forwardPatterns, readCount, Exact());
             for(unsigned i = 0; i < readCount; ++i)
             {
-                setHost(forwardPatterns[i], store.readSeqStore[i]); // FIXME: store.readSeqStore insead of indexText(...)
+                setHost(forwardPatterns[i], store.readSeqStore[i]);
                 _patternMatchNOfPattern(forwardPatterns[i], options.matchN);
                 _patternMatchNOfFinder(forwardPatterns[i], options.matchN);
             }
@@ -575,15 +678,13 @@ namespace SEQAN_NAMESPACE_MAIN
         options.timeMapReads = 0;
         options.timeDumpResults = 0;
         SEQAN_PROTIMESTART(find_time);
-        
-
+		
 #ifdef RAZERS_TIMER
 		// print header line for timer
-		std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\n";
+		std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\tmatches\n";
 		std::cout << "waiting>\tthread\ttime\n";
 #endif
-        
-#ifndef RAZERS_PARALLEL_READS_WHOLE_GENOME		
+        	
         // iterate over genome sequences
         for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
         {
@@ -597,42 +698,6 @@ namespace SEQAN_NAMESPACE_MAIN
                 _mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
             unlockAndFreeContig(store, contigId);
         }
-#else
-		// TODO: something is wrong here + need to reverse the genome only once
-		// a temporary store for every block. reduces the critical region in pushing verified hit to an atomic ID increment
-		String<TFragmentStore> blockStores;
-		resize(blockStores, options.numberOfBlocks, Exact());
-		
-		// reduce the size at which the alignment store is compacted
-		unsigned mainCompactThresh = options.compactThresh;
-		options.compactThresh = mainCompactThresh / options.numberOfBlocks;
-		
-		# pragma omp parallel for //TODO: correct pragma
-		for(int blockID = 0; blockID < (int)options.numberOfBlocks; ++blockID){
-			// only first one in verbous
-			if(blockID != 0)
-				options._debugLevel = 0;
-			
-			// iterate over genome sequences
-			for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
-			{				
-				// lock to prevent releasing and loading the same contig twice
-				// (once per _mapSingleReadsToContig call)
-				lockContig(store, contigId);
-				if (options.forward)
-					_mapSingleReadsToContigWindow(store, blockStores[blockID], contigId, swiftPatterns[blockID], swiftPatternHandler, forwardPatternsBlocks[blockID], cnts, 'F', options, mode);
-				
-				if (options.reverse)
-					_mapSingleReadsToContigWindow(store, blockStores[blockID], contigId, swiftPatterns[blockID], swiftPatternHandler, forwardPatternsBlocks[blockID], cnts, 'R', options, mode);
-				unlockAndFreeContig(store, contigId);
-			}
-		}
-		
-		// reset compact threshold
-		options.compactThresh = mainCompactThresh; 
-		// combine blocks
-		appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
-#endif
         
         options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
         if (options._debugLevel >= 1)
@@ -648,20 +713,20 @@ namespace SEQAN_NAMESPACE_MAIN
     
     // TODO: doc
     template <
-        typename TFSSpec, 
-        typename TFSConfig, 
-        typename TCounts,
-        typename TSpec, 
-        typename TShape,
-        typename TAlignMode,
-        typename TGapMode,
-        typename TScoreMode >
+	typename TFSSpec, 
+	typename TFSConfig, 
+	typename TCounts,
+	typename TSpec, 
+	typename TShape,
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode >
     int _mapSingleReadsParallel(
-            FragmentStore<TFSSpec, TFSConfig>					& store,
-            TCounts												& cnts,
-            RazerSOptions<TSpec>								& options,
-            TShape const										& shape,
-            RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
+			FragmentStore<TFSSpec, TFSConfig>					& store,
+			TCounts												& cnts,
+			RazerSOptions<TSpec>								& options,
+			TShape const										& shape,
+			RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
     {
         SEQAN_CHECKPOINT
         
@@ -732,7 +797,7 @@ namespace SEQAN_NAMESPACE_MAIN
             
             return _mapSingleReadsParallel(store, cnts, options, mode, indices);
         }
-                
+		
     }
     
 }
