@@ -101,7 +101,7 @@ struct ContigStoreElement
 	typedef __int64				TPos;
 	typedef String<TGapAnchor>	TGapAnchors;
 
-	static const TId INVALID_ID = SupremumValue<typename Id<ContigStoreElement>::Type>::VALUE;
+	static const TId INVALID_ID;
 
 	TContigSeq	seq;
 	TGapAnchors	gaps;
@@ -114,6 +114,14 @@ struct ContigStoreElement
 
 	ContigStoreElement() : usage(0), fileId(INVALID_ID), fileBeginPos(0), fileEndPos(0) {}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec> 
+const typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type 
+ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = SupremumValue<typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type>::VALUE; 
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.ContigFile
@@ -144,12 +152,18 @@ struct ContigFile
 {
 	typedef typename Id<ContigFile>::Type	TId;
 
-	static const TId INVALID_ID = SupremumValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE;
+	static const TId INVALID_ID;
 
 	CharString		fileName;
 	AutoSeqFormat	format;
 	TId				firstContigId;	// first sequence of the file corresponds to this contigId
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename _TSpec> 
+const typename Id<ContigFile<_TSpec> >::Type 
+ContigFile<_TSpec>::INVALID_ID = SupremumValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 

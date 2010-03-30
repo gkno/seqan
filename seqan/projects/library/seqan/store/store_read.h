@@ -59,7 +59,7 @@ struct ReadStoreElement
 {
 	typedef typename Id<ReadStoreElement>::Type TId;
 	
-	static const TId INVALID_ID = SupremumValue<typename Id<ReadStoreElement<TSpec> >::Type>::VALUE;
+	static const TId INVALID_ID;
 
 	TId matePairId;				// refers to the mate-pair, INVALID_ID if not part of a mate-pair
 
@@ -68,6 +68,11 @@ struct ReadStoreElement
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSpec>
+const typename Id<ReadStoreElement<TSpec> >::Type
+ReadStoreElement<TSpec>::INVALID_ID = SupremumValue<typename Id<ReadStoreElement<TSpec> >::Type>::VALUE;
+
+//////////////////////////////////////////////////////////////////////////////
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

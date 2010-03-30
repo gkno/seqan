@@ -109,7 +109,7 @@ struct AlignedReadStoreElement
 	typedef _TSpec										TSpec;
 	typedef String<TGapAnchor>							TGapAnchors;
 
-	static const TId INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement>::Type>::VALUE;
+	static const TId INVALID_ID;
 	
 	TId			id;
 	TId			readId;
@@ -138,6 +138,14 @@ struct AlignedReadStoreElement
 		endPos(_endPos),
 		gaps(_gaps) {}
 };
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TPos, typename TGapAnchor, typename TSpec> 
+const typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type 
+AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type>::VALUE; 
+
+//////////////////////////////////////////////////////////////////////////////
 
 /**
 .Class.AlignQualityStoreElement
@@ -180,14 +188,13 @@ struct AlignQualityStoreElement
 		errors(0) {}
 };
 
-//////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // Sorting tags
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Sort Aligned Reads Tags
+.Tag.sortAlignedRead Tags
 ..summary:Tag to select a specific field to stably sort the @Memvar.FragmentStore#alignedReadStore@ by.
 ..cat:Fragment Store
 ..see:Function.sortAlignedReads
@@ -314,7 +321,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ..signature:sortAlignedReads(alignStore, lessFunctor)
 ..param.alignStore:A sequence of @Class.AlignedReadStoreElement@ to be sorted, e.g. @Memvar.FragmentStore#alignedReadStore@.
 ..param.sortTag:Selects the field to sort by.
-...type:Tag.Sort Aligned Reads Tags
+...type:Tag.sortAlignedRead Tags
 ..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
 ..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
 */
