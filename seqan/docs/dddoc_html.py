@@ -1727,22 +1727,20 @@ def warningPage(cat, key, data):
     sigs = sigs.strip(" \n")
     if len(sigs) > 0:
         params = data["param"]
-        if not params.empty():
-            keys = params.keys_by_occ()
-            if len(keys) > 0:         
-                for k in keys:
-                    if sigs.find(k) < 0:
-                        # Maybe ignore the "unknown param" warning for this
-                        # parameter if the "nowarn" child includes "unknown
-                        # param".
-                        print '>>>', data['%s.nowarn' % k].text(), '<<<'
-                        if "unknown param" in data["%s.nowarn" % k].text():
-                            continue
-                        WARNING_COUNT += 1
-                        print
-                        print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
-                        line = params.find(k).lines[0]
-                        print '        Location: %s:%d' % (line.file_name, line.line_no)
+        if params.empty():
+            return
+        keys = params.keys_by_occ()
+        for k in keys:
+            if sigs.find(k) < 0:
+                # Maybe ignore the "unknown param" warning for this parameter
+                # if the "nowarn" child includes "unknown param".
+                if "unknown param" in data["param.%s.nowarn" % k].text():
+                    continue
+                WARNING_COUNT += 1
+                print
+                print "\n!!  WARNING: unknown param \"" + k + "\" in \"" + cat + "." + key + "\""
+                line = params.find(k).lines[0]
+                print '        Location: %s:%d' % (line.file_name, line.line_no)
                         
                         
 ################################################################################
