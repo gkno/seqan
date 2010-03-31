@@ -205,7 +205,7 @@ bool find(Finder<THaystack, Default> & finder,
     }
 
     // Search the needle in the haystack naively.
-    for (TPosition i = 0u; i < length(needle(pattern)); ++i) {
+    for (TPosition i = 0u; i < length(needle(pattern));) {
         // Break out of loop if no more match is possible.
         if (finder._beginPosition >= length(haystack(finder)) - length(needle(pattern))) {
             finder._state = TFinder::STATE_NOTFOUND;
@@ -218,6 +218,7 @@ bool find(Finder<THaystack, Default> & finder,
             i = 0u;
             continue;
         }
+        i += 1;
     }
     finder._endPosition = finder._beginPosition + length(needle(pattern));
     finder._state = TFinder::STATE_BEGIN_FOUND;

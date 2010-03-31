@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 207-010
+  Copyright (C) 2007-2010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -21,8 +21,8 @@
   implementation.
  ==========================================================================*/
 
-#ifndef SEQAN_FIND2_FIND_HAMMING_SIMPLE_H_
-#define SEQAN_FIND2_FIND_HAMMING_SIMPLE_H_
+#ifndef SEQAN_FIND2_FIND_MULTIPLE_EXACT_SIMPLE_H_
+#define SEQAN_FIND2_FIND_MULTIPLE_EXACT_SIMPLE_H_
 
 namespace seqan {
 
@@ -348,11 +348,9 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
 }
 
 
-/*
-  Build the alignment resulting from the search result as specified by the
-  finder and the pattern.  If the state is not "begin found" then no alignment
-  is built and false is returned.
-*/
+// Build the alignment resulting from the search result as specified by the
+// finder and the pattern.  If the state is not "begin found" then no alignment
+// is built and false is returned.
 template <typename THaystack, typename TNeedle, typename TStringSetSpec, typename TAlignSeq, typename TAlignSpec>
 bool buildAlignment(Finder<THaystack, Default> &finder,
                     Pattern<StringSet<TNeedle, TStringSetSpec>, MultipleSimple> &pattern,
@@ -381,4 +379,4 @@ bool buildAlignment(Finder<THaystack, Default> &finder,
 
 }  // namespace seqan
           
-#endif  // SEQAN_FIND2_FIND_HAMMING_SIMPLE_H_
+#endif  // SEQAN_FIND2_FIND_MULTIPLE_EXACT_SIMPLE_H_

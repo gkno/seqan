@@ -214,6 +214,21 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_harder) {
 }
 
 
+// Search without any match.
+SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_nomatch) {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, Simple> TPattern;
+
+    DnaString kHaystack = "AGAAGAAGAGGAAGAAGA";
+    DnaString kNeedle = "CAA";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle);
+
+    bool ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+
 // Tests for setEndPosition() with simple pattern.
 SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     typedef Finder<DnaString> TFinder;

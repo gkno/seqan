@@ -199,6 +199,32 @@ SEQAN_DEFINE_TEST(test_find2_find_multiple_exact_simple_pattern_find_harder) {
 }
 
 
+// Find without any match.
+SEQAN_DEFINE_TEST(test_find2_find_multiple_exact_simple_pattern_find_nomatch) {
+    typedef StringSet<CharString> TCharStringSet;
+    typedef Finder<CharString> TFinder;
+    typedef Pattern<TCharStringSet, MultipleSimple> TPattern;
+
+    // TODO(holtgrew): Strings should be const.
+    CharString kHaystack = "AGAAGAAGAGGAAGAAGA";
+    CharString kNeedle0 = "CAA";
+    CharString kNeedle1 = "AAC";
+
+    TCharStringSet kNeedleSet;
+    appendValue(kNeedleSet, kNeedle0);
+    appendValue(kNeedleSet, kNeedle1);
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedleSet);
+
+    // We will search for all occurences of the needle using find()
+    // and findBegin() in the haystack and check for the correct begin
+    // and end position in both finder and needle.  Testing the
+    // alignment each time seems overkill.
+    bool ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+
 // Test the interface of the MultipleSimple pattern.
 SEQAN_DEFINE_TEST(test_find2_find_multiple_exact_simple_pattern_interface) {
     typedef StringSet<CharString> TCharStringSet;
