@@ -27,6 +27,11 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
     TPattern pattern(kNeedle);
     TFinder finder(kHaystack);
 
+    // Function host().
+    CharString const & patternHost = host(pattern);
+    SEQAN_ASSERT_EQ(kNeedle, patternHost);
+    SEQAN_ASSERT_EQ(3u, length(patternHost));
+
     // Function needle().
     CharString const & patternNeedle = needle(pattern);
     SEQAN_ASSERT_EQ(kNeedle, patternNeedle);
@@ -39,6 +44,10 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
     // Function findBegin().
     ret = findBegin(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
+
+    // Test found position.
+    SEQAN_ASSERT_EQ(8u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(11u, endPosition(finder));
 
     // Function alignment().
     Align<CharString, ArrayGaps> align;
@@ -218,7 +227,8 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     // We will search for all occurences of the needle using find()
     // and findBegin() in the haystack and check for the correct begin
     // and end position in both finder and needle.  Testing the
-    // alignment each time seems overkill.
+    // alignment each time seems overkill.  In between, we will call
+    // setEndPosition() sometimes.
     bool ret;
 
     // Set end position to a hit.

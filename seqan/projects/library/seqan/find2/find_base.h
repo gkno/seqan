@@ -38,11 +38,17 @@ struct _FindState {
     };
 };
 
+
 template <typename TNeedle, typename TSpec>
 struct Pattern;
 
+
 template <typename THaystack, typename TSpec = Default>
 struct Finder;
+
+
+template <typename TPattern>
+struct Needle;
 
 }  // namespace seqan
           

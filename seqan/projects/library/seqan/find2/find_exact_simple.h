@@ -49,6 +49,12 @@ struct Pattern<_TNeedle, Simple> : _FindState {
 
 
 template <typename TNeedle>
+struct Needle<Pattern<TNeedle, Simple> > {
+    typedef typename Value<TNeedle>::Type Value;
+};
+
+
+template <typename TNeedle>
 TNeedle const & host(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
     return value(pattern._host);
@@ -190,6 +196,7 @@ bool find(Finder<THaystack, Default> & finder,
         finder._beginPosition = 0u;
         finder._endPosition = length(needle(pattern));
     } else if (finder._state == TPattern::STATE_NO_HIT) {
+        // Only advance if not at end if set manually to a "no hit" position.
         if (finder._endPosition == length(haystack(finder)))
             return false;
         finder._beginPosition += 1;
