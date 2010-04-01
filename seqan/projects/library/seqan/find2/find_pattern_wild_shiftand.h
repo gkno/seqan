@@ -463,6 +463,108 @@ inline bool _find_WildShiftAnd_isValid(CharString const & needle) {
 }
 
 
+// Determine the pattern length without wildcard characters.  needle
+// must be a valid pattern.
+inline Position<CharString>::Type _find_WildShiftAnd_lengthWithoutWildcards(CharString const & needle) {
+    SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(needle));
+
+    typedef Position<CharString>::Type TPosition;
+    TPosition result = 0u;
+
+    for (TPosition i = 0u; i < length(needle); ++i) {
+        char c = needle[i];
+
+        // Used in the switch statement below, must be defined before.
+        CharString number;
+        unsigned n, m;
+
+        switch (c) {
+            case '+':
+            case '*':
+            case '?':
+                // Skip quantifier characters.
+                continue;
+            case '[':
+                // Skip over character set, means one character.
+                while (needle[i] != ']')
+                    ++i;
+                result += 1;
+                break;
+            case '{':
+                // Skip over explicit quantifier, extract number of quantified
+                // characters.
+                ++i;
+                // Read first number.
+                while (needle[i] != ',') {
+                    appendValue(number, needle[i]);
+                    i += 1;
+                }
+                n = atoi(toCString(number));
+                i += 1;  // Skip comma.
+                // Read second number.
+                clear(number);
+                while (needle[i] != '}') {
+                    appendValue(number, needle[i]);
+                    i += 1;
+                }
+                m = atoi(toCString(number));
+
+                SEQAN_ASSERT_GEQ(m, n);
+                result += m - 1;
+                break;
+            case '\\':
+                // Escape-sequences count as one character.
+                result += 1;
+                i += 1;
+            default:
+                result += 1;
+                break;
+        }
+    }
+
+    return result;
+}
+
+
+// Build a string with all characters in the range [begin, end) in host into
+// result.
+//
+// TODO(holtgrew): We could simply use segments in the caller and a template argument for host instead of begin/end here.
+inline void _find_WildShiftAnd_getCharacterClass(
+        CharString & result, CharString const & host,
+        Position<CharString>::Type begin, Position<CharString>::Type end) {
+    SEQAN_CHECKPOINT;
+    typedef Position<CharString>::Type TPosition;
+    clear(result);
+
+    for (TPosition pos = begin; pos < end; ++pos) {
+        if (host[pos] == '\\') {
+            SEQAN_ASSERT_LT(pos + 1, end);
+            pos += 1;
+            appendValue(result, host[pos]);
+        } else if (host[pos] != '-') {
+            appendValue(result, host[pos]);
+        } else {
+            // Read end of range character.
+            SEQAN_ASSERT_LT(pos + 1, end);
+            char last;
+            if (host[pos + 1] == '\\') {
+                SEQAN_ASSERT_LT(pos + 2, end);
+                pos += 2;
+                last = host[pos];
+            } else {
+                pos += 1;
+                last = host[pos];
+            }
+            SEQAN_ASSERT_LEQ(back(result), last);
+            for (char c = back(result) + 1; c <= last; ++c)
+                appendValue(result, c);
+        }
+    }
+}
+
 }  // namespace seqan
           
 #endif  // SEQAN_FIND2_FIND_PATTERN_WILD_SHIFTAND_H_

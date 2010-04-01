@@ -37,6 +37,8 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
 
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_unsigned);
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_valid);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_length_without_wildcards);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_get_character_class);
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_easy);
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder);
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_nomatch);

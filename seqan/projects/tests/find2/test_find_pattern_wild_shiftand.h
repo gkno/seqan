@@ -55,6 +55,35 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_valid) {
 }
 
 
+// Tests the _find_WildShiftAnd_lengthWithoutWildcards function.
+SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_length_without_wildcards) {
+    SEQAN_ASSERT_EQ(4u, _find_WildShiftAnd_lengthWithoutWildcards("asdf"));
+    SEQAN_ASSERT_EQ(3u, _find_WildShiftAnd_lengthWithoutWildcards("x{1,3}"));
+    SEQAN_ASSERT_EQ(3u, _find_WildShiftAnd_lengthWithoutWildcards("x{3,3}"));
+    SEQAN_ASSERT_EQ(1u, _find_WildShiftAnd_lengthWithoutWildcards("x*"));
+    SEQAN_ASSERT_EQ(2u, _find_WildShiftAnd_lengthWithoutWildcards(".*[A-Z]+"));
+    SEQAN_ASSERT_EQ(5u, _find_WildShiftAnd_lengthWithoutWildcards("a?b+c*de"));
+}
+
+
+// Test the find_WildShiftAnd_getCharacterClass function.
+SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_get_character_class) {
+    CharString buffer;
+
+    _find_WildShiftAnd_getCharacterClass(buffer, "[A-F]", 1, 4);
+    SEQAN_ASSERT_EQ("ABCDEF", buffer);
+
+    _find_WildShiftAnd_getCharacterClass(buffer, "XX[ZA-F]XX", 3, 7);
+    SEQAN_ASSERT_EQ("ZABCDEF", buffer);
+
+    _find_WildShiftAnd_getCharacterClass(buffer, "A-C\\*\\.", 0, 7);
+    SEQAN_ASSERT_EQ("ABC*.", buffer);
+
+    _find_WildShiftAnd_getCharacterClass(buffer, "\\A-\\C\\*\\.", 0, 9);
+    SEQAN_ASSERT_EQ("ABC*.", buffer);
+}
+
+
 // Test the basic interface for the Simple pattern class.
 SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_pattern_interface) {
     // TODO(holtgrew): Strings should be const.
