@@ -5,6 +5,7 @@
 #include "test_find_finder_default.h"
 #include "test_find_hamming_simple.h"
 #include "test_find_multiple_exact_simple.h"
+#include "test_find_pattern_wild_shiftand.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_find2) {
@@ -34,6 +35,14 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_limit_0);
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_limit_1);
 
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_unsigned);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_valid);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_easy);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_harder);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_find_nomatch);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_interface);
+    SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_pattern_set_end_position);
+
     std::cout << std::endl;
     std::cout << "Verifying Check Points" << std::endl;
     std::cout << "======================" << std::endl;
@@ -44,6 +53,7 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_finder_default.h");
     //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_hamming_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_multiple_exact_simple.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_pattern_wild_shiftand.h");
 
     std::cout << std::endl;
 }
