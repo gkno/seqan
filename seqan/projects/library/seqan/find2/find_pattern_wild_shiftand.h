@@ -23,6 +23,11 @@
 #ifndef SEQAN_FIND2_FIND_PATTERN_WILD_SHIFTAND_H_
 #define SEQAN_FIND2_FIND_PATTERN_WILD_SHIFTAND_H_
 
+// Deactivate debugging for WildShiftAnd by default.
+#ifndef SEQAN_WILD_SHIFTAND_DEBUG
+#define SEQAN_WILD_SHIFTAND_DEBUG 0
+#endif  // SEQAN_WILD_SHIFTAND_DEBUG
+
 namespace seqan {
 
 struct _WildShiftAnd;
@@ -32,12 +37,30 @@ typedef Tag<_WildShiftAnd> WildShiftAnd;
 template <typename _TNeedle>
 struct Pattern<_TNeedle, WildShiftAnd> : _FindState {
     typedef _TNeedle TNeedle;
+	typedef unsigned TWord;
 
     // The pattern's state.
     TState _state;
 
-    // The needle we store.
-    Holder<TNeedle> _host;
+    // Holder with the needle's data.
+	Holder<TNeedle> data_host;
+
+    // TODO(holtgrew): Adjust naming of members to the style guide.
+	String<TWord> table;			// Look up table for each character in the alphabet (called B in "Navarro")
+	
+	String<TWord> s_table;			// marks all positions, that can remain active, after reading a specific character (called S in "Navarro")
+	String<TWord> a_table;			// marks all positions of optional characters in the pattern (called A in "Navarro")
+	String<TWord> i_table;			// marks all positions in the pattern, that preceed a block of optional characters (called I in "Navarro")
+	String<TWord> f_table;			// marks all end-positions of blocks of optional characters (called F in "Navarro")
+	
+	String<TWord> prefSufMatch;		// Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
+	String<TWord> df;				// additional bit mask to enable flooding of bits
+	
+	TWord needleLength;				// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
+	TWord character_count;			// number of normal characters in the needle
+	TWord blockCount;				// #unsigned ints required to store needle	
+
+	bool _valid;					// is the pattern valid or not
 
     Pattern() : _state(STATE_EMPTY) {
         SEQAN_CHECKPOINT;
@@ -46,8 +69,9 @@ struct Pattern<_TNeedle, WildShiftAnd> : _FindState {
     explicit
     Pattern(TNeedle & ndl)
         : _state(STATE_INITIAL),
-          _host(ndl) {
+          data_host(ndl) {
         SEQAN_CHECKPOINT;
+        _initializePattern(*this);
     }
 };
 
@@ -61,7 +85,7 @@ struct Needle<Pattern<TNeedle, WildShiftAnd> > {
 template <typename TNeedle>
 TNeedle const & host(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
-    return value(pattern._host);
+    return value(pattern.data_host);
 }
 
 
@@ -77,7 +101,7 @@ TNeedle const & host(Pattern<TNeedle, WildShiftAnd> & pattern) {
 template <typename TNeedle>
 TNeedle const & needle(Pattern<TNeedle, WildShiftAnd> const & pattern) {
     SEQAN_CHECKPOINT;
-    return value(pattern._host);
+    return value(pattern.data_host);
 }
 
 
@@ -177,57 +201,6 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, WildShiftAnd> & pa
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, WildShiftAnd> TPattern;
     return endPosition(const_cast<TPattern const &>(pattern));
-}
-
-
-template <typename THaystack, typename TNeedle>
-bool find(Finder<THaystack, Default> & finder,
-          Pattern<TNeedle, WildShiftAnd> & pattern) {
-    SEQAN_CHECKPOINT;
-    typedef Finder<THaystack, Default> TFinder;
-    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
-    typedef typename Position<TNeedle>::Type TPosition;
-
-    // State of finder and pattern should be in sync.
-    SEQAN_ASSERT_EQ(finder._state, pattern._state);
-
-    // Do not continue if the state is "not found".
-    if (finder._state == TPattern::STATE_NOTFOUND)
-        return false;
-    // Initialize finder if state is "initial".  Otherwise advance at
-    // least by one (if not set to of haystack with setEndPosition()).
-    if (finder._state == TPattern::STATE_INITIAL) {
-        finder._beginPosition = 0u;
-        finder._endPosition = length(needle(pattern));
-    } else if (finder._state == TPattern::STATE_NO_HIT) {
-        // Only advance if not at end if set manually to a "no hit" position.
-        if (finder._endPosition == length(haystack(finder)))
-            return false;
-        finder._beginPosition += 1;
-    } else {
-        finder._beginPosition += 1;
-    }
-
-    // Search the needle in the haystack naively.
-    for (TPosition i = 0u; i < length(needle(pattern));) {
-        // Break out of loop if no more match is possible.
-        if (finder._beginPosition >= length(haystack(finder)) - length(needle(pattern))) {
-            finder._state = TFinder::STATE_NOTFOUND;
-            pattern._state = TPattern::STATE_NOTFOUND;
-            return false;
-        }
-        // Otherwise, go on searching.
-        if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
-            finder._beginPosition += 1;
-            i = 0u;
-            continue;
-        }
-        i += 1;
-    }
-    finder._endPosition = finder._beginPosition + length(needle(pattern));
-    finder._state = TFinder::STATE_BEGIN_FOUND;
-    pattern._state = TPattern::STATE_BEGIN_FOUND;
-    return true;
 }
 
 
@@ -563,6 +536,310 @@ inline void _find_WildShiftAnd_getCharacterClass(
                 appendValue(result, c);
         }
     }
+}
+
+
+// Called after the host has been set, does the precomputation.
+template <typename TNeedle>
+void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
+    SEQAN_CHECKPOINT;
+
+    TNeedle const & needle = value(me.data_host);
+
+	me._valid = _find_WildShiftAnd_isValid(needle);
+
+	if (me._valid) return;
+
+	typedef unsigned TWord;
+    // TODO(holtgrew): TValue will always be char?!?!
+	typedef typename Value<TNeedle>::Type TValue;
+	
+	me.needleLength = length(needle);
+	me.character_count = _find_WildShiftAnd_lengthWithoutWildcards(needle);
+
+	if (me.character_count<1) me.blockCount=1;
+	else me.blockCount=((me.character_count-1) / BitsPerValue<TWord>::VALUE)+1;
+	
+	clear(me.table);
+	fill(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+
+	clear(me.s_table);
+	fill(me.s_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+
+	clear(me.a_table);
+	fill(me.a_table,me.blockCount,0,Exact());
+
+	int i = -1;
+	String <char> last_char; // stores the character (or characters) that were read in the last step
+	TWord j=0;
+	while(j < me.needleLength){
+		if (convert<char>(getValue(needle,j)) == '+'){
+			TWord len = length(last_char);
+			for (unsigned int k = 0; k < len; ++k)
+				me.s_table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+		} 
+		else if (convert<char>(getValue(needle,j)) == '?'){
+			me.a_table[i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+		}
+		else if (convert<char>(getValue(needle,j)) == '*'){
+			TWord len = length(last_char);
+			for (unsigned int k = 0; k < len; ++k)
+				me.s_table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+			me.a_table[i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+		}
+		else if(convert<char>(getValue(needle,j)) == '['){
+			/* find characters in class */
+			TWord e = j;
+			while(convert<char>(getValue(needle,e)) != ']') ++e;
+			/* get character codes of class */
+			_find_WildShiftAnd_getCharacterClass(last_char, needle, j+1, e);
+			TWord len = length(last_char);			
+			
+			/* add class to the mask */
+			++i;
+			for (unsigned int k = 0; k < len; ++k){
+				me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+			}
+			j = e;
+		}
+		else if(convert<char>(getValue(needle,j)) == '.'){ // matches all characters in the current alphabet
+			clear(last_char);
+			++i;
+			for(unsigned int l = 0;l < ValueSize<TValue>::VALUE;++l){
+				append(last_char,l);
+				me.table[me.blockCount*l + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+			}
+			
+		}
+		else if(convert<char>(getValue(needle,j)) == '\\'){ // handle escape characters
+			/* goto next character use this for the bit mask */
+			++i;++j;
+			clear(last_char);
+			append(last_char, convert<TWord>(convert<TValue>(getValue(needle,j))));
+			me.table[me.blockCount*last_char[0] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));			
+		}
+		else if(convert<char>(getValue(needle,j)) == '{'){ // handle bounded character repeats
+			String <char> number;
+			TWord n,m,r;
+			TWord len = length(last_char);			
+			n = m = 0;
+			++j;
+			while(convert<char>(getValue(needle,j)) != '}' && convert<char>(getValue(needle,j)) != ',') {			
+				append(number,convert<char>(getValue(needle,j)));
+				++j;
+			}
+			n = atoi(toCString(number));
+			if (convert<char>(getValue(needle,j)) == ','){
+				++j;
+				clear(number);
+				while(convert<char>(getValue(needle,j)) != '}') {			
+					append(number,convert<char>(getValue(needle,j)));
+					++j;
+				}
+				m = atoi(toCString(number));
+			}
+			// we already have seen one required occurence of the character (last_char)
+			n -= 1;
+			r = 0;
+			while(r < n){ // add n normal characters
+				++i;
+				for (unsigned int k = 0; k < len; ++k){
+					me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+				}
+				++r;
+			}
+			++r; // correct the -1 of n to get in the correct relation to m
+			while (r < m){ // if there was no m specified this won't be used
+				// add m - n charaters and make them optional
+				++i;
+				for (unsigned int k = 0; k < len; ++k){
+					me.table[me.blockCount*last_char[k] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+				}
+				me.a_table[i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+				++r;
+			}			
+		}
+
+		else // we have a character here
+		{
+			// determine character position in array table
+			clear(last_char);
+			append(last_char, convert<TWord>(convert<TValue>(getValue(needle,j))));
+			++i;
+			me.table[me.blockCount*last_char[0] + i / BitsPerValue<TWord>::VALUE] |= (1<<(i%BitsPerValue<TWord>::VALUE));
+		}
+		++j;
+	}
+
+	clear(me.i_table);
+	fill(me.i_table,me.blockCount,0,Exact());
+
+	clear(me.f_table);
+	fill(me.f_table,me.blockCount,0,Exact());
+
+	for (unsigned int i = 0; i < me.character_count; ++i){
+		if ((me.a_table[i / BitsPerValue<TWord>::VALUE] & (1 << (i % BitsPerValue<TWord>::VALUE))) != 0){
+			if ((me.f_table[i / BitsPerValue<TWord>::VALUE] & (1 << ((i-1) % BitsPerValue<TWord>::VALUE))) == 0){
+				if(i > 0)
+					me.i_table[(i-1) / BitsPerValue<TWord>::VALUE] |= 1 << ((i-1) % BitsPerValue<TWord>::VALUE);
+				me.f_table[i / BitsPerValue<TWord>::VALUE] |= 1 << (i % BitsPerValue<TWord>::VALUE);
+#if SEQAN_WILD_SHIFTAND_DEBUG
+				std::cout << "Update F and I" << std::endl;
+				_printMask(me.f_table,0,"F ");
+				_printMask(me.i_table,0,"I ");
+				_printMask(me.a_table,0,"A ");
+				std::cout << std::endl;
+#endif
+			}
+			else{
+				TWord curBlock = i / BitsPerValue<TWord>::VALUE;
+				for (unsigned int k = 0; k < me.blockCount; ++k){
+					if(k != curBlock)
+						me.f_table[i / BitsPerValue<TWord>::VALUE] &= ~0;
+					else
+						me.f_table[i / BitsPerValue<TWord>::VALUE] &= ~(1 << ((i-1) % BitsPerValue<TWord>::VALUE));
+
+				}
+				//me.f_table[i / BitsPerValue<TWord>::VALUE] &= ~(1 << ((i-1) % BitsPerValue<TWord>::VALUE));
+				me.f_table[i / BitsPerValue<TWord>::VALUE] |= 1 << (i % BitsPerValue<TWord>::VALUE);
+#if SEQAN_WILD_SHIFTAND_DEBUG
+				std::cout << "Update F" << std::endl;
+				_printMask(me.f_table,0,"F ");
+				std::cout << std::endl;
+#endif
+			}
+		}
+	}
+
+	setValue(me.data_host, needle);
+
+#if SEQAN_WILD_SHIFTAND_DEBUG	
+	// Debug code
+	std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;
+	std::cout << "Needle length (with wildcards): " << me.needleLength << ::std::endl;
+	std::cout << "Needle length (wo wildcards): " << me.character_count << ::std::endl;
+	std::cout << "Block count: " << me.blockCount << ::std::endl;
+
+	std::cout << "Needle:" << needle << ::std::endl;
+
+	_printMask(me.f_table,0,"F ");
+	_printMask(me.i_table,0,"I ");
+	_printMask(me.a_table,0,"A ");
+	std::cout << std::endl << std::endl;
+
+	for(unsigned i=0;i<ValueSize<TValue>::VALUE;++i) {
+		if (((i<97) && (4 < i) ) || (i>122)) continue;
+		std::cout << static_cast<TValue>(i) << ": ";
+		for(unsigned int j=0;j<me.blockCount;++j) {
+			for(int bit_pos=0;bit_pos<BitsPerValue<unsigned>::VALUE;++bit_pos) {
+				std::cout << ((me.table[me.blockCount*i+j] & (1<<(bit_pos % BitsPerValue<unsigned>::VALUE))) !=0);
+			}
+		}
+		std::cout << ::std::endl;
+	}
+#endif
+}
+
+
+template <typename THaystack, typename TNeedle>
+inline bool _find_WildShiftAnd_SmallNeedle(Finder<THaystack, Default> & finder,
+                                           Pattern<TNeedle, WildShiftAnd> & me) {
+    SEQAN_CHECKPOINT;
+	typedef unsigned TWord;
+	TWord compare = (1 << (me.character_count - 1));
+	while (!atEnd(finder)) {
+		TWord pos = convert<TWord>(*finder);
+		/* added  | (me.prefSufMatch[0] & me.s_table[me.blockCount*pos]) at the end of the line */
+		me.prefSufMatch[0] = (((me.prefSufMatch[0] << 1) | 1) & me.table[me.blockCount*pos]) | (me.prefSufMatch[0] & me.s_table[me.blockCount*pos]) ;
+
+		/* additional bit operations */
+		me.df[0] = me.prefSufMatch[0] | me.f_table[0];
+		me.prefSufMatch[0] |= ((me.a_table[0] & (~(me.df[0] - me.i_table[0]))) ^ me.df[0]);
+		if ((me.prefSufMatch[0] & compare) != 0) {
+			return true; 
+		}
+		goNext(finder);
+	}
+	return false;
+}
+
+template <typename TFinder, typename TNeedle>
+inline bool _find_WildShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
+    SEQAN_CHECKPOINT;
+	typedef unsigned TWord;
+	const TWord all1 = ~0;	
+	TWord compare = (1 << ((me.character_count-1) % BitsPerValue<TWord>::VALUE));
+
+	while (!atEnd(finder)) {
+		TWord pos = convert<TWord>(*finder);
+		TWord carry = 1;
+		TWord wc_carry = 0;
+		// shift of blocks with carry
+		for(TWord block=0;block<me.blockCount;++block) {
+			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
+			me.prefSufMatch[block] = (((me.prefSufMatch[block] << 1) | carry) & me.table[me.blockCount*pos+block]) | (me.prefSufMatch[block] & me.s_table[me.blockCount*pos+block]) ;
+			carry = newCarry;
+			
+			me.df[block] = me.prefSufMatch[block] | me.f_table[block];
+			TWord Z = me.df[block] - me.i_table[block] - wc_carry;
+			wc_carry = ((me.df[block] < Z) || (me.i_table[block]==all1 && wc_carry)) ? 1 : 0;
+			me.prefSufMatch[block] |= (me.a_table[block] & (~Z ^ me.df[block]));
+		}
+
+#if SEQAN_WILD_SHIFTAND_DEBUG
+		std::cout << "reading " << *finder << std::endl;
+		_printMask(me.prefSufMatch,position(finder),"D ");
+		_printMask(me.df,position(finder),"Df");
+		std::cout << std::endl;
+#endif
+		
+		// check for match
+		if ((me.prefSufMatch[me.blockCount-1] & compare) != 0)
+			return true; 
+
+		goNext(finder);
+	}
+	return false;
+}
+
+
+template <typename THaystack, typename TNeedle>
+bool find(Finder<THaystack, Default> & finder,
+          Pattern<TNeedle, WildShiftAnd> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
+    typedef typename Position<TNeedle>::Type TPosition;
+
+    // State of finder and pattern should be in sync.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+
+    // Do not continue if the state is "not found".
+    if (finder._state == TPattern::STATE_NOTFOUND)
+        return false;
+    // Initialize finder if state is "initial".  Otherwise advance at
+    // least by one (if not set to of haystack with setEndPosition()).
+    if (finder._state == TPattern::STATE_INITIAL) {
+        finder._beginPosition = 0u;
+        finder._endPosition = length(needle(pattern));
+    } else if (finder._state == TPattern::STATE_NO_HIT) {
+        // Only advance if not at end if set manually to a "no hit" position.
+        if (finder._endPosition == length(haystack(finder)))
+            return false;
+        finder._beginPosition += 1;
+    } else {
+        finder._beginPosition += 1;
+    }
+
+	// Use fast algorithm for needles < machine word if possible.
+    /*
+	if (pattern.blockCount == 1) {
+		return _find_WildShiftAnd_SmallNeedle(finder, pattern);
+	} else {
+		return _find_WildShiftAnd_LargeNeedle(finder, pattern);
+    }
+    */
+    return false;
 }
 
 }  // namespace seqan
