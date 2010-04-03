@@ -297,6 +297,7 @@ bool buildAlignment(Finder<THaystack, Default> &finder,
     resize(rows(outAlignment), 2);
     assignSource(row(outAlignment, 0), haystack(finder));
     assignSource(row(outAlignment, 1), needle(pattern));
+    // Insert gap into the needle.
     insertGaps(row(outAlignment, 1), 0, beginPosition(finder));
 
     return true;

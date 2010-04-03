@@ -31,8 +31,8 @@
 #include <seqan/align.h>
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
+#include <seqan/score.h>
 //#include <seqan/modifier.h>
-//#include <seqan/score.h>
 //#include <seqan/graph_types.h>
 //#include <seqan/graph_algorithms.h>
 //#include <seqan/map.h>
@@ -58,6 +58,7 @@
 #include <seqan/find2/find_hamming_simple.h>
 
 // Approximate matching with linear/affine gap costs, edit distance etc.
+#include <seqan/find2/find_approx_find_begin.h>  // findBegin() support
 #include <seqan/find2/find_approx_dpsearch.h>
 
 #endif  // SEQAN_SEQAN_FIND_H_

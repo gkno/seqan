@@ -1,36 +1,31 @@
 /*
   Test the find2/find_exact_simple.h header.
 */
-#ifndef TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
-#define TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+#ifndef TESTS_FIND2_TEST_FIND_APPROX_DPSEARCH_H_
+#define TESTS_FIND2_TEST_FIND_APPROX_DPSEARCH_H_
 
 #include <seqan/basic.h>
 #include <seqan/find2.h>
 
 using namespace seqan;
 
-// Test the basic interface for the Simple pattern class.
-SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
+// Test the basic interface for the DPSearch pattern class.
+SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_interface) {
     // TODO(holtgrew): Strings should be const.
     CharString kHaystack = "he is a hero";
     CharString kNeedle = "her";
 
     typedef Finder<CharString> TFinder;
-    typedef Pattern<CharString, Simple> TPattern;
+    typedef Pattern<CharString, DPSearch<EditDistanceScore> > TPattern;
 
     // Default constructor.
     {
         TPattern pattern;
     }
 
-    // Construt pattern and finder that are used below.
-    TPattern pattern(kNeedle);
+    // Construct pattern and finder that are used below.
+    TPattern pattern(kNeedle, -1);
     TFinder finder(kHaystack);
-
-    // Function host().
-    CharString const & patternHost = host(pattern);
-    SEQAN_ASSERT_EQ(kNeedle, patternHost);
-    SEQAN_ASSERT_EQ(3u, length(patternHost));
 
     // Function needle().
     CharString const & patternNeedle = needle(pattern);
@@ -45,9 +40,10 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
     ret = findBegin(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
 
-    // Test found position.
-    SEQAN_ASSERT_EQ(8u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(11u, endPosition(finder));
+    // Resulting alignment should be.
+    // he-is a hero
+    // ||
+    // her
 
     // Function alignment().
     Align<CharString, ArrayGaps> align;
@@ -57,20 +53,20 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
     // First row.
     SEQAN_ASSERT_EQ(0u, toViewPosition(row(align, 0), 0));
     SEQAN_ASSERT_EQ(1u, toViewPosition(row(align, 0), 1));
-    SEQAN_ASSERT_EQ(2u, toViewPosition(row(align, 0), 2));
-    SEQAN_ASSERT_EQ(3u, toViewPosition(row(align, 0), 3));
-    SEQAN_ASSERT_EQ(4u, toViewPosition(row(align, 0), 4));
-    SEQAN_ASSERT_EQ(5u, toViewPosition(row(align, 0), 5));
-    SEQAN_ASSERT_EQ(6u, toViewPosition(row(align, 0), 6));
-    SEQAN_ASSERT_EQ(7u, toViewPosition(row(align, 0), 7));
-    SEQAN_ASSERT_EQ(8u, toViewPosition(row(align, 0), 8));
-    SEQAN_ASSERT_EQ(9u, toViewPosition(row(align, 0), 9));
-    SEQAN_ASSERT_EQ(10u, toViewPosition(row(align, 0), 10));
-    SEQAN_ASSERT_EQ(11u, toViewPosition(row(align, 0), 11));
+    SEQAN_ASSERT_EQ(3u, toViewPosition(row(align, 0), 2));
+    SEQAN_ASSERT_EQ(4u, toViewPosition(row(align, 0), 3));
+    SEQAN_ASSERT_EQ(5u, toViewPosition(row(align, 0), 4));
+    SEQAN_ASSERT_EQ(6u, toViewPosition(row(align, 0), 5));
+    SEQAN_ASSERT_EQ(7u, toViewPosition(row(align, 0), 6));
+    SEQAN_ASSERT_EQ(8u, toViewPosition(row(align, 0), 7));
+    SEQAN_ASSERT_EQ(9u, toViewPosition(row(align, 0), 8));
+    SEQAN_ASSERT_EQ(10u, toViewPosition(row(align, 0), 9));
+    SEQAN_ASSERT_EQ(11u, toViewPosition(row(align, 0), 10));
+    SEQAN_ASSERT_EQ(12u, toViewPosition(row(align, 0), 11));
     // Second row.
-    SEQAN_ASSERT_EQ(8u, toViewPosition(row(align, 1), 0));
-    SEQAN_ASSERT_EQ(9u, toViewPosition(row(align, 1), 1));
-    SEQAN_ASSERT_EQ(10u, toViewPosition(row(align, 1), 2));
+    SEQAN_ASSERT_EQ(0u, toViewPosition(row(align, 1), 0));
+    SEQAN_ASSERT_EQ(1u, toViewPosition(row(align, 1), 1));
+    SEQAN_ASSERT_EQ(2u, toViewPosition(row(align, 1), 2));
 
     // Function length().
     SEQAN_ASSERT_EQ(3u, length(pattern));
@@ -108,14 +104,14 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_interface) {
 
 
 // "Easy" (= short, few hits) test of find() using the exact pattern.
-SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_easy) {
+SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_0) {
     typedef Finder<CharString> TFinder;
-    typedef Pattern<CharString, Simple> TPattern;
+    typedef Pattern<CharString, DPSearch<EditDistanceScore> > TPattern;
 
     CharString kHaystack = "he is her hero";
     CharString kNeedle = "he";
     TFinder finder(kHaystack);
-    TPattern pattern(kNeedle);
+    TPattern pattern(kNeedle, 0);
 
     // We will search for all occurences of the needle using find()
     // and findBegin() in the haystack and check for the correct begin
@@ -127,28 +123,40 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_easy) {
     // he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // he is her hero
     //       he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
     SEQAN_ASSERT_EQ(8u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // he is her hero
     //           he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
     SEQAN_ASSERT_EQ(12u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // no more hit
     ret = find(finder, pattern);
@@ -157,14 +165,14 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_easy) {
 
 
 // "Harder" (= longer, more hits hits) test of find() using the exact pattern.
-SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_harder) {
+SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_find_harder_score_limit_0) {
     typedef Finder<DnaString> TFinder;
-    typedef Pattern<DnaString, Simple> TPattern;
+    typedef Pattern<DnaString, DPSearch<EditDistanceScore> > TPattern;
 
     DnaString kHaystack = "AGAAGAAGAGGAAGAAGA";
     DnaString kNeedle = "GAA";
     TFinder finder(kHaystack);
-    TPattern pattern(kNeedle);
+    TPattern pattern(kNeedle, 0);
 
     // We will search for all occurences of the needle using find()
     // and findBegin() in the haystack and check for the correct begin
@@ -176,37 +184,53 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_harder) {
     //  GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // AGAAGAAGAGGAAGAAGA
     //           GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
     SEQAN_ASSERT_EQ(13u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // AGAAGAAGAGGAAGAAGA
     //              GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
     SEQAN_ASSERT_EQ(16u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // no more hit
     ret = find(finder, pattern);
@@ -214,36 +238,20 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_harder) {
 }
 
 
-// Search without any match.
-SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_find_nomatch) {
-    typedef Finder<DnaString> TFinder;
-    typedef Pattern<DnaString, Simple> TPattern;
-
-    DnaString kHaystack = "AGAAGAAGAGGAAGAAGA";
-    DnaString kNeedle = "CAA";
-    TFinder finder(kHaystack);
-    TPattern pattern(kNeedle);
-
-    bool ret = find(finder, pattern);
-    SEQAN_ASSERT_NOT(ret);
-}
-
-
 // Tests for setEndPosition() with simple pattern.
-SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
+SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score_limit_0) {
     typedef Finder<DnaString> TFinder;
-    typedef Pattern<DnaString, Simple> TPattern;
+    typedef Pattern<DnaString, DPSearch<EditDistanceScore> > TPattern;
 
     DnaString kHaystack = "AGAAGAAGAGGAAGAAGA";
     DnaString kNeedle = "GAA";
     TFinder finder(kHaystack);
-    TPattern pattern(kNeedle);
+    TPattern pattern(kNeedle, 0);
 
     // We will search for all occurences of the needle using find()
     // and findBegin() in the haystack and check for the correct begin
     // and end position in both finder and needle.  Testing the
-    // alignment each time seems overkill.  In between, we will call
-    // setEndPosition() sometimes.
+    // alignment each time seems overkill.
     bool ret;
 
     // Set end position to a hit.
@@ -251,20 +259,28 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     //  GAA
     ret = setEndPosition(finder, pattern, 4);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // Continue to search from here.
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // Set end position to a mismatch.
     // AGAAGAAGAGGAAGAAGA
@@ -277,10 +293,14 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
 
     // Set to end.
     // AGAAGAAGAGGAAGAAGA
@@ -293,4 +313,66 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     SEQAN_ASSERT_NOT(ret);
 }
 
-#endif  // TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+
+// More or less extensive test for findBegin().  We test find() and
+// findBegin() with two "new" alignments, i.e. distinct end positions
+// and two "begin alignments" each.
+//
+// TODO(holtgrew): Move to test_find_approx_find_begin.h?
+SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_find_begin) {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, DPSearch<EditDistanceScore> > TPattern;
+
+    DnaString kHaystack = "GGCACACA";
+    DnaString kNeedle = "CCACA";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle, -1);
+
+    bool ret;
+
+    //  GGCACACA
+    //    ||||
+    //    CACA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, endPosition(finder));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(2u, beginPosition(finder));
+    //  GGCACACA
+    //    ||||
+    //   CCACA
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    // No further begin match.
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+
+    // GGCACACA
+    //     ||||
+    //     CACA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(8u, endPosition(finder));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    // GGCACACA
+    //     ||||
+    //   C-CACA
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(3u, beginPosition(finder));
+    // GGCACACA
+    //     ||||
+    //   C-CACA
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(2u, beginPosition(finder));
+    // No further begin match.
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+#endif  // TESTS_FIND2_TEST_FIND_APPROX_DPSEARCH_H_

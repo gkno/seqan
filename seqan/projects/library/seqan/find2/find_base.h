@@ -1,6 +1,6 @@
 /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2007-2010
 
@@ -50,6 +50,17 @@ struct Finder;
 template <typename TPattern>
 struct Needle;
 
+
+template <typename TNeedle, typename TSpec>
+struct Needle<Pattern<TNeedle, TSpec> > {
+    typedef TNeedle Type;
+};
+
+
+// Metafunction for retrieving scoring schemes.
+template <typename TPattern>
+struct ScoringScheme;
+
 }  // namespace seqan
-          
+
 #endif  // SEQAN_FIND2_FIND_BASE_H_

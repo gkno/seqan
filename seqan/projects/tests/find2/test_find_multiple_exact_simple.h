@@ -1,8 +1,8 @@
 /*
   Test the find2/find_multiple_exact_simple.h header.
 */
-#ifndef TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
-#define TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+#ifndef TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_
+#define TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_
 
 #include <seqan/basic.h>
 #include <seqan/find2.h>
@@ -426,4 +426,4 @@ SEQAN_DEFINE_TEST(test_find2_find_multiple_exact_simple_pattern_set_end_position
     SEQAN_ASSERT_NOT(ret);
 }
 
-#endif  // TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
+#endif  // TESTS_FIND2_TEST_FIND_MULTIPLE_EXACT_SIMPLE_H_
