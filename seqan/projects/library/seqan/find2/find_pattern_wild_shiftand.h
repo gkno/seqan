@@ -832,6 +832,7 @@ bool find(Finder<THaystack, Default> & finder,
     }
 
 	// Use fast algorithm for needles < machine word if possible.
+    SEQAN_ASSERT_FAIL("Implement find for WildShiftAnd.");
     /*
 	if (pattern.blockCount == 1) {
 		return _find_WildShiftAnd_SmallNeedle(finder, pattern);
