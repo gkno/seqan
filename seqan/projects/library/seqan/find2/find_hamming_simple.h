@@ -328,6 +328,15 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
 }
 
 
+template <typename THaystack, typename TNeedle, typename TPosition>
+bool setBeginPosition(Finder<THaystack, Default> & finder,
+                      Pattern<TNeedle, HammingSimple> & pattern,
+                      TPosition const & pos) {
+    SEQAN_CHECKPOINT;
+    return setEndPosition(finder, pattern, pos + length(needle(pattern)));
+}
+
+
 // Build the alignment resulting from the search result as specified by the
 // finder and the pattern.  If the state is not "begin found" then no alignment
 // is built and false is returned.

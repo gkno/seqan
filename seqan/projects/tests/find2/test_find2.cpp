@@ -20,12 +20,14 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_find_nomatch);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_end_position);
+    SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_begin_position);
 
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_find_easy);
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_find_harder);
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_find_nomatch);
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_set_end_position);
+    SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_set_begin_position);
 
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_0);
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_1);
@@ -48,6 +50,7 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_limit_0);
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_limit_1);
+    SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_set_begin_position_score_limit_1);
 
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_unsigned);
     SEQAN_CALL_TEST(test_find2_find_pattern_wild_shiftand_is_valid);

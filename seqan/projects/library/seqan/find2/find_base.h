@@ -62,7 +62,7 @@ template <typename TPattern>
 struct ScoringScheme;
 
 
-// TODO(holtgrew): Implement HasFeature<TPattern, SetEndPosition> and HasFeature<TPattern, SetBeginPosition>.
+// TODO(holtgrew): Implement HasFeature<TPattern, SetEndPosition> and HasFeature<TPattern, SetBeginPosition>, HasFeature<TPattern, ScoreLimit>, HasFeature<TPattern, Score>?
 
 }  // namespace seqan
 

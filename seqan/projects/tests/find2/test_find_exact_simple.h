@@ -313,4 +313,75 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_end_position) {
     SEQAN_ASSERT_NOT(ret);
 }
 
+
+// Tests for setBeginPosition() with simple pattern.
+SEQAN_DEFINE_TEST(test_find2_find_exact_simple_pattern_set_begin_position) {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, Simple> TPattern;
+
+    DnaString kHaystack = "AGAAGAAGAGGAAGAAGA";
+    DnaString kNeedle = "GAA";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle);
+
+    // We will search for all occurences of the needle using find()
+    // and findBegin() in the haystack and check for the correct begin
+    // and end position in both finder and needle.  Testing the
+    // alignment each time seems overkill.  In between, we will call
+    // setBeginPosition() sometimes.
+    bool ret;
+
+    // Set end position to a hit.
+    // AGAAGAAGAGGAAGAAGA
+    //  GAA
+    ret = setBeginPosition(finder, pattern, 1);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Continue to search from here.
+    // AGAAGAAGAGGAAGAAGA
+    //     GAA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set end position to a mismatch.
+    // AGAAGAAGAGGAAGAAGA
+    //   GAA
+    ret = setBeginPosition(finder, pattern, 2);
+    SEQAN_ASSERT_NOT(ret);
+
+    // Continue to search from here.
+    // AGAAGAAGAGGAAGAAGA
+    //     GAA
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set to end.
+    // AGAAGAAGAGGAAGAAGA
+    //                GAA
+    ret = setBeginPosition(finder, pattern, 15);
+    SEQAN_ASSERT_NOT(ret);
+
+    // No more hit.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
 #endif  // TESTS_FIND2_TEST_FIND_EXACT_SIMPLE_H_
