@@ -20,7 +20,8 @@
  ============================================================================
   Approximate string matching with linear and affine gap costs based
   on Sellers' (Sellers, 1980) algorithm based on the Needleman-Wunsch
-  (Needleman and Wunsch, 1970) algorithm .
+  (Needleman and Wunsch, 1970) algorithm.  Described in the SeqAn book
+  Section 9.3.1, p.154ff.
 
     Needleman, S. B. and C. D. Wunsch (1970).  A general method
       applicable to the search for similarities in the amino acid
@@ -53,6 +54,7 @@ struct DPSearch;
 //
 // TODO(holtgrew): Rename TScore to TScoringScheme?  Also: Rename Score class to ScoringScheme?
 // TODO(holtgrew): Support affine gap costs, documented in book, code does not allow this.
+// TODO(holtgrew): Add FindPrefix support.
 template <typename _TNeedle, typename TScore, typename TSpec, typename TSupportFindBegin>
 struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
         : public _ApproxFindBegin<_TNeedle, TScore, TSupportFindBegin> {
@@ -67,11 +69,11 @@ struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
     // The needle we work on.
     Holder<TNeedle> _host;
 
-    // The scoring scheme to use.
-    TScore _scoringScheme;
-
     // The minimal score of a match.
     TScoreValue _scoreLimit;
+
+    // The scoring scheme to use.
+    TScore _scoringScheme;
 
     // The current score of a match, in book: v.
     TScoreValue _currentScore;
@@ -121,6 +123,12 @@ typename Value<TScore>::Type const & scoreLimit(Pattern<TNeedle, DPSearch<TScore
 template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TSupportFindBegin>
 typename Value<TScore>::Type const & score(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
+    // State of pattern should be in "found", "found begin" or "found
+    // no begin" state.
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return pattern._currentScore;
 }
 
@@ -144,7 +152,7 @@ TNeedle const & host(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFi
 template <typename TNeedle, typename TScore, typename TDPSearchSpec, typename TSupportFindBegin>
 TNeedle const & needle(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > const & pattern) {
     SEQAN_CHECKPOINT;
-    return value(pattern._host);
+    return host(pattern);
 }
 
 
@@ -278,7 +286,7 @@ inline void _initPattern(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSuppo
 // DP search.  This is the prefix case where v and d are update approriately
 // for a non-0 top row.
 template <typename TScore, typename TPosition>
-inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const & j, TScore const & g, FindPrefix) {
+inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const & j, TScore const & g, FindPrefix const &) {
     SEQAN_CHECKPOINT;
     // Note that we use zero-based arrays while the book uses 1-based ones.
     v = (j + 1) * g;
@@ -289,7 +297,7 @@ inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPositio
 // Initialization of v and d for the loop in find for the aproximate
 // DP search.  This is the infix case where v and d are both set to 0.
 template <typename TScore, typename TPosition>
-inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const &, TScore const &, FindInfix) {
+inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const &, TScore const &, FindInfix const &) {
     SEQAN_CHECKPOINT;
     v = 0;
     d = 0;
@@ -331,9 +339,11 @@ bool find(Finder<THaystack, Default> & finder,
     // Search for the next match.
     for (TPosition j = finder._endPosition; j < length(haystack(finder)); ++j) {
         // Compute best score if the end of needle would align at j.
-        // pattern._currentScore is the "v" from the book.
-        TScoreValue d;
-        _findApproxDPSearch_initVAndDInLoop(pattern._currentScore, d, j, scoreGap(myScore), TDPSearchSpec());
+        // pattern._currentScore is the "v" from the book.  This
+        // initialization depends on whether we are doing a prefix
+        // search or an infix search.
+        TScoreValue d = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
+        pattern._currentScore = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
         for (TPosition i = 0; i < length(pattern._matrixColumn); ++i) {
             TScoreValue h = pattern._matrixColumn[i];
             pattern._currentScore = _max(d + score(myScore, haystack(finder)[j], needle(pattern)[i]),
@@ -357,22 +367,48 @@ bool find(Finder<THaystack, Default> & finder,
 }
 
 
+// findBeginScore() only works if the Pattern object has the necessary
+// state information via _ApproxFindBegin<..., True>.
+template <typename TNeedle, typename TScore>
+typename Value<typename ScoringScheme<Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > >::Type>::Type
+findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > const & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > TPattern;
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND);
+    return pattern._findBeginCurrentScore;
+}
+
+
+// findBeginScore() also works if we are doing a prefix search.  In
+// this case, findBegin() is superflous.
+template <typename TNeedle, typename TScore, typename TFindBeginSpec>
+typename Value<typename ScoringScheme<Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > >::Type>::Type
+findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > const & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > TPattern;
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_BEGIN_FOUND);
+    return score(pattern);
+}
+
+
 // findBegin() only works if the Pattern object has the necessary
 // state information via _ApproxFindBegin<..., True>
-template <typename THaystack, typename TNeedle, typename TScore, typename TDPSearchSpec>
+template <typename THaystack, typename TNeedle, typename TScore, typename TFindBeginScoreLimitTag>
 bool findBegin(Finder<THaystack, Default> & finder,
-               Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, True> > & pattern) {
+               Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > & pattern,
+               TFindBeginScoreLimitTag const & tag) {
     SEQAN_CHECKPOINT;
-    // State of finder and pattern should be in sync.
-    SEQAN_ASSERT_EQ(finder._state, pattern._state);
     typedef Finder<THaystack, Default> TFinder;
-    typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, True> > TPattern;
+    typedef Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > TPattern;
+    // State of finder and pattern should be in sync and in "found" or
+    // "found begin" state.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
     SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
                       pattern._state == TPattern::STATE_BEGIN_FOUND);
     // Initialize findBegin() data if necessary.
     if (pattern._state == TPattern::STATE_FOUND)
         _initFindBegin(pattern, length(needle(pattern)), scoringScheme(pattern), scoreLimit(pattern));
-    bool res = _findBeginImpl(pattern, scoringScheme(pattern), endPosition(finder), haystack(finder), needle(pattern));
+    bool res = _findBeginImpl(pattern, scoringScheme(pattern), score(pattern), endPosition(finder), haystack(finder), needle(pattern), tag);
     if (res) {
         finder._state = TFinder::STATE_BEGIN_FOUND;
         pattern._state = TPattern::STATE_BEGIN_FOUND;
@@ -382,7 +418,45 @@ bool findBegin(Finder<THaystack, Default> & finder,
 }
 
 
-// TODO(holtgrew): Support prefix search, start position would always be 0!
+// findBegin() also works if we are doing a prefix search only.  In
+// this case, an actual search is superflous and we can always return
+// true after updating the state.
+template <typename THaystack, typename TNeedle, typename TScore, typename TFindBeginSpec, typename TFindBeginScoreLimitTag>
+bool findBegin(Finder<THaystack, Default> & finder,
+               Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > & pattern,
+               TFindBeginScoreLimitTag const &) {
+    SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > TPattern;
+    // State of finder and pattern should be in sync and in "found" or
+    // "found begin" state.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND);
+    finder._beginPosition = 0;
+    if (pattern._state == TPattern::STATE_FOUND) {
+        finder._state = TFinder::STATE_BEGIN_FOUND;
+        pattern._state = TPattern::STATE_BEGIN_FOUND;
+        return true;
+    } else {
+        finder._state = TFinder::STATE_BEGIN_NOTFOUND;
+        pattern._state = TPattern::STATE_BEGIN_NOTFOUND;
+        return false;
+    }
+}
+
+
+// If not given,t he find begin score limit tag is FindBeginScore and
+// the score from the find() search is used for the score limit of the
+// findBegin() search.
+template <typename THaystack, typename TNeedle, typename TScore, typename TDPSearchSpec>
+bool findBegin(Finder<THaystack, Default> & finder,
+               Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, True> > & pattern) {
+    SEQAN_CHECKPOINT;
+    return findBegin(finder, pattern, UseScore());
+}
+
+
 // The execution of this function is costly, O(length(needle)) for most realistic scoring schemes.
 template <typename THaystack, typename TNeedle, typename TScore, typename TDPSearchSpec, typename TSupportFindBegin>
 bool setEndPosition(Finder<THaystack, Default> & finder,
@@ -417,15 +491,17 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     for (TIterator it = begin(needle(pattern), Standard()); it != end(needle(pattern), Standard()); ++it)
         baseScore += score(myScore, *it, *it);
     TScoreValue gapScore = scoreGap(myScore);
-    // In the worst case, the search start position is 0, if the gap
-    // penalty is non-negative.  Otherwise, compute the search start
-    // position.
+    // In the worst case, the search start position is 0.  This is the
+    // case if the gap penalty is non-negative or we are doing a
+    // prefix search.  Otherwise, compute the search start position.
     TPosition searchStartPosition = 0;
-    double frac = (gapScore == 0) ? 1.0 : (1.0 * baseScore / gapScore);
-    if (frac <= 0.0) {
-        TPosition delta = -floor(frac) + length(needle(pattern));
-        if (delta < pos)
-            searchStartPosition = pos - delta;
+    if (!TYPECMP<TDPSearchSpec, FindPrefix>::VALUE) {
+        double frac = (gapScore == 0) ? 1.0 : (1.0 * baseScore / gapScore);
+        if (frac <= 0.0) {
+            TPosition delta = -floor(frac) + length(needle(pattern));
+            if (delta < pos)
+                searchStartPosition = pos - delta;
+        }
     }
 
     // Re-initialize the pattern.
@@ -505,22 +581,28 @@ bool buildAlignment(Finder<THaystack, Default> &finder,
     assignSource(row(tempAlignment, 0), infix(finder));
     assignSource(row(tempAlignment, 1), infix(pattern));
     globalAlignment(tempAlignment, scoringScheme(pattern));
+//     std::cout << tempAlignment;
 
     // Copy over the gaps from the alignment.
     typedef typename Cols<TTempAlign>::Type TColumns;
     typedef typename Iterator<TColumns>::Type TIterator;
     TPosition i = beginPosition(finder);
+//     std::cout << "length(cols(tempAlignment)) = " << length(cols(tempAlignment)) << std::endl;
+    // TODO(holtgrew): This does not work as expected.
     for (TPosition j = 0; j < length(cols(tempAlignment)); ++j) {
         if (value(col(tempAlignment, j), 0) == '-') {
+//             std::cout << "j = " << j << ", insertGaps(row(outAlignment, 0), " << i << ", 1)" << std::endl;
             insertGaps(row(outAlignment, 0), i, 1);
             i += 1;
         } else if (value(col(tempAlignment, j), 1) == '-') {
+//             std::cout << "j = " << j << ", insertGaps(row(outAlignment, 1), " << i << ", 1)" << std::endl;
             insertGaps(row(outAlignment, 1), i, 1);
             i += 1;
         }
         i += 1;
     }
-    
+//     std::cout << tempAlignment;
+
     return true;
 }
 

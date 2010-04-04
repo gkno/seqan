@@ -126,7 +126,8 @@ template <typename TNeedle, typename TTag>
 typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, Simple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, Simple> TPattern;
-    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND);
     return end(needle(pattern), spec);
 }
 
@@ -162,7 +163,8 @@ template <typename TNeedle>
 typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, Simple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, Simple> TPattern;
-    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND);
     return length(needle(pattern));
 }
 
@@ -221,8 +223,8 @@ bool find(Finder<THaystack, Default> & finder,
         i += 1;
     }
     finder._endPosition = finder._beginPosition + length(needle(pattern));
-    finder._state = TFinder::STATE_BEGIN_FOUND;
-    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    finder._state = TFinder::STATE_FOUND;
+    pattern._state = TPattern::STATE_FOUND;
     return true;
 }
 
@@ -231,10 +233,21 @@ template <typename THaystack, typename TNeedle>
 bool findBegin(Finder<THaystack, Default> & finder,
                Pattern<TNeedle, Simple> & pattern) {
     SEQAN_CHECKPOINT;
-    // State of finder and pattern should be in sync.
-    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    typedef Finder<THaystack, Default> TFinder;
     typedef Pattern<TNeedle, Simple> TPattern;
-    return finder._state == TPattern::STATE_BEGIN_FOUND;
+    // State of finder and pattern should be in sync and in "found" or
+    // "found begin" state.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND);
+    if (pattern._state == TPattern::STATE_FOUND) {
+        finder._state = TFinder::STATE_BEGIN_FOUND;
+        pattern._state = TPattern::STATE_BEGIN_FOUND;
+        return true;
+    }
+    finder._state = TFinder::STATE_BEGIN_NOTFOUND;
+    pattern._state = TPattern::STATE_BEGIN_NOTFOUND;
+    return false;
 }
 
 
@@ -266,8 +279,8 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
             return false;
         }
     }
-    finder._state = TPattern::STATE_BEGIN_FOUND;
-    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    finder._state = TPattern::STATE_FOUND;
+    pattern._state = TPattern::STATE_FOUND;
     return true;
 }
 

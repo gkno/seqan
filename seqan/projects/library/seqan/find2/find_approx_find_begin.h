@@ -17,8 +17,8 @@
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
   A simple implementation of the algorithms and datastructures required for
-  findBegin().  It is a "backwards" implementation of Sellers' algorithm for
-  approxim prefix search.
+  findBegin().  It is a "backwards" implementation of Sellers' algorithm (see
+  find_approx_dpsearch.h for references) for approximate prefix search.
 
   In order to support findBegin(), the approximate DP-based algorithms need
   to store more information than only for the forward search.  If findBegin()
@@ -37,7 +37,6 @@
 
 namespace seqan {
 
-// TODO(holtgrew): Add FindPrefix support.
 // TODO(holtgrew): Add support for affine gap costs.
 template <typename TNeedle, typename TScore, typename HasFindBeginSupport>
 struct _ApproxFindBegin;
@@ -76,6 +75,18 @@ struct _ApproxFindBegin<TNeedle, TScore, True> : public _FindState {
 };
 
 
+// Tag for findBegin().  Use score of forward search result when doing
+// find begin.
+struct _UseScore;
+typedef Tag<_UseScore> UseScore;
+
+
+// Tag for findBegin().  Use score limit of forward search when
+// doing find begin.
+struct _UseScoreLimit;
+typedef Tag<_UseScoreLimit> UseScoreLimit;
+
+
 // Called to initialize a _ApproxFindBegin datastructure.
 template <typename TNeedle, typename TScore>
 void _initFindBegin(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
@@ -104,12 +115,34 @@ void _initFindBegin(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
 }
 
 
+template <typename TNeedle, typename TScore>
+inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedle, TScore, True> const &,
+                                                  typename Value<TScore>::Type const & findScore,
+                                                  typename Value<TScore>::Type const &,
+                                                  UseScore const &) {
+    SEQAN_CHECKPOINT;
+    return findScore;
+}
+
+
+template <typename TNeedle, typename TScore>
+inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedle, TScore, True> const &,
+                                                  typename Value<TScore>::Type const &,
+                                                  typename Value<TScore>::Type const & findScoreLimit,
+                                                  UseScoreLimit const &) {
+    SEQAN_CHECKPOINT;
+    return findScoreLimit;
+}
+
+
 // Actual implementation of findBegin() through _ApproxFindBegin.
-template <typename TNeedle, typename TScore, typename THaystack>
+template <typename TNeedle, typename TScore, typename THaystack, typename TTag>
 bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
                     TScore const & scoringScheme,
+                    typename Value<TScore>::Type const & findScore,
                     typename Position<TNeedle>::Type const & endPosition,
-                    THaystack const & haystack, TNeedle const & needle) {
+                    THaystack const & haystack, TNeedle const & needle,
+                    Tag<TTag> const & tag) {
     SEQAN_CHECKPOINT;
     typedef _ApproxFindBegin<TNeedle, TScore, True> TApproxFindBegin;
     typedef typename Position<TNeedle>::Type TPosition;
@@ -119,11 +152,14 @@ bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
     // Finding the start of the match follows Seller's algorithm but
     // works from the right to the left.
 
+    // TODO(holtgrew): Remove all commented out debug output code from this function.
 //     std::cout << "== start of findBegin() == " << std::endl;
 //     for (unsigned i = 0; i < length(findBeginStruct._findBeginMatrixColumn); ++i)
 //         std::cout << findBeginStruct._findBeginMatrixColumn[i] << " ";
 //     std::cout << std::endl;
 //     std::cout << "=====" << std::endl;
+
+    TScoreValue findBeginScoreLimit = _findBeginScoreLimit(findBeginStruct, findScore, findBeginStruct._findBeginScoreLimit, tag);
 
     // Search for the next match.
     for (TPosition & j = findBeginStruct._findBeginMatchLength; j < endPosition; ++j) {
@@ -143,7 +179,7 @@ bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
 //             std::cout << findBeginStruct._findBeginMatrixColumn[i] << " ";
 //         std::cout << std::endl;
 //         std::cout << "=====" << std::endl;
-        if (findBeginStruct._findBeginCurrentScore >= findBeginStruct._findBeginScoreLimit) {
+        if (findBeginStruct._findBeginCurrentScore >= findBeginScoreLimit) {
 //             std::cout << "== end of findBegin() == " << std::endl;
 //             for (unsigned i = 0; i < length(findBeginStruct._findBeginMatrixColumn); ++i)
 //                 std::cout << findBeginStruct._findBeginMatrixColumn[i] << " ";

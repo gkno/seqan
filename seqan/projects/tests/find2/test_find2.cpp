@@ -8,7 +8,6 @@
 #include "test_find_multiple_exact_simple.h"
 #include "test_find_pattern_wild_shiftand.h"
 
-
 SEQAN_BEGIN_TESTSUITE(test_find2) {
     std::cout << "Running Tests" << std::endl;
     std::cout << "=============" << std::endl;
@@ -29,11 +28,17 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_set_end_position);
 
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_0);
-    // TODO(holtgrew): Test with score limit -1.
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_1);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_0_prefix);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_1_prefix);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_easy_score_limit_1_use_score_limit);
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_harder_score_limit_0);
-    // TODO(holtgrew): Test with score limit -1, too.
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_harder_score_limit_1);
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score_limit_0);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score_limit_1);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score_limit_0_prefix);
+    SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score_limit_1_prefix);
     SEQAN_CALL_TEST(test_find2_find_approx_dpsearch_pattern_find_begin);
 
     SEQAN_CALL_TEST(test_find2_find_hamming_simple_pattern_find_easy_score_limit_0);
@@ -63,7 +68,7 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_approx_find_begin.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_exact_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_finder_default.h");
-    //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_hamming_simple.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_hamming_simple.h");
     //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_multiple_exact_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find2/find_pattern_wild_shiftand.h");
 

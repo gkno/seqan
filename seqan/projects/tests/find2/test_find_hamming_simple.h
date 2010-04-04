@@ -177,31 +177,37 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_find_easy_score_limit_0
     // he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(2u, endPosition(finder));
+    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // he is her hero
     //       he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(8u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(8u, endPosition(finder));
+    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // he is her hero
     //           he
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(12u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(12u, endPosition(finder));
+    SEQAN_ASSERT_EQ(2u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // no more hit
     ret = find(finder, pattern);
@@ -230,31 +236,37 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_find_easy_score_limit_1
     // her
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(-1, score(pattern));
+    SEQAN_ASSERT_EQ(3u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // he is her hero
     //       her
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(9u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(9u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(6u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // he is her hero
     //           her
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(13u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(13u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // no more hit
     ret = find(finder, pattern);
@@ -283,41 +295,49 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_find_harder_score_limit
     //  GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //           GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(13u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(13u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //              GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(16u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(16u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // no more hit
     ret = find(finder, pattern);
@@ -346,61 +366,73 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_find_harder_score_limit
     //  GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //        GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(7u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(10u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(-1, score(pattern));
+    SEQAN_ASSERT_EQ(10u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(7u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //          GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(9u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(12u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(-1, score(pattern));
+    SEQAN_ASSERT_EQ(12u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(9u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //           GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(13u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(13u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // AGAAGAAGAGGAAGAAGA
     //              GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(16u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(16u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(13u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // no more hit
     ret = find(finder, pattern);
@@ -430,22 +462,26 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_
     //  GAA
     ret = setEndPosition(finder, pattern, 4);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Continue to search from here.
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Set end position to a mismatch.
     // AGAAGAAGAGGAAGAAGA
@@ -458,11 +494,13 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Set to end.
     // AGAAGAAGAGGAAGAAGA
@@ -498,22 +536,26 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_
     //  GAA
     ret = setEndPosition(finder, pattern, 4);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(4u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(1u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Continue to search from here.
     // AGAAGAAGAGGAAGAAGA
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Set end position to a mismatch.
     // AGAAGAAGAGGAAGAAGA
@@ -526,33 +568,39 @@ SEQAN_DEFINE_TEST(test_find2_find_hamming_simple_pattern_set_end_position_score_
     //     GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(7u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(4u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Set end position to an approximate hit.
     // AGAAGAAGAGGAAGAAGA
     //          GAA
     ret = setEndPosition(finder, pattern, 12);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(9u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(12u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(-1, score(pattern));
+    SEQAN_ASSERT_EQ(12u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(9u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Continue to search from here.
     // AGAAGAAGAGGAAGAAGA
     //           GAA
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
-    SEQAN_ASSERT_EQ(13u, endPosition(finder));
-    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
-    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
     SEQAN_ASSERT_EQ(0, score(pattern));
+    SEQAN_ASSERT_EQ(13u, endPosition(finder));
+    SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
 
     // Set to end.
     // AGAAGAAGAGGAAGAAGA

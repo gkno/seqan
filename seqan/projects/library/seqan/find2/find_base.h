@@ -61,6 +61,9 @@ struct Needle<Pattern<TNeedle, TSpec> > {
 template <typename TPattern>
 struct ScoringScheme;
 
+
+// TODO(holtgrew): Implement HasFeature<TPattern, SetEndPosition> and HasFeature<TPattern, SetBeginPosition>.
+
 }  // namespace seqan
 
 #endif  // SEQAN_FIND2_FIND_BASE_H_

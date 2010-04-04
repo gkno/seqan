@@ -75,7 +75,11 @@ template <typename TNeedle>
 int score(Pattern<TNeedle, HammingSimple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, HammingSimple> TPattern;
-    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
+    // State of pattern should be in "found", "found begin" or "found
+    // no begin" state.
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return pattern._score;
 }
 
@@ -152,7 +156,11 @@ template <typename TNeedle, typename TTag>
 typename Iterator<TNeedle const, Tag<TTag> const>::Type end(Pattern<TNeedle, HammingSimple> const & pattern, Tag<TTag> const & spec) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, HammingSimple> TPattern;
-    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
+    // State of pattern should be in "found", "found begin" or "found
+    // no begin" state.
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return end(needle(pattern), spec);
 }
 
@@ -188,7 +196,11 @@ template <typename TNeedle>
 typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, HammingSimple> const & pattern) {
     SEQAN_CHECKPOINT;
     typedef Pattern<TNeedle, HammingSimple> TPattern;
-    SEQAN_ASSERT_EQ(TPattern::STATE_BEGIN_FOUND, pattern._state);
+    // State of pattern should be in "found", "found begin" or "found
+    // no begin" state.
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_NOTFOUND);
     return length(needle(pattern));
 }
 
@@ -250,8 +262,8 @@ bool find(Finder<THaystack, Default> & finder,
         i += 1;
     }
     finder._endPosition = finder._beginPosition + length(needle(pattern));
-    finder._state = TFinder::STATE_BEGIN_FOUND;
-    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    finder._state = TFinder::STATE_FOUND;
+    pattern._state = TPattern::STATE_FOUND;
     pattern._score = -mismatchCount;
     return true;
 }
@@ -261,10 +273,21 @@ template <typename THaystack, typename TNeedle>
 bool findBegin(Finder<THaystack, Default> & finder,
                Pattern<TNeedle, HammingSimple> & pattern) {
     SEQAN_CHECKPOINT;
-    // State of finder and pattern should be in sync.
-    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    typedef Finder<THaystack, Default> TFinder;
     typedef Pattern<TNeedle, HammingSimple> TPattern;
-    return finder._state == TPattern::STATE_BEGIN_FOUND;
+    // State of finder and pattern should be in sync and in "found" or
+    // "found begin" state.
+    SEQAN_ASSERT_EQ(finder._state, pattern._state);
+    SEQAN_ASSERT_TRUE(pattern._state == TPattern::STATE_FOUND ||
+                      pattern._state == TPattern::STATE_BEGIN_FOUND);
+    if (pattern._state == TPattern::STATE_FOUND) {
+        finder._state = TFinder::STATE_BEGIN_FOUND;
+        pattern._state = TPattern::STATE_BEGIN_FOUND;
+        return true;
+    }
+    finder._state = TFinder::STATE_BEGIN_NOTFOUND;
+    pattern._state = TPattern::STATE_BEGIN_NOTFOUND;
+    return false;
 }
 
 
@@ -298,8 +321,8 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
             return false;
         }
     }
-    finder._state = TPattern::STATE_BEGIN_FOUND;
-    pattern._state = TPattern::STATE_BEGIN_FOUND;
+    finder._state = TPattern::STATE_FOUND;
+    pattern._state = TPattern::STATE_FOUND;
     pattern._score = -mismatchCount;
     return true;
 }
