@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 207-010
+  Copyright (C) 2007-2010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -16,12 +16,15 @@
 
  ============================================================================
   Author: Stefan Aiche <aiche@fu-berlin.de>
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
   Wildcard pattern matching using a modification of the Shift-And Algorithm.
  ==========================================================================*/
 
 #ifndef SEQAN_FIND2_FIND_PATTERN_WILD_SHIFTAND_H_
 #define SEQAN_FIND2_FIND_PATTERN_WILD_SHIFTAND_H_
+
+// TODO(holtgrew): This algorithm yields end positions. What about the start position?
 
 // Deactivate debugging for WildShiftAnd by default.
 #ifndef SEQAN_WILD_SHIFTAND_DEBUG
@@ -58,9 +61,7 @@ struct Pattern<_TNeedle, WildShiftAnd> : _FindState {
 	
 	TWord needleLength;				// e.g., needleLength=33 --> blockCount=2 (iff w=32 bits)
 	TWord character_count;			// number of normal characters in the needle
-	TWord blockCount;				// #unsigned ints required to store needle	
-
-	bool _valid;					// is the pattern valid or not
+	TWord blockCount;				// number of unsigned ints required to store needle	
 
     Pattern() : _state(STATE_EMPTY) {
         SEQAN_CHECKPOINT;
@@ -204,15 +205,15 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, WildShiftAnd> & pa
 }
 
 
-template <typename THaystack, typename TNeedle>
-bool findBegin(Finder<THaystack, Default> & finder,
-               Pattern<TNeedle, WildShiftAnd> & pattern) {
-    SEQAN_CHECKPOINT;
-    // State of finder and pattern should be in sync.
-    SEQAN_ASSERT_EQ(finder._state, pattern._state);
-    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
-    return finder._state == TPattern::STATE_BEGIN_FOUND;
-}
+// template <typename THaystack, typename TNeedle>
+// bool findBegin(Finder<THaystack, Default> & finder,
+//                Pattern<TNeedle, WildShiftAnd> & pattern) {
+//     SEQAN_CHECKPOINT;
+//     // State of finder and pattern should be in sync.
+//     SEQAN_ASSERT_EQ(finder._state, pattern._state);
+//     typedef Pattern<TNeedle, WildShiftAnd> TPattern;
+//     return finder._state == TPattern::STATE_BEGIN_FOUND;
+// }
 
 
 template <typename THaystack, typename TNeedle, typename TPosition>
@@ -440,7 +441,6 @@ inline bool _find_WildShiftAnd_isValid(CharString const & needle) {
 // must be a valid pattern.
 inline Position<CharString>::Type _find_WildShiftAnd_lengthWithoutWildcards(CharString const & needle) {
     SEQAN_CHECKPOINT;
-
     SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(needle));
 
     typedef Position<CharString>::Type TPosition;
@@ -543,12 +543,12 @@ inline void _find_WildShiftAnd_getCharacterClass(
 template <typename TNeedle>
 void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
     SEQAN_CHECKPOINT;
-
+    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
+    SEQAN_ASSERT_EQ(TPattern::STATE_INITIAL, me._state);
+    
     TNeedle const & needle = value(me.data_host);
 
-	me._valid = _find_WildShiftAnd_isValid(needle);
-
-	if (me._valid) return;
+	SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(needle));
 
 	typedef unsigned TWord;
     // TODO(holtgrew): TValue will always be char?!?!
@@ -568,6 +568,12 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
 
 	clear(me.a_table);
 	fill(me.a_table,me.blockCount,0,Exact());
+
+	clear(me.prefSufMatch);
+	fill(me.prefSufMatch, me.blockCount, 0, Exact());
+
+	clear(me.df);
+	fill(me.df, me.blockCount, 0, Exact());
 
 	int i = -1;
 	String <char> last_char; // stores the character (or characters) that were read in the last step
@@ -711,8 +717,6 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
 		}
 	}
 
-	setValue(me.data_host, needle);
-
 #if SEQAN_WILD_SHIFTAND_DEBUG	
 	// Debug code
 	std::cout << "Alphabet size: " << ValueSize<TValue>::VALUE << ::std::endl;
@@ -743,61 +747,72 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
 
 template <typename THaystack, typename TNeedle>
 inline bool _find_WildShiftAnd_SmallNeedle(Finder<THaystack, Default> & finder,
-                                           Pattern<TNeedle, WildShiftAnd> & me) {
+                                           Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
+    THaystack const & hstck = haystack(finder);
 	typedef unsigned TWord;
-	TWord compare = (1 << (me.character_count - 1));
-	while (!atEnd(finder)) {
-		TWord pos = convert<TWord>(*finder);
-		/* added  | (me.prefSufMatch[0] & me.s_table[me.blockCount*pos]) at the end of the line */
-		me.prefSufMatch[0] = (((me.prefSufMatch[0] << 1) | 1) & me.table[me.blockCount*pos]) | (me.prefSufMatch[0] & me.s_table[me.blockCount*pos]) ;
+	TWord compare = (1 << (pattern.character_count - 1));
+    for (; finder._endPosition < length(hstck); ++finder._endPosition) {
+		TWord pos = convert<TWord>(hstck[finder._endPosition]);
+		// added  | (pattern.prefSufMatch[0] & pattern.s_table[pattern.blockCount*pos]) at the end of the line
+		pattern.prefSufMatch[0] = (((pattern.prefSufMatch[0] << 1) | 1) & pattern.table[pattern.blockCount*pos]) | (pattern.prefSufMatch[0] & pattern.s_table[pattern.blockCount*pos]);
 
-		/* additional bit operations */
-		me.df[0] = me.prefSufMatch[0] | me.f_table[0];
-		me.prefSufMatch[0] |= ((me.a_table[0] & (~(me.df[0] - me.i_table[0]))) ^ me.df[0]);
-		if ((me.prefSufMatch[0] & compare) != 0) {
+		// additional bit operations
+		pattern.df[0] = pattern.prefSufMatch[0] | pattern.f_table[0];
+		pattern.prefSufMatch[0] |= ((pattern.a_table[0] & (~(pattern.df[0] - pattern.i_table[0]))) ^ pattern.df[0]);
+		if (pattern.prefSufMatch[0] & compare != 0) {
+            // Found a match: Update states, positions and report the match.
+            finder._endPosition += 1;
+            finder._state = TFinder::STATE_FOUND;
+            pattern._state = TFinder::STATE_FOUND;
 			return true; 
 		}
-		goNext(finder);
 	}
+    finder._state = TFinder::STATE_NOTFOUND;
+    pattern._state = TFinder::STATE_NOTFOUND;
 	return false;
 }
 
-template <typename TFinder, typename TNeedle>
-inline bool _find_WildShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
+
+template <typename THaystack, typename TNeedle>
+inline bool _find_WildShiftAnd_LargeNeedle(Finder<THaystack, Default> & finder,
+                                           Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
+    typedef Finder<THaystack, Default> TFinder;
+    typedef Pattern<TNeedle, WildShiftAnd> TPattern;
+    THaystack const & hstck = haystack(finder);
 	typedef unsigned TWord;
 	const TWord all1 = ~0;	
-	TWord compare = (1 << ((me.character_count-1) % BitsPerValue<TWord>::VALUE));
+	TWord compare = (1 << ((pattern.character_count-1) % BitsPerValue<TWord>::VALUE));
 
-	while (!atEnd(finder)) {
-		TWord pos = convert<TWord>(*finder);
+    for (; finder._endPosition < length(hstck); ++finder._endPosition) {
+		TWord pos = convert<TWord>(hstck[finder._endPosition]);
 		TWord carry = 1;
 		TWord wc_carry = 0;
 		// shift of blocks with carry
-		for(TWord block=0;block<me.blockCount;++block) {
-			bool newCarry = ((me.prefSufMatch[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
-			me.prefSufMatch[block] = (((me.prefSufMatch[block] << 1) | carry) & me.table[me.blockCount*pos+block]) | (me.prefSufMatch[block] & me.s_table[me.blockCount*pos+block]) ;
+		for(TWord block=0;block<pattern.blockCount;++block) {
+			bool newCarry = ((pattern.prefSufMatch[block] & (1<< (BitsPerValue<TWord>::VALUE - 1)))!=0); 
+			pattern.prefSufMatch[block] = (((pattern.prefSufMatch[block] << 1) | carry) & pattern.table[pattern.blockCount*pos+block]) | (pattern.prefSufMatch[block] & pattern.s_table[pattern.blockCount*pos+block]) ;
 			carry = newCarry;
 			
-			me.df[block] = me.prefSufMatch[block] | me.f_table[block];
-			TWord Z = me.df[block] - me.i_table[block] - wc_carry;
-			wc_carry = ((me.df[block] < Z) || (me.i_table[block]==all1 && wc_carry)) ? 1 : 0;
-			me.prefSufMatch[block] |= (me.a_table[block] & (~Z ^ me.df[block]));
+			pattern.df[block] = pattern.prefSufMatch[block] | pattern.f_table[block];
+			TWord Z = pattern.df[block] - pattern.i_table[block] - wc_carry;
+			wc_carry = ((pattern.df[block] < Z) || (pattern.i_table[block]==all1 && wc_carry)) ? 1 : 0;
+			pattern.prefSufMatch[block] |= (pattern.a_table[block] & (~Z ^ pattern.df[block]));
 		}
 
 #if SEQAN_WILD_SHIFTAND_DEBUG
 		std::cout << "reading " << *finder << std::endl;
-		_printMask(me.prefSufMatch,position(finder),"D ");
-		_printMask(me.df,position(finder),"Df");
+		_printMask(pattern.prefSufMatch,position(finder),"D ");
+		_printMask(pattern.df,position(finder),"Df");
 		std::cout << std::endl;
 #endif
 		
 		// check for match
-		if ((me.prefSufMatch[me.blockCount-1] & compare) != 0)
+		if ((pattern.prefSufMatch[pattern.blockCount-1] & compare) != 0)
 			return true; 
-
-		goNext(finder);
 	}
 	return false;
 }
@@ -820,8 +835,9 @@ bool find(Finder<THaystack, Default> & finder,
     // Initialize finder if state is "initial".  Otherwise advance at
     // least by one (if not set to of haystack with setEndPosition()).
     if (finder._state == TPattern::STATE_INITIAL) {
+        _initializePattern(pattern);
         finder._beginPosition = 0u;
-        finder._endPosition = length(needle(pattern));
+        finder._endPosition = 0u;
     } else if (finder._state == TPattern::STATE_NO_HIT) {
         // Only advance if not at end if set manually to a "no hit" position.
         if (finder._endPosition == length(haystack(finder)))
@@ -832,14 +848,10 @@ bool find(Finder<THaystack, Default> & finder,
     }
 
 	// Use fast algorithm for needles < machine word if possible.
-    SEQAN_ASSERT_FAIL("Implement find for WildShiftAnd.");
-    /*
-	if (pattern.blockCount == 1) {
+	if (pattern.blockCount == 1)
 		return _find_WildShiftAnd_SmallNeedle(finder, pattern);
-	} else {
+	else
 		return _find_WildShiftAnd_LargeNeedle(finder, pattern);
-    }
-    */
     return false;
 }
 

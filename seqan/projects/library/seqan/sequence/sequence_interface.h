@@ -830,15 +830,15 @@ SEQAN_CHECKPOINT
 ..see:Function.capacity
 */
 
-//* ???Anti Default Sequences
+/* ???Anti Default Sequences
 template <typename T> 
 inline typename Size<T>::Type
-length(T const & /*me*/)
+length(T const & me)
 {
 SEQAN_CHECKPOINT
 	return 1;
 }
-//*/
+*/
 
 //////////////////////////////////////////////////////////////////////////////
 // capacity
