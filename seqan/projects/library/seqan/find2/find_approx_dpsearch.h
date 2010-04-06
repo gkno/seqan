@@ -282,28 +282,6 @@ inline void _initPattern(Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSuppo
 }
 
 
-// Initialization of v and d for the loop in find for the aproximate
-// DP search.  This is the prefix case where v and d are update approriately
-// for a non-0 top row.
-template <typename TScore, typename TPosition>
-inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const & j, TScore const & g, FindPrefix const &) {
-    SEQAN_CHECKPOINT;
-    // Note that we use zero-based arrays while the book uses 1-based ones.
-    v = (j + 1) * g;
-    d = j * g;
-}
-
-
-// Initialization of v and d for the loop in find for the aproximate
-// DP search.  This is the infix case where v and d are both set to 0.
-template <typename TScore, typename TPosition>
-inline void _findApproxDPSearch_initVAndDInLoop(TScore & v, TScore & d, TPosition const &, TScore const &, FindInfix const &) {
-    SEQAN_CHECKPOINT;
-    v = 0;
-    d = 0;
-}
-
-
 template <typename THaystack, typename TNeedle, typename TScore, typename TDPSearchSpec, typename TSupportFindBegin>
 bool find(Finder<THaystack, Default> & finder,
           Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > & pattern) {
@@ -514,8 +492,8 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     for (j = searchStartPosition; j < pos; ++j) {
         // Compute best score if the end of needle would align at j.
         // pattern._currentScore is the "v" from the book.
-        TScoreValue d;
-        _findApproxDPSearch_initVAndDInLoop(pattern._currentScore, d, j, scoreGap(myScore), TDPSearchSpec());
+        TScoreValue d = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
+        pattern._currentScore = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
         for (TPosition i = 0; i < length(pattern._matrixColumn); ++i) {
             TScoreValue h = pattern._matrixColumn[i];
             pattern._currentScore = _max(d + score(myScore, haystack(finder)[j], needle(pattern)[i]),
