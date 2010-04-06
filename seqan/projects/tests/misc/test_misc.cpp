@@ -45,22 +45,24 @@ SEQAN_DEFINE_TEST(test_misc_random) {
 
 
 SEQAN_BEGIN_TESTSUITE(test_misc) {
-//     SEQAN_CALL_TEST(test_misc_random);
+    //     SEQAN_CALL_TEST(test_misc_random);
 
     SEQAN_CALL_TEST(test_misc_long_word_native_interface);
     SEQAN_CALL_TEST(test_misc_long_word_static_interface);
+    SEQAN_CALL_TEST(test_misc_long_word_dynamic_interface);
 
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/edit_environment.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_cmdparser.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_dequeue.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_map.h");
+    // Verify checkpoints.
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/edit_environment.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_cmdparser.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_dequeue.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_map.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_long_word.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_parsing.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_random.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_set.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_base.h");
-//     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_heap.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_parsing.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_random.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_set.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_heap.h");
 }
 SEQAN_END_TESTSUITE
 
