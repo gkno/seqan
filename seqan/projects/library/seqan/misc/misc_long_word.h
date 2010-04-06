@@ -32,8 +32,6 @@
 #ifndef SEQAN_MISC_MISC_LONG_WORD_H_
 #define SEQAN_MISC_MISC_LONG_WORD_H_
 
-#include <bitset>
-
 namespace seqan {
 
 // TODO(holtgrew): Document this.
