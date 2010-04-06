@@ -46,6 +46,7 @@
 #include <seqan/find2/find_finder_default.h>
 
 // Exact pattern matching.
+#include <seqan/find2/find_exact_shiftand.h>
 #include <seqan/find2/find_exact_simple.h>
 
 // Complex pattern matching.

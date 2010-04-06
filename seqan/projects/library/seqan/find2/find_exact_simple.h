@@ -50,7 +50,7 @@ struct Pattern<_TNeedle, Simple> : _FindState {
 
 template <typename TNeedle>
 struct Needle<Pattern<TNeedle, Simple> > {
-    typedef typename Value<TNeedle>::Type Value;
+    typedef TNeedle Type;
 };
 
 
@@ -294,6 +294,7 @@ bool setBeginPosition(Finder<THaystack, Default> & finder,
     typedef Pattern<TNeedle, Simple> TPattern;
     return setEndPosition(finder, pattern, pos + length(needle(pattern)));
 }
+
 
 /*
   Build the alignment resulting from the search result as specified by the

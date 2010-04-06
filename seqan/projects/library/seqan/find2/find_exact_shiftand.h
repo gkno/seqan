@@ -15,6 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
   Exact pattern matching using the Shift-And algorithm.
@@ -23,17 +24,29 @@
 #ifndef SEQAN_FIND2_FIND_EXACT_SHIFTAND_H_
 #define SEQAN_FIND2_FIND_EXACT_SHIFTAND_H_
 
+// TODO(holtgrew): Try to achieve a speedup using the LongWord class.
+
 namespace seqan {
+
+struct _ShiftAnd;
+typedef Tag<_ShiftAnd> ShiftAnd;
+
 
 template <typename _TNeedle>
 struct Pattern<_TNeedle, ShiftAnd> : _FindState {
     typedef _TNeedle TNeedle;
+    typedef unsigned TWord;
 
     // The pattern's state.
     TState _state;
 
     // The needle we store.
     Holder<TNeedle> _host;
+    
+    String<TWord> _table;         // Lookup table for each character in the alphabet (called B in "Navarro")
+    String<TWord> _prefSufMatch;  // Set of all the prefixes of needle that match a suffix of haystack (called D in "Navarro")
+    TWord _blockCount;            // number of unsigneds required to store needle  
+
 
     Pattern() : _state(STATE_EMPTY) {
         SEQAN_CHECKPOINT;
@@ -44,14 +57,42 @@ struct Pattern<_TNeedle, ShiftAnd> : _FindState {
         : _state(STATE_INITIAL),
           _host(ndl) {
         SEQAN_CHECKPOINT;
+        _initPattern(*this);
     }
 };
 
 
 template <typename TNeedle>
 struct Needle<Pattern<TNeedle, ShiftAnd> > {
-    typedef typename Value<TNeedle>::Type Value;
+    typedef TNeedle Type;
 };
+
+
+template <typename TNeedle>
+void _initPattern(Pattern<TNeedle, ShiftAnd> & pattern) {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<TNeedle, ShiftAnd> TPattern;
+	typedef typename TPattern::TWord TWord;
+	typedef typename Position<TNeedle>::Type TPosition;
+	typedef typename Value<TNeedle>::Type TAlphabet;
+
+    // Get some shortcuts.
+    TNeedle const & ndl = needle(pattern);
+    TPosition needleLength = length(ndl);
+    // Compute number of blocks required for the bitmasks.
+    pattern._blockCount = needleLength / BitsPerValue<TWord>::VALUE;
+    if (needleLength % BitsPerValue<TWord>::VALUE > 0)
+        pattern._blockCount += 1;
+    // Resize and initialize the "match/mismatch" word.
+	fill(pattern._prefSufMatch, pattern._blockCount, 0u, Exact());
+    // Resize and initialize the bitmask table.
+	fill(pattern._table, pattern._blockCount * ValueSize<TAlphabet>::VALUE, 0u, Exact());
+	for (TWord j = 0; j < needleLength; ++j) {
+		// Determine character position in array table.
+		TWord pos = ordValue(getValue(ndl, j));
+		pattern._table[pattern._blockCount * pos + j / BitsPerValue<TWord>::VALUE] |= (1 << (j % BitsPerValue<TWord>::VALUE));
+	}
+}
 
 
 template <typename TNeedle>
@@ -179,8 +220,60 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, ShiftAnd> & patter
 
 
 template <typename THaystack, typename TNeedle>
-bool find(Finder<THaystack, Default> & finder,
-          Pattern<TNeedle, ShiftAnd> & pattern) {
+inline bool _find_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & finder,
+                                       Pattern<TNeedle, ShiftAnd> & pattern) {
+    SEQAN_CHECKPOINT;
+	typedef typename Value<TNeedle>::Type TValue;
+	typedef unsigned int TWord;
+    typedef typename Position<TNeedle>::Type TPosition;
+    THaystack const & hstck = haystack(finder);
+    TPosition needleLength = length(needle(pattern));
+    TPosition haystackLength = length(hstck);
+	TWord compare = 1 << (needleLength - 1);
+	while (finder._endPosition < haystackLength) {
+		TWord pos = ordValue(hstck[finder._endPosition]);
+		pattern._prefSufMatch[0] = ((pattern._prefSufMatch[0] << 1) | 1) & pattern._table[pattern._blockCount * pos];
+		if ((pattern._prefSufMatch[0] & compare) != 0)
+			return true;
+        finder._endPosition += 1;
+	}
+	return false;
+}
+
+
+template <typename THaystack, typename TNeedle>
+inline bool _find_ShiftAnd_LongNeedle(Finder<THaystack, Default> & finder,
+                                      Pattern<TNeedle, ShiftAnd> & pattern) {
+    SEQAN_CHECKPOINT;
+	typedef typename Value<TNeedle>::Type TValue;
+	typedef unsigned int TWord;
+    typedef typename Position<TNeedle>::Type TPosition;
+    THaystack const & hstck = haystack(finder);
+    TPosition needleLength = length(needle(pattern));
+    TPosition haystackLength = length(hstck);
+	TWord compare = 1 << ((needleLength - 1) % BitsPerValue<TWord>::VALUE);
+	while (finder._endPosition < haystackLength) {
+		TWord pos = ordValue(hstck[finder._endPosition]);
+		TWord carry = 1;
+		for (TWord block = 0; block < pattern._blockCount; ++block) {
+			bool newCarry = (pattern._prefSufMatch[block] & (1 << (BitsPerValue<TWord>::VALUE - 1))) != 0;
+			pattern._prefSufMatch[block] <<= 1;
+			pattern._prefSufMatch[block] |= carry;
+			carry = newCarry;
+		}
+		for (TWord block = 0; block < pattern._blockCount; ++block)
+            pattern._prefSufMatch[block] &= pattern._table[pattern._blockCount * pos + block];
+		if ((pattern._prefSufMatch[pattern._blockCount - 1] & compare) != 0)
+			return true; 
+        finder._endPosition += 1;
+	}
+	return false;
+}
+
+
+template <typename THaystack, typename TNeedle>
+inline bool find(Finder<THaystack, Default> & finder,
+                 Pattern<TNeedle, ShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
     typedef Pattern<TNeedle, ShiftAnd> TPattern;
@@ -195,37 +288,32 @@ bool find(Finder<THaystack, Default> & finder,
     // Initialize finder if state is "initial".  Otherwise advance at
     // least by one (if not set to of haystack with setEndPosition()).
     if (finder._state == TPattern::STATE_INITIAL) {
-        finder._beginPosition = 0u;
-        finder._endPosition = length(needle(pattern));
+        finder._endPosition = 0;
     } else if (finder._state == TPattern::STATE_NO_HIT) {
         // Only advance if not at end if set manually to a "no hit" position.
-        if (finder._endPosition == length(haystack(finder)))
+        if (finder._endPosition == length(haystack(finder))) {
+            finder._state = TPattern::STATE_NOTFOUND;
             return false;
-        finder._beginPosition += 1;
-    } else {
-        finder._beginPosition += 1;
+        }
     }
 
-    // Search the needle in the haystack naively.
-    for (TPosition i = 0u; i < length(needle(pattern));) {
-        // Break out of loop if no more match is possible.
-        if (finder._beginPosition >= length(haystack(finder)) - length(needle(pattern))) {
-            finder._state = TFinder::STATE_NOTFOUND;
-            pattern._state = TPattern::STATE_NOTFOUND;
-            return false;
-        }
-        // Otherwise, go on searching.
-        if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
-            finder._beginPosition += 1;
-            i = 0u;
-            continue;
-        }
-        i += 1;
+    bool res;
+    if (pattern._blockCount == 1)
+        res = _find_ShiftAnd_ShortNeedle(finder, pattern);
+    else
+        res = _find_ShiftAnd_ShortNeedle(finder, pattern);
+    // Advance end position to make an "end" position from a "last" position.
+    finder._endPosition += 1;
+    if (res) {
+        finder._beginPosition = finder._endPosition - length(needle(pattern));
+        finder._state = TFinder::STATE_FOUND;
+        pattern._state = TPattern::STATE_FOUND;
+        return true;
+    } else {
+        finder._state = TFinder::STATE_NOTFOUND;
+        pattern._state = TPattern::STATE_NOTFOUND;
+        return false;
     }
-    finder._endPosition = finder._beginPosition + length(needle(pattern));
-    finder._state = TFinder::STATE_FOUND;
-    pattern._state = TPattern::STATE_FOUND;
-    return true;
 }
 
 
@@ -251,13 +339,64 @@ bool findBegin(Finder<THaystack, Default> & finder,
 }
 
 
-template <typename THaystack, typename TNeedle, typename TPosition>
+
+template <typename THaystack, typename TNeedle>
+inline bool _setEndPosition_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & finder,
+                                                 Pattern<TNeedle, ShiftAnd> & pattern,
+                                                 typename Position<THaystack>::Type const & pos) {
+    SEQAN_CHECKPOINT;
+	typedef typename Value<TNeedle>::Type TValue;
+    typedef typename Position<THaystack>::Type TPosition;
+	typedef unsigned int TWord;
+    THaystack const & hstck = haystack(finder);
+    TPosition needleLength = length(needle(pattern));
+	TWord compare = 1 << (needleLength - 1);
+	while (finder._endPosition < pos) {
+		TWord pos = ordValue(hstck[finder._endPosition]);
+		pattern._prefSufMatch[0] = ((pattern._prefSufMatch[0] << 1) | 1) & pattern._table[pattern._blockCount * pos];
+        finder._endPosition += 1;
+	}
+	return (pattern._prefSufMatch[0] & compare) != 0;
+}
+
+
+template <typename THaystack, typename TNeedle>
+inline bool _setEndPosition_ShiftAnd_LongNeedle(Finder<THaystack, Default> & finder,
+                                                Pattern<TNeedle, ShiftAnd> & pattern,
+                                                typename Position<THaystack>::Type const & pos) {
+    SEQAN_CHECKPOINT;
+	typedef typename Value<TNeedle>::Type TValue;
+	typedef unsigned int TWord;
+    typedef typename Position<TNeedle>::Type TPosition;
+    THaystack const & hstck = haystack(finder);
+    TPosition needleLength = length(needle(pattern));
+	TWord compare = 1 << ((needleLength - 1) % BitsPerValue<TWord>::VALUE);
+	while (finder._endPosition < pos) {
+		TWord pos = ordValue(hstck[finder._endPosition]);
+		TWord carry = 1;
+		for (TWord block = 0; block < pattern._blockCount; ++block) {
+			bool newCarry = (pattern._prefSufMatch[block] & (1 << (BitsPerValue<TWord>::VALUE - 1))) != 0;
+			pattern._prefSufMatch[block] <<= 1;
+			pattern._prefSufMatch[block] |= carry;
+			carry = newCarry;
+		}
+		for (TWord block = 0; block < pattern._blockCount; ++block)
+            pattern._prefSufMatch[block] &= pattern._table[pattern._blockCount * pos + block];
+        finder._endPosition += 1;
+	}
+	return ((pattern._prefSufMatch[pattern._blockCount - 1] & compare) != 0);
+}
+
+
+// Sets end position and adjusts the bit pattern state.
+template <typename THaystack, typename TNeedle>
 bool setEndPosition(Finder<THaystack, Default> & finder,
                     Pattern<TNeedle, ShiftAnd> & pattern,
-                    TPosition const & pos) {
+                    typename Position<THaystack>::Type const & pos) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
     typedef Pattern<TNeedle, ShiftAnd> TPattern;
+    typedef typename Position<THaystack>::Type TPosition;
     // State of finder and pattern should be in sync.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
     // End position must not be right of the end of the haystack.
@@ -265,23 +404,34 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     // Begin position must not be left of the beginning of the haystack.
     SEQAN_ASSERT_GEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(needle(pattern)));
 
-    // Set the end position.
-    finder._endPosition = pos;
-    finder._beginPosition = pos - length(needle(pattern));
+    // Set finder's end position if it is in the initial state.
+    if (finder._state == TPattern::STATE_INITIAL)
+        finder._endPosition = 0;
 
-    // Check whether there is a hit at this position and update the
-    // state accordingly.
-    typedef typename Position<THaystack>::Type THaystackPos;
-    for (THaystackPos i = 0u; i < length(needle(pattern)); ++i) {
-        if (needle(pattern)[i] != haystack(finder)[finder._beginPosition + i]) {
-            finder._state = TPattern::STATE_NO_HIT;
-            pattern._state = TFinder::STATE_NO_HIT;
-            return false;
-        }
+    // Set the end position to the start position and search from
+    // there until pos is reached.
+    if (finder._endPosition > pos)
+        finder._endPosition = finder._endPosition - pos;
+    else
+        finder._endPosition = 0u;
+
+    bool ret;
+    if (pattern._blockCount == 1)
+        ret = _setEndPosition_ShiftAnd_ShortNeedle(finder, pattern, pos);
+    else
+        ret = _setEndPosition_ShiftAnd_LongNeedle(finder, pattern, pos);
+
+    // Adjust state.
+    if (ret) {
+        finder._beginPosition = finder._endPosition - length(needle(pattern));
+        finder._state = TPattern::STATE_FOUND;
+        pattern._state = TPattern::STATE_FOUND;
+        return true;
+    } else {
+        finder._state = TPattern::STATE_NO_HIT;
+        pattern._state = TFinder::STATE_NO_HIT;
+        return false;
     }
-    finder._state = TPattern::STATE_FOUND;
-    pattern._state = TPattern::STATE_FOUND;
-    return true;
 }
 
 
