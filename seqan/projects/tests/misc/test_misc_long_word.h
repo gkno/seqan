@@ -1,6 +1,9 @@
 #ifndef SEQAN_TESTS_MISC_TEST_MISC_LONG_WORD_H_
 #define SEQAN_TESTS_MISC_TEST_MISC_LONG_WORD_H_
 
+#include <sstream>
+#include <string>
+
 #include <seqan/basic.h>
 #include <seqan/misc/misc_long_word.h>
 
@@ -112,6 +115,13 @@ SEQAN_DEFINE_TEST(test_misc_long_word_native_interface) {
                 SEQAN_ASSERT_EQ(0u, word[i], "i == %u", i);
         }
     }
+
+    // Test const operator[].
+    {
+        TLongWord const word = 1u;
+        SEQAN_ASSERT_EQ(1u, word[0]);
+        SEQAN_ASSERT_EQ(0u, word[1]);
+    }
 }
 
 
@@ -137,6 +147,16 @@ SEQAN_DEFINE_TEST(test_misc_long_word_static_interface) {
         for (size_t i = 1; i < length(word2); ++i) {
             SEQAN_ASSERT_EQ(0u, word1[i], "i == %u", i);
         }
+    }
+
+    // Test assignment operator.
+    {
+        TLongWord word1;
+        word1[0] = 1u;
+        TLongWord word2;
+        word2 = word1;
+        SEQAN_ASSERT_EQ(1u, word2[0]);
+        SEQAN_ASSERT_EQ(0u, word2[1]);
     }
 
     // Test comparison operators.
@@ -267,6 +287,29 @@ SEQAN_DEFINE_TEST(test_misc_long_word_static_interface) {
             else
                 SEQAN_ASSERT_EQ(0u, word[i], "i == %u", i);
         }
+    }
+
+    // Test const operator[].
+    {
+        TLongWord word;
+        word[128] = 1;
+        word[0] = 1;
+        TLongWord const word2 = word;
+        SEQAN_ASSERT_EQ(1u, word2[128]);
+        SEQAN_ASSERT_EQ(1u, word2[0]);
+    }
+
+    // Test stream shift operator.
+    {
+        LongWord<StaticWidth<9> > word;
+        word[0] = 1;
+        word[8] = 1;
+        std::stringstream ss(std::stringstream::in | std::stringstream::out);
+        ss << word;
+        std::string str;
+        ss >> str;
+        std::string const expectedStr = "100000001";
+        SEQAN_ASSERT_EQ(expectedStr, str);
     }
 }
 

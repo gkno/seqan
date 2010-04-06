@@ -229,6 +229,7 @@ struct LongWord<StaticWidth<LENGTH> > {
         SEQAN_CHECKPOINT;
         for (size_t i = 0; i < UNSIGNED_COUNT; ++i)
             _data[i] = other._data[i];
+        return *this;
     }
 
     unsigned operator[](unsigned index) const {
