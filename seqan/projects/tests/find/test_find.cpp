@@ -1583,7 +1583,50 @@ SEQAN_DEFINE_TEST(test_find_on_segments) {
 }
 
 
+SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
+    DnaString haystackString = "CAACAACAACAACAACAACAACAA";
+    DnaString needleString = "CAACAACAACAA";
+
+    String<size_t> positionsMyers;
+    {
+        DnaString haystackStringTmp(haystackString);
+        DnaString needleStringTmp(needleString);
+        Finder<DnaString> finder(haystackStringTmp);
+        Pattern<DnaString, Myers<FindInfix> > pattern(needleStringTmp);
+        while (find(finder, pattern)) {
+            appendValue(positionsMyers, endPosition(finder));
+        }
+    }
+    std::cout << "Myers end positions: ";
+    for (size_t i = 0; i < length(positionsMyers); ++i)
+        std::cout << positionsMyers[i] << " ";
+    std::cout << std::endl;
+
+    String<size_t> positionsDpSearch;
+    {
+        DnaString haystackStringTmp(haystackString);
+        DnaString needleStringTmp(needleString);
+        Finder<DnaString> finder(haystackStringTmp);
+        Pattern<DnaString, DPSearch<EditDistanceScore, FindInfix> > pattern(needleStringTmp);
+        while (find(finder, pattern)) {
+            appendValue(positionsDpSearch, endPosition(finder));
+        }
+    }
+    std::cout << "DPSearch end positions: ";
+    for (size_t i = 0; i < length(positionsDpSearch); ++i)
+        std::cout << positionsDpSearch[i] << " ";
+    std::cout << std::endl;
+
+    SEQAN_ASSERT_EQ(length(positionsDpSearch), length(positionsMyers));
+    for (unsigned i = 0; i < length(positionsMyers); ++i)
+        SEQAN_ASSERT_EQ(positionsDpSearch[i], positionsMyers[i], "i = %u", i);
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
+    SEQAN_CALL_TEST(test_myers_trigger_bug);
+    /*
+    
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_within);
@@ -1647,5 +1690,6 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wumanber.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_abndm.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_pex.h");
+    */
 }
 SEQAN_END_TESTSUITE
