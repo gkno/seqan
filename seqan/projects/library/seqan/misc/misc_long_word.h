@@ -17,6 +17,8 @@
  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
+  State: Tested but not used in real code.
+ ============================================================================
   Implementation of the LongWord class.  It provides an almost
   transparent interface to arbitrarily long words.  In contrast to
   std::bitset, it provides a specialization that allows to set the
