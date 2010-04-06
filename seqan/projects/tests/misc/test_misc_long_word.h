@@ -130,15 +130,7 @@ SEQAN_DEFINE_TEST(test_misc_long_word_static_interface) {
     // Copy from other long word.
     {
         TLongWord word1;
-//         for (size_t i = 0; i < TLongWord::UNSIGNED_COUNT; ++i)
-//             std::cout << word1._data[i] << " ";
-//         std::cout << std::endl;
-//         std::cout << __LINE__ << ": word1 = " << word1 << std::endl;
         word1[0] = 1;
-//         for (size_t i = 0; i < TLongWord::UNSIGNED_COUNT; ++i)
-//             std::cout << word1._data[i] << " ";
-//         std::cout << std::endl;
-//         std::cout << __LINE__ << ": word1 = " << word1 << std::endl;
         TLongWord word2(word1);
         SEQAN_ASSERT_EQ(word1, word2);
         SEQAN_ASSERT_EQ(1u, word1[0]);
@@ -262,7 +254,7 @@ SEQAN_DEFINE_TEST(test_misc_long_word_static_interface) {
         word[128] = 1;
         word[0] = 1;
         for (unsigned i = 0; i < 129; ++i) {
-            if (i == 0u || 128u)
+            if (i == 0u || i == 128u)
                 SEQAN_ASSERT_EQ(1u, word[i], "i == %u", i);
             else
                 SEQAN_ASSERT_EQ(0u, word[i], "i == %u", i);

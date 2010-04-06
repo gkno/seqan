@@ -82,6 +82,10 @@ struct LongWordBitProxy<TWord, NativeWidth> {
 };
 
 
+// Forward declaration.
+inline LongWord<NativeWidth> & reset(LongWord<NativeWidth> & x);
+
+
 template <>
 struct LongWord<NativeWidth> {
     typedef LongWord<NativeWidth> TWord;
@@ -89,7 +93,7 @@ struct LongWord<NativeWidth> {
 
     LongWord() {
         SEQAN_CHECKPOINT;
-        _value = 0;
+        reset(*this);
     }
 
     LongWord(unsigned const & value) : _value(value) {
@@ -103,6 +107,7 @@ struct LongWord<NativeWidth> {
     }
 
     unsigned operator[](unsigned index) const {
+        SEQAN_CHECKPOINT;
         SEQAN_ASSERT_LT(index, sizeof(unsigned) * 8);
         return (_value & (1u << index)) >> index;
     }
@@ -115,7 +120,14 @@ struct LongWord<NativeWidth> {
 };
 
 
-inline size_t length(LongWord<NativeWidth> const & x) {
+inline LongWord<NativeWidth> & reset(LongWord<NativeWidth> & x) {
+    SEQAN_CHECKPOINT;
+    x._value = 0u;
+    return x;
+}
+
+
+inline size_t length(LongWord<NativeWidth> const &) {
     SEQAN_CHECKPOINT;
     return sizeof(unsigned) * 8;
 }
@@ -174,7 +186,7 @@ struct LongWordBitProxy<TWord, StaticWidth<LENGTH> > {
     LongWordBitProxy & operator=(unsigned x) {
         SEQAN_CHECKPOINT;
         SEQAN_ASSERT_LT(x, LENGTH);
-        unsigned & block = _word._data[_bitIndex / BitsPerValue<unsigned>::VALUE];
+        unsigned & block = _word._data[TWord::UNSIGNED_COUNT - 1 - _bitIndex / BitsPerValue<unsigned>::VALUE];
         unsigned bitIndex = _bitIndex % BitsPerValue<unsigned>::VALUE;
         block = (block ^ (1 << bitIndex)) | (x << bitIndex);
         return *this;
@@ -182,7 +194,7 @@ struct LongWordBitProxy<TWord, StaticWidth<LENGTH> > {
 
     operator unsigned() const {
         SEQAN_CHECKPOINT;
-        unsigned const & block = _word._data[_bitIndex / BitsPerValue<unsigned>::VALUE];
+        unsigned const & block = _word._data[TWord::UNSIGNED_COUNT - 1 - _bitIndex / BitsPerValue<unsigned>::VALUE];
         unsigned bitIndex = _bitIndex % BitsPerValue<unsigned>::VALUE;
 //         std::cerr << "LongWordBitProxy<... StaticWidth<" << LENGTH << "> >" << std::endl;
 //         std::cerr << "  _word      = " << _word << std::endl;
@@ -204,13 +216,7 @@ struct LongWord<StaticWidth<LENGTH> > {
 
     LongWord() {
         SEQAN_CHECKPOINT;
-        // Clear _data.
-        for (size_t i = 0; i < UNSIGNED_COUNT; ++i)
-            _data[i] = 0u;
-//         std::cout << "bits per unsigned = " << BitsPerValue<unsigned>::VALUE << std::endl;
-//         std::cout << "# of unsigneds = " << ((LENGTH / BitsPerValue<unsigned>::VALUE) + ((LENGTH % BitsPerValue<unsigned>::VALUE > 0) ? 1 : 0)) << std::endl;
-//         std::cout << "UNSIGNED_COUNT = " << UNSIGNED_COUNT << std::endl;
-//         std::cout << "sizeof(_data) = " << sizeof(_data) << std::endl;
+        reset(*this);
     }
 
     LongWord(LongWord const & other) {
@@ -227,7 +233,8 @@ struct LongWord<StaticWidth<LENGTH> > {
 
     unsigned operator[](unsigned index) const {
         SEQAN_CHECKPOINT;
-        unsigned const & block = _data[index / BitsPerValue<unsigned>::VALUE];
+        SEQAN_ASSERT_LT(index, LENGTH);
+        unsigned const & block = _data[UNSIGNED_COUNT - 1 - index / BitsPerValue<unsigned>::VALUE];
         unsigned bitIndex = index % BitsPerValue<unsigned>::VALUE;
         return (block & (1 << bitIndex)) >> bitIndex;
     }
@@ -238,6 +245,16 @@ struct LongWord<StaticWidth<LENGTH> > {
         return LongWordBitProxy<TWord, StaticWidth<LENGTH> >(*this, index);
     }
 };
+
+
+template <unsigned LENGTH>
+inline LongWord<StaticWidth<LENGTH> > & reset(LongWord<StaticWidth<LENGTH> > & a) {
+    SEQAN_CHECKPOINT;
+    typedef LongWord<StaticWidth<LENGTH> > TLongWord;
+    for (size_t i = 0; i < TLongWord::UNSIGNED_COUNT; ++i)
+        a._data[i] = 0u;
+    return a;
+}
 
 
 template <unsigned LENGTH>
@@ -282,7 +299,7 @@ bool operator<=(LongWord<StaticWidth<LENGTH> > const & a, LongWord<StaticWidth<L
     typedef LongWord<StaticWidth<LENGTH> > TLongWord;
     // TODO(holtgrew): Roll out loop?
     for (unsigned i = 0; i < TLongWord::UNSIGNED_COUNT; ++i) {
-        if (a._data[i] > b._data[i])
+        if (a._data[TLongWord::UNSIGNED_COUNT - 1 - i] > b._data[TLongWord::UNSIGNED_COUNT - 1 - i])
             return false;
     }
     return true;    
@@ -295,7 +312,7 @@ bool operator>=(LongWord<StaticWidth<LENGTH> > const & a, LongWord<StaticWidth<L
     typedef LongWord<StaticWidth<LENGTH> > TLongWord;
     // TODO(holtgrew): Roll out loop?
     for (unsigned i = 0; i < TLongWord::UNSIGNED_COUNT; ++i) {
-        if (a._data[i] <= b._data[i])
+        if (a._data[TLongWord::UNSIGNED_COUNT - 1 - i] <= b._data[TLongWord::UNSIGNED_COUNT - 1 - i])
             return false;
     }
     return true;    
@@ -405,15 +422,39 @@ LongWord<StaticWidth<LENGTH> > & operator^=(LongWord<StaticWidth<LENGTH> > & a, 
 template<unsigned LENGTH>
 LongWord<StaticWidth<LENGTH> > operator>>(LongWord<StaticWidth<LENGTH> > const & a, unsigned shift) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return a;
+    LongWord<StaticWidth<LENGTH> > x(a);
+    x >>= shift;
+    return x;
 }
 
 
 template<unsigned LENGTH>
 LongWord<StaticWidth<LENGTH> > & operator>>=(LongWord<StaticWidth<LENGTH> > & a, unsigned shift) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    typedef LongWord<StaticWidth<LENGTH> > TLongWord;
+    // Clear if shift is larger than the number of bits.
+    if (shift > LENGTH)
+        return reset(a);
+    // Do nothing if shift is zero.
+    if (shift == 0u)
+        return a;
+
+    // Otherwise, perform shift operation.
+    size_t const last = TLongWord::UNSIGNED_COUNT - 1;
+    size_t const blockShift = shift / BitsPerValue<unsigned>::VALUE;    // Number of blocks to shift values from.
+    size_t const indexInBlock = shift % BitsPerValue<unsigned>::VALUE;
+    if (indexInBlock != 0) {
+        // More common case: shift is not multiple of bit count of unsigned.
+        unsigned const x = BitsPerValue<unsigned>::VALUE - indexInBlock;
+        for (size_t i = last - blockShift; i < last; ++i)
+            a._data[i + blockShift] = (a._data[i] >> indexInBlock) | (a._data[i + 1] << x);
+        a._data[last - blockShift] = a._data[0] >> indexInBlock;
+    } else {
+        // Less common case: We can simply copy these unsigneds.
+        for (size_t i = blockShift; i <= last; ++i)
+            a._data[i + blockShift] = a._data[0];
+    }
+    std::fill_n(&(a._data[TLongWord::UNSIGNED_COUNT - 1 - blockShift]), blockShift, 0u);
     return a;
 }
 
@@ -421,15 +462,40 @@ LongWord<StaticWidth<LENGTH> > & operator>>=(LongWord<StaticWidth<LENGTH> > & a,
 template<unsigned LENGTH>
 LongWord<StaticWidth<LENGTH> > operator<<(LongWord<StaticWidth<LENGTH> > const & a, unsigned shift) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return a;
+    LongWord<StaticWidth<LENGTH> > x(a);
+    x <<= shift;
+    return x;
 }
 
 
 template<unsigned LENGTH>
 LongWord<StaticWidth<LENGTH> > & operator<<=(LongWord<StaticWidth<LENGTH> > & a, unsigned shift) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
+    typedef LongWord<StaticWidth<LENGTH> > TLongWord;
+    // Clear if shift is larger than the number of bits.
+    if (shift > LENGTH)
+        return reset(a);
+    // Do nothing if shift is zero.
+    if (shift == 0u)
+        return a;
+
+    // Otherwise, perform shift operation.
+    size_t const last = TLongWord::UNSIGNED_COUNT - 1;
+    size_t const blockShift = shift / BitsPerValue<unsigned>::VALUE;    // Number of blocks to shift values from.
+    size_t const indexInBlock = shift % BitsPerValue<unsigned>::VALUE;
+    if (indexInBlock != 0) {
+        // More common case: shift is not multiple of bit count of unsigned.
+        unsigned const x = BitsPerValue<unsigned>::VALUE - indexInBlock;
+        for (size_t i = last - blockShift; i > 0; --i)
+            a._data[i + blockShift] = (a._data[i] << indexInBlock) | (a._data[i - 1] >> x);
+        a._data[blockShift] = a._data[0] << indexInBlock;
+    } else {
+        // Less common case: We can simply copy these unsigneds.
+        for (size_t i = last - blockShift; i > 0; --i)
+            a._data[i + blockShift] = a._data[0];
+        a._data[blockShift] = a._data[0];
+    }
+    std::fill_n(&(a._data[0]), blockShift, 0u);
     return a;
 }
 
@@ -448,6 +514,12 @@ TStream & operator<<(TStream & stream, seqan::LongWord<seqan::StaticWidth<LENGTH
         unsigned x = a[LENGTH - 1 - i];
         stream << x;
     }
+    typedef seqan::LongWord<seqan::StaticWidth<LENGTH> > TLongWord;
+    stream << "  ( ";
+    for (size_t i = 0; i < TLongWord::UNSIGNED_COUNT; ++i) {
+        stream << a._data[i] << " ";
+    }
+    stream << ")";
     return stream;
 }
 }  // namespace std
