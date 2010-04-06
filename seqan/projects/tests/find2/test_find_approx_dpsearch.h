@@ -1194,7 +1194,7 @@ SEQAN_DEFINE_TEST(test_find2_find_approx_dpsearch_pattern_set_end_position_score
 
         // Set end position to a non-hit
         // AGAAGAAGAGGAAGAAGA
-        //  GAA
+        //   GAA
         ret = setEndPosition(finder, pattern, 4);
         SEQAN_ASSERT_NOT(ret);
 
