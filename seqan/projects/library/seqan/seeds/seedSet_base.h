@@ -1596,12 +1596,12 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 ...type:Tag.Seed Extension.tag.GappedXDrop
 */
 
-template<typename TContainer, typename TText>
+template<typename TContainer, typename TQuery, typename TDatabase, typename TDirection>
 void
 extendSeeds(TContainer &seedSet, 
-			String<TText> &query, 
-			String<TText> &database, 
-			int direction, 
+			String<TQuery> &query, 
+			String<TDatabase> &database, 
+			TDirection direction, 
 			MatchExtend)
 {
 	SEQAN_CHECKPOINT
@@ -1611,13 +1611,13 @@ extendSeeds(TContainer &seedSet,
 		extendSeed(*it1, query, database, direction, MatchExtend());
 }
 
-template<typename TIterator, typename TText>
+template<typename TIterator, typename TQuery, typename TDatabase, typename TDirection>
 void
 extendSeeds(TIterator begin, 
 			TIterator end, 
-			String<TText> &query,
-			String<TText> &database, 
-			int direction, 
+			String<TQuery> &query,
+			String<TDatabase> &database, 
+			TDirection direction, 
 			MatchExtend)
 {
 	SEQAN_CHECKPOINT
@@ -1625,14 +1625,14 @@ extendSeeds(TIterator begin,
 		extendSeed(*it, query, database, direction, MatchExtend());		
 }
 
-template<typename TContainer, typename TText, typename TextendSeedSpec, typename TValue, typename TValue2>
+template<typename TContainer, typename TQuery, typename TDatabase, typename TextendSeedSpec, typename TValue, typename TValue2, typename TDirection>
 void
 extendSeeds(TContainer &seedSet, 
 			TValue scoreDropOff, 
 			Score<TValue2, Simple> const &scoreMatrix,
-			String<TText> const &query, 
-			String<TText> const &database, 
-			int direction, 
+			String<TQuery> const &query, 
+			String<TDatabase> const &database, 
+			TDirection direction, 
 			TextendSeedSpec tag)
 {
 	SEQAN_CHECKPOINT
@@ -1643,15 +1643,15 @@ extendSeeds(TContainer &seedSet,
 }
 
 
-template<typename TIterator, typename TextendSeedSpec, typename TValue, typename TText>
+template<typename TIterator, typename TextendSeedSpec, typename TValue, typename TQuery, typename TDatabase, typename TDirection>
 void
 extendSeeds(TIterator begin, 
 			TIterator end, 
 			TValue scoreDropOff, 
 			Score<TValue, Simple> const &scoreMatrix, 
-			String<TText> const &query,
-			String<TText> const &database, 
-			int direction, 
+			String<TQuery> const &query,
+			String<TDatabase> const &database, 
+			TDirection direction, 
 			TextendSeedSpec tag)
 {
 	SEQAN_CHECKPOINT

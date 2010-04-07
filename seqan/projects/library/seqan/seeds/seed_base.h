@@ -714,12 +714,12 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 */
 
 
-template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase>
+template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase, typename TDirection>
 void 
 extendSeed(Seed<TPosition, TSpecSeed> &seed, 
 		   TQuery const &query, 
 		   TDatabase const &database, 
-		   TPosition direction, 
+		   TDirection direction, 
 		   MatchExtend)
 {
 	SEQAN_CHECKPOINT
@@ -753,19 +753,19 @@ extendSeed(Seed<TPosition, TSpecSeed> &seed,
 }
 
 
-template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase, typename TScore>
+template<typename TPosition, typename TSpecSeed, typename TQuery, typename TDatabase, typename TScore, typename TDirection>
 void 
 extendSeed(Seed<TPosition,TSpecSeed> &seed, 
 		   TScore scoreDropOff, 
 		   Score<TScore, Simple> const &scoreMatrix,
 		   TQuery const &query,
 		   TDatabase const &database,
-		   TPosition direction, 
+		   TDirection direction, 
 		   UngappedXDrop)
 {
 	SEQAN_CHECKPOINT
 	scoreDropOff *=-1;
-	TPosition tmpScore = 0;
+	TScore tmpScore = 0;
 
 	//left extension
 	if (direction != 1){
