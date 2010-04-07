@@ -232,6 +232,73 @@ void testFind2_ExactPattern_FindHarder() {
 }
 
 
+// Exact pattern search with long (129 characters) needle.
+template <typename TTag>
+void testFind2_ExactPattern_FindLongNeedle() {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, TTag> TPattern;
+
+    DnaString kHaystack = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCT";
+    DnaString kNeedle = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTC";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle);
+
+    SEQAN_ASSERT_EQ(150u, length(kHaystack));
+    SEQAN_ASSERT_EQ(129u, length(kNeedle));
+
+    bool ret;
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(129u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(134u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(5u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(139u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(144u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(15u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(149u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(20u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // No more hit.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+
 // Search without any match.
 template <typename TTag>
 void testFind2_ExactPattern_FindNoMatch() {
@@ -273,6 +340,7 @@ void testFind2_ExactPattern_SetEndPosition() {
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
     SEQAN_ASSERT_EQ(3u, endPosition(pattern));
+
     ret = findBegin(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
@@ -312,6 +380,64 @@ void testFind2_ExactPattern_SetEndPosition() {
     // AGAAGAAGAGGAAGAAGA
     //                GAA
     ret = setEndPosition(finder, pattern, 18);
+    SEQAN_ASSERT_NOT(ret);
+
+    // No more hit.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+
+// Tests for setEndPosition() with exact pattern and long needle.
+template <typename TTag>
+void testFind2_ExactPattern_SetEndPositionLongNeedle() {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, TTag> TPattern;
+
+    DnaString kHaystack = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCT";
+    DnaString kNeedle = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTC";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle);
+
+    bool ret;
+
+    // Set end position to a hit.
+    ret = setEndPosition(finder, pattern, 129);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(129, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Continue to search from here.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(134u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(5u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set end position to a mismatch.
+    ret = setEndPosition(finder, pattern, 138);
+    SEQAN_ASSERT_NOT(ret);
+
+    // Continue to search from here.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(139u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set to end.
+    ret = setEndPosition(finder, pattern, 149);
     SEQAN_ASSERT_NOT(ret);
 
     // No more hit.
@@ -384,6 +510,64 @@ void testFind2_ExactPattern_SetBeginPosition() {
     // AGAAGAAGAGGAAGAAGA
     //                GAA
     ret = setBeginPosition(finder, pattern, 15);
+    SEQAN_ASSERT_NOT(ret);
+
+    // No more hit.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_NOT(ret);
+}
+
+
+// Tests for setBeginPosition() with the pattern.
+template <typename TTag>
+void testFind2_ExactPattern_SetBeginPositionLongNeedle() {
+    typedef Finder<DnaString> TFinder;
+    typedef Pattern<DnaString, TTag> TPattern;
+
+    DnaString kHaystack = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCT";
+    DnaString kNeedle = "CTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTC";
+    TFinder finder(kHaystack);
+    TPattern pattern(kNeedle);
+
+    bool ret;
+
+    // Set begin position to a hit.
+    ret = setBeginPosition(finder, pattern, 0);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(129, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(0u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Continue to search from here.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(134u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(5u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set begin position to a mismatch.
+    ret = setBeginPosition(finder, pattern, 9);
+    SEQAN_ASSERT_NOT(ret);
+
+    // Continue to search from here.
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(139u, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(pattern));
+    ret = findBegin(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(10u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(0u, beginPosition(pattern));
+
+    // Set to end.
+    ret = setBeginPosition(finder, pattern, 21);
     SEQAN_ASSERT_NOT(ret);
 
     // No more hit.

@@ -301,7 +301,7 @@ inline bool find(Finder<THaystack, Default> & finder,
     if (pattern._blockCount == 1)
         res = _find_ShiftAnd_ShortNeedle(finder, pattern);
     else
-        res = _find_ShiftAnd_ShortNeedle(finder, pattern);
+        res = _find_ShiftAnd_LongNeedle(finder, pattern);
     // Advance end position to make an "end" position from a "last" position.
     finder._endPosition += 1;
     if (res) {

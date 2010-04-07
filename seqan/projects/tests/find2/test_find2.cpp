@@ -19,17 +19,22 @@ SEQAN_BEGIN_TESTSUITE(test_find2) {
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_find_easy);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_find_harder);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_find_nomatch);
+    SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_find_long_needle);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_end_position);
+    SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_end_position_long_needle);
     SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_begin_position);
+    SEQAN_CALL_TEST(test_find2_find_exact_simple_pattern_set_begin_position_long_needle);
 
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_find_easy);
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_find_harder);
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_find_nomatch);
+    SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_find_long_needle);
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_interface);
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_set_end_position);
+    SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_set_end_position_long_needle);
     SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_set_begin_position);
-    // TODO(holtgrew): Test find and setEndPosition/setBeginPosition with long needle
+    SEQAN_CALL_TEST(test_find2_find_exact_shiftand_pattern_set_begin_position_long_needle);
 
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_find_easy);
     SEQAN_CALL_TEST(test_find2_find_multiple_exact_simple_pattern_find_harder);

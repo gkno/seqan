@@ -32,15 +32,34 @@ SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_find_nomatch) {
 }
 
 
-// "Harder" (= longer, more hits hits) test of find() using the exact pattern.
+// Setting end position of exact ShiftAnd finder with long needle.
 SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_set_end_position) {
     testFind2_ExactPattern_SetEndPosition<ShiftAnd>();
+}
+
+
+// Setting end position of exact Simple finder with long needle.
+SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_set_end_position_long_needle) {
+    testFind2_ExactPattern_SetEndPosition<ShiftAnd>();
+}
+
+
+// Test find() with long needle.
+SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_find_long_needle) {
+    testFind2_ExactPattern_FindLongNeedle<ShiftAnd>();
 }
 
 
 // Tests for setBeginPosition() with ShiftAnd pattern.
 SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_set_begin_position) {
     testFind2_ExactPattern_SetBeginPosition<ShiftAnd>();
+}
+
+
+// Tests for setBeginPosition() with ShiftAnd pattern and a long
+// needle.
+SEQAN_DEFINE_TEST(test_find2_find_exact_shiftand_pattern_set_begin_position_long_needle) {
+    testFind2_ExactPattern_SetBeginPositionLongNeedle<ShiftAnd>();
 }
 
 #endif  // TESTS_FIND2_TEST_FIND_EXACT_SHIFTAND_H_
