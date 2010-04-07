@@ -183,6 +183,14 @@ shrinkToMaxEpsMatchSimple(Align<TSource> & align,
     //std::cout << align << std::endl;
 }
 
+//template<typename TInfix>
+//void
+//insertMatch(String<Align<TInfix> > & matches, Align<TInfix> & match) {
+//    typedef typename Size<String<Align<TInfix> > >::Type TSize;
+//    TSize len = length(matches);
+//    if(len == 0)
+//}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize>
@@ -193,6 +201,13 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
                            TSize minLength,
                            String<Align<TInfixB> > & matches) {
     typedef Seed<int, SimpleSeed> TSeed;
+
+    typename Position<TInfixB>::Type maxLength = 1000000000;
+    if (length(a)*length(b) > maxLength) {
+        std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
+        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped." << std::flush;
+        return;
+    }
 
     // define a scoring scheme
     typedef int TScore;
@@ -257,238 +272,22 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// calls swift, verifies swift hits, outputs eps-matches
+template<typename TText, typename TIndex, typename TSize, typename TInfix>
+int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
+                Pattern<TIndex, Swift<SwiftLocal> > & pattern,
+                double epsilon,
+                TSize minLength,
+                StringSet<String<Align<TInfix> > > & matches) {
+    resize(matches, countSequences(needle(pattern)));
+    TSize numSwiftHits = 0;
 
-
-// create all chains of threshold q grams that where the starting positions 
-// of no two q-grams are further than limit apart
-template<typename TSeed, typename TInfixA, typename TInfixB, typename TThreshold, typename TLimit>
-void
-qGramChains(String< String<TSeed> > & outputChains,
-                 TInfixA const & a,
-                 TInfixB const & b,
-                 TThreshold q,
-                 TThreshold threshold,
-                 TLimit limit) {
-    typedef String<TSeed> TChain;
-    typedef String<TChain> TChainList;
-    TChainList chainList;
-
-    typedef Index<DnaString, Index_QGram<SimpleShape> > TQGramIndex;
-	TQGramIndex index_qgram(b); 
-    resize(indexShape(index_qgram), q);
-
-	typedef Finder<TQGramIndex> TFinder;
-    for (unsigned i = beginPosition(a); i < endPosition(a)-q+1; i++) {
-        TFinder finder(index_qgram);
-		
-        while (find(finder, infix(host(a), i, i+q))) {
-		    // for all common q-grams
-
-		    // create a new seed from the q-gram
-		    typedef typename Position<TFinder>::Type TFinderPos;
-		    TFinderPos posA = i;
-		    TFinderPos posB = beginPosition(b) + position(finder);
-		    TSeed newSeed(posA, posB, q);
-
-		    unsigned numChains = length(chainList);
-            unsigned i = 0;     // current position in the chain list
-            for (unsigned k = 0; k < numChains; k++) {
-                // for all chains in the current chainList
-                TSeed lastSeed = *(end(chainList[i]) - 1);
-                if(posB <= leftDim1(lastSeed)) {
-                    // do nothing if seed is before last seed in chain
-                    i++;
-                    continue;
-                }
-
-                TFinderPos rightPosA = rightDim0(lastSeed) + 1;
-                TFinderPos rightPosB = rightDim1(lastSeed) + 1;
-                TFinderPos leftPosA = leftDim0(lastSeed);
-                TFinderPos leftPosB = leftDim1(lastSeed);
-                // ::std::cout << "last seed: " << leftPosA << "," << leftPosB;
-                // ::std::cout << " (" << rightPosA << "," << rightPosB << ")" << ::std::endl;
-                
-                if ((__int64)posA-(__int64)leftDim0(*(begin(chainList[i]))) > limit) {
-                    // remove chain if new seed is further than limit apart from first seed
-                    erase(chainList, i);
-                } else {
-                    // append q-gram to copy of the chain if possible
-                    if((posA >= rightPosA && posB >= rightPosB) || 
-                        (endDiagonal(lastSeed) == endDiagonal(newSeed) && posA > leftPosA && posB > leftPosB)) {
-                        TChain chainCopy(chainList[i]);
-                        appendValue(chainCopy, newSeed);
-
-                        // append copy of chain to output if its length reached threshold else add it to chainList
-                        if (length(chainCopy) == threshold) {
-                            appendValue(outputChains, chainCopy);
-                        } else {
-                            appendValue(chainList, chainCopy);
-                        }
-                    }
-                    i++;
-                }
-            }
-
-            // add a new chain that starts with this q-gram
-            TChain newChain;
-            appendValue(newChain, newSeed);
-            appendValue(chainList, newChain);
-        }
-    }
-}
-
-
-// banded chain alignment and gapped X-drop extension for all chains of threshold q-grams
-template<typename TInfixA, typename TInfixB, typename TFloat, typename TSize, typename TShortSize, typename TMatches>
-void 
-verifySwiftHitByChains(TInfixA const & a,
-               TInfixB const & b,
-               TFloat eps,
-               TSize minLength,
-               TShortSize q,
-               TShortSize threshold,
-               TShortSize distanceCut,
-               TSize bandwidth,
-               TMatches & matches) {
-	typedef Seed<int, SimpleSeed> TSeed;
-	typedef typename Value<TSeed>::Type TPosition;
-    typedef String<TSeed> TChain;
-    typedef String<TChain> TChainList;
-
-    TChainList outputChains;
-    TShortSize limit = distanceCut - threshold - q + 1;
-
-    // create all chains of threshold q grams with no two q-grams further than limit apart
-    qGramChains(outputChains, a, b, q, threshold, limit);
-
-    typename Iterator<TChainList>::Type oIt = begin(outputChains);
-    while (oIt != end(outputChains)) {
-        // merge overlapping q-grams on same diagonal to one seed
-        typename Iterator<TChain>::Type chainIt1 = begin(*oIt);
-        typename Iterator<TChain>::Type chainIt2 = begin(*oIt) + 1;
-        unsigned i = 0;    // counts the position of chainIt1
-        while (chainIt2 != end(*oIt)) {
-            if (endDiagonal(*chainIt1) == endDiagonal(*chainIt2)
-                && leftDim0(*chainIt2) > leftDim0(*chainIt1) && leftDim0(*chainIt2) <= rightDim0(*chainIt1)+1) {
-                // merge the two seeds, set chain iterators to next positions
-                setLeftDim0(*chainIt2, leftDim0(*chainIt1));
-                setLeftDim1(*chainIt2, leftDim1(*chainIt1));
-                erase(*oIt, i);
-            } else {
-                chainIt1++;
-                chainIt2++;
-                i++;
-            }
-        }
-        
-        // define a scoring scheme
-        typedef int TScore;
-        TScore match = 1;
-        TScore mismatchIndel = -1;
-        Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
-
-        TShortSize totalSeedLength = 0;
-        for (chainIt1 = begin(*oIt); chainIt1 != end(*oIt); ++chainIt1) {
-            totalSeedLength += length(*chainIt1);
-        }
-
-        // gapped X-drop extension
-        TSeed seed(leftDim0(*begin(*oIt)),
-                   leftDim1(*begin(*oIt)),
-                   rightDim0(*(end(*oIt)-1)),
-                   rightDim1(*(end(*oIt)-1)));
-        TSize errors = (length(seed) - totalSeedLength) / 2;
-        TScore scoreDropOff = (TScore)(2* length(seed) * eps) - errors;/*
-        std::cout << host(a) << "  " << leftDim0(seed) << "  " << rightDim0(seed) << std::endl;
-        std::cout << host(b) << "  " <<  leftDim1(seed) << "  " << rightDim1(seed) << std::endl;
-        std::cout << scoreDropOff << "  " << errors << std::endl;*/
-        extendSeed(seed, scoreDropOff, scoreMatrix, 
-                   host(a), host(b), 2, GappedXDrop());/*
-        std::cout << host(a) << "  " << leftDim0(seed) << "  " << rightDim0(seed) << std::endl;
-        std::cout << host(b) << "  " <<  leftDim1(seed) << "  " << rightDim1(seed) << std::endl;*/
-
-        // create alignment object for the infixes
-        Align<TInfixB> alignment;
-        resize(rows(alignment), 2);
-        assignSource(row(alignment, 0), infix(host(a), leftDim0(seed), rightDim0(seed)+1));
-        assignSource(row(alignment, 1), infix(host(b), leftDim1(seed), rightDim1(seed)+1));
-
-        // banded chain alignment
-        TScore score = bandedChainAlignment(*oIt, bandwidth, alignment, scoreMatrix);
-
-        if (score >= length(sourceSegment(row(alignment, 1))) - 2*bandwidth) {
-            // cut ends to obtain longest contained epsilon-match
-            shrinkToMaxEpsMatch(alignment, minLength, eps);
-
-            // insert new e-match in matches string
-            typename Iterator<String<Align<TInfixB> > >::Type iter = begin(matches);
-            while (iter != end(matches)) {
-                if (beginPosition(sourceSegment(row(alignment,0))) == beginPosition(sourceSegment(row(*iter,0)))
-                    && endPosition(sourceSegment(row(alignment,0))) == endPosition(sourceSegment(row(*iter,0)))
-                    && beginPosition(sourceSegment(row(alignment,1))) == beginPosition(sourceSegment(row(*iter,1)))
-                    && endPosition(sourceSegment(row(alignment,1))) == endPosition(sourceSegment(row(*iter,1)))) {
-                        break;
-                }
-                ++iter;
-            }
-            if (iter == end(matches)) {
-                appendValue(matches, alignment);
-            }
-        }
-
-        oIt++;
-    }
-}
-
-// banded chain alignment and gapped X-drop extension for all maximal chains of q-grams
-template<typename TInfixA, typename TInfixB, typename TFloat, typename TSize, typename TShortSize, typename TMatches>
-void 
-verifySwiftHitByMaxChain(TInfixA const & a,
-               TInfixB const & b,
-               TFloat eps,
-               TSize minLength,
-               TShortSize q,
-               TShortSize threshold,
-               TShortSize distanceCut,
-               TSize bandwidth,
-               TMatches & matches) {
-    typedef Seed<int, SimpleSeed> TSeed;
-    SeedSet<int, SimpleSeed, DefaultScore> seeds(1, q);
-    String<TSeed> chain;//, seeds;
-
-    typedef Index<DnaString, Index_QGram<SimpleShape> > TQGramIndex;
-	TQGramIndex index_qgram(b); 
-    resize(indexShape(index_qgram), q);
-
-    // create seed set of all common q-grams
-	typedef Finder<TQGramIndex> TFinder;
-    for (unsigned i = beginPosition(a); i < endPosition(a)-q+1; i++) {
-        TFinder finder(index_qgram);
-        while (find(finder, infix(host(a), i, i+q))) {
-            //TSeed newSeed(i, beginPosition(b) + position(finder), q);
-            //appendValue(seeds, newSeed);
-            unsigned begin = beginPosition(b) + position(finder);
-            std::cout << i << "  " << i+q << "    " << begin << "  " << begin+q << std::endl;
-            //if(!addSeed(seeds, i, begin, i+q, begin+q, 0, Merge())) {
-                addSeed(seeds, i, begin, q, q, Single());
-            //}
-        }
-    }
-    
-    // compute chain of q-grams from seed set
-    int score = globalChaining(seeds, chain, -1, length(a), length(b));
-
-    if (score > -10/*TODO: score???*/) {
-        typename Iterator<String<TSeed> >::Type it = begin(chain);
-        while (it != end(chain)) {
-            std::cout << rightDim0(*it) << "  " << leftDim0(*it) << "    " << rightDim1(*it) << "  " << leftDim1(*it) << std::endl;
-            ++it;
-        }
-        // TODO:
-        // seed extension
-        // bandedAlignment
-        // cutEnds
-        // insert into matches
-    }
+	while (find(finder, pattern, epsilon, minLength)) {
+        ++numSwiftHits;
+        //std::cout << positionRange(finder) << " ; " << positionRange(pattern) << std::endl;
+        // verification
+        verifySwiftHitByLocalAlign(range(finder), range(pattern), epsilon, minLength,
+                                   value(matches, pattern.curSeqNo));
+	}
+    return numSwiftHits;
 }
