@@ -1584,48 +1584,64 @@ SEQAN_DEFINE_TEST(test_find_on_segments) {
 
 
 SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
-    DnaString haystackString = "CAACAACAACAACAACAACAACAA";
-    DnaString needleString = "CAACAACAACAA";
-
-    String<size_t> positionsMyers;
-    {
-        DnaString haystackStringTmp(haystackString);
-        DnaString needleStringTmp(needleString);
-        Finder<DnaString> finder(haystackStringTmp);
-        Pattern<DnaString, Myers<FindInfix> > pattern(needleStringTmp);
-        while (find(finder, pattern)) {
-            appendValue(positionsMyers, endPosition(finder));
+    DnaString haystackString = "TCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCCCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTC";
+    DnaString needleString = "GAGAAGAGAAGAGAAGAGAAGAGAAGAGAAGAGAAGAAGAAG";
+    reverseComplementInPlace(needleString);
+    typedef Segment<DnaString, InfixSegment> TSegment;
+    typedef ModifiedString<TSegment, ModReverse> TSegmentRev;
+    std::cout << "haystack = " << haystackString << std::endl;
+    std::cout << "needle = " << needleString << std::endl;
+    std::cout << "haystack length = " << length(haystackString) << std::endl
+              << "needle length = " << length(needleString) << std::endl
+              << "machine word length = " << sizeof(unsigned) * 8 << std::endl;
+    
+    for (int maxDistance = 0; maxDistance < 10; ++maxDistance) {
+        for (unsigned beginPosition = 0; beginPosition < length(haystackString) - length(needleString); ++beginPosition) {
+            std::cout << "max distance = " << maxDistance << ", begin position = " << beginPosition << std::endl;
+            TSegmentRev haystackSegment(infix(haystackString, beginPosition, length(haystackString)));
+            std::cout << "haystack = " << haystackSegment << std::endl;
+            std::cout << "needle = " << needleString << std::endl;
+            std::cout << "-----------------------" << std::endl;
+        
+            String<size_t> positionsMyers;
+            {
+                TSegmentRev segment(infix(haystackString, beginPosition, length(haystackString)));
+                Finder<TSegmentRev> finder(segment);
+                Pattern<DnaString, MyersUkkonenGlobal > pattern(needleString, -maxDistance);
+                while (find(finder, pattern)) {
+                    appendValue(positionsMyers, endPosition(finder));
+                }
+            }
+            
+            String<size_t> positionsDpSearch;
+            {
+                TSegmentRev segment(infix(haystackString, beginPosition, length(haystackString)));
+                Finder<TSegmentRev> finder(segment);
+                Pattern<DnaString, DPSearch<EditDistanceScore, FindPrefix> > pattern(needleString, -maxDistance);
+                while (find(finder, pattern)) {
+                    appendValue(positionsDpSearch, endPosition(finder));
+                }
+            }
+            
+            std::cout << "Myers end positions: " << std::endl;
+            for (size_t i = 0; i < length(positionsMyers); ++i)
+                std::cout << positionsMyers[i] << " ";
+            std::cout << std::endl;
+            std::cout << "DPSearch end positions: " << std::endl;
+            for (size_t i = 0; i < length(positionsDpSearch); ++i)
+                std::cout << positionsDpSearch[i] << " ";
+            std::cout << std::endl;
+            
+            SEQAN_ASSERT_EQ(length(positionsDpSearch), length(positionsMyers));
+            for (unsigned i = 0; i < length(positionsMyers); ++i)
+                SEQAN_ASSERT_EQ(positionsDpSearch[i], positionsMyers[i], "i = %u", i);
         }
     }
-    std::cout << "Myers end positions: ";
-    for (size_t i = 0; i < length(positionsMyers); ++i)
-        std::cout << positionsMyers[i] << " ";
-    std::cout << std::endl;
-
-    String<size_t> positionsDpSearch;
-    {
-        DnaString haystackStringTmp(haystackString);
-        DnaString needleStringTmp(needleString);
-        Finder<DnaString> finder(haystackStringTmp);
-        Pattern<DnaString, DPSearch<EditDistanceScore, FindInfix> > pattern(needleStringTmp);
-        while (find(finder, pattern)) {
-            appendValue(positionsDpSearch, endPosition(finder));
-        }
-    }
-    std::cout << "DPSearch end positions: ";
-    for (size_t i = 0; i < length(positionsDpSearch); ++i)
-        std::cout << positionsDpSearch[i] << " ";
-    std::cout << std::endl;
-
-    SEQAN_ASSERT_EQ(length(positionsDpSearch), length(positionsMyers));
-    for (unsigned i = 0; i < length(positionsMyers); ++i)
-        SEQAN_ASSERT_EQ(positionsDpSearch[i], positionsMyers[i], "i = %u", i);
 }
 
 
 SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_CALL_TEST(test_myers_trigger_bug);
-    /*
     
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
@@ -1690,6 +1706,5 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wumanber.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_abndm.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_pex.h");
-    */
 }
 SEQAN_END_TESTSUITE
