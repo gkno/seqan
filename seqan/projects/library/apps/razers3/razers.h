@@ -176,6 +176,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	numberOfCores;
         unsigned	blocksPerCore;
 		unsigned	numberOfBlocks;
+		unsigned	blockSize;
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -250,12 +251,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			fastaIdQual = false;
             
 #ifdef RAZERS_PARALLEL_READS
-            windowSize = 1000;
+            windowSize = 10000;
 #ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
 #endif
-            blocksPerCore = 5;
+            blocksPerCore = 1;
 			numberOfBlocks = numberOfCores * blocksPerCore;
+			blockSize = 0;
 #endif
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;

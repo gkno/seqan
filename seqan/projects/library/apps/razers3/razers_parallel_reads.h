@@ -26,56 +26,76 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-//#define RAZERS_PARALLEL_READS_WHOLE_GENOME
-#ifdef RAZERS_PARALLEL_READS_WHOLE_GENOME
-#include "razers_window.h"
-#endif
+
+#define RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
 
 namespace SEQAN_NAMESPACE_MAIN
 {
-    
-    // TODO: doc
-    template <typename TSwiftPatterns>
-    struct ParallelSwiftPatternHandler
-    {
-        SEQAN_CHECKPOINT
-        
-        TSwiftPatterns &swiftPatterns;
-        ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
-		swiftPatterns(_swiftPatterns) {}
-    };
-    
-    // TODO: doc
-    template<
-	typename TReadSet,
-	typename TShape>
-    void intiIndex(Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index, TReadSet & _text, TShape const & _shape)
-    {
-        SEQAN_CHECKPOINT
-        
-        value(index.text) = _text;
-        index.shape = _shape;
-    }
 	
-    // TODO: doc
-    template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
-    inline void 
-    setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
-    {
-        SEQAN_CHECKPOINT
-        
-        int blockSize = length(host(host(swift.swiftPatterns[0])));
-        int indexNo = readNo / blockSize;
-        int localReadNo = readNo % blockSize;
-        
-        int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
-        if (minT > 1)
-        {
-            //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
-            if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
-            setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
-        }
-    }
+#ifndef _OPENMP
+	int omp_get_thread_num(){
+		return 0;
+	}
+#endif
+
+/**
+.Class.ParallelSwiftPatternHandler:
+..summary:Holds a string of @Spec.Swift@ @Class.Pattern@s to allow the access of the overall read IDs.
+..cat:Razers
+..signature:ParallelSwiftPatternHandler<TSwiftPatterns>
+..param.TSwiftPatterns:The patterns type. With the @Class.String@ around.
+*/
+	template <typename TSwiftPatterns>
+	struct ParallelSwiftPatternHandler
+	{
+		SEQAN_CHECKPOINT
+
+		TSwiftPatterns &swiftPatterns;
+		ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
+		swiftPatterns(_swiftPatterns) {}
+	};
+
+/**
+.Function.intiIndex:
+..cat:Razers
+..summary:Connects an empty @Spec.Index_QGram@ with a host text and a shape.
+..signature:intiIndex(index, _text, _shape)
+..param.index:@Spec.Index_QGram@
+..param._text:In case of RazerS a @Class.StringSet@ of the reads
+..param._shape:@Class.Shape@
+*/
+	template<
+		typename TReadSet,
+		typename TShape>
+	void intiIndex(
+			Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index,
+			TReadSet & _text,
+			TShape const & _shape)
+	{
+		SEQAN_CHECKPOINT
+
+		value(index.text) = _text;
+		index.shape = _shape;
+	}
+	
+	// TODO: doc
+	template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
+	inline void 
+	setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
+	{
+		SEQAN_CHECKPOINT
+
+		int blockSize = length(host(host(swift.swiftPatterns[0])));
+		int indexNo = readNo / blockSize;
+		int localReadNo = readNo % blockSize;
+
+		int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
+		if (minT > 1){
+			//::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
+			if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+			setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
+		}
+	}
 	
 	// iterates over the aligned read store and look for a certain begin position. should set break point in if clause
 	template <typename TFragmentStore>
@@ -112,34 +132,33 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 	
 	
-	// BLOCK_STORE
-	/**
-	 .Function.appendBlockStores:
-	 ..cat:Razers
-	 ..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-	 ..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
-	 ..param.store:@Class.FragmentStore@
-	 ..param.blockStores:@Class.String@ of @Class.FragmentStore@
-	 ..param.swiftPatternHandler:
-	 ..param.cnts:Counts
-	 ..param.options:RazerSOptions
-	 ..param.mode:RazerSMode
-	 */
+/**
+.Function.appendBlockStores:
+..cat:Razers
+..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
+..param.store:@Class.FragmentStore@
+..param.blockStores:@Class.String@ of @Class.FragmentStore@
+..param.swiftPatternHandler:@Class.ParallelSwiftPatternHandler@
+..param.cnts:Counts
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
 	template <
-	typename TFragmentStore,
-	typename TPatternHandler,
-	typename TCounts,
-	typename TRazerSOptions,
-	typename TRazerSMode >
+		typename TFragmentStore,
+		typename TPatternHandler,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TRazerSMode >
 	inline void
 	appendBlockStores(
-					  TFragmentStore			& store,
-					  String<TFragmentStore>	& blockStores,
-					  TPatternHandler			& swiftPatternHandler,
-					  TCounts					& cnts,
-					  TRazerSOptions			& options,
-					  TRazerSMode const		& mode
-					  ){
+			TFragmentStore			& store,
+			String<TFragmentStore>	& blockStores,
+			TPatternHandler			& swiftPatternHandler,
+			TCounts					& cnts,
+			TRazerSOptions			& options,
+			TRazerSMode const		& mode
+			){
 		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 		typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
@@ -182,160 +201,347 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 	}
 	
-	/*
-	///////////////////////////////////////
-	//
-	//
+#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+	
+/**
+.Class._ConvertedSwiftHit:
+..summary:Representation of a Swift hit containing the corresponding read ID and infix in the reference.
+..cat:Razers
+..signature:_ConvertedSwiftHit<TText>
+..param.TText:Text on which the @Spec.Infix@ is based on.
+*/
+	template <typename TText>
+	struct _ConvertedSwiftHit
+	{
+		typedef typename Infix<TText>::Type TInfix;
+
+		unsigned	readID;
+		TInfix		onContig;
+
+		_ConvertedSwiftHit(){}
+		
+		// TODO: better template
+		template <typename TSpec, typename THstkPos, typename TText2>
+		_ConvertedSwiftHit(_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> & other, TText2 & ref):
+			readID(other.ndlSeqNo),
+			onContig(getSwiftRange(other, ref))
+		{}
+
+	};
+
+/**
+.Function._collectHits:
+..cat:Razers
+..summary:Searches for new hits with the finder and pattern.
+Stops when the finder reaches its end or the threshold of total hits is surpassed.
+..signature:_collectHits(hits, totalHits, threshold, finder, pattern, windowSize)
+..param.hits:String of @Class._ConvertedSwiftHit@ to store the found hits
+..param.totalHits:Variable shared by all threads to know when to stop.
+..param.threshold:The function stops searching for new hits when totalHits surpasses this value.
+..param.finder:Swift finder.
+..param.pattern:Swift pattern.
+..param.windowSize:Window size @Function.windowFindNext@ is called with.
+*/
 	template <
-	typename TContigSeq, 
-	typename TReadIndex, 
-	typename TSwiftSpec,
-	typename TVerifier,
-	typename TRazerSOptions,
-	typename TRazerSMode >
-    void _goOverContigPipe(
-						   TContigSeq										& contigSeq,
-						   ParallelSwiftPatternHandler<String<
-						   Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
-						   String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
-						   TVerifier										& verifier,
-						   TRazerSOptions									& options,
-						   TRazerSMode const                               & mode)
+		typename TConvertedSwiftHitString,
+		typename TSwiftFinder,
+		typename TSwiftPattern>
+	bool _collectHits(
+			TConvertedSwiftHitString	& hits,
+			unsigned					& totalHits,
+			unsigned const				  threshold,
+			TSwiftFinder				& finder,
+			TSwiftPattern				& pattern,
+			unsigned const				  windowSize)
+	{
+		typedef typename TSwiftFinder::THitString				TSwiftHitString;
+		typedef typename Size<TConvertedSwiftHitString>::Type	TSize; 
+		typedef typename Host<TSwiftFinder>::Type				TText;
+		
+		// Get new hits till all threads together have enough.
+		bool sequenceLeft = true;
+		while(totalHits < threshold and sequenceLeft){
+			// Search for new hits.
+			sequenceLeft = windowFindNext(finder, pattern, windowSize);
+			TSwiftHitString oriHits = getSwiftHits(finder);
+			// Resize the hit string so it can hold the new hits
+			TSize oldSize = length(hits);
+			resize(hits, (oldSize + length(oriHits)));
+			// Convert hits and append them to the hit string for this block.
+			// Conversion is neccessary so that the hits can be sorted by the readID.
+			for(TSize hitID = 0; hitID < length(oriHits); ++hitID)
+				hits[oldSize + hitID] = _ConvertedSwiftHit<TText>(oriHits[hitID], host(finder));
+			
+			// Update the overall hit count so that the other threads know when to stop as well.
+			#pragma omp atomic
+			totalHits += length(oriHits);
+		}
+		return sequenceLeft;
+	}
+
+	// TODO: doku
+	template <
+		typename TText,
+		typename TReadSet,
+		typename TVerifier,
+		typename TRazerSOptions,
+		typename TRazerSMode>
+	bool _verifyHits(
+			StringSet<String<_ConvertedSwiftHit<TText> > >	& hits,
+			int const										  blockId,
+			TReadSet										& readSet,
+			String<TVerifier> 								& verifier,
+			TRazerSOptions									& options,
+			TRazerSMode const								& mode)
+	{
+		typedef String<_ConvertedSwiftHit<TText> >	THitString;
+		typedef typename Size<THitString>::Type		THitStringSize;
+		
+		THitString & myHits = hits[blockId];
+		
+		// go over all hits or till a different thread set a flag to stop
+		for(THitStringSize h = 0; h < length(myHits); ++h){
+			unsigned myId = (blockId * options.blockSize) + myHits[h].readID;
+			verifier[omp_get_thread_num()].m.readId = myId;
+			matchVerify(verifier[omp_get_thread_num()], myHits[h].onContig, myId, readSet, mode);
+
+			#pragma omp atomic
+			++options.countFiltration;
+		}
+		
+		//
+		
+		// check if other block has sufficient many hits left to steal work
+		
+		// if so
+			// stop that task
+			// sort the remaining hits, if they are not already sorted (flag)
+			// find a paritioning that works (maybe helper output to check size of the partitions)
+			
+		return true;
+	}
+
+
+	// TODO: doku
+	template <
+		typename TContigSeq, 
+		typename TReadIndex, 
+		typename TSwiftSpec,
+		typename TVerifier,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TFragmentStore,
+		typename TRazerSMode >
+	void _goOverContigFlex(
+			//TContigSeq										& contigSeq,
+			ParallelSwiftPatternHandler<String<
+				Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+			TVerifier										& verifier,
+			TCounts											& cnts,
+			TRazerSOptions									& options,
+			String<TFragmentStore>							& threadStores,
+			TFragmentStore									& store,
+			TRazerSMode const								& mode)
     {
 		
 		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
 		typedef typename TSwiftFinder::THitString		THitString;
-		typedef typename Value<THitString>::Type        TSwiftHit;
-        typedef typename Size<THitString>::Type         THitStringSize;
+		typedef typename Value<THitString>::Type		TSwiftHit;
+		typedef typename Size<THitString>::Type			THitStringSize;
+		typedef typename Host<TSwiftFinder>::Type		TText;
 		
-		unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
-		
-		omp_set_nested(1);
 		// use only core many threads
-#pragma omp parallel num_threads((int)options.numberOfBlocks)
-		
 		// go over contig sequence
-#pragma omp for schedule(static, 1)
-		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+		//#pragma omp parallel num_threads((int)options.numberOfCores)
 		{
+			// initialize before the while loop so that the memory does not need to be reallocated every time
+			StringSet<String<_ConvertedSwiftHit<TText> >, Owner<> > hits;
+			resize(hits, options.numberOfBlocks, Exact());
 			
-#pragma omp parallel num_threads(2)
+			// Number of hits that are colleced before the verification is started
+			unsigned threshold = 10000;
+			// To keep track if any block has some sequence left to cover.
+			bool sequenceLeft = true;
+			// To keep track which block is done and which not.
+			String<bool> blockSeqLeft;
+			fill(blockSeqLeft, options.numberOfBlocks, true, Exact());
 			
-			while(true){
+			// Collect hits, verify them and store them in the main store while there is sequence left to cover.
+			while(sequenceLeft)
+			{
+				// first: collect hits
+				// Number of hits collected in this iteration. Shared by all threads
+				// Updated in an atomic expression
+				unsigned totalHits = 0;
 				
-				bool stop = false;
-				THitString hits = getSwiftHits(swiftFinders[blockId]);				
-#pragma omp sections
+				sequenceLeft = false;
+				
+				// Go over sequence with blocks in parallel
+				#pragma omp parallel num_threads((int)options.numberOfCores)
+				#pragma omp for
+				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+					// Only use block if there is sequnce left.
+					// Otherwise findwindow next does unpredicted things.
+					if(blockSeqLeft[blockId]){
+						blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, threshold,
+							swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+						// if any of the block has sequnece left the while loops again
+						sequenceLeft |= blockSeqLeft[blockId];
+					}
+
+				/* Alternative to preceding parallel for
+				if used needs to be adjusted as the for loop is
+				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
-#pragma omp section
-					{
-						stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-						printf("filter: thread %d\n", omp_get_thread_num());
-					}
-#pragma omp section
-					{
-						// verify hits
-						for(THitStringSize h = 0; h < length(hits); ++h){
-							verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-							matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
-							++options.countFiltration;
-						}						
-						printf("verification: thread %d\n", omp_get_thread_num());
-					}
+					int blockId = omp_get_thread_num();
+					bool left = _collectHits(hits[blockId], totalHits, threshold, swiftFinders[blockId], 
+									swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
 					
+					#pragma omp atomic
+					sequenceLeft |= left;
 				}
+				*/
+				// second: combine sort hits by readId
+				// already partially sorted since the blocks are containing
 				
-				if(stop) break;
+				// third: verify the hits
+				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+					_verifyHits(hits, blockId, store.readSeqStore, verifier, options, mode);
+				
+				// clear hit strings
+				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+					clear(hits[blockId]);
+				
+				// fourth: get the matches from different thread stores and write them in the main one
+				appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+				
+				// clear thread stores
+				for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+					clear(threadStores[blockId].alignedReadStore);
+					clear(threadStores[blockId].alignQualityStore);
+				}
 			}
-			
-			// verify hits
-			THitString hits = getSwiftHits(swiftFinders[blockId]);
-			for(THitStringSize h = 0; h < length(hits); ++h){
-				verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-				matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
-				++options.countFiltration;
-			}
-			
-			// clear finders			
-			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 		}
+		// clear finders
+		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
+			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+	}
+
+/**
+.Function._mapSingleReadsToContigFlex:
+..cat:Razers
+..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+..signature:_mapSingleReadsToContigFlex(store, contigId, swiftPatterns, preprocessing, cnts, orientation, options, mode)
+..param.store:@Class.FragmentStore@
+..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
+..param.swiftPatternHandler: Handler for swift pattern
+..param.preprocessing: String with bit vector patterns for each read
+..param.cnts:Counts for statistics
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
+	template <
+		typename TFragmentStore, 
+		typename TReadIndex, 
+		typename TSwiftSpec, 
+		typename TPreprocessing,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TRazerSMode >
+    void _mapSingleReadsToContigFlex(
+		TFragmentStore										& store,
+		int													  contigId,
+		ParallelSwiftPatternHandler<String<
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
+		TPreprocessing										& preprocessing,
+		TCounts												& cnts,
+		char												  orientation,
+		TRazerSOptions										& options,
+		TRazerSMode const									& mode)
+    {
+		SEQAN_CHECKPOINT
+
+		// FILTRATION
+		typedef typename TFragmentStore::TContigSeq				TContigSeq;
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
+		typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
+		typedef typename Size<TSwiftFinder>::Type               TSwiftFinderSize;
+
+		// HITS
+		typedef typename TSwiftFinder::THitString				THitString;
+		typedef typename Value<THitString>::Type				TSwiftHit;
+		typedef typename Size<THitString>::Type					THitStringSize;
+
+		// VERIFICATION
+		typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >TSwiftPatterns;
+		typedef ParallelSwiftPatternHandler<TSwiftPatterns>		TSwiftPatternHandler;
+		typedef MatchVerifier <TFragmentStore, TRazerSOptions,
+			TRazerSMode, TPreprocessing,
+			TSwiftPatternHandler, TCounts >						TVerifier;
+		typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+		typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
+		typedef typename Size<TAlignedReadStore>::Type			TAlignedReadStoreSize;
+
+		// for verbose options
+		if (options._debugLevel >= 1)
+		{
+			::std::cerr << ::std::endl << "Process genome seq #" << contigId;
+			if (orientation == 'F') ::std::cerr << "[fwd]" << std::endl;
+			else                    ::std::cerr << "[rev]" << std::endl;
+		}
+
+		// lock contig
+		lockContig(store, contigId);
+		TContigSeq &contigSeq = store.contigStore[contigId].seq;
+		if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+
+		// Finder and verifier strings of the same size as there are swift patterns
+		// One Swift finder, Swift pattern and verifier work together
+		String<TSwiftFinder> swiftFinders;
+		resize(swiftFinders, options.numberOfBlocks, Exact());
+		// The finders are the same for each block as they only depend on the reference.
+		// Separate ones are needed nevertheless as they form a pair with the patterns.
+		TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
+		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+			swiftFinders[blockId] = swiftFinder;
+
+		// Create a verifier for each thread. This way each thread gets its own store to dump the matches in.
+		// As consequence the dumping does not need to be critical
+		String<TVerifier> verifier;
+		resize(verifier, options.numberOfCores, Exact());
 		
-	}*/
-	/*
-	 template<typename THitString, typename TVerifier>
-	 void verifyHitString(THitString & hits, TVerifier & verifier){
-	 
-	 // verify hits
-	 for(THitStringSize h = 0; h < length(hits); ++h){
-	 verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-	 matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
-	 ++options.countFiltration;
-	 }						
-	 }
-	 
-	 }
-	 
-	 ///////////////////////////////////////
-	 //
-	 //
-	 
-	 template <
-	 typename TContigSeq, 
-	 typename TReadIndex, 
-	 typename TSwiftSpec,
-	 typename TVerifier,
-	 typename TRazerSOptions,
-	 typename TRazerSMode >
-	 void _goOverContigPipe2(
-	 TContigSeq										& contigSeq,
-	 ParallelSwiftPatternHandler<String<
-	 Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
-	 String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
-	 TVerifier										& verifier,
-	 TRazerSOptions									& options,
-	 TRazerSMode const                               & mode)
-	 {
-	 
-	 typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
-	 typedef typename TSwiftFinder::THitString		THitString;
-	 typedef typename Value<THitString>::Type        TSwiftHit;
-	 typedef typename Size<THitString>::Type         THitStringSize;
-	 
-	 unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
-	 
-	 omp_set_nested(1);
-	 
-	 // use only core many threads
-	 #pragma omp parallel num_threads((int)options.numberOfCores)
-	 
-	 // go over contig sequence
-	 #pragma omp for schedule(static, 1)
-	 for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-	 {
-	 while(true){
-	 
-	 bool stop = false;
-	 THitString hits = getSwiftHits(swiftFinders[blockId]);
-	 
-	 stop = not windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-	 
-	 #pragma omp task 
-	 {
-	 
-	 
-	 
-	 if(stop) break;
-	 }
-	 
-	 // clear finders			
-	 windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
-	 }
-	 
-	 }*/
+		// A temporary store for every block. They are emptied after each verification step
+		String<TFragmentStore> threadStores;
+		resize(threadStores, options.numberOfCores , Exact());
+		for(int threadId = 0; threadId < (int)options.numberOfCores; ++threadId){
+			// initialize verifier
+			TVerifier oneVerifier(threadStores[threadId], options, preprocessing, swiftPatternHandler, cnts);
+			oneVerifier.onReverseComplement = (orientation == 'R');
+			oneVerifier.genomeLength = length(contigSeq);
+			oneVerifier.m.contigId = contigId;
+			// assign it to the string
+			verifier[threadId] = oneVerifier;
+		}
+
+		// Set up finder. beginOK is true after the loop if all finders are set up successfully.
+		bool beginOk = true;
+		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+			beginOk = beginOk & windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
+			if(not beginOk) break;
+		}
+
+		// Only if the finders are set up.
+		if(beginOk)
+			_goOverContigFlex(swiftPatternHandler, swiftFinders, verifier,
+								cnts, options, threadStores, store, mode);
+		
+		if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
+		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+	}
+
+#else // not RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
 	
-	///////////////////////////////////////
-	//
-	//
 	template <
 	typename TContigSeq, 
 	typename TReadIndex, 
@@ -347,24 +553,24 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 	typename TRazerSMode >
     void _goOverContig(
-					   TContigSeq										& contigSeq,
-					   ParallelSwiftPatternHandler<String<
-					   Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
-					   String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
-					   TVerifier										& verifier,
-					   TRazerSOptions									& options,
+			TContigSeq										& contigSeq,
+			ParallelSwiftPatternHandler<String<
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+			TVerifier										& verifier,
+			TRazerSOptions									& options,
 #ifdef RAZERS_TIMER
-					   TFragmentStore									& store,
-					   unsigned										  contigId,
-					   char											  orientation,
+			TFragmentStore									& store,
+			unsigned										  contigId,
+			char											  orientation,
 #endif
-					   TRazerSMode const                               & mode)
+			TRazerSMode const                               & mode)
     {
 		
-		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >	TSwiftFinder;
 		typedef typename TSwiftFinder::THitString		THitString;
-		typedef typename Value<THitString>::Type        TSwiftHit;
-        typedef typename Size<THitString>::Type         THitStringSize;
+		typedef typename Value<THitString>::Type		TSwiftHit;
+		typedef typename Size<THitString>::Type			THitStringSize;
 		
 		unsigned blockSize = length(host(host(swiftPatternHandler.swiftPatterns[0])));
 #ifdef RAZERS_TIMER
@@ -439,8 +645,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				#ifdef _OPENMP
 				waitingTimes[omp_get_thread_num()] = sysTime();
 				#endif
-// in not RAZERS_TIMER
-#else
+// not RAZERS_TIMER
+#else 
 				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
 				
 				// verify hits
@@ -470,29 +676,29 @@ namespace SEQAN_NAMESPACE_MAIN
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 	}
 	
-    
-	/**
-	 .Function._mapSingleReadsToContig:
-	 ..cat:Razers
-	 ..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-	 ..signature:_mapSingleReadsToContig(store, contigId, swiftPatterns, preprocessingBlocks, cnts, orientation, options, mode)
-	 ..param.store:@Class.FragmentStore@
-	 ..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
-	 ..param.swiftPatternHandler: Handler for swift pattern
-	 ..param.preprocessingBlocks: String of infixes of a string with bit vector patterns for each read
-	 ..param.cnts:Counts for statistics
-	 ..param.options:RazerSOptions
-	 ..param.mode:RazerSMode
-	 */
-    template <
-	typename TFragmentStore, 
-	typename TReadIndex, 
-	typename TSwiftSpec, 
-	typename TPreprocessing,
-	typename TCounts,
-	typename TRazerSOptions,
-	typename TRazerSMode >
-    void _mapSingleReadsToContig(
+
+/**
+.Function._mapSingleReadsToContig:
+..cat:Razers
+..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
+..signature:_mapSingleReadsToContig(store, contigId, swiftPatterns, preprocessingBlocks, cnts, orientation, options, mode)
+..param.store:@Class.FragmentStore@
+..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
+..param.swiftPatternHandler: Handler for swift pattern
+..param.preprocessingBlocks: String of infixes of a string with bit vector patterns for each read
+..param.cnts:Counts for statistics
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
+	template <
+		typename TFragmentStore, 
+		typename TReadIndex, 
+		typename TSwiftSpec, 
+		typename TPreprocessing,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TRazerSMode >
+	void _mapSingleReadsToContig(
 			TFragmentStore                                     & store,
 			unsigned                                             contigId,				// ... and its sequence number
 			ParallelSwiftPatternHandler<String<Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
@@ -501,79 +707,78 @@ namespace SEQAN_NAMESPACE_MAIN
 			char                                                 orientation,			// q-gram index of reads
 			TRazerSOptions                                     & options,
 			TRazerSMode const                                  & mode)
-    {
-        SEQAN_CHECKPOINT
-        
-        // FILTRATION
-        typedef typename TFragmentStore::TContigSeq				TContigSeq;
-        typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
-        typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
-        typedef typename Size<TSwiftFinder>::Type               TSwiftFinderSize;
-		
-        // HITS
-        typedef typename TSwiftFinder::THitString               THitString;
+	{
+		SEQAN_CHECKPOINT
+
+		// FILTRATION
+		typedef typename TFragmentStore::TContigSeq				TContigSeq;
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
+		typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
+		typedef typename Size<TSwiftFinder>::Type               TSwiftFinderSize;
+
+		// HITS
+		typedef typename TSwiftFinder::THitString               THitString;
 		typedef typename Value<THitString>::Type                TSwiftHit;
-        typedef typename Size<THitString>::Type                 THitStringSize;
-        
-        // VERIFICATION
-        typedef typename Value<TPreprocessing>::Type                                TPreprocessingBlock;
-        typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                    TSwiftPatterns;
-        typedef ParallelSwiftPatternHandler<TSwiftPatterns>                         TSwiftPatternHandler;
-        typedef MatchVerifier <TFragmentStore, TRazerSOptions,
+		typedef typename Size<THitString>::Type                 THitStringSize;
+
+		// VERIFICATION
+		typedef typename Value<TPreprocessing>::Type                                TPreprocessingBlock;
+		typedef String<Pattern<TReadIndex, Swift<TSwiftSpec> > >                    TSwiftPatterns;
+		typedef ParallelSwiftPatternHandler<TSwiftPatterns>                         TSwiftPatternHandler;
+		typedef MatchVerifier <TFragmentStore, TRazerSOptions,
 		TRazerSMode, TPreprocessingBlock,
 		TSwiftPatternHandler, TCounts >									TVerifier;
-        typedef typename Fibre<TReadIndex, Fibre_Text>::Type                        TReadSet;
+		typedef typename Fibre<TReadIndex, Fibre_Text>::Type                        TReadSet;
 		typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type		TAlignedReadStoreSize;
-        
-        if (options._debugLevel >= 1)
-        {
-            ::std::cerr << ::std::endl << "Process genome seq #" << contigId;
-            if (orientation == 'F') ::std::cerr << "[fwd]" << std::endl;
-            else                    ::std::cerr << "[rev]" << std::endl;
-        }
-        
-        lockContig(store, contigId);
-        TContigSeq &contigSeq = store.contigStore[contigId].seq;
-        if (orientation == 'R')	reverseComplementInPlace(contigSeq);
-        
-        // Finder and verifier strings of the same size as there are swift patterns
-        // One Swift finder, Swift pattern and verifier work together
-        String<TSwiftFinder> swiftFinders;
-        resize(swiftFinders, options.numberOfBlocks, Exact());
-        TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
-		
-        String<TVerifier> verifier;
-        resize(verifier, options.numberOfBlocks, Exact());
+
+		if (options._debugLevel >= 1)
+		{
+			::std::cerr << ::std::endl << "Process genome seq #" << contigId;
+			if (orientation == 'F') ::std::cerr << "[fwd]" << std::endl;
+			else                    ::std::cerr << "[rev]" << std::endl;
+		}
+
+		lockContig(store, contigId);
+		TContigSeq &contigSeq = store.contigStore[contigId].seq;
+		if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+
+		// Finder and verifier strings of the same size as there are swift patterns
+		// One Swift finder, Swift pattern and verifier work together
+		String<TSwiftFinder> swiftFinders;
+		resize(swiftFinders, options.numberOfBlocks, Exact());
+		TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
+
+		String<TVerifier> verifier;
+		resize(verifier, options.numberOfBlocks, Exact());
 		
 		// BLOCK_STORE
 		// a temporary store for every block. reduces the critical region in pushing verified hit to an atomic ID increment
 		String<TFragmentStore> blockStores;
 		resize(blockStores, options.numberOfBlocks, Exact());
-        
-        for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-            // initialize finders
-            swiftFinders[blockId] = swiftFinder;
-			
-			// BLOCK_STORE
-            // initialize verifier
+ 
+		 for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+			// initialize finders
+			swiftFinders[blockId] = swiftFinder;
+
+			// initialize verifier
 			TVerifier oneVerifier(blockStores[blockId], options, preprocessingBlocks[blockId], swiftPatternHandler, cnts);
-            oneVerifier.onReverseComplement = (orientation == 'R');
-            oneVerifier.genomeLength = length(contigSeq);
-            oneVerifier.m.contigId = contigId;
-            
-            verifier[blockId] = oneVerifier;
-        }
-        
-        bool beginOk = true;
-        
-        // set up finder
-        for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-            beginOk = beginOk & windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
+			oneVerifier.onReverseComplement = (orientation == 'R');
+			oneVerifier.genomeLength = length(contigSeq);
+			oneVerifier.m.contigId = contigId;
+
+			verifier[blockId] = oneVerifier;
+		}
+
+		bool beginOk = true;
+
+		// set up finder
+		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+			beginOk = beginOk & windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
 			if(not beginOk) break;
-        }
-        
-        // if started correctly
-        if(beginOk){
+		}
+
+		// if started correctly
+		if(beginOk){
 #ifndef RAZERS_TIMER
 			_goOverContig(contigSeq, swiftPatternHandler, swiftFinders, verifier, options, mode);
 #else
@@ -584,222 +789,236 @@ namespace SEQAN_NAMESPACE_MAIN
 			appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode);
         }
 		
-        if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
-            if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
-    }
-    
-    // TODO: doc
-    //////////////////////////////////////////////////////////////////////////////
-    // Find read matches in many genome sequences
-    template <
-	typename TFSSpec, 
-	typename TFSConfig, 
-	typename TCounts,
-	typename TSpec, 
-	typename TAlignMode,
-	typename TGapMode,
-	typename TScoreMode,
-	typename TReadIndexString>
-    int _mapSingleReadsParallel(
+		if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
+			if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+	}
+#endif // end else: not RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+	
+/**
+.Function._mapSingleReadsParallelCreatePatterns:
+..cat:Razers
+..summary:Creates @Class.Pattern@s for the filtration (@Class.SwiftLocal@) and verification (@Class.Myers@)
+..signature:_mapSingleReadsParallelCreatePatterns(store, cnts, options, mode, readIndices)
+..param.store:@Class.FragmentStore@
+..param.cnts:Counts for statistics
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+..param.readIndices:@Class.String@ over @Class.Index_QGram@
+*/
+	template <
+		typename TFSSpec, 
+		typename TFSConfig, 
+		typename TCounts,
+		typename TSpec, 
+		typename TAlignMode,
+		typename TGapMode,
+		typename TScoreMode,
+		typename TReadIndexString>
+	int _mapSingleReadsParallelCreatePatterns(
 			FragmentStore<TFSSpec, TFSConfig>					& store,
 			TCounts												& cnts,
 			RazerSOptions<TSpec>								& options,
 			RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
 			TReadIndexString									& readIndices)
-    {
-        SEQAN_CHECKPOINT
-        
-        typedef FragmentStore<TFSSpec, TFSConfig>                   TFragmentStore;
-        typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
-        typedef typename Value<TReadIndexString>::Type              TReadIndex;
-        
-        // filter
-        typedef Pattern<TReadIndex, Swift<TSwiftSpec> >             TSwiftPattern;
+	{
+		SEQAN_CHECKPOINT
+
+		typedef FragmentStore<TFSSpec, TFSConfig>                   TFragmentStore;
+		typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+		typedef typename Value<TReadIndexString>::Type              TReadIndex;
+
+		// filter
+		typedef Pattern<TReadIndex, Swift<TSwiftSpec> >             TSwiftPattern;
 		typedef String<TSwiftPattern>								TSwiftPatterns;
 		typedef ParallelSwiftPatternHandler<TSwiftPatterns>         TSwiftPatternHandler;
-        
-        // verifier
-        typedef Pattern<TRead, MyersUkkonen>                        TMyersPattern;
-        typedef typename Infix<String<TMyersPattern> >::Type        TVerifierBlock;
-        typedef typename Position<TReadIndexString>::Type           TPos;
-		
-        // configure Swift patterns
-        TSwiftPatterns swiftPatterns;
-        
-        resize(swiftPatterns, options.numberOfBlocks, Exact());
-        for (TPos blockId = 0; blockId < options.numberOfBlocks; ++blockId) {
-            assign(swiftPatterns[blockId].data_host, readIndices[blockId]);
-            swiftPatterns[blockId].params.minThreshold = options.threshold;
-            swiftPatterns[blockId].params.tabooLength = options.tabooLength;
+
+		// verifier
+		typedef Pattern<TRead, MyersUkkonen>                        TMyersPattern;
+		typedef typename Infix<String<TMyersPattern> >::Type        TVerifierBlock;
+		typedef typename Position<TReadIndexString>::Type           TPos;
+
+		// configure Swift patterns
+		TSwiftPatterns swiftPatterns;
+
+		resize(swiftPatterns, options.numberOfBlocks, Exact());
+		for (TPos blockId = 0; blockId < options.numberOfBlocks; ++blockId) {
+			assign(swiftPatterns[blockId].data_host, readIndices[blockId]);
+			swiftPatterns[blockId].params.minThreshold = options.threshold;
+			swiftPatterns[blockId].params.tabooLength = options.tabooLength;
 			swiftPatterns[blockId].params.printDots = (blockId == 0) and (options._debugLevel > 0);
-        }
+		}
+
 		// use pattern handler instead of pattern to have access to the global read ID
-        TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
+		TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
+
+		// init edit distance verifiers
+		unsigned readCount = length(store.readSeqStore);
+		String<TMyersPattern> forwardPatterns;
+		resize(forwardPatterns, readCount, Exact());
+
+		options.compMask[4] = (options.matchN)? 15: 0;
+		if (options.gapMode == RAZERS_GAPPED){
+			resize(forwardPatterns, readCount, Exact());
+			for(unsigned i = 0; i < readCount; ++i){
+				setHost(forwardPatterns[i], store.readSeqStore[i]);
+				_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
+				_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
+			}
+		}
 		
-        // init edit distance verifiers
-        unsigned readCount = length(store.readSeqStore);
-        String<TMyersPattern> forwardPatterns;
-        resize(forwardPatterns, readCount, Exact());
-        
-        options.compMask[4] = (options.matchN)? 15: 0;
-        if (options.gapMode == RAZERS_GAPPED)
-        {
-            resize(forwardPatterns, readCount, Exact());
-            for(unsigned i = 0; i < readCount; ++i)
-            {
-                setHost(forwardPatterns[i], store.readSeqStore[i]);
-                _patternMatchNOfPattern(forwardPatterns[i], options.matchN);
-                _patternMatchNOfFinder(forwardPatterns[i], options.matchN);
-            }
-        }
-        
-        // divide the verification Patterns in the same blocks as the filters
-        String<TVerifierBlock> forwardPatternsBlocks;
-        resize(forwardPatternsBlocks, options.numberOfBlocks, Exact());
-        TPos offSet = 0;
-        for (TPos blockId = 0; blockId < options.numberOfBlocks; ++blockId){
-            // block of the same size as the corresponding index (number of reads in this index)
-            unsigned blockSize = length(host(readIndices[blockId]));
-            TVerifierBlock block = infix(forwardPatterns, offSet, offSet + blockSize);            
-            forwardPatternsBlocks[blockId] = block;
-            offSet += blockSize;
-        }
-        
-        if (options.maqMapping)
-        {
-            resize(cnts, 2);
-            for (unsigned i = 0; i < length(cnts); ++i)
-                fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
-        }
-        
-        // clear stats
-        options.countFiltration = 0;
-        options.countVerification = 0;
-        options.timeMapReads = 0;
-        options.timeDumpResults = 0;
-        SEQAN_PROTIMESTART(find_time);
+#ifndef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+		// divide the verification Patterns in the same blocks as the filters
+		String<TVerifierBlock> forwardPatternsBlocks;
+		resize(forwardPatternsBlocks, options.numberOfBlocks, Exact());
+		TPos offSet = 0;
+		for (TPos blockId = 0; blockId < options.numberOfBlocks; ++blockId){
+			// block of the same size as the corresponding index (number of reads in this index)
+			unsigned blockSize = length(host(readIndices[blockId]));
+			TVerifierBlock block = infix(forwardPatterns, offSet, offSet + blockSize);            
+			forwardPatternsBlocks[blockId] = block;
+			offSet += blockSize;
+		}
+#endif
+
+		if (options.maqMapping){
+			resize(cnts, 2);
+			for (unsigned i = 0; i < length(cnts); ++i)
+				fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
+		}
+
+		// clear stats
+		options.countFiltration = 0;
+		options.countVerification = 0;
+		options.timeMapReads = 0;
+		options.timeDumpResults = 0;
+		SEQAN_PROTIMESTART(find_time);
 		
 #ifdef RAZERS_TIMER
 		// print header line for timer
 		std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\tmatches\n";
 		std::cout << "waiting>\tthread\ttime\n";
 #endif
-        	
-        // iterate over genome sequences
-        for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
-        {
-            // lock to prevent releasing and loading the same contig twice
-            // (once per _mapSingleReadsToContig call)
-            lockContig(store, contigId);
-            if (options.forward)
-                _mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'F', options, mode);
-            
-            if (options.reverse)
-                _mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
-            unlockAndFreeContig(store, contigId);
-        }
-        
-        options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
-        if (options._debugLevel >= 1)
-            ::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
-        if (options._debugLevel >= 2) {
-            ::std::cerr << ::std::endl;
-            ::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
-            ::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
-            ::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
-        }
-        return 0;
-    }
-    
-    // TODO: doc
-    template <
-	typename TFSSpec, 
-	typename TFSConfig, 
-	typename TCounts,
-	typename TSpec, 
-	typename TShape,
-	typename TAlignMode,
-	typename TGapMode,
-	typename TScoreMode >
-    int _mapSingleReadsParallel(
+
+		// iterate over genome sequences
+		for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId){
+			// lock to prevent releasing and loading the same contig twice
+			// (once per _mapSingleReadsToContig call)
+			lockContig(store, contigId);
+			if (options.forward){
+				#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, mode);
+				#else
+				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'F', options, mode);
+				#endif
+			}
+			if (options.reverse){
+				#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, mode);
+				#else
+				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
+				#endif
+			}
+			unlockAndFreeContig(store, contigId);
+		}
+
+		// output for verbose and very verbose options
+		options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
+		if (options._debugLevel >= 1)
+			::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
+		if (options._debugLevel >= 2) {
+			::std::cerr << ::std::endl;
+			::std::cerr << "___FILTRATION_STATS____" << ::std::endl;
+			::std::cerr << "Filtration counter:      " << options.countFiltration << ::std::endl;
+			::std::cerr << "Successful verfications: " << options.countVerification << ::std::endl;
+		}
+		return 0;
+	}
+
+	// TODO: doc
+	template <
+		typename TFSSpec, 
+		typename TFSConfig, 
+		typename TCounts,
+		typename TSpec, 
+		typename TShape,
+		typename TAlignMode,
+		typename TGapMode,
+		typename TScoreMode >
+	int _mapSingleReadsParallel(
 			FragmentStore<TFSSpec, TFSConfig>					& store,
 			TCounts												& cnts,
 			RazerSOptions<TSpec>								& options,
 			TShape const										& shape,
-			RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
-    {
-        SEQAN_CHECKPOINT
-        
-        typedef FragmentStore<TFSSpec, TFSConfig>                       TFragmentStore;
-        typedef typename TFragmentStore::TReadSeqStore                  TReadSeqStore;
-        typedef typename Value<TReadSeqStore>::Type                     TRead;
-        typedef StringSet<TRead>                                        TReadSet;
-        typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
-        typedef typename Size<TReadSeqStore>::Type                      TSize;
-        
-        // number of cores and how many blocks there should be
-        // a block is a subset of reads that is filtered and verified in a row
-        // depending on how long it takes to process the individual blocks a single
-        // thread might work through more than otheres
-        unsigned cores = options.numberOfCores;
-#ifdef RAZERS_PARALLEL_READS_WHOLE_GENOME
-		// does not make sence to split up further in this case
-		options.blocksPerCore = 1;
-#endif
-        options.numberOfBlocks = cores * options.blocksPerCore;
-        
-        if (options._debugLevel >= 1){
-            ::std::cerr << ::std::endl << "Number of cores:                 \t" << cores << std::endl;
-            ::std::cerr <<                "Number of blocks:                \t" << options.numberOfBlocks << " (" << cores << " x " << options.blocksPerCore << ")" << std::endl;
-        }
-        
-        // compare with noOfBlocks, there needs to be at least one read per block
-        if(length(store.readSeqStore) < options.numberOfBlocks)
-            options.numberOfBlocks = length(store.readSeqStore);
-        
-        // if there are not enough reads that the parallel version makes sence use the normal one
-        if(length(store.readSeqStore) < 10) // TODO: usefull number
-            return _mapSingleReads(store, cnts, options, shape, mode);
-        else {
-            // number of reads per block
-            unsigned perBlock = length(store.readSeqStore) / options.numberOfBlocks;
-            unsigned perBlockRemainder = length(store.readSeqStore) % options.numberOfBlocks;
-            
-            String<TIndex> indices;
-            resize(indices, options.numberOfBlocks, Exact());
-            
-            int readID = 0;
-            // create swift indices that can work in parallel
-            for (unsigned blockID = 0; blockID < options.numberOfBlocks; ++blockID) {
-                TReadSet readSet;
-                
-                // the last one gets some extra
-                if((blockID == options.numberOfBlocks - 1) && (perBlockRemainder != 0)){
-                    resize(readSet, perBlock + perBlockRemainder, Exact());
-                } else {
-                    resize(readSet, perBlock, Exact());
-                }
-                
-                // get a subset of reads from the store
-                for (unsigned i = 0; i < length(readSet); ++i) {
-                    assign(readSet[i], store.readSeqStore[readID]);
-                    ++readID;
-                }
-                
-                // configure q-gram index
-                intiIndex(indices[blockID], readSet, shape);
-#ifdef RAZERS_OPENADDRESSING
+			RazerSMode<TAlignMode, TGapMode, TScoreMode>  const	& mode)
+	{
+		SEQAN_CHECKPOINT
+
+		typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
+		typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
+		typedef typename Value<TReadSeqStore>::Type						TRead;
+		typedef StringSet<TRead>										TReadSet;
+		typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
+		typedef typename Size<TReadSeqStore>::Type						TSize;
+
+		// number of cores and how many blocks there should be
+		// a block is a subset of reads that is filtered and verified in a row
+		// depending on how long it takes to process the individual blocks a single
+		// thread might work through more than otheres
+		unsigned cores = options.numberOfCores;
+
+		options.numberOfBlocks = cores * options.blocksPerCore;
+
+		if (options._debugLevel >= 1){
+			::std::cerr << ::std::endl << "Number of cores:                 \t" << cores << std::endl;
+			::std::cerr <<                "Number of blocks:                \t" << options.numberOfBlocks << " (" << cores << " x " << options.blocksPerCore << ")" << std::endl;
+		}
+
+		// compare with noOfBlocks, there needs to be at least one read per block
+		if(length(store.readSeqStore) < options.numberOfBlocks)
+			options.numberOfBlocks = length(store.readSeqStore);
+
+		// if there are not enough reads that the parallel version makes sence use the normal one
+		if(length(store.readSeqStore) < 10) // TODO: usefull number
+			return _mapSingleReads(store, cnts, options, shape, mode);
+		else {
+			// number of reads per block
+			unsigned perBlock = length(store.readSeqStore) / options.numberOfBlocks;
+			options.blockSize = perBlock;
+			unsigned perBlockRemainder = length(store.readSeqStore) % options.numberOfBlocks;
+
+			String<TIndex> indices;
+			resize(indices, options.numberOfBlocks, Exact());
+
+			int readID = 0;
+			// create swift indices that can work in parallel
+			for (unsigned blockID = 0; blockID < options.numberOfBlocks; ++blockID) {
+				TReadSet readSet;
+
+				// the last one gets some extra
+				if((blockID == options.numberOfBlocks - 1) && (perBlockRemainder != 0))
+					resize(readSet, perBlock + perBlockRemainder, Exact());
+				else
+					resize(readSet, perBlock, Exact());
+
+				// get a subset of reads from the store
+				for (unsigned i = 0; i < length(readSet); ++i) {
+					assign(readSet[i], store.readSeqStore[readID]);
+					++readID;
+				}
+			
+				// configure q-gram indices
+				intiIndex(indices[blockID], readSet, shape);
+				#ifdef RAZERS_OPENADDRESSING
 				indices[blockID].alpha = options.loadFactor;
-#endif
-                cargo(indices[blockID]).abundanceCut = options.abundanceCut;
-                cargo(indices[blockID])._debugLevel = options._debugLevel;
-            }
-            
-            return _mapSingleReadsParallel(store, cnts, options, mode, indices);
-        }
-		
-    }
-    
+				#endif
+				cargo(indices[blockID]).abundanceCut = options.abundanceCut;
+				cargo(indices[blockID])._debugLevel = options._debugLevel;
+				// build index
+				//indexRequire(indices[blockID], QGram_SADir());
+			}
+			return _mapSingleReadsParallelCreatePatterns(store, cnts, options, mode, indices);
+		}	
+	}
 }
 
 #endif
