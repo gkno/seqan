@@ -534,7 +534,7 @@ void testFind2_ExactPattern_SetBeginPositionLongNeedle() {
     // Set begin position to a hit.
     ret = setBeginPosition(finder, pattern, 0);
     SEQAN_ASSERT_TRUE(ret);
-    SEQAN_ASSERT_EQ(129, endPosition(finder));
+    SEQAN_ASSERT_EQ(129u, endPosition(finder));
     SEQAN_ASSERT_EQ(129u, endPosition(pattern));
 
     ret = findBegin(finder, pattern);

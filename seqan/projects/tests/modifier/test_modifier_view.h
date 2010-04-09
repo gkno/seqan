@@ -199,7 +199,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_upper_case) {
 
     SEQAN_ASSERT_EQ(length(kExpectedResult), length(modifiedStr));
     for (size_t i = 0; i < length(originalStr); ++i)
-        SEQAN_ASSERT_EQ(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
+        SEQAN_ASSERT_EQ_MSG(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
 
     // TODO(holtgrew): This does not compile.
 //     SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
@@ -224,7 +224,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_low_case) {
 
     SEQAN_ASSERT_EQ(length(kExpectedResult), length(modifiedStr));
     for (size_t i = 0; i < length(originalStr); ++i)
-        SEQAN_ASSERT_EQ(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
+        SEQAN_ASSERT_EQ_MSG(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
 
     // TODO(holtgrew): This does not compile.
 //     SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
@@ -248,7 +248,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_alphabet_conversion) {
 
     SEQAN_ASSERT_EQ(length(kExpectedResult), length(modifiedStr));
     for (size_t i = 0; i < length(originalStr); ++i)
-        SEQAN_ASSERT_EQ(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
+        SEQAN_ASSERT_EQ_MSG(kExpectedResult[i], modifiedStr[i], "i = %lu", i);
 
     // TODO(holtgrew): This does not compile.
 //     SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
@@ -289,7 +289,7 @@ SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
     SEQAN_ASSERT_EQ(expectedResult, originalStr);
 
     // TODO(holtgrew): convertInPlace as a const function does not make any sense.
-    SEQAN_ASSERT_TRUE(false, "convertInPlace() on const strings is just plain wrong!");
+    SEQAN_ASSERT_TRUE_MSG(false, "convertInPlace() on const strings is just plain wrong!");
     CharString const kOriginalStr = originalStr;
     convertInPlace(kOriginalStr, CaesarChiffre<char>(1));
     SEQAN_ASSERT_EQ(expectedResult, kOriginalStr);

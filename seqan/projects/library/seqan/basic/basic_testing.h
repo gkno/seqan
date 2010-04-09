@@ -770,26 +770,50 @@ namespace ClassTest {
     } while (false)
 
 
-// Equality assertion with an optional comment.
+// Equality assertion without a comment.
 //
 // Usage:  SEQAN_ASSERT_EQ(4, 4);
-// Usage:  SEQAN_ASSERT_EQ(4, 5, "Wheee...");
-#define SEQAN_ASSERT_EQ(_arg1, _arg2, ...)                              \
+#define SEQAN_ASSERT_EQ(_arg1, _arg2)                                   \
     do {                                                                \
         if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,          \
-                                              (_arg1), #_arg1,          \
-                                              (_arg2), #_arg2,          \
+                                           (_arg1), #_arg1,             \
+                                           (_arg2), #_arg2)) {          \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Equality assertion with a comment.
+//
+// Usage:  SEQAN_ASSERT_EQ(4, 4);
+#define SEQAN_ASSERT_EQ_MSG(_arg1, _arg2, ...)                          \
+    do {                                                                \
+        if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,          \
+                                           (_arg1), #_arg1,             \
+                                           (_arg2), #_arg2,             \
                                               ## __VA_ARGS__)) {        \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
 
-// Inequality assertion with an optional comment.
+// Inequality assertion without a comment.
 //
 // Usage:  SEQAN_ASSERT_NEQ(4, 5);
-// Usage:  SEQAN_ASSERT_NEQ(4, 4, "Wheee...");
-#define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...)                             \
+#define SEQAN_ASSERT_NEQ(_arg1, _arg2)                                  \
+    do {                                                                \
+        if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,       \
+                                              (_arg1), #_arg1,          \
+                                              (_arg2), #_arg2) {        \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Inequality assertion with a comment.
+//
+// Usage:  SEQAN_ASSERT_NEQ(4, 5);
+#define SEQAN_ASSERT_NEQ_MSG(_arg1, _arg2, ...)                         \
     do {                                                                \
         if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,       \
                                               (_arg1), #_arg1,          \
@@ -800,8 +824,19 @@ namespace ClassTest {
     } while (false)
 
 
-// Less-than-or-equal assertion with an optional comment.
-#define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...)                             \
+// Less-than-or-equal assertion without a comment.
+#define SEQAN_ASSERT_LEQ(_arg1, _arg2)                                  \
+    do {                                                                \
+        if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,            \
+                                         (_arg1), #_arg1,               \
+                                         (_arg2), #_arg2)) {            \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Less-than-or-equal assertion with a comment.
+#define SEQAN_ASSERT_LEQ_MSG(_arg1, _arg2, ...)                         \
     do {                                                                \
         if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,            \
                                          (_arg1), #_arg1,               \
@@ -812,20 +847,42 @@ namespace ClassTest {
     } while (false)
 
 
-// Less-than assertion with an optional comment.
-#define SEQAN_ASSERT_LT(_arg1, _arg2, ...)                              \
+// Less-than assertion without a comment.
+#define SEQAN_ASSERT_LT(_arg1, _arg2)                                   \
     do {                                                                \
         if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,             \
-                                           (_arg1), #_arg1,             \
-                                           (_arg2), #_arg2,             \
-                                           ## __VA_ARGS__)) {           \
+                                        (_arg1), #_arg1,                \
+                                        (_arg2), #_arg2)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
 
 
-// Greater-than-or-equal assertion with an optional comment.
-#define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...)                             \
+// Less-than assertion with a comment.
+#define SEQAN_ASSERT_LT_MSG(_arg1, _arg2, ...)                          \
+    do {                                                                \
+        if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,             \
+                                        (_arg1), #_arg1,                \
+                                        (_arg2), #_arg2,                \
+                                        ## __VA_ARGS__)) {              \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Greater-than-or-equal assertion without a comment.
+#define SEQAN_ASSERT_GEQ(_arg1, _arg2)                                  \
+    do {                                                                \
+        if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,            \
+                                         (_arg1), #_arg1,               \
+                                         (_arg2), #_arg2)) {            \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Greater-than-or-equal assertion with a comment.
+#define SEQAN_ASSERT_GEQ_MSG(_arg1, _arg2, ...)                         \
     do {                                                                \
         if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,            \
                                          (_arg1), #_arg1,               \
@@ -836,8 +893,19 @@ namespace ClassTest {
     } while (false)
 
 
-// Greater-than assertion with an optional comment.
-#define SEQAN_ASSERT_GT(_arg1, _arg2, ...)                              \
+// Greater-than assertion without a comment.
+#define SEQAN_ASSERT_GT(_arg1, _arg2)                                   \
+    do {                                                                \
+        if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,             \
+                                        (_arg1), #_arg1,                \
+                                        (_arg2), #_arg2)) {             \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// Greater-than assertion with a comment.
+#define SEQAN_ASSERT_GT_MSG(_arg1, _arg2, ...)                          \
     do {                                                                \
         if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,             \
                                         (_arg1), #_arg1,                \
@@ -849,11 +917,21 @@ namespace ClassTest {
 
 
 // TODO(holtgrew): Rename to SEQAN_TASSERT once that name is free.
-// Trueness assertion with an optional comment.
+// Trueness assertion with a comment.
 //
-// Usage:  SEQAN_ASSERT_TRUE(true, "Yay!");
 // Usage:  SEQAN_ASSERT_TRUE(false);
-#define SEQAN_ASSERT_TRUE(_arg1, ...)                                   \
+#define SEQAN_ASSERT_TRUE(_arg1)                                        \
+    do {                                                                \
+        if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
+                                          (_arg1), #_arg1)) {           \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// TODO(holtgrew): Rename to SEQAN_TASSERT once that name is free.
+// Trueness assertion with a comment.
+#define SEQAN_ASSERT_TRUE_MSG(_arg1, ...)                               \
     do {                                                                \
         if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
                                           (_arg1), #_arg1,              \
@@ -863,11 +941,20 @@ namespace ClassTest {
     } while (false)
 
 
-// Falseness assertion with an optional comment.
+// Falseness assertion without a comment.
 //
-// Usage:  SEQAN_ASSERT_NOT(true, "Yay!");
 // Usage:  SEQAN_ASSERT_NOT(false);
-#define SEQAN_ASSERT_NOT(_arg1, ...)                                  \
+#define SEQAN_ASSERT_NOT(_arg1)                                       \
+    do {                                                              \
+        if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,        \
+                                           (_arg1), #_arg1)) {        \
+            ::seqan::ClassTest::fail();                               \
+        }                                                             \
+    } while (false)
+
+
+// Falseness assertion with a comment.
+#define SEQAN_ASSERT_NOT_MSG(_arg1, ...)                              \
     do {                                                              \
         if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,        \
                                            (_arg1), #_arg1,           \
@@ -879,15 +966,24 @@ namespace ClassTest {
 
 #else  // #if SEQAN_ENABLE_DEBUG
 
-#define SEQAN_ASSERT_EQ(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_NEQ(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_LEQ(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_LT(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_GEQ(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_GT(_arg1, _arg2, ...) do {} while (false)
-#define SEQAN_ASSERT_TRUE(_arg1, ...) do {} while (false)
-#define SEQAN_ASSERT_NOT(_arg1, ...) do {} while (false)
-#define SEQAN_FAIL() do {} while (false)
+#define SEQAN_ASSERT_EQ(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_EQ_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_NEQ(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_NEQ_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_LEQ(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_LEQ_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_LT(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_LT_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_GEQ(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_GEQ_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_GT(_arg1, _arg2) do {} while (false)
+#define SEQAN_ASSERT_GT_MSG(_arg1, _arg2, ...) do {} while (false)
+#define SEQAN_ASSERT_TRUE(_arg1) do {} while (false)
+#define SEQAN_ASSERT_TRUE_MSG(_arg1, ...) do {} while (false)
+#define SEQAN_ASSERT_NOT(_arg1) do {} while (false)
+#define SEQAN_ASSERT_NOT_MSG(_arg1, ...) do {} while (false)
+#define SEQAN_FAIL(...) do {} while (false)
+#define SEQAN_FAIL_MSG() do {} while (false)
 
 #endif  // #if SEQAN_ENABLE_DEBUG
 
@@ -905,7 +1001,17 @@ void SEQAN_ASSERT_FAIL(const char *comment, ...)
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testEqual("", 0, _arg1, "", _arg2, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_EQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -915,7 +1021,17 @@ void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testNotEqual("", _arg1, "", _arg2, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_NEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -925,7 +1041,17 @@ void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testLeq("", 0, _arg1, "", _arg2, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -935,7 +1061,17 @@ void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testLt("", 0, _arg1, "", _arg2, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_LT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -955,7 +1091,17 @@ void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testGt("", 0, _arg1, "", _arg2, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -965,7 +1111,17 @@ void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 }
 
 template <typename T1>
-void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comment, ...)
+void SEQAN_ASSERT_TRUE(T1 const &_arg1)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testTrue("", 0, _arg1, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1>
+void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -975,7 +1131,17 @@ void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comment, ...)
 }
 
 template <typename T1>
-void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...)
+void SEQAN_ASSERT_NOT(T1 const &_arg1)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::testFalse("", 0, _arg1, ""))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
+template <typename T1>
+void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -987,68 +1153,28 @@ void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...)
 #else // #if SEQAN_ENABLE_DEBUG
 
 inline void SEQAN_ASSERT_FAIL(const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1, typename T2> void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
-template <typename T1> void SEQAN_ASSERT_TRUE(T1 const &_arg1, const char *comment, ...) {}
-template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_EQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_NEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_LT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2) {}
+template <typename T1, typename T2> void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
+template <typename T1> void SEQAN_ASSERT_TRUE(T1 const &_arg1) {}
+template <typename T1> void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...) {}
+template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1) {}
+template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...) {}
 
 #endif // #if SEQAN_ENABLE_DEBUG
 
 inline void SEQAN_ASSERT_FAIL()
 {
 	SEQAN_ASSERT_FAIL("");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_EQ(_arg1, _arg2, "");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_NEQ(_arg1, _arg2, "");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_LEQ(_arg1, _arg2, "");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_LT(_arg1, _arg2, "");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_GEQ(_arg1, _arg2, "");
-}
-
-template <typename T1, typename T2>
-void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2)
-{
-	SEQAN_ASSERT_GT(_arg1, _arg2, "");
-}
-
-template <typename T1>
-void SEQAN_ASSERT_TRUE(T1 const &_arg1)
-{
-	SEQAN_ASSERT_TRUE(_arg1, "");
-}
-
-template <typename T1>
-void SEQAN_ASSERT_NOT(T1 const &_arg1)
-{
-	SEQAN_ASSERT_NOT(_arg1, "");
 }
 
 #endif // no variadic macros

@@ -64,13 +64,13 @@ template <typename TString>struct ForAllNeedlesFunctor {
             while (true) {
                 bool resSimple = find(simpleFinder, simplePattern);
                 bool resHorspool = find(horspoolFinder, horspoolPattern);
-                SEQAN_ASSERT_EQ(resSimple, resHorspool, "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(resSimple, resHorspool, "i = %d", i);
                 if (!resSimple || !resHorspool)
                     break;
-                SEQAN_ASSERT_EQ(position(simpleFinder) + length(needle), endPosition(simpleFinder), "i = %d", i);
-                SEQAN_ASSERT_EQ(position(simpleFinder), position(horspoolFinder), "i = %d", i);
-                SEQAN_ASSERT_EQ(endPosition(simpleFinder), endPosition(horspoolFinder), "i = %d", i);
-                SEQAN_ASSERT_EQ(getScore(simplePattern), getScore(horspoolPattern), "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(position(simpleFinder) + length(needle), endPosition(simpleFinder), "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(position(simpleFinder), position(horspoolFinder), "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(endPosition(simpleFinder), endPosition(horspoolFinder), "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(getScore(simplePattern), getScore(horspoolPattern), "i = %d", i);
                 i += 1;
             }
         }

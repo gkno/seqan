@@ -106,7 +106,7 @@ setHost(Pattern<TNeedle, HammingHorspool> & me,
     SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_NOT(empty(needle));
-    SEQAN_ASSERT_LEQ(k_, 0, "Are you confusing distances and scores?");
+    SEQAN_ASSERT_LEQ_MSG(k_, 0, "Are you confusing distances and scores?");
 
     typedef typename Position<TNeedle>::Type TPosition;
     typedef typename Size<TNeedle>::Type TSize;

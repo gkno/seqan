@@ -43,9 +43,10 @@ template <typename TScore1, typename TScore2>
 void assertAminoAcidMatricesAreEqual(TScore1 const & mat1, TScore2 const & mat2) {
     for (AminoAcid a = 'A'; a <= '*'; ++a) {
         for (AminoAcid b = 'A'; b <= '*'; ++b) {
-            SEQAN_ASSERT_EQ(score(mat1, a, b), score(mat2, a, b),
-                            "a = %c, b = %c", static_cast<char>(a),
-                            static_cast<char>(b));
+            SEQAN_ASSERT_EQ_MSG(
+                    score(mat1, a, b), score(mat2, a, b),
+                    "a = %c, b = %c", static_cast<char>(a),
+                    static_cast<char>(b));
         }
     }
 }

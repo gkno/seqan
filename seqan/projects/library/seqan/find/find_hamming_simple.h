@@ -76,7 +76,7 @@ void setHost (Pattern<TNeedle, HammingSimple> & me,
     SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_NOT(empty(needle));
-    SEQAN_ASSERT_LEQ(k, 0, "Are you confusing distances and scores?");
+    SEQAN_ASSERT_LEQ_MSG(k, 0, "Are you confusing distances and scores?");
 
     setValue(me.data_host, needle);
     me.maxDistance = -k;

@@ -98,7 +98,7 @@ void _initFindBegin(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
     typedef String<TScoreValue> TMatrixColumn;
     typedef typename Iterator<TMatrixColumn>::Type TIterator;
 
-    SEQAN_ASSERT_EQ(scoreGapOpen(scoringScheme), scoreGapOpen(scoringScheme), "findBegin() only supports linear gap costs at the moment.");
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapOpen(scoringScheme), "findBegin() only supports linear gap costs at the moment.");
 
     // Assumption: The end position must have been found already!  The
     // caller has to ensure this.
@@ -147,7 +147,7 @@ bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
     typedef _ApproxFindBegin<TNeedle, TScore, True> TApproxFindBegin;
     typedef typename Position<TNeedle>::Type TPosition;
     typedef typename Value<TScore>::Type TScoreValue;
-    SEQAN_ASSERT_EQ(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme), "findBegin() only supports linear gap costs at the moment.");
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme), "findBegin() only supports linear gap costs at the moment.");
 
     // Finding the start of the match follows Seller's algorithm but
     // works from the right to the left.
@@ -203,6 +203,6 @@ bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
 	return false;
 }
 
-};
+}
 
 #endif  // SEQAN_FIND2_FIND_APPROX_DPSEARCH_

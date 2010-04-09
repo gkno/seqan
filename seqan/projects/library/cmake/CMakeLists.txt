@@ -125,9 +125,7 @@ include_directories (${SEQAN_LIBRARY})
 if (CMAKE_COMPILER_IS_GNUCXX)
   # For the GCC, enable warnings.
   set (CMAKE_CXX_WARNING_LEVEL 4)
-  # TODO(holtgrew): Add -pedantic.
-  #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-variadic-macros -pedantic")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-variadic-macros -pedantic")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)

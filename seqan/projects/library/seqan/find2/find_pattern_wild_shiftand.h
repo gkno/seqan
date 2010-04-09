@@ -312,7 +312,7 @@ enum _Find_WildShiftAnd_ParserStates {
     STATE_QUANTIFIER_BEGIN,           // Just read "{" from a quantifier.
     STATE_QUANTIFIER_NUM1,            // Read at least one character from the first number.
     STATE_QUANTIFIER_COMMA,           // Read comma, expecting first character of second number in quantifier.
-    STATE_QUANTIFIER_NUM2,            // Read at least one character from second number.
+    STATE_QUANTIFIER_NUM2             // Read at least one character from second number.
 };
 
 

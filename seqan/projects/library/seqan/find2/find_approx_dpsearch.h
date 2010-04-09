@@ -87,7 +87,7 @@ struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
     Pattern(TNeedle2 & needle, int scoreLimit)
         : _state(_FindState::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit) {
         SEQAN_CHECKPOINT;
-        SEQAN_ASSERT_EQ(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
+        SEQAN_ASSERT_EQ_MSG(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
     }
 
     template <typename TNeedle2>
@@ -95,7 +95,7 @@ struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
         : _state(_FindState::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit),
           _scoringScheme(scoringScheme) {
         SEQAN_CHECKPOINT;
-        SEQAN_ASSERT_EQ(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
+        SEQAN_ASSERT_EQ_MSG(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
     }
 };
 
@@ -446,8 +446,8 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     typedef Pattern<TNeedle, DPSearch<TScore, TDPSearchSpec, TSupportFindBegin> > TPattern;
     typedef typename Value<TScore>::Type TScoreValue;
     typedef typename Iterator<TNeedle, Standard>::Type TIterator;
-    SEQAN_ASSERT_LEQ(pos, length(haystack(finder)), "End position must be valid.");
-    SEQAN_ASSERT_EQ(scoreGapOpen(pattern._scoringScheme), scoreGapExtend(pattern._scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
+    SEQAN_ASSERT_LEQ_MSG(pos, length(haystack(finder)), "End position must be valid.");
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(pattern._scoringScheme), scoreGapExtend(pattern._scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
 
     // Get some shortcuts.
     TScore const & myScore = scoringScheme(pattern);

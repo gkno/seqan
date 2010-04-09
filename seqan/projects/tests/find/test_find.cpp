@@ -1272,7 +1272,7 @@ SEQAN_DEFINE_TEST(test_find_online_multi_MultiBFAM_Trie) {
 
 
 SEQAN_DEFINE_TEST(test_find_approx_prefix_edit_dist_dpsearch) {
-    SEQAN_ASSERT_TRUE(false, "TODO(holtgrew): Fix test_find_approx_prefix_edit_dist_dpsearch, segfaults.");
+    SEQAN_ASSERT_TRUE_MSG(false, "TODO(holtgrew): Fix test_find_approx_prefix_edit_dist_dpsearch, segfaults.");
     return;
     Test_Approx_Prefix_EditDist<DPSearch<Score<>, FindPrefix> >();
 }
@@ -1634,7 +1634,7 @@ SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
             
             SEQAN_ASSERT_EQ(length(positionsDpSearch), length(positionsMyers));
             for (unsigned i = 0; i < length(positionsMyers); ++i)
-                SEQAN_ASSERT_EQ(positionsDpSearch[i], positionsMyers[i], "i = %u", i);
+                SEQAN_ASSERT_EQ_MSG(positionsDpSearch[i], positionsMyers[i], "i = %u", i);
         }
     }
 }
