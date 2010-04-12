@@ -1002,11 +1002,8 @@ void SEQAN_ASSERT_FAIL(const char *comment, ...)
 template <typename T1, typename T2>
 void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testEqual("", 0, _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1, typename T2>
@@ -1022,11 +1019,8 @@ void SEQAN_ASSERT_EQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 template <typename T1, typename T2>
 void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testNotEqual("", _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1, typename T2>
@@ -1042,11 +1036,8 @@ void SEQAN_ASSERT_NEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment,
 template <typename T1, typename T2>
 void SEQAN_ASSERT_LEQ(T1 const &_arg1, T2 const &_arg2)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testLeq("", 0, _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1, typename T2>
@@ -1062,11 +1053,8 @@ void SEQAN_ASSERT_LEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment,
 template <typename T1, typename T2>
 void SEQAN_ASSERT_LT(T1 const &_arg1, T2 const &_arg2)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testLt("", 0, _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1, typename T2>
@@ -1080,7 +1068,14 @@ void SEQAN_ASSERT_LT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 }
 
 template <typename T1, typename T2>
-void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
+void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2)
+{
+	if (!::seqan::ClassTest::testGeq("", 0, _arg1, "", _arg2, "", comment, args))
+		::seqan::ClassTest::fail();
+}
+
+template <typename T1, typename T2>
+void SEQAN_ASSERT_GEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -1092,11 +1087,8 @@ void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2, const char *comment, ...
 template <typename T1, typename T2>
 void SEQAN_ASSERT_GT(T1 const &_arg1, T2 const &_arg2)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testGt("", 0, _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1, typename T2>
@@ -1112,11 +1104,8 @@ void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 template <typename T1>
 void SEQAN_ASSERT_TRUE(T1 const &_arg1)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testTrue("", 0, _arg1, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1>
@@ -1132,11 +1121,8 @@ void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...)
 template <typename T1>
 void SEQAN_ASSERT_NOT(T1 const &_arg1)
 {
-	va_list args;
-	va_start(args, comment);
 	if (!::seqan::ClassTest::testFalse("", 0, _arg1, ""))
 		::seqan::ClassTest::fail();
-	va_end(args);
 }
 
 template <typename T1>
