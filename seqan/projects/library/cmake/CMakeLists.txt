@@ -125,7 +125,20 @@ include_directories (${SEQAN_LIBRARY})
 if (CMAKE_COMPILER_IS_GNUCXX)
   # For the GCC, enable warnings.
   set (CMAKE_CXX_WARNING_LEVEL 4)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-variadic-macros -pedantic")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic")
+
+  # Determine GCC version.
+  message("Determining GCC version.")
+  EXEC_PROGRAM(${CMAKE_CXX_COMPILER}
+               ARGS --version
+               OUTPUT_VARIABLE _GCC_VERSION)
+  STRING(REGEX REPLACE ".* ([0-9])\\.([0-9])\\.([0-9]) .*" "\\1\\2\\3"
+         _GCC_VERSION ${_GCC_VERSION})
+  message("  GCC version is ${_GCC_VERSION}")
+
+  # Only add -Wno-variadic-macros if >= 420.
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
+  message("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
