@@ -760,7 +760,6 @@ namespace ClassTest {
 
 // Force a test failure.
 //
-// Usage:  SEQAN_ASSERT_FAIL();
 // Usage:  SEQAN_ASSERT_FAIL("Failed at position %d", pos);
 #define SEQAN_ASSERT_FAIL(...)                                          \
     do {                                                                \
@@ -1171,11 +1170,6 @@ template <typename T1> void SEQAN_ASSERT_NOT(T1 const &_arg1) {}
 template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...) {}
 
 #endif // #if SEQAN_ENABLE_DEBUG
-
-inline void SEQAN_ASSERT_FAIL()
-{
-	SEQAN_ASSERT_FAIL("");
-}
 
 #endif // no variadic macros
 
