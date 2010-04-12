@@ -136,12 +136,12 @@ if (CMAKE_COMPILER_IS_GNUCXX)
          _GCC_VERSION ${_GCC_VERSION})
   message("  GCC version is ${_GCC_VERSION}")
 
-  # Only add -Wno-variadic-macros if >= 420.
-  if (420 GREATER _GCC_VERSION)
-  else (420 GREATER _GCC_VERSION)
+  # Only add -Wno-variadic-macros if >= 400 and -Wno-long-long if < 400.
+  if (400 GREATER _GCC_VERSION)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
+  else (400 GREATER _GCC_VERSION)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
-    message("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
-  endif (420 GREATER _GCC_VERSION)
+  endif (400 GREATER _GCC_VERSION)
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
