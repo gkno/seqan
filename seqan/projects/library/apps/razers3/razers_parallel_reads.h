@@ -27,7 +27,7 @@
 #include <omp.h>
 #endif
 
-#define RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+//#define RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -215,6 +215,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Infix<TText>::Type TInfix;
 
+		static const unsigned accuracy = 100;
+
 		unsigned	readID;
 		TInfix		onContig;
 
@@ -226,7 +228,26 @@ namespace SEQAN_NAMESPACE_MAIN
 			readID(other.ndlSeqNo),
 			onContig(getSwiftRange(other, ref))
 		{}
-
+		/*
+		bool operator<(_ConvertedSwiftHit const & other){
+			return (readID / accuracy) < (other.readID / accuracy);
+		}
+		*/
+	};
+	
+	
+	struct _ConvertedSwiftHitComparison {
+		
+		unsigned accuracy;
+		
+		_ConvertedSwiftHitComparison(unsigned _accuracy):
+			accuracy(_accuracy)
+		{}
+		
+		template<typename TText>
+		bool operator() (_ConvertedSwiftHit<TText> i1, _ConvertedSwiftHit<TText> i2) {
+			return (i1.readID / accuracy) < (i2.readID / accuracy);
+		}
 	};
 
 /**
@@ -279,45 +300,189 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		return sequenceLeft;
 	}
 
+/**
+.Class._AssignmentDetail:
+..summary:Representation of a verification task.
+..cat:Razers
+..signature:_AssignmentDetail<TPos>
+..param.TPos: Type of the start and end positions
+*/
+	template <typename TPos>
+	struct _TaskDetails{
+		int blockId;
+		TPos current;
+		TPos end;
+		bool running;
+		bool split;
+		int splitWith;
+		bool sorted;
+		
+		_TaskDetails(){}
+		
+		_TaskDetails(int _blockId, TPos _end):
+			blockId(_blockId),
+			current(0),
+			end(_end),
+			running(true),
+			split(false),
+			splitWith(-1),
+			sorted(false)
+		{}
+		
+		_TaskDetails(int _blockId, TPos _start, TPos _end):
+			blockId(_blockId),
+			current(_start),
+			end(_end),
+			running(true),
+			split(false),
+			splitWith(-1),
+			sorted(true)
+		{}
+		
+	};
+
 	// TODO: doku
 	template <
 		typename TText,
+		typename TSize,
 		typename TReadSet,
 		typename TVerifier,
 		typename TRazerSOptions,
 		typename TRazerSMode>
 	bool _verifyHits(
 			StringSet<String<_ConvertedSwiftHit<TText> > >	& hits,
-			int const										  blockId,
+			int const										  myTaskId,
+			String<_TaskDetails<TSize> >					& tasks,
 			TReadSet										& readSet,
 			String<TVerifier> 								& verifier,
 			TRazerSOptions									& options,
-			TRazerSMode const								& mode)
+			TRazerSMode const								& mode,
+			int												  level) //TODO: remove
 	{
-		typedef String<_ConvertedSwiftHit<TText> >	THitString;
-		typedef typename Size<THitString>::Type		THitStringSize;
+		typedef String<_ConvertedSwiftHit<TText> >		THitString;
+		typedef typename Position<THitString>::Type		THitStringPos;
+		typedef typename Iterator<THitString>::Type		THitIter;
+		typedef _TaskDetails<TSize>						TTask;
+				
+		TTask & task = tasks[myTaskId];
+		TSize & current = task.current;
+	
+		#pragma omp critical(output1)
+		std::cout << "thread " << omp_get_thread_num() << " (of " << omp_get_num_threads() << " level: " << level << ") verifying block " << task.blockId << " range " << task.current << " to " << task.end << " (task: " << myTaskId << ") (running: " << task.running << ", split: " << task.split << ", splitwith: " << task.splitWith << ", sorted:" << task.sorted << ")" << std::endl;
 		
-		THitString & myHits = hits[blockId];
+		THitString & myHits = hits[task.blockId];
 		
-		// go over all hits or till a different thread set a flag to stop
-		for(THitStringSize h = 0; h < length(myHits); ++h){
-			unsigned myId = (blockId * options.blockSize) + myHits[h].readID;
-			verifier[omp_get_thread_num()].m.readId = myId;
-			matchVerify(verifier[omp_get_thread_num()], myHits[h].onContig, myId, readSet, mode);
-
+		// go over all hits or till a different thread set a flag to stop and split
+		for(; (current < task.end) and (not task.split); ++current){
+			unsigned myId = (task.blockId * options.blockSize) + myHits[current].readID;
+			int threadId = omp_get_thread_num();
+			verifier[threadId].m.readId = myId;
+			matchVerify(verifier[threadId], myHits[current].onContig, myId, readSet, mode);
+			
 			#pragma omp atomic
 			++options.countFiltration;
+			
+			#pragma omp flush(tasks)
 		}
 		
-		//
-		
-		// check if other block has sufficient many hits left to steal work
-		
-		// if so
-			// stop that task
-			// sort the remaining hits, if they are not already sorted (flag)
-			// find a paritioning that works (maybe helper output to check size of the partitions)
+		// if split is true
+		if(task.split){
+			// set running false
+			task.running = false;
 			
+			// TODO:replace with option
+			unsigned accuracy = 1;
+			
+			// If not sorted yet, sort remaining hits.
+			if(not task.sorted){
+				// get iterators for sorting
+				THitIter i1 = begin(myHits) + current;
+				THitIter i2 = end(myHits);
+				
+				// TODO replace with parallel sort
+				_ConvertedSwiftHitComparison comp(accuracy);
+				sort(i1, i2, comp);
+			}
+			
+			// search for first hit after the half for that the read Id changes significantly
+			// split the hits at this position, so that the myers patterns shared by the 
+			// verifier don't collide
+			TSize half = (task.end - task.current) / 2;
+			unsigned now, last = myHits[task.current + half - 1].readID / accuracy;
+			TSize i = task.current + half;
+			for(; i < task.end; ++i){
+				now = myHits[i].readID / accuracy;
+				if(last != now)
+					break;
+				
+				last = now;
+			}
+			
+			// split and start new tasks
+			int splitWith = task.splitWith;
+			
+			#pragma omp critical(output1)
+			std::cout << "spliting: " << myTaskId << " with " << splitWith << "(" << task.current << ", " << i << ", " << task.end << ")" << std::endl;
+			
+			// First the other one so the task.end can be used without 
+			// writing it in a temporary variable.
+
+			_TaskDetails<TSize> me(task.blockId, task.current, i);
+			_TaskDetails<TSize> you(task.blockId, i, task.end);
+			//std::cout << "block: " << me.blockId << ", range " << me.current << " to " << me.end << ", running: " << me.running << ", split: " << me.split << ", splitwith: " << me.splitWith << ", sorted:" << me.sorted << std::endl;
+			//std::cout << "block: " << you.blockId << ", range " << you.current << " to " << you.end << ", running: " << you.running << ", split: " << you.split << ", splitwith: " << you.splitWith << ", sorted:" << you.sorted << std::endl;
+			
+			#pragma omp flush(tasks)
+			tasks[splitWith] = you;
+			tasks[myTaskId]  = me;
+			#pragma omp flush(tasks)
+			
+			#pragma omp task shared (hits, tasks, readSet, verifier, options, mode)
+			{
+				_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode, level+1);
+			}
+			
+			
+			_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode, level+1);
+						
+		}
+		else // if ended by itself
+		{
+			
+			// critical so two threads don't make the same one split
+			#pragma omp critical(split_with)
+			{
+				// Inital value of maxHitsLeft is also the minimum number of hits needed
+				// to trigger a the splitting.
+				THitStringPos maxHitsLeft = 10;
+				bool oneIsSplitting = false;
+				
+				int splitWith = -1;
+				
+				// check if another block has sufficient many hits left to steal work and non is in the process of splitting
+				for(int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
+					//
+					if(not tasks[taskId].split){
+						THitStringPos hitsLeft = tasks[taskId].end;
+						if(hitsLeft > maxHitsLeft){
+							maxHitsLeft = hitsLeft;
+							splitWith = taskId;
+						}
+					}
+					else
+						oneIsSplitting = true;	
+				}
+				// set running false
+				task.running = false;
+				
+				// set the other threads split true
+				tasks[splitWith].splitWith = myTaskId;
+				tasks[splitWith].split = true;
+			}
+			
+		}
+		#pragma omp critical(output1)
+		std::cout << "thread " << omp_get_thread_num() << " level " << level << " done." << std::endl;
 		return true;
 	}
 
@@ -348,15 +513,18 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typedef Finder<TContigSeq, Swift<TSwiftSpec> >  TSwiftFinder;
 		typedef typename TSwiftFinder::THitString		THitString;
 		typedef typename Value<THitString>::Type		TSwiftHit;
-		typedef typename Size<THitString>::Type			THitStringSize;
+		typedef typename Position<THitString>::Type		THitStringSize;
 		typedef typename Host<TSwiftFinder>::Type		TText;
+		typedef String<_ConvertedSwiftHit<TText> >		TConvertedHitString;
+		typedef typename Size<TConvertedHitString>::Type	TConvertedHitStringSize;
+		typedef typename TFragmentStore::TReadSeqStore	TReadSeqStore;
 		
 		// use only core many threads
 		// go over contig sequence
 		//#pragma omp parallel num_threads((int)options.numberOfCores)
 		{
 			// initialize before the while loop so that the memory does not need to be reallocated every time
-			StringSet<String<_ConvertedSwiftHit<TText> >, Owner<> > hits;
+			StringSet<TConvertedHitString, Owner<> > hits;
 			resize(hits, options.numberOfBlocks, Exact());
 			
 			// Number of hits that are colleced before the verification is started
@@ -366,6 +534,9 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			// To keep track which block is done and which not.
 			String<bool> blockSeqLeft;
 			fill(blockSeqLeft, options.numberOfBlocks, true, Exact());
+			
+			// ??? is that needed?
+			omp_set_nested(true);
 			
 			// Collect hits, verify them and store them in the main store while there is sequence left to cover.
 			while(sequenceLeft)
@@ -378,49 +549,78 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				sequenceLeft = false;
 				
 				// Go over sequence with blocks in parallel
-				#pragma omp parallel num_threads((int)options.numberOfCores)
-				#pragma omp for
-				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-					// Only use block if there is sequnce left.
-					// Otherwise findwindow next does unpredicted things.
-					if(blockSeqLeft[blockId]){
-						blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, threshold,
-							swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-						// if any of the block has sequnece left the while loops again
-						sequenceLeft |= blockSeqLeft[blockId];
-					}
 
-				/* Alternative to preceding parallel for
-				if used needs to be adjusted as the for loop is
 				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
-					int blockId = omp_get_thread_num();
-					bool left = _collectHits(hits[blockId], totalHits, threshold, swiftFinders[blockId], 
-									swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+					#pragma omp single
+					{
+
+					}
 					
-					#pragma omp atomic
-					sequenceLeft |= left;
+					#pragma omp for
+					for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+						// Only use block if there is sequnce left.
+						// Otherwise findwindow next does unpredicted things.
+						if(blockSeqLeft[blockId]){
+							blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, threshold,
+																 swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+							// if any of the block has sequnece left the while loops again
+							sequenceLeft |= blockSeqLeft[blockId];
+						}
+					}
+					
+					/* Alternative to preceding parallel for
+					 if used needs to be adjusted as the for loop is
+					 #pragma omp parallel num_threads((int)options.numberOfCores)
+					 {
+					 int blockId = omp_get_thread_num();
+					 bool left = _collectHits(hits[blockId], totalHits, threshold, swiftFinders[blockId], 
+					 swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+					 
+					 #pragma omp atomic
+					 sequenceLeft |= left;
+					 }
+					 */
+					
+					#pragma omp single
+					{
+						// third: verify the hits
+						// create verification tasks
+						String<_TaskDetails<TConvertedHitStringSize> > tasks;
+						resize(tasks, options.numberOfBlocks, Exact());
+						for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId)
+							tasks[taskId] = _TaskDetails<TConvertedHitStringSize>(taskId, length(hits[taskId]));
+						// start verification
+						TReadSeqStore & readSet = store.readSeqStore;
+						for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
+							#pragma omp task shared (hits, tasks, readSet, verifier, options, mode)
+							_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode, 0);
+						}
+
+						// wait till all blocks are done
+						#pragma omp taskwait
+						std::cout << "next window." << std::endl;
+						
+						// clear hit strings
+						for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+							clear(hits[blockId]);
+						
+						// fourth: get the matches from different thread stores and write them in the main one
+						appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+						
+						// clear thread stores
+						for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+							clear(threadStores[blockId].alignedReadStore);
+							clear(threadStores[blockId].alignQualityStore);
+						}
+					}
 				}
-				*/
-				// second: combine sort hits by readId
-				// already partially sorted since the blocks are containing
 				
-				// third: verify the hits
-				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-					_verifyHits(hits, blockId, store.readSeqStore, verifier, options, mode);
+
 				
-				// clear hit strings
-				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-					clear(hits[blockId]);
-				
-				// fourth: get the matches from different thread stores and write them in the main one
-				appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
-				
-				// clear thread stores
-				for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-					clear(threadStores[blockId].alignedReadStore);
-					clear(threadStores[blockId].alignQualityStore);
-				}
+
+
+
 			}
 		}
 		// clear finders
