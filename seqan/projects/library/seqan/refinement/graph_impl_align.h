@@ -1073,7 +1073,7 @@ write(TFile & file,
 template<typename TString, typename TDefault, typename TCargo, typename TSpec, typename TDefault2>
 inline void
 assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> >& g,
-				StringSet<TString, Dependent<TDefault2> >& sStr)
+				StringSet<TString, Dependent<TDefault2> > const& sStr)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> > TGraph;
@@ -1094,7 +1094,7 @@ assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo
 template<typename TString, typename TDefault, typename TCargo, typename TSpec, typename TDefault2>
 inline void
 assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> >& g,
-				StringSet<TString, Owner<TDefault2> >& sStr)
+				StringSet<TString, Owner<TDefault2> > const& sStr)
 {
 	SEQAN_CHECKPOINT
 	StringSet<TString, Dependent<> > depStr(sStr);
