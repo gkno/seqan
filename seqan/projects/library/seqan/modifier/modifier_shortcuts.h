@@ -355,7 +355,7 @@ inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
 ..summary:Modifier for the reverse complement of a @Shortcut.DnaString@.
 ..signature:DnaStringReverseComplement
 ..shortcutfor:Class.ModifiedString
-...signature:ModifiedString<ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >, ModReverseComplement>
+...signature:ModifiedString<ModifiedString<DnaString, ModView< FunctorComplement<Dna> > >, ModReverse>
 ..see:Shortcut.DnaString
 ..see:Class.ModifiedString
 ..see:Spec.ModReverse
@@ -369,7 +369,7 @@ inline void toUpperInPlace(StringSet<TSequence, TSpec> const & stringSet)
 ..summary:Modifier for the reverse complement of a @Shortcut.Dna5String@.
 ..signature:Dna5StringReverseComplement
 ..shortcutfor:Class.ModifiedString
-...signature:ModifiedString<ModifiedString<Dna5String, ModView< FunctorComplement<Dna> > >, ModReverseComplement>
+...signature:ModifiedString<ModifiedString<Dna5String, ModView< FunctorComplement<Dna> > >, ModReverse>
 ..see:Shortcut.Dna5String
 ..see:Class.ModifiedString
 ..see:Spec.ModReverse
