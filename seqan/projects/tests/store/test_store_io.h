@@ -23,6 +23,8 @@
 #include <seqan/basic/basic_testing.h>  // For test functionality.
 #include <seqan/store.h>  // Header under test.
 
+using namespace seqan;
+
 // TODO(holtgrew): David, write me!
 SEQAN_DEFINE_TEST(test_store_io_writeme) {
     SEQAN_ASSERT_TRUE(false);
