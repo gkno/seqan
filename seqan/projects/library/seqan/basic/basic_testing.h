@@ -278,6 +278,19 @@ namespace ClassTest {
         std::cerr << std::endl;
     }
 
+    // Similar to forceFail above, but accepting a va_list parameter.
+    inline void vforceFail(const char *file, int line,
+                           const char *comment, va_list argp) {
+        StaticData::errorCount() += 1;
+        std::cerr << file << ":" << line << " FAILED! ";
+        if (comment) {
+            std::cerr << " (";
+            vfprintf(stderr, comment, argp);
+            std::cerr << ")";
+        }
+        std::cerr << std::endl;
+    }
+
     // Same as forceFail above, but with comment set to 0.
     inline void forceFail(const char *file, int line) {
         forceFail(file, line, 0);
@@ -306,6 +319,33 @@ namespace ClassTest {
                 va_start(args, comment);
                 vfprintf(stderr, comment, args);
                 va_end(args);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Similar to testEqual above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestEqual(const char *file, int line,
+                    const T1 &value1, const char *expression1,
+                    const T2 &value2, const char *expression2,
+                    const char *comment, va_list argp) {
+        if (!(value1 == value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " == " << expression2 << " was: " << value1
+                      << " != " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
                 std::cerr << ")";
             }
             std::cerr << std::endl;
@@ -347,6 +387,32 @@ namespace ClassTest {
                 va_start(args, comment);
                 vfprintf(stderr, comment, args);
                 va_end(args);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    // Similar to testNotEqual above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestNotEqual(const char *file, int line,
+                       const T1 &value1, const char *expression1,
+                       const T2 &value2, const char *expression2,
+                       const char *comment, va_list argp) {
+        if (!(value1 != value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " != " << expression2 << " was: " << value1
+                      << " == " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
                 std::cerr << ")";
             }
             std::cerr << std::endl;
@@ -397,6 +463,32 @@ namespace ClassTest {
     }
 
 
+    // Similar to testGeq above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestGeq(const char *file, int line,
+                  const T1 &value1, const char *expression1,
+                  const T2 &value2, const char *expression2,
+                  const char *comment, va_list argp) {
+        if (!(value1 >= value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " >= " << expression2 << " was: " << value1
+                      << " < " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
     // Same as testGeq above, but with comment set to 0.
     template <typename T1, typename T2>
     bool testGeq(const char *file, int line,
@@ -438,6 +530,33 @@ namespace ClassTest {
     }
 
 
+    // Similar to testGt above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestGt(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2,
+                 const char *comment, va_list argp) {
+        if (!(value1 > value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " > " << expression2 << " was: " << value1
+                      << " <= " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+                
     // Same as testGt above, but with comment set to 0.
     template <typename T1, typename T2>
     bool testGt(const char *file, int line,
@@ -470,6 +589,33 @@ namespace ClassTest {
                 va_start(args, comment);
                 vfprintf(stderr, comment, args);
                 va_end(args);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Similar to testLeq above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestLeq(const char *file, int line,
+                  const T1 &value1, const char *expression1,
+                  const T2 &value2, const char *expression2,
+                  const char *comment, va_list argp) {
+        if (!(value1 <= value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " <= " << expression2 << " was: " << value1
+                      << " > " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
                 std::cerr << ")";
             }
             std::cerr << std::endl;
@@ -520,6 +666,33 @@ namespace ClassTest {
     }
 
 
+    // Similar to testLt above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2>
+    bool vtestLt(const char *file, int line,
+                 const T1 &value1, const char *expression1,
+                 const T2 &value2, const char *expression2,
+                 const char *comment, va_list argp) {
+        if (!(value1 < value2)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " < " << expression2 << " was: " << value1
+                      << " > " << value2;
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
     // Same as testLt above, but comment is 0.
     template <typename T1, typename T2>
     bool testLt(const char *file, int line,
@@ -558,6 +731,31 @@ namespace ClassTest {
     }
 
 
+    // Similar to testTrue above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T>
+    bool vtestTrue(const char *file, int line,
+                   const T &value_, const char *expression_,
+                   const char *comment, va_list argp) {
+        if (!(value_)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression_ << " should be true but was " << (value_);
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
     // Same as testTrue above, but comment will automatically be set to 0.
     template <typename T>
     bool testTrue(const char *file, int line,
@@ -587,6 +785,31 @@ namespace ClassTest {
                 va_start(args, comment);
                 vfprintf(stderr, comment, args);
                 va_end(args);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Similar to testFalse above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T>
+    bool vtestFalse(const char *file, int line,
+                    const T &value_, const char *expression_,
+                    const char *comment, va_list argp) {
+        if (value_) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression_ << " should be false but was " << (value_);
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
                 std::cerr << ")";
             }
             std::cerr << std::endl;
@@ -989,13 +1212,12 @@ namespace ClassTest {
 #else // no variadic macros
 
 #if SEQAN_ENABLE_DEBUG
-template <typename T1, typename T2>
 void SEQAN_ASSERT_FAIL(const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::forceFail(comment, args))
-		::seqan::ClassTest::fail();
+	::seqan::ClassTest::vforceFail("", 0, comment, args);
+    ::seqan::ClassTest::fail();
 	va_end(args);
 }
 
@@ -1011,7 +1233,7 @@ void SEQAN_ASSERT_EQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testEqual("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestEqual("", 0, _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1028,7 +1250,7 @@ void SEQAN_ASSERT_NEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment,
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testNotEqual("", _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestNotEqual("", _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1045,7 +1267,7 @@ void SEQAN_ASSERT_LEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment,
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testLeq("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestLeq("", 0, _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1062,7 +1284,7 @@ void SEQAN_ASSERT_LT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testLt("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestLt("", 0, _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1079,7 +1301,7 @@ void SEQAN_ASSERT_GEQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment,
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testGeq("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestGeq("", 0, _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1096,7 +1318,7 @@ void SEQAN_ASSERT_GT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testGt("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::vtestGt("", 0, _arg1, "", _arg2, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1113,7 +1335,7 @@ void SEQAN_ASSERT_TRUE_MSG(T1 const &_arg1, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testTrue("", 0, _arg1, "", comment, args))
+	if (!::seqan::ClassTest::vtestTrue("", 0, _arg1, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
@@ -1130,7 +1352,7 @@ void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
-	if (!::seqan::ClassTest::testFalse("", 0, _arg1, "", comment, args))
+	if (!::seqan::ClassTest::vtestFalse("", 0, _arg1, "", comment, args))
 		::seqan::ClassTest::fail();
 	va_end(args);
 }
