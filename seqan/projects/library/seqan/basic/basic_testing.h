@@ -803,7 +803,7 @@ namespace ClassTest {
     do {                                                                \
         if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,       \
                                               (_arg1), #_arg1,          \
-                                              (_arg2), #_arg2) {        \
+                                              (_arg2), #_arg2)) {       \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
