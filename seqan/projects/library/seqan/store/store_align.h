@@ -642,7 +642,7 @@ public:
 		data_viewCutBegin(0),
 		data_viewCutEnd(0) {}
 
-	Gaps(TSource const &source, TGapAnchors &anchors):
+	Gaps(TSource const &source, TGapAnchors const &anchors):
 		data_source(source),
 		data_gaps(anchors),
 		data_viewCutBegin(0),
