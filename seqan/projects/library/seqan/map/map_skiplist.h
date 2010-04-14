@@ -1033,9 +1033,13 @@ public:
 		data_pointer = other.data_pointer;
 		return *this;
 	}
+
+    // TODO(holtgrew): Why conversion to boolean?
 	operator bool () const
 	{
-		return data_pointer;
+        // Using != 0 instead of implicit/explicit task here to suppress
+        // performance warning C4800 in Visual Studio.
+		return data_pointer != 0;
 	}
 
 	TValue *
