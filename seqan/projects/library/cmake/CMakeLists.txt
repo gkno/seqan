@@ -142,6 +142,9 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   else (400 GREATER _GCC_VERSION)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
   endif (400 GREATER _GCC_VERSION)
+
+  # Pass CXX flags to flags.
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_CXX_FLAGS_=\"${CMAKE_CXX_FLAGS}\"")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)

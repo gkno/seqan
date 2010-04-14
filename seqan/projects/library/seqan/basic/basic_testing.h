@@ -73,10 +73,22 @@
 
 namespace seqan {
 
+// SEQAN_CXX_FLAGS_ contains the compiler flags, SEQAN_CXX_FLAGS is a string
+// literal with this value.
+#if !defined(SEQAN_CXX_FLAGS_)
+#define SEQAN_CXX_FLAGS_ SEQAN_CXX_FLAGS_NOT_SET
+#endif //  !defined(_SEQAN_CXX_FLAGS_)
+#define SEQAN_MKSTRING_(str) # str
+#define SEQAN_MKSTRING(str) SEQAN_MKSTRING_(str)
+#define SEQAN_CXX_FLAGS SEQAN_MKSTRING(SEQAN_CXX_FLAGS_)
+//#undef SEQAN_MKSTRING
+//#undef SEQAN_MKSTRING_
+
+
 /**
 .Function.printDebugLevel:
 ..cat:Miscellaneous:
-..summary:Print the current SeqAn debug level to the given stream.
+..summary:Print the current SeqAn debug level and the compiler flags to the given stream.
 ..signature:printDebugLevel(stream)
 ..param.stream:The stream to print to, e.g. $std::cout$.
  */
@@ -84,6 +96,7 @@ template <typename TStream>
 void printDebugLevel(TStream &stream) {
     stream << "SEQAN_ENABLE_DEBUG == " << SEQAN_ENABLE_DEBUG << std::endl;
     stream << "SEQAN_ENABLE_TESTING == " << SEQAN_ENABLE_TESTING << std::endl;
+    stream << "SEQAN_CXX_FLAGS == \"" << SEQAN_CXX_FLAGS << "\"" << std::endl;
 }
 
 
