@@ -50,7 +50,8 @@ typedef Tag<_HammingSimple> HammingSimple;
 
 
 template <typename TNeedle>
-struct Pattern<TNeedle, HammingSimple> {
+class Pattern<TNeedle, HammingSimple> {
+public:
     // The holder for the needle.
     Holder<TNeedle> data_host;
 

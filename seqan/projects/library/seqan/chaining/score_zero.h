@@ -34,7 +34,7 @@ namespace seqan
 */
 
 template <typename TValue>
-class Score<TValue, Zero>
+struct Score<TValue, Zero>
 {
 private:
 

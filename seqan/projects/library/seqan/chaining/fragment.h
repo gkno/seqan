@@ -47,8 +47,9 @@ namespace seqan
 struct MultiSeed;
 
 template <typename TBorder>
-struct Seed <TBorder, MultiSeed>
+class Seed <TBorder, MultiSeed>
 {
+public:
 	typedef MultiSeed TSpec;
 	typename Key< Seed< TBorder, TSpec > >::Type * _left;
 	typename Key< Seed< TBorder, TSpec > >::Type * _right;

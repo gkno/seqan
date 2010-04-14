@@ -37,7 +37,7 @@ namespace seqan
 */
 
 template <typename TValue>
-class Score<TValue, ChainSoP>
+struct Score<TValue, ChainSoP>
 {
 private:
 	TValue data_match;

@@ -50,7 +50,8 @@ typedef Tag<_HammingHorspool> HammingHorspool;
 
 
 template <typename TNeedle>
-struct Pattern<TNeedle, HammingHorspool> {
+class Pattern<TNeedle, HammingHorspool> {
+public:
     typedef typename Size<TNeedle>::Type TSize;
 
     // Holder of the pattern's needle.
