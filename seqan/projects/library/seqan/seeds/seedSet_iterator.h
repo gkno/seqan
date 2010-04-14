@@ -29,8 +29,6 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 
-struct SeedIterator;
-
 template <typename TSeedSet>
 class Iter<TSeedSet, SeedIterator>
 {

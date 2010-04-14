@@ -24,6 +24,9 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+// Forward declaration.
+struct SeedIterator;
+
 /*
 .Function:_calculateScoringValue
 ..summary: calculates a Value for a gap during chaining.

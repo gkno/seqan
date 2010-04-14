@@ -37,8 +37,8 @@
 #include <seqan/seeds/seed_base.h>
 #include <seqan/seeds/seed_multi.h>
 #include <seqan/seeds/seedHandlingTags.h>
-#include <seqan/seeds/seedSet_iterator.h>
 #include <seqan/seeds/seedSet_base.h>
+#include <seqan/seeds/seedSet_iterator.h>
 #include <seqan/seeds/seedSet_score.h>
 #include <seqan/seeds/banded_align.h>
 #include <seqan/seeds/global_seed_chain.h>
