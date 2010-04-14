@@ -981,22 +981,70 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Type$.
 */
 
-	template < typename TIndex, class TSpec >
+	template < typename TIndex, typename TSpec >
 	inline typename Size<TIndex>::Type 
-	countChildren(Iter< TIndex, VSTree<TSpec> > const &it) 
+	countChildren(Iter<TIndex, VSTree<TSpec> > const &it) 
 	{
+		typedef Iter<TIndex, VSTree<TSpec> >					TIter;
+		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
+		
+		Iter<TIndex, VSTree<TopDown<TTraits> > > temp(it);
+		typename Size<TIndex>::Type numChildren = 0; 
+		if (goDown(temp))
+		{
+			++numChildren;
+			while (goRight(temp)) ++numChildren;
+		}
+		return numChildren;
+	}
+
+	template < typename TText, typename TIndexSpec, typename TSpec >
+	inline typename Size<Index<TText, Index_ESA<TIndexSpec> > >::Type 
+	countChildren(Iter< Index<TText, Index_ESA<TIndexSpec> >, VSTree<TSpec> > const &it) 
+	{
+		typedef Index<TText, Index_ESA<TIndexSpec> >			TIndex;
+		typedef Iter<TIndex, VSTree<TSpec> >					TIter;
+		typedef typename GetVSTreeIteratorTraits<TIter>::Type	TTraits;
+		typedef typename TTraits::HideEmptyEdges				THideEmptyEdges;
+
 		if (_isLeaf(it, EmptyEdges())) return 0;
 
 		typedef typename Size<TIndex>::Type TSize;
+		TIndex const &index = container(it);
+		TSize lcp = repLength(it);
+		TSize result = (isRoot(it))? 0: 1;
 
-		TSize i = _getUp(value(it).range.i2, container(it));
+		// check if child has an empty edge (same representative as its parent)
+		typename SAValue<TIndex>::Type pos = getOccurrence(it);
+		if (THideEmptyEdges::VALUE && getSeqOffset(pos, stringSetLimits(index)) + lcp == sequenceLength(getSeqNo(pos, stringSetLimits(index)), index))
+			--result;	// if so, don't count
+
+		// get l-Value between first and second child
+		TSize i = _getUp(value(it).range.i2, index);
 		if (!(value(it).range.i1 < i && i < value(it).range.i2))
-			i = _getDown(value(it).range.i1, container(it));
+			i = _getDown(value(it).range.i1, index);
 
-		TSize result = (isRoot(it))? 1: 2;
-		while (_isNextl(i, container(it))) {
-			i = _getNextl(i, container(it));
+		if (THideEmptyEdges::VALUE)
+		{
+			// only count children with non-empty parent edges (different representative than its parent)
+			pos = saAt(i, index);
+			if (getSeqOffset(pos, stringSetLimits(index)) + lcp != sequenceLength(getSeqNo(pos, stringSetLimits(index)), index))
+				++result;
+		} else
 			++result;
+
+		// try to get next l-Value
+		while (_isNextl(i, index)) 
+		{
+			i = _getNextl(i, index);
+			if (THideEmptyEdges::VALUE)
+			{
+				// only count children with non-empty parent edges (different representative than its parent)
+				pos = saAt(i, index);
+				if (getSeqOffset(pos, stringSetLimits(index)) + lcp != sequenceLength(getSeqNo(pos, stringSetLimits(index)), index))
+					++result;
+			} else
+				++result;
 		}
 		return result;
 	}
