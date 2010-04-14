@@ -32,7 +32,7 @@
 
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
-//#define RAZERS_PARALLEL_READS			// parallelize by reads
+#define RAZERS_PARALLEL_READS			// parallelize by reads
 #ifdef RAZERS_PARALLEL_READS
 #define RAZERS_OPENADDRESSING	
 #endif
