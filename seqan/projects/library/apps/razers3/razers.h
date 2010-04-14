@@ -477,13 +477,7 @@ struct MicroRNA{};
 				m.beginPos = genomeLength - m.beginPos;
 				m.endPos = genomeLength - m.endPos;
 			}
-			
-			//delete:
-			if(m.readId == 36){
-				#pragma omp critical(output1)
-				std::cout << "match 37 > " << m.beginPos << ", " << m.endPos << std::endl;
-			}
-			
+						
 //#pragma omp critical
 // begin of critical section
 			{

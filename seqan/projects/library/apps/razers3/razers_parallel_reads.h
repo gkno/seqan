@@ -387,10 +387,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				
 		TTask & task = tasks[myTaskId];
 		TSize & current = task.current;
-	
-		#pragma omp critical(output1)
-		std::cerr << "thread " << omp_get_thread_num() << " (task: " <<  myTaskId << " level: " << level << ") verifying block " << task.blockId << " range " << task.current << " to " << task.end << " (running: " << task.running << ", split: " << task.split << ", splitwith: " << task.splitWith << ", sorted:" << task.sorted << ") START" << std::endl;
-		
 		THitString & myHits = hits[task.blockId];
 		
 		// go over all hits or till a different thread set a flag to stop and split
@@ -399,13 +395,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			int threadId = myTaskId; //omp_get_thread_num();
 			verifier[threadId].m.readId = myId;
 			
-			//delete:
-//			if(myId == 36){
-//				#pragma omp critical(output1)
-//				std::cerr << "hit 37 > " << beginPosition(myHits[current].onContig) << ", " << endPosition(myHits[current].onContig) << std::endl;
-//				//std::cerr << "hit 37 > " << verifier[threadId].genomeLength - beginPosition(myHits[current].onContig) << ", " << verifier[threadId].genomeLength - endPosition(myHits[current].onContig) << std::endl;
-//			}
-			
 			matchVerify(verifier[threadId], myHits[current].onContig, myId, readSet, mode);
 			
 			#pragma omp atomic
@@ -413,8 +402,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			
 			#pragma omp flush(tasks)
 		}
-		#pragma omp critical(output1)
-		std::cerr << "thread " << omp_get_thread_num() << " (task: " <<  myTaskId << " level: " << level << ") verifying block " << task.blockId << " range " << task.current << " to " << task.end << " (running: " << task.running << ", split: " << task.split << ", splitwith: " << task.splitWith << ", sorted:" << task.sorted << ") STOP" << std::endl;
 		
 		// if split is true
 		if(task.split){
@@ -422,7 +409,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			task.running = false;
 			
 			// TODO:replace with option
-			unsigned accuracy = 1;
+			unsigned accuracy = 5;
 			
 			// If not sorted yet, sort remaining hits.
 			if(not task.sorted){
@@ -454,16 +441,11 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			// split and start new tasks
 			int splitWith = task.splitWith;
 			
-			#pragma omp critical(output1)
-			std::cerr << "spliting: " << myTaskId << " with " << splitWith << "(" << task.current << ", " << i << ", " << task.end << ")" << std::endl;
-			
 			// First the other one so the task.end can be used without 
 			// writing it in a temporary variable.
 
 			_TaskDetails<TSize> me(task.blockId, task.current, i);
 			_TaskDetails<TSize> you(task.blockId, i, task.end);
-			//std::cout << "block: " << me.blockId << ", range " << me.current << " to " << me.end << ", running: " << me.running << ", split: " << me.split << ", splitwith: " << me.splitWith << ", sorted:" << me.sorted << std::endl;
-			//std::cout << "block: " << you.blockId << ", range " << you.current << " to " << you.end << ", running: " << you.running << ", split: " << you.split << ", splitwith: " << you.splitWith << ", sorted:" << you.sorted << std::endl;
 			
 			#pragma omp flush(tasks)
 			tasks[splitWith] = you;
@@ -508,19 +490,9 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				}
 				// set running false
 				task.running = false;
-				
-				// if there is another block that can be splitted
-//				if(splitWith >= 0){
-//					std::cerr << "trigger split" << std::endl;
-//					// set the other threads split true
-//					tasks[splitWith].splitWith = myTaskId;
-//					tasks[splitWith].split = true;					
-//				}
 			}
 			
 		}
-		#pragma omp critical(output1)
-		std::cerr << "thread " << omp_get_thread_num() << " task " <<  myTaskId << " level " << level << " done." << std::endl;
 		return true;
 	}
 
@@ -582,9 +554,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				
 				sequenceLeft = false;
 				
-				#pragma omp critical(output1)
-				std::cerr << "start filtering " << omp_in_parallel() << std::endl;
-				
 				// Go over sequence with blocks in parallel
 				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
@@ -613,15 +582,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				 sequenceLeft |= left;
 				 }
 				 */
-				
-				//delete:
-//				for(int m = 0; m < (int)length(hits); ++m){
-//					for(int n = 0; n < (int)length(hits[m]); ++n){
-//						if(hits[m][n].readID == 36){
-//							std::cerr << "hit 37 > " << beginPosition(hits[m][n].onContig) << ", " << endPosition(hits[m][n].onContig) << std::endl;
-//						}
-//					}
-//				}
 					
 				// third: verify the hits
 				// create verification tasks
@@ -629,10 +589,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				resize(tasks, options.numberOfBlocks, Exact());
 				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId)
 					tasks[taskId] = _TaskDetails<TConvertedHitStringSize>(taskId, length(hits[taskId]));
-				
-				#pragma omp critical(output1)
-				std::cerr << "start verification " << omp_in_parallel() << std::endl;
-					
+									
 				// start verification
 				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
@@ -641,9 +598,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 					_verifyHits(hits, taskId, tasks, store.readSeqStore, verifier, options, mode, 0);
 				}					
 				}
-				
-				#pragma omp critical(output1)
-				std::cerr << "next window." << std::endl;
 					
 				// clear hit strings
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
