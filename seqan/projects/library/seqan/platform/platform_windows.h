@@ -23,7 +23,12 @@
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 
+// Disable warning "'function' : resolved overload was found by
+// argument-dependent lookup".  Visual Studio warns because Koenig
+// lookup was introduced in later version and behaviour has changed at some
+// point.
 #pragma warning( disable : 4675 )
+// Disable warning for identifer name truncation.
 #pragma warning( disable : 4503 )
 
 #define finline __forceinline
