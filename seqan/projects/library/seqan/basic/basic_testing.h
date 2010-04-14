@@ -1212,7 +1212,7 @@ namespace ClassTest {
 #else // no variadic macros
 
 #if SEQAN_ENABLE_DEBUG
-void SEQAN_ASSERT_FAIL(const char *comment, ...)
+inline void SEQAN_ASSERT_FAIL(const char *comment, ...)
 {
 	va_list args;
 	va_start(args, comment);
@@ -1292,7 +1292,7 @@ void SEQAN_ASSERT_LT_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, 
 template <typename T1, typename T2>
 void SEQAN_ASSERT_GEQ(T1 const &_arg1, T2 const &_arg2)
 {
-	if (!::seqan::ClassTest::testGeq("", 0, _arg1, "", _arg2, "", comment, args))
+	if (!::seqan::ClassTest::testGeq("", 0, _arg1, "", _arg2, ""))
 		::seqan::ClassTest::fail();
 }
 
