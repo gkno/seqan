@@ -1139,6 +1139,11 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //??? TODO: Documentation of Simple Holder
 
+#ifdef PLATFORM_WINDOWS_VS
+// Disable warning C4521 locally (multiple copy constructors).
+#pragma warning( disable: 4521 )
+#endif  // PLATFORM_WINDOWS_VS
+
 template <typename TValue>
 struct Holder<TValue, Simple>
 {
@@ -1211,6 +1216,11 @@ SEQAN_CHECKPOINT
 	}
 //____________________________________________________________________________
 };
+
+#ifdef PLATFORM_WINDOWS_VS
+// Enable warning C4521 again (multiple copy constructors).
+#pragma warning( default: 4521 )
+#endif  // PLATFORM_WINDOWS_VS
 
 
 //////////////////////////////////////////////////////////////////////////////
