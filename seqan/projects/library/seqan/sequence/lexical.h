@@ -494,7 +494,7 @@ isLessOrEqual(Lexical<TSpec> const & _lex,
 		TagPrefixLess)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::EQUAL | Lexical<TSpec>::LEFT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::EQUAL | Lexical<TSpec>::LEFT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -502,7 +502,7 @@ isLessOrEqual(Lexical<TSpec> const & _lex,
 		TagPrefixGreater)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::EQUAL | Lexical<TSpec>::RIGHT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::LESS | Lexical<TSpec>::EQUAL | Lexical<TSpec>::RIGHT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -561,7 +561,7 @@ isGreater(Lexical<TSpec> const & _lex,
 		TagPrefixLess)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::RIGHT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::RIGHT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -569,7 +569,7 @@ isGreater(Lexical<TSpec> const & _lex,
 		TagPrefixGreater)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::LEFT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::LEFT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -629,7 +629,7 @@ isGreaterOrEqual(Lexical<TSpec> const & _lex,
 		TagPrefixLess)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::EQUAL | Lexical<TSpec>::RIGHT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::EQUAL | Lexical<TSpec>::RIGHT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -637,7 +637,7 @@ isGreaterOrEqual(Lexical<TSpec> const & _lex,
 		TagPrefixGreater)
 {
 SEQAN_CHECKPOINT
-   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::EQUAL | Lexical<TSpec>::LEFT_IS_PREFIX));
+   return (_lex.data_compare & (Lexical<TSpec>::GREATER | Lexical<TSpec>::EQUAL | Lexical<TSpec>::LEFT_IS_PREFIX)) != 0;
 }
 template <typename TSpec>
 inline bool
@@ -680,7 +680,7 @@ inline bool
 isPrefix(Lexical<TSpec> const & _lex)
 {
 SEQAN_CHECKPOINT
-    return (_lex.data_compare & (Lexical<TSpec>::LEFT_IS_PREFIX | Lexical<TSpec>::EQUAL));
+    return (_lex.data_compare & (Lexical<TSpec>::LEFT_IS_PREFIX | Lexical<TSpec>::EQUAL)) != 0;
 }
 
 
@@ -718,7 +718,7 @@ inline bool
 hasPrefix(Lexical<TSpec> const & _lex)
 {
 SEQAN_CHECKPOINT
-    return (_lex.data_compare & (Lexical<TSpec>::RIGHT_IS_PREFIX | Lexical<TSpec>::EQUAL));
+    return (_lex.data_compare & (Lexical<TSpec>::RIGHT_IS_PREFIX | Lexical<TSpec>::EQUAL)) != 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
