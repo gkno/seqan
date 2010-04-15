@@ -667,6 +667,10 @@ SEQAN_CHECKPOINT
 ..param.score: The score matrix used.
 ...type:Spec.Simple Score
 ..returns:The score of the optimal banded alignment given in align.
+..remarks:Use the function @Function.globalAlignment@ with the tag $BandedNeedlemanWunsch$ or $BandedGotoh$ for more general banded alignment without a seed.
+..see:Function.globalAlignment
+..see:Tag.Global Alignment Algorithms
+..include:seqan/seeds.h
 */
 template <typename TSource, typename TSpec, typename TScoreValue, typename TValue, typename TSpecSeed>
 TScoreValue
