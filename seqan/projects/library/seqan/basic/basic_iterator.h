@@ -648,7 +648,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Iter
 ...Concept.Iterator
 ..returns:Length of the range between $begin$ and $end$.
-..remarks:This function is equivalent to $begin - end$.
+..remarks:This function is equivalent to $end - begin$.
 ...text:Usually, $begin$ and $end$ have the same type.
 ..see:Function.begin
 ..see:Function.end
