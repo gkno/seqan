@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 struct _Seed_simple;
-typedef Tag<_Seed_simple> SimpleSeed;
+typedef Tag<_Seed_simple> const SimpleSeed;
 
 
 
@@ -55,19 +55,19 @@ typedef Tag<_Seed_simple> SimpleSeed;
 ..include:seqan/seeds.h
 */
 struct _Chain_Merge;
-typedef Tag<_Chain_Merge> Merge;
+typedef Tag<_Chain_Merge> const Merge;
 
 
 
 struct _extendSeed_Match;
-typedef Tag<_extendSeed_Match> MatchExtend;
+typedef Tag<_extendSeed_Match> const MatchExtend;
 
 
 struct _extendSeed_UnGappedXDrop;
-typedef Tag<_extendSeed_UnGappedXDrop> UngappedXDrop;
+typedef Tag<_extendSeed_UnGappedXDrop> const UngappedXDrop;
 
 struct _extendSeed_GappedXDrop;
-typedef Tag<_extendSeed_GappedXDrop> GappedXDrop;
+typedef Tag<_extendSeed_GappedXDrop> const GappedXDrop;
 
 //template<typename TPosition = int, typename TSpecSeed = SimpleSeed>class Seed;
 
