@@ -60,6 +60,11 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 ..class:Spec.OpenAddressing
 */	
 
+#ifdef PLATFORM_WINDOWS_VS
+// Disable warning C4521 locally (multiple copy constructors).
+#pragma warning( disable: 4521 )
+#endif  // PLATFORM_WINDOWS_VS
+
 	template < typename TObject, typename TShapeSpec >
 	class Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >
 	{
@@ -140,6 +145,11 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 			stepSize(1),
 			alpha(defaultAlpha) {}
 	};
+#ifdef PLATFORM_WINDOWS_VS
+// Enable warning C4521 again (multiple copy operators).
+#pragma warning( default: 4521 )
+#endif  // PLATFORM_WINDOWS_VS
+
 
     template < typename TObject, typename TShapeSpec >
     const double Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >::defaultAlpha = 1.6;
