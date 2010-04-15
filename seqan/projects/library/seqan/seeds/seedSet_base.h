@@ -563,11 +563,11 @@ addSeed(SeedSet<TValue, ChainedSeed, const Tag<Scoring_Scheme<TQualityFactor, TG
 }
 
 
-template<typename TValue, typename TSeedSpec, typename TIterator, typename TAlgoSpec, typename TSpec, typename TQualityFactor, typename TGapCosts>
+template<typename TValue, typename TSeedSpec, typename TIterator, typename TAlgoSpec, typename TSpec, typename TQualityFactor, typename TGapCosts, typename TIteratorSpec>
 bool
 addSeeds(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, TSpec> &set, 
-		 TIterator begin, 
-		 TIterator end, 
+		 Iterator<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> > >, TIteratorSpec> begin, 
+		 Iterator<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> > >, TIteratorSpec> end, 
 		 int gapDistance, 
 		 TAlgoSpec tag)
 {
@@ -1424,16 +1424,16 @@ _gapFill(TValue qlPos, //query sequence left
 	    seeds.push_front(Triple<TValue,TValue,TValue>(qlPos, dlPos,0));
 	    seeds.push_back(Triple<TValue,TValue,TValue>(qrPos, drPos,0));
 	    TIterator it2 = ++seeds.begin();
-	    TIterator it = seeds.begin();
+	    TIterator it3 = seeds.begin();
 		it_end = seeds.end();
 	    while (it2!= it_end)
 		{
 		    change = true;
-			if ((it2->i1 - it->i1 - it->i3 >5)&&(it2->i2 - it->i2 - it->i3 >5))
-				_gapFill(it->i1+it->i3,it->i2+it->i3,it2->i1,it2->i2, diagList, query,database,q-1);
+			if ((it2->i1 - it3->i1 - it3->i3 >5)&&(it2->i2 - it3->i2 - it3->i3 >5))
+				_gapFill(it3->i1+it3->i3,it3->i2+it3->i3,it2->i1,it2->i2, diagList, query,database,q-1);
 
 			diagList.push_back(Triple<TValue, TValue, TValue>(it2->i1,it2->i2,it2->i3));
-		    ++it;
+		    ++it3;
 		    ++it2;
 	    }
 		diagList.pop_back();
