@@ -35,6 +35,7 @@ class Iter<TSeedSet, SeedIterator>
 public:
 	typedef typename Size<TSeedSet>::Type TSize;
 	typename std::set<TSize>::iterator data_ptr;
+    typedef TSize TValue;
 	TSeedSet *set;
 
 	Iter()
@@ -105,7 +106,7 @@ public:
 		return *this;
 	}
 
-	operator typename Value<TSeedSet>::Type * ()
+	operator TValue * ()
 	{
 		return set->manager[*data_ptr];
 	}
