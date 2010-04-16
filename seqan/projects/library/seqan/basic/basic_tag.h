@@ -195,6 +195,15 @@ typedef Tag<SmithWatermanClump_> const WatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Tag.Local Alignment Algorithms.value.BandedSmithWatermanClump:
+	Triggers a banded version of the Smith Waterman local alignment algorithm with "declumping".
+*/
+struct BandedSmithWatermanClump_;
+typedef Tag<BandedSmithWatermanClump_> const BandedSmithWatermanClump;
+
+//////////////////////////////////////////////////////////////////////////////
+
 /*DISABLED
 .Tag.RNA Folding Algorithms.value.Nussinov:
 	Nussinov style RNA folding algorithm

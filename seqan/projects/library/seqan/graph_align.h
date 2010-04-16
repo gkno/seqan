@@ -26,7 +26,6 @@
 #include <seqan/graph_algorithms.h>
 #include <seqan/refinement.h>
 
-
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_align/graph_align_generated_forwards.h>
 #endif
@@ -42,6 +41,7 @@
 #include <seqan/graph_align/graph_align_hirschberg.h>
 #include <seqan/graph_align/graph_align_smith_waterman.h>
 #include <seqan/graph_align/graph_align_smith_waterman_clump.h>
+#include <seqan/graph_align/graph_align_banded_smith_waterman_clump.h>
 
 
 #endif //#ifndef SEQAN_HEADER_...
