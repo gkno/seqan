@@ -403,6 +403,8 @@ to split up.
 			#pragma omp flush(tasks)
 		}
 		
+		#pragma omp flush(verifier)
+		
 		// If a different thread set the split flag.
 		// Sort the remaining hits if neccessary and split them in two groups,
 		// which are then processed in parallel
@@ -453,14 +455,10 @@ to split up.
 			tasks[myTaskId]  = me;
 			#pragma omp flush(tasks)
 			
-			#pragma omp parallel sections
-			{
-				#pragma omp section
-				_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
+			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
+			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
 				
-				#pragma omp section
-				_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode);
-			}
+			_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode);
 						
 		}
 		else // If the block is completed and no other thread interrupted the execution.
@@ -559,8 +557,7 @@ to split up.
 				unsigned totalHits = 0;
 				
 				sequenceLeft = false;
-				
-				// Go over sequence with blocks in parallel
+
 				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
 				#pragma omp for
@@ -595,16 +592,24 @@ to split up.
 				resize(tasks, options.numberOfBlocks, Exact());
 				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId)
 					tasks[taskId] = _TaskDetails<TConvertedHitStringSize>(taskId, length(hits[taskId]));
-									
-				// start verification
+					
+
+				TReadSeqStore & readSet = store.readSeqStore;
 				#pragma omp parallel num_threads((int)options.numberOfCores)
 				{
-				#pragma omp for
-				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
-					_verifyHits(hits, taskId, tasks, store.readSeqStore, verifier, options, mode);
-				}					
-				}
+				#pragma omp master
+				{
+
+					// start verification
+					for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
+						#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
+						_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode);
+					}					
 					
+					#pragma omp taskwait					
+				} // End omp master
+				} // End omp parallel
+				
 				// clear hit strings
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 					clear(hits[blockId]);
