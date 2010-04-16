@@ -377,7 +377,6 @@ _localAlignment(StringSet<TString, Dependent<> > const& str,
         //    }
         //    std::cerr << std::endl;
         //}
-        std::cerr << align << std::endl;
 
 		if (local_score >= minScore) {
             appendValue(alignments, align);

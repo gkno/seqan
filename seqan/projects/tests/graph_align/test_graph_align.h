@@ -897,6 +897,36 @@ void Test_SmithWatermanClump() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+void Test_BandedSmithWatermanClump() {
+    typedef String<Dna> TString;
+	typedef StringSet<TString, Dependent<> > TStringSet;
+
+	TStringSet str;
+	TString str0("ggggcttaagcttgggg"); assignValueById(str, str0);
+	TString str1("aaaacttagctctaaaa"); assignValueById(str, str1);
+	Score<int> score_type = Score<int>(2,-1,-2,-2);
+	String<Graph<Alignment<TStringSet> > > alignments;
+	String<int> scores;
+	multiLocalAlignment(str, alignments, scores, score_type, 5, -6, 6, BandedSmithWatermanClump() );
+
+    SEQAN_TASSERT(length(alignments) == 4);
+    SEQAN_TASSERT(length(scores) == 4);
+
+    SEQAN_TASSERT(value(scores, 0) == 12);
+    Graph<Alignment<TStringSet> > align = value(alignments, 0);
+    SEQAN_TASSERT(label(align, findVertex(align, 0, 0)) == "GGGG");
+    SEQAN_TASSERT(label(align, findVertex(align, 0, 4)) == "CTT");
+    SEQAN_TASSERT(label(align, findVertex(align, 0, 7)) == "A");
+    SEQAN_TASSERT(label(align, findVertex(align, 0, 8)) == "AGCT");
+    SEQAN_TASSERT(label(align, findVertex(align, 0, 12)) == "TGGGG");
+    SEQAN_TASSERT(label(align, findVertex(align, 1, 0)) == "AAAA");
+    SEQAN_TASSERT(label(align, findVertex(align, 1, 4)) == "CTT");
+    SEQAN_TASSERT(label(align, findVertex(align, 1, 7)) == "AGCT");
+    SEQAN_TASSERT(label(align, findVertex(align, 1, 11)) == "CTAAAA");
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void Test_GraphAlignment() {
 	// Global alignments
 	Test_NeedlemanWunsch();
@@ -908,6 +938,7 @@ void Test_GraphAlignment() {
 	// Local alignments
 	Test_SmithWaterman();
 	Test_SmithWatermanClump();
+    Test_BandedSmithWatermanClump();
 
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_base.h");
 	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_config.h");
