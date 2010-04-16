@@ -78,7 +78,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		index.shape = _shape;
 	}
 	
-	// TODO: doc
+	// TODO:remove
 	template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
 	inline void 
 	setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
@@ -106,16 +106,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
 		
 		for(unsigned i = 0; i < length(store.alignedReadStore); ++i){
-			
-			if(store.alignedReadStore[i].readId == 36){
-				#pragma omp critical(output1)
-				std::cout << "inStore 37 > " << store.alignedReadStore[i].beginPos << ", " << store.alignedReadStore[i].endPos << std::endl;
+			if(store.alignedReadStore[i].beginPos == 28927578){
+				TAlignedReadStoreElem a = store.alignedReadStore[i];
+				TAlignedQualStoreElem q = store.alignQualityStore[a.id];
+				int k = 0; k = 1;
 			}
-//			if(store.alignedReadStore[i].beginPos == 28927578){
-//				TAlignedReadStoreElem a = store.alignedReadStore[i];
-//				TAlignedQualStoreElem q = store.alignQualityStore[a.id];
-//				int k = 0; k = 1;
-//			}
 		}
 	}
 	
@@ -190,14 +185,6 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 		
-		//delete:
-//		for(unsigned i = 0; i < length(store.alignedReadStore); ++i){
-//			if(store.alignedReadStore[i].readId == 36){
-//				#pragma omp critical(output1)
-//				std::cout << "inStore 37 > " << store.alignedReadStore[i].beginPos << ", " << store.alignedReadStore[i].endPos << " (not compacted)" << std::endl;
-//			}
-//		}
-		
 		// fourth: compact matches
 		if (length(store.alignedReadStore) > options.compactThresh)
 		{
@@ -211,28 +198,20 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (options._debugLevel >= 2)
 				::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 		}
-
-		//delete:
-//		for(unsigned i = 0; i < length(store.alignedReadStore); ++i){
-//			if(store.alignedReadStore[i].readId == 36){
-//				#pragma omp critical(output1)
-//				std::cout << "inStore 37 > " << store.alignedReadStore[i].beginPos << ", " << store.alignedReadStore[i].endPos << " (compacted)" << std::endl;
-//			}
-//		}
 		
 	}
 	
 #ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
 	
 /**
-.Class._ConvertedSwiftHit:
+.Class.ConvertedSwiftHit:
 ..summary:Representation of a Swift hit containing the corresponding read ID and infix in the reference.
 ..cat:Razers
-..signature:_ConvertedSwiftHit<TText>
+..signature:ConvertedSwiftHit<TText>
 ..param.TText:Text on which the @Spec.Infix@ is based on.
 */
 	template <typename TText>
-	struct _ConvertedSwiftHit
+	struct ConvertedSwiftHit
 	{
 		typedef typename Infix<TText>::Type TInfix;
 
@@ -241,32 +220,41 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	readID;
 		TInfix		onContig;
 
-		_ConvertedSwiftHit(){}
+		ConvertedSwiftHit(){}
 		
 		// TODO: better template
 		template <typename TSpec, typename THstkPos, typename TText2>
-		_ConvertedSwiftHit(_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> & other, TText2 & ref):
+		ConvertedSwiftHit(_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> & other, TText2 & ref):
 			readID(other.ndlSeqNo),
 			onContig(getSwiftRange(other, ref))
 		{}
-		/*
-		bool operator<(_ConvertedSwiftHit const & other){
-			return (readID / accuracy) < (other.readID / accuracy);
-		}
-		*/
+
 	};
 	
-	
-	struct _ConvertedSwiftHitComparison {
+/**
+.Class.ConvertedSwiftHitComparison:
+..summary:Functor to compare two @Class.ConvertedSwiftHit@ by their read ID with a certain accuracy.
+..cat:Razers
+..signature:ConvertedSwiftHitComparison
+..remarks:For the comparison the read IDs are divied by the accuracy value and the results are then compared.
+*/
+	struct ConvertedSwiftHitComparison {
 		
 		unsigned accuracy;
 		
-		_ConvertedSwiftHitComparison(unsigned _accuracy):
+/**
+.Memfunc.ConvertedSwiftHitComparison#ConvertedSwiftHitComparison:
+..class:Class.ConvertedSwiftHitComparison
+..summary:Constructor
+..signature:ConvertedSwiftHitComparison(_accuracy)
+..param._accuracy:unsigned.Value by which the read IDs are divided before they are compared
+*/
+		ConvertedSwiftHitComparison(unsigned _accuracy):
 			accuracy(_accuracy)
 		{}
 		
 		template<typename TText>
-		bool operator() (_ConvertedSwiftHit<TText> i1, _ConvertedSwiftHit<TText> i2) {
+		bool operator() (ConvertedSwiftHit<TText> i1, ConvertedSwiftHit<TText> i2) {
 			return (i1.readID / accuracy) < (i2.readID / accuracy);
 		}
 	};
@@ -277,7 +265,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Searches for new hits with the finder and pattern.
 Stops when the finder reaches its end or the threshold of total hits is surpassed.
 ..signature:_collectHits(hits, totalHits, threshold, finder, pattern, windowSize)
-..param.hits:String of @Class._ConvertedSwiftHit@ to store the found hits
+..param.hits:String of @Class.ConvertedSwiftHit@ to store the found hits
 ..param.totalHits:Variable shared by all threads to know when to stop.
 ..param.threshold:The function stops searching for new hits when totalHits surpasses this value.
 ..param.finder:Swift finder.
@@ -312,7 +300,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			// Convert hits and append them to the hit string for this block.
 			// Conversion is neccessary so that the hits can be sorted by the readID.
 			for(TSize hitID = 0; hitID < length(oriHits); ++hitID)
-				hits[oldSize + hitID] = _ConvertedSwiftHit<TText>(oriHits[hitID], host(finder));
+				hits[oldSize + hitID] = ConvertedSwiftHit<TText>(oriHits[hitID], host(finder));
 			
 			// Update the overall hit count so that the other threads know when to stop as well.
 			#pragma omp atomic
@@ -322,10 +310,10 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 	}
 
 /**
-.Class._AssignmentDetail:
+.Class.AssignmentDetail:
 ..summary:Representation of a verification task.
 ..cat:Razers
-..signature:_AssignmentDetail<TPos>
+..signature:AssignmentDetail<TPos>
 ..param.TPos: Type of the start and end positions
 */
 	template <typename TPos>
@@ -333,7 +321,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		int blockId;
 		TPos current;
 		TPos end;
-		bool running;
 		bool split;
 		int splitWith;
 		bool sorted;
@@ -344,7 +331,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			blockId(_blockId),
 			current(0),
 			end(_end),
-			running(true),
 			split(false),
 			splitWith(-1),
 			sorted(false)
@@ -354,7 +340,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			blockId(_blockId),
 			current(_start),
 			end(_end),
-			running(true),
 			split(false),
 			splitWith(-1),
 			sorted(true)
@@ -362,7 +347,21 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 	};
 
-	// TODO: doku
+/**
+.Function._verifyHits:
+..cat:Razers
+..summary:Verifies a String of @Class.ConvertedSwiftHit@. When all hits are verified the other
+tasks are check for remaining hits. If there are some left the function triggers that block
+to split up.
+..signature:_verifyHits(hits, myTaskId, tasks, readSet, verifier, option, mode)
+..param.hits:String of @Class.ConvertedSwiftHit@ to store the found hits
+..param.myTaskId:Id to identify the task in tasks that is processed by this function call.
+..param.tasks:All task that are being processed right now
+..param.readSet:Original read set. Not split in blocks
+..param.verifier:String of matchVerifier (one for each thread).
+..param.options:RazerSOptions
+..param.mode:RazerSMode
+*/
 	template <
 		typename TText,
 		typename TSize,
@@ -371,16 +370,15 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typename TRazerSOptions,
 		typename TRazerSMode>
 	bool _verifyHits(
-					 StringSet<String<_ConvertedSwiftHit<TText> > >	& hits,
+					 StringSet<String<ConvertedSwiftHit<TText> > >	& hits,
 					 int const										  myTaskId,
 					 String<_TaskDetails<TSize> >					& tasks,
 					 TReadSet										& readSet,
 					 String<TVerifier> 								& verifier,
 					 TRazerSOptions									& options,
-					 TRazerSMode const								& mode,
-					 int											  level) //TODO: remove
+					 TRazerSMode const								& mode)
 	{
-		typedef String<_ConvertedSwiftHit<TText> >		THitString;
+		typedef String<ConvertedSwiftHit<TText> >		THitString;
 		typedef typename Position<THitString>::Type		THitStringPos;
 		typedef typename Iterator<THitString>::Type		THitIter;
 		typedef _TaskDetails<TSize>						TTask;
@@ -397,35 +395,38 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			
 			matchVerify(verifier[threadId], myHits[current].onContig, myId, readSet, mode);
 			
+			// To ensure the count is correct. Atomic causes an implicit flush
 			#pragma omp atomic
 			++options.countFiltration;
 			
+			// To ensure that task.split is up to date.
 			#pragma omp flush(tasks)
 		}
 		
-		// if split is true
+		// If a different thread set the split flag.
+		// Sort the remaining hits if neccessary and split them in two groups,
+		// which are then processed in parallel
 		if(task.split){
-			// set running false
-			task.running = false;
 			
 			// TODO:replace with option
 			unsigned accuracy = 5;
 			
 			// If not sorted yet, sort remaining hits.
 			if(not task.sorted){
-				// get iterators for sorting
+				// Get iterators for sorting
 				THitIter i1 = begin(myHits) + current;
 				THitIter i2 = end(myHits);
 				
+				// At least one other core should be free to help sorting
 				// TODO replace with parallel sort
-				_ConvertedSwiftHitComparison comp(accuracy);
+				ConvertedSwiftHitComparison comp(accuracy);
 				sort(i1, i2, comp);
 			}
 			
-			// search for first hit after the half for that the read Id changes significantly
-			// split the hits at this position, so that the myers patterns shared by the 
-			// verifier don't collide
+			// Go over the hits starting at the center. If the read ID change with
+			// a high enough significance use the position to split the hit string. 
 			TSize left = task.end - task.current;
+			// should not happen
 			if (left == 0) return true;
 			TSize half = left / 2;
 			unsigned now, last = myHits[task.current + half - 1].readID / accuracy;
@@ -455,49 +456,55 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			#pragma omp parallel sections
 			{
 				#pragma omp section
-				_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode, level+1);
+				_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
 				
 				#pragma omp section
-				_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode, level+1);
+				_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode);
 			}
 						
 		}
-		else // if ended by itself
+		else // If the block is completed and no other thread interrupted the execution.
 		{
-			
-			// critical so two threads don't make the same one split
+			// Critical so no two threads stop the same other thread and trigger spliting.
 			#pragma omp critical(split_with)
 			{
 				// Inital value of maxHitsLeft is also the minimum number of hits needed
 				// to trigger a the splitting.
+				//TODO: replace with option
 				THitStringPos maxHitsLeft = 10;
-				bool oneIsSplitting = false;
-				
 				int splitWith = -1;
 				
-				// check if another block has sufficient many hits left to steal work and non is in the process of splitting
+				// Check if another block has sufficient many hits left to steal work
+				// and is not in the process of splitting
 				for(int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
-					//
 					if(not tasks[taskId].split){
-						THitStringPos hitsLeft = tasks[taskId].end;
-						if(hitsLeft > maxHitsLeft){
-							maxHitsLeft = hitsLeft;
+						if(tasks[taskId].end > maxHitsLeft){
+							maxHitsLeft = tasks[taskId].end;
 							splitWith = taskId;
 						}
 					}
-					else
-						oneIsSplitting = true;	
 				}
-				// set running false
-				task.running = false;
-			}
+			} // End critical section
 			
 		}
 		return true;
 	}
 
 
-	// TODO: doku
+/**
+.Function.goOverContigFlex:
+..cat:Razers
+..summary:
+..signature:goOverContigFlex(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode)
+..param.swiftPatternHandler:@Class.ParallelSwiftPatternHandler@
+..param.swiftFinders:String of Finders
+..param.verifier:String of Verifier
+..param.cnts:For the Statistics
+..param.options::RazerSOptions
+..param.threadStores:String of @Class.FragmentStore@. One for each thread. Only temporarily used.
+..param.store:Main @Class.FragmentStore@. Contains the matches in the end
+..param.mode:RazerSMode
+*/
 	template <
 		typename TContigSeq, 
 		typename TReadIndex, 
@@ -507,8 +514,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typename TRazerSOptions,
 		typename TFragmentStore,
 		typename TRazerSMode >
-	void _goOverContigFlex(
-			//TContigSeq										& contigSeq,
+	void goOverContigFlex(
 			ParallelSwiftPatternHandler<String<
 				Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
 			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
@@ -525,7 +531,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typedef typename Value<THitString>::Type		TSwiftHit;
 		typedef typename Position<THitString>::Type		THitStringSize;
 		typedef typename Host<TSwiftFinder>::Type		TText;
-		typedef String<_ConvertedSwiftHit<TText> >		TConvertedHitString;
+		typedef String<ConvertedSwiftHit<TText> >		TConvertedHitString;
 		typedef typename Size<TConvertedHitString>::Type	TConvertedHitStringSize;
 		typedef typename TFragmentStore::TReadSeqStore	TReadSeqStore;
 		
@@ -595,7 +601,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				{
 				#pragma omp for
 				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
-					_verifyHits(hits, taskId, tasks, store.readSeqStore, verifier, options, mode, 0);
+					_verifyHits(hits, taskId, tasks, store.readSeqStore, verifier, options, mode);
 				}					
 				}
 					
@@ -723,7 +729,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 
 		// Only if the finders are set up.
 		if(beginOk)
-			_goOverContigFlex(swiftPatternHandler, swiftFinders, verifier,
+			goOverContigFlex(swiftPatternHandler, swiftFinders, verifier,
 								cnts, options, threadStores, store, mode);
 		
 		if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
