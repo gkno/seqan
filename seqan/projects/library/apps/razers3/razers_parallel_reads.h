@@ -603,7 +603,6 @@ to split up.
 				}					
 				
 				#pragma omp taskwait					
-
 				
 				// clear hit strings
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)

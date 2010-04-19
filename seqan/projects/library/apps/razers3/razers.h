@@ -177,6 +177,8 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned	blocksPerCore;
 		unsigned	numberOfBlocks;
 		unsigned	blockSize;
+		unsigned	accuracy;
+		unsigned	collect;
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -258,6 +260,8 @@ namespace SEQAN_NAMESPACE_MAIN
             blocksPerCore = 1;
 			numberOfBlocks = numberOfCores * blocksPerCore;
 			blockSize = 0;
+			accuracy = 200;
+			collect = 1000000;
 #endif
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
