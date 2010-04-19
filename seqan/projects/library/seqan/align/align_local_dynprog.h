@@ -93,7 +93,7 @@ bool operator <(const ScoreAndID<TValue,TID> & a,
 ..signature:LocalAlignmentFinder<TScoreValue>
 ..param.TScoreValue:The value type that is used for scoring the alignments.
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
-..see:Function.smithWaterman
+..see:Function.localAlignment
 */
 template<typename TScoreValue = int>
 class LocalAlignmentFinder{
@@ -647,29 +647,29 @@ SEQAN_CHECKPOINT
 
 }
 
-/**
-.Function.smithWaterman:
-..summary:Computes the best local alignment of the (two) sequences given in align.
-..cat:Alignments
-..signature:smithWaterman(align, sw_finder, score, cutoff)
-..param.align:The alignment object having the sequences to be aligned as sources.
-...type:Class.Align
-..param.sw_finder:The local alignment finder object.
-...type:Class.LocalAlignmentFinder
-..param.score:The score values to be used for computing the alignment.
-...type:Class.Score
-..param.cutoff:A score limit.
-...remarks:Alignments with scores < cutoff will be discarded (starTCGCGCCTGGAC
-CAAGACA
-ts being useful when
-	not only the best, but also sub-optimal local aligments are of interest). 
-	Low cutoff scores cause a higher runtime.
-..returns:The score value of the best scoring local alignment or 0 if there was no alignment with score > cutoff.
-...param.align:The corresponding alignment.
-..remarks:So far, only linear gap costs are allowed.
-..see:Function.smithWatermanGetNext
-..see:Function.localAlignment
-*/
+///**
+//.Function.smithWaterman:
+//..summary:Computes the best local alignment of the (two) sequences given in align.
+//..cat:Alignments
+//..signature:smithWaterman(align, sw_finder, score, cutoff)
+//..param.align:The alignment object having the sequences to be aligned as sources.
+//...type:Class.Align
+//..param.sw_finder:The local alignment finder object.
+//...type:Class.LocalAlignmentFinder
+//..param.score:The score values to be used for computing the alignment.
+//...type:Class.Score
+//..param.cutoff:A score limit.
+//...remarks:Alignments with scores < cutoff will be discarded (starTCGCGCCTGGAC
+//CAAGACA
+//ts being useful when
+//	not only the best, but also sub-optimal local aligments are of interest). 
+//	Low cutoff scores cause a higher runtime.
+//..returns:The score value of the best scoring local alignment or 0 if there was no alignment with score > cutoff.
+//...param.align:The corresponding alignment.
+//..remarks:So far, only linear gap costs are allowed.
+//..see:Function.smithWatermanGetNext
+//..see:Function.localAlignment
+//*/
 ///////////////////////////////////////////////////////////////////////////////////
 //wrapper that computes the matrix and does the backtracking for the best alignment
 template <typename TSource, typename TSpec, typename TScoreValue>
@@ -708,27 +708,28 @@ SEQAN_CHECKPOINT
 
 ///////////////////////////////////////////////////////////////////////////
 // wrapper that declumps the matrix and traces back the next best alignment
-/**
-.Function.smithWatermanGetNext:
-..summary:Computes next best local alignment.
-..description:Declumps the matrix and computes the next best local alignment of the (two) sequences given in align 
-according to the score values given in score. Declumping means forbidding all matches and mismatches that were used
-in previously found alignment to be used again.
-..cat:Alignments
-..signature:smithWatermanGetNext(align, sw_finder, score, cutoff)
-..param.align:The alignment object having the sequences to be aligned as sources.
-...type:Class.Align
-..param.sw_finder:The local alignment finder object (that has been passed to @Function.smithWaterman@ before).
-...type:Class.LocalAlignmentFinder
-..param.score:The score values to be used for computing the alignment.
-...type:Class.Score
-..param.cutoff:Alignments with scores < cutoff will be discarded. 
-...remarks:Only use a cut off score that is greater or equal to the one that was used when calling @Function.smithWaterman@.
-..returns:The score value of the next best local alignment or 0 if there was no alignment with score > cutoff.
-..returns:The corresponding alignment can be found in align.
-..see:Function.smithWaterman
-..see:Function.localAlignment
-*/
+
+///**
+//.Function.smithWatermanGetNext:
+//..summary:Computes next best local alignment.
+//..description:Declumps the matrix and computes the next best local alignment of the (two) sequences given in align 
+//according to the score values given in score. Declumping means forbidding all matches and mismatches that were used
+//in previously found alignment to be used again.
+//..cat:Alignments
+//..signature:smithWatermanGetNext(align, sw_finder, score, cutoff)
+//..param.align:The alignment object having the sequences to be aligned as sources.
+//...type:Class.Align
+//..param.sw_finder:The local alignment finder object (that has been passed to @Function.smithWaterman@ before).
+//...type:Class.LocalAlignmentFinder
+//..param.score:The score values to be used for computing the alignment.
+//...type:Class.Score
+//..param.cutoff:Alignments with scores < cutoff will be discarded. 
+//...remarks:Only use a cut off score that is greater or equal to the one that was used when calling @Function.smithWaterman@.
+//..returns:The score value of the next best local alignment or 0 if there was no alignment with score > cutoff.
+//..returns:The corresponding alignment can be found in align.
+//..see:Function.smithWaterman
+//..see:Function.localAlignment
+//*/
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
 smithWatermanGetNext(Align<TSource, TSpec> & align_,
