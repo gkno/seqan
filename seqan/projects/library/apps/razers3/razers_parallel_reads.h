@@ -410,8 +410,10 @@ to split up.
 		// which are then processed in parallel
 		if(task.split){
 			
-			// TODO:replace with option
-			unsigned accuracy = 5;
+			// Accuracy by which the remaining hits are sorted.
+			// The higher the number is the faster is the sorting step and
+			// the less optimal might be the splitting
+			unsigned accuracy = options.blockSize / options.accuracy;
 			
 			// If not sorted yet, sort remaining hits.
 			if(not task.sorted){
@@ -450,10 +452,10 @@ to split up.
 			_TaskDetails<TSize> me(task.blockId, task.current, i);
 			_TaskDetails<TSize> you(task.blockId, i, task.end);
 			
-			#pragma omp flush(tasks)
+			//#pragma omp flush(tasks)
 			tasks[splitWith] = you;
 			tasks[myTaskId]  = me;
-			#pragma omp flush(tasks)
+			//#pragma omp flush(tasks)
 			
 			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
 			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
@@ -533,21 +535,28 @@ to split up.
 		typedef typename Size<TConvertedHitString>::Type	TConvertedHitStringSize;
 		typedef typename TFragmentStore::TReadSeqStore	TReadSeqStore;
 		
+		std::cout << "contig START" << std::endl;
+		
+		#pragma omp parallel num_threads((int)options.numberOfCores)
+		{
+		#pragma omp master
+		{
 			// initialize before the while loop so that the memory does not need to be reallocated every time
 			StringSet<TConvertedHitString, Owner<> > hits;
 			resize(hits, options.numberOfBlocks, Exact());
 			
-			// Number of hits that are colleced before the verification is started
-			unsigned threshold = 10000;
 			// To keep track if any block has some sequence left to cover.
 			bool sequenceLeft = true;
 			// To keep track which block is done and which not.
 			String<bool> blockSeqLeft;
 			fill(blockSeqLeft, options.numberOfBlocks, true, Exact());
 			
+			// needed because the omp shared clause does not allow for "." in the variabel names.
+			TReadSeqStore & readSet = store.readSeqStore;
+		
 			// ??? is that needed?
 			omp_set_nested(true);
-			
+					
 			// Collect hits, verify them and store them in the main store while there is sequence left to cover.
 			while(sequenceLeft)
 			{
@@ -558,57 +567,42 @@ to split up.
 				
 				sequenceLeft = false;
 
-				#pragma omp parallel num_threads((int)options.numberOfCores)
-				{
-				#pragma omp for
+
+				//#pragma omp for
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
 					// Only use block if there is sequnce left.
 					// Otherwise findwindow next does unpredicted things.
 					if(blockSeqLeft[blockId]){
-						blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, threshold,
-															 swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-						// if any of the block has sequnece left the while loops again
-						sequenceLeft |= blockSeqLeft[blockId];
+						#pragma omp task shared(hits, totalHits, readSet)
+						{
+							blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, options.collect,
+								 swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+							
+							// if any of the block has sequnece left the while loops again
+							#pragma omp atomic
+							sequenceLeft |= blockSeqLeft[blockId];
+						}
 					}
 				}
-				}
-					
-				/* Alternative to preceding parallel for
-				 if used needs to be adjusted as the for loop is
-				 #pragma omp parallel num_threads((int)options.numberOfCores)
-				 {
-				 int blockId = omp_get_thread_num();
-				 bool left = _collectHits(hits[blockId], totalHits, threshold, swiftFinders[blockId], 
-				 swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
-				 
-				 #pragma omp atomic
-				 sequenceLeft |= left;
-				 }
-				 */
-					
+				
+				#pragma omp taskwait
+
 				// third: verify the hits
 				// create verification tasks
 				String<_TaskDetails<TConvertedHitStringSize> > tasks;
 				resize(tasks, options.numberOfBlocks, Exact());
 				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId)
 					tasks[taskId] = _TaskDetails<TConvertedHitStringSize>(taskId, length(hits[taskId]));
-					
+				
 
-				TReadSeqStore & readSet = store.readSeqStore;
-				#pragma omp parallel num_threads((int)options.numberOfCores)
-				{
-				#pragma omp master
-				{
+				// start verification
+				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
+					#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
+					_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode);
+				}					
+				
+				#pragma omp taskwait					
 
-					// start verification
-					for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
-						#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
-						_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode);
-					}					
-					
-					#pragma omp taskwait					
-				} // End omp master
-				} // End omp parallel
 				
 				// clear hit strings
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
@@ -622,11 +616,19 @@ to split up.
 					clear(threadStores[blockId].alignedReadStore);
 					clear(threadStores[blockId].alignQualityStore);
 				}
-			}
+				
+			} // End while
 
+		} // End omp master
+		} // End omp parallel
+				
+		std::cout << "find end" << std::endl;
+		
 		// clear finders
 		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+		
+		std::cout << "contig STOP" << std::endl;
 	}
 
 /**
@@ -727,10 +729,15 @@ to split up.
 
 		// Set up finder. beginOK is true after the loop if all finders are set up successfully.
 		bool beginOk = true;
-		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-			beginOk = beginOk & windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
-			if(not beginOk) break;
+		
+		#pragma omp parallel num_threads((int)options.numberOfCores)
+		{
+			#pragma omp for reduction(&:beginOk)
+			for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+				beginOk = windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
+			}	
 		}
+		
 
 		// Only if the finders are set up.
 		if(beginOk)
