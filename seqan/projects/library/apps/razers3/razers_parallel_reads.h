@@ -537,29 +537,30 @@ to split up.
 		
 		std::cout << "contig START" << std::endl;
 		
-		#pragma omp parallel num_threads((int)options.numberOfCores)
-		{
-		#pragma omp master
-		{
-			// initialize before the while loop so that the memory does not need to be reallocated every time
-			StringSet<TConvertedHitString, Owner<> > hits;
-			resize(hits, options.numberOfBlocks, Exact());
-			
-			// To keep track if any block has some sequence left to cover.
-			bool sequenceLeft = true;
-			// To keep track which block is done and which not.
-			String<bool> blockSeqLeft;
-			fill(blockSeqLeft, options.numberOfBlocks, true, Exact());
-			
-			// needed because the omp shared clause does not allow for "." in the variabel names.
-			TReadSeqStore & readSet = store.readSeqStore;
+		// initialize before the while loop so that the memory does not need to be reallocated every time
+		StringSet<TConvertedHitString, Owner<> > hits;
+		resize(hits, options.numberOfBlocks, Exact());
 		
-			// ??? is that needed?
-			omp_set_nested(true);
-					
-			// Collect hits, verify them and store them in the main store while there is sequence left to cover.
-			while(sequenceLeft)
+		// To keep track if any block has some sequence left to cover.
+		bool sequenceLeft = true;
+		// To keep track which block is done and which not.
+		String<bool> blockSeqLeft;
+		fill(blockSeqLeft, options.numberOfBlocks, true, Exact());
+		
+		// needed because the omp shared clause does not allow for "." in the variabel names.
+		TReadSeqStore & readSet = store.readSeqStore;
+	
+		// ??? is that needed?
+		omp_set_nested(true);
+				
+		// Collect hits, verify them and store them in the main store while there is sequence left to cover.
+		while(sequenceLeft){
+				
+			#pragma omp parallel num_threads((int)options.numberOfCores)
 			{
+			#pragma omp master
+			{
+				
 				// first: collect hits
 				// Number of hits collected in this iteration. Shared by all threads
 				// Updated in an atomic expression
@@ -616,11 +617,11 @@ to split up.
 					clear(threadStores[blockId].alignedReadStore);
 					clear(threadStores[blockId].alignQualityStore);
 				}
-				
-			} // End while
 
-		} // End omp master
-		} // End omp parallel
+			} // End omp master
+			} // End omp parallel
+						
+		} // End while
 				
 		std::cout << "find end" << std::endl;
 		
