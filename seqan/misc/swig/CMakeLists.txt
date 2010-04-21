@@ -1,9 +1,19 @@
 cmake_minimum_required(VERSION 2.6)
 project(SwigBinding)
+#################################################################################
+## get svn version
+#################################################################################
 
-################################################################################
-# Set Path Variables
-################################################################################
+find_package(Subversion)
+if(Subversion_FOUND)
+  Subversion_WC_INFO(${CMAKE_CURRENT_SOURCE_DIR} ER)
+  set(SUBVERSION_REVISION ${ER_WC_REVISION})
+endif(Subversion_FOUND)
+
+
+#################################################################################
+## Set Path Variables
+#################################################################################
 SET (SEQAN_LIBRARY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../projects/library")
 
 if (NOT SEQAN_LIBRARY)
@@ -117,9 +127,34 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 SET(CMAKE_SWIG_FLAGS "")
 
 SET_SOURCE_FILES_PROPERTIES(alignment.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(pattern_matching.i PROPERTIES CPLUSPLUS ON)
 ################################################################################
 # indicate the files needed to be wrapped: target_name  target_language interface_file wrapper_file
 ################################################################################
 
 SWIG_ADD_MODULE(alignment python alignment.i alignment.h)
 SWIG_LINK_LIBRARIES(alignment ${PYTHON_LIBRARIES})
+IF (WIN32)
+  SET_TARGET_PROPERTIES ( _alignment PROPERTIES SUFFIX ".pyd")
+ENDIF (WIN32)
+
+INSTALL ( TARGETS _alignment LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+INSTALL ( FILES ${CMAKE_BINARY_DIR}/alignment.py DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+INSTALL(FILES example.py  DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/bin )
+
+#SWIG_ADD_MODULE(pattern_matching python pattern_matching.i pattern_matching.h)
+#SWIG_LINK_LIBRARIES(pattern_matching ${PYTHON_LIBRARIES})
+
+#IF (WIN32)
+##  SET_TARGET_PROPERTIES ( _pattern_matching PROPERTIES SUFFIX ".pyd")
+#ENDIF (WIN32)
+
+SET(CPACK_SET_DESTDIR "ON")
+set(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+
+include (InstallRequiredSystemLibraries)
+INCLUDE (CPack) 
+
+
