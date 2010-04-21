@@ -179,6 +179,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	blockSize;
 		unsigned	accuracy;
 		unsigned	collect;
+		unsigned	splitThreshold;
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -262,6 +263,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			blockSize = 0;
 			accuracy = 200;
 			collect = 1000000;
+			splitThreshold = 100; // should be high enough to justify the overhead it is causing (scheduling, sorting)
 #endif
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;

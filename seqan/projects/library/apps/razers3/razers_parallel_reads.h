@@ -19,8 +19,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_RAZERS_PARALLEL_2_H
-#define SEQAN_HEADER_RAZERS_PARALLEL_2_H
+#ifndef SEQAN_HEADER_RAZERS_PARALLEL_READS_H
+#define SEQAN_HEADER_RAZERS_PARALLEL_READS_H
 
 #include <iostream>
 #ifdef _OPENMP
@@ -28,6 +28,9 @@
 #endif
 
 #define RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+#include <parallel/algorithm>
+#endif
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -275,14 +278,18 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 	template <
 		typename TConvertedSwiftHitString,
 		typename TSwiftFinder,
-		typename TSwiftPattern>
+		typename TSwiftPattern,
+		typename TRazerSOptions>
 	bool _collectHits(
 			TConvertedSwiftHitString	& hits,
 			unsigned					& totalHits,
-			unsigned const				  threshold,
 			TSwiftFinder				& finder,
 			TSwiftPattern				& pattern,
-			unsigned const				  windowSize)
+			TRazerSOptions const		& options
+#ifdef FLEX_TIMER
+			, int & windowNumbers
+#endif
+			)
 	{
 		typedef typename TSwiftFinder::THitString				TSwiftHitString;
 		typedef typename Size<TConvertedSwiftHitString>::Type	TSize; 
@@ -290,9 +297,9 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 		// Get new hits till all threads together have enough.
 		bool sequenceLeft = true;
-		while(totalHits < threshold and sequenceLeft){
+		while(totalHits < options.collect and sequenceLeft){
 			// Search for new hits.
-			sequenceLeft = windowFindNext(finder, pattern, windowSize);
+			sequenceLeft = windowFindNext(finder, pattern, options.windowSize);
 			TSwiftHitString oriHits = getSwiftHits(finder);
 			// Resize the hit string so it can hold the new hits
 			TSize oldSize = length(hits);
@@ -305,6 +312,10 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			// Update the overall hit count so that the other threads know when to stop as well.
 			#pragma omp atomic
 			totalHits += length(oriHits);
+			
+#ifdef FLEX_TIMER
+			++windowNumbers;
+#endif
 		}
 		return sequenceLeft;
 	}
@@ -370,13 +381,17 @@ to split up.
 		typename TRazerSOptions,
 		typename TRazerSMode>
 	bool _verifyHits(
-					 StringSet<String<ConvertedSwiftHit<TText> > >	& hits,
-					 int const										  myTaskId,
-					 String<_TaskDetails<TSize> >					& tasks,
-					 TReadSet										& readSet,
-					 String<TVerifier> 								& verifier,
-					 TRazerSOptions									& options,
-					 TRazerSMode const								& mode)
+			StringSet<String<ConvertedSwiftHit<TText> > >	& hits,
+			int const										  myTaskId,
+			String<_TaskDetails<TSize> >					& tasks,
+			TReadSet										& readSet,
+			String<TVerifier> 								& verifier,
+			TRazerSOptions									& options,
+			TRazerSMode const								& mode
+#ifdef FLEX_TIMER
+			,String<_proFloat>								& waitingTimes
+#endif
+			)
 	{
 		typedef String<ConvertedSwiftHit<TText> >		THitString;
 		typedef typename Position<THitString>::Type		THitStringPos;
@@ -422,9 +437,9 @@ to split up.
 				THitIter i2 = end(myHits);
 				
 				// At least one other core should be free to help sorting
-				// TODO replace with parallel sort
 				ConvertedSwiftHitComparison comp(accuracy);
-				sort(i1, i2, comp);
+				__gnu_parallel::sort(i1, i2, comp, __gnu_parallel::default_parallel_tag(2));
+				//sort(i1, i2, comp);
 			}
 			
 			// Go over the hits starting at the center. If the read ID change with
@@ -457,11 +472,19 @@ to split up.
 			tasks[myTaskId]  = me;
 			//#pragma omp flush(tasks)
 			
+#ifndef FLEX_TIMER
 			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
 			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
 				
 			_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode);
-						
+#else
+			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode, waitingTimes)
+			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode, waitingTimes);
+			
+			_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode, waitingTimes);
+#endif
+			
+			
 		}
 		else // If the block is completed and no other thread interrupted the execution.
 		{
@@ -470,8 +493,7 @@ to split up.
 			{
 				// Inital value of maxHitsLeft is also the minimum number of hits needed
 				// to trigger a the splitting.
-				//TODO: replace with option
-				THitStringPos maxHitsLeft = 10;
+				THitStringPos maxHitsLeft = options.splitThreshold;
 				int splitWith = -1;
 				
 				// Check if another block has sufficient many hits left to steal work
@@ -485,6 +507,10 @@ to split up.
 					}
 				}
 			} // End critical section
+			
+#ifdef FLEX_TIMER
+			waitingTimes[myTaskId] = sysTime();
+#endif
 			
 		}
 		return true;
@@ -568,26 +594,56 @@ to split up.
 				
 				sequenceLeft = false;
 
+#ifdef FLEX_TIMER
+				// for waiting times
+				String<_proFloat> waitingTimes;
+				resize(waitingTimes, options.numberOfCores, Exact());
+				for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
+					waitingTimes[coreId] = sysTime();
+				
+				String<int> windowNumbers;
+				fill(windowNumbers, options.numberOfBlocks, 0, Exact());
+#endif
+				
 
 				//#pragma omp for
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
 					// Only use block if there is sequnce left.
 					// Otherwise findwindow next does unpredicted things.
 					if(blockSeqLeft[blockId]){
-						#pragma omp task shared(hits, totalHits, readSet)
+						#pragma omp task shared(hits, totalHits, windowNumbers, waitingTimes)
 						{
-							blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits, options.collect,
-								 swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
+							blockSeqLeft[blockId] = _collectHits(hits[blockId], totalHits,
+								swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options
+#ifdef FLEX_TIMER
+								, windowNumbers[blockId]
+#endif
+								);
 							
 							// if any of the block has sequnece left the while loops again
 							#pragma omp atomic
 							sequenceLeft |= blockSeqLeft[blockId];
+							
+#ifdef FLEX_TIMER
+							waitingTimes[blockId] = sysTime();
+#endif
+							
 						}
 					}
 				}
 				
 				#pragma omp taskwait
 
+#ifdef FLEX_TIMER
+				std::cout << std::endl;
+				// for waiting times
+				_proFloat now = sysTime();
+				for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+					std::cout << "filter>\t" << blockId << "\t" << (now - waitingTimes[blockId]) << "\t" << length(hits[blockId]) << "\t" <<  windowNumbers[blockId] << std::endl;
+#endif
+				
+				
+				
 				// third: verify the hits
 				// create verification tasks
 				String<_TaskDetails<TConvertedHitStringSize> > tasks;
@@ -598,11 +654,23 @@ to split up.
 
 				// start verification
 				for (int taskId = 0; taskId < (int)options.numberOfBlocks; ++taskId){
+#ifndef FLEX_TIMER
 					#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
 					_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode);
+#else
+					#pragma omp task shared(hits, tasks, readSet, verifier, options, mode, waitingTimes)
+					_verifyHits(hits, taskId, tasks, readSet, verifier, options, mode, waitingTimes);
+#endif
 				}					
 				
 				#pragma omp taskwait					
+				
+#ifdef FLEX_TIMER
+				// for waiting times
+				now = sysTime();
+				for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
+					std::cout << "verification>\t" << coreId << "\t" << (now - waitingTimes[coreId]) << std::endl;
+#endif
 				
 				// clear hit strings
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)

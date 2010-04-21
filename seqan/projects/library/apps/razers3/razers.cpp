@@ -335,7 +335,8 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("nc", "number-of-cores",   "set the number of cores that is available (this many threads will be started)", OptionType::Int | OptionType::Label, options.numberOfCores));
     addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Int | OptionType::Label, options.blocksPerCore));
 	addOption(parser, CommandLineOption("ac", "accuracy",          "the accuracy with which the hits are sorted in the parallel version", OptionType::Int | OptionType::Label, options.accuracy));
-	addOption(parser, CommandLineOption("cl", "collect",          "number of hits that is collected before the verification in triggered", OptionType::Int | OptionType::Label, options.collect));
+	addOption(parser, CommandLineOption("cl", "collect",           "number of hits that is collected before the verification in triggered", OptionType::Int | OptionType::Label, options.collect));
+	addOption(parser, CommandLineOption("sp", "split",             "number of hits that need to be left in a block to trigger splitting", OptionType::Int | OptionType::Label, options.splitThreshold));
 #endif
 #ifdef RAZERS_OPENADDRESSING
 	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
@@ -386,6 +387,7 @@ int main(int argc, const char *argv[])
     getOptionValueLong(parser, "blocks-per-thread", options.blocksPerCore);
 	getOptionValueLong(parser, "accuracy", options.accuracy);
 	getOptionValueLong(parser, "collect", options.collect);
+	getOptionValueLong(parser, "split", options.splitThreshold);
 #endif
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValueLong(parser, "load-factor", options.loadFactor);

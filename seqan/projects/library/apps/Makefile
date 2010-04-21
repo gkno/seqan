@@ -15,26 +15,37 @@ ifeq ($(filter /% $(SLASH)%, $(subst :, ,$(tbb_root)) ),)
     export TBB21_INSTALL_DIR := $(tbb_root)
 endif
 
+#CC=g++-4.2
+
 # explicitly compile for a 32 or 64 bit platform
 #CXXFLAGS += -m32
 #CXXFLAGS += -m64
 
 CXXFLAGS += -I$(SEQAN_BASE)
-CXXFLAGS += -O9
+CXXFLAGS += -O0
+
+CXXFLAGS += -fopenmp 
+CXXFLAGS += -D_GLIBCXX_PARALLEL
+CXXFLAGS += -D FLEX_TIMER
+
+CXXFLAGS += -g
 #CXXFLAGS += -O0 -g
-CXXFLAGS += -pedantic -W -Wall
+CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
 
 # Intel Threading Building Blocks
 #CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
 #LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers razers2/paramChooser razers2/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon #transquant/transquant
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers razers2/paramChooser razers2/razers razers3/paramChooser razers3/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon #transquant/transquant
 
 all:           check_seqan_base $(TARGETS)
 dfi:           check_seqan_base dfi/dfi 
 razers:        check_seqan_base razers/razers razers/paramChooser
 razers2:       check_seqan_base razers2/razers razers2/paramChooser
+razers3:       check_seqan_base razers3/razers
+razersMc:      check_seqan_base razers3/razers
+contigView:    check_seqan_base contigView/contigView
 micro_razers:  check_seqan_base micro_razers/micro_razers
 seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee 
 seqcons:       check_seqan_base seqcons/seqcons
