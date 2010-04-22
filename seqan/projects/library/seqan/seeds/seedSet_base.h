@@ -1407,7 +1407,7 @@ _gapFill(TValue qlPos, //query sequence left
 		{
 		    if ((itInner->i1 > qValue) &&(itInner->i2 >dValue))
 			{
-			    seeds.push_back(*it);
+			    seeds.push_back(*itInner);
 			    qValue = itInner->i1 + itInner->i3 -1;
 			    dValue = itInner->i2 + itInner->i3 -1;
 		    }
