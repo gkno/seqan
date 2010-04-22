@@ -1,12 +1,42 @@
 #include <cstring>
 #include <seqan.h>
 #include <seqan/align.h>
+#include <string>
 
+#ifdef SWIG
+namespace std
+{	
+%typemap(in,numinputs=0) std::string& str1(std::string temp) 
+	{
+		$1 = &temp;
+	}
+%typemap(in,numinputs=0) std::string& str2(std::string temp) 
+	{
+		$1 = &temp;
+	}
+	%typemap(argout)std::string& str1
+	{
+		$result=SWIG_Python_AppendOutput($result, PyString_FromStringAndSize((*$1).c_str(),(*$1).length()));
+	}
+	%typemap(argout)std::string& str2
+	{
+		$result=SWIG_Python_AppendOutput($result, PyString_FromStringAndSize((*$1).c_str(),(*$1).length()));
+	}
+%typemap(out)std::string
+	{
+		$result=SWIG_Python_AppendOutput($result, PyString_FromStringAndSize(($1).c_str(),($1).length()));
+	}
+	
+}	
+
+
+#endif
 
 namespace seqan
 {
 
 	#ifdef SWIG
+
 	//typemap(in) -> python to c++
 	//typemap(out) -> c++ to python
 
@@ -40,6 +70,10 @@ namespace seqan
         Py_DECREF(o3);
     }
 	}
+	
+
+	
+	/*
 	//see above... by using char** we have to pre allocate memory
 	%typemap(in,numinputs=0) char** str1(char* temp) 
 	{
@@ -50,6 +84,10 @@ namespace seqan
 		  $1 = (char **) malloc((strlen(temp)+1)*sizeof(char *));
 	}
 	//returns a list of char using the Python_AppendOupt function.
+	*/
+
+	
+	/*
 	%typemap(argout)char** str1
 	{
 		$result=SWIG_Python_AppendOutput($result, PyString_FromStringAndSize(*$1,strlen(*$1)));
@@ -63,7 +101,7 @@ namespace seqan
 	{
 		free((char *) $1);
 	}
-
+	*/
 	%typemap(in,numinputs=0) int** scoreMatrix(int* temp)
 	{
 		  $1 = (int **) malloc((sizeof(temp)+1)*sizeof(int *));
@@ -145,7 +183,7 @@ namespace seqan
 	%feature("autodoc", DOCSTRING_) getAminoAcidScoreMatrix;
 
 	%feature("autodoc", DOCSTRING2) printAlignment;
-
+	
 	#endif
 
 	//returns a specific amino acid scoring matrix selected by the input name.
@@ -380,15 +418,15 @@ namespace seqan
 
 	//returns the alignment into different output variables ->via typemap into a string list
 	template<typename Type>
-	char* printAlignment(seqan::Align<seqan::String<Type> >&align,char **str1,char **str2)
+	std::string printAlignment(seqan::Align<seqan::String<Type> >*align, std::string& str1, std::string& str2)//char **str1,char **str2)
 	{
 		typedef Align<seqan::String<Type> > const TAlign;
 		typedef typename Row<TAlign>::Type TRow;
 		typedef typename Position<typename Rows<TAlign>::Type>::Type TRowsPosition;
 		typedef typename Position<TAlign>::Type TPosition;
-		TRowsPosition row_count = length(rows(align));
-		TPosition begin_ = beginPosition(cols(align));
-		TPosition end_ = endPosition(cols(align));
+		TRowsPosition row_count = length(rows(*align));
+		TPosition begin_ = beginPosition(cols(*align));
+		TPosition end_ = endPosition(cols(*align));
 		unsigned int baseCount=0;
 		unsigned int leftSpace=6;
 		std::string pAlignment;
@@ -405,7 +443,7 @@ namespace seqan
 				}
 				if ((i % 2)==0) 
 				{
-					TRow& row_ = row(align, i/2);
+					TRow& row_ = row(*align, i/2);
 					typedef typename Iterator<typename Row<TAlign>::Type const, Standard>::Type TIter;
 					TIter begin1_ = iter(row_, begin_);
 					TIter end1_ = iter(row_, begin_ + windowSize_);
@@ -434,7 +472,7 @@ namespace seqan
 				{
 					for(unsigned int j = 0;j<windowSize_;++j)
 					{
-						if ((!isGap(row(align, (i-1)/2), begin_+j)) &&(!isGap(row(align, (i+1)/2), begin_+j)) && (row(align, (i-1)/2)[begin_+j]==row(align, (i+1)/2)[begin_+j]))
+						if ((!isGap(row(*align, (i-1)/2), begin_+j)) &&(!isGap(row(*align, (i+1)/2), begin_+j)) && (row(*align, (i-1)/2)[begin_+j]==row(*align, (i+1)/2)[begin_+j]))
 						{
 							pAlignment+="|";
 						}
@@ -451,14 +489,9 @@ namespace seqan
 		}
 	pAlignment+="\n";
 
-
-	*str1 = new char[seq1Alignment.length()+1];
-	*str2 = new char[seq2Alignment.length()+1];
-	char* pp=new char[pAlignment.length()+1];
-	strcpy(*str1,seq1Alignment.c_str());
-	strcpy(*str2,seq2Alignment.c_str());
-	strcpy(pp,pAlignment.c_str());
-	return pp;
+	str1= seq1Alignment;
+	str2= seq2Alignment;
+	return pAlignment;
 	}
 /*
 //overload function with seqan pointers does not work......
