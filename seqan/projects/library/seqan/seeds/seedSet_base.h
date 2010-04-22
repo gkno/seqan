@@ -1403,13 +1403,13 @@ _gapFill(TValue qlPos, //query sequence left
 	    TValue dValue = -1;
 		typedef typename std::list<Triple<TValue,TValue,TValue> >::iterator TIterator;
 		TIterator it_end = listTmp.end();
-	    for (TIterator it = listTmp.begin(); it != it_end; ++it)
+	    for (TIterator itInner = listTmp.begin(); itInner != it_end; ++itInner)
 		{
-		    if ((it->i1 > qValue) &&(it->i2 >dValue))
+		    if ((itInner->i1 > qValue) &&(itInner->i2 >dValue))
 			{
 			    seeds.push_back(*it);
-			    qValue = it->i1 + it->i3 -1;
-			    dValue = it->i2 + it->i3 -1;
+			    qValue = itInner->i1 + itInner->i3 -1;
+			    dValue = itInner->i2 + itInner->i3 -1;
 		    }
 	    }
 	    listTmp.clear();
