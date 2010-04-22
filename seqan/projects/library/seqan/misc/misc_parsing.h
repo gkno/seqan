@@ -177,6 +177,18 @@ _parse_readIdentifier(TFile & file, TChar& c)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TFile, typename TChar>
+inline char
+_parse_readChar(TFile & file, TChar& c)
+{
+    char result = c;
+    if (!_streamEOF(file))
+        c = _streamGet(file);
+    return result;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TFile, typename TString, typename TChar>
 inline void
 _parse_readIdentifier(TFile & file, TString& str, TChar& c)
