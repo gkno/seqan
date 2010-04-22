@@ -1415,10 +1415,10 @@ _gapFill(TValue qlPos, //query sequence left
 	    listTmp.clear();
 
 		it_end = seeds.end();
-	    for (TIterator it = seeds.begin(); it != it_end; ++it)
+	    for (TIterator itInner = seeds.begin(); itInner != it_end; ++itInner)
 		{
-		    it->i1 += qlPos;
-		    it->i2 += dlPos;
+		    itInner->i1 += qlPos;
+		    itInner->i2 += dlPos;
 	    }
 
 	    seeds.push_front(Triple<TValue,TValue,TValue>(qlPos, dlPos,0));
