@@ -39,6 +39,7 @@ struct AnnotationStoreElement
 	TId					parentId;
 	TId					contigId;
 	TId					countId;
+	TId					typeId;			// gene, intron, ...
 	TPos				beginPos;		// begin position of the gapped sequence in gapped contig sequence
 	TPos				endPos;			// end position of ..., for reverse aligned reads holds end < begin
 

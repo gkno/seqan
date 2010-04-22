@@ -103,6 +103,137 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
+//////////////////////////////////////////////////////////////////////////////
+// refresh
+
+/**
+.Function.refresh:
+..summary:Recreate a name store cache.
+..cat:Fragment Store
+..signature:refresh(cache)
+..param.cache:A @Class.NameStoreCache@ object.
+...type:Class.NameStoreCache
+..see:Function.getIdByName
+*/
+    
+    template <typename TNameStore, typename TName>
+    inline void
+    refresh(NameStoreCache<TNameStore, TName> &cache)
+    {
+		cache.nameSet.clear();
+		for (unsigned i = 0; i < length(cache.store); ++i)
+			cache.nameSet.insert(i);
+	}
+		
+
+//////////////////////////////////////////////////////////////////////////////
+// getIdByName
+    
+/**
+.Function.getIdByName:
+..summary:Appends a name to a name store.
+..cat:Fragment Store
+..signature:getIdByName(nameStore, name, id[, cache])
+..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
+...see:Class.FragmentStore
+..param.name:The name to be searched.
+...type:Shortcut.CharString
+..param.id:The resulting id.
+..param.cache:A structure to efficiently retrieve the id for a given name. If ommited a brute force method is used to search.
+...default:Tag.Nothing
+...type:Class.NameStoreCache
+..returns:$true$ if the name was found and $false$ if not.
+..see:Function.getIdByName
+*/
+
+    template <typename TNameStore, typename TName, typename TPos>
+    inline bool 
+    getIdByName(TNameStore &store, TName &name, TPos &pos)
+    {
+        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
+        
+        // Iterator over read names
+        for (TNameStoreIter iter = begin(store); iter != end(store); ++iter)
+		{
+            // if the element was found
+            if (name == getValue(iter))
+			{
+                // set the ID
+                pos = position(iter);
+                // and break the loop
+                return true;
+            }
+        }
+        return false;
+    }
+	
+    template <typename TNameStore, typename TName, typename TPos, typename TContext>
+    inline bool 
+    getIdByName(TNameStore &store, TName &name, TPos &pos, TContext &)
+	{
+		return getIdByName(store, name, pos);
+	}
+    
+    template<typename TNameStore, typename TName, typename TPos>
+    inline bool 
+    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
+    {
+        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
+		typedef typename Position<TNameStore>::Type TId;
+		typedef NameStoreCache<TNameStore, TName> TNameStoreCache;
+		typedef typename TNameStoreCache::TSet TSet;
+		
+		TSet const &set = context.nameSet;	
+		context.name = name;
+		
+		typename TSet::const_iterator it = set.find(supremumValue<TId>());
+		if (it != set.end())
+		{
+			pos = *it;
+			return true;
+		}
+		return false;
+    }
+	
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.appendName:
+..summary:Appends a name to a name store.
+..cat:Fragment Store
+..signature:appendRead(nameStore, name[, cache])
+..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
+...see:Class.FragmentStore
+..param.name:The name to be appended.
+...type:Shortcut.CharString
+..param.cache:A structure to efficiently retrieve the id for a given name. See @Function.getIdByName@.
+...default:Tag.Nothing
+...type:Class.NameStoreCache
+..see:Function.getIdByName
+*/
+
+    template<typename TNameStore, typename TName>
+    inline void
+    appendName(TNameStore &store, TName &name)
+    {
+		appendValue(store, name);
+	}
+	
+    template<typename TNameStore, typename TName, typename TContext>
+    inline void
+    appendName(TNameStore &store, TName &name, TContext &)
+    {
+		appendName(store, name);
+	}
+	
+    template<typename TNameStore, typename TName>
+    inline void
+    appendName(TNameStore &store, TName &name, NameStoreCache<TNameStore, TName> &context)
+    {
+		appendValue(store, name);
+		context.nameSet.insert(length(store) - 1);
+    }
+	
 
 //////////////////////////////////////////////////////////////////////////////
 // Contig Store Configuration
@@ -334,146 +465,39 @@ public:
 	TNameStore	libraryNameStore;
 	TNameStore	contigNameStore;
 	TNameStore	annotationNameStore;
+	TNameStore	annotationTypeStore;
 	
 	NameStoreCache<TNameStore, CharString>	readNameStoreCache;
 	NameStoreCache<TNameStore, CharString>	contigNameStoreCache;
+	NameStoreCache<TNameStore, CharString>	annotationNameStoreCache;
+	NameStoreCache<TNameStore, CharString>	annotationTypeStoreCache;
+
+	enum {
+		ANNO_GENE = 0,
+		ANNO_MRNA = 1,
+		ANNO_CDS = 2,
+		ANNO_EXON = 3,
+		ANNO_FIVE_PRIME_UTR = 4,
+		ANNO_INTRON = 5,
+		ANNO_THREE_PRIME_UTR = 6
+	};
 	
 	FragmentStore():
 		readNameStoreCache(readNameStore),
-		contigNameStoreCache(contigNameStore) {}
+		contigNameStoreCache(contigNameStore),
+		annotationNameStoreCache(annotationNameStore),
+		annotationTypeStoreCache(annotationTypeStore)
+	{
+		appendName(annotationTypeStore, "gene", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "mRNA", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "CDS", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "exon", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "five_prime_UTR", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "intron", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "three_prime_UTR", annotationTypeStoreCache);
+	}
 };
 
-//////////////////////////////////////////////////////////////////////////////
-// refresh
-
-/**
-.Function.refresh:
-..summary:Recreate a name store cache.
-..cat:Fragment Store
-..signature:refresh(cache)
-..param.cache:A @Class.NameStoreCache@ object.
-...type:Class.NameStoreCache
-..see:Function.getIdByName
-*/
-    
-    template <typename TNameStore, typename TName>
-    inline void
-    refresh(NameStoreCache<TNameStore, TName> &cache)
-    {
-		cache.nameSet.clear();
-		for (unsigned i = 0; i < length(cache.store); ++i)
-			cache.nameSet.insert(i);
-	}
-		
-
-//////////////////////////////////////////////////////////////////////////////
-// getIdByName
-    
-/**
-.Function.getIdByName:
-..summary:Appends a name to a name store.
-..cat:Fragment Store
-..signature:getIdByName(nameStore, name, id[, cache])
-..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
-...see:Class.FragmentStore
-..param.name:The name to be searched.
-...type:Shortcut.CharString
-..param.id:The resulting id.
-..param.cache:A structure to efficiently retrieve the id for a given name. If ommited a brute force method is used to search.
-...default:Tag.Nothing
-...type:Class.NameStoreCache
-..returns:$true$ if the name was found and $false$ if not.
-..see:Function.getIdByName
-*/
-
-    template <typename TNameStore, typename TName, typename TPos>
-    inline bool 
-    getIdByName(TNameStore &store, TName &name, TPos &pos)
-    {
-        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
-        
-        // Iterator over read names
-        for (TNameStoreIter iter = begin(store); iter != end(store); ++iter)
-		{
-            // if the element was found
-            if (name == getValue(iter))
-			{
-                // set the ID
-                pos = position(iter);
-                // and break the loop
-                return true;
-            }
-        }
-        return false;
-    }
-	
-    template <typename TNameStore, typename TName, typename TPos, typename TContext>
-    inline bool 
-    getIdByName(TNameStore &store, TName &name, TPos &pos, TContext &)
-	{
-		return getIdByName(store, name, pos);
-	}
-    
-    template<typename TNameStore, typename TName, typename TPos>
-    inline bool 
-    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
-    {
-        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
-		typedef typename Position<TNameStore>::Type TId;
-		typedef NameStoreCache<TNameStore, TName> TNameStoreCache;
-		typedef typename TNameStoreCache::TSet TSet;
-		
-		TSet const &set = context.nameSet;	
-		context.name = name;
-		
-		typename TSet::const_iterator it = set.find(supremumValue<TId>());
-		if (it != set.end())
-		{
-			pos = *it;
-			return true;
-		}
-		return false;
-    }
-	
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.appendName:
-..summary:Appends a name to a name store.
-..cat:Fragment Store
-..signature:appendRead(nameStore, name[, cache])
-..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
-...see:Class.FragmentStore
-..param.name:The name to be appended.
-...type:Shortcut.CharString
-..param.cache:A structure to efficiently retrieve the id for a given name. See @Function.getIdByName@.
-...default:Tag.Nothing
-...type:Class.NameStoreCache
-..see:Function.getIdByName
-*/
-
-    template<typename TNameStore, typename TName>
-    inline void
-    appendName(TNameStore &store, TName &name)
-    {
-		appendValue(store, name);
-	}
-	
-    template<typename TNameStore, typename TName, typename TContext>
-    inline void
-    appendName(TNameStore &store, TName &name, TContext &)
-    {
-		appendName(store, name);
-	}
-	
-    template<typename TNameStore, typename TName>
-    inline void
-    appendName(TNameStore &store, TName &name, NameStoreCache<TNameStore, TName> &context)
-    {
-		appendValue(store, name);
-		context.nameSet.insert(length(store) - 1);
-    }
-	
     
 //////////////////////////////////////////////////////////////////////////////
 // Read Store Accessors
@@ -862,7 +886,6 @@ getMateNo(FragmentStore<TSpec, TConfig> const &me, TId readId)
 	return -1;
 }
 
-
 /**
 .Function.calculateMateIndices
 ..summary:Calculates a string that maps the $readId$ of a read to the $readId$ of its mate.
@@ -902,6 +925,17 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 
 //////////////////////////////////////////////////////////////////////////////
 
+struct AlignedReadLayout
+{
+	typedef String<unsigned>	TRow;
+	typedef String<TRow>		TRows;
+	typedef String<TRows>		TContigRows;
+	
+	TContigRows contigRows;			// rows string, each row is a string of ids of alignedReads from left to right
+	String<Pair<int> > mateCoords;	// coords of mate pair
+	
+};
+
 /**
 .Function.layoutAlignment
 ..summary:Calculates a visible layout of reads aligned to a contig.
@@ -913,13 +947,13 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 ...type:Class.FragmentStore
 ..param.contigId:The $contigId$ of the affected contig.
 ..remarks:This function layouts all reads aligned to a contig in rows from up to down reusing empty row spaces.
-$layout[row][gappedPos]$ stores the $alignId$ of the alignment beginning at position $gappedPos$ in gap-space.
+$layout[row]$ stores the $alignId$ of all aligned reads from left to right assigned to the same row.
 $row$ is the row of the alignment in the multiple sequence alignment.
 ..see:Function.printAlignment
 */
 
-template <typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId>
-void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, TContigId contigId)
+template <typename TSpec, typename TConfig>
+void layoutAlignment(AlignedReadLayout &layout, FragmentStore<TSpec, TConfig> &store)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
@@ -930,23 +964,25 @@ void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &st
 	typedef typename Id<TAlignedRead>::Type							TId;
 	typedef typename TFragmentStore::TContigPos						TContigPos;
 	
-	typedef typename Value<TLayoutStringSet>::Type					TLayoutString;
-	typedef typename Iterator<TLayoutStringSet>::Type				TLayoutStringSetIter;
+	typedef typename AlignedReadLayout::TRows						TRows;
+	typedef typename AlignedReadLayout::TRow						TRow;
+	typedef typename Iterator<TRows>::Type							TRowsIter;
 	
 	// sort matches by increasing begin positions
-//	sortAlignedReads(store.alignedReadStore, SortBeginPos());
-//	sortAlignedReads(store.alignedReadStore, SortContigId());
+	sortAlignedReads(store.alignedReadStore, SortBeginPos());
+	sortAlignedReads(store.alignedReadStore, SortContigId());
 
-	clear(layout);
+	clear(layout.contigRows);
 	TAlignedReadIter it = begin(store.alignedReadStore, Standard());
 	TAlignedReadIter itEnd = end(store.alignedReadStore, Standard());
 
 	for (TId id = 0; it != itEnd; ++it, ++id)
 	{
-		if ((*it).contigId != (TId)contigId) continue;
+		if (length(layout.contigRows) <= (*it).contigId)
+			resize(layout.contigRows, (*it).contigId + 1);
 		
-		TLayoutStringSetIter lit = begin(layout, Standard());
-		TLayoutStringSetIter litEnd = end(layout, Standard());
+		TRowsIter lit = begin(layout.contigRows[(*it).contigId], Standard());
+		TRowsIter litEnd = end(layout.contigRows[(*it).contigId], Standard());
 		
 		TContigPos beginPos = _min((*it).beginPos, (*it).endPos);
 		
@@ -960,9 +996,9 @@ void layoutAlignment(TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &st
 			
 		if (lit == litEnd)
 		{
-			TLayoutString s;
+			TRow s;
 			appendValue(s, id);
-			appendValue(layout, s);
+			appendValue(layout.contigRows[(*it).contigId], s);
 		} else
 			appendValue(*lit, id);
 	}
@@ -987,10 +1023,35 @@ The empty space is then filled with whitespaces.
 ..see:Function.layoutAlignment
 */
 
-template <typename TStream, typename TLayoutStringSet, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
+template <typename TStream, typename TFormatTag, typename TContigGaps, typename TReadGaps, typename TAlignedRead, typename TLine>
+inline void _printRead(
+	TStream &stream, 
+	Tag<TFormatTag> const &format,
+	AlignedReadLayout &, 
+	TContigGaps &,
+	TReadGaps &readGaps,
+	TAlignedRead &,
+	TLine)
+{
+	write(stream, readGaps, "", format);
+}
+
+template <typename TStream, typename TFormatTag, typename TContigGaps>
+inline void _printContig(
+	TStream &stream,
+	Tag<TFormatTag> const &format,
+	AlignedReadLayout &layout, 
+	TContigGaps &contigGaps)
+{
+	write(stream, contigGaps, "", format);
+}
+
+template <typename TStream, typename TFormatTag, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
 void printAlignment(
 	TStream &stream, 
-	TLayoutStringSet &layout, FragmentStore<TSpec, TConfig> &store, 
+	Tag<TFormatTag> const &format,
+	AlignedReadLayout &layout, 
+	FragmentStore<TSpec, TConfig> &store, 
 	TContigId contigId,
 	TPos posBegin, TPos posEnd,
 	TNum lineBegin, TNum lineEnd)
@@ -1008,37 +1069,44 @@ void printAlignment(
 	typedef typename TFragmentStore::TContigPos						TContigPos;
 	typedef typename TContig::TContigSeq							TContigSeq;
 
-	typedef typename Value<TLayoutStringSet>::Type					TLayoutString;
-	typedef typename Size<TLayoutStringSet>::Type					TLayoutStringSize;
-	typedef typename Iterator<TLayoutStringSet>::Type				TLayoutStringSetIter;
-	typedef typename Iterator<TLayoutString>::Type					TLayoutStringIter;
+	typedef AlignedReadLayout::TRows								TRows;
+	typedef typename Value<TRows>::Type								TRow;
+	typedef typename Size<TRows>::Type								TRowsSize;
+	typedef typename Iterator<TRows>::Type							TRowsIter;
+	typedef typename Iterator<TRow>::Type							TRowIter;
 
 	typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
 	typedef Gaps<CharString, AnchorGaps<typename TAlignedRead::TGapAnchors> >	TReadGaps;
 	
+	TContigGaps	contigGaps;
 	if ((TId)contigId < length(store.contigStore))
 	{
-		TContigGaps	contigGaps(store.contigStore[contigId].seq, store.contigStore[contigId].gaps);
+		set(contigGaps.data_source, store.contigStore[contigId].seq);
+		set(contigGaps.data_gaps, store.contigStore[contigId].gaps);
+//		TContigGaps	contigGaps(store.contigStore[contigId].seq, store.contigStore[contigId].gaps);
 		setBeginPosition(contigGaps, posBegin);
 		setEndPosition(contigGaps, posEnd);
-		stream << contigGaps << '\n';
+		_printContig(stream, format, layout, contigGaps);
+		stream << '\n';
 	} else
 		stream << '\n';
 		
-	if ((TLayoutStringSize)lineEnd > length(layout)) lineEnd = length(layout);
-	if ((TLayoutStringSize)lineBegin >= (TLayoutStringSize)lineEnd) return;
+	if ((TRowsSize)lineEnd > length(layout.contigRows[contigId])) lineEnd = length(layout.contigRows[contigId]);
+	if ((TRowsSize)lineBegin >= (TRowsSize)lineEnd) return;
 
-	TLayoutStringSetIter lit = begin(layout, Standard()) + lineBegin;
-	TLayoutStringSetIter litEnd = begin(layout, Standard()) + lineEnd;
+	TRowsIter lit = begin(layout.contigRows[contigId], Standard()) + lineBegin;
+	TRowsIter litEnd = begin(layout.contigRows[contigId], Standard()) + lineEnd;
 	TReadSeq readSeq;
 	CharString readSeqString;
+	setBeginPosition(contigGaps, 0);
+	setEndPosition(contigGaps, _unclippedLength(contigGaps));
 
-	for (; lit < litEnd; ++lit)
+	for (TNum line = 1; lit < litEnd; ++lit, ++line)
 	{
-		TLayoutStringIter itEnd = end(*lit, Standard());
-		TLayoutStringIter left = begin(*lit, Standard());
-		TLayoutStringIter right = itEnd;
-		TLayoutStringIter mid = itEnd;
+		TRowIter itEnd = end(*lit, Standard());
+		TRowIter left = begin(*lit, Standard());
+		TRowIter right = itEnd;
+		TRowIter mid = itEnd;
 
 		while (left < right)
 		{
@@ -1085,7 +1153,7 @@ void printAlignment(
 			if (posEnd < (TPos)cEnd)
 				setEndPosition(readGaps, posEnd - (TPos)cBegin);
 			
-			stream << readGaps;
+			_printRead(stream, format, layout, contigGaps, readGaps, align, line);
 			cursor = cEnd;
 		}
 		stream << '\n';

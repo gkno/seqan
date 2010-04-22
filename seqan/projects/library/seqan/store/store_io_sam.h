@@ -396,7 +396,7 @@ namespace SEQAN_NAMESPACE_MAIN
             // set the ID on the last entry after appending
             contigId = length(fragStore.contigStore);
             // append contig store
-            appendName(fragStore.contigNameStore, rName, fragStore.contigNameStoreCache);
+			appendName(fragStore.contigNameStore, rName, fragStore.contigNameStoreCache);
             appendValue(fragStore.contigStore, TContigElement());
         }
     }
@@ -587,7 +587,7 @@ namespace SEQAN_NAMESPACE_MAIN
             appendValue(fragStore.alignedReadTagStore, "", Generous());
         
         // read in alignments
-		Nothing contextSAM;		
+		Nothing contextSAM;
 		refresh(fragStore.contigNameStoreCache);
 		refresh(fragStore.readNameStoreCache);
 
