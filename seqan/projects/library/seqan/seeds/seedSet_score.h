@@ -678,7 +678,7 @@ addSeed(SeedSet<TValue, SimpleSeed, TScoringSpec, TSpec> &set,
 	return false;
 }
 
-template<typename TValue, typename TSeedSpec, typename TSpec, typename TScoringSpec>
+template<typename TValue, typename TSpec, typename TScoringSpec, typename TSeedSpec>
 bool 
 addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set, 
 		Seed<TValue, TSeedSpec> const &seed, 
