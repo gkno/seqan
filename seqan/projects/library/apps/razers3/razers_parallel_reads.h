@@ -358,6 +358,11 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 	};
 
+	void myPrintF(char const * const myLocation){
+		printf("threads: %d level: %d (%s) ", omp_get_num_threads(), omp_get_level(), myLocation);
+	}
+	
+	
 /**
 .Function._verifyHits:
 ..cat:Razers
@@ -402,6 +407,8 @@ to split up.
 		TSize & current = task.current;
 		THitString & myHits = hits[task.blockId];
 		
+		myPrintF("verify hits");
+		
 		// go over all hits or till a different thread set a flag to stop and split
 		for(; (current < task.end) and (not task.split); ++current){
 			unsigned myId = (task.blockId * options.blockSize) + myHits[current].readID;
@@ -417,6 +424,8 @@ to split up.
 			// To ensure that task.split is up to date.
 			#pragma omp flush(tasks)
 		}
+		
+		myPrintF("verify hits2");
 		
 		#pragma omp flush(verifier)
 		
@@ -475,8 +484,9 @@ to split up.
 #ifndef FLEX_TIMER
 			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode)
 			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode);
-				
+			myPrintF("split2");	
 			_verifyHits(hits, myTaskId, tasks, readSet, verifier, options, mode);
+			myPrintF("split");
 #else
 			#pragma omp task shared(hits, tasks, readSet, verifier, options, mode, waitingTimes)
 			_verifyHits(hits, splitWith, tasks, readSet, verifier, options, mode, waitingTimes);
@@ -506,6 +516,8 @@ to split up.
 						}
 					}
 				}
+				myPrintF("trigger split");
+				
 			} // End critical section
 			
 #ifdef FLEX_TIMER
@@ -601,6 +613,8 @@ to split up.
 				for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
 					waitingTimes[coreId] = sysTime();
 				
+				_proFloat filterTime = sysTime();
+				
 				String<int> windowNumbers;
 				fill(windowNumbers, options.numberOfBlocks, 0, Exact());
 #endif
@@ -619,7 +633,7 @@ to split up.
 								, windowNumbers[blockId]
 #endif
 								);
-							
+							myPrintF("filter");
 							// if any of the block has sequnece left the while loops again
 							#pragma omp atomic
 							sequenceLeft |= blockSeqLeft[blockId];
@@ -633,13 +647,17 @@ to split up.
 				}
 				
 				#pragma omp taskwait
-
+				myPrintF("between");
 #ifdef FLEX_TIMER
 				std::cout << std::endl;
 				// for waiting times
 				_proFloat now = sysTime();
+				std::cout << "filter time: " << (now - filterTime) << std::endl;
 				for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-					std::cout << "filter>\t" << blockId << "\t" << (now - waitingTimes[blockId]) << "\t" << length(hits[blockId]) << "\t" <<  windowNumbers[blockId] << std::endl;
+					std::cout << "filter>\t" << blockId << "\t" << (now - waitingTimes[blockId]) 
+							<< "\t" << length(hits[blockId]) << "\t" <<  windowNumbers[blockId] << std::endl;
+
+				_proFloat verificationTime = sysTime();
 #endif
 				
 				
@@ -664,10 +682,11 @@ to split up.
 				}					
 				
 				#pragma omp taskwait					
-				
+				myPrintF("after verify");
 #ifdef FLEX_TIMER
 				// for waiting times
 				now = sysTime();
+				std::cout << "verification time: " << (now - verificationTime) << std::endl;
 				for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
 					std::cout << "verification>\t" << coreId << "\t" << (now - waitingTimes[coreId]) << std::endl;
 #endif
@@ -691,7 +710,7 @@ to split up.
 		} // End while
 				
 		std::cout << "find end" << std::endl;
-		
+		myPrintF("at end");
 		// clear finders
 		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
