@@ -40,17 +40,17 @@ namespace seqan
 	//typemap(in) -> python to c++
 	//typemap(out) -> c++ to python
 
-	//typemap(in,numinputs=0)int& scoreAlignment -> masked the variable scoreAlignment as a shadows argument. Meaning that SWIG will not consider this variable to be filled by calling the function in python, instead it is declaring the variable with a temporary value. This value will be replaced in the typemap(argout) later with the wanted value. 
+	//typemap(in,numinputs=0)int& scoreAlignment. This typemap masked scoreAlignment as a shadows argument, which means SWIG will not consider this variable to be filled when calling the function in python. Instead it is filling the argument with a temporary value. The currect value will be replaced in the typemap(argout) later. 
 	%typemap(in,numinputs=0)int& scoreAlignment(int temp)
 	{
 		$1=&temp;
 	}
-	//this template shows how to return a tupel into python using a variable from the argument list of the calling function.
+	//this template shows how to return a tupel into python
 	%typemap(argout)int& scoreAlignment
 	{    
 		PyObject *o, *o2, *o3; 
     o = PyInt_FromLong(*$1); //$1 -> the value which has to be convert to python
-    if ((!$result) || ($result == Py_None))  //check if already exist an result if not set the actual result
+    if ((!$result) || ($result == Py_None))  //check if already exist a result, if not set the actual result
 		{
 			$result = o;
     }
@@ -70,8 +70,6 @@ namespace seqan
         Py_DECREF(o3);
     }
 	}
-	
-
 	
 	/*
 	//see above... by using char** we have to pre allocate memory
@@ -173,11 +171,11 @@ namespace seqan
 
 
 	%define DOCSTRING_
-	"""getAminoAcidScoreMatrix(\"X\")->[long integer]; \n Returns a list containing long integer, which represent the specific scoring matrices X.\n A selectable value for X could be:\n Blosum30 \n Blosum45 \n Blosum62 \n Blosum80 \n Pam40 \n Pam120 \n Pam200 \n Pam250 \n Vtml200 \n Example: scoreMatrix=getAminoAcidScoreMatrix(\"Blosum30\");"""
+	"getAminoAcidScoreMatrix(\"X\")->[long integer]; \n Returns a list containing integer, which represent the specified scoring matrices X.\n Selectable value for X are:\n Blosum30 \n Blosum45 \n Blosum62 \n Blosum80 \n Pam40 \n Pam120 \n Pam200 \n Pam250 \n Vtml200 \n Example: scoreMatrix=getAminoAcidScoreMatrix(\"Blosum30\");\n print(scoreMatrix)"
 	%enddef
 
 	%define DOCSTRING2
-	"printAlignment(AlignmentObject)->[Strings];\n Returns a list containing three strings.\n The first string illustrate the alignment for both sequence in one representation.\n List entry two and three contains the alignment sequence separately.\n"
+	"printAlignment(AlignmentObject)->[Strings];\n Returns a list containing three string objects.\n The first string illustrate the alignment.\n String two and three contains the alignment sequence separately.\n"
 	%enddef
 
 	%feature("autodoc", DOCSTRING_) getAminoAcidScoreMatrix;
@@ -185,6 +183,20 @@ namespace seqan
 	%feature("autodoc", DOCSTRING2) printAlignment;
 	
 	#endif
+	
+	unsigned int binToInt(std::string s)
+	{
+	  unsigned int lastnumber = s[s.length()-1] == '1' ? 1 : 0;
+	  if(s.length() > 1)
+	  {
+		  return 2 * binToInt(s.substr(0,s.length() - 1)) + lastnumber;
+	  }
+	  else
+	  {
+		  return lastnumber;
+	  }
+
+	}
 
 	//returns a specific amino acid scoring matrix selected by the input name.
 	void getAminoAcidScoreMatrix(char* str,int** scoreMatrix, int& aSize)
@@ -373,11 +385,18 @@ namespace seqan
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//main wrapper function for calling the alignment.
 	template< typename Type >
-	seqan::Align<seqan::String<Type> >* alignSequence(char* seq1, char*seq2, int len, int *value, char* algo, unsigned int matrix, unsigned int dia1, unsigned int dia2, int& scoreAlignment)
+	seqan::Align<seqan::String<Type> >* alignSequence(char* seq1, char*seq2, int len, int *value, char* algo, char* binary, unsigned int dia1, unsigned int dia2, int& scoreAlignment)
 	{
+		unsigned int matrix=0; 
+		std::string binarySt=binary;
+		if(binarySt.length()>1)
+		matrix= binToInt(binarySt.substr(2,binarySt.length()));
+		else matrix=0;
+		
+		if(matrix >15) matrix=0;
 		Align<String<Type> >* align = new Align<String<Type> >();
 		
-		String<Type> _seq1=seq1; //this is necessary!!! Python strings are immutable!! Swig does not care what happens with strings
+		String<Type> _seq1=seq1; //this is necessary!!! Python strings are immutable!! Swig does not care what happens with the strings
 		String<Type> _seq2=seq2;
 		
 		resize(rows(*align), 2);
