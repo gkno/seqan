@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.Source:Type of the object that should be converted to $Target$.
 ..returns.param.Type:Type that is returned by @Function.convert@.
 ...remarks:This is either $Target$ or $Target &$:
-If instances of $Source: /cvsroot/ag-bio/seqan/version7/projects/library/seqan/basic/basic_converter.h,v $ can be re-interpreted as instances of $Target$,
+If instances of $Source$ can be re-interpreted as instances of $Target$,
 than this metafunction returns a reference, otherwise it returns $Target$, 
 that is @Function.convert@ returns a temporary.
 ..remarks:A constant instance of $Convert$ is (ab)used as tag argument of @Function.convertImpl@.
@@ -48,7 +48,6 @@ template <typename TTarget, typename TSource = void>
 struct Convert
 {
 	typedef TTarget Type;
-	
 };
 
 //////////////////////////////////////////////////////////////////////////////
