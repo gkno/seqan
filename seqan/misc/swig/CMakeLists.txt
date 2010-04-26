@@ -158,8 +158,15 @@ ENDIF (WIN32)
 
 SET(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_VERSION_PATCH "${SUBVERSION_REVISION}")
+IF (WIN32)
+	SET(CMAKE_INSTALL_PREFIX .)
+	SET(CPACK_GENERATOR "ZIP")
+ENDIF (WIN32)
 
 include (InstallRequiredSystemLibraries)
 INCLUDE (CPack) 
+################################################################################
+# to generate the package call  cpack -C CPackConfig.cmake 
+################################################################################
 
 
