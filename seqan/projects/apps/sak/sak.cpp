@@ -21,6 +21,8 @@ using namespace seqan;
 	bool		optionRevComp = false;
 	const char	*optionOutput = NULL;
 	bool		optionFastQ = false;
+    bool        optionSeqNameSet = false;
+    CharString  optionSeqName = "";
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -44,20 +46,40 @@ bool loadSeqs(TSeqSet &seqs, TQuals &quals, TIDs &ids, const char *fileName)
 
 	if (optionSeqEnd > seqCount) optionSeqEnd = seqCount;
 	if (optionSeqStart < 0) optionSeqStart = 0;
-		
-	if (optionSeqStart < optionSeqEnd)
-	{
-		resize(seqs, optionSeqEnd - optionSeqStart, Exact());
-		resize(ids, optionSeqEnd - optionSeqStart, Exact());
-		resize(quals, optionSeqEnd - optionSeqStart, Exact());
-		for(int i = 0, j = optionSeqStart; j < optionSeqEnd; ++i, ++j)
-		{
-			assignSeq(seqs[i], multiFasta[j], format);		// read Genome sequence
-			assignSeqId(ids[i], multiFasta[j], format);		// read Genome ids
-			assignQual(quals[i], multiFasta[j], format);	// read qualities
-			fill(quals[i], length(seqs[i]), 33 + 80);
-		}
-	}
+
+    if (optionSeqNameSet) {
+        clear(seqs);
+        clear(quals);
+        clear(ids);
+        for (unsigned i = 0; i < length(multiFasta); ++i) {
+            CharString thisName;
+            assignSeqId(thisName, multiFasta[i], format);
+            std::cerr << thisName << std::endl;
+            if (optionSeqName == infix(thisName, 0, length(optionSeqName))) {
+                resize(seqs, 1, Exact());
+                assignSeq(seqs[0], multiFasta[i], format);
+                resize(ids, 1, Exact());
+                assignSeqId(ids[0], multiFasta[i], format);
+                resize(quals, 1, Exact());
+                assignQual(quals[0], multiFasta[i], format);
+                return true;
+            }
+        }
+    } else {
+        if (optionSeqStart < optionSeqEnd)
+        {
+            resize(seqs, optionSeqEnd - optionSeqStart, Exact());
+            resize(ids, optionSeqEnd - optionSeqStart, Exact());
+            resize(quals, optionSeqEnd - optionSeqStart, Exact());
+            for(int i = 0, j = optionSeqStart; j < optionSeqEnd; ++i, ++j)
+            {
+                assignSeq(seqs[i], multiFasta[j], format);		// read Genome sequence
+                assignSeqId(ids[i], multiFasta[j], format);		// read Genome ids
+                assignQual(quals[i], multiFasta[j], format);	// read qualities
+                fill(quals[i], length(seqs[i]), 33 + 80);
+            }
+        }
+    }
 
 	return (seqCount > 0);
 }
@@ -180,7 +202,8 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -q,  --qual                   \t" << "enable Fastq output (default: Fasta)" << endl;
 		cerr << "  -h,  --help                   \t" << "print this help" << endl;
 		cerr << endl << "Extract Options:" << endl;
-		cerr << "  -s,  --sequence NUM           \t" << "select a single sequence" << endl;
+		cerr << "  -s,  --sequence NUM           \t" << "select a single sequence by index" << endl;
+        cerr << "  -sn, --sequence-name NAME     \t" << "select a single sequence by name" << endl;
 		cerr << "  -ss, --sequences START END    \t" << "select sequences (default: select all)" << endl;
 		cerr << "  -i,  --infix START END        \t" << "extract infix" << endl;
 		cerr << "  -rc, --revcomp                \t" << "reverse complement" << endl;
@@ -221,6 +244,15 @@ int main(int argc, const char *argv[])
 				printHelp(argc, argv);
 				return 0;
 			}
+
+            if (strcmp(argv[arg], "-sn") == 0 || strcmp(argv[arg], "--sequence-name") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+                    optionSeqNameSet = true;
+                    optionSeqName = argv[arg];
+                    continue;
+                }
+            }
 
 			if (strcmp(argv[arg], "-ss") == 0 || strcmp(argv[arg], "--sequences") == 0) {
 				if (arg + 2 < argc) {
