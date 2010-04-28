@@ -196,8 +196,17 @@ typedef Tag<SmithWatermanClump_> const WatermanEggert;
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Tag.Local Alignment Algorithms.value.BandedWatermanEggert:
+	Triggers a banded version of the local alignment algorithm by Waterman and Eggert with "declumping".
+*/
+struct BandedWatermanEggert_;
+typedef Tag<BandedWatermanEggert_> const BandedWatermanEggert;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/*DISABLED
 .Tag.Local Alignment Algorithms.value.BandedSmithWatermanClump:
-	Triggers a banded version of the Smith Waterman local alignment algorithm with "declumping".
+	Triggers a banded version of the local alignment algorithm by Waterman and Eggert with "declumping".
 */
 struct BandedSmithWatermanClump_;
 typedef Tag<BandedSmithWatermanClump_> const BandedSmithWatermanClump;

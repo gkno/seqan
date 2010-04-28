@@ -60,6 +60,7 @@
 #include <seqan/align/align_algorithms.h>
 #include <seqan/align/align_dynprog.h>
 #include <seqan/align/align_local_dynprog.h>
+#include <seqan/align/align_local_dynprog_banded.h>
 #include <seqan/align/hirschberg_set.h>
 #include <seqan/align/align_myers.h>
 #include <seqan/align/align_hirschberg.h>
