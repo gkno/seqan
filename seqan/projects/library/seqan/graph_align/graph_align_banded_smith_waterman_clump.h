@@ -385,20 +385,6 @@ _localAlignment(StringSet<TString, Dependent<> > const& str,
 	}
 }
 
-template<typename TString, typename TAlignments, typename TScores, typename TScoreValue, typename TSpec2, typename TDiagonal, typename TTag>
-inline void
-multiLocalAlignment(StringSet<TString, Dependent<> > const& str,
-                    TAlignments& alignments,
-                    TScores& scores,
-                    Score<TScoreValue, TSpec2> const& sc,
-                    TScoreValue minScore,
-                    TDiagonal diag1,
-                    TDiagonal diag2,
-                    TTag) {
-	// Make multiple local alignment and save them in alignments container
-	_localAlignment(str, alignments, scores, sc, minScore, diag1, diag2, TTag());
-}
-
 
 }// namespace SEQAN_NAMESPACE_MAIN
 

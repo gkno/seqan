@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..cat:Alignments
 ..signature:globalAlignment(align, score [, align_config], tag)
 ..signature:globalAlignment(result, strings, score [, align_config], tag)
-..signature:globalAlignment(result, strings, score [, align_config], diagLow, diagHigh, BandedGotoh() )
+..signature:globalAlignment(result, strings, score [, align_config], diagLow, diagHigh, tag)
 ..param.align:An alignment data structure containing two sequences.
 ...type:Spec.Alignment Graph
 ...type:Class.Align
@@ -49,7 +49,9 @@ If TTop is true the first row of the DP Matrix is initialized with 0's. If TLeft
 column is initialized with 0's. If TRight is true, the maximum is search in the last column. If TBottom
 is true, the maximum is searched in the last row. All options can be combined in all possible ways.
 ....text:This feature is not yet supported for all alignment algorithms (e.g. Hirschberg).
-..param.tag:A tag indicating the alignment algorithm to use
+..paran.diagLow: The lowest diagonal that will be computed for banded alignment.
+..param.diagHigh: The upmost diagonal that will be computed for banded alignment.
+..param.tag:A tag indicating the alignment algorithm to use.
 ...type:Tag.Global Alignment Algorithms
 ..returns:The maximum score of an global alignment between two sequences given in $align$ or $strings$.
 ...param.align:An optimal global alignment.
@@ -366,15 +368,19 @@ localAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..cat:Alignments
 ..signature:
 multiLocalAlignment(strSet, matches, scores, scType, numAlign, tag)
+multiLocalAlignment(strSet, alignments, scores, scType, minScore, diagLow, diagHigh, tag)
 ..param.strSet:A string set of 2 sequences.
 ...type:Class.StringSet
 ..param.matches:The set of all local alignment matches.
 ..param.scores:The respective local alignment score that match was coming from.
 ..param.scType:A scoring object.
+..param.minScore: The minimal score of a local alignment.
+..paran.diagLow: The lowest diagonal that will be computed for banded alignment.
+..param.diagHigh: The upmost diagonal that will be computed for banded alignment.
 ...type:Class.Score
 ..param.numAlign:The desired number of local alignments to compute.
 ..param.tag:A tag indicating the alignment algorithm to use
-...remarks:SmithWatermanClump
+...remarks: $SmithWatermanClump$ or $BandedSmithWatermanClump$
 ..returns:void
 */
 
@@ -391,6 +397,20 @@ multiLocalAlignment(StringSet<TString, Dependent<> > const& str,
 {
 	// Make a multiple local alignment and get all matches
 	_localAlignment(str,matches,scores,sc,numAlignments,TTag());
+}
+
+template<typename TString, typename TAlignments, typename TScores, typename TScoreValue, typename TSpec2, typename TDiagonal, typename TTag>
+inline void
+multiLocalAlignment(StringSet<TString, Dependent<> > const& str,
+                    TAlignments& alignments,
+                    TScores& scores,
+                    Score<TScoreValue, TSpec2> const& sc,
+                    TScoreValue minScore,
+                    TDiagonal diag1,
+                    TDiagonal diag2,
+                    TTag) {
+	// Make multiple local alignment and save them in alignments container
+	_localAlignment(str, alignments, scores, sc, minScore, diag1, diag2, TTag());
 }
 
 

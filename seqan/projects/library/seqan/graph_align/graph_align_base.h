@@ -91,9 +91,9 @@ template <typename TFile, typename TStringSet, typename TId, typename TPos, type
 inline void
 _align_trace_print(TFile& file,
 				   TStringSet const& str,
-				   TId const id1,
+				   TId const /*id1*/,
 				   TPos const pos1,
-				   TId const id2,
+				   TId const /*id2*/,
 				   TPos const pos2,
 				   TPos const segLen,
 				   TTraceValue const tv)
