@@ -24,6 +24,7 @@ void SEQAN_TEST_test_align_hirschberger();
 
 void SEQAN_TEST_testLocalAlign();
 void SEQAN_TEST_testLocalAlign2();
+void SEQAN_TEST_testBandedLocalAlign();
 
 
 SEQAN_BEGIN_TESTSUITE("test_align") {
@@ -42,6 +43,7 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
 
     SEQAN_CALL_TEST(testLocalAlign);
     SEQAN_CALL_TEST(testLocalAlign2);
+    SEQAN_CALL_TEST(testBandedLocalAlign);
 
     SEQAN_CALL_TEST(test_align_myers_test_short);
     SEQAN_CALL_TEST(test_align_myers_test_long);

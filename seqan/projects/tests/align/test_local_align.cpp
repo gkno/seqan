@@ -24,11 +24,11 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 	setSource(row(ali, 1), str1);
 
 	Score<int> score_type = Score<int>(2,-1,-2,0) ;
-	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
+	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>();
 	
 	int cutoff = 0;
 
-	int score = smithWaterman(ali,sw_finder,score_type,cutoff);
+	int score = _smith_waterman(ali,sw_finder,score_type,cutoff);
 	
 	SEQAN_TASSERT(score == 9);
 	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
@@ -37,7 +37,8 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 	int i = 1;
 	while (true){
 		
-		score = smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
+		score = _smith_waterman_get_next(ali,sw_finder,score_type,cutoff);
+
 		if(score==0){
 	//		cout <<"No more alignments satisfying score > "<<cutoff<<"found.\n";		
 			break;
@@ -49,8 +50,8 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 		}
 		if(i == 2){
 			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "taagcgtctcg");
-			SEQAN_TASSERT(row(ali,1) == "tcatagagttg");
+			SEQAN_TASSERT(row(ali,0) == "tc");
+			SEQAN_TASSERT(row(ali,1) == "tc");
 		}
 		if(i == 3){
 			SEQAN_TASSERT(score == 4);
@@ -64,18 +65,18 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 		}
 		if(i == 5){
 			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "tc");
-			SEQAN_TASSERT(row(ali,1) == "tc");
+			SEQAN_TASSERT(row(ali,0) == "taagcgtctcg");
+			SEQAN_TASSERT(row(ali,1) == "tcatagagttg");
 		}
 		if(i == 6){
 			SEQAN_TASSERT(score == 3);
-			SEQAN_TASSERT(row(ali,0) == "cgt");
-			SEQAN_TASSERT(row(ali,1) == "cat");
+			SEQAN_TASSERT(row(ali,0) == "ata");
+			SEQAN_TASSERT(row(ali,1) == "aga");
 		}
 		if(i == 7){
 			SEQAN_TASSERT(score == 3);
-			SEQAN_TASSERT(row(ali,0) == "ata");
-			SEQAN_TASSERT(row(ali,1) == "aga");
+			SEQAN_TASSERT(row(ali,0) == "cgt");
+			SEQAN_TASSERT(row(ali,1) == "cat");
 		}
 		if(i == 8){
 			SEQAN_TASSERT(score == 2);
@@ -99,33 +100,33 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 		}
 		if(i == 12){
 			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "c");
-			SEQAN_TASSERT(row(ali,1) == "c");
+			SEQAN_TASSERT(row(ali,0) == "a");
+			SEQAN_TASSERT(row(ali,1) == "a");
 		}
 		if(i == 13){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "a");
-			SEQAN_TASSERT(row(ali,1) == "a");
-		}
-		if(i == 14){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "a");
-			SEQAN_TASSERT(row(ali,1) == "a");
-		}
-		if(i == 15){
 			SEQAN_TASSERT(score == 2);
 			SEQAN_TASSERT(row(ali,0) == "t");
 			SEQAN_TASSERT(row(ali,1) == "t");
 		}
-		if(i == 16){
+		if(i == 14){
+			SEQAN_TASSERT(score == 2);
+			SEQAN_TASSERT(row(ali,0) == "c");
+			SEQAN_TASSERT(row(ali,1) == "c");
+		}
+		if(i == 15){
 			SEQAN_TASSERT(score == 2);
 			SEQAN_TASSERT(row(ali,0) == "g");
 			SEQAN_TASSERT(row(ali,1) == "g");
 		}
-		if(i == 17){
+		if(i == 16){
 			SEQAN_TASSERT(score == 2);
 			SEQAN_TASSERT(row(ali,0) == "t");
 			SEQAN_TASSERT(row(ali,1) == "t");
+		}
+		if(i == 17){
+			SEQAN_TASSERT(score == 2);
+			SEQAN_TASSERT(row(ali,0) == "a");
+			SEQAN_TASSERT(row(ali,1) == "a");
 		}
 		if(i == 18){
 			SEQAN_TASSERT(score == 2);
@@ -143,7 +144,7 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 		bool check = true;
 		for(int i = 0; i <str1len; ++i){
 			for(int j=0;j<str0len;++j){
-				if(getValue(sw_finder.matrix_,(i*str0len)+j)!=0){
+				if(getValue(sw_finder.matrix,(i*str0len)+j)!=0){
 					check = false;
 				}
 			}
@@ -154,10 +155,10 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 	}
 
 //desweiteren nur so:
-	push(sw_finder.pq_,LocalAlignmentFinder<int>::TPQEntry());
-	SEQAN_TASSERT(empty(sw_finder.pq_) == false);
-	clear(sw_finder.pq_);
-	SEQAN_TASSERT(empty(sw_finder.pq_) == true);
+	push(sw_finder.pQ,LocalAlignmentFinder<int>::TPQEntry());
+	SEQAN_TASSERT(empty(sw_finder.pQ) == false);
+	clear(sw_finder.pQ);
+	SEQAN_TASSERT(empty(sw_finder.pQ) == true);
 
 
 
@@ -177,18 +178,57 @@ SEQAN_DEFINE_TEST(testLocalAlign2) {
 	setSource(row(ali, 1), str1);
 
 	Score<int> score_type = Score<int>(2,-1,-2,0) ;
-	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
+	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>();
 	
-	int score = localAlignment(ali, sw_finder, score_type, 4);
+	int score = localAlignment(ali, sw_finder, score_type, 5);
 	SEQAN_TASSERT(score == 9);
 	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
 	SEQAN_TASSERT(row(ali,1) == "ata-gagt");
 	
-	score = localAlignment(ali, sw_finder, score_type, 4);
+	score = localAlignment(ali, sw_finder, score_type, 5);
 	SEQAN_TASSERT(score == 5);
 	SEQAN_TASSERT(row(ali,0) == "tc-tcg");
 	SEQAN_TASSERT(row(ali,1) == "tcatag");
 
-	score = localAlignment(ali, sw_finder, score_type, 4, WatermanEggert());
-	SEQAN_TASSERT(score == 0);
+	score = localAlignment(ali, sw_finder, score_type, 5, WatermanEggert());
+	SEQAN_ASSERT_EQ(score, 0);
+}
+
+
+SEQAN_DEFINE_TEST(testBandedLocalAlign) {
+    typedef String<Dna> TString;
+	TString str0("ggggcttaagcttgggg");
+	TString str1("aaaacttagctctaaaa");
+
+	Score<int> score_type = Score<int>(2,-1,-2,-2);
+	
+    Align<TString> align;
+	resize(rows(align), 2);
+	assignSource(row(align, 0), str0);
+	assignSource(row(align, 1), str1);
+
+	LocalAlignmentFinder<int> finder = LocalAlignmentFinder<int>();
+
+	int score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 12);
+    SEQAN_ASSERT_TRUE(row(align, 0) == "cttaagct");
+    SEQAN_ASSERT_TRUE(row(align, 1) == "ctt-agct");
+
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 10);
+    SEQAN_ASSERT_TRUE(row(align, 0) == "aagcttgg");
+    SEQAN_ASSERT_TRUE(row(align, 1) == "aaacttag");
+
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 10);
+    SEQAN_ASSERT_TRUE(row(align, 0) == "gct-taa");
+    SEQAN_ASSERT_TRUE(row(align, 1) == "gctctaa");
+
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 5);
+    SEQAN_ASSERT_TRUE(row(align, 0) == "aagcttg");
+    SEQAN_ASSERT_TRUE(row(align, 1) == "aacttag");
+
+    score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 0);
 }
