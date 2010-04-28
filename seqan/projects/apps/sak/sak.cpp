@@ -54,7 +54,6 @@ bool loadSeqs(TSeqSet &seqs, TQuals &quals, TIDs &ids, const char *fileName)
         for (unsigned i = 0; i < length(multiFasta); ++i) {
             CharString thisName;
             assignSeqId(thisName, multiFasta[i], format);
-            std::cerr << thisName << std::endl;
             if (optionSeqName == infix(thisName, 0, length(optionSeqName))) {
                 resize(seqs, 1, Exact());
                 assignSeq(seqs[0], multiFasta[i], format);
