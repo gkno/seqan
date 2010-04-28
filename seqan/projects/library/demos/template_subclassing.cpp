@@ -58,19 +58,23 @@ struct MyClass<SpecD> {
 
 // Define some functions that demostrate overloading.
 
-// Most generic class.
+// Most generic case, "base implementation".
 template <typename TSpec>
 void foo(MyClass<TSpec> const & obj) {
     std::cout << "foo(MyClass<typename TSpec> const & obj) called!  obj.x == " << obj.x << std::endl;
 }
 
 
+// This function overwrites the generic implementation of foo() for
+// the specialization B.
 template <>
 void foo(MyClass<SpecB> const & obj) {
     std::cout << "foo(MyClass<SpecB> const & obj) called!  obj.x == " << obj.x << std::endl;
 }
 
 
+// This function overwrites the generic implementation of foo() for
+// the specialization C.
 template <>
 void foo(MyClass<SpecC> const & obj) {
     std::cout << "foo(MyClass<SpecC> const & obj) called!  obj.x == " << obj.x << std::endl;
