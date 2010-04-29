@@ -629,6 +629,8 @@ public:
 	const CharString			null;			// empty return values
 	const String<CharString>	nullSet;
 	
+	friend inline void addOption(CommandLineParser & me, CommandLineOption const & opt);
+	
 /**
 .Memfunc.CommandLineParser#CommandLineParser:
 ..class:Class.CommandLineParser
@@ -640,36 +642,26 @@ public:
 */
 
     CommandLineParser()
-        : required_arguments(0)
 	{
-		CommandLineOption opt("h","help","displays this help message",OptionType::Boolean);
-		appendValue(optionMap,opt);
-		insert(shortNameMap,"h",0);
-		insert(longNameMap,"help",0);
-		//insert(_long2ShortMap,longName(opt),shortName(opt));
-
-		line_width   = 32;
-		padding_left = 2;
-		short_width  = 0;
-		long_width   = 0;
-		full_width   = 0;
-
-		appName = "";
+		line_width         = 32;
+		padding_left       = 2;
+		short_width        = 0;
+		long_width         = 0;
+		full_width         = 0;
+		required_arguments = 0;
+		addOption(*this, CommandLineOption("h", "help", "displays this help message", OptionType::Boolean));
 	}
 
     CommandLineParser(CharString appName)
-        : required_arguments(0),appName(appName)
+        : appName(appName)
 	{
-		CommandLineOption opt("h","help","displays this help message",OptionType::Boolean);
-		appendValue(optionMap,opt);
-		insert(shortNameMap,"h",0);
-		insert(longNameMap,"help",0);
-
-		line_width   = 32;
-		padding_left = 2;
-		short_width  = 0;
-		long_width   = 0;
-		full_width   = 0;
+		line_width         = 32;
+		padding_left       = 2;
+		short_width        = 0;
+		long_width         = 0;
+		full_width         = 0;
+		required_arguments = 0;
+		addOption(*this, CommandLineOption("h", "help", "displays this help message", OptionType::Boolean));
 	}
 };
 
@@ -869,7 +861,7 @@ hasOptionShort(CommandLineParser const & me, CharString const & _short)
 .Function.requiredArguments:
 ..summary:Sets the number of arguments (non-parameterized options) are required by the program.
 ..cat:Miscellaneous
-..signature:requireRemainder(parser, count)
+..signature:requiredArguments(parser, count)
 ..param.parser:The @Class.CommandLineParser@ object.
 ...type:Class.CommandLineParser
 ..param.count:A $unsigned int$ defining the amount of non-parameterized options requried by the program.
@@ -1209,7 +1201,7 @@ _assignOptionValue(CommandLineParser & me, unsigned option_index, CharString con
 ..param.argv:Array of the different command line arguments ($const char *argv[]$). 
 ..param.errorStream:A stream where error messages are sent to.
 ..remarks:Must be called before retrieving options or arguments.
-..returns:$true$ on success.
+..returns:$true$ if all required arguments are set and parseable and neither the help nor version argument is set.
 */
 
 template<typename TErrorStream>
@@ -1347,12 +1339,12 @@ parse(CommandLineParser & me, int argc, const char *argv[], TErrorStream & estre
 	if (isSetLong(me, "version"))
 	{
 		version(me, estream);
-        return true;
+        return false;
 	}
     if (isSetLong(me, "help"))
     {
         help(me, estream);
-        return true;
+        return false;
     }
 	return _allMandatorySet(me) && (length(me.arguments) >= me.required_arguments);
 }
