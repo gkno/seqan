@@ -1,12 +1,15 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ALIGNMENT_H
 #define SEQAN_HEADER_TEST_GRAPH_ALIGNMENT_H
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+#include <seqan/basic.h>
+#include <seqan/map.h>
+#include <seqan/graph_align.h>
+
+using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 
-void  Test_NeedlemanWunsch() {
+SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	typedef String<char> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
@@ -20,128 +23,128 @@ void  Test_NeedlemanWunsch() {
 	TGraph g(str);
 	Score<int> score_type = Score<int>(0,-1,-1,0);
 	int score = globalAlignment(g, score_type, NeedlemanWunsch() );
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "annual")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "anneal")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ing")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "annual");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "anneal");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "ing");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 3 == score2)
+	SEQAN_ASSERT_EQ(score + 3, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 3 == score2)
+	SEQAN_ASSERT_EQ(score + 3, score2);
 	typedef Fragment<> TFragment;
 	typedef String<TFragment> TFragmentString;
 	TFragmentString matches;
 	int score3 = globalAlignment(matches, stringSet(g), score_type, NeedlemanWunsch() );
-	SEQAN_TASSERT(length(matches) == 1)
-	SEQAN_TASSERT(label(matches[0], stringSet(g), 0) == "annual")
-	SEQAN_TASSERT(label(matches[0], stringSet(g), 1) == "anneal")
-	SEQAN_TASSERT(score3 == score)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(length(matches), 1);
+	SEQAN_ASSERT_EQ(label(matches[0], stringSet(g), 0), "annual");
+	SEQAN_ASSERT_EQ(label(matches[0], stringSet(g), 1), "anneal");
+	SEQAN_ASSERT_EQ(score3, score);
+	//std::cout << g << std::endl;
 
 	str[0] = "annealing";
 	str[1] = "annual";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, NeedlemanWunsch() );
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "annual")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "anneal")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "ing")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "annual");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "anneal");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "ing");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 3 == score2)
+	SEQAN_ASSERT_EQ(score + 3, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 3 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 3, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "Garfield";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, NeedlemanWunsch() );
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "Thisis")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "Garfield")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "Garfield")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 17)) == "thecat")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "Thisis");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 9)), "Garfield");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "Garfield");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 17)), "thecat");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6  == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score,score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6 == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6 == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 12 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 12, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "Garfield";
 	str[1] = "ThisisGarfieldthecat";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, NeedlemanWunsch() );
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "Thisis")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "Garfield")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "Garfield")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 17)) == "thecat")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "Thisis");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 9)), "Garfield");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "Garfield");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 17)), "thecat");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score  == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6 == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6 == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 6 == score2)
+	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,true>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), NeedlemanWunsch() );
-	SEQAN_TASSERT(score + 12 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 12, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "cat";
 	str[1] = "ThisisGarfieldthecat";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, NeedlemanWunsch());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ThisisGarfieldthe")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 18)) == "cat")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "cat")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ThisisGarfieldthe");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 18)), "cat");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "cat");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 
 	str[0] = "ThisisGarfieldthecat";
 	str[1] = "cat";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, NeedlemanWunsch());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ThisisGarfieldthe")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 18)) == "cat")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "cat")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ThisisGarfieldthe");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 18)), "cat");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "cat");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Gotoh() {
+SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
@@ -155,258 +158,258 @@ void Test_Gotoh() {
 	TGraph g(str);
 	Score<int> score_type = Score<int>(1,-1,-1,-2);
 	int score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "gt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "gt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "gt");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 5);
 	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	int score3 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score2, score3);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttgt";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "gt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "gt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "gt");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 5);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
+	SEQAN_ASSERT_EQ(score2, score3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
-	SEQAN_TASSERT(score2 == score3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score2, score3);
+	//std::cout << g << std::endl;
 
 	str[0] = "tagt";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "tagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 4)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 2, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 4)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 2, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,true,true>(), Gotoh() );
-	SEQAN_TASSERT(score + 4 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 4, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
 	score2 = globalAlignment(g, score_type, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 2 == score2)
+	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,false,false,true>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
+	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,true,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 4 == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score + 4, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "cttccagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "cc")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "ag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 7)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "cc");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "ag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "ag");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "cc")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "ag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 7)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "cc");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "ag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "ag");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
 	str[1] = "aaa";
 	assignStringSet(g, str);
 	Score<int> score_type2 = Score<int>(10,-1,-1,-2);
 	score = globalAlignment(g, score_type2, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "aa")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 6)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "aa");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "aa");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 6);
 	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<true,false,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score + 3 == score2)
+	SEQAN_ASSERT_EQ(score + 3, score2);
 	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<false,true,false,false>(), Gotoh() );
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "aaa";
 	str[1] = "ttattaa";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type2, Gotoh());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "aa")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 6)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "aa");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "aa");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	//std::cout << g << std::endl;
 
 
 	// Note: Depending on the used recursion formula, the gotoh algorithms can differ !!!
@@ -423,7 +426,7 @@ void Test_Gotoh() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_Hirschberg() {
+SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, void> > TGraph;
@@ -437,156 +440,156 @@ void Test_Hirschberg() {
 	TGraph g(str);
 	Score<int> score_type = Score<int>(1,-1,-1,-2);
 	int score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "gt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "gt")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 5)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "gt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "gt");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 5);
 	int score2 = globalAlignment(stringSet(g), score_type, Hirschberg() );
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttgt";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "gt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "gt")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 5)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "gt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "gt");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	//std::cout << g << std::endl;
 
 	str[0] = "tagt";
 	str[1] = "attagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "at")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "at");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 
 	str[0] = "attagt";
 	str[1] = "tagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "tagt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "at")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "tagt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "at");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 4)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "ttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 4)) == "t")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 3)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 4)), "t");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	//std::cout << g << std::endl;
 
 	str[0] = "cttagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "ttag")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "ttag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "ttag")
-	SEQAN_TASSERT(numEdges(g) == 1)
-	SEQAN_TASSERT(numVertices(g) == 4)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "ttag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	//std::cout << g << std::endl;
 
 	str[0] = "cttccagt";
 	str[1] = "ttag";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "cc")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "ag")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 7)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "ag")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 7)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "cc");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "ag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "ag");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
 	str[1] = "cttccagt";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "c")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "cc")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "ag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "t")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "ag")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 7)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "cc");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "ag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "t");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "ag");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	//std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
 	str[1] = "aaa";
 	assignStringSet(g, str);
 	Score<int> score_type2 = Score<int>(10,-1,-1,-2);
 	score = globalAlignment(g, score_type2, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 3)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 5)) == "aa")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 1)) == "aa")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 6)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "aa");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "aa");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	//std::cout << g << std::endl;
 
 	str[0] = "aaa";
 	str[1] = "ttattaa";
 	assignStringSet(g, str);
 	score = globalAlignment(g, score_type2, Hirschberg());
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 0)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 2)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tt")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 5)) == "aa")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 1)) == "aa")
-	SEQAN_TASSERT(numEdges(g) == 2)
-	SEQAN_TASSERT(numVertices(g) == 6)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "tt");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "aa");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "aa");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	//std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -685,7 +688,7 @@ void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 }
 
 
-void Test_GotohVSBandedGotoh() {
+SEQAN_DEFINE_TEST(test_graph_align_gotohVsBandedGotoh) {
 	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,false>() );
 	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,true>() );
 	_Test_GotohVSBandedGotoh(AlignConfig<false,false,true,false>() );
@@ -817,7 +820,7 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_AllAgainstAll() {
+SEQAN_DEFINE_TEST(test_graph_align_allAgainstAll) {
 	__AllAgainstAll(AlignConfig<false,false,false,false>() );
 	__AllAgainstAll(AlignConfig<false,false,false,true>() );
 	__AllAgainstAll(AlignConfig<false,false,true,false>() );
@@ -839,7 +842,7 @@ void Test_AllAgainstAll() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_SmithWaterman() {
+SEQAN_DEFINE_TEST(test_graph_align_smith_waterman) {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
@@ -853,31 +856,31 @@ void Test_SmithWaterman() {
 	TGraph g(str);
 	Score<int> score_type = Score<int>(2,-1,-2,-2);
 	int score = localAlignment(g, score_type, SmithWaterman());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 4)) == "tgcg")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 8)) == "a")
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 9)) == "ata")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 3)) == "tgag")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 7)) == "ata")
-	SEQAN_TASSERT(numEdges(g) == 2)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 4)), "tgcg");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 8)), "a");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 9)), "ata");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "tgag");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "ata");
+	SEQAN_ASSERT_EQ(numEdges(g), 2);
 	int score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 	
 	str[0] = "TTGACACCCTCCCAATTGTA";
 	str[1] = "ACCCCAGGCTTTACACAT";
 	assignStringSet(g, str);
 	score = localAlignment(g, score_type, SmithWaterman());
-	SEQAN_TASSERT(label(g, findVertex(g, 0, 0)) == "TTGACAC")
-	SEQAN_TASSERT(label(g, findVertex(g, 1, 9)) == "TTTACAC")
-	SEQAN_TASSERT(numEdges(g) == 1)
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "TTGACAC");
+	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 9)), "TTTACAC");
+	SEQAN_ASSERT_EQ(numEdges(g), 1);
 	score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
-	SEQAN_TASSERT(score == score2)
-	std::cout << g << std::endl;
+	SEQAN_ASSERT_EQ(score, score2);
+	//std::cout << g << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_SmithWatermanClump() {
+SEQAN_DEFINE_TEST(test_graph_align_smith_waterman_clump) {
 	typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 	typedef Graph<Alignment<TStringSet, unsigned int> > TGraph;
@@ -892,12 +895,12 @@ void Test_SmithWatermanClump() {
 	String<Fragment<> > matches;
 	String<int> scores;
 	multiLocalAlignment(str, matches, scores, score_type, 4, SmithWatermanClump() );
-	std::cout << length(matches) << std::endl;
+	//std::cout << length(matches) << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_BandedSmithWatermanClump() {
+SEQAN_DEFINE_TEST(test_graph_align_banded_smith_waterman_clump) {
     typedef String<Dna> TString;
 	typedef StringSet<TString, Dependent<> > TStringSet;
 
@@ -909,47 +912,20 @@ void Test_BandedSmithWatermanClump() {
 	String<int> scores;
 	multiLocalAlignment(str, alignments, scores, score_type, 5, -6, 6, BandedSmithWatermanClump() );
 
-    SEQAN_TASSERT(length(alignments) == 4);
-    SEQAN_TASSERT(length(scores) == 4);
+   SEQAN_ASSERT_EQ(length(alignments), 4);
+   SEQAN_ASSERT_EQ(length(scores), 4);
 
-    SEQAN_TASSERT(value(scores, 0) == 12);
+   SEQAN_ASSERT_EQ(value(scores, 0), 12);
     Graph<Alignment<TStringSet> > align = value(alignments, 0);
-    SEQAN_TASSERT(label(align, findVertex(align, 0, 0)) == "GGGG");
-    SEQAN_TASSERT(label(align, findVertex(align, 0, 4)) == "CTT");
-    SEQAN_TASSERT(label(align, findVertex(align, 0, 7)) == "A");
-    SEQAN_TASSERT(label(align, findVertex(align, 0, 8)) == "AGCT");
-    SEQAN_TASSERT(label(align, findVertex(align, 0, 12)) == "TGGGG");
-    SEQAN_TASSERT(label(align, findVertex(align, 1, 0)) == "AAAA");
-    SEQAN_TASSERT(label(align, findVertex(align, 1, 4)) == "CTT");
-    SEQAN_TASSERT(label(align, findVertex(align, 1, 7)) == "AGCT");
-    SEQAN_TASSERT(label(align, findVertex(align, 1, 11)) == "CTAAAA");
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void Test_GraphAlignment() {
-	// Global alignments
-	Test_NeedlemanWunsch();
-	Test_Gotoh();	
-	Test_Hirschberg();
-	Test_AllAgainstAll();
-	Test_GotohVSBandedGotoh();
-
-	// Local alignments
-	Test_SmithWaterman();
-	Test_SmithWatermanClump();
-    Test_BandedSmithWatermanClump();
-
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_config.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_interface.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_needleman_wunsch.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_gotoh.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_hirschberg.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_align/graph_align_smith_waterman_clump.h");
-}
-
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 0)), "GGGG");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 4)), "CTT");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 7)), "A");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 8)), "AGCT");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 12)), "TGGGG");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 1, 0)), "AAAA");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 1, 4)), "CTT");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 1, 7)), "AGCT");
+   SEQAN_ASSERT_EQ(label(align, findVertex(align, 1, 11)), "CTAAAA");
 }
 
 #endif

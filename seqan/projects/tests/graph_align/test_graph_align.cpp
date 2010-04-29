@@ -1,47 +1,31 @@
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-#define SEQAN_VERBOSE
-
 // Test path
 #define TEST_PATH "projects/tests/graph_align/"
 
-// External / STL
-#include <iostream>
-#include <fstream>
-#include <string>
-
+#include <seqan/basic.h>
 #include <seqan/map.h>
-
-
-// SeqAn Includes
 #include <seqan/graph_align.h>
-
-
-// Test files
 #include "test_graph_align.h"
 
-
-using namespace seqan;
-
-
-//////////////////////////////////////////////////////////////////////////////
-
-int main() 
-{
-	SEQAN_TREPORT("TEST BEGIN")
-	//simulateSequences();
-
-	// Redirect std::cout
-    std::ofstream file(TEST_PATH "redirect.txt");
-    std::streambuf* strm_puffer = std::cout.rdbuf();
-    std::cout.rdbuf(file.rdbuf());
-	
-	Test_GraphAlignment();		// Test Graph Alignment
-
-	// Restore std::cout
-	std::cout.rdbuf(strm_puffer);
-
-	SEQAN_TREPORT("TEST END")
-
-	return 0;
+SEQAN_BEGIN_TESTSUITE(test_graph_align) {
+    // global alignments
+    SEQAN_CALL_TEST(test_graph_align_needleman_wunsch);
+    SEQAN_CALL_TEST(test_graph_align_gotoh);
+    SEQAN_CALL_TEST(test_graph_align_hirschberg);
+    SEQAN_CALL_TEST(test_graph_align_allAgainstAll);
+    SEQAN_CALL_TEST(test_graph_align_gotohVsBandedGotoh);
+    
+    // local alignments
+    SEQAN_CALL_TEST(test_graph_align_smith_waterman);
+    SEQAN_CALL_TEST(test_graph_align_smith_waterman_clump);
+    SEQAN_CALL_TEST(test_graph_align_banded_smith_waterman_clump);
+    
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_config.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_interface.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_needleman_wunsch.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_gotoh.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_hirschberg.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_smith_waterman.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/graph_align/graph_align_smith_waterman_clump.h");
 }
+SEQAN_END_TESTSUITE
