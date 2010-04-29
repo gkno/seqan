@@ -28,7 +28,7 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 	
 	int cutoff = 0;
 
-	int score = _smith_waterman(ali,sw_finder,score_type,cutoff);
+	int score = _smithWaterman(ali,sw_finder,score_type,cutoff);
 	
 	SEQAN_TASSERT(score == 9);
 	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
@@ -37,7 +37,7 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 	int i = 1;
 	while (true){
 		
-		score = _smith_waterman_get_next(ali,sw_finder,score_type,cutoff);
+		score = _smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
 
 		if(score==0){
 	//		cout <<"No more alignments satisfying score > "<<cutoff<<"found.\n";		

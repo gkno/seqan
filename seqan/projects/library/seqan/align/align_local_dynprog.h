@@ -695,7 +695,7 @@ ts being useful when
 //wrapper that computes the matrix and does the backtracking for the best alignment
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
-_smith_waterman(Align<TSource, TSpec> & align_,
+_smithWaterman(Align<TSource, TSpec> & align_,
 			    LocalAlignmentFinder<TScoreValue> & sw_finder,
 			    Score<TScoreValue, Simple> const & score_, 
 			    TScoreValue cutoff)
@@ -755,7 +755,7 @@ in previously found alignment to be used again.
 // wrapper that declumps the matrix and traces back the next best alignment
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
-_smith_waterman_get_next(Align<TSource, TSpec> & align_,
+_smithWatermanGetNext(Align<TSource, TSpec> & align_,
 					 LocalAlignmentFinder<TScoreValue> & sw_finder ,
 					 Score<TScoreValue, Simple> const & score_, 
 					 TScoreValue cutoff)
@@ -803,7 +803,7 @@ localAlignment(Align<TSource, TSpec> & align_,
 {
 	LocalAlignmentFinder<TScoreValue> sw_finder(align_);
 
-	return _smith_waterman(align_, sw_finder, score_, 0, tag);
+	return _smithWaterman(align_, sw_finder, score_, 0, tag);
 }
 
 
@@ -844,11 +844,11 @@ localAlignment(Align<TSource, TSpec> & align_,
 {
 	if (sw_finder.needReinit)
 	{
-		return _smith_waterman(align_, sw_finder, score_, cutoff);
+		return _smithWaterman(align_, sw_finder, score_, cutoff);
 	}
 	else
 	{
-		return _smith_waterman_get_next(align_, sw_finder, score_, cutoff);
+		return _smithWatermanGetNext(align_, sw_finder, score_, cutoff);
 	}
 }
 template <typename TSource, typename TSpec, typename TScoreValue1, typename TScoreValue2, typename TScoreValue3>

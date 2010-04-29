@@ -253,7 +253,7 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 
 			LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
 			
-			int score = smithWaterman(ali,sw_finder,score_type,cutoff);
+			int score = _smithWaterman(ali,sw_finder,score_type,cutoff);
 			if(score==0) continue;
 			//cout << ali<<"\n";
 			//cout <<"Seq "<<i<<" - Seq "<<j<<"\n"<<score<< ali;
@@ -264,7 +264,7 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 			int k = 1;
 			while(k<numAlignments)
 			{
-				score = smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
+				score = _smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
 				if(score==0) break;
 				//cout <<score<< ali;
 				//cout << sourceBeginPosition(row(ali,0)) <<"   ";
@@ -312,7 +312,7 @@ SEQAN_DEFINE_TEST(RefineAlign)
 
 	int numAlignments = 1;
 	int numSequencePairs = 0;
-	int cutoff = 3;
+	int cutoff = 4;
 	for(int i = 1 ; i < numSequences; ++i) 
 		numSequencePairs += i;
 	String<TAlign> alis;
