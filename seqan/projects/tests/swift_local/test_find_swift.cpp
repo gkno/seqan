@@ -1,9 +1,7 @@
-#include <iostream>
+#ifndef SEQAN_HEADER_TEST_FIND_SWIFT_H
+#define SEQAN_HEADER_TEST_FIND_SWIFT_H
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 #include <seqan/index.h>
 #include <seqan/seeds.h>
 
@@ -221,7 +219,7 @@ SEQAN_DEFINE_TEST(test_find_swift) {
     testLocalSwiftLongPatterns();
 }
 
-SEQAN_DEFINE_TEST(test_find_longest_epsMatch) {
+SEQAN_DEFINE_TEST(test_longest_epsMatch) {
     testShrink1();
     testShrink2();
     testShrink3();
@@ -229,9 +227,11 @@ SEQAN_DEFINE_TEST(test_find_longest_epsMatch) {
 
 SEQAN_BEGIN_TESTSUITE(test_find_swift) {
     SEQAN_CALL_TEST(test_find_swift);
-    SEQAN_CALL_TEST(test_find_longest_epsMatch);
+    SEQAN_CALL_TEST(test_longest_epsMatch);
 
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/index/find_swift.h");
+    //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/index/find_swift.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/demos/swift_local.h");
 }
 SEQAN_END_TESTSUITE
+
+#endif
