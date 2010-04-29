@@ -670,12 +670,14 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ///.Function.container.param.iterator.type:Spec.VSTree Iterator
 
 	template < typename TIndex, class TSpec >
-	inline TIndex const & container(Iter< TIndex, VSTree<TSpec> > const &it) { 
+	inline TIndex const & 
+	container(Iter< TIndex, VSTree<TSpec> > const &it) { 
 		return *it.index; 
 	}
 
 	template < typename TIndex, class TSpec >
-	inline TIndex & container(Iter< TIndex, VSTree<TSpec> > &it) { 
+	inline TIndex & 
+	container(Iter< TIndex, VSTree<TSpec> > &it) { 
 		return *const_cast<TIndex*>(it.index); 
 	}
 
