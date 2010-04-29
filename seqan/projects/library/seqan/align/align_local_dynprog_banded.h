@@ -477,8 +477,6 @@ SEQAN_CHECKPOINT
 	_pump_trace_2_Align(align, finder.trace);
     _finishAlign(align, alignmentPositions.i1.i1, alignmentPositions.i1.i2, alignmentPositions.i2.i1, alignmentPositions.i2.i2);
 
-	pop(finder.pQ);
-
     return maxScore;
 }
 
