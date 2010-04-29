@@ -795,15 +795,15 @@ SEQAN_CHECKPOINT
 ...type:Tag.Local Alignment Algorithms.value.SmithWaterman
 .remarks:TODO
  */
-template <typename TSource, typename TSpec, typename TScoreValue, typename TTag>
+template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
 			   Score<TScoreValue, Simple> const & score_, 
-			   TTag tag)
+			   SmithWaterman)
 {
 	LocalAlignmentFinder<TScoreValue> sw_finder(align_);
 
-	return _smithWaterman(align_, sw_finder, score_, 0, tag);
+	return _smithWaterman(align_, sw_finder, score_, 0);
 }
 
 
