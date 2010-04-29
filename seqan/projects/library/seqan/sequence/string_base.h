@@ -1475,6 +1475,8 @@ _reserveStorage(
 	typename Value< String<TValue, TSpec> >::Type * old_array = _reallocateStorage(seq, new_capacity, tag);
 	if (old_array)
 	{//buffer was replaced, destruct old buffer
+//		arrayConstruct(begin(seq, Standard()), begin(seq, Standard()) + seq_length);
+//		arrayMoveForward(old_array, old_array + seq_length, begin(seq, Standard()));
 		arrayConstructCopy(old_array, old_array + seq_length, begin(seq, Standard()));
 		arrayDestruct(old_array, old_array + seq_length);
 		_deallocateStorage(seq, old_array, old_capacity);
@@ -1579,17 +1581,19 @@ SEQAN_CHECKPOINT
 			if (new_length > me_capacity)
 			{
 SEQAN_CHECKPOINT
+				TValue tempCopy = val;	// reserve could invalidate val
 				TSize new_capacity = reserve(me, new_length, TExpand());
 				if (new_capacity < new_length)
 				{
 					new_length = new_capacity;
 				}
-			}
-			if (new_length > me_length)
-			{
+				arrayConstruct(begin(me, Standard()) + me_length, begin(me, Standard()) + new_length, tempCopy);
+			} else
+				if (new_length > me_length)
+				{
 SEQAN_CHECKPOINT
-				arrayConstruct(begin(me, Standard()) + me_length, begin(me, Standard()) + new_length, val);
-			}
+					arrayConstruct(begin(me, Standard()) + me_length, begin(me, Standard()) + new_length, val);
+				}
 		}
 
 		_setLength(me, new_length);

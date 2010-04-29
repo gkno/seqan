@@ -1253,6 +1253,75 @@ a single integer value between 0 and the sum of string lengths minus 1.
         appendValue(me.limits, lengthSum(me) + length(obj), tag);
 	}
   
+//////////////////////////////////////////////////////////////////////////////
+// assignValue, insertValue, erase for ConcatDirect StringSets
+
+	template < typename TString, typename TSpec, typename TPos, typename TSequence >
+    inline void assignValue(
+		StringSet< TString, Owner<TSpec> > & me, 
+		TPos pos,
+		TSequence const & seq)
+	{
+		typedef StringSet< TString, Owner<TSpec> > TStringSet;
+		typedef typename Size<TStringSet>::Type TSize;
+		typedef typename StringSetLimits<TStringSet>::Type TLimits;
+		typedef typename Value<TLimits>::Type TLimitValue;
+		
+		TLimitValue oldSize = length(me[pos]);
+        assign(me[pos], seq);
+		if (_validStringSetLimits(me))
+		{
+			TLimitValue delta = (TLimitValue)length(seq) - oldSize;
+			TSize size = length(me);
+			while (pos < size)
+				me.limits[++pos] += delta;
+		}
+    }
+
+	template < typename TString, typename TDelimiter, typename TPos, typename TSequence, typename TExpand >
+	inline void	insertValue(
+		StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, 
+		TPos pos,
+		TSequence const & seq,
+		Tag<TExpand> const tag)
+	{
+		typedef StringSet< TString, Owner<ConcatDirect<TDelimiter> > > TStringSet;
+		typedef typename Size<TStringSet>::Type TSize;
+		typedef typename StringSetLimits<TStringSet>::Type TLimits;
+		typedef typename Value<TLimits>::Type TLimitValue;
+		
+        replace(me.concat, me.limits[pos], me.limits[pos], seq, tag);
+		insertValue(me.limits, pos, me.limits[pos], tag);
+		TLimitValue delta = (TLimitValue)length(seq);
+		TSize size = length(me);
+		while (pos < size)
+			me.limits[++pos] += delta;
+	}
+
+	template < typename TString, typename TDelimiter, typename TPos >
+    inline void erase(
+		StringSet< TString, Owner<ConcatDirect<TDelimiter> > > & me, 
+		TPos pos,
+		TPos pos_end)
+	{
+		typedef StringSet< TString, Owner<ConcatDirect<TDelimiter> > > TStringSet;
+		typedef typename Size<TStringSet>::Type TSize;
+		typedef typename StringSetLimits<TStringSet>::Type TLimits;
+		typedef typename Value<TLimits>::Type TLimitValue;
+		
+		erase(me.concat, me.limits[pos], me.limits[pos_end]);
+
+		TLimitValue lengthSum = 0;
+		for (TSize i = pos; i < pos_end; ++i)
+			lengthSum += me.limits[i];
+
+		erase(me.limits, pos, pos_end);
+
+		TSize size = length(me);
+		while (pos < size)
+			me.limits[++pos] -= lengthSum;
+    }
+
 /*
     inline void append(TString *_objs[], unsigned count) {
         for(unsigned i = 0; i < count; ++i)
@@ -1338,7 +1407,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline typename Size< StringSet< TString, Owner<ConcatDirect<TSpec> > > >::Type 
 	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size, Tag<TExpand> const tag) 
 	{
-		return resize(me.limits, new_size + 1, tag) - 1;
+		return fill(me.limits, new_size + 1, back(me.limits), tag) - 1;
     }
 
 ///.Function.iter.param.object.type:Class.StringSet
