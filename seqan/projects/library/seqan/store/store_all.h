@@ -150,7 +150,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool 
     getIdByName(TNameStore &store, TName &name, TPos &pos)
     {
-        typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
+        typedef typename Iterator<TNameStore, Standard>::Type TNameStoreIter;
         
         // Iterator over read names
         for (TNameStoreIter iter = begin(store); iter != end(store); ++iter)
@@ -174,13 +174,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		return getIdByName(store, name, pos);
 	}
     
-    template<typename TNameStore, typename TName, typename TPos>
+    template<typename TNameStore, typename TName, typename TPos, typename TCNameStore, typename TCName>
     inline bool 
-    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TNameStore, TName> &context)
+    getIdByName(TNameStore &, TName &name, TPos &pos, NameStoreCache<TCNameStore, TCName> &context)
     {
         typedef Iterator<StringSet<CharString> >::Type TNameStoreIter;
 		typedef typename Position<TNameStore>::Type TId;
-		typedef NameStoreCache<TNameStore, TName> TNameStoreCache;
+		typedef NameStoreCache<TCNameStore, TCName> TNameStoreCache;
 		typedef typename TNameStoreCache::TSet TSet;
 		
 		TSet const &set = context.nameSet;	
@@ -212,23 +212,23 @@ namespace SEQAN_NAMESPACE_MAIN
 ..see:Function.getIdByName
 */
 
-    template<typename TNameStore, typename TName>
+    template <typename TNameStore, typename TName>
     inline void
     appendName(TNameStore &store, TName &name)
     {
 		appendValue(store, name);
 	}
 	
-    template<typename TNameStore, typename TName, typename TContext>
+    template <typename TNameStore, typename TName, typename TContext>
     inline void
     appendName(TNameStore &store, TName &name, TContext &)
     {
 		appendName(store, name);
 	}
 	
-    template<typename TNameStore, typename TName>
+    template <typename TNameStore, typename TName, typename TCNameStore, typename TCName>
     inline void
-    appendName(TNameStore &store, TName &name, NameStoreCache<TNameStore, TName> &context)
+    appendName(TNameStore &store, TName &name, NameStoreCache<TCNameStore, TCName> &context)
     {
 		appendValue(store, name);
 		context.nameSet.insert(length(store) - 1);
@@ -390,6 +390,7 @@ struct FragmentStoreConfig
 ..class:Class.FragmentStore
 */
 
+
 template <typename TSpec = void, typename TConfig = FragmentStoreConfig<TSpec> >
 class FragmentStore
 {
@@ -417,6 +418,8 @@ public:
 	typedef GapAnchor<TReadPos>						TReadGapAnchor;
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
 	
+	typedef StringSet<CharString>					TNameStore;
+
 	typedef AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec >	TAnnotationStoreElement;
 	typedef typename TAnnotationStoreElement::TId								TAnnotationStoreElementId;
 
@@ -431,7 +434,14 @@ public:
 	typedef String< TAnnotationStoreElement >																TAnnotationStore;
 	typedef String< IntervalTree< TContigPos, TAnnotationStoreElementId > >									TIntervalTreeStore;
 	typedef StringSet<TReadSeq, TReadSeqStoreSpec>															TReadSeqStore;
-	typedef StringSet<CharString>																			TNameStore;
+	
+	typedef TNameStore																						TReadNameStore;
+	typedef TNameStore																						TMatePairNameStore;
+	typedef TNameStore																						TLibraryNameStore;
+	typedef TNameStore																						TContigNameStore;
+	typedef TNameStore																						TAnnotationNameStore;
+	typedef TNameStore																						TAnnotationTypeStore;
+	typedef TNameStore																						TAnnotationKeyStore;
 	
 	// main containers
 	TReadStore			readStore;			// readId       -> matePairId
@@ -460,34 +470,43 @@ public:
 	TAlignedReadTagStore	alignedReadTagStore;
 
 	// retrieve the names of reads, mate-pairs, libraries, contigs, annotations by their ids
-	TNameStore	readNameStore;
-	TNameStore	matePairNameStore;
-	TNameStore	libraryNameStore;
-	TNameStore	contigNameStore;
-	TNameStore	annotationNameStore;
-	TNameStore	annotationTypeStore;
+	TReadNameStore			readNameStore;
+	TMatePairNameStore		matePairNameStore;
+	TLibraryNameStore		libraryNameStore;
+	TContigNameStore		contigNameStore;
+	TAnnotationNameStore	annotationNameStore;
+	TAnnotationTypeStore	annotationTypeStore;
+	TAnnotationKeyStore		annotationKeyStore;
 	
-	NameStoreCache<TNameStore, CharString>	readNameStoreCache;
-	NameStoreCache<TNameStore, CharString>	contigNameStoreCache;
-	NameStoreCache<TNameStore, CharString>	annotationNameStoreCache;
-	NameStoreCache<TNameStore, CharString>	annotationTypeStoreCache;
+	NameStoreCache<TReadNameStore, CharString>			readNameStoreCache;
+	NameStoreCache<TContigNameStore, CharString>		contigNameStoreCache;
+	NameStoreCache<TAnnotationNameStore, CharString>	annotationNameStoreCache;
+	NameStoreCache<TAnnotationTypeStore, CharString>	annotationTypeStoreCache;
+	NameStoreCache<TAnnotationKeyStore, CharString>		annotationKeyStoreCache;
 
 	enum {
-		ANNO_GENE = 0,
-		ANNO_MRNA = 1,
-		ANNO_CDS = 2,
-		ANNO_EXON = 3,
-		ANNO_FIVE_PRIME_UTR = 4,
-		ANNO_INTRON = 5,
-		ANNO_THREE_PRIME_UTR = 6
+		ANNO_ROOT,
+		ANNO_DELETED,
+		ANNO_GENE,
+		ANNO_MRNA,
+		ANNO_CDS,
+		ANNO_EXON,
+		ANNO_FIVE_PRIME_UTR,
+		ANNO_INTRON,
+		ANNO_THREE_PRIME_UTR,
+		ANNO_PREDEFINED
 	};
 	
 	FragmentStore():
 		readNameStoreCache(readNameStore),
 		contigNameStoreCache(contigNameStore),
 		annotationNameStoreCache(annotationNameStore),
-		annotationTypeStoreCache(annotationTypeStore)
+		annotationTypeStoreCache(annotationTypeStore),
+		annotationKeyStoreCache(annotationKeyStore)
 	{
+		// ATTENTION: The order of these keywords must correspond to the order of the enums above.
+		appendName(annotationTypeStore, "<root>", annotationTypeStoreCache);
+		appendName(annotationTypeStore, "<deleted>", annotationTypeStoreCache);
 		appendName(annotationTypeStore, "gene", annotationTypeStoreCache);
 		appendName(annotationTypeStore, "mRNA", annotationTypeStoreCache);
 		appendName(annotationTypeStore, "CDS", annotationTypeStoreCache);
@@ -495,10 +514,361 @@ public:
 		appendName(annotationTypeStore, "five_prime_UTR", annotationTypeStoreCache);
 		appendName(annotationTypeStore, "intron", annotationTypeStoreCache);
 		appendName(annotationTypeStore, "three_prime_UTR", annotationTypeStoreCache);
+		_storeClearAnnotations(*this);
 	}
 };
 
+//////////////////////////////////////////////////////////////////////////////
     
+template < typename TSpec, typename TConfig >
+struct VertexDescriptor< FragmentStore<TSpec, TConfig> > 
+{
+	typedef FragmentStore<TSpec, TConfig>		TFragmentStore;
+	typedef typename Id<TFragmentStore>::Type	Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+template < typename TConfig, typename TSpec, typename TIterSpec >
+inline typename Iterator<FragmentStore<TSpec, TConfig>, TIterSpec >::Type
+begin(FragmentStore<TSpec, TConfig> &store, TIterSpec const) 
+{
+	return Iter<FragmentStore<TSpec, TConfig>, TIterSpec>(store);
+}
+
+template < typename TConfig, typename TSpec, typename TIterSpec >
+inline typename Iterator<FragmentStore<TSpec, TConfig> const, TIterSpec >::Type
+begin(FragmentStore<TSpec, TConfig> const &store, TIterSpec const) 
+{
+	return Iter<FragmentStore<TSpec, TConfig> const, TIterSpec>(store);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template < typename TConfig, typename TSpec, typename TIterSpec >
+inline typename Iterator<FragmentStore<TSpec, TConfig>, TIterSpec >::Type
+end(FragmentStore<TSpec, TConfig> &store, TIterSpec const) 
+{
+	return Iter<FragmentStore<TSpec, TConfig>, TIterSpec>(store, MinimalCtor());
+}
+
+template < typename TConfig, typename TSpec, typename TIterSpec >
+inline typename Iterator<FragmentStore<TSpec, TConfig> const, TIterSpec >::Type
+end(FragmentStore<TSpec, TConfig> const &store, TIterSpec const) 
+{
+	return Iter<FragmentStore<TSpec, TConfig> const, TIterSpec>(store, MinimalCtor());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template < typename TConfig, typename TSpec >
+inline void
+_storeClearAnnotations(FragmentStore<TSpec, TConfig> & me)
+{
+	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
+	typedef typename TFragmentStore::TAnnotationStore	TAnnotationStore;
+	typedef typename Value<TAnnotationStore>::Type		TAnnotation;
+	
+	resize(me.annotationStore, 1);
+	resize(me.annotationNameStore, 1);
+	resize(me.annotationTypeStore, (unsigned)TFragmentStore::ANNO_PREDEFINED);
+	
+	TAnnotation root;
+	root.typeId = 0;
+	me.annotationStore[0] = root;
+	me.annotationNameStore[0] = "<root>";
+}
+
+template < typename TConfig, typename TSpec >
+inline void
+_storeRemoveTempAnnoNames(FragmentStore<TSpec, TConfig> & me)
+{
+	typedef FragmentStore<TSpec, TConfig>						TFragmentStore;
+	typedef typename TFragmentStore::TAnnotationStore			TAnnotationStore;
+	typedef typename TFragmentStore::TAnnotationNameStore		TAnnotationNameStore;
+	typedef typename TFragmentStore::TAnnotationTypeStore		TAnnotationTypeStore;
+
+	typedef typename GetValue<TAnnotationNameStore>::Type		TName;
+	typedef typename GetValue<TAnnotationTypeStore>::Type		TType;
+	typedef typename Iterator<TAnnotationStore, Standard>::Type	TAnnoIter;
+	typedef typename Position<TAnnotationStore>::Type			TPosition;
+	
+	TAnnoIter it = end(me.annotationStore, Standard()) - 1;
+	TAnnoIter itBegin = begin(me.annotationStore, Standard());
+	TPosition pos = it - itBegin;
+	for (; itBegin <= it; --it, --pos)
+	{
+		TName name = me.annotationNameStore[pos];
+		TType type = me.annotationTypeStore[(*it).typeId];
+		if (length(name) > length(type) + 3)
+			if (prefix(name, 2) == "__" && infix(name, 2, 2 + length(type)) == type && name[2 + length(type)] == '_')
+				assignValue(me.annotationNameStore, pos, "");
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec, typename TConfig, typename TId>
+inline typename GetValue<typename FragmentStore<TSpec, TConfig>::TAnnotationNameStore>::Type
+getAnnoName(FragmentStore<TSpec, TConfig> & store, TId id)
+{
+	return store.annotationNameStore[id];
+}
+
+template <typename TSpec, typename TConfig, typename TId>
+inline typename GetValue<typename FragmentStore<TSpec, TConfig>::TAnnotationTypeStore>::Type
+getAnnoType(FragmentStore<TSpec, TConfig> & store, TId id)
+{
+	return store.annotationTypeStore[id];
+}
+
+template <typename TSpec, typename TConfig, typename TId>
+inline CharString
+getAnnoUniqueName(FragmentStore<TSpec, TConfig> & store, TId id)
+{
+	std::stringstream tmp;
+	tmp << "__" << getAnnoType(store, store.annotationStore[id].typeId) << '_' << id;
+	return tmp.str();
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// append functions
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+// _storeAppendRead
+// 
+// adds a new entry to the read store if neccessary. Otherwise it writes the 
+// correct Id in the variable using to qname to identify it
+// If needed a mate pair entry is created
+    
+template <typename TSpec, typename TConfig, typename TId, typename TName, typename TString, typename TFlag, typename TContext>
+inline void 
+_storeAppendRead (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TId & readId, 
+	TName & qname,
+	TString & readSeq,
+	TFlag & flag,
+	TContext &)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
+
+	// search for readId by name
+	if (getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
+	{
+		if ((flag & 1) == 1)
+		{
+			// if the read is in the store and paired
+			// check the mate pair store if it is the same mate of the pair
+			// assuming that only one flag 0x040 or 0x0080 is 1
+			int inPair = 1 - ((flag & 0x40) >> 6);	// bit 7 is set => inPair = 0
+													// else inPair = 1 (even if bits 6 and 7 are not set)
+			
+			TId matePairId = fragStore.readStore[readId].matePairId;
+			if (matePairId != TMatePairElement::INVALID_ID)
+			{
+				readId = fragStore.matePairStore[matePairId].readId[inPair];
+				if (readId == TMatePairElement::INVALID_ID)
+				{
+					// create new entry in read and read name store
+					// set sequence and mate pair ID in new read store element
+					readId = appendRead(fragStore, readSeq, matePairId);
+					// add the identifier to the read name store
+					appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
+					// set the ID in the mate pair store
+					fragStore.matePairStore[matePairId].readId[inPair] = readId;
+					return;
+				}
+			}
+		} else 
+			return;
+	}
+
+	// if the read name is not in the store
+	// create new entry in read and read name store
+	readId = length(fragStore.readStore);
+
+	// if the read is paired
+	if ((flag & 1) == 1)
+	{
+		TMatePairElement mateElem;
+		// set the first or second read ID in the mate pair element
+		TId matePairId = length(fragStore.matePairStore);
+		mateElem.readId[(flag & 0x80) >> 7] = readId;
+		// get a new mate pair ID and add the new mate pair element
+		appendValue(fragStore.matePairStore, mateElem);
+		// set the new mate pair ID in the read element
+		appendRead(fragStore, readSeq, matePairId);
+	} 
+	// if read is not paired
+	else
+		appendRead(fragStore, readSeq);
+	
+	appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// _storeAppendContig
+// 
+// adds a new entry to the read store if neccessary. Otherwise it writes the 
+// correct Id in the variable using to qname to identify it
+// If needed a mate pair entry is created
+    
+template <typename TSpec, typename TConfig, typename TId, typename TName>
+inline void 
+_storeAppendContig (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TId & contigId, 
+	TName & rName)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
+	
+	if (!getIdByName(fragStore.contigNameStore, rName, contigId, fragStore.contigNameStoreCache))
+	{
+		// if the contig is not in the store yet
+		// set the ID on the last entry after appending
+		contigId = length(fragStore.contigStore);
+		// append contig store
+		appendName(fragStore.contigNameStore, rName, fragStore.contigNameStoreCache);
+		appendValue(fragStore.contigStore, TContigElement());
+//		std::cout << "added contig:" << rName << std::endl;	
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// _annotationAppendAnnotation
+// 
+// adds a new entry to the read store if neccessary. Otherwise it writes the 
+// correct Id in the variable using to qname to identify it
+
+template <typename TSpec, typename TConfig, typename TId, typename TName>
+inline void 
+_storeAppendAnnotationName (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TId & annotationId, 
+	TName & annotationName)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
+	
+	if (!getIdByName(fragStore.annotationNameStore, annotationName, annotationId, fragStore.annotationNameStoreCache))
+	{
+		// if the annotation is not in the store yet
+		// set the ID on the last entry after appending
+		annotationId = length(fragStore.annotationNameStore);
+		// append to annotationName store
+		if (!empty(annotationName))
+			appendName(fragStore.annotationNameStore, annotationName, fragStore.annotationNameStoreCache);
+//		std::cout << "added annotation:" << annotationName << std::endl;	
+	}
+}
+
+template <typename TSpec, typename TConfig, typename TId, typename TName>
+inline void 
+_storeAppendType (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TId & typeId, 
+	TName & annotationType)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
+	
+	if (!getIdByName(fragStore.annotationTypeStore, annotationType, typeId, fragStore.annotationTypeStoreCache))
+	{
+		// if the annotation type name is not in the store yet
+		// set the ID on the last entry after appending
+		typeId = length(fragStore.annotationTypeStore);
+		// append to annotationType store
+		if (!empty(annotationType))
+			appendName(fragStore.annotationTypeStore, annotationType, fragStore.annotationTypeStoreCache);
+//		std::cout << "added type:" << annotationType << std::endl;	
+	}
+}
+
+template <typename TSpec, typename TConfig, typename TId, typename TName>
+inline void 
+_storeAppendKey (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TId & keyId,
+	TName & annotationKey)
+{
+	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
+	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
+	
+	if (!getIdByName(fragStore.annotationKeyStore, annotationKey, keyId, fragStore.annotationKeyStoreCache))
+	{
+		// if the key name is not in the store yet
+		// set the ID on the last entry after appending
+		keyId = length(fragStore.annotationKeyStore);
+		// append to annotationKey store
+		if (!empty(annotationKey))
+			appendName(fragStore.annotationKeyStore, annotationKey, fragStore.annotationKeyStoreCache);
+//		std::cout << "added key:" << annotationKey << std::endl;	
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec, typename TConfig, typename TAnnotation, typename TKey, typename TValue>
+inline void 
+annotationAssignValueByKey (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TAnnotation & annotation,
+	TKey const & key,
+	TValue const & value)
+{
+	typedef typename TAnnotation::TValues	TValues;
+	typedef typename Size<TValues>::Type	TKeyId;
+	
+	TKeyId keyId = 0;	
+	_storeAppendKey(fragStore, keyId, key);
+	if (length(annotation.values) <= keyId)
+		resize(annotation.values, keyId + 1);
+	assignValue(annotation.values, keyId, value);
+}
+
+template <typename TSpec, typename TConfig, typename TAnnotation, typename TKey, typename TValue>
+inline bool 
+annotationGetValueByKey (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TAnnotation const & annotation,
+	TKey const & key,
+	TValue & value)
+{
+	typedef typename TAnnotation::TValues	TValues;
+	typedef typename Size<TValues>::Type	TKeyId;
+	
+	TKeyId keyId = 0;	
+	if (getIdByName(fragStore.annotationKeyStore, key, keyId, fragStore.annotationKeyStoreCache))
+	{
+		assign(value, annotation.values[keyId]);
+		return true;
+	}
+	return false;
+}
+
+template <typename TSpec, typename TConfig, typename TAnnotation, typename TKey>
+inline CharString 
+annotationGetValueByKey (
+	FragmentStore<TSpec, TConfig> & fragStore, 
+	TAnnotation const & annotation,
+	TKey const & key)
+{
+	typedef typename TAnnotation::TValues	TValues;
+	typedef typename Size<TValues>::Type	TKeyId;
+	
+	TKeyId keyId = 0;
+	if (getIdByName(fragStore.annotationKeyStore, key, keyId, fragStore.annotationKeyStoreCache))
+		return annotation.values[keyId];
+	else
+		return "";
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Read Store Accessors
 //////////////////////////////////////////////////////////////////////////////
@@ -933,7 +1303,6 @@ struct AlignedReadLayout
 	
 	TContigRows contigRows;			// rows string, each row is a string of ids of alignedReads from left to right
 	String<Pair<int> > mateCoords;	// coords of mate pair
-	
 };
 
 /**
@@ -978,6 +1347,7 @@ void layoutAlignment(AlignedReadLayout &layout, FragmentStore<TSpec, TConfig> &s
 
 	for (TId id = 0; it != itEnd; ++it, ++id)
 	{
+		if ((*it).contigId == TAlignedRead::INVALID_ID) continue;
 		if (length(layout.contigRows) <= (*it).contigId)
 			resize(layout.contigRows, (*it).contigId + 1);
 		
@@ -1055,7 +1425,6 @@ void printAlignment(
 	TContigId contigId,
 	TPos posBegin, TPos posEnd,
 	TNum lineBegin, TNum lineEnd)
-//	unsigned lastRead)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
@@ -1090,7 +1459,10 @@ void printAlignment(
 		stream << '\n';
 	} else
 		stream << '\n';
-		
+	
+	if ((TId)contigId >= length(layout.contigRows))
+		return;
+	
 	if ((TRowsSize)lineEnd > length(layout.contigRows[contigId])) lineEnd = length(layout.contigRows[contigId]);
 	if ((TRowsSize)lineBegin >= (TRowsSize)lineEnd) return;
 

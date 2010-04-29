@@ -269,13 +269,6 @@ namespace SEQAN_NAMESPACE_MAIN
 	        c = _streamGet(file);
     }
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-// append functions
-//////////////////////////////////////////////////////////////////////////////
-
-
 //////////////////////////////////////////////////////////////////////////////
 // appendAlignment
     
@@ -297,108 +290,6 @@ namespace SEQAN_NAMESPACE_MAIN
         append(fragStore.alignedReadStore, alignedElem);
 		
 		return id;
-    }
-    
-//////////////////////////////////////////////////////////////////////////////
-// _appendRead
-// 
-// adds a new entry to the read store if neccessary. Otherwise it writes the 
-// correct Id in the variable using to qname to identify it
-// If needed a mate pair entry is created
-    
-    template<typename TSpec, typename TConfig, typename TId, typename TName, typename TString, typename TFlag, typename TContext>
-    inline void 
-	_appendRead (
-		FragmentStore<TSpec, TConfig> & fragStore, 
-		TId & readId, 
-		TName & qname,
-		TString & readSeq,
-		TFlag & flag,
-		TContext &)
-	{
-        typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-        typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
-
-		// search for readId by name
-        if (getIdByName(fragStore.readNameStore, qname, readId, fragStore.readNameStoreCache))
-		{
-			if ((flag & 1) == 1)
-			{
-				// if the read is in the store and paired
-				// check the mate pair store if it is the same mate of the pair
-				// assuming that only one flag 0x040 or 0x0080 is 1
-				int inPair = 1 - ((flag & 0x40) >> 6);	// bit 7 is set => inPair = 0
-														// else inPair = 1 (even if bits 6 and 7 are not set)
-				
-				TId matePairId = fragStore.readStore[readId].matePairId;
-				if (matePairId != TMatePairElement::INVALID_ID)
-				{
-					readId = fragStore.matePairStore[matePairId].readId[inPair];
-					if (readId == TMatePairElement::INVALID_ID)
-					{
-						// create new entry in read and read name store
-						// set sequence and mate pair ID in new read store element
-						readId = appendRead(fragStore, readSeq, matePairId);
-						// add the identifier to the read name store
-						appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
-						// set the ID in the mate pair store
-						fragStore.matePairStore[matePairId].readId[inPair] = readId;
-						return;
-					}
-				}
-			} else 
-				return;
-        }
-
-		// if the read name is not in the store
-		// create new entry in read and read name store
-		readId = length(fragStore.readStore);
-
-		// if the read is paired
-		if ((flag & 1) == 1)
-		{
-			TMatePairElement mateElem;
-			// set the first or second read ID in the mate pair element
-			TId matePairId = length(fragStore.matePairStore);
-			mateElem.readId[(flag & 0x80) >> 7] = readId;
-			// get a new mate pair ID and add the new mate pair element
-			appendValue(fragStore.matePairStore, mateElem);
-			// set the new mate pair ID in the read element
-			appendRead(fragStore, readSeq, matePairId);
-		} 
-		// if read is not paired
-		else
-			appendRead(fragStore, readSeq);
-		
-		appendName(fragStore.readNameStore, qname, fragStore.readNameStoreCache);
-    }
-    
-//////////////////////////////////////////////////////////////////////////////
-// _appendContig
-// 
-// adds a new entry to the read store if neccessary. Otherwise it writes the 
-// correct Id in the variable using to qname to identify it
-// If needed a mate pair entry is created
-    
-    template<typename TSpec, typename TConfig, typename TId, typename TName>
-    inline void 
-	_appendContig (
-		FragmentStore<TSpec, TConfig> & fragStore, 
-		TId & contigId, 
-		TName & rName)
-    {
-        typedef FragmentStore<TSpec, TConfig> TFragmentStore;
-        typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
-        
-        if (!getIdByName(fragStore.contigNameStore, rName, contigId, fragStore.contigNameStoreCache))
-        {
-			// if the contig is not in the store yet
-            // set the ID on the last entry after appending
-            contigId = length(fragStore.contigStore);
-            // append contig store
-			appendName(fragStore.contigNameStore, rName, fragStore.contigNameStoreCache);
-            appendValue(fragStore.contigStore, TContigElement());
-        }
     }
     
 
@@ -731,12 +622,12 @@ namespace SEQAN_NAMESPACE_MAIN
         // read, read name and mate pair store
         
         TId readId = 0;
-        _appendRead(fragStore, readId, qname, readSeq, flag, contextSAM);
+        _storeAppendRead(fragStore, readId, qname, readSeq, flag, contextSAM);
         
         // check if the contig is already in the store
         // get its ID or create a new one otherwise
         TId contigId = 0;
-        _appendContig(fragStore, contigId, rname);
+        _storeAppendContig(fragStore, contigId, rname);
 
 		if (empty(cigar)) return;
 		
@@ -756,7 +647,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (mrnm != "*")
 		{
 			if (mrnm != "=")
-				_appendContig(fragStore, mcontigId, mrnm);
+				_storeAppendContig(fragStore, mcontigId, mrnm);
 
 			if (flag & 0x40)	// store mate info only for the first read in the pair
 			{
