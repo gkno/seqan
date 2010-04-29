@@ -169,10 +169,10 @@ void testShrink1() {
     Score<int> score(1, -1, -1);
     globalAlignment(alignment, score);
 
-    shrinkToMaxEpsMatch(alignment, 6, 0.125);
+    longestEpsMatch(alignment, 6, 0.125);
 
-    SEQAN_TASSERT(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_TASSERT(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
 }
 
 void testShrink2() {
@@ -187,10 +187,10 @@ void testShrink2() {
     Score<int> score(1, -1, -1);
     globalAlignment(alignment, score);
     
-    shrinkToMaxEpsMatch(alignment, 6, 0.125);
+    longestEpsMatch(alignment, 6, 0.125);
     
-    SEQAN_TASSERT(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_TASSERT(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
 }
 
 void testShrink3() {
@@ -205,10 +205,10 @@ void testShrink3() {
     Score<int> score(1, -1, -1);
     globalAlignment(alignment, score);
 
-    shrinkToMaxEpsMatch(alignment, 6, 0.125);
+    longestEpsMatch(alignment, 6, 0.125);
 
-    SEQAN_TASSERT(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
-    SEQAN_TASSERT(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
 }
 
 SEQAN_DEFINE_TEST(test_find_swift) {
@@ -230,5 +230,8 @@ SEQAN_DEFINE_TEST(test_find_longest_epsMatch) {
 SEQAN_BEGIN_TESTSUITE(test_find_swift) {
     SEQAN_CALL_TEST(test_find_swift);
     SEQAN_CALL_TEST(test_find_longest_epsMatch);
+
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/index/find_swift.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/demos/swift_local.h");
 }
 SEQAN_END_TESTSUITE
