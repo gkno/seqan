@@ -254,6 +254,23 @@ SEQAN_CHECKPOINT
 	return _AlphabetConversionTable<TTarget, TSource>::table[ordValue(source_)];
 }
 
+
+// For SimpleType sources with the same underlying alphabet.
+template <char CHAR, typename TSpec, typename T, typename TSourceValue, typename TSourceSpec>
+inline typename Convert<ModifiedAlphabet<SimpleType<TSourceValue, TSourceSpec>, ModExpand<CHAR, TSpec> >, SimpleType<TSourceValue, TSourceSpec> >::Type
+convertImpl(Convert<ModifiedAlphabet<SimpleType<TSourceValue, TSourceSpec>, ModExpand<CHAR, TSpec> >, T> const,
+			SimpleType<TSourceValue, TSourceSpec> const & source_)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Do we need special handling for alphabets that already contain the gap symbol?
+	typedef SimpleType<TSourceValue, TSourceSpec> TSource;
+	typedef ModifiedAlphabet<TSource, ModExpand<CHAR, TSpec> > TTarget;
+    TTarget target;
+    target.data = source_.value;
+    return target;
+}
+
+
 //for Proxy sources
 template <typename THost, char CHAR, typename TSpec, typename T, typename TSpec2>
 inline typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, Proxy<TSpec2> >::Type
@@ -264,6 +281,7 @@ SEQAN_CHECKPOINT
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
 	return convert<TTarget>(getValue(source_));
 }
+
 
 
 // ModExpand => some type
@@ -289,13 +307,35 @@ _initializeAlphabetConversionTable(TTarget * buf,
 	buf[ValueSize<THost>::VALUE] = convert<TTarget, char>(CHAR);
 }
 
-template <typename TTarget, typename T, typename THost, char CHAR, typename TSpec>
+
+// Conversion from modified alphabet to non-modified alphabet with an
+// arbitrary type.  The conversion is done through an alphabet
+// conversion table.  See below for a specialization where the
+// underlying type of the modified alphabet and the target type are
+// the same SimpleType specialization.
+template <typename TTarget, typename THost, char CHAR, typename TSpec>
 inline typename Convert<TTarget, ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >::Type
-convertImpl(Convert<TTarget, T> const,
+convertImpl(Convert<TTarget, ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > > const,
 			ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & source_)
 {
+    SEQAN_CHECKPOINT;
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
 	return _AlphabetConversionTable<TTarget, TSource>::table[ordValue(source_)];
+}
+
+
+// Conversion from modified alphabet to non-modified with the same underlying type.
+template <typename TTargetValue, typename TTargetSpec, char CHAR, typename TSpec>
+inline typename Convert<SimpleType<TTargetValue, TTargetSpec>, ModifiedAlphabet<SimpleType<TTargetValue, TTargetSpec>, ModExpand<CHAR, TSpec> > >::Type
+convertImpl(Convert<SimpleType<TTargetValue, TTargetSpec>, ModifiedAlphabet<SimpleType<TTargetValue, TTargetSpec>, ModExpand<CHAR, TSpec> > > const,
+			ModifiedAlphabet<SimpleType<TTargetValue, TTargetSpec>, ModExpand<CHAR, TSpec> > const & source_)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): What is source is a gap? For DNA5Q, the gap symbol is part of the alphabet already.
+    typedef SimpleType<TTargetValue, TTargetSpec> TTarget;
+    TTarget target;
+    target.value = source_.data;
+    return target;
 }
 
 

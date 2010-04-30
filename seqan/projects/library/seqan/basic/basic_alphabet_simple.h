@@ -345,6 +345,7 @@ assign(SimpleType<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	target.value = getValue(source);
+std::cout << "target.value == " << target.value << std::endl;
 }
 
 //____________________________________________________________________________
