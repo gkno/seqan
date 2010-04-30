@@ -28,7 +28,7 @@
 #define RAZERS_MASK_READS				// remove matches with max-hits optimal hits on-the-fly
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 
-//#define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
+#define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
 //#define RAZERS_PARALLEL				// parallelize razerS
 //#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
