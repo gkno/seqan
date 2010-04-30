@@ -1018,9 +1018,10 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 
     if(tmpMax != infimum) {
         _setExtendedSeedDimensions(seed, lowerBound, upperBound, extLengthQuery, extLengthDatabase, direction);
+        return tmpMax;
+    } else {
+        return 0;
     }
-
-    return tmpMax;
 }
 
 
