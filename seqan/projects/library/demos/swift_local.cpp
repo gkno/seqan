@@ -71,6 +71,7 @@ setParser(TParser & parser) {
     addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int));
     addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int));
     addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double));
+    addOption(parser, CommandLineOption('x', "x-drop", "maximal x-drop for extension", OptionType::Int));
 }
 
 int main(int argc, const char *argv[]) {
@@ -98,12 +99,14 @@ int main(int argc, const char *argv[]) {
     StringSet<String<Dna5> > queries;
     appendValue(queries, String<Dna5, FileReader<Fasta> >(queryFile));
 
-    int q = 5;
+    int q = 10;
     if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", q);
-    int minLength = 30;
+    int minLength = 100;
     if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", minLength);
-    double eps = 0.1;
+    double eps = 0.05;
     if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', eps);
+    int xDrop = 10;
+    if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', xDrop);
     CharString outFile = "swift_local.out";
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', outFile);
 
@@ -125,7 +128,7 @@ int main(int argc, const char *argv[]) {
     StringSet<String<Align<TInfix> > > matches;
 
     // local swift
-    int numSwiftHits = localSwift(finder_swift, pattern_swift, eps, minLength, matches);
+    int numSwiftHits = localSwift(finder_swift, pattern_swift, eps, minLength, xDrop, matches);
 
     std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
 

@@ -8,6 +8,7 @@ using namespace seqan;
 template<typename TSource, typename TSize>
 inline bool
 isMatch(Align<TSource> const & align, TSize pos) {
+SEQAN_CHECKPOINT
     if(isGap(row(align, 0), pos)) {
         return false;
     } else if(isGap(row(align, 1), pos)) {
@@ -23,6 +24,7 @@ template<typename TSource, typename TPos>
 void
 _fillGapsString(Align<TSource> const & align,
                 String<Triple<TPos, TPos, TPos> > & gaps) {
+SEQAN_CHECKPOINT
     typedef Triple<TPos, TPos, TPos> TGapInfo;
     TPos totalErrors = 0;
     TPos gapBegin = beginPosition(row(align, 0));
@@ -60,6 +62,7 @@ inline bool
 _isEpsMatch(Triple<TPos, TPos, TPos> const & left,
            Triple<TPos, TPos, TPos> const & right,
            TFloat eps) {
+SEQAN_CHECKPOINT
     // compute mismatches/indels and length
     TPos errors = right.i3 - left.i3 - (right.i2 - right.i1);
     TPos length = right.i1 - left.i2;
@@ -73,9 +76,10 @@ _isEpsMatch(Triple<TPos, TPos, TPos> const & left,
 // align to start and end position of the longest epsilon match
 template<typename TSource, typename TSize, typename TFloat>
 void 
-shrinkToMaxEpsMatch(Align<TSource> & align,
+longestEpsMatch(Align<TSource> & align,
                     TSize matchMinLength,
                     TFloat epsilon) {
+SEQAN_CHECKPOINT
     // Preprocessing: compute and store gaps and lengths
     // A gap is a triple of gap begin position, gap end position, and total number of errors of sequence from begin
     //   to end position of this gap.
@@ -115,98 +119,38 @@ shrinkToMaxEpsMatch(Align<TSource> & align,
 	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
-template<typename TSource, typename TPosition, typename TFloat>
-inline bool
-_isEpsMatch(Align<TSource> & align, TPosition left, TPosition right, TFloat eps) {
-    // count mismatches/indels
-    typename Size<Align<TSource> >::Type errors = 0;
-    for (TPosition i = left; i < right; ++i) {
-        if (!isMatch(align, i)) {
-            ++errors;
-        }
-    }
-    
-    // check error rate
-    return errors/(TFloat)(right-left) <= eps;
-}
-
-template<typename TSource, typename TSize, typename TFloat>
-void 
-shrinkToMaxEpsMatchSimple(Align<TSource> & align,
-                    TSize matchMinLength,
-                    TFloat epsilon) {
-    typedef typename Position<Align<TSource> >::Type TPosition;
-    TPosition begin = 0;
-    TPosition end = 0;
-    TSize minLength = matchMinLength - 1;
-
-    // iterate over all right positions
-    TPosition right = endPosition(row(align,0));
-    TPosition left;
-    while (right > beginPosition(row(align, 0)) + minLength) {
-        if (!isMatch(align, right-1)) {
-            --right;
-        } else {
-            // iterate over all left positions until eps match found 
-            // or fragment is shorter than minLength
-            left = beginPosition(row(align, 0));
-            while (right > left + minLength) {
-                if (!isMatch(align, left)) {
-                    ++left;
-                } else {
-                    // check for new longest epsilon match
-                    if (_isEpsMatch(align, left, right, epsilon)) {
-                        begin = left;
-                        end = right;
-                        minLength = right - left;
-                        break;
-                    }
-                    // skip matches at left end
-                    while (right > left + minLength && isMatch(align, left))
-                        ++left;
-                }
-            }
-            // skip matches at right end
-            while (right > beginPosition(row(align, 0)) + minLength && isMatch(align, right-1))
-                --right;
-        }
-    }
-    
-    // set view positions to the eps-match
-	setSourceBeginPosition(row(align, 0), toSourcePosition(row(align, 0), begin));
-	setSourceBeginPosition(row(align, 1), toSourcePosition(row(align, 1), begin));
-	setBeginPosition(row(align, 0), begin);
-	setBeginPosition(row(align, 1), begin);
-	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), end));
-	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), end));
-    //std::cout << "begin:" << begin << " end:" << end << std::endl;
-    //std::cout << align << std::endl;
-}
-
 //template<typename TInfix>
 //void
 //insertMatch(String<Align<TInfix> > & matches, Align<TInfix> & match) {
 //    typedef typename Size<String<Align<TInfix> > >::Type TSize;
 //    TSize len = length(matches);
-//    if(len == 0)
+//    if(len == 0) {
+//        appendValue(matches, match);
+//    } else {
+//        typename Iterator<String<Align<TInfix> > >::Type iter = begin(matches);
+//        // TODO
+//    }
 //}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
-template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize>
-void 
-verifySwiftHitByLocalAlign(TInfixA const & a,
-                           TInfixB const & b,
-                           TEpsilon eps,
-                           TSize minLength,
-                           String<Align<TInfixB> > & matches) {
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, typename TDrop>
+int 
+verifySwiftHit(TInfixA const & a,
+               TInfixB const & b,
+               TEpsilon eps,
+               TSize minLength,
+               TDelta delta,
+               TDrop xDrop,
+               String<Align<TInfixB> > & matches) {
     typedef Seed<int, SimpleSeed> TSeed;
+    typedef typename Position<TInfixB>::Type TPos;
 
-    typename Position<TInfixB>::Type maxLength = 1000000000;
+    TPos maxLength = 1000000000;
     if (length(a)*length(b) > maxLength) {
         std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
-        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped." << std::flush;
-        return;
+        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped.\n" << std::flush;
+        return 0;
     }
 
     // define a scoring scheme
@@ -214,6 +158,7 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     TScore match = 1;
     TScore mismatchIndel = (int)(-1/eps) + 1;
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
+    TScore scoreDropOff = xDrop * (-mismatchIndel);
     
     // create alignment object for the infixes
     Align<TInfixB> alignment;
@@ -228,15 +173,23 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
     TSize minScore = _min((TSize)ceil((minLength-e) / (e+1)), (TSize)ceil((minLength1-e1) / (e1+1)));
 
     // local alignment
-    LocalAlignmentFinder<> finder(alignment);
-    while (localAlignment(alignment, finder, scoreMatrix, minScore-1)) {
+    __int64 upperDiag = 0;
+    __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
+    if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
+    if (endPosition(b) == endPosition(host(b))) lowerDiag = upperDiag - delta;
+    LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
+    int count = 0;
+    while (localAlignment(alignment, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
+        //splitXDrop
+
         // gapped X-drop extension
+        ++count;
         TSeed seed(sourceBeginPosition(row(alignment, 0)) + beginPosition(a),
                    sourceBeginPosition(row(alignment, 1)) + beginPosition(b),
                    sourceEndPosition(row(alignment, 0)) + beginPosition(a)-1,
                    sourceEndPosition(row(alignment, 1)) + beginPosition(b)-1);
-        TSize errors = (getScore(finder) - length(row(alignment, 0)) * match) / (mismatchIndel - match);
-        TSize scoreDropOff = -(int)(2 * length(row(alignment, 0)) * eps * mismatchIndel) + errors * mismatchIndel;
+        //TSize errors = (score - length(row(alignment, 0)) * match) / (mismatchIndel - match);
+        //TSize scoreDropOff = 2*score;//(int)(errors - 2 * eps * length(row(alignment, 0))) * mismatchIndel + score;//
         extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), 2, GappedXDrop());
 
         // banded alignment
@@ -245,16 +198,24 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
         assignSource(row(extAlign, 0), infix(host(a), leftDim0(seed), rightDim0(seed)+1));
         assignSource(row(extAlign, 1), infix(host(b), leftDim1(seed), rightDim1(seed)+1));
 
-        bandedAlignment(extAlign, seed, errors, scoreMatrix);
+        TSize band = xDrop;
+        bandedAlignment(extAlign, seed, band, scoreMatrix);
+        //StringSet<TInfixB> str;
+        //appendValue(str, infix(host(a), leftDim0(seed), rightDim0(seed)+1));
+        //appendValue(str, infix(host(b), leftDim1(seed), rightDim1(seed)+1));
+        //_Align_Traceback<TSize> trace;
+        //globalAlignment(trace, str, scoreMatrix, rightDiagonal(seed), leftDiagonal(seed), BandedNeedlemanWunsch()); // funktioniert nicht auf Infixen!!!
+        //_pump_trace_2_Align(extAlign, trace);
 
         if ((TSize)length(row(extAlign, 0)) < minLength) continue;
 
         // cut ends to obtain longest contained epsilon-match
-        shrinkToMaxEpsMatch(extAlign, minLength, eps);
+        longestEpsMatch(extAlign, minLength, eps);
 
         if ((TSize)length(row(extAlign, 0)) < minLength) continue;
 
         // insert e-match in matches string
+        //insertMatch(matches, extAlign);
         typename Iterator<String<Align<TInfixB> > >::Type iter = begin(matches);
         while (iter != end(matches)) {
             if (beginPosition(sourceSegment(row(extAlign,0))) == beginPosition(sourceSegment(row(*iter,0)))
@@ -265,29 +226,36 @@ verifySwiftHitByLocalAlign(TInfixA const & a,
             }
             ++iter;
         }
-        if (iter == end(matches) &&
-            (TSize)length(row(extAlign,0)) >= minLength) {
+        if (iter == end(matches)) {
+            //std::cout << alignment << std::endl;
+            //std::cout << score << std::endl;
+            //std::cout << extAlign << std::endl;
             appendValue(matches, extAlign);
         }
     }
+    return count;
 }
 
 // calls swift, verifies swift hits, outputs eps-matches
-template<typename TText, typename TIndex, typename TSize, typename TInfix>
+template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TInfix>
 int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
                 Pattern<TIndex, Swift<SwiftLocal> > & pattern,
                 double epsilon,
                 TSize minLength,
+                TDrop xDrop,
                 StringSet<String<Align<TInfix> > > & matches) {
     resize(matches, countSequences(needle(pattern)));
     TSize numSwiftHits = 0;
 
+    int count = 0;
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
         //std::cout << positionRange(finder) << " ; " << positionRange(pattern) << std::endl;
         // verification
-        verifySwiftHitByLocalAlign(range(finder), range(pattern), epsilon, minLength,
-                                   value(matches, pattern.curSeqNo));
+        count += verifySwiftHit(range(finder), range(pattern), epsilon, minLength,
+                              pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
+                              xDrop, value(matches, pattern.curSeqNo));
 	}
+    std::cout << count << std::endl;
     return numSwiftHits;
 }
