@@ -313,9 +313,9 @@ _initializeAlphabetConversionTable(TTarget * buf,
 // conversion table.  See below for a specialization where the
 // underlying type of the modified alphabet and the target type are
 // the same SimpleType specialization.
-template <typename TTarget, typename THost, char CHAR, typename TSpec>
+template <typename TTarget, typename T, typename THost, char CHAR, typename TSpec>
 inline typename Convert<TTarget, ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >::Type
-convertImpl(Convert<TTarget, ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > > const,
+convertImpl(Convert<TTarget, T> const,
 			ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & source_)
 {
     SEQAN_CHECKPOINT;
