@@ -39,7 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct Quality;
 
 	template <typename TValue, typename TQualityString>
-	class Score<TValue, Quality<TQualityString> >
+	struct Score<TValue, Quality<TQualityString> >
 	{
 	public:
 		TValue data_match;
