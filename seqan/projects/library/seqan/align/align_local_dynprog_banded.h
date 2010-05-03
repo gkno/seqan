@@ -43,7 +43,7 @@ SEQAN_CHECKPOINT
     TSize hi_row = length(value(str, 1)) + 1;
     TSize len0 = length(value(str, 0));
     if (len0 - lowerDiag < hi_row) hi_row = static_cast<TSize>(len0 - lowerDiag);
-    TSize height = hi_row - lo_row;
+    TSize height = hi_row - lo_row + 1;
     TSize diagonalWidth = (TSize) (upperDiag - lowerDiag + 1);
 
     setDimension(finder.matrix, 2);
@@ -192,7 +192,7 @@ SEQAN_CHECKPOINT
 
     // Initialize position in trace
     TSize tracePos = length(finder.trace.sizes);
-    while (finder.trace.tvs[tracePos-1] != Diagonal && tracePos > 2) --tracePos;
+    while (tracePos > 0 && finder.trace.tvs[tracePos-1] != Diagonal) --tracePos;
     if (tracePos == 0) return;
     TSize traceSize = finder.trace.sizes[tracePos-1];
     TTraceValue traceValue = finder.trace.tvs[tracePos-1];
@@ -226,7 +226,7 @@ SEQAN_CHECKPOINT
             }
 
             if ((coordinate(traceCol, 0) >= coordinate(maxCol, 0)) && 
-                (row == coordinate(maxCol, 1))) {
+                (coordinate(traceCol, 1) == coordinate(maxCol, 1))) {
                     maxCol = traceCol + 1;
             }
         }
