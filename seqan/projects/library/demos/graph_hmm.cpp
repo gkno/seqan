@@ -11,7 +11,7 @@ int main() {
 	typedef LogProb<> TProbability;
 	typedef Dna TAlphabet;
 	typedef Size<TAlphabet>::Type TSize;
-	typedef Graph<Hmm<TAlphabet, TProbability, Default()> > THmm;
+	typedef Graph<Hmm<TAlphabet, TProbability, Default> > THmm;
 	typedef VertexDescriptor<THmm>::Type TVertexDescriptor;
 	typedef EdgeDescriptor<THmm>::Type TEdgeDescriptor;
 	
