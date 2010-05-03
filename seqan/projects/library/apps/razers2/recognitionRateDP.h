@@ -365,7 +365,8 @@ void initPatterns(
 
 		// place errors in the pattern
 		bool skip = false;
-		for (int i = 0; (i < maxErrors) && !skip; ++i)
+		int i;  // The value of i is not used beyond this loop, but next loop needs i after first one and VS complains if i is used once in for loop and once outside in the same scope. 
+		for (i = 0; (i < maxErrors) && !skip; ++i)
 		{
 //			::std::cout << mods[i].i1 << " " << (ErrorAlphabet)mods[i].i2 << "\t";
 			switch (mods[i].i2)
@@ -425,8 +426,7 @@ void initPatterns(
 		}
 
 		// reposition modifiers
-		int i = 0;
-		for (; i < maxErrors; ++i)
+		for (i = 0; i < maxErrors; ++i)
 		{
 			if (mods[i].i2 == SEQAN_MATCH) continue;
 			int endPos = (mods[i].i2 == SEQAN_INSERT)? span + 1: span;
