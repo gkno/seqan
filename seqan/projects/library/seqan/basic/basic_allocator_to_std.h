@@ -80,7 +80,8 @@ struct ToStdAllocator
 	ToStdAllocator(THost & host): m_host(& host)
 	{
 	}
-	ToStdAllocator(ToStdAllocator const & alloc): m_host(alloc.m_host)
+	template <typename TValue2>
+	ToStdAllocator(ToStdAllocator<THost, TValue2> const & alloc): m_host(alloc.m_host)
 	{
 	}
 	ToStdAllocator & operator= (ToStdAllocator const & alloc)
@@ -147,6 +148,10 @@ struct ToStdAllocator
 	{
 		typedef ToStdAllocator<THost, TValue2> other;
 	};
+
+	template <typename THost2, typename TValue2>
+	friend
+	struct ToStdAllocator;
 
 	private:
 		THost * m_host;
