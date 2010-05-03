@@ -228,14 +228,19 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		int pos = 0;
 		while (!_streamEOF(file))
 		{
+			if (!_parse_isDigit(c) && c !='-')
+			{
+				std::cerr<<"Ignoring entry " << header_ << std::endl;
+				break;
+			}
 			int nodeId = _parse_readNumber(file, c);			
-			if (c != ':') 
-				std::cerr<<"HUH1?"<<std::endl;
+			if (c != ':')
+				std::cerr<<"HUH1? "<<header_<<std::endl;
 
 			c = _streamGet(file);	// :
 			// quick fix for Hugues' bug
-			//int endPos = _parse_readNumber(file, c);
-			int endPos = pos + _parse_readNumber(file, c);
+			int endPos = _parse_readNumber(file, c);
+			//int endPos = pos + _parse_readNumber(file, c);
 			if (nodeId < 0) nodeId = -nodeId;
 
 			// rename nodeIds
