@@ -34,11 +34,11 @@ void test_global_seed_chain()
 	addSeed(seedContainer2,10,8,2,3,Single());
 
 	SEQAN_ASSERT_EQ(globalChaining(seedContainer2, chain), 10);
-	SEQAN_ASSERT_EQ(length(chain), 4); 
+	SEQAN_ASSERT_EQ(length(chain), 4u); 
 
 	SEQAN_ASSERT_EQ(globalChaining(seedContainer2, chain2, -1 ,13, 13), -4);
 
-	SEQAN_ASSERT_EQ(length(chain2), 4); 
+	SEQAN_ASSERT_EQ(length(chain2), 4u); 
 
 	String<TSeed> chain3;
 	String<TSeed> chain4;
@@ -47,7 +47,7 @@ void test_global_seed_chain()
 	addSeed(seedContainer3,1,1,2,3,Single());
 
 	SEQAN_ASSERT_EQ(globalChaining(seedContainer3, chain3), 3);
-	SEQAN_ASSERT_EQ(length(chain3), 1); 
+	SEQAN_ASSERT_EQ(length(chain3), 1u); 
 }
 
 

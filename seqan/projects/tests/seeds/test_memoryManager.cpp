@@ -15,14 +15,14 @@ void Test_MemoryManager_FreeMemoryPointer()
 {
 	MemoryManager<int, Block<32>, FreeMemoryPointer > manager;
 
-	SEQAN_ASSERT_EQ(capacity(manager), 0);
-	SEQAN_ASSERT_EQ(length(manager), 0);
+	SEQAN_ASSERT_EQ(capacity(manager), 0u);
+	SEQAN_ASSERT_EQ(length(manager), 0u);
 
 
 	Size<MemoryManager<int, Block<32>, FreeMemoryPointer> >::Type id = obtainID(manager);
 	
-	SEQAN_ASSERT_EQ(capacity(manager), 32);
-	SEQAN_ASSERT_EQ(length(manager), 1);
+	SEQAN_ASSERT_EQ(capacity(manager), 32u);
+	SEQAN_ASSERT_EQ(length(manager), 1u);
 
 	manager[id] = 4;
 	SEQAN_ASSERT_EQ(manager[0], 4);
@@ -32,7 +32,7 @@ void Test_MemoryManager_FreeMemoryPointer()
 	releaseID(manager, 0);
 	
 	id = obtainID(manager);
-	SEQAN_ASSERT_EQ(id, 0);
+	SEQAN_ASSERT_EQ(id, 0u);
 
 
 	assignValue(manager, id, 4);
@@ -40,33 +40,33 @@ void Test_MemoryManager_FreeMemoryPointer()
 
 
 	clear(manager);
-	SEQAN_ASSERT_EQ(capacity(manager), 0);
+	SEQAN_ASSERT_EQ(capacity(manager), 0u);
 	
 
 	for(int i = 0; i < 35;i++)
 		manager[obtainID(manager)] = i;
 
-	SEQAN_ASSERT_EQ(capacity(manager), 64);
-	SEQAN_ASSERT_EQ(length(manager), 35);
+	SEQAN_ASSERT_EQ(capacity(manager), 64u);
+	SEQAN_ASSERT_EQ(length(manager), 35u);
 
 	releaseID(manager,6);
 	releaseID(manager,11);
 	id = obtainID(manager);
-	SEQAN_ASSERT_EQ(id, 11);
+	SEQAN_ASSERT_EQ(id, 11u);
 	id =obtainID(manager);
 
-	SEQAN_ASSERT_EQ(id, 6);
+	SEQAN_ASSERT_EQ(id, 6u);
 	
 	releaseID(manager,3);
 	releaseID(manager,14);
 	MemoryManager<int, Block<8>, FreeMemoryPointer> manager2(manager);
 	
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 14);
+	SEQAN_ASSERT_EQ(id, 14u);
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 3);
+	SEQAN_ASSERT_EQ(id, 3u);
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 35);
+	SEQAN_ASSERT_EQ(id, 35u);
 
         typedef MemoryManager<int, Block<8>, FreeMemoryPointer > const TMemoryManager2;
 	TMemoryManager2 manager3(manager);
@@ -79,14 +79,14 @@ void Test_MemoryManager_FreeMemoryInt()
 {
 	MemoryManager<int, Block<32>, FreeMemoryInt > manager;
 
-	SEQAN_ASSERT_EQ(capacity(manager), 0);
-	SEQAN_ASSERT_EQ(length(manager), 0);
+	SEQAN_ASSERT_EQ(capacity(manager), 0u);
+	SEQAN_ASSERT_EQ(length(manager), 0u);
 
 
 	Size<MemoryManager<int, Block<32>, FreeMemoryInt> >::Type id = obtainID(manager);
 	
-	SEQAN_ASSERT_EQ(capacity(manager), 32);
-	SEQAN_ASSERT_EQ(length(manager), 1);
+	SEQAN_ASSERT_EQ(capacity(manager), 32u);
+	SEQAN_ASSERT_EQ(length(manager), 1u);
 
 	manager[id] = 4;
 	SEQAN_ASSERT_EQ(manager[0], 4);
@@ -96,7 +96,7 @@ void Test_MemoryManager_FreeMemoryInt()
 	releaseID(manager, 0);
 	
 	id = obtainID(manager);
-	SEQAN_ASSERT_EQ(id, 0);
+	SEQAN_ASSERT_EQ(id, 0u);
 
 
 	assignValue(manager, id, 4);
@@ -104,32 +104,32 @@ void Test_MemoryManager_FreeMemoryInt()
 
 
 	clear(manager);
-	SEQAN_ASSERT_EQ(capacity(manager), 0);
+	SEQAN_ASSERT_EQ(capacity(manager), 0u);
 	
 
 	for(int i = 0; i < 35;i++)
 		manager[obtainID(manager)] = i;
-	SEQAN_ASSERT_EQ(capacity(manager), 64);
-	SEQAN_ASSERT_EQ(length(manager), 35);
+	SEQAN_ASSERT_EQ(capacity(manager), 64u);
+	SEQAN_ASSERT_EQ(length(manager), 35u);
 
 	releaseID(manager,6);
 	releaseID(manager,11);
 	id = obtainID(manager);
-	SEQAN_ASSERT_EQ(id, 11);
+	SEQAN_ASSERT_EQ(id, 11u);
 	id =obtainID(manager);
 
-	SEQAN_ASSERT_EQ(id, 6);
+	SEQAN_ASSERT_EQ(id, 6u);
 	
 	releaseID(manager,3);
 	releaseID(manager,14);
 	MemoryManager<int, Block<8>, FreeMemoryInt> manager2(manager);
 	
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 14);
+	SEQAN_ASSERT_EQ(id, 14u);
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 3);
+	SEQAN_ASSERT_EQ(id, 3u);
 	id =obtainID(manager2);
-	SEQAN_ASSERT_EQ(id, 35);
+	SEQAN_ASSERT_EQ(id, 35u);
 
 	MemoryManager<int, Block<8>, FreeMemoryInt > const manager3(manager);
 	
