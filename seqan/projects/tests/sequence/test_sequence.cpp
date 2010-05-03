@@ -17,6 +17,8 @@ int mainTestSegment();
 
 //////////////////////////////////////////////////////////////////////////////
 
+void mainTestProblem();
+
 int main()  
 {
 	SEQAN_TREPORT("TEST BEGIN")
@@ -24,6 +26,7 @@ int main()
 	mainTestString();
 	mainTestStringSet();
 	mainTestSegment();
+	mainTestProblem();
 
 	SEQAN_TREPORT("TEST END")
 
