@@ -927,11 +927,11 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 		}
         
         // narrow the relevant matrix region
-		while (((*antiDiag3)[b] == infimum) && (*antiDiag2)[b-1] == infimum && (b < (TPosition)length(*antiDiag3)-1)) {
+		while ((b < (TPosition)length(*antiDiag3)-1) && ((*antiDiag3)[b] == infimum) && (*antiDiag2)[b-1] == infimum) {
 			++b;
 		}
 		++u;
-		while (((*antiDiag3)[u] == infimum) && (*antiDiag2)[u] == infimum && (u >= 0)) {
+		while ((u >= 0) && ((*antiDiag3)[u] == infimum) && (*antiDiag2)[u] == infimum) {
 			--u;
         }
 			
