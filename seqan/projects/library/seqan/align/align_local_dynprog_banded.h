@@ -191,8 +191,9 @@ SEQAN_CHECKPOINT
     typename TFinder::TMatrixIterator newMaxCol;
 
     // Initialize position in trace
-    TSize tracePos = length(finder.trace.sizes) - 2;
-    if (tracePos == 2) return;
+    TSize tracePos = length(finder.trace.sizes);
+    while (finder.trace.tvs[tracePos-1] != Diagonal && tracePos > 2) --tracePos;
+    if (tracePos == 0) return;
     TSize traceSize = finder.trace.sizes[tracePos-1];
     TTraceValue traceValue = finder.trace.tvs[tracePos-1];
 
@@ -204,13 +205,13 @@ SEQAN_CHECKPOINT
         actualRow = row + lo_row;
 
         // make sure that all matrix entries of trace are re-calculated and set to forbidden
-        while (traceSize == 0) {
+        while (traceSize == 0 && tracePos > 0) {
             // determine next trace direction
             --tracePos;
             traceSize = finder.trace.sizes[tracePos-1];
             traceValue = finder.trace.tvs[tracePos-1];
         }
-        if (tracePos != 2) {
+        if (tracePos != 0) {
             // follow the trace in the current row
             if (traceValue == Diagonal) {
                 //++traceCol;
