@@ -24,74 +24,26 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-//template<typename TString>
-//inline void
-//_initAlign(Align<TString>& align,
-//           StringSet<TString, Dependent<> > const& str) {
-//    resize(rows(align), 2);
-//    assignSource(row(align, 0), str[0]);
-//    assignSource(row(align, 1), str[1]);
-//}
-
 template<typename TString>
 inline void
 _initAlign(Graph<Alignment<StringSet<TString, Dependent<> > > >& align,
            StringSet<TString, Dependent<> > const& str) {
+SEQAN_CHECKPOINT
 	assignStringSet(align, str);
 }
 
-//template<typename TString, typename TPos>
-//inline void
-//_finishAlign(Align<TString>& align,
-//             TPos const begin1,
-//             TPos const end1,
-//             TPos const begin2,
-//             TPos const end2) {
-//    setSourceBeginPosition(row(align, 0), begin1);
-//	setSourceBeginPosition(row(align, 1), begin2);
-//	setBeginPosition(row(align, 0), 0);
-//	setBeginPosition(row(align, 1), 0);
-//	setSourceEndPosition(row(align, 0), end1);
-//	setSourceEndPosition(row(align, 1), end2);
-//}
-
 template<typename TString, typename TPos>
 inline void
-_finishAlign(Graph<Alignment<StringSet<TString, Dependent<> > > >& g,
-             TPos const begin1,
-             TPos const end1,
-             TPos const begin2,
-             TPos const end2) {
+_finishAlign(Graph<Alignment<StringSet<TString, Dependent<> > > >&,
+             TPos,
+             TPos,
+             TPos,
+             TPos) {
+SEQAN_CHECKPOINT
     // Nothing to be done?
     //stringSet(g)[0] = infix(stringSet(g)[0], begin1, end1);
     //stringSet(g)[1] = infix(stringSet(g)[1], begin2, end2);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//template <typename TString, typename TId, typename TPos, typename TTraceValue>
-//inline void
-//_align_trace_print(Align<TString>& align,
-//				   StringSet<TString, Dependent<> > const&,
-//				   TId,
-//				   TPos const pos1,
-//				   TId,
-//				   TPos const pos2,
-//				   TPos const segLen,
-//				   TTraceValue const tv)
-//{
-//	SEQAN_CHECKPOINT
-//
-//	// TraceBack values
-//	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
-//
-//	if (segLen == 0 || tv == Diagonal) return;
-//
-//    if (tv == Horizontal) {
-//        insertGaps(row(align, 0), toViewPosition(row(align, 0), pos1), segLen);
-//    } else if (tv == Vertical) {
-//        insertGaps(row(align, 1), toViewPosition(row(align, 1), pos2), segLen);
-//    }
-//}
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -105,7 +57,7 @@ _align_banded_sw_trace(TStringSet const& str,
                        TDiagonal diagL,
                        TDiagonal diagU,
                        TForbidden& forbidden) {
-    SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
     typedef typename Value<TStringSet>::Type TString;
     typedef typename Id<TStringSet>::Type TId;
     typedef typename Size<TTrace>::Type TSize;
@@ -138,7 +90,7 @@ _align_banded_sw_trace(TStringSet const& str,
 	_setForbiddenCell(forbidden, row+1, col+1, diagonalWidth);
 	
     TTraceValue traceValue = initialDir;
-    TTraceValue nextTraceValue;
+    TTraceValue nextTraceValue = traceValue;
     if (traceValue == Diagonal) nextTraceValue = trace[(--row) * diagonalWidth + col];
     else if (traceValue == Vertical) nextTraceValue = trace[(--row) * diagonalWidth + (++col)];
     else if (traceValue == Horizontal) nextTraceValue = trace[row * diagonalWidth + (--col)];
@@ -183,7 +135,7 @@ _align_banded_sw(TTrace& trace,
                  TDiagonal diagL,
                  TDiagonal diagU,
                  TForbidden forbidden) {
-    SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
     typedef typename Value<TTrace>::Type TTraceValue;
     typedef typename Value<TScore>::Type TScoreValue;
     typedef typename Value<TStringSet>::Type TString;
@@ -237,14 +189,12 @@ _align_banded_sw(TTrace& trace,
         if (actualRow >= len1 - diagU) --hi_diag;
         traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
         matIt = begin(mat, Standard()) + lo_diag;
-        TScoreValue diagValMat = *matIt;
         hori_val = 0;
         
         for (TSize col = lo_diag; col < hi_diag; ++col, ++matIt, ++traceIt) {
             actualCol = col + diagL + actualRow;
             if (actualCol != 0) {
                 if (_isClumping(forbidden, col+1, row+1, diagonalWidth)) {
-                    //*traceIt = Stop; // TODO: Do we need this line?
                     *matIt = 0;
                 } else {
                     // Get the new maximum for mat
@@ -318,7 +268,7 @@ _localAlignment(TStringSet& str,
                 TDiagonal diag1,
                 TDiagonal diag2,
                 BandedSmithWatermanClump) {
-    SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
     typedef typename Value<TScore>::Type TScoreValue;
     typedef typename Size<TStringSet>::Type TSize;
     typedef unsigned char TDir;
@@ -348,7 +298,7 @@ _localAlignment(StringSet<TString, Dependent<> > const& str,
 				TDiagonal diag1,
 				TDiagonal diag2,
 				BandedSmithWatermanClump) {
-	SEQAN_CHECKPOINT
+SEQAN_CHECKPOINT
 	typedef typename Value<TAlignments>::Type TAlign;
 	typedef typename Size<TString>::Type TSize;
   
