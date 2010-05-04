@@ -476,7 +476,7 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     if (!TYPECMP<TDPSearchSpec, FindPrefix>::VALUE) {
         double frac = (gapScore == 0) ? 1.0 : (1.0 * baseScore / gapScore);
         if (frac <= 0.0) {
-            TPosition delta = -floor(frac) + length(needle(pattern));
+            TPosition delta = -static_cast<TPosition>(frac) + length(needle(pattern));
             if (delta < pos)
                 searchStartPosition = pos - delta;
         }
