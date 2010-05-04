@@ -30,7 +30,7 @@ void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle
 /*
 .Function._zscore:
 ..summary:Auxiliary function to compute the z-score index for a set of patterns w.r.t. a set of text strings and a MarkovModel
-..signature:template <TFloat,TStringSet,TAlphabet,TSpec,tTAlgorithm>_zscore(W,X,M)
+..signature:template <TFloat,TStringSet,TAlphabet,TSpec,tTAlgorithm>_zscore(W,X,M, algorithmTag)
 ..param.TFloat:The type of the exploited arrays.
 ..param.TStringSet:A set of strings.
 ..param.TAlphabet:The type of the alphabet.
@@ -46,7 +46,7 @@ void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle
 */
 
 template <typename TAlgorithm, typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat _zscore( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M)
+TFloat _zscore(TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M, TAlgorithm const &)
 {
 
 
@@ -311,26 +311,26 @@ typedef String<TDnaAlphabet> TDnaSequence;
 /**
 .Function.zscore:
 ..summary:Computes the z-score index for a set of patterns w.r.t. a set of text strings and a MarkovModel
-..signature:zscore<TAlgorithm>(W,X,M)
-..param.TAlgorithm:The algorithm to exploit to compute the number of occurrences of patterns in the text strings (see @Spec.AhoCorasick@ etc.).
+..signature:zscore(W, X, M, algorithmTag)
 ..param.W:The set of patterns.
 ...type:Class.StringSet
 ..param.X:The set of text strings.
 ...type:Class.StringSet
 ..param.M:The MarkovModel object.
 ...type:Class.MarkovModel
+..param.algorithmTag:The algorithm to exploit to compute the number of occurrences of patterns in the text strings (see @Spec.AhoCorasick@ etc.).
 ..returns:The z-score for W w.r.t. X and M.
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
 */
 
-template <typename TAlgorithm, typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat zscore(TStringSet W,  TStringSet &X, MarkovModel<TAlphabet, TFloat, TSpec> &M)
+template <typename TAlgorithm, typename TFloat, typename TSpec, typename TStringSet, typename TAlphabet>
+TFloat zscore(TStringSet W,  TStringSet &X, MarkovModel<TAlphabet, TFloat, TSpec> &M, TAlgorithm const & algorithmTag)
 {
-   return _zscore<TAlgorithm, TFloat, TStringSet, TAlphabet, TSpec>(W,X,M);
+   return _zscore(W,X,M, algorithmTag);
 }
 
-template <typename TAlgorithm, typename TFloat, typename TSpec>
-TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovModel<Dna, TFloat, TSpec> &M)
+template <typename TAlgorithm, typename TFloat, typename TSpec, typename TDnaSequence>
+TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovModel<Dna, TFloat, TSpec> &M, TAlgorithm const &)
 {
    //add-reverse complements
    _addReveseComplements(W);

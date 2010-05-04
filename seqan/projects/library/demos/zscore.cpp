@@ -35,8 +35,8 @@ int main()
 	appendValue(W,str2);
 	appendValue(W,str3);
 
-	std::cout << zscore<AhoCorasick>(W,X,mm) << std::endl;
-	//std::cout << zscore<WuManber>(W,X,mm) << std::endl;
+	std::cout << zscore(W, X, mm, AhoCorasick()) << std::endl;
+	//std::cout << zscore(W, X, mm, WuManber()) << std::endl;
 
 	return 0;
 }
