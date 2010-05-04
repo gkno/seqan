@@ -125,7 +125,7 @@ include_directories (${SEQAN_LIBRARY})
 if (CMAKE_COMPILER_IS_GNUCXX)
   # For the GCC, enable warnings.
   set (CMAKE_CXX_WARNING_LEVEL 4)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -pedantic")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
 
   # Determine GCC version.
   message("Determining GCC version.")
@@ -136,11 +136,14 @@ if (CMAKE_COMPILER_IS_GNUCXX)
          _GCC_VERSION ${_GCC_VERSION})
   message("  GCC version is ${_GCC_VERSION}")
 
-  # Only add -Wno-variadic-macros if >= 400 and -Wno-long-long if < 400.
+  # Add -Wno-longlong if the GCC version is < 4.0.0.  Add -pedantic flag
+  # but disable warnings for variadic macros with GCC >= 4.0.0.  Earlier
+  # versions warn because of anonymous variadic macros in pedantic mode
+  # but do not have a flag to disable these warnings.
   if (400 GREATER _GCC_VERSION)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
   else (400 GREATER _GCC_VERSION)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wno-variadic-macros")
   endif (400 GREATER _GCC_VERSION)
 
   # Pass CXX flags to flags.
