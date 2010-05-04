@@ -62,6 +62,102 @@ struct Spec< Proxy<TSpec> const>
 	typedef TSpec Type;
 };
 
+template <typename TIterator>
+struct IteratorProxy;
+
+//////////////////////////////////////////////////////////////////////////////
+// Metafunctions
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Value.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Value< Proxy<IteratorProxy<TIterator> > >:
+	Value<TIterator>
+{
+};
+template <typename TIterator>
+struct Value< Proxy<IteratorProxy<TIterator> > const>
+{
+	typedef typename Value<TIterator>::Type const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.GetValue.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct GetValue< Proxy<IteratorProxy<TIterator> > >:
+	GetValue<TIterator>
+{
+};
+template <typename TIterator>
+struct GetValue< Proxy<IteratorProxy<TIterator> > const>
+{
+	typedef typename GetValue<TIterator const>::Type Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Reference.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Reference< Proxy<IteratorProxy<TIterator> > >
+{
+	typedef Proxy<IteratorProxy<TIterator> > Type;
+};
+template <typename TIterator>
+struct Reference< Proxy<IteratorProxy<TIterator> > const >
+{
+	typedef Proxy<IteratorProxy<TIterator> > const Type;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Size.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Size< Proxy<IteratorProxy<TIterator> > >:
+	Size<TIterator>
+{
+};
+template <typename TIterator>
+struct Size< Proxy<IteratorProxy<TIterator> > const>:
+	Size<TIterator>
+{
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+///.Metafunction.Difference.param.T.type:Class.Proxy
+
+template <typename TIterator>
+struct Difference< Proxy<IteratorProxy<TIterator> > >:
+	Difference<TIterator>
+{
+};
+template <typename TIterator>
+struct Difference< Proxy<IteratorProxy<TIterator> > const>:
+	Difference<TIterator>
+{
+};
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSpec>
+typename GetValue<Proxy<TSpec> >::Type
+getValue(Proxy<TSpec> & me)
+{
+	return getValue(iter(me));
+}
+template <typename TSpec>
+typename GetValue<Proxy<TSpec> const>::Type
+getValue(Proxy<TSpec> const & me)
+{
+	return getValue(iter(me));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Iterator Proxy
 //////////////////////////////////////////////////////////////////////////////
@@ -158,99 +254,6 @@ iter(Proxy<IteratorProxy<TIterator> > const & me)
 	return me.data_iterator;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-// Metafunctions
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Value.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Value< Proxy<IteratorProxy<TIterator> > >:
-	Value<TIterator>
-{
-};
-template <typename TIterator>
-struct Value< Proxy<IteratorProxy<TIterator> > const>
-{
-	typedef typename Value<TIterator>::Type const Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.GetValue.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > >:
-	GetValue<TIterator>
-{
-};
-template <typename TIterator>
-struct GetValue< Proxy<IteratorProxy<TIterator> > const>
-{
-	typedef typename GetValue<TIterator const>::Type Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Reference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Reference< Proxy<IteratorProxy<TIterator> > >
-{
-	typedef Proxy<IteratorProxy<TIterator> > Type;
-};
-template <typename TIterator>
-struct Reference< Proxy<IteratorProxy<TIterator> > const >
-{
-	typedef Proxy<IteratorProxy<TIterator> > const Type;
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Size.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Size< Proxy<IteratorProxy<TIterator> > >:
-	Size<TIterator>
-{
-};
-template <typename TIterator>
-struct Size< Proxy<IteratorProxy<TIterator> > const>:
-	Size<TIterator>
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Metafunction.Difference.param.T.type:Class.Proxy
-
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > >:
-	Difference<TIterator>
-{
-};
-template <typename TIterator>
-struct Difference< Proxy<IteratorProxy<TIterator> > const>:
-	Difference<TIterator>
-{
-};
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> >::Type
-getValue(Proxy<TSpec> & me)
-{
-	return getValue(iter(me));
-}
-template <typename TSpec>
-typename GetValue<Proxy<TSpec> const>::Type
-getValue(Proxy<TSpec> const & me)
-{
-	return getValue(iter(me));
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // Comparison
