@@ -518,3 +518,4 @@ SEQAN_CHECKPOINT
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
+
