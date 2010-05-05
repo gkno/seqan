@@ -11,6 +11,8 @@
 // TODO(holtgrew): This raises a warning with Boost 1.42. Deactivate warnings, activate again afterwards. The correct #pragma has to be used for each supported compiler.
 #include <boost/math/distributions/normal.hpp>
 
+//#define RENAME_NODES
+
 using namespace seqan;
 using namespace std;
 
@@ -50,11 +52,20 @@ struct Stats
 
 Stats stats;
 
+
+typedef StringSet<CharString>	TNames;
+typedef NameStoreCache<TNames>	TNameCache;
+typedef std::map<string,Pair<int,int> >	TTransNameCache;
+
 // DContig - Dave's contig is a contig (e.g. chromosome) in the fragment store
 // MContig - Marcel's contig is a node in the de Bruijn graph
 
+TNames						locusNames;
+TNames						transNames;		// DContig id -> original name, e.g. Locus_0_Transcript_0_Confidence_0.800
 String<String<int> >		transToDContig;	// (locus,transcript) -> DContig id
-String<CharString>			dContigToTrans;	// DContig id -> original name, e.g. Locus_0_Transcript_0_Confidence_0.800
+
+TNameCache					locusNameCache(locusNames);
+TTransNameCache				transNameCache;
 
 String<int>					dContigToAnno;	// DContig id -> its first node annotation
 String<String<Count> >		counts;			// node[0] -> ((node[1..],count), (node[1..],count), ...)
@@ -62,14 +73,55 @@ String<String<Count> >		counts;			// node[0] -> ((node[1..],count), (node[1..],c
 String<int>					nodeToMContig;	// node number -> MContig id (compact renumeration)
 String<int>					mContigToNode;	// MContig id -> node number (reverse map)
 int							lastMContig = 0;
-	
-typedef std::map<string,int>	TTransName2Num;
-TTransName2Num					transName2Num;
 
 bool disablePairedEnds;
 boost::math::normal fragmentDistr;
 double width = 0.5;
 unsigned histSize = 18;
+
+
+template <typename TId, typename TName>
+inline void 
+appendLocus(TId & locusId, TName const & locusName)
+{
+	if (!getIdByName(locusNames, locusName, locusId, locusNameCache))
+	{
+		locusId = length(locusNames);
+		appendName(locusNames, locusName, locusNameCache);
+	}
+}
+
+template <typename TId, typename TName>
+inline int 
+appendTrans(TId & locusId, TId & transId, TName const & transName)
+{
+	if (locusId >= (int)length(transToDContig))
+		resize(transToDContig, locusId + 1, Generous());		
+	transId = length(transToDContig[locusId]);
+	if (transId >= (int)length(transToDContig[locusId]))
+		fill(transToDContig[locusId], transId + 1, 0, Generous());
+	
+	int contigId = length(transNames);
+	transToDContig[locusId][transId] = contigId;
+	transNameCache[transName] = Pair<int>(locusId, transId);
+	appendValue(transNames, transName, Generous());
+	return contigId;
+}
+
+template <typename TId, typename TName>
+inline bool 
+getTransId(TId & locusId, TId & transId, TName const & transName)
+{
+	TTransNameCache::iterator it = transNameCache.find(transName);
+	if (it != transNameCache.end())
+	{
+		locusId = it->second.i1;
+		transId = it->second.i2;
+		return true;
+	}
+	return false;
+}
+
 
 void initStats()
 {
@@ -175,15 +227,10 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 	file.open(toCString(fileName), ios_base::in | ios_base::binary);
 
 	typename Value<TFile>::Type c = _streamGet(file);
-	CharString header_;
-	std::string header;
 	std::string transName;
 
-	unsigned contigId = 0;
-	if (!empty(transToDContig))
-		contigId = back(back(transToDContig)) + 1;
 	if (empty(dContigToAnno))
-		appendValue(dContigToAnno, 0);
+		appendValue(dContigToAnno, 1);
 
 	while (!_streamEOF(file))
 	{
@@ -192,50 +239,34 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		if (_streamEOF(file)) break;
 		
 		c = _streamGet(file);
-		header_ = _parse_readIdentifier(file, c);
-		assign(header, suffix(header_, 6));
-		size_t confPos = header.find("_Confidence_");
-		if (confPos != header.npos)
-			header.erase(confPos);		
+		assign(transName, _parse_readIdentifier(file, c));
+		size_t locusPos = transName.find("Locus_");
+		size_t transPos = transName.find("_Transcript_");
+		if (locusPos == transName.npos || transPos == transName.npos)
+		{
+			std::cerr << "Error parsing: " << transName << std::endl;
+			break;
+		}
 
-		std::istringstream iss(header);
 		_parse_skipLine(file, c);
 
-		char d;
 		int locusNum = -1;
 		int transNum = -1;
-//		double confidence = 0;
-
-		iss >> locusNum >> d >> d;
-		if (d != 'T') continue;
-		for (int i = 0; i < 10; ++i) iss >> d;
-		iss >> transName;
-//		for (int i = 0; i < 12; ++i) iss >> d;
-//		iss >> confidence;
-
-		if (locusNum >= (int)length(transToDContig))
-			resize(transToDContig, locusNum + 1, Generous());
-
-		// next 2 lines patched
-		transNum = length(transToDContig[locusNum]);
-		transName2Num[transName] = transNum;
-		if (transNum >= (int)length(transToDContig[locusNum]))
-			fill(transToDContig[locusNum], transNum + 1, 0, Generous());
-
-		transToDContig[locusNum][transNum] = contigId;
-		appendValue(dContigToTrans, header_, Generous());
+		
+		appendLocus(locusNum, transName.substr(locusPos + 6, transPos - (locusPos + 6)));
+		unsigned contigId = appendTrans(locusNum, transNum, transName);
 
 		int pos = 0;
 		while (!_streamEOF(file))
 		{
 			if (!_parse_isDigit(c) && c !='-')
 			{
-				std::cerr<<"Ignoring entry " << header_ << std::endl;
+				std::cerr << "Ignoring entry " << transName << std::endl;
 				break;
 			}
 			int nodeId = _parse_readNumber(file, c);			
 			if (c != ':')
-				std::cerr<<"HUH1? "<<header_<<std::endl;
+				std::cerr << "HUH1? " << transName << std::endl;
 
 			c = _streamGet(file);	// :
 			// quick fix for Hugues' bug
@@ -246,13 +277,17 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 			// rename nodeIds
 			if (nodeId >= (int)length(nodeToMContig))
 				fill(nodeToMContig, nodeId + 1, -1, Generous());
+#ifdef RENAME_NODES
 			if (nodeToMContig[nodeId] == -1)
 			{
-				appendValue(stats.contigStats, Pair<double, int>(0, endPos-pos));
 				nodeToMContig[nodeId] = lastMContig++;
 				appendValue(mContigToNode, nodeId, Generous());
 			}
 			nodeId = nodeToMContig[nodeId];
+#endif
+			if ((int)length(stats.contigStats) <= nodeId)
+				fill(stats.contigStats, nodeId + 1, Pair<double, int>(0, 0));
+			stats.contigStats[nodeId] = Pair<double, int>(0, endPos-pos);
 
 			TAnnotation a;
 			a.beginPos = pos;
@@ -521,9 +556,9 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		size_t posFragId = line.find(",fragId=");
 		size_t posContigId = line.find("contigId=");
 		size_t posAmbig = line.find("ambiguity=");
-		size_t posErrors = line.find("errors=");
-		size_t posConf = line.find("_Confidence_");
-		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos || posConf == line.npos)
+		size_t posErrors = line.find(",errors=");
+//		size_t posConf = line.find("_Confidence_");
+		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos)
 		{
 			std::cerr << "Error parsing: " << line << std::endl;
 			break;
@@ -541,17 +576,19 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 			readName.resize(readName.length() - 2);
 		}
 		
+		transName = line.substr(posContigId + 9, posErrors - (posContigId + 9));	// skip "contigId="
+/*		
 		std::istringstream iss2(line.substr(posContigId + 9 + 6, posConf - (posContigId + 9 + 6)));	// skip "contigId=" and "Locus_"
 		iss2 >> locusNum >> d;
 		for (int i = 0; i < 11; ++i) iss2 >> d;
 		iss2 >> transName;
 		for (int i = 0; i < 12; ++i) iss2 >> d;
 //		iss2 >> confidence;
-
+*/
 		std::istringstream iss3(line.substr(posAmbig + 10));		// skip "ambiguity="
 		iss3 >> ambig;
 
-		std::istringstream iss4(line.substr(posErrors + 7));		// skip "errors="
+		std::istringstream iss4(line.substr(posErrors + 8));		// skip ",errors="
 		iss4 >> errors;
 		if (errors >= length(stats.histMatchErrors))
 		fill(stats.histMatchErrors, errors + 1, 0, Generous());
@@ -567,15 +604,12 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		} else
 			m.forward = true;
 		
-		TTransName2Num::iterator it = transName2Num.find(transName);
-		if (it == transName2Num.end())
+		if (!getTransId(locusNum, transNum, transName))
 		{
 			std::cerr << "ERROR: No annotation for transcript: " << transName << std::endl;
 			continue;
 		}
-		
-		transNum = it->second;
-		
+				
 		if (locusNum >= (int)length(transToDContig) || transNum >= (int)length(transToDContig[locusNum]))
 		{
 			std::cerr << "ERROR: No annotation for read: " << line << std::endl;
@@ -645,18 +679,28 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	
 	// dump node names
 	CharString fileName = prefix;
+#ifdef RENAME_NODES
 	append(fileName, ".node");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
 	for (unsigned i = 0; i < length(mContigToNode); ++i)
 		file << "Node_" << mContigToNode[i] << std::endl;
 	file.close();
+#endif
 
+	// dump transcript names
+	fileName = prefix;
+	append(fileName, ".locus");
+	file.open(toCString(fileName), ios_base::out | ios_base::binary);
+	for (unsigned i = 0; i < length(locusNames); ++i)
+		file << locusNames[i] << std::endl;
+	file.close();	
+	
 	// dump transcript names
 	fileName = prefix;
 	append(fileName, ".trans");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
-	for (unsigned i = 0; i < length(dContigToTrans); ++i)
-		file << dContigToTrans[i] << std::endl;
+	for (unsigned i = 0; i < length(transNames); ++i)
+		file << transNames[i] << std::endl;
 	file.close();	
 	
 	// dump indicator matrices
@@ -822,7 +866,7 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("o", "output-prefix", "prefix for all output files (.mat, .stat, .cnt, .node, .trans)", OptionType::String | OptionType::Label, "result"));
 	addOption(parser, CommandLineOption("m", "mean",          "fragment size mean value", OptionType::Double | OptionType::Label, 220));
 	addOption(parser, CommandLineOption("s", "std",           "fragment size standard deviation", OptionType::Double | OptionType::Label, 30));
-	addOption(parser, CommandLineOption("w", "width",         "pdf integral radius", OptionType::Double | OptionType::Label, width));
+	addOption(parser, CommandLineOption("w", "width",         "probability distribution function integral radius", OptionType::Double | OptionType::Label, width));
 	addOption(parser, CommandLineOption("",  "single",        "interpret paired-end as single matches", OptionType::Bool));
 	addHelpLine(parser, "");
 	
