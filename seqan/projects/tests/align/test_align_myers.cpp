@@ -16,7 +16,7 @@ String<TAlphabet> generate_random(int length_of_sequence)
 	int alphabet_size = ValueSize<TAlphabet>::VALUE;
 	// generate random sequence of length "length_of_sequence"
 	for (int i = 0; i < length_of_sequence; ++i)
-		ret[i] = static_cast<TAlphabet>((alphabet_size * static_cast<int>(rand()) / (static_cast<int>(RAND_MAX) + 1)));
+    ret[i] = static_cast<TAlphabet>((rand() >> 4) % alphabet_size);
 
 	return ret;
 }
@@ -35,7 +35,7 @@ String<TAlphabet> generate_second_sequence(int error_count,String<TAlphabet> cop
 		int pos = static_cast<int>((int)length_of_org * rand() / (RAND_MAX +  1.0));
 		
 		// generate new char
-		TAlphabet new_char = static_cast<TAlphabet>((alphabet_size * static_cast<int>(rand()) / (static_cast<int>(RAND_MAX) + 1)));
+		TAlphabet new_char = static_cast<TAlphabet>((rand() >> 4) % alphabet_size);
 		
 		// replace char
 		copy_of_org[pos] = new_char;
