@@ -16,7 +16,7 @@ String<TAlphabet> generate_random(int length_of_sequence)
 	int alphabet_size = ValueSize<TAlphabet>::VALUE;
 	// generate random sequence of length "length_of_sequence"
 	for (int i = 0; i < length_of_sequence; ++i)
-		ret[i] =  static_cast<int>((alphabet_size * static_cast<int>(rand()) / (static_cast<int>(RAND_MAX) + 1)));
+		ret[i] = static_cast<TAlphabet>((alphabet_size * static_cast<int>(rand()) / (static_cast<int>(RAND_MAX) + 1)));
 
 	return ret;
 }
