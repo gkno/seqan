@@ -155,60 +155,6 @@ void testLocalSwiftLongPatterns() {
 	testLocalSwift(finder_swift, pattern_swift, 0.1, 6, expectedPositions);
 }
 
-void testShrink1() {
-    DnaString seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
-    DnaString seq2 = "ACGTTTACCCCCCCCCCGAAAAAAAAGAAAA";
-
-    Align<DnaString> alignment;
-    resize(rows(alignment), 2);
-    assignSource(row(alignment, 0), seq1);
-    assignSource(row(alignment, 1), seq2);
-
-    Score<int> score(1, -1, -1);
-    globalAlignment(alignment, score);
-
-    longestEpsMatch(alignment, 6, 0.125);
-
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
-}
-
-void testShrink2() {
-    DnaString seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
-    DnaString seq2 = "ACGTTTCCCCCCCCCCGAAAAAAAAGAAAA";
-
-    Align<DnaString> alignment;
-    resize(rows(alignment), 2);
-    assignSource(row(alignment, 0), seq1);
-    assignSource(row(alignment, 1), seq2);
-
-    Score<int> score(1, -1, -1);
-    globalAlignment(alignment, score);
-    
-    longestEpsMatch(alignment, 6, 0.125);
-    
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
-}
-
-void testShrink3() {
-    DnaString seq1 = "AAAATTAAAAAAAATCCCCCCCCCCGTTTCCA";
-    DnaString seq2 = "AAAAGAAAAAAAAGCCCCCCCCCCTTTGCA";
-
-    Align<DnaString> alignment;
-    resize(rows(alignment), 2);
-    assignSource(row(alignment, 0), seq1);
-    assignSource(row(alignment, 1), seq2);
-
-    Score<int> score(1, -1, -1);
-    globalAlignment(alignment, score);
-
-    longestEpsMatch(alignment, 6, 0.125);
-
-    SEQAN_ASSERT_TRUE(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
-    SEQAN_ASSERT_TRUE(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
-}
-
 SEQAN_DEFINE_TEST(test_find_swift) {
     testOneLocalSwiftHit();
     testOneLocalSwiftHit2();
@@ -219,15 +165,123 @@ SEQAN_DEFINE_TEST(test_find_swift) {
     testLocalSwiftLongPatterns();
 }
 
+template<typename TString>
+Align<TString>
+testLongestEpsMatch(TString const & seq1, TString const & seq2) {
+    Align<TString> alignment;
+    resize(rows(alignment), 2);
+    assignSource(row(alignment, 0), seq1);
+    assignSource(row(alignment, 1), seq2);
+
+    Score<int> score(1, -1, -1);
+    globalAlignment(alignment, score);
+
+    longestEpsMatch(alignment, 6, 0.125);
+
+    return alignment;
+}
+
 SEQAN_DEFINE_TEST(test_longest_epsMatch) {
-    testShrink1();
-    testShrink2();
-    testShrink3();
+    DnaString seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
+    DnaString seq2 = "ACGTTTACCCCCCCCCCGAAAAAAAAGAAAA";
+    Align<DnaString> alignment = testLongestEpsMatch(seq1, seq2);
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
+
+    seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
+    seq2 = "ACGTTTCCCCCCCCCCGAAAAAAAAGAAAA";
+    alignment = testLongestEpsMatch(seq1, seq2);
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
+    
+    seq1 = "AAAATTAAAAAAAATCCCCCCCCCCGTTTCCA";
+    seq2 = "AAAAGAAAAAAAAGCCCCCCCCCCTTTGCA";
+    alignment = testLongestEpsMatch(seq1, seq2);
+    SEQAN_ASSERT_TRUE(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
+    SEQAN_ASSERT_TRUE(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
+}
+
+template<typename TString, typename TScore, typename TAliString, typename TScoreValue>
+void testXDropAlign(TString const & seq1, TString const & seq2, TScore scoring, TScoreValue scoreDropOff, TScoreValue minScore, TAliString & aliString) {
+    Align<TString> align;
+    resize(rows(align), 2);
+    assignSource(row(align, 0), seq1);
+    assignSource(row(align, 1), seq2);
+
+    globalAlignment(align, scoring);
+    //std::cout << align << std::endl;
+
+    _splitAtXDrops(align, scoring, scoreDropOff, minScore, aliString);
+}
+
+SEQAN_DEFINE_TEST(test_split_xDrop_align) {
+    Score<int> scoring(2,-1,-2);
+
+    DnaString seq1 = "cgataagctcttggacta";
+    DnaString seq2 = "cgataatatggactagg";
+    String<Align<DnaString> > aliString;
+    testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 10/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 2);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tggacta");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tggacta");
+
+    seq1 = "cgataagctcttggacta";
+    seq2 = "cgataatatggactagggg";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 14/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 1);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "tggacta");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "tggacta");
+
+    seq1 = "cgataagctcagttggacta";
+    seq2 = "cgataatcactggactagggg";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, scoring, 2/*scoreDropOff*/, 6/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 3);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tca");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tca");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 2), 0) == "tggacta");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 2), 1) == "tggacta");
+
+    clear(aliString);
+    testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 6/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 2);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tcagttggacta");
+    SEQAN_TASSERT(row(value(aliString, 2), 1) == "tca-ctggacta"); // TODO: Warum geht SEQAN_ASSERT_TRUE hier nicht?    
+    
+    seq1 = "aaaaaa";
+    seq2 = "ccaaaaaa";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 12/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 1);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "aaaaaa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "aaaaaa"); 
+
+    seq1 = "aaaaaa";
+    seq2 = "aaaaaa";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, scoring, 3/*scoreDropOff*/, 12/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 1);
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "aaaaaa");
+    SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "aaaaaa");
+    
+    seq1 = "CCCCAGGGGGGACAAAAAAGAAACCCAGGGGGGACCCAGGG";
+    seq2 = "CCCCTGGGGGGTCTTTTTGTCCCTGGGGGGTCCCTGGG";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, Score<int>(1, -1, -1), 3/*scoreDropOff*/, 7/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 2);
 }
 
 SEQAN_BEGIN_TESTSUITE(test_find_swift) {
     SEQAN_CALL_TEST(test_find_swift);
     SEQAN_CALL_TEST(test_longest_epsMatch);
+    SEQAN_CALL_TEST(test_split_xDrop_align);
 
     //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/index/find_swift.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/demos/swift_local.h");
