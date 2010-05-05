@@ -762,7 +762,7 @@ inline bool _find_WildShiftAnd_SmallNeedle(Finder<THaystack, Default> & finder,
 		// additional bit operations
 		pattern.df[0] = pattern.prefSufMatch[0] | pattern.f_table[0];
 		pattern.prefSufMatch[0] |= ((pattern.a_table[0] & (~(pattern.df[0] - pattern.i_table[0]))) ^ pattern.df[0]);
-		if (pattern.prefSufMatch[0] & compare != 0) {
+		if ((pattern.prefSufMatch[0] & compare) != 0) {
             // Found a match: Update states, positions and report the match.
             finder._endPosition += 1;
             finder._state = TFinder::STATE_FOUND;
