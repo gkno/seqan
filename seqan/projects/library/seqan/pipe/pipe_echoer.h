@@ -83,11 +83,14 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned echoRepeats, bool omitFirst >
     struct Pipe< TInput, Echoer<echoRepeats, omitFirst> >
     {
-        TInput                      &in;
-        typename Value<Pipe>::Type	tmp;
-        
+        typedef typename Value<Pipe>::Type TValue;
+
+        TInput	&in;
+        TValue	tmp;
+
         Pipe(TInput& _in):
-            in(_in) {}
+            in(_in),
+            tmp(0, typename Value<TValue, 2>::Type()) {}
 
         inline typename Value<Pipe>::Type const & operator*() const {
             return tmp;

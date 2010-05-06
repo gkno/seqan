@@ -574,8 +574,9 @@ bestNeighbors(TIntSet & neighbors,
 
 			// find out the mismatch position of both l-mers x and y 
 			TPos mismatch_pos = 0;
-			TValue letter_in_x; //base in x at the mismatch position
-			TValue letter_in_y; //base in y at the mismatch position
+			// TODO: Check if letter_in_x/y are used before initialization and remove '= TValue()'
+			TValue letter_in_x = 0; //base in x at the mismatch position
+			TValue letter_in_y = 0; //base in y at the mismatch position
 			for(TPos i=0; i<l; ++i)
 			{
 				if(l_mer_x[i]!=l_mer_y[i])

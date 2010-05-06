@@ -695,7 +695,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		Iter<TSTree, VSTree<BottomUp<MaxRepeats> > > const *maxIt;
 
+		inline Iter():
+			childPtr(0), parentPtr(0),
+			_atEnd(true),
+			tmp(TPair(0, 0)),
+			leftmostChild(false), leftmostParent(false) {}
+
 		inline Iter(Iter<TSTree, VSTree<BottomUp<MaxRepeats> > > const &_maxIt):
+			childPtr(0), parentPtr(0),
+			_atEnd(true), 
+			tmp(TPair(0, 0)),
+			leftmostChild(false), leftmostParent(false),
 			maxIt(&_maxIt)
 		{
 			_init();

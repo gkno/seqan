@@ -1195,7 +1195,7 @@ _extend_shortest_paths(TMatrix& local,
 		for(TSize j = 0; j<len;++j) {
 			if (i==j) continue;
 			assignValue(local, i*len+j,infDist);
-			TPredVal ind;
+			TPredVal ind = 0;
 			for(TSize k = 0; k<len;++k) {
 				TMatrixVal min1 = getValue(local, i*len+j);
 				TMatrixVal min2 = getValue(oldLocal, i*len+k) + getValue(w, k*len + j);

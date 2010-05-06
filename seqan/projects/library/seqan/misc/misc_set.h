@@ -176,7 +176,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSetIter	ptr;
 		TObjIter	obj;
 
-		Iter() {}
+		Iter():
+			obj(NULL) {}
 
 		Iter(TSetIter _ptr, TObjIter _obj):
 			ptr(_ptr), obj(_obj)

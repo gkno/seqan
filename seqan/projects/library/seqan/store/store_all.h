@@ -1410,7 +1410,7 @@ template <typename TStream, typename TFormatTag, typename TContigGaps>
 inline void _printContig(
 	TStream &stream,
 	Tag<TFormatTag> const &format,
-	AlignedReadLayout &layout, 
+	AlignedReadLayout &, 
 	TContigGaps &contigGaps)
 {
 	write(stream, contigGaps, "", format);
@@ -1485,7 +1485,7 @@ void printAlignment(
 			mid = left + (right - left) / 2;
 			TAlignedRead &align = store.alignedReadStore[*mid];
 
-			if (align.contigId < contigId || (align.contigId == contigId && (TPos)_max(align.beginPos, align.endPos) <= posBegin))
+			if (align.contigId < (TId)contigId || (align.contigId == (TId)contigId && (TPos)_max(align.beginPos, align.endPos) <= posBegin))
 				left = mid + 1;	// what we search is in the right part
 			else
 				right = mid;	//            ...           left part
@@ -1496,7 +1496,7 @@ void printAlignment(
 		{
 //			if (*mid >= lastRead) continue;
 			TAlignedRead &align = store.alignedReadStore[*mid];
-			if (align.contigId != contigId) break;
+			if (align.contigId != (TId)contigId) break;
 
 			TReadGaps readGaps(readSeqString, align.gaps);
 			TContigPos	left = align.beginPos;

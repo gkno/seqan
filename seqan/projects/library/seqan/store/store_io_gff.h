@@ -141,6 +141,7 @@ struct _IOContextGFF
 	CharString contigName;
 	CharString typeName;
 	CharString annotationName;
+	CharString parentKey;
 	CharString parentName;
 	
 	CharString _key;
@@ -148,6 +149,7 @@ struct _IOContextGFF
 	StringSet<CharString> keys;
 	StringSet<CharString> values;
 	
+	CharString gtfGeneKey;
 	CharString gtfGene;
 
 	TId annotationId;
@@ -163,9 +165,11 @@ inline void clear(_IOContextGFF<TFragmentStore, TSpec> &ctx)
 	clear(ctx.contigName);
 	clear(ctx.typeName);
 	clear(ctx.annotationName);
+	clear(ctx.parentKey);
 	clear(ctx.parentName);
 	clear(ctx._key);
 	clear(ctx._value);
+	clear(ctx.gtfGeneKey);
 	clear(ctx.gtfGene);
 	clear(ctx.keys);
 	clear(ctx.values);
@@ -258,23 +262,40 @@ _readOneAnnotation (
 	{
 		if (ctx._key == "ID") 
 			ctx.annotationName = ctx._value;
-		else if (ctx._key == "Parent" || ctx._key == "ParentID" || ctx._key == "transcript_name") 
-			ctx.parentName = ctx._value;
-		else if (ctx._key == "transcript_id")
+		else
+			if (!empty(ctx._key) && !empty(ctx._value))
+			{
+				appendValue(ctx.keys, ctx._key);
+				appendValue(ctx.values, ctx._value);
+			}
+				
+		if (ctx._key == "Parent" || ctx._key == "ParentID" || ctx._key == "transcript_id") 
 		{
-			if (empty(ctx.parentName)) ctx.parentName = ctx._value;
+			ctx.parentKey = ctx._key;
+			ctx.parentName = ctx._value;
+		}
+		else if (ctx._key == "transcript_name")
+		{
+			if (empty(ctx.parentName)) 
+			{
+				ctx.parentKey = ctx._key;
+				ctx.parentName = ctx._value;
+			}
 		} 
-		else if (ctx._key == "gene_name")
-			ctx.gtfGene = ctx._value;
 		else if (ctx._key == "gene_id")
 		{
-			if (empty(ctx.gtfGene)) ctx.gtfGene = ctx._value;
-		} 
-		else if (!empty(ctx._key) && !empty(ctx._value))
-		{
-			appendValue(ctx.keys, ctx._key);
-			appendValue(ctx.values, ctx._value);
+			ctx.gtfGeneKey = ctx._key;
+			ctx.gtfGene = ctx._value;
 		}
+		else if (ctx._key == "gene_name")
+		{
+			if (empty(ctx.gtfGene))
+			{
+				ctx.gtfGeneKey = ctx._key;
+				ctx.gtfGene = ctx._value;
+			}
+		} 
+
 		clear(ctx._key);
 		clear(ctx._value);
 		_parse_skipSpace(file, c);
@@ -351,7 +372,8 @@ _storeOneAnnotation (
 		maxId = ctx.annotationId;
 	
 	for (unsigned i = 0; i < length(ctx.keys); ++i)
-		annotationAssignValueByKey(fragStore, ctx.annotation, ctx.keys[i], ctx.values[i]);
+		if (ctx.keys[i] != ctx.gtfGeneKey && ctx.keys[i] != ctx.parentKey)
+			annotationAssignValueByKey(fragStore, ctx.annotation, ctx.keys[i], ctx.values[i]);
 
 	if (length(fragStore.annotationStore) <= maxId)
 		resize(fragStore.annotationStore, maxId + 1, Generous());
