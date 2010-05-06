@@ -20,27 +20,31 @@ endif
 #CXXFLAGS += -m64
 
 CXXFLAGS += -I$(SEQAN_BASE)
-CXXFLAGS += -O9
+#CXXFLAGS += -I~/Documents/Development/
+CXXFLAGS += -O9 -fopenmp
 #CXXFLAGS += -O0 -g
-CXXFLAGS += -pedantic -W -Wall
-CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
+CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
+CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CXXFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
+CXXFLAGS += ${CXXEXTRAFLAGS}
 
 # Intel Threading Building Blocks
 #CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
 #LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers razers2/paramChooser razers2/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon #transquant/transquant
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers razers2/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon #transquant/transquant
 
 all:           check_seqan_base $(TARGETS)
-dfi:           check_seqan_base dfi/dfi 
+dfi:           check_seqan_base dfi/dfi
 razers:        check_seqan_base razers/razers razers/paramChooser
-razers2:       check_seqan_base razers2/razers razers2/paramChooser
+razers2:       check_seqan_base razers2/razers
+razers3:       check_seqan_base razers3/razers
 micro_razers:  check_seqan_base micro_razers/micro_razers
-seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee 
+seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee
 seqcons:       check_seqan_base seqcons/seqcons
 pair_align:    check_seqan_base pair_align/pair_align
 tree_recon:    check_seqan_base tree_recon/tree_recon
-#transquant:    check_seqan_base transquant/transquant
+transquant:    check_seqan_base transquant/transquant transquant/rectifier transquant/transsplice
 insegt:        check_seqan_base insegt/insegt
 
 check_seqan_base:
