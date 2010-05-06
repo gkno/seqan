@@ -799,8 +799,7 @@ normalizeTupleCounts(TTupleCountStore &tupleCountStore, FragmentStore<TSpec, TCo
 //////////////////////////////////////////////////////////////////////////////
 
 inline bool
-ngsOverlapper(CharString const &nameSAM, CharString const &nameFASTA, 
-	      CharString const &nameGFF, CharString const &outputPath,
+ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString const &outputPath,
 	      unsigned tupleValue, bool exact_nTuple,
 	      unsigned thresholdGaps, unsigned offsetInterval,
 	      unsigned thresholdCount, double thresholdRPKM,
@@ -809,10 +808,8 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameFASTA,
 	FragmentStore<> me;
 #ifdef DEBUG_OVERLAP_MODULE
 	SEQAN_PROTIMESTART(find1_time);	
-	std::cout << "load FASTA..." << std::endl;
 #endif 
 	// build contigStore from FASTA file
-	if (!loadContigs(me, nameFASTA)) return false;
 #ifdef DEBUG_OVERLAP_MODULE
 	std::cout << "load SAM..." << std::endl;
 #endif 
@@ -829,7 +826,6 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameFASTA,
 	std::cout << "load GFF..." << std::endl;
 #endif 
 	readAnnotationsFromGFF(me, toCString(nameGFF));
-
 
 	// create IntervalTreeStore:
 #ifdef DEBUG_OVERLAP_MODULE

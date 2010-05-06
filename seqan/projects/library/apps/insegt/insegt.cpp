@@ -25,91 +25,6 @@
 using namespace seqan;
 using namespace std;
 
-
-///////////////////////////////////////////////////////////////////////////////
-inline void
-test_createCombinations()
-{
-	StringSet<String<unsigned> > annoIds;
-	StringSet<String<unsigned> > tuple;
-	clear(annoIds);
-	
-	String<unsigned> str1;
-	String<unsigned> str2;
-	String<unsigned> str3;
-	
-	clear(str1);
-	clear(str2);
-	clear(str3);
-	
-	appendValue(str1, 1);
-	appendValue(str1, 2);
-	appendValue(str1, 3);
-	appendValue(str2, 4);
-	appendValue(str2, 5);
-	appendValue(str3, 6);
-	appendValue(str3, 7);
-	appendValue(str3, 8);
-	
-	appendValue(annoIds, str1);
-	appendValue(annoIds, str2);
-	appendValue(annoIds, str3);
-	
-	createCombinations(tuple, annoIds);
-	
-	std::cout << "Tuple: " << std::endl;
-	for (unsigned i = 0; i < length(tuple); ++i)
-	{
-		for (unsigned j = 0; j < length(getValue(tuple, i)); ++j)
-		{
-			std::cout << getValue(getValue(tuple, i), j);
-		}
-		std::cout << std::endl;
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-inline void
-test_interSec()
-{
-	String<int> list1;
-	String<int> list2;
-	
-	clear(list1);
-	clear(list2);
-	
-	appendValue(list1, 3);
-	appendValue(list1, 4);
-	appendValue(list1, 4);
-	appendValue(list1, 8);
-	appendValue(list1, 9);
-	appendValue(list1, 9);
-	appendValue(list1, 12);
-	appendValue(list1, 13);
-	
-	appendValue(list2, 4);
-	appendValue(list2, 6);
-	appendValue(list2, 9);
-	appendValue(list2, 9);
-	appendValue(list2, 10);
-	appendValue(list2, 12);
-	appendValue(list2, 12);
-	appendValue(list2, 12);
-	appendValue(list2, 13);
-	appendValue(list2, 19);
-
-	String<int> result;
-	interSec(result, list1, list2);
-	std::cout << "interSec: " << std::endl;
-	for (unsigned i = 0; i < length(result); ++i)
-	{
-		std::cout << getValue(result, i) << ", ";
-	}
-	std::cout << std::endl;
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 ////// main
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,7 +32,6 @@ test_interSec()
 int main( int argc, const char *argv[] ) 
 {
 	CharString nameSAM;
-	CharString nameFASTA;
 	CharString nameGFF;
 	CharString outputPath;
 	unsigned nTuple;
@@ -131,9 +45,15 @@ int main( int argc, const char *argv[] )
 	
 	CommandLineParser parser;
 	
+	//////////////////////////////////////////////////////////////////////////////
+	// Define options
+	addTitleLine(parser, "**********************************************************************");
+	addTitleLine(parser, "*** INSEGT                                                         ***");
+	addTitleLine(parser, "*** INtersecting SEcond Generation sequencing daTa with annotation ***");
+	addTitleLine(parser, "**********************************************************************");
+
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM-file with aligned reads", (int)OptionType::String), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "fa", "FASTA-file with contig sequence (only names, sequences should be empty)", (int)OptionType::String), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("g", "gff", "GFF_file with annotations", (int)OptionType::String), "<Filename>"));
 	addOption(parser, addArgumentText(CommandLineOption("p", "outputPath", "path for output-files", (int)OptionType::String, ""), "<String>"));
 	addOption(parser, addArgumentText(CommandLineOption("n", "nTuple", "nTuple", (int)OptionType::Int, 2), "<Int>"));
@@ -145,10 +65,15 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", (int)OptionType::Boolean));
 	
+	if (argc == 1)
+	{
+		shortHelp(parser, cerr);	// print short help and exit
+		return 0;
+	}
+
 	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
 	
 	getOptionValueLong(parser, "sam", nameSAM);
-	getOptionValueLong(parser, "fa", nameFASTA);
 	getOptionValueLong(parser, "gff", nameGFF);
 	getOptionValueLong(parser, "outputPath", outputPath);
 	getOptionValueLong(parser, "nTuple", nTuple);
@@ -167,7 +92,7 @@ int main( int argc, const char *argv[] )
 		exact_nTuple = 0;	// not both possible: maxTuple is prefered over exact_nTuple and n
 	}
 	
-	ngsOverlapper(nameSAM, nameFASTA, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO);
+	ngsOverlapper(nameSAM, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO);
 	return 0;
 }
 
