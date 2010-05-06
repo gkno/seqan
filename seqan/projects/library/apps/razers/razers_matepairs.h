@@ -829,7 +829,7 @@ void mapMatePairReads(
 		if (bestLeftErrors != SupremumValue<int>::VALUE)
 		{
 			if (matchVerify(
-					mR, range(swiftFinderR, genomeInf),
+					mR, infix(swiftFinderR),
 					rseqNo, readSetR, forwardPatternsR,
 					options, TSwiftSpec()))
 			{

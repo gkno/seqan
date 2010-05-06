@@ -1774,7 +1774,7 @@ void _mapSingleReadsToContig(
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)
-			matchVerify(verifier, range(swiftFinder, contigSeq), verifier.m.readId, readSet, mode);
+			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, mode);
 		++options.countFiltration;
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used

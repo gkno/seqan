@@ -446,7 +446,7 @@ int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
         ++numSwiftHits;
         //std::cout << positionRange(finder) << " ; " << positionRange(pattern) << std::endl;
         // verification
-        count += verifySwiftHit(range(finder), range(pattern), epsilon, minLength,
+        count += verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
                               xDrop, value(matches, pattern.curSeqNo));
 	}

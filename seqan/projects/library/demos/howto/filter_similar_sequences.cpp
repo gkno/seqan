@@ -32,7 +32,7 @@ int main (int argc, char const * argv[])
 			if (i == position(pattern).i1) continue;
 			// do further alignment here
 /*			std::cout << "Found possible overlap of " << std::endl;
-			std::cout << "\t" << range(finder) << std::endl;
+			std::cout << "\t" << infix(finder) << std::endl;
 			std::cout << "\t" << seqs[position(pattern).i1] << std::endl;
 */		}
 	}

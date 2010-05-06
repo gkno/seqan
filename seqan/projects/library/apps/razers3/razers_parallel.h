@@ -95,7 +95,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			{
 				TToken &token = tokens[nextToken];
 				nextToken = (nextToken + 1) % nTokens;
-				set(token.genomeInf, range(swiftFinder, genome));
+				set(token.genomeInf, infix(swiftFinder));
 				token.rseqNo = (*swiftFinder.curHit).ndlSeqNo;
 				return &token;
 			}

@@ -31,7 +31,7 @@
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
-#define RAZERS_OPENADDRESSING
+//#define RAZERS_OPENADDRESSING
 
 #include <seqan/platform.h>
 #ifdef PLATFORM_WINDOWS
@@ -439,9 +439,12 @@ int main(int argc, const char *argv[])
 			cerr << "Invalid Shape" << endl;
 			stop = true;
 		}
-
-		if ((ones < 7 || ones > 14) && !stop)
-			cerr << "Warning: Shape should contain at least 7 and at most 14 '1's" << endl;
+		unsigned maxOnes = 14;
+#ifdef RAZERS_OPENADDRESSING
+		maxOnes = 31;
+#endif
+		if ((ones < 7 || ones > maxOnes) && !stop)
+			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes " '1's" << endl;
 	}
 	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;

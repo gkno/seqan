@@ -1297,7 +1297,7 @@ inline typename SAValue<TIndex >::Type
 endPosition(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
 {
 	typedef typename Size<TIndex>::Type TSize;
-    typename SAValue<TIndex >::Type pos;
+	typename SAValue<TIndex >::Type pos;
 	posLocalToX(pos, Pair<unsigned, TSize>(pattern.curSeqNo, length(needle(pattern))), stringSetLimits(host(pattern)));
 	return pos;
 }
@@ -1310,8 +1310,40 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 }
 
 //____________________________________________________________________________
+/**
+.Function.positionRangeNoClip
+..cat:Searching
+..summary:Returns a pair of the begin and end position in or beyond the haystack or needle for the last hit found.
+..signature:positionRangeNoClip(finder)
+..signature:positionRangeNoClip(pattern)
+..param.finder:A @Class.Finder@ object.
+..param.pattern:A @Class.Pattern@ object.
+..returns:A pair of the begin and end position in the haystack or needle for the last hit found. These positions could
+be negative or beyond the end of $finder$ or $pattern$ when using filter algorithms.
+...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
+..see:Function.positionRange
+*/
+///.Function.positionRangeNoClip.param.finder.type:Spec.Swift
+///.Function.positionRangeNoClip.param.pattern.type:Spec.Swift
 
-// TODO(bkehr): Is this documentation right?
+template <typename THaystack, typename TSpec>
+inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
+positionRangeNoClip(Finder<THaystack, Swift<TSpec> > const & finder)
+{
+	typedef typename Position<Finder<THaystack, Swift<TSpec> > >::Type TPosition;
+	typedef Pair<TPosition> TPair;
+	typename Finder<THaystack, Swift<TSpec> >::TSwiftHit &hit = *finder.curHit;
+	return TPair((TPosition)hit.hstkPos, (TPosition)(hit.hstkPos + hit.bucketWidth));
+}
+
+template <typename THaystack, typename TSpec>
+inline Pair<typename Position<Finder<THaystack, Swift<TSpec> > >::Type>
+positionRangeNoClip(Finder<THaystack, Swift<TSpec> > & finder)
+{
+	return positionRangeNoClip(const_cast<Finder<THaystack, Swift<TSpec> > const &>(finder));
+}
+
+//____________________________________________________________________________
 /**
 .Function.positionRange
 ..cat:Searching
@@ -1322,7 +1354,6 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 ..param.pattern:A @Class.Pattern@ object.
 ..returns:A pair of the begin and end position in the haystack or needle for the last hit found.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
-...remarks:If no swift hit was found, the value is undefined.
 ..see:Function.range
 */
 ///.Function.positionRange.param.finder.type:Spec.Swift
@@ -1365,7 +1396,14 @@ positionRange(Pattern<TIndex, Swift<TSpec> > & pattern)
 
 template <typename TSwiftHit, typename TText>
 inline typename Infix<TText>::Type
-getSwiftRange(TSwiftHit const &hit, TText &text)
+swiftInfixNoClip(TSwiftHit const &hit, TText &text)
+{
+	return infix(text, hit.hstkPos, hit.hstkPos + hit.bucketWidth);
+}
+
+template <typename TSwiftHit, typename TText>
+inline typename Infix<TText>::Type
+swiftInfix(TSwiftHit const &hit, TText &text)
 {
 	__int64 hitBegin = hit.hstkPos;
 	__int64 hitEnd = hit.hstkPos + hit.bucketWidth;
@@ -1382,8 +1420,8 @@ getSwiftRange(TSwiftHit const &hit, TText &text)
 /**.Function.range
 ..cat:Searching
 ..summary:Returns the haystack or needle infix of the last hit found.
-..signature:range(finder)
-..signature:range(pattern)
+..signature:infix(finder)
+..signature:infix(pattern)
 ..param.finder:A @Class.Finder@ object.
 ..param.pattern:A @Class.Pattern@ object.
 ..returns:The haystack or needle infix of the last swift hit found.
@@ -1396,23 +1434,39 @@ getSwiftRange(TSwiftHit const &hit, TText &text)
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
-range(Finder<THaystack, Swift<TSpec> > &finder)
+infix(Finder<THaystack, Swift<TSpec> > &finder)
 {
-	return getSwiftRange(*finder.curHit, haystack(finder));
+	return swiftInfix(*finder.curHit, haystack(finder));
 }
 
 template <typename THaystack, typename TSpec, typename TText>
 inline typename Infix<TText>::Type
-range(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
+infix(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 {
-	return getSwiftRange(*finder.curHit, text);
+	return swiftInfix(*finder.curHit, text);
+}
+
+//____________________________________________________________________________
+
+template <typename THaystack, typename TSpec>
+inline typename Infix<THaystack>::Type
+infixNoClip(Finder<THaystack, Swift<TSpec> > &finder)
+{
+	return swiftInfixNoClip(*finder.curHit, haystack(finder));
+}
+
+template <typename THaystack, typename TSpec, typename TText>
+inline typename Infix<TText>::Type
+infixNoClip(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
+{
+	return swiftInfixNoClip(*finder.curHit, text);
 }
 
 //____________________________________________________________________________
 
 template <typename TIndex, typename TSpec, typename TText>
 inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
-range(Pattern<TIndex, Swift<TSpec> > const & pattern, TText &text)
+infix(Pattern<TIndex, Swift<TSpec> > const & pattern, TText &text)
 {
     __int64 hitBegin = pattern.curBeginPos;
 	__int64 hitEnd = pattern.curEndPos;
@@ -1426,23 +1480,23 @@ range(Pattern<TIndex, Swift<TSpec> > const & pattern, TText &text)
 
 template <typename TIndex, typename TSpec>
 inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
-range(Pattern<TIndex, Swift<TSpec> > const & pattern)
+infix(Pattern<TIndex, Swift<TSpec> > const & pattern)
 {
-	return range(pattern, getSequenceByNo(pattern.curSeqNo, needle(pattern)));
+	return infix(pattern, getSequenceByNo(pattern.curSeqNo, needle(pattern)));
 }
 
 template <typename TIndex, typename TSpec>
 inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
-range(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
+infix(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
 {
 	return infix(getSequenceByNo(pattern.curSeqNo, needle(pattern)), 0, sequenceLength(pattern.curSeqNo, needle(pattern)));
 }
 
 template <typename TIndex, typename TSpec>
 inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
-range(Pattern<TIndex, Swift<TSpec> > & pattern)
+infix(Pattern<TIndex, Swift<TSpec> > & pattern)
 {
-	return range(const_cast<Pattern<TIndex, Swift<TSpec> > const &>(pattern));
+	return infix(const_cast<Pattern<TIndex, Swift<TSpec> > const &>(pattern));
 }
 
 //____________________________________________________________________________

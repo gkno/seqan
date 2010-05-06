@@ -1485,7 +1485,7 @@ void mapSingleReads(
 	{
 		unsigned rseqNo = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY && 
-			matchVerify(m, range(swiftFinder, genome), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
+			matchVerify(m, infix(swiftFinder), rseqNo, readSet, forwardPatterns, options, TSwiftSpec()))
 		{
 			// transform coordinates to the forward strand
 			if (orientation == 'R') 
@@ -1527,12 +1527,12 @@ void mapSingleReads(
 			}
 
 			++localTP;
-//			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"  ";
+//			::std::cerr << "\"" << infix(swiftFinder) << "\"  ";
 //			::std::cerr << hstkPos << " + ";
 //			::std::cerr << ::std::endl;
 		} else {
 			++localFP;
-//			::std::cerr << "\"" << range(swiftFinder, genomeInf) << "\"   \"" << range(swiftPattern) << "\"  ";
+//			::std::cerr << "\"" << infx(swiftFinder) << "\"   \"" << infix(swiftPattern) << "\"  ";
 //			::std::cerr << rseqNo << " : ";
 //			::std::cerr << hstkPos << " + ";
 //			::std::cerr << bucketWidth << "  " << TP << ::std::endl;
