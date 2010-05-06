@@ -298,7 +298,17 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-// transforms source- to view-position
+/**
+.Function.toViewPosition:
+..summary:Transforms source to view position.
+..cat:Alignments
+..signature:toViewPosition(gaps, pos)
+..param.gap:A Gaps object, e.g. a row in the alignment.
+...type:Class.Gaps
+..param.pos:Position in the original sequence to get the view position for.
+..returns:The position in the view/gaps position.
+..see:Function.toSourcePosition
+*/
 template <typename TSource>
 inline typename Position< Gaps<TSource, ArrayGaps> >::Type
 toViewPosition(Gaps<TSource, ArrayGaps> const & gaps,
@@ -335,7 +345,18 @@ SEQAN_CHECKPOINT
 }
 
 //____________________________________________________________________________
-// transformates view- to source-position. (aufgerundet!)
+
+/**
+.Function.toSourcePosition:
+..summary:Transforms view to source position, if the view position is a gap, the original position of the next non-gap entry is returned.
+..cat:Alignments
+..signature:toSourcePosition(gaps, pos)
+..param.gap:A Gaps object, e.g. a row in the alignment.
+...type:Class.Gaps
+..param.pos:Position in the view sequence to get the original position for.
+..returns:The position in the source sequence.
+..see:Function.toViewPosition
+*/
 template <typename TSource>
 inline typename Position<TSource>::Type
 toSourcePosition(Gaps<TSource, ArrayGaps> const & gaps,
