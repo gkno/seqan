@@ -352,34 +352,46 @@ verifySwiftHit(TInfixA const & a,
         String<Align<TInfixB> > alignmentString;
         _splitAtXDrops(localAlign, scoreMatrix, scoreDropOff, minScore, alignmentString);
 
-
         typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(alignmentString);
         while (aliIt != end(alignmentString)) {
-            // gapped X-drop extension
             ++count;
-            TSeed seed(sourceBeginPosition(row(*aliIt, 0)) + beginPosition(a),
-                       sourceBeginPosition(row(*aliIt, 1)) + beginPosition(b),
-                       sourceEndPosition(row(*aliIt, 0)) + beginPosition(a) - 1,
-                       sourceEndPosition(row(*aliIt, 1)) + beginPosition(b) - 1);
-            extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), 2, GappedXDrop());
 
-            if (length(seed) < minLengthWithoutErrors) {
-                ++aliIt;
-                continue;
-            }
+            char direction;
+            if (length(alignmentString) == 1) direction = 2;
+            else if (aliIt == begin(alignmentString)) direction = 0;
+            else if (aliIt == end(alignmentString)-1) direction = 1;
+            else direction = 3;
 
-            // banded alignment
-            StringSet<TInfixB> str;
-            appendValue(str, infix(host(a), leftPosition(seed, 0), rightPosition(seed, 0)+1));
-            appendValue(str, infix(host(b), leftPosition(seed, 1), rightPosition(seed, 1)+1));
-            __int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
-            _Align_Traceback<TSize> trace;
-            globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed), startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
             Align<TInfixB> extAlign;
-            resize(rows(extAlign), 2);
-            assignSource(row(extAlign, 0), infix(host(a), leftPosition(seed, 0), rightPosition(seed, 0)+1));
-            assignSource(row(extAlign, 1), infix(host(b), leftPosition(seed, 1), rightPosition(seed, 1)+1));
-            _pump_trace_2_Align(extAlign, trace);
+            if (direction == 3) {
+                extAlign = Align<TInfixB>(*aliIt);
+            }
+            else {
+                // gapped X-drop extension
+                TSeed seed(sourceBeginPosition(row(*aliIt, 0)) + beginPosition(a),
+                           sourceBeginPosition(row(*aliIt, 1)) + beginPosition(b),
+                           sourceEndPosition(row(*aliIt, 0)) + beginPosition(a) - 1,
+                           sourceEndPosition(row(*aliIt, 1)) + beginPosition(b) - 1);
+                extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
+
+                if (length(seed) < minLengthWithoutErrors) {
+                    ++aliIt;
+                    continue;
+                }
+
+                // banded alignment
+                StringSet<TInfixB> str;
+                appendValue(str, infix(host(a), leftPosition(seed, 0), rightPosition(seed, 0)+1));
+                appendValue(str, infix(host(b), leftPosition(seed, 1), rightPosition(seed, 1)+1));
+                __int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
+                _Align_Traceback<TSize> trace;
+                globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed), startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
+
+                resize(rows(extAlign), 2);
+                assignSource(row(extAlign, 0), infix(host(a), leftPosition(seed, 0), rightPosition(seed, 0)+1));
+                assignSource(row(extAlign, 1), infix(host(b), leftPosition(seed, 1), rightPosition(seed, 1)+1));
+                _pump_trace_2_Align(extAlign, trace);
+            }
 
             if ((TSize)length(row(extAlign, 0)) < minLength) {
                 ++aliIt;
