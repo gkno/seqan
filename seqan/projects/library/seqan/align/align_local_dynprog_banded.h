@@ -170,25 +170,34 @@ SEQAN_CHECKPOINT
     typedef unsigned char TTraceValue;
 
     // Traceback values
-	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; // TTraceValue Vertical = 2;
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 
     TString const& str1 = str[0];
     TString const& str2 = str[1];
+    TSize len1 = length(str1);
+    TSize len2 = length(str2);
+
     TSize diagonalWidth = (TSize) (diagU - diagL + 1);
     TSize lo_row = (diagU <= 0) ? static_cast<TSize>(-diagU) : 0;
+    TSize hi_row = length(value(str, 1)) + 1;
+    if (len1 - diagL < hi_row) hi_row = static_cast<TSize>(len1 - diagL);
+    TSize height = hi_row - lo_row;
+
     TSize actualRow, actualCol;
-    TSize row, col;
+    //TSize row, col;
 
     // Initialize iterators
     typename TFinder::TMatrixIterator matIt = iter(finder.matrix, finder.bestBeginPos);
-    typename TFinder::TMatrixIterator matIt2 = iter(finder.matrix, finder.bestBeginPos);
-    goPrevious(matIt2, 1);
+    typename TFinder::TMatrixIterator matIt2;
 
     // Initialize column boundaries
-    typename TFinder::TMatrixIterator minCol = matIt;
-    typename TFinder::TMatrixIterator traceCol = matIt;
-    typename TFinder::TMatrixIterator maxCol = matIt+1; // behind last
-    typename TFinder::TMatrixIterator newMaxCol;
+    TSize minCol = diagonalWidth, newMinCol = diagonalWidth;
+    TSize maxCol = 0, newMaxCol = 0;
+    TSize row = coordinate(matIt, 1);
+    TSize col = coordinate(matIt, 0);
+    TSize traceCol = col;
+
+    matIt -= col;
 
     // Initialize position in trace
     TSize tracePos = length(finder.trace.sizes);
@@ -197,106 +206,104 @@ SEQAN_CHECKPOINT
     TSize traceSize = finder.trace.sizes[tracePos-1];
     TTraceValue traceValue = finder.trace.tvs[tracePos-1];
 
-    TSize lastRow = length(value(str, 1));
-
     // iterate over rows
-    row = coordinate(matIt, 1);
-    while((maxCol != minCol) && (row <= lastRow)) {
+    while((row <= height) && ((maxCol > minCol) || (tracePos > 0))) {
         actualRow = row + lo_row;
 
         // make sure that all matrix entries of trace are re-calculated and set to forbidden
         while (traceSize == 0 && tracePos > 0) {
             // determine next trace direction
             --tracePos;
-            traceSize = finder.trace.sizes[tracePos-1];
             traceValue = finder.trace.tvs[tracePos-1];
+            if (traceValue == Horizontal) {
+                traceCol += finder.trace.sizes[tracePos-1];
+            } else {
+                traceSize = finder.trace.sizes[tracePos-1];
+            }
         }
-        if (tracePos != 0) {
+        if (tracePos > 0) {
             // follow the trace in the current row
             if (traceValue == Diagonal) {
-                //++traceCol;
                 --traceSize;
-                _setForbiddenCell(finder.forbidden, row+1, coordinate(traceCol, 0)+1, diagonalWidth);
-            } else if (traceValue == Horizontal) {
-                traceCol += traceSize;
-                traceSize = 0;
-            } else /*traceValue == Vertical*/ {
-                --traceCol;
+                _setForbiddenCell(finder.forbidden, row+1, traceCol+1, diagonalWidth);
+                minCol = _min(minCol, traceCol);
+                maxCol = _max(maxCol, traceCol+1);
+            } else if (traceValue == Vertical) {
+                if (traceCol > 0) --traceCol;
                 --traceSize;
             }
 
-            if ((coordinate(traceCol, 0) >= coordinate(maxCol, 0)) && 
-                (coordinate(traceCol, 1) == coordinate(maxCol, 1))) {
+            if (traceCol >= maxCol) {
                     maxCol = traceCol + 1;
             }
         }
  
         // iterate over columns that have to be re-calculated
-        newMaxCol = maxCol;
-        while (matIt != maxCol) {
-            col = coordinate(matIt, 0);
-            actualCol = static_cast<TSize>(col + diagL + actualRow);
-            if (actualCol > length(str1)) break;
-            TScoreValue newVal = 0;
+        if (maxCol > minCol) {
+            col = minCol;
+            matIt += col;
+            matIt2 = matIt - diagonalWidth;
+            while (col < maxCol) {
+                actualCol = static_cast<TSize>(col + diagL + actualRow);
+                if (actualCol > len2) break;
 
-            // diagonal
-            if (!value(finder.forbidden, position(matIt))) {
-                newVal = _max(newVal, *matIt2 + score(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
-            }
-            ++matIt2;
+                TScoreValue newVal = 0;
 
-            // horizontal
-            --matIt;
-            if (row == coordinate(matIt, 1)) {
+                // diagonal
+                if (!value(finder.forbidden, position(matIt))) {
+                    newVal = _max(newVal, *matIt2 + score(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
+                }
+                ++matIt2;
+
+                // horizontal
+                --matIt;
                 newVal = _max(newVal, *matIt + scoreGapExtendHorizontal(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
-            }
-            ++matIt;
+                ++matIt;
 
-            // vertical
-            if (row-1 == coordinate(matIt2, 1)) {
+                // vertical
                 newVal = _max(newVal, *matIt2 + scoreGapExtendVertical(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
-            }
 
-            if (newVal != *matIt) {
-                // matrix entry changed
-                *matIt = newVal;
-                if ((matIt+1 == maxCol) && (coordinate(maxCol, 1) == row)) {
-                    ++maxCol;
-                    newMaxCol = maxCol;
-                }
+                if (newVal != *matIt) {
+                    // matrix entry changed
+                    *matIt = newVal;
+                    maxCol = _min(_max(maxCol, col+2), diagonalWidth);
+                    newMaxCol = _max(newMaxCol, col+1);
+                    newMinCol = _min(newMinCol, col-1);
 
-                // Record the new best score
-                if (*matIt >= cutoff) {
-                    push(finder.pQ, ScoreAndID<TScoreValue, typename TFinder::TMatrixPosition>(*matIt, position(matIt)));
+                    // Record the new best score
+                    if (newVal >= cutoff) {
+                        push(finder.pQ, ScoreAndID<TScoreValue, typename TFinder::TMatrixPosition>(newVal, position(matIt)));
+                    }
+                } else {
+                    // matrix entry did not change
+                    if (col == minCol) {
+                        ++minCol;
+                    }
                 }
-            } else {
-                // matrix entry did not change
-                if ((matIt == minCol) && (coordinate(minCol, 0) < coordinate(traceCol, 0))) {
-                    ++minCol;
-                } else if (col > coordinate(traceCol, 0) && col+1 < coordinate(newMaxCol, 0)) {
-                    newMaxCol = matIt+1;
-                }
+                ++col;
+                ++matIt;
             }
-            ++matIt;
+            matIt += diagonalWidth - col;
+        } else {
+            matIt += diagonalWidth;
         }
-        maxCol = newMaxCol;
 
-        if(coordinate(minCol, 0) != 0) --minCol;
-        matIt2 = minCol;
-        goNext(minCol, 1);
-        goNext(traceCol, 1);
-        goNext(maxCol, 1);
-        matIt = minCol;
-        row = coordinate(matIt, 1);
+        minCol = _max((TSize)0, newMinCol);
+        maxCol = _min(diagonalWidth, newMaxCol);
+        newMinCol = diagonalWidth;
+        newMaxCol = 0;
+
+        ++row;
     }
  //   // Debug code
- //   TSize hi_row = length(str2) + 1;
- //   if (length(str1) - diagL < hi_row) hi_row = static_cast<TSize>(length(str1) - diagL);
- //   TSize height = hi_row - lo_row;
  //   std::cerr << std::endl;
 	//for(TSize i= 0; i<height; ++i) {
 	//	for(TSize j= 0; j<diagonalWidth; ++j) {
 	//		std::cerr << value(finder.matrix, j, i) << ',';
+	//	}
+	//	std::cerr << " " << str2[i-1] << "    ";
+ //       for(TSize j= 0; j<diagonalWidth; ++j) {
+	//		std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
 	//	}
 	//	std::cerr << " " << str2[i-1] << std::endl;
 	//}

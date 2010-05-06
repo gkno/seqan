@@ -231,4 +231,21 @@ SEQAN_DEFINE_TEST(testBandedLocalAlign) {
 
     score = localAlignment(align, finder, score_type, 5, -6, 6, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 0);
+
+
+	
+    Align<TString> align1;
+	resize(rows(align1), 2);
+	assignSource(row(align1, 0), "gcagaattaaggaggattacaagtgggaatttgaagagcttttgaaatcc");
+	assignSource(row(align1, 1), "cggttgagcagaacttgggctacgagactccccccgaggaatttgaaggctttcttcaaatccaaaagca");
+
+    Score<int> score_type1 = Score<int>(1,-9,-9,-9);
+
+	LocalAlignmentFinder<int> finder1 = LocalAlignmentFinder<int>();
+	score = localAlignment(align1, finder1, score_type1, 7, -20, 0, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 11);
+    SEQAN_ASSERT_TRUE(row(align1, 0) == "ggaatttgaag");
+    SEQAN_ASSERT_TRUE(row(align1, 1) == "ggaatttgaag");
+	score = localAlignment(align1, finder1, score_type1, 7, -20, 0, BandedWatermanEggert());
+    SEQAN_ASSERT_EQ(score, 0);
 }
