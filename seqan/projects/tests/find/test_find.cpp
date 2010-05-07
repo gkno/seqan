@@ -1692,7 +1692,6 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftor.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_bndm.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_bom.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_quasar.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_ahocorasick.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_multiple_shiftand.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_set_horspool.h");
