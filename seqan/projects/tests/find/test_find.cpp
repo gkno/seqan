@@ -1635,8 +1635,40 @@ SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
 }
 
 
+// Test myers algorithm: Palindrom vs. non-palindrom.
+SEQAN_DEFINE_TEST(test_myers_find_begin) {
+    {
+        String<char> haystack_1 = "AABBAA";
+        String<char> needle_1 = "ABBA";
+        Finder<String<char> > finder_1(haystack_1);
+        Pattern<String<char>, Myers<FindInfix> > pattern_1(needle_1, 0);
+        SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
+        SEQAN_ASSERT_EQ(endPosition(finder_1), 5u);
+        SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
+        SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
+        SEQAN_ASSERT_EQ(infix(finder_1), "ABBA");
+        SEQAN_ASSERT_EQ(getBeginScore(pattern_1), 0);
+        SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
+    }
+    {
+        String<char> haystack_1 = "ABCD";
+        String<char> needle_1 = "BCD";
+        Finder<String<char> > finder_1(haystack_1);
+        Pattern<String<char>, Myers<FindInfix> > pattern_1(needle_1, 0);
+        SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
+        SEQAN_ASSERT_EQ(endPosition(finder_1), 4u);
+        SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
+        SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
+        SEQAN_ASSERT_EQ(infix(finder_1), "BCD");
+        SEQAN_ASSERT_EQ(getBeginScore(pattern_1), 0);
+        SEQAN_ASSERT_NOT(findBegin(finder_1, pattern_1));
+    }
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find) {
 //     SEQAN_CALL_TEST(test_myers_trigger_bug);
+    SEQAN_CALL_TEST(test_myers_find_begin);
     
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);

@@ -575,7 +575,7 @@ SEQAN_CHECKPOINT
 
   me.lastFPos = 0;
   me.lastFNdl = 0;
-  setHost(me.multiPattern,me.splitted_needles);
+  setHost(me.multiPattern, me.splitted_needles);
   me.patternNeedsInit = false;
   me.findNext = false;
 

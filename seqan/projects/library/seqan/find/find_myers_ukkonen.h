@@ -129,7 +129,7 @@ private:
 
 public:
 	TFindBeginPattern data_findBeginPattern;
-	Holder<TNeedle>	data_host;	//defines the 
+ 	Holder<TNeedle>	data_host;	//defines the 
 	typedef True HasHost;
 };
 
@@ -181,7 +181,7 @@ public:
 	TWord VN0;					// VN[0]
 	String<TWord> bitMasks;		// encoding the alphabet as bit-masks
 
-//	Holder<TNeedle>		data_host;	// by now, this holder is not needed, would waste mem.
+// 	Holder<TNeedle>		data_host;	// by now, this holder is not needed, would waste mem.
 									// but is is added again via _FindBegin base class if TFindBeginPatternSpec is not void
 	_MyersLargePattern	*large;	// extra preprocessing info for large patterns
 
@@ -449,7 +449,7 @@ template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, type
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 & ndl)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	typedef Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > TPattern;
 	_myersSetHost(me, ndl, typename TPattern::HasHost());
 	_patternFirstInit(me, ndl);
@@ -458,6 +458,7 @@ template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, type
 void setHost(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, 
 			 TNeedle2 const & ndl) 
 {
+    SEQAN_CHECKPOINT;
 	typedef Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > TPattern;
 	_myersSetHost(me, ndl, typename TPattern::HasHost());
 	_patternFirstInit(me, ndl);
