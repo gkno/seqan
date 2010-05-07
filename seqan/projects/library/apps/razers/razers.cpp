@@ -444,7 +444,7 @@ int main(int argc, const char *argv[])
 		maxOnes = 31;
 #endif
 		if ((ones < 7 || ones > maxOnes) && !stop)
-			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes " '1's" << endl;
+			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
 	}
 	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;
