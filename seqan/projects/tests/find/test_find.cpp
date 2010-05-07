@@ -1475,15 +1475,10 @@ SEQAN_DEFINE_TEST(test_find_hamming_simple_regression_rmbench) {
     SEQAN_ASSERT_EQ(-1, getScore(pattern));
 }
 
-
-SEQAN_DEFINE_TEST(test_find_hamming_horspool) {
-    testFindApproximateHamming<HammingHorspool, Dna>();
-}
-
-
-/*SEQAN_DEFINE_TEST(test_find_hamming_simple) {
+/*
+SEQAN_DEFINE_TEST(test_find_hamming_simple) {
     testFindApproximateHamming<HammingSimple, Dna>();
-}*/
+    }*/
 
 SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_at_start) {
     String<char> haystack = "___AAA___AAA";
@@ -1589,19 +1584,19 @@ SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
     reverseComplementInPlace(needleString);
     typedef Segment<DnaString, InfixSegment> TSegment;
     typedef ModifiedString<TSegment, ModReverse> TSegmentRev;
-    std::cout << "haystack = " << haystackString << std::endl;
-    std::cout << "needle = " << needleString << std::endl;
-    std::cout << "haystack length = " << length(haystackString) << std::endl
-              << "needle length = " << length(needleString) << std::endl
-              << "machine word length = " << sizeof(unsigned) * 8 << std::endl;
+//     std::cout << "haystack = " << haystackString << std::endl;
+//     std::cout << "needle = " << needleString << std::endl;
+//     std::cout << "haystack length = " << length(haystackString) << std::endl
+//               << "needle length = " << length(needleString) << std::endl
+//               << "machine word length = " << sizeof(unsigned) * 8 << std::endl;
     
     for (int maxDistance = 0; maxDistance < 10; ++maxDistance) {
         for (unsigned beginPosition = 0; beginPosition < length(haystackString) - length(needleString); ++beginPosition) {
-            std::cout << "max distance = " << maxDistance << ", begin position = " << beginPosition << std::endl;
+//             std::cout << "max distance = " << maxDistance << ", begin position = " << beginPosition << std::endl;
             TSegmentRev haystackSegment(infix(haystackString, beginPosition, length(haystackString)));
-            std::cout << "haystack = " << haystackSegment << std::endl;
-            std::cout << "needle = " << needleString << std::endl;
-            std::cout << "-----------------------" << std::endl;
+//             std::cout << "haystack = " << haystackSegment << std::endl;
+//             std::cout << "needle = " << needleString << std::endl;
+//             std::cout << "-----------------------" << std::endl;
         
             String<size_t> positionsMyers;
             {
@@ -1623,14 +1618,14 @@ SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
                 }
             }
             
-            std::cout << "Myers end positions: " << std::endl;
-            for (size_t i = 0; i < length(positionsMyers); ++i)
-                std::cout << positionsMyers[i] << " ";
-            std::cout << std::endl;
-            std::cout << "DPSearch end positions: " << std::endl;
-            for (size_t i = 0; i < length(positionsDpSearch); ++i)
-                std::cout << positionsDpSearch[i] << " ";
-            std::cout << std::endl;
+//             std::cout << "Myers end positions: " << std::endl;
+//             for (size_t i = 0; i < length(positionsMyers); ++i)
+//                 std::cout << positionsMyers[i] << " ";
+//             std::cout << std::endl;
+//             std::cout << "DPSearch end positions: " << std::endl;
+//             for (size_t i = 0; i < length(positionsDpSearch); ++i)
+//                 std::cout << positionsDpSearch[i] << " ";
+//             std::cout << std::endl;
             
             SEQAN_ASSERT_EQ(length(positionsDpSearch), length(positionsMyers));
             for (unsigned i = 0; i < length(positionsMyers); ++i)
@@ -1641,7 +1636,7 @@ SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
 
 
 SEQAN_BEGIN_TESTSUITE(test_find) {
-    SEQAN_CALL_TEST(test_myers_trigger_bug);
+//     SEQAN_CALL_TEST(test_myers_trigger_bug);
     
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
@@ -1649,7 +1644,6 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
 
     SEQAN_CALL_TEST(test_find_on_segments);
 
-    SEQAN_CALL_TEST(test_find_hamming_horspool);
     SEQAN_CALL_TEST(test_find_hamming_simple);
 
     SEQAN_CALL_TEST(test_find_hamming_simple_regression_rmbench);
@@ -1689,7 +1683,6 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_CALL_TEST(test_find_hamming_simple);
 
     // Verify checkpoints in all files in this module.
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_horspool.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_myers_ukkonen.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wild_shiftand.h");

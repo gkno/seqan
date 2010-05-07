@@ -40,9 +40,9 @@ void iterateOverStrings(size_t len, TString &string, TFunctor &functor) {
     }
 }
 
-
+/*
 // Called for all needles in ForAllHaystacksFunctor.
-template <typename TString>struct ForAllNeedlesFunctor {
+template <typename TString> struct ForAllNeedlesFunctor {
     TString &haystack;
     ForAllNeedlesFunctor(TString &haystack_) : haystack(haystack_) {}
 
@@ -130,6 +130,7 @@ void testFindApproximateHamming(
         iterateOverStrings(n, haystack, forAllHaystacks);
     }
 }
+*/
 
 #endif  // TESTS_FIND_TEST_FIND_HAMMING_H_
 
