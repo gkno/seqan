@@ -564,10 +564,10 @@ void mapMatePairReads(
 		if (bestLeftScore != InfimumValue<int>::VALUE)
 		{
 //			if (matchVerify(
-//					mR, qR, range(swiftFinderR, genomeInf),
+//					mR, qR, infix(swiftFinderR, genomeInf),
 //					matePairId, readSetR, forwardPatternsR,
 //					options, TSwiftSpec()))
-			if (matchVerify(verifierR, range(swiftFinderR, genomeInf), 
+			if (matchVerify(verifierR, infix(swiftFinderR, genomeInf), 
 					matePairId, readSetR, TSwiftSpec()))
 			{
 				// distance between left mate beginning and right mate end

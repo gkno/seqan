@@ -1579,11 +1579,11 @@ void mapSingleReads(
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(genome, options.repeatLength, 1);
 	TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
-	
+
 	verifier.onReverseComplement = (orientation == 'R');
 	verifier.genomeLength = length(genome);
 	verifier.m.contigId = contigId;
-	
+
 	// iterate all verification regions returned by SWIFT
 #ifdef RAZERS_MICRO_RNA
 	while (find(swiftFinder, swiftPattern, 0.2)) 
@@ -1596,7 +1596,7 @@ void mapSingleReads(
 		if (store.readNameStore[verifier.m.readId] == "SRR001317.770.1")
 			std::cout<<"gotit"<<std::endl;
 		if (!options.spec.DONT_VERIFY)
-			matchVerify(verifier, range(swiftFinder, genome), verifier.m.readId, readSet, TSwiftSpec());
+			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, TSwiftSpec());
 		++options.countFiltration;
 	}
 }
