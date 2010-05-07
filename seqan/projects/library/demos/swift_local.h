@@ -285,23 +285,94 @@ SEQAN_CHECKPOINT
 	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
-//template<typename TInfix>
-//void
-//insertMatch(String<Align<TInfix> > & matches, Align<TInfix> & match) {
-//    typedef typename Size<String<Align<TInfix> > >::Type TSize;
-//    TSize len = length(matches);
-//    if(len == 0) {
-//        appendValue(matches, match);
-//    } else {
-//        typename Iterator<String<Align<TInfix> > >::Type iter = begin(matches);
-//        // TODO
-//    }
+template<typename TRow>
+inline bool
+_isUpstream(TRow & row1, TRow & row2) {
+SEQAN_CHECKPOINT
+    typedef typename Position<TRow>::Type TPos;
+    TPos end1 = endPosition(sourceSegment(row1));
+    TPos begin2 = beginPosition(sourceSegment(row2));
+    if (end1 <= begin2) return true;
+    else return false;
+}
+
+//template<TRow>
+//inline bool
+//_isDownstream(TRow & row1, TRow & row2) {
+//QAN_CHECKPOINT
+//    _isUpstream(row2, row1);
 //}
+
+template<typename TSource>
+inline void
+_insertMatch(String<Align<TSource> > & matches, Align<TSource> & match) {
+SEQAN_CHECKPOINT
+    typedef typename Position<String<Align<TSource> > >::Type TPosString;
+    typedef typename Row<Align<TSource> >::Type TRow;
+
+    TPosString maxPos = length(matches);
+    TPosString minPos = 0;
+
+    if(maxPos == 0) {
+        // matches string is empty
+        appendValue(matches, match);
+        return;
+    }
+
+    TRow matchRow0 = row(match, 0);
+    TRow matchRow1 = row(match, 1);
+
+    // determine insertion position
+    TPosString pos = maxPos / 2;
+    while (pos < maxPos) {
+        TRow row0 = row(value(matches, pos), 0);
+        if (_isUpstream(row0, matchRow0)) {
+            // match is downstream of matches[pos] in first row
+            if (minPos == pos) {
+                ++pos;
+                break;
+            }
+            minPos = pos;
+        } else if (_isUpstream(matchRow0, row0)) {
+            // match is upstream of matches[pos] in first row
+            maxPos = pos;
+        } else {
+            // match overlaps in first row with another match
+            TRow row1 = row(value(matches, pos), 1);
+            if (_isUpstream(row1, matchRow1)) {
+                // match is downstream of matches[pos] in second row
+                if (minPos == pos) {
+                    ++pos;
+                    break;
+                }
+                minPos = pos;
+            } else if (_isUpstream(matchRow1, row1)) {
+                // match is upstream of matches[pos] in second row
+                maxPos = pos;
+            } else {
+                // match overlaps in both rows with another match -> keep longer match
+                // TODO: If non-overlapping part is greater than minLength, keep the match!!!
+                if (length(matchRow0) > length(row0)) {
+                    // new match is longer
+                    replace(matches, pos, pos+1, String<Align<TSource> >());
+                    --maxPos;
+                } else {
+                    return;
+                }
+            }
+        }
+        pos = minPos + ((maxPos-minPos) / 2);
+    }
+    // insert match in matches at position pos
+    String<Align<TSource> > str;
+    appendValue(str, match);
+    replace(matches, pos, pos, str);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, typename TDrop>
-int 
+void//int 
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
                TEpsilon eps,
@@ -309,6 +380,7 @@ verifySwiftHit(TInfixA const & a,
                TDelta delta,
                TDrop xDrop,
                String<Align<TInfixB> > & matches) {
+SEQAN_CHECKPOINT
     typedef Seed<int, SimpleSeed> TSeed;
     typedef typename Position<TInfixB>::Type TPos;
 
@@ -346,7 +418,7 @@ verifySwiftHit(TInfixA const & a,
     if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
     if (endPosition(b) == endPosition(host(b))) lowerDiag = upperDiag - delta;
     LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
-    int count = 0;
+    //int count = 0;
     while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
         // split local alignments containing an X-drop
         String<Align<TInfixB> > alignmentString;
@@ -354,7 +426,7 @@ verifySwiftHit(TInfixA const & a,
 
         typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(alignmentString);
         while (aliIt != end(alignmentString)) {
-            ++count;
+            //++count;
 
             char direction;
             if (length(alignmentString) == 1) direction = 2;
@@ -407,27 +479,11 @@ verifySwiftHit(TInfixA const & a,
             }
 
             // insert e-match in matches string
-            //insertMatch(matches, extAlign);
-            typename Iterator<String<Align<TInfixB> > >::Type iter = begin(matches);
-            while (iter != end(matches)) {
-                if (beginPosition(sourceSegment(row(extAlign,0))) == beginPosition(sourceSegment(row(*iter,0)))
-                    && endPosition(sourceSegment(row(extAlign,0))) == endPosition(sourceSegment(row(*iter,0)))
-                    && beginPosition(sourceSegment(row(extAlign,1))) == beginPosition(sourceSegment(row(*iter,1)))
-                    && endPosition(sourceSegment(row(extAlign,1))) == endPosition(sourceSegment(row(*iter,1)))) {
-                        break;
-                }
-                ++iter;
-            }
-            if (iter == end(matches)) {
-                //std::cout << alignment << std::endl;
-                //std::cout << score << std::endl;
-                //std::cout << extAlign << std::endl;
-                appendValue(matches, extAlign);
-            }
+            _insertMatch(matches, extAlign);
             ++aliIt;
         }
     }
-    return count;
+    //return count;
 }
 
 // calls swift, verifies swift hits, outputs eps-matches
@@ -438,18 +494,19 @@ int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
                 TSize minLength,
                 TDrop xDrop,
                 StringSet<String<Align<TInfix> > > & matches) {
+SEQAN_CHECKPOINT
     resize(matches, countSequences(needle(pattern)));
     TSize numSwiftHits = 0;
 
-    int count = 0;
+    //int count = 0;
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
         //std::cout << positionRange(finder) << " ; " << positionRange(pattern) << std::endl;
         // verification
-        count += verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
+        /*count += */verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
                               xDrop, value(matches, pattern.curSeqNo));
 	}
-    std::cout << "# local alignments: " << count << std::endl;
+    //std::cout << "# local alignments: " << count << std::endl;
     return numSwiftHits;
 }
