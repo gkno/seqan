@@ -544,10 +544,11 @@ namespace SEQAN_NAMESPACE_MAIN
         _parse_skipWhitespace(file, c);
 		bool reverse = (flag & (1 << 4)) == (1 << 4);
 
-		// read reference name
+		// Read reference name.  Same behaviour as for query name:  Read up to
+        // the first whitespace character and skip to next tab char.
         String<char> rname;
         _parse_readSamIdentifier(file, rname, c);
-        _parse_skipWhitespace(file, c);
+        _parse_skipUntilChar(file, '\t', c);
 
 		// read begin position
         TContigPos beginPos;
