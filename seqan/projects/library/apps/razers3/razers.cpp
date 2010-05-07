@@ -464,8 +464,12 @@ int main(int argc, const char *argv[])
 			stop = true;
 		}
 
-		if ((ones < 7 || ones > 14) && !stop)
-			cerr << "Warning: Shape should contain at least 7 and at most 14 '1's" << endl;
+        unsigned maxOnes = 14;
+#ifdef RAZERS_OPENADDRESSING
+        maxOnes = 31;
+#endif
+        if ((ones < 7 || ones > maxOnes) && !stop)
+			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
 	}
 	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
 		cerr << "Overabundance cut ratio must be a value >0 and <=1. Set to 1 to disable." << endl;

@@ -434,7 +434,7 @@ int main(int argc, const char *argv[])
 					stop = true;
 					i = length(options.shape);
 			}
-		if ((ones == 0 || ones > 20) && !stop) 
+		if ((ones == 0 || ones > 31) && !stop) 
 		{
 			cerr << "Invalid Shape" << endl;
 			stop = true;
