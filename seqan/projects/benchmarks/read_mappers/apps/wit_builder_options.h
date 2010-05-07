@@ -10,6 +10,9 @@ struct Options
     // Whether to reverse-complement the genome.  If false, the reads are
     // reverse complemented to find matches on the reverse strand.
 //     bool reverseComplementGenome;
+
+    // Whether N should match all characters without penalty.
+    bool matchN;
     
     // Maximum errors in percent, relative to the read length.
     double maxError;
@@ -28,9 +31,7 @@ struct Options
     bool validDistanceFunction() const
     {
         if (distanceFunction == "hamming") return true;
-        if (distanceFunction == "hamming-weighted") return true;
         if (distanceFunction == "edit") return true;
-        if (distanceFunction == "edit-weighted") return true;
         return false;
     }
 };

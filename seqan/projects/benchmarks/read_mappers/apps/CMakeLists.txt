@@ -53,6 +53,8 @@ ADD_EXECUTABLE(verify_sam verify_sam.cpp)
 # ------------------------------------------------------------
 ADD_EXECUTABLE(do_search do_search.cpp)
 
+ADD_EXECUTABLE(reweight_wit reweight_wit.cpp)
+
 # ------------------------------------------------------------
 # Program: compare_sam_wit
 # ------------------------------------------------------------

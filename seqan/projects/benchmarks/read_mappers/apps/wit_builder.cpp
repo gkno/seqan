@@ -63,11 +63,10 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("x", "verify", "Verify Result.  Default: true.", OptionType::Boolean));
     addOption(parser, CommandLineOption("d", "distance-function", ("the distance function to use, default: hamming"), OptionType::String | OptionType::Label));
     addHelpLine(parser, "hamming          = Hamming distance");
-    addHelpLine(parser, "hamming-weighted = Hamming distance, weighted by base call score");
     addHelpLine(parser, "edit             = Edit distance");
-    addHelpLine(parser, "edit-weighted    = Edit distance, weighted by base call score");
     addOption(parser, CommandLineOption("o", "out-file", ("Path to the output file.  Use \"-\" for stdout, default is \"-\""), OptionType::String));
 //     addOption(parser, CommandLineOption("rr", "reverse-complement-reads", "If set, the reads are reverse-complemented instead of the genome for finding hits on the reverse strand.  Default: not set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("mN" , "match-N", "If specified, N characters match all other characters.  The default is for them to mismatch with CGAT.", OptionType::Boolean));
     
     // We require 4 command line options.
     requiredArguments(parser, 2);
@@ -97,6 +96,8 @@ int parseCommandLineAndCheck(Options &options,
     if (isSetLong(parser, "distance-function"))
         getOptionValueLong(parser, "distance-function",
                            options.distanceFunction);
+    if (isSetLong(parser, "match-N"))
+        options.matchN = true;
     if (isSetLong(parser, "out-file"))
         getOptionValueLong(parser, "out-file", outFile);
 //     if (isSetLong(parser, "reverse-complement-reads"))
@@ -234,6 +235,7 @@ int main(int argc, const char *argv[]) {
     options.verify = false;
     options.maxError = 0;
     options.distanceFunction = "edit";
+    options.matchN = false;
 //     options.reverseComplementGenome = true;
     CharString outFile = "-";
 
@@ -265,12 +267,8 @@ int main(int argc, const char *argv[]) {
     if (options.distanceFunction == "edit")
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
         matchesToErrorFunction(fragments, errorCurves, options, Myers<FindInfix>());
-    else if (options.distanceFunction == "edit-weighted")
-        matchesToErrorFunction(fragments, errorCurves, options, QualityDpSearch<FindInfix>());
-    else if (options.distanceFunction == "hamming")
+    else // options.distanceFunction == "hamming"
         matchesToErrorFunction(fragments, errorCurves, options, HammingSimple());
-    else  // options.distanceFunction == "hamming-weighted"
-        matchesToErrorFunction(fragments, errorCurves, options, HammingSimpleQuality());
 
     // =================================================================
     // Verify result when enabled.
@@ -280,12 +278,8 @@ int main(int argc, const char *argv[]) {
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
         if (options.distanceFunction == "edit")
             valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, Myers<FindInfix>());
-        else if (options.distanceFunction == "edit-weighted")
-            valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, QualityDpSearch<FindInfix>());
-        else if (options.distanceFunction == "hamming")
+        else // options.distanceFunction == "hamming"
             valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, HammingSimple());
-        else  // options.distanceFunction == "hamming-weighted"
-            valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, HammingSimpleQuality());
 
         if (!valid) {
             std::cerr << "ERROR: Result does not validate!" << std::endl;

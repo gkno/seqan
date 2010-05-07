@@ -74,6 +74,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                              size_t previousContigId,
                              size_t previousRightBorder,
                              TReadNames const & readNames,
+                             bool matchN,
                              TPatternSpec const &) {
     typedef typename Position<TContigSeq>::Type TPosition;
 
@@ -107,6 +108,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     // Setup the finder and pattern.
     Finder<TContigSeq> finder(contig);
     Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
+    // If configured so, match N against all other values.
+    _patternMatchNOfPattern(pattern, matchN);
+    _patternMatchNOfFinder(pattern, matchN);
     TPosition hitBeginPosition;
 
     if (ENABLE && (ALL || readId == READID)) {
@@ -393,7 +397,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 
                 // Convert mapped begin and end positions from gap space
                 // (with gaps in the alignment) to sequence space.
-                std::cerr << "read name == " << fragments.readNameStore[readId] << std::endl;
+//                 std::cerr << "read name == " << fragments.readNameStore[readId] << std::endl;
 //                 std::cerr << "alignedRead.contigId = " << alignedRead.contigId << std::endl;
 //                 std::cerr << "alignedRead.readId = " << alignedRead.readId << std::endl;
 //                 std::cerr << "alignedRead.beginPos = " << alignedRead.beginPos << std::endl;
@@ -410,9 +414,9 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
                 int maxError = floor(0.01 * options.maxError * length(read));
                 
                 if (isForward) {
-                    right = buildErrorCurvePoints(errorCurves[readId], contig, contigId, isForward, read, readId, endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, TPatternSpec());
+                    right = buildErrorCurvePoints(errorCurves[readId], contig, contigId, isForward, read, readId, endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
                 } else {
-                    right = buildErrorCurvePoints(errorCurves[readId], rcContig, contigId, isForward, read, readId, length(contig) - endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, TPatternSpec());
+                    right = buildErrorCurvePoints(errorCurves[readId], rcContig, contigId, isForward, read, readId, length(contig) - endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
                 }
                 previousReadId = readId;
                 previousContigId = contigId;
