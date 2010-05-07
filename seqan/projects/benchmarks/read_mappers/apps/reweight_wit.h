@@ -1,6 +1,44 @@
 #ifndef BENCHMARKS_READ_MAPPERS_REWEIGHT_WIT_H_
 #define BENCHMARKS_READ_MAPPERS_REWEIGHT_WIT_H_
 
+#include "witio.h"
+#include "file_helpers.h"
+#include "curve_smoothing.h"
+#include "find_myers_ukkonen_ext.h"
+#include "find_hamming_simple_ext.h"
+
+
+struct Options
+{
+    // Distance function to use, also see validDistanceFunction.
+    CharString distanceFunction;
+
+    // Path to the target WIT file.
+    CharString outWitFilename;
+
+    // Path to the genome file.
+    CharString genomeFilename;
+
+    // Path to to FASTQ file with the reads.
+    CharString readsFilename;
+
+    // Path to WIT file to reweight.
+    CharString inputWitFilename;
+
+    // Maximal weighted error.
+    int maxWeightedError;
+
+    // Return true iff distanceFunction is a valid distance function.
+    // Can be one of {"hamming", "edit"}.
+    bool validDistanceFunction() const
+    {
+        if (distanceFunction == "hamming") return true;
+        if (distanceFunction == "edit") return true;
+        return false;
+    }
+};
+
+
 // Compute quality-based alignment score.  The read has to be given
 // since we do not have qualities in the alignment object.
 template <typename TAlign>
@@ -115,7 +153,14 @@ void reweightInterval(WitStore & store,
 //     _patternMatchNOfFinder(pattern, true);
 
     // Build scoring matrix that allows N to match with all.
-    Score<int, ScoreMatrix<Dna5> > matrixScore(-1, -1);  // open, extension = -1
+    int gapExtensionScore = -1;
+    int gapOpenScore = -1;
+    if (TYPECMP<TPatternSpec, HammingSimple>::VALUE) {
+        // No gaps for hamming distance.
+        gapOpenScore = -length(read);
+        gapExtensionScore = -length(read);
+    }
+    Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);
     for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
         for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y) {
             setScore(matrixScore, Dna5(x), Dna5(y), -1);
@@ -136,7 +181,7 @@ void reweightInterval(WitStore & store,
     while (find(finder, pattern) && endPosition(finder) <= interval.lastPos + 1) {
         bool ret = findBegin(finder, pattern, getScore(pattern));
         SEQAN_ASSERT_TRUE(ret);
-        SEQAN_ASSERT_GEQ(getScore(pattern), -static_cast<int>(interval.distance));
+        SEQAN_ASSERT_GEQ(static_cast<int>(1.0 * getScore(pattern) / length(read)), -static_cast<int>(interval.distance));
 
         // Prepare alignment datastructures.
         Align<String<Dna5>, ArrayGaps> align;

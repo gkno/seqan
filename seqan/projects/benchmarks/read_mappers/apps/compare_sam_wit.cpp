@@ -290,16 +290,13 @@ int main(int argc, const char *argv[]) {
     typedef Position<TWitRecords>::Type TPos;
     size_t relevantIntervalCount = 0;
     size_t foundIntervalCount = 0;
+    // TODO(holtgrew): Interpret -weighted variants.
     if (options.distanceFunction == "edit")
         compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, Myers<FindInfix>());
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
 //                                              MyersUkkonenReads());
-    else if (options.distanceFunction == "edit-weighted")
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, QualityDpSearch<FindInfix>());
-    else if (options.distanceFunction == "hamming")
+    else  // options.distanceFunction == "hamming"
         compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, HammingSimple());
-    else // options.distanceFunction == "hamming-weighted"
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, HammingSimpleQuality());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     
 

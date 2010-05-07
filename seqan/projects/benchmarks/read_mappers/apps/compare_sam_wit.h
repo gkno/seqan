@@ -195,6 +195,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                                                  size_t & foundIntervalCount,
                                                  size_t & relevantIntervalCount,
                                                  TPatternSpec const &) {
+    // TODO(holtgrew): Enable n-matches-wildcard mode and use qualities for weights.
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
     typedef typename TFragmentStore::TContigStore TContigStore;

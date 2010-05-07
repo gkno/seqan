@@ -14,44 +14,10 @@
 #include "return_codes.h"
 #include "wit_store.h"
 #include "reweight_wit.h"
-#include "curve_smoothing.h"
-#include "witio.h"
-#include "find_myers_ukkonen_ext.h"
-#include "find_hamming_simple_ext.h"
 
 const char * kRevision = "0.0alpha";
 
 using namespace seqan;
-
-struct Options
-{
-    // Distance function to use, also see validDistanceFunction.
-    CharString distanceFunction;
-
-    // Path to the target WIT file.
-    CharString outWitFilename;
-
-    // Path to the genome file.
-    CharString genomeFilename;
-
-    // Path to to FASTQ file with the reads.
-    CharString readsFilename;
-
-    // Path to WIT file to reweight.
-    CharString inputWitFilename;
-
-    // Maximal weighted error.
-    int maxWeightedError;
-
-    // Return true iff distanceFunction is a valid distance function.
-    // Can be one of {"hamming", "edit"}.
-    bool validDistanceFunction() const
-    {
-        if (distanceFunction == "hamming") return true;
-        if (distanceFunction == "edit") return true;
-        return false;
-    }
-};
 
 
 // Set up the CommandLineParser options with options.
