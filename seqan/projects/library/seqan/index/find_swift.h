@@ -1354,7 +1354,8 @@ positionRangeNoClip(Finder<THaystack, Swift<TSpec> > & finder)
 ..param.pattern:A @Class.Pattern@ object.
 ..returns:A pair of the begin and end position in the haystack or needle for the last hit found.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
-..see:Function.range
+..see:Function.beginPosition
+..see:Function.endPosition
 */
 ///.Function.positionRange.param.finder.type:Spec.Swift
 ///.Function.positionRange.param.pattern.type:Spec.Swift
@@ -1416,21 +1417,9 @@ swiftInfix(TSwiftHit const &hit, TText &text)
 
 //____________________________________________________________________________
 
-// TODO(bkehr): Is this documentation right?
-/**.Function.range
-..cat:Searching
-..summary:Returns the haystack or needle infix of the last hit found.
-..signature:infix(finder)
-..signature:infix(pattern)
-..param.finder:A @Class.Finder@ object.
-..param.pattern:A @Class.Pattern@ object.
-..returns:The haystack or needle infix of the last swift hit found.
-...remarks:The return type is $Infix<THost>$ if $THost$ is the type of haystack or needle.
-...remarks:If no hit was found, the value is undefined.
-..see:Function.positionRange
-*/
-///.Function.range.param.finder.type:Spec.Swift
-///.Function.range.param.pattern.type:Spec.Swift
+///.Function.infix.returns:For finders or patterns of filtering algorithms (e.g. Spec.Swift) the returned infix spans a potential match.
+///.Function.infix.param.finder.type:Spec.Swift
+///.Function.infix.param.pattern.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
@@ -1569,22 +1558,22 @@ _firstNonRepeatRange(
 		finder.endPos = length(host(finder));
 	else
 		finder.endPos = (*finder.curRepeat).beginPosition;
-		
+
 	if (length(pattern.shape) > finder.endPos)
 		return _nextNonRepeatRange(finder, pattern);
 
 	finder.curPos = finder.startPos = 0;
 	hostIterator(finder) = begin(host(finder));
 	finder.haystackEnd = begin(host(finder)) + (finder.endPos - length(pattern.shape) + 1);
-	
+
 //	if (pattern.params.printDots)
 //		::std::cerr << ::std::endl << "  scan range (" << finder.startPos << ", " << finder.endPos << ") " << std::flush;
-	
+
 	return true;
 }
 
 template <typename TFinder, typename TIndex, typename TSpec>
-inline void 
+inline void
 _copySwiftHit(
 	TFinder &finder,
 	Pattern<TIndex, Swift<TSpec> > &pattern)
