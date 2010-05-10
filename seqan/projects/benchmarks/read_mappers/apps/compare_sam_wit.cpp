@@ -73,13 +73,13 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("e", "max-error-rate", "the maximal error rate in percent, default: 0", OptionType::Int));
     addOption(parser, CommandLineOption("d", "distance-function", "the distance function to use, default: hamming", OptionType::String | OptionType::Label));
     addHelpLine(parser, "hamming          = Hamming distance");
-    addHelpLine(parser, "hamming-weighted = Hamming distance, weighted by quality value");
     addHelpLine(parser, "edit             = Edit distance");
-    addHelpLine(parser, "edit-weighted    = Edit distance, weighted by quality value");
     addOption(parser, CommandLineOption("o", "out-file", "Path to the output file.  Use \"-\" for stdout, default is \"-\"", OptionType::String));
     addOption(parser, CommandLineOption("mi", "show-missed-intervals", "the missed intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("hi", "show-hit-intervals", "the hit intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("st", "show-try-hit-intervals", "The last positions tried to hit against an intervals are printd to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     
     // We require 4 command line options.
     requiredArguments(parser, 3);
@@ -102,6 +102,10 @@ int parseCommandLineAndCheck(Options &options,
     }
 
     // Get arguments.
+    if (isSetLong(parser, "match-N"))
+        options.matchN = true;
+    if (isSetLong(parser, "weighted-distances"))
+        options.weightedDistances = true;
     if (isSetLong(parser, "show-missed-intervals"))
         options.showMissedIntervals = true;
     if (isSetLong(parser, "show-hit-intervals"))
@@ -228,6 +232,8 @@ int main(int argc, const char *argv[]) {
     options.showMissedIntervals = false;
     options.showHitIntervals = false;
     options.showTryHitIntervals = false;
+    options.matchN = false;
+    options.weightedDistances = false;
     CharString outFile = "-";
 
     // Setup the parser, parse command line and return if an error occured.
@@ -290,13 +296,14 @@ int main(int argc, const char *argv[]) {
     typedef Position<TWitRecords>::Type TPos;
     size_t relevantIntervalCount = 0;
     size_t foundIntervalCount = 0;
-    // TODO(holtgrew): Interpret -weighted variants.
+    size_t superflousIntervalCount = 0;
+    size_t surplusIntervalCount = 0;
     if (options.distanceFunction == "edit")
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, Myers<FindInfix>());
+        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, Myers<FindInfix>());
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
 //                                              MyersUkkonenReads());
     else  // options.distanceFunction == "hamming"
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, HammingSimple());
+        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, HammingSimple());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     
 
@@ -312,9 +319,12 @@ int main(int argc, const char *argv[]) {
         // Print to stdout.
         std::cout << "{\"total_intervals\": " << relevantIntervalCount
                   << ", \"found_intervals\": " << foundIntervalCount
+                  << ", \"superflous_intervals\": " << superflousIntervalCount
+                  << ", \"additional_intervals\": " << surplusIntervalCount
                   << "}" << std::endl;
     } else {
         // Write output to file.
+        // TODO(holtgrew): What about things the tool found, our benchmark did not find?
         std::fstream fstrm(toCString(outFile), std::ios_base::out);
         if (not fstrm.is_open()) {
             std::cerr << "Could not open output JSON file." << std::endl;
@@ -322,6 +332,8 @@ int main(int argc, const char *argv[]) {
         }
         fstrm << "{\"total_intervals\": " << relevantIntervalCount + ignoredReadCount
               << ", \"found_intervals\": " << foundIntervalCount
+              << ", \"superflous_intervals\": " << superflousIntervalCount
+              << ", \"additional_intervals\": " << surplusIntervalCount
               << "}" << std::endl;
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;

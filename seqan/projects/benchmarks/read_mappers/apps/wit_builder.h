@@ -108,10 +108,10 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     // Setup the finder and pattern.
     Finder<TContigSeq> finder(contig);
     Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
-    // If configured so, match N against all other values.
-    // TODO(holtgrew): Activate when this works for the find begin part, too.
-//     _patternMatchNOfPattern(pattern, matchN);
-//     _patternMatchNOfFinder(pattern, matchN);
+    // If configured so, match N against all other values, otherwise match
+    // against none.
+    _patternMatchNOfPattern(pattern, matchN);
+    _patternMatchNOfFinder(pattern, matchN);
     TPosition hitBeginPosition;
 
     if (ENABLE && (ALL || readId == READID)) {

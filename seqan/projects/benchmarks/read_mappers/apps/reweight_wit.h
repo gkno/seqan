@@ -149,8 +149,8 @@ void reweightInterval(WitStore & store,
 
     // We are only considering the weighted case, N is a wildcard.
     // TODO(holtgrew): Enable for reverse search, too.
-//     _patternMatchNOfPattern(pattern, true);
-//     _patternMatchNOfFinder(pattern, true);
+    _patternMatchNOfPattern(pattern, true);
+    _patternMatchNOfFinder(pattern, true);
 
     // Build scoring matrix that allows N to match with all.
     int gapExtensionScore = -1;
@@ -166,8 +166,8 @@ void reweightInterval(WitStore & store,
             setScore(matrixScore, Dna5(x), Dna5(y), -1);
         }
         // TODO(holtgrew): Enable N-is-wildcard when patterns support it.
-//         setScore(matrixScore, Dna5(x), Dna5('N'), 0);
-//         setScore(matrixScore, Dna5('N'), Dna5(x), 0);
+        setScore(matrixScore, Dna5(x), Dna5('N'), 0);
+        setScore(matrixScore, Dna5('N'), Dna5(x), 0);
         setScore(matrixScore, Dna5(x), Dna5(x), 0);
     }
 

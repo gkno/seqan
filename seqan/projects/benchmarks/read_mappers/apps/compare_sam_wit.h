@@ -49,6 +49,12 @@ struct Options {
     // Print each end position that we try to match agains the interval.
     bool showTryHitIntervals;
 
+    // If true, N matches as a wildcard.  Otherwise it matches none.
+    bool matchN;
+
+    // If true, use weighted distances instead of unit ones.
+    bool weightedDistances;
+
     // Distance function to use, also see validDistanceFunction.
     String<char> distanceFunction;
 
@@ -66,22 +72,62 @@ struct Options {
     bool validDistanceFunction() const
     {
         if (distanceFunction == "hamming") return true;
-        if (distanceFunction == "hamming-weighted") return true;
         if (distanceFunction == "edit") return true;
-        if (distanceFunction == "edit-weighted") return true;
         return false;
     }
 };
 
+// Copy-and-paste from reweight_wit.h
+//
+// Compute quality-based alignment score.  The read has to be given
+// since we do not have qualities in the alignment object.
+template <typename TAlign>
+int computeQualityAlignmentScore(TAlign const & align, Score<int, ScoreMatrix<Dna5> > const & scoreMatrix, String<Dna5Q> const & read) {
+    // TODO(holtgrew): Maybe convert to iterators for performance?
+    typedef typename Row<TAlign const>::Type TRow;
+    typedef typename Value<TRow>::Type TAlignChar;
+    typedef typename Size<TRow>::Type TSize;
+
+    TRow & rowContig = row(align, 0);
+    TRow & rowRead = row(align, 1);
+
+    int result = 0;
+    for (TSize i = 0; i < length(rowContig); ++i) {
+        TAlignChar contigChar = rowContig[i];
+        TAlignChar readChar = rowRead[i];
+        if (isGap(rowContig, i)) {
+            result -= getQualityValue(read[toSourcePosition(rowRead, i)]);
+        } else if (isGap(rowRead, i)) {
+            if (toSourcePosition(rowRead, i) == 0) {
+                result -= getQualityValue(read[0]);
+            } else if (toSourcePosition(rowRead, i) == length(read)) {
+                result -= getQualityValue(read[length(read) - 1]);
+            } else {
+                int x = 0;
+                x += getQualityValue(read[toSourcePosition(rowRead, i) - 1]);
+                x += getQualityValue(read[toSourcePosition(rowRead, i)]);
+                result -= ceil(1.0 * x / 2);
+            }
+        } else {
+            result += score(scoreMatrix, readChar, contigChar) * getQualityValue(read[toSourcePosition(rowRead, i)]);
+        }
+    }
+
+    return result;
+}
+
+
 // Returns the best score for the alignment of the aligned read from
 // the given fragment store.  The maximum error is given, to be able
 // to limit the interval in the contig we are looking for.
-template <typename TFragmentStore, typename TContigSeq2, typename TAlignedRead, typename TPatternSpec>
+template <typename TFragmentStore, typename TContigSeq2, typename TAlignedRead, typename TScore, typename TPatternSpec>
 int bestScoreForAligned(TFragmentStore & fragments,
                         TContigSeq2 & contig2,
                         bool const & isForward,
                         TAlignedRead const & alignedRead,
                         int /*maxError*/,
+                        Options const & options,
+                        TScore const & scoringScheme,
                         TPatternSpec const &) {
     typedef size_t TContigId;  // TODO(holtgrew): Better type.
     typedef size_t TAlignedReadPos;  // TODO(holtgrew): Better type.
@@ -91,6 +137,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> > TContigGaps;
     typedef typename TFragmentStore::TReadSeqStore     TReadSeqStore;
     typedef typename TFragmentStore::TReadSeq        TReadSeq;
+    typedef typename Size<TReadSeq>::Type TSize;
     TContigStore & contigs = fragments.contigStore;
     TContigId contigId = alignedRead.contigId;
     TContigSeq & contig = contigs[contigId].seq;
@@ -111,47 +158,41 @@ int bestScoreForAligned(TFragmentStore & fragments,
 
     Finder<TContigSeq2> finder(contig2);
     Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 1000);
+    _patternMatchNOfPattern(pattern, options.matchN);
+    _patternMatchNOfFinder(pattern, options.matchN);
     bool ret = setEndPosition(finder, pattern, endPos);
 //     std::cerr << __FILE__ << ":" << __LINE__ << " -- endPos = " << endPos << ", endPosition(finder) == " << endPosition(finder) << std::endl;
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(endPos, endPosition(finder));
-    return getScore(pattern);
-    /*
-//     std::cout << "endPos = " << endPos << ", beginPos = " << beginPos << std::endl;
-    TAlignedReadPos contigOffset;
-    if (endPos < length(read) + maxError) {
-        contigOffset = 0;
-    } else {
-        contigOffset = endPos - length(read) - maxError;
-    }
-    // TODO(holtgrew): We actually want to use a Suffix Segment here, but the Finder breaks then.
-    TAlignedReadPos contigLength = length(contig) - contigOffset;
-    typedef Segment<TContigSeq> TContigSegment;
-    TContigSegment contigSegment(contig, contigOffset,
-                                 contigOffset + contigLength);
-    // Search the best alignment ending at the end-align position.
-//     std::cout << "Aligning read " << read << std::endl;
-//     std::cout << "Aligning contig " << prefix(contigSegment, length(read) + maxError) << std::endl;
-    Finder<TContigSegment> finder(contigSegment);
-    const int kErrorValueInfty = 100000; // TODO(holtgrew): Should depend on scoring.
-    Pattern<TReadSeq, TPatternSpec> pattern(read, -kErrorValueInfty);
-    while (find(finder, pattern) and endPosition(finder) < length(read) + maxError)
-        continue;  // Skip.
-//     std::cerr << "end position: " << endPosition(finder) << std::endl;
-//     std::cerr << "length(read) == " << length(read) << std::endl;
-//     std::cerr << "length(contig) == " << length(contig) << std::endl;
-//     std::cerr << "max error = " << maxError << std::endl;
-//     std::cerr << "end position = " << endPosition(finder) << std::endl;
-//     std::cerr << "contig offset = " << contigOffset << std::endl;
-//     std::cerr << "sum offset = " << endPosition(finder) + contigOffset << std::endl;
-//     std::cerr << "read is " << read << std::endl;
-//     std::cerr << "contig segment[:length(read) + maxError + 2] is " << prefix(contigSegment, length(read) + maxError + 2) << std::endl;
-//     std::cerr << "contig is " << infix(fragments.contigStore[alignedRead.contigId].seq, endPos - length(readSeqs[alignedRead.readId]), endPos) << std::endl;
-//     std::cerr << "          " << fragments.contigNameStore[alignedRead.contigId] << std::endl;
-    SEQAN_ASSERT_EQ(endPosition(finder), length(read) + maxError);
+    
+    // No explicit alignment is required if distances are not to be weighted.
+    if (!options.weightedDistances)
+        return getScore(pattern);
 
-    return getScore(pattern);
-    */
+    // Otherwise, we need to build an alignment and compute the score from it.
+    ret = findBegin(finder, pattern, getScore(pattern));
+    SEQAN_ASSERT_TRUE(ret);
+
+    // Prepare alignment datastructures.
+    Align<String<Dna5>, ArrayGaps> align;
+    resize(rows(align), 2);
+    assignSource(row(align, 0), infix(finder));
+    assignSource(row(align, 1), read);
+
+    // Perform banded Needleman-Wunsch alignment.
+    // TODO(holtgrew): Use wrapper for trace pumping, once it is in place.
+    StringSet<String<Dna5> > stringSet;
+    appendValue(stringSet, infix(finder));
+    appendValue(stringSet, read);
+    _Align_Traceback<TSize> trace;
+    int alignmentScore = globalAlignment(trace, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
+    _pump_trace_2_Align(align, trace);
+    SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
+
+    // Compute quality-based score of alignment.  We pass the
+    // score matrix to allow for N-is-wildcard mode.
+    int qualityValue = computeQualityAlignmentScore(align, scoringScheme, read);
+    return qualityValue;
 }
 
 
@@ -184,8 +225,8 @@ void
 compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                                                  TFragmentStore & fragments,
                                                  size_t const & contigId,
-                                                 TContigSeq const & contig,
-                                                 TContigGaps const & contigGaps,
+                                                 TContigSeq /*const*/ & contig,
+                                                 TContigGaps /*const*/ & contigGaps,
                                                  bool const & isForward,
                                                  size_t const & readId,
                                                  TAlignedReadIter const & alignedReadsBegin,
@@ -194,12 +235,33 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                                                  TWitRecordIter const & witRecordsEnd,
                                                  size_t & foundIntervalCount,
                                                  size_t & relevantIntervalCount,
+                                                 size_t & superflousIntervalCount,
+                                                 size_t & surplusIntervalCount,
                                                  TPatternSpec const &) {
     // TODO(holtgrew): Enable n-matches-wildcard mode and use qualities for weights.
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
     typedef typename TFragmentStore::TContigStore TContigStore;
     typedef typename TMap::iterator TMapIterator;
+
+    // TODO(holtgrew): Only necessary for weighted variant.
+    // Build scoring matrix that allows N to match with all.
+    int gapExtensionScore = -1;
+    int gapOpenScore = -1;
+    if (TYPECMP<TPatternSpec, HammingSimple>::VALUE) {
+        // No gaps for hamming distance.
+        gapOpenScore = -length(fragments.readSeqStore[readId]);
+        gapExtensionScore = -length(fragments.readSeqStore[readId]);
+    }
+    Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);
+    for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
+        for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y) {
+            setScore(matrixScore, Dna5(x), Dna5(y), -1);
+        }
+        setScore(matrixScore, Dna5(x), Dna5('N'), 0);
+        setScore(matrixScore, Dna5('N'), Dna5(x), 0);
+        setScore(matrixScore, Dna5(x), Dna5(x), 0);
+    }
 
 //     std::cerr << "compare aligned reads to reference on contig (" << contigId << ") for one read (" << readId << ")" << std::endl;
 //     std::cerr << ".--- readId == " << readId << std::endl;
@@ -265,7 +327,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         TMapIterator iter = intervalMap.lower_bound(lastPos);
 
         // Skip reads that aligned with a too bad score.
-        int bestScore = bestScoreForAligned(fragments, contig, isForward, *it, maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])), TPatternSpec());
+        int bestScore = bestScoreForAligned(fragments, contig, isForward, *it, maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])), options, matrixScore, TPatternSpec());
         if (bestScore < -maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId]))) {
             std::cerr << "INFO: Skipping read " << fragments.readNameStore[it->readId] << " (" << fragments.readSeqStore[it->readId] << ")" << std::endl;
             std::cerr << "  contigId = " << contigId << std::endl;
@@ -282,12 +344,17 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
             }
             std::cerr << std::endl;
             std::cerr << "  max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
+            superflousIntervalCount += 1;
             continue;
         }
 
         // Handle alignment out of target intervals.
         if (iter == intervalMap.end() || (iter->second.firstPos > lastPos) || (iter->second.lastPos < lastPos)) {
-            std::cerr << "PANIC: A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
+            if (options.weightedDistances)
+                std::cerr << "WARNING: ";
+            else
+                std::cerr << "PANIC: ";
+            std::cerr << "A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
             if (iter == intervalMap.end())
                 std::cerr << "not found in map" << std::endl;
             else
@@ -308,7 +375,12 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
             std::cerr << "max error rate is " << options.maxError << std::endl;
             std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
             std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
-            exit(1);
+            if (options.weightedDistances) {
+                surplusIntervalCount += 1;
+                continue;
+            } else {
+                exit(1);
+            }
         }
 
         SEQAN_ASSERT_LEQ(iter->second.firstPos, lastPos);
@@ -352,7 +424,7 @@ void
 compareAlignedReadsToReferenceOnContig(Options const & options,
                                        TFragmentStore & fragments,
                                        size_t const & contigId,
-                                       TContigSeq const & contig,
+                                       TContigSeq /*const*/ & contig,
                                        bool const & isForward,
                                        TAlignedReadsIter const & alignedReadsBegin,
                                        TAlignedReadsIter const & alignedReadsEnd,
@@ -360,6 +432,8 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
                                        TWitRecordsIter const & witRecordsEnd,
                                        size_t & foundIntervalCount,
                                        size_t & relevantIntervalCount,
+                                       size_t & superflousIntervalCount,
+                                       size_t & surplusIntervalCount,
                                        TPatternSpec const &) {
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
@@ -402,7 +476,7 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
 //         std::cerr << "`---" << std::endl;
 
         // Actually compare the aligned reads for this contig on forward and backwards strand.
-        compareAlignedReadsToReferenceOnContigForOneRead(options, fragments, contigId, contig, contigGaps, isForward, readId, alignedReadsBeginForRead, alignedReadsEndForRead, witRecordsBeginForRead, witRecordsEndForRead, foundIntervalCount, relevantIntervalCount, TPatternSpec());
+        compareAlignedReadsToReferenceOnContigForOneRead(options, fragments, contigId, contig, contigGaps, isForward, readId, alignedReadsBeginForRead, alignedReadsEndForRead, witRecordsBeginForRead, witRecordsEndForRead, foundIntervalCount, superflousIntervalCount, surplusIntervalCount, relevantIntervalCount, TPatternSpec());
         // This iteration's end iterators are the next iteration's begin iterators.
         alignedReadsBeginForRead = alignedReadsEndForRead;
         witRecordsBeginForRead = witRecordsEndForRead;
@@ -421,6 +495,8 @@ compareAlignedReadsToReference(Options const & options,
                                String<WitRecord> & witRecords,  // non-const so it is sortable
                                size_t & foundIntervalCount,
                                size_t & relevantIntervalCount,
+                               size_t & superflousIntervalCount,
+                               size_t & surplusIntervalCount,
                                TPatternSpec const &) {
     // Type aliases.
     typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
@@ -433,6 +509,8 @@ compareAlignedReadsToReference(Options const & options,
     // Initialization.
     foundIntervalCount = 0;
     relevantIntervalCount = 0;
+    superflousIntervalCount = 0;
+    surplusIntervalCount = 0;
 
     // Sort aligned reads and wit records by contig id.
     sortAlignedReads(fragments.alignedReadStore, SortEndPos());
@@ -473,11 +551,11 @@ compareAlignedReadsToReference(Options const & options,
 //         std::cerr << "`---" << std::endl;
 
         // Actually compare the aligned reads for this contig on forward and backwards strand.
-        TContigSeq const & contig = fragments.contigStore[contigId].seq;
-        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, contig, true, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, TPatternSpec());
+        TContigSeq & contig = fragments.contigStore[contigId].seq;
+        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, contig, true, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, TPatternSpec());
         TContigSeq rcContig(contig);
         reverseComplementInPlace(rcContig);
-        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, rcContig, false, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, TPatternSpec());
+        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, rcContig, false, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, TPatternSpec());
         
         // This iteration's end iterators are the next iteration's begin iterators.
         alignedReadsBegin = alignedReadsEnd;
