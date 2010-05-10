@@ -198,9 +198,9 @@ int main(int argc, const char *argv[]) {
     ComparisonResult result;
     if (options.distanceFunction == "edit")
         // TODO(holtgrew): Switch to "reads version" (force alignment of last characters) after RazerS can do this, too.  Tag is MyersUkkonenReads().
-        compareAlignedReadsToReference(options, fragments, witStore, result, Myers<FindInfix>());
+        compareAlignedReadsToReference(result, fragments, witStore, options, Myers<FindInfix>());
     else  // options.distanceFunction == "hamming"
-        compareAlignedReadsToReference(options, fragments, witStore, result, HammingSimple());
+        compareAlignedReadsToReference(result, fragments, witStore, options, HammingSimple());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     
 

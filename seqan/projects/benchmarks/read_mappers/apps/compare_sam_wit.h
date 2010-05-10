@@ -16,6 +16,35 @@
   
   ==========================================================================
    Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ==========================================================================
+   Usage: compare_sam_wit [options] <contig.fasta> <result.sam> <golden.wit>
+
+   Call as "compare_sam_wit --help" for a full list of options.
+  
+   This program is used to compare the read mapper results in a SAM file
+   with the golden standard in a WIT file.  Log messages are printed to
+   stderr, the result is written to the first line of stdout.
+
+   The first line of stdout consists of a JSON encoded dictionary that has
+   the following entries:
+
+   * total_intervals       Total number of intervals with the given error
+                           rate in the WIT file.
+   * found_intervals       Number of intervals in the WIT file that were
+                           found by the read mapper.
+   * superflous_intervals  Number of alignments in the SAM file that do not
+                           have their end position in an interval from the
+                           WIT file and the alignment at this position has
+                           a higher error rate than the specified one.
+   * additional_intervals  Same as superflous_intervals, but these alignments
+                           have an error rate that is as low as the specified
+                           one or lower.  If this happens in the non-weighted
+                           case then this is a bug in the benchmark tools.
+                           For the weighted case, this happens if RazerS does
+                           not find the alignment with low weighted but too
+                           high unweighted error rate and the read mapper
+                           generating the SAM file finds it.  Read the paper
+                           and/or manual for more details.
   ==========================================================================*/
 
 #include <map>
@@ -32,6 +61,58 @@
 #include "find_hamming_simple_quality.h"
 
 using namespace seqan;  // Remove some syntatic noise.
+
+
+// ======================================================================
+// Options
+// ======================================================================
+
+// Container for the program options.
+struct Options {
+    // Maximum number or errors per read length in percent.
+    int maxError;
+
+    // Print the missed intervals to stderr for debugging purposes.
+    bool showMissedIntervals;
+
+    // Print the hit intervals to stderr for debugging purposes.
+    bool showHitIntervals;
+
+    // Print each end position that we try to match agains the interval.
+    bool showTryHitIntervals;
+
+    // If true, N matches as a wildcard.  Otherwise it matches none.
+    bool matchN;
+
+    // If true, use weighted distances instead of unit ones.
+    bool weightedDistances;
+
+    // Distance function to use, also see validDistanceFunction.
+    String<char> distanceFunction;
+
+    // Name of reference sequence file.
+    String<char> seqFileName;
+
+    // Name of WIT file.
+    String<char> witFileName;
+
+    // Name of SAM file.
+    String<char> samFileName;
+
+    // Return true iff distanceFunction is a valid distance function.
+    // Valid distances are one of {"hamming", "edit"}.
+    bool validDistanceFunction() const
+    {
+        if (distanceFunction == "hamming") return true;
+        if (distanceFunction == "edit") return true;
+        return false;
+    }
+};
+
+
+// ======================================================================
+// Comparison Result
+// ======================================================================
 
 
 // Counters for the comparison result.
@@ -78,47 +159,27 @@ void clear(ComparisonResult & result) {
 }
 
 
-// Container for the program options.
-struct Options {
-    // Maximum number or errors per read length in percent.
-    int maxError;
+// ======================================================================
+// FlaggedInterval
+// ======================================================================
 
-    // Print the missed intervals to stderr for debugging purposes.
-    bool showMissedIntervals;
+struct FlaggedInterval {
+    size_t firstPos;
+    size_t lastPos;
+    bool flag;
 
-    // Print the hit intervals to stderr for debugging purposes.
-    bool showHitIntervals;
+    FlaggedInterval() {}
 
-    // Print each end position that we try to match agains the interval.
-    bool showTryHitIntervals;
-
-    // If true, N matches as a wildcard.  Otherwise it matches none.
-    bool matchN;
-
-    // If true, use weighted distances instead of unit ones.
-    bool weightedDistances;
-
-    // Distance function to use, also see validDistanceFunction.
-    String<char> distanceFunction;
-
-    // Name of reference sequence file.
-    String<char> seqFileName;
-
-    // Name of WIT file.
-    String<char> witFileName;
-
-    // Name of SAM file.
-    String<char> samFileName;
-
-    // Return true iff distanceFunction is a valid distance function.
-    // Can be one of {"hamming", "edit"}.
-    bool validDistanceFunction() const
-    {
-        if (distanceFunction == "hamming") return true;
-        if (distanceFunction == "edit") return true;
-        return false;
-    }
+    FlaggedInterval(size_t _firstPos, size_t _lastPos, bool _flag = false)
+            : firstPos(_firstPos), lastPos(_lastPos), flag(_flag) {}
 };
+
+
+template <typename TStream>
+TStream & operator<<(TStream & stream, FlaggedInterval const & interval) {
+    return stream << "FlaggedInterval(" << interval.firstPos << ", " << interval.lastPos << ", " << interval.flag << ")";
+}
+
 
 // Copy-and-paste from reweight_wit.h
 //
@@ -237,25 +298,6 @@ int bestScoreForAligned(TFragmentStore & fragments,
     int qualityValue = computeQualityAlignmentScore(align, scoringScheme, read);
     return qualityValue;
 }
-
-
-struct FlaggedInterval {
-    size_t firstPos;
-    size_t lastPos;
-    bool flag;
-
-    FlaggedInterval() {}
-
-    FlaggedInterval(size_t _firstPos, size_t _lastPos, bool _flag = false)
-            : firstPos(_firstPos), lastPos(_lastPos), flag(_flag) {}
-};
-
-
-template <typename TStream>
-TStream & operator<<(TStream & stream, FlaggedInterval const & interval) {
-    return stream << "FlaggedInterval(" << interval.firstPos << ", " << interval.lastPos << ", " << interval.flag << ")";
-}
-
 
 // Return maximum error count for maximum error rate
 inline int maxErrorRateToMaxErrors(int maxErrorRate, size_t len) {
@@ -522,24 +564,22 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
 
 
 // Compare aligned reads in fragment store to the intervals specified
-// in witRecords, the number of hits is written to foundIntervalCount,
-// the number of relevant intervals is written to
-// relevantIntervalCount.
+// in witStore, results is used for the counting statistics.
 template <typename TFragmentStore, typename TPatternSpec>
 void
-compareAlignedReadsToReference(Options const & options,
+compareAlignedReadsToReference(ComparisonResult & result,
                                TFragmentStore & fragments,  // non-const so reads can be sorted
                                WitStore & witStore,  // non-const so it is sortable
-                               ComparisonResult & result,
+                               Options const & options,
                                TPatternSpec const &) {
     // Type aliases.
     typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
     typedef typename Iterator<TAlignedReadStore>::Type TAlignedReadsIter;
-    typedef typename WitStore::TIntervalStore TIntervalStore;
-    typedef typename Iterator<TIntervalStore>::Type TIntervalIter;
     typedef typename TFragmentStore::TContigStore TContigStore;
     typedef typename Value<TContigStore>::Type TContigStoreElement;
     typedef typename TContigStoreElement::TContigSeq TContigSeq;
+    typedef typename WitStore::TIntervalStore TIntervalStore;
+    typedef typename Iterator<TIntervalStore>::Type TIntervalIter;
     
     // Initialization.
     clear(result);
@@ -577,11 +617,11 @@ compareAlignedReadsToReference(Options const & options,
         }
 //         std::cerr << "+---" << std::endl;
         // Get wit records iterator for the next contigId.
-//         while (witRecordsEnd != end(witStore.intervals, Standard()) && witRecordsEnd->contigId <= contigId) {
+        while (witRecordsEnd != end(witStore.intervals, Standard()) && witRecordsEnd->contigId <= contigId) {
 //             if (witRecordsEnd->distance == options.maxError)
 //                 std::cerr << "| " << *witRecordsEnd << std::endl;
-//             ++witRecordsEnd;
-//         }
+            ++witRecordsEnd;
+        }
 //         std::cerr << "`---" << std::endl;
 
         // Actually compare the aligned reads for this contig on forward and backwards strand.
