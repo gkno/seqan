@@ -317,7 +317,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
 //         std::cerr << *it << std::endl;
         if (it->isForward != isForward) continue;  // Skip aligned reads on other strand.
-        if (it->distance != options.maxError) continue;  // Skip intervals with wrong distance.
+        if (static_cast<int>(it->distance) != options.maxError) continue;  // Skip intervals with wrong distance.
 
 //         std::cerr << __FILE__ << ":" << __LINE__ << " -- add(" << it->firstPos << ", " << it->lastPos << ", is forward = " << it->isForward << ")" << "  " << *it << std::endl;
         intervalMap[it->lastPos] = FlaggedInterval(it->firstPos, it->lastPos);
