@@ -27,8 +27,7 @@
 #include <omp.h>
 #endif
 
-//#define RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
-#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
 #include <parallel/algorithm>
 #endif
 
@@ -51,7 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSwiftPatterns>
 	struct ParallelSwiftPatternHandler
 	{
-		SEQAN_CHECKPOINT
+		// SEQAN_CHECKPOINT
 
 		TSwiftPatterns &swiftPatterns;
 		ParallelSwiftPatternHandler(TSwiftPatterns &_swiftPatterns):
@@ -203,7 +202,310 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 		
 	}
+#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
+
+	inline void updateTav(String<int> & tav, int const myId){
+		SEQAN_CHECKPOINT
+		
+		int k = 1;
+		int n = (int)length(tav);
+		// Search for the next block that is still working
+		while(tav[(myId + k) % n] == -1)
+			++k;
+		// If there is none (all checked).
+		if(k == n)
+			return;
+		
+		tav[(myId + k) % n] += tav[myId];
+		tav[myId] = -1;
+		
+		return;
+	}
+
+	template<typename TSwiftHit>
+	struct SwiftHitComparison:
+		public ::std::binary_function<TSwiftHit, TSwiftHit, bool>
+	{
+
+		inline bool
+		operator() (TSwiftHit const & i1, TSwiftHit const & i2) {
+			return (i1.ndlSeqNo) < (i2.ndlSeqNo);
+		}
+	};
+
+
+	template<
+		int stage,
+		typename TSize>
+	inline TSize toBucket(TSize id){
+		SEQAN_CHECKPOINT
+		
+		// return (id >> (4*stage)) & 15;
+		return (id >> (8*stage)) & 255;
+	}
 	
+	
+	template<
+		int stage,
+		typename THit,
+		typename TSize>
+	inline void myRadixPass(
+			String<THit> 			& sorted,
+			String<THit> const 		& unsorted,
+			String<TSize> 			& buckets)
+	{
+		SEQAN_CHECKPOINT
+		
+		typedef typename Position<String<THit> >::Type		TPos;
+		typedef typename Position<String<TSize> >::Type		TBucketPos;
+		
+		std::fill(begin(buckets), end(buckets), 0);
+		
+		for(TPos i = 0; i < length(unsorted); ++i){
+			++buckets[toBucket<stage>(unsorted[i].ndlSeqNo)];
+		}
+		
+		// Exclusive partial sum
+		TBucketPos sum1 = -1, sum2 = -1;
+		for(TBucketPos i = 0; i < length(buckets); ++i){
+			sum1 += buckets[i];
+			buckets[i] = sum2;
+			sum2 = sum1;
+		}
+		
+		for(TPos i = 0; i < length(unsorted); ++i){
+			sorted[++buckets[toBucket<stage>(unsorted[i].ndlSeqNo)]] = unsorted[i];
+		}
+	}
+
+
+	template<typename THit>
+	inline void myRadixSort(String<THit> & hits)
+	{
+		SEQAN_CHECKPOINT
+		
+		String<THit> sorted;
+		resize(sorted, length(hits), Exact());
+		
+		String<unsigned long> buckets;
+		resize(buckets, 256, Exact());
+		
+		myRadixPass<0>(sorted, hits, buckets);
+		myRadixPass<1>(hits, sorted, buckets);
+		myRadixPass<2>(sorted, hits, buckets);
+		myRadixPass<3>(hits, sorted, buckets);
+		// If more stages are added be aware that hits needs to be the first argument in the last call
+		// or sorted needs to be copied in hits.
+	}
+
+
+	template<
+		typename TPosition,
+		typename TSpec,
+		typename THstkPos>
+	void partitionHits(
+			String<TPosition>									& positions,
+			String<_SwiftHit<Tag<
+				_SwiftSemiGlobal<TSpec> >, THstkPos> > const	& hits,
+			int const											  noOfParts)
+	{ 
+		resize(positions, noOfParts + 1, Exact());
+		positions[0] = 0;
+		positions[noOfParts] = length(hits);
+		
+		TPosition partSize = length(hits) / noOfParts;
+		TPosition myPos;
+		
+		for (int blockId = 1; blockId < noOfParts+1; ++blockId){
+			myPos = blockId * partSize;
+			
+			unsigned now = 0;
+			unsigned last = hits[myPos - 1].ndlSeqNo;;
+			
+			for(; myPos < length(hits); ++myPos){
+				now = hits[myPos].ndlSeqNo;
+				if(last != now)
+					break;
+				
+				last = now;
+			}
+			positions[blockId] = myPos;
+		}
+	}
+
+
+	template<
+		typename TVerifier,
+		typename THitString,
+		typename TReadId,
+		typename TContigSeq,
+		typename TReadSet,
+		typename TRazerSMode>
+	inline void verifyHits(
+			TVerifier									& verifier,
+			THitString									& hits,
+			typename Position<THitString>::Type const	  startPos,
+			typename Position<THitString>::Type const	  endPos,
+			TReadId const								  offSet,
+			TContigSeq									& contigSeq,
+			TReadSet									& readSet,
+			TRazerSMode									& mode)
+	{
+		typedef typename Position<THitString>::Type		THitStringPos;
+		
+		for(THitStringPos h = startPos; h < endPos; ++h){
+			TReadId absReadId = offSet + hits[h].ndlSeqNo;
+			verifier.m.readId = absReadId;
+			
+			matchVerify(verifier, getSwiftRange(hits[h], contigSeq), absReadId, readSet, mode);
+			// TODO: temp Var
+			// ++options.countFiltration;
+		}
+	}
+
+	template <
+		typename TContigSeq, 
+		typename TReadIndex, 
+		typename TSwiftSpec,
+		typename TVerifier,
+		typename TCounts,
+		typename TRazerSOptions,
+		typename TFragmentStore,
+		typename TRazerSMode >
+	inline void goOverContigIndependent(
+			ParallelSwiftPatternHandler<String<
+				Pattern<TReadIndex, Swift<TSwiftSpec> > > >	& swiftPatternHandler,
+			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+			String<TVerifier>								& verifier,
+			TCounts											& cnts,
+			TRazerSOptions									& options,
+			String<TFragmentStore>							& threadStores,
+			TFragmentStore									& store,
+			TRazerSMode										& mode)
+    {
+		typedef Finder<TContigSeq, Swift<TSwiftSpec> >		TSwiftFinder;
+		typedef typename TSwiftFinder::THitString			THitString;
+		typedef typename Value<THitString>::Type			TSwiftHit;
+		typedef typename Position<THitString>::Type			THitStringPos;
+		typedef typename Iterator<THitString>::Type			THitStringIter;
+		typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+		
+		// TODO: (size of aligned read store)?
+		
+		// Needed because the omp shared clause does not allow for "." in the variabel names.
+		TReadSeqStore const & readSet = store.readSeqStore;
+		TContigSeq const & contigSeq = host(swiftFinders[0]);
+		
+		// Number of Threads Allowed for Verification. Shared by all blocks
+		String<int> tav;
+		fill(tav, options.numberOfBlocks, 1, Exact());
+		
+		#pragma omp parallel num_threads((int)options.numberOfCores)
+		{
+		#pragma omp master
+		{
+			
+			for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+			{
+				#pragma omp task default(none) \
+					shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, options, mode) \
+					firstprivate(blockId)
+				{
+					// TODO: remove
+					printf("%d start task\n", blockId);
+					_proFloat myTime = sysTime();
+					
+					bool sequenceLeft = true;
+					while(sequenceLeft){
+						sequenceLeft = windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], 
+							options.windowSize);
+							
+						// TODO: remove
+						#pragma omp critical(printf)
+						printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
+						myTime = sysTime();
+						
+						THitString & hits = getSwiftHits(swiftFinders[blockId]);
+						if(length(hits) == 0)
+							continue;
+						#pragma omp flush(tav)
+						
+						// TODO: remove
+						#pragma omp critical(printf)
+						printf("%d tav: %d\n", blockId, tav[blockId]);
+						
+						if(tav[blockId] == 1 or length(hits) < tav[blockId]){
+							verifyHits(verifier[blockId], hits, 0, length(hits),
+								(blockId * options.blockSize), host(swiftFinders[0]), readSet, mode);
+						}
+						else {
+							// sort
+							myRadixSort(hits);
+							// THitStringIter i1 = begin(hits);
+							// THitStringIter i2 = end(hits);
+							// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+							// partition
+							String<THitStringPos> positions;
+							partitionHits(positions, hits, tav[blockId]);
+							// verify
+							// TODO: no task for first ...
+							for(int relId = 0; relId < tav[blockId]; ++relId)
+							{
+								#pragma omp task default(none) \
+									shared(verifier, hits, positions, contigSeq, readSet, options, mode) \
+									firstprivate(blockId, relId)
+								{
+									// calculate the absolute Id 
+									int absVerifyId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+									
+									verifyHits(verifier[absVerifyId], hits, positions[relId], positions[relId + 1],
+										(blockId * options.blockSize), contigSeq, readSet, mode);
+								}
+							}
+							#pragma omp taskwait
+						} // End else
+						
+						// TODO: remove
+						#pragma omp critical(printf)
+						printf("%d verifying took %f\n", blockId, sysTime() - myTime);
+						myTime = sysTime();
+					} // End while
+					
+					#pragma omp critical(update_tav)
+					updateTav(tav, blockId);
+					
+					// TODO: remove
+					#pragma omp critical(printf)
+					{
+						printf("%d done; tav: ", blockId);
+						for(int i = 0; i < (int)length(tav); ++i)
+							printf("%d, ", tav[i]);
+						printf("\n");
+					}
+					
+				} // End task
+			} // End for
+			
+			#pragma omp taskwait
+			
+		} // End Master
+		} // End Parallel
+		
+		// Get the matches from different thread stores and write them in the main store
+		appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+		
+		// Clear thread stores and finders
+		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+			clear(threadStores[blockId].alignedReadStore);
+			clear(threadStores[blockId].alignQualityStore);
+			
+			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+		}
+		
+	}
+
+// END RAZERS_PARALLEL_READS_INDEPENDENT
+#endif
 #ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
 	
 /**
@@ -371,12 +673,10 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 #ifdef FLEX_TIMER
 		String<_proFloat> waitingTimes;
-		resize(waitingTimes, options.numberOfCores, Exact());
-		for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
+		resize(waitingTimes, options.numberOfBlocks, Exact());
+		for(unsigned coreId = 0; coreId < options.numberOfBlocks; ++coreId)
 			waitingTimes[coreId] = sysTime();
-
-		_proFloat filterTime = sysTime();
-
+		
 		String<int> windowNumbers;
 		fill(windowNumbers, options.numberOfBlocks, 0, Exact());
 #endif
@@ -393,6 +693,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				{
 					blockSeqLeft[blockId] = collectHitsForBlock(hits[blockId], totalHits, blockId*options.blockSize,
 						swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options);
+
 					// If any of the block has sequnece left the value will be true in the end.
 					#pragma omp atomic
 					sequenceLeft |= blockSeqLeft[blockId];
@@ -412,7 +713,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 					waitingTimes[blockId] = sysTime();
 				} // End task.
 #endif
-				
 			} // End if.
 		} // End for loop.
 		
@@ -423,7 +723,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		std::cout << std::endl;
 		// for waiting times
 		_proFloat now = sysTime();
-		std::cout << "filter time: " << (now - filterTime) << std::endl;
 		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 			std::cout << "filter>\t" << blockId << "\t" << (now - waitingTimes[blockId]) 
 					<< "\t" << length(hits[blockId]) << "\t" <<  windowNumbers[blockId] << std::endl;
@@ -440,36 +739,28 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typename TRazerSOptions>
 	inline void partitionHits(
 			String<TPosition>						& positions,
+			TPosition const							& startPos,
 			String<ConvertedSwiftHit<TText> > const	& hits,
-#ifdef RAZER_USE_ACCURACY
-			unsigned const							& accuracy,
-#endif
 			TRazerSOptions const					& options)
 	{ 
 		// typedef String<ConvertedSwiftHit<TText> >			TConvertedHitString;
 		// typedef typename Size<TConvertedHitString>::Type	TConvertedHitStringSize;
 		
 		resize(positions, options.numberOfBlocks+1, Exact());
-		positions[0] = 0; positions[options.numberOfBlocks] = length(hits);
+		positions[0] = startPos;
+		positions[options.numberOfBlocks] = length(hits); // Last element in positions
 		
-		TPosition partSize = length(hits) / options.numberOfBlocks;
+		TPosition partSize = (length(hits) - startPos) / options.numberOfBlocks;
 		TPosition myPos;
 		
 		for (int blockId = 1; blockId < (int)options.numberOfBlocks; ++blockId){
-			unsigned now = 0;
-#ifndef RAZER_USE_ACCURACY
-			unsigned last = hits[blockId*partSize - 1].readID;;
-#else
-			unsigned last = hits[blockId*partSize - 1].readID / accuracy;
-#endif
+			myPos = startPos + blockId*partSize;
 			
-			myPos = blockId*partSize;
+			unsigned now = 0;
+			unsigned last = hits[myPos - 1].readID;;
+			
 			for(; myPos < length(hits); ++myPos){
-#ifndef RAZER_USE_ACCURACY
 				now = hits[myPos].readID;
-#else
-				now = hits[myPos].readID / accuracy;
-#endif
 				if(last != now)
 					break;
 				
@@ -478,15 +769,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			positions[blockId] = myPos;
 			
 		}
-#ifdef FLEX_TIMER		
-		for(int i = 0; i < (int)length(positions); ++i)
-			printf("%lu, ", positions[i]);
-		printf("\n");
-		for(int i = 1; i < (int)length(positions); ++i)
-			printf("%lu, ", positions[i] - positions[i-1]);
-		printf("\n");
+#ifdef FLEX_TIMER
+		// for(int i = 1; i < (int)length(positions); ++i)
+		// 	printf("%lu, ", positions[i] - positions[i-1]);
+		// printf("\n");
 #endif
 	}
+
 
 	// TODO: doc
 	template<
@@ -498,77 +787,106 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typename TRazerSMode>
 	inline void verifyHits(
 			String<TPosition> const					& positions,
-			String<ConvertedSwiftHit<TText> > 		& hits,
+			TPosition const							& shortestPos,
+			StringSet<String<
+				ConvertedSwiftHit<TText> > > 		& hits,
 			TVerifier								& verifier,
-			TReads 							& readSet,
-			TContigSeq 						& contigSeq,
+			TReads 									& readSet,
+			TContigSeq 								& contigSeq,
 			TRazerSMode const						& mode)
 	{
 		typedef typename Infix<TContigSeq>::Type	TContigInfix;
+		typedef String<ConvertedSwiftHit<TText> >	THitString;
+		
+#ifdef FLEX_TIMER
+				String<_proFloat> waitingTimes;
+				resize(waitingTimes, (int)length(positions)-1, Exact());
+				for(int coreId = 0; coreId < (int)length(positions)-1; ++coreId)
+					waitingTimes[coreId] = sysTime();
+				_proFloat myTime = sysTime();
+#endif
+		
 		
 		for(int i = 1; i < (int)length(positions); ++i){
 			#pragma omp task default(none) \
-				shared(positions, verifier, contigSeq, hits, readSet, mode) \
+				shared(positions, shortestPos, verifier, contigSeq, hits, readSet, mode, waitingTimes) \
 				firstprivate(i)
 			{
-				TPosition myPos = positions[i-1];
-				for(; myPos < positions[i]; ++myPos){
+				// TVerifier & myVerifier = verifier[i-1];
+				// THitString & myHits = hits[i-1];
+				
+				// First verify hits in your own string
+				TPosition myPos = 0;
+				printf("block: %d, from:%lu, to: %lu, length: %lu\n", i, myPos, shortestPos, length(hits[i-1]));
+				for(; myPos < shortestPos; ++myPos){
+					verifier[i-1].m.readId = hits[i-1][myPos].readID;
+					TContigInfix inf = infix(contigSeq, hits[i-1][myPos].begin, hits[i-1][myPos].end);
 					
-					verifier[i-1].m.readId = hits[myPos].readID;
-					TContigInfix inf = infix(contigSeq, hits[myPos].begin, hits[myPos].end);
-					// Verify the hit and write the match in the verifiers store.
-					matchVerify(verifier[i-1], inf, hits[myPos].readID, readSet, mode);	
+					matchVerify(verifier[i-1], inf, hits[i-1][myPos].readID, readSet, mode);	
 				}
+				
+#ifdef FLEX_TIMER
+				waitingTimes[i-1] = sysTime();
+#endif
 			}
 		}
 		#pragma omp taskwait
+		
+#ifdef FLEX_TIMER
+		std::cout << std::endl;
+		// for waiting times
+		_proFloat now = sysTime();
+		for(int blockId = 0; blockId < (int)length(positions)-1; ++blockId)
+			printf("verify 1>%d\t%f\n", blockId, (now - waitingTimes[blockId]));
+			
+		printf("verification 2 took:%f\n", (sysTime() - myTime));
+		myTime = sysTime();
+#endif
+		
+		for(int i = 1; i < (int)length(positions); ++i){
+			#pragma omp task default(none) \
+				shared(positions, shortestPos, verifier, contigSeq, hits, readSet, mode, waitingTimes) \
+				firstprivate(i)
+			{
+				// TVerifier & myVerifier = verifier[i-1];
+				// THitString & sharedHits = hits[0];
+				
+				// Second verifY your Partition in the shared string
+				TPosition myPos = positions[i-1];
+				printf("block: %d, from:%lu, to: %lu, length: %lu\n", i, myPos, positions[i], length(hits[i-1]));
+				for(; myPos < positions[i]; ++myPos){
+					verifier[i-1].m.readId = hits[0][myPos].readID;
+					TContigInfix inf = infix(contigSeq, hits[0][myPos].begin, hits[0][myPos].end);
+					
+					matchVerify(verifier[i-1], inf, hits[0][myPos].readID, readSet, mode);	
+				}
+				
+#ifdef FLEX_TIMER
+				waitingTimes[i-1] = sysTime();
+#endif
+			}
+		}
+		#pragma omp taskwait
+	
+#ifdef FLEX_TIMER
+		std::cout << std::endl;
+		// for waiting times
+		now = sysTime();
+		for(int blockId = 0; blockId < (int)length(positions)-1; ++blockId)
+			printf("verify 2>%d\t%f\n", blockId, (now - waitingTimes[blockId]));
+		printf("verification 2 took:%f\n", (sysTime() - myTime));
+#endif
 	}
 
 
-/**
-.Class.AssignmentDetail:
-..summary:Representation of a verification task.
-..cat:Razers
-..signature:AssignmentDetail<TPos>
-..param.TPos: Type of the start and end positions
-..remarks: members: blockId, to identify the right string of hits in the string set.
-taskId, for identification and selection of the correct verifier.
-current, first hit to verify in the string.
-end, one after the last hit.
-sorted, true if the hit string is already sorted.
-*/
-	template <typename TPos>
-	struct _TaskDetails{
-		int blockId; // to identify the 
-		int taskId;
-		TPos current;
+// TODO: doc
+	template<typename TPos>
+	struct Task
+	{
+		int blockId;
+		TPos begin;
 		TPos end;
-		bool sorted;
-		
-		_TaskDetails(){}
-		
-		_TaskDetails(int _blockId, TPos _end):
-			blockId(_blockId),
-			taskId(_blockId),
-			current(0),
-			end(_end),
-			sorted(false)
-		{}
-		
-		_TaskDetails(int _blockId, int _taskId, TPos _start, TPos _end):
-			blockId(_blockId),
-			taskId(_taskId),
-			current(_start),
-			end(_end),
-			sorted(true)
-		{}
-		
 	};
-
-	void myPrintF(char const * const myLocation){
-		printf("threads: %d level: %d (%s) ", omp_get_num_threads(), omp_get_level(), myLocation);
-	}
-
 
 /**
 .Function.goOverContigFlex:
@@ -639,21 +957,38 @@ sorted, true if the hit string is already sorted.
 			{
 			#pragma omp master
 			{
-#ifdef RAZER_SORT_TIMER
+				
+#ifdef FLEX_TIMER
 				_proFloat myTime = sysTime();
 #endif
+				
 				// First: collect hits
 				sequenceLeft = collectHits(swiftPatternHandler, swiftFinders, hits, blockSeqLeft, options);
 				
-#ifdef RAZER_SORT_TIMER
-				printf("\nfiltering took:%f\n", (sysTime() - myTime));
+#ifdef FLEX_TIMER
+				printf("\n");
+				printf("filtering took:%f\n", (sysTime() - myTime));
 				myTime = sysTime();
 #endif
+				// for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+				// 	printf("block: %d, length %lu\n", blockId, length(hits[blockId]));
 				
 				// Second: Combine hits in one string so they can be sorted
-				TConvertedHitString allHits;
-				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
-					append(allHits, hits[blockId]);
+				TConvertedHitStringSize shortestLength = length(hits[0]);
+				for (int blockId = 1; blockId < (int)options.numberOfBlocks; ++blockId)
+					if(length(hits[blockId]) < shortestLength)
+						shortestLength = length(hits[blockId]);
+				
+				for (int blockId = 1; blockId < (int)options.numberOfBlocks; ++blockId)
+					append(hits[0], infix(hits[blockId], shortestLength, length(hits[blockId])));
+				
+				// for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+				// 	printf("block: %d, length %lu\n", blockId, length(hits[blockId]));
+				
+#ifdef FLEX_TIMER
+				printf("appending took:%f\n", (sysTime() - myTime));
+				myTime = sysTime();
+#endif
 				
 				// TODO: remove
 				// for(TConvertedHitStringSize myPos = 0; myPos < length(allHits); ++myPos){
@@ -662,28 +997,16 @@ sorted, true if the hit string is already sorted.
 				
 				// Third: Sort hits.
 				// Get iterators for sorting
-				TConvertedHitStringIter i1 = begin(allHits);
-				TConvertedHitStringIter i2 = end(allHits);
+				TConvertedHitStringIter i1 = begin(hits[0]) + shortestLength;
+				TConvertedHitStringIter i2 = end(hits[0]);
 				
-#ifdef RAZER_SORT_TIMER
-				printf("appending took:%f\n", (sysTime() - myTime));
-				myTime = sysTime();
-#endif
+
 				
-#ifndef RAZER_USE_ACCURACY
 				// TODO: Parallel version of sort.
-				// __gnu_parallel::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
-				std::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
-#else
-				// Accuracy by which the remaining hits are sorted.
-				// The higher the number is the faster is the sorting step and
-				// the less optimal might be the splitting
-				unsigned accuracy = 128; //options.blockSize / options.accuracy;
-				// __gnu_parallel::sort(i1, i2, ConvertedSwiftHitComparison<TText>(accuracy));
-				std::sort(i1, i2, ConvertedSwiftHitComparison<TText>(accuracy));
-#endif
+				__gnu_parallel::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
+				// std::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
 				
-#ifdef RAZER_SORT_TIMER
+#ifdef FLEX_TIMER
 				printf("sorting took:%f\n", (sysTime() - myTime));
 				myTime = sysTime();
 #endif
@@ -695,34 +1018,17 @@ sorted, true if the hit string is already sorted.
 				
 				// Fourth: Get boundaries at which the hit string is split.
 				String<TConvertedHitStringSize> positions;
-				partitionHits(positions, allHits,
-#ifdef RAZER_USE_ACCURACY
-				accuracy,
-#endif
-				options);
+				partitionHits(positions, shortestLength, hits[0], options);
 				
-#ifdef RAZER_SORT_TIMER
+#ifdef FLEX_TIMER
 				printf("partitioning took:%f\n", (sysTime() - myTime));
-				myTime = sysTime();
 #endif
 				
 				// Fifth: Verify hits.
-				verifyHits(positions, allHits, verifier, readSet, host(swiftFinders[0]), mode);
+				verifyHits(positions, shortestLength, hits, verifier, readSet, host(swiftFinders[0]), mode);
 				
-#ifdef RAZER_SORT_TIMER
-				printf("verifying took:%f\n", (sysTime() - myTime));
-#endif
-				
-#ifdef FLEX_TIMER
-				// for waiting times
-				// now = sysTime();
-				// std::cout << "verification time: " << (now - verificationTime) << std::endl;
-				// for(unsigned coreId = 0; coreId < options.numberOfCores; ++coreId)
-				// 	std::cout << "verification>\t" << coreId << "\t" << (now - waitingTimes[coreId]) << std::endl;
-#endif
 				
 				// clear hit strings
-				clear(allHits);
 				for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 					clear(hits[blockId]);
 				
@@ -745,6 +1051,11 @@ sorted, true if the hit string is already sorted.
 			windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 		
 	}
+
+// END RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+#endif 
+#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
+
 
 /**
 .Function._mapSingleReadsToContigFlex:
@@ -808,12 +1119,12 @@ sorted, true if the hit string is already sorted.
 			if (orientation == 'F') ::std::cerr << "[fwd]" << std::endl;
 			else                    ::std::cerr << "[rev]" << std::endl;
 		}
-
+		
 		// lock contig
 		lockContig(store, contigId);
 		TContigSeq &contigSeq = store.contigStore[contigId].seq;
 		if (orientation == 'R')	reverseComplementInPlace(contigSeq);
-
+		
 		// Finder and verifier strings of the same size as there are swift patterns
 		// One Swift finder, Swift pattern and verifier work together
 		String<TSwiftFinder> swiftFinders;
@@ -823,7 +1134,7 @@ sorted, true if the hit string is already sorted.
 		TSwiftFinder swiftFinder(contigSeq, options.repeatLength, 1);
 		for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 			swiftFinders[blockId] = swiftFinder;
-
+		
 		// Create a verifier for each thread. This way each thread gets its own store to dump the matches in.
 		// As consequence the dumping does not need to be critical
 		String<TVerifier> verifier;
@@ -841,29 +1152,37 @@ sorted, true if the hit string is already sorted.
 			// assign it to the string
 			verifier[threadId] = oneVerifier;
 		}
-
+		
 		// Set up finder. beginOK is true after the loop if all finders are set up successfully.
 		bool beginOk = true;
 		
+		// TODO: neccessary
 		#pragma omp parallel num_threads((int)options.numberOfCores)
 		{
 			#pragma omp for reduction(&:beginOk)
 			for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-				beginOk = windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.errorRate);
+				beginOk = windowFindBegin(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], 
+					options.errorRate);
 			}	
 		}
 		// Only if the finders are set up.
-		if(beginOk)
-			goOverContigFlex(swiftPatternHandler, swiftFinders, verifier,
-								cnts, options, threadStores, store, mode);
+		if(beginOk){
+			#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+				goOverContigFlex(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode);
+			#endif
+			#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
+				goOverContigIndependent(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode);
+			#endif
+		}
 		
 		if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
 		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
-
-
+		
 	}
 
-#else // not RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+// END RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS or RAZERS_PARALLEL_READS_INDEPENDENT
+#endif
+#ifdef RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW 
 	
 	template <
 	typename TContigSeq, 
@@ -878,7 +1197,7 @@ sorted, true if the hit string is already sorted.
     void _goOverContig(
 			TContigSeq										& contigSeq,
 			ParallelSwiftPatternHandler<String<
-			Pattern<TReadIndex, Swift<TSwiftSpec> > > > & swiftPatternHandler,
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
 			String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
 			TVerifier										& verifier,
 			TRazerSOptions									& options,
@@ -973,7 +1292,7 @@ sorted, true if the hit string is already sorted.
 				stop = !windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], options.windowSize);
 				
 				// verify hits
-				THitString hits = getSwiftHits(swiftFinders[blockId]);
+				THitString & hits = getSwiftHits(swiftFinders[blockId]);
 				for(THitStringSize h = 0; h < length(hits); ++h){
 					verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
 					matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
@@ -1113,7 +1432,9 @@ sorted, true if the hit string is already sorted.
 		if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
 			if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
 	}
-#endif // end else: not RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+
+// End: RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
+#endif
 	
 /**
 .Function._mapSingleReadsParallelCreatePatterns:
@@ -1187,7 +1508,7 @@ sorted, true if the hit string is already sorted.
 			}
 		}
 		
-#ifndef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+#ifdef RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 		// divide the verification Patterns in the same blocks as the filters
 		String<TVerifierBlock> forwardPatternsBlocks;
 		resize(forwardPatternsBlocks, options.numberOfBlocks, Exact());
@@ -1226,16 +1547,16 @@ sorted, true if the hit string is already sorted.
 			// (once per _mapSingleReadsToContig call)
 			lockContig(store, contigId);
 			if (options.forward){
-				#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
 				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, mode);
-				#else
+				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'F', options, mode);
 				#endif
 			}
 			if (options.reverse){
-				#ifdef RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
+				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
 				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, mode);
-				#else
+				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
 				#endif
 			}

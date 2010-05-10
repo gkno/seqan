@@ -131,17 +131,29 @@ TRazerSMode                      const & mode)
         
 		// if the pattern can be initialized and there is a non-repeat region in the contig that fits a qgram.
         if(windowFindBegin(swiftFinder, swiftPattern, options.errorRate)){
-            
+			
+			_proFloat myTime = sysTime();
+			
+			bool sequenceLeft = true;
+			
 			// while there is more contig sequence to search through
-            while(windowFindNext(swiftFinder, swiftPattern, 50000)){
-                // get the found hits from the finder
-                THitString hits = getSwiftHits(swiftFinder);
-                // verifiy them
-                for(THitStringSize h = 0; h < length(hits); ++h){
-                    verifier.m.readId = hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-                    matchVerify(verifier, getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPattern)), mode);
-                    ++options.countFiltration;
-                }
+			while(sequenceLeft){
+				sequenceLeft = windowFindNext(swiftFinder, swiftPattern, 500000);
+				
+				printf("filtering took: %f\n", sysTime() - myTime);
+				myTime = sysTime();
+				
+				// get the found hits from the finder
+				THitString hits = getSwiftHits(swiftFinder);
+				// verifiy them
+				for(THitStringSize h = 0; h < length(hits); ++h){
+					verifier.m.readId = hits[h].ndlSeqNo;         //array oder jedesmal berechnen
+					matchVerify(verifier, getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPattern)), mode);
+					++options.countFiltration;
+				}
+				
+				printf("verifying took: %f\n", sysTime() - myTime);
+				myTime = sysTime();
 				
 				// compact matches if neccessary
 				if (length(blockStore.alignedReadStore) > options.compactThresh)
