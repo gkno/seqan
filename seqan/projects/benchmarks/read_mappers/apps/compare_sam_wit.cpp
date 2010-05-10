@@ -17,14 +17,39 @@
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  FUBerMarkRM -- SAM against WIT checker
+   Usage: compare_sam_wit [options] <contig.fasta> <result.sam> <golden.wit>
 
-  Compares the SAM file yielded by a read mapper against a golden standard
-  WIT file.
+   Call as "compare_sam_wit --help" for a full list of options.
+  
+   This program is used to compare the read mapper results in a SAM file
+   with the golden standard in a WIT file.  Log messages are printed to
+   stderr, the result is written to the first line of stdout.
+
+   The first line of stdout consists of a JSON encoded dictionary that has
+   the following entries:
+
+   * total_intervals       Total number of intervals with the given error
+                           rate in the WIT file.
+   * found_intervals       Number of intervals in the WIT file that were
+                           found by the read mapper.
+   * superflous_intervals  Number of alignments in the SAM file that do not
+                           have their end position in an interval from the
+                           WIT file and the alignment at this position has
+                           a higher error rate than the specified one.
+   * additional_intervals  Same as superflous_intervals, but these alignments
+                           have an error rate that is as low as the specified
+                           one or lower.  If this happens in the non-weighted
+                           case then this is a bug in the benchmark tools.
+                           For the weighted case, this happens if RazerS does
+                           not find the alignment with low weighted but too
+                           high unweighted error rate and the read mapper
+                           generating the SAM file finds it.  Read the paper
+                           and/or manual for more details.
+
+   This .cpp file only contains the code to parse the command line arguments
+   and kicks off the flesh of the program which is defined in
+   compare_sam_wit.h.
   ===========================================================================*/
-
-// Uncomment to disable debugging.
-// #define SEQAN_ENABLE_DEBUG 0
 
 #include "compare_sam_wit.h"
 
@@ -41,6 +66,7 @@
 #include "wit_store.h"
 #include "return_codes.h"
 #include "find_myers_ukkonen_reads.h"
+#include "wit_store.h"
 
 using namespace seqan;  // Remove some syntatic noise.
 

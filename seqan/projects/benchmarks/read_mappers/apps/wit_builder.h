@@ -17,7 +17,11 @@
   ==========================================================================
    Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ==========================================================================
-   FUBerMarkRM -- WIT builder
+   This header defines the flesh of the wit_builder program.
+
+   The code is a bit scary in some places and needs some cleanup.
+
+   TODO(holtgrew): Switch to WitStore.
   ==========================================================================*/
 
 #include <algorithm>
@@ -26,21 +30,23 @@
 #include <iostream>
 #include <map>
 
-#include <seqan/basic/basic_testing.h>
-#include <seqan/find.h>                 // Finding infrastructure.
-#include <seqan/misc/misc_cmdparser.h>  // Command parser.
-#include <seqan/modifier.h>             // reverseAndComplement()
-#include <seqan/store.h>                // Fragment store et al.
+#include <seqan/basic.h>
+#include <seqan/file.h>
+#include <seqan/find.h>
+#include <seqan/modifier.h>
+#include <seqan/sequence.h>
+#include <seqan/store.h>
 
 #include "curve_smoothing.h"
 #include "find_myers_ukkonen_reads.h"
 
-//#include "witio.h"
 #include "verification.h"
 #include "wit_builder_options.h"
 #include "find_hamming_simple_ext.h"
 #include "find_hamming_simple_quality.h"
 #include "find_approx_dp_quality.h"
+#include "intervals.h"
+#include "verification.h"
 
 using namespace seqan;  // Remove some syntatic noise.
 
@@ -53,6 +59,80 @@ inline T ceilAwayFromZero(const T &x) {
     if (x < 0)
         return floor(x);
     return ceil(x);
+}
+
+
+// Build intervals from the error curves.
+template <typename TFragmentStore>
+void intervalizeErrorCurves(String<WitRecord> & result,
+                            TErrorCurves const & errorCurves,
+                            TFragmentStore const & fragments,
+                            Options const & options) {
+    typedef typename TErrorCurves::const_iterator TErrorCurvesIter;
+    for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it) {
+        size_t readId = it->first;
+        TWeightedMatches const & matches = it->second;
+        
+        // Sort the matches.  Matches with high scores (negative score and
+        // low absolute value) come first.
+        TWeightedMatches sortedMatches(matches);
+        std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
+    
+        // intervals[e] holds the intervals for error e of the current read.
+        String<String<ContigInterval> > intervals;
+        resize(intervals, options.maxError + 1);
+
+        // Join the intervals stored in sortedMatches.
+        //
+        // The position of the previous match, so we can consider only the
+        // ones with the smallest error.
+        //
+        // The following two vars should be != first pos and contigId.
+        size_t previousPos = supremumValue<size_t>();
+        size_t previousContigId = supremumValue<size_t>();
+        typedef Iterator<TWeightedMatches>::Type TWeightedMatchesIter;
+        for (TWeightedMatchesIter it = begin(sortedMatches);
+             it != end(sortedMatches); ++it) {
+            // Skip it if (it - 1) pointed to same pos (and must point to
+            // one with smaller absolute distance.
+            if (it->pos == previousPos and it->contigId == previousContigId)
+                continue;
+            // Consider all currently open intervals with a greater error
+            // than the error in *it and extend them or create a new one.
+            int error = abs(it->distance);
+            SEQAN_ASSERT_LEQ(error, options.maxError);
+            for (int e = error; e <= options.maxError; ++e) {
+                // Handle base case of no open interval:  Create new one.
+                if (length(intervals[e]) == 0) {
+                    appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));
+                    continue;
+                }
+                ContigInterval &interval = back(intervals[e]);
+                // Either extend the interval or create a new one.
+                SEQAN_ASSERT(interval.last <= pos);
+                if (interval.last + 1 == it->pos)
+                    back(intervals[e]).last += 1;
+                else
+                    appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));
+            }
+            // Book-keeping.
+            previousPos = it->pos;
+            previousContigId = it->contigId;
+        }
+
+        // Print the resulting intervals.
+        typedef Iterator<String<String<ContigInterval> > >::Type TIntervalContainerIter;
+        int distance = 0;
+        for (TIntervalContainerIter it = begin(intervals);
+             it != end(intervals); ++it, ++distance) {
+            typedef Iterator<String<ContigInterval> >::Type TIntervalIter;
+            for (TIntervalIter it2 = begin(*it); it2 != end(*it); ++it2)
+                appendValue(result,
+                            WitRecord(fragments.readNameStore[readId],
+                                      distance, fragments.contigNameStore[it2->contigId],
+                                      it2->isForward, it2->first, it2->last));
+        }
+    }
 }
 
 

@@ -1,6 +1,41 @@
+/*==========================================================================
+   SeqAn - The Library for Sequence Analysis
+   http://www.seqan.de 
+  ==========================================================================
+   Copyright (C) 2010
+  
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   Lesser General Public License for more details.
+  
+  ==========================================================================
+   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ==========================================================================
+   This file contains the flesh of the program reweight_wit.
+  ==========================================================================*/
+
 #ifndef BENCHMARKS_READ_MAPPERS_REWEIGHT_WIT_H_
 #define BENCHMARKS_READ_MAPPERS_REWEIGHT_WIT_H_
 
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <cstdlib>
+
+#include <seqan/align.h>
+#include <seqan/basic.h>
+#include <seqan/find.h>
+#include <seqan/score.h>
+#include <seqan/sequence.h>
+
+#include "wit_store.h"
 #include "witio.h"
 #include "file_helpers.h"
 #include "curve_smoothing.h"
@@ -148,7 +183,6 @@ void reweightInterval(WitStore & store,
     typedef typename Size<String<Dna5> >::Type TSize;
 
     // We are only considering the weighted case, N is a wildcard.
-    // TODO(holtgrew): Enable for reverse search, too.
     _patternMatchNOfPattern(pattern, true);
     _patternMatchNOfFinder(pattern, true);
 
@@ -162,10 +196,8 @@ void reweightInterval(WitStore & store,
     }
     Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);
     for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
-        for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y) {
+        for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y)
             setScore(matrixScore, Dna5(x), Dna5(y), -1);
-        }
-        // TODO(holtgrew): Enable N-is-wildcard when patterns support it.
         setScore(matrixScore, Dna5(x), Dna5('N'), 0);
         setScore(matrixScore, Dna5('N'), Dna5(x), 0);
         setScore(matrixScore, Dna5(x), Dna5(x), 0);
@@ -221,8 +253,8 @@ void reweightInterval(WitStore & store,
 
 
 template <typename TPatternSpec>
-void reweightWitStoreForContig(WitStore & store,
-                               WitStore & reweightedStore,
+void reweightWitStoreForContig(WitStore & reweightedStore,
+                               WitStore /*const*/ & store,
                                StringSet<String<Dna5> > /*const*/ & contigs,
                                StringSet<String<Dna5Q> > /*const*/ & reads,
                                size_t contigId,
@@ -284,7 +316,7 @@ void reweightWitStore(WitStore & store,
     reweightedStore.readNames = store.readNames;
     reweightedStore.contigNames = store.contigNames;
     for (size_t contigId = 0; contigId < length(contigs); ++contigId) {
-        reweightWitStoreForContig(store, reweightedStore, contigs, reads, contigId, options, TPatternSpec());
+        reweightWitStoreForContig(reweightedStore, store, contigs, reads, contigId, options, TPatternSpec());
     }
     move(store, reweightedStore);
 }

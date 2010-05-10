@@ -17,35 +17,25 @@
   ==========================================================================
    Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ==========================================================================
-   FUBerMarkRM -- WIT builder
+   Usage: wit_builder [options] <contigs.fasta> <golden.sam>
+
+   Call "wit_builder --help" to see a complete list of options.
+
+   This file creates a reference WIT file from a "golden" SAM result file
+   by a read mapper with full sensitivity (such as RazerS).  This file
+   only parses the command line arguments.  The real flesh of the program
+   is in wit_builder.h.
   ==========================================================================*/
 
-#include <algorithm>
-#include <cstdlib>    // exit()
+#include "wit_builder.h"
 
-#include <seqan/basic.h>
-#include <seqan/find.h>
-#include <seqan/sequence.h>
 #include <seqan/misc/misc_cmdparser.h>
 
-#include "intervals.h"
-#include "verification.h"
-#include "wit_builder.h"
-//#include "witio.h"
-
+#include "return_codes.h"
 
 const char * kRevision = "0.0alpha";
 
-
-// Define some return codes.
-const int kRetOk = 0;       // OK, no errors.
-const int kRetArgsErr = 1;  // Errors in arguments.
-const int kRetIoErr = 2;    // I/O error, problem reading files.
-const int kFatalErr = 3;    // Some other sort of fatal error.
-
-
 using namespace seqan;  // Remove some syntatic noise.
-
 
 // Set up the CommandLineParser options with options.
 void setUpCommandLineParser(CommandLineParser &parser) {
@@ -65,7 +55,6 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addHelpLine(parser, "hamming          = Hamming distance");
     addHelpLine(parser, "edit             = Edit distance");
     addOption(parser, CommandLineOption("o", "out-file", ("Path to the output file.  Use \"-\" for stdout, default is \"-\""), OptionType::String));
-//     addOption(parser, CommandLineOption("rr", "reverse-complement-reads", "If set, the reads are reverse-complemented instead of the genome for finding hits on the reverse strand.  Default: not set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("mN" , "match-N", "If specified, N characters match all other characters.  The default is for them to mismatch with CGAT.", OptionType::Boolean));
     
     // We require 4 command line options.
@@ -94,24 +83,19 @@ int parseCommandLineAndCheck(Options &options,
     if (isSetLong(parser, "max-error-rate"))
         getOptionValueLong(parser, "max-error-rate", options.maxError);
     if (isSetLong(parser, "distance-function"))
-        getOptionValueLong(parser, "distance-function",
-                           options.distanceFunction);
+        getOptionValueLong(parser, "distance-function", options.distanceFunction);
     if (isSetLong(parser, "match-N"))
         options.matchN = true;
     if (isSetLong(parser, "out-file"))
         getOptionValueLong(parser, "out-file", outFile);
-//     if (isSetLong(parser, "reverse-complement-reads"))
-//         options.reverseComplementGenome = false;
 
     // Validate values.
     if (options.maxError < 0) {
-        std::cerr << "ERROR: Invalid maximum error value: " <<
-            options.maxError << std::endl;
+        std::cerr << "ERROR: Invalid maximum error value: " << options.maxError << std::endl;
         return kRetArgsErr;
     }
     if (not options.validDistanceFunction()) {      
-      std::cerr << "ERROR: Invalid distance function: " <<
-        options.distanceFunction << std::endl;
+      std::cerr << "ERROR: Invalid distance function: " << options.distanceFunction << std::endl;
       return kRetArgsErr;
     }
     
@@ -120,81 +104,6 @@ int parseCommandLineAndCheck(Options &options,
     options.perfectMapFilename = getArgumentValue(parser, 1);
 
     return kRetOk;
-}
-
-
-
-// Build intervals from the error curves.
-template <typename TFragmentStore>
-void intervalizeErrorCurves(String<WitRecord> & result,
-                            TErrorCurves const & errorCurves,
-                            TFragmentStore const & fragments,
-                            Options const & options) {
-    typedef typename TErrorCurves::const_iterator TErrorCurvesIter;
-    for (TErrorCurvesIter it = errorCurves.begin(); it != errorCurves.end(); ++it) {
-        size_t readId = it->first;
-        TWeightedMatches const & matches = it->second;
-        
-        // Sort the matches.  Matches with high scores (negative score and
-        // low absolute value) come first.
-        TWeightedMatches sortedMatches(matches);
-        std::sort(begin(sortedMatches, Standard()), end(sortedMatches, Standard()));
-    
-        // intervals[e] holds the intervals for error e of the current read.
-        String<String<ContigInterval> > intervals;
-        resize(intervals, options.maxError + 1);
-
-        // Join the intervals stored in sortedMatches.
-        //
-        // The position of the previous match, so we can consider only the
-        // ones with the smallest error.
-        //
-        // The following two vars should be != first pos and contigId.
-        size_t previousPos = supremumValue<size_t>();
-        size_t previousContigId = supremumValue<size_t>();
-        typedef Iterator<TWeightedMatches>::Type TWeightedMatchesIter;
-        for (TWeightedMatchesIter it = begin(sortedMatches);
-             it != end(sortedMatches); ++it) {
-            // Skip it if (it - 1) pointed to same pos (and must point to
-            // one with smaller absolute distance.
-            if (it->pos == previousPos and it->contigId == previousContigId)
-                continue;
-            // Consider all currently open intervals with a greater error
-            // than the error in *it and extend them or create a new one.
-            int error = abs(it->distance);
-            SEQAN_ASSERT_LEQ(error, options.maxError);
-            for (int e = error; e <= options.maxError; ++e) {
-                // Handle base case of no open interval:  Create new one.
-                if (length(intervals[e]) == 0) {
-                    appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));
-                    continue;
-                }
-                ContigInterval &interval = back(intervals[e]);
-                // Either extend the interval or create a new one.
-                SEQAN_ASSERT(interval.last <= pos);
-                if (interval.last + 1 == it->pos)
-                    back(intervals[e]).last += 1;
-                else
-                    appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));
-            }
-            // Book-keeping.
-            previousPos = it->pos;
-            previousContigId = it->contigId;
-        }
-
-        // Print the resulting intervals.
-        typedef Iterator<String<String<ContigInterval> > >::Type TIntervalContainerIter;
-        int distance = 0;
-        for (TIntervalContainerIter it = begin(intervals);
-             it != end(intervals); ++it, ++distance) {
-            typedef Iterator<String<ContigInterval> >::Type TIntervalIter;
-            for (TIntervalIter it2 = begin(*it); it2 != end(*it); ++it2)
-                appendValue(result,
-                            WitRecord(fragments.readNameStore[readId],
-                                      distance, fragments.contigNameStore[it2->contigId],
-                                      it2->isForward, it2->first, it2->last));
-        }
-    }
 }
 
 
@@ -236,7 +145,6 @@ int main(int argc, const char *argv[]) {
     options.maxError = 0;
     options.distanceFunction = "edit";
     options.matchN = false;
-//     options.reverseComplementGenome = true;
     CharString outFile = "-";
 
     seqan::printDebugLevel(std::cerr);
@@ -263,7 +171,6 @@ int main(int argc, const char *argv[]) {
     // Build point-wise error curve.
     // =================================================================
     TErrorCurves errorCurves;
-    // TODO(holtgrew): CONTINUE to interpret options for weighted edit and hamming distance.
     if (options.distanceFunction == "edit")
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
         matchesToErrorFunction(fragments, errorCurves, options, Myers<FindInfix>());

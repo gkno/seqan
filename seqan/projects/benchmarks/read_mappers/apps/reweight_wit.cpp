@@ -1,19 +1,47 @@
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
-#include <map>
-#include <cmath>
+/*==========================================================================
+   SeqAn - The Library for Sequence Analysis
+   http://www.seqan.de 
+  ===========================================================================
+   Copyright (C) 2007
+  
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
+  
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   Lesser General Public License for more details.
+  
+  ===========================================================================
+   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ===========================================================================
+   Usage: reweight_wit.cpp [options] <contig.fasta> <reads.fastq> <input.wit>
 
-#include <seqan/basic.h>
-#include <seqan/file.h>
-#include <seqan/find.h>
-#include <seqan/sequence.h>
-#include <seqan/score.h>
+   Call as "compare_sam_wit --help" for a full list of options.
+
+   This program takes a WIT file and the contigs and reads it refers to as
+   its input.  It then computes all alignments of each read for each
+   alignment that ends in one of the intervals in the WIT file.  The
+   Hamming/Edit distance is then weighted by the quality values at the
+   error locations.  Inserts in the read get the ceiled mean of the adjacent
+   qualities.
+
+   Log messages are printed to stderr.
+
+   Refer to the paper for a complete description of the reweighting.
+
+   This .cpp file only contains code to parse the command line option and
+   kicks off calls to functions defined in reweight_wit.h which contains
+   the real flesh of this program.
+  ===========================================================================*/
+
+#include "reweight_wit.h"
+
 #include <seqan/misc/misc_cmdparser.h>
 
 #include "return_codes.h"
-#include "wit_store.h"
-#include "reweight_wit.h"
 
 const char * kRevision = "0.0alpha";
 
@@ -21,7 +49,7 @@ using namespace seqan;
 
 
 // Set up the CommandLineParser options with options.
-void setUpCommandLineParser(CommandLineParser &parser) {
+void setUpCommandLineParser(CommandLineParser & parser) {
     // Add a version string.
     std::string versionString = "WIT Reweighting Program  ";
     versionString += kRevision;
@@ -132,7 +160,7 @@ int main(int argc, const char *argv[]) {
         std::fstream fstrm(toCString(options.outWitFilename), std::ios_base::out | std::ios_base::binary);
         if (!fstrm.is_open()) {
             std::cerr << "Could not open WIT file " << options.outWitFilename << std::endl;
-            exit(1);
+            return kRetIoErr;
         }
         writeWitFile(fstrm, witStore);
     }
