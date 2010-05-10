@@ -1487,7 +1487,7 @@ inline void eraseBack(T & me)
 /**
 .Function.fill:
 ..cat:Containers
-..summary:Resizes and fills a container.
+..summary:Resizes a container. If the new length exceeds the old length the new elements are filled.
 ..signature:Size fill(object, new_length, value [, resize_tag])
 ..param.object: A container.
 ...type:Class.String
