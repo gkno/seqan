@@ -376,9 +376,9 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
+inline void _patternMatchNOfPatternImpl(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	typedef typename Value<TNeedle>::Type TValue;
@@ -409,10 +409,28 @@ SEQAN_CHECKPOINT
 	}
 }
 
+
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
+void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+    _patternMatchNOfPatternImpl(me, match);
+    _patternMatchNOfPatternImpl(me.data_findBeginPattern, match);
+}
+
+
+template <typename TNeedle, typename TSpec>
+void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, void> > & me, bool match)
+{
+    SEQAN_CHECKPOINT;
+    _patternMatchNOfPatternImpl(me, match);
+}
+
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+inline void _patternMatchNOfFinderImpl(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
+{
+    SEQAN_CHECKPOINT;
 
 	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
 	unsigned blockCount = (me.large == NULL)? 1: me.large->blockCount;
@@ -428,6 +446,22 @@ SEQAN_CHECKPOINT
 	}
 }
 
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me, bool match)
+{
+    SEQAN_CHECKPOINT;
+    _patternMatchNOfFinderImpl(me, match);
+    _patternMatchNOfFinderImpl(me.data_findBeginPattern, match);
+}
+
+
+template <typename TNeedle, typename TSpec>
+void _patternNOfFinder(Pattern<TNeedle, Myers<TSpec, void> > & me, bool match)
+{
+    SEQAN_CHECKPOINT;
+    _patternNOfFinderImpl(me, match);
+}
 
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TNeedle2>

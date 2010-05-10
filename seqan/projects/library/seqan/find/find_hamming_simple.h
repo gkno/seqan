@@ -61,14 +61,40 @@ public:
     // The current distance, >= 0, i.e. -current score.
     int distance;
 
-    Pattern() : maxDistance(-1), distance(0) {}
+    // TODO(holtgrew): This is extremely hacky, works only with Dna5.
+    // Flags -- ..1xx activate, ..01 match pattern, ..10 match finder.
+    unsigned matchNFlags;
+
+    Pattern() : maxDistance(-1), distance(0), matchNFlags(0) {}
 
     template <typename TNeedle2>
-    Pattern(const TNeedle2 &ndl, int k = -1) {
+    Pattern(const TNeedle2 &ndl, int k = -1) : matchNFlags(0) {
         SEQAN_CHECKPOINT;
         setHost(*this, ndl, k);
     }
 };
+
+
+template <typename TNeedle>
+inline void _patternMatchNOfPattern(Pattern<TNeedle, HammingSimple> & pattern, bool matchN)
+{
+    if (matchN)
+        pattern.matchNFlags |= 1;  // |= 01b
+    else
+        pattern.matchNFlags &= 2;  // &= 10b
+    pattern.matchNFlags |= 4;
+}
+
+
+template <typename TNeedle>
+inline void _patternMatchNOfFinder(Pattern<TNeedle, HammingSimple> & pattern, bool matchN)
+{
+    if (matchN)
+        pattern.matchNFlags |= 2;  // |= 10b
+    else
+        pattern.matchNFlags &= 1;  // &= 01b
+    pattern.matchNFlags |= 4;
+}
 
 
 template <typename TNeedle, typename TNeedle2>
@@ -121,6 +147,42 @@ inline void setScoreLimit(Pattern<TNeedle, HammingSimple> & me, int _limit) {
 }
 
 
+template <typename TAlphabet, typename TNeedle>
+inline bool _find_HammingSimple_charsEqual(TAlphabet const & a, TAlphabet const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return a == b;
+}
+
+
+template <typename TNeedle>
+inline bool _find_HammingSimple_charsEqual(Dna5 const & ndlChar, Dna5 const & hstckChar, Pattern<TNeedle, HammingSimple> const & pattern) {
+    if (ndlChar == Dna5('N') && pattern.matchNFlags & 1) {
+        return true;
+    } else if (hstckChar == Dna5('N') && pattern.matchNFlags & 2) {
+        return true;
+    } else {
+        return ndlChar == hstckChar;
+    }
+}
+
+
+template <typename TNeedle>
+inline bool _find_HammingSimple_charsEqual(Dna5Q const & a, Dna5 const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _find_HammingSimple_charsEqual(convert<Dna5>(a), b, pattern);
+}
+
+
+template <typename TNeedle>
+inline bool _find_HammingSimple_charsEqual(Dna5 const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _find_HammingSimple_charsEqual(a, convert<Dna5>(b), pattern);
+}
+
+
+template <typename TNeedle>
+inline bool _find_HammingSimple_charsEqual(Dna5Q const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _find_HammingSimple_charsEqual(convert<Dna5>(a), convert<Dna5>(b), pattern);
+}
+
+
 template <typename TFinder, typename TNeedle>
 inline bool find(TFinder &finder, 
                  Pattern<TNeedle, HammingSimple> &me) {
@@ -155,16 +217,33 @@ inline bool find(TFinder &finder,
 
     // Perform a naive search for the needle in the haystack such that
     // the difference is <= me.maxDistance.
+    //
+    // If a special behaviour is enabled for N then we use a different case.
     TSize i;
-    for (i = position(finder); i <= length(hstk) - length(ndl); ++i) {
-        me.distance = 0;  // Reset mismatch count.
-        for (TSize j = 0; j < length(ndl); ++j) {
-            me.distance += (ndl[j] != hstk[i + j]);
-            if (me.distance > me.maxDistance)
+    if (!(me.matchNFlags & 6u)) {
+        // No special behaviour for N.
+        for (i = position(finder); i <= length(hstk) - length(ndl); ++i) {
+            me.distance = 0;  // Reset mismatch count.
+            for (TSize j = 0; j < length(ndl); ++j) {
+                me.distance += (ndl[j] != hstk[i + j]);
+                if (me.distance > me.maxDistance)
+                    break;
+            }
+            if (me.distance <= me.maxDistance)
                 break;
         }
-        if (me.distance <= me.maxDistance)
-            break;
+    } else {
+        // Special behaviour for N enabled.
+        for (i = position(finder); i <= length(hstk) - length(ndl); ++i) {
+            me.distance = 0;  // Reset mismatch count.
+            for (TSize j = 0; j < length(ndl); ++j) {
+                me.distance += !(_find_HammingSimple_charsEqual(ndl[j], hstk[i + j], me));
+                if (me.distance > me.maxDistance)
+                    break;
+            }
+            if (me.distance <= me.maxDistance)
+                break;
+        }
     }
 
     // Return false if we did not break out of the for-loop but it
