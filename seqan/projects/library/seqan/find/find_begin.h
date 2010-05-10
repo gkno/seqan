@@ -35,8 +35,8 @@ template <typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 struct DPSearch;
 
 //see finder_myers_ukkonen.h
-//template <typename TSpec, typename TFindBeginPatternSpec>
-//struct Myers;
+template <typename TSpec, typename TFindBeginPatternSpec>
+struct Myers;
 
 
 //____________________________________________________________________________
