@@ -24,8 +24,7 @@
 #include <seqan/misc/misc_cmdparser.h>  // Command parser.
 #include <seqan/store.h>                // Fragment store et al.
 
-#include "witio.h"
-#include "intervals.h"
+#include "wit_store.h"
 #include "find_hamming_simple_ext.h"
 #include "find_myers_ukkonen_reads.h"
 #include "find_myers_ukkonen_ext.h"
@@ -33,6 +32,50 @@
 #include "find_hamming_simple_quality.h"
 
 using namespace seqan;  // Remove some syntatic noise.
+
+
+// Counters for the comparison result.
+struct ComparisonResult {
+    // Total number of intervals in golden standard.
+    size_t totalIntervalCount;
+
+    // Number of intervals in golden standard that were found by the
+    // read mapper.
+    size_t foundIntervalCount;
+
+    // Number of intervals with a too high distance that were found by
+    // the read mappers, i.e. "junk output".
+    size_t superflousIntervalCount;
+
+    // Number of intervals with a good score that the read mapper
+    // found which were not in our golden standard.
+    size_t additionalIntervalCount;
+    
+    ComparisonResult()
+            : totalIntervalCount(0), foundIntervalCount(0),
+              superflousIntervalCount(0), additionalIntervalCount(0) {}
+};
+
+
+// Output-to-stream operator for ComparisonResult.
+template <typename TStream>
+TStream & operator<<(TStream & stream, ComparisonResult const & result) {
+    stream << "{\"total_intervals\": " << result.totalIntervalCount
+           << ", \"found_intervals\": " << result.foundIntervalCount
+           << ", \"superflous_intervals\": " << result.superflousIntervalCount
+           << ", \"additional_intervals\": " << result.additionalIntervalCount
+           << "}";
+    return stream;
+}
+
+
+// Resetting all counters to 0 for ComparisonResult.
+void clear(ComparisonResult & result) {
+    result.totalIntervalCount = 0;
+    result.foundIntervalCount = 0;
+    result.superflousIntervalCount = 0;
+    result.additionalIntervalCount = 0;
+}
 
 
 // Container for the program options.
@@ -233,10 +276,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                                                  TAlignedReadIter const & alignedReadsEnd,
                                                  TWitRecordIter const & witRecordsBegin,
                                                  TWitRecordIter const & witRecordsEnd,
-                                                 size_t & foundIntervalCount,
-                                                 size_t & relevantIntervalCount,
-                                                 size_t & superflousIntervalCount,
-                                                 size_t & surplusIntervalCount,
+                                                 ComparisonResult & result,
                                                  TPatternSpec const &) {
     // TODO(holtgrew): Enable n-matches-wildcard mode and use qualities for weights.
     typedef size_t TPos;
@@ -281,7 +321,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
 
 //         std::cerr << __FILE__ << ":" << __LINE__ << " -- add(" << it->firstPos << ", " << it->lastPos << ", is forward = " << it->isForward << ")" << "  " << *it << std::endl;
         intervalMap[it->lastPos] = FlaggedInterval(it->firstPos, it->lastPos);
-        relevantIntervalCount += 1;
+        result.totalIntervalCount += 1;
     }
 
     // Now, try to hit all entries in intervals with the aligned reads on this strand.
@@ -344,7 +384,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
             }
             std::cerr << std::endl;
             std::cerr << "  max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
-            superflousIntervalCount += 1;
+            result.superflousIntervalCount += 1;
             continue;
         }
 
@@ -376,7 +416,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
             std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
             std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
             if (options.weightedDistances) {
-                surplusIntervalCount += 1;
+                result.additionalIntervalCount += 1;
                 continue;
             } else {
                 exit(1);
@@ -389,7 +429,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         // Count interval if hit for the this time.
         if (!iter->second.flag) {
             iter->second.flag = true;
-            foundIntervalCount += 1;
+            result.foundIntervalCount += 1;
         }
     }
 
@@ -430,10 +470,7 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
                                        TAlignedReadsIter const & alignedReadsEnd,
                                        TWitRecordsIter const & witRecordsBegin,
                                        TWitRecordsIter const & witRecordsEnd,
-                                       size_t & foundIntervalCount,
-                                       size_t & relevantIntervalCount,
-                                       size_t & superflousIntervalCount,
-                                       size_t & surplusIntervalCount,
+                                       ComparisonResult & result,
                                        TPatternSpec const &) {
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
@@ -476,7 +513,7 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
 //         std::cerr << "`---" << std::endl;
 
         // Actually compare the aligned reads for this contig on forward and backwards strand.
-        compareAlignedReadsToReferenceOnContigForOneRead(options, fragments, contigId, contig, contigGaps, isForward, readId, alignedReadsBeginForRead, alignedReadsEndForRead, witRecordsBeginForRead, witRecordsEndForRead, foundIntervalCount, superflousIntervalCount, surplusIntervalCount, relevantIntervalCount, TPatternSpec());
+        compareAlignedReadsToReferenceOnContigForOneRead(options, fragments, contigId, contig, contigGaps, isForward, readId, alignedReadsBeginForRead, alignedReadsEndForRead, witRecordsBeginForRead, witRecordsEndForRead, result, TPatternSpec());
         // This iteration's end iterators are the next iteration's begin iterators.
         alignedReadsBeginForRead = alignedReadsEndForRead;
         witRecordsBeginForRead = witRecordsEndForRead;
@@ -492,37 +529,34 @@ template <typename TFragmentStore, typename TPatternSpec>
 void
 compareAlignedReadsToReference(Options const & options,
                                TFragmentStore & fragments,  // non-const so reads can be sorted
-                               String<WitRecord> & witRecords,  // non-const so it is sortable
-                               size_t & foundIntervalCount,
-                               size_t & relevantIntervalCount,
-                               size_t & superflousIntervalCount,
-                               size_t & surplusIntervalCount,
+                               WitStore & witStore,  // non-const so it is sortable
+                               ComparisonResult & result,
                                TPatternSpec const &) {
     // Type aliases.
     typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
     typedef typename Iterator<TAlignedReadStore>::Type TAlignedReadsIter;
-    typedef typename Iterator<String<WitRecord> >::Type TWitRecordsIter;
+    typedef typename WitStore::TIntervalStore TIntervalStore;
+    typedef typename Iterator<TIntervalStore>::Type TIntervalIter;
     typedef typename TFragmentStore::TContigStore TContigStore;
     typedef typename Value<TContigStore>::Type TContigStoreElement;
     typedef typename TContigStoreElement::TContigSeq TContigSeq;
     
     // Initialization.
-    foundIntervalCount = 0;
-    relevantIntervalCount = 0;
-    superflousIntervalCount = 0;
-    surplusIntervalCount = 0;
+    clear(result);
 
     // Sort aligned reads and wit records by contig id.
     sortAlignedReads(fragments.alignedReadStore, SortEndPos());
     sortAlignedReads(fragments.alignedReadStore, SortReadId());
     sortAlignedReads(fragments.alignedReadStore, SortContigId());
-    std::sort(begin(witRecords, Standard()), end(witRecords, Standard()), WitRecord_Lt_ContigIdReadIdLastPos());
+    sortWitRecords(witStore, SortLastPos());
+    sortWitRecords(witStore, SortReadId());
+    sortWitRecords(witStore, SortContigId());
 
     TAlignedReadsIter alignedReadsBegin = begin(fragments.alignedReadStore, Standard());
     TAlignedReadsIter alignedReadsEnd = alignedReadsBegin;
 //     std::cerr << "# of alignd reads " << length(fragments.alignedReadStore) << std::endl;
-    TWitRecordsIter witRecordsBegin = begin(witRecords, Standard());
-    TWitRecordsIter witRecordsEnd = witRecordsBegin;
+    TIntervalIter witRecordsBegin = begin(witStore.intervals, Standard());
+    TIntervalIter witRecordsEnd = witRecordsBegin;
 //     std::cerr << "# of wit records " << length(witRecords) << std::endl;
 
 //     std::cerr << ".--- wit records" << std::endl;
@@ -531,7 +565,7 @@ compareAlignedReadsToReference(Options const & options,
 //     std::cerr << "`---" << std::endl;
 
     while (alignedReadsBegin != end(fragments.alignedReadStore, Standard()) &&
-           witRecordsBegin != end(witRecords, Standard())) {
+           witRecordsBegin != end(witStore.intervals, Standard())) {
         // Get current contigId.
         size_t contigId = _min(alignedReadsBegin->contigId, witRecordsBegin->contigId);
 //         std::cerr << "alignedReadsBegin->contigId == " << alignedReadsBegin->contigId << ", witRecordsBegin->contigId == " <<  witRecordsBegin->contigId << std::endl;
@@ -543,19 +577,19 @@ compareAlignedReadsToReference(Options const & options,
         }
 //         std::cerr << "+---" << std::endl;
         // Get wit records iterator for the next contigId.
-        while (witRecordsEnd != end(witRecords, Standard()) && witRecordsEnd->contigId <= contigId) {
+//         while (witRecordsEnd != end(witStore.intervals, Standard()) && witRecordsEnd->contigId <= contigId) {
 //             if (witRecordsEnd->distance == options.maxError)
 //                 std::cerr << "| " << *witRecordsEnd << std::endl;
-            ++witRecordsEnd;
-        }
+//             ++witRecordsEnd;
+//         }
 //         std::cerr << "`---" << std::endl;
 
         // Actually compare the aligned reads for this contig on forward and backwards strand.
         TContigSeq & contig = fragments.contigStore[contigId].seq;
-        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, contig, true, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, TPatternSpec());
+        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, contig, true, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, result, TPatternSpec());
         TContigSeq rcContig(contig);
         reverseComplementInPlace(rcContig);
-        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, rcContig, false, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, TPatternSpec());
+        compareAlignedReadsToReferenceOnContig(options, fragments, contigId, rcContig, false, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, result, TPatternSpec());
         
         // This iteration's end iterators are the next iteration's begin iterators.
         alignedReadsBegin = alignedReadsEnd;

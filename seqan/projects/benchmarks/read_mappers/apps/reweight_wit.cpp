@@ -116,7 +116,7 @@ int main(int argc, const char *argv[]) {
     loadWitFile(witStore, readNames, contigNames, options.inputWitFilename);
 
     // =================================================================
-    // Reweight Weightd Intervals.
+    // Reweight Weighted Intervals.
     // =================================================================
     if (options.distanceFunction == "edit")
         reweightWitStore(witStore, contigs, reads, options, Myers<FindInfix>());

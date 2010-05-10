@@ -38,24 +38,15 @@
 #include <seqan/basic.h>
 #include <seqan/store.h>
 
-#include "intervals.h"
-#include "witio.h"
+#include "wit_store.h"
+#include "return_codes.h"
 #include "find_myers_ukkonen_reads.h"
-
-// TODO(holtgrew): Hamming distance not implemented.
-// TODO(holtgrew): We do not need to know the distance type here?!
 
 using namespace seqan;  // Remove some syntatic noise.
 
 
 // The revision string of the program.
 const char * kRevision = "0.0alpha";
-
-// Define some return codes.
-const int kRetOk = 0;       // OK, no errors.
-const int kRetArgsErr = 1;  // Errors in arguments.
-const int kRetIoErr = 2;    // I/O error, problem reading files.
-const int kFatalErr = 3;    // Some other sort of fatal error.
 
 
 // Set up the CommandLineParser options with options.
@@ -115,20 +106,17 @@ int parseCommandLineAndCheck(Options &options,
     if (isSetLong(parser, "max-error-rate"))
         getOptionValueLong(parser, "max-error-rate", options.maxError);
     if (isSetLong(parser, "distance-function"))
-        getOptionValueLong(parser, "distance-function",
-                           options.distanceFunction);
+        getOptionValueLong(parser, "distance-function", options.distanceFunction);
     if (isSetLong(parser, "out-file"))
         getOptionValueLong(parser, "out-file", outFile);
 
     // Validate values.
     if (options.maxError < 0) {
-        std::cerr << "ERROR: Invalid maximum error value: " <<
-            options.maxError << std::endl;
+        std::cerr << "ERROR: Invalid maximum error value: " << options.maxError << std::endl;
         return kRetArgsErr;
     }
     if (not options.validDistanceFunction())     {      
-      std::cerr << "ERROR: Invalid distance function: " <<
-        options.distanceFunction << std::endl;
+      std::cerr << "ERROR: Invalid distance function: " << options.distanceFunction << std::endl;
       return kRetArgsErr;
     }
     
@@ -136,86 +124,6 @@ int parseCommandLineAndCheck(Options &options,
     options.seqFileName = getArgumentValue(parser, 0);
     options.samFileName = getArgumentValue(parser, 1);
     options.witFileName = getArgumentValue(parser, 2);
-
-    return kRetOk;
-}
-
-
-// Read the WIT file at the given filename.
-//
-// Return return code for the program.
-//
-// filename -- Path to file to read.
-// fragments -- The FragmentStore<> to use for read/contig identification
-//              from string name.
-// weightedMatches  -- The resulting weighted matches.
-// ignoredReadCount -- Output parameter, number of reads in the WIT file
-//                     that could not be found in the fragment store.
-template <typename TFragmentStore>
-int readWitFile(const CharString &filename, const TFragmentStore &fragments,
-                String<WitRecord> &witRecords, size_t &ignoredReadCount) {
-    // Initialize output parameters.
-    clear(witRecords);
-    ignoredReadCount = 0;
-
-    // Open the file.
-    std::fstream fstrm(toCString(filename), std::ios_base::in);
-    if (not fstrm.is_open()) {
-        std::cerr << "Could not open WIT file." << std::endl;
-        return kRetIoErr;
-    }
-
-    // Build map from read name to read id.
-    typedef typename TFragmentStore::TReadStore TReadStore;
-    typedef typename Position<TReadStore>::Type TReadStorePos;
-    std::map<CharString, TReadStorePos> readNameToId;
-    for (TReadStorePos readId = 0; readId < length(fragments.readNameStore); ++readId) {
-        readNameToId[fragments.readNameStore[readId]] = readId;
-        // std::cout << readId << ": " << fragments.readNameStore[readId] << std::endl;
-    }
-
-    // Build map from contig name to contig id.
-    typedef typename TFragmentStore::TContigStore TContigStore;
-    typedef typename Position<TContigStore>::Type TContigStorePos;
-    std::map<CharString, TContigStorePos> contigNameToId;
-    for (TContigStorePos contigId = 0; contigId < length(fragments.contigNameStore); ++contigId) {
-        contigNameToId[fragments.contigNameStore[contigId]] = contigId;
-    }
-
-    // Read header.
-    char c;
-    readWitHeader(fstrm, c);
-    // Read all records.
-    bool wasRecord;
-    std::set<CharString> ignoredReadNames;
-    while (true) {  // Will break, depending on wasRecord.
-        WitRecord witRecord;
-        wasRecord = readWitRecord(fstrm, witRecord, c);
-        if (not wasRecord)
-            break;  // out of loop.
-
-        // If we have a read with an id in the WIT file that is not in
-        // the SAM file then we have ignore the WIT entry.  We record
-        // all the ignored read names and return a count of them in an
-        // output parameter so they can be tallied as "not hit" later.
-        if (readNameToId.find(witRecord.readName) == readNameToId.end()) {
-            ignoredReadNames.insert(witRecord.readName);
-            continue;  // Next record.
-        }
-
-        // Resolve contig and read name to id.
-        SEQAN_ASSERT_TRUE(contigNameToId.find(witRecord.contigName) != contigNameToId.end());
-        witRecord.contigId = contigNameToId[witRecord.contigName];
-        SEQAN_ASSERT_TRUE(contigNameToId.find(witRecord.readName) != readNameToId.end());
-        witRecord.readId = readNameToId[witRecord.readName];
-
-        // Append record to the output parameter witRecords.
-        appendValue(witRecords, witRecord);
-//         std::cerr << "append(witRecords, " << witRecord << ")" << std::endl;
-    }
-
-    // Write number of ignored reads out.
-    ignoredReadCount = ignoredReadNames.size();
 
     return kRetOk;
 }
@@ -275,17 +183,10 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     // Load WIT file.
     // =================================================================
-    std::cerr << "Reading WIT file " << options.witFileName << " ..." << std::endl;
+    std::cerr << "Loading intervals from " << options.witFileName << std::endl;
     startTime = sysTime();
-    typedef String<WitRecord> TWitRecords;
-    TWitRecords witRecords;
-    size_t ignoredReadCount;
-    ret = readWitFile(options.witFileName, fragments, witRecords,
-                      ignoredReadCount);
-    if (ret != kRetOk)
-        return ret;
-    // Sort WIT records by read id.
-    std::sort(begin(witRecords), end(witRecords));
+    WitStore witStore;
+    loadWitFile(witStore, fragments.readNameStore, fragments.contigNameStore, options.witFileName);
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================
@@ -293,17 +194,13 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     std::cerr << "Compare reader hits from SAM file against WIT file." << std::endl;
     startTime = sysTime();
-    typedef Position<TWitRecords>::Type TPos;
-    size_t relevantIntervalCount = 0;
-    size_t foundIntervalCount = 0;
-    size_t superflousIntervalCount = 0;
-    size_t surplusIntervalCount = 0;
+    typedef Position<WitStore::TIntervalStore>::Type TPos;
+    ComparisonResult result;
     if (options.distanceFunction == "edit")
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, Myers<FindInfix>());
-        // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
-//                                              MyersUkkonenReads());
+        // TODO(holtgrew): Switch to "reads version" (force alignment of last characters) after RazerS can do this, too.  Tag is MyersUkkonenReads().
+        compareAlignedReadsToReference(options, fragments, witStore, result, Myers<FindInfix>());
     else  // options.distanceFunction == "hamming"
-        compareAlignedReadsToReference(options, fragments, witRecords, foundIntervalCount, relevantIntervalCount, superflousIntervalCount, surplusIntervalCount, HammingSimple());
+        compareAlignedReadsToReference(options, fragments, witStore, result, HammingSimple());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
     
 
@@ -314,28 +211,21 @@ int main(int argc, const char *argv[]) {
     startTime = sysTime();
     // The output consists of one line that describes the total and
     // found intervals as a JSON record with the entries
-    // "total_intervals" and "found_itervals".
+    // "total_intervals", "found_itervals", "superflous_intervals",
+    // "additional_intervals".
     if (outFile == "-") {
         // Print to stdout.
-        std::cout << "{\"total_intervals\": " << relevantIntervalCount
-                  << ", \"found_intervals\": " << foundIntervalCount
-                  << ", \"superflous_intervals\": " << superflousIntervalCount
-                  << ", \"additional_intervals\": " << surplusIntervalCount
-                  << "}" << std::endl;
+        std::cout << result << std::endl;
     } else {
         // Write output to file.
-        // TODO(holtgrew): What about things the tool found, our benchmark did not find?
         std::fstream fstrm(toCString(outFile), std::ios_base::out);
         if (not fstrm.is_open()) {
             std::cerr << "Could not open output JSON file." << std::endl;
             return kRetIoErr;
         }
-        fstrm << "{\"total_intervals\": " << relevantIntervalCount + ignoredReadCount
-              << ", \"found_intervals\": " << foundIntervalCount
-              << ", \"superflous_intervals\": " << superflousIntervalCount
-              << ", \"additional_intervals\": " << surplusIntervalCount
-              << "}" << std::endl;
+        fstrm << result << std::endl;
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
+
     return kRetOk;
 }

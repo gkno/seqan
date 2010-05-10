@@ -46,6 +46,7 @@ struct WitStore {
     Holder<TNameSet> readNames;
     Holder<TNameSet> contigNames;
 
+    // TODO(holtgrew): Rename to witRecords.
     TIntervalStore intervals;
 };
 
@@ -133,6 +134,24 @@ struct WitStoreLess<SortFirstPos>
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
         return a.firstPos < b.firstPos;
+    }
+};
+
+
+struct _SortLastPos {};
+typedef Tag<_SortLastPos> const SortLastPos;
+
+
+template <>
+struct WitStoreLess<SortLastPos>
+{
+    WitStore const & store;
+
+    WitStoreLess(WitStore const & _store) : store(_store) {};
+
+    bool
+    operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
+        return a.lastPos < b.lastPos;
     }
 };
 
