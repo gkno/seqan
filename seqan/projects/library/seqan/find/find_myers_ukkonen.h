@@ -457,10 +457,10 @@ void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec>
 
 
 template <typename TNeedle, typename TSpec>
-void _patternNOfFinder(Pattern<TNeedle, Myers<TSpec, void> > & me, bool match)
+void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, void> > & me, bool match)
 {
     SEQAN_CHECKPOINT;
-    _patternNOfFinderImpl(me, match);
+    _patternMatchNOfFinderImpl(me, match);
 }
 
 
