@@ -146,6 +146,7 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     // Reweight Weighted Intervals.
     // =================================================================
+    std::cerr << "Reweighting intervals..." << std::endl;
     if (options.distanceFunction == "edit")
         reweightWitStore(witStore, contigs, reads, options, Myers<FindInfix>());
     else  // options.distanceFunction == "hamming"
@@ -154,6 +155,7 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     // Write Output
     // =================================================================
+    std::cerr << "Writing output..." << std::endl;
     if (options.outWitFilename == "-") {
         writeWitFile(std::cout, witStore);
     } else {

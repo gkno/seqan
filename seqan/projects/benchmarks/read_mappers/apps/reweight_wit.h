@@ -196,12 +196,14 @@ void reweightInterval(WitStore & store,
     }
     Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);
     for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
-        for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y)
+        for (int y = 0; y < ValueSize<Dna5>::VALUE - 1; ++y)
             setScore(matrixScore, Dna5(x), Dna5(y), -1);
         setScore(matrixScore, Dna5(x), Dna5('N'), 0);
         setScore(matrixScore, Dna5('N'), Dna5(x), 0);
         setScore(matrixScore, Dna5(x), Dna5(x), 0);
     }
+    for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x)
+        setScore(matrixScore, Dna5('N'), Dna5(x), 0);
 
     bool ret = setEndPosition(finder, pattern, interval.firstPos);
     SEQAN_ASSERT_TRUE(ret);
@@ -222,13 +224,10 @@ void reweightInterval(WitStore & store,
         assignSource(row(align, 1), read);
 
         // Perform banded Needleman-Wunsch alignment.
-        // TODO(holtgrew): Use wrapper for trace pumping, once it is in place.
         StringSet<String<Dna5> > stringSet;
         appendValue(stringSet, infix(finder));
         appendValue(stringSet, read);
-        _Align_Traceback<TSize> trace;
-        int alignmentScore = globalAlignment(trace, stringSet, matrixScore, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
-        _pump_trace_2_Align(align, trace);
+        int alignmentScore = globalAlignment(align, stringSet, matrixScore, 2*getScore(pattern), -2*getScore(pattern), BandedNeedlemanWunsch());
         SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
         // Compute quality-based score of alignment.  We pass the

@@ -160,7 +160,9 @@ TStream & operator<<(TStream & stream, FlaggedInterval const & interval) {
 // Compute quality-based alignment score.  The read has to be given
 // since we do not have qualities in the alignment object.
 template <typename TAlign>
-int computeQualityAlignmentScore(TAlign const & align, Score<int, ScoreMatrix<Dna5> > const & scoreMatrix, String<Dna5Q> const & read) {
+int computeQualityAlignmentScore(TAlign const & align,
+                                 Score<int, ScoreMatrix<Dna5> > const & scoreMatrix,
+                                 String<Dna5Q> const & read) {
     // TODO(holtgrew): Maybe convert to iterators for performance?
     typedef typename Row<TAlign const>::Type TRow;
     typedef typename Value<TRow>::Type TAlignChar;
