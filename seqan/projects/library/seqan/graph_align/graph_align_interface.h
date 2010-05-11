@@ -153,6 +153,25 @@ globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TString, typename TAlignSpec, typename TStringSet, typename TScoreValue, typename TScoreSpec, typename TDiagonal>
+inline TScoreValue
+globalAlignment(Align<TString, TAlignSpec> & align,
+                TStringSet const & stringSet,
+				Score<TScoreValue, TScoreSpec> const & sc,
+				TDiagonal diag1,
+				TDiagonal diag2,
+				BandedNeedlemanWunsch)
+{
+	SEQAN_CHECKPOINT;
+    typedef typename Size<TString>::Type TSize;
+    _Align_Traceback<TSize> trace;
+    int alignmentScore = globalAlignment(trace, stringSet, sc, diag1, diag2, BandedNeedlemanWunsch());
+    _pump_trace_2_Align(align, trace);
+    return alignmentScore;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScoreValue, typename TSpec2, typename TDiagonal>
 inline TScoreValue
 globalAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,

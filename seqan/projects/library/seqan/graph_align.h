@@ -22,6 +22,7 @@
 #define SEQAN_HEADER_GRAPH_ALIGN_H
 
 // Seqan
+#include <seqan/align.h>
 #include <seqan/graph_types.h>
 #include <seqan/graph_algorithms.h>
 #include <seqan/refinement.h>

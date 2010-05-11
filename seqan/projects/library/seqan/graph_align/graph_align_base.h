@@ -25,7 +25,15 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
+//////////////////////////////////////////////////////////////////////////////
+// helper class to store traceback
 
+template <typename TSize>
+struct _Align_Traceback
+{
+	String<TSize> sizes;
+	String<TraceBack> tvs; //trace values: 0 = diagonal, 1 = horizontal, 2 = vertical
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // Alignment: Simple Traceback Alphabet
