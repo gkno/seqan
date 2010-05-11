@@ -25,6 +25,8 @@
 #include <seqan/find.h>                 // Finding infrastructure.
 #include <seqan/misc/misc_cmdparser.h>  // Command parser.
 #include <seqan/store.h>                // Fragment store et al.
+#include <seqan/align.h>
+#include <seqan/graph_align.h>
 
 #include "wit_store.h"
 #include "find_hamming_simple_ext.h"
@@ -222,22 +224,22 @@ int bestScoreForAligned(TFragmentStore & fragments,
     TAlignedReadPos beginPos = positionGapToSeq(contigGaps, alignedRead.beginPos);
     TReadSeqStore & readSeqs = fragments.readSeqStore;
     TReadSeq read = readSeqs[alignedRead.readId];
-            
-    // Maybe compute reverse of read, then beginPos and endPos
-    // must be exchanged, too.
-//     std::cout << "endPos = " << endPos << ", beginPos = " << beginPos << std::endl;
+
+    // If we are aligning on the reverse strand then we have to compute the
+    // begin and end position on this strand.
     if (!isForward) {
         SEQAN_ASSERT_GT(beginPos, endPos);
         beginPos = length(contig) - beginPos;
         endPos = length(contig) - endPos;
     }
 
+    // Initialize finder and pattern, configure to match N with none or all,
+    // depending on configuration.
     Finder<TContigSeq2> finder(contig2);
     Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 1000);
     _patternMatchNOfPattern(pattern, options.matchN);
     _patternMatchNOfFinder(pattern, options.matchN);
     bool ret = setEndPosition(finder, pattern, endPos);
-//     std::cerr << __FILE__ << ":" << __LINE__ << " -- endPos = " << endPos << ", endPosition(finder) == " << endPosition(finder) << std::endl;
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(endPos, endPosition(finder));
     
@@ -260,9 +262,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     StringSet<String<Dna5> > stringSet;
     appendValue(stringSet, infix(finder));
     appendValue(stringSet, read);
-    _Align_Traceback<TSize> trace;
-    int alignmentScore = globalAlignment(trace, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
-    _pump_trace_2_Align(align, trace);
+    int alignmentScore = globalAlignment(align, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
     SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
     // Compute quality-based score of alignment.  We pass the
