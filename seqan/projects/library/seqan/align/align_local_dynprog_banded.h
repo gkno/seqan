@@ -268,7 +268,7 @@ SEQAN_CHECKPOINT
                     *matIt = newVal;
                     maxCol = _min(_max(maxCol, col+2), diagonalWidth);
                     newMaxCol = _max(newMaxCol, col+1);
-                    newMinCol = _min(newMinCol, col-1);
+                    newMinCol = ((col != 0) ? _min(newMinCol, col-1) : 0);
 
                     // Record the new best score
                     if (newVal >= cutoff) {
@@ -297,16 +297,16 @@ SEQAN_CHECKPOINT
     }
  //   // Debug code
  //   std::cerr << std::endl;
-	//for(TSize i= 0; i<height; ++i) {
-	//	for(TSize j= 0; j<diagonalWidth; ++j) {
-	//		std::cerr << value(finder.matrix, j, i) << ',';
-	//	}
-	//	std::cerr << " " << str2[i-1] << "    ";
- //       for(TSize j= 0; j<diagonalWidth; ++j) {
-	//		std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
-	//	}
-	//	std::cerr << " " << str2[i-1] << std::endl;
-	//}
+ //   for (TSize i = 0; i < height; ++i) {
+ //       for(TSize j = 0; j < diagonalWidth; ++j) {
+ //           std::cerr << value(finder.matrix, j, i) << ',';
+ //       }
+ //       std::cerr << " " << str2[i-1] << "    ";
+ //       for (TSize j= 0; j<diagonalWidth; ++j) {
+ //           std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
+ //       }
+ //       std::cerr << " " << str2[i-1] << std::endl;
+ //   }
 }
 
 ////////////////////////////////////////////////////////////////////////////
