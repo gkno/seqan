@@ -222,6 +222,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		return;
 	}
 
+
+// End RAZERS_PARALLEL_READS_INDEPENDENT
+#endif
+#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
+
 	template<typename TSwiftHit>
 	struct SwiftHitComparison:
 		public ::std::binary_function<TSwiftHit, TSwiftHit, bool>
@@ -247,23 +252,35 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 	template<
 		int stage,
-		typename THit,
-		typename TSize>
+		typename THit>
 	inline void myRadixPass(
 			String<THit> 			& sorted,
-			String<THit> const 		& unsorted,
-			String<TSize> 			& buckets)
+			String<THit> const 		& unsorted)
 	{
 		SEQAN_CHECKPOINT
 		
 		typedef typename Position<String<THit> >::Type		TPos;
-		typedef typename Position<String<TSize> >::Type		TBucketPos;
+		typedef String<unsigned long> 						TBuckets;
+		typedef typename Position<TBuckets>::Type			TBucketPos;
 		
-		std::fill(begin(buckets), end(buckets), 0);
+		TPos threads = 8;
 		
-		for(TPos i = 0; i < length(unsorted); ++i){
-			++buckets[toBucket<stage>(unsorted[i].ndlSeqNo)];
+		TBuckets buckets;
+		fill(buckets, (threads * 256), 0, Exact());
+		
+		TPos partSize = length(unsorted) / threads;
+		for(TPos p = 0; p < threads; ++p){
+			#pragma omp task shared(buckets, unsorted)
+			{
+				TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
+				for(TPos i = p*partSize; i < endPos; ++i){
+					TBucketPos bp = toBucket<stage>(unsorted[i].ndlSeqNo) * threads + p;
+					++buckets[bp];
+				}
+			}
+			
 		}
+		#pragma omp taskwait
 		
 		// Exclusive partial sum
 		TBucketPos sum1 = -1, sum2 = -1;
@@ -273,9 +290,17 @@ namespace SEQAN_NAMESPACE_MAIN
 			sum2 = sum1;
 		}
 		
-		for(TPos i = 0; i < length(unsorted); ++i){
-			sorted[++buckets[toBucket<stage>(unsorted[i].ndlSeqNo)]] = unsorted[i];
+		for(TPos p = 0; p < threads; ++p){
+			#pragma omp task shared(buckets, sorted, unsorted)
+			{
+				TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
+				for(TPos i = p*partSize; i < endPos; ++i){
+					TBucketPos bp = toBucket<stage>(unsorted[i].ndlSeqNo) * threads + p;
+					sorted[++buckets[bp]] = unsorted[i];
+				}
+			}
 		}
+		#pragma omp taskwait
 	}
 
 
@@ -286,19 +311,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		String<THit> sorted;
 		resize(sorted, length(hits), Exact());
-		
-		String<unsigned long> buckets;
-		resize(buckets, 256, Exact());
-		
-		myRadixPass<0>(sorted, hits, buckets);
-		myRadixPass<1>(hits, sorted, buckets);
-		myRadixPass<2>(sorted, hits, buckets);
-		myRadixPass<3>(hits, sorted, buckets);
+				
+		myRadixPass<0>(sorted, hits);
+		myRadixPass<1>(hits, sorted);
+		myRadixPass<2>(sorted, hits);
+		myRadixPass<3>(hits, sorted);
 		// If more stages are added be aware that hits needs to be the first argument in the last call
 		// or sorted needs to be copied in hits.
 	}
 
 
+// End (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
+#endif
+#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
 	template<
 		typename TPosition,
 		typename TSpec,
@@ -534,7 +559,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			readID(offSet + other.ndlSeqNo)
 		{
 			typedef typename Infix<TText2>::Type TInfix;
-			TInfix i = getSwiftRange(other, ref);
+			TInfix i = swiftInfixNoClip(other, ref);
 			
 			begin = beginPosition(i);
 			end = endPosition(i);
@@ -604,12 +629,12 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 ..param.windowSize:Window size @Function.windowFindNext@ is called with.
 */
 	template <
-		typename TConvertedSwiftHitString,
+		typename TSwiftHitString,
 		typename TSwiftFinder,
 		typename TSwiftPattern,
 		typename TRazerSOptions>
 	bool collectHitsForBlock(
-			TConvertedSwiftHitString	& hits,
+			TSwiftHitString				& hits,
 			unsigned					& totalHits,
 			unsigned const				  offSet,
 			TSwiftFinder				& finder,
@@ -620,32 +645,26 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 #endif
 			)
 	{
-		typedef typename TSwiftFinder::THitString				TSwiftHitString;
-		typedef typename Size<TConvertedSwiftHitString>::Type	TSize; 
-		typedef typename Host<TSwiftFinder>::Type				TText;
+		typedef typename Size<TSwiftHitString>::Type	TSize; 
 		
 		// Get new hits till all threads together have enough.
 		bool sequenceLeft = true;
 		while(totalHits < options.collect and sequenceLeft){
 			// Search for new hits.
 			sequenceLeft = windowFindNext(finder, pattern, options.windowSize);
-			TSwiftHitString oriHits = getSwiftHits(finder);
-			// Resize the hit string so it can hold the new hits
-			TSize oldSize = length(hits);
-			resize(hits, (oldSize + length(oriHits)));
-			// Convert hits and append them to the hit string for this block.
-			// Conversion is neccessary so that the hits can be sorted by the readID.
-			for(TSize hitID = 0; hitID < length(oriHits); ++hitID)
-				hits[oldSize + hitID] = ConvertedSwiftHit<TText>(oriHits[hitID], host(finder), offSet);
-			
+			append(hits, getSwiftHits(finder));
 			// Update the overall hit count so that the other threads know when to stop as well.
 			#pragma omp atomic
-			totalHits += length(oriHits);
+			totalHits += length(getSwiftHits(finder));
 			
 #ifdef FLEX_TIMER
 			++windowNumbers;
 #endif
 		}
+		
+		for(TSize i = 0; i < length(hits); ++i)
+			hits[i].ndlSeqNo += offSet;
+		
 		return sequenceLeft;
 	}
 	
@@ -735,12 +754,12 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 // TODO: doc
 	template<
 		typename TPosition,
-		typename TText,
+		typename TSwiftHit,
 		typename TRazerSOptions>
 	inline void partitionHits(
 			String<TPosition>						& positions,
 			TPosition const							& startPos,
-			String<ConvertedSwiftHit<TText> > const	& hits,
+			String<TSwiftHit> const					& hits,
 			TRazerSOptions const					& options)
 	{ 
 		// typedef String<ConvertedSwiftHit<TText> >			TConvertedHitString;
@@ -757,10 +776,10 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			myPos = startPos + blockId*partSize;
 			
 			unsigned now = 0;
-			unsigned last = hits[myPos - 1].readID;;
+			unsigned last = hits[myPos - 1].ndlSeqNo;
 			
 			for(; myPos < length(hits); ++myPos){
-				now = hits[myPos].readID;
+				now = hits[myPos].ndlSeqNo;
 				if(last != now)
 					break;
 				
@@ -780,7 +799,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 	// TODO: doc
 	template<
 		typename TPosition,
-		typename TText,
+		typename TSwiftHit,
 		typename TVerifier,
 		typename TReads,
 		typename TContigSeq,
@@ -788,15 +807,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 	inline void verifyHits(
 			String<TPosition> const					& positions,
 			TPosition const							& shortestPos,
-			StringSet<String<
-				ConvertedSwiftHit<TText> > > 		& hits,
+			StringSet<String<TSwiftHit > > 			& hits,
 			TVerifier								& verifier,
 			TReads 									& readSet,
 			TContigSeq 								& contigSeq,
 			TRazerSMode const						& mode)
 	{
-		typedef typename Infix<TContigSeq>::Type	TContigInfix;
-		typedef String<ConvertedSwiftHit<TText> >	THitString;
+		// typedef String<ConvertedSwiftHit<TText> >	THitString;
 		
 #ifdef FLEX_TIMER
 				String<_proFloat> waitingTimes;
@@ -819,10 +836,8 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				TPosition myPos = 0;
 				printf("block: %d, from:%lu, to: %lu, length: %lu\n", i, myPos, shortestPos, length(hits[i-1]));
 				for(; myPos < shortestPos; ++myPos){
-					verifier[i-1].m.readId = hits[i-1][myPos].readID;
-					TContigInfix inf = infix(contigSeq, hits[i-1][myPos].begin, hits[i-1][myPos].end);
-					
-					matchVerify(verifier[i-1], inf, hits[i-1][myPos].readID, readSet, mode);	
+					verifier[i-1].m.readId = hits[i-1][myPos].ndlSeqNo;
+					matchVerify(verifier[i-1], swiftInfix(hits[i-1][myPos], contigSeq), hits[i-1][myPos].ndlSeqNo, readSet, mode);	
 				}
 				
 #ifdef FLEX_TIMER
@@ -855,10 +870,8 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				TPosition myPos = positions[i-1];
 				printf("block: %d, from:%lu, to: %lu, length: %lu\n", i, myPos, positions[i], length(hits[i-1]));
 				for(; myPos < positions[i]; ++myPos){
-					verifier[i-1].m.readId = hits[0][myPos].readID;
-					TContigInfix inf = infix(contigSeq, hits[0][myPos].begin, hits[0][myPos].end);
-					
-					matchVerify(verifier[i-1], inf, hits[0][myPos].readID, readSet, mode);	
+					verifier[i-1].m.readId = hits[0][myPos].ndlSeqNo;
+					matchVerify(verifier[i-1], swiftInfix(hits[0][myPos], contigSeq), hits[0][myPos].ndlSeqNo, readSet, mode);	
 				}
 				
 #ifdef FLEX_TIMER
@@ -927,15 +940,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typedef typename TSwiftFinder::THitString				THitString;
 		typedef typename Value<THitString>::Type				TSwiftHit;
 		typedef typename Position<THitString>::Type				THitStringSize;
+		typedef typename Iterator<THitString>::Type				THitStringIter;
 		typedef typename Host<TSwiftFinder>::Type				TText;
-		typedef String<ConvertedSwiftHit<TText> >				TConvertedHitString;
-		typedef typename Size<TConvertedHitString>::Type		TConvertedHitStringSize;
-		typedef typename Iterator<TConvertedHitString>::Type	TConvertedHitStringIter;
 		typedef typename TFragmentStore::TReadSeqStore			TReadSeqStore;
 		typedef typename Infix<TContigSeq>::Type				TContigInfix;
 		
 		// initialize before the while loop so that the memory does not need to be reallocated every time
-		StringSet<TConvertedHitString, Owner<> > hits;
+		StringSet<THitString, Owner<> > hits;
 		resize(hits, options.numberOfBlocks, Exact());
 		
 		// To keep track if any block has some sequence left to cover.
@@ -974,13 +985,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				// 	printf("block: %d, length %lu\n", blockId, length(hits[blockId]));
 				
 				// Second: Combine hits in one string so they can be sorted
-				TConvertedHitStringSize shortestLength = length(hits[0]);
+				THitStringSize shortestLength = length(hits[0]);
 				for (int blockId = 1; blockId < (int)options.numberOfBlocks; ++blockId)
 					if(length(hits[blockId]) < shortestLength)
 						shortestLength = length(hits[blockId]);
 				
 				for (int blockId = 1; blockId < (int)options.numberOfBlocks; ++blockId)
-					append(hits[0], infix(hits[blockId], shortestLength, length(hits[blockId])));
+					append(hits[0], hits[blockId]);
 				
 				// for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 				// 	printf("block: %d, length %lu\n", blockId, length(hits[blockId]));
@@ -997,14 +1008,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				
 				// Third: Sort hits.
 				// Get iterators for sorting
-				TConvertedHitStringIter i1 = begin(hits[0]) + shortestLength;
-				TConvertedHitStringIter i2 = end(hits[0]);
-				
-
+				THitStringIter i1 = begin(hits[0]) + shortestLength;
+				THitStringIter i2 = end(hits[0]);
 				
 				// TODO: Parallel version of sort.
-				__gnu_parallel::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
-				// std::sort(i1, i2, ConvertedSwiftHitComparison2<TText>());
+				__gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+				// std::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+				// myRadixSort(hits[0]);
 				
 #ifdef FLEX_TIMER
 				printf("sorting took:%f\n", (sysTime() - myTime));
@@ -1017,15 +1027,15 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				// }
 				
 				// Fourth: Get boundaries at which the hit string is split.
-				String<TConvertedHitStringSize> positions;
-				partitionHits(positions, shortestLength, hits[0], options);
-				
-#ifdef FLEX_TIMER
-				printf("partitioning took:%f\n", (sysTime() - myTime));
-#endif
+// 				String<THitStringSize> positions;
+// 				partitionHits(positions, shortestLength, hits[0], options);
+// 				
+// #ifdef FLEX_TIMER
+// 				printf("partitioning took:%f\n", (sysTime() - myTime));
+// #endif
 				
 				// Fifth: Verify hits.
-				verifyHits(positions, shortestLength, hits, verifier, readSet, host(swiftFinders[0]), mode);
+				// verifyHits(positions, shortestLength, hits, verifier, readSet, host(swiftFinders[0]), mode);
 				
 				
 				// clear hit strings
