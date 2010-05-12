@@ -309,14 +309,20 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         gapOpenScore = -length(fragments.readSeqStore[readId]);
         gapExtensionScore = -length(fragments.readSeqStore[readId]);
     }
+    // Build scoring matrix.
     Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);
     for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
         for (int y = 0; y < ValueSize<Dna5>::VALUE; ++y) {
             setScore(matrixScore, Dna5(x), Dna5(y), -1);
         }
-        setScore(matrixScore, Dna5(x), Dna5('N'), 0);
-        setScore(matrixScore, Dna5('N'), Dna5(x), 0);
         setScore(matrixScore, Dna5(x), Dna5(x), 0);
+    }
+    // Update score matrix if N works as a wildcard character.
+    if (options.matchN) {
+        for (int x = 0; x < ValueSize<Dna5>::VALUE; ++x) {
+            setScore(matrixScore, Dna5(x), Dna5('N'), 0);
+            setScore(matrixScore, Dna5('N'), Dna5(x), 0);
+        }
     }
 
 //     std::cerr << "compare aligned reads to reference on contig (" << contigId << ") for one read (" << readId << ")" << std::endl;
