@@ -49,6 +49,12 @@ struct Options {
     // Print the missed intervals to stderr for debugging purposes.
     bool showMissedIntervals;
 
+    // Print superflous intervals (intervals found in SAM file but have too bad score).
+    bool showSuperflousIntervals;
+
+    // Print additional intervals (intervals found in SAM with good score that are not in WIT file).
+    bool showAdditionalIntervals;
+
     // Print the hit intervals to stderr for debugging purposes.
     bool showHitIntervals;
 
@@ -379,64 +385,85 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         // position falls into.
         TPos lastPos = endPos - 1;
         SEQAN_ASSERT_LEQ(beginPos, lastPos);
-        if (options.showTryHitIntervals)
-            std::cerr << "Searching for read " << fragments.readNameStore[it->readId]
-                      << " on contig " << fragments.contigNameStore[contigId]
-                      << " forward? " << isForward
-                      << " last pos " << lastPos
-                      << " (beginPos == " << beginPos
-                      << ", endPos == " << endPos << ")" << std::endl;
+        if (options.showTryHitIntervals) {
+            std::cerr << "log> {\"type\": \"log.try_hit"
+                      << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                      << "\", \"read_id\": \"" << fragments.readNameStore[it->readId]
+                      << ", \"strand\": \"" << (isForward ? "forward" : "reverse")
+                      << "\", \"interval_first\": " << beginPos
+                      << ", \"interval_last\": " << lastPos << "}" << std::endl;
+        }
         TMapIterator iter = intervalMap.lower_bound(lastPos);
 
         // Skip reads that aligned with a too bad score.
         int bestScore = bestScoreForAligned(fragments, contig, isForward, *it, maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])), options, matrixScore, TPatternSpec());
         if (bestScore < -maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId]))) {
-            std::cerr << "INFO: Skipping read " << fragments.readNameStore[it->readId] << " (" << fragments.readSeqStore[it->readId] << ")" << std::endl;
-            std::cerr << "  contigId = " << contigId << std::endl;
-            std::cerr << "  forward strand? " << isForward << std::endl;
-            std::cerr << "  begin pos = " << beginPos << ", endPos == " << endPos << std::endl;
-            std::cerr << "  infix(contig, beginPos, endPos) == " << infix(contig, beginPos, endPos) << std::endl;
-            std::cerr << "  score is " << bestScore << std::endl;
-            std::cerr << "  max error rate is " << options.maxError << std::endl;
-            std::cerr << "  read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
-            std::cerr << "  read is " << fragments.readSeqStore[it->readId] << std::endl;
-            std::cerr << "  read qualities are ";
-            for (unsigned i = 0; i < length(fragments.readSeqStore[it->readId]); ++i) {
-                std::cerr << getQualityValue(fragments.readSeqStore[it->readId][i]) << ", ";
+            if (options.showSuperflousIntervals) {
+                std::cerr << "log> {\"type\": \"log.superflous_hit"
+                          << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                          << "\", \"read_id\": \"" << fragments.readNameStore[it->readId]
+                          << "\", \"distance\": " << -bestScore
+                          << ", \"strand\": \"" << (isForward ? "forward" : "reverse")
+                          << "\", \"begin_pos\": " << beginPos
+                          << ", \"end_pos\": " << endPos
+                          << ", \"read_seq\": \"" << fragments.readSeqStore[it->readId]
+                          << "\", \"contig_infix_seq\": \"" << infix(contig, beginPos, endPos);
+                std::cerr << "\", \"qualities\": [";
+                for (unsigned i = 0; i < length(fragments.readSeqStore[it->readId]); ++i) {
+                    if (i > 0)
+                        std::cerr << ", ";
+                    std::cerr << getQualityValue(fragments.readSeqStore[it->readId][i]);
+                }
+                std::cerr << "]}" << std::endl;
             }
-            std::cerr << std::endl;
-            std::cerr << "  max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
             result.superflousIntervalCount += 1;
             continue;
         }
 
         // Handle alignment out of target intervals.
         if (iter == intervalMap.end() || (iter->second.firstPos > lastPos) || (iter->second.lastPos < lastPos)) {
-            if (options.weightedDistances)
-                std::cerr << "WARNING: ";
-            else
-                std::cerr << "PANIC: ";
-            std::cerr << "A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
-            if (iter == intervalMap.end())
-                std::cerr << "not found in map" << std::endl;
-            else
-                std::cerr << "found was " << iter->second << std::endl;
-            std::cerr << "bestScore = " << bestScore << std::endl;
-            std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
-            std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;
-            Dna5String rcRead(fragments.readSeqStore[it->readId]);
-            reverseComplementInPlace(rcRead);
-            std::cerr << "          " << rcRead << std::endl;
-            std::cerr << "on forward strand? " << isForward << std::endl;
-            std::cerr << "original begin pos = " << it->beginPos << std::endl;
-            std::cerr << "original end pos = " << it->endPos << std::endl;
-            std::cerr << "begin pos = " << beginPos << std::endl;
-            std::cerr << "end pos = " << endPos << std::endl;
-            std::cerr << "last pos = " << lastPos << std::endl;
-            std::cerr << "contigId = " << it->contigId << std::endl;
-            std::cerr << "max error rate is " << options.maxError << std::endl;
-            std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
-            std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
+            if (options.showAdditionalIntervals) {
+                if (options.weightedDistances) {
+                    std::cerr << "log> {\"type\": \"log.additional_hit"
+                              << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                              << "\", \"read_id\": \"" << fragments.readNameStore[it->readId]
+                              << "\", \"distance\": " << -bestScore
+                              << ", \"strand\": \"" << (isForward ? "forward" : "reverse")
+                              << "\", \"begin_pos\": " << beginPos
+                              << ", \"end_pos\": " << endPos
+                              << ", \"read_seq\": \"" << fragments.readSeqStore[it->readId]
+                              << "\", \"contig_infix_seq\": \"" << infix(contig, beginPos, endPos);
+                    std::cerr << "\", \"qualities\": [";
+                    for (unsigned i = 0; i < length(fragments.readSeqStore[it->readId]); ++i) {
+                        if (i > 0)
+                            std::cerr << ", ";
+                        std::cerr << getQualityValue(fragments.readSeqStore[it->readId][i]);
+                    }
+                    std::cerr << "]}" << std::endl;
+                } else {
+                    std::cerr << "PANIC: A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
+                    if (iter == intervalMap.end())
+                        std::cerr << "not found in map" << std::endl;
+                    else
+                        std::cerr << "found was " << iter->second << std::endl;
+                    std::cerr << "bestScore = " << bestScore << std::endl;
+                    std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
+                    std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;
+                    Dna5String rcRead(fragments.readSeqStore[it->readId]);
+                    reverseComplementInPlace(rcRead);
+                    std::cerr << "          " << rcRead << std::endl;
+                    std::cerr << "on forward strand? " << isForward << std::endl;
+                    std::cerr << "original begin pos = " << it->beginPos << std::endl;
+                    std::cerr << "original end pos = " << it->endPos << std::endl;
+                    std::cerr << "begin pos = " << beginPos << std::endl;
+                    std::cerr << "end pos = " << endPos << std::endl;
+                    std::cerr << "last pos = " << lastPos << std::endl;
+                    std::cerr << "contigId = " << it->contigId << std::endl;
+                    std::cerr << "max error rate is " << options.maxError << std::endl;
+                    std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
+                    std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
+                }
+            }
             if (options.weightedDistances) {
                 result.additionalIntervalCount += 1;
                 continue;
@@ -459,15 +486,19 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     if (options.showHitIntervals || options.showMissedIntervals) {
         for (TMapIterator it = intervalMap.begin(); it != intervalMap.end(); ++it) {
             if (!it->second.flag && options.showMissedIntervals) {
-                std::cerr << "Missed interval for read " << fragments.readNameStore[readId]
-                          << " on contig " << fragments.contigNameStore[contigId]
-                          << " forward strand? " << isForward << " -- ["
-                          << it->second.firstPos << ", " << it->second.lastPos << "]" << std::endl;
+                std::cout << "log> {\"type\": \"log.missed_interval"
+                          << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                          << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
+                          << "\", \"read_id\": \"" << fragments.readNameStore[readId]
+                          << "\", \"interval_first\": " << it->second.firstPos
+                          << ", \"interval_last\": " << it->second.lastPos << "}" << std::endl;
             } else if (it->second.flag && options.showHitIntervals) {
-                std::cerr << "Hit interval for read " << fragments.readNameStore[readId]
-                          << " on contig " << fragments.contigNameStore[contigId]
-                          << " forward strand? " << isForward << " -- ["
-                          << it->second.firstPos << ", " << it->second.lastPos << "]" << std::endl;
+                std::cout << "log> {\"type\": \"log.hit_interval"
+                          << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                          << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
+                          << "\", \"read_id\": \"" << fragments.readNameStore[readId]
+                          << "\", \"interval_first\": " << it->second.firstPos
+                          << ", \"interval_last\": " << it->second.lastPos << "}" << std::endl;
             }
         }
     }

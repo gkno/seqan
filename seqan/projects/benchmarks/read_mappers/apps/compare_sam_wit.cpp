@@ -92,9 +92,11 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addHelpLine(parser, "hamming          = Hamming distance");
     addHelpLine(parser, "edit             = Edit distance");
     addOption(parser, CommandLineOption("o", "out-file", "Path to the output file.  Use \"-\" for stdout, default is \"-\"", OptionType::String));
-    addOption(parser, CommandLineOption("mi", "show-missed-intervals", "the missed intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
-    addOption(parser, CommandLineOption("hi", "show-hit-intervals", "the hit intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("sm", "show-missed-intervals", "the missed intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("sh", "show-hit-intervals", "the hit intervals are printed to stderr for debugging if this option is set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("st", "show-try-hit-intervals", "The last positions tried to hit against an intervals are printd to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("ss", "show-superflous-intervals", "The intervals that are in the SAM file but have a too bad score are printed to stderr if set.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("sa", "show-additional-intervals", "The intervals that are in the SAM with good score but not in WIT file to stderr if set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     
@@ -129,6 +131,10 @@ int parseCommandLineAndCheck(Options &options,
         options.showHitIntervals = true;
     if (isSetLong(parser, "show-try-hit-intervals"))
         options.showTryHitIntervals = true;
+    if (isSetLong(parser, "show-superflous-intervals"))
+        options.showSuperflousIntervals = true;
+    if (isSetLong(parser, "show-additional-intervals"))
+        options.showAdditionalIntervals = true;
     if (isSetLong(parser, "max-error-rate"))
         getOptionValueLong(parser, "max-error-rate", options.maxError);
     if (isSetLong(parser, "distance-function"))
@@ -168,6 +174,8 @@ int main(int argc, const char *argv[]) {
     options.showTryHitIntervals = false;
     options.matchN = false;
     options.weightedDistances = false;
+    options.showSuperflousIntervals = false;
+    options.showAdditionalIntervals = false;
     CharString outFile = "-";
 
     // Setup the parser, parse command line and return if an error occured.
