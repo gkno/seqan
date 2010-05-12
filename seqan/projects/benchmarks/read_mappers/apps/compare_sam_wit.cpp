@@ -45,6 +45,8 @@
                            high unweighted error rate and the read mapper
                            generating the SAM file finds it.  Read the paper
                            and/or manual for more details.
+                           In the non-weighte case, the program will exit
+                           with a non-zero exit code and print a PANIC message.
 
    This .cpp file only contains the code to parse the command line arguments
    and kicks off the flesh of the program which is defined in
@@ -99,6 +101,7 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("sa", "show-additional-intervals", "The intervals that are in the SAM with good score but not in WIT file to stderr if set.", OptionType::Boolean));
     addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("c", "benchmark-category", "The benchmark category to compare for.  One of {all, any-best, all-best}.  Default: all.", OptionType::String));
     
     // We require 4 command line options.
     requiredArguments(parser, 3);
@@ -141,15 +144,21 @@ int parseCommandLineAndCheck(Options &options,
         getOptionValueLong(parser, "distance-function", options.distanceFunction);
     if (isSetLong(parser, "out-file"))
         getOptionValueLong(parser, "out-file", outFile);
+    if (isSetLong(parser, "benchmark-category"))
+        getOptionValueLong(parser, "benchmark-category", options.benchmarkCategory);
 
     // Validate values.
     if (options.maxError < 0) {
         std::cerr << "ERROR: Invalid maximum error value: " << options.maxError << std::endl;
         return kRetArgsErr;
     }
-    if (not options.validDistanceFunction())     {      
+    if (!options.validDistanceFunction()) {      
       std::cerr << "ERROR: Invalid distance function: " << options.distanceFunction << std::endl;
       return kRetArgsErr;
+    }
+    if (!options.validBenchmarkCategory()) {
+        std::cerr << "ERROR: Invalid benchmark category: " << options.benchmarkCategory << std::endl;
+        return kRetArgsErr;
     }
     
     // Get positional arguments.
@@ -176,6 +185,7 @@ int main(int argc, const char *argv[]) {
     options.weightedDistances = false;
     options.showSuperflousIntervals = false;
     options.showAdditionalIntervals = false;
+    options.benchmarkCategory = "all";
     CharString outFile = "-";
 
     // Setup the parser, parse command line and return if an error occured.
@@ -241,7 +251,6 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     // Write Output.
     // =================================================================
-    std::cerr << "Write output..." << std::endl;
     startTime = sysTime();
     // The output consists of one line that describes the total and
     // found intervals as a JSON record with the entries
@@ -259,7 +268,6 @@ int main(int argc, const char *argv[]) {
         }
         fstrm << result << std::endl;
     }
-    std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
     return kRetOk;
 }
