@@ -372,7 +372,7 @@ SEQAN_CHECKPOINT
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, typename TDrop>
-void//int 
+int//void
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
                TEpsilon eps,
@@ -384,12 +384,13 @@ SEQAN_CHECKPOINT
     typedef Seed<int, SimpleSeed> TSeed;
     typedef typename Position<TInfixB>::Type TPos;
 
-    //TPos maxLength = 1000000000;
-    //if (length(a)*length(b) > maxLength) {
-    //    std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
-    //    std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped.\n" << std::flush;
-    //    return 0;
-    //}
+    TPos maxLength = 1000000000;
+    if (length(a) > maxLength) {
+        std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
+        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped.\n" << std::flush;
+        return 0;
+    }
+    int count = length(matches);
 
     TSize minLengthWithoutErrors = minLength - (int)floor(minLength*eps);
 
@@ -412,22 +413,22 @@ SEQAN_CHECKPOINT
     TEpsilon e1 = floor(eps*minLength1);
     TSize minScore = _min((TSize)ceil((minLength-e) / (e+1)), (TSize)ceil((minLength1-e1) / (e1+1)));
 
-    // local alignment
+    // banded local alignment
     __int64 upperDiag = 0;
     __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
     if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
     if (endPosition(b) == endPosition(host(b))) lowerDiag = upperDiag - delta;
     LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
-    //int count = 0;
     while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
+
         // split local alignments containing an X-drop
         String<Align<TInfixB> > alignmentString;
         _splitAtXDrops(localAlign, scoreMatrix, scoreDropOff, minScore, alignmentString);
 
         typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(alignmentString);
         while (aliIt != end(alignmentString)) {
-            //++count;
 
+            // determine extension direction
             char direction;
             if (length(alignmentString) == 1) direction = 2;
             else if (aliIt == begin(alignmentString)) direction = 0;
@@ -483,7 +484,7 @@ SEQAN_CHECKPOINT
             ++aliIt;
         }
     }
-    //return count;
+    return length(matches) - count;
 }
 
 // calls swift, verifies swift hits, outputs eps-matches
@@ -498,15 +499,36 @@ SEQAN_CHECKPOINT
     resize(matches, countSequences(needle(pattern)));
     TSize numSwiftHits = 0;
 
-    //int count = 0;
+    TSize maxLength = 0;
+    TSize totalLength = 0;
+
+    String<unsigned> counts;
+    for (unsigned i = 0; i < 6; ++i) {
+        appendValue(counts, 0);
+    }
+    int c = 0;
+    int maxCount = 0;
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
-        //std::cout << positionRange(finder) << " ; " << positionRange(pattern) << std::endl;
+
         // verification
-        /*count += */verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
+        c = verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
                               xDrop, value(matches, pattern.curSeqNo));
+        totalLength += length(infix(finder));
+        if (length(infix(finder)) > maxLength) maxLength = length(infix(finder));
+
+        if (c < 6 && c >= 0) ++counts[c];
+        if (c < 0) std::cout << c << std::endl;
+        if (c > maxCount) maxCount = c;
 	}
-    //std::cout << "# local alignments: " << count << std::endl;
+    for (unsigned i = 0; i < 6; ++i) {
+        std::cout << counts[i] << "  ";
+    }
+    std::cout << "\nmax: " << maxCount << std::endl;
+
+    std::cout << "Longest hit: " << maxLength << std::endl;
+    if (numSwiftHits > 0) std::cout << "Avg hit length: " << totalLength/numSwiftHits << std::endl;
+    
     return numSwiftHits;
 }

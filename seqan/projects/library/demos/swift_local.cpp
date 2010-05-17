@@ -94,26 +94,33 @@ _writeGffLine(TId const & databaseID,
               TAlign const & match,
               TFile & file) {
     
-    for (typename Position<TId>::Type i = 0; value(databaseID, i) > 32; ++i) {
+    for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
     }
 
     file << "\tSwiftLocal";
     file << "\teps-matches";
 
-    file << "\t" << toSourcePosition(row(match, 0), beginPosition(row(match, 0))) + beginPosition(source(row(match, 0)));
-    file << "\t" << toSourcePosition(row(match, 0), endPosition(row(match, 0))) + beginPosition(source(row(match, 0)));
+    if (databaseStrand) {
+        file << "\t" << toSourcePosition(row(match, 0), beginPosition(row(match, 0))) + beginPosition(source(row(match, 0))) + 1;
+        file << "\t" << toSourcePosition(row(match, 0), endPosition(row(match, 0))) + beginPosition(source(row(match, 0)));
+    } else {
+        file << "\t" << length(host(source(row(match, 0)))) - 
+            (toSourcePosition(row(match, 0), endPosition(row(match, 0))) + beginPosition(source(row(match, 0)))) + 1;
+        file << "\t" << length(host(source(row(match, 0)))) - 
+            (toSourcePosition(row(match, 0), beginPosition(row(match, 0))) + beginPosition(source(row(match, 0))));
+    }
 
     file << "\t" << _calculateIdentity(match);
 
     file << "\t" << (databaseStrand ? '+' : '-');
 
     file << "\t.\t";
-    for (typename Position<TId>::Type i = 0; value(patternID, i) > 32; ++i) {
+    for (typename Position<TId>::Type i = 0; i < length(patternID) && value(patternID, i) > 32; ++i) {
         file << value(patternID, i);
     }
 
-    file << ";seq2Range=" << toSourcePosition(row(match, 1), beginPosition(row(match, 1))) + beginPosition(source(row(match, 1)));
+    file << ";seq2Range=" << toSourcePosition(row(match, 1), beginPosition(row(match, 1))) + beginPosition(source(row(match, 1))) + 1;
     file << "," << toSourcePosition(row(match, 1), endPosition(row(match, 1))) + beginPosition(source(row(match, 1)));
 
     std::stringstream cigar, mutations;
@@ -133,22 +140,29 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
               TFile & file) {
     typedef typename Size<Align<TInfix> >::Type TSize;
 
+    std::ofstream aliFile;
+    aliFile.open("swift_local.align");
+
     TSize maxLength = 0;
     TSize totalLength = 0;
     TSize numMatches = 0;
 
+    aliFile << "Database sequence: " << databaseID;
+    if (!databaseStrand) aliFile << " complement\n";
+    else aliFile << "\n";
+
     for (unsigned i = 0; i < length(matches); i++) {
         if (length(value(matches, i)) == 0) continue;
         std::cout << "Pattern sequence: " << ids[i] << "\n";
-        //file << "Pattern sequence: " << ids[i] << "\n\n";
+        aliFile << "Pattern sequence: " << ids[i] << "\n\n";
         for (TSize j = 0; j < length(value(matches, i)); j++) {
             Align<TInfix> m = value(value(matches, i), j);
 
-            //file << "< " << toSourcePosition(row(m, 0), beginPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
-            //file << " , " << toSourcePosition(row(m, 0), endPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
-            //file << " >< " << toSourcePosition(row(m, 1), beginPosition(row(m, 1))) + beginPosition(source(row(m, 1)));
-            //file << " , " << toSourcePosition(row(m, 1), endPosition(row(m, 1))) + beginPosition(source(row(m, 1))) << " >\n";
-            //file << m;
+            aliFile << "< " << toSourcePosition(row(m, 0), beginPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
+            aliFile << " , " << toSourcePosition(row(m, 0), endPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
+            aliFile << " >< " << toSourcePosition(row(m, 1), beginPosition(row(m, 1))) + beginPosition(source(row(m, 1)));
+            aliFile << " , " << toSourcePosition(row(m, 1), endPosition(row(m, 1))) + beginPosition(source(row(m, 1))) << " >\n";
+            aliFile << m;
 
             TSize len = _max(length(row(m, 0)), length(row(m, 1)));
             totalLength += len;
@@ -165,6 +179,8 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
     std::cout << "Longest eps-match: " << maxLength << " cols" << std::endl;
     if (numMatches > 1)
         std::cout << "Avg match length: " << totalLength / numMatches << " cols" << std::endl << std::endl;
+
+    aliFile.close();
 }
 
 template<typename TStringSet, typename TIdSet>
@@ -215,17 +231,18 @@ _setParser(TParser & parser) {
     addOption(parser, CommandLineOption('q', "query", "file containing the query sequences", (OptionType::String | OptionType::Mandatory)));
     
 	addSection(parser, "Main Options:");
-    addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String));
-    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database", OptionType::Boolean));
-    addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int));
-    addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int));
-    addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double));
-    addOption(parser, CommandLineOption('x', "x-drop", "maximal x-drop for extension", OptionType::Int));
+    addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String, "swift_local.gff"));
+    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database", OptionType::Boolean, false));
+    addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int, 10));
+    addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int, 100));
+    addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double, 0.05));
+    addOption(parser, CommandLineOption('x', "x-drop", "maximal x-drop for extension", OptionType::Int, 5));
 }
 
 int main(int argc, const char *argv[]) {
 
 //-d "Z:\GenomeData\NC_001405_short.fa" -q "Z:\GenomeData\NC_001460_short.fa" -k 5 -l 30 -e 0.1 -x 10 -r
+//-d "Z:\GenomeData\adenoviruses\NC_001405.fa" -q "Z:\GenomeData\adenoviruses\NC_001460.fa" -k 5 -l 30 -e 0.1 -x 5 -r
 
     // Get rid of warnings for unused variables.
     (void)argc;
@@ -263,6 +280,10 @@ int main(int argc, const char *argv[]) {
     if (isSetLong(parser, "minLength")) getOptionValueLong(parser, "minLength", minLength);
     double eps = 0.05;
     if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', eps);
+    if (eps > 0.25) {
+        std::cerr << "Please choose a smaller error rate." << std::endl;
+        return 1;
+    }
     int xDrop = 10;
     if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', xDrop);
     CharString outFile = "swift_local.gff";
