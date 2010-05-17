@@ -72,7 +72,7 @@ void performAnalysis(char const * filename,
     int minQuality = 1000;
     int maxQuality = 0;
     std::map<int, size_t> qualityHistogram;
-    long long int qualitySum = 0;
+    __int64 qualitySum = 0;
     size_t minSequenceLength = ~0;
     size_t maxSequenceLength = 0;
     size_t sequenceLengthSum = 0;

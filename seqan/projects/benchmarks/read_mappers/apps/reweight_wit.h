@@ -167,7 +167,8 @@ void intervalizeErrorCurves(WitStore & store,
 
     // Append the resulting intervals to the result store.
     for (size_t i = 0; i < length(intervals); ++i)
-        append(store.intervals, intervals[i]);
+        for (size_t j = 0; j < length(intervals[i]); ++j)
+            appendValue(store, intervals[i][j]);
 }
 
 

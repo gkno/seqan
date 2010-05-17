@@ -20,6 +20,7 @@
    This file contains the flesh of the program compare_sam_wit.
   ==========================================================================*/
 
+#include <algorithm>
 #include <map>
 
 #include <seqan/find.h>                 // Finding infrastructure.
@@ -157,20 +158,21 @@ void clear(ComparisonResult & result) {
 // ======================================================================
 
 struct FlaggedInterval {
+    size_t intervalId;
     size_t firstPos;
     size_t lastPos;
     bool flag;
 
     FlaggedInterval() {}
 
-    FlaggedInterval(size_t _firstPos, size_t _lastPos, bool _flag = false)
-            : firstPos(_firstPos), lastPos(_lastPos), flag(_flag) {}
+    FlaggedInterval(size_t _intervalId, size_t _firstPos, size_t _lastPos, bool _flag = false)
+            : intervalId(_intervalId), firstPos(_firstPos), lastPos(_lastPos), flag(_flag) {}
 };
 
 
 template <typename TStream>
 TStream & operator<<(TStream & stream, FlaggedInterval const & interval) {
-    return stream << "FlaggedInterval(" << interval.firstPos << ", " << interval.lastPos << ", " << interval.flag << ")";
+    return stream << "FlaggedInterval(" << interval.intervalId << ", " << interval.firstPos << ", " << interval.lastPos << ", " << interval.flag << ")";
 }
 
 
@@ -312,7 +314,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                                                  TAlignedReadIter const & alignedReadsEnd,
                                                  TWitRecordIter const & witRecordsBegin,
                                                  TWitRecordIter const & witRecordsEnd,
-                                                 ComparisonResult & result,
+                                                 String<size_t> & result,
                                                  TPatternSpec const &) {
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
@@ -351,8 +353,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         if (it->isForward != isForward) continue;  // Skip aligned reads on other strand.
         if (static_cast<int>(it->distance) != options.maxError) continue;  // Skip intervals with wrong distance.
 
-        intervalMap[it->lastPos] = FlaggedInterval(it->firstPos, it->lastPos);
-        result.totalIntervalCount += 1;
+        intervalMap[it->lastPos] = FlaggedInterval(it->id, it->firstPos, it->lastPos);
     }
 
     // Now, try to hit all entries in intervals with the aligned reads on this strand.
@@ -419,7 +420,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 }
                 std::cerr << "]}" << std::endl;
             }
-            result.superflousIntervalCount += 1;
+            appendValue(result, IntervalOfReadOnContig::superflousId());
             continue;
         }
 
@@ -468,7 +469,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 }
             }
             if (options.weightedDistances) {
-                result.additionalIntervalCount += 1;
+                appendValue(result, IntervalOfReadOnContig::additionalId());
                 continue;
             } else {
                 exit(1);
@@ -480,8 +481,8 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
 
         // Count interval if hit for the first time.
         if (!iter->second.flag) {
+            appendValue(result, iter->second.intervalId);
             iter->second.flag = true;
-            result.foundIntervalCount += 1;
         }
     }
 
@@ -526,7 +527,7 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
                                        TAlignedReadsIter const & alignedReadsEnd,
                                        TWitRecordsIter const & witRecordsBegin,
                                        TWitRecordsIter const & witRecordsEnd,
-                                       ComparisonResult & result,
+                                       String<size_t> & result,
                                        TPatternSpec const &) {
     typedef size_t TPos;
     typedef std::map<size_t, FlaggedInterval> TMap;
@@ -568,7 +569,7 @@ compareAlignedReadsToReferenceOnContig(Options const & options,
 // in witStore, results is used for the counting statistics.
 template <typename TFragmentStore, typename TPatternSpec>
 void
-compareAlignedReadsToReference(ComparisonResult & result,
+compareAlignedReadsToReference(String<size_t> & result,
                                TFragmentStore & fragments,  // non-const so reads can be sorted
                                WitStore & witStore,  // non-const so it is sortable
                                Options const & options,
@@ -619,5 +620,169 @@ compareAlignedReadsToReference(ComparisonResult & result,
         // This iteration's end iterators are the next iteration's begin iterators.
         alignedReadsBegin = alignedReadsEnd;
         witRecordsBegin = witRecordsEnd;
+    }
+}
+
+
+// Tags for selecting an evaluateFoundIntervals_compareToIntervals specialization.
+struct _CategoryAll;
+typedef Tag<_CategoryAll> CategoryAll;
+struct _CategoryAnyBest;
+typedef Tag<_CategoryAnyBest> CategoryAnyBest;
+struct _CategoryAllBest;
+typedef Tag<_CategoryAllBest> CategoryAllBest;
+
+
+// result must contain all ids of the intervals in
+// [beginIntervalsForRead, endIntervalsForRead) that have the error
+// rate options.maxError.  The intervals are sorted by (read id,
+// error rate).
+void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
+                                               WitStore & witStore,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
+                                               String<size_t> & result,
+                                               Options const & options,
+                                               CategoryAll const &) {
+    if (beginIntervalsForRead == endIntervalsForRead)
+        return;  // Guard: Skip if interval range empty.
+
+    typedef Iterator<WitStore::TIntervalStore, Standard>::Type TIntervalIterator;
+
+    // Now, get begin and end iterators to the intervals for the error rate
+    // configured in options.
+    IntervalOfReadOnContig refInterval;
+    refInterval.distance = options.maxError;
+    std::pair<TIntervalIterator, TIntervalIterator> boundsForDistance;
+    boundsForDistance = std::equal_range(beginIntervalsForRead, endIntervalsForRead, refInterval, WitStoreLess<SortDistance>(witStore));
+    if (boundsForDistance.first == boundsForDistance.second)
+        return;  // Guard:  Skip if there are no required intervals.
+
+    for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
+        comparisonResult.totalIntervalCount += 1;
+        comparisonResult.foundIntervalCount += std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+    }
+}
+
+
+void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
+                                               WitStore & witStore,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
+                                               String<size_t> & result,
+                                               Options const & /*options*/,
+                                               CategoryAnyBest const &) {
+    if (beginIntervalsForRead == endIntervalsForRead)
+        return;  // Guard: Skip if interval range empty.
+
+    typedef Iterator<WitStore::TIntervalStore, Standard>::Type TIntervalIterator;
+
+    // The read mapper has to find one of the intervals with the smallest
+    // error rate in [beginIntervalsForRead, endIntervalsForRead).
+    //
+    // The intervals in this range are sorted by error rate.  We get the
+    // smallest error rate first, then get the subrange with the smallest
+    // range.
+    IntervalOfReadOnContig refInterval;
+    refInterval.distance = value(beginIntervalsForRead).distance;
+    std::pair<TIntervalIterator, TIntervalIterator> boundsForDistance;
+    boundsForDistance = std::equal_range(beginIntervalsForRead, endIntervalsForRead, refInterval, WitStoreLess<SortDistance>(witStore));
+    if (boundsForDistance.first == boundsForDistance.second)
+        return;  // Guard:  Skip if there are no required intervals.
+
+    // One interval is to be found.
+    comparisonResult.totalIntervalCount += 1;
+
+    // Now, try to find one of the intervals.
+    for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
+        if (std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id)) {
+            comparisonResult.foundIntervalCount += 1;
+            break;
+        }
+    }
+}
+
+
+void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
+                                               WitStore & witStore,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
+                                               Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
+                                               String<size_t> & result,
+                                               Options const & /*options*/,
+                                               CategoryAllBest const &) {
+    if (beginIntervalsForRead == endIntervalsForRead)
+        return;  // Guard: Skip if interval range empty.
+
+    typedef Iterator<WitStore::TIntervalStore, Standard>::Type TIntervalIterator;
+
+    // The read mapper has to find one of the intervals with the smallest
+    // error rate in [beginIntervalsForRead, endIntervalsForRead).
+    //
+    // The intervals in this range are sorted by error rate.  We get the
+    // smallest error rate first, then get the subrange with the smallest
+    // range.
+    IntervalOfReadOnContig refInterval;
+    refInterval.distance = value(beginIntervalsForRead).distance;
+    std::pair<TIntervalIterator, TIntervalIterator> boundsForDistance;
+    boundsForDistance = std::equal_range(beginIntervalsForRead, endIntervalsForRead, refInterval, WitStoreLess<SortDistance>(witStore));
+    if (boundsForDistance.first == boundsForDistance.second)
+        return;  // Guard:  Skip if there are no required intervals.
+
+    // One interval is to be found.
+
+    // Now, try to find one of the intervals.
+    for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
+        comparisonResult.totalIntervalCount += 1;
+        comparisonResult.foundIntervalCount += std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+    }
+}
+
+
+// Evaluate the ids in result pointing to intervals in witStore.
+// Result is written to comparisonResult.
+void evaluateFoundIntervals(ComparisonResult & comparisonResult,
+                            WitStore & witStore,
+                            String<size_t> & result,
+                            Options const & options)
+{
+    typedef Iterator<String<size_t>, Standard>::Type TIdIterator;
+    typedef Iterator<WitStore::TIntervalStore, Standard>::Type TIntervalIterator;
+
+    // Initialization.
+    clear(comparisonResult);
+    sortWitRecords(witStore, SortDistance());
+    sortWitRecords(witStore, SortReadId());
+    std::sort(begin(result, Standard()), end(result, Standard()));
+
+    // Count ids of superflous and additional intervals (at end of result).
+    std::pair<TIdIterator, TIdIterator> superflousBounds = std::equal_range(begin(result, Standard()), end(result, Standard()), IntervalOfReadOnContig::superflousId());
+    comparisonResult.superflousIntervalCount = superflousBounds.second - superflousBounds.first;
+    std::pair<TIdIterator, TIdIterator> additionalBounds = std::equal_range(begin(result, Standard()), end(result, Standard()), IntervalOfReadOnContig::additionalId());
+    comparisonResult.additionalIntervalCount = additionalBounds.second - additionalBounds.first;
+
+    // For each read: Get list of intervals that are to be found,
+    // depending on options.  Then, look whether they are in result.
+    for (size_t readId = 0; readId < length(value(witStore.readNames)); ++readId) {
+        // We need a read id to search for in a sequence of
+        // IntervalOfReadOnContig objects.  To do this, we create a
+        // reference interval with the current read id.
+        IntervalOfReadOnContig refInterval;
+        refInterval.readId = readId;
+        std::pair<TIntervalIterator, TIntervalIterator> boundsForRead;
+        boundsForRead = std::equal_range(begin(witStore.intervals, Standard()), end(witStore.intervals, Standard()), refInterval, WitStoreLess<SortReadId>(witStore));
+        if (boundsForRead.first == boundsForRead.second)
+            continue;  // Skip if there are no intervals to be found for read.
+
+        // Now, depending on the configured benchmark category, perform the
+        // evaluation.
+        if (options.benchmarkCategory == "all") {
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAll());
+        } else if (options.benchmarkCategory == "any-best") {
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAnyBest());
+        } else if (options.benchmarkCategory == "all-best") {
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAllBest());
+        } else {
+            SEQAN_ASSERT_FAIL("Invalid benchmark category '%s'.", toCString(options.benchmarkCategory));
+        }
     }
 }

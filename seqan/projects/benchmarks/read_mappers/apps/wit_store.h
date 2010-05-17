@@ -12,6 +12,11 @@ using namespace seqan;
 
 // Stores closed intervals [firstPos, lastPos].
 struct IntervalOfReadOnContig {
+    static size_t invalidId() { return ~0ul; }
+    static size_t additionalId() { return ~1ul; }
+    static size_t superflousId() { return ~2ul; }
+    
+    size_t id;
     size_t readId;
     unsigned distance;
     size_t contigId;
@@ -20,11 +25,11 @@ struct IntervalOfReadOnContig {
     size_t lastPos;
 
     IntervalOfReadOnContig()
-            : readId(0), distance(0), contigId(0), isForward(0), firstPos(0),
+            : id(invalidId()), readId(0), distance(0), contigId(0), isForward(0), firstPos(0),
               lastPos(0) {}
 
     IntervalOfReadOnContig(size_t _readId, unsigned _distance, size_t _contigId, bool _isForward, size_t _firstPos, size_t _lastPos)
-            : readId(_readId), distance(_distance), contigId(_contigId),
+            : id(invalidId()), readId(_readId), distance(_distance), contigId(_contigId),
               isForward(_isForward), firstPos(_firstPos), lastPos(_lastPos) {}
 };
 
@@ -85,6 +90,20 @@ struct WitStoreLess<SortReadId>
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
         return a.readId < b.readId;
+    }
+};
+
+
+template <>
+struct WitStoreLess<SortId>
+{
+    WitStore const & store;
+
+    WitStoreLess(WitStore const & _store) : store(_store) {};
+
+    bool
+    operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
+        return a.id < b.id;
     }
 };
 
@@ -165,7 +184,9 @@ sortWitRecords(WitStore const & store, TSortTag &) {
 
 inline
 void appendValue(WitStore & store, IntervalOfReadOnContig const & record) {
-    appendValue(store.intervals, record);
+    IntervalOfReadOnContig tmp(record);
+    tmp.id = length(store.intervals);
+    appendValue(store.intervals, tmp);
 }
 
 

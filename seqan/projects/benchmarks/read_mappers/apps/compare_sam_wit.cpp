@@ -1,21 +1,21 @@
 /*==========================================================================
-  SeqAn - The Library for Sequence Analysis
-  http://www.seqan.de 
+   SeqAn - The Library for Sequence Analysis
+   http://www.seqan.de 
   ===========================================================================
-  Copyright (C) 2007
+   Copyright (C) 2010
   
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 3 of the License, or (at your option) any later version.
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 3 of the License, or (at your option) any later version.
   
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  Lesser General Public License for more details.
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+   Lesser General Public License for more details.
   
   ===========================================================================
-  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
    Usage: compare_sam_wit [options] <contig.fasta> <result.sam> <golden.wit>
 
@@ -239,14 +239,20 @@ int main(int argc, const char *argv[]) {
     std::cerr << "Compare reader hits from SAM file against WIT file." << std::endl;
     startTime = sysTime();
     typedef Position<WitStore::TIntervalStore>::Type TPos;
-    ComparisonResult result;
+    // The result will be a list of ids to entries in witStore.
+    String<size_t> result;
     if (options.distanceFunction == "edit")
         // TODO(holtgrew): Switch to "reads version" (force alignment of last characters) after RazerS can do this, too.  Tag is MyersUkkonenReads().
         compareAlignedReadsToReference(result, fragments, witStore, options, Myers<FindInfix>());
     else  // options.distanceFunction == "hamming"
         compareAlignedReadsToReference(result, fragments, witStore, options, HammingSimple());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
-    
+
+    // =================================================================
+    // Perform Counting On Result Indices, Yield ComparisonResult.
+    // =================================================================
+    ComparisonResult comparisonResult;
+    evaluateFoundIntervals(comparisonResult, witStore, result, options);
 
     // =================================================================
     // Write Output.
@@ -258,7 +264,7 @@ int main(int argc, const char *argv[]) {
     // "additional_intervals".
     if (outFile == "-") {
         // Print to stdout.
-        std::cout << result << std::endl;
+        std::cout << comparisonResult << std::endl;
     } else {
         // Write output to file.
         std::fstream fstrm(toCString(outFile), std::ios_base::out);
@@ -266,7 +272,7 @@ int main(int argc, const char *argv[]) {
             std::cerr << "Could not open output JSON file." << std::endl;
             return kRetIoErr;
         }
-        fstrm << result << std::endl;
+        fstrm << comparisonResult << std::endl;
     }
 
     return kRetOk;

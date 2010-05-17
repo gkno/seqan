@@ -181,6 +181,6 @@ inline bool setEndPosition(Finder<THaystack, void> & finder,
     return result;
 }
 
-};
+}  // namespace seqan
 
 #endif  // WIT_BUILDER_HAMMING_SIMPLE_QUALITY_H_
