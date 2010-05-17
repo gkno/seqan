@@ -4,7 +4,7 @@
 #include <seqan/file.h>
 #include <seqan/index.h>
 #include <seqan/misc/misc_cmdparser.h>
-#include <demos/swift_local.h>
+#include "swift_local.h"
 
 using namespace seqan;
 

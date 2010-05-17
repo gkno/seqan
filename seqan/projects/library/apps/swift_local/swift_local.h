@@ -372,7 +372,7 @@ SEQAN_CHECKPOINT
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // banded chain alignment and X-drop extension for all local alignments with a min score
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, typename TDrop>
-int//void
+void // int // 
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
                TEpsilon eps,
@@ -388,9 +388,9 @@ SEQAN_CHECKPOINT
     if (length(a) > maxLength) {
         std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
         std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped.\n" << std::flush;
-        return 0;
+        return;
     }
-    int count = length(matches);
+    //int count = length(matches);
 
     TSize minLengthWithoutErrors = minLength - (int)floor(minLength*eps);
 
@@ -484,7 +484,7 @@ SEQAN_CHECKPOINT
             ++aliIt;
         }
     }
-    return length(matches) - count;
+    //return length(matches) - count;
 }
 
 // calls swift, verifies swift hits, outputs eps-matches
@@ -502,30 +502,30 @@ SEQAN_CHECKPOINT
     TSize maxLength = 0;
     TSize totalLength = 0;
 
-    String<unsigned> counts;
-    for (unsigned i = 0; i < 6; ++i) {
-        appendValue(counts, 0);
-    }
-    int c = 0;
-    int maxCount = 0;
+    //String<unsigned> counts;
+    //for (unsigned i = 0; i < 6; ++i) {
+    //    appendValue(counts, 0);
+    //}
+    //int c = 0;
+    //int maxCount = 0;
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
 
         // verification
-        c = verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
+        /*c = */verifySwiftHit(infix(finder), infix(pattern), epsilon, minLength,
                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
                               xDrop, value(matches, pattern.curSeqNo));
         totalLength += length(infix(finder));
-        if (length(infix(finder)) > maxLength) maxLength = length(infix(finder));
+        if ((TSize)length(infix(finder)) > maxLength) maxLength = length(infix(finder));
 
-        if (c < 6 && c >= 0) ++counts[c];
-        if (c < 0) std::cout << c << std::endl;
-        if (c > maxCount) maxCount = c;
+        //if (c < 6 && c >= 0) ++counts[c];
+        //if (c < 0) std::cout << c << std::endl;
+        //if (c > maxCount) maxCount = c;
 	}
-    for (unsigned i = 0; i < 6; ++i) {
-        std::cout << counts[i] << "  ";
-    }
-    std::cout << "\nmax: " << maxCount << std::endl;
+    //for (unsigned i = 0; i < 6; ++i) {
+    //    std::cout << counts[i] << "  ";
+    //}
+    //std::cout << "\nmax: " << maxCount << std::endl;
 
     std::cout << "Longest hit: " << maxLength << std::endl;
     if (numSwiftHits > 0) std::cout << "Avg hit length: " << totalLength/numSwiftHits << std::endl;
