@@ -611,7 +611,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 	    			bucketsPerCol2 = 1;
 		    	}
 			
-    			bucketParams.firstBucket = count; // TODO: check this line! is firstBucket the globel number of the first bucket in this read/sequence
+    			bucketParams.firstBucket = count; // firstBucket is only used if Swift<TSpec>::PARAMS_BY_LENGTH == 0
 	    		bucketParams.reuseMask = bucketsPerCol2 - 1;
 		    	bucketParams.tabooLength = pattern.params.tabooLength;
 			

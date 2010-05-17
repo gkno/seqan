@@ -179,7 +179,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 			return hash;
 		
 		// where the hash should be found if no collision took place before
-		TSize h1 = hash % hlen;
+		TSize h1 = (TSize)(hash % hlen);
 		
 		// -1 is the undefiend value, hence the method works not for the largest word of length 32
 		// if there is no collision with another hash value
@@ -200,7 +200,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 			else 
 			{
 				// TSize step = 1 + (hash % bucketMap.prime);
-				TSize step = bucketMap.prime;
+				TSize step = (TSize)bucketMap.prime;
 				// look 'step' buckets further untill one is free or was requested by this hash earlier
 				do {
 					h1 = (h1 + step) % hlen;
