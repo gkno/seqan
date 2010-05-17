@@ -215,6 +215,7 @@ void reweightInterval(WitStore & store,
 
     while (find(finder, pattern) && endPosition(finder) <= interval.lastPos + 1) {
         bool ret = findBegin(finder, pattern, getScore(pattern));
+        (void)ret;  // Supress warnings in Release mode.
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_GEQ(static_cast<int>(1.0 * getScore(pattern) / length(read)), -static_cast<int>(interval.distance));
 
@@ -229,6 +230,7 @@ void reweightInterval(WitStore & store,
         appendValue(stringSet, infix(finder));
         appendValue(stringSet, read);
         int alignmentScore = globalAlignment(align, stringSet, matrixScore, 2*getScore(pattern), -2*getScore(pattern), BandedNeedlemanWunsch());
+        (void)alignmentScore;  // Supress warnings in Release mode.
         SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
         // Compute quality-based score of alignment.  We pass the
