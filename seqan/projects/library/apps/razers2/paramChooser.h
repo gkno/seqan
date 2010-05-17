@@ -64,7 +64,7 @@ int getDir(TPath path, TFilenameString &files)
 
 struct ParamChooserOptions
 {
-	typedef float TFloat;
+	typedef double TFloat;
 	unsigned minThreshold;					// minimum value for threshold parameter 
 	unsigned maxWeight;                                           // maximum value of q
 	bool chooseOneGappedOnly;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)
@@ -733,8 +733,8 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		for(unsigned e = minErrors; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
-				TFloat lossrate = 1.0 - (TFloat) _transformBack(found[e*maxT+t]);
-				if(lossrate <= 0.0){
+				TFloat lossrate = (TFloat)1.0 - (TFloat)_transformBack(found[e*maxT+t]);
+				if (lossrate <= 0.0){
 					if(highestOptimalFound) break;
 					else highestOptimalFound = true;
 				}
@@ -914,7 +914,7 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 		unsigned currThreshold = (unsigned)(_parse_readNumber(file,c) * extrapolFactor); //when extrapolating from shorter read lengths, threshold can be at least linearly increased
 		_parse_skipWhitespace(file,c);
 
-		TFloat currLossrate = _parse_readEValue(file,c);
+		TFloat currLossrate = (TFloat)_parse_readEValue(file,c);
 		_parse_skipWhitespace(file,c);
 		unsigned currMeasure = _parse_readNumber(file,c); // potential matches measured on simulated reads
 

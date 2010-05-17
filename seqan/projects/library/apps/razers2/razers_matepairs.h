@@ -61,8 +61,8 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 #endif
 
 	
-template <typename TShape>
-struct Cargo< Index<TMPReadSet, TShape> > {
+template <typename TShape, typename TSpec>
+struct Cargo< Index<TMPReadSet, Index_QGram<TShape, TSpec> > > {
 	typedef struct {
 		double		abundanceCut;
 		int			_debugLevel;

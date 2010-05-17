@@ -64,7 +64,7 @@ int getDir(TPath path, TFilenameString &files)
 
 struct ParamChooserOptions
 {
-	typedef float TFloat;
+	typedef double TFloat;
 	unsigned minThreshold;					// minimum value for threshold parameter 
 	unsigned maxWeight;                                           // maximum value of q
 	bool chooseOneGappedOnly;      // choose onegapped (or ungapped) shape (discard all other gapped shapes)

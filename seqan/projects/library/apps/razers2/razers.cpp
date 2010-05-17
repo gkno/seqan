@@ -481,7 +481,7 @@ int main(int argc, const char *argv[])
 	}
 
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
-	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
+	pm_options.optionLossRate = (ParamChooserOptions::TFloat)(100.0 - pm_options.optionLossRate) / 100.0;
 	if (stop)
 	{
 		cerr << "Exiting ..." << endl;
@@ -511,7 +511,7 @@ int main(int argc, const char *argv[])
 	{
 		if (options.lowMemory) pm_options.maxWeight = 13;
 		pm_options.verbose = (options._debugLevel >= 1);
-		pm_options.optionErrorRate = options.errorRate;
+		pm_options.optionErrorRate = (ParamChooserOptions::TFloat)options.errorRate;
 		if (options.hammingOnly)
 		{
 			pm_options.optionProbINSERT = (ParamChooserOptions::TFloat)0.0;

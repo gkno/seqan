@@ -661,11 +661,11 @@ void computeFilteringLoss(
 	resize(col1, maxErrors * statesCount * maxT);
 
 #ifdef COUNT_LOSSES
-	TFloat positive = _transform(0.0);
-	TFloat negative = _transform(1.0);
+	TFloat positive = (TFloat)_transform(0.0);
+	TFloat negative = (TFloat)_transform(1.0);
 #else
-	TFloat positive = _transform(1.0);
-	TFloat negative = _transform(0.0);
+	TFloat positive = (TFloat)_transform(1.0);
+	TFloat negative = (TFloat)_transform(0.0);
 #endif
 
 	// RECURSION BEGIN
@@ -775,7 +775,7 @@ void computeFilteringLoss(
 	for (int eSum = 0; eSum < maxErrors; ++eSum)
 		for (int t = 0; t < maxT; ++t) 
 		{
-			TFloat recovered = _transform(0.0);
+			TFloat recovered = (TFloat)_transform(0.0);
 			for (int s = 0; s < statesCount; ++s)
 			{
 				TState const &state = states[s];
