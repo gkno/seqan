@@ -286,6 +286,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     appendValue(stringSet, infix(finder));
     appendValue(stringSet, read);
     int alignmentScore = globalAlignment(align, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
+    (void)alignmentScore; // Supress warning in non-debug mode.
     SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
     // Compute quality-based score of alignment.  We pass the

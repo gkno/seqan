@@ -1217,8 +1217,7 @@ namespace ClassTest {
 #define SEQAN_ASSERT_TRUE_MSG(_arg1, ...) do {} while (false)
 #define SEQAN_ASSERT_NOT(_arg1) do {} while (false)
 #define SEQAN_ASSERT_NOT_MSG(_arg1, ...) do {} while (false)
-#define SEQAN_FAIL(...) do {} while (false)
-#define SEQAN_FAIL_MSG() do {} while (false)
+#define SEQAN_ASSERT_FAIL(...) do {} while (false)
 
 #endif  // #if SEQAN_ENABLE_DEBUG
 
