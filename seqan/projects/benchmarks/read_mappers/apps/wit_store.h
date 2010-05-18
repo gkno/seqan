@@ -62,7 +62,7 @@ TStream & operator<<(TStream & stream, WitStore const & store) {
     typedef typename Iterator<typename WitStore::TIntervalStore, Standard>::Type TIterator;
     stream << ",-- WIT Store" << std::endl;
     for (TIterator it = begin(store.intervals, Standard()); it != end(store.intervals, Standard()); ++it) {
-        stream << "| " << value(store.readNames)[value(it).readId] << "\t" << value(it).distance << "\t" << value(store.contigNames)[value(it).contigId]
+        stream << "| " << value(store.readNames)[value(it).readId] << " read id = " << value(it).readId << "\t" << value(it).distance << "\t" << value(store.contigNames)[value(it).contigId]
                << "\t" << (value(it).isForward ? "F" : "R") << "\t" << value(it).firstPos << "\t" << value(it).lastPos << std::endl;
     }
     stream << "`--" << std::endl;

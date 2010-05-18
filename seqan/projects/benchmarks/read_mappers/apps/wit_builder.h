@@ -164,11 +164,11 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     // Debug-adjustments.
     #define ENABLE 0
     #define ALL 0
-    #define READID 4
+    #define READID 553
 
-//     if (readNames[readId] == CharString("SRR027007.862.1")) {
-//         std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
-//     }
+//    if (readNames[readId] == CharString("SRR027007.518.1")) {
+//    	std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
+//    }
 
     // The read maps with less than the given number of errors to [left, right]
     // to the contig sequence, is forward strand iff is Forwar is true.
@@ -195,7 +195,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     TPosition hitBeginPosition;
 
     if (ENABLE && (ALL || readId == READID)) {
-        std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
+        std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << " length is " << length(read) << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " relative min score = " << relativeMinScore << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " extending to the right." << std::endl;
         std::cerr << __FILE__ << ":" << __LINE__ << " contig id == " << contigId << std::endl;
@@ -288,7 +288,6 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
             // Tentatively extend the interval to the left.  We will
             // extend until we hit a position with too low score.
             TPosition tentativeLeft = endPos;
-            String<WeightedMatch> tempMatches;
             // Flag that indicates whether we found an entry with too low score.
             bool foundTooLowScore = false;
             // Flag that indicates whether we performed a loop iteration after having found a too low score.
@@ -328,9 +327,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 ret = findBegin(finder, pattern, getScore(pattern));
                 SEQAN_ASSERT_TRUE(ret);
                 int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
-                appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
+                appendValue(errorCurve, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 if (ENABLE && (ALL || readId == READID)) {
-                    std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
+                    std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(errorCurve) << " for read id " << readId << std::endl;
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << std::endl;
                 }
                 foundTooLowScore = foundTooLowScore || (relativeScore < relativeMinScore);
@@ -338,9 +337,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     ret = findBegin(finder, pattern, getScore(pattern));
                     SEQAN_ASSERT_TRUE(ret);
                     relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
-                    appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
+                    appendValue(errorCurve, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
-                        std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
+                        std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(errorCurve) << " for read id " << readId << std::endl;
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << std::endl;
                     }
                     foundTooLowScore = foundTooLowScore || (relativeScore < relativeMinScore);
@@ -349,47 +348,6 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
             if (ENABLE && (ALL || readId == READID)) {
                 std::cerr << __FILE__ << ":" << __LINE__ << " -- after loop" << std::endl;
             }
-            // Now we can be sure that the temporary matches contain an entry
-            // left of the first one with a too low score that has a different
-            // begin position than hitBeginPosition.
-            std::sort(begin(tempMatches, Standard()), end(tempMatches, Standard()));
-            ModifiedString<String<WeightedMatch>, ModReverse> rTempMatches(tempMatches);
-            TPosition prefixLength = 0;
-            TPosition i;
-            // Search up to the first too low score.
-            for (i = 0; i < length(rTempMatches); ++i) {
-                if (ENABLE && (ALL || readId == READID)) {
-                    std::cerr << "Considering " << rTempMatches[i] << std::endl;
-                }
-                if (rTempMatches[i].distance < relativeMinScore) {
-                    if (rTempMatches[i].beginPos == hitBeginPosition) {
-                        prefixLength += 1;
-                        left -= 1;
-                        i += 1;
-                    }
-                    break;
-                }
-                prefixLength += 1;
-                left -= 1;
-            }
-            if (ENABLE && (ALL || readId == READID)) {
-                std::cerr << "prefixLength == " << prefixLength << std::endl;
-                std::cerr << "i == " << i << std::endl;
-            }
-            // Then, append until we find a position with a different begin position.
-            for (; i < length(rTempMatches); ++i) {
-                if (rTempMatches[i].beginPos == hitBeginPosition) {
-                    prefixLength += 1;
-                    left -= 1;
-                } else {
-                    break;
-                }
-            }
-            // Finally, append the prefix of the given length.
-            if (ENABLE && (ALL || readId == READID)) {
-                std::cerr << "appending prefix(rTempMatches, " << prefixLength << ")" << std::endl;
-            }
-            append(errorCurve, prefix(rTempMatches, prefixLength));
         }
     }
 
@@ -516,6 +474,9 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     TReadSeqStore const & readSeqs = fragments.readSeqStore;
     for (TReadId i = 0; i < length(readSeqs); ++i) {
         std::sort(begin(errorCurves[i], Standard()), end(errorCurves[i], Standard()));
+        typedef typename Iterator<String<WeightedMatch>, Standard>::Type TIterator;
+        TIterator newEnd = std::unique(begin(errorCurves[i], Standard()), end(errorCurves[i], Standard()));
+        resize(errorCurves[i], newEnd - begin(errorCurves[i], Standard()), Exact());
         fillGaps(errorCurves[i]);
         smoothErrorCurve(errorCurves[i]);
 
@@ -528,8 +489,9 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
         for (TIterator it = begin(errorCurves[i]); it != end(errorCurves[i]); ++it) {
-            if (value(it).distance >= relativeMinScore)
+            if (value(it).distance >= relativeMinScore) {
                 appendValue(filtered, value(it));
+            }
         }
         move(errorCurves[i], filtered);
     }

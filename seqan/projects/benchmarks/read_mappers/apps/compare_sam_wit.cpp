@@ -232,6 +232,7 @@ int main(int argc, const char *argv[]) {
     WitStore witStore;
     loadWitFile(witStore, fragments.readNameStore, fragments.contigNameStore, options.witFileName);
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
+    std::cerr << witStore << std::endl;
 
     // =================================================================
     // Compare The SAM Hits Against WIT Intervals.
