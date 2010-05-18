@@ -5,7 +5,7 @@
 #include <seqan/index.h>
 #include <seqan/seeds.h>
 
-#include <demos/swift_local.h>
+#include "../../library/apps/swift_local/swift_local.h"
 
 using namespace seqan;
 
@@ -275,6 +275,12 @@ SEQAN_DEFINE_TEST(test_split_xDrop_align) {
     seq2 = "CCCCTGGGGGGTCTTTTTGTCCCTGGGGGGTCCCTGGG";
     clear(aliString);
     testXDropAlign(seq1, seq2, Score<int>(1, -1, -1), 3/*scoreDropOff*/, 7/*minScore*/, aliString);
+    SEQAN_ASSERT_EQ(length(aliString), 2);
+
+    seq1 = "GCTGTAGCTGGAG";
+    seq2 = "GCTGTAGCTGGAG";
+    clear(aliString);
+    testXDropAlign(seq1, seq2, Score<int>(1, -9, -9), 5/*scoreDropOff*/, 7/*minScore*/, aliString);
     SEQAN_ASSERT_EQ(length(aliString), 2);
 }
 
