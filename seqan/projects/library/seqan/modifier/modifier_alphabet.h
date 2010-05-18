@@ -686,7 +686,7 @@ _initializeAlphabetConversionTable(TTarget *,
 template <typename TTarget, typename TSource>
 struct _AlphabetConversionTable
 {
-	enum { SIZE = ValueSize<TSource>::VALUE };
+	enum { SIZE = _InternalValueSize<TSource>::VALUE };
 private:
 	static TTarget table_store[SIZE];
 public:
@@ -704,13 +704,55 @@ public:
 	}
 };
 
-
 template <typename TTarget, typename TSource>
 TTarget _AlphabetConversionTable<TTarget, TSource>::table_store[_AlphabetConversionTable<TTarget, TSource>::SIZE];
 
 
 template <typename TTarget, typename TSource>
 TTarget * _AlphabetConversionTable<TTarget, TSource>::table = _AlphabetConversionTable<TTarget, TSource>::initialize();
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TTarget, typename TSource>
+inline void
+_initializeAlphabetOrdTable(TTarget *,
+							TSource const &)
+{
+    SEQAN_CHECKPOINT;
+	//default: do nothing (because this array is not used)
+	//define this function for each conversion table
+}
+
+
+template <typename TSource>
+struct _AlphabetOrdTable
+{
+	enum { SIZE = _InternalValueSize<TSource>::VALUE };
+private:
+	static unsigned table_store[SIZE];
+public:
+	static unsigned * table;
+	static unsigned * initialize()
+	{
+        SEQAN_CHECKPOINT;
+		static bool _is_initialized = false;
+		if (! _is_initialized)
+		{
+			_initializeAlphabetOrdTable(table_store, TSource());
+		}
+		_is_initialized = true;
+		return table_store;
+	}
+};
+
+
+template <typename TSource>
+unsigned _AlphabetOrdTable<TSource>::table_store[_AlphabetOrdTable<TSource>::SIZE];
+
+
+template <typename TSource>
+unsigned * _AlphabetOrdTable<TSource>::table = _AlphabetOrdTable<TSource>::initialize();
 
 }  // namespace seqan
 

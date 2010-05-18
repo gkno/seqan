@@ -950,6 +950,9 @@ template <typename TValue>
 struct ValueSize<TValue const>:
 	public ValueSize<TValue> {};
 
+template <typename TValue> 
+struct _InternalValueSize:
+	public ValueSize<TValue> {};
 
 
 //////////////////////////////////////////////////////////////////////////////

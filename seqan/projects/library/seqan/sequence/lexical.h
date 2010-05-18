@@ -781,6 +781,18 @@ inline unsigned ordValue(SimpleType<TValue,TSpec> const &c)
 	return c;
 }
 
+template <typename TValue>
+inline unsigned _internalOrdValue(TValue const &c) 
+{
+	return ordValue(c);
+}
+
+template <typename TValue, typename TSpec>
+inline unsigned _internalOrdValue(SimpleType<TValue,TSpec> const &c) 
+{
+	return c.value;
+}
+
 
 
 //////////////////////////////////////////////////////////////////////////////

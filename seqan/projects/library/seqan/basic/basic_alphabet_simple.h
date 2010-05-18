@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007
+		  Copyright (C) 2007
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -423,7 +423,6 @@ assign(unsigned int & c_target,
 SEQAN_CHECKPOINT
 	c_target = source.value;
 }
-
 
 //short
 template <typename TValue, typename TSpec>
@@ -1377,7 +1376,8 @@ SEQAN_CHECKPOINT
 struct _DnaQ {};
 typedef SimpleType <unsigned char, _DnaQ> DnaQ;
 
-template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };	// considering only the nucleotide
+template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };				// considering nucleotides
+template <> struct _InternalValueSize< DnaQ > { enum { VALUE = 252 }; };	// considering nucleotides x Quality 0..62
 template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
 
 //____________________________________________________________________________
@@ -1400,7 +1400,10 @@ template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
 struct _Dna5Q {};
 typedef SimpleType <unsigned char, _Dna5Q> Dna5Q;
 
-template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };
+static const unsigned char _Dna5QValueN = 252;								// value representing N
+
+template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };				// considering nucleotides + N
+template <> struct _InternalValueSize< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides + N) x Quality 0..62
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
 
 
@@ -1453,7 +1456,7 @@ inline void assign(DnaQ & target, Dna5Q const & source)
     // We perform the converstion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
- 	// target.value = (source.value == 0xff) ? 0: source.value;
+	// target.value = (source.value == _Dna5QValueN)? 0: source.value;
 
     static const unsigned table[] = {
           0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -1471,7 +1474,7 @@ inline void assign(DnaQ & target, Dna5Q const & source)
         192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
         208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
         224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-        240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254,   0
+        240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 0,   0,   0,   0
     };
     target.value = table[source.value];
 }
@@ -1508,7 +1511,7 @@ inline void assign(Dna5 & target, Dna5Q const & source)
     // We perform the conversion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
- 	// target.value = (source.value == 0xff) ? 4: source.value & 3;
+	// target.value = (source.value == _Dna5QValueN)? 4: source.value & 3;
 
     static const unsigned table[] = {
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
@@ -1523,7 +1526,7 @@ inline void assign(Dna5 & target, Dna5Q const & source)
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
-        0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 4 // <-- note the 4
+        0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 4, 4, 4 // <-- note the 4
     };
     target.value = table[source.value];
 }
@@ -1540,10 +1543,10 @@ inline void assign(Dna5Q & target, Dna5 const & source)
     // We perform the conversion from DNA5 with qualities to DNA5 by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
-    // target.value = (source.value == 4)? 0xff : source.value | (60 << 2);
+	// target.value = (source.value == 4)? _Dna5QValueN : source.value | (60 << 2);
 
     static const unsigned table[] = {
-        (60 << 2) + 0, (60 << 2) + 1, (60 << 2) + 2, (60 << 2) + 3, 0xff
+        (60 << 2) + 0, (60 << 2) + 1, (60 << 2) + 2, (60 << 2) + 3, _Dna5QValueN
     };
     target.value = table[source.value];
 }
@@ -1605,6 +1608,22 @@ inline void assign(DnaQ & target, Unicode c_source)
 {
 SEQAN_CHECKPOINT
 	assign(target, (Dna) c_source);
+}
+//____________________________________________________________________________
+
+inline void 
+assign(DnaQ & target, DnaQ const & source)
+{
+SEQAN_CHECKPOINT
+	target.value = source.value;
+}
+
+template <typename TSource>
+inline void 
+assign(DnaQ & target, TSource const & source)
+{
+SEQAN_CHECKPOINT
+	target.value = (Dna)source;
 }
 //____________________________________________________________________________
 
@@ -1674,6 +1693,21 @@ inline void assign(Dna5Q & target, Iupac const & source)
 SEQAN_CHECKPOINT
 	assign(target, (Dna5)source);
 }
+
+inline void 
+assign(Dna5Q & target, Dna5Q const & source)
+{
+SEQAN_CHECKPOINT
+	target.value = source.value;
+}
+template <typename TSource>
+inline void 
+assign(Dna5Q & target, TSource const & source)
+{
+SEQAN_CHECKPOINT
+	assign(target, (Dna5)source);
+}
+
 
 //____________________________________________________________________________
 
@@ -2015,7 +2049,7 @@ inline int getQualityValue(Dna5Q const &c)
 {
     // We use a lookup table to extract the qualities from DNA5Q.  The lookup
     // table based code is equivalent to the following line:
-	// return (c.value == 0xff)? 0: c.value >> 2;
+	// return (c.value == _Dna5QValueN)? 0: c.value >> 2;
 
     static const unsigned table[] = {
          0,  0,  0,  0,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,
@@ -2032,8 +2066,8 @@ inline int getQualityValue(Dna5Q const &c)
         46, 47, 47, 47, 47, 48, 48, 48, 48, 49, 49, 49, 49, 50, 50, 50, 50,
         51, 51, 51, 51, 52, 52, 52, 52, 53, 53, 53, 53, 54, 54, 54, 54, 55,
         55, 55, 55, 56, 56, 56, 56, 57, 57, 57, 57, 58, 58, 58, 58, 59, 59,
-        59, 59, 60, 60, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62, 63, 63, 63,
-         0};
+        59, 59, 60, 60, 60, 60, 61, 61, 61, 61, 62, 62, 62, 62,
+		0,  0,  0,  0};
     return table[c.value];
 }
 
@@ -2055,7 +2089,7 @@ void assignQualityValue(DnaQ &c, int q)
 inline 
 void assignQualityValue(Dna5Q &c, int q) 
 {
-	if (c.value != 0xff)
+	if (c.value != _Dna5QValueN)
 		c.value = (c.value & 3) | (q << 2);
 }
 

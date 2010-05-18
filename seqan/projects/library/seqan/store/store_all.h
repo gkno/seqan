@@ -1406,14 +1406,16 @@ inline void _printRead(
 	write(stream, readGaps, "", format);
 }
 
-template <typename TStream, typename TFormatTag, typename TContigGaps>
+template <typename TStream, typename TFormatTag, typename TContigGaps, typename TContigName>
 inline void _printContig(
 	TStream &stream,
 	Tag<TFormatTag> const &format,
 	AlignedReadLayout &, 
-	TContigGaps &contigGaps)
+	TContigGaps &contigGaps,
+	TContigName const &)
 {
 	write(stream, contigGaps, "", format);
+	std::cout<<"!!"<<value(contigGaps.data_source)<<std::endl;
 }
 
 template <typename TStream, typename TFormatTag, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
@@ -1455,7 +1457,7 @@ void printAlignment(
 //		TContigGaps	contigGaps(store.contigStore[contigId].seq, store.contigStore[contigId].gaps);
 		setBeginPosition(contigGaps, posBegin);
 		setEndPosition(contigGaps, posEnd);
-		_printContig(stream, format, layout, contigGaps);
+		_printContig(stream, format, layout, contigGaps, store.contigNameStore[contigId]);
 		stream << '\n';
 	} else
 		stream << '\n';

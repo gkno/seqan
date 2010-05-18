@@ -59,12 +59,12 @@ public:
 	{
 	}
 	ModifiedAlphabet(ModifiedAlphabet const & other)
-		: data(other.data)
+		: data(_internalOrdValue(other))
 	{
 	}
 	template <typename TOther>
 	ModifiedAlphabet(TOther const & other_data)
-		: data(ordValue(convert<ModifiedAlphabet>(other_data)))
+		: data(_internalOrdValue(convert<ModifiedAlphabet>(other_data)))
 	{
 	}
 	~ModifiedAlphabet()
@@ -80,7 +80,7 @@ public:
 	ModifiedAlphabet const & 
 	operator = (TOther const & other_data)
 	{
-		data = ordValue(convert<ModifiedAlphabet>(other_data));
+		data = _internalOrdValue(convert<ModifiedAlphabet>(other_data));
 		return *this;
 	}
 
@@ -96,10 +96,19 @@ public:
 */
 //____________________________________________________________________________
 
+	//TODO(weese): investigate the issue below
 	//this cannot be a template since a template would be in conflict to
 	//the template c'tor
 
-
+/*
+	// weese: I tried the template below without problems in the tests
+	template <typename TValue>
+	operator TValue() const
+	{
+SEQAN_CHECKPOINT
+		return convert<TValue>(*this);
+	}
+*/
 	operator long() const
 	{
 SEQAN_CHECKPOINT
@@ -145,7 +154,6 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		return convert<unsigned char>(*this);
 	}
-
 };
 
 
@@ -170,6 +178,32 @@ struct ValueSize<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >
 	enum { VALUE = ValueSize<THost>::VALUE + 1 };
 };
 
+template <typename THost, char CHAR, typename TSpec>
+struct _InternalValueSize<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >
+{
+	enum { VALUE = _InternalValueSize<THost>::VALUE + 1 };
+};
+
+//////////////////////////////////////////////////////////////////////////////
+// _internalCreateChar
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, typename TNum>
+inline TValue
+_internalCreateChar(TValue const &, TNum i)
+{
+	return convert<TValue>(i);
+}
+
+template <typename TValue, typename TSpec, typename TNum>
+inline SimpleType<TValue, TSpec>
+_internalCreateChar(SimpleType<TValue, TSpec> const &, TNum i)
+{
+	SimpleType<TValue, TSpec> s;
+	s.value = i;
+	return s;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // conversions
 //////////////////////////////////////////////////////////////////////////////
@@ -186,17 +220,16 @@ _initializeAlphabetConversionTable(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec
 	//assure that the conversion from TSource to THost is possible
 //	_AlphabetConversionTable<THost, TSource>::initialize();
 	
-	//add the new character CHAR to the table
-	buf[ordValue(convert<TSource>(CHAR))].data = ValueSize<THost>::VALUE;
-
 	//copy the conversion table for converting TSouce => THost
 	//maybe, if there is no CHAR in TSource, the entry for CHAR is overwritten now
-	for (int i = ValueSize<TSource>::VALUE; i > 0; )
+	for (int i = _InternalValueSize<TSource>::VALUE; i > 0; )
 	{
 		--i;
-		buf[i].data = ordValue(convert<THost>(convert<TSource>(i)));
+		buf[i].data = _internalOrdValue(convert<THost>(_internalCreateChar(TSource(), i)));
 	}
 
+	//add the new character CHAR to the table
+	buf[_internalOrdValue(convert<TSource>(CHAR))].data = _InternalValueSize<THost>::VALUE;
 }
 
 template <int SIZE_OF_SOURCE>
@@ -212,7 +245,9 @@ struct _ConvertImpl_ModExpand
 		typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
 		if (source_ == ValueSize<THost>::VALUE)
 		{// the extra character
-			return convert<TTarget>((int) ValueSize<THost>::VALUE);
+			TTarget tmp;
+			tmp.data = _InternalValueSize<THost>::VALUE;
+			return tmp;
 		}
 		return convert<TTarget>(convert<THost>(source_));
 	}
@@ -229,7 +264,8 @@ struct _ConvertImpl_ModExpand<1>
 		TSource const & source_)
 	{
 		typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
-		return _AlphabetConversionTable<TTarget, TSource>::table[ordValue(source_)];
+		TTarget * table = _AlphabetConversionTable<TTarget, TSource>::table;
+		return table[_internalOrdValue(source_)];
 	}
 };
 
@@ -251,7 +287,7 @@ convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
 SEQAN_CHECKPOINT
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
 	typedef SimpleType<TSourceValue, TSourceSpec> TSource;
-	return _AlphabetConversionTable<TTarget, TSource>::table[ordValue(source_)];
+	return _AlphabetConversionTable<TTarget, TSource>::table[_internalOrdValue(source_)];
 }
 
 
@@ -262,12 +298,12 @@ convertImpl(Convert<ModifiedAlphabet<SimpleType<TSourceValue, TSourceSpec>, ModE
 			SimpleType<TSourceValue, TSourceSpec> const & source_)
 {
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): Do we need special handling for alphabets that already contain the gap symbol?
 	typedef SimpleType<TSourceValue, TSourceSpec> TSource;
 	typedef ModifiedAlphabet<TSource, ModExpand<CHAR, TSpec> > TTarget;
-    TTarget target;
-    target.data = source_.value;
-    return target;
+	
+	TTarget tmp;
+	tmp.data = _internalOrdValue(source_);
+	return tmp;
 }
 
 
@@ -283,7 +319,6 @@ SEQAN_CHECKPOINT
 }
 
 
-
 // ModExpand => some type
 
 template <typename TTarget, typename THost, char CHAR, typename TSpec>
@@ -297,14 +332,35 @@ _initializeAlphabetConversionTable(TTarget * buf,
 	_AlphabetConversionTable<TTarget, THost>::initialize(); 
 	
 	//copy the conversion table for converting THost => TTarget
-	for (int i = ValueSize<THost>::VALUE; i > 0; )
+	for (int i = _InternalValueSize<THost>::VALUE; i > 0; )
 	{
 		--i;
-		buf[i] = convert<TTarget>(convert<THost>(i));
+		buf[i] = convert<TTarget>(_internalCreateChar(THost(), i));
 	}
 
 	//add the new character CHAR to the table
-	buf[ValueSize<THost>::VALUE] = convert<TTarget, char>(CHAR);
+	buf[_InternalValueSize<THost>::VALUE] = convert<TTarget, char>(CHAR);
+}
+
+template <typename TTarget, typename THost, char CHAR, typename TSpec>
+inline void
+_initializeAlphabetOrdTable(TTarget * buf,
+							ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const &)
+{
+	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
+
+	//assure that the conversion from THost to TTarget is possible
+	_AlphabetOrdTable<THost>::initialize(); 
+	
+	//copy the conversion table for converting THost => TTarget
+	for (int i = _InternalValueSize<THost>::VALUE; i > 0; )
+	{
+		--i;
+		buf[i] = ordValue(_internalCreateChar(THost(), i));
+	}
+
+	//add the new character CHAR to the table
+	buf[_InternalValueSize<THost>::VALUE] = ValueSize<THost>::VALUE;
 }
 
 
@@ -320,7 +376,7 @@ convertImpl(Convert<TTarget, T> const,
 {
     SEQAN_CHECKPOINT;
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
-	return _AlphabetConversionTable<TTarget, TSource>::table[ordValue(source_)];
+	return _AlphabetConversionTable<TTarget, TSource>::table[_internalOrdValue(source_)];
 }
 
 
@@ -331,10 +387,12 @@ convertImpl(Convert<SimpleType<TTargetValue, TTargetSpec>, ModifiedAlphabet<Simp
 			ModifiedAlphabet<SimpleType<TTargetValue, TTargetSpec>, ModExpand<CHAR, TSpec> > const & source_)
 {
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): What is source is a gap? For DNA5Q, the gap symbol is part of the alphabet already.
     typedef SimpleType<TTargetValue, TTargetSpec> TTarget;
     TTarget target;
-    target.value = source_.data;
+	if (source_.data == _InternalValueSize<TTarget>::VALUE)
+		assign(target, CHAR);
+	else
+		target.value = source_.data;
     return target;
 }
 
@@ -372,9 +430,18 @@ convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
 
 template <typename THost, char CHAR, typename TSpec>
 inline unsigned
-ordValue(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & c) 
+_internalOrdValue(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & c) 
 {
 	return c.data;
+}
+
+template <typename THost, char CHAR, typename TSpec>
+inline unsigned
+ordValue(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & c) 
+{
+    SEQAN_CHECKPOINT;
+	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
+	return _AlphabetOrdTable<TSource>::table[_internalOrdValue(c)];
 }
 
 //////////////////////////////////////////////////////////////////////////////
