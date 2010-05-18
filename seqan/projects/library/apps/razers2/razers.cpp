@@ -32,6 +32,7 @@
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_DONTMASKDUPLICATES
+#define RAZERS_NOOUTERREADGAPS			// enforce the alignment of the first and last base (determines the lakes)
 #define RAZERS_OPENADDRESSING
 
 #include <seqan/platform.h>

@@ -1321,6 +1321,14 @@ matchVerify(
 	while (find(myersFinder, myersPattern, minScore))
 	{
 		TPosition pos = position(hostIterator(myersFinder));
+		int score = getScore(myersPattern);
+		
+#ifdef RAZERS_NOOUTERREADGAPS
+		// manually adapt score depending on the last bases
+		++pos;
+		if ((verifier.options.compMask[ordValue(inf[pos])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
+			if (--score < minScore) continue;
+#endif		
 		if (lastPos + minDistance < pos)
 		{
 			if (minScore <= maxScore)
@@ -1344,7 +1352,7 @@ matchVerify(
 
 				_patternMatchNOfPattern(myersPatternRev, verifier.options.matchN);
 				_patternMatchNOfFinder(myersPatternRev, verifier.options.matchN);
-				while (find(myersFinderRev, myersPatternRev, maxScore))
+				while (find(myersFinderRev, myersPatternRev, /*score*/maxScore))
 					verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
 				verifier.push();
@@ -1353,9 +1361,9 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
-		if (getScore(myersPattern) >= maxScore) 
+		if (score >= maxScore) 
 		{
-			maxScore = getScore(myersPattern);
+			maxScore = score;
 			maxPos = pos;
 		}
 		lastPos = pos;
@@ -1786,7 +1794,11 @@ int mapSingleReads(
 		resize(forwardPatterns, readCount, Exact());
 		for(unsigned i = 0; i < readCount; ++i)
 		{
+#ifdef RAZERS_NOOUTERREADGAPS
+			setHost(forwardPatterns[i], prefix(indexText(swiftIndex)[i], length(indexText(swiftIndex)[i]) - 1));
+#else
 			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
+#endif
 			_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
@@ -1929,7 +1941,11 @@ int mapSingleReads(
 		resize(forwardPatterns, readCount, Exact());
 		for(unsigned i = 0; i < readCount; ++i)
 		{
+#ifdef RAZERS_NOOUTERREADGAPS
+			setHost(forwardPatterns[i], prefix(indexText(swiftIndex)[i], length(indexText(swiftIndex)[i]) - 1));
+#else
 			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
+#endif
 			_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
