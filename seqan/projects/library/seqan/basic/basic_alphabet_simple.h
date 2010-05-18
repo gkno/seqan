@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-		  Copyright (C) 2007
+  Copyright (C) 2007
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public

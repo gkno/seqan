@@ -1415,7 +1415,6 @@ inline void _printContig(
 	TContigName const &)
 {
 	write(stream, contigGaps, "", format);
-	std::cout<<"!!"<<value(contigGaps.data_source)<<std::endl;
 }
 
 template <typename TStream, typename TFormatTag, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
