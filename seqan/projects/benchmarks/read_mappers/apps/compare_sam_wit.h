@@ -468,6 +468,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 std::cerr << "last pos = " << lastPos << std::endl;
                 std::cerr << "contigId = " << it->contigId << std::endl;
                 std::cerr << "max error rate is " << options.maxError << std::endl;
+                std::cerr << "contig_infix_seq = " << infix(contig, beginPos, endPos) << std::endl;
                 std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
                 std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
                 exit(1);
