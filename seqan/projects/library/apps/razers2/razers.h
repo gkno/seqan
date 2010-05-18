@@ -1317,6 +1317,10 @@ matchVerify(
 	TPosition lastPos = length(inf);
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
+#ifdef RAZERS_NOOUTERREADGAPS
+	setEndPosition(inf, endPosition(inf) - 1);
+#endif		
+	
 	// find end of best semi-global alignment
 	while (find(myersFinder, myersPattern, minScore))
 	{
