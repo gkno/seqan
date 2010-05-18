@@ -98,7 +98,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         TString /*const*/ & contig,
         bool const & isForward,
         TString /*const*/ & read,
-        const Options & /*options*/,
+        const Options & options,
         int maxError,
         TContigIdType contigId,
         String<WeightedMatch> &foundMatches,
@@ -114,6 +114,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
             continue;
         int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
+        (void)options;  // Supress warnings in non-debug mode.
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         (void)ret;  // Supress warning in non-debug mode.
         SEQAN_ASSERT_TRUE(ret);
@@ -131,7 +132,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         const Options &options,
         int maxError,
         TContigIdType contigId,
-        String<WeightedMatch> &foundMatches,
+        String<WeightedMatch> & foundMatches,
         const QualityDpSearch<FindInfix> &) {
     Finder<TString> finder(contig);
     Pattern<TString, QualityDpSearch<FindInfix> > pattern(read, -maxError);
@@ -157,7 +158,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         TString /*const*/ & contig,
         bool const & isForward,
         TString /*const*/ & read,
-        const Options & /*options*/,
+        const Options & options,
         int maxError,
         TContigIdType contigId,
         String<WeightedMatch> &foundMatches,
@@ -172,6 +173,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
             continue;
         int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
+        (void)options;  // Supress warnings in non-debug mode.
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
         (void)ret;  // Supress warning in non-debug mode.
         SEQAN_ASSERT_TRUE(ret);
