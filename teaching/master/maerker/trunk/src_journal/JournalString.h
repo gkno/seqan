@@ -14,8 +14,14 @@
 
 namespace seqan {
 
+
 	template< typename TStringSpec, typename TJournalSpec >
 	struct Journal;
+
+	template <typename TValue, typename TStringSpec, typename TJournalSpec>
+	struct Value< String< TValue, Journal< TStringSpec, TJournalSpec > > > {
+		typedef String<TValue> Type;
+	};
 
 	struct Operation{
 		Operation() : length( 0 ) { };
@@ -57,14 +63,14 @@ namespace seqan {
 	inline bool isInsertion( Operation* op ){
 		return op->isIns();
 	}
-
-	inline bool isIns( Operation * op ){
-		return false;
-	}
-
-	inline bool isIns( Insertion * op ){
-		return true;
-	}
+//	TODO: SCHMARRN
+//	inline bool isIns( Operation * op ){
+//		return false;
+//	}
+//
+//	inline bool isIns( Insertion * op ){
+//		return true;
+//	}
 
 	struct JournalNode{
 
@@ -78,6 +84,9 @@ namespace seqan {
 
 	};
 
+	/**
+	 * Prints the content of the JournalNode
+	 */
 	template<>
 	inline std::string stringify( JournalNode const & cargo ){
 		std::stringstream sstr;
@@ -85,11 +94,18 @@ namespace seqan {
 		return sstr.str();
 	}
 
+	/**
+	 * Defines the String-template specialization for journal strings.
+	 *
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	class String< TValue, Journal< TStringSpec, TJournalSpec > > {
 
 	public:
-		String( String< TValue, TStringSpec > & other ) : m_holder( other ) {
+		String() {
+
+		};
+		String( String< TValue, TStringSpec > const & other ) : m_holder( other ) {
 			JournalNode root( 0, new Operation( seqan::length( other ) ) );
 			root.physical_position = 0;
 			root.blocksize = seqan::length( other );
@@ -102,28 +118,28 @@ namespace seqan {
 			seqan::appendValue( m_insertion_string, TValue(), Generous() );
 		};
 
-		String< TValue, TStringSpec> & underlying(){
+		String< TValue, TStringSpec> & underlying() const {
 			return value( m_holder );
 		}
 
-		seqan::SeqTree< seqan::STNode< JournalNode > > & journal_tree(){
+		seqan::SeqTree< seqan::STNode< JournalNode > > & journal_tree() {
 			return m_journal_tree;
 		}
 
-		seqan::String< TValue > & insertion_string(){
+		seqan::String< TValue > & insertion_string() {
 			return m_insertion_string;
 		}
 
-		size_t length(){
-			return len;
-		}
+//		size_t length() const {
+//			return len;
+//		}
 
 		void setLength( size_t l ){
 			len = l;
 		}
 
 		template< typename TPosition >
-		inline TValue operator[]( TPosition pos ){
+		inline TValue operator[]( TPosition const & pos ){
 			return value( *this, pos );
 		}
 
@@ -131,48 +147,78 @@ namespace seqan {
 		typename DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type m_insertion_string;
 		Holder< String< TValue, TStringSpec > > m_holder;
 
-	private:
 		size_t len;
 	};
 
+	/**
+	 * Returns the journal tree of the given journal
+	 */
+//	template< typename TValue, typename TStringSpec, typename TJournalSpec >
+//	seqan::SeqTree< seqan::STNode< JournalNode > > &
+//	journal_tree( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
+//		return journal.m_journal_tree;
+//	}
+
+	/**
+	 * Returns the journal tree of the given journal
+	 */
+	template< typename TValue, typename TStringSpec, typename TJournalSpec >
+	seqan::SeqTree< seqan::STNode< JournalNode > > const &
+	journal_tree( String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ){
+		return journal.m_journal_tree;
+	}
+
+	/**
+	 * Returns the journal tree of the given journal
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	seqan::SeqTree< seqan::STNode< JournalNode > > &
 	journal_tree( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
 		return journal.m_journal_tree;
 	}
 
-	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-	seqan::SeqTree< seqan::STNode< JournalNode > > &
-	journal_tree( String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ){
-		return journal.m_journal_tree;
-	}
+	/**
+	 * Returns the inserted string of the given journal
+	 */
+//	template< typename TValue, typename TStringSpec, typename TJournalSpec >
+//	typename DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type &
+//	insertion_string( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
+//		return journal.m_insertion_string;
+//	}
 
+	/**
+	 * Returns the inserted string of the given journal.
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	typename DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type &
-	insertion_string( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
+	insertion_string( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ) {
 		return journal.m_insertion_string;
 	}
 
-	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-	typename DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type &
-	insertion_string( String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ){
-		return journal.m_insertion_string;
-	}
+	/**
+	 * Returns the underlying sequence of the given journal.
+	 */
+//	template< typename TValue, typename TStringSpec, typename TJournalSpec >
+//	String< TValue, TStringSpec> &
+//	underlying( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
+//		return value( journal.m_holder );
+//	}
 
-	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-	String< TValue, TStringSpec> &
-	underlying( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
-		return value( journal.m_holder );
-	}
-
+	/**
+	 * Returns the underlying sequence of the given journal.
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	String< TValue, TStringSpec> &
 	underlying( String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ){
 		return value( journal.m_holder );
 	}
 
+	/**
+	 * Overloads the operator <<, which returns the output stream containing the
+	 * value of the Iterator over a journal
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-	std::ostream & operator << ( std::ostream& os, String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ) {
+	std::ostream & operator << ( std::ostream& os, String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ) {
 		typename Iterator< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type it_journal = begin( journal );
 		typename Iterator< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type it_journal_end = end( journal );
 		while( it_journal != it_journal_end ){
@@ -182,16 +228,25 @@ namespace seqan {
 		return os;
 	}
 
+	/**
+	 * Sets the given length to the given journal
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	inline void _setLength( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal, size_t len ){
 		journal.setLength( len );
 	}
 
+	/**
+	 * Defines the default string type of the insertion string
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
 	struct 	DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >{
 		typedef String< TValue > Type;
 	};
 
+	/**
+	 *
+	 */
 	template< typename TValue, typename TStringSpec, typename TJournalSpec, typename TPosition >
 	inline TValue value( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal, TPosition pos ){
 		JournalNode entry = cargo( (*seqan::find( journal.journal_tree(), pos )) );
@@ -203,36 +258,36 @@ namespace seqan {
 	}
 
 	template< typename TPosition >
-	bool isLess( JournalNode & jn, TPosition pos ){
+	bool isLess( JournalNode const & jn, TPosition const & pos ){
 		return jn.virtual_position + jn.blocksize <= pos;
 	}
 
 	template< typename TPosition >
-	bool isGreater( JournalNode & jn, TPosition pos ){
+	bool isGreater( JournalNode const & jn, TPosition const & pos ){
 		return jn.virtual_position > pos;
 	}
 
 	template< typename TPosition >
-	bool isLess( TPosition pos, JournalNode & jn ){
+	bool isLess( TPosition const & pos, JournalNode const & jn ){
 		return pos < jn.virtual_position;
 	}
 
 	template< typename TPosition >
-	bool isGreater( TPosition pos, JournalNode & jn ){
-		return pos >= jn.virtual_position + jn.blocksize;
+	bool isGreater( TPosition const & pos, JournalNode const & jn ){
+		return  pos >= jn.virtual_position + jn.blocksize;
 	}
 
-	bool isLess( JournalNode  lhs, JournalNode  rhs ){
+	bool isLess( JournalNode const & lhs, JournalNode const & rhs ){
 		return lhs.virtual_position + lhs.blocksize <= rhs.virtual_position;
 	}
 
-	bool isGreater( JournalNode  lhs, JournalNode  rhs ){
+	bool isGreater( JournalNode const & lhs, JournalNode const & rhs ){
 		return lhs.virtual_position >= rhs.virtual_position + rhs.blocksize;
 	}
 
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-	size_t length( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal ){
-		return journal.length();
+	size_t length( String< TValue, Journal< TStringSpec, TJournalSpec > > const & journal ){
+		return journal.len;
 	}
 
 	template< typename TValue, typename TStringSpec, typename TJournalSpec, typename TPosition, typename TString >
@@ -275,9 +330,10 @@ namespace seqan {
 		_setLength( journal, seqan::length( journal ) + seqan::length( str ) ); //update length
 	}
 
-	void eraseFromTo( SeqTree< STNode< JournalNode > > & tree, size_t pos_begin, size_t pos_end ){
-
-	}
+	//TODO must be implemented
+//	void eraseFromTo( SeqTree< STNode< JournalNode > > & tree, size_t pos_begin, size_t pos_end ){
+//
+//	}
 
 	template< typename TValue, typename TStringSpec, typename TJournalSpec, typename TPosition >
 	void erase( String< TValue, Journal< TStringSpec, TJournalSpec > > & journal, TPosition pos, TPosition pos_end ){
@@ -285,7 +341,7 @@ namespace seqan {
 
 		// Initial Assertions to check for correct parameters
 		assert( pos < pos_end && "Deletion of negative Length!" );
-		assert( pos_end <= journal.length() && "Deletion exceeds string limits!" );
+		assert( pos_end <= length(journal) && "Deletion exceeds string limits!" );
 
 		// The new Node will represent the Deletion in the Tree
 		JournalNode new_node;
