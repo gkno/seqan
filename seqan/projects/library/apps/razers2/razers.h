@@ -1799,7 +1799,8 @@ int mapSingleReads(
 		for(unsigned i = 0; i < readCount; ++i)
 		{
 #ifdef RAZERS_NOOUTERREADGAPS
-			setHost(forwardPatterns[i], prefix(indexText(swiftIndex)[i], length(indexText(swiftIndex)[i]) - 1));
+			if (!empty(indexText(swiftIndex)[i]))
+				setHost(forwardPatterns[i], prefix(indexText(swiftIndex)[i], length(indexText(swiftIndex)[i]) - 1));
 #else
 			setHost(forwardPatterns[i], indexText(swiftIndex)[i]);
 #endif
