@@ -238,16 +238,18 @@ SEQAN_CHECKPOINT
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Identifies the longest epsilon match in align and sets the view positions of
+// Identifies the longest epsilon match in align that spans seedBegin and seedEnd and sets the view positions of
 // align to start and end position of the longest epsilon match
-template<typename TSource, typename TSize, typename TFloat>
+template<typename TSource, typename TPos, typename TSize, typename TFloat>
 void 
 longestEpsMatch(Align<TSource> & align,
+                TPos seedBegin,
+                TPos seedEnd,
                 TSize matchMinLength,
                 TFloat epsilon) {
 SEQAN_CHECKPOINT
     // Preprocessing: compute and store gaps and lengths
-    // A gap is a triple of gap begin position, gap end position, and total number of errors of sequence from begin
+    // A gap is a triple of gap begin position, gap end position, and total number of errors in sequence from begin
     //   to end position of this gap.
     typedef typename Position<Align<TSource> >::Type TPosition;
     typedef String<Triple<TPosition, TPosition, TPosition> > TGapsString;
@@ -262,8 +264,8 @@ SEQAN_CHECKPOINT
     TPosition endPos = 0;
     TSize minLength = matchMinLength - 1;
     
-    while ((*leftIt).i2 + minLength < (*rightIt).i1) {
-        while ((*leftIt).i2 + minLength < (*rightIt).i1) {
+    while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*leftIt).i2 <= (TPosition)seedBegin) {
+        while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*rightIt).i1 >= (TPosition)seedEnd) {
             if(_isEpsMatch(*leftIt, *rightIt, epsilon)) {
                 beginPos = (*leftIt).i2;
                 endPos = (*rightIt).i1;
@@ -285,15 +287,23 @@ SEQAN_CHECKPOINT
 	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
-template<typename TRow>
+template<typename TRow, typename TSize>
 inline bool
-_isUpstream(TRow & row1, TRow & row2) {
+_isUpstream(TRow & row1, TRow & row2, TSize minLength) {
 SEQAN_CHECKPOINT
     typedef typename Position<TRow>::Type TPos;
+    
     TPos end1 = endPosition(sourceSegment(row1));
     TPos begin2 = beginPosition(sourceSegment(row2));
     if (end1 <= begin2) return true;
-    else return false;
+    
+    TPos begin1 = beginPosition(sourceSegment(row1));
+    if (begin1 < begin2 && (begin2 - begin1 >= (TPos)minLength)) {
+        TPos end2 = endPosition(sourceSegment(row2));
+        if ((end1 < end2) && (end2 - end1 >= (TPos)minLength)) return true;
+    }
+    
+    return false;
 }
 
 //template<TRow>
@@ -303,9 +313,9 @@ SEQAN_CHECKPOINT
 //    _isUpstream(row2, row1);
 //}
 
-template<typename TSource>
+template<typename TSource, typename TSize>
 inline void
-_insertMatch(String<Align<TSource> > & matches, Align<TSource> & match) {
+_insertMatch(String<Align<TSource> > & matches, Align<TSource> & match, TSize minLength) {
 SEQAN_CHECKPOINT
     typedef typename Position<String<Align<TSource> > >::Type TPosString;
     typedef typename Row<Align<TSource> >::Type TRow;
@@ -326,32 +336,31 @@ SEQAN_CHECKPOINT
     TPosString pos = maxPos / 2;
     while (pos < maxPos) {
         TRow row0 = row(value(matches, pos), 0);
-        if (_isUpstream(row0, matchRow0)) {
+        if (_isUpstream(row0, matchRow0, minLength)) {
             // match is downstream of matches[pos] in first row
             if (minPos == pos) {
                 ++pos;
                 break;
             }
             minPos = pos;
-        } else if (_isUpstream(matchRow0, row0)) {
+        } else if (_isUpstream(matchRow0, row0, minLength)) {
             // match is upstream of matches[pos] in first row
             maxPos = pos;
         } else {
             // match overlaps in first row with another match
             TRow row1 = row(value(matches, pos), 1);
-            if (_isUpstream(row1, matchRow1)) {
+            if (_isUpstream(row1, matchRow1, minLength)) {
                 // match is downstream of matches[pos] in second row
                 if (minPos == pos) {
                     ++pos;
                     break;
                 }
                 minPos = pos;
-            } else if (_isUpstream(matchRow1, row1)) {
+            } else if (_isUpstream(matchRow1, row1, minLength)) {
                 // match is upstream of matches[pos] in second row
                 maxPos = pos;
             } else {
                 // match overlaps in both rows with another match -> keep longer match
-                // TODO: If non-overlapping part is greater than minLength, keep the match!!!
                 if (length(matchRow0) > length(row0)) {
                     // new match is longer
                     replace(matches, pos, pos+1, String<Align<TSource> >());
@@ -387,12 +396,12 @@ SEQAN_CHECKPOINT
     TPos maxLength = 1000000000;
     if (length(a) > maxLength) {
         std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
-        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long... verification skipped.\n" << std::flush;
+        std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b) << "> too long. Verification skipped.\n" << std::flush;
         return;
     }
     //int count = length(matches);
 
-    TSize minLengthWithoutErrors = minLength - (int)floor(minLength*eps);
+    //TSize minLengthWithoutErrors = minLength - (int)floor(minLength*eps);
 
     // define a scoring scheme
     typedef int TScore;
@@ -422,32 +431,35 @@ SEQAN_CHECKPOINT
     while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
 
         // split local alignments containing an X-drop
-        String<Align<TInfixB> > alignmentString;
-        _splitAtXDrops(localAlign, scoreMatrix, scoreDropOff, minScore, alignmentString);
+        String<Align<TInfixB> > seedAlignments;
+        _splitAtXDrops(localAlign, scoreMatrix, scoreDropOff, minScore, seedAlignments);
 
-        typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(alignmentString);
-        while (aliIt != end(alignmentString)) {
+        typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(seedAlignments);
+        while (aliIt != end(seedAlignments)) {
 
             // determine extension direction
             char direction;
-            if (length(alignmentString) == 1) direction = 2;
-            else if (aliIt == begin(alignmentString)) direction = 0;
-            else if (aliIt == end(alignmentString)-1) direction = 1;
+            if (length(seedAlignments) == 1) direction = 2;
+            else if (aliIt == begin(seedAlignments)) direction = 0;
+            else if (aliIt == end(seedAlignments)-1) direction = 1;
             else direction = 3;
+
+            // determine begin and end position of seed alignment
+            TPos seedBeginA = sourceBeginPosition(row(*aliIt, 0)) + beginPosition(a);
+            TPos seedBeginB = sourceBeginPosition(row(*aliIt, 1)) + beginPosition(b);
+            TPos seedEndA = sourceEndPosition(row(*aliIt, 0)) + beginPosition(a);
+            TPos seedEndB = sourceEndPosition(row(*aliIt, 1)) + beginPosition(b);
 
             Align<TInfixB> extAlign;
             if (direction == 3) {
                 extAlign = Align<TInfixB>(*aliIt);
             }
             else {
-                // gapped X-drop extension
-                TSeed seed(sourceBeginPosition(row(*aliIt, 0)) + beginPosition(a),
-                           sourceBeginPosition(row(*aliIt, 1)) + beginPosition(b),
-                           sourceEndPosition(row(*aliIt, 0)) + beginPosition(a) - 1,
-                           sourceEndPosition(row(*aliIt, 1)) + beginPosition(b) - 1);
+                // gapped X-drop extension of seed alignments
+                TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
                 extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
 
-                if (length(seed) < minLengthWithoutErrors) {
+                if (length(seed) < minLength - (int)floor(minLength*eps)) {
                     ++aliIt;
                     continue;
                 }
@@ -458,7 +470,8 @@ SEQAN_CHECKPOINT
                 appendValue(str, infix(host(b), leftPosition(seed, 1), rightPosition(seed, 1)+1));
                 __int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
                 _Align_Traceback<TSize> trace;
-                globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed), startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
+                globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed),
+                    startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
 
                 resize(rows(extAlign), 2);
                 assignSource(row(extAlign, 0), infix(host(a), leftPosition(seed, 0), rightPosition(seed, 0)+1));
@@ -471,8 +484,9 @@ SEQAN_CHECKPOINT
                 continue;
             }
 
-            // cut ends to obtain longest contained epsilon-match
-            longestEpsMatch(extAlign, minLength, eps);
+            // cut ends to obtain longest epsilon-match that contains the seed alignment
+            TPos offsetExtAlign = beginPosition(source(row(extAlign, 0))) + sourceBeginPosition(row(extAlign, 0));
+            longestEpsMatch(extAlign, seedBeginA - offsetExtAlign, seedEndA - offsetExtAlign, minLength, eps);
 
             if ((TSize)length(row(extAlign, 0)) < minLength) {
                 ++aliIt;
@@ -480,7 +494,7 @@ SEQAN_CHECKPOINT
             }
 
             // insert e-match in matches string
-            _insertMatch(matches, extAlign);
+            _insertMatch(matches, extAlign, minLength);
             ++aliIt;
         }
     }

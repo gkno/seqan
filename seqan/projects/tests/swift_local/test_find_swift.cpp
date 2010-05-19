@@ -165,9 +165,9 @@ SEQAN_DEFINE_TEST(test_find_swift) {
     testLocalSwiftLongPatterns();
 }
 
-template<typename TString>
+template<typename TString, typename TPos>
 Align<TString>
-testLongestEpsMatch(TString const & seq1, TString const & seq2) {
+testLongestEpsMatch(TString const & seq1, TString const & seq2, TPos seedBegin, TPos seedEnd) {
     Align<TString> alignment;
     resize(rows(alignment), 2);
     assignSource(row(alignment, 0), seq1);
@@ -176,7 +176,7 @@ testLongestEpsMatch(TString const & seq1, TString const & seq2) {
     Score<int> score(1, -1, -1);
     globalAlignment(alignment, score);
 
-    longestEpsMatch(alignment, 6, 0.125);
+    longestEpsMatch(alignment, seedBegin, seedEnd, 6, 0.125);
 
     return alignment;
 }
@@ -184,19 +184,19 @@ testLongestEpsMatch(TString const & seq1, TString const & seq2) {
 SEQAN_DEFINE_TEST(test_longest_epsMatch) {
     DnaString seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
     DnaString seq2 = "ACGTTTACCCCCCCCCCGAAAAAAAAGAAAA";
-    Align<DnaString> alignment = testLongestEpsMatch(seq1, seq2);
+    Align<DnaString> alignment = testLongestEpsMatch(seq1, seq2, 7, 17);
     SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
     SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTTACCCCCCCCCCGAAAAAAAA");
 
     seq1 = "ACCTTTGCCCCCCCCCCTAAAAAAAATTAAAA";
     seq2 = "ACGTTTCCCCCCCCCCGAAAAAAAAGAAAA";
-    alignment = testLongestEpsMatch(seq1, seq2);
+    alignment = testLongestEpsMatch(seq1, seq2, 7, 17);
     SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACCTTTGCCCCCCCCCCTAAAAAAAA");
     SEQAN_ASSERT_TRUE(row(alignment, 1) == "ACGTTT-CCCCCCCCCCGAAAAAAAA");
     
     seq1 = "AAAATTAAAAAAAATCCCCCCCCCCGTTTCCA";
     seq2 = "AAAAGAAAAAAAAGCCCCCCCCCCTTTGCA";
-    alignment = testLongestEpsMatch(seq1, seq2);
+    alignment = testLongestEpsMatch(seq1, seq2, 15, 25);
     SEQAN_ASSERT_TRUE(row(alignment, 0) == "AAAAAAAATCCCCCCCCCCGTTTCCA");
     SEQAN_ASSERT_TRUE(row(alignment, 1) == "AAAAAAAAGCCCCCCCCCC-TTTGCA");
 }
@@ -281,7 +281,7 @@ SEQAN_DEFINE_TEST(test_split_xDrop_align) {
     seq2 = "GCTGTAGCTGGAG";
     clear(aliString);
     testXDropAlign(seq1, seq2, Score<int>(1, -9, -9), 5/*scoreDropOff*/, 7/*minScore*/, aliString);
-    SEQAN_ASSERT_EQ(length(aliString), 2);
+    SEQAN_ASSERT_EQ(length(aliString), 1);
 }
 
 SEQAN_BEGIN_TESTSUITE(test_find_swift) {
@@ -290,7 +290,7 @@ SEQAN_BEGIN_TESTSUITE(test_find_swift) {
     SEQAN_CALL_TEST(test_split_xDrop_align);
 
     //SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/index/find_swift.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/demos/swift_local.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/apps/swift_local/swift_local.h");
 }
 SEQAN_END_TESTSUITE
 

@@ -312,7 +312,7 @@ int main(int argc, const char *argv[]) {
     for(unsigned i = 0; i < length(databases); ++i) {
         numSwiftHits = 0;
         clear(matches);
-        std::cout << "------------------------------------------------" << std::endl;
+        //std::cout << "------------------------------------------------" << std::endl;
         std::cout << databaseIDs[i] << std::endl;
 	    //file << databaseIDs[i] << "\n";
         //pattern
@@ -335,7 +335,7 @@ int main(int argc, const char *argv[]) {
         for(unsigned i = 0; i < length(databases); ++i) {
             clear(matches);
             numSwiftHits = 0;
-            std::cout << "------------------------------------------------" << std::endl;
+            //std::cout << "------------------------------------------------" << std::endl;
             std::cout << databaseIDs[i] << std::endl;
             //file << databaseIDs[i] << "\n";
             // pattern
