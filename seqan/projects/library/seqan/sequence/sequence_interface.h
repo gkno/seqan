@@ -641,7 +641,7 @@ SEQAN_CHECKPOINT
 ...concept:Concept.Container
 ..returns:A @Metafunction.Reference.reference@ of the first item in $container$.
 ...metafunction:Metafunction.Reference
-..remarks:This function is equivalent to $value(me, beginPosition(me))$.
+..remarks:This function is equivalent to $value(me, 0)$.
 ..see:Function.value
 ..see:Function.begin
 */
@@ -652,14 +652,14 @@ inline typename Reference<T>::Type
 front(T & me)
 {
 SEQAN_CHECKPOINT
-    return value(me, beginPosition(me));
+    return value(me, 0);
 }
 template <typename T>
 inline typename Reference<T const>::Type
 front(T const & me)
 {
 SEQAN_CHECKPOINT
-    return value(me, beginPosition(me));
+    return value(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -675,7 +675,7 @@ SEQAN_CHECKPOINT
 ...concept:Concept.Container
 ..returns:A @Metafunction.Reference.reference@ of the last item in $container$.
 ...metafunction:Metafunction.Reference
-..remarks:This function is equivalent to $value(me, endPosition(me) - 1)$.
+..remarks:This function is equivalent to $value(me, length(me) - 1)$.
 ..see:Function.value
 ..see:Function.end
 ..see:Function.Container#front
@@ -686,7 +686,7 @@ inline typename Reference<T const>::Type
 back(T const & me)
 {
 SEQAN_CHECKPOINT
-    return value(me, endPosition(me) - 1); 
+    return value(me, length(me) - 1); 
 }
 
 template <typename T>
@@ -694,7 +694,7 @@ inline typename Reference<T>::Type
 back(T & me)
 {
 SEQAN_CHECKPOINT
-    return value(me, endPosition(me) - 1);
+    return value(me, length(me) - 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
