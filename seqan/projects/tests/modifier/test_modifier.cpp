@@ -15,6 +15,8 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     // Tests for modifier_alphabet.h and modifier_alphabet_expansion.h.
     SEQAN_CALL_TEST(test_modifier_alphabet_size_metafunctions);
     SEQAN_CALL_TEST(test_modifier_alphabet_convert);
+	SEQAN_CALL_TEST(test_modifier_DnaQ);
+    SEQAN_CALL_TEST(test_modifier_alphabet_enumerate);
     SEQAN_CALL_TEST(test_modifier_alphabet_ord_value);
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_eq);
     SEQAN_CALL_TEST(test_modifier_alphabet_operator_neq);
