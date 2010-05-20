@@ -16,7 +16,7 @@ int main()
 	::std::cout << " and Seq2[" << sourceBeginPosition(row(ali, 1)) << ":" <<  (sourceEndPosition(row(ali, 1))-1) << "]" << ::std::endl << ::std::endl;
 
 
-///Example 2: This program applies the Waterman-Eggert algorithm to compute all non-overlapping local alignments with score better than 2.
+///Example 2: This program applies the Waterman-Eggert algorithm to compute all non-overlapping local alignments with score better or equal 2.
 	Align< String<Dna> > ali2;
 	appendValue(rows(ali2), "ataagcgtctcg");
 	appendValue(rows(ali2), "tcatagagttgc");
@@ -41,6 +41,21 @@ int main()
 	    ::std::cout << ali3;
 	    ::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali3, 0)) << ":" << (sourceEndPosition(row(ali3, 0))-1) << "]";
 	    ::std::cout << " and Seq2[" << sourceBeginPosition(row(ali3, 1)) << ":" <<  (sourceEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
+    }
+
+///Example 4: This program applies the banded Waterman-Eggert algorithm to compute all non-overlapping local alignments with score or equal 5
+///           in the band from diagonal -1 to diagonal 8.
+    Align< String<Dna5> > ali4;
+    appendValue(rows(ali4), "AAAAAAANAAAGGGNGGGGGGGGNGGGGGANAA");
+    appendValue(rows(ali4), "GGGGGGCGGGGGGGA");
+
+    LocalAlignmentFinder<> finder4(ali4);
+    Score<int> scoring4(1, -1, -1, -1);
+    while (localAlignment(ali4, finder4, scoring4, 5, -1, 8, BandedWatermanEggert())) {
+        ::std::cout << "Score = " << getScore(finder4) << ::std::endl;
+        ::std::cout << ali4;
+        ::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali4, 0)) << ":" << (sourceEndPosition(row(ali4, 0))-1) << "]";
+        ::std::cout << " and Seq2[" << sourceBeginPosition(row(ali4, 1)) << ":" <<  (sourceEndPosition(row(ali4, 1))-1) << "]" << ::std::endl << ::std::endl;
     }
 
 	return 0;
