@@ -783,18 +783,26 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 //interface for Function.localAlignment
 
-//1. only Align object
-
 /**
 .Function.localAlignment:
 ..cat:Alignments
-..signature:localAlignment(align, score, tag)
-..param.align:Alignment object to use.
 ...type:Class.Align
+..signature:localAlignment(align, score, tag)
+..signature:localAlignment(align, score)
+..signature:localAlignment(align, sw_finder, score, cutoff, tag)
+..signature:localAlignment(align, sw_finder, score, cutoff, diagLow, diagHigh, tag)
+..param.align:Alignment object to use.
+..param.cutoff:Alignments with scores < cutoff will be discarded.
+..param.diagLow:The lowest diagonal of the alignment matrix that will be computed for banded alignment.
+..param.diagHigh:The highest diagonal of the alignment matrix that will be computed for banded alignment.
 ..param.tag:
 ...type:Tag.Local Alignment Algorithms.value.SmithWaterman
+...type:Tag.Local Alignment Algorithms.value.WatermanEggert
+...type:Tag.Local Alignment Algorithms.value.BandedWatermanEggert
 .remarks:TODO
- */
+ */	
+
+//1. only Align object
 template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
@@ -806,13 +814,6 @@ localAlignment(Align<TSource, TSpec> & align_,
 	return _smithWaterman(align_, sw_finder, score_, 0);
 }
 
-
-/**
-.Function.localAlignment:
-..cat:Alignments
-..signature:localAlignment(align, score)
-..remarks:TODO
- */	
 template <typename TSource, typename TSpec, typename TScoreValue>
 inline TScoreValue
 localAlignment(Align<TSource, TSpec> & align_,
@@ -823,17 +824,6 @@ localAlignment(Align<TSource, TSpec> & align_,
 
 
 //2. Align, LocalAlignmentFinder, and cutoff arguments
-
-/**
-.Function.localAlignment:
-..cat:Alignments
-..signature:localAlignment(align, sw_finder, score, cutoff, tag)
-..param.cutoff:Alignments with scores < cutoff will be discarded.
-..param.tag:
-...type:Tag.Local Alignment Algorithms.value.WatermanEggert
-...type:Tag.Local Alignment Algorithms.value.BandedWatermanEggert
-.remarks:TODO
- */	
 template <typename TSource, typename TSpec, typename TScoreValue1, typename TScoreValue2, typename TScoreValue3>
 inline TScoreValue1
 localAlignment(Align<TSource, TSpec> & align_,
