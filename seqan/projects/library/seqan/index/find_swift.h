@@ -1454,7 +1454,7 @@ infixNoClip(Finder<THaystack, Swift<TSpec> > &finder, TText &text)
 //____________________________________________________________________________
 
 template <typename TIndex, typename TSpec, typename TText>
-inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
+inline typename Infix<TText>::Type
 infix(Pattern<TIndex, Swift<TSpec> > const & pattern, TText &text)
 {
     __int64 hitBegin = pattern.curBeginPos;
