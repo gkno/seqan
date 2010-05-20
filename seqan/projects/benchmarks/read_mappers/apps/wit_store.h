@@ -37,9 +37,9 @@ struct IntervalOfReadOnContig {
 template <typename TStream>
 inline
 TStream & operator<<(TStream & stream, IntervalOfReadOnContig const & record) {
-    stream << "(" << record.readId << ", " << record.contigId << ", "
-           << record.distance << ", " << record.isForward << ", "
-           << record.firstPos << ", " << record.lastPos << ")";
+    stream << "(id=" << record.id << ", readId=" << record.readId << ", contigId=" << record.contigId << ", distance="
+           << record.distance << ", isForward=" << record.isForward << ", firstPos="
+           << record.firstPos << ", lastPos=" << record.lastPos << ")";
     return stream;
 }
 
@@ -251,9 +251,9 @@ void loadWitFile(WitStore & store,
 
         // Insert record into read store.
         IntervalOfReadOnContig record;
-        getIdByName(store.readNames, readName, record.readId, readNameCache);
+        getIdByName(value(store.readNames), readName, record.readId, readNameCache);
         record.distance = distance;
-        getIdByName(store.contigNames, contigName, record.contigId, contigNameCache);
+        getIdByName(value(store.contigNames), contigName, record.contigId, contigNameCache);
         record.isForward = isForward;
         record.firstPos = firstPos;
         record.lastPos = lastPos;
