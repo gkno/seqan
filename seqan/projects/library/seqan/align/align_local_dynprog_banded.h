@@ -175,7 +175,6 @@ SEQAN_CHECKPOINT
     TString const& str1 = str[0];
     TString const& str2 = str[1];
     TSize len1 = length(str1);
-    TSize len2 = length(str2);
 
     TSize diagonalWidth = (TSize) (diagU - diagL + 1);
     TSize lo_row = (diagU <= 0) ? static_cast<TSize>(-diagU) : 0;
@@ -245,7 +244,7 @@ SEQAN_CHECKPOINT
             matIt2 = matIt - diagonalWidth;
             while (col < maxCol) {
                 actualCol = static_cast<TSize>(col + diagL + actualRow);
-                if (actualCol > len2) break;
+                if (actualCol > len1) break;
 
                 TScoreValue newVal = 0;
 
@@ -295,18 +294,18 @@ SEQAN_CHECKPOINT
 
         ++row;
     }
- //   // Debug code
- //   std::cerr << std::endl;
- //   for (TSize i = 0; i < height; ++i) {
- //       for(TSize j = 0; j < diagonalWidth; ++j) {
- //           std::cerr << value(finder.matrix, j, i) << ',';
- //       }
- //       std::cerr << " " << str2[i-1] << "    ";
- //       for (TSize j= 0; j<diagonalWidth; ++j) {
- //           std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
- //       }
- //       std::cerr << " " << str2[i-1] << std::endl;
- //   }
+    //// Debug code
+    //std::cerr << std::endl;
+    //for (TSize i = 0; i < height; ++i) {
+    //    for(TSize j = 0; j < diagonalWidth; ++j) {
+    //        std::cerr << value(finder.matrix, j, i) << ',';
+    //    }
+    //    std::cerr << " " << str2[i-1] << "    ";
+    //    for (TSize j= 0; j<diagonalWidth; ++j) {
+    //        std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
+    //    }
+    //    std::cerr << " " << str2[i-1] << std::endl;
+    //}
 }
 
 ////////////////////////////////////////////////////////////////////////////
