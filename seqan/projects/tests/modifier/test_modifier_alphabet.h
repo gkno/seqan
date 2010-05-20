@@ -107,6 +107,15 @@ SEQAN_DEFINE_TEST(test_modifier_alphabet_convert) {
     SEQAN_ASSERT_EQ(Dna('G'), convert<Dna>(TDnaWithX('G')));
     SEQAN_ASSERT_EQ(Dna('T'), convert<Dna>(TDnaWithX('T')));
     SEQAN_ASSERT_EQ(Dna('A'), convert<Dna>(TDnaWithX('X')));
+	
+	
+	typedef String<TDnaWithGap> TString;
+
+	TString str = "aCgT-AcGt";
+//	std::cout << str << std::endl;
+
+	SEQAN_ASSERT_EQ(str, "aCgT-AcGt");
+	SEQAN_ASSERT_EQ(str, "AcGt-aCgT");
 }
 
 
