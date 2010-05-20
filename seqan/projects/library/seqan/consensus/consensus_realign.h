@@ -460,7 +460,8 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename TFragmentStore::TContigPos TContigPos;
 	typedef typename TFragmentStore::TReadSeq TReadSeq;
 	typedef typename TFragmentStore::TReadGapAnchor TGapAnchor;
-	typedef typename Value<typename TFragmentStore::TReadSeq>::Type TAlphabet;
+	typedef typename Value<typename TFragmentStore::TReadSeq>::Type TStoreAlphabet;
+	typedef typename BaseAlphabet<TStoreAlphabet>::Type TAlphabet;
 	typedef typename Value<TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Value<typename TFragmentStore::TReadStore>::Type TReadElement;
 
@@ -618,7 +619,12 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 				appendValue(contigEl.gaps, TGapAnchor(contigPos - diff, contigPos), Generous() );
 				gapLen = 0;
 			}
-			appendValue(contigEl.seq, value(itConsensus), Generous() );
+			// TODO(weese): Here we convert from ProfileChar<Dna5>->Dna5->Dna5Q
+			// instead diverting through Dna5 we could think of directly converting
+			// a profile to a quality value, e.g. like the base caller Phred does.
+			// Therefore the conversion ProfileChar<Dna5> <-> Dna5Q needs to be
+			// defined.
+			appendValue(contigEl.seq, (TAlphabet)value(itConsensus), Generous() );
 		}
 
 	}
