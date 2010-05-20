@@ -1354,6 +1354,12 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TValue>
+struct BaseAlphabet
+{
+	typedef TValue Type;
+};
+
 //////////////////////////////////////////////////////////////////////////////
 
 // //DnaQ and Dna5Q
@@ -1379,6 +1385,12 @@ typedef SimpleType <unsigned char, _DnaQ> DnaQ;
 template <> struct ValueSize< DnaQ > { enum { VALUE = 4 }; };				// considering nucleotides
 template <> struct _InternalValueSize< DnaQ > { enum { VALUE = 252 }; };	// considering nucleotides x Quality 0..62
 template <> struct BitsPerValue< DnaQ > { enum { VALUE = 8 }; };
+
+template <>
+struct BaseAlphabet<DnaQ>
+{
+	typedef Dna Type;
+};
 
 //____________________________________________________________________________
  
@@ -1406,7 +1418,11 @@ template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };				// considering
 template <> struct _InternalValueSize< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides + N) x Quality 0..62
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
 
-
+template <>
+struct BaseAlphabet<Dna5Q>
+{
+	typedef Dna5 Type;
+};
 
 
 
