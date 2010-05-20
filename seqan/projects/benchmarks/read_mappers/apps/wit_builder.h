@@ -162,12 +162,12 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // Debug-adjustments.
-    #define ENABLE 1
+    #define ENABLE 0
     #define ALL 0
-    #define READID 668
+    #define READID 430
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
-//         std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
+//          std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
 //     }
 
     // The read maps with less than the given number of errors to [left, right]
@@ -214,6 +214,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         ret = findBegin(finder, pattern, getScore(pattern));
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_GT(endPos, beginPosition(finder));
+        SEQAN_ASSERT_EQ(getScore(pattern), getBeginScore(pattern));
 
         // Add original hit to the error curve points.
         int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
@@ -230,10 +231,11 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         while (find(finder, pattern)) {
             ret = findBegin(finder, pattern, getScore(pattern));
             SEQAN_ASSERT_TRUE(ret);
-            if (getScore(pattern) < -maxError) {
+            if (getScore(pattern) < -maxError && beginPosition(finder) != back(errorCurve).beginPos) {
                 foundWithTooLowScore = true;
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- Found too low score." << std::endl;
+                    std::cerr << __FILE__ << ":" << __LINE__ << " -- low scoring match was " << WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)) << std::endl;
                 }
                 break;
             }
@@ -393,6 +395,14 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         }
     }
 
+//     if (readId == READID) {
+//         std::cerr << ",-- errorCurve is (read id = " << readId << " readname = " << readNames[readId] << ")" << std::endl;
+//         for (unsigned i = 0; i < length(errorCurve); ++i) {
+//             std::cerr << "| " << errorCurve[i] << std::endl;
+//         }
+//         std::cerr << "`--" << std::endl;
+//     }
+    
 //     std::cerr << __FILE__ << ":" << __LINE__ << " return " << right << std::endl;
 
     return right;
@@ -484,6 +494,9 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 //                 std::cerr << "alignedRead.beginPos = " << alignedRead.beginPos << std::endl;
 //                 std::cerr << "alignedRead.endPos = " << alignedRead.endPos << std::endl;
                 TAlignedReadPos endPos = positionGapToSeq(contigGaps, alignedRead.endPos);
+                if (ENABLE && (ALL || readId == READID)) {
+                    std::cerr << "beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << ", endPos = " << endPos << std::endl;
+                }
 //                 std::cerr << "endPos = " << endPos << std::endl;
 
                 // Build error curve fragment around the aligned read's
@@ -528,8 +541,12 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
         for (TIterator it = begin(errorCurves[i]); it != end(errorCurves[i]); ++it) {
-            if (value(it).distance >= relativeMinScore)
+            if (value(it).distance >= relativeMinScore) {
+                std::cerr << fragments.readNameStore[i] << " accepting  " << value(it) << std::endl;
                 appendValue(filtered, value(it));
+            } else {
+                std::cerr << fragments.readNameStore[i] << " discarding " << value(it) << std::endl;
+            }
         }
         move(errorCurves[i], filtered);
     }

@@ -1,3 +1,8 @@
+#undef SEQAN_ENABLE_TESTING
+#undef SEQAN_ENABLE_DEBUG
+#define SEQAN_ENABLE_TESTING 1
+#define SEQAN_ENABLE_DEBUG 1
+
 #include <seqan/basic.h>
 #include <seqan/sequence.h>
 
@@ -260,10 +265,41 @@ SEQAN_DEFINE_TEST(test_find_myers_ukkonen_set_end_position2) {
 }
 
 
+SEQAN_DEFINE_TEST(test_find_myers_ukkonen_set_end_position3) {
+    DnaString hstck = "GAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAGAAGAGAAGAGAAGAGAGAAGAGAGAAGAGAAGAGAAGAGAGAAGAGAGAAGAGAAGA";
+    Finder<DnaString> finder(hstck);
+    DnaString ndl = "GAAGAGGGAAGAGAGAAGAGAGAAGAGCGAAGACAG";
+    Pattern<DnaString, Myers<FindInfix> > pattern(ndl, -40 * length(ndl));
+
+    bool ret = setEndPosition(finder, pattern, 143u);
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(143u, endPosition(finder));
+    SEQAN_ASSERT_EQ(-3, getScore(pattern));
+    
+    ret = findBegin(finder, pattern, getScore(pattern));
+    SEQAN_ASSERT_TRUE(ret);
+    SEQAN_ASSERT_EQ(107u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(-3, getBeginScore(pattern));
+//     std::cout << "infix(finder) = " << infix(finder) << std::endl;
+//     std::cout << "ndl = " << ndl << std::endl;
+
+    ret = find(finder, pattern);
+    SEQAN_ASSERT_TRUE(ret);
+    ret = findBegin(finder, pattern, getScore(pattern));
+    SEQAN_ASSERT_TRUE(ret);
+//     std::cout << "infix(finder) = " << infix(finder) << std::endl;
+//     std::cout << "ndl = " << ndl << std::endl;
+    SEQAN_ASSERT_EQ(144u, endPosition(finder));
+    SEQAN_ASSERT_EQ(107u, beginPosition(finder));
+    SEQAN_ASSERT_EQ(-4, getScore(pattern));
+}
+
+
 SEQAN_BEGIN_TESTSUITE(test_find_myers_ukkonen_reads) {
     SEQAN_CALL_TEST(test_find_myers_ukkonen_reads_set_end_position);
     SEQAN_CALL_TEST(test_find_myers_ukkonen_reads_find_begin);
     SEQAN_CALL_TEST(test_find_myers_ukkonen_set_end_position2);
     SEQAN_CALL_TEST(test_find_myers_ukkonen_find_begin);
+    SEQAN_CALL_TEST(test_find_myers_ukkonen_set_end_position3);
 }
 SEQAN_END_TESTSUITE
