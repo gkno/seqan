@@ -123,21 +123,30 @@ typedef Score<int, Simple> SimpleScore;
 ..see:Function.scoreGapOpen
 */
 template <typename TValue, typename TSpec>
-inline TValue &
-scoreMatch(Score<TValue, TSpec> & me) {
-    SEQAN_CHECKPOINT;
-    return me.data_match;
-}
-
-
-// TODO(holtgrew): Why is this not a get* function?
-template <typename TValue, typename TSpec>
-inline TValue const &
+inline TValue
 scoreMatch(Score<TValue, TSpec> const & me) {
     SEQAN_CHECKPOINT;
     return me.data_match;
 }
 
+/**
+.Function.setScoreMatch:
+..class:Class.Score
+..cat:Alignments
+..summary:Set match score.
+..signature:setScoreMatch(object, value)
+..param.object.type:Spec.Simple Score
+..param.value.type:TValue
+..see:Function.scoreMismatch
+..see:Function.scoreGapExtend
+..see:Function.scoreGapOpen
+*/
+template <typename TValue, typename TSpec>
+inline void
+setScoreMatch(Score<TValue, TSpec> & me, TValue const & value) {
+    SEQAN_CHECKPOINT;
+    me.data_match = value;
+}
 
 /**
 .Function.scoreMismatch:
@@ -153,19 +162,30 @@ scoreMatch(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreGapOpen
 */
 template <typename TValue, typename TSpec>
-inline TValue &
-scoreMismatch(Score<TValue, TSpec> & me) {
+inline TValue
+scoreMismatch(Score<TValue, TSpec> const & me) {
     SEQAN_CHECKPOINT;
     return me.data_mismatch;
 }
 
 
-// TODO(holtgrew): Why is this not a get* function?
+/**
+.Function.setScoreMismatch:
+..class:Class.Score
+..cat:Alignments
+..summary:Set mismatch score.
+..signature:setScoreMismatch(object, value)
+..param.object.type:Spec.Simple Score
+..param.value.type:TValue
+..see:Function.scoreMismatch
+..see:Function.scoreGapExtend
+..see:Function.scoreGapOpen
+*/
 template <typename TValue, typename TSpec>
-inline TValue const &
-scoreMismatch(Score<TValue, TSpec> const & me) {
+inline void
+setScoreMismatch(Score<TValue, TSpec> & me, TValue const & value) {
     SEQAN_CHECKPOINT;
-    return me.data_mismatch;
+    me.data_mismatch = value;
 }
 
 
@@ -183,19 +203,30 @@ scoreMismatch(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreGapOpen
 */
 template <typename TValue, typename TSpec>
-inline TValue &
-scoreGapExtend(Score<TValue, TSpec> &me) {
+inline TValue
+scoreGapExtend(Score<TValue, TSpec> const & me) {
     SEQAN_CHECKPOINT;
     return me.data_gap_extend;
 }
 
 
-// TODO(holtgrew): Why is this not a get* function?
+/**
+.Function.setScoreGapExtend:
+..class:Class.Score
+..cat:Alignments
+..summary:Set gap extension score.
+..signature:setScoreGapExtend(object, value)
+..param.object.type:Spec.Simple Score
+..param.value.type:TValue
+..see:Function.scoreMismatch
+..see:Function.scoreGapExtend
+..see:Function.scoreGapOpen
+*/
 template <typename TValue, typename TSpec>
-inline TValue const &
-scoreGapExtend(const Score<TValue, TSpec> &me) {
+inline void
+setScoreGapExtend(Score<TValue, TSpec> & me, TValue const & value) {
     SEQAN_CHECKPOINT;
-    return me.data_gap_extend;
+    me.data_gap_extend = value;
 }
 
 
@@ -213,19 +244,30 @@ scoreGapExtend(const Score<TValue, TSpec> &me) {
 ..see:Function.scoreMatch
 */
 template <typename TValue, typename TSpec>
-inline TValue &
-scoreGapOpen(Score<TValue, TSpec> &me) {
+inline TValue
+scoreGapOpen(Score<TValue, TSpec> const & me) {
     SEQAN_CHECKPOINT;
     return me.data_gap_open;
 }
 
 
-// TODO(holtgrew): Why is this not a get* function?
+/**
+.Function.setScoreGapOpen:
+..class:Class.Score
+..cat:Alignments
+..summary:Set gap opening score.
+..signature:setScoreGapOpen(object, value)
+..param.object.type:Spec.Simple Score
+..param.value.type:TValue
+..see:Function.scoreMismatch
+..see:Function.scoreGapExtend
+..see:Function.scoreGapOpen
+*/
 template <typename TValue, typename TSpec>
-inline TValue const &
-scoreGapOpen(const Score<TValue, TSpec> &me) {
+inline void
+setScoreGapOpen(Score<TValue, TSpec> & me, TValue const & value) {
     SEQAN_CHECKPOINT;
-    return me.data_gap_open;
+    me.data_gap_open = value;
 }
 
 
@@ -246,19 +288,31 @@ scoreGapOpen(const Score<TValue, TSpec> &me) {
 */
 // TODO(holtgrew): This shortcut/forward should live in score_base.h.
 template <typename TValue, typename TSpec>
-inline TValue &
-scoreGap(Score<TValue, TSpec> &me) {
+inline TValue
+scoreGap(Score<TValue, TSpec> const & me) {
     SEQAN_CHECKPOINT;
     return scoreGapExtend(me);
 }
 
 
-// TODO(holtgrew): Why is this not a get* function?
+/**
+.Function.setScoreGap:
+..class:Class.Score
+..cat:Alignments
+..summary:Set gap opening and extension score.
+..signature:setScoreGap(object, value)
+..param.object.type:Spec.Simple Score
+..param.value.type:TValue
+..see:Function.scoreMismatch
+..see:Function.scoreGapExtend
+..see:Function.scoreGapOpen
+*/
 template <typename TValue, typename TSpec>
-inline const TValue &
-scoreGap(const Score<TValue, TSpec> &me) {
+inline void
+setScoreGap(Score<TValue, TSpec> & me, TValue const & value) {
     SEQAN_CHECKPOINT;
-    return scoreGapExtend(me);
+    me.data_gap_open = value;
+    me.data_gap_extend = value;
 }
 
 

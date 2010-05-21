@@ -372,11 +372,11 @@ SEQAN_DEFINE_TEST(test_score_simple) {
         const int kGapOpen = 4;
         // Perform assignments.
         TScore simpleScore;
-        scoreMatch(simpleScore) = kMatch;
-        scoreMismatch(simpleScore) = kMismatch;
-        scoreGap(simpleScore) = kGapExtension;
-        scoreGapExtend(simpleScore) = kGapExtension;
-        scoreGapOpen(simpleScore) = kGapOpen;
+        setScoreMatch(simpleScore, kMatch);
+        setScoreMismatch(simpleScore, kMismatch);
+        setScoreGap(simpleScore, kGapExtension);
+        setScoreGapExtend(simpleScore, kGapExtension);
+        setScoreGapOpen(simpleScore, kGapOpen);
         // Check results.
         SEQAN_ASSERT_EQ(kMatch, scoreMatch(simpleScore));
         SEQAN_ASSERT_EQ(kMismatch, scoreMismatch(simpleScore));
