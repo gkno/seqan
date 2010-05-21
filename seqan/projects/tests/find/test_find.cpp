@@ -1294,11 +1294,11 @@ SEQAN_DEFINE_TEST(test_approx_edit_dp_search_simple_score_legacy_case) {
     Pattern<String<char>, DPSearch<SimpleScore> > pat1;
 
     SimpleScore sc;
-    scoreGap(sc) = -10;
+    setScoreGap(sc, -10);
     setScoringScheme(pat1, sc);
     SEQAN_ASSERT_EQ(scoreGap(scoringScheme(pat1)), -10);
 
-    scoreGap(sc) = -1;
+    setScoreGap(sc, -1);
     SEQAN_ASSERT_EQ(scoreGap(scoringScheme(pat1)), -10);
     setScoringScheme(pat1, sc);
     SEQAN_ASSERT_EQ(scoreGap(scoringScheme(pat1)), -1);
