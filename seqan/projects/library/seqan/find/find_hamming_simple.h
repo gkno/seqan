@@ -148,7 +148,7 @@ inline void setScoreLimit(Pattern<TNeedle, HammingSimple> & me, int _limit) {
 
 
 template <typename TAlphabet, typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(TAlphabet const & a, TAlphabet const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+inline bool _find_HammingSimple_charsEqual(TAlphabet const & a, TAlphabet const & b, Pattern<TNeedle, HammingSimple> const &) {
     return a == b;
 }
 
