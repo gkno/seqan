@@ -175,6 +175,49 @@ namespace ClassTest {
         }
     };
 
+// Open a temporary file, unlink it, return posix handle.  Note: This has not been tested yet.
+inline
+int openTempFile() {
+#ifdef PLATFORM_WINDOWS
+    char * fileName = _tempnam(NULL, "SQN");
+    if (!fileName) {
+        ::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
+        exit(1);
+    }
+    int result = open(fileName, _O_RDWR | OPEN_TEMPORARY);
+    free(fileName);
+    return result;
+#else  // A Unix...
+    char filenameBuffer[100];
+    strcpy(filenameBuffer, "/tmp/SEQANXXXXXXXXXX");
+    int result = mkstemp(filenameBuffer);
+    unlink(filenameBuffer);
+    return result;
+#endif  // ifdef PLATFORM_WINDOWS
+}
+
+// Return the path to a temporary file, in a static buffer in this
+// function.  This is not thread safe!
+inline
+const char *tempFileName() {
+    static char fileNameBuffer[100];
+#ifdef PLATFORM_WINDOWS
+    char * fileName = _tempnam(NULL, "SEQAN.");
+    if (!fileName) {
+        ::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
+        exit(1);
+    }
+    strcpy(fileNameBuffer, fileName);
+    free(fileName);
+    return fileNameBuffer;
+#else
+    strcpy(fileNameBuffer, "/tmp/SEQAN.XXXXXXXXXXXXXXXXXXXX");
+    mkstemp(fileNameBuffer);
+    unlink(fileNameBuffer);
+    return fileNameBuffer;
+#endif  // ifdef PLATFORM_WINDOWS
+}
+
     // Initialize the testing infrastructure.
     //
     // Used through SEQAN_BEGIN_TESTSUITE(test_name)
@@ -1404,9 +1447,12 @@ template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *co
     ::seqan::ClassTest::StaticData::pathToProjects()
 
 
-// Returns the path to a temporary file with the given name.
-// TODO(holtgrew): This is very crude, should be portable!
-#define SEQAN_TEMP_FILENAME() (tmpnam(NULL))
+// Returns the POSIX int file handle to an open file.
+#define SEQAN_OPEN_TEMP_FILE() (::seqan::ClassTest::openTempFile())
+
+
+// Returns a temporary filename.
+#define SEQAN_TEMP_FILENAME() (::seqan::ClassTest::tempFileName())
 
 
 #if SEQAN_ENABLE_TESTING
