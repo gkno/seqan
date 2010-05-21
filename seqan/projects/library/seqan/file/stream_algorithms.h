@@ -65,25 +65,26 @@ SEQAN_CHECKPOINT
 ...type:Adaption."std::iostream"
 ..param.number:A number that is written to $stream$.
 */
-template <typename TStream, typename TFloat>
+template <typename TStream>
 inline void
 _streamPutFloat(TStream & target,
-			  TFloat number, 
+			  double number, 
 			  char const * format_string)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	char str[BitsPerValue<float>::VALUE];
 	sprintf(str, format_string, number);
 	_streamWrite(target, str);
 }
-template <typename TStream, typename TFloat>
+template <typename TStream>
 inline void
 _streamPutFloat(TStream & target,
-				TFloat number)
+				double number)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
 	_streamPutFloat(target, number, "%f");
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
