@@ -264,8 +264,8 @@ SEQAN_CHECKPOINT
     TPosition endPos = 0;
     TSize minLength = matchMinLength - 1;
     
-    while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*leftIt).i2 <= (TPosition)seedBegin) {
-        while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*rightIt).i1 >= (TPosition)seedEnd) {
+    while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*leftIt).i2 <= (TPosition)toViewPosition(row(align, 0), seedBegin)) {
+        while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*rightIt).i2 >= (TPosition)toViewPosition(row(align, 0), seedEnd)) {
             if(_isEpsMatch(*leftIt, *rightIt, epsilon)) {
                 beginPos = (*leftIt).i2;
                 endPos = (*rightIt).i1;
