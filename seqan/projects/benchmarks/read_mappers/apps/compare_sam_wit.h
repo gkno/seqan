@@ -481,18 +481,19 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     if (options.showHitIntervals || options.showMissedIntervals) {
         for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
             bool found = intervalsInResult.find(value(it).id) != intervalsInResult.end();
+            // TODO(holtgrew): Missed intervals are buggy. Shows missed for this read, but does not take hits of other reads into consideration.  Can only be shown after all reads have been matched.
             if (!found && options.showMissedIntervals) {
                 std::cout << "log> {\"type\": \"log.missed_interval"
-                          << "\", \"interval_id\": \"" << value(it).id
-                          << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                          << "\", \"interval_id\": " << value(it).id
+                          << ", \"contig_id\": \"" << fragments.contigNameStore[contigId]
                           << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
                           << "\", \"read_id\": \"" << fragments.readNameStore[readId]
                           << "\", \"interval_first\": " << value(it).firstPos
                           << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
             } else if (found && options.showHitIntervals) {
                 std::cout << "log> {\"type\": \"log.hit_interval"
-                          << "\", \"interval_id\": \"" << value(it).id
-                          << "\", \"contig_id\": \"" << fragments.contigNameStore[contigId]
+                          << "\", \"interval_id\": " << value(it).id
+                          << ", \"contig_id\": \"" << fragments.contigNameStore[contigId]
                           << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
                           << "\", \"read_id\": \"" << fragments.readNameStore[readId]
                           << "\", \"interval_first\": " << value(it).firstPos
