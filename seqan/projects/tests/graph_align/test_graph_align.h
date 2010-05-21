@@ -26,8 +26,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "annual");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "anneal");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "ing");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
@@ -42,7 +42,7 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	typedef String<TFragment> TFragmentString;
 	TFragmentString matches;
 	int score3 = globalAlignment(matches, stringSet(g), score_type, NeedlemanWunsch() );
-	SEQAN_ASSERT_EQ(length(matches), 1);
+	SEQAN_ASSERT_EQ(length(matches), 1u);
 	SEQAN_ASSERT_EQ(label(matches[0], stringSet(g), 0), "annual");
 	SEQAN_ASSERT_EQ(label(matches[0], stringSet(g), 1), "anneal");
 	SEQAN_ASSERT_EQ(score3, score);
@@ -55,8 +55,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "annual");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "anneal");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "ing");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
@@ -77,8 +77,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 9)), "Garfield");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "Garfield");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 17)), "thecat");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
 	SEQAN_ASSERT_EQ(score + 6, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
@@ -101,8 +101,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 9)), "Garfield");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "Garfield");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 17)), "thecat");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), NeedlemanWunsch() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), NeedlemanWunsch() );
@@ -126,8 +126,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ThisisGarfieldthe");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 18)), "cat");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "cat");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ThisisGarfieldthecat";
@@ -137,8 +137,8 @@ SEQAN_DEFINE_TEST(test_graph_align_needleman_wunsch) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ThisisGarfieldthe");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 18)), "cat");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "cat");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 }
 
@@ -163,8 +163,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "gt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "gt");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
 	int score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	int score3 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
@@ -196,8 +196,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "gt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "gt");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score3 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), -1 * length(stringSet(g)[1]), length(stringSet(g)[0]), BandedGotoh());
@@ -227,8 +227,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -248,8 +248,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -269,8 +269,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 4)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -290,8 +290,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 4)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -312,8 +312,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score + 2, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -334,8 +334,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	score2 = globalAlignment(g, score_type, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score, score2);
 	score2 = globalAlignment(stringSet(g), score_type, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -359,8 +359,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "ag");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 7u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
@@ -374,8 +374,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "ag");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 7u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
@@ -389,8 +389,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "aa");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "aa");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 6u);
 	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<true,false,false,false>(), Gotoh() );
 	SEQAN_ASSERT_EQ(score + 3, score2);
 	score2 = globalAlignment(stringSet(g), score_type2, AlignConfig<false,true,false,false>(), Gotoh() );
@@ -407,8 +407,8 @@ SEQAN_DEFINE_TEST(test_graph_align_gotoh) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "aa");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "aa");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 6u);
 	//std::cout << g << std::endl;
 
 
@@ -445,8 +445,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 3)), "gt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "gt");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
 	int score2 = globalAlignment(stringSet(g), score_type, Hirschberg() );
 	SEQAN_ASSERT_EQ(score, score2);
 	//std::cout << g << std::endl;
@@ -460,8 +460,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "gt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "gt");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 5);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 5u);
 	//std::cout << g << std::endl;
 
 	str[0] = "tagt";
@@ -471,8 +471,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "at");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 
 	str[0] = "attagt";
@@ -482,8 +482,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "tagt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "at");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttagt";
@@ -493,8 +493,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 4)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
@@ -504,8 +504,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 4)), "t");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 3);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 3u);
 	//std::cout << g << std::endl;
 
 	str[0] = "cttagt";
@@ -516,8 +516,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "c");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "ttag");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
@@ -528,8 +528,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "c");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "ttag");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
-	SEQAN_ASSERT_EQ(numVertices(g), 4);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
+	SEQAN_ASSERT_EQ(numVertices(g), 4u);
 	//std::cout << g << std::endl;
 
 	str[0] = "cttccagt";
@@ -543,8 +543,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 7)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "tt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 2)), "ag");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 7u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttag";
@@ -558,8 +558,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "t");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "tt");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 2)), "ag");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 7);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 7u);
 	//std::cout << g << std::endl;
 
 	str[0] = "ttattaa";
@@ -573,8 +573,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 5)), "aa");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 0)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 1)), "aa");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 6u);
 	//std::cout << g << std::endl;
 
 	str[0] = "aaa";
@@ -587,8 +587,8 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 5)), "aa");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "a");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 1)), "aa");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
-	SEQAN_ASSERT_EQ(numVertices(g), 6);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
+	SEQAN_ASSERT_EQ(numVertices(g), 6u);
 	//std::cout << g << std::endl;
 }
 
@@ -861,7 +861,7 @@ SEQAN_DEFINE_TEST(test_graph_align_smith_waterman) {
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 9)), "ata");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 3)), "tgag");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 7)), "ata");
-	SEQAN_ASSERT_EQ(numEdges(g), 2);
+	SEQAN_ASSERT_EQ(numEdges(g), 2u);
 	int score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_ASSERT_EQ(score, score2);
 	//std::cout << g << std::endl;
@@ -872,7 +872,7 @@ SEQAN_DEFINE_TEST(test_graph_align_smith_waterman) {
 	score = localAlignment(g, score_type, SmithWaterman());
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 0, 0)), "TTGACAC");
 	SEQAN_ASSERT_EQ(label(g, findVertex(g, 1, 9)), "TTTACAC");
-	SEQAN_ASSERT_EQ(numEdges(g), 1);
+	SEQAN_ASSERT_EQ(numEdges(g), 1u);
 	score2 = localAlignment(stringSet(g), score_type, SmithWaterman());
 	SEQAN_ASSERT_EQ(score, score2);
 	//std::cout << g << std::endl;
@@ -912,11 +912,11 @@ SEQAN_DEFINE_TEST(test_graph_align_banded_smith_waterman_clump) {
 	String<int> scores;
 	multiLocalAlignment(str, alignments, scores, score_type, 5, -6, 6, BandedSmithWatermanClump() );
 
-   SEQAN_ASSERT_EQ(length(alignments), 4);
-   SEQAN_ASSERT_EQ(length(scores), 4);
+   SEQAN_ASSERT_EQ(length(alignments), 4u);
+   SEQAN_ASSERT_EQ(length(scores), 4u);
 
    SEQAN_ASSERT_EQ(value(scores, 0), 12);
-    Graph<Alignment<TStringSet> > align = value(alignments, 0);
+   Graph<Alignment<TStringSet> > align = value(alignments, 0);
    SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 0)), "GGGG");
    SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 4)), "CTT");
    SEQAN_ASSERT_EQ(label(align, findVertex(align, 0, 7)), "A");
