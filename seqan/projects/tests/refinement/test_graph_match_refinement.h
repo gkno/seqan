@@ -709,11 +709,11 @@ SEQAN_DEFINE_TEST(GraphMatchRefinement_Problem)
 	TString str5 = "";
 
 	TStringSet strSet;
-	assignValueById(strSet,str1,0);
-	assignValueById(strSet,str2,1);
-	assignValueById(strSet,str3,2);
-	assignValueById(strSet,str4,3);
-	assignValueById(strSet,str5,4);
+	assignValueById(strSet,str1,0u);
+	assignValueById(strSet,str2,1u);
+	assignValueById(strSet,str3,2u);
+	assignValueById(strSet,str4,3u);
+	assignValueById(strSet,str5,4u);
 	//cout << length(strSet)<<"\n";
 	//cout << idToPosition(strSet,0) <<"\n";
 	//cout << idToPosition(strSet,3) <<"\n";
