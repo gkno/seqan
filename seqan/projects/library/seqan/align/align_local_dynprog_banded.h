@@ -114,7 +114,10 @@ SEQAN_CHECKPOINT
 	
     while (nextTraceValue != Stop) {
         traceValue = nextTraceValue;
-        if (*matIt == *matIt2 + score(const_cast<TScore&>(sc), ((int)actualCol-1), ((int)actualRow-1), str1, str2)) {
+        if (*matIt == 0) {
+            nextTraceValue = Stop;
+        }
+        else if (*matIt == *matIt2 + score(const_cast<TScore&>(sc), ((int)actualCol-1), ((int)actualRow-1), str1, str2)) {
             nextTraceValue = Diagonal;
             --actualRow; --actualCol;
             --row;
@@ -126,14 +129,13 @@ SEQAN_CHECKPOINT
             --row; ++col;
             goPrevious(matIt, 1); goNext(matIt, 0);
             goPrevious(matIt2, 1); goNext(matIt2, 0);
-        } else if (*matIt == *(matIt-1) + scoreGapExtendHorizontal(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2)) {
+        } else {
+            SEQAN_ASSERT_EQ(*matIt, *(matIt-1) + scoreGapExtendHorizontal(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
             nextTraceValue = Horizontal;
             --actualCol; 
             --col;
             goPrevious(matIt, 0);
             goPrevious(matIt2, 0);
-        } else {
-            nextTraceValue = Stop;
         }
         if (traceValue == nextTraceValue) {
             ++segLen;
@@ -210,7 +212,7 @@ SEQAN_CHECKPOINT
         actualRow = row + lo_row;
 
         // make sure that all matrix entries of trace are re-calculated and set to forbidden
-        while (traceSize == 0 && tracePos > 0) {
+        while (traceSize == 0 && tracePos > 1) {
             // determine next trace direction
             --tracePos;
             traceValue = finder.trace.tvs[tracePos-1];
@@ -400,7 +402,7 @@ SEQAN_CHECKPOINT
 	//	}
 	//	std::cerr << " " << str2[i-1] << std::endl;
 	//}
-	//std::cerr << "Max score: " << top(finder.pQ).value_ << std::endl;
+ //   if(length(finder.pQ) > 0) std::cerr << "Max score: " << top(finder.pQ).value_ << std::endl;
 
     if(!empty(finder.pQ)) {
         finder.bestEndPos = top(finder.pQ).id_;
@@ -474,7 +476,11 @@ SEQAN_CHECKPOINT
 
     // Declump the matrix and find new maximum score
     _align_banded_sw_declump(finder, str, sc, cutoff, diag1, diag2);
-    TScoreValue maxScore = getValue(finder.matrix, _get_next_best_end_position(finder, cutoff));
+    typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition nextBestEnd;
+	nextBestEnd = _get_next_best_end_position(finder, cutoff);
+	if(nextBestEnd==0)
+		return 0;
+    TScoreValue maxScore = getValue(finder.matrix, nextBestEnd);
 	if(maxScore == 0) return 0;
 
     // Follow the trace matrix and create a trace path
