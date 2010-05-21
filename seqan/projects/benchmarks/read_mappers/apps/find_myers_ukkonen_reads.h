@@ -112,6 +112,22 @@ struct Pattern<TNeedle, MyersUkkonenReads> {
 
 
 template <typename TNeedle>
+void _patternMatchNOfPattern(Pattern<TNeedle, MyersUkkonenReads> & me, bool match)
+{
+    SEQAN_CHECKPOINT;
+    _patternMatchNOfPattern(me._wrappedPattern, match);
+}
+
+
+template <typename TNeedle>
+void _patternMatchNOfFinder(Pattern<TNeedle, MyersUkkonenReads> & me, bool match)
+{
+    SEQAN_CHECKPOINT;
+    _patternMatchNOfFinder(me._wrappedPattern, match);
+}
+
+
+template <typename TNeedle>
 inline int 
 scoreLimit(Pattern<TNeedle, MyersUkkonenReads> const & me) {
     SEQAN_CHECKPOINT;

@@ -173,7 +173,7 @@ int main(int argc, const char *argv[]) {
     TErrorCurves errorCurves;
     if (options.distanceFunction == "edit")
         // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
-        matchesToErrorFunction(fragments, errorCurves, options, Myers<FindInfix>());
+        matchesToErrorFunction(fragments, errorCurves, options, MyersUkkonenReads());
     else // options.distanceFunction == "hamming"
         matchesToErrorFunction(fragments, errorCurves, options, HammingSimple());
 
@@ -182,9 +182,8 @@ int main(int argc, const char *argv[]) {
     // =================================================================
     if (options.verify) {
         bool valid;
-        // TODO(holtgrew): Using non-read version of MyersUkkonen for now to check whether this causes problems with RazerS.
         if (options.distanceFunction == "edit")
-            valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, Myers<FindInfix>());
+            valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, MyersUkkonenReads());
         else // options.distanceFunction == "hamming"
             valid = verifyMatchesToErrorFunctionResults(fragments, errorCurves, options, HammingSimple());
 

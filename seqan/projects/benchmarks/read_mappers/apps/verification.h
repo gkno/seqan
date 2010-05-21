@@ -84,8 +84,10 @@ void verifyMatchestoErrorFunctionResults_FindReads(
             continue;
         int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
+        (void)options;  // Supress warnings in non-debug mode.
         // std::cout << "append value(expected, WeightedMatch(" << contigId << ", " << endPosition(finder) + 1 << ", " << relativeScore << ") delta = " << (back(reversedAndComplementedRead) != contig[endPosition(finder) - 1]) << ", score " << score << std::endl;
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
+        (void)ret;  // Supress warning in non-debug mode.
         SEQAN_ASSERT_TRUE(ret);
         appendValue(foundMatches, WeightedMatch(contigId, isForward, endPosition(finder), relativeScore, beginPosition(finder)));
     }

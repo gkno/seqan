@@ -12,6 +12,7 @@
 
 #include "curve_smoothing.h"
 #include "witio.h"
+#include "find_myers_ukkonen_reads.h"
 
 using namespace seqan;
 
@@ -22,7 +23,7 @@ int main(int argc, char **argv) {
     DnaString read = argv[2];
 
     Finder<DnaString> finder(contig);
-    Pattern<DnaString, Myers<FindInfix> > pattern(read, -length(read));
+    Pattern<DnaString, MyersUkkonenReads> pattern(read, -length(read));
 
     EditDistanceScore scoring;
 

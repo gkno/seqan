@@ -162,12 +162,12 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // Debug-adjustments.
-    #define ENABLE 0
-    #define ALL 0
-    #define READID 430
+    #define ENABLE 1
+    #define ALL 1
+    #define READID 0
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
-//          std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
+//           std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
 //     }
 
     // The read maps with less than the given number of errors to [left, right]
@@ -542,10 +542,14 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;
         for (TIterator it = begin(errorCurves[i]); it != end(errorCurves[i]); ++it) {
             if (value(it).distance >= relativeMinScore) {
+                #if ENABLED
                 std::cerr << fragments.readNameStore[i] << " accepting  " << value(it) << std::endl;
+                #endif
                 appendValue(filtered, value(it));
             } else {
+                #if ENABLED
                 std::cerr << fragments.readNameStore[i] << " discarding " << value(it) << std::endl;
+                #endif
             }
         }
         move(errorCurves[i], filtered);

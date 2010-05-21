@@ -102,6 +102,7 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("mN", "match-N", "If set, N matches all as a wildcard character, otherwise it never matches.", OptionType::Boolean));
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     addOption(parser, CommandLineOption("c", "benchmark-category", "The benchmark category to compare for.  One of {all, any-best, all-best}.  Default: all.", OptionType::String));
+    addOption(parser, CommandLineOption("DP", "DONT-PANIC", "Don't panic on additional hits in non-weightedmode.  Default: False.", OptionType::Boolean));
     
     // We require 4 command line options.
     requiredArguments(parser, 3);
@@ -124,6 +125,8 @@ int parseCommandLineAndCheck(Options &options,
     }
 
     // Get arguments.
+    if (isSetLong(parser, "DONT-PANIC"))
+        options.dontPanic = true;
     if (isSetLong(parser, "match-N"))
         options.matchN = true;
     if (isSetLong(parser, "weighted-distances"))
@@ -186,6 +189,7 @@ int main(int argc, const char *argv[]) {
     options.showSuperflousIntervals = false;
     options.showAdditionalIntervals = false;
     options.benchmarkCategory = "all";
+    options.dontPanic = false;
     CharString outFile = "-";
 
     // Setup the parser, parse command line and return if an error occured.
@@ -242,8 +246,7 @@ int main(int argc, const char *argv[]) {
     // The result will be a list of ids to entries in witStore.
     String<size_t> result;
     if (options.distanceFunction == "edit")
-        // TODO(holtgrew): Switch to "reads version" (force alignment of last characters) after RazerS can do this, too.  Tag is MyersUkkonenReads().
-        compareAlignedReadsToReference(result, fragments, witStore, options, Myers<FindInfix>());
+        compareAlignedReadsToReference(result, fragments, witStore, options, MyersUkkonenReads());
     else  // options.distanceFunction == "hamming"
         compareAlignedReadsToReference(result, fragments, witStore, options, HammingSimple());
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;

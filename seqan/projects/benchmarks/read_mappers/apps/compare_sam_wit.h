@@ -63,6 +63,9 @@ struct Options {
     // Print each end position that we try to match agains the interval.
     bool showTryHitIntervals;
 
+    // If enabled, don't panic on additional hits in non-weighted mode.
+    bool dontPanic;
+
     // If true, N matches as a wildcard.  Otherwise it matches none.
     bool matchN;
 
@@ -435,7 +438,11 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 appendValue(result, IntervalOfReadOnContig::additionalId());
                 continue;
             } else if (!options.weightedDistances) {
-                std::cerr << "PANIC: A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
+                if (options.dontPanic)
+                    std::cerr << "WARNING: ";
+                else
+                    std::cerr << "PANIC: ";
+                std::cerr << "A read in the SAM file aligns out of all target intervals for this read in the WIT file." << std::endl;
                 std::cerr << "bestScore = " << bestScore << std::endl;
                 std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
                 std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;
@@ -453,7 +460,9 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 std::cerr << "contig_infix_seq = " << infix(contig, beginPos, endPos) << std::endl;
                 std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
                 std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
-                exit(1);
+                if (!options.dontPanic)
+                    exit(1);
+                appendValue(result, IntervalOfReadOnContig::additionalId());
             }
         }
 
