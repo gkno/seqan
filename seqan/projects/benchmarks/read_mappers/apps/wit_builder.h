@@ -162,7 +162,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // Debug-adjustments.
-    #define ENABLE 1
+    #define ENABLE 0
     #define ALL 1
     #define READID 0
 
