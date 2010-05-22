@@ -176,6 +176,8 @@ namespace ClassTest {
     };
 
 // Open a temporary file, unlink it, return posix handle.  Note: This has not been tested yet.
+// TODO(holtgrew): Not used yet and Windows code does not work.
+/*
 inline
 int openTempFile() {
 #ifdef PLATFORM_WINDOWS
@@ -195,6 +197,7 @@ int openTempFile() {
     return result;
 #endif  // ifdef PLATFORM_WINDOWS
 }
+*/
 
 // Return the path to a temporary file, in a static buffer in this
 // function.  This is not thread safe!
@@ -1448,7 +1451,8 @@ template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *co
 
 
 // Returns the POSIX int file handle to an open file.
-#define SEQAN_OPEN_TEMP_FILE() (::seqan::ClassTest::openTempFile())
+// TODO(holtgrewe): Uncomment if openTempFile has been implemented.
+// #define SEQAN_OPEN_TEMP_FILE() (::seqan::ClassTest::openTempFile())
 
 
 // Returns a temporary filename.
