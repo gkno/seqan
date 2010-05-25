@@ -1,11 +1,53 @@
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <limits>
+/*==========================================================================
+  SeqAn - The Library for Sequence Analysis
+  http://www.seqan.de 
+  ===========================================================================
+  Copyright (C) 2007-2010
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+  
+  ===========================================================================
+  Author: David Weese <david.weese@fu-berlin.de>
+  ===========================================================================
+  Swiss Army Knife tool... It slices and dices and makes the laundry!
 
-#include <seqan/sequence.h>
-#include <seqan/file.h>
+  This tool allows to cut sequences and parts of sequences out of sequence
+  files.  It supports all formats supported by the AutoSeqFormat class from
+  SeqAn, including FASTA, FASTQ and QSeq (Illumina format).
+
+
+  Usage: sak [OPTION]... <SOURCE SEQUENCE FILE>
+
+  Main Options:
+    -o,  --output FILE              set output filename (default: use stdout)
+    -q,  --qual                     enable Fastq output (default: Fasta)
+    -h,  --help                     print this help
+
+  Extract Options:
+    -s,  --sequence NUM             select a single sequence by index
+    -sn, --sequence-name NAME       select a single sequence by name
+    -ss, --sequences START END      select sequences (default: select all)
+    -i,  --infix START END          extract infix
+    -rc, --revcomp                  reverse complement
+  ===========================================================================*/
+
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <sstream>
+
+#include <seqan/basic.h>
 #include <seqan/modifier.h>
+#include <seqan/file.h>
+#include <seqan/sequence.h>
 //#include "../library/apps/razers/mmap_fasta.h"
 
 using namespace std;
