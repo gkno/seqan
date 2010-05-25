@@ -204,7 +204,7 @@ int openTempFile() {
 inline
 const char *tempFileName() {
     static char fileNameBuffer[100];
-#ifdef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS_VS
     char * fileName = _tempnam(NULL, "SEQAN.");
     if (!fileName) {
         ::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
@@ -213,12 +213,12 @@ const char *tempFileName() {
     strcpy(fileNameBuffer, fileName);
     free(fileName);
     return fileNameBuffer;
-#else
+#else  // ifdef PLATFORM_WINDOWS_VS
     strcpy(fileNameBuffer, "/tmp/SEQAN.XXXXXXXXXXXXXXXXXXXX");
     mkstemp(fileNameBuffer);
     unlink(fileNameBuffer);
     return fileNameBuffer;
-#endif  // ifdef PLATFORM_WINDOWS
+#endif  // ifdef PLATFORM_WINDOWS_VS
 }
 
     // Initialize the testing infrastructure.
