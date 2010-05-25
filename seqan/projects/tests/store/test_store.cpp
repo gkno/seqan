@@ -20,7 +20,7 @@
   Tests for the SeqAn model store.
   ===========================================================================*/
 
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 #include "test_store_io.h"
 
 SEQAN_BEGIN_TESTSUITE(test_store) {

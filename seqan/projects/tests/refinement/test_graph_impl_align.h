@@ -1,4 +1,4 @@
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 
 #ifndef SEQAN_HEADER_TEST_GRAPH_IMPL_ALIGN_H
 #define SEQAN_HEADER_TEST_GRAPH_IMPL_ALIGN_H

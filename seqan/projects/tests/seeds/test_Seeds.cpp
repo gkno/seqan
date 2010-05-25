@@ -1,8 +1,8 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
+#include <seqan/basic.h>
 #include <seqan/seeds.h>
-#include <seqan/basic/basic_testing.h>
 
 using namespace std;
 using namespace seqan;

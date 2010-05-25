@@ -2,7 +2,7 @@
 #define SEQAN_HEADER_TEST_GRAPH_MATCH_REFINEMENT_H
 
 #include <seqan/align.h>
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 
 using namespace std;
 using namespace seqan;

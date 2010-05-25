@@ -20,7 +20,7 @@
   Tests for the SeqAn model store, I/O functionality.
   ===========================================================================*/
 
-#include <seqan/basic/basic_testing.h>  // For test functionality.
+#include <seqan/basic.h>  // For test functionality.
 #include <seqan/store.h>  // Header under test.
 
 using namespace seqan;

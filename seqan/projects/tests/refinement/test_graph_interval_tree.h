@@ -29,7 +29,7 @@
 
 #include <seqan/refinement.h>  // Header under test.
 
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 
 namespace SEQAN_NAMESPACE_MAIN {
 

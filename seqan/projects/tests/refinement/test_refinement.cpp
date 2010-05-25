@@ -39,7 +39,7 @@
 
 // SeqAn Includes
 #include <seqan/refinement.h>
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 
 // Test files
 #include "test_graph_impl_align.h"

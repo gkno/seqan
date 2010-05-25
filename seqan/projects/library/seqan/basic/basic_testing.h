@@ -215,8 +215,13 @@ const char *tempFileName() {
     return fileNameBuffer;
 #else  // ifdef PLATFORM_WINDOWS_VS
     strcpy(fileNameBuffer, "/tmp/SEQAN.XXXXXXXXXXXXXXXXXXXX");
+#ifdef PLATFORM_WINDOWS_MINGW
+    // There is no mkstemp in MinGW but it does not complain about tmpnam.
+    tmpnam(fileNameBuffer);
+#else  // ifdef PLATFORM_WINDOWS_MINGW
     mkstemp(fileNameBuffer);
     unlink(fileNameBuffer);
+#endif  // #ifdef PLATFORM_WINDOWS_MINGW
     return fileNameBuffer;
 #endif  // ifdef PLATFORM_WINDOWS_VS
 }

@@ -30,7 +30,7 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
-#include <seqan/basic/basic_testing.h>
+#include <seqan/basic.h>
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
