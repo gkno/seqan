@@ -208,7 +208,7 @@ SEQAN_CHECKPOINT
     TTraceValue traceValue = finder.trace.tvs[tracePos-1];
 
     // iterate over rows
-    while((row <= height) && ((maxCol > minCol) || (tracePos > 0))) {
+    while((row < height) && ((maxCol > minCol) || (tracePos > 0))) {
         actualRow = row + lo_row;
 
         // make sure that all matrix entries of trace are re-calculated and set to forbidden

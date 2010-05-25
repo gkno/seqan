@@ -147,10 +147,12 @@ public:
 SEQAN_CHECKPOINT
 	}
 
+    // TODO(holtgrew): Remove and replace all occurences with default constructor.
     template<typename TAlign>
-	LocalAlignmentFinder(TAlign)
+	LocalAlignmentFinder(TAlign const &)
+	    : needReinit(true)
 	{
-        LocalAlignmentFinder();
+SEQAN_CHECKPOINT
     }
 
 	~LocalAlignmentFinder()
