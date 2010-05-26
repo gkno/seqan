@@ -301,6 +301,7 @@ int main(int argc, const char *argv[]) {
     typedef Index<StringSet<String<Dna5> >, Index_QGram<SimpleShape> > TQGramIndex;
     TQGramIndex index_qgram(queries);
     resize(indexShape(index_qgram), q);
+	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
 
     typedef Finder<String<Dna5>, Swift<SwiftLocal> > TFinder;
     
@@ -312,11 +313,7 @@ int main(int argc, const char *argv[]) {
     for(unsigned i = 0; i < length(databases); ++i) {
         numSwiftHits = 0;
         clear(matches);
-        //std::cout << "------------------------------------------------" << std::endl;
         std::cout << databaseIDs[i] << std::endl;
-	    //file << databaseIDs[i] << "\n";
-        //pattern
-        Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
         // finder
         TFinder finder_swift(databases[i], 1000, 1);
         // local swift
@@ -330,16 +327,11 @@ int main(int argc, const char *argv[]) {
         // local swift on reverse complement of database
         std::cout << "================================================" << std::endl;
         std::cout << "Database sequence(s) reverse complemented: " << std::endl;
-        //file << "\n\nDatabase sequence(s) reverse complemented: \n";
         reverseComplementInPlace(databases);
         for(unsigned i = 0; i < length(databases); ++i) {
             clear(matches);
             numSwiftHits = 0;
-            //std::cout << "------------------------------------------------" << std::endl;
             std::cout << databaseIDs[i] << std::endl;
-            //file << databaseIDs[i] << "\n";
-            // pattern
-            Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
             // finder
             TFinder finder_swift_compl(databases[i], 1000, 1);
             // local swift

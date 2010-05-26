@@ -774,22 +774,24 @@ inline void _createHit(
 	TSize ndlSeqNo)
 {
 	typedef typename Finder<THaystack, Swift<TSpec> >::TSwiftHit	THit;
+	__int64 lastInc = (__int64)(*bkt).lastIncrement - pattern.finderPosOffset;
+	__int64 firstInc = (__int64)(*bkt).firstIncrement - pattern.finderPosOffset;
 
-    if(diag > (__int64)(*bkt).lastIncrement) 
+    if(diag > lastInc) 
 	{
 		// bucket is reused since last increment 
 		TSize reusePos = (bucketParams.reuseMask + 1) << bucketParams.logDelta;
-		diag -= (__int64)ceil((diag-(*bkt).lastIncrement)/(double)reusePos) * reusePos;
+		diag -= (__int64)ceil((diag-lastInc)/(double)reusePos) * reusePos;
 	}
 
     // determine width, height, and begin position in needle
-	TSize width = (*bkt).lastIncrement - (*bkt).firstIncrement + length(pattern.shape);
+	TSize width = lastInc - firstInc + length(pattern.shape);
 	TSize height = width + bucketParams.delta + bucketParams.overlap;
-	__int64 ndlBegin = (*bkt).lastIncrement + length(pattern.shape) /*- 1*/ - diag - height;
+	__int64 ndlBegin = lastInc + length(pattern.shape) - diag - height;
 
     // create the hit
 	THit hit = {                //                              *
-		(*bkt).firstIncrement,  // bucket begin in haystack     * *
+		firstInc,               // bucket begin in haystack     * *
 		ndlSeqNo,               // needle seq. number           *   *
 		ndlBegin,               // bucket begin in needle       *     *
 		width,                  // bucket width (non-diagonal)    *   *
@@ -849,6 +851,7 @@ inline bool _swiftMultiProcessQGram(
 	}
 */	
 	// iterate over all q-gram occurences and do the processing
+	__int64 curPos = finder.curPos + pattern.finderPosOffset;
 	for(; occ != occEnd; ++occ)
 	{
 		posLocalize(ndlPos, *occ, stringSetLimits(index)); // get pair of SeqNo and Pos in needle
@@ -869,7 +872,7 @@ inline bool _swiftMultiProcessQGram(
 
 		do {
 			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset
-				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < (__int64)(finder.curPos + length(pattern.shape)))
+				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < (__int64)(curPos + length(pattern.shape)))
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused
 				// OR last increment was in the same bucket but lies more than distanceCut away
@@ -882,9 +885,9 @@ inline bool _swiftMultiProcessQGram(
 
 				// reuse bucket
 				hitCount = 1;
-				(*bkt).firstIncrement = finder.curPos;
+				(*bkt).firstIncrement = curPos;
 			}
-			else if((*bkt).lastIncrement + bucketParams.tabooLength > finder.curPos)
+			else if((*bkt).lastIncrement + bucketParams.tabooLength > curPos)
 			{
 				// bkt counter was already incremented for another q-gram at
 				//   a haystack position that is closer than tabooLength
@@ -894,11 +897,11 @@ inline bool _swiftMultiProcessQGram(
 			}
 			else
 			{
-				if((*bkt).counter == 0) (*bkt).firstIncrement = finder.curPos; // TODO: Can we do s.th. instead of this line?
+				if((*bkt).counter == 0) (*bkt).firstIncrement = curPos;
 				hitCount = (*bkt).counter + 1;
 			}
 
-			(*bkt).lastIncrement = finder.curPos;
+			(*bkt).lastIncrement = curPos;
 			(*bkt).counter = hitCount;
 #ifdef SEQAN_DEBUG_SWIFT
 			(*bkt)._lastIncDiag = diag;
