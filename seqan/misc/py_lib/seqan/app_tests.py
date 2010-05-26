@@ -121,15 +121,22 @@ def autolocateBinary(base_path, relative_path, binary_name):
   # Names of intermediary directories and possible file extensions.
   intermediary_dir_names = ['', 'Debug', 'Release']
   extensions = ['', '.exe']
+  paths = []
   # Try all possible paths.
   for dir_name in intermediary_dir_names:
     for ext in extensions:
       res_list = [base_path, relative_path, dir_name, binary_name + ext]
       filtered_list = [x for x in res_list if x]  # Filter out empty strings.
-      res_path = os.path.join(*filtered_list)
-      print >>sys.stderr, 'Trying path %s' % res_path
-      if os.path.isfile(res_path):
-        return res_path
+      paths.append(os.path.join(*filtered_list))
+      if dir_name:
+        paths.append('/'.join([base_path] + relative_path.split('/')[:-1] +
+                              [dir_name] + relative_path.split('/')[-1:] +
+                              [binary_name]))
+  for path in paths:
+    logging.debug('Trying path %s', path)
+    if os.path.isfile(path):
+      logging.debug('  Found binary %s', path)
+      return path
   # Fall back ot Unix default.
   return os.path.join(base_path, relative_path, binary_name)
 
