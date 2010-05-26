@@ -14,6 +14,8 @@
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 #  Lesser General Public License for more details.
 # ============================================================================
+# Author: Tobias Rausch <rausch@embl.de>
+# ============================================================================
 
 ############################################################
 # Variables
