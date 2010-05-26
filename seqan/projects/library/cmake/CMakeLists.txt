@@ -152,6 +152,8 @@ endif (CMAKE_COMPILER_IS_GNUCXX)
 
 if (MSVC)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3  /wd4996 -D_CRT_SECURE_NO_WARNINGS")
+  # Disable Microsoft C++ language extensions.
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Za")
 endif (MSVC)
 
 ################################################################################
