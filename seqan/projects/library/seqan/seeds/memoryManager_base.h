@@ -329,7 +329,7 @@ obtainID(MemoryManager<TValue,Block<SPACE>,TFree > &manager)
 	}else{
 		int i = 0;
 		long tmp = (TValue*)manager.pEmptySpace - (TValue*)manager.blocks[i];
-		while ((tmp >=SPACE)||( tmp < 0)){
+		while ((tmp >= static_cast<long>(SPACE))||( tmp < 0)){
 			++i;
 			tmp = (TValue*)manager.pEmptySpace - (TValue*)manager.blocks[i];
 		}
@@ -346,7 +346,7 @@ _getPosition(MemoryManager<TValue,Block<SPACE>, TFree > const &manager,
 	SEQAN_CHECKPOINT
 	int i = 0;
 	long tmp = (TValue*)pointer - (TValue*)manager.blocks[i];
-	while ((tmp >=SPACE)||( tmp < 0)){
+	while ((tmp >= static_cast<long>(SPACE))||( tmp < 0)){
 		++i;
 		tmp = (TValue*)pointer - (TValue*)manager.blocks[i];
 	}
