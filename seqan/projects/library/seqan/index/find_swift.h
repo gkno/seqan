@@ -887,7 +887,7 @@ inline bool _swiftMultiProcessQGram(
 				hitCount = 1;
 				(*bkt).firstIncrement = curPos;
 			}
-			else if((*bkt).lastIncrement + bucketParams.tabooLength > curPos)
+			else if((__int64)((*bkt).lastIncrement + bucketParams.tabooLength) > curPos)
 			{
 				// bkt counter was already incremented for another q-gram at
 				//   a haystack position that is closer than tabooLength
