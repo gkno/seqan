@@ -58,7 +58,8 @@ typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSequenceValue, typename TSpec>
-struct Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > {
+class Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > {
+public:
     // Static computation of the required array size.
     enum {
         VALUE_SIZE = ValueSize<TSequenceValue>::VALUE,

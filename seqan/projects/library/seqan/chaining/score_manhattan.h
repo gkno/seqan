@@ -36,7 +36,7 @@ namespace seqan
 ..remarks:The manhattan distance between two n-dimensional points is defined is the sum of the (absolute) differences of their coordinates. 
 */
 template <typename TValue>
-struct Score<TValue, Manhattan>
+class Score<TValue, Manhattan>
 {
 public:
 	TValue data_match;

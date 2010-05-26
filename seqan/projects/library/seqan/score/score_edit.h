@@ -41,7 +41,8 @@ namespace SEQAN_NAMESPACE_MAIN {
 // TODO(holtgrew): Should EditDistance better live here instead of basic_tag.h?
 // EditDistance is defined in basic_tag.h
 template <typename TValue>
-struct Score<TValue, EditDistance> {
+class Score<TValue, EditDistance> {
+public:
     Score() {}
 };
 

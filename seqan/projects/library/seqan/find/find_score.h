@@ -132,7 +132,7 @@ struct ScoringScheme <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPattern
 //DEPRECATED
 //.Metafunction.ScoreValue.param.T.type:Spec.DPSearch
 //template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
-//struct ScoreValue <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >:
+//class ScoreValue <Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > >:
 //	Value<TScore>
 //{
 //};

@@ -43,7 +43,8 @@ struct Simple;
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
 */
 template <typename TValue>
-struct Score<TValue, Simple> {
+class Score<TValue, Simple> {
+public:
     // The score for a match.
     TValue data_match;
 

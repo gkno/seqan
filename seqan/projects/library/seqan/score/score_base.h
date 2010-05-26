@@ -37,7 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 ..include:seqan/score.h
 */
 template <typename TValue = int, typename TSpec = Simple>
-struct Score;
+class Score;
 
 
 /**
