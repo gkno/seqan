@@ -54,3 +54,9 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   target_link_libraries (test_find_myers_ukkonen_reads rt)
 endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+add_executable (seq_sample seq_sample.cpp)
+add_dependencies (test_find_myers_ukkonen_reads ${SEQAN_TARGET})
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  target_link_libraries (test_find_myers_ukkonen_reads rt)
+endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+
