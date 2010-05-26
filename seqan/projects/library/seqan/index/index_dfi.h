@@ -165,7 +165,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		Iter<Index<TText, Index_Wotd< DFI<TPredHull, TPred> > >, TSpec> &it)
 	{
 		typedef Index<TText, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
-		return dirAt(value(it).node, container(it)) & TIndex::DFI_PRED;
+		return (dirAt(value(it).node, container(it)) & TIndex::DFI_PRED) != 0;
 	}
 
 	template < 
@@ -178,7 +178,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		Iter<Index<TText, Index_Wotd< DFI<TPredHull, TPred> > >, TSpec> &it)
 	{
 		typedef Index<TText, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
-		return dirAt(value(it).node, container(it)) & TIndex::DFI_PRED_HULL;
+		return (dirAt(value(it).node, container(it)) & TIndex::DFI_PRED_HULL) != 0;
 	}
 
 

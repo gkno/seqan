@@ -199,7 +199,7 @@ public:
 
 	operator bool()
 	{
-		return data_iterator;
+		return data_iterator != 0;
 	}
 
 	TValue *

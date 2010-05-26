@@ -202,7 +202,7 @@ _skipsumlistFindGoNext(TNext const & _next,
 					   unsigned int /*_dim*/,
 					   GoEnd)
 {
-	return _next.data_element;
+	return _next.data_element != 0;
 }
 
 

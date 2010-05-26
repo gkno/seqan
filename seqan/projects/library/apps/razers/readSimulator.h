@@ -220,7 +220,7 @@ void simulateReads(
 			samplePosCounter = 0;
 		}
 		int  startPos = sortedStartPos[samplePosCounter] & ~REVCOMP;
-		bool revComp  = sortedStartPos[samplePosCounter] & REVCOMP;
+		bool revComp  = (sortedStartPos[samplePosCounter] & REVCOMP) != 0;
 		int  maxEnd   = startPos + readLength + maxErrors - 1;
 	
 		TGenome read;
