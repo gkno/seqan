@@ -59,7 +59,7 @@ assign(TTarget & target,
 	   TSource const & source)
 {
 SEQAN_CHECKPOINT
-	target = source != 0;
+	target = source;
 }
 
 //////////////////////////////////////////////////////////////////////////////
