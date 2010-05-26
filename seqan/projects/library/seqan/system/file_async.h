@@ -136,7 +136,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool read(void *memPtr, _SizeType count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
-		    bool result = ReadFile(handle, memPtr, count, &_transferedBytes, NULL);
+		    bool result = ReadFile(handle, memPtr, count, &_transferedBytes, NULL) != 0;
             SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline bool write(void const *memPtr, _SizeType count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
-		    bool result = WriteFile(handle, memPtr, count, &_transferedBytes, NULL);
+		    bool result = WriteFile(handle, memPtr, count, &_transferedBytes, NULL) != 0;
             SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
             return result;
         }
@@ -396,7 +396,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec>
     inline bool flush(File<Async<TSpec> > & me) {
 		if (me.handle != me.handleAsync)	// in case of equality no direct access was done -> no flush needed
-        	return FlushFileBuffers(me.handle);
+        	return FlushFileBuffers(me.handle) != 0;
         else
             return true;
     }
