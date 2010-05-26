@@ -163,7 +163,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 
     // Debug-adjustments.
     #define ENABLE 0
-    #define ALL 1
+    #define ALL 0
     #define READID 0
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
@@ -342,6 +342,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
+                        std::cerr << __FILE__ << ":" << __LINE__ << " -- raw score is " << getScore(pattern) << std::endl;
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << std::endl;
                     }
@@ -437,12 +438,6 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     if (length(fragments.alignedReadStore) == 0)
         return;  // Do nothing if the aligned read store is empty.
 
-    // TODO(holtgrew): Already sorted by contig id, iteration below much simpler!
-    // Sort aligned reads by (contig index, read index, end position).
-    sortAlignedReads(fragments.alignedReadStore, SortEndPos());
-    sortAlignedReads(fragments.alignedReadStore, SortReadId());
-    sortAlignedReads(fragments.alignedReadStore, SortContigId());
-
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
 //     }
@@ -467,6 +462,22 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 
         for (int isForward = 0; isForward <= 1; ++isForward) {
             std::cerr << "[" << fragments.contigNameStore[contigId] << "] (" << (contigId + 1) << "/" << length(contigStore) << ") " << (isForward ? "F" : "R") << " ";
+
+            // Sort aligned reads by (contig index, read index, end
+            // position) when iterating forward and by begin position
+            // instead when iterating backwards.
+            //
+            // TODO(holtgrew): Only resort with a given contig id? We are sorting $contig-count times too often.
+            if (isForward) {
+                sortAlignedReads(fragments.alignedReadStore, SortEndPos());
+                sortAlignedReads(fragments.alignedReadStore, SortReadId());
+                sortAlignedReads(fragments.alignedReadStore, SortContigId());
+            } else {
+                sortAlignedReads(fragments.alignedReadStore, SortBeginPos());
+                sortAlignedReads(fragments.alignedReadStore, SortReadId());
+                sortAlignedReads(fragments.alignedReadStore, SortContigId());
+            }
+            
             // Previous contig id and right border for both forward and backward
             // strand.  The number of contigs suffices as a sentinel value.
             TReadId previousReadId = length(fragments.readStore);
@@ -495,9 +506,9 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
 //                 std::cerr << "alignedRead.endPos = " << alignedRead.endPos << std::endl;
                 TAlignedReadPos endPos = positionGapToSeq(contigGaps, alignedRead.endPos);
                 if (ENABLE && (ALL || readId == READID)) {
-                    std::cerr << "beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << ", endPos = " << endPos << std::endl;
+                    std::cerr << __FILE__ << ":" << __LINE__ << " -- beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << ", endPos = " << endPos << std::endl;
+                    std::cerr << __FILE__ << ":" << __LINE__ << " -- rev beginPos = " << length(contig) - positionGapToSeq(contigGaps, alignedRead.beginPos) << ", rev endPos = " << length(contig) - endPos << std::endl;
                 }
-//                 std::cerr << "endPos = " << endPos << std::endl;
 
                 // Build error curve fragment around the aligned read's
                 // position, depending on which strand the read was aligned.
