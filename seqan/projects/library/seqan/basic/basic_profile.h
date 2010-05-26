@@ -26,16 +26,16 @@
 // todo: substitute defines with inlines
 #ifndef SEQAN_PROFILE
 
-    #define SEQAN_PROSET(i,v)
-    #define SEQAN_PROADD(i,v)
-    #define SEQAN_PROSUB(i,v)
+    #define SEQAN_PROSET(i,v)           do {} while (false)
+    #define SEQAN_PROADD(i,v)           do {} while (false)
+    #define SEQAN_PROSUB(i,v)           do {} while (false)
 	#define SEQAN_PROVAL(i)				0
-    #define SEQAN_PROEXTRAS(i)
-    #define SEQAN_PROMARK(m)
-    #define SEQAN_PROENDMARK(m)
-    #define SEQAN_PRORESET
+    #define SEQAN_PROEXTRAS(i)          do {} while (false)
+    #define SEQAN_PROMARK(m)            do {} while (false)
+    #define SEQAN_PROENDMARK(m)         do {} while (false)
+    #define SEQAN_PRORESET              do {} while (false)
 	#define SEQAN_PROGETTIME			0
-    #define SEQAN_PROTIMESTART(a)
+    #define SEQAN_PROTIMESTART(a)       do {} while (false)
     #define SEQAN_PROTIMEDIFF(a)		0
 	#define SEQAN_PROTIMEUPDATE(a)		0
 	// replace malloc and free in external tools
