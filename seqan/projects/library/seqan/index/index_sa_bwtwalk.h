@@ -236,7 +236,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		//   1) first suffix is returned ...
 		TValue p = _createXoredSuffixList(lexxorpos, s);
 
+#ifdef PLATFORM_WINDOWS_MINGW
+        // MinGW's GCC warns that it is smart enough to optimize away the
+        // following conditional expression.
+        // Also see: http://gcc.gnu.org/ml/gcc-patches/2005-06/msg01876.html.
+        volatile TValue = NIL & NOTFLAGBIT;
+		if (length(s) >= val) {
+#else  // PLATFORM_WINDOWS_MINGW
 		if (length(s) >= (NIL & NOTFLAGBIT)) {
+#endif  // PLATFORM_WINDOWS_MINGW
 			// If the string is too long, we cannot use the MSB of the SA entries as a flag.
 			// Instead, we allocate a separate bitvector
 			String<bool, Packed<> > visited;
