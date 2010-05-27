@@ -972,19 +972,19 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 		tmpMax1 = tmpMax2;
 	}
 
- //   // print anti diagonals
- //   for(int ii = length(*antiDiag1)-1; ii >= 0 ; --ii) {
- //       for(int jj = ii; jj > 0 ; --jj) std::cout << "  ";
- //       std::cout << " ";
- //       if ((*antiDiag1)[ii] == infimum ) std::cout << "i" << " ";
- //       else std::cout << (*antiDiag1)[ii] << " ";
- //       if (length(*antiDiag2) <= ii+1 ) std::cout << " ";
- //       else if ((*antiDiag2)[ii+1] == infimum ) std::cout << "i" << " ";
- //       else std::cout << (*antiDiag2)[ii+1] << " ";
-	//	if (length(*antiDiag3) <= ii+2 ) std::cout << std::endl;
- //       else if ((*antiDiag3)[ii+2] == infimum ) std::cout << "i" << std::endl;
- //       else std::cout << (*antiDiag3)[ii+2] << std::endl;
- //   }
+  //  // print anti diagonals
+  //  for(int ii = length(*antiDiag1)-1; ii >= 0 ; --ii) {
+  //      for(int jj = ii; jj > 0 ; --jj) std::cout << "  ";
+  //      std::cout << " ";
+  //      if ((*antiDiag1)[ii] == infimum ) std::cout << "i" << " ";
+  //      else std::cout << (*antiDiag1)[ii] << " ";
+  //      if (length(*antiDiag2) <= ii+1 ) std::cout << " ";
+  //      else if ((*antiDiag2)[ii+1] == infimum ) std::cout << "i" << " ";
+  //      else std::cout << (*antiDiag2)[ii+1] << " ";
+		//if (length(*antiDiag3) <= ii+2 ) std::cout << std::endl;
+  //      else if ((*antiDiag3)[ii+2] == infimum ) std::cout << "i" << std::endl;
+  //      else std::cout << (*antiDiag3)[ii+2] << std::endl;
+  //  }
 
 	//Find seed start/end
 	TPosition extLengthQuery = 0; // length of extension in query
@@ -1000,7 +1000,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
         tmpMax = (*antiDiag2)[b];
         extLengthQuery = xLength;
         extLengthDatabase = k-(xLength+1);
-    } else if ((k-u-1 >= yLength) && ((*antiDiag2)[u] >= tmpMax1-scoreDropOff)) {
+    } else if ((k-u-1 >= yLength) && u >= 0 && ((*antiDiag2)[u] >= tmpMax1-scoreDropOff)) {
         // extension ends at end of database
         tmpMax = (*antiDiag2)[u];
         extLengthQuery = u;
