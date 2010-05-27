@@ -995,7 +995,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 		extLengthQuery = xLength;
         extLengthDatabase = yLength;
 		tmpMax = (*antiDiag2)[u+1];
-    } else if ((b >= xLength) && ((*antiDiag2)[b] >= tmpMax1-scoreDropOff)) {
+    } else if ((b >= xLength) && b < (TPosition)length(*antiDiag2) && ((*antiDiag2)[b] >= tmpMax1-scoreDropOff)) {
         // extension ends at end of query
         tmpMax = (*antiDiag2)[b];
         extLengthQuery = xLength;
