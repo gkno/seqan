@@ -162,8 +162,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // Debug-adjustments.
-    #define ENABLE 0
-    #define ALL 0
+    #define ENABLE 1
+    #define ALL 1
     #define READID 0
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
@@ -211,6 +211,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         ret = setEndPosition(finder, pattern, endPos);
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_EQ(endPos, endPosition(finder));
+        SEQAN_ASSERT_GEQ(getScore(pattern), -maxError);
         ret = findBegin(finder, pattern, getScore(pattern));
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_GT(endPos, beginPosition(finder));
