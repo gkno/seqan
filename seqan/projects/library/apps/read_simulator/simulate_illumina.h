@@ -10,7 +10,7 @@ using namespace seqan;
 
 // Error probabilities for Illumina reads of length 36, from
 // Anne-Katrin's interpol36subsBiases.dat.
-static const double ERROR_PROBABILITIES_36[] = {
+const static double ERROR_PROBABILITIES_36[36] = {
     0.005,
     0.003671429,
     0.0035,
@@ -52,7 +52,7 @@ static const double ERROR_PROBABILITIES_36[] = {
 
 // Error probabilities for Illumina reads of length 50, from
 // Anne-Katrin's interpol50subsBiases.dat.
-static const double ERROR_PROBABILITIES_50[] = {
+const static double ERROR_PROBABILITIES_50[50] = {
     0.005,
     0.004051020,
     0.0035,
@@ -108,7 +108,7 @@ static const double ERROR_PROBABILITIES_50[] = {
 
 // Error probabilities for Illumina reads of length 100, from
 // Anne-Katrin's interpol100subsBiases.dat.
-static const double ERROR_PROBABILITIES_100[] = {
+const static double ERROR_PROBABILITIES_100[100] = {
     0.005,
     0.004530303,
     0.004060606,
@@ -357,6 +357,10 @@ void buildEditString(ReadSimulationInstruction & inst, String<double> const & er
         double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
         double pMismatch = errorProbabilities[i * 4 + ERROR_TYPE_MISMATCH];
         double pInsert   = errorProbabilities[i * 4 + ERROR_TYPE_INSERT];
+/*        std::cout << "i = " << i << std::endl;
+        std::cout << "xxx == " << i * 4 + ERROR_TYPE_MATCH << std::endl;
+        std::cout << "len = " << length(errorProbabilities) << std::endl;
+        std::cout << "i = " << errorProbabilities[i * 4 + ERROR_TYPE_MATCH] << std::endl;*/
         if (x < pMatch) {
             // match
             appendValue(inst.editString, ERROR_TYPE_MATCH);
@@ -384,9 +388,10 @@ void buildEditString(ReadSimulationInstruction & inst, String<double> const & er
 
 void buildQualityValues(ReadSimulationInstruction & inst, String<double> const & errorProbabilities, IlluminaOptions const & options) {
     SEQAN_ASSERT_GT(length(inst.editString), 0u);
-    resize(inst.qualities, length(inst.editString), Exact());
+    clear(inst.qualities);
+    fill(inst.qualities, length(inst.editString), 0, Exact());
     String<double> tmp;
-    resize(tmp, inst.endPos - inst.beginPos, Exact());
+    fill(tmp, inst.endPos - inst.beginPos, 0, Exact());
 
     // TODO(holtgrew): Quality computation is HIGHLY bogus.
     //
@@ -404,9 +409,9 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
     //
     // First round.
     for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
+        SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos);
         if (inst.editString[i] == ERROR_TYPE_MATCH || inst.editString[i] == ERROR_TYPE_MISMATCH) {
-            j += 1;
-            double p = 1 - errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
+            double p = 1 - errorProbabilities[j * 4 + ERROR_TYPE_MATCH];
             double delta = mtRandDouble() * 2 * options.qualityErrorFactor * p;
             double x = p - options.qualityErrorFactor * p + delta;
             int score = -10 * std::log10(x);
@@ -415,6 +420,7 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
             // Store scores.
             inst.qualities[i] = score;
             tmp[j] = score;
+            j += 1;
         }
     }
 
@@ -423,13 +429,13 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
         if (inst.editString[i] == ERROR_TYPE_INSERT || inst.editString[i] == ERROR_TYPE_DELETE) {
             if (j == 0) {
                 // Indel at beginning.
-                inst.qualities[i] = tmp[j];
+                inst.qualities[i] = tmp[0];
             } else if (j == inst.endPos - inst.beginPos - 1) {
                 // Indel at end.
                 inst.qualities[i] = back(tmp);
             } else {
                 // Indel in center.
-                inst.qualities[i] = 0.25 * (tmp[i] + tmp[i + 1]);
+                inst.qualities[i] = 0.25 * (tmp[j] + tmp[j + 1]);
             }
         } else {
             j += 1;
@@ -452,7 +458,7 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
         std::cerr << "Simulating reads..." << std::endl;
 
     // Build partial sums over relative contig lengths so we can pick the contigs later on.
-    size_t totalLength;
+    size_t totalLength = 0;
     for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i)
         totalLength += length(fragmentStore.contigStore[i].seq);
     String<double> relativeContigLengths;
@@ -478,7 +484,7 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
     String<ReadSimulationInstruction> simulationInstructions;
     reserve(simulationInstructions, options.numReads);
     for (size_t i = 0; i < options.numReads; ++i) {
-        std::cout << "i == " << i << std::endl;
+    	std::cout << "round 1, i = " << i << std::endl;
         // We have to retry simulation if the mate pair did not fit in.
         bool invalid = false;
         do {
@@ -512,6 +518,8 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
             buildEditString(inst, errorProbabilities);
             // Build quality values.
             buildQualityValues(inst, errorProbabilities, options);
+            // Append read to result list.
+            appendValue(simulationInstructions, inst);
 
             // Maybe create a mate for this read.
             if (options.generateMatePairs) {
@@ -526,6 +534,7 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
                 if (inst.beginPos > contigLength || inst.endPos > contigLength) {
                     // Mate did not fit!  Remove previously added read and set
                     // invalid to true so we repeat this simulation.
+                    SEQAN_ASSERT_GT(length(simulationInstructions), 0u);
                     resize(simulationInstructions, length(simulationInstructions) - 1, Exact());
                     invalid = true;
                     if (options.verbose)
@@ -535,6 +544,8 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
                 buildEditString(inst, errorProbabilities);
                 // Build quality values.
                 buildQualityValues(inst, errorProbabilities, options);
+	            // Append read to result list.
+    	        appendValue(simulationInstructions, inst);
             }
         } while (invalid);
     }
@@ -588,13 +599,13 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
     if (options.errorDistributionFile == "") {
         if (options.readLength == 36) {
             for (unsigned i = 0; i < 36; ++i)
-                mismatchProbabilities = ERROR_PROBABILITIES_36[i];
+                mismatchProbabilities[i] = ERROR_PROBABILITIES_36[i];
         } else if (options.readLength == 50) {
             for (unsigned i = 0; i < 50; ++i)
-                mismatchProbabilities = ERROR_PROBABILITIES_50[i];
+                mismatchProbabilities[i] = ERROR_PROBABILITIES_50[i];
         } else if (options.readLength == 100) {
             for (unsigned i = 0; i < 100; ++i)
-                mismatchProbabilities = ERROR_PROBABILITIES_100[i];
+                mismatchProbabilities[i] = ERROR_PROBABILITIES_100[i];
         } else {
             std::cerr << "WARNING: No error distribution file given and n != 36.  Using uniform distribution." << std::endl;
             double sum = 0;
