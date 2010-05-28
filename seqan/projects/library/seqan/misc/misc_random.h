@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 //forward declaration
 
-inline unsigned long mtRand(); 
+inline unsigned mtRand(); 
 inline void mtRandInit();
 
 //////////////////////////////////////////////////////////////////////////////
@@ -128,13 +128,13 @@ mtRandInit()
 ..summary:Return a Mersenne-Twister random number.
 ..cat:Misc
 ..signature:mtRand()
-..returns:A random number between 0 and $SupremumValue<unsigned long>::VALUE$.
-...type:nolink:unsigned long
+..returns:A random number between 0 and $SupremumValue<unsigned>::VALUE$.
+...type:nolink:unsigned
 ..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
 ..see:Function.mtRandInit
 */
 
-inline unsigned long 
+inline unsigned 
 mtRand()
 {
 	unsigned long * b = _MersenneBuffer<>::buffer;
@@ -160,6 +160,17 @@ mtRand()
 	}
 	_MersenneBuffer<>::index = idx + sizeof(unsigned long);
 	return *(unsigned long *)((unsigned char *)b + idx);
+}
+
+/**
+.Function.mtRandDouble:
+..summary:Return a random number between 0 and 1 using mtRand.
+..see:Function.mtRand
+*/
+inline double
+mtRandDouble()
+{
+    return static_cast<double>(mtRand()) / static_cast<double>(SupremumValue<unsigned>::VALUE);
 }
 
 //////////////////////////////////////////////////////////////////////////////
