@@ -12,6 +12,9 @@
 #include <boost/math/distributions/normal.hpp>
 
 //#define RENAME_NODES
+#define MANY_BINS
+#define SINGLE_MAT_FILE
+#define OMIT_UNCOVERED_MATS
 
 using namespace seqan;
 using namespace std;
@@ -25,11 +28,14 @@ struct Count
 };
 
 struct Match {
-	unsigned	contigId;
-	int			posBegin;
-	int			posEnd;
-	bool		forward;	// true..forward strand, false..reverse complement strand
-	std::string line;
+//	unsigned		contigId;
+	unsigned		locusId;
+	unsigned		transId;
+	int				posBegin;
+	int				posEnd;
+	unsigned char	errors;
+	bool			forward;	// true..forward strand, false..reverse complement strand
+	std::string		line;
 };
 
 struct Stats
@@ -52,6 +58,33 @@ struct Stats
 
 Stats stats;
 
+struct CoverageBin
+{
+	unsigned			binLength;		// size in bps all transcripts with length >= binLength are counted
+	unsigned			transcripts;	// coverages of how many transcripts were counted
+#ifdef MANY_BINS
+	String<double, Array<64> >	coverage;		// stores the sum of coverages for each position i=0,...,binLength-1
+#else
+	String<double>		coverage;		// stores the sum of coverages for each position i=0,...,binLength-1
+#endif
+	
+	CoverageBin():
+		binLength(0),
+		transcripts(0) {}
+
+	CoverageBin(unsigned _binLength):
+		binLength(_binLength),
+		transcripts(0) 
+	{
+#ifdef MANY_BINS
+		fill(coverage, 64, 0);
+#else
+		fill(coverage, binLength, 0);
+#endif
+	}
+};
+
+String<CoverageBin> bins;
 
 typedef StringSet<CharString>	TNames;
 typedef NameStoreCache<TNames>	TNameCache;
@@ -68,6 +101,7 @@ TNameCache					locusNameCache(locusNames);
 TTransNameCache				transNameCache;
 
 String<int>					dContigToAnno;	// DContig id -> its first node annotation
+String<int>					dContigLength;	// transcript length
 String<String<Count> >		counts;			// node[0] -> ((node[1..],count), (node[1..],count), ...)
 
 String<int>					nodeToMContig;	// node number -> MContig id (compact renumeration)
@@ -108,9 +142,9 @@ appendTrans(TId & locusId, TId & transId, TName const & transName)
 	return contigId;
 }
 
-template <typename TId, typename TName>
+template <typename TId>
 inline bool 
-getTransId(TId & locusId, TId & transId, TName const & transName)
+getTransId(TId & locusId, TId & transId, std::string const & transName)
 {
 	TTransNameCache::iterator it = transNameCache.find(transName);
 	if (it != transNameCache.end())
@@ -256,7 +290,8 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		appendLocus(locusNum, transName.substr(locusPos + 6, transPos - (locusPos + 6)));
 		unsigned contigId = appendTrans(locusNum, transNum, transName);
 
-		int pos = 0;
+		int beginPos = 0;
+		int endPos = 0;
 		while (!_streamEOF(file))
 		{
 			if (!_parse_isDigit(c) && c !='-')
@@ -270,8 +305,8 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 
 			c = _streamGet(file);	// :
 			// quick fix for Hugues' bug
-			int endPos = _parse_readNumber(file, c);
-			//int endPos = pos + _parse_readNumber(file, c);
+			endPos = _parse_readNumber(file, c);
+			//int endPos = beginPos + _parse_readNumber(file, c);
 			if (nodeId < 0) nodeId = -nodeId;
 
 			// rename nodeIds
@@ -287,10 +322,10 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 #endif
 			if ((int)length(stats.contigStats) <= nodeId)
 				fill(stats.contigStats, nodeId + 1, Pair<double, int>(0, 0));
-			stats.contigStats[nodeId] = Pair<double, int>(0, endPos-pos);
+			stats.contigStats[nodeId] = Pair<double, int>(0, endPos - beginPos);
 
 			TAnnotation a;
-			a.beginPos = pos;
+			a.beginPos = beginPos;
 			a.endPos = endPos;
 			a.parentId = 0;
 			a.contigId = contigId;
@@ -313,9 +348,10 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 			c = _streamGet(file);	// -
 			c = _streamGet(file);	// >
 
-			pos = endPos + gapLen;
+			beginPos = endPos + gapLen;
 		}
 		++contigId;
+		appendValue(dContigLength, endPos, Generous());
 		appendValue(dContigToAnno, length(store.annotationStore), Generous());
 	}
 	file.close();
@@ -336,14 +372,46 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 	TMIter mEnd = end(matches, Standard());
 	for (; m != mEnd; ++m)
 	{
-		TIter it = begin(store.annotationStore, Standard()) + dContigToAnno[(*m).contigId];
-		TIter itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[(*m).contigId + 1];
+		unsigned contigId = transToDContig[(*m).locusId][(*m).transId];
+		TIter it = begin(store.annotationStore, Standard()) + dContigToAnno[contigId];
+		TIter itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[contigId + 1];
 		clear(ids);
 		
+		int transPosBegin = 0;
+		int transPosEnd = 0;
 		for (; it != itEnd; ++it)
 		{
-			if ((*m).posEnd <= (int)(*it).beginPos) break;
-			if ((*m).posBegin >= (int)(*it).endPos) continue;
+			if ((*m).posEnd <= (int)(*it).beginPos) 
+			{
+				// node is right of our read
+				break;
+			}
+			if ((*m).posBegin >= (int)(*it).endPos) 
+			{
+				// node is left of our read
+				transPosBegin += (int)(*it).endPos - (int)(*it).beginPos;
+				transPosEnd += (int)(*it).endPos - (int)(*it).beginPos;
+				continue;
+			}
+			
+			// here we have an overlap
+			
+			if ((*m).posBegin >= (int)(*it).beginPos)
+			{
+				// read begin is in the node
+				transPosBegin += (*m).posBegin - (int)(*it).beginPos;
+			}
+			
+			if ((*m).posEnd <= (int)(*it).endPos)
+			{
+				// read end is in the node
+				transPosEnd += (*m).posEnd - (int)(*it).beginPos;
+			} else
+			{
+				// read end is right of the node
+				transPosEnd += (int)(*it).endPos - (int)(*it).beginPos;
+			}
+			
 			appendValue(ids, (*it).countId, Generous());
 			stats.contigStats[(*it).countId].i1 += 1.0 / ambig;
 		}
@@ -353,7 +421,33 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 			std::cerr << (*m).line;
 			std::cerr << ')' << std::endl;
 		} else
+		{
 			addCount(counts, ids, 1.0 / ambig);
+			if (length(transToDContig[(*m).locusId]) == 1 && (*m).errors < 2 && ambig == 1)
+			{
+				unsigned transLen = dContigLength[contigId];
+//				std::cout << (*m).line << '\t'<<transPosBegin<<'\t'<<transPosEnd<<'\t'<<transLen<<std::endl;
+
+				unsigned binNo;
+#ifdef MANY_BINS
+				binNo = transLen;
+				if (length(bins) <= binNo)
+					resize(bins, binNo + 1);
+				bins[binNo].binLength = binNo;
+				fill(bins[binNo].coverage, 64, 0);
+#else
+				for (binNo = 0; binNo < (int)length(bins); ++binNo)
+					if (bins[binNo].binLength > transLen)
+						break;
+				if (binNo != 0) --binNo;
+#endif				
+				CoverageBin &bin = bins[binNo];
+				transPosBegin = (transPosBegin * length(bin.coverage)) / transLen;
+				transPosEnd = (transPosEnd * length(bin.coverage)) / transLen;
+				for (; transPosBegin < transPosEnd; ++transPosBegin)
+					bin.coverage[transPosBegin] += 1;
+			}
+		}
 		
 		unsigned i = length(ids);
 		if (i >= length(stats.histSingleContigs))
@@ -395,7 +489,7 @@ countPairedMatches(FragmentStore<TSpec, TConfig> &store, TMatches const matches[
 	for (m0 = begin(matches[0], Standard()); m0 != m0End; ++m0)
 		for (m1 = begin(matches[1], Standard()); m1 != m1End; ++m1)
 			// reads must be mapped on different strands of the same contig
-			if ((*m0).contigId == (*m1).contigId && ((*m0).forward != (*m1).forward))
+			if ((*m0).locusId == (*m1).locusId && (*m0).transId == (*m1).transId && (*m0).forward != (*m1).forward)
 			{
 				int beg0 = (*m0).posBegin;
 				int end0 = (*m0).posEnd;
@@ -439,7 +533,7 @@ countPairedMatches(FragmentStore<TSpec, TConfig> &store, TMatches const matches[
 	m1 = begin(matches[1], Standard());
 	for (m0 = begin(matches[0], Standard()); m0 != m0End; ++m0)
 		for (m1 = begin(matches[1], Standard()); m1 != m1End; ++m1)
-			if ((*m0).contigId == (*m1).contigId && ((*m0).forward != (*m1).forward))
+			if ((*m0).locusId == (*m1).locusId && (*m0).transId == (*m1).transId && (*m0).forward != (*m1).forward)
 			{
 				int beg0 = (*m0).posBegin;
 				int end0 = (*m0).posEnd;
@@ -462,9 +556,10 @@ countPairedMatches(FragmentStore<TSpec, TConfig> &store, TMatches const matches[
 				
 				double x = end1 - beg0;
 				double val = (cdf(fragmentDistr, x + width) - cdf(fragmentDistr, x - width)) / sum;
+				unsigned contigId0 = transToDContig[(*m0).locusId][(*m0).transId];
 
-				TIter it = begin(store.annotationStore, Standard()) + dContigToAnno[(*m0).contigId];
-				TIter itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[(*m0).contigId + 1];
+				TIter it = begin(store.annotationStore, Standard()) + dContigToAnno[contigId0];
+				TIter itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[contigId0 + 1];
 				clear(ids);
 				
 				for (; it != itEnd; ++it)
@@ -484,9 +579,10 @@ countPairedMatches(FragmentStore<TSpec, TConfig> &store, TMatches const matches[
 				}
 				appendValue(ids, -1, Generous());
 				unsigned old = length(ids);
+				unsigned contigId1 = transToDContig[(*m1).locusId][(*m1).transId];
 
-				it = begin(store.annotationStore, Standard()) + dContigToAnno[(*m1).contigId];
-				itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[(*m1).contigId + 1];
+				it = begin(store.annotationStore, Standard()) + dContigToAnno[contigId1];
+				itEnd = begin(store.annotationStore, Standard()) + dContigToAnno[contigId1 + 1];
 
 				for (; it != itEnd; ++it)
 				{
@@ -594,7 +690,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		fill(stats.histMatchErrors, errors + 1, 0, Generous());
 		++stats.histMatchErrors[errors];
 
-
+		m.errors = errors;
 		if (m.posBegin > m.posEnd)
 		{
 			int temp = m.posBegin;
@@ -615,7 +711,9 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 			std::cerr << "ERROR: No annotation for read: " << line << std::endl;
 			continue;
 		}
-		m.contigId = transToDContig[locusNum][transNum];
+		m.locusId = locusNum;
+		m.transId = transNum;
+//		m.contigId = transToDContig[locusNum][transNum];
 		m.line = line;
 		
 		// Count Matches
@@ -681,6 +779,7 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	CharString fileName = prefix;
 #ifdef RENAME_NODES
 	append(fileName, ".node");
+	file << "id\tname\tnodes\tlength" << std::endl;
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
 	for (unsigned i = 0; i < length(mContigToNode); ++i)
 		file << "Node_" << mContigToNode[i] << std::endl;
@@ -691,36 +790,56 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	fileName = prefix;
 	append(fileName, ".locus");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
+	file << "id\tname\tisoforms" << std::endl;
 	for (unsigned i = 0; i < length(locusNames); ++i)
-		file << locusNames[i] << std::endl;
+		file << i << '\t' << locusNames[i] << '\t' << length(transToDContig[i]) << std::endl;
 	file.close();	
 	
 	// dump transcript names
 	fileName = prefix;
 	append(fileName, ".trans");
 	file.open(toCString(fileName), ios_base::out | ios_base::binary);
+	file << "id\tname\tnodes\tlength" << std::endl;
 	for (unsigned i = 0; i < length(transNames); ++i)
-		file << transNames[i] << std::endl;
+		file << i << '\t' << transNames[i] << '\t' << (dContigToAnno[i+1]-dContigToAnno[i]) << '\t' << dContigLength[i] << std::endl;
 	file.close();	
 	
 	// dump indicator matrices
 	String<int> headerNodes, nodes;
+#ifdef SINGLE_MAT_FILE
+	fileName = prefix;
+	append(fileName, ".mat");
+	file.open(toCString(fileName), ios_base::out | ios_base::binary);
+#endif
 	for (unsigned i = 0; i < length(transToDContig); ++i)
 	{
+		// get and sort all nodes of the locus i
+		clear(headerNodes);
+		double locusCoverage = 0.0;
+		for (unsigned j = 0; j < length(transToDContig[i]); ++j)
+		{
+			unsigned l = transToDContig[i][j];
+			for (int k = dContigToAnno[l]; k < dContigToAnno[l + 1]; ++k)
+			{
+				appendValue(headerNodes, store.annotationStore[k].countId, Generous());
+				locusCoverage += stats.contigStats[back(headerNodes)].i1;
+			}
+		}
+#ifdef OMIT_UNCOVERED_MATS
+		if (locusCoverage == 0.0) continue;
+#endif		
+		std::sort(begin(headerNodes, Standard()), end(headerNodes, Standard()));
+
+#ifdef SINGLE_MAT_FILE
+		if (empty(transToDContig[i])) continue;
+		file << ">" << i << "\tcvrg=" << locusCoverage << std::endl;
+#else
 		std::ostringstream ss;
 		ss.fill('0');
 		ss << prefix << ".mat/" << setw(3) << (i / 1000) << "xxx/" << setw(6) << i << ".mat";
 		
 		file.open(ss.str().c_str(), ios_base::out | ios_base::binary);
-		
-		clear(headerNodes);
-		for (unsigned j = 0; j < length(transToDContig[i]); ++j)
-		{
-			unsigned l = transToDContig[i][j];
-			for (int k = dContigToAnno[l]; k < dContigToAnno[l + 1]; ++k)
-				appendValue(headerNodes, store.annotationStore[k].countId, Generous());
-			std::sort(begin(headerNodes, Standard()), end(headerNodes, Standard()));
-		}
+#endif		
 
 		file << 'T';	
 		for (unsigned j = 0; j < length(headerNodes); ++j)
@@ -752,8 +871,13 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 			}
 			file << std::endl;
 		}
+#ifndef SINGLE_MAT_FILE
 		file.close();
+#endif
 	}
+#ifdef SINGLE_MAT_FILE
+	file.close();
+#endif
 
 	// dump statistics
 	fileName = prefix;
@@ -763,6 +887,25 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 	for (unsigned i = 0; i < length(stats.contigStats); ++i)
 		file << i << '\t' << setprecision(2) << stats.contigStats[i].i1 << '\t' << stats.contigStats[i].i2 << std::endl;
 	file.close();
+	
+	// dump sequencing bias
+	fileName = prefix;
+	append(fileName, ".bias");
+	file << "bin-length\tcoverage" << std::endl;
+	file.open(toCString(fileName), ios_base::out | ios_base::binary);
+	// begin with bin no.2 and always output the same number of coverage points
+	for (unsigned i = 2, s = 1; i < length(bins); ++i)
+		if (bins[i].binLength > 0)
+		{
+			file << bins[i].binLength;
+			for (unsigned j = 0; j < length(bins[i].coverage); j+=s)
+				file << '\t' << bins[i].coverage[j];
+			file << std::endl;
+#ifndef MANY_BINS
+			s<<=1;
+#endif
+		}
+	file.close();	
 
 	// dump all connections with counts
 	fileName = prefix;
@@ -881,6 +1024,12 @@ int main( int argc, const char *argv[] )
 
 	double mean = 0;
 	double sd = 0;
+
+#ifndef MANY_BINS
+	for (unsigned i = 4, l = 16; i < 16; ++i, l<<=1)
+		append(bins, CoverageBin(l));
+#endif
+	
 	disablePairedEnds = isSetLong(parser, "single");
 	getOptionValueLong(parser, "mean", mean);
 	getOptionValueLong(parser, "std", sd);
