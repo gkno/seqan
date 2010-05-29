@@ -205,7 +205,7 @@ inline
 const char *tempFileName() {
     static char fileNameBuffer[100];
 #ifdef PLATFORM_WINDOWS_VS
-    char * fileName = _tempnam(NULL, "SEQAN.");
+    char * fileName = tmpnam(NULL, "SEQAN.");
     if (!fileName) {
         ::std::cerr << "Cannot create a unique temporary filename" << ::std::endl;
         exit(1);
