@@ -260,22 +260,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		SEQAN_CHECKPOINT
 		
 		typedef typename Position<String<THit> >::Type		TPos;
-		typedef String<unsigned long> 						TBuckets;
+		typedef String<TPos>						TBucket;
+		typedef String<TBucket>								TBuckets;
 		typedef typename Position<TBuckets>::Type			TBucketPos;
 		
-		TPos threads = 8;
+		TPos threads = 16;
+		TPos noOfBuckets = 256;
 		
+		TBucket emptyBucket;
+		fill(emptyBucket, noOfBuckets, 0, Exact());
 		TBuckets buckets;
-		fill(buckets, (threads * 256), 0, Exact());
+		fill(buckets, threads, emptyBucket, Exact());
 		
 		TPos partSize = length(unsorted) / threads;
 		for(TPos p = 0; p < threads; ++p){
-			#pragma omp task shared(buckets, unsorted)
+			#pragma omp task shared(buckets, unsorted) if(length(unsorted) > 10)
 			{
 				TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
 				for(TPos i = p*partSize; i < endPos; ++i){
-					TBucketPos bp = toBucket<stage>(unsorted[i].ndlSeqNo) * threads + p;
-					++buckets[bp];
+					++buckets[p][toBucket<stage>(unsorted[i].ndlSeqNo)];
 				}
 			}
 			
@@ -283,24 +286,51 @@ namespace SEQAN_NAMESPACE_MAIN
 		#pragma omp taskwait
 		
 		// Exclusive partial sum
-		TBucketPos sum1 = -1, sum2 = -1;
-		for(TBucketPos i = 0; i < length(buckets); ++i){
-			sum1 += buckets[i];
-			buckets[i] = sum2;
-			sum2 = sum1;
+		TPos sum1 = -1, sum2 = -1;
+		
+		for(TBucketPos i = 0; i < noOfBuckets; ++i){
+			for(TPos p = 0; p < threads; ++p){
+				sum2 += buckets[p][i];
+				buckets[p][i] = sum1;
+				sum1 = sum2;
+			}
 		}
 		
 		for(TPos p = 0; p < threads; ++p){
-			#pragma omp task shared(buckets, sorted, unsorted)
+			#pragma omp task shared(buckets, sorted, unsorted) if(length(unsorted) > 10)
 			{
 				TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
 				for(TPos i = p*partSize; i < endPos; ++i){
-					TBucketPos bp = toBucket<stage>(unsorted[i].ndlSeqNo) * threads + p;
-					sorted[++buckets[bp]] = unsorted[i];
+					sorted[++buckets[p][toBucket<stage>(unsorted[i].ndlSeqNo)]] = unsorted[i];
 				}
 			}
 		}
 		#pragma omp taskwait
+		
+		// // Exclusive partial sum
+		// TPos sum1 = -1, sum2 = -1;
+		// 
+		// for(TBucketPos i = 0; i < noOfBuckets; ++i){
+		// 	for(TPos p = 0; p < threads; ++p){
+		// 		sum2 += buckets[p][i];
+		// 	}
+		// 	buckets[0][i] = sum1;
+		// 	sum1 = sum2;
+		// }
+		// 
+		// for(TPos p = 0; p < threads; ++p){
+		// 	#pragma omp task shared(buckets, sorted, unsorted) if(length(unsorted) > 10)
+		// 	{
+		// 		for(TPos i = 0; i < length(unsorted); ++i){
+		// 			unsigned b = toBucket<stage>(unsorted[i].ndlSeqNo);
+		// 			if(b / threads == p){
+		// 				++buckets[0][b];
+		// 				sorted[buckets[0][b]] = unsorted[i];
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// #pragma omp taskwait
 	}
 
 
@@ -382,7 +412,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			TReadId absReadId = offSet + hits[h].ndlSeqNo;
 			verifier.m.readId = absReadId;
 			
-			matchVerify(verifier, getSwiftRange(hits[h], contigSeq), absReadId, readSet, mode);
+			matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode);
 			// TODO: temp Var
 			// ++options.countFiltration;
 		}
@@ -459,7 +489,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						#pragma omp critical(printf)
 						printf("%d tav: %d\n", blockId, tav[blockId]);
 						
-						if(tav[blockId] == 1 or length(hits) < tav[blockId]){
+						if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
 							verifyHits(verifier[blockId], hits, 0, length(hits),
 								(blockId * options.blockSize), host(swiftFinders[0]), readSet, mode);
 						}
@@ -559,7 +589,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			readID(offSet + other.ndlSeqNo)
 		{
 			typedef typename Infix<TText2>::Type TInfix;
-			TInfix i = swiftInfixNoClip(other, ref);
+			TInfix i = swiftInfix(other, ref);
 			
 			begin = beginPosition(i);
 			end = endPosition(i);
@@ -1008,13 +1038,13 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				
 				// Third: Sort hits.
 				// Get iterators for sorting
-				THitStringIter i1 = begin(hits[0]) + shortestLength;
-				THitStringIter i2 = end(hits[0]);
+				// THitStringIter i1 = begin(hits[0]) + shortestLength;
+				// THitStringIter i2 = end(hits[0]);
 				
 				// TODO: Parallel version of sort.
-				__gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+				// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
 				// std::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
-				// myRadixSort(hits[0]);
+				myRadixSort(hits[0]);
 				
 #ifdef FLEX_TIMER
 				printf("sorting took:%f\n", (sysTime() - myTime));
@@ -1027,15 +1057,15 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				// }
 				
 				// Fourth: Get boundaries at which the hit string is split.
-// 				String<THitStringSize> positions;
-// 				partitionHits(positions, shortestLength, hits[0], options);
-// 				
-// #ifdef FLEX_TIMER
-// 				printf("partitioning took:%f\n", (sysTime() - myTime));
-// #endif
+				String<THitStringSize> positions;
+				partitionHits(positions, shortestLength, hits[0], options);
+				
+#ifdef FLEX_TIMER
+				printf("partitioning took:%f\n", (sysTime() - myTime));
+#endif
 				
 				// Fifth: Verify hits.
-				// verifyHits(positions, shortestLength, hits, verifier, readSet, host(swiftFinders[0]), mode);
+				verifyHits(positions, shortestLength, hits, verifier, readSet, host(swiftFinders[0]), mode);
 				
 				
 				// clear hit strings
