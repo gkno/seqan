@@ -8,6 +8,8 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+// SEQAN_NO_GENERATED_FORWARDS
+
 namespace seqan{
 	namespace util{
 	    unsigned int randomNumber( int upper_bound )

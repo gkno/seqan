@@ -8,6 +8,8 @@
 #ifndef TREEITERATOR_H_
 #define TREEITERATOR_H_
 
+// SEQAN_NO_GENERATED_FORWARDS
+
 namespace seqan{
 
 		/*****************************************************************

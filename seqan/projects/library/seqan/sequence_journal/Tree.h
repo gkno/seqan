@@ -5,6 +5,8 @@
  *      Author: Rene-User
  */
 
+// SEQAN_NO_GENERATED_FORWARDS
+
 #include <seqan.h>
 #include <ostream>
 #include "TreeIterator.h"

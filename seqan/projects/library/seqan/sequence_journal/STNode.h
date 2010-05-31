@@ -5,6 +5,8 @@
  *      Author: Rene-User
  */
 
+// SEQAN_NO_GENERATED_FORWARDS
+
 #include <string> ///maybe?!
 #include <sstream>
 #include <seqan.h>
