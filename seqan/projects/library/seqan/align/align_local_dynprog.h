@@ -794,6 +794,7 @@ SEQAN_CHECKPOINT
 ..signature:localAlignment(align, sw_finder, score, cutoff, tag)
 ..signature:localAlignment(align, sw_finder, score, cutoff, diagLow, diagHigh, tag)
 ..param.align:Alignment object to use.
+...type:Class.Align
 ..param.cutoff:Alignments with scores < cutoff will be discarded.
 ..param.diagLow:The lowest diagonal of the alignment matrix that will be computed for banded alignment.
 ..param.diagHigh:The highest diagonal of the alignment matrix that will be computed for banded alignment.
