@@ -83,7 +83,6 @@ _subtractFromVirtualPositionsRightOf(TNode * node,
                                      typename Position<TNode>::Type const & pos,
                                      typename Position<TNode>::Type const & delta)
 {
-    std::cout << "_subtractFromVirtualPositionsRightOf(" << *node << ", pos=" << pos << ", delta=" << delta << ")" << std::endl;
     SEQAN_CHECKPOINT;
 
     if (node->virtualPosition >= pos) {
@@ -99,10 +98,37 @@ _subtractFromVirtualPositionsRightOf(TNode * node,
 }
 
 
+// Add delta to all nodes with virtual positions right of,
+// respectively >= pos.  Note that this must not make the tree invalid.
+template <typename TNode>
+inline
+void
+_addToVirtualPositionsRightOf(TNode * node,
+                              typename Position<TNode>::Type const & pos,
+                              typename Position<TNode>::Type const & delta)
+{
+    SEQAN_CHECKPOINT;
+
+    if (node->virtualPosition >= pos) {
+        node->virtualPosition += delta;
+        if (node->left != 0)
+            _addToVirtualPositionsRightOf(node->left, pos, delta);
+        if (node->right != 0)
+            _addToVirtualPositionsRightOf(node->right, pos, delta);
+    } else {  // node->virtualPosition < pos
+        if (node->right != 0)
+            _addToVirtualPositionsRightOf(node->right, pos, delta);
+    }
+}
+
+
 template <typename TNode, typename TPos>
 inline
 void
-findNodeWithVirtualPos(TNode * & node, TNode * & parent, JournalTree<TNode, Unbalanced> const & tree, TPos const & pos)
+findNodeWithVirtualPos(TNode * & node,
+                       TNode * & parent,
+                       JournalTree<TNode, Unbalanced> const & tree,
+                       TPos const & pos)
 {
     parent = 0;
     node = tree._root;
@@ -111,6 +137,8 @@ findNodeWithVirtualPos(TNode * & node, TNode * & parent, JournalTree<TNode, Unba
         if ((node->virtualPosition <= pos) && (node->virtualPosition + node->length > pos)) {
             break;
         } else if ((node->virtualPosition + node->length) <= pos) {
+            if (node->right == 0)
+                break;
             TNode * tmp = node;
             node = node->right;
             parent = tmp;
@@ -146,12 +174,10 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
     // Virtual begin and end position of the node.
     TPos nodeBegin = node->virtualPosition;
     TPos nodeEnd = node->virtualPosition + node->length;
-    std::cout << "node begin = " << nodeBegin << ", nodeEnd = " << nodeEnd << std::endl;
 
     // The simple cases are: A prefix or suffix but not all of the node are erased.
     // Otherwise, we have to delete or split the existing node.
     if (nodeBegin == pos && nodeEnd == posEnd) {
-        std::cout << "WHOLE NODE" << std::endl;
         // The whole node is removed.  If there is <= one child, things are
         // simple, otherwise, we replace node with its right child and perform
         // a left-right traversal to find the leaf for which node's left child
@@ -191,30 +217,21 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
         // Actually deallocate node.
         deallocate(tree._nodeAllocator, node, 1);
         // Adjust virtual positions.
-        std::cout << "before subtraction <<<" << tree << ">>>" << std::endl;
         _subtractFromVirtualPositionsRightOf(tree._root, subtractRightOf, posEnd - pos);
-        std::cout << "after subtraction <<<" << tree << ">>>" << std::endl;
     } else if (nodeBegin == pos && nodeEnd > posEnd) {
         // A true prefix is removed, not the whole node.
-        std::cout << "TRUE PREFIX" << std::endl;
         node->length -= posEnd - pos;
         node->physicalPosition += posEnd - pos;
         subtractRightOf = posEnd;  // No need to update this node!
         // Adjust virtual positions.
-        std::cout << "before subtraction <<<" << tree << ">>>" << std::endl;
         _subtractFromVirtualPositionsRightOf(tree._root, subtractRightOf, posEnd - pos);
-        std::cout << "after subtraction <<<" << tree << ">>>" << std::endl;
     } else if (nodeBegin < pos && nodeEnd == posEnd) {
         // A true suffix is removed, not the whole node.
-        std::cout << "TRUE SUFFIX" << std::endl;
         node->length -= posEnd - pos;
         subtractRightOf = posEnd;  // No need to update this node!
         // Adjust virtual positions.
-        std::cout << "before subtraction <<<" << tree << ">>>" << std::endl;
         _subtractFromVirtualPositionsRightOf(tree._root, subtractRightOf, posEnd - pos);
-        std::cout << "after subtraction <<<" << tree << ">>>" << std::endl;
     } else if (nodeBegin < pos && nodeEnd > posEnd) {
-        std::cout << "TRUE INFIX" << std::endl;
         // A true infix of the node is removed.  This node stores the prefix
         // and we do a right-left traversal to place the newly created node.
         TNode * tmp;
@@ -241,22 +258,107 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
         }
         subtractRightOf = node->physicalPosition + prefixLength + deletedInfixLength + 1;
         // Adjust virtual positions.
-        std::cout << "before subtraction <<<" << tree << ">>>" << std::endl;
         _subtractFromVirtualPositionsRightOf(tree._root, subtractRightOf, posEnd - pos);
-        std::cout << "after subtraction <<<" << tree << ">>>" << std::endl;
     } else {
-        std::cout << "RANGE SPANS" << std::endl;
         // The deletion range spans more than this node.  We solve this by
         // calling this function recursively.  First, we delete a suffix of
         // this node (possibly all of it) and then we recursively remove the
         // remaining suffix of [pos, posEnd).
         TSize len = node->length - (pos - node->virtualPosition);
-        std::cout << "recordErase(tree, " << pos << ", " << pos + len << ")" << std::endl;
         recordErase(tree, pos, pos + len);
-        std::cout << "recordErase(tree, " << pos << ", " << posEnd - len << ")" << std::endl;
         recordErase(tree, pos, posEnd - len);
     }
 }
+
+
+template <typename TNode>
+inline
+void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
+                     typename Position<TNode>::Type const & virtualPos,
+                     typename Position<TNode>::Type const & physicalBeginPos,
+                     typename Size<TNode>::Type const & length)
+{
+    typedef typename Position<TNode>::Type TPos;
+    typedef typename Size<TNode>::Type TSize;
+    // TODO(holtgrew): Does this really, really work?
+    TNode * node;
+    TNode * parent;
+    findNodeWithVirtualPos(node, parent, tree, virtualPos);
+    SEQAN_ASSERT_LEQ(node->virtualPosition, virtualPos);
+
+    if (node->virtualPosition + node->length > virtualPos) {
+        // Found node that contains virtualPos.
+        SEQAN_ASSERT_LEQ(node->virtualPosition, virtualPos);
+        if (node->virtualPosition == virtualPos) {
+            // Simple case: Insert left of current.
+            TNode * tmp;
+            allocate(tree._nodeAllocator, tmp, 1);
+            TNode * insertNode = new (tmp) TNode(SOURCE_PATCH, physicalBeginPos, virtualPos, length);
+            _addToVirtualPositionsRightOf(tree._root, virtualPos, length);
+            insertNode->left = node->left;
+            node->left = insertNode;
+        } else {
+            // Harder case: Split current and insert new node.
+            _addToVirtualPositionsRightOf(tree._root, node->virtualPosition + node->length, length);
+            TPos offset = virtualPos - node->virtualPosition;
+            // Create right part of the node.
+            TNode * tmp;
+            allocate(tree._nodeAllocator, tmp, 1);
+            TNode * splitNode = new (tmp) TNode(SOURCE_ORIGINAL, node->physicalPosition + offset, node->virtualPosition + offset + length, node->length - offset);
+            // Current node becomes left part of current node.
+            node->length = offset;
+            // Create insertion node.
+            allocate(tree._nodeAllocator, tmp, 1);
+            TNode * insertNode = new (tmp) TNode(SOURCE_PATCH, physicalBeginPos, virtualPos, length);
+            // Insert into tree...
+            insertNode->left = node;
+            insertNode->right = splitNode;
+            if (parent == 0) {
+                // current is the root node.
+                tree._root = insertNode;
+            } else {
+                if (parent->left == node)
+                    parent->left = insertNode;
+                else
+                    parent->right = insertNode;
+            }
+        }
+    } else {
+        // Returned node with highest virtualPosition but we need to insert
+        // right of it.
+        SEQAN_ASSERT_EQ(node->right, static_cast<TNode *>(0));
+        SEQAN_ASSERT_EQ(node->virtualPosition + node->length, virtualPos);
+        TNode * tmp;
+        allocate(tree._nodeAllocator, tmp, 1);
+        TNode * insertNode = new (tmp) TNode(SOURCE_PATCH, physicalBeginPos, virtualPos, length);
+        node->right = insertNode;
+    }
+}
+
+
+template <typename TNode>
+inline
+TNode const * 
+back(JournalTree<TNode, Unbalanced> const & tree)
+{
+    TNode * current = tree._root;
+    while (current->right != 0)
+        current = current->right;
+    return current;
+}
+
+
+template <typename TNode>
+inline
+TNode const * 
+front(JournalTree<TNode, Unbalanced> const & tree)
+{
+    TNode * current = tree._root;
+    while (current->left != 0)
+        current = current->left;
+    return current;
+}
+
 
 }  // namespace seqan
 

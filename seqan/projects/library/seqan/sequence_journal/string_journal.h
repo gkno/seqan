@@ -59,6 +59,8 @@ public:
     THost _insertionBuffer;
     // The journal is a binary search tree.
     JournalTree<TNode, TJournalSpec> _journalTree;
+    // The journal string's size.
+    TSize _length;
     
 	String() {}
 
@@ -125,30 +127,31 @@ operator<<(TStream & stream, String<TValue, Journal<TStringSpec, TJournalSpec> >
     typedef String<TValue, Journal<TStringSpec, TJournalSpec> > TString;
     typedef typename Position<TString>::Type TPos;
     typedef typename TString::TNode TNode;
-    String<TNode*> nodePointers;
-    appendValue(nodePointers, journalString._journalTree._root);
 
     // Depth-first, in-order traversal of the tree using an explicit stack.
-    while (!empty(nodePointers)) {
-        TNode * current = back(nodePointers);
+    String<TNode*> nodePointers;
+    TNode * current = journalString._journalTree._root;
+    while (true) {
+        while (current) {
+            appendValue(nodePointers, current);
+            current = current->left;
+        }
+
+        // POP - or break.
+        if (empty(nodePointers))
+            break;
+        current = back(nodePointers);
         eraseBack(nodePointers);
 
         if (current->segmentSource == SOURCE_ORIGINAL) {
-            for (TPos i = current->physicalPosition; i < current->physicalPosition + current->length; ++i) {
-                stream << getValue(value(journalString._host), i);
-            }
+            stream << infix(value(journalString._host), current->physicalPosition, current->physicalPosition + current->length);
         } else {
             SEQAN_ASSERT_EQ(current->segmentSource, SOURCE_PATCH);
-            for (TPos i = current->physicalPosition; i < current->physicalPosition + current->length; ++i) {
-                stream << getValue(journalString._insertionBuffer, i);
-            }
+            stream << infix(journalString._insertionBuffer, current->physicalPosition, current->physicalPosition + current->length);
         }
-
-        if (current->left != 0)
-            appendValue(nodePointers, current->left);
-        if (current->right != 0)
-            appendValue(nodePointers, current->right);
+        current = current->right;
     }
+
     return stream;
 }
 
@@ -164,6 +167,7 @@ void setHost(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString
 {
     SEQAN_CHECKPOINT;
     setValue(journalString._host, str);
+    journalString._length = length(str);
     reinit(journalString._journalTree, length(str));
 }
 
@@ -211,6 +215,8 @@ erase(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
       TPos const & posEnd)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GEQ(static_cast<TPos>(journalString._length), posEnd - pos);
+    journalString._length += posEnd - pos;
     recordErase(journalString._journalTree, pos, posEnd);
 }
 
@@ -221,29 +227,121 @@ erase(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
       TPos const & pos)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_GEQ(journalString._length, 1u);
     erase(journalString, pos, pos + 1);
 }
 
-// TODO(holtgrew): erase
-// TODO(holtgrew): insertValue
-// TODO(holtgrew): insert
-// TODO(holtgrew): assignValue
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec, typename TPos, typename TString>
+inline
+void
+insert(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
+       TPos const & pos,
+       TString const & seq)
+{
+    SEQAN_CHECKPOINT;
+    journalString._length += length(seq);
+    TPos beginPos = length(journalString._insertionBuffer);
+    append(journalString._insertionBuffer, seq);
+    recordInsertion(journalString._journalTree, pos, beginPos, length(seq));
+}
+
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec, typename TPos>
+inline
+void
+insertValue(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
+            TPos const & pos,
+            TValue const & value)
+{
+    SEQAN_CHECKPOINT;
+    TPos beginPos = length(journalString._insertionBuffer);
+    appendValue(journalString._insertionBuffer, value);
+    recordInsertion(journalString._journalTree, pos, beginPos, 1u);
+}
+
+
+template <typename TValue, typename TStringSpec, typename TJournalSpec, typename TPos, typename TString>
+inline
+void
+assignInfix(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
+            TPos const & beginPos,
+            TPos const & endPos,
+            TString const & valueString)
+{
+    SEQAN_CHECKPOINT;
+    erase(journalString, beginPos, endPos);
+    insert(journalString, beginPos, valueString);
+}
+
+
+template <typename TValue, typename TStringSpec, typename TJournalSpec, typename TPos>
+inline
+void
+assignValue(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
+            TPos const & pos,
+            TValue const & value)
+{
+    erase(journalString, pos);
+    insertValue(journalString, pos, value);
+}
+
+
 // TODO(holtgrew): Batch-Assignment of values through segments?
 
-// TODO(holtgrew): back
 // TODO(holtgrew): begin
 // TODO(holtgrew): empty
 // TODO(holtgrew): end
+// TODO(holtgrew): flatten
 // TODO(holtgrew): fill
-// TODO(holtgrew): front
 // TODO(holtgrew): getValue
 // TODO(holtgrew): infix
 // TODO(holtgrew): infixWithLength
 // TODO(holtgrew): iter
-// TODO(holtgrew): length
-// TODO(holtgrew): prefix
-// TODO(holtgrew): resize
-// TODO(holtgrew): suffix
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+inline
+TValue const &
+front(String<TValue, Journal<TStringSpec, TJournalSpec> > const & journalString)
+{
+    typedef String<TValue, Journal<TStringSpec, TJournalSpec> > TString;
+    typedef typename TString::TNode TNode;
+    TNode frontNode = front(journalString._journalTree);
+    if (frontNode->segmentSource == SOURCE_ORIGINAL) {
+        return getValue(value(journalString._host), frontNode->virtualPosition + frontNode->length - 1);
+    } else {
+        SEQAN_ASSERT_EQ(frontNode->segmentSource, SOURCE_PATCH);
+        return getValue(journalString._insertionBuffer, frontNode->virtualPosition + frontNode->length - 1);
+    }
+}
+
+/* front/back clash with general sequence definitions.
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+inline
+TValue const &
+back(String<TValue, Journal<TStringSpec, TJournalSpec> > const & journalString)
+{
+    typedef String<TValue, Journal<TStringSpec, TJournalSpec> > TString;
+    typedef typename TString::TNode TNode;
+    TNode backNode = back(journalString._journalTree);
+    if (backNode->segmentSource == SOURCE_ORIGINAL) {
+        return getValue(value(journalString._host), backNode->virtualPosition + backNode->length - 1);
+    } else {
+        SEQAN_ASSERT_EQ(backNode->segmentSource, SOURCE_PATCH);
+        return getValue(journalString._insertionBuffer, backNode->virtualPosition + backNode->length - 1);
+    }
+}
+*/
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+inline
+typename Size<String<TValue, Journal<TStringSpec, TJournalSpec> > >::Type
+length(String<TValue, Journal<TStringSpec, TJournalSpec> > const & journalString)
+{
+    return journalString._length;
+}
+
+
 // TODO(holtgrew): toCString
 // TODO(holtgrew): value
 
