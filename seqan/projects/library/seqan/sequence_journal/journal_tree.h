@@ -51,13 +51,44 @@ class JournalTree<_TNode, Unbalanced>
 // Functions
 // ============================================================================
 
+
+template <typename TNode>
+bool checkVirtualPositionsRec(TNode * const & node, unsigned & virtualPosition)
+{
+    if (node == 0)
+        return true;
+    bool res = true;
+    if (node->left)
+        res = res && checkVirtualPositionsRec(node->left, virtualPosition);
+    if (node->virtualPosition != virtualPosition) {
+        res = false;
+//         std::cerr << "ERROR at " << *node << ", virtualPosition should be " << virtualPosition << std::endl;
+    }
+//     std::cerr << *node << std::endl;
+//     std::cerr << "virtualPosition += " << node->length << std::endl;
+    virtualPosition += node->length;
+    if (node->right)
+        res = res && checkVirtualPositionsRec(node->right, virtualPosition);
+    return res;
+}
+
+template <typename TNode>
+bool checkVirtualPositions(TNode * const & node)
+{
+    unsigned virtualPosition = 0;
+    return checkVirtualPositionsRec(node, virtualPosition);
+}
+
 template <typename TStream, typename TNode, typename TTreeSpec>
 inline
 TStream &
 operator<<(TStream & stream, JournalTree<TNode, TTreeSpec> const & tree)
 {
     SEQAN_CHECKPOINT;
-    return stream << "JournalTree(" << value(tree._root) << ")";
+    if (tree._root != 0)
+        return stream << "JournalTree(" << value(tree._root) << ")";
+    else
+        return stream << "JournalTree()";
 }
 
 template <typename TNode>
@@ -162,7 +193,19 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
     SEQAN_CHECKPOINT;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
-    // TODO(holtgrew): Guard against removing the root node.
+
+    // Handle special case of removing all of the root node.
+    if (tree._root->left == 0 && tree._root->right == 0 && pos == 0 && posEnd == tree._root->length) {
+        tree._root = 0;
+        clear(tree._nodeAllocator);
+        return;
+    }
+    // Handle case of an empty journal tree.
+    if (tree._root == 0) {
+        SEQAN_ASSERT_EQ(pos, 0u);
+        SEQAN_ASSERT_EQ(posEnd, 0u);
+        return;
+    }
 
     // Find node with virtual position pos.
     TNode * node = 0;
@@ -186,23 +229,38 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
         TNode * right = node->right;
         if (left == 0) {
             // Replace parent's pointer.
-            if (parent->left == node)
-                parent->left = node->right;
-            else
-                parent->right = node->right;
-        } else {
-            if (right == 0) {
-                // left != 0 && right == 0
+            if (parent == 0) {
+                // Node was root.
+                tree._root = node->right;
+            } else {
+                // Node was not root.
                 if (parent->left == node)
-                    parent->left = node->left;
+                    parent->left = node->right;
                 else
-                    parent->right = node->left;
+                    parent->right = node->right;
+            }
+        } else {
+            if (right == 0) { // left != 0 && right == 0
+                if (parent == 0) {
+                    // Node was root.
+                    tree._root = node->left;
+                } else {
+                    // Node was not root.
+                    if (parent->left == node)
+                        parent->left = node->left;
+                    else
+                        parent->right = node->left;
+                }
             } else {
                 // left != 0 && right != 0
-                if (parent->left == node) {
-                    parent->left = node->right;
+                if (parent == 0) {
+                    tree._root = node->right;
                 } else {
-                    parent->right = node->right;
+                    if (parent->left == node) {
+                        parent->left = node->right;
+                    } else {
+                        parent->right = node->right;
+                    }
                 }
                 TNode * tmp = node->right->left;
                 node->right->left = node->left;
@@ -256,7 +314,7 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
                 current = current->left;
             current->left = suffixNode;
         }
-        subtractRightOf = node->physicalPosition + prefixLength + deletedInfixLength + 1;
+        subtractRightOf = node->virtualPosition + prefixLength + deletedInfixLength + 1;
         // Adjust virtual positions.
         _subtractFromVirtualPositionsRightOf(tree._root, subtractRightOf, posEnd - pos);
     } else {
@@ -268,6 +326,10 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
         recordErase(tree, pos, pos + len);
         recordErase(tree, pos, posEnd - len);
     }
+//     unsigned nextId = mtRand();
+//     journalTreeToDot(std::cerr, nextId, tree);
+//     std::cout << tree << std::endl;
+    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
 }
 
 
@@ -280,6 +342,18 @@ void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
 {
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
+
+    // Handle special case of empty tree.
+    if (tree._root == 0) {
+        SEQAN_ASSERT_EQ(virtualPos, 0u);
+        if (length == 0)
+            return;
+        TNode * tmp;
+        allocate(tree._nodeAllocator, tmp, 1);
+        tree._root = new (tmp) TNode(SOURCE_PATCH, physicalBeginPos, virtualPos, length);
+        return;
+    }
+    
     // TODO(holtgrew): Does this really, really work?
     TNode * node;
     TNode * parent;
@@ -304,7 +378,7 @@ void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
             // Create right part of the node.
             TNode * tmp;
             allocate(tree._nodeAllocator, tmp, 1);
-            TNode * splitNode = new (tmp) TNode(SOURCE_ORIGINAL, node->physicalPosition + offset, node->virtualPosition + offset + length, node->length - offset);
+            TNode * splitNode = new (tmp) TNode(node->segmentSource, node->physicalPosition + offset, node->virtualPosition + offset + length, node->length - offset);
             // Current node becomes left part of current node.
             node->length = offset;
             // Create insertion node.
@@ -313,6 +387,8 @@ void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
             // Insert into tree...
             insertNode->left = node;
             insertNode->right = splitNode;
+            splitNode->right = node->right;
+            node->right = 0;
             if (parent == 0) {
                 // current is the root node.
                 tree._root = insertNode;
@@ -333,6 +409,10 @@ void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
         TNode * insertNode = new (tmp) TNode(SOURCE_PATCH, physicalBeginPos, virtualPos, length);
         node->right = insertNode;
     }
+//     unsigned nextId = mtRand();
+//     journalTreeToDot(std::cerr, nextId, tree);
+//     std::cout << tree << std::endl;
+    SEQAN_ASSERT_TRUE(checkVirtualPositions(tree._root));
 }
 
 
@@ -358,6 +438,34 @@ front(JournalTree<TNode, Unbalanced> const & tree)
         current = current->left;
     return current;
 }
+
+
+template <typename TStream, typename TNode>
+void journalTreeToDotRec(TStream & stream, unsigned & nextId, TNode const & node)
+{
+    unsigned currentId = nextId;
+    nextId += 1;
+    stream << "  node_" << currentId << "[label=\"source=" << node.segmentSource << ", vpos=" << node.virtualPosition << ", phpos=" << node.physicalPosition << ", len=" << node.length << "\"]" << std::endl;
+    if (node.left != 0) {
+        stream << "  node_" << currentId << " -> node_" << nextId << "[label=\"L\"]" << std::endl;
+        journalTreeToDotRec(stream, nextId, *(node.left));
+        nextId += 1;
+    }
+    if (node.right != 0) {
+        stream << "  node_" << currentId << " -> node_" << nextId << "[label=\"R\"]" << std::endl;
+        journalTreeToDotRec(stream, nextId, *(node.right));
+        nextId += 1;
+    }
+}
+
+
+template <typename TStream, typename TNode>
+void journalTreeToDot(TStream & stream, unsigned & nextId, JournalTree<TNode, Unbalanced> const & journalTree)
+{
+    stream << "ROOTPTR" << nextId << " -> node_" << nextId << std::endl;
+    journalTreeToDotRec(stream, nextId, *journalTree._root);
+}
+
 
 
 }  // namespace seqan

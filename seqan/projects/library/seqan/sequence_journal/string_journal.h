@@ -144,9 +144,11 @@ operator<<(TStream & stream, String<TValue, Journal<TStringSpec, TJournalSpec> >
         eraseBack(nodePointers);
 
         if (current->segmentSource == SOURCE_ORIGINAL) {
+//             stream << "((" << infix(value(journalString._host), current->physicalPosition, current->physicalPosition + current->length) << "))";
             stream << infix(value(journalString._host), current->physicalPosition, current->physicalPosition + current->length);
         } else {
             SEQAN_ASSERT_EQ(current->segmentSource, SOURCE_PATCH);
+//             stream << "((" << infix(journalString._insertionBuffer, current->physicalPosition, current->physicalPosition + current->length) << "))";
             stream << infix(journalString._insertionBuffer, current->physicalPosition, current->physicalPosition + current->length);
         }
         current = current->right;
@@ -218,6 +220,8 @@ erase(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
     SEQAN_ASSERT_GEQ(static_cast<TPos>(journalString._length), posEnd - pos);
     journalString._length += posEnd - pos;
     recordErase(journalString._journalTree, pos, posEnd);
+    if (length(journalString) == 0)
+        clear(journalString._insertionBuffer);
 }
 
 template<typename TValue, typename TStringSpec, typename TJournalSpec, typename TPos>
