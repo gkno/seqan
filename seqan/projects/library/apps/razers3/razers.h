@@ -174,7 +174,7 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef RAZERS_PARALLEL_READS
         unsigned	windowSize;
 		unsigned	numberOfCores;
-        unsigned	blocksPerCore;
+        double		blocksPerCore;
 		unsigned	numberOfBlocks;
 		unsigned	blockSize;
 		unsigned	accuracy;
@@ -258,7 +258,7 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
 #endif
-            blocksPerCore = 1;
+			blocksPerCore = 1.0;
 			numberOfBlocks = numberOfCores * blocksPerCore;
 			blockSize = 0;
 			accuracy = 200;

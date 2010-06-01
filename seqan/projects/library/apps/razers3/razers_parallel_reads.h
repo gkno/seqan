@@ -395,6 +395,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TReadId,
 		typename TContigSeq,
 		typename TReadSet,
+		typename TRazerSOptions,
 		typename TRazerSMode>
 	inline void verifyHits(
 			TVerifier									& verifier,
@@ -404,18 +405,26 @@ namespace SEQAN_NAMESPACE_MAIN
 			TReadId const								  offSet,
 			TContigSeq									& contigSeq,
 			TReadSet									& readSet,
+			TRazerSOptions								& options,
 			TRazerSMode									& mode)
 	{
 		typedef typename Position<THitString>::Type		THitStringPos;
+		
+		__int64 verified = 0;
 		
 		for(THitStringPos h = startPos; h < endPos; ++h){
 			TReadId absReadId = offSet + hits[h].ndlSeqNo;
 			verifier.m.readId = absReadId;
 			
-			matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode);
-			// TODO: temp Var
-			// ++options.countFiltration;
+			if(matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode))
+				++verified;
 		}
+		
+		#pragma omp atomic
+		options.countFiltration += length(hits);
+		#pragma omp atomic
+		options.countVerification += verified;
+		
 	}
 
 	template <
@@ -491,7 +500,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						
 						if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
 							verifyHits(verifier[blockId], hits, 0, length(hits),
-								(blockId * options.blockSize), host(swiftFinders[0]), readSet, mode);
+								(blockId * options.blockSize), host(swiftFinders[0]), readSet, options, mode);
 						}
 						else {
 							// sort
@@ -514,7 +523,7 @@ namespace SEQAN_NAMESPACE_MAIN
 									int absVerifyId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
 									
 									verifyHits(verifier[absVerifyId], hits, positions[relId], positions[relId + 1],
-										(blockId * options.blockSize), contigSeq, readSet, mode);
+										(blockId * options.blockSize), contigSeq, readSet, options, mode);
 								}
 							}
 							#pragma omp taskwait
@@ -1041,7 +1050,6 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				// THitStringIter i1 = begin(hits[0]) + shortestLength;
 				// THitStringIter i2 = end(hits[0]);
 				
-				// TODO: Parallel version of sort.
 				// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
 				// std::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
 				myRadixSort(hits[0]);
@@ -1178,12 +1186,12 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		// Create a verifier for each thread. This way each thread gets its own store to dump the matches in.
 		// As consequence the dumping does not need to be critical
 		String<TVerifier> verifier;
-		resize(verifier, options.numberOfCores, Exact());
+		resize(verifier, options.numberOfBlocks, Exact());
 		
 		// A temporary store for every block. They are emptied after each verification step
 		String<TFragmentStore> threadStores;
-		resize(threadStores, options.numberOfCores , Exact());
-		for(int threadId = 0; threadId < (int)options.numberOfCores; ++threadId){
+		resize(threadStores, options.numberOfBlocks, Exact());
+		for(int threadId = 0; threadId < (int)options.numberOfBlocks; ++threadId){
 			// initialize verifier
 			TVerifier oneVerifier(threadStores[threadId], options, preprocessing, swiftPatternHandler, cnts);
 			oneVerifier.onReverseComplement = (orientation == 'R');

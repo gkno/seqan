@@ -333,7 +333,7 @@ int main(int argc, const char *argv[])
 	addSection(parser, "Parallel Options:");
     addOption(parser, CommandLineOption("ws", "window-size",       "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("nc", "number-of-cores",   "set the number of cores that is available (this many threads will be started)", OptionType::Int | OptionType::Label, options.numberOfCores));
-    addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Int | OptionType::Label, options.blocksPerCore));
+    addOption(parser, CommandLineOption("bt", "blocks-per-thread", "set the number of blocks per thread in which the reads are split up", OptionType::Double | OptionType::Label, options.blocksPerCore));
 	addOption(parser, CommandLineOption("ac", "accuracy",          "the accuracy with which the hits are sorted in the parallel version", OptionType::Int | OptionType::Label, options.accuracy));
 	addOption(parser, CommandLineOption("cl", "collect",           "number of hits that is collected before the verification in triggered", OptionType::Int | OptionType::Label, options.collect));
 	addOption(parser, CommandLineOption("sp", "split",             "number of hits that need to be left in a block to trigger splitting", OptionType::Int | OptionType::Label, options.splitThreshold));
