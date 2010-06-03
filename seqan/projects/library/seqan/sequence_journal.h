@@ -37,16 +37,16 @@
 #include <seqan/sequence_journal/sequence_journal_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-//#include <seqan/sequence_journal/sequence_journal_generated_forwards.h>
+#include <seqan/sequence_journal/sequence_journal_generated_forwards.h>
 #endif
 
 //____________________________________________________________________________
 // Journaled Sequences.
 
-#include <seqan/sequence_journal/journal_tree_node.h>
-#include <seqan/sequence_journal/journal_tree.h>
-#include <seqan/sequence_journal/journal_tree_iterator.h>
-#include <seqan/sequence_journal/string_journal.h>
+#include <seqan/sequence_journal/journal_tree_unordered_node.h>
+#include <seqan/sequence_journal/journal_tree_unordered.h>
+#include <seqan/sequence_journal/journal_tree_unordered_iterator.h>
+#include <seqan/sequence_journal/sequence_journal.h>
 #include <seqan/sequence_journal/sequence_journal_iterator.h>
 
 //____________________________________________________________________________

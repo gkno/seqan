@@ -17,8 +17,8 @@
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_ITERATOR_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_ITERATOR_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_ITERATOR_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_ITERATOR_H_
 
 namespace seqan {
 
@@ -62,9 +62,9 @@ public:
             : _currentNode(other._currentNode),
               _iterationDirection(other._iterationDirection)
     { SEQAN_CHECKPOINT; }
-   
+
     explicit
-    Iter(JournalTree<TNode, Unbalanced> & tree)
+    Iter(TJournalTree & tree)
     {
         SEQAN_CHECKPOINT;
         _initJournalTreeIterator(*this, tree);
@@ -131,7 +131,7 @@ typename Iterator<JournalTree<TNode, TTreeSpec> const, Standard>::Type
 end(JournalTree<TNode, TTreeSpec> const & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef Iter<JournalTree<TNode, TTreeSpec>, JournalTreeIterSpec<Unbalanced> > TIterator;
+    typedef typename Iterator<JournalTree<TNode, TTreeSpec> const, Standard>::Type TIterator;
     TIterator result;
     result._currentNode = journalTree._root;
     result._iterationDirection = DIRECTION_UP_RIGHT;
@@ -173,7 +173,7 @@ template <typename TJournalTree>
 inline
 void
 setValue(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
-         typename TJournalTree::TNode * & value)
+         typename TJournalTree::TNode * const & value)
 {
     SEQAN_CHECKPOINT;
     iterator._currentNode = value;
@@ -362,4 +362,4 @@ operator!=(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_ITERATOR_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_UNORDERED_TREE_ITERATOR_H_

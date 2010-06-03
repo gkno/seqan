@@ -1,5 +1,5 @@
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_
 
 namespace seqan {
 
@@ -602,4 +602,4 @@ void journalTreeToDot(TStream & stream, unsigned & nextId, JournalTree<TNode, Un
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_

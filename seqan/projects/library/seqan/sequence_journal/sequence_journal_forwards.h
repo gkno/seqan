@@ -17,8 +17,8 @@
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
-#define SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_FORWARDS_H_
+#define SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_FORWARDS_H_
 
 namespace seqan {
 

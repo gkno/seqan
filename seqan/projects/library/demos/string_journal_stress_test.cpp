@@ -44,10 +44,10 @@ int main(int, char **)
 //     std::cout << "reference = " << string << std::endl;
 //     std::cout << "host = " << host << std::endl;
 
-    typedef String<char, Journal<Alloc<>, Unbalanced> > TJournalString;
-    
+    typedef SequenceJournal<String<char>, Unbalanced> TSequenceJournal;
+
     // Construct sequence journal on host.
-    TJournalString sequenceJournal(host);
+    TSequenceJournal sequenceJournal(host);
 
 //     unsigned nextId = 0;
 //     std::cerr << "digraph {" << std::endl;
@@ -66,7 +66,7 @@ int main(int, char **)
     }
 
     size_t expectedLength = length(string);
-    
+
     for (unsigned i = 0; i < NUM_CHANGES; ++i) {
         std::cout << "i == " << i << std::endl;
         unsigned changeType = mtRand() % 3;
@@ -155,7 +155,7 @@ int main(int, char **)
             // Check via iterator on the journal string.
             std::string buffer;
             reserve(buffer, length(sequenceJournal));
-            typedef Iterator<TJournalString, Standard>::Type TIterator;
+            typedef Iterator<TSequenceJournal, Standard>::Type TIterator;
 //             std::cout << sequenceJournal._journalTree << std::endl;
             for (TIterator it = begin(sequenceJournal), itend = end(sequenceJournal, Standard()); it != itend; ++it) {
                 appendValue(buffer, *it);
@@ -167,10 +167,10 @@ int main(int, char **)
 
         {
             // Check operator+ and operator+= on sequence journal iterators;
-            typedef Iterator<TJournalString, Standard>::Type TJournalStringIterator;
+            typedef Iterator<TSequenceJournal, Standard>::Type TSequenceJournalIterator;
             typedef Iterator<String<char>, Standard>::Type TCharStringIterator;
 
-            TJournalStringIterator sjIt = begin(sequenceJournal);
+            TSequenceJournalIterator sjIt = begin(sequenceJournal);
             TCharStringIterator csIt = begin(string);
             size_t remaining = length(sequenceJournal);
 
@@ -189,6 +189,6 @@ int main(int, char **)
     }
 
 //     std::cerr << "}" << std::endl;
-    
+
     return 0;
 }

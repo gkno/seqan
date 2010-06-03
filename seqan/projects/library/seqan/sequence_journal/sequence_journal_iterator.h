@@ -34,7 +34,6 @@ class Iter<TJournalString, JournalStringIterSpec>
 public:
     typedef Iter<TJournalString, JournalStringIterSpec> TIterator;
     typedef typename TJournalString::TValue TValue;
-    typedef typename TJournalString::TStringSpec TStringSpec;
     typedef typename TJournalString::TJournalSpec TJournalSpec;
     typedef typename TJournalString::TJournalTree TJournalTree;
     typedef typename Iterator<TJournalTree, Standard>::Type TJournalTreeIterator;
@@ -95,22 +94,22 @@ public:
 // Metafunctions
 // ============================================================================
 
-// For String<TValue, Journal<TStringSpec, TJournalSpec> >
+// For SequenceJournal<TSequence, Journal<TJournalSpec> >
 
 /**
 .Metafunction.Iterator:
 ..param.TValue:Spec.Journal String
  */
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
-struct Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> >, Standard>
+template <typename TSequence, typename TJournalSpec>
+struct Iterator<SequenceJournal<TSequence, TJournalSpec>, Standard>
 {
-    typedef Iter<String<TValue, Journal<TStringSpec, TJournalSpec> >, JournalStringIterSpec> Type;
+    typedef Iter<SequenceJournal<TSequence, TJournalSpec>, JournalStringIterSpec> Type;
 };
 
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
-struct Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Standard>
+template <typename TSequence, typename TJournalSpec>
+struct Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>
 {
-    typedef Iter<String<TValue, Journal<TStringSpec, TJournalSpec> > const, JournalStringIterSpec> Type;
+    typedef Iter<SequenceJournal<TSequence, TJournalSpec> const, JournalStringIterSpec> Type;
 };
 
 // For Iter<TJournalString, JournalStringIterSpec>
@@ -119,47 +118,47 @@ struct Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Stand
 // Functions
 // ============================================================================
 
-// For String<TValue, Journal<TStringSpec, TJournalSpec> >
+// For SequenceJournal<TSequence, TJournalSpec>
 
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
-typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Standard>::Type
-begin(String<TValue, Journal<TStringSpec, TJournalSpec> > const & journalString, Standard const &)
+typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type
+begin(SequenceJournal<TSequence, TJournalSpec> const & journalString, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Standard>::Type TResult;
+    typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type TResult;
     return TResult(journalString);
 }
 
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
-typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> >, Standard>::Type
-begin(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString, Standard const &)
+typename Iterator<SequenceJournal<TSequence, TJournalSpec>, Standard>::Type
+begin(SequenceJournal<TSequence, TJournalSpec> & journalString, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> >, Standard>::Type TResult;
+    typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec>, Standard>::Type TResult;
     return TResult(journalString);
 }
 
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
-typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Standard>::Type
-end(String<TValue, Journal<TStringSpec, TJournalSpec> > const & journalString, Standard const &)
+typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type
+end(SequenceJournal<TSequence, TJournalSpec> const & journalString, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> > const, Standard>::Type TResult;
+    typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type TResult;
     TResult result;
     _initJournalStringIteratorEnd(result, journalString);
     return result;
 }
 
-template <typename TValue, typename TStringSpec, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
-typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> >, Standard>::Type
-end(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString, Standard const &)
+typename Iterator<SequenceJournal<TSequence, TJournalSpec>, Standard>::Type
+end(SequenceJournal<TSequence, TJournalSpec> & journalString, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Iterator<String<TValue, Journal<TStringSpec, TJournalSpec> >, Standard>::Type TResult;
+    typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec>, Standard>::Type TResult;
     TResult result;
     _initJournalStringIteratorEnd(result, journalString);
     return result;
