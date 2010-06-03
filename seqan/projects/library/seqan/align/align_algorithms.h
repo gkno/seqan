@@ -39,6 +39,7 @@ _align_trace_print(_Align_Traceback<TSize> & tb,
 				   TPos const segLen,
 				   TTraceValue const tv)
 {
+SEQAN_CHECKPOINT
 	appendValue(tb.sizes, segLen);
 	appendValue(tb.tvs, tv);
 }
@@ -46,12 +47,12 @@ _align_trace_print(_Align_Traceback<TSize> & tb,
 //////////////////////////////////////////////////////////////////////////////
 // _pump_trace_2_Align: build alignment accoring to the traceback stored in trace
 // note that the traceback in trace is "reverse" (from back to front)
-
 template <typename TSource, typename TSpec, typename TTrace> 
 void
 _pump_trace_2_Align(Align<TSource, TSpec> & align_,
 					TTrace trace)
 {
+SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Size<TAlign>::Type TSize;
 
@@ -83,6 +84,100 @@ _pump_trace_2_Align(Align<TSource, TSpec> & align_,
 	}
 }
 
+/**
+.Function.integrateAlign:
+..summary:Integrates an alignment into another by copying the gaps.
+..cat:Alignments
+...type:Class.Align
+..signature:integrateAlign(align1, align2[, positions])
+..param.align1:Alignment object into which align2 is to be integrated.
+...type:Class.Align
+..param.align2:Alignment object that is to be integrated into align1.
+...type:Class.Align
+..param.positions:The integration positions in align1 for all rows (view positions).
+...type:Class.String
+..remarks:If the integration positions are not specified, the Source type of align2 has to be an @Metafunction.Infix@ type.
+ */
+template <typename TSource1, typename TSpec1, typename TSource2, typename TSpec2, typename TPos> 
+void
+integrateAlign(Align<TSource1, TSpec1> & align,
+			   Align<TSource2, TSpec2> & infixAlign,
+			   String<TPos> viewPos) {
+SEQAN_CHECKPOINT
+	typedef Align<TSource1, TSpec1> TAlign;
+	typedef Align<TSource2, TSpec2> TInfixAlign;
+	typedef typename Size<TAlign>::Type TSize;
+	TSize maxLen = 0;
+
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Row<TInfixAlign>::Type TInfixRow;
+	TInfixRow infixRow;
+
+	// iterators on align and infixAlign
+	typename Iterator<TRow>::Type it;
+	typename Iterator<TInfixRow>::Type infixIt, infixEnd;
+	
+	for (TSize i = 0; i < length(rows(align)); ++i) {
+		infixRow = row(infixAlign, i);
+
+		// init iterators
+		it = iter(row(align, i), value(viewPos, i));
+		infixIt = begin(infixRow);
+		infixEnd = end(infixRow);
+		
+		// insert leading gaps
+		if (beginPosition(infixRow) != 0) {
+			insertGaps(it, beginPosition(infixRow));
+			goFurther(it, beginPosition(infixRow));
+		}
+
+		// walk through Gaps containers and copy gaps
+		while (infixIt != infixEnd) {
+			TSize gapSize = countGaps(infixIt);
+			if (gapSize != 0) {
+				insertGaps(it, gapSize);
+			}
+			goFurther(it, gapSize+1);
+			goFurther(infixIt, gapSize+1);
+		}
+
+		// find longest row
+		if (maxLen < endPosition(infixRow)) {
+			maxLen = endPosition(infixRow);
+		}
+	}
+
+	// insert trailing gaps
+	for (TSize i = 0; i < length(rows(align)); ++i) {
+		infixRow = row(infixAlign, i);
+		TSize diffLen = maxLen - endPosition(infixRow);
+		if (diffLen > 0) {
+			insertGaps(iter(row(align, i), value(viewPos, i) + endPosition(infixRow)), diffLen);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource1, typename TSpec1, typename TSource2, typename TSpec2> 
+void
+integrateAlign(Align<TSource1, TSpec1> & align,
+			   Align<typename Infix<TSource2>::Type, TSpec2> & infixAlign) {
+SEQAN_CHECKPOINT
+	typedef typename Size<TSource>::Type TSize;
+	typedef typename Position<typename Row<Align<TSource, TSpec1> >::Type>::Type TPos;
+
+	String<TPos> viewPos;
+	TPos pos;
+	for (TSize i = 0; i < length(rows(infixAlign)); ++i) {
+		pos = beginPosition(source(row(infixAlign, i))) + sourceBeginPosition(row(infixAlign, i));
+		appendValue(viewPos, toViewPosition(row(align, i), pos));
+	}
+
+	integrateAlign(align, infixAlign, viewPos);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // globalAlignment Interface
 
@@ -94,6 +189,7 @@ TScoreValue
 globalAlignment(TAlign & align_,
 				Score<TScoreValue, TScoreSpec> const & score_)
 {
+SEQAN_CHECKPOINT
 	if (scoreGapOpen(score_)==scoreGapExtend(score_))
 	{//linear gap costs
 		return globalAlignment(align_, score_, NeedlemanWunsch());
