@@ -1,3 +1,23 @@
+ /*==========================================================================
+                     SwiftLocal - Fast Local Alignment
+
+ ============================================================================
+  Copyright (C) 2010 by Birte Kehr
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your options) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ==========================================================================*/
+
 #define SEQAN_PROFILE
 
 #include <iostream>
@@ -27,7 +47,8 @@ _getCigarLine(TAlign const & align, TString & cigar, TString & mutations) {
 		int matched = 0;
 		int inserted = 0;
 		int deleted = 0;
-		while (dbPos != dbEndPos && queryPos != queryEndPos && !isGap(row(align, 0), dbPos) && !isGap(row(align, 1), queryPos)) {
+		while (dbPos != dbEndPos && queryPos != queryEndPos &&
+               !isGap(row(align, 0), dbPos) && !isGap(row(align, 1), queryPos)) {
             ++readPos;
 			if (value(row(align, 0), dbPos) != value(row(align, 1), queryPos)) {
 				if (first) first = false;
@@ -93,6 +114,9 @@ _writeGffLine(TId const & databaseID,
               bool const databaseStrand,
               TAlign const & match,
               TFile & file) {
+	typedef typename Row<TAlign>::Type TRow;
+	TRow row0 = row(match, 0);
+	TRow row1 = row(match, 1);
     
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
@@ -102,13 +126,15 @@ _writeGffLine(TId const & databaseID,
     file << "\teps-matches";
 
     if (databaseStrand) {
-        file << "\t" << toSourcePosition(row(match, 0), beginPosition(row(match, 0))) + beginPosition(source(row(match, 0))) + 1;
-        file << "\t" << toSourcePosition(row(match, 0), endPosition(row(match, 0))) + beginPosition(source(row(match, 0)));
+        file << "\t" << 
+			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)) + 1;
+        file << "\t" << 
+			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
     } else {
-        file << "\t" << length(host(source(row(match, 0)))) - 
-            (toSourcePosition(row(match, 0), endPosition(row(match, 0))) + beginPosition(source(row(match, 0)))) + 1;
-        file << "\t" << length(host(source(row(match, 0)))) - 
-            (toSourcePosition(row(match, 0), beginPosition(row(match, 0))) + beginPosition(source(row(match, 0))));
+        file << "\t" << length(source(row0)) - 
+            (toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0))) + 1;
+        file << "\t" << length(source(row0)) - 
+            (toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)));
     }
 
     file << "\t" << _calculateIdentity(match);
@@ -120,14 +146,47 @@ _writeGffLine(TId const & databaseID,
         file << value(patternID, i);
     }
 
-    file << ";seq2Range=" << toSourcePosition(row(match, 1), beginPosition(row(match, 1))) + beginPosition(source(row(match, 1))) + 1;
-    file << "," << toSourcePosition(row(match, 1), endPosition(row(match, 1))) + beginPosition(source(row(match, 1)));
+    file << ";seq2Range=" << 
+		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1)) + 1;
+    file << "," << 
+		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
 
     std::stringstream cigar, mutations;
     _getCigarLine(match, cigar, mutations);
     file << ";cigar=" << cigar.str();
     file << ";mutations=" << mutations.str();
     file << "\n";
+}
+
+template<typename TAlign, typename TStrand, typename TFile>
+void
+_writeMatch(TAlign & match,
+			TStrand databaseStrand,
+			TFile & aliFile) {
+	typedef typename Row<TAlign>::Type TRow;
+	TRow row0 = row(match, 0);
+	TRow row1 = row(match, 1);
+
+	// write database positions
+	if (databaseStrand) {
+		aliFile << "< " <<
+			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
+		aliFile << " , " << 
+			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+	} else {
+		aliFile << "< " << length(source(row0)) - 
+			toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0));
+		aliFile << " , " << length(source(row0)) -
+			toSourcePosition(row0, endPosition(row0)) + beginPosition(source(row0));
+	}
+	// write query positions
+	aliFile << " >< " << 
+		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1));
+	aliFile << " , " << 
+		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1)) << " >\n";
+
+	// write match
+	aliFile << match;
 }
 
 template<typename TInfix, typename TNumber, typename TId, typename TIds, typename TFile>
@@ -158,17 +217,12 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
         for (TSize j = 0; j < length(value(matches, i)); j++) {
             Align<TInfix> m = value(value(matches, i), j);
 
-            aliFile << "< " << toSourcePosition(row(m, 0), beginPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
-            aliFile << " , " << toSourcePosition(row(m, 0), endPosition(row(m, 0))) + beginPosition(source(row(m, 0)));
-            aliFile << " >< " << toSourcePosition(row(m, 1), beginPosition(row(m, 1))) + beginPosition(source(row(m, 1)));
-            aliFile << " , " << toSourcePosition(row(m, 1), endPosition(row(m, 1))) + beginPosition(source(row(m, 1))) << " >\n";
-            aliFile << m;
-
             TSize len = _max(length(row(m, 0)), length(row(m, 1)));
             totalLength += len;
             if(len > maxLength) maxLength = len;
 
             _writeGffLine(databaseID, ids[i], databaseStrand, m, file);
+			_writeMatch(m, databaseStrand, aliFile);
         }
         numMatches += length(value(matches, i));
         std::cout << "  # Eps-matches: " << length(value(matches, i)) << std::endl;
@@ -183,11 +237,11 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
     aliFile.close();
 }
 
-template<typename TStringSet, typename TIdSet>
+template<typename TSequence, typename TId>
 inline int
 _importSequences(CharString const & fileName,
-                TStringSet & seqs,
-                TIdSet & ids) {
+                 StringSet<TSequence> & seqs,
+                 StringSet<TId> & ids) {
     MultiSeqFile multiSeqFile;
     if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY))
         return 1;
@@ -200,8 +254,8 @@ _importSequences(CharString const & fileName,
     reserve(seqs, seqCount, Exact());
     reserve(ids, seqCount, Exact());
 
-    String<Dna5> seq;
-    String<char> id;
+    TSequence seq;
+    TId id;
     for(unsigned i = 0; i < seqCount; ++i) {
         assignSeq(seq, multiSeqFile[i], format);
         assignSeqId(id, multiSeqFile[i], format);
@@ -227,12 +281,15 @@ _setParser(TParser & parser) {
     addLine(parser, "and extraction of the longest epsilon-match.");
 
 	addSection(parser, "Non-optional Arguments:");
-    addOption(parser, CommandLineOption('d', "database", "fasta file containing the database sequence", (OptionType::String | OptionType::Mandatory)));
-    addOption(parser, CommandLineOption('q', "query", "file containing the query sequences", (OptionType::String | OptionType::Mandatory)));
+    addOption(parser, CommandLineOption('d', "database", "fasta file containing the database sequence",
+              (OptionType::String | OptionType::Mandatory)));
+    addOption(parser, CommandLineOption('q', "query", "file containing the query sequences", 
+              (OptionType::String | OptionType::Mandatory)));
     
 	addSection(parser, "Main Options:");
     addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String, "swift_local.gff"));
-    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database", OptionType::Boolean, false));
+    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database",
+              OptionType::Boolean, false));
     addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int, 10));
     addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int, 100));
     addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double, 0.05));
@@ -240,14 +297,6 @@ _setParser(TParser & parser) {
 }
 
 int main(int argc, const char *argv[]) {
-
-//-d "Z:\GenomeData\NC_001405_short.fa" -q "Z:\GenomeData\NC_001460_short.fa" -k 5 -l 30 -e 0.1 -x 10 -r
-//-d "Z:\GenomeData\adenoviruses\NC_001405.fa" -q "Z:\GenomeData\adenoviruses\NC_001460.fa" -k 5 -l 30 -e 0.1 -x 5 -r
-
-    // Get rid of warnings for unused variables.
-    (void)argc;
-    (void)argv;
-
     // command line parsing
     CommandLineParser parser("swift_local");
     _setParser(parser);
@@ -259,19 +308,23 @@ int main(int argc, const char *argv[]) {
         return 0;
     }
 
+	typedef String<Dna5> TSequence;
+
     // import database sequence
     CharString databaseFile;
     getOptionValueShort(parser, 'd', databaseFile);
-    StringSet<String<Dna5> > databases;
+    StringSet<TSequence > databases;
     StringSet<CharString> databaseIDs;
-    std::cout << "Loaded " << _importSequences(databaseFile, databases, databaseIDs) << " database sequences." << std::endl;
+    std::cout << "Loaded " << _importSequences(databaseFile, databases, databaseIDs);
+	std::cout << " database sequences." << std::endl;
 
     // import query sequences
     CharString queryFile;
     getOptionValueShort(parser, 'q', queryFile);
-    StringSet<String<Dna5> > queries;
+    StringSet<TSequence > queries;
     StringSet<CharString> queryIDs;
-    std::cout << "Loaded " << _importSequences(queryFile, queries, queryIDs) << " query sequences." << std::endl;
+    std::cout << "Loaded " << _importSequences(queryFile, queries, queryIDs);
+	std::cout << " query sequences." << std::endl;
 
     // input parameters
     int q = 10;
@@ -298,16 +351,15 @@ int main(int argc, const char *argv[]) {
     SEQAN_PROTIMESTART(timeLocalSwift);
 
     // pattern
-    typedef Index<StringSet<String<Dna5> >, Index_QGram<SimpleShape> > TQGramIndex;
+    typedef Index<StringSet<TSequence, Dependent<> >, Index_QGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex index_qgram(queries);
     resize(indexShape(index_qgram), q);
 	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
 
-    typedef Finder<String<Dna5>, Swift<SwiftLocal> > TFinder;
+    typedef Finder<TSequence, Swift<SwiftLocal> > TFinder;
     
     // container for eps-matches
-    typedef Infix<GetSequenceByNo<TQGramIndex const >::Type >::Type TInfix;
-    StringSet<String<Align<TInfix> > > matches;
+	StringSet<String<Align<TSequence> > > matches;
 
     int numSwiftHits;
     for(unsigned i = 0; i < length(databases); ++i) {
@@ -345,13 +397,6 @@ int main(int argc, const char *argv[]) {
     std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
 
     file.close();
-
-    // read alignment file
-    //std::fstream fstrm;
-    //fstrm.open(/* some file*/ );
-    //Align<DnaString> ali;
-    //read(fstrm, ali, FastaAlign());
-    //fstrm.close();
 
 	return 0;
 }
