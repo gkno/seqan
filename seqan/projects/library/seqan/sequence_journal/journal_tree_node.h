@@ -20,6 +20,8 @@ struct SegmentNode
     SegmentNode *left;
     // Right child.
     SegmentNode *right;
+    // Parent, 0 for root.
+    SegmentNode *parent;
     // Flag for where the segment comes from.
     SegmentSource segmentSource;
     // Position in the original string or the insertion buffer,
@@ -38,6 +40,7 @@ struct SegmentNode
                 TPos const & _length)
             : left(0),
               right(0),
+              parent(0),
               segmentSource(_segmentSource),
               virtualPosition(_virtualPosition),
               physicalPosition(_physicalPosition),
@@ -77,10 +80,12 @@ template <typename TStream, typename TPos, typename TSize>
 TStream & operator<<(TStream & stream, SegmentNode<TPos, TSize> const & node)
 {
     SEQAN_CHECKPOINT;
-    stream << "SegmentNode(segmentSource=" << node.segmentSource
+    stream << "SegmentNode(add=" << &node
+           << ", segmentSource=" << node.segmentSource
            << ", virtualPosition=" << node.virtualPosition
            << ", physicalPosition=" << node.physicalPosition
            << ", length=" << node.length
+           << ", parent=" << node.parent
            << ", left=";
     if (node.left)
         stream << *node.left;

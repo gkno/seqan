@@ -14,7 +14,7 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
   ============================================================================
-  Author: Paul Theodor Pyl <paul.pyl@fu-berlin.de>
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ==========================================================================*/
 
 #ifndef SEQAN_SEQUENCE_JOURNAL_STRING_JOURNAL_H_
@@ -23,7 +23,7 @@
 namespace seqan {
 
 // ============================================================================
-// Tags
+// Tags, Classes
 // ============================================================================
 
 /**
@@ -33,38 +33,39 @@ namespace seqan {
 template <typename TStringSpec, typename TJournalSpec>
 struct Journal;
 
-// ============================================================================
-// Specialization Journal String
-// ============================================================================
 
 /**
 .Spec.Journal String:Journaled versions of arbitrary underlying strings.
 ..signature:String<TValue, Journal<TStringSpec, TJournalSpec>
  */
-template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class String<TValue, Journal< TStringSpec, TJournalSpec > >
+// TODO(holtgrew): What about SequenceJournal<TSequence, TJournalSpec>?
+template<typename _TValue, typename _TStringSpec, typename _TJournalSpec>
+class String<_TValue, Journal<_TStringSpec, _TJournalSpec > >
 {
 public:
+    typedef _TValue TValue;
+    typedef _TStringSpec TStringSpec;
+    typedef _TJournalSpec TJournalSpec;
     typedef String<TValue, TStringSpec> THost;
+    typedef String<TValue, Alloc<> > TInsertionBuffer;
     typedef typename Size<THost>::Type TSize;
     typedef typename Position<THost>::Type TPosition;
     typedef SegmentNode<TSize, TPosition> TNode;
+    typedef JournalTree<TNode, TJournalSpec> TJournalTree;
     
-    // TODO(holtgrew): Why this?
-    // typename DefaultStringSpec< String< TValue, Journal< TStringSpec, TJournalSpec > > >::Type m_insertion_string;
-
 	// The underlying, hosting string.
 	Holder<THost> _host;
     // A buffer for inserted strings.
-    THost _insertionBuffer;
+    TInsertionBuffer _insertionBuffer;
     // The journal is a binary search tree.
-    JournalTree<TNode, TJournalSpec> _journalTree;
+    TJournalTree _journalTree;
     // The journal string's size.
     TSize _length;
     
 	String() {}
 
-	String(String<TValue, TStringSpec> & host) {
+	String(String<TValue, TStringSpec> & host)
+    {
         setHost(*this, host);
 	}
 };
@@ -73,18 +74,16 @@ public:
 // Metafunctions
 // ============================================================================
 
-// TODO(holtgrew): Iterator<>, Iterator<const>
-
 /**
 .Metafunction.Size:
 ..param.TValue:Spec.Journal String
  */
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class Size<String<TValue, Journal< TStringSpec, TJournalSpec > > >
+struct Size<String<TValue, Journal<TStringSpec, TJournalSpec> > >
         : public Size<String<TValue, TStringSpec> > {};
 
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class Size<String<TValue, Journal< TStringSpec, TJournalSpec > > const>
+struct Size<String<TValue, Journal<TStringSpec, TJournalSpec> > const>
         : public Size<String<TValue, TStringSpec> const> {};
 
 /**
@@ -92,28 +91,48 @@ class Size<String<TValue, Journal< TStringSpec, TJournalSpec > > const>
 ..param.TValue:Spec.Journal String
  */
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class Position<String<TValue, Journal< TStringSpec, TJournalSpec > > >
+struct Position<String<TValue, Journal<TStringSpec, TJournalSpec> > >
         : public Position<String<TValue, TStringSpec> > {};
 
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class Position<String<TValue, Journal< TStringSpec, TJournalSpec > > const>
+struct Position<String<TValue, Journal<TStringSpec, TJournalSpec> > const>
         : public Position<String<TValue, TStringSpec> const> {};
 
-// TODO(holtgrew): Value<>, Value<const>
+/**
+.Metafunction.Value:
+..param.TValue:Spec.Journal String
+ */
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+struct Value<String<TValue, Journal<TStringSpec, TJournalSpec> > >
+        : public Value<String<TValue, TStringSpec> > {};
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+struct Value<String<TValue, Journal<TStringSpec, TJournalSpec> > const>
+        : public Value<String<TValue, TStringSpec> const> {};
 
 /**
 .Metafunction.GetValue:
 ..param.TValue:Spec.Journal String
  */
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class GetValue<String<TValue, Journal< TStringSpec, TJournalSpec > > >
+struct GetValue<String<TValue, Journal<TStringSpec, TJournalSpec> > >
         : public GetValue<String<TValue, TStringSpec> > {};
  
 template<typename TValue, typename TStringSpec, typename TJournalSpec>
-class GetValue<String<TValue, Journal< TStringSpec, TJournalSpec > > const>
+struct GetValue<String<TValue, Journal<TStringSpec, TJournalSpec> > const>
         : public GetValue<String<TValue, TStringSpec> const> {};
 
-// TODO(holtgrew): Reference<>, Reference<const>
+/**
+.Metafunction.Reference:
+..param.TValue:Spec.Journal String
+ */
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+struct Reference<String<TValue, Journal<TStringSpec, TJournalSpec> > >
+        : public Value<String<TValue, TStringSpec> > {};
+
+template<typename TValue, typename TStringSpec, typename TJournalSpec>
+struct Reference<String<TValue, Journal<TStringSpec, TJournalSpec> > const>
+        : public Reference<String<TValue, TStringSpec> const> {};
 
 // ============================================================================
 // Functions
@@ -124,9 +143,24 @@ inline
 TStream &
 operator<<(TStream & stream, String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString)
 {
-    typedef String<TValue, Journal<TStringSpec, TJournalSpec> > TString;
-    typedef typename Position<TString>::Type TPos;
-    typedef typename TString::TNode TNode;
+    typedef String<TValue, Journal<TStringSpec, TJournalSpec> > TSequenceJournal;
+    typedef typename TSequenceJournal::TJournalTree TJournalTree;
+    typedef typename Iterator<TJournalTree>::Type TIterator;
+
+//     std::cout << __FILE__ << ":" << __LINE__ << " -- " << journalString._journalTree << std::endl;
+    TIterator itend = end(journalString._journalTree, Standard());
+//     std::cout << __FILE__ << ":" << __LINE__ << " -- itend = " << value(itend) << ", " << itend._iterationDirection << std::endl;
+    for (TIterator it = begin(journalString._journalTree, Standard()); it != itend; ++it) {
+//         std::cout << __FILE__ << ":" << __LINE__ << " --   " << value(it) << ", " << it._iterationDirection << std::endl;
+        if (value(it)->segmentSource == SOURCE_ORIGINAL) {
+            stream << infix(value(journalString._host), value(it)->physicalPosition, value(it)->physicalPosition + value(it)->length);
+        } else {
+            SEQAN_ASSERT_EQ(value(it)->segmentSource, SOURCE_PATCH);
+            stream << infix(journalString._insertionBuffer, value(it)->physicalPosition, value(it)->physicalPosition + value(it)->length);
+        }
+    }
+    return stream;
+    /*
 
     // Depth-first, in-order traversal of the tree using an explicit stack.
     String<TNode*> nodePointers;
@@ -155,6 +189,7 @@ operator<<(TStream & stream, String<TValue, Journal<TStringSpec, TJournalSpec> >
     }
 
     return stream;
+    */
 }
 
 
@@ -218,7 +253,7 @@ erase(String<TValue, Journal<TStringSpec, TJournalSpec> > & journalString,
 {
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_GEQ(static_cast<TPos>(journalString._length), posEnd - pos);
-    journalString._length += posEnd - pos;
+    journalString._length -= posEnd - pos;
     recordErase(journalString._journalTree, pos, posEnd);
     if (length(journalString) == 0)
         clear(journalString._insertionBuffer);

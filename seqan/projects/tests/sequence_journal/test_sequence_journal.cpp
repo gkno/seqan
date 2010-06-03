@@ -29,7 +29,7 @@
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_journal) {
     // Call tests.
-    SEQAN_CALL_TEST(test_sequence_journal);
+    SEQAN_CALL_TEST(test_sequence_journal_simple_demo);
 
     // Verify checkpoints.
 //     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence_journal/journal_node.h");
