@@ -64,6 +64,12 @@ file (GLOB SEQAN_TCOFFEE_HEADERS ${SEQAN_LIBRARY}/apps/seqan_tcoffee/[A-z]*.h)
 
 # Manually add predefined targets
 list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/paramChooser)
+list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/transrectify)
+list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/transsplice)
+list (APPEND SEQAN_APPS ${SEQAN_LIBRARY}/apps/chopsuey)
+set  (APP_transrectify_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transrectify.cpp)
+set  (APP_transsplice_SOURCES ${SEQAN_LIBRARY}/apps/transquant/transsplice.cpp)
+set  (APP_chopsuey_SOURCES ${SEQAN_LIBRARY}/apps/transquant/chopsuey.cpp)
 
 # Manually set predefined sets of source files for some targets
 set (APP_razers_SOURCES ${SEQAN_LIBRARY}/apps/razers/razers.cpp ${RAZERS_HEADERS})
@@ -78,8 +84,8 @@ else (Boost_FOUND)
   message ("WARNING Boost not found, not building transquant!")
   # Disable building of transquant.
   set (APP_transquant_NOBUILD TRUE)
+  list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/transquant)
 endif (Boost_FOUND)
-set (APP_rectifier_SOURCES ${SEQAN_LIBRARY}/apps/transquant/rectifier.cpp)
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
