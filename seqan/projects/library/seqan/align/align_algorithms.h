@@ -96,7 +96,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Align
 ..param.positions:The integration positions in align1 for all rows (view positions).
 ...type:Class.String
-..remarks:If the integration positions are not specified, the Source type of align2 has to be an @Metafunction.Infix@ type.
+..remarks:If the integration positions are not specified, the sources of align2 have to be @Metafunction.Infix@es of the sources of align1.
  */
 template <typename TSource1, typename TSpec1, typename TSource2, typename TSpec2, typename TPos> 
 void
@@ -159,10 +159,10 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TSource1, typename TSpec1, typename TSource2, typename TSpec2> 
+template <typename TSource, typename TSpec1, typename TSpec2> 
 void
-integrateAlign(Align<TSource1, TSpec1> & align,
-			   Align<typename Infix<TSource2>::Type, TSpec2> & infixAlign) {
+integrateAlign(Align<TSource, TSpec1> & align,
+			   Align<typename Infix<TSource>::Type, TSpec2> & infixAlign) {
 SEQAN_CHECKPOINT
 	typedef typename Size<TSource>::Type TSize;
 	typedef typename Position<typename Row<Align<TSource, TSpec1> >::Type>::Type TPos;
