@@ -7,84 +7,59 @@ namespace seqan {
 // Enums, Classes
 // ============================================================================
 
-enum SegmentSource {
-    SOURCE_ORIGINAL,
-    SOURCE_PATCH
-};
-
-
-template <typename TPos, typename TSize>
+// TODO(holtgrew): s/SegmentNode/JournalTreeUnorderedNode/
+template <typename TCargo>
 struct SegmentNode
 {
     // Left child.
-    SegmentNode *left;
+    SegmentNode * left;
     // Right child.
-    SegmentNode *right;
+    SegmentNode * right;
     // Parent, 0 for root.
-    SegmentNode *parent;
-    // Flag for where the segment comes from.
-    SegmentSource segmentSource;
-    // Position in the original string or the insertion buffer,
-    // depending on segmentSource.
-    TPos virtualPosition;
-    // Position in the virtual string.
-    TPos physicalPosition;
-    // Length of the segment.
-    TSize length;
+    SegmentNode * parent;
+    // The actual payload:  The journal entry.
+    TCargo cargo;
     
-    SegmentNode() : left(0), right(0) {}
+    SegmentNode() : left(0), right(0), parent(0) {}
 
-    SegmentNode(SegmentSource const & _segmentSource,
-                TPos const & _physicalPosition,
-                TPos const & _virtualPosition,
-                TPos const & _length)
+    SegmentNode(TCargo const & _cargo)
             : left(0),
               right(0),
               parent(0),
-              segmentSource(_segmentSource),
-              virtualPosition(_virtualPosition),
-              physicalPosition(_physicalPosition),
-              length(_length) {}
+              cargo(_cargo) {}
 };
 
 // ============================================================================
 // Metafunctions
 // ============================================================================
 
-template <typename TPos, typename TSize>
-struct Position<SegmentNode<TPos, TSize> >
+// TODO(holtgrew): Rename value to cargo?
+
+template <typename T>
+struct Cargo;
+
+template <typename TCargo>
+struct Cargo<SegmentNode<TCargo> >
 {
-    typedef TPos Type;
+    typedef TCargo Type;
 };
 
-template <typename TPos, typename TSize>
-struct Position<SegmentNode<TPos, TSize> const>
-        : Position<SegmentNode<TPos, TSize> > {};
-
-
-template <typename TPos, typename TSize>
-struct Size<SegmentNode<TPos, TSize> >
+template <typename TCargo>
+struct Cargo<SegmentNode<TCargo> const>
 {
-    typedef TSize Type;
+    typedef TCargo const Type;
 };
-
-template <typename TPos, typename TSize>
-struct Size<SegmentNode<TPos, TSize> const>
-        : Size<SegmentNode<TPos, TSize> > {};
 
 // ============================================================================
 // Functions
 // ============================================================================
 
-template <typename TStream, typename TPos, typename TSize>
-TStream & operator<<(TStream & stream, SegmentNode<TPos, TSize> const & node)
+template <typename TStream, typename TCargo>
+TStream & operator<<(TStream & stream, SegmentNode<TCargo> const & node)
 {
     SEQAN_CHECKPOINT;
     stream << "SegmentNode(add=" << &node
-           << ", segmentSource=" << node.segmentSource
-           << ", virtualPosition=" << node.virtualPosition
-           << ", physicalPosition=" << node.physicalPosition
-           << ", length=" << node.length
+           << ", cargo=" << node.cargo
            << ", parent=" << node.parent
            << ", left=";
     if (node.left)
@@ -97,6 +72,78 @@ TStream & operator<<(TStream & stream, SegmentNode<TPos, TSize> const & node)
     else
         stream << "NULL";
     return stream << ")";
+}
+
+template <typename TCargo>
+typename Cargo<SegmentNode<TCargo> >::Type &
+cargo(SegmentNode<TCargo> & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.cargo;
+}
+
+template <typename TCargo>
+typename Cargo<SegmentNode<TCargo> const>::Type &
+cargo(SegmentNode<TCargo> const & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.cargo;
+}
+
+template <typename TCargo>
+typename Cargo<SegmentNode<TCargo> const>::Type
+getCargo(SegmentNode<TCargo> const & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.cargo;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> *
+left(SegmentNode<TCargo> & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.left;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> const *
+left(SegmentNode<TCargo> const & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.left;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> *
+right(SegmentNode<TCargo> & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.right;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> const *
+right(SegmentNode<TCargo> const & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.right;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> *
+parent(SegmentNode<TCargo> & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.parent;
+}
+
+template <typename TCargo>
+SegmentNode<TCargo> const *
+parent(SegmentNode<TCargo> const & node)
+{
+    SEQAN_CHECKPOINT;
+    return node.parent;
 }
 
 }  // namespace seqan

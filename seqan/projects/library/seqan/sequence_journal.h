@@ -43,6 +43,7 @@
 //____________________________________________________________________________
 // Journaled Sequences.
 
+#include <seqan/sequence_journal/journal_entry.h>
 #include <seqan/sequence_journal/journal_tree_unordered_node.h>
 #include <seqan/sequence_journal/journal_tree_unordered.h>
 #include <seqan/sequence_journal/journal_tree_unordered_iterator.h>

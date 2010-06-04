@@ -79,13 +79,13 @@ public:
 template <typename TJournalTree>
 struct Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >
 {
-    typedef typename TJournalTree::TNode * & Type;
+    typedef typename Cargo<typename TJournalTree::TNode>::Type Type;
 };
 
 template <typename TJournalTree>
 struct Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const>
 {
-    typedef typename TJournalTree::TNode const * & Type;
+    typedef typename Cargo<typename TJournalTree::TNode const>::Type Type;
 };
 
 // ============================================================================
@@ -147,7 +147,7 @@ _initJournalTreeIterator(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & 
                          TJournalTree & tree)
 {
     SEQAN_CHECKPOINT;
-    setValue(iterator, tree._root);
+    iterator._currentNode = tree._root;
     if (tree._root == 0) {
         iterator._iterationDirection = DIRECTION_UP_RIGHT;
     } else {
@@ -165,7 +165,7 @@ _initJournalTreeIteratorEnd(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> >
                             TJournalTree & tree)
 {
     SEQAN_CHECKPOINT;
-    setValue(iterator, tree._root);
+    iterator._currentNode = tree._root;
     iterator._iterationDirection = DIRECTION_UP_RIGHT;
 }
 
@@ -173,10 +173,10 @@ template <typename TJournalTree>
 inline
 void
 setValue(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
-         typename TJournalTree::TNode * const & value)
+         typename Value<TJournalTree>::Type const & value)
 {
     SEQAN_CHECKPOINT;
-    iterator._currentNode = value;
+    setValue(*iterator._currentNode, value);
 }
 
 template <typename TJournalTree>
@@ -185,7 +185,16 @@ typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
 value(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 {
     SEQAN_CHECKPOINT;
-    return iterator._currentNode;
+    return cargo(*iterator._currentNode);
+}
+
+template <typename TJournalTree>
+inline
+typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
+value(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+{
+    SEQAN_CHECKPOINT;
+    return cargo(*iterator._currentNode);
 }
 
 template <typename TJournalTree>
@@ -199,11 +208,20 @@ operator*(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 
 template <typename TJournalTree>
 inline
+typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
+operator*(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+{
+    SEQAN_CHECKPOINT;
+    return value(iterator);
+}
+
+template <typename TJournalTree>
+inline
 bool
 hasLeftChild(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 {
     SEQAN_CHECKPOINT;
-    return value(iterator)->left != 0;
+    return iterator._currentNode->left != 0;
 }
 
 template <typename TJournalTree>
@@ -215,7 +233,7 @@ goLeft(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
     if (!hasLeftChild(iterator))
         return false;
     iterator._iterationDirection = DIRECTION_DOWN;
-    value(iterator) = value(iterator)->left;
+    iterator._currentNode = iterator._currentNode->left;
     return true;
 }
 
@@ -225,7 +243,7 @@ bool
 hasRightChild(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 {
     SEQAN_CHECKPOINT;
-    return value(iterator)->right != 0;
+    return iterator._currentNode->right != 0;
 }
 
 template <typename TJournalTree>
@@ -237,7 +255,7 @@ goRight(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
     if (!hasRightChild(iterator))
         return false;
     iterator._iterationDirection = DIRECTION_DOWN;
-    value(iterator) = value(iterator)->right;
+    iterator._currentNode = iterator._currentNode->right;
     return true;
 }
 
@@ -260,11 +278,11 @@ goUp(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
         iterator._iterationDirection = DIRECTION_UP_RIGHT;
         return false;
     }
-    if (value(iterator)->parent->left == value(iterator))
+    if (iterator._currentNode->parent->left == iterator._currentNode)
         iterator._iterationDirection = DIRECTION_UP_LEFT;
     else
         iterator._iterationDirection = DIRECTION_UP_RIGHT;
-    value(iterator) = value(iterator)->parent;
+    iterator._currentNode = iterator._currentNode->parent;
     return true;
 }
 

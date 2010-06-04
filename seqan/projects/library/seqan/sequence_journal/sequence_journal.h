@@ -45,7 +45,7 @@ public:
     typedef String<TValue, Alloc<> > TInsertionBuffer;
     typedef typename Size<THost>::Type TSize;
     typedef typename Position<THost>::Type TPosition;
-    typedef SegmentNode<TSize, TPosition> TNode;
+    typedef SegmentNode<JournalEntry<TSize, TPosition> > TNode;
     typedef JournalTree<TNode, TJournalSpec> TJournalTree;
 
     // The underlying, hosting string.
@@ -143,16 +143,15 @@ operator<<(TStream & stream, SequenceJournal<TSequence, TJournalSpec> const & se
     typedef typename Iterator<TJournalTree const, Standard>::Type TIterator;
 
     for (TIterator it = begin(sequenceJournal._journalTree), itend = end(sequenceJournal._journalTree); it != itend; ++it) {
-        if (value(it)->segmentSource == SOURCE_ORIGINAL) {
-            stream << infix(value(sequenceJournal._host), value(it)->physicalPosition, value(it)->physicalPosition + value(it)->length);
+        if (value(it).segmentSource == SOURCE_ORIGINAL) {
+            stream << infix(value(sequenceJournal._host), value(it).physicalPosition, value(it).physicalPosition + value(it).length);
         } else {
-            SEQAN_ASSERT_EQ(value(it)->segmentSource, SOURCE_PATCH);
-            stream << infix(sequenceJournal._insertionBuffer, value(it)->physicalPosition, value(it)->physicalPosition + value(it)->length);
+            SEQAN_ASSERT_EQ(value(it).segmentSource, SOURCE_PATCH);
+            stream << infix(sequenceJournal._insertionBuffer, value(it).physicalPosition, value(it).physicalPosition + value(it).length);
         }
     }
     return stream;
 }
-
 
 /**
 .Function.setHost:
