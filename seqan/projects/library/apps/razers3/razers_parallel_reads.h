@@ -476,8 +476,8 @@ namespace SEQAN_NAMESPACE_MAIN
 					firstprivate(blockId)
 				{
 					// TODO: remove
-					printf("%d start task\n", blockId);
-					_proFloat myTime = sysTime();
+					// printf("%d start task\n", blockId);
+					// _proFloat myTime = sysTime();
 					
 					bool sequenceLeft = true;
 					while(sequenceLeft){
@@ -485,9 +485,9 @@ namespace SEQAN_NAMESPACE_MAIN
 							options.windowSize);
 							
 						// TODO: remove
-						#pragma omp critical(printf)
-						printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
-						myTime = sysTime();
+						// #pragma omp critical(printf)
+						// printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
+						// myTime = sysTime();
 						
 						THitString & hits = getSwiftHits(swiftFinders[blockId]);
 						if(length(hits) == 0)
@@ -495,16 +495,24 @@ namespace SEQAN_NAMESPACE_MAIN
 						#pragma omp flush(tav)
 						
 						// TODO: remove
-						#pragma omp critical(printf)
-						printf("%d tav: %d\n", blockId, tav[blockId]);
+						// #pragma omp critical(printf)
+						// printf("%d tav: %d\n", blockId, tav[blockId]);
 						
-						if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
+						if(true){ //(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
 							verifyHits(verifier[blockId], hits, 0, length(hits),
 								(blockId * options.blockSize), host(swiftFinders[0]), readSet, options, mode);
 						}
 						else {
+							// TODO: remove
+							// myTime = sysTime();
 							// sort
 							myRadixSort(hits);
+							
+							// TODO: remove
+							// #pragma omp critical(printf)
+							// printf("%d tav: %d\n", blockId, tav[blockId]);
+							// myTime = sysTime();
+							
 							// THitStringIter i1 = begin(hits);
 							// THitStringIter i2 = end(hits);
 							// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
@@ -530,9 +538,9 @@ namespace SEQAN_NAMESPACE_MAIN
 						} // End else
 						
 						// TODO: remove
-						#pragma omp critical(printf)
-						printf("%d verifying took %f\n", blockId, sysTime() - myTime);
-						myTime = sysTime();
+						// #pragma omp critical(printf)
+						// printf("%d verifying took %f\n", blockId, sysTime() - myTime);
+						// myTime = sysTime();
 					} // End while
 					
 					#pragma omp critical(update_tav)
@@ -1171,7 +1179,12 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		// lock contig
 		lockContig(store, contigId);
 		TContigSeq &contigSeq = store.contigStore[contigId].seq;
-		if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+		// if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+		if (orientation == 'R'){
+			_proFloat complementTime = sysTime();
+			reverseComplementInPlace(contigSeq);
+			printf("reverseComplement took %f sec\n", sysTime()-complementTime);
+		} //TODO: reverseComplement in parallel?
 		
 		// Finder and verifier strings of the same size as there are swift patterns
 		// One Swift finder, Swift pattern and verifier work together
@@ -1428,7 +1441,12 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 
 		lockContig(store, contigId);
 		TContigSeq &contigSeq = store.contigStore[contigId].seq;
-		if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+		if (orientation == 'R'){
+			_proFloat complementTime = sysTime();
+			reverseComplementInPlace(contigSeq);
+			printf("reverseComplement took %f sec\n", sysTime()-complementTime);
+		}
+			
 
 		// Finder and verifier strings of the same size as there are swift patterns
 		// One Swift finder, Swift pattern and verifier work together
