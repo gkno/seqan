@@ -241,19 +241,15 @@ SEQAN_CHECKPOINT
 	TVertexDescriptor root = addVertex(g);
 	resizeVertexMap(g,pm);
 	
-	::std::cout << "aqui\n";
 	TValue center =	_calcIntervalTreeRootCenter(intervals);
 	
 	std::sort(begin(intervals),end(intervals),_less_compI1_ITree<TInterval>);
 
 	String<TInterval*> interval_pointers;
 	resize(interval_pointers,length(intervals));
-	::std::cout << "aca\n";
 	_makePointerInterval(intervals,interval_pointers);
 
-	::std::cout << "aca2\n";
 	_createIntervalTree(g,pm,interval_pointers,root,(TValue)0.0,center,length(intervals),tag);
-	::std::cout << "aca3\n";
 	reserve(pm, length(pm), Exact());
 	reserve(g.data_vertex, length(g.data_vertex), Exact());
 
@@ -349,7 +345,6 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   Tag<_TagComputeCenter> const tag)
 {
 SEQAN_CHECKPOINT
-	::std::cout << "hierCreat\n";
 	//  Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*intervals[0]);
@@ -449,9 +444,6 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   Tag<TSpec> const tag)
 {
 SEQAN_CHECKPOINT
-	::std::cout << "hieeeeeeeeeeer\n";
-	::std::cout << "center = " << center << "\n";
-	::std::cout << "numIntervals = " << length(intervals) << "\n";
 	// Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*value(intervals,0));
