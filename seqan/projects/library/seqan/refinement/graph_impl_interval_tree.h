@@ -241,17 +241,19 @@ SEQAN_CHECKPOINT
 	TVertexDescriptor root = addVertex(g);
 	resizeVertexMap(g,pm);
 	
+	::std::cout << "aqui\n";
 	TValue center =	_calcIntervalTreeRootCenter(intervals);
 	
 	std::sort(begin(intervals),end(intervals),_less_compI1_ITree<TInterval>);
 
 	String<TInterval*> interval_pointers;
 	resize(interval_pointers,length(intervals));
-
+	::std::cout << "aca\n";
 	_makePointerInterval(intervals,interval_pointers);
 
+	::std::cout << "aca2\n";
 	_createIntervalTree(g,pm,interval_pointers,root,(TValue)0.0,center,length(intervals),tag);
-		
+	::std::cout << "aca3\n";
 	reserve(pm, length(pm), Exact());
 	reserve(g.data_vertex, length(g.data_vertex), Exact());
 
@@ -347,6 +349,7 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   Tag<_TagComputeCenter> const tag)
 {
 SEQAN_CHECKPOINT
+	::std::cout << "hierCreat\n";
 	//  Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*intervals[0]);
@@ -446,6 +449,9 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   Tag<TSpec> const tag)
 {
 SEQAN_CHECKPOINT
+	::std::cout << "hieeeeeeeeeeer\n";
+	::std::cout << "center = " << center << "\n";
+	::std::cout << "numIntervals = " << length(intervals) << "\n";
 	// Rekursionsanker
 	if(len==1){
 		_setIntervalTreeNode(value(pm,knot),center,*value(intervals,0));
@@ -729,8 +735,9 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.findIntervals
-..summary:Find all intervals that contain the query point.
+..summary:Find all intervals that contain the query point or overlap with the query interval.
 ..signature:findIntervals(graph, propertyMap, query, result)
+..param.query:A query point.
 ..include:seqan/refinement.h
 */
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
@@ -917,13 +924,136 @@ SEQAN_CHECKPOINT
 */
 template<typename TValue,typename TCargo>
 void
-findIntervalsExcludeTouching(IntervalTree<TValue,TCargo> & it, TValue query, String<TCargo> & result)
+findIntervalsExcludeTouching(IntervalTree<TValue,TCargo> & tree, TValue query, String<TCargo> & result)
 {
 SEQAN_CHECKPOINT
 
-	findIntervalsExcludeTouching(it.g,it.pm,query,result);
+	findIntervalsExcludeTouching(tree.g,tree.pm,query,result);
 
 }
+
+
+
+
+/**
+.Function.findIntervals
+..signature:findIntervals(intervalTree, query_begin, query_end, result)
+..param.query_begin:The begin position of the query interval.
+..param.query_end:The end position of the query interval.
+*/
+template<typename TValue,typename TCargo>
+void
+findIntervals(IntervalTree<TValue,TCargo> & tree, TValue query_begin, TValue query_end, String<TCargo> & result)
+{
+SEQAN_CHECKPOINT
+
+	findIntervals(tree.g,tree.pm,query_begin,query_end,result);
+
+}
+
+
+
+template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
+void
+findIntervals(TGraph & g, TPropertyMap & pm, TValue query_begin, TValue query_end, String<TCargo> & result)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TPropertyMap>::Type TProperty;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	resize(result,0);
+
+	// start at root
+	TVertexDescriptor act_knot = 0;
+	findIntervals(g, pm, act_knot, query_begin, query_end, result);
+}
+
+
+template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
+void
+findIntervals(TGraph & g, 
+			  TPropertyMap & pm, 
+			  typename VertexDescriptor<TGraph>::Type & act_knot, 
+			  TValue query_begin, 
+			  TValue query_end, 
+			  String<TCargo> & result)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename Value<TPropertyMap>::Type TProperty;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
+
+	TProperty act_prop = property(pm,act_knot);
+	TProperty next_prop;
+		
+	while(true)
+	{
+		TOutEdgeIterator it(g, act_knot);
+		act_prop = property(pm,act_knot);
+		//
+		if(act_prop.center < query_begin) // query interval is to the right of node center
+		{
+			unsigned int i = 0;
+			while(i < length(act_prop.list2) && rightBoundary(value(act_prop.list2,i)) > query_begin)
+			{
+				appendValue(result,cargo(value(act_prop.list2,i)), Generous());
+				++i;	
+			}
+			if(atEnd(it)) break;
+			else{
+				next_prop = property(pm,targetVertex(it));
+				if(next_prop.center <= act_prop.center)
+				{
+					goNext(it);
+					if(atEnd(it)) break;
+				}
+			}
+			act_knot = targetVertex(it);
+		}
+		else{
+			if(query_end < act_prop.center) // query interval is to the left of node center
+			{
+				unsigned int i = 0;
+				while(i < length(act_prop.list1) && leftBoundary(value(act_prop.list1,i)) < query_end)
+				{
+					appendValue(result,cargo(value(act_prop.list1,i)), Generous());
+					++i;
+				}
+				if(atEnd(it)) break;
+				else
+				{
+					next_prop = property(pm,targetVertex(it));
+					if(next_prop.center >= act_prop.center)
+					{
+						goNext(it);
+						if(atEnd(it)) break;
+					}
+				}
+				act_knot = targetVertex(it);
+			}
+			else{//node center is contained in query interval
+				for(unsigned int i = 0; i < length(act_prop.list1); ++i)
+                    appendValue(result, cargo(value(act_prop.list1,i)), Generous());
+				
+				while(!atEnd(it))
+				{
+					TVertexDescriptor next_knot = targetVertex(it);
+					findIntervals(g,pm, next_knot, query_begin, query_end, result);
+					goNext(it);
+				}
+				break;
+
+				//break; //dont break! continue in both subtrees!!
+			}
+		}
+	}
+
+}
+
+
 
 /////////////////// Metafunctions ///////////////////////
 
