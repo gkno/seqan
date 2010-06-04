@@ -1,5 +1,5 @@
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_H_
 
 namespace seqan {
 
@@ -20,6 +20,7 @@ class JournalTree<_TNode, Unbalanced>
 {
   public:
     typedef _TNode TNode;
+    typedef JournalTree<_TNode, Unbalanced> TJournalTree;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
     typedef Unbalanced TSpec;
@@ -37,10 +38,10 @@ class JournalTree<_TNode, Unbalanced>
         SEQAN_CHECKPOINT;
     }
 
-    JournalTree(TSize const & originalStringLength)
+    JournalTree(JournalTree const & other)
+            : _originalStringLength(other._originalStringLength)
     {
-        SEQAN_CHECKPOINT;
-        reinit(*this, originalStringLength);
+        _copyJournalTreeNodes(_root, _nodeAllocator, other._root);
     }
 };
 
@@ -63,6 +64,27 @@ struct Iterator<JournalTree<TNode, TTreeSpec> const, Standard>
 // ============================================================================
 // Functions
 // ============================================================================
+
+template <typename TNode, typename TAllocator>
+void
+_copyJournalTreeNodes(TNode * & target,
+                      TAllocator & allocator,
+                      TNode * const & source)
+{
+    SEQAN_CHECKPOINT;
+    allocate(allocator, target, 1);
+    target = new (target) TNode(*source);
+
+    if (source->left != 0) {
+        _copyJournalTreeNodes(target->left, allocator, source->left);
+        target->left->parent = target;
+    }
+    if (source->right != 0) {
+        _copyJournalTreeNodes(target->right, allocator, source->right);
+        target->right->parent = target;
+    }
+}
+
 
 template <typename TNode>
 inline
@@ -163,7 +185,6 @@ inline
 TStream &
 operator<<(TStream & stream, JournalTree<TNode, TTreeSpec> const & tree)
 {
-    SEQAN_CHECKPOINT;
     if (tree._root != 0)
         return stream << "JournalTree(" << *tree._root << ")";
     else
@@ -549,12 +570,14 @@ void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
 }
 
 
+// TODO(holtgrew): Remove?
+/*
 template <typename TNode>
 inline
 TNode const * 
 back(JournalTree<TNode, Unbalanced> const & tree)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     TNode * current = tree._root;
     while (current->right != 0)
         current = current->right;
@@ -567,18 +590,18 @@ inline
 TNode const * 
 front(JournalTree<TNode, Unbalanced> const & tree)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     TNode * current = tree._root;
     while (current->left != 0)
         current = current->left;
     return current;
 }
+*/
 
 
 template <typename TStream, typename TNode>
 void journalTreeToDotRec(TStream & stream, unsigned & nextId, TNode const & node)
 {
-    SEQAN_CHECKPOINT;
     unsigned currentId = nextId;
     nextId += 1;
     stream << "  node_" << currentId << "[label=\"source=" << node.segmentSource << ", vpos=" << node.virtualPosition << ", phpos=" << node.physicalPosition << ", len=" << node.length << "\"]" << std::endl;
@@ -598,11 +621,10 @@ void journalTreeToDotRec(TStream & stream, unsigned & nextId, TNode const & node
 template <typename TStream, typename TNode>
 void journalTreeToDot(TStream & stream, unsigned & nextId, JournalTree<TNode, Unbalanced> const & journalTree)
 {
-    SEQAN_CHECKPOINT;
     stream << "ROOTPTR" << nextId << " -> node_" << nextId << std::endl;
     journalTreeToDotRec(stream, nextId, *journalTree._root);
 }
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_H_

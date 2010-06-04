@@ -138,6 +138,7 @@ inline
 TStream &
 operator<<(TStream & stream, SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
+    SEQAN_CHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TSequenceJournal;
     typedef typename TSequenceJournal::TJournalTree TJournalTree;
     typedef typename Iterator<TJournalTree const, Standard>::Type TIterator;
@@ -281,6 +282,7 @@ assignValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
             TPos const & pos,
             TValue const & value)
 {
+    SEQAN_CHECKPOINT;
     erase(sequenceJournal, pos);
     insertValue(sequenceJournal, pos, value);
 }
@@ -298,11 +300,14 @@ assignValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
 // TODO(holtgrew): infixWithLength
 // TODO(holtgrew): iter
 
+// TODO(holtgrew): Unused, remove?
+/*
 template<typename TSequence, typename TJournalSpec>
 inline
 typename Value<TSequence>::Type const &
 front(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
+    SEQAN_XXXCHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TString;
     typedef typename TString::TNode TNode;
     TNode frontNode = front(sequenceJournal._journalTree);
@@ -314,12 +319,13 @@ front(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
     }
 }
 
-/* front/back clash with general sequence definitions.
+// front/back clash with general sequence definitions.
 template<typename TSequence, typename TJournalSpec>
 inline
 TValue const &
 back(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
+    SEQAN_XXXCHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TString;
     typedef typename TString::TNode TNode;
     TNode backNode = back(sequenceJournal._journalTree);
@@ -337,6 +343,7 @@ inline
 typename Size<SequenceJournal<TSequence, TJournalSpec> >::Type
 length(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
+    SEQAN_CHECKPOINT;
     return sequenceJournal._length;
 }
 

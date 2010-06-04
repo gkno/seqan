@@ -1,5 +1,5 @@
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_NODE_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_NODE_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_NODE_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_NODE_H_
 
 namespace seqan {
 
@@ -57,7 +57,6 @@ struct Cargo<SegmentNode<TCargo> const>
 template <typename TStream, typename TCargo>
 TStream & operator<<(TStream & stream, SegmentNode<TCargo> const & node)
 {
-    SEQAN_CHECKPOINT;
     stream << "SegmentNode(add=" << &node
            << ", cargo=" << node.cargo
            << ", parent=" << node.parent
@@ -82,11 +81,13 @@ cargo(SegmentNode<TCargo> & node)
     return node.cargo;
 }
 
+// TODO(holtgrew): Unused, remove?
+/*
 template <typename TCargo>
 typename Cargo<SegmentNode<TCargo> const>::Type &
 cargo(SegmentNode<TCargo> const & node)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     return node.cargo;
 }
 
@@ -94,58 +95,11 @@ template <typename TCargo>
 typename Cargo<SegmentNode<TCargo> const>::Type
 getCargo(SegmentNode<TCargo> const & node)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     return node.cargo;
 }
-
-template <typename TCargo>
-SegmentNode<TCargo> *
-left(SegmentNode<TCargo> & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.left;
-}
-
-template <typename TCargo>
-SegmentNode<TCargo> const *
-left(SegmentNode<TCargo> const & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.left;
-}
-
-template <typename TCargo>
-SegmentNode<TCargo> *
-right(SegmentNode<TCargo> & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.right;
-}
-
-template <typename TCargo>
-SegmentNode<TCargo> const *
-right(SegmentNode<TCargo> const & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.right;
-}
-
-template <typename TCargo>
-SegmentNode<TCargo> *
-parent(SegmentNode<TCargo> & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.parent;
-}
-
-template <typename TCargo>
-SegmentNode<TCargo> const *
-parent(SegmentNode<TCargo> const & node)
-{
-    SEQAN_CHECKPOINT;
-    return node.parent;
-}
+*/
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNORDERED_NODE_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_NODE_H_

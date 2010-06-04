@@ -32,7 +32,8 @@ template <typename TJournalString>
 class Iter<TJournalString, JournalStringIterSpec>
 {
 public:
-    typedef Iter<TJournalString, JournalStringIterSpec> TIterator;
+    typedef Iter<typename _RemoveConst<TJournalString>::Type, JournalStringIterSpec> TNonConstIterator;
+    typedef Iter<TJournalString const, JournalStringIterSpec> TConstIterator;
     typedef typename TJournalString::TValue TValue;
     typedef typename TJournalString::TJournalSpec TJournalSpec;
     typedef typename TJournalString::TJournalTree TJournalTree;
@@ -59,7 +60,7 @@ public:
 
     Iter() : _journalStringPtr(0) { SEQAN_CHECKPOINT; }
 
-    Iter(TIterator const & other)
+    Iter(TConstIterator const & other)
             : _journalStringPtr(other._journalStringPtr),
               _journalTreeIterator(other._journalTreeIterator),
               _hostSegmentBegin(other._hostSegmentBegin),
@@ -67,11 +68,10 @@ public:
               _currentHostIt(other._currentHostIt),
               _insertionBufferSegmentBegin(other._insertionBufferSegmentBegin),
               _insertionBufferSegmentEnd(other._insertionBufferSegmentEnd),
-              _currentInsertionBufferIt(other._currentInsertionBufferIt)
-    { SEQAN_CHECKPOINT; }
+              _currentInsertionBufferIt(other._currentInsertionBufferIt) {}
 
     // Always allow conversion from non-const.
-    Iter(typename _RemoveConst<TIterator>::Type & other)
+    Iter(TNonConstIterator const & other)
             : _journalStringPtr(other._journalStringPtr),
               _journalTreeIterator(other._journalTreeIterator),
               _hostSegmentBegin(other._hostSegmentBegin),
@@ -79,8 +79,7 @@ public:
               _currentHostIt(other._currentHostIt),
               _insertionBufferSegmentBegin(other._insertionBufferSegmentBegin),
               _insertionBufferSegmentEnd(other._insertionBufferSegmentEnd),
-              _currentInsertionBufferIt(other._currentInsertionBufferIt)
-    { SEQAN_CHECKPOINT; }
+              _currentInsertionBufferIt(other._currentInsertionBufferIt) {}
 
     explicit
     Iter(TJournalString & journalString)
@@ -120,15 +119,18 @@ struct Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>
 
 // For SequenceJournal<TSequence, TJournalSpec>
 
+// TODO(holtgrew): Const-iteration does not work yet...
+/*
 template <typename TSequence, typename TJournalSpec>
 inline
 typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type
 begin(SequenceJournal<TSequence, TJournalSpec> const & journalString, Standard const &)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type TResult;
     return TResult(journalString);
 }
+*/
 
 template <typename TSequence, typename TJournalSpec>
 inline
@@ -140,17 +142,20 @@ begin(SequenceJournal<TSequence, TJournalSpec> & journalString, Standard const &
     return TResult(journalString);
 }
 
+// TODO(holtgrew): Const-iteration does not work yet...
+/*
 template <typename TSequence, typename TJournalSpec>
 inline
 typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type
 end(SequenceJournal<TSequence, TJournalSpec> const & journalString, Standard const &)
 {
-    SEQAN_CHECKPOINT;
+    SEQAN_XXXCHECKPOINT;
     typedef typename Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>::Type TResult;
     TResult result;
     _initJournalStringIteratorEnd(result, journalString);
     return result;
 }
+*/
 
 template <typename TSequence, typename TJournalSpec>
 inline
@@ -275,10 +280,10 @@ operator++(Iter<TJournalString, JournalStringIterSpec> & iterator)
 template <typename TJournalString>
 inline
 Iter<TJournalString, JournalStringIterSpec>
-operator++(Iter<TJournalString, JournalStringIterSpec> & iterator, int postfix)
+operator++(Iter<TJournalString, JournalStringIterSpec> & iterator, int /*postfix*/)
 {
     SEQAN_CHECKPOINT;
-    typename Iterator<TJournalString, JournalStringIterSpec>::Type temp;
+    Iter<TJournalString, JournalStringIterSpec> temp(iterator);
     ++iterator;
     return temp;    
 }
