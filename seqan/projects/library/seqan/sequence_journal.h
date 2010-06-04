@@ -44,9 +44,9 @@
 // Journaled Sequences.
 
 #include <seqan/sequence_journal/journal_entry.h>
-#include <seqan/sequence_journal/journal_tree_unordered_node.h>
-#include <seqan/sequence_journal/journal_tree_unordered.h>
-#include <seqan/sequence_journal/journal_tree_unordered_iterator.h>
+#include <seqan/sequence_journal/journal_tree_unbalanced_node.h>
+#include <seqan/sequence_journal/journal_tree_unbalanced.h>
+#include <seqan/sequence_journal/journal_tree_unbalanced_iterator.h>
 #include <seqan/sequence_journal/sequence_journal.h>
 #include <seqan/sequence_journal/sequence_journal_iterator.h>
 
