@@ -79,6 +79,7 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalExcludeTouching__int);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindNoInterval__int);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_GraphMap__int_ComputeCenter_StoreIntervals);
+    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalsIntervals__int_ComputeCenter);
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_Random__int_RandomCenter_StorePointsOnly);
 
     // Restore std::cout

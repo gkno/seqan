@@ -233,6 +233,85 @@ void IntervalTreeTest_TreeStructure() {
 }
 
 
+
+
+// Build an IntervalTree from constant data.  Then perform some interval queries
+// and check the results.
+template<typename TValue, typename TConstructSpec>
+void IntervalTreeTest_FindIntervalsIntervals() {
+
+    // Define some types to test.
+    typedef int                                     TCargo;
+    typedef IntervalAndCargo<TValue, TCargo>        TInterval;
+    typedef IntervalTree<TValue, TCargo>			TIntervalTree;
+
+    // Constant test fixture data.
+    const size_t kValuesLen = 10;
+    const double kValues[kValuesLen][2] = {
+        { 5.0, 20.0}, { 6.0, 13.0}, { 8.0, 10.0}, { 9.0, 18.0}, {15.0, 23.0},
+        {21.0, 25.0}, {29.0, 42.0}, {20.0, 36.0}, {38.0, 42.0}, {36.0, 48.0}
+    };
+
+    // Fill intervals with the intervals from kValues and a cargo that
+    // is equal to its index.
+    String<TInterval> intervals;
+    resize(intervals, kValuesLen);
+    for (size_t i = 0; i < kValuesLen; ++i) {
+        intervals[i].i1 = static_cast<TValue>(kValues[i][0]);
+        intervals[i].i2 = static_cast<TValue>(kValues[i][1]);
+        intervals[i].cargo = i;
+    }
+
+    // Construct interval tree graph and its corresponding property map.
+    TIntervalTree itree(intervals,TConstructSpec());
+
+    // Query for interval [10.0,20.0) and check for the expected result.
+    {
+		String<TCargo> result;
+		findIntervals(itree, (TValue)10.0, (TValue)20.0, result);
+
+		// intervals 0, 1, 3, and 4 should be returned
+	    SEQAN_ASSERT_EQ(length(result), 4u);
+
+		TCargo check = 0;
+		TCargo found = 100;
+		for(unsigned i = 0; i < length(result); ++i)
+		{
+			if(result[i]==check){ found = check; break;}
+		}
+        SEQAN_ASSERT_TRUE(found == check);
+    
+		check = 1;
+		found = 100;
+		for(unsigned i = 0; i < length(result); ++i)
+		{
+			if(result[i]==check){ found = check; break;}
+		}
+        SEQAN_ASSERT_TRUE(found == check);
+
+		check = 3;
+		found = 100;
+		for(unsigned i = 0; i < length(result); ++i)
+		{
+			if(result[i]==check){ found = check; break;}
+		}
+        SEQAN_ASSERT_TRUE(found == check);
+
+		check = 4;
+		found = 100;
+		for(unsigned i = 0; i < length(result); ++i)
+		{
+			if(result[i]==check){ found = check; break;}
+		}
+        SEQAN_ASSERT_TRUE(found == check);
+
+	}
+
+
+
+}
+
+
 // Build an IntervalTree from constant data.  The, perform extensive
 // checks on its structure and also test some query results against
 // expected results.
@@ -615,6 +694,13 @@ SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest_Random__int_RandomCenter
     IntervalTreeTest_Random<int, RandomCenter, StorePointsOnly>(0,100000);
 }
 
+
+// Call IntervalTreeTest_FindIntervalsIntervals with <int, ComputeCenter, StoreIntervals>
+// parametrization.
+SEQAN_DEFINE_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalsIntervals__int_ComputeCenter) {
+    srand(static_cast<unsigned>(time(NULL)));
+    IntervalTreeTest_FindIntervalsIntervals<int, ComputeCenter>();
+}
 
 
 //// Call IntervalTreeTests with <float, RandomCenter, StorePointsOnly>
