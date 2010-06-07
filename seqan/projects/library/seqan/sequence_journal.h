@@ -23,6 +23,7 @@
 //____________________________________________________________________________
 // Prerequisites.
 
+#include <algorithm>
 #include <map>
 #include <ostream>
 #include <string> 
@@ -47,6 +48,7 @@
 #include <seqan/sequence_journal/journal_tree_unbalanced_node.h>
 #include <seqan/sequence_journal/journal_tree_unbalanced.h>
 #include <seqan/sequence_journal/journal_tree_unbalanced_iterator.h>
+#include <seqan/sequence_journal/journal_tree_sorted_array.h>
 #include <seqan/sequence_journal/sequence_journal.h>
 #include <seqan/sequence_journal/sequence_journal_iterator.h>
 
