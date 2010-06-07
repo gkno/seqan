@@ -27,6 +27,7 @@ struct Unbalanced;
 template <typename TJournalTreeSpec>
 struct JournalTreeIterSpec;
 
+template <typename TJournalTreeSpec>
 struct JournalStringIterSpec;
 
 }  // namespace seqan

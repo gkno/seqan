@@ -28,21 +28,35 @@
 
 
 SEQAN_BEGIN_TESTSUITE(test_sequence_journal) {
-    // Call tests of the sequence journal.
-    SEQAN_CALL_TEST(test_sequence_journal_host);
-    SEQAN_CALL_TEST(test_sequence_clear);
-    SEQAN_CALL_TEST(test_sequence_erase_position);
-    SEQAN_CALL_TEST(test_sequence_erase_begin_end);
-    SEQAN_CALL_TEST(test_sequence_insert);
-    SEQAN_CALL_TEST(test_sequence_insert_value);
-    SEQAN_CALL_TEST(test_sequence_assign_value);
-    SEQAN_CALL_TEST(test_sequence_assign_infix);
-    SEQAN_CALL_TEST(test_sequence_length);
-    SEQAN_CALL_TEST(test_sequence_copy_constructor);
-    SEQAN_CALL_TEST(test_sequence_begin_end_iterator);
-    // TODO(holtgrew): Broken.
-//     SEQAN_CALL_TEST(test_sequence_begin_end_const_iterator);
-    SEQAN_CALL_TEST(test_sequence_journal_fuzzying);
+    // Call tests of the sequence journal with unbalanced tree journal.
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_host);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_clear);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_erase_position);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_erase_begin_end);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_insert);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_insert_value);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_assign_value);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_assign_infix);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_length);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_copy_constructor);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_begin_end_iterator);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_begin_end_const_iterator);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_fuzzying);
+
+    // Call tests of the sequence journal with sorted array_ journals.
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_host);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_clear);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_erase_position);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_erase_begin_end);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_insert);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_insert_value);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_assign_value);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_assign_infix);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_length);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_copy_constructor);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_begin_end_iterator);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_begin_end_const_iterator);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_fuzzying);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence_journal/journal_entry.h");

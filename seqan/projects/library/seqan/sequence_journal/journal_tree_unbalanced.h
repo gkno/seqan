@@ -8,19 +8,20 @@ namespace seqan {
 // ============================================================================
 
 // Tag: Unbalanced tree.
-struct Unbalanced;
+struct Unbalanced {};
 
 
 template <typename TNode, typename TTreeSpec>
 class JournalTree;
 
 
-template <typename _TNode>
-class JournalTree<_TNode, Unbalanced>
+template <typename _TCargo>
+class JournalTree<_TCargo, Unbalanced>
 {
   public:
-    typedef _TNode TNode;
-    typedef JournalTree<_TNode, Unbalanced> TJournalTree;
+    typedef _TCargo TCargo;
+    typedef SegmentNode<TCargo> TNode;
+    typedef JournalTree<TCargo, Unbalanced> TJournalTree;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
     typedef Unbalanced TSpec;
@@ -49,16 +50,16 @@ class JournalTree<_TNode, Unbalanced>
 // Metafunctions
 // ============================================================================
 
-template <typename TNode, typename TTreeSpec>
-struct Iterator<JournalTree<TNode, TTreeSpec>, Standard>
+template <typename TCargo>
+struct Reference<JournalTree<TCargo, Unbalanced> >
 {
-    typedef Iter<JournalTree<TNode, TTreeSpec>, JournalTreeIterSpec<TTreeSpec> > Type;
+    typedef TCargo & Type;
 };
 
-template <typename TNode, typename TTreeSpec>
-struct Iterator<JournalTree<TNode, TTreeSpec> const, Standard>
+template <typename TCargo>
+struct Reference<JournalTree<TCargo, Unbalanced> const>
 {
-    typedef Iter<JournalTree<TNode, TTreeSpec> const, JournalTreeIterSpec<TTreeSpec> > Type;
+    typedef TCargo const & Type;
 };
 
 // ============================================================================
@@ -180,10 +181,10 @@ bool checkStructure(TNode * const & node)
     return checkStructureRec(node);
 }
 
-template <typename TStream, typename TNode, typename TTreeSpec>
+template <typename TStream, typename TNode>
 inline
 TStream &
-operator<<(TStream & stream, JournalTree<TNode, TTreeSpec> const & tree)
+operator<<(TStream & stream, JournalTree<TNode, Unbalanced> const & tree)
 {
     if (tree._root != 0)
         return stream << "JournalTree(" << *tree._root << ")";
@@ -191,13 +192,13 @@ operator<<(TStream & stream, JournalTree<TNode, TTreeSpec> const & tree)
         return stream << "JournalTree()";
 }
 
-template <typename TNode>
+template <typename TCargo>
 inline
-void reinit(JournalTree<TNode, Unbalanced> & tree,
-            typename Size<TNode>::Type originalStringLength)
+void reinit(JournalTree<TCargo, Unbalanced> & tree,
+            typename Size<typename JournalTree<TCargo, Unbalanced>::TNode>::Type originalStringLength)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Cargo<TNode>::Type TCargo;
+    typedef typename JournalTree<TCargo, Unbalanced>::TNode TNode;
     clear(tree._nodeAllocator);
     tree._originalStringLength = originalStringLength;
     TNode *tmp;
@@ -254,15 +255,16 @@ _addToVirtualPositionsRightOf(TNode * node,
 }
 
 
-template <typename TNode, typename TPos>
+template <typename TCargo, typename TPos>
 inline
 void
-findNodeWithVirtualPos(TNode * & node,
-                       TNode * & parent,
-                       JournalTree<TNode, Unbalanced> const & tree,
+findNodeWithVirtualPos(typename JournalTree<TCargo, Unbalanced>::TNode * & node,
+                       typename JournalTree<TCargo, Unbalanced>::TNode * & parent,
+                       JournalTree<TCargo, Unbalanced> const & tree,
                        TPos const & pos)
 {
     SEQAN_CHECKPOINT;
+    typedef typename JournalTree<TCargo, Unbalanced>::TNode TNode;
 
     parent = 0;
     node = tree._root;
@@ -287,16 +289,16 @@ findNodeWithVirtualPos(TNode * & node,
 }
 
 
-template <typename TNode>
+template <typename TCargo>
 inline
-void recordErase(JournalTree<TNode, Unbalanced> & tree,
-                 typename Position<TNode>::Type const & pos,
-                 typename Position<TNode>::Type const & posEnd)
+void recordErase(JournalTree<TCargo, Unbalanced> & tree,
+                 typename Position<typename JournalTree<TCargo, Unbalanced>::TNode>::Type const & pos,
+                 typename Position<typename JournalTree<TCargo, Unbalanced>::TNode>::Type const & posEnd)
 {
     SEQAN_CHECKPOINT;
+    typedef typename JournalTree<TCargo, Unbalanced>::TNode TNode;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
-    typedef typename Cargo<TNode>::Type TCargo;
 
     SEQAN_ASSERT_TRUE(checkStructure(tree._root));
     SEQAN_ASSERT_TRUE(checkOrder(tree._root));
@@ -469,17 +471,17 @@ void recordErase(JournalTree<TNode, Unbalanced> & tree,
 }
 
 
-template <typename TNode>
+template <typename TCargo>
 inline
-void recordInsertion(JournalTree<TNode, Unbalanced> & tree,
-                     typename Position<TNode>::Type const & virtualPos,
-                     typename Position<TNode>::Type const & physicalBeginPos,
-                     typename Size<TNode>::Type const & length)
+void recordInsertion(JournalTree<TCargo, Unbalanced> & tree,
+                     typename Position<typename JournalTree<TCargo, Unbalanced>::TNode>::Type const & virtualPos,
+                     typename Position<typename JournalTree<TCargo, Unbalanced>::TNode>::Type const & physicalBeginPos,
+                     typename Size<typename JournalTree<TCargo, Unbalanced>::TNode>::Type const & length)
 {
     SEQAN_CHECKPOINT;
+    typedef typename JournalTree<TCargo, Unbalanced>::TNode TNode;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
-    typedef typename Cargo<TNode>::Type TCargo;
 
     SEQAN_ASSERT_TRUE(checkStructure(tree._root));
     SEQAN_ASSERT_TRUE(checkOrder(tree._root));

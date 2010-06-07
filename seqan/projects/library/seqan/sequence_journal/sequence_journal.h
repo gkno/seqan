@@ -45,8 +45,8 @@ public:
     typedef String<TValue, Alloc<> > TInsertionBuffer;
     typedef typename Size<THost>::Type TSize;
     typedef typename Position<THost>::Type TPosition;
-    typedef SegmentNode<JournalEntry<TSize, TPosition> > TNode;
-    typedef JournalTree<TNode, TJournalSpec> TJournalTree;
+    typedef JournalEntry<TSize, TPosition> TJournalEntry;
+    typedef JournalTree<TJournalEntry, TJournalSpec> TJournalTree;
 
     // The underlying, hosting string.
     Holder<THost> _host;
@@ -68,6 +68,22 @@ public:
 // ============================================================================
 // Metafunctions
 // ============================================================================
+
+/**
+.Metafunction.Size:
+..param.TValue:Spec.Journal String
+ */
+template<typename TSequence, typename TJournalSpec>
+struct Host<SequenceJournal<TSequence, TJournalSpec> >
+{
+    typedef TSequence Type;
+};
+
+template<typename TSequence, typename TJournalSpec>
+struct Host<SequenceJournal<TSequence, TJournalSpec> const>
+{
+    typedef TSequence const Type;
+};
 
 /**
 .Metafunction.Size:
@@ -175,8 +191,16 @@ void setHost(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal, TSequen
 */
 template<typename TSequence, typename TJournalSpec>
 inline
-TSequence &
+typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
 host(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
+{
+    SEQAN_CHECKPOINT;
+    return value(sequenceJournal._host);
+}
+template<typename TSequence, typename TJournalSpec>
+inline
+typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
+host(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
     SEQAN_CHECKPOINT;
     return value(sequenceJournal._host);
@@ -216,7 +240,7 @@ erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
     SEQAN_ASSERT_GEQ(static_cast<TPos>(sequenceJournal._length), posEnd - pos);
     sequenceJournal._length -= posEnd - pos;
     recordErase(sequenceJournal._journalTree, pos, posEnd);
-    if (length(sequenceJournal) == 0)
+    if (length(sequenceJournal._journalTree) == 0)
         clear(sequenceJournal._insertionBuffer);
 }
 
