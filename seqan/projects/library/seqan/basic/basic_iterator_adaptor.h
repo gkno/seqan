@@ -339,6 +339,24 @@ SEQAN_CHECKPOINT
 	return hostIterator(left) == hostIterator(right);
 }
 
+template <typename TContainer, typename TIterator, typename TSpec>
+inline bool 
+operator == (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
+			 typename IterComplementConst<TIterator>::Type const & right)
+{
+SEQAN_CHECKPOINT
+ 	return hostIterator(left) == right;
+}
+
+template <typename TContainer, typename TIterator, typename TSpec>
+inline bool 
+operator == (typename IterComplementConst<TIterator>::Type const & left,
+			 Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
+{
+SEQAN_CHECKPOINT
+	return left == hostIterator(right);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // operator !=
 //////////////////////////////////////////////////////////////////////////////
@@ -350,6 +368,24 @@ operator != (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
 {
 SEQAN_CHECKPOINT
 	return hostIterator(left) != hostIterator(right);
+}
+
+template <typename TContainer, typename TIterator, typename TSpec>
+inline bool 
+operator != (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
+			 typename IterComplementConst<TIterator>::Type const & right)
+{
+SEQAN_CHECKPOINT
+	return hostIterator(left) != right;
+}
+
+template <typename TContainer, typename TIterator, typename TSpec>
+inline bool 
+operator != (typename IterComplementConst<TIterator>::Type const & left,
+			 Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
+{
+SEQAN_CHECKPOINT
+	return left != hostIterator(right);
 }
 
 //////////////////////////////////////////////////////////////////////////////

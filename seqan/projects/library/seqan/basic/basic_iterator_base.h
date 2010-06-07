@@ -41,6 +41,53 @@ template <typename TContainer, typename TSpec>
 class Iter;
 
 //////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.IterComplementConst:
+..cat:Basic
+..summary:Complement the "constness" of the container of an iterator.
+..signature:IterComplementConst<TIterator>
+..param.TIterator:The iterator to toggle the constness of its container for.
+*/
+template <typename TIterator>
+struct IterComplementConst;
+
+template <typename TContainer, typename TSpec>
+struct IterComplementConst<Iter<TContainer, TSpec> >
+{
+    typedef Iter<
+        typename IF<
+            TYPECMP<typename _RemoveConst<TContainer>::Type, TContainer>::VALUE,
+            TContainer const,
+            typename _RemoveConst<TContainer>::Type>::Type,
+        TSpec> Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct IterComplementConst<Iter<TContainer, TSpec> const>
+        : IterComplementConst<Iter<TContainer, TSpec> > {};
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Metafunction.IterMakeConst:
+..cat:Basic
+..summary:Make the container of an Iter const.
+..signature:IterMakeConst<TIterator>
+..param.TIterator:The iterator make the container const for.
+*/
+template <typename TIterator>
+struct IterMakeConst;
+
+template <typename TContainer, typename TSpec>
+struct IterMakeConst<Iter<TContainer, TSpec> >
+{
+    typedef Iter<typename _RemoveConst<TContainer>::Type, TSpec> Type;
+};
+
+template <typename TContainer, typename TSpec>
+struct IterMakeConst<Iter<TContainer, TSpec> const>
+        : IterMakeConst<Iter<TContainer, TSpec> > {};
+
+//////////////////////////////////////////////////////////////////////////////
 ///.Metafunction.Spec.param.T.type:Class.Iter
 
 template <typename TContainer, typename TSpec>
