@@ -15,10 +15,12 @@
   Lesser General Public License for more details.
   ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ============================================================================
+  Code for a SearchEntries<UnorderedTree> iterator.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_ITERATOR_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_UNBALANCED_ITERATOR_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
 
 namespace seqan {
 
@@ -26,8 +28,8 @@ namespace seqan {
 // Tags, Classes
 // ============================================================================
 
-template <typename TJournalTreeSpec>
-struct JournalTreeIterSpec;
+template <typename TJournalEntriesSpec>
+struct JournalEntriesIterSpec;
 
 
 enum IterationDirection {
@@ -37,12 +39,12 @@ enum IterationDirection {
     DIRECTION_UP_RIGHT
 };
 
-template <typename TJournalTree>
-class Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> >
+template <typename TJournalEntries>
+class Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
 {
 public:
-    typedef Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > TIter;
-    typedef typename TJournalTree::TNode TNode;
+    typedef Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > TIter;
+    typedef typename TJournalEntries::TNode TNode;
 
     // The current node.
     TNode * _currentNode;
@@ -63,10 +65,10 @@ public:
     { SEQAN_CHECKPOINT; }
 
     explicit
-    Iter(TJournalTree & tree)
+    Iter(TJournalEntries & tree)
     {
         SEQAN_CHECKPOINT;
-        _initJournalTreeIterator(*this, tree);
+        _initJournalEntriesIterator(*this, tree);
     }
 };
 
@@ -76,84 +78,84 @@ public:
 // ============================================================================
 
 template <typename TCargo>
-struct Iterator<JournalTree<TCargo, Unbalanced>, Standard>
+struct Iterator<JournalEntries<TCargo, UnbalancedTree>, Standard>
 {
-    typedef Iter<JournalTree<TCargo, Unbalanced>, JournalTreeIterSpec<Unbalanced> > Type;
+    typedef Iter<JournalEntries<TCargo, UnbalancedTree>, JournalEntriesIterSpec<UnbalancedTree> > Type;
 };
 
 template <typename TCargo>
-struct Iterator<JournalTree<TCargo, Unbalanced> const, Standard>
+struct Iterator<JournalEntries<TCargo, UnbalancedTree> const, Standard>
 {
-    typedef Iter<JournalTree<TCargo, Unbalanced> const, JournalTreeIterSpec<Unbalanced> > Type;
+    typedef Iter<JournalEntries<TCargo, UnbalancedTree> const, JournalEntriesIterSpec<UnbalancedTree> > Type;
 };
 
-template <typename TJournalTree>
-struct Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct Value<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo & Type;
+    typedef typename TJournalEntries::TCargo & Type;
 };
 
-template <typename TJournalTree>
-struct Value<Iter<TJournalTree const, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct Value<Iter<TJournalEntries const, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo const & Type;
+    typedef typename TJournalEntries::TCargo const & Type;
 };
 
-template <typename TJournalTree>
-struct GetValue<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct GetValue<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo Type;
+    typedef typename TJournalEntries::TCargo Type;
 };
 
-template <typename TJournalTree>
-struct GetValue<Iter<TJournalTree const, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct GetValue<Iter<TJournalEntries const, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo Type;
+    typedef typename TJournalEntries::TCargo Type;
 };
 
-template <typename TJournalTree>
-struct Reference<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct Reference<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo & Type;
+    typedef typename TJournalEntries::TCargo & Type;
 };
 
-template <typename TJournalTree>
-struct Reference<Iter<TJournalTree const, JournalTreeIterSpec<Unbalanced> > >
+template <typename TJournalEntries>
+struct Reference<Iter<TJournalEntries const, JournalEntriesIterSpec<UnbalancedTree> > >
 {
-    typedef typename TJournalTree::TCargo const & Type;
+    typedef typename TJournalEntries::TCargo const & Type;
 };
 
 // ============================================================================
 // Functions
 // ============================================================================
 
-// For JournalTree<TNode, Unbalanced>
+// For JournalEntries<TNode, UnbalancedTree>
 
 template <typename TNode>
 inline
-typename Iterator<JournalTree<TNode, Unbalanced> const, Standard>::Type
-begin(JournalTree<TNode, Unbalanced> const & journalTree, Standard const &)
+typename Iterator<JournalEntries<TNode, UnbalancedTree> const, Standard>::Type
+begin(JournalEntries<TNode, UnbalancedTree> const & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    return Iter<JournalTree<TNode, Unbalanced> const, JournalTreeIterSpec<Unbalanced> >(journalTree);
+    return Iter<JournalEntries<TNode, UnbalancedTree> const, JournalEntriesIterSpec<UnbalancedTree> >(journalTree);
 }
 
 template <typename TNode>
 inline
-typename Iterator<JournalTree<TNode, Unbalanced>, Standard>::Type
-begin(JournalTree<TNode, Unbalanced> & journalTree, Standard const &)
+typename Iterator<JournalEntries<TNode, UnbalancedTree>, Standard>::Type
+begin(JournalEntries<TNode, UnbalancedTree> & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    return Iter<JournalTree<TNode, Unbalanced>, JournalTreeIterSpec<Unbalanced> >(journalTree);
+    return Iter<JournalEntries<TNode, UnbalancedTree>, JournalEntriesIterSpec<UnbalancedTree> >(journalTree);
 }
 
 template <typename TNode>
 inline
-typename Iterator<JournalTree<TNode, Unbalanced> const, Standard>::Type
-end(JournalTree<TNode, Unbalanced> const & journalTree, Standard const &)
+typename Iterator<JournalEntries<TNode, UnbalancedTree> const, Standard>::Type
+end(JournalEntries<TNode, UnbalancedTree> const & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef typename Iterator<JournalTree<TNode, Unbalanced> const, Standard>::Type TIterator;
+    typedef typename Iterator<JournalEntries<TNode, UnbalancedTree> const, Standard>::Type TIterator;
     TIterator result;
     result._currentNode = journalTree._root;
     result._iterationDirection = DIRECTION_UP_RIGHT;
@@ -162,24 +164,24 @@ end(JournalTree<TNode, Unbalanced> const & journalTree, Standard const &)
 
 template <typename TNode>
 inline
-typename Iterator<JournalTree<TNode, Unbalanced>, Standard>::Type
-end(JournalTree<TNode, Unbalanced> & journalTree, Standard const &)
+typename Iterator<JournalEntries<TNode, UnbalancedTree>, Standard>::Type
+end(JournalEntries<TNode, UnbalancedTree> & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
-    typedef Iter<JournalTree<TNode, Unbalanced>, JournalTreeIterSpec<Unbalanced> > TIterator;
+    typedef Iter<JournalEntries<TNode, UnbalancedTree>, JournalEntriesIterSpec<UnbalancedTree> > TIterator;
     TIterator result;
     result._currentNode = journalTree._root;
     result._iterationDirection = DIRECTION_UP_RIGHT;
     return result;
 }
 
-// For JournalTreeIterator<TJournalTree, JournalTreeIterSpec<Unbalanced> >
+// For JournalEntriesIterator<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 void
-_initJournalTreeIterator(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
-                         TJournalTree & tree)
+_initJournalEntriesIterator(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
+                         TJournalEntries & tree)
 {
     SEQAN_CHECKPOINT;
     iterator._currentNode = tree._root;
@@ -193,11 +195,11 @@ _initJournalTreeIterator(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & 
 }
 
 // Initialize journal tree iterator to end, i.e. root & direction is up right.
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 void
-_initJournalTreeIteratorEnd(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
-                            TJournalTree & tree)
+_initJournalEntriesIteratorEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
+                            TJournalEntries & tree)
 {
     SEQAN_CHECKPOINT;
     iterator._currentNode = tree._root;
@@ -206,30 +208,30 @@ _initJournalTreeIteratorEnd(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> >
 
 // TODO(holtgrew): Unused, remove?
 /*
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 void
-setValue(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
-         typename Value<TJournalTree>::Type const & value)
+setValue(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
+         typename Value<TJournalEntries>::Type const & value)
 {
     SEQAN_XXXCHECKPOINT;
     setValue(*iterator._currentNode, value);
 }
 */
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
-value(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+typename Value<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type
+value(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     return cargo(*iterator._currentNode);
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
-value(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+typename Value<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type
+value(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
 {
     SEQAN_CHECKPOINT;
     return cargo(*iterator._currentNode);
@@ -237,10 +239,10 @@ value(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
 
 // TODO(holtgrew): Unused, remove?
 /*
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
-operator*(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+typename Value<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type
+operator*(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_XXXCHECKPOINT;
     return value(iterator);
@@ -249,29 +251,29 @@ operator*(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 
 // TODO(holtgrew): Unused, remove?
 /*
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-typename Value<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type
-operator*(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+typename Value<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type
+operator*(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
 {
     SEQAN_XXXCHECKPOINT;
     return value(iterator);
 }
 */
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-hasLeftChild(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+hasLeftChild(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     return iterator._currentNode->left != 0;
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-goLeft(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+goLeft(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     if (!hasLeftChild(iterator))
@@ -281,19 +283,19 @@ goLeft(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
     return true;
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-hasRightChild(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+hasRightChild(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     return iterator._currentNode->right != 0;
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-goRight(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+goRight(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     if (!hasRightChild(iterator))
@@ -303,19 +305,19 @@ goRight(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
     return true;
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-hasParent(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+hasParent(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
 {
     SEQAN_CHECKPOINT;
     return iterator._currentNode->parent != 0;
 }
     
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-goUp(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+goUp(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     if (!hasParent(iterator)) {
         // Up from the root means we go to end, set direction to up-right.
@@ -330,29 +332,29 @@ goUp(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
     return true;
 }
 
-// template <typename TJournalTree>
+// template <typename TJournalEntries>
 // inline
 // bool
-// atEnd(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & iterator)
+// atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
 // {
 //     SEQAN_CHECKPOINT;
 //     return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
 // }
 
-// template <typename TJournalTree>
+// template <typename TJournalEntries>
 // inline
 // bool
-// atEnd(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+// atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 // {
 //     SEQAN_CHECKPOINT;
-//     typedef Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > TIterator;
+//     typedef Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > TIterator;
 //     return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
 // }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > &
-operator++(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
+Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > &
+operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
 {
     SEQAN_CHECKPOINT;
     switch (iterator._iterationDirection) {
@@ -392,54 +394,54 @@ operator++(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator)
 
 // TODO(holtgrew): Unused, remove?
 /*
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
-Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> >
-operator++(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > & iterator,
+Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
+operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
            int postfix)
 {
     SEQAN_XXXCHECKPOINT;
-    Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > temp(iterator);
+    Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > temp(iterator);
     ++iterator;
     return temp;
 }
 */
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-operator==(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
-           Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & b)
+operator==(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & a,
+           Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & b)
 {
     SEQAN_CHECKPOINT;
     return (a._currentNode == b._currentNode) && (a._iterationDirection == b._iterationDirection);
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-operator==(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
-           typename IterComplementConst<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type const & b)
+operator==(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & a,
+           typename IterComplementConst<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type const & b)
 {
     SEQAN_CHECKPOINT;
     return (a._currentNode == b._currentNode) && (a._iterationDirection == b._iterationDirection);
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-operator!=(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
-           Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & b)
+operator!=(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & a,
+           Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & b)
 {
     SEQAN_CHECKPOINT;
     return (a._currentNode != b._currentNode) || (a._iterationDirection != b._iterationDirection);
 }
 
-template <typename TJournalTree>
+template <typename TJournalEntries>
 inline
 bool
-operator!=(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
-           typename IterComplementConst<Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > >::Type const & b)
+operator!=(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & a,
+           typename IterComplementConst<Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > >::Type const & b)
 {
     SEQAN_CHECKPOINT;
     return (a._currentNode != b._currentNode) || (a._iterationDirection != b._iterationDirection);
@@ -447,4 +449,4 @@ operator!=(Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > const & a,
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_UNBALANCED_TREE_ITERATOR_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_

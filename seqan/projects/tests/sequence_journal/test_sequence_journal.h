@@ -13,12 +13,15 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-  
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  High-level tests for the sequence_journal module.  In the future, these
-  should be broken down and code should be tested more isolated.
+  Tests for the sequence_journal module.  Note that we only test journaled
+  strings here.  In a perfect world, we would have tests for each atomic
+  part of the module but for the moment, this has to suffice.  Instead of
+  testing each of the many corner cases for the Journal Entries data
+  structures, we rely on "fuzzying", i.e. executing a random set of operations
+  and hope that all corner cases occur there.
   ===========================================================================
 */
 
@@ -216,12 +219,92 @@ void testSequenceJournalBeginEndConstIterator(TStringJournalSpec const &)
     SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
     insert(sequenceJournal, 2, 'X');
 
-    typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec> const, Standard>::Type TIterator;
+    // Test with non-const iterator.
+    {
+        typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec>, Standard>::Type TIterator;
+        CharString buffer;
+        for (TIterator it = begin(sequenceJournal, Standard()), itend = end(sequenceJournal, Standard()); it != itend; ++it)
+            appendValue(buffer, *it);
+        SEQAN_ASSERT_EQ("teXst", buffer);
+    }
+    // Test with const iterator.
+    {
+        typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec> const, Standard>::Type TIterator;
+        SequenceJournal<CharString, TStringJournalSpec> const & constSJ = sequenceJournal;
+        CharString buffer;
+        for (TIterator it = begin(constSJ, Standard()), itend = end(constSJ, Standard()); it != itend; ++it)
+            appendValue(buffer, *it);
+        SEQAN_ASSERT_EQ("teXst", buffer);
+    }
+    // Test comparison of const and non-const iterators.
+//     {
+//         typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec>, Standard>::Type TNonConstIterator;
+//         typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec> const, Standard>::Type TIterator;
+//         SequenceJournal<CharString, TStringJournalSpec> const & constSJ = sequenceJournal;
 
-    CharString buffer;
-    for (TIterator it = begin(sequenceJournal, Standard()), itend = end(sequenceJournal, Standard()); it != itend; ++it)
-        appendValue(buffer, *it);
-    SEQAN_ASSERT_EQ("teXst", buffer);
+//         SEQAN_ASSERT_TRUE(begin(sequenceJournal, Standard()) == begin(constSJ, Standard()));
+//     }
+}
+
+
+template <typename TStringJournalSpec>
+void testSequenceJournalSubscriptOperator(TStringJournalSpec const &)
+{
+    using namespace seqan;
+
+    const unsigned ASSIGN_COUNT = 2;
+    const unsigned LENGTH = 1000;
+    const unsigned SEED = 42;
+    std::srand(SEED);
+    mtRandInit(false);
+
+#define RAND_CHAR() ('A' + mtRand() % ('Z' - 'A'))
+
+    // Build random reference and host string.
+    String<char> string;
+    reserve(string, LENGTH);
+    String<char> host;
+    reserve(host, LENGTH);
+    for (unsigned i = 0; i < LENGTH; ++i) {
+        char c = RAND_CHAR();
+        appendValue(string, c);
+        appendValue(host, c);
+    }
+
+    // Create journal string over host and randomly assign infixes in
+    // both to fill the tree.
+    SequenceJournal<String<char>, TStringJournalSpec> sequenceJournal(host);
+    for (unsigned i = 0; i < ASSIGN_COUNT; ++i) {
+        unsigned begin = 0;
+        unsigned end = 0;
+        while (begin == end) {
+            begin = mtRand() % length(string);
+            end = mtRand() % (length(string) + 1);
+        }
+        if (begin > end)
+            std::swap(begin, end);            
+        unsigned len = end - begin;
+        String<char> buffer;
+        reserve(buffer, len);
+        for (unsigned i = 0; i < len; ++i)
+            appendValue(buffer, RAND_CHAR());
+        infix(string, begin, end) = buffer;
+        assignInfix(sequenceJournal, begin, end, buffer);
+    }
+
+#undef RAND_CHAR
+
+    SEQAN_ASSERT_EQ(length(sequenceJournal), length(string));
+
+    std::stringstream tmp;
+    tmp << sequenceJournal;
+    CharString str2(tmp.str());
+    SEQAN_ASSERT_EQ(str2, string);
+
+    // Now, test the subscript operator.
+    for (unsigned i = 0; i < length(sequenceJournal); ++i) {
+        SEQAN_ASSERT_EQ_MSG(sequenceJournal[i], string[i], "i = %d", i);
+    }
 }
 
 
@@ -271,10 +354,10 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 //         SEQAN_ASSERT_EQ(string, tmp.str());
 //         std::cout << "string = " << string << std::endl;
 //         std::cout << "jrnld  = " << tmp.str() << std::endl;
-//         std::cout << "  tree = " << sequenceJournal._journalTree << std::endl;
+//         std::cout << "  tree = " << sequenceJournal._journalEntries << std::endl;
 //         std::cout << "  orig = " << value(sequenceJournal._host) << std::endl;
 //         std::cout << "  buff = " << sequenceJournal._insertionBuffer << std::endl;
-//         journalTreeToDot(std::cerr, nextId, sequenceJournal._journalTree);
+//         journalTreeToDot(std::cerr, nextId, sequenceJournal._journalEntries);
     }
 
     size_t expectedLength = length(string);
@@ -331,7 +414,7 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
             //std::cerr << "length(string) == " << length(string) << std::endl;
             //std::cerr << "string == " << string << std::endl;
             //std::cerr << "journal string== " << sequenceJournal << std::endl;
-            //std::cerr << "journal string== " << sequenceJournal._journalTree << std::endl;
+            //std::cerr << "journal string== " << sequenceJournal._journalEntries << std::endl;
             unsigned begin = 0;
             unsigned end = 0;
             while (begin == end) {
@@ -347,15 +430,15 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 //             std::cout << ",---" << std::endl;
 //             std::cout << "| string = " << string << std::endl;
 //             std::cout << "| jrnld  = " << tmp.str() << std::endl;
-//             std::cout << "|   tree = " << sequenceJournal._journalTree << std::endl;
+//             std::cout << "|   tree = " << sequenceJournal._journalEntries << std::endl;
 //             std::cout << "|   orig = " << value(sequenceJournal._host) << std::endl;
 //             std::cout << "|   buff = " << sequenceJournal._insertionBuffer << std::endl;
 //             std::cout << "erase(sequenceJournal, " << begin << ", " << end << ")" << std::endl;
 //             std::cout << "`---" << std::endl;
-//             std::cout << sequenceJournal._journalTree << std::endl;
+//             std::cout << sequenceJournal._journalEntries << std::endl;
             erase(string, begin, end);
             erase(sequenceJournal, begin, end);
-//             std::cout << sequenceJournal._journalTree << std::endl;
+//             std::cout << sequenceJournal._journalEntries << std::endl;
         } else {
             SEQAN_ASSERT_FAIL("Invalid change type.");
         }
@@ -372,7 +455,7 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
             std::string buffer;
             reserve(buffer, length(sequenceJournal));
             typedef typename Iterator<TSequenceJournal, Standard>::Type TIterator;
-//             std::cout << sequenceJournal._journalTree << std::endl;
+//             std::cout << sequenceJournal._journalEntries << std::endl;
             for (TIterator it = begin(sequenceJournal), itend = end(sequenceJournal, Standard()); it != itend; ++it) {
                 appendValue(buffer, *it);
             }
@@ -408,70 +491,76 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 }
 
 
-// Tag: Unbalanced()
+// Tag: UnbalancedTree()
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_host) {
-    testSequenceJournalHost(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_host) {
+    testSequenceJournalHost(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_clear) {
-    testSequenceJournalClear(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_clear) {
+    testSequenceJournalClear(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_erase_position) {
-    testSequenceJournalErasePosition(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_position) {
+    testSequenceJournalErasePosition(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_erase_begin_end) {
-    testSequenceJournalEraseBeginEnd(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_begin_end) {
+    testSequenceJournalEraseBeginEnd(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_insert) {
-    testSequenceJournalInsert(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert) {
+    testSequenceJournalInsert(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_insert_value) {
-    testSequenceJournalInsertValue(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert_value) {
+    testSequenceJournalInsertValue(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_assign_value) {
-    testSequenceJournalAssignValue(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_value) {
+    testSequenceJournalAssignValue(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_assign_infix) {
-    testSequenceJournalAssignInfix(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_infix) {
+    testSequenceJournalAssignInfix(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_length) {
-    testSequenceJournalLength(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_length) {
+    testSequenceJournalLength(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_copy_constructor) {
-    testSequenceJournalCopyConstructor(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_copy_constructor) {
+    testSequenceJournalCopyConstructor(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_begin_end_iterator) {
-    testSequenceJournalBeginEndIterator(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_iterator) {
+    testSequenceJournalBeginEndIterator(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_begin_end_const_iterator) {
-    testSequenceJournalBeginEndConstIterator(Unbalanced());
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_const_iterator) {
+    testSequenceJournalBeginEndConstIterator(UnbalancedTree());
 }
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_fuzzying) {
-    testSequenceJournalFuzzying(Unbalanced());
+
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_subscript_operator) {
+    testSequenceJournalSubscriptOperator(UnbalancedTree());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_fuzzying) {
+    testSequenceJournalFuzzying(UnbalancedTree());
 }
 
 
@@ -534,6 +623,11 @@ SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_iterator) {
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_const_iterator) {
     testSequenceJournalBeginEndConstIterator(SortedArray());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_subscript_operator) {
+    testSequenceJournalSubscriptOperator(SortedArray());
 }
 
 

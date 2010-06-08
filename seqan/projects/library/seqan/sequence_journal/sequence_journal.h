@@ -15,6 +15,8 @@
   Lesser General Public License for more details.
   ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ============================================================================
+  Journaled String implementation.
   ==========================================================================*/
 
 #ifndef SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
@@ -46,26 +48,30 @@ public:
     typedef typename Size<THost>::Type TSize;
     typedef typename Position<THost>::Type TPosition;
     typedef JournalEntry<TSize, TPosition> TJournalEntry;
-    typedef JournalTree<TJournalEntry, TJournalSpec> TJournalTree;
+    typedef JournalEntries<TJournalEntry, TJournalSpec> TJournalEntries;
 
-    // The underlying, hosting string.
-    Holder<THost> _host;
+    // The underlying host string.
+    Holder<THost> _holder;
     // A buffer for inserted strings.
     TInsertionBuffer _insertionBuffer;
-    // The journal is a binary search tree.
-    TJournalTree _journalTree;
-    // The journal string's size.
+    // The journal is a sorted set of TJournalEntry objects, the exact types
+    // depends on TJournalSpec.  Note that the entries resemble a partial
+    // sum datastructure.
+    TJournalEntries _journalEntries;
+    // The journaled string's size.
     TSize _length;
 
-	SequenceJournal() {}
+    SequenceJournal() {}
 
-	SequenceJournal(TSequence & host)
+    SequenceJournal(TSequence & host)
     {
+        SEQAN_CHECKPOINT;
         setHost(*this, host);
-	}
+    }
 
     TValue operator[](TPosition const & pos) const
     {
+        SEQAN_CHECKPOINT;
         return getValue(*this, pos);
     }
 };
@@ -164,7 +170,7 @@ struct JournalType<SequenceJournal<TSequence, TJournalSpec> const>
     typedef typename Position<TSequence>::Type _TPosition;
     typedef JournalEntry<_TSize, _TPosition> _TJournalEntry;
 
-    typedef JournalTree<_TJournalEntry, TJournalSpec> const Type;
+    typedef JournalEntries<_TJournalEntry, TJournalSpec> const Type;
 };
 
 template<typename TSequence, typename TJournalSpec>
@@ -174,7 +180,7 @@ struct JournalType<SequenceJournal<TSequence, TJournalSpec> >
     typedef typename Position<TSequence>::Type _TPosition;
     typedef JournalEntry<_TSize, _TPosition> _TJournalEntry;
 
-    typedef JournalTree<_TJournalEntry, TJournalSpec> Type;
+    typedef JournalEntries<_TJournalEntry, TJournalSpec> Type;
 };
 
 
@@ -189,12 +195,12 @@ operator<<(TStream & stream, SequenceJournal<TSequence, TJournalSpec> const & se
 {
     SEQAN_CHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TSequenceJournal;
-    typedef typename TSequenceJournal::TJournalTree TJournalTree;
-    typedef typename Iterator<TJournalTree const, Standard>::Type TIterator;
+    typedef typename TSequenceJournal::TJournalEntries TJournalEntries;
+    typedef typename Iterator<TJournalEntries const, Standard>::Type TIterator;
 
-    for (TIterator it = begin(sequenceJournal._journalTree), itend = end(sequenceJournal._journalTree); it != itend; ++it) {
+    for (TIterator it = begin(sequenceJournal._journalEntries), itend = end(sequenceJournal._journalEntries); it != itend; ++it) {
         if (value(it).segmentSource == SOURCE_ORIGINAL) {
-            stream << infix(value(sequenceJournal._host), value(it).physicalPosition, value(it).physicalPosition + value(it).length);
+            stream << infix(value(sequenceJournal._holder), value(it).physicalPosition, value(it).physicalPosition + value(it).length);
         } else {
             SEQAN_ASSERT_EQ(value(it).segmentSource, SOURCE_PATCH);
             stream << infix(sequenceJournal._insertionBuffer, value(it).physicalPosition, value(it).physicalPosition + value(it).length);
@@ -213,9 +219,9 @@ inline
 void setHost(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal, TSequence & str)
 {
     SEQAN_CHECKPOINT;
-    setValue(sequenceJournal._host, str);
+    setValue(sequenceJournal._holder, str);
     sequenceJournal._length = length(str);
-    reinit(sequenceJournal._journalTree, length(str));
+    reinit(sequenceJournal._journalEntries, length(str));
 }
 
 /**
@@ -228,7 +234,7 @@ typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
 host(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
 {
     SEQAN_CHECKPOINT;
-    return value(sequenceJournal._host);
+    return value(sequenceJournal._holder);
 }
 template<typename TSequence, typename TJournalSpec>
 inline
@@ -236,7 +242,7 @@ typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
 host(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 {
     SEQAN_CHECKPOINT;
-    return value(sequenceJournal._host);
+    return value(sequenceJournal._holder);
 }
 
 /**
@@ -250,7 +256,7 @@ void
 clear(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
 {
     SEQAN_CHECKPOINT;
-    reinit(sequenceJournal._journalTree, length(host(sequenceJournal)));
+    reinit(sequenceJournal._journalEntries, length(host(sequenceJournal)));
 }
 
 /**
@@ -272,8 +278,8 @@ erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
     SEQAN_CHECKPOINT;
     SEQAN_ASSERT_GEQ(static_cast<TPos>(sequenceJournal._length), posEnd - pos);
     sequenceJournal._length -= posEnd - pos;
-    recordErase(sequenceJournal._journalTree, pos, posEnd);
-    if (length(sequenceJournal._journalTree) == 0)
+    recordErase(sequenceJournal._journalEntries, pos, posEnd);
+    if (length(sequenceJournal._journalEntries) == 0)
         clear(sequenceJournal._insertionBuffer);
 }
 
@@ -300,7 +306,7 @@ insert(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
     sequenceJournal._length += length(seq);
     TPos beginPos = length(sequenceJournal._insertionBuffer);
     append(sequenceJournal._insertionBuffer, seq);
-    recordInsertion(sequenceJournal._journalTree, pos, beginPos, length(seq));
+    recordInsertion(sequenceJournal._journalEntries, pos, beginPos, length(seq));
 }
 
 
@@ -314,7 +320,7 @@ insertValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
     SEQAN_CHECKPOINT;
     TPos beginPos = length(sequenceJournal._insertionBuffer);
     appendValue(sequenceJournal._insertionBuffer, value);
-    recordInsertion(sequenceJournal._journalTree, pos, beginPos, 1u);
+    recordInsertion(sequenceJournal._journalEntries, pos, beginPos, 1u);
 }
 
 
@@ -367,9 +373,9 @@ front(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
     SEQAN_XXXCHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TString;
     typedef typename TString::TNode TNode;
-    TNode frontNode = front(sequenceJournal._journalTree);
+    TNode frontNode = front(sequenceJournal._journalEntries);
     if (frontNode->segmentSource == SOURCE_ORIGINAL) {
-        return getValue(value(sequenceJournal._host), frontNode->virtualPosition + frontNode->length - 1);
+        return getValue(value(sequenceJournal._holder), frontNode->virtualPosition + frontNode->length - 1);
     } else {
         SEQAN_ASSERT_EQ(frontNode->segmentSource, SOURCE_PATCH);
         return getValue(sequenceJournal._insertionBuffer, frontNode->virtualPosition + frontNode->length - 1);
@@ -385,9 +391,9 @@ back(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
     SEQAN_XXXCHECKPOINT;
     typedef SequenceJournal<TSequence, TJournalSpec> TString;
     typedef typename TString::TNode TNode;
-    TNode backNode = back(sequenceJournal._journalTree);
+    TNode backNode = back(sequenceJournal._journalEntries);
     if (backNode->segmentSource == SOURCE_ORIGINAL) {
-        return getValue(value(sequenceJournal._host), backNode->virtualPosition + backNode->length - 1);
+        return getValue(value(sequenceJournal._holder), backNode->virtualPosition + backNode->length - 1);
     } else {
         SEQAN_ASSERT_EQ(backNode->segmentSource, SOURCE_PATCH);
         return getValue(sequenceJournal._insertionBuffer, backNode->virtualPosition + backNode->length - 1);
@@ -426,11 +432,11 @@ getValue(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal,
     typedef typename TSequenceJournal::TJournalEntry TJournalEntry;
     typedef typename Position<TSequenceJournal>::Type TPos;
 
-    TJournalEntry entry = findJournalEntry(sequenceJournal._journalTree, pos);
+    TJournalEntry entry = findJournalEntry(sequenceJournal._journalEntries, pos);
     TPos relativePos = pos - entry.virtualPosition;
     
     if (entry.segmentSource == SOURCE_ORIGINAL) {
-        return getValue(value(sequenceJournal._host), entry.physicalPosition + relativePos);
+        return getValue(value(sequenceJournal._holder), entry.physicalPosition + relativePos);
     } else {
         return getValue(sequenceJournal._insertionBuffer, entry.physicalPosition + relativePos);
     }

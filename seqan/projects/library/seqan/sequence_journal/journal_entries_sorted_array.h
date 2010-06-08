@@ -16,11 +16,11 @@
   ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ============================================================================
-  Journal implementation using a sorted string of journal elements.
+  Journal entries implementation using a sorted string of journal elements.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_SORTED_ARRAY_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_SORTED_ARRAY_H_
+#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_
+#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_
 
 namespace seqan {
 
@@ -33,11 +33,11 @@ struct SortedArray {};
 
 
 template <typename TNode, typename TTreeSpec>
-class JournalTree;
+class JournalEntries;
 
 
 template <typename _TCargo>
-class JournalTree<_TCargo, SortedArray>
+class JournalEntries<_TCargo, SortedArray>
 {
 public:
     typedef _TCargo TCargo;
@@ -46,7 +46,7 @@ public:
     String<TCargo> _journalNodes;
     TSize _originalStringLength;
 
-    JournalTree() : _originalStringLength(0) {}
+    JournalEntries() : _originalStringLength(0) {}
 };
 
 // ============================================================================
@@ -54,26 +54,26 @@ public:
 // ============================================================================
 
 template <typename TCargo>
-struct Iterator<JournalTree<TCargo, SortedArray>, Standard>
+struct Iterator<JournalEntries<TCargo, SortedArray>, Standard>
 {
     typedef typename Iterator<String<TCargo>, Standard>::Type Type;
 };
 
 
 template <typename TCargo>
-struct Iterator<JournalTree<TCargo, SortedArray> const, Standard>
+struct Iterator<JournalEntries<TCargo, SortedArray> const, Standard>
 {
     typedef typename Iterator<String<TCargo> const, Standard>::Type Type;
 };
 
 template <typename TCargo>
-struct Reference<JournalTree<TCargo, SortedArray> >
+struct Reference<JournalEntries<TCargo, SortedArray> >
 {
     typedef TCargo & Type;
 };
 
 template <typename TCargo>
-struct Reference<JournalTree<TCargo, SortedArray> const>
+struct Reference<JournalEntries<TCargo, SortedArray> const>
 {
     typedef TCargo const & Type;
 };
@@ -85,9 +85,9 @@ struct Reference<JournalTree<TCargo, SortedArray> const>
 template <typename TStream, typename TNode>
 inline
 TStream &
-operator<<(TStream & stream, JournalTree<TNode, SortedArray> const & tree)
+operator<<(TStream & stream, JournalEntries<TNode, SortedArray> const & tree)
 {
-    stream << "JournalTree(";
+    stream << "JournalEntries(";
     for (unsigned i = 0; i < length(tree._journalNodes); ++i) {
         if (i > 0) stream << ", ";
         stream << tree._journalNodes[i];
@@ -97,7 +97,7 @@ operator<<(TStream & stream, JournalTree<TNode, SortedArray> const & tree)
 }
 
 template <typename TCargo>
-bool _checkSortedArrayTree(JournalTree<TCargo, SortedArray> const & tree)
+bool _checkSortedArrayTree(JournalEntries<TCargo, SortedArray> const & tree)
 {
     SEQAN_CHECKPOINT;
     typedef typename Iterator<String<TCargo> const, Standard>::Type TIterator;
@@ -119,8 +119,8 @@ bool _checkSortedArrayTree(JournalTree<TCargo, SortedArray> const & tree)
 }
 
 template <typename TCargo>
-typename Iterator<JournalTree<TCargo, SortedArray>, Standard>::Type
-begin(JournalTree<TCargo, SortedArray> & journalTree, Standard const &)
+typename Iterator<JournalEntries<TCargo, SortedArray>, Standard>::Type
+begin(JournalEntries<TCargo, SortedArray> & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return begin(journalTree._journalNodes, Standard());
@@ -128,8 +128,8 @@ begin(JournalTree<TCargo, SortedArray> & journalTree, Standard const &)
 
 
 template <typename TCargo>
-typename Iterator<JournalTree<TCargo, SortedArray> const, Standard>::Type
-begin(JournalTree<TCargo, SortedArray> const & journalTree, Standard const &)
+typename Iterator<JournalEntries<TCargo, SortedArray> const, Standard>::Type
+begin(JournalEntries<TCargo, SortedArray> const & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return begin(journalTree._journalNodes, Standard());
@@ -137,8 +137,8 @@ begin(JournalTree<TCargo, SortedArray> const & journalTree, Standard const &)
 
 
 template <typename TCargo>
-typename Iterator<JournalTree<TCargo, SortedArray>, Standard>::Type
-end(JournalTree<TCargo, SortedArray> & journalTree, Standard const &)
+typename Iterator<JournalEntries<TCargo, SortedArray>, Standard>::Type
+end(JournalEntries<TCargo, SortedArray> & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return end(journalTree._journalNodes, Standard());
@@ -146,8 +146,8 @@ end(JournalTree<TCargo, SortedArray> & journalTree, Standard const &)
 
 
 template <typename TCargo>
-typename Iterator<JournalTree<TCargo, SortedArray> const, Standard>::Type
-end(JournalTree<TCargo, SortedArray> const & journalTree, Standard const &)
+typename Iterator<JournalEntries<TCargo, SortedArray> const, Standard>::Type
+end(JournalEntries<TCargo, SortedArray> const & journalTree, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return end(journalTree._journalNodes, Standard());
@@ -156,7 +156,7 @@ end(JournalTree<TCargo, SortedArray> const & journalTree, Standard const &)
 
 template <typename TCargo>
 inline
-void reinit(JournalTree<TCargo, SortedArray> & tree,
+void reinit(JournalEntries<TCargo, SortedArray> & tree,
             typename Size<TCargo>::Type originalStringLength)
 {
     SEQAN_CHECKPOINT;
@@ -169,7 +169,7 @@ void reinit(JournalTree<TCargo, SortedArray> & tree,
 template <typename TCargo>
 inline
 TCargo const &
-findJournalEntry(JournalTree<TCargo, SortedArray> const & tree,
+findJournalEntry(JournalEntries<TCargo, SortedArray> const & tree,
                  typename Position<TCargo>::Type const & pos) {
     typedef typename Size<TCargo>::Type TSize;
     typedef typename Position<TCargo>::Type TPos;
@@ -193,7 +193,7 @@ findJournalEntry(JournalTree<TCargo, SortedArray> const & tree,
 
 template <typename TCargo>
 inline
-void recordInsertion(JournalTree<TCargo, SortedArray> & tree,
+void recordInsertion(JournalEntries<TCargo, SortedArray> & tree,
                      typename Position<TCargo>::Type const & virtualPosition,
                      typename Position<TCargo>::Type const & physicalBeginPos,
                      typename Size<TCargo>::Type const & len)
@@ -266,7 +266,7 @@ void recordInsertion(JournalTree<TCargo, SortedArray> & tree,
 
 template <typename TCargo>
 inline
-void recordErase(JournalTree<TCargo, SortedArray> & tree,
+void recordErase(JournalEntries<TCargo, SortedArray> & tree,
                  typename Position<TCargo>::Type const & pos,
                  typename Position<TCargo>::Type const & posEnd)
 {
@@ -392,4 +392,4 @@ void recordErase(JournalTree<TCargo, SortedArray> & tree,
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_TREE_SORTED_ARRAY_H_
+#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_

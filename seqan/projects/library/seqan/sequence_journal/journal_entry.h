@@ -1,3 +1,24 @@
+/*==========================================================================
+                SeqAn - The Library for Sequence Analysis
+                          http://www.seqan.de 
+  ============================================================================
+  Copyright (C) 2010
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+  ============================================================================
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ============================================================================
+  Code for journal entries.
+  ==========================================================================*/
+
 #ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRY_H_
 #define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRY_H_
 
@@ -34,7 +55,10 @@ struct JournalEntry
             : segmentSource(SOURCE_NULL),
               physicalPosition(0),
               virtualPosition(0),
-              length(0) {}
+              length(0)
+    {
+		SEQAN_CHECKPOINT;
+    }
 
     JournalEntry(SegmentSource const & _segmentSource,
                  TPos _physicalPosition,
@@ -43,7 +67,10 @@ struct JournalEntry
             : segmentSource(_segmentSource),
               physicalPosition(_physicalPosition),
               virtualPosition(_virtualPosition),
-              length(_length) {}
+              length(_length)
+    {
+		SEQAN_CHECKPOINT;
+    }
 };
 
 

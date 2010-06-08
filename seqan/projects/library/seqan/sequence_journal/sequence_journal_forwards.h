@@ -22,13 +22,14 @@
 
 namespace seqan {
 
-struct Unbalanced;
+// TODO(holtgrew): Is this actually needed?
 
-template <typename TJournalTreeSpec>
-struct JournalTreeIterSpec;
+struct UnbalancedTree;
 
-template <typename TJournalTreeSpec>
-struct JournalStringIterSpec;
+struct SortedArray;
+
+template <typename TJournalEntriesSpec>
+struct JournalEntriesIterSpec;
 
 }  // namespace seqan
 
