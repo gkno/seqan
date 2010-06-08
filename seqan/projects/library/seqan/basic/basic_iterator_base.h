@@ -80,7 +80,7 @@ struct IterMakeConst;
 template <typename TContainer, typename TSpec>
 struct IterMakeConst<Iter<TContainer, TSpec> >
 {
-    typedef Iter<typename _RemoveConst<TContainer>::Type, TSpec> Type;
+    typedef Iter<typename _RemoveConst<TContainer>::Type const, TSpec> Type;
 };
 
 template <typename TContainer, typename TSpec>
