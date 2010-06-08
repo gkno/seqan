@@ -3,6 +3,8 @@
 
 #include <numeric>
 
+#include <seqan/sequence_journal.h>
+
 #include "read_simulator.h"
 
 using namespace seqan;
@@ -256,7 +258,7 @@ struct IlluminaOptions {
     // Mate-pair library length tolerance.
     unsigned libraryLengthError;
 
-    // Probability Options.
+    // Sequencing Error Probability Options.
 
     // Path to the mismatch error distribution file.  If empty,
     // built-ins (available for n=36, 50, 100) will be used.
@@ -267,6 +269,23 @@ struct IlluminaOptions {
     double probabilityDelete;
     // Standard error in %*100 around error probability for quality simulation.
     double qualityErrorFactor;
+
+    // Source Sequence Repeat Parameters.
+
+    // TODO(holtgrew): Mostly interesting for randomly generated source sequences.
+
+    // Haplotype parameters.
+
+    // Number of haplotypes to generated.  All are generated from the input genome.
+    unsigned numHaplotypes;
+    // SNP rate.
+    double haplotypeSnpRate;
+    // Indel rate.
+    double haplotypeIndelRate;
+    // Smallest number of indels.
+    unsigned haplotypeIndelRangeMin;
+    // Largest number of indels.
+    unsigned haplotypeIndelRangeMax;
 
     IlluminaOptions()
             : showHelp(false),
@@ -287,7 +306,12 @@ struct IlluminaOptions {
               errorDistributionFile(""),
               probabilityInsert(0.01),
               probabilityDelete(0.01),
-              qualityErrorFactor(0.1)
+              qualityErrorFactor(0.1),
+              numHaplotypes(1),
+              haplotypeSnpRate(0.01),
+              haplotypeIndelRate(0.01),
+              haplotypeIndelRangeMin(4),
+              haplotypeIndelRangeMax(6)
     {}
 };
 
@@ -295,22 +319,28 @@ struct IlluminaOptions {
 template <typename TStream>
 TStream & operator<<(TStream & stream, IlluminaOptions const & options) {
     stream << "illumina-options {" << std::endl
-           << "  seed:                  " << options.seed << std::endl
-           << "  readLength:            " << options.readLength << std::endl
-           << "  numReads:              " << options.numReads << std::endl
-           << "  useRandomSequence:     " << (options.useRandomSequence ? "true" : "false") << std::endl
-           << "  randomSourceLength:    " << options.randomSourceLength << std::endl
-           << "  maxErrorsPerRead:      " << options.maxErrorsPerRead << std::endl
-           << "  onlyForward:           " << (options.onlyForward ? "true" : "false") << std::endl
-           << "  onlyReverse:           " << (options.onlyReverse ? "true" : "false") << std::endl
-           << "  outputFile:            \"" << options.outputFile << "\"" <<std::endl
-           << "  simulateQualities:     " << (options.simulateQualities ? "true" : "false") << std::endl
-           << "  generateMatePairs:     " << (options.generateMatePairs ? "true" : "false") << std::endl
-           << "  libraryLength:         " << options.libraryLength << std::endl
-           << "  libraryLengthError:    " << options.libraryLengthError << std::endl
-           << "  errorDistributionFile: \"" << options.errorDistributionFile << "\"" <<std::endl
-           << "  probabilityInsert:     " << options.probabilityInsert << std::endl
-           << "  probabilityDelete:     " << options.probabilityDelete << std::endl
+           << "  seed:                   " << options.seed << std::endl
+           << "  readLength:             " << options.readLength << std::endl
+           << "  numReads:               " << options.numReads << std::endl
+           << "  useRandomSequence:      " << (options.useRandomSequence ? "true" : "false") << std::endl
+           << "  randomSourceLength:     " << options.randomSourceLength << std::endl
+           << "  maxErrorsPerRead:       " << options.maxErrorsPerRead << std::endl
+           << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
+           << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
+           << "  outputFile:             \"" << options.outputFile << "\"" <<std::endl
+           << "  simulateQualities:      " << (options.simulateQualities ? "true" : "false") << std::endl
+           << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
+           << "  libraryLength:          " << options.libraryLength << std::endl
+           << "  libraryLengthError:     " << options.libraryLengthError << std::endl
+           << "  errorDistributionFile:  \"" << options.errorDistributionFile << "\"" <<std::endl
+           << "  probabilityInsert:      " << options.probabilityInsert << std::endl
+           << "  probabilityDelete:      " << options.probabilityDelete << std::endl
+           << "  qualityErrorFactor: " << options.qualityErrorFactor << std::endl
+           << "  numHaplotypes:          " << options.numHaplotypes << std::endl
+           << "  haplotypeSnpRate:       " << options.haplotypeSnpRate << std::endl
+           << "  haplotypeIndelRate:     " << options.haplotypeIndelRate << std::endl
+           << "  haplotypeIndelRangeMin: " << options.haplotypeIndelRangeMin << std::endl
+           << "  haplotypeIndelRangeMax: " << options.haplotypeIndelRangeMax << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -324,22 +354,27 @@ struct ReadSimulationInstruction {
     bool isForward;
     size_t beginPos;
     size_t endPos;
+    // Number of characters added/removed to the string by indels.
+    unsigned delCount;
+    unsigned insCount;
     String<ErrorType> editString;
     String<int> qualities;
+
+    ReadSimulationInstruction() : delCount(0), insCount(0) {}
 };
 
 
 template <typename TStream>
 TStream & operator<<(TStream & stream, ReadSimulationInstruction const & inst) {
-    stream << "(haplotype=" << inst.haplotype << ", contigId=" << inst.contigId << ", isForward=" << inst.isForward << ", beginPos=" << inst.beginPos << ", endPos=" << inst.endPos << ", editString=";
+    stream << "(haplotype=" << inst.haplotype << ", contigId=" << inst.contigId << ", isForward=" << inst.isForward << ", beginPos=" << inst.beginPos << ", endPos=" << inst.endPos << ", insCount=" << inst.insCount << ", delCount=" << inst.delCount << ", editString=";
     for (unsigned i = 0; i < length(inst.editString); ++i) {
         stream << "MEID"[inst.editString[i]];
     }
     stream << ", qualities=[";
     for (unsigned i = 0; i < length(inst.qualities); ++i) {
-        stream << inst.qualities[i];
         if (i != 0)
             stream << ", ";
+        stream << inst.qualities[i];
     }
     stream << "])";
     return stream;
@@ -350,17 +385,15 @@ void buildEditString(ReadSimulationInstruction & inst, String<double> const & er
     size_t sourceLength = inst.endPos - inst.beginPos;  // Length of original data in genome.
     SEQAN_ASSERT_EQ_MSG(length(errorProbabilities), 4 * sourceLength, "Error probability vector len must be == 4 * read len.");
     clear(inst.editString);
-    reserve(inst.editString, sourceLength, Generous());
+    reserve(inst.editString, static_cast<size_t>(1.2 * sourceLength), Generous());
+    inst.delCount = 0;
+    inst.insCount = 0;
 
     for (unsigned i = 0; i < sourceLength; /*NOP*/) {
         double x = mtRandDouble();
         double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
         double pMismatch = errorProbabilities[i * 4 + ERROR_TYPE_MISMATCH];
         double pInsert   = errorProbabilities[i * 4 + ERROR_TYPE_INSERT];
-/*        std::cout << "i = " << i << std::endl;
-        std::cout << "xxx == " << i * 4 + ERROR_TYPE_MATCH << std::endl;
-        std::cout << "len = " << length(errorProbabilities) << std::endl;
-        std::cout << "i = " << errorProbabilities[i * 4 + ERROR_TYPE_MATCH] << std::endl;*/
         if (x < pMatch) {
             // match
             appendValue(inst.editString, ERROR_TYPE_MATCH);
@@ -371,16 +404,26 @@ void buildEditString(ReadSimulationInstruction & inst, String<double> const & er
             i += 1;
         } else if (x < pMatch + pMismatch + pInsert) {
             // insert
-            if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_INSERT))
+            inst.insCount += 1;
+            if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_DELETE)) {
                 resize(inst.editString, length(inst.editString) - 1, Exact());
-            else
+            } else {
                 appendValue(inst.editString, ERROR_TYPE_INSERT);
+            }
         } else {
+            // Decrement string size, do not add a delete if string is too short.
+            if (i == 0)
+                continue;
+            i -= 1;
             // delete
-            if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_INSERT))
-                resize(inst.editString, length(inst.editString) - 1, Exact());
-            else
-                appendValue(inst.editString, ERROR_TYPE_DELETE);
+            if (length(inst.editString) > 0) {
+                inst.delCount += 1;
+                if (back(inst.editString == ERROR_TYPE_INSERT)) {
+                    resize(inst.editString, length(inst.editString) - 1, Exact());
+                } else {
+                    appendValue(inst.editString, ERROR_TYPE_DELETE);
+                }
+            }
         }
     }
 }
@@ -391,7 +434,7 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
     clear(inst.qualities);
     fill(inst.qualities, length(inst.editString), 0, Exact());
     String<double> tmp;
-    fill(tmp, inst.endPos - inst.beginPos, 0, Exact());
+    fill(tmp, inst.endPos - inst.beginPos + inst.delCount, 0, Exact());
 
     // TODO(holtgrew): Quality computation is HIGHLY bogus.
     //
@@ -409,7 +452,7 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
     //
     // First round.
     for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
-        SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos);
+        SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
         if (inst.editString[i] == ERROR_TYPE_MATCH || inst.editString[i] == ERROR_TYPE_MISMATCH) {
             double p = 1 - errorProbabilities[j * 4 + ERROR_TYPE_MATCH];
             double delta = mtRandDouble() * 2 * options.qualityErrorFactor * p;
@@ -440,6 +483,31 @@ void buildQualityValues(ReadSimulationInstruction & inst, String<double> const &
         } else {
             j += 1;
         }
+    }
+}
+
+
+/* Indels change the size of a sequence.  We use Strings of DeltaEntry
+   structs to efficiently convert from the original position
+ */
+struct DeltaEntry {
+    size_t pos;
+    long int delta;
+};
+
+
+bool operator<(DeltaEntry const & a, DeltaEntry const & b) const {
+    return a.pos < b.pos;
+}
+
+
+void buildHaplotype(StringSet<String<Dna5Q> > & haplotype,
+                    String<String<std::pair<_t> >
+                    FragmentStore<> & fragmentStore,
+                    IlluminaOptions const & options) {
+    clear(haplotype);
+    for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i) {
+        appendValue(haplotype, fragmentStore.contigStore[i].seq);
     }
 }
 
@@ -484,7 +552,6 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
     String<ReadSimulationInstruction> simulationInstructions;
     reserve(simulationInstructions, options.numReads);
     for (size_t i = 0; i < options.numReads; ++i) {
-    	std::cout << "round 1, i = " << i << std::endl;
         // We have to retry simulation if the mate pair did not fit in.
         bool invalid = false;
         do {
@@ -538,7 +605,7 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
                     resize(simulationInstructions, length(simulationInstructions) - 1, Exact());
                     invalid = true;
                     if (options.verbose)
-                        std::cerr << "Mate did not fit! Repeating..." << std::endl;
+                        std::cerr << "INFO: Mate did not fit! Repeating..." << std::endl;
                 }
                 // Build edit string.
                 buildEditString(inst, errorProbabilities);
@@ -550,12 +617,31 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
         } while (invalid);
     }
 
-    // * Simulate haplotypes.
-    // TODO(holtgrew): See R program.
+    // TODO(holtgrew): If mate pairs are to be simulated, change end of left one and beginning of right one to adjust for additional characters because of many deletions.
 
-    // * Actually simulate reads.
-    // for each description:
-    //   build simulated read
+    // We do not build all haplotypes at once since this could cost a
+    // lot of memory.
+    //
+    // for each haplotype id
+    //   simulate haplotype
+    //   for each simulation instruction for this haplotype:
+    //     build simulated read
+    StringSet<String<Dna5q> > readSeqs;
+    resize(readSeqs, length(simulationInstructions), Exact());
+    StringSet<CharString> readIds;
+    resize(readIds, length(simulationInstructions), Exact());
+    for (unsigned i = 0; i < options.numHaplotypes; ++i) {
+        std::cerr << "Simulating for haplotype #" << i << "..." << std::endl;
+        StringSet<String<Dna5Q> > haplotypeContigs;
+        buildHaplotype(haplotypeContigs, fragmentStore, options);
+
+        std::cerr << "Simulating reads for haplotype #" << i << "..." << std::endl;
+        for (unsigned j = 0; j < length(simulationInstructions); ++j) {
+            if (simulationInstructions[j].haplotype != i)
+                continue;  // Guard against instructions on wrong haplotype.
+            
+        }
+    }
 
     return 0;
 }
@@ -607,7 +693,7 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
             for (unsigned i = 0; i < 100; ++i)
                 mismatchProbabilities[i] = ERROR_PROBABILITIES_100[i];
         } else {
-            std::cerr << "WARNING: No error distribution file given and n != 36.  Using uniform distribution." << std::endl;
+            std::cerr << "WARNING: No error distribution file given and n != 36, 50, 100.  Using uniform distribution." << std::endl;
             double sum = 0;
             if (options.readLength > 1) {
                 for (unsigned i = 0; i < options.readLength - 1; ++i) {

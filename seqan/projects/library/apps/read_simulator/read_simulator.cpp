@@ -111,6 +111,14 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.01.", OptionType::Double));
     addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.01.", OptionType::Double));
 
+    addSection(parser, "Haplotype Options");
+
+    addOption(parser, CommandLineOption("hn", "num-haplotypes", "Number of haplotypes to simulate.  Default: 1.", OptionType::Integer));
+    addOption(parser, CommandLineOption("hs", "haplotype-snp-rate", "Haplotype SNP rate.  Default: 0.01.", OptionType::Double));
+    addOption(parser, CommandLineOption("hi", "haplotype-indel-rate", "Haplotype indel rate.  Default: 0.01.", OptionType::Double));
+    addOption(parser, CommandLineOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.  Default: 4.", OptionType::Integer));
+    addOption(parser, CommandLineOption("hM", "haplotype-indel-range-max", "Haplotype indel size max.  Default: 6.", OptionType::Integer));
+
     // Need "illumina" and SEQUENCE.fasta.
     requiredArguments(parser, 2);
 }
@@ -162,6 +170,18 @@ int parseCommandLineAndCheck(IlluminaOptions & options,
         getOptionValueLong(parser, "prob-insert", options.probabilityInsert);
     if (isSetLong(parser, "prob-delete"))
         getOptionValueLong(parser, "prob-delete", options.probabilityDelete);
+
+    if (isSetLong(parser, "num-haplotypes"))
+        getOptionValueLong(parser, "num-haplotypes", options.numHaplotypes);
+    if (isSetLong(parser, "haplotype-snp-rate"))
+        getOptionValueLong(parser, "haplotype-snp-rate", options.haplotypeSnpRate);
+    if (isSetLong(parser, "haplotype-indel-rate"))
+        getOptionValueLong(parser, "haplotype-indel-rate", options.haplotypeIndelRate);
+    if (isSetLong(parser, "haplotype-indel-range-min"))
+        getOptionValueLong(parser, "haplotype-indel-range-min", options.haplotypeIndelRangeMin);
+    if (isSetLong(parser, "haplotype-indel-range-max"))
+        getOptionValueLong(parser, "haplotype-indel-range-max", options.haplotypeIndelRangeMax);
+
 
     // First argument is "illumina", second one name of reference file.
     referenceFilename = getArgumentValue(parser, 1);
