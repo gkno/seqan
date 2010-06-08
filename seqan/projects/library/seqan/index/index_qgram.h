@@ -2309,6 +2309,18 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 
 
 //////////////////////////////////////////////////////////////////////////////
+// clear
+
+	template < typename TText, typename TShapeSpec, typename TSpec >
+	inline void clear(Index<TText, Index_QGram<TShapeSpec, TSpec> > &index)
+	{
+		clear(getFibre(index, QGram_SA()));
+		clear(getFibre(index, QGram_Dir()));
+		clear(getFibre(index, QGram_Counts()));
+		clear(getFibre(index, QGram_CountsDir()));
+	}
+
+//////////////////////////////////////////////////////////////////////////////
 // open
 
 	template < typename TObject, typename TShapeSpec, typename TSpec >
