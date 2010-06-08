@@ -63,6 +63,11 @@ public:
     {
         setHost(*this, host);
 	}
+
+    TValue operator[](TPosition const & pos) const
+    {
+        return getValue(*this, pos);
+    }
 };
 
 // ============================================================================
@@ -144,6 +149,34 @@ struct Reference<SequenceJournal<TSequence, TJournalSpec> const>
 template<typename TSequence, typename TJournalSpec>
 struct Reference<SequenceJournal<TSequence, TJournalSpec> >
         : public Reference<TSequence> {};
+
+/**
+.Metafunction.JournalType:
+..param.TValue:Spec.Journal String
+ */
+template <typename T>
+struct JournalType;
+
+template<typename TSequence, typename TJournalSpec>
+struct JournalType<SequenceJournal<TSequence, TJournalSpec> const>
+{
+    typedef typename Size<TSequence>::Type _TSize;
+    typedef typename Position<TSequence>::Type _TPosition;
+    typedef JournalEntry<_TSize, _TPosition> _TJournalEntry;
+
+    typedef JournalTree<_TJournalEntry, TJournalSpec> const Type;
+};
+
+template<typename TSequence, typename TJournalSpec>
+struct JournalType<SequenceJournal<TSequence, TJournalSpec> >
+{
+    typedef typename Size<TSequence>::Type _TSize;
+    typedef typename Position<TSequence>::Type _TPosition;
+    typedef JournalEntry<_TSize, _TPosition> _TJournalEntry;
+
+    typedef JournalTree<_TJournalEntry, TJournalSpec> Type;
+};
+
 
 // ============================================================================
 // Functions
@@ -381,6 +414,28 @@ length(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 // TOOD(holtgrew): operator>=
 // TOOD(holtgrew): operator==
 // TOOD(holtgrew): operator!=
+
+template<typename TSequence, typename TJournalSpec>
+inline
+typename GetValue<SequenceJournal<TSequence, TJournalSpec> >::Type
+getValue(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal,
+         typename Position<SequenceJournal<TSequence, TJournalSpec> >::Type const & pos)
+{
+    SEQAN_CHECKPOINT;
+    typedef SequenceJournal<TSequence, TJournalSpec> TSequenceJournal;
+    typedef typename TSequenceJournal::TJournalEntry TJournalEntry;
+    typedef typename Position<TSequenceJournal>::Type TPos;
+
+    TJournalEntry entry = findJournalEntry(sequenceJournal._journalTree, pos);
+    TPos relativePos = pos - entry.virtualPosition;
+    
+    if (entry.segmentSource == SOURCE_ORIGINAL) {
+        return getValue(value(sequenceJournal._host), entry.physicalPosition + relativePos);
+    } else {
+        return getValue(sequenceJournal._insertionBuffer, entry.physicalPosition + relativePos);
+    }
+}
+
 
 }  // namespace seqan
 

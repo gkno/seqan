@@ -33,10 +33,9 @@ template <typename TJournalString, typename TJournalSpec>
 class Iter<TJournalString, JournalStringIterSpec<TJournalSpec> >
 {
 public:
-    typedef Iter<typename _RemoveConst<TJournalString>::Type, JournalStringIterSpec<TJournalSpec> > TNonConstIterator;
-    typedef Iter<typename _RemoveConst<TJournalString>::Type const, JournalStringIterSpec<TJournalSpec> > TConstIterator;
+    typedef Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > TIterator;
     typedef typename TJournalString::TValue TValue;
-    typedef typename TJournalString::TJournalTree TJournalTree;
+    typedef typename JournalType<TJournalString>::Type TJournalTree;
     // We need a rooted iterator for iterating the journal tree since we need atEnd().
     typedef typename Iterator<TJournalTree, Rooted>::Type TJournalTreeIterator;
     typedef typename Host<TJournalString>::Type THost;
@@ -61,7 +60,7 @@ public:
 
     Iter() : _journalStringPtr(0) { SEQAN_CHECKPOINT; }
 
-    Iter(TConstIterator const & other)
+    Iter(TIterator const & other)
             : _journalStringPtr(other._journalStringPtr),
               _journalTreeIterator(other._journalTreeIterator),
               _hostSegmentBegin(other._hostSegmentBegin),
@@ -71,8 +70,7 @@ public:
               _insertionBufferSegmentEnd(other._insertionBufferSegmentEnd),
               _currentInsertionBufferIt(other._currentInsertionBufferIt) {}
 
-    // Always allow conversion from non-const.
-    Iter(TNonConstIterator const & other)
+    Iter(typename IterComplementConst<TIterator>::Type const & other)
             : _journalStringPtr(other._journalStringPtr),
               _journalTreeIterator(other._journalTreeIterator),
               _hostSegmentBegin(other._hostSegmentBegin),
@@ -387,7 +385,7 @@ operator==(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > const & a,
 {
     SEQAN_CHECKPOINT;
     typedef typename IterMakeConst<Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > >::Type TConstIter;
-    return TConstIter(a) == TConstIter(b);
+    return static_cast<TConstIter>(a) == static_cast<TConstIter>(b);
 }
 
 template <typename TJournalString, typename TJournalSpec>

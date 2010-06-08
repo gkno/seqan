@@ -168,6 +168,31 @@ void reinit(JournalTree<TCargo, SortedArray> & tree,
 
 template <typename TCargo>
 inline
+TCargo const &
+findJournalEntry(JournalTree<TCargo, SortedArray> const & tree,
+                 typename Position<TCargo>::Type const & pos) {
+    typedef typename Size<TCargo>::Type TSize;
+    typedef typename Position<TCargo>::Type TPos;
+    typedef typename Iterator<String<TCargo>, Standard>::Type TIterator;
+    typedef JournalEntryLtByVirtualPos<TPos, TSize> TCmp;
+
+    TCargo refCargo;
+    refCargo.virtualPosition = pos;
+    TIterator iter = std::upper_bound(begin(tree._journalNodes, Standard()),
+                                      end(tree._journalNodes, Standard()),
+                                      refCargo,
+                                      TCmp());
+    SEQAN_ASSERT_TRUE(iter != begin(tree._journalNodes, Standard()));
+    iter -= 1;
+
+    SEQAN_ASSERT_TRUE(iter != end(tree._journalNodes, Standard()));
+
+    return *iter;
+}
+
+
+template <typename TCargo>
+inline
 void recordInsertion(JournalTree<TCargo, SortedArray> & tree,
                      typename Position<TCargo>::Type const & virtualPosition,
                      typename Position<TCargo>::Type const & physicalBeginPos,

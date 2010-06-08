@@ -289,6 +289,19 @@ findNodeWithVirtualPos(typename JournalTree<TCargo, Unbalanced>::TNode * & node,
 }
 
 
+template <typename TCargo, typename TPos>
+inline
+TCargo const &
+findJournalEntry(JournalTree<TCargo, Unbalanced> const & tree,
+                 TPos const & pos) {
+    typedef typename JournalTree<TCargo, Unbalanced>::TNode TNode;
+    TNode * node;
+    TNode * parent;
+    findNodeWithVirtualPos(node, parent, tree, pos);
+    return cargo(*node);
+}
+
+
 template <typename TCargo>
 inline
 void recordErase(JournalTree<TCargo, Unbalanced> & tree,

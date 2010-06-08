@@ -41,8 +41,7 @@ template <typename TJournalTree>
 class Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> >
 {
 public:
-    typedef Iter<typename _RemoveConst<TJournalTree>::Type, JournalTreeIterSpec<Unbalanced> > TNonConstIterator;
-    typedef Iter<typename _RemoveConst<TJournalTree>::Type const, JournalTreeIterSpec<Unbalanced> > TConstIterator;
+    typedef Iter<TJournalTree, JournalTreeIterSpec<Unbalanced> > TIter;
     typedef typename TJournalTree::TNode TNode;
 
     // The current node.
@@ -53,13 +52,12 @@ public:
 
     Iter() : _currentNode(0), _iterationDirection(DIRECTION_NULL) {}
 
-    Iter(TConstIterator const & other)
+    Iter(TIter const & other)
             : _currentNode(other._currentNode),
               _iterationDirection(other._iterationDirection)
     { SEQAN_CHECKPOINT; }
 
-    // Always allow conversion from non-const.
-    Iter(TNonConstIterator const & other)
+    Iter(typename IterComplementConst<TIter>::Type const & other)
             : _currentNode(other._currentNode),
               _iterationDirection(other._iterationDirection)
     { SEQAN_CHECKPOINT; }
