@@ -1890,6 +1890,68 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
+//////////////////////////////////////////////////////////////////////////////
+// clear
+
+	template < typename TText, typename TSpec >
+	inline void clear(Index<TText, Index_Wotd<TSpec> > &index)
+	{
+		clear(getFibre(index, Wotd_SA()));
+		clear(getFibre(index, Wotd_Dir()));
+	}
+
+//////////////////////////////////////////////////////////////////////////////
+// open
+
+	template < typename TText, typename TSpec >
+	inline bool open(
+		Index< TText, Index_Wotd<TSpec> > &index, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".txt");
+		if ((!open(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
+			(!open(getFibre(index, Wotd_Text()), fileName), openMode)) return false;
+
+		name = fileName;	append(name, ".sa");	open(getFibre(index, Wotd_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".dir");	open(getFibre(index, Wotd_Dir()), toCString(name), openMode);
+		return true;
+	}
+	template < typename TText, typename TSpec >
+	inline bool open(
+		Index< TText, Index_Wotd<TSpec> > &index, 
+		const char *fileName) 
+	{
+		return open(index, fileName, OPEN_RDONLY);
+	}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// save
+
+	template < typename TText, typename TSpec >
+	inline bool save(
+		Index< TText, Index_Wotd<TSpec> > &index, 
+		const char *fileName,
+		int openMode)
+	{
+		String<char> name;
+		name = fileName;	append(name, ".txt");	
+		if ((!save(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
+			(!save(getFibre(index, Wotd_Text()), fileName), openMode)) return false;
+
+		name = fileName;	append(name, ".sa");	save(getFibre(index, Wotd_SA()), toCString(name), openMode);
+		name = fileName;	append(name, ".dir");	save(getFibre(index, Wotd_Dir()), toCString(name), openMode);
+		return true;
+	}
+	template < typename TText, typename TSpec >
+	inline bool save(
+		Index< TText, Index_Wotd<TSpec> > &index, 
+		const char *fileName)
+	{
+		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);
+	}
 }
 
 #endif //#ifndef SEQAN_HEADER_...
