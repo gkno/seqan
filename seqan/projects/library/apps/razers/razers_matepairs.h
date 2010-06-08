@@ -697,8 +697,11 @@ void mapMatePairReads(
 		0, 0, 0,
 #endif
 		0,
-#ifdef RAZERS_DIRECT_MAQ_MAPPING
+#ifdef RAZERS_EXTENDED_MATCH
 		0, 0,
+#endif
+#ifdef RAZERS_SPLICED
+		0,
 #endif
 		0
 	};

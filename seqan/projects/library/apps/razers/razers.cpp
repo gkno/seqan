@@ -32,6 +32,11 @@
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_OPENADDRESSING
+//#define RAZERS_SPLICED
+
+#ifdef RAZERS_SPLICED
+  #define RAZERS_MATEPAIRS				
+#endif
 
 #include <seqan/platform.h>
 #ifdef PLATFORM_WINDOWS
@@ -52,6 +57,11 @@
 #ifdef RAZERS_MATEPAIRS
 #include "razers_matepairs.h"
 #endif
+
+#ifdef RAZERS_SPLICED
+#include "razers_spliced.h" 
+#endif
+
 
 
 #include <iostream>
@@ -322,11 +332,23 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("mq", "mapping-quality",   "switch on mapping quality mode", OptionType::Boolean));
 	addOption(parser, CommandLineOption("nbi","no-below-id",       "do not report matches with seed identity < percent id", OptionType::Boolean));
 	addOption(parser, CommandLineOption("qsl","mq-seed-length",    "seed length used for mapping quality assignment", OptionType::Int | OptionType::Label, options.artSeedLength));
+	addOption(parser, CommandLineOption("smq","seed-mism-quality", OptionType::Int | OptionType::Label, options.maxMismatchQualSum));
+	addOption(parser, CommandLineOption("tmq","total-mism-quality", OptionType::Int | OptionType::Label, options.absMaxQualSumErrors));
 #endif
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
 
+	
+#ifdef RAZERS_SPLICED
+	addOption(parser, CommandLineOption("sm", "spliced-mapping",   "min. match length for prefix/suffix alignment strategy", OptionType::Int | OptionType::Label, options.minMatchLen));
+	addOption(parser, CommandLineOption("maxD", "max-distance",    "max distance of pref/suff match", OptionType::Int | OptionType::Label, options.maxDistance));
+#endif
+	
+	addOption(parser, CommandLineOption("qih", "quality-in-header","quality string in fasta header", OptionType::Boolean));
+
+
+	
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -372,6 +394,14 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "taboo-length", options.tabooLength);
 	getOptionValueLong(parser, "match-N", options.matchN);
 	getOptionValueLong(parser, "error-distr", errorPrbFileName);
+	
+#ifdef RAZERS_SPLICED
+	getOptionValueLong(parser, "spliced-mapping", options.minMatchLen);
+	getOptionValueLong(parser, "max-distance", options.maxDistance);
+#endif
+	
+	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
+	
 	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 	if (isSetLong(parser, "verbose")) options._debugLevel = max(options._debugLevel, 1);
 	if (isSetLong(parser, "vverbose")) options._debugLevel = max(options._debugLevel, 3);
@@ -485,6 +515,15 @@ int main(int argc, const char *argv[])
 		return RAZERS_INVALID_OPTIONS;
 	}
 
+#ifdef RAZERS_SPLICED
+	if ((options.minMatchLen != 0 && options.minMatchLen < 6) && (stop = true))
+		cerr << "Minimal match length in spliced mapping must be a value greater than 5" << endl;
+	if ((options.maxDistance <= 0) && (stop = true))
+		cerr << "Max distance of prefix-suffix match must be a value greater 0" << endl;
+//	if (options.minMatchLen > 0)
+//		options.minDistance = 2 * options.minMatchLen;
+#endif
+	
 	//////////////////////////////////////////////////////////////////////////////
 	// get read length
 	int readLength = estimateReadLength(toCString(readFileNames[0]));
@@ -503,6 +542,8 @@ int main(int argc, const char *argv[])
 	if (options.trimLength > readLength)
 		options.trimLength = readLength;
 	
+		
+		
 #ifndef NO_PARAM_CHOOSER
 	if (!(isSetLong(parser, "shape") || isSetLong(parser, "threshold")))
 	{
@@ -536,6 +577,10 @@ int main(int argc, const char *argv[])
 				pm_options.totalN = options.artSeedLength;
 			else*/
 				pm_options.totalN = readLength;
+#ifdef RAZERS_SPLICED
+			if(options.minMatchLen>0)
+				pm_options.totalN = options.minMatchLen;
+#endif
 			if (options._debugLevel >= 1)
 				cerr << "___PARAMETER_CHOOSING__" << endl;
 			if (!chooseParams(options,pm_options))

@@ -129,6 +129,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
 
+#ifdef RAZERS_SPLICED
+		unsigned        minMatchLen;
+		unsigned        maxDistance;
+		unsigned        minDistance;
+#endif
+		
+		
 	// multi-threading
 
 #ifdef RAZERS_PARALLEL
@@ -193,6 +200,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			rnaSeedLength = 16;
 			exactSeed = true;
 #endif			
+#ifdef RAZERS_SPLICED
+			minMatchLen = 0;
+			maxDistance = 4000;
+			minDistance = 0;
+#endif
 
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
@@ -209,8 +221,11 @@ struct MicroRNA{};
 #ifdef RAZERS_DIRECT_MAQ_MAPPING 
 #define RAZERS_EXTENDED_MATCH
 #endif
-	
-	
+
+#ifdef RAZERS_SPLICED
+#define RAZERS_EXTENDED_MATCH
+#endif
+
 //////////////////////////////////////////////////////////////////////////////
 // Typedefs
 
@@ -232,7 +247,10 @@ struct MicroRNA{};
 		unsigned short	editDist;		// Levenshtein distance
 #ifdef RAZERS_EXTENDED_MATCH
 		short	 		mScore;
-		short			seedEditDist;
+		short			seedEditDist:8;	
+#endif
+#ifdef RAZERS_SPLICED
+		short			gSeedLen:8;// used as gMinMatchLen to store genomic end position of seed match
 #endif
 		char			orientation;	// 'F'..forward strand, 'R'..reverse comp. strand
 	};
@@ -270,6 +288,13 @@ struct MicroRNA{};
 		} Type;
 	};
 	
+	template <typename TAnyReadSet, typename TSpec>
+	struct Cargo< Index<TAnyReadSet, TSpec> > {
+		typedef struct {
+			double		abundanceCut;
+			int			_debugLevel;
+		} Type;
+	};
 //////////////////////////////////////////////////////////////////////////////
 // Memory tuning
 
@@ -283,6 +308,15 @@ struct MicroRNA{};
 			BitCompressed<24, 8>	// max. 16M reads of length < 256
 		> Type;
 	};
+	//454 
+//	template <typename TSpec>
+//	struct SAValue< Index<TReadSet, TSpec> > {
+//		typedef Pair<
+//			unsigned,				
+//			unsigned,
+//			BitCompressed<22, 10>	// max. 4M reads of length < 1024
+//		> Type;
+//	};
 	
 #else
 
@@ -625,6 +659,27 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 #endif
 		}
 	};
+	
+#ifdef RAZERS_SPLICED
+template <typename TReadMatch>
+struct LessSplicedErrors : public ::std::binary_function < TReadMatch, TReadMatch, bool >
+{
+	inline bool operator() (TReadMatch const &a, TReadMatch const &b) const
+	{
+		// read number
+		if (a.rseqNo < b.rseqNo ) return true;
+		if (a.rseqNo > b.rseqNo ) return false;
+		//if ((a.rseqNo >> 1) < (b.rseqNo >> 1)) return true;
+		//if ((a.rseqNo >> 1) > (b.rseqNo >> 1)) return false;
+
+		// quality
+		if (a.pairScore > b.pairScore) return true;
+		if (a.pairScore < b.pairScore) return false;
+		return a.pairId < b.pairId;
+	}
+};
+#endif	
+	
 	
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 
@@ -1468,6 +1523,9 @@ void mapSingleReads(
 #ifdef RAZERS_EXTENDED_MATCH
 		0, 0,
 #endif
+#ifdef RAZERS_SPLICED
+		0,
+#endif
 		0
 	};
 
@@ -1518,7 +1576,7 @@ void mapSingleReads(
 #endif
 						compactMatches(matches, cnts, options, false, swiftPattern);
 #ifdef RAZERS_MICRO_RNA
-					options.compactThresh += length(matches);
+					options.compactThresh = 2 * length(matches);
 #else
 					if (length(matches) * 4 > oldSize)			// the threshold should not be raised
 						options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
@@ -1571,6 +1629,7 @@ void mapSingleReads(
 		StringSet<TString, TSpec> const &stringSet,
 		TShape &shape, 
 		TDir &dir,
+		Nothing,
 		TWithConstraints const,
 		TValue prefixLen)
 	{
@@ -1643,6 +1702,8 @@ void mapSingleReads(
 		typename Fibre<TIndex, QGram_SA>::Type         &sa    = indexSA(index);
 		typename Fibre<TIndex, QGram_Dir>::Type        &dir   = indexDir(index);
 		typename Fibre<TIndex, QGram_Shape>::Type      &shape = indexShape(index);
+
+		Nothing nothing;
 		
 		// 1. clear counters
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
@@ -1656,7 +1717,7 @@ void mapSingleReads(
 			_qgramCummulativeSum(dir, True());
 
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, True(), prefixLen);
+			_qgramFillSuffixArray(sa, text, shape, dir, nothing, True(), prefixLen);
 
 			// 5. correct disabled buckets
 			_qgramPostprocessBuckets(dir);
@@ -1667,7 +1728,7 @@ void mapSingleReads(
 			_qgramCummulativeSum(dir, False());
 			
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, False(),prefixLen);
+			_qgramFillSuffixArray(sa, text, shape, dir, nothing, False(),prefixLen);
 		} 
 	}
 
@@ -1947,12 +2008,22 @@ int mapReads(
 	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
-	TReadSet const &		readSet, 
+	TReadSet &		readSet, 
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
+
+#ifdef RAZERS_SPLICED
+	if (options.minMatchLen > 0)
+	{
+		//std::cout << "Spliced mapping\n";
+		return mapSplicedReads(matches,genomeFileNameList,  genomeNames,gnoToFileMap, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+	}
+#endif
+
+
 #ifdef RAZERS_MATEPAIRS
 	if (options.libraryLength >= 0)
 		return mapMatePairReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options, shape, Swift<TSwiftSpec>());
@@ -1972,12 +2043,21 @@ template <
 int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
-	TReadSet const &		readSet,
+	TReadSet &		readSet,
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options,
 	TShape const &			shape,
 	Swift<TSwiftSpec> const)
 {
+#ifdef RAZERS_SPLICED
+	if (options.minMatchLen > 0)
+	{
+	//            std::cout << "Spliced mapping\n";
+		return mapSplicedReads(matches, genomeSet, readSet, cnts, options, shape, Swift<TSwiftSpec>());
+	
+	}
+#endif
+
 #ifdef RAZERS_MATEPAIRS
 	if (options.libraryLength >= 0)
 		return mapMatePairReads(matches, genomeSet, readSet, cnts, options, shape, Swift<TSwiftSpec>());
@@ -1994,7 +2074,7 @@ int mapReads(
 	StringSet<CharString> &	genomeFileNameList,
 	StringSet<CharString> &	genomeNames,	// genome names, taken from the Fasta file
 	::std::map<unsigned,::std::pair< ::std::string,unsigned> > & gnoToFileMap,
-	TReadSet const &		readSet, 
+	TReadSet &		readSet, 
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
@@ -2035,7 +2115,7 @@ template <typename TMatches, typename TGenomeSet, typename TReadSet, typename TC
 int mapReads(
 	TMatches &				matches,
 	TGenomeSet &			genomeSet,
-	TReadSet const &		readSet, 
+	TReadSet &		readSet, 
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {

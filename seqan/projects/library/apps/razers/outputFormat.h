@@ -324,30 +324,28 @@ countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
 }
 
 
-template<typename TAlign, typename TString, typename TPosition>
+template<typename TAlign, typename TString, typename TIter>
 void
-getCigarLine(TAlign & align, TString & cigar, TString & mutations, TPosition begin_, TPosition end_)
+getCigarLine(TAlign & align, TString & cigar, TString & mutations, TIter ali_it0, TIter ali_it0_stop, TIter ali_it1, TIter ali_it1_stop)
 {
 	
 	typedef typename Source<TAlign>::Type TSource;
 	typedef typename Iterator<TSource, Rooted>::Type TStringIterator;
 
-	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
+// 	typedef typename Row<TAlign>::Type TRow;
+// 	typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
 
-	TAlignIterator ali_it0 = iter(row(align,0),begin_);
-	TAlignIterator ali_it1 = iter(row(align,1),begin_);					
-	TAlignIterator ali_it0_stop = iter(row(align,0),end_);
-	TAlignIterator ali_it1_stop = iter(row(align,1),end_);
 	TStringIterator readBase = begin(source(row(align,0))); 
-	//std::cout << "getting cigar line\n";//ali0 len = " <<ali_it0_stop-ali_it0 << " \t ali1 len = "<<ali_it1_stop-ali_it1<<"\n";
+
 	int readPos = 0;
 	bool first = true;
+	int inserted = 0;
+	int deleted = 0;
 	while(ali_it0 != ali_it0_stop && ali_it1 != ali_it1_stop)
 	{
+		inserted = 0;
+		deleted = 0;
 		int matched = 0;
-		int inserted = 0;
-		int deleted = 0;
 		while(ali_it0!=ali_it0_stop && ali_it1!=ali_it1_stop && !isGap(ali_it0)&& !isGap(ali_it1))
 		{
 			++readPos;
@@ -383,6 +381,23 @@ getCigarLine(TAlign & align, TString & cigar, TString & mutations, TPosition beg
 		}
 		if(inserted>0) cigar << inserted << "I";
 	}
+	// end gaps can happen in split mapping
+	while(ali_it0!=ali_it0_stop)
+	{
+		++ali_it0;
+		++deleted;
+	}
+	if(deleted>0) cigar << deleted << "D";
+	while(ali_it1 != ali_it1_stop)
+	{
+		++ali_it1;
+		++readPos;
+		if(first) first = false;
+		else mutations << ",";
+		mutations << readPos << *readBase;
+		++inserted;
+	}
+	if(inserted>0) cigar << inserted << "I";
 	
 }
 
@@ -531,6 +546,10 @@ void dumpMatches(
 		options.dumpAlignment = false;
 	}
 
+#ifdef RAZERS_SPLICED
+	if(options.minMatchLen > 0)
+		options.sortOrder = 1;
+#endif
 
 	// error profile
 	unsigned maxReadLength = 0;
@@ -566,8 +585,10 @@ void dumpMatches(
 	CharString readName = _readName.substr(lastPos);
 	
 
-	Align<String<Dna5>, ArrayGaps> align;
+	typedef Align<String<Dna5>, ArrayGaps> TAlign;
+	TAlign align;
 	Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
+//	Score<int> scoreType(0,-1,-1,-1);
 
 	if (options.hammingOnly)
 		scoreType.data_mismatch = -1;
@@ -588,7 +609,11 @@ void dumpMatches(
 	}
 
 	
+#ifdef RAZERS_SPLICED
+	//maskPairDuplicates(matches);
+#else
 	maskDuplicates(matches);
+#endif
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
@@ -597,12 +622,18 @@ void dumpMatches(
 	{
 		// match statistics
 		unsigned maxErrors = (int)(options.errorRate * maxReadLength);
-		if (maxErrors > 10) maxErrors = 10;
+		//if (maxErrors > 10) maxErrors = 10;
 		resize(stats, maxErrors + 1);
 		for (unsigned i = 0; i <= maxErrors; ++i)
 			fill(stats[i], length(reads), 0);
+#ifdef RAZERS_SPLICED
+		if(options.minMatchLen > 0) countSplitMatches(matches, stats);
+		else
+#endif
 		countMatches(matches, stats);
 	}
+
+
 
 	Nothing nothing;
 	unsigned currSeqNo = 0;
@@ -621,7 +652,19 @@ void dumpMatches(
 	if(options.microRNA)purgeAmbiguousRnaMatches(matches,options);
 	else
 #endif
-	compactMatches(matches, stats, options, true, nothing);
+	{
+	#ifdef RAZERS_SPLICED
+		if(options.minMatchLen>0)
+		{
+			if(options.purgeAmbiguous)
+				compactSplicedMatchesPurgeAmbiguous(matches, stats, options, nothing, nothing);
+			else
+				compactSplicedMatches(matches, stats, options, nothing,nothing);
+		}
+		else
+	#endif
+			compactMatches(matches, stats, options, true, nothing);
+	}
 
 	switch (options.sortOrder) {
 		case 0:
@@ -915,35 +958,51 @@ void dumpMatches(
 							++it;
 							continue;
 						}
-#else
-						file << (*it).editDist << "\t";
 #endif
 
 						unsigned currReadNo = (*it).rseqNo;
 						int unique = 1;
 						unsigned bestMatches = 0;
-						//would seedEditDist make more sense here?
-//CHECKcnts					if ((unsigned)(*it).editDist < length(stats))
-//							bestMatches = stats[(*it).editDist][currReadNo];
+
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 						if(options.maqMapping)
 							bestMatches = stats[0][currReadNo] >> 5;
 						else
 #endif
-							if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
+						{
+#ifdef RAZERS_SPLICED
+							if (options.minMatchLen > 0)
+							{
+								if( -(*it).pairScore < (int)length(stats))
+									bestMatches = stats[-(*it).pairScore][currReadNo]/2;
+							}
+							else if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
 								bestMatches = stats[(*it).editDist][currReadNo];
-
+#endif
+						}
+						
 						bool suboptimal = false;
 						if (
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 							!options.maqMapping && 
 #endif
-							(unsigned)(*it).editDist > 0)
+							(unsigned)(*it).editDist > 0
+#ifdef RAZERS_SPLICED
+							&& options.minMatchLen == 0
+#endif
+							)
 						{
 							for(unsigned d = 0; d < (unsigned)(*it).editDist; ++d)
 								if (stats[d][currReadNo]>0) suboptimal=true;
 						}
-						//std::cout << (stats[0][currReadNo] & 31) <<"<-dist "<< (stats[0][currReadNo] >> 5) <<"<-count\n";
+#ifdef RAZERS_SPLICED
+						if(options.minMatchLen > 0 &&  -(*it).pairScore > 0)
+						{
+							for(unsigned d = 0; d < -(unsigned)(*it).pairScore; ++d)
+								if (stats[d][currReadNo]>0) suboptimal=true;
+						}
+#endif
+						
 						if (bestMatches !=  1)
 						{
 							unique = 0;
@@ -955,10 +1014,27 @@ void dumpMatches(
 							
 //							if((*it).mScore > 0) std::cout << (*it).mScore << "<-non uniq but score > 0\n";
 //							++it;
-//							continue; // TODO: output non-unique matches
+//							continue; // TODO: output non-unique matches (concerns maq mapping only)
 						}
 						unsigned readLen = length(reads[currReadNo]);
-		
+#ifdef RAZERS_SPLICED
+						if(options.minMatchLen > 0)
+							readLen = (*it).mScore;
+#endif
+						String<Dna5Q> readInf = infix(reads[currReadNo],0,readLen);
+#ifdef RAZERS_SPLICED
+						if(options.minMatchLen > 0)
+						{
+							if(((*it).orientation == 'F' && (*it).mateDelta < 0)
+								|| ((*it).orientation == 'R' && (*it).mateDelta > 0))
+							{
+								readInf = infix(reads[currReadNo],
+									length(reads[currReadNo])-readLen,
+									length(reads[currReadNo]));
+							}
+						}
+ #endif
+
 						switch (options.genomeNaming)
 						{
 							// 0..filename is the read's Fasta id
@@ -975,38 +1051,43 @@ void dumpMatches(
 						// get alignment to dump or to fix end coordinates
 						if (!options.hammingOnly)
 						{
-							assignSource(row(align, 0), reads[currReadNo]);
+							assignSource(row(align, 0), readInf);
 							assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
 							if ((*it).orientation == 'R')
 								reverseComplementInPlace(source(row(align, 1)));
 
-							globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+#ifdef RAZERS_SPLICED
+							if(options.minMatchLen > 0)
+								globalAlignment(align, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
+							else
+#endif
+								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
 
 							// transform first and last read character to genomic positions
 							viewPosReadFirst  = toViewPosition(row(align, 0), 0);
 							viewPosReadLast   = toViewPosition(row(align, 0), readLen - 1);
 							unsigned genomePosReadFirst = toSourcePosition(row(align, 1), viewPosReadFirst);
 							unsigned genomePosReadLast  = toSourcePosition(row(align, 1), viewPosReadLast);
-
-							if ((*it).orientation == 'R')
+#ifdef RAZERS_SPLICED
+							if(options.minMatchLen == 0)
+#endif
 							{
-								(*it).gBegin = (*it).gEnd - (genomePosReadLast + 1);
-								(*it).gEnd -= genomePosReadFirst;
-							}
-							else
-							{
-								(*it).gEnd = (*it).gBegin + (genomePosReadLast + 1);
-								(*it).gBegin += genomePosReadFirst;
+								if ((*it).orientation == 'R')
+								{
+									(*it).gBegin = (*it).gEnd - (genomePosReadLast + 1);
+									(*it).gEnd -= genomePosReadFirst;
+								}
+								else
+								{
+									(*it).gEnd = (*it).gBegin + (genomePosReadLast + 1);
+									(*it).gBegin += genomePosReadFirst;
+								}
 							}
 						}
 						
 						//file <<  options.runID << "_razers\tread";
 						file << "razers\tread";
 						file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd << '\t';
-		//				if ((*it).orientation == 'F')
-		//					file << '\t' << ((*it).gBegin + options.positionFormat) << '\t' << (*it).gEnd <<'\t';
-		//				else
-		//					file << '\t' << (*it).gEnd << '\t'<<((*it).gBegin + options.positionFormat)<< '\t';
 						double percId = 100.0 * (1.0 - (double)(*it).editDist / (double)readLen);
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 						if(options.maqMapping)
@@ -1014,7 +1095,6 @@ void dumpMatches(
 						else
 #endif
 							file << percId << "\t";
-					//	std::cout << "hier4\n";
 
 						if ((*it).orientation == 'F')
 							file << '+' << '\t' << '.' <<'\t';
@@ -1034,13 +1114,21 @@ void dumpMatches(
 								file << "ID=" << readName << '#' << ::std::setw(pzeros) << currReadNo + 1;
 								break;
 						}
-					//	std::cout << "hier5\n";
 						if(suboptimal) file << ";suboptimal";
 						else 
 						{
 							if(unique==1) file << ";unique";
 							if(unique==0) file << ";multi";
 						}
+						
+#ifdef RAZERS_SPLICED
+						if(options.minMatchLen > 0)
+						{
+							file << ";delta=" << (*it).mateDelta << ";pairId="<<(*it).pairId;
+							file << ";pairErr=" << -(*it).pairScore;
+						}
+#endif
+						
 						if ((*it).editDist > 0)
 						{
 							if (options.hammingOnly)
@@ -1049,44 +1137,49 @@ void dumpMatches(
 								if ((*it).orientation == 'R')
 									reverseComplementInPlace(gInf);
 								bool first = true;
-								file << ";cigar=" << length(reads[currReadNo]) << "M";
+								file << ";cigar=" << readLen << "M";
 								file << ";mutations=";
-								unsigned i = 0;
-//								while ((*it).gBegin == 0 && i < length(reads[currReadNo])-length(gInf) )
-//								{
-//									if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
-//									else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
-//									++i;
-//								}
-								for (; i < length(gInf); ++i)
-									if ((options.compMask[ordValue(reads[currReadNo][i])] & 
+								for (unsigned i = 0; i < length(gInf); ++i)
+									if ((options.compMask[ordValue(readInf[i])] & 
 										options.compMask[ordValue(gInf[i])]) == 0)
 									{
-				//						if(first){ file << i + 1 << gInf[i]; first = false;}
-				//						else file <<','<< i + 1 << gInf[i];
-										if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
-										else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
+										if(first){ file << i + 1 << (Dna5)readInf[i]; first = false;}
+										else file <<','<< i + 1 << (Dna5)readInf[i];
 									}
-//								while ((*it).gEnd == length(currGenome) && i < length(reads[currReadNo]) )
-//								{
-//									if(first){ file << i + 1 << (Dna5)reads[currReadNo][i]; first = false;}
-//									else file <<','<< i + 1 << (Dna5)reads[currReadNo][i];
-//									++i;
-//								}
 								
 							}
 							else
 							{
 								std::stringstream cigar, mutations;
-								getCigarLine(align,cigar,mutations,viewPosReadFirst,viewPosReadLast + 1);
-								file << ";cigar="<<cigar.str();
+								typedef typename Row<TAlign>::Type TRow;
+								typedef typename Iterator<TRow, Rooted>::Type TAlignIterator;
+								TAlignIterator ali_it0 = iter(row(align,0),viewPosReadFirst);
+								TAlignIterator ali_it1 = iter(row(align,1),viewPosReadFirst);
+								TAlignIterator ali_it0stop = iter(row(align,0),viewPosReadLast + 1);
+								TAlignIterator ali_it1stop = iter(row(align,1),viewPosReadLast + 1);
 
+#ifdef RAZERS_SPLICED
+								if(options.minMatchLen > 0)
+								{
+									ali_it0 = begin(row(align,0));
+									ali_it1 = begin(row(align,1));
+									ali_it0stop = end(row(align,0));
+									ali_it1stop = end(row(align,1));
+									}
+#endif
+								getCigarLine(align,cigar,mutations,ali_it0,ali_it0stop,ali_it1,ali_it1stop);
+								file << ";cigar="<<cigar.str();
 								if(length(mutations.str())>0)
 									file << ";mutations=" << mutations.str();								
 							}
 						}
+						
+						
+						if(
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-						if(options.maqMapping || options.fastaIdQual)
+						options.maqMapping || 
+#endif
+						options.fastaIdQual)
 						{
 		//					file << ";read=";
 		//					for(unsigned j=0;j<length(reads[currReadNo]);++j)
@@ -1096,13 +1189,10 @@ void dumpMatches(
 							file << ";quality=";
 							for(unsigned j=0;j<readLen;++j)
 							{
-								//TODO need to output the original quality here!
-								//file << (char) ((int)((unsigned char)reads[currReadNo][j] >> 3) + 33);
-								file << (char)(getQualityValue(reads[currReadNo][j])+ 33);
+								file << (char)(getQualityValue(readInf[j])+ 33);
 							}
 						}
-#endif
-						//std::cout << "hier6\n";
+
 						file << ::std::endl;
 						++it;
 					}
