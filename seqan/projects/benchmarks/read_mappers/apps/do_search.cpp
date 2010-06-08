@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
             continue;
         findBegin(finder, pattern, getScore(pattern));
 
-        std::cout << "end = " << endPosition(finder) << ", begin = " << beginPosition(finder) << ", last = " << endPosition(finder) - 1 << std::endl;
+        std::cout << "end = " << endPosition(finder) << ", begin = " << beginPosition(finder) << ", last = " << endPosition(finder) - 1 << ", score = " << getScore(pattern) << std::endl;
         Align<Segment<DnaString, InfixSegment> > ali;
         appendValue(rows(ali), infix(finder));
         appendValue(rows(ali), infix(read, 0, length(read)));
