@@ -1010,8 +1010,8 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
             if ((*antiDiag1)[eu] > tmpMax) {
                 // extension ends with mismatch
 		        tmpMax = (*antiDiag1)[eu];
-		        extLengthQuery = eu;
-                extLengthDatabase = k - (eu+2);
+		        extLengthQuery = _min(xLength, eu);
+                extLengthDatabase = _min(yLength, k - (eu+2));
 		    }
         }
 	}

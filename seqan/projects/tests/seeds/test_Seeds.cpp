@@ -246,6 +246,13 @@ void Test_SimpleSeeds()
 	SEQAN_ASSERT_EQ(rightDim1(seed9h), 14);
     SEQAN_ASSERT_EQ(rightDiagonal(seed9h), -2);
     SEQAN_ASSERT_EQ(leftDiagonal(seed9h), 0);
+
+	String<Dna> query7 =  "CTGACAGCGAGAAACAGTAACCAGCTAGCCT";
+	String<Dna> database7 = "AGCAGCAAACAGTAAGCCAGCAGCCT";
+	Seed<int, SimpleSeed> seed15(26, 21, 5);
+	extendSeed(seed15, 45, Score<int, Simple>(1, -9, -9, -9), query7, database7, 2, GappedXDrop());
+	SEQAN_ASSERT_EQ(leftDim0(seed15), 2);
+	SEQAN_ASSERT_EQ(leftDim1(seed15), 0);
 }
 
 void Test_MultiSeeds(){
