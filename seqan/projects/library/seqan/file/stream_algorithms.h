@@ -154,7 +154,7 @@ SEQAN_CHECKPOINT
 	typename Iterator<TSource const, Standard>::Type it = begin(source, Standard());
 	typename Iterator<TSource const, Standard>::Type it_end = end(source, Standard());
 
-	for (; it < it_end; ++it)
+	for (; it != it_end; ++it)
 	{
 		typename GetValue<TSource const>::Type val_ = getValue(it);
 		_streamWrite(target, val_);
