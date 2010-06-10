@@ -105,6 +105,18 @@ namespace seqan {
 		String() {
 
 		};
+		String( String< TValue, TStringSpec > & other ) : m_holder( other ) {
+			JournalNode root( 0, new Operation( seqan::length( other ) ) );
+			root.physical_position = 0;
+			root.blocksize = seqan::length( other );
+			seqan::insert( m_journal_tree, root );
+			len = seqan::length( other );
+			JournalNode dummy( len, new Insertion( 1 ) );
+			dummy.physical_position = 0;
+			dummy.blocksize = 1;
+			seqan::insert( m_journal_tree, dummy );
+			seqan::appendValue( m_insertion_string, TValue(), Generous() );
+		};
 		String( String< TValue, TStringSpec > const & other ) : m_holder( other ) {
 			JournalNode root( 0, new Operation( seqan::length( other ) ) );
 			root.physical_position = 0;
