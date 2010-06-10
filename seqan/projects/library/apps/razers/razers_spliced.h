@@ -177,7 +177,12 @@ struct OrientationForward{};
 // Remove low quality matches # necessary to have an own splicedmatch function? 
 // planned specs: SpliceSite, General, ... 
 template < typename TMatches, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
-void compactSplicedMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options, TSwiftL &swiftL, TSwiftR &swiftR)
+void compactSplicedMatches(TMatches &matches, 
+			TCounts & /*cnts*/, 
+			RazerSOptions<TSpec> &options, 
+			bool compactFinal, 
+			TSwiftL &swiftL, 
+			TSwiftR &swiftR)
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -199,7 +204,7 @@ void compactSplicedMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<
 	for (; it != itEnd; ++it) 
 	{
 		++counter;
-		if ((*it).orientation == '-') continue;
+		if ((*it).orientation == '-') { ++it; continue; }
 		if (readNo == (*it).rseqNo)
 		{ 
 			if ((*it).pairScore <= scoreDistCutOff)
@@ -223,16 +228,16 @@ void compactSplicedMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<
 					if (maxErrors == -1 && options._debugLevel >= 2)
 						::std::cerr << "(read #" << readNo << " disabled)";
 					
-					if(options.purgeAmbiguous && maxErrors == -1 )
+					if(options.purgeAmbiguous)
 	     				{
-						dit = ditBeg;
+						if (options.distanceRange == 0 || -(*it).pairScore < (int) options.distanceRange || compactFinal)
+							dit = ditBeg;
+						else {
+							*dit = *it;	++dit; ++it;
+							*dit = *it;	++dit;
+						}
 					}
-					else
-					{
-						*dit = *it;	++dit; ++it;
-						*dit = *it;	++dit;
-						continue;
-					}
+		
 				}
 #endif
 				++it;
@@ -1697,7 +1702,7 @@ int mapSplicedReads(
 		++filecount;
 	}
 
-	compactSplicedMatches(matches, cnts, options, swiftPatternL, swiftPatternR);
+	compactSplicedMatches(matches, cnts, options, false, swiftPatternL, swiftPatternR);
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
@@ -2100,7 +2105,7 @@ void mapSplicedReads(
 						{
 							typename Size<TMatches>::Type oldSize = length(matches);
 //							maskDuplicates(matches);	// overlapping parallelograms cause duplicates //TODO: implement!
-							compactSplicedMatches(matches, cnts, options, swiftPatternL, swiftPatternR);
+							compactSplicedMatches(matches, cnts, options, false, swiftPatternL, swiftPatternR);
 							options.compactThresh += (options.compactThresh >> 1);
 							if (options._debugLevel >= 2)
 								::std::cerr << '(' << oldSize - length(matches) << " matches removed)";

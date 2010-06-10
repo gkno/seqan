@@ -31,7 +31,7 @@
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
-//#define RAZERS_OPENADDRESSING
+#define RAZERS_OPENADDRESSING
 //#define RAZERS_SPLICED
 
 #ifdef RAZERS_SPLICED
@@ -345,6 +345,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("maxD", "max-distance",    "max distance of pref/suff match", OptionType::Int | OptionType::Label, options.maxDistance));
 #endif
 	
+	addOption(parser, CommandLineOption("mcl", "min-clipped-len",  "min. read length for read clipping", OptionType::Int | OptionType::Label, options.minClippedLen));
 	addOption(parser, CommandLineOption("qih", "quality-in-header","quality string in fasta header", OptionType::Boolean));
 
 
@@ -400,6 +401,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "max-distance", options.maxDistance);
 #endif
 	
+	getOptionValueLong(parser, "min-clipped-len", options.minClippedLen);
 	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
 	
 	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
@@ -506,6 +508,8 @@ int main(int argc, const char *argv[])
 			return 0;
 		}
 	}
+	if ((options.minClippedLen < 0) && (stop = true))
+		cerr << "Min. clipped read length must be a value greater 0" << endl;
 
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
 	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;

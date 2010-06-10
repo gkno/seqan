@@ -124,7 +124,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		bool		lowMemory;		// set maximum shape weight to 13 to limit size of q-gram index
 		bool		fastaIdQual;		// hidden option for special fasta+quality format we use
-
+		int			minClippedLen;
 
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
@@ -134,7 +134,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned        maxDistance;
 		unsigned        minDistance;
 #endif
-		
 		
 	// multi-threading
 
@@ -208,6 +207,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
+			minClippedLen = 0;
 
 		}
 	};
@@ -380,6 +380,78 @@ struct MicroRNA{};
 
 #endif
 
+
+template<typename TIdString, typename TSeqString, typename TQString, typename TOptions>
+bool
+_clipReads(TIdString & fastaID, TSeqString & seq, TQString & qual, TOptions & options)
+{
+	typedef typename Value<TIdString>::Type TChar;
+        
+	int tagStart = length(fastaID);
+	int clipFront = -1;
+	int clipBack = -1;
+	for(unsigned i = 0; i < length(fastaID); ++i)
+	{
+		TChar c = fastaID[i];
+		if(c == 'c')
+		{
+			tagStart = i-1;
+			if(infix(fastaID,i,i+5)=="clip=")
+			{
+				i += 5;
+				String<TChar> clipStr = "";
+				while(i < length(fastaID) && _parse_isDigit(fastaID[i]))
+				{
+					append(clipStr,fastaID[i]);
+					++i;
+				}
+				std::istringstream istr(toCString(clipStr));
+				istr >> clipFront;
+				if(i < length(fastaID) && fastaID[i] == ',') ++i;
+				clipStr = "";
+				while(i < length(fastaID) && _parse_isDigit(fastaID[i]))
+				{
+					append(clipStr,fastaID[i]);
+					++i;
+				}
+				std::istringstream istr2(toCString(clipStr));
+				istr2 >> clipBack;
+				break;
+			}
+		}
+	}
+	if(clipFront<0 && clipBack<0) return true;	//no clip tag found
+	if(clipFront<0) clipFront = 0;
+	if(clipBack<0) clipBack = 0;
+	resize(fastaID,tagStart);	// only resize fastaID, as it might contain the quality string
+
+	if(options.minClippedLen == 0) // clipping tag was found, but clipping option is turned off
+		return true;
+
+	if(((int)length(seq)-clipBack-clipFront) < options.minClippedLen)  // sequence is too short after clipping
+		return false;
+
+//	int newLen = (int)length(seq)-clipBack-clipFront;
+	
+	//clip
+	if(length(qual) == 0) // meaning that quality is in fasta header
+	{
+		// first adapt the fasta header
+		TIdString tmp = fastaID;
+		fastaID = infix(tmp,0,length(tmp)-length(seq)); 
+		append(fastaID,infix(tmp,length(tmp)-length(seq)+clipFront,length(tmp)-clipBack)); 
+	}
+	else
+		qual = infix(qual,clipFront,length(qual)-clipBack);
+
+	// now adapt the sequence
+	seq = infix(seq,clipFront,length(seq)-clipBack);
+
+	return true;	
+	
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Load multi-Fasta sequences with or w/o quality values
 template <typename TReadSet, typename TNameSet, typename TRazerSOptions>
@@ -423,8 +495,19 @@ bool loadReads(
 		assignSeq(seq, multiFasta[i], format);					// read Read sequence
 		assignQual(qual, multiFasta[i], format);				// read ascii quality values  
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
-		if(options.fastaIdQual)
+		//check if sequence has a clip tag
+		if(options.minClippedLen > 0)
 		{
+			if(!_clipReads(fastaIDs[i],seq,qual,options))
+			{
+				clear(seq);
+				clear(qual);
+				++kickoutcount;
+			}
+		}
+		if(options.fastaIdQual && !empty(seq))
+		{
+			if(options.minClippedLen == 0)_clipReads(fastaIDs[i],seq,qual,options); // if the header wasnt clipped before, then clip now!! necessary for quality in header
 			qual = suffix(fastaIDs[i],length(fastaIDs[i])-length(seq));
 			if(options.readNaming == 0)
 				fastaIDs[i] = prefix(fastaIDs[i],length(fastaIDs[i])-length(seq));
@@ -826,6 +909,8 @@ void countMatches(TMatches &matches, TCounts &cnt)
 	}
 	if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
 		cnt[editDist][readNo] = count;
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

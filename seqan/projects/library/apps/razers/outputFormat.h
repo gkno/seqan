@@ -653,16 +653,11 @@ void dumpMatches(
 	else
 #endif
 	{
-	#ifdef RAZERS_SPLICED
+#ifdef RAZERS_SPLICED
 		if(options.minMatchLen>0)
-		{
-			if(options.purgeAmbiguous)
-				compactSplicedMatchesPurgeAmbiguous(matches, stats, options, nothing, nothing);
-			else
-				compactSplicedMatches(matches, stats, options, nothing,nothing);
-		}
+			compactSplicedMatches(matches, stats, options, true, nothing,nothing);
 		else
-	#endif
+#endif
 			compactMatches(matches, stats, options, true, nothing);
 	}
 
@@ -976,9 +971,11 @@ void dumpMatches(
 								if( -(*it).pairScore < (int)length(stats))
 									bestMatches = stats[-(*it).pairScore][currReadNo]/2;
 							}
-							else if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
-								bestMatches = stats[(*it).editDist][currReadNo];
+							else 
 #endif
+								if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
+								bestMatches = stats[(*it).editDist][currReadNo];
+
 						}
 						
 						bool suboptimal = false;
@@ -1165,7 +1162,7 @@ void dumpMatches(
 									ali_it1 = begin(row(align,1));
 									ali_it0stop = end(row(align,0));
 									ali_it1stop = end(row(align,1));
-									}
+								}
 #endif
 								getCigarLine(align,cigar,mutations,ali_it0,ali_it0stop,ali_it1,ali_it1stop);
 								file << ";cigar="<<cigar.str();
