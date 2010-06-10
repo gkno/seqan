@@ -51,6 +51,15 @@ namespace seqan {
 			m_remaining_blocksize = other.remaining_blocksize();
 		}
 
+		operator void* ()
+		{
+			if( !isInsertion( cargo(*m_iter_tree).op ) ){
+				return m_iter_underlying;
+			}else{
+				return m_iter_insertion;
+			}
+		}
+
 		inline bool operator== ( Type & other ){
 			return ( m_iter_underlying == other.iter_underlying() && m_iter_insertion == other.iter_insertion() && m_remaining_blocksize == other.remaining_blocksize() );
 			//m_string == other.string() && && m_iter_tree == other.iter_tree() && m_remaining_blocksize == other.remaining_blocksize() );
@@ -59,16 +68,6 @@ namespace seqan {
 		inline bool operator!= ( Type & other ){
 			return !( operator==(other) );
 		}
-
-//		inline Type & operator+=(size_t pStepSize) const {
-//
-//			return *this;
-//		}
-//
-//		inline Type operator+(size_t pStepSize) const {
-//			Type temp_iter = *this;
-//			return temp_iter += pStepSize;
-//		}
 
 		inline TValue operator*(){
 			if( !isInsertion( cargo(*m_iter_tree).op ) ){
@@ -107,6 +106,34 @@ namespace seqan {
 			Type temp_it = *this;
 			minus_one();
 			return temp_it;
+		}
+
+		template <typename TSize>
+		inline Type & operator+=(TSize other) {
+			for (; other > 0; --other)
+				++(*this);
+			return *this;
+		}
+
+		template <typename TSize>
+		inline Type const operator+( TSize const & other ) {
+			Type result = *this;
+			result += other;
+			return result;
+		}
+
+		template <typename TSize>
+		inline Type & operator-=(TSize other)
+		{
+			for (; other > 0; --other) {
+				--(*this);
+			}
+		}
+		template <typename TSize>
+		inline Type const operator-(TSize const & other) {
+			Type result = *this;
+			result -= other;
+			return result;
 		}
 
 		int remaining_blocksize() {
@@ -284,9 +311,15 @@ namespace seqan {
 //meta functions
 
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
-		struct Iterator< String< TValue, Journal< TStringSpec, TJournalSpec > > >{
+		struct Iterator< String< TValue, Journal< TStringSpec, TJournalSpec > >, Standard >{
 			typedef JournalIterator< TValue, TStringSpec, TJournalSpec > Type;
 		};
+
+	template< typename TValue, typename TStringSpec, typename TJournalSpec >
+		struct Iterator< String< TValue, Journal< TStringSpec, TJournalSpec > >, Rooted >{
+			typedef JournalIterator< TValue, TStringSpec, TJournalSpec > Type;
+		};
+
 
 #if 0
 	template< typename TValue, typename TStringSpec, typename TJournalSpec >
@@ -317,7 +350,7 @@ namespace seqan {
 		}
 #endif
 	template <typename TValue, typename TStringSpec, typename TJournalSpec>
-		inline typename Iterator< String< TValue, Journal < TStringSpec, TJournalSpec> > >::Type
+		inline typename Iterator< String< TValue, Journal < TStringSpec, TJournalSpec> > const >::Type
 		begin (
 				String<TValue, Journal<TStringSpec, TJournalSpec> > const & str	)
 		{
@@ -326,12 +359,12 @@ namespace seqan {
 		}
 
 	template <typename TValue, typename TStringSpec, typename TJournalSpec, typename TTagSpec>
-		inline typename Iterator< String< TValue, Journal < TStringSpec, TJournalSpec> > >::Type
+		inline typename Iterator< String< TValue, Journal < TStringSpec, TJournalSpec> > const, Tag<TTagSpec> const >::Type
 		begin (
 				String<TValue, Journal<TStringSpec, TJournalSpec> > const & str,
 				Tag<TTagSpec> const )
 		{
-			typename Iterator< String< TValue, Journal<TStringSpec, TJournalSpec> > const >::Type begin_iter( str );
+			typename Iterator< String< TValue, Journal<TStringSpec, TJournalSpec> > const, Tag<TTagSpec> const >::Type begin_iter( str );
 			return begin_iter;
 		}
 #if 0
