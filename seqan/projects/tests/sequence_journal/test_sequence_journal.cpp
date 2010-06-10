@@ -37,6 +37,7 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journal) {
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_assign_value);
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_assign_infix);
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_length);
+    SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_virtual_to_host_position);
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_copy_constructor);
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_begin_end_iterator);
     SEQAN_CALL_TEST(test_sequence_journal_unbalanced_tree_begin_end_const_iterator);
@@ -53,6 +54,7 @@ SEQAN_BEGIN_TESTSUITE(test_sequence_journal) {
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_assign_value);
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_assign_infix);
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_length);
+    SEQAN_CALL_TEST(test_sequence_journal_sorted_array_virtual_to_host_position);
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_copy_constructor);
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_begin_end_iterator);
     SEQAN_CALL_TEST(test_sequence_journal_sorted_array_begin_end_const_iterator);

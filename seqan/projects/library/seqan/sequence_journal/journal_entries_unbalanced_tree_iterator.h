@@ -34,7 +34,8 @@ struct JournalEntriesIterSpec;
 
 enum IterationDirection {
     DIRECTION_NULL,
-    DIRECTION_DOWN,
+    DIRECTION_DOWN_LEFT,
+    DIRECTION_DOWN_RIGHT,
     DIRECTION_UP_LEFT,
     DIRECTION_UP_RIGHT
 };
@@ -188,7 +189,7 @@ _initJournalEntriesIterator(Iter<TJournalEntries, JournalEntriesIterSpec<Unbalan
     if (tree._root == 0) {
         iterator._iterationDirection = DIRECTION_UP_RIGHT;
     } else {
-        iterator._iterationDirection = DIRECTION_DOWN;
+        iterator._iterationDirection = DIRECTION_DOWN_LEFT;
         while (goLeft(iterator))
             continue;  // Left-only traversal.
     }
@@ -278,7 +279,7 @@ goLeft(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator
     SEQAN_CHECKPOINT;
     if (!hasLeftChild(iterator))
         return false;
-    iterator._iterationDirection = DIRECTION_DOWN;
+    iterator._iterationDirection = DIRECTION_DOWN_LEFT;
     iterator._currentNode = iterator._currentNode->left;
     return true;
 }
@@ -300,7 +301,7 @@ goRight(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterato
     SEQAN_CHECKPOINT;
     if (!hasRightChild(iterator))
         return false;
-    iterator._iterationDirection = DIRECTION_DOWN;
+    iterator._iterationDirection = DIRECTION_DOWN_RIGHT;
     iterator._currentNode = iterator._currentNode->right;
     return true;
 }
@@ -332,24 +333,24 @@ goUp(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
     return true;
 }
 
-// template <typename TJournalEntries>
-// inline
-// bool
-// atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
-// {
-//     SEQAN_CHECKPOINT;
-//     return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
-// }
+template <typename TJournalEntries>
+inline
+bool
+atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const & iterator)
+{
+    SEQAN_CHECKPOINT;
+    return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
+}
 
-// template <typename TJournalEntries>
-// inline
-// bool
-// atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
-// {
-//     SEQAN_CHECKPOINT;
-//     typedef Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > TIterator;
-//     return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
-// }
+template <typename TJournalEntries>
+inline
+bool
+atEnd(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
+{
+    SEQAN_CHECKPOINT;
+    typedef Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > TIterator;
+    return (iterator._currentNode == 0) || (!hasParent(iterator) && (iterator._iterationDirection == DIRECTION_UP_RIGHT));
+}
 
 template <typename TJournalEntries>
 inline
@@ -358,7 +359,8 @@ operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iter
 {
     SEQAN_CHECKPOINT;
     switch (iterator._iterationDirection) {
-        case DIRECTION_DOWN:
+        case DIRECTION_DOWN_LEFT:
+        case DIRECTION_DOWN_RIGHT:
             // Arrived here by going down (either right or left).  Next is
             // either right-left traversal (if node has a child to the right)
             // or going up if we do not have a child on the right.
@@ -392,20 +394,84 @@ operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iter
     return iterator;    
 }
 
-// TODO(holtgrew): Unused, remove?
-/*
 template <typename TJournalEntries>
 inline
 Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
 operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
            int postfix)
 {
-    SEQAN_XXXCHECKPOINT;
+    SEQAN_CHECKPOINT;
     Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > temp(iterator);
     ++iterator;
     return temp;
 }
-*/
+
+template <typename TJournalEntries>
+inline
+Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > &
+operator--(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator)
+{
+    SEQAN_CHECKPOINT;
+    typedef typename TJournalEntries::TNode TNode;
+    
+    // If we are at the end, go to the last vertex.
+    if (atEnd(iterator)) {
+        while (goRight(iterator))
+            continue;
+        return iterator;
+    }
+    // Otherwise, simply go one step left.
+    
+    // The following comments are from the point of perspective of having
+    // performed an increment in the previous step.
+    TNode const * parent;
+    switch (iterator._iterationDirection) {
+        case DIRECTION_DOWN_RIGHT:
+        case DIRECTION_DOWN_LEFT:
+            // Arrived here in a right-left traversal.  Reverse this by
+            // going up until we went up from a right child.
+            while (goUp(iterator) && iterator._iterationDirection != DIRECTION_UP_RIGHT)
+                continue;
+            // Next, update iteration direction such that going up and then
+            // down the same edge would lead to current node.
+            parent = iterator._currentNode->parent;
+            if (parent == 0) {
+                iterator._iterationDirection = DIRECTION_DOWN_LEFT;
+            } else {
+                if (parent->left == iterator._currentNode) {
+                    iterator._iterationDirection = DIRECTION_DOWN_LEFT;
+                } else {
+                    SEQAN_ASSERT_EQ(parent->right, iterator._currentNode);
+                    iterator._iterationDirection = DIRECTION_DOWN_RIGHT;
+                }
+            }
+            break;
+        case DIRECTION_UP_LEFT:
+            // We came up from our left child.  Next in going to predecessor
+            // is going back to the left child.
+            goLeft(iterator);
+            break;
+        case DIRECTION_UP_RIGHT:
+            SEQAN_ASSERT_FAIL("Should probably not happen.");
+            break;
+        default:
+            SEQAN_ASSERT_FAIL("Invalid iteration direction.");
+    }
+        
+    return iterator;    
+}
+
+template <typename TJournalEntries>
+inline
+Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
+operator--(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
+           int /*postfix*/)
+{
+    SEQAN_CHECKPOINT;
+    Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > temp(iterator);
+    --iterator;
+    return temp;
+}
 
 template <typename TJournalEntries>
 inline

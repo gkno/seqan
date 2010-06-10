@@ -168,9 +168,9 @@ void reinit(JournalEntries<TCargo, SortedArray> & tree,
 
 template <typename TCargo>
 inline
-TCargo const &
-findJournalEntry(JournalEntries<TCargo, SortedArray> const & tree,
-                 typename Position<TCargo>::Type const & pos) {
+typename Iterator<JournalEntries<TCargo, SortedArray> const, Standard>::Type 
+findInJournalEntries(JournalEntries<TCargo, SortedArray> const & journalEntries,
+                     typename Position<TCargo>::Type const & pos) {
     typedef typename Size<TCargo>::Type TSize;
     typedef typename Position<TCargo>::Type TPos;
     typedef typename Iterator<String<TCargo>, Standard>::Type TIterator;
@@ -178,16 +178,25 @@ findJournalEntry(JournalEntries<TCargo, SortedArray> const & tree,
 
     TCargo refCargo;
     refCargo.virtualPosition = pos;
-    TIterator iter = std::upper_bound(begin(tree._journalNodes, Standard()),
-                                      end(tree._journalNodes, Standard()),
+    TIterator iter = std::upper_bound(begin(journalEntries._journalNodes, Standard()),
+                                      end(journalEntries._journalNodes, Standard()),
                                       refCargo,
                                       TCmp());
-    SEQAN_ASSERT_TRUE(iter != begin(tree._journalNodes, Standard()));
+    SEQAN_ASSERT_TRUE(iter != begin(journalEntries._journalNodes, Standard()));
     iter -= 1;
 
-    SEQAN_ASSERT_TRUE(iter != end(tree._journalNodes, Standard()));
+    SEQAN_ASSERT_TRUE(iter != end(journalEntries._journalNodes, Standard()));
 
-    return *iter;
+    return iter;
+}
+
+
+template <typename TCargo>
+inline
+TCargo const &
+findJournalEntry(JournalEntries<TCargo, SortedArray> const & journalEntries,
+                 typename Position<TCargo>::Type const & pos) {
+    return *findInJournalEntries(journalEntries, pos);
 }
 
 
@@ -388,6 +397,48 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
     //std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
     SEQAN_ASSERT_TRUE(_checkSortedArrayTree(tree));
+}
+
+
+template <typename TNode, typename TJournalSpec, typename TPos>
+inline
+typename Position<typename Cargo<TNode>::Type >::Type
+virtualToHostPosition(JournalEntries<TNode, TJournalSpec> const & journalEntries,
+                      TPos const & pos)
+{
+    SEQAN_CHECKPOINT;
+    typedef JournalEntries<TNode, TJournalSpec> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+
+    TIterator it = findInJournalEntries(journalEntries, pos);
+    // The easiest case is to find a segment from the original sequence that
+    // contains the position.  This case also works if we hit the entry after
+    // the last one in a segment from the original sequence.
+    if (value(it).segmentSource == SOURCE_ORIGINAL) {
+        TPos offset = pos - value(it).virtualPosition;
+        return value(it).physicalPosition + offset;
+    }
+    // The harder case is to find a segment from the patch sequence.  We first
+    // try to find an original segment right of it, if this fails a segment
+    // left of it.  If this fails, 0 is returned.
+    SEQAN_ASSERT_EQ(value(it).segmentSource, SOURCE_PATCH);
+    TIterator it2 = it;
+    for (++it; it != end(journalEntries, Standard()); ++it) {
+        if (value(it).segmentSource == SOURCE_ORIGINAL)
+            return value(it).physicalPosition;
+    }
+	it = it2;
+    // Search left;
+    while (true) {
+        if (value(it).segmentSource == SOURCE_ORIGINAL)
+            return value(it).physicalPosition + value(it).length;
+        if (it == begin(journalEntries, Standard()))
+            return 0;
+        --it;
+    }
+
+    SEQAN_ASSERT_FAIL("Should never reach here!");
+    return 0;
 }
 
 }  // namespace seqan

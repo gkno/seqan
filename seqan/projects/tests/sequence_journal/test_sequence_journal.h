@@ -171,6 +171,33 @@ void testSequenceJournalLength(TStringJournalSpec const &)
 }
 
 
+// Test conversion of virtual to host position.
+template <typename TStringJournalSpec>
+void testSequenceJournalVirtualToHostPosition(TStringJournalSpec const &)
+{
+    CharString charStr = "test";
+    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+
+    insertValue(sequenceJournal, 0, '!');
+    erase(sequenceJournal, 2);
+    insertValue(sequenceJournal, 4, '!');
+
+    // sequenceJournal == !tst!
+    //
+    //                           01234
+    // alignment with original  "test"
+    //                         "!t-st!"
+    //                          01 2345
+
+    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(sequenceJournal, 0));
+    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(sequenceJournal, 1));
+    SEQAN_ASSERT_EQ(2u, virtualToHostPosition(sequenceJournal, 2));
+    SEQAN_ASSERT_EQ(3u, virtualToHostPosition(sequenceJournal, 3));
+    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(sequenceJournal, 4));
+    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(sequenceJournal, 5));
+}
+
+
 template <typename TStringJournalSpec>
 void testSequenceJournalCopyConstructor(TStringJournalSpec const &)
 {
@@ -539,6 +566,11 @@ SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_length) {
 }
 
 
+SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_virtual_to_host_position) {
+    testSequenceJournalVirtualToHostPosition(UnbalancedTree());
+}
+
+
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_copy_constructor) {
     testSequenceJournalCopyConstructor(UnbalancedTree());
 }
@@ -608,6 +640,11 @@ SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_assign_infix) {
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_length) {
     testSequenceJournalLength(SortedArray());
+}
+
+
+SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_virtual_to_host_position) {
+    testSequenceJournalVirtualToHostPosition(SortedArray());
 }
 
 

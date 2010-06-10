@@ -276,50 +276,44 @@ _addToVirtualPositionsRightOf(TNode * node,
 }
 
 
-template <typename TCargo, typename TPos>
+template <typename TCargo>
 inline
-void
-findNodeWithVirtualPos(typename JournalEntries<TCargo, UnbalancedTree>::TNode * & node,
-                       typename JournalEntries<TCargo, UnbalancedTree>::TNode * & parent,
-                       JournalEntries<TCargo, UnbalancedTree> const & tree,
-                       TPos const & pos)
-{
+typename Iterator<JournalEntries<TCargo, UnbalancedTree> const, Standard>::Type 
+findInJournalEntries(JournalEntries<TCargo, UnbalancedTree> const & journalEntries,
+                     typename Position<TCargo>::Type const & pos) {
     SEQAN_CHECKPOINT;
-    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
+    typedef JournalEntries<TCargo, UnbalancedTree> TJournalEntries;
+    typedef typename TJournalEntries::TNode TNode;
+    typedef typename Iterator<TJournalEntries, Standard>::Type TIterator;
 
-    parent = 0;
-    node = tree._root;
+    TIterator result;
+    result._currentNode = journalEntries._root;
+
     while (true) {
-        SEQAN_ASSERT_NEQ(node, static_cast<TNode *>(0));
-        if ((cargo(*node).virtualPosition <= pos) && (cargo(*node).virtualPosition + cargo(*node).length > pos)) {
+        SEQAN_ASSERT_NEQ(result._currentNode, static_cast<TNode *>(0));
+
+        if ((value(result).virtualPosition <= pos) && (value(result).virtualPosition + value(result).length > pos)) {
             break;
-        } else if ((cargo(*node).virtualPosition + cargo(*node).length) <= pos) {
-            if (node->right == 0)
+        } else if (value(result).virtualPosition + value(result).length <= pos) {
+            if (!goRight(result))
                 break;
-            TNode * tmp = node;
-            node = node->right;
-            parent = tmp;
-            continue;
         } else {  // pos < node->virtualPosition
-            TNode * tmp = node;
-            node = node->left;
-            parent = tmp;
-            continue;
+            if (!goLeft(result))
+                break;
         }
     }
+
+    return result;
 }
 
 
-template <typename TCargo, typename TPos>
+template <typename TCargo>
 inline
 TCargo const &
-findJournalEntry(JournalEntries<TCargo, UnbalancedTree> const & tree,
-                 TPos const & pos) {
-    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
-    TNode * node;
-    TNode * parent;
-    findNodeWithVirtualPos(node, parent, tree, pos);
-    return cargo(*node);
+findJournalEntry(JournalEntries<TCargo, UnbalancedTree> const & journalEntries,
+                 typename Position<TCargo>::Type const & pos) {
+    SEQAN_CHECKPOINT;
+    return *findInJournalEntries(journalEntries, pos);
 }
 
 
@@ -330,7 +324,9 @@ void recordErase(JournalEntries<TCargo, UnbalancedTree> & tree,
                  typename Position<typename JournalEntries<TCargo, UnbalancedTree>::TNode>::Type const & posEnd)
 {
     SEQAN_CHECKPOINT;
-    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
+    typedef JournalEntries<TCargo, UnbalancedTree> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+    typedef typename TJournalEntries::TNode TNode;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
 
@@ -356,7 +352,9 @@ void recordErase(JournalEntries<TCargo, UnbalancedTree> & tree,
     // Find node with virtual position pos.
     TNode * node = 0;
     TNode * parent = 0;
-    findNodeWithVirtualPos(node, parent, tree, pos);
+    TIterator iter = findInJournalEntries(tree, pos);
+    node = iter._currentNode;
+    parent = node->parent;
 
     // The position to subtract values from right of.
     TPos subtractRightOf = pos;
@@ -513,7 +511,9 @@ void recordInsertion(JournalEntries<TCargo, UnbalancedTree> & tree,
                      typename Size<typename JournalEntries<TCargo, UnbalancedTree>::TNode>::Type const & length)
 {
     SEQAN_CHECKPOINT;
-    typedef typename JournalEntries<TCargo, UnbalancedTree>::TNode TNode;
+    typedef JournalEntries<TCargo, UnbalancedTree> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+    typedef typename TJournalEntries::TNode TNode;
     typedef typename Position<TNode>::Type TPos;
     typedef typename Size<TNode>::Type TSize;
 
@@ -534,7 +534,9 @@ void recordInsertion(JournalEntries<TCargo, UnbalancedTree> & tree,
     
     TNode * node;
     TNode * parent;
-    findNodeWithVirtualPos(node, parent, tree, virtualPos);
+    TIterator iter = findInJournalEntries(tree, virtualPos);
+    node = iter._currentNode;
+    parent = node->parent;
     SEQAN_ASSERT_LEQ(cargo(*node).virtualPosition, virtualPos);
 
     if (cargo(*node).virtualPosition + cargo(*node).length > virtualPos) {
@@ -660,6 +662,7 @@ void journalTreeToDot(TStream & stream, unsigned & nextId, JournalEntries<TNode,
     stream << "ROOTPTR" << nextId << " -> node_" << nextId << std::endl;
     journalTreeToDotRec(stream, nextId, *journalTree._root);
 }
+
 
 }  // namespace seqan
 

@@ -443,6 +443,18 @@ getValue(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal,
 }
 
 
+template <typename TSequence, typename TJournalSpec, typename TPos>
+inline
+typename Position<SequenceJournal<TSequence, TJournalSpec> >::Type
+virtualToHostPosition(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal,
+                      TPos const & pos)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): With a better journal entries datastructure, we could solve the main problem here. At the moment, we delegate completely.
+    return virtualToHostPosition(sequenceJournal._journalEntries, pos);
+}
+
+
 }  // namespace seqan
 
 #endif  // SEQAN_SEQUENCE_JOURNAL_SEQUENCE_JOURNAL_H_
