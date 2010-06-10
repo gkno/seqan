@@ -32,11 +32,11 @@ namespace seqan {
 .Class.SequenceJournal:Journaled versions of arbitrary underlying sequences.
 ..signature:SequenceJournal<TSequence, Journal<TJournalSpec> >
  */
-//template<typename TSequence, typename TJournalSpec>
+//template <typename TSequence, typename TJournalSpec>
 //class SequenceJournal;
 
 
-template<typename _TSequence, typename _TJournalSpec>
+template <typename _TSequence, typename _TJournalSpec>
 class SequenceJournal
 {
 public:
@@ -84,13 +84,13 @@ public:
 .Metafunction.Size:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Host<SequenceJournal<TSequence, TJournalSpec> >
 {
     typedef TSequence Type;
 };
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Host<SequenceJournal<TSequence, TJournalSpec> const>
 {
     typedef TSequence const Type;
@@ -100,11 +100,11 @@ struct Host<SequenceJournal<TSequence, TJournalSpec> const>
 .Metafunction.Size:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Size<SequenceJournal<TSequence, TJournalSpec> >
         : public Size<TSequence> {};
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Size<SequenceJournal<TSequence, TJournalSpec> const>
         : public Size<TSequence> {};
 
@@ -112,11 +112,11 @@ struct Size<SequenceJournal<TSequence, TJournalSpec> const>
 .Metafunction.Position:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Position<SequenceJournal<TSequence, TJournalSpec> const>
         : public Position<TSequence> {};
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Position<SequenceJournal<TSequence, TJournalSpec> >
         : public Position<TSequence> {};
 
@@ -124,11 +124,11 @@ struct Position<SequenceJournal<TSequence, TJournalSpec> >
 .Metafunction.Value:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Value<SequenceJournal<TSequence, TJournalSpec> const>
         : public Value<TSequence> {};
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Value<SequenceJournal<TSequence, TJournalSpec> >
         : public Value<TSequence> {};
 
@@ -136,11 +136,11 @@ struct Value<SequenceJournal<TSequence, TJournalSpec> >
 .Metafunction.GetValue:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct GetValue<SequenceJournal<TSequence, TJournalSpec> const>
         : public GetValue<TSequence> {};
  
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct GetValue<SequenceJournal<TSequence, TJournalSpec> >
         : public GetValue<TSequence> {};
 
@@ -148,11 +148,11 @@ struct GetValue<SequenceJournal<TSequence, TJournalSpec> >
 .Metafunction.Reference:
 ..param.TValue:Spec.Journal String
  */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Reference<SequenceJournal<TSequence, TJournalSpec> const>
         : public Reference<TSequence> {};
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct Reference<SequenceJournal<TSequence, TJournalSpec> >
         : public Reference<TSequence> {};
 
@@ -163,7 +163,7 @@ struct Reference<SequenceJournal<TSequence, TJournalSpec> >
 template <typename T>
 struct JournalType;
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct JournalType<SequenceJournal<TSequence, TJournalSpec> const>
 {
     typedef typename Size<TSequence>::Type _TSize;
@@ -173,7 +173,7 @@ struct JournalType<SequenceJournal<TSequence, TJournalSpec> const>
     typedef JournalEntries<_TJournalEntry, TJournalSpec> const Type;
 };
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 struct JournalType<SequenceJournal<TSequence, TJournalSpec> >
 {
     typedef typename Size<TSequence>::Type _TSize;
@@ -214,9 +214,10 @@ operator<<(TStream & stream, SequenceJournal<TSequence, TJournalSpec> const & se
 ..param.object.type:Spec.Journal String
 ..param.host.type:Class.String
 */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec, typename TSequence2>
 inline
-void setHost(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal, TSequence & str)
+void
+setHost(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal, TSequence2 & str)
 {
     SEQAN_CHECKPOINT;
     setValue(sequenceJournal._holder, str);
@@ -228,7 +229,7 @@ void setHost(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal, TSequen
 .Function.host:
 ..param.object.type:Spec.Journal String
 */
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
 host(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
@@ -236,7 +237,7 @@ host(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
     SEQAN_CHECKPOINT;
     return value(sequenceJournal._holder);
 }
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 typename Host<SequenceJournal<TSequence, TJournalSpec> >::Type &
 host(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
@@ -250,7 +251,7 @@ host(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 ..param.object.type:Spec.Journal String
  */
 // TODO(holtgrew): Behaviour is to clear the journal, not the string!
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 void
 clear(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
@@ -268,7 +269,7 @@ clear(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal)
  */
 // TODO(holtgrew): Write me! What about non-destructive version that creates a new copy and sets holder to it?
 
-template<typename TSequence, typename TJournalSpec, typename TPos>
+template <typename TSequence, typename TJournalSpec, typename TPos>
 inline
 void
 erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
@@ -283,7 +284,7 @@ erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
         clear(sequenceJournal._insertionBuffer);
 }
 
-template<typename TSequence, typename TJournalSpec, typename TPos>
+template <typename TSequence, typename TJournalSpec, typename TPos>
 inline
 void
 erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
@@ -295,7 +296,7 @@ erase(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
 }
 
 
-template<typename TSequence, typename TJournalSpec, typename TPos, typename TString>
+template <typename TSequence, typename TJournalSpec, typename TPos, typename TString>
 inline
 void
 insert(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
@@ -310,7 +311,7 @@ insert(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
 }
 
 
-template<typename TSequence, typename TJournalSpec, typename TPos, typename TValue>
+template <typename TSequence, typename TJournalSpec, typename TPos, typename TValue>
 inline
 void
 insertValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
@@ -365,7 +366,7 @@ assignValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
 
 // TODO(holtgrew): Unused, remove?
 /*
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 typename Value<TSequence>::Type const &
 front(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
@@ -383,7 +384,7 @@ front(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 }
 
 // front/back clash with general sequence definitions.
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 TValue const &
 back(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
@@ -401,7 +402,7 @@ back(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 }
 */
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 typename Size<SequenceJournal<TSequence, TJournalSpec> >::Type
 length(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
@@ -421,7 +422,7 @@ length(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal)
 // TOOD(holtgrew): operator==
 // TOOD(holtgrew): operator!=
 
-template<typename TSequence, typename TJournalSpec>
+template <typename TSequence, typename TJournalSpec>
 inline
 typename GetValue<SequenceJournal<TSequence, TJournalSpec> >::Type
 getValue(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal,
@@ -454,6 +455,22 @@ virtualToHostPosition(SequenceJournal<TSequence, TJournalSpec> const & sequenceJ
     return virtualToHostPosition(sequenceJournal._journalEntries, pos);
 }
 
+
+template <typename TSequence, typename TJournalSpec>
+inline
+const void *
+id(SequenceJournal<TSequence, TJournalSpec> const & sequenceJournal) {
+    SEQAN_CHECKPOINT;
+    return id(value(sequenceJournal._holder));
+}
+
+template <typename TSequence, typename TJournalSpec>
+inline
+const void *
+id(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal) {
+    SEQAN_CHECKPOINT;
+    return id(value(sequenceJournal._holder));
+}
 
 }  // namespace seqan
 

@@ -118,7 +118,26 @@ struct Iterator<SequenceJournal<TSequence, TJournalSpec> const, Standard>
     typedef Iter<SequenceJournal<TSequence, TJournalSpec> const, JournalStringIterSpec<TJournalSpec> > Type;
 };
 
-// For Iter<TJournalString, JournalStringIterSpec>
+// For Iter<TJournalString, TJournalStringIterSpec>
+template <typename TJournalString, typename TJournalStringIterSpec>
+struct GetValue<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > >
+{
+    typedef typename GetValue<TJournalString>::Type Type;
+};
+
+template <typename TJournalString, typename TJournalStringIterSpec>
+struct GetValue<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > const>
+        : GetValue<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > > {};
+
+template <typename TJournalString, typename TJournalStringIterSpec>
+struct Value<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > >
+{
+    typedef typename Value<TJournalString>::Type Type;
+};
+
+template <typename TJournalString, typename TJournalStringIterSpec>
+struct Value<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > const>
+        : Value<Iter<TJournalString, JournalStringIterSpec<TJournalStringIterSpec> > > {};
 
 // ============================================================================
 // Functions
@@ -228,7 +247,7 @@ _updateSegmentIterators(Iter<TJournalString, JournalStringIterSpec<TJournalSpec>
 template <typename TJournalString, typename TJournalSpec>
 inline
 typename Value<TJournalString>::Type
-value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > & iterator)
+value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > const & iterator)
 {
     SEQAN_CHECKPOINT;
     if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
@@ -242,7 +261,7 @@ value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > & iterator)
 template <typename TJournalString, typename TJournalSpec>
 inline
 typename Value<TJournalString>::Type
-value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > const & iterator)
+value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > & iterator)
 {
     SEQAN_CHECKPOINT;
     if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
@@ -250,6 +269,34 @@ value(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > const & iterato
     } else {
         SEQAN_ASSERT_EQ(value(iterator._journalEntriesIterator).segmentSource, SOURCE_PATCH);
         return value(iterator._currentInsertionBufferIt);
+    }
+}
+
+template <typename TJournalString, typename TJournalSpec>
+inline
+typename GetValue<Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > >::Type
+getValue(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > const & iterator)
+{
+    SEQAN_CHECKPOINT;
+    if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
+        return getValue(iterator._currentHostIt);
+    } else {
+        SEQAN_ASSERT_EQ(value(iterator._journalEntriesIterator).segmentSource, SOURCE_PATCH);
+        return getValue(iterator._currentInsertionBufferIt);
+    }
+}
+
+template <typename TJournalString, typename TJournalSpec>
+inline
+typename GetValue<Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > >::Type
+getValue(Iter<TJournalString, JournalStringIterSpec<TJournalSpec> > & iterator)
+{
+    SEQAN_CHECKPOINT;
+    if (value(iterator._journalEntriesIterator).segmentSource == SOURCE_ORIGINAL) {
+        return getValue(iterator._currentHostIt);
+    } else {
+        SEQAN_ASSERT_EQ(value(iterator._journalEntriesIterator).segmentSource, SOURCE_PATCH);
+        return getValue(iterator._currentInsertionBufferIt);
     }
 }
 
