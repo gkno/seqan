@@ -3,6 +3,7 @@
 
 #include <numeric>
 
+#include <seqan/store.h>
 #include <seqan/sequence_journal.h>
 
 #include "read_simulator.h"
@@ -335,7 +336,7 @@ TStream & operator<<(TStream & stream, IlluminaOptions const & options) {
            << "  errorDistributionFile:  \"" << options.errorDistributionFile << "\"" <<std::endl
            << "  probabilityInsert:      " << options.probabilityInsert << std::endl
            << "  probabilityDelete:      " << options.probabilityDelete << std::endl
-           << "  qualityErrorFactor: " << options.qualityErrorFactor << std::endl
+           << "  qualityErrorFactor:     " << options.qualityErrorFactor << std::endl
            << "  numHaplotypes:          " << options.numHaplotypes << std::endl
            << "  haplotypeSnpRate:       " << options.haplotypeSnpRate << std::endl
            << "  haplotypeIndelRate:     " << options.haplotypeIndelRate << std::endl
@@ -381,51 +382,60 @@ TStream & operator<<(TStream & stream, ReadSimulationInstruction const & inst) {
 }
 
 
-void buildEditString(ReadSimulationInstruction & inst, String<double> const & errorProbabilities) {
-    size_t sourceLength = inst.endPos - inst.beginPos;  // Length of original data in genome.
-    SEQAN_ASSERT_EQ_MSG(length(errorProbabilities), 4 * sourceLength, "Error probability vector len must be == 4 * read len.");
+void buildEditString(ReadSimulationInstruction & inst, unsigned readLength, String<double> const & errorProbabilities) {
+    SEQAN_ASSERT_EQ(readLength * 4, length(errorProbabilities));
     clear(inst.editString);
-    reserve(inst.editString, static_cast<size_t>(1.2 * sourceLength), Generous());
+    reserve(inst.editString, static_cast<size_t>(1.2 * readLength), Generous());
     inst.delCount = 0;
     inst.insCount = 0;
 
-    for (unsigned i = 0; i < sourceLength; /*NOP*/) {
+    for (unsigned i = 0; i < readLength; /*NOP*/) {
         double x = mtRandDouble();
         double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
         double pMismatch = errorProbabilities[i * 4 + ERROR_TYPE_MISMATCH];
         double pInsert   = errorProbabilities[i * 4 + ERROR_TYPE_INSERT];
         if (x < pMatch) {
+//             std::cout << "match" << std::endl;
             // match
+            i += 1;
             appendValue(inst.editString, ERROR_TYPE_MATCH);
-            i += 1;
         } else if (x < pMatch + pMismatch) {
+//             std::cout << "mismatch" << std::endl;
             // mismatch
-            appendValue(inst.editString, ERROR_TYPE_MISMATCH);
             i += 1;
+            appendValue(inst.editString, ERROR_TYPE_MISMATCH);
         } else if (x < pMatch + pMismatch + pInsert) {
+//             std::cout << "insert" << std::endl;
             // insert
-            inst.insCount += 1;
             if (length(inst.editString) > 0 && back(inst.editString == ERROR_TYPE_DELETE)) {
-                resize(inst.editString, length(inst.editString) - 1, Exact());
+                inst.delCount -= 1;
+                eraseBack(inst.editString);
             } else {
+                i += 1;
+                inst.insCount += 1;
                 appendValue(inst.editString, ERROR_TYPE_INSERT);
             }
         } else {
-            // Decrement string size, do not add a delete if string is too short.
-            if (i == 0)
-                continue;
-            i -= 1;
-            // delete
+//             std::cout << "delete" << std::endl;
+            // Decrement string size, do not add a delete if string is
+            // too short, possibly remove insert from edit string.
             if (length(inst.editString) > 0) {
-                inst.delCount += 1;
                 if (back(inst.editString == ERROR_TYPE_INSERT)) {
-                    resize(inst.editString, length(inst.editString) - 1, Exact());
+                    i -= 1;
+                    inst.insCount -= 1;
+                    eraseBack(inst.editString);
                 } else {
+                    inst.delCount += 1;
                     appendValue(inst.editString, ERROR_TYPE_DELETE);
                 }
             }
         }
     }
+//     for (unsigned i = 0; i < length(inst.editString); ++i)
+//         std::cout << " " << inst.editString[i];
+//     std::cout << std::endl;
+//     std::cout << "del " << inst.delCount << " ins " << inst.insCount << std::endl;
+    SEQAN_ASSERT_EQ(readLength, length(inst.editString) - inst.delCount);
 }
 
 
@@ -496,19 +506,115 @@ struct DeltaEntry {
 };
 
 
-bool operator<(DeltaEntry const & a, DeltaEntry const & b) const {
+bool operator<(DeltaEntry const & a, DeltaEntry const & b) {
     return a.pos < b.pos;
 }
 
 
-void buildHaplotype(StringSet<String<Dna5Q> > & haplotype,
-                    String<String<std::pair<_t> >
-                    FragmentStore<> & fragmentStore,
+void buildHaplotype(StringSet<String<Dna5> > & haplotype,
+                    FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     IlluminaOptions const & options) {
     clear(haplotype);
     for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i) {
-        appendValue(haplotype, fragmentStore.contigStore[i].seq);
+        // TODO(holtgrew): Use journal string instead of ordinary string!
+        String<Dna5> const & contig = fragmentStore.contigStore[i].seq;
+        String<Dna5> haplotypeContig;
+        // TODO(holtgrew): Crude guess, should depend on options.
+        reserve(haplotypeContig, static_cast<size_t>(1.1 * length(contig)));
+
+        for (size_t j = 0; j < length(contig);) {
+            double x = mtRand();
+            if (x < options.haplotypeSnpRate) {
+                // SNP
+                Dna5 c = Dna5(4 * mtRandDouble());
+                if (c == contig[j])
+                    c = Dna5(ordValue(c) + 1);
+                j++;
+            } else if (x < options.haplotypeSnpRate + options.haplotypeIndelRate) {
+                // Indel of random length.
+                unsigned rangeLen = options.haplotypeIndelRangeMax - options.haplotypeIndelRangeMin;
+                unsigned indelLen = options.haplotypeIndelRangeMin + static_cast<unsigned>(mtRandDouble() * rangeLen);
+                if (mtRandDouble() < 0.5) {
+                    // Insertion.
+                    for (unsigned k = 0; k < indelLen; ++k) {
+                        Dna5 c = Dna5(5 * mtRandDouble());
+                        appendValue(haplotypeContig, c);
+                    }
+                } else {
+                    // Deletion.
+                    j += indelLen;
+                }
+            } else {
+                appendValue(haplotypeContig, contig[j]);
+                j++;
+            }
+        }
+        
+        appendValue(haplotype, String<Dna5Q>());
+        move(back(haplotype), haplotypeContig);
+
+//         std::cout << "contig = " << contig << std::endl;
+//         std::cout << "back(haplotype) = " << back(haplotype) << std::endl;
+//         std::cout << "haplotype contig = " << haplotypeContig << std::endl;
     }
+}
+
+
+template <typename TString>
+void applySimulationInstructions(TString & read, ReadSimulationInstruction const & inst, IlluminaOptions const & options, IlluminaReads const &)
+{
+    typedef typename Value<TString>::Type TAlphabet;
+
+    SEQAN_ASSERT_EQ(length(inst.qualities), length(inst.editString));
+    
+    TString tmp;
+    reserve(tmp, length(read) + inst.insCount - inst.delCount);
+    unsigned j = 0;
+//     std::cout << "length(read) == " << length(read) << std::endl;
+//     std::cout << "beg = " << inst.beginPos << std::endl;
+//     std::cout << "end = " << inst.endPos << std::endl;
+//     std::cout << "#   = " << inst.endPos - inst.beginPos << std::endl;
+//     std::cout << "insCount = " << inst.insCount << std::endl;
+//     std::cout << "delCount = " << inst.delCount << std::endl;
+//     for (unsigned i = 0; i < length(inst.editString); ++i)
+//         std::cout << "i == " << i << "  edit string[i] = " << inst.editString[i] << "  len = " << length(inst.editString) << std::endl;
+    for (unsigned i = 0; i < length(inst.editString); ++i) {
+        SEQAN_ASSERT_LEQ(j, i);
+
+        TAlphabet c;
+        switch (inst.editString[i]) {
+            case ERROR_TYPE_MATCH:
+                SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
+                appendValue(tmp, read[j]);
+                assignQualityValue(back(tmp), inst.qualities[i]);
+                j += 1;
+                break;
+            case ERROR_TYPE_MISMATCH:
+                c = TAlphabet(mtRandDouble() * (ValueSize<TAlphabet>::VALUE - 1));
+                SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
+                if (c == read[j])
+                    c = TAlphabet(ordValue(c) + 1);
+                appendValue(tmp, c);
+                assignQualityValue(back(tmp), inst.qualities[i]);
+                j += 1;
+                break;
+            case ERROR_TYPE_INSERT:
+                appendValue(tmp, TAlphabet(mtRandDouble() * ValueSize<TAlphabet>::VALUE));
+                assignQualityValue(back(tmp), inst.qualities[i]);
+                break;
+            case ERROR_TYPE_DELETE:
+                j += 1;
+                break;
+            default:
+                SEQAN_ASSERT_FAIL("Invalid error type.");
+        }
+    }
+    SEQAN_ASSERT_EQ(j, length(read));
+    SEQAN_ASSERT_GEQ(length(tmp), options.readLength);
+//     std::cerr << "read == " << read << std::endl << "tmp  == " << tmp << std::endl;
+    resize(tmp, options.readLength, Exact());
+//     std::cerr << "read == " << read << std::endl << "tmp  == " << tmp << " (truncated)" << std::endl;
+    move(read, tmp);
 }
 
 
@@ -518,7 +624,7 @@ void buildHaplotype(StringSet<String<Dna5Q> > & haplotype,
 ..param.errorDistribution:Error distribution, indexed by pos * 4 + ERROR_TYPE_{MATCH,MISMATCH,INSERT,DELETE}.
 ..param.tag:Tag for specifying reads to simulate.
 */
-int simulateReadsMain(FragmentStore<> & fragmentStore,
+int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                       IlluminaOptions const & options,
                       String<double> const & errorProbabilities,
                       IlluminaReads const &) {
@@ -582,9 +688,24 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
             inst.beginPos = mtRand() % (length(fragmentStore.contigStore[inst.contigId].seq) - options.readLength);
             inst.endPos = inst.beginPos + options.readLength;
             // Build edit string.
-            buildEditString(inst, errorProbabilities);
+            buildEditString(inst, options.readLength, errorProbabilities);
             // Build quality values.
             buildQualityValues(inst, errorProbabilities, options);
+            // If the number of reads does not equal the number of inserts
+            // then we have to adjust the read positions.
+            if (inst.delCount != inst.insCount) {
+                int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);
+//                 std::cout << __LINE__ << " delta == " << delta << std::endl;
+                inst.endPos += delta;
+                if (inst.endPos > length(fragmentStore.contigStore[inst.contigId].seq)) {
+                    delta = inst.endPos - length(fragmentStore.contigStore[inst.contigId].seq);
+//                     std::cout << __LINE__ << " delta == " << delta << std::endl;
+                    inst.endPos -= delta;
+                    inst.beginPos -= delta;
+                }
+                SEQAN_ASSERT_EQ(inst.endPos - inst.beginPos + inst.insCount - inst.delCount,
+                                options.readLength);
+            }
             // Append read to result list.
             appendValue(simulationInstructions, inst);
 
@@ -592,10 +713,10 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
             if (options.generateMatePairs) {
                 // Pick a library length.
                 // TODO(holtgrew): Library length should really be a random variable.
-                size_t libraryLength = options.libraryLength;  // std distributed around mean with error from options
+                size_t libraryLength = options.libraryLength;  // TODO(holtgrew): std distributed around mean with error from options
                 // Compute start and end position.
-                inst.beginPos += libraryLength;
-                inst.endPos += libraryLength;
+                inst.endPos = inst.beginPos + options.readLength + libraryLength;
+                inst.beginPos = inst.endPos - options.readLength;
                 // Verify that the mate fits right of the originally simulated read.
                 size_t contigLength = length(fragmentStore.contigStore[inst.contigId].seq);
                 if (inst.beginPos > contigLength || inst.endPos > contigLength) {
@@ -608,7 +729,35 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
                         std::cerr << "INFO: Mate did not fit! Repeating..." << std::endl;
                 }
                 // Build edit string.
-                buildEditString(inst, errorProbabilities);
+                buildEditString(inst, options.readLength, errorProbabilities);
+                // If there were != inserts and deletes then we have to adjust
+                // the mate reads' boundaries but keep the library length the
+                // same.
+                if (inst.delCount != inst.insCount) {
+                    int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);
+//                     std::cout << __LINE__ << " delta == " << delta << std::endl;
+                    inst.endPos += delta;
+                    if (inst.endPos > length(fragmentStore.contigStore[inst.contigId].seq)) {
+                        delta = inst.endPos - length(fragmentStore.contigStore[inst.contigId].seq);
+//                         std::cout << __LINE__ << " delta == " << delta << std::endl;
+                        inst.endPos -= delta;
+                        inst.beginPos -= delta;
+                    }
+                }
+                // Make sure to keep the library length.
+                if (inst.endPos - back(simulationInstructions).beginPos != options.libraryLength) {
+                    int delta = static_cast<__int64>(inst.endPos) - static_cast<__int64>(back(simulationInstructions).beginPos) - static_cast<__int64>(options.libraryLength);
+//                     std::cout << __LINE__ << " delta == " << delta << std::endl;
+                    inst.beginPos -= delta;
+                    inst.endPos -= delta;
+                }
+//                 if (inst.endPos - inst.beginPos + inst.insCount - inst.delCount != options.readLength) {
+//                     for (unsigned i = 0; i < length(inst.editString); ++i)
+//                         std::cout << " " << inst.editString[i];
+//                     std::cout << std::endl;
+//                 }
+                SEQAN_ASSERT_EQ(inst.endPos - inst.beginPos + inst.insCount - inst.delCount,
+                                options.readLength);
                 // Build quality values.
                 buildQualityValues(inst, errorProbabilities, options);
 	            // Append read to result list.
@@ -617,8 +766,6 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
         } while (invalid);
     }
 
-    // TODO(holtgrew): If mate pairs are to be simulated, change end of left one and beginning of right one to adjust for additional characters because of many deletions.
-
     // We do not build all haplotypes at once since this could cost a
     // lot of memory.
     //
@@ -626,22 +773,72 @@ int simulateReadsMain(FragmentStore<> & fragmentStore,
     //   simulate haplotype
     //   for each simulation instruction for this haplotype:
     //     build simulated read
-    StringSet<String<Dna5q> > readSeqs;
-    resize(readSeqs, length(simulationInstructions), Exact());
-    StringSet<CharString> readIds;
-    resize(readIds, length(simulationInstructions), Exact());
+    reserve(fragmentStore.readSeqStore, length(simulationInstructions), Exact());
+    reserve(fragmentStore.readNameStore, length(simulationInstructions), Exact());
+    char readName[1024];
+    char outFileName[151];
+    snprintf(outFileName, 150, "%s", toCString(options.outputFile));
     for (unsigned i = 0; i < options.numHaplotypes; ++i) {
         std::cerr << "Simulating for haplotype #" << i << "..." << std::endl;
-        StringSet<String<Dna5Q> > haplotypeContigs;
+        StringSet<String<Dna5> > haplotypeContigs;
         buildHaplotype(haplotypeContigs, fragmentStore, options);
 
-        std::cerr << "Simulating reads for haplotype #" << i << "..." << std::endl;
+        if (options.verbose)
+            std::cerr << "Simulating reads for haplotype #" << i << "..." << std::endl;
         for (unsigned j = 0; j < length(simulationInstructions); ++j) {
-            if (simulationInstructions[j].haplotype != i)
+            ReadSimulationInstruction const & inst = simulationInstructions[j];
+            if (inst.haplotype != i)
                 continue;  // Guard against instructions on wrong haplotype.
-            
+            SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
+            unsigned readId = length(fragmentStore.readSeqStore);
+            // TODO(holtgrew): If the read aligns in an insert with its right end then pick one of the inserted characters.
+            // Cut out segment from haplotype.
+            String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
+//             std::cout << "original = " << infix(fragmentStore.contigStore[inst.contigId].seq, inst.beginPos, inst.endPos) << std::endl;
+//             std::cout << "haplotype = " << haplotypeContigs[inst.contigId] << std::endl;
+//             std::cout << "haplotype original = " << read << std::endl;
+//             std::cout << inst.beginPos << ", " << inst.endPos << ", " << length(haplotypeContigs[inst.contigId]) << std::endl;
+            // Simulate errors on read.
+//             std::cout << "read id == " << readId << std::endl;
+            applySimulationInstructions(read, inst, options, IlluminaReads());
+            appendValue(fragmentStore.readSeqStore, read);
+
+            // TODO(holtgrew): Get expected begin/end position in the original sequence.  Should be written to WIT file AND to read name line.
+
+            // Generate read name.
+            // TODO(holtgrew): Also embed begin/end position and whether this was forward reverse match.  Then, we have to adjust the read name store to be an Owner<Default> string.
+            if (options.generateMatePairs)
+                sprintf(readName, "%s.%09u/%d haploid=%u length=%lu edit_string=", outFileName, readId / 2, (readId % 2) + 1, i, length(read));
+            else
+                sprintf(readName, "%s.%09u haploid=%u length=%lu edit_string=", outFileName, readId, i, length(read));
+            for (unsigned i = 0; i < length(inst.editString); ++i) {
+                char buffer[2] = "*";
+                buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
+                strcat(readName, buffer);
+            }
+            appendValue(fragmentStore.readNameStore, readName);
+
+            // Perform flipping and reordering.
+            if (options.generateMatePairs) {
+                if (readId % 2 == 1) {  // Only flip after simulating second mate.
+                    reverseComplementInPlace(fragmentStore.readSeqStore[readId - 1]);
+                    // Maybe write out in different order.
+                    if (mtRandDouble() < 0.5) {
+                        String<Dna5Q> tmp;
+                        move(tmp, fragmentStore.readSeqStore[readId - 1]);
+                        move(fragmentStore.readSeqStore[readId - 1], fragmentStore.readSeqStore[readId]);
+                        move(fragmentStore.readSeqStore[readId], tmp);
+                    }
+                }
+            } else {
+                if (mtRandDouble() < 0.5)
+                    reverseComplementInPlace(back(fragmentStore.readSeqStore));
+            }
         }
     }
+
+    if (options.verbose)
+        std::cerr << "Simulated " << length(fragmentStore.readSeqStore) << " reads" << std::endl;
 
     return 0;
 }
@@ -652,18 +849,12 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
     std::cerr << options;
     std::cerr << "reference file: " << referenceFilename << std::endl;
 
-    // Generate output file name if necessary.
-    if (options.outputFile == "") {
-        options.outputFile = referenceFilename;
-        append(options.outputFile, ".fastq");
-    }
-
     // Seed RNG.
     std::srand(options.seed);
     mtRandInit(false);
 
     // Load or randomly generate the reference sequence.
-    FragmentStore<> fragmentStore;
+    FragmentStore<MyFragmentStoreConfig> fragmentStore;
     if (options.useRandomSequence) {
         // TODO(holtgrew): Make setting random output file name possible.
         referenceFilename = "random.fasta";
@@ -672,6 +863,11 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
         int ret = writeRandomSequence(options.randomSourceLength, referenceFilename);
         if (ret != 0)
             return ret;
+    }
+    // Generate output file name if necessary.
+    if (options.outputFile == "") {
+        options.outputFile = referenceFilename;
+        append(options.outputFile, ".fastq");
     }
     std::cerr << "Loading reference sequence from \"" << referenceFilename << "\"" << std::endl;
     if (!loadContigs(fragmentStore, referenceFilename)) {
@@ -703,6 +899,9 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
             }
             mismatchProbabilities[options.readLength - 1] = 1 - sum;
         }
+    } else {
+        std::cerr << "Cannot load error distribution from file yet!" << std::endl;
+        return 1;
     }
 	// Prepare log error distribution;
     String<double> errorDistribution;

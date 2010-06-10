@@ -164,5 +164,29 @@ int writeRandomSequence(size_t length, CharString const & fileName) {
     return 0;
 }
 
+namespace seqan {
+struct MyFragmentStoreConfig {};
+
+template<>
+struct FragmentStoreConfig<MyFragmentStoreConfig>
+{
+	typedef String<Dna5Q>	TReadSeq;
+	typedef String<Dna5Q>	TContigSeq;
+	
+	typedef double			TMean;
+	typedef double			TStd;
+	typedef signed char		TMappingQuality;
+		
+	typedef void    TReadStoreElementSpec;
+	typedef Owner<Default> TReadSeqStoreSpec;
+	typedef void    TMatePairStoreElementSpec;
+	typedef void    TLibraryStoreElementSpec;
+	typedef void    TContigStoreElementSpec;
+	typedef void    TContigFileSpec;
+	typedef void    TAlignedReadStoreElementSpec;
+	typedef Owner<Default>	TAlignedReadTagStoreSpec;
+	typedef void    TAnnotationStoreElementSpec;
+};
+}  // namespace seqan
 
 #endif  // READ_SIMULATOR_H_
