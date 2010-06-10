@@ -1050,14 +1050,14 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 		if(r_options.artSeedLength==29) r_options.shape = "11101001110100111010011";//q14
 		if(r_options.artSeedLength==30) r_options.shape = "111010011101001110100101";//q14
 		if(r_options.artSeedLength==31) r_options.shape = "111010011101001110100101";//q14
-		if(r_options.lowMemory & r_options.artSeedLength==29) r_options.shape = "10101001110100111010011";
+		if(r_options.lowMemory && r_options.artSeedLength==29) r_options.shape = "10101001110100111010011";
 		r_options.threshold = 1; 
-		if(r_options.lowMemory & r_options.artSeedLength==30)		
+		if(r_options.lowMemory && r_options.artSeedLength==30)		
 		{
 			r_options.shape = "111110101000011111";
 			r_options.threshold = 2;		
 		}
-		if(r_options.lowMemory & r_options.artSeedLength==31)		
+		if(r_options.lowMemory && r_options.artSeedLength==31)		
 		{
 			r_options.shape = "1101000110100011010001101";
 			r_options.threshold = 2;		
