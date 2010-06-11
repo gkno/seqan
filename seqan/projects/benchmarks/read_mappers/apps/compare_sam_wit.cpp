@@ -103,6 +103,7 @@ void setUpCommandLineParser(CommandLineParser &parser) {
     addOption(parser, CommandLineOption("wm", "weighted-distances", "If set, use weighted distances instead of unit ones.", OptionType::Boolean));
     addOption(parser, CommandLineOption("c", "benchmark-category", "The benchmark category to compare for.  One of {all, any-best, all-best}.  Default: all.", OptionType::String));
     addOption(parser, CommandLineOption("DP", "DONT-PANIC", "Don't panic on additional hits in non-weightedmode.  Default: False.", OptionType::Boolean));
+    addOption(parser, CommandLineOption("ow", "oracle-wit-mode", "Enable 'oracle wit mode', alignment distances are ignored, assumed to be 0.  Default: False.", OptionType::Boolean));
     
     // We require 4 command line options.
     requiredArguments(parser, 3);
@@ -127,6 +128,8 @@ int parseCommandLineAndCheck(Options &options,
     // Get arguments.
     if (isSetLong(parser, "DONT-PANIC"))
         options.dontPanic = true;
+    if (isSetLong(parser, "oracle-wit-mode"))
+        options.oracleWitMode = true;
     if (isSetLong(parser, "match-N"))
         options.matchN = true;
     if (isSetLong(parser, "weighted-distances"))
@@ -190,6 +193,7 @@ int main(int argc, const char *argv[]) {
     options.showAdditionalIntervals = false;
     options.benchmarkCategory = "all";
     options.dontPanic = false;
+    options.oracleWitMode = false;
     CharString outFile = "-";
 
     // Setup the parser, parse command line and return if an error occured.
