@@ -53,6 +53,12 @@ struct WitStore {
 
     // TODO(holtgrew): Rename to witRecords.
     TIntervalStore intervals;
+
+    WitStore() {}
+
+    WitStore(TNameSet & _readNames, TNameSet & _contigNames)
+            : readNames(_readNames), contigNames(_contigNames) {}
+
 };
 
 
@@ -269,7 +275,13 @@ void writeWitFile(TStream & stream, WitStore const & witStore) {
     typedef typename WitStore::TIntervalStore TIntervalStore;
     typedef typename Iterator<TIntervalStore, Standard>::Type TIterator;
     for (TIterator it = begin(witStore.intervals, Standard()); it != end(witStore.intervals, Standard()); ++it) {
-        stream << value(witStore.readNames)[it->readId] << '\t'
+        for (unsigned i = 0; i < length(value(witStore.readNames)[it->readId]); ++i) {
+            char c = value(witStore.readNames)[it->readId][i];
+            if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+                break;
+            stream << c;
+        }
+        stream << '\t'
                << it->distance << '\t'
                << value(witStore.contigNames)[it->contigId] << '\t'
                << (it->isForward ? 'F' : 'R') << '\t'
