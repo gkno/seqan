@@ -284,8 +284,8 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
     typedef typename Position<TCargo>::Type TPos;
     typedef typename Iterator<String<TCargo>, Standard>::Type TIter;
     typedef JournalEntryLtByVirtualPos<TPos, TSize> TCmp;
-	//std::cerr << __FILE__ << ":" << __LINE__ << " -- ERASE(" << pos << ", " << posEnd << ")" << std::endl;
-    //std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
+//	std::cerr << __FILE__ << ":" << __LINE__ << " -- ERASE(" << pos << ", " << posEnd << ")" << std::endl;
+//    std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
     // Handle special case of removing all of the singleton existing entry.
     if (length(tree._journalNodes) == 1 && pos == 0 && front(tree._journalNodes).length == posEnd) {
@@ -341,11 +341,11 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
 		TSize prefixLength = pos - it->virtualPosition;
 		TSize suffixLength = it->length - prefixLength - (posEnd - pos);
 		TSize removedInfixLength = posEnd - pos;
+		// Update the left part, this must be done before the iterator is possibly invalidate because of copied memory.
+		it->length -= removedInfixLength + suffixLength;
 		// Insert a new entry for the right part.
 		TCargo tmpEntry(it->segmentSource, it->physicalPosition + prefixLength + removedInfixLength, it->virtualPosition + prefixLength, suffixLength);
 		insertValue(tree._journalNodes, itPos + 1, tmpEntry);
-		// Update the left part.
-		it->length -= removedInfixLength + suffixLength;
 		// Set shift position and delta.
 		delta = removedInfixLength;
 		beginShiftPos = itPos + 2;
@@ -394,7 +394,7 @@ void recordErase(JournalEntries<TCargo, SortedArray> & tree,
         SEQAN_ASSERT_GEQ(it->virtualPosition, delta);
         it->virtualPosition -= delta;
     }
-    //std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
+//	std::cerr << __FILE__ << ":" << __LINE__ << " -- " << tree << std::endl;
 
     SEQAN_ASSERT_TRUE(_checkSortedArrayTree(tree));
 }
