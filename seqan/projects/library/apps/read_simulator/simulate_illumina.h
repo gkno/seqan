@@ -7,6 +7,7 @@
 #include <seqan/sequence_journal.h>
 
 #include "read_simulator.h"
+#include "../../../benchmarks/read_mappers/apps/wit_store.h"
 
 using namespace seqan;
 
@@ -231,7 +232,7 @@ struct IlluminaOptions {
     unsigned seed;
     // Length of the reads to simulate.
     unsigned readLength;
-    // Number of reads to simulate.
+    // Number of reads (pairs) to simulate.
     unsigned numReads;
     // true iff a random reference sequence is to be used.
     bool useRandomSequence;
@@ -247,6 +248,9 @@ struct IlluminaOptions {
     // possibly with a ".1" or ".2" before the ".fastq" if mate pairs
     // are simulated.
     CharString outputFile;
+    // Path to the wit file to generate.  Defaults to fastq file name
+    // with suffix ".wit"
+    CharString witFile;
     // true iff qualities are to be simulated.
     bool simulateQualities;
 
@@ -300,8 +304,9 @@ struct IlluminaOptions {
               onlyForward(false),
               onlyReverse(false),
               outputFile(""),
+              witFile(""),
               simulateQualities(false),
-              generateMatePairs(true),
+              generateMatePairs(false),
               libraryLength(1000),
               libraryLengthError(100),
               errorDistributionFile(""),
@@ -329,6 +334,7 @@ TStream & operator<<(TStream & stream, IlluminaOptions const & options) {
            << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
            << "  outputFile:             \"" << options.outputFile << "\"" <<std::endl
+           << "  witFile:                \"" << options.witFile << "\"" <<std::endl
            << "  simulateQualities:      " << (options.simulateQualities ? "true" : "false") << std::endl
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
            << "  libraryLength:          " << options.libraryLength << std::endl
@@ -518,6 +524,8 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
     String<Dna5> buffer;
     reserve(buffer, options.haplotypeIndelRangeMax);
 
+//     std::cout << back(haplotype)._journalEntries << std::endl;
+
     for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i) {
         clear(haplotype[i]);
         setHost(haplotype[i], fragmentStore.contigStore[i].seq);
@@ -526,9 +534,11 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
 
         // j is position in original sequence, k is position in haplotype
         for (size_t j = 0, k = 0; j < length(contig);) {
-            SEQAN_ASSERT_LT(k, length(haplotypeContig));
+            if (k >= length(haplotypeContig))
+                std::cout << haplotypeContig._journalEntries << std::endl;
+            SEQAN_ASSERT_LT_MSG(k, length(haplotypeContig), "k = %lu, length(contig) == %lu", k, length(contig));
 
-            double x = mtRand();
+            double x = mtRandDouble();
             if (x < options.haplotypeSnpRate) {
                 // SNP
                 Dna5 c = Dna5(4 * mtRandDouble());
@@ -564,6 +574,7 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
 //         std::cout << "back(haplotype) = " << back(haplotype) << std::endl;
 //         std::cout << "haplotype contig = " << haplotypeContig << std::endl;
     }
+//     std::cout << back(haplotype)._journalEntries << std::endl;
 }
 
 
@@ -641,13 +652,13 @@ int buildReadSimulationInstruction(
         String<double> const & errorProbabilities,
         IlluminaOptions const & options)
 {
-    clear(instructions);
     ReadSimulationInstruction inst;
     inst.haplotype = haplotypeId;
 
     // We have to retry simulation if the mate pair did not fit in.
     bool invalid = false;
     do {
+		clear(instructions);
         invalid = false;  // By default, we do not want to repeat.
         // Pick contig id, probability is proportional to the length.
         double x = mtRandDouble();
@@ -748,6 +759,12 @@ int buildReadSimulationInstruction(
             appendValue(instructions, inst);
         }
     } while (invalid);
+	
+	if (options.generateMatePairs)
+		SEQAN_ASSERT_EQ(length(instructions), 2u);
+	else
+		SEQAN_ASSERT_EQ(length(instructions), 1u);
+	
     return 0;
 }
 
@@ -758,6 +775,7 @@ int buildReadSimulationInstruction(
 ..param.tag:Tag for specifying reads to simulate.
 */
 int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
+                      WitStore & witStore,
                       IlluminaOptions const & options,
                       String<double> const & errorProbabilities,
                       IlluminaReads const &) {
@@ -770,7 +788,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     String<unsigned> haplotypeIds;
     reserve(haplotypeIds, options.numReads);
     for (size_t i = 0; i < options.numReads; ++i)
-        appendValue(haplotypeIds, i);
+        appendValue(haplotypeIds, mtRand() % options.numHaplotypes);
 
     // We do not build all haplotypes at once since this could cost a
     // lot of memory.
@@ -784,6 +802,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     char readName[1024];
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.outputFile));
+    String<bool> flipped;
     for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
         StringSet<SequenceJournal<String<Dna5>, SortedArray> > haplotypeContigs;
@@ -807,6 +826,8 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
         if (options.verbose)
             std::cerr << "Simulating reads for haplotype #" << haplotypeId << "..." << std::endl;
 
+//         std::cerr << "Journal: " << haplotypeContigs[0]._journalEntries << std::endl;
+
         for (unsigned j = 0; j < length(haplotypeIds); ++j) {
             if (haplotypeIds[j] != haplotypeId)
                 continue;  // Guard against instructions on wrong haplotype.
@@ -817,9 +838,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
             if (res != 0)
                 return res;
 
+            int previousMateNum = 0;
             for (unsigned k = 0; k < length(instructions); ++k) {
                 ReadSimulationInstruction const & inst = instructions[k];
-            
                 // Apply simulation instructions.
                 SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
                 unsigned readId = length(fragmentStore.readSeqStore);
@@ -828,41 +849,87 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 applySimulationInstructions(read, inst, options, IlluminaReads());
                 appendValue(fragmentStore.readSeqStore, read);
 
-                // TODO(holtgrew): Get expected begin/end position in the original sequence.  Should be written to WIT file AND to read name line.
+                // Get expected begin/end position in the original sequence.  If we decide to flip this read later on, we will modify the WIT store.
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
 
                 // Generate read name.
-                // TODO(holtgrew): Also embed begin/end position and whether this was forward reverse match.  Then, we have to adjust the read name store to be an Owner<Default> string.
-                if (options.generateMatePairs)
-                    sprintf(readName, "%s.%09u/%d haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId / 2, (readId % 2) + 1, haplotypeId, length(read), origBeginPos, origEndPos);
-                else
-                    sprintf(readName, "%s.%09u haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId, haplotypeId, length(read), origBeginPos, origEndPos);
+                if (options.generateMatePairs) {
+                    // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have different nums.  This also decides about the flipping.
+                    int mateNum = 3 - previousMateNum;
+                    if (readId % 2 == 0) {
+                        mateNum = mtRand() % 2 + 1;
+						SEQAN_ASSERT_GEQ(mateNum, 1);
+						SEQAN_ASSERT_LEQ(mateNum, 2);
+                        previousMateNum = mateNum;
+                        appendValue(flipped, mateNum == 2);
+                    } else {
+						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
+                        appendValue(flipped, mateNum == 1);
+                    }
+                    sprintf(readName, "%s.%09u/%d contig=%s haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                } else {
+                    sprintf(readName, "%s.%09u contig=%s haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                }
                 for (unsigned i = 0; i < length(inst.editString); ++i) {
                     char buffer[2] = "*";
                     buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
                     strcat(readName, buffer);
                 }
                 appendValue(fragmentStore.readNameStore, readName);
+                // Tentatively adding interval to read store.  Especially note that the interval borders are not used in the original intention.
+                appendValue(witStore, IntervalOfReadOnContig(readId, 0, inst.contigId, true, origBeginPos, origEndPos));
 
                 // Perform flipping and reordering.
                 if (options.generateMatePairs) {
                     if (readId % 2 == 1) {  // Only flip after simulating second mate.
-                        reverseComplementInPlace(fragmentStore.readSeqStore[readId - 1]);
+                        reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
+                        witStore.intervals[readId].isForward = false;
+                        TPos revPos = length(fragmentStore.contigStore[witStore.intervals[readId].contigId].seq) - witStore.intervals[readId].firstPos - 1;
+                        witStore.intervals[readId].lastPos = revPos;
+                        witStore.intervals[readId].firstPos = revPos;
+                        witStore.intervals[readId - 1].firstPos = witStore.intervals[readId - 1].lastPos - 1;
+                        witStore.intervals[readId - 1].lastPos = witStore.intervals[readId - 1].lastPos - 1;
+                        append(fragmentStore.readNameStore[readId - 1], " strand=forward");
+                        append(fragmentStore.readNameStore[readId], " strand=reverse");
                         // Maybe write out in different order.
-                        if (mtRandDouble() < 0.5) {
+                        if (flipped[readId]) {
+                            SEQAN_ASSERT_TRUE(flipped[readId - 1]);
+//                             std::cout << "flipped" << std::endl;
+//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
                             String<Dna5Q> tmp;
-                            move(tmp, fragmentStore.readSeqStore[readId - 1]);
-                            move(fragmentStore.readSeqStore[readId - 1], fragmentStore.readSeqStore[readId]);
-                            move(fragmentStore.readSeqStore[readId], tmp);
+                            std::swap(fragmentStore.readSeqStore[readId - 1], fragmentStore.readSeqStore[readId]);
+                            std::swap(fragmentStore.readNameStore[readId - 1], fragmentStore.readNameStore[readId]);
+                            std::swap(witStore.intervals[readId - 1], witStore.intervals[readId]);
+                            std::swap(witStore.intervals[readId - 1].readId, witStore.intervals[readId].readId);
+                        } else {
+                            SEQAN_ASSERT_NOT(flipped[readId - 1]);
+//                             std::cout << "not flipped" << std::endl;
+//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
                         }
                     }
                 } else {
-                    if (mtRandDouble() < 0.5)
+                    if (mtRandDouble() < 0.5) {
                         reverseComplementInPlace(back(fragmentStore.readSeqStore));
+                        append(back(fragmentStore.readNameStore), " strand=reverse");
+                        back(witStore.intervals).isForward = false;
+                        TPos revPos = length(fragmentStore.contigStore[witStore.intervals[readId].contigId].seq) - back(witStore.intervals).firstPos - 1;
+                        back(witStore.intervals).lastPos = revPos;
+                        back(witStore.intervals).firstPos = revPos;
+                    } else {
+                        append(back(fragmentStore.readNameStore), " strand=forward");
+                        back(witStore.intervals).firstPos = back(witStore.intervals).lastPos - 1;
+                        back(witStore.intervals).lastPos = back(witStore.intervals).lastPos - 1;
+                    }
                 }
             }
-        }
+			// When generating mate pairs, an even number of reads is generated in each step.
+			if (options.generateMatePairs) {
+				SEQAN_ASSERT_EQ(length(witStore.intervals) % 2, 0u);
+				SEQAN_ASSERT_EQ(length(fragmentStore.readNameStore) % 2, 0u);
+				SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore) % 2, 0u);
+			}
+		}
     }
 
     if (options.verbose)
@@ -896,6 +963,10 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
     if (options.outputFile == "") {
         options.outputFile = referenceFilename;
         append(options.outputFile, ".fastq");
+    }
+    if (options.witFile == "") {
+        options.witFile = options.outputFile;
+        append(options.witFile, ".wit");
     }
     std::cerr << "Loading reference sequence from \"" << referenceFilename << "\"" << std::endl;
     if (!loadContigs(fragmentStore, referenceFilename)) {
@@ -944,21 +1015,72 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
 	}
 
     // Kick off the read generation.
-    int ret = simulateReadsMain(fragmentStore, options, errorDistribution, IlluminaReads());
+    WitStore witStore(fragmentStore.readNameStore, fragmentStore.contigNameStore);
+    int ret = simulateReadsMain(fragmentStore, witStore, options, errorDistribution, IlluminaReads());
     if (ret != 0)
         return ret;
 
     // Write out results.
-    // TODO(holtgrew): Care about writing optimal alignments to a WIT file.
-    // TODO(holtgrew): Care about mate-paired reads.
-    std::cerr << "Writing resulting reads to \"" << options.outputFile << "\"" << std::endl;
-    std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
-    if (not fstrm.is_open()) {
-        std::cerr << "Could not open out file \"" << options.outputFile << "\"" << std::endl;
-        return 1;
+    if (options.generateMatePairs) {
+        // Build filename with '.1.' infix.
+        CharString mateFilename = options.outputFile;
+        size_t dotPos = 0;
+        for (size_t i = 0; i < length(mateFilename); ++i)
+            if (mateFilename[i] == '.')
+                dotPos = i;
+        infix(mateFilename, dotPos, dotPos + 1) = ".1.";
+        // Write out first mates.
+        std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/1" << std::endl;
+        StringSet<String<Dna5Q>, Dependent<> > reads;
+        StringSet<CharString, Dependent<> > readNames;
+        for (size_t i = 0; i < length(fragmentStore.readNameStore); i += 2) {
+            appendValue(readNames, fragmentStore.readNameStore[i]);
+            appendValue(reads, fragmentStore.readSeqStore[i]);
+        }
+        {
+            std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
+            if (not fstrm.is_open()) {
+                std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
+                return 1;
+            }
+            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+        }
+        // Build filename with '.2.' infix.
+        infix(mateFilename, dotPos + 1, dotPos + 2) = "2";
+        // Write out second mates.
+        std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/2" << std::endl;
+        clear(reads);
+        clear(readNames);
+        for (size_t i = 1; i < length(fragmentStore.readNameStore); i += 2) {
+            appendValue(readNames, fragmentStore.readNameStore[i]);
+            appendValue(reads, fragmentStore.readSeqStore[i]);
+        }
+        {
+            std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
+            if (not fstrm.is_open()) {
+                std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
+                return 1;
+            }
+            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+        }
+    } else {
+        std::cerr << "Writing resulting reads to \"" << options.outputFile << "\"" << std::endl;
+        std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
+        if (not fstrm.is_open()) {
+            std::cerr << "Could not open out file \"" << options.outputFile << "\"" << std::endl;
+            return 1;
+        }
+        write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
     }
-    write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
-
+    std::cerr << "Writing WIT file \"" << options.witFile << "\"" << std::endl;
+    {
+        std::fstream fstrm(toCString(options.witFile), std::ios_base::out);
+        if (not fstrm.is_open()) {
+            std::cerr << "Could not open WIT file \"" << options.witFile << "\"" << std::endl;
+            return 1;
+        }
+        writeWitFile(fstrm, witStore);
+    }
     return 0;
 }
 

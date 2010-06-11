@@ -92,7 +92,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("s",  "seed", "The seed for RNG.  Default: 0.", OptionType::Integer | OptionType::Label));
     addOption(parser, CommandLineOption("n",  "length", "The length of the reads to simulate.  Default: 36.", OptionType::Integer | OptionType::Label));
     addHelpLine(parser, "All resulting reads will have the same length.");
-    addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads to simulate.  Default: 1000.", OptionType::Integer));
+    addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
     addOption(parser, CommandLineOption("e",  "errors", "Maximal number of errors per read.  Default: 4.", OptionType::Integer));
     addOption(parser, CommandLineOption("f",  "forward-only", "Simulate from forward strand only.  Default: false.", OptionType::Bool));
@@ -104,6 +104,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
 
     addOption(parser, CommandLineOption("ll", "library-length", "Mate-pair library length.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("le", "library-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Integer));
+    addOption(parser, CommandLineOption("mp", "mate-pairs", "Enable mate pair simulation.  Default: false.", OptionType::Bool));
 
     addSection(parser, "Probability Options");
 
@@ -163,6 +164,8 @@ int parseCommandLineAndCheck(IlluminaOptions & options,
         getOptionValueLong(parser, "library-length", options.libraryLength);
     if (isSetLong(parser, "library-error"))
         getOptionValueLong(parser, "library-error", options.libraryLengthError);
+    if (isSetLong(parser, "mate-pairs"))
+        options.generateMatePairs = true;
 
     if (isSetLong(parser, "error-distribution"))
         getOptionValueLong(parser, "error-distribution", options.errorDistributionFile);
