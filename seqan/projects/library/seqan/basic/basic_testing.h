@@ -714,7 +714,7 @@ const char *tempFileName() {
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " < " << expression2 << " was: " << value1
-                      << " > " << value2;
+                      << " >= " << value2;
             if (comment) {
                 std::cerr << " (";
                 va_list args;
@@ -744,7 +744,7 @@ const char *tempFileName() {
             // Print assertion failure text, with comment if any is given.
             std::cerr << file << ":" << line << " Assertion failed : "
                       << expression1 << " < " << expression2 << " was: " << value1
-                      << " > " << value2;
+                      << " >= " << value2;
             if (comment) {
                 std::cerr << " (";
                 vfprintf(stderr, comment, argp);
