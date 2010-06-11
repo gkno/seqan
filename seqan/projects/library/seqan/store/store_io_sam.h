@@ -806,8 +806,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 			
 			// <qname>
-			if (readId < length(store.readNameStore))
-				_streamWrite(target, store.readNameStore[readId]);
+			if (readId < length(store.readNameStore)) {
+                typedef typename Iterator<CharString, Standard>::Type TCharStringIterator;
+                for (TCharStringIterator it = begin(store.readNameStore[readId]); it != end(store.readNameStore[readId]); ++it) {
+                    if (*it == ' ' || *it == '\t' || *it == '\n' || *it == '\r')
+                        break;
+                    _streamPut(target, *it);
+                }
+            }
             _streamPut(target, '\t');
             
             // <flag>
