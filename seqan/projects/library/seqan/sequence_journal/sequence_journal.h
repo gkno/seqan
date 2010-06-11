@@ -319,6 +319,7 @@ insertValue(SequenceJournal<TSequence, TJournalSpec> & sequenceJournal,
             TValue const & value)
 {
     SEQAN_CHECKPOINT;
+    sequenceJournal._length += 1;
     TPos beginPos = length(sequenceJournal._insertionBuffer);
     appendValue(sequenceJournal._insertionBuffer, value);
     recordInsertion(sequenceJournal._journalEntries, pos, beginPos, 1u);
