@@ -120,11 +120,12 @@ _parse_isLetter(TChar const c)
 
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): The name of this function is WRONG.
 template<typename TChar>
 inline bool
 _parse_isAlphanumericChar(TChar const c)
 {
-	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|'));
+	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|') || (c == '/'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
