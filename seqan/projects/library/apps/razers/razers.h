@@ -1620,6 +1620,7 @@ void mapSingleReads(
 	TSize gLength = length(genome);
 	__int64 localTP = 0;
 	__int64 localFP = 0;
+
 #ifdef RAZERS_MICRO_RNA
 	while (find(swiftFinder, swiftPattern, 0.2)) 
 #else
@@ -1701,8 +1702,7 @@ void mapSingleReads(
 	// multiple sequences
 	template <
 		typename TSA, 
-		typename TString, 
-		typename TSpec, 
+		typename TStringSet, 
 		typename TShape, 
 		typename TDir, 
 		typename TValue, 
@@ -1711,14 +1711,16 @@ void mapSingleReads(
 	inline void
 	_qgramFillSuffixArray(
 		TSA &sa, 
-		StringSet<TString, TSpec> const &stringSet,
+		TStringSet &stringSet,
 		TShape &shape, 
 		TDir &dir,
 		Nothing,
 		TWithConstraints const,
-		TValue prefixLen)
+		TValue prefixLen,
+		MicroRNA)
 	{
 	SEQAN_CHECKPOINT
+		typedef typename Value<TStringSet>::Type					TString;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type				TSize;
 		typedef typename Value<TShape>::Type				THash;
@@ -1727,7 +1729,7 @@ void mapSingleReads(
 		{
 			TString const &sequence = value(stringSet, seqNo);
 			if (length(sequence) < length(shape)) continue;
-			TSize num_qgrams = prefixLen - length(shape) + 1;
+			int num_qgrams = prefixLen - (int)length(shape) + 1;
 
 			typename Value<TSA>::Type localPos;
 			assignValueI1(localPos, seqNo);
@@ -1753,12 +1755,12 @@ void mapSingleReads(
 		}
 	}
 
-
-	template < typename TDir, typename TString, typename TSpec, typename TShape, typename TValue >
+	template < typename TDir, typename TStringSet, typename TShape, typename TValue >
 	inline void
-	_qgramCountQGrams(TDir &dir, StringSet<TString, TSpec> const &stringSet, TShape &shape, TValue prefixLen)
+	_qgramCountQGrams(TDir &dir, TStringSet &stringSet, TShape &shape, TValue prefixLen, MicroRNA)
 	{
 	SEQAN_CHECKPOINT
+		typedef typename Value<TStringSet>::Type					TString;
 		typedef typename Iterator<TString const, Standard>::Type	TIterator;
 		typedef typename Value<TDir>::Type							TSize;
 	
@@ -1778,12 +1780,12 @@ void mapSingleReads(
 		}
 	}
 	
-	
+
 	template < typename TIndex, typename TValue>
-	void createQGramIndex(TIndex &index, TValue prefixLen)
+	void createQGramIndex(TIndex &index, TValue prefixLen, MicroRNA)
 	{
 	SEQAN_CHECKPOINT
-		typename Fibre<TIndex, QGram_Text>::Type const &text  = indexText(index);
+		typename Fibre<TIndex, QGram_Text>::Type	   &text  = indexText(index);
 		typename Fibre<TIndex, QGram_SA>::Type         &sa    = indexSA(index);
 		typename Fibre<TIndex, QGram_Dir>::Type        &dir   = indexDir(index);
 		typename Fibre<TIndex, QGram_Shape>::Type      &shape = indexShape(index);
@@ -1794,7 +1796,7 @@ void mapSingleReads(
 		arrayFill(begin(dir, Standard()), end(dir, Standard()), 0);
 
 		// 2. count q-grams
-		_qgramCountQGrams(dir, text, shape, prefixLen);
+		_qgramCountQGrams(dir, text, shape, prefixLen,MicroRNA());
 
 		if (_qgramDisableBuckets(index))
 		{
@@ -1802,7 +1804,7 @@ void mapSingleReads(
 			_qgramCummulativeSum(dir, True());
 
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, nothing, True(), prefixLen);
+			_qgramFillSuffixArray(sa, text, shape, dir, nothing, True(), prefixLen, MicroRNA());
 
 			// 5. correct disabled buckets
 			_qgramPostprocessBuckets(dir);
@@ -1813,7 +1815,7 @@ void mapSingleReads(
 			_qgramCummulativeSum(dir, False());
 			
 			// 4. fill suffix array
-			_qgramFillSuffixArray(sa, text, shape, dir, nothing, False(),prefixLen);
+			_qgramFillSuffixArray(sa, text, shape, dir, nothing, False(),prefixLen, MicroRNA());
 		} 
 	}
 
@@ -1898,7 +1900,7 @@ int mapSingleReads(
 				qgram_count += options.rnaSeedLength - (length(shape) - 1);
 		resize(indexSA(swiftIndex), qgram_count, Exact());
 		resize(indexDir(swiftIndex), _fullDirLength(swiftIndex), Exact());
-		createQGramIndex(swiftIndex,options.rnaSeedLength);
+		createQGramIndex(swiftIndex,options.rnaSeedLength,MicroRNA());
 	}
 #endif
 
