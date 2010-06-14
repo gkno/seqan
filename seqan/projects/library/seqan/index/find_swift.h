@@ -622,8 +622,8 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
     			} else
 	    			count += bucketsPerCol2;
 		
-		    	if (seqNo<3)
-			    	_printSwiftParams(bucketParams);
+		    	/*if (seqNo<3)
+			    	_printSwiftParams(bucketParams);*/
 		    }
 		} else
 			for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo) 

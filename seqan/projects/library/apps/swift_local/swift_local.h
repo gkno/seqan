@@ -198,17 +198,19 @@ _bandedInfixAlignment(StringSet<TString> & str,
 					 TDiag startDiag,
 					 TAlign & align) {
 SEQAN_CHECKPOINT
-	_Align_Traceback<unsigned> trace;
-	globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed),
-		startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
-	
-	Align<TString> infixAlign;
-	resize(rows(infixAlign), 2);
-	assignSource(row(infixAlign, 0), str[0]);
-	assignSource(row(infixAlign, 1), str[1]);
+	if (length(str[0]) != 0 && length(str[1]) != 0) {
+		_Align_Traceback<unsigned> trace;
+		globalAlignment(trace, str, scoreMatrix, startDiag - leftDiagonal(seed),
+			startDiag - rightDiagonal(seed), BandedNeedlemanWunsch());
+		
+		Align<TString> infixAlign;
+		resize(rows(infixAlign), 2);
+		assignSource(row(infixAlign, 0), str[0]);
+		assignSource(row(infixAlign, 1), str[1]);
 
-	_pump_trace_2_Align(infixAlign, trace);
-	integrateAlign(align, infixAlign);
+		_pump_trace_2_Align(infixAlign, trace);
+		integrateAlign(align, infixAlign);
+	}
 }
 
 template<typename TSource, typename TPos>
@@ -414,7 +416,7 @@ SEQAN_CHECKPOINT
 // banded chain alignment and X-drop extension for all local alignments with a min score
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
          typename TDelta, typename TDrop, typename TAlign>
-void 
+void
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
                TEpsilon eps,
@@ -451,7 +453,7 @@ SEQAN_CHECKPOINT
     __int64 upperDiag = 0;
     __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
     if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
-    if (endPosition(b) == endPosition(host(b))) lowerDiag = upperDiag - delta;
+    if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
 
 	// banded local alignment
     LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
@@ -459,6 +461,7 @@ SEQAN_CHECKPOINT
     resize(rows(localAlign), 2);
     assignSource(row(localAlign, 0), a);
     assignSource(row(localAlign, 1), b);
+
     while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
 
         // split local alignments containing an X-drop
@@ -570,17 +573,16 @@ SEQAN_CHECKPOINT
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
 
-        // verification
-        verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)),
-                             epsilon, minLength,
-                             pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
-                             xDrop, value(matches, pattern.curSeqNo));
+		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)),
+                       epsilon, minLength,
+                       pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
+                       xDrop, value(matches, pattern.curSeqNo));
         totalLength += length(infix(finder));
         if ((TSize)length(infix(finder)) > maxLength) maxLength = length(infix(finder));
 	}
 
-    std::cout << "Longest hit: " << maxLength << std::endl;
-    if (numSwiftHits > 0) std::cout << "Avg hit length: " << totalLength/numSwiftHits << std::endl;
+    std::cout << "    Longest hit: " << maxLength << std::endl;
+    if (numSwiftHits > 0) std::cout << "    Avg hit length: " << totalLength/numSwiftHits << std::endl;
     
     return numSwiftHits;
 }
