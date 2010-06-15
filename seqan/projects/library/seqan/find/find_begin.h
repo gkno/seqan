@@ -35,7 +35,7 @@ template <typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 struct DPSearch;
 
 //see finder_myers_ukkonen.h
-template <typename TSpec, typename TFindBeginPatternSpec>
+template <typename TSpec, typename THasState, typename TFindBeginPatternSpec>
 struct Myers;
 
 
@@ -51,16 +51,17 @@ struct Myers;
 ..returns.param.Type:The pattern specialization to use as a default.
 ..include:seqan/find.h
  */
-template <typename TScore = EditDistanceScore>
+template <typename TScore = EditDistanceScore, typename THasState = True>
 struct DefaultFindBeginPatternSpec
 {
 	typedef DPSearch<TScore, FindPrefix, void> Type;
 };
 
-template <>
-struct DefaultFindBeginPatternSpec<EditDistanceScore>
+template <typename THasState>
+struct DefaultFindBeginPatternSpec<EditDistanceScore, THasState>
 {
-	typedef Myers<FindPrefix, void> Type;
+	// typedef Myers<FindPrefix, void, True> Type;
+	typedef Myers<FindPrefix, THasState, void> Type;
 };
 
 //____________________________________________________________________________
@@ -182,8 +183,8 @@ struct _FindBegin_Impl
 
 
 // TODO(holtgrew): Copy-and-paste code from above.
-template <>
-struct _FindBegin_Impl<Myers<FindPrefix, void> >
+template <typename THasState>
+struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
 {
 	template <typename TPattern>
 	static inline void
