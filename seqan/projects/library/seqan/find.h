@@ -72,7 +72,8 @@
 #include <seqan/find/find_begin.h>
 
 #include <seqan/find/find_score.h>
-#include <seqan/find/find_myers_ukkonen.h>
+// #include <seqan/find/find_myers_ukkonen.h>
+#include <seqan/find/find_myers_ukkonen2.h>
 #include <seqan/find/find_abndm.h>
 #include <seqan/find/find_pex.h>
 
