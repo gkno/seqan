@@ -24,14 +24,25 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
+template <typename TSpec>
+struct UCSC_;
+
 /**
 .Tag.File Format.tag.UCSC:
 	UCSC Genome Browser annotation file (a.k.a. knownGene format).
 ..include:seqan/store.h
 */
-struct TagUCSC_;
-typedef Tag<TagUCSC_> const UCSC;
 
+struct UCSC_KNOWN_GENE_;
+typedef Tag<UCSC_<UCSC_KNOWN_GENE_> > const UCSC;
+
+/**
+.Tag.File Format.tag.UCSC_ISOFORMS:
+	UCSC Genome Browser isoforms file (a.k.a. knownIsoforms format).
+..include:seqan/store.h
+*/
+struct UCSC_KNOWN_ISOFORMS_;
+typedef Tag<UCSC_<UCSC_KNOWN_ISOFORMS_> > const UCSC_ISOFORMS;
 	
 //////////////////////////////////////////////////////////////////////////////
 // _parse_readUCSCIdentifier
@@ -356,12 +367,12 @@ _storeOneAnnotation (
 		_storeOneAnnotation_KNOWN_ISOFORMS(fragStore, ctx);
 }
 
-template<typename TFile, typename TSpec, typename TConfig>
+template<typename TFile, typename TSpec, typename TConfig, typename TFormatSpec>
 inline void 
 read (
 	TFile & file,
 	FragmentStore<TSpec, TConfig> & fragStore,
-	UCSC)
+	Tag<UCSC_<TFormatSpec> > const)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
@@ -394,52 +405,60 @@ _retrieveOneAnnotation (
 	TFragmentStore & fragStore,
 	_IOContextUCSC<TFragmentStore, TSpec> & ctx,
 	TAnnotation &annotation,
-	TId id)
+	TId id,
+	UCSC)
 {	
-	if (annotation.typeId == TFragmentStore::ANNO_GENE)
-	{
-		if (annotation.lastChildId == TAnnotation::INVALID_ID) return false;
-		ctx.format = ctx.KNOWN_ISOFORMS;
-		ctx.transName = getAnnoUniqueName(fragStore, id);
-		ctx.contigName = getAnnoUniqueName(fragStore, annotation.lastChildId);
-		return true;
-	}
+	if (annotation.typeId != TFragmentStore::ANNO_MRNA) return false;
 	
-	if (annotation.typeId == TFragmentStore::ANNO_MRNA)
-	{
-		ctx.format = ctx.KNOWN_GENE;
-		ctx.transName = getAnnoUniqueName(fragStore, id);
-		if (annotation.contigId < length(fragStore.contigNameStore))
-			ctx.contigName = fragStore.contigNameStore[annotation.contigId];
-		else
-			clear(ctx.contigName);
-		
-		ctx.annotation = annotation;
-		clear(ctx.proteinName);
-		clear(ctx.exonBegin);
-		clear(ctx.exonEnd);
-		
-		TId lastChildId = annotation.lastChildId;
-		TId i = lastChildId;
-		do {
-			i = fragStore.annotationStore[i].nextSiblingId;
-			TAnnotation &anno = fragStore.annotationStore[i];
-			if (anno.typeId == TFragmentStore::ANNO_CDS)
-			{
-				if (i < length(fragStore.annotationNameStore))
-					ctx.proteinName = fragStore.annotationNameStore[i];
-				ctx.cdsBegin = anno.beginPos;
-				ctx.cdsEnd = anno.endPos;
-			}
-			if (anno.typeId == TFragmentStore::ANNO_EXON)
-			{
-				appendValue(ctx.exonBegin, anno.beginPos, Generous());
-				appendValue(ctx.exonEnd, anno.endPos, Generous());
-			}
-		} while (i != lastChildId);
-		return true;
-	}
-	return false;
+	ctx.format = ctx.KNOWN_GENE;
+	ctx.transName = getAnnoUniqueName(fragStore, id);
+	if (annotation.contigId < length(fragStore.contigNameStore))
+		ctx.contigName = fragStore.contigNameStore[annotation.contigId];
+	else
+		clear(ctx.contigName);
+	
+	ctx.annotation = annotation;
+	clear(ctx.proteinName);
+	clear(ctx.exonBegin);
+	clear(ctx.exonEnd);
+	
+	TId lastChildId = annotation.lastChildId;
+	TId i = lastChildId;
+	do {
+		i = fragStore.annotationStore[i].nextSiblingId;
+		TAnnotation &anno = fragStore.annotationStore[i];
+		if (anno.typeId == TFragmentStore::ANNO_CDS)
+		{
+			if (i < length(fragStore.annotationNameStore))
+				ctx.proteinName = fragStore.annotationNameStore[i];
+			ctx.cdsBegin = anno.beginPos;
+			ctx.cdsEnd = anno.endPos;
+		}
+		if (anno.typeId == TFragmentStore::ANNO_EXON)
+		{
+			appendValue(ctx.exonBegin, anno.beginPos, Generous());
+			appendValue(ctx.exonEnd, anno.endPos, Generous());
+		}
+	} while (i != lastChildId);
+	return true;
+}
+
+template <typename TFragmentStore, typename TSpec, typename TAnnotation, typename TId>
+inline bool 
+_retrieveOneAnnotation (
+	TFragmentStore & fragStore,
+	_IOContextUCSC<TFragmentStore, TSpec> & ctx,
+	TAnnotation &annotation,
+	TId id,
+	UCSC_ISOFORMS)
+{	
+	if (annotation.typeId != TFragmentStore::ANNO_MRNA) return false;
+	if (annotation.parentId == TAnnotation::INVALID_ID || annotation.parentId == 0) return false;
+	
+	ctx.format = ctx.KNOWN_ISOFORMS;
+	ctx.transName = getAnnoUniqueName(fragStore, annotation.parentId);
+	ctx.contigName = getAnnoUniqueName(fragStore, id);
+	return true;
 }
 
 template<typename TTargetStream, typename TFragmentStore, typename TSpec>
@@ -535,64 +554,29 @@ _writeOneAnnotation (
 	_streamPut(file, '\n');
 }
 
-template<typename TTargetStream, typename TSpec, typename TConfig, typename TFormat>
-inline void 
-_write_KNOWN_GENE (
-	TTargetStream & target,
-	FragmentStore<TSpec, TConfig> & store,
-	TFormat)
-{
-	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
-	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
-	typedef typename Value<TAnnotationStore>::Type					TAnnotation;
-	typedef typename Iterator<TAnnotationStore, Standard>::Type		TAnnoIter;
-	typedef typename Id<TAnnotation>::Type							TId;
-
-	_IOContextUCSC<TFragmentStore> ctx;
-
-	TAnnoIter it = begin(store.annotationStore, Standard());
-	TAnnoIter itEnd = end(store.annotationStore, Standard());
-	
-	for(TId id = 0; it != itEnd; ++it, ++id)
-	{
-		if ((*it).typeId == TFragmentStore::ANNO_MRNA && _retrieveOneAnnotation(store, ctx, *it, id))
-			_writeOneAnnotation(target, ctx);
-	}
-}
-
-template<typename TTargetStream, typename TSpec, typename TConfig, typename TFormat>
-inline void 
-_write_KNOWN_ISOFORMS (
-	TTargetStream & target,
-	FragmentStore<TSpec, TConfig> & store,
-	TFormat)
-{
-	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
-	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
-	typedef typename Value<TAnnotationStore>::Type					TAnnotation;
-	typedef typename Iterator<TAnnotationStore, Standard>::Type		TAnnoIter;
-	typedef typename Id<TAnnotation>::Type							TId;
-
-	_IOContextUCSC<TFragmentStore> ctx;
-
-	TAnnoIter it = begin(store.annotationStore, Standard());
-	TAnnoIter itEnd = end(store.annotationStore, Standard());
-	
-	for(TId id = 0; it != itEnd; ++it, ++id)
-	{
-		if ((*it).typeId == TFragmentStore::ANNO_GENE && _retrieveOneAnnotation(store, ctx, *it, id))
-			_writeOneAnnotation(target, ctx);
-	}
-}
-
-template<typename TTargetStream, typename TSpec, typename TConfig>
+template<typename TTargetStream, typename TSpec, typename TConfig, typename TFormatSpec>
 inline void 
 write (
 	TTargetStream & target,
 	FragmentStore<TSpec, TConfig> & store,
-	UCSC format)
+	Tag<UCSC_<TFormatSpec> > const format)
 {
-	_write_KNOWN_GENE(target, store, format);
+	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
+	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
+	typedef typename Value<TAnnotationStore>::Type					TAnnotation;
+	typedef typename Iterator<TAnnotationStore, Standard>::Type		TAnnoIter;
+	typedef typename Id<TAnnotation>::Type							TId;
+
+	_IOContextUCSC<TFragmentStore> ctx;
+
+	TAnnoIter it = begin(store.annotationStore, Standard());
+	TAnnoIter itEnd = end(store.annotationStore, Standard());
+	
+	for(TId id = 0; it != itEnd; ++it, ++id)
+	{
+		if (_retrieveOneAnnotation(store, ctx, *it, id, format))
+			_writeOneAnnotation(target, ctx);
+	}
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
