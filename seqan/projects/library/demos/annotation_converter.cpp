@@ -22,10 +22,9 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "");
 	addOption(parser, CommandLineOption("wg",  "write-gff",     "write annotation in GFF format", OptionType::String | OptionType::Label));
 	addOption(parser, CommandLineOption("wt",  "write-gtf",     "write annotation in GTF format", OptionType::String | OptionType::Label));
-	addOption(parser, CommandLineOption("wu",  "write-ucsc",    "write annotation in UCSC format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("wu",  "write-ucsc", 2, "write annotation in UCSC format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
 
 	bool stop = !parse(parser, argc, argv, cerr);
-	
 	if (argc == 1 || stop)
 	{
 		if (argc == 1)
@@ -45,8 +44,10 @@ int main(int argc, const char *argv[])
 	}
 	if (isSetLong(parser, "read-ucsc"))
 	{
-		ifstream file1(toCString(getOptionValuesLong(parser, "read-ucsc")[0]), ios_base::in | ios_base::binary);
-		ifstream file2(toCString(getOptionValuesLong(parser, "read-ucsc")[1]), ios_base::in | ios_base::binary);
+		fileName = getOptionValuesLong(parser, "read-ucsc")[0];
+		ifstream file1(toCString(fileName), ios_base::in | ios_base::binary);
+		fileName = getOptionValuesLong(parser, "read-ucsc")[1];
+		ifstream file2(toCString(fileName), ios_base::in | ios_base::binary);
 		read(file1, store, UCSC());
 		read(file2, store, UCSC());
 	}
@@ -66,8 +67,10 @@ int main(int argc, const char *argv[])
 	}
 	if (isSetLong(parser, "write-ucsc"))
 	{
-		ofstream file1(toCString(getOptionValuesLong(parser, "write-ucsc")[0]), ios_base::in | ios_base::binary);
-		ofstream file2(toCString(getOptionValuesLong(parser, "write-ucsc")[1]), ios_base::in | ios_base::binary);
+		fileName = getOptionValuesLong(parser, "write-ucsc")[0];
+		ofstream file1(toCString(fileName), ios_base::out | ios_base::binary);
+		fileName = getOptionValuesLong(parser, "write-ucsc")[1];
+		ofstream file2(toCString(fileName), ios_base::out | ios_base::binary);
 		write(file1, store, UCSC());
 		write(file2, store, UCSC_ISOFORMS());
 	}
