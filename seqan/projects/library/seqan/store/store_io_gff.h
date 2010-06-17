@@ -32,6 +32,11 @@ namespace SEQAN_NAMESPACE_MAIN
 struct TagGFF_;
 typedef Tag<TagGFF_> const GFF;
 
+/**
+.Tag.File Format.tag.GTF:
+	GTF annotation file.
+..include:seqan/store.h
+*/
 struct TagGTF_;
 typedef Tag<TagGTF_> const GTF;
 
@@ -196,7 +201,7 @@ _readOneAnnotation (
 		
 	clear(ctx);
 
-	// read fields of alignments line        
+	// read fields of annotation line        
 	_parse_skipWhitespace(file, c);
 	
 	// read column 1: contig name
@@ -234,7 +239,7 @@ _readOneAnnotation (
 		ctx.annotation.endPos = _parse_readNumber(file, c);
 	else 
 	{
-		ctx.annotation.beginPos = TAnnotation::INVALID_POS;
+		ctx.annotation.endPos = TAnnotation::INVALID_POS;
 		_parse_skipEntryUntilWhitespace(file, c);
 	}
 	_parse_skipWhitespace(file, c);	
@@ -309,19 +314,35 @@ _adjustParent (
 	TAnnotation &parent,
 	TAnnotation const &child)
 {
-	parent.contigId = child.contigId;
+	if (child.contigId == TAnnotation::INVALID_ID || child.beginPos == TAnnotation::INVALID_POS || child.endPos == TAnnotation::INVALID_POS)
+		return;
+
+	parent.contigId = child.contigId;	
+	if ((parent.beginPos == TAnnotation::INVALID_POS) != (parent.endPos == TAnnotation::INVALID_POS))
+		return;
+
+	typename TAnnotation::TPos childBegin, childEnd;
 	if (child.beginPos < child.endPos)
 	{
-		if (parent.beginPos == TAnnotation::INVALID_POS || parent.beginPos > child.beginPos)
-			parent.beginPos = child.beginPos;
-		if (parent.endPos == TAnnotation::INVALID_POS || parent.endPos < child.endPos)
-			parent.endPos = child.endPos;
+		childBegin = child.beginPos;
+		childEnd = child.endPos;
+	} else {
+		childBegin = child.endPos;
+		childEnd = child.beginPos;
+	}
+
+	if (parent.beginPos < parent.endPos)
+	{
+		if (parent.beginPos == TAnnotation::INVALID_POS || parent.beginPos > childBegin)
+			parent.beginPos = childBegin;
+		if (parent.endPos == TAnnotation::INVALID_POS || parent.endPos < childEnd)
+			parent.endPos = childEnd;
 	} else
 	{
-		if (parent.beginPos == TAnnotation::INVALID_POS || parent.beginPos < child.beginPos)
-			parent.beginPos = child.beginPos;
-		if (parent.endPos == TAnnotation::INVALID_POS || parent.endPos > child.endPos)
-			parent.endPos = child.endPos;
+		if (parent.endPos == TAnnotation::INVALID_POS || parent.endPos > childBegin)
+			parent.endPos = childBegin;
+		if (parent.beginPos == TAnnotation::INVALID_POS || parent.beginPos < childEnd)
+			parent.beginPos = childEnd;
 	}
 }
 
@@ -361,13 +382,7 @@ _storeOneAnnotation (
 	_storeAppendType(fragStore, ctx.annotation.typeId, ctx.typeName);
 
 	// add annotation name of the current line
-	if (!empty(ctx.annotationName))
-		_storeAppendAnnotationName(fragStore, ctx.annotationId, ctx.annotationName);
-	else
-	{
-		appendName(fragStore.annotationNameStore, ctx.annotationName, fragStore.annotationNameStoreCache);
-		ctx.annotationId = length(fragStore.annotationNameStore) - 1;
-	}
+	_storeAppendAnnotationName(fragStore, ctx.annotationId, ctx.annotationName);
 	if (maxId < ctx.annotationId)
 		maxId = ctx.annotationId;
 	

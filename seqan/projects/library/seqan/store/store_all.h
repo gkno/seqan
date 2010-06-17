@@ -216,21 +216,21 @@ namespace SEQAN_NAMESPACE_MAIN
     inline void
     appendName(TNameStore &store, TName &name)
     {
-		appendValue(store, name);
+		appendValue(store, name, Generous());
 	}
 	
     template <typename TNameStore, typename TName, typename TContext>
     inline void
     appendName(TNameStore &store, TName &name, TContext &)
     {
-		appendName(store, name);
+		appendName(store, name, Generous());
 	}
 	
     template <typename TNameStore, typename TName, typename TCNameStore, typename TCName>
     inline void
     appendName(TNameStore &store, TName &name, NameStoreCache<TCNameStore, TCName> &context)
     {
-		appendValue(store, name);
+		appendValue(store, name, Generous());
 		context.nameSet.insert(length(store) - 1);
     }
 	
@@ -626,6 +626,9 @@ template <typename TSpec, typename TConfig, typename TId>
 inline CharString
 getAnnoUniqueName(FragmentStore<TSpec, TConfig> & store, TId id)
 {
+	if (id < length(store.annotationNameStore))
+		return getAnnoName(store, id);
+	
 	std::stringstream tmp;
 	tmp << "__" << getAnnoType(store, store.annotationStore[id].typeId) << '_' << id;
 	return tmp.str();
@@ -754,17 +757,15 @@ _storeAppendAnnotationName (
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Value<typename TFragmentStore::TContigStore>::Type TContigElement;
-	
-	if (!getIdByName(fragStore.annotationNameStore, annotationName, annotationId, fragStore.annotationNameStoreCache))
-	{
-		// if the annotation is not in the store yet
-		// set the ID on the last entry after appending
-		annotationId = length(fragStore.annotationNameStore);
-		// append to annotationName store
-		if (!empty(annotationName))
-			appendName(fragStore.annotationNameStore, annotationName, fragStore.annotationNameStoreCache);
-//		std::cout << "added annotation:" << annotationName << std::endl;	
-	}
+
+	if (!empty(annotationName) && getIdByName(fragStore.annotationNameStore, annotationName, annotationId, fragStore.annotationNameStoreCache))
+		return;
+	// if the annotation is not in the store yet
+	// set the ID on the last entry after appending
+	annotationId = length(fragStore.annotationNameStore);
+	// append to annotationName store
+	appendName(fragStore.annotationNameStore, annotationName, fragStore.annotationNameStoreCache);
+//	std::cout << "added annotation:" << annotationName << std::endl;	
 }
 
 template <typename TSpec, typename TConfig, typename TId, typename TName>
