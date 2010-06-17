@@ -500,11 +500,14 @@ inline void verifyHits(
 {
 	typedef typename Position<THitString>::Type		THitStringPos;
 	
+	__int64 verified = 0;
+	
 	for(THitStringPos h = startPos; h < endPos; ++h){
 		TReadId absReadId = offSet + hits[h].ndlSeqNo;
 		verifier.m.readId = absReadId;
 		
-		matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode);
+		if(matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode))
+			++verified;
 	}
 	
 	#pragma omp atomic
