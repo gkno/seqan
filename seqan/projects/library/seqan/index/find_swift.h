@@ -386,10 +386,10 @@ struct SwiftParameters {
 		SwiftParameters			params;
 		unsigned				curSeqNo;
         __int64                 curBeginPos, curEndPos;
-		__int64					finderPosOffset;
-		__int64					finderPosNextOffset;
+		TSize					finderPosOffset;						// these must be of
+		TSize					finderPosNextOffset;					// type TSize of TBucket
 		__int64					finderLength;
-
+		
 		double					_currentErrorRate;
 		int						_currentMinLengthForAll;
 
@@ -728,7 +728,8 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		pattern.finderPosNextOffset += pattern.finderLength;
 		
 		// reset buckets only if an overflow of the finder position would occur
-		if (pattern.finderPosNextOffset <= pattern.finderPosOffset)
+		// we would not detect an overflow if finderLength is larger than the largest TBucketSize value
+		if (pattern.finderPosNextOffset <= pattern.finderPosOffset || (__int64)(TBucketSize)pattern.finderLength < (__int64)pattern.finderLength)
 		{
 			pattern.finderPosOffset = 0;
 			pattern.finderPosNextOffset = pattern.finderLength;
