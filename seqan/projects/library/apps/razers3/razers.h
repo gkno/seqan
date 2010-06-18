@@ -449,6 +449,10 @@ struct MicroRNA{};
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
 
+		// TODO: make sure that it is the same pattern as in _mapReads
+		typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;
+		typedef typename PatternState<TMyersPattern>::Type		TPatternState;
+
 		TFragmentStore	*store;
 		TOptions		*options;			// RazerS options
 		TPreprocessing	*preprocessing;
@@ -460,15 +464,18 @@ struct MicroRNA{};
 		bool			onReverseComplement;
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
+		TPatternState	patternState;
 		
-        MatchVerifier() {}
+		MatchVerifier() {}
                
-		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, 
+					  TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
 			preprocessing(&_preprocessing),
 			swiftPattern(&_swiftPattern),
-			cnts(&_cnts)
+			cnts(&_cnts),
+			patternState()
 		{
 			onReverseComplement = false;
 			genomeLength = 0;
@@ -1489,11 +1496,10 @@ matchVerify(
 	typedef ModifiedString<TRead, ModReverse>				TReadRev;
 	typedef Finder<TGenomeInfixRev>							TMyersFinderRev;
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
-	typedef typename PatternState<TMyersPatternRev>::Type	TPatternStateRev;
 
 	TMyersFinder myersFinder(inf);
 	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
-	TPatternState state;
+	TPatternState & state = verifier.patternState;
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
@@ -1537,11 +1543,10 @@ matchVerify(
 					TReadRev			readRev(readSet[readId]);
 					TMyersFinderRev		myersFinderRev(infRev);
 					TMyersPatternRev	myersPatternRev(readRev);
-					TPatternStateRev	stateRev;
 
 					_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 					_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-					while (find(myersFinderRev, myersPatternRev, stateRev, maxScore))
+					while (find(myersFinderRev, myersPatternRev, maxScore))
 						verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
 					setBeginPosition(inf, infBeginPos);
@@ -1579,11 +1584,10 @@ matchVerify(
 			TReadRev			readRev(readSet[readId]);
 			TMyersFinderRev		myersFinderRev(infRev);
 			TMyersPatternRev	myersPatternRev(readRev);
-			TPatternStateRev	stateRev;
 
 			_patternMatchNOfPattern(myersPatternRev, verifier.options->matchN);
 			_patternMatchNOfFinder(myersPatternRev, verifier.options->matchN);
-			while (find(myersFinderRev, myersPatternRev, stateRev, maxScore))
+			while (find(myersFinderRev, myersPatternRev, maxScore))
 				verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 		}
 
