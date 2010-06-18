@@ -229,6 +229,11 @@ public:
 		}
 	}
 
+	~_PatternState()
+	{
+		delete largeState;
+	}
+	
 	_PatternState &
 	operator = (_PatternState const & other)
 	{
@@ -237,9 +242,11 @@ public:
 		VN0 = other.VN0;
 		if (other.largeState)
 		{
-			largeState = new _MyersLargeState;
+			if (largeState == NULL)
+				largeState = new _MyersLargeState;
 			(*largeState) = *(other.largeState);
-		}
+		} else
+			delete largeState;
 		return *this;
 	}
 };
@@ -287,6 +294,7 @@ public:
 			largePattern = new _MyersLargePattern;
 			(*largePattern) = *(other.largePattern);
 		}
+		
 	}
 
 	~Pattern()
