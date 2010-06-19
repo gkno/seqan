@@ -603,8 +603,11 @@ inline void goOverContigIndependent(
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					
 					// Verify found hits. // TODO: find an upper bound for the length of hits to verify in parallel or not.
+					#ifdef RAZERS_WORKSREALING
 					if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
-					// if(true){
+					#else
+					if(true){
+					#endif
 						verifyHits(verifier[blockId], hits, 0, length(hits),
 							(blockId * options.blockSize), host(swiftFinders[0]), readSet, options, mode);
 						
