@@ -603,11 +603,11 @@ inline void goOverContigIndependent(
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					
 					// Verify found hits. // TODO: find an upper bound for the length of hits to verify in parallel or not.
-					#ifdef RAZERS_WORKSREALING
+					// #ifdef RAZERS_WORKSREALING
 					if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
-					#else
-					if(true){
-					#endif
+					// #else
+					// if(true){
+					// #endif
 						verifyHits(verifier[blockId], hits, 0, length(hits),
 							(blockId * options.blockSize), host(swiftFinders[0]), readSet, options, mode);
 						
@@ -679,6 +679,156 @@ inline void goOverContigIndependent(
 	for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
 		windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 	}
+}
+
+
+template <
+	typename TContigSeq, 
+	typename TReadIndex, 
+	typename TSwiftSpec,
+	typename TVerifier,
+	typename TCounts,
+	typename TRazerSOptions,
+	typename TFragmentStore,
+	typename TRazerSMode >
+inline void goOverContigIndependent2(
+		ParallelSwiftPatternHandler<String<
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > >	& swiftPatternHandler,
+		String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
+		String<TVerifier>								& verifier,
+		TCounts											& cnts,
+		TRazerSOptions									& options,
+		String<TFragmentStore>							& threadStores,
+		TFragmentStore									& store,
+		TRazerSMode										& mode)
+{
+	typedef Finder<TContigSeq, Swift<TSwiftSpec> >		TSwiftFinder;
+	typedef typename TSwiftFinder::THitString			THitString;
+	typedef typename Value<THitString>::Type			TSwiftHit;
+	typedef typename Position<THitString>::Type			THitStringPos;
+	typedef typename Iterator<THitString>::Type			THitStringIter;
+	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+	
+	// TODO: (size of aligned read store)?
+	
+	// Needed because the omp shared clause does not allow for "." in the variabel names.
+	TReadSeqStore const & readSet = store.readSeqStore;
+	TContigSeq const & contigSeq = host(swiftFinders[0]);
+	
+	// Number of Threads Allowed for Verification. Shared by all blocks
+	String<int> tav;
+	fill(tav, options.numberOfBlocks, 1, Exact());
+	
+	#pragma omp parallel num_threads((int)options.numberOfCores)
+	{
+	#pragma omp master
+	{
+		
+		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
+		{
+			#pragma omp task default(none) \
+				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, options, mode) \
+				firstprivate(blockId)
+			{
+				// TODO: remove
+				// printf("%d start task\n", blockId);
+				// _proFloat myTime = sysTime();
+				
+				bool sequenceLeft = true;
+				while(sequenceLeft){
+					sequenceLeft = windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], 
+						options.windowSize);
+						
+					// TODO: remove
+					// #pragma omp critical(printf)
+					// printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
+					// myTime = sysTime();
+					
+					THitString & hits = getSwiftHits(swiftFinders[blockId]);
+					if(length(hits) == 0)
+						continue;
+					#pragma omp flush(tav)
+					
+					// TODO: remove
+					// #pragma omp critical(printf)
+					// printf("%d tav: %d\n", blockId, tav[blockId]);
+					
+					if(true){ //(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
+						verifyHits(verifier[blockId], hits, 0, length(hits),
+							(blockId * options.blockSize), host(swiftFinders[0]), readSet, options, mode);
+					}
+					else {
+						// TODO: remove
+						// myTime = sysTime();
+						// sort
+						myRadixSort(hits);
+						
+						// TODO: remove
+						// #pragma omp critical(printf)
+						// printf("%d tav: %d\n", blockId, tav[blockId]);
+						// myTime = sysTime();
+						
+						// THitStringIter i1 = begin(hits);
+						// THitStringIter i2 = end(hits);
+						// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+						// partition
+						String<THitStringPos> positions;
+						partitionHits(positions, hits, tav[blockId]);
+						// verify
+						// TODO: no task for first ...
+						for(int relId = 0; relId < tav[blockId]; ++relId)
+						{
+							#pragma omp task default(none) \
+								shared(verifier, hits, positions, contigSeq, readSet, options, mode) \
+								firstprivate(blockId, relId)
+							{
+								// calculate the absolute Id 
+								int absVerifyId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+								
+								verifyHits(verifier[absVerifyId], hits, positions[relId], positions[relId + 1],
+									(blockId * options.blockSize), contigSeq, readSet, options, mode);
+							}
+						}
+						#pragma omp taskwait
+					} // End else
+					
+					// TODO: remove
+					// #pragma omp critical(printf)
+					// printf("%d verifying took %f\n", blockId, sysTime() - myTime);
+					// myTime = sysTime();
+				} // End while
+				
+				#pragma omp critical(update_tav)
+				updateTav(tav, blockId);
+				
+				// TODO: remove
+				#pragma omp critical(printf)
+				{
+					printf("%d done; tav: ", blockId);
+					for(int i = 0; i < (int)length(tav); ++i)
+						printf("%d, ", tav[i]);
+					printf("\n");
+				}
+				
+			} // End task
+		} // End for
+		
+		#pragma omp taskwait
+		
+	} // End Master
+	} // End Parallel
+	
+	// Get the matches from different thread stores and write them in the main store
+	appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+	
+	// Clear thread stores and finders
+	for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
+		clear(threadStores[blockId].alignedReadStore);
+		clear(threadStores[blockId].alignQualityStore);
+		
+		windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
+	}
+	
 }
 
 
@@ -1340,7 +1490,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				goOverContigFlex(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode);
 			#endif
 			#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
-				goOverContigIndependent(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode);
+				goOverContigIndependent2(swiftPatternHandler, swiftFinders, verifier, cnts, options, threadStores, store, mode);
 			#endif
 		}
 		
