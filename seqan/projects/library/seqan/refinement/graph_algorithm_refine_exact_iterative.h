@@ -101,12 +101,15 @@ SEQAN_CHECKPOINT
 	//foreach of those segments
 	while(segment_it != segment_end)
 	{
+		TValue match_id = (*segment_it).i1; // segment match
+		TValue seg_num = (*segment_it).i2; // first or second segment in segment match?
+
 		//get the sequence that node_i needs to be projected onto (seq_j)
 		//and get the projected position (pos_j)
 		TValue seq_j_id, node_j;
-		_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i_id,node_i,seq_j_id,node_j);
+		_getOtherSequenceAndProject(alis[match_id],seg_num,seq_map,seq_i_id,node_i,seq_j_id,node_j);
 		TValue seq_j_pos = idToPosition(seqs,seq_j_id);
-		updateCutPosition(alis[*segment_it],node_j);
+		updateCutPosition(alis[match_id],node_j);
 
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j_pos].find(node_j);
@@ -124,6 +127,21 @@ SEQAN_CHECKPOINT
 	}
 }
 
+template<typename TFragSize, typename TFragSpec>
+void
+printMatch(Fragment<TFragSize,TFragSpec> & f)
+{
+	::std::cout << "FRAGMENT:" << " f.len = "<< f.len <<std::endl;
+	::std::cout << "f.seqId1 = "<< f.seqId1 << " f.begin1 = " << f.begin1 << std::endl;
+	::std::cout << "f.seqId2 = "<< f.seqId2 << " f.begin2 = " << f.begin2 << std::endl;
+}
+
+template<typename TAlign>
+void
+printMatch(TAlign & f)
+{
+	::std::cout << f;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////	
 //Construct interval trees 
@@ -148,22 +166,23 @@ SEQAN_CHECKPOINT
 	while(ali_it != ali_end)
 	{
 		TValue seq_i_id,begin_,end_;
-	
+		//printMatch(*ali_it);
 		//get the first sequence (and its begin and end) that takes part in the alignment (seq_i)
 		_getSeqBeginAndEnd(*ali_it,seq_map,seq_i_id,begin_,end_,0);
 		TValue seq_i_pos = idToPosition(seqs, seq_i_id);
 		//and append the interval (ali_begin, ali_end) with cargo ali* to the list of intervals of seq_i
-		appendValue(intervals[seq_i_pos],IntervalAndCargo<TValue,TCargo>(begin_,end_,ali_counter)); 
+		appendValue(intervals[seq_i_pos],IntervalAndCargo<TValue,TCargo>(begin_,end_,TCargo(ali_counter,0))); 
 	
 		//get the second sequence (and its begin and end) that takes part in the alignment (seq_i)
 		_getSeqBeginAndEnd(*ali_it,seq_map,seq_i_id,begin_,end_,1);
 		seq_i_pos = idToPosition(seqs, seq_i_id);
 		//and again append the interval (ali_begin, ali_end) with cargo ali* to the list of intervals of seq_i
-		appendValue(intervals[seq_i_pos],IntervalAndCargo<TValue,TCargo>(begin_,end_,ali_counter)); 
+		appendValue(intervals[seq_i_pos],IntervalAndCargo<TValue,TCargo>(begin_,end_,TCargo(ali_counter,1))); 
 	
 		++ali_counter;
 		++ali_it;
 	}
+
 }
 
 
@@ -180,7 +199,7 @@ createTreesForAllSequences(String<TGraph> & gs,
 SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlignment;
 //	typedef TAlignment* TCargo;
-	typedef TValue TCargo;
+	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
 	typedef IntervalAndCargo<int,TCargo> TInterval;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
@@ -297,7 +316,7 @@ SEQAN_CHECKPOINT
 		{
 			//get other sequence and projected position
 			TValue seq_j_id,pos_j;
-			_getOtherSequenceAndProject(*ali_it,seq_map,seq_id,act_pos,seq_j_id,pos_j);
+			_getOtherSequenceAndProject(*ali_it,(TValue)0,seq_map,seq_id,act_pos,seq_j_id,pos_j);
 			//find node that contains the projected position (pos_j)
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 		
@@ -429,7 +448,9 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TAlignmentString>::Type TAlign;
 	typedef typename Iterator<TAlignmentString, Rooted>::Type TAliIterator;
 	typedef typename Size<TAlign>::Type TValue;
-	typedef TValue TCargo;
+//	typedef TValue TCargo;
+//	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
+	typedef Pair<unsigned,unsigned,BitCompressed<31,1> > TCargo;
 	typedef IntervalAndCargo<int,TCargo> TInterval;
 	typedef Graph<Directed<void,WithoutEdgeId> > TGraph;
 	typedef IntervalTreeNode<TInterval> TNode;
@@ -440,6 +461,7 @@ SEQAN_CHECKPOINT
 	typedef typename Cargo<typename Value<TPropertyMap>::Type>::Type TAlignmentPointer;
 	typedef typename Iterator<String<TAlignmentPointer>, Rooted>::Type TSegmentIterator;
 	
+
 	////////////////////////////////////////////////////////////////
 	TValue numSequences = length(seq);
 	//weird ID --> good ID map
@@ -486,6 +508,7 @@ SEQAN_CHECKPOINT
 		++ali_it;
 	}
 
+
 	TSetIterator queueIt;
 	bool done = false;
 	while(!done)
@@ -509,12 +532,13 @@ SEQAN_CHECKPOINT
 					//foreach of those segments
 					while(segment_it != segment_end)
 					{
-						//get the sequence that node_i needs to be projected onto (seq_j)
+						TValue match_id = (*segment_it).i1;
+						TValue seg_num = (*segment_it).i2;						//get the sequence that node_i needs to be projected onto (seq_j)
 						//and get the projected position (pos_j)
 						TValue seq_j_id, node_j;
-						_getOtherSequenceAndProject(alis[*segment_it],seq_map,seq_i_id,node_i,seq_j_id,node_j);
+						_getOtherSequenceAndProject(alis[match_id],seg_num,seq_map,seq_i_id,node_i,seq_j_id,node_j);
 						TValue seq_j_pos = idToPosition(seq,seq_j_id);
-						updateCutPosition(alis[*segment_it],node_j);
+						updateCutPosition(alis[match_id],node_j);
 
 						typename std::set<TValue>::iterator iter_j;
 						iter_j = all_nodes[seq_j_pos].find(node_j);

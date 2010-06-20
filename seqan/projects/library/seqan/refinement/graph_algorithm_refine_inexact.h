@@ -174,7 +174,7 @@ SEQAN_CHECKPOINT
 		{
 			//get other sequence and projected position
 			TValue seq2,act_pos2;
-			_getOtherSequenceAndProject(*ali_it,seq_map,seq1,act_pos1,seq2,act_pos2);
+			_getOtherSequenceAndProject(*ali_it,0,seq_map,seq1,act_pos1,seq2,act_pos2);
 		
 			//get node that corresponds to that position
 			TVertexDescriptor act_knot2;
@@ -183,7 +183,7 @@ SEQAN_CHECKPOINT
 			//corresponding end on seq2 (there might be more than one node on seq2 that corresponds
 			//to the same interval (=node) on seq1)
 			TValue act_end_pos2;
-			_getOtherSequenceAndProject(*ali_it,seq_map,seq1,act_end_pos1-1,seq2,act_end_pos2);
+			_getOtherSequenceAndProject(*ali_it,0,seq_map,seq1,act_end_pos1-1,seq2,act_end_pos2);
 			++act_end_pos2;
 			TVertexDescriptor act_end_knot2;
 			TValue cut_act_end_pos2;

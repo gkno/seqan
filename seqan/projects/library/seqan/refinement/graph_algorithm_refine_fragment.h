@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 template<typename TFragSize, typename TFragSpec,typename TValue, typename TMap>
 void
 _getOtherSequenceAndProject(Fragment<TFragSize,TFragSpec> & segment,
+						TValue seg_num,
 						   TMap &,
 						   TValue seq_i_id,
 						   TValue pos_i,
@@ -42,7 +43,7 @@ _getOtherSequenceAndProject(Fragment<TFragSize,TFragSpec> & segment,
 						   TValue & pos_j)
 {
 SEQAN_CHECKPOINT
-	getProjectedPosition(segment,seq_i_id, pos_i,seq_j_id,pos_j);
+	getProjectedPosition(segment,seg_num, seq_i_id, pos_i,seq_j_id,pos_j);
 	
 	//if(seq_i_id == sequenceId(segment,0))
 	//	seq_j_id = sequenceId(segment,1);
@@ -65,8 +66,11 @@ _getSeqBeginAndEnd(Fragment<TFragSize,TFragSpec> & segment,
 {
 SEQAN_CHECKPOINT
 	seq_i_id = sequenceId(segment,seq);
-	begin_i = fragmentBegin(segment,seq_i_id);
-	end_i = begin_i + fragmentLength(segment,seq_i_id);
+	if(seq==0)
+		begin_i = segment.begin1; // fragmentBegin(segment,seq_i_id);
+	else
+		begin_i = segment.begin2; // fragmentBegin(segment,seq_i_id);
+	end_i = begin_i + segment.len; //fragmentLength(segment,seq_i_id);
 }
 
 
@@ -104,9 +108,9 @@ SEQAN_CHECKPOINT
 //
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////
-////die nächsten beiden funktionen: für Fragmente und Score vom Typ Simple
-////für den fall dass es keine mismatches innerhalb der segmente gibt und Score vom typ Simple ist
-////TODO: müsste für einen bestimmten TFragSpec sein (Exact oder noMismatches)
+////die nï¿½chsten beiden funktionen: fï¿½r Fragmente und Score vom Typ Simple
+////fï¿½r den fall dass es keine mismatches innerhalb der segmente gibt und Score vom typ Simple ist
+////TODO: mï¿½sste fï¿½r einen bestimmten TFragSpec sein (Exact oder noMismatches)
 ////get score for alignment starting at pos_i on one sequence (first sequence if i_am_first==true)
 ////and pos_j on other sequence (second sequence if i_am_first==true), if len1!=len2 then the refinement
 ////process was stopped (the cut is not exact)

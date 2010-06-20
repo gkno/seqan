@@ -35,13 +35,14 @@ namespace SEQAN_NAMESPACE_MAIN
 template<typename TAlignment,typename TValue, typename TMap>
 void
 _getOtherSequenceAndProject(Graph<TAlignment> & segment, 
+			    TValue seg_num,
                             TMap &, 
  							TValue seq_i_id, 
 							TValue pos_i, 
 							TValue & seq_j_id, 
 							TValue & pos_j)
 {
-	getProjectedPosition(segment,seq_i_id, pos_i,seq_j_id,pos_j);
+	getProjectedPosition(segment,seg_num,seq_i_id, pos_i,seq_j_id,pos_j);
 
 }
 
@@ -74,7 +75,6 @@ SEQAN_CHECKPOINT
 	{
 		TVertexDescriptor src = sourceVertex(ed_it);
 		seq_i_id = sequenceId(segment,src);
-		
 	}
 	else
 	{

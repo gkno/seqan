@@ -12,6 +12,55 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
+SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
+{
+	typedef String<char> TString;
+	typedef StringSet<TString > TStringSet;
+	typedef StringSet<TString, Dependent<> > TDepStringSet;
+	typedef Graph<Alignment<TDepStringSet> > TAliGraph;
+	typedef Fragment<> TFragment;
+	typedef String<TFragment> TFragString;
+
+
+	TStringSet seq_set;
+	appendValue(seq_set,String<char>("aaaaabbbbbbccccccaaaaaa"));
+	appendValue(seq_set,String<char>("aaaabbbbbbaaaaaa"));
+	
+
+	TFragString matches;
+	appendValue(matches,TFragment(0,0,1,0,4));
+	appendValue(matches,TFragment(0,0,1,11,5));
+	appendValue(matches,TFragment(0,17,1,10,6));
+	appendValue(matches,TFragment(0,5,1,4,6));
+
+	// without within-sequence-matches: 12 vertices, 7 edges
+	TAliGraph ali_graph(seq_set);
+	matchRefinement(matches,seq_set,ali_graph);
+
+	SEQAN_TASSERT(numVertices(ali_graph) == 12)
+	SEQAN_TASSERT(numEdges(ali_graph) == 7)
+
+	// with within-sequence-match: 24 vertices, 20 edges
+	appendValue(matches,TFragment(1,0,1,10,4));
+
+	TAliGraph ali_graph2(seq_set);
+	matchRefinement(matches,seq_set,ali_graph2);
+
+	SEQAN_TASSERT(numVertices(ali_graph2) == 24)
+	SEQAN_TASSERT(numEdges(ali_graph2) == 20)
+
+//	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
+//	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
+//	std::cout << ali_graph << "\n\n";
+
+//	std::cout << "\nnumEdges: "<<numEdges(ali_graph2)<<"\n";
+//	std::cout << "\nnumVertices: "<<numVertices(ali_graph2)<<"\n";
+//	std::cout << ali_graph2 << "\n\n";
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////77
+
 // TODO(holtgrew): Is this a helper? What does it do?
 int Test_ConvertSequences(String<char> const in_path, String<char> const in_file, String<char> const path, String<char> const file_prefix) {
 	typedef String<Dna5, External<ExternalConfig<File<>, 64*1024> > > TString;
@@ -171,9 +220,9 @@ SEQAN_DEFINE_TEST(GraphMatchRefine)
 	// Access the matches
 	TFragmentString matches;
 	std::stringstream strstream;
-	//strstream << out_path << "matchesTest.dat"; // 10 Matches
+	strstream << out_path << "matchesTest.dat"; // 10 Matches
 	//strstream << out_path << "matches1000.dat"; // 2001948 Matches
-	strstream << out_path << "matches10000.dat"; // 2111 Matches
+	//strstream << out_path << "matches10000.dat"; // 2111 Matches
 	//strstream << out_path << "matches2000.dat"; // 653095 Matches
 	//strstream << out_path << "matches500.dat"; // 3999176 
 	open(matches, strstream.str().c_str());
@@ -194,7 +243,8 @@ SEQAN_DEFINE_TEST(GraphMatchRefine)
 
 	// Print number of matches
 	std::cout << "Number of matches: " << length(matches) << std::endl;
-	
+//	for(unsigned i = 0; i < length(matches); ++i)
+//		printMatch(matches[i]);
 	// Re7finement
 	typedef Infix<TString>::Type TInfix;
 	typedef StringSet<TString, Dependent<> > TAlignmentStringSet;
@@ -250,7 +300,6 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 			resize(rows(ali), 2);
 			setSource(row(ali, 0), seq[i]);
 			setSource(row(ali, 1), seq[j]);
-
 			LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>(ali);
 			
 			int score = _smithWaterman(ali,sw_finder,score_type,cutoff);
@@ -287,7 +336,8 @@ SEQAN_DEFINE_TEST(RefineAlign)
 {
     SEQAN_SKIP_TEST;
 	typedef String<char> TString;
-	typedef StringSet<TString, Dependent<> > TStringSet;
+	typedef StringSet<TString> TStringSet;
+	typedef StringSet<TString,Dependent<> > TDepStringSet;
 	typedef Align<TString, ArrayGaps> TAlign;
 
 	int numSequences = 4;
@@ -295,17 +345,10 @@ SEQAN_DEFINE_TEST(RefineAlign)
 	TStringSet seq_set;
 
 
-	TString str = "GARFIELDTHELASTFATCAT";
-	appendValue(seq_set,str);
-
-	str = "GARFIELDTHEFASTCAT";
-	appendValue(seq_set,str);
-	
-	str = "GARFIELDTHEVERYFASTCAT";
-	appendValue(seq_set,str);
-	
-	str = "THEFATCAT";
-	appendValue(seq_set,str);
+	appendValue(seq_set,String<char>("GARFIELDTHELASTFATCAT"));
+	appendValue(seq_set,String<char>("GARFIELDTHEFASTCAT"));
+	appendValue(seq_set,String<char>("GARFIELDTHEVERYFASTCAT"));
+	appendValue(seq_set,String<char>("THEFATCAT"));
 
 
 
@@ -321,7 +364,7 @@ SEQAN_DEFINE_TEST(RefineAlign)
 
 	getAlignments(alis,seq_set,score_type,numAlignments,cutoff);
 
-	typedef Graph<Alignment<TStringSet> > TAliGraph;
+	typedef Graph<Alignment<TDepStringSet> > TAliGraph;
 	TAliGraph ali_graph(seq_set);
 
 	//std::cout <<"Number of Segments: "<<length(alis)<<"\n";

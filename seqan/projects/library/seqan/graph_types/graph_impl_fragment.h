@@ -208,6 +208,38 @@ getProjectedPosition(Fragment<TSize, ExactFragment<TSpec> > const& f,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TSize, typename TSpec, typename TValue, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
+inline void
+getProjectedPosition(Fragment<TSize, ExactFragment<TSpec> > const& f,
+					TValue seg_num,
+					 TId1 const seqId,
+					 TPosition1 const pos,
+					 TId2& seqId2,
+					 TPosition2& pos2)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+	SEQAN_TASSERT((seg_num == 0 && seqId == f.seqId1) || (seg_num == 1 && seqId == f.seqId2))
+	
+	if (seg_num == 0) {
+		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
+		SEQAN_TASSERT(pos - f.begin1 < f.len)	
+		pos2 = f.begin2 + (pos - f.begin1);
+		seqId2 = f.seqId2;
+		return;
+	} else {
+		SEQAN_TASSERT((TPosition1)f.begin2<=pos)
+		SEQAN_TASSERT(pos - f.begin2 < f.len)
+		pos2 = f.begin1 + (pos - f.begin2);
+		seqId2 = f.seqId1;
+		return;
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
 template<typename TSize, typename TSpec, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
 inline void
 getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
@@ -220,6 +252,39 @@ getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
 	
 	if ((TId) seqId == f.seqId1) {
+		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
+		SEQAN_TASSERT(pos - f.begin1 < f.len)	
+		if (f.reversed) pos2 = (f.begin2 + f.len - 1) - (pos - f.begin1);
+		else pos2 = f.begin2 + (pos - f.begin1);
+		seqId2 = f.seqId2;
+		return;
+	} else {
+		SEQAN_TASSERT((TPosition1)f.begin2<=pos)
+		SEQAN_TASSERT(pos - f.begin2 < f.len)
+		if (f.reversed) pos2 = (f.begin1 + f.len - 1) - (pos - f.begin2);
+		else pos2 = f.begin1 + (pos - f.begin2);
+		seqId2 = f.seqId1;
+		return;
+	}
+}
+
+
+/////////////////////////////////////////////////////////////
+
+template<typename TSize, typename TSpec, typename TValue, typename TId1, typename TPosition1, typename TId2, typename TPosition2>
+inline void
+getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
+					 TValue seg_num,
+					 TId1 const seqId,
+					 TPosition1 const pos,
+					 TId2& seqId2,
+					 TPosition2& pos2)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+	SEQAN_TASSERT((seg_num == 0 && seqId==f.seqId1) || (seg_num == 1 && seqId==f.seqId2))
+	
+	if (seg_num == 0) {
 		SEQAN_TASSERT((TPosition1)f.begin1<=pos)
 		SEQAN_TASSERT(pos - f.begin1 < f.len)	
 		if (f.reversed) pos2 = (f.begin2 + f.len - 1) - (pos - f.begin1);

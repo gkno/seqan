@@ -33,28 +33,29 @@ namespace SEQAN_NAMESPACE_MAIN
 template<typename TSource,typename TSpec,typename TValue,typename TMap>
 void
 _getOtherSequenceAndProject(Align<TSource,TSpec> & segment, 
+				TValue seg_num,
 							TMap & seq_map, 
-						   TValue seq_i_id, 
+						   TValue , 
 						   TValue node_i, 
 						   TValue & seq_j_id, 
 						   TValue & node_j)
 {
 SEQAN_CHECKPOINT
-	TValue ali_seq_0 = seq_map[id(source(row(segment,0)))];
-	if(seq_i_id == ali_seq_0)
+
+	if(seg_num == 0)
 	{
 		seq_j_id = seq_map[id(source(row(segment,1)))];
 		node_j = toSourcePosition(row(segment,1),toViewPosition(row(segment,0),node_i));
 	}
 	else
 	{
-		seq_j_id = ali_seq_0;
+		seq_j_id  = seq_map[id(source(row(segment,0)))];
 		node_j = toSourcePosition(row(segment,0),toViewPosition(row(segment,1),node_i));
 	}
 }
 
 
-//unspektakuläre funktion, die die int ID zurückgibt (braucht man damit es für alle alignment typen geht)
+//unspektakulï¿½re funktion, die die int ID zurï¿½ckgibt (braucht man damit es fï¿½r alle alignment typen geht)
 //template<typename TSource,typename TSpec, typename TValue, typename TSeqMap>					
 //int 
 //_getSeqMapId(TSeqMap & seq_map,

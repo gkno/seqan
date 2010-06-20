@@ -59,16 +59,19 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
 //     std::cout.rdbuf(file.rdbuf());
 
 //      Test_AlignmentGraph();
-//      Test_GraphMatchRefinement();// Test Match Refinement
+     // Test_GraphMatchRefinement();// Test Match Refinement
 
     // Test AlignmentGraph.
 //     SEQAN_CALL_TEST(AlignmentGraphFunctions);
-//     SEQAN_CALL_TEST(HeaviestCommonSubsequence);
-//     SEQAN_CALL_TEST(OutEdgeIteratorAlignment);
+  //   SEQAN_CALL_TEST(HeaviestCommonSubsequence);
+    // SEQAN_CALL_TEST(OutEdgeIteratorAlignment);
 
     // Test Match Refinement.
-    SEQAN_CALL_TEST(GraphMatchRefine);
+    SEQAN_CALL_TEST(RefineMatchesSelfEdges);
+
+    //SEQAN_CALL_TEST(GraphMatchRefine);
     SEQAN_CALL_TEST(RefineAlign);
+
 
     // Test IntervalTree class.
     SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_IntervalTree__int);
@@ -97,5 +100,6 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align_adapt.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_tree.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_types.h");
+
 }
 SEQAN_END_TESTSUITE

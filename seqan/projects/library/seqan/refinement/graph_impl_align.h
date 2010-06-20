@@ -1330,6 +1330,53 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
+template<typename TStringSet, typename TValue, typename TCargo, typename TSpec, typename TSeqId, typename TPosition, typename TSeqId2, typename TPosition2> 
+inline void
+getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+					 TValue seg_num,
+					 TSeqId const id1,
+					 TPosition const pos1,
+					 TSeqId2& id2,
+					 TPosition2& pos2)
+{
+	SEQAN_TASSERT(length(stringSet(g)) == 2);
+
+	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename EdgeType<TGraph>::Type TEdgeStump;
+	TStringSet& str = stringSet(g);
+	TVertexDescriptor sV = findVertex(g, id1, pos1);
+
+	// Case 1: No projection possible
+	if (sV == getNil<TVertexDescriptor>()) {
+		if ( (TSeqId) positionToId(str, 0) == id1) id2 = (TSeqId2) positionToId(str,1);
+		else id2 = (TSeqId2) positionToId(str,0);
+		pos2 = 0;
+		return;
+	}
+
+	// Case 2: Projection is possible
+	TEdgeStump* current = getValue(g.data_align.data_vertex, sV);
+	if(current != (TEdgeStump*) 0) {
+		TVertexDescriptor tV = target(current);
+		if (seg_num == 0) tV = source(current); // segnum 0 is defined as the sourceVertex, segnum 1 is targetVertex
+		pos2 = (TPosition2) (fragmentBegin(g,tV) + (pos1 - fragmentBegin(g, sV)));
+		id2 = (TSeqId2) sequenceId(g, tV);
+		return;
+	} else {
+		// If no out-going edge, get the preceding or following vertex
+		if (fragmentBegin(g, sV) == 0) {
+			getProjectedPosition(g, seg_num, id1, fragmentBegin(g,sV) + fragmentLength(g, sV), id2, pos2);
+			return;
+		} else {
+			getProjectedPosition(g, seg_num, id1, fragmentBegin(g,sV) - 1, id2, pos2);
+			return;
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.getFirstCoveredPosition:
 ..cat:Graph
