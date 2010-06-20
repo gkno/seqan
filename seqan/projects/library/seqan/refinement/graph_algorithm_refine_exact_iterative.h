@@ -598,6 +598,9 @@ SEQAN_CHECKPOINT
 .Function.matchRefinement:
 ..signature:matchRefinement(matches,stringSet,scoringScheme,refinedGraph)
 ..param.matches:The set of matches.
+...type:Class.Fragment
+...type:Class.Align
+...type:Spec.Alignment Graph
 ..param.scoringScheme:The scoring scheme used to score the refined matches (scores are attached to 
 edges in the refined Alignment Graph).
 ...remarks:If no scoring scheme is given, all edges get weight 1.
@@ -626,7 +629,6 @@ SEQAN_CHECKPOINT
 matches in such a way that none of the segments partly overlap. They are either 
 identical (fully overlapping) or non-overlapping.
 ..signature:matchRefinement(matches,stringSet,refinedGraph)
-..param.matches:The set of matches.
 ..param.stringSet:The StringSet containing the sequences which the matches lie on.
 ...type:Class.StringSet
 ..param.refinedGraph:The resulting refined set of matches stored in a graph.
