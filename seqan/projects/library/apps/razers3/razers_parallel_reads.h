@@ -1403,6 +1403,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		TCounts												& cnts,
 		char												  orientation,
 		TRazerSOptions										& options,
+		String<TRazerSOptions>								& threadOptions,
 		TRazerSMode const									& mode)
     {
 		SEQAN_CHECKPOINT
@@ -1467,7 +1468,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 		for(int threadId = 0; threadId < (int)options.numberOfBlocks; ++threadId){
 			// initialize verifier
-			TVerifier oneVerifier(threadStores[threadId], options, preprocessing, swiftPatternHandler, cnts);
+			TVerifier oneVerifier(threadStores[threadId], threadOptions[threadId], preprocessing, swiftPatternHandler, cnts);
 			oneVerifier.onReverseComplement = (orientation == 'R');
 			oneVerifier.genomeLength = length(contigSeq);
 			oneVerifier.m.contigId = contigId;
@@ -1852,6 +1853,9 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		// A temporary store for every block. They are emptied after each verification step
 		String<TFragmentStore> threadStores;
 		resize(threadStores, options.numberOfBlocks, Exact());
+		
+		String<RazerSOptions<TSpec> > threadOptions;
+		fill(threadOptions, options.numberOfBlocks, options, Exact());
 #endif
 
 		if (options.maqMapping){
@@ -1880,14 +1884,14 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			lockContig(store, contigId);
 			if (options.forward){
 				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, mode);
+				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, threadOptions, mode);
 				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'F', options, mode);
 				#endif
 			}
 			if (options.reverse){
 				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, mode);
+				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, threadOptions, mode);
 				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
 				#endif
@@ -1897,6 +1901,10 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 #ifdef RAZERS_PARALLEL_READS_INDEPENDENT
 		appendBlockStores(store, threadStores, options);
+		for(int i = 0; i < (int) options.numberOfBlocks; ++i){
+			// options.countFiltration += threadOptions[i].countFiltration;
+			options.countVerification += threadOptions[i].countVerification;
+		}
 #endif		
 
 		// output for verbose and very verbose options
