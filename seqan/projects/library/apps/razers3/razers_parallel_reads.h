@@ -151,18 +151,19 @@ inline void consistencyTest(TFragmentStore const & store)
 */
 template <
 	typename TFragmentStore,
-	typename TPatternHandler,
-	typename TCounts,
-	typename TRazerSOptions,
-	typename TRazerSMode >
+	// typename TPatternHandler,
+	// typename TCounts,
+	typename TRazerSOptions//,
+	// typename TRazerSMode 
+	>
 inline void
 appendBlockStores(
 		TFragmentStore			& store,
 		String<TFragmentStore>	& blockStores,
-		TPatternHandler			& swiftPatternHandler,
-		TCounts					& cnts,
-		TRazerSOptions			& options,
-		TRazerSMode const		& mode
+		// TPatternHandler			& swiftPatternHandler,
+		// TCounts					& cnts,
+		TRazerSOptions			& options//,
+		// TRazerSMode const		& mode
 		)
 {
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
@@ -192,18 +193,18 @@ appendBlockStores(
 	}
 	
 	// fourth: compact matches
-	if (length(store.alignedReadStore) > options.compactThresh)
-	{
-		oldSize = length(store.alignedReadStore);
-		
-		if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-			maskDuplicates(store, mode);	// overlapping parallelograms cause duplicates
-		
-		compactMatches(store, cnts, options, mode, swiftPatternHandler, COMPACT);
-		
-		if (options._debugLevel >= 2)
-			::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
-	}
+	// if (length(store.alignedReadStore) > options.compactThresh)
+	// 	{
+	// 		oldSize = length(store.alignedReadStore);
+	// 		
+	// 		if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+	// 			maskDuplicates(store, mode);	// overlapping parallelograms cause duplicates
+	// 		
+	// 		compactMatches(store, cnts, options, mode, swiftPatternHandler, COMPACT);
+	// 		
+	// 		if (options._debugLevel >= 2)
+	// 			::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+	// 	}
 	
 }
 	
@@ -696,9 +697,9 @@ inline void goOverContigIndependent2(
 			Pattern<TReadIndex, Swift<TSwiftSpec> > > >	& swiftPatternHandler,
 		String<Finder<TContigSeq, Swift<TSwiftSpec> > >	& swiftFinders,
 		String<TVerifier>								& verifier,
-		TCounts											& cnts,
+		TCounts											& ,//cnts,
 		TRazerSOptions									& options,
-		String<TFragmentStore>							& threadStores,
+		String<TFragmentStore>							& ,//threadStores,
 		TFragmentStore									& store,
 		TRazerSMode										& mode)
 {
@@ -819,12 +820,12 @@ inline void goOverContigIndependent2(
 	} // End Parallel
 	
 	// Get the matches from different thread stores and write them in the main store
-	appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+	// appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
 	
 	// Clear thread stores and finders
 	for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-		clear(threadStores[blockId].alignedReadStore);
-		clear(threadStores[blockId].alignQualityStore);
+		// clear(threadStores[blockId].alignedReadStore);
+		// clear(threadStores[blockId].alignQualityStore);
 		
 		windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 	}
@@ -1394,6 +1395,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		typename TRazerSMode >
     void _mapSingleReadsToContigFlex(
 		TFragmentStore										& store,
+		String<TFragmentStore>								& threadStores,
 		int													  contigId,
 		ParallelSwiftPatternHandler<String<
 			Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandler,
@@ -1460,8 +1462,9 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		resize(verifier, options.numberOfBlocks, Exact());
 		
 		// A temporary store for every block. They are emptied after each verification step
-		String<TFragmentStore> threadStores;
-		resize(threadStores, options.numberOfBlocks, Exact());
+		// String<TFragmentStore> threadStores;
+		// resize(threadStores, options.numberOfBlocks, Exact());
+		
 		for(int threadId = 0; threadId < (int)options.numberOfBlocks; ++threadId){
 			// initialize verifier
 			TVerifier oneVerifier(threadStores[threadId], options, preprocessing, swiftPatternHandler, cnts);
@@ -1845,6 +1848,11 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			offSet += blockSize;
 		}
 #endif
+#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
+		// A temporary store for every block. They are emptied after each verification step
+		String<TFragmentStore> threadStores;
+		resize(threadStores, options.numberOfBlocks, Exact());
+#endif
 
 		if (options.maqMapping){
 			resize(cnts, 2);
@@ -1872,20 +1880,24 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			lockContig(store, contigId);
 			if (options.forward){
 				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, mode);
+				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, mode);
 				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'F', options, mode);
 				#endif
 			}
 			if (options.reverse){
 				#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-				_mapSingleReadsToContigFlex(store, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, mode);
+				_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, mode);
 				#elif RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
 				_mapSingleReadsToContig(store, contigId, swiftPatternHandler, forwardPatternsBlocks, cnts, 'R', options, mode);
 				#endif
 			}
 			unlockAndFreeContig(store, contigId);
 		}
+		
+#ifdef RAZERS_PARALLEL_READS_INDEPENDENT
+		appendBlockStores(store, threadStores, options);
+#endif		
 
 		// output for verbose and very verbose options
 		options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
