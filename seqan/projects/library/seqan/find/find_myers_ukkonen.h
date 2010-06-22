@@ -21,7 +21,7 @@
 #ifndef SEQAN_HEADER_FIND_MYERS_UKKONEN_H
 #define SEQAN_HEADER_FIND_MYERS_UKKONEN_H
 
-SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
+// SEQAN_NO_GENERATED_FORWARDS no forwards are generated for this file
 
 namespace SEQAN_NAMESPACE_MAIN 
 {

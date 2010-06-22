@@ -21,8 +21,6 @@
 #ifndef SEQAN_HEADER_FIND_MYERS_UKKONEN2_H
 #define SEQAN_HEADER_FIND_MYERS_UKKONEN2_H
 
-// SEQAN_NO_GENERATED_FORWARDS: no forwards are generated for this file
-
 namespace SEQAN_NAMESPACE_MAIN 
 {
 
@@ -673,7 +671,7 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
 inline int
-scoreLimit(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern)
+scoreLimit(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern)
 {
 SEQAN_CHECKPOINT
 	return - (int) pattern.k;
@@ -751,6 +749,15 @@ SEQAN_CHECKPOINT
 		clear(largeState.VN);
 		fill(largeState.VN, largePattern.blockCount, 0, Exact());
 	}
+}
+
+
+template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TFinder>
+void _patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & pattern, 
+				  TFinder & finder)
+{
+    SEQAN_CHECKPOINT;
+    _patternInit(pattern, pattern, finder);
 }
 
 
