@@ -63,7 +63,7 @@ SEQAN_CHECKPOINT
         }
         ++pos;
     }
-    if (pos == len) appendValue(queue, TMerger(beginPos, pos, infimumValue<TScoreValue>()));
+    if (pos == len) appendValue(queue, TMerger(beginPos, pos, infimumValue<TScoreValue>()+1));
     else appendValue(queue, TMerger(beginPos, pos, score));
 }
 
@@ -156,7 +156,7 @@ SEQAN_CHECKPOINT
     String<TMerger> queue;
     TPos pos = _min(toViewPosition(row(align, 0), sourceBeginPosition(row(align, 0))),
                     toViewPosition(row(align, 1), sourceBeginPosition(row(align, 1))));
-    appendValue(queue, TMerger(pos, pos, infimumValue<TScoreValue1>()));
+    appendValue(queue, TMerger(pos, pos, infimumValue<TScoreValue1>()+1));
 
     TPos aliLength = _max(toViewPosition(row(align, 0), sourceEndPosition(row(align, 0))),
                           toViewPosition(row(align, 1), sourceEndPosition(row(align, 1))));
@@ -220,25 +220,27 @@ _fillGapsString(Align<TSource> const & align,
 SEQAN_CHECKPOINT
     typedef Triple<TPos, TPos, TPos> TGapInfo;
     TPos totalErrors = 0;
-    TPos gapBegin = beginPosition(row(align, 0));
-    TPos i = gapBegin;
+	typename Row<Align<TSource> >::Type row0 = row(align, 0);
+    TPos i = 0;
+	TPos endPos = endPosition(row0);
+    TPos gapBegin = i;
 
     // append gap starting at beginPosition (also if its length is 0!)
-    while(i < endPosition(row(align, 0)) && !isMatch(align, i)) {
+    while(i < endPos && !isMatch(align, i)) {
         ++i;
         ++totalErrors;
     }
     appendValue(gaps, TGapInfo(gapBegin, i, totalErrors));
 
     // iterate over alignment and append gaps
-    while (i < endPosition(row(align, 0))) {
+    while (i < endPos) {
         // skip matches
-        while(i < endPosition(row(align, 0)) && isMatch(align, i)) {
+        while(i < endPos && isMatch(align, i)) {
             ++i;
         }
         gapBegin = i;
         // skip and count mismatches/indels
-        while(i < endPosition(row(align, 0)) && !isMatch(align, i)) {
+        while(i < endPos && !isMatch(align, i)) {
             ++i;
             ++totalErrors;
         }
@@ -291,12 +293,14 @@ SEQAN_CHECKPOINT
     TPosition endPos = 0;
     TSize minLength = matchMinLength - 1;
 
-	TPosition seedBeginView = (TPosition)toViewPosition(row(align, 0), 
-		seedBegin + sourceBeginPosition(row(align, 0)));
-	seedBeginView -= (TPosition)toViewPosition(row(align, 0), sourceBeginPosition(row(align, 0)));
-	TPosition seedEndView = (TPosition)toViewPosition(row(align, 0), 
-		seedEnd + sourceBeginPosition(row(align, 0)));
-	seedEndView -= (TPosition)toViewPosition(row(align, 0), sourceBeginPosition(row(align, 0)));
+	typename Row<Align<TSource > >::Type row0 = row(align, 0);
+
+	TPosition seedBeginView = (TPosition)toViewPosition(row0, seedBegin + sourceBeginPosition(row0));
+	TPosition seedEndView = (TPosition)toViewPosition(row0, seedEnd + sourceBeginPosition(row0));
+	if (sourceBeginPosition(row0) > 0) {
+		seedBeginView -= (TPosition)toViewPosition(row0, sourceBeginPosition(row0));
+		seedEndView -= (TPosition)toViewPosition(row0, sourceBeginPosition(row0));
+	}
     
     while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*leftIt).i2 <= seedBeginView) {
         while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*rightIt).i2 >= seedEndView) {
@@ -439,13 +443,13 @@ SEQAN_CHECKPOINT
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = (int)(-1/eps) + 1;
+    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, (TScore)-length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
-    TScore scoreDropOff = xDrop * (-mismatchIndel);
+    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
 
     // calculate minimal score for local alignments
     TEpsilon e = floor(eps*minLength);
-    TSize minLength1 = (TSize)ceil((e+1) / eps);
+    TSize minLength1 = _max(0, (TSize)ceil((e+1) / eps));
     TEpsilon e1 = floor(eps*minLength1);
     TSize minScore = _min((TSize)ceil((minLength-e) / (e+1)), (TSize)ceil((minLength1-e1) / (e1+1)));
 
@@ -462,7 +466,7 @@ SEQAN_CHECKPOINT
     assignSource(row(localAlign, 0), a);
     assignSource(row(localAlign, 1), b);
 
-    while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
+	while (localAlignment(localAlign, finder, scoreMatrix, minScore, lowerDiag, upperDiag, BandedWatermanEggert())) {
 
         // split local alignments containing an X-drop
         String<Align<TInfixB> > seedAlignments;
@@ -470,7 +474,6 @@ SEQAN_CHECKPOINT
 
         typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(seedAlignments);
         while (aliIt != end(seedAlignments)) {
-
             // determine extension direction
             char direction;
             if (length(seedAlignments) == 1) direction = 2;
@@ -573,16 +576,19 @@ SEQAN_CHECKPOINT
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
 
+        // verification
 		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)),
-                       epsilon, minLength,
-                       pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
-                       xDrop, value(matches, pattern.curSeqNo));
+                               epsilon, minLength,
+                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
+                               xDrop, value(matches, pattern.curSeqNo));
         totalLength += length(infix(finder));
         if ((TSize)length(infix(finder)) > maxLength) maxLength = length(infix(finder));
 	}
 
-    std::cout << "    Longest hit: " << maxLength << std::endl;
-    if (numSwiftHits > 0) std::cout << "    Avg hit length: " << totalLength/numSwiftHits << std::endl;
+	if (numSwiftHits > 0) {
+		std::cout << "    Longest hit      : " << maxLength << std::endl;
+		std::cout << "    Avg hit length   : " << totalLength/numSwiftHits << std::endl;
+	}
     
     return numSwiftHits;
 }

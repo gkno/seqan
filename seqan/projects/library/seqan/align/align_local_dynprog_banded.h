@@ -182,7 +182,7 @@ SEQAN_CHECKPOINT
     TSize lo_row = (diagU <= 0) ? static_cast<TSize>(-diagU) : 0;
     TSize hi_row = length(value(str, 1)) + 1;
     if (len1 - diagL < hi_row) hi_row = static_cast<TSize>(len1 - diagL);
-    TSize height = hi_row - lo_row;
+    TSize height = hi_row - lo_row + 1;
 
     TSize actualRow, actualCol;
     //TSize row, col;
@@ -335,7 +335,7 @@ SEQAN_CHECKPOINT
     TSize hi_row = len2 + 1;
     if (len1 - diagL < hi_row) hi_row = static_cast<TSize>(len1 - diagL);
 
-    TSize height = hi_row - lo_row;
+    TSize height = hi_row - lo_row + 1;
     TSize diagonalWidth = (TSize) (diagU - diagL + 1);
 
     TSize actualCol, actualRow;
@@ -443,8 +443,6 @@ _localAlignment(LocalAlignmentFinder<TScoreValue> & finder,
                 TDiagonal diag2,
                 BandedWatermanEggert) {
 SEQAN_CHECKPOINT
-    typedef typename Size<typename Value<TStringSet>::Type>::Type TSize;
-
     // Fill the matrix
     TScoreValue maxScore = _align_banded_sw(finder, str, sc, cutoff, diag1, diag2);
     if (maxScore < cutoff) return 0;
@@ -472,8 +470,6 @@ _localAlignmentNext(LocalAlignmentFinder<TScoreValue> & finder,
                 TDiagonal diag2,
                 BandedWatermanEggert) {
 SEQAN_CHECKPOINT
-    typedef typename Size<typename Value<TStringSet>::Type>::Type TSize;
-
     // Declump the matrix and find new maximum score
     _align_banded_sw_declump(finder, str, sc, cutoff, diag1, diag2);
     typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition nextBestEnd;

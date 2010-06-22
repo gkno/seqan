@@ -176,14 +176,16 @@ _writeGffLine(TId const & databaseID,
         file << value(patternID, i);
     }
 
-    file << ";seq2Range=\t" << 
+	file << ";seq2Length=" << length(source(row1));
+
+    file << ";seq2Range=" << 
 		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1)) + 1;
-    file << "\t,\t" << 
+    file << "," << 
 		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
 
     std::stringstream cigar, mutations;
     _getCigarLine(match, cigar, mutations);
-    file << "\t;cigar=" << cigar.str();
+    file << ";cigar=" << cigar.str();
     file << ";mutations=" << mutations.str();
     file << "\n";
 }
@@ -256,11 +258,12 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
         numMatches += length(value(matches, i));
     }
 
-    std::cout << "    # SWIFT hits: " << numSwiftHits << std::endl;
-    std::cout << "    # Eps-matches: " << numMatches << std::endl;
-    std::cout << "    Longest eps-match: " << maxLength << " cols" << std::endl;
-    if (numMatches > 1)
-        std::cout << "    Avg match length: " << totalLength / numMatches << " cols" << std::endl;
+	if (numMatches > 0) {
+		std::cout << "    Longest eps-match: " << maxLength << std::endl;
+        std::cout << "    Avg match length : " << totalLength / numMatches << std::endl;
+	}
+    std::cout << "    # SWIFT hits     : " << numSwiftHits << std::endl;
+    std::cout << "    # Eps-matches    : " << numMatches << std::endl;
 
     aliFile.close();
 }
@@ -326,24 +329,24 @@ _setParser(TParser & parser) {
 	addUsageLine(parser, "-d <FASTA sequence file> -q <FASTA sequence file> [Options]");
 
 	addLine(parser, "");
-    addLine(parser, "An implementation of the SWIFT filter algorithm (Rasmussen et al., 2006).");
-    addLine(parser, "SWIFT hits are verified using local alignment, gapped X-drop extension");
-    addLine(parser, "and extraction of the longest epsilon-match.");
+    addLine(parser, "An implementation of the SWIFT filter algorithm (Rasmussen et al., 2006)");
+    addLine(parser, "and subsequent verification of the SWIFT hits using local alignment,");
+    addLine(parser, "gapped X-drop extension, and extraction of the longest epsilon-match.");
 
 	addSection(parser, "Non-optional Arguments:");
-    addOption(parser, CommandLineOption('d', "database", "fasta file containing the database sequence",
+    addOption(parser, CommandLineOption('d', "database", "fasta file containing the database sequences",
               (OptionType::String | OptionType::Mandatory)));
     addOption(parser, CommandLineOption('q', "query", "file containing the query sequences", 
               (OptionType::String | OptionType::Mandatory)));
     
 	addSection(parser, "Main Options:");
-    addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String, "swift_local.gff"));
-    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database",
-              OptionType::Boolean, false));
     addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int, 10));
     addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int, 100));
     addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double, 0.05));
     addOption(parser, CommandLineOption('x', "x-drop", "maximal x-drop for extension", OptionType::Double, 5));
+    addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database",
+              OptionType::Boolean, false));
+    addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String, "swift_local.gff"));
 }
 
 int main(int argc, const char *argv[]) {
@@ -423,9 +426,9 @@ int main(int argc, const char *argv[]) {
 
 	// Calculate calculated parameters
 	int n = (int) ceil((floor(options.epsilon * options.minLength) + 1) / options.epsilon);
-	int threshold = (int) _min(
+	int threshold = (int) _max(1, (int) _min(
 		(n + 1) - options.qGram * (floor(options.epsilon * n) + 1),
-		(options.minLength + 1) - options.qGram * (floor(options.epsilon * options.minLength) + 1));
+		(options.minLength + 1) - options.qGram * (floor(options.epsilon * options.minLength) + 1)));
 	int overlap = (int) floor((2 * threshold + options.qGram - 3) / (1 / options.epsilon - options.qGram));
 	int distanceCut = (threshold - 1) + options.qGram * overlap + options.qGram;
 	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
@@ -444,7 +447,7 @@ int main(int argc, const char *argv[]) {
     // container for eps-matches
 	StringSet<String<Align<TSequence> > > matches;
 
-	std::cout << "Aligning to database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
+	std::cout << "Aligning all query sequences to database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
 
     int numSwiftHits;
     for(unsigned i = 0; i < length(databases); ++i) {
@@ -457,12 +460,12 @@ int main(int argc, const char *argv[]) {
         numSwiftHits += localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, matches);
         // file output
         _outputMatches(matches, numSwiftHits, databaseIDs[i], true, queryIDs, file);
-        std::cout << std::endl;
     }
+	std::cout << std::endl;
 
     if (options.reverse) {
         // local swift on reverse complement of database
-        std::cout << "Aligning to reverse complement of database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
+        std::cout << "Aligning all query sequences to reverse complement of database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
         reverseComplementInPlace(databases);
         for(unsigned i = 0; i < length(databases); ++i) {
             clear(matches);
@@ -474,8 +477,8 @@ int main(int argc, const char *argv[]) {
             numSwiftHits += localSwift(finder_swift_compl, pattern_swift, options.epsilon, options.minLength, options.xDrop, matches);
             // file output
             _outputMatches(matches, numSwiftHits, databaseIDs[i], false, queryIDs, file);
-            std::cout << std::endl;
         }
+		std::cout << std::endl;
     }
 
     std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
