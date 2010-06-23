@@ -205,6 +205,8 @@ int parseCommandLineAndCheck(IlluminaOptions & options,
 
 
 int main(const int argc, const char * argv[]) {
+    printDebugLevel(std::cerr);
+    
     // Switch command type (which reads to simulate) or show global help.
     GlobalOptions globalOptions;
     int ret = parseOptions(globalOptions, argc, argv);

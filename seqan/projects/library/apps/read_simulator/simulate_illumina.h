@@ -295,8 +295,8 @@ struct IlluminaOptions {
 
     IlluminaOptions()
             : showHelp(false),
-              verbose(true),
-              veryVerbose(true),
+              verbose(false),
+              veryVerbose(false),
               seed(0),
               readLength(36),
               numReads(1000),
@@ -529,6 +529,7 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
 //     std::cout << back(haplotype)._journalEntries << std::endl;
 
     for (unsigned i = 0; i < length(fragmentStore.contigStore); ++i) {
+        std::cout << "    contig # " << i+1 << "/" << length(fragmentStore.contigStore) << std::endl;
         clear(haplotype[i]);
         setHost(haplotype[i], fragmentStore.contigStore[i].seq);
         String<Dna5> const & contig = fragmentStore.contigStore[i].seq;
@@ -536,9 +537,9 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
 
         // j is position in original sequence, k is position in haplotype
         for (size_t j = 0, k = 0; j < length(contig);) {
-            if (k >= length(haplotypeContig))
-                std::cout << haplotypeContig._journalEntries << std::endl;
-            SEQAN_ASSERT_LT_MSG(k, length(haplotypeContig), "k = %lu, length(contig) == %lu", k, length(contig));
+//             if (k >= length(haplotypeContig))
+//                 std::cout << haplotypeContig._journalEntries << std::endl;
+//             SEQAN_ASSERT_LT_MSG(k, length(haplotypeContig), "k = %lu, length(contig) == %lu", k, length(contig));
 
             double x = mtRandDouble();
             if (x < options.haplotypeSnpRate) {
@@ -809,6 +810,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     String<bool> flipped;
     for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
+        std::cout << "  Building haplotype..." << std::endl;
         StringSet<SequenceJournal<String<Dna5>, SortedArray> > haplotypeContigs;
         buildHaplotype(haplotypeContigs, fragmentStore, options);
 
@@ -827,8 +829,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
         back(relativeContigLengths) = 1.0;
 
         // Simulate the reads...
-        if (options.verbose)
-            std::cerr << "Simulating reads for haplotype #" << haplotypeId << "..." << std::endl;
+        std::cerr << "  Simulating reads for haplotype #" << haplotypeId << "..." << std::endl;
 
 //         std::cerr << "Journal: " << haplotypeContigs[0]._journalEntries << std::endl;
 
