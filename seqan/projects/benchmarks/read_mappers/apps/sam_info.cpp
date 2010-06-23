@@ -57,8 +57,7 @@ void performEvaluation(TFragmentStore & store) {
 //             std::cerr << "mismatch: " << convert<Dna5>(*readGapsIt) << " != " << convert<Dna5>(*contigGapsIt) << " score is " << getQualityValue(convert<Dna5Q>(*readGapsIt)) << std::endl;
             alignQualScore += getQualityValue(convert<Dna5Q>(*readGapsIt));
 
-            Dna5Q x = *readGapsIt;
-            std::cout << x << std::endl;
+            std::cout << convert<Dna5Q>(*readGapsIt) << std::endl;
         }
 
         printf("%6lu\t", alignedReadId);
