@@ -25,24 +25,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// skip entry until whitespace
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TFile, typename TChar>
-inline bool
-_parse_skipEntryUntilWhitespace(TFile& file, TChar& c)
-{
-	if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) return false;
-	
-	while (!_streamEOF(file)) {
-		c = _streamGet(file);
-		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) break;
-	}
-	return true; 
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
 // skip word
 //////////////////////////////////////////////////////////////////////////////
 
