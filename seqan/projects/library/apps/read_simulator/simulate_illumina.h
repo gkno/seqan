@@ -7,7 +7,6 @@
 #include <seqan/sequence_journal.h>
 
 #include "read_simulator.h"
-#include "../../../benchmarks/read_mappers/apps/wit_store.h"
 
 using namespace seqan;
 
@@ -248,9 +247,9 @@ struct IlluminaOptions {
     // possibly with a ".1" or ".2" before the ".fastq" if mate pairs
     // are simulated.
     CharString outputFile;
-    // Path to the wit file to generate.  Defaults to fastq file name
-    // with suffix ".wit"
-    CharString witFile;
+    // Path to the SAM file to generate.  Defaults to fastq file name
+    // with suffix ".sam"
+    CharString samFile;
     // true iff qualities are to be simulated.
     bool simulateQualities;
 
@@ -304,7 +303,7 @@ struct IlluminaOptions {
               onlyForward(false),
               onlyReverse(false),
               outputFile(""),
-              witFile(""),
+              samFile(""),
               simulateQualities(false),
               generateMatePairs(false),
               libraryLength(1000),
@@ -334,7 +333,7 @@ TStream & operator<<(TStream & stream, IlluminaOptions const & options) {
            << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
            << "  outputFile:             \"" << options.outputFile << "\"" <<std::endl
-           << "  witFile:                \"" << options.witFile << "\"" <<std::endl
+           << "  samFile:                \"" << options.samFile << "\"" <<std::endl
            << "  simulateQualities:      " << (options.simulateQualities ? "true" : "false") << std::endl
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
            << "  libraryLength:          " << options.libraryLength << std::endl
@@ -775,10 +774,12 @@ int buildReadSimulationInstruction(
 ..param.tag:Tag for specifying reads to simulate.
 */
 int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
-                      WitStore & witStore,
                       IlluminaOptions const & options,
                       String<double> const & errorProbabilities,
                       IlluminaReads const &) {
+    typedef FragmentStore<MyFragmentStoreConfig> TFragmentStore;
+    typedef Value<TFragmentStore::TMatePairStore>::Type TMatePairStoreElement;
+    
     if (options.verbose)
         std::cerr << "Simulating reads..." << std::endl;
 
@@ -843,11 +844,17 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 ReadSimulationInstruction const & inst = instructions[k];
                 // Apply simulation instructions.
                 SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
-                unsigned readId = length(fragmentStore.readSeqStore);
                 // Cut out segment from haplotype.
                 String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
                 applySimulationInstructions(read, inst, options, IlluminaReads());
-                appendValue(fragmentStore.readSeqStore, read);
+                // Append read sequence to read seq store and mate pair to read
+                // name store.  This also yields the read id.  We will generate
+                // and append the read name below, depending on the read id.
+                unsigned readId;
+                if (options.generateMatePairs)
+                    readId = appendRead(fragmentStore, read, length(fragmentStore.matePairStore));
+                else
+                    readId = appendRead(fragmentStore, read);
 
                 // Get expected begin/end position in the original sequence.  If we decide to flip this read later on, we will modify the WIT store.
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
@@ -877,61 +884,72 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     strcat(readName, buffer);
                 }
                 appendValue(fragmentStore.readNameStore, readName);
-                // Tentatively adding interval to read store.  Especially note that the interval borders are not used in the original intention.
-                appendValue(witStore, IntervalOfReadOnContig(readId, 0, inst.contigId, true, origBeginPos, origEndPos));
+
+                // Tentatively add matches to aligned read store.  We will
+                // maybe flip begin and end position below in the "flipping and
+                // reordering" step and convert the matches to a global
+                // alignment in the "convertMatchesToGlobalAlignment" call.
+                if (options.generateMatePairs)
+                    appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos, length(fragmentStore.matePairStore));
+                else
+                    appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos);
 
                 // Perform flipping and reordering.
                 if (options.generateMatePairs) {
-                    if (readId % 2 == 1) {  // Only flip after simulating second mate.
-                        reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
-                        witStore.intervals[readId].isForward = false;
-                        TPos revPos = length(fragmentStore.contigStore[witStore.intervals[readId].contigId].seq) - witStore.intervals[readId].firstPos - 1;
-                        witStore.intervals[readId].lastPos = revPos;
-                        witStore.intervals[readId].firstPos = revPos;
-                        witStore.intervals[readId - 1].firstPos = witStore.intervals[readId - 1].lastPos - 1;
-                        witStore.intervals[readId - 1].lastPos = witStore.intervals[readId - 1].lastPos - 1;
+                    if (readId % 2 == 1) {  // Only flip and append mate pair info after simulating second mate.
+                        // Append mate pair element to fragment store's mate pair store.
+                        TMatePairStoreElement matePair;
+                        matePair.readId[0] = readId - 1 + flipped[readId];
+                        matePair.readId[1] = readId - flipped[readId];
+                        appendValue(fragmentStore.matePairStore, matePair);
+
+                        // The first mate always comes from the forward strand.
                         append(fragmentStore.readNameStore[readId - 1], " strand=forward");
+                        // The second read always comes from the reverse strand.
+                        reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
+                        // Note: readId is also last index of aligned read store because we only have one alignment per read!
+                        std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                         append(fragmentStore.readNameStore[readId], " strand=reverse");
-                        // Maybe write out in different order.
+
+                        // Maybe, we write out the mates in different order, i.e. flip the entries in the stores.
                         if (flipped[readId]) {
                             SEQAN_ASSERT_TRUE(flipped[readId - 1]);
-//                             std::cout << "flipped" << std::endl;
-//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
-                            String<Dna5Q> tmp;
                             std::swap(fragmentStore.readSeqStore[readId - 1], fragmentStore.readSeqStore[readId]);
                             std::swap(fragmentStore.readNameStore[readId - 1], fragmentStore.readNameStore[readId]);
-                            std::swap(witStore.intervals[readId - 1], witStore.intervals[readId]);
-                            std::swap(witStore.intervals[readId - 1].readId, witStore.intervals[readId].readId);
+                            std::swap(fragmentStore.alignedReadStore[readId - 1], fragmentStore.alignedReadStore[readId]);
+                            std::cout << "flipped" << std::endl;
+                            std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
+                            std::cout << fragmentStore.alignedReadStore[readId - 1] << std::endl << fragmentStore.alignedReadStore[readId] << std::endl;
                         } else {
                             SEQAN_ASSERT_NOT(flipped[readId - 1]);
-//                             std::cout << "not flipped" << std::endl;
-//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
+                            std::cout << "not flipped" << std::endl;
+                            std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
+                            std::cout << fragmentStore.alignedReadStore[readId - 1] << std::endl << fragmentStore.alignedReadStore[readId] << std::endl;
                         }
                     }
                 } else {
                     if (mtRandDouble() < 0.5) {
                         reverseComplementInPlace(back(fragmentStore.readSeqStore));
                         append(back(fragmentStore.readNameStore), " strand=reverse");
-                        back(witStore.intervals).isForward = false;
-                        TPos revPos = length(fragmentStore.contigStore[witStore.intervals[readId].contigId].seq) - back(witStore.intervals).firstPos - 1;
-                        back(witStore.intervals).lastPos = revPos;
-                        back(witStore.intervals).firstPos = revPos;
+                        // Note: readId is also last index of aligned read store because we only have one alignment per read!
+                        std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     } else {
                         append(back(fragmentStore.readNameStore), " strand=forward");
-                        back(witStore.intervals).firstPos = back(witStore.intervals).lastPos - 1;
-                        back(witStore.intervals).lastPos = back(witStore.intervals).lastPos - 1;
                     }
                 }
             }
-			// When generating mate pairs, an even number of reads is generated in each step.
 			if (options.generateMatePairs) {
-				SEQAN_ASSERT_EQ(length(witStore.intervals) % 2, 0u);
+                // When generating mate pairs, an even number of reads is generated in each step.
+ 				SEQAN_ASSERT_EQ(length(fragmentStore.alignedReadStore) % 2, 0u);
 				SEQAN_ASSERT_EQ(length(fragmentStore.readNameStore) % 2, 0u);
 				SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore) % 2, 0u);
 			}
 		}
     }
 
+    // Last but not least, convert the matches collected before to a global alignment.
+    convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
+    
     if (options.verbose)
         std::cerr << "Simulated " << length(fragmentStore.readSeqStore) << " reads" << std::endl;
 
@@ -964,9 +982,9 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
         options.outputFile = referenceFilename;
         append(options.outputFile, ".fastq");
     }
-    if (options.witFile == "") {
-        options.witFile = options.outputFile;
-        append(options.witFile, ".wit");
+    if (options.samFile == "") {
+        options.samFile = options.outputFile;
+        append(options.samFile, ".sam");
     }
     std::cerr << "Loading reference sequence from \"" << referenceFilename << "\"" << std::endl;
     if (!loadContigs(fragmentStore, referenceFilename)) {
@@ -1015,8 +1033,7 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
 	}
 
     // Kick off the read generation.
-    WitStore witStore(fragmentStore.readNameStore, fragmentStore.contigNameStore);
-    int ret = simulateReadsMain(fragmentStore, witStore, options, errorDistribution, IlluminaReads());
+    int ret = simulateReadsMain(fragmentStore, options, errorDistribution, IlluminaReads());
     if (ret != 0)
         return ret;
 
@@ -1038,12 +1055,12 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
             appendValue(reads, fragmentStore.readSeqStore[i]);
         }
         {
-            std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
+            std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
             if (not fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
-            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+            write(fstrm, readNames, reads, Fastq());
         }
         // Build filename with '.2.' infix.
         infix(mateFilename, dotPos + 1, dotPos + 2) = "2";
@@ -1056,12 +1073,12 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
             appendValue(reads, fragmentStore.readSeqStore[i]);
         }
         {
-            std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
+            std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
             if (not fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
-            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+            write(fstrm, readNames, reads, Fastq());
         }
     } else {
         std::cerr << "Writing resulting reads to \"" << options.outputFile << "\"" << std::endl;
@@ -1072,14 +1089,14 @@ int simulateReads(IlluminaOptions options, CharString referenceFilename, Illumin
         }
         write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
     }
-    std::cerr << "Writing WIT file \"" << options.witFile << "\"" << std::endl;
+    std::cerr << "Writing SAM file \"" << options.samFile << "\"" << std::endl;
     {
-        std::fstream fstrm(toCString(options.witFile), std::ios_base::out);
+        std::fstream fstrm(toCString(options.samFile), std::ios_base::out);
         if (not fstrm.is_open()) {
-            std::cerr << "Could not open WIT file \"" << options.witFile << "\"" << std::endl;
+            std::cerr << "Could not open SAM file \"" << options.samFile << "\"" << std::endl;
             return 1;
         }
-        writeWitFile(fstrm, witStore);
+        write(fstrm, fragmentStore, SAM());
     }
     return 0;
 }
