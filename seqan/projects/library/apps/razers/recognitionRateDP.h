@@ -22,6 +22,8 @@
 #ifndef SEQAN_HEADER_RECOGNITION_RATE_DP_H
 #define SEQAN_HEADER_RECOGNITION_RATE_DP_H
 
+#include <algorithm>
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -240,7 +242,7 @@ inline int
 _getErrorPatternIndex(TPatternStore const &patternStore, TPattern const &pattern)
 {
 	typedef typename Iterator<TPatternStore const>::Type TIter;
-	TIter lb = lower_bound(begin(patternStore, Standard()), end(patternStore, Standard()), pattern, ErrorPatternLess());
+	TIter lb = std::lower_bound(begin(patternStore, Standard()), end(patternStore, Standard()), pattern, ErrorPatternLess());
 	TIter invalid = end(patternStore, Standard());
 	if (lb != invalid && *lb == pattern) {
 //		::std::cout << pattern;
