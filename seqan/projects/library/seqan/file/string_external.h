@@ -203,25 +203,25 @@ you should think of using @Tag.ExternalConfig@.
 
         inline TDifference operator- (const TIterator &I) const {
 			return offset - I.offset;
-		};
+		}
 		
 		inline TIterator operator- (TDifference delta) const {
 			return TIterator(extString, offset - delta);
-		};
+		}
 		
 		inline TIterator& operator-= (TDifference delta) const {
 			offset -= delta;
 			return *this;
-		};
+		}
 		
 		inline TIterator operator+ (TDifference delta) const {
 			return TIterator(extString, offset + delta);
-		};
+		}
 		
 		inline TIterator& operator+= (TDifference delta) const {
 			offset += delta;
 			return *this;
-		};
+		}
 		
 		inline TValue & operator* () const {
 			return (*extString)[offset];
@@ -310,25 +310,25 @@ you should think of using @Tag.ExternalConfig@.
 
 		inline TDifference operator- (const TIterator &I) const {
 			return offset - I.offset;
-		};
+		}
 		
 		inline TIterator operator- (TDifference delta) const {
 			return TIterator(extString, offset - delta);
-		};
+		}
 		
 		inline TIterator& operator-= (TDifference delta) const {
 			offset -= delta;
 			return *this;
-		};
+		}
 		
 		inline TIterator operator+ (TDifference delta) const {
 			return TIterator(extString, offset + delta);
-		};
+		}
 		
 		inline TIterator& operator+= (TDifference delta) const {
 			offset += delta;
 			return *this;
-		};
+		}
 		
 		inline TValue const & operator* () const {
 			return (*extString)[offset];
@@ -466,7 +466,7 @@ you should think of using @Tag.ExternalConfig@.
 
 		inline TDifference operator- (const TIterator &I) const {
 			return (TDifference)(pageNo - I.pageNo) * (TDifference)PAGE_SIZE + (pageOfs - I.pageOfs);
-		};
+		}
 		
 		inline TIterator operator- (TDifference delta) const {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -475,7 +475,7 @@ you should think of using @Tag.ExternalConfig@.
 				return TIterator(extString, pageNo - dPNo, pageOfs - dPOfs);
 			else
 				return TIterator(extString, pageNo - dPNo - 1, PAGE_SIZE + pageOfs - dPOfs);
-		};
+		}
 		
 		inline TIterator& operator-= (TDifference delta) {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -488,7 +488,7 @@ you should think of using @Tag.ExternalConfig@.
 			if (dPNo) invalidate(0);
 			pageNo -= dPNo;
 			return *this;
-		};
+		}
 		
 		inline TIterator operator+ (TDifference delta) const {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -497,7 +497,7 @@ you should think of using @Tag.ExternalConfig@.
 				return TIterator(extString, pageNo + dPNo, nPOfs);
 			else
 				return TIterator(extString, pageNo + dPNo + 1, nPOfs - PAGE_SIZE);
-		};
+		}
 		
 		inline TIterator& operator+= (TDifference delta) {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -510,7 +510,7 @@ you should think of using @Tag.ExternalConfig@.
 			pageNo += dPNo;
 			pageOfs = nPOfs;
 			return *this;
-		};
+		}
 		
 		inline void validate() const {
 			typename TExtString::TPageFrame &pf = extString->getSharedPage(pageNo, prefetch);
@@ -725,7 +725,7 @@ you should think of using @Tag.ExternalConfig@.
 
 		inline TDifference operator- (const TIterator &I) const {
 			return (TDifference)(pageNo - I.pageNo) * (TDifference)PAGE_SIZE + (pageOfs - I.pageOfs);
-		};
+		}
 		
 		inline TIterator operator- (TDifference delta) const {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -734,7 +734,7 @@ you should think of using @Tag.ExternalConfig@.
 				return TIterator(extString, pageNo - dPNo, pageOfs - dPOfs);
 			else
 				return TIterator(extString, pageNo - dPNo - 1, PAGE_SIZE + pageOfs - dPOfs);
-		};
+		}
 		
 		inline TIterator& operator-= (TDifference delta) {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -747,7 +747,8 @@ you should think of using @Tag.ExternalConfig@.
 			if (dPNo) invalidate(0);
 			pageNo -= dPNo;
 			return *this;
-		};
+		}
+
 		inline TIterator operator+ (TDifference delta) const {
 			TDifference dPNo  = delta / PAGE_SIZE;
 			TDifference nPOfs = pageOfs + delta % PAGE_SIZE;
@@ -755,7 +756,7 @@ you should think of using @Tag.ExternalConfig@.
 				return TIterator(extString, pageNo + dPNo, nPOfs);
 			else
 				return TIterator(extString, pageNo + dPNo + 1, nPOfs - PAGE_SIZE);
-		};
+		}
 		
 		inline TIterator& operator+= (TDifference delta) {
 			TDifference dPNo  = delta / PAGE_SIZE;
@@ -768,7 +769,7 @@ you should think of using @Tag.ExternalConfig@.
 			pageNo += dPNo;
 			pageOfs = nPOfs;
 			return *this;
-		};
+		}
 		
 		inline void validate() const {
 			typename TExtString::TPageFrame &pf = extString->getSharedPage(pageNo, prefetch);
@@ -1217,7 +1218,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 } else
                     return false;
 			}
-		};
+		}
 
         inline TPageFrame &getPage(
             int pageNo, 

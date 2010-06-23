@@ -139,7 +139,7 @@ SEQAN_CHECKPOINT
 		data_compare(other.data_compare)
 	{
 SEQAN_CHECKPOINT
-	};
+	}
 
 	Lexical & operator=(Lexical const & other)
 	{

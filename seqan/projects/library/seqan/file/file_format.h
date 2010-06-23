@@ -134,7 +134,7 @@ public:
 
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
-	~FileFormat() {};
+	~FileFormat() {}
 	FileFormat const & operator =(FileFormat const &) {}
 
 	virtual void *

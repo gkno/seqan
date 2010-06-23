@@ -276,7 +276,7 @@ struct SwiftParameters {
 			endHit = end(hits, Standard());
 			curRepeat = begin(data_repeats, Standard()) + (orig.curRepeat - begin(orig.data_repeats, Standard()));
 			endRepeat = end(data_repeats, Standard());
-		};
+		}
 
 		inline typename Reference<TIterator>::Type 
 		operator* () { return value(hostIterator(*this)); }
@@ -340,7 +340,7 @@ struct SwiftParameters {
 		{
 			curHit = begin(hits, Standard()) + (orig.curHit - begin(orig.hits, Standard()));
 			endHit = end(hits, Standard());
-		};
+		}
 	};
 
 

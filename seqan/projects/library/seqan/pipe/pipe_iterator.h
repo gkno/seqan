@@ -88,11 +88,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			for(; delta != 0; --delta)
 				++*this;
 			return *this;
-		};
+		}
 		
         difference_type operator- (const iterator &I) const {
 			return I.rest - rest;
-		};
+		}
 		
 		bool _Equal(const iterator &I) const {
 			return rest == I.rest;
@@ -171,7 +171,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         difference_type operator- (const iterator &I) const {
 			return I.rest - rest;
-		};
+		}
 		
 		bool _Equal(const iterator &I) const {
 			return rest == I.rest;

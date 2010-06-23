@@ -904,7 +904,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			limitsValid(true)
 		{
 			appendValue(limits, 0);
-		};
+		}
 //____________________________________________________________________________
 
 		template <typename TPos>

@@ -53,7 +53,7 @@ namespace SEQAN_NAMESPACE_MAIN
         VolatilePtr() {	    // volatile pinters behave like normal pointers
             prev = this;    // and are not initialized (ptr) per default
             next = this;
-        };
+        }
 
         VolatilePtr(const pointer _p) {
 			ptr = _p;
