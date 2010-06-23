@@ -139,6 +139,14 @@ struct AlignedReadStoreElement
 		gaps(_gaps) {}
 };
 
+
+// TODO(holtgrew): I find this useful for debugging purposes. Keep it?
+template <typename TStream, typename TPos, typename TGapAnchor, typename TSpec>
+TStream & operator<<(TStream & stream, AlignedReadStoreElement<TPos, TGapAnchor, TSpec> const & e) {
+    return stream << "AlignedReadStore(id=" << e.id << ", readId=" << e.readId << ", contigId=" << e.contigId << ", pairMatchId=" << e.pairMatchId << ", beginPos=" << e.beginPos << ", endPos=" << e.endPos << ", {gaps})";
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TPos, typename TGapAnchor, typename TSpec> 
