@@ -80,7 +80,8 @@ void intervalizeErrorCurves(String<WitRecord> & result,
     
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
-        resize(intervals, options.maxError + 1);
+        int maxError = options.oracleSamMode ? 0 : options.maxError;
+        resize(intervals, maxError + 1);
 
         // Join the intervals stored in sortedMatches.
         //
@@ -99,9 +100,9 @@ void intervalizeErrorCurves(String<WitRecord> & result,
                 continue;
             // Consider all currently open intervals with a greater error
             // than the error in *it and extend them or create a new one.
-            int error = abs(it->distance);
-            SEQAN_ASSERT_LEQ(error, options.maxError);
-            for (int e = error; e <= options.maxError; ++e) {
+            int error = options.oracleSamMode ? 0 : abs(it->distance);
+            SEQAN_ASSERT_LEQ(error, maxError);
+            for (int e = error; e <= maxError; ++e) {
                 // Handle base case of no open interval:  Create new one.
                 if (length(intervals[e]) == 0) {
                     appendValue(intervals[e], ContigInterval(it->contigId, it->isForward, it->pos, it->pos));
@@ -143,13 +144,13 @@ void intervalizeErrorCurves(String<WitRecord> & result,
 // Returns rightmost border of the added points.
 template <typename TContigSeq, typename TReadSeq, typename TPatternSpec, typename TReadNames>
 size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
+                             int & maxError,
                              TContigSeq /*const*/ & contig,
                              size_t contigId,
                              bool isForward,
                              TReadSeq /*const*/ &read,
                              size_t readId,
                              size_t endPos,
-                             int maxError,
                              size_t previousReadId,
                              size_t previousContigId,
                              size_t previousRightBorder,
@@ -161,6 +162,15 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " readId = " << readId << ", name = " << readNames[readId] << ", contigId = " << contigId << ", endPos = " << endPos << std::endl;
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
+    // In oracle SAM mode, the maximum error is the error at the position given in the SAM alignment.
+    if (maxError == -1) {
+        Finder<TContigSeq> finder(contig);
+        Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
+        bool ret = setEndPosition(finder, pattern, endPos);
+        SEQAN_ASSERT_TRUE(ret);
+        maxError = -getScore(pattern);
+    }
+    
     // Debug-adjustments.
     #define ENABLE 0
     #define ALL 1
@@ -450,6 +460,11 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     if (length(fragments.alignedReadStore) == 0)
         return;  // Do nothing if the aligned read store is empty.
 
+    // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.
+    String<int> readAlignmentDistances;
+    if (options.oracleSamMode)
+        fill(readAlignmentDistances, length(fragments.readNameStore), -1);
+    
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));
 //     }
@@ -479,7 +494,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
             // position) when iterating forward and by begin position
             // instead when iterating backwards.
             //
-            // TODO(holtgrew): Only resort with a given contig id? We are sorting $contig-count times too often.
+            // TODO(holtgrew): Only re-sort with a given contig id? We are sorting $contig-count times too often.
             if (isForward) {
                 sortAlignedReads(fragments.alignedReadStore, SortEndPos());
                 sortAlignedReads(fragments.alignedReadStore, SortReadId());
@@ -501,7 +516,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
                     std::cerr << ".";
                 size_t idx = isForward ? i : length(alignedReadStore) - i - 1;
                 TAlignedRead const & alignedRead = alignedReadStore[idx];
-                if (alignedRead.contigId != contigId)
+                if (alignedRead.contigId != contigId) 
                     continue;  // Skip alignments on other contig.
                 if ((isForward && (alignedRead.beginPos > alignedRead.endPos)) ||
                     (!isForward && (alignedRead.beginPos < alignedRead.endPos)))
@@ -527,14 +542,22 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
                 size_t right;
 //                std::cerr << __FILE__ << ":" << __LINE__ << " -- read name == " << fragments.readNameStore[readId] << ", isForward = " << isForward << ", endPos = " << endPos << ", beginPos = " << positionGapToSeq(contigGaps, alignedRead.beginPos) << std::endl;
 
-                // Convert from error rate from options to error count.
-                int maxError = floor(0.01 * options.maxError * length(read));
+                int maxError;
+                if (options.oracleSamMode) {
+                    // In oracle SAM mode, set max error to -1, buildErrorCurvePoints() will use the error at the alignment position from the SAM file.
+                    maxError = -1;
+                } else {
+                    // In normal mode, convert from error rate from options to error count.
+                    maxError = floor(0.01 * options.maxError * length(read));
+                }
                 
                 if (isForward) {
-                    right = buildErrorCurvePoints(errorCurves[readId], contig, contigId, isForward, read, readId, endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
+                    right = buildErrorCurvePoints(errorCurves[readId], maxError, contig, contigId, isForward, read, readId, endPos, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
                 } else {
-                    right = buildErrorCurvePoints(errorCurves[readId], rcContig, contigId, isForward, read, readId, length(contig) - endPos, maxError, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
+                    right = buildErrorCurvePoints(errorCurves[readId], maxError, rcContig, contigId, isForward, read, readId, length(contig) - endPos, previousReadId, previousContigId, previousRightBorder, fragments.readNameStore, options.matchN, TPatternSpec());
                 }
+                if (options.oracleSamMode)
+                    readAlignmentDistances[readId] = maxError;
                 previousReadId = readId;
                 previousContigId = contigId;
                 previousRightBorder = right;
@@ -559,6 +582,10 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         String<WeightedMatch> filtered;
         TReadSeq read = readSeqs[i];
         int maxError = floor(options.maxError / 100.0 * length(read));
+        if (options.oracleSamMode) {
+            SEQAN_ASSERT_NEQ(readAlignmentDistances[i], -1);
+            maxError = readAlignmentDistances[i];
+        }
         int relativeMinScore = ceilAwayFromZero(100.0 * -maxError / length(read));
 
         // Filter out low scoring ones.

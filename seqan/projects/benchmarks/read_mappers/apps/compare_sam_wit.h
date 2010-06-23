@@ -444,7 +444,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 }
                 appendValue(result, IntervalOfReadOnContig::additionalId());
                 continue;
-            } else if (!options.weightedDistances) {
+            } else { // if (!options.weightedDistances) {
                 if (options.dontPanic)
                     std::cerr << "WARNING: ";
                 else
@@ -467,6 +467,8 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 std::cerr << "contig_infix_seq = " << infix(contig, beginPos, endPos) << std::endl;
                 std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;
                 std::cerr << "max errors is " <<  maxErrorRateToMaxErrors(options.maxError, length(fragments.readSeqStore[it->readId])) << std::endl;
+                if (!options.oracleWitMode)
+                    std::cerr << "NOTE: Oracle WIT mode is enabled!" << std::endl;
                 if (!options.dontPanic)
                     exit(1);
                 appendValue(result, IntervalOfReadOnContig::additionalId());
