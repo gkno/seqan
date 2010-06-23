@@ -201,7 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Function.appendName:
 ..summary:Appends a name to a name store.
 ..cat:Fragment Store
-..signature:appendRead(nameStore, name[, cache])
+..signature:appendName(nameStore, name[, cache])
 ..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
 ...see:Class.FragmentStore
 ..param.name:The name to be appended.
@@ -998,6 +998,63 @@ getRead(
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Function.appendAlignedRead:
+..summary:Appends an aligned read entry to a fragment store.
+..cat:Fragment Store
+..signature:appendRead(store, readId, contigId, beginPos, endPos[, pairMatchId])
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.readId:The id of the read.
+..param.contigId:The id of the contig.
+..param.beginPos:The begin position of the alignment.
+..param.endPos:The end position of the alignment.
+..param.pairMatchId:Id of alignedRead pair.
+...default:$INVALID_ID$, which corresponds to an unmated read.
+..returns:The $alignedReadId$ of the aligned read.
+..remarks:This function appends a single aligned read to the @Memvar.FragmentStore#alignedReadId@.
+Note that this really only adds a match.
+To generate a global alignment out of all of these matches, use @Function.convertMatchesToGlobalAlignment@.
+..see:Function.appendRead
+*/
+template <typename TSpec, typename TConfig, typename TReadId, typename TContigId, typename TPos, typename TPairMatchId>
+inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
+appendAlignedRead(
+        FragmentStore<TSpec, TConfig> & store,
+        TReadId const & readId,
+        TContigId const & contigId,
+        TPos const & beginPos,
+        TPos const & endPos,
+        TPairMatchId const & pairMatchId)
+{
+    SEQAN_CHECKPOINT;
+	typedef typename FragmentStore<TSpec, TConfig>::TAlignedReadStore TAlignedReadStore;
+    typedef typename Value<TAlignedReadStore>::Type TAlignedReadStoreElement;
+
+    TAlignedReadStoreElement element(length(store.alignedReadStore), readId, contigId, beginPos, endPos);
+    element.pairMatchId = pairMatchId;
+    appendValue(store.alignedReadStore, element);
+
+    return back(store.alignedReadStore).id;
+}
+
+template <typename TSpec, typename TConfig, typename TReadId, typename TContigId, typename TPos>
+inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
+appendAlignedRead(
+        FragmentStore<TSpec, TConfig> & store,
+        TReadId const & readId,
+        TContigId const & contigId,
+        TPos const & beginPos,
+        TPos const & endPos)
+{
+    SEQAN_CHECKPOINT;
+	typedef typename FragmentStore<TSpec, TConfig>::TAlignedReadStore TAlignedReadStore;
+    typedef typename Value<TAlignedReadStore>::Type TAlignedReadStoreElement;
+    return appendAlignedRead(store, readId, contigId, beginPos, endPos, TAlignedReadStoreElement::INVALID_ID);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Function.appendMatePair
 ..summary:Appends two paired-end reads to a fragment store.
 ..cat:Fragment Store
@@ -1549,7 +1606,7 @@ Gaps introduced by these pair-wise alignments are then inserted to the affected 
 */
 
 template <typename TSpec, typename TConfig, typename TScore>
-void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore &score)
+void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore const & score)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
