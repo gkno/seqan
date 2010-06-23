@@ -823,6 +823,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			// <rname>
 			if ((*it).contigId < length(store.contigNameStore))
 				_streamWrite(target, store.contigNameStore[(*it).contigId]);
+            else
+                _streamWrite(target, '.');  // No reference name given.  Standard says field must not be empty but gives no "NULL" value.
             _streamPut(target, '\t');
             
 			// <pos>
@@ -832,6 +834,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			// <mapq>
 			if (alignedId < length(store.alignQualityStore))
 				_streamPutInt(target, store.alignQualityStore[alignedId].score);
+            else
+                _streamPutInt(target, 255);
             _streamPut(target, '\t');
             
 			// get read sequence
