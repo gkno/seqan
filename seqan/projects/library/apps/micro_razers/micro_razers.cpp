@@ -47,6 +47,41 @@ using namespace std;
 using namespace seqan;
 
 
+template<typename TSpec>
+int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
+{
+	::std::ifstream file;
+	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
+	if(!file.is_open())
+		return RAZERS_GENOME_FAILED;
+
+	char c = _streamGet(file);
+	if (c != '>' && c != '@')	//if file does not start with a fasta header --> list of multiple reference genome files
+	{
+		if(options._debugLevel >=1)
+			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
+		
+		unsigned i = 1;
+		while(!_streamEOF(file))
+		{ 
+			_parse_skipWhitespace(file, c);
+			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			if(options._debugLevel >=2)
+				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
+			++i;
+			_parse_skipWhitespace(file, c);
+		}
+		if(options._debugLevel >=1)
+			::std::cout << i-1 << " genome files total." <<::std::endl;
+	}
+	else		//if file starts with a fasta header --> regular one-genome-file input
+		appendValue(genomeFileNames,filename);
+	file.close();
+	return 0;
+
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Main read mapper function
 template <typename TSpec>
@@ -210,41 +245,6 @@ void printHelp(int, const char *[], RazerSOptions<TSpec> &options, ParamChooserO
 	} else {
 		cerr << "Try 'micro_razers --help' for more information." << endl;
 	}
-}
-
-
-template<typename TSpec>
-int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeFileNames, RazerSOptions<TSpec> &options)
-{
-	::std::ifstream file;
-	file.open(filename,::std::ios_base::in | ::std::ios_base::binary);
-	if(!file.is_open())
-		return RAZERS_GENOME_FAILED;
-
-	char c = _streamGet(file);
-	if (c != '>' && c != '@')	//if file does not start with a fasta header --> list of multiple reference genome files
-	{
-		if(options._debugLevel >=1)
-			::std::cout << ::std::endl << "Reading multiple genome files:" <<::std::endl;
-		
-		unsigned i = 1;
-		while(!_streamEOF(file))
-		{ 
-			_parse_skipWhitespace(file, c);
-			appendValue(genomeFileNames,_parse_readFilepath(file,c));
-			if(options._debugLevel >=2)
-				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
-			++i;
-			_parse_skipWhitespace(file, c);
-		}
-		if(options._debugLevel >=1)
-			::std::cout << i-1 << " genome files total." <<::std::endl;
-	}
-	else		//if file starts with a fasta header --> regular one-genome-file input
-		appendValue(genomeFileNames,filename);
-	file.close();
-	return 0;
-
 }
 
 
