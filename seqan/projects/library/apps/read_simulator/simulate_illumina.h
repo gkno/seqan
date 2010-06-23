@@ -224,6 +224,8 @@ struct IlluminaOptions {
     bool showHelp;
     // true iff verbosity is enabled.
     bool verbose;
+    // true if very verbose is enabled.
+    bool veryVerbose;
 
     // Basic Read Simulation Parameters.
 
@@ -294,6 +296,7 @@ struct IlluminaOptions {
     IlluminaOptions()
             : showHelp(false),
               verbose(true),
+              veryVerbose(true),
               seed(0),
               readLength(36),
               numReads(1000),
@@ -859,6 +862,15 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 // Get expected begin/end position in the original sequence.  If we decide to flip this read later on, we will modify the WIT store.
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
+
+                // Print info about read and haplotype.
+                if (options.veryVerbose) {
+                    std::cout << ",-- Read #" << readId << std::endl
+                              << "| original infix:  " << infix(fragmentStore.contigStore[inst.contigId].seq, origBeginPos, origEndPos) << std::endl
+                              << "| haplotype infix: " << infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos) << std::endl
+                              << "| read:            " << read << std::endl
+                              << "`-- " << std::endl;
+                }
 
                 // Generate read name.
                 if (options.generateMatePairs) {

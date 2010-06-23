@@ -15,8 +15,8 @@
   Lesser General Public License for more details.
   
   ===========================================================================
-  Author: Manuel Holtgrewe <anne-katrin.emde@fu-berlin.de>
-  Author: Anne-Katrin Emde <manuel.holtgrewe@fu-berlin.de>
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  Author: Anne-Katrin Emde <anne-katrin.emde@fu-berlin.de>
   ===========================================================================
   A simple read simulator.
 
@@ -99,6 +99,8 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("r",  "reverse-only", "Simulate from reverse strand only.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("o",  "output-file", "Write results to PARAM.fasta file instead of SEQUENCE.reads.fasta.  Default: \"\".", OptionType::String));
     addOption(parser, CommandLineOption("sq", "simulate-qualities", "Simulate qualities, generate FASTQ instead of FASTA.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
 
     addSection(parser, "Mate-Pair Options");
 
@@ -159,6 +161,12 @@ int parseCommandLineAndCheck(IlluminaOptions & options,
         getOptionValueLong(parser, "output-file", options.outputFile);
     if (isSetLong(parser, "simulate-qualities"))
         options.simulateQualities = true;
+    if (isSetLong(parser, "verbose"))
+        options.verbose = true;
+    if (isSetLong(parser, "very-verbose")) {
+        options.verbose = true;
+        options.veryVerbose = true;
+    }
 
     if (isSetLong(parser, "library-length"))
         getOptionValueLong(parser, "library-length", options.libraryLength);
