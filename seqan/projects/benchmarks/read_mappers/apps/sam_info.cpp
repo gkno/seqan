@@ -57,10 +57,10 @@ void performEvaluation(TFragmentStore & store) {
 //             std::cerr << "mismatch: " << convert<Dna5>(*readGapsIt) << " != " << convert<Dna5>(*contigGapsIt) << " score is " << getQualityValue(convert<Dna5Q>(*readGapsIt)) << std::endl;
             alignQualScore += getQualityValue(convert<Dna5Q>(*readGapsIt));
 
-            std::cout << convert<Dna5Q>(*readGapsIt) << std::endl;
+//             std::cout << convert<Dna5Q>(*readGapsIt) << std::endl;
         }
 
-        printf("%6lu\t", alignedReadId);
+        printf("%6lu\t%6u\t", alignedReadId, it->readId);
         std::cout << store.readNameStore[it->readId];
         printf("\t%3d\n", alignQualScore);
     }
@@ -95,6 +95,7 @@ int main(int argc, char **argv) {
         }
         read(fstrm, fragments, SAM());
     }
+    std::cout << "length(fragments.alignedReadStore) == " << length(fragments.alignedReadStore) << std::endl;
 
     std::cerr << "Evaluating..." << std::endl;
     performEvaluation(fragments);
