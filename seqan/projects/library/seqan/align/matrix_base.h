@@ -526,9 +526,16 @@ value(Matrix<TValue, DIMENSION> & me,
 template <typename TValue, unsigned DIMENSION>
 inline void
 goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
-	   unsigned int dimension_ = 0)
+	   unsigned int dimension_)
 {
 	setPosition(me, nextPosition(container(me), position(me), dimension_));
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
+goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me)
+{
+	goNext(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -538,9 +545,16 @@ goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
 template <typename TValue, unsigned DIMENSION>
 inline void
 goPrevious(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
-		   unsigned int dimension_ = 0)
+		   unsigned int dimension_)
 {
 	setPosition(me, previousPosition(container(me), position(me), dimension_));
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
+goPrevious(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me)
+{
+	goPrevious(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////

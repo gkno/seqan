@@ -43,8 +43,7 @@ typedef Tag<TagEmbl_> const Embl;
 
 template <typename TFile, typename TFile2, typename TSpec>
 inline void
-goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, 
-bool skip_meta = true)
+goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it, bool skip_meta)
 {
 SEQAN_CHECKPOINT
 	if (skip_meta)
@@ -100,6 +99,15 @@ SEQAN_CHECKPOINT
 //	it.data_file_pos = _streamTellG(host(it));
 	it.data_file_pos -= 1;
 	it.data_eof = _streamEOF(host(it));
+}
+
+
+template <typename TFile, typename TFile2, typename TSpec>
+inline void
+goBegin(Iter<TFile, FileReader<Embl, TFile2, TSpec> > & it)
+{
+    SEQAN_CHECKPOINT;
+    goBegin(it, true);
 }
 
 

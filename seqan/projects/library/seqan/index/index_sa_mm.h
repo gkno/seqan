@@ -163,13 +163,25 @@ namespace SEQAN_NAMESPACE_MAIN
 		TText &s,
 		ManberMyers const &alg,
         TSize maxLCP,
-        unsigned K = ValueSize< typename Value<TText>::Type >::VALUE)
+        unsigned K)
     {
         unsigned depth = 0;
         for(TSize i = 1; i < maxLCP; i*=2) ++depth;
         createSuffixArray(SA, s, alg, K, depth);
     }
 
+    template < typename TSA,
+               typename TText,
+               typename TSize >
+    inline void createSuffixArrayPart(
+		TSA &SA,
+		TText &s,
+		ManberMyers const &alg,
+        TSize maxLCP)
+    {
+        SEQAN_CHECKPOINT;
+        createSuffixArrayPart(SA, s, alg, maxLCP, ValueSize< typename Value<TText>::Type >::VALUE);
+    }
 }
 
 #endif //#ifndef SEQAN_HEADER_...
