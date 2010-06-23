@@ -1218,7 +1218,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 } else
                     return false;
 			}
-		}
+		};
 
         inline TPageFrame &getPage(
             int pageNo, 
