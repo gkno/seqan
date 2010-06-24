@@ -872,7 +872,7 @@ inline bool _swiftMultiProcessQGram(
 		TShortSize hitCount;
 
 		do {
-			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset
+			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + (__int64)pattern.finderPosOffset
 				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < (__int64)(curPos + length(pattern.shape)))
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused

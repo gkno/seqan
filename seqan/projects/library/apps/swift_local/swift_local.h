@@ -24,6 +24,29 @@
 
 using namespace seqan;
 
+
+struct _VerifyAllLocal;
+typedef Tag<_VerifyAllLocal> const AllLocal;
+
+struct _VerifyBestLocal;
+typedef Tag<_VerifyBestLocal> const BestLocal;
+
+struct _VerifyBandedGlobal;
+typedef Tag<_VerifyBandedGlobal> const BandedGlobal;
+
+struct _VerifyBandedGlobalExtend;
+typedef Tag<_VerifyBandedGlobalExtend> const BandedGlobalExtend;
+
+
+inline bool _verifyFast(BestLocal) {
+	return true;
+}
+
+template<typename TTag>
+inline bool _verifyFast(TTag) {
+	return false;
+}
+
 // returns true if align has a match at pos, otherwise false
 template<typename TSource, typename TSize>
 inline bool
@@ -221,7 +244,7 @@ SEQAN_CHECKPOINT
     typedef Triple<TPos, TPos, TPos> TGapInfo;
     TPos totalErrors = 0;
 	typename Row<Align<TSource> >::Type row0 = row(align, 0);
-    TPos i = 0;
+    TPos i = 0;//toViewPosition(row0, beginPosition(row0));
 	TPos endPos = endPosition(row0);
     TPos gapBegin = i;
 
@@ -272,10 +295,10 @@ SEQAN_CHECKPOINT
 template<typename TSource, typename TPos, typename TSize, typename TFloat>
 void 
 longestEpsMatch(Align<TSource> & align,
-                TPos seedBegin,
-                TPos seedEnd,
-                TSize matchMinLength,
-                TFloat epsilon) {
+						  TPos seedBegin,
+						  TPos seedEnd,
+						  TSize matchMinLength,
+						  TFloat epsilon) {
 SEQAN_CHECKPOINT
     // Preprocessing: compute and store gaps and lengths
     // A gap is a triple of gap begin position, gap end position, and total number of errors in sequence from begin
@@ -323,6 +346,131 @@ SEQAN_CHECKPOINT
 	setBeginPosition(row(align, 1), beginPos);
 	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
 	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Identifies the longest epsilon match in align that spans seedBegin and seedEnd and sets the view positions of
+// align to start and end position of the longest epsilon match
+template<typename TSource, typename TSize, typename TFloat>
+void 
+longestEpsMatch(Align<TSource> & align,
+                TSize matchMinLength,
+                TFloat epsilon) {
+SEQAN_CHECKPOINT
+    // Preprocessing: compute and store gaps and lengths
+    // A gap is a triple of gap begin position, gap end position, and total number of errors in sequence from begin
+    //   to end position of this gap.
+    typedef typename Position<Align<TSource> >::Type TPosition;
+    typedef String<Triple<TPosition, TPosition, TPosition> > TGapsString;
+    TGapsString gaps;
+    _fillGapsString(align, gaps);
+
+    // Identify longest eps match by iterating over combinations of left and right positions
+    typename Iterator<TGapsString >::Type rightIt = end(gaps) - 1;
+    typename Iterator<TGapsString >::Type leftIt = begin(gaps);
+
+    TPosition beginPos = 0;
+    TPosition endPos = 0;
+    TSize minLength = matchMinLength - 1;
+    
+    while ((*leftIt).i2 + minLength < (*rightIt).i1) {
+        while ((*leftIt).i2 + minLength < (*rightIt).i1) {
+            if(_isEpsMatch(*leftIt, *rightIt, epsilon)) {
+                beginPos = (*leftIt).i2;
+                endPos = (*rightIt).i1;
+                minLength = endPos - beginPos;
+                break;
+            }
+            --rightIt;
+        }
+        rightIt = end(gaps) - 1;
+        ++leftIt;
+    }
+
+    // Set view positions to the eps-match
+	setSourceBeginPosition(row(align, 0), toSourcePosition(row(align, 0), beginPos));
+	setSourceBeginPosition(row(align, 1), toSourcePosition(row(align, 1), beginPos));
+	setBeginPosition(row(align, 0), beginPos);
+	setBeginPosition(row(align, 1), beginPos);
+	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
+	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
+}
+
+template<typename TScoreValue, typename TScore, typename TInfixA, typename TInfixB, typename TDir, typename TSize, typename TEps, typename TAlign>
+bool
+_extendAndExtract(Align<TInfixB> const & localAlign,
+				  TScoreValue scoreDropOff,
+				  TScore const & scoreMatrix,
+				  TInfixA const & a,
+				  TInfixB const & b,
+				  TDir direction,
+				  TSize minLength,
+				  TEps eps,
+				  TAlign & align) {
+SEQAN_CHECKPOINT
+    typedef Seed<int, SimpleSeed> TSeed;
+    typedef typename Position<TInfixB>::Type TPos;
+
+	integrateAlign(align, localAlign);
+
+	// begin and end position of local alignment (seed)
+	TPos seedBeginA = sourceBeginPosition(row(localAlign, 0)) + beginPosition(a);
+	TPos seedBeginB = sourceBeginPosition(row(localAlign, 1)) + beginPosition(b);
+	TPos seedEndA = sourceEndPosition(row(localAlign, 0)) + beginPosition(a);
+	TPos seedEndB = sourceEndPosition(row(localAlign, 1)) + beginPosition(b);
+
+	if (direction == 3) {
+		// set begin and end positions of align
+		setSourceBeginPosition(row(align, 0), seedBeginA);
+		setSourceBeginPosition(row(align, 1), seedBeginB);
+		setBeginPosition(row(align, 0), 0);
+		setBeginPosition(row(align, 1), 0);
+		setSourceEndPosition(row(align, 0), seedEndA);
+		setSourceEndPosition(row(align, 1), seedEndB);
+	} else {
+		// gapped X-drop extension of seed alignments
+		TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
+		extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
+
+		if (length(seed) < minLength - (int)floor(minLength*eps))
+			return false;
+
+		// set extended begin and end positions of align
+		setSourceBeginPosition(row(align, 0), leftPosition(seed, 0));
+		setSourceBeginPosition(row(align, 1), leftPosition(seed, 1));
+		setBeginPosition(row(align, 0), 0);
+		setBeginPosition(row(align, 1), 0);
+		setSourceEndPosition(row(align, 0), rightPosition(seed, 0)+1);
+		setSourceEndPosition(row(align, 1), rightPosition(seed, 1)+1);
+
+		// banded alignment on ...
+		__int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
+		if (direction != 1) { // ... extension to the left
+			StringSet<TInfixB> str;
+			appendValue(str, infix(host(a), leftPosition(seed, 0), seedBeginA));
+			appendValue(str, infix(host(b), leftPosition(seed, 1), seedBeginB));
+			_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
+		}
+		if (direction != 0) { // ... extension to the right
+			StringSet<TInfixB> str;
+			appendValue(str, infix(host(a), seedEndA, rightPosition(seed, 0)+1));
+			appendValue(str, infix(host(b), seedEndB, rightPosition(seed, 1)+1));
+			_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
+		}
+	}
+
+	if ((TSize)length(row(align, 0)) < minLength)
+		return false;
+
+	// cut ends to obtain longest epsilon-match that contains the seed alignment
+	TPos extBegin = beginPosition(source(row(align, 0))) + sourceBeginPosition(row(align, 0));
+	longestEpsMatch(align, seedBeginA - extBegin, seedEndA - extBegin, minLength, eps);
+
+
+    if ((TSize)length(row(align, 0)) < minLength)
+		return false;
+
+	return true;
 }
 
 template<typename TRow, typename TSize>
@@ -417,9 +565,123 @@ SEQAN_CHECKPOINT
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// banded chain alignment and X-drop extension for all local alignments with a min score
+
+// banded alignment on swift hit and extraction of longest contained eps-match
 template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
          typename TDelta, typename TDrop, typename TAlign>
+void
+verifySwiftHit(TInfixA const & a,
+			   TInfixB const & b,
+			   TEpsilon eps,
+			   TSize minLength,
+			   TDelta delta,
+			   TDrop /*xDrop*/,
+			   String<TAlign> & matches,
+			   BandedGlobal) {
+SEQAN_CHECKPOINT
+    // define a scoring scheme
+    typedef int TScore;
+    TScore match = 1;
+    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
+    Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
+
+    // diagonals for banded alignment
+    __int64 upperDiag = 0;
+    __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
+    if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
+    if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
+
+	// banded alignment on parallelogram
+	Align<TInfixB> bandedAlign;
+    resize(rows(bandedAlign), 2);
+    assignSource(row(bandedAlign, 0), a);
+    assignSource(row(bandedAlign, 1), b);
+	StringSet<TInfixB> str;
+	appendValue(str, a);
+	appendValue(str, b);
+	globalAlignment(bandedAlign, str, scoreMatrix, lowerDiag, upperDiag, BandedNeedlemanWunsch());
+
+	longestEpsMatch(bandedAlign, minLength, eps);
+
+	// integrate alignment in object of type TAlign
+	TAlign align;
+	resize(rows(align), 2);
+	setSource(row(align, 0), host(a));
+	setSource(row(align, 1), host(b));
+	integrateAlign(align, bandedAlign);
+
+	// set begin and end positions of align
+	setSourceBeginPosition(row(align, 0), beginPosition(a) + sourceBeginPosition(row(bandedAlign, 0)));
+	setSourceBeginPosition(row(align, 1), beginPosition(b) + sourceBeginPosition(row(bandedAlign, 1)));
+	setBeginPosition(row(align, 0), 0);
+	setBeginPosition(row(align, 1), 0);
+	setSourceEndPosition(row(align, 0), beginPosition(a) + sourceEndPosition(row(bandedAlign, 0)));
+	setSourceEndPosition(row(align, 1), beginPosition(b) + sourceEndPosition(row(bandedAlign, 1)));
+
+	if ((TSize)length(row(align, 0)) < minLength)
+		return;
+
+	// insert eps-match in matches string
+	_insertMatch(matches, align, minLength);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// banded alignment on swift hit and extraction of longest contained eps-match
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
+         typename TDelta, typename TDrop, typename TAlign>
+void
+verifySwiftHit(TInfixA const & a,
+			   TInfixB const & b,
+			   TEpsilon eps,
+			   TSize minLength,
+			   TDelta delta,
+			   TDrop xDrop,
+			   String<TAlign> & matches,
+			   BandedGlobalExtend) {
+SEQAN_CHECKPOINT
+    // define a scoring scheme
+    typedef int TScore;
+    TScore match = 1;
+    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
+    Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
+    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
+
+    // diagonals for banded alignment
+    __int64 upperDiag = 0;
+    __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
+    if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
+    if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
+
+	// banded alignment on parallelogram
+	Align<TInfixB> bandedAlign;
+    resize(rows(bandedAlign), 2);
+    assignSource(row(bandedAlign, 0), a);
+    assignSource(row(bandedAlign, 1), b);
+	StringSet<TInfixB> str;
+	appendValue(str, a);
+	appendValue(str, b);
+	globalAlignment(bandedAlign, str, scoreMatrix, lowerDiag, upperDiag, BandedNeedlemanWunsch());
+
+	// create alignment object for the complete sequences
+	TAlign align;
+	resize(rows(align), 2);
+	setSource(row(align, 0), host(a));
+	setSource(row(align, 1), host(b));
+
+	// extend alignment and obtain longest contained eps-match
+	// TODO: something is wrong here, e.g. extract around seed, but also something else
+	if (!_extendAndExtract(bandedAlign, scoreDropOff, scoreMatrix, a, b, 2, minLength, eps, align))
+		return;
+
+	// insert eps-match in matches string
+	_insertMatch(matches, align, minLength);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
+         typename TDelta, typename TDrop, typename TAlign, typename TTag>
 void
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
@@ -427,13 +689,11 @@ verifySwiftHit(TInfixA const & a,
                TSize minLength,
                TDelta delta,
                TDrop xDrop,
-               String<TAlign> & matches) {
+               String<TAlign> & matches,
+			   TTag tag) {
 SEQAN_CHECKPOINT
-    typedef Seed<int, SimpleSeed> TSeed;
-    typedef typename Position<TInfixB>::Type TPos;
-
-    TPos maxLength = 1000000000;
-    if (length(a) > maxLength) {
+    TSize maxLength = 1000000000;
+    if ((TSize)length(a) > maxLength) {
         std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
         std::cerr << "> , <" << beginPosition(b) << "," << endPosition(b);
 		std::cerr << "> too long. Verification skipped.\n" << std::flush;
@@ -443,7 +703,7 @@ SEQAN_CHECKPOINT
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, (TScore)-length(host(a)));
+    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
     TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
 
@@ -481,91 +741,35 @@ SEQAN_CHECKPOINT
             else if (aliIt == end(seedAlignments)-1) direction = 1;
             else direction = 3;
 
-            // begin and end position of local alignment (seed)
-            TPos seedBeginA = sourceBeginPosition(row(*aliIt, 0)) + beginPosition(a);
-            TPos seedBeginB = sourceBeginPosition(row(*aliIt, 1)) + beginPosition(b);
-            TPos seedEndA = sourceEndPosition(row(*aliIt, 0)) + beginPosition(a);
-            TPos seedEndB = sourceEndPosition(row(*aliIt, 1)) + beginPosition(b);
-
 			// create alignment object for the complete sequences
 			TAlign align;
 			resize(rows(align), 2);
 			setSource(row(align, 0), host(a));
 			setSource(row(align, 1), host(b));
 
-			integrateAlign(align, *aliIt);
+			// extend alignment and obtain longest contained eps-match
+			if (!_extendAndExtract(*aliIt, scoreDropOff, scoreMatrix, a, b, direction, minLength, eps, align)) {
+				aliIt++;
+				continue;
+			}
 
-            if (direction == 3) {
-				// set begin and end positions of align
-				setSourceBeginPosition(row(align, 0), seedBeginA);
-				setSourceBeginPosition(row(align, 1), seedBeginB);
-				setBeginPosition(row(align, 0), 0);
-				setBeginPosition(row(align, 1), 0);
-				setSourceEndPosition(row(align, 0), seedEndA);
-				setSourceEndPosition(row(align, 1), seedEndB);
-			} else {
-                // gapped X-drop extension of seed alignments
-                TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
-                extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
-
-                if (length(seed) < minLength - (int)floor(minLength*eps)) {
-                    ++aliIt;
-                    continue;
-                }
-
-				// set extended begin and end positions of align
-				setSourceBeginPosition(row(align, 0), leftPosition(seed, 0));
-				setSourceBeginPosition(row(align, 1), leftPosition(seed, 1));
-				setBeginPosition(row(align, 0), 0);
-				setBeginPosition(row(align, 1), 0);
-				setSourceEndPosition(row(align, 0), rightPosition(seed, 0)+1);
-				setSourceEndPosition(row(align, 1), rightPosition(seed, 1)+1);
-
-				// banded alignment on ...
-				__int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
-				if (direction != 1) { // ... extension to the left
-					StringSet<TInfixB> str;
-					appendValue(str, infix(host(a), leftPosition(seed, 0), seedBeginA));
-					appendValue(str, infix(host(b), leftPosition(seed, 1), seedBeginB));
-					_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
-				}
-				if (direction != 0) { // ... extension to the right
-					StringSet<TInfixB> str;
-					appendValue(str, infix(host(a), seedEndA, rightPosition(seed, 0)+1));
-					appendValue(str, infix(host(b), seedEndB, rightPosition(seed, 1)+1));
-					_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
-				}
-            }
-
-            if ((TSize)length(row(align, 0)) < minLength) {
-                ++aliIt;
-                continue;
-            }
-
-            // cut ends to obtain longest epsilon-match that contains the seed alignment
-            TPos extBegin = beginPosition(source(row(align, 0))) + sourceBeginPosition(row(align, 0));
-            longestEpsMatch(align, seedBeginA - extBegin, seedEndA - extBegin, minLength, eps);
-
-            if ((TSize)length(row(align, 0)) < minLength) {
-                ++aliIt;
-                continue;
-            }
-
-            // insert e-match in matches string
+            // insert eps-match in matches string
             _insertMatch(matches, align, minLength);
             ++aliIt;
         }
+		if (_verifyFast(tag)) break;
     }
 }
 
 // calls swift, verifies swift hits, outputs eps-matches
-template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSource>
+template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSource, typename TTag>
 int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
                 Pattern<TIndex, Swift<SwiftLocal> > & pattern,
                 double epsilon,
                 TSize minLength,
                 TDrop xDrop,
-                StringSet<String<Align<TSource> > > & matches) {
+                StringSet<String<Align<TSource> > > & matches,
+				TTag tag) {
 SEQAN_CHECKPOINT
     resize(matches, countSequences(needle(pattern)));
     TSize numSwiftHits = 0;
@@ -578,9 +782,10 @@ SEQAN_CHECKPOINT
 
         // verification
 		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)),
-                               epsilon, minLength,
-                               pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
-                               xDrop, value(matches, pattern.curSeqNo));
+                       epsilon, minLength,
+                       pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
+                       xDrop, value(matches, pattern.curSeqNo), tag);
+
         totalLength += length(infix(finder));
         if ((TSize)length(infix(finder)) > maxLength) maxLength = length(infix(finder));
 	}

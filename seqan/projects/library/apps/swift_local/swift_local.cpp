@@ -44,6 +44,7 @@ struct SwiftLocalOptions {
 
 	// more options
 	bool reverse;				// compute also matches to reverse complemented database
+	CharString fastOption;		// verification strategy: exact, bestLocal, bandedGlobal
 
 
 	SwiftLocalOptions() {
@@ -56,6 +57,7 @@ struct SwiftLocalOptions {
 		xDrop = 5;
 
 		reverse = false;
+		fastOption = "exact";		// exact verification
 	}
 };
 
@@ -176,7 +178,7 @@ _writeGffLine(TId const & databaseID,
         file << value(patternID, i);
     }
 
-	file << ";seq2Length=" << length(source(row1));
+	//file << ";seq2Length=" << length(source(row1));
 
     file << ";seq2Range=" << 
 		toSourcePosition(row1, beginPosition(row1)) + beginPosition(source(row1)) + 1;
@@ -231,20 +233,21 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
               TFile & file) {
     typedef typename Size<Align<TInfix> >::Type TSize;
 
-    std::ofstream aliFile;
-    aliFile.open("swift_local.align");
+    //std::ofstream aliFile;
+    //aliFile.open("swift_local.align");
 
     TSize maxLength = 0;
     TSize totalLength = 0;
     TSize numMatches = 0;
 
-    aliFile << "Database sequence: " << databaseID;
-    if (!databaseStrand) aliFile << " complement\n";
-    else aliFile << "\n";
+    //aliFile << "Database sequence: " << databaseID;
+    //if (!databaseStrand) aliFile << " complement\n";
+    //else aliFile << "\n";
 
     for (unsigned i = 0; i < length(matches); i++) {
         if (length(value(matches, i)) == 0) continue;
-        aliFile << "Pattern sequence: " << ids[i] << "\n\n";
+        //std::cout << "Pattern sequence: " << ids[i] << "\n";
+        //aliFile << "Pattern sequence: " << ids[i] << "\n\n";
         for (TSize j = 0; j < length(value(matches, i)); j++) {
             Align<TInfix> m = value(value(matches, i), j);
 
@@ -253,9 +256,10 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
             if(len > maxLength) maxLength = len;
 
             _writeGffLine(databaseID, ids[i], databaseStrand, m, file);
-			_writeMatch(m, databaseStrand, aliFile);
+			//_writeMatch(m, databaseStrand, aliFile);
         }
         numMatches += length(value(matches, i));
+        //std::cout << "  # Eps-matches: " << length(value(matches, i)) << std::endl;
     }
 
 	if (numMatches > 0) {
@@ -265,17 +269,103 @@ _outputMatches(StringSet<String<Align<TInfix> > > const & matches,
     std::cout << "    # SWIFT hits     : " << numSwiftHits << std::endl;
     std::cout << "    # Eps-matches    : " << numMatches << std::endl;
 
-    aliFile.close();
+    //aliFile.close();
+}
+
+template<typename TSequence, typename TId, typename TPattern, typename TFile>
+inline bool
+_swiftLocalOnOne(TSequence & database,
+				TId & databaseID,
+				TPattern & pattern_swift,
+				StringSet<TId> & queryIDs,
+				SwiftLocalOptions & options,
+				TFile & file) {
+	std::cout << "  " << databaseID << std::endl;
+    int numSwiftHits;
+
+	// finder
+    typedef Finder<TSequence, Swift<SwiftLocal> > TFinder;
+	TFinder finder_swift(database, 1000, 1);
+
+    // container for eps-matches
+	StringSet<String<Align<TSequence> > > matches;
+
+	// local swift
+	if (options.fastOption == CharString("exact"))
+		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon,
+								   options.minLength, options.xDrop, matches, AllLocal());
+	else if (options.fastOption == "bestLocal")
+		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon,
+								   options.minLength, options.xDrop, matches, BestLocal());
+	else if (options.fastOption == "bandedGlobal")
+		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon,
+								   options.minLength, options.xDrop, matches, BandedGlobal());
+	else if (options.fastOption == "bandedGlobalExtend")
+		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon,
+								   options.minLength, options.xDrop, matches, BandedGlobalExtend());
+	else {
+		std::cerr << "Unknown verification strategy: " << options.fastOption << std::endl;
+		return false;
+	}
+
+	// file output
+	_outputMatches(matches, numSwiftHits, databaseID, true, queryIDs, file);
+
+	return true;
+}
+
+template<typename TSequence, typename TId, typename TFile>
+inline bool
+_swiftLocalOnAll(StringSet<TSequence> & databases,
+				StringSet<TId> & databaseIDs,
+				StringSet<TSequence> & queries,
+				StringSet<TId> & queryIDs,
+				SwiftLocalOptions & options,
+				TFile & file) {
+    // pattern
+    typedef Index<StringSet<TSequence, Dependent<> >, Index_QGram<SimpleShape, OpenAddressing> > TQGramIndex;
+    TQGramIndex index_qgram(queries);
+    resize(indexShape(index_qgram), options.qGram);
+	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
+
+	// positive database strand
+	std::cout << "Aligning all query sequences to database sequence";
+	std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
+
+    for(unsigned i = 0; i < length(databases); ++i) {
+		if(!_swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, options, file))
+			return false;
+    }
+	std::cout << std::endl;
+
+	// negative (reverse complemented) database strand
+    if (options.reverse) {
+        std::cout << "Aligning all query sequences to reverse complement of database sequence";
+		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
+
+        reverseComplementInPlace(databases);
+
+        for(unsigned i = 0; i < length(databases); ++i) {
+			if(!_swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, options, file))
+				return false;
+        }
+		std::cout << std::endl;
+    }
+
+    return true;
 }
 
 template<typename TSequence, typename TId>
-inline int
+inline bool
 _importSequences(CharString const & fileName,
+				 CharString const & name,
                  StringSet<TSequence> & seqs,
                  StringSet<TId> & ids) {
     MultiSeqFile multiSeqFile;
-    if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY))
-        return -1;
+	if (!open(multiSeqFile.concat, toCString(fileName), OPEN_RDONLY)) {
+		std::cerr << "Failed to open " << name << " file." << std::endl;
+        return false;
+	}
 
     AutoSeqFormat format;
     guessFormat(multiSeqFile.concat, format);
@@ -293,7 +383,52 @@ _importSequences(CharString const & fileName,
         appendValue(seqs, seq, Generous());
         appendValue(ids, id, Generous());
     }
-    return seqCount;
+
+	std::cout << "Loaded " << seqCount << " " << name << " sequence" << ((seqCount>1)?"s.":".") << std::endl;
+    return true;
+}
+
+void _writeCalculatedParams(SwiftLocalOptions & options) {
+	// Calculate parameters
+	int n = (int) ceil((floor(options.epsilon * options.minLength) + 1) / options.epsilon);
+	int threshold = (int) _max(1, (int) _min(
+		(n + 1) - options.qGram * (floor(options.epsilon * n) + 1),
+		(options.minLength + 1) - options.qGram * (floor(options.epsilon * options.minLength) + 1)));
+	int overlap = (int) floor((2 * threshold + options.qGram - 3) / (1 / options.epsilon - options.qGram));
+	int distanceCut = (threshold - 1) + options.qGram * overlap + options.qGram;
+	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
+	int delta = 1 << logDelta;
+
+	// Output calculated parameters
+	std::cout << "Calculated parameters:" << std::endl;
+	std::cout << "  threshold   : " << threshold << std::endl;
+	std::cout << "  distance cut: " << distanceCut << std::endl;
+	std::cout << "  delta       : " << delta << std::endl;
+	std::cout << "  overlap     : " << overlap << std::endl;
+	std::cout << std::endl;
+}
+
+template<typename TOptions>
+void
+_writeSpecifiedParams(TOptions & options) {
+	// Output user specified parameters
+	std::cout << "User specified parameters:" << std::endl;
+	std::cout << "  minimal match length        : " << options.minLength << std::endl;
+	std::cout << "  maximal error rate (epsilon): " << options.epsilon << std::endl;
+	std::cout << "  maximal x-drop              : " << options.xDrop << std::endl;
+	std::cout << "  q-gram length               : " << options.qGram << std::endl;
+	std::cout << "  reverse complement database : " << ((options.reverse)?"yes":"no") << std::endl;
+	std::cout << "  verification strategy       : " << options.fastOption << std::endl;
+	std::cout << std::endl;
+}
+
+template<typename TOptions>
+void
+_writeFileNames(TOptions & options) {
+	std::cout << "Database file: " << options.databaseFile << std::endl;
+	std::cout << "Query file   : " << options.queryFile << std::endl;
+	std::cout << "Output file  : " << options.outputFile << std::endl;
+	std::cout << std::endl;
 }
 
 template<typename TParser, typename TOptions>
@@ -315,6 +450,7 @@ _parseOptions(TParser & parser, TOptions & options) {
     if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', options.xDrop);
 
 	if (isSetShort(parser, 'r')) getOptionValueShort(parser, 'r', options.reverse);
+	if (isSetShort(parser, 'v')) getOptionValueShort(parser, 'v', options.fastOption);
 	return 1;
 }
 
@@ -336,20 +472,33 @@ _setParser(TParser & parser) {
 	addSection(parser, "Non-optional Arguments:");
     addOption(parser, CommandLineOption('d', "database", "fasta file containing the database sequences",
               (OptionType::String | OptionType::Mandatory)));
-    addOption(parser, CommandLineOption('q', "query", "file containing the query sequences", 
+    addOption(parser, CommandLineOption('q', "query", "fasta file containing the query sequences", 
               (OptionType::String | OptionType::Mandatory)));
     
-	addSection(parser, "Main Options:");
+	addSection(parser, "Filtering Options:");
     addOption(parser, CommandLineOption('k', "kmer", "length of the q-grams", OptionType::Int, 10));
     addOption(parser, CommandLineOption('l', "minLength", "minimal length of epsilon-matches", OptionType::Int, 100));
     addOption(parser, CommandLineOption('e', "epsilon", "maximal error rate", OptionType::Double, 0.05));
-    addOption(parser, CommandLineOption('x', "x-drop", "maximal x-drop for extension", OptionType::Double, 5));
     addOption(parser, CommandLineOption('r', "reverseComplement", "search also in reverse complement of database",
               OptionType::Boolean, false));
-    addOption(parser, CommandLineOption('o', "out", "output file", OptionType::String, "swift_local.gff"));
+
+	addSection(parser, "Verification Options:");
+    addOption(parser, CommandLineOption('x', "xDrop", "maximal x-drop for extension", OptionType::Double, 5));
+	addOption(parser, CommandLineOption('v', "verification", "verification strategy", OptionType::String, "exact"));
+	addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
+	addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
+	addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
+
+	addSection(parser, "Output Options:");
+    addOption(parser, CommandLineOption('o', "out", "name of output file", OptionType::String, "swift_local.gff"));
+	addOption(parser, CommandLineOption('f', "outFormat", "output format", OptionType::String, "gff"));
+	addHelpLine(parser, "possible formats: gff");
 }
 
 int main(int argc, const char *argv[]) {
+
+//-d "Z:\GenomeData\NC_001405_short.fa" -q "Z:\GenomeData\NC_001460_short.fa" -k 5 -l 30 -e 0.1 -x 10 -r
+//-d "Z:\GenomeData\adenoviruses\NC_001405.fa" -q "Z:\GenomeData\adenoviruses\NC_001460.fa" -k 5 -l 30 -e 0.1 -x 5 -r
 
     // command line parsing
     CommandLineParser parser("swift_local");
@@ -368,35 +517,27 @@ int main(int argc, const char *argv[]) {
 	}
 
 	typedef String<Dna5> TSequence;
-	int numSeq;
 
+	// output header
 	_title(parser, std::cout);
 	std::cout << std::endl;
 
-	std::cout << "Database file: " << options.databaseFile << std::endl;
-	std::cout << "Query file   : " << options.queryFile << std::endl;
-	std::cout << "Output file  : " << options.outputFile << std::endl;
-	std::cout << std::endl;
+	// output file names
+	_writeFileNames(options);
+
+	// output parameters
+	_writeSpecifiedParams(options);
+	_writeCalculatedParams(options);
 
     // import query sequences
     StringSet<TSequence > queries;
     StringSet<CharString> queryIDs;
-	if ((numSeq = _importSequences(options.queryFile, queries, queryIDs)) == -1) {
-		std::cerr << "Failed to open query file." << std::endl;
-		return 1;
-	} else {
-		std::cout << "Loaded " << numSeq << " query sequence" << ((numSeq>1)?"s.":".") << std::endl;
-	}
+	if (!_importSequences(options.queryFile, "query", queries, queryIDs)) return 1;
 
     // import database sequence
     StringSet<TSequence > databases;
     StringSet<CharString> databaseIDs;
-	if ((numSeq = _importSequences(options.databaseFile, databases, databaseIDs)) == -1) {
-		std::cerr << "Failed to open database file." << std::endl;
-		return 1;
-	} else {
-		std::cout << "Loaded " << numSeq << " database sequence" << ((numSeq>1)?"s.":".") << std::endl;
-	}
+	if (!_importSequences(options.databaseFile, "database", databases, databaseIDs)) return 1;
 
     // open output file
     std::ofstream file;
@@ -407,83 +548,14 @@ int main(int argc, const char *argv[]) {
 	}
     std::cout << std::endl;
 
+
+	// local swift on all databases and queries writing results to file
     SEQAN_PROTIMESTART(timeLocalSwift);
-
-    // pattern
-    typedef Index<StringSet<TSequence, Dependent<> >, Index_QGram<SimpleShape, OpenAddressing> > TQGramIndex;
-    TQGramIndex index_qgram(queries);
-    resize(indexShape(index_qgram), options.qGram);
-	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_qgram);
-
-	// Output user specified parameters
-	std::cout << "User specified parameters:" << std::endl;
-	std::cout << "  minimal match length        : " << options.minLength << std::endl;
-	std::cout << "  maximal error rate (epsilon): " << options.epsilon << std::endl;
-	std::cout << "  maximal x-drop              : " << options.xDrop << std::endl;
-	std::cout << "  q-gram length               : " << options.qGram << std::endl;
-	std::cout << "  reverse complement database : " << ((options.reverse)?"yes":"no") << std::endl;
-	std::cout << std::endl;
-
-	// Calculate calculated parameters
-	int n = (int) ceil((floor(options.epsilon * options.minLength) + 1) / options.epsilon);
-	int threshold = (int) _max(1, (int) _min(
-		(n + 1) - options.qGram * (floor(options.epsilon * n) + 1),
-		(options.minLength + 1) - options.qGram * (floor(options.epsilon * options.minLength) + 1)));
-	int overlap = (int) floor((2 * threshold + options.qGram - 3) / (1 / options.epsilon - options.qGram));
-	int distanceCut = (threshold - 1) + options.qGram * overlap + options.qGram;
-	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
-	int delta = 1 << logDelta;
-
-	// Output calculated parameters
-	std::cout << "Calculated parameters:" << std::endl;
-	std::cout << "  threshold   : " << threshold << std::endl;
-	std::cout << "  distance cut: " << distanceCut << std::endl;
-	std::cout << "  delta       : " << delta << std::endl;
-	std::cout << "  overlap     : " << overlap << std::endl;
-	std::cout << std::endl;
-
-    typedef Finder<TSequence, Swift<SwiftLocal> > TFinder;
-    
-    // container for eps-matches
-	StringSet<String<Align<TSequence> > > matches;
-
-	std::cout << "Aligning all query sequences to database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
-
-    int numSwiftHits;
-    for(unsigned i = 0; i < length(databases); ++i) {
-        numSwiftHits = 0;
-        clear(matches);
-        std::cout << "  " << databaseIDs[i] << std::endl;
-        // finder
-        TFinder finder_swift(databases[i], 1000, 1);
-        // local swift
-        numSwiftHits += localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, matches);
-        // file output
-        _outputMatches(matches, numSwiftHits, databaseIDs[i], true, queryIDs, file);
-    }
-	std::cout << std::endl;
-
-    if (options.reverse) {
-        // local swift on reverse complement of database
-        std::cout << "Aligning all query sequences to reverse complement of database sequence" << ((numSeq>1)?"s...":"...") << std::endl;
-        reverseComplementInPlace(databases);
-        for(unsigned i = 0; i < length(databases); ++i) {
-            clear(matches);
-            numSwiftHits = 0;
-            std::cout << "  " << databaseIDs[i] << std::endl;
-            // finder
-            TFinder finder_swift_compl(databases[i], 1000, 1);
-            // local swift
-            numSwiftHits += localSwift(finder_swift_compl, pattern_swift, options.epsilon, options.minLength, options.xDrop, matches);
-            // file output
-            _outputMatches(matches, numSwiftHits, databaseIDs[i], false, queryIDs, file);
-        }
-		std::cout << std::endl;
-    }
-
+	if(!_swiftLocalOnAll(databases, databaseIDs, queries, queryIDs, options, file))
+		return 1;
     std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
 
     file.close();
-
+	
 	return 0;
 }
