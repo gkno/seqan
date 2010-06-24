@@ -31,12 +31,12 @@ void write(TStream & stream,
     CharString qualBuffer;
     for (TPosition i = 0; i < length(sequences); ++i) {
         stream << "@" << seqIds[i] << std::endl;
-        _dumpWrapped(stream, sequences[i]);
+        stream << sequences[i] << std::endl;
         stream << "+" << /*seqIds[i] << */std::endl;
         resize(qualBuffer, length(sequences[i]), Exact());
         for (TPosition j = 0; j < length(sequences[i]); ++j)
             qualBuffer[j] = getQualityValue(sequences[i][j]) + '!';
-        _dumpWrapped(stream, qualBuffer);
+        stream << qualBuffer << std::endl;
     }
 }
 
