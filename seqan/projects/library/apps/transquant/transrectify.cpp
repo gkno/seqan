@@ -41,7 +41,7 @@ void merge(TExons &lines, int beginExon, TFragStore &fragStore, int minDistance)
 		GTFLine &line = lines[j];
 		if (prevLine.beginPos < line.beginPos && prevLine.endPos + minDistance > line.beginPos)
 		{
-			if (_getIdByName(fragStore.contigNameStore, line.contig, contigId))
+			if (getIdByName(fragStore.contigNameStore, line.contig, contigId))
 			{
 				std::cerr << "remove gap " << infix(fragStore.contigStore[contigId].seq, prevLine.endPos, prevLine.endPos + 2);
 				std::cerr << "..." << infix(fragStore.contigStore[contigId].seq, line.beginPos - 3, line.beginPos - 1);
@@ -54,7 +54,7 @@ void merge(TExons &lines, int beginExon, TFragStore &fragStore, int minDistance)
 		}
 		else if (prevLine.beginPos > line.beginPos && line.endPos + minDistance > prevLine.beginPos)
 		{
-			if (_getIdByName(fragStore.contigNameStore, line.contig, contigId))
+			if (getIdByName(fragStore.contigNameStore, line.contig, contigId))
 			{
 				std::cerr << "remove gap " << infix(fragStore.contigStore[contigId].seq, line.endPos, line.endPos + 2);
 				std::cerr << "..." << infix(fragStore.contigStore[contigId].seq, prevLine.beginPos - 3, prevLine.beginPos - 1);
@@ -81,7 +81,7 @@ int rectify(TExons &lines, int beginExon, int endExon, TFragStore &fragStore, in
 	for (int j = beginExon; j < endExon; ++j)
 	{
 		GTFLine &line = lines[j];
-		if (_getIdByName(fragStore.contigNameStore, line.contig, contigId))
+		if (getIdByName(fragStore.contigNameStore, line.contig, contigId))
 		{
 			if (line.beginPos > 3)
 			{
@@ -229,7 +229,7 @@ int rectify(CharString const &src, CharString const &dst, TFragStore &fragStore,
 		appendValue(transcriptLines, line);
 		
 		int contigId = -1;
-		if (_getIdByName(fragStore.contigNameStore, line.contig, contigId))
+		if (getIdByName(fragStore.contigNameStore, line.contig, contigId))
 		{
 			std::cerr << "\tLeft:"<<infix(fragStore.contigStore[contigId].seq, line.beginPos-5, line.beginPos + 1)<<" Right:"<<infix(fragStore.contigStore[contigId].seq, line.endPos-2, line.endPos+4)<<" Locus:"<<locus<<" Trans:"<<transcript<<" Begin:"<<line.beginPos<<" End:"<<line.endPos<<std::endl;
 		} else {
