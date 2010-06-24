@@ -62,7 +62,7 @@ struct _MyersUkkonenReads;
 typedef Tag<_MyersUkkonenReads> MyersUkkonenReads;
 
 template <typename TNeedle>
-struct Pattern<TNeedle, MyersUkkonenReads> {
+class Pattern<TNeedle, MyersUkkonenReads> {
     // Shortcut to the MyersUkkonen-Pattern we will use internally.
     typedef Pattern<Segment<TNeedle, InfixSegment>, Myers<FindInfix> > _TMyersUkkonen;
 

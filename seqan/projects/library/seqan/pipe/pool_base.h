@@ -708,7 +708,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			_init(_conf);
             _temporary = false;
             memBufferSize = 0;
-            if (_ownFile = open(file, fileName))
+            _ownFile = open(file, fileName);
+            if (_ownFile)
                 _setSize(::seqan::size(file) / sizeof(TValue));
             else
                 _setSize(0);
@@ -920,7 +921,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TSpec >
 	OPipeIterator< Pool< TValue, TSpec > >
-	end(Pool< TValue, TSpec > &pool) {
+	end(Pool< TValue, TSpec > &/*pool*/) {
 		return OPipeIterator< Pool< TValue, TSpec > >();
 	}
 

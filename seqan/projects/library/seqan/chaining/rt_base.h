@@ -322,9 +322,9 @@ namespace seqan{
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize >
 	void 
-	printLayerScores(	SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > * list,
-						TSize layer,
-						TSize _dim )
+	printLayerScores(	SkipList< TObject, SkipListStatic, RT< TSpec >, TStructuring > * /*list*/,
+						TSize /*layer*/,
+						TSize /*_dim*/ )
 	{}
 
 }

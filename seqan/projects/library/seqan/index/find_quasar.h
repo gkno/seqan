@@ -105,7 +105,7 @@ setHost (Pattern<TNeedle, Quasar> & me, TNeedle2 & needle)
 
 
 template <typename TNeedle>
-inline void _patternInit (Pattern<TNeedle, Quasar> & me) 
+inline void _patternInit (Pattern<TNeedle, Quasar> & /*me*/) 
 {
 SEQAN_CHECKPOINT
 }

@@ -1161,9 +1161,9 @@ template <
 void compactMatches(
 	TFragmentStore &store,
 	TCounts & cnts, 
-	RazerSOptions<TSpec> &options, 
+	RazerSOptions<TSpec> & /*options*/, 
 	RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ> > const,
-	TSwift & swift, 
+	TSwift & /*swift*/, 
 	CompactMatchesMode compactMode)
 {
 	typedef typename TFragmentStore::TAlignedReadStore						TAlignedReadStore;

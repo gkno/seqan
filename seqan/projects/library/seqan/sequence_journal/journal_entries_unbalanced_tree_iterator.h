@@ -398,7 +398,7 @@ template <typename TJournalEntries>
 inline
 Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
 operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iterator,
-           int postfix)
+           int /*postfix*/)
 {
     SEQAN_CHECKPOINT;
     Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > temp(iterator);

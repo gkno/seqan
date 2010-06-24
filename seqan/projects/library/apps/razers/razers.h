@@ -1742,7 +1742,7 @@ void mapSingleReads(
 			} else
 				sa[dir[hash(shape, itText) + 1]++] = localPos;			// first hash
 
-			for(TSize i = 1; i < num_qgrams; ++i)
+			for(int i = 1; i < num_qgrams; ++i)
 			{
 				++itText;
 				assignValueI2(localPos, i);

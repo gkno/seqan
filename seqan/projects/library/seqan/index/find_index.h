@@ -118,7 +118,7 @@ SEQAN_CHECKPOINT
 	inline void
 	setHost(
 		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
-		typename _Parameter<Index<TText, TSpec> >::Type container_)
+		typename _Parameter<Index<TText, TSpec> >::Type /*container_*/)
 	{
 SEQAN_CHECKPOINT
 		me.index = container;
@@ -128,7 +128,7 @@ SEQAN_CHECKPOINT
 	inline void
 	setContainer(
 		Finder< Index<TText, TSpec>, TSpecFinder > & me, 
-		typename _Parameter<Index<TText, TSpec> >::Type container_)
+		typename _Parameter<Index<TText, TSpec> >::Type /*container_*/)
 	{
 SEQAN_CHECKPOINT
 		me.index = container;

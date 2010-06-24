@@ -44,8 +44,8 @@ namespace seqan{
 
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void
-	_completeBuild( SkipList< TObject, TModus, RT< TSpec >, Deferred > & list,
-					TSize dim )
+	_completeBuild( SkipList< TObject, TModus, RT< TSpec >, Deferred > & /*list*/,
+					TSize /*dim*/ )
 	{
 	} 
 
@@ -145,8 +145,8 @@ namespace seqan{
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey, typename TResultSet > inline
 	SkipBaseElement< TObject, TModus, RT< TSpec >, TStructuring > *
 	_checkBaseElementsLeftBottom( SkipBaseElement< TObject, TModus, RT< TSpec >, TStructuring > * base,
-									TObject * left_border,
-									TObject * right_border,
+									TObject * /*left_border*/,
+									TObject * /*right_border*/,
 									TKey left_theKey,
 									TKey right_theKey,
 									TResultSet & results )

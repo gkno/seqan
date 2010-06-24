@@ -224,7 +224,7 @@ namespace seqan{
 
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & list,
+	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & /*list*/,
 						SkipBaseElement< TObject, TModus, RT< TSpec >, Deferred > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< TSpec >, Deferred > ** search_path,
@@ -248,7 +248,7 @@ namespace seqan{
 	// reconnect the pointers after building a tower
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & list,
+	_connect(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & /*list*/,
 				SkipBaseElement< TObject, TModus, RT< TSpec >, Deferred > * base,
 				TSize height,
 				SkipElement< TObject, TModus, RT< TSpec >, Deferred > ** search_path,

@@ -1716,7 +1716,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, External<TConfig> > const &me, const char *fileName, int openMode) {
+    save(String<TValue, External<TConfig> > const &/*me*/, const char */*fileName*/, int /*openMode*/) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1724,7 +1724,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, External<TConfig> > const &me, const char *fileName) {
+    save(String<TValue, External<TConfig> > const &/*me*/, const char */*fileName*/) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;
@@ -1732,7 +1732,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, External<TConfig> > const &me, typename TConfig::TFile file) {
+    save(String<TValue, External<TConfig> > const &/*me*/, typename TConfig::TFile /*file*/) {
 		// External Strings are persistent, thus there is no need to save them
 		//ExtStringsDontNeedToBeSaved error;
 		return true;

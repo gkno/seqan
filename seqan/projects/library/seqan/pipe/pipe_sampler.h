@@ -266,7 +266,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
     }
 
     template < typename TInput, unsigned m, typename TCompression >
-	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Sampler<m, TCompression> > &me, ControlEof const &/*command*/) {
 		return me._rest == 0;
     }
 
@@ -482,12 +482,12 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
     }
 
 	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
-	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEof const &/*command*/) {
 		return me._rest == 0;
     }
 
 	template < typename TInput, unsigned m, typename TCompression, typename TPair, typename TLimitsString >
-	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEos const &command) {
+	inline bool control(Pipe< TInput, Multi<Sampler<m, TCompression>, TPair, TLimitsString> > &me, ControlEos const &/*command*/) {
 		return control(me, ControlEof());
     }
 

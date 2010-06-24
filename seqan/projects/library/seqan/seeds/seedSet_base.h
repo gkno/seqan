@@ -1337,7 +1337,7 @@ struct SortProcess : public std::binary_function<TTriple, TTriple, bool>{
     inline bool 
 	operator()(TTriple left, TTriple right) const {//return true if left is logically less then right for given comparison
 		return (left.i1+left.i2 < right.i1+right.i2);
-	};
+	}
 
 };
 

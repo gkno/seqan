@@ -283,7 +283,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename THost, typename TContainer>
 	inline bool
 	atEnd(ModifiedIterator<THost, ModReverse> const & me,
-			TContainer const & container)
+			TContainer const & /*container*/)
 	{
 	SEQAN_CHECKPOINT
 		return cargo(me)._atEnd;

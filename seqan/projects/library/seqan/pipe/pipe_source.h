@@ -357,7 +357,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TInput, typename TSpec, typename TCommand >
-	inline bool control(Pipe< TInput, Source<TSpec> > &me, TCommand const &) {
+	inline bool control(Pipe< TInput, Source<TSpec> > &/*me*/, TCommand const &) {
         return true;
     }
 

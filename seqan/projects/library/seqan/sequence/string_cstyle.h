@@ -414,7 +414,7 @@ template <typename TTargetValue, typename TSource, typename TSize, typename TExp
 inline void
 assign(String<TTargetValue, CStyle> & target,
 	   TSource & source,
-	   TSize limit,
+	   TSize /*limit*/,
 	   Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT

@@ -94,8 +94,8 @@ namespace seqan
 
 	template < typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TValue>
 	inline void
-	assignValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * me,
-					TValue const & _value)
+	assignValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*me*/,
+					TValue const & /*_value*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -104,8 +104,8 @@ namespace seqan
 	//const version for iterators as targets
 	template < typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TValue>
 	inline void
-	assignValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > const * me,
-					TValue const & _value)
+	assignValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > const * /*me*/,
+					TValue const & /*_value*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -114,8 +114,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TValue >
 	inline void
-	moveValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > *& it,
-				TValue const & _value)
+	moveValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > *& /*it*/,
+				TValue const & /*_value*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -123,8 +123,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TValue >
 	inline void
-	moveValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > const *& it,
-				TValue const & _value)
+	moveValue( SkipBaseElement< TObject, TModus, TSpec, TStructuring > const *& /*it*/,
+				TValue const & /*_value*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing

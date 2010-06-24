@@ -84,7 +84,7 @@ setParentAlloc( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & me );
 
 template< typename TClass, typename TSpec, typename TParentAlloc > inline
 TClass * 
-_getNextBlock( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & me,
+_getNextBlock( Allocator< ClassPool< TClass, TSpec, TParentAlloc > > & /*me*/,
 				TClass & block )
 {
 	return _getNext( block );
@@ -222,7 +222,7 @@ struct Allocator< ClassPool< TClass, Unlimited, TParentAllocator > >
 	template< typename TClass, typename TParentAlloc, typename TSize > inline
 	void deallocate( Allocator< ClassPool< TClass, Unlimited, TParentAlloc > > & me, 
 					 TClass * location,
-					 TSize count )
+					 TSize /*count*/ )
 	{
 		SEQAN_CHECK2( location != NULL, "Tried to free NULL-pointer" )
 		_setNext( *location, me._freeBlock );

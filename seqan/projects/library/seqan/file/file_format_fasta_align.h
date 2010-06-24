@@ -221,7 +221,7 @@ void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 //Fasta file records have no meta data
 
 template <typename TFile, typename TMeta>
-void readMeta(TFile & file, TMeta & meta, FastaAlign) {
+void readMeta(TFile & /*file*/, TMeta & meta, FastaAlign) {
 	SEQAN_CHECKPOINT
 	clear(meta);
 }
@@ -232,7 +232,8 @@ void readMeta(TFile & file, TMeta & meta, FastaAlign) {
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile>
 void goNext(TFile & file, FastaAlign) {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+	(void) file; // When compiled without assertions.
 	SEQAN_ASSERT(!_streamEOF(file))
 	
 	return;

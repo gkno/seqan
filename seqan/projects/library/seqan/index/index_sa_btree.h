@@ -52,12 +52,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		// counter for each b-tree level
 		TSize *cnt = new TSize[treeLevels];
-		for(int i = 0; i < treeLevels; ++i)
+		for(unsigned i = 0; i < treeLevels; ++i)
 			cnt[i] = 0;
 
 		// distribute to responsible levels
 		for(TSize j = 0; j < size; ++j, ++_First)
-			for(int i = 0; i < treeLevels; ++i) {
+			for(unsigned i = 0; i < treeLevels; ++i) {
 				*(level[i]) = *_First;
 				++(level[i]);
 				if (cnt[i] != BlockElements) {

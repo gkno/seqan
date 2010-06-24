@@ -283,7 +283,7 @@ Can be used to perform operation s
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > __inline
 	void
-	_performDestructorAction( SkipElement< TObject, TModus, TSpec, TStructuring > & me )
+	_performDestructorAction( SkipElement< TObject, TModus, TSpec, TStructuring > & /*me*/ )
 	{}
 
 /*

@@ -514,7 +514,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCPE, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &/*index*/, Fibre_LCPE, TSpecAlg const /*alg*/) {
 	SEQAN_CHECKPOINT
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
 //		resize(indexLCP(index), length(indexRawText(index)), Exact());

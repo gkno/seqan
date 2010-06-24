@@ -183,7 +183,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename TKey, typename TString>
-	inline void erase(TKey const &key, SequenceMap<TString> &map)
+	inline void erase(TKey const &/*key*/, SequenceMap<TString> &/*map*/)
 	{
             // TODO(holtgrew): Commented out the following, no idea how to make it work.
             /* 

@@ -135,11 +135,11 @@ addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g,
 
 template<typename TAlphabet, typename TSpec, typename TVertexDescriptor, typename TLabel, typename TEdgeCargo>
 inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > >::Type 
-addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g, 
-		TVertexDescriptor const source, 
-		TVertexDescriptor const target,
-		TLabel const label,
-		TEdgeCargo const cargo)
+addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& /*g*/, 
+		TVertexDescriptor const /*source*/, 
+		TVertexDescriptor const /*target*/,
+		TLabel const /*label*/,
+		TEdgeCargo const /*cargo*/)
 {
 	// No additional cargo allowed. Cargo is used for the words in the graph.
 	// Use external property map.
@@ -152,7 +152,7 @@ template<typename TAlphabet, typename TSpec, typename TVertexDescriptor>
 inline void
 removeEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g, 
 		TVertexDescriptor const source, 
-		TVertexDescriptor const target,
+		TVertexDescriptor const /*target*/,
 		String<TAlphabet> const& label) 
 {
 	SEQAN_CHECKPOINT

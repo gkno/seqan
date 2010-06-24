@@ -137,12 +137,12 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TInput, int delta, bool omitBlank, bool _echoing >
-	inline bool control(Pipe< TInput, Shifter< delta, omitBlank, _echoing > > &me, ControlEof const &command) {
+	inline bool control(Pipe< TInput, Shifter< delta, omitBlank, _echoing > > &me, ControlEof const &/*command*/) {
 		return me.charCounter == 0 && me.blankCounter == 0;
     }
 
     template < typename TInput, int delta, bool omitBlank, bool _echoing >
-	inline bool control(Pipe< TInput, Shifter< delta, omitBlank, _echoing > > &me, ControlEos const &command) {
+	inline bool control(Pipe< TInput, Shifter< delta, omitBlank, _echoing > > &me, ControlEos const &/*command*/) {
 		return control(me, ControlEof());
     }
 

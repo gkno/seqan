@@ -72,7 +72,7 @@ template<typename TAliGraph, typename TVertexDescriptor,typename TValue>
 TValue  
 _getClosestRefinedNeighbor(TAliGraph & ali_g,
 						   TVertexDescriptor & vd,
-						   TValue seq,
+						   TValue /*seq*/,
 						   TValue pos)
 {
 SEQAN_CHECKPOINT
@@ -134,7 +134,7 @@ SEQAN_CHECKPOINT
 template<typename TAlignmentString,typename TPropertyMap,typename TStringSet,typename TSeqMap, typename TScore,typename TAliGraph>
 void
 _makeRefinedGraphEdges(TAlignmentString & alis,
-					   TPropertyMap & pm,
+					   TPropertyMap & /*pm*/,
 					  TStringSet & seqs,
 				      TSeqMap & seq_map,
 				      TScore & score_type,

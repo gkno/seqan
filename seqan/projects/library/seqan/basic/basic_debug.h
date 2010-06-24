@@ -250,28 +250,46 @@ class Report {};
 //template argument TAction is the action (Check or Report)
 //use explicit instatiation for overwriting the default behavior
 template <typename TAction>
-void Error(const char * file, int line, const char * comment="-")
+void Error(const char * file, int line, const char * comment)
 {
 	std::fprintf(stderr, "%s(%i) : SEQAN: %s\nSEQAN: execution aborted\n", file, line, comment);
 	exit(1);
+}
+
+template <typename TAction>
+void Error(const char * file, int line)
+{
+  Error<TAction>(file, line, "-");
 }
 
 //report debug message
 //template argument TAction is the action (Check or Report)
 //use explicit instatiation for overwriting the default behavior
 template <typename TAction>
-void Message(const char * file, int line, const char * comment="-")
+void Message(const char * file, int line, const char * comment)
 {
 	std::fprintf(stderr, "%s(%i) : SEQAN: %s\n", file, line, comment);
+}
+
+template <typename TAction>
+void Message(const char * file, int line)
+{
+  Message<TAction>(file, line, "-");
 }
 
 //report test result
 //template argument TAction is the action (Check or Report)
 //use explicit instatiation for overwriting the default behavior
 template <typename TAction>
-void Result(const char * file, int line, const char * comment="-")
+void Result(const char * file, int line, const char * comment)
 {
 	std::fprintf(stdout, "%s(%i) : %s\n", file, line, comment);
+}
+
+template <typename TAction>
+void Result(const char * file, int line)
+{
+  Result<TAction>(file, line, "-");
 }
 
 } //namespace debug

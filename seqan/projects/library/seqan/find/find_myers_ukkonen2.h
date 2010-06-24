@@ -184,7 +184,8 @@ class _PatternState{};
 template<typename TSpec, typename TFindBeginPatternSpec>
 class _PatternState<Myers<TSpec, False, TFindBeginPatternSpec> >
 {
-	
+public:
+	  _PatternState() {}
 };
 
 
@@ -265,6 +266,8 @@ public:
 	typedef typename Iterator<TNeedle, Standard>::Type TIter;
 	enum { MACHINE_WORD_SIZE = sizeof(TWord) * 8 };
 
+	typedef _PatternState<Myers<TSpec, THasState, TFindBeginPatternSpec> > TPatternState;
+
 	unsigned needleSize;
 	unsigned k;					// the maximal number of differences allowed
 	String<TWord> bitMasks;		// encoding the alphabet as bit-masks
@@ -275,13 +278,15 @@ public:
 
 //____________________________________________________________________________
 
-	Pattern(int _limit = -1):
+	Pattern(int _limit = -1) :
+	  TPatternState(),
 		needleSize(0),
 		k(- _limit),
 		largePattern(NULL)
 	{}
 
-	Pattern(Pattern const & other):
+	Pattern(Pattern const & other) :
+	  TPatternState(other),
 		needleSize(other.needleSize),
 		k(other.k),
 		bitMasks(other.bitMasks),

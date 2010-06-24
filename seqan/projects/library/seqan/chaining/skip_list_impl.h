@@ -54,34 +54,34 @@ compared to a static SkipList. Default is SkipListDynamic.
 		// no append operations on skip lists
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	void
-	append( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-			TParam & param)
+	append( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+			TParam & /*param*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam1, typename TParam2 > inline 
 	void
-	append( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-			TParam1 & param1,
-			TParam2 & param2 )
+	append( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+			TParam1 & /*param1*/,
+			TParam2 & /*param2*/ )
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	void
-	appendValue( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-					TParam & param)
+	appendValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+					TParam & /*param*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam1, typename TParam2 > inline 
 	void
-	appendValue( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-				TParam1 & param1,
-				TParam2 & param2 )
+	appendValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+				TParam1 & /*param1*/,
+				TParam2 & /*param2*/ )
 	{
 		// do nothing
 	}
@@ -89,34 +89,34 @@ compared to a static SkipList. Default is SkipListDynamic.
 		// no assign operations on skip lists
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	void
-	assign( SkipList< TObject, TModus, TSpec, TStructuring > & me,
-			TParam & param)
+	assign( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/,
+			TParam & /*param*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam1, typename TParam2 > inline 
 	void
-	assign( SkipList< TObject, TModus, TSpec, TStructuring > & me,
-			TParam1 & param1,
-			TParam2 & param2 )
+	assign( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/,
+			TParam1 & /*param1*/,
+			TParam2 & /*param2*/ )
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam > inline 
 	void
-	assignValue( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-					TParam & param)
+	assignValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+					TParam & /*param*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam1, typename TParam2 > inline 
 	void
-	assignValue( SkipList< TObject, TModus, TSpec, TStructuring > & me ,
-				TParam1 & param1,
-				TParam2 & param2 )
+	assignValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ ,
+				TParam1 & /*param1*/,
+				TParam2 & /*param2*/ )
 	{
 		// do nothing
 	}
@@ -156,7 +156,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 		// dynamic case: the list can hold an infinite number of objevts
 	template< typename TObject, typename TSpec, typename TStructuring > inline 
 	typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type
-	capacity( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & me)
+	capacity( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & /*me*/)
 	{
 	SEQAN_CHECKPOINT
 		return supremumValue< typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type >();
@@ -201,32 +201,32 @@ compared to a static SkipList. Default is SkipListDynamic.
 		// no moving objects in skip lists
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > & me, 
-				TPos & pos)
+	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				TPos & /*pos*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > const & me, 
-				TPos & pos)
+	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > const & /*me*/, 
+				TPos & /*pos*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > & me, 
-				TPos const & pos)
+	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				TPos const & /*pos*/)
 	{
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > const & me, 
-				TPos const & pos)
+	moveValue( SkipList< TObject, TModus, TSpec, TStructuring > const & /*me*/, 
+				TPos const & /*pos*/)
 	{
 		// do nothing
 	}
@@ -235,8 +235,8 @@ compared to a static SkipList. Default is SkipListDynamic.
 			// no replacements in skip lists
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	replace( SkipList< TObject, TModus, TSpec, TStructuring > & me, 
-				TPos & pos)
+	replace( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				TPos & /*pos*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -244,8 +244,8 @@ compared to a static SkipList. Default is SkipListDynamic.
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	replace( SkipList< TObject, TModus, TSpec, TStructuring >  const & me, 
-				TPos & pos)
+	replace( SkipList< TObject, TModus, TSpec, TStructuring >  const & /*me*/, 
+				TPos & /*pos*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -253,8 +253,8 @@ compared to a static SkipList. Default is SkipListDynamic.
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TPos >
 	void
-	replace( SkipList< TObject, TModus, TSpec, TStructuring > & me, 
-				TPos const & pos)
+	replace( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				TPos const & /*pos*/)
 	{
 	SEQAN_CHECKPOINT
 		// do nothing
@@ -443,7 +443,7 @@ struct SkipList
 
 private:
 
-	SkipList & operator=( const SkipList & old )
+	SkipList & operator=( const SkipList & /*old*/ )
 	{}
 
 	SkipList( const SkipList & old )
@@ -669,7 +669,7 @@ private:
 
 	friend
 	void
-	printValues( SkipList< TObject, TModus, TSpec, TStructuring > & me )
+	printValues( SkipList< TObject, TModus, TSpec, TStructuring > & /*me*/ )
 	{
 		//SkipBaseElement< TObject, TModus, TSpec, TStructuring >* temp = &me._baseStore[0];
 		//for( typename seqan::Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type i = 0; i < me._numOfElements + 1; ++i ){

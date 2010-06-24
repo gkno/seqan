@@ -127,7 +127,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct WorkerNothing
 	{
 		template <typename Arg>
-		static inline void body(Arg &arg, int I) {}
+		static inline void body(Arg &/*arg*/, int /*I*/) {}
 	};
 
 	template <typename Worker, int I>

@@ -413,8 +413,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void 
-	_setSucc( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me, 
-				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * succ )
+	_setSucc( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*succ*/ )
 	{
 		SEQAN_ASSERT2( false, "No dynamic related members in default mode" )
 	}
@@ -489,8 +489,8 @@ namespace seqan
 */
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void 
-	_setPred(	SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me, 
-				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * goPrevious )
+	_setPred(	SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/, 
+				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*goPrevious*/ )
 	{
 		SEQAN_ASSERT2( false, "No dynamic related members in default mode" )
 	}
@@ -543,8 +543,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
 	void 
-	_setLeft( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me,
-							SkipBaseElement< TObject, TModus, TSpec, TStructuring > * left )
+	_setLeft( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/,
+							SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*left*/ )
 	{
 		SEQAN_ASSERT2( false, "No deferred related members in default mode" )
 	}
@@ -625,15 +625,15 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline 
 	void 
-	_setRight( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & me,
-				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * right )
+	_setRight( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*me*/,
+				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*right*/ )
 	{
 	}
 
 	template< typename TObject, typename TSpec > inline 
 	void 
-	_setRight( SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > & me,
-				SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * right )
+	_setRight( SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > & /*me*/,
+				SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * /*right*/ )
 	{
 		// do nothing
 	}

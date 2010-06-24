@@ -437,7 +437,7 @@ template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDe
 inline void
 removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	       TVertexDescriptor const source,
-	       TVertexDescriptor const target,
+	       TVertexDescriptor const /*target*/,
 		   TLabel const label)
 {
 	SEQAN_CHECKPOINT

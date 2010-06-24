@@ -246,7 +246,7 @@ _getMap(String< TValue, ValueExpand<THost, TMap, TSpec> > const & me)
 
 template <typename TValue, typename THost, typename TMap, typename TSpec>
 inline typename Value<THost>::Type
-_getValueExpandFlagValue(String< TValue, ValueExpand<THost, TMap, TSpec> > const & me)
+_getValueExpandFlagValue(String< TValue, ValueExpand<THost, TMap, TSpec> > const & /*me*/)
 {
 	typedef typename Value<THost>::Type TSmallValue;
 	return supremumValue<TSmallValue>();
@@ -270,7 +270,7 @@ template <typename TValue, typename THost, typename TMap, typename TPos, typenam
 inline typename Iterator<String< TValue, ValueExpand<THost, TMap, TSpec> >, Tag<TTag> const>::Type 
 iter(String< TValue, ValueExpand<THost, TMap, TSpec> > & me,
 	 TPos pos_,
-	 Tag<TTag> const tag_)
+	 Tag<TTag> const /*tag_*/)
 {
 SEQAN_CHECKPOINT
 	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > TMe;
@@ -281,7 +281,7 @@ template <typename TValue, typename THost, typename TMap, typename TPos, typenam
 inline typename Iterator<String< TValue, ValueExpand<THost, TMap, TSpec> > const, Tag<TTag> const>::Type 
 iter(String< TValue, ValueExpand<THost, TMap, TSpec> > const & me,
 	 TPos pos_,
-	 Tag<TTag> const tag_ )
+	 Tag<TTag> const /*tag_*/ )
 {
 SEQAN_CHECKPOINT
 	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > const TMe;

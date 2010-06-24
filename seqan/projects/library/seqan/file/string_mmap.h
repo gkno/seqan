@@ -694,7 +694,7 @@ SEQAN_CHECKPOINT
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, MMap<TConfig> > const &me, const char *fileName, int openMode) {
+    save(String<TValue, MMap<TConfig> > const &/*me*/, const char */*fileName*/, int /*openMode*/) {
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;
@@ -702,7 +702,7 @@ SEQAN_CHECKPOINT
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, MMap<TConfig> > const &me, const char *fileName) {
+    save(String<TValue, MMap<TConfig> > const &/*me*/, const char */*fileName*/) {
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;
@@ -710,7 +710,7 @@ SEQAN_CHECKPOINT
 
 	template < typename TValue, typename TConfig >
     inline bool 
-    save(String<TValue, MMap<TConfig> > const &me, typename TConfig::TFile file) {
+    save(String<TValue, MMap<TConfig> > const &/*me*/, typename TConfig::TFile /*file*/) {
 		// Memory Mapped Strings are persistent, thus there is no need to save them
 		//MMapStringsDontNeedToBeSaved error;
 		return true;

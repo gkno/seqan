@@ -336,16 +336,16 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey > inline
 	void
-	_sort_equals(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
-					SkipBaseElement< TObject, TModus, TSpec, TStructuring > * elem,
-					TKey theKey)
+	_sort_equals(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
+					SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*elem*/,
+					TKey /*theKey*/)
 	{	
 		// do nothing
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TKey > 
 	void
-	_sort_equals(	SkipList< TObject, TModus, TSpec, Deferred > & list,
+	_sort_equals(	SkipList< TObject, TModus, TSpec, Deferred > & /*list*/,
 					SkipBaseElement< TObject, TModus, TSpec, Deferred > * elem,
 					TKey theKey)
 	{
@@ -383,10 +383,10 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TSize > inline
 	void
-	_renewDynConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & elem,
-						SkipBaseElement< TObject, TModus, TSpec, TStructuring > & pivot,
-						TSize elem_count,
-						TSize i_count )
+	_renewDynConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*elem*/,
+						SkipBaseElement< TObject, TModus, TSpec, TStructuring > & /*pivot*/,
+						TSize /*elem_count*/,
+						TSize /*i_count*/ )
 	{
 	}
 
@@ -512,7 +512,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec > inline
 	void
-	_completeBuild( SkipList< TObject, TModus, TSpec, Deferred > & list )
+	_completeBuild( SkipList< TObject, TModus, TSpec, Deferred > & /*list*/ )
 	{}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -580,7 +580,7 @@ namespace seqan
 		// complete skip list
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam, typename TKey >
 	SkipBaseElement< TObject, TModus, TSpec, TStructuring > *
-	_searchFrom(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_searchFrom(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 						SkipElement< TObject, TModus, TSpec, TStructuring > * layer_element, 
 						TKey theKey,
 						TParam & param )
@@ -706,11 +706,11 @@ namespace seqan
 		// general case (not deferred)
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam, typename TKey > inline
 	SkipBaseElement< TObject, TModus, TSpec, TStructuring > *
-	_splitAction( SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_splitAction( SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 					SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base,
-					TKey theKey, 
-					SkipElement< TObject, TModus, TSpec, TStructuring > ** search_path,
-					TParam & param )
+					TKey /*theKey*/, 
+					SkipElement< TObject, TModus, TSpec, TStructuring > ** /*search_path*/,
+					TParam & /*param*/ )
 	{
 		return base;
 	}
@@ -772,7 +772,7 @@ namespace seqan
 		// 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_connect_actualize(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base,
 						TSize height,
 						SkipElement< TObject, TModus, TSpec, TStructuring > ** search_path,
@@ -795,7 +795,7 @@ namespace seqan
 		// reconnect the pointers after building a tower
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam, typename TSize > inline
 	void 
-	_connect(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_connect(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base,
 				TSize height,
 				SkipElement< TObject, TModus, TSpec, TStructuring > ** search_path,
@@ -847,8 +847,8 @@ namespace seqan
 			// static case
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_setDynConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * pred,
-						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * succ )
+	_setDynConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*pred*/,
+						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*succ*/ )
 	{
 		// do nothing
 	}
@@ -867,8 +867,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_setDefConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * left,
-						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * right )
+	_setDefConnects( SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*left*/,
+						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*right*/ )
 	{
 		// do nothing
 	}
@@ -963,7 +963,7 @@ namespace seqan
 	void
 	_initSL(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
 				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * first_base,
-				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * last_base,
+				SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*last_base*/,
 				TSize numEntries )
 	{
 			// allocate space for base elements and base layer

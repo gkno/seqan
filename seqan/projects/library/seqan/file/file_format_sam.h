@@ -169,15 +169,17 @@ namespace SEQAN_NAMESPACE_MAIN {
 					  TIDString const &,
 					  Tag<TagSBAM_<TSAMSpec> > ) {
 
-		int nrOfReads = length(rows(source));
+		unsigned nrOfReads = length(rows(source));
 
-		unsigned int refID = getValue(IDs, refPosition);
+		//unsigned int refID = getValue(IDs, refPosition);
 
-		for (unsigned int i = 0; i < refPosition; ++i){
-			unsigned int readID = getValue(IDs, i);
-            SAMMeta meta = getProperty(metas, readID);
-			_write_alignment(target, source, refPosition, i, meta, Tag<TagSBAM_<TSAMSpec> >());
-		}
+    if (refPosition > 0) {
+      for (unsigned int i = 0; i < static_cast<unsigned>(refPosition); ++i){
+        unsigned int readID = getValue(IDs, i);
+              SAMMeta meta = getProperty(metas, readID);
+        _write_alignment(target, source, refPosition, i, meta, Tag<TagSBAM_<TSAMSpec> >());
+      }
+    }
 		
 		for (unsigned int i = (refPosition + 1); i < nrOfReads; ++i){
 			unsigned int readID = getValue(IDs, i);
@@ -368,12 +370,12 @@ namespace SEQAN_NAMESPACE_MAIN {
 	//TODO: documentation
 	template <typename TFile, typename TGapsSpec, typename TIDString, typename TSAMSpec>
 	inline void _writeAlignment(
-		TFile & target,
-		Align<DnaString, TGapsSpec> const & source,
-		int ref,
-		int read,
-		const CharString & refName,
-		const CharString & readName,
+		TFile & /*target*/,
+		Align<DnaString, TGapsSpec> const & /*source*/,
+		int /*ref*/,
+		int /*read*/,
+		const CharString & /*refName*/,
+		const CharString & /*readName*/,
 		BAM)
 	{
 		//TODO: binaeres Format implementieren
@@ -403,8 +405,8 @@ namespace SEQAN_NAMESPACE_MAIN {
     template <typename TFile, typename TGapsSpec>
     void
     read(TFile & file,
-         Align<DnaString, TGapsSpec> & data,
-         SAMMeta & meta,
+         Align<DnaString, TGapsSpec> & /*data*/,
+         SAMMeta & /*meta*/,
          SAM)
     {
         while(! _streamEOF(file) && _streamGet(file) != '\n' ){
@@ -493,7 +495,7 @@ namespace SEQAN_NAMESPACE_MAIN {
             TTags tags;
             resize(tags, countTagsInLine);
             
-            for(int i = 0; i < countTagsInLine; ++i){
+            for(unsigned int i = 0; i < countTagsInLine; ++i){
                 CharString tagIdentifier;
                 resize(tagIdentifier, 2);
                 
@@ -527,7 +529,7 @@ namespace SEQAN_NAMESPACE_MAIN {
     
     template<typename TFile>
     inline void write_header_line(TFile & target,
-                                  const CharString & cat, 
+                                  const CharString & /*cat*/, 
                                   const String<Pair<CharString, CharString> > & meta,
                                   Tag<TagSBAM_<_SAM> > )
     {

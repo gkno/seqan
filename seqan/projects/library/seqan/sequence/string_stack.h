@@ -351,7 +351,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//dummy implementation
 	template<typename TValue, unsigned int SPACE, typename TSize, typename TExpand>
 	inline typename Size< String<TValue, Block<SPACE> > >::Type
-	reserve(String<TValue, Block<SPACE> > & me,
+	reserve(String<TValue, Block<SPACE> > & /*me*/,
 		TSize new_capacity,
 		Tag<TExpand> const)
 	{
@@ -365,7 +365,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	append(
 		String<TValue, Block<SPACE> >& me,
 		TSource const& source,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const /*tag*/)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TSource const, Standard>::Type TIter;

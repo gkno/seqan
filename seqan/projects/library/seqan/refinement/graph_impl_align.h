@@ -1776,7 +1776,7 @@ rebuildGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize2, typename TSpec2, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
 inline void
 __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
-							String<TSize2, TSpec2> const& slotToPos,
+							String<TSize2, TSpec2> const& /*slotToPos*/,
 							TPositions const&,
 							TSize const,
 							TSize const,

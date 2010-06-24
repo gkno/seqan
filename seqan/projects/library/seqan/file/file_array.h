@@ -89,7 +89,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < unsigned _FileCount, typename TFile >
 	class File< Striped<_FileCount, TFile> >: public Tuple< TFile, _FileCount > {
-		File(void *dummy = NULL) {}	// to be compatible with the FILE*(NULL) constructor
+		File(void * /*dummy = NULL*/) {}	// to be compatible with the FILE*(NULL) constructor
 		operator bool() const { return (*this)[0]; }
 	};
 
@@ -102,7 +102,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		__int64			fileSize;
 		bool			temporary;
 
-		File(void *dummy = NULL) :	// to be compatible with the FILE*(NULL) constructor
+		File(void * /*dummy = NULL*/) :	// to be compatible with the FILE*(NULL) constructor
 			fileSize(0),
 			_realign(false) {}
 
@@ -140,9 +140,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		inline TFile& getFile(int fileNo) {
 			unsigned _oldFileCount = fileCount();
-			if (fileNo >= _oldFileCount) {
+			if (fileNo > 0 && static_cast<unsigned>(fileNo) >= _oldFileCount) {
 				resize(*(Base*)this, fileNo + 1);
-				for(unsigned i = _oldFileCount; i <= fileNo; ++i)
+				for(unsigned i = _oldFileCount; i <= static_cast<unsigned>(fileNo); ++i)  // Cast OK since fileNo > 0 checked above.
 					if (temporary)
 						openTemp((*this)[i], openMode);
 					else
@@ -247,7 +247,7 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TFileArray >
-    inline unsigned _sectorSizeFArray(TFileArray &me, int openMode) {
+    inline unsigned _sectorSizeFArray(TFileArray &me, int /*openMode*/) {
 		return sectorSize(me[0]);
     }
 
@@ -286,7 +286,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
     template < unsigned _FileCount, typename TFile >
-	inline unsigned length(File< Striped<_FileCount, TFile> > const &me) {
+	inline unsigned length(File< Striped<_FileCount, TFile> > const &/*me*/) {
 		return _FileCount;
 	}
 

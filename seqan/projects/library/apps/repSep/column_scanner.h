@@ -100,9 +100,9 @@ bool isCandidate(FragmentStore<TSpec, TConfig> const& fragStore,
 }
 
 template <typename TSpec, typename TConfig, typename TId, typename TCandidateColumn>
-void refineCandidates(FragmentStore<TSpec, TConfig> const& fragStore,
-           TId const contigId,
-           StringSet<TCandidateColumn> & candidate_set,
+void refineCandidates(FragmentStore<TSpec, TConfig> const& /*fragStore*/,
+           TId const /*contigId*/,
+           StringSet<TCandidateColumn> & /*candidate_set*/,
            SimpleColumn const)
 {
 #ifdef REPSEP_DEBUG_COLUMN_SCANNER

@@ -47,7 +47,8 @@ typedef Tag<TagCGViz_> const CGViz;
 
 template <typename TFile>
 void goNext(TFile & file, CGViz) {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+    (void) file; // When compiled without assertions.
 	SEQAN_ASSERT(!_streamEOF(file))
 	
 	return;

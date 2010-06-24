@@ -86,16 +86,16 @@ namespace seqan
 		// calculate the count values of the deferred skip list
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_setDeferredCounts( SkipList< TObject, TModus, TSpec, TStructuring > & list,
-						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * preceding_elem,
-						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * new_elem )
+	_setDeferredCounts( SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
+						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*preceding_elem*/,
+						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*new_elem*/ )
 	{
 		// do nothing (non-deferred sl's don't have count values)
 	}
 
 	template< typename TObject, typename TModus, typename TSpec > inline
 	void
-	_setDeferredCounts( SkipList< TObject, TModus, TSpec, Deferred > & list,
+	_setDeferredCounts( SkipList< TObject, TModus, TSpec, Deferred > & /*list*/,
 						SkipBaseElement< TObject, TModus, TSpec, Deferred > * preceding_elem,
 						SkipBaseElement< TObject, TModus, TSpec, Deferred > * new_elem )
 	{
@@ -128,8 +128,8 @@ namespace seqan
 		// static spec -> do nothing
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void 
-	insert( SkipList< TObject, TModus, TSpec, TStructuring > & list, 
-			TObject & obj )
+	insert( SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
+			TObject & /*obj*/ )
 	{
 		SEQAN_ASSERT2( false, "SkipListStatic Skip Lists don't provide insertion operations" )
 	}
@@ -151,7 +151,7 @@ namespace seqan
 	void 
 	_insertBack( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & list,
 				TObject & obj,
-				TParam & param )
+				TParam & /*param*/ )
 	{
 		SEQAN_CHECKPOINT
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * last_elem = _getPred( *list._rightBorder );
@@ -356,8 +356,8 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey >
 	bool 
-	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & list, 
-			TKey theKey)
+	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
+			TKey /*theKey*/)
 	{
 		SEQAN_ASSERT2( false, "No deletion in static lists")
 		return false;
@@ -387,8 +387,8 @@ namespace seqan
 	// deleting an element with a given object
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	bool 
-	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & list, 
-			TObject & obj )
+	erase(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/, 
+			TObject & /*obj*/ )
 	{
 		SEQAN_ASSERT2( false, "No deletion in static lists")
 		return false;

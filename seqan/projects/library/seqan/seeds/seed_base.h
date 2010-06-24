@@ -302,7 +302,7 @@ setRightPosition(Seed<TPosition, TSpecSeed>  & me,
 */
 template< typename TPosition, typename TSpec > inline
 typename Size< Seed< TPosition, TSpec > >::Type
-dimension( Seed< TPosition, TSpec > & me )
+dimension( Seed< TPosition, TSpec > & /*me*/ )
 {
 	return 2;
 }

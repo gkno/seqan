@@ -67,7 +67,7 @@ public:
         
         
         
-	Iter(TSeedSet &set, TSize &other_data_ptr):
+	Iter(TSeedSet &/*set*/, TSize &other_data_ptr):
 		data_ptr(other_data_ptr)
 	{
 	}
@@ -146,7 +146,7 @@ public:
 		this->set = &set;
 	}
 
-	Iter(TSeedSet const  &set, TSize * other_data_ptr):
+	Iter(TSeedSet const  &/*set*/, TSize * other_data_ptr):
 		data_ptr(other_data_ptr)
 	{
 	}

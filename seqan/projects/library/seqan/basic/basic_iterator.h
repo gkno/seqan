@@ -355,7 +355,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline typename Position<T>::Type 
-position(T * me)
+position(T * /*me*/)
 {
 SEQAN_CHECKPOINT
 	return 0;

@@ -491,7 +491,7 @@ _skiplistFindGoNext(SkiplistNext<TValue, TSpec> & next,
 template <typename TValue, typename TSpec>
 inline bool
 _skiplistFindGoNext(SkiplistNext<TValue, TSpec> & next,
-					unsigned char height,
+					unsigned char /*height*/,
 					GoEnd)
 {
 	return next.data_element;

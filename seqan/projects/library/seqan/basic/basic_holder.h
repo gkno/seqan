@@ -605,7 +605,7 @@ _holderAllocatePointer(THolder & me, TValue * data, True)			// is a pointer to a
 
 template <typename THolder, typename TValue>
 inline typename Value<THolder, 0>::Type
-_holderAllocatePointer(THolder & me, TValue * data, False)			// is a pointer to *one* object
+_holderAllocatePointer(THolder & /*me*/, TValue * data, False)			// is a pointer to *one* object
 {
 	return data;
 }
@@ -638,7 +638,7 @@ _holderDeallocate(THolder & me, TValue * data, True)				// is a pointer to an *a
 
 template <typename THolder, typename TValue>
 inline void
-_holderDeallocate(THolder & me, TValue * data, False)				// is a pointer to *one* object
+_holderDeallocate(THolder & /*me*/, TValue * /*data*/, False)				// is a pointer to *one* object
 {
 }
 
@@ -1229,7 +1229,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline bool
-empty(Holder<TValue, Simple> const & me)
+empty(Holder<TValue, Simple> const & /*me*/)
 {
 SEQAN_CHECKPOINT
 	return false;
@@ -1239,7 +1239,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline bool
-dependent(Holder<TValue, Simple> const & me)
+dependent(Holder<TValue, Simple> const & /*me*/)
 {
 SEQAN_CHECKPOINT
 	return false;
@@ -1249,7 +1249,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void
-clear(Holder<TValue, Simple> & me)
+clear(Holder<TValue, Simple> & /*me*/)
 {
 SEQAN_CHECKPOINT
 }
@@ -1258,7 +1258,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void
-create(Holder<TValue, Simple> & me)
+create(Holder<TValue, Simple> & /*me*/)
 {
 SEQAN_CHECKPOINT
 }
@@ -1278,7 +1278,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void
-detach(Holder<TValue, Simple> & me)
+detach(Holder<TValue, Simple> & /*me*/)
 {
 SEQAN_CHECKPOINT
 }

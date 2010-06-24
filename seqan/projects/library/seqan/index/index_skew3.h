@@ -294,8 +294,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSA &SA,
 		String< TValue, External<TConfig> > &s,
 		Skew3 const &spec,
-		unsigned K,
-        unsigned maxdepth)
+		unsigned /*K*/,
+        unsigned /*maxdepth*/)
 	{
         createSuffixArrayExt(SA, s, spec);
 	}

@@ -228,7 +228,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFile, typename TMeta>
 void
-readMeta(TFile & file,
+readMeta(TFile & /*file*/,
 		 TMeta & meta,
 		 Raw)
 {
@@ -247,7 +247,8 @@ goNext(TFile & file,
 	   Raw)
 {
 SEQAN_CHECKPOINT
-	SEQAN_ASSERT(!_streamEOF(file))
+  (void) file;  // When compiled without assertions.
+	SEQAN_ASSERT_TRUE(!_streamEOF(file));
 
 //??? TODO: set file to eof
 }

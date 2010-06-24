@@ -225,7 +225,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TInput, typename TSpec >
 	IPipeIterator< Pipe< TInput, TSpec > >
-	end(Pipe< TInput, TSpec > &pipe) {
+	end(Pipe< TInput, TSpec > &/*pipe*/) {
 		return IPipeIterator< Pipe< TInput, TSpec > >();
 	}
 

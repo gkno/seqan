@@ -710,8 +710,8 @@ SEQAN_CHECKPOINT
 
 template <typename TValue, typename TSpec, typename TValue2>
 inline void
-assignValue(String<TValue, TSpec> & me,
-			TValue2 const & _value)
+assignValue(String<TValue, TSpec> & /*me*/,
+			TValue2 const & /*_value*/)
 {
 //	assign(me, toString(_value)); ???TODO
 }

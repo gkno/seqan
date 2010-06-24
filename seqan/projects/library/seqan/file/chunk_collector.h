@@ -320,7 +320,7 @@ template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typ
 inline void 
 assign(String<TTargetValue, TTargetSpec> & target,
 	   _ChunkCollector<TSourceHost> const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const /*tag*/)
 {
 	_Assign_ChunkCollector_2_String<Tag<TExpand> const>::assign_(target, source);
 }
@@ -329,7 +329,7 @@ inline void
 assign(String<TTargetValue, TTargetSpec> & target,
 	   _ChunkCollector<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const /*tag*/)
 {
 	_Assign_ChunkCollector_2_String<Tag<TExpand> const>::assign_(target, source, limit);
 }
@@ -469,7 +469,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 	   _ChunkCollector<TSourceHost> const & source,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const /*tag*/)
 {
 	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
@@ -481,7 +481,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
 	   _ChunkCollector<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
-	   Tag<TExpand> const tag)
+	   Tag<TExpand> const /*tag*/)
 {
 	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
@@ -494,7 +494,7 @@ replace(TTargetValue * target,
 		size_t pos_begin,
 		size_t pos_end,
 		_ChunkCollector<TSourceHost> const & source,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const /*tag*/)
 {
 	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
@@ -506,7 +506,7 @@ replace(TTargetValue * target,
 		size_t pos_end,
 		_ChunkCollector<TSourceHost> const & source,
 		size_t limit,
-		Tag<TExpand> const tag)
+		Tag<TExpand> const /*tag*/)
 {
 	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }

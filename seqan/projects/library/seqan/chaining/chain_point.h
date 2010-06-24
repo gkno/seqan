@@ -254,7 +254,7 @@ SEQAN_ASSERT( me._meta != NULL )
 		_ChainPoint( typename Key< TFragType >::Type * coords,
 						typename Size< TFragType >::Type dim,
 						_MetaFragment< TFragType > * meta, 
-						bool begin = false )
+						bool /*begin = false*/ )
 		: _meta( meta )
 		, _coords( NULL )
 		, _dim( dim )
@@ -406,9 +406,9 @@ SEQAN_ASSERT( me._meta != NULL )
 		}
 
 		_ChainPoint( typename Key< TFragType >::Type * coords,
-						typename Size< TFragType >::Type dim,
+						typename Size< TFragType >::Type /*dim*/,
 						_MetaFragment< TFragType > * meta, 
-						bool begin = false )
+						bool /*begin = false*/ )
 		: _meta( meta )
 		, _prio( infimumValue< typename Weight< TFragType >::Type >() )
 		{
@@ -419,7 +419,7 @@ SEQAN_ASSERT( me._meta != NULL )
 		}
 
 		_ChainPoint( typename Key< TFragType >::Type * coords,
-						typename Size< TFragType >::Type dim )
+						typename Size< TFragType >::Type /*dim*/ )
 		: _meta( NULL )
 		, _prio( infimumValue< typename Weight< TFragType >::Type >() )
 		{

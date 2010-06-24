@@ -69,10 +69,10 @@ struct SkipList< TObject, TModus, RT< TSpec >, TStructuring >
 		return me._mainTree;
 	}
 
-	SkipList & operator=( const SkipList & old )
+	SkipList & operator=( const SkipList & /*old*/ )
 	{}
 
-	SkipList( const SkipList & old )
+	SkipList( const SkipList & /*old*/ )
 	{}
 		
 public:
@@ -81,7 +81,7 @@ public:
 	SkipList()
 	{
 		mtRandInit();
-	};
+	}
 
 
 	~SkipList()

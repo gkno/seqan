@@ -364,8 +364,8 @@ operation_2_set(Segment<THost, TSpec> & target,
 
 template <typename THost, typename TSpec, typename TSource, typename TSize>
 inline bool 
-operation_2_set(Segment<THost, TSpec> & target, 
-				TSource & source,
+operation_2_set(Segment<THost, TSpec> & /*target*/, 
+				TSource & /*source*/,
 				TSize)
 {
 	return false;
@@ -483,7 +483,7 @@ SEQAN_CHECKPOINT
 	assign_(
 		Segment<THost const, TSpec> & target, 
 		TSource & source, 
-		typename Size< Segment<THost const, TSpec> >::Type limit)
+		typename Size< Segment<THost const, TSpec> >::Type /*limit*/)
 	{
 SEQAN_CHECKPOINT
 		set(target, source);
@@ -872,7 +872,7 @@ struct _Append_Value_2_Segment
 	template <typename T, typename TValue>
 	static inline void 
 	appendValue_(T & me,
-				TValue & _value)
+				TValue & /*_value*/)
 	{
 SEQAN_CHECKPOINT
 		insertValue(host(me), endPosition(me), TExpand());
@@ -915,7 +915,7 @@ struct _Insert_Value_2_Segment
 	static inline void 
 	insertValue_(T & me,
 				TPosition pos,
-				TValue & _value)
+				TValue & /*_value*/)
 	{
 SEQAN_CHECKPOINT
 		insertValue(host(me), beginPosition(me) + pos, TExpand());

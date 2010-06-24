@@ -217,7 +217,8 @@ getProjectedPosition(Fragment<TSize, ExactFragment<TSpec> > const& f,
 					 TId2& seqId2,
 					 TPosition2& pos2)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+	  (void) seqId;  // When compiled without assertions.
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
 	SEQAN_TASSERT((seg_num == 0 && seqId == f.seqId1) || (seg_num == 1 && seqId == f.seqId2))
 	
@@ -282,6 +283,7 @@ getProjectedPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f,
 {
 	SEQAN_CHECKPOINT
 	typedef typename Id<Fragment<TSize, TSpec> >::Type TId;
+	(void) seqId;  // When compiled without assertions.
 	SEQAN_TASSERT((seg_num == 0 && seqId==f.seqId1) || (seg_num == 1 && seqId==f.seqId2))
 	
 	if (seg_num == 0) {

@@ -76,7 +76,7 @@ scoreMatch(Score<TValue, Zero> const &)
 
 template <typename TValue>
 inline TValue 
-scoreMismatch(Score<TValue, Zero> & me)
+scoreMismatch(Score<TValue, Zero> & /*me*/)
 {
 	return 0;
 }
@@ -113,9 +113,9 @@ scoreGap(Score<TValue, Zero> const &)
 
 template <typename TValue, typename T>
 inline TValue
-score(Score<TValue, Zero> const & me,
-	  T const & left,
-	  T const & right)
+score(Score<TValue, Zero> const & /*me*/,
+	  T const & /*left*/,
+	  T const & /*right*/)
 {
 	return 0;
 }

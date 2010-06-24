@@ -303,7 +303,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > > >::Type TSize;
 
 		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
-		unsigned seqs = countSequences(me.in);
+		/*unsigned seqs = countSequences(me.in);*/
 		TSize sum = 0;
 /*		for(unsigned i = 0; i < seqs; ++i)
 			sum += (length((*me.in.in.in.in.set)[i]) / STEP_SIZE) * (1 + length(me.tmp.i2) * (alphabetSize - 1));

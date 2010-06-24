@@ -364,8 +364,8 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle, typename TSpec, typename TScore2>
 inline void
-setScoringScheme(Pattern<TNeedle, TSpec> & me, 
-				 TScore2 & score)
+setScoringScheme(Pattern<TNeedle, TSpec> & /*me*/, 
+				 TScore2 & /*score*/)
 {
 //dummy implementation for compatibility reasons
 }

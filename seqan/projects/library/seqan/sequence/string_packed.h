@@ -1061,7 +1061,7 @@ template <typename TContainer, typename THostspec, typename TParam>
 inline void
 valueConstruct(Iter<TContainer, Packed<THostspec> > const & it,
 			   TParam const & param_,
-			   Move tag)
+			   Move /*tag*/)
 {
 	moveValue(it, param_);
 }
