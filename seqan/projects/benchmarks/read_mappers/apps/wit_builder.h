@@ -167,6 +167,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         Finder<TContigSeq> finder(contig);
         Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
         bool ret = setEndPosition(finder, pattern, endPos);
+        (void) ret; // If compiled without assertions.
         SEQAN_ASSERT_TRUE(ret);
         maxError = -getScore(pattern);
     }
