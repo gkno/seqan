@@ -63,6 +63,7 @@ typedef Tag<_MyersUkkonenReads> MyersUkkonenReads;
 
 template <typename TNeedle>
 class Pattern<TNeedle, MyersUkkonenReads> {
+public:
     // Shortcut to the MyersUkkonen-Pattern we will use internally.
     typedef Pattern<Segment<TNeedle, InfixSegment>, Myers<FindInfix> > _TMyersUkkonen;
 
