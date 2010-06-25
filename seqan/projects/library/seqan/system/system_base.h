@@ -27,13 +27,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #ifdef SEQAN_DEBUG
 
-#define SEQAN_DO_SYS(_cond) SEQAN_ASSERT_TRUE(_cond)
-#define SEQAN_DO_SYS1(_cond) SEQAN_DO_SYS(_cond)
-#define SEQAN_DO_SYS2(_cond, _comment) SEQAN_ASSERT_TRUE_MSG(_cond, _comment)
+#define SEQAN_DO_SYS(_cond) (SEQAN_ASSERT_TRUE(_cond))
+#define SEQAN_DO_SYS1(_cond) (SEQAN_DO_SYS(_cond))
+#define SEQAN_DO_SYS2(_cond, _comment) (SEQAN_ASSERT_TRUE_MSG(_cond, _comment))
 
 #else
 
-#define SEQAN_DO_SYS(_cond) do { (void)_cond; } while (false)
+#define SEQAN_DO_SYS(_cond) do { (void)(_cond); } while (false)
 #define SEQAN_DO_SYS1(_cond) SEQAN_DO_SYS(_cond)
 #define SEQAN_DO_SYS2(_cond, _comment) SEQAN_DO_SYS(_cond)
 
