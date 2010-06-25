@@ -46,11 +46,11 @@ namespace SEQAN_NAMESPACE_MAIN
             hEvent(NULL) {}
 
         Event(BOOL initial) {
-            SEQAN_DO_SYS2(open(initial), "Could not create Event")
+            SEQAN_DO_SYS2(open(initial), "Could not create Event");
         }
 
         ~Event() {
-            if (*this) SEQAN_DO_SYS2(close(), "Could not destroy Event")
+            if (*this) SEQAN_DO_SYS2(close(), "Could not destroy Event");
         }
 
         Event(Event const &origin) {
