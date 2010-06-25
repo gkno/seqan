@@ -101,7 +101,7 @@ SEQAN_CHECKPOINT
 template <typename TSource1, typename TSpec1, typename TSource2, typename TSpec2, typename TPos> 
 void
 integrateAlign(Align<TSource1, TSpec1> & align,
-			   Align<TSource2, TSpec2> & infixAlign,
+			   Align<TSource2, TSpec2> const & infixAlign,
 			   String<TPos> viewPos) {
 SEQAN_CHECKPOINT
 	typedef Align<TSource1, TSpec1> TAlign;
@@ -162,7 +162,7 @@ SEQAN_CHECKPOINT
 template <typename TSource, typename TSpec1, typename TSpec2> 
 void
 integrateAlign(Align<TSource, TSpec1> & align,
-			   Align<typename Infix<TSource>::Type, TSpec2> & infixAlign) {
+			   Align<typename Infix<TSource>::Type, TSpec2> const & infixAlign) {
 SEQAN_CHECKPOINT
 	typedef typename Size<TSource>::Type TSize;
 	typedef typename Position<typename Row<Align<TSource, TSpec1> >::Type>::Type TPos;
