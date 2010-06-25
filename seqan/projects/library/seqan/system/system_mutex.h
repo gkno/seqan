@@ -44,12 +44,12 @@ namespace SEQAN_NAMESPACE_MAIN
             hMutex(NULL) {}
 
         Mutex(BOOL initial) {
-            SEQAN_DO_SYS2(open(initial), "Could not create Mutex")
+            SEQAN_DO_SYS2(open(initial), "Could not create Mutex");
         }
 
         ~Mutex() {
             if (*this)
-                SEQAN_DO_SYS2(close(), "Could not destroy Mutex")
+                SEQAN_DO_SYS2(close(), "Could not destroy Mutex");
         }
 
         inline bool open(BOOL initial = false) {
