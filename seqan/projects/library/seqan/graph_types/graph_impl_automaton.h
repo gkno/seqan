@@ -437,10 +437,12 @@ template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDe
 inline void
 removeEdge(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 	       TVertexDescriptor const source,
-	       TVertexDescriptor const /*target*/,
+	       TVertexDescriptor const target,
 		   TLabel const label)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+    (void) source;  // If compiled without assertions.
+    (void) target;  // If compiled without assertions.
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
 	removeEdge(g, &g.data_vertex[source].data_edge[ordValue((TAlphabet) label)]);
