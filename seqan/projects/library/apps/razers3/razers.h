@@ -496,7 +496,7 @@ struct MicroRNA{};
 				m.id = length(store->alignedReadStore);
 				appendValue(store->alignedReadStore, m, Generous());
 				appendValue(store->alignQualityStore, q, Generous());
-#if ! defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) && ! defined (RAZERS_PARALLEL_READS_INDEPENDENT)
+// #if ! defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) && ! defined (RAZERS_PARALLEL_READS_INDEPENDENT)
 // if either macro is defined this is called at a different location. see razers_parallel_reads.h
 				
 				if (length(store->alignedReadStore) > options->compactThresh)
@@ -514,7 +514,7 @@ struct MicroRNA{};
 //					if (options._debugLevel >= 2)
 //						::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
 				}
-#endif
+// #endif
 			}
 			++options->countVerification;
 		}
@@ -1074,6 +1074,9 @@ void compactMatches(
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
 	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode>			TRazerSMode;
 
+	// TODO: remove
+	// printf("compactMatches");
+
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
@@ -1117,7 +1120,7 @@ void compactMatches(
 						{
 							setMaxErrors(swift, readNo, errors - 1);
 							if (errors == 0 && options._debugLevel >= 2)
-								::std::cerr << "(read #" << readNo << " disabled)";
+								::std::cerr << "(read #" << readNo << " set to: " << errors << ")";
 						}
 
 					if (options.purgeAmbiguous)
