@@ -21,6 +21,7 @@
 #ifndef SEQAN_HEADER_MISC_RANDOM_H
 #define SEQAN_HEADER_MISC_RANDOM_H
 
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 
@@ -211,6 +212,58 @@ geomRand()
 
 //////////////////////////////////////////////////////////////////////////////
 
-}// namespace SEQAN_NAMESPACE_MAIN
+//////////////////////////////////////////////////////////////////////////////
+// Normal Distribution Heuristics.
+//
+// Ported from Python.
+//
+// Kinderman and Monahan method. Reference: Kinderman,
+// A.J. and Monahan, J.F., "Computer generation of random
+// variables using the ratio of uniform deviates", ACM Trans
+// Math Software, 3, (1977), pp257-260.
+//////////////////////////////////////////////////////////////////////////////
+
+static const double SEQAN_NV_MAGICCONST = 1.7155277699214135;  // == 4 * exp(-0.5)/sqrt(2.0)
+
+inline double
+normRand(double mean, double stddev)
+{
+    /* in Python:
+        random = self.random
+        while 1:
+            u1 = random()
+            u2 = 1.0 - random()
+            z = NV_MAGICCONST*(u1-0.5)/u2
+            zz = z*z/4.0
+            if zz <= -_log(u2):
+                break
+        return mu + z*sigma
+    */
+    double z;
+    while (true) {
+        double u1 = mtRandDouble();
+        double u2 = 1 - mtRandDouble();
+        z = SEQAN_NV_MAGICCONST * (u1 - 0.5) / u2;
+        double zz = z * z / 4.0;
+        if (zz < -::std::log10(u2))
+            break;
+    }
+    return mean + z * stddev;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+// Lognormal Distribution Heuristics.
+
+inline double
+lognormRand(double mean, double stddev)
+{
+  return ::std::exp(normRand(mean, stddev));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+}  // namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
