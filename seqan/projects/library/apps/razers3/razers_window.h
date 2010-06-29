@@ -138,7 +138,7 @@ TRazerSMode                      const & mode)
 			
 			// while there is more contig sequence to search through
 			while(sequenceLeft){
-				sequenceLeft = windowFindNext(swiftFinder, swiftPattern, 500000);
+				sequenceLeft = windowFindNext(swiftFinder, swiftPattern, 1000000);
 				
 				printf("filtering took: %f\n", sysTime() - myTime);
 				myTime = sysTime();

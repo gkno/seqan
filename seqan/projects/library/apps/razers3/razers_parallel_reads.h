@@ -151,19 +151,19 @@ inline void consistencyTest(TFragmentStore const & store)
 */
 template <
 	typename TFragmentStore,
-	// typename TPatternHandler,
-	// typename TCounts,
-	typename TRazerSOptions//,
-	// typename TRazerSMode 
+	typename TPatternHandler,
+	typename TCounts,
+	typename TRazerSOptions,
+	typename TRazerSMode 
 	>
 inline void
 appendBlockStores(
 		TFragmentStore			& store,
 		String<TFragmentStore>	& blockStores,
-		// TPatternHandler			& swiftPatternHandler,
-		// TCounts					& cnts,
-		TRazerSOptions			& options//,
-		// TRazerSMode const		& mode
+		TPatternHandler			& swiftPatternHandler,
+		TCounts					& cnts,
+		TRazerSOptions			& options,
+		TRazerSMode const		& mode
 		)
 {
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
@@ -193,18 +193,18 @@ appendBlockStores(
 	}
 	
 	// fourth: compact matches
-	// if (length(store.alignedReadStore) > options.compactThresh)
-	// {
-	// 	oldSize = length(store.alignedReadStore);
-	// 	
-	// 	if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-	// 		maskDuplicates(store, mode);	// overlapping parallelograms cause duplicates
-	// 	
-	// 	compactMatches(store, cnts, options, mode, swiftPatternHandler, COMPACT);
-	// 	
-	// 	if (options._debugLevel >= 2)
-	// 		::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
-	// }
+	if (length(store.alignedReadStore) > options.compactThresh)
+	{
+		oldSize = length(store.alignedReadStore);
+		
+		if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+			maskDuplicates(store, mode);	// overlapping parallelograms cause duplicates
+		
+		compactMatches(store, cnts, options, mode, swiftPatternHandler, COMPACT);
+		
+		if (options._debugLevel >= 2)
+			::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+	}
 	
 }
 	
@@ -1541,7 +1541,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 		
 		// use only core many threads		
 		// go over contig sequence
-		#pragma omp parallel num_threads((int)options.numberOfCores)
+		// #pragma omp parallel num_threads((int)options.numberOfCores)
 		while(true)
 		{
 			bool stop = false;
@@ -1550,7 +1550,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 			// As the data structures are split up alread and each thread works on only one element of
 			// the strings (finder, patterns) at a time the variables can be shared
 			// TODO: maybe try schedule(guided)
-			#pragma omp for schedule(dynamic, 1)
+			#pragma omp parallel for num_threads((int)options.numberOfCores) schedule(dynamic, 1)
 			for (int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){ //TSwiftFinderSize
 				
 #ifdef RAZERS_TIMER					
@@ -1572,7 +1572,7 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				THitString hits = getSwiftHits(swiftFinders[blockId]);
 				for(THitStringSize h = 0; h < length(hits); ++h){
 					verifier[blockId].m.readId = (blockId * blockSize) + hits[h].ndlSeqNo;         //array oder jedesmal berechnen
-					matches += matchVerify(verifier[blockId], getSwiftRange(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
+					matches += matchVerify(verifier[blockId], swiftInfix(hits[h], contigSeq), hits[h].ndlSeqNo, host(host(swiftPatternHandler.swiftPatterns[blockId])), mode);
 					++options.countFiltration;
 				}
 
@@ -1581,18 +1581,18 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 				
 				#pragma omp critical
 				{
-					std::cout << "timing>\t";
+					std::cerr << "timing>\t";
 					#ifdef _OPENMP
-					std::cout << omp_get_thread_num() << "\t";
+					std::cerr << omp_get_thread_num() << "\t";
 					#endif
-					std::cout << blockId << "\t";
-					std::cout << contigAndDirection << "\t";
-					std::cout << posLength.i1 << "\t";
-					std::cout << posLength.i2 << "\t";
-					std::cout << filteringTime << "\t";
-					std::cout << length(hits) << "\t";
-					std::cout << verificationTime << "\t";
-					std::cout << matches << "\n";
+					std::cerr << blockId << "\t";
+					std::cerr << contigAndDirection << "\t";
+					std::cerr << posLength.i1 << "\t";
+					std::cerr << posLength.i2 << "\t";
+					std::cerr << filteringTime << "\t";
+					std::cerr << length(hits) << "\t";
+					std::cerr << verificationTime << "\t";
+					std::cerr << matches << "\n";
 				}
 				// set waiting time
 				#ifdef _OPENMP
@@ -1610,19 +1610,20 @@ Stops when the finder reaches its end or the threshold of total hits is surpasse
 					++options.countFiltration;
 				}
 #endif
-			}			
+			} // end for
 #ifdef RAZERS_TIMER
+			
 			_proFloat now = sysTime();
 			#pragma omp critical
 			{
 				for(unsigned k = 0; k < length(waitingTimes); ++k){
-					std::cout << "waiting>\t"  << k << "\t" << (now - waitingTimes[k]) << "\n";
+					std::cerr << "waiting>\t"  << k << "\t" << (now - waitingTimes[k]) << "\n";
 				}
 			}
 #endif
 			
 			if(stop) break;
-		}
+		} // end while
 		
 		// clear finders
 		for (unsigned int blockId = 0; blockId < options.numberOfBlocks; ++blockId)
@@ -1861,8 +1862,8 @@ void _mapSingleReadsToContig(
 		
 #ifdef RAZERS_TIMER
 		// print header line for timer
-		std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\tmatches\n";
-		std::cout << "waiting>\tthread\ttime\n";
+		// std::cout << "timing>\tthread\tblock\tcontigAndDircetion\tpos\tlength\tfilter.time\tverifications\tverification.time\tmatches\n";
+		// std::cout << "waiting>\tthread\ttime\n";
 #endif
 
 		// iterate over genome sequences

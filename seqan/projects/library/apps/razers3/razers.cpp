@@ -155,6 +155,13 @@ int mapReads(
 
 	if (options._debugLevel >= 1)
 		cerr << "Loading reads took               \t" << options.timeLoadFiles << " seconds" << endl;
+		
+	#ifdef RAZERS_MEMOPT
+		if(length(store.readSeqStore) > 16777216){
+			cerr << "more than 2^24 reads. Switch of RAZERS_MEMOPT in razers.cpp or use less."
+			return 1;
+		}
+	#endif
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Load genomes
