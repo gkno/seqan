@@ -98,11 +98,11 @@ inline typename EdgeDescriptor<Graph<Automaton<TAlphabet, String<TAlphabet>, Wor
 addEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g, 
 		TVertexDescriptor const source, 
 		TVertexDescriptor const target,
-		String<TAlphabet> const& label) 
+		String<TAlphabet> const & label) 
 {
-	SEQAN_CHECKPOINT
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
-	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
+	SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, source));
+	SEQAN_ASSERT_TRUE(idInUse(g.data_id_managerV, target));
 	
 	typedef Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
