@@ -163,7 +163,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 //     std::cerr << __FILE__ << ":" << __LINE__ << " previousRightBorder = " << previousRightBorder << std::endl;
 
     // In oracle SAM mode, the maximum error is the error at the position given in the SAM alignment.
+    bool oracleSamMode = false;
     if (maxError == -1) {
+        oracleSamMode = true;
         Finder<TContigSeq> finder(contig);
         Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
         bool ret = setEndPosition(finder, pattern, endPos);
@@ -174,8 +176,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     
     // Debug-adjustments.
     #define ENABLE 0
-    #define ALL 1
-    #define READID 0
+    #define ALL 0
+    #define READID 993
 
 //     if (readNames[readId] == CharString("SRR027007.862.1")) {
 //           std::cerr << "**************** read id = " << readId << " readname = " << readNames[readId] << " read = " << read << std::endl;
@@ -415,9 +417,31 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     // Postprocessing: Sorting, smoothing, filtering.
     std::sort(begin(tempMatches, Standard()), end(tempMatches, Standard()));
     smoothErrorCurve(tempMatches);
-    for (size_t i = 0; i < length(tempMatches); ++i)
-        if (tempMatches[i].distance >= relativeMinScore)
-            appendValue(errorCurve, tempMatches[i]);
+    appendValue(tempMatches, WeightedMatch(0, 0, 0, relativeMinScore - 1, 0));  // Sentinel.
+    if (oracleSamMode) {
+        // In oracle SAM mode, we only want the lake with last pos endPos-1.
+        String<WeightedMatch> buffer;
+        bool flag = false;
+        for (size_t i = 0; i < length(tempMatches); ++i) {
+            if (tempMatches[i].distance < relativeMinScore) {
+                if (flag) {
+                    append(errorCurve, buffer);
+                    break;
+                } else {
+                    clear(buffer);
+                }
+            } else {
+                appendValue(buffer, tempMatches[i]);
+                if (tempMatches[i].pos == endPos-1)
+                    flag = true;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < length(tempMatches); ++i) {
+            if (tempMatches[i].distance >= relativeMinScore)
+                appendValue(errorCurve, tempMatches[i]);
+        }
+    }
 
 //     if (readId == READID) {
 //         std::cerr << ",-- errorCurve is (read id = " << readId << " readname = " << readNames[readId] << ")" << std::endl;
