@@ -3,6 +3,9 @@
 
 #include "simulate_454_base_calling.h"
 
+// Maximal homopolymer length we will observe.
+const unsigned MAX_HOMOPOLYMER_LEN = 40;
+
 // ============================================================================
 // Enums, Tags, Classes.
 // ============================================================================
@@ -123,11 +126,6 @@ int simulateReadsSetupModelSpecificData(ModelParameters<LS454Reads> & parameters
     return 0;
 }
 
-template <typename TString>
-void applySimulationInstructions(TString & read, ReadSimulationInstruction<LS454Reads> const & inst, Options<LS454Reads> const & options)
-{
-}
-
 unsigned pickReadLength(Options<LS454Reads> const & options)
 {
     if (options.readLengthUniform) {
@@ -143,15 +141,22 @@ unsigned pickReadLength(Options<LS454Reads> const & options)
 }
 
 template <typename TContig>
-void buildEditString(ReadSimulationInstruction<LS454Reads> & inst, unsigned readLength, TContig const & contig, ModelParameters<LS454Reads> const & parameters, Options<LS454Reads> const & options)
+void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, unsigned readLength, TContig const & contig, ModelParameters<LS454Reads> const & parameters, Options<LS454Reads> const & options)
 {
+//     std::cout << __FILE__ << ":" << __LINE__ << " -- inst == " << inst << std::endl;
+
     typedef Iterator<String<Dna5>, Standard>::Type TIterator;
     
     if (inst.endPos == inst.beginPos)
         return;
 
+    //
+    // Perform Flowcell Simulation.
+    //
     reserve(inst.editString, readLength, Generous());
     clear(inst.editString);
+    reserve(inst.qualities, readLength, Generous());
+    clear(inst.qualities);
 
     // Get a copy of the haplotype region we are considering.
     String<Dna5> haplotypeInfix = infix(contig, inst.beginPos, inst.endPos);
@@ -184,7 +189,7 @@ void buildEditString(ReadSimulationInstruction<LS454Reads> & inst, unsigned read
             i += homopolymerLength;
             homopolymerType = haplotypeInfix[i];
             homopolymerLength = 0;
-            while (haplotypeInfix[i + homopolymerLength] == homopolymerType)
+            while (haplotypeInfix[i + homopolymerLength] == homopolymerType && ((i + homopolymerLength) < (inst.endPos - inst.beginPos)))
                 ++homopolymerLength;
         } else {
             // Simulate negative flow observation.
@@ -202,6 +207,15 @@ void buildEditString(ReadSimulationInstruction<LS454Reads> & inst, unsigned read
 //         std::cout << "observed == " << back(observedIntensities) << ", real == " << back(realBaseCount) << std::endl;
     }
 
+//     std::cout << "infix == " << infix(contig, inst.beginPos, inst.endPos) << std::endl;
+//     std::cout << "real base count == ";
+//     for (unsigned y = 0; y < length(realBaseCount); ++y)
+//         std::cout << realBaseCount[y] << " ";
+//     std::cout << std::endl;
+
+    inst.insCount = 0;
+    inst.delCount = 0;
+
     // Call bases, from this build the edit string and maybe qualities.  We
     // only support the "inter" base calling method which was published by
     // the MetaSim authors in the PLOS paper.
@@ -218,21 +232,73 @@ void buildEditString(ReadSimulationInstruction<LS454Reads> & inst, unsigned read
         for (; j < calledBaseCount; ++j) {
             appendValue(inst.insertionNucleotides, Dna(i % 4));
             appendValue(inst.editString, ERROR_TYPE_INSERT);
+            inst.insCount += 1;
         }
         // Add deletions, if any.
-        for (; j < realBaseCount[i]; ++j)
+        for (; j < realBaseCount[i]; ++j) {
             appendValue(inst.editString, ERROR_TYPE_DELETE);
+            inst.delCount += 1;
+        }
+        // Compute likelihood for calling the bases, given this intensity and the Phred score from this.
+        double densitySum = 0;
+        for (unsigned j = 0; j <= _max(4u, 2 * MAX_HOMOPOLYMER_LEN); ++j)  // Anecdotally through plot in maple: Enough to sum up to 4.
+            densitySum += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
+        double x = 0;  // Probability of seeing < (j+1) bases.
+//         std::cout << "called base count " << calledBaseCount << std::endl;
+        for (j = 0; j < calledBaseCount; ++j) {
+            x += dispatchDensityFunction(parameters.thresholdMatrix, j == 0 ? 0.0001 : j, *it);
+            unsigned phredScore = -static_cast<unsigned>(10 * ::std::log10(x / densitySum));
+            appendValue(inst.qualities, phredScore);
+//             std::cout << "j=" << j << " x=" << x << " densitySum=" << densitySum << " phredScore=" << phredScore << " log=" << ::std::log10(x / densitySum) << " p=" << x / densitySum << std::endl;
+        }
     }
+
+//     std::cout << __FILE__ << ":" << __LINE__ << " -- inst == " << inst << std::endl;
 }
 
-void buildQualityValues(ReadSimulationInstruction<LS454Reads> & inst, unsigned readLength, ModelParameters<LS454Reads> const & parameters, Options<LS454Reads> const & options)
+template <typename TString>
+void applySimulationInstructions(TString & read, ReadSimulationInstruction<LS454Reads> const & inst, Options<LS454Reads> const & /*options*/)
 {
-    reserve(inst.qualities, readLength, Exact());
-    clear(inst.qualities);
+//     std::cout << __FILE__ << ":" << __LINE__ << " -- length(read) == " << length(read) << std::endl;
+    typedef typename Value<TString>::Type TAlphabet;
 
-    for (unsigned i = 0; i < readLength; ++i) {
-        appendValue(inst.qualities, 1);  // TODO(holtgrew): Write something that makes sense.
+    SEQAN_ASSERT_EQ(length(inst.insertionNucleotides), inst.insCount);
+    SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
+    SEQAN_ASSERT_EQ(length(read), length(inst.editString) - inst.insCount);
+    
+    TString tmp;
+    reserve(tmp, length(read) + inst.insCount - inst.delCount);
+    unsigned j = 0;  // Index in read
+    unsigned k = 0;  // Index in inst.insertionNucleotides
+    unsigned l = 0;  // Index in inst.qualities
+    for (unsigned i = 0; i < length(inst.editString); ++i) {
+        SEQAN_ASSERT_LEQ(j, i);
+
+        TAlphabet c;
+        switch (inst.editString[i]) {
+            case ERROR_TYPE_MATCH:
+                SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
+                appendValue(tmp, read[j]);
+                assignQualityValue(back(tmp), inst.qualities[l++]);
+                j += 1;
+                break;
+            case ERROR_TYPE_MISMATCH:
+                SEQAN_ASSERT_FAIL("No mismatches should occur for 454 reads!");
+                break;
+            case ERROR_TYPE_INSERT:
+                appendValue(tmp, inst.insertionNucleotides[k++]);
+                assignQualityValue(back(tmp), inst.qualities[l++]);
+                break;
+            case ERROR_TYPE_DELETE:
+                j += 1;
+                break;
+            default:
+                SEQAN_ASSERT_FAIL("Invalid error type.");
+        }
     }
+    SEQAN_ASSERT_EQ(j, length(read));
+
+    move(read, tmp);
 }
 
-#endif SIMULATE_454_H_
+#endif  // SIMULATE_454_H_

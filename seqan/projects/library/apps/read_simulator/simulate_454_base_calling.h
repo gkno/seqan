@@ -55,7 +55,7 @@ dispatchDensityFunction(ThresholdMatrix const & matrix, unsigned r, double x)
 {
     if (r == 0)
 //         return lognormalDensityF(x, 0.23, 0.15);
-        return normalDensityF(x, 0, 0.01);  // TODO(holtgrew): Using this for now until Huson answers.
+        return normalDensityF(x, 0, 0.15);  // TODO(holtgrew): Using this for now until Huson answers.
     else
         return normalDensityF(x, r, (matrix._useSqrt ? sqrt(r) : r));
 }
@@ -96,7 +96,7 @@ computeThreshold(ThresholdMatrix const & matrix, unsigned r1, unsigned r2)
 
     // Now, search for the intersection point.
     while (true) {
-        SEQAN_ASSERT_LT_MSG(i++, 1000, "Too many iterations (%u)! r1 = %u, r2 = %u.", i, r1, r2);
+        SEQAN_ASSERT_LT_MSG(i++, 1000u, "Too many iterations (%u)! r1 = %u, r2 = %u.", i, r1, r2);
 //         std::cout << "i == " << i << std::endl;
 
         double center = (left + right) / 2;
@@ -144,7 +144,7 @@ inline double
 getThreshold(ThresholdMatrix const & matrix, unsigned r1, unsigned r2)
 {
 //     std::cout << "getThreshold(matrix, r1=" << r1 << ", r2=" << r2 << ")" << std::endl;
-    if (matrix._size < r1 || matrix._size < r2)
+    if (matrix._size <= r1 || matrix._size <= r2)
         extendThresholds(matrix, _max(r1, r2) + 1);
     return matrix._data[r1 * matrix._size + r2];
 }

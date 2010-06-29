@@ -578,7 +578,6 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
 // pick whether to match on the forward or reverse strand
 // simulate edit string
 // build quality values
-//   Juliane Dohm, MPI Solexa quality...
 // possibly adjust mate if left read has insert at the beginning or right read has insert at the right
 template <typename TReadsTag>
 int buildReadSimulationInstruction(
@@ -612,33 +611,18 @@ int buildReadSimulationInstruction(
             inst.isForward = false;
         else
             inst.isForward = mtRandDouble() < 0.5 ? true : false;
-        // Pick a read length, possibly randomly.
-        // TODO(holtgrew): This only relates to the length of the infix of the haplotype! CHECK THAT THIS WORKS FOR BOTH 454 AND ILLUMINA SIMULATION.
+        // Pick the length in the haplotype infix the read comes from, possibly randomly.
         unsigned readLength = pickReadLength(options);
-        // Pick a start position.
+        // This cannot work if the haplotype is shorter than the length of the read to simulate.
         if (length(haplotype[inst.contigId]) < readLength) {
             std::cerr << "ERROR: haplotype (== " << length(haplotype[inst.contigId]) << ") < read length!" << std::endl;
             return 1;
         }
+        // Pick a start and end position.
         inst.beginPos = mtRand() % (length(haplotype[inst.contigId]) - readLength);
         inst.endPos = inst.beginPos + readLength;
-        // Build edit string.
-        buildEditString(inst, readLength, haplotype[inst.contigId], parameters, options);
-        // Build quality values.
-        buildQualityValues(inst, readLength, parameters, options);
-        // If the number of reads does not equal the number of inserts
-        // then we have to adjust the read positions.
-        if (inst.delCount != inst.insCount) {
-            int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);
-            inst.endPos += delta;
-            if (inst.endPos > length(haplotype[inst.contigId])) {
-                delta = inst.endPos - length(haplotype[inst.contigId]);
-                inst.endPos -= delta;
-                inst.beginPos -= delta;
-            }
-            SEQAN_ASSERT_EQ(inst.endPos - inst.beginPos + inst.insCount - inst.delCount,
-                            readLength);
-        }
+        // Simulate the read with these parameters.
+        buildSimulationInstructions(inst, readLength, haplotype[inst.contigId], parameters, options);
         // Append read to result list.
         appendValue(instructions, inst);
 
@@ -663,32 +647,8 @@ int buildReadSimulationInstruction(
                     std::cerr << "INFO: Mate did not fit! Repeating..." << std::endl;
                 continue;
             }
-            // Build edit string.
-            buildEditString(inst, readLength, haplotype[inst.contigId], parameters, options);
-            // If there were != inserts and deletes then we have to adjust
-            // the mate reads' boundaries but keep the library length the
-            // same.
-            if (inst.delCount != inst.insCount) {
-                int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);
-                //                     std::cout << __LINE__ << " delta == " << delta << std::endl;
-                inst.endPos += delta;
-                if (inst.endPos > length(haplotype[inst.contigId])) {
-                    delta = inst.endPos - length(haplotype[inst.contigId]);
-                    //                         std::cout << __LINE__ << " delta == " << delta << std::endl;
-                    inst.endPos -= delta;
-                    inst.beginPos -= delta;
-                }
-            }
-            // Make sure to keep the library length.
-            if (inst.endPos - back(instructions).beginPos != options.libraryLengthMean) {
-                int delta = static_cast<__int64>(inst.endPos) - static_cast<__int64>(back(instructions).beginPos) - static_cast<__int64>(options.libraryLengthMean);
-                inst.beginPos -= delta;
-                inst.endPos -= delta;
-            }
-            SEQAN_ASSERT_EQ(inst.endPos - inst.beginPos + inst.insCount - inst.delCount,
-                            readLength);
-            // Build quality values.
-            buildQualityValues(inst, readLength, parameters, options);
+            // Simulate the read with these parameters.
+            buildSimulationInstructions(inst, readLength, haplotype[inst.contigId], parameters, options);
             // Append read to result list.
             appendValue(instructions, inst);
         }

@@ -161,7 +161,7 @@ unsigned pickReadLength(Options<IlluminaReads> const & options)
 }
 
 template <typename TContig>
-void buildEditString(ReadSimulationInstruction<IlluminaReads> & inst, unsigned readLength, TContig const & /*contig*/, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
+void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst, unsigned readLength, TContig const & contig, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
     String<double> errorProbabilities = parameters.errorDistribution;
     
     SEQAN_ASSERT_EQ(readLength * 4, length(errorProbabilities));
@@ -170,6 +170,9 @@ void buildEditString(ReadSimulationInstruction<IlluminaReads> & inst, unsigned r
     inst.delCount = 0;
     inst.insCount = 0;
 
+    //
+    // Build Edit String.
+    //
     for (unsigned i = 0; i < readLength; /*NOP*/) {
         double x = mtRandDouble();
         double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
@@ -209,17 +212,36 @@ void buildEditString(ReadSimulationInstruction<IlluminaReads> & inst, unsigned r
         }
     }
     SEQAN_ASSERT_EQ(readLength, length(inst.editString) - inst.delCount);
-}
 
 
-void buildQualityValues(ReadSimulationInstruction<IlluminaReads> & inst, unsigned /*readLength*/, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
-    String<double> errorProbabilities = parameters.errorDistribution;
-    
+    //
+    // Adjust Positions.
+    //
+
+    // If the number of reads does not equal the number of inserts
+    // then we have to adjust the read positions.
+    if (inst.delCount != inst.insCount) {
+        int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);
+        inst.endPos += delta;
+        if (inst.endPos > length(contig)) {
+            delta = inst.endPos - length(contig);
+            inst.endPos -= delta;
+            inst.beginPos -= delta;
+        }
+        SEQAN_ASSERT_EQ(inst.endPos - inst.beginPos + inst.insCount - inst.delCount,
+                        readLength);
+    }
+
+    //
+    // Quality Simulation.
+    //
+
     SEQAN_ASSERT_GT(length(inst.editString), 0u);
     clear(inst.qualities);
     fill(inst.qualities, length(inst.editString), 0, Exact());
     String<double> tmp;
     fill(tmp, inst.endPos - inst.beginPos + inst.delCount, 0, Exact());
+
 
     // TODO(holtgrew): Quality computation is HIGHLY bogus.
     //
@@ -270,6 +292,7 @@ void buildQualityValues(ReadSimulationInstruction<IlluminaReads> & inst, unsigne
         }
     }
 }
+
 
 template <typename TString>
 void applySimulationInstructions(TString & read, ReadSimulationInstruction<IlluminaReads> const & inst, Options<IlluminaReads> const & options)
