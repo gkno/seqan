@@ -1415,7 +1415,7 @@ typedef SimpleType <unsigned char, _Dna5Q> Dna5Q;
 static const unsigned char _Dna5QValueN = 252;								// value representing N
 
 template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };				// considering nucleotides + N
-template <> struct _InternalValueSize< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides + N) x Quality 0..62
+template <> struct _InternalValueSize< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides x Quality 0..62) + N
 template <> struct BitsPerValue< Dna5Q > { enum { VALUE = 8 }; };
 
 template <>
@@ -2099,12 +2099,16 @@ void convertQuality(Ascii & c, int q)
 inline 
 void assignQualityValue(DnaQ &c, int q)
 {
+    if (q >= _InternalValueSize<DnaQ>::VALUE / 4)
+        q = (_InternalValueSize<DnaQ>::VALUE / 4) - 1;
 	c.value = (c.value & 3) | (q << 2);
 }
 
 inline 
 void assignQualityValue(Dna5Q &c, int q) 
 {
+    if (q >= _InternalValueSize<Dna5Q>::VALUE / 4)
+        q = (_InternalValueSize<Dna5Q>::VALUE / 4) - 1;
 	if (c.value != _Dna5QValueN)
 		c.value = (c.value & 3) | (q << 2);
 }
@@ -2112,13 +2116,19 @@ void assignQualityValue(Dna5Q &c, int q)
 inline 
 void assignQualityValue(DnaQ &c, Ascii q)
 {
-	assignQualityValue(c, (int)(q - '0'));
+    int q1 = static_cast<int>(q - '0');
+    if (q1 >= _InternalValueSize<DnaQ>::VALUE / 4)
+        q1 = (_InternalValueSize<DnaQ>::VALUE / 4) - 1;
+	assignQualityValue(c, q1);
 }
 
 inline 
 void assignQualityValue(Dna5Q &c, Ascii q) 
 {
-	assignQualityValue(c, (int)(q - '0'));
+    int q1 = static_cast<int>(q - '0');
+    if (q1 >= _InternalValueSize<Dna5Q>::VALUE / 4)
+        q1 = (_InternalValueSize<Dna5Q>::VALUE / 4) - 1;
+	assignQualityValue(c, q1);
 }
 
 
