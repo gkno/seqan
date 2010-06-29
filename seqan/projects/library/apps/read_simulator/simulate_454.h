@@ -183,6 +183,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, u
             double l = homopolymerLength;
             double sigma = options.k * (options.sqrtInStdDev ? sqrt(l) : l);
             double intensity = _max(0.0, normRand(homopolymerLength, sigma));
+            intensity += fabs(_max(0.0, normRand(0, 0.15))); // Add noise. TODO(holtgrew): Correct to lognormal when Huson answered.
             appendValue(observedIntensities, intensity);
             appendValue(realBaseCount, homopolymerLength);
             // Get begin pos and length of next homopolymer.
@@ -200,7 +201,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, u
 //             static const double negativeFlowStdDev = 0.15;
 //             double intensity = lognormRand(negativeFlowMean, negativeFlowStdDev);
             // TODO(holtgrew): Use something that makes more sense for now.
-            double intensity = _max(0.0, normRand(0, 0.01));
+            double intensity = fabs(_max(0.0, normRand(0, 0.15)));
             appendValue(observedIntensities, intensity);
             appendValue(realBaseCount, 0);
         }
