@@ -33,7 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #else
 
-#define SEQAN_DO_SYS(_cond) ((void)_cond)
+#define SEQAN_DO_SYS(_cond) do { (void) _cond; } while (false)
 #define SEQAN_DO_SYS1(_cond) SEQAN_DO_SYS(_cond)
 #define SEQAN_DO_SYS2(_cond, _comment) SEQAN_DO_SYS(_cond)
 
