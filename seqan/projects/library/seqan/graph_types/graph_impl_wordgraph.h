@@ -152,10 +152,11 @@ template<typename TAlphabet, typename TSpec, typename TVertexDescriptor>
 inline void
 removeEdge(Graph<Automaton<TAlphabet, String<TAlphabet>, WordGraph<TSpec> > >& g, 
 		TVertexDescriptor const source, 
-		TVertexDescriptor const /*target*/,
+		TVertexDescriptor const target,
 		String<TAlphabet> const& label) 
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+	(void)target;  // In case it is compiled without assertions.
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, source) == true)
 	SEQAN_ASSERT(idInUse(g.data_id_managerV, target) == true)
 
