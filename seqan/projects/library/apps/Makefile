@@ -1,75 +1,51 @@
 SEQAN_BASE = ..
 
-# CXX = /home/takifugu2/data/teaching/mriese/bin/myGcc2/bin/g++
-
 # Link against runtime library on Linux systems
 OS_NAME=$(shell uname)
 ifeq ($(OS_NAME),Linux)
   LDFLAGS += -lrt
 endif
 
-######################## Name ##############################################################
+tbb_root?=../extra/tbb
 
-# 1.4.2 1.5.2 1.6
-VERSION = 1
+#check, if tbb_root is not absolute path (the filter keeps only /* paths)
+ifeq ($(filter /% $(SLASH)%, $(subst :, ,$(tbb_root)) ),)
+    # also changes related variables like work_dir
+    override tbb_root := $(CWD)$(SLASH)..
+    export TBB21_INSTALL_DIR := $(tbb_root)
+endif
 
-# tanne sequoia
-SERVER = mac
+# explicitly compile for a 32 or 64 bit platform
+#CXXFLAGS += -m32
+#CXXFLAGS += -m64
 
-FULL_NAME = razerMC-${VERSION}-${SERVER}
-# FULL_NAME = razersWindow-${SERVER}
-
-######################## My Flags ##########################################################
-# Compile window version
-# CXXFLAGS += -D RAZERS_WINDOW
-
-# Compile parallel version choose one of the following versions: A, B, C
-CXXFLAGS += -D RAZERS_PARALLEL_READS -D SEQAN_PARALLEL -fopenmp
-
-# Compile version A (1.4.2): with which waits after each window
-# CXXFLAGS += -D RAZERS_PARALLEL_READS_WAIT_AFTER_WINDOW
-# VERSION = 1.4.2
-
-# Compile verstion B (1.5.2): with flexible verification blocks
-# CXXFLAGS += -D RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS
-# VERSION = 1.5.2
-
-# Debug output for that option
-# CXXFLAGS += -D FLEX_TIMER
-
-# Sort and Partition hits with accuracy
-# CXXFLAGS += -D RAZER_USE_ACCURACY
-
-# Take time for sorting in Flex version
-# CXXFLAGS += -D RAZER_SORT_TIMER
-
-# Compile version C (1.6): that runs independent and does work stealing in the end
-CXXFLAGS += -D RAZERS_PARALLEL_READS_INDEPENDENT
-VERSION = 1.6.3
-
-#################### General Flags ##########################################################
-# Optimization
-CXXFLAGS += -O3
-
-# Parallel sort
-#CXXFLAGS += -D_GLIBCXX_PARALLEL
-
-# Debug
-# CXXFLAGS += -g -save-temps
-
-# Library
 CXXFLAGS += -I$(SEQAN_BASE)
-
-# Seqan Flags
+#CXXFLAGS += -I~/Documents/Development/
+CXXFLAGS += -O9 -fopenmp
+#CXXFLAGS += -O0 -g
 CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
-CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 ${CXXEXTRAFLAGS}
+CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CXXFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
+CXXFLAGS += ${CXXEXTRAFLAGS}
 
-razerMC:	check_seqan_base razers3/razers
-	cp razers3/razers ~/masterKram/bin/${FULL_NAME}
+# Intel Threading Building Blocks
+#CXXFLAGS += -I$(SEQAN_BASE)/extra/tbb/include/
+#LDFLAGS += -L$(SEQAN_BASE)/extra/tbb/build/macos_em64t_gcc_cc4.0.1_os10.5.5_debug/ -ltbb_debug -lpthread
 
-test:	CXXFLAGS += -D SEQAN_ENABLE_TESTING
-test:	check_seqan_base razers3/test_razers3/test_razers3
-	./razers3/test_razers3/test_razers3
+TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChooser razers/razers razers2/razers pair_align/pair_align micro_razers/micro_razers tree_recon/tree_recon #transquant/transquant
+
+all:           check_seqan_base $(TARGETS)
+dfi:           check_seqan_base dfi/dfi
+razers:        check_seqan_base razers/razers razers/paramChooser
+razers2:       check_seqan_base razers2/razers
+razers3:       check_seqan_base razers3/razers
+micro_razers:  check_seqan_base micro_razers/micro_razers
+seqan_tcoffee: check_seqan_base seqan_tcoffee/seqan_tcoffee
+seqcons:       check_seqan_base seqcons/seqcons
+pair_align:    check_seqan_base pair_align/pair_align
+tree_recon:    check_seqan_base tree_recon/tree_recon
+transquant:    check_seqan_base transquant/transquant transquant/rectifier transquant/transsplice
+insegt:        check_seqan_base insegt/insegt
 
 check_seqan_base:
 	@if [ ! -d "$(SEQAN_BASE)/seqan" ]; then \
