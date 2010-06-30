@@ -10,9 +10,17 @@ int main(int argc, const char *argv[])
 	typedef String<Dna> TSequence;
 	typedef StringSet<TSequence> TSequenceSet;
 	
+	if(argc < 3)
+	{
+		::std::cout << "\nAt least two Fasta sequence files need to be specified.\n\n";
+		::std::cout << "Usage: ./segmentalignment <seq1.fa> <seq2.fa> ...\n\n";
+		return 1;
+	}
+	
 	TSequenceSet seqs;
 	for(int i = 1; i < argc; ++i)
 		appendValue(seqs, String<Dna, FileReader<Fasta> >(argv[i]));
+	
 	
 	typedef Fragment<> TMatch;
 	String<TMatch> matches;
