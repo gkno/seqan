@@ -1804,11 +1804,7 @@ windowFindNext(
 	Finder<THaystack, Swift<TSpec> > &finder,
 	Pattern<TIndex, Swift<TSpec> > &pattern, 
 	TSize finderWindowLength
-#ifdef RAZERS_TIMER
-    ,
-    Pair<int, int>& posLength	// weese: ifdefs in signatures are eval, and should be removed
-#endif
-               )
+	)
 {
 	SEQAN_CHECKPOINT
 	
@@ -1820,10 +1816,6 @@ windowFindNext(
     
 	// all previous matches reported -> search new ones
 	clear(finder.hits);
-
-#ifdef RAZERS_TIMER
-    posLength.i1 = finder.curPos;
-#endif
     
 	THstkPos windowEnd = finder.curPos + finderWindowLength;
 	// iterate over all non-repeat regions within the window
@@ -1831,10 +1823,6 @@ windowFindNext(
 	{
 		THstkPos localEnd = finder.endPos;
 		if (localEnd > windowEnd) localEnd = windowEnd;
-
-#ifdef RAZERS_TIMER
-        posLength.i2 += localEnd - finder.curPos;
-#endif
         
 		// filter a non-repeat region within the window
 		TShape &shape = pattern.shape;
