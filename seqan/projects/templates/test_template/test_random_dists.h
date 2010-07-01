@@ -127,4 +127,54 @@ SEQAN_DEFINE_TEST(test_random_lognormal_pick)
     }
 }
 
+SEQAN_DEFINE_TEST(test_random_uniform_int_constructors)
+{
+    using namespace seqan;
+
+    PDF<Uniform<int> > pdf(-10, 10);
+}
+
+SEQAN_DEFINE_TEST(test_random_uniform_int_pick)
+{
+    using namespace seqan;
+
+    RNG<MersenneTwister> mt(42);
+    PDF<Uniform<int> > pdf(-10, 10);
+
+    int sum = 0;
+    for (unsigned i = 0; i < 100000; ++i) {
+        int x = pickRandomNumber(mt, pdf);
+        sum += x;
+        SEQAN_ASSERT_GEQ(x, -10);
+        SEQAN_ASSERT_LEQ(x, 10);
+    }
+
+    SEQAN_ASSERT_LEQ(fabs(sum / 100000.0), 0.02);
+}
+
+SEQAN_DEFINE_TEST(test_random_uniform_double_constructors)
+{
+    using namespace seqan;
+
+    PDF<Uniform<int> > pdf(0, 1);
+}
+
+SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
+{
+    using namespace seqan;
+
+    RNG<MersenneTwister> mt(42);
+    PDF<Uniform<double> > pdf(0, 1);
+
+    double sum;
+    for (unsigned i = 0; i < 10000; ++i) {
+        double x = pickRandomNumber(mt, pdf);
+        sum += x;
+        SEQAN_ASSERT_GEQ(x, -10);
+        SEQAN_ASSERT_LEQ(x, 10);
+    }
+
+    SEQAN_ASSERT_LEQ(fabs(sum / 10000.0 - 0.5), 0.02);
+}
+
 #endif  // TEST_RANDOM_TEST_RANDOM_DISTS_H_

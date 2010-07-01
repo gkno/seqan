@@ -89,7 +89,7 @@ struct Value<const PDF<LogNormal> > : Value<PDF<LogNormal> > {};
 template <typename TRandomNumberGenerator>
 inline
 typename Value<PDF<LogNormal> >::Type
-pickRandomNumber(TRandomNumberGenerator & rng, PDF<LogNormal> & pdf)
+pickRandomNumber(TRandomNumberGenerator & rng, PDF<LogNormal> const & pdf)
 {
     SEQAN_CHECKPOINT;
     return exp(pickRandomNumber(rng, pdf._normalDist));
