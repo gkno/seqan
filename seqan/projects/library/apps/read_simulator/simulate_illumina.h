@@ -155,13 +155,14 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
     return 0;
 }
 
-unsigned pickReadLength(Options<IlluminaReads> const & options)
+template <typename TRNG>
+unsigned pickReadLength(TRNG const &, Options<IlluminaReads> const & options)
 {
     return options.readLength;
 }
 
-template <typename TContig>
-void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst, unsigned readLength, TContig const & contig, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
+template <typename TRNG, typename TContig>
+void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst, TRNG & rng, unsigned readLength, TContig const & contig, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
     String<double> errorProbabilities = parameters.errorDistribution;
     
     SEQAN_ASSERT_EQ(readLength * 4, length(errorProbabilities));
@@ -174,7 +175,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     // Build Edit String.
     //
     for (unsigned i = 0; i < readLength; /*NOP*/) {
-        double x = mtRandDouble();
+        double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
         double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
         double pMismatch = errorProbabilities[i * 4 + ERROR_TYPE_MISMATCH];
         double pInsert   = errorProbabilities[i * 4 + ERROR_TYPE_INSERT];
@@ -262,7 +263,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
         SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
         if (inst.editString[i] == ERROR_TYPE_MATCH || inst.editString[i] == ERROR_TYPE_MISMATCH) {
             double p = 1 - errorProbabilities[j * 4 + ERROR_TYPE_MATCH];
-            double delta = mtRandDouble() * 2 * options.qualityErrorFactor * p;
+            double delta = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * 2 * options.qualityErrorFactor * p;
             double x = p - options.qualityErrorFactor * p + delta;
             int score = -10 * std::log10(x);
             if (inst.editString[i] == ERROR_TYPE_MISMATCH)
@@ -294,8 +295,8 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
 }
 
 
-template <typename TString>
-void applySimulationInstructions(TString & read, ReadSimulationInstruction<IlluminaReads> const & inst, Options<IlluminaReads> const & options)
+template <typename TRNG, typename TString>
+void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstruction<IlluminaReads> const & inst, Options<IlluminaReads> const & options)
 {
     typedef typename Value<TString>::Type TAlphabet;
 
@@ -316,7 +317,7 @@ void applySimulationInstructions(TString & read, ReadSimulationInstruction<Illum
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(mtRandDouble() * (ValueSize<TAlphabet>::VALUE - 1));
+                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * (ValueSize<TAlphabet>::VALUE - 1));
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (c == read[j])
                     c = TAlphabet(ordValue(c) + 1);
@@ -325,7 +326,7 @@ void applySimulationInstructions(TString & read, ReadSimulationInstruction<Illum
                 j += 1;
                 break;
             case ERROR_TYPE_INSERT:
-                appendValue(tmp, TAlphabet(mtRandDouble() * ValueSize<TAlphabet>::VALUE));
+                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * ValueSize<TAlphabet>::VALUE));
                 assignQualityValue(back(tmp), inst.qualities[i]);
                 break;
             case ERROR_TYPE_DELETE:
