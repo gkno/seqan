@@ -73,7 +73,7 @@ struct Value<const PDF<Normal> > : Value<PDF<Normal> > {};
 template <typename TRNG>
 inline
 typename Value<PDF<Normal> >::Type
-pickRandomNumber(TRNG & rng, PDF<Normal> & pdf)
+pickRandomNumber(TRNG & rng, PDF<Normal> const & pdf)
 {
     SEQAN_CHECKPOINT;
 

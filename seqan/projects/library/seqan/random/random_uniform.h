@@ -73,7 +73,7 @@ struct Value<const PDF<Uniform<T> > > : Value<PDF<Uniform<T> > > {};
 template <typename TRNG, typename T>
 inline
 typename Value<PDF<Uniform<T> > >::Type
-_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, True const &)
+_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, True const &)
 {
     SEQAN_CHECKPOINT;
     typename Value<TRNG>::Type limit = (SupremumValue<TRNG>::VALUE / (pdf._max - pdf._min)) * (pdf._max - pdf._min);
@@ -89,7 +89,7 @@ _pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, True const &)
 template <typename TRNG, typename T>
 inline
 typename Value<PDF<Uniform<T> > >::Type
-_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, False const &)
+_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, False const &)
 {
     SEQAN_CHECKPOINT;
     T x = static_cast<T>(pickRandomNumber(rng) - InfimumValue<TRNG>::VALUE) / static_cast<T>(SupremumValue<TRNG>::VALUE - InfimumValue<TRNG>::VALUE);
@@ -102,7 +102,7 @@ _pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, False const &)
 template <typename TRNG, typename T>
 inline
 typename Value<PDF<Uniform<T> > >::Type
-pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf)
+pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf)
 {
     SEQAN_CHECKPOINT;
     return _pickRandomNumber(rng, pdf, typename IsIntegral<T>::Type());
