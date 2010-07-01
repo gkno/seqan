@@ -17,12 +17,12 @@
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  Code for normally distributed random number generation.
+  Code for uniformly distributed random number generation.
   ===========================================================================
 */
 
-#ifndef SEQAN_RANDOM_RANDOM_NORMAL_H_
-#define SEQAN_RANDOM_RANDOM_NORMAL_H_
+#ifndef SEQAN_RANDOM_RANDOM_UNIFORM_H_
+#define SEQAN_RANDOM_RANDOM_UNIFORM_H_
 
 namespace seqan {
 
@@ -30,23 +30,25 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
-struct Normal {};
+template <typename T>
+struct Uniform;
 
 // ===========================================================================
 // Classes
 // ===========================================================================
 
-template <>
-class PDF<Normal>
+template <typename T>
+class PDF<Uniform<T> >
 {
 public:
-    double _mu;
-    double _sigma;
+    T _min;
+    T _max;
 
-    PDF(double mu, double sigma)
-            : _mu(mu), _sigma(sigma)
+    PDF(T min, T max)
+            : _min(min), _max(max)
     {
         SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_LEQ(_min, _max);
     }
 };
 
@@ -54,49 +56,58 @@ public:
 // Metafunctions
 // ===========================================================================
 
-template <>
-struct Value<PDF<Normal> >
+template <typename T>
+struct Value<PDF<Uniform<T> > >
 {
-    typedef double Type;
+    typedef T Type;
 };
 
-template <>
-struct Value<const PDF<Normal> > : Value<PDF<Normal> > {};
+template <typename T>
+struct Value<const PDF<Uniform<T> > > : Value<PDF<Uniform<T> > > {};
 
 // ===========================================================================
 // Functions
 // ===========================================================================
 
-/*
-..summary:Pick a normally distributed random number.
-*/
-template <typename TRNG>
+// Pick an integral random number uniformly distributed.
+template <typename TRNG, typename T>
 inline
-typename Value<PDF<Normal> >::Type
-pickRandomNumber(TRNG & rng, PDF<Normal> & pdf)
+typename Value<PDF<Uniform<T> > >::Type
+_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, True const &)
 {
     SEQAN_CHECKPOINT;
+    typename Value<TRNG>::Type limit = (SupremumValue<TRNG>::VALUE / (pdf._max - pdf._min)) * (pdf._max - pdf._min);
+    typename Value<TRNG>::Type x;
+    do {
+        x = pickRandomNumber(rng);
+    } while (x > limit);
+    T y = x % (pdf._max - pdf._min + 1);
+    return y + pdf._min;
+}
 
-    // Normal Distribution Heuristics, ported from Python.
-    //
-    // Kinderman and Monahan method. Reference: Kinderman, A.J. and
-    // Monahan, J.F., "Computer generation of random variables using
-    // the ratio of uniform deviates", ACM Trans Math Software, 3,
-    // (1977), pp257-260.
+// Pick a continuous random number uniformly distributed.
+template <typename TRNG, typename T>
+inline
+typename Value<PDF<Uniform<T> > >::Type
+_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf, False const &)
+{
+    SEQAN_CHECKPOINT;
+    T x = static_cast<T>(pickRandomNumber(rng) - InfimumValue<TRNG>::VALUE) / static_cast<T>(SupremumValue<TRNG>::VALUE - InfimumValue<TRNG>::VALUE);
+    return pdf._min + (x - pdf._min) * (pdf._max - pdf._min);
+}
 
-    double z;
-    PDF<Uniform<double> > pdfUniform(0, 1);
-    while (true) {
-        double u1 = pickRandomNumber(rng, pdfUniform);
-        double u2 = 1 - pickRandomNumber(rng, pdfUniform);
-        z = SEQAN_NV_MAGICCONST * (u1 - 0.5) / u2;
-        double zz = z * z / 4.0;
-        if (zz < -::std::log10(u2))
-            break;
-    }
-    return pdf._mu + z * pdf._sigma;
+/*
+..summary:Pick a uniformly distributed random number.
+*/
+template <typename TRNG, typename T>
+inline
+typename Value<PDF<Uniform<T> > >::Type
+pickRandomNumber(TRNG & rng, PDF<Uniform<T> > & pdf)
+{
+    SEQAN_CHECKPOINT;
+    return _pickRandomNumber(rng, pdf, typename IsIntegral<T>::Type());
 }
 
 }  // namespace seqan
 
-#endif  // SEQAN_RANDOM_RANDOM_NORMAL_H_
+#endif  // SEQAN_RANDOM_RANDOM_UNIFORM_H_
