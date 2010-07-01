@@ -114,9 +114,9 @@ struct Options<Global>
               libraryLengthMean(1000),
               libraryLengthError(100),
               numHaplotypes(1),
-              haplotypeSnpRate(0.01),
-              haplotypeIndelRate(0.01),
-              haplotypeIndelRangeMin(4),
+              haplotypeSnpRate(0.001),
+              haplotypeIndelRate(0.001),
+              haplotypeIndelRangeMin(1),
               haplotypeIndelRangeMax(6)
     {}
 };
@@ -231,9 +231,9 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addSection(parser, "Haplotype Options");
 
     addOption(parser, CommandLineOption("hn", "num-haplotypes", "Number of haplotypes to simulate.  Default: 1.", OptionType::Integer));
-    addOption(parser, CommandLineOption("hs", "haplotype-snp-rate", "Haplotype SNP rate.  Default: 0.01.", OptionType::Double));
-    addOption(parser, CommandLineOption("hi", "haplotype-indel-rate", "Haplotype indel rate.  Default: 0.01.", OptionType::Double));
-    addOption(parser, CommandLineOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.  Default: 4.", OptionType::Integer));
+    addOption(parser, CommandLineOption("hs", "haplotype-snp-rate", "Haplotype SNP rate.  Default: 0.001.", OptionType::Double));
+    addOption(parser, CommandLineOption("hi", "haplotype-indel-rate", "Haplotype indel rate.  Default: 0.001.", OptionType::Double));
+    addOption(parser, CommandLineOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.  Default: 1.", OptionType::Integer));
     addOption(parser, CommandLineOption("hM", "haplotype-indel-range-max", "Haplotype indel size max.  Default: 6.", OptionType::Integer));
 
     // Need reads type and {SEQUENCE.fasta, random}.
@@ -317,7 +317,6 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     // Load or randomly generate the reference sequence.
     FragmentStore<MyFragmentStoreConfig> fragmentStore;
     if (options.useRandomSequence) {
-        // TODO(holtgrew): Make setting random output file name possible.
         referenceFilename = "random.fasta";
         std::cerr << "Generating random sequence of length " << options.randomSourceLength
                   << " to file \"" << referenceFilename << "\"." << std::endl;
