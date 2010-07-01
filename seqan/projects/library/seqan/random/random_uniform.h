@@ -106,7 +106,7 @@ pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf)
 {
     SEQAN_CHECKPOINT;
     if (pdf._min == pdf._max)
-        return pdf_min;
+        return pdf._min;
     return _pickRandomNumber(rng, pdf, typename IsIntegral<T>::Type());
 }
 
