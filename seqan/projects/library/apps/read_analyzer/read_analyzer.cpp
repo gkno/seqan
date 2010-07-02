@@ -56,11 +56,15 @@ int main(int argc, char **argv) {
     ReadEvaluationResult readResult;
     setReadLength(readResult, length(fragments.readSeqStore[0]));
     performReadEvaluation(readResult, fragments);
+    AlignmentEvaluationResult alignmentResult;
+    setReadLength(alignmentResult, length(fragments.readSeqStore[0]));
+    performAlignmentEvaluation(alignmentResult, fragments);
 
     // =======================================================================
     // Print result.
     // =======================================================================
     printReadEvaluationResults(readResult);
+    printAlignmentEvaluationResults(alignmentResult);
     
     return 0;
 }
