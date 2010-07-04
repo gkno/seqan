@@ -321,7 +321,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
 
         TContigGapAnchorsIterator contigGapsIt = begin(contigGaps);
         unsigned readPos = 0;
-        for (TReadGapAnchorsIterator readGapsIt = begin(readGaps); readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt, ++readPos) {
+        for (TReadGapAnchorsIterator readGapsIt = begin(readGaps); readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt) {
             if (isGap(readGapsIt) && isGap(contigGapsIt))
                 continue;  // Skip paddings.
             unsigned reportedPos = flipped ? readPos : readLength - readPos;
@@ -331,9 +331,11 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
             } else if (isGap(contigGapsIt)) {
                 // Insert
                 countInsertAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt));
+                readPos += 1;
             } else {
                 // Match / Mismatch.
                 countMismatchAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), convert<Dna5Q>(*readGapsIt));
+                readPos += 1;
             }
         }
     }
