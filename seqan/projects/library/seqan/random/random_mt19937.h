@@ -79,8 +79,10 @@ struct SupremumValue<RNG<MersenneTwister> >
 {
     typedef RNG<MersenneTwister> _TMT;
     typedef Value<_TMT>::Type _TValue;
-    static const _TValue VALUE = SupremumValue<_TValue>::VALUE;
+    static const _TValue VALUE;
 };
+
+const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
 
 template <>
 struct SupremumValue<const RNG<MersenneTwister> > : SupremumValue<RNG<MersenneTwister> > {};
@@ -90,8 +92,11 @@ struct InfimumValue<RNG<MersenneTwister> >
 {
     typedef RNG<MersenneTwister> _TMT;
     typedef Value<_TMT>::Type _TValue;
-    static const _TValue VALUE = InfimumValue<_TValue>::VALUE;
+    static const _TValue VALUE;
 };
+
+const Value<RNG<MersenneTwister> >::Type InfimumValue<RNG<MersenneTwister> >::VALUE = InfimumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
+
 
 template <>
 struct InfimumValue<const RNG<MersenneTwister> > : InfimumValue<RNG<MersenneTwister> > {};
