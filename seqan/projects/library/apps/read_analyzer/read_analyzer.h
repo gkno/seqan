@@ -312,23 +312,28 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
         setBeginPosition(contigGaps, _min(it->beginPos, it->endPos));
         setEndPosition(contigGaps, _max(it->beginPos, it->endPos));
         // Reverse-complement readSeq in-place.
-        if (it->beginPos > it->endPos)
+        unsigned readLength = length(readSeq);
+        bool flipped = false;
+        if (it->beginPos > it->endPos) {
+            flipped = true;
             reverseComplementInPlace(readSeq);
+        }
 
         TContigGapAnchorsIterator contigGapsIt = begin(contigGaps);
         unsigned readPos = 0;
         for (TReadGapAnchorsIterator readGapsIt = begin(readGaps); readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt, ++readPos) {
             if (isGap(readGapsIt) && isGap(contigGapsIt))
                 continue;  // Skip paddings.
+            unsigned reportedPos = flipped ? readPos : readLength - readPos;
             if (isGap(readGapsIt)) {
                 // Deletion
-                countDeleteAtPositionWithBase(result, readPos, convert<Dna5Q>(*contigGapsIt));
+                countDeleteAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt));
             } else if (isGap(contigGapsIt)) {
                 // Insert
-                countInsertAtPositionWithBase(result, readPos, convert<Dna5Q>(*contigGapsIt));
+                countInsertAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt));
             } else {
                 // Match / Mismatch.
-                countMismatchAtPositionWithBase(result, readPos, convert<Dna5Q>(*contigGapsIt), convert<Dna5Q>(*readGapsIt));
+                countMismatchAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), convert<Dna5Q>(*readGapsIt));
             }
         }
     }
