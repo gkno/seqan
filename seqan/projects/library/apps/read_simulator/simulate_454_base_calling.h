@@ -62,10 +62,12 @@ lognormalDensityF(double x, double mu, double sigma)
 inline double
 dispatchDensityFunction(ThresholdMatrix const & matrix, unsigned r, double x)
 {
-    if (r == 0)
+    if (r == 0) {
         return lognormalDensityF(x, matrix._noiseMu, matrix._noiseSigma);
-    else
-        return normalDensityF(x, r, (matrix._useSqrt ? sqrt(r) : r));
+    } else {
+        double rd = static_cast<double>(r);
+        return normalDensityF(x, rd, (matrix._useSqrt ? sqrt(rd) : rd));
+    }
 }
 
 inline double
