@@ -19,8 +19,8 @@
   Journal entries implementation using an unbalanced binary search tree.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_H_
+#ifndef SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_H_
+#define SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_H_
 
 namespace seqan {
 
@@ -666,4 +666,4 @@ void journalTreeToDot(TStream & stream, unsigned & nextId, JournalEntries<TNode,
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_H_
+#endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_H_

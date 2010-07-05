@@ -16,7 +16,7 @@
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  Tests for the sequence_journal module.  Note that we only test journaled
+  Tests for the sequence_journaled module.  Note that we only test journaled
   strings here.  In a perfect world, we would have tests for each atomic
   part of the module but for the moment, this has to suffice.  Instead of
   testing each of the many corner cases for the Journal Entries data
@@ -25,8 +25,8 @@
   ===========================================================================
 */
 
-#ifndef TEST_SEQUENCE_JOURNAL_TEST_SEQUENCE_JOURNAL_H_
-#define TEST_SEQUENCE_JOURNAL_TEST_SEQUENCE_JOURNAL_H_
+#ifndef TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_H_
+#define TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_H_
 
 #include <cstdlib>
 #include <sstream>
@@ -35,7 +35,7 @@
 #include <seqan/basic.h>
 #include <seqan/misc/misc_random.h>
 #include <seqan/sequence.h>
-#include <seqan/sequence_journal.h>
+#include <seqan/sequence_journaled.h>
 
 using namespace seqan;
 
@@ -524,156 +524,156 @@ void testJournaledStringFuzzying(TStringJournalSpec const &)
 // Tag: UnbalancedTree()
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_host) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_host) {
     testJournaledStringHost(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_clear) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_clear) {
     testJournaledStringClear(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_position) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_erase_position) {
     testJournaledStringErasePosition(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_begin_end) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_erase_begin_end) {
     testJournaledStringEraseBeginEnd(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_insert) {
     testJournaledStringInsert(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert_value) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_insert_value) {
     testJournaledStringInsertValue(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_value) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_assign_value) {
     testJournaledStringAssignValue(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_infix) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_assign_infix) {
     testJournaledStringAssignInfix(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_length) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_length) {
     testJournaledStringLength(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_virtual_to_host_position) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_virtual_to_host_position) {
     testJournaledStringVirtualToHostPosition(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_copy_constructor) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_copy_constructor) {
     testJournaledStringCopyConstructor(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_iterator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_begin_end_iterator) {
     testJournaledStringBeginEndIterator(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_const_iterator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_begin_end_const_iterator) {
     testJournaledStringBeginEndConstIterator(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_subscript_operator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_subscript_operator) {
     testJournaledStringSubscriptOperator(UnbalancedTree());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_fuzzying) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_unbalanced_tree_fuzzying) {
     testJournaledStringFuzzying(UnbalancedTree());
 }
 
 
 // Tag: SortedArray()
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_host) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_host) {
     testJournaledStringHost(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_clear) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_clear) {
     testJournaledStringClear(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_erase_position) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_erase_position) {
     testJournaledStringErasePosition(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_erase_begin_end) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_erase_begin_end) {
     testJournaledStringEraseBeginEnd(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_insert) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_insert) {
     testJournaledStringInsert(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_insert_value) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_insert_value) {
     testJournaledStringInsertValue(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_assign_value) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign_value) {
     testJournaledStringAssignValue(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_assign_infix) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_assign_infix) {
     testJournaledStringAssignInfix(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_length) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_length) {
     testJournaledStringLength(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_virtual_to_host_position) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_virtual_to_host_position) {
     testJournaledStringVirtualToHostPosition(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_copy_constructor) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_copy_constructor) {
     testJournaledStringCopyConstructor(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_iterator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_begin_end_iterator) {
     testJournaledStringBeginEndIterator(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_const_iterator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_begin_end_const_iterator) {
     testJournaledStringBeginEndConstIterator(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_subscript_operator) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_subscript_operator) {
     testJournaledStringSubscriptOperator(SortedArray());
 }
 
 
-SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_fuzzying) {
+SEQAN_DEFINE_TEST(test_sequence_journaled_sorted_array_fuzzying) {
     testJournaledStringFuzzying(SortedArray());
 }
 
 
-#endif  // TEST_SEQUENCE_JOURNAL_TEST_SEQUENCE_JOURNAL_H_
+#endif  // TEST_SEQUENCE_JOURNALED_TEST_SEQUENCE_JOURNALED_H_

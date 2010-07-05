@@ -19,8 +19,8 @@
   Journal entries implementation using a sorted string of journal elements.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_
+#ifndef SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_SORTED_ARRAY_H_
+#define SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_SORTED_ARRAY_H_
 
 namespace seqan {
 
@@ -443,4 +443,4 @@ virtualToHostPosition(JournalEntries<TNode, TJournalSpec> const & journalEntries
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_SORTED_ARRAY_H_
+#endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_SORTED_ARRAY_H_

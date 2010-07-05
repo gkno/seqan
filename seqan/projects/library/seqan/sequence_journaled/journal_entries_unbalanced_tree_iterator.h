@@ -19,8 +19,8 @@
   Code for a SearchEntries<UnorderedTree> iterator.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
+#ifndef SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
+#define SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
 
 namespace seqan {
 
@@ -515,4 +515,4 @@ operator!=(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > const 
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_
+#endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_ITERATOR_H_

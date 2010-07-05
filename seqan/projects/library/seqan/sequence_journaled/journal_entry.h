@@ -19,8 +19,8 @@
   Code for journal entries.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRY_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRY_H_
+#ifndef SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRY_H_
+#define SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRY_H_
 
 namespace seqan {
 
@@ -125,5 +125,5 @@ TStream & operator<<(TStream & stream, JournalEntry<TPos, TSize> const & entry)
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRY_H_
+#endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRY_H_
 

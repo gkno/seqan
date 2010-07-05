@@ -24,8 +24,8 @@
   balanced binary search trees.
   ==========================================================================*/
 
-#ifndef SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_
-#define SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_
+#ifndef SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_
+#define SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_
 
 namespace seqan {
 
@@ -127,4 +127,4 @@ getCargo(JournalEntriesUnorderedTreeNode<TCargo> const & node)
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEQUENCE_JOURNAL_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_
+#endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_UNBALANCED_TREE_NODE_H_

@@ -16,11 +16,11 @@
   ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ============================================================================
-  Umbrella Header for the sequence_journal module.
+  Umbrella Header for the sequence_journaleded module.
   ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SEQUENCE_JOURNAL_H
-#define SEQAN_HEADER_SEQUENCE_JOURNAL_H
+#ifndef SEQAN_HEADER_SEQUENCE_JOURNALED_H
+#define SEQAN_HEADER_SEQUENCE_JOURNALED_H
 
 // ============================================================================
 // Prerequisites.
@@ -39,23 +39,23 @@
 // Forwards.
 // ============================================================================
 
-#include <seqan/sequence_journal/sequence_journal_forwards.h>
+#include <seqan/sequence_journaled/sequence_journaled_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/sequence_journal/sequence_journal_generated_forwards.h>
+#include <seqan/sequence_journaled/sequence_journaled_generated_forwards.h>
 #endif
 
 // ============================================================================
 // Journaled Sequences.
 // ============================================================================
 
-#include <seqan/sequence_journal/journal_entry.h>
-#include <seqan/sequence_journal/journal_entries_unbalanced_tree_node.h>
-#include <seqan/sequence_journal/journal_entries_unbalanced_tree.h>
-#include <seqan/sequence_journal/journal_entries_unbalanced_tree_iterator.h>
-#include <seqan/sequence_journal/journal_entries_sorted_array.h>
-#include <seqan/sequence_journal/sequence_journal.h>
-#include <seqan/sequence_journal/sequence_journal_iterator.h>
+#include <seqan/sequence_journaled/journal_entry.h>
+#include <seqan/sequence_journaled/journal_entries_unbalanced_tree_node.h>
+#include <seqan/sequence_journaled/journal_entries_unbalanced_tree.h>
+#include <seqan/sequence_journaled/journal_entries_unbalanced_tree_iterator.h>
+#include <seqan/sequence_journaled/journal_entries_sorted_array.h>
+#include <seqan/sequence_journaled/sequence_journaled.h>
+#include <seqan/sequence_journaled/sequence_journaled_iterator.h>
 
 // ============================================================================
 // Incremental Indices.
@@ -63,4 +63,4 @@
 
 // TODO(holtgrew): Port back the incremental index stuff to the new code.
 
-#endif  // SEQAN_HEADER_SEQUENCE_JOURNAL_H
+#endif  // SEQAN_HEADER_SEQUENCE_JOURNALED_H
