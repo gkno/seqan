@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 template <typename TSpec = void>
-struct Alloc;
+struct Alloc {};
 
 
 //////////////////////////////////////////////////////////////////////////////
