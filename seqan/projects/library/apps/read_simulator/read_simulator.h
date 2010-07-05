@@ -6,7 +6,7 @@
 #include <numeric>
 
 #include <seqan/random.h>
-#include <seqan/sequence_journal.h>
+#include <seqan/sequence_journaled.h>
 
 #include "store_config.h"
 #include "util.h"
@@ -522,7 +522,7 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) 
 }
 
 template <typename TRNG>
-void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & haplotype,
+void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     TRNG & rng,
                     Options<Global> const & options) {
@@ -535,7 +535,7 @@ void buildHaplotype(StringSet<SequenceJournal<String<Dna5>, SortedArray> > & hap
         clear(haplotype[i]);
         setHost(haplotype[i], fragmentStore.contigStore[i].seq);
         String<Dna5> const & contig = fragmentStore.contigStore[i].seq;
-        SequenceJournal<String<Dna5>, SortedArray> & haplotypeContig = haplotype[i];
+        String<Dna5, Journaled<Alloc<> > > & haplotypeContig = haplotype[i];
 
         // j is position in original sequence, k is position in haplotype
         for (size_t j = 0, k = 0; j < length(contig);) {
@@ -586,7 +586,7 @@ int buildReadSimulationInstruction(
         String<ReadSimulationInstruction<TReadsTag> > & instructions,
         TRNG & rng,
         unsigned const & haplotypeId,
-        StringSet<SequenceJournal<String<Dna5>, SortedArray> > const & haplotype,
+        StringSet<String<Dna5, Journaled<Alloc<> > > > const & haplotype,
         String<double> const & relativeContigLengths,
         ModelParameters<TReadsTag> const & parameters,
         Options<TReadsTag> const & options)
@@ -724,7 +724,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     for (unsigned haplotypeId = 0; haplotypeId < options.numHaplotypes; ++haplotypeId) {
         std::cerr << "Simulating for haplotype #" << haplotypeId << "..." << std::endl;
         std::cout << "  Building haplotype..." << std::endl;
-        StringSet<SequenceJournal<String<Dna5>, SortedArray> > haplotypeContigs;
+        StringSet<String<Dna5, Journaled<Alloc<> > > > haplotypeContigs;
         buildHaplotype(haplotypeContigs, fragmentStore, rng, options);
 
         // Build partial sums over relative contig lengths so we can pick the contigs later on.

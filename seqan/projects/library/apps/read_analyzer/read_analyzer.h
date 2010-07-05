@@ -172,19 +172,19 @@ struct AlignmentEvaluationResult
 {
     // "Mismatch" also stores matches.
 
-    String<size_t> insertCountsPerBase;  // arr[base]
-    String<size_t> deleteCountsPerBase;  // arr[base]
-    String<size_t> mismatchCountsPerMismatch;  // arr[source base * 5 + target base]
+    String<double> insertCountsPerBase;  // arr[base]
+    String<double> deleteCountsPerBase;  // arr[base]
+    String<double> mismatchCountsPerMismatch;  // arr[source base * 5 + target base]
 
-    String<String<size_t> > qualityCountsForInsertPerBase;  // arr[base][quality]
-    String<String<size_t> > qualityCountsForMismatchPerBase;  // arr[src*5+tgt][quality]
+    String<String<double> > qualityCountsForInsertPerBase;  // arr[base][quality]
+    String<String<double> > qualityCountsForMismatchPerBase;  // arr[src*5+tgt][quality]
 
-    String<String<size_t> > insertCountsPerBasePerPosition;  // arr[base][pos]
-    String<String<size_t> > deleteCountsPerBasePerPosition;  // arr[base][pos]
-    String<String<size_t> > mismatchCountsPerMismatchPerPosition;  // arr[src*5+tgt][pos]
+    String<String<double> > insertCountsPerBasePerPosition;  // arr[base][pos]
+    String<String<double> > deleteCountsPerBasePerPosition;  // arr[base][pos]
+    String<String<double> > mismatchCountsPerMismatchPerPosition;  // arr[src*5+tgt][pos]
 
-    String<String<String<size_t> > > qualityCountsForInsertPerBasePerPosition;  // arr[base][quality][pos]
-    String<String<String<size_t> > > qualityCountsForMismatchPerMismatchPerPosition;  // arr[src*5+tgt][quality][pos]
+    String<String<String<double> > > qualityCountsForInsertPerBasePerPosition;  // arr[base][quality][pos]
+    String<String<String<double> > > qualityCountsForMismatchPerMismatchPerPosition;  // arr[src*5+tgt][quality][pos]
 
     AlignmentEvaluationResult() {}
 };
@@ -363,9 +363,9 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result)
         totalMatches += matches;
         totalInserts += result.insertCountsPerBase[i];
         totalDeletes += result.deleteCountsPerBase[i];
-        printf(" %9lu %9lu    %9lu %9lu\n", result.insertCountsPerBase[i], result.deleteCountsPerBase[i], mismatches, matches);
+        printf(" %9.2f %9.2f    %9.2f %9.2f\n", result.insertCountsPerBase[i], result.deleteCountsPerBase[i], mismatches, matches);
     }
-    printf("    * %9lu %9lu    %9lu %9lu\n", totalInserts, totalDeletes, totalMismatches, totalMatches);
+    printf("    * %9.2f %9.2f    %9.2f %9.2f\n", totalInserts, totalDeletes, totalMismatches, totalMatches);
 
     // Print substitution counts.
     std::cout << std::endl << std::endl << "#--file:substitution-counts.dat" << std::endl;
