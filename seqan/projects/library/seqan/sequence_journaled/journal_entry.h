@@ -97,7 +97,7 @@ struct Size<JournalEntry<TPos, TSize> >
 
 template <typename TPos, typename TSize>
 struct Size<JournalEntry<TPos, TSize> const>
-        : Position<JournalEntry<TPos, TSize> > {};
+        : Size<JournalEntry<TPos, TSize> > {};
 
 template <typename TPos, typename TSize>
 struct Position<JournalEntry<TPos, TSize> >
