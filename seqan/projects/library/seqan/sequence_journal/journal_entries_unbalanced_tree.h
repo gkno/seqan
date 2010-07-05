@@ -278,7 +278,7 @@ _addToVirtualPositionsRightOf(TNode * node,
 
 template <typename TCargo>
 inline
-typename Iterator<JournalEntries<TCargo, UnbalancedTree> const, Standard>::Type 
+typename Iterator<JournalEntries<TCargo, UnbalancedTree> const, Standard>::Type
 findInJournalEntries(JournalEntries<TCargo, UnbalancedTree> const & journalEntries,
                      typename Position<TCargo>::Type const & pos) {
     SEQAN_CHECKPOINT;

@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <map>
 #include <ostream>
-#include <string> 
+#include <string>
 #include <sstream>
 
 #include <seqan/basic.h>

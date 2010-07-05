@@ -41,35 +41,35 @@ using namespace seqan;
 
 // Test setHost(), host().
 template <typename TStringJournalSpec>
-void testSequenceJournalHost(TStringJournalSpec const &)
+void testJournaledStringHost(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal;
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString;
 
-    setHost(sequenceJournal, charStr);
-    SEQAN_ASSERT_EQ(&charStr, &host(sequenceJournal));
-    SEQAN_ASSERT_EQ(charStr, host(sequenceJournal));
+    setHost(journaledString, charStr);
+    SEQAN_ASSERT_EQ(&charStr, &host(journaledString));
+    SEQAN_ASSERT_EQ(charStr, host(journaledString));
 }
 
 
 // Test clear().
 template <typename TStringJournalSpec>
-void testSequenceJournalClear(TStringJournalSpec const &)
+void testJournaledStringClear(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    insert(sequenceJournal, 4, "!");
+    insert(journaledString, 4, "!");
     {
         std::stringstream tmp;
-        tmp << sequenceJournal;
+        tmp << journaledString;
         SEQAN_ASSERT_EQ("test!", tmp.str());
     }
 
-    clear(sequenceJournal);
+    clear(journaledString);
     {
         std::stringstream tmp;
-        tmp << sequenceJournal;
+        tmp << journaledString;
         SEQAN_ASSERT_EQ("test", tmp.str());
     }
 }
@@ -77,162 +77,163 @@ void testSequenceJournalClear(TStringJournalSpec const &)
 
 // Test erase() with position only
 template <typename TStringJournalSpec>
-void testSequenceJournalErasePosition(TStringJournalSpec const &)
+void testJournaledStringErasePosition(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    erase(sequenceJournal, 1);
+    erase(journaledString, 1);
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("tst", tmp.str());
 }
 
 
 // Test erase() with begin/end parameters.
 template <typename TStringJournalSpec>
-void testSequenceJournalEraseBeginEnd(TStringJournalSpec const &)
+void testJournaledStringEraseBeginEnd(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    erase(sequenceJournal, 1, 3);
+    erase(journaledString, 1, 3);
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("tt", tmp.str());
 }
 
 
 // Test insert().
 template <typename TStringJournalSpec>
-void testSequenceJournalInsert(TStringJournalSpec const &)
+void testJournaledStringInsert(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    insert(sequenceJournal, 1, "!!");
+    insert(journaledString, 1, "!!");
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("t!!est", tmp.str());
 }
 
 
 // Test insertValue().
 template <typename TStringJournalSpec>
-void testSequenceJournalInsertValue(TStringJournalSpec const &)
+void testJournaledStringInsertValue(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    insert(sequenceJournal, 2, 'X');
+    insert(journaledString, 2, 'X');
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("teXst", tmp.str());
 }
 
 
 // Test assignValue().
 template <typename TStringJournalSpec>
-void testSequenceJournalAssignValue(TStringJournalSpec const &)
+void testJournaledStringAssignValue(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    assignValue(sequenceJournal, 2, 'X');
+    assignValue(journaledString, 2, 'X');
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("teXt", tmp.str());
 }
 
 
 // Test assignInfix().
 template <typename TStringJournalSpec>
-void testSequenceJournalAssignInfix(TStringJournalSpec const &)
+void testJournaledStringAssignInfix(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    assignInfix(sequenceJournal, 2, 4, "quick brown fox");
+    assignInfix(journaledString, 2, 4, "quick brown fox");
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     SEQAN_ASSERT_EQ("tequick brown fox", tmp.str());
 }
 
 
 // Test length().
 template <typename TStringJournalSpec>
-void testSequenceJournalLength(TStringJournalSpec const &)
+void testJournaledStringLength(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    assignInfix(sequenceJournal, 2, 3, "XX");
-    SEQAN_ASSERT_EQ(length("teXXt"), length(sequenceJournal));
+    assignInfix(journaledString, 2, 3, "XX");
+    SEQAN_ASSERT_EQ(length("teXXt"), length(journaledString));
 }
 
 
 // Test conversion of virtual to host position.
 template <typename TStringJournalSpec>
-void testSequenceJournalVirtualToHostPosition(TStringJournalSpec const &)
+void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
 
-    insertValue(sequenceJournal, 0, '!');
-    erase(sequenceJournal, 2);
-    insertValue(sequenceJournal, 4, '!');
+    insertValue(journaledString, 0, '!');
+    erase(journaledString, 2);
+    insertValue(journaledString, 4, '!');
 
-    // sequenceJournal == !tst!
+    // journaledString == !tst!
     //
     //                           01234
     // alignment with original  "test"
     //                         "!t-st!"
     //                          01 2345
 
-    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(sequenceJournal, 0));
-    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(sequenceJournal, 1));
-    SEQAN_ASSERT_EQ(2u, virtualToHostPosition(sequenceJournal, 2));
-    SEQAN_ASSERT_EQ(3u, virtualToHostPosition(sequenceJournal, 3));
-    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(sequenceJournal, 4));
-    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(sequenceJournal, 5));
+    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
+    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 1));
+    SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 2));
+    SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 3));
+    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 4));
+    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 5));
 }
 
 
 template <typename TStringJournalSpec>
-void testSequenceJournalCopyConstructor(TStringJournalSpec const &)
+void testJournaledStringCopyConstructor(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> * sequenceJournalPtr = new SequenceJournal<CharString, TStringJournalSpec>(charStr);
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(*sequenceJournalPtr);
-    delete sequenceJournalPtr;
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    TJournaledString * journaledStringPtr = new TJournaledString(charStr);
+    TJournaledString journaledString(*journaledStringPtr);
+    delete journaledStringPtr;
 
-    insert(sequenceJournal, 1, "XX");
+    insert(journaledString, 1, "XX");
 
     std::stringstream ss;
-    ss << sequenceJournal;
+    ss << journaledString;
     SEQAN_ASSERT_EQ("tXXest", ss.str());
 }
 
 
 template <typename TStringJournalSpec>
-void testSequenceJournalBeginEndIterator(TStringJournalSpec const &)
+void testJournaledStringBeginEndIterator(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    typedef SequenceJournal<CharString, TStringJournalSpec> TSequenceJournal;
-    TSequenceJournal sequenceJournal(charStr);
-    insert(sequenceJournal, 2, 'X');
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
+    TJournaledString journaledString(charStr);
+    insert(journaledString, 2, 'X');
 
-    typedef typename Iterator<TSequenceJournal, Standard>::Type TIterator;
+    typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
 
     {  // Test pre-increment iteration.
         CharString buffer;
-        for (TIterator it = begin(sequenceJournal), itend = end(sequenceJournal); it != itend; ++it)
+        for (TIterator it = begin(journaledString), itend = end(journaledString); it != itend; ++it)
             appendValue(buffer, *it);
         SEQAN_ASSERT_EQ("teXst", buffer);
     }
     {  // Test post-increment iteration.
         CharString buffer;
-        for (TIterator it = begin(sequenceJournal), itend = end(sequenceJournal); it != itend; it++)
+        for (TIterator it = begin(journaledString), itend = end(journaledString); it != itend; it++)
             appendValue(buffer, *it);
         SEQAN_ASSERT_EQ("teXst", buffer);
     }
@@ -240,24 +241,26 @@ void testSequenceJournalBeginEndIterator(TStringJournalSpec const &)
 
 
 template <typename TStringJournalSpec>
-void testSequenceJournalBeginEndConstIterator(TStringJournalSpec const &)
+void testJournaledStringBeginEndConstIterator(TStringJournalSpec const &)
 {
     CharString charStr = "test";
-    SequenceJournal<CharString, TStringJournalSpec> sequenceJournal(charStr);
-    insert(sequenceJournal, 2, 'X');
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+    insert(journaledString, 2, 'X');
+
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
 
     // Test with non-const iterator.
     {
-        typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec>, Standard>::Type TIterator;
+        typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
         CharString buffer;
-        for (TIterator it = begin(sequenceJournal, Standard()), itend = end(sequenceJournal, Standard()); it != itend; ++it)
+        for (TIterator it = begin(journaledString, Standard()), itend = end(journaledString, Standard()); it != itend; ++it)
             appendValue(buffer, *it);
         SEQAN_ASSERT_EQ("teXst", buffer);
     }
     // Test with const iterator.
     {
-        typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec> const, Standard>::Type TIterator;
-        SequenceJournal<CharString, TStringJournalSpec> const & constSJ = sequenceJournal;
+        typedef typename Iterator<TJournaledString const, Standard>::Type TIterator;
+        String<char, Journaled<Alloc<void>, TStringJournalSpec> > const & constSJ = journaledString;
         CharString buffer;
         for (TIterator it = begin(constSJ, Standard()), itend = end(constSJ, Standard()); it != itend; ++it)
             appendValue(buffer, *it);
@@ -265,17 +268,17 @@ void testSequenceJournalBeginEndConstIterator(TStringJournalSpec const &)
     }
     // Test comparison of const and non-const iterators.
 //     {
-//         typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec>, Standard>::Type TNonConstIterator;
-//         typedef typename Iterator<SequenceJournal<CharString, TStringJournalSpec> const, Standard>::Type TIterator;
-//         SequenceJournal<CharString, TStringJournalSpec> const & constSJ = sequenceJournal;
+//         typedef typename Iterator<String<char, Journaled<Alloc<void>, TStringJournalSpec>, Standard>::Type TNonConstIterator;
+//         typedef typename Iterator<String<char, Journaled<Alloc<void>, TStringJournalSpec> const, Standard>::Type TIterator;
+//         String<char, Journaled<Alloc<void>, TStringJournalSpec> const & constSJ = journaledString;
 
-//         SEQAN_ASSERT_TRUE(begin(sequenceJournal, Standard()) == begin(constSJ, Standard()));
+//         SEQAN_ASSERT_TRUE(begin(journaledString, Standard()) == begin(constSJ, Standard()));
 //     }
 }
 
 
 template <typename TStringJournalSpec>
-void testSequenceJournalSubscriptOperator(TStringJournalSpec const &)
+void testJournaledStringSubscriptOperator(TStringJournalSpec const &)
 {
     using namespace seqan;
 
@@ -300,7 +303,7 @@ void testSequenceJournalSubscriptOperator(TStringJournalSpec const &)
 
     // Create journal string over host and randomly assign infixes in
     // both to fill the tree.
-    SequenceJournal<String<char>, TStringJournalSpec> sequenceJournal(host);
+    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(host);
     for (unsigned i = 0; i < ASSIGN_COUNT; ++i) {
         unsigned begin = 0;
         unsigned end = 0;
@@ -316,28 +319,28 @@ void testSequenceJournalSubscriptOperator(TStringJournalSpec const &)
         for (unsigned i = 0; i < len; ++i)
             appendValue(buffer, RAND_CHAR());
         infix(string, begin, end) = buffer;
-        assignInfix(sequenceJournal, begin, end, buffer);
+        assignInfix(journaledString, begin, end, buffer);
     }
 
 #undef RAND_CHAR
 
-    SEQAN_ASSERT_EQ(length(sequenceJournal), length(string));
+    SEQAN_ASSERT_EQ(length(journaledString), length(string));
 
     std::stringstream tmp;
-    tmp << sequenceJournal;
+    tmp << journaledString;
     CharString str2(tmp.str());
     SEQAN_ASSERT_EQ(str2, string);
 
     // Now, test the subscript operator.
-    for (unsigned i = 0; i < length(sequenceJournal); ++i) {
-        SEQAN_ASSERT_EQ_MSG(sequenceJournal[i], string[i], "i = %d", i);
+    for (unsigned i = 0; i < length(journaledString); ++i) {
+        SEQAN_ASSERT_EQ_MSG(journaledString[i], string[i], "i = %d", i);
     }
 }
 
 
 // Perform a random insert/edit/delete of the sequence journal.
 template <typename TStringJournalSpec>
-void testSequenceJournalFuzzying(TStringJournalSpec const &)
+void testJournaledStringFuzzying(TStringJournalSpec const &)
 {
     using namespace seqan;
 
@@ -366,10 +369,10 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 //     std::cout << "reference = " << string << std::endl;
 //     std::cout << "host = " << host << std::endl;
 
-    typedef SequenceJournal<String<char>, TStringJournalSpec> TSequenceJournal;
+    typedef String<char, Journaled<Alloc<void>, TStringJournalSpec> > TJournaledString;
 
     // Construct sequence journal on host.
-    TSequenceJournal sequenceJournal(host);
+    TJournaledString journaledString(host);
 
 //     unsigned nextId = 0;
 //     std::cerr << "digraph {" << std::endl;
@@ -377,14 +380,14 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
     // We will use a string stream to test the string result of tmp.
     {
         std::stringstream tmp;
-        tmp << sequenceJournal;
+        tmp << journaledString;
 //         SEQAN_ASSERT_EQ(string, tmp.str());
 //         std::cout << "string = " << string << std::endl;
 //         std::cout << "jrnld  = " << tmp.str() << std::endl;
-//         std::cout << "  tree = " << sequenceJournal._journalEntries << std::endl;
-//         std::cout << "  orig = " << value(sequenceJournal._host) << std::endl;
-//         std::cout << "  buff = " << sequenceJournal._insertionBuffer << std::endl;
-//         journalTreeToDot(std::cerr, nextId, sequenceJournal._journalEntries);
+//         std::cout << "  tree = " << journaledString._journalEntries << std::endl;
+//         std::cout << "  orig = " << value(journaledString._host) << std::endl;
+//         std::cout << "  buff = " << journaledString._insertionBuffer << std::endl;
+//         journalTreeToDot(std::cerr, nextId, journaledString._journalEntries);
     }
 
     size_t expectedLength = length(string);
@@ -409,12 +412,12 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
             for (unsigned i = 0; i < len; ++i)
                 appendValue(buffer, RAND_CHAR());
             // Perform insert.
-//             std::cout << "assignInfix(sequenceJournal, " << begin << ", " << end << ", \"" << buffer << "\")" << std::endl;
-//             std::cout << "assignInfix(sequenceJournal, " << begin << ", " << end << ", buffer, len(buffer) == " << length(buffer) << ")" << std::endl;
+//             std::cout << "assignInfix(journaledString, " << begin << ", " << end << ", \"" << buffer << "\")" << std::endl;
+//             std::cout << "assignInfix(journaledString, " << begin << ", " << end << ", buffer, len(buffer) == " << length(buffer) << ")" << std::endl;
             infix(string, begin, end) = buffer;
-//             std::cout << "pre assign infix " << length(sequenceJournal) << std::endl;
-            assignInfix(sequenceJournal, begin, end, buffer);
-//             std::cout << "post assign infix " << length(sequenceJournal) << std::endl;
+//             std::cout << "pre assign infix " << length(journaledString) << std::endl;
+            assignInfix(journaledString, begin, end, buffer);
+//             std::cout << "post assign infix " << length(journaledString) << std::endl;
         } else if (changeType == 1) {  // insert
             unsigned begin = 0;
             unsigned len = 0;
@@ -431,17 +434,17 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
             for (unsigned i = 0; i < len; ++i)
                 appendValue(buffer, RAND_CHAR());
             // Perform insert.
-//             std::cout << "insert(sequenceJournal, " << begin << ", \"" << buffer << "\")" << std::endl;
-//             std::cout << "insert(sequenceJournal, " << begin << ", buffer)" << std::endl;
+//             std::cout << "insert(journaledString, " << begin << ", \"" << buffer << "\")" << std::endl;
+//             std::cout << "insert(journaledString, " << begin << ", buffer)" << std::endl;
             infix(string, begin, begin) = buffer;
-            insert(sequenceJournal, begin, buffer);
+            insert(journaledString, begin, buffer);
         } else if (changeType == 2) {  // delete
             if (length(string) == 0)
                 continue;
             //std::cerr << "length(string) == " << length(string) << std::endl;
             //std::cerr << "string == " << string << std::endl;
-            //std::cerr << "journal string== " << sequenceJournal << std::endl;
-            //std::cerr << "journal string== " << sequenceJournal._journalEntries << std::endl;
+            //std::cerr << "journal string== " << journaledString << std::endl;
+            //std::cerr << "journal string== " << journaledString._journalEntries << std::endl;
             unsigned begin = 0;
             unsigned end = 0;
             while (begin == end) {
@@ -453,19 +456,19 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
             expectedLength -= (end - begin);
             // Perform erase.
 //             std::stringstream tmp;
-//             tmp << sequenceJournal;
+//             tmp << journaledString;
 //             std::cout << ",---" << std::endl;
 //             std::cout << "| string = " << string << std::endl;
 //             std::cout << "| jrnld  = " << tmp.str() << std::endl;
-//             std::cout << "|   tree = " << sequenceJournal._journalEntries << std::endl;
-//             std::cout << "|   orig = " << value(sequenceJournal._host) << std::endl;
-//             std::cout << "|   buff = " << sequenceJournal._insertionBuffer << std::endl;
-//             std::cout << "erase(sequenceJournal, " << begin << ", " << end << ")" << std::endl;
+//             std::cout << "|   tree = " << journaledString._journalEntries << std::endl;
+//             std::cout << "|   orig = " << value(journaledString._host) << std::endl;
+//             std::cout << "|   buff = " << journaledString._insertionBuffer << std::endl;
+//             std::cout << "erase(journaledString, " << begin << ", " << end << ")" << std::endl;
 //             std::cout << "`---" << std::endl;
-//             std::cout << sequenceJournal._journalEntries << std::endl;
+//             std::cout << journaledString._journalEntries << std::endl;
             erase(string, begin, end);
-            erase(sequenceJournal, begin, end);
-//             std::cout << sequenceJournal._journalEntries << std::endl;
+            erase(journaledString, begin, end);
+//             std::cout << journaledString._journalEntries << std::endl;
         } else {
             SEQAN_ASSERT_FAIL("Invalid change type.");
         }
@@ -473,17 +476,17 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
         {
             // Check via stream operator<< into stringstream.
             std::stringstream tmp;
-            tmp << sequenceJournal;
+            tmp << journaledString;
             SEQAN_ASSERT_EQ(expectedLength, length(tmp.str()));
             SEQAN_ASSERT_EQ(expectedLength, length(string));
             SEQAN_ASSERT_EQ(string, tmp.str());
 //             std::cout << "string = " << string << std::endl << "tmp.str() = " << tmp.str() << std::endl;
             // Check via iterator on the journal string.
             std::string buffer;
-            reserve(buffer, length(sequenceJournal));
-            typedef typename Iterator<TSequenceJournal, Standard>::Type TIterator;
-//             std::cout << sequenceJournal._journalEntries << std::endl;
-            for (TIterator it = begin(sequenceJournal), itend = end(sequenceJournal, Standard()); it != itend; ++it) {
+            reserve(buffer, length(journaledString));
+            typedef typename Iterator<TJournaledString, Standard>::Type TIterator;
+//             std::cout << journaledString._journalEntries << std::endl;
+            for (TIterator it = begin(journaledString), itend = end(journaledString, Standard()); it != itend; ++it) {
                 appendValue(buffer, *it);
             }
 //             std::cout << "buffer = " << buffer << std::endl;
@@ -493,12 +496,12 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 
         {
             // Check operator+ and operator+= on sequence journal iterators;
-            typedef typename Iterator<TSequenceJournal, Standard>::Type TSequenceJournalIterator;
+            typedef typename Iterator<TJournaledString, Standard>::Type TJournaledStringIterator;
             typedef typename Iterator<String<char>, Standard>::Type TCharStringIterator;
 
-            TSequenceJournalIterator sjIt = begin(sequenceJournal);
+            TJournaledStringIterator sjIt = begin(journaledString);
             TCharStringIterator csIt = begin(string);
-            size_t remaining = length(sequenceJournal);
+            size_t remaining = length(journaledString);
 
             while (remaining > 1) {
                 SEQAN_ASSERT_TRUE(csIt != end(string) - 1);
@@ -522,154 +525,154 @@ void testSequenceJournalFuzzying(TStringJournalSpec const &)
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_host) {
-    testSequenceJournalHost(UnbalancedTree());
+    testJournaledStringHost(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_clear) {
-    testSequenceJournalClear(UnbalancedTree());
+    testJournaledStringClear(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_position) {
-    testSequenceJournalErasePosition(UnbalancedTree());
+    testJournaledStringErasePosition(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_erase_begin_end) {
-    testSequenceJournalEraseBeginEnd(UnbalancedTree());
+    testJournaledStringEraseBeginEnd(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert) {
-    testSequenceJournalInsert(UnbalancedTree());
+    testJournaledStringInsert(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_insert_value) {
-    testSequenceJournalInsertValue(UnbalancedTree());
+    testJournaledStringInsertValue(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_value) {
-    testSequenceJournalAssignValue(UnbalancedTree());
+    testJournaledStringAssignValue(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_assign_infix) {
-    testSequenceJournalAssignInfix(UnbalancedTree());
+    testJournaledStringAssignInfix(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_length) {
-    testSequenceJournalLength(UnbalancedTree());
+    testJournaledStringLength(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_virtual_to_host_position) {
-    testSequenceJournalVirtualToHostPosition(UnbalancedTree());
+    testJournaledStringVirtualToHostPosition(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_copy_constructor) {
-    testSequenceJournalCopyConstructor(UnbalancedTree());
+    testJournaledStringCopyConstructor(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_iterator) {
-    testSequenceJournalBeginEndIterator(UnbalancedTree());
+    testJournaledStringBeginEndIterator(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_begin_end_const_iterator) {
-    testSequenceJournalBeginEndConstIterator(UnbalancedTree());
+    testJournaledStringBeginEndConstIterator(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_subscript_operator) {
-    testSequenceJournalSubscriptOperator(UnbalancedTree());
+    testJournaledStringSubscriptOperator(UnbalancedTree());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_unbalanced_tree_fuzzying) {
-    testSequenceJournalFuzzying(UnbalancedTree());
+    testJournaledStringFuzzying(UnbalancedTree());
 }
 
 
 // Tag: SortedArray()
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_host) {
-    testSequenceJournalHost(SortedArray());
+    testJournaledStringHost(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_clear) {
-    testSequenceJournalClear(SortedArray());
+    testJournaledStringClear(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_erase_position) {
-    testSequenceJournalErasePosition(SortedArray());
+    testJournaledStringErasePosition(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_erase_begin_end) {
-    testSequenceJournalEraseBeginEnd(SortedArray());
+    testJournaledStringEraseBeginEnd(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_insert) {
-    testSequenceJournalInsert(SortedArray());
+    testJournaledStringInsert(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_insert_value) {
-    testSequenceJournalInsertValue(SortedArray());
+    testJournaledStringInsertValue(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_assign_value) {
-    testSequenceJournalAssignValue(SortedArray());
+    testJournaledStringAssignValue(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_assign_infix) {
-    testSequenceJournalAssignInfix(SortedArray());
+    testJournaledStringAssignInfix(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_length) {
-    testSequenceJournalLength(SortedArray());
+    testJournaledStringLength(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_virtual_to_host_position) {
-    testSequenceJournalVirtualToHostPosition(SortedArray());
+    testJournaledStringVirtualToHostPosition(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_copy_constructor) {
-    testSequenceJournalCopyConstructor(SortedArray());
+    testJournaledStringCopyConstructor(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_iterator) {
-    testSequenceJournalBeginEndIterator(SortedArray());
+    testJournaledStringBeginEndIterator(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_begin_end_const_iterator) {
-    testSequenceJournalBeginEndConstIterator(SortedArray());
+    testJournaledStringBeginEndConstIterator(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_subscript_operator) {
-    testSequenceJournalSubscriptOperator(SortedArray());
+    testJournaledStringSubscriptOperator(SortedArray());
 }
 
 
 SEQAN_DEFINE_TEST(test_sequence_journal_sorted_array_fuzzying) {
-    testSequenceJournalFuzzying(SortedArray());
+    testJournaledStringFuzzying(SortedArray());
 }
 
 
