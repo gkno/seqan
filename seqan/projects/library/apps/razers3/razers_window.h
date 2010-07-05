@@ -140,7 +140,7 @@ TRazerSMode                      const & mode)
 			while(sequenceLeft){
 				sequenceLeft = windowFindNext(swiftFinder, swiftPattern, 1000000);
 				
-				printf("filtering took: %f\n", sysTime() - myTime);
+				printf("filter: %f sec\n", sysTime() - myTime);
 				myTime = sysTime();
 				
 				// get the found hits from the finder
@@ -152,7 +152,7 @@ TRazerSMode                      const & mode)
 					++options.countFiltration;
 				}
 				
-				printf("verifying took: %f\n", sysTime() - myTime);
+				printf("verify: %f sec\n", sysTime() - myTime);
 				myTime = sysTime();
 				
 				// compact matches if neccessary

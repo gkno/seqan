@@ -666,8 +666,6 @@ inline void goOverContigIndependent2(
 	typedef typename Iterator<THitString>::Type			THitStringIter;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
 	
-	// TODO: (size of aligned read store)?
-	
 	// Needed because the omp shared clause does not allow for "." in the variabel names.
 	TReadSeqStore const & readSet = store.readSeqStore;
 	TContigSeq const & contigSeq = host(swiftFinders[0]);
@@ -691,17 +689,17 @@ inline void goOverContigIndependent2(
 			{
 				// TODO: remove
 				// printf("%d start task\n", blockId);
-				// _proFloat myTime = sysTime();
+				_proFloat myTime = sysTime();
 				
 				bool sequenceLeft = true;
 				while(sequenceLeft){
 					sequenceLeft = windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], 
 						options.windowSize);
-						
+					
 					// TODO: remove
 					// #pragma omp critical(printf)
-					// printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
-					// myTime = sysTime();
+					printf("filter: %f sec (thread: %d, pos: %lu)\n", sysTime() - myTime, blockId, swiftFinders[blockId].curPos);
+					myTime = sysTime();
 					
 					THitString & hits = getSwiftHits(swiftFinders[blockId]);
 					if(length(hits) == 0)
@@ -712,8 +710,8 @@ inline void goOverContigIndependent2(
 					// #pragma omp critical(printf)
 					// printf("%d tav: %d\n", blockId, tav[blockId]);
 					
-					#pragma omp atomic
-					options.countFiltration += length(hits);
+					// #pragma omp atomic
+					// options.countFiltration += length(hits);
 					
 					if(true){ //(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
 						verifyHits(verifier[blockId], hits, 0, length(hits),
@@ -757,8 +755,8 @@ inline void goOverContigIndependent2(
 					
 					// TODO: remove
 					// #pragma omp critical(printf)
-					// printf("%d verifying took %f\n", blockId, sysTime() - myTime);
-					// myTime = sysTime();
+					printf("verify: %f sec (thread: %d)\n", sysTime() - myTime, blockId);
+					myTime = sysTime();
 				} // End while
 				
 				// #pragma omp critical(update_tav)
@@ -822,7 +820,7 @@ template <
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode >
-   void _mapSingleReadsToContigFlex(
+   void _mapSingleReadsToContig(
 	TFragmentStore										& store,
 	String<TFragmentStore>								& threadStores,
 	int													  contigId,
@@ -870,12 +868,6 @@ template <
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')	reverseComplementInPlace(contigSeq);
-	// TODO: delete
-	// if (orientation == 'R'){
-	// 	_proFloat complementTime = sysTime();
-	// 	reverseComplementInPlace(contigSeq);
-	// 	printf("reverseComplement took %f sec\n", sysTime()-complementTime);
-	// }
 	
 	// Finder and verifier strings of the same size as there are swift patterns
 	// One Swift finder, Swift pattern and verifier work together
@@ -891,10 +883,6 @@ template <
 	// As consequence the dumping does not need to be critical
 	String<TVerifier> verifier;
 	resize(verifier, options.numberOfBlocks, Exact());
-	
-	// A temporary store for every block. They are emptied after each verification step
-	// String<TFragmentStore> threadStores;
-	// resize(threadStores, options.numberOfBlocks, Exact());
 	
 	for(int threadId = 0; threadId < (int)options.numberOfBlocks; ++threadId){
 		// initialize verifier
@@ -916,7 +904,7 @@ template <
 	}
 	
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
-	if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
 	
 }
 
@@ -992,12 +980,10 @@ int _mapSingleReadsParallelCreatePatterns(
 			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
 	}
-	// A temporary store for every block. They are emptied after each verification step
+	// A temporary store for every block. 
 	String<TFragmentStore> threadStores;
 	resize(threadStores, options.numberOfBlocks, Exact());
 	
-	String<RazerSOptions<TSpec> > threadOptions;
-	fill(threadOptions, options.numberOfBlocks, options, Exact());
 
 	if (options.maqMapping){
 		resize(cnts, 2);
@@ -1005,15 +991,15 @@ int _mapSingleReadsParallelCreatePatterns(
 			fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
 	}
 
-	// TODO: remove
-	// options._debugLevel = 3;
-
 	// clear stats
 	options.countFiltration = 0;
 	options.countVerification = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
 	SEQAN_PROTIMESTART(find_time);
+
+	String<RazerSOptions<TSpec> > threadOptions;
+	fill(threadOptions, options.numberOfBlocks, options, Exact());
 	
 	// iterate over genome sequences
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId){
@@ -1021,10 +1007,10 @@ int _mapSingleReadsParallelCreatePatterns(
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 		if (options.forward){
-			_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, threadOptions, mode);
+			_mapSingleReadsToContig(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'F', options, threadOptions, mode);
 		}
 		if (options.reverse){
-			_mapSingleReadsToContigFlex(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, threadOptions, mode);
+			_mapSingleReadsToContig(store, threadStores, contigId, swiftPatternHandler, forwardPatterns, cnts, 'R', options, threadOptions, mode);
 		}
 		unlockAndFreeContig(store, contigId);
 	}
@@ -1092,7 +1078,8 @@ int _mapSingleReadsParallel(
 		options.numberOfBlocks = length(store.readSeqStore);
 
 	// if there are not enough reads that the parallel version makes sence use the normal one
-	if(length(store.readSeqStore) < 10) // TODO: usefull number
+	// if(length(store.readSeqStore) < 10 or options.numberOfBlocks == 1) // TODO: usefull number
+	if(length(store.readSeqStore) < 10)
 		return _mapSingleReads(store, cnts, options, shape, mode);
 	else {
 		// number of reads per block

@@ -235,7 +235,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
 
-//			compactThresh = 1024;
+			// compactThresh = 1024;
 			compactThresh = 40;
 
 			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
@@ -501,6 +501,8 @@ struct MicroRNA{};
 				
 				if (length(store->alignedReadStore) > options->compactThresh)
 				{
+					_proFloat myTime = sysTime();
+					
 					typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
 					
 					if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
@@ -511,8 +513,10 @@ struct MicroRNA{};
 					if (length(store->alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 						options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
 					
-//					if (options._debugLevel >= 2)
-//						::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+					if (options->_debugLevel >= 2)
+						::std::cerr << '(' << oldSize - length(store->alignedReadStore) << " matches removed)";
+						
+					printf("compacting: %f sec\n", (sysTime() - myTime));
 				}
 // #endif
 			}
@@ -1503,6 +1507,7 @@ matchVerify(
 	TMyersFinder myersFinder(inf);
 	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
 	TPatternState & state = verifier.patternState;
+	// TPatternState state;
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
