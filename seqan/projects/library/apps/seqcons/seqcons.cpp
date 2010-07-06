@@ -1,19 +1,24 @@
 /*==========================================================================
                SeqAn - The Library for Sequence Analysis
                          http://www.seqan.de 
-============================================================================
-Copyright (C) 2007
+  ============================================================================
+  Copyright (C) 2007
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 3 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-Lesser General Public License for more details.
-==========================================================================*/
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+  ==========================================================================
+  SeqCons -- Read alignment via realignment or MSA.
+  ==========================================================================
+  Author: Tobias Rausch <rausch@embl.de>
+  ==========================================================================
+*/
 
 #include <seqan/basic.h>
 #include <seqan/consensus.h>
@@ -26,21 +31,15 @@ Lesser General Public License for more details.
 
 using namespace seqan;
 
-//////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////
-
-inline void
-_addVersion(CommandLineParser& parser) {
+void
+_addVersion(CommandLineParser & parser)
+{
 	::std::string rev = "$Revision: 4663 $";
 	addVersionLine(parser, "Version 0.22 (06. August 2009) Revision: " + rev.substr(11, 4) + "");
 }
 
-//////////////////////////////////////////////////////////////////////////////////
-
-int main(int argc, const char *argv[]) {
-	// Command line parsing
-	CommandLineParser parser;
+void setUpCommandLineParser(CommandLineParser & parser)
+{
 	_addVersion(parser);
 
 	addTitleLine(parser, "***************************************");
@@ -50,12 +49,15 @@ int main(int argc, const char *argv[]) {
 
 	addUsageLine(parser, "-r <FASTA file with reads> [Options]");
 	addUsageLine(parser, "-a <AMOS message file> [Options]");
+	addUsageLine(parser, "-s <SAM file> [-c <FASTA contigs file>] [Options]");
 
 	addSection(parser, "Main Options:");
 	addOption(parser, addArgumentText(CommandLineOption("r", "reads", "file with reads", OptionType::String), "<FASTA reads file>"));
 	addOption(parser, addArgumentText(CommandLineOption("a", "afg", "message file", OptionType::String), "<AMOS afg file>"));
+	addOption(parser, addArgumentText(CommandLineOption("s", "sam", "SAM file", OptionType::String), "<SAM file>"));
+	addOption(parser, addArgumentText(CommandLineOption("c", "contigs", "FASTA file with contigs, ignored if not SAM input", OptionType::String), "<FASTA contigs file>"));
 	addOption(parser, addArgumentText(CommandLineOption("o", "outfile", "output filename", (int)OptionType::String, "align.txt"), "<Filename>"));
-	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "afg"), "[seqan | afg]"));
+	addOption(parser, addArgumentText(CommandLineOption("f", "format", "output format", (int)OptionType::String, "afg"), "[seqan | afg | sam]"));
 	addOption(parser, addArgumentText(CommandLineOption("m", "method", "alignment method", (int)OptionType::String, "realign"), "[realign | msa]"));
 	addOption(parser, addArgumentText(CommandLineOption("b", "bandwidth", "bandwidth", (int)OptionType::Int, 8), "<Int>"));
 	addOption(parser, CommandLineOption("n", "noalign", "no align, only convert input", OptionType::Boolean));
@@ -72,40 +74,57 @@ int main(int argc, const char *argv[]) {
 	addSection(parser, "ReAlign Method Options:");
 	addOption(parser, CommandLineOption("in", "include", "include contig sequence", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("rm", "rmethod", "realign method", (int)OptionType::String, "gotoh"), "[nw | gotoh]"));
+}
 
-	if (argc == 1)
+int parseCommandLine(ConsensusOptions & consOpt, CommandLineParser & parser, int argc, const char * argv[])
+{
+    if (argc == 1)
 	{
 		shortHelp(parser, std::cerr);	// print short help and exit
-		return 0;
+		return 1;
 	}
 
-	if (!parse(parser, argc, argv, ::std::cerr)) return 1;
-	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
-
-
-	// Get all command line options
-	ConsensusOptions consOpt;
+	if (!parse(parser, argc, argv, ::std::cerr))
+        return 1;
+	if (isSetLong(parser, "help") || isSetLong(parser, "version"))
+        return 0;	// print help or version and exit
 
 	// Main options
 	getOptionValueLong(parser, "reads", consOpt.readsfile);
 	getOptionValueLong(parser, "afg", consOpt.afgfile);
+	getOptionValueLong(parser, "sam", consOpt.samfile);
+	getOptionValueLong(parser, "contigs", consOpt.contigsfile);
 	getOptionValueLong(parser, "outfile", consOpt.outfile);
+
+    if (empty(consOpt.samfile) && !empty(consOpt.contigsfile))
+        std::cerr << "WARNING: Contigs specified by input is not FASTA, ignoring --contigs parameters." << std::endl;
+
 	String<char> optionVal;
 	getOptionValueLong(parser, "format", optionVal);
-	if (optionVal == "seqan") consOpt.output = 0;
-	else if (optionVal == "afg") consOpt.output = 1;
-	else if (optionVal == "frg") consOpt.output = 2;
-	else if (optionVal == "cgb") consOpt.output = 3;
+	if (optionVal == "seqan")
+        consOpt.output = 0;
+	else if (optionVal == "afg")
+        consOpt.output = 1;
+	else if (optionVal == "frg")
+        consOpt.output = 2;
+	else if (optionVal == "cgb")
+        consOpt.output = 3;
+	else if (optionVal == "sam")
+        consOpt.output = 4;
+
 	getOptionValueLong(parser, "method", optionVal);
-	if (optionVal == "realign") consOpt.method = 0;
-	else if (optionVal == "msa") consOpt.method = 1;
+	if (optionVal == "realign")
+        consOpt.method = 0;
+	else if (optionVal == "msa")
+        consOpt.method = 1;
+
 	getOptionValueLong(parser, "bandwidth", consOpt.bandwidth);
 #ifdef CELERA_OFFSET
 	if (!isSetLong(parser, "bandwidth")) consOpt.bandwidth = 15;	
 #endif
 	getOptionValueLong(parser, "noalign", consOpt.noalign);
 
-	// Msa options
+	// MSA options
 	getOptionValueLong(parser, "matchlength", consOpt.matchlength);
 	getOptionValueLong(parser, "quality", consOpt.quality);
 	getOptionValueLong(parser, "overlaps", consOpt.overlaps);
@@ -117,9 +136,88 @@ int main(int argc, const char *argv[]) {
 	// ReAlign options
 	getOptionValueLong(parser, "include", consOpt.include);
 	getOptionValueLong(parser, "rmethod", optionVal);
-	if (optionVal == "nw") consOpt.rmethod = 0;
-	else if (optionVal == "gotoh") consOpt.rmethod = 1;
+	if (optionVal == "nw")
+        consOpt.rmethod = 0;
+	else if (optionVal == "gotoh")
+        consOpt.rmethod = 1;
+    return 0;
+}
 
+// Load the reads and layout positions
+template <typename TFragmentStore, typename TSize>
+int loadFiles(TFragmentStore & fragStore, TSize & numberOfContigs, ConsensusOptions const & consOpt)
+{
+    std::cerr << "Reading input..." << std::endl;
+	if (!empty(consOpt.readsfile)) {
+		// Load simple read file
+        std::fstream strmReads(consOpt.readsfile.c_str(), std::fstream::in | std::fstream::binary);
+		bool moveToFront = false;
+		if (consOpt.noalign) moveToFront = true;
+		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, moveToFront);
+		if (!success)
+			return 1;
+		numberOfContigs = 1;
+	} else if (!empty(consOpt.afgfile)) {
+		// Load Amos message file
+        std::fstream strmReads(consOpt.afgfile.c_str(), std::fstream::in | std::fstream::binary);
+		read(strmReads, fragStore, Amos());	
+		numberOfContigs = length(fragStore.contigStore);
+	} else if (!empty(consOpt.samfile)) {
+        // Possibly load contigs into fragment store.
+        if (!empty(consOpt.contigsfile)) {
+            if (!loadContigs(fragStore, consOpt.contigsfile.c_str())) {
+                std::cerr << "Could not load contigs file " << consOpt.contigsfile.c_str() << std::endl;
+                return 1;
+            }
+        }
+		// Load SAM message file
+        std::fstream strmReads(consOpt.samfile.c_str(), std::fstream::in | std::fstream::binary);
+		read(strmReads, fragStore, SAM());
+		numberOfContigs = length(fragStore.contigStore);
+	} else {
+		return 1;
+	}
+
+    return 0;
+}
+
+// Write resulting alignment.
+template <typename TFragmentStore>
+int writeOutput(TFragmentStore /*const*/ & fragStore, ConsensusOptions const & consOpt)
+{
+    std::cerr << "Writing output..." << std::endl;
+	if (consOpt.output == 0) {
+		// Write old SeqAn multi-read alignment format
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		write(strmWrite, fragStore, FastaReadFormat());	
+		fclose(strmWrite);
+	} else if (consOpt.output == 1) {
+		// Write Amos
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		write(strmWrite, fragStore, Amos());	
+		fclose(strmWrite);
+	} else if (consOpt.output == 2) {
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		_writeCeleraFrg(strmWrite, fragStore);	
+		fclose(strmWrite);
+	} else if (consOpt.output == 3) {
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		_writeCeleraCgb(strmWrite, fragStore);	
+		fclose(strmWrite);
+	}
+    return 0;
+}
+
+int main(int argc, const char *argv[]) {
+	// Command line parsing
+	CommandLineParser parser;
+    setUpCommandLineParser(parser);
+
+	// Get all command line options
+	ConsensusOptions consOpt;
+    int ret = parseCommandLine(consOpt, parser, argc, argv);
+    if (ret != 0)
+        return ret;
 
 	// Create a new fragment store
 	typedef FragmentStore<> TFragmentStore;
@@ -128,41 +226,26 @@ int main(int argc, const char *argv[]) {
 
 	// Load the reads and layout positions
 	TSize numberOfContigs = 0;
-	if (!empty(consOpt.readsfile)) {
-		// Load simple read file
-		FILE* strmReads = fopen(consOpt.readsfile.c_str(), "rb");
-		bool moveToFront = false;
-		if (consOpt.noalign) moveToFront = true;
-		bool success = _convertSimpleReadFile(strmReads, fragStore, consOpt.readsfile, moveToFront);
-		fclose(strmReads);
-		if (!success) { 
-			shortHelp(parser, std::cerr);
-			return 0;
-		}
-		numberOfContigs = 1;
-	} else if (!empty(consOpt.afgfile)) {
-		// Load Amos message file
-		FILE* strmReads = fopen(consOpt.afgfile.c_str(), "rb");
-		read(strmReads, fragStore, Amos());	
-		fclose(strmReads);
-		numberOfContigs = length(fragStore.contigStore);
-	} else {
-		shortHelp(parser, std::cerr);
-		return 0;
-	}
-
-
+    ret = loadFiles(fragStore, numberOfContigs, consOpt);
+    if (ret != 0) {
+        shortHelp(parser, std::cerr);
+        return ret;
+    }
 
 	// Multi-realignment desired or just conversion of the input
 	if (!consOpt.noalign) {
-	
 		// Iterate over all contigs
-		for(TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
-
+        if (consOpt.method == 0)
+            std::cerr << "Performing realignment..." << std::endl;
+        else
+            std::cerr << "Performing consensus alignment..." << std::endl;
+		for (TSize currentContig = 0; currentContig < numberOfContigs; ++currentContig) {
+            std::cerr << "contig " << (currentContig + 1) << "/" << numberOfContigs << std::endl;
 			if (consOpt.method == 0) {
 				Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
 				reAlign(fragStore, combinedScore, currentContig, consOpt.rmethod, consOpt.bandwidth, consOpt.include);
 			} else {
+                std::cerr << "Performing consensus alignment..." << std::endl;
 				// Import all reads of the given contig
 				typedef TFragmentStore::TReadSeq TReadSeq;
 				StringSet<TReadSeq, Owner<> > readSet;
@@ -202,27 +285,8 @@ int main(int argc, const char *argv[]) {
 			}
 		} // end loop over all contigs
 	}
-	
-	// Output
-	if (consOpt.output == 0) {
-		// Write old SeqAn multi-read alignment format
-		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-		write(strmWrite, fragStore, FastaReadFormat());	
-		fclose(strmWrite);
-	} else if (consOpt.output == 1) {
-		// Write Amos
-		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-		write(strmWrite, fragStore, Amos());	
-		fclose(strmWrite);
-	} else if (consOpt.output == 2) {
-		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-		_writeCeleraFrg(strmWrite, fragStore);	
-		fclose(strmWrite);
-	} else if (consOpt.output == 3) {
-		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
-		_writeCeleraCgb(strmWrite, fragStore);	
-		fclose(strmWrite);
-	}
 
-	return 0;
+    // Write result.
+    ret = writeOutput(fragStore, consOpt);
+    return ret;
 }

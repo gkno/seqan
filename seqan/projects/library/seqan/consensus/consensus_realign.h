@@ -631,7 +631,6 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
-
 }
 
 //////////////////////////////////////////////////////////////////////////////////
