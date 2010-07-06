@@ -369,7 +369,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         }
         {
             std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
-            if (not fstrm.is_open()) {
+            if (!fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
@@ -387,7 +387,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         }
         {
             std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
-            if (not fstrm.is_open()) {
+            if (!fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
@@ -396,7 +396,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     } else {
         std::cerr << "Writing resulting reads to \"" << options.outputFile << "\"" << std::endl;
         std::fstream fstrm(toCString(options.outputFile), std::ios_base::out);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open out file \"" << options.outputFile << "\"" << std::endl;
             return 1;
         }
@@ -405,7 +405,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     std::cerr << "Writing SAM file \"" << options.samFile << "\"" << std::endl;
     {
         std::fstream fstrm(toCString(options.samFile), std::ios_base::out);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open SAM file \"" << options.samFile << "\"" << std::endl;
             return 1;
         }
