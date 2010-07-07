@@ -796,6 +796,27 @@ write(TFile & target,
 //////////////////////////////////////////////////////////////////////////////
 
 /**
+.Function.writeContigs
+..summary:Write contigs from fragment store into file.
+..cat:Fragment Store
+..signature:writeContigs(file, store, tag)
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.file:A file/stream.
+..param.tag:Specify format to write, e.g. Fasta.
+..returns:A $bool$ which is $true$ on success.
+*/
+template <typename TStream, typename TFSSpec, typename TFSConfig, typename TFormat>
+bool writeContigs(TStream & file, FragmentStore<TFSSpec, TFSConfig> & store, TFormat const &)
+{
+	for (unsigned i = 0; i < length(store.contigNameStore); ++i)
+		write(file, store.contigStore[i].seq, store.contigNameStore[i], TFormat());
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
 .Function.loadContigs
 ..summary:Loads contigs into fragment store.
 ..cat:Fragment Store
