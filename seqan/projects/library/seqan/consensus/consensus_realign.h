@@ -239,7 +239,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		int increaseBand = 0;
 		int removedBeginPos = 0;
 		int removedEndPos = 0;
-		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
+		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos && itCons != itConsEnd; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
 			*bandConsIt = *itCons;
 		TSize itConsPosBegin = itConsPos;
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
@@ -263,14 +263,15 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			diff -= old;
 			++itGaps;
 		}
-		for(;itGaps != itGapsEnd; ++itGaps) {
+		for(;itGaps != itGapsEnd && itCons != itConsEnd; ++itGaps) {
 			TReadPos limit = itGaps->seqPos;
 			int newDiff = (itGaps->gapPos - limit);
 			if (diff > newDiff) {
 				clippedEndPos = diff - newDiff;
 				limit -= clippedEndPos;				
 			}
-			for(;old < limit; ++old, ++itRead) {
+			for(;old < limit && itCons != itConsEnd; ++old, ++itRead) {
+                SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -288,8 +289,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				++myReadIt;
 				++itCons;
 			}
-			for(;diff < newDiff; ++diff) {
+			for(;diff < newDiff && itCons != itConsEnd; ++diff) {
 				++increaseBand;
+                SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[gapPos];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -300,7 +302,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			}
 		}
 		if (!clippedEndPos) {
-			for(;itRead!=itReadEnd; ++itRead) {
+			for(;itRead!=itReadEnd && itCons != itConsEnd; ++itRead) {
+                SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -518,6 +521,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	TProfileString consensus;
 	fill(consensus, maxPos - minPos, TProfile());
 	TConsIter itCons = begin(consensus, Standard() );
+	TConsIter itConsEnd = end(consensus, Standard());
 	TAlignIter contigReadsIt = begin(contigReads, Standard() );
 	TAlignIter contigReadsItEnd = end(contigReads, Standard() );
 	for(;contigReadsIt != contigReadsItEnd; ++contigReadsIt) {
@@ -555,7 +559,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 				++(value(itCons++)).count[gapPos];
 		}
 		if (!clippedEnd) {
-			for( ; itRead!=itReadEnd ;++itRead) 
+			for( ; itRead!=itReadEnd && itCons != itConsEnd;++itRead) 
 				++(value(itCons++)).count[ordValue(*itRead)];
 		}
 	}
