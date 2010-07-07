@@ -457,11 +457,11 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
     std::cout << std::endl << std::endl << "#--file:insert-qualities.dat" << std::endl;
     printf("#base   mean     sd\n");
     double totalMeanSum = 0;
-    size_t totalCount = 0;
+    double totalCount = 0;
     for (int i = 0; i < 5; ++i) {
         std::cout << "    " << Dna5(i);
         double meanSum = 0;
-        size_t count = 0;
+        double count = 0;
         for (size_t j = 0; j < 63; ++j) {
             meanSum += result.qualityCountsForInsertPerBase[i][j] * j;
             count += result.qualityCountsForInsertPerBase[i][j];
@@ -502,7 +502,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
     for (int i = 0; i < 5; ++i) {
         std::cout << "    " << Dna5(i);
         double meanSum = 0;
-        size_t count = 0;
+        double count = 0;
         for (size_t j = 0; j < 63; ++j) {
             meanSum += result.qualityCountsForInsertPerBase[i][j] * j;
             count += result.qualityCountsForInsertPerBase[i][j];
@@ -545,7 +545,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
         for (unsigned j = 0; j < 5; ++j) {  // target base
             // Compute mean.
             double sum = 0;
-            size_t count = 0;
+            double count = 0;
             for (unsigned k = 0; k < 63; ++k) {  // qualities
                 count += result.qualityCountsForMismatchPerBase[i * 5 + j][k];
                 sum += result.qualityCountsForMismatchPerBase[i * 5 + j][k] * k;
@@ -568,9 +568,9 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
         {
             // Compute mean.
             double sum = 0;
-            size_t count = 0;
+            double count = 0;
             double sumMismatch = 0;
-            size_t countMismatch = 0;
+            double countMismatch = 0;
             for (unsigned j = 0; j < 5; ++j) {  // base
                 for (unsigned k = 0; k < 63; ++k) {  // qualities
                     if (i != j) {
