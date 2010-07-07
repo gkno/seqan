@@ -546,7 +546,9 @@ template<typename TIntervals>
 typename Value<typename Value<TIntervals>::Type>::Type
 _calcIntervalTreeRootCenter(TIntervals & intervals)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_GT(length(intervals), 0u);
 	
 	typedef typename Value<typename Value<TIntervals>::Type>::Type TValue;
 	typedef typename Iterator<TIntervals,Standard>::Type TIntervalIterator;
@@ -561,8 +563,11 @@ SEQAN_CHECKPOINT
 	{
 		if(leftBoundary(*it)<min) min = leftBoundary(*it);
 		if(rightBoundary(*it)>max) max = rightBoundary(*it);
+	  SEQAN_ASSERT_LEQ(min, max);
 		++it;
 	}
+
+	SEQAN_ASSERT_LEQ(min, max);
 	
 	return (min+(max-min)/(TValue)2.0);
 
