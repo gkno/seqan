@@ -238,7 +238,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
     typedef Iterator<String<double>, Standard>::Type IntensitiesIterator;
     int i = 0;  // Flow round, Dna(i) gives base.
     for (IntensitiesIterator it = begin(observedIntensities); it != end(observedIntensities); ++it, ++i) {
-        double threshold = getThreshold(parameters.thresholdMatrix, floor(*it), ceil(*it));
+        double threshold = getThreshold(parameters.thresholdMatrix, static_cast<unsigned>(floor(*it)), static_cast<unsigned>(ceil(*it)));
         unsigned calledBaseCount = static_cast<unsigned>(*it < threshold ? floor(*it) : ceil(*it));
         // Add any matches.
         unsigned j = 0;
@@ -261,7 +261,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
             densitySum += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
         double x = 0;  // Probability of seeing < (j+1) bases.
         for (j = 0; j < calledBaseCount; ++j) {
-            x += dispatchDensityFunction(parameters.thresholdMatrix, j == 0 ? 0.0001 : j, *it);
+            x += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
             unsigned phredScore = -static_cast<unsigned>(10 * ::std::log10(x / densitySum));
             appendValue(inst.qualities, phredScore);
         }

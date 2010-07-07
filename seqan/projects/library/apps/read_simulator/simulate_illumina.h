@@ -1,6 +1,8 @@
 #ifndef SIMULATE_ILLUMINA_H_
 #define SIMULATE_ILLUMINA_H_
 
+#include <cmath>
+
 #include <seqan/store.h>
 
 #include "read_simulator.h"
@@ -265,9 +267,9 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
             double p = 1 - errorProbabilities[j * 4 + ERROR_TYPE_MATCH];
             double delta = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * 2 * options.qualityErrorFactor * p;
             double x = p - options.qualityErrorFactor * p + delta;
-            int score = -10 * std::log10(x);
+            int score = static_cast<int>(round(-10 * std::log10(x)));
             if (inst.editString[i] == ERROR_TYPE_MISMATCH)
-                score = std::ceil(score / 2.0);
+                score = static_cast<int>(std::ceil(score / 2.0));
             // Store scores.
             inst.qualities[i] = score;
             tmp[j] = score;
@@ -280,13 +282,13 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
         if (inst.editString[i] == ERROR_TYPE_INSERT || inst.editString[i] == ERROR_TYPE_DELETE) {
             if (j == 0) {
                 // Indel at beginning.
-                inst.qualities[i] = tmp[0];
+                inst.qualities[i] = static_cast<int>(round(tmp[0]));
             } else if (j == inst.endPos - inst.beginPos - 1) {
                 // Indel at end.
-                inst.qualities[i] = back(tmp);
+                inst.qualities[i] = static_cast<int>(round(back(tmp)));
             } else {
                 // Indel in center.
-                inst.qualities[i] = 0.25 * (tmp[j] + tmp[j + 1]);
+                inst.qualities[i] = static_cast<int>(round(0.25 * (tmp[j] + tmp[j + 1])));
             }
         } else {
             j += 1;
