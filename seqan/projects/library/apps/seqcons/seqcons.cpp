@@ -204,6 +204,19 @@ int writeOutput(TFragmentStore /*const*/ & fragStore, ConsensusOptions const & c
 		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
 		_writeCeleraCgb(strmWrite, fragStore);	
 		fclose(strmWrite);
+	} else if (consOpt.output == 4) {
+		// Write out resulting MSA in a SAM file.
+		FILE* strmWrite = fopen(consOpt.outfile.c_str(), "w");
+		write(strmWrite, fragStore, SAM());
+		fclose(strmWrite);
+		// Write out resulting consensus sequence.
+		char buffer[10*1024];
+		buffer[0] = '\0';
+		strcat(buffer, consOpt.outfile.c_str());
+		strcat(buffer, ".consensus.fasta");
+		strmWrite = fopen(buffer, "w");
+		writeContigs(strmWrite, fragStore, Fasta());
+		fclose(strmWrite);
 	}
     return 0;
 }
