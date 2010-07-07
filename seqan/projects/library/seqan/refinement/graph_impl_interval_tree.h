@@ -237,22 +237,23 @@ SEQAN_CHECKPOINT
 
 	reserve(g.data_vertex,length(intervals));
 	reserve(pm,length(intervals));
-	
+
 	TVertexDescriptor root = addVertex(g);
 	resizeVertexMap(g,pm);
-	
-	TValue center =	_calcIntervalTreeRootCenter(intervals);
-	
-	std::sort(begin(intervals),end(intervals),_less_compI1_ITree<TInterval>);
 
-	String<TInterval*> interval_pointers;
-	resize(interval_pointers,length(intervals));
-	_makePointerInterval(intervals,interval_pointers);
+    if (length(intervals) > 0u) {
+        TValue center =	_calcIntervalTreeRootCenter(intervals);
 
-	_createIntervalTree(g,pm,interval_pointers,root,(TValue)0.0,center,length(intervals),tag);
-	reserve(pm, length(pm), Exact());
-	reserve(g.data_vertex, length(g.data_vertex), Exact());
+        std::sort(begin(intervals),end(intervals),_less_compI1_ITree<TInterval>);
 
+        String<TInterval*> interval_pointers;
+        resize(interval_pointers,length(intervals));
+        _makePointerInterval(intervals,interval_pointers);
+
+        _createIntervalTree(g,pm,interval_pointers,root,(TValue)0.0,center,length(intervals),tag);
+        reserve(pm, length(pm), Exact());
+        reserve(g.data_vertex, length(g.data_vertex), Exact());
+    }
 }
 
 
