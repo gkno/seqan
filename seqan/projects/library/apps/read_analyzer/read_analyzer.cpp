@@ -28,11 +28,11 @@ int main(int argc, char **argv) {
     // Load files.
     // =======================================================================
     typedef FragmentStore<> TFragmentStore;
-    TFragmentStore fragments;
+    TFragmentStore fragmentStore;
 
     // Load contigs.
     std::cerr << "Reading FASTA contigs sequence file " << argv[1] << " ..." << std::endl;
-    if (!loadContigs(fragments, argv[1])) {
+    if (!loadContigs(fragmentStore, argv[1])) {
         std::cerr << "Could not read contigs." << std::endl;
         return 1;
     }
@@ -45,26 +45,26 @@ int main(int argc, char **argv) {
             std::cerr << "Could not open SAM file." << std::endl;
             return 1;
         }
-        read(fstrm, fragments, SAM());
+        read(fstrm, fragmentStore, SAM());
     }
-    std::cout << "length(fragments.alignedReadStore) == " << length(fragments.alignedReadStore) << std::endl;
+    std::cout << "length(fragmentStore.alignedReadStore) == " << length(fragmentStore.alignedReadStore) << std::endl;
 
     // =======================================================================
     // Perform evaluation.
     // =======================================================================
     std::cerr << "Evaluating..." << std::endl;
     ReadEvaluationResult readResult;
-    setReadLength(readResult, length(fragments.readSeqStore[0]));
-    performReadEvaluation(readResult, fragments);
+    setReadLength(readResult, length(fragmentStore.readSeqStore[0]));
+    performReadEvaluation(readResult, fragmentStore);
     AlignmentEvaluationResult alignmentResult;
-    setReadLength(alignmentResult, length(fragments.readSeqStore[0]));
-    performAlignmentEvaluation(alignmentResult, fragments);
+    setReadLength(alignmentResult, length(fragmentStore.readSeqStore[0]));
+    performAlignmentEvaluation(alignmentResult, fragmentStore);
 
     // =======================================================================
     // Print result.
     // =======================================================================
     printReadEvaluationResults(readResult);
-    printAlignmentEvaluationResults(alignmentResult);
+    printAlignmentEvaluationResults(alignmentResult, fragmentStore);
     
     return 0;
 }
