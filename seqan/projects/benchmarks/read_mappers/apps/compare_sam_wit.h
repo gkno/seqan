@@ -342,6 +342,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
         // Skip intervals with too high distance, ignore distance in oracle wit mode.
         if (!options.oracleWitMode && static_cast<int>(it->distance) > options.maxError) continue;
 
+        SEQAN_ASSERT_LEQ(value(it).firstPos, value(it).lastPos);
         appendValue(intervals, TInterval(value(it).firstPos, value(it).lastPos + 1, value(it).id));
     }
     IntervalTree<size_t, size_t> intervalTree(intervals, ComputeCenter());

@@ -263,6 +263,10 @@ void loadWitFile(WitStore & store,
         record.isForward = isForward;
         record.firstPos = firstPos;
         record.lastPos = lastPos;
+        if (record.isForward)
+          SEQAN_ASSERT_LEQ(record.firstPos, record.lastPos);
+        else
+          SEQAN_ASSERT_LEQ(record.lastPos, record.firstPos);
         appendValue(store, record);
     }
 }
