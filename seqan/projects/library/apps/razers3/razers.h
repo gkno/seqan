@@ -235,7 +235,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
 
-			// compactThresh = 1024;
+//			compactThresh = 1024;
 			compactThresh = 40;
 
 			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
@@ -448,10 +448,9 @@ struct MicroRNA{};
 		typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
-
-		// TODO: make sure that it is the same pattern as in _mapReads
-		typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;
-		typedef typename PatternState<TMyersPattern>::Type		TPatternState;
+		
+		typedef Pattern<TRead, Myers<FindInfix, False, void>  >  TMyersPattern;
+		typedef typename PatternState<TMyersPattern>::Type      TPatternState;
 
 		TFragmentStore	*store;
 		TOptions		*options;			// RazerS options
@@ -464,18 +463,17 @@ struct MicroRNA{};
 		bool			onReverseComplement;
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
-		TPatternState	patternState;
+		// TPatternState	patternState;
 		
 		MatchVerifier() {}
                
-		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, 
-					  TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
 			preprocessing(&_preprocessing),
 			swiftPattern(&_swiftPattern),
-			cnts(&_cnts),
-			patternState()
+			cnts(&_cnts)
+			// , patternState()
 		{
 			onReverseComplement = false;
 			genomeLength = 0;
@@ -490,37 +488,34 @@ struct MicroRNA{};
 				m.beginPos = genomeLength - m.beginPos;
 				m.endPos = genomeLength - m.endPos;
 			}
-
-			if (!options->spec.DONT_DUMP_RESULTS)
-			{
-				m.id = length(store->alignedReadStore);
-				appendValue(store->alignedReadStore, m, Generous());
-				appendValue(store->alignQualityStore, q, Generous());
-// #if ! defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) && ! defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-// if either macro is defined this is called at a different location. see razers_parallel_reads.h
-				
-				if (length(store->alignedReadStore) > options->compactThresh)
-				{
-					_proFloat myTime = sysTime();
-					
-					typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
-					
-					if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
-						maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
-					
-					compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
-					
-					if (length(store->alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
-						options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
-					
-					if (options->_debugLevel >= 2)
-						::std::cerr << '(' << oldSize - length(store->alignedReadStore) << " matches removed)";
 						
-					printf("compacting: %f sec\n", (sysTime() - myTime));
+//#pragma omp critical
+// begin of critical section
+			{
+				if (!options->spec.DONT_DUMP_RESULTS)
+				{
+					m.id = length(store->alignedReadStore);
+					appendValue(store->alignedReadStore, m, Generous());
+					appendValue(store->alignQualityStore, q, Generous());
+					if (length(store->alignedReadStore) > options->compactThresh)
+					{
+						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
+
+						if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+							maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
+		
+						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
+						
+						if (length(store->alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+							options->compactThresh += (options->compactThresh >> 1);	// if too many matches were removed
+						
+//						if (options._debugLevel >= 2)
+//							::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+					}
 				}
-// #endif
+				++options->countVerification;
 			}
-			++options->countVerification;
+// end of critical section
 		}
 	};
  
@@ -1041,7 +1036,6 @@ template < typename TSwift, typename TReadNo, typename TMaxErrors >
 inline void 
 setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 {
-	// TODO: remove?
 	if (readNo==643)
 		std::cout<<"dman"<<std::endl;
 	int minT = _qgramLemma(swift, readNo, maxErrors);
@@ -1078,9 +1072,6 @@ void compactMatches(
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
 	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode>			TRazerSMode;
 
-	// TODO: remove
-	// printf("compactMatches");
-
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
@@ -1101,7 +1092,6 @@ void compactMatches(
 		if ((*it).id == TAlignedRead::INVALID_ID) continue;
 		int score = store.alignQualityStore[(*it).id].score;
 		int errors = store.alignQualityStore[(*it).id].errors;
-		// TODO: remove?
 										if (readNo == 643) std::cerr <<"["<<score<<","<<errors<<"] "<<::std::flush;
 		if (readNo == (*it).readId && (*it).pairMatchId == TAlignedRead::INVALID_ID)
 		{ 
@@ -1124,7 +1114,7 @@ void compactMatches(
 						{
 							setMaxErrors(swift, readNo, errors - 1);
 							if (errors == 0 && options._debugLevel >= 2)
-								::std::cerr << "(read #" << readNo << " set to: " << errors << ")";
+								::std::cerr << "(read #" << readNo << " disabled)";
 						}
 
 					if (options.purgeAmbiguous)
@@ -1168,9 +1158,9 @@ template <
 void compactMatches(
 	TFragmentStore &store,
 	TCounts & cnts, 
-	RazerSOptions<TSpec> & /*options*/, 
+	RazerSOptions<TSpec> &options, 
 	RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ> > const,
-	TSwift & /*swift*/, 
+	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
 	typedef typename TFragmentStore::TAlignedReadStore						TAlignedReadStore;
@@ -1493,8 +1483,8 @@ matchVerify(
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
-	typedef Finder<TGenomeInfix>							TMyersFinder;
-	typedef typename TMatchVerifier::TPreprocessing			TPreprocessing;
+	typedef Finder<TGenomeInfix>								TMyersFinder;
+	typedef typename TMatchVerifier::TPreprocessing		TPreprocessing;
 	typedef typename Value<TPreprocessing>::Type			TMyersPattern;
 	typedef typename PatternState<TMyersPattern>::Type		TPatternState;
 
@@ -1506,9 +1496,9 @@ matchVerify(
 
 	TMyersFinder myersFinder(inf);
 	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
-	TPatternState & state = verifier.patternState;
+	// TPatternState & state = verifier.patternState;
 	// TPatternState state;
-
+	
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
 	::std::cout<<"Genome: "<<inf<<"\t" << beginPosition(inf) << "," << endPosition(inf) << ::std::endl;
@@ -1523,12 +1513,13 @@ matchVerify(
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
 	// find end of best semi-global alignment
-	while (find(myersFinder, myersPattern, state, minScore))
+	// while (find(myersFinder, myersPattern, state, minScore))
+	while (find(myersFinder, myersPattern, minScore))
 	{
 		TPosition pos = position(hostIterator(myersFinder));
-		if (lastPos + minDistance < pos) // if end position is further to the right
+		if (lastPos + minDistance < pos)
 		{
-			if (minScore <= maxScore) // if better than minimal expected
+			if (minScore <= maxScore)
 			{
 				verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 				verifier.q.errors = -maxScore;
@@ -1564,15 +1555,17 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
-		if (getScore(state) >= maxScore) // reset score and pos if a better match was found
+		if (getScore(myersPattern) >= maxScore)
+		// if (getScore(state) >= maxScore)
 		{
-			maxScore = getScore(state);
+			// maxScore = getScore(state);
+			maxScore = getScore(myersPattern);
 			maxPos = pos;
 		}
 		lastPos = pos;
-	} // end while(find)
+	}
 	
-	if (minScore <= maxScore) // if best score is as least as good as minimal expected score
+	if (minScore <= maxScore)
 	{
 		verifier.m.endPos = beginPosition(inf) + maxPos + 1;
 		verifier.q.errors = -maxScore;
@@ -1819,14 +1812,15 @@ int _mapSingleReads(
 	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
 	TReadIndex											& readIndex)
 {
-	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
+	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename IF<
 				TYPECMP<TGapMode,RazerSGapped>::VALUE,
 				SwiftSemiGlobal,
-				SwiftSemiGlobalHamming>::Type				TSwiftSpec;
-	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;	// verifier
-
+				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
+	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >		TSwiftPattern;	// filter
+	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
+	// typedef Pattern<TRead, Myers<FindInfix, False, void> >	TMyersPattern;	// verifier
+	
 	// configure Swift pattern
 	TSwiftPattern swiftPattern(readIndex);
 	swiftPattern.params.minThreshold = options.threshold;
@@ -1863,6 +1857,9 @@ int _mapSingleReads(
 	SEQAN_PROTIMESTART(find_time);
 	
 	// iterate over genome sequences
+    #ifdef RAZERS_PARALLEL_CONTIGS
+    #pragma omp parallel for private(swiftPattern)
+    #endif
     for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
 		// lock to prevent releasing and loading the same contig twice
