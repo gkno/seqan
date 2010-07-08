@@ -436,6 +436,8 @@ inline void goOverContig(
 	typedef typename Position<THitString>::Type			THitStringPos;
 	typedef typename Iterator<THitString>::Type			THitStringIter;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+	typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
+	typedef typename Size<TAlignedReadStore>::Type		TAlignedReadStoreSize;
 	
 	// TODO: (size of aligned read store)?
 	
@@ -446,6 +448,10 @@ inline void goOverContig(
 	// Number of Threads Allowed for Verification. Shared by all blocks
 	String<int> tav;
 	fill(tav, options.numberOfBlocks, 1, Exact());
+	
+	// used to store the old lengths in the case that some of the matches are copied
+	String<TAlignedReadStoreSize> oldLengths;
+	resize(oldLengths, options.numberOfBlocks, Exact());
 	
 	#pragma omp parallel num_threads((int)options.numberOfCores)
 	{
@@ -461,7 +467,7 @@ inline void goOverContig(
 		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 		{
 			#pragma omp task default(none) \
-				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, options, mode) \
+				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, oldLengths, threadStores, options, mode) \
 				firstprivate(blockId)
 			{
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -508,11 +514,12 @@ inline void goOverContig(
 						for(int relId = 0; relId < tav[blockId]; ++relId)
 						{
 							#pragma omp task default(none) \
-								shared(verifier, hits, positions, contigSeq, readSet, options, mode) \
+								shared(verifier, hits, positions, contigSeq, readSet, oldLengths, threadStores, options, mode) \
 								firstprivate(blockId, relId)
 							{
 								// calculate the absolute Id 
 								int absVerifyId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+								oldLengths[absVerifyId] = length(threadStores[absVerifyId]);
 								
 								verifyHits(verifier[absVerifyId], hits, positions[relId], positions[relId + 1],
 									(blockId * options.blockSize), contigSeq, readSet, mode);
@@ -521,6 +528,28 @@ inline void goOverContig(
 						#pragma omp taskwait
 						
 						// TODO: copy matches to their store
+						TAlignedReadStoreSize diff = 0;
+						for(int relId = 0; relId < tav[blockId]; ++relId){
+							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+							diff += length(threadStores[absId].alignedReadStore) - oldLengths[absId];
+						}
+						
+						TAlignedReadStoreSize oldSize = length(threadStores[blockId].alignedReadStore);
+						resize(threadStores[blockId].alignedReadStore, oldSize + diff, Generous());
+						resize(threadStores[blockId].alignQualityStore, oldSize + diff, Generous());
+						
+						for(int relId = 0; relId < tav[blockId]; ++relId){
+							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+							for(TAlignedReadStoreSize i = oldLengths[absId]; i < length(threadStores[absId]); ++i) {
+								
+								threadStores[absId].alignedReadStore[i].id = oldSize;
+								threadStores[blockId].alignedReadStore[++oldSize] = threadStores[absId].alignedReadStore[i];
+								threadStores[blockId].alignQualityStore[oldSize] = threadStores[absId].alignQualityStore[i];
+							}
+							resize(threadStores[absId].alignedReadStore, oldLengths[absId], Generous());
+							resize(threadStores[absId].alignQualityStore, oldLengths[absId], Generous());
+							
+						}
 						
 					} // End else
 					
