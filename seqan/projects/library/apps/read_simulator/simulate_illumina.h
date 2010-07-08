@@ -319,7 +319,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * (ValueSize<TAlphabet>::VALUE - 1));
+                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1)));
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (c == read[j])
                     c = TAlphabet(ordValue(c) + 1);
@@ -328,7 +328,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_INSERT:
-                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * ValueSize<TAlphabet>::VALUE));
+                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));
                 assignQualityValue(back(tmp), inst.qualities[i]);
                 break;
             case ERROR_TYPE_DELETE:

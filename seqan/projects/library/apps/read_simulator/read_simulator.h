@@ -542,7 +542,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
             if (x < options.haplotypeSnpRate) {
                 // SNP
-                Dna5 c = Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, 4));
+                Dna5 c = Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, 4)));
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
                 assignValue(haplotypeContig, k, c);
@@ -556,7 +556,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     // Insertion.
                     clear(buffer);
                     for (unsigned ii = 0; ii < indelLen; ++ii)
-                        appendValue(buffer, Dna5(5 * pickRandomNumber(rng, PDF<Uniform<double> >(0, 1))));
+                        appendValue(buffer, Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, 4))));
                     insert(haplotypeContig, k, buffer);
                     k += indelLen;
                 } else {
