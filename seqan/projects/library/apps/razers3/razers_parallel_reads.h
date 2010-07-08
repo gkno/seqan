@@ -426,7 +426,7 @@ inline void goOverContig(
 		String<TVerifier>								& verifier,
 		TCounts											& ,//cnts,
 		TRazerSOptions									& options,
-		String<TFragmentStore>							& ,//threadStores,
+		String<TFragmentStore>							& threadStores,
 		TFragmentStore									& store,
 		TRazerSMode										& mode)
    {
