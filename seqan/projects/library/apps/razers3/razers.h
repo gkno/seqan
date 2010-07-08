@@ -254,7 +254,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			fastaIdQual = false;
             
 #ifdef RAZERS_PARALLEL_READS
-            windowSize = 10000;
+            windowSize = 50000;
 #ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
 #endif

@@ -250,7 +250,7 @@ inline void myRadixPass(
 	typedef String<TBucket>								TBuckets;
 	typedef typename Position<TBuckets>::Type			TBucketPos;
 	
-	TPos threads = 16;
+	TPos threads = 2;
 	TPos noOfBuckets = 256;
 	
 	TBucket emptyBucket;
@@ -293,30 +293,6 @@ inline void myRadixPass(
 	}
 	#pragma omp taskwait
 	
-	// // Exclusive partial sum
-	// TPos sum1 = -1, sum2 = -1;
-	// 
-	// for(TBucketPos i = 0; i < noOfBuckets; ++i){
-	// 	for(TPos p = 0; p < threads; ++p){
-	// 		sum2 += buckets[p][i];
-	// 	}
-	// 	buckets[0][i] = sum1;
-	// 	sum1 = sum2;
-	// }
-	// 
-	// for(TPos p = 0; p < threads; ++p){
-	// 	#pragma omp task shared(buckets, sorted, unsorted) if(length(unsorted) > 10)
-	// 	{
-	// 		for(TPos i = 0; i < length(unsorted); ++i){
-	// 			unsigned b = toBucket<stage>(unsorted[i].ndlSeqNo);
-	// 			if(b / threads == p){
-	// 				++buckets[0][b];
-	// 				sorted[buckets[0][b]] = unsorted[i];
-	// 			}
-	// 		}
-	// 	}
-	// }
-	// #pragma omp taskwait
 }
 
 
@@ -340,13 +316,22 @@ inline void myRadixSort(String<THit> & hits)
 template<
 	typename TPosition,
 	typename TSpec,
-	typename THstkPos>
+	typename THstkPos,
+	typename TGlobal,
+	typename TErrors>
 void partitionHits(
 		String<TPosition>									& positions,
 		String<_SwiftHit<Tag<
-			_SwiftSemiGlobal<TSpec> >, THstkPos> > const	& hits,
-		int const											  noOfParts)
-{ 
+			_SwiftSemiGlobal<TSpec> >, THstkPos> > 			& hits,
+		int const											  noOfParts,
+		RazerSMode<TGlobal, RazerSGapped, TErrors> const)
+{
+	myRadixSort(hits);
+	
+	// THitStringIter i1 = begin(hits);
+	// THitStringIter i2 = end(hits);
+	// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+
 	resize(positions, noOfParts + 1, Exact());
 	positions[0] = 0;
 	positions[noOfParts] = length(hits);
@@ -354,8 +339,8 @@ void partitionHits(
 	TPosition partSize = length(hits) / noOfParts;
 	TPosition myPos;
 	
-	for (int blockId = 1; blockId < noOfParts+1; ++blockId){
-		myPos = blockId * partSize;
+	for (int i = 1; i < noOfParts+1; ++i){
+		myPos = i * partSize;
 		
 		unsigned now = 0;
 		unsigned last = hits[myPos - 1].ndlSeqNo;;
@@ -367,8 +352,34 @@ void partitionHits(
 			
 			last = now;
 		}
-		positions[blockId] = myPos;
+		positions[i] = myPos;
 	}
+}
+
+
+template<
+	typename TPosition,
+	typename TSpec,
+	typename THstkPos,
+	typename TGlobal,
+	typename TErrors>
+void partitionHits(
+		String<TPosition>									& positions,
+		String<_SwiftHit<Tag<
+			_SwiftSemiGlobal<TSpec> >, THstkPos> > const	& hits,
+		int const											  noOfParts,
+		RazerSMode<TGlobal, RazerSUngapped, TErrors> const)
+{
+	resize(positions, noOfParts + 1, Exact());
+	
+	TPosition partSize = length(hits) / noOfParts;
+	
+	positions[0] = 0;
+	for (int i = 1; i < noOfParts; ++i){
+		positions[i] = i * partSize;;
+	}
+	positions[noOfParts] = length(hits);
+	
 }
 
 
@@ -441,25 +452,35 @@ inline void goOverContig(
 	#pragma omp master
 	{
 		
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		#ifdef FLEX_TIMER
+		_proFloat myTime = sysTime();
+		#endif
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		
 		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 		{
 			#pragma omp task default(none) \
 				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, options, mode) \
 				firstprivate(blockId)
 			{
-				// TODO: remove
-				// printf("%d start task\n", blockId);
-				// _proFloat myTime = sysTime();
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				#ifdef FLEX_TIMER
+				myTime = sysTime();
+				#endif
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				
 				bool sequenceLeft = true;
 				while(sequenceLeft){
 					sequenceLeft = windowFindNext(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId], 
 						options.windowSize);
 						
-					// TODO: remove
-					// #pragma omp critical(printf)
-					// printf("%d filtering took %f, finder at: %lu\n", blockId, sysTime() - myTime, swiftFinders[blockId].curPos);
-					// myTime = sysTime();
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+					#ifdef FLEX_TIMER
+					printf("filter: %f sec (pos: %lu, thread: %d)\n", sysTime() - myTime, swiftFinders[blockId].curPos, blockId);
+					myTime = sysTime();
+					#endif
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					
 					THitString & hits = getSwiftHits(swiftFinders[blockId]);
 					options.countFiltration += length(hits);
@@ -468,33 +489,22 @@ inline void goOverContig(
 						continue;
 					#pragma omp flush(tav)
 					
-					// TODO: remove
-					// #pragma omp critical(printf)
-					// printf("%d tav: %d\n", blockId, tav[blockId]);
-					
-					if(true){ //(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
+					// if(true){ 
+					if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
 						verifyHits(verifier[blockId], hits, 0, length(hits),
 							(blockId * options.blockSize), host(swiftFinders[0]), readSet, mode);
 					}
 					else {
-						// TODO: remove
-						// myTime = sysTime();
-						// sort
-						myRadixSort(hits);
-						
-						// TODO: remove
-						// #pragma omp critical(printf)
-						// printf("%d tav: %d\n", blockId, tav[blockId]);
-						// myTime = sysTime();
-						
-						// THitStringIter i1 = begin(hits);
-						// THitStringIter i2 = end(hits);
-						// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
-						// partition
 						String<THitStringPos> positions;
-						partitionHits(positions, hits, tav[blockId]);
+						partitionHits(positions, hits, tav[blockId], mode);
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+						#ifdef FLEX_TIMER
+						printf("partition: %f sec (hits: %d, thread: %d)\n", sysTime() - myTime, length(hits), blockId);
+						myTime = sysTime();
+						#endif
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						// verify
-						// TODO: no task for first ...
+						// TODO: for instead of task
 						for(int relId = 0; relId < tav[blockId]; ++relId)
 						{
 							#pragma omp task default(none) \
@@ -509,12 +519,17 @@ inline void goOverContig(
 							}
 						}
 						#pragma omp taskwait
+						
+						// TODO: copy matches to their store
+						
 					} // End else
 					
-					// TODO: remove
-					// #pragma omp critical(printf)
-					// printf("%d verifying took %f\n", blockId, sysTime() - myTime);
-					// myTime = sysTime();
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+					#ifdef FLEX_TIMER
+					#pragma omp critical(printf)
+					printf("verify: %f sec (thread: %d)\n", sysTime() - myTime, blockId);
+					#endif
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				} // End while
 				
 				#pragma omp critical(update_tav)
@@ -536,14 +551,9 @@ inline void goOverContig(
 		
 	} // End Master
 	} // End Parallel
-	
-	// Get the matches from different thread stores and write them in the main store
-	// appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
-	
+		
 	// Clear finders
 	for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId){
-		// clear(threadStores[blockId].alignedReadStore);
-		// clear(threadStores[blockId].alignQualityStore);		
 		windowFindEnd(swiftFinders[blockId], swiftPatternHandler.swiftPatterns[blockId]);
 	}
 	
