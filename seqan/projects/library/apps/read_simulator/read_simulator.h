@@ -622,7 +622,7 @@ int buildReadSimulationInstruction(
             return 1;
         }
         // Pick a start and end position.
-        inst.beginPos = pickRandomNumber(rng, PDF<Uniform<double> >(0, length(haplotype[inst.contigId]) - readLength - 1));
+        inst.beginPos = pickRandomNumber(rng, PDF<Uniform<size_t> >(0, length(haplotype[inst.contigId]) - readLength - 1));
         inst.endPos = inst.beginPos + readLength;
         // Simulate the read with these parameters.
         buildSimulationInstructions(inst, rng, readLength, haplotype[inst.contigId], parameters, options);
