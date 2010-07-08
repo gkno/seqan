@@ -139,7 +139,7 @@ struct GetValue<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 struct Reference<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
-	typedef TValue const & Type;
+	typedef TValue Type;
 };
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
