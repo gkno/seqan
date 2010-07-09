@@ -836,7 +836,7 @@ struct Iterator< Finder<THaystack, TSpec>, TIteratorSpec >
 template <typename THaystack, typename TSpec, typename TIteratorSpec>
 struct Iterator< Finder<THaystack, TSpec> const, TIteratorSpec >
 {
-	typedef typename Iterator<THaystack>::Type const Type;
+	typedef typename Iterator<THaystack>::Type Type;
 };
 
 

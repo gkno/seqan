@@ -1059,7 +1059,7 @@ void Test_WordGraph() {
 	addEdge(g,7,6,"g");
 	SEQAN_TASSERT(parseString(g, 0, "agaggg") == 1)
 	SEQAN_TASSERT(parseString(g, 0, "aga") == 3)  // Does not reach 1
-	SEQAN_TASSERT(parseString(g, 0, 'g') == 5)
+	SEQAN_TASSERT(parseString(g, 0, "g") == 5)
 	SEQAN_TASSERT(parseString(g, 0, "ggg") == 6)
 	SEQAN_TASSERT(parseString(g, 0, "gaggg") == 2)
 	SEQAN_TASSERT(parseString(g, 0, "gagggg") == 2)
