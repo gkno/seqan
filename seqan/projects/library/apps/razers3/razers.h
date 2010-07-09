@@ -174,12 +174,8 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef RAZERS_PARALLEL_READS
         unsigned	windowSize;
 		unsigned	numberOfCores;
-        double		blocksPerCore;
 		unsigned	numberOfBlocks;
 		unsigned	blockSize;
-		unsigned	accuracy;
-		unsigned	collect;
-		unsigned	splitThreshold;
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -235,8 +231,9 @@ namespace SEQAN_NAMESPACE_MAIN
 				compMask[i] = 1 << i;
 			compMask[4] = 0;
 
-//			compactThresh = 1024;
-			compactThresh = 40;
+
+			compactThresh = 1024;
+			// compactThresh = 40;
 
 			absMaxQualSumErrors = 100;	// maximum for sum of mism qualities in total readlength
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -258,12 +255,8 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
 #endif
-			blocksPerCore = 1.0;
-			numberOfBlocks = numberOfCores * blocksPerCore;
+			numberOfBlocks = numberOfCores;
 			blockSize = 0;
-			accuracy = 200;
-			collect = 1000000;
-			splitThreshold = 100; // should be high enough to justify the overhead it is causing (scheduling, sorting)
 #endif
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
@@ -1483,10 +1476,10 @@ matchVerify(
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
-	typedef Finder<TGenomeInfix>								TMyersFinder;
-	typedef typename TMatchVerifier::TPreprocessing		TPreprocessing;
+	typedef Finder<TGenomeInfix>							TMyersFinder;
+	typedef typename TMatchVerifier::TPreprocessing			TPreprocessing;
 	typedef typename Value<TPreprocessing>::Type			TMyersPattern;
-	typedef typename PatternState<TMyersPattern>::Type		TPatternState;
+	// typedef typename PatternState<TMyersPattern>::Type		TPatternState;
 
 	// find read match begin
 	typedef ModifiedString<TGenomeInfix, ModReverse>		TGenomeInfixRev;

@@ -317,14 +317,14 @@ template<
 	typename TPosition,
 	typename TSpec,
 	typename THstkPos,
-	typename TGlobal,
+	typename TAlignMode,
 	typename TErrors>
 void partitionHits(
 		String<TPosition>									& positions,
 		String<_SwiftHit<Tag<
 			_SwiftSemiGlobal<TSpec> >, THstkPos> > 			& hits,
 		int const											  noOfParts,
-		RazerSMode<TGlobal, RazerSGapped, TErrors> const)
+		RazerSMode<TAlignMode, RazerSGapped, TErrors> const)
 {
 	myRadixSort(hits);
 	
@@ -361,14 +361,14 @@ template<
 	typename TPosition,
 	typename TSpec,
 	typename THstkPos,
-	typename TGlobal,
+	typename TAlignMode,
 	typename TErrors>
 void partitionHits(
 		String<TPosition>									& positions,
 		String<_SwiftHit<Tag<
 			_SwiftSemiGlobal<TSpec> >, THstkPos> > const	& hits,
 		int const											  noOfParts,
-		RazerSMode<TGlobal, RazerSUngapped, TErrors> const)
+		RazerSMode<TAlignMode, RazerSUngapped, TErrors> const)
 {
 	resize(positions, noOfParts + 1, Exact());
 	
@@ -866,11 +866,10 @@ int _mapSingleReadsParallel(
 	// thread might work through more than otheres
 	unsigned cores = options.numberOfCores;
 
-	options.numberOfBlocks = cores * options.blocksPerCore;
+	options.numberOfBlocks = cores;
 
 	if (options._debugLevel >= 1){
 		::std::cerr << ::std::endl << "Number of cores:                 \t" << cores << std::endl;
-		::std::cerr <<                "Number of blocks:                \t" << options.numberOfBlocks << " (" << cores << " x " << options.blocksPerCore << ")" << std::endl;
 	}
 
 	// compare with noOfBlocks, there needs to be at least one read per block
