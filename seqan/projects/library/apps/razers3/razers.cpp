@@ -31,9 +31,7 @@
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
 //#define RAZERS_PARALLEL				// parallelize razerS
-//#define RAZERS_PARALLEL_CONTIGS		// parallelize by contigs
-//#define RAZERS_PARALLEL_READS			// parallelize by reads
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
 #define RAZERS_OPENADDRESSING	
 #endif
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
@@ -57,10 +55,7 @@
 #include <seqan/file.h>
 #include <seqan/store.h>
 
-#ifdef RAZERS_PARALLEL_HYBRID
-#include "razers_parallel.h"
-#endif
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
 #include "razers_parallel_reads.h"
 #endif
 #ifdef RAZERS_WINDOW
@@ -177,11 +172,6 @@ int mapReads(
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 3: Find matches using SWIFT
-#ifdef RAZERS_PARALLEL_HYBRID
-    typedef typename RazerSOptions<TSpec>::TMutex TMutex;
-    options.patternMutex = new TMutex[length(readSet)];
-#endif
-
 	loadContigs(store, genomeFileNames, false); // add filenames to the contig store (they are loaded on-demand)
 	int error = _mapReads(store, stats, options);
 	if (error != 0)
@@ -199,10 +189,6 @@ int mapReads(
 		return error;
 	}
 
-#ifdef RAZERS_PARALLEL_HYBRID
-    delete[] options.patternMutex;
-#endif
-
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 4: Remove duplicates and output matches
 	if (!options.spec.DONT_DUMP_RESULTS)
@@ -218,7 +204,7 @@ inline void whichMacros(){
 	std::cerr << "Index:   Normal" << std::endl;
 #endif
 	
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
 	std::cerr << "Version: Parallel by reads" << std::endl;
 #else
 	std::cerr << "Version: Serial" << std::endl;
@@ -336,7 +322,7 @@ int main(int argc, const char *argv[])
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
 	addSection(parser, "Parallel Options:");
     addOption(parser, CommandLineOption("ws", "window-size",       "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("nc", "number-of-cores",   "set the number of cores that is available (this many threads will be started)", OptionType::Int | OptionType::Label, options.numberOfCores));
@@ -384,7 +370,7 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
 	getOptionValueLong(parser, "low-memory", options.lowMemory);
 #endif
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
     getOptionValueLong(parser, "window-size", options.windowSize);
     getOptionValueLong(parser, "number-of-cores", options.numberOfCores);
 #endif
@@ -575,10 +561,6 @@ int main(int argc, const char *argv[])
 		}
 	}
 #endif	
-
-#ifdef RAZERS_PARALLEL_HYBRID
-	tbb::task_scheduler_init scheduler;
-#endif
 
 	int result = mapReads(genomeFileNames, readFileNames, errorPrbFileName, options);
 	if (result != 0)

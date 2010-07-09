@@ -29,14 +29,10 @@
 #include <seqan/index.h>
 #include <seqan/store.h>
 
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
 	#ifdef _OPENMP
 		#include <omp.h>
 	#endif
-#endif
-
-#ifdef RAZERS_PARALLEL
-#include "tbb/spin_mutex.h"
 #endif
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -171,7 +167,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// multi-threading
 
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
         unsigned	windowSize;
 		unsigned	numberOfCores;
 		unsigned	numberOfBlocks;
@@ -179,14 +175,6 @@ namespace SEQAN_NAMESPACE_MAIN
 #endif
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
-#endif
-
-#ifdef RAZERS_PARALLEL
-		typedef ::tbb::spin_mutex	TMutex;
-
-		TMutex		*patternMutex;
-		TMutex		optionsMutex;
-		TMutex		matchMutex;
 #endif
 
 		RazerSOptions() 
@@ -250,7 +238,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
             
-#ifdef RAZERS_PARALLEL_READS
+#ifdef RAZERS_PARALLEL
             windowSize = 50000;
 #ifdef _OPENMP
 			numberOfCores = omp_get_num_procs();
@@ -1717,7 +1705,6 @@ matchVerify(
 }
 
 
-#ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in a single genome sequence
 template <
@@ -1784,7 +1771,6 @@ void _mapSingleReadsToContig(
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
 		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
 }
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1850,9 +1836,6 @@ int _mapSingleReads(
 	SEQAN_PROTIMESTART(find_time);
 	
 	// iterate over genome sequences
-    #ifdef RAZERS_PARALLEL_CONTIGS
-    #pragma omp parallel for private(swiftPattern)
-    #endif
     for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
 	{
 		// lock to prevent releasing and loading the same contig twice
@@ -1984,7 +1967,7 @@ int _mapReads(
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else
 #endif
-#ifndef RAZERS_PARALLEL_READS
+#ifndef RAZERS_PARALLEL
         return _mapSingleReads(store, cnts, options, shape, mode);
 #else
         return _mapSingleReadsParallel(store, cnts, options, shape, mode);

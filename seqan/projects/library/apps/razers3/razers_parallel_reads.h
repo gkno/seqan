@@ -27,9 +27,7 @@
 #include <omp.h>
 #endif
 
-#if defined (RAZERS_PARALLEL_READS_FLEXIBLE_VERIFICATION_BLOCKS) || defined (RAZERS_PARALLEL_READS_INDEPENDENT)
-#include <parallel/algorithm>
-#endif
+// #include <parallel/algorithm>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
