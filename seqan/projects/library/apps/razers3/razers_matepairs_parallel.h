@@ -663,7 +663,7 @@ template <
 	typename TSpec, 
 	typename TShape,
 	typename TSwiftSpec >
-int _mapMatePairReads(
+int _mapMatePairReadsParallel(
 	FragmentStore<TFSSpec, TFSConfig>	& store,
 	StringSet<CharString>				& genomeFileNameList,
 	String<TGNoToFile>					& gnoToFileMap,

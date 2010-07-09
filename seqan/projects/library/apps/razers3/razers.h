@@ -1962,15 +1962,21 @@ int _mapReads(
 	TShape const							& shape,
 	TRazerSMode						  const & mode)
 {
-#ifdef RAZERS_MATEPAIRS
+
+#ifndef RAZERS_PARALLEL
+	#ifdef RAZERS_MATEPAIRS
 	if (options.libraryLength >= 0)
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else
-#endif
-#ifndef RAZERS_PARALLEL
-        return _mapSingleReads(store, cnts, options, shape, mode);
+	#endif
+		return _mapSingleReads(store, cnts, options, shape, mode);
 #else
-        return _mapSingleReadsParallel(store, cnts, options, shape, mode);
+	#ifdef RAZERS_MATEPAIRS
+	if (options.libraryLength >= 0)
+		return _mapMatePairReadsParallel(store, cnts, options, shape, mode);
+	else
+	#endif
+		return _mapSingleReadsParallel(store, cnts, options, shape, mode);
 #endif
 }
 

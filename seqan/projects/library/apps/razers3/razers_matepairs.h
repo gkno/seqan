@@ -310,8 +310,8 @@ void compactPairMatches(
 		{
 			matePairId = r.matePairId;
 			hitCount = 0;
-			if (options.distanceRange > 0)
-				scoreDistCutOff = q.pairScore - options.distanceRange;
+			if (options.scoreDistanceRange > 0)
+				scoreDistCutOff = q.pairScore - options.scoreDistanceRange;
 			ditBeg = dit;
 		}
 		*dit = *it;	++dit; ++it;
@@ -327,17 +327,16 @@ void compactPairMatches(
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
 template <
-	typename TFSSpec, 
-	typename TFSConfig, 
-	typename TGenome,
+	typename TFSSpec,
+	typename TFSConfig,
 	typename TReadIndex, 
 	typename TSwiftSpec, 
 	typename TPreprocessing,
 	typename TCounts,
-	typename TRazerSOptions >
+	typename TRazerSOptions,
+	typename TRazerSMode>
 void _mapMatePairReads(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
-	TGenome									& genome,				// genome ...
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternL,
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternR,
@@ -345,7 +344,8 @@ void _mapMatePairReads(
 	TPreprocessing							& preprocessingR,
 	TCounts									& cnts,
 	char									  orientation,			// q-gram index of reads
-	TRazerSOptions							& options)
+	TRazerSOptions							& options,
+	TRazerSMode								& mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
@@ -357,6 +357,7 @@ void _mapMatePairReads(
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Id<TAlignedRead>::Type					TId;
 
+	typedef typename TFragmentStore::TContigSeq				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
 	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
@@ -376,6 +377,7 @@ void _mapMatePairReads(
 	typedef MatchVerifier <
 		TFragmentStore, 
 		TRazerSOptions, 
+		TRazerSMode, 
 		TPreprocessing, 
 		TSwiftPattern,
 		TCounts >											TVerifier;
@@ -391,6 +393,10 @@ void _mapMatePairReads(
 		else
 			::std::cerr << "[rev]";
 	}
+
+	lockContig(store, contigId);
+	TGenome &genome = store.contigStore[contigId].seq;
+	if (orientation == 'R')	reverseComplementInPlace(genome);
 
 	TReadSet	&readSetL = host(host(swiftPatternL));
 	TReadSet	&readSetR = host(host(swiftPatternR));
@@ -502,7 +508,7 @@ void _mapMatePairReads(
 //							matePairId, readSetL, forwardPatternsL, 
 //							options, TSwiftSpec()))
 					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-							matePairId, readSetL, TSwiftSpec()))
+							matePairId, readSetL, mode))
 					{
 						verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 						(*it).i2 = verifierL.m;
@@ -568,7 +574,7 @@ void _mapMatePairReads(
 //					matePairId, readSetR, forwardPatternsR,
 //					options, TSwiftSpec()))
 			if (matchVerify(verifierR, infix(swiftFinderR), 
-					matePairId, readSetR, TSwiftSpec()))
+					matePairId, readSetR, mode))
 			{
 				// distance between left mate beginning and right mate end
 				__int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
@@ -648,6 +654,10 @@ void _mapMatePairReads(
 				++options.countFiltration;
 			}
 		} 
+	
+	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
+		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
+	
 	}
 }
 #endif
@@ -655,29 +665,38 @@ void _mapMatePairReads(
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in many genome sequences (import from Fasta)
+	
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 
-	typename TGNoToFile, 
 	typename TCounts,
 	typename TSpec, 
 	typename TShape,
-	typename TSwiftSpec >
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode >
 int _mapMatePairReads(
-	FragmentStore<TFSSpec, TFSConfig>	& store,
-	StringSet<CharString>				& genomeFileNameList,
-	String<TGNoToFile>					& gnoToFileMap,
-	TCounts								& cnts,
-	RazerSOptions<TSpec>				& options,
-	TShape const						& shape,
-	Swift<TSwiftSpec> const)
+	FragmentStore<TFSSpec, TFSConfig>					& store,
+	TCounts												& cnts,
+	RazerSOptions<TSpec>								& options,
+	TShape const										& shape,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
 	
 	typedef typename Value<TReadSeqStore>::Type			TRead;
 	typedef StringSet<TRead>							TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+#ifndef RAZERS_OPENADDRESSING
+	typedef Index<TReadSet, Index_QGram<TShape> >	TIndex;			// q-gram index
+#else
+	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;
+#endif
+
+	typedef typename IF<
+				TYPECMP<TGapMode,RazerSGapped>::VALUE,
+				SwiftSemiGlobal,
+				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -699,6 +718,10 @@ int _mapMatePairReads(
 	// configure q-gram index
 	TIndex swiftIndexL(readSetL, shape);
 	TIndex swiftIndexR(readSetR, shape);
+#ifdef RAZERS_OPENADDRESSING
+	swiftIndexL.alpha = options.loadFactor;
+	swiftIndexR.alpha = options.loadFactor;
+#endif
 	reverse(indexShape(swiftIndexR));		// right mate qualities are reversed -> reverse right shape
 	
 	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
@@ -720,7 +743,7 @@ int _mapMatePairReads(
 	String<TMyersPattern> forwardPatternsL;
 	String<TMyersPattern> forwardPatternsR;
 	options.compMask[4] = (options.matchN)? 15: 0;
-	if (!options.hammingOnly)
+	if (options.gapMode == RAZERS_GAPPED)
 	{
 		resize(forwardPatternsL, pairCount, Exact());
 		resize(forwardPatternsR, pairCount, Exact());
@@ -740,62 +763,21 @@ int _mapMatePairReads(
 	options.countVerification = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
-
-	unsigned filecount = 0;
-	unsigned numFiles = length(genomeFileNameList);
-	unsigned contigId = 0;
-
-	// open genome files, one by one	
-	while (filecount < numFiles)
-	{
-		// open genome file	
-		::std::ifstream file;
-		file.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
-		if (!file.is_open())
-			return RAZERS_GENOME_FAILED;
-
-		// remove the directory prefix of current genome file
-		::std::string genomeFile(toCString(genomeFileNameList[filecount]));
-		size_t lastPos = genomeFile.find_last_of('/') + 1;
-		if (lastPos == genomeFile.npos) lastPos = genomeFile.find_last_of('\\') + 1;
-		if (lastPos == genomeFile.npos) lastPos = 0;
-		::std::string genomeName = genomeFile.substr(lastPos);
+	
+	
+	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId) {
+		// lock to prevent releasing and loading the same contig twice
+		// (once per _mapSingleReadsToContig call)
+		lockContig(store, contigId);
 		
-		CharString	id;
-		Dna5String	genome;
-		unsigned gseqNoWithinFile = 0;
-		// iterate over genome sequences
-		SEQAN_PROTIMESTART(find_time);
-		for(; !_streamEOF(file); ++contigId)
-		{
-			if (options.genomeNaming == 0)
-			{
-				//readID(file, id, Fasta());			// read Fasta id
-				readShortID(file, id, Fasta());			// read Fasta id up to first whitespace
-				appendValue(store.contigNameStore, id, Generous());
-			}
-			read(file, genome, Fasta());			// read Fasta sequence
-			
-			appendValue(gnoToFileMap, TGNoToFile(genomeName, gseqNoWithinFile));
-			
-			if (options.forward)
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
-
-			if (options.reverse)
-			{
-				reverseComplementInPlace(genome);
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
-			}
-			++gseqNoWithinFile;
-
-		}
-		options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
-		file.close();
-		++filecount;
+		if (options.forward)
+			_mapMatePairReads(store, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
+		
+		if (options.reverse)
+			_mapMatePairReads(store, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
+		
+		unlockAndFreeContig(store, contigId);
 	}
-
-	compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
-	reverseComplementInPlace(readSetR);
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
