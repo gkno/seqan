@@ -146,19 +146,13 @@ inline void consistencyTest(TFragmentStore const & store)
 */
 template <
 	typename TFragmentStore,
-	typename TPatternHandler,
-	typename TCounts,
-	typename TRazerSOptions,
-	typename TRazerSMode >
+	typename TRazerSOptions>
 inline void
 appendBlockStores(
 		TFragmentStore			& store,
 		String<TFragmentStore>	& blockStores,
-		TPatternHandler			& ,//swiftPatternHandler,
-		TCounts					& ,//cnts,
-		TRazerSOptions			& options,
-		TRazerSMode const		& //mode
-		){
+		TRazerSOptions			& options)
+{
 	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
 	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
@@ -659,7 +653,7 @@ template <
 	if (orientation == 'R'){
 		_proFloat complementTime = sysTime();
 		reverseComplementInPlace(contigSeq);
-		printf("reverseComplement took %f sec\n", sysTime()-complementTime);
+		printf("revComp: %f sec\n", sysTime()-complementTime);
 	}
 	
 	// Finder and verifier strings of the same size as there are swift patterns
@@ -764,9 +758,6 @@ int _mapSingleReadsParallelCreatePatterns(
 		swiftPatterns[blockId].params.printDots = (blockId == 0) and (options._debugLevel > 0);
 	}
 
-	String<RazerSOptions<TSpec> > threadOptions; 
-	fill(threadOptions, options.numberOfBlocks, options, Exact());
-
 	// use pattern handler instead of pattern to have access to the global read ID
 	TSwiftPatternHandler swiftPatternHandler(swiftPatterns);
 
@@ -798,6 +789,9 @@ int _mapSingleReadsParallelCreatePatterns(
 	options.timeDumpResults = 0;
 	SEQAN_PROTIMESTART(find_time);
 	
+	String<RazerSOptions<TSpec> > threadOptions; 
+	fill(threadOptions, options.numberOfBlocks, options, Exact());
+	
 	// iterate over genome sequences
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId){
 		// lock to prevent releasing and loading the same contig twice
@@ -813,7 +807,7 @@ int _mapSingleReadsParallelCreatePatterns(
 	}
 
 	// Get the matches from different thread stores and write them in the main store
-	appendBlockStores(store, threadStores, swiftPatternHandler, cnts, options, mode);
+	appendBlockStores(store, threadStores, options);
 	for(int i = 0; i < (int) options.numberOfBlocks; ++i){
 		options.countVerification += threadOptions[i].countVerification;
 	}

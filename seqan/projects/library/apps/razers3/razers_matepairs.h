@@ -312,6 +312,7 @@ void compactPairMatches(
 			hitCount = 0;
 			if (options.scoreDistanceRange > 0)
 				scoreDistCutOff = q.pairScore - options.scoreDistanceRange;
+			
 			ditBeg = dit;
 		}
 		*dit = *it;	++dit; ++it;
@@ -322,8 +323,6 @@ void compactPairMatches(
 }
 
 
-
-#ifndef RAZERS_PARALLEL
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
 template <
@@ -502,7 +501,6 @@ void _mapMatePairReads(
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
-
 //					if (matchVerify(
 //							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
 //							matePairId, readSetL, forwardPatternsL, 
@@ -653,14 +651,12 @@ void _mapMatePairReads(
 				}
 				++options.countFiltration;
 			}
-		} 
-	
+		}
+	}
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
 		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
-	
-	}
+
 }
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -791,6 +787,6 @@ int _mapMatePairReads(
 }
 
 
-}
+} // End namespace
 
 #endif

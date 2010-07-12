@@ -19,10 +19,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_H
-#define SEQAN_HEADER_RAZERS_MATEPAIRS_H
+#ifndef SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
+#define SEQAN_HEADER_RAZERS_MATEPAIRS_PARALLEL_H
 
 #include <seqan/misc/misc_dequeue.h>
+
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -32,320 +33,31 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Definitions
-
-typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
-
-#ifdef RAZERS_MEMOPT
-
-	template <typename TShape>
-	struct SAValue< Index<TMPReadSet, Index_QGram<TShape> > > {
-		typedef Pair<
-			unsigned,				
-			unsigned,
-			BitCompressed<24, 8>	// max. 16M reads of length < 256
-		> Type;
-	};
-	
-#else
-
-	template <typename TShape>
-	struct SAValue< Index<TMPReadSet, Index_QGram<TShape> > > {
-		typedef Pair<
-			unsigned,			// many reads
-			unsigned,			// of arbitrary length
-			Compressed
-		> Type;
-	};
-
-#endif
-
-	
-template <typename TShape, typename TSpec>
-struct Cargo< Index<TMPReadSet, Index_QGram<TShape, TSpec> > > {
-	typedef struct {
-		double		abundanceCut;
-		int			_debugLevel;
-	} Type;
-};
-
-#ifdef RAZERS_PRUNE_QGRAM_INDEX
-
-//////////////////////////////////////////////////////////////////////////////
-// Repeat masker
-template <typename TShape>
-inline bool _qgramDisableBuckets(Index<TMPReadSet, Index_QGram<TShape> > &index) 
-{
-	typedef Index<TMPReadSet, Index_QGram<TShape>	>	TReadIndex;
-	typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
-	typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
-	typedef typename Value<TDir>::Type					TSize;
-	
-	TDir &dir    = indexDir(index);
-	bool result  = false;
-	unsigned counter = 0;
-	TSize thresh = (TSize)(length(index) * cargo(index).abundanceCut);
-	if (thresh < 100) thresh = 100;
-	
-	TDirIterator it = begin(dir, Standard());
-	TDirIterator itEnd = end(dir, Standard());
-	for (; it != itEnd; ++it)
-		if (*it > thresh) 
-		{
-			*it = (TSize)-1;
-			result = true;
-			++counter;
-		}
-	
-	if (counter > 0 && cargo(index)._debugLevel >= 1)
-		::std::cerr << "Removed " << counter << " k-mers" << ::std::endl;
-	
-	return result;
-}
-
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-// Load multi-Fasta sequences
-template <typename TFSSpec, typename TFSConfig, typename TRazerSOptions>
-bool loadReads(
-	FragmentStore<TFSSpec, TFSConfig>	& store,
-	const char							* fileNameL,		// left mates file
-	const char							* fileNameR,		// right mates file
-	TRazerSOptions						& options)
-{
-	bool countN = !(options.matchN || options.outputFormat == 1);
-
-	MultiFasta leftMates;
-	MultiFasta rightMates;
-
-	if (!open(leftMates.concat, fileNameL, OPEN_RDONLY)) return false;
-	if (!open(rightMates.concat, fileNameR, OPEN_RDONLY)) return false;
-
-	AutoSeqFormat formatL;
-	guessFormat(leftMates.concat, formatL);
-	split(leftMates, formatL);
-
-	AutoSeqFormat formatR;
-	guessFormat(rightMates.concat, formatR);
-	split(rightMates, formatR);
-
-	unsigned seqCount = length(leftMates);
-	if (seqCount != length(rightMates))
-	if (options._debugLevel > 1) 
-	{
-		::std::cerr << "Numbers of mates differ: " << seqCount << "(left) != " << length(rightMates) << "(right).\n";
-		return false;
-	}
-
-	String<Dna5Q>	seq[2];
-	CharString		qual[2];
-	CharString		id[2];
-	
-	unsigned kickoutcount = 0;
-	for(unsigned i = 0; i < seqCount; ++i) 
-	{
-		if (options.readNaming == 0)
-		{
-			assignSeqId(id[0], leftMates[i], formatL);				// read left Fasta id
-			assignSeqId(id[1], rightMates[i], formatR);				// read right Fasta id
-			append(id[0], "/L");
-			append(id[1], "/R");
-		}
-		
-		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
-		assignSeq(seq[1], rightMates[i], formatR);					// read right Read sequence
-		assignQual(qual[0], leftMates[i], formatL);					// read left ascii quality values  
-		assignQual(qual[1], rightMates[i], formatR);				// read right ascii quality values  
-		
-		if (countN)
-		{
-			for (int j = 0; j < 2; ++j)
-			{
-				int maxBase = (int)(0.8 * length(seq[j]));
-				int allowed[5] = 
-					{ maxBase, maxBase, maxBase, maxBase, (int)(options.errorRate * length(seq[j]))};
-				for (unsigned k = 0; k < length(seq[j]); ++k)
-					if (--allowed[ordValue(getValue(seq[j], k))] == 0)
-					{
-//						std::cout << "Ignoring mate-pair: " << seq[0] << " " << seq[1] << std::endl;
-						clear(seq[0]);
-						clear(seq[1]);
-						clear(id[0]);
-						clear(id[1]);
-						++kickoutcount;
-						break;
-					}
-			}
-		}
-		
-		for (int j = 0; j < 2; ++j)
-		{
-			// store dna and quality together
-			for (unsigned p = 0; p < length(qual[j]) && p < length(seq[j]); ++p)
-				assignQualityValue(seq[j][p], (int)(ordValue(qual[j][p]) - 33));
-			
-			if (options.trimLength > 0 && length(seq[j]) > (unsigned)options.trimLength)
-				resize(seq[j], options.trimLength);
-		}
-		appendMatePair(store, seq[0], seq[1], id[0], id[1]);
-	}
-	// memory optimization
-	reserve(store.readSeqStore.concat, length(store.readSeqStore.concat), Exact());
-//	reserve(store.readNameStore.concat, length(store.readNameStore.concat), Exact());
-
-	if (options._debugLevel > 1 && kickoutcount > 0) 
-		::std::cerr << "Ignoring " << kickoutcount << " low quality mate-pairs.\n";
-	return (seqCount > 0);
-}
-
-	template <typename TFragmentStore>
-	struct LessPairScore : 
-		public ::std::binary_function <
-			typename Value<typename TFragmentStore::TAlignedReadStore>::Type, 
-			typename Value<typename TFragmentStore::TAlignedReadStore>::Type,
-			bool >
-	{
-		TFragmentStore &store;
-		
-		LessPairScore(TFragmentStore &_store):
-			store(_store) {}
-		
-		inline bool operator() (
-			typename Value<typename TFragmentStore::TAlignedReadStore>::Type const &a, 
-			typename Value<typename TFragmentStore::TAlignedReadStore>::Type const &b) const 
-		{
-			typedef typename TFragmentStore::TReadStore			TReadStore;
-			typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
-			typedef typename TFragmentStore::TAlignQualityStore	TAlignQualityStore;
-			typedef typename Value<TReadStore>::Type			TRead;
-			typedef typename Value<TAlignedReadStore>::Type		TAlignedRead;
-			typedef typename Value<TAlignQualityStore>::Type	TQual;
-			typedef typename Id<TRead>::Type					TId;
-
-			// pair number
-			if (b.readId == TAlignedRead::INVALID_ID) return false;
-			if (a.readId == TAlignedRead::INVALID_ID) return true;
-			TRead const &ra = store.readStore[a.readId];
-			TRead const &rb = store.readStore[b.readId];
-			if (ra.matePairId < rb.matePairId) return true;
-			if (ra.matePairId > rb.matePairId) return false;
-
-			// quality
-			if (a.id == TAlignedRead::INVALID_ID) return false;
-			if (b.id == TAlignedRead::INVALID_ID) return true;
-			TQual const &qa = store.alignQualityStore[a.id];
-			TQual const &qb = store.alignQualityStore[b.id];
-			if (qa.pairScore > qb.pairScore) return true;
-			if (qa.pairScore < qb.pairScore) return false;
-			
-			return a.pairMatchId < b.pairMatchId;
-		}
-	};
-	
-
-//////////////////////////////////////////////////////////////////////////////
-// Remove low quality matches
-template < typename TFragmentStore, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
-void compactPairMatches(
-	TFragmentStore			& store,
-	TCounts					&, 
-	RazerSOptions<TSpec>	& options, 
-	TSwiftL					& swiftL, 
-	TSwiftR					& swiftR)
-{
-	typedef typename TFragmentStore::TReadStore						TReadStore;
-	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
-	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
-	typedef typename Value<TReadStore>::Type						TRead;
-	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
-	typedef typename Value<TAlignQualityStore>::Type				TQual;
-	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-	
-	unsigned matePairId = -2;
-	unsigned hitCount = 0;
-	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
-
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
-	TIterator dit = it;
-	TIterator ditBeg = it;
-
-	// sort 
-	sortAlignedReads(store.alignedReadStore, LessPairScore<TFragmentStore>(store));
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).id == TAlignedRead::INVALID_ID || (*it).readId == TAlignedRead::INVALID_ID) continue;
-		TRead &r = store.readStore[(*it).readId];
-		TQual &q = store.alignQualityStore[(*it).id];
-		if (matePairId == r.matePairId)
-		{ 
-			if (q.pairScore <= scoreDistCutOff) continue;
-			if (++hitCount >= hitCountCutOff)
-			{
-#ifdef RAZERS_MASK_READS
-				if (hitCount == hitCountCutOff)
-				{
-					// we have enough, now look for better matches
-					int maxErrors = -1 - q.pairScore;
-					if (options.purgeAmbiguous)
-						maxErrors = -1;
-
-					setMaxErrors(swiftL, matePairId, maxErrors);
-					setMaxErrors(swiftR, matePairId, maxErrors);
-
-					if (maxErrors == -1 && options._debugLevel >= 2)
-						::std::cerr << "(pair #" << matePairId << " disabled)";
-
-					if (options.purgeAmbiguous)
-						dit = ditBeg;
-				}
-#endif
-				continue;
-			}
-		}
-		else
-		{
-			matePairId = r.matePairId;
-			hitCount = 0;
-			if (options.distanceRange > 0)
-				scoreDistCutOff = q.pairScore - options.distanceRange;
-			ditBeg = dit;
-		}
-		*dit = *it;	++dit; ++it;
-		*dit = *it;	++dit;
-	}
-	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
-	compactAlignedReads(store);
-}
-
-
-
-#ifndef RAZERS_PARALLEL
-//////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
 template <
-	typename TFSSpec, 
-	typename TFSConfig, 
-	typename TGenome,
-	typename TReadIndex, 
-	typename TSwiftSpec, 
+	typename TFSSpec,
+	typename TFSConfig,
+	typename TReadIndex,
+	typename TSwiftSpec,
+	typename TThreadId,
 	typename TPreprocessing,
 	typename TCounts,
-	typename TRazerSOptions >
-void _mapMatePairReads(
-	FragmentStore<TFSSpec, TFSConfig>		& store,
-	TGenome									& genome,				// genome ...
-	unsigned								  contigId,				// ... and its sequence number
-	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternL,
-	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPatternR,
-	TPreprocessing							& preprocessingL,
-	TPreprocessing							& preprocessingR,
-	TCounts									& cnts,
-	char									  orientation,			// q-gram index of reads
-	TRazerSOptions							& options)
+	typename TRazerSOptions,
+	typename TRazerSMode>
+void _mapMatePairReadsParallel(
+	FragmentStore<TFSSpec, TFSConfig>					& store,
+	unsigned											  contigId,				// ... and its sequence number
+	ParallelSwiftPatternHandler<String<
+		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerL,
+	ParallelSwiftPatternHandler<String<
+		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerR,
+	TThreadId const										threadID,
+	TPreprocessing										& preprocessingL,
+	TPreprocessing										& preprocessingR,
+	TCounts												& cnts,
+	char												  orientation,			// q-gram index of reads
+	TRazerSOptions										& options,
+	TRazerSMode											& mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
@@ -357,6 +69,7 @@ void _mapMatePairReads(
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
 	typedef typename Id<TAlignedRead>::Type					TId;
 
+	typedef typename TFragmentStore::TContigSeq				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
 	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
@@ -366,23 +79,21 @@ void _mapMatePairReads(
 	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinderL;
 	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >			TSwiftFinderR;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
-
+	
 	// MATE-PAIR FILTRATION
 	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
 	typedef Dequeue<TDequeueValue>							TDequeue;
 	typedef typename TDequeue::TIter						TDequeueIterator;
 
 	// VERIFICATION
-	typedef MatchVerifier <
-		TFragmentStore, 
-		TRazerSOptions, 
-		TPreprocessing, 
-		TSwiftPattern,
-		TCounts >											TVerifier;
-
+	typedef String<TSwiftPattern>							TSwiftPatterns;
+	typedef ParallelSwiftPatternHandler<TSwiftPatterns>		TSwiftPatternHandler;
+	typedef MatchVerifier <TFragmentStore, TRazerSOptions,
+		TRazerSMode, TPreprocessing,
+		TSwiftPatternHandler, TCounts >						TVerifier;
+	
 	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
-
-	// iterate all genomic sequences
+	
 	if (options._debugLevel >= 1)
 	{
 		::std::cerr << ::std::endl << "Process genome seq #" << contigId;
@@ -391,11 +102,18 @@ void _mapMatePairReads(
 		else
 			::std::cerr << "[rev]";
 	}
-
+	
+	lockContig(store, contigId);
+	TGenome &genome = store.contigStore[contigId].seq;
+	if (orientation == 'R')	reverseComplementInPlace(genome);
+	
+	TSwiftPattern & swiftPatternL = swiftPatternHandlerL.swiftPatterns[threadID];
+	TSwiftPattern & swiftPatternR = swiftPatternHandlerR.swiftPatterns[threadID];
+	
 	TReadSet	&readSetL = host(host(swiftPatternL));
 	TReadSet	&readSetR = host(host(swiftPatternR));
-	TVerifier	verifierL(store, options, preprocessingL, swiftPatternL, cnts);
-	TVerifier	verifierR(store, options, preprocessingR, swiftPatternR, cnts);
+	TVerifier	verifierL(store, options, preprocessingL, swiftPatternHandlerL, cnts);
+	TVerifier	verifierR(store, options, preprocessingR, swiftPatternHandlerR, cnts);
 
 	verifierL.oneMatchPerBucket = true;
 	verifierR.oneMatchPerBucket = true;
@@ -442,21 +160,13 @@ void _mapMatePairReads(
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
-
+		
 		// remove out-of-window left mates from fifo
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
 			popFront(fifo);
 			++firstNo;
 		}
-/*		
-		if (empty(fifo) || back(fifo).endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
-			for (unsigned i = 0; i < preFetchMatches; ++i)
-				if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
-					pushBack(fifo, mL);
-				else
-					break;
-*/
 		// add within-window left mates to fifo
 		while (empty(fifo) || (TSignedGPos)back(fifo).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
@@ -478,31 +188,23 @@ void _mapMatePairReads(
 			} else
 				break;
 		}
-
+		
 		int	bestLeftScore = InfimumValue<int>::VALUE;
 		int bestLibSizeError = SupremumValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
-
+		
 		TDequeueIterator it;
 		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
 		__int64 lastPositive = (__int64)-1;
 		for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
 		{
 			it = &value(fifo, i - firstNo);
-
-			// search left mate
-//			if (((*it).i2.readId & ~NOT_VERIFIED) == leftReadId)
 			{
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
-
-//					if (matchVerify(
-//							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-//							matePairId, readSetL, forwardPatternsL, 
-//							options, TSwiftSpec()))
 					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-							matePairId, readSetL, TSwiftSpec()))
+							matePairId, readSetL, mode))
 					{
 						verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
 						(*it).i2 = verifierL.m;
@@ -517,14 +219,7 @@ void _mapMatePairReads(
 					} else
 						(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
 				}
-/*
-				if ((*it).i2.readId == leftReadId)
-				{
-					bestLeft = it;
-					bestLeftScore = (*it).i3.score;
-					break;
-				}
-*/
+
 				if ((*it).i2.readId == leftReadId)
 				{
 					int score = (*it).i3.score;
@@ -550,10 +245,8 @@ void _mapMatePairReads(
 					}
 				}
 			}
-//			else
-//				std::cout << "HUH?" << std::endl;
 		}
-
+		
 		// short-cut negative matches
 		if (lastPositive == (__int64)-1)
 			lastPotMatchNo[matePairId] = (__int64)-1;
@@ -563,12 +256,8 @@ void _mapMatePairReads(
 		// verify right mate, if left mate matches
 		if (bestLeftScore != InfimumValue<int>::VALUE)
 		{
-//			if (matchVerify(
-//					mR, qR, infix(swiftFinderR),
-//					matePairId, readSetR, forwardPatternsR,
-//					options, TSwiftSpec()))
 			if (matchVerify(verifierR, infix(swiftFinderR), 
-					matePairId, readSetR, TSwiftSpec()))
+					matePairId, readSetR, mode))
 			{
 				// distance between left mate beginning and right mate end
 				__int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
@@ -606,21 +295,10 @@ void _mapMatePairReads(
 					fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId;
 					if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
 						options.nextPairMatchId = 0;
-
+					
 					// score the whole match pair
 					fL.i3.pairScore = qR.pairScore = fL.i3.score + qR.score;
-
-					// both mates match with correct library size
-/*								std::cout << "found " << matePairId << " on " << orientation << contigId;
-					std::cout << " dist:" << dist;
-					if (orientation=='F')
-						std::cout << " \t_" << fL.i2.beginPos+1 << "_" << mR.endPos;
-					else
-						std::cout << " \t_" << mR.beginPos+1 << "_" << mL.endPos;
-//							std::cout << " L_" << (*bestLeft).beginPos << "_" << (*bestLeft).endPos << "_" << (*bestLeft).editDist;
-//							std::cout << " R_" << mR.beginPos << "_" << mR.endPos << "_" << mR.editDist;
-					std::cout << std::endl;
-*/
+					
 					if (!options.spec.DONT_DUMP_RESULTS)
 					{
 						fL.i2.id = length(store.alignedReadStore);
@@ -647,169 +325,148 @@ void _mapMatePairReads(
 				}
 				++options.countFiltration;
 			}
-		} 
+		} 	
 	}
+	
+	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
+		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
+	
 }
-#endif
 
 
-//////////////////////////////////////////////////////////////////////////////
-// Find read matches in many genome sequences (import from Fasta)
+
+
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 
-	typename TGNoToFile, 
 	typename TCounts,
 	typename TSpec, 
-	typename TShape,
-	typename TSwiftSpec >
-int _mapMatePairReadsParallel(
-	FragmentStore<TFSSpec, TFSConfig>	& store,
-	StringSet<CharString>				& genomeFileNameList,
-	String<TGNoToFile>					& gnoToFileMap,
-	TCounts								& cnts,
-	RazerSOptions<TSpec>				& options,
-	TShape const						& shape,
-	Swift<TSwiftSpec> const)
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode,
+	typename TReadIndexString>
+int _mapMatePairReadsParallelCreatePatterns(
+		FragmentStore<TFSSpec, TFSConfig>					& store,
+		TCounts												& cnts,
+		RazerSOptions<TSpec>								& options,
+		RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
+		TReadIndexString									& readIndicesL, // TODO const? 
+		TReadIndexString									& readIndicesR)
 {
-	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
-	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+	SEQAN_CHECKPOINT
+
+	typedef FragmentStore<TFSSpec, TFSConfig>					TFragmentStore;
+	typedef typename IF<
+				TYPECMP<TGapMode,RazerSGapped>::VALUE,
+	 			SwiftSemiGlobal, 
+				SwiftSemiGlobalHamming>::Type 					TSwiftSpec;
+	typedef typename Value<TReadIndexString>::Type				TReadIndex;
+
+	// filter
+	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >				TSwiftPattern;
+	typedef String<TSwiftPattern>								TSwiftPatterns;
+	typedef ParallelSwiftPatternHandler<TSwiftPatterns>			TSwiftPatternHandler;
+
+	// verifier
+	typedef Pattern<TRead, MyersUkkonen>						TMyersPattern;
+	// typedef Pattern<TRead, Myers<FindInfix, False, void> >		TMyersPattern;
+	typedef typename Position<TReadIndexString>::Type			TPos;
 	
-	typedef typename Value<TReadSeqStore>::Type			TRead;
-	typedef StringSet<TRead>							TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
-	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
-	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
-
-//	std::cout << "SA-TYPE:" <<sizeof(typename SAValue<TIndex>::Type)<<std::endl;
-
-	// TODO: if only one thread is requested call serial function
-
-	// split mate-pairs over two indices
-	TReadSet readSetL, readSetR;
 	unsigned pairCount = length(store.matePairStore);
 	
-	// TODO: calculate  block sizes
-	// TODO: create two strings of indices
-	resize(readSetL, pairCount, Exact());
-	resize(readSetR, pairCount, Exact());
+	// A temporary store for every thread. They are combined after all contigs are processed
+	String<TFragmentStore> threadStores;
+	resize(threadStores, options.numberOfCores, Exact());
 
-	for (unsigned i = 0; i < pairCount; ++i)
-	{
-		assign(readSetL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
-		assign(readSetR[i], store.readSeqStore[store.matePairStore[i].readId[1]]);
-	}
-	// TODO: reverse complement in place parallel version for stringSets
-	reverseComplementInPlace(readSetR);
-
-	// TODO: iterate over blocks
-	// configure q-gram index
-	TIndex swiftIndexL(readSetL, shape);
-	TIndex swiftIndexR(readSetR, shape);
-	reverse(indexShape(swiftIndexR));		// right mate qualities are reversed -> reverse right shape
+	// configure Swift patterns
+	String<TSwiftPattern> swiftPatternsL, swiftPatternsR;
+	resize(swiftPatternsL, options.numberOfCores, Exact());
+	resize(swiftPatternsR, options.numberOfCores, Exact());
 	
-	cargo(swiftIndexL).abundanceCut = options.abundanceCut;
-	cargo(swiftIndexR).abundanceCut = options.abundanceCut;
-	cargo(swiftIndexL)._debugLevel = options._debugLevel;
-	cargo(swiftIndexR)._debugLevel = options._debugLevel;
-
 	// configure Swift
-	// TODO: create two swift pattern handler
-	TSwiftPattern swiftPatternL(swiftIndexL);
-	TSwiftPattern swiftPatternR(swiftIndexR);
-	swiftPatternL.params.minThreshold = options.threshold;
-	swiftPatternR.params.minThreshold = options.threshold;
-	swiftPatternL.params.tabooLength = options.tabooLength;
-	swiftPatternR.params.tabooLength = options.tabooLength;
-	swiftPatternL.params.printDots = options._debugLevel > 0;
-	swiftPatternR.params.printDots = options._debugLevel > 0;
-
+	for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID) {
+		assign(swiftPatternsL[threadID].data_host, readIndicesL[threadID]);
+		swiftPatternsL[threadID].params.minThreshold = options.threshold;
+		swiftPatternsL[threadID].params.tabooLength = options.tabooLength;
+		swiftPatternsL[threadID].params.printDots = (threadID == 0) and (options._debugLevel > 0);
+		
+		assign(swiftPatternsR[threadID].data_host, readIndicesR[threadID]);
+		swiftPatternsR[threadID].params.minThreshold = options.threshold;
+		swiftPatternsR[threadID].params.tabooLength = options.tabooLength;
+		swiftPatternsR[threadID].params.printDots = (threadID == 0) and (options._debugLevel > 0);
+	}
+	
+	// use pattern handler instead of pattern to have access to the global read ID
+	TSwiftPatternHandler swiftPatternHandlerL(swiftPatternsL);
+	TSwiftPatternHandler swiftPatternHandlerR(swiftPatternsR);
+	
 	// init edit distance verifiers
 	String<TMyersPattern> forwardPatternsL;
 	String<TMyersPattern> forwardPatternsR;
 	options.compMask[4] = (options.matchN)? 15: 0;
-	if (!options.hammingOnly)
+	if (options.gapMode == RAZERS_GAPPED)
 	{
 		resize(forwardPatternsL, pairCount, Exact());
 		resize(forwardPatternsR, pairCount, Exact());
 		for(unsigned i = 0; i < pairCount; ++i)
 		{
-			setHost(forwardPatternsL[i], readSetL[i]);
-			setHost(forwardPatternsR[i], readSetR[i]);
+			setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
+			setHost(forwardPatternsR[i], store.readSeqStore[store.matePairStore[i].readId[1]]);
 			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsR[i], options.matchN);
 		}
 	}
-
-	// TODO: create one option per thread
+	
 	// clear stats
 	options.countFiltration = 0;
 	options.countVerification = 0;
 	options.timeMapReads = 0;
 	options.timeDumpResults = 0;
-
-	unsigned filecount = 0;
-	unsigned numFiles = length(genomeFileNameList);
-	unsigned contigId = 0;
-
-	// open genome files, one by one	
-	while (filecount < numFiles)
-	{
-		// open genome file	
-		::std::ifstream file;
-		file.open(toCString(genomeFileNameList[filecount]), ::std::ios_base::in | ::std::ios_base::binary);
-		if (!file.is_open())
-			return RAZERS_GENOME_FAILED;
-
-		// remove the directory prefix of current genome file
-		::std::string genomeFile(toCString(genomeFileNameList[filecount]));
-		size_t lastPos = genomeFile.find_last_of('/') + 1;
-		if (lastPos == genomeFile.npos) lastPos = genomeFile.find_last_of('\\') + 1;
-		if (lastPos == genomeFile.npos) lastPos = 0;
-		::std::string genomeName = genomeFile.substr(lastPos);
+	SEQAN_PROTIMESTART(find_time);
+	
+	String<RazerSOptions<TSpec> > threadOptions; 
+	fill(threadOptions, options.numberOfCores, options, Exact());
+	
+	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId) {
+		// lock to prevent releasing and loading the same contig twice
+		// (once per _mapSingleReadsToContig call)
+		lockContig(store, contigId);
 		
-		CharString	id;
-		Dna5String	genome;
-		unsigned gseqNoWithinFile = 0;
-		// iterate over genome sequences
-		SEQAN_PROTIMESTART(find_time);
-		for(; !_streamEOF(file); ++contigId)
-		{
-			if (options.genomeNaming == 0)
-			{
-				//readID(file, id, Fasta());			// read Fasta id
-				readShortID(file, id, Fasta());			// read Fasta id up to first whitespace
-				appendValue(store.contigNameStore, id, Generous());
+		if (options.forward){
+			// #pragma omp parallel for share(...)
+			for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID) {
+				_mapMatePairReadsParallel(threadStores[threadID], contigId, 
+					swiftPatternHandlerL, swiftPatternHandlerR, threadID,
+					forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
 			}
-			read(file, genome, Fasta());			// read Fasta sequence
-			
-			appendValue(gnoToFileMap, TGNoToFile(genomeName, gseqNoWithinFile));
-			
-			if (options.forward)
-				// TODO: for loop over blocks
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'F', options);
-
-			if (options.reverse)
-			{
-				reverseComplementInPlace(genome);
-				// TODO: for loop over blocks
-				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
-			}
-			++gseqNoWithinFile;
 		}
-		options.timeMapReads += SEQAN_PROTIMEDIFF(find_time);
-		file.close();
-		++filecount;
+	
+		if (options.reverse){
+			// #pragma omp parallel for share(...)
+			for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID) {
+				_mapMatePairReadsParallel(threadStores[threadID], contigId, 
+					swiftPatternHandlerL, swiftPatternHandlerR, threadID,
+					forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
+			}
+		}
+		
+		unlockAndFreeContig(store, contigId);
 	}
 
 	// TODO: combine stores
 	// TODO: get filter and verify count from thread options
+	// TODO: remember matepair id
 
-	compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
-	reverseComplementInPlace(readSetR);
+	// Get the matches from different thread stores and write them in the main store
+	appendBlockStores(store, threadStores, options);
+	for(int i = 0; i < (int) options.numberOfCores; ++i){
+		options.countVerification += threadOptions[i].countVerification;
+	}
 
+	// output for verbose and very verbose options
+	options.timeMapReads = SEQAN_PROTIMEDIFF(find_time);
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;
 	if (options._debugLevel >= 2) {
@@ -818,10 +475,100 @@ int _mapMatePairReadsParallel(
 		::std::cerr << "Filtration counter:  " << options.countFiltration << ::std::endl;
 		::std::cerr << "Verfication counter: " << options.countVerification << ::std::endl;
 	}
+	
 	return 0;
 }
 
 
+template <
+	typename TFSSpec, 
+	typename TFSConfig, 
+	typename TCounts,
+	typename TSpec, 
+	typename TShape,
+	typename TAlignMode,
+	typename TGapMode,
+	typename TScoreMode >
+int _mapMatePairReadsParallel(
+	FragmentStore<TFSSpec, TFSConfig>					& store,
+	TCounts												& cnts,
+	RazerSOptions<TSpec>								& options,
+	TShape const										& shape,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
+{
+	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
+	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
+	typedef typename Position<TReadSeqStore>::Type		TReadSeqStorePos;
+	
+	typedef typename Value<TReadSeqStore>::Type			TRead;
+	typedef StringSet<TRead>							TReadSet;
+#ifndef RAZERS_OPENADDRESSING
+	typedef Index<TReadSet, Index_QGram<TShape> >	TIndex;			// q-gram index
+#else
+	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;
+#endif
+
+	if (options._debugLevel >= 1){
+		::std::cerr << ::std::endl << "Number of cores:                 \t" << options.numberOfCores << std::endl;
+	}
+
+	unsigned pairCount = length(store.matePairStore);
+
+	// compare with noOfBlocks, there needs to be at least one read per block
+	if(options.numberOfCores == 1 or pairCount < options.numberOfCores or pairCount < 1000)
+		return _mapMatePairReads(store, cnts, options, shape, mode);
+	else {
+		// number of reads per block
+		options.blockSize = pairCount / options.numberOfCores;
+		unsigned perBlockRemainder = pairCount % options.numberOfCores;
+		
+		// TODO: create two strings of indices
+		String<TIndex> indicesL, indicesR;
+		resize(indicesL, options.numberOfBlocks, Exact());
+		resize(indicesR, options.numberOfBlocks, Exact());
+
+		TReadSeqStorePos readID = 0;
+		// create swift indices that can work in parallel
+		for (unsigned threadID = 0; threadID < options.numberOfCores; ++threadID) {
+			TReadSet readSetL, readSetR;
+
+			// the last one gets some extra
+			if((threadID == options.numberOfBlocks - 1) && (perBlockRemainder != 0)){
+				resize(readSetL, options.blockSize + perBlockRemainder, Exact());
+				resize(readSetR, options.blockSize + perBlockRemainder, Exact());
+			}
+			else{
+				resize(readSetL, options.blockSize, Exact());
+				resize(readSetR, options.blockSize, Exact());
+			}
+			
+			// split mate-pairs over two indices
+			for (unsigned i = 0; i < length(readSetL); ++i) {
+				assign(readSetL[i], store.readSeqStore[store.matePairStore[readID].readId[0]]);
+				assign(readSetR[i], store.readSeqStore[store.matePairStore[readID].readId[1]]);
+				++readID;
+			}
+			reverseComplementInPlace(readSetR);
+			
+			// configure q-gram indices
+			intiIndex(indicesL[threadID], readSetL, shape);
+			intiIndex(indicesR[threadID], readSetR, shape);
+#ifdef RAZERS_OPENADDRESSING
+			indicesL[threadID].alpha = options.loadFactor;
+			indicesR[threadID].alpha = options.loadFactor;
+#endif
+			reverse(indexShape(indicesR[threadID]));		// right mate qualities are reversed -> reverse right shape
+			
+			cargo(indicesL[threadID]).abundanceCut = options.abundanceCut;
+			cargo(indicesL[threadID])._debugLevel = options._debugLevel;
+			cargo(indicesR[threadID]).abundanceCut = options.abundanceCut;
+			cargo(indicesR[threadID])._debugLevel = options._debugLevel;
+		}
+		return _mapMatePairReadsParallelCreatePatterns(store, cnts, options, mode, indicesL, indicesR);
+	}
 }
+
+
+} // End namespace
 
 #endif
