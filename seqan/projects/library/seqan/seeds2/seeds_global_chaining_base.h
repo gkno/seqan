@@ -16,14 +16,14 @@
  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ============================================================================
-  Basic definitions for the module seeds.
+  Generic parts of the global chaining algorithms and basic definitions.
  ==========================================================================*/
 
-#ifndef SEQAN_SEEDS_SEEDS_BASE_H_
-#define SEQAN_SEEDS_SEEDS_BASE_H_
+#ifndef SEQAN_SEEDS_SEEDS_GLOBAL_CHAINING_BASE_H_
+#define SEQAN_SEEDS_SEEDS_GLOBAL_CHAINING_BASE_H_
 
 namespace seqan {
 
 }  // namespace seqan
 
-#endif  // SEQAN_SEEDS_SEEDS_BASE_H_
+#endif  // SEQAN_SEEDS_SEEDS_GLOBAL_CHAINING_BASE_H_

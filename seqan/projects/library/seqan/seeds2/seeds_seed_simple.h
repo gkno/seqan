@@ -22,13 +22,16 @@
 #ifndef SEQAN_SEEDS_SEEDS_SEED_SIMPLE_H_
 #define SEQAN_SEEDS_SEEDS_SEED_SIMPLE_H_
 
+namespace seqan {
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
 // Already defined in module score.
-// struct _Simple;
-// typedef Tag<_Simple> Simple;
+// struct _Simple {};
+// typedef Tag<_Simple> Simple;  // Already defined in module base.
+struct Simple {}; // .. but type is not complete yet
 
 /**
 .Spec.SimpleSeed:
@@ -102,7 +105,7 @@ startDiagonal(Seed<TPosition, Simple> const & seed)
 	return seed._leftDim1 - seed._leftDim0;
 }
 
-template<typename TPosition, typename TSpecSeed>
+template<typename TPosition>
 inline TPosition 
 endDiagonal(Seed<TPosition, Simple> const & seed)
 {
@@ -115,20 +118,20 @@ inline TPosition
 leftPosition(Seed<TPosition, Simple> const & seed, TDimension dim)
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<dim>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<dim>(1));
+    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
+    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
 	return dim ? seed._leftDim1 : seed._leftDim0;
 }
 
 template< typename TPosition, typename TDimension, typename TPosition2> 
 inline TPosition 
 setLeftPosition(Seed<TPosition, Simple> & seed, 
-				TSize dim,
+				TDimension dim,
 				TPosition2 newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<dim>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<dim>(1));
+    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
+    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
     if (dim)
         seed._leftDim1 = newLeftPosition;
 	else
@@ -140,20 +143,20 @@ inline TPosition
 rightPosition(Seed<TPosition, Simple> const & seed, TDimension dim)
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<dim>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<dim>(1));
+    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
+    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
 	return dim ? seed._rightDim1 : seed._rightDim0;
 }
 
 template< typename TPosition, typename TDimension, typename TPosition2> 
 inline TPosition 
 setRightPosition(Seed<TPosition, Simple> & seed, 
-                 TSize dim,
+                 TDimension dim,
                  TPosition2 newRightPosition)
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<dim>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<dim>(1));
+    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
+    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
     if (dim)
         seed._rightDim1 = newRightPosition;
 	else
@@ -279,5 +282,7 @@ setRightDiagonal(Seed<TPosition, Simple> & seed,
 	SEQAN_CHECKPOINT;
 	seed._rightDiagonal = newDiag;
 }
+
+}  // namespace seqan
 
 #endif  // SEQAN_SEEDS_SEEDS_SEED_SIMPLE_H_

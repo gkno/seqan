@@ -38,11 +38,29 @@
 // ===========================================================================
 
 // Basic definitions
-#include <seqan/seeds2/seeds_base.h>
+// #include <seqan/seeds2/seeds_base.h>
 
 // Class Seed and specializations
 #include <seqan/seeds2/seeds_seed_base.h>
 #include <seqan/seeds2/seeds_seed_simple.h>
+#include <seqan/seeds2/seeds_seed_diagonal.h>
 #include <seqan/seeds2/seeds_seed_chained.h>
 
-#endif //#ifndef SEQAN_HEADER_...
+// Algorithms on Seed objects.
+// #include <seqan/seeds2/seeds_extension.h>
+
+// Class SeedSet and specializations
+// #include <seqan/seeds2/seeds_scoring_scheme.h>
+// #include <seqan/seeds2/seeds_seed_set_base.h>
+// #include <seqan/seeds2/seeds_seed_set_scored.h>
+// #include <seqan/seeds2/seeds_seed_set_non_scored.h>
+
+// Algorithms on SeedSet objects
+// #include <seqan/seeds2/seeds_add_seed.h>
+
+// Global chaining algorithms
+// #include <seqan/seeds2/seeds_global_chaining_base.h>
+// #include <seqan/seeds2/seeds_global_chaining_gusfield.h>
+// #include <seqan/seeds2/seeds_global_chaining_lagan.h>
+
+#endif  // #ifndef SEQAN_HEADER_SEEDS_H

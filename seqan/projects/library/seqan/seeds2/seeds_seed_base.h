@@ -22,6 +22,8 @@
 #ifndef SEQAN_SEEDS_SEEDS_SEED_BASE_H_
 #define SEQAN_SEEDS_SEEDS_SEED_BASE_H_
 
+namespace seqan {
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -47,6 +49,7 @@
 ..include:seqan/seeds.h
  */
 // TODO(holtgrew): Maybe add TSize?
+// TODO(holtgrew): Store score in the seed!
 template <typename TPosition, typename TSpec>
 class Seed;
 
@@ -298,28 +301,6 @@ struct Position<Seed<TPosition, TSpec> const>
 ..include:seqan/seeds.h
 */
 
-/**
-.Function.extendSeed
-..summary:Extends a seed.
-..cat:Seed Handling
-..signature:extendSeed(seed, query, database, direction, tag)
-..signature:extendSeed(seed, scoreDropOff, scoreMatrix, query, database, direction, tag)
-..param.seed: The seed to extend.
-...type:Class.Seed
-..param.query: The query sequence.
-...type:Class.String
-..param.query: The database sequence.
-...type:Class.String
-..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
-..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
-...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
-..param.scoreMatrix: The scoring scheme.
-...type:Spec.Simple Score
-...remarks:Only used for the algorithms @Tag.Seed Extension.UngappedXDrop@ and @Tag.Seed Extension.GappedXDrop@
-..param.tag: The algorithm to use.
-...type:Tag.Seed Extension.MatchExtend
-...type:Tag.Seed Extension.UngappedXDrop
-...type:Tag.Seed Extension.GappedXDrop
-*/
+}  // namespace seqan
 
 #endif  // SEQAN_SEEDS_SEEDS_SEED_BASE_H_
