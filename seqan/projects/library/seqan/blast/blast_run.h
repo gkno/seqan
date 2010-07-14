@@ -107,7 +107,7 @@ run(Tag<TBlast> tag,
 	TString query_path,
 	TString query_name,
 	TBlastReport & blastObj, //BlastReport<BlastHsp<BlastN,THspInfoSpec>,TStoreSpec,TInfoSpec >
-	TParamString params = "")
+	TParamString params)
 {
 SEQAN_CHECKPOINT
 
@@ -131,7 +131,20 @@ SEQAN_CHECKPOINT
 
 }
 	
-
+//run without saving the blast report file (saves temporarily)
+template<typename TBlast, typename TBlastReport, typename TString, typename TParamString>
+void
+run(Tag<TBlast> tag,
+	TString blast_path,
+	TString db_path,
+	TString db_name,
+	TString query_path,
+	TString query_name,
+	TBlastReport & blastObj)
+{
+	SEQAN_CHECKPOINT;
+	run(tag, blast_path, db_path, db_name, query_path, query_name, blastObj);
+}
 
 
 
