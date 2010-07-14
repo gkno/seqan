@@ -112,14 +112,14 @@ struct GapAnchor {
 	inline bool
 	operator <= (TOther const &other) const
 	{
-		return seqPos <= other.seqPos || gapPos <= other.gapPos;
+		return seqPos < other.seqPos || gapPos <= other.gapPos;
 	} 
 
 	template <typename TOther>
 	inline bool
 	operator >= (TOther const &other) const
 	{
-		return seqPos >= other.seqPos || gapPos >= other.gapPos;
+		return seqPos > other.seqPos || gapPos >= other.gapPos;
 	}
 };
 

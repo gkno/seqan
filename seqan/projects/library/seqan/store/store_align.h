@@ -732,10 +732,10 @@ SEQAN_CHECKPOINT
 		else
 		{
 			// for the sick case that an anchor seq position is beyond the sequence end
-/*			if (!empty(_dataAnchors(me)))
+			if (!empty(_dataAnchors(me)))
 				if (anchor.seqPos < back(_dataAnchors(me)).seqPos)
 					anchor.seqPos = back(_dataAnchors(me)).seqPos;
-*/			anchor.gapPos = supremumValue(anchor.gapPos);
+			anchor.gapPos = supremumValue(anchor.gapPos);
 		}
 	}
 	else if (idx > 0)
@@ -1432,6 +1432,7 @@ getCigarString(
 		}
 		++numOps;
 	}
+	SEQAN_ASSERT_EQ(atEnd(it1), atEnd(it2));
 	if (lastOp == 'D' && numOps >= (unsigned)splicedGapThresh)
 		lastOp = 'N';
 	if (numOps > 0)
