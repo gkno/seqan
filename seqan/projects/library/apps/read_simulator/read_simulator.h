@@ -305,6 +305,28 @@ int parseCommandLineAndCheck(TOptions & options,
     return parseCommandLineAndCheckModelSpecific(options, parser);
 }
 
+// Write a random DNA sequence of the given length to the file with the given name.
+template <typename TRNG>
+int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) {
+    DnaString randomSequence;
+    reserve(randomSequence, length);
+
+    for (size_t i = 0; i < length; ++i) {
+        Dna c = static_cast<Dna>(pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, ValueSize<Dna>::VALUE - 1)));
+        appendValue(randomSequence, c);
+    }
+
+    std::ofstream file;
+    file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc);
+    if (!file.is_open()) {
+        std::cerr << "Failed to write random sequence to " << fileName << std::endl;
+        return 1;
+    }
+    write(file, randomSequence, "random_sequence", Fasta());
+    file.close();
+    return 0;
+}
+
 template <typename TOptions, typename TReadsTypeTag>
 int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag const &) {
     // Print options.
@@ -498,28 +520,6 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
 	}
 
 #endif  // USE_LOGVALUES
-
-// Write a random DNA sequence of the given length to the file with the given name.
-template <typename TRNG>
-int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) {
-    DnaString randomSequence;
-    reserve(randomSequence, length);
-
-    for (size_t i = 0; i < length; ++i) {
-        Dna c = static_cast<Dna>(pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, ValueSize<Dna>::VALUE - 1)));
-        appendValue(randomSequence, c);
-    }
-
-    std::ofstream file;
-    file.open(toCString(fileName), std::ios_base::out | std::ios_base::trunc);
-    if (!file.is_open()) {
-        std::cerr << "Failed to write random sequence to " << fileName << std::endl;
-        return 1;
-    }
-    write(file, randomSequence, "random_sequence", Fasta());
-    file.close();
-    return 0;
-}
 
 template <typename TRNG>
 void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
