@@ -24,6 +24,8 @@
 
 namespace seqan {
 
+// TODO(holtgrew): Add possibility to generate TikZ code.
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -39,18 +41,45 @@ namespace seqan {
 ..include:seqan/seeds.h
 */
 
+// Mixin member for mixing in scores into seeds.
+template <typename TScore>
+struct _ScoreMixin
+{
+    TScore score;
+};
+
+// Default configuration for seeds without score.
+struct DefaultSeedConfig
+{
+    typedef size_t TPosition;
+    typedef size_t TSize;
+    typedef _MakeSigned<size_t>::Type TDiagonal;
+    typedef False THasScore;
+    typedef Nothing TScoreValue;
+    typedef Nothing TScoreMixin;
+};
+
+// Default configuration for seeds with score.
+struct DefaultSeedConfigScore
+{
+    typedef size_t TPosition;
+    typedef size_t TSize;
+    typedef _MakeSigned<size_t>::Type TDiagonal;
+    typedef True THasScore;
+    typedef int TScoreValue;
+    typedef _ScoreMixin<int> TScoreMixin;
+};
+
 /**
 .Class.Seed:
 ..summary:Describe a seed.
 ..cat:Seed Handling
-..signature:Seed<TPosition, TSpec>
-..param.TPosition:The type for storing position.
+..signature:Seed<TSpec, TConfig>
 ..param.TSpec:The seed specialization type.
+..param.TConfig:The configuration object to use for this seed.
 ..include:seqan/seeds.h
  */
-// TODO(holtgrew): Maybe add TSize?
-// TODO(holtgrew): Store score in the seed!
-template <typename TPosition, typename TSpec>
+template <typename TSpec, typename TConfig = DefaultSeedConfig>
 class Seed;
 
 // ===========================================================================
@@ -60,113 +89,98 @@ class Seed;
 /**
 .Metafunction.Position.param.T:type:Class.Seed
  */
-template <typename TPosition, typename TSpec>
-struct Position<Seed<TPosition, TSpec> >
+template <typename TSpec, typename TConfig>
+struct Position<Seed<TSpec, TConfig> >
 {
-    typedef TPosition Type;
+    typedef typename TConfig::TPosition Type;
 };
 
-template <typename TPosition, typename TSpec>
-struct Position<Seed<TPosition, TSpec> const>
-        : Position<Seed<TPosition, TSpec> > {};
+template <typename TSpec, typename TConfig>
+struct Position<Seed<TSpec, TConfig> const>
+        : Position<Seed<TSpec, TConfig> > {};
+
+/**
+.Metafunction.Size.param.T:type:Class.Seed
+ */
+template <typename TSpec, typename TConfig>
+struct Size<Seed<TSpec, TConfig> >
+{
+    typedef typename TConfig::TSize Type;
+};
+
+template <typename TSpec, typename TConfig>
+struct Size<Seed<TSpec, TConfig> const>
+        : Size<Seed<TSpec, TConfig> > {};
+
+/**
+.Metafunction.Diagonal:
+..cat:Seed Handling
+..summary:Returns type of the value for the diagonal of a seed.
+..signature:Diagonal<T>::Type
+..param.T:Type of the seed to retrieve the diagonal for.
+...type:Class.Seed
+ */
+template <typename T>
+struct Diagonal;
+
+template <typename TSpec, typename TConfig>
+struct Diagonal<Seed<TSpec, TConfig> >
+{
+    typedef typename TConfig::TDiagonal Type;
+};
+
+template <typename TSpec, typename TConfig>
+struct Diagonal<Seed<TSpec, TConfig> const>
+        : Diagonal<Seed<TSpec, TConfig> > {};
+
+/**
+.Metafunction.HasScore:
+..cat:Seed Handling
+..summary:Returns True if the seed stores a score, False otherwise.
+..signature:HasScore<T>::Type
+..param.T:Type of the seed to retrieve whether it has a score for.
+...type:Class.Seed
+ */
+template <typename T>
+struct HasScore;
+
+template <typename TSpec, typename TConfig>
+struct HasScore<Seed<TSpec, TConfig> >
+{
+    typedef typename TConfig::THasScore Type;
+};
+
+template <typename TSpec, typename TConfig>
+struct HasScore<Seed<TSpec, TConfig> const>
+        : HasScore<Seed<TSpec, TConfig> > {};
+
+/**
+.Metafunction.SeedScore:
+..cat:Seed Handling
+..summary:Returns type of the value for the score of a seed.
+..signature:SeedScore<T>::Type
+..param.T:Type of the seed to retrieve the score for.
+...type:Class.Seed
+ */
+template <typename T>
+struct SeedScore;
+
+template <typename TSpec, typename TConfig>
+struct SeedScore<Seed<TSpec, TConfig> >
+{
+    typedef typename TConfig::TScoreValue Type;
+};
+
+template <typename TSpec, typename TConfig>
+struct SeedScore<Seed<TSpec, TConfig> const>
+        : SeedScore<Seed<TSpec, TConfig> > {};
 
 // ===========================================================================
 // Functions
 // ===========================================================================
 
-// TODO(holtgrew): Probably, all the getter should begin with "get"
-
 /**
-.Function.startDiagonal:
-..summary: Returns the diagonal of the start point.
-..cat:Seed Handling
-..signature:startDiagonal(seed)
-..param.seed:The seed whose start diagonal should be returned.
-...type:Class.Seed
-..returns:The diagonal of the start point.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.endDiagonal:
-..summary: Returns the diagonal of the end point.
-..cat:Seed Handling
-..signature:endDiagonal(seed)
-..param.seed:The seed whose end diagonal should be returned.
-...type:Class.Seed
-..returns:The diagonal of the end point.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.leftPosition:
-..summary:The begin position of segment in a seed.
-..cat:Seed Handling
-..signature:leftPosition(seed, dim)
-..param.seed:A seed.
-...type:Class.Seed
-..param.dim:Number of segment.
-...remarks:$dim <$ @Function.dimension.dimension(seed)@
-..returns:Begin position of the $dim$-th segment in $seed$.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setLeftPosition:
-..summary:Sets begin position of segment in a seed.
-..cat:Seed Handling
-..signature:setLeftPosition(seed, dim, new_pos)
-..param.seed:A seed.
-...type:Class.Seed
-..param.dim:Number of segment.
-...remarks:$dim <$ @Function.dimension.dimension(seed)@
-..param.new_pos:The new begin position of the $dim$-th segment in $seed$.
-..see:Function.leftPosition
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.rightPosition:
-..summary:The end position of segment in a seed.
-..cat:Seed Handling
-..signature:rightPosition(seed, dim)
-..param.seed:A seed.
-...type:Class.Seed
-..param.dim:Number of segment.
-...remarks:$dim <$ @Function.dimension.dimension(seed)@
-..returns:End position of the $dim$-th segment in $seed$.
-..see:Function.leftPosition
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setRightPosition:
-..summary:Sets end position of segment in a seed.
-..cat:Seed Handling
-..signature:setRightPosition(seed, dim, new_pos)
-..param.seed:A seed.
-...type:Class.Seed
-..param.dim:Number of segment.
-...remarks:$dim <$ @Function.dimension.dimension(seed)@
-..param.new_pos:The new end position of the $dim$-th segment in $seed$.
-..see:Function.rightPosition
-..see:Function.setLeftPosition
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.dimension:
-..summary:Dimension of a seed.
-..cat:Seed Handling
-..signature:dimension(seed)
-..param.seed:A seed.
-...type:Class.Seed
-..returns:The number of reference sequences for $seed$.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.leftDim0:
+.Function.getLeftDim0:
 ..summary: Returns the first position of the seed in the query.
 ..cat:Seed Handling
 ..signature:leftDim0(seed)
@@ -177,7 +191,7 @@ struct Position<Seed<TPosition, TSpec> const>
 */
 
 /**
-.Function.rightDim0:
+.Function.getRightDim0:
 ..summary: Returns the last position of the seed in the query.
 ..cat:Seed Handling
 ..signature:rightDim0(seed)
@@ -188,7 +202,7 @@ struct Position<Seed<TPosition, TSpec> const>
 */
 
 /**
-.Function.leftDim1:
+.Function.getLeftDim1:
 ..summary: Returns the first position of the seed in the database.
 ..cat:Seed Handling
 ..signature:leftDim1(seed)
@@ -199,7 +213,7 @@ struct Position<Seed<TPosition, TSpec> const>
 */
 
 /**
-.Function.rightDim1:
+.Function.getRightDim1:
 ..summary: Returns the last position of the seed in the database.
 ..cat:Seed Handling
 ..signature:rightDim1(seed)
@@ -210,77 +224,25 @@ struct Position<Seed<TPosition, TSpec> const>
 */
 
 /**
-.Function.leftDiagonal:
+.Function.getLowerDiagonal:
 ..summary: Returns the most left diagonal of the seed (maximum diagonal value).
 ..cat:Seed Handling
-..signature:leftDiagonal(seed)
+..signature:lowerDiagonal(seed)
 ..param.seed:The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns:The most left diagonal.
 ..include:seqan/seeds.h
 */
+template <typename TSpec, typename TConfig>
+inline typename Diagonal<Seed<TSpec, TConfig> >::Type
+getLowerDiagonal(Seed<TSpec, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+    return seed._lowerDiagonal;
+}
 
 /**
-.Function.rightDiagonal:
-..summary: Returns the most right diagonal of the seed (minimum diagonal value).
-..cat:Seed Handling
-..signature:rightDiagonal(seed)
-..param.seed:The seed whose database position should be returned.
-...type:Class.Seed
-..returns:The most right diagonal.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.length.param.object.type:Class.Seed
-*/
-
-/**
-.Function.setLeftDim0:
-..summary: Updates the start point of the seed.
-..cat:Seed Handling
-..signature:setLeftDim0(seed, start)
-..param.seed:The seed whose start position should be updated.
-...type:Class.Seed
-..param.start:The query position where the seed should start.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setRightDim0:
-..summary: Updates the end point of the seed.
-..cat:Seed Handling
-..signature:setRightDim0(seed, end)
-..param.seed:The seed whose end position should be updated.
-...type:Class.Seed
-..param.end:The query position where the seed should end.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setLeftDim1:
-..summary: Updates the start point of the seed.
-..cat:Seed Handling
-..signature:setLeftDim1(seed, start)
-..param.seed:The seed whose start position should be updated.
-...type:Class.Seed
-..param.start:The database position where the seed should start.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setRightDim1:
-..summary: Updates the end point of the seed.
-..cat:Seed Handling
-..signature:setRightDim1(seed, end)
-..param.seed:The seed whose end position should be updated.
-...type:Class.Seed
-..param.end:The database position where the seed should end.
-..include:seqan/seeds.h
-*/
-
-/**
-.Function.setLeftDiagonal:
+.Function.setLowerDiagonal:
 ..summary: Sets a new value for the most left diagonal.
 ..cat:Seed Handling
 ..signature:setLeftDiagonal(seed, diag)
@@ -289,9 +251,35 @@ struct Position<Seed<TPosition, TSpec> const>
 ..param.diag:The new value for the most left diagonal.
 ..include:seqan/seeds.h
 */
+template <typename TSpec, typename TConfig, typename TPosition>
+inline void 
+setLowerDiagonal(Seed<TSpec, TConfig> & seed, 
+				 TPosition newDiag)
+{
+	SEQAN_CHECKPOINT;
+	seed._lowerDiagonal = newDiag;
+}
 
 /**
-.Function.setRightDiagonal:
+.Function.getUpperDiagonal:
+..summary: Returns the most right diagonal of the seed (minimum diagonal value).
+..cat:Seed Handling
+..signature:upperDiagonal(seed)
+..param.seed:The seed whose database position should be returned.
+...type:Class.Seed
+..returns:The most right diagonal.
+..include:seqan/seeds.h
+*/
+template <typename TSpec, typename TConfig>
+inline typename Diagonal<Seed<TSpec, TConfig> >::Type
+getUpperDiagonal(Seed<TSpec, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+    return seed._upperDiagonal;
+}
+
+/**
+.Function.setUpperDiagonal:
 ..summary: Sets a new value for the most right diagonal.
 ..cat:Seed Handling
 ..signature:setRightDiagonal(seed, diag)
@@ -300,6 +288,54 @@ struct Position<Seed<TPosition, TSpec> const>
 ..param.diag:The new value for the most right diagonal.
 ..include:seqan/seeds.h
 */
+template <typename TSpec, typename TConfig, typename TPosition>
+inline void 
+setUpperDiagonal(Seed<TSpec, TConfig> & seed, 
+				 TPosition newDiag)
+{
+	SEQAN_CHECKPOINT;
+	seed._upperDiagonal = newDiag;
+}
+
+// Computed values, based on properties returned by getters.
+
+/**
+.Function.getStartDiagonal:
+..summary: Returns the diagonal of the start point.
+..cat:Seed Handling
+..signature:startDiagonal(seed)
+..param.seed:The seed whose start diagonal should be returned.
+...type:Class.Seed
+..returns:The diagonal of the start point.
+..include:seqan/seeds.h
+*/
+template <typename TSpec, typename TConfig>
+inline typename Diagonal<Seed<TSpec, TConfig> >::Type
+getStartDiagonal(Seed<TSpec, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+    return getLeftDim1(seed) - getLeftDim0(seed);
+}
+
+/**
+.Function.getEndDiagonal:
+..summary: Returns the diagonal of the end point.
+..cat:Seed Handling
+..signature:endDiagonal(seed)
+..param.seed:The seed whose end diagonal should be returned.
+...type:Class.Seed
+..returns:The diagonal of the end point.
+..include:seqan/seeds.h
+*/
+template <typename TSpec, typename TConfig>
+inline typename Diagonal<Seed<TSpec, TConfig> >::Type
+getEndDiagonal(Seed<TSpec, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+    return getRightDim1(seed) - getRightDim0(seed);
+}
+
+// TODO(holtgrew): COULD introduce {get,set}{Left,Right}(dim, value)
 
 }  // namespace seqan
 

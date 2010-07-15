@@ -29,18 +29,26 @@
 #include "test_seeds_seed_diagonal.h"
 #include "test_seeds_seed_base.h"
 #include "test_seeds_seed_chained.h"
+#include "test_seeds_seed_simple.h"
 
 SEQAN_BEGIN_TESTSUITE(test_seeds) {
     // Call tests.
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_metafunctions);
+
     SEQAN_CALL_TEST(test_seeds_seed_base_constructors_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_metafunctions_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_getters_setters_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_constructors_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_metafunctions_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_getters_setters_chained);
+
     SEQAN_CALL_TEST(test_seeds_seed_chained_metafunctions);
+    SEQAN_CALL_TEST(test_seeds_seed_chained_add_diagonal);
+    SEQAN_CALL_TEST(test_seeds_seed_chained_iterators);
+
+    SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
+    SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");

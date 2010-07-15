@@ -53,20 +53,25 @@ struct Simple {}; // .. but type is not complete yet
 ..param.length: Length of the seed.
 ..include:seqan/seeds.h
 */
-template <typename TPosition>
-class Seed<TPosition, Simple>
+template <typename TConfiguration>
+class Seed<Simple, TConfiguration>
+        : TConfiguration::TScoreMixin
 {
 public:
+    typedef typename TConfiguration::TPosition TPosition;
+    typedef typename TConfiguration::TSize TSize;
+    typedef typename TConfiguration::TDiagonal TDiagonal;
+
     TPosition _leftDim0;
     TPosition _leftDim1;
     TPosition _rightDim0;
     TPosition _rightDim1;
-    TPosition _leftDiagonal;
-    TPosition _rightDiagonal;
+    TDiagonal _lowerDiagonal;
+    TDiagonal _upperDiagonal;
 
     Seed()
             : _leftDim0(0), _leftDim1(0), _rightDim0(0), _rightDim1(0),
-              _leftDiagonal(0), _rightDiagonal(0)
+              _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
     Seed(TPosition leftDim0, TPosition leftDim1, TPosition seedLength)
@@ -74,8 +79,8 @@ public:
               _leftDim1(leftDim1),
               _rightDim0(leftDim0 + seedLength - 1),
               _rightDim1(leftDim1 + seedLength - 1),
-              _leftDiagonal(leftDim1 - leftDim0),
-              _rightDiagonal(leftDim1 - leftDim0)
+              _lowerDiagonal(leftDim1 - leftDim0),
+              _upperDiagonal(leftDim1 - leftDim0)
     { SEQAN_CHECKPOINT; }
 
     Seed(TPosition leftDim0, TPosition leftDim1, TPosition rightDim0,
@@ -84,8 +89,8 @@ public:
               _leftDim1(leftDim1),
               _rightDim0(rightDim0),
               _rightDim1(rightDim1),
-              _leftDiagonal(_max(leftDim1 - leftDim0, rightDim1 - rightDim0)),
-              _rightDiagonal(_min(leftDim1 - leftDim0, rightDim1 - rightDim0))
+              _lowerDiagonal(_min(leftDim1 - leftDim0, rightDim1 - rightDim0)),
+              _upperDiagonal(_max(leftDim1 - leftDim0, rightDim1 - rightDim0))
     { SEQAN_CHECKPOINT; }
 };
 
@@ -97,190 +102,112 @@ public:
 // Functions
 // ===========================================================================
 
-template<typename TPosition>
-inline TPosition 
-startDiagonal(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-	return seed._leftDim1 - seed._leftDim0;
-}
-
-template<typename TPosition>
-inline TPosition 
-endDiagonal(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-	return seed._rightDim1 - seed._rightDim0;
-}
-
-template< typename TPosition, typename TDimension>
-inline TPosition 
-leftPosition(Seed<TPosition, Simple> const & seed, TDimension dim)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
-	return dim ? seed._leftDim1 : seed._leftDim0;
-}
-
-template< typename TPosition, typename TDimension, typename TPosition2> 
-inline TPosition 
-setLeftPosition(Seed<TPosition, Simple> & seed, 
-				TDimension dim,
-				TPosition2 newLeftPosition)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
-    if (dim)
-        seed._leftDim1 = newLeftPosition;
-	else
-        seed._leftDim0 = newLeftPosition;
-}
-
-template< typename TPosition, typename TDimension>
-inline TPosition 
-rightPosition(Seed<TPosition, Simple> const & seed, TDimension dim)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
-	return dim ? seed._rightDim1 : seed._rightDim0;
-}
-
-template< typename TPosition, typename TDimension, typename TPosition2> 
-inline TPosition 
-setRightPosition(Seed<TPosition, Simple> & seed, 
-                 TDimension dim,
-                 TPosition2 newRightPosition)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GEQ(dim, static_cast<TDimension>(0));
-    SEQAN_ASSERT_LEQ(dim, static_cast<TDimension>(1));
-    if (dim)
-        seed._rightDim1 = newRightPosition;
-	else
-        seed._rightDim0 = newRightPosition;
-}
-
-// TODO(holtgrew): Same as for Chained, maybe inherit from same base class Seed2D?
-template <typename TPosition>
-inline unsigned
-dimension(Seed<TPosition, Simple> & seed)
-{
-    SEQAN_CHECKPOINT;
-    return 2u;
-}
-
-template <typename TPosition>
-inline TPosition 
-leftDim0(Seed<TPosition, Simple> const & seed)
+template <typename TConfig>
+inline typename Position<Seed<Simple, TConfig> >::Type
+getLeftDim0(Seed<Simple, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
 	return seed._leftDim0;
 }
 
-template <typename TPosition>
-inline TPosition 
-rightDim0(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;;
-	return seed._rightDim0;
-}
-
-template <typename TPosition>
-inline TPosition 
-leftDim1(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-	return seed._leftDim1;
-}
-
-template <typename TPosition>
-inline TPosition 
-rightDim1(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-	return seed._rightDim1;
-}
-
-template<typename TPosition>
-inline TPosition 
-leftDiagonal(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    return seed._leftDiagonal;
-}
-
-template<typename TPosition>
-inline TPosition 
-rightDiagonal(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    return seed._rightDiagonal;
-}
-
-// TODO(holtgrew): Maybe rename to seedLength or so, name-clashes with containers' length().
-template<typename TPosition>
-inline TPosition 
-length(Seed<TPosition, Simple> const & seed)
-{
-	SEQAN_CHECKPOINT;
-	return seed._rightDim0 - seed._leftDim0 + 1;
-}
-
-template<typename TPosition>
+/**
+.Function.setLeftDim0:
+..summary: Updates the start point of the seed.
+..cat:Seed Handling
+..signature:setLeftDim0(seed, start)
+..param.seed:The seed whose start position should be updated.
+...type:Spec.SimpleSeed
+..param.start:The query position where the seed should start.
+..include:seqan/seeds.h
+*/
+template <typename TConfig, typename TPosition>
 inline void 
-setLeftDim0(Seed<TPosition, Simple> & seed, 
+setLeftDim0(Seed<Simple, TConfig> & seed, 
             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._leftDim0 = newLeftPosition;
 }
 
-template<typename TPosition>
-inline void 
-setRightDim0(Seed<TPosition, Simple> & seed, 
-             TPosition newRightPosition)
+template <typename TConfig>
+inline typename Position<Seed<Simple, TConfig> >::Type
+getRightDim0(Seed<Simple, TConfig> const & seed)
 {
-	SEQAN_CHECKPOINT;
-	seed._rightDim0 = newRightPosition;
+	SEQAN_CHECKPOINT;;
+	return seed._rightDim0;
 }
 
-template<typename TPosition>
+template <typename TConfig>
+inline typename Position<Seed<Simple, TConfig> >::Type
+getLeftDim1(Seed<Simple, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+	return seed._leftDim1;
+}
+
+/**
+.Function.setLeftDim1:
+..summary: Updates the start point of the seed.
+..cat:Seed Handling
+..signature:setLeftDim1(seed, start)
+..param.seed:The seed whose start position should be updated.
+...type:Spec.SimpleType
+..param.start:The database position where the seed should start.
+..include:seqan/seeds.h
+*/
+template <typename TConfig, typename TPosition>
 inline void 
-setLeftDim1(Seed<TPosition, Simple> & seed, 
+setLeftDim1(Seed<Simple, TConfig> & seed, 
             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._leftDim1 = newLeftPosition;
 }
 
-template<typename TPosition>
+template <typename TConfig>
+inline typename Position<Seed<Simple, TConfig> >::Type
+getRightDim1(Seed<Simple, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;
+	return seed._rightDim1;
+}
+
+/**
+.Function.setRightDim0:
+..summary: Updates the end point of the seed.
+..cat:Seed Handling
+..signature:setRightDim0(seed, end)
+..param.seed:The seed whose end position should be updated.
+...type:Spec.SimpleSeed
+..param.end:The query position where the seed should end.
+..include:seqan/seeds.h
+*/
+template <typename TConfig, typename TPosition>
 inline void 
-setRightDim1(Seed<TPosition, Simple> & seed, 
+setRightDim0(Seed<Simple, TConfig> & seed, 
+             TPosition newRightPosition)
+{
+	SEQAN_CHECKPOINT;
+	seed._rightDim0 = newRightPosition;
+}
+
+/**
+.Function.setRightDim1:
+..summary: Updates the end point of the seed.
+..cat:Seed Handling
+..signature:setRightDim1(seed, end)
+..param.seed:The seed whose end position should be updated.
+...type:Spec.Simple Seed
+..param.end:The database position where the seed should end.
+..include:seqan/seeds.h
+*/
+template <typename TConfig, typename TPosition>
+inline void 
+setRightDim1(Seed<Simple, TConfig> & seed, 
              TPosition newRightPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._rightDim1 = newRightPosition;
-}
-
-template<typename TPosition>
-inline void 
-setLeftDiagonal(Seed<TPosition, Simple> & seed,
-				TPosition newDiag)
-{
-	SEQAN_CHECKPOINT;
-	seed._leftDiagonal = newDiag;
-}
-
-template<typename TPosition>
-inline void 
-setRightDiagonal(Seed<TPosition, Simple> & seed, 
-				 TPosition newDiag)
-{
-	SEQAN_CHECKPOINT;
-	seed._rightDiagonal = newDiag;
 }
 
 }  // namespace seqan

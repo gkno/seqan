@@ -28,7 +28,6 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-// TODO(holtgrew): Document seed tags.
 struct _Chained;
 typedef Tag<_Chained> ChainedSeed;  // TODO(holtgrew): Chained already taken as template in file. Maybe prefer non-parameterized types for simpler names.
 
@@ -50,35 +49,30 @@ between start and end position2 are stored.
 ..param.length: Length of the seed.
 ..include:seqan/seeds.h
 */
-template <typename TPosition>
-class Seed<TPosition, ChainedSeed>
+template <typename TConfig>
+class Seed<ChainedSeed, TConfig>
+        : TConfig::TScoreMixin
 {
 public:
-    typedef SeedDiagonal<TPosition, TPosition> _TSeedDiagonal;
+    typedef typename TConfig::TPosition TPosition;
+    typedef typename TConfig::TSize TSize;
+    typedef typename TConfig::TDiagonal TDiagonal;
 
-    ::std::list<_TSeedDiagonal> _seedDiagonals;
-    TPosition _leftDiagonal;
-    TPosition _rightDiagonal;
+    typedef SeedDiagonal<TPosition, TSize> TSeedDiagonal;
 
-    Seed() : _leftDiagonal(0), _rightDiagonal(0)
+    ::std::list<TSeedDiagonal> _seedDiagonals;
+    TDiagonal _lowerDiagonal;
+    TDiagonal _upperDiagonal;
+
+    Seed() : _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
     Seed(TPosition leftDim0, TPosition leftDim1, TPosition seedLength)
-            : _leftDiagonal(leftDim1 - leftDim0),
-              _rightDiagonal(leftDim1 - leftDim0)
+            : _lowerDiagonal(leftDim1 - leftDim0),
+              _upperDiagonal(leftDim1 - leftDim0)
     {
         SEQAN_CHECKPOINT;
-        appendValue(_seedDiagonals, _TSeedDiagonal(leftDim0, leftDim1, seedLength));
-    }
-
-	Seed(TPosition leftDim0, TPosition leftDim1, TPosition rightDim0, TPosition rightDim1)
-    {
-        SEQAN_CHECKPOINT;
-        SEQAN_ASSERT_FAIL("Implement me!");
-        (void)leftDim0;
-        (void)leftDim1;
-        (void)rightDim0;
-        (void)rightDim1;
+        appendValue(_seedDiagonals, TSeedDiagonal(leftDim0, leftDim1, seedLength));
     }
 };
 
@@ -89,203 +83,65 @@ public:
 /**
 .Metafunction.Value.param.T:Class.Seed
  */
-template <typename TPosition>
-struct Value<Seed<TPosition, ChainedSeed> >
+template <typename TConfig>
+struct Value<Seed<ChainedSeed, TConfig> >
 {
-    typedef SeedDiagonal<TPosition, TPosition> Type;
+    typedef Seed<ChainedSeed, TConfig> _TSeed;
+    typedef typename Position<_TSeed>::Type _TPosition;
+    typedef typename Size<_TSeed>::Type _TSize;
+
+    typedef SeedDiagonal<_TPosition, _TSize> Type;
 };
 
-template <typename TPosition>
-struct Value<Seed<TPosition, ChainedSeed> const>
+template <typename TConfig>
+struct Value<Seed<ChainedSeed, TConfig> const>
 {
-    typedef SeedDiagonal<TPosition, TPosition> const Type;
+    typedef Seed<ChainedSeed, TConfig> _TSeed;
+    typedef typename Position<_TSeed>::Type _TPosition;
+    typedef typename Size<_TSeed>::Type _TSize;
+
+    typedef SeedDiagonal<_TPosition, _TSize> const Type;
 };
 
 // ===========================================================================
 // Functions
 // ===========================================================================
 
-// From base class Seed<TPosition, TSpec>
-
-template<typename TPosition>
-inline TPosition 
-startDiagonal(Seed<TPosition, ChainedSeed> const & seed)
+template <typename TConfig>
+inline typename Position<Seed<ChainedSeed, TConfig> >::Type
+getLeftDim0(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-    // TODO(holtgrew): front() is not specialized for std::list, apparently!
-    return seed._seedDiagonals.front().leftDim1 - seed._seedDiagonals.front().leftDim0;
+	return front(seed._seedDiagonals).leftDim0;
 }
 
-template<typename TPosition>
-inline TPosition 
-endDiagonal(Seed<TPosition, ChainedSeed> const & seed)
+template <typename TConfig>
+inline typename Position<Seed<ChainedSeed, TConfig> >::Type
+getRightDim0(Seed<ChainedSeed, TConfig> const & seed)
+{
+	SEQAN_CHECKPOINT;;
+	return back(seed._seedDiagonals).leftDim0 + back(seed._seedDiagonals).length - 1;
+}
+
+template <typename TConfig>
+inline typename Position<Seed<ChainedSeed, TConfig> >::Type
+getLeftDim1(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-    // TODO(holtgrew): back() is not specialized for std::list, apparently!
-//     return back(seed._seedDiagonals).leftDim1 + back(seed._seedDiagonals).length - 1;
-    return seed._seedDiagonals.back().leftDim1 + seed._seedDiagonals.back().length - 1;
+	return front(seed._seedDiagonals).leftDim1;
 }
 
-template< typename TPosition, typename TDimension>
-inline TPosition 
-leftPosition(Seed<TPosition, ChainedSeed> const & seed, TDimension dim)
+template <typename TConfig>
+inline typename Position<Seed<ChainedSeed, TConfig> >::Type
+getRightDim1(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return 0;
+	return back(seed._seedDiagonals).leftDim1 + back(seed._seedDiagonals).length - 1;
 }
 
-template< typename TPosition, typename TDimension>
-inline TPosition 
-rightPosition(Seed<TPosition, ChainedSeed> const & seed, TDimension dim)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return 0;
-}
-
-template <typename TPosition>
-inline TPosition 
-leftDim0(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return 0;
-}
-
-template <typename TPosition>
-inline TPosition 
-rightDim0(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Implement me!");
-    return 0;
-}
-
-template <typename TPosition>
-inline TPosition 
-leftDim1(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    // TODO(holtgrew): front() is not specialized for std::list, apparently!
-    return seed._seedDiagonals.front().leftDim1;
-}
-
-template <typename TPosition>
-inline TPosition 
-rightDim1(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    // TODO(holtgrew): back() is not specialized for std::list, apparently!
-//     return back(seed._seedDiagonals).leftDim0 + back(seed._seedDiagonals).length - front(seed._seedDiagonals).leftDim0;
-    return seed._seedDiagonals.back().leftDim0 + seed._seedDiagonals.back().length - seed._seedDiagonals.front().leftDim0;
-}
-
-// TODO(holtgrew): Same as Simple Seed.
-template<typename TPosition>
-inline TPosition 
-leftDiagonal(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    return seed._leftDiagonal;
-}
-
-// TODO(holtgrew): Same as Simple Seed.
-template<typename TPosition>
-inline TPosition 
-rightDiagonal(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    return seed._rightDiagonal;
-}
-
-// TODO(holtgrew): Maybe rename to seedLength or so, name-clashes with containers' length().
-template<typename TPosition>
-inline TPosition 
-length(Seed<TPosition, ChainedSeed> const & seed)
-{
-	SEQAN_CHECKPOINT;
-    return back(seed._seedDiagonals).leftDim0 + back(seed._seedSegmetns).length - front(seed._seedDiagonals).leftDim0;
-}
-
-template<typename TPosition>
-inline void 
-setLeftDim0(Seed<TPosition, ChainedSeed> & seed, 
-            TPosition newLeftPosition)
-{
-	SEQAN_CHECKPOINT;
-    TPosition lengthDiff = front(seed._seedDiagonals).leftDim0 - newLeftPosition;
-    front(seed._seedDiagonals).leftDim0 = newLeftPosition;
-    front(seed._seedDiagonals).leftDim1 -= newLeftPosition;
-    front(seed._seedDiagonals).length += newLeftPosition;
-}
-
-template<typename TPosition>
-inline void 
-setRightDim0(Seed<TPosition, ChainedSeed> & seed, 
-             TPosition newRightPosition)
-{
-	SEQAN_CHECKPOINT;
-    back(seed._seedDiagonals).length = newRightPosition - back(seed._seedDiagonals).leftDim0 + 1;
-}
-
-template<typename TPosition>
-inline void 
-setLeftDim1(Seed<TPosition, ChainedSeed> & seed, 
-            TPosition newLeftPosition)
-{
-	SEQAN_CHECKPOINT;
-    TPosition lengthDiff = front(seed._seedDiagonals).leftDim1 - newLeftPosition;
-    front(seed._seedDiagonals).leftDim0 -= newLeftPosition;
-    front(seed._seedDiagonals).leftDim1 = newLeftPosition;
-    front(seed._seedDiagonals).length += newLeftPosition;
-}
-
-template<typename TPosition>
-inline void 
-setRightDim1(Seed<TPosition, ChainedSeed> & seed, 
-             TPosition newRightPosition)
-{
-	SEQAN_CHECKPOINT;
-    back(seed._seedDiagonals).length = newRightPosition - back(seed._seedDiagonals).leftDim1 + 1;
-}
-
-// TODO(holtgrew): Same as Simple Seed.
-template<typename TPosition>
-inline void 
-setLeftDiagonal(Seed<TPosition, ChainedSeed> & seed,
-				TPosition newDiag)
-{
-	SEQAN_CHECKPOINT;
-    seed._leftDiagonal = newDiag;
-}
-
-// TODO(holtgrew): Same as Simple Seed.
-template<typename TPosition>
-inline void 
-setRightDiagonal(Seed<TPosition, ChainedSeed> & seed, 
-				 TPosition newDiag)
-{
-	SEQAN_CHECKPOINT;
-    seed._rightDiagonal = newDiag;
-}
-
-// TODO(holtgrew): Same as for Chained, maybe inherit from same base class Seed2D?
-template <typename TPosition>
-inline unsigned
-dimension(Seed<TPosition, ChainedSeed> & seed)
-{
-    SEQAN_CHECKPOINT;
-    return 2u;
-}
-
-
-// From specialization Seed<TPosition, ChainedSeed>
-
-// TODO(holtgrew): Rename to appendDiagonal?
 /**
-.Function.appendDiag
-..summary: Adds diagonal to the seed.
+.Function.appendDiagonal
+..summary: Adds diagonal to the Chained Seed.
 ..cat:Seed Handling
 ..signature:appendDiag(seed, diagonal)
 ..param.seed: The seed to which the diagonal should be added.
@@ -294,12 +150,13 @@ dimension(Seed<TPosition, ChainedSeed> & seed)
 ...type:Class.SeedDiagonal.
 ...remarks: A diagonal consists of three values: 1: start in 1. sequence, 2: start in 2. sequence, 3: length of match
 */
-template <typename TPosition>
+template <typename TConfig>
 inline void
-appendDiag(Seed<TPosition, ChainedSeed> & seed,
-           typename Value<Seed<TPosition, ChainedSeed> >::Type const & diagonal)
+appendDiagonal(Seed<ChainedSeed, TConfig> & seed,
+               typename Value<Seed<ChainedSeed, TConfig> >::Type const & diagonal)
 {
     SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Check for consistency!
     appendValue(seed._seedDiagonals, diagonal);
 }
 

@@ -37,15 +37,11 @@ void testSeedsSeedBaseConstructors(TSeedSpec const &)
 
     // Execute default constructor.
     {
-        Seed<int, TSeedSpec> s;
+        Seed<TSeedSpec> s;
     }
     // Execute with start position and length.
     {
-        Seed<int, TSeedSpec> s(1, 2, 3);
-    }
-    // Execute with start and end position.
-    {
-        Seed<int, TSeedSpec> s(1, 2, 3, 4);
+        Seed<TSeedSpec> s(1, 2, 3);
     }
 }
 
@@ -55,23 +51,24 @@ void testSeedsSeedBaseGettersSetters(TSeedSpec const &)
     using namespace seqan;
 
     // Define Seed type and declare a variable.
-    typedef Seed<int, TSeedSpec> TSeed;
+    typedef Seed<TSeedSpec> TSeed;
     TSeed s(1, 2, 3);
 
-    // Check values from default construction.
-    SEQAN_ASSERT_EQ(1, startDiagonal(s));
-    SEQAN_ASSERT_EQ(2, endDiagonal(s));
-    SEQAN_ASSERT_EQ(2, leftPosition(s, 0));
-    SEQAN_ASSERT_EQ(2, rightPosition(s, 0));
-    SEQAN_ASSERT_EQ(2, leftPosition(s, 1));
-    SEQAN_ASSERT_EQ(2, rightPosition(s, 1));
-    SEQAN_ASSERT_EQ(2u, dimension(s));
-    SEQAN_ASSERT_EQ(2, leftDim0(s));
-    SEQAN_ASSERT_EQ(2, rightDim0(s));
-    SEQAN_ASSERT_EQ(2, leftDim1(s));
-    SEQAN_ASSERT_EQ(2, rightDim1(s));
-    SEQAN_ASSERT_EQ(2, leftDiagonal(s));
-    SEQAN_ASSERT_EQ(2, rightDiagonal(s));
+    // Check values from construction.
+    SEQAN_ASSERT_EQ(1u, getLeftDim0(s));
+    SEQAN_ASSERT_EQ(3u, getRightDim0(s));
+    SEQAN_ASSERT_EQ(2u, getLeftDim1(s));
+    SEQAN_ASSERT_EQ(4u, getRightDim1(s));
+    SEQAN_ASSERT_EQ(1, getLowerDiagonal(s));
+    SEQAN_ASSERT_EQ(1, getUpperDiagonal(s));
+    SEQAN_ASSERT_EQ(1, getStartDiagonal(s));
+    SEQAN_ASSERT_EQ(1, getEndDiagonal(s));
+
+    // Use setters from base class.
+    setLowerDiagonal(s, 42);
+    SEQAN_ASSERT_EQ(42, getLowerDiagonal(s));
+    setUpperDiagonal(s, 5);
+    SEQAN_ASSERT_EQ(5, getUpperDiagonal(s));
 }
 
 // Test constructors of the SimpleSeed specialization, as specified

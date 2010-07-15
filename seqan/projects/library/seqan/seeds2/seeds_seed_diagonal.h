@@ -52,8 +52,8 @@ public:
 /**
 .Memvar.SeedDiagonal#length:The length of the diagonal.
 */
-  TSize length;
-
+    TSize length;
+    
     SeedDiagonal()
             : leftDim0(0), leftDim1(0), length(0)
     { SEQAN_CHECKPOINT; }
