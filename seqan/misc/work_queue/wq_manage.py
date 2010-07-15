@@ -134,20 +134,20 @@ def insertJob(database_path, command):
 
 
 def fetchJob(con):
-    with con:
-        sql = 'SELECT COUNT(*) FROM jobs WHERE status = ?'
-        res = con.execute(sql, ('waiting',))
-        if int(res.fetchone()['COUNT(*)']) == 0:
-            return None
-        # Fetch one job.
-        sql = 'SELECT id, args FROM jobs WHERE status = ? LIMIT 1'
-        res = con.execute(sql, ('waiting',))
-        data = res.fetchone()
-        job_id, job_args = data['id'], data['args']
-        # Update job's state.
-        sql = 'UPDATE jobs SET status = ? WHERE id = ?'
-        con.execute(sql, ('running', job_id))
-        return (job_id, job_args)
+    sql = 'SELECT COUNT(*) FROM jobs WHERE status = ?'
+    res = con.execute(sql, ('waiting',))
+    if int(res.fetchone()['COUNT(*)']) == 0:
+        return None
+    # Fetch one job.
+    sql = 'SELECT id, args FROM jobs WHERE status = ? LIMIT 1'
+    res = con.execute(sql, ('waiting',))
+    data = res.fetchone()
+    job_id, job_args = data['id'], data['args']
+    # Update job's state.
+    sql = 'UPDATE jobs SET status = ? WHERE id = ?'
+    con.execute(sql, ('running', job_id))
+    con.commit()
+    return (job_id, job_args)
 
 
 def executeJob(con, job_id, job_args):
@@ -156,11 +156,11 @@ def executeJob(con, job_id, job_args):
     p = subprocess.Popen(job_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Update job entry.
     this_hostname = socket.gethostname()
-    with con:
-        sql = 'SELECT tries FROM jobs WHERE id = ?'
-        tries = con.execute(sql, (job_id,)).fetchone()['tries']
-        sql = 'UPDATE jobs SET tries = ?, pid = ?, host = ? WHERE id = ?'
-        con.execute(sql, (int(tries) + 1, p.pid, this_hostname, job_id))
+    sql = 'SELECT tries FROM jobs WHERE id = ?'
+    tries = con.execute(sql, (job_id,)).fetchone()['tries']
+    sql = 'UPDATE jobs SET tries = ?, pid = ?, host = ? WHERE id = ?'
+    con.execute(sql, (int(tries) + 1, p.pid, this_hostname, job_id))
+    con.commit()
     # Wait for process to finish.
     ret = p.wait()
     # Create job_run entry.
