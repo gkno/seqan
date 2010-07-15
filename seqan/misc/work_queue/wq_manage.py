@@ -11,7 +11,9 @@ import os
 import os.path
 import signal
 import socket
+import subprocess
 import sys
+import time
 
 import sqlite3
 
@@ -36,6 +38,12 @@ Usage: wq_manage.py init path.db
 """.strip()
 
 
+def connectToDatabase(path):
+    c = sqlite3.connect(path) # connect to db
+    c.row_factory = dictFactory
+    return c
+
+
 def dictFactory(cursor, row):
     """Converts database rows into dicts, taken from Python documentation."""
     d = {}
@@ -56,7 +64,8 @@ def initDatabase(database_path):
     # Execute SQL.
     c = sqlite3.connect(database_path)
     cur = c.cursor()
-    cur.execute(sql)
+    cur.executescript(sql)
+    c.commit()
     print 'Database %s successfully initialized.' % database_path
     return 0
 
@@ -72,8 +81,7 @@ def pidRunning(pid):
 
 
 def purgeDatabase(database_path):
-    c = sqlite3.connect(database_path)    # connect to db
-    c.row_factory = dictFactory
+    c = connectToDatabase(database_path)    # connect to db
     cur = c.cursor()
     this_hostname = socket.gethostname()  # get hostname
     # Query for the jobs running on this machine.
@@ -95,8 +103,7 @@ def purgeDatabase(database_path):
 
 
 def listJobs(database_path):
-    c = sqlite3.connect(database_path)    # connect to db
-    c.row_factory = dictFactory
+    c = connectToDatabase(database_path)    # connect to db
     cur = c.cursor()
     # Query for the jobs on this machine.
     sql = 'SELECT COUNT(*) FROM jobs'
@@ -114,8 +121,7 @@ def listJobs(database_path):
 
 
 def insertJob(database_path, command):
-    c = sqlite3.connect(database_path)    # connect to db
-    c.row_factory = dictFactory
+    c = connectToDatabase(database_path)  # connect to db
     cur = c.cursor()
     this_hostname = socket.gethostname()  # get hostname
     # Insert job into database.
@@ -125,7 +131,67 @@ def insertJob(database_path, command):
     c.commit()
     c.close()
     return 0
-    
+
+
+def fetchJob(con):
+    with con:
+        sql = 'SELECT COUNT(*) FROM jobs WHERE status = ?'
+        res = con.execute(sql, ('waiting',))
+        if int(res.fetchone()['COUNT(*)']) == 0:
+            return None
+        # Fetch one job.
+        sql = 'SELECT id, args FROM jobs WHERE status = ? LIMIT 1'
+        res = con.execute(sql, ('waiting',))
+        data = res.fetchone()
+        job_id, job_args = data['id'], data['args']
+        # Update job's state.
+        sql = 'UPDATE jobs SET status = ? WHERE id = ?'
+        con.execute(sql, ('running', job_id))
+        return (job_id, job_args)
+
+
+def executeJob(con, job_id, job_args):
+    # Execute subprocess.
+    print 'Running %s' % job_args
+    p = subprocess.Popen(job_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # Update job entry.
+    this_hostname = socket.gethostname()
+    with con:
+        sql = 'SELECT tries FROM jobs WHERE id = ?'
+        tries = con.execute(sql, (job_id,)).fetchone()['tries']
+        sql = 'UPDATE jobs SET tries = ?, pid = ?, host = ? WHERE id = ?'
+        con.execute(sql, (int(tries) + 1, p.pid, this_hostname, job_id))
+    # Wait for process to finish.
+    ret = p.wait()
+    # Create job_run entry.
+    sql = ('INSERT INTO job_executions (job_id, host, stdout, stderr, return_code) '
+           'VALUES (?, ?, ?, ?, ?)')
+    con.execute(sql, (job_id, this_hostname, p.stdout.read(), p.stderr.read(), ret))
+    # Update job entry.
+    sql = 'UPDATE jobs SET status = ? WHERE id = ?'
+    con.execute(sql, ('done', job_id))
+
+
+def runJobs(database_path):
+    """Fetch job after job from the database."""
+    c = connectToDatabase(database_path)    # connect to db
+    # Fetch all jobs.
+    is_sleeping = False
+    try:
+        while True:
+            job_id_args = fetchJob(c)
+            if job_id_args:
+                executeJob(c, *job_id_args)
+            else:
+                if not is_sleeping:
+                    print 'No job. Checking in 5 s intervals.'
+                    print 'Press Ctrl+C to terminate.'
+                is_sleeping = True
+                time.sleep(5)
+            pass
+    except KeyboardInterrupt:
+        print 'Caught Ctrl+C. Stopping.'
+        return 0
 
 
 def mainInit():
@@ -169,16 +235,23 @@ def mainInsert():
     return insertJob(sys.argv[2], sys.argv[3:][0])
 
 
+def mainRun():
+    if len(sys.argv) != 3:
+        print 'Invalid argument count!'
+        print USAGE_MESSAGE
+        return 1
+    return runJobs(sys.argv[2])
+
 def main():
     if (len(sys.argv) < 3):
         print USAGE_MESSAGE
         return 1
     command = sys.argv[1]
-    if command not in ['init', 'purge', 'list', 'insert']:
+    if command not in ['init', 'purge', 'list', 'insert', 'run']:
         print USAGE_MESSAGE
         return 1
     FUNCS = {'init': mainInit, 'purge': mainPurge, 'list': mainList,
-             'insert': mainInsert}
+             'insert': mainInsert, 'run': mainRun}
     return FUNCS[command]()
 
 
