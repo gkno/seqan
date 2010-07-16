@@ -52,18 +52,32 @@ struct _Single;
 typedef Tag<_Single> Single;
 
 
+struct _Scored;
+typedef Tag<_Scored> Score;
+
+struct _UnScored;
+typedef Tag<_UnScored> UnScored;
+
+
 /**
 .Class.SeedSet:
 ..summary:Handles a set of seeds with local chaining on adding seeds.
 ..cat:Seed Handling
-..signature:SeedSet<TSeedPosition, TSeedSpec, TScoringScheme>
-..param.TSeedPosition:The type for storing position in the seeds.
-..param.TSeedSpec:The seed specialization type.
-..param.TScoringScheme:The scoring scheme to use.
-...see:Tag.ScoringScheme
+..signature:SeedSet<TSeedSpec, TScored, TSpec[, TSeedConfig]>
+..param.TSeedSpec:Specialization of the seed to use.
+..param.TScored:Either UnScored or a seed set scoring scheme specification.
+..param.TSpec:Specialization of the seed set.
+..param.TSeedConfig:Configuration for the seeds.  Sensible defaults are chosen based on the other template parameters.
 ..include:seqan/seeds.h
 */
-template <typename TSeedPosition, typename TSeedSpec, typename TScoringScheme>
+template <typename TSeedSpec,
+          typename TScored,
+          typename TSpec,
+          typename TSeedConfig = typename IF<
+              typename TYPECMP<TScored, UnScored>::Type,
+              DefaultSeedConfig,
+              DefaultSeedConfigScore>::Type
+          >
 class SeedSet;
 
 // ===========================================================================

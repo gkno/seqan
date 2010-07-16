@@ -92,6 +92,16 @@ public:
               _lowerDiagonal(_min(beginDim1 - beginDim0, endDim1 - endDim0)),
               _upperDiagonal(_max(beginDim1 - beginDim0, endDim1 - endDim0))
     { SEQAN_CHECKPOINT; }
+
+    template <typename TSeed2>
+    Seed(TSeed2 const & other)
+            : _beginDim0(getBeginDim0(other)),
+              _beginDim1(getBeginDim1(other)),
+              _endDim0(getEndDim0(other)),
+              _endDim1(getEndDim1(other)),
+              _lowerDiagonal(getLowerDiagonal(other)),
+              _upperDiagonal(getUpperDiagonal(other))
+    { SEQAN_CHECKPOINT; }
 };
 
 // ===========================================================================
