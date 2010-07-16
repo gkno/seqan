@@ -180,10 +180,10 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 // ===========================================================================
 
 /**
-.Function.getLeftDim0:
+.Function.getBeginDim0:
 ..summary: Returns the first position of the seed in the query.
 ..cat:Seed Handling
-..signature:leftDim0(seed)
+..signature:beginDim0(seed)
 ..param.seed:The seed whose query position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
@@ -191,10 +191,10 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 */
 
 /**
-.Function.getRightDim0:
+.Function.getEndDim0:
 ..summary: Returns the last position of the seed in the query.
 ..cat:Seed Handling
-..signature:rightDim0(seed)
+..signature:endDim0(seed)
 ..param.seed:The seed whose last in the query position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
@@ -202,10 +202,10 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 */
 
 /**
-.Function.getLeftDim1:
+.Function.getBeginDim1:
 ..summary: Returns the first position of the seed in the database.
 ..cat:Seed Handling
-..signature:leftDim1(seed)
+..signature:beginDim1(seed)
 ..param.seed:The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
@@ -213,10 +213,10 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 */
 
 /**
-.Function.getRightDim1:
+.Function.getEndDim1:
 ..summary: Returns the last position of the seed in the database.
 ..cat:Seed Handling
-..signature:rightDim1(seed)
+..signature:endDim1(seed)
 ..param.seed:The seed whose last in the database position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
@@ -314,7 +314,7 @@ inline typename Diagonal<Seed<TSpec, TConfig> >::Type
 getStartDiagonal(Seed<TSpec, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-    return getLeftDim1(seed) - getLeftDim0(seed);
+    return getBeginDim1(seed) - getBeginDim0(seed);
 }
 
 /**
@@ -332,7 +332,7 @@ inline typename Diagonal<Seed<TSpec, TConfig> >::Type
 getEndDiagonal(Seed<TSpec, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-    return getRightDim1(seed) - getRightDim0(seed);
+    return getEndDim1(seed) - getEndDim0(seed);
 }
 
 // TODO(holtgrew): COULD introduce {get,set}{Left,Right}(dim, value)

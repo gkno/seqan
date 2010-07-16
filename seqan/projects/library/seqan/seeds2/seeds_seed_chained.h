@@ -67,12 +67,12 @@ public:
     Seed() : _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
-    Seed(TPosition leftDim0, TPosition leftDim1, TPosition seedLength)
-            : _lowerDiagonal(leftDim1 - leftDim0),
-              _upperDiagonal(leftDim1 - leftDim0)
+    Seed(TPosition beginDim0, TPosition beginDim1, TPosition seedLength)
+            : _lowerDiagonal(beginDim1 - beginDim0),
+              _upperDiagonal(beginDim1 - beginDim0)
     {
         SEQAN_CHECKPOINT;
-        appendValue(_seedDiagonals, TSeedDiagonal(leftDim0, leftDim1, seedLength));
+        appendValue(_seedDiagonals, TSeedDiagonal(beginDim0, beginDim1, seedLength));
     }
 };
 
@@ -128,34 +128,34 @@ struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
 
 template <typename TConfig>
 inline typename Position<Seed<ChainedSeed, TConfig> >::Type
-getLeftDim0(Seed<ChainedSeed, TConfig> const & seed)
+getBeginDim0(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return front(seed._seedDiagonals).leftDim0;
+	return front(seed._seedDiagonals).beginDim0;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<ChainedSeed, TConfig> >::Type
-getRightDim0(Seed<ChainedSeed, TConfig> const & seed)
+getEndDim0(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return back(seed._seedDiagonals).leftDim0 + back(seed._seedDiagonals).length - 1;
+	return back(seed._seedDiagonals).beginDim0 + back(seed._seedDiagonals).length;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<ChainedSeed, TConfig> >::Type
-getLeftDim1(Seed<ChainedSeed, TConfig> const & seed)
+getBeginDim1(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return front(seed._seedDiagonals).leftDim1;
+	return front(seed._seedDiagonals).beginDim1;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<ChainedSeed, TConfig> >::Type
-getRightDim1(Seed<ChainedSeed, TConfig> const & seed)
+getEndDim1(Seed<ChainedSeed, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return back(seed._seedDiagonals).leftDim1 + back(seed._seedDiagonals).length - 1;
+	return back(seed._seedDiagonals).beginDim1 + back(seed._seedDiagonals).length;
 }
 
 /**

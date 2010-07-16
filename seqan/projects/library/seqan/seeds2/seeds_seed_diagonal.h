@@ -42,24 +42,24 @@ class SeedDiagonal
 {
 public:
 /**
-.Memvar.SeedDiagonal#leftDim0:The position in the query (dimension 0).
+.Memvar.SeedDiagonal#beginDim0:The position in the query (dimension 0).
 */
-    TPosition leftDim0;
+    TPosition beginDim0;
 /**
- .Memvar.SeedDiagonal#leftDim0:The position in the database sequence (dimension 1).
+ .Memvar.SeedDiagonal#beginDim0:The position in the database sequence (dimension 1).
 */
-    TPosition leftDim1;
+    TPosition beginDim1;
 /**
 .Memvar.SeedDiagonal#length:The length of the diagonal.
 */
     TSize length;
     
     SeedDiagonal()
-            : leftDim0(0), leftDim1(0), length(0)
+            : beginDim0(0), beginDim1(0), length(0)
     { SEQAN_CHECKPOINT; }
 
-    SeedDiagonal(TPosition _leftDim0, TPosition _leftDim1, TSize _length)
-            : leftDim0(_leftDim0), leftDim1(_leftDim1), length(_length)
+    SeedDiagonal(TPosition _beginDim0, TPosition _beginDim1, TSize _length)
+            : beginDim0(_beginDim0), beginDim1(_beginDim1), length(_length)
     { SEQAN_CHECKPOINT; }
 };
 

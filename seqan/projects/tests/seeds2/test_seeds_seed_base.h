@@ -55,10 +55,10 @@ void testSeedsSeedBaseGettersSetters(TSeedSpec const &)
     TSeed s(1, 2, 3);
 
     // Check values from construction.
-    SEQAN_ASSERT_EQ(1u, getLeftDim0(s));
-    SEQAN_ASSERT_EQ(3u, getRightDim0(s));
-    SEQAN_ASSERT_EQ(2u, getLeftDim1(s));
-    SEQAN_ASSERT_EQ(4u, getRightDim1(s));
+    SEQAN_ASSERT_EQ(1u, getBeginDim0(s));
+    SEQAN_ASSERT_EQ(4u, getEndDim0(s));
+    SEQAN_ASSERT_EQ(2u, getBeginDim1(s));
+    SEQAN_ASSERT_EQ(5u, getEndDim1(s));
     SEQAN_ASSERT_EQ(1, getLowerDiagonal(s));
     SEQAN_ASSERT_EQ(1, getUpperDiagonal(s));
     SEQAN_ASSERT_EQ(1, getStartDiagonal(s));

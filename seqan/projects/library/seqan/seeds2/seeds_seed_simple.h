@@ -62,35 +62,35 @@ public:
     typedef typename TConfiguration::TSize TSize;
     typedef typename TConfiguration::TDiagonal TDiagonal;
 
-    TPosition _leftDim0;
-    TPosition _leftDim1;
-    TPosition _rightDim0;
-    TPosition _rightDim1;
+    TPosition _beginDim0;
+    TPosition _beginDim1;
+    TPosition _endDim0;
+    TPosition _endDim1;
     TDiagonal _lowerDiagonal;
     TDiagonal _upperDiagonal;
 
     Seed()
-            : _leftDim0(0), _leftDim1(0), _rightDim0(0), _rightDim1(0),
+            : _beginDim0(0), _beginDim1(0), _endDim0(0), _endDim1(0),
               _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
-    Seed(TPosition leftDim0, TPosition leftDim1, TPosition seedLength)
-            : _leftDim0(leftDim0),
-              _leftDim1(leftDim1),
-              _rightDim0(leftDim0 + seedLength - 1),
-              _rightDim1(leftDim1 + seedLength - 1),
-              _lowerDiagonal(leftDim1 - leftDim0),
-              _upperDiagonal(leftDim1 - leftDim0)
+    Seed(TPosition beginDim0, TPosition beginDim1, TPosition seedLength)
+            : _beginDim0(beginDim0),
+              _beginDim1(beginDim1),
+              _endDim0(beginDim0 + seedLength),
+              _endDim1(beginDim1 + seedLength),
+              _lowerDiagonal(beginDim1 - beginDim0),
+              _upperDiagonal(beginDim1 - beginDim0)
     { SEQAN_CHECKPOINT; }
 
-    Seed(TPosition leftDim0, TPosition leftDim1, TPosition rightDim0,
-         TPosition rightDim1)
-            : _leftDim0(leftDim0),
-              _leftDim1(leftDim1),
-              _rightDim0(rightDim0),
-              _rightDim1(rightDim1),
-              _lowerDiagonal(_min(leftDim1 - leftDim0, rightDim1 - rightDim0)),
-              _upperDiagonal(_max(leftDim1 - leftDim0, rightDim1 - rightDim0))
+    Seed(TPosition beginDim0, TPosition beginDim1, TPosition endDim0,
+         TPosition endDim1)
+            : _beginDim0(beginDim0),
+              _beginDim1(beginDim1),
+              _endDim0(endDim0),
+              _endDim1(endDim1),
+              _lowerDiagonal(_min(beginDim1 - beginDim0, endDim1 - endDim0)),
+              _upperDiagonal(_max(beginDim1 - beginDim0, endDim1 - endDim0))
     { SEQAN_CHECKPOINT; }
 };
 
@@ -104,17 +104,17 @@ public:
 
 template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
-getLeftDim0(Seed<Simple, TConfig> const & seed)
+getBeginDim0(Seed<Simple, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return seed._leftDim0;
+	return seed._beginDim0;
 }
 
 /**
-.Function.setLeftDim0:
+.Function.setBeginDim0:
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
-..signature:setLeftDim0(seed, start)
+..signature:setBeginDim0(seed, start)
 ..param.seed:The seed whose start position should be updated.
 ...type:Spec.SimpleSeed
 ..param.start:The query position where the seed should start.
@@ -122,34 +122,34 @@ getLeftDim0(Seed<Simple, TConfig> const & seed)
 */
 template <typename TConfig, typename TPosition>
 inline void 
-setLeftDim0(Seed<Simple, TConfig> & seed, 
+setBeginDim0(Seed<Simple, TConfig> & seed, 
             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
-	seed._leftDim0 = newLeftPosition;
+	seed._beginDim0 = newLeftPosition;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
-getRightDim0(Seed<Simple, TConfig> const & seed)
+getEndDim0(Seed<Simple, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;;
-	return seed._rightDim0;
+	return seed._endDim0;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
-getLeftDim1(Seed<Simple, TConfig> const & seed)
+getBeginDim1(Seed<Simple, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return seed._leftDim1;
+	return seed._beginDim1;
 }
 
 /**
-.Function.setLeftDim1:
+.Function.setBeginDim1:
 ..summary: Updates the start point of the seed.
 ..cat:Seed Handling
-..signature:setLeftDim1(seed, start)
+..signature:setBeginDim1(seed, start)
 ..param.seed:The seed whose start position should be updated.
 ...type:Spec.SimpleType
 ..param.start:The database position where the seed should start.
@@ -157,26 +157,26 @@ getLeftDim1(Seed<Simple, TConfig> const & seed)
 */
 template <typename TConfig, typename TPosition>
 inline void 
-setLeftDim1(Seed<Simple, TConfig> & seed, 
+setBeginDim1(Seed<Simple, TConfig> & seed, 
             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
-	seed._leftDim1 = newLeftPosition;
+	seed._beginDim1 = newLeftPosition;
 }
 
 template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
-getRightDim1(Seed<Simple, TConfig> const & seed)
+getEndDim1(Seed<Simple, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
-	return seed._rightDim1;
+	return seed._endDim1;
 }
 
 /**
-.Function.setRightDim0:
+.Function.setEndDim0:
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
-..signature:setRightDim0(seed, end)
+..signature:setEndDim0(seed, end)
 ..param.seed:The seed whose end position should be updated.
 ...type:Spec.SimpleSeed
 ..param.end:The query position where the seed should end.
@@ -184,18 +184,18 @@ getRightDim1(Seed<Simple, TConfig> const & seed)
 */
 template <typename TConfig, typename TPosition>
 inline void 
-setRightDim0(Seed<Simple, TConfig> & seed, 
+setEndDim0(Seed<Simple, TConfig> & seed, 
              TPosition newRightPosition)
 {
 	SEQAN_CHECKPOINT;
-	seed._rightDim0 = newRightPosition;
+	seed._endDim0 = newRightPosition;
 }
 
 /**
-.Function.setRightDim1:
+.Function.setEndDim1:
 ..summary: Updates the end point of the seed.
 ..cat:Seed Handling
-..signature:setRightDim1(seed, end)
+..signature:setEndDim1(seed, end)
 ..param.seed:The seed whose end position should be updated.
 ...type:Spec.Simple Seed
 ..param.end:The database position where the seed should end.
@@ -203,11 +203,11 @@ setRightDim0(Seed<Simple, TConfig> & seed,
 */
 template <typename TConfig, typename TPosition>
 inline void 
-setRightDim1(Seed<Simple, TConfig> & seed, 
+setEndDim1(Seed<Simple, TConfig> & seed, 
              TPosition newRightPosition)
 {
 	SEQAN_CHECKPOINT;
-	seed._rightDim1 = newRightPosition;
+	seed._endDim1 = newRightPosition;
 }
 
 }  // namespace seqan

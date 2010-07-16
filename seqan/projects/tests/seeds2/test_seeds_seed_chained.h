@@ -97,20 +97,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_add_diagonal)
     typedef Value<TSeed>::Type TSeedDiagonal;
     TSeed s(1, 3, 4);
 
-    SEQAN_ASSERT_EQ(1u, getLeftDim0(s));
-    SEQAN_ASSERT_EQ(3u, getLeftDim1(s));
-    SEQAN_ASSERT_EQ(4u, getRightDim0(s));
-    SEQAN_ASSERT_EQ(6u, getRightDim1(s));
+    SEQAN_ASSERT_EQ(1u, getBeginDim0(s));
+    SEQAN_ASSERT_EQ(3u, getBeginDim1(s));
+    SEQAN_ASSERT_EQ(5u, getEndDim0(s));
+    SEQAN_ASSERT_EQ(7u, getEndDim1(s));
     SEQAN_ASSERT_EQ(2, getStartDiagonal(s));
     SEQAN_ASSERT_EQ(2, getEndDiagonal(s));
     SEQAN_ASSERT_EQ(1u, length(s._seedDiagonals));
 
     appendDiagonal(s, TSeedDiagonal(5, 5, 3));
 
-    SEQAN_ASSERT_EQ(1u, getLeftDim0(s));
-    SEQAN_ASSERT_EQ(3u, getLeftDim1(s));
-    SEQAN_ASSERT_EQ(7u, getRightDim0(s));
-    SEQAN_ASSERT_EQ(7u, getRightDim1(s));
+    SEQAN_ASSERT_EQ(1u, getBeginDim0(s));
+    SEQAN_ASSERT_EQ(3u, getBeginDim1(s));
+    SEQAN_ASSERT_EQ(8u, getEndDim0(s));
+    SEQAN_ASSERT_EQ(8u, getEndDim1(s));
     SEQAN_ASSERT_EQ(2, getStartDiagonal(s));
     SEQAN_ASSERT_EQ(0, getEndDiagonal(s));
     SEQAN_ASSERT_EQ(2u, length(s._seedDiagonals));
@@ -130,12 +130,12 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_iterators)
     {  // non-const seed
         typedef Iterator<TSeed, Standard>::Type TIterator;
         TIterator it = begin(s);
-        SEQAN_ASSERT_EQ(1u, it->leftDim0);
-        SEQAN_ASSERT_EQ(2u, it->leftDim1);
+        SEQAN_ASSERT_EQ(1u, it->beginDim0);
+        SEQAN_ASSERT_EQ(2u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
-        SEQAN_ASSERT_EQ(4u, it->leftDim0);
-        SEQAN_ASSERT_EQ(5u, it->leftDim1);
+        SEQAN_ASSERT_EQ(4u, it->beginDim0);
+        SEQAN_ASSERT_EQ(5u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
         SEQAN_ASSERT_TRUE(it == end(s));
@@ -144,12 +144,12 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_iterators)
         TSeed const & cs = s;
         typedef Iterator<TSeed const, Standard>::Type TIterator;
         TIterator it = begin(cs);
-        SEQAN_ASSERT_EQ(1u, it->leftDim0);
-        SEQAN_ASSERT_EQ(2u, it->leftDim1);
+        SEQAN_ASSERT_EQ(1u, it->beginDim0);
+        SEQAN_ASSERT_EQ(2u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
-        SEQAN_ASSERT_EQ(4u, it->leftDim0);
-        SEQAN_ASSERT_EQ(5u, it->leftDim1);
+        SEQAN_ASSERT_EQ(4u, it->beginDim0);
+        SEQAN_ASSERT_EQ(5u, it->beginDim1);
         SEQAN_ASSERT_EQ(3u, it->length);
         ++it;
         SEQAN_ASSERT_TRUE(it == end(cs));
