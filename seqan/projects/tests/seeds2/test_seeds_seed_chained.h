@@ -89,7 +89,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
 }
 
 // Test the appendDiagonal() function for Chained Seed.
-SEQAN_DEFINE_TEST(test_seeds_seed_chained_add_diagonal)
+SEQAN_DEFINE_TEST(test_seeds_seed_chained_append_diagonal)
 {
     using namespace seqan;
 
@@ -103,7 +103,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_add_diagonal)
     SEQAN_ASSERT_EQ(7u, getEndDim1(s));
     SEQAN_ASSERT_EQ(2, getStartDiagonal(s));
     SEQAN_ASSERT_EQ(2, getEndDiagonal(s));
-    SEQAN_ASSERT_EQ(1u, length(s._seedDiagonals));
+    SEQAN_ASSERT_EQ(1u, length(s));
 
     appendDiagonal(s, TSeedDiagonal(5, 5, 3));
 
@@ -113,7 +113,29 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_add_diagonal)
     SEQAN_ASSERT_EQ(8u, getEndDim1(s));
     SEQAN_ASSERT_EQ(2, getStartDiagonal(s));
     SEQAN_ASSERT_EQ(0, getEndDiagonal(s));
-    SEQAN_ASSERT_EQ(2u, length(s._seedDiagonals));
+    SEQAN_ASSERT_EQ(2u, length(s));
+}
+
+// Test the truncateDiagonal() function for Chained Seed.
+SEQAN_DEFINE_TEST(test_seeds_seed_chained_truncate_diagonals)
+{
+    using namespace seqan;
+
+    typedef Seed<ChainedSeed> TSeed;
+    typedef Value<TSeed>::Type TSeedDiagonal;
+    TSeed s(1, 3, 4);
+
+    appendDiagonal(s, TSeedDiagonal(5, 5, 3));
+    SEQAN_ASSERT_EQ(2u, length(s));
+    appendDiagonal(s, TSeedDiagonal(10, 10, 3));
+    SEQAN_ASSERT_EQ(3u, length(s));
+    typedef Iterator<TSeed, Standard>::Type TIterator;
+    TIterator it = begin(s);
+    ++it;
+    truncateDiagonals(s, it);
+    SEQAN_ASSERT_EQ(1u, length(s));
+    TSeedDiagonal const diag = *begin(s)
+    SEQAN_ASSERT_TRUE(diag == TSeedDiagonal(1, 3, 4));
 }
 
 // Test the begin/end functions for chained seeds.

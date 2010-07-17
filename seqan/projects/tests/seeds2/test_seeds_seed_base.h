@@ -71,6 +71,28 @@ void testSeedsSeedBaseGettersSetters(TSeedSpec const &)
     SEQAN_ASSERT_EQ(5, getUpperDiagonal(s));
 }
 
+template <typename TSeedSpec>
+void testSeedsSeedBaseBasicFunctions(TSeedSpec const &)
+{
+    using namespace seqan;
+
+    // Define Seed type and declare a variable.
+    typedef Seed<TSeedSpec> TSeed;
+    TSeed s(1, 2, 3);
+
+    {  // test assign
+        TSeed x;
+        assign(x, s);
+        SEQAN_ASSERT_TRUE(x == s);
+    }
+    {  // test move
+        TSeed s2(s);
+        TSeed x;
+        move(x, s);
+        SEQAN_ASSERT_TRUE(x == s2);
+    }
+}
+
 // Test constructors of the SimpleSeed specialization, as specified
 // for the base class Seed.
 SEQAN_DEFINE_TEST(test_seeds_seed_base_constructors_simple)
@@ -95,6 +117,14 @@ SEQAN_DEFINE_TEST(test_seeds_seed_base_getters_setters_simple)
     testSeedsSeedBaseGettersSetters(Simple());
 }
 
+// Test the basic functions of the SimpleSeed specialization as
+// specified for the base class Seed.
+SEQAN_DEFINE_TEST(test_seeds_seed_base_basic_functions_simple)
+{
+    using namespace seqan;
+    testSeedsSeedBaseBasicFunctions(Simple());
+}
+
 // Test constructors of the ChainedSeed specialization, as specified
 // for the base class Seed.
 SEQAN_DEFINE_TEST(test_seeds_seed_base_constructors_chained)
@@ -117,6 +147,14 @@ SEQAN_DEFINE_TEST(test_seeds_seed_base_getters_setters_chained)
 {
     using namespace seqan;
     testSeedsSeedBaseGettersSetters(ChainedSeed());
+}
+
+// Test the basic functions of the ChainedSeed specialization as
+// specified for the base class Seed.
+SEQAN_DEFINE_TEST(test_seeds_seed_base_basic_functions_chained)
+{
+    using namespace seqan;
+    testSeedsSeedBaseBasicFunctions(ChainedSeed());
 }
 
 #endif  // TEST_SEEDS_TEST_SEEDS_SEED_BASE_H_
