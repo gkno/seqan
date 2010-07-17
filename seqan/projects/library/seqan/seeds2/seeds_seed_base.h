@@ -180,6 +180,13 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 // ===========================================================================
 
 /**
+.Function.assign.param.source.type:Class.Seed
+.Function.assign.param.target.type:Class.Seed
+.Function.move.param.source.type:Class.Seed
+.Function.move.param.target.type:Class.Seed
+*/
+
+/**
 .Function.getBeginDim0:
 ..summary: Returns the first position of the seed in the query.
 ..cat:Seed Handling

@@ -104,6 +104,22 @@ struct Value<Seed<ChainedSeed, TConfig> const>
 };
 
 /**
+.Metafunction.Size.param.T:Spec.ChainedSeed
+ */
+template <typename TConfig>
+struct Size<Seed<ChainedSeed, TConfig> >
+{
+//     typedef typename Value<Seed<ChainedSeed, TConfig> >::Type _TSeedDiagonal;
+//     typedef typename Size<std::list<_TSeedDiagonal> >::Type Type;
+    // TODO(holtgrew): Fix lines above.
+    typedef size_t Type;
+};
+
+template <typename TConfig>
+struct Size<Seed<ChainedSeed, TConfig> const>
+        : Size<Seed<ChainedSeed, TConfig> > {};
+
+/**
 .Metafunction.Iterator.param.T:Spec.ChainedSeed
  */
 template <typename TConfig>
@@ -125,6 +141,16 @@ struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
 // ===========================================================================
 // Functions
 // ===========================================================================
+
+template <typename TConfig>
+inline bool
+operator==(Seed<ChainedSeed, TConfig> const & a, Seed<ChainedSeed, TConfig> const & b)
+{
+    SEQAN_CHECKPOINT;
+    return a._seedDiagonals == b._seedDiagonals &&
+            a._upperDiagonal == b._upperDiagonal &&
+            a._lowerDiagonal == b._lowerDiagonal;
+}
 
 template <typename TConfig>
 inline typename Position<Seed<ChainedSeed, TConfig> >::Type
@@ -159,6 +185,17 @@ getEndDim1(Seed<ChainedSeed, TConfig> const & seed)
 }
 
 /**
+.Function.length.param.object.type:Spec.ChainedSeed
+*/
+template <typename TConfig>
+inline typename Size<Seed<ChainedSeed, TConfig> >::Type
+length(Seed<ChainedSeed, TConfig> const & seed)
+{
+    SEQAN_CHECKPOINT;
+    return length(seed._seedDiagonals);
+}
+
+/**
 .Function.appendDiagonal
 ..summary: Adds diagonal to the Chained Seed.
 ..cat:Seed Handling
@@ -177,6 +214,25 @@ appendDiagonal(Seed<ChainedSeed, TConfig> & seed,
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): Check for consistency!
     appendValue(seed._seedDiagonals, diagonal);
+}
+
+/**
+.Function.truncateDiagonals
+..summary:Removes diagonals from the given first one to the end of the seed's diagonals.
+..cat:Seed Handling
+..signature:truncateDiagonals(seed, first)
+..param.seed: The seed to which the diagonal should be added.
+...type:Spec.ChainedSeed
+..param.first: Iterator the first diagonal to remove.
+*/
+template <typename TConfig>
+inline void
+truncateDiagonals(Seed<ChainedSeed, TConfig> & seed,
+                  typename Iterator<Seed<ChainedSeed, TConfig> >::Type const & first)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): Add erase() to std::list adaptors?
+    seed._seedDiagonals.erase(first, seed._seedDiagonals.end());
 }
 
 /**
@@ -215,6 +271,43 @@ end(Seed<ChainedSeed, TConfig> const & seed, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return seed._seedDiagonals.end();
+}
+
+// Basic Functions
+
+template <typename TConfig>
+void
+assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> const & source)
+{
+    SEQAN_CHECKPOINT;
+    target._seedDiagonals = source._seedDiagonals;
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+}
+
+template <typename TConfig>
+void
+move(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> & source)
+{
+    SEQAN_CHECKPOINT;
+    std::swap(target._seedDiagonals, source._seedDiagonals);
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+}
+
+// Debug Output
+
+template <typename TStream, typename TConfig>
+inline void
+_write(TStream & stream, Seed<ChainedSeed, TConfig> const & seed, _Tikz const &)
+{
+    // Overall seed.
+    stream << "\\draw[seed] (" << getBeginDim1(seed) << ", -" << getBeginDim0(seed) << ") -- (" << (getEndDim1(seed) - 1) << ", -" << (getEndDim0(seed) - 1) << ");" << std::endl;
+    // Diagonals.
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Iterator<TSeed const, Standard>::Type TIterator;
+    for (TIterator it = begin(seed); it != end(seed); ++it)
+        stream << "\\draw[seed diagonal] (" << it->beginDim1 << ", -" << it->beginDim0 << ") -- (" << (it->beginDim1 + it->length - 1) << ", -" << (it->beginDim0 + it->length - 1) << ");" << std::endl;
 }
 
 }  // namespace seqan

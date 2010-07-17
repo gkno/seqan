@@ -97,6 +97,14 @@ struct Size<SeedDiagonal<TPosition, TSize> const>
 // Functions
 // ===========================================================================
 
+template <typename TPosition, typename TSize>
+inline bool
+operator==(SeedDiagonal<TPosition, TSize> const & a, SeedDiagonal<TPosition, TSize> const & b)
+{
+    SEQAN_CHECKPOINT;
+    return a.beginDim0 == b.beginDim0 && a.beginDim1 == b.beginDim1 && a.length == b.length;
+}
+
 }  // namespace seqan
 
 #endif  // SEQAN_SEEDS_SEEDS_SEED_DIAGONAL_H_

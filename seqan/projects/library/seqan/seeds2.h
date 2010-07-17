@@ -51,9 +51,8 @@
 
 // Class SeedSet and specializations
 // #include <seqan/seeds2/seeds_scoring_scheme.h>
-// #include <seqan/seeds2/seeds_seed_set_base.h>
-// #include <seqan/seeds2/seeds_seed_set_scored.h>
-// #include <seqan/seeds2/seeds_seed_set_non_scored.h>
+#include <seqan/seeds2/seeds_seed_set_base.h>
+#include <seqan/seeds2/seeds_seed_set_unordered.h>
 
 // Algorithms on SeedSet objects
 // #include <seqan/seeds2/seeds_add_seed.h>

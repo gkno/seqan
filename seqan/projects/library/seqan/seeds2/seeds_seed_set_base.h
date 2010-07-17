@@ -23,6 +23,8 @@
 #ifndef SEQAN_SEEDS_SEEDS_SEED_SET_BASE_H_
 #define SEQAN_SEEDS_SEEDS_SEED_SET_BASE_H_
 
+namespace seqan {
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -52,11 +54,11 @@ struct _Single;
 typedef Tag<_Single> Single;
 
 
-struct _Scored;
-typedef Tag<_Scored> Score;
+// struct _Scored;
+// typedef Tag<_Scored> Scored;
 
-struct _UnScored;
-typedef Tag<_UnScored> UnScored;
+// struct _UnScored;
+// typedef Tag<_UnScored> UnScored;
 
 
 /**
@@ -70,14 +72,7 @@ typedef Tag<_UnScored> UnScored;
 ..param.TSeedConfig:Configuration for the seeds.  Sensible defaults are chosen based on the other template parameters.
 ..include:seqan/seeds.h
 */
-template <typename TSeedSpec,
-          typename TScored,
-          typename TSpec,
-          typename TSeedConfig = typename IF<
-              typename TYPECMP<TScored, UnScored>::Type,
-              DefaultSeedConfig,
-              DefaultSeedConfigScore>::Type
-          >
+template <typename TSeedSpec, typename TSpec, typename TSeedConfig = DefaultSeedConfig>
 class SeedSet;
 
 // ===========================================================================
@@ -121,6 +116,18 @@ class SeedSet;
 // Functions
 // ===========================================================================
 
+// Basic Container Functions
+
+/**
+.Function.begin.param.object.type:Class.SeedSet
+.Function.end.param.object.type:Class.SeedSet
+.Function.length.param.object.type:Class.SeedSet
+.Function.front.param.object.type:Class.SeedSet
+.Function.back.param.object.type:Class.SeedSet
+ */
+
+// SeedSet Functions
+
 /**
 .Function.addSeed:
 ..summary:Adds a seed to an existing set.
@@ -161,5 +168,42 @@ class SeedSet;
 ...type:Tag.Local Chaining
 ...remarks: Note that not every algorithm can be used with each specialization of @Class.Seed@.
 */
+
+// Debugging / TikZ Output
+
+template <typename TStream, typename TQuerySequence, typename TDatabaseSequence, typename TSeedSetSpec, typename TSeedSpec, typename TSeedConfig>
+inline void
+_write(TStream & stream,
+       TQuerySequence & sequence0,
+       TDatabaseSequence & sequence1,
+       SeedSet<TSeedSpec, TSeedSetSpec, TSeedConfig> const & seedSet,
+       _Tikz const &)
+{
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, TSeedConfig> TSeedSet;
+
+    stream << "\\begin{tikzpicture}[" << std::endl
+           << "    seed/.style={very thick}," << std::endl
+           << "    seed diagonal/.style={red,<->}" << std::endl
+           << "    ]" << std::endl;
+
+    // Draw sequences.
+    stream << "  \\draw";
+    // Draw query / sequence 0;
+    for (unsigned i = 0; i < length(sequence0); ++i)
+        stream << std::endl << "    (0, -" << i << ") node {" << sequence0[i] << "}";
+    stream << std::endl;
+    // Draw database / sequence 1.
+    for (unsigned i = 0; i < length(sequence1); ++i)
+        stream << std::endl << "    (" << i << ", 0) node {" << sequence1[i] << "}";
+    stream << ";" << std::endl;
+
+    // Draw seeds.
+    typedef typename Iterator<TSeedSet const, Standard>::Type TIterator;
+    for (TIterator it = begin(seedSet); it != end(seedSet); ++it)
+        _write(stream, value(it), _Tikz());
+    stream << "\\end{tikzpicture}" << std::endl;
+}
+
+}  // namespace seqan
 
 #endif  // SEQAN_SEEDS_SEEDS_SEED_SET_BASE_H_

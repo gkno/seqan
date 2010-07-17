@@ -1,7 +1,7 @@
 /*==========================================================================
-                SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
- ============================================================================
+  SeqAn - The Library for Sequence Analysis
+  http://www.seqan.de 
+  ============================================================================
   Copyright (C) 2010
 
   This library is free software; you can redistribute it and/or
@@ -13,11 +13,11 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
- ============================================================================
+  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
- ============================================================================
+  ============================================================================
   Specialization "Simple" for class Seed.
- ==========================================================================*/
+  ==========================================================================*/
 
 #ifndef SEQAN_SEEDS_SEEDS_SEED_SIMPLE_H_
 #define SEQAN_SEEDS_SEEDS_SEED_SIMPLE_H_
@@ -34,30 +34,30 @@ namespace seqan {
 struct Simple {}; // .. but type is not complete yet
 
 /**
-.Spec.SimpleSeed:
-..summary:Describes a seed with start and end position and diagonal upper and lower bounds.
-..cat:Seed Handling
-..general:Class.Seed
-..signature:Seed<TPosition, SimpleSeed>
-..param.TPosition:The type number that schuld be used. Must have negative numbers (e.g. int/long).
-.Memfunc.SimpleSeed#Seed:
-..class:Spec.SimpleSeed
-..summary:Constructor
-..signature: Seed<TPosition, SimpleSeed> ()
-..signature: Seed<TPosition, SimpleSeed> (qStartPos, dStartPos, length)
-..signature: Seed<TPosition, SimpleSeed> (qStartPos, dStartPos, qEndPos, dEndPos)
-..param.qStartPos: Start in query sequence.
-..param.dStartPos: Start in database sequence.
-..param.qEndPos: End in query sequence.
-..param.dEndPos: End in database sequence.
-..param.length: Length of the seed.
-..include:seqan/seeds.h
+   .Spec.SimpleSeed:
+   ..summary:Describes a seed with start and end position and diagonal upper and lower bounds.
+   ..cat:Seed Handling
+   ..general:Class.Seed
+   ..signature:Seed<TPosition, SimpleSeed>
+   ..param.TPosition:The type number that schuld be used. Must have negative numbers (e.g. int/long).
+   .Memfunc.SimpleSeed#Seed:
+   ..class:Spec.SimpleSeed
+   ..summary:Constructor
+   ..signature: Seed<TPosition, SimpleSeed> ()
+   ..signature: Seed<TPosition, SimpleSeed> (qStartPos, dStartPos, length)
+   ..signature: Seed<TPosition, SimpleSeed> (qStartPos, dStartPos, qEndPos, dEndPos)
+   ..param.qStartPos: Start in query sequence.
+   ..param.dStartPos: Start in database sequence.
+   ..param.qEndPos: End in query sequence.
+   ..param.dEndPos: End in database sequence.
+   ..param.length: Length of the seed.
+   ..include:seqan/seeds.h
 */
 template <typename TConfiguration>
 class Seed<Simple, TConfiguration>
         : TConfiguration::TScoreMixin
 {
-public:
+  public:
     typedef typename TConfiguration::TPosition TPosition;
     typedef typename TConfiguration::TSize TSize;
     typedef typename TConfiguration::TDiagonal TDiagonal;
@@ -113,6 +113,19 @@ public:
 // ===========================================================================
 
 template <typename TConfig>
+inline bool
+operator==(Seed<Simple, TConfig> const & a, Seed<Simple, TConfig> const & b)
+{
+    SEQAN_CHECKPOINT;
+    return a._beginDim0 == b._beginDim0 &&
+            a._beginDim1 == b._beginDim1 &&
+            a._endDim0 == b._endDim0 &&
+            a._endDim1 == b._endDim1 &&
+            a._upperDiagonal == b._upperDiagonal &&
+            a._lowerDiagonal == b._lowerDiagonal;
+}
+
+template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
 getBeginDim0(Seed<Simple, TConfig> const & seed)
 {
@@ -121,19 +134,19 @@ getBeginDim0(Seed<Simple, TConfig> const & seed)
 }
 
 /**
-.Function.setBeginDim0:
-..summary: Updates the start point of the seed.
-..cat:Seed Handling
-..signature:setBeginDim0(seed, start)
-..param.seed:The seed whose start position should be updated.
-...type:Spec.SimpleSeed
-..param.start:The query position where the seed should start.
-..include:seqan/seeds.h
+   .Function.setBeginDim0:
+   ..summary: Updates the start point of the seed.
+   ..cat:Seed Handling
+   ..signature:setBeginDim0(seed, start)
+   ..param.seed:The seed whose start position should be updated.
+   ...type:Spec.SimpleSeed
+   ..param.start:The query position where the seed should start.
+   ..include:seqan/seeds.h
 */
 template <typename TConfig, typename TPosition>
 inline void 
 setBeginDim0(Seed<Simple, TConfig> & seed, 
-            TPosition newLeftPosition)
+             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._beginDim0 = newLeftPosition;
@@ -156,19 +169,19 @@ getBeginDim1(Seed<Simple, TConfig> const & seed)
 }
 
 /**
-.Function.setBeginDim1:
-..summary: Updates the start point of the seed.
-..cat:Seed Handling
-..signature:setBeginDim1(seed, start)
-..param.seed:The seed whose start position should be updated.
-...type:Spec.SimpleType
-..param.start:The database position where the seed should start.
-..include:seqan/seeds.h
+   .Function.setBeginDim1:
+   ..summary: Updates the start point of the seed.
+   ..cat:Seed Handling
+   ..signature:setBeginDim1(seed, start)
+   ..param.seed:The seed whose start position should be updated.
+   ...type:Spec.SimpleType
+   ..param.start:The database position where the seed should start.
+   ..include:seqan/seeds.h
 */
 template <typename TConfig, typename TPosition>
 inline void 
 setBeginDim1(Seed<Simple, TConfig> & seed, 
-            TPosition newLeftPosition)
+             TPosition newLeftPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._beginDim1 = newLeftPosition;
@@ -183,41 +196,80 @@ getEndDim1(Seed<Simple, TConfig> const & seed)
 }
 
 /**
-.Function.setEndDim0:
-..summary: Updates the end point of the seed.
-..cat:Seed Handling
-..signature:setEndDim0(seed, end)
-..param.seed:The seed whose end position should be updated.
-...type:Spec.SimpleSeed
-..param.end:The query position where the seed should end.
-..include:seqan/seeds.h
+   .Function.setEndDim0:
+   ..summary: Updates the end point of the seed.
+   ..cat:Seed Handling
+   ..signature:setEndDim0(seed, end)
+   ..param.seed:The seed whose end position should be updated.
+   ...type:Spec.SimpleSeed
+   ..param.end:The query position where the seed should end.
+   ..include:seqan/seeds.h
 */
 template <typename TConfig, typename TPosition>
 inline void 
 setEndDim0(Seed<Simple, TConfig> & seed, 
-             TPosition newRightPosition)
+           TPosition newRightPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._endDim0 = newRightPosition;
 }
 
 /**
-.Function.setEndDim1:
-..summary: Updates the end point of the seed.
-..cat:Seed Handling
-..signature:setEndDim1(seed, end)
-..param.seed:The seed whose end position should be updated.
-...type:Spec.Simple Seed
-..param.end:The database position where the seed should end.
-..include:seqan/seeds.h
+   .Function.setEndDim1:
+   ..summary: Updates the end point of the seed.
+   ..cat:Seed Handling
+   ..signature:setEndDim1(seed, end)
+   ..param.seed:The seed whose end position should be updated.
+   ...type:Spec.Simple Seed
+   ..param.end:The database position where the seed should end.
+   ..include:seqan/seeds.h
 */
 template <typename TConfig, typename TPosition>
 inline void 
 setEndDim1(Seed<Simple, TConfig> & seed, 
-             TPosition newRightPosition)
+           TPosition newRightPosition)
 {
 	SEQAN_CHECKPOINT;
 	seed._endDim1 = newRightPosition;
+}
+
+// Basic Functions
+
+template <typename TConfig>
+void
+assign(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> const & source)
+{
+    SEQAN_CHECKPOINT;
+    target._beginDim0 = source._beginDim0;
+    target._beginDim1 = source._beginDim1;
+    target._endDim0 = source._endDim0;
+    target._endDim1 = source._endDim1;
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+}
+
+template <typename TConfig>
+void
+move(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> & source)
+{
+    SEQAN_CHECKPOINT;
+    target._beginDim0 = source._beginDim0;
+    target._beginDim1 = source._beginDim1;
+    target._endDim0 = source._endDim0;
+    target._endDim1 = source._endDim1;
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+}
+
+// Debug Output
+
+struct _Tikz {};
+
+template <typename TStream, typename TConfig>
+inline void
+_write(TStream & stream, Seed<Simple, TConfig> const & seed, _Tikz const &)
+{
+    stream << "\\draw[seed] (" << getBeginDim1(seed) << ", -" << getBeginDim0(seed) << ") -- (" << (getEndDim1(seed) - 1) << ", -" << (getEndDim0(seed) - 1) << ");" << std::endl;
 }
 
 }  // namespace seqan
