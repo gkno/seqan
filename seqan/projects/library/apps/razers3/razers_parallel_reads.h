@@ -27,7 +27,7 @@
 #include <omp.h>
 #endif
 
-// #include <parallel/algorithm>
+#include <parallel/algorithm>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
