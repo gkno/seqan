@@ -34,7 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	
 #ifndef _OPENMP
 int omp_get_thread_num(){
-	return 0;
+	return 2;
 }
 #endif
 
@@ -162,7 +162,7 @@ appendBlockStores(
 	// so the prefix increment can be used in the loops
 	TAlignedReadStoreSize sizeSum = --oldSize;
 	
-	for(unsigned i = 0; i < options.numberOfBlocks; ++i)
+	for(unsigned i = 0; i < options.numberOfCores; ++i)
 		for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j)
 			blockStores[i].alignedReadStore[j].id = ++sizeSum;
 	++sizeSum;
@@ -172,7 +172,7 @@ appendBlockStores(
 	resize(store.alignQualityStore, sizeSum, Generous());			
 	
 	// third: append single block stores
-	for(unsigned i = 0; i < options.numberOfBlocks; ++i){
+	for(unsigned i = 0; i < options.numberOfCores; ++i){
 		for(unsigned j = 0; j < length(blockStores[i].alignedReadStore); ++j){
 			store.alignedReadStore[++oldSize] = blockStores[i].alignedReadStore[j];
 			store.alignQualityStore[oldSize] = blockStores[i].alignQualityStore[j];
@@ -318,11 +318,15 @@ void partitionHits(
 		int const											  noOfParts,
 		RazerSMode<TAlignMode, RazerSGapped, TErrors> const)
 {
-	myRadixSort(hits);
+	typedef String<_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> >		THitString;
+	typedef typename Value<THitString>::Type									TSwiftHit;
+	typedef typename Iterator<THitString>::Type								THitStringIter;
 	
-	// THitStringIter i1 = begin(hits);
-	// THitStringIter i2 = end(hits);
-	// __gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
+	// myRadixSort(hits);
+	
+	THitStringIter i1 = begin(hits);
+	THitStringIter i2 = end(hits);
+	__gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>(), __gnu_parallel::default_parallel_tag(2));
 
 	resize(positions, noOfParts + 1, Exact());
 	positions[0] = 0;
@@ -431,8 +435,6 @@ inline void goOverContig(
 	typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;
 	typedef typename Size<TAlignedReadStore>::Type		TAlignedReadStoreSize;
 	
-	// TODO: (size of aligned read store)?
-	
 	// Needed because the omp shared clause does not allow for "." in the variabel names.
 	TReadSeqStore const & readSet = store.readSeqStore;
 	TContigSeq const & contigSeq = host(swiftFinders[0]);
@@ -488,7 +490,7 @@ inline void goOverContig(
 					#pragma omp flush(tav)
 					
 					// if(true){ 
-					if(tav[blockId] == 1 or (int) length(hits) < tav[blockId]){
+					if(tav[blockId] == 1 or (int) length(hits) < tav[blockId] * 3){
 						verifyHits(verifier[blockId], hits, 0, length(hits),
 							(blockId * options.blockSize), host(swiftFinders[0]), readSet, mode);
 					}
@@ -542,6 +544,31 @@ inline void goOverContig(
 							resize(threadStores[absId].alignQualityStore, oldLengths[absId], Generous());
 							
 						}
+						
+						/*
+						TAlignedReadStoreSize diff = 0;
+						for(int relId = 1; relId < tav[blockId]; ++relId){
+							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+							diff += length(threadStores[absId].alignedReadStore) - oldLengths[absId];
+						}
+						
+						TAlignedReadStoreSize oldSize = length(threadStores[blockId].alignedReadStore);
+						resize(threadStores[blockId].alignedReadStore, oldSize + diff, Generous());
+						resize(threadStores[blockId].alignQualityStore, oldSize + diff, Generous());
+						
+						for(int relId = 1; relId < tav[blockId]; ++relId){
+							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
+							for(TAlignedReadStoreSize i = oldLengths[absId]; i < length(threadStores[absId]); ++i) {
+								
+								threadStores[absId].alignedReadStore[i].id = oldSize;
+								threadStores[blockId].alignedReadStore[oldSize] = threadStores[absId].alignedReadStore[i];
+								threadStores[blockId].alignQualityStore[oldSize] = threadStores[absId].alignQualityStore[i];
+								++oldSize;
+							}
+							resize(threadStores[absId].alignedReadStore, oldLengths[absId], Generous());
+							resize(threadStores[absId].alignQualityStore, oldLengths[absId], Generous());
+							
+						}*/
 						
 					} // End else
 					

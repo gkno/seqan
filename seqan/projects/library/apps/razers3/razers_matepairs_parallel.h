@@ -34,30 +34,32 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 // Find read matches in one genome sequence
+
 template <
 	typename TFSSpec,
 	typename TFSConfig,
+	typename TThreadId,
 	typename TReadIndex,
 	typename TSwiftSpec,
-	typename TThreadId,
-	typename TPreprocessing,
+	typename TVerifier,
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode>
-void _mapMatePairReadsParallel(
-	FragmentStore<TFSSpec, TFSConfig>					& store,
-	unsigned											  contigId,				// ... and its sequence number
-	ParallelSwiftPatternHandler<String<
-		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerL,
-	ParallelSwiftPatternHandler<String<
-		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerR,
-	TThreadId const										threadID,
-	TPreprocessing										& preprocessingL,
-	TPreprocessing										& preprocessingR,
-	TCounts												& cnts,
-	char												  orientation,			// q-gram index of reads
-	TRazerSOptions										& options,
-	TRazerSMode											& mode)
+void goOverContig(
+		FragmentStore<TFSSpec, TFSConfig>					& mainStore,
+		FragmentStore<TFSSpec, TFSConfig>					& threadStore,
+		unsigned											  contigId,
+		TThreadId											& threadID,
+		ParallelSwiftPatternHandler<String<
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerL,
+		ParallelSwiftPatternHandler<String<
+			Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerR,
+		TVerifier											& verifierL,
+		TVerifier											& verifierR,
+		TCounts												& cnts,
+		char												  orientation,
+		TRazerSOptions										& options,
+		TRazerSMode											& mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
@@ -87,42 +89,20 @@ void _mapMatePairReadsParallel(
 
 	// VERIFICATION
 	typedef String<TSwiftPattern>							TSwiftPatterns;
-	typedef ParallelSwiftPatternHandler<TSwiftPatterns>		TSwiftPatternHandler;
-	typedef MatchVerifier <TFragmentStore, TRazerSOptions,
-		TRazerSMode, TPreprocessing,
-		TSwiftPatternHandler, TCounts >						TVerifier;
-	
+
 	const unsigned NOT_VERIFIED = 1u << (8*sizeof(unsigned)-1);
 	
-	if (options._debugLevel >= 1)
-	{
-		::std::cerr << ::std::endl << "Process genome seq #" << contigId;
-		if (orientation == 'F')
-			::std::cerr << "[fwd]";
-		else
-			::std::cerr << "[rev]";
-	}
-	
-	lockContig(store, contigId);
-	TGenome &genome = store.contigStore[contigId].seq;
-	if (orientation == 'R')	reverseComplementInPlace(genome);
+	TGenome &genome = mainStore.contigStore[contigId].seq;
 	
 	TSwiftPattern & swiftPatternL = swiftPatternHandlerL.swiftPatterns[threadID];
 	TSwiftPattern & swiftPatternR = swiftPatternHandlerR.swiftPatterns[threadID];
 	
 	TReadSet	&readSetL = host(host(swiftPatternL));
-	TReadSet	&readSetR = host(host(swiftPatternR));
-	TVerifier	verifierL(store, options, preprocessingL, swiftPatternHandlerL, cnts);
-	TVerifier	verifierR(store, options, preprocessingR, swiftPatternHandlerR, cnts);
-
-	verifierL.oneMatchPerBucket = true;
-	verifierR.oneMatchPerBucket = true;
-	verifierL.m.contigId = contigId;
-	verifierR.m.contigId = contigId;
-
+	//TReadSet	&readSetR = host(host(swiftPatternR));
+		
 	if (empty(readSetL))
 		return;
-
+	
 	// distance <= libLen + libErr + 2*(parWidth-readLen) - shapeLen
 	// distance >= libLen - libErr - 2*parWidth + shapeLen
 	TSize readLength = length(readSetL[0]);
@@ -133,11 +113,11 @@ void _mapMatePairReadsParallel(
 	// exit if contig is shorter than library size
 	if (length(genome) <= scanShift)
 		return;
-
+	
 	TGenomeInf genomeInf = infix(genome, scanShift, length(genome));
 	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
-
+	
 	TDequeue fifo;						// stores left-mate potential matches
 	String<__int64> lastPotMatchNo;		// last number of a left-mate potential
 	__int64 lastNo = 0;					// last number over all left-mate pot. matches in the queue
@@ -158,6 +138,8 @@ void _mapMatePairReadsParallel(
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
 	{
 		unsigned matePairId = swiftPatternR.curSeqNo;
+		unsigned globalMatePairId = matePairId + options.blockSize * threadID; // local ID to global ID
+		
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 		
@@ -176,10 +158,11 @@ void _mapMatePairReadsParallel(
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
 				{
 					// link in
+					unsigned globalCurSeqNo = swiftPatternL.curSeqNo + options.blockSize * threadID; // local ID to global ID
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo];
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++;
 
-					fL.i2.readId = store.matePairStore[swiftPatternL.curSeqNo].readId[0] | NOT_VERIFIED;
+					fL.i2.readId = mainStore.matePairStore[globalCurSeqNo].readId[0] | NOT_VERIFIED;
 					fL.i2.beginPos = gPair.i1;
 					fL.i2.endPos = gPair.i2;
 					
@@ -194,7 +177,7 @@ void _mapMatePairReadsParallel(
 		TDequeueIterator bestLeft = TDequeueIterator();
 		
 		TDequeueIterator it;
-		unsigned leftReadId = store.matePairStore[matePairId].readId[0];
+		unsigned leftReadId = mainStore.matePairStore[globalMatePairId].readId[0];
 		__int64 lastPositive = (__int64)-1;
 		for (__int64 i = lastPotMatchNo[matePairId]; firstNo <= i; i = (*it).i1)
 		{
@@ -203,23 +186,29 @@ void _mapMatePairReadsParallel(
 				// verify left mate (equal seqNo), if not done already
 				if ((*it).i2.readId & NOT_VERIFIED)
 				{
-					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-							matePairId, readSetL, mode))
+					if((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
-						verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
-						(*it).i2 = verifierL.m;
-						(*it).i3 = verifierL.q;
-						
-						// short-cut negative matches
-						if (lastPositive == (__int64)-1)
-							lastPotMatchNo[matePairId] = i;
-						else
-							value(fifo, lastPositive - firstNo).i1 = i;
-						lastPositive = i;
+						TId globalReadId = (*it).i2.readId & ~NOT_VERIFIED;
+						if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
+								globalReadId, mainStore.readSeqStore, mode))
+						{
+							verifierL.m.readId = globalReadId;		// has been verified positively
+							(*it).i2 = verifierL.m;
+							(*it).i3 = verifierL.q;
+							
+							// short-cut negative matches
+							if (lastPositive == (__int64)-1)
+								lastPotMatchNo[matePairId] = i;
+							else
+								value(fifo, lastPositive - firstNo).i1 = i;
+							lastPositive = i;
+						} else
+							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
 					} else
-						(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
-				}
-
+						lastPositive = i;
+				} else
+					lastPositive = i;
+				
 				if ((*it).i2.readId == leftReadId)
 				{
 					int score = (*it).i3.score;
@@ -257,7 +246,7 @@ void _mapMatePairReadsParallel(
 		if (bestLeftScore != InfimumValue<int>::VALUE)
 		{
 			if (matchVerify(verifierR, infix(swiftFinderR), 
-					matePairId, readSetR, mode))
+					mainStore.matePairStore[globalMatePairId].readId[1], mainStore.readSeqStore, mode))
 			{
 				// distance between left mate beginning and right mate end
 				__int64 dist = (__int64)verifierR.m.endPos - (__int64)(*bestLeft).i2.beginPos;
@@ -271,7 +260,7 @@ void _mapMatePairReadsParallel(
 					fL.i3 = (*bestLeft).i3;
 
 					// transform mate readNo to global readNo
-					TMatePair &mp = store.matePairStore[matePairId];
+					TMatePair &mp = mainStore.matePairStore[globalMatePairId];
 					fL.i2.readId = mp.readId[0];
 					mR.readId    = mp.readId[1];
 
@@ -293,7 +282,8 @@ void _mapMatePairReadsParallel(
 					
 					// set a unique pair id
 					fL.i2.pairMatchId = mR.pairMatchId = options.nextPairMatchId;
-					if (++options.nextPairMatchId == TAlignedRead::INVALID_ID)
+					options.nextPairMatchId += options.numberOfCores;
+					if (options.nextPairMatchId == TAlignedRead::INVALID_ID)
 						options.nextPairMatchId = 0;
 					
 					// score the whole match pair
@@ -301,24 +291,24 @@ void _mapMatePairReadsParallel(
 					
 					if (!options.spec.DONT_DUMP_RESULTS)
 					{
-						fL.i2.id = length(store.alignedReadStore);
-						appendValue(store.alignedReadStore, fL.i2, Generous());
-						appendValue(store.alignQualityStore, fL.i3, Generous());
-						mR.id = length(store.alignedReadStore);
-						appendValue(store.alignedReadStore, mR, Generous());
-						appendValue(store.alignQualityStore, qR, Generous());
-
-						if (length(store.alignedReadStore) > options.compactThresh)
+						fL.i2.id = length(threadStore.alignedReadStore);
+						appendValue(threadStore.alignedReadStore, fL.i2, Generous());
+						appendValue(threadStore.alignQualityStore, fL.i3, Generous());
+						mR.id = length(threadStore.alignedReadStore);
+						appendValue(threadStore.alignedReadStore, mR, Generous());
+						appendValue(threadStore.alignQualityStore, qR, Generous());
+						
+						if (length(threadStore.alignedReadStore) > options.compactThresh)
 						{
-							typename Size<TAlignedReadStore>::Type oldSize = length(store.alignedReadStore);
+							typename Size<TAlignedReadStore>::Type oldSize = length(threadStore.alignedReadStore);
 //									maskDuplicates(matches);	// overlapping parallelograms cause duplicates
-							compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
+							compactPairMatches(mainStore, threadStore, cnts, options, swiftPatternHandlerL, swiftPatternHandlerR);
 							
-							if (length(store.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
+							if (length(threadStore.alignedReadStore) * 4 > oldSize)			// the threshold should not be raised
 								options.compactThresh += (options.compactThresh >> 1);	// if too many matches were removed
 							
 							if (options._debugLevel >= 2)
-								::std::cerr << '(' << oldSize - length(store.alignedReadStore) << " matches removed)";
+								::std::cerr << '(' << oldSize - length(threadStore.alignedReadStore) << " matches removed)";
 						}
 					}
 					++options.countVerification;
@@ -327,13 +317,113 @@ void _mapMatePairReadsParallel(
 			}
 		} 	
 	}
+}
+
+template <
+	typename TFSSpec,
+	typename TFSConfig,
+	typename TReadIndex,
+	typename TSwiftSpec,
+	typename TPreprocessing,
+	typename TCounts,
+	typename TRazerSOptions,
+	typename TRazerSMode>
+void _mapMatePairReadsParallel(
+	FragmentStore<TFSSpec, TFSConfig>					& store,
+	String<FragmentStore<TFSSpec, TFSConfig> >			& threadStores,
+	unsigned											  contigId,				// ... and its sequence number
+	ParallelSwiftPatternHandler<String<
+		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerL,
+	ParallelSwiftPatternHandler<String<
+		Pattern<TReadIndex, Swift<TSwiftSpec> > > >		& swiftPatternHandlerR,
+	TPreprocessing										& preprocessing,
+	TCounts												& cnts,
+	char												  orientation,
+	TRazerSOptions										& options,
+	String<TRazerSOptions>								& threadOptions,
+	TRazerSMode											& mode)
+{
+	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
+	typedef typename TFragmentStore::TMatePairStore			TMatePairStore;
+	typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
+	typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
+	typedef typename Value<TMatePairStore>::Type			TMatePair;
+	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
+	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
+	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Id<TAlignedRead>::Type					TId;
+
+	typedef typename TFragmentStore::TContigSeq				TGenome;
+	typedef typename Size<TGenome>::Type					TSize;
+	typedef typename Position<TGenome>::Type				TGPos;
+	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
+	typedef typename Infix<TGenome>::Type					TGenomeInf;
+
+	// FILTRATION
+	typedef Finder<TGenome, Swift<TSwiftSpec> >				TSwiftFinderL;
+	typedef Finder<TGenomeInf, Swift<TSwiftSpec> >			TSwiftFinderR;
+	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >			TSwiftPattern;
 	
+	// MATE-PAIR FILTRATION
+	typedef Triple<__int64, TAlignedRead, TAlignQuality>	TDequeueValue;
+	typedef Dequeue<TDequeueValue>							TDequeue;
+	typedef typename TDequeue::TIter						TDequeueIterator;
+
+	// VERIFICATION
+	typedef String<TSwiftPattern>							TSwiftPatterns;
+	typedef ParallelSwiftPatternHandler<TSwiftPatterns>		TSwiftPatternHandler;
+	typedef MatchVerifier <TFragmentStore, TRazerSOptions,
+		TRazerSMode, TPreprocessing,
+		TSwiftPatternHandler, TCounts >						TVerifier;
+	
+	if (options._debugLevel >= 1)
+	{
+		::std::cerr << ::std::endl << "Process genome seq #" << contigId;
+		if (orientation == 'F')
+			::std::cerr << "[fwd]";
+		else
+			::std::cerr << "[rev]";
+	}
+	
+	lockContig(store, contigId);
+	TGenome &genome = store.contigStore[contigId].seq;
+	if (orientation == 'R')	reverseComplementInPlace(genome);
+		
+	// Create a verifier for each thread. This way each thread gets its own store to dump the matches in.
+	String<TVerifier> verifierL, verifierR;
+	resize(verifierL, options.numberOfCores, Exact());
+	resize(verifierR, options.numberOfCores, Exact());
+	
+	for(int threadId = 0; threadId < (int)options.numberOfCores; ++threadId){
+		// initialize verifier
+		TVerifier oneVerifierL(threadStores[threadId], threadOptions[threadId], preprocessing, swiftPatternHandlerL, cnts);
+		oneVerifierL.oneMatchPerBucket = true;
+		oneVerifierL.m.contigId = contigId;
+		// assign it to the string
+		verifierL[threadId] = oneVerifierL;
+		
+		// initialize verifier
+		TVerifier oneVerifierR(threadStores[threadId], threadOptions[threadId], preprocessing, swiftPatternHandlerR, cnts);
+		oneVerifierR.oneMatchPerBucket = true;
+		oneVerifierR.m.contigId = contigId;
+		// assign it to the string
+		verifierR[threadId] = oneVerifierR;
+	}
+		
+	#pragma omp parallel default(none) \
+	shared(options, store, threadStores, contigId, swiftPatternHandlerL, swiftPatternHandlerR, verifierL, verifierR, cnts, orientation, threadOptions, mode)
+	{
+	#pragma omp for
+		for (int threadID = 0; threadID < (int)options.numberOfCores; ++threadID) {
+			goOverContig(store, threadStores[threadID], contigId, threadID, swiftPatternHandlerL, swiftPatternHandlerR, 
+				verifierL[threadID], verifierR[threadID], cnts, orientation, threadOptions[threadID], mode);
+		}
+	}
+		
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
 		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
 	
 }
-
-
 
 
 template <
@@ -372,7 +462,7 @@ int _mapMatePairReadsParallelCreatePatterns(
 	// typedef Pattern<TRead, Myers<FindInfix, False, void> >		TMyersPattern;
 	typedef typename Position<TReadIndexString>::Type			TPos;
 	
-	unsigned pairCount = length(store.matePairStore);
+	//unsigned pairCount = length(store.matePairStore);
 	
 	// A temporary store for every thread. They are combined after all contigs are processed
 	String<TFragmentStore> threadStores;
@@ -388,7 +478,7 @@ int _mapMatePairReadsParallelCreatePatterns(
 		assign(swiftPatternsL[threadID].data_host, readIndicesL[threadID]);
 		swiftPatternsL[threadID].params.minThreshold = options.threshold;
 		swiftPatternsL[threadID].params.tabooLength = options.tabooLength;
-		swiftPatternsL[threadID].params.printDots = (threadID == 0) and (options._debugLevel > 0);
+		swiftPatternsL[threadID].params.printDots = 0; // only one should print the dots
 		
 		assign(swiftPatternsR[threadID].data_host, readIndicesR[threadID]);
 		swiftPatternsR[threadID].params.minThreshold = options.threshold;
@@ -401,21 +491,17 @@ int _mapMatePairReadsParallelCreatePatterns(
 	TSwiftPatternHandler swiftPatternHandlerR(swiftPatternsR);
 	
 	// init edit distance verifiers
-	String<TMyersPattern> forwardPatternsL;
-	String<TMyersPattern> forwardPatternsR;
+	String<TMyersPattern> forwardPatterns;
 	options.compMask[4] = (options.matchN)? 15: 0;
 	if (options.gapMode == RAZERS_GAPPED)
 	{
-		resize(forwardPatternsL, pairCount, Exact());
-		resize(forwardPatternsR, pairCount, Exact());
-		for(unsigned i = 0; i < pairCount; ++i)
+		unsigned readCount = length(store.readSeqStore);
+		resize(forwardPatterns, readCount, Exact());
+		for(unsigned i = 0; i < readCount; ++i)
 		{
-			setHost(forwardPatternsL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
-			setHost(forwardPatternsR[i], store.readSeqStore[store.matePairStore[i].readId[1]]);
-			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
-			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
-			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);
-			_patternMatchNOfFinder(forwardPatternsR[i], options.matchN);
+			setHost(forwardPatterns[i], store.readSeqStore[i]);
+			_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
+			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
 		}
 	}
 	
@@ -428,29 +514,24 @@ int _mapMatePairReadsParallelCreatePatterns(
 	
 	String<RazerSOptions<TSpec> > threadOptions; 
 	fill(threadOptions, options.numberOfCores, options, Exact());
+	for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID)
+		threadOptions[threadID].nextPairMatchId = threadID;
+	
 	
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId) {
 		// lock to prevent releasing and loading the same contig twice
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 		
-		if (options.forward){
-			// #pragma omp parallel for share(...)
-			for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID) {
-				_mapMatePairReadsParallel(threadStores[threadID], contigId, 
-					swiftPatternHandlerL, swiftPatternHandlerR, threadID,
-					forwardPatternsL, forwardPatternsR, cnts, 'F', options, mode);
-			}
-		}
-	
-		if (options.reverse){
-			// #pragma omp parallel for share(...)
-			for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID) {
-				_mapMatePairReadsParallel(threadStores[threadID], contigId, 
-					swiftPatternHandlerL, swiftPatternHandlerR, threadID,
-					forwardPatternsL, forwardPatternsR, cnts, 'R', options, mode);
-			}
-		}
+		if (options.forward)
+			_mapMatePairReadsParallel(store, threadStores, contigId, 
+				swiftPatternHandlerL, swiftPatternHandlerR,
+				forwardPatterns, cnts, 'F', options, threadOptions, mode);
+		
+		if (options.reverse)
+			_mapMatePairReadsParallel(store, threadStores, contigId, 
+				swiftPatternHandlerL, swiftPatternHandlerR,
+				forwardPatterns, cnts, 'R', options, threadOptions, mode);
 		
 		unlockAndFreeContig(store, contigId);
 	}
@@ -511,11 +592,11 @@ int _mapMatePairReadsParallel(
 	if (options._debugLevel >= 1){
 		::std::cerr << ::std::endl << "Number of cores:                 \t" << options.numberOfCores << std::endl;
 	}
-
+	
 	unsigned pairCount = length(store.matePairStore);
-
+	
 	// compare with noOfBlocks, there needs to be at least one read per block
-	if(options.numberOfCores == 1 or pairCount < options.numberOfCores or pairCount < 1000)
+	if(options.numberOfCores == 1 or pairCount < options.numberOfCores or pairCount < 100)
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else {
 		// number of reads per block
@@ -524,8 +605,8 @@ int _mapMatePairReadsParallel(
 		
 		// TODO: create two strings of indices
 		String<TIndex> indicesL, indicesR;
-		resize(indicesL, options.numberOfBlocks, Exact());
-		resize(indicesR, options.numberOfBlocks, Exact());
+		resize(indicesL, options.numberOfCores, Exact());
+		resize(indicesR, options.numberOfCores, Exact());
 
 		TReadSeqStorePos readID = 0;
 		// create swift indices that can work in parallel
@@ -533,7 +614,7 @@ int _mapMatePairReadsParallel(
 			TReadSet readSetL, readSetR;
 
 			// the last one gets some extra
-			if((threadID == options.numberOfBlocks - 1) && (perBlockRemainder != 0)){
+			if((threadID == options.numberOfCores - 1) && (perBlockRemainder != 0)){
 				resize(readSetL, options.blockSize + perBlockRemainder, Exact());
 				resize(readSetR, options.blockSize + perBlockRemainder, Exact());
 			}

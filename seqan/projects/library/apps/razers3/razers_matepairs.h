@@ -206,10 +206,11 @@ bool loadReads(
 			typename Value<typename TFragmentStore::TAlignedReadStore>::Type,
 			bool >
 	{
-		TFragmentStore &store;
+		TFragmentStore &mainStore;
+		TFragmentStore &threadStore;
 		
-		LessPairScore(TFragmentStore &_store):
-			store(_store) {}
+		LessPairScore(TFragmentStore &_mainStore, TFragmentStore &_threadStore):
+			mainStore(_mainStore), threadStore(_threadStore) {}
 		
 		inline bool operator() (
 			typename Value<typename TFragmentStore::TAlignedReadStore>::Type const &a, 
@@ -226,16 +227,16 @@ bool loadReads(
 			// pair number
 			if (b.readId == TAlignedRead::INVALID_ID) return false;
 			if (a.readId == TAlignedRead::INVALID_ID) return true;
-			TRead const &ra = store.readStore[a.readId];
-			TRead const &rb = store.readStore[b.readId];
+			TRead const &ra = mainStore.readStore[a.readId];
+			TRead const &rb = mainStore.readStore[b.readId];
 			if (ra.matePairId < rb.matePairId) return true;
 			if (ra.matePairId > rb.matePairId) return false;
 
 			// quality
 			if (a.id == TAlignedRead::INVALID_ID) return false;
 			if (b.id == TAlignedRead::INVALID_ID) return true;
-			TQual const &qa = store.alignQualityStore[a.id];
-			TQual const &qb = store.alignQualityStore[b.id];
+			TQual const &qa = threadStore.alignQualityStore[a.id];
+			TQual const &qb = threadStore.alignQualityStore[b.id];
 			if (qa.pairScore > qb.pairScore) return true;
 			if (qa.pairScore < qb.pairScore) return false;
 			
@@ -249,6 +250,18 @@ bool loadReads(
 template < typename TFragmentStore, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
 void compactPairMatches(
 	TFragmentStore			& store,
+	TCounts					& cnts, 
+	RazerSOptions<TSpec>	& options, 
+	TSwiftL					& swiftL, 
+	TSwiftR					& swiftR)
+{
+	compactPairMatches(store, store, cnts, options, swiftL, swiftR);
+}
+
+template < typename TFragmentStore, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
+void compactPairMatches(
+	TFragmentStore			& mainStore, // need to separate them for the parallel version
+	TFragmentStore			& threadStore,
 	TCounts					&, 
 	RazerSOptions<TSpec>	& options, 
 	TSwiftL					& swiftL, 
@@ -267,19 +280,19 @@ void compactPairMatches(
 	unsigned hitCountCutOff = options.maxHits;
 	int scoreDistCutOff = InfimumValue<int>::VALUE;
 
-	TIterator it = begin(store.alignedReadStore, Standard());
-	TIterator itEnd = end(store.alignedReadStore, Standard());
+	TIterator it = begin(threadStore.alignedReadStore, Standard());
+	TIterator itEnd = end(threadStore.alignedReadStore, Standard());
 	TIterator dit = it;
 	TIterator ditBeg = it;
 
 	// sort 
-	sortAlignedReads(store.alignedReadStore, LessPairScore<TFragmentStore>(store));
+	sortAlignedReads(threadStore.alignedReadStore, LessPairScore<TFragmentStore>(mainStore, threadStore));
 
 	for (; it != itEnd; ++it) 
 	{
 		if ((*it).id == TAlignedRead::INVALID_ID || (*it).readId == TAlignedRead::INVALID_ID) continue;
-		TRead &r = store.readStore[(*it).readId];
-		TQual &q = store.alignQualityStore[(*it).id];
+		TRead &r = mainStore.readStore[(*it).readId];
+		TQual &q = threadStore.alignQualityStore[(*it).id];
 		if (matePairId == r.matePairId)
 		{ 
 			if (q.pairScore <= scoreDistCutOff) continue;
@@ -318,8 +331,8 @@ void compactPairMatches(
 		*dit = *it;	++dit; ++it;
 		*dit = *it;	++dit;
 	}
-	resize(store.alignedReadStore, dit - begin(store.alignedReadStore, Standard()));
-	compactAlignedReads(store);
+	resize(threadStore.alignedReadStore, dit - begin(threadStore.alignedReadStore, Standard()));
+	compactAlignedReads(threadStore);
 }
 
 
@@ -416,7 +429,7 @@ void _mapMatePairReads(
 	TSignedGPos maxDistance = options.libraryLength + options.libraryError - 2 * (int)readLength - (int)length(indexShape(host(swiftPatternL)));
 	TSignedGPos minDistance = options.libraryLength - options.libraryError + (int)length(indexShape(host(swiftPatternL)));
 	TGPos scanShift = (minDistance < 0)? 0: minDistance;
-
+	
 	// exit if contig is shorter than library size
 	if (length(genome) <= scanShift)
 		return;
@@ -443,11 +456,11 @@ void _mapMatePairReads(
 
 	// iterate all verification regions returned by SWIFT
 	while (find(swiftFinderR, swiftPatternR, options.errorRate)) 
-	{
+	{		
 		unsigned matePairId = swiftPatternR.curSeqNo;
 		TGPos rEndPos = endPosition(swiftFinderR) + scanShift;
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
-
+		
 		// remove out-of-window left mates from fifo
 		while (!empty(fifo) && (TSignedGPos)front(fifo).i2.endPos + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
@@ -473,7 +486,7 @@ void _mapMatePairReads(
 					// link in
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo];
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++;
-
+					
 					fL.i2.readId = store.matePairStore[swiftPatternL.curSeqNo].readId[0] | NOT_VERIFIED;
 					fL.i2.beginPos = gPair.i1;
 					fL.i2.endPos = gPair.i2;
@@ -505,22 +518,27 @@ void _mapMatePairReads(
 //							(*it).i2, (*it).i3, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
 //							matePairId, readSetL, forwardPatternsL, 
 //							options, TSwiftSpec()))
-					if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
-							matePairId, readSetL, mode))
+					if ((TSignedGPos)(*it).i2.endPos + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 					{
-						verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
-						(*it).i2 = verifierL.m;
-						(*it).i3 = verifierL.q;
-						
-						// short-cut negative matches
-						if (lastPositive == (__int64)-1)
-							lastPotMatchNo[matePairId] = i;
-						else
-							value(fifo, lastPositive - firstNo).i1 = i;
-						lastPositive = i;
+						if (matchVerify(verifierL, infix(genome, (TSignedGPos)(*it).i2.beginPos, (TSignedGPos)(*it).i2.endPos), 
+								matePairId, readSetL, mode))
+						{
+							verifierL.m.readId = (*it).i2.readId & ~NOT_VERIFIED;		// has been verified positively
+							(*it).i2 = verifierL.m;
+							(*it).i3 = verifierL.q;
+							
+							// short-cut negative matches
+							if (lastPositive == (__int64)-1)
+								lastPotMatchNo[matePairId] = i;
+							else
+								value(fifo, lastPositive - firstNo).i1 = i;
+							lastPositive = i;
+						} else
+							(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
 					} else
-						(*it).i2.readId = ~NOT_VERIFIED;				// has been verified negatively
-				}
+						lastPositive = i;
+				} else
+					lastPositive = i;
 /*
 				if ((*it).i2.readId == leftReadId)
 				{
@@ -554,8 +572,6 @@ void _mapMatePairReads(
 					}
 				}
 			}
-//			else
-//				std::cout << "HUH?" << std::endl;
 		}
 
 		// short-cut negative matches
@@ -581,15 +597,15 @@ void _mapMatePairReads(
 				{
 					mR = verifierR.m;
 					qR = verifierR.q;
-
+					
 					fL.i2 = (*bestLeft).i2;
 					fL.i3 = (*bestLeft).i3;
-
+					
 					// transform mate readNo to global readNo
 					TMatePair &mp = store.matePairStore[matePairId];
 					fL.i2.readId = mp.readId[0];
 					mR.readId    = mp.readId[1];
-
+					
 					// transform coordinates to the forward strand
 					if (orientation == 'F')
 					{
@@ -653,6 +669,7 @@ void _mapMatePairReads(
 			}
 		}
 	}
+	
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
 		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
 
@@ -732,7 +749,7 @@ int _mapMatePairReads(
 	swiftPatternR.params.minThreshold = options.threshold;
 	swiftPatternL.params.tabooLength = options.tabooLength;
 	swiftPatternR.params.tabooLength = options.tabooLength;
-	swiftPatternL.params.printDots = options._debugLevel > 0;
+	swiftPatternL.params.printDots = 0; // only one should print the dots
 	swiftPatternR.params.printDots = options._debugLevel > 0;
 
 	// init edit distance verifiers

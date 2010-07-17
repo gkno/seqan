@@ -30,8 +30,8 @@
 
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
-//#define RAZERS_PARALLEL				// parallelize razerS
-#ifdef RAZERS_PARALLEL
+#ifdef _OPENMP
+#define RAZERS_PARALLEL					// parallelize razerS
 #define RAZERS_OPENADDRESSING	
 #endif
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
