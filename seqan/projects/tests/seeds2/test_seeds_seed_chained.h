@@ -134,7 +134,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_truncate_diagonals)
     ++it;
     truncateDiagonals(s, it);
     SEQAN_ASSERT_EQ(1u, length(s));
-    TSeedDiagonal const diag = *begin(s)
+    TSeedDiagonal const diag = *begin(s, Standard());
     SEQAN_ASSERT_TRUE(diag == TSeedDiagonal(1, 3, 4));
 }
 

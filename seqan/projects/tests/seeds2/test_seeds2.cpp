@@ -56,6 +56,13 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
 
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_unordered);
 
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_right_merging_possible_threshold_reached_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_impossible_threshold_reached_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered);
+
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");

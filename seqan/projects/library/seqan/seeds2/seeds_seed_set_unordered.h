@@ -34,6 +34,8 @@ namespace seqan {
 struct _Unordered;
 typedef Tag<_Unordered> Unordered;
 
+// TODO(holtgrew): Maybe allow iterating over seeds that have reached a certain quality (length/score).
+
 template <typename TSeedSpec, typename TSeedConfig>
 class SeedSet<TSeedSpec, Unordered, TSeedConfig>
 {
@@ -207,7 +209,6 @@ _seedsMergeable(Seed<TSeedSpec, TSeedConfig> const & a,
 {
     // TODO(holtgrew): TThreshold could be Position<TSeed>::Type.
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): Kemena talks about overlapping in one coordinate only. True?
     // If the two seeds do not overlap, they cannot be merged.
     if (getBeginDim0(b) >= getEndDim0(a) && getBeginDim1(b) >= getEndDim1(a))
         return false;
@@ -216,7 +217,6 @@ _seedsMergeable(Seed<TSeedSpec, TSeedConfig> const & a,
     typedef typename _MakeUnsigned<TThreshold>::Type TUnsignedThreshold;
     if (getEndDim1(a) - getEndDim0(a) - abs(getBeginDim1(a) - getBeginDim0(a)) >= static_cast<TUnsignedThreshold>(threshold))
         return false;
-    // TODO(holtgrew): Check score.
     // Otherwise, the seeds can be merged.
     return true;
 }
@@ -297,17 +297,34 @@ addSeed(SeedSet<TSeedSpec, Unordered, TSeedConfig> & seedSet,
     typedef SeedSet<TSeedSpec, Unordered, TSeedConfig> TSeedSet;
     typedef typename Iterator<TSeedSet, Standard>::Type TIterator;
     typedef typename Value<TSeedSet>::Type TSeed;
+
+    // Iterate over all seeds and search for the first one in this
+    // arbitrary order that is mergeable with parameter seed within a
+    // maximal diagonal distance maxDiagDist.  We allow either seed to
+    // be the left one.
+    //
+    // TODO(holtgrew): Search for *closest* overlapping one instead!
     for (TIterator it = begin(seedSet); it != end(seedSet); ++it) {
+        bool mergedThisSeed = true;
         if (_seedsMergeable(value(it), seed, maxDiagDist, Merge())) {
             // Merge seed into *it.
             _mergeSeeds(value(it), seed, Merge());
-            return true;
+            mergedThisSeed = true;
         } else if (_seedsMergeable(seed, value(it), maxDiagDist, Merge())) {
             // Merge *it into seed.
             TSeed tmp;
             move(tmp, value(it));
             assign(value(it), seed);
             _mergeSeeds(value(it), tmp, Merge());
+            mergedThisSeed = true;
+        }
+        if (mergedThisSeed) {
+            // Possibly add resulting seed to the subset of seeds with
+            // high enough score.
+            //
+            // TODO(holtgrew): Implement this.
+//             if (_qualityReached(seedSet, value(it)))
+//                 appendValue(seedSet._highScoringSeeds, value(it));
             return true;
         }
     }

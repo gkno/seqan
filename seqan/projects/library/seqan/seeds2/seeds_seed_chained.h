@@ -109,10 +109,7 @@ struct Value<Seed<ChainedSeed, TConfig> const>
 template <typename TConfig>
 struct Size<Seed<ChainedSeed, TConfig> >
 {
-//     typedef typename Value<Seed<ChainedSeed, TConfig> >::Type _TSeedDiagonal;
-//     typedef typename Size<std::list<_TSeedDiagonal> >::Type Type;
-    // TODO(holtgrew): Fix lines above.
-    typedef size_t Type;
+    typedef typename TConfig::TSize Type;
 };
 
 template <typename TConfig>
@@ -274,16 +271,6 @@ end(Seed<ChainedSeed, TConfig> const & seed, Standard const &)
 }
 
 // Basic Functions
-
-template <typename TConfig>
-void
-assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> const & source)
-{
-    SEQAN_CHECKPOINT;
-    target._seedDiagonals = source._seedDiagonals;
-    target._lowerDiagonal = source._lowerDiagonal;
-    target._upperDiagonal = source._upperDiagonal;
-}
 
 template <typename TConfig>
 void

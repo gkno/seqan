@@ -104,6 +104,73 @@ void testSeedsSeedSetAddSeedSingle(TSeedSetSpec const &)
     }
 }
 
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Case: Seed left of added; Merging possible; Quality threshold
+// reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReached(TSeedSetSpec const &)
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Case: Seed right of added; Merging possible; Quality threshold
+// reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeRightMergingPossibleThresholdReached(TSeedSetSpec const &)
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Case: Seed left of added; Merging impossible; Quality threshold
+// reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingImpossibleThresholdReached(TSeedSetSpec const &)
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Case: Seed left of added; Merging possible; Quality threshold
+// not reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReached(TSeedSetSpec const &)
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Seeds have scores.  Case: Seed left of added; Merging possible;
+// Quality threshold not reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(TSeedSetSpec const & )
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Seeds have scores.  Case: Seed left of added; Merging possible;
+// Quality threshold reached.
+template <typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeedSetSpec const & )
+{
+    using namespace seqan;
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
 // Test container functions for specialization Unordered SeedSet.
 SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_functions_unordered)
 {
@@ -116,6 +183,68 @@ SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_unordered)
 {
     using namespace seqan;
     testSeedsSeedSetAddSeedSingle(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReached(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+//
+// Case: Seed in set is right of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_right_merging_possible_threshold_reached_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeRightMergingPossibleThresholdReached(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging is not possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_impossible_threshold_reached_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingImpossibleThresholdReached(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging not possible;  Quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReached(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Seeds have scores.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Seeds have scores.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(Unordered());
 }
 
 #endif  // TEST_SEEDS_TEST_SEEDS_SEED_SET_BASE_H_
