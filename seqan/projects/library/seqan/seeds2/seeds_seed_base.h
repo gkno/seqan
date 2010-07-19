@@ -30,6 +30,13 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
+// Mixin member for mixing in scores into seeds.
+template <typename TScore>
+struct _ScoreMixin
+{
+    TScore _score;
+};
+
 /**
 .Tag.Seed Specs
 ..summary:Specialization tags for @Class.Seed@.
@@ -40,13 +47,6 @@ namespace seqan {
 ..see:Spec.ChainedSeed
 ..include:seqan/seeds.h
 */
-
-// Mixin member for mixing in scores into seeds.
-template <typename TScore>
-struct _ScoreMixin
-{
-    TScore score;
-};
 
 // Default configuration for seeds without score.
 struct DefaultSeedConfig
@@ -304,6 +304,32 @@ setUpperDiagonal(Seed<TSpec, TConfig> & seed,
 	seed._upperDiagonal = newDiag;
 }
 
+
+/**
+.Function.getSeedSize
+..summary:Returns the number of matches and mismatches of the seed.  This is the longest true diagonal fitting into its dimensions.
+..remark:"Seed size" is mostly called "seed length" in the literature.  However, in SeqAn reverse "length" is reserved to be the size of a container.
+*/
+template <typename TSpec, typename TConfig>
+inline typename Size<Seed<TSpec, TConfig> >::Type
+getSeedSize(Seed<TSpec, TConfig> & seed)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): What if reverse seed?
+    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
+}
+
+
+template <typename TSpec, typename TConfig>
+inline typename Size<Seed<TSpec, TConfig> >::Type
+getSeedSize(Seed<TSpec, TConfig> const & seed)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): What if reverse seed?
+    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
+}
+
+
 // Computed values, based on properties returned by getters.
 
 /**
@@ -343,6 +369,91 @@ getEndDiagonal(Seed<TSpec, TConfig> const & seed)
 }
 
 // TODO(holtgrew): COULD introduce {get,set}{Left,Right}(dim, value)
+
+// Standard functions.
+
+template <typename TSpec, typename TConfig>
+inline typename Size<Seed<TSpec, TConfig> >::Type
+length(Seed<TSpec, TConfig> const & seed)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): What if reverse see
+    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
+}
+
+// Functions for seeds with the _ScoreMixin.
+
+// Case: No score, do not update anything.
+template <typename TSpec, typename TConfig>
+inline void
+_updateMergeScoreHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, False const &)
+{
+    SEQAN_CHECKPOINT;
+}
+
+// Case: Seed has score.  The assumption is that the score is
+// proportional to the size of the seed.  Each seed contributes a
+// fraction of its score that is proportional to the fraction of the
+// score it contributes.
+template <typename TSpec, typename TConfig>
+inline void
+_updateMergeScoreHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, True const &)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<TSpec, TConfig> TSeed;
+    typedef typename Size<TSeed>::Type TSize;
+
+    // Compute new size.
+    TSize newBegin0 = _min(getBeginDim0(seed), getBeginDim0(other));
+    TSize newEnd0 = _max(getEndDim0(seed), getEndDim0(other));
+    TSize newBegin1 = _min(getBeginDim1(seed), getBeginDim0(other));
+    TSize newEnd1 = _max(getEndDim1(seed), getEndDim1(other));
+    TSize newSize = _max(newEnd0 - newBegin0, newEnd1 - newBegin1);
+    // New seed should be larger than either old one and overlap should be > 0.
+    SEQAN_ASSERT_GEQ(newSize, getSeedSize(seed));
+    SEQAN_ASSERT_GEQ(newSize, getSeedSize(other));
+    SEQAN_ASSERT_LEQ(newSize, getSeedSize(seed) + getSeedSize(other));
+    TSize overlap = getSeedSize(seed) + getSeedSize(other) - newSize;
+    // Overlap should be smaller than either seed size.
+    SEQAN_ASSERT_GT(getSeedSize(seed), overlap);
+    SEQAN_ASSERT_GT(getSeedSize(other), overlap);
+
+    // Compute fraction each seed contributes.
+    TSize total = getSeedSize(seed) + getSeedSize(other) - overlap;
+    double fracSeed = static_cast<double>(getSeedSize(seed) - 0.5 * overlap) / static_cast<double>(total);
+    double fracOther = static_cast<double>(getSeedSize(other) - 0.5 * overlap) / static_cast<double>(total);
+    typedef typename SeedScore<TSeed>::Type TScoreValue;
+    TScoreValue newScore = static_cast<TScoreValue>(round(fracSeed * getScore(seed) + fracOther * getScore(other)));
+    setScore(seed, newScore);
+}
+
+// Update the score for merging.  If the seeds do not have scores, nothing is done.
+template <typename TSpec, typename TConfig>
+inline void
+_updateMergeScore(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<TSpec, TConfig> TSeed;
+    _updateMergeScoreHelper(seed, other, typename HasScore<TSeed>::Type());
+}
+
+
+template <typename TSeed>
+inline typename SeedScore<TSeed>::Type
+getScore(TSeed const & seed)
+{
+    SEQAN_CHECKPOINT;
+    return seed._score;
+}
+
+
+template <typename TSeed, typename TScore>
+inline void
+setScore(TSeed & seed, TScore const & score)
+{
+    SEQAN_CHECKPOINT;
+    seed._score = score;
+}
 
 }  // namespace seqan
 

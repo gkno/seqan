@@ -54,25 +54,117 @@ struct _Single;
 typedef Tag<_Single> Single;
 
 
-// struct _Scored;
-// typedef Tag<_Scored> Scored;
+struct _MinSeedSize;
+typedef Tag<_MinSeedSize> MinSeedSize;
 
-// struct _UnScored;
-// typedef Tag<_UnScored> UnScored;
+struct _MinScore;
+typedef Tag<_MinScore> MinScore;
+
+// TODO(holtgrew): Put configs and mixins into their own header.
+// TODO(holtgrew): Add metafunctions for mixin classes?
+
+struct DefaultSeedSetConfig
+{
+    typedef DefaultSeedConfig TSeedConfig;
+    typedef Nothing TQualityThreshold;
+    typedef Nothing TQualityThresholdMixin;
+};
+
+// TODO(holtgrew): Rename _qualityReached to _qualityAboveThreshold
+// Quality is always reached for seed sets without a quality threshold.
+template <typename TSeed, typename TSeedSet>
+bool _qualityReached(TSeed const & /*seed*/, TSeedSet const & /*seedSet*/, Nothing const &)
+{
+    SEQAN_CHECKPOINT;
+    return true;
+}
+
+template <typename TSize>
+struct _MinSeedSizeMixin
+{
+    TSize _minSeedSizeThreshold;
+
+    _MinSeedSizeMixin() : _minSeedSizeThreshold(InfimumValue<TSize>::VALUE) {}
+};
+
+template <typename TSeedSet, typename TSize>
+void setMinSeedSizeThreshold(TSeedSet & seedSet, TSize const & size)
+{
+    SEQAN_CHECKPOINT;
+    seedSet._minSeedSizeThreshold = size;
+}
+
+template <typename TSize>
+TSize getMinSeedSizeThreshold(_MinSeedSizeMixin<TSize> const & mixin)
+{
+    SEQAN_CHECKPOINT;
+    return mixin._minSeedSizeThreshold;
+}
+
+template <typename TSeed, typename TSeedSet>
+bool _qualityReached(TSeed const & seed, TSeedSet const & seedSet, MinSeedSize const &)
+{
+    SEQAN_CHECKPOINT;
+    return getSeedSize(seed) >= getMinSeedSizeThreshold(seedSet);
+}
+
+struct DefaultSeedSetConfigLength
+{
+    typedef DefaultSeedConfig TSeedConfig;
+    typedef MinSeedSize TQualityThreshold;
+    typedef _MinSeedSizeMixin<TSeedConfig::TSize> TQualityThresholdMixin;
+};
+
+template <typename TScore>
+struct _MinScoreMixin
+{
+    TScore _minScoreThreshold;
+    _MinScoreMixin() : _minScoreThreshold(InfimumValue<TScore>::VALUE) {}
+};
+
+template <typename TSeedSet, typename TScore>
+void setMinScoreThreshold(TSeedSet & seedSet, TScore const & score)
+{
+    SEQAN_CHECKPOINT;
+    seedSet._minScoreThreshold = score;
+}
+
+template <typename TScore>
+TScore getMinScoreThreshold(_MinScoreMixin<TScore> const & mixin)
+{
+    SEQAN_CHECKPOINT;
+    return mixin._minScoreThreshold;
+}
+
+
+template <typename TSeed, typename TSeedSet>
+bool _qualityReached(TSeed const & seed, TSeedSet const & seedSet, MinScore const &)
+{
+    SEQAN_CHECKPOINT;
+    return getScore(seed) >= getMinScoreThreshold(seedSet);
+}
+
+
+struct DefaultSeedSetConfigScore
+{
+    typedef DefaultSeedConfigScore TSeedConfig;
+    typedef MinScore TQualityThreshold;
+    typedef _MinScoreMixin<TSeedConfig::TScoreValue> TQualityThresholdMixin;
+};
 
 
 /**
 .Class.SeedSet:
 ..summary:Handles a set of seeds with local chaining on adding seeds.
 ..cat:Seed Handling
-..signature:SeedSet<TSeedSpec, TScored, TSpec[, TSeedConfig]>
+..signature:SeedSet<TSeedSpec, TScored, TSpec[, TSeedSetConfig]>
 ..param.TSeedSpec:Specialization of the seed to use.
 ..param.TScored:Either UnScored or a seed set scoring scheme specification.
 ..param.TSpec:Specialization of the seed set.
 ..param.TSeedConfig:Configuration for the seeds.  Sensible defaults are chosen based on the other template parameters.
 ..include:seqan/seeds.h
 */
-template <typename TSeedSpec, typename TSpec, typename TSeedConfig = DefaultSeedConfig>
+template <typename TSeedSpec, typename TSpec, typename TSeedSetConfig = DefaultSeedSetConfig>
 class SeedSet;
 
 // ===========================================================================
@@ -125,6 +217,7 @@ class SeedSet;
 .Function.front.param.object.type:Class.SeedSet
 .Function.back.param.object.type:Class.SeedSet
  */
+// TODO(holtgrew): dddoc {begin,end,length,front,back}All(T)
 
 // SeedSet Functions
 

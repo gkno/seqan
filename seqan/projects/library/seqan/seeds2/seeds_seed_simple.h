@@ -55,12 +55,14 @@ struct Simple {}; // .. but type is not complete yet
 */
 template <typename TConfiguration>
 class Seed<Simple, TConfiguration>
-        : TConfiguration::TScoreMixin
+        : public TConfiguration::TScoreMixin
 {
   public:
     typedef typename TConfiguration::TPosition TPosition;
     typedef typename TConfiguration::TSize TSize;
     typedef typename TConfiguration::TDiagonal TDiagonal;
+
+    typedef typename TConfiguration::TScoreMixin TScoreMixin;
 
     TPosition _beginDim0;
     TPosition _beginDim1;
@@ -70,12 +72,14 @@ class Seed<Simple, TConfiguration>
     TDiagonal _upperDiagonal;
 
     Seed()
-            : _beginDim0(0), _beginDim1(0), _endDim0(0), _endDim1(0),
+            : TScoreMixin(),
+              _beginDim0(0), _beginDim1(0), _endDim0(0), _endDim1(0),
               _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
     Seed(TPosition beginDim0, TPosition beginDim1, TPosition seedLength)
-            : _beginDim0(beginDim0),
+            : TScoreMixin(),
+              _beginDim0(beginDim0),
               _beginDim1(beginDim1),
               _endDim0(beginDim0 + seedLength),
               _endDim1(beginDim1 + seedLength),
@@ -85,7 +89,8 @@ class Seed<Simple, TConfiguration>
 
     Seed(TPosition beginDim0, TPosition beginDim1, TPosition endDim0,
          TPosition endDim1)
-            : _beginDim0(beginDim0),
+            : TScoreMixin(),
+              _beginDim0(beginDim0),
               _beginDim1(beginDim1),
               _endDim0(endDim0),
               _endDim1(endDim1),
@@ -95,7 +100,8 @@ class Seed<Simple, TConfiguration>
 
     template <typename TSeed2>
     Seed(TSeed2 const & other)
-            : _beginDim0(getBeginDim0(other)),
+            : TScoreMixin(),
+              _beginDim0(getBeginDim0(other)),
               _beginDim1(getBeginDim1(other)),
               _endDim0(getEndDim0(other)),
               _endDim1(getEndDim1(other)),
@@ -111,6 +117,16 @@ class Seed<Simple, TConfiguration>
 // ===========================================================================
 // Functions
 // ===========================================================================
+
+template <typename TStream, typename TConfig>
+inline TStream &
+operator<<(TStream & stream, Seed<Simple, TConfig> const & seed)
+{
+    return stream << "Seed<Simple, TConfig>(" << getBeginDim0(seed)
+                  << ", " << getBeginDim1(seed) << ", "
+                  << getEndDim0(seed) << ", "
+                  << getEndDim1(seed) << ")";
+}
 
 template <typename TConfig>
 inline bool

@@ -51,12 +51,14 @@ between start and end position2 are stored.
 */
 template <typename TConfig>
 class Seed<ChainedSeed, TConfig>
-        : TConfig::TScoreMixin
+        : public TConfig::TScoreMixin
 {
 public:
     typedef typename TConfig::TPosition TPosition;
     typedef typename TConfig::TSize TSize;
     typedef typename TConfig::TDiagonal TDiagonal;
+
+    typedef typename TConfig::TScoreMixin TScoreMixin;
 
     typedef SeedDiagonal<TPosition, TSize> TSeedDiagonal;
 
@@ -64,11 +66,12 @@ public:
     TDiagonal _lowerDiagonal;
     TDiagonal _upperDiagonal;
 
-    Seed() : _lowerDiagonal(0), _upperDiagonal(0)
+    Seed() : TScoreMixin(), _lowerDiagonal(0), _upperDiagonal(0)
     { SEQAN_CHECKPOINT; }
 
     Seed(TPosition beginDim0, TPosition beginDim1, TPosition seedLength)
-            : _lowerDiagonal(beginDim1 - beginDim0),
+            : TScoreMixin(),
+              _lowerDiagonal(beginDim1 - beginDim0),
               _upperDiagonal(beginDim1 - beginDim0)
     {
         SEQAN_CHECKPOINT;
