@@ -88,6 +88,26 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
     }
 }
 
+// Test the front() and back() functions for Chained Seed.
+SEQAN_DEFINE_TEST(test_seeds_seed_chained_front_back)
+{
+    using namespace seqan;
+    
+    typedef Seed<ChainedSeed> TSeed;
+    typedef Value<TSeed>::Type TSeedDiagonal;
+
+    {
+        TSeed s(1, 3, 4);
+        SEQAN_ASSERT_EQ(TSeedDiagonal(1, 3, 4), front(s));
+        SEQAN_ASSERT_EQ(TSeedDiagonal(1, 3, 4), back(s));
+    }
+    {
+        TSeed const cs(1, 3, 4);
+        SEQAN_ASSERT_EQ(TSeedDiagonal(1, 3, 4), front(cs));
+        SEQAN_ASSERT_EQ(TSeedDiagonal(1, 3, 4), back(cs));
+    }
+}
+
 // Test the appendDiagonal() function for Chained Seed.
 SEQAN_DEFINE_TEST(test_seeds_seed_chained_append_diagonal)
 {

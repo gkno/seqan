@@ -154,7 +154,7 @@ struct Reference<Seed<ChainedSeed, TConfig> const>
 {
     typedef Seed<ChainedSeed, TConfig> _TSeed;
     typedef typename Value<_TSeed>::Type _TSeedDiagonal;
-    typedef _TSeedDiagonal & Type;
+    typedef _TSeedDiagonal const & Type;
 };
 
 // ===========================================================================
@@ -302,7 +302,7 @@ front(Seed<ChainedSeed, TConfig> & seed)
 }
 
 template <typename TConfig>
-inline typename Iterator<Seed<ChainedSeed, TConfig> const>::Type
+inline typename Reference<Seed<ChainedSeed, TConfig> const>::Type
 front(Seed<ChainedSeed, TConfig> const & seed)
 {
     SEQAN_CHECKPOINT;
@@ -321,7 +321,7 @@ back(Seed<ChainedSeed, TConfig> & seed)
 }
 
 template <typename TConfig>
-inline typename Iterator<Seed<ChainedSeed, TConfig> const>::Type
+inline typename Reference<Seed<ChainedSeed, TConfig> const>::Type
 back(Seed<ChainedSeed, TConfig> const & seed)
 {
     SEQAN_CHECKPOINT;

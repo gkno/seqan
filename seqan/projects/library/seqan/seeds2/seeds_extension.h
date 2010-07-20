@@ -193,19 +193,91 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
 }
 
 
-template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
+template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue, typename TScoreSpec>
 inline void 
-extendSeed(Seed<Simple, TConfig> & seed, 
-		   TQuery const & query,
-		   TDatabase const & database,
-		   ExtensionDirection direction,
-           Score<TScoreValue, Simple> const & scoreMatrix,
+extendSeed(Seed<Simple, TConfig> & seed,
+           TQuery const & query,
+           TDatabase const & database,
+           ExtensionDirection direction,
+           Score<TScoreValue, TScoreSpec> const & scoringScheme,
            TScoreValue scoreDropOff,
-		   UnGappedXDrop const &)
+           UnGappedXDrop const &)
 {
     // For ungapped X-drop extension of Simple Seeds, we can simply
     // update the begin and end values in each dimension.
 	SEQAN_CHECKPOINT;
+
+    scoreDropOff = -scoreDropOff;
+
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Position<TSeed>::Type TPosition;
+    typedef typename Size<TSeed>::Type TSize;
+    
+	// Extension to the left
+	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
+        TScoreValue tmpScore = 0;
+		TPosition posDim0 = getBeginDim0(seed) ;
+		TPosition posDim1 = getBeginDim1(seed);
+        TPosition mismatchingSuffixLength = 0;
+		while (posDim0 >= 1 && posDim1 >= 1 && tmpScore > scoreDropOff) {
+            tmpScore += score(scoringScheme, posDim0, posDim1, query, database);
+            if (query[posDim0 - 1] == database[posDim1 - 1]) {
+                mismatchingSuffixLength = 0;
+                if (tmpScore > static_cast<TScoreValue>(0))
+                    tmpScore = 0;
+            } else {
+                mismatchingSuffixLength += 1;
+            }
+			--posDim0;
+			--posDim1;
+		}
+		setBeginDim0(seed, posDim0 + mismatchingSuffixLength);
+		setBeginDim1(seed, posDim1 + mismatchingSuffixLength);
+	}
+
+	// Extension to the right
+	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
+        TScoreValue tmpScore = 0;
+		TSize lengthDim0 = length(query);
+		TSize lengthDim1 = length(database);
+		TPosition posDim0 = getEndDim0(seed) ;
+		TPosition posDim1 = getEndDim1(seed);
+        TPosition mismatchingSuffixLength = 0;
+		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && tmpScore > scoreDropOff) {
+            tmpScore += score(scoringScheme, posDim0, posDim1, query, database);
+            if (query[posDim0] == database[posDim1]) {
+                mismatchingSuffixLength = 0;
+                if (tmpScore > static_cast<TScoreValue>(0))
+                    tmpScore = 0;
+            } else {
+                mismatchingSuffixLength += 1;
+            }
+            ++posDim0;
+            ++posDim1;
+		}
+		setEndDim0(seed, posDim0 - mismatchingSuffixLength);
+		setEndDim1(seed, posDim1 - mismatchingSuffixLength);
+    }
+
+    // TODO(holtgrew): Update score?!
+}
+
+
+template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue, typename TScoreSpec>
+inline void 
+extendSeed(Seed<ChainedSeed, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+           Score<TScoreValue, TScoreSpec> const & scoringScheme,
+           TScoreValue scoreDropOff,
+		   UnGappedXDrop const &)
+{
+    // For ungapped X-drop extension of Chained Seeds, we extend the
+    // first and the last Seed Diagonal.
+	SEQAN_CHECKPOINT;
+
+    scoreDropOff = -scoreDropOff;
 
     typedef Seed<ChainedSeed, TConfig> TSeed;
     typedef typename Value<TSeed>::Type TSeedDiagonal;
@@ -215,63 +287,56 @@ extendSeed(Seed<Simple, TConfig> & seed,
 	// Extension to the left
 	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
         TScoreValue tmpScore = 0;
+        TPosition mismatchingSuffixLength = 0;
+        TSeedDiagonal & diag = front(seed);
 		TPosition posDim0 = getBeginDim0(seed) ;
 		TPosition posDim1 = getBeginDim1(seed);
-        TPosition last = 0;  // TODO(holtgrew): What is this for?
+        TSize diagonalLength = diag.length;
 		while (posDim0 >= 1 && posDim1 >= 1 && tmpScore > scoreDropOff) {
-            tmpScore += score(scoreMatrix, posDim0, posDim1, query, database);
+            tmpScore += score(scoringScheme, posDim0, posDim1, query, database);
             if (query[posDim0 - 1] == database[posDim1 - 1]) {
-                last = 0;
+                mismatchingSuffixLength = 0;
                 if (tmpScore > static_cast<TScoreValue>(0))
                     tmpScore = 0;
             } else {
-                last += 1;
+                mismatchingSuffixLength += 1;
             }
 			--posDim0;
 			--posDim1;
+            ++diagonalLength;
 		}
-		setBeginDim0(seed, posDim0 + last + 1);
-		setBeginDim1(seed, posDim1 + last + 1);
+        diag.beginDim0 = posDim0 + mismatchingSuffixLength;
+        diag.beginDim1 = posDim1 + mismatchingSuffixLength;
+        diag.length = diagonalLength - mismatchingSuffixLength;
 	}
 
 	// Extension to the right
 	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
+        TScoreValue tmpScore = 0;
+        TPosition mismatchingSuffixLength = 0;
 		TSize lengthDim0 = length(query);
 		TSize lengthDim1 = length(database);
-		TPosition posDim0 = getEndDim0(seed) ;
-		TPosition posDim1 = getEndDim1(seed);
-		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && query[posDim0] == database[posDim1]) {
-			++posDim0;
-			++posDim1;
+        TSeedDiagonal & diag = back(seed);
+		TPosition posDim0 = diag.beginDim0 + diag.length;
+		TPosition posDim1 = diag.beginDim1 + diag.length;
+        TSize diagonalLength = diag.length;
+		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && tmpScore > scoreDropOff) {
+            tmpScore += score(scoringScheme, posDim0, posDim1, query, database);
+            if (query[posDim0] == database[posDim1]) {
+                mismatchingSuffixLength = 0;
+                if (tmpScore > static_cast<TScoreValue>(0))
+                    tmpScore = 0;
+            } else {
+                mismatchingSuffixLength += 1;
+            }
+            ++posDim0;
+            ++posDim1;
+            ++diagonalLength;
 		}
-		setEndDim0(seed, posDim0);
-		setEndDim1(seed, posDim1);
+        diag.length = diagonalLength - mismatchingSuffixLength;
 	}
-}
 
-
-template <typename TConfig, typename TQuery, typename TDatabase>
-inline void 
-extendSeed(Seed<ChainedSeed, TConfig> & seed, 
-		   TQuery const & query,
-		   TDatabase const & database,
-		   ExtensionDirection direction,
-           TScoreValue scoreDropOff,
-           Score<TScore, Simple> const & scoreMatrix,
-		   UnGappedXDrop const &)
-{
-    // For ungapped X-drop extension of Chained Seeds, we extend the
-    // first and the last Seed Diagonal.
-	SEQAN_CHECKPOINT;
-
-    SEQAN_ASSERT_GT(length(seed), 0u);
-
-    typedef Seed<ChainedSeed, TConfig> TSeed;
-    typedef typename Value<TSeed>::Type TSeedDiagonal;
-    typedef typename Position<TSeedDiagonal>::Type TPosition;
-    typedef typename Size<TSeedDiagonal>::Type TSize;
-    
-    SEQAN_ASSERT_FAIL("Write me!");
+    // TODO(holtgrew): Update score?!
 }
 
 
@@ -316,33 +381,6 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
     
     SEQAN_ASSERT_FAIL("Write me!");
 }
-
-
-/**
-.Function.extendSeeds
-..summary: Extension of seeds.
-..cat:Seed Handling
-..signature:extendSeeds(container, query, database, direction, MatchExtend)
-..signature:extendSeeds(begin, end, query, database, direction, MatchExtend)
-..signature:extendSeeds(container, query, database, direction, scoreDropOff, scoreMatrix, {UngappedXDrop, GappedXDrop})
-..signature:extendSeeds(begin, end, query, database, direction, scoreDropOff, scoreMatrix, {UngappedXDrop, GappedXDrop})
-..param.container: The container with the @Class.Seed@ objects to extend.
-...type:Concept.Container
-..param.begin: Iterator pointing to the first value to add.
-..param.end: Iterator pointing just behind the last value to add.
-..param.query: The query sequence.
-...type:Class.String
-..param.query: The database sequence.
-...type:Class.String
-..param.direction: Defines the direction in which the seed should be extended. 0 = left, 1 = right, 2 = both
-..param.scoreDropOff: The score drop after which the extension should stop. The extension stops if this value is exceeded.
-..param.scoreMatrix: The scoring sheme.
-...type:Spec.Simple Score
-..param.tag: The algorithm to use.
-...type:Tag.Seed Extension.MatchExtend
-...type:Tag.Seed Extension.UngappedXDrop
-...type:Tag.Seed Extension.GappedXDrop
-*/
 
 }  // namespace seqan
 

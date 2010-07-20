@@ -24,8 +24,6 @@
 
 namespace seqan {
 
-// TODO(holtgrew): Add possibility to generate TikZ code.
-
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -178,6 +176,8 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 // ===========================================================================
 // Functions
 // ===========================================================================
+
+// TODO(holtgrew): COULD introduce {get,set}{Begin,End}(dim, value), but probably only necessary to make consistent with multi dimensional chaining interface.
 
 /**
 .Function.assign.param.source.type:Class.Seed
@@ -366,19 +366,6 @@ getEndDiagonal(Seed<TSpec, TConfig> const & seed)
 {
 	SEQAN_CHECKPOINT;
     return getEndDim1(seed) - getEndDim0(seed);
-}
-
-// TODO(holtgrew): COULD introduce {get,set}{Left,Right}(dim, value)
-
-// Standard functions.
-
-template <typename TSpec, typename TConfig>
-inline typename Size<Seed<TSpec, TConfig> >::Type
-length(Seed<TSpec, TConfig> const & seed)
-{
-    SEQAN_CHECKPOINT;
-    // TODO(holtgrew): What if reverse see
-    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
 }
 
 // Functions for seeds with the _ScoreMixin.

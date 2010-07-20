@@ -52,6 +52,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_chained_append_diagonal);
     SEQAN_CALL_TEST(test_seeds_seed_chained_truncate_diagonals);
     SEQAN_CALL_TEST(test_seeds_seed_chained_iterators);
+    SEQAN_CALL_TEST(test_seeds_seed_chained_front_back);
 
     SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
@@ -69,7 +70,11 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
 
     // Tests for seed algorithms
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_simple);
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_chained);
+    SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_chained);
+    SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
@@ -78,5 +83,6 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_unordered.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_extension.h");
 }
 SEQAN_END_TESTSUITE
