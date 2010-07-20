@@ -97,6 +97,14 @@ struct Size<SeedDiagonal<TPosition, TSize> const>
 // Functions
 // ===========================================================================
 
+template <typename TStream, typename TPosition, typename TSize>
+inline TStream &
+operator<<(TStream & stream, SeedDiagonal<TPosition, TSize> const & seedDiagonal)
+{
+    return stream << "SeedDiagonal(" << seedDiagonal.beginDim0 << ", " << seedDiagonal.beginDim1 << ", "  << seedDiagonal.length << ")";
+}
+
+
 template <typename TPosition, typename TSize>
 inline bool
 operator==(SeedDiagonal<TPosition, TSize> const & a, SeedDiagonal<TPosition, TSize> const & b)

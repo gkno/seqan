@@ -15,7 +15,10 @@
   Lesser General Public License for more details.
  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
- ============================================================================
+
+  Based on the code by Carsten Kemena <carsten.kemena@crg.es>, debugged
+  by Birte Kehr <birte.kehr@fu-berlin.de>.
+  ============================================================================
   Generic parts of the seed extension algorithms.
  ==========================================================================*/
 
@@ -23,6 +26,10 @@
 #define SEQAN_SEEDS_SEEDS_EXTENSION_H_
 
 namespace seqan {
+
+// ===========================================================================
+// Enums, Tags, Classes, Specializations
+// ===========================================================================
 
 /**
 .Tag.Seed Extension
@@ -46,6 +53,20 @@ typedef Tag<_UnGappedXDrop> const UnGappedXDrop;
 struct _GappedXDrop;
 typedef Tag<_GappedXDrop> const GappedXDrop;
 
+enum ExtensionDirection
+{
+    EXTEND_LEFT,
+    EXTEND_RIGHT,
+    EXTEND_BOTH
+};
+
+// ===========================================================================
+// Metafunctions
+// ===========================================================================
+
+// ===========================================================================
+// Functions
+// ===========================================================================
 
 /**
 .Function.extendSeed
@@ -70,6 +91,101 @@ typedef Tag<_GappedXDrop> const GappedXDrop;
 ...type:Tag.Seed Extension.UngappedXDrop
 ...type:Tag.Seed Extension.GappedXDrop
 */
+template <typename TConfig, typename TQuery, typename TDatabase>
+inline void 
+extendSeed(Seed<Simple, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+		   MatchExtend const &)
+{
+    // For Simple Seeds, we can simply update the begin and end values
+    // in each dimension.
+	SEQAN_CHECKPOINT;
+
+    typedef Seed<Simple, TConfig> TSeed;
+    typedef typename Position<TSeed>::Type TPosition;
+    typedef typename Size<TSeed>::Type TSize;
+    
+	// Extension to the left
+	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
+		TPosition posDim0 = getBeginDim0(seed) ;
+		TPosition posDim1 = getBeginDim1(seed);
+		while (posDim0 >= 1 && posDim1 >= 1 && query[posDim0 - 1] == database[posDim1 - 1]) {
+			--posDim0;
+			--posDim1;
+		}
+		setBeginDim0(seed, posDim0);
+		setBeginDim1(seed, posDim1);
+	}
+
+	// Extension to the right
+	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
+		TSize lengthDim0 = length(query);
+		TSize lengthDim1 = length(database);
+		TPosition posDim0 = getEndDim0(seed) ;
+		TPosition posDim1 = getEndDim1(seed);
+		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && query[posDim0] == database[posDim1]) {
+			++posDim0;
+			++posDim1;
+		}
+		setEndDim0(seed, posDim0);
+		setEndDim1(seed, posDim1);
+	}
+}
+
+
+template <typename TConfig, typename TQuery, typename TDatabase>
+inline void 
+extendSeed(Seed<ChainedSeed, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+		   MatchExtend const &)
+{
+    // For Chained Seeds, we extend the first and the last Seed
+    // Diagonal.
+	SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_GT(length(seed), 0u);
+
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Value<TSeed>::Type TSeedDiagonal;
+    typedef typename Position<TSeedDiagonal>::Type TPosition;
+    typedef typename Size<TSeedDiagonal>::Type TSize;
+    
+	// Extension to the left
+	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
+        TSeedDiagonal & diag = front(seed);
+		TPosition posDim0 = diag.beginDim0;
+		TPosition posDim1 = diag.beginDim1;
+        TSize diagonalLength = diag.length;
+		while (posDim0 >= 1 && posDim1 >= 1 && query[posDim0 - 1] == database[posDim1 - 1]) {
+			--posDim0;
+			--posDim1;
+            ++diagonalLength;
+		}
+        diag.beginDim0 = posDim0;
+        diag.beginDim1 = posDim1;
+        diag.length = diagonalLength;
+	}
+
+	// Extension to the right
+	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
+		TSize lengthDim0 = length(query);
+		TSize lengthDim1 = length(database);
+        TSeedDiagonal & diag = back(seed);
+		TPosition posDim0 = diag.beginDim0 + diag.length;
+		TPosition posDim1 = diag.beginDim1 + diag.length;
+        TSize diagonalLength = diag.length;
+		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && query[posDim0] == database[posDim1]) {
+			++posDim0;
+			++posDim1;
+            ++diagonalLength;
+		}
+        diag.length = diagonalLength;
+	}
+}
 
 /**
 .Function.extendSeeds

@@ -49,7 +49,7 @@
 #include <seqan/seeds2/seeds_seed_chained.h>
 
 // Algorithms on Seed objects.
-// #include <seqan/seeds2/seeds_extension.h>
+ #include <seqan/seeds2/seeds_extension.h>
 
 // Class SeedSet, specializations, iterators.
 #include <seqan/seeds2/basic_iter_indirect.h>

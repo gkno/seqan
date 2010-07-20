@@ -138,9 +138,45 @@ struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
     typedef typename ::std::list<_TSeedDiagonal>::const_iterator Type;
 };
 
+/**
+.Metafunction.Reference.param.T:Spec.ChainedSeed
+ */
+template <typename TConfig>
+struct Reference<Seed<ChainedSeed, TConfig> >
+{
+    typedef Seed<ChainedSeed, TConfig> _TSeed;
+    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
+    typedef _TSeedDiagonal & Type;
+};
+
+template <typename TConfig>
+struct Reference<Seed<ChainedSeed, TConfig> const>
+{
+    typedef Seed<ChainedSeed, TConfig> _TSeed;
+    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
+    typedef _TSeedDiagonal & Type;
+};
+
 // ===========================================================================
 // Functions
 // ===========================================================================
+
+template <typename TStream, typename TConfig>
+inline TStream &
+operator<<(TStream & stream, Seed<ChainedSeed, TConfig> const & seed)
+{
+    typedef Seed<ChainedSeed, TConfig> const TSeed;
+    typedef typename Iterator<TSeed>::Type TIterator;
+
+    stream << "Seed<ChainedSeed, TConfig>([";
+    for (TIterator it = begin(seed); it != end(seed); ++it) {
+        if (it != begin(seed))
+            stream << ", ";
+        stream << *it;
+    }
+    stream << "])";
+    return stream;
+}
 
 template <typename TConfig>
 inline bool
@@ -252,6 +288,44 @@ begin(Seed<ChainedSeed, TConfig> const & seed, Standard const &)
 {
     SEQAN_CHECKPOINT;
     return seed._seedDiagonals.begin();
+}
+
+/**
+.Function.front.param.object.type:Spec.ChainedSeed
+*/
+template <typename TConfig>
+inline typename Reference<Seed<ChainedSeed, TConfig> >::Type
+front(Seed<ChainedSeed, TConfig> & seed)
+{
+    SEQAN_CHECKPOINT;
+    return front(seed._seedDiagonals);
+}
+
+template <typename TConfig>
+inline typename Iterator<Seed<ChainedSeed, TConfig> const>::Type
+front(Seed<ChainedSeed, TConfig> const & seed)
+{
+    SEQAN_CHECKPOINT;
+    return front(seed._seedDiagonals);
+}
+
+/**
+.Function.back.param.object.type:Spec.ChainedSeed
+*/
+template <typename TConfig>
+inline typename Reference<Seed<ChainedSeed, TConfig> >::Type
+back(Seed<ChainedSeed, TConfig> & seed)
+{
+    SEQAN_CHECKPOINT;
+    return back(seed._seedDiagonals);
+}
+
+template <typename TConfig>
+inline typename Iterator<Seed<ChainedSeed, TConfig> const>::Type
+back(Seed<ChainedSeed, TConfig> const & seed)
+{
+    SEQAN_CHECKPOINT;
+    return back(seed._seedDiagonals);
 }
 
 /**

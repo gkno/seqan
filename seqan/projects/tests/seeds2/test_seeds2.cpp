@@ -31,12 +31,14 @@
 #include "test_seeds_seed_chained.h"
 #include "test_seeds_seed_simple.h"
 #include "test_seeds_seed_set_base.h"
+#include "test_seeds_extension.h"
 
 SEQAN_BEGIN_TESTSUITE(test_seeds) {
-    // Call tests.
+    // Tests for seed diagonals.
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_metafunctions);
 
+    // Tests for seeds.
     SEQAN_CALL_TEST(test_seeds_seed_base_constructors_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_metafunctions_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_getters_setters_simple);
@@ -54,6 +56,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
 
+    // Tests for seed sets.    
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_unordered);
 
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_no_threshold_unordered);
@@ -63,6 +66,10 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_length_unordered);
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered);
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered);
+
+    // Tests for seed algorithms
+    SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_match_extension_chained);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
