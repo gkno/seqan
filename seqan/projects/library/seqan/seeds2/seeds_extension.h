@@ -91,6 +91,11 @@ enum ExtensionDirection
 ...type:Tag.Seed Extension.UngappedXDrop
 ...type:Tag.Seed Extension.GappedXDrop
 */
+
+// We need one specialization for each combination of the extension
+// variants and seeds.  It is not worth to extract the common parts
+// for simple and chained seeds.
+
 template <typename TConfig, typename TQuery, typename TDatabase>
 inline void 
 extendSeed(Seed<Simple, TConfig> & seed, 
@@ -99,8 +104,8 @@ extendSeed(Seed<Simple, TConfig> & seed,
 		   ExtensionDirection direction,
 		   MatchExtend const &)
 {
-    // For Simple Seeds, we can simply update the begin and end values
-    // in each dimension.
+    // For match extension of Simple Seeds, we can simply update the
+    // begin and end values in each dimension.
 	SEQAN_CHECKPOINT;
 
     typedef Seed<Simple, TConfig> TSeed;
@@ -143,8 +148,8 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
 		   ExtensionDirection direction,
 		   MatchExtend const &)
 {
-    // For Chained Seeds, we extend the first and the last Seed
-    // Diagonal.
+    // For match extension of Chained Seeds, we extend the first and
+    // the last Seed Diagonal.
 	SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_GT(length(seed), 0u);
@@ -186,6 +191,132 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
         diag.length = diagonalLength;
 	}
 }
+
+
+template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
+inline void 
+extendSeed(Seed<Simple, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+           Score<TScoreValue, Simple> const & scoreMatrix,
+           TScoreValue scoreDropOff,
+		   UnGappedXDrop const &)
+{
+    // For ungapped X-drop extension of Simple Seeds, we can simply
+    // update the begin and end values in each dimension.
+	SEQAN_CHECKPOINT;
+
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Value<TSeed>::Type TSeedDiagonal;
+    typedef typename Position<TSeedDiagonal>::Type TPosition;
+    typedef typename Size<TSeedDiagonal>::Type TSize;
+    
+	// Extension to the left
+	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
+        TScoreValue tmpScore = 0;
+		TPosition posDim0 = getBeginDim0(seed) ;
+		TPosition posDim1 = getBeginDim1(seed);
+        TPosition last = 0;  // TODO(holtgrew): What is this for?
+		while (posDim0 >= 1 && posDim1 >= 1 && tmpScore > scoreDropOff) {
+            tmpScore += score(scoreMatrix, posDim0, posDim1, query, database);
+            if (query[posDim0 - 1] == database[posDim1 - 1]) {
+                last = 0;
+                if (tmpScore > static_cast<TScoreValue>(0))
+                    tmpScore = 0;
+            } else {
+                last += 1;
+            }
+			--posDim0;
+			--posDim1;
+		}
+		setBeginDim0(seed, posDim0 + last + 1);
+		setBeginDim1(seed, posDim1 + last + 1);
+	}
+
+	// Extension to the right
+	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
+		TSize lengthDim0 = length(query);
+		TSize lengthDim1 = length(database);
+		TPosition posDim0 = getEndDim0(seed) ;
+		TPosition posDim1 = getEndDim1(seed);
+		while (posDim0 < lengthDim0 && posDim1 < lengthDim1 && query[posDim0] == database[posDim1]) {
+			++posDim0;
+			++posDim1;
+		}
+		setEndDim0(seed, posDim0);
+		setEndDim1(seed, posDim1);
+	}
+}
+
+
+template <typename TConfig, typename TQuery, typename TDatabase>
+inline void 
+extendSeed(Seed<ChainedSeed, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+           TScoreValue scoreDropOff,
+           Score<TScore, Simple> const & scoreMatrix,
+		   UnGappedXDrop const &)
+{
+    // For ungapped X-drop extension of Chained Seeds, we extend the
+    // first and the last Seed Diagonal.
+	SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_GT(length(seed), 0u);
+
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Value<TSeed>::Type TSeedDiagonal;
+    typedef typename Position<TSeedDiagonal>::Type TPosition;
+    typedef typename Size<TSeedDiagonal>::Type TSize;
+    
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+template <typename TConfig, typename TQuery, typename TDatabase>
+inline void 
+extendSeed(Seed<Simple, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+		   GappedXDrop const &)
+{
+    // For gapped X-drop extension of Simple Seeds, we can simply
+    // update the begin and end values in each dimension.
+	SEQAN_CHECKPOINT;
+
+    typedef Seed<Simple, TConfig> TSeed;
+    typedef typename Position<TSeed>::Type TPosition;
+    typedef typename Size<TSeed>::Type TSize;
+
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+template <typename TConfig, typename TQuery, typename TDatabase>
+inline void 
+extendSeed(Seed<ChainedSeed, TConfig> & seed, 
+		   TQuery const & query,
+		   TDatabase const & database,
+		   ExtensionDirection direction,
+		   GappedXDrop const &)
+{
+    // For ungaed X-drop extension of Chained Seeds, we have to append
+    // diagonals to the front and end of the list of Seed Diagonals.
+	SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_GT(length(seed), 0u);
+
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    typedef typename Value<TSeed>::Type TSeedDiagonal;
+    typedef typename Position<TSeedDiagonal>::Type TPosition;
+    typedef typename Size<TSeedDiagonal>::Type TSize;
+    
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
 
 /**
 .Function.extendSeeds
