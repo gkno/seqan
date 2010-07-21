@@ -521,30 +521,7 @@ inline void goOverContig(
 						}
 						#pragma omp taskwait
 						
-						// TODO: copy matches to their store
-						TAlignedReadStoreSize diff = 0;
-						for(int relId = 0; relId < tav[blockId]; ++relId){
-							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
-							diff += length(threadStores[absId].alignedReadStore) - oldLengths[absId];
-						}
-						
-						TAlignedReadStoreSize oldSize = length(threadStores[blockId].alignedReadStore);
-						resize(threadStores[blockId].alignedReadStore, oldSize + diff, Generous());
-						resize(threadStores[blockId].alignQualityStore, oldSize + diff, Generous());
-						
-						for(int relId = 0; relId < tav[blockId]; ++relId){
-							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
-							for(TAlignedReadStoreSize i = oldLengths[absId]; i < length(threadStores[absId]); ++i) {
-								
-								threadStores[absId].alignedReadStore[i].id = oldSize;
-								threadStores[blockId].alignedReadStore[++oldSize] = threadStores[absId].alignedReadStore[i];
-								threadStores[blockId].alignQualityStore[oldSize] = threadStores[absId].alignQualityStore[i];
-							}
-							resize(threadStores[absId].alignedReadStore, oldLengths[absId], Generous());
-							resize(threadStores[absId].alignQualityStore, oldLengths[absId], Generous());
-							
-						}
-						
+						// TODO: copy matches to their store						
 						/*
 						TAlignedReadStoreSize diff = 0;
 						for(int relId = 1; relId < tav[blockId]; ++relId){
