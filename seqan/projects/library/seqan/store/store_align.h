@@ -723,7 +723,10 @@ template <typename TAnchor, typename TSource, typename TGapAnchors, typename TId
 inline void
 _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TIdx idx)
 {
-SEQAN_CHECKPOINT
+    SEQAN_CHECKPOINT;
+
+    typedef typename Position<TSource>::Type TPosition;
+
 	if (idx > (TIdx)length(_dataAnchors(me)))
 	{
 		_assignSourceLength(anchor.seqPos, me);
@@ -733,7 +736,7 @@ SEQAN_CHECKPOINT
 		{
 			// for the sick case that an anchor seq position is beyond the sequence end
 			if (!empty(_dataAnchors(me)))
-				if (anchor.seqPos < back(_dataAnchors(me)).seqPos)
+				if (static_cast<TPosition>(anchor.seqPos) < static_cast<TPosition>(back(_dataAnchors(me)).seqPos))
 					anchor.seqPos = back(_dataAnchors(me)).seqPos;
 			anchor.gapPos = supremumValue(anchor.gapPos);
 		}
