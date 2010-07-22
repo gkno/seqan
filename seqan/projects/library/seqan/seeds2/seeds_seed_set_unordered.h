@@ -27,6 +27,15 @@
 
 namespace seqan {
 
+template <typename T>
+T _abs(T const & x)
+{
+    if (x < static_cast<T>(0))
+        return -x;
+    else
+        return x;
+}
+
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
@@ -265,7 +274,7 @@ _seedsMergeable(Seed<TSeedSpec, TSeedConfig> const & a,
     // If the distance between the diagonals exceeds the threshold
     // then the seeds cannot be merged.
     typedef typename _MakeUnsigned<TThreshold>::Type TUnsignedThreshold;
-    if (static_cast<TUnsignedThreshold>(abs(getEndDiagonal(a) - getStartDiagonal(b))) >= static_cast<TUnsignedThreshold>(threshold))
+    if (static_cast<TUnsignedThreshold>(_abs(getEndDiagonal(a) - getStartDiagonal(b))) >= static_cast<TUnsignedThreshold>(threshold))
         return false;
     // Otherwise, the seeds can be merged.
     return true;
