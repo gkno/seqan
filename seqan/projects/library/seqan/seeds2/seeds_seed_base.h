@@ -480,6 +480,37 @@ _updateSeedsScoreSimpleChain(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> c
     _updateSeedsScoreSimpleChainHelper(seed, other, scoringScheme, typename HasScore<TSeed>::Type());
 }
 
+
+// Case: No score, do not update anything.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreChaosHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, TScoreValue const & /*scoreDelta*/, False const &)
+{
+    SEQAN_CHECKPOINT;
+}
+
+// Case: Seed has score.  The new score is the sum of the other seed's
+// score and the delta as computed by the chaining routine.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreChaosHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, TScoreValue const & scoreDelta, True const &)
+{
+    SEQAN_CHECKPOINT;
+    setScore(seed, getScore(seed) + getScore(other) + scoreDelta);
+}
+
+
+// Update the score for CHAOS chaining.  If the seeds do not have scores, nothing is done.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreChaos(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, TScoreValue const & scoreDelta)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<TSpec, TConfig> TSeed;
+    _updateSeedsScoreChaosHelper(seed, other, scoreDelta, typename HasScore<TSeed>::Type());
+}
+
+
 template <typename TSeed>
 inline typename SeedScore<TSeed>::Type
 getScore(TSeed const & seed)

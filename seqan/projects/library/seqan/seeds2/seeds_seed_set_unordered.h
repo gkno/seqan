@@ -266,6 +266,7 @@ inline bool
 _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
                   Seed<TSeedSpec, TSeedConfig> const & b,
                   TThreshold const & maxDiagonalDistance,
+                  Nothing const & /*maxBandwidth*/,
                   Merge const &)
 {
     // TODO(holtgrew): TThreshold could be Position<TSeed>::Type.
@@ -291,6 +292,7 @@ inline bool
 _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
                   Seed<TSeedSpec, TSeedConfig> const & b,
                   TThreshold const & maxGapSize,
+                  Nothing const & /*maxBandwidth*/,
                   SimpleChain const &)
 {
     // TODO(holtgrew): We should be able to configure whether we want to have Manhattan, euclidean, minimal edit distance, for seeds.
@@ -305,6 +307,41 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
     // distacen in the smaller distance with matches/mismatches and
     // the rest with indels.
     TThreshold distance = _max(getBeginDim0(b) - getEndDim0(a), getBeginDim1(b) - getEndDim1(a));
+    // Compare distance with threshold.
+    return distance <= maxGapSize;
+}
+
+
+// Returns true iff b can be Chaos chained to a where a is the one to
+// the upper left, b the one to the lower right.
+//
+// TODO(holtgrew): Replace bandwidth with diagonalDistance.
+template <typename TSeedSpec, typename TSeedConfig, typename TDistanceThreshold, typename TBandwidthThreshold>
+inline bool
+_seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
+                  Seed<TSeedSpec, TSeedConfig> const & b,
+                  TDistanceThreshold const & maxGapSize,
+                  TBandwidthThreshold const & bandwidth,
+                  Chaos const &)
+{
+    SEQAN_CHECKPOINT;
+
+    // b has to be right of a for the two seeds to be chainable.
+    if (getBeginDim0(b) < getEndDim0(a) || getBeginDim1(b) < getEndDim1(a))
+        return false;
+
+    // TODO(holtgrew): Ignore gray areas from CHAOS paper "so sequence order does not matter".
+
+    // The diagonal distance has to be smaller than the bandwidth.
+    // TODO(holtgrew): s/getStartDiagonal/getBeginDiagonal/
+    TBandwidthThreshold diagonalDistance = _abs(getEndDiagonal(b) - getStartDiagonal(a));
+    if (diagonalDistance > bandwidth)
+        return false;
+
+    // Distance is maximal distance, this corresponds to going the
+    // distacen in the smaller distance with matches/mismatches and
+    // the rest with indels.
+    TDistanceThreshold distance = _max(getBeginDim0(b) - getEndDim0(a), getBeginDim1(b) - getEndDim1(a));
     // Compare distance with threshold.
     return distance <= maxGapSize;
 }
@@ -328,11 +365,14 @@ _updateSeedsCoordinatesMergeOrSimpleChain(
     setUpperDiagonal(seed, _max(getUpperDiagonal(seed), getUpperDiagonal(other)));
 }
 
+
 template <typename TSeedConfig, typename TScoreValue>
 inline void
 _combineSeeds(Seed<Simple, TSeedConfig> & seed,
               Seed<Simple, TSeedConfig> const & other,
               Score<TScoreValue, Simple> const & /*scoringScheme*/,
+              Nothing const & /*sequence0*/,
+              Nothing const & /*sequence1*/,
               Merge const &)
 {
     SEQAN_CHECKPOINT;
@@ -347,6 +387,8 @@ inline void
 _combineSeeds(Seed<Simple, TSeedConfig> & seed,
               Seed<Simple, TSeedConfig> const & other,
               Score<TScoreValue, Simple> const & scoringScheme,
+              Nothing const & /*sequence0*/,
+              Nothing const & /*sequence1*/,
               SimpleChain const &)
 {
     SEQAN_CHECKPOINT;
@@ -359,11 +401,84 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
 }
 
 
+template <typename TSeedConfig, typename TScoreValue, typename TSequence0, typename TSequence1>
+inline void
+_combineSeeds(Seed<Simple, TSeedConfig> & seed,
+              Seed<Simple, TSeedConfig> const & other,
+              Score<TScoreValue, Simple> const & scoringScheme,
+              TSequence0 const & sequence0,
+              TSequence1 const & sequence1,
+              Chaos const &)
+{
+    SEQAN_CHECKPOINT;
+
+    typedef Seed<Simple, TSeedConfig> TSeed;
+    typedef typename Position<TSeed>::Type TPosition;
+
+    // TODO(holtgrew): Assert seed left of other.
+
+    // Compute gaps in both dimensions, the remaining gap is the
+    // vertical/horizontal distance we will not fill with CHAOS
+    // chaining.
+    //
+    // TODO(holtgrew): We need + 1 here, do we need it anywhere else?
+    TPosition gapDim0 = getBeginDim0(other) - getEndDim0(seed) + 1;
+    TPosition gapDim1 = getBeginDim1(other) - getEndDim1(seed) + 1;
+    TPosition minGap = _min(gapDim0, gapDim1);
+    TPosition maxGap = _max(gapDim0, gapDim1);
+    TPosition remainingGap = maxGap - minGap;
+
+    // Compute new score using the CHAOS method.
+    //
+    // First, compute the score when force-aligning from seed.
+    TPosition posLeft0 = getEndDim0(seed);
+    TPosition posLeft1 = getEndDim1(seed);
+    TScoreValue tmpScore = 0;
+    for (TPosition i = 0; i < minGap; ++i)
+        tmpScore += score(scoringScheme, sequence0[posLeft0 + i], sequence1[posLeft1 + i]);
+
+    SEQAN_ASSERT_GT(getBeginDim0(other), static_cast<TPosition>(0));
+    SEQAN_ASSERT_GT(getBeginDim1(other), static_cast<TPosition>(0));
+    TPosition posRight0 = getBeginDim0(other);
+    TPosition posRight1 = getBeginDim1(other);
+
+    // Now, try to put the gap at each position and get the position
+    // with the highest score.  If there are two such positions, the
+    // first one found is returned which is the one that is furthest
+    // away from seed.
+    TPosition bestGapPos = 0;  // delta to lowermost position
+    TPosition bestScore = tmpScore;
+    for (TPosition i = 1; i < minGap; ++i) {
+        tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - 1 - i], sequence1[posLeft1 + minGap - 1 - i]);
+        tmpScore += score(scoringScheme, sequence0[posRight0 - i], sequence1[posRight0 - i]);
+        if (tmpScore > bestScore) {
+            // Found a better score.
+            bestScore = tmpScore;
+            bestGapPos = i;
+        }
+    }
+
+    // Now, the best gap is when extending the lower right seed
+    // (other) by bestGapPos to the upper right.  However, this is
+    // ignored for simple seeds: We simply update the score and are
+    // done.
+    _updateSeedsScoreChaos(seed, other, bestScore + remainingGap * scoreGap(scoringScheme));
+
+    // For simple seeds, the coordinate computation is the same as for
+    // merge/simple chain.
+    //
+    // TODO(holtgrew): Adjust the name of updateSeedsCoordinatesMergeOrSimpleChain to reflect this.
+    _updateSeedsCoordinatesMergeOrSimpleChain(seed, other);
+}
+
+
 template <typename TSeedConfig, typename TScoreValue>
 inline void
 _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
               Seed<ChainedSeed, TSeedConfig> const & other,
               Score<TScoreValue, Simple> const & /*scoringScheme*/,
+              Nothing const & /*sequence0*/,
+              Nothing const & /*sequence1*/,
               Merge const &)
 {
     SEQAN_CHECKPOINT;
@@ -409,6 +524,8 @@ inline void
 _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
               Seed<ChainedSeed, TSeedConfig> const & other,
               Score<TScoreValue, Simple> const & scoringScheme,
+              Nothing const & /*sequence0*/,
+              Nothing const & /*sequence1*/,
               SimpleChain const &)
 {
     SEQAN_CHECKPOINT;
@@ -425,14 +542,32 @@ _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
 }
 
 
-template <typename TSeedSpec, typename TSeedSetConfig, typename TThreshold, typename TCombination>
+template <typename TSeedConfig, typename TScoreValue, typename TSequence0, typename TSequence1>
+inline void
+_combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
+              Seed<ChainedSeed, TSeedConfig> const & other,
+              Score<TScoreValue, Simple> const & scoringScheme,
+              TSequence0 const & /*sequence0*/,
+              TSequence1 const & /*sequence1*/,
+              Chaos const &)
+{
+    SEQAN_CHECKPOINT;
+    // Simply copy over the diagonals of the seed (other) into the
+    // left one (seed) after updating the score.
+
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+template <typename TSeedSpec, typename TSeedSetConfig, typename TDistanceThreshold, typename TBandwidth, typename TCombination>
 bool
 _findSeedForCombination(
         typename Iterator<typename SeedSet<TSeedSpec, Unordered, TSeedSetConfig>::TAllSeeds, Standard>::Type & mergePartner,
         bool & seedIsOnTheLeft,
         SeedSet<TSeedSpec, Unordered, TSeedSetConfig> & seedSet,
         typename Value<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >::Type const & seed,
-        TThreshold const & maxDiagDist,
+        TDistanceThreshold const & maxDistance,
+        TBandwidth const & bandwidth,
         TCombination const & tag)
 {
     SEQAN_CHECKPOINT;
@@ -441,17 +576,17 @@ _findSeedForCombination(
 
     // Iterate over all seeds and search for the first one in this
     // arbitrary order that is combineable with parameter seed within
-    // a maximal diagonal distance maxDiagDist.  We allow either seed
+    // a maximal diagonal distance maxDistance.  We allow either seed
     // to be the left one.
     //
     // TODO(holtgrew): Search for *closest* overlapping one instead!
     for (TSeedPtrIterator it = begin(seedSet._allSeeds); it != end(seedSet._allSeeds); ++it) {
-        if (_seedsCombineable(*value(it), seed, maxDiagDist, tag)) {
+        if (_seedsCombineable(*value(it), seed, maxDistance, bandwidth, tag)) {
             // seed is to be merged into *it.
             mergePartner = it;
             seedIsOnTheLeft = false;
             return true;
-        } else if (_seedsCombineable(seed, *value(it), maxDiagDist, tag)) {
+        } else if (_seedsCombineable(seed, *value(it), maxDistance, bandwidth, tag)) {
             // *it is to be merged into seed.
             mergePartner = it;
             seedIsOnTheLeft = true;
@@ -465,12 +600,15 @@ _findSeedForCombination(
 
 // TODO(holtgrew): Score not needed for Merge!
 
-template <typename TSeedSpec, typename TSeedSetConfig, typename TThreshold, typename TScoreValue, typename TCombination>
+template <typename TSeedSpec, typename TSeedSetConfig, typename TDistanceThreshold, typename TBandwidth, typename TScoreValue, typename TSequence0, typename TSequence1, typename TCombination>
 inline bool
 addSeed(SeedSet<TSeedSpec, Unordered, TSeedSetConfig> & seedSet,
         typename Value<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >::Type const & seed,
-        TThreshold const & maxDiagDist,
+        TDistanceThreshold const & maxDiagDist,
+        TBandwidth const & bandwidth,
         Score<TScoreValue, Simple> const & scoringScheme,
+        TSequence0 const & sequence0,
+        TSequence1 const & sequence1,
         TCombination const & tag)
 {
     SEQAN_CHECKPOINT;
@@ -483,19 +621,19 @@ addSeed(SeedSet<TSeedSpec, Unordered, TSeedSetConfig> & seedSet,
     // Try to find a seed for recombination.
     TSeedPtrIterator it = 0;
     bool seedIsOnTheLeft = false;
-    bool foundSeed = _findSeedForCombination(it, seedIsOnTheLeft, seedSet, seed, maxDiagDist, tag);
+    bool foundSeed = _findSeedForCombination(it, seedIsOnTheLeft, seedSet, seed, maxDiagDist, bandwidth, tag);
 
     // If we could find a seed: Combine them.
     if (foundSeed) {
         // Swap seed and *value(it) if seed is on the left and
         // *value(it) is on the right.  Then, merge both.
         if (!seedIsOnTheLeft) {
-            _combineSeeds(*value(it), seed, scoringScheme, tag);
+            _combineSeeds(*value(it), seed, scoringScheme, sequence0, sequence1, tag);
         } else {
             TSeed tmp;
             move(tmp, *value(it));
             assign(*value(it), seed);
-            _combineSeeds(*value(it), tmp, scoringScheme, tag);
+            _combineSeeds(*value(it), tmp, scoringScheme, sequence0, sequence1, tag);
         }
         // If the new seed has a high enough quality, add it to the
         // set of high-scoring seeds.
