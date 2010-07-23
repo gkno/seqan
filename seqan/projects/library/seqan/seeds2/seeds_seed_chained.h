@@ -357,6 +357,18 @@ move(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> & source)
     std::swap(target._seedDiagonals, source._seedDiagonals);
     target._lowerDiagonal = source._lowerDiagonal;
     target._upperDiagonal = source._upperDiagonal;
+    _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
+}
+
+template <typename TConfig>
+void
+assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> const & source)
+{
+    SEQAN_CHECKPOINT;
+    assign(target._seedDiagonals, source._seedDiagonals);
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+    _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
 }
 
 // Debug Output

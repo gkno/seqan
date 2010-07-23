@@ -262,6 +262,21 @@ move(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> & source)
     target._endDim1 = source._endDim1;
     target._lowerDiagonal = source._lowerDiagonal;
     target._upperDiagonal = source._upperDiagonal;
+    _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
+}
+
+template <typename TConfig>
+void
+assign(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> const & source)
+{
+    SEQAN_CHECKPOINT;
+    target._beginDim0 = source._beginDim0;
+    target._beginDim1 = source._beginDim1;
+    target._endDim0 = source._endDim0;
+    target._endDim1 = source._endDim1;
+    target._lowerDiagonal = source._lowerDiagonal;
+    target._upperDiagonal = source._upperDiagonal;
+    _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
 }
 
 // Debug Output

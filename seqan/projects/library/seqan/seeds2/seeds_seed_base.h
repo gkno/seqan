@@ -332,6 +332,7 @@ getSeedSize(Seed<TSpec, TConfig> const & seed)
 
 // Computed values, based on properties returned by getters.
 
+// TODO(holtgrew): Rename to getBeginDiagonal.
 /**
 .Function.getStartDiagonal:
 ..summary: Returns the diagonal of the start point.
@@ -373,7 +374,7 @@ getEndDiagonal(Seed<TSpec, TConfig> const & seed)
 // Case: No score, do not update anything.
 template <typename TSpec, typename TConfig>
 inline void
-_updateMergeScoreHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, False const &)
+_updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, False const &)
 {
     SEQAN_CHECKPOINT;
 }
@@ -384,7 +385,7 @@ _updateMergeScoreHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> co
 // score it contributes.
 template <typename TSpec, typename TConfig>
 inline void
-_updateMergeScoreHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, True const &)
+_updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, True const &)
 {
     SEQAN_CHECKPOINT;
     typedef Seed<TSpec, TConfig> TSeed;
@@ -414,16 +415,70 @@ _updateMergeScoreHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const 
     setScore(seed, newScore);
 }
 
+
 // Update the score for merging.  If the seeds do not have scores, nothing is done.
 template <typename TSpec, typename TConfig>
 inline void
-_updateMergeScore(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other)
+_updateSeedsScoreMerge(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other)
 {
     SEQAN_CHECKPOINT;
     typedef Seed<TSpec, TConfig> TSeed;
-    _updateMergeScoreHelper(seed, other, typename HasScore<TSeed>::Type());
+    _updateSeedsScoreMergeHelper(seed, other, typename HasScore<TSeed>::Type());
 }
 
+// Case: No score, do not update anything.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreSimpleChainHelper(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, Score<TScoreValue, Simple> const & /*scoringScheme*/, False const &)
+{
+    SEQAN_CHECKPOINT;
+}
+
+// Case: Seeds have scores.  Update the score of seed according to the
+// gap size.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreSimpleChainHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, Score<TScoreValue, Simple> const & scoringScheme, True const &)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<TSpec, TConfig> TSeed;
+    typedef typename Size<TSeed>::Type TSize;
+
+    // TODO(holtgrew): seed must be the one to the upper left.
+
+    // Only linear gap costs are supported.
+    SEQAN_ASSERT_EQ(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme));
+    // Scores for gaps and mismatches must be penalties.
+    SEQAN_ASSERT_LT(scoreGap(scoringScheme), static_cast<TScoreValue>(0));
+    SEQAN_ASSERT_LT(scoreMismatch(scoringScheme), static_cast<TScoreValue>(0));
+
+    // We use a simple heuristic for updating the seed's score the
+    // systematically overestimates the gap costs: We close the gap
+    // with a maximal diagonal and then remaining indels or just
+    // indels, whatever yields a lower score.
+    TSize maxDist = _max(getBeginDim0(other) - getEndDim0(seed), getBeginDim1(other) - getEndDim1(seed));
+    TSize minDist = _max(getBeginDim0(other) - getEndDim0(seed), getBeginDim1(other) - getEndDim1(seed));
+    TSize diagLen = minDist;
+    TSize indelLen = maxDist - minDist;
+    TScoreValue gapScore1 = diagLen * scoreMismatch(scoringScheme) + indelLen * scoreGap(scoringScheme);
+    TScoreValue gapScore2 = (maxDist + minDist) * scoreGap(scoringScheme);
+    TScoreValue gapScore = _max(gapScore1, gapScore2);
+
+    // The new score is the sum of the seed scores and the better of
+    // the gap scores computed above.
+    setScore(seed, getScore(seed) + getScore(other) + gapScore);
+}
+
+
+// Update the score for simple chaining.  If the seeds do not have scores, nothing is done.
+template <typename TSpec, typename TConfig, typename TScoreValue>
+inline void
+_updateSeedsScoreSimpleChain(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, Score<TScoreValue, Simple> const & scoringScheme)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<TSpec, TConfig> TSeed;
+    _updateSeedsScoreSimpleChainHelper(seed, other, scoringScheme, typename HasScore<TSeed>::Type());
+}
 
 template <typename TSeed>
 inline typename SeedScore<TSeed>::Type
@@ -440,6 +495,27 @@ setScore(TSeed & seed, TScore const & score)
 {
     SEQAN_CHECKPOINT;
     seed._score = score;
+}
+
+
+// The part of assign() for seeds that have no score mixin.
+template <typename TSpec, typename TConfig>
+inline void
+_assignScoreMixin(Seed<TSpec, TConfig> & /*seed*/, Seed<TSpec, TConfig> const & /*other*/, False const &)
+{
+    SEQAN_CHECKPOINT;
+    // Do nothing, no mixin.
+}
+
+
+// The part of assign() for seeds that have a score mixin.
+template <typename TSpec, typename TConfig>
+inline void
+_assignScoreMixin(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, True const &)
+{
+    SEQAN_CHECKPOINT;
+    // Update score.
+    seed._score = other._score;
 }
 
 }  // namespace seqan

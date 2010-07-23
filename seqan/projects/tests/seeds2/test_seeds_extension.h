@@ -179,7 +179,153 @@ testSeedsExtensionGappedXDropExtension(TSeedSpec const &)
     using namespace seqan;
 
     typedef Seed<TSeedSpec> TSeed;
-    SEQAN_ASSERT_FAIL("Write me!");
+	typedef Score<int, Simple> TScoringScheme;
+
+    // Each of the following blocks contains a test case for the gapped X-drop
+    // seed extension.
+    
+    {
+        DnaString query =    "AAACCCTTTGGGTTTTT";
+        DnaString database = "AACCCCTTTGGTGAAAAA";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(4, 4, 3);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 1, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 0u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 13u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 0u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 14u);
+    }
+    {
+        DnaString query =    "aaaacgatcgatgc";
+        DnaString database = "ttttcgatcgatgcttttt";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(4, 4, 9);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 1, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 3u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 14u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 3u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 15u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), 0);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), 2);
+    }
+    {
+        DnaString query =    "aaaacgatcgatgc";
+        DnaString database = "ttttcgatcgatgcttttt";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(5, 5, 7);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 1, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 3u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 14u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 3u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 15u);
+    }
+    {
+        DnaString query =    "aaaacgatcgatgc";
+        DnaString database = "ttttcgatcgatgcttttt";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(6, 6, 6);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 0, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 14u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 14u);
+    }
+    {
+        DnaString query =        "cgatcgatgcaaaaaaaaa";
+        DnaString database = "ttttcgatcgatgc";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(1, 5, 5);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 1, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 0u);
+//        SEQAN_ASSERT_EQ(getEndDim0(seed), 11u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 3u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 14u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), 2);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), 5);
+    }
+    {
+        DnaString query = "aaaaaaaaacgatcgatgcaaaaaaaaa";
+        DnaString database =       "cgatcgatgccaact";
+        TScoringScheme scoringScheme(2, -1, -1);
+        TSeed seed(11,2,4);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 1, GappedXDrop());
+
+//        SEQAN_ASSERT_EQ(getBeginDim0(seed), 8u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 23u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 0u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 14u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), -10);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), -7);
+    }
+    {
+        DnaString query =      "ttttagtgacgttttaaaaaa";
+        DnaString database = "ccccagctgatcgtttgcccccc";
+        TScoringScheme scoringScheme(1,-5,-5);
+        TSeed seed(9,11,5);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 7, GappedXDrop());
+        
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 15u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 17u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), 0);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), 2);
+    }
+    {
+        DnaString query =    "aaaaaattttgcagtgatttt";
+        DnaString database = "ccccccgtttgctagtcgacccc";
+        TScoringScheme scoringScheme(1, -5, -5);
+        TSeed seed(7, 7, 5);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 7, GappedXDrop());
+        
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 6u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 17u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 6u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 19u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), 0);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), 2);
+    }
+    {
+        DnaString query =  "ccccagctgatcgtttgcccccc";
+        DnaString database = "ttttagtgacgttttaaaaaa";
+        TScoringScheme scoringScheme(1, -5, -5);
+        TSeed seed(11, 9, 5);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 7, GappedXDrop());
+
+        SEQAN_ASSERT_EQ(getBeginDim0(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 17u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 4u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 15u);
+        SEQAN_ASSERT_EQ(getUpperDiagonal(seed), -2);
+        SEQAN_ASSERT_EQ(getLowerDiagonal(seed), 0);
+    }
+    {
+        DnaString query =  "CTGACAGCGAGAAACAGTAACCAGCTAGCCT";
+        DnaString database =    "AGCAGCAAACAGTAAGCCAGCAGCCT";
+        TScoringScheme scoringScheme(1, -9, -9);
+        TSeed seed(26, 21, 5);
+
+        extendSeed(seed, query, database, EXTEND_BOTH, scoringScheme, 45, GappedXDrop());
+
+//        SEQAN_ASSERT_EQ(getBeginDim0(seed), 2u);
+        SEQAN_ASSERT_EQ(getBeginDim1(seed), 0u);
+        SEQAN_ASSERT_EQ(getEndDim0(seed), 31u);
+        SEQAN_ASSERT_EQ(getEndDim1(seed), 26u);
+    }
 }
 
 

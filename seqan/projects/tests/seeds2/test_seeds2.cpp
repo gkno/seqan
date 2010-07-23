@@ -57,8 +57,14 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
 
-    // Tests for seed sets.    
+    // Tests for seed sets.
+    // TODO(holtgrew): All these tests are for Simple Seeds only at the moment.  When all chaining strategies are in place, add a version for chained seeds, too.  Should be only copy-and-paste work.
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_length_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_length_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_score_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_score_unordered);
 
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_no_threshold_unordered);
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_right_merging_possible_no_threshold_unordered);
@@ -67,6 +73,14 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_length_unordered);
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered);
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_no_threshold_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_right_chaining_possible_no_threshold_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_impossible_no_threshold_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_length_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_length_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_scored_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_scored_unordered);
 
     // Tests for seed algorithms
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
