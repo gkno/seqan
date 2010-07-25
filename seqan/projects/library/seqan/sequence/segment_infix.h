@@ -64,8 +64,7 @@ public:
     // Check member variables with assertions.  This is called in the
     // constructors.
     void _checkMemberVariables() const {
-        // TODO(holtgrew): Should use SEQAN_ASSERT_*.
-        assert( data_begin_position <= data_end_position );
+        SEQAN_ASSERT_LEQ(data_begin_position, data_end_position);
     }
 
 /**

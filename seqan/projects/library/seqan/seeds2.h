@@ -62,6 +62,8 @@
 #include <seqan/seeds2/seeds_seed_set_unordered.h>
 
 // Banded alignment around seeds.
+#include <seqan/seeds2/align_seed_banded_linear.h>
+#include <seqan/seeds2/align_seed_banded_affine.h>
 #include <seqan/seeds2/align_seed_banded.h>
 
 // Banded chain alignment.
