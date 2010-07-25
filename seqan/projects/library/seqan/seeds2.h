@@ -26,6 +26,7 @@
 // Preliminaries
 // ===========================================================================
 
+#include <algorithm>
 #include <list>
 #include <new>
 
@@ -34,6 +35,10 @@
 #include <seqan/score.h>
 #include <seqan/align.h>
 #include <seqan/map.h>
+
+// #ifdef SEQAN_SWITCH_USE_FORWARDS
+// #include <seqan/seeds2/seeds2_generated_forwards.h>
+// #endif
 
 // ===========================================================================
 // Seeds Module
@@ -49,15 +54,20 @@
 #include <seqan/seeds2/seeds_seed_chained.h>
 
 // Algorithms on Seed objects.
- #include <seqan/seeds2/seeds_extension.h>
+#include <seqan/seeds2/seeds_extension.h>
 
 // Class SeedSet, specializations, iterators.
 #include <seqan/seeds2/basic_iter_indirect.h>
 #include <seqan/seeds2/seeds_seed_set_base.h>
 #include <seqan/seeds2/seeds_seed_set_unordered.h>
 
-// Algorithms on SeedSet objects
-// #include <seqan/seeds2/seeds_add_seed.h>
+// Banded alignment around seeds.
+#include <seqan/seeds2/align_seed_banded.h>
+
+// Banded chain alignment.
+#include <seqan/seeds2/align_chain_banded_linear.h>
+#include <seqan/seeds2/align_chain_banded_affine.h>
+#include <seqan/seeds2/align_chain_banded.h>
 
 // Global chaining algorithms
 // #include <seqan/seeds2/seeds_global_chaining_base.h>

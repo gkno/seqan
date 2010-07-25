@@ -32,6 +32,8 @@
 #include "test_seeds_seed_simple.h"
 #include "test_seeds_seed_set_base.h"
 #include "test_seeds_extension.h"
+#include "test_align_seed_banded.h"
+#include "test_align_chain_banded.h"
 
 SEQAN_BEGIN_TESTSUITE(test_seeds) {
     // Tests for seed diagonals.
@@ -99,7 +101,19 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_chained);
     SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
 
+    // Tests for the banded alignment algorithms.
+    SEQAN_CALL_TEST(test_align_seed_banded_gotoh);
+    SEQAN_CALL_TEST(test_align_seed_banded_needleman_wunsch);
+
+    // Tests for the banded chain alignment algorithms.
+    SEQAN_CALL_TEST(test_align_chain_banded_align_linear);
+    SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
+
     // Verify checkpoints.
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded_linear.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_seed_banded.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_chained.h");
