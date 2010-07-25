@@ -94,6 +94,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_scored_unordered);
 
     // Tests for seed algorithms
+    // TODO(holtgrew): Un-comment again!
     // SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
     // SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_simple);
     // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_simple);
@@ -106,8 +107,9 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_seed_banded_needleman_wunsch);
 
     // Tests for the banded chain alignment algorithms.
-    // SEQAN_CALL_TEST(test_align_chain_banded_align_linear);
-    // SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
+    // TODO(holtgrew): Un-comment again!
+    SEQAN_CALL_TEST(test_align_chain_banded_align_linear);
+    SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
 
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");

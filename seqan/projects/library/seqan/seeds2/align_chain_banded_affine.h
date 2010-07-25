@@ -30,143 +30,6 @@ namespace seqan {
 // TODO(bkehr): large parts of this file are identical to banded_chain_align.h
 
 // ===========================================================================
-// Forwards
-// ===========================================================================
-
-template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>
-void
-_gotoh_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_diag,
-				 Matrix<TScoreValue, DIMENSION> & matrix_vert,
-				 Matrix<TScoreValue, DIMENSION> & matrix_hori,	//edit matrix
-				 Seed<TSeedSpec, TSeedConfig> const &seed1,				//Seed nearer to the end
-				 Seed<TSeedSpec, TSeedConfig> const &seed2,				//Seed nearer to the start
-				 TValue2 k_begin,									//upper diagonal extension
-				 TValue2 k_end,										//lower diagonal extension
-				 TString const & str1_,								//first sequence
-				 TString const & str2_,								//secondSequence
-				 Score<TScoreValue, Simple> const & score_,			//score matrix
-				 String<TScoreValue> & init_diag,					//Values for initialisation
-				 String<TScoreValue> & init_vert,					//Values for initialisation
-				 String<TScoreValue> & init_hori);					//Values for initialisation
-
-template <typename TContainer, typename TValue, typename TScore, typename TAlign>
-TScore
-chain_to_alignment_gotoh(TContainer const &seedChain, 
-						TValue k,
-						TAlign & whole_alignment, 
-						Score< TScore, Simple> const &scoreMatrix);
-
-template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>
-TScoreValue
-_banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
-			  Matrix<TScoreValue, DIMENSION> & matrix_vert,
-			  Matrix<TScoreValue, DIMENSION> & matrix_hori,
-			  Seed<TSeedSpec, TSeedConfig> const &seed,
-			  TValue2 k,
-			  TString const & str1_,
-			  TString const & str2_,
-			  Score<TScoreValue, Simple> const & score_,
-			  String<TScoreValue> & init_diag,
-			  String<TScoreValue> & init_vert,
-			  String<TScoreValue> & init_hori);
-
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
-typename Size<Matrix<TScoreValue, DIMENSION> >::Type
-_banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
-					 Matrix<TScoreValue, DIMENSION> & diag_matrix_,
-					 Matrix<TScoreValue, DIMENSION> & vert_matrix_,
-					 Matrix<TScoreValue, DIMENSION> & hori_matrix_,
-					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_
-					);
-
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
-TScoreValue
-_gotoh_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
-						Matrix<TScoreValue, DIMENSION> & diag_matrix_,
-						Matrix<TScoreValue, DIMENSION> & vert_matrix_,
-						Matrix<TScoreValue, DIMENSION> & hori_matrix_,
-						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_);
-
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateBandedSeedGotoh(TSeed const &seed,
-					 TDiff k,
-					 TMatrix &matrix_diag,
-					 TMatrix &matrix_vert,
-					 TMatrix &matrix_hori,
-					 TString *p_seq1,
-					 TString *p_seq2,
-					 TScoreString &score_str_diag,
-					 TScoreString &score_str_vert,
-					 TScoreString &score_str_hori,
-					 TValue &score_length,
-					 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-					 TScoreMatrix const &scoreMatrix);
-
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateFirstRectangleGotoh(TSeed const &seed,
-						 TDiff k,
-						 TMatrix &matrix_diag,
-						 TMatrix &matrix_vert,
-						 TMatrix &matrix_hori,
-						 TString *p_seq1,
-						 TString *p_seq2,
-						 TScoreString &score_str_diag,
-						 TScoreString &score_str_vert,
-						 TScoreString &score_str_hori,
-						 TValue &score_length,
-						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-						 TScoreMatrix const &scoreMatrix);
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateLastRectangleGotoh(TSeed const &seed,
-						TDiff k,
-						TMatrix & matrix_diag,
-						TMatrix & matrix_vert,
-						TMatrix & matrix_hori,
-						TString *p_seq1,
-						TString *p_seq2,
-						TScoreString & score_str_diag,
-						TScoreString & score_str_vert,
-						TScoreString & score_str_hori,
-						TValue &score_length,
-						::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-						TScoreMatrix const &scoreMatrix);
-
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateRectangleGotoh(TSeed const &seed,
-					TSeed const &seed2,
-					TDiff k_begin,
-					TDiff k_end,
-					TMatrix & matrix_diag,
-					TMatrix & matrix_vert,
-					TMatrix & matrix_hori,
-					TString *p_seq1,
-					TString *p_seq2,
-					TScoreString &score_str_diag,
-					TScoreString &score_str_vert,
-					TScoreString &score_str_hori,
-					TValue &score_length,
-					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
-					TScoreMatrix const &scoreMatrix);
-
-template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>
-void
-_banded_gotoh_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//edit matrix
-							  Matrix<TScoreValue, DIMENSION> & matrix_vert,
-							  Matrix<TScoreValue, DIMENSION> & matrix_hori,
-							  Seed<TSeedSpec, TSeedConfig> const &seed,				//Seed
-							  TValue2 k,											//diagonal extension
-							  TString const & str1_,							//first sequence
-							  TString const & str2_,							//secondSequence
-							  Score<TScoreValue, Simple> const & score_,		//score matrix
-							  String<TScoreValue> & init_diag,					//Values for initialisation
-							  String<TScoreValue> & init_vert,
-							  String<TScoreValue> & init_hori);
-
-// ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
@@ -178,13 +41,20 @@ _banded_gotoh_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//ed
 // Functions
 // ===========================================================================
 
+// TODO(holtgrew): s/TScore/TScoreValue/
 template <typename TContainer, typename TValue, typename TScore, typename TAlign>
 TScore
-chain_to_alignment_gotoh(TContainer const &seedChain, 
-						TValue k,
-						TAlign & whole_alignment, 
-						Score< TScore, Simple> const &scoreMatrix)
+_bandedChainAlignment_Gotoh(
+        // TODO(holtgrew): whole_alignment should be renamed to alignment and be the first parameter since it is the result.
+        TContainer const & seedChain, 
+        TValue k,
+        TAlign & whole_alignment, 
+        // TODO(holtgrew): Rename scoreMatrix to scoringScheme.
+        Score<TScore, Simple> const & scoreMatrix)
 {
+	SEQAN_CHECKPOINT;
+    // TODO(holtgrew): The alignment matrix is computed from the lower right to the upper left. Why?
+
     typedef typename Infix<typename Source<TAlign>::Type>::Type TString;    //Sequence in an align object
 	typedef typename Size<TString>::Type TSize;								//Size of the string
 	typedef typename Iterator<const TContainer, Standard>::Type TIterator;	//Iterator for the seed chain
@@ -258,6 +128,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	return score_str_diag[0];
 }
 
+// TODO(holtgrew): This is more or less the same as _bandedAlignment_Gotoh_align() from banded seed alignment! Make a diff of the original code and create a more general function.
 template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>
 TScoreValue
 _banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
@@ -272,6 +143,8 @@ _banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 			  String<TScoreValue> & init_vert,
 			  String<TScoreValue> & init_hori)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
 	typedef typename Size<TMatrix>::Type TSize;
@@ -537,7 +410,7 @@ _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
 					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_
 					)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	
 	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
@@ -608,7 +481,7 @@ _gotoh_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
 						Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_)
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
@@ -678,6 +551,8 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 					 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 					 TScoreMatrix const &scoreMatrix)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
     typedef typename Infix<TString>::Type TSegment;
@@ -774,6 +649,8 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						 TScoreMatrix const &scoreMatrix)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 	TValue new_connect;
@@ -830,6 +707,8 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 						::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
 						TScoreMatrix const &scoreMatrix)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
     typedef typename Infix<TString>::Type TSegment;
@@ -923,6 +802,8 @@ _calculateRectangleGotoh(TSeed const &seed,
 					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
 					TScoreMatrix const &scoreMatrix)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
     typedef typename Infix<TString>::Type TSegment;
@@ -1025,8 +906,7 @@ _gotoh_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 				 String<TScoreValue> & init_vert,					//Values for initialisation
 				 String<TScoreValue> & init_hori)					//Values for initialisation
 {
-SEQAN_CHECKPOINT
-
+	SEQAN_CHECKPOINT;
 
 	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
@@ -1329,7 +1209,7 @@ _gotoh2(Matrix<TScoreValue, DIMENSION> & matrix_diag,		//edit matrix
 		TString const & str2_,								//secondSequence
 		Score<TScoreValue, Simple> const & score_)			//score matrix
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 
 	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 	typedef typename Size<TMatrix> ::Type TValue;
@@ -1497,6 +1377,8 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 						TValue width_stop, 
 						TValue height_stop)
 {
+	SEQAN_CHECKPOINT;
+
 	typedef typename Position<Matrix<TScoreValue, DIMENSION> >::Type TPosition;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
@@ -1573,8 +1455,7 @@ _banded_gotoh_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//ed
 							  String<TScoreValue> & init_vert,
 							  String<TScoreValue> & init_hori)					
 {
-SEQAN_CHECKPOINT
-
+	SEQAN_CHECKPOINT;
 
 	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 

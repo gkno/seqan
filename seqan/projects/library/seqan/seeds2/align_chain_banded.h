@@ -73,18 +73,20 @@ bandedChainAlignment(TContainer const & seedChain,
         // TODO(holtgrew): If we have to copy, why not use a reverse string modifier so it is reversed on the fly?
         TContainer copyChain(seedChain);
         std::reverse(begin(copyChain), end(copyChain));
-        
+
+        // TODO(holtgrew): For consistency, we should have bandedChainAlignment(..., {Gotoh, NeedlemanWunsch}) functions.
+
         if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
-            return chain_to_alignment_needlemanwunsch(copyChain, k, alignment, scoringScheme);
+            return _bandedChainAlignment_NW(alignment, copyChain, k, scoringScheme);
         else
-            return chain_to_alignment_gotoh(copyChain, k, alignment, scoringScheme);
+            return _bandedChainAlignment_Gotoh(copyChain, k, alignment, scoringScheme);
     }
     // Chain of seeds is properly sorted, simply kick of the banded
     // chain alignment.
 	if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
-		return chain_to_alignment_needlemanwunsch(seedChain, k, alignment, scoringScheme);
+		return _bandedChainAlignment_NW(alignment, seedChain, k, scoringScheme);
 	else
-		return chain_to_alignment_gotoh(seedChain, k, alignment, scoringScheme);
+		return _bandedChainAlignment_Gotoh(seedChain, k, alignment, scoringScheme);
 }
     
 }  // namespace seqan

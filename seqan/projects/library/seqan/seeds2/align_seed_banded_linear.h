@@ -252,7 +252,7 @@ _bandedAlignment_NW_align(
     //
     goPrevious(finger3);
 
-    // TODO(holtgrew): The second loop now computes the band up from the lower right triangle. It is not clear to me whether the upper left empty triangle is computed or now.
+    // TODO(holtgrew): The second loop now computes the band up from the lower right triangle. It is not clear to me whether the upper left empty triangle is computed or not.
     while (y != y_begin) {
 		verticalValue = *finger3;
 		finger1 = finger3;
