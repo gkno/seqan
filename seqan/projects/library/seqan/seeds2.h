@@ -67,8 +67,9 @@
 #include <seqan/seeds2/align_seed_banded.h>
 
 // Banded chain alignment.
+#include <seqan/seeds2/align_chain_banded_alignment_chain.h>
 #include <seqan/seeds2/align_chain_banded_linear.h>
-#include <seqan/seeds2/align_chain_banded_affine.h>
+// #include <seqan/seeds2/align_chain_banded_affine.h>
 #include <seqan/seeds2/align_chain_banded.h>
 
 // Global chaining algorithms
