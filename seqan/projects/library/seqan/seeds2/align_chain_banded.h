@@ -88,7 +88,119 @@ bandedChainAlignment(TContainer const & seedChain,
 	else
 		return _bandedChainAlignment_Gotoh(seedChain, k, alignment, scoringScheme);
 }
-    
+
+//"Glues" single alignments together
+template<typename TValue, typename TAlign, typename TAlign2>
+void
+// TODO(holtgrew): wholeAlignment should be named alignment and be the first alignment.
+_constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > const & me,
+					TAlign2 & wholeAlignment)
+{
+	SEQAN_CHECKPOINT;
+
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::const_iterator TIterator;
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
+	typedef typename Row<TAlign2>::Type TRow2;
+	typedef typename Iterator<TRow2, Standard>::Type TTargetIterator2;
+
+	TTargetIterator2 align_it0 = iter(row(wholeAlignment, 0), 0);
+	TTargetIterator2 align_it1 = iter(row(wholeAlignment, 1), 0);
+	//TValue position = 0;
+	int length_ = me.size()-1;
+	TIterator it;
+
+	typedef typename Position<TAlign>::Type TPosition;
+	for (int i = length_; i != -1; --i)
+	{
+		//cout << "LENGHT: " << me[i].size() << endl;
+		it = me[i].begin();//find(position);
+		//position = it->second.i1;
+		TRow tmp_row0 = row(it->second.i2, 0);
+		TRow tmp_row1 = row(it->second.i2, 1);
+		TPosition end_ = endPosition(cols(it->second.i2));
+		unsigned int j = 0;
+		for (TPosition it_ = beginPosition(cols(it->second.i2)); it_ != end_; ++it_)
+		{
+			if(isGap(tmp_row0, j))
+				insertGap(align_it0);
+			if(isGap(tmp_row1, j))
+				insertGap(align_it1);
+			++align_it0;
+			++align_it1;
+			++j;
+		}
+	}
+}
+
+
+template<typename TAlign, typename TValue>
+void
+_rec_delete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
+		   TValue index,										//position im vector
+		   TValue position)										//alignment to delete
+{
+	SEQAN_CHECKPOINT;
+
+	if (position != -1)
+	{
+		typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
+		it = vec[index].find(position);
+		bool x = true; //true = successor of it can be deleted
+		if (it != vec[index].begin())
+		{
+			it1 = it;
+			--it1;
+			x = (it1->second.i1 != it->second.i1);
+		}
+		it2 = it;
+		++it2;
+		if (x && (it2 != vec[index].end()))
+		{
+			x = (it2->second.i1 != it->second.i1);
+		}
+		if (x)
+			_rec_delete(vec, index-1, it->second.i1);
+		vec[index].erase(position);
+	}
+}
+
+template<typename TValue, typename TAlign, typename TSize>
+void
+_deleteAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &me,
+				TSize old_end,
+				TSize new_end)
+{
+	SEQAN_CHECKPOINT;
+
+	//cout << "me: " << me[0].size() << endl;
+	int length = me.size()-2;
+	typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
+	for(TSize i = old_end+1; i < new_end; ++i)
+	{
+	
+		it = me[length].find(i);
+		bool x = true; //true = successor of it can be deleted
+		if (it != me[length].begin())
+		{
+			it1 = it;
+			--it1;
+			x = (it1->second.i1 != it->second.i1);
+		}
+		it2 = it;
+		++it2;
+		if (x && (it2 != me[length].end()))
+		{
+			x = (it2->second.i1 != it->second.i1);
+		}
+		if (x)
+			_rec_delete(me, length-1, it->second.i1);
+		me[length].erase(i);
+		//cout << "me2: " << me[0].size() << endl;
+	}
+	
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEEDS_ALIGN_CHAIN_BANDED_H_

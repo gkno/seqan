@@ -79,8 +79,6 @@ _bandedChainAlignment_NW(
 
 	TInfix seq1 = sourceSegment(row(alignment, 0));
 	TInfix seq2 = sourceSegment(row(alignment, 1));
-    TInfix *p_seq1 = &seq1;  // TODO(holtgrew): Why not copy infixes? Cheap...
-	TInfix *p_seq2 = &seq2;
 	
 	TBandwidth score_length = 0;
 	TMatrix matrix_;
@@ -98,8 +96,8 @@ _bandedChainAlignment_NW(
 	if (length(*it) <= k || (getEndDim1(*it) - 1 - getBeginDim1(*it)) <= k)
  		k_end = length(*it) - 1;
 
-	_calculateLastRectangle(*it, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoringScheme);
-	_calculateBandedSeed(*it, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoringScheme);
+	_calculateLastRectangleNW(*it, k_end, matrix_, seq1, seq2, score_str, score_length, alignmentVector, scoringScheme);
+	_calculateBandedSeedNW(*it, k_end, matrix_, seq1, seq2, score_str, score_length, alignmentVector, scoringScheme);
 
     // Compute alignment around all but the first and last rectangle
     // and last seed.
@@ -113,14 +111,14 @@ _bandedChainAlignment_NW(
 		else 
 			k_end = k;
 		
-		_calculateRectangle(*it, *it2, k_begin, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoringScheme);	
-		_calculateBandedSeed(*it2, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoringScheme);
+		_calculateRectangleNW(*it, *it2, k_begin, k_end, matrix_, seq1, seq2, score_str, score_length, alignmentVector, scoringScheme);	
+		_calculateBandedSeedNW(*it2, k_end, matrix_, seq1, seq2, score_str, score_length, alignmentVector, scoringScheme);
 		++it;
 		++it2;
 	}
 
     // Compute alignment of first rectangle.
-	_calculateFirstRectangle(*it, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoringScheme);
+	_calculateFirstRectangleNW(*it, k_end, matrix_, seq1, seq2, score_str, score_length, alignmentVector, scoringScheme);
 
     // -----------------------------------------------------------------------
     // Construct Alignment, Return Score
@@ -129,320 +127,239 @@ _bandedChainAlignment_NW(
 	return score_str[0];
 }
 
-// TODO(holtgrew): _constructAlignment is shared with affine gap costs.
-//
-//"Glues" single alignments together
-template<typename TValue, typename TAlign, typename TAlign2>
+
+// TODO(holtgrew): The result is alignmentVector so this should be the first argument.
+template <typename TSeedSpec, typename TSeedConfig, typename TSequence, typename TBandwidth, typename TScoreValue, unsigned DIMENSION, typename TScoreString, typename TValue, typename TAlign>
 void
-// TODO(holtgrew): wholeAlignment should be named alignment and be the first alignment.
-_constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > const & me,
-					TAlign2 & wholeAlignment)
+_calculateLastRectangleNW(
+        Seed<TSeedSpec, TSeedConfig> const & seed,
+        TBandwidth k,
+        Matrix<TScoreValue, DIMENSION> & matrix_,
+        TSequence & seq1,
+        TSequence & seq2,
+        TScoreString & score_str,
+        TValue & score_length,
+        ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > & alignmentVector,
+        Score<TScoreValue, Simple> const & scoringScheme)
 {
 	SEQAN_CHECKPOINT;
 
-	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::const_iterator TIterator;
-	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	typedef typename Row<TAlign2>::Type TRow2;
-	typedef typename Iterator<TRow2, Standard>::Type TTargetIterator2;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+    typedef Matrix<TScoreValue, DIMENSION> TMatrix;
+	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
 
-	TTargetIterator2 align_it0 = iter(row(wholeAlignment, 0), 0);
-	TTargetIterator2 align_it1 = iter(row(wholeAlignment, 1), 0);
-	//TValue position = 0;
-	int length_ = me.size()-1;
-	TIterator it;
+    TValue seq1_end = endPosition(seq1);
+	TValue seq2_end = endPosition(seq2);
+	TValue width_diag=getLowerDiagonal(seed) - getEndDiagonal(seed)+k;
+	TValue width =  width_diag + seq1_end - (getEndDim0(seed) - 1);
+	TValue height_diag = getEndDiagonal(seed) - getUpperDiagonal(seed)+k;
+	TValue height = height_diag + seq2_end - (getEndDim1(seed) - 1);
+	
+	resize(score_str, width_diag+height_diag+1);
+	
+    typedef typename Infix<TSequence>::Type TSegment;
+	TSegment seg1 = infix(host(seq1),seq1_end-width+1,seq1_end);
+	TSegment seg2 = infix(host(seq2),seq2_end-height+1,seq2_end);
 
-	typedef typename Position<TAlign>::Type TPosition;
-	for (int i = length_; i != -1; --i)
+	_needleman_wunsch(matrix_, seg1, seg2, scoringScheme);
+
+	TValue width_align = seq1_end - width  + width_diag +1;
+	TValue height_align = seq2_end - height+1;
+
+	TMatrixIterator iter_ = begin(matrix_);
+
+	TValue x = width_diag;
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
+	
+	//last rectangle
+	for(TValue i = 0; i<height_diag; ++i)
 	{
-		//cout << "LENGHT: " << me[i].size() << endl;
-		it = me[i].begin();//find(position);
-		//position = it->second.i1;
-		TRow tmp_row0 = row(it->second.i2, 0);
-		TRow tmp_row1 = row(it->second.i2, 1);
-		TPosition end_ = endPosition(cols(it->second.i2));
-		unsigned int j = 0;
-		for (TPosition it_ = beginPosition(cols(it->second.i2)); it_ != end_; ++it_)
-		{
-			if(isGap(tmp_row0, j))
-				insertGap(align_it0);
-			if(isGap(tmp_row1, j))
-				insertGap(align_it1);
-			++align_it0;
-			++align_it1;
-			++j;
-		}
+		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
+		TMapIterator mapIt = --alignmentVector[0].end();
+		TSegment seg1_align = infix(host(seq1), width_align, seq1_end);
+		TSegment seg2_align = infix(host(seq2), height_align, seq2_end);
+		resize(rows(mapIt->second.i2),2);
+		assignSource(row(mapIt->second.i2,0),seg1_align);
+		assignSource(row(mapIt->second.i2,1), seg2_align);
+		setPosition(iter_, x);
+		score_str[i] = *iter_;
+		mapIt->second.i1 = -1;
+		_needleman_wunsch_trace_lastRectangleNW(mapIt->second.i2, iter_, scoringScheme);
+		x+=width;
+		++height_align;
 	}
+	TValue a = height_diag + width_diag+1;
+	
+	for(TValue i = height_diag; i<a; ++i)
+	{
+		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
+		TMapIterator mapIt = --alignmentVector[0].end();
+		TSegment seg1_align = infix(host(seq1), width_align, seq1_end);
+		TSegment seg2_align = infix(host(seq2), height_align, seq2_end);
+		resize(rows(mapIt->second.i2),2);
+		assignSource(row(mapIt->second.i2,0),seg1_align);
+		assignSource(row(mapIt->second.i2,1), seg2_align);
+		setPosition(iter_, x);
+		score_str[i] = *iter_;
+		mapIt->second.i1 = -1;
+		_needleman_wunsch_trace_lastRectangleNW(mapIt->second.i2, iter_, scoringScheme);
+		--x;
+		--width_align;
+	}
+	score_length = length(score_str);
 }
 
 
-// TODO(holtgrew): This is more or less the same as _bandedAlignment_NW_align() from banded seed alignment! Make a diff of the original code and create a more general function.
-template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>
-TScoreValue
-_banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
-						 Seed<TSeedSpec, TSeedConfig> const & seed,
-						 TValue2 k,
-						 TString const & str1_,
-						 TString const & str2_,
-						 Score<TScoreValue, Simple> const & score_,
-						 String<TScoreValue> init)
+//calculation and backtracking of the edit matrix between two seeds
+template<typename TSeed, typename TSequence, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
+void
+_calculateRectangleNW(TSeed const &seed,
+					TSeed const &seed2,
+					TDiff k_begin,
+					TDiff k_end,
+					TMatrix &matrix_,
+					TSequence seq1,
+					TSequence seq2,
+					TScoreString &score_str,
+					TValue &score_length,
+					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+					TScoreMatrix const &scoringScheme)
 {
 	SEQAN_CHECKPOINT;
 
-	typedef Matrix<TScoreValue, DIMENSION> TMatrix;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
+    typedef typename Infix<TSequence>::Type TSegment;
+	TSegment seg1b_align = infix(host(seq1), (getEndDim0(seed2) - 1)-(getLowerDiagonal(seed2) - getEndDiagonal(seed2)   + k_end) + 1, getBeginDim0(seed) + getStartDiagonal(seed) - getUpperDiagonal(seed) + k_begin);
+	TSegment seg2b_align = infix(host(seq2), (getEndDim1(seed2) - 1)-(getEndDiagonal(seed2) -  getUpperDiagonal(seed2) + k_end) + 1, getBeginDim1(seed) + getLowerDiagonal(seed)  - getStartDiagonal(seed) + k_begin);
 
-	typedef typename Size<TMatrix>::Type TSize;
-	typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
+	_needleman_wunsch_rectangle(matrix_, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoringScheme,score_str);
 
-	typedef typename Iterator<TString const, Rooted>::Type TStringIterator;
-	typedef typename Value<TString const>::Type TAlphabet;
-
-	//-------------------------------------------------------------------------
-	//define some variables
-	TSize height = getLowerDiagonal(seed) - getUpperDiagonal(seed)+1;
-	TSize str1_length = height+2*k;
-	TSize str2_length = length(str2_);
-
-	TStringIterator x_begin = begin(str1_);
-	TStringIterator x_end = end(str1_) -1;
-	TStringIterator y_begin = begin(str2_);
-	--y_begin;
-	TStringIterator y_end = end(str2_)-1;
+	TValue width_diag = getLowerDiagonal(seed2) - getEndDiagonal(seed2)+k_end;
+	TValue height_diag = getEndDiagonal(seed2) - getUpperDiagonal(seed2)+k_end;
 	
-	TSize up_height = getLowerDiagonal(seed) - getStartDiagonal(seed) + k; //equals length of empty lower triangle
-	//TValue up_width = str1_length - up_height;
-	TSize down_height = getEndDiagonal(seed) - getUpperDiagonal(seed) + k; //equals length of empty lower triangle
-	TSize down_width = str1_length - down_height;
-	TSize length_right_diag = str2_length - down_height;
-	TSize length_left_diag = str2_length - up_height;
+	TValue w_d2 = getStartDiagonal(seed) - getUpperDiagonal(seed) + k_begin;
+	TValue h_d2 = getLowerDiagonal(seed) - getStartDiagonal(seed) + k_begin;
 
-	TScoreValue score_match = scoreMatch(score_);
-	TScoreValue score_mismatch = scoreMismatch(score_);
-	TScoreValue score_gap = scoreGapExtend(score_);
+	TValue overall = height_diag + width_diag + 1;
 
-	TScoreValue horizontalValue = 0;
-	TScoreValue border_ = score_gap;
-	TScoreValue verticalValue = border_;
+	resize(score_str, overall);
+	TMatrixIterator matr_it = begin(matrix_);
+	setPosition(matr_it, width_diag);
 
-	setDimension(matrix_, 2);
-	setLength(matrix_, 0, str1_length + 2);
-	setLength(matrix_, 1, str2_length + 1);
-	resize(matrix_);
-	
-	TMatrixIterator col_ = begin(matrix_);
-	TMatrixIterator finger1;
-	TMatrixIterator finger2;
-	TMatrixIterator finger3;
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
+	TValue width_align = (getEndDim0(seed2) - 1)+1;
+	TValue height_align = (getEndDim1(seed2) - 1) - height_diag + 1;
 
-	TStringIterator x = x_begin;
-	TStringIterator y = y_begin;
+	TValue width_stop = getBeginDim0(seed) - (getEndDim0(seed2) - 1)-1;
+	TValue height_stop = getBeginDim1(seed) - ((getEndDim1(seed2) - 1) - height_diag)-1;
 
-	//-------------------------------------------------------------------------
-	// init
+	TValue old_connect = -1;
+	TValue new_connect;
+	for(TValue j = 0; j<height_diag; ++j)
+	{
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
+		TMapIterator mapIt = --(alignmentVector.back().end());
+		TSegment seg1_align = infix(host(seq1), width_align, getBeginDim0(seed) + w_d2);
+		TSegment seg2_align = infix(host(seq2), height_align, getBeginDim1(seed)+ h_d2);
+		resize(rows(mapIt->second.i2),2);
+		assignSource(row(mapIt->second.i2,0), seg1_align);
+		assignSource(row(mapIt->second.i2,1), seg2_align);
 
-	TScoreValue inf = -1000000;
-	finger2 = col_;
-
-	setPosition(finger2, length(matrix_, 0)-1);
-	for (unsigned int i = 1; i != length_right_diag; ++i){
-		*finger2 = inf;
-		goNext(finger2, 1);
-	}
-
-	TScoreValue pos = -1;  // TODO(holtgrew): Shouldn't this be TPosition? Why negative?
-
-	*finger2 = inf;
-	for (int i = -1; i != down_height; ++i){
-		goPrevious(finger2, 0);
-		goNext(finger2,1);
-		*finger2 = init[++pos];
-	}
-		
-	finger3 = finger2;
-
-	for (int i = 0; i != down_width; ++i){
-		goPrevious(finger2, 0);
-		*finger2 = init[++pos];
-	}
-
-	*finger2 = inf;
-	TScoreValue tmp;
-	//-------------------------------------------------------------------------
-	//first section
-	
-	y=y_end;
-	TSize run_length = down_width;
-	TSize measure = 0;
-
-	for (int i = -1; i != down_height; ++i){	
-		verticalValue = *finger3;
-		finger1 = finger3;
-		goPrevious(finger1,0);
-		goPrevious(finger3,1);
-		finger2 = finger3;
-		goNext(finger3,0);
-		horizontalValue = *finger3;
-		x = x_end;
-		for (unsigned int j = 0; j != run_length; ++j){
-			if (*x==*y){
-				*finger2 = verticalValue + score_match;
-			} else {
-				tmp = *finger1;
-				TScoreValue s1 = verticalValue + score_mismatch;
-				TScoreValue s2 = score_gap + ((horizontalValue > tmp) ? horizontalValue : tmp);
-				*finger2 = (s1 > s2) ? s1 : s2;
-			}
-			horizontalValue = *finger2;
-			goPrevious(finger2);
-			verticalValue = *finger1;
-			goPrevious(finger1);
-			--x;
+		//cout << "ALL: " << length(seg1_align) << " " << length(seg2_align) << " " << width_stop << " " <<height_stop << endl;
+		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
+		score_str[j] = *matr_it;
+		mapIt->second.i1 = new_connect;
+		goNext(matr_it, 1);
+		++height_align;
+		--height_stop;
+		if (old_connect != new_connect){
+			//cout << "ups "<< old_connect << " " << new_connect << endl;
+			_deleteAlignment(alignmentVector, old_connect, new_connect);
+			//cout << "ups_ENDE" << endl;
 		}
-		*finger2 = inf;
-		++measure;
-		if (measure < length_left_diag)
-			++run_length;
-		--y;
+		old_connect = new_connect;
 	}
-	--run_length;
-
-	goPrevious(finger3);
-
-	while (y!= y_begin)
-	{	
-		verticalValue = *finger3;
-		finger1 = finger3;
-		goPrevious(finger1,0);
-		goPrevious(finger3,1);
-		finger2 = finger3;
-		x = --x_end;
-		horizontalValue = inf;
-		for (unsigned int j = 0; j != run_length; ++j){
-			if (*x==*y){
-				*finger2 = verticalValue + score_match;
-			} else {
-				tmp = *finger1;
-				TScoreValue s1 = verticalValue + score_mismatch;
-				TScoreValue s2 = score_gap + ((horizontalValue > tmp) ? horizontalValue : tmp);
-				*finger2 = (s1 > s2) ? s1 : s2;
-			}
-			horizontalValue = *finger2;
-			goPrevious(finger2);
-			verticalValue = *finger1;
-			goPrevious(finger1);
-			--x;
-		}
-		*finger2 = inf;
-		++measure;
-		if (measure >= length_left_diag)
-			--run_length;
-		--y;
+	for(TValue j = height_diag; j < overall; ++j)
+	{
+		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
+		TMapIterator mapIt = --(alignmentVector.back().end());
+		TSegment seg1_align = infix(host(seq1), width_align, getBeginDim0(seed) + w_d2);
+		TSegment seg2_align = infix(host(seq2), height_align, getBeginDim1(seed)+ h_d2);
+		resize(rows(mapIt->second.i2),2);
+		assignSource(row(mapIt->second.i2,0), seg1_align);
+		assignSource(row(mapIt->second.i2,1), seg2_align);
+		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
+		score_str[j] = *matr_it;
+		mapIt->second.i1 = new_connect;
+		goPrevious(matr_it,0);
+		--width_align;
+		++width_stop;
+		if (old_connect != new_connect)
+			_deleteAlignment(alignmentVector, old_connect, new_connect);
+		old_connect = new_connect;
 	}
-	return *(++finger2);
-
+	_deleteAlignment(alignmentVector, old_connect, score_length);
+	score_length = length(score_str);
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-//traceback through needleman wunsch matrix
-
-
-//Position berechnen!
-template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
-typename Size<Matrix<TScoreValue, DIMENSION> >::Type
-_banded_needleman_wunsch_trace2(Align<TTargetSource, TTargetSpec> & target_,
-								Matrix<TScoreValue, DIMENSION> & matrix,
-								Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
-								Score<TScoreValue, Simple> const & score_)
+template<typename TSeed, typename TSequence, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
+void
+_calculateFirstRectangleNW(TSeed const &seed,
+						 TDiff k,
+						 TMatrix &matrix_,
+						 TSequence seq1,
+						 TSequence seq2,
+						 TScoreString &score_str,
+						 TValue &score_length,
+						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+						 TScoreMatrix const &scoringScheme)
 {
 	SEQAN_CHECKPOINT;
 
-	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
-    typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
+	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
+	TValue new_connect;
+    typedef typename Infix<TSequence>::Type TSegment;
+	TSegment seg1b_align = infix(host(seq1), beginPosition(seq1), getBeginDim0(seed) + getStartDiagonal(seed) - getUpperDiagonal(seed) + k);
+	TSegment seg2b_align = infix(host(seq2), beginPosition(seq2), getBeginDim1(seed) + getLowerDiagonal(seed) - getStartDiagonal(seed) + k);
 
-	TTargetSourceSegment str_0 = sourceSegment(row(target_, 0));
-	TTargetSourceSegment str_1 = sourceSegment(row(target_, 1));
+	_banded_needleman_wunsch_rectangle_first(matrix_, seed, k, seg1b_align, seg2b_align, scoringScheme,score_str);
 
+	TValue w_d2 = getStartDiagonal(seed) - getUpperDiagonal(seed) + k;
+	TValue h_d2 = getLowerDiagonal(seed) - getStartDiagonal(seed) + k;
 
-	typedef Align<TTargetSource, TTargetSpec> TAlign;
-	typedef typename Row<TAlign>::Type TRow;
-	typedef typename Iterator<TRow, Standard>::Type TTargetIterator;
-	TTargetIterator target_0 = iter(row(target_, 0), 0);
-	TTargetIterator target_1 = iter(row(target_, 1), 0);
+	resize(score_str,1);
 
+	TMatrixIterator matr_it = begin(matrix_);
 
+	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
 
-	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TStringIterator;
-	TStringIterator it_0 = begin(str_0);
-	TStringIterator it_0_end = end(str_0);
+	TValue width_stop = getBeginDim0(seed) - beginPosition(seq1);
+	TValue height_stop = getBeginDim1(seed) - beginPosition(seq2);
 
-	TStringIterator it_1 = begin(str_1);
-	TStringIterator it_1_end = end(str_1);
-
-	TScoreValue score_diff = scoreMismatch(score_) - scoreGapExtend(score_);
-
-
-	//-------------------------------------------------------------------------
-	//follow the trace until the border is reached
-	while ((it_0 != it_0_end) && (it_1 != it_1_end))
-	{
-		bool gv;
-		bool gh;
-
-		if (*it_0 == *it_1)
-		{
-			gv = gh = true;
-		}
-		else
-		{
-			TMatrixIterator it_ = source_;
-
-			goNext(it_, 0);
-			TScoreValue h = *it_;
-
-			it_ = source_;
-			goNext(it_, 1);
-			TScoreValue d = *it_;
-		
-			goPrevious(it_, 0);
-			TScoreValue v = *it_;
-
-			gv = (v >= h) | (d + score_diff >= h);
-			gh = (h >  v) | (d + score_diff >= v);
-
-		}
-
+	alignmentVector.back().insert(std::make_pair(0,Pair<TValue, TAlign> ()));
+	TMapIterator mapIt = --(alignmentVector.back().end());
+	TSegment seg1_align = infix(host(seq1), beginPosition(seq1), getBeginDim0(seed) + w_d2);
+	TSegment seg2_align = infix(host(seq2), beginPosition(seq2), getBeginDim1(seed)+ h_d2);
 	
-		if (gv){
-			++it_1;
-			goNext(source_, 1);
-			goPrevious(source_, 0);
-		}else{
-			insertGap(target_1);
-		}
+	resize(rows(mapIt->second.i2),2);
+	assignSource(row(mapIt->second.i2,0), seg1_align);
+	assignSource(row(mapIt->second.i2,1), seg2_align);
 
-		if (gh) {
-			++it_0;
-			goNext(source_, 0);
-	
-		}else{
-			insertGap(target_0);
-		}
-		++target_0;
-		++target_1;
-	}
-
-	setSourceEndPosition(row(target_,1),position(it_1));
-	setSourceEndPosition(row(target_,0),position(it_0));
-
-	return length(matrix,0) - coordinate(source_,0) -2;
+	new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
+	score_str[0] = *matr_it;
+	mapIt->second.i1 = new_connect;
+	_deleteAlignment(alignmentVector, -1, new_connect);
+	_deleteAlignment(alignmentVector, new_connect, score_length);
 }
 
 
 //changed version of usual trace-back
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 int
-_needleman_wunsch_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
+_needleman_wunsch_trace_lastRectangleNW(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
@@ -527,94 +444,30 @@ _needleman_wunsch_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target
 	return 0;
 }
 
-template<typename TAlign, typename TValue>
-void
-_rec_delete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
-		   TValue index,										//position im vector
-		   TValue position)										//alignment to delete
-{
-	SEQAN_CHECKPOINT;
-
-	if (position != -1)
-	{
-		typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
-		it = vec[index].find(position);
-		bool x = true; //true = successor of it can be deleted
-		if (it != vec[index].begin())
-		{
-			it1 = it;
-			--it1;
-			x = (it1->second.i1 != it->second.i1);
-		}
-		it2 = it;
-		++it2;
-		if (x && (it2 != vec[index].end()))
-		{
-			x = (it2->second.i1 != it->second.i1);
-		}
-		if (x)
-			_rec_delete(vec, index-1, it->second.i1);
-		vec[index].erase(position);
-	}
-}
-
-template<typename TValue, typename TAlign, typename TSize>
-void
-_deleteAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &me,
-				TSize old_end,
-				TSize new_end)
-{
-	SEQAN_CHECKPOINT;
-
-	//cout << "me: " << me[0].size() << endl;
-	int length = me.size()-2;
-	typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator it, it1, it2;
-	for(TSize i = old_end+1; i < new_end; ++i)
-	{
-	
-		it = me[length].find(i);
-		bool x = true; //true = successor of it can be deleted
-		if (it != me[length].begin())
-		{
-			it1 = it;
-			--it1;
-			x = (it1->second.i1 != it->second.i1);
-		}
-		it2 = it;
-		++it2;
-		if (x && (it2 != me[length].end()))
-		{
-			x = (it2->second.i1 != it->second.i1);
-		}
-		if (x)
-			_rec_delete(me, length-1, it->second.i1);
-		me[length].erase(i);
-		//cout << "me2: " << me[0].size() << endl;
-	}
-	
-}
 
 //calculation and backtracking of the banded alignment of a seed
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
+template<typename TSeed, typename TSequence, typename TDiff, typename TScoreValue, unsigned DIMENSION, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
 void
-_calculateBandedSeed(TSeed const &seed,
-					 TDiff k,
-					 TMatrix &matrix_,
-					 TString *p_seq1,
-					 TString *p_seq2,
-					 TScoreString &score_str,
-					 TValue &score_length,
-					 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-					 TScoreMatrix const &scoringScheme)
+_calculateBandedSeedNW(
+        TSeed const &seed,
+        TDiff k,
+        Matrix<TScoreValue, DIMENSION> & matrix_,
+        TSequence seq1,
+        TSequence seq2,
+        TScoreString &score_str,
+        TValue &score_length,
+        ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
+        TScoreMatrix const & scoringScheme)
 {
 	SEQAN_CHECKPOINT;
 
 	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
+    typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-    typedef typename Infix<TString>::Type TSegment;
-	TSegment seg1_align = infix(host(*p_seq1), getBeginDim0(seed), (getEndDim0(seed) - 1)+1);
-	TSegment seg2_align = infix(host(*p_seq2), getBeginDim1(seed), (getEndDim1(seed) - 1)+1);
-	_banded_needleman_wunsch(matrix_, seed, k, seg1_align, seg2_align, scoringScheme, score_str);
+    typedef typename Infix<TSequence>::Type TSegment;
+	TSegment seg1_align = infix(host(seq1), getBeginDim0(seed), (getEndDim0(seed) - 1)+1);
+	TSegment seg2_align = infix(host(seq2), getBeginDim1(seed), (getEndDim1(seed) - 1)+1);
+	_bandedAlignment_NW_align(matrix_, seed, k, seg1_align, seg2_align, scoringScheme, score_str);
 
 	TValue height_diag = getLowerDiagonal(seed)-getStartDiagonal(seed)+k;
 	TValue width_diag = getStartDiagonal(seed)-getUpperDiagonal(seed)+k;
@@ -635,12 +488,12 @@ _calculateBandedSeed(TSeed const &seed,
 	{
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		TSegment seg1_align = infix(host(*p_seq1), width_align, (getEndDim0(seed) - 1)+1);
-		TSegment seg2_align = infix(host(*p_seq2), height_align,(getEndDim1(seed) - 1)+1);
+		TSegment seg1_align = infix(host(seq1), width_align, (getEndDim0(seed) - 1)+1);
+		TSegment seg2_align = infix(host(seq2), height_align,(getEndDim1(seed) - 1)+1);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _banded_needleman_wunsch_trace2(mapIt->second.i2, matrix_,  matr_it, scoringScheme);
+		new_connect = _bandedAlignment_NW_traceback(mapIt->second.i2, matrix_, matr_it, scoringScheme, true);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goPrevious(matr_it,0);
@@ -658,13 +511,13 @@ _calculateBandedSeed(TSeed const &seed,
 		goNext(matr_it,1);
 		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
 		TMapIterator mapIt = --(alignmentVector.back().end());
-		TSegment seg1_align = infix(host(*p_seq1), width_align, (getEndDim0(seed) - 1)+1);
-		TSegment seg2_align = infix(host(*p_seq2), height_align,(getEndDim1(seed) - 1)+1);
+		TSegment seg1_align = infix(host(seq1), width_align, (getEndDim0(seed) - 1)+1);
+		TSegment seg2_align = infix(host(seq2), height_align,(getEndDim1(seed) - 1)+1);
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
 		
-		new_connect = _banded_needleman_wunsch_trace2(mapIt->second.i2, matrix_,  matr_it, scoringScheme);
+		new_connect = _bandedAlignment_NW_traceback(mapIt->second.i2, matrix_,  matr_it, scoringScheme, true);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goPrevious(matr_it,0);
@@ -676,231 +529,6 @@ _calculateBandedSeed(TSeed const &seed,
 	_deleteAlignment(alignmentVector, old_connect, score_length);
 	score_length = length(score_str);
 }
-
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateFirstRectangle(TSeed const &seed,
-						 TDiff k,
-						 TMatrix &matrix_,
-						 TString *p_seq1,
-						 TString *p_seq2,
-						 TScoreString &score_str,
-						 TValue &score_length,
-						 ::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-						 TScoreMatrix const &scoringScheme)
-{
-	SEQAN_CHECKPOINT;
-
-	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
-	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-	TValue new_connect;
-    typedef typename Infix<TString>::Type TSegment;
-	TSegment seg1b_align = infix(host(*p_seq1), beginPosition(*p_seq1), getBeginDim0(seed) + getStartDiagonal(seed) - getUpperDiagonal(seed) + k);
-	TSegment seg2b_align = infix(host(*p_seq2), beginPosition(*p_seq2), getBeginDim1(seed) + getLowerDiagonal(seed) - getStartDiagonal(seed) + k);
-
-	_banded_needleman_wunsch_rectangle_first(matrix_, seed, k, seg1b_align, seg2b_align, scoringScheme,score_str);
-
-	TValue w_d2 = getStartDiagonal(seed) - getUpperDiagonal(seed) + k;
-	TValue h_d2 = getLowerDiagonal(seed) - getStartDiagonal(seed) + k;
-
-	resize(score_str,1);
-
-	TMatrixIterator matr_it = begin(matrix_);
-
-	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
-
-	TValue width_stop = getBeginDim0(seed) - beginPosition(*p_seq1);
-	TValue height_stop = getBeginDim1(seed) - beginPosition(*p_seq2);
-
-	alignmentVector.back().insert(std::make_pair(0,Pair<TValue, TAlign> ()));
-	TMapIterator mapIt = --(alignmentVector.back().end());
-	TSegment seg1_align = infix(host(*p_seq1), beginPosition(*p_seq1), getBeginDim0(seed) + w_d2);
-	TSegment seg2_align = infix(host(*p_seq2), beginPosition(*p_seq2), getBeginDim1(seed)+ h_d2);
-	
-	resize(rows(mapIt->second.i2),2);
-	assignSource(row(mapIt->second.i2,0), seg1_align);
-	assignSource(row(mapIt->second.i2,1), seg2_align);
-
-	new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
-	score_str[0] = *matr_it;
-	mapIt->second.i1 = new_connect;
-	_deleteAlignment(alignmentVector, -1, new_connect);
-	_deleteAlignment(alignmentVector, new_connect, score_length);
-}
-
-// TODO(holtgrew): The result is alignmentVector so this should be the first argument.
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateLastRectangle(TSeed const &seed,
-						TDiff k,
-						TMatrix &matrix_,
-						TString *p_seq1,
-						TString *p_seq2,
-						TScoreString &score_str,
-						TValue &score_length,
-						::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-						TScoreMatrix const & scoringScheme)
-{
-	SEQAN_CHECKPOINT;
-
-	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
-	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-
-    TValue seq1_end = endPosition(*p_seq1);
-	TValue seq2_end = endPosition(*p_seq2);
-	TValue width_diag=getLowerDiagonal(seed) - getEndDiagonal(seed)+k;
-	TValue width =  width_diag + seq1_end - (getEndDim0(seed) - 1);
-	TValue height_diag = getEndDiagonal(seed) - getUpperDiagonal(seed)+k;
-	TValue height = height_diag + seq2_end - (getEndDim1(seed) - 1);
-	
-	resize(score_str, width_diag+height_diag+1);
-	
-    typedef typename Infix<TString>::Type TSegment;
-	TSegment seg1 = infix(host(*p_seq1),seq1_end-width+1,seq1_end);
-	TSegment seg2 = infix(host(*p_seq2),seq2_end-height+1,seq2_end);
-
-	_needleman_wunsch(matrix_, seg1, seg2, scoringScheme);
-
-	TValue width_align = seq1_end - width  + width_diag +1;
-	TValue height_align = seq2_end - height+1;
-
-	TMatrixIterator iter_ = begin(matrix_);
-
-	TValue x = width_diag;
-	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
-	
-	//last rectangle
-	for(TValue i = 0; i<height_diag; ++i)
-	{
-		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
-		TMapIterator mapIt = --alignmentVector[0].end();
-		TSegment seg1_align = infix(host(*p_seq1), width_align, seq1_end);
-		TSegment seg2_align = infix(host(*p_seq2), height_align, seq2_end);
-		resize(rows(mapIt->second.i2),2);
-		assignSource(row(mapIt->second.i2,0),seg1_align);
-		assignSource(row(mapIt->second.i2,1), seg2_align);
-		setPosition(iter_, x);
-		score_str[i] = *iter_;
-		mapIt->second.i1 = -1;
-		_needleman_wunsch_trace_lastRectangle(mapIt->second.i2, iter_, scoringScheme);
-		x+=width;
-		++height_align;
-	}
-	TValue a = height_diag + width_diag+1;
-	
-	for(TValue i = height_diag; i<a; ++i)
-	{
-		alignmentVector[0].insert(std::make_pair(i,Pair<TValue, TAlign> ()));
-		TMapIterator mapIt = --alignmentVector[0].end();
-		TSegment seg1_align = infix(host(*p_seq1), width_align, seq1_end);
-		TSegment seg2_align = infix(host(*p_seq2), height_align, seq2_end);
-		resize(rows(mapIt->second.i2),2);
-		assignSource(row(mapIt->second.i2,0),seg1_align);
-		assignSource(row(mapIt->second.i2,1), seg2_align);
-		setPosition(iter_, x);
-		score_str[i] = *iter_;
-		mapIt->second.i1 = -1;
-		_needleman_wunsch_trace_lastRectangle(mapIt->second.i2, iter_, scoringScheme);
-		--x;
-		--width_align;
-	}
-	score_length = length(score_str);
-}
-
-//calculation and backtracking of the edit matrix between two seeds
-template<typename TSeed, typename TString, typename TDiff, typename TMatrix, typename TScoreString, typename TValue, typename TAlign, typename TScoreMatrix>
-void
-_calculateRectangle(TSeed const &seed,
-					TSeed const &seed2,
-					TDiff k_begin,
-					TDiff k_end,
-					TMatrix &matrix_,
-					TString *p_seq1,
-					TString *p_seq2,
-					TScoreString &score_str,
-					TValue &score_length,
-					::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &alignmentVector,
-					TScoreMatrix const &scoringScheme)
-{
-	SEQAN_CHECKPOINT;
-
-	typedef typename ::std::map<TValue,Pair<TValue, TAlign> >::iterator TMapIterator;
-	typedef Iter<TMatrix, PositionIterator> TMatrixIterator;
-    typedef typename Infix<TString>::Type TSegment;
-	TSegment seg1b_align = infix(host(*p_seq1), (getEndDim0(seed2) - 1)-(getLowerDiagonal(seed2) - getEndDiagonal(seed2)   + k_end) + 1, getBeginDim0(seed) + getStartDiagonal(seed) - getUpperDiagonal(seed) + k_begin);
-	TSegment seg2b_align = infix(host(*p_seq2), (getEndDim1(seed2) - 1)-(getEndDiagonal(seed2) -  getUpperDiagonal(seed2) + k_end) + 1, getBeginDim1(seed) + getLowerDiagonal(seed)  - getStartDiagonal(seed) + k_begin);
-
-	_needleman_wunsch_rectangle(matrix_, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoringScheme,score_str);
-
-	TValue width_diag = getLowerDiagonal(seed2) - getEndDiagonal(seed2)+k_end;
-	TValue height_diag = getEndDiagonal(seed2) - getUpperDiagonal(seed2)+k_end;
-	
-	TValue w_d2 = getStartDiagonal(seed) - getUpperDiagonal(seed) + k_begin;
-	TValue h_d2 = getLowerDiagonal(seed) - getStartDiagonal(seed) + k_begin;
-
-	TValue overall = height_diag + width_diag + 1;
-
-	resize(score_str, overall);
-	TMatrixIterator matr_it = begin(matrix_);
-	setPosition(matr_it, width_diag);
-
-	alignmentVector.push_back(::std::map<TValue,Pair<TValue, TAlign> >());
-	TValue width_align = (getEndDim0(seed2) - 1)+1;
-	TValue height_align = (getEndDim1(seed2) - 1) - height_diag + 1;
-
-	TValue width_stop = getBeginDim0(seed) - (getEndDim0(seed2) - 1)-1;
-	TValue height_stop = getBeginDim1(seed) - ((getEndDim1(seed2) - 1) - height_diag)-1;
-
-	TValue old_connect = -1;
-	TValue new_connect;
-	for(TValue j = 0; j<height_diag; ++j)
-	{
-		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
-		TMapIterator mapIt = --(alignmentVector.back().end());
-		TSegment seg1_align = infix(host(*p_seq1), width_align, getBeginDim0(seed) + w_d2);
-		TSegment seg2_align = infix(host(*p_seq2), height_align, getBeginDim1(seed)+ h_d2);
-		resize(rows(mapIt->second.i2),2);
-		assignSource(row(mapIt->second.i2,0), seg1_align);
-		assignSource(row(mapIt->second.i2,1), seg2_align);
-
-		//cout << "ALL: " << length(seg1_align) << " " << length(seg2_align) << " " << width_stop << " " <<height_stop << endl;
-		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
-		score_str[j] = *matr_it;
-		mapIt->second.i1 = new_connect;
-		goNext(matr_it, 1);
-		++height_align;
-		--height_stop;
-		if (old_connect != new_connect){
-			//cout << "ups "<< old_connect << " " << new_connect << endl;
-			_deleteAlignment(alignmentVector, old_connect, new_connect);
-			//cout << "ups_ENDE" << endl;
-		}
-		old_connect = new_connect;
-	}
-	for(TValue j = height_diag; j < overall; ++j)
-	{
-		alignmentVector.back().insert(std::make_pair(j,Pair<TValue, TAlign> ()));
-		TMapIterator mapIt = --(alignmentVector.back().end());
-		TSegment seg1_align = infix(host(*p_seq1), width_align, getBeginDim0(seed) + w_d2);
-		TSegment seg2_align = infix(host(*p_seq2), height_align, getBeginDim1(seed)+ h_d2);
-		resize(rows(mapIt->second.i2),2);
-		assignSource(row(mapIt->second.i2,0), seg1_align);
-		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoringScheme, matrix_, width_stop, height_stop);
-		score_str[j] = *matr_it;
-		mapIt->second.i1 = new_connect;
-		goPrevious(matr_it,0);
-		--width_align;
-		++width_stop;
-		if (old_connect != new_connect)
-			_deleteAlignment(alignmentVector, old_connect, new_connect);
-		old_connect = new_connect;
-	}
-	_deleteAlignment(alignmentVector, old_connect, score_length);
-	score_length = length(score_str);
-}
-
-
 
 //Rectangle calculation between two seeds
 template <typename TScoreValue, unsigned DIMENSION, typename TSeedSpec, typename TSeedConfig, typename TString, typename TValue2>

@@ -74,7 +74,7 @@ bandedAlignment(
     // seed.
     Iter<TMatrix, PositionIterator> iter = begin(matr);
     setPosition(iter, 1 + k + getLowerDiagonal(seed) - getStartDiagonal(seed));
-    _bandedAlignment_NW_traceback(alignment, iter, scoringScheme);
+    _bandedAlignment_NW_traceback(alignment, matr, iter, scoringScheme);
 
     return ret;
 }
@@ -83,6 +83,11 @@ bandedAlignment(
 // Compute traceback through the alignment matrix.  Step 1 for
 // bandedAlignment(..., NeedlemanWunsch()).  Step 2 is
 // _bandedAlignment_NW_traceback().
+//
+// If this function is used for the banded alignment around one seed,
+// initialValues is empty, if it is used for banded chain alignment,
+// it is not.
+
 template <typename TScoreValue, typename TSeedConfig, unsigned DIMENSION, typename TSequence, typename TValue, typename TSpecSeed>
 TScoreValue
 _bandedAlignment_NW_align(
@@ -93,6 +98,25 @@ _bandedAlignment_NW_align(
         TSequence const & sequence1,
         Score<TScoreValue, Simple> const & scoringScheme)
 {
+    // Case: Not banded chain alignment, plain banded alignment.
+    SEQAN_CHECKPOINT;
+    String<TScoreValue> emptyInitialValues;
+    return _bandedAlignment_NW_align(matrix, seed, k, sequence0, sequence1, scoringScheme, emptyInitialValues);
+}
+
+
+template <typename TScoreValue, typename TSeedConfig, unsigned DIMENSION, typename TSequence, typename TValue, typename TSpecSeed, typename TInitialValuesSpec>
+TScoreValue
+_bandedAlignment_NW_align(
+        Matrix<TScoreValue, DIMENSION> & matrix,
+        Seed<TSpecSeed, TSeedConfig> const & seed,
+        TValue k,
+        TSequence const & sequence0,
+        TSequence const & sequence1,
+        Score<TScoreValue, Simple> const & scoringScheme,
+        String<TScoreValue, TInitialValuesSpec> const & initialValues)
+{
+    // Case: Banded chain alignment if length(initialValues) > 0.
     SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
@@ -101,6 +125,7 @@ _bandedAlignment_NW_align(
     typedef Matrix<TScoreValue, DIMENSION> TMatrix;
 
     typedef typename Size<TMatrix>::Type TSize;
+    typedef typename Position<TMatrix>::Type TPosition;
     typedef typename Iterator<TMatrix, Standard>::Type TMatrixIterator;
 
     typedef typename Iterator<TSequence const, Rooted>::Type TSequenceIterator;
@@ -180,14 +205,19 @@ _bandedAlignment_NW_align(
         goNext(finger2, 1);
     }
 
+    TPosition pos = 0;
     borderScore = lowerEmpyTriangleHeight * gapScore;
 
     *finger2 = inf;
     for (int i = -1; i != lowerEmpyTriangleHeight; ++i){
         goPrevious(finger2, 0);
         goNext(finger2,1);
-        *finger2 = borderScore;
-        borderScore -= gapScore;
+        if (length(initialValues) > 0) {
+            *finger2 = initialValues[pos++];
+        } else {
+            *finger2 = borderScore;
+            borderScore -= gapScore;
+        }
     }
 
     borderScore = gapScore;
@@ -195,8 +225,12 @@ _bandedAlignment_NW_align(
 
     for (int i = 0; i != lowerEmptyTriangleWidth; ++i){
         goPrevious(finger2, 0);
-        *finger2 = borderScore;
-        borderScore += gapScore;
+        if (length(initialValues) > 0) {
+            *finger2 = initialValues[pos++];
+        } else {
+            *finger2 = borderScore;
+            borderScore += gapScore;
+        }
     }
 
     *finger2 = inf;
@@ -292,13 +326,30 @@ _bandedAlignment_NW_align(
 // Compute traceback through the alignment matrix.  Step 2 for
 // bandedAlignment(..., NeedlemanWunsch()).  Step 1 is
 // _bandedAlignment_NW_align().
+
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
-void
+typename Size<Matrix<TScoreValue, DIMENSION> >::Type
 _bandedAlignment_NW_traceback(
         Align<TTargetSource, TTargetSpec> & alignment,
-        Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > alignmentMatrixIt,
+        Matrix<TScoreValue, DIMENSION> const & matrix,
+        Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator> & alignmentMatrixIt,
         Score<TScoreValue, Simple> const & scoringScheme)
 {
+    // Case: Not banded chain alignment, plain banded alignment.
+    SEQAN_CHECKPOINT;
+    return _bandedAlignment_NW_traceback(alignment, matrix, alignmentMatrixIt, scoringScheme, false);
+}
+
+template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
+typename Size<Matrix<TScoreValue, DIMENSION> >::Type
+_bandedAlignment_NW_traceback(
+        Align<TTargetSource, TTargetSpec> & alignment,
+        Matrix<TScoreValue, DIMENSION> const & matrix,
+        Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator> & alignmentMatrixIt,
+        Score<TScoreValue, Simple> const & scoringScheme,
+        bool bandedChainAlignment)
+{
+    // Case: Banded chain alignment if bandedChainAlignment == true.
     SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
@@ -307,7 +358,7 @@ _bandedAlignment_NW_traceback(
 	typedef Iter<Matrix<TScoreValue, DIMENSION>, PositionIterator > TMatrixIterator;
 
     typedef typename Infix<TTargetSource>::Type TTargetSourceSegment;
-	typedef typename Iterator<TTargetSourceSegment, Standard>::Type TSequenceIterator;
+	typedef typename Iterator<TTargetSourceSegment, Rooted>::Type TSequenceIterator;
 
 	typedef Align<TTargetSource, TTargetSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
@@ -382,6 +433,14 @@ _bandedAlignment_NW_traceback(
 		++targetSequence0It;
 		++targetSequence1It;
 	}
+
+    if (bandedChainAlignment) {
+        setSourceEndPosition(row(alignment, 0), position(itSeq0));
+        setSourceEndPosition(row(alignment, 1), position(itSeq1));
+        return length(matrix, 0) - coordinate(alignmentMatrixIt, 0) - 2;
+    } else {
+        return 0;
+    }
 }
 
 }  // namespace seqan
