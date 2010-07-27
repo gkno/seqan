@@ -68,7 +68,7 @@ _bandedChainAlignment(
     //
 	TSegment seq1 = sourceSegment(row(alignment, 0));
 	TSegment seq2 = sourceSegment(row(alignment, 1));
-    TAlignmentChain alignmentChain(scoringScheme, seq1, seq2);
+    TAlignmentChain alignmentChain(k, scoringScheme, seq1, seq2);
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _bandedChainAlignment" << std::endl;

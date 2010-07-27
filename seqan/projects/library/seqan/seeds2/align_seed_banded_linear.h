@@ -179,7 +179,7 @@ _bandedAlignment_NW_align(
     setDimension(matrix, 2);
     setLength(matrix, 0, sequence0Length + 2);
     setLength(matrix, 1, sequence1Length + 1);
-    resize(matrix);
+    fill(matrix, 0);
 
     // Get iterators into the matrix.
     //
@@ -199,8 +199,9 @@ _bandedAlignment_NW_align(
     // TODO(holtgrew): Using a real infimum here can use problems below if anything is subtracted.  This should not be the case...
     TScoreValue inf = InfimumValue<TScoreValue>::VALUE / 2;
 
+    // Fill parts outside the upper-right diagonal.
     setPosition(finger2, length(matrix, 0) - 1);
-    for (unsigned i = 1; i != upperDiagonalLength; ++i){
+    for (unsigned i = 1; i != upperDiagonalLength; ++i) {
         *finger2 = inf;
         goNext(finger2, 1);
     }
@@ -208,6 +209,7 @@ _bandedAlignment_NW_align(
     TPosition pos = 0;
     borderScore = lowerEmpyTriangleHeight * gapScore;
 
+    // Fill along the cut-off towards the lower right empty triangle.
     *finger2 = inf;
     for (int i = -1; i != lowerEmpyTriangleHeight; ++i){
         goPrevious(finger2, 0);
@@ -223,6 +225,7 @@ _bandedAlignment_NW_align(
     borderScore = gapScore;
     finger3 = finger2;
 
+    // Fill along bottom.
     for (int i = 0; i != lowerEmptyTriangleWidth; ++i){
         goPrevious(finger2, 0);
         if (length(initialValues) > 0) {
@@ -248,7 +251,10 @@ _bandedAlignment_NW_align(
     TSize runLength = lowerEmptyTriangleWidth;
     TSize measure = 0;
 
-    // TODO(holtgrew): This first loop appears to compute the lower part of the band until the lower empty triangle height is reached.
+    // This first loop appears to compute the lower part of the band
+    // until the lower empty triangle height is reached.  The lower
+    // right corner is empty so handling this separately make sure we
+    // do not access this uninitialized memory.
     for (int i = -1; i != lowerEmpyTriangleHeight; ++i) {
         verticalValue = *finger3;
         finger1 = finger3;
@@ -286,7 +292,8 @@ _bandedAlignment_NW_align(
     //
     goPrevious(finger3);
 
-    // TODO(holtgrew): The second loop now computes the band up from the lower right triangle. It is not clear to me whether the upper left empty triangle is computed or not.
+    // The second loop now computes the band up from the lower right
+    // triangle.  The upper left triangle is not computed.
     while (y != y_begin) {
 		verticalValue = *finger3;
 		finger1 = finger3;
