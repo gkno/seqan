@@ -103,11 +103,11 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
 
     // Tests for the banded alignment algorithms.
-    SEQAN_CALL_TEST(test_align_seed_banded_gotoh);
-    SEQAN_CALL_TEST(test_align_seed_banded_needleman_wunsch);
+    // TODO(holtgrew): Un-comment again!
+    // SEQAN_CALL_TEST(test_align_seed_banded_gotoh);
+    // SEQAN_CALL_TEST(test_align_seed_banded_needleman_wunsch);
 
     // Tests for the banded chain alignment algorithms.
-    // TODO(holtgrew): Un-comment again!
     SEQAN_CALL_TEST(test_align_chain_banded_align_linear);
     SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
 

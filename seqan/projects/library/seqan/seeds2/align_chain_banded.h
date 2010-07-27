@@ -44,7 +44,7 @@ namespace seqan {
 ..summary:Calculates a banded alignment around a chain of seeds. 
 ..cat:Seed Handling
 ..signature:bandedChainAlignment(seedChain, k, alignment, scoreMatrix);
-..param.seedChain:A chain of seeds.
+..param.seedChain:A chain of seeds, must be ascendingly sorted in both dimensions.
 ..param.k:Half of the width of the band.
 ..param.alignment:The alignment where the result is stored.
 ...type:Class.Align
@@ -64,25 +64,6 @@ bandedChainAlignment(TContainer const & seedChain,
 {
     SEQAN_CHECKPOINT;
 
-    // The assumption is that seedChain is sorted by dimension 0,
-    // either ascendingly or descendingly.  In the first case, we have
-    // to reverse the order since the banded chain alignment assumes
-    // reverse order.  Because of the assumption about being sorted,
-    // we only test the first two entries.
-    if (length(seedChain) >= 2u && getBeginDim0(seedChain[0]) < getBeginDim0(seedChain[1])) {
-        // TODO(holtgrew): If we have to copy, why not use a reverse string modifier so it is reversed on the fly?
-        TContainer copyChain(seedChain);
-        std::reverse(begin(copyChain), end(copyChain));
-
-        // TODO(holtgrew): For consistency, we should have bandedChainAlignment(..., {Gotoh, NeedlemanWunsch}) functions.
-
-        if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
-            return _bandedChainAlignment(alignment, copyChain, k, scoringScheme, NeedlemanWunsch());
-        else
-            return _bandedChainAlignment(alignment, copyChain, k, scoringScheme, Gotoh());
-    }
-    // Chain of seeds is properly sorted, simply kick of the banded
-    // chain alignment.
 	if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
 		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, NeedlemanWunsch());
 	else

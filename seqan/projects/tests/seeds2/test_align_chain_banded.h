@@ -45,8 +45,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed> seedChain;
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
         appendValue(seedChain, TSeed(1, 2, 6, 8));
+        appendValue(seedChain, TSeed(12, 10, 19, 19));
 
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
@@ -68,8 +68,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed > seedChain;
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
         appendValue(seedChain, TSeed(1, 2, 6, 8));
+        appendValue(seedChain, TSeed(12, 10, 19, 19));
 
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
@@ -102,8 +102,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         Score<int, Simple> scoringScheme(3, -2, -1, -3);
         
         String<TSeed> seedChain;
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
         appendValue(seedChain, TSeed(1, 2, 6, 8));
+        appendValue(seedChain, TSeed(12, 10, 19, 19));
         
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
@@ -125,8 +125,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         Score<int, Simple> scoringScheme(3, -2, -1, -3);
         
         String<TSeed> seedChain;
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
         appendValue(seedChain, TSeed(1, 2, 6, 8));
+        appendValue(seedChain, TSeed(12, 10, 19, 19));
         
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);

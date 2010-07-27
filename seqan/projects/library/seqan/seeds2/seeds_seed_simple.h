@@ -83,9 +83,12 @@ class Seed<Simple, TConfiguration>
               _beginDim1(beginDim1),
               _endDim0(beginDim0 + seedLength),
               _endDim1(beginDim1 + seedLength),
-              _lowerDiagonal(beginDim1 - beginDim0),
-              _upperDiagonal(beginDim1 - beginDim0)
-    { SEQAN_CHECKPOINT; }
+              _lowerDiagonal(static_cast<TDiagonal>(beginDim1 - beginDim0)),
+              _upperDiagonal(static_cast<TDiagonal>(beginDim1 - beginDim0))
+    {
+        SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_GEQ(_upperDiagonal, _lowerDiagonal);
+    }
 
     Seed(TPosition beginDim0, TPosition beginDim1, TPosition endDim0,
          TPosition endDim1)
@@ -94,9 +97,12 @@ class Seed<Simple, TConfiguration>
               _beginDim1(beginDim1),
               _endDim0(endDim0),
               _endDim1(endDim1),
-              _lowerDiagonal(_min(beginDim1 - beginDim0, endDim1 - endDim0)),
-              _upperDiagonal(_max(beginDim1 - beginDim0, endDim1 - endDim0))
-    { SEQAN_CHECKPOINT; }
+              _lowerDiagonal(_min(static_cast<TDiagonal>(beginDim1 - beginDim0), static_cast<TDiagonal>(endDim1 - endDim0))),
+              _upperDiagonal(_max(static_cast<TDiagonal>(beginDim1 - beginDim0), static_cast<TDiagonal>(endDim1 - endDim0)))
+    {
+        SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_GEQ(_upperDiagonal, _lowerDiagonal);
+    }
 
     template <typename TSeed2>
     Seed(TSeed2 const & other)
@@ -107,7 +113,10 @@ class Seed<Simple, TConfiguration>
               _endDim1(getEndDim1(other)),
               _lowerDiagonal(getLowerDiagonal(other)),
               _upperDiagonal(getUpperDiagonal(other))
-    { SEQAN_CHECKPOINT; }
+    {
+        SEQAN_CHECKPOINT;
+        SEQAN_ASSERT_GEQ(_upperDiagonal, _lowerDiagonal);
+    }
 };
 
 // ===========================================================================

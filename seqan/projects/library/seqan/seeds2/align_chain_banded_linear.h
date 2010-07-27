@@ -79,19 +79,19 @@ _bandedChainAlignment(
     //
     // Compute Alignment using Alignment Chain
     //
-    // Compute alignment for trailing rectangle and the last seed.
-    _alignTrailingRectangle(alignmentChain, front(seedChain));
+    // Compute alignment for leading rectangle and the first seed.
+    _alignLeadingRectangle(alignmentChain, front(seedChain));
     _alignSeed(alignmentChain, front(seedChain));
 
-    // For all seeds from the second one from the right to the
-    // leftmost one: Align rectangle right of it and then the seed.
-    for (TIterator it = begin(seedChain) + 1; it != end(seedChain); ++it) {
+    // For all seeds from the second one from the left to the
+    // rightmost one: Align rectangle left of it and then the seed.
+    for (TIterator it = begin(seedChain) ; it != end(seedChain); ++it) {
         _alignRectangle(alignmentChain, value(it - 1), value(it));
         _alignSeed(alignmentChain, value(it));
     }
 
-    // Compute alignment for the leading rectangle.
-    _alignLeadingRectangle(alignmentChain, back(seedChain));
+    // Compute alignment for the trailing rectangle.
+    _alignTrailingRectangle(alignmentChain, back(seedChain));
 
     // Glue all alignments together.
     return _glueAlignmentChain(alignment, alignmentChain);
