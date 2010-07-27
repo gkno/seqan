@@ -1363,6 +1363,8 @@ SEQAN_CHECKPOINT
 If $new_length$ is too large for $object$ (i.e. the @Function.capacity@ of $object$ is too small), then $object$ is
 expanded as far as possible. The resulting length
 of $object$ could be less than $new_length$, depending on the type of $object$ and the available storage.
+If $new_length$ is larger than $length(object)$, this function will not initialize the newly allocated elements by
+calling any constructor. To resize and initialize the new elements, use @Function.fill@ instead.
 ..see:Function.length
 ..see:Function.reserve
 */
