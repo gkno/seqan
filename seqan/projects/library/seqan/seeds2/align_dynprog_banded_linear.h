@@ -43,17 +43,73 @@ namespace seqan {
 // The data of the lower right rectangle of the DP alignment matrix is
 // copied over into the upper right corner of the alignment matrix and
 // the alignment border is filled with infimum values.
-template <typename TScoreValue, typename TSequence, typename TScoringScheme>
+template <typename TScoreValue, typename TSequence, typename TDiagonal, typename TScoringScheme>
 void
 _align_banded_dynProg(
         Matrix<TScoreValue, 2> & matrix,
         TSequence const & seq0,
         TSequence const & seq1,
+        TDiagonal lowerDiagonal,
+        TDiagonal upperDiagonal,
         TScoringScheme const & scoringScheme,
         _DPMatrixRectangle<TScoreValue> /*const*/ & lowerRightRectangle,
         NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_GT(lowerRightRectangle.length0, 0u);
+    SEQAN_ASSERT_GT(lowerRightRectangle.length1, 0u);
+    
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+    typedef typename Size<TSequence>::Type TSize;
+    typedef typename Position<TSequence>::Type TPosition;
+
+    // Compute bandwidth in direction of dimension 1.  Band is
+    // "jolted" to the right to give a rectangle for the matrix.  This
+    // matrix has size length(seq0) x bandwidth.
+    TSize bandwidth = upperDiagonal - lowerDiagonal;
+    // The width of the overlapping rectangle is in relation to the bandwidth.
+    SEQAN_ASSERT_EQ(lowerRightRectangle.length1 + 1, bandwidth);
+    // Length of the empty triangles.
+    TSize triangleSideLength = lowerRightRectangle.length0;
+
+    // Allocate memory for the alignment matrix.
+    setLength(matrix, 0, length(seq0) + 1);
+    setLength(matrix, 1, bandwidth + 2);
+    resize(matrix);
+
+    // Initialize matrix.
+    //
+    // First, fill the diagonal left of the lower one with infimas (we
+    // actually need to pick a little higher value so no overflow
+    // happens).  The diagonal corresponds to the first column.
+    {
+        TMatrixIterator it = begin(matrix);
+        for (TPosition pos = lowerRightRectangle.length0; pos < length(seq0) + 1; ++pos) {
+            *it = InfimumValue<TScoreValue>::VALUE / 2;
+            goNext(it, 0);
+        }
+    }
+    // Second, copy in the data from the rectangle.
+    //
+    // TODO(holtgrew): Actually, we could copy in less, only L-shaped border is required. Or this part could be ignored in the alignment in the upper left rectangle...
+    TMatrixIterator destLeft = begin(matrix);
+    TMatrixIterator srcLeft = begin(lowerRightRectangle.matrix);
+    setPosition(srcLeft, length(lowerRightRectangle.matrix, 0)  - lowerRightRectangle.length0 + (length(lowerRightRectangle.matrix, 1) - lowerRightRectangle.length1) * _dataFactors(lowerRightRectangle.matrix)[1]);  // TODO(holtgrew): Extend matrix interface for something like this...
+    unsigned skipped = 1;  // Number of cells skipped because of band/rectangle difference.
+    for (TPosition offset0 = 0; offset0 < lowerRightRectangle.length0; ++offset0) {
+        TMatrixIterator destIt = destLeft;
+        TMatrixIterator srcIt = srcLeft;
+        for (TPosition offset1 = skipped; offset1 < lowerRightRectangle.length1; ++offset1) {
+            *destIt = *srcIt;
+            goNext(destIt, 1);
+            goNext(srcIt, 1);
+        }
+        goNext(destLeft, 0);
+        goNext(srcLeft, 0);
+        skipped += 1;
+    }
 }
 
 

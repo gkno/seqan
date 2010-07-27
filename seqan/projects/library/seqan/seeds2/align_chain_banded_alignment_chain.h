@@ -90,6 +90,7 @@ struct ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> >
     typedef TScoringScheme Type;
 };
 
+
 template <typename TSegment, typename TScoringScheme, typename TAlignmentTag>
 struct ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> const>
         : ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> > {};
@@ -163,7 +164,6 @@ _alignTrailingRectangle(
         Seed<TSeedSpec, TSeedConfig> const & seed)
 {
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): Maybe change the structure to follow the one of _alignRectangle()?
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, 2> TMatrix;
@@ -325,9 +325,11 @@ _alignSeed(
     std::cout << "| infix1: '" << infix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
 
+    // _align_banded_dynProg // XXX TODO(holtgrew): Actually call banded dynamic programming.
+
     // TODO(holtgrew): Temporary debug code.
     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- Last rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+    std::cout << ",-- Seed Alignment, Banded NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
     for (unsigned i = 0; i < length(matrix, 0); ++i) {
         std::cout << "|\t";
         for (unsigned j = 0; j < length(matrix, 1); ++j) {

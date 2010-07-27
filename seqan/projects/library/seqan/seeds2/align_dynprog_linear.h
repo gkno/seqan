@@ -15,6 +15,11 @@
   Lesser General Public License for more details.
  ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+ ============================================================================
+  The alignment code could use some optimization.  However, we cannot
+  use the same optimization as in the graph alignment since we want to
+  compute globally optimal trace through multiple connected alignment
+  matrices.
  ==========================================================================*/
 
 #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_LINEAR_H_
@@ -53,23 +58,101 @@ struct _DPMatrixRectangle
 // Functions
 // ===========================================================================
 
+template <typename TScoreValue, typename TScoringScheme>
+inline void
+_initDPMatrixEdgeDim(
+        Matrix<TScoreValue, 2> & matrix,
+        TScoringScheme const & scoringScheme,
+        unsigned dim,
+        bool fillWithZeros,
+        NeedlemanWunsch const &)
+{
+    SEQAN_CHECKPOINT;
+    
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+    typedef typename Position<TMatrix>::Type TPosition;
+
+    TMatrixIterator it = begin(matrix);
+    if (fillWithZeros) {
+        for (TPosition i = 0; i < length(matrix, dim); ++i) {
+            *it = 0;
+            goNext(it, dim);
+        }
+    } else {
+        TScoreValue x = 0;
+        for (TPosition i = 0; i < length(matrix, dim); ++i) {
+            *it = x;
+            x += scoreGap(scoringScheme);
+            goNext(it, dim);
+        }
+    }
+}
+
 // Fill the Needleman-Wunsch DP matrix for the alignment of the two
 // given sequences.  The alignment configuration gives whether the
 // first column and row are initialized with value 0 or with the gap
 // scores.
 //
 // This is the most basic case.
-template <typename TScoreValue, typename TSequence, typename TScoringScheme, typename TAlignmentConfig>
+template <typename TScoreValue, typename TSequence, typename TScoringScheme, bool TOP, bool LEFT, bool RIGHT, bool BOTTOM, typename TAlignConfigSpec>
+// TODO(holtgrew): Which bool for AlignConfig is for which sequence? We assume LEFT/RIGHT is dim0, TOP/BOTTOM is dim1.
 void
 _align_dynProg(
         Matrix<TScoreValue, 2> & matrix,
-        TSequence const & seq0,
-        TSequence const & seq1,
-        TScoringScheme const & scoringScheme,
-        TAlignmentConfig const &,
+        TSequence const & sequence0,
+        TSequence const & sequence1,
+        TScoringScheme const & scoringScheme,  // TODO(holtgrew): Enforce Simple Score?
+        AlignConfig<TOP, LEFT, RIGHT, BOTTOM, TAlignConfigSpec> const &,
         NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
+
+    // In this function, we assume sequence 0 is written along
+    // dimension 0 of the matrix and this is the vertical direction.
+    // sequence 1 corresponds to dimension 0 and the horizontal
+    // direction.
+
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
+                        "Needleman-Wunsch DP only support linear gap costs.");
+
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+    typedef typename Position<TSequence>::Type TPosition;
+    typedef typename Iterator<TSequence, Standard>::Type TSequenceIterator;
+
+    // Resize the matrix, first row and column are gap scores.
+    setLength(matrix, 0, length(sequence0) + 1);
+    setLength(matrix, 1, length(sequence0) + 1);
+    resize(matrix);
+
+    // Initialize the left and top edges of the matrix.
+    _initDPMatrixEdgeDim(matrix, scoringScheme, 0, LEFT, NeedlemanWunsch());
+    _initDPMatrixEdgeDim(matrix, scoringScheme, 1, TOP, NeedlemanWunsch());
+
+    // We need thre iterators in the alignment matrix to fill it.
+    // itTop points to the cell in the top row of the current column.
+    // itLeft points to the column to the top left of the current
+    // cell.  itAbove points to the cell above the current cell.  We
+    // can use itAbove for value assignment.
+    TMatrixIterator itTop = begin(matrix);
+    TMatrixIterator itLeft;
+    TMatrixIterator itAbove;
+
+    // Perform the Needleman-Wunsch dynamic programming.
+    for (TSequenceIterator it1 = begin(sequence1); it1 != end(sequence1); ++it1) {
+        itLeft = itTop;
+        goNext(itTop, 1);
+        itAbove = itTop;
+        for (TSequenceIterator it0 = begin(sequence0); it0 != end(sequence0); ++it0) {
+            TScoreValue scoreMoveDiagonal = *itLeft + ((*it1 == *it0) ? scoreMatch(scoringScheme) : scoreMismatch(scoringScheme));
+            goNext(itLeft, 0);
+            TScoreValue scoreMoveRight = *itLeft + scoreGap(scoringScheme);
+            TScoreValue scoreMoveDown = *itAbove + scoreGap(scoringScheme);
+            goNext(itAbove, 0);
+            *itAbove = _max(scoreMoveDiagonal, _max(scoreMoveRight, scoreMoveDown));
+        }
+    }
 }
 
 
@@ -92,6 +175,10 @@ _align_dynProg(
         NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
+                        "Needleman-Wunsch DP only support linear gap costs.");
+
 }
 
 
