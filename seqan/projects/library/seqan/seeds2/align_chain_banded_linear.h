@@ -81,11 +81,12 @@ _bandedChainAlignment(
     //
     // Compute alignment for leading rectangle and the first seed.
     _alignLeadingRectangle(alignmentChain, front(seedChain));
+    /*
     _alignSeed(alignmentChain, front(seedChain));
 
     // For all seeds from the second one from the left to the
     // rightmost one: Align rectangle left of it and then the seed.
-    for (TIterator it = begin(seedChain) ; it != end(seedChain); ++it) {
+    for (TIterator it = begin(seedChain) + 1; it != end(seedChain); ++it) {
         _alignRectangle(alignmentChain, value(it - 1), value(it));
         _alignSeed(alignmentChain, value(it));
     }
@@ -95,6 +96,8 @@ _bandedChainAlignment(
 
     // Glue all alignments together.
     return _glueAlignmentChain(alignment, alignmentChain);
+    */
+    return 0;
 }
 
 }  // namespace seqan

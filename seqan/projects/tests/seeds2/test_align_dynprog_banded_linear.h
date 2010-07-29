@@ -16,12 +16,12 @@
  ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ===========================================================================
-  Tests for the classic DP programming algorithms in the seeds module.
+  Tests for the banded DP programming algorithms in the seeds module.
  ===========================================================================
 */
 
-#ifndef TEST_SEEDS_TEST_ALIGN_DYNPROG_LINEAR_H_
-#define TEST_SEEDS_TEST_ALIGN_DYNPROG_LINEAR_H_
+#ifndef TEST_SEEDS_TEST_ALIGN_DYNPROG_BANDED_LINEAR_H_
+#define TEST_SEEDS_TEST_ALIGN_DYNPROG_BANDED_LINEAR_H_
 
 #include <seqan/basic.h>  // Includes testing infrastructure.
 #include <seqan/file.h>   // Required to print strings in tests.
@@ -29,61 +29,81 @@
 #include <seqan/seeds2.h>  // Include module under test.
 
 // Test matrix resizing.
-SEQAN_DEFINE_TEST(test_align_dynprog_linear_resize_matrix)
+SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_resize_matrix)
 {
     using namespace seqan;
 
     Matrix<int, 2> matrix;
 
-    _align_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), NeedlemanWunsch());
+    _alignBanded_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), 2, NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(9u, length(matrix, 0));
-    SEQAN_ASSERT_EQ(13u, length(matrix, 1));
+    SEQAN_ASSERT_EQ(4u, length(matrix, 1));
 }
 
 
 // Test gutter initialization if gap costs are free.
-SEQAN_DEFINE_TEST(test_align_dynprog_linear_init_gutter_free)
+SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_free)
 {
     using namespace seqan;
 
     Matrix<int, 2> matrix;
-    setLength(matrix, 0, 2);
-    setLength(matrix, 1, 3);
+    setLength(matrix, 0, 4);
+    setLength(matrix, 1, 4);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), 2, NeedlemanWunsch());
 
+    // "left" gutter
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 1));
     SEQAN_ASSERT_EQ(0, value(matrix, 1, 0));
     SEQAN_ASSERT_EQ(0, value(matrix, 2, 0));
+    SEQAN_ASSERT_EQ(0, value(matrix, 3, 0));
+    // top gutter
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 1));
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 2));
+    // right gutter must be very small so we never go there.
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 0, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 1, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 2, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 3, 3));
 }
 
 
 // Test gutter initialization if gap costs are not free.
-SEQAN_DEFINE_TEST(test_align_dynprog_linear_init_gutter_not_free)
+SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
 {
     using namespace seqan;
 
     Matrix<int, 2> matrix;
-    setLength(matrix, 0, 2);
-    setLength(matrix, 1, 3);
+    setLength(matrix, 0, 4);
+    setLength(matrix, 1, 4);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), 2, NeedlemanWunsch());
 
+    // "left" gutter
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 2, 0));
+    SEQAN_ASSERT_EQ(-6, value(matrix, 3, 0));
+    // top gutter
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
     SEQAN_ASSERT_EQ(-4, value(matrix, 0, 2));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0));
+    // right gutter must be very small so we never go there.
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 0, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 1, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 2, 3));
+    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 3, 3));
 }
 
 
 // Test DP matrix filling
-SEQAN_DEFINE_TEST(test_align_dynprog_linear_fill_matrix)
+SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_fill_matrix)
 {
     using namespace seqan;
+
+    SEQAN_ASSERT_FAIL("Write me for banded!");
 
     Matrix<int, 2> matrix;
     DnaString const sequence0 = "CCA";
@@ -108,4 +128,4 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_fill_matrix)
     }
 }
 
-#endif  // TEST_SEEDS_TEST_ALIGN_DYNPROG_LINEAR_H_
+#endif  // TEST_SEEDS_TEST_ALIGN_DYNPROG_BANDED_LINEAR_H_

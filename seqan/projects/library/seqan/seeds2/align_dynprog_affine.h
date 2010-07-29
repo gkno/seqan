@@ -34,61 +34,59 @@ namespace seqan {
 // Functions
 // ===========================================================================
 
-// Fill the Gotoh DP matrices for the alignment of the two given
-// sequences.  The alignment configuration gives whether the first
-// column and row are initialized with value 0 or with the gap scores.
-//
-// This is the most basic case.
-template <typename TScoreValue, typename TSequence, typename TScoringScheme, typename TAlignmentConfig>
-void
-_align_dynProg(
-        Matrix<TScoreValue, 2> & matrix,
-        TSequence const & seq0,
-        TSequence const & seq1,
-        TScoringScheme const & scoringScheme,
-        TAlignmentConfig const &,
-        Gotoh const &)
+template <typename TScoreValue, typename TSequence>
+inline void
+_align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_FAIL("Not implemented!");
 }
 
 
-// Fill the NW DP matrix for the alignment of the two given sequences.
-//
-// This is the case where data is copied over from a banded seed
-// alignment DP matrix.
-//
-// The data of the lower right rectangle of the DP seed alignment
-// matrix is copied over into the upper right corner of the alignment
-// matrix and the alignment border is filled with infimum values.
-template <typename TScoreValue, typename TSequence, typename TScoringScheme>
-void
-_align_dynProg(
-        Matrix<TScoreValue, 2> & matrix,
-        TSequence const & seq0,
-        TSequence const & seq1,
-        TScoringScheme const & scoringScheme,
-        _DPMatrixRectangle<TScoreValue> /*const*/ & lowerRightRectangle,
-        Gotoh const &)
+template <typename TScoreValue, bool BEGIN1_FREE, bool BEGIN0_FREE, bool END1_FREE, bool END0_FREE>
+inline void
+_align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TIterator;
+    typedef typename Position<TMatrix>::Type TPosition;
+
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
+                        "Only linear gap costs allowed for Needleman-Wunsch.");
+
+    // Init left gutter with zeroes if begin gaps are in dimension 0
+    // free or with gap scores otherwise.
+    if (BEGIN0_FREE) {
+        TIterator it = begin(matrix);
+        for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i) {
+            *it = 0;
+            goNext(it, 0);
+        }
+    } else {
+        TScoreValue gapScore = scoreGap(scoringScheme);
+        TScoreValue x = 0;
+        TIterator it = begin(matrix);
+        for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i) {
+            *it = x;
+            x += gapScore;
+            goNext(it, 0);
+        }
+    }
+    SEQAN_ASSERT_FAIL("Not implemented!");
 }
 
 
-// Perform a traceback in the Gotoh alignment matrices beginning with
-// the characters at pos0/pos1 of the segments of this matrix.
-template <typename TTarget, typename TScoreValue, typename TPosition>
-void
-_align_traceBack(
-        TTarget gaps0It,
-        TTarget gaps1It,
-        Matrix<TScoreValue, 2> const & matrix,
-        TPosition pos0,
-        TPosition pos1,
-        Gotoh const &)
+template <typename TScoreValue, typename TSequence>
+inline void
+_align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
-}   
+
+    SEQAN_ASSERT_FAIL("Not implemented!");
+}
 
 }  // namespace seqan
 

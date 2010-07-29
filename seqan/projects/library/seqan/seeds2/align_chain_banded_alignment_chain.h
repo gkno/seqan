@@ -75,7 +75,7 @@ public:
 
     // TODO(holtgrew): Default constructor + setSequence{0,1} missing for now.
 
-    _AlignmentChain(TPosition bandwidth, TScoringScheme scoringScheme, TSegment sequence0, TSegment sequence1)
+    _AlignmentChain(TPosition bandwidth, TScoringScheme const & scoringScheme, TSegment /*const*/ & sequence0, TSegment /*const*/ & sequence1)
             : bandwidth_(bandwidth), scoringScheme_(scoringScheme), sequence0_(sequence0), sequence1_(sequence1)
     { SEQAN_CHECKPOINT; }
 };
@@ -99,49 +99,81 @@ struct ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> co
 // Functions
 // ===========================================================================
 
+// Given a seed and an alignment chain, the overlap of the seed with
+// the rectangle to the lower right is written to overlap0 and
+// overlap1.
+template <typename TSize, typename TSequence, typename TScoringScheme, typename TSeedSpec, typename TSeedConfig, typename TAlignmentTag>
+inline void
+_computeLowerRightOverlap(TSize & overlap0,
+                          TSize & overlap1,
+                          Seed<TSeedSpec, TSeedConfig> const & seed,
+                          _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
+{
+    SEQAN_CHECKPOINT;
+    overlap0 = getUpperDiagonal(seed) - getEndDiagonal(seed) + alignmentChain.bandwidth_;
+    overlap1 = getEndDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
+    // Don't overlap more than the seed...
+    overlap0 = _min(overlap0, getEndDim0(seed) - getBeginDim0(seed));
+    overlap1 = _min(overlap1, getEndDim1(seed) - getBeginDim1(seed));
+}
+
+
+// Given a seed and an alignment chain, the overlap of the seed with
+// the rectangle to the upper left is written to overlap0 and
+// overlap1.
+template <typename TSize, typename TSequence, typename TScoringScheme, typename TSeedSpec, typename TSeedConfig, typename TAlignmentTag>
+inline void
+_computeUpperLeftOverlap(TSize & overlap0,
+                         TSize & overlap1,
+                         Seed<TSeedSpec, TSeedConfig> const & seed,
+                         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
+{
+    SEQAN_CHECKPOINT;
+    overlap0 = getStartDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
+    overlap1 = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
+    // Don't overlap more than the seed...
+    overlap0 = _min(overlap0, getEndDim0(seed) - getBeginDim0(seed));
+    overlap1 = _min(overlap1, getEndDim1(seed) - getBeginDim1(seed));
+}
+
+
+// Performs the alignment matrix filling step for the leading
+// rectangle in the alignment chain.
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignLeadingRectangle(
         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
-        Seed<TSeedSpec, TSeedConfig> const & seed)
+        Seed<TSeedSpec, TSeedConfig> const & rightSeed)
 {
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, 2> TMatrix;
-    typedef typename Prefix<TSequence>::Type TPrefix;
+    typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
 
-    // Compute the overlaps of the sequence prefixes with the seed
-    // banded alignment matrix.
-    //
-    // TODO(holtgrew): Are these computations correct?
-    TSize rightOverlap0 = getLowerDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
-    TSize rightOverlap1 = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
-    // The rectangle must overlap with the band around the seed (given
-    // the bandwidth is > 0).
-    SEQAN_ASSERT_GT(rightOverlap0, 0u);
-    SEQAN_ASSERT_GT(rightOverlap1, 0u);
-    // Limit overlap so it does not go over the alignment matrix
-    // (given the bandwidth is > 0).
-    rightOverlap0 = _min(rightOverlap0, length(value(alignmentChain.sequence0_)) - getBeginDim0(seed));
-    rightOverlap1 = _min(rightOverlap1, length(value(alignmentChain.sequence1_)) - getBeginDim1(seed));
-    // Get prefixes of the sequences to be aligned for the first
-    // rectangle.  They use the overlap computed above.
-    TPrefix prefix0 = prefix(value(alignmentChain.sequence0_), getBeginDim0(seed) + rightOverlap0);
-    TPrefix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(seed) + rightOverlap1);
+    // Compute overlap of the rectangle with the seed to the lower right.
+    TSize rightOverlap0, rightOverlap1;
+    _computeUpperLeftOverlap(rightOverlap0, rightOverlap1, rightSeed, alignmentChain);
+
+    // Get infixes of the sequences that correspond to this rectangle.
+    TInfix prefix0 = prefix(value(alignmentChain.sequence0_), getBeginDim0(rightSeed) + rightOverlap0);
+    TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignLeadingRectangle" << std::endl;
-    std::cout << "| prefix0: '" << prefix0 << "' (overlap = " << rightOverlap0 << ")" << std::endl;
-    std::cout << "| prefix1: '" << prefix1 << "' (overlap = " << rightOverlap1 << ")" << std::endl;
+    std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
+    std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
 
-    // Append a new alignment matrix for the DP programming.
+    // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
-    // Compute DP matrix with free begin gaps in both sequences but no
-    // free end gaps.
-    _align_dynProg(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, alignmentChain.scoringScheme_, AlignConfig<true, true, false, false>(), TAlignmentTag());
+    // Resize the alignment matrix to the appropriate size.
+    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, TAlignmentTag());
+    // Initialize the matrix gutter.
+    _align_initGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, AlignConfig<true, true, false, false>(), TAlignmentTag());
+    // Fill the Matrix using standard dynamic programming.
+    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
@@ -157,11 +189,12 @@ _alignLeadingRectangle(
 }
 
 
+/*
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignTrailingRectangle(
         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
-        Seed<TSeedSpec, TSeedConfig> const & seed)
+        Seed<TSeedSpec, TSeedConfig> const & leftSeed)
 {
     SEQAN_CHECKPOINT;
 
@@ -170,40 +203,30 @@ _alignTrailingRectangle(
     typedef typename Suffix<TSequence>::Type TSuffix;
     typedef typename Size<TSequence>::Type TSize;
 
-    // Compute the overlaps of the sequence suffixes with the seed
-    // banded alignment matrix.
-    //
-    // TODO(holtgrew): Are these computations correct?
-    TSize leftOverlap0 = getUpperDiagonal(seed) - getEndDiagonal(seed) + alignmentChain.bandwidth_;
-    TSize leftOverlap1 = getEndDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
-    // The rectangle must overlap with the band around the seed (given
-    // the bandwidth is > 0).
-    SEQAN_ASSERT_GT(leftOverlap0, 0u);
-    SEQAN_ASSERT_GT(leftOverlap1, 0u);
-    // Limit overlaps so they do not go beyond the alignment matrix.
-    leftOverlap0 = _min(leftOverlap0, getEndDim0(seed));
-    leftOverlap1 = _min(leftOverlap1, getEndDim1(seed));
-    // Get suffixes of the sequences to be aligned for the last
-    // rectangle.  They use the overlap computed above.
-    TSuffix suffix0 = suffix(value(alignmentChain.sequence0_), getEndDim0(seed) - leftOverlap0);
-    TSuffix suffix1 = suffix(value(alignmentChain.sequence1_), getEndDim1(seed) - leftOverlap1);
+    // Compute overlap of the rectangle with the seed to the upper left.
+    TSize leftOverlap0, leftOverlap1;
+    _computeLowerRightOverlap(leftOverlap0, leftOverlap1, leftSeed, alignmentChain);
+
+    // Get infixes of the sequences that correspond to this rectangle.
+    TInfix suffix0 = suffix(value(alignmentChain.sequence0_), getEndDim0(leftSeed));
+    TInfix suffix1 = suffix(value(alignmentChain.sequence1_), getEndDim1(leftSeed));
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignTrailingRectangle" << std::endl;
-    std::cout << "| suffix0: '" << suffix0 << "' (overlap = " << leftOverlap0 << ")" << std::endl;
-    std::cout << "| suffix1: '" << suffix1 << "' (overlap = " << leftOverlap1 << ")" << std::endl;
+    std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
+    std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
 
-    // Get a description of the lower horizontal stripe of the
-    // previous banded DP matrix to copy into the rectangular DP
-    // programming matrix.
-    _DPMatrixRectangle<TScoreValue> bandedDPMatrixRectangle(back(alignmentChain.alignmentMatrices_), leftOverlap0, leftOverlap1);
-
-    // Append a new alignment matrix for the DP programming.
+    // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
-    // Compute DP matrix copying in the values from the lower stripe
-    // of a banded DP alignment matrix.
-    _align_dynProg(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, alignmentChain.scoringScheme_, bandedDPMatrixRectangle, TAlignmentTag());
+    // Resize the alignment matrix to the appropriate size.
+    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
+    // Copy over the data from the banded seed alignment matrix.
+    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Initialize the rest of the gutter.
+    _align_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<true, true, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Fill the Matrix using standard dynamic programming.
+    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
@@ -233,53 +256,35 @@ _alignRectangle(
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
 
-    // Compute overlap with left seed in both dimensions.
-    //
-    // TODO(holtgrew): Are these computations correct?
-    TSize leftOverlap0 = getUpperDiagonal(leftSeed) - getEndDiagonal(leftSeed) + alignmentChain.bandwidth_;
-    TSize leftOverlap1 = getEndDiagonal(leftSeed) - getLowerDiagonal(leftSeed) + alignmentChain.bandwidth_;
-    // The rectangle must overlap with the band around the seed.
-    SEQAN_ASSERT_GEQ(leftOverlap0, 0u);
-    SEQAN_ASSERT_GEQ(leftOverlap1, 0u);
-    // TODO(holtgrew): Are these computations correct?
-    TSize rightOverlap0 = getLowerDiagonal(rightSeed) - getStartDiagonal(rightSeed) + alignmentChain.bandwidth_;
-    TSize rightOverlap1 = getUpperDiagonal(rightSeed) - getStartDiagonal(rightSeed) + alignmentChain.bandwidth_;
-    // The rectangle must overlap with the band around the seed.
-    SEQAN_ASSERT_GEQ(rightOverlap0, 0u);
-    SEQAN_ASSERT_GEQ(rightOverlap1, 0u);
+    // Compute overlap of the rectangle with the seed to the upper left and to the lower right.
+    TSize leftOverlap0, leftOverlap1, rightOverlap0, rightOverlap1;
+    _computeLowerRightOverlap(leftOverlap0, leftOverlap1, leftSeed, alignmentChain);
+    _computeUpperLeftOverlap(rightOverlap0, rightOverlap1, rightSeed, alignmentChain);
 
-    // Limit overlaps so they do not go beyond the alignment matrix.
-    leftOverlap0 = _min(leftOverlap0, getEndDim0(leftSeed));
-    leftOverlap1 = _min(leftOverlap1, getEndDim1(leftSeed));
-    rightOverlap0 = _min(rightOverlap0, length(value(alignmentChain.sequence0_)) - getBeginDim0(rightSeed));
-    rightOverlap1 = _min(rightOverlap1, length(value(alignmentChain.sequence1_)) - getBeginDim1(rightSeed));
-
-    // Get infixes of the sequences to be aligned for the rectangle in
-    // the middle of the chain.  They use the overlaps computed above.
+    // Get infixes of the sequences that correspond to this rectangle.
     TInfix infix0 = infix(value(alignmentChain.sequence0_), getEndDim0(leftSeed) - leftOverlap0, getBeginDim0(rightSeed) + rightOverlap0);
     TInfix infix1 = infix(value(alignmentChain.sequence1_), getEndDim1(leftSeed) - leftOverlap1, getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignRectangle" << std::endl;
-    std::cout << "| infix0: '" << infix0 << "' overlaps = (" << leftOverlap0 << ", " << rightOverlap0 << ")"<< std::endl;
-    std::cout << "| infix1: '" << infix1 << "' overlaps = (" << leftOverlap1 << ", " << rightOverlap1 << ")" << std::endl;
+    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
 
-    // Get a description of the lower horizontal stripe of the
-    // previous banded DP matrix to copy into the rectangular DP
-    // programming matrix.  It is the same as the overlap with this DP
-    // matrix.
-    _DPMatrixRectangle<TScoreValue> bandedDPMatrixRectangle(back(alignmentChain.alignmentMatrices_), leftOverlap0, leftOverlap1);
-
-    // Append a new alignment matrix for the DP programming.
+    // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
-    // Compute DP matrix copying in the values from the lower stripe
-    // of a banded DP alignment matrix.
-    _align_dynProg(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, bandedDPMatrixRectangle, TAlignmentTag());
+    // Resize the alignment matrix to the appropriate size.
+    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
+    // Copy over the data from the banded seed alignment matrix.
+    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Initialize the rest of the gutter.
+    _align_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<false, false, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Fill the Matrix using standard dynamic programming.
+    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- Last rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+    std::cout << ",-- Middle rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
     for (unsigned i = 0; i < length(matrix, 0); ++i) {
         std::cout << "|\t";
         for (unsigned j = 0; j < length(matrix, 1); ++j) {
@@ -302,22 +307,16 @@ _alignSeed(
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
+    typedef Seed<TSeedSpec, TSeedConfig> TSeed;
+    typedef typename Diagonal<TSeed>::Type TDiagonal;
+
+    // Compute overlap with the rectangle to the upper left.
+    TSize leftOverlap0, leftOverlap1, rightOverlap0, rightOverlap1;
+    _computeUpperLeftOverlap(leftOverlap0, leftOverlap1, seed, alignmentChain);
 
     // Get the infixes corresponding to the seed.
     TInfix infix0 = infix(value(alignmentChain.sequence0_), getBeginDim0(seed), getEndDim0(seed));
     TInfix infix1 = infix(value(alignmentChain.sequence1_), getBeginDim1(seed), getEndDim1(seed));
-
-    // Compute the overlapping part of the seed's banded alignment
-    // matrix and the rectangle left of it.
-    //
-    // TODO(holtgrew): Are these computations correct?
-    TSize leftOverlap0 = getStartDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
-    TSize leftOverlap1 = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
-    // The overlaps should be greater than 0 (given the bandwidth is > 0).
-    SEQAN_ASSERT_GT(leftOverlap0, 0u);
-    SEQAN_ASSERT_GT(leftOverlap1, 0u);
-    // Get the DP matrix rectangle description corresponding to this overlap.
-    _DPMatrixRectangle<TScoreValue> bandedDPMatrixRectangle(back(alignmentChain.alignmentMatrices_), leftOverlap0, leftOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignSeed" << std::endl;
@@ -325,13 +324,24 @@ _alignSeed(
     std::cout << "| infix1: '" << infix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
 
-    // _align_banded_dynProg // XXX TODO(holtgrew): Actually call banded dynamic programming.
+    // Append a new alignment matrix to the chain.
+    appendValue(alignmentChain.alignmentMatrices_, TMatrix());
+    // Resize the alignment matrix to the appropriate size.
+    _alignBanded_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
+    // Copy over the data from the unbanded banded rectangle alignment matrix.
+    _alignBanded_initGutterFromUnbanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Initialize the rest of the gutter.
+    _alignBanded_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<false, false, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Fill the Matrix using banded dynamic programming.
+    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
     std::cout << ",-- Seed Alignment, Banded NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
     for (unsigned i = 0; i < length(matrix, 0); ++i) {
         std::cout << "|\t";
+        for (unsigned j = 0; j < i; ++j)
+            std::cout << "\t";
         for (unsigned j = 0; j < length(matrix, 1); ++j) {
             std::cout << value(matrix, i, j) << "\t";
         }
@@ -351,7 +361,7 @@ _glueAlignmentChain(
     SEQAN_ASSERT_FAIL("Write _glueAlignmentChain()!");
     return 0;
 }
-
+*/
 }  // namespace seqan
 
 #endif  // SEQAN_SEEDS_ALIGN_CHAIN_BANDED_ALIGNMENT_CHAIN_H_

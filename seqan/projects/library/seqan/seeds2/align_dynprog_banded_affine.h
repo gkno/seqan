@@ -34,6 +34,8 @@ namespace seqan {
 // Functions
 // ===========================================================================
 
+#if 0
+
 // Fill the NW DP matrix for the banded alignment of the two given
 // sequences.
 //
@@ -71,6 +73,8 @@ _align_banded_traceBack(
 {
     SEQAN_CHECKPOINT;
 }   
+
+#endif  // #if 0
 
 }  // namespace seqan
 
