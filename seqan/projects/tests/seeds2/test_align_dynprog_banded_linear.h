@@ -54,19 +54,21 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_free)
 
     _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), 2, NeedlemanWunsch());
 
+    int inf = InfimumValue<int>::VALUE / 2;
+
     // "left" gutter
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 1, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 2, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 3, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0));
     // top gutter
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 1));
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 2));
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 3));
     // right gutter must be very small so we never go there.
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 0, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 1, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 2, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 3, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 3));
 }
 
 
@@ -82,19 +84,21 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
 
     _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), 2, NeedlemanWunsch());
 
+    int inf = InfimumValue<int>::VALUE / 2;
+
     // "left" gutter
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 2, 0));
-    SEQAN_ASSERT_EQ(-6, value(matrix, 3, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0));
     // top gutter
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
     SEQAN_ASSERT_EQ(-4, value(matrix, 0, 2));
+    SEQAN_ASSERT_EQ(-6, value(matrix, 0, 3));
     // right gutter must be very small so we never go there.
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 0, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 1, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 2, 3));
-    SEQAN_ASSERT_EQ(InfimumValue<int>::VALUE / 2, value(matrix, 3, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 3));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 3));
 }
 
 
