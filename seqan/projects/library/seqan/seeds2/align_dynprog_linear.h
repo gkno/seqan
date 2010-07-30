@@ -143,7 +143,7 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
         goNext(itTop, 1);
         itAbove = itTop;
         for (TSequenceIterator it0 = begin(sequence0), it0end = end(sequence0); it0 != it0end; ++it0) {
-            TScoreValue scoreMoveDiagonal = *itLeft + ((*it1 == *it0) ? matchScore : mismatchScore);
+            TScoreValue scoreMoveDiagonal = *itLeft + ((*it0 == *it1) ? matchScore : mismatchScore);
             goNext(itLeft, 0);
             TScoreValue scoreMoveRight = *itLeft + gapScore;
             TScoreValue scoreMoveDown = *itAbove + gapScore;

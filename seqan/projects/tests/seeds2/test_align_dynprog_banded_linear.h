@@ -35,10 +35,10 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_resize_matrix)
 
     Matrix<int, 2> matrix;
 
-    _alignBanded_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), 2, NeedlemanWunsch());
+    _alignBanded_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), -1, 1, NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(9u, length(matrix, 0));
-    SEQAN_ASSERT_EQ(4u, length(matrix, 1));
+    SEQAN_ASSERT_EQ(5u, length(matrix, 1));
 }
 
 
@@ -49,26 +49,28 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_free)
 
     Matrix<int, 2> matrix;
     setLength(matrix, 0, 4);
-    setLength(matrix, 1, 4);
+    setLength(matrix, 1, 5);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), 2, NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), -1, 1, NeedlemanWunsch());
 
     int inf = InfimumValue<int>::VALUE / 2;
 
-    // "left" gutter
+    // Diagonal below the lower one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0));
-    // top gutter
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 1));
+    // Diagonal above the upper one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 4));
+    // Top gutter
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 2));
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 3));
-    // right gutter must be very small so we never go there.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 3));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 3));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 3));
+    // Left gutter.
+    SEQAN_ASSERT_EQ(0, value(matrix, 1, 1));
 }
 
 
@@ -82,23 +84,27 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
     setLength(matrix, 1, 4);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), 2, NeedlemanWunsch());
+    Score<int, Simple> const scoringScheme(1, -1, -2);
+
+    _alignBanded_initGutter(matrix, scoringScheme, AlignConfig<false, false, true, true>(), -1, 1, NeedlemanWunsch());
 
     int inf = InfimumValue<int>::VALUE / 2;
 
-    // "left" gutter
+    // Diagonal below the lower one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0));
     SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0));
-    // top gutter
-    SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 0, 2));
-    SEQAN_ASSERT_EQ(-6, value(matrix, 0, 3));
-    // right gutter must be very small so we never go there.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 3));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 3));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 3));
+    // Diagonal above the upper one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 4));
+    // Top gutter
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 3));
+    // Left gutter.
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 1));
 }
 
 
@@ -107,29 +113,62 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_fill_matrix)
 {
     using namespace seqan;
 
-    SEQAN_ASSERT_FAIL("Write me for banded!");
-
     Matrix<int, 2> matrix;
-    DnaString const sequence0 = "CCA";
-    DnaString const sequence1 = "CAA";
+    DnaString const sequence0 = "CACCCC";
+    DnaString const sequence1 = "CCACCC";
     Score<int, Simple> const scoringScheme(1, -1, -1);
 
-    _align_resizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
-    _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-    _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
+    _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -1, 1, NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), -1, 1, NeedlemanWunsch());
+    _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, NeedlemanWunsch());
 
-    int const expected[16] = {
-         0, -1, -2, -3,
-        -1,  1,  0, -1,
-        -2,  0,  0, -1,
-        -3, -1,  1,  1
-    };
+    int inf = InfimumValue<int>::VALUE / 2;
 
-    for (unsigned j = 0; j < 4; ++j) {
-        for (unsigned i = 0; i < 4; ++i) {
-            SEQAN_ASSERT_EQ_MSG(expected[i * 4 + j], value(matrix, i, j), "i = %d, j = %d", i, j);
-        }
-    }
+    // First, the gutters and border diagonals should not have been touched.
+    //
+    // Diagonal below the lower one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 4, 0));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 5, 0));
+    // Diagonal above the upper one.
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 4, 4));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 5, 4));
+    // Top gutter
+    SEQAN_ASSERT_EQ(0, value(matrix, 0, 2));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 0, 3));
+    // Left gutter.
+    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 1));
+
+    // Second, check the fields in between.
+    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 1));
+    SEQAN_ASSERT_EQ(1, value(matrix, 1, 2));
+    SEQAN_ASSERT_EQ(0, value(matrix, 1, 3));
+    // row 2
+    SEQAN_ASSERT_EQ(0, value(matrix, 2, 1));
+    SEQAN_ASSERT_EQ(0, value(matrix, 2, 2));
+    SEQAN_ASSERT_EQ(1, value(matrix, 2, 3));
+    // row 3
+    SEQAN_ASSERT_EQ(1, value(matrix, 3, 1));
+    SEQAN_ASSERT_EQ(0, value(matrix, 3, 2));
+    SEQAN_ASSERT_EQ(2, value(matrix, 3, 3));
+    // row 4
+    SEQAN_ASSERT_EQ(0, value(matrix, 4, 1));
+    SEQAN_ASSERT_EQ(1, value(matrix, 4, 2));
+    SEQAN_ASSERT_EQ(3, value(matrix, 4, 3));
+    // row 5
+    SEQAN_ASSERT_EQ(1, value(matrix, 5, 1));
+    SEQAN_ASSERT_EQ(2, value(matrix, 5, 2));
+    SEQAN_ASSERT_EQ(4, value(matrix, 5, 3));
+    // row 6
+    SEQAN_ASSERT_EQ(2, value(matrix, 6, 1));
+    SEQAN_ASSERT_EQ(3, value(matrix, 6, 2));
 }
 
 #endif  // TEST_SEEDS_TEST_ALIGN_DYNPROG_BANDED_LINEAR_H_
