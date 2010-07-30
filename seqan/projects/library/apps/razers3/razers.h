@@ -1427,7 +1427,8 @@ matchVerify(
 				// for RazerSErrors bestErrors == -maxScore
 				verifier.m.endPos = verifier.m.beginPos + ndlLength;
 				verifier.q.pairScore = verifier.q.score = maxScore;
-				verifier.push();
+				if (!verifier.oneMatchPerBucket)
+					verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
@@ -1532,7 +1533,8 @@ matchVerify(
 					setBeginPosition(inf, infBeginPos);
 					setEndPosition(inf, infEndPos);
 				}
-				verifier.push();
+				if (!verifier.oneMatchPerBucket)
+					verifier.push();
 				maxScore = minScore - 1;
 			}
 		}
