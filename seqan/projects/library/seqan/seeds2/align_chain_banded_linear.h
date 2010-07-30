@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007-2010
+  Copyright (C) 2010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -81,7 +81,6 @@ _bandedChainAlignment(
     //
     // Compute alignment for leading rectangle and the first seed.
     _alignLeadingRectangle(alignmentChain, front(seedChain));
-    /*
     _alignSeed(alignmentChain, front(seedChain));
 
     // For all seeds from the second one from the left to the
@@ -96,8 +95,6 @@ _bandedChainAlignment(
 
     // Glue all alignments together.
     return _glueAlignmentChain(alignment, alignmentChain);
-    */
-    return 0;
 }
 
 }  // namespace seqan

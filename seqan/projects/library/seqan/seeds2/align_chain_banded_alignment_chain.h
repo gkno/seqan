@@ -64,7 +64,8 @@ public:
     // The second sequence / dimension 1 / database sequence, horizontal ltr
     Holder<TSegment> sequence1_;
 
-    // The bandwidth for the banded alignment.
+    // The bandwidth for the banded alignment.  Actually, this is the
+    // delta to the upper and lower diagonals of the seeds.
     TPosition bandwidth_;
 
     // The alignment matrices for the different part.  The first
@@ -110,6 +111,7 @@ _computeLowerRightOverlap(TSize & overlap0,
                           _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_FAIL("Overlap computation is bogus!");
     overlap0 = getUpperDiagonal(seed) - getEndDiagonal(seed) + alignmentChain.bandwidth_;
     overlap1 = getEndDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
     // Don't overlap more than the seed...
@@ -129,6 +131,7 @@ _computeUpperLeftOverlap(TSize & overlap0,
                          _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
 {
     SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_FAIL("Overlap computation is bogus!");
     overlap0 = getStartDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_;
     overlap1 = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
     // Don't overlap more than the seed...
@@ -176,20 +179,24 @@ _alignLeadingRectangle(
     _align_fillMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
-    TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- First rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
-    for (unsigned i = 0; i < length(matrix, 0); ++i) {
-        std::cout << "|\t";
-        for (unsigned j = 0; j < length(matrix, 1); ++j) {
-            std::cout << value(matrix, i, j) << "\t";
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- First rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "|";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else 
+                    std::cout << "\t" <<value(matrix, i, j);
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << "`--" << std::endl;
     }
-    std::cout << "`--" << std::endl;
 }
 
 
-/*
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignTrailingRectangle(
@@ -202,14 +209,20 @@ _alignTrailingRectangle(
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Suffix<TSequence>::Type TSuffix;
     typedef typename Size<TSequence>::Type TSize;
+    typedef Seed<TSeedSpec, TSeedConfig> TSeed;
+    typedef typename Diagonal<TSeed>::Type TDiagonal;
 
     // Compute overlap of the rectangle with the seed to the upper left.
     TSize leftOverlap0, leftOverlap1;
     _computeLowerRightOverlap(leftOverlap0, leftOverlap1, leftSeed, alignmentChain);
 
     // Get infixes of the sequences that correspond to this rectangle.
-    TInfix suffix0 = suffix(value(alignmentChain.sequence0_), getEndDim0(leftSeed));
-    TInfix suffix1 = suffix(value(alignmentChain.sequence1_), getEndDim1(leftSeed));
+    TSuffix suffix0 = suffix(value(alignmentChain.sequence0_), getEndDim0(leftSeed) - leftOverlap0);
+    TSuffix suffix1 = suffix(value(alignmentChain.sequence1_), getEndDim1(leftSeed) - leftOverlap1);
+
+    // Compute lower and upper diagonal for the alignment.
+    TDiagonal lowerDiagonal = getStartDiagonal(leftSeed) - getLowerDiagonal(leftSeed) - alignmentChain.bandwidth_;
+    TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignTrailingRectangle" << std::endl;
@@ -220,25 +233,46 @@ _alignTrailingRectangle(
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
     // Resize the alignment matrix to the appropriate size.
-    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
-    // Copy over the data from the banded seed alignment matrix.
-    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
-    // Initialize the rest of the gutter.
-    _align_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<true, true, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
+    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, TAlignmentTag());
+    // Copy over the data from the banded seed alignment matrix into
+    // the gutter and initialize the rest of it according to the
+    // alignment config object.
+    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // TODO(holtgrew): Temporary debug code.
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- Lasts rectangle after init from banded " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "|";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else 
+                    std::cout << "\t" <<value(matrix, i, j);
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "`--" << std::endl;
+    }
     // Fill the Matrix using standard dynamic programming.
     _align_fillMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
-    TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- Last rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
-    for (unsigned i = 0; i < length(matrix, 0); ++i) {
-        std::cout << "|\t";
-        for (unsigned j = 0; j < length(matrix, 1); ++j) {
-            std::cout << value(matrix, i, j) << "\t";
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- Last rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "|";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else 
+                    std::cout << "\t" <<value(matrix, i, j);
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << "`--" << std::endl;
     }
-    std::cout << "`--" << std::endl;
 }
 
 
@@ -255,6 +289,8 @@ _alignRectangle(
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
+    typedef Seed<TSeedSpec, TSeedConfig> TSeed;
+    typedef typename Diagonal<TSeed>::Type TDiagonal;
 
     // Compute overlap of the rectangle with the seed to the upper left and to the lower right.
     TSize leftOverlap0, leftOverlap1, rightOverlap0, rightOverlap1;
@@ -265,35 +301,63 @@ _alignRectangle(
     TInfix infix0 = infix(value(alignmentChain.sequence0_), getEndDim0(leftSeed) - leftOverlap0, getBeginDim0(rightSeed) + rightOverlap0);
     TInfix infix1 = infix(value(alignmentChain.sequence1_), getEndDim1(leftSeed) - leftOverlap1, getBeginDim1(rightSeed) + rightOverlap1);
 
+    // Compute lower and upper diagonal for the alignment.
+    TDiagonal lowerDiagonal = getStartDiagonal(leftSeed) - getLowerDiagonal(leftSeed) - alignmentChain.bandwidth_;
+    TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
+
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignRectangle" << std::endl;
     std::cout << "| infix0: '" << infix0 << "'" << std::endl;
     std::cout << "| infix1: '" << infix1 << "'" << std::endl;
     std::cout << "`--" << std::endl;
+    std::cout << "left seed = " << leftSeed << std::endl;
+    std::cout << "right seed = " << rightSeed << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
     // Resize the alignment matrix to the appropriate size.
     _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
-    // Copy over the data from the banded seed alignment matrix.
-    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
-    // Initialize the rest of the gutter.
-    _align_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<false, false, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // Copy over the data from the banded seed alignment matrix into
+    // the gutter and initialize the rest of it according to the
+    // alignment config object.
+    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // TODO(holtgrew): Temporary debug code.
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- Rectangle after init from banded " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "|";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else 
+                    std::cout << "\t" <<value(matrix, i, j);
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "`--" << std::endl;
+    }
     // Fill the Matrix using standard dynamic programming.
     _align_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
-    TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- Middle rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
-    for (unsigned i = 0; i < length(matrix, 0); ++i) {
-        std::cout << "|\t";
-        for (unsigned j = 0; j < length(matrix, 1); ++j) {
-            std::cout << value(matrix, i, j) << "\t";
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- Middle rectangle, NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "|";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else 
+                    std::cout << "\t" <<value(matrix, i, j);
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << "`--" << std::endl;
     }
-    std::cout << "`--" << std::endl;
 }
+
 
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
@@ -311,12 +375,17 @@ _alignSeed(
     typedef typename Diagonal<TSeed>::Type TDiagonal;
 
     // Compute overlap with the rectangle to the upper left.
-    TSize leftOverlap0, leftOverlap1, rightOverlap0, rightOverlap1;
+    TSize leftOverlap0, leftOverlap1;
     _computeUpperLeftOverlap(leftOverlap0, leftOverlap1, seed, alignmentChain);
 
     // Get the infixes corresponding to the seed.
     TInfix infix0 = infix(value(alignmentChain.sequence0_), getBeginDim0(seed), getEndDim0(seed));
     TInfix infix1 = infix(value(alignmentChain.sequence1_), getBeginDim1(seed), getEndDim1(seed));
+
+    // Compute lower and upper diagonal for the alignment.
+    TDiagonal lowerDiagonal = getStartDiagonal(seed) - getLowerDiagonal(seed) - alignmentChain.bandwidth_;
+    TDiagonal upperDiagonal = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
+    // std::cout << "lowerDiagonal = " << lowerDiagonal << ", upperDiagonal = " << upperDiagonal << std::endl;
 
     // TODO(holtgrew): Temporary debug code.
     std::cout << ",-- _alignSeed" << std::endl;
@@ -326,28 +395,52 @@ _alignSeed(
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
-    // Resize the alignment matrix to the appropriate size.
-    _alignBanded_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
-    // Copy over the data from the unbanded banded rectangle alignment matrix.
-    _alignBanded_initGutterFromUnbanded(back(alignmentChain.alignmentMatrices_), value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
-    // Initialize the rest of the gutter.
-    _alignBanded_initGutter(back(alignmentChain.alignmentMatrices_), AlignConfig<false, false, false, false>(), leftOverlap0, leftOverlap1, TAlignmentTag());
-    // Fill the Matrix using banded dynamic programming.
-    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
-    // TODO(holtgrew): Temporary debug code.
-    TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
-    std::cout << ",-- Seed Alignment, Banded NW Matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
-    for (unsigned i = 0; i < length(matrix, 0); ++i) {
-        std::cout << "|\t";
-        for (unsigned j = 0; j < i; ++j)
-            std::cout << "\t";
-        for (unsigned j = 0; j < length(matrix, 1); ++j) {
-            std::cout << value(matrix, i, j) << "\t";
+    // Resize the alignment matrix to the appropriate size.
+    _alignBanded_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, lowerDiagonal, upperDiagonal, TAlignmentTag());
+    // Initialize the banded DP matrix' gutter.  Some data is copied
+    // in from the previous non-banded DP matrix.
+    // _alignBanded_initGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, AlignConfig<false, false, false, false>(), TAlignmentTag());
+    _alignBanded_initGutterFromUnbanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // // TODO(holtgrew): Debug output, remove when not needed any more.
+    // {
+    //     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+    //     std::cout << ",-- matrix after init gutter" << std::endl;
+    //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //         std::cout << "| ";
+    //         for (unsigned j = 0; j < i; ++j)
+    //             std::cout << "\t";
+    //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //                 std::cout << "\tinf";
+    //             else
+    //                 std::cout << "\t" << value(matrix, i, j);
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    //     std::cout << "`--" << std::endl;
+    // }
+    // Fill the Matrix using banded dynamic programming.
+    _alignBanded_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, TAlignmentTag());
+
+    // TODO(holtgrew): Debug output, remove when not needed any more.
+    {
+        TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
+        std::cout << ",-- matrix after DP filling" << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "| ";
+            for (unsigned j = 0; j < i; ++j)
+                std::cout << "\t";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else
+                    std::cout << "\t" << value(matrix, i, j);
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+        std::cout << "`--" << std::endl;
     }
-    std::cout << "`--" << std::endl;
 }
 
 
@@ -361,7 +454,7 @@ _glueAlignmentChain(
     SEQAN_ASSERT_FAIL("Write _glueAlignmentChain()!");
     return 0;
 }
-*/
+
 }  // namespace seqan
 
 #endif  // SEQAN_SEEDS_ALIGN_CHAIN_BANDED_ALIGNMENT_CHAIN_H_

@@ -52,7 +52,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_free)
     setLength(matrix, 1, 5);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), -1, 1, NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), NeedlemanWunsch());
 
     int inf = InfimumValue<int>::VALUE / 2;
 
@@ -86,7 +86,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
 
     Score<int, Simple> const scoringScheme(1, -1, -2);
 
-    _alignBanded_initGutter(matrix, scoringScheme, AlignConfig<false, false, true, true>(), -1, 1, NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, true, true>(), NeedlemanWunsch());
 
     int inf = InfimumValue<int>::VALUE / 2;
 
@@ -119,7 +119,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_fill_matrix)
     Score<int, Simple> const scoringScheme(1, -1, -1);
 
     _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -1, 1, NeedlemanWunsch());
-    _alignBanded_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), -1, 1, NeedlemanWunsch());
+    _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
     _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, NeedlemanWunsch());
 
     int inf = InfimumValue<int>::VALUE / 2;

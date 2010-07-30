@@ -34,47 +34,46 @@ namespace seqan {
 // Functions
 // ===========================================================================
 
-#if 0
-
-// Fill the NW DP matrix for the banded alignment of the two given
-// sequences.
-//
-// This is the case where data is copied over from an alignment DP
-// matrix.
-//
-// The data of the lower right rectangle of the DP alignment matrix is
-// copied over into the upper right corner of the alignment matrix and
-// the alignment border is filled with infimum values.
-template <typename TScoreValue, typename TSequence, typename TScoringScheme>
-void
-_align_banded_dynProg(
-        Matrix<TScoreValue, 2> & matrix,
-        TSequence const & seq0,
-        TSequence const & seq1,
-        TScoringScheme const & scoringScheme,
-        _DPMatrixRectangle<TScoreValue> /*const*/ & lowerRightRectangle,
-        Gotoh const &)
+template <typename TScoreValue, typename TSequence, typename TDiagonal>
+inline void
+_alignBanded_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_FAIL("Write me!");
 }
 
 
-// Perform a traceback in the Gotoh banded alignment matrices
-// beginning with the positions pos0/pos1 in the sequences.
-template <typename TTarget, typename TScoreValue, typename TPosition>
-void
-_align_banded_traceBack(
-        TTarget gaps0It,
-        TTarget gaps1It,
-        Matrix<TScoreValue, 2> const & matrix,
-        TPosition pos0,
-        TPosition pos1,
-        Gotoh const &)
+template <typename TScoreValue, typename TDiagonal, bool BEGIN1_FREE, bool BEGIN0_FREE, bool END1_FREE, bool END0_FREE>
+inline void
+_alignBanded_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
-}   
 
-#endif  // #if 0
+
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+template <typename TScoreValue, typename TDiagonal, typename TOverlap>
+inline void
+_alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 2> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
+{
+    SEQAN_CHECKPOINT;
+
+
+    SEQAN_ASSERT_FAIL("Write me!");
+}
+
+
+template <typename TScoreValue, typename TSequence, typename TDiagonal>
+inline void
+_alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
+{
+    SEQAN_CHECKPOINT;
+
+    SEQAN_ASSERT_FAIL("Write me!");
+}
 
 }  // namespace seqan
 

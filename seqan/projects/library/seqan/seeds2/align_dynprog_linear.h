@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007-2010
+  Copyright (C) 2010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -50,13 +50,14 @@ _align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0
 
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, length(sequence1) + 1);
-    resize(matrix);
+    // resize(matrix);
+    fill(matrix, -42);
 }
 
 
 template <typename TScoreValue, bool BEGIN1_FREE, bool BEGIN0_FREE, bool END1_FREE, bool END0_FREE>
 inline void
-_align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
+_align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const & scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -104,6 +105,50 @@ _align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> co
             goNext(it, 1);
         }
     }
+}
+
+template <typename TScoreValue, typename TDiagonal, typename TOverlap>
+inline void
+_align_initGutterFromBanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 2> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, NeedlemanWunsch const &)
+{
+    SEQAN_CHECKPOINT;
+
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TIterator;
+    typedef typename Position<TMatrix>::Type TPosition;
+
+    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
+                        "Only linear gap costs allowed for Needleman-Wunsch.");
+
+    TScoreValue gapScore = scoreGap(scoringScheme);
+
+    // Copy over data for left gutter.
+    std::cout << "overlap0 = " << overlap0 << ", overlap1 = " << overlap1 << std::endl;
+    TIterator it = begin(matrix);
+    TIterator otherIt(otherMatrix);
+    setPosition(otherIt, (length(otherMatrix, 0) - (overlap0 + 1)) + overlap0 * _dataFactors(otherMatrix)[1]);
+    TIterator srcIt = otherIt;
+    for (TOverlap i = 0; i < overlap0 + 1; ++i) {
+        *it = *srcIt;
+        goNext(it, 0);
+        goNext(srcIt, 0);
+        goPrevious(srcIt, 1);
+    }
+    // Init the rest of the left gutter with infima.
+    for (TPosition i = overlap0 + 1, iend = length(matrix, 0); i < iend; ++i, goNext(it, 0))
+        *it = InfimumValue<TScoreValue>::VALUE / 2;
+
+    // Copy over data for top gutter.
+    it = begin(matrix);
+    srcIt = otherIt;
+    for (TOverlap i = 0; i < overlap1 + 1; ++i) {
+        *it = *srcIt;
+        goNext(it, 1);
+        goNext(srcIt, 1);
+    }
+    // Init the rest of the top gutter with infima.
+    for (TPosition i = overlap1 + 1, iend = length(matrix, 1); i < iend; ++i, goNext(it, 1))
+        *it = InfimumValue<TScoreValue>::VALUE / 2;
 }
 
 

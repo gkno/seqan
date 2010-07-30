@@ -50,31 +50,16 @@ _align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> co
 {
     SEQAN_CHECKPOINT;
 
-    typedef Matrix<TScoreValue, 2> TMatrix;
-    typedef typename Iterator<TMatrix>::Type TIterator;
-    typedef typename Position<TMatrix>::Type TPosition;
+    SEQAN_ASSERT_FAIL("Not implemented!");
+}
 
-    SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
-                        "Only linear gap costs allowed for Needleman-Wunsch.");
 
-    // Init left gutter with zeroes if begin gaps are in dimension 0
-    // free or with gap scores otherwise.
-    if (BEGIN0_FREE) {
-        TIterator it = begin(matrix);
-        for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i) {
-            *it = 0;
-            goNext(it, 0);
-        }
-    } else {
-        TScoreValue gapScore = scoreGap(scoringScheme);
-        TScoreValue x = 0;
-        TIterator it = begin(matrix);
-        for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i) {
-            *it = x;
-            x += gapScore;
-            goNext(it, 0);
-        }
-    }
+template <typename TScoreValue, typename TDiagonal, typename TOverlap>
+inline void
+_align_initGutterFromBanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 2> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
+{
+    SEQAN_CHECKPOINT;
+
     SEQAN_ASSERT_FAIL("Not implemented!");
 }
 

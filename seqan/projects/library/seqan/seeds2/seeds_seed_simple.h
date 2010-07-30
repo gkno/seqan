@@ -134,7 +134,7 @@ operator<<(TStream & stream, Seed<Simple, TConfig> const & seed)
     return stream << "Seed<Simple, TConfig>(" << getBeginDim0(seed)
                   << ", " << getBeginDim1(seed) << ", "
                   << getEndDim0(seed) << ", "
-                  << getEndDim1(seed) << ")";
+                  << getEndDim1(seed) << ", lower diag = " << getLowerDiagonal(seed) << ", upper diag = " << getUpperDiagonal(seed) << ")";
 }
 
 template <typename TConfig>
