@@ -40,6 +40,10 @@ _align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0
 {
     SEQAN_CHECKPOINT;
 
+    (void)matrix;
+    (void)sequence0;
+    (void)sequence1;
+
     SEQAN_ASSERT_FAIL("Not implemented!");
 }
 
@@ -49,6 +53,9 @@ inline void
 _align_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simple> const scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    (void)matrix;
+    (void)scoringScheme;
 
     SEQAN_ASSERT_FAIL("Not implemented!");
 }
@@ -60,6 +67,14 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, 
 {
     SEQAN_CHECKPOINT;
 
+    (void)matrix;
+    (void)scoringScheme;
+    (void)lowerDiagonal;
+    (void)upperDiagonal;
+    (void)otherMatrix;
+    (void)overlap0;
+    (void)overlap1;
+
     SEQAN_ASSERT_FAIL("Not implemented!");
 }
 
@@ -69,6 +84,11 @@ inline void
 _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    (void)matrix;
+    (void)sequence0;
+    (void)sequence1;
+    (void)scoringScheme;
 
     SEQAN_ASSERT_FAIL("Not implemented!");
 }

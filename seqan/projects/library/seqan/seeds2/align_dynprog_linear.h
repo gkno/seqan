@@ -113,14 +113,16 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, 
 {
     SEQAN_CHECKPOINT;
 
+    // TODO(holtgrew): Really unnecessary? Remove along with all other unused parameters in all align_*.h files.
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
+
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Iterator<TMatrix>::Type TIterator;
     typedef typename Position<TMatrix>::Type TPosition;
 
     SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
                         "Only linear gap costs allowed for Needleman-Wunsch.");
-
-    TScoreValue gapScore = scoreGap(scoringScheme);
 
     // Copy over data for left gutter.
     std::cout << "overlap0 = " << overlap0 << ", overlap1 = " << overlap1 << std::endl;

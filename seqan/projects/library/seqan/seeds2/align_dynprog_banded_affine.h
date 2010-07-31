@@ -40,6 +40,12 @@ _alignBanded_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seq
 {
     SEQAN_CHECKPOINT;
 
+    (void) matrix;
+    (void) sequence0;
+    (void) sequence1;
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
+
     SEQAN_ASSERT_FAIL("Write me!");
 }
 
@@ -50,6 +56,10 @@ _alignBanded_initGutter(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, Simp
 {
     SEQAN_CHECKPOINT;
 
+    (void) matrix;
+    (void) scoringScheme;
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
 
     SEQAN_ASSERT_FAIL("Write me!");
 }
@@ -61,6 +71,13 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScor
 {
     SEQAN_CHECKPOINT;
 
+    (void) matrix;
+    (void) scoringScheme;
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
+    (void) otherMatrix;
+    (void) overlap0;
+    (void) overlap1;
 
     SEQAN_ASSERT_FAIL("Write me!");
 }
@@ -71,6 +88,13 @@ inline void
 _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    (void) matrix;
+    (void) sequence0;
+    (void) sequence1;
+    (void) scoringScheme;
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
 
     SEQAN_ASSERT_FAIL("Write me!");
 }

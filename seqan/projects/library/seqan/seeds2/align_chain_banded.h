@@ -55,19 +55,20 @@ namespace seqan {
 */
 // TODO(holtgrew): wholeAlignment is the result and should be the first parameter.
 // TODO(holtgrew): Adjust the documentation to the parameter names.
-template<typename TContainer, typename TValue, typename TScoreValue, typename TAlign>
+template<typename TContainer, typename TValue, typename TScoreValue, typename TAlign, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
 TScoreValue
 bandedChainAlignment(TContainer const & seedChain, 
 					 TValue k,
 					 TAlign & alignment, 
-					 Score<TScoreValue, Simple> const & scoringScheme)
+					 Score<TScoreValue, Simple> const & scoringScheme,
+                     AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
     SEQAN_CHECKPOINT;
 
 	if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
-		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, NeedlemanWunsch());
+		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, alignConfig, NeedlemanWunsch());
 	else
-		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, Gotoh());
+		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, alignConfig, Gotoh());
 }
 
 }  // namespace seqan

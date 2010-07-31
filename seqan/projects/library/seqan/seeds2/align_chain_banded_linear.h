@@ -40,13 +40,14 @@ namespace seqan {
 // Functions
 // ===========================================================================
 
-template <typename TContainer, typename TBandwidth, typename TScoreValue, typename TAlign, typename TGlobalAlignmentTag>
+template <typename TContainer, typename TBandwidth, typename TScoreValue, typename TAlign, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE, typename TGlobalAlignmentTag>
 TScoreValue
 _bandedChainAlignment(
         TAlign & alignment,
         TContainer const & seedChain,
         TBandwidth k,
         Score<TScoreValue, Simple> const & scoringScheme,
+        AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig,
         TGlobalAlignmentTag const &)
 {
     SEQAN_CHECKPOINT;
@@ -80,7 +81,7 @@ _bandedChainAlignment(
     // Compute Alignment using Alignment Chain
     //
     // Compute alignment for leading rectangle and the first seed.
-    _alignLeadingRectangle(alignmentChain, front(seedChain));
+    _alignLeadingRectangle(alignmentChain, front(seedChain), alignConfig);
     _alignSeed(alignmentChain, front(seedChain));
 
     // For all seeds from the second one from the left to the
@@ -94,7 +95,7 @@ _bandedChainAlignment(
     _alignTrailingRectangle(alignmentChain, back(seedChain));
 
     // Glue all alignments together.
-    return _glueAlignmentChain(alignment, alignmentChain);
+    return _glueAlignmentChain(alignment, alignmentChain, alignConfig);
 }
 
 }  // namespace seqan

@@ -447,10 +447,10 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
     // first one found is returned which is the one that is furthest
     // away from seed.
     TPosition bestGapPos = 0;  // delta to lowermost position
-    TPosition bestScore = tmpScore;
+    TScoreValue bestScore = tmpScore;
     for (TPosition i = 1; i < minGap; ++i) {
         tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - 1 - i], sequence1[posLeft1 + minGap - 1 - i]);
-        tmpScore += score(scoringScheme, sequence0[posRight0 - i], sequence1[posRight0 - i]);
+        tmpScore += score(scoringScheme, sequence0[posRight0 - i], sequence1[posRight1 - i]);
         if (tmpScore > bestScore) {
             // Found a better score.
             bestScore = tmpScore;

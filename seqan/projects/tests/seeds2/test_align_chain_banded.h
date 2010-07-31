@@ -51,8 +51,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_upper_left_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeUpperLeftOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(2, overlap0);
-        SEQAN_ASSERT_EQ(4, overlap1);
+        SEQAN_ASSERT_EQ(2u, overlap0);
+        SEQAN_ASSERT_EQ(4u, overlap1);
     }
     // Test with a seed where start/end = upper/lower diagonal
     {
@@ -62,8 +62,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_upper_left_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeUpperLeftOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(4, overlap0);
-        SEQAN_ASSERT_EQ(2, overlap1);
+        SEQAN_ASSERT_EQ(4u, overlap0);
+        SEQAN_ASSERT_EQ(2u, overlap1);
     }
     // Test with a seed where start = end = lower = upper diagonal
     {
@@ -112,8 +112,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_lower_right_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeLowerRightOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(2, overlap0);
-        SEQAN_ASSERT_EQ(4, overlap1);
+        SEQAN_ASSERT_EQ(2u, overlap0);
+        SEQAN_ASSERT_EQ(4u, overlap1);
     }
     // Test with a seed where start/end = upper/lower diagonal
     {
@@ -123,8 +123,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_lower_right_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeLowerRightOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(4, overlap0);
-        SEQAN_ASSERT_EQ(2, overlap1);
+        SEQAN_ASSERT_EQ(4u, overlap0);
+        SEQAN_ASSERT_EQ(2u, overlap1);
     }
     // Test with a seed where start = end = lower = upper diagonal
     {
@@ -175,13 +175,13 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 1), database);
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix) << endl;
-        int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme);
+        int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 11);
 
         std::cout << alignment << std::endl;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACGTCCTCGTACACCGTCTTAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "TACGATC-C--ACACCG-CGTCT");
-    }/*
+    }
     // Test on infixes.
     {
         CharString query = "ACGTCCTCGTACACCGTCTTAA";
@@ -199,17 +199,17 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 1), database, 2, length(database));
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme);
+        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 11);
 
         //cout << alignment2 << endl;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CGTCCTCGTACACCGTCTTAA" );
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGATC-C--ACACCG-CGTCT");
-    }*/
+    }
 }
 
-/*
-// Test banded alignment algorithm around a chain.  Linear gap cost
+
+// Test banded alignment algorithm around a chain.  Affine gap cost
 // case.
 SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
 {
@@ -232,7 +232,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         assignSource(row(alignment, 1), database);
         
         //cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme);
+        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 24);
         
         //cout << alignment3 << endl;
@@ -255,7 +255,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         assignSource(row(alignment, 1), database, 2, length(database));
         
         //cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme);
+        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 21);
         
         //cout << alignment4 << endl;
@@ -263,5 +263,5 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGATCC----ACACCGCGTCT");
     }
 }
-*/
+
 #endif  // TEST_SEEDS_TEST_ALIGN_CHAIN_BANDED_H_

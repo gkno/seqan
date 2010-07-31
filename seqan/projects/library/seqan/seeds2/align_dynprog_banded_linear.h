@@ -46,7 +46,7 @@ namespace seqan {
 
 template <typename TScoreValue, typename TSequence, typename TDiagonal>
 inline void
-_alignBanded_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & sequence1, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, NeedlemanWunsch const &)
+_alignBanded_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, TSequence const & /*sequence1*/, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -114,6 +114,9 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScor
 {
     SEQAN_CHECKPOINT;
 
+    // TODO(holtgrew): Really unnecessary? Remove along with all other unused parameters in all align_*.h files.
+    (void) upperDiagonal;
+
     SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme),
                         "Only linear gap costs allowed for Needleman-Wunsch.");
 
@@ -142,7 +145,7 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScor
     setPosition(otherIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
     TIterator srcIt = otherIt;
     setPosition(it, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
-    for (TOverlap i = 0; i < overlap0 + 1; ++i) {
+    for (TOverlap i = 0; i < overlap0; ++i) {
         // std::cout << "*srcIt = " << *srcIt << std::endl;
         *it = *srcIt;
         goNext(srcIt, 0);
@@ -152,7 +155,7 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScor
     // Copy over a row from the other matrix into the top gutter.
     srcIt = otherIt;
     setPosition(it, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
-    for (TOverlap i = 0; i < overlap1 + 1; ++i) {
+    for (TOverlap i = 0; i < overlap1; ++i) {
         // std::cout << "*srcIt = " << *srcIt << std::endl;
         *it = *srcIt;
         goNext(srcIt, 1);
@@ -200,11 +203,10 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seque
     // need the length of the current column in the sheared alignment
     // matrix which complicates things.
     setPosition(itTop, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
-    TSize seq1Length = length(sequence1);
     TPosition seq1Pos = 0;
     TSequenceIterator it0Begin = begin(sequence0);
     for (TSequenceIterator it1 = begin(sequence1), it1end = end(sequence1); it1 != it1end; ++it1, ++seq1Pos) {
-        if (seq1Pos <= upperDiagonal) {
+        if (seq1Pos <= static_cast<TPosition>(upperDiagonal)) {
             itLeft = itTop;
             goNext(itTop, 1);
         } else {
@@ -259,7 +261,7 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seque
         // std::cout << "++it1" << std::endl;
         // We only need an offset for it0 when all diagonals up to the
         // upper one are aligned.
-        if (seq1Pos >= upperDiagonal)
+        if (seq1Pos >= static_cast<TPosition>(upperDiagonal))
             it0Begin += 1;
     }
 }
