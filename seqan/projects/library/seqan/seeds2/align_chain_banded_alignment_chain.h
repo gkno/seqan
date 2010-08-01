@@ -444,21 +444,72 @@ _alignSeed(
 }
 
 
-template <typename TAlignment, typename TSequence, typename TScoringScheme, typename TAlignmentTag, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
+template <typename TAlignment, typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeed, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
 typename Value<typename ScoringScheme<Alignment<TSequence, TScoringScheme, TAlignmentTag> >::Type >::Type
 _glueAlignmentChain(
         TAlignment & alignment,
         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain,
+        String<TSeed> const & seedChain,
         AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_FAIL("Write _glueAlignmentChain()!");
 
-    (void) alignment;
-    (void) alignmentChain;
-    (void) alignConfig;
+    typedef typename Value<TScoringScheme>::Type TScoreValue;
+    typedef String<Matrix<TScoreValue, 2> > const TMatrixString;
+    typedef typename Iterator<TMatrixString, Standard>::Type TMatrixStringIterator;
+    typedef typename Position<TMatrixString>::Type TPosition;
 
-    return 0;
+    typedef String<TSeed> const TSeedChain;
+    typedef typename Iterator<TSeedChain, Standard>::Type TSeedChainIterator;
+
+    // Define type for iterator over alignment rows.
+	typedef typename Row<TAlignment>::Type TAlignmentRow;
+	typedef typename Iterator<TAlignmentRow, Standard>::Type TTargetIterator;
+    typedef typename Infix<TSequence>::Type TSourceInfix;
+    typedef typename Iterator<TSourceInfix, Standard>::Type TSourceInfixIterator;
+
+	TSourceInfixIterator sequenceIt0 = end(sourceSegment(row(alignment, 0)));
+	TSourceInfixIterator sequenceIt1 = end(sourceSegment(row(alignment, 1)));
+    TTargetIterator alignmentIt0 = end(row(alignment, 0));
+    TTargetIterator alignmentIt1 = end(row(alignment, 1));
+    TMatrixStringIterator matricesIt = end(alignmentChain.alignmentMatrices_) - 1;
+    TSeedChainIterator seedChainIt = end(seedChain) - 1;
+
+    // Traceback through trailing rectangle and seed.
+    TPosition finalPos0 = 0;
+    TPosition finalPos1 = 0;
+    TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, 1, 1, false, alignConfig, TAlignmentTag());
+    std::cout << "Alignment so far:" << std::endl;
+    std::cout << alignment;
+    std::cout << result << std::endl;
+    std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+    goPrevious(matricesIt);
+    TPosition overlap0, overlap1;
+    _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
+    _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+    goPrevious(matricesIt);
+
+    std::cout << "Alignment so far:" << std::endl << alignment;
+    
+    // Traceback through matrices in reverse order.
+    for (TPosition i = 0, iend = length(seedChain) - 1; i < iend; ++i) {
+        _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
+        _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        goPrevious(matricesIt);
+        goPrevious(seedChainIt);
+        std::cout << "Alignment so far:" << std::endl << alignment;
+
+        _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
+        _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        goPrevious(matricesIt);
+        std::cout << "Alignment so far:" << std::endl << alignment;
+    }
+
+    // // Traceback through leading rectangle.
+    _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
+    _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, true, alignConfig, TAlignmentTag());
+    std::cout << "Alignment so far:" << std::endl << alignment;
+    return result;
 }
 
 }  // namespace seqan

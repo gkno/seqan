@@ -93,6 +93,34 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
     SEQAN_ASSERT_FAIL("Not implemented!");
 }
 
+// Compute traceback in the given normal DP alignment matrix, starting
+// at the lower right, shifted by the given overlap to the upper left.
+// The matrix was filled with the Needleman-Wunschla lgorithm, end
+// gaps are free as configured by the AlignConfig object.  Returns the
+// best score.
+template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
+TScoreValue
+_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+{
+    SEQAN_CHECKPOINT;
+
+    (void) alignmentIt0;
+    (void) alignmentIt1;
+    (void) sourceIt0;
+    (void) sourceIt1;
+    (void) matrix;
+    (void) scoringScheme;
+    (void) overlap0;
+    (void) overlap1;
+    (void) goToTopLeft;
+    (void) finalPos0;
+    (void) finalPos1;
+    
+    SEQAN_ASSERT_FAIL("Not implemented!");
+
+    return 0;
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_AFFINE_H_

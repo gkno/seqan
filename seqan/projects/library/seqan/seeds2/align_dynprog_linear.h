@@ -200,6 +200,201 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
     }
 }
 
+
+// Compute traceback in the given normal DP alignment matrix, starting
+// at the lower right, shifted by the given overlap to the upper left.
+// The matrix was filled with the Needleman-Wunschla lgorithm, end
+// gaps are free as configured by the AlignConfig object.  Returns the
+// best score.
+template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
+TScoreValue
+_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
+{
+    SEQAN_CHECKPOINT;
+
+    std::cout << "trace back unbanded" << std::endl;
+    // TODO(holtgrew): Debug output, remove when not needed any more.
+    {
+        std::cout << ",-- filled unbanded alignment matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+        for (unsigned i = 0; i < length(matrix, 0); ++i) {
+            std::cout << "| ";
+            for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                    std::cout << "\tinf";
+                else
+                    std::cout << "\t" << value(matrix, i, j);
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "`--" << std::endl;
+    }
+    std::cout << "begin pos0 = " << (length(matrix, 0) - overlap0 + finalPos0) << std::endl;
+    std::cout << "begin pos1 = " << (length(matrix, 1) - overlap1 + finalPos1) << std::endl;
+
+    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
+
+    // Initialization
+    //
+    // Precomputation of the score difference between mismatch and gap.
+	TScoreValue scoreDifference = scoreMismatch(scoringScheme) - scoreGap(scoringScheme);
+    // Current position in the matrix.
+    TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
+    TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
+    TPosition origPos0 = pos0;
+    (void) origPos0;  // In case we run without assertions.
+    TPosition origPos1 = pos1;
+    // Iterator to current entry in the matrix.
+    TMatrixIterator matrixIt = begin(matrix);
+    setPosition(matrixIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPositionw ith coordinates.
+    TMatrixIterator origMatrixIt = matrixIt;
+
+    // Search for starting point of the trace.
+    //
+    // If end gaps are free in any direction, search for the position
+    // with the highest score on the lower/right edge.  Prefer end
+    // positions closer to the end and shifts in sequence 0 over
+    // those in sequence 1.
+    if (END0_FREE) {
+        TMatrixIterator it = origMatrixIt;
+        TPosition altPos1 = pos1;
+        while (altPos1 > 1) {
+            goPrevious(it, 1);
+            altPos1 -= 1;
+            if (*it > *origMatrixIt) {
+                matrixIt = it;
+                pos1 = altPos1;
+            }
+        }
+    }
+    if (END1_FREE) {
+        TMatrixIterator it = origMatrixIt;
+        TPosition altPos0 = pos0;
+        while (altPos0 > 0) {
+            goPrevious(it, 0);
+            altPos0 -= 1;
+            if (*it > *origMatrixIt) {
+                matrixIt = it;
+                pos1 = origPos1;
+                pos0 = altPos0;
+            }
+        }
+    }
+
+    // Insert free end gaps if any.
+    //
+    // TODO(holtgrew): We could have 3 cases here but I guess it will not matter performance wise in the big picture.
+    if (END0_FREE || END1_FREE) {
+        SEQAN_ASSERT_TRUE(pos0 == origPos0 || pos1 == origPos1);
+        // std::cout << "Inserting " << (origPos0 - pos0) << " end gaps into sequence 1" << std::endl;
+        insertGaps(alignmentIt1, origPos0 - pos0);
+        // std::cout << "Inserting " << (origPos1 - pos1) << " end gaps into sequence 0" << std::endl;
+        insertGaps(alignmentIt0, origPos1 - pos1);
+    }
+
+    // Now, perform the traceback.
+    while (pos0 > static_cast<TPosition>(0) && pos1 > static_cast<TPosition>(0)) {
+        // std::cout << "pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+
+        // Flags for "go horizontal" and "go vertical".
+        bool gh = false;
+        bool gv = false;
+
+        // Determine whether to go vertical/horizontal.
+        // std::cout << "Compare: " << *sourceIt0 << ", " << *sourceIt1 << std::endl;
+        // std::cout << "  Score: " << *matrixIt << std::endl;
+        if (*sourceIt0 == *sourceIt1) {
+            gh = true;
+            gv = true;
+        } else {
+			TMatrixIterator it = matrixIt;
+
+			goPrevious(it, 0);
+			TScoreValue v = *it;
+
+			goPrevious(it, 1);
+			TScoreValue d = *it;
+
+			it = matrixIt;
+			goPrevious(it, 1);
+			TScoreValue h = *it;
+
+			gv = (v >= h) || (d + scoreDifference >= h);
+			gh = (h > v) || (d + scoreDifference >= v);
+        }
+
+        if (gv && gh) {
+            std::cout << "GO DIAGONAL" << std::endl;
+        } else if (gv) {
+            std::cout << "GO VERTICAL" << std::endl;
+        } else if (gh) {
+            std::cout << "GO HORIZONTAL" << std::endl;
+        }
+
+        // Move iterators in source sequence, alignment rows, matrix
+        // and possibly insert gaps.
+        if (gv) {
+            // std::cout << "  moving in dimension 0" << std::endl;
+            goPrevious(sourceIt0);
+            goPrevious(alignmentIt0);
+            // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
+            goPrevious(matrixIt, 0);
+            pos0 -= 1;
+        } else {
+            // std::cout << "  gap in dimension 0" << std::endl;
+            insertGap(alignmentIt0);
+        }
+        if (gh) {
+            // std::cout << "  moving in dimension 1" << std::endl;
+            goPrevious(sourceIt1);
+            goPrevious(alignmentIt1);
+            // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;
+            goPrevious(matrixIt, 1);
+            pos1 -= 1;
+        } else {
+            // std::cout << "  gap in dimension 0" << std::endl;
+            insertGap(alignmentIt1);
+        }
+    }
+    // std::cout << "pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+
+    // TODO(holtgrew): I guess we have to search for the maximum in the resulting row and column after all...
+    
+    // Go to the top left of the matrix if configured to do so.
+    if (goToTopLeft) {
+        if (pos0 > 0) {
+            for (TPosition i = 0; i < pos0; ++i) {
+                // std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
+                goPrevious(sourceIt0);
+                goPrevious(alignmentIt0);
+                // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
+                insertGap(alignmentIt1);
+            }
+            pos0 = 0;
+        }
+        if (pos1 > 0) {
+            for (TPosition i = 0; i< pos1; ++i) {
+                // std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
+                goPrevious(sourceIt1);
+                goPrevious(alignmentIt1);
+                // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;
+                insertGap(alignmentIt0);
+            }
+            pos1 = 0;
+        }
+    }
+
+    // Write out the final positions in the alignment matrix.
+    finalPos0 = pos0;
+    finalPos0 = pos0;
+    finalPos0 = pos0;
+    finalPos1 = pos1;
+    std::cout << "pos0 = " << pos0 << ", pos1 = " << pos1 << std::endl;
+    std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+
+    return *origMatrixIt;
+}
+
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_LINEAR_H_

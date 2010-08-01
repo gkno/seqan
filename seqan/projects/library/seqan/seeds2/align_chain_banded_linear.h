@@ -95,7 +95,7 @@ _bandedChainAlignment(
     _alignTrailingRectangle(alignmentChain, back(seedChain));
 
     // Glue all alignments together.
-    return _glueAlignmentChain(alignment, alignmentChain, alignConfig);
+    return _glueAlignmentChain(alignment, alignmentChain, seedChain, alignConfig);
 }
 
 }  // namespace seqan

@@ -121,11 +121,13 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_linear_init_gutter_free);
     SEQAN_CALL_TEST(test_align_dynprog_linear_init_gutter_not_free);
     SEQAN_CALL_TEST(test_align_dynprog_linear_fill_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_linear_traceback);
     // Tests for the banded NW dynamic programming.
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_resize_matrix);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_init_gutter_free);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_init_gutter_not_free);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_fill_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
     // Verify checkpoints.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");

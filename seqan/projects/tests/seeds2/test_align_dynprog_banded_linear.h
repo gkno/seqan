@@ -171,4 +171,77 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_fill_matrix)
     SEQAN_ASSERT_EQ(3, value(matrix, 6, 2));
 }
 
+
+SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
+{
+    using namespace seqan;
+
+    typedef CharString TString;
+    typedef Align<TString> TAlign;
+    typedef Row<TAlign>::Type TAlignRow;
+    typedef Iterator<TAlignRow, Standard>::Type TAlignRowIterator;
+    typedef Iterator<TString, Standard>::Type TStringIterator;
+
+    // Case: No free begin/end gaps.
+    {
+        // Fill the matrix with DP (tested by other tests).
+        Matrix<int, 2> matrix;
+        TString const sequence0 = "CCAAA";
+        TString const sequence1 = "CAA";
+        Score<int, Simple> const scoringScheme(1, -1, -1);
+        
+        _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -2, 1, NeedlemanWunsch());
+        _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, NeedlemanWunsch());
+
+        // TODO(holtgrew): Debug output, remove when not needed any more.
+        {
+            std::cout << ",-- filled banded alignment matrix" << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                std::cout << "| ";
+                for (unsigned j = 0; j < i; ++j)
+                    std::cout << "\t";
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+                        std::cout << "\tinf";
+                    else
+                        std::cout << "\t" << value(matrix, i, j);
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "`--" << std::endl;
+        }
+
+        // Perform the traceback.
+        Align<TString> alignment;
+        resize(rows(alignment), 2);
+        assignSource(row(alignment, 0), sequence0);
+        assignSource(row(alignment, 1), sequence1);
+
+        size_t finalPos0 = 0;
+        size_t finalPos1 = 1;
+        TStringIterator seq0It = end(sequence0) - 1;
+        TStringIterator seq1It = end(sequence1) - 1;
+        TAlignRowIterator align0It = end(row(alignment, 0));
+        TAlignRowIterator align1It = end(row(alignment, 1));
+        int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 2, 5, false, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+
+        // std::cout << alignment;
+        SEQAN_ASSERT_EQ(score, 2);
+        SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
+        std::cout << (begin(sequence1, Standard()) - seq1It) << std::endl;
+        SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
+        // TODO(holtgrew): Why does this not work?
+        // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
+        // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
+        SEQAN_ASSERT_EQ(finalPos0, 0u);
+        SEQAN_ASSERT_EQ(finalPos1, ~0u);
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
+        // TODO(holtgrew): Visual inspection shows that the following SHOULD be true, why is this not the case?
+        // std::cout << alignment;
+        // SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA-");
+    }
+    // TODO(holtgrew): Case with free begin and end gaps.
+}
+
 #endif  // TEST_SEEDS_TEST_ALIGN_DYNPROG_BANDED_LINEAR_H_

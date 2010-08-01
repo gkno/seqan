@@ -161,31 +161,41 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
     
     // Test on whole strings.
     {
-        CharString database = "ACGTCCTCGTACACCGTCTTAA";
-        CharString query = "TACGATCCACACCGCGTCT";  // TODO(holtgrew): Switch back again.
+        // Resulting alignment should be something like this (seeds
+        // are marked by < and >).
+        //
+        //     >   <   > <
+        //   GGCGA-TNNNCATGG
+        //   --CGAATC-CCATCC
+        CharString sequence0 = "GGCGATNNNCATGG";
+        CharString sequence1 = "CGAATCCATCC";  // TODO(holtgrew): Switch back again.
+        std::cout << "ALIGNING " << sequence0 << " AND " << sequence1 << std::endl;
+        std::cout << "  >   <   > <" << std::endl;
+        std::cout << "GGCGA-TNNNCATGG" << std::endl;
+        std::cout << "--CGAATC-CCATCC" << std::endl;
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed> seedChain;
-        appendValue(seedChain, TSeed(1, 2, 6, 8));
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
+        appendValue(seedChain, TSeed(2, 0, 6, 5));
+        appendValue(seedChain, TSeed(9, 6, 12, 9));
 
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
-        assignSource(row(alignment, 0), query);
-        assignSource(row(alignment, 1), database);
+        assignSource(row(alignment, 0), sequence0);
+        assignSource(row(alignment, 1), sequence1);
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix) << endl;
         int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        std::cout << alignment << std::endl;
         SEQAN_ASSERT_EQ(result, 11);
 
-        std::cout << alignment << std::endl;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACGTCCTCGTACACCGTCTTAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "TACGATC-C--ACACCG-CGTCT");
     }
     // Test on infixes.
     {
-        CharString query = "ACGTCCTCGTACACCGTCTTAA";
-        CharString database = "TACGATCCACACCGCGTCT";
+        CharString sequence0 = "ACGTCCTCGTACACCGTCTTAA";
+        CharString sequence1 = "TACGATCCACACCGCGTCT";
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed > seedChain;
@@ -195,8 +205,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
         // TODO(holtgrew): This infix assignment for alignments is a bit creepy, maybe one of the too many shortcuts?
-        assignSource(row(alignment, 0), query, 1, length(query));
-        assignSource(row(alignment, 1), database, 2, length(database));
+        assignSource(row(alignment, 0), sequence0, 1, length(sequence0));
+        assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
         int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
