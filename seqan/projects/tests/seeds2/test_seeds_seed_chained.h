@@ -139,14 +139,14 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_append_diagonal)
     SEQAN_ASSERT_EQ(2, getEndDiagonal(s));
     SEQAN_ASSERT_EQ(1u, length(s));
 
-    appendDiagonal(s, TSeedDiagonal(5, 5, 3));
+    appendDiagonal(s, TSeedDiagonal(5, 7, 3));
 
     SEQAN_ASSERT_EQ(1u, getBeginDim0(s));
     SEQAN_ASSERT_EQ(3u, getBeginDim1(s));
     SEQAN_ASSERT_EQ(8u, getEndDim0(s));
-    SEQAN_ASSERT_EQ(8u, getEndDim1(s));
+    SEQAN_ASSERT_EQ(10u, getEndDim1(s));
     SEQAN_ASSERT_EQ(2, getStartDiagonal(s));
-    SEQAN_ASSERT_EQ(0, getEndDiagonal(s));
+    SEQAN_ASSERT_EQ(2, getEndDiagonal(s));
     SEQAN_ASSERT_EQ(2u, length(s));
 }
 
@@ -159,7 +159,7 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_truncate_diagonals)
     typedef Value<TSeed>::Type TSeedDiagonal;
     TSeed s(1, 3, 4);
 
-    appendDiagonal(s, TSeedDiagonal(5, 5, 3));
+    appendDiagonal(s, TSeedDiagonal(5, 7, 3));
     SEQAN_ASSERT_EQ(2u, length(s));
     appendDiagonal(s, TSeedDiagonal(10, 10, 3));
     SEQAN_ASSERT_EQ(3u, length(s));

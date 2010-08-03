@@ -785,7 +785,10 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(TSee
     // The seed is chained into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 5), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim1(front(set)));
 }
 
 
@@ -856,7 +859,10 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     // The seed is chained with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 6), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
     SEQAN_ASSERT_EQ(5, getScore(front(set)));
 }
 

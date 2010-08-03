@@ -19,6 +19,8 @@
   Algorithms for combining (i.e. merging and chaining) seeds.
  ==========================================================================*/
 
+// TODO(holtgrew): All the Nothing()'s should not be part of the public interface.
+
 #ifndef SEQAN_SEEDS_SEEDS_COMBINATION_H_
 #define SEQAN_SEEDS_SEEDS_COMBINATION_H_
 
@@ -28,6 +30,7 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
+// TODO(holtgrew): Stream-line tags to Merge, ChaosChain, SimpleChain?
 /**
 .Tag.Local Chaining
 ..cat:Seed Handling
@@ -134,8 +137,6 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
     if (getBeginDim0(b) < getEndDim0(a) || getBeginDim1(b) < getEndDim1(a))
         return false;
 
-    // TODO(holtgrew): Ignore gray areas from CHAOS paper "so sequence order does not matter".
-
     // The diagonal distance has to be smaller than the bandwidth.
     // TODO(holtgrew): s/getStartDiagonal/getBeginDiagonal/
     TBandwidthThreshold diagonalDistance = _abs(getEndDiagonal(b) - getStartDiagonal(a));
@@ -143,7 +144,7 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
         return false;
 
     // Distance is maximal distance, this corresponds to going the
-    // distacen in the smaller distance with matches/mismatches and
+    // distance in the smaller distance with matches/mismatches and
     // the rest with indels.
     TDistanceThreshold distance = _max(getBeginDim0(b) - getEndDim0(a), getBeginDim1(b) - getEndDim1(a));
     // Compare distance with threshold.
@@ -238,6 +239,7 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
     TPosition posLeft0 = getEndDim0(seed);
     TPosition posLeft1 = getEndDim1(seed);
     TScoreValue tmpScore = 0;
+    // TODO(holtgrew): Probably better use iterators on sequences!
     for (TPosition i = 0; i < minGap; ++i)
         tmpScore += score(scoringScheme, sequence0[posLeft0 + i], sequence1[posLeft1 + i]);
 
@@ -253,7 +255,7 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
     TPosition bestGapPos = 0;  // delta to lowermost position
     TScoreValue bestScore = tmpScore;
     for (TPosition i = 1; i < minGap; ++i) {
-        tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - 1 - i], sequence1[posLeft1 + minGap - 1 - i]);
+        tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - i], sequence1[posLeft1 + minGap - i]);
         tmpScore += score(scoringScheme, sequence0[posRight0 - i], sequence1[posRight1 - i]);
         if (tmpScore > bestScore) {
             // Found a better score.
@@ -321,12 +323,20 @@ _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
         lastKept->length = getBeginDim1(other) - lastKept->beginDim1;
     }
 
+    // Maybe remove shortened diagonal if its length is 0.
+    if (back(seed).length == 0) {
+        // TODO(holtgrew): Do not use dot method.
+        seed._seedDiagonals.pop_back();
+    }
+
     // Copy over other diagonals.
     typedef typename Iterator<TSeed const, Standard>::Type TConstIterator;
     for (TConstIterator it = begin(other, Standard()); it != end(other, Standard()); ++it)
         appendDiagonal(seed, *it);
 
     // std::cout << "Chained seed after merging: " << seed << std::endl;
+
+    // TODO(holtgrew): Update lower and upper diagonals!
 }
 
 
@@ -358,15 +368,80 @@ inline void
 _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
               Seed<ChainedSeed, TSeedConfig> const & other,
               Score<TScoreValue, Simple> const & scoringScheme,
-              TSequence0 const & /*sequence0*/,
-              TSequence1 const & /*sequence1*/,
+              TSequence0 const & sequence0,
+              TSequence1 const & sequence1,
               Chaos const &)
 {
     SEQAN_CHECKPOINT;
-    // Simply copy over the diagonals of the seed (other) into the
-    // left one (seed) after updating the score.
 
-    SEQAN_ASSERT_FAIL("Write me!");
+    typedef Seed<ChainedSeed, TSeedConfig> TSeed;
+    typedef typename Position<TSeed>::Type TPosition;
+    typedef typename Iterator<TSeed const, Standard>::Type TConstIterator;
+
+    // TODO(holtgrew): Assert seed left of other.
+
+    // Compute gaps in both dimensions, the remaining gap is the
+    // vertical/horizontal distance we will not fill with CHAOS
+    // chaining.
+    //
+    // TODO(holtgrew): We need + 1 here, do we need it anywhere else?
+    TPosition gapDim0 = getBeginDim0(other) - getEndDim0(seed);
+    TPosition gapDim1 = getBeginDim1(other) - getEndDim1(seed);
+    TPosition minGap = _min(gapDim0, gapDim1);
+    TPosition maxGap = _max(gapDim0, gapDim1);
+    TPosition remainingGap = maxGap - minGap;
+
+    // Compute new score using the CHAOS method.
+    //
+    // First, compute the score when force-aligning from seed.
+    TPosition posLeft0 = getEndDim0(seed);
+    TPosition posLeft1 = getEndDim1(seed);
+    TScoreValue tmpScore = 0;
+    // TODO(holtgrew): Probably better use iterators on sequences!
+    for (TPosition i = 0; i < minGap; ++i)
+        tmpScore += score(scoringScheme, sequence0[posLeft0 + i], sequence1[posLeft1 + i]);
+
+    SEQAN_ASSERT_GT(getBeginDim0(other), static_cast<TPosition>(0));
+    SEQAN_ASSERT_GT(getBeginDim1(other), static_cast<TPosition>(0));
+    TPosition posRight0 = getBeginDim0(other);
+    TPosition posRight1 = getBeginDim1(other);
+
+    // Now, try to put the gap at each position and get the position
+    // with the highest score.  If there are two such positions, the
+    // first one found is returned which is the one that is furthest
+    // away from seed.
+    TPosition bestGapPos = 0;  // delta to lowermost position
+    TScoreValue bestScore = tmpScore;
+    for (TPosition i = 1; i < minGap; ++i) {
+        tmpScore -= score(scoringScheme, sequence0[posLeft0 + minGap - i], sequence1[posLeft1 + minGap - i]);
+        tmpScore += score(scoringScheme, sequence0[posRight0 - i], sequence1[posRight1 - i]);
+        if (tmpScore > bestScore) {
+            // Found a better score.
+            bestScore = tmpScore;
+            bestGapPos = i;
+        }
+    }
+
+    // Now, the best gap is when extending the lower right seed
+    // (other) by bestGapPos to the upper right.  The upper left seed
+    // is extended by (minGap - bestGapPos).
+    //
+    // Adjust last diagonal of seed.
+    back(seed).length += minGap - bestGapPos;
+    // Copy over the first diagonal of other and adjust diagonal.
+    appendDiagonal(seed, front(other));
+    back(seed).beginDim0 -= bestGapPos;
+    back(seed).beginDim1 -= bestGapPos;
+    back(seed).length += bestGapPos;
+    // Copy over all other diagonals.
+    TConstIterator it = begin(other, Standard());
+    TConstIterator itEnd = end(other, Standard());
+    // TODO(holtgrew): value(it) does not work here, the adaption around std::list needs more work!
+    for (++it; it != itEnd; ++it)
+        appendDiagonal(seed, *it);
+
+    // Finally, we update the score and are done.
+    _updateSeedsScoreChaos(seed, other, bestScore + remainingGap * scoreGap(scoringScheme));
 }
 
 }  // namespace seqan

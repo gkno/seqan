@@ -30,6 +30,7 @@
 #include "test_align_dynprog_banded_linear.h"
 #include "test_align_dynprog_linear.h"
 #include "test_basic_iter_indirect.h"
+#include "test_seeds_combination.h"
 #include "test_seeds_extension.h"
 #include "test_seeds_seed_base.h"
 #include "test_seeds_seed_chained.h"
@@ -68,6 +69,14 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
 
     SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
+
+    // Tests for the combination of seeds.
+    SEQAN_CALL_TEST(test_seeds_combination_seeds_combineable_merge_chained);
+    SEQAN_CALL_TEST(test_seeds_combination_seeds_combineable_simple_chaining_chained);
+    SEQAN_CALL_TEST(test_seeds_combination_seeds_combineable_simple_chaos_chaining_chained);
+    SEQAN_CALL_TEST(test_seeds_combination_combine_seeds_merge_chained);
+    SEQAN_CALL_TEST(test_seeds_combination_combine_seeds_simple_chaining_chained);
+    SEQAN_CALL_TEST(test_seeds_combination_combine_seeds_simple_chaos_chaining_chained);
 
     // Tests for unordered seed sets and simple seeds.
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_simple_unordered);

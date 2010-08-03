@@ -248,7 +248,12 @@ appendDiagonal(Seed<ChainedSeed, TConfig> & seed,
                typename Value<Seed<ChainedSeed, TConfig> >::Type const & diagonal)
 {
     SEQAN_CHECKPOINT;
-    // TODO(holtgrew): Check for consistency!
+
+    if (length(seed) > 0) {
+        SEQAN_ASSERT_LEQ(back(seed._seedDiagonals).beginDim0 + back(seed._seedDiagonals).length, diagonal.beginDim0);
+        SEQAN_ASSERT_LEQ(back(seed._seedDiagonals).beginDim1 + back(seed._seedDiagonals).length, diagonal.beginDim1);
+    }
+
     appendValue(seed._seedDiagonals, diagonal);
 }
 
