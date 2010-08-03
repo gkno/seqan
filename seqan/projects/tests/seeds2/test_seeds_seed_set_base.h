@@ -776,7 +776,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(T
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
-    setMinScoreThreshold(set, 2);
+    setMinScoreThreshold(set, 4);
     Score<int, Simple> scoringScheme(1, -1, -1);
 
     DnaString sequence0 = "CCCCCCCCCC";
@@ -811,7 +811,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
-    setMinScoreThreshold(set, 3);
+    setMinScoreThreshold(set, 5);
     Score<int, Simple> scoringScheme(1, -1, -1);
 
     DnaString sequence0 = "CCCCCCCCCC";
@@ -832,7 +832,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(TSeed(0, 0, 6), front(set));
-    SEQAN_ASSERT_EQ(3, getScore(front(set)));
+    SEQAN_ASSERT_EQ(5, getScore(front(set)));
 }
 
 // Test container functions for specialization Unordered SeedSet.

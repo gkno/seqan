@@ -39,38 +39,6 @@ namespace seqan {
 // Functions
 // ===========================================================================
 
-/**
-.Function.bandedChainAlignment:
-..summary:Calculates a banded alignment around a chain of seeds. 
-..cat:Seed Handling
-..signature:bandedChainAlignment(seedChain, k, alignment, scoreMatrix);
-..param.seedChain:A chain of seeds, must be ascendingly sorted in both dimensions.
-..param.k:Half of the width of the band.
-..param.alignment:The alignment where the result is stored.
-...type:Class.Align
-..param.scoreMatrix: The score matrix.
-...type:Spec.Simple Score
-...remarks: Depending on the score matrix the Needleman-Wunsch or the Gotoh algorithm is used. For a description of the algorithm see the masters thesis of C. Kemena, Section 5.3.3 LAGAN Alignment.
-..returns: The score of the alignment.
-*/
-// TODO(holtgrew): wholeAlignment is the result and should be the first parameter.
-// TODO(holtgrew): Adjust the documentation to the parameter names.
-template<typename TContainer, typename TValue, typename TScoreValue, typename TAlign, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
-TScoreValue
-bandedChainAlignment(TContainer const & seedChain, 
-					 TValue k,
-					 TAlign & alignment, 
-					 Score<TScoreValue, Simple> const & scoringScheme,
-                     AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
-{
-    SEQAN_CHECKPOINT;
-
-	if (scoreGapOpen(scoringScheme) == scoreGapExtend(scoringScheme))
-		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, alignConfig, NeedlemanWunsch());
-	else
-		return _bandedChainAlignment(alignment, seedChain, k, scoringScheme, alignConfig, Gotoh());
-}
-
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEEDS_ALIGN_CHAIN_BANDED_H_

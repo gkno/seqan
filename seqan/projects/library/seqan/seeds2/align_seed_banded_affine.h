@@ -167,7 +167,7 @@ _bandedAlignment_Gotoh_align(
     // Matrix Initialization
     // -----------------------------------------------------------------------
 
-    // TODO(holtgrew): Using a real infimum here can use problems below if anything is subtracted.  This should not be the case...
+    // TODO(holtgrew): Using a real infimum here can use problems below if anything is subtracted.
 	TScoreValue inf = InfimumValue<TScoreValue>::VALUE / 2;
 	for (int i = 1; i != length_right_diag; ++i){
 		*diag_finger1 = inf;

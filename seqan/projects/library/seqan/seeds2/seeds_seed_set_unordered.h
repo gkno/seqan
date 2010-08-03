@@ -422,8 +422,8 @@ _combineSeeds(Seed<Simple, TSeedConfig> & seed,
     // chaining.
     //
     // TODO(holtgrew): We need + 1 here, do we need it anywhere else?
-    TPosition gapDim0 = getBeginDim0(other) - getEndDim0(seed) + 1;
-    TPosition gapDim1 = getBeginDim1(other) - getEndDim1(seed) + 1;
+    TPosition gapDim0 = getBeginDim0(other) - getEndDim0(seed);
+    TPosition gapDim1 = getBeginDim1(other) - getEndDim1(seed);
     TPosition minGap = _min(gapDim0, gapDim1);
     TPosition maxGap = _max(gapDim0, gapDim1);
     TPosition remainingGap = maxGap - minGap;

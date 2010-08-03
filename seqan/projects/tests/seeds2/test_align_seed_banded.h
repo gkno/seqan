@@ -128,6 +128,7 @@ SEQAN_DEFINE_TEST(test_align_seed_banded_gotoh)
         assignSource(row(alignment, 1), seg2);
 
         int result = bandedAlignment(alignment, seed, 1, scoringScheme);
+        std::cout << alignment;
         SEQAN_ASSERT_EQ(result, 6);
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "cgtacgtga");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "cg-a--tta");
