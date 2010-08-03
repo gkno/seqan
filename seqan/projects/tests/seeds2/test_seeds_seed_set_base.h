@@ -210,8 +210,12 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(TSeedSpec const 
     bool ret = addSeed(set, TSeed(2, 2, 3), 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
     SEQAN_ASSERT_TRUE(ret);
 
+    // std::cout << front(set) << std::endl;
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(2, 2, 4), front(set));
+    SEQAN_ASSERT_EQ(2u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(2u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
 }
 
 
@@ -233,7 +237,10 @@ void testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(TSeedSpec const
     SEQAN_ASSERT_TRUE(ret);
 
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(2, 2, 4), front(set));
+    SEQAN_ASSERT_EQ(2u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(2u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
 }
 
 
@@ -328,7 +335,10 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(TSeed
     // The seed is merged into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 4), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(4u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(4u, getEndDim1(front(set)));
 }
 
 
@@ -384,14 +394,17 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
     SEQAN_ASSERT_EQ(0u, length(set));
 
     // Add a seed to merge into a high-quality seed.
-    TSeed s2(0, 0, 1);
+    TSeed s2(0, 0, 2);
     setScore(s2, 1);
     bool ret = addSeed(set, s2, 1, Nothing(), Score<int, Simple>()/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge());
     SEQAN_ASSERT_TRUE(ret);
     // The seed is merged with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 4), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(4u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(4u, getEndDim1(front(set)));
     SEQAN_ASSERT_EQ(-2, getScore(front(set)));
 }
 
@@ -537,7 +550,10 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLengt
     // The seed is chained into the first one and exceeds the quality
     // threshold.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 5), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim1(front(set)));
 }
 
 
@@ -602,7 +618,10 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScore
     // The seed is chained with the existing low-quality seed into one
     // of sufficiently high quality.
     SEQAN_ASSERT_EQ(1u, length(set));
-    SEQAN_ASSERT_EQ(TSeed(0, 0, 6), front(set));
+    SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
+    SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
     SEQAN_ASSERT_EQ(3, getScore(front(set)));
 }
 

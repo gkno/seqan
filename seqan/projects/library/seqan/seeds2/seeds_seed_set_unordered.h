@@ -280,11 +280,13 @@ _findSeedForCombination(
     // TODO(holtgrew): Search for *closest* overlapping one instead!
     for (TSeedPtrIterator it = begin(seedSet._allSeeds); it != end(seedSet._allSeeds); ++it) {
         if (_seedsCombineable(*value(it), seed, maxDistance, bandwidth, tag)) {
+//			std::cout << "Combineable: " << (*value(it)) << " and " << seed << std::endl;
             // seed is to be merged into *it.
             mergePartner = it;
             seedIsOnTheLeft = false;
             return true;
         } else if (_seedsCombineable(seed, *value(it), maxDistance, bandwidth, tag)) {
+//			std::cout << "Combineable: " << seed << " and " << (*value(it)) << std::endl;
             // *it is to be merged into seed.
             mergePartner = it;
             seedIsOnTheLeft = true;
@@ -354,13 +356,13 @@ addSeed(SeedSet<TSeedSpec, Unordered, TSeedSetConfig> & seedSet,
     typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
-    // Allocate space for new seed in allocator and assign seed from
-    // parameter to this space.
+    // Allocate space for new seed in allocator and copy construct the
+    // seed there.
     //
     // TODO(holtgrew): Move would be faster if it is a chained seed with many diagonals.
     TSeed * tmp;
     allocate(seedSet._seedAllocator, tmp, 1);
-    assign(*tmp, seed);
+    new(tmp) TSeed(seed);
 
     appendValue(seedSet._allSeeds, tmp);
 	typedef typename TSeedSetConfig::TQualityThreshold TQualityThreshold;

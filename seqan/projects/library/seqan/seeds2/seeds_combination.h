@@ -73,6 +73,9 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
     // TODO(holtgrew): TThreshold could be Position<TSeed>::Type.
     SEQAN_CHECKPOINT;
 
+    // b has to be right of a for the two seeds to be mergeable.
+    if (getBeginDim0(b) < getBeginDim0(a) || getBeginDim1(b) < getBeginDim1(a))
+        return false;
     // If the two seeds do not overlap, they cannot be merged.
     if (getBeginDim0(b) >= getEndDim0(a) && getBeginDim1(b) >= getEndDim1(a))
         return false;
@@ -288,35 +291,42 @@ _combineSeeds(Seed<ChainedSeed, TSeedConfig> & seed,
     // Then, we possibly shorten the last diagonal.  Finally, we copy
     // over all diagonals from other.
 
+    // std::cout << "Merging chained seeds " << seed << " and " << other << std::endl;
+    SEQAN_ASSERT_LEQ_MSG(getBeginDim0(seed), getBeginDim0(other), "Monotony in both dimensions required for merging.");
+    SEQAN_ASSERT_LEQ_MSG(getBeginDim1(seed), getBeginDim1(other), "Monotony in both dimensions required for merging.");
+    
     _updateSeedsScoreMerge(seed, other);
 
     // Remove diagonals.
     typedef Seed<ChainedSeed, TSeedConfig> TSeed;
     typedef typename Iterator<TSeed, Standard>::Type TIterator;
     TIterator it;
+    // TODO(holtgrew): Could use back() instead of lastKept.
     TIterator lastKept = begin(seed);
     for (it = begin(seed); it != end(seed); ++it) {
-        if (it->beginDim0 < getBeginDim0(other) &&
-            it->beginDim1 < getBeginDim1(other))
+        if (it->beginDim0 >= getBeginDim0(other) && it->beginDim1 >= getBeginDim1(other))
             break;
         lastKept = it;
     }
-    truncateDiagonals(seed, it);
+    if (it != end(seed))
+        truncateDiagonals(seed, it);
+    // std::cout << "Seed after truncating diagonals: " << seed << std::endl;
 
     // Shorten last diagonal if necessary.
-    if (it->beginDim0 + it->length > getBeginDim0(other) &&
-        it->beginDim1 + it->length > getBeginDim1(other)) {
-        it->length = _min(getBeginDim0(other) - it->beginDim0, getBeginDim1(other) - it->beginDim1);
-    } else if (it->beginDim0 + it->length > getBeginDim0(other)) {
-        it->length = getBeginDim0(other) - it->beginDim0;
-    } else if (it->beginDim1 + it->length > getBeginDim1(other)) {
-        it->length = getBeginDim1(other) - it->beginDim1;
+    if (lastKept->beginDim0 + lastKept->length > getBeginDim0(other) && lastKept->beginDim1 + lastKept->length > getBeginDim1(other)) {
+        lastKept->length = _min(getBeginDim0(other) - lastKept->beginDim0, getBeginDim1(other) - lastKept->beginDim1);
+    } else if (lastKept->beginDim0 + lastKept->length > getBeginDim0(other)) {
+        lastKept->length = getBeginDim0(other) - lastKept->beginDim0;
+    } else if (lastKept->beginDim1 + lastKept->length > getBeginDim1(other)) {
+        lastKept->length = getBeginDim1(other) - lastKept->beginDim1;
     }
 
     // Copy over other diagonals.
     typedef typename Iterator<TSeed const, Standard>::Type TConstIterator;
     for (TConstIterator it = begin(other, Standard()); it != end(other, Standard()); ++it)
         appendDiagonal(seed, *it);
+
+    // std::cout << "Chained seed after merging: " << seed << std::endl;
 }
 
 
