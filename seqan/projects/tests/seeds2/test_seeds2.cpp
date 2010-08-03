@@ -26,18 +26,23 @@
 
 #include <seqan/seeds2.h>  // Include module under test.
 
-#include "test_seeds_seed_diagonal.h"
+#include "test_align_chain_banded.h"
+#include "test_align_dynprog_banded_linear.h"
+#include "test_align_dynprog_linear.h"
+#include "test_basic_iter_indirect.h"
+#include "test_seeds_extension.h"
 #include "test_seeds_seed_base.h"
 #include "test_seeds_seed_chained.h"
-#include "test_seeds_seed_simple.h"
+#include "test_seeds_seed_diagonal.h"
 #include "test_seeds_seed_set_base.h"
-#include "test_seeds_extension.h"
-#include "test_align_dynprog_linear.h"
-#include "test_align_dynprog_banded_linear.h"
-#include "test_align_seed_banded.h"
-#include "test_align_chain_banded.h"
+#include "test_seeds_seed_simple.h"
 
 SEQAN_BEGIN_TESTSUITE(test_seeds) {
+    // Test indirect iterator.
+    // SEQAN_CALL_TEST(test_seeds_basic_iter_indirect_constructors);
+    // SEQAN_CALL_TEST(test_seeds_basic_iter_indirect_metafunctions);
+    // SEQAN_CALL_TEST(test_seeds_basic_iter_indirect_basic_functions);
+        
     // Tests for seed diagonals.
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_diagonal_metafunctions);
@@ -47,10 +52,12 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_base_metafunctions_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_getters_setters_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_basic_functions_simple);
+    SEQAN_CALL_TEST(test_seeds_seed_base_assign_simple);
     SEQAN_CALL_TEST(test_seeds_seed_base_constructors_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_metafunctions_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_getters_setters_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_basic_functions_chained);
+    SEQAN_CALL_TEST(test_seeds_seed_base_assign_chained);
 
     SEQAN_CALL_TEST(test_seeds_seed_chained_metafunctions);
     SEQAN_CALL_TEST(test_seeds_seed_chained_append_diagonal);
@@ -96,16 +103,12 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_scored_unordered);
 
     // Tests for seed algorithms
-    // SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
-    // SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_simple);
     // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_simple);
-    // SEQAN_CALL_TEST(test_seeds_extension_match_extension_chained);
-    // SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_chained);
+    SEQAN_CALL_TEST(test_seeds_extension_match_extension_chained);
+    SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_chained);
     // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
-
-    // Tests for the banded alignment algorithms.
-    // SEQAN_CALL_TEST(test_align_seed_banded_needleman_wunsch);
-    // SEQAN_CALL_TEST(test_align_seed_banded_gotoh);
 
     // Tests for the banded chain alignment algorithms.
     SEQAN_CALL_TEST(test_align_chain_banded_compute_upper_left_overlap);
@@ -126,17 +129,19 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_fill_matrix);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
-    // Verify checkpoints.
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded_affine.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded_linear.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_seed_banded.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_chained.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_simple.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_base.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_unordered.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_extension.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_linear.h");
+    // TODO(holtgrew): Write tests for indirect iterator and uncomment this.
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/basic_iter_indirect.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_extension.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_chained.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_base.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_set_unordered.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_simple.h");
 }
 SEQAN_END_TESTSUITE

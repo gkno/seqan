@@ -288,6 +288,15 @@ assign(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> const & source)
     _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
 }
 
+template <typename TConfig>
+void
+assign(Seed<Simple, TConfig> & target, Seed<Simple, TConfig> & source)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<Simple, TConfig> TSeed;
+    assign(target, const_cast<TSeed const &>(source));
+}
+
 // Debug Output
 
 struct _Tikz {};

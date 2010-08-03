@@ -371,6 +371,15 @@ assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> const & s
     _assignScoreMixin(target, source, typename HasScore<Seed<Simple, TConfig> >::Type());
 }
 
+template <typename TConfig>
+void
+assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> & source)
+{
+    SEQAN_CHECKPOINT;
+    typedef Seed<ChainedSeed, TConfig> TSeed;
+    assign(target, const_cast<TSeed const &>(source));
+}
+
 // Debug Output
 
 template <typename TStream, typename TConfig>

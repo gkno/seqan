@@ -41,7 +41,7 @@ class Iter<TContainer, Indirect<TWrappedIter> >
 public:
     TWrappedIter _wrappedIter;
     
-    Iter()
+    Iter() : _wrappedIter(0)
     { SEQAN_CHECKPOINT; }
 
     Iter(Iter const & other)
