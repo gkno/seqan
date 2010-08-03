@@ -305,10 +305,75 @@ struct LessThanReadId
     }
 };
 
+
+// Collect the aligned reads ids of all reads with more than maxErrors
+// in bogusReadIds.
+template <typename TReadIdSet, typename TAlignedReadsIterator, typename TFragmentStore>
+void computeBogusReads(
+        TReadIdSet & bogusReadIds,
+        size_t alignedReadId,
+        TAlignedReadsIterator alignedReadsBegin,
+        TAlignedReadsIterator alignedReadsEnd,
+        TFragmentStore & fragmentStore,
+        unsigned maxErrors)
+{
+    typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
+    typedef typename Iterator<TAlignedReadStore, Standard>::Type TAlignedReadsIter;
+    typedef typename TFragmentStore::TContigStore TContigStore;
+    typedef typename TFragmentStore::TReadSeqStore TReadSeqStore;
+    typedef typename TFragmentStore::TReadSeq TReadSeq;
+    typedef typename Value<TContigStore>::Type TContigStoreElement;
+    typedef typename Value<TAlignedReadStore>::Type TAlignedReadStoreElement;
+    typedef typename TAlignedReadStoreElement::TGapAnchors TReadGapAnchors;
+    typedef typename TContigStoreElement::TContigSeq TContigSeq;
+    typedef typename TContigStoreElement::TGapAnchors TContigGapAnchors;
+    typedef Gaps<TReadSeq, AnchorGaps<TContigGapAnchors> > TReadGaps;
+    typedef Gaps<TContigSeq, AnchorGaps<TContigGapAnchors> > TContigGaps;
+    typedef typename Iterator<TContigGaps, Standard>::Type TContigGapAnchorsIterator;
+    typedef typename Iterator<TReadGaps, Standard>::Type TReadGapAnchorsIterator;
+
+    bogusReadIds.clear();
+
+    for (TAlignedReadsIterator it = alignedReadsBegin; it != alignedReadsEnd; ++it, ++alignedReadId) {
+        // Get contig and read sequences.
+        TContigSeq const & contigSeq = fragmentStore.contigStore[it->contigId].seq;
+        TReadSeq readSeq = fragmentStore.readSeqStore[it->readId];
+        // Get gaps for contig and read.
+        TContigGaps contigGaps(contigSeq, fragmentStore.contigStore[it->contigId].gaps);
+        TReadGaps readGaps(readSeq, fragmentStore.alignedReadStore[alignedReadId].gaps);
+        // Limit contig gaps to aligned read position.
+        setBeginPosition(contigGaps, _min(it->beginPos, it->endPos));
+        setEndPosition(contigGaps, _max(it->beginPos, it->endPos));
+        // Reverse-complement readSeq in-place.
+        bool flipped = false;
+        if (it->beginPos > it->endPos) {
+            flipped = true;
+            reverseComplementInPlace(readSeq);
+        }
+
+        TContigGapAnchorsIterator contigGapsIt = begin(contigGaps);
+        unsigned errorCount = 0;
+        for (TReadGapAnchorsIterator readGapsIt = begin(readGaps); readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt) {
+            if (isGap(readGapsIt) && isGap(contigGapsIt))
+                continue;  // Skip paddings.
+            if (isGap(readGapsIt)) {
+                errorCount += 1;
+            } else if (isGap(contigGapsIt)) {
+                errorCount += 1;
+            } else {
+                errorCount += convert<Dna5>(*contigGapsIt) != convert<Dna5>(*readGapsIt);
+            }
+        }
+
+        if (errorCount > maxErrors)
+            bogusReadIds.insert(alignedReadId);
+    }
+}
+
+
 template <typename TFragmentStore>
 void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentStore & fragmentStore)
 {
-    // TODO(holtgrew): Weight info about each alignment by 1/c where c is the number of alignment positions for the read.
     typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
     typedef typename Iterator<TAlignedReadStore, Standard>::Type TAlignedReadsIter;
     typedef typename TFragmentStore::TContigStore TContigStore;
@@ -327,17 +392,15 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
     // Sort aligned read by read so we can easily compute the number
     // of alignments of a read using binary search.
     sortAlignedReads(fragmentStore.alignedReadStore, SortReadId());
+    // Initialize reference aligned read with a sentinel value.
     TAlignedReadStoreElement refAlignedRead;
-    refAlignedRead.readId = fragmentStore.alignedReadStore[0].readId;
+    refAlignedRead.readId = ~0u;
     typedef std::pair<TAlignedReadsIter, TAlignedReadsIter> TAlignedReadsIterPair;
-    TAlignedReadsIterPair alignedReadsBeginEnd =
-            std::equal_range(begin(fragmentStore.alignedReadStore, Standard()),
-                             end(fragmentStore.alignedReadStore, Standard()),
-                             refAlignedRead,
-                             LessThanReadId<TAlignedReadStoreElement>());
-    unsigned readAlignmentCount = alignedReadsBeginEnd.second - alignedReadsBeginEnd.first;
+    TAlignedReadsIterPair alignedReadsBeginEnd;
 
     size_t alignedReadId = 0;
+    unsigned readAlignmentCount = 0;
+    std::set<size_t> bogusAlignmentIds;
     for (TAlignedReadsIter it = begin(fragmentStore.alignedReadStore, Standard()); it != end(fragmentStore.alignedReadStore, Standard()); ++it, ++alignedReadId) {
         // Maybe need to re-count number of reads, if at next read id.
         if (it->readId != refAlignedRead.readId) {
@@ -348,7 +411,17 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
                                      refAlignedRead,
                                      LessThanReadId<TAlignedReadStoreElement>());
             readAlignmentCount = alignedReadsBeginEnd.second - alignedReadsBeginEnd.first;
+
+            // Ignore reads that have more than 10% errors.
+            unsigned maxErrors = static_cast<unsigned>(0.1 * length(fragmentStore.readSeqStore[refAlignedRead.readId]));
+            computeBogusReads(bogusAlignmentIds, alignedReadId, alignedReadsBeginEnd.first, alignedReadsBeginEnd.second, fragmentStore, maxErrors);
+            size_t bogusAlignmentCount = bogusAlignmentIds.size();
+            SEQAN_ASSERT_LEQ(bogusReadCount, readAlignmentCount);
+            readAlignmentCount -= bogusAlignmentCount;
         }
+        // Maybe ignore bogus read.
+        if (bogusAlignmentIds.find(alignedReadId) != bogusAlignmentIds.end())
+            continue;
         // Get contig and read sequences.
         TContigSeq const & contigSeq = fragmentStore.contigStore[it->contigId].seq;
         TReadSeq readSeq = fragmentStore.readSeqStore[it->readId];
@@ -394,7 +467,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
 }
 
 template <typename TFragmentStore>
-void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, TFragmentStore const & fragmentStore)
+void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, TFragmentStore const & /*fragmentStore*/)  // TODO(holtgrew): Remove parameter fragmentStore.
 {
     // Print error counts per base.
     std::cout << std::endl << std::endl << "#--file:error-counts-base.dat" << std::endl;
@@ -538,7 +611,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
     // Qualities per substitution.
     std::cout << std::endl << std::endl << "#--file:qualities-mismatch-base.dat" << std::endl;
     std::cout << "#Mean Quality/Std Dev Per Substitution" << std::endl;
-    std::cout << "* means any, + means any but match" << std::endl;
+    std::cout << "# * means any, + means any but match" << std::endl;
     std::cout << "#       A   sd A      C   sd C      G   sd G      T   sd T      N   sd N      +   sd +      *   sd *" << std::endl;
     for (unsigned i = 0; i < 5; ++i) {  // source base
         std::cout << Dna5(i) << " ";
@@ -641,7 +714,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
         // The number of aligned reads is fixed.  Note that there may
         // be multiple error events per position but at most one
         // mismatch.
-        double total = length(fragmentStore.alignedReadStore);
+        double total = inserts + deletes + mismatches + matches;
         printf("%9u   %9.2f %8.5f %9.2f %8.5f %9.2f  %8.5f %9.2f %8.5f %9.2f\n", i, inserts, 100.0 * inserts / total, deletes, 100.0 * deletes / total, mismatches, 100.0 * mismatches / total, inserts + deletes + mismatches, 100.0 * (inserts + deletes + mismatches) / total, total);
     }
 
@@ -697,9 +770,9 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
                 }
             }
         }
-        if (mismatchCount == 0)
+        if (mismatchCount > 0)
             mismatchMean = mismatchSum / mismatchCount;
-        if (matchCount == 0)
+        if (matchCount > 0)
             matchMean = matchSum / matchCount;
         if (mismatchCount > 0 || matchCount > 0) {
             // match/mismatch sd
