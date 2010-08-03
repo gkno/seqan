@@ -39,6 +39,20 @@ struct TestSmallSeedConfig
     typedef seqan::_ScoreMixin<int> TScoreMixin;
 };
 
+// Test assignment of chained seeds.
+SEQAN_DEFINE_TEST(test_seeds_seed_chained_assign)
+{
+    using namespace seqan;
+
+    typedef Seed<ChainedSeed> TSeed;
+
+    TSeed s(0, 0, 3);
+
+    TSeed s2 = s;
+    s2 = s;
+    assign(s2, s);
+}
+
 // Test the metafunctions of the ChainedSeed specialization.
 SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
 {

@@ -29,31 +29,6 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-/**
-.Tag.Local Chaining
-..cat:Seed Handling
-..summary:The local chaining algorithms to use when adding a seed to a @Class.SeedSet@.
-..see:Class.SeedSet
-..see:Function.addSeed
-..tag.Merge:Merge with existing seed.
-..tag.Chaos:CHAOS chaining.
-..tag.SimpleChain:Simple chaining.
-..tag.Single:Add single seed without merging and chaining.
-..include:seqan/seeds.h
-*/
-struct _Merge;
-typedef Tag<_Merge> Merge;
-
-struct _Chaos;
-typedef Tag<_Chaos> Chaos;
-
-struct _SimpleChain;
-typedef Tag<_SimpleChain> SimpleChain;
-
-struct _Single;
-typedef Tag<_Single> Single;
-
-
 struct _MinSeedSize;
 typedef Tag<_MinSeedSize> MinSeedSize;
 

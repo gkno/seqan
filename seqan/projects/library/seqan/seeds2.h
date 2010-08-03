@@ -53,28 +53,24 @@
 #include <seqan/seeds2/seeds_seed_diagonal.h>
 #include <seqan/seeds2/seeds_seed_chained.h>
 
-// Algorithms on Seed objects.
+// Seed extension algorithms.
 #include <seqan/seeds2/seeds_extension.h>
+
+// Algorithms for chaining and merging seeds.
+#include <seqan/seeds2/seeds_combination.h>
 
 // Class SeedSet, specializations, iterators.
 #include <seqan/seeds2/basic_iter_indirect.h>
 #include <seqan/seeds2/seeds_seed_set_base.h>
 #include <seqan/seeds2/seeds_seed_set_unordered.h>
 
-// Banded alignment around seeds.
-#include <seqan/seeds2/align_seed_banded_linear.h>
-#include <seqan/seeds2/align_seed_banded_affine.h>
-#include <seqan/seeds2/align_seed_banded.h>
-
-// Banded chain alignment.
+// Banded and unbanded DP algorithms.
 #include <seqan/seeds2/align_dynprog_linear.h>
 #include <seqan/seeds2/align_dynprog_banded_linear.h>
 #include <seqan/seeds2/align_dynprog_affine.h>
 #include <seqan/seeds2/align_dynprog_banded_affine.h>
 
-#include <seqan/seeds2/align_chain_banded_alignment_chain.h>
-#include <seqan/seeds2/align_chain_banded_linear.h>
-// #include <seqan/seeds2/align_chain_banded_affine.h>
+// Banded chain alignment.
 #include <seqan/seeds2/align_chain_banded.h>
 
 // Global chaining algorithms

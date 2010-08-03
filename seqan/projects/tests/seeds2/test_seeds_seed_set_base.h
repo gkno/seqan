@@ -29,14 +29,15 @@
 
 #include <seqan/seeds2.h>  // Include module under test.
 
-// Test the container functions for the given SeedSet specialization.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetContainerFunctions(TSeedSetSpec const &)
+// Test the container functions for the given Seed and SeedSet
+// specialization.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetContainerFunctions(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
     // Define SeedSet type and declare a variable.
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     TSeedSet s;
 
     // Test length/begin/end with empty set.
@@ -78,15 +79,16 @@ void testSeedsSeedSetContainerFunctions(TSeedSetSpec const &)
 }
 
 
-// Test addSeed(..., Single) for the given SeedSet specialization.
+// Test addSeed(..., Single) for the given Seed and SeedSet
+// specialization.
 //
 // Case: No quality threshold.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSingleNoThreshold(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSingleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfig> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfig> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -99,15 +101,16 @@ void testSeedsSeedSetAddSeedSingleNoThreshold(TSeedSetSpec const &)
 }
 
 
-// Test addSeed(..., Single) for the given SeedSet specialization.
+// Test addSeed(..., Single) for the given Seed and SeedSet
+// specialization.
 //
 // Case: Seed size threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSingleThresholdReachedLength(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSingleThresholdReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -121,15 +124,16 @@ void testSeedsSeedSetAddSeedSingleThresholdReachedLength(TSeedSetSpec const &)
 }
 
 
-// Test addSeed(..., Single) for the given SeedSet specialization.
+// Test addSeed(..., Single) for the given Seed and SeedSet
+// specialization.
 //
 // Case: Seed size threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -142,15 +146,16 @@ void testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(TSeedSetSpec const &
 }
 
 
-// Test addSeed(..., Single) for the given SeedSet specialization.
+// Test addSeed(..., Single) for the given Seed and SeedSet
+// specialization.
 //
 // Case: Seed score threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSingleThresholdReachedScore(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSingleThresholdReachedScore(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -165,15 +170,16 @@ void testSeedsSeedSetAddSeedSingleThresholdReachedScore(TSeedSetSpec const &)
 }
 
 
-// Test addSeed(..., Single) for the given SeedSet specialization.
+// Test addSeed(..., Single) for the given Seed and SeedSet
+// specialization.
 //
 // Case: Seed score threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -187,15 +193,15 @@ void testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(TSeedSetSpec const &)
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
-// Case: Seed left of added; Merging possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Merge) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Merging possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -209,15 +215,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(TSeedSetSpec con
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
-// Case: Seed right of added; Merging possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Merge) with the given Seed and SeedSet
+// Specialization.  Case: Seed right of added; Merging possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -231,15 +237,15 @@ void testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(TSeedSetSpec co
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
-// Case: Seed left of added; Merging impossible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Merge) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Merging impossible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     {  // Merging not possible because of diagonal distance
@@ -267,15 +273,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(TSeedSetSpec c
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
-// Case: Seed left of added; Merging possible; Length quality
-// threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., Merge) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Merging possible; Length
+// quality threshold not reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -296,15 +302,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(TS
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
-// Case: Seed left of added; Merging possible; Length quality
-// threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., Merge) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Merging possible; Length
+// quality threshold reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -326,15 +332,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(TSeed
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Test addSeed(..., Merge) with the given Seed and SeedSet Specialization.
 // Seeds have scores.  Case: Seed left of added; Merging possible;
 // Score quality threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -357,15 +363,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(TS
 }
 
 
-// Test addSeed(..., Merge) with the given SeedSet Specialization.
+// Test addSeed(..., Merge) with the given Seed and SeedSet Specialization.
 // Seeds have scores.  Case: Seed left of added; Merging possible;
 // Score quality threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeedSetSpec const &)
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -390,15 +396,15 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -415,15 +421,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(TSeedSetS
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Case: Seed right of added; Chaining possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Case: Seed right of added; Chaining possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -440,15 +446,15 @@ void testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(TSeedSet
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining impossible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining impossible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     {  // Chaining not possible because of distance
@@ -476,15 +482,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(TSeedSe
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; Length quality
-// threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible;
+// Length quality threshold not reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -505,15 +511,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLe
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; Length quality
-// threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible;
+// Length quality threshold reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -535,15 +541,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLengt
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Seeds have scores.  Case: Seed left of added; Chaining possible;
-// Score quality threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedScored(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Seeds have scores.  Case: Seed left of added;
+// Chaining possible; Score quality threshold not reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -567,15 +573,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedSc
 }
 
 
-// Test addSeed(..., SimpleChain) with the given SeedSet Specialization.
-// Seeds have scores.  Case: Seed left of added; Chaining possible;
-// Score quality threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScored(TSeedSetSpec const &)
+// Test addSeed(..., SimpleChain) with the given Seed and SeedSet
+// Specialization.  Seeds have scores.  Case: Seed left of added;
+// Chaining possible; Score quality threshold reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -601,15 +607,15 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScore
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     DnaString sequence0 = "CCCCCCCCCC";
@@ -629,15 +635,15 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(TSeedSetSpec co
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Case: Seed right of added; Chaining possible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Case: Seed right of added; Chaining possible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     DnaString sequence0 = "CCCCCCCCCC";
@@ -657,15 +663,15 @@ void testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(TSeedSetSpec c
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining impossible; No quality threshold
-// required.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining impossible; No
+// quality threshold required.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     {  // Chaining not possible because of distance
@@ -699,15 +705,15 @@ void testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(TSeedSetSpec 
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; Length quality
-// threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible;
+// Length quality threshold not reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -731,15 +737,15 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(T
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Case: Seed left of added; Chaining possible; Length quality
-// threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Case: Seed left of added; Chaining possible;
+// Length quality threshold reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigLength> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -764,15 +770,15 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(TSee
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Seeds have scores.  Case: Seed left of added; Chaining possible;
-// Score quality threshold not reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Seeds have scores.  Case: Seed left of added;
+// Chaining possible; Score quality threshold not reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -799,15 +805,15 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(T
 }
 
 
-// Test addSeed(..., Chaos) with the given SeedSet Specialization.
-// Seeds have scores.  Case: Seed left of added; Chaining possible;
-// Score quality threshold reached.
-template <typename TSeedSetSpec>
-void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSeedSetSpec const &)
+// Test addSeed(..., Chaos) with the given Seed and SeedSet
+// Specialization.  Seeds have scores.  Case: Seed left of added;
+// Chaining possible; Score quality threshold reached.
+template <typename TSeedSpec, typename TSeedSetSpec>
+void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSeedSpec const &, TSeedSetSpec const &)
 {
     using namespace seqan;
 
-    typedef SeedSet<Simple, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
+    typedef SeedSet<TSeedSpec, TSeedSetSpec, DefaultSeedSetConfigScore> TSeedSet;
     typedef typename Value<TSeedSet>::Type TSeed;
 
     TSeedSet set;
@@ -835,276 +841,592 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     SEQAN_ASSERT_EQ(5, getScore(front(set)));
 }
 
-// Test container functions for specialization Unordered SeedSet.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_functions_unordered)
+
+// Test container functions for specialization Simple Seed and
+// Unordered SeedSet.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_functions_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetContainerFunctions(Unordered());
+    testSeedsSeedSetContainerFunctions(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Single) for specialization Unordered SeedSet.
+// Test addSeed(..., Single) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: No threshold.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSingleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedSingleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Single) for specialization Unordered SeedSet.
+// Test addSeed(..., Single) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Size threshold, threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSingleThresholdReachedLength(Unordered());
+    testSeedsSeedSetAddSeedSingleThresholdReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Single) for specialization Unordered SeedSet.
+// Test addSeed(..., Single) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Size threshold, threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(Unordered());
+    testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Single) for specialization Unordered SeedSet.
+// Test addSeed(..., Single) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Size threshold, threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_score_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_score_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSingleThresholdReachedScore(Unordered());
+    testSeedsSeedSetAddSeedSingleThresholdReachedScore(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Single) for specialization Unordered SeedSet.
+// Test addSeed(..., Single) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Size threshold, threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_score_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_score_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(Unordered());
+    testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is right of added;  Merging is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_right_merging_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_right_merging_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Merging is not possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_impossible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_impossible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Merging not possible;  Length quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Merging not possible;  Length quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Merging is possible;  Quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Merge) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., Merge) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(Unordered());
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(Simple(), Unordered());
 }
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is right of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_right_chaining_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_right_chaining_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining is not possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_impossible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_impossible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLength(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLength(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedScored(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedScored(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., SimpleChain) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., SimpleChain) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScored(Unordered());
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScored(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is right of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_right_chaining_possible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_right_chaining_possible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining is not possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_impossible_no_threshold_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_impossible_no_threshold_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.
 //
 // Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_length_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_length_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold not reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(Simple(), Unordered());
 }
 
 
-// Test addSeed(..., Chaos) for specialization Unordered SeedSet.
-// Seeds have scores.
+// Test addSeed(..., Chaos) for specialization Simple Seed and
+// Unordered SeedSet.  Seeds have scores.
 //
 // Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
-SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_scored_unordered)
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_scored_simple_unordered)
 {
     using namespace seqan;
-    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(Unordered());
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(Simple(), Unordered());
+}
+
+
+// Test container functions for specialization Chained Seed and
+// Unordered SeedSet.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_container_functions_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetContainerFunctions(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Single) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: No threshold.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSingleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Single) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Size threshold, threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSingleThresholdReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Single) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Size threshold, threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSingleThresholdNotReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Single) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Size threshold, threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_score_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSingleThresholdReachedScore(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Single) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Size threshold, threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_score_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSingleThresholdNotReachedScore(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is right of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_right_merging_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeRightMergingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging is not possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_impossible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingImpossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging not possible;  Length quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Merging not possible;  Length quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdNotReachedScored(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Merge) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Merging is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(ChainedSeed(), Unordered());
+}
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is right of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_right_chaining_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainRightChainingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining is not possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_impossible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingImpossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_not_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_not_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdNotReachedScored(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., SimpleChain) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScored(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is right of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_right_chaining_possible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosRightChainingPossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining is not possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_impossible_no_threshold_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingImpossibleNoThreshold(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.
+//
+// Case: Seed in set is left of added;  Chaining not possible;  Length quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_length_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedLength(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold not reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdNotReachedScored(ChainedSeed(), Unordered());
+}
+
+
+// Test addSeed(..., Chaos) for specialization Chained Seed and
+// Unordered SeedSet.  Seeds have scores.
+//
+// Case: Seed in set is left of added;  Chaining is possible;  Quality threshold reached.
+SEQAN_DEFINE_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_scored_chained_unordered)
+{
+    using namespace seqan;
+    testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(ChainedSeed(), Unordered());
 }
 
 #endif  // TEST_SEEDS_TEST_SEEDS_SEED_SET_BASE_H_

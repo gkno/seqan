@@ -59,6 +59,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_base_basic_functions_chained);
     SEQAN_CALL_TEST(test_seeds_seed_base_assign_chained);
 
+    SEQAN_CALL_TEST(test_seeds_seed_chained_assign);
     SEQAN_CALL_TEST(test_seeds_seed_chained_metafunctions);
     SEQAN_CALL_TEST(test_seeds_seed_chained_append_diagonal);
     SEQAN_CALL_TEST(test_seeds_seed_chained_truncate_diagonals);
@@ -68,39 +69,69 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_seeds_seed_simple_constructors);
     SEQAN_CALL_TEST(test_seeds_seed_simple_setters);
 
-    // Tests for seed sets.
-    // TODO(holtgrew): All these tests are for Simple Seeds only at the moment.  When all chaining strategies are in place, add a version for chained seeds, too.  Should be only copy-and-paste work.
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_unordered);
+    // Tests for unordered seed sets and simple seeds.
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_simple_unordered);
 
-    // TODO(holtgrew): Remove _container_ from the test names in the following.
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_reached_score_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_single_threshold_not_reached_score_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_score_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_score_simple_unordered);
 
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_right_merging_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_impossible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_not_reached_scored_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_merge_left_merging_possible_threshold_reached_scored_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_right_merging_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_impossible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_scored_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_scored_simple_unordered);
 
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_right_chaining_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_impossible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_scored_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_simple_chain_left_chaining_possible_threshold_reached_scored_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_right_chaining_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_impossible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_not_reached_scored_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_simple_chain_left_chaining_possible_threshold_reached_scored_simple_unordered);
 
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_right_chaining_possible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_impossible_no_threshold_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_length_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_unordered);
-    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_add_seed_chaos_left_chaining_possible_threshold_reached_scored_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_right_chaining_possible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_impossible_no_threshold_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_length_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_simple_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_scored_simple_unordered);
+
+    // Tests for unordered seed sets and chained seeds.
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_container_functions_chained_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_reached_score_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_single_threshold_not_reached_score_chained_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_right_merging_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_impossible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_not_reached_scored_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_merge_left_merging_possible_threshold_reached_scored_chained_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_right_chaining_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_impossible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_not_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_not_reached_scored_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chained_chain_left_chaining_possible_threshold_reached_scored_chained_unordered);
+
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_right_chaining_possible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_impossible_no_threshold_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_length_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_not_reached_scored_chained_unordered);
+    SEQAN_CALL_TEST(test_seeds_seed_set_base_add_seed_chaos_left_chaining_possible_threshold_reached_scored_chained_unordered);
 
     // Tests for seed algorithms
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
@@ -130,12 +161,14 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
+    // TODO(holtgrew): Enable again once affine alignment algorithms and tests are in place.
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
+    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_linear.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_linear.h");
     // TODO(holtgrew): Write tests for indirect iterator and uncomment this.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/basic_iter_indirect.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_combination.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_extension.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_chained.h");
