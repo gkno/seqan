@@ -275,35 +275,41 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seque
 
 // Compute traceback in the given banded alignment matrix, starting at
 // the lower right, shifted by the given overlap to the upper left.
-// The matrix was filled with the Needleman-Wunschla lgorithm, end
+// The matrix was filled with the Needleman-Wunschl algorithm, end
 // gaps are free as configured by the AlignConfig object.  Returns the
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
+_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeLength, TOverlap lowerTriangleEdgeLength, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
 
-    std::cout << "trace back banded" << std::endl;
-    // TODO(holtgrew): Debug output, remove when not needed any more.
-    {
-        std::cout << ",-- filled banded alignment matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
-        for (unsigned i = 0; i < length(matrix, 0); ++i) {
-            std::cout << "| ";
-            for (unsigned j = 0; j < i; ++j)
-                std::cout << "\t";
-            for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
-                    std::cout << "\tinf";
-                else
-                    std::cout << "\t" << value(matrix, i, j);
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "`--" << std::endl;
-    }
-    std::cout << "begin pos0 = " << (length(matrix, 0) - overlap0 + finalPos0) << std::endl;
-    std::cout << "begin pos1 = " << (length(matrix, 1) - overlap1 + finalPos1) << std::endl;
+    // std::cout << "trace back banded" << std::endl;
+    // // TODO(holtgrew): Debug output, remove when not needed any more.
+    // {
+    //     std::cout << ",-- filled banded alignment matrix " << length(matrix, 0) << " x " << length(matrix, 1) << std::endl;
+    //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //         std::cout << "| ";
+    //         for (unsigned j = 0; j < i; ++j)
+    //             std::cout << "\t";
+    //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //                 std::cout << "\tinf";
+    //             else
+    //                 std::cout << "\t" << value(matrix, i, j);
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    //     std::cout << "`--" << std::endl;
+    // }
+    // std::cout << "length(matrix, 0) = " << length(matrix, 0) << std::endl;
+    // std::cout << "overlap0 = " << overlap0 << std::endl;
+    // std::cout << "finalPos0 = " << finalPos0 << std::endl;
+    // std::cout << "length(matrix, 1) = " << length(matrix, 1) << std::endl;
+    // std::cout << "overlap1 = " << overlap1 << std::endl;
+    // std::cout << "finalPos1 = " << finalPos1 << std::endl;
+    // std::cout << "upperTriangleEdgeLength = " << upperTriangleEdgeLength << std::endl;
+    // std::cout << "lowerTriangleEdgeLength = " << lowerTriangleEdgeLength << std::endl;
     
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Iterator<TMatrix>::Type TMatrixIterator;
@@ -312,9 +318,15 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     //
     // Precomputation of the score difference between mismatch and gap.
 	TScoreValue scoreDifference = scoreMismatch(scoringScheme) - scoreGap(scoringScheme);
-    // Current position in the matrix.
+    // Current position in the matrix.  Note that this is the position
+    // in the matrix including the gutter.  When writing this out, we
+    // want to have the position in the matrix, excluding the gutter,
+    // i.e. everything is shifted to the upper left.
     TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
-    TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
+    TPosition pos1 = length(matrix, 1) - overlap1 - lowerTriangleEdgeLength - 1 + (length(matrix, 0) - pos0 - 1) + finalPos1;
+    // std::cout << "length(matrix, 0) - pos0 - 1 == " << (length(matrix, 0) - pos0 - 1) << std::endl;
+    // std::cout << "begin pos0 = " << pos0 << std::endl;
+    // std::cout << "begin pos1 = " << pos1 << std::endl;
     TPosition origPos0 = pos0;
     (void) origPos0;  // In case we run without assertions.
     // TPosition origPos1 = pos1;
@@ -323,7 +335,7 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     setPosition(matrixIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPosition with coordinates.
     TMatrixIterator origMatrixIt = matrixIt;
 
-    std::cout << "STARTING AT " << pos0 << ", " << pos1 << std::endl;
+    // std::cout << "STARTING AT " << pos0 << ", " << pos1 << std::endl;
 
     // Search for starting point of the trace.
     //
@@ -332,14 +344,15 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     // TODO(holtgrew): Currently not supported.
 
     // Now, perform the traceback.
-    while (pos0 > static_cast<TPosition>(0)) {
+    while (pos0 > static_cast<TPosition>(1)) {
+        SEQAN_ASSERT_GT(pos1, static_cast<TPosition>(0));
         // Flags for "go horizontal" and "go vertical".
         bool gh = false;
         bool gv = false;
 
         // Determine whether to go vertical/horizontal.
-        std::cout << "Compare: " << *sourceIt0 << ", " << *sourceIt1 << std::endl;
-        std::cout << "  Score: " << *matrixIt << std::endl;
+        // std::cout << "Compare: " << *sourceIt0 << ", " << *sourceIt1 << std::endl;
+        // std::cout << "  Score: " << *matrixIt << std::endl;
         if (*sourceIt0 == *sourceIt1) {
             gh = true;
             gv = true;
@@ -360,22 +373,26 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
 			gh = (h > v) || (d + scoreDifference >= v);
         }
 
-        if (gv && gh) {
-            std::cout << "GO DIAGONAL" << std::endl;
-        } else if (gv) {
-            std::cout << "GO VERTICAL" << std::endl;
-        } else if (gh) {
-            std::cout << "GO HORIZONTAL" << std::endl;
-        }
+        // if (gv && gh) {
+        //     std::cout << "GO DIAGONAL" << std::endl;
+        // } else if (gv) {
+        //     std::cout << "GO VERTICAL" << std::endl;
+        // } else if (gh) {
+        //     std::cout << "GO HORIZONTAL" << std::endl;
+        // }
 
         // Move iterators in source sequence, alignment rows, matrix
         // and possibly insert gaps.
         if (gv && gh) {
+            pos0 -= 1;
             goPrevious(matrixIt, 0);
         } else if (gv) {
+            pos0 -= 1;
+            pos1 += 1;
             goPrevious(matrixIt, 0);
             goNext(matrixIt, 1);
         } else if (gh) {
+            pos1 -= 1;
             goPrevious(matrixIt, 1);
         }
         if (gv) {
@@ -383,9 +400,8 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             goPrevious(sourceIt0);
             goPrevious(alignmentIt0);
             // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
-            pos0 -= 1;
         } else {
-            // std::cout << "  gap in dimension 0" << std::endl;
+            // std::cout << __FILE__ << ":" << __LINE__ << "--  gap in dimension 0" << std::endl;
             insertGap(alignmentIt0);
         }
         if (gh) {
@@ -393,9 +409,8 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             goPrevious(sourceIt1);
             goPrevious(alignmentIt1);
             // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;
-            pos1 -= 1;
         } else {
-            // std::cout << "  gap in dimension 0" << std::endl;
+            // std::cout << __FILE__ << ":" << __LINE__ << "--  gap in dimension 0" << std::endl;
             insertGap(alignmentIt1);
         }
     }
@@ -405,11 +420,15 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     // TODO(holtgrew): Currently not supported.
     SEQAN_ASSERT_NOT_MSG(goToTopLeft, "goToTopLeft is currently not supported in banded alignment.");
 
-    // Write out the final positions in the alignment matrix.
-    finalPos0 = pos0;
-    finalPos1 = pos1;
+    // Write out the final positions in the alignment matrix.  Convert
+    // from position in the current alignment matrix with gutter to
+    // positioin without gutter by shifting the position to the upper
+    // left.  Also adjust for the shear of the matrix.
+    // std::cout << "@and: pos0 = " << pos0 << ", pos1 = " << pos1 << std::endl;
+    finalPos0 = pos0 - 1;
+    finalPos1 = pos1 - 2 - (upperTriangleEdgeLength - 1);
     SEQAN_ASSERT_EQ_MSG(finalPos0, 0u, "Must reach top of matrix in banded alignment traceback.");
-    std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+    // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
 
     return *origMatrixIt;
 }

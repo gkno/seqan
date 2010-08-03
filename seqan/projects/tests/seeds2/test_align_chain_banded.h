@@ -73,8 +73,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_upper_left_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeUpperLeftOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(2u, overlap0);
-        SEQAN_ASSERT_EQ(2u, overlap1);
+        SEQAN_ASSERT_EQ(3u, overlap0);
+        SEQAN_ASSERT_EQ(3u, overlap1);
     }
     // Test with a seed where {start, end} != {lower, upper diagonal}.
     {
@@ -134,8 +134,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_lower_right_overlap)
         // Compute overlaps.
         unsigned overlap0, overlap1;
         _computeLowerRightOverlap(overlap0, overlap1, seed, alignmentChain);
-        SEQAN_ASSERT_EQ(2u, overlap0);
-        SEQAN_ASSERT_EQ(2u, overlap1);
+        SEQAN_ASSERT_EQ(3u, overlap0);
+        SEQAN_ASSERT_EQ(3u, overlap1);
     }
     // Test with a seed where {start, end} != {lower, upper diagonal}.
     {
@@ -164,43 +164,43 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         // Resulting alignment should be something like this (seeds
         // are marked by < and >).
         //
-        //     >   <   > <
-        //   GGCGA-TNNNCATGG
-        //   --CGAATC-CCATCC
-        CharString sequence0 = "GGCGATNNNCATGG";
-        CharString sequence1 = "CGAATCCATCC";  // TODO(holtgrew): Switch back again.
-        std::cout << "ALIGNING " << sequence0 << " AND " << sequence1 << std::endl;
-        std::cout << "  >   <   > <" << std::endl;
-        std::cout << "GGCGA-TNNNCATGG" << std::endl;
-        std::cout << "--CGAATC-CCATCC" << std::endl;
+        //     > <    > <    >  <
+        //   GGCGATNNNCAT--GGCACA
+        //   --CGA-ATCCATCCCACACA
+        CharString sequence0 = "GGCGATNNNCATGGCACA";
+        CharString sequence1 = "CGAATCCATCCCACACA";  // TODO(holtgrew): Switch back again.
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed> seedChain;
         appendValue(seedChain, TSeed(2, 0, 6, 5));
         appendValue(seedChain, TSeed(9, 6, 12, 9));
+        appendValue(seedChain, TSeed(14, 11, 16, 17));
 
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment1, scoreMatrix) << endl;
         int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
-        std::cout << alignment << std::endl;
-        SEQAN_ASSERT_EQ(result, 11);
+        SEQAN_ASSERT_EQ(result, 5);
 
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACGTCCTCGTACACCGTCTTAA");
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "TACGATC-C--ACACCG-CGTCT");
+        // Compare alignment rows.
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA");
+        // Note that leading gaps are not stored in the row itself,
+        // when printed, there will be a "--" prepended.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGA-ATCCATCCCACACA");
     }
     // Test on infixes.
     {
-        CharString sequence0 = "ACGTCCTCGTACACCGTCTTAA";
-        CharString sequence1 = "TACGATCCACACCGCGTCT";
+        // The test data is the same as above but with a T and a TT prepended.
+        CharString sequence0 = "TGGCGATNNNCATGGCACA";
+        CharString sequence1 = "TTCGAATCCATCCCACACA";
         Score<int, Simple> scoringScheme(2, -1, -2);
 
         String<TSeed > seedChain;
-        appendValue(seedChain, TSeed(1, 2, 6, 8));
-        appendValue(seedChain, TSeed(12, 10, 19, 19));
+        appendValue(seedChain, TSeed(2, 0, 6, 5));
+        appendValue(seedChain, TSeed(9, 6, 12, 9));
+        appendValue(seedChain, TSeed(14, 11, 16, 17));
 
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
@@ -209,12 +209,14 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
-        SEQAN_ASSERT_EQ(result, 11);
+        int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        SEQAN_ASSERT_EQ(result, 5);
 
-        //cout << alignment2 << endl;
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CGTCCTCGTACACCGTCTTAA" );
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGATC-C--ACACCG-CGTCT");
+        // Compare alignment rows.
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA");
+        // Note that leading gaps are not stored in the row itself,
+        // when printed, there will be a "--" prepended.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGA-ATCCATCCCACACA");
     }
 }
 
@@ -225,6 +227,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
 {
     using namespace seqan;
     typedef Seed<Simple> TSeed;
+    SEQAN_ASSERT_FAIL("Does not work yet");
     
     // Test on whole strings.
     {

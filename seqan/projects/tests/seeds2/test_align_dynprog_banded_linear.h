@@ -35,10 +35,10 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_resize_matrix)
 
     Matrix<int, 2> matrix;
 
-    _alignBanded_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), -1, 1, NeedlemanWunsch());
+    _alignBanded_resizeMatrix(matrix, CharString("length   11"), CharString("length 8"), -3, 1, NeedlemanWunsch());
 
-    SEQAN_ASSERT_EQ(9u, length(matrix, 0));
-    SEQAN_ASSERT_EQ(5u, length(matrix, 1));
+    SEQAN_ASSERT_EQ(12u, length(matrix, 0));
+    SEQAN_ASSERT_EQ(7u, length(matrix, 1));
 }
 
 
@@ -177,6 +177,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
     using namespace seqan;
 
     typedef CharString TString;
+    typedef Position<CharString>::Type TPosition;
     typedef Align<TString> TAlign;
     typedef Row<TAlign>::Type TAlignRow;
     typedef Iterator<TAlignRow, Standard>::Type TAlignRowIterator;
@@ -194,23 +195,23 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
         _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, NeedlemanWunsch());
 
-        // TODO(holtgrew): Debug output, remove when not needed any more.
-        {
-            std::cout << ",-- filled banded alignment matrix" << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                std::cout << "| ";
-                for (unsigned j = 0; j < i; ++j)
-                    std::cout << "\t";
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
-                        std::cout << "\tinf";
-                    else
-                        std::cout << "\t" << value(matrix, i, j);
-                }
-                std::cout << std::endl;
-            }
-            std::cout << "`--" << std::endl;
-        }
+        // // TODO(holtgrew): Debug output, remove when not needed any more.
+        // {
+        //     std::cout << ",-- filled banded alignment matrix" << std::endl;
+        //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
+        //         std::cout << "| ";
+        //         for (unsigned j = 0; j < i; ++j)
+        //             std::cout << "\t";
+        //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
+        //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+        //                 std::cout << "\tinf";
+        //             else
+        //                 std::cout << "\t" << value(matrix, i, j);
+        //         }
+        //         std::cout << std::endl;
+        //     }
+        //     std::cout << "`--" << std::endl;
+        // }
 
         // Perform the traceback.
         Align<TString> alignment;
@@ -218,28 +219,28 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        size_t finalPos0 = 0;
-        size_t finalPos1 = 1;
+        size_t finalPos0 = 4;
+        size_t finalPos1 = 2;
         TStringIterator seq0It = end(sequence0) - 1;
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 2, 5, false, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
 
         // std::cout << alignment;
-        SEQAN_ASSERT_EQ(score, 2);
+        SEQAN_ASSERT_EQ(score, 1);
         SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
-        std::cout << (begin(sequence1, Standard()) - seq1It) << std::endl;
+        // std::cout << (begin(sequence1, Standard()) - seq1It) << std::endl;
         SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
         SEQAN_ASSERT_EQ(finalPos0, 0u);
-        SEQAN_ASSERT_EQ(finalPos1, ~0u);
+        SEQAN_ASSERT_EQ(finalPos1, static_cast<TPosition>(-1));
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
-        // TODO(holtgrew): Visual inspection shows that the following SHOULD be true, why is this not the case?
-        // std::cout << alignment;
-        // SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA-");
+        // Note that leading and trailing gaps are not saved.  The
+        // following is postfixed with a gap on visual inspection.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA");
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }

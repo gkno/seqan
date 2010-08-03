@@ -114,6 +114,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
     using namespace seqan;
 
     typedef CharString TString;
+    typedef Position<CharString>::Type TPosition;
     typedef Align<TString> TAlign;
     typedef Row<TAlign>::Type TAlignRow;
     typedef Iterator<TAlignRow, Standard>::Type TAlignRowIterator;
@@ -146,17 +147,21 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, true, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
 
         SEQAN_ASSERT_EQ(score, 1);
-        SEQAN_ASSERT_TRUE(seq0It + 1 == begin(sequence0));
-        SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
+        SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
+        SEQAN_ASSERT_TRUE(seq1It == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
-        SEQAN_ASSERT_EQ(finalPos0, 0u);
+        SEQAN_ASSERT_EQ(finalPos0, static_cast<TPosition>(-1));
         SEQAN_ASSERT_EQ(finalPos1, 0u);
+        // Expected alignment:
+        //
+        //  CCAAA
+        //  --CAA
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
-        // TODO(holtgrew): Visual inspection shows that the following SHOULD be true, why is this not the case?
-        // std::cout << alignment;
-        // SEQAN_ASSERT_TRUE(row(alignment, 1) == "-C-AA");
+        // Leading gaps are not shown, so there should be two gaps in
+        // front of the following.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CAA");
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }

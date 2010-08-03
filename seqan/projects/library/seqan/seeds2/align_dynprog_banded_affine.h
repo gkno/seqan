@@ -107,7 +107,7 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seque
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeWidth, TOverlap lowerTriangleEdgeWidth, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -122,6 +122,8 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     (void) goToTopLeft;
     (void) finalPos0;
     (void) finalPos1;
+    (void) upperTriangleEdgeWidth;
+    (void) lowerTriangleEdgeWidth;
 
     SEQAN_ASSERT_FAIL("Write me!");
     return 0;
