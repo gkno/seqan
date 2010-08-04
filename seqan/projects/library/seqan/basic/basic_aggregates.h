@@ -239,6 +239,24 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename __T1, typename __T2, typename __T3, typename __TSpec>
 		inline Triple(Triple<__T1, __T2, __T3, __TSpec> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
+
+        inline bool
+        operator==(Triple const & other) const
+        {
+            return i1 == other.i1 && i2 == other.i2 && i3 == other.i3;
+        }
+        
+        inline bool
+        operator<(Triple const & other) const
+        {
+            if (i1 < other.i1)
+                return true;
+            if (i1 == other.i1 && i2 < other.i2)
+                return true;
+            if (i1 == other.i1 && i2 == other.i2 && i3 < other.i3)
+                return true;
+            return false;
+        }
 	};
 	
 /**
