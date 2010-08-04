@@ -74,8 +74,6 @@
 #include <seqan/seeds2/align_chain_banded.h>
 
 // Global chaining algorithms
-// #include <seqan/seeds2/seeds_global_chaining_base.h>
-// #include <seqan/seeds2/seeds_global_chaining_gusfield.h>
-// #include <seqan/seeds2/seeds_global_chaining_lagan.h>
+#include <seqan/seeds2/seeds_global_chaining.h>
 
 #endif  // #ifndef SEQAN_HEADER_SEEDS_H

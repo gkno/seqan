@@ -32,6 +32,7 @@
 #include "test_basic_iter_indirect.h"
 #include "test_seeds_combination.h"
 #include "test_seeds_extension.h"
+#include "test_seeds_global_chaining.h"
 #include "test_seeds_seed_base.h"
 #include "test_seeds_seed_chained.h"
 #include "test_seeds_seed_diagonal.h"
@@ -169,6 +170,9 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_fill_matrix);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
+    // Test global chaining of seeds.
+    SEQAN_CALL_TEST(test_seeds_global_chaining_gusfield_length);
+
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
     // TODO(holtgrew): Enable again once affine alignment algorithms and tests are in place.
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
@@ -179,6 +183,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/basic_iter_indirect.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_combination.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_extension.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_global_chaining.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_chained.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/seeds_seed_diagonal.h");
