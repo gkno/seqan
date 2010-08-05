@@ -29,7 +29,7 @@
 
 
 // Test global chaining weighting the seeds by their length only.
-SEQAN_DEFINE_TEST(test_seeds_global_chaining_gusfield_length)
+SEQAN_DEFINE_TEST(test_seeds_global_chaining_sparse_length)
 {
     using namespace seqan;
 
@@ -43,10 +43,10 @@ SEQAN_DEFINE_TEST(test_seeds_global_chaining_gusfield_length)
         addSeed(seedSet, TSeed(1, 2, 3), Single());
 
         TSeedChain result;
-        chainSeedsGlobally(result, seedSet, GusfieldChaining());
+        chainSeedsGlobally(result, seedSet, SparseChaining());
 
-        // SEQAN_ASSERT_EQ(1u, length(result));
-        // SEQAN_ASSERT_EQ(TSeed(1, 2, 3), front(result));
+        SEQAN_ASSERT_EQ(1u, length(result));
+        SEQAN_ASSERT_EQ(TSeed(1, 2, 3), front(result));
     }
     // Test with two seeds, both are part of the chain.
     {
@@ -55,11 +55,11 @@ SEQAN_DEFINE_TEST(test_seeds_global_chaining_gusfield_length)
         addSeed(seedSet, TSeed(4, 5, 6), Single());
 
         TSeedChain result;
-        chainSeedsGlobally(result, seedSet, GusfieldChaining());
+        chainSeedsGlobally(result, seedSet, SparseChaining());
 
-        // SEQAN_ASSERT_EQ(2u, length(result));
-        // SEQAN_ASSERT_EQ(TSeed(1, 2, 3), result[0]);
-        // SEQAN_ASSERT_EQ(TSeed(4, 5, 6), result[0]);
+        SEQAN_ASSERT_EQ(2u, length(result));
+        SEQAN_ASSERT_EQ(TSeed(1, 2, 3), result[0]);
+        SEQAN_ASSERT_EQ(TSeed(4, 5, 6), result[1]);
     }
     // Test with two seeds, only first one is part of the chain.
     {
@@ -68,27 +68,26 @@ SEQAN_DEFINE_TEST(test_seeds_global_chaining_gusfield_length)
         addSeed(seedSet, TSeed(2, 1, 2), Single());
 
         TSeedChain result;
-        chainSeedsGlobally(result, seedSet, GusfieldChaining());
+        chainSeedsGlobally(result, seedSet, SparseChaining());
 
-        // SEQAN_ASSERT_EQ(1u, length(result));
-        // SEQAN_ASSERT_EQ(TSeed(1, 2, 3), front(result));
+        SEQAN_ASSERT_EQ(1u, length(result));
+        SEQAN_ASSERT_EQ(TSeed(1, 2, 3), front(result));
     }
     // A bit larger example.
     {
         TSeedSet seedSet;
         addSeed(seedSet, TSeed(0, 0, 2), Single());
-        addSeed(seedSet, TSeed(2, 1, 2), Single());
-        addSeed(seedSet, TSeed(5, 3, 1), Single());
-        addSeed(seedSet, TSeed(6, 3, 4), Single());
-        addSeed(seedSet, TSeed(10, 8, 3), Single());
+        addSeed(seedSet, TSeed(3, 5, 2), Single());
+        addSeed(seedSet, TSeed(4, 1, 3), Single());
+        addSeed(seedSet, TSeed(9, 9, 2), Single());
 
         TSeedChain result;
-        chainSeedsGlobally(result, seedSet, GusfieldChaining());
+        chainSeedsGlobally(result, seedSet, SparseChaining());
 
-        // SEQAN_ASSERT_EQ(3u, length(result));
-        // SEQAN_ASSERT_EQ(TSeed(2, 1, 2), result[0]);
-        // SEQAN_ASSERT_EQ(TSeed(6, 3, 4), result[1]);
-        // SEQAN_ASSERT_EQ(TSeed(10, 8, 3), result[2]);
+        SEQAN_ASSERT_EQ(3u, length(result));
+        SEQAN_ASSERT_EQ(TSeed(0, 0, 2), result[0]);
+        SEQAN_ASSERT_EQ(TSeed(4, 1, 3), result[1]);
+        SEQAN_ASSERT_EQ(TSeed(9, 9, 2), result[2]);
     }
 }
 

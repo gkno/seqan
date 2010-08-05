@@ -171,7 +171,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
     // Test global chaining of seeds.
-    SEQAN_CALL_TEST(test_seeds_global_chaining_gusfield_length);
+    SEQAN_CALL_TEST(test_seeds_global_chaining_sparse_length);
 
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
     // TODO(holtgrew): Enable again once affine alignment algorithms and tests are in place.
