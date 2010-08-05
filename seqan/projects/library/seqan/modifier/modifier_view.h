@@ -357,26 +357,47 @@ template < typename TSequence, typename TFunctor >
 inline void
 convertInPlace(TSequence & sequence, TFunctor const &F)
 {
-    SEQAN_CHECKPOINT;
-    typedef typename Iterator<TSequence, Standard>::Type	TIter;
+	SEQAN_CHECKPOINT;
+#if defined (_OPENMP) && defined (SEQAN_PARALLEL)
+	// OpenMP does not support for loop with iterators. Therefore use index variables.
+	typedef typename Position<TSequence>::Type	TPos;
 
-    TIter it = begin(sequence, Standard());
-    TIter itEnd = end(sequence, Standard());
-    for(; it != itEnd; ++it)
-        *it = F(*it);
+	#pragma omp parallel for if(length(sequence) > 1000000)
+	for(TPos p = 0; p < length(sequence); ++p)
+		sequence[p] = F(sequence[p]);
+	
+#else
+	typedef typename Iterator<TSequence, Standard>::Type	TIter;
+
+	TIter it = begin(sequence, Standard());
+	TIter itEnd = end(sequence, Standard());
+	for(; it != itEnd; ++it)
+		*it = F(*it);
+#endif
 }
 
 template < typename TSequence, typename TFunctor >
 inline void
 convertInPlace(TSequence const & sequence, TFunctor const &F)
 {
-    SEQAN_CHECKPOINT;
-    typedef typename Iterator<TSequence, Standard>::Type	TIter;
+		SEQAN_CHECKPOINT;
+	#if defined (_OPENMP) && defined (SEQAN_PARALLEL)
+		// OpenMP does not support for loop with iterators. Therefore use index variables.
+		typedef typename Position<TSequence>::Type	TPos;
 
-    TIter it = begin(sequence, Standard());
-    TIter itEnd = end(sequence, Standard());
-    for(; it != itEnd; ++it)
-        *it = F(*it);
+
+		#pragma omp parallel for if(length(sequence) > 1000000)
+		for(TPos p = 0; p < length(sequence); ++p)
+			sequence[p] = F(sequence[p]);
+
+	#else
+		typedef typename Iterator<TSequence, Standard>::Type	TIter;
+
+		TIter it = begin(sequence, Standard());
+		TIter itEnd = end(sequence, Standard());
+		for(; it != itEnd; ++it)
+			*it = F(*it);
+	#endif
 }
 
 }  // namespace seqan

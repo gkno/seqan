@@ -21,6 +21,10 @@
 #ifndef SEQAN_HEADER_MODIFIER_REVERSE_H
 #define SEQAN_HEADER_MODIFIER_REVERSE_H
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -496,9 +500,23 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline void
 	reverseInPlace(TSequence & sequence) 
 	{
-		typedef typename Iterator<TSequence, Standard>::Type	TIter;
 		typedef typename Value<TSequence>::Type					TValue;
 
+#if defined (_OPENMP) && defined (SEQAN_PARALLEL)
+		// OpenMP does not support for loop with iterators. Therefore use index variables.
+		typedef typename Position<TSequence>::Type				TPos;
+
+		TPos pMid = length(sequence) / 2;
+
+		#pragma omp parallel for if(length(sequence) > 1000000)
+		for(TPos p1 = 0; p1 < pMid; ++p1) {
+			TPos p2 = length(sequence) - 1 - p1;
+			TValue tmp = sequence[p1];
+			sequence[p1] = sequence[p2];
+			sequence[p2] = tmp;
+		}
+#else
+		typedef typename Iterator<TSequence, Standard>::Type	TIter;
 		TIter it1 = begin(sequence, Standard());
 		TIter it2 = it1 + length(sequence) - 1;
 		TIter itMid = it1 + length(sequence) / 2;
@@ -508,6 +526,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			*it1 = *it2;
 			*it2 = tmp;
 		}
+#endif
 	}
 
 	template < typename TSequence, typename TSpec >
