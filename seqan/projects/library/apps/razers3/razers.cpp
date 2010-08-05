@@ -32,6 +32,7 @@
 
 #ifdef _OPENMP
 #define RAZERS_PARALLEL					// parallelize razerS
+#define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING	
 #endif
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
@@ -233,7 +234,7 @@ inline void whichMacros(){
 // Command line parsing and parameter choosing
 int main(int argc, const char *argv[]) 
 {
-	whichMacros();
+	// whichMacros();
 	
 	RazerSOptions<>			options;
 	ParamChooserOptions		pm_options;

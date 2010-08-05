@@ -1098,10 +1098,11 @@ void compactMatches(
 								::std::cerr << "(read #" << readNo << " disabled)";
 						}
 
-					if (options.purgeAmbiguous)
+					if (options.purgeAmbiguous && compactMode == COMPACT_FINAL)
 					{
-						if (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest || compactMode == COMPACT_FINAL)
+						if (options.scoreDistanceRange == 0 || errors < errorRangeBest || score > scoreRangeBest || compactMode == COMPACT_FINAL){
 							dit = ditBeg;
+						}
 						else {
 							*dit = *it;
 							++dit;

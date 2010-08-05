@@ -38,13 +38,9 @@ int omp_get_thread_num(){
 }
 #endif
 
-/**
-.Class.ParallelSwiftPatternHandler:
-..summary:Holds a string of @Spec.Swift@ @Class.Pattern@s to allow the access of the overall read IDs.
-..cat:Razers
-..signature:ParallelSwiftPatternHandler<TSwiftPatterns>
-..param.TSwiftPatterns:The patterns type. With the @Class.String@ around.
-*/
+
+// Pattern handler: is necessary to be able to calculate the overall read ID based on the local 
+// read ID within one thread. Used in matchVerify.
 template <typename TSwiftPatterns>
 struct ParallelSwiftPatternHandler
 {
@@ -55,15 +51,9 @@ struct ParallelSwiftPatternHandler
 	swiftPatterns(_swiftPatterns) {}
 };
 
-/**
-.Function.intiIndex:
-..cat:Razers
-..summary:Connects an empty @Spec.Index_QGram@ with a host text and a shape.
-..signature:intiIndex(index, _text, _shape)
-..param.index:@Spec.Index_QGram@
-..param._text:In case of RazerS a @Class.StringSet@ of the reads
-..param._shape:@Class.Shape@
-*/
+
+// Initializes a q-gram index. Does the same as the constructor with the same parameters, 
+// which cannot be called for a string of indices.
 template<
 	typename TReadSet,
 	typename TShape>
@@ -78,7 +68,9 @@ void intiIndex(
 	index.shape = _shape;
 }
 
-// TODO:remove
+
+// Uses the read ID to find the correct SWIFT pattern in the string handled by the ParallelSwiftPatternHandler,
+// and the correct local ID within this SWIFT pattern to update the max errors.
 template < typename TSwiftPatterns, typename TReadNo, typename TMaxErrors >
 inline void 
 setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo, TMaxErrors maxErrors)
@@ -91,59 +83,13 @@ setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo,
 
 	int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
 	if (minT > 1){
-		//::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
 		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
 		setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
 	}
 }
 
-// iterates over the aligned read store and look for a certain begin position. should set break point in if clause
-template <typename TFragmentStore>
-inline void containsRead(TFragmentStore const & store)
-{
-	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
-	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
-	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
-	
-	for(unsigned i = 0; i < length(store.alignedReadStore); ++i){
-		if(store.alignedReadStore[i].beginPos == 28927578){
-			TAlignedReadStoreElem a = store.alignedReadStore[i];
-			TAlignedQualStoreElem q = store.alignQualityStore[a.id];
-			int k = 0; k = 1;
-		}
-	}
-}
 
-// checks if the IDs in the alignedReadStore are continuously increasing
-// prints the two values and the position in the store if not
-template <typename TFragmentStore>
-inline void consistencyTest(TFragmentStore const & store)
-{
-	typedef typename Size<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreSize;
-	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedReadStoreElem;
-	typedef typename Value<typename TFragmentStore::TAlignQualityStore>::Type TAlignedQualStoreElem;
-	
-	for(unsigned i = 1; i < length(store.alignedReadStore); ++i){
-		if(store.alignedReadStore[i-1].id != (store.alignedReadStore[i].id -1)){
-			std::cout << i <<  ": " << store.alignedReadStore[i-1].id << " , " << store.alignedReadStore[i].id << "(i-1, i)\n";
-			int k = 0; k = 1;
-		}
-	}
-}
-
-
-/**
-.Function.appendBlockStores:
-..cat:Razers
-..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-..signature:appendBlockStores(store, blockStores, swiftPatternHandler, cnts, options, mode)
-..param.store:@Class.FragmentStore@
-..param.blockStores:@Class.String@ of @Class.FragmentStore@
-..param.swiftPatternHandler:@Class.ParallelSwiftPatternHandler@
-..param.cnts:Counts
-..param.options:RazerSOptions
-..param.mode:RazerSMode
-*/
+// Appends the content fo the aligned read / quality stores in the blockStores to the counterparts in the (main) store.
 template <
 	typename TFragmentStore,
 	typename TRazerSOptions>
@@ -209,100 +155,11 @@ template<typename TSwiftHit>
 struct SwiftHitComparison:
 	public ::std::binary_function<TSwiftHit, TSwiftHit, bool>
 {
-
 	inline bool
 	operator() (TSwiftHit const & i1, TSwiftHit const & i2) {
 		return (i1.ndlSeqNo) < (i2.ndlSeqNo);
 	}
 };
-
-
-template<
-	int stage,
-	typename TSize>
-inline TSize toBucket(TSize id){
-	SEQAN_CHECKPOINT
-	
-	// return (id >> (4*stage)) & 15;
-	return (id >> (8*stage)) & 255;
-}
-
-
-template<
-	int stage,
-	typename THit>
-inline void myRadixPass(
-		String<THit> 			& sorted,
-		String<THit> const 		& unsorted)
-{
-	SEQAN_CHECKPOINT
-	
-	typedef typename Position<String<THit> >::Type		TPos;
-	typedef String<TPos>						TBucket;
-	typedef String<TBucket>								TBuckets;
-	typedef typename Position<TBuckets>::Type			TBucketPos;
-	
-	TPos threads = 2;
-	TPos noOfBuckets = 256;
-	
-	TBucket emptyBucket;
-	fill(emptyBucket, noOfBuckets, 0, Exact());
-	TBuckets buckets;
-	fill(buckets, threads, emptyBucket, Exact());
-	
-	TPos partSize = length(unsorted) / threads;
-	for(TPos p = 0; p < threads; ++p){
-		#pragma omp task shared(buckets, unsorted) if(length(unsorted) > 10)
-		{
-			TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
-			for(TPos i = p*partSize; i < endPos; ++i){
-				++buckets[p][toBucket<stage>(unsorted[i].ndlSeqNo)];
-			}
-		}
-		
-	}
-	#pragma omp taskwait
-	
-	// Exclusive partial sum
-	TPos sum1 = -1, sum2 = -1;
-	
-	for(TBucketPos i = 0; i < noOfBuckets; ++i){
-		for(TPos p = 0; p < threads; ++p){
-			sum2 += buckets[p][i];
-			buckets[p][i] = sum1;
-			sum1 = sum2;
-		}
-	}
-	
-	for(TPos p = 0; p < threads; ++p){
-		#pragma omp task shared(buckets, sorted, unsorted) if(length(unsorted) > 10)
-		{
-			TPos endPos = (p == threads-1) ? length(unsorted) : (p+1)*partSize;
-			for(TPos i = p*partSize; i < endPos; ++i){
-				sorted[++buckets[p][toBucket<stage>(unsorted[i].ndlSeqNo)]] = unsorted[i];
-			}
-		}
-	}
-	#pragma omp taskwait
-	
-}
-
-
-template<typename THit>
-inline void myRadixSort(String<THit> & hits)
-{
-	SEQAN_CHECKPOINT
-	
-	String<THit> sorted;
-	resize(sorted, length(hits), Exact());
-			
-	myRadixPass<0>(sorted, hits);
-	myRadixPass<1>(hits, sorted);
-	myRadixPass<2>(sorted, hits);
-	myRadixPass<3>(hits, sorted);
-	// If more stages are added be aware that hits needs to be the first argument in the last call
-	// or sorted needs to be copied in hits.
-}
 
 
 template<
@@ -321,8 +178,6 @@ void partitionHits(
 	typedef String<_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> >		THitString;
 	typedef typename Value<THitString>::Type									TSwiftHit;
 	typedef typename Iterator<THitString>::Type								THitStringIter;
-	
-	// myRadixSort(hits);
 	
 	THitStringIter i1 = begin(hits);
 	THitStringIter i2 = end(hits);
@@ -343,8 +198,9 @@ void partitionHits(
 		
 		for(; myPos < length(hits); ++myPos){
 			now = hits[myPos].ndlSeqNo;
-			if(last != now)
-				break;
+			if(last != now){
+ 				break;
+			}
 			
 			last = now;
 		}
@@ -375,7 +231,6 @@ void partitionHits(
 		positions[i] = i * partSize;;
 	}
 	positions[noOfParts] = length(hits);
-	
 }
 
 
@@ -405,6 +260,7 @@ inline void verifyHits(
 		matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode);
 	}
 }
+
 
 template <
 	typename TContigSeq, 
@@ -443,10 +299,6 @@ inline void goOverContig(
 	String<int> tav;
 	fill(tav, options.numberOfBlocks, 1, Exact());
 	
-	// used to store the old lengths in the case that some of the matches are copied
-	String<TAlignedReadStoreSize> oldLengths;
-	resize(oldLengths, options.numberOfBlocks, Exact());
-	
 	#pragma omp parallel num_threads((int)options.numberOfCores)
 	{
 	#pragma omp master
@@ -461,7 +313,7 @@ inline void goOverContig(
 		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 		{
 			#pragma omp task default(none) \
-				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, oldLengths, threadStores, options, mode) \
+				shared(tav, verifier, swiftFinders, swiftPatternHandler, contigSeq, readSet, threadStores, options, mode) \
 				firstprivate(blockId)
 			{
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -504,48 +356,20 @@ inline void goOverContig(
 						#endif
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						// verify
-						// TODO: for instead of task
 						for(int relId = 0; relId < tav[blockId]; ++relId)
 						{
 							#pragma omp task default(none) \
-								shared(verifier, hits, positions, contigSeq, readSet, oldLengths, threadStores, options, mode) \
+								shared(verifier, hits, positions, contigSeq, readSet, threadStores, options, mode) \
 								firstprivate(blockId, relId)
 							{
 								// calculate the absolute Id 
 								int absVerifyId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
-								oldLengths[absVerifyId] = length(threadStores[absVerifyId]);
 								
 								verifyHits(verifier[absVerifyId], hits, positions[relId], positions[relId + 1],
 									(blockId * options.blockSize), contigSeq, readSet, mode);
 							}
 						}
 						#pragma omp taskwait
-						
-						// TODO: copy matches to their store						
-						/*
-						TAlignedReadStoreSize diff = 0;
-						for(int relId = 1; relId < tav[blockId]; ++relId){
-							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
-							diff += length(threadStores[absId].alignedReadStore) - oldLengths[absId];
-						}
-						
-						TAlignedReadStoreSize oldSize = length(threadStores[blockId].alignedReadStore);
-						resize(threadStores[blockId].alignedReadStore, oldSize + diff, Generous());
-						resize(threadStores[blockId].alignQualityStore, oldSize + diff, Generous());
-						
-						for(int relId = 1; relId < tav[blockId]; ++relId){
-							int absId = (options.numberOfBlocks + blockId - relId) % options.numberOfBlocks;
-							for(TAlignedReadStoreSize i = oldLengths[absId]; i < length(threadStores[absId]); ++i) {
-								
-								threadStores[absId].alignedReadStore[i].id = oldSize;
-								threadStores[blockId].alignedReadStore[oldSize] = threadStores[absId].alignedReadStore[i];
-								threadStores[blockId].alignQualityStore[oldSize] = threadStores[absId].alignQualityStore[i];
-								++oldSize;
-							}
-							resize(threadStores[absId].alignedReadStore, oldLengths[absId], Generous());
-							resize(threadStores[absId].alignQualityStore, oldLengths[absId], Generous());
-							
-						}*/
 						
 					} // End else
 					
@@ -559,15 +383,6 @@ inline void goOverContig(
 				
 				#pragma omp critical(update_tav)
 				updateTav(tav, blockId);
-				
-				// TODO: remove
-				#pragma omp critical(printf)
-				{
-					printf("%d done; tav: ", blockId);
-					for(int i = 0; i < (int)length(tav); ++i)
-						printf("%d, ", tav[i]);
-					printf("\n");
-				}
 				
 			} // End task
 		} // End for
@@ -585,19 +400,6 @@ inline void goOverContig(
 }
 
 
-/**
-.Function._mapSingleReadsToContig:
-..cat:Razers
-..summary:Appends the aligned read and quality stores from the block stores to the main store given as first argument
-..signature:_mapSingleReadsToContigFlex(store, contigId, swiftPatterns, preprocessing, cnts, orientation, options, mode)
-..param.store:@Class.FragmentStore@
-..param.contigId: the ID of the contig within the fragment store to which the reads are mapped
-..param.swiftPatternHandler: Handler for swift pattern
-..param.preprocessing: String with bit vector patterns for each read
-..param.cnts:Counts for statistics
-..param.options:RazerSOptions
-..param.mode:RazerSMode
-*/
 template <
 	typename TFragmentStore, 
 	typename TReadIndex, 
@@ -655,9 +457,7 @@ template <
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
 	// if (orientation == 'R')	reverseComplementInPlace(contigSeq);
 	if (orientation == 'R'){
-		_proFloat complementTime = sysTime();
 		reverseComplementInPlace(contigSeq);
-		printf("revComp: %f sec\n", sysTime()-complementTime);
 	}
 	
 	// Finder and verifier strings of the same size as there are swift patterns
@@ -703,17 +503,7 @@ template <
 	
 }
 
-/**
-.Function._mapSingleReadsParallelCreatePatterns:
-..cat:Razers
-..summary:Creates @Class.Pattern@s for the filtration (@Class.SwiftLocal@) and verification (@Class.Myers@)
-..signature:_mapSingleReadsParallelCreatePatterns(store, cnts, options, mode, readIndices)
-..param.store:@Class.FragmentStore@
-..param.cnts:Counts for statistics
-..param.options:RazerSOptions
-..param.mode:RazerSMode
-..param.readIndices:@Class.String@ over @Class.Index_QGram@
-*/
+
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 
@@ -830,7 +620,7 @@ int _mapSingleReadsParallelCreatePatterns(
 	return 0;
 }
 
-// TODO: doc
+
 template <
 	typename TFSSpec, 
 	typename TFSConfig, 

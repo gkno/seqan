@@ -22,7 +22,7 @@ endif
 CXXFLAGS += -I$(SEQAN_BASE)
 #CXXFLAGS += -I~/Documents/Development/
 CXXFLAGS += -O9 -fopenmp
-#CXXFLAGS += -O0 -g
+# CXXFLAGS += -O0 -g -fopenmp
 CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CXXFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
