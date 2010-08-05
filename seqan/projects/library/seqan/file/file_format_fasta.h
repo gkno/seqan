@@ -191,6 +191,7 @@ SEQAN_CHECKPOINT
 // read
 //////////////////////////////////////////////////////////////////////////////
 
+// TODO(holtgrew): The interface of this function does not correlate with documentation where the third parameter is metadata!
 template <typename TFile, typename TData, typename TSize>
 void
 read(TFile & file,

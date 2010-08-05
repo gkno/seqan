@@ -547,6 +547,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			reverseComplementInPlace(stringSet[seqNo]);
 	}
 
+    template <typename TValue>
+    inline void
+    reverseInPlace(std::list<TValue> & list)
+    {
+        SEQAN_CHECKPOINT;
+        list.reverse();
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 // shortcut
 

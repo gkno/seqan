@@ -25,6 +25,7 @@
 // prerequisites
 
 #include <functional>
+#include <list>
 
 //____________________________________________________________________________
 // basics

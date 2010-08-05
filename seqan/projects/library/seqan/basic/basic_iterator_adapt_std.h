@@ -69,6 +69,7 @@ struct StdContainerIterator
 	typedef void * Type; //dummy, just to make VC++ 2003 happy
 };
 
+// TODO(holtgrew): This should go into the STL string adaption header...
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct StdContainerIterator< ::std::basic_string<TChar, TCharTraits, TAlloc> >
 {
