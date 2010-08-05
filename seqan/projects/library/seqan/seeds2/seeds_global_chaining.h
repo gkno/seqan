@@ -189,25 +189,14 @@ chainSeedsGlobally(
     // -----------------------------------------------------------------------
     // Step 3: Write out the resulting chain.
     // -----------------------------------------------------------------------
-    typedef ModifiedString<TTargetContainer, ModReverse> TReverseTarget;
-    typedef typename Iterator<TReverseTarget, Standard>::Type TReverseTargetIterator;
-    // Count number of elements in the chain.
-    TSize chainLength = 0;
+    // TODO(holtgrew): We could use two different algorithms for target containers that are strings and those that are lists.
+    clear(target);
     TSeed *next = intermediateSolutions.rbegin()->i3;
     while (next != static_cast<TSeed *>(0)) {
+        appendValue(target, *next);
         next = predecessor[next];
-        chainLength += 1;
     }
-    // Write them out.
-    resize(target, chainLength);
-    TReverseTarget reverseTarget(target);
-    TReverseTargetIterator targetIt = begin(reverseTarget);
-    next = intermediateSolutions.rbegin()->i3;
-    while (next != static_cast<TSeed *>(0)) {
-        *targetIt = *next;
-        next = predecessor[next];
-        ++targetIt;
-    }
+    reverseInPlace(target);
 }
 
 }  // namespace seqan

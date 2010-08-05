@@ -35,6 +35,7 @@
 #include <seqan/score.h>
 #include <seqan/align.h>
 #include <seqan/map.h>
+#include <seqan/modifier.h>
 
 // #ifdef SEQAN_SWITCH_USE_FORWARDS
 // #include <seqan/seeds2/seeds2_generated_forwards.h>

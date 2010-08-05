@@ -448,12 +448,12 @@ _alignSeed(
 }
 
 
-template <typename TAlignment, typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeed, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
+template <typename TAlignment, typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedChain, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
 typename Value<typename ScoringScheme<Alignment<TSequence, TScoringScheme, TAlignmentTag> >::Type >::Type
 _glueAlignmentChain(
         TAlignment & alignment,
         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain,
-        String<TSeed> const & seedChain,
+        TSeedChain const & seedChain,
         AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
     SEQAN_CHECKPOINT;
@@ -463,8 +463,8 @@ _glueAlignmentChain(
     typedef typename Iterator<TMatrixString, Standard>::Type TMatrixStringIterator;
     typedef typename Position<TMatrixString>::Type TPosition;
 
-    typedef String<TSeed> const TSeedChain;
-    typedef typename Iterator<TSeedChain, Standard>::Type TSeedChainIterator;
+    typedef typename Value<TSeedChain const>::Type TSeed;
+    typedef typename Iterator<TSeedChain const, Standard>::Type TSeedChainIterator;
 
     // Define type for iterator over alignment rows.
 	typedef typename Row<TAlignment>::Type TAlignmentRow;
@@ -477,7 +477,8 @@ _glueAlignmentChain(
     TTargetIterator alignmentIt0 = end(row(alignment, 0));
     TTargetIterator alignmentIt1 = end(row(alignment, 1));
     TMatrixStringIterator matricesIt = end(alignmentChain.alignmentMatrices_) - 1;
-    TSeedChainIterator seedChainIt = end(seedChain) - 1;
+    TSeedChainIterator seedChainIt = end(seedChain);
+    --seedChainIt;
 
     // Traceback through trailing rectangle and seed.
     TPosition finalPos0 = 0;
@@ -630,8 +631,8 @@ _bandedChainAlignment(
     //
     typedef typename Source<TAlign>::Type TSequence;
     typedef typename Infix<TSequence>::Type TSegment;
-    typedef typename Value<TContainer>::Type TSeed;
-    typedef typename Iterator<TContainer, Standard>::Type TIterator;
+    typedef typename Value<TContainer const>::Type TSeed;
+    typedef typename Iterator<TContainer const, Standard>::Type TIterator;
     typedef Score<TScoreValue, Simple> TScoringScheme;
     typedef _AlignmentChain<TSegment, TScoringScheme, TGlobalAlignmentTag> TAlignmentChain;
 
@@ -657,9 +658,13 @@ _bandedChainAlignment(
 
     // For all seeds from the second one from the left to the
     // rightmost one: Align rectangle left of it and then the seed.
-    for (TIterator it = begin(seedChain) + 1; it != end(seedChain); ++it) {
-        _alignRectangle(alignmentChain, value(it - 1), value(it));
+    TIterator itPrevious = begin(seedChain, Standard());
+    TIterator it = itPrevious;
+    ++it;
+    for (; it != end(seedChain, Standard()); ++it) {
+        _alignRectangle(alignmentChain, value(itPrevious), value(it));
         _alignSeed(alignmentChain, value(it));
+        itPrevious = it;
     }
 
     // Compute alignment for the trailing rectangle.
@@ -695,9 +700,9 @@ _bandedChainAlignment(
 // TODO(holtgrew): Adjust the documentation to the parameter names.
 template<typename TContainer, typename TValue, typename TScoreValue, typename TAlign, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
 TScoreValue
-bandedChainAlignment(TContainer const & seedChain, 
+bandedChainAlignment(TAlign & alignment,
+                     TContainer const & seedChain, 
 					 TValue k,
-					 TAlign & alignment, 
 					 Score<TScoreValue, Simple> const & scoringScheme,
                      AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {

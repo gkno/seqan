@@ -181,7 +181,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        int result = bandedChainAlignment(alignment, seedChain, 1, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 5);
 
         // Compare alignment rows.
@@ -209,7 +209,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
 
         //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
-        int result = bandedChainAlignment(seedChain, 1, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        int result = bandedChainAlignment(alignment, seedChain, 1, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 5);
 
         // Compare alignment rows.
@@ -245,7 +245,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         assignSource(row(alignment, 1), database);
         
         //cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        int result = bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 24);
         
         //cout << alignment3 << endl;
@@ -268,7 +268,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         assignSource(row(alignment, 1), database, 2, length(database));
         
         //cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2) << endl;
-        int result = bandedChainAlignment(seedChain, 2, alignment, scoringScheme, AlignConfig<false, false, false, false>());
+        int result = bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 21);
         
         //cout << alignment4 << endl;
