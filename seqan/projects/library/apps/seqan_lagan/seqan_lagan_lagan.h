@@ -81,10 +81,10 @@ struct Options<Lagan>
     Options()
             : showHelp(false),
               // LAGAN specific options
-              sequenceLengthRecursionThreshold(200),
+              sequenceLengthRecursionThreshold(10),  // was 200
               qMax(6),
               qMin(3),
-              seedScoreThreshold(30),
+              seedScoreThreshold(5), // was 30
               chainingMaxDistance(200),
               chainingMaxDiagonalDistance(5),
               chainAlignmentBandwidthDelta(5),
@@ -190,14 +190,14 @@ void constructLaganChain(
 	TSeedSet seedSet;
     setMinScoreThreshold(seedSet, options.seedScoreThreshold);
 
-    std::cout << "Creating index of sequence1;  length(sequence1) == " << length(sequence1) << std::endl;
+    // std::cout << "Creating index of sequence1;  length(sequence1) == " << length(sequence1) << std::endl;
 	TQGramIndex qGramIndex(sequence1);
 	TFinder finder(qGramIndex);
 
     std::cout << "Iterating over qgrams" << std::endl;
     unsigned q = options.qMax;
 	while (length(seedSet) == 0) {
-        std::cout << "Iteration..." << std::endl;
+        // std::cout << "Iteration..." << std::endl;
         // Do not recurse if we have reached the minimal q-gram size.
 		if (q < options.qMin)
             return;
@@ -207,15 +207,21 @@ void constructLaganChain(
 		resize(indexShape(qGramIndex), q);
 		for (unsigned i = 0; i < length(sequence0) - q + 1; ++i) {
 			while (find(finder, TSequence(infix(sequence0, i, i + q)))) {
-                std::cout << "found" << std::endl;
 				TPosition pos0 = beginPosition(sequence0) + i;
 				TPosition pos1 = beginPosition(sequence1) + position(finder);
-                // TODO(holtgrew): bandwidth?
-                if (addSeed(seedSet, TSeed(pos0, pos1, q), options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge()))
+                TSeed seed(pos0, pos1, q);
+                setScore(seed, q * scoreMatch(scoringScheme));
+                std::cout << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
+                if (addSeed(seedSet, seed, options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
+                    std::cout << "  by merging" << std::endl;
                     continue;
-				if (addSeed(seedSet, TSeed(pos0, pos1, q), options.chainingMaxDistance, options.chainingMaxDiagonalDistance, scoringScheme, sequence0, sequence1, Chaos()))
+                }
+				if (addSeed(seedSet, seed, options.chainingMaxDistance, options.chainingMaxDiagonalDistance, scoringScheme, sequence0, sequence1, Chaos())) {
+                    std::cout << "  by CHAOS chaining" << std::endl;
                     continue;
-				addSeed(seedSet, TSeed(pos0, pos1, q), Single());
+                }
+                std::cout << "  as single seed" << std::endl;
+				addSeed(seedSet, seed, Single());
 			}
 			clear(finder);
 		}
@@ -226,6 +232,7 @@ void constructLaganChain(
     // Perform global chaining of these seeds
     // -----------------------------------------------------------------------
     std::cout << "Global chaining..." << std::endl;
+    std::cout << "length(seedSet) == " << length(seedSet) << std::endl;
     chainSeedsGlobally(chain, seedSet, SparseChaining());
 
     // -----------------------------------------------------------------------
@@ -290,7 +297,7 @@ int executeCommand(Options<Global> const & /*globalOptions*/,
         std::fstream f0(toCString(leftFilename));
         readID(f0, sequence0Id, Fasta());
         read(f0, sequence0, Fasta());
-        std::fstream f1(toCString(leftFilename));
+        std::fstream f1(toCString(rightFilename));
         readID(f1, sequence1Id, Fasta());
         read(f1, sequence1, Fasta());
     }
@@ -300,10 +307,14 @@ int executeCommand(Options<Global> const & /*globalOptions*/,
     std::cout << "  sequence 1 is " << sequence1Id << std::endl;
 
     // Execute LAGAN algorithm which constructs a chain of seeds.
-    typedef Seed<Simple> TSeed;
+    typedef Seed<Simple, DefaultSeedConfigScore> TSeed;
     typedef std::list<TSeed> TSeedChain;
     TSeedChain seedChain;
     constructLaganChain(seedChain, sequence0, sequence1, options);
+    if (length(seedChain) == 0) {
+        std::cout << "ERROR: No similarity found!" << std::endl;
+        return 1;
+    }
 
     // Perform banded alignment around this seed.
     Align<TSequence, TAlignSpec> alignment;
@@ -315,8 +326,15 @@ int executeCommand(Options<Global> const & /*globalOptions*/,
     int score = bandedChainAlignment(alignment, seedChain, options.chainAlignmentBandwidthDelta, scoringScheme, AlignConfig<false, false, false, false>());
 
     // Write result to output file.
-    std::cout << "score = " << score << std::endl;
-    std::cout << "Alignment" << std::endl
+    std::cout << "LAGAN Alignment (score == " << score << ")" << std::endl
+              << alignment;
+
+    // Perform NW alignment.
+    clearGaps(row(alignment, 0));
+    clearGaps(row(alignment, 1));
+    score = globalAlignment(alignment, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+
+    std::cout << "NW (score == " << score << ")" << std::endl
               << alignment;
     
     return 0;
