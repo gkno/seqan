@@ -89,6 +89,21 @@ SEQAN_DEFINE_TEST(test_seeds_global_chaining_sparse_length)
         SEQAN_ASSERT_EQ(TSeed(4, 1, 3), result[1]);
         SEQAN_ASSERT_EQ(TSeed(9, 9, 2), result[2]);
     }
+    // Another non-trivial example that caused a problem earlier.  The
+    // seeds are all overlapping here.
+    {
+        TSeedSet seedSet;
+        addSeed(seedSet, TSeed(0, 93, 281, 342), Single());
+        addSeed(seedSet, TSeed(3, 237, 127, 364), Single());
+        addSeed(seedSet, TSeed(3, 284, 86, 368), Single());
+        addSeed(seedSet, TSeed(5, 146, 239, 374), Single());
+
+        TSeedChain result;
+        chainSeedsGlobally(result, seedSet, SparseChaining());
+
+        SEQAN_ASSERT_EQ(1u, length(result));
+        SEQAN_ASSERT_EQ(TSeed(0, 93, 281, 342), result[0]);
+    }
 }
 
 #endif  // TEST_SEEDS_TEST_SEEDS_GLOBAL_CHAINING_H_

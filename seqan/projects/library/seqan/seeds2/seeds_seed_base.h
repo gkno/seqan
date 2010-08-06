@@ -316,7 +316,7 @@ getSeedSize(Seed<TSpec, TConfig> & seed)
 {
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): What if reverse seed?
-    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
+    return _max(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
 }
 
 
@@ -326,7 +326,7 @@ getSeedSize(Seed<TSpec, TConfig> const & seed)
 {
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): What if reverse seed?
-    return _min(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
+    return _max(getEndDim0(seed) - getBeginDim0(seed), getEndDim1(seed) - getBeginDim1(seed));
 }
 
 
@@ -394,7 +394,7 @@ _updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> c
     // Compute new size.
     TSize newBegin0 = _min(getBeginDim0(seed), getBeginDim0(other));
     TSize newEnd0 = _max(getEndDim0(seed), getEndDim0(other));
-    TSize newBegin1 = _min(getBeginDim1(seed), getBeginDim0(other));
+    TSize newBegin1 = _min(getBeginDim1(seed), getBeginDim1(other));
     TSize newEnd1 = _max(getEndDim1(seed), getEndDim1(other));
     TSize newSize = _max(newEnd0 - newBegin0, newEnd1 - newBegin1);
     // New seed should be larger than either old one and overlap should be > 0.
@@ -402,9 +402,9 @@ _updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> c
     SEQAN_ASSERT_GEQ(newSize, getSeedSize(other));
     SEQAN_ASSERT_LEQ(newSize, getSeedSize(seed) + getSeedSize(other));
     TSize overlap = getSeedSize(seed) + getSeedSize(other) - newSize;
-    // Overlap should be smaller than either seed size.
-    SEQAN_ASSERT_GT(getSeedSize(seed), overlap);
-    SEQAN_ASSERT_GT(getSeedSize(other), overlap);
+    // Overlap should be smaller than or equal to either seed size.
+    SEQAN_ASSERT_GEQ(getSeedSize(seed), overlap);
+    SEQAN_ASSERT_GEQ(getSeedSize(other), overlap);
 
     // Compute fraction each seed contributes.
     TSize total = getSeedSize(seed) + getSeedSize(other) - overlap;

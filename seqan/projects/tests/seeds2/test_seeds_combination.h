@@ -73,7 +73,7 @@ SEQAN_DEFINE_TEST(test_seeds_combination_seeds_combineable_merge_chained)
     // Case: Not Mergeable, no overlap.
     {
         TSeed left(0, 0, 4);
-        TSeed right(4, 4, 3);
+        TSeed right(5, 5, 3);
         SEQAN_ASSERT_NOT(_seedsCombineable(left, right, 1, Nothing(), Merge()));
     }
     // Case: Not Mergeable, second starts right of first one.

@@ -80,7 +80,7 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
     if (getBeginDim0(b) < getBeginDim0(a) || getBeginDim1(b) < getBeginDim1(a))
         return false;
     // If the two seeds do not overlap, they cannot be merged.
-    if (getBeginDim0(b) >= getEndDim0(a) && getBeginDim1(b) >= getEndDim1(a))
+    if (getBeginDim0(b) > getEndDim0(a) || getBeginDim1(b) > getEndDim1(a))
         return false;
     // If the distance between the diagonals exceeds the threshold
     // then the seeds cannot be merged.

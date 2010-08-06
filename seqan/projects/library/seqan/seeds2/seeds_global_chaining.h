@@ -89,7 +89,7 @@ chainSeedsGlobally(
         appendValue(intervalPoints, TIntervalPoint(getEndDim0(**it), false, *it));
     }
     // std::cout << "`--" << std::endl;
-    // std::sort(begin(intervalPoints, Standard()), end(intervalPoints, Standard()));
+    std::sort(begin(intervalPoints, Standard()), end(intervalPoints, Standard()));
     // std::cout << ",--- interval points" << std::endl;
     // for (unsigned i = 0; i < length(intervalPoints); ++i) {
     //     std::cout << "| (" << intervalPoints[i].i1 << ", " << intervalPoints[i].i2 << ", " << intervalPoints[i].i3 << ")" << std::endl;

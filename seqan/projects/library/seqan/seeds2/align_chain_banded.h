@@ -387,7 +387,7 @@ _alignSeed(
     TInfix infix1 = infix(value(alignmentChain.sequence1_), getBeginDim1(seed), getEndDim1(seed));
 
     // Compute lower and upper diagonal for the alignment.
-    TDiagonal lowerDiagonal = getStartDiagonal(seed) - getLowerDiagonal(seed) - alignmentChain.bandwidth_;
+    TDiagonal lowerDiagonal = getLowerDiagonal(seed) - getStartDiagonal(seed) - alignmentChain.bandwidth_;
     TDiagonal upperDiagonal = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
     // std::cout << "lowerDiagonal = " << lowerDiagonal << ", upperDiagonal = " << upperDiagonal << std::endl;
 
@@ -625,6 +625,26 @@ _bandedChainAlignment(
     SEQAN_CHECKPOINT;
 
     SEQAN_ASSERT_GT(length(seedChain), 0u);
+    #if SEQAN_ENABLE_DEBUG
+    {
+        // Assert that the chain is non-overlapping.
+        typedef typename Iterator<TContainer const, Standard>::Type TIterator;
+        std::cout << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
+        for (TIterator it = begin(seedChain, Standard()); it != end(seedChain, Standard()); ++it)
+            std::cout << "| " << *it << std::endl;
+        std::cout << "`--" << std::endl;
+        TIterator itPrevious = begin(seedChain, Standard());
+        TIterator it = itPrevious;
+        // std::cout << *it << std::endl;
+        ++it;
+        for (; it != end(seedChain, Standard()); ++it) {
+            // std::cout << *it << std::endl;
+            SEQAN_ASSERT_LEQ(getEndDim0(*itPrevious), getBeginDim0(*it));
+            SEQAN_ASSERT_LEQ(getEndDim1(*itPrevious), getBeginDim1(*it));
+            itPrevious = it;
+        }
+    }
+    #endif  // #if SEQAN_ENABLE_DEBUG
 
     //
     // Function-Wide Typedefs

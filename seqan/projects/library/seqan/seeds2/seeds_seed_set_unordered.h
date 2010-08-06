@@ -338,9 +338,10 @@ addSeed(SeedSet<TSeedSpec, Unordered, TSeedSetConfig> & seedSet,
         // If the new seed has a high enough quality, add it to the
         // set of high-scoring seeds.
         typedef typename TSeedSetConfig::TQualityThreshold TQualityThreshold;
-        if (_qualityReached(*value(it), seedSet, TQualityThreshold()))
+        if (_qualityReached(*value(it), seedSet, TQualityThreshold())) {
             // TODO(holtgrew): Do not use dot-methods.
             seedSet._highQualitySeeds.insert(value(it));
+        }
         return true;
     }
     return false;
