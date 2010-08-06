@@ -43,7 +43,8 @@ struct Options;
 
 enum GlobalCommand
 {
-    COMMAND_LAGAN
+    COMMAND_LAGAN,
+    COMMAND_CLASSIC_DP
 };
 
 template <>

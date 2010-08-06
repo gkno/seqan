@@ -34,6 +34,7 @@ void printHelpGlobal() {
               << "Computes a pairwise sequence alignment." << std::endl
               << std::endl
               << "Usage: seqan_lagan [-h, --help]" << std::endl
+              << "       seqan_lagan dp LEFT.fasta RIGHT.fasta" << std::endl
               << "       seqan_lagan lagan LEFT.fasta RIGHT.fasta" << std::endl;
 }
 
@@ -44,7 +45,7 @@ int parseOptions(Options<Global> & options, const int argc, const char * argv[])
     if (argc == 1 ||
         (argc >= 2 && CharString(argv[1]) == "--help") ||
         (argc >= 2 && CharString(argv[1]) == "-h") ||
-        (CharString(argv[1]) != "lagan")) {
+        (CharString(argv[1]) != "lagan" && CharString(argv[1]) != "dp")) {
         printHelpGlobal();
         return 1;
     }
@@ -52,6 +53,8 @@ int parseOptions(Options<Global> & options, const int argc, const char * argv[])
     // Parse command.
     if (CharString(argv[1]) == "lagan") {
         options.command = COMMAND_LAGAN;
+    } else if (CharString(argv[1]) == "dp") {
+        options.command = COMMAND_CLASSIC_DP;
     }
 
     return 0;
@@ -76,7 +79,19 @@ int main(int argc, char const * argv[])
             return 0;
         if (ret != 0)
             return ret;
-        return executeCommand(globalOptions, options, leftFilename, rightFilename, Lagan());
+        return executeParwiseAlignmentCommand(globalOptions, options, leftFilename, rightFilename, Lagan());
+    } else if (globalOptions.command == COMMAND_CLASSIC_DP) {
+        CommandLineParser parser;
+        setUpCommandLineParser(parser, ClassicDP());
+        Options<ClassicDP> options;
+        CharString leftFilename;
+        CharString rightFilename;
+        int ret = parseCommandLineAndCheck(options, leftFilename, rightFilename, parser, argc, argv);
+        if (options.showHelp)
+            return 0;
+        if (ret != 0)
+            return ret;
+        return executeParwiseAlignmentCommand(globalOptions, options, leftFilename, rightFilename, ClassicDP());
     } else {
         SEQAN_ASSERT_FAIL("Invalid command!");
     }
