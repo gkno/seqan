@@ -50,8 +50,7 @@ _align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0
 
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, length(sequence1) + 1);
-    // resize(matrix);
-    fill(matrix, -42);
+    resize(matrix);
 }
 
 
@@ -185,6 +184,7 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
     TScoreValue gapScore = scoreGap(scoringScheme);
     
     // Perform the Needleman-Wunsch dynamic programming.
+    // TODO(holtgrew): camelCase for itXend.
     for (TSequenceIterator it1 = begin(sequence1), it1end = end(sequence1); it1 != it1end; ++it1) {
         itLeft = itTop;
         goNext(itTop, 1);

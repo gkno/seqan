@@ -51,6 +51,21 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
+template <typename AlignmentAlgorithm>
+struct _AlignmentMatrixDimension;
+
+template <>
+struct _AlignmentMatrixDimension<NeedlemanWunsch>
+{
+    enum { VALUE = 2 };
+};
+
+template <>
+struct _AlignmentMatrixDimension<Gotoh>
+{
+    enum { VALUE = 3 };
+};
+
 template <typename TSegment, typename TScoringScheme, typename TAlignmentTag>
 class _AlignmentChain
 {
@@ -77,7 +92,7 @@ public:
     // element is the alignment matrix for the rectangle to the upper
     // left right, followed by the one for the first seed in the chain
     // (left-uppermost one), the next rectangle and so on.
-    String<Matrix<TScoreValue, 2> > alignmentMatrices_;
+    String<Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> > alignmentMatrices_;
 
     // TODO(holtgrew): Default constructor + setSequence{0,1} missing for now.
 
@@ -155,7 +170,7 @@ _alignLeadingRectangle(
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
 
@@ -210,7 +225,7 @@ _alignTrailingRectangle(
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Suffix<TSequence>::Type TSuffix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -290,7 +305,7 @@ _alignRectangle(
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -372,7 +387,7 @@ _alignSeed(
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, 2> TMatrix;
+    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -459,7 +474,7 @@ _glueAlignmentChain(
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef String<Matrix<TScoreValue, 2> > const TMatrixString;
+    typedef String<Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> > const TMatrixString;
     typedef typename Iterator<TMatrixString, Standard>::Type TMatrixStringIterator;
     typedef typename Position<TMatrixString>::Type TPosition;
 
@@ -629,10 +644,10 @@ _bandedChainAlignment(
     {
         // Assert that the chain is non-overlapping.
         typedef typename Iterator<TContainer const, Standard>::Type TIterator;
-        std::cout << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
-        for (TIterator it = begin(seedChain, Standard()); it != end(seedChain, Standard()); ++it)
-            std::cout << "| " << *it << std::endl;
-        std::cout << "`--" << std::endl;
+        // std::cout << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
+        // for (TIterator it = begin(seedChain, Standard()); it != end(seedChain, Standard()); ++it)
+        //     std::cout << "| " << *it << std::endl;
+        // std::cout << "`--" << std::endl;
         TIterator itPrevious = begin(seedChain, Standard());
         TIterator it = itPrevious;
         // std::cout << *it << std::endl;

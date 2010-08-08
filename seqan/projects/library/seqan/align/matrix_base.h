@@ -190,6 +190,66 @@ public:
 //____________________________________________________________________________
 };
 
+template <typename TValue>
+class Matrix<TValue, 3>
+{
+//____________________________________________________________________________
+
+public:
+	typedef typename Size<Matrix>::Type TSize;
+	typedef String<TSize> TSizeArr;
+	typedef String<TValue> THost;
+
+	TSizeArr data_lengths;
+	TSizeArr data_factors;
+
+	Holder<THost> data_host;
+
+
+//____________________________________________________________________________
+
+public:
+	Matrix()
+	{
+		create(data_host);
+
+		//setDimension to 3
+		fill(data_lengths, 3, 0);
+		resize(data_factors, 3);
+		data_factors[0] = 1;
+	}
+	Matrix(Matrix const & other_):
+		data_lengths(other_.data_lengths),
+		data_factors(other_.data_factors),
+		data_host(other_.data_host)
+	{
+	}
+	inline Matrix const &
+	operator = (Matrix const & other_)
+	{
+		data_lengths = other_.data_lengths;
+		data_factors = other_.data_factors;
+		data_host = other_.data_host;
+
+		return *this;
+	}
+
+	~Matrix()
+	{
+	}
+//____________________________________________________________________________
+
+
+//____________________________________________________________________________
+
+	inline TValue &
+	operator () (TSize x1, TSize x2, TSize x3)
+	{
+		return value(*this, x1, x2, x3);
+	}
+
+//____________________________________________________________________________
+};
 
 template <typename TValue, unsigned DIMENSION>
 inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type &

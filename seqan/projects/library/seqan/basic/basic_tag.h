@@ -85,8 +85,8 @@ typedef Tag<_LevenshteinDistance>	EditDistance;
 ..include:seqan/basic.h
 */
 
-struct NeedlemanWunsch_;
-typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
+struct _NeedlemanWunsch;
+typedef Tag<_NeedlemanWunsch> NeedlemanWunsch;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +95,8 @@ typedef Tag<NeedlemanWunsch_> const NeedlemanWunsch;
 	The Needleman-Wunsch alignment algorithm in a banded version.
 ..include:seqan/basic.h
 */
-struct BandedNeedlemanWunsch_;
-typedef Tag<BandedNeedlemanWunsch_> const BandedNeedlemanWunsch;
+struct _BandedNeedlemanWunsch;
+typedef Tag<_BandedNeedlemanWunsch> BandedNeedlemanWunsch;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -106,8 +106,8 @@ typedef Tag<BandedNeedlemanWunsch_> const BandedNeedlemanWunsch;
 	Gotoh's affine gap cost alignment algorithm.
 ..include:seqan/basic.h
 */
-struct Gotoh_;
-typedef Tag<Gotoh_> const Gotoh;
+struct _Gotoh;
+typedef Tag<_Gotoh> Gotoh;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -116,8 +116,8 @@ typedef Tag<Gotoh_> const Gotoh;
 	Gotoh's affine gap cost alignment algorithm in a banded version.
 ..include:seqan/basic.h
 */
-struct BandedGotoh_;
-typedef Tag<BandedGotoh_> const BandedGotoh;
+struct _BandedGotoh;
+typedef Tag<_BandedGotoh> BandedGotoh;
 
 //////////////////////////////////////////////////////////////////////////////
 

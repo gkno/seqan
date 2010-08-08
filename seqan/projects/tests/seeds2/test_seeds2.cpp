@@ -27,6 +27,8 @@
 #include <seqan/seeds2.h>  // Include module under test.
 
 #include "test_align_chain_banded.h"
+#include "test_align_dynprog_affine.h"
+#include "test_align_dynprog_banded_affine.h"
 #include "test_align_dynprog_banded_linear.h"
 #include "test_align_dynprog_linear.h"
 #include "test_basic_iter_indirect.h"
@@ -39,7 +41,8 @@
 #include "test_seeds_seed_set_base.h"
 #include "test_seeds_seed_simple.h"
 
-SEQAN_BEGIN_TESTSUITE(test_seeds) {
+SEQAN_BEGIN_TESTSUITE(test_seeds)
+{
     // Test indirect iterator.
     // SEQAN_CALL_TEST(test_seeds_basic_iter_indirect_constructors);
     // SEQAN_CALL_TEST(test_seeds_basic_iter_indirect_metafunctions);
@@ -170,13 +173,25 @@ SEQAN_BEGIN_TESTSUITE(test_seeds) {
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_fill_matrix);
     SEQAN_CALL_TEST(test_align_dynprog_banded_linear_traceback);
 
+    // Tests for the classic Gotoh dynamic programming.
+    SEQAN_CALL_TEST(test_align_dynprog_affine_resize_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_affine_init_gutter_free);
+    SEQAN_CALL_TEST(test_align_dynprog_affine_init_gutter_not_free);
+    SEQAN_CALL_TEST(test_align_dynprog_affine_fill_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_affine_traceback);
+    // Tests for the banded Gotoh dynamic programming.
+    SEQAN_CALL_TEST(test_align_dynprog_banded_affine_resize_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_banded_affine_init_gutter_free);
+    SEQAN_CALL_TEST(test_align_dynprog_banded_affine_init_gutter_not_free);
+    SEQAN_CALL_TEST(test_align_dynprog_banded_affine_fill_matrix);
+    SEQAN_CALL_TEST(test_align_dynprog_banded_affine_traceback);
+
     // Test global chaining of seeds.
     SEQAN_CALL_TEST(test_seeds_global_chaining_sparse_length);
 
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_chain_banded.h");
-    // TODO(holtgrew): Enable again once affine alignment algorithms and tests are in place.
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
-    // SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_affine.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_affine.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_banded_linear.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/seeds2/align_dynprog_linear.h");
     // TODO(holtgrew): Write tests for indirect iterator and uncomment this.

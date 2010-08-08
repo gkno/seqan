@@ -2,7 +2,7 @@
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
  ============================================================================
-  Copyright (C) 2007
+  Copyright (C) 2007-2010
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -13,20 +13,20 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <doering@mdc-berlin.de>
+ ============================================================================
+  Support for writing and reading FASTA alignment files.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_FILE_FASTA_ALIGN_H
-#define SEQAN_HEADER_FILE_FASTA_ALIGN_H
+#ifndef SEQAN_FILE_FILE_FORMAT_FASTA_ALIGN_H_
+#define SEQAN_FILE_FILE_FORMAT_FASTA_ALIGN_H_
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
 
-//////////////////////////////////////////////////////////////////////////////
-// File Formats - Fasta alignment format
-//////////////////////////////////////////////////////////////////////////////
+// ===========================================================================
+// Forward Declarations
+// ===========================================================================
 
 //forward declarations
 template <typename T>
@@ -35,23 +35,30 @@ struct Row;
 template <typename T>
 struct Rows;
 
-//////////////////////////////////////////////////////////////////////////////
+// ===========================================================================
+// Tags, Enums, Classes, Specializations
+// ===========================================================================
 
 /**
 .Tag.File Format.tag.Fasta alignment:
 	FASTA alignment file format for sequences.
 ..include:seqan/file.h
 */
-struct TagFastaAlign_;
-typedef Tag<TagFastaAlign_> const FastaAlign;
+struct _FastaAlign;
+typedef Tag<_FastaAlign> FastaAlign;
 
+// ===========================================================================
+// Metafunctions
+// ===========================================================================
 
-/////////////////////////////////////////////////////////////////////////
+// ===========================================================================
+// Functions
+// ===========================================================================
 
 template <typename TFile, typename TSize>
 void _fasta_align_scan_line(TFile & file, TSize & count) {
 
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	SEQAN_ASSERT(!_streamEOF(file))
 
 	while (true) {
@@ -60,9 +67,8 @@ void _fasta_align_scan_line(TFile & file, TSize & count) {
 		if (_streamEOF(file)) return;
 		if (c == '\n') return;
 
-		if ((c != '\r') && (c!='-')) {
+		if ((c != '\r') && (c!='-'))
 			++count;
-		}
 	}
 }
 
@@ -70,10 +76,10 @@ void _fasta_align_scan_line(TFile & file, TSize & count) {
 // read
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile, typename TSource, typename TSpec>
-void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign) {
-SEQAN_CHECKPOINT
+void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
+    SEQAN_CHECKPOINT;
 
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 	
 	typedef typename Value<TSource>::Type TSourceValue;
 	typedef typename Size<TSourceValue>::Type TSize;
@@ -90,7 +96,7 @@ SEQAN_CHECKPOINT
 	while (!_streamEOF(file)) {
 		begin_pos = _streamTellG(file);
 		count = 0;
-		SEQAN_ASSERT(!_streamEOF(file))
+		SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	
 		c = _streamGet(file);
@@ -178,9 +184,9 @@ SEQAN_CHECKPOINT
 template <typename TFile, typename TStringContainer>
 void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 	
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
 	
-	SEQAN_ASSERT(!_streamEOF(file))
+    SEQAN_ASSERT_NOT(_streamEOF(file));
 
 	typedef typename Value<TStringContainer>::Type TString;
 	typename Position<TFile>::Type start_pos;
@@ -234,7 +240,7 @@ template <typename TFile>
 void goNext(TFile & file, FastaAlign) {
 	SEQAN_CHECKPOINT;
 	(void) file; // When compiled without assertions.
-	SEQAN_ASSERT(!_streamEOF(file))
+	SEQAN_ASSERT_NOT(_streamEOF(file));
 	
 	return;
 }
@@ -245,7 +251,7 @@ void goNext(TFile & file, FastaAlign) {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
-void _write_impl(TFile& file, Align<TSource, TSpec>& align, TStringContainer& ids, FastaAlign) {
+void _write_impl(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const &) {
 	SEQAN_CHECKPOINT
 
 	typedef Align<TSource, TSpec> const TAlign;
@@ -283,7 +289,7 @@ void _write_impl(TFile& file, Align<TSource, TSpec>& align, TStringContainer& id
 //____________________________________________________________________________
 
 template <typename TFile, typename TSource, typename TSpec>
-void write(TFile & file, Align<TSource, TSpec>& align, FastaAlign) {
+void write(TFile & file, Align<TSource, TSpec> const & align, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
 	_write_impl(file, align, String<String<char> >(), FastaAlign());
 }
@@ -291,15 +297,16 @@ void write(TFile & file, Align<TSource, TSpec>& align, FastaAlign) {
 //____________________________________________________________________________
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
-void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, FastaAlign) {
+void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
 	_write_impl(file, align, ids, FastaAlign());
 }
 
 
 //VisualC++ const array bug workaround
+// TODO(holtgrew): Superflous?!
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
-void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, FastaAlign) {
+void write(TFile & file, Align<TSource, TSpec> const * align, TStringContainer const & ids, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
 	_write_impl(file, align, ids, FastaAlign());
 }
@@ -307,16 +314,11 @@ void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, F
 //____________________________________________________________________________
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec, typename TMeta>
-void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, TMeta &, FastaAlign) {
-	SEQAN_CHECKPOINT
+void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, TMeta &, FastaAlign const & ) {
+	SEQAN_CHECKPOINT;
 	_write_impl(file, align, ids, FastaAlign());
 }
 
+}  // namespace seqan
 
-
-//////////////////////////////////////////////////////////////////////////////
-} //namespace SEQAN_NAMESPACE_MAIN
-
-//////////////////////////////////////////////////////////////////////////////
-
-#endif //#ifndef SEQAN_HEADER_...
+#endif   // #ifndef SEQAN_FILE_FILE_FORMAT_FASTA_ALIGN_H_
