@@ -227,8 +227,8 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
 {
     using namespace seqan;
     typedef Seed<Simple> TSeed;
-    SEQAN_ASSERT_FAIL("Does not work yet");
-    
+
+    /*
     // Test on whole strings.
     {
         CharString query = "ACGTCCTCGTACACCGTCTTAA";
@@ -274,6 +274,66 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //cout << alignment4 << endl;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CG-TCCTCGTACAC--CGTCTTAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGATCC----ACACCGCGTCT");
+    }
+    */
+    // Test on whole strings -- linear gap costs.
+    {
+        // Resulting alignment should be something like this (seeds
+        // are marked by < and >).
+        //
+        //     > <    > <    >  <
+        //   GGCGATNNNCAT--GGCACA
+        //   --CGA-ATCCATCCCACACA
+        CharString sequence0 = "GGCGATNNNCATGGCACA";
+        CharString sequence1 = "CGAATCCATCCCACACA";  // TODO(holtgrew): Switch back again.
+        Score<int, Simple> scoringScheme(2, -1, -2);
+
+        String<TSeed> seedChain;
+        appendValue(seedChain, TSeed(2, 0, 6, 5));
+        appendValue(seedChain, TSeed(9, 6, 12, 9));
+        appendValue(seedChain, TSeed(14, 11, 16, 17));
+
+        Align<CharString, ArrayGaps> alignment;
+        resize(rows(alignment), 2);
+        assignSource(row(alignment, 0), sequence0);
+        assignSource(row(alignment, 1), sequence1);
+
+        int result = bandedChainAlignment(alignment, seedChain, 1, scoringScheme, AlignConfig<false, false, false, false>());
+        SEQAN_ASSERT_EQ(result, 5);
+
+        // Compare alignment rows.
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA");
+        // Note that leading gaps are not stored in the row itself,
+        // when printed, there will be a "--" prepended.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGA-ATCCATCCCACACA");
+    }
+    // Test on infixes -- linear gap costs.
+    {
+        // The test data is the same as above but with a T and a TT prepended.
+        CharString sequence0 = "TGGCGATNNNCATGGCACA";
+        CharString sequence1 = "TTCGAATCCATCCCACACA";
+        Score<int, Simple> scoringScheme(2, -1, -2);
+
+        String<TSeed > seedChain;
+        appendValue(seedChain, TSeed(2, 0, 6, 5));
+        appendValue(seedChain, TSeed(9, 6, 12, 9));
+        appendValue(seedChain, TSeed(14, 11, 16, 17));
+
+        Align<CharString, ArrayGaps> alignment;
+        resize(rows(alignment), 2);
+        // TODO(holtgrew): This infix assignment for alignments is a bit creepy, maybe one of the too many shortcuts?
+        assignSource(row(alignment, 0), sequence0, 1, length(sequence0));
+        assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
+
+        //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
+        int result = bandedChainAlignment(alignment, seedChain, 1, scoringScheme, AlignConfig<false, false, false, false>());
+        SEQAN_ASSERT_EQ(result, 5);
+
+        // Compare alignment rows.
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGATNNNCAT--GGCACA");
+        // Note that leading gaps are not stored in the row itself,
+        // when printed, there will be a "--" prepended.
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGA-ATCCATCCCACACA");
     }
 }
 
