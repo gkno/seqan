@@ -81,7 +81,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
 
     Matrix<int, 2> matrix;
     setLength(matrix, 0, 4);
-    setLength(matrix, 1, 4);
+    setLength(matrix, 1, 5);
     resize(matrix);
 
     Score<int, Simple> const scoringScheme(1, -1, -2);
