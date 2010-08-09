@@ -17,6 +17,8 @@
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ==========================================================================*/
 
+// TODO(holtgrew): Maybe adjust rausch's code so things can be copied in and use it instead since it is heavily tuned?
+
 #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_BANDED_AFFINE_H_
 #define SEQAN_SEEDS_ALIGN_DYNPROG_BANDED_AFFINE_H_
 

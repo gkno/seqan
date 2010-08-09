@@ -27,6 +27,8 @@
   The banding is done in dimension 1, dimension 0 is there completely.
  ==========================================================================*/
 
+// TODO(holtgrew): Maybe adjust rausch's code so things can be copied in and use it instead since it is heavily tuned?
+
 #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_BANDED_LINEAR_H_
 #define SEQAN_SEEDS_ALIGN_DYNPROG_BANDED_LINEAR_H_
 

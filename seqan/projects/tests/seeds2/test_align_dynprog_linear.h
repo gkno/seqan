@@ -159,9 +159,13 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         //  CCAAA
         //  --CAA
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
-        // Leading gaps are not shown, so there should be two gaps in
-        // front of the following.
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CAA");
+        // Leading gaps are not shown, we test through the iterators.
+        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 0)));
+        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 1)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 2)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 3)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 4)));
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }

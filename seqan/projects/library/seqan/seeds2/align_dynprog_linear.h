@@ -25,6 +25,8 @@
   matrices.
  ==========================================================================*/
 
+// TODO(holtgrew): Maybe adjust rausch's code so things can be copied in and use it instead since it is heavily tuned?
+
 #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_LINEAR_H_
 #define SEQAN_SEEDS_ALIGN_DYNPROG_LINEAR_H_
 

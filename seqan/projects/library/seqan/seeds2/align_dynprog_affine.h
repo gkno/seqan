@@ -27,6 +27,8 @@
   -- in order -- M, I^a, I^b.
  ==========================================================================*/
 
+// TODO(holtgrew): Maybe adjust rausch's code so things can be copied in and use it instead since it is heavily tuned?
+
 #ifndef SEQAN_SEEDS_ALIGN_DYNPROG_AFFINE_H_
 #define SEQAN_SEEDS_ALIGN_DYNPROG_AFFINE_H_
 
@@ -214,21 +216,161 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 {
     SEQAN_CHECKPOINT;
 
-    (void) alignmentIt0;
-    (void) alignmentIt1;
-    (void) sourceIt0;
-    (void) sourceIt1;
-    (void) matrix;
-    (void) scoringScheme;
-    (void) overlap0;
-    (void) overlap1;
-    (void) goToTopLeft;
-    (void) finalPos0;
-    (void) finalPos1;
-    
-    SEQAN_ASSERT_FAIL("Not implemented!");
+    typedef Matrix<TScoreValue, 3> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
 
-    return 0;
+    // Initialization
+    //
+    // Precomputation of the score difference between mismatch and gap.
+	TScoreValue openGapScore = scoreGapOpen(scoringScheme);
+	TScoreValue gapDiffScore = openGapScore;
+    // Current position in the matrix.  Note that this is the position
+    // in the matrix including the gutter.  When writing this out, we
+    // want to have the position in the matrix, excluding the gutter,
+    // i.e. everything is shifted to the upper left.
+    TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
+    TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
+    // Iterator to current entry in the matrix.
+    TMatrixIterator diagonalIt = begin(matrix);
+    setPosition(diagonalIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPositionw ith coordinates.
+    TMatrixIterator verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    TMatrixIterator horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+
+    // TODO(holtgrew): At this point, we could search for the starting point of the backtrace if free end gaps were suppported.
+    //
+    SEQAN_ASSERT_NOT_MSG(END0_FREE, "Free end gaps are not supported yet.");
+    SEQAN_ASSERT_NOT_MSG(END1_FREE, "Free end gaps are not supported yet.");
+
+    // Flags for movement, also determines which matrix we are in.
+    // TODO(holtgrew): Maybe better use an enum here?
+    bool horizontal = false;
+    bool vertical = false;
+    bool diagonal = false;
+    int result = *diagonalIt;
+    if (*diagonalIt > *horizontalIt) {
+        if (*diagonalIt > *verticalIt)
+            diagonal = true;
+        else
+            vertical = true;
+    } else {
+        if (*horizontalIt > *verticalIt)
+            horizontal = true;
+        else
+            vertical = true;
+    }
+
+    // Now, perform the traceback.
+    while (pos0 > static_cast<TPosition>(1) && pos1 > static_cast<TPosition>(1)) {
+        if (diagonal) {
+            // Move iterators in sequences, alignment rows and matrices.
+            goPrevious(sourceIt0);
+            goPrevious(sourceIt1);
+            goPrevious(alignmentIt0);
+            goPrevious(alignmentIt1);
+            goPrevious(diagonalIt, 0);
+            goPrevious(diagonalIt, 1);
+            goPrevious(horizontalIt, 0);
+            goPrevious(horizontalIt, 1);
+            goPrevious(verticalIt, 0);
+            goPrevious(verticalIt, 1);
+            pos0 -= 1;
+            pos1 -= 1;
+
+            // Update the movement/matrix indicators.
+            if (*diagonalIt >= *horizontalIt) {
+                if (*diagonalIt < *verticalIt) {
+                    vertical = true;
+                    diagonal = false;
+                }
+            } else {
+                diagonal = false;
+                if (*horizontalIt >= *verticalIt)
+                    horizontal = true;
+                else
+                    vertical = true;
+            }
+        } else {
+            if (vertical) {
+                // Insert gap.
+                insertGap(alignmentIt1);
+
+                // Move iterators in sequence, alignment rows and matrices.,
+                goPrevious(sourceIt0);
+                goPrevious(alignmentIt0);
+                goPrevious(diagonalIt, 0);
+                goPrevious(verticalIt, 0);
+                goPrevious(horizontalIt, 0);
+                pos0 -= 1;
+
+                // Update the movement/matrix indicators.
+                if (*diagonalIt + gapDiffScore >= *verticalIt) {
+                    diagonal = true;
+                    vertical = false;
+                }
+            } else {
+                if (horizontal) {
+                    // Insert gap.
+                    insertGap(alignmentIt0);
+                    
+                    // Move iterators in sequence, alignment rows and matrices.,
+                    goPrevious(sourceIt1);
+                    goPrevious(alignmentIt1);
+                    goPrevious(diagonalIt, 1);
+                    goPrevious(verticalIt, 1);
+                    goPrevious(horizontalIt, 1);
+                    pos1 -= 1;
+                    
+                    // Move iterators in sequence, alignment rows and matrices.,
+                    // Update the movement/matrix indicators.
+                    if (*diagonalIt + gapDiffScore >= *horizontalIt) {
+                        diagonal = true;
+                        horizontal = false;
+                    }
+                }
+            }
+        }
+    }
+    // std::cout << "pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+
+    // Go to the top left of the matrix if configured to do so.
+    if (goToTopLeft) {
+        if (pos0 > 1) {
+            goPrevious(alignmentIt1);
+            for (TPosition i = 1; i < pos0; ++i) {
+                // std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
+                goPrevious(sourceIt0);
+                goPrevious(alignmentIt0);
+                // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
+                // std::cout << __FILE__ << ":" << __LINE__ << "-- gap in dimension 1" << std::endl;
+                insertGap(alignmentIt1);
+            }
+            pos0 = 0;
+        }
+        if (pos1 > 1) {
+            goPrevious(alignmentIt0);
+            for (TPosition i = 1; i< pos1; ++i) {
+                // std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
+                goPrevious(sourceIt1);
+                goPrevious(alignmentIt1);
+                // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;
+                // std::cout << __FILE__ << ":" << __LINE__ << "-- gap in dimension 0" << std::endl;
+                insertGap(alignmentIt0);
+            }
+            pos1 = 0;
+        }
+    }
+
+    // Write out the final positions in the alignment matrix.  Convert
+    // from position in the current alignment matrix with gutter to
+    // positioin without gutter by shifting the position to the upper
+    // left.
+    finalPos0 = pos0 - 1;
+    finalPos1 = pos1 - 1;
+    // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+
+    return result;
 }
 
 }  // namespace seqan
