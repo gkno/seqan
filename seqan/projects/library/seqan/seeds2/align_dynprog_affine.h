@@ -188,10 +188,12 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
             goNext(itMLeft, 0);
             // Compute I^a_{i,j}
             TScoreValue scoreIA = _max(*itMAbove + gapOpenScore, *itIAAbove + gapExtendScore);
+            goNext(itIALeft, 0);  // TODO(holtgrew): Remove IALeft? Not necessary!
             goNext(itIAAbove, 0);
             *itIAAbove = scoreIA;
             // Compute I^b_{i,j}
-            TScoreValue scoreIB = _max(*itMLeft + gapOpenScore, *itIBAbove + gapExtendScore);
+            goNext(itIBLeft, 0);
+            TScoreValue scoreIB = _max(*itMLeft + gapOpenScore, *itIBLeft + gapExtendScore);
             goNext(itIBAbove, 0);
             *itIBAbove = scoreIB;
             // Assign M_{i,j}
