@@ -172,26 +172,6 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_fill_matrix)
 
     int inf = InfimumValue<int>::VALUE / 2;
 
-    // TODO(holtgrew): Debug output, remove when not needed any more.
-    // {
-    //     for (int k = 0; k < 3; ++k) {
-    //         std::cout << ",-- filled banded alignment matrix " << k << std::endl;
-    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
-    //             std::cout << "| ";
-    //             for (unsigned j = 0; j < i; ++j)
-    //                 std::cout << "\t";
-    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) == InfimumValue<int>::VALUE / 2)
-    //                     std::cout << "\tinf";
-    //                 else
-    //                     std::cout << "\t" << value(matrix, i, j, k);
-    //             }
-    //             std::cout << std::endl;
-    //         }
-    //         std::cout << "`--" << std::endl;
-    //     }
-    // }
-
     // First, the gutters and border diagonals should not have been touched.
     //
     // Test matrix M
@@ -282,23 +262,25 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
         _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), Gotoh());
         _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, Gotoh());
 
-        // // TODO(holtgrew): Debug output, remove when not needed any more.
-        // {
-        //     std::cout << ",-- filled banded alignment matrix" << std::endl;
-        //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
-        //         std::cout << "| ";
-        //         for (unsigned j = 0; j < i; ++j)
-        //             std::cout << "\t";
-        //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-        //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
-        //                 std::cout << "\tinf";
-        //             else
-        //                 std::cout << "\t" << value(matrix, i, j);
-        //         }
-        //         std::cout << std::endl;
-        //     }
-        //     std::cout << "`--" << std::endl;
-        // }
+        // TODO(holtgrew): Debug output, remove when not needed any more.
+		{
+			for (int k = 0; k < 3; ++k) {
+				std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+				for (unsigned i = 0; i < length(matrix, 0); ++i) {
+					std::cout << "| ";
+					for (unsigned j = 0; j < i; ++j)
+						std::cout << "\t";
+					for (unsigned j = 0; j < length(matrix, 1); ++j) {
+						if (value(matrix, i, j, k) < InfimumValue<int>::VALUE / 4)
+							std::cout << "\tinf";
+						else
+							std::cout << "\t" << value(matrix, i, j, k);
+					}
+					std::cout << std::endl;
+				}
+				std::cout << "`--" << std::endl;
+			}
+		}
 
         // Perform the traceback.
         Align<TString> alignment;

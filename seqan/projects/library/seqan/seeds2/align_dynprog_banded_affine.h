@@ -55,6 +55,7 @@ _alignBanded_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seq
     setLength(matrix, 1, upperDiagonal - lowerDiagonal + 3);
     setLength(matrix, 2, 3);
     resize(matrix);
+    //fill(matrix, -42);
 }
 
 
@@ -117,7 +118,7 @@ _alignBanded_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simp
             x += gapScore;
         }
     }
-    for (TPosition i = 0, iend = -lowerDiagonal; i <= iend; ++i, goNext(verticalIt, 1), goNext(horizontalIt, 1)) {
+    for (TPosition i = 0, iend = upperDiagonal; i <= iend; ++i, goNext(verticalIt, 1), goNext(horizontalIt, 1)) {
         *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
         *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
     }
@@ -191,7 +192,7 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
     itIATop = itMTop;
     goNext(itIATop, 2);
     itIBTop = itIATop;
-    goNext(itIATop, 2);
+    goNext(itIBTop, 2);
     TPosition seq1Pos = 0;
     TSequenceIterator it0Begin = begin(sequence0);
     for (TSequenceIterator it1 = begin(sequence1), it1end = end(sequence1); it1 != it1end; ++it1, ++seq1Pos) {
