@@ -690,6 +690,7 @@ value(Segment<THost, TSpec> & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
+  SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
 	return *(begin(me, Standard()) + pos);
 }
 
@@ -699,6 +700,7 @@ value(Segment<THost, TSpec> const & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
+  SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
 	return *(begin(me, Standard()) + pos);
 }
 
