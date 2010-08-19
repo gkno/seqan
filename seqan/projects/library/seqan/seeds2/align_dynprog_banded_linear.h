@@ -151,6 +151,7 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 2> & matrix, Score<TScor
     // std::cout << "pos = " << (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1] << std::endl;
     TIterator otherIt = begin(otherMatrix);
     setPosition(otherIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
+    // Copy over values from the left gutter column of otherMatrix.
     TIterator srcIt = otherIt;
     setPosition(it, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
     for (TOverlap i = 0; i < overlap0; ++i) {
@@ -344,6 +345,8 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     // Insert free end gaps if any.
     //
     // TODO(holtgrew): Currently not supported.
+    SEQAN_ASSERT_NOT_MSG(END0_FREE, "Free end gaps are not supported yet.");
+    SEQAN_ASSERT_NOT_MSG(END1_FREE, "Free end gaps are not supported yet.");
 
     // Now, perform the traceback.
     while (pos0 > static_cast<TPosition>(1)) {

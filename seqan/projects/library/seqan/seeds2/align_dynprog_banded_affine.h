@@ -55,7 +55,6 @@ _alignBanded_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seq
     setLength(matrix, 1, upperDiagonal - lowerDiagonal + 3);
     setLength(matrix, 2, 3);
     resize(matrix);
-    //fill(matrix, -42);
 }
 
 
@@ -136,15 +135,81 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScor
 {
     SEQAN_CHECKPOINT;
 
-    (void) matrix;
+    // TODO(holtgrew): Really unnecessary? Remove along with all other unused parameters in all align_*.h files.
     (void) scoringScheme;
-    (void) lowerDiagonal;
     (void) upperDiagonal;
-    (void) otherMatrix;
-    (void) overlap0;
-    (void) overlap1;
 
-    SEQAN_ASSERT_FAIL("Write me!");
+    typedef Matrix<TScoreValue, 3> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TIterator;
+    typedef typename Position<TMatrix>::Type TPosition;
+
+    // Initialize the diagonal below the lower one with infimas.
+    TIterator diagonalIt = begin(matrix);
+    TIterator verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    TIterator horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+    for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(horizontalIt, 0)) {
+        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+    }
+
+    // Copy over left gutter column.
+    setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
+    verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+    TIterator srcDiagonalIt = begin(otherMatrix);
+    setPosition(srcDiagonalIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
+    TIterator srcVerticalIt = srcDiagonalIt;
+    goNext(srcVerticalIt, 2);
+    TIterator srcHorizontalIt = srcVerticalIt;
+    goNext(srcHorizontalIt, 2);
+    for (TOverlap i = 0; i < overlap0; ++i) {
+        *diagonalIt = *srcDiagonalIt;
+        // *verticalIt = *srcVerticalIt;
+        *horizontalIt = *srcHorizontalIt;
+        goNext(srcDiagonalIt, 0);
+        // goNext(srcVerticalIt, 0);
+        goNext(srcHorizontalIt, 0);
+        goNext(diagonalIt, 0);
+        goPrevious(diagonalIt, 1);
+        // goNext(verticalIt, 0);
+        // goPrevious(verticalIt, 1);
+        goNext(horizontalIt, 0);
+        goPrevious(horizontalIt, 1);
+    }
+
+    // Copy over a row from the other matrix into the top gutter.
+    setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
+    verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+    srcDiagonalIt = begin(otherMatrix);
+    setPosition(srcDiagonalIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
+    srcVerticalIt = srcDiagonalIt;
+    goNext(srcVerticalIt, 2);
+    // srcHorizontalIt = srcVerticalIt;
+    // goNext(srcHorizontalIt, 2);
+    for (TOverlap i = 0; i < overlap1; ++i) {
+        *diagonalIt = *srcDiagonalIt;
+        *verticalIt = *srcVerticalIt;
+        // *horizontalIt = *srcHorizontalIt;
+        goNext(srcDiagonalIt, 1);
+        goNext(srcVerticalIt, 1);
+        // goNext(srcHorizontalIt, 1);
+        goNext(diagonalIt, 1);
+        goNext(verticalIt, 1);
+        // goNext(horizontalIt, 1);
+    }
+
+    // Initialize the diagonal above the upper one with infimas.
+    for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(verticalIt, 0)) {
+        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
+    }
 }
 
 
@@ -269,26 +334,157 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeWidth, TOverlap lowerTriangleEdgeWidth, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeLength, TOverlap lowerTriangleEdgeLength, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
-    (void) alignmentIt0;
-    (void) alignmentIt1;
-    (void) sourceIt0;
-    (void) sourceIt1;
-    (void) matrix;
-    (void) scoringScheme;
-    (void) overlap0;
-    (void) overlap1;
-    (void) goToTopLeft;
-    (void) finalPos0;
-    (void) finalPos1;
-    (void) upperTriangleEdgeWidth;
-    (void) lowerTriangleEdgeWidth;
+    typedef Matrix<TScoreValue, 3> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TMatrixIterator;
 
-    SEQAN_ASSERT_FAIL("Write me!");
-    return 0;
+    // Initialization
+    //
+    // Precomputation of the score difference between mismatch and gap.
+	TScoreValue openGapScore = scoreGapOpen(scoringScheme);
+	TScoreValue gapDiffScore = openGapScore;
+    // Current position in the matrix.  Note that this is the position
+    // in the matrix including the gutter.  When writing this out, we
+    // want to have the position in the matrix, excluding the gutter,
+    // i.e. everything is shifted to the upper left.
+    TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
+    TPosition pos1 = length(matrix, 1) - overlap1 - lowerTriangleEdgeLength - 1 + (length(matrix, 0) - pos0 - 1) + finalPos1;
+    // Iterators to current entries in the matrices.
+    TMatrixIterator diagonalIt = begin(matrix);
+    setPosition(diagonalIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPosition with coordinates.
+    // std::cout << "STARTING AT (" << pos0 << ", " << pos1 << ")" << std::endl;
+    TMatrixIterator verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    TMatrixIterator horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+
+    // Search for starting point of the trace.
+    //
+    // Insert free end gaps if any.
+    //
+    // TODO(holtgrew): Currently not supported.
+    SEQAN_ASSERT_NOT_MSG(END0_FREE, "Free end gaps are not supported yet.");
+    SEQAN_ASSERT_NOT_MSG(END1_FREE, "Free end gaps are not supported yet.");
+
+    // Flags for movement, also determines which matrix we are in.
+    // TODO(holtgrew): Maybe better use an enum here?
+    bool horizontal = false;
+    bool vertical = false;
+    bool diagonal = false;
+    TScoreValue result = *diagonalIt;
+    if (*diagonalIt > *horizontalIt) {
+        if (*diagonalIt > *verticalIt)
+            diagonal = true;
+        else
+            vertical = true;
+    } else {
+        if (*horizontalIt > *verticalIt)
+            horizontal = true;
+        else
+            vertical = true;
+    }
+
+    // Now, perform the traceback.
+    while (pos0 > static_cast<TPosition>(1)) {
+        SEQAN_ASSERT_GT(pos1, static_cast<TPosition>(0));
+
+        // Determine
+        if (diagonal) {
+            // std::cout << "DIAGONAL" << std::endl;
+            // Move iterators in sequences, alignment rows and matrices.
+            goPrevious(sourceIt0);  // XXX
+            goPrevious(sourceIt1);  // XXX
+            goPrevious(alignmentIt0);  // XXX
+            goPrevious(alignmentIt1);  // XXX
+            goPrevious(diagonalIt, 0);
+            // goPrevious(diagonalIt, 1);
+            goPrevious(horizontalIt, 0);
+            // goPrevious(horizontalIt, 1);
+            goPrevious(verticalIt, 0);
+            // goPrevious(verticalIt, 1);
+            pos0 -= 1;
+            // pos1 -= 1;
+
+            // Update the movement/matrix indicators.
+            if (*diagonalIt >= *horizontalIt) {
+                if (*diagonalIt < *verticalIt) {
+                    vertical = true;
+                    diagonal = false;
+                }
+            } else {
+                diagonal = false;
+                if (*horizontalIt >= *verticalIt)
+                    horizontal = true;
+                else
+                    vertical = true;
+            }
+        } else {
+            if (vertical) {
+                // std::cout << "VERTICAL" << std::endl;
+                // Insert gap.
+                insertGap(alignmentIt1);
+
+                // Move iterators in sequence, alignment rows and matrices.,
+                goPrevious(sourceIt0);
+                goPrevious(alignmentIt0);
+                goPrevious(diagonalIt, 0);
+                goNext(diagonalIt, 1);  // XXX added
+                goPrevious(verticalIt, 0);
+                goNext(verticalIt, 1);  // XXX added
+                goPrevious(horizontalIt, 0);
+                goNext(horizontalIt, 1);  // XXX added
+                pos0 -= 1;
+                pos1 += 1;
+
+                // Update the movement/matrix indicators.
+                if (*diagonalIt + gapDiffScore >= *verticalIt) {
+                    diagonal = true;
+                    vertical = false;
+                }
+            } else {
+                if (horizontal) {
+                    // std::cout << "HORIZONTAL" << std::endl;
+                    // Insert gap.
+                    insertGap(alignmentIt0);
+                    
+                    // Move iterators in sequence, alignment rows and matrices.,
+                    goPrevious(sourceIt1);
+                    goPrevious(alignmentIt1);
+                    goPrevious(diagonalIt, 1);
+                    goPrevious(verticalIt, 1);
+                    goPrevious(horizontalIt, 1);
+                    pos1 -= 1;
+                    
+                    // Move iterators in sequence, alignment rows and matrices.,
+                    // Update the movement/matrix indicators.
+                    if (*diagonalIt + gapDiffScore >= *horizontalIt) {
+                        diagonal = true;
+                        horizontal = false;
+                    }
+                }
+            }
+        }
+    }
+
+    // Go to the top left of the matrix if configured to do so.
+    //
+    // TODO(holtgrew): Currently not supported.
+    SEQAN_ASSERT_NOT_MSG(goToTopLeft, "goToTopLeft is currently not supported in banded alignment.");
+
+    // Write out the final positions in the alignment matrix.  Convert
+    // from position in the current alignment matrix with gutter to
+    // positioin without gutter by shifting the position to the upper
+    // left.  Also adjust for the shear of the matrix.
+    // std::cout << "@and: pos0 = " << pos0 << ", pos1 = " << pos1 << std::endl;
+    finalPos0 = pos0 - 1;
+    finalPos1 = pos1 - 2 - (upperTriangleEdgeLength - 1);
+    SEQAN_ASSERT_EQ_MSG(finalPos0, 0u, "Must reach top of matrix in banded alignment traceback.");
+    // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+
+    return result;
 }
 
 }  // namespace seqan

@@ -88,30 +88,29 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
     goNext(itIBBegin, 2);
 
     // Init top and left gutters.
-    {
-        // Left gutters...
-        TIterator itM = itMBegin;
-        *itM = 0;
+    //
+    // Left gutters...
+    TIterator itM = itMBegin;
+    *itM = 0;
+    goNext(itM, 0);
+    TIterator itIB = itIBBegin;
+    goNext(itIB, 0);
+    for (TPosition pos = 1, posEnd = length(matrix, 0); pos < posEnd; ++pos) {
+        *itM = pos * gapExtendScore;
+        *itIB = inf;
         goNext(itM, 0);
-        TIterator itIB = itIBBegin;
         goNext(itIB, 0);
-        for (TPosition pos = 1, posEnd = length(matrix, 0); pos < posEnd; ++pos) {
-            *itM = pos * gapExtendScore;
-            *itIB = inf;
-            goNext(itM, 0);
-            goNext(itIB, 0);
-        }
-        // Top gutters...
-        itM = itMBegin;
+    }
+    // Top gutters...
+    itM = itMBegin;
+    goNext(itM, 1);
+    TIterator itIA = itIABegin;
+    goNext(itIA, 1);
+    for (TPosition pos = 1, posEnd = length(matrix, 1); pos < posEnd; ++pos) {
+        *itM = pos * gapExtendScore;
+        *itIA = inf;
         goNext(itM, 1);
-        TIterator itIA = itIABegin;
         goNext(itIA, 1);
-        for (TPosition pos = 1, posEnd = length(matrix, 1); pos < posEnd; ++pos) {
-            *itM = pos * gapExtendScore;
-            *itIA = inf;
-            goNext(itM, 1);
-            goNext(itIA, 1);
-        }
     }
 }
 
@@ -122,15 +121,73 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, 
 {
     SEQAN_CHECKPOINT;
 
-    (void)matrix;
-    (void)scoringScheme;
-    (void)lowerDiagonal;
-    (void)upperDiagonal;
-    (void)otherMatrix;
-    (void)overlap0;
-    (void)overlap1;
+    // TODO(holtgrew): Really unnecessary? Remove along with all other unused parameters in all align_*.h files.
+    (void) scoringScheme;
+    (void) lowerDiagonal;
+    (void) upperDiagonal;
 
-    SEQAN_ASSERT_FAIL("Not implemented!");
+    SEQAN_ASSERT_EQ(length(matrix, 2), 3u);
+
+    typedef Matrix<TScoreValue, 3> TMatrix;
+    typedef typename Iterator<TMatrix>::Type TIterator;
+    typedef typename Position<TMatrix>::Type TPosition;
+
+    // Get iterators to the top left corners of the matrices.
+    TIterator itMBegin = begin(matrix);
+    TIterator itIABegin = itMBegin;
+    goNext(itIABegin, 2);
+    TIterator itIBBegin = itIABegin;
+    goNext(itIBBegin, 2);
+    TIterator otherItMBegin = begin(otherMatrix);
+    setPosition(otherItMBegin, (length(otherMatrix, 0) - (overlap0 + 1)) + overlap0 * _dataFactors(otherMatrix)[1]);
+    TIterator otherItIABegin = otherItMBegin;
+    goNext(otherItIABegin, 2);
+    TIterator otherItIBBegin = otherItIABegin;
+    goNext(otherItIBBegin, 2);
+
+    // Copy over data for left gutter.
+    {
+        TIterator itM = itMBegin;
+        TIterator otherItM = otherItMBegin;
+        TIterator itIB = itIBBegin;
+        TIterator otherItIB = otherItIBBegin;
+        for (TOverlap i = 0; i < overlap0 + 1; ++i) {
+            *itM = *otherItM;
+            *itIB = *otherItIB;
+            goNext(itM, 0);
+            goNext(otherItM, 0);
+            goPrevious(otherItM, 1);
+            goNext(itIB, 0);
+            goNext(otherItIB, 0);
+            goPrevious(otherItIB, 1);
+        }
+        // Init the rest of the left gutter with infima.
+        for (TPosition i = overlap0 + 1, iend = length(matrix, 0); i < iend; ++i, goNext(itM, 0), goNext(itIB, 0)) {
+            *itM = InfimumValue<TScoreValue>::VALUE / 2;
+            *itIB = InfimumValue<TScoreValue>::VALUE / 2;
+        }
+    }
+
+    // Copy over data for top gutter.
+    {
+        TIterator itM = itMBegin;
+        TIterator otherItM = otherItMBegin;
+        TIterator itIA = itIABegin;
+        TIterator otherItIA = otherItIABegin;
+        for (TOverlap i = 0; i < overlap1 + 1; ++i) {
+            *itM = *otherItM;
+            *itIA = *otherItIA;
+            goNext(itM, 1);
+            goNext(otherItM, 1);
+            goNext(itIA, 1);
+            goNext(otherItIA, 1);
+        }
+        // Init the rest of the top gutter with infima.
+        for (TPosition i = overlap1 + 1, iend = length(matrix, 1); i < iend; ++i, goNext(itM, 1), goNext(itIA, 1)) {
+            *itM = InfimumValue<TScoreValue>::VALUE / 2;
+            *itIA = InfimumValue<TScoreValue>::VALUE / 2;
+        }
+    }
 }
 
 
@@ -230,7 +287,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // i.e. everything is shifted to the upper left.
     TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
     TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
-    // Iterator to current entry in the matrix.
+    // Iterators to current entries in the matrices.
     TMatrixIterator diagonalIt = begin(matrix);
     setPosition(diagonalIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPositionw ith coordinates.
     TMatrixIterator verticalIt = diagonalIt;
@@ -248,7 +305,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     bool horizontal = false;
     bool vertical = false;
     bool diagonal = false;
-    int result = *diagonalIt;
+    TScoreValue result = *diagonalIt;
     if (*diagonalIt > *horizontalIt) {
         if (*diagonalIt > *verticalIt)
             diagonal = true;

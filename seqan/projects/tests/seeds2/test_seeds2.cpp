@@ -158,7 +158,7 @@ SEQAN_BEGIN_TESTSUITE(test_seeds)
     SEQAN_CALL_TEST(test_align_chain_banded_compute_upper_left_overlap);
     SEQAN_CALL_TEST(test_align_chain_banded_compute_lower_right_overlap);
     SEQAN_CALL_TEST(test_align_chain_banded_align_linear);
-    // SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
+    SEQAN_CALL_TEST(test_align_chain_banded_align_affine);
 
     // Tests for the classic NW dynamic programming.
     SEQAN_CALL_TEST(test_align_dynprog_linear_resize_matrix);

@@ -228,7 +228,6 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
     using namespace seqan;
     typedef Seed<Simple> TSeed;
 
-    /*
     // Test on whole strings.
     {
         CharString query = "ACGTCCTCGTACACCGTCTTAA";
@@ -246,7 +245,15 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         
         //cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment3, scoreMatrix2) << endl;
         int result = bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>());
-        SEQAN_ASSERT_EQ(result, 24);
+        std::cout << result << std::endl;
+        std::cout << alignment << std::endl;
+        // SEQAN_ASSERT_EQ(result, 24);
+
+        clearGaps(row(alignment, 0));
+        clearGaps(row(alignment, 1));
+        int x = globalAlignment(alignment, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+        std::cout << x << std::endl;
+        std::cout << alignment;
         
         //cout << alignment3 << endl;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "ACG-TCCTCGTACAC--CGTCTTAA");
@@ -275,7 +282,6 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CG-TCCTCGTACAC--CGTCTTAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CGATCC----ACACCGCGTCT");
     }
-    */
     // Test on whole strings -- linear gap costs.
     {
         // Resulting alignment should be something like this (seeds

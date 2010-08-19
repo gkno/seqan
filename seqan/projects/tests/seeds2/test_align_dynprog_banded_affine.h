@@ -53,7 +53,6 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_init_gutter_free)
     setLength(matrix, 1, 5);
     setLength(matrix, 2, 3);
     resize(matrix);
-    // fill(matrix, 42);
 
     _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), Gotoh());
 
@@ -164,13 +163,33 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_fill_matrix)
     Matrix<int, 3> matrix;
     DnaString const sequence0 = "CACCCC";
     DnaString const sequence1 = "CCACCC";
-    Score<int, Simple> const scoringScheme(1, -1, -1);
+    Score<int, Simple> const scoringScheme(1, -1, -1, -2);
 
     _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -1, 1, Gotoh());
     _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), Gotoh());
     _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, Gotoh());
 
     int inf = InfimumValue<int>::VALUE / 2;
+
+    // TODO(holtgrew): Debug output, remove when not needed any more.
+    // {
+    //     for (int k = 0; k < 3; ++k) {
+    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             std::cout << "| ";
+    //             for (unsigned j = 0; j < i; ++j)
+    //                 std::cout << "\t";
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) == InfimumValue<int>::VALUE / 4)
+    //                     std::cout << "\tinf";
+    //                 else
+    //                     std::cout << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         std::cout << "`--" << std::endl;
+    //     }
+    // }
 
     // First, the gutters and border diagonals should not have been touched.
     //
@@ -214,28 +233,79 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_fill_matrix)
     SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0, 2));
 
     // Second, check the fields in between.
-    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 1));
-    SEQAN_ASSERT_EQ(1, value(matrix, 1, 2));
-    SEQAN_ASSERT_EQ(0, value(matrix, 1, 3));
+    //
+    // The following values have been taken from the algorithm results
+    // and looked "good enough", some steps have been verified.
+    // However, no real verification on paper has been performed.
+    //
+    // Test M
+    //
+    // row 1
+    SEQAN_ASSERT_EQ(1, value(matrix, 1, 2, 0));
+    SEQAN_ASSERT_EQ(0, value(matrix, 1, 3, 0));
     // row 2
-    SEQAN_ASSERT_EQ(0, value(matrix, 2, 1));
-    SEQAN_ASSERT_EQ(0, value(matrix, 2, 2));
-    SEQAN_ASSERT_EQ(1, value(matrix, 2, 3));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 2, 1, 0));
+    SEQAN_ASSERT_EQ(0, value(matrix, 2, 2, 0));
+    SEQAN_ASSERT_EQ(1, value(matrix, 2, 3, 0));
     // row 3
-    SEQAN_ASSERT_EQ(1, value(matrix, 3, 1));
-    SEQAN_ASSERT_EQ(0, value(matrix, 3, 2));
-    SEQAN_ASSERT_EQ(2, value(matrix, 3, 3));
+    SEQAN_ASSERT_EQ(0, value(matrix, 3, 1, 0));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 3, 2, 0));
+    SEQAN_ASSERT_EQ(2, value(matrix, 3, 3, 0));
     // row 4
-    SEQAN_ASSERT_EQ(0, value(matrix, 4, 1));
-    SEQAN_ASSERT_EQ(1, value(matrix, 4, 2));
-    SEQAN_ASSERT_EQ(3, value(matrix, 4, 3));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 4, 1, 0));
+    SEQAN_ASSERT_EQ(0, value(matrix, 4, 2, 0));
+    SEQAN_ASSERT_EQ(3, value(matrix, 4, 3, 0));
     // row 5
-    SEQAN_ASSERT_EQ(1, value(matrix, 5, 1));
-    SEQAN_ASSERT_EQ(2, value(matrix, 5, 2));
-    SEQAN_ASSERT_EQ(4, value(matrix, 5, 3));
+    SEQAN_ASSERT_EQ(0, value(matrix, 5, 1, 0));
+    SEQAN_ASSERT_EQ(1, value(matrix, 5, 2, 0));
     // row 6
-    SEQAN_ASSERT_EQ(2, value(matrix, 6, 1));
-    SEQAN_ASSERT_EQ(3, value(matrix, 6, 2));
+    SEQAN_ASSERT_EQ(1, value(matrix, 6, 1, 0));
+    //
+    // Test I^a
+    //
+    // row 1
+    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 2, 1));
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 1, 3, 1));
+    // row 2
+    SEQAN_ASSERT_EQ(-1, value(matrix, 2, 1, 1));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 2, 2, 1));
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 2, 3, 1));
+    // row 3
+    SEQAN_ASSERT_EQ(-2, value(matrix, 3, 1, 1));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 3, 2, 1));
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 3, 3, 1));
+    // row 4
+    SEQAN_ASSERT_EQ(-2, value(matrix, 4, 1, 1));
+    SEQAN_ASSERT_EQ(0, value(matrix, 4, 2, 1));
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 4, 3, 1));
+    // row 5
+    SEQAN_ASSERT_EQ(-1, value(matrix, 5, 1, 1));
+    SEQAN_ASSERT_EQ(1, value(matrix, 5, 2, 1));
+    // row 6
+    SEQAN_ASSERT_EQ(0, value(matrix, 6, 1, 1));
+    //
+    // Test I^b
+    //
+    // row 1
+    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 2, 2));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 3, 2));
+    // row 2
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 2, 1, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 2, 2, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 2, 3, 2));
+    // row 3
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 3, 1, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 3, 2, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 3, 3, 2));
+    // row 4
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 4, 1, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 4, 2, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 4, 3, 2));
+    // row 5
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 5, 1, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 5, 2, 2));
+    // row 6
+    SEQAN_ASSERT_EQ(inf - 1, value(matrix, 6, 1, 2));
 }
 
 
@@ -254,9 +324,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
     {
         // Fill the matrix with DP (tested by other tests).
         Matrix<int, 3> matrix;
-        TString const sequence0 = "CCAAA";
+        TString const sequence0 = "CCAA";
         TString const sequence1 = "CAA";
-        Score<int, Simple> const scoringScheme(1, -1, -1);
+        Score<int, Simple> const scoringScheme(1, -1, -1, -2);
         
         _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -2, 1, Gotoh());
         _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), Gotoh());
@@ -296,20 +366,19 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
         TAlignRowIterator align1It = end(row(alignment, 1));
         int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), Gotoh());
 
-        // std::cout << alignment;
-        SEQAN_ASSERT_EQ(score, 1);
+        SEQAN_ASSERT_EQ(score, -1);
         SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
         // std::cout << (begin(sequence1, Standard()) - seq1It) << std::endl;
-        SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
+        SEQAN_ASSERT_TRUE(seq1It == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
         SEQAN_ASSERT_EQ(finalPos0, 0u);
         SEQAN_ASSERT_EQ(finalPos1, static_cast<TPosition>(-1));
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAA");
         // Note that leading and trailing gaps are not saved.  The
         // following is postfixed with a gap on visual inspection.
-        SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA");
+        SEQAN_ASSERT_TRUE(row(alignment, 1) == "CAA");
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }
