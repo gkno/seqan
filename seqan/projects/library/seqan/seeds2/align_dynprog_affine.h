@@ -77,7 +77,8 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
 
     // We do not take the real minimum here because of overflows.
     TScoreValue inf = InfimumValue<TScoreValue>::VALUE / 2;
-    // Get shortcuts to gap extension score.
+    // Get shortcuts to gap related scores.
+    TScoreValue gapOpenScore = scoreGapOpen(scoringScheme);
     TScoreValue gapExtendScore = scoreGapExtend(scoringScheme);
 
     // Get iterators to the top left corners of the matrices.
@@ -96,7 +97,7 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
     TIterator itIB = itIBBegin;
     goNext(itIB, 0);
     for (TPosition pos = 1, posEnd = length(matrix, 0); pos < posEnd; ++pos) {
-        *itM = pos * gapExtendScore;
+        *itM = gapOpenScore + (pos - 1) * gapExtendScore;
         *itIB = inf;
         goNext(itM, 0);
         goNext(itIB, 0);
@@ -107,7 +108,7 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
     TIterator itIA = itIABegin;
     goNext(itIA, 1);
     for (TPosition pos = 1, posEnd = length(matrix, 1); pos < posEnd; ++pos) {
-        *itM = pos * gapExtendScore;
+        *itM = gapOpenScore + (pos - 1) * gapExtendScore;
         *itIA = inf;
         goNext(itM, 1);
         goNext(itIA, 1);
@@ -260,6 +261,23 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
             *itMAbove = _max(scoreMoveDiagonal, _max(*itIAAbove, *itIBAbove));
         }
     }
+
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 3; ++k) {
+            std::cout << ",-- *** filled alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cout << "\tinf";
+                    else
+                        std::cout << "\t" << value(matrix, i, j, k);
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "`--" << std::endl;
+        }
+    }
 }
 
 // Compute traceback in the given normal DP alignment matrix, starting
@@ -273,14 +291,14 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 {
     SEQAN_CHECKPOINT;
 
+    // Suppress warnings about unused parameters.
+    (void) scoringScheme;
+
     typedef Matrix<TScoreValue, 3> TMatrix;
     typedef typename Iterator<TMatrix>::Type TMatrixIterator;
 
     // Initialization
     //
-    // Precomputation of the score difference between mismatch and gap.
-	TScoreValue openGapScore = scoreGapOpen(scoringScheme);
-	TScoreValue gapDiffScore = openGapScore;
     // Current position in the matrix.  Note that this is the position
     // in the matrix including the gutter.  When writing this out, we
     // want to have the position in the matrix, excluding the gutter,
@@ -306,6 +324,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     bool vertical = false;
     bool diagonal = false;
     TScoreValue result = *diagonalIt;
+    // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
     if (*diagonalIt > *horizontalIt) {
         if (*diagonalIt > *verticalIt)
             diagonal = true;
@@ -321,6 +340,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // Now, perform the traceback.
     while (pos0 > static_cast<TPosition>(1) && pos1 > static_cast<TPosition>(1)) {
         if (diagonal) {
+            // std::cout << "DIAGONAL" << std::endl;
             // Move iterators in sequences, alignment rows and matrices.
             goPrevious(sourceIt0);
             goPrevious(sourceIt1);
@@ -336,20 +356,22 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
             pos1 -= 1;
 
             // Update the movement/matrix indicators.
-            if (*diagonalIt >= *horizontalIt) {
-                if (*diagonalIt < *verticalIt) {
+            // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+            if (*diagonalIt > *horizontalIt) {
+                if (*diagonalIt <= *verticalIt) {
                     vertical = true;
                     diagonal = false;
                 }
             } else {
                 diagonal = false;
-                if (*horizontalIt >= *verticalIt)
+                if (*horizontalIt > *verticalIt)
                     horizontal = true;
                 else
                     vertical = true;
             }
         } else {
             if (vertical) {
+                // std::cout << "VERTICAL" << std::endl;
                 // Insert gap.
                 insertGap(alignmentIt1);
 
@@ -362,12 +384,22 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
                 pos0 -= 1;
 
                 // Update the movement/matrix indicators.
-                if (*diagonalIt + gapDiffScore >= *verticalIt) {
-                    diagonal = true;
+                // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+                if (*verticalIt > *horizontalIt) {
+                    if (*diagonalIt > *verticalIt) {
+                        diagonal = true;
+                        vertical = false;
+                    }
+                } else {
                     vertical = false;
+                    if (*diagonalIt > *horizontalIt)
+                        diagonal = true;
+                    else
+                        horizontal = true;
                 }
             } else {
                 if (horizontal) {
+                    // std::cout << "HORIZONTAL" << std::endl;
                     // Insert gap.
                     insertGap(alignmentIt0);
                     
@@ -381,9 +413,18 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
                     
                     // Move iterators in sequence, alignment rows and matrices.,
                     // Update the movement/matrix indicators.
-                    if (*diagonalIt + gapDiffScore >= *horizontalIt) {
-                        diagonal = true;
+                    // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+                    if (*horizontalIt > *verticalIt) {
+                        if (*diagonalIt > *horizontalIt) {
+                            diagonal = true;
+                            horizontal = false;
+                        }
+                    } else {
                         horizontal = false;
+                        if (*diagonalIt > *verticalIt)
+                            diagonal = true;
+                        else
+                            vertical = true;
                     }
                 }
             }

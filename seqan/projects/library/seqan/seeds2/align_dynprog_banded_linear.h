@@ -273,6 +273,26 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & seque
         if (seq1Pos >= static_cast<TPosition>(upperDiagonal))
             it0Begin += 1;
     }
+
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 1; ++k) {
+            std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                std::cout << "| ";
+                for (unsigned j = 0; j < i; ++j)
+                    std::cout << "\t";
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cout << "\tinf";
+                    else
+                        std::cout << "\t" << value(matrix, i, j, k);
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "`--" << std::endl;
+        }
+    }
 }
 
 

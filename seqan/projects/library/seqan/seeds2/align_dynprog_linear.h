@@ -200,6 +200,23 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
             *itAbove = _max(scoreMoveDiagonal, _max(scoreMoveRight, scoreMoveDown));
         }
     }
+
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 1; ++k) {
+            std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cout << "\tinf";
+                    else
+                        std::cout << "\t" << value(matrix, i, j, k);
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "`--" << std::endl;
+        }
+    }
 }
 
 

@@ -177,16 +177,18 @@ _alignLeadingRectangle(
     // Compute overlap of the rectangle with the seed to the lower right.
     TSize rightOverlap0, rightOverlap1;
     _computeUpperLeftOverlap(rightOverlap0, rightOverlap1, rightSeed, alignmentChain);
+    std::cout << "rightSeed == " << rightSeed << std::endl;
+    std::cout << "rightOverlap0 == " << rightOverlap0 << "rightOverlap1 == " << rightOverlap1 << std::endl;
 
     // Get infixes of the sequences that correspond to this rectangle.
     TInfix prefix0 = prefix(value(alignmentChain.sequence0_), getBeginDim0(rightSeed) + rightOverlap0);
     TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignLeadingRectangle" << std::endl;
-    // std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
-    // std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cout << ",-- _alignLeadingRectangle" << std::endl;
+    std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
+    std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
+    std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -244,10 +246,10 @@ _alignTrailingRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignTrailingRectangle" << std::endl;
-    // std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
-    // std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cout << ",-- _alignTrailingRectangle" << std::endl;
+    std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
+    std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
+    std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -325,12 +327,12 @@ _alignRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignRectangle" << std::endl;
-    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
-    // std::cout << "left seed = " << leftSeed << std::endl;
-    // std::cout << "right seed = " << rightSeed << std::endl;
+    std::cout << ",-- _alignRectangle" << std::endl;
+    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
+    std::cout << "`--" << std::endl;
+    std::cout << "left seed = " << leftSeed << std::endl;
+    std::cout << "right seed = " << rightSeed << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -407,10 +409,10 @@ _alignSeed(
     // std::cout << "lowerDiagonal = " << lowerDiagonal << ", upperDiagonal = " << upperDiagonal << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignSeed" << std::endl;
-    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cout << ",-- _alignSeed" << std::endl;
+    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
+    std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -688,6 +690,7 @@ _bandedChainAlignment(
     // Compute Alignment using Alignment Chain
     //
     // Compute alignment for leading rectangle and the first seed.
+    std::cout << "first seed: " << front(seedChain) << std::endl;
     _alignLeadingRectangle(alignmentChain, front(seedChain), alignConfig);
     _alignSeed(alignmentChain, front(seedChain));
 

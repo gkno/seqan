@@ -324,6 +324,26 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
         if (seq1Pos >= static_cast<TPosition>(upperDiagonal))
             it0Begin += 1;
     }
+
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 3; ++k) {
+            std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                std::cout << "| ";
+                for (unsigned j = 0; j < i; ++j)
+                    std::cout << "\t";
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cout << "\tinf";
+                    else
+                        std::cout << "\t" << value(matrix, i, j, k);
+                }
+                std::cout << std::endl;
+            }
+            std::cout << "`--" << std::endl;
+        }
+    }
 }
 
 
@@ -338,14 +358,14 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
 {
     SEQAN_CHECKPOINT;
 
+    // Suppress unused parameters warning.
+    (void) scoringScheme;
+
     typedef Matrix<TScoreValue, 3> TMatrix;
     typedef typename Iterator<TMatrix>::Type TMatrixIterator;
 
     // Initialization
     //
-    // Precomputation of the score difference between mismatch and gap.
-	TScoreValue openGapScore = scoreGapOpen(scoringScheme);
-	TScoreValue gapDiffScore = openGapScore;
     // Current position in the matrix.  Note that this is the position
     // in the matrix including the gutter.  When writing this out, we
     // want to have the position in the matrix, excluding the gutter,
@@ -409,14 +429,15 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             // pos1 -= 1;
 
             // Update the movement/matrix indicators.
-            if (*diagonalIt >= *horizontalIt) {
-                if (*diagonalIt < *verticalIt) {
+            // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+            if (*diagonalIt > *horizontalIt) {
+                if (*diagonalIt <= *verticalIt) {
                     vertical = true;
                     diagonal = false;
                 }
             } else {
                 diagonal = false;
-                if (*horizontalIt >= *verticalIt)
+                if (*horizontalIt > *verticalIt)
                     horizontal = true;
                 else
                     vertical = true;
@@ -440,9 +461,18 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
                 pos1 += 1;
 
                 // Update the movement/matrix indicators.
-                if (*diagonalIt + gapDiffScore >= *verticalIt) {
-                    diagonal = true;
+                // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+                if (*verticalIt > *horizontalIt) {
+                    if (*diagonalIt > *verticalIt) {
+                        diagonal = true;
+                        vertical = false;
+                    }
+                } else {
                     vertical = false;
+                    if (*diagonalIt > *horizontalIt)
+                        diagonal = true;
+                    else
+                        horizontal = true;
                 }
             } else {
                 if (horizontal) {
@@ -460,9 +490,18 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
                     
                     // Move iterators in sequence, alignment rows and matrices.,
                     // Update the movement/matrix indicators.
-                    if (*diagonalIt + gapDiffScore >= *horizontalIt) {
-                        diagonal = true;
+                    // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
+                    if (*horizontalIt > *verticalIt) {
+                        if (*diagonalIt > *horizontalIt) {
+                            diagonal = true;
+                            horizontal = false;
+                        }
+                    } else {
                         horizontal = false;
+                        if (*diagonalIt > *verticalIt)
+                            diagonal = true;
+                        else
+                            vertical = true;
                     }
                 }
             }

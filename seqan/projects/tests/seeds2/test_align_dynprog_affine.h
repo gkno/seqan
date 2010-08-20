@@ -45,6 +45,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_resize_matrix)
 // Test gutter initialization if gap costs are free.
 SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_free)
 {
+    SEQAN_SKIP_TEST;  // This is not supported yet.
     using namespace seqan;
 
     Matrix<int, 3> matrix;
@@ -57,7 +58,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_free)
 
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 0, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0));
 }
 
@@ -78,9 +79,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_not_free)
 
     // Check M.
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0, 0));
-    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 0, 0));
-    SEQAN_ASSERT_EQ(-1, value(matrix, 0, 1, 0));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 2, 0));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0, 0));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1, 0));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2, 0));
     // Check I^a.
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 1, 1));
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 2, 1));
@@ -105,30 +106,50 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_fill_matrix)
 
     int inf = InfimumValue<int>::VALUE / 2;
 
+    // // TODO(holtgrew): Debug code, remove when working.
+    // {
+    //     for (int k = 0; k < 3; ++k) {
+    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             std::cout << "| ";
+    //             // for (unsigned j = 0; j < i; ++j)
+    //             //     std::cout << "\t";
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                     std::cout << "\tinf";
+    //                 else
+    //                     std::cout << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         std::cout << "`--" << std::endl;
+    //     }
+    // }
+
     // Check M.
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0, 0));
-    SEQAN_ASSERT_EQ(-1, value(matrix, 0, 1, 0));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 2, 0));
-    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 3, 0));
-    SEQAN_ASSERT_EQ(-1, value(matrix, 1, 0, 0));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1, 0));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2, 0));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 0, 3, 0));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0, 0));
     SEQAN_ASSERT_EQ(1, value(matrix, 1, 1, 0));
     SEQAN_ASSERT_EQ(-1, value(matrix, 1, 2, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 1, 3, 0));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 2, 0, 0));
-    SEQAN_ASSERT_EQ(0, value(matrix, 2, 1, 0));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 2, 0, 0));
+    SEQAN_ASSERT_EQ(-1, value(matrix, 2, 1, 0));
     SEQAN_ASSERT_EQ(0, value(matrix, 2, 2, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 2, 3, 0));
-    SEQAN_ASSERT_EQ(-3, value(matrix, 3, 0, 0));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 3, 0, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 3, 1, 0));
-    SEQAN_ASSERT_EQ(1, value(matrix, 3, 2, 0));
+    SEQAN_ASSERT_EQ(0, value(matrix, 3, 2, 0));
     SEQAN_ASSERT_EQ(1, value(matrix, 3, 3, 0));
     // Check I^a.
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 1, 1));
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 2, 1));
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 3, 1));
-    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 1, 1));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 2, 1));
-    SEQAN_ASSERT_EQ(-5, value(matrix, 1, 3, 1));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 1, 1));
+    SEQAN_ASSERT_EQ(-5, value(matrix, 1, 2, 1));
+    SEQAN_ASSERT_EQ(-6, value(matrix, 1, 3, 1));
     SEQAN_ASSERT_EQ(-1, value(matrix, 2, 1, 1));
     SEQAN_ASSERT_EQ(-3, value(matrix, 2, 2, 1));
     SEQAN_ASSERT_EQ(-4, value(matrix, 2, 3, 1));
@@ -137,17 +158,17 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_fill_matrix)
     SEQAN_ASSERT_EQ(-4, value(matrix, 3, 3, 1));
     // Check I^b.
     SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0, 2));
-    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 1, 2));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 1, 2));
     SEQAN_ASSERT_EQ(-1, value(matrix, 1, 2, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 1, 3, 2));
     SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0, 2));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 2, 1, 2));
-    SEQAN_ASSERT_EQ(-2, value(matrix, 2, 2, 2));
+    SEQAN_ASSERT_EQ(-5, value(matrix, 2, 1, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 2, 2, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 2, 3, 2));
     SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0, 2));
-    SEQAN_ASSERT_EQ(-5, value(matrix, 3, 1, 2));
+    SEQAN_ASSERT_EQ(-6, value(matrix, 3, 1, 2));
     SEQAN_ASSERT_EQ(-4, value(matrix, 3, 2, 2));
-    SEQAN_ASSERT_EQ(-1, value(matrix, 3, 3, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 3, 3, 2));
 }
 
 
