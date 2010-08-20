@@ -851,7 +851,7 @@ _setExtendedSeedDimensions(Seed<TPosition, SimpleSeed> & seed,
 }
 
 template<typename TSeedSpec, typename TPosition, typename DatabaseInfix, typename QueryInfix, typename TScore, typename TSize>
-TPosition
+TScore
 _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
                        DatabaseInfix const & dataSeg,
                        QueryInfix const & querySeg, 
@@ -859,7 +859,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
                        Score<TScore, Simple> const & scoreMatrix,
                        TSize direction) {
     TScore gapCost = scoreGap(scoreMatrix);
-    TPosition infimum = infimumValue<TPosition>()+1-gapCost;
+    TScore infimum = infimumValue<TScore>()+1-gapCost;
 
     TPosition upperBound = 0;
     TPosition lowerBound = 0;
@@ -880,18 +880,18 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
     }
 
     // antidiagonals of DP matrix
-    String<TPosition> antiDiagonal1;
-    String<TPosition> antiDiagonal2;
-    String<TPosition> antiDiagonal3;
+    String<TScore> antiDiagonal1;
+    String<TScore> antiDiagonal2;
+    String<TScore> antiDiagonal3;
 
     fill(antiDiagonal1, 1, 0);
     fill(antiDiagonal2, 2, infimum);
     fill(antiDiagonal3, _min(3, xLength+1), infimum);
 
-    String<TPosition> *antiDiag1 = &antiDiagonal1;	//smallest diagonal
-	String<TPosition> *antiDiag2 = &antiDiagonal2;
-	String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
-	String<TPosition> *tmpDiag;
+    String<TScore> *antiDiag1 = &antiDiagonal1;	//smallest diagonal
+	String<TScore> *antiDiag2 = &antiDiagonal2;
+	String<TScore> *antiDiag3 = &antiDiagonal3;	//current diagonal
+	String<TScore> *tmpDiag;
 
 	//Matrix initialization
 	if (gapCost >= (-1)*scoreDropOff) {
@@ -906,9 +906,9 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 	TPosition b = 1; // lower bound for i
 	TPosition u = 0; // upper bound for i
 	TPosition k = 1; // current antidiagonal
-	TPosition tmp;   // for calculating the maximum for a single matrix entry
-	TPosition tmpMax1 = 0; // maximum score without the current diagonal
-	TPosition tmpMax2 = 0; // maximum score including the current diagonal
+	TScore tmp;   // for calculating the maximum for a single matrix entry
+	TScore tmpMax1 = 0; // maximum score without the current diagonal
+	TScore tmpMax2 = 0; // maximum score including the current diagonal
 
 	//Extension as proposed by Zhang et al
 	while(true) {
@@ -936,7 +936,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
         }
 			
 		//borders for lower triangle of edit matrix
-		b = _max(b, k-yLength);
+		b = _max(b, k+1-yLength);
 		u = _min(u, xLength-1);
 
         if (b > u+1) break;
@@ -989,7 +989,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
 	//Find seed start/end
 	TPosition extLengthQuery = 0; // length of extension in query
     TPosition extLengthDatabase = 0; // length of extension in database
-	TPosition tmpMax = infimum;
+	TScore tmpMax = infimum;
 	if ((k >= xLength+yLength) && ((*antiDiag2)[u+1] >= tmpMax1-scoreDropOff)) {
         // extension ends at end of both sequences
 		extLengthQuery = xLength;
