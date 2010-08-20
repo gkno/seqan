@@ -21,6 +21,7 @@
 #include <iostream>
 #include <seqan/index.h>
 #include <seqan/seeds.h>
+#include "swift_local_types.h"
 
 using namespace seqan;
 
@@ -473,24 +474,24 @@ SEQAN_CHECKPOINT
 	return true;
 }
 
-template<typename TRow, typename TSize>
-inline bool
-_isUpstream(TRow & row1, TRow & row2, TSize minLength) {
-SEQAN_CHECKPOINT
-    typedef typename Position<TRow>::Type TPos;
-    
-    TPos end1 = endPosition(sourceSegment(row1));
-    TPos begin2 = beginPosition(sourceSegment(row2));
-    if (end1 <= begin2) return true;
-    
-    TPos begin1 = beginPosition(sourceSegment(row1));
-    if (begin1 < begin2 && (begin2 - begin1 >= (TPos)minLength)) {
-        TPos end2 = endPosition(sourceSegment(row2));
-        if ((end1 < end2) && (end2 - end1 >= (TPos)minLength)) return true;
-    }
-    
-    return false;
-}
+//template<typename TRow, typename TSize>
+//inline bool
+//_isUpstream(TRow & row1, TRow & row2, TSize minLength) {
+//SEQAN_CHECKPOINT
+//    typedef typename Position<TRow>::Type TPos;
+//    
+//    TPos end1 = endPosition(sourceSegment(row1));
+//    TPos begin2 = beginPosition(sourceSegment(row2));
+//    if (end1 <= begin2) return true;
+//    
+//    TPos begin1 = beginPosition(sourceSegment(row1));
+//    if (begin1 < begin2 && (begin2 - begin1 >= (TPos)minLength)) {
+//        TPos end2 = endPosition(sourceSegment(row2));
+//        if ((end1 < end2) && (end2 - end1 >= (TPos)minLength)) return true;
+//    }
+//    
+//    return false;
+//}
 
 //template<TRow>
 //inline bool
@@ -499,76 +500,212 @@ SEQAN_CHECKPOINT
 //    _isUpstream(row2, row1);
 //}
 
-template<typename TSource, typename TSize>
-inline void
-_insertMatch(String<Align<TSource> > & matches, Align<TSource> & match, TSize minLength) {
+//template<typename TSource, typename TId, typename TSize>
+//inline void
+//_insertMatch(String<SwiftLocalMatch<TSource, TId> >/*String<Align<TSource> >*/ & matches, SwiftLocalMatch<TSource, TId> match, /*Align<TSource> & align,*/ TSize minLength) {
+//SEQAN_CHECKPOINT
+//	typedef SwiftLocalMatch<TSource, TId> TMatch;
+//    typedef typename Position<String<typename TMatch::TAlign/*Align<TSource> */> >::Type TPosString;
+//    //typedef typename Row<Align<TSource> >::Type TRow;
+//
+//    TPosString maxPos = length(matches);
+//    TPosString minPos = 0;
+//
+//    if(maxPos == 0) {
+//        // matches string is empty
+//        appendValue(matches, match);
+//        return;
+//    }
+//
+//    //TRow matchRow0 = row(match.align, 0);
+//    //TRow matchRow1 = row(match.align, 1);
+//
+//    // determine insertion position
+//    TPosString pos = maxPos / 2;
+//    while (pos < maxPos) {
+//        //TRow row0 = row(value(matches, pos).align, 0);
+//        if (_isUpstream(value(matches, pos), match, 0, minLength)) {
+//        //if (_isUpstream(row0, matchRow0, minLength)) {
+//            // match is downstream of matches[pos] in first row
+//            if (minPos == pos) {
+//                ++pos;
+//                break;
+//            }
+//            minPos = pos;
+//        } else if (_isUpstream(match, value(matches, pos), 0, minLength)) {
+//        //} else if (_isUpstream(matchRow0, row0, minLength)) {
+//            // match is upstream of matches[pos] in first row
+//            maxPos = pos;
+//        } else {
+//            // match overlaps in first row with another match
+//            //TRow row1 = row(value(matches, pos).align, 1);
+//            if (_isUpstream(value(matches, pos), match, 1, minLength)) {
+//            //if (_isUpstream(row1, matchRow1, minLength)) {
+//                // match is downstream of matches[pos] in second row
+//                if (minPos == pos) {
+//                    ++pos;
+//                    break;
+//                }
+//                minPos = pos;
+//            } else if (_isUpstream(match, value(matches, pos), 1, minLength)) {
+//            //} else if (_isUpstream(matchRow1, row1, minLength)) {
+//                // match is upstream of matches[pos] in second row
+//                maxPos = pos;
+//            } else {
+//                // match overlaps in both rows with another match -> keep longer match
+//                if (length(row(match.align, 0)/*matchRow0*/) > length(row(value(matches, pos).align, 0)/*row0*/)) {
+//                    // new match is longer
+//                    replace(matches, pos, pos+1, String<TMatch/*Align<TSource>*/ >());
+//                    --maxPos;
+//                } else {
+//                    return;
+//                }
+//            }
+//        }
+//        pos = minPos + ((maxPos-minPos) / 2);
+//    }
+//    // insert match in matches at position pos
+//    String<TMatch/*Align<TSource>*/ > str;
+//    appendValue(str, match);
+//    replace(matches, pos, pos, str);
+//}
+
+// checks if two matches overlap also in seq2 and 
+// whether the non-overlaping parts are shorter than minLength
+template<typename TMatch, typename TSize>
+bool
+checkOverlap(TMatch & matchA, TMatch & matchB, TSize minLength) {
 SEQAN_CHECKPOINT
-    typedef typename Position<String<Align<TSource> > >::Type TPosString;
-    typedef typename Row<Align<TSource> >::Type TRow;
+	// check overlap in seq2
+	if (((TSize)matchA.begin2 - (TSize)matchB.begin2 > minLength &&
+		 (TSize)matchA.end2 - (TSize)matchB.end2 > minLength) ||
+		((TSize)matchB.begin2 - (TSize)matchA.begin2 > minLength &&
+		 (TSize)matchB.end2 - (TSize)matchA.end2 > minLength)) {
+		// non-overlapping parts of both matches are longer than minLength
+		return false;
+	}
 
-    TPosString maxPos = length(matches);
-    TPosString minPos = 0;
+	// same offset in both sequences?
+	if ((TSize)matchA.begin1 - (TSize)matchB.begin1 != (TSize)matchA.begin2 - (TSize)matchB.begin2) {
+		return false;
+	}
 
-    if(maxPos == 0) {
-        // matches string is empty
-        appendValue(matches, match);
-        return;
-    }
+	// check length of non-overlapping parts in seq1
+	if (((TSize)matchA.begin1 - (TSize)matchB.begin1 > minLength &&
+		 (TSize)matchA.end1 - (TSize)matchB.end1 > minLength) ||
+		((TSize)matchB.begin1 - (TSize)matchA.begin1 > minLength &&
+		 (TSize)matchB.end1 - (TSize)matchA.end1 > minLength)) {
+		// non-overlapping parts of both matches are longer than minLength
+		return false;
+	}
 
-    TRow matchRow0 = row(match, 0);
-    TRow matchRow1 = row(match, 1);
+	return true;
+}
 
-    // determine insertion position
-    TPosString pos = maxPos / 2;
-    while (pos < maxPos) {
-        TRow row0 = row(value(matches, pos), 0);
-        if (_isUpstream(row0, matchRow0, minLength)) {
-            // match is downstream of matches[pos] in first row
-            if (minPos == pos) {
-                ++pos;
-                break;
-            }
-            minPos = pos;
-        } else if (_isUpstream(matchRow0, row0, minLength)) {
-            // match is upstream of matches[pos] in first row
-            maxPos = pos;
-        } else {
-            // match overlaps in first row with another match
-            TRow row1 = row(value(matches, pos), 1);
-            if (_isUpstream(row1, matchRow1, minLength)) {
-                // match is downstream of matches[pos] in second row
-                if (minPos == pos) {
-                    ++pos;
-                    break;
-                }
-                minPos = pos;
-            } else if (_isUpstream(matchRow1, row1, minLength)) {
-                // match is upstream of matches[pos] in second row
-                maxPos = pos;
-            } else {
-                // match overlaps in both rows with another match -> keep longer match
-                if (length(matchRow0) > length(row0)) {
-                    // new match is longer
-                    replace(matches, pos, pos+1, String<Align<TSource> >());
-                    --maxPos;
-                } else {
-                    return;
-                }
-            }
-        }
-        pos = minPos + ((maxPos-minPos) / 2);
-    }
-    // insert match in matches at position pos
-    String<Align<TSource> > str;
-    appendValue(str, match);
-    replace(matches, pos, pos, str);
+template<typename TSequence, typename TId, typename TSize>
+void
+maskOverlaps(String<SwiftLocalMatch<TSequence, TId> > & matches,
+			 TSize minLength) {
+SEQAN_CHECKPOINT
+	typedef SwiftLocalMatch<TSequence, TId>						TMatch;
+	typedef typename TMatch::TPos								TPos;
+	
+	typedef unsigned											TCargo;
+	typedef IntervalAndCargo<TPos, TCargo>						TInterval;
+	typedef IntervalTree<TPos, TCargo>							TIntervalTree;
+
+	typedef typename Iterator<String<TCargo>, Standard>::Type	TIntervalIterator;
+	typedef typename Iterator<String<TMatch>, Rooted>::Type		TIterator;
+
+	// put matches into interval tree
+	String<TInterval> intervals;
+	for (unsigned i = 0; i < length(matches); ++i) {
+		TMatch m = value(matches, i);
+		appendValue(intervals, TInterval(m.begin1, m.end1, i));
+	}
+	TIntervalTree tree(intervals);
+
+	TIterator it = begin(matches, Rooted());
+	TIterator itEnd = end(matches, Rooted());
+
+	for (; it != itEnd; ++it) {
+		if ((*it).id == TMatch::INVALID_ID) continue;
+		
+		// find overlapping matches (overlap in seq1)
+		String<TCargo> overlaps;
+		findIntervals(tree, (*it).begin1, (*it).end1, overlaps);
+
+		TIntervalIterator overlapIt = begin(overlaps, Standard());
+		TIntervalIterator overlapItEnd = end(overlaps, Standard());
+
+		for (; overlapIt != overlapItEnd; ++overlapIt) {
+			TMatch overlap = value(matches, *overlapIt);
+			if (overlap.id == TMatch::INVALID_ID || position(it) == *overlapIt) continue;
+
+			// check for overlap in both sequences and small non-overlapping parts
+			if (checkOverlap(*it, overlap, minLength)) {
+				// set shorter match invalid
+				if (length((*it)) > length(overlap)) {
+					overlap.id = TMatch::INVALID_ID;
+				} else {
+					(*it).id = TMatch::INVALID_ID;
+					break;
+				}
+			}
+		}
+	}
+}
+
+template<typename TSequence, typename TId, typename TSize>
+void
+compactMatches(String<SwiftLocalMatch<TSequence, TId> > & matches, TSize numMatches) {
+	typedef SwiftLocalMatch<TSequence, TId>						TMatch;
+	typedef typename Iterator<String<TMatch>, Standard>::Type	TIterator;
+	
+	// sort matches by length (and validity)
+	sortMatches(matches, LessLength<TMatch>());
+	
+	// count valid matches
+	TSize num = 0;
+
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+
+	for(; it != itEnd; ++it) {
+		if ((*it).id != TMatch::INVALID_ID)
+			++num;
+	}
+
+	// keep only valid and longest matches
+	resize(matches, _min(num, numMatches));
+}
+
+template<typename TSource, typename TId, typename TSize, typename TSize1>
+inline void
+_insertMatch(String<SwiftLocalMatch<TSource, TId> > & matches,
+			 SwiftLocalMatch<TSource, TId> match,
+			 TSize minLength,
+			 TSize1 & compactThresh,
+			 TSize1 numMatches) {
+SEQAN_CHECKPOINT
+
+	appendValue(matches, match);
+
+	if (length(matches) > compactThresh) {
+		maskOverlaps(matches, minLength);		// remove overlaps and duplicates
+		compactMatches(matches, numMatches);	// keep only the <numMatches> longest matches
+
+		// raise compact threshold if many matches are kept
+		if ((length(matches) << 1) > compactThresh)
+			compactThresh += (compactThresh >> 1);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // banded alignment on swift hit and extraction of longest contained eps-match
-template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
-         typename TDelta, typename TDrop, typename TAlign>
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, 
+         typename TDrop, typename TSize1, typename TId, typename TSequence/*, typename TAlign*/>
 void
 verifySwiftHit(TInfixA const & a,
 			   TInfixB const & b,
@@ -576,13 +713,19 @@ verifySwiftHit(TInfixA const & a,
 			   TSize minLength,
 			   TDelta delta,
 			   TDrop /*xDrop*/,
-			   String<TAlign> & matches,
+			   TSize1 & compactThresh,
+			   TSize1 numMatches,
+			   TId & queryId,
+			   //String<TAlign> & matches,
+			   String<SwiftLocalMatch<TSequence, TId> > & matches,
 			   BandedGlobal) {
 SEQAN_CHECKPOINT
+	typedef typename SwiftLocalMatch<TSequence, TId>::TAlign TAlign;
+
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
+    TScore mismatchIndel = (TScore)_max((TScore) ceil(-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
 
     // diagonals for banded alignment
@@ -622,14 +765,15 @@ SEQAN_CHECKPOINT
 		return;
 
 	// insert eps-match in matches string
-	_insertMatch(matches, align, minLength);
+	SwiftLocalMatch<TSequence, TId> m(align, queryId);
+	_insertMatch(matches, m, minLength, compactThresh, numMatches);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // banded alignment on swift hit and extraction of longest contained eps-match
-template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
-         typename TDelta, typename TDrop, typename TAlign>
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, 
+         typename TDrop, typename TSize1, typename TId, typename TSequence/*, typename TAlign*/>
 void
 verifySwiftHit(TInfixA const & a,
 			   TInfixB const & b,
@@ -637,13 +781,19 @@ verifySwiftHit(TInfixA const & a,
 			   TSize minLength,
 			   TDelta delta,
 			   TDrop xDrop,
-			   String<TAlign> & matches,
+			   TSize1 & compactThresh,
+			   TSize1 numMatches,
+			   TId & queryId,
+			   //String<TAlign> & matches,
+			   String<SwiftLocalMatch<TSequence, TId> > & matches,
 			   BandedGlobalExtend) {
 SEQAN_CHECKPOINT
+	typedef typename SwiftLocalMatch<TSequence, TId>::TAlign TAlign;
+
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
+    TScore mismatchIndel = (TScore)_max((TScore) ceil(-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
     TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
 
@@ -675,13 +825,14 @@ SEQAN_CHECKPOINT
 		return;
 
 	// insert eps-match in matches string
-	_insertMatch(matches, align, minLength);
+	SwiftLocalMatch<TSequence, TId> m(align, queryId);
+	_insertMatch(matches, m, minLength, compactThresh, numMatches);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize,
-         typename TDelta, typename TDrop, typename TAlign, typename TTag>
+template<typename TInfixA, typename TInfixB, typename TEpsilon, typename TSize, typename TDelta, typename TDrop,
+         typename TSize1, typename TId, typename TSequence/*, typename TAlign*/, typename TTag>
 void
 verifySwiftHit(TInfixA const & a,
                TInfixB const & b,
@@ -689,9 +840,15 @@ verifySwiftHit(TInfixA const & a,
                TSize minLength,
                TDelta delta,
                TDrop xDrop,
-               String<TAlign> & matches,
+			   TSize1 & compactThresh,
+			   TSize1 numMatches,
+			   TId & queryId,
+			   //String<TAlign> & matches,
+			   String<SwiftLocalMatch<TSequence, TId> > & matches,
 			   TTag tag) {
 SEQAN_CHECKPOINT
+	typedef typename SwiftLocalMatch<TSequence, TId>::TAlign TAlign;
+
     TSize maxLength = 1000000000;
     if ((TSize)length(a) > maxLength) {
         std::cerr << "Warning: SWIFT hit <" << beginPosition(a) << "," << endPosition(a);
@@ -703,7 +860,7 @@ SEQAN_CHECKPOINT
     // define a scoring scheme
     typedef int TScore;
     TScore match = 1;
-    TScore mismatchIndel = (TScore)_max((TScore) (-1/eps) + 1, -(TScore)length(host(a)));
+    TScore mismatchIndel = (TScore)_max((TScore) ceil(-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
     TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
 
@@ -716,8 +873,15 @@ SEQAN_CHECKPOINT
     // diagonals for banded local alignment
     __int64 upperDiag = 0;
     __int64 lowerDiag = endPosition(a) - (__int64)endPosition(b) - beginPosition(a) + beginPosition(b);
-    if (beginPosition(b) == 0) upperDiag = lowerDiag + delta;
-    if (endPosition(b) == endPosition(host(b))) lowerDiag = -(__int64)delta;
+	if (beginPosition(b) == 0) {
+		if (endPosition(b) == endPosition(host(b))) {
+			// TODO: is it possible to get a smaller band in this case?
+			upperDiag = delta;
+			lowerDiag = -(__int64)delta;
+		} else
+			upperDiag = lowerDiag + delta;
+	} else if (endPosition(b) == endPosition(host(b)))
+		lowerDiag = -(__int64)delta;
 
 	// banded local alignment
     LocalAlignmentFinder<> finder = LocalAlignmentFinder<>();
@@ -754,23 +918,30 @@ SEQAN_CHECKPOINT
 			}
 
             // insert eps-match in matches string
-            _insertMatch(matches, align, minLength);
+			SwiftLocalMatch<TSequence, TId> m(align, queryId);
+            _insertMatch(matches, m, minLength, compactThresh, numMatches);
             ++aliIt;
         }
 		if (_verifyFast(tag)) break;
     }
 }
 
-// calls swift, verifies swift hits, outputs eps-matches
-template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSource, typename TTag>
+// calls swift, verifies swift hits, returns eps-matches
+template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSize1,
+         typename TSource, typename TId, typename TTag>
 int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
                 Pattern<TIndex, Swift<SwiftLocal> > & pattern,
                 double epsilon,
                 TSize minLength,
                 TDrop xDrop,
-                StringSet<String<Align<TSource> > > & matches,
+			    TSize1 & compactThresh,
+			    TSize1 numMatches,
+				StringSet<TId> & queryIDs,
+                StringSet<String<SwiftLocalMatch<TSource, TId> > > & matches,
+                //StringSet<String<Align<TSource> > > & matches,
 				TTag tag) {
 SEQAN_CHECKPOINT
+	typedef SwiftLocalMatch<TSource, TId> TMatch;
     resize(matches, countSequences(needle(pattern)));
     TSize numSwiftHits = 0;
 
@@ -781,18 +952,26 @@ SEQAN_CHECKPOINT
         ++numSwiftHits;
 
         // verification
-		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)),
-                       epsilon, minLength,
-                       pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap,
-                       xDrop, value(matches, pattern.curSeqNo), tag);
+		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)), epsilon,
+					   minLength, pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap, xDrop, compactThresh,
+					   numMatches, value(queryIDs, pattern.curSeqNo), value(matches, pattern.curSeqNo), tag);
 
         totalLength += length(infix(finder));
         if ((TSize)length(infix(finder)) > maxLength) maxLength = length(infix(finder));
 	}
 
-	if (numSwiftHits > 0) {
-		std::cout << "    Longest hit      : " << maxLength << std::endl;
-		std::cout << "    Avg hit length   : " << totalLength/numSwiftHits << std::endl;
+	//if (numSwiftHits > 0) {
+	//	std::cout << "    Longest hit      : " << maxLength << std::endl;
+	//	std::cout << "    Avg hit length   : " << totalLength/numSwiftHits << std::endl;
+	//}
+	
+	typedef typename Iterator<StringSet<String<TMatch> >, Standard>::Type TIterator;
+	TIterator it = begin(matches, Standard());
+	TIterator itEnd = end(matches, Standard());
+
+	for(; it < itEnd; ++it) {
+		maskOverlaps(*it, minLength);		// remove overlaps and duplicates
+		compactMatches(*it, numMatches);	// keep only the <numMatches> longest matches
 	}
     
     return numSwiftHits;
