@@ -13,9 +13,10 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-
  ============================================================================
-  $Id$
+  Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ ============================================================================
+  Simple matrices;  Used in many alignment algorithms.
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_MATRIX_BASE_H
@@ -272,6 +273,13 @@ _dataFactors(Matrix<TValue, DIMENSION> & me)
 	return me.data_factors;
 }
 
+template <typename TValue, unsigned DIMENSION>
+inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type &
+_dataFactors(Matrix<TValue, DIMENSION> const & me)
+{
+	return me.data_factors;
+}
+
 //____________________________________________________________________________
 
 
@@ -340,6 +348,12 @@ template <typename TValue, unsigned DIMENSION, typename TIteratorSpec>
 struct Iterator< Matrix<TValue, DIMENSION>, TIteratorSpec >
 {
 	typedef Iter<Matrix<TValue, DIMENSION>, PositionIterator> Type;
+};
+
+template <typename TValue, unsigned DIMENSION, typename TIteratorSpec>
+struct Iterator< Matrix<TValue, DIMENSION> const, TIteratorSpec >
+{
+	typedef Iter<Matrix<TValue, DIMENSION> const, PositionIterator> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -466,7 +480,25 @@ nextPosition(Matrix<TValue, DIMENSION> & me,
 
 template <typename TValue, unsigned DIMENSION, typename TPosition>
 inline typename Position<Matrix <TValue, DIMENSION> >::Type
+nextPosition(Matrix<TValue, DIMENSION> const & me,
+			 TPosition position_,
+			 unsigned int dimension_)
+{
+	return position_ + _dataFactors(me)[dimension_];
+}
+
+template <typename TValue, unsigned DIMENSION, typename TPosition>
+inline typename Position<Matrix <TValue, DIMENSION> >::Type
 previousPosition(Matrix<TValue, DIMENSION> & me,
+				 TPosition position_,
+				 unsigned int dimension_)
+{
+	return position_ - _dataFactors(me)[dimension_];
+}
+
+template <typename TValue, unsigned DIMENSION, typename TPosition>
+inline typename Position<Matrix <TValue, DIMENSION> >::Type
+previousPosition(Matrix<TValue, DIMENSION> const & me,
 				 TPosition position_,
 				 unsigned int dimension_)
 {
@@ -507,7 +539,7 @@ inline typename Iterator<Matrix <TValue, DIMENSION> const, Tag<TTag> const>::Typ
 begin(Matrix<TValue, DIMENSION> const & me,
 	  Tag<TTag> const)
 {
-	return typename Iterator<Matrix <TValue, DIMENSION>, Tag<TTag> const >::Type(me, 0);
+	return typename Iterator<Matrix <TValue, DIMENSION> const, Tag<TTag> const >::Type(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -585,7 +617,7 @@ value(Matrix<TValue, DIMENSION> & me,
 
 template <typename TValue, unsigned DIMENSION>
 inline void
-goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
+goNext(Iter<Matrix<TValue, DIMENSION>, PositionIterator> & me,
 	   unsigned int dimension_)
 {
 	setPosition(me, nextPosition(container(me), position(me), dimension_));
@@ -593,7 +625,22 @@ goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
 
 template <typename TValue, unsigned DIMENSION>
 inline void
-goNext(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me)
+goNext(Iter<Matrix<TValue, DIMENSION> const, PositionIterator> & me,
+	   unsigned int dimension_)
+{
+	setPosition(me, nextPosition(container(me), position(me), dimension_));
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
+goNext(Iter<Matrix<TValue, DIMENSION>, PositionIterator> & me)
+{
+	goNext(me, 0);
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
+goNext(Iter<Matrix<TValue, DIMENSION> const, PositionIterator> & me)
 {
 	goNext(me, 0);
 }
@@ -612,9 +659,59 @@ goPrevious(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
 
 template <typename TValue, unsigned DIMENSION>
 inline void
+goPrevious(Iter< Matrix<TValue, DIMENSION> const, PositionIterator > & me,
+		   unsigned int dimension_)
+{
+	setPosition(me, previousPosition(container(me), position(me), dimension_));
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
 goPrevious(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me)
 {
 	goPrevious(me, 0);
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline void
+goPrevious(Iter< Matrix<TValue, DIMENSION> const, PositionIterator > & me)
+{
+	goPrevious(me, 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// goTo
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TValue, unsigned DIMENSION, typename TPosition0, typename TPosition1>
+inline void
+goTo(Iter<Matrix<TValue, DIMENSION>, PositionIterator> & me, TPosition0 pos0, TPosition1 pos1)
+{
+    setPosition(me, pos0 + pos1 * _dataFactors(container(me))[1]);
+}
+
+
+template <typename TValue, unsigned DIMENSION, typename TPosition0, typename TPosition1>
+inline void
+goTo(Iter<Matrix<TValue, DIMENSION> const, PositionIterator> & me, TPosition0 pos0, TPosition1 pos1)
+{
+    setPosition(me, pos0 + pos1 * _dataFactors(container(me))[1]);
+}
+
+
+template <typename TValue, unsigned DIMENSION, typename TPosition0, typename TPosition1, typename TPosition2>
+inline void
+goTo(Iter<Matrix<TValue, DIMENSION>, PositionIterator> & me, TPosition0 pos0, TPosition1 pos1, TPosition2 pos2)
+{
+    setPosition(me, pos0 + pos1 * _dataFactors(container(me))[1] + pos2 * _dataFactors(container(me))[2]);
+}
+
+
+template <typename TValue, unsigned DIMENSION, typename TPosition0, typename TPosition1, typename TPosition2>
+inline void
+goTo(Iter<Matrix<TValue, DIMENSION> const, PositionIterator> & me, TPosition0 pos0, TPosition1 pos1, TPosition2 pos2)
+{
+    setPosition(me, pos0 + pos1 * _dataFactors(container(me))[1] + pos2 * _dataFactors(container(me))[2]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -622,7 +719,15 @@ goPrevious(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me)
 
 template <typename TValue, unsigned DIMENSION>
 inline typename Size< Matrix<TValue, DIMENSION> >::Type
-coordinate(Iter< Matrix<TValue, DIMENSION>, PositionIterator > & me,
+coordinate(Iter<Matrix<TValue, DIMENSION>, PositionIterator > & me,
+		   unsigned int dimension_)
+{
+	return coordinate(container(me), position(me), dimension_);
+}
+
+template <typename TValue, unsigned DIMENSION>
+inline typename Size< Matrix<TValue, DIMENSION> >::Type
+coordinate(Iter<Matrix<TValue, DIMENSION> const, PositionIterator > & me,
 		   unsigned int dimension_)
 {
 	return coordinate(container(me), position(me), dimension_);
