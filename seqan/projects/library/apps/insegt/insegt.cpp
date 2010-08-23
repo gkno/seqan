@@ -69,7 +69,7 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("f", "fusion_genes", "check for fusion genes and create separate output for matepair tuple", (int)OptionType::Boolean));
-	addOption(parser, CommandLineOption("z", "gtf", "GTF-format as input (instead of GFF-format)", (int)OptionType::Boolean));	
+	addOption(parser, CommandLineOption("z", "gtf", "GTF-format as input for annotation (instead of GFF-format)", (int)OptionType::Boolean));	
 
 	if (argc == 1)
 	{
