@@ -27,6 +27,7 @@
 
 #include "seqan_lagan.h"
 #include "seqan_lagan_lagan.h"
+#include "evaluate.h"
 
 void printHelpGlobal() {
     std::cerr << "SeqAn::LAGAN" << std::endl
@@ -35,7 +36,8 @@ void printHelpGlobal() {
               << std::endl
               << "Usage: seqan_lagan [-h, --help]" << std::endl
               << "       seqan_lagan dp LEFT.fasta RIGHT.fasta" << std::endl
-              << "       seqan_lagan lagan LEFT.fasta RIGHT.fasta" << std::endl;
+              << "       seqan_lagan lagan LEFT.fasta RIGHT.fasta" << std::endl
+              << "       seqan_lagan evaluate ALIGNMENT.fasta" << std::endl;
 }
 
 
@@ -45,7 +47,8 @@ int parseOptions(Options<Global> & options, const int argc, const char * argv[])
     if (argc == 1 ||
         (argc >= 2 && CharString(argv[1]) == "--help") ||
         (argc >= 2 && CharString(argv[1]) == "-h") ||
-        (CharString(argv[1]) != "lagan" && CharString(argv[1]) != "dp")) {
+        (CharString(argv[1]) != "lagan" && CharString(argv[1]) != "dp" &&
+         CharString(argv[1]) != "evaluate")) {
         printHelpGlobal();
         return 1;
     }
@@ -55,6 +58,8 @@ int parseOptions(Options<Global> & options, const int argc, const char * argv[])
         options.command = COMMAND_LAGAN;
     } else if (CharString(argv[1]) == "dp") {
         options.command = COMMAND_CLASSIC_DP;
+    } else if (CharString(argv[1]) == "evaluate") {
+        options.command = COMMAND_EVALUATE;
     }
 
     return 0;
@@ -92,6 +97,17 @@ int main(int argc, char const * argv[])
         if (ret != 0)
             return ret;
         return executeParwiseAlignmentCommand(globalOptions, options, leftFilename, rightFilename, ClassicDP());
+    } else if (globalOptions.command == COMMAND_EVALUATE) {
+        CommandLineParser parser;
+        setUpCommandLineParser(parser, Evaluate());
+        Options<Evaluate> options;
+        CharString alignmentFilename;
+        int ret = parseCommandLineAndCheck(options, alignmentFilename, parser, argc, argv);
+        if (options.showHelp)
+            return 0;
+        if (ret != 0)
+            return ret;
+        return executeEvaluation(globalOptions, options, alignmentFilename, Evaluate());
     } else {
         SEQAN_ASSERT_FAIL("Invalid command!");
     }

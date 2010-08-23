@@ -38,10 +38,18 @@
 
 using namespace seqan;
 
+// ===========================================================================
+// Tags, Enums, Classes, Specializations
+// ===========================================================================
+
 enum OutputFormat
 {
+    OUTPUT_SCREEN,
     OUTPUT_FASTA_ALIGN
 };
+
+struct _AlignmentScores {};
+typedef Tag<_AlignmentScores> AlignmentScores;
 
 struct _PairwiseAlignment {};
 typedef Tag<_PairwiseAlignment> PairwiseAlignment;
@@ -53,7 +61,28 @@ struct _ClassicDP : PairwiseAlignment {};
 typedef Tag<_ClassicDP> ClassicDP;
 
 template <>
-struct Options<PairwiseAlignment>
+struct Options<AlignmentScores>
+{
+    // The score value for a match.
+    int scoreMatch;
+    // The score value for a mismatch.
+    int scoreMismatch;
+    // The score value for opening a gap.
+    int scoreGapOpen;
+    // The score value for extending gaps.
+    int scoreGapExtend;
+
+    Options()
+            : scoreMatch(3),
+              scoreMismatch(-2),
+              scoreGapOpen(-3),
+              scoreGapExtend(-1)
+    {}
+};
+
+
+template <>
+struct Options<PairwiseAlignment> : Options<AlignmentScores>
 {
     // Whether or not to show help and exit.
     bool showHelp;
@@ -65,26 +94,12 @@ struct Options<PairwiseAlignment>
     // The output format.
     OutputFormat outputFormat;
 
-    // Alignment Score Related.
-
-    // The score value for a match.
-    int scoreMatch;
-    // The score value for a mismatch.
-    int scoreMismatch;
-    // The score value for opening a gap.
-    int scoreGapOpen;
-    // The score value for extending gaps.
-    int scoreGapExtend;
-
     Options()
-            : showHelp(false),
+            : Options<AlignmentScores>(),
+              showHelp(false),
               // General options
               outputFilename("-"),
-              outputFormat(OUTPUT_FASTA_ALIGN),
-              scoreMatch(3),
-              scoreMismatch(-2),
-              scoreGapOpen(-1),
-              scoreGapExtend(-1)  // TODO(holtgrew): Change to -3 when affine banded chain alignment is in place.
+              outputFormat(OUTPUT_SCREEN)
     {}
 };
 
@@ -135,10 +150,6 @@ struct Options<Lagan> : Options<PairwiseAlignment>
 };
 
 // ===========================================================================
-// Tags, Enums, Classes, Specializations
-// ===========================================================================
-
-// ===========================================================================
 // Metafunctions
 // ===========================================================================
 
@@ -147,15 +158,24 @@ struct Options<Lagan> : Options<PairwiseAlignment>
 // ===========================================================================
 
 template <typename TStream>
-TStream & operator<<(TStream & stream, Options<PairwiseAlignment> const & options)
+TStream & operator<<(TStream & stream, Options<AlignmentScores> const & options)
 {
-    std::cout << "Pairwise Alignment options {" << std::endl
-              << "  outputFilename: " << options.outputFilename << std::endl
-              << "  outputFormat: " << options.outputFormat << std::endl
+    std::cerr << "Alignment Scores options {" << std::endl
               << "  scoreMatch: " << options.scoreMatch << ", " << std::endl
               << "  scoreMismatch: " << options.scoreMismatch << ", " << std::endl
               << "  scoreGapOpen: " << options.scoreGapOpen << ", " << std::endl
               << "  scoreGapExtend: " << options.scoreGapExtend << std::endl
+              << "}" << std::endl;
+    return stream;
+}
+
+template <typename TStream>
+TStream & operator<<(TStream & stream, Options<PairwiseAlignment> const & options)
+{
+    stream << static_cast<Options<AlignmentScores> >(options);
+    std::cerr << "Pairwise Alignment options {" << std::endl
+              << "  outputFilename: " << options.outputFilename << std::endl
+              << "  outputFormat: " << options.outputFormat << std::endl
               << "}" << std::endl;
     return stream;
 }
@@ -183,16 +203,9 @@ TStream & operator<<(TStream & stream, Options<Lagan> const & options)
     return stream;
 }
 
-
 void setUpCommandLineParser(CommandLineParser & parser,
-                            PairwiseAlignment const &)
+                            AlignmentScores const &)
 {
-    addSection(parser, "Input / Output");
-
-    addOption(parser, CommandLineOption("o", "output-filename", "Path to the output file, '-' for stdout.", OptionType::String));
-    addOption(parser, CommandLineOption("of", "output-format", "Alignment format to write. Default is 'fasta'.", OptionType::String));
-    addHelpLine(parser, "  fasta    FASTA Alignment Format.");
-
     addSection(parser, "Alignment Scores");
 
     addOption(parser, CommandLineOption("sm", "score-match", "Score value for a match.", OptionType::Int));
@@ -203,6 +216,20 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addHelpLine(parser, "Score values are applied in the order of the");
     addHelpLine(parser, "command line options above.  Thus, gap open/");
     addHelpLine(parser, "extend overwrite gap.");
+}
+
+
+void setUpCommandLineParser(CommandLineParser & parser,
+                            PairwiseAlignment const &)
+{
+    addSection(parser, "Input / Output");
+
+    addOption(parser, CommandLineOption("o", "output-filename", "Path to the output file, '-' for stdout.", OptionType::String));
+    addOption(parser, CommandLineOption("of", "output-format", "Alignment format to write. Default is 'screen'.", OptionType::String));
+    addHelpLine(parser, "  screen   Suitable for visual inspection on a screen.");
+    addHelpLine(parser, "  fasta    FASTA Alignment Format.");
+
+    setUpCommandLineParser(parser, AlignmentScores());
 }
 
 void setUpCommandLineParser(CommandLineParser & parser,
@@ -236,6 +263,28 @@ void setUpCommandLineParser(CommandLineParser & parser,
     requiredArguments(parser, 2);
 }
 
+int parseCommandLineAndCheck(Options<AlignmentScores> & options,
+                             CommandLineParser & parser,
+                             const int /*argc*/,
+                             const char ** /*argv[]*/)
+{
+    // Apply alignment score related options.
+    if (isSetLong(parser, "score-match"))
+        getOptionValueLong(parser, "score-match", options.scoreMatch);
+    if (isSetLong(parser, "score-mismatch"))
+        getOptionValueLong(parser, "score-mismatch", options.scoreMatch);
+    if (isSetLong(parser, "score-gap")) {
+        getOptionValueLong(parser, "score-gap", options.scoreGapOpen);
+        getOptionValueLong(parser, "score-gap", options.scoreGapExtend);
+    }
+    if (isSetLong(parser, "score-gap-open"))
+        getOptionValueLong(parser, "score-gap-open", options.scoreGapOpen);
+    if (isSetLong(parser, "score-gap-extend"))
+        getOptionValueLong(parser, "score-gap-extend", options.scoreGapExtend);
+
+    return 0;
+}
+
 int parseCommandLineAndCheck(Options<PairwiseAlignment> & options,
                              CommandLineParser & parser,
                              const int argc,
@@ -257,25 +306,20 @@ int parseCommandLineAndCheck(Options<PairwiseAlignment> & options,
     if (isSetLong(parser, "output-format")) {
         CharString outputFormat;
         getOptionValueLong(parser, "output-format", outputFormat);
-        if (outputFormat != "fasta") {
+        if (outputFormat == "screen") {
+            options.outputFormat = OUTPUT_SCREEN;
+        } else if (outputFormat == "fasta") {
+            options.outputFormat = OUTPUT_FASTA_ALIGN;
+        } else {
             std::cerr << "Invalid output format!" << std::endl;
             return 1;
         }
     }
 
-    // Apply alignment score related options.
-    if (isSetLong(parser, "score-match"))
-        getOptionValueLong(parser, "score-match", options.scoreMatch);
-    if (isSetLong(parser, "score-mismatch"))
-        getOptionValueLong(parser, "score-mismatch", options.scoreMatch);
-    if (isSetLong(parser, "score-gap")) {
-        getOptionValueLong(parser, "score-gap", options.scoreGapOpen);
-        getOptionValueLong(parser, "score-gap", options.scoreGapExtend);
-    }
-    if (isSetLong(parser, "score-gap-open"))
-        getOptionValueLong(parser, "score-gap-open", options.scoreGapOpen);
-    if (isSetLong(parser, "score-gap-extend"))
-        getOptionValueLong(parser, "score-gap-extend", options.scoreGapExtend);
+    int ret = parseCommandLineAndCheck(static_cast<Options<AlignmentScores> &>(options),
+                                       parser, argc, argv);
+    if (ret != 0)
+        return ret;
 
     return 0;
 }
@@ -350,14 +394,14 @@ void constructLaganChain(
 	TSeedSet seedSet;
     setMinScoreThreshold(seedSet, options.seedScoreThreshold);
 
-    // std::cout << "Creating index of sequence1;  length(sequence1) == " << length(sequence1) << std::endl;
+    // std::cerr << "Creating index of sequence1;  length(sequence1) == " << length(sequence1) << std::endl;
 	TQGramIndex qGramIndex(sequence1);
 	TFinder finder(qGramIndex);
 
-    std::cout << "Iterating over qgrams" << std::endl;
+    std::cerr << "Iterating over qgrams" << std::endl;
     unsigned q = options.qMax;
 	while (length(seedSet) == 0) {
-        // std::cout << "Iteration..." << std::endl;
+        // std::cerr << "Iteration..." << std::endl;
         // Do not recurse if we have reached the minimal q-gram size.
 		if (q < options.qMin)
             return;
@@ -371,16 +415,16 @@ void constructLaganChain(
 				TPosition pos1 = beginPosition(sequence1) + position(finder);
                 TSeed seed(pos0, pos1, q);
                 setScore(seed, q * scoreMatch(scoringScheme));
-                // std::cout << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
+                // std::cerr << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
                 if (addSeed(seedSet, seed, options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
-                    // std::cout << "  by merging" << std::endl;
+                    // std::cerr << "  by merging" << std::endl;
                     continue;
                 }
 				if (addSeed(seedSet, seed, options.chainingMaxDistance, options.chainingMaxDiagonalDistance, scoringScheme, sequence0, sequence1, Chaos())) {
-                    // std::cout << "  by CHAOS chaining" << std::endl;
+                    // std::cerr << "  by CHAOS chaining" << std::endl;
                     continue;
                 }
-                // std::cout << "  as single seed" << std::endl;
+                // std::cerr << "  as single seed" << std::endl;
 				addSeed(seedSet, seed, Single());
 			}
 			clear(finder);
@@ -391,8 +435,8 @@ void constructLaganChain(
     // -----------------------------------------------------------------------
     // Perform global chaining of these seeds
     // -----------------------------------------------------------------------
-    std::cout << "Global chaining..." << std::endl;
-    // std::cout << "length(seedSet) == " << length(seedSet) << std::endl;
+    std::cerr << "Global chaining..." << std::endl;
+    // std::cerr << "length(seedSet) == " << length(seedSet) << std::endl;
     chainSeedsGlobally(chain, seedSet, SparseChaining());
 
     // -----------------------------------------------------------------------
@@ -437,7 +481,11 @@ int writeOutputPairwiseToStream(TStream & stream,
                                 TSequenceIds const & sequenceIds,
                                 Options<TAlgorithm> const & options)
 {
-    if (options.outputFormat == OUTPUT_FASTA_ALIGN) {
+    if (options.outputFormat == OUTPUT_SCREEN) {
+        stream << "Alignment of sequences " << sequenceIds[0] << " and " << sequenceIds[1] << std::endl;
+        stream << alignment;
+        return 0;
+    } else if (options.outputFormat == OUTPUT_FASTA_ALIGN) {
         write(stream, alignment, sequenceIds, FastaAlign());
         return 0;
     } else {
@@ -483,14 +531,14 @@ int performPairwiseAlignment(
     TSeedChain seedChain;
     constructLaganChain(seedChain, sequence0, sequence1, options);
     if (length(seedChain) == 0) {
-        std::cout << "ERROR: No similarity found!" << std::endl;
+        std::cerr << "ERROR: No similarity found!" << std::endl;
         return 1;
     }
 
     // Perform banded alignment around this seed.
-    Score<int, Simple> scoringScheme(options.scoreMatch, options.scoreMismatch, options.scoreGapOpen, options.scoreGapExtend);
+    Score<int, Simple> scoringScheme(options.scoreMatch, options.scoreMismatch, options.scoreGapExtend, options.scoreGapOpen);
     int score = bandedChainAlignment(alignment, seedChain, options.chainAlignmentBandwidthDelta, scoringScheme, AlignConfig<false, false, false, false>());
-    (void) score;
+    std::cerr << "Alignment score is " << score << std::endl;
     
     return 0;
 }
@@ -506,13 +554,15 @@ int performPairwiseAlignment(
     clearGaps(row(alignment, 0));
     clearGaps(row(alignment, 1));
 
-    Score<int, Simple> scoringScheme(options.scoreMatch, options.scoreMismatch, options.scoreGapOpen, options.scoreGapExtend);
+    Score<int, Simple> scoringScheme(options.scoreMatch, options.scoreMismatch, options.scoreGapExtend, options.scoreGapOpen);
 
+    int score = 0;
     if (options.scoreGapOpen == options.scoreGapExtend) {
-        globalAlignment(alignment, scoringScheme, NeedlemanWunsch());
+        score = globalAlignment(alignment, scoringScheme, NeedlemanWunsch());
     } else {
-        globalAlignment(alignment, scoringScheme, Gotoh());
+        score = globalAlignment(alignment, scoringScheme, Gotoh());
     }
+    std::cerr << "Alignment score is " << score << std::endl;
     return 0;
 }
 
@@ -529,10 +579,10 @@ int executeParwiseAlignmentCommand(
     typedef CharString TSequenceIdentifier;
     typedef ArrayGaps TAlignSpec;
 
-    std::cout << "Pairwise LAGAN alignment of " << leftFilename << " and " << rightFilename << std::endl;
-    std::cout << std::endl;
-    std::cout << options;
-    std::cout << std::endl;
+    std::cerr << "Pairwise LAGAN alignment of " << leftFilename << " and " << rightFilename << std::endl << std::endl;
+    std::cerr << std::endl;
+    std::cerr << options;
+    std::cerr << std::endl;
 
     // Declare variables for sequences and sequence identifiers.
     TSequence sequence0;
@@ -552,9 +602,9 @@ int executeParwiseAlignmentCommand(
         read(f1, sequence1, Fasta());
     }
 
-    std::cout << "Sequence Information" << std::endl;
-    std::cout << "  sequence 0 is " << sequenceIds[0] << std::endl;
-    std::cout << "  sequence 1 is " << sequenceIds[1] << std::endl;
+    std::cerr << "Sequence Information" << std::endl;
+    std::cerr << "  sequence 0 is " << sequenceIds[0] << std::endl;
+    std::cerr << "  sequence 1 is " << sequenceIds[1] << std::endl;
 
     // Initialize Align object.
     Align<TSequence, TAlignSpec> alignment;
