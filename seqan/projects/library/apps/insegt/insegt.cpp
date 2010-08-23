@@ -19,6 +19,7 @@
 
 #include "base.h"
 #include "read_gff.h"
+#include "read_gtf.h"
 #include "create_gff.h"
 #include "fusion.h"
 #include "overlap_module.h"
@@ -44,6 +45,7 @@ int main( int argc, const char *argv[] )
 	bool exact_nTuple = 0;
 	bool unknownO = 0;
 	bool fusion = 0;
+	bool gtf = 0;
 	
 	CommandLineParser parser;
 	
@@ -67,7 +69,8 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("f", "fusion_genes", "check for fusion genes and create separate output for matepair tuple", (int)OptionType::Boolean));
-	
+	addOption(parser, CommandLineOption("z", "gtf", "GTF-format as input (instead of GFF-format)", (int)OptionType::Boolean));	
+
 	if (argc == 1)
 	{
 		shortHelp(parser, cerr);	// print short help and exit
@@ -89,7 +92,8 @@ int main( int argc, const char *argv[] )
 	if (isSetLong(parser, "exact_nTuple")) exact_nTuple = 1;
 	if (isSetLong(parser, "unknown_orientation")) unknownO = 1;
 	if (isSetLong(parser, "fusion_genes")) fusion = 1;
-	
+	if (isSetLong(parser, "gtf")) gtf = 1;	
+
 	if (maxTuple) 
 	{
 		nTuple = 0;		// sign for maxTuple
@@ -97,7 +101,7 @@ int main( int argc, const char *argv[] )
 	}
 
 	
-	ngsOverlapper(nameSAM, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO, fusion);
+	ngsOverlapper(nameSAM, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO, fusion, gtf);
 	return 0;
 }
 
