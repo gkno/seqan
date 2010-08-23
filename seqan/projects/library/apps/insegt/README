@@ -123,7 +123,12 @@ the command line:
   [ -f],   [ --fusion_genes ]
 
   Check for fusion genes. A separate output for matepair tupel, which map in 
-  different genes, is created.
+  different genes, is created. By default there is no check for fusion genes.
+
+  [ -z],   [ --gtf ]
+
+  The gene-annotations are given in a GTF file (instead of GFF).
+  By default INSEGT expects a GFF file.
 
 ---------------------------------------------------------------------------
 4. Input General Feature Format
