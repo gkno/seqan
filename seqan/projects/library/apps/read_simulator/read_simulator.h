@@ -800,9 +800,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
                         appendValue(flipped, mateNum == 1);
                     }
-                    sprintf(readName, "%s.%09u/%d contig=%s haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
                 } else {
-                    sprintf(readName, "%s.%09u contig=%s haploid=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
                 }
                 for (unsigned i = 0; i < length(inst.editString); ++i) {
                     char buffer[2] = "*";
