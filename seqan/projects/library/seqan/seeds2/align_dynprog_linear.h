@@ -52,6 +52,7 @@ _align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0
 
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, length(sequence1) + 1);
+    // fill(matrix, -42);
     resize(matrix);
 }
 
@@ -129,7 +130,7 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 2> & matrix, Score<TScoreValue, 
     // std::cout << "overlap0 = " << overlap0 << ", overlap1 = " << overlap1 << std::endl;
     TIterator it = begin(matrix);
     TIterator otherIt(otherMatrix);
-    setPosition(otherIt, (length(otherMatrix, 0) - (overlap0 + 1)) + overlap0 * _dataFactors(otherMatrix)[1]);
+    goTo(otherIt, length(otherMatrix, 0) - (overlap0 + 1), overlap0);
     TIterator srcIt = otherIt;
     for (TOverlap i = 0; i < overlap0 + 1; ++i) {
         *it = *srcIt;
@@ -201,22 +202,22 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
         }
     }
 
-    // TODO(holtgrew): Debug code, remove when working.
-    {
-        for (int k = 0; k < 1; ++k) {
-            std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-                        std::cout << "\tinf";
-                    else
-                        std::cout << "\t" << value(matrix, i, j, k);
-                }
-                std::cout << std::endl;
-            }
-            std::cout << "`--" << std::endl;
-        }
-    }
+    // // TODO(holtgrew): Debug code, remove when working.
+    // {
+    //     for (int k = 0; k < 1; ++k) {
+    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                     std::cout << "\tinf";
+    //                 else
+    //                     std::cout << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         std::cout << "`--" << std::endl;
+    //     }
+    // }
 }
 
 
@@ -274,7 +275,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     TPosition origPos1 = pos1;
     // Iterator to current entry in the matrix.
     TMatrixIterator matrixIt = begin(matrix);
-    setPosition(matrixIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPositionw ith coordinates.
+    goTo(matrixIt, pos0, pos1);
     TMatrixIterator origMatrixIt = matrixIt;
 
     // Search for starting point of the trace.

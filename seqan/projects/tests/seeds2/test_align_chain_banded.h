@@ -158,7 +158,27 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
 {
     using namespace seqan;
     typedef Seed<Simple> TSeed;
-    
+
+    // Test alignment with chain of length 1 with various bandwidths
+    // to check that too large bandwidths do not do any harm.
+    for (unsigned k = 0; k < 6; ++k)
+    {
+        CharString sequence0 = "NNNAAANNN";
+        CharString sequence1 =  "NCAAACNN";  // TODO(holtgrew): Switch back again.
+        Score<int, Simple> scoringScheme(2, -1, -2);
+
+        String<TSeed> seedChain;
+        appendValue(seedChain, TSeed(3, 2, 6, 5));
+
+        Align<CharString, ArrayGaps> alignment;
+        resize(rows(alignment), 2);
+        assignSource(row(alignment, 0), sequence0);
+        assignSource(row(alignment, 1), sequence1);
+
+        int result = bandedChainAlignment(alignment, seedChain, k, scoringScheme, AlignConfig<false, false, false, false>());
+        SEQAN_ASSERT_EQ_MSG(result, 8, "k == %u", k);
+    }
+
     // Test on whole strings.
     {
         // Resulting alignment should be something like this (seeds
@@ -181,10 +201,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        std::cout << "===============================================" << std::endl;
-        int result = bandedChainAlignment(alignment, seedChain, 4, scoringScheme, AlignConfig<false, false, false, false>());
-        std::cout << "result == " << result << std::endl << alignment << std::endl;
-        std::cout << "===============================================" << std::endl;
+        int result = bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 5);
 
         // Compare alignment rows.
@@ -231,6 +248,33 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
 {
     using namespace seqan;
     typedef Seed<Simple> TSeed;
+
+    // Test alignment with chain of length 1 with various bandwidths
+    // to check that too large bandwidths do not do any harm.
+    for (unsigned k = 0; k < 6; ++k)
+    {
+        CharString sequence0 = "NNNAAANNN";
+        CharString sequence1 =  "NCAAACNN";  // TODO(holtgrew): Switch back again.
+        Score<int, Simple> scoringScheme(2, -1, -2);
+
+        String<TSeed> seedChain;
+        appendValue(seedChain, TSeed(3, 2, 6, 5));
+
+        Align<CharString, ArrayGaps> alignment;
+        resize(rows(alignment), 2);
+        assignSource(row(alignment, 0), sequence0);
+        assignSource(row(alignment, 1), sequence1);
+
+        int result = _bandedChainAlignment(alignment, seedChain, k, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+        SEQAN_ASSERT_EQ_MSG(result, 8, "k == %u", k);
+
+        // Compare alignment rows.
+        //
+        // Note that leading and trailing gaps are not stored, so the
+        // start and end gaps do not appear in the strings.
+        // SEQAN_ASSERT_TRUE_MSG(row(alignment, 0) == "NNNAAANNN", "k == %u", k);
+        // SEQAN_ASSERT_TRUE_MSG(row(alignment, 1) == /*-*/"NCAAACNN", "k == %u", k);
+    }
 
     // Test on whole strings.
     {
@@ -311,7 +355,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGC--ACA");
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
         SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
     }
     // Test on infixes -- linear gap costs.
@@ -334,13 +378,12 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
 
         int result = _bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
         SEQAN_ASSERT_EQ(result, 5);
-        std::cout << alignment;
 
         // Compare alignment rows.
         //
         // Note that leading and trailing gaps are not stored, so the
         // start and end gaps do not appear in the strings.
-        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGC--ACA");
+        SEQAN_ASSERT_TRUE(row(alignment, 0) == "GGCGA-TNNNCATGGCACA"/*--*/);
         SEQAN_ASSERT_TRUE(row(alignment, 1) == /*--*/"CGAATC--CATCCCACACA");
     }
 }

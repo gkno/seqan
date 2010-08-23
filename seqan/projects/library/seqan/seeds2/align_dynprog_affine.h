@@ -140,7 +140,7 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, 
     TIterator itIBBegin = itIABegin;
     goNext(itIBBegin, 2);
     TIterator otherItMBegin = begin(otherMatrix);
-    setPosition(otherItMBegin, (length(otherMatrix, 0) - (overlap0 + 1)) + overlap0 * _dataFactors(otherMatrix)[1]);
+    goTo(otherItMBegin, length(otherMatrix, 0) - (overlap0 + 1), overlap0);
     TIterator otherItIABegin = otherItMBegin;
     goNext(otherItIABegin, 2);
     TIterator otherItIBBegin = otherItIABegin;
@@ -262,22 +262,22 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
         }
     }
 
-    // TODO(holtgrew): Debug code, remove when working.
-    {
-        for (int k = 0; k < 3; ++k) {
-            std::cout << ",-- *** filled alignment matrix " << k << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-                        std::cout << "\tinf";
-                    else
-                        std::cout << "\t" << value(matrix, i, j, k);
-                }
-                std::cout << std::endl;
-            }
-            std::cout << "`--" << std::endl;
-        }
-    }
+    // // TODO(holtgrew): Debug code, remove when working.
+    // {
+    //     for (int k = 0; k < 3; ++k) {
+    //         std::cout << ",-- *** filled alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                     std::cout << "\tinf";
+    //                 else
+    //                     std::cout << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         std::cout << "`--" << std::endl;
+    //     }
+    // }
 }
 
 // Compute traceback in the given normal DP alignment matrix, starting
@@ -307,7 +307,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
     // Iterators to current entries in the matrices.
     TMatrixIterator diagonalIt = begin(matrix);
-    setPosition(diagonalIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPositionw ith coordinates.
+    goTo(diagonalIt, pos0, pos1);
     TMatrixIterator verticalIt = diagonalIt;
     goNext(verticalIt, 2);
     TMatrixIterator horizontalIt = verticalIt;

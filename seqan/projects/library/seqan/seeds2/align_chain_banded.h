@@ -168,6 +168,7 @@ _alignLeadingRectangle(
         AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
     SEQAN_CHECKPOINT;
+    // std::cout << "_alignLeadingRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
@@ -177,18 +178,18 @@ _alignLeadingRectangle(
     // Compute overlap of the rectangle with the seed to the lower right.
     TSize rightOverlap0, rightOverlap1;
     _computeUpperLeftOverlap(rightOverlap0, rightOverlap1, rightSeed, alignmentChain);
-    std::cout << "rightSeed == " << rightSeed << std::endl;
-    std::cout << "rightOverlap0 == " << rightOverlap0 << "rightOverlap1 == " << rightOverlap1 << std::endl;
+    // std::cout << "rightSeed == " << rightSeed << std::endl;
+    // std::cout << "rightOverlap0 == " << rightOverlap0 << "rightOverlap1 == " << rightOverlap1 << std::endl;
 
     // Get infixes of the sequences that correspond to this rectangle.
     TInfix prefix0 = prefix(value(alignmentChain.sequence0_), getBeginDim0(rightSeed) + rightOverlap0);
     TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
-    std::cout << ",-- _alignLeadingRectangle" << std::endl;
-    std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
-    std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
-    std::cout << "`--" << std::endl;
+    // std::cout << ",-- _alignLeadingRectangle" << std::endl;
+    // std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
+    // std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
+    // std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -225,6 +226,7 @@ _alignTrailingRectangle(
         Seed<TSeedSpec, TSeedConfig> const & leftSeed)
 {
     SEQAN_CHECKPOINT;
+    // std::cout << "_alignTrailingRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
@@ -246,10 +248,10 @@ _alignTrailingRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // TODO(holtgrew): Temporary debug code.
-    std::cout << ",-- _alignTrailingRectangle" << std::endl;
-    std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
-    std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
-    std::cout << "`--" << std::endl;
+    // std::cout << ",-- _alignTrailingRectangle" << std::endl;
+    // std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
+    // std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
+    // std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -305,6 +307,7 @@ _alignRectangle(
         Seed<TSeedSpec, TSeedConfig> const & rightSeed)
 {
     SEQAN_CHECKPOINT;
+    // std::cout << "_alignRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
@@ -327,12 +330,12 @@ _alignRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // // TODO(holtgrew): Temporary debug code.
-    std::cout << ",-- _alignRectangle" << std::endl;
-    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    std::cout << "`--" << std::endl;
-    std::cout << "left seed = " << leftSeed << std::endl;
-    std::cout << "right seed = " << rightSeed << std::endl;
+    // std::cout << ",-- _alignRectangle" << std::endl;
+    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
+    // std::cout << "`--" << std::endl;
+    // std::cout << "left seed = " << leftSeed << std::endl;
+    // std::cout << "right seed = " << rightSeed << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -387,6 +390,7 @@ _alignSeed(
         Seed<TSeedSpec, TSeedConfig> const & seed)
 {
     SEQAN_CHECKPOINT;
+    // std::cout << "_alignSeed ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
     typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
@@ -406,13 +410,20 @@ _alignSeed(
     // Compute lower and upper diagonal for the alignment.
     TDiagonal lowerDiagonal = getLowerDiagonal(seed) - getStartDiagonal(seed) - alignmentChain.bandwidth_;
     TDiagonal upperDiagonal = getUpperDiagonal(seed) - getStartDiagonal(seed) + alignmentChain.bandwidth_;
-    // std::cout << "lowerDiagonal = " << lowerDiagonal << ", upperDiagonal = " << upperDiagonal << std::endl;
+    // Limit lower and upper diagonal so no more than a whole rectangle is computed.
+    TDiagonal maxBandwidth = getEndDim0(seed) - getBeginDim0(seed) - 1;
+    // std::cout << "lowerDiagonal = _max(" << lowerDiagonal << ", - " << maxBandwidth << ");" << std::endl;
+    // std::cout << "upperDiagonal = _min(" << upperDiagonal << ", " << getEndDiagonal(seed) << " - " << getStartDiagonal(seed) << " + " << maxBandwidth << ");" << std::endl;
+    lowerDiagonal = _max(lowerDiagonal, - maxBandwidth);
+    upperDiagonal = _min(upperDiagonal, getEndDiagonal(seed) - getStartDiagonal(seed) + maxBandwidth);
+    // std::cout << "seed == " << seed << std::endl;
+    // std::cout << "leftOverlap0 == " << leftOverlap0 << "leftOverlap1 == " << leftOverlap1 << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
-    std::cout << ",-- _alignSeed" << std::endl;
-    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    std::cout << "`--" << std::endl;
+    // std::cout << ",-- _alignSeed" << std::endl;
+    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
+    // std::cout << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -500,6 +511,7 @@ _glueAlignmentChain(
     // Traceback through trailing rectangle and seed.
     TPosition finalPos0 = 0;
     TPosition finalPos1 = 0;
+    // std::cout << "trace back through trailing..." << std::endl;
     TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, 1, 1, false, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl;
     // std::cout << alignment;
@@ -510,6 +522,11 @@ _glueAlignmentChain(
     _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
     TPosition lowerTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
     TPosition upperTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+    TPosition maxTriangleEdgeLength = getEndDim0(value(seedChainIt)) - getBeginDim0(value(seedChainIt)) - 1;
+    lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
+    upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
+    // std::cout << "trace back through last seed..." << std::endl;
+    // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
     _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
     goPrevious(matricesIt);
 
@@ -517,21 +534,30 @@ _glueAlignmentChain(
     
     // Traceback through matrices in reverse order.
     for (TPosition i = 0, iend = length(seedChain) - 1; i < iend; ++i) {
+        // std::cout << "trace back through seed..." << std::endl;
+        // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
         _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
         _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         goPrevious(seedChainIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
 
+        // std::cout << "trace back through rectangle..." << std::endl;
+        // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
         _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
         lowerTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
         upperTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+        maxTriangleEdgeLength = getEndDim0(value(seedChainIt)) - getBeginDim0(value(seedChainIt)) - 1;
+        lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
+        upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
         _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
     }
 
-    // // Traceback through leading rectangle.
+    // std::cout << "trace back through leading..." << std::endl;
+    // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
+    // Traceback through leading rectangle.
     _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
     _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, true, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl << alignment;
@@ -690,7 +716,7 @@ _bandedChainAlignment(
     // Compute Alignment using Alignment Chain
     //
     // Compute alignment for leading rectangle and the first seed.
-    std::cout << "first seed: " << front(seedChain) << std::endl;
+    // std::cout << "first seed: " << front(seedChain) << std::endl;
     _alignLeadingRectangle(alignmentChain, front(seedChain), alignConfig);
     _alignSeed(alignmentChain, front(seedChain));
 

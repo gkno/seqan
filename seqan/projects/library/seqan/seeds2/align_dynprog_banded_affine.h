@@ -143,30 +143,20 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScor
     typedef typename Iterator<TMatrix>::Type TIterator;
     typedef typename Position<TMatrix>::Type TPosition;
 
-    // Initialize the diagonal below the lower one with infimas.
+    // Copy over left gutter column.
     TIterator diagonalIt = begin(matrix);
+    goTo(diagonalIt, 0, 1 - lowerDiagonal);
     TIterator verticalIt = diagonalIt;
     goNext(verticalIt, 2);
     TIterator horizontalIt = verticalIt;
     goNext(horizontalIt, 2);
-    for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(horizontalIt, 0)) {
-        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
-    }
-
-    // Copy over left gutter column.
-    setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
-    verticalIt = diagonalIt;
-    goNext(verticalIt, 2);
-    horizontalIt = verticalIt;
-    goNext(horizontalIt, 2);
     TIterator srcDiagonalIt = begin(otherMatrix);
-    setPosition(srcDiagonalIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
+    goTo(srcDiagonalIt, length(otherMatrix, 0) - overlap0 - 1, length(otherMatrix, 1) - overlap1 - 1);
     TIterator srcVerticalIt = srcDiagonalIt;
     goNext(srcVerticalIt, 2);
     TIterator srcHorizontalIt = srcVerticalIt;
     goNext(srcHorizontalIt, 2);
-    for (TOverlap i = 0; i < overlap0; ++i) {
+    for (TOverlap i = 0; i < overlap0 + 1; ++i) {
         *diagonalIt = *srcDiagonalIt;
         // *verticalIt = *srcVerticalIt;
         *horizontalIt = *srcHorizontalIt;
@@ -180,15 +170,25 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScor
         goNext(horizontalIt, 0);
         goPrevious(horizontalIt, 1);
     }
+    // Initialize the diagonal below the lower one with infimas.
+    diagonalIt = begin(matrix);
+    verticalIt = diagonalIt;
+    goNext(verticalIt, 2);
+    horizontalIt = verticalIt;
+    goNext(horizontalIt, 2);
+    for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(horizontalIt, 0)) {
+        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+    }
 
     // Copy over a row from the other matrix into the top gutter.
-    setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
+    goTo(diagonalIt, 0, 1 - lowerDiagonal);
     verticalIt = diagonalIt;
     goNext(verticalIt, 2);
     horizontalIt = verticalIt;
     goNext(horizontalIt, 2);
     srcDiagonalIt = begin(otherMatrix);
-    setPosition(srcDiagonalIt, (length(otherMatrix, 0) - overlap0 - 1) + (length(otherMatrix, 1) - overlap1 - 1) * _dataFactors(otherMatrix)[1]);
+    goTo(srcDiagonalIt, length(otherMatrix, 0) - overlap0 - 1, length(otherMatrix, 1) - overlap1 - 1);
     srcVerticalIt = srcDiagonalIt;
     goNext(srcVerticalIt, 2);
     // srcHorizontalIt = srcVerticalIt;
@@ -325,25 +325,25 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
             it0Begin += 1;
     }
 
-    // TODO(holtgrew): Debug code, remove when working.
-    {
-        for (int k = 0; k < 3; ++k) {
-            std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                std::cout << "| ";
-                for (unsigned j = 0; j < i; ++j)
-                    std::cout << "\t";
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-                        std::cout << "\tinf";
-                    else
-                        std::cout << "\t" << value(matrix, i, j, k);
-                }
-                std::cout << std::endl;
-            }
-            std::cout << "`--" << std::endl;
-        }
-    }
+    // // TODO(holtgrew): Debug code, remove when working.
+    // {
+    //     for (int k = 0; k < 3; ++k) {
+    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             std::cout << "| ";
+    //             for (unsigned j = 0; j < i; ++j)
+    //                 std::cout << "\t";
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                     std::cout << "\tinf";
+    //                 else
+    //                     std::cout << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cout << std::endl;
+    //         }
+    //         std::cout << "`--" << std::endl;
+    //     }
+    // }
 }
 
 
