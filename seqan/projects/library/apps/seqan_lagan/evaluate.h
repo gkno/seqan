@@ -115,7 +115,7 @@ int evaluateAlignment(TAlignment const & alignment,
 
     int totalScore = 0;
     for (unsigned i = beginPos; i < endPos; ++i) {
-        SEQAN_ASSERT_TRUE(!isGap(row(alignment, 0), i) || !isGap(row(alignment, 1), i));
+        SEQAN_ASSERT_TRUE_MSG(!isGap(row(alignment, 0), i) || !isGap(row(alignment, 1), i), "i = %u", i);
         if (isGap(row(alignment, 0), i)) {
             if (inGap0)
                 totalScore += options.scoreGapExtend;

@@ -76,7 +76,7 @@ struct Options<AlignmentScores>
             : scoreMatch(3),
               scoreMismatch(-2),
               scoreGapOpen(-3),
-              scoreGapExtend(-1)
+              scoreGapExtend(-3)
     {}
 };
 
@@ -145,7 +145,7 @@ struct Options<Lagan> : Options<PairwiseAlignment>
               seedScoreThreshold(5), // was 30
               chainingMaxDistance(200),
               chainingMaxDiagonalDistance(5),
-              chainAlignmentBandwidthDelta(5)
+              chainAlignmentBandwidthDelta(2)
     {}
 };
 
@@ -416,10 +416,10 @@ void constructLaganChain(
                 TSeed seed(pos0, pos1, q);
                 setScore(seed, q * scoreMatch(scoringScheme));
                 // std::cerr << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
-                if (addSeed(seedSet, seed, options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
-                    // std::cerr << "  by merging" << std::endl;
-                    continue;
-                }
+                // if (addSeed(seedSet, seed, options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
+                //     // std::cerr << "  by merging" << std::endl;
+                //     continue;
+                // }
 				if (addSeed(seedSet, seed, options.chainingMaxDistance, options.chainingMaxDiagonalDistance, scoringScheme, sequence0, sequence1, Chaos())) {
                     // std::cerr << "  by CHAOS chaining" << std::endl;
                     continue;
@@ -438,6 +438,7 @@ void constructLaganChain(
     std::cerr << "Global chaining..." << std::endl;
     // std::cerr << "length(seedSet) == " << length(seedSet) << std::endl;
     chainSeedsGlobally(chain, seedSet, SparseChaining());
+    // std::cout << "length(chain) == " << length(chain) << std::endl;
 
     // -----------------------------------------------------------------------
     // Recursively fill gaps
