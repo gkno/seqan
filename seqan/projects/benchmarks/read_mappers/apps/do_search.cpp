@@ -19,11 +19,11 @@ using namespace seqan;
 int main(int argc, char **argv) {
     if (argc != 3) return 1;
 
-    DnaString contig = argv[1];
-    DnaString read = argv[2];
+    Dna5String contig = argv[1];
+    Dna5String read = argv[2];
 
-    Finder<DnaString> finder(contig);
-    Pattern<DnaString, MyersUkkonenReads> pattern(read, -length(read));
+    Finder<Dna5String> finder(contig);
+    Pattern<Dna5String, MyersUkkonenReads> pattern(read, -length(read));
 
     EditDistanceScore scoring;
 
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         findBegin(finder, pattern, getScore(pattern));
 
         std::cout << "end = " << endPosition(finder) << ", begin = " << beginPosition(finder) << ", last = " << endPosition(finder) - 1 << ", score = " << getScore(pattern) << std::endl;
-        Align<Segment<DnaString, InfixSegment> > ali;
+        Align<Segment<Dna5String, InfixSegment> > ali;
         appendValue(rows(ali), infix(finder));
         appendValue(rows(ali), infix(read, 0, length(read)));
         int scoreValue = globalAlignment(ali, scoring, NeedlemanWunsch());
