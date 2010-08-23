@@ -20,6 +20,7 @@
 #include "base.h"
 #include "read_gff.h"
 #include "create_gff.h"
+#include "fusion.h"
 #include "overlap_module.h"
 
 using namespace seqan;
@@ -42,6 +43,7 @@ int main( int argc, const char *argv[] )
 	bool maxTuple = 0;
 	bool exact_nTuple = 0;
 	bool unknownO = 0;
+	bool fusion = 0;
 	
 	CommandLineParser parser;
 	
@@ -64,6 +66,7 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("m", "maxTuple", "create only maxTuple", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("e", "exact_nTuple", "create only Tuple of exact length n", (int)OptionType::Boolean));
 	addOption(parser, CommandLineOption("u", "unknown_orientation", "orientation of reads is unknown", (int)OptionType::Boolean));
+	addOption(parser, CommandLineOption("f", "fusion_genes", "check for fusion genes and create separate output for matepair tuple", (int)OptionType::Boolean));
 	
 	if (argc == 1)
 	{
@@ -85,14 +88,16 @@ int main( int argc, const char *argv[] )
 	if (isSetLong(parser, "maxTuple")) maxTuple = 1;
 	if (isSetLong(parser, "exact_nTuple")) exact_nTuple = 1;
 	if (isSetLong(parser, "unknown_orientation")) unknownO = 1;
+	if (isSetLong(parser, "fusion_genes")) fusion = 1;
 	
 	if (maxTuple) 
 	{
 		nTuple = 0;		// sign for maxTuple
 		exact_nTuple = 0;	// not both possible: maxTuple is prefered over exact_nTuple and n
 	}
+
 	
-	ngsOverlapper(nameSAM, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO);
+	ngsOverlapper(nameSAM, nameGFF, outputPath, nTuple, exact_nTuple, thresholdGaps, offsetInterval, thresholdCount, thresholdRPKM, unknownO, fusion);
 	return 0;
 }
 
