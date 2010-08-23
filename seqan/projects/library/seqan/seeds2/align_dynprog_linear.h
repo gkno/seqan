@@ -52,8 +52,8 @@ _align_resizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0
 
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, length(sequence1) + 1);
-    // fill(matrix, -42);
-    resize(matrix);
+    fill(matrix, -420);
+    // resize(matrix);
 }
 
 
@@ -202,22 +202,22 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
         }
     }
 
-    // // TODO(holtgrew): Debug code, remove when working.
-    // {
-    //     for (int k = 0; k < 1; ++k) {
-    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
-    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
-    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-    //                     std::cout << "\tinf";
-    //                 else
-    //                     std::cout << "\t" << value(matrix, i, j, k);
-    //             }
-    //             std::cout << std::endl;
-    //         }
-    //         std::cout << "`--" << std::endl;
-    //     }
-    // }
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 1; ++k) {
+            std::cerr << ",-- *** filled unbanded alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cerr << "\tinf";
+                    else
+                        std::cerr << "\t" << value(matrix, i, j, k);
+                }
+                std::cerr << std::endl;
+            }
+            std::cerr << "`--" << std::endl;
+        }
+    }
 }
 
 
@@ -352,13 +352,13 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 			gh = (h > v) || (d + scoreDifference >= v);
         }
 
-        // if (gv && gh) {
-        //     std::cout << "GO DIAGONAL" << std::endl;
-        // } else if (gv) {
-        //     std::cout << "GO VERTICAL" << std::endl;
-        // } else if (gh) {
-        //     std::cout << "GO HORIZONTAL" << std::endl;
-        // }
+        if (gv && gh) {
+            std::cout << "GO DIAGONAL" << std::endl;
+        } else if (gv) {
+            std::cout << "GO VERTICAL" << std::endl;
+        } else if (gh) {
+            std::cout << "GO HORIZONTAL" << std::endl;
+        }
 
         // Move iterators in source sequence, alignment rows, matrix
         // and possibly insert gaps.
@@ -394,7 +394,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
         if (pos0 > 1) {
             goPrevious(alignmentIt1);
             for (TPosition i = 1; i < pos0; ++i) {
-                // std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
+                std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
                 goPrevious(sourceIt0);
                 goPrevious(alignmentIt0);
                 // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
@@ -406,7 +406,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
         if (pos1 > 1) {
             goPrevious(alignmentIt0);
             for (TPosition i = 1; i< pos1; ++i) {
-                // std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
+                std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
                 goPrevious(sourceIt1);
                 goPrevious(alignmentIt1);
                 // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;

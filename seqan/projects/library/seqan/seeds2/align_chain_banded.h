@@ -186,10 +186,10 @@ _alignLeadingRectangle(
     TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignLeadingRectangle" << std::endl;
-    // std::cout << "| prefix0: '" << prefix0 << "'" << std::endl;
-    // std::cout << "| prefix1: '" << prefix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cerr << ",-- _alignLeadingRectangle" << std::endl;
+    std::cerr << "| prefix0: '" << prefix0 << "'" << std::endl;
+    std::cerr << "| prefix1: '" << prefix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -248,10 +248,10 @@ _alignTrailingRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignTrailingRectangle" << std::endl;
-    // std::cout << "| suffix0: '" << suffix0 << "'" << std::endl;
-    // std::cout << "| suffix1: '" << suffix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cerr << ",-- _alignTrailingRectangle" << std::endl;
+    std::cerr << "| suffix0: '" << suffix0 << "'" << std::endl;
+    std::cerr << "| suffix1: '" << suffix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -420,10 +420,10 @@ _alignSeed(
     // std::cout << "leftOverlap0 == " << leftOverlap0 << "leftOverlap1 == " << leftOverlap1 << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignSeed" << std::endl;
-    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
+    std::cerr << ",-- _alignSeed" << std::endl;
+    std::cerr << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cerr << "| infix1: '" << infix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -705,6 +705,8 @@ _bandedChainAlignment(
 	TSegment seq1 = sourceSegment(row(alignment, 0));
 	TSegment seq2 = sourceSegment(row(alignment, 1));
     TAlignmentChain alignmentChain(k, scoringScheme, seq1, seq2);
+
+    std::cerr << "length(seedChain) == " << length(seedChain) << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
     // std::cout << ",-- _bandedChainAlignment" << std::endl;

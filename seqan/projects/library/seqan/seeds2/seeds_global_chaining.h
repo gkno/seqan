@@ -123,19 +123,21 @@ chainSeedsGlobally(
             // *first* one that compares greater than the reference
             // one.  Searching for the next and decrementing the
             // result iterator gives the desired result.
-            TIntermediateSolution referenceSolution(getEndDim1(seedK), 0, 0);
-            // std::cout << "    intermediateSolutions.upper_bound(" << getEndDim1(seedK) << ")" << std::endl;
+            TIntermediateSolution referenceSolution(getBeginDim1(seedK), 0, 0);
+            // std::cout << "    intermediateSolutions.upper_bound(" << getBeginDim1(seedK) << ")" << std::endl;
             TIntermediateSolutionsIterator itJ = intermediateSolutions.upper_bound(referenceSolution);
             if (itJ == intermediateSolutions.begin())
                 continue;
             SEQAN_ASSERT_GT(intermediateSolutions.size(), 0u);  // TODO(holtgrew): Remove this assertion?
             --itJ;
+            // std::cout << "     --> " << value(itJ->i3) << std::endl;
             // Now, we have found such a seed j.
             SEQAN_ASSERT_LEQ(getEndDim1(value(itJ->i3)), getEndDim1(seedK));
             // Update the intermediate solution value for k and set predecessor.
             qualityOfChainEndingIn[value(it).i3] += itJ->i2;
-            predecessor[value(it).i3] = itJ->i3;
             // std::cout << "  UPDATE qualityOfChainEndingIn[" << value(it).i3 << "] == " << qualityOfChainEndingIn[value(it).i3] << std::endl;
+            predecessor[value(it).i3] = itJ->i3;
+            // std::cout << "         predecessor[" << value(it).i3 << "] == " << itJ->i3 << std::endl;
         } else {  // Is end point.
             // Search for the first triple in intermediateSolutions
             // where the end coordinate in dimension 1 is >= end
@@ -197,6 +199,28 @@ chainSeedsGlobally(
         next = predecessor[next];
     }
     reverseInPlace(target);
+
+    // Assert that the resulting chain is non-overlapping.
+    #if SEQAN_ENABLE_DEBUG
+    if (length(target) > 0u) {
+        typedef typename Iterator<TTargetContainer, Standard>::Type TIterator;
+        std::cerr << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
+        for (TIterator it = begin(target, Standard()); it != end(target, Standard()); ++it)
+            std::cerr << "| " << *it << std::endl;
+        std::cerr << "`--" << std::endl;
+        TIterator itPrevious = begin(target, Standard());
+        TIterator it = itPrevious;
+        TIterator itEnd = end(target, Standard());
+        // std::cout << *it << std::endl;
+        ++it;
+        for (; it != itEnd; ++it) {
+            // std::cout << *it << std::endl;
+            SEQAN_ASSERT_LEQ(getEndDim0(*itPrevious), getBeginDim0(*it));
+            SEQAN_ASSERT_LEQ(getEndDim1(*itPrevious), getBeginDim1(*it));
+            itPrevious = it;
+        }
+    }
+    #endif  // #if SEQAN_ENABLE_DEBUG
 }
 
 }  // namespace seqan
