@@ -61,13 +61,11 @@ with:
 3. Usage
 ---------------------------------------------------------------------------
 
-Usage: insegt [OPTION]... -s <ALIGNMENTS FILE> -g <ANNOTATIONS FILE> -f <GENOME FILE>
+Usage: insegt [OPTION]... -s <ALIGNMENTS FILE> -g <ANNOTATIONS FILE> 
 
 INSEGT expects at least three files:
-A SAM file which contains the alignments of the reads, a GFF file which 
-contains the gene-annotations and a FASTA file which contains the reference genome. 
-The reference-sequences are not used, hence the FASTA file could contain just 
-the names of the chromosomes with a pseudo-sequence e.g. A.
+A SAM file which contains the alignments of the reads and a GFF file which 
+contains the gene-annotations. 
 Without any additional parameters INSEGT would compute all tuple up to the 
 length 2. That means that it builds only 2-tuple, whose exons are connected 
 by matepairs.  
@@ -122,6 +120,10 @@ the command line:
   annotations of both strands. By default they're just searched in the 
   annotations corresponding to the given orientation of the read.
 
+  [ -f],   [ --fusion_genes ]
+
+  Check for fusion genes. A separate output for matepair tupel, which map in 
+  different genes, is created.
 
 ---------------------------------------------------------------------------
 4. Input General Feature Format
