@@ -19,7 +19,7 @@
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FUSION_H
-#define SEQAN_HEADER_FUSIONH
+#define SEQAN_HEADER_FUSION_H
 //#define DEBUG_OVERLAP_MODULE
 
 namespace SEQAN_NAMESPACE_MAIN
