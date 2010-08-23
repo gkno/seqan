@@ -803,7 +803,8 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	      unsigned tupleValue, bool exact_nTuple,
 	      unsigned thresholdGaps, unsigned offsetInterval,
 	      unsigned thresholdCount, double thresholdRPKM,
-	      bool unknownO)
+	      bool unknownO,
+	      bool fusion)
 {	
 	FragmentStore<> me;
 #ifdef DEBUG_OVERLAP_MODULE
@@ -837,19 +838,29 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 #endif 
 	
 	// build stores for results:
-	String<ReadAnnoStoreElement<unsigned> >		readAnnoStore; 	
-	String<unsigned> 				annoCountStore;
-	String<TupleCountStoreElement<unsigned> >	tupleCountStore;
+	String<ReadAnnoStoreElement<unsigned> >			readAnnoStore; 	
+	String<unsigned> 					annoCountStore;
+	String<TupleCountStoreElement<unsigned> >		tupleCountStore;
+	String<TupleCountStoreElement_Fusion<unsigned> >	tupleCountStore_Fusion;			// additional Store, if fusion genes should be checked
+
+
+
+	// get results with additional check for transfusion genes (will be changed later additionally) 
+	if (fusion == 1)
+		getResults_Fusion(readAnnoStore, annoCountStore, tupleCountStore, tupleCountStore_Fusion, me, tupleValue, exact_nTuple, offsetInterval, thresholdGaps, unknownO);
+	else // get normal results:
+		getResults(readAnnoStore, annoCountStore, tupleCountStore, me, tupleValue, exact_nTuple, offsetInterval, thresholdGaps, unknownO);
 	
-	// get results:
-	getResults(readAnnoStore, annoCountStore, tupleCountStore, me, tupleValue, exact_nTuple, offsetInterval, thresholdGaps, unknownO);
 	
 	// normalize:
 	String<double>			annoNormStore;
 	Map<Pair<unsigned, bool> > 	mapO;
 	normalizeAnnoCounts(annoNormStore, mapO, annoCountStore, me);
 	normalizeTupleCounts(tupleCountStore, me);
-	
+	if (fusion == 1)
+		normalizeTupleCounts_Fusion(tupleCountStore_Fusion, me);
+
+
 	// output:
 	CharString pathReadOutput = outputPath;
 	append(pathReadOutput, "readOutput.gff");
@@ -871,6 +882,18 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	tupleOutput.open(toCString(pathTupleOutput), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
 	createTupleCountGFF(tupleOutput, tupleCountStore, me, thresholdCount, thresholdRPKM);
 	tupleOutput.close();
+
+	// additional output, if fusion genes were checked
+	if (fusion == 1)
+	{
+		CharString pathTupleOutput_Fusion = outputPath;
+		append(pathTupleOutput_Fusion, "tupleOutput_Fusion.gff");
+		std::fstream tupleOutput_Fusion;
+		tupleOutput_Fusion.open(toCString(pathTupleOutput_Fusion), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+		createTupleCountGFF_Fusion(tupleOutput_Fusion, tupleCountStore_Fusion, me, thresholdCount, thresholdRPKM);
+		tupleOutput_Fusion.close();
+	}
+
 	
 #ifdef DEBUG_OVERLAP_MODULE
 	std::cout << "ngsOverlapper-function took: \t" << SEQAN_PROTIMEDIFF(find1_time) << " seconds" << std::endl;
