@@ -207,6 +207,8 @@ _align_banded_nw(TTrace& trace,
 	//}
 	//std::cerr << std::endl;
 
+    // TODO(holtgrew): Surely, *linear* gap costs are meant in the comment below? The code below appears to be converted over from Gotoh, it might make sense to replace scoreGapExtend* with scoreGap to reflect that this is NW DP.
+    
 	// Classical DP with affine gap costs
 	typedef typename Iterator<TRow, Standard>::Type TRowIter;
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
