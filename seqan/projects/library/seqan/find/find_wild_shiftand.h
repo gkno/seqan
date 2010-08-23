@@ -116,7 +116,7 @@ inline void _printMask(String <unsigned> const &  mask,unsigned line,String <cha
 //____________________________________________________________________________
 //								VALIDATION
 
-inline bool _isInt(String<char> const & number)
+inline bool _isUnsigned(String<char> const & number)
 {
 	unsigned int len = length(number);
 	for(unsigned int i = 0;i < len;++i){
@@ -164,7 +164,7 @@ SEQAN_CHECKPOINT
 			if(i == nl)	return false;
 			
 			// isNumber
-			if(!_isInt(number)) return false;
+			if(!_isUnsigned(number)) return false;
 			n = atoi(toCString(number));
 			
 			// check the second number
@@ -182,7 +182,7 @@ SEQAN_CHECKPOINT
 				if(i == nl) return false;
 				
 				// isNumber
-				if(!_isInt(number)) return false;
+				if(!_isUnsigned(number)) return false;
 				m = atoi(toCString(number));
 				--len;
 			}
