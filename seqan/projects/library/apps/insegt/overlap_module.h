@@ -804,7 +804,8 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	      unsigned thresholdGaps, unsigned offsetInterval,
 	      unsigned thresholdCount, double thresholdRPKM,
 	      bool unknownO,
-	      bool fusion)
+	      bool fusion,
+	      bool gtf)
 {	
 	FragmentStore<> me;
 #ifdef DEBUG_OVERLAP_MODULE
@@ -821,12 +822,23 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	read(fileSAM, me, SAM());
 	fileSAM.close();
 
-	// readAnnotations from GFF:
+	// readAnnotations from GFF or GTF:
+	if (gtf == 0)
+	{
 #ifdef DEBUG_OVERLAP_MODULE
-	SEQAN_PROTIMESTART(find2_time);	
-	std::cout << "load GFF..." << std::endl;
+		SEQAN_PROTIMESTART(find2_time);	
+		std::cout << "load GFF..." << std::endl;
 #endif 
-	readAnnotationsFromGFF(me, toCString(nameGFF));
+		readAnnotationsFromGFF(me, toCString(nameGFF));
+	}
+	else
+	{
+#ifdef DEBUG_OVERLAP_MODULE
+		SEQAN_PROTIMESTART(find2_time);	
+		std::cout << "load GFF..." << std::endl;
+#endif 
+		readAnnotationsFromGTF(me, toCString(nameGFF));
+	}
 
 	// create IntervalTreeStore:
 #ifdef DEBUG_OVERLAP_MODULE
