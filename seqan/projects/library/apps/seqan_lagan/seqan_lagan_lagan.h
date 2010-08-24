@@ -76,7 +76,7 @@ struct Options<AlignmentScores>
             : scoreMatch(3),
               scoreMismatch(-2),
               scoreGapOpen(-3),
-              scoreGapExtend(-3)
+              scoreGapExtend(-1)
     {}
 };
 
