@@ -82,6 +82,7 @@ _isInt(TString const s)
 
 struct OptionType
 {
+    // TODO(holtgrew): Should be all upper case!
     enum {
         Bool = 1,		    // option needs no argument, value is true iff given on command line
         Boolean = 1,		// option needs no argument, value is true iff given on command line
