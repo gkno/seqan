@@ -534,9 +534,14 @@ _glueAlignmentChain(
     // std::cout << "trace back through last seed..." << std::endl;
     // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
     {
-        TSeedChainIterator seedChainItPrevious = seedChainIt;
-        goPrevious(seedChainItPrevious);
-        _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainItPrevious), alignmentChain);
+        if (length(seedChain) > 1u) {
+            TSeedChainIterator seedChainItPrevious = seedChainIt;
+            goPrevious(seedChainItPrevious);
+            _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainItPrevious), alignmentChain);
+        } else {
+            upperLeftOverlap0 = 0;
+            upperLeftOverlap1 = 0;
+        }
     }
     _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
     goPrevious(matricesIt);
