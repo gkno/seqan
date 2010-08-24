@@ -83,10 +83,12 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_not_free)
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1, 0));
     SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2, 0));
     // Check I^a.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 1, 1));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 2, 1));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0, 1));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1, 1));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2, 1));
     // Check I^b.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0, 2));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0, 2));
 }
 
 
@@ -144,29 +146,37 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_fill_matrix)
     SEQAN_ASSERT_EQ(0, value(matrix, 3, 2, 0));
     SEQAN_ASSERT_EQ(1, value(matrix, 3, 3, 0));
     // Check I^a.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 1, 1));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 2, 1));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 3, 1));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 1, 1));
-    SEQAN_ASSERT_EQ(-5, value(matrix, 1, 2, 1));
-    SEQAN_ASSERT_EQ(-6, value(matrix, 1, 3, 1));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0, 1));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1, 1));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 0, 2, 1));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 0, 3, 1));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0, 1));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 1, 1));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 2, 1));
+    SEQAN_ASSERT_EQ(-5, value(matrix, 1, 3, 1));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0, 1));
     SEQAN_ASSERT_EQ(-1, value(matrix, 2, 1, 1));
     SEQAN_ASSERT_EQ(-3, value(matrix, 2, 2, 1));
     SEQAN_ASSERT_EQ(-4, value(matrix, 2, 3, 1));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0, 1));
     SEQAN_ASSERT_EQ(-2, value(matrix, 3, 1, 1));
     SEQAN_ASSERT_EQ(-2, value(matrix, 3, 2, 1));
     SEQAN_ASSERT_EQ(-4, value(matrix, 3, 3, 1));
     // Check I^b.
-    SEQAN_ASSERT_EQ(inf, value(matrix, 1, 0, 2));
-    SEQAN_ASSERT_EQ(-4, value(matrix, 1, 1, 2));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0, 2));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 1, 2));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 2, 2));
+    SEQAN_ASSERT_EQ(inf, value(matrix, 0, 3, 2));
+    SEQAN_ASSERT_EQ(-2, value(matrix, 1, 0, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 1, 1, 2));
     SEQAN_ASSERT_EQ(-1, value(matrix, 1, 2, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 1, 3, 2));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 2, 0, 2));
-    SEQAN_ASSERT_EQ(-5, value(matrix, 2, 1, 2));
+    SEQAN_ASSERT_EQ(-3, value(matrix, 2, 0, 2));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 2, 1, 2));
     SEQAN_ASSERT_EQ(-3, value(matrix, 2, 2, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 2, 3, 2));
-    SEQAN_ASSERT_EQ(inf, value(matrix, 3, 0, 2));
-    SEQAN_ASSERT_EQ(-6, value(matrix, 3, 1, 2));
+    SEQAN_ASSERT_EQ(-4, value(matrix, 3, 0, 2));
+    SEQAN_ASSERT_EQ(-5, value(matrix, 3, 1, 2));
     SEQAN_ASSERT_EQ(-4, value(matrix, 3, 2, 2));
     SEQAN_ASSERT_EQ(-2, value(matrix, 3, 3, 2));
 }
