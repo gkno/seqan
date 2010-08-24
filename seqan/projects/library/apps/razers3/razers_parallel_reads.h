@@ -302,14 +302,7 @@ inline void goOverContig(
 	#pragma omp parallel num_threads((int)options.numberOfCores)
 	{
 	#pragma omp master
-	{
-		
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		#ifdef FLEX_TIMER
-		_proFloat myTime = sysTime();
-		#endif
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		
+	{		
 		for(int blockId = 0; blockId < (int)options.numberOfBlocks; ++blockId)
 		{
 			#pragma omp task default(none) \
@@ -317,8 +310,8 @@ inline void goOverContig(
 				firstprivate(blockId)
 			{
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				#ifdef FLEX_TIMER
-				myTime = sysTime();
+				#ifdef RAZERS_PARALLEL_TIMER
+				_proFloat myTime = sysTime();
 				#endif
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				
@@ -328,7 +321,7 @@ inline void goOverContig(
 						options.windowSize);
 						
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-					#ifdef FLEX_TIMER
+					#ifdef RAZERS_PARALLEL_TIMER
 					printf("filter: %f sec (pos: %lu, thread: %d)\n", sysTime() - myTime, swiftFinders[blockId].curPos, blockId);
 					myTime = sysTime();
 					#endif
@@ -349,12 +342,6 @@ inline void goOverContig(
 					else {
 						String<THitStringPos> positions;
 						partitionHits(positions, hits, tav[blockId], mode);
-//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-						#ifdef FLEX_TIMER
-						printf("partition: %f sec (hits: %d, thread: %d)\n", sysTime() - myTime, length(hits), blockId);
-						myTime = sysTime();
-						#endif
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						// verify
 						for(int relId = 0; relId < tav[blockId]; ++relId)
 						{
@@ -374,7 +361,7 @@ inline void goOverContig(
 					} // End else
 					
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-					#ifdef FLEX_TIMER
+					#ifdef RAZERS_PARALLEL_TIMER
 					#pragma omp critical(printf)
 					printf("verify: %f sec (thread: %d)\n", sysTime() - myTime, blockId);
 					#endif
@@ -532,8 +519,8 @@ int _mapSingleReadsParallelCreatePatterns(
 	typedef ParallelSwiftPatternHandler<TSwiftPatterns>         TSwiftPatternHandler;
 
 	// verifier
-	typedef Pattern<TRead, MyersUkkonen>                        TMyersPattern;
-	// typedef Pattern<TRead, Myers<FindInfix, False, void> >		TMyersPattern;
+	// typedef Pattern<TRead, MyersUkkonen>                        TMyersPattern;
+	typedef Pattern<TRead, Myers<FindInfix, False, void> >		TMyersPattern;
 	typedef typename Infix<String<TMyersPattern> >::Type        TVerifierBlock;
 	typedef typename Position<TReadIndexString>::Type           TPos;
 
@@ -663,7 +650,7 @@ int _mapSingleReadsParallel(
 		options.numberOfBlocks = length(store.readSeqStore);
 
 	// if there are not enough reads that the parallel version makes sence use the normal one
-	if(length(store.readSeqStore) < 10) // TODO: usefull number
+	if(length(store.readSeqStore) < 100 || options.numberOfBlocks == 1)
 		return _mapSingleReads(store, cnts, options, shape, mode);
 	else {
 		// number of reads per block
