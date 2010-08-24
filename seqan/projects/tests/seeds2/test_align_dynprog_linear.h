@@ -145,27 +145,27 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
         int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 0, 0, 0, 0, true, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-        std::cout << alignment;
-        // TODO(holtgrew): Debug code, remove when working.
-        {
-            for (int k = 0; k < 1; ++k) {
-                std::cout << ",-- *** filled alignment matrix " << k << std::endl;
-                for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                    std::cout << "| ";
-                    for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                        if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-                            std::cout << "\tinf";
-                        else
-                            std::cout << "\t" << value(matrix, i, j, k);
-                    }
-                    std::cout << std::endl;
-                }
-                std::cout << "`--" << std::endl;
-            }
-        }
+        // std::cout << alignment;
+        // // TODO(holtgrew): Debug code, remove when working.
+        // {
+        //     for (int k = 0; k < 1; ++k) {
+        //         std::cout << ",-- *** filled alignment matrix " << k << std::endl;
+        //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+        //             std::cout << "| ";
+        //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+        //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+        //                     std::cout << "\tinf";
+        //                 else
+        //                     std::cout << "\t" << value(matrix, i, j, k);
+        //             }
+        //             std::cout << std::endl;
+        //         }
+        //         std::cout << "`--" << std::endl;
+        //     }
+        // }
 
         SEQAN_ASSERT_EQ(score, 1);
-        SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
+        SEQAN_ASSERT_TRUE(seq0It + 1 == begin(sequence0));
         SEQAN_ASSERT_TRUE(seq1It + 1 == begin(sequence1));
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
@@ -179,11 +179,11 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "C-AA"/*-*/);
         // Leading gaps are not shown, we test through the iterators.
-        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 0)));
-        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 1)));
-        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 2)));
+        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 0)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 1)));
+        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 2)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 3)));
-        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 4)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 4)));
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }
