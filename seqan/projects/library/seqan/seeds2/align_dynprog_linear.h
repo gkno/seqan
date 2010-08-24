@@ -202,22 +202,22 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
         }
     }
 
-    // TODO(holtgrew): Debug code, remove when working.
-    {
-        for (int k = 0; k < 1; ++k) {
-            std::cerr << ",-- *** filled unbanded alignment matrix " << k << std::endl;
-            for (unsigned i = 0; i < length(matrix, 0); ++i) {
-                for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-                        std::cerr << "\tinf";
-                    else
-                        std::cerr << "\t" << value(matrix, i, j, k);
-                }
-                std::cerr << std::endl;
-            }
-            std::cerr << "`--" << std::endl;
-        }
-    }
+    // // TODO(holtgrew): Debug code, remove when working.
+    // {
+    //     for (int k = 0; k < 1; ++k) {
+    //         std::cerr << ",-- *** filled unbanded alignment matrix " << k << std::endl;
+    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
+    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
+    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                     std::cerr << "\tinf";
+    //                 else
+    //                     std::cerr << "\t" << value(matrix, i, j, k);
+    //             }
+    //             std::cerr << std::endl;
+    //         }
+    //         std::cerr << "`--" << std::endl;
+    //     }
+    // }
 }
 
 
@@ -228,7 +228,7 @@ _align_fillMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0, 
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
+_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 2> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap lowerRightOverlap0, TOverlap lowerRightOverlap1, TOverlap upperLeftOverlap0, TOverlap upperLeftOverlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, NeedlemanWunsch const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -249,13 +249,13 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     //     std::cout << "`--" << std::endl;
     // }
     // std::cout << "length(matrix, 0) = " << length(matrix, 0) << std::endl;
-    // std::cout << "overlap0 = " << overlap0 << std::endl;
+    // std::cout << "lowerRightOverlap0 = " << lowerRightOverlap0 << std::endl;
     // std::cout << "finalPos0 = " << finalPos0 << std::endl;
     // std::cout << "length(matrix, 1) = " << length(matrix, 1) << std::endl;
-    // std::cout << "overlap1 = " << overlap1 << std::endl;
+    // std::cout << "lowerRightOverlap1 = " << lowerRightOverlap1 << std::endl;
     // std::cout << "finalPos1 = " << finalPos1 << std::endl;
-    // std::cout << "begin pos0 = " << (length(matrix, 0) - overlap0 + finalPos0) << std::endl;
-    // std::cout << "begin pos1 = " << (length(matrix, 1) - overlap1 + finalPos1) << std::endl;
+    // std::cout << "begin pos0 = " << (length(matrix, 0) - lowerRightOverlap0 + finalPos0) << std::endl;
+    // std::cout << "begin pos1 = " << (length(matrix, 1) - lowerRightOverlap1 + finalPos1) << std::endl;
 
     typedef Matrix<TScoreValue, 2> TMatrix;
     typedef typename Iterator<TMatrix>::Type TMatrixIterator;
@@ -264,12 +264,13 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     //
     // Precomputation of the score difference between mismatch and gap.
 	TScoreValue scoreDifference = scoreMismatch(scoringScheme) - scoreGap(scoringScheme);
+    TScoreValue matchScore = scoreMatch(scoringScheme);
     // Current position in the matrix.  Note that this is the position
     // in the matrix including the gutter.  When writing this out, we
     // want to have the position in the matrix, excluding the gutter,
     // i.e. everything is shifted to the upper left.
-    TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
-    TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
+    TPosition pos0 = length(matrix, 0) - lowerRightOverlap0 + finalPos0 - 1;
+    TPosition pos1 = length(matrix, 1) - lowerRightOverlap1 + finalPos1 - 1;
     TPosition origPos0 = pos0;
     (void) origPos0;  // In case we run without assertions.
     TPosition origPos1 = pos1;
@@ -322,17 +323,30 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     }
 
     // Now, perform the traceback.
-    while (pos0 > static_cast<TPosition>(1) && pos1 > static_cast<TPosition>(1)) {
-        // std::cout << "pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
-
+    while (true) {
+        // Break condition depends on whether this is the leading
+        // rectangle, i.e. we want to go to the upper left corner.
+        if (goToTopLeft) {
+            if (pos0 == static_cast<TPosition>(0) || pos1 == static_cast<TPosition>(0))
+                break;
+        } else {
+            // If we do not walk up to the upper left corner, we at
+            // least have to move into the overlapping area.
+            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) && (pos0 < upperLeftOverlap0 && pos1 < upperLeftOverlap1))
+                break;
+        }
+        
         // Flags for "go horizontal" and "go vertical".
         bool gh = false;
         bool gv = false;
 
         // Determine whether to go vertical/horizontal.
         // std::cout << "Compare: " << *sourceIt0 << ", " << *sourceIt1 << std::endl;
-        // std::cout << "  Score: " << *matrixIt << std::endl;
-        if (*sourceIt0 == *sourceIt1) {
+        // std::cout << "  Score: " << *matrixIt << std::endl
+        TMatrixIterator tmpIt = matrixIt;
+        goPrevious(tmpIt, 0);
+        goPrevious(tmpIt, 1);
+        if ((*sourceIt0 == *sourceIt1) && (*tmpIt + matchScore == *matrixIt)) {
             gh = true;
             gv = true;
         } else {
@@ -352,13 +366,13 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 			gh = (h > v) || (d + scoreDifference >= v);
         }
 
-        if (gv && gh) {
-            std::cout << "GO DIAGONAL" << std::endl;
-        } else if (gv) {
-            std::cout << "GO VERTICAL" << std::endl;
-        } else if (gh) {
-            std::cout << "GO HORIZONTAL" << std::endl;
-        }
+        // if (gv && gh) {
+        //     std::cout << "GO DIAGONAL (" << "*sourceIt0 == " << *sourceIt0 << ", *sourceIt1 == " << *sourceIt1 << ") *matrixIt == " << *matrixIt << ", pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+        // } else if (gv) {
+        //     std::cout << "GO VERTICAL (" << "*sourceIt0 == " << *sourceIt0 << ", *sourceIt1 == " << *sourceIt1 << ") *matrixIt == " << *matrixIt << ", pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+        // } else if (gh) {
+        //     std::cout << "GO HORIZONTAL (" << "*sourceIt0 == " << *sourceIt0 << ", *sourceIt1 == " << *sourceIt1 << ") *matrixIt == " << *matrixIt << ", pos0 == " << pos0 << ", pos1 == " << pos1 << std::endl;
+        // }
 
         // Move iterators in source sequence, alignment rows, matrix
         // and possibly insert gaps.
@@ -391,10 +405,10 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     
     // Go to the top left of the matrix if configured to do so.
     if (goToTopLeft) {
-        if (pos0 > 1) {
+        if (pos0 > 0) {
             goPrevious(alignmentIt1);
-            for (TPosition i = 1; i < pos0; ++i) {
-                std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
+            // std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
+            for (TPosition i = 0; i < pos0; ++i) {
                 goPrevious(sourceIt0);
                 goPrevious(alignmentIt0);
                 // std::cout << "  *alignmentIt0 == " << convert<char>(*alignmentIt0) << std::endl;
@@ -403,10 +417,10 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
             }
             pos0 = 0;
         }
-        if (pos1 > 1) {
+        if (pos1 > 0) {
             goPrevious(alignmentIt0);
-            for (TPosition i = 1; i< pos1; ++i) {
-                std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
+            // std::cout << "Inserting " << pos1 << " gaps into alignment row 0" << std::endl;
+            for (TPosition i = 0; i < pos1; ++i) {
                 goPrevious(sourceIt1);
                 goPrevious(alignmentIt1);
                 // std::cout << "  *alignmentIt1 == " << convert<char>(*alignmentIt1) << std::endl;
@@ -417,12 +431,11 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
         }
     }
 
-    // Write out the final positions in the alignment matrix.  Convert
-    // from position in the current alignment matrix with gutter to
-    // positioin without gutter by shifting the position to the upper
-    // left.
-    finalPos0 = pos0 - 1;
-    finalPos1 = pos1 - 1;
+    // Write out the final positions in the alignment matrix.
+    // Position is in the current matrix, including gutter since we
+    // can get there.
+    finalPos0 = pos0;
+    finalPos1 = pos1;
     // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
 
     return *origMatrixIt;

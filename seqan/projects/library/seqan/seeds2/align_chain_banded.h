@@ -186,10 +186,10 @@ _alignLeadingRectangle(
     TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
-    std::cerr << ",-- _alignLeadingRectangle" << std::endl;
-    std::cerr << "| prefix0: '" << prefix0 << "'" << std::endl;
-    std::cerr << "| prefix1: '" << prefix1 << "'" << std::endl;
-    std::cerr << "`--" << std::endl;
+    // std::cerr << ",-- _alignLeadingRectangle" << std::endl;
+    // std::cerr << "| prefix0: '" << prefix0 << "'" << std::endl;
+    // std::cerr << "| prefix1: '" << prefix1 << "'" << std::endl;
+    // std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -247,11 +247,11 @@ _alignTrailingRectangle(
     TDiagonal lowerDiagonal = getStartDiagonal(leftSeed) - getLowerDiagonal(leftSeed) - alignmentChain.bandwidth_;
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
-    // TODO(holtgrew): Temporary debug code.
-    std::cerr << ",-- _alignTrailingRectangle" << std::endl;
-    std::cerr << "| suffix0: '" << suffix0 << "'" << std::endl;
-    std::cerr << "| suffix1: '" << suffix1 << "'" << std::endl;
-    std::cerr << "`--" << std::endl;
+    // // TODO(holtgrew): Temporary debug code.
+    // std::cerr << ",-- _alignTrailingRectangle" << std::endl;
+    // std::cerr << "| suffix0: '" << suffix0 << "'" << std::endl;
+    // std::cerr << "| suffix1: '" << suffix1 << "'" << std::endl;
+    // std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -420,10 +420,10 @@ _alignSeed(
     // std::cout << "leftOverlap0 == " << leftOverlap0 << "leftOverlap1 == " << leftOverlap1 << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
-    std::cerr << ",-- _alignSeed" << std::endl;
-    std::cerr << "| infix0: '" << infix0 << "'" << std::endl;
-    std::cerr << "| infix1: '" << infix1 << "'" << std::endl;
-    std::cerr << "`--" << std::endl;
+    // std::cerr << ",-- _alignSeed" << std::endl;
+    // std::cerr << "| infix0: '" << infix0 << "'" << std::endl;
+    // std::cerr << "| infix1: '" << infix1 << "'" << std::endl;
+    // std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -509,25 +509,36 @@ _glueAlignmentChain(
     --seedChainIt;
 
     // Traceback through trailing rectangle and seed.
-    TPosition finalPos0 = 0;
-    TPosition finalPos1 = 0;
+    TPosition finalPos0 = 1;
+    TPosition finalPos1 = 1;
     // std::cout << "trace back through trailing..." << std::endl;
-    TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, 1, 1, false, alignConfig, TAlignmentTag());
+    TPosition upperLeftOverlap0, upperLeftOverlap1;
+    _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainIt), alignmentChain);
+    TPosition lowerRightOverlap0 = 1;
+    TPosition lowerRightOverlap1 = 1;
+    TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl;
     // std::cout << alignment;
     // std::cout << result << std::endl;
     // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
     goPrevious(matricesIt);
-    TPosition overlap0, overlap1;
-    _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
-    TPosition lowerTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
-    TPosition upperTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+    _computeLowerRightOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
+    TPosition upperTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+    TPosition lowerTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
     TPosition maxTriangleEdgeLength = getEndDim0(value(seedChainIt)) - getBeginDim0(value(seedChainIt)) - 1;
+    // std::cout << "lowerTriangleEdgeLength == " << lowerTriangleEdgeLength << std::endl;
+    // std::cout << "upperTriangleEdgeLength == " << upperTriangleEdgeLength << std::endl;
+    // std::cout << "maxTriangleEdgeLength == " << maxTriangleEdgeLength << std::endl;
     lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
     upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
     // std::cout << "trace back through last seed..." << std::endl;
     // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
-    _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+    {
+        TSeedChainIterator seedChainItPrevious = seedChainIt;
+        goPrevious(seedChainItPrevious);
+        _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainItPrevious), alignmentChain);
+    }
+    _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
     goPrevious(matricesIt);
 
     // std::cout << "Alignment so far:" << std::endl << alignment;
@@ -536,21 +547,29 @@ _glueAlignmentChain(
     for (TPosition i = 0, iend = length(seedChain) - 1; i < iend; ++i) {
         // std::cout << "trace back through seed..." << std::endl;
         // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
-        _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
-        _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        _computeUpperLeftOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
+        {
+            TSeedChainIterator seedChainItPrevious = seedChainIt;
+            goPrevious(seedChainItPrevious);
+            _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainItPrevious), alignmentChain);
+        }
+        _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         goPrevious(seedChainIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
 
         // std::cout << "trace back through rectangle..." << std::endl;
         // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
-        _computeLowerRightOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
-        lowerTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
-        upperTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+        _computeLowerRightOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
+        upperTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
+        lowerTriangleEdgeLength = getUpperDiagonal(value(seedChainIt)) - getEndDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
         maxTriangleEdgeLength = getEndDim0(value(seedChainIt)) - getBeginDim0(value(seedChainIt)) - 1;
+        // std::cout << "lowerTriangleEdgeLength == " << lowerTriangleEdgeLength << std::endl;
+        // std::cout << "upperTriangleEdgeLength == " << upperTriangleEdgeLength << std::endl;
+        // std::cout << "maxTriangleEdgeLength == " << maxTriangleEdgeLength << std::endl;
         lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
         upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
-        _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
     }
@@ -558,8 +577,10 @@ _glueAlignmentChain(
     // std::cout << "trace back through leading..." << std::endl;
     // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
     // Traceback through leading rectangle.
-    _computeUpperLeftOverlap(overlap0, overlap1, value(seedChainIt), alignmentChain);
-    _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, overlap0, overlap1, true, alignConfig, TAlignmentTag());
+    upperLeftOverlap0 = 0;
+    upperLeftOverlap1 = 0;
+    _computeUpperLeftOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
+    _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, true, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl << alignment;
     return result;
 }
@@ -706,7 +727,7 @@ _bandedChainAlignment(
 	TSegment seq2 = sourceSegment(row(alignment, 1));
     TAlignmentChain alignmentChain(k, scoringScheme, seq1, seq2);
 
-    std::cerr << "length(seedChain) == " << length(seedChain) << std::endl;
+    // std::cerr << "length(seedChain) == " << length(seedChain) << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
     // std::cout << ",-- _bandedChainAlignment" << std::endl;

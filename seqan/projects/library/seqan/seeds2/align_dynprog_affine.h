@@ -287,9 +287,11 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap lowerRightOverlap0, TOverlap lowerRightOverlap1, TOverlap upperLeftOverlap0, TOverlap upperLeftOverlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
+
+    // std::cout << "unbanded traceback" << std::endl;
 
     // Suppress warnings about unused parameters.
     (void) scoringScheme;
@@ -303,8 +305,8 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // in the matrix including the gutter.  When writing this out, we
     // want to have the position in the matrix, excluding the gutter,
     // i.e. everything is shifted to the upper left.
-    TPosition pos0 = length(matrix, 0) - overlap0 + finalPos0;
-    TPosition pos1 = length(matrix, 1) - overlap1 + finalPos1;
+    TPosition pos0 = length(matrix, 0) - lowerRightOverlap0 + (finalPos0 - 1);
+    TPosition pos1 = length(matrix, 1) - lowerRightOverlap1 + (finalPos1 - 1);
     // Iterators to current entries in the matrices.
     TMatrixIterator diagonalIt = begin(matrix);
     goTo(diagonalIt, pos0, pos1);
@@ -324,7 +326,6 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     bool vertical = false;
     bool diagonal = false;
     TScoreValue result = *diagonalIt;
-    // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
     if (*diagonalIt > *horizontalIt) {
         if (*diagonalIt > *verticalIt)
             diagonal = true;
@@ -338,7 +339,19 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     }
 
     // Now, perform the traceback.
-    while (pos0 > static_cast<TPosition>(1) && pos1 > static_cast<TPosition>(1)) {
+    while (true) {
+        // Break condition depends on whether this is the leading
+        // rectangle, i.e. we want to go to the upper left corner.
+        if (goToTopLeft) {
+            if (pos0 == static_cast<TPosition>(0) || pos1 == static_cast<TPosition>(0))
+                break;
+        } else {
+            // If we do not walk up to the upper left corner, we at
+            // least have to move into the overlapping area.
+            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) && (pos0 < upperLeftOverlap0 && pos1 < upperLeftOverlap1))
+                break;
+        }
+
         if (diagonal) {
             // std::cout << "DIAGONAL" << std::endl;
             // Move iterators in sequences, alignment rows and matrices.
@@ -369,64 +382,63 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
                 else
                     vertical = true;
             }
-        } else {
-            if (vertical) {
-                // std::cout << "VERTICAL" << std::endl;
-                // Insert gap.
-                insertGap(alignmentIt1);
+        } else if (vertical) {
+            // std::cout << "VERTICAL" << std::endl;
+            // Insert gap.
+            insertGap(alignmentIt1);
 
-                // Move iterators in sequence, alignment rows and matrices.,
-                goPrevious(sourceIt0);
-                goPrevious(alignmentIt0);
-                goPrevious(diagonalIt, 0);
-                goPrevious(verticalIt, 0);
-                goPrevious(horizontalIt, 0);
-                pos0 -= 1;
+            // Move iterators in sequence, alignment rows and matrices.,
+            goPrevious(sourceIt0);
+            goPrevious(alignmentIt0);
+            goPrevious(diagonalIt, 0);
+            goPrevious(verticalIt, 0);
+            goPrevious(horizontalIt, 0);
+            pos0 -= 1;
 
-                // Update the movement/matrix indicators.
-                // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
-                if (*verticalIt > *horizontalIt) {
-                    if (*diagonalIt > *verticalIt) {
-                        diagonal = true;
-                        vertical = false;
-                    }
-                } else {
+            // std::cout << "  *verticalIt == " << *verticalIt << ", *horizontalIt == " << *horizontalIt << ", *diagonalIt == " << *diagonalIt << std::endl;
+
+            // Update the movement/matrix indicators.
+            if (*verticalIt >= *horizontalIt) {
+                if (*diagonalIt > *verticalIt) {
+                    diagonal = true;
                     vertical = false;
-                    if (*diagonalIt > *horizontalIt)
-                        diagonal = true;
-                    else
-                        horizontal = true;
                 }
             } else {
-                if (horizontal) {
-                    // std::cout << "HORIZONTAL" << std::endl;
-                    // Insert gap.
-                    insertGap(alignmentIt0);
+                vertical = false;
+                if (*diagonalIt > *horizontalIt)
+                    diagonal = true;
+                else
+                    horizontal = true;
+            }
+        } else {
+            SEQAN_ASSERT_TRUE(horizontal);
+            // std::cout << "HORIZONTAL" << std::endl;
+            // Insert gap.
+            insertGap(alignmentIt0);
                     
-                    // Move iterators in sequence, alignment rows and matrices.,
-                    goPrevious(sourceIt1);
-                    goPrevious(alignmentIt1);
-                    goPrevious(diagonalIt, 1);
-                    goPrevious(verticalIt, 1);
-                    goPrevious(horizontalIt, 1);
-                    pos1 -= 1;
+            // Move iterators in sequence, alignment rows and matrices.,
+            goPrevious(sourceIt1);
+            goPrevious(alignmentIt1);
+            goPrevious(diagonalIt, 1);
+            goPrevious(verticalIt, 1);
+            goPrevious(horizontalIt, 1);
+            pos1 -= 1;
+
+            // std::cout << "  *verticalIt == " << *verticalIt << ", *horizontalIt == " << *horizontalIt << ", *diagonalIt == " << *diagonalIt << std::endl;
                     
-                    // Move iterators in sequence, alignment rows and matrices.,
-                    // Update the movement/matrix indicators.
-                    // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
-                    if (*horizontalIt > *verticalIt) {
-                        if (*diagonalIt > *horizontalIt) {
-                            diagonal = true;
-                            horizontal = false;
-                        }
-                    } else {
-                        horizontal = false;
-                        if (*diagonalIt > *verticalIt)
-                            diagonal = true;
-                        else
-                            vertical = true;
-                    }
+            // Move iterators in sequence, alignment rows and matrices.,
+            // Update the movement/matrix indicators.
+            if (*horizontalIt >= *verticalIt) {
+                if (*diagonalIt > *horizontalIt) {
+                    diagonal = true;
+                    horizontal = false;
                 }
+            } else {
+                horizontal = false;
+                if (*diagonalIt > *verticalIt)
+                    diagonal = true;
+                else
+                    vertical = true;
             }
         }
     }
@@ -434,9 +446,9 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 
     // Go to the top left of the matrix if configured to do so.
     if (goToTopLeft) {
-        if (pos0 > 1) {
+        if (pos0 > 0) {
             goPrevious(alignmentIt1);
-            for (TPosition i = 1; i < pos0; ++i) {
+            for (TPosition i = 0; i < pos0; ++i) {
                 // std::cout << "Inserting " << pos0 << " gaps into alignment row 1" << std::endl;
                 goPrevious(sourceIt0);
                 goPrevious(alignmentIt0);
@@ -446,9 +458,9 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
             }
             pos0 = 0;
         }
-        if (pos1 > 1) {
+        if (pos1 > 0) {
             goPrevious(alignmentIt0);
-            for (TPosition i = 1; i< pos1; ++i) {
+            for (TPosition i = 0; i< pos1; ++i) {
                 // std::cout << "Inserting " << pos0 << " gaps into alignment row 0" << std::endl;
                 goPrevious(sourceIt1);
                 goPrevious(alignmentIt1);
@@ -464,8 +476,8 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // from position in the current alignment matrix with gutter to
     // positioin without gutter by shifting the position to the upper
     // left.
-    finalPos0 = pos0 - 1;
-    finalPos1 = pos1 - 1;
+    finalPos0 = pos0;
+    finalPos1 = pos1;
     // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
 
     return result;

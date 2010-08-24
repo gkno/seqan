@@ -48,6 +48,7 @@ typedef Tag<_SparseChaining> SparseChaining;
 // Functions
 // ===========================================================================
 
+// TODO(holtgrew): Implement scored!
 template <typename TTargetContainer, typename TSeedSpec, typename TSeedSetSpec, typename TSeedConfig>
 void
 chainSeedsGlobally(
@@ -121,15 +122,23 @@ chainSeedsGlobally(
             //
             // STL gives us upper_bound which returns a pointer to the
             // *first* one that compares greater than the reference
-            // one.  Searching for the next and decrementing the
+            // one.  Searching for the this one and decrementing the
             // result iterator gives the desired result.
             TIntermediateSolution referenceSolution(getBeginDim1(seedK), 0, 0);
             // std::cout << "    intermediateSolutions.upper_bound(" << getBeginDim1(seedK) << ")" << std::endl;
             TIntermediateSolutionsIterator itJ = intermediateSolutions.upper_bound(referenceSolution);
-            if (itJ == intermediateSolutions.begin())
-                continue;
-            SEQAN_ASSERT_GT(intermediateSolutions.size(), 0u);  // TODO(holtgrew): Remove this assertion?
-            --itJ;
+            if (itJ == intermediateSolutions.begin()) {
+                if (intermediateSolutions.size() > 0 &&
+                    intermediateSolutions.rbegin()->i1 <= getBeginDim1(seedK)) {
+                    itJ = intermediateSolutions.end();
+                    --itJ;
+                } else {
+                    continue;
+                }
+            } else {
+                SEQAN_ASSERT_GT(intermediateSolutions.size(), 0u);  // TODO(holtgrew): Remove this assertion?
+                --itJ;
+            }
             // std::cout << "     --> " << value(itJ->i3) << std::endl;
             // Now, we have found such a seed j.
             SEQAN_ASSERT_LEQ(getEndDim1(value(itJ->i3)), getEndDim1(seedK));
@@ -204,10 +213,10 @@ chainSeedsGlobally(
     #if SEQAN_ENABLE_DEBUG
     if (length(target) > 0u) {
         typedef typename Iterator<TTargetContainer, Standard>::Type TIterator;
-        std::cerr << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
-        for (TIterator it = begin(target, Standard()); it != end(target, Standard()); ++it)
-            std::cerr << "| " << *it << std::endl;
-        std::cerr << "`--" << std::endl;
+        // std::cerr << ".-- Chain (" << __FILE__ << ":" << __LINE__ << "):" << std::endl;
+        // for (TIterator it = begin(target, Standard()); it != end(target, Standard()); ++it)
+        //     std::cerr << "| " << *it << std::endl;
+        // std::cerr << "`--" << std::endl;
         TIterator itPrevious = begin(target, Standard());
         TIterator it = itPrevious;
         TIterator itEnd = end(target, Standard());

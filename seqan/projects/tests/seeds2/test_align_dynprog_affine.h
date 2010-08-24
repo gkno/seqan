@@ -201,13 +201,13 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        size_t finalPos0 = 0;
-        size_t finalPos1 = 0;
+        size_t finalPos0 = 1;
+        size_t finalPos1 = 1;
         TStringIterator seq0It = end(sequence0) - 1;
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, true, AlignConfig<false, false, false, false>(), Gotoh());
+        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
 
         SEQAN_ASSERT_EQ(score, 1);
         SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
@@ -215,8 +215,8 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
-        SEQAN_ASSERT_EQ(finalPos0, static_cast<TPosition>(-1));
-        SEQAN_ASSERT_EQ(finalPos1, 0u);
+        SEQAN_ASSERT_EQ(finalPos0, 0u);
+        SEQAN_ASSERT_EQ(finalPos1, 1u);
         // Expected alignment:
         //
         //  CCAAA
@@ -234,14 +234,14 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
     // here, but Gotoh's algorithm will work nevertheless.
     {
         // Fill the matrix with DP (tested by other tests).
-        Matrix<int, 2> matrix;
+        Matrix<int, 3> matrix;
         TString const sequence0 = "CCAAA";
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -1, -1);
         
-        _align_resizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
-        _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-        _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
+        _align_resizeMatrix(matrix, sequence0, sequence1, Gotoh());
+        _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+        _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
 
         // Perform the traceback.
         Align<TString> alignment;
@@ -249,13 +249,13 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        size_t finalPos0 = 0;
-        size_t finalPos1 = 0;
+        size_t finalPos0 = 1;
+        size_t finalPos1 = 1;
         TStringIterator seq0It = end(sequence0) - 1;
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, true, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
 
         SEQAN_ASSERT_EQ(score, 1);
         SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));
@@ -263,20 +263,21 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
-        SEQAN_ASSERT_EQ(finalPos0, static_cast<TPosition>(-1));
-        SEQAN_ASSERT_EQ(finalPos1, 0u);
+        SEQAN_ASSERT_EQ(finalPos0, 0u);
+        SEQAN_ASSERT_EQ(finalPos1, 1u);
         // Expected alignment:
         //
         //  CCAAA
-        //  --CAA
+        //  -CAA-
+        std::cout << alignment;
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
         SEQAN_ASSERT_TRUE(row(alignment, 1) == "CAA");
         // Leading gaps are not shown, we test through the iterators.
         SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 0)));
-        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 1)));
+        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 1)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 2)));
         SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 3)));
-        SEQAN_ASSERT_NOT(isGap(iter(row(alignment, 1), 4)));
+        SEQAN_ASSERT_TRUE(isGap(iter(row(alignment, 1), 4)));
     }
     // TODO(holtgrew): Case with free begin and end gaps.
 }

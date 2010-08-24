@@ -219,8 +219,8 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         assignSource(row(alignment, 0), sequence0);
         assignSource(row(alignment, 1), sequence1);
 
-        size_t finalPos0 = 4;
-        size_t finalPos1 = 2;
+        size_t finalPos0 = 5;
+        size_t finalPos1 = 3;
         TStringIterator seq0It = end(sequence0) - 1;
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
@@ -235,8 +235,8 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         // TODO(holtgrew): Why does this not work?
         // SEQAN_ASSERT_TRUE(align0It == begin(row(alignment, 0)));
         // SEQAN_ASSERT_TRUE(align1It == begin(row(alignment, 1)));
-        SEQAN_ASSERT_EQ(finalPos0, 0u);
-        SEQAN_ASSERT_EQ(finalPos1, static_cast<TPosition>(-1));
+        SEQAN_ASSERT_EQ(finalPos0, 1u);
+        SEQAN_ASSERT_EQ(finalPos1, 0u);
         SEQAN_ASSERT_TRUE(row(alignment, 0) == "CCAAA");
         // Note that leading and trailing gaps are not saved.  The
         // following is postfixed with a gap on visual inspection.
