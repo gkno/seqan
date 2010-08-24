@@ -94,24 +94,34 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
     TIterator itM = itMBegin;
     *itM = 0;
     goNext(itM, 0);
+    TIterator itIA = itIABegin;
+    *itIA = inf;
+    goNext(itIA, 0);
     TIterator itIB = itIBBegin;
+    *itIB = inf;
     goNext(itIB, 0);
     for (TPosition pos = 1, posEnd = length(matrix, 0); pos < posEnd; ++pos) {
         *itM = gapOpenScore + (pos - 1) * gapExtendScore;
-        *itIB = inf;
+        *itIA = inf;
+        *itIB = gapOpenScore + (pos - 1) * gapExtendScore;
         goNext(itM, 0);
+        goNext(itIA, 0);
         goNext(itIB, 0);
     }
     // Top gutters...
     itM = itMBegin;
+    itIA = itIABegin;
+    itIB = itIBBegin;
     goNext(itM, 1);
-    TIterator itIA = itIABegin;
     goNext(itIA, 1);
+    goNext(itIB, 1);
     for (TPosition pos = 1, posEnd = length(matrix, 1); pos < posEnd; ++pos) {
         *itM = gapOpenScore + (pos - 1) * gapExtendScore;
-        *itIA = inf;
+        *itIA = gapOpenScore + (pos - 1) * gapExtendScore;
+        *itIB = inf;
         goNext(itM, 1);
         goNext(itIA, 1);
+        goNext(itIB, 1);
     }
 }
 
