@@ -72,11 +72,12 @@ struct Options<AlignmentScores>
     // The score value for extending gaps.
     int scoreGapExtend;
 
+    // Scores are taken from (Brudno, Cooper et al. 2003), values for LAGAN.
     Options()
-            : scoreMatch(3),
-              scoreMismatch(-2),
-              scoreGapOpen(-3),
-              scoreGapExtend(-1)
+            : scoreMatch(12),
+              scoreMismatch(-8),
+              scoreGapOpen(-100),
+              scoreGapExtend(-5)
     {}
 };
 
