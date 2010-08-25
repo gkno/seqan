@@ -438,7 +438,7 @@ void constructLaganChain(
     std::cerr << "Global chaining..." << std::endl;
     // std::cerr << "length(seedSet) == " << length(seedSet) << std::endl;
     chainSeedsGlobally(chain, seedSet, SparseChaining());
-    // std::cout << "length(chain) == " << length(chain) << std::endl;
+    std::cout << "# of seeds: " << length(chain) << std::endl;
 
     // -----------------------------------------------------------------------
     // Recursively fill gaps
