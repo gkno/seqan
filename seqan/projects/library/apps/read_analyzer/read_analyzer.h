@@ -188,6 +188,8 @@ struct AlignmentEvaluationResult
 
     String<String<String<double> > > qualityCountsForInsertPerBasePerPosition;  // arr[base][quality][pos]
     String<String<String<double> > > qualityCountsForMismatchPerMismatchPerPosition;  // arr[src*5+tgt][quality][pos]
+    String<String<String<double> > > qualityCountsBeforeDeletesPerBasePerPosition;  // arr[base][quality][pos]
+    String<String<String<double> > > qualityCountsAfterDeletesPerBasePerPosition;  // arr[base][quality][pos]
 
     AlignmentEvaluationResult() {}
 };
@@ -227,6 +229,20 @@ void setReadLength(AlignmentEvaluationResult & result, unsigned readLength)
     for (int i = 0; i < 25; ++i)
         fill(result.mismatchCountsPerMismatchPerPosition[i], readLength, 0);
 
+    clear(result.qualityCountsBeforeDeletesPerBasePerPosition);
+    resize(result.qualityCountsBeforeDeletesPerBasePerPosition, 5);
+    for (int i = 0; i < 5; ++i) {
+        resize(result.qualityCountsBeforeDeletesPerBasePerPosition[i], 63);
+        for (int j = 0; j < 63; ++j)
+            fill(result.qualityCountsBeforeDeletesPerBasePerPosition[i][j], readLength, 0);
+    }
+    clear(result.qualityCountsAfterDeletesPerBasePerPosition);
+    resize(result.qualityCountsAfterDeletesPerBasePerPosition, 5);
+    for (int i = 0; i < 5; ++i) {
+        resize(result.qualityCountsAfterDeletesPerBasePerPosition[i], 63);
+        for (int j = 0; j < 63; ++j)
+            fill(result.qualityCountsAfterDeletesPerBasePerPosition[i][j], readLength, 0);
+    }
     clear(result.qualityCountsForInsertPerBasePerPosition);
     resize(result.qualityCountsForInsertPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i) {
@@ -234,6 +250,14 @@ void setReadLength(AlignmentEvaluationResult & result, unsigned readLength)
         for (int j = 0; j < 63; ++j)
             fill(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
     }
+    clear(result.qualityCountsForInsertPerBasePerPosition);
+    resize(result.qualityCountsForInsertPerBasePerPosition, 5);
+    for (int i = 0; i < 5; ++i) {
+        resize(result.qualityCountsForInsertPerBasePerPosition[i], 63);
+        for (int j = 0; j < 63; ++j)
+            fill(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
+    }
+
     clear(result.qualityCountsForMismatchPerMismatchPerPosition);
     resize(result.qualityCountsForMismatchPerMismatchPerPosition, 25);
     for (int i = 0; i < 25; ++i) {
@@ -265,8 +289,15 @@ inline void
 countDeleteAtPositionWithBase(AlignmentEvaluationResult & result,
                               size_t position,
                               Dna5 referenceBase,
+                              bool hasBefore,
+                              Dna5Q beforeReadBase,
+                              bool hasAfter,
+                              Dna5Q afterReadBase,
                               unsigned readAlignmentCount)
 {
+    int qb = getQualityValue(beforeReadBase);
+    int qa = getQualityValue(afterReadBase);
+
     int b = ordValue(referenceBase);
 
     double x = 1.0 / readAlignmentCount;
@@ -274,6 +305,10 @@ countDeleteAtPositionWithBase(AlignmentEvaluationResult & result,
     result.deleteCountsPerBase[b] += x;
     SEQAN_ASSERT_LT(position, length(result.mismatchCountsPerMismatchPerPosition[b]));
     result.deleteCountsPerBasePerPosition[b][position] += x;
+    if (hasBefore)
+        result.qualityCountsBeforeDeletesPerBasePerPosition[b][qb][position] += x;
+    if (hasAfter)
+        result.qualityCountsAfterDeletesPerBasePerPosition[b][qa][position] += x;
 }
 
 inline void
@@ -416,7 +451,6 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
             unsigned maxErrors = static_cast<unsigned>(0.1 * length(fragmentStore.readSeqStore[refAlignedRead.readId]));
             computeBogusReads(bogusAlignmentIds, alignedReadId, alignedReadsBeginEnd.first, alignedReadsBeginEnd.second, fragmentStore, maxErrors);
             size_t bogusAlignmentCount = bogusAlignmentIds.size();
-            SEQAN_ASSERT_LEQ(bogusReadCount, readAlignmentCount);
             readAlignmentCount -= bogusAlignmentCount;
         }
         // Maybe ignore bogus read.
@@ -452,7 +486,29 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
             unsigned reportedPos = flipped ? readLength - readPos - 1 : readPos;
             if (isGap(readGapsIt)) {
                 // Deletion
-                countDeleteAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), readAlignmentCount);
+                bool hasBefore = false;
+                Dna5Q baseBefore('N');
+                if (reportedPos > 0) {
+                    TReadGapAnchorsIterator tmpIt = readGapsIt;
+                    while (isGap(tmpIt) && tmpIt != begin(readGaps))
+                        goPrevious(tmpIt);
+                    if (!isGap(tmpIt)) {
+                        hasBefore = true;
+                        baseBefore = convert<Dna5Q>(*tmpIt);
+                    }
+                }
+                bool hasAfter = false;
+                Dna5Q baseAfter('N');
+                if (reportedPos < readLength - 1) {
+                    TReadGapAnchorsIterator tmpIt = readGapsIt;
+                    while (isGap(tmpIt) && tmpIt != end(readGaps))
+                        goNext(tmpIt);
+                    if (tmpIt != end(readGaps)) {
+                        hasAfter = true;
+                        baseAfter = convert<Dna5Q>(*tmpIt);
+                    }
+                }
+                countDeleteAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), hasBefore, baseBefore, hasAfter, baseAfter, readAlignmentCount);
             } else if (isGap(contigGapsIt)) {
                 // Insert
                 countInsertAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*readGapsIt), readAlignmentCount);
@@ -720,7 +776,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
 
     // Qualities per position and error type.
     std::cout << std::endl << std::endl << "#--file:qualities-per-error-position.dat" << std::endl;
-    std::cout << "#position insert sd insert mismatch   sd mismatch   match sd match  total  sd total" << std::endl;
+    std::cout << "#position insert sd insert delete before sd delete before delete after delete after sd mismatch   sd mismatch   match sd match  total  sd total" << std::endl;
     for (unsigned position = 0; position < length(result.insertCountsPerBasePerPosition[0]); ++position) {  // position
         printf("%9u", position);
         // insert mean
@@ -745,8 +801,57 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
                     insertStdDevSum += result.qualityCountsForInsertPerBasePerPosition[b][q][position] * x * x;
                 }
             }
-            double insertStdDev = std::sqrt(1 / insertCount * insertStdDevSum);
+            double insertStdDev = std::sqrt(1.0 / insertCount * insertStdDevSum);
             printf("%7.2f   %7.2f", insertMean, insertStdDev);
+        }
+        // delete mean
+        double deleteBeforeSum = 0;
+        double deleteBeforeCount = 0;
+        double deleteBeforeMean = 0;
+        double deleteAfterSum = 0;
+        double deleteAfterCount = 0;
+        double deleteAfterMean = 0;
+        for (int b = 0; b < 5; ++b) {
+            for (int q = 0; q < 63; ++q) {
+                deleteBeforeSum += result.qualityCountsBeforeDeletesPerBasePerPosition[b][q][position] * q;
+                deleteBeforeCount += result.qualityCountsBeforeDeletesPerBasePerPosition[b][q][position];
+                deleteAfterSum += result.qualityCountsAfterDeletesPerBasePerPosition[b][q][position] * q;
+                deleteAfterCount += result.qualityCountsAfterDeletesPerBasePerPosition[b][q][position];
+            }
+        }
+        if (deleteBeforeCount == 0) {
+            printf("       %7s          %7s", "-", "-");
+        } else {
+            deleteBeforeMean = deleteBeforeSum / deleteBeforeCount;
+            // insert sd
+            double deleteBeforeStdDevSum = 0;
+            for (int b = 0; b < 5; ++b) {
+                for (int q = 0; q < 63; ++q) {
+                    double x = deleteBeforeMean - q;
+                    deleteBeforeStdDevSum += result.qualityCountsBeforeDeletesPerBasePerPosition[b][q][position] * x * x;
+                }
+            }
+            double deleteBeforeStdDev = std::sqrt(1.0 / deleteBeforeCount * deleteBeforeStdDevSum);
+            if (deleteBeforeStdDevSum == 0)
+                deleteBeforeStdDev = 0;
+            printf("       %7.2f          %7.2f", deleteBeforeMean, deleteBeforeStdDev);
+        }
+        if (deleteAfterCount == 0) {
+            printf("      %7s         %7s", "-", "-");
+        } else {
+            deleteAfterMean = deleteAfterSum / deleteAfterCount;
+            // insert sd
+            double deleteAfterStdDevSum = 0;
+            for (int b = 0; b < 5; ++b) {
+                for (int q = 0; q < 63; ++q) {
+                    double x = deleteAfterMean - q;
+                    deleteAfterStdDevSum += result.qualityCountsAfterDeletesPerBasePerPosition[b][q][position] * x * x;
+                }
+            }
+            double deleteAfterStdDev = std::sqrt(1.0 / deleteAfterCount * deleteAfterStdDevSum);
+            if (deleteAfterStdDevSum == 0)
+                deleteAfterStdDev = 0;
+            printf("      %7.2f         %7.2f", deleteAfterMean, deleteAfterStdDev);
         }
         // match/mismatch mean
         double mismatchSum = 0;
