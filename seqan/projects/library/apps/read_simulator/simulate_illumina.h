@@ -6,7 +6,6 @@
 #include <seqan/store.h>
 
 #include "read_simulator.h"
-#include "simulate_illumina_data.h"
 
 using namespace seqan;
 
@@ -25,31 +24,80 @@ struct Options<IlluminaReads> : public Options<Global>
 
     // Base Calling Error Model Parameters.
 
-    // Path to the mismatch error distribution file.  If empty,
-    // built-ins (available for n=36, 50, 100) will be used, or uniform
-    // distribution is assumed.
-    CharString errorDistributionFile;
     // Probability of an insertion.
     double probabilityInsert;
     // Probability of a deletion.
     double probabilityDelete;
-    // Standard error in %*100 around error probability for quality simulation.
-    double qualityErrorFactor;
+
+    // Probability of a mismatch (single-base polymorphism).
+    double probabilityMismatch;
+    // Probability for a mismatch in the first base.
+    double probabilityMismatchBegin;
+    // Probability for a mismatch in the last base.
+    double probabilityMismatchEnd;
+    // Relative position in the read between 0 and 1 where the steeper curve begins.
+    double positionRaise;
+
+    // Base Calling Quality Model Parameters.
+
+    // Mean quality for non-mismatches at the first base.
+    double meanQualityBegin;
+    // Mean quality for non-mismatches at last base.
+    double meanQualityEnd;
+    // Standard deviation quality for non-mismatches at the first base.
+    double stdDevQualityBegin;
+    // Standard deviation quality for non-mismatches at the last base.
+    double stdDevQualityEnd;
+
+    // Mean quality for mismatches at the first base.
+    double meanMismatchQualityBegin;
+    // Mean quality for mismatches at last base.
+    double meanMismatchQualityEnd;
+    // Standard deviation quality for mismatches at the first base.
+    double stdDevMismatchQualityBegin;
+    // Standard deviation quality for mismatches at the last base.
+    double stdDevMismatchQualityEnd;
 
     Options()
             : readLength(36),
-              errorDistributionFile(""),
-              probabilityInsert(0.01),
-              probabilityDelete(0.01),
-              qualityErrorFactor(0.1)
+              // Base Calling Error Model Parameters
+              probabilityInsert(0.001),
+              probabilityDelete(0.001),
+              probabilityMismatch(0.004),
+              probabilityMismatchBegin(0.002),
+              probabilityMismatchEnd(0.012),
+              positionRaise(0.66),
+              // Base Calling Quality Model Parameters
+              meanQualityBegin(40),
+              meanQualityEnd(39.5),
+              stdDevQualityBegin(0.05),
+              stdDevQualityEnd(10),
+              meanMismatchQualityBegin(39.5),
+              meanMismatchQualityEnd(30),
+              stdDevMismatchQualityBegin(3),
+              stdDevMismatchQualityEnd(15)
     {}
 };
 
 template<>
 struct ModelParameters<IlluminaReads>
 {
+    // Probabilities for a mismatch at a given position.
     String<double> mismatchProbabilities;
-    String<double> errorDistribution;
+
+    // Standard deviations for the normal distributions of base
+    // qualities for the mismatch case.
+    String<double> mismatchQualityMeans;
+    // Standard deviations for the normal distributions of base
+    // qualities for the mismatch case.
+    String<double> mismatchQualityStdDevs;
+
+    // Standard deviations for the normal distributions of base
+    // qualities for the non-mismatch case.
+    String<double> qualityMeans;
+    // Standard deviations for the normal distributions of base
+    // qualities for the non-mismatch case.
+    String<double> qualityStdDevs;
 };
 
 // ============================================================================
@@ -64,11 +112,21 @@ template <typename TStream>
 TStream & operator<<(TStream & stream, Options<IlluminaReads> const & options) {
     stream << static_cast<Options<Global> >(options);
     stream << "illumina-options {" << std::endl
-           << "  readLength:             " << options.readLength << std::endl
-           << "  errorDistributionFile:  \"" << options.errorDistributionFile << "\"" <<std::endl
-           << "  probabilityInsert:      " << options.probabilityInsert << std::endl
-           << "  probabilityDelete:      " << options.probabilityDelete << std::endl
-           << "  qualityErrorFactor:     " << options.qualityErrorFactor << std::endl
+           << "  readLength:                 " << options.readLength << std::endl
+           << "  probabilityInsert:          " << options.probabilityInsert << std::endl
+           << "  probabilityDelete:          " << options.probabilityDelete << std::endl
+           << "  probabilityMismatch:        " << options.probabilityMismatch << std::endl
+           << "  probabilityMismatchBegin:   " << options.probabilityMismatchBegin << std::endl
+           << "  probabilityMismatchEnd:     " << options.probabilityMismatchEnd << std::endl
+           << "  positionRaise:              " << options.positionRaise << std::endl
+           << "  meanQualityBegin:           " << options.meanQualityBegin << std::endl
+           << "  meanQualityEnd:             " << options.meanQualityEnd << std::endl
+           << "  stdDevQualityBegin:         " << options.stdDevQualityBegin << std::endl
+           << "  stdDevQualityEnd:           " << options.stdDevQualityEnd << std::endl
+           << "  meanMismatchQualityBegin:   " << options.meanMismatchQualityBegin << std::endl
+           << "  meanMismatchQualityEnd:     " << options.meanMismatchQualityEnd << std::endl
+           << "  stdDevMismatchQualityBegin: " << options.stdDevMismatchQualityBegin << std::endl
+           << "  stdDevMismatchQualityEnd:   " << options.stdDevMismatchQualityEnd << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -88,9 +146,22 @@ void setUpCommandLineParser(CommandLineParser & parser,
 
     addSection(parser, "Illumina Error Model");
 
-    addOption(parser, CommandLineOption("d",  "error-distribution", "File containing mismatch qualities.  If left blank, defaults are used.  Defaults are available for n = 36, 50, 100.  Default: \"\".", OptionType::String));
-    addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.01.", OptionType::Double));
-    addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.01.", OptionType::Double));
+    addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.001.", OptionType::Double));
+    addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.001.", OptionType::Double));
+    addOption(parser, CommandLineOption("pmm", "prob-mismatch", "Average mismatch probability.  Default: 0.004.", OptionType::Double));
+    addOption(parser, CommandLineOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.  Default: 0.003.", OptionType::Double));
+    addOption(parser, CommandLineOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.  Default: 0.012.", OptionType::Double));
+    addOption(parser, CommandLineOption("pr", "position-raise", "Relative position of raise point.  Default: 0.66.", OptionType::Double));
+
+    addOption(parser, CommandLineOption("qmb", "quality-mean-begin", "Quality mean at first base.  Default: 40.", OptionType::Double));
+    addOption(parser, CommandLineOption("qme", "quality-mean-end", "Quality mean at last base.  Default: 39.5.", OptionType::Double));
+    addOption(parser, CommandLineOption("qsdb", "quality-std-dev-begin", "Quality standard deviation at first base.  Default: 0.05.", OptionType::Double));
+    addOption(parser, CommandLineOption("qsde", "quality-std-dev-end", "Quality standard deviation at last base.  Default: 10.", OptionType::Double));
+
+    addOption(parser, CommandLineOption("mmqmb", "mismatch-quality-mean-begin", "Mismatch quality mean at first base.  Default: 39.4.", OptionType::Double));
+    addOption(parser, CommandLineOption("mmqme", "mismatch-quality-mean-end", "Mismatch quality mean at last base.  Default: 30.", OptionType::Double));
+    addOption(parser, CommandLineOption("mmqsdb", "mismatch-quality-std-dev-begin", "Mismatch quality standard deviation at first base.  Default: 3.", OptionType::Double));
+    addOption(parser, CommandLineOption("mmqsde", "mismatch-quality-std-dev-end", "Mismatch quality standard deviation at last base.  Default: 15.", OptionType::Double));
 }
 
 int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
@@ -99,60 +170,102 @@ int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
     if (isSetLong(parser, "read-length"))
         getOptionValueLong(parser, "read-length", options.readLength);
 
-    if (isSetLong(parser, "error-distribution"))
-        getOptionValueLong(parser, "error-distribution", options.errorDistributionFile);
     if (isSetLong(parser, "prob-insert"))
         getOptionValueLong(parser, "prob-insert", options.probabilityInsert);
     if (isSetLong(parser, "prob-delete"))
         getOptionValueLong(parser, "prob-delete", options.probabilityDelete);
+    if (isSetLong(parser, "prob-mismatch"))
+        getOptionValueLong(parser, "prob-mismatch", options.probabilityMismatch);
+    if (isSetLong(parser, "prob-mismatch-begin"))
+        getOptionValueLong(parser, "prob-mismatch-begin", options.probabilityMismatchBegin);
+    if (isSetLong(parser, "prob-mismatch-end"))
+        getOptionValueLong(parser, "prob-mismatch-end", options.probabilityMismatchEnd);
+    if (isSetLong(parser, "position-raise"))
+        getOptionValueLong(parser, "positio-raise", options.positionRaise);
+
+    if (isSetLong(parser, "quality-mean-begin"))
+        getOptionValueLong(parser, "quality-mean-begin", options.meanQualityBegin);
+    if (isSetLong(parser, "quality-mean-end"))
+        getOptionValueLong(parser, "quality-mean-end", options.meanQualityEnd);
+    if (isSetLong(parser, "quality-std-dev-begin"))
+        getOptionValueLong(parser, "quality-std-dev-begin", options.stdDevQualityBegin);
+    if (isSetLong(parser, "quality-std-dev-end"))
+        getOptionValueLong(parser, "quality-std-dev-end", options.stdDevQualityEnd);
+
+    if (isSetLong(parser, "mismatch-quality-mean-begin"))
+        getOptionValueLong(parser, "mismatch-quality-mean-begin", options.meanMismatchQualityBegin);
+    if (isSetLong(parser, "mismatch-quality-mean-end"))
+        getOptionValueLong(parser, "mismatch-quality-mean-end", options.meanMismatchQualityEnd);
+    if (isSetLong(parser, "mismatch-quality-std-dev-begin"))
+        getOptionValueLong(parser, "mismatch-quality-std-dev-begin", options.stdDevMismatchQualityBegin);
+    if (isSetLong(parser, "mismatch-quality-std-dev-end"))
+        getOptionValueLong(parser, "mismatch-quality-std-dev-end", options.stdDevMismatchQualityEnd);
 
     return 0;
 }
 
-// Called in simulateReads() to setup model specific data between loading
-// or generating the reference sequence and actually simulating the reads.
+// Called in simulateReads() to compute the model specific data from the options.
+//
+// For Illumina reads, this means computing probabilities, means and
+// standard deviations for each position, depending on the options.
 int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & parameters,
                                          Options<IlluminaReads> const & options)
 {
-    // Load error probabilities from file or set from built-in data.
-    String<double> & mismatchProbabilities = parameters.mismatchProbabilities;
-    resize(mismatchProbabilities, options.readLength, Exact());
-    if (options.errorDistributionFile == "") {
-        if (options.readLength == 36) {
-            for (unsigned i = 0; i < 36; ++i)
-                mismatchProbabilities[i] = ERROR_PROBABILITIES_36[i];
-        } else if (options.readLength == 50) {
-            for (unsigned i = 0; i < 50; ++i)
-                mismatchProbabilities[i] = ERROR_PROBABILITIES_50[i];
-        } else if (options.readLength == 100) {
-            for (unsigned i = 0; i < 100; ++i)
-                mismatchProbabilities[i] = ERROR_PROBABILITIES_100[i];
+    // Compute mismatch probabilities, piecewise linear function.
+    resize(parameters.mismatchProbabilities, options.readLength);
+    // Compute probability at raise point.
+    double y_r = 2 * options.probabilityMismatch - options.positionRaise * options.probabilityMismatchBegin - options.probabilityMismatchEnd + options.probabilityMismatchEnd * options.positionRaise;
+    // std::cout << "y_r = " << y_r << std::endl;
+    // Compute probability at each base.
+    for (unsigned i = 0; i < options.readLength; ++i) {
+        double x = static_cast<double>(i) / (options.readLength - 1);
+        if (x < options.positionRaise) {
+            double b = options.probabilityMismatchBegin;
+            double m = (y_r - options.probabilityMismatchBegin) / options.positionRaise;
+            parameters.mismatchProbabilities[i] = m * x + b;
+            // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
         } else {
-            std::cerr << "WARNING: No error distribution file given and n != 36, 50, 100.  Using uniform distribution." << std::endl;
-            double sum = 0;
-            if (options.readLength > 1) {
-                for (unsigned i = 0; i < options.readLength - 1; ++i) {
-                    sum += 1.0 / options.readLength;
-                    mismatchProbabilities[i] = 1.0 / options.readLength;
-                }
-            }
-            mismatchProbabilities[options.readLength - 1] = 1 - sum;
+            double b = y_r;
+            double m = (options.probabilityMismatchEnd - y_r) / (1 - options.positionRaise);
+            x -= options.positionRaise;
+            parameters.mismatchProbabilities[i] = m * x + b;
+            // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
         }
-    } else {
-        std::cerr << "Cannot load error distribution from file yet!" << std::endl;
-        return 1;
     }
-	// Prepare log error distribution;
-    String<double> & errorDistribution = parameters.errorDistribution;
-	resize(errorDistribution, 4 * options.readLength, Exact());
-	// Log probs for seeing 1s at positions 0...optionMaxN-1.
-	double remainingProb = 1.0 - options.probabilityInsert - options.probabilityDelete;
-    for (unsigned j = 0; j < options.readLength; ++j) {
-		errorDistribution[j * 4 + ERROR_TYPE_MISMATCH] = mismatchProbabilities[j];
-		errorDistribution[j * 4 + ERROR_TYPE_INSERT]   = options.probabilityInsert;
-		errorDistribution[j * 4 + ERROR_TYPE_DELETE]   = options.probabilityDelete;
-		errorDistribution[j * 4 + ERROR_TYPE_MATCH]    = remainingProb - mismatchProbabilities[j];
-	}
+
+    // Compute match/mismatch means and standard deviations.
+    resize(parameters.mismatchQualityMeans, options.readLength);
+    for (unsigned i = 0; i < options.readLength; ++i) {
+        double b = options.meanQualityBegin;
+        double x = static_cast<double>(i) / (options.readLength - 1);
+        double m = (options.meanQualityEnd - options.meanQualityBegin);
+        parameters.mismatchQualityMeans[i] = m * x + b;
+        // std::cout << "parameters.mismatchQualityMeans[" << i << "] = " << parameters.mismatchQualityMeans[i] << std::endl;
+    }
+    resize(parameters.mismatchQualityStdDevs, options.readLength);
+    for (unsigned i = 0; i < options.readLength; ++i) {
+        double b = options.stdDevQualityBegin;
+        double x = static_cast<double>(i) / (options.readLength - 1);
+        double m = (options.stdDevQualityEnd - options.stdDevQualityBegin);
+        parameters.mismatchQualityStdDevs[i] = m * x + b;
+        // std::cout << "parameters.mismatchQualityStdDevs[" << i << "] = " << parameters.mismatchQualityStdDevs[i] << std::endl;
+    }
+    resize(parameters.qualityMeans, options.readLength);
+    for (unsigned i = 0; i < options.readLength; ++i) {
+        double b = options.meanQualityBegin;
+        double x = static_cast<double>(i) / (options.readLength - 1);
+        double m = (options.meanQualityEnd - options.meanQualityBegin);
+        parameters.qualityMeans[i] = m * x + b;
+        // std::cout << "parameters.qualityMeans[" << i << "] = " << parameters.qualityMeans[i] << std::endl;
+    }
+    resize(parameters.qualityStdDevs, options.readLength);
+    for (unsigned i = 0; i < options.readLength; ++i) {
+        double b = options.stdDevQualityBegin;
+        double x = static_cast<double>(i) / (options.readLength - 1);
+        double m = (options.stdDevQualityEnd - options.stdDevQualityBegin);
+        parameters.qualityStdDevs[i] = m * x + b;
+        // std::cout << "parameters.qualityStdDevs[" << i << "] = " << parameters.qualityStdDevs[i] << std::endl;
+    }
 
     return 0;
 }
@@ -165,9 +278,6 @@ unsigned pickReadLength(TRNG const &, Options<IlluminaReads> const & options)
 
 template <typename TRNG, typename TContig>
 void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst, TRNG & rng, unsigned readLength, TContig const & contig, ModelParameters<IlluminaReads> const & parameters, Options<IlluminaReads> const & options) {
-    String<double> errorProbabilities = parameters.errorDistribution;
-    
-    SEQAN_ASSERT_EQ(readLength * 4, length(errorProbabilities));
     clear(inst.editString);
     reserve(inst.editString, static_cast<size_t>(1.2 * readLength), Generous());
     inst.delCount = 0;
@@ -178,9 +288,10 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     //
     for (unsigned i = 0; i < readLength; /*NOP*/) {
         double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
-        double pMatch    = errorProbabilities[i * 4 + ERROR_TYPE_MATCH];
-        double pMismatch = errorProbabilities[i * 4 + ERROR_TYPE_MISMATCH];
-        double pInsert   = errorProbabilities[i * 4 + ERROR_TYPE_INSERT];
+        double pMismatch = parameters.mismatchProbabilities[i];
+        double pInsert   = options.probabilityInsert;
+        double pDelete   = options.probabilityDelete;
+        double pMatch    = 1.0 - pMismatch - pInsert - pDelete;
         if (x < pMatch) {
             // match
             i += 1;
@@ -245,54 +356,18 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     String<double> tmp;
     fill(tmp, inst.endPos - inst.beginPos + inst.delCount, 0, Exact());
 
-
-    // TODO(holtgrew): Quality computation is HIGHLY bogus.
-    //
-    // We derive the read qualities from the error probabilities and
-    // the actual match/mismatch/indel event at a point.  For a match,
-    // we compute the quality as the phred score of x where x is
-    // picked around options.qualityErrorFactor around the error
-    // probability for this location.  For mismatches, we do the same
-    // and half the resulting score.  Matches and mismatches are
-    // handled in the first round.
-    //
-    // In a second round, we compute the scores for indels as half the
-    // arithmetic mean of the quality values of the neighbouring
-    // bases.
-    //
-    // First round.
     for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
         SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
-        if (inst.editString[i] == ERROR_TYPE_MATCH || inst.editString[i] == ERROR_TYPE_MISMATCH) {
-            double p = 1 - errorProbabilities[j * 4 + ERROR_TYPE_MATCH];
-            double delta = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * 2 * options.qualityErrorFactor * p;
-            double x = p - options.qualityErrorFactor * p + delta;
-            int score = static_cast<int>(round(-10 * std::log10(x)));
-            if (inst.editString[i] == ERROR_TYPE_MISMATCH)
-                score = static_cast<int>(std::ceil(score / 2.0));
-            // Store scores.
-            inst.qualities[i] = score;
-            tmp[j] = score;
-            j += 1;
-        }
-    }
-
-    // Second round.
-    for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
-        if (inst.editString[i] == ERROR_TYPE_INSERT || inst.editString[i] == ERROR_TYPE_DELETE) {
-            if (j == 0) {
-                // Indel at beginning.
-                inst.qualities[i] = static_cast<int>(round(tmp[0]));
-            } else if (j == inst.endPos - inst.beginPos - 1) {
-                // Indel at end.
-                inst.qualities[i] = static_cast<int>(round(back(tmp)));
-            } else {
-                // Indel in center.
-                inst.qualities[i] = static_cast<int>(round(0.25 * (tmp[j] + tmp[j + 1])));
-            }
+        if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
+            PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
+            inst.qualities[i] = pickRandomNumber(rng, pdf);
         } else {
-            j += 1;
+            PDF<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
+            inst.qualities[i] = pickRandomNumber(rng, pdf);
         }
+
+        if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_MATCH)
+            j += 1;
     }
 }
 
@@ -319,17 +394,19 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1)));
+                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2 == no N
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (c == read[j])
                     c = TAlphabet(ordValue(c) + 1);
                 appendValue(tmp, c);
                 assignQualityValue(back(tmp), inst.qualities[i]);
+                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
                 j += 1;
                 break;
             case ERROR_TYPE_INSERT:
-                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));
+                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
                 assignQualityValue(back(tmp), inst.qualities[i]);
+                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " insertion" << std::endl;
                 break;
             case ERROR_TYPE_DELETE:
                 j += 1;

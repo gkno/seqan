@@ -81,7 +81,6 @@ computeThreshold(ThresholdMatrix const & matrix, unsigned r1, unsigned r2)
     // In i, we will count the number of iterations so we can limit the maximal
     // number of iterations.
     unsigned i = 0;
-    (void) i;  // In case assertions are disabled.
 
     // f1 is the density function for r1 and f2 the density function for r2.
 
@@ -98,7 +97,8 @@ computeThreshold(ThresholdMatrix const & matrix, unsigned r1, unsigned r2)
 
     // Now, search for the intersection point.
     while (true) {
-        SEQAN_ASSERT_LT_MSG(i++, 1000u, "Too many iterations (%u)! r1 = %u, r2 = %u.", i, r1, r2);
+        SEQAN_ASSERT_LT_MSG(i, 1000u, "Too many iterations (%u)! r1 = %u, r2 = %u.", i, r1, r2);
+        i += 1;
 
         double center = (left + right) / 2;
         double fCenter1 = dispatchDensityFunction(matrix, r1, center);

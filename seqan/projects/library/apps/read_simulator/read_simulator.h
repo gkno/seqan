@@ -696,6 +696,8 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                       ModelParameters<TReadsTag> const & parameters) {
     typedef FragmentStore<MyFragmentStoreConfig> TFragmentStore;
     typedef Value<TFragmentStore::TMatePairStore>::Type TMatePairStoreElement;
+    typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type	TAlignedElement;
+    typedef typename TAlignedElement::TGapAnchors								TReadGapAnchors;
 
     if (options.verbose)
         std::cerr << "Simulating reads..." << std::endl;
@@ -777,15 +779,6 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 TPos origBeginPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.beginPos);
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
 
-                // Print info about read and haplotype.
-                if (options.veryVerbose) {
-                    std::cout << ",-- Read #" << readId << std::endl
-                              << "| original infix:  " << infix(fragmentStore.contigStore[inst.contigId].seq, origBeginPos, origEndPos) << std::endl
-                              << "| haplotype infix: " << infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos) << std::endl
-                              << "| read:            " << read << std::endl
-                              << "`-- " << std::endl;
-                }
-
                 // Generate read name.
                 if (options.generateMatePairs) {
                     // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have different nums.  This also decides about the flipping.
@@ -800,9 +793,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
                         appendValue(flipped, mateNum == 1);
                     }
-                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu original=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(read)));
                 } else {
-                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos);
+                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu original=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(read)));
                 }
                 for (unsigned i = 0; i < length(inst.editString); ++i) {
                     char buffer[2] = "*";
@@ -810,6 +803,45 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     strcat(readName, buffer);
                 }
                 appendValue(fragmentStore.readNameStore, readName);
+
+                // Print info about read and haplotype.
+                if (options.veryVerbose) {
+                    std::cout << ",-- Read #" << readId << std::endl
+                              << "| inst.beginPos    " << inst.beginPos << std::endl
+                              << "| inst.endPos      " << inst.endPos << std::endl
+                              << "| origBeginPos     " << origBeginPos << std::endl
+                              << "| origEndPos       " << origEndPos << std::endl
+                              << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos-1) << std::endl
+                              << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos) << std::endl
+                              << "| isgapinhost      " << isGapInHost(haplotypeContigs[inst.contigId], inst.beginPos+1) << std::endl
+                              << "| name:            " << readName << std::endl
+                              << "| original infix:  " << infix(fragmentStore.contigStore[inst.contigId].seq, origBeginPos, origEndPos) << std::endl
+                              << "| haplotype infix: " << infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos) << std::endl
+                              << "| read:            " << read << std::endl
+                              << "`-- " << std::endl;
+                }
+
+                // Align haplotype infix with the read sequence, then copy over gaps.
+                //
+                // TODO(holtgrew): A better way to do this would be to build the gaps by copying over gaps from differences of haplotype and original sequence and then apply the edit string.
+                // TReadGapAnchors readGapAnchors;
+                // TReadGaps readGaps(fragmentStore.readSeqStore[readId], readGapAnchors);
+                // Align<Dna5String> alignment;
+                // resize(rows(alignment), 2);
+                // assignSource(row(alignment, 0), infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos));
+                // assignSource(row(alignment, 1), fragmentStore.readSeqStore[readId]);
+                // globalAlignment(alignment, Score<int, EditDistance>(), NeedlemanWunsch());
+                // typedef typename Row<Align<Dna5String> >::Type TRow;
+                // typedef typename Iterator<TRow>::Type TAlignmentIterator;
+                // for (unsigned i = 0; i < length(columns(alignment)); ++i) {
+                //     TAlignmentIterator it0 = iter(row(alignemnt, 0), i);
+                //     TAlignmentIterator it1 = iter(row(alignemnt, 1), i);
+                //     SEQAN_ASSERT_TRUE(!isGap(it0) || !isGap(it1));
+                //     if (isGap(it0)) {
+                //     } else if (isGap(it1)) {
+                //     } else {
+                //     }
+                // }
 
                 // Tentatively add matches to aligned read store.  We will
                 // maybe flip begin and end position below in the "flipping and
@@ -875,6 +907,10 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
     // Last but not least, convert the matches collected before to a global alignment.
     convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
+	
+	// AlignedReadLayout layout;
+	// layoutAlignment(layout, fragmentStore);
+	// printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 1700, 1900, 0, 100);
     
     if (options.verbose)
         std::cerr << "Simulated " << length(fragmentStore.readSeqStore) << " reads" << std::endl;
