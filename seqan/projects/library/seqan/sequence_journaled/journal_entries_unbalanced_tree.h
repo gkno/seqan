@@ -28,6 +28,16 @@ namespace seqan {
 // Tags, Classes
 // ============================================================================
 
+// For iterator, needs to be declared here.
+enum IterationDirection {
+    DIRECTION_NULL,
+    DIRECTION_DOWN_LEFT,
+    DIRECTION_DOWN_RIGHT,
+    DIRECTION_UP_LEFT,
+    DIRECTION_UP_RIGHT
+};
+
+
 // Tag: Unbalanced tree.
 struct UnbalancedTree {};
 
@@ -288,6 +298,7 @@ findInJournalEntries(JournalEntries<TCargo, UnbalancedTree> const & journalEntri
 
     TIterator result;
     result._currentNode = journalEntries._root;
+    result._iterationDirection = DIRECTION_DOWN_LEFT;
 
     while (true) {
         SEQAN_ASSERT_NEQ(result._currentNode, static_cast<TNode *>(0));

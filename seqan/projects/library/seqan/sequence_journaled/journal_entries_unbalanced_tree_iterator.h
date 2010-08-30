@@ -32,14 +32,6 @@ template <typename TJournalEntriesSpec>
 struct JournalEntriesIterSpec;
 
 
-enum IterationDirection {
-    DIRECTION_NULL,
-    DIRECTION_DOWN_LEFT,
-    DIRECTION_DOWN_RIGHT,
-    DIRECTION_UP_LEFT,
-    DIRECTION_UP_RIGHT
-};
-
 template <typename TJournalEntries>
 class Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> >
 {
@@ -387,6 +379,9 @@ operator++(Iter<TJournalEntries, JournalEntriesIterSpec<UnbalancedTree> > & iter
         case DIRECTION_UP_RIGHT:
             // We came here from our right child.  Next is up until we got
             // to the current node from it's left child.
+            while (goUp(iterator) && iterator._iterationDirection == DIRECTION_UP_RIGHT)
+                continue;
+            break;
         default:
             SEQAN_ASSERT_FAIL("Invalid iteration direction.");
     }

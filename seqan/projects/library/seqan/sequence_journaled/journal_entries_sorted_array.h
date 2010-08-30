@@ -441,6 +441,21 @@ virtualToHostPosition(JournalEntries<TNode, TJournalSpec> const & journalEntries
     return 0;
 }
 
+template <typename TNode, typename TJournalSpec, typename TPos>
+inline
+bool
+isGapInHost(JournalEntries<TNode, TJournalSpec> const & journalEntries,
+            TPos const & pos)
+{
+    SEQAN_CHECKPOINT;
+    typedef JournalEntries<TNode, TJournalSpec> TJournalEntries;
+    typedef typename Iterator<TJournalEntries>::Type TIterator;
+
+    TIterator it = findInJournalEntries(journalEntries, pos);
+    return value(it).segmentSource == SOURCE_PATCH;
+}
+
+
 }  // namespace seqan
 
 #endif  // SEQAN_SEQUENCE_JOURNALED_JOURNAL_ENTRIES_SORTED_ARRAY_H_

@@ -472,6 +472,8 @@ getValue(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const 
 }
 
 
+// Note that if pos is in a gap, we return the position of the entry
+// after the gap in the host.
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
 inline
 typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type
@@ -481,6 +483,18 @@ virtualToHostPosition(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferS
     SEQAN_CHECKPOINT;
     // TODO(holtgrew): With a better journal entries datastructure, we could solve the main problem here. At the moment, we delegate completely.
     return virtualToHostPosition(journaledString._journalEntries, pos);
+}
+
+
+template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TPos>
+inline
+bool
+isGapInHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & journaledString,
+            TPos const & pos)
+{
+    SEQAN_CHECKPOINT;
+    // TODO(holtgrew): With a better journal entries datastructure, we could solve the main problem here. At the moment, we delegate completely.
+    return isGapInHost(journaledString._journalEntries, pos);
 }
 
 
