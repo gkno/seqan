@@ -175,26 +175,41 @@ void testJournaledStringLength(TStringJournalSpec const &)
 template <typename TStringJournalSpec>
 void testJournaledStringVirtualToHostPosition(TStringJournalSpec const &)
 {
-    CharString charStr = "test";
-    String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+    {
+        CharString charStr = "test";
+        String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+        
+        insertValue(journaledString, 0, '!');
+        erase(journaledString, 2);
+        insertValue(journaledString, 4, '!');
+        
+        // journaledString == !tst!
+        //
+        //                           01234
+        // alignment with original  "test"
+        //                         "!t-st!"
+        //                          01 2345
 
-    insertValue(journaledString, 0, '!');
-    erase(journaledString, 2);
-    insertValue(journaledString, 4, '!');
-
-    // journaledString == !tst!
-    //
-    //                           01234
-    // alignment with original  "test"
-    //                         "!t-st!"
-    //                          01 2345
-
-    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
-    SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 1));
-    SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 2));
-    SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 3));
-    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 4));
-    SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 5));
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 1));
+        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 2));
+        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 3));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 4));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 5));
+    }
+    {
+        CharString charStr = "ABCDE";
+        String<char, Journaled<Alloc<void>, TStringJournalSpec> > journaledString(charStr);
+        insert(journaledString, 1, "XX");
+        SEQAN_ASSERT_EQ(0u, virtualToHostPosition(journaledString, 0));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 1));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 2));
+        SEQAN_ASSERT_EQ(1u, virtualToHostPosition(journaledString, 3));
+        SEQAN_ASSERT_EQ(2u, virtualToHostPosition(journaledString, 4));
+        SEQAN_ASSERT_EQ(3u, virtualToHostPosition(journaledString, 5));
+        SEQAN_ASSERT_EQ(4u, virtualToHostPosition(journaledString, 6));
+        SEQAN_ASSERT_EQ(5u, virtualToHostPosition(journaledString, 7));
+    }
 }
 
 
