@@ -274,7 +274,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template<typename TSpec, typename TConfig, typename TId, typename TPos, typename TGaps>
     inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
-	appendAlignment (
+	appendAlignment(
 		FragmentStore<TSpec, TConfig> & fragStore, 
 		TId readId, 
 		TId contigId, 

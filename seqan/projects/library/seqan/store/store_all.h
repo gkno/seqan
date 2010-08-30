@@ -1664,6 +1664,9 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGaps, cBegin);
+		// Increment cBegin by the number of gaps in front of the read
+		// row in the global alignment computed above.
+		cBegin += beginPosition(row(align, 1));
 		if (lastContigId != (*it).contigId)
 		{
 			firstOverlap = it;
@@ -1680,10 +1683,32 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		typename Iterator<TGaps>::Type it1 = begin(row(align, 0));
 		typename Iterator<TGaps>::Type it2 = begin(row(align, 1));
 
+        unsigned beginLocalContigGaps = beginPosition(row(align, 0));
+		// Heuristic (hack) for gaps in the beginning, so the following 
+		// does not happen:
+		//
+		// contig: XXXX------AAA
+		//             CCC---AAA
+		//                CCCAAA
+		//
+		// But instead, the C's are all aligned.
+		if (beginLocalContigGaps > 0u) {
+			unsigned i = beginLocalContigGaps;
+			do {
+				goPrevious(cIt);
+				i -= 1;
+				cBegin -= 1;
+			} while (isGap(cIt) && i > 0u);
+			if (!isGap(cIt)) {
+				goNext(cIt);
+				cBegin += 1;
+			}
+		}
+        
 		for (; !atEnd(cIt) && !atEnd(it1); goNext(cIt), goNext(rIt))
 		{
 			bool isGapContig = isGap(cIt);
-			bool isGapLocalContig = isGap(it1);
+			bool isGapLocalContig = (beginLocalContigGaps > 0) ? true : isGap(it1);
 			if (isGapContig != isGapLocalContig)
 			{
 				if (isGapContig)
@@ -1721,7 +1746,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 								++(*j).endPos;
 							else
 								++(*j).beginPos;
-						}
+						} else if (insPos <= rBegin) {
+                            ++(*j).endPos;
+                            ++(*j).beginPos;
+                        }
 					}
 				}
 			}
@@ -1731,7 +1759,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 				// copy gaps from alignment
 				insertGaps(rIt, 1);
 			}
-			goNext(it1);
+            if (beginLocalContigGaps == 0)
+                goNext(it1);
+            else
+                beginLocalContigGaps -= 1;
 			goNext(it2);
 		}
 
