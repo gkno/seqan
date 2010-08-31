@@ -74,11 +74,11 @@ struct Options<Global>
     // otherwise standard distribution is used.
     bool libraryLengthIsUniform;
     // Mate-pair library mean length.
-    unsigned libraryLengthMean;
+    double libraryLengthMean;
     // Mate-pair library length error.  Standard deviation for normally
     // distributed library lengths, interval length around mean for uniform
     // distribution.
-    unsigned libraryLengthError;
+    double libraryLengthError;
 
     // Source Sequence Repeat Parameters.
 
@@ -224,8 +224,8 @@ void setUpCommandLineParser(CommandLineParser & parser)
 
     addSection(parser, "Mate-Pair Options");
 
-    addOption(parser, CommandLineOption("ll", "library-length", "Mate-pair library length.  Default: 1000.", OptionType::Integer));
-    addOption(parser, CommandLineOption("le", "library-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Integer));
+    addOption(parser, CommandLineOption("ll", "library-length-mean", "Mate-pair mean library length.  Default: 1000.", OptionType::Double));
+    addOption(parser, CommandLineOption("le", "library-length-error", "Mate-pair library tolerance.  Default: 100.", OptionType::Double));
     addOption(parser, CommandLineOption("mp", "mate-pairs", "Enable mate pair simulation.  Default: false.", OptionType::Bool));
 
     addSection(parser, "Haplotype Options");
@@ -280,7 +280,7 @@ int parseCommandLineAndCheck(TOptions & options,
     if (isSetLong(parser, "library-length-mean"))
         getOptionValueLong(parser, "library-length-mean", options.libraryLengthMean);
     if (isSetLong(parser, "library-error"))
-        getOptionValueLong(parser, "library-error", options.libraryLengthError);
+        getOptionValueLong(parser, "library-length-error", options.libraryLengthError);
     if (isSetLong(parser, "mate-pairs"))
         options.generateMatePairs = true;
 
@@ -629,6 +629,8 @@ int buildReadSimulationInstruction(
         // Append read to result list.
         appendValue(instructions, inst);
 
+        ReadSimulationInstruction<TReadsTag> inst2(inst);
+
         // Maybe create a mate for this read.
         if (options.generateMatePairs) {
             // Pick a read length, possibly randomly.
@@ -646,8 +648,11 @@ int buildReadSimulationInstruction(
                 SEQAN_ASSERT_GT(length(instructions), 0u);
                 eraseBack(instructions);
                 invalid = true;
-                if (options.verbose)
+                if (options.verbose) {
                     std::cerr << "INFO: Mate did not fit! Repeating..." << std::endl;
+                    std::cerr << "      inst2.beginPos == " << inst2.beginPos << ", inst2.endPos == " << inst2.endPos << std::endl;
+                    std::cerr << "       inst.beginPos == " << inst.beginPos << ",  inst.endPos == " << inst.endPos << std::endl;
+                }
                 continue;
             }
             // Simulate the read with these parameters.
@@ -678,7 +683,7 @@ unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
     } else {
         // Pick normally distributed.
         double len = pickRandomNumber(rng, PDF<Normal>(options.libraryLengthMean, options.libraryLengthError));
-        return static_cast<unsigned>(round(len));
+        return static_cast<unsigned>(_max(0.0, round(len)));
     }
 }
 
@@ -847,6 +852,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 // maybe flip begin and end position below in the "flipping and
                 // reordering" step and convert the matches to a global
                 // alignment in the "convertMatchesToGlobalAlignment" call.
+                // std::cout << "origBeginPos = " << origBeginPos << ", origEndPos = " << origEndPos << std::endl;
                 if (options.generateMatePairs)
                     appendAlignedRead(fragmentStore, readId, inst.contigId, origBeginPos, origEndPos, length(fragmentStore.matePairStore));
                 else
@@ -865,25 +871,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         append(fragmentStore.readNameStore[readId - 1], " strand=forward");
                         // The second read always comes from the reverse strand.
                         reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
+                        append(fragmentStore.readNameStore[readId], " strand=reverse");
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
-                        append(fragmentStore.readNameStore[readId], " strand=reverse");
-
-                        // Maybe, we write out the mates in different order, i.e. flip the entries in the stores.
-                        if (flipped[readId]) {
-                            SEQAN_ASSERT_TRUE(flipped[readId - 1]);
-                            std::swap(fragmentStore.readSeqStore[readId - 1], fragmentStore.readSeqStore[readId]);
-                            std::swap(fragmentStore.readNameStore[readId - 1], fragmentStore.readNameStore[readId]);
-                            std::swap(fragmentStore.alignedReadStore[readId - 1], fragmentStore.alignedReadStore[readId]);
-//                             std::cout << "flipped" << std::endl;
-//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
-//                             std::cout << fragmentStore.alignedReadStore[readId - 1] << std::endl << fragmentStore.alignedReadStore[readId] << std::endl;
-                        } else {
-                            SEQAN_ASSERT_NOT(flipped[readId - 1]);
-//                             std::cout << "not flipped" << std::endl;
-//                             std::cout << fragmentStore.readNameStore[readId - 1] << std::endl << fragmentStore.readNameStore[readId] << std::endl;
-//                             std::cout << fragmentStore.alignedReadStore[readId - 1] << std::endl << fragmentStore.alignedReadStore[readId] << std::endl;
-                        }
                     }
                 } else {
                     if (pickRandomNumber(rng, PDF<Uniform<double> >(0.0, 1.0)) < 0.5) {
@@ -908,9 +898,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     // Last but not least, convert the matches collected before to a global alignment.
     convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
 	
-	// AlignedReadLayout layout;
-	// layoutAlignment(layout, fragmentStore);
-	// printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 1700, 1900, 0, 100);
+	AlignedReadLayout layout;
+	layoutAlignment(layout, fragmentStore);
+	printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 0, 300, 0, 100);
     
     if (options.verbose)
         std::cerr << "Simulated " << length(fragmentStore.readSeqStore) << " reads" << std::endl;
