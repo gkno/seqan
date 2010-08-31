@@ -23,7 +23,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("c",  "contig",    "display only contig #NUM (default: show all contigs)", OptionType::Int | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("p",  "pos",    2, "set begin and end position (default: show whole strands)", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "lines",  2, "set first and last line of the alignment (default: show whole alignment)", OptionType::Int | OptionType::Label));
-	addOption(parser, CommandLineOption("a",  "ascii",     "write alignment in ASCII format instead of SVG", OptionType::Bool | OptionType::Label));
+	addOption(parser, CommandLineOption("a",  "ascii",     "output alignment in ASCII format instead of SVG", OptionType::Bool | OptionType::Label));
 	requiredArguments(parser, 2);
 
 	if (argc == 1)
@@ -68,6 +68,16 @@ int main(int argc, const char *argv[])
 	SVGFile svg;
 	
 	//////////////////////////////////////////////////////////////////////////////
+	// Optionally load genome file
+	uint outArgNo = 1;
+	if (argumentCount(parser) > 2)
+	{
+		if (!loadContigs(store, getArgumentValue(parser, 1)) && (stop = true))
+			std::cerr << "Failed to load genome." << std::endl;
+		++outArgNo;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
 	// Load SAM file
 	if (!stop) read(samFile, store, SAM());
 	
@@ -91,13 +101,6 @@ int main(int argc, const char *argv[])
 	// Optionally load genome and open SVG file for writing
 	if (!stop)
 	{
-		uint outArgNo = 1;
-		if (argumentCount(parser) > 2)
-		{
-			if (!loadContigs(store, getArgumentValue(parser, 1)) && (stop = true))
-				std::cerr << "Failed to load genome." << std::endl;
-			++outArgNo;
-		}
 		
 		if (!stop)
 		{
@@ -118,6 +121,9 @@ int main(int argc, const char *argv[])
 		std::cerr << "Exiting ..." << std::endl;
 		return 1;
 	}
+	
+	for(unsigned o=0;o<length(store.contigStore);++o)
+	std::cerr<<store.contigNameStore[o]<<std::endl;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Output alignment
@@ -143,7 +149,7 @@ int main(int argc, const char *argv[])
 						right_ = store.alignedReadStore[id].endPos;
 				}
 			}
-			
+			std::cout << left<<'\t'<<right_<<'\t'<<firstLine<<'\t'<<lastLine<<std::endl;
 			if (inASCII)
 				printAlignment(ascii, Raw(), layout, store, contigs[i], left, right_, firstLine, lastLine);
 			else
