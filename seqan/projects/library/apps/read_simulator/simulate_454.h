@@ -262,7 +262,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
         double x = 0;  // Probability of seeing < (j+1) bases.
         for (j = 0; j < calledBaseCount; ++j) {
             x += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
-            unsigned phredScore = -static_cast<unsigned>(10 * ::std::log10(x / densitySum));
+            unsigned phredScore = -static_cast<int>(10 * ::std::log10(x / densitySum));
             appendValue(inst.qualities, phredScore);
         }
     }
