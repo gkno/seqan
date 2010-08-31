@@ -16,34 +16,41 @@
   ============================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ============================================================================
-  Shared code for the Read Analyzer program.
+  Implementation of simple histograms.
   ==========================================================================*/
 
-#ifndef READ_ANALYZER_READ_ANALYZER_H_
-#define READ_ANALYZER_READ_ANALYZER_H_
+// TODO(holtgrew): Add iterators interface?
 
-#include <algorithm>
-#include <sstream>
+#ifndef READ_ANALYZER_HISTOGRAM_H_
+#define READ_ANALYZER_HISTOGRAM_H_
 
-using namespace seqan;
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
 
 // ============================================================================
 // Enums, Classes
 // ============================================================================
 
-/*
-.Class.ReadEvaluationResult
-..summary:Stores base and quality counts for reads.
-*/
-template <typename TSpec>
-class ReadEvaluationResult;
+struct Dense_;
+typedef Tag<Dense_> Dense;
 
 /*
-.Class.AlignmentEvaluationResult
-..summary:Stores base and quality counts for reads.
+.Class.Histogram
+..summary:Stores number of occurences for a contiguous interval of integers beginning in 0.
+..remark:The size is automatically updated.
 */
 template <typename TSpec>
-class AlignmentEvaluationResult;
+class Histogram;
+
+template <>
+class Histogram<Dense>
+{
+public:
+    String<double> counters;
+
+    Histogram()
+    {}
+};
 
 // ============================================================================
 // Metafunctions
@@ -53,5 +60,16 @@ class AlignmentEvaluationResult;
 // Functions
 // ============================================================================
 
+void tally(Histogram<Dense> & histogram, size_t value, double weight)
+{
+    if (value >= length(histogram.counters))
+        fill(histogram.counters, value + 1, 0);
+    histogram.counters[value] += weight;
+}
 
-#endif  // READ_ANALYZER_READ_ANALYZER_H_
+void tally(Histogram<Dense> & histogram, size_t value)
+{
+    tally(histogram, value, 1.0);
+}
+
+#endif  // #ifndef READ_ANALYZER_HISTOGRAM_H_
