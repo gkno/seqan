@@ -18,8 +18,8 @@
   $Id$
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_STORE_CONTIG_H
-#define SEQAN_HEADER_STORE_CONTIG_H
+#ifndef SEQAN_HEADER_MISC_SVG_H
+#define SEQAN_HEADER_MISC_SVG_H
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -50,9 +50,34 @@ struct SVGFile
 	friend inline void svgWriteHeader(SVGFile &svg);
 	friend inline void svgWriteFooter(SVGFile &svg);
 	
+	template <typename TFileName>
+	friend inline bool open(SVGFile &svg, TFileName const &fileName);
+	friend inline bool close(SVGFile &svg);
+	
+	SVGFile():
+		cursor(0,0) 
+	{
+		resetStyles();
+	}
+
 	SVGFile(char const *fileName):
 		cursor(0,0) 
 	{
+		resetStyles();
+		open(*this, fileName);
+	}
+
+	~SVGFile()
+	{
+		if (file.is_open())
+			close(*this);
+	}
+
+private:
+
+	inline void resetStyles()
+	{
+		clear(style);
 		readText = dpSequence = length(style);
 		appendValue(style, "style=\"text-anchor:middle; font-family:Verdana,sans-serif;\" font-size=\"18px\"");
 		text = length(style);
@@ -77,15 +102,6 @@ struct SVGFile
 		appendValue(style, "style=\"stroke:salmon;stroke-width:1;\"");
 		appendValue(style, "style=\"stroke:darkred;stroke-width:3;\" marker-end=\"url(#startMarkerReverse)\"");
 		appendValue(style, "style=\"stroke:salmon;stroke-width:1;\" marker-end=\"url(#startMarkerReverse)\"");
-
-		file.open(fileName, std::ios_base::out);
-		svgWriteHeader(*this);
-	}
-
-	~SVGFile()
-	{
-		svgWriteFooter(*this);
-		file.close();
 	}
 };
 
@@ -130,6 +146,25 @@ inline void svgWriteFooter(SVGFile &svg)
 	svg.file << "</svg>" << std::endl;
 }
 
+
+template <typename TFileName>
+inline bool open(SVGFile &svg, TFileName const &fileName)
+{
+	svg.file.open(fileName, std::ios_base::out);
+	if (!svg.file.is_open()) return false;
+	svgWriteHeader(svg);
+	return true;
+}
+
+inline bool close(SVGFile &svg)
+{
+	if (svg.file.is_open())
+	{
+		svgWriteFooter(svg);
+		svg.file.close();
+	}
+	return true;
+}
 
 template <typename TChar>
 inline void
@@ -415,5 +450,10 @@ _align_trace_print(SVGFile& svg,
 	svg.file << "\" " << svg.style[svg.dpTrace] << " />" << std::endl;
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
-}
+
+
+} //namespace SEQAN_NAMESPACE_MAIN
+
+#endif //#ifndef SEQAN_HEADER_...

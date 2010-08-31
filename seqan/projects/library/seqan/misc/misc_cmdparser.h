@@ -1414,6 +1414,22 @@ _convertOptionValue(CommandLineOption const & opt, unsigned int & dst, CharStrin
 }
 
 inline bool
+_convertOptionValue(CommandLineOption const & opt, __int64 & dst, CharString const & src)
+{
+    if (!isIntOption(opt)) return false;
+	dst = atoll(toCString(src));
+	return length(src) > 0;
+}
+
+inline bool
+_convertOptionValue(CommandLineOption const & opt, __uint64 & dst, CharString const & src)
+{
+    if (!isIntOption(opt)) return false;
+	dst = atoll(toCString(src));
+	return length(src) > 0;
+}
+
+inline bool
 _convertOptionValue(CommandLineOption const & opt, float & dst, CharString const & src)
 {
     if (!isDoubleOption(opt)) return false;
