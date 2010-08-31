@@ -322,6 +322,9 @@ countMismatchAtPositionWithBase(AlignmentEvaluationResult & result,
     int t = ordValue(readBase);
     int q = getQualityValue(readBase);
 
+    // if (convert<Dna5>(readBase) != referenceBase)
+    //     std::cout << position << " " << q << " " << convert<char>(readBase) << std::endl;
+
     double x = 1.0 / readAlignmentCount;
 
     result.mismatchCountsPerMismatch[s * 5 + t] += x;
@@ -467,11 +470,13 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
         setEndPosition(contigGaps, _max(it->beginPos, it->endPos));
         // Reverse-complement readSeq in-place.
         unsigned readLength = length(readSeq);
-        bool flipped = false;
+        bool flipped = false;  // TODO(holtgrew): Remove?
         if (it->beginPos > it->endPos) {
             flipped = true;
             reverseComplementInPlace(readSeq);
         }
+        // std::cout << "Evaluating" << std::endl;
+        // std::cout << "  " << fragmentStore.readNameStore[it->readId] << ", flipped = " << flipped << std::endl; 
 
         std::stringstream contigInfix;
         std::stringstream matches;
@@ -483,7 +488,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
             if (isGap(readGapsIt) && isGap(contigGapsIt))
                 continue;  // Skip paddings.
             SEQAN_ASSERT_LT(readPos, readLength);
-            unsigned reportedPos = flipped ? readLength - readPos - 1 : readPos;
+            unsigned reportedPos = /*flipped ? readLength - readPos - 1 :*/ readPos;
             if (isGap(readGapsIt)) {
                 // Deletion
                 bool hasBefore = false;
@@ -515,6 +520,9 @@ void performAlignmentEvaluation(AlignmentEvaluationResult & result, TFragmentSto
                 readPos += 1;
             } else {
                 // Match / Mismatch.
+                // if (*readGapsIt != *contigGapsIt) {
+                //     std::cout << "it->contigId == " << it->contigId << ", it->beginPos == " << it->beginPos << ", _it->endPos == " << it->endPos << std::endl;
+                // }
                 countMismatchAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), convert<Dna5Q>(*readGapsIt), readAlignmentCount);
                 readPos += 1;
             }
@@ -862,8 +870,8 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
         double matchCount = 0;
         double matchMean = 0;
         double matchStdDev = 0;
-        for (int b = 0; b < 5; ++b) {
-            for (int a = 0; a < 5; ++a) {
+        for (int b = 0; b < 4; ++b) {  // < 4 instead of < 5, ignoring matches/mismatches with N
+            for (int a = 0; a < 4; ++a) {  // < 4 instead of < 5, ignoring matches/mismatches with N
                 for (int q = 0; q < 63; ++q) {
                     if (a != b) {
                         mismatchSum += result.qualityCountsForMismatchPerMismatchPerPosition[a * 5 + b][q][position] * q;
@@ -883,21 +891,23 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult const & result, T
             // match/mismatch sd
             double mismatchStdDevSum = 0;
             double matchStdDevSum = 0;
-            for (int b = 0; b < 5; ++b) {
-                for (int a = 0; a < 5; ++a) {
+            for (int b = 0; b < 4; ++b) {  // < 4 instead of < 5, ignoring matches/mismatches with N
+                for (int a = 0; a < 4; ++a) {  // < 4 instead of < 5, ignoring matches/mismatches with N
                     for (int q = 0; q < 63; ++q) {
-                        double x = mismatchMean - q;
-                        if (a != b)
+                        if (a != b) {
+                            double x = mismatchMean - q;
                             mismatchStdDevSum += result.qualityCountsForMismatchPerMismatchPerPosition[a * 5 + b][q][position] * x * x;
-                        else
+                        } else {
+                            double x = matchMean - q;
                             matchStdDevSum += result.qualityCountsForMismatchPerMismatchPerPosition[a * 5 + b][q][position] * x * x;
+                        }
                     }
                 }
             }
             if (mismatchCount > 0)
-                mismatchStdDev = std::sqrt(1 / mismatchCount * mismatchStdDevSum);
+                mismatchStdDev = std::sqrt(1.0 / mismatchCount * mismatchStdDevSum);
             if (matchCount > 0)
-                matchStdDev = std::sqrt(1 / matchCount * matchStdDevSum);
+                matchStdDev = std::sqrt(1.0 / matchCount * matchStdDevSum);
             if (mismatchCount == 0 && matchCount == 0)
                 printf("  %7s       %7s %7s  %7s", "-", "-", "-", "-");
             else if (mismatchCount == 0 && matchCount > 0)
