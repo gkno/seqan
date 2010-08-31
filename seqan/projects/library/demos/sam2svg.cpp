@@ -101,18 +101,14 @@ int main(int argc, const char *argv[])
 	// Optionally load genome and open SVG file for writing
 	if (!stop)
 	{
-		
-		if (!stop)
+		if (inASCII)
 		{
-			if (inASCII)
-			{
-				ascii.open(toCString(getArgumentValue(parser, outArgNo)), std::ios_base::out | std::ios_base::trunc);
-				if (!ascii.is_open()) stop = true;
-			} else
-				if (!open(svg, toCString(getArgumentValue(parser, outArgNo)))) stop = true;
-			
-			if (stop) std::cerr << "Failed to open output file for writing." << std::endl;
-		}
+			ascii.open(toCString(getArgumentValue(parser, outArgNo)), std::ios_base::out | std::ios_base::trunc);
+			if (!ascii.is_open()) stop = true;
+		} else
+			if (!open(svg, toCString(getArgumentValue(parser, outArgNo)))) stop = true;
+		
+		if (stop) std::cerr << "Failed to open output file for writing." << std::endl;
 	}
 	
 	// something went wrong
