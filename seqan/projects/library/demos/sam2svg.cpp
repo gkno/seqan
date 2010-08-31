@@ -48,10 +48,13 @@ int main(int argc, const char *argv[])
 	
 	if (isSetLong(parser, "pos"))
 	{
-		getOptionValueLong(parser, "pos", 0, left);
-		getOptionValueLong(parser, "pos", 1, right);
-		if ((left >= right) && (stop = true))
+		__int64 l = 0, r = 0;
+		getOptionValueLong(parser, "pos", 0, l);
+		getOptionValueLong(parser, "pos", 1, r);
+		if ((l >= r) && (stop = true))
 			std::cerr << "Begin position must be less than end position." << std::endl;
+		left = l;
+		right = r;
 	}
 
 	if (isSetLong(parser, "lines"))
