@@ -140,7 +140,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef _EnumeratorHammingModifier<TSignedSize> TModifier;
         
 		TObject									&orig;
-		typename _RemoveConst<TObject>::Type	tmp;
+//		typename _RemoveConst<TObject>::Type	tmp;
+		String<TValue>							tmp;
 
 		TModifier	mod[DISTANCE];
 		unsigned	minDist;
@@ -233,6 +234,21 @@ namespace SEQAN_NAMESPACE_MAIN
 			mod.skipChar = -1;
 		}
 	}
+	
+	template < typename TObject, unsigned DISTANCE >
+    inline void
+	atBegin(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const & it)
+	{
+		Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> tmp(it.orig, it.minDist, it.trim);
+		return tmp == it;
+	}
+
+	template < typename TObject, unsigned DISTANCE >
+    inline bool
+	atBegin(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> & it)
+	{
+		return atBegin(const_cast<Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const &>(it));
+	}
 
 	template < typename TObject, unsigned DISTANCE >
     inline void
@@ -247,6 +263,29 @@ namespace SEQAN_NAMESPACE_MAIN
 			mod.errorPos = -1;
 			mod.character = 0;
 		}
+	}
+
+	template < typename TObject, unsigned DISTANCE >
+    inline bool
+	atEnd(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const & it)
+	{
+		typedef typename Size<TObject>::Type			TSize;
+		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+
+		for(unsigned i = 0; i < DISTANCE; ++i) {
+			TModifier const &mod = it.mod[i];
+			if (mod.errorPos != (TSignedSize)-1 || mod.character != 0u)
+				return false;
+		}
+		return true;
+	}
+
+	template < typename TObject, unsigned DISTANCE >
+    inline bool
+	atEnd(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> & it)
+	{
+		return atEnd(const_cast<Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const &>(it));
 	}
 
 	template < typename TObject, unsigned DISTANCE >
@@ -272,7 +311,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			mod->character = (0 == mod->skipChar)? 1: 0;
 			assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
 
-			if (++i == DISTANCE || (mod + 1)->errorPos == -1)
+			if (++i == DISTANCE || (mod + 1)->errorPos == (TSignedSize)-1)
 			{
 				for(i = 0; i < DISTANCE; ++i) 
 				{
@@ -280,10 +319,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 					// restore char at old position
 					if (mod->errorPos >= 0)
+					{
+						std::cout<<"org"<<it.orig<<"  tmp"<<it.tmp<<" ___  ";
 						assignValueAt(it.tmp, mod->errorPos, it.orig[mod->errorPos]);
+						std::cout<<"org"<<it.orig<<"  tmp"<<it.tmp<<std::endl;
+					}
 
 					// next error position
-					if (++mod->errorPos < (TSignedSize)(length(it.tmp) - i)) 
+					if (++(mod->errorPos) < (TSignedSize)(length(it.tmp) - i)) 
 					{
 						mod->skipChar = (unsigned) it.orig[mod->errorPos];
 						mod->character = (0 == mod->skipChar)? 1: 0;
@@ -364,7 +407,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef _EnumeratorLevenshteinModifier<TSignedSize> TModifier;
         
 		TObject									&orig;
-		typename _RemoveConst<TObject>::Type	tmp;
+//		typename _RemoveConst<TObject>::Type	tmp;
+		String<TValue>							tmp;
 
 		TModifier	mod[DISTANCE + 1];
 		unsigned	minDist;
@@ -472,18 +516,18 @@ namespace SEQAN_NAMESPACE_MAIN
 				TModifier &_mod = mod[i];
 				if (_mod.state != TModifier::_DELETE) {
 					if (cut) {
-						if (_mod.errorPos >= pos - 1)
+						if (_mod.errorPos >= (TSignedSize)(pos - 1))
 							return false;
 						_mod.errorPosEnd = pos - 1;
 					} else {
-						if (_mod.errorPos >= pos)
+						if (_mod.errorPos >= (TSignedSize)pos)
 							return false;
 						_mod.errorPosEnd = pos;
 					}
 					--pos;
 				} else {
 					cut = false;
-					if (_mod.errorPos > pos)
+					if (_mod.errorPos > (TSignedSize)pos)
 						return false;
 					_mod.errorPosEnd = pos + 1;
 				}
