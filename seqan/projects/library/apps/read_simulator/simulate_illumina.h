@@ -209,12 +209,16 @@ int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
 // For Illumina reads, this means computing probabilities, means and
 // standard deviations for each position, depending on the options.
 int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & parameters,
-                                         Options<IlluminaReads> const & options)
+                                        Options<IlluminaReads> const & options)
 {
     // Compute mismatch probabilities, piecewise linear function.
     resize(parameters.mismatchProbabilities, options.readLength);
     // Compute probability at raise point.
     double y_r = 2 * options.probabilityMismatch - options.positionRaise * options.probabilityMismatchBegin - options.probabilityMismatchEnd + options.probabilityMismatchEnd * options.positionRaise;
+    if (options.verbose) {
+        std::cout << "Illumina error curve:" << std::endl
+                  << "  (0, " << options.probabilityMismatchBegin << ") -- (" << options.positionRaise << ", " << y_r << ") -- (1, " << options.probabilityMismatchEnd << ")" << std::endl;
+    }
     // std::cout << "y_r = " << y_r << std::endl;
     // Compute probability at each base.
     for (unsigned i = 0; i < options.readLength; ++i) {
@@ -236,19 +240,19 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
     // Compute match/mismatch means and standard deviations.
     resize(parameters.mismatchQualityMeans, options.readLength);
     for (unsigned i = 0; i < options.readLength; ++i) {
-        double b = options.meanQualityBegin;
+        double b = options.meanMismatchQualityBegin;
         double x = static_cast<double>(i) / (options.readLength - 1);
-        double m = (options.meanQualityEnd - options.meanQualityBegin);
+        double m = (options.meanMismatchQualityEnd - options.meanMismatchQualityBegin);
         parameters.mismatchQualityMeans[i] = m * x + b;
-        // std::cout << "parameters.mismatchQualityMeans[" << i << "] = " << parameters.mismatchQualityMeans[i] << std::endl;
+        std::cout << "parameters.mismatchQualityMeans[" << i << "] = " << parameters.mismatchQualityMeans[i] << std::endl;
     }
     resize(parameters.mismatchQualityStdDevs, options.readLength);
     for (unsigned i = 0; i < options.readLength; ++i) {
-        double b = options.stdDevQualityBegin;
+        double b = options.stdDevMismatchQualityBegin;
         double x = static_cast<double>(i) / (options.readLength - 1);
-        double m = (options.stdDevQualityEnd - options.stdDevQualityBegin);
+        double m = (options.stdDevMismatchQualityEnd - options.stdDevMismatchQualityBegin);
         parameters.mismatchQualityStdDevs[i] = m * x + b;
-        // std::cout << "parameters.mismatchQualityStdDevs[" << i << "] = " << parameters.mismatchQualityStdDevs[i] << std::endl;
+        std::cout << "parameters.mismatchQualityStdDevs[" << i << "] = " << parameters.mismatchQualityStdDevs[i] << std::endl;
     }
     resize(parameters.qualityMeans, options.readLength);
     for (unsigned i = 0; i < options.readLength; ++i) {
@@ -353,12 +357,11 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     SEQAN_ASSERT_GT(length(inst.editString), 0u);
     clear(inst.qualities);
     fill(inst.qualities, length(inst.editString), 0, Exact());
-    String<double> tmp;
-    fill(tmp, inst.endPos - inst.beginPos + inst.delCount, 0, Exact());
 
     for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
         SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
         if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
+            // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
             PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
             inst.qualities[i] = pickRandomNumber(rng, pdf);
         } else {
@@ -386,20 +389,25 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
         SEQAN_ASSERT_LEQ(j, i);
 
         TAlphabet c;
+        int x, xold;
         switch (inst.editString[i]) {
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 appendValue(tmp, read[j]);
                 assignQualityValue(back(tmp), inst.qualities[i]);
+                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2 == no N
+                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
+                xold = ordValue(c);
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
-                if (c == read[j])
+                if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
+                x = ordValue(c);
                 appendValue(tmp, c);
                 assignQualityValue(back(tmp), inst.qualities[i]);
+                // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
                 j += 1;
                 break;

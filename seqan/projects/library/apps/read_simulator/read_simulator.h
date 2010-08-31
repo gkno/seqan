@@ -898,9 +898,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     // Last but not least, convert the matches collected before to a global alignment.
     convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
 	
-	AlignedReadLayout layout;
-	layoutAlignment(layout, fragmentStore);
-	printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 0, 300, 0, 100);
+	// AlignedReadLayout layout;
+	// layoutAlignment(layout, fragmentStore);
+	// printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 0, 300, 0, 100);
     
     if (options.verbose)
         std::cerr << "Simulated " << length(fragmentStore.readSeqStore) << " reads" << std::endl;
