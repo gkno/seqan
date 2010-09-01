@@ -244,7 +244,7 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
         double x = static_cast<double>(i) / (options.readLength - 1);
         double m = (options.meanMismatchQualityEnd - options.meanMismatchQualityBegin);
         parameters.mismatchQualityMeans[i] = m * x + b;
-        std::cout << "parameters.mismatchQualityMeans[" << i << "] = " << parameters.mismatchQualityMeans[i] << std::endl;
+        // std::cout << "parameters.mismatchQualityMeans[" << i << "] = " << parameters.mismatchQualityMeans[i] << std::endl;
     }
     resize(parameters.mismatchQualityStdDevs, options.readLength);
     for (unsigned i = 0; i < options.readLength; ++i) {
@@ -252,7 +252,7 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
         double x = static_cast<double>(i) / (options.readLength - 1);
         double m = (options.stdDevMismatchQualityEnd - options.stdDevMismatchQualityBegin);
         parameters.mismatchQualityStdDevs[i] = m * x + b;
-        std::cout << "parameters.mismatchQualityStdDevs[" << i << "] = " << parameters.mismatchQualityStdDevs[i] << std::endl;
+        // std::cout << "parameters.mismatchQualityStdDevs[" << i << "] = " << parameters.mismatchQualityStdDevs[i] << std::endl;
     }
     resize(parameters.qualityMeans, options.readLength);
     for (unsigned i = 0; i < options.readLength; ++i) {
