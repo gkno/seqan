@@ -1,6 +1,7 @@
 //#define SEQAN_ENABLE_DEBUG 1
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
 
@@ -329,8 +330,8 @@ void writeOrderings(TStream &target, TOrderings &orderings, TFragmentStore &stor
 					_streamWrite(target, "-(0)->");
 				if (anno.beginPos > anno.endPos)
 					_streamPut(target, '-');
-				bool hasNodeId = annotationGetValueByKey(store, anno, LARGE_NODE_ID, idStr);
-				SEQAN_ASSERT_EQ(hasNodeId, true);
+				if (!annotationGetValueByKey(store, anno, LARGE_NODE_ID, idStr))
+					std::cerr << "nodeId is missing for exon " << store.annotationNameStore[orderings[i][j]] << std::endl;
 				int nodeId = atoi(idStr);
 #ifdef COMPACT_NODE_IDS
 				typename Iterator<TNodeIds, Standard>::Type it = std::lower_bound(begin(nodeIds, Standard()), end(nodeIds, Standard()), nodeId);
@@ -382,9 +383,12 @@ int main(int argc, char const * argv[])
 	typedef String<TContigExonBounds> TExonBounds;
 	typedef Id<TFragmentStore>::Type TId;
 
+	CommandLineParser parser;
+	std::string rev = "$Revision$";
+	addVersionLine(parser, "TransSplice version 1.0 20100901 [" + rev.substr(11, 4) + "]");
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
-	CommandLineParser	parser;
 	addTitleLine(parser, "*****************************************");
 	addTitleLine(parser, "***        Transcript Splicer         ***");
 	addTitleLine(parser, "*** (c) Copyright 2010 by David Weese ***");
