@@ -1347,6 +1347,11 @@ parse(CommandLineParser & me, int argc, const char *argv[], TErrorStream & estre
         help(me, estream);
         return false;
     }
+	if (argc == 1 && me.required_arguments > 0)
+	{
+		shortHelp(me, estream);	// print short help and exit
+		return 0;
+	}
 	return _allMandatorySet(me) && (length(me.arguments) >= me.required_arguments);
 }
 

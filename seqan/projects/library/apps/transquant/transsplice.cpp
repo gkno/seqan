@@ -396,16 +396,15 @@ int main(int argc, char const * argv[])
 	addUsageLine(parser, "[OPTION]... <genome.fa> <annotation.gff> <output-prefix>");
 	addUsageLine(parser, "[OPTION]... <genome.fa> <annotation.gtf> <output-prefix>");
 	addUsageLine(parser, "[OPTION]... <genome.fa> <knownGene.txt> <knownIsoforms.txt> <output-prefix>");
+	addLine(parser, "");
+	addLine(parser, "Splice transcripts of a given annotation according to a given genome.");
+	addLine(parser, "The resulting transcripts are written to <output-prefix>/transcripts.fa.");
+	addLine(parser, "Overlapping exons on the same strand are divided and annotated as subexons (<output-prefix>/refined.gff).");
+	addLine(parser, "The sequences of subexon ids for every transcript are written to <output-prefix>/ordering.fa.");
 	requiredArguments(parser, 3);
 	
-	if (argc == 1)
-	{
-		shortHelp(parser, std::cerr);	// print short help and exit
-		return 0;
-	}
-	
 	if (!parse(parser, argc, argv, std::cerr)) return 0;
-
+	
 	double t0 = sysTime();
 	TFragmentStore store;
 
