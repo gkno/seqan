@@ -1,8 +1,9 @@
 /*
   Usage: seq_sample N IN.fastq OUT.fastq
+         seq_sample N IN.1.fastq IN.2.fastq OUT.1.fastq OUT.2.fastq
 
   Samples N reads from IN.fastq and writes them to OUT.fastq without
-  duplicates.
+  duplicates, alternatively from mate-paired reads.
  */
 
 #include <fstream>
@@ -16,20 +17,6 @@
 #include <seqan/store.h>
 
 using namespace seqan;
-
-template < 
-	typename TStream, 
-	typename TSeq >
-void dumpWrapped(
-	TStream &out,
-	TSeq &seq)
-{
-	unsigned size = length(seq);
-	unsigned i;
-	for (i = 0; i + 60 < size; i += 60)
-		out << infix(seq, i, i + 60) << std::endl;
-	out << infix(seq, i, size) << std::endl;
-}
 
 
 template <typename TStream, typename TStringSetSpec, typename TStringSetSpec2>
@@ -55,26 +42,34 @@ void write(TStream & stream,
 
 
 int main(int argc, char **argv) {
-    if (argc != 4) {
+    if (argc != 4 && argc != 6) {
         std::cerr << "ERROR: Wrong number of parameters!" << std::endl;
         std::cerr << "USAGE: seq_sample N IN.fastq OUT.fastq" << std::endl;
+        std::cerr << "       seq_sample N IN.1.fastq IN.2.fastq OUT.1.fastq OUT.2.fastq" << std::endl;
         return 1;
     }
 
     // TODO(holtgrew): Actually, we want to seed this!
-//     const unsigned SEED = 42;
-    mtRandInit();
+    const unsigned SEED = 42;
+    mtRandInit(SEED);
 
     unsigned n = atoi(argv[1]);
 
     // Load reads using the fragment store.
     FragmentStore<> fragStore;
-    if (!loadReads(fragStore, argv[2])) return 1;
+    bool hasMatePairs = (argc == 6);
+    unsigned matePairFactor = hasMatePairs ? 2 : 1;
+    if (!hasMatePairs) {
+        if (!loadReads(fragStore, argv[2])) return 1;
+    } else {
+        if (!loadReads(fragStore, argv[2], argv[3])) return 1;
+    }
+    unsigned matePairCount = length(fragStore.readSeqStore) / matePairFactor;
 
     // The factor 10 is arbitrarily chosen to make sure the generation
     // is sufficiently fast.
-    if (length(fragStore.readSeqStore) < 10 * n) {
-        std::cerr << "Number of reads in file should be >= 10*n" << std::endl;
+    if (matePairCount < 10 * n) {
+        std::cerr << "Number of reads/mate pairs in file/s should be >= 10*n" << std::endl;
         return 1;
     }
 
@@ -82,29 +77,63 @@ int main(int argc, char **argv) {
     // Pick ids to select.
     std::set<unsigned> selectedIds;
     while (length(selectedIds) < n) {
-        unsigned x = mtRand() % length(fragStore.readSeqStore);
+        unsigned x = mtRand() % matePairCount;
         selectedIds.insert(x);
     }
     // Actually build result.
-    StringSet<String<Dna5Q> > resultSeqs;
-    reserve(resultSeqs, n);
-    StringSet<CharString> resultIds;
-    reserve(resultIds, n);
+    StringSet<String<Dna5Q> > resultSeqsL, resultSeqsR;
+    StringSet<CharString> resultIdsL, resultIdsR;
+    reserve(resultSeqsL, n);
+    reserve(resultIdsL, n);
+    if (hasMatePairs) {
+        reserve(resultIdsR, n);
+        reserve(resultSeqsR, n);
+    }
     for (std::set<unsigned>::const_iterator it = selectedIds.begin(); it != selectedIds.end(); ++it) {
-        appendValue(resultSeqs, fragStore.readSeqStore[*it]);
-        appendValue(resultIds, fragStore.readNameStore[*it]);
+        if (!hasMatePairs) {
+            appendValue(resultSeqsL, fragStore.readSeqStore[*it]);
+            appendValue(resultIdsL, fragStore.readNameStore[*it]);
+        } else {
+            appendValue(resultSeqsL, fragStore.readSeqStore[2 * (*it)]);
+            appendValue(resultIdsL, fragStore.readNameStore[2 * (*it)]);
+            appendValue(resultSeqsR, fragStore.readSeqStore[2 * (*it) + 1]);
+            appendValue(resultIdsR, fragStore.readNameStore[2 * (*it) + 1]);
+        }
     }
 
     // Write out the result.
-    if (CharString("-") == argv[3]) {
-        write(std::cout, resultSeqs, resultIds, Fastq());
-    } else {
-        std::fstream fstrm(argv[3], std::ios_base::out);
-        if (not fstrm.is_open()) {
-            std::cerr << "Could not open out file \"" << argv[3] << "\"" << std::endl;
-            return 1;
+    if (!hasMatePairs) {
+        if (CharString("-") == argv[3]) {
+            write(std::cout, resultSeqsL, resultIdsL, Fastq());
+        } else {
+            std::fstream fstrm(argv[3], std::ios_base::out);
+            if (not fstrm.is_open()) {
+                std::cerr << "Could not open out file \"" << argv[3] << "\"" << std::endl;
+                return 1;
+            }
+            write(fstrm, resultSeqsL, resultIdsL, Fastq());
         }
-        write(fstrm, resultSeqs, resultIds, Fastq());
+    } else {
+        if (CharString("-") == argv[4]) {
+            write(std::cout, resultSeqsL, resultIdsL, Fastq());
+        } else {
+            std::fstream fstrm(argv[4], std::ios_base::out);
+            if (not fstrm.is_open()) {
+                std::cerr << "Could not open out file \"" << argv[4] << "\"" << std::endl;
+                return 1;
+            }
+            write(fstrm, resultSeqsL, resultIdsL, Fastq());
+        }
+        if (CharString("-") == argv[5]) {
+            write(std::cout, resultSeqsR, resultIdsR, Fastq());
+        } else {
+            std::fstream fstrm(argv[5], std::ios_base::out);
+            if (not fstrm.is_open()) {
+                std::cerr << "Could not open out file \"" << argv[5] << "\"" << std::endl;
+                return 1;
+            }
+            write(fstrm, resultSeqsR, resultIdsR, Fastq());
+        }
     }
 
     return 0;
