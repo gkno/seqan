@@ -9,7 +9,7 @@ using namespace seqan;
 // forward and reverse strands are separated,
 // they have no common subexons
 #define SEPARATE_STRANDS
-//#define COMPACT_NODE_IDS
+#define COMPACT_NODE_IDS
 
 #ifdef COMPACT_NODE_IDS
 #define LARGE_NODE_ID "LargeNodeId"
@@ -60,13 +60,9 @@ void getExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store)
 	
 	clear(exonBounds);
 	TAnnoTreeIter dfsIt = begin(store, AnnotationTree<>());
-	int firstId = dfsIt.id;
-	int lastId = -1;
+		
 	while (!atEnd(dfsIt))
 	{
-		if (dfsIt.id ==firstId)
-		std::cout<<lastId<<std::endl;
-		lastId = dfsIt.id;
 		TAnnotation &anno = getAnnotation(dfsIt);
 		if (anno.typeId == TFragmentStore::ANNO_EXON)
 		{
@@ -413,8 +409,8 @@ int main(int argc, char const * argv[])
 	if (empty(prefix))
 		prefix = ".";
 	CharString orderingFileName(prefix);
-	CharString refinedFileName(prefix);
 	CharString transcriptsFileName(prefix);
+	CharString refinedFileName(prefix);
 	append(orderingFileName, "/ordering.fa");
 	append(transcriptsFileName, "/transcripts.fa");
 	append(refinedFileName, "/refined.gff");
