@@ -725,7 +725,8 @@ _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, 
 {
     SEQAN_CHECKPOINT;
 
-    typedef typename Position<TSource>::Type TPosition;
+	typedef typename Value<TGapAnchors>::Type TGapAnchor;
+	typedef typename Position<TGapAnchor>::Type TPos;
 
 	if (idx > (TIdx)length(_dataAnchors(me)))
 	{
@@ -736,8 +737,15 @@ _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, 
 		{
 			// for the sick case that an anchor seq position is beyond the sequence end
 			if (!empty(_dataAnchors(me)))
-				if (static_cast<TPosition>(anchor.seqPos) < static_cast<TPosition>(back(_dataAnchors(me)).seqPos))
+			{
+				// if there is no sequence but anchors -> assume infinite sequence
+				if (anchor.seqPos == 0)
+					anchor.seqPos = supremumValue(anchor.gapPos);
+				// if the sequence has a length > 0, but there is an anchor behind the end
+				// -> elongate sequence
+				else if ((TPos)anchor.seqPos < back(_dataAnchors(me)).seqPos)
 					anchor.seqPos = back(_dataAnchors(me)).seqPos;
+			}
 			anchor.gapPos = supremumValue(anchor.gapPos);
 		}
 	}
