@@ -17,8 +17,8 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	CommandLineParser parser;
-	addUsageLine(parser, "sam2svg [OPTION]... <SAM file> <SVG file>");
-	addUsageLine(parser, "sam2svg [OPTION]... <SAM file> <GENOME file> <SVG file>");
+	addUsageLine(parser, "[OPTION]... <SAM file> <SVG file>");
+	addUsageLine(parser, "[OPTION]... <SAM file> <GENOME file> <SVG file>");
 	
 	addOption(parser, CommandLineOption("c",  "contig",    "display only contig #NUM (default: show all contigs)", OptionType::Int | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("p",  "pos",    2, "set begin and end position (default: show whole strands)", OptionType::Int | OptionType::Label));
@@ -26,19 +26,11 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("a",  "ascii",     "output alignment in ASCII format instead of SVG", OptionType::Bool | OptionType::Label));
 	requiredArguments(parser, 2);
 
-	if (argc == 1)
-	{
-		shortHelp(parser, std::cerr);	// print short help and exit
-		return 0;
-	}
-
 	bool stop = !parse(parser, argc, argv, std::cerr);
+	if (stop) return 0;
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Extract and check options
-
-	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
-	
+	// Extract and check options	
 	String<unsigned> contigs;
 	TContigPos left = 0;
 	TContigPos right = SupremumValue<TContigPos>::VALUE;
