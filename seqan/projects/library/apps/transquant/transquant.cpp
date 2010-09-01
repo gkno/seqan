@@ -997,6 +997,9 @@ int main( int argc, const char *argv[] )
 	CommandLineParser	parser;
 	FragmentStore<>		store;			// stores all of the tables
 
+	std::string rev = "$Revision$";
+	addVersionLine(parser, "TransQuant version 1.0 20100901 [" + rev.substr(11, 4) + "]");
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	addTitleLine(parser, "*****************************************");
@@ -1012,14 +1015,9 @@ int main( int argc, const char *argv[] )
 	addOption(parser, CommandLineOption("w", "width",         "probability distribution function integral radius", OptionType::Double | OptionType::Label, width));
 	addOption(parser, CommandLineOption("",  "single",        "interpret paired-end as single matches", OptionType::Bool));
 	addHelpLine(parser, "");
+	requiredArguments(parser, 1);
 	
-	if (argc == 1)
-	{
-		shortHelp(parser, cerr);	// print short help and exit
-		return 0;
-	}
-	
-	!parse(parser, argc, argv, cerr);
+	if (!parse(parser, argc, argv, cerr)) return 0;
 	initStats();
 
 	double mean = 0;
