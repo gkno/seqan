@@ -1076,8 +1076,11 @@ bool unlockAndFreeContigs(FragmentStore<TSpec, TConfig> &store)
 /**
 .Function.loadReads
 ..summary:Loads reads into fragment store.
+..remarks:When two file names are given, the files are expected to contain the same number of reads and reads with the same index are assumed to be mate pairs.
+Mate pairs are stored internally in an "interleaved" mode, i.e. a read is read from each file before reading the next one.
 ..cat:Fragment Store
 ..signature:loadReads(store, fileName)
+..signature:loadReads(store, fileNameL, fileNameR)
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..param.fileName:A sequence file name.
@@ -1131,6 +1134,63 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
 }
 
 
-}// namespace SEQAN_NAMESPACE_MAIN
+template <typename TFSSpec, typename TFSConfig, typename TFileName>
+bool loadReads(FragmentStore<TFSSpec, TFSConfig> & store, TFileName & fileNameL, TFileName & fileNameR)
+{
+	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
+	typedef typename TFragmentStore::TContigFileStore	TContigFileStore;
+	typedef typename Value<TContigFileStore>::Type		TContigFile;
+
+	MultiSeqFile multiSeqFileL, multiSeqFileR;
+	if (!open(multiSeqFileL.concat, toCString(fileNameL), OPEN_RDONLY))
+		return false;
+	if (!open(multiSeqFileR.concat, toCString(fileNameR), OPEN_RDONLY))
+		return false;
+
+	// Guess file format and split into sequence fractions
+	AutoSeqFormat formatL, formatR;
+	guessFormat(multiSeqFileL.concat, formatL);
+	split(multiSeqFileL, formatL);
+	guessFormat(multiSeqFileR.concat, formatR);
+	split(multiSeqFileR, formatR);
+
+    // Check that both files have the same number of reads
+	SEQAN_ASSERT_EQ(length(multiSeqFileL), length(multiSeqFileR));
+
+	// Reserve space in fragment store
+	unsigned seqOfs = length(store.readStore);
+	unsigned seqCountL = length(multiSeqFileL);
+	unsigned seqCountR = length(multiSeqFileR);
+	reserve(store.readStore, seqOfs + seqCountL + seqCountR);
+	reserve(store.readSeqStore, seqOfs + seqCountL + seqCountR);
+	reserve(store.readNameStore, seqOfs + seqCountL + seqCountR);
+
+	// Read in sequences
+	String<Dna5Q> seq[2];
+	CharString qual[2];
+	CharString id[2];
+
+	for (unsigned i = 0; i < seqCountL; ++i) {
+		assignSeq(seq[0], multiSeqFileL[i], formatL);    // read sequence
+		assignQual(qual[0], multiSeqFileL[i], formatL);  // read ascii quality values
+		assignSeqId(id[0], multiSeqFileL[i], formatL);   // read sequence id
+		assignSeq(seq[1], multiSeqFileR[i], formatR);    // read sequence
+		assignQual(qual[1], multiSeqFileR[i], formatR);  // read ascii quality values
+		assignSeqId(id[1], multiSeqFileR[i], formatR);   // read sequence id
+
+		// convert ascii to values from 0..62
+		// store dna and quality together in Dna5Q
+		// TODO: support different ASCII represenations of quality values
+		for (int j = 0; j < 2; ++j) {
+            for (unsigned k = 0; k < length(qual[j]) && k < length(seq[j]); ++k)
+                assignQualityValue(seq[j][k], (int)(ordValue(qual[j][k]) - 33));
+        }
+        
+		appendMatePair(store, seq[0], seq[1], id[0], id[1]);
+	}
+	return true;
+}
+
+}  // namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
