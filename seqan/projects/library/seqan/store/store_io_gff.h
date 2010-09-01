@@ -434,6 +434,7 @@ read (
 		if (_readOneAnnotation(file, c, ctx))
 			_storeOneAnnotation(fragStore, ctx);
 	}
+	_storeClearAnnoBackLinks(fragStore.annotationStore);
 	_storeCreateAnnoBackLinks(fragStore.annotationStore);
 	_storeRemoveTempAnnoNames(fragStore);
 }

@@ -344,10 +344,12 @@ _storeOneAnnotation_KNOWN_ISOFORMS (
 	resize(fragStore.annotationStore, annoStoreLen, Generous());
 	resize(fragStore.annotationNameStore, annoStoreLen, Generous());
 	
+	// set parent link locus->root
 	TAnnotation &locus = fragStore.annotationStore[geneId];
 	locus.parentId = 0;
 	locus.typeId = TFragmentStore::ANNO_GENE;
 
+	// set parent link transcript->locus
 	TAnnotation &transcript = fragStore.annotationStore[transId];
 	transcript.parentId = geneId;
 	transcript.typeId = TFragmentStore::ANNO_MRNA;
@@ -391,6 +393,7 @@ read (
 		if (_readOneAnnotation(file, c, ctx))
 			_storeOneAnnotation(fragStore, ctx);
 	}
+	_storeClearAnnoBackLinks(fragStore.annotationStore);
 	_storeCreateAnnoBackLinks(fragStore.annotationStore);
 	_storeRemoveTempAnnoNames(fragStore);
 }

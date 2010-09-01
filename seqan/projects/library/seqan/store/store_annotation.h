@@ -438,6 +438,82 @@ nodeRight(Iter<TFragmentStore, AnnotationTree<TSpec> > const & it)
 
 //////////////////////////////////////////////////////////////////////////////
 
+// insert a new id into a cyclic list and returns new last child id
+template <typename TAnnotationStore, typename TId>
+inline TId
+_cyclicListFrontInsert(TAnnotationStore & annotationStore, TId newId, TId lastChildId)
+{
+	typedef typename Value<TAnnotationStore>::Type TAnnotation;
+
+	TId nextId, newLastId;
+	if (lastChildId != TAnnotation::INVALID_ID)
+	{
+		// get last node in the cycle
+		TAnnotation &lastChild = annotationStore[lastChildId];
+		// last child points to first child
+		nextId = lastChild.nextSiblingId;
+		// insert new node between last and first
+		lastChild.nextSiblingId = newId;
+		// last child remains the same
+		newLastId = lastChildId;
+	} else
+		// cyclic list was empty
+		newLastId = nextId = newId;
+	
+	// link new node to former first node
+	annotationStore[newId].nextSiblingId = nextId;
+	
+	return newLastId;
+}
+
+// delete an id from a cyclic list and returns new last child id
+template <typename TAnnotationStore, typename TId>
+inline TId
+_cyclicListSearchPrev(TAnnotationStore & annotationStore, TId id, TId lastChildId)
+{
+	typedef typename Value<TAnnotationStore>::Type TAnnotation;
+
+	if (lastChildId == TAnnotation::INVALID_ID)
+		return TAnnotation::INVALID_ID;
+	
+	TId prevId, i = lastChildId;
+	do {
+		prevId = i;
+		i = annotationStore[i].nextSiblingId;
+		if (i == id) break;
+	} while (i != lastChildId);
+
+	if (i == id)
+		return prevId;
+	else
+		return TAnnotation::INVALID_ID;
+}
+
+// delete an id from a cyclic list and returns new last child id
+template <typename TAnnotationStore, typename TId>
+inline TId
+_cyclicListRemove(TAnnotationStore & annotationStore, TId id, TId lastChildId)
+{
+	typedef typename Value<TAnnotationStore>::Type TAnnotation;
+
+	TId prevId = _cyclicListSearchPrev(annotationStore, id, lastChildId);
+	
+	if (prevId != TAnnotation::INVALID_ID)
+	{
+		annotationStore[prevId].nextSiblingId = annotationStore[id].nextSiblingId;
+		
+		if (id == lastChildId)
+		{
+			if (prevId != id)
+				return prevId;
+			else
+				return TAnnotation::INVALID_ID;
+		} else
+			return lastChildId;
+	}
+	return lastChildId;
+}
+
 template <typename TFragmentStore, typename TSpec>
 inline Iter<TFragmentStore, AnnotationTree<TSpec> >
 createLeftChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
@@ -447,26 +523,14 @@ createLeftChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	typedef typename TAnnotation::TId					TId;
 	
 	appendValue(it.store->annotationStore, getAnnotation(it));
-	TAnnotation &anno = getAnnotation(it);
+	TAnnotation &parentAnno = getAnnotation(it);
 
 	TId childId = length(it.store->annotationStore) - 1;
 	TAnnotation &childAnno = it.store->annotationStore[childId];
 	
-	TId firstChildId;
-	TId lastChildId = anno.lastChildId;
-	
-	if (lastChildId != TAnnotation::INVALID_ID)
-	{
-		TAnnotation &lastChild = it.store->annotationStore[lastChildId];
-		firstChildId = lastChild.nextSiblingId;
-		lastChild.nextSiblingId = childId;
-	} else
-		firstChildId = childId;
-
-	childAnno.nextSiblingId = firstChildId;
+	parentAnno.lastChildId = _cyclicListFrontInsert(it.store->annotationStore, childId, parentAnno.lastChildId);
 	childAnno.parentId = it.id;
 	childAnno.lastChildId = TAnnotation::INVALID_ID;
-	it.store->annotationStore[lastChildId].nextSiblingId = childId;
 	
 	Iter<TFragmentStore, AnnotationTree<TSpec> > childIter(it);
 	childIter.id = childId;
@@ -487,21 +551,10 @@ createRightChild(Iter<TFragmentStore, AnnotationTree<TSpec> > & it)
 	TId childId = length(it.store->annotationStore) - 1;
 	TAnnotation &childAnno = it.store->annotationStore[childId];
 	
-	TId firstChildId;
-	TId lastChildId = parentAnno.lastChildId;
-	
-	if (lastChildId != TAnnotation::INVALID_ID)
-	{
-		TAnnotation &lastChild = it.store->annotationStore[lastChildId];
-		firstChildId = lastChild.nextSiblingId;
-		lastChild.nextSiblingId = childId;
-	} else
-		firstChildId = childId;
-
-	childAnno.nextSiblingId = firstChildId;
+	_cyclicListFrontInsert(it.store->annotationStore, childId, parentAnno.lastChildId);
+	parentAnno.lastChildId = childId;
 	childAnno.parentId = it.id;
 	childAnno.lastChildId = TAnnotation::INVALID_ID;
-	parentAnno.lastChildId = childId;
 	
 	Iter<TFragmentStore, AnnotationTree<TSpec> > childIter(it);
 	childIter.id = childId;
