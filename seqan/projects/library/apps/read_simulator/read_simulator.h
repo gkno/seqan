@@ -111,6 +111,7 @@ struct Options<Global>
               samFile(""),
               simulateQualities(false),
               generateMatePairs(false),
+              libraryLengthIsUniform(false),
               libraryLengthMean(1000),
               libraryLengthError(100),
               numHaplotypes(1),
@@ -679,7 +680,7 @@ unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
         double minLen = options.libraryLengthMean - options.libraryLengthError;
         double maxLen = options.libraryLengthMean + options.libraryLengthError;
         double len = pickRandomNumber(rng, PDF<Uniform<double> >(minLen, maxLen));
-        return static_cast<unsigned>(round(len));
+        return static_cast<unsigned>(_max(0.0, round(len)));
     } else {
         // Pick normally distributed.
         double len = pickRandomNumber(rng, PDF<Normal>(options.libraryLengthMean, options.libraryLengthError));
