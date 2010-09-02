@@ -82,7 +82,7 @@ void computeQualityScale(const char * contigsFilename, const char * samFilename,
     }
 
     // Compute average weight per unit distance.
-    double result = 1.0 * totalWeightedDistance / totalUnweightedDistance;
+    double result = (totalUnweightedDistance == 0) ? 0 : 1.0 * totalWeightedDistance / totalUnweightedDistance;
 //     std::cout << "# contigs file\tSAM file\ttotal unweighted distance\ttotal weighted distance\tweight factor" << std::endl;
     std::cout << "{ \"genome\": \"" << contigsFilename << "\", \"sam_filename\": \"" << samFilename << "\", \"total_unweighted\": " << totalUnweightedDistance << ", \"total_weighted\": " << totalWeightedDistance << ", \"factor\": " << result << " }" << std::endl;
 //     std::cout << contigsFilename << "\t" << samFilename << "\t" << totalUnweightedDistance << "\t" << totalWeightedDistance << "\t" << result << std::endl;
