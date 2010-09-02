@@ -7,9 +7,12 @@
 #include <string.h>
 #include <sstream>
 
+//#define MEDIAN
 
 using namespace std;
 using namespace seqan;
+
+/*TODO cumulative poisson distribution determinated just once for a level, not at each node like now*/
 
 /*matching string*/
 bool strContains(const string inputStr, const string searchStr)
@@ -600,7 +603,9 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 							positionError = length(setReads[idReadsError[s].i1]) - positionError - 1; 
 							nucleotide = complementaire(nucleotide);
 						}
-						
+
+// debug					if(idReadsError[s].i1==176 || idReadsError[s].i1 ==177){cout << representative(iter);}
+
 						/*search if we have identify the same read already as erroneous*/
 						map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapID;
 						mapID = allErrors.find(idReadErrorPos);
@@ -1145,11 +1150,16 @@ Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > builtSuffixAr
 	frequency = determineFrequency(myConstrainedIterator,setReads);
 
 	/*restrictions just for estimate the genome length if there is no data*/
+
+#ifdef MEDIAN
 	int level = fromLevel;
 	ofstream out("medianLevels.txt"); 
 	ofstream median("medianForEachLevel.txt");
-	if(genomeLength == 0.0){
-		
+#endif
+
+	if (genomeLength == 0.0)
+	{
+#ifdef MEDIAN		
 		while(level < toLevel){
 		//int logRation = (log10(length(setReads)/2))/(log10(4));
 		//int l = logRation + 1;
@@ -1170,6 +1180,28 @@ Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > builtSuffixAr
 			}
 			level+=1;
 		}
+#else
+		//int logRation = (log10(length(setReads)/2))/(log10(4));
+		//int l = logRation + 1;
+		//cout << l << endl;
+		cargo(myIndex).replen_min = fromLevel;
+		cargo(myIndex).replen_max = fromLevel+2; 	
+		cargo(myIndex).frequency = frequency;
+
+		double expectedValueGivenLevel = medianLevel(myConstrainedIterator);
+
+		/*TODO the length for the reads is always the same, but for real cases it is better to change*/
+		/*estimate the genome length by the use of expected value*/
+		double readLength = length(setReads[0]);
+		double numberReads = length(setReads)/2;
+
+		/* a = readLength - path_label + 1 */
+		/*here plus 1 also because the level is between fromLevel and toLevel*/
+		double a = readLength - fromLevel + 2;
+		double mult = numberReads*a;
+		genomeLength = mult/expectedValueGivenLevel;
+		cout << "The estimated genome length is " << genomeLength << endl;
+#endif
 	}
 	end1 = clock();
 	cout << "#Time required for suffix array construction : "<< (double)(end1-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
