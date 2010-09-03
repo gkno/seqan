@@ -542,7 +542,7 @@ SEQAN_CHECKPOINT
 */
 
 // count gaps beginning at given view position
-// counting trailing gaps returns 0
+// counting trailing gaps returns either the intended trailing gaps or 0
 
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename Size<Gaps<TSource, TSpec> >::Type
@@ -559,6 +559,40 @@ countGaps(Gaps<TSource, TSpec> const & me,
 {
 SEQAN_CHECKPOINT
 	return countGaps(iter(me, view_pos));
+}
+
+/**
+.Function.countCharacters:
+..cat:Alignments
+..summary:Count characters at a specific position in a gapped sequence.
+..signature:Size countCharacters(gapped_sequence, view_position)
+..param.gapped_sequence:A gapped sequence.
+...type:Class.Gaps
+..param.view_position:The view position at which $gapped_sequence$ is tested.
+..returns:Number of consecutive characters in $gapped_sequence$ starting at position $view_position$.
+...metafunction:Metafunction.Size
+..remarks:If there is no character at position $view_position$, the function returns $0$.
+...text:If $view_position \geq $@Function.endPosition@$(gapped_sequence)$, the function returns $0$.
+*/
+
+// count characters beginning at given view position
+
+template <typename TSource, typename TSpec, typename TPosition>
+inline typename Size<Gaps<TSource, TSpec> >::Type
+countCharacters(Gaps<TSource, TSpec> const & me,
+				TPosition view_pos)
+{
+SEQAN_CHECKPOINT
+	return countCharacters(iter(me, view_pos));
+}
+
+template <typename TSource, typename TSpec, typename TPoistion>
+inline typename Size<Gaps<TSource, TSpec> >::Type
+countCharacters(Gaps<TSource, TSpec> & me,
+				TPoistion view_pos)
+{
+SEQAN_CHECKPOINT
+	return countCharacters(iter(me, view_pos));
 }
 
 //////////////////////////////////////////////////////////////////////////////
