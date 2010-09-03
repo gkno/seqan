@@ -51,7 +51,7 @@ struct Options<LS454Reads> : public Options<Global>
             : readLengthIsUniform(false),
               readLengthMean(400),
               readLengthError(40),
-              sqrtInStdDev(false),
+              sqrtInStdDev(true),
               k(0.15),
               backgroundNoiseMean(0.23),
               backgroundNoiseStdDev(0.15)
@@ -107,7 +107,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
 
     addSection(parser, "454 Error Model Parameters");
 
-    addOption(parser, CommandLineOption("sq",  "sqrt-in-std-dev", "If set, no square root is used in error calculation.  Default: Don't use sqrt.", OptionType::Bool));
+    addOption(parser, CommandLineOption("nsq",  "no-sqrt-in-std-dev", "If set, no square root is used in error calculation.  Default: Do use sqrt.", OptionType::Bool));
     addOption(parser, CommandLineOption("k", "proportionality-factor", "Proportionality factor for calculating standard deviation proportional to sqrt(homopolymer length).  Default: 0.15", OptionType::Double));
     addOption(parser, CommandLineOption("bm",  "background-noise-mean", "Background noise mean.  Default: 0.2.", OptionType::Double));
     addOption(parser, CommandLineOption("bs",  "background-noise-stddev", "Background noise std dev.  Default: 0.1.", OptionType::Double));
@@ -123,8 +123,8 @@ int parseCommandLineAndCheckModelSpecific(Options<LS454Reads> & options,
     if (isSetLong(parser, "read-length-error"))
         getOptionValueLong(parser, "read-length-error", options.readLengthError);
 
-    if (isSetLong(parser, "sqrt-in-std-dev"))
-        options.sqrtInStdDev = true;
+    if (isSetLong(parser, "no-sqrt-in-std-dev"))
+        options.sqrtInStdDev = false;
     if (isSetLong(parser, "proportionality-factor"))
         getOptionValueLong(parser, "proportionality-factor", options.k);
     if (isSetLong(parser, "background-noise-mean"))
