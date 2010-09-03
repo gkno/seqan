@@ -397,6 +397,156 @@ void TestSequenceGapsBase()
 
 }
 
+//____________________________________________________________________________
+
+template <typename TSource, typename TSpec>
+void TestTrailingGaps()
+{
+	typedef Gaps<TSource, TSpec> TGaps;
+
+	//inserting gaps
+	TSource src1 = "hello";
+	TGaps gaps6(src1);
+	SEQAN_TASSERT(gaps6 == "hello");
+
+	insertGaps(gaps6, 10, 2);//somewhere behind the last char
+	SEQAN_TASSERT(gaps6 == "hello"); //nothing changes
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 0);
+	SEQAN_TASSERT(countGaps(gaps6, 10) == 0);
+
+	insertGaps(gaps6, 5, 3); //directly behind the last char: append intended trailing gap
+	SEQAN_TASSERT(gaps6 == "hello"); //"hello---"
+	SEQAN_TASSERT(countGaps(gaps6,5) == 3);
+	SEQAN_TASSERT(countGaps(gaps6,6) == 2);
+
+	insertGap(gaps6, 8);//expand trailing gaps
+	SEQAN_TASSERT(gaps6 == "hello"); //"hello----"
+	SEQAN_TASSERT(countGaps(gaps6,5) == 4);
+	SEQAN_TASSERT(countGaps(gaps6,6) == 3);
+	SEQAN_TASSERT(countGaps(gaps6,7) == 2);
+	SEQAN_TASSERT(countGaps(gaps6,8) == 1);
+	SEQAN_TASSERT(countGaps(gaps6,9) == 0);
+	SEQAN_TASSERT(countGaps(gaps6,10) == 0);
+	SEQAN_TASSERT(countGaps(gaps6,20) == 0);
+
+	insertGaps(gaps6, 9, 2);//expand trailing gaps on last position
+	SEQAN_TASSERT(gaps6 == "hello") //"hello------"
+	SEQAN_TASSERT(countGaps(gaps6,5) == 6);
+
+//removing gaps
+	SEQAN_TASSERT(gaps6 == "hello"); // "hello------"
+	SEQAN_TASSERT(beginPosition(gaps6) == 0);
+
+	removeGap(gaps6, 7); //remove gap somewhere in gap area
+	SEQAN_TASSERT(gaps6 == "hello");//"hello-----"
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 5);
+	SEQAN_TASSERT(countGaps(gaps6, 7) == 3);
+	SEQAN_TASSERT(countGaps(gaps6, 9) == 1);
+	SEQAN_TASSERT(countGaps(gaps6, 10) == 0);
+
+	removeGaps(gaps6, 8, 15); //remove rest of gap region
+	SEQAN_TASSERT(gaps6 == "hello"); //"hello---"
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 3);
+	SEQAN_TASSERT(countGaps(gaps6, 7) == 1);
+	SEQAN_TASSERT(countGaps(gaps6, 8) == 0);
+
+	removeGaps(gaps6, 5, 3); //remove gap region completely
+	SEQAN_TASSERT(gaps6 == "hello"); //"hello"
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 0);
+
+	insertGaps(gaps6, 5, 6);
+	SEQAN_TASSERT(countGaps(gaps6,5) == 6);
+
+	assignSource(gaps6, "new");		//clear trailing gaps when assign new source
+	SEQAN_TASSERT(gaps6 == "new")   //"new"
+	SEQAN_TASSERT(countGaps(gaps6, 3) == 0);
+	insertGaps(gaps6, 3, 10);
+	SEQAN_TASSERT(countGaps(gaps6, 3) == 10);
+
+	TSource src2 = "hello";
+	setSource(gaps6, src2);			//clear trailing gaps when set new source
+	SEQAN_TASSERT(gaps6 == "hello") //"re"
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 0);
+
+	insertGaps(gaps6, 5, 10);
+	SEQAN_TASSERT(countGaps(gaps6, 5) == 10);
+
+	TGaps gaps6a(gaps6); 		//copy all trailing gaps
+	SEQAN_TASSERT(gaps6a == "hello");
+	SEQAN_TASSERT(countGaps(gaps6a, 5) == 10);
+
+	TGaps gaps6b = gaps6a;		//assign the trailing gaps
+	insertGaps(gaps6b, 10, 5);
+	SEQAN_TASSERT(gaps6b == "hello");
+	SEQAN_TASSERT(countGaps(gaps6a, 5) == 10);
+	SEQAN_TASSERT(countGaps(gaps6b, 5) == 15);
+
+	clearGaps(gaps6a);				//remove all trailing gaps
+	SEQAN_TASSERT(countGaps(gaps6a, 5) == 0);
+	SEQAN_TASSERT(countGaps(gaps6b, 5) == 15);
+
+	}
+
+template <typename TSource, typename TGapSpec>
+inline void
+TestCountCharacters() {
+	typedef Gaps<TSource, TGapSpec> TGap;
+
+	TSource seq = "hello";
+	TGap gap7(seq);
+
+	SEQAN_TASSERT(gap7 == "hello");
+	SEQAN_TASSERT(length(gap7) == 5);
+
+	SEQAN_TASSERT(countCharacters(gap7, 0) == 5);
+	SEQAN_TASSERT(countCharacters(gap7, 1) == 4);
+	SEQAN_TASSERT(countCharacters(gap7, 0) == 5);
+	SEQAN_TASSERT(countCharacters(gap7, 3) == 2);
+	SEQAN_TASSERT(countCharacters(gap7, 5) == 0);
+
+	insertGaps(gap7, 0, 2);
+	SEQAN_TASSERT(gap7 == "hello"); //"--hello"
+	SEQAN_TASSERT(length(gap7) == 5);
+
+	SEQAN_TASSERT(countCharacters(gap7, 0) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 2) == 5);
+
+	insertGap(gap7, 4);
+	SEQAN_TASSERT(gap7 == "he-llo"); //"--he-llo"
+	SEQAN_TASSERT(length(gap7) == 6);
+
+	SEQAN_TASSERT(countCharacters(gap7, 0) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 2) == 2);
+	SEQAN_TASSERT(countCharacters(gap7, 3) == 1);
+	SEQAN_TASSERT(countCharacters(gap7, 4) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 5) == 3);
+	SEQAN_TASSERT(countCharacters(gap7, 6) == 2);
+	SEQAN_TASSERT(countCharacters(gap7, 7) == 1);
+	SEQAN_TASSERT(countCharacters(gap7, 8) == 0);
+
+	insertGaps(gap7, 6, 3);
+	SEQAN_TASSERT(gap7 == "he-l---lo"); //"--he-l---lo"
+	SEQAN_TASSERT(length(gap7) == 9);
+
+	SEQAN_TASSERT(countCharacters(gap7, 0) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 2) == 2);
+	SEQAN_TASSERT(countCharacters(gap7, 3) == 1);
+	SEQAN_TASSERT(countCharacters(gap7, 4) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 5) == 1);
+	SEQAN_TASSERT(countCharacters(gap7, 6) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 7) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 8) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 9) == 2);
+	SEQAN_TASSERT(countCharacters(gap7, 10) == 1);
+
+	insertGaps(gap7, 11, 5);
+	SEQAN_TASSERT(gap7 == "he-l---lo"); //"--he-l---lo-----"
+	SEQAN_TASSERT(length(gap7) == 9);
+	SEQAN_TASSERT(countCharacters(gap7, 11) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 12) == 0);
+	SEQAN_TASSERT(countCharacters(gap7, 30) == 0);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 SEQAN_DEFINE_TEST(test_align_gaps_base_char_string_array_gaps) {
@@ -426,5 +576,13 @@ SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps
 
 SEQAN_DEFINE_TEST(test_align_gaps_test_sequence_gaps_base) {
     TestSequenceGapsBase<String<char>, SequenceGaps>();
+}
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps) {
+	TestTrailingGaps<String<char>, ArrayGaps>();
+}
+
+SEQAN_DEFINE_TEST(test_align_gaps_test_count_characters_char_string_array_gaps) {
+	TestCountCharacters<String<char>, ArrayGaps >();
 }
 
