@@ -17,6 +17,8 @@ void SEQAN_TEST_test_align_gaps_test_gaps_iterator();
 void SEQAN_TEST_test_align_gaps_test_gap_manipulation_char_string_array_gaps();
 void SEQAN_TEST_test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps();
 void SEQAN_TEST_test_align_gaps_test_sequence_gaps_base();
+void SEQAN_TEST_test_align_gaps_test_trailing_gaps_char_string_array_gaps();
+void SEQAN_TEST_test_align_gaps_test_count_characters_char_string_array_gaps();
 
 void SEQAN_TEST_test_align_myers_test_short();
 void SEQAN_TEST_test_align_myers_test_long();
@@ -40,6 +42,8 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_sequence_gaps_base);
+    SEQAN_CALL_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps);
+    SEQAN_CALL_TEST(test_align_gaps_test_count_characters_char_string_array_gaps);
 
     SEQAN_CALL_TEST(testLocalAlign);
     SEQAN_CALL_TEST(testLocalAlign2);
