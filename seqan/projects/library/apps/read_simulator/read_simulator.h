@@ -771,6 +771,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 SEQAN_ASSERT_EQ(length(fragmentStore.readSeqStore), length(fragmentStore.readNameStore));
                 // Cut out segment from haplotype.
                 String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
+                String<Dna5Q> haplotypeInfix = read;  // Copy for printing later on.
                 applySimulationInstructions(read, rng, inst, options);
                 // Append read sequence to read seq store and mate pair to read
                 // name store.  This also yields the read id.  We will generate
@@ -799,9 +800,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
                         appendValue(flipped, mateNum == 1);
                     }
-                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu original=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(read)));
+                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
                 } else {
-                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu original=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(read)));
+                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
                 }
                 for (unsigned i = 0; i < length(inst.editString); ++i) {
                     char buffer[2] = "*";
