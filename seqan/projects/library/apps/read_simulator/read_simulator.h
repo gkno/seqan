@@ -386,9 +386,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/1" << std::endl;
         StringSet<String<Dna5Q>, Dependent<> > reads;
         StringSet<CharString, Dependent<> > readNames;
-        for (size_t i = 0; i < length(fragmentStore.readNameStore); i += 2) {
-            appendValue(readNames, fragmentStore.readNameStore[i]);
-            appendValue(reads, fragmentStore.readSeqStore[i]);
+        for (size_t i = 0; i < length(fragmentStore.matePairStore); ++i) {
+            size_t readId = fragmentStore.matePairStore[i].readId[0];
+            appendValue(readNames, fragmentStore.readNameStore[readId]);
+            appendValue(reads, fragmentStore.readSeqStore[readId]);
         }
         {
             std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
@@ -404,9 +405,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/2" << std::endl;
         clear(reads);
         clear(readNames);
-        for (size_t i = 1; i < length(fragmentStore.readNameStore); i += 2) {
-            appendValue(readNames, fragmentStore.readNameStore[i]);
-            appendValue(reads, fragmentStore.readSeqStore[i]);
+        for (size_t i = 0; i < length(fragmentStore.matePairStore); ++i) {
+            size_t readId = fragmentStore.matePairStore[i].readId[1];
+            appendValue(readNames, fragmentStore.readNameStore[readId]);
+            appendValue(reads, fragmentStore.readSeqStore[readId]);
         }
         {
             std::fstream fstrm(toCString(mateFilename), std::ios_base::out);
