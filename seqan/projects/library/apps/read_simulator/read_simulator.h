@@ -65,6 +65,8 @@ struct Options<Global>
     CharString samFile;
     // true iff qualities are to be simulated.
     bool simulateQualities;
+    // true iff additional information is to be included in the reads file.
+    bool includeReadInformation;
 
     // Mate-Pair Related Options.
 
@@ -110,6 +112,7 @@ struct Options<Global>
               outputFile(""),
               samFile(""),
               simulateQualities(false),
+              includeReadInformation(false),
               generateMatePairs(false),
               libraryLengthIsUniform(false),
               libraryLengthMean(1000),
@@ -171,9 +174,10 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  randomSourceLength:     " << options.randomSourceLength << std::endl
            << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
-           << "  outputFile:             \"" << options.outputFile << "\"" <<std::endl
-           << "  samFile:                \"" << options.samFile << "\"" <<std::endl
+           << "  outputFile:             \"" << options.outputFile << "\"" << std::endl
+           << "  samFile:                \"" << options.samFile << "\"" << std::endl
            << "  simulateQualities:      " << (options.simulateQualities ? "true" : "false") << std::endl
+           << "  includeReadInformation: " << options.includeReadInformation << std::endl
            << "  generateMatePairs:      " << (options.generateMatePairs ? "true" : "false") << std::endl
            << "  libraryLengthMean:      " << options.libraryLengthMean << std::endl
            << "  libraryLengthError:     " << options.libraryLengthError << std::endl
@@ -220,6 +224,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("r",  "reverse-only", "Simulate from reverse strand only.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("o",  "output-file", "Write results to PARAM.fasta file instead of SEQUENCE.reads.fasta.  Default: \"\".", OptionType::String));
     addOption(parser, CommandLineOption("sq", "simulate-qualities", "Simulate qualities, generate FASTQ instead of FASTA.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("i", "include-read-information", "Include additional read information in reads file.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
 
@@ -271,6 +276,8 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "output-file", options.outputFile);
     if (isSetLong(parser, "simulate-qualities"))
         options.simulateQualities = true;
+    if (isSetLong(parser, "include-read-information"))
+        options.includeReadInformation = true;
     if (isSetLong(parser, "verbose"))
         options.verbose = true;
     if (isSetLong(parser, "very-verbose")) {
@@ -802,14 +809,22 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 						SEQAN_ASSERT_EQ(flipped[readId - 1], mateNum == 1);
                         appendValue(flipped, mateNum == 1);
                     }
-                    sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
+                    if (options.includeReadInformation)
+                        sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
+                    else
+                        sprintf(readName, "%s.%09u/%d", outFileName, readId / 2, mateNum);
                 } else {
-                    sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
+                    if (options.includeReadInformation)
+                        sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, length(read), origBeginPos, origEndPos, toCString(CharString(haplotypeInfix)));
+                    else
+                        sprintf(readName, "%s.%09u", outFileName, readId);
                 }
-                for (unsigned i = 0; i < length(inst.editString); ++i) {
-                    char buffer[2] = "*";
-                    buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
-                    strcat(readName, buffer);
+                if (options.includeReadInformation) {
+                    for (unsigned i = 0; i < length(inst.editString); ++i) {
+                        char buffer[2] = "*";
+                        buffer[0] = "MEID"[static_cast<int>(inst.editString[i])];
+                        strcat(readName, buffer);
+                    }
                 }
                 appendValue(fragmentStore.readNameStore, readName);
 
@@ -872,21 +887,25 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         appendValue(fragmentStore.matePairStore, matePair);
 
                         // The first mate always comes from the forward strand.
-                        append(fragmentStore.readNameStore[readId - 1], " strand=forward");
+                        if (options.includeReadInformation)
+                            append(fragmentStore.readNameStore[readId - 1], " strand=forward");
                         // The second read always comes from the reverse strand.
                         reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
-                        append(fragmentStore.readNameStore[readId], " strand=reverse");
+                        if (options.includeReadInformation)
+                            append(fragmentStore.readNameStore[readId], " strand=reverse");
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     }
                 } else {
                     if (pickRandomNumber(rng, PDF<Uniform<double> >(0.0, 1.0)) < 0.5) {
                         reverseComplementInPlace(back(fragmentStore.readSeqStore));
-                        append(back(fragmentStore.readNameStore), " strand=reverse");
+                        if (options.includeReadInformation)
+                            append(back(fragmentStore.readNameStore), " strand=reverse");
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     } else {
-                        append(back(fragmentStore.readNameStore), " strand=forward");
+                        if (options.includeReadInformation)
+                            append(back(fragmentStore.readNameStore), " strand=forward");
                     }
                 }
             }
