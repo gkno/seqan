@@ -56,6 +56,7 @@ public:
 public:
 	String<TSize> data_arr; //a list of gap and non-gap region lengths
 	TViewPosition data_end_position;
+	TViewPosition data_unclipped_end_position;
 
 	Holder<TSource> data_source;
 	TSourcePosition data_source_begin_position;
@@ -63,18 +64,21 @@ public:
 
 public:
 	Gaps():
+		data_unclipped_end_position(0),
 		data_source_begin_position(0),
 		data_source_end_position(0)
 	{
 SEQAN_CHECKPOINT
 	}
 	Gaps(TSize _size):
+		data_unclipped_end_position(0),
 		data_source_begin_position(0),
 		data_source_end_position(0)
 	{
 		_init_to_resize(*this, _size);
 	}
 	Gaps(TSource & source_):
+		data_unclipped_end_position(0),
 		data_source(source_),
 		data_source_begin_position(beginPosition(source_)),
 		data_source_end_position(endPosition(source_))
@@ -85,6 +89,7 @@ SEQAN_CHECKPOINT
 
 	template <typename TSource2>
 	Gaps(TSource2 const & source_):
+		data_unclipped_end_position(0),
 		data_source_begin_position(0),
 		data_source_end_position(length(source_))
 		//data_source_begin_position(beginPosition(source_)),
@@ -98,6 +103,7 @@ SEQAN_CHECKPOINT
 	Gaps(Gaps const & other_):
 		data_arr(other_.data_arr),
 		data_end_position(other_.data_end_position),
+		data_unclipped_end_position(other_.data_unclipped_end_position),
 //		data_source(value(other_.data_source)), //variant: setValue => Align benutzen gemeinsame Sources
 		data_source(other_.data_source),		//variant: assignValue => Align kopieren Sources
 		data_source_begin_position(other_.data_source_begin_position),
@@ -110,6 +116,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		data_arr = other_.data_arr;
 		data_end_position = other_.data_end_position;
+		data_unclipped_end_position = other_.data_unclipped_end_position,
 		setValue(data_source, source(other_));
 		data_source_begin_position = other_.data_source_begin_position;
 		data_source_end_position = other_.data_source_end_position; 
@@ -185,6 +192,43 @@ endPosition(Gaps<TSource, ArrayGaps> const & me)
 {
 SEQAN_CHECKPOINT
 	return me.data_end_position;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSource>
+inline typename Position<Gaps<TSource, ArrayGaps> >::Type
+_getTrailingGaps(Gaps<TSource, ArrayGaps> const & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_unclipped_end_position;
+}
+
+template <typename TSource, typename TSize>
+inline void
+_setTrailingGaps(Gaps<TSource, ArrayGaps> & me, TSize const & size)
+{
+	TSize zero = 0;
+	if (size >= zero)
+	{
+		me.data_unclipped_end_position = size;
+	}
+	else
+	{
+		me.data_unclipped_end_position = 0;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+ * Returns the length of the gaps sequence including the trailing gaps
+ */
+template <typename TSource>
+inline typename Position<Gaps<TSource, ArrayGaps> >::Type
+_unclippedLength(Gaps<TSource, ArrayGaps> & me)
+{
+SEQAN_CHECKPOINT
+	return me.data_end_position + me.data_unclipped_end_position;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -272,6 +316,7 @@ SEQAN_CHECKPOINT
 	_dataArr(me)[0] = 0;
 	_dataArr(me)[1] = _size;
 	_setEndPosition(me, _size);
+	_setTrailingGaps(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -755,11 +800,20 @@ countGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 
 		TArr & arr = _dataArr(container(me));
 		typename Position<TArr>::Type pos = me.data_block;
+		typename Position<TArr>::Type block_pos = me.data_sub;
 
 		if (length(arr) == pos)
 		{//counting trailing gaps
+			if (block_pos <= _getTrailingGaps(container(me)))
+			{//is in range of trailing gaps
 SEQAN_CHECKPOINT
-			return 0;
+				return _getTrailingGaps(container(me)) - block_pos;
+			}
+			else
+			{//no trailing gaps here
+SEQAN_CHECKPOINT
+				return 0;
+			}
 		}
 		else
 		{
@@ -771,6 +825,29 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		return 0;
+	}
+}
+
+template <typename TGaps>
+inline typename Size<TGaps>::Type
+countCharacters(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
+{
+	if (isGap(me))
+	{// only count chars
+SEQAN_CHECKPOINT
+		return 0;
+	}
+	else
+	{//count chars
+SEQAN_CHECKPOINT
+		typedef typename Size<TGaps>::Type TGapsSize;
+		typedef String<TGapsSize> const TArr;
+
+		TArr & arr = _dataArr(container(me));
+		typename Position<TArr>::Type pos = me.data_block;
+		typename Position<TArr>::Type block_pos = me.data_sub;
+
+		return arr[pos] - block_pos;
 	}
 }
 
@@ -877,6 +954,7 @@ insertGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me,
 
 	TArr & arr = _dataArr(container(me));
 	typename Position<TArr>::Type pos = me.data_block;
+	typename Position<TArr>::Type block_pos = me.data_sub;
 	typename Iterator<TArr, Rooted>::Type it = iter(arr, pos);
 
 	if (isGap(me))
@@ -886,10 +964,14 @@ insertGaps(Iter<TGaps, GapsIterator<ArrayGaps> > const & me,
 SEQAN_CHECKPOINT
 			value(it) += size;
 		}
-		else
-		{//gap at end: nothing to do
+		else if (pos == length(arr))
+		{//gap at end: add trailing gaps
+			if (block_pos <= _getTrailingGaps(container(me)))
+			{
 SEQAN_CHECKPOINT
-			return;
+				_setTrailingGaps(container(me), _getTrailingGaps(container(me)) + size);
+			}
+			return; // do not adjust right position
 		}
 	}
 	else
@@ -972,7 +1054,22 @@ SEQAN_CHECKPOINT
 				_setEndPosition(container(me), endPosition(container(me)) - size);
 			}
 		}
-		//else: trailing gaps: infinite gaps here, so do nothing
+		else if (me.data_block == length(arr))
+		{
+			if (me.data_sub <= _getTrailingGaps(container(me)))
+			{//remove trailing gaps
+				if (size > (_getTrailingGaps(container(me)) - me.data_sub))
+				{//remove more than exists
+SEQAN_CHECKPOINT
+					_setTrailingGaps(container(me), me.data_sub);
+				}
+				else
+				{//remove less or equal than exists
+SEQAN_CHECKPOINT
+					_setTrailingGaps(container(me), _getTrailingGaps(container(me)) - size);
+				}
+			}
+		}//else: trailing gaps: infinite gaps here - nothing to do
 	}
 	//else: here is no gap - nothing to do
 }
