@@ -365,6 +365,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 		lenParent = parentRepLength(iter);
 		lenPath = repLength(iter);
 	
+	  SEQAN_ASSERT_LT(lenParent + 1, expectedTheorical.size());
 		double pValue_Poisson =  pValue(countOccurrences(iter), expectedTheorical[lenParent+1]);
 		
 		/*compare the cumulative poisson distribution with the p-value(strictness)*/
