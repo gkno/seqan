@@ -1188,6 +1188,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
         return back(stringSetLimits(me));
     }
 
+
 ///.Function.appendValue.param.target.type:Class.StringSet
 //////////////////////////////////////////////////////////////////////////////
 // appendValue
@@ -1199,8 +1200,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		TString2 const &obj,
 		Tag<TExpand> const &tag) 
 	{
+		if (_validStringSetLimits(me))
+			appendValue(me.limits, lengthSum(me) + length(obj), tag);
         appendValue(me.strings, obj, tag);
-        appendValue(me.limits, lengthSum(me) + length(obj), tag);
     }
 
 	// ConcatDirect
@@ -1210,8 +1212,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		TString2 const &obj,
 		Tag<TExpand> const &tag) 
 	{
+		appendValue(me.limits, lengthSum(me) + length(obj), tag);
         append(me.concat, obj, tag);
-        appendValue(me.limits, lengthSum(me) + length(obj), tag);
     }
 
     template < typename TString, typename TDelimiter, typename TString2, typename TExpand >
@@ -1220,9 +1222,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		TString2 const &obj,
 		Tag<TExpand> const &tag) 
 	{
-        append(me.concat, obj);
-        appendValue(me.concat, TDelimiter(), tag);
         appendValue(me.limits, lengthSum(me) + length(obj) + 1, tag);
+        append(me.concat, obj, tag);
+        appendValue(me.concat, TDelimiter(), tag);
     }
 
 	// Generous
@@ -1233,8 +1235,8 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		Tag<TExpand> const &tag) 
 	{
 		SEQAN_CHECKPOINT
-		appendValue(me.strings, const_cast<TString*>(&obj), tag);
         appendValue(me.limits, lengthSum(me) + length(obj), tag);
+		appendValue(me.strings, const_cast<TString*>(&obj), tag);
 	}
 
 	// Tight
@@ -1246,11 +1248,11 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 		SEQAN_CHECKPOINT
 		typedef typename Position<StringSet<TString, Dependent<Tight> > >::Type TPos;
+        appendValue(me.limits, lengthSum(me) + length(obj), tag);
 		appendValue(me.strings, const_cast<TString*>(&obj));
 		TPos last = me.lastId++;
 		appendValue(me.ids, last, tag);
 		me.id_pos_map.insert(std::make_pair(last, (TPos)(length(me.strings) - 1)));
-        appendValue(me.limits, lengthSum(me) + length(obj), tag);
 	}
   
 //////////////////////////////////////////////////////////////////////////////
@@ -1399,7 +1401,13 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	{
 		resize(me.limits, new_size + 1, tag);
 		me.limitsValid = (new_size == 0);
-//		me.limitsValid = (new_size == length(me.limits));
+
+//	 the following would not work as changing the size of 
+//	 a single string cannot be recognized by the stringset
+//
+//		if (_validStringSetLimits(me))
+//			fill(me.limits, new_size + 1, back(me.limits), tag);
+
 		return resize(me.strings, new_size, tag);
     }
 
