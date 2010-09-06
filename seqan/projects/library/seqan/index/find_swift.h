@@ -139,6 +139,7 @@ struct SwiftParameters {
 		TSize					lastIncrement;
 		TShortSize				counter;		// q-gram hits
 		TShortSize				threshold;		// at least threshold q-gram hits induce an approx match
+		bool					notListed;         // true if bucket is not listed in the patterns' verify list
 #ifdef SEQAN_DEBUG_SWIFT
 		TSize					_lastIncDiag;
 #endif
@@ -379,10 +380,12 @@ struct SwiftParameters {
 		typedef String<TBucket>											TBucketString;
 		typedef _SwiftBucketParams<TSpec, TSize, TShortSize>			TBucketParams;
 		typedef String<TBucketParams>									TBucketParamsString;
+		typedef String<Pair<unsigned> >									TVerifyList;
 		
 		TShape					shape;
 		TBucketString			buckets;
 		TBucketParamsString		bucketParams;
+		TVerifyList				verifyList;								// numbers of buckets that need to be verified
 		SwiftParameters			params;
 		unsigned				curSeqNo;
         __int64                 curBeginPos, curEndPos;
@@ -508,6 +511,41 @@ setMinThreshold(Pattern<TIndex, Swift<TSpec> > & pattern, TSeqNo seqNo, TThresho
 			(*it).threshold = thresh;
 }
 
+template <typename TSpec, typename TSize, typename TShortSize, typename TPos>
+inline void
+_resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement)
+{
+	bkt.lastIncrement = lastIncrement;
+	bkt.counter = 0;
+	bkt.notListed = true;
+}
+
+template <typename TSpec, typename TSize, typename TShortSize, typename TPos, typename TThresh>
+inline void
+_resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
+{
+	bkt.lastIncrement = lastIncrement;
+	bkt.counter = 0;
+	bkt.threshold = threshold;
+	bkt.notListed = true;
+}
+
+template <typename _TSpec, typename TSize, typename TShortSize, typename TPos>
+inline void
+_resetBucket(_SwiftBucket<_SwiftSemiGlobal<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement)
+{
+	bkt.lastIncrement = lastIncrement;
+	bkt.counter = 0;
+}
+
+template <typename _TSpec, typename TSize, typename TShortSize, typename TPos, typename TThresh>
+inline void
+_resetBucket(_SwiftBucket<_SwiftSemiGlobal<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
+{
+	bkt.lastIncrement = lastIncrement;
+	bkt.counter = 0;
+	bkt.threshold = threshold;
+}
 
 template <typename TIndex, typename TFloat, typename _TSize, typename TSpec>
 inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, _TSize minLengthForAll) 
@@ -529,6 +567,8 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 	{
 		// settings have been changed -> initialize bucket parameters
 	
+		clear(pattern.verifyList);
+
 		pattern._currentErrorRate = _newErrorRate;
 		pattern._currentMinLengthForAll = minLengthForAll;
 		pattern.finderPosOffset = 0;
@@ -578,7 +618,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
     			// a bucket has distanceCut different positions of q-grams
 	    		// if a q-gram is this far or further away it can't belong to the
 		    	// same bucket
-			    bucketParams.distanceCut = (bucketParams.threshold - 1) + span * errors + span;
+			    bucketParams.distanceCut = (bucketParams.threshold - 1) + span * errors;
 
     			TSize bucketsPerCol2;
 	    		if(Swift<TSpec>::DIAGONAL == 1) 
@@ -713,9 +753,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 			TBucketSize lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
 			for(bktEnd = bkt + bucketParams.reuseMask + 1; bkt != bktEnd; ++bkt) 
 			{
-				(*bkt).lastIncrement = lastIncrement;
-				(*bkt).counter = 0;
-				(*bkt).threshold = bucketParams.threshold;
+				_resetBucket(*bkt, lastIncrement, bucketParams.threshold);
 			}
 		}
 	}
@@ -741,8 +779,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 				TBucketSize lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
 				for (bktEnd = bkt + (bucketParams.reuseMask + 1); bkt != bktEnd; ++bkt)
 				{
-					(*bkt).lastIncrement = lastIncrement;
-					(*bkt).counter = 0;
+					_resetBucket(*bkt, lastIncrement);
 				}
 			}
 		}
@@ -775,8 +812,8 @@ inline void _createHit(
 	TSize ndlSeqNo)
 {
 	typedef typename Finder<THaystack, Swift<TSpec> >::TSwiftHit	THit;
-	__int64 lastInc = (__int64)(*bkt).lastIncrement - pattern.finderPosOffset;
-	__int64 firstInc = (__int64)(*bkt).firstIncrement - pattern.finderPosOffset;
+	__int64 lastInc = (__int64)bkt.lastIncrement - pattern.finderPosOffset;
+	__int64 firstInc = (__int64)bkt.firstIncrement - pattern.finderPosOffset;
 
     if(diag > lastInc) 
 	{
@@ -809,7 +846,7 @@ inline void _createHit(
 //    - that exceeded the reuse mask since last increment
 //    - for which the last increment lies more than distanceCut away.
 // If a bucket counter reaches threshold a hit is appended to the hit-list of the finder.
-// Returns true if the hit-list of the finder is not empty after this calls.
+// Returns true if the hit-list of the finder is not empty after this call.
 template <
 	typename TFinder,
 	typename TIndex,
@@ -873,7 +910,7 @@ inline bool _swiftMultiProcessQGram(
 
 		do {
 			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + (__int64)pattern.finderPosOffset
-				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < (__int64)(curPos + length(pattern.shape)))
+				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < curPos)
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused
 				// OR last increment was in the same bucket but lies more than distanceCut away
@@ -881,7 +918,7 @@ inline bool _swiftMultiProcessQGram(
                 if ((*bkt).counter >= (*bkt).threshold)
                 {
 	                // create a new hit and append it to the finders hit list
-				    _createHit(finder, pattern, bkt, bucketParams, bktBeginHstk, getSeqNo(ndlPos));
+				    _createHit(finder, pattern, *bkt, bucketParams, bktBeginHstk, getSeqNo(ndlPos));
                 }
 
 				// reuse bucket
@@ -907,6 +944,12 @@ inline bool _swiftMultiProcessQGram(
 #ifdef SEQAN_DEBUG_SWIFT
 			(*bkt)._lastIncDiag = diag;
 #endif
+
+			if (hitCount == (*bkt).threshold && (*bkt).notListed) {
+				// append bkt no to patterns verify list
+				append(pattern.verifyList, Pair<unsigned>(getSeqNo(ndlPos), bktNo));
+				(*bkt).notListed = false;
+			}
 
 checkOverlap:
 			// check if q-gram falls into another overlapping bucket
@@ -1078,8 +1121,8 @@ inline bool _swiftMultiProcessQGram(
 	return !empty(finder.hits);
 }
 
-//////////////////////////////////////////////////////
-// resets counter and lastIncrement of all buckets
+////////////////////////////////////////////////////////////////////////////////////
+// resets counter and lastIncrement of all buckets listed in patterns verify list
 template <
 	typename TFinder,
 	typename TIndex, 
@@ -1098,36 +1141,38 @@ inline bool _swiftMultiFlushBuckets(
 	typedef typename Iterator<TBucketString, Standard>::Type	TBucketIterator;
 	typedef typename TPattern::TBucketParams					TBucketParams;
 
+	typedef typename TPattern::TVerifyList						TVerifyList;
+	typedef typename Iterator<TVerifyList, Standard>::Type		TListIterator;
+
 	typedef typename Size<TIndex>::Type							TSize;
 
-	TBucketIterator	bkt = begin(pattern.buckets, Standard());
-	TBucketIterator	bktEnd;
-	TSize seqCount = countSequences(host(pattern));
 	__int64 hstkLength = length(haystack(finder));
 
-	for(TSize ndlSeqNo = 0; ndlSeqNo < seqCount; ++ndlSeqNo) 
+	TListIterator verifyBkt = begin(pattern.verifyList, Standard());
+	TListIterator verifyListEnd = end(pattern.verifyList, Standard());
+	for (; verifyBkt < verifyListEnd; ++verifyBkt)
 	{
+		unsigned bktNo = (*verifyBkt).i2;
+		unsigned ndlSeqNo = (*verifyBkt).i1;
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, ndlSeqNo);
-		bktEnd = bkt + (bucketParams.reuseMask + 1);
-		for(unsigned bktNo = 0; bkt != bktEnd; ++bkt, ++bktNo)
-		{
-            if ((*bkt).counter >= (*bkt).threshold)
-            {
-		    	// hstkPos / delta: gives the number of the bucket that is at the top of this column (modulo reuseMask missing)
-			    TSize topBucket = (TSize)(hstkLength >> bucketParams.logDelta);
-    			// number of buckets in last column above the bucket with the number bktNo
-	    		TSize bucketNoInCol = (topBucket + bucketParams.reuseMask + 1 - bktNo) & bucketParams.reuseMask;
-		    	// begin position of lower diagonal of this bucket in haystack (possibly negative)
-			    __int64 diag = (hstkLength & ~(__int64)(bucketParams.delta - 1)) - (bucketNoInCol << bucketParams.logDelta);
-			
-    	        // create a new hit and append it to the finders hit list
-	    		_createHit(finder, pattern, bkt, bucketParams, diag, ndlSeqNo);
 
-		    	(*bkt).lastIncrement = (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength;
-			    (*bkt).counter = 0;
-            }
+		TBucketIterator bkt = begin(pattern.buckets, Standard()) + _swiftBucketNo(pattern, bucketParams, ndlSeqNo) + bktNo;
+		if ((*bkt).counter >= (*bkt).threshold)
+		{
+			// hstkPos / delta: gives the number of the bucket that is at the top of this column (modulo reuseMask missing)
+			TSize topBucket = (TSize)(hstkLength >> bucketParams.logDelta);
+			// number of buckets in last column above the bucket with the number bktNo
+			TSize bucketNoInCol = (topBucket + bucketParams.reuseMask + 1 - bktNo) & bucketParams.reuseMask;
+			// begin position of lower diagonal of this bucket in haystack (possibly negative)
+			__int64 diag = (hstkLength & ~(__int64)(bucketParams.delta - 1)) - (bucketNoInCol << bucketParams.logDelta);
+
+			// create a new hit and append it to the finders hit list
+	    	_createHit(finder, pattern, *bkt, bucketParams, diag, ndlSeqNo);
+
+			_resetBucket(*bkt, (TBucketSize)0 - (TBucketSize)bucketParams.tabooLength);
 		}
 	}
+
 	finder.curHit = begin(finder.hits, Standard());
 	finder.endHit = end(finder.hits, Standard());
 

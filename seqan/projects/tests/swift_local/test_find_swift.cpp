@@ -107,8 +107,8 @@ void testOneLocalSwiftHitNegDiag() {
     Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
 
     String<String<char> > expectedPositions;
-    appendValue(expectedPositions, "< < 36 , 46 > , < < 0 , 3 > , < 0 , 30 > > >");
     appendValue(expectedPositions, "< < 36 , 46 > , < < 0 , 0 > , < 0 , 14 > > >");
+    appendValue(expectedPositions, "< < 36 , 46 > , < < 0 , 3 > , < 0 , 30 > > >");
 
 	testLocalSwift(finder_swift, pattern_swift, 0.1, 10, expectedPositions);
 }
@@ -147,10 +147,10 @@ void testLocalSwiftLongPatterns() {
 	Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
 
     String<String<char> > expectedPositions;
-    appendValue(expectedPositions, "< < 90 , 96 > , < < 0 , 41 > , < 0 , 63 > > >");
     appendValue(expectedPositions, "< < 88 , 99 > , < < 0 , 7 > , < 0 , 35 > > >");
-    appendValue(expectedPositions, "< < 90 , 96 > , < < 1 , 41 > , < 1 , 63 > > >");
     appendValue(expectedPositions, "< < 88 , 99 > , < < 1 , 7 > , < 1 , 35 > > >");
+    appendValue(expectedPositions, "< < 90 , 96 > , < < 0 , 41 > , < 0 , 63 > > >");
+    appendValue(expectedPositions, "< < 90 , 96 > , < < 1 , 41 > , < 1 , 63 > > >");
 
 	testLocalSwift(finder_swift, pattern_swift, 0.1, 6, expectedPositions);
 }
