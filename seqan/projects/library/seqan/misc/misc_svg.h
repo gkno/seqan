@@ -69,8 +69,7 @@ struct SVGFile
 
 	~SVGFile()
 	{
-		if (file.is_open())
-			close(*this);
+		close(*this);
 	}
 
 private:

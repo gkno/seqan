@@ -1422,7 +1422,11 @@ inline bool
 _convertOptionValue(CommandLineOption const & opt, __int64 & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
+#ifdef PLATFORM_WINDOWS
+	dst = _atoi64(toCString(src));
+#else
 	dst = atoll(toCString(src));
+#endif
 	return length(src) > 0;
 }
 
@@ -1430,7 +1434,11 @@ inline bool
 _convertOptionValue(CommandLineOption const & opt, __uint64 & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
+#ifdef PLATFORM_WINDOWS
+	dst = _atoi64(toCString(src));
+#else
 	dst = atoll(toCString(src));
+#endif
 	return length(src) > 0;
 }
 
