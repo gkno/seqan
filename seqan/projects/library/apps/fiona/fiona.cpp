@@ -1341,7 +1341,7 @@ int main(int argc, char* argv[]) {
 	/*initialise the top and down level by using the log4 from the total number of reads*/
 	if(fromLevel==0){
 		
-		int logRation = (log10(length(setReads)/2))/(log10(4));
+		int logRation = (log10(length(setReads)/2.0))/(log10(4.0));
 		fromLevel = logRation + 2;
 		toLevel   = fromLevel + 10;
 		cout << "The top level is " << fromLevel << " and the down level is " << toLevel <<endl;
