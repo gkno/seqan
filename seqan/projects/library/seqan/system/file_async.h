@@ -753,11 +753,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_read():");
 		#endif
-*/      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+*/      if (request.aio_nbytes == 0) return true;
+		SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_read(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         if (result) 
 		{
+			request.aio_nbytes = 0;
 			if (errno == EAGAIN) {  // read synchronoulsy instead
 #ifdef SEQAN_DEBUG_OR_TEST_
             	::std::cerr << "Warning: Falling back to sync. read. :( " << ::std::endl;
@@ -790,12 +792,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_write():");
 		#endif
-*/      SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
+*/      if (request.aio_nbytes == 0) return true;
+		SEQAN_PROADD(SEQAN_PROIO, (request.aio_nbytes + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
 		int result = aio_write(&request);
         SEQAN_PROADD(SEQAN_PROIWAIT, SEQAN_PROTIMEDIFF(tw));
         if (result) 
 		{
-			if (errno == EAGAIN) {  // read synchronoulsy instead
+			request.aio_nbytes = 0;
+			if (errno == EAGAIN) {  // write synchronoulsy instead
 #ifdef SEQAN_DEBUG_OR_TEST_
             	::std::cerr << "Warning: Falling back to sync. write. :( " << ::std::endl;
 #endif
@@ -826,6 +830,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			printRequest(request, "aio_suspend():");
 		#endif
 */
+		if (request.aio_nbytes == 0) return true;
 		aiocb * cblist = &request;
         SEQAN_PROTIMESTART(tw);
 		int result = aio_suspend(&cblist, 1, NULL);
@@ -845,6 +850,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			printRequest(request, "aio_suspend_timeout():");
 		#endif
 */
+		if (request.aio_nbytes == 0) return true;
+
 		int result;
 		if (timeout_millis == 0)
 			result = aio_error(&request);
