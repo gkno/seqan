@@ -1242,9 +1242,21 @@ parse(CommandLineParser & me, int argc, const char *argv[], TErrorStream & estre
 								_assignOptionValue(me, option_index, "true", estream);
 							else
 							{
-								if (i + opt.argumentsPerOption < argc)
+								int firstArgIndex = 0;
+
+								if (e < len - 1)
 								{
-									for (int t = 0; t < opt.argumentsPerOption; ++t)
+									// Try getting the first option argument from the remaining characters
+									// of this program argument. Use-case: immediately adjacent option
+									// values without separating space, as in `-x1` instead of `-x 1`.
+									if (!_assignOptionValue(me, option_index, suffix(inParam, e + 1), 0, estream)) return false;
+									firstArgIndex = 1;
+									s = len - 1;
+								}
+
+								if (i + opt.argumentsPerOption - firstArgIndex < argc)
+								{
+									for (int t = firstArgIndex; t < opt.argumentsPerOption; ++t)
 										if (!_assignOptionValue(me, option_index, argv[++i], t, estream)) return false;
 								}
 								else // no value available
