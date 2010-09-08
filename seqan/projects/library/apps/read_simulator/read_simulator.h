@@ -357,7 +357,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     // Generate output file name if necessary.
     if (options.outputFile == "") {
         options.outputFile = referenceFilename;
-        append(options.outputFile, ".fastq");
+        if (options.simulateQualities)
+            append(options.outputFile, ".fastq");
+        else
+            append(options.outputFile, ".fasta");
     }
     if (options.samFile == "") {
         options.samFile = options.outputFile;
@@ -404,7 +407,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
-            write(fstrm, readNames, reads, Fastq());
+            if (options.simulateQualities)
+                write(fstrm, readNames, reads, Fastq());
+            else
+                write(fstrm, readNames, reads, Fasta());
         }
         // Build filename with '.2.' infix.
         infix(mateFilename, dotPos + 1, dotPos + 2) = "2";
@@ -423,7 +429,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
                 std::cerr << "Could not open out file \"" << mateFilename << "\"" << std::endl;
                 return 1;
             }
-            write(fstrm, readNames, reads, Fastq());
+            if (options.simulateQualities)
+                write(fstrm, readNames, reads, Fastq());
+            else
+                write(fstrm, readNames, reads, Fasta());
         }
     } else {
         std::cerr << "Writing resulting reads to \"" << options.outputFile << "\"" << std::endl;
@@ -432,7 +441,10 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
             std::cerr << "Could not open out file \"" << options.outputFile << "\"" << std::endl;
             return 1;
         }
-        write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+        if (options.simulateQualities)
+            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fastq());
+        else
+            write(fstrm, fragmentStore.readNameStore, fragmentStore.readSeqStore, Fasta());
     }
     std::cerr << "Writing SAM file \"" << options.samFile << "\"" << std::endl;
     {

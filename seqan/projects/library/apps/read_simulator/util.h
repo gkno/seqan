@@ -25,4 +25,19 @@ void write(TStream & stream,
     }
 }
 
+template <typename TStream, typename TIdString, typename TIdStringSpec, typename TSeqString, typename TSeqStringSpec>
+void write(TStream & stream,
+           StringSet<TIdString, TIdStringSpec> & seqIds,
+           StringSet<TSeqString, TSeqStringSpec> & sequences,
+           Fasta const &) {
+    typedef StringSet<TSeqString, TSeqStringSpec> TStringSet;
+    typedef typename Position<TStringSet>::Type TPosition;
+
+    CharString qualBuffer;
+    for (TPosition i = 0; i < length(sequences); ++i) {
+        stream << ">" << seqIds[i] << std::endl;
+        stream << sequences[i] << std::endl;
+    }
+}
+
 #endif  // UTIL_H_
