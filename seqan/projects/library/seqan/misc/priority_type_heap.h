@@ -255,7 +255,7 @@ SEQAN_CHECKPOINT
 	TSize heapsize = length(me.heap) - 1 ;
 	resize(me.heap, heapsize, Generous());
 	if ( heapsize > 0 ) 
-		_adjustHeapTowardLeaves(me, element, 0, 1 );
+		_adjustHeapTowardLeaves(me, element, 0, 2 );
 
 }
 
