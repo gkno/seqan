@@ -727,8 +727,10 @@ int mapMatePairReads(
 		for(unsigned i = 0; i < pairCount; ++i)
 		{
 #ifdef RAZERS_NOOUTERREADGAPS
-			setHost(forwardPatternsL[i], prefix(readSetL[i], length(readSetL[i]) - 1));
-			setHost(forwardPatternsR[i], prefix(readSetR[i], length(readSetR[i]) - 1));
+			if (!empty(readSetL[i]) && !empty(readSetR[i])) {
+				setHost(forwardPatternsL[i], prefix(readSetL[i], length(readSetL[i]) - 1));
+				setHost(forwardPatternsR[i], prefix(readSetR[i], length(readSetR[i]) - 1));
+			}
 #else
 			setHost(forwardPatternsL[i], readSetL[i]);
 			setHost(forwardPatternsR[i], readSetR[i]);
