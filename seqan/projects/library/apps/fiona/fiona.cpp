@@ -1,3 +1,5 @@
+#define SEQAN_DEBUG
+
 #include <iostream>
 #include <fstream>
 #include <seqan/index.h>
@@ -7,6 +9,9 @@
 #include <string.h>
 #include <sstream>
 
+// TODO(holtgrew): This raises a warning with Boost 1.42. Deactivate warnings, activate again afterwards. The correct #pragma has to be used for each supported compiler.
+//#include <boost/math/distributions/normal.hpp>
+
 //#define MEDIAN
 
 using namespace std;
@@ -15,22 +20,22 @@ using namespace seqan;
 /*TODO cumulative poisson distribution determinated just once for a level, not at each node like now*/
 
 /*matching string*/
-bool strContains(const string inputStr, const string searchStr)
+inline bool strContains(string const & inputStr, string const & searchStr)
 {
-        size_t contains;
- 
-        contains = inputStr.find(searchStr);
- 
-        if(contains != string::npos)
-                return true;
-        else
-                return false;
+	return inputStr.find(searchStr) != string::npos;
 }
 
 /*save in table, information about the erroneous reads and the respective correct one */
-Pair<int,Pair<vector<int>, Dna> > dataErroneousNodes(int idCorr, int positionError, int lenParent, int best, 
-						    int smallMismatch, int occurBest, Dna nucleotide){
-													 
+Pair<int,Pair<vector<int>, Dna> > 
+dataErroneousNodes(
+	int idCorr, 
+	int positionError, 
+	int lenParent, 
+	int best, 
+    int smallMismatch, 
+	int occurBest, 
+	Dna nucleotide)
+{													 
 	Pair<int,Pair<vector<int>, Dna> > pairCorrect;	
 
 	/*data for the erroneous node and correct one*/
@@ -52,59 +57,59 @@ Pair<int,Pair<vector<int>, Dna> > dataErroneousNodes(int idCorr, int positionErr
 }
 
 
-/*Expected value - general, use if all reads have the same length*/
-vector <double> expectedValueEqualReadsLength(StringSet<String<Dna>,Owner < > > readsTable, double genomeLength)
+// Expected value - general, use if all reads have the same length
+template <typename TExpectedValues, typename TReadSet, typename TGenomeSize>
+void expectedValueEqualReadsLength(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize genomeLength)
 {
-		double read_length = length(readsTable[0]);
+	//
+	//	E(m) = (read_length - suffix_length + 1) * numberReads / genomeLength
+	//
 
-		/*without reverse complement*/
-		double numberReads = length(readsTable)/2;
-		/* 
-			E(m)= (read_length - suffix_length + 1)*numberReads/genomeLength 
-		*/
-		vector <double> expected;
+	// without reverse complement
+	unsigned numberReads = length(readSet) / 2;
+	unsigned readLength = length(readSet[0]);
 
-		for (double suffix_length=0; suffix_length < read_length+1; suffix_length++){
-			expected.push_back(((read_length - suffix_length + 1)*numberReads)/genomeLength );		
-		}
-		return expected;
+	clear(expected);
+	for (unsigned suffixLength = 0; suffixLength <= readLength; ++suffixLength)
+		append(expected, (readLength - suffixLength + 1) * numberReads / (double)genomeLength);
 }
 
-/*Expected value for set of reads with different length*/
-vector <double> expectedValueTheorical(StringSet<String<Dna>,Owner < > > readsTable, double genomeLength){
-
-		/* 
-			E(m)= (read_length - suffix_length + 1)*numberReads/genomeLength 
-		*/
-		map <int,double> expected;
-		vector<double> d;
-		map<int,int> vectorLength;
-
-		/*without reverse complement*/
-		for(int i=0;i < length(readsTable);i=i+2){
-			vectorLength[length(readsTable[i])]+=1;
-		}
+// Expected value for set of reads with different length
+template <typename TExpectedValues, typename TReadSet, typename TGenomeSize>
+void expectedValueTheorical(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize genomeLength)
+{
+	//
+	//	E(m) = (read_length - suffix_length + 1) * numberReads / genomeLength
+	//
 	
-		/* a = read_length - suffix_length + 1 */
-		double a = 0.0;
-		map<int,int>::iterator iterMap;
-		for (iterMap = vectorLength.begin (); iterMap != vectorLength.end (); ++iterMap){
-			for(int suffix_length=0; suffix_length < iterMap->first; suffix_length++){
-				a = iterMap->first - suffix_length +1;
-				double ration = (a*iterMap->second)/genomeLength;
-				expected[suffix_length]+=ration;		
-			}	
+	// calculate a read length histogram
+	// excluding reverse complements
+	String<unsigned> readLengthHistogram;
+	for (unsigned i = 0; i < length(readSet); i += 2)
+	{
+		unsigned readLength = length(readSet[i]);
+		if (readLength >= length(readLengthHistogram))
+			fill(readLengthHistogram, readLength + 1, 0);
+		++readLengthHistogram[readLength];
+	}
+
+	// a = read_length - suffix_length + 1
+	clear(expected);
+	fill(expected, length(readLengthHistogram), 0.0);
+	for (unsigned i = 0; i < length(readLengthHistogram); ++i)
+	{
+		for (unsigned suffixLength = 0; suffixLength <= i; ++suffixLength)
+		{
+			double a = i - suffixLength + 1;
+			double ratio = a * readLengthHistogram[i] / (double)genomeLength;
+			expected[suffixLength] += ratio;
 		}
-		map<int,double>::iterator iMap;
-		for (iMap = expected.begin (); iMap != expected.end (); ++iMap){
-			d.push_back(iMap->second);
-		}	
-		return d;
+	}
 }
 
 /* Standard Deviation */
 vector <double> standardDeviation(StringSet<String<Dna>,Owner < > > readsTable, double genomeLength)
-	{
+{
 		double read_length = length(readsTable[0]);
 
 		/*without reverse complement*/
@@ -127,31 +132,26 @@ vector <double> standardDeviation(StringSet<String<Dna>,Owner < > > readsTable, 
 		return standardDev;
 }
 
-/*factoriel*/
-double factoriel(double n)
+// factorial
+template <typename TValue>
+inline double factorial(TValue n)
 {
-	double factoriel, i;
-	factoriel=1;
-	i=1;
-	while (i<=n)
-	{
-		factoriel=factoriel*i;
-		i=i+1;
-	}
-	return factoriel;
+	double fact = 1.0;
+	for (TValue i = 2; i <= n; ++i)
+		fact *= i;
+	return fact;
 }
 
-/*cumulative poisson distribution*/
-double pValue(const unsigned int k, const double mean){
-	//return gsl_cdf_poisson_P(k,mean);
+// cumulative poisson distribution
+template <typename TValue, typename TMean>
+inline double pValue(TValue k, TMean mean)
+{
+	// return gsl_cdf_poisson_P(k,mean);
+	double negExp = exp(-mean);
 	double pValue = 0.0;
-	for(double i=0.0; i <=k; i++){
-		double a = exp(-mean);
-		double b = pow(mean,i);
-		double c = a*b;
-		double f = factoriel(i); 
-		pValue+= c/f;	
-	}
+
+	for (TValue i = 0; i <= k; ++i)
+		pValue += pow(mean, (double)i) * negExp / factorial(i);
 	return pValue;
 }
 
@@ -189,16 +189,20 @@ double medianLevel(Iter< TIndex, VSTree<TSpec> > iter){
 	return median;	
 }
 
-double probabilityOneError(double percentageErr, int lenPath){
-	double percent = 1 - percentageErr;
-	return (1-pow(percent,lenPath));
+template <typename TPercentage, typename TSize>
+inline double probabilityOneError(TPercentage percentageErr, TSize lenPath)
+{
+	return 1.0 - pow(1.0 - percentageErr,lenPath);
 
 }
 
 /*change the erroneous nucleotide in all reads identify with errors*/
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > correctErroneousRead(map<int,Pair<int,Pair<vector<int>, Dna> > > allErrors, 
-	StringSet<String<char> > fastaComment, StringSet<String<Dna>,Owner < > > setReads){
-	
+Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > 
+correctErroneousRead(
+	map<int,Pair<int,Pair<vector<int>, Dna> > > allErrors,
+	StringSet<String<char> > fastaComment,
+	StringSet<String<Dna>,Owner < > > setReads)
+{	
 	map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator iR;
 	int comment = 0;
 	for (iR = allErrors.begin (); iR != allErrors.end (); ++iR)
@@ -321,7 +325,8 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 	cout << "Searching... " << endl;
 	
 	/*table with the theoricals values*/
-	vector <double> expectedTheorical = expectedValueTheorical(setReads, genomeLength);
+	String<double> expectedTheorical;
+	expectedValueTheorical(expectedTheorical, setReads, genomeLength);
 	
 	/*save reads with errors*/
 	vector<String<Dna> > readsErrors;
@@ -358,14 +363,18 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 
 	/*the bigining of the tree*/
 	goBegin(iter);
-
+	
+	for(int i=0;i<length(expectedTheorical);++i)
+		std::cout<<expectedTheorical[i]<<"\t";
+	std::cout<<"\n";
+	
 	while (!atEnd(iter)){
 
 		/*affectation*/
 		lenParent = parentRepLength(iter);
 		lenPath = repLength(iter);
 	
-	  SEQAN_ASSERT_LT(lenParent + 1, expectedTheorical.size());
+	  SEQAN_ASSERT_LT(lenParent + 1, length(expectedTheorical));
 		double pValue_Poisson =  pValue(countOccurrences(iter), expectedTheorical[lenParent+1]);
 		
 		/*compare the cumulative poisson distribution with the p-value(strictness)*/
@@ -377,7 +386,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 			vector<Pair<int,int> > idReadsError;
 
 			/*take all reads containing errors at that position in the tree*/
-			for(int i=0; i < length(getOccurrences(iter));i++){
+			for(int i=0; i < length(getOccurrences(iter)); ++i){
 				idReadsError.push_back(getOccurrences(iter)[i]);
 			}
 			/*if there is a nodes detect as erroneus*/
@@ -404,7 +413,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 					if(representative(iterParent) != nodeError && strictness <= pValue_Poisson_Sibling){
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent));i++){
+							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
 								Pair<Pair<int,int>,int> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
@@ -421,7 +430,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 						if(representative(iterParent) != nodeError && strictness <= pValue_Poisson_Sibling ){
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent));i++){
+							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
 								Pair<Pair<int,int>,int> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
@@ -678,11 +687,12 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 	cout << "Searching... " << endl;
 	
 	/*table with the theoricals values*/
-	vector <double> expectedTheorical = expectedValueTheorical(setReads, genomeLength);
+	String<double> expectedTheorical;
+	expectedValueTheorical(expectedTheorical, setReads, genomeLength);
 	vector <double> sd = standardDeviation(setReads, genomeLength);
 
 	/*The strictness value allows to estimate the confidential intervall*/
-	for (int i=0; i < expectedTheorical.size();i++){
+	for (int i=0; i < length(expectedTheorical); ++i){
 		double expectedTemporary = expectedTheorical[i] - strictness*sd[i];
 		
 		/*If the connfidential intervall take value less than 1 ??? not sure for that*/
@@ -747,7 +757,7 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 			vector<Pair<int,int> > idReadsError;
 
 			/*take all reads containing errors at that position in the tree*/
-			for(int i=0; i < length(getOccurrences(iter));i++){
+			for(int i=0; i < length(getOccurrences(iter)); ++i){
 				idReadsError.push_back(getOccurrences(iter)[i]);
 			}
 			/*if there is a nodes detect as erroneus*/
@@ -771,7 +781,7 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 					if(representative(iterParent) != nodeError && occur >= expectedTheorical[lenSiblings]){
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent));i++){
+							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
 								Pair<Pair<int,int>,int> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
@@ -786,7 +796,7 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 						if(representative(iterParent) != nodeError && occur >= expectedTheorical[lenSiblings]){
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent));i++){
+							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
 								Pair<Pair<int,int>,int> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
@@ -1259,7 +1269,7 @@ int main(int argc, char* argv[]) {
 	/*default value*/
 	int nbcycle = 3;
 	bool expected = false;
-	for(int i = 1; i < length(argv); i++){
+	for(int i = 1; i < length(argv); ++i){
 		String<char> option = argv[i];
 		
 		if(strcmp(toCString(option[0]), "-")==0){
@@ -1368,7 +1378,7 @@ int main(int argc, char* argv[]) {
 			StringSet<String<Dna> > newSetReads;
 			resize(newSetReads,length(setReads));
 			
-			for(int i=0; i < length(setReads); i++){
+			for(int i=0; i < length(setReads); ++i){
 				newSetReads[i] = setReads[i];
 				Dna5StringReverseComplement revCompl(setReads[i]);
 				newSetReads[i+1] = revCompl;
@@ -1389,7 +1399,7 @@ int main(int argc, char* argv[]) {
 	ofstream out(toCString(fileOutPutReadsErrorsCorrected));
 	int comment = 0;
 	int nbCorrected = 0;
-	for(int i=0; i < length(setReads); i++){
+	for(int i=0; i < length(setReads); ++i){
 		/*to give the number of reads corrected for several iteration*/ 
 		if(strContains(toCString(fastaComment[comment]), "corrected")){
 			nbCorrected+=1;
