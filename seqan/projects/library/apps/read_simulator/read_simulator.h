@@ -52,6 +52,8 @@ struct Options<Global>
     bool useRandomSequence;
     // Length of random sequence to be simulated.
     unsigned randomSourceLength;
+    // If true then no Ns are generated for the seource sequence.
+    bool sourceNoN;
     // true iff only the forward strand is to be simulated.
     bool onlyForward;
     // true iff only the reverse strand is to be simulated.
@@ -98,6 +100,8 @@ struct Options<Global>
     unsigned haplotypeIndelRangeMin;
     // Largest number of indels.
     unsigned haplotypeIndelRangeMax;
+    // If true then no Ns are substituted or inserted into the haplotype.
+    bool haplotypeNoN;
 
     Options()
             : showHelp(false),
@@ -107,6 +111,7 @@ struct Options<Global>
               numReads(1000),
               useRandomSequence(false),
               randomSourceLength(1000*1000),
+              sourceNoN(false),
               onlyForward(false),
               onlyReverse(false),
               outputFile(""),
@@ -121,7 +126,8 @@ struct Options<Global>
               haplotypeSnpRate(0.001),
               haplotypeIndelRate(0.001),
               haplotypeIndelRangeMin(1),
-              haplotypeIndelRangeMax(6)
+              haplotypeIndelRangeMax(6),
+              haplotypeNoN(false)
     {}
 };
 
@@ -172,6 +178,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  numReads:               " << options.numReads << std::endl
            << "  useRandomSequence:      " << (options.useRandomSequence ? "true" : "false") << std::endl
            << "  randomSourceLength:     " << options.randomSourceLength << std::endl
+           << "  sourceNoN :             " << options.sourceNoN << std::endl
            << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
            << "  outputFile:             \"" << options.outputFile << "\"" << std::endl
@@ -186,6 +193,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  haplotypeIndelRate:     " << options.haplotypeIndelRate << std::endl
            << "  haplotypeIndelRangeMin: " << options.haplotypeIndelRangeMin << std::endl
            << "  haplotypeIndelRangeMax: " << options.haplotypeIndelRangeMax << std::endl
+           << "  haplotypeNoN:           " << options.haplotypeNoN << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -220,6 +228,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("s",  "seed", "The seed for RNG.  Default: 0.", OptionType::Integer | OptionType::Label));
     addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
+    addOption(parser, CommandLineOption("snN", "source-no-N", "If set then no Ns are generated in the random source sequence.", OptionType::Bool));
     addOption(parser, CommandLineOption("f",  "forward-only", "Simulate from forward strand only.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("r",  "reverse-only", "Simulate from reverse strand only.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("o",  "output-file", "Write results to PARAM.fasta file instead of SEQUENCE.reads.fasta.  Default: \"\".", OptionType::String));
@@ -241,6 +250,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("hi", "haplotype-indel-rate", "Haplotype indel rate.  Default: 0.001.", OptionType::Double));
     addOption(parser, CommandLineOption("hm", "haplotype-indel-range-min", "Haplotype indel size min.  Default: 1.", OptionType::Integer));
     addOption(parser, CommandLineOption("hM", "haplotype-indel-range-max", "Haplotype indel size max.  Default: 6.", OptionType::Integer));
+    addOption(parser, CommandLineOption("hnN", "haplotype-no-N", "Do not allow Ns to be substituted or inserted into N.  Default: Is allowed.", OptionType::Bool));
 
     // Need reads type and {SEQUENCE.fasta, random}.
     requiredArguments(parser, 2);
@@ -268,6 +278,8 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "num-reads", options.numReads);
     if (isSetLong(parser, "source-length"))
         getOptionValueLong(parser, "source-length", options.randomSourceLength);
+    if (isSetLong(parser, "source-no-N"))
+        options.sourceNoN = true;
     if (isSetLong(parser, "forward-only"))
         options.onlyForward = true;
     if (isSetLong(parser, "reverse-only"))
@@ -302,7 +314,8 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "haplotype-indel-range-min", options.haplotypeIndelRangeMin);
     if (isSetLong(parser, "haplotype-indel-range-max"))
         getOptionValueLong(parser, "haplotype-indel-range-max", options.haplotypeIndelRangeMax);
-
+    if (isSetLong(parser, "haplotype-no-N"))
+        options.haplotypeNoN = true;
 
     // First argument is "illumina", second one name of reference file.
     referenceFilename = getArgumentValue(parser, 1);
@@ -318,6 +331,8 @@ template <typename TRNG>
 int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) {
     DnaString randomSequence;
     reserve(randomSequence, length);
+
+    // TODO(holtgrew): When generating Dna5 sequences, interpret options.sourceNoN.
 
     for (size_t i = 0; i < length; ++i) {
         Dna c = static_cast<Dna>(pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, ValueSize<Dna>::VALUE - 1)));
@@ -559,14 +574,19 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
         String<Dna5> const & contig = fragmentStore.contigStore[i].seq;
         String<Dna5, Journaled<Alloc<> > > & haplotypeContig = haplotype[i];
 
+        // Only generate Ns in the haplotype if allowed.
+        int maxOrdValue = options.haplotypeNoN ? 3 : 4;
+
         // j is position in original sequence, k is position in haplotype
         for (size_t j = 0, k = 0; j < length(contig);) {
             double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
             if (x < options.haplotypeSnpRate) {
                 // SNP
-                Dna5 c = Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, 4)));
+                Dna5 c = Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, maxOrdValue - 1)));
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
+                if (options.haplotypeNoN)
+                    SEQAN_ASSERT_TRUE(c != Dna5('N'));
                 assignValue(haplotypeContig, k, c);
                 j += 1;
                 k += 1;
@@ -578,7 +598,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     // Insertion.
                     clear(buffer);
                     for (unsigned ii = 0; ii < indelLen; ++ii)
-                        appendValue(buffer, Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, 4))));
+                        appendValue(buffer, Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, maxOrdValue))));
                     insert(haplotypeContig, k, buffer);
                     k += indelLen;
                 } else {
@@ -794,6 +814,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
                 String<Dna5Q> haplotypeInfix = read;  // Copy for printing later on.
                 applySimulationInstructions(read, rng, inst, options);
+                std::cout << length(fragmentStore.readSeqStore) << " read == " << read << ", haplotypeInfix == " << haplotypeInfix << std::endl;
                 // Append read sequence to read seq store and mate pair to read
                 // name store.  This also yields the read id.  We will generate
                 // and append the read name below, depending on the read id.

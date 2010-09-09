@@ -38,6 +38,9 @@ struct Options<IlluminaReads> : public Options<Global>
     // Relative position in the read between 0 and 1 where the steeper curve begins.
     double positionRaise;
 
+    // If set then no Ns will be introduced into the read.
+    bool illuminaNoN;
+
     // Base Calling Quality Model Parameters.
 
     // Mean quality for non-mismatches at the first base.
@@ -67,6 +70,7 @@ struct Options<IlluminaReads> : public Options<Global>
               probabilityMismatchBegin(0.002),
               probabilityMismatchEnd(0.012),
               positionRaise(0.66),
+              illuminaNoN(false),
               // Base Calling Quality Model Parameters
               meanQualityBegin(40),
               meanQualityEnd(39.5),
@@ -119,6 +123,7 @@ TStream & operator<<(TStream & stream, Options<IlluminaReads> const & options) {
            << "  probabilityMismatchBegin:   " << options.probabilityMismatchBegin << std::endl
            << "  probabilityMismatchEnd:     " << options.probabilityMismatchEnd << std::endl
            << "  positionRaise:              " << options.positionRaise << std::endl
+           << "  illuminaNoN:                " << options.illuminaNoN << std::endl
            << "  meanQualityBegin:           " << options.meanQualityBegin << std::endl
            << "  meanQualityEnd:             " << options.meanQualityEnd << std::endl
            << "  stdDevQualityBegin:         " << options.stdDevQualityBegin << std::endl
@@ -152,6 +157,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.  Default: 0.003.", OptionType::Double));
     addOption(parser, CommandLineOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.  Default: 0.012.", OptionType::Double));
     addOption(parser, CommandLineOption("pr", "position-raise", "Relative position of raise point.  Default: 0.66.", OptionType::Double));
+    addOption(parser, CommandLineOption("nN", "no-N", "If set then no Ns will be introduced in the reads.  Default: Ns can be introduced.", OptionType::Bool));
 
     addOption(parser, CommandLineOption("qmb", "quality-mean-begin", "Quality mean at first base.  Default: 40.", OptionType::Double));
     addOption(parser, CommandLineOption("qme", "quality-mean-end", "Quality mean at last base.  Default: 39.5.", OptionType::Double));
@@ -182,6 +188,8 @@ int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
         getOptionValueLong(parser, "prob-mismatch-end", options.probabilityMismatchEnd);
     if (isSetLong(parser, "position-raise"))
         getOptionValueLong(parser, "positio-raise", options.positionRaise);
+    if (isSetLong(parser, "no-N"))
+        options.illuminaNoN = true;
 
     if (isSetLong(parser, "quality-mean-begin"))
         getOptionValueLong(parser, "quality-mean-begin", options.meanQualityBegin);
@@ -399,11 +407,17 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
+                if (options.illuminaNoN) {
+                    c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 3)));  // -3, N not allowed
+                } else {
+                    c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
+                }
                 xold = ordValue(c);
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
+                if (options.illuminaNoN)
+                    SEQAN_ASSERT_TRUE(c != TAlphabet('N'));
                 x = ordValue(c);
                 appendValue(tmp, c);
                 assignQualityValue(back(tmp), inst.qualities[i]);
