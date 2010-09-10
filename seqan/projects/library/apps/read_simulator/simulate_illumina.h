@@ -445,7 +445,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
         SEQAN_ASSERT_LEQ(j, i);
 
         TAlphabet c;
-        int x, xold;
+        //int x, xold;
         switch (inst.editString[i]) {
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
@@ -460,15 +460,18 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 } else {
                     c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
                 }
-                xold = ordValue(c);
+                //xold = ordValue(c);
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
                 if (options.illuminaNoN)
                     SEQAN_ASSERT_TRUE(c != TAlphabet('N'));
-                x = ordValue(c);
+                //x = ordValue(c);
                 appendValue(tmp, c);
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.illuminaNoN)  // Ns can be introduced through quality, too.
+                  assignQualityValue(back(tmp), min(1, inst.qualities[i]));
+                else
+                  assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
                 j += 1;
