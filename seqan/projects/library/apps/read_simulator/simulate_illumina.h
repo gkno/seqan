@@ -452,6 +452,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 appendValue(tmp, read[j]);
                 assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
+                // std::cout << back(tmp) << " " << read[j] << std::endl;
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
@@ -474,8 +475,8 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                   assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
+                // std::cout << back(tmp) << std::endl;
                 j += 1;
-                break;
             case ERROR_TYPE_INSERT:
                 appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
                 assignQualityValue(back(tmp), inst.qualities[i]);
@@ -491,6 +492,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
     SEQAN_ASSERT_EQ(j, length(read));
     SEQAN_ASSERT_GEQ(length(tmp), options.readLength);
 
+    //std::cout << "tmp == " << tmp << std::endl;
     resize(tmp, options.readLength, Exact());
     move(read, tmp);
 }
