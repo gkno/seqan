@@ -814,7 +814,6 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 String<Dna5Q> read = infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos);
                 String<Dna5Q> haplotypeInfix = read;  // Copy for printing later on.
                 applySimulationInstructions(read, rng, inst, options);
-                std::cout << length(fragmentStore.readSeqStore) << " read == " << read << ", haplotypeInfix == " << haplotypeInfix << std::endl;
                 // Append read sequence to read seq store and mate pair to read
                 // name store.  This also yields the read id.  We will generate
                 // and append the read name below, depending on the read id.

@@ -34,6 +34,8 @@ struct Options<IlluminaReads> : public Options<Global>
     bool probabilityMismatchFromFile;
     // Name of the file to load the probabilities from.
     CharString probabilityMismatchFile;
+    // Scale factor to apply to mismatch probabilities,
+    double probabilityMismatchScale;
 
     // Probability of a mismatch (single-base polymorphism).
     double probabilityMismatch;
@@ -73,6 +75,7 @@ struct Options<IlluminaReads> : public Options<Global>
               probabilityInsert(0.001),
               probabilityDelete(0.001),
               probabilityMismatchFromFile(false),
+              probabilityMismatchScale(1.0),
               probabilityMismatch(0.004),
               probabilityMismatchBegin(0.002),
               probabilityMismatchEnd(0.012),
@@ -127,6 +130,7 @@ TStream & operator<<(TStream & stream, Options<IlluminaReads> const & options) {
            << "  probabilityInsert:           " << options.probabilityInsert << std::endl
            << "  probabilityDelete:           " << options.probabilityDelete << std::endl
            << "  probabilityMismatchFromFile: " << options.probabilityMismatchFromFile << std::endl
+           << "  probabilityMismatchScale:    " << options.probabilityMismatchScale << std::endl
            << "  probabilityMismatchFile:     " << options.probabilityMismatchFile << std::endl
            << "  probabilityMismatch:         " << options.probabilityMismatch << std::endl
            << "  probabilityMismatchBegin:    " << options.probabilityMismatchBegin << std::endl
@@ -163,6 +167,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.001.", OptionType::Double));
     addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.001.", OptionType::Double));
     addOption(parser, CommandLineOption("pmmf", "prob-mismatch-file", "Mismatch probability path.  If set, probability distribution is loaded from argument.  Default: not set.", OptionType::String));
+    addOption(parser, CommandLineOption("pmms", "prob-mismatch-scale", "Scale to apply for probability mismatch.  Default: 1.0", OptionType::Double));
     addOption(parser, CommandLineOption("pmm", "prob-mismatch", "Average mismatch probability.  Default: 0.004.", OptionType::Double));
     addOption(parser, CommandLineOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.  Default: 0.003.", OptionType::Double));
     addOption(parser, CommandLineOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.  Default: 0.012.", OptionType::Double));
@@ -194,6 +199,8 @@ int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
         options.probabilityMismatchFromFile = true;
         getOptionValueLong(parser, "prob-mismatch-file", options.probabilityMismatchFile);
     }
+    if (isSetLong(parser, "prob-mismatch-scale"))
+        getOptionValueLong(parser, "prob-mismatch-scale", options.probabilityMismatchScale);
     if (isSetLong(parser, "prob-mismatch"))
         getOptionValueLong(parser, "prob-mismatch", options.probabilityMismatch);
     if (isSetLong(parser, "prob-mismatch-begin"))
@@ -280,6 +287,10 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
                 // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
             }
         }
+    }
+    if (options.probabilityMismatchScale != 1.0) {
+        for (unsigned i = 0; i < options.readLength; ++i)
+          parameters.mismatchProbabilities[i] *= options.probabilityMismatchScale;
     }
 
     // Compute match/mismatch means and standard deviations.
