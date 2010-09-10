@@ -384,7 +384,7 @@ int main(int argc, const char *argv[])
 			// parse file name
 			if (fnameCount == 1) {
 				printHelp(argc, argv);
-				return 0;
+				return 1;
 			}
 			fname[fnameCount++] = argv[arg];
 		}
