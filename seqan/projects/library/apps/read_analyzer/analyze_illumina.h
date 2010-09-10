@@ -521,7 +521,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
             if (isGap(readGapsIt) && isGap(contigGapsIt))
                 continue;  // Skip paddings.
             SEQAN_ASSERT_LT(readPos, readLength);
-            unsigned reportedPos = /*flipped ? readLength - readPos - 1 :*/ readPos;
+            unsigned reportedPos = flipped ? (readLength - readPos - 1) : readPos;
             if (isGap(readGapsIt)) {
                 // Deletion
                 bool hasBefore = false;
