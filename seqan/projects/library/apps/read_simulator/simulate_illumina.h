@@ -469,7 +469,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 //x = ordValue(c);
                 appendValue(tmp, c);
                 if (options.illuminaNoN)  // Ns can be introduced through quality, too.
-                  assignQualityValue(back(tmp), min(1, inst.qualities[i]));
+                  assignQualityValue(back(tmp), _min(1, inst.qualities[i]));
                 else
                   assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
