@@ -68,8 +68,8 @@ int main(int argc, char **argv) {
 
     // The factor 10 is arbitrarily chosen to make sure the generation
     // is sufficiently fast.
-    if (matePairCount < 10 * n) {
-        std::cerr << "Number of reads/mate pairs in file/s should be >= 10*n" << std::endl;
+    if (matePairCount < 2 * n) {
+        std::cerr << "Number of reads/mate pairs in file/s should be >= 2*n" << std::endl;
         return 1;
     }
 
