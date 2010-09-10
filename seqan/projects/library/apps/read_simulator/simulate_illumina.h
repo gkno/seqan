@@ -29,6 +29,12 @@ struct Options<IlluminaReads> : public Options<Global>
     // Probability of a deletion.
     double probabilityDelete;
 
+    // Set to true if the probability distribution is to be loaded
+    // from probabilityMismatchFile.
+    bool probabilityMismatchFromFile;
+    // Name of the file to load the probabilities from.
+    CharString probabilityMismatchFile;
+
     // Probability of a mismatch (single-base polymorphism).
     double probabilityMismatch;
     // Probability for a mismatch in the first base.
@@ -66,6 +72,7 @@ struct Options<IlluminaReads> : public Options<Global>
               // Base Calling Error Model Parameters
               probabilityInsert(0.001),
               probabilityDelete(0.001),
+              probabilityMismatchFromFile(false),
               probabilityMismatch(0.004),
               probabilityMismatchBegin(0.002),
               probabilityMismatchEnd(0.012),
@@ -116,22 +123,24 @@ template <typename TStream>
 TStream & operator<<(TStream & stream, Options<IlluminaReads> const & options) {
     stream << static_cast<Options<Global> >(options);
     stream << "illumina-options {" << std::endl
-           << "  readLength:                 " << options.readLength << std::endl
-           << "  probabilityInsert:          " << options.probabilityInsert << std::endl
-           << "  probabilityDelete:          " << options.probabilityDelete << std::endl
-           << "  probabilityMismatch:        " << options.probabilityMismatch << std::endl
-           << "  probabilityMismatchBegin:   " << options.probabilityMismatchBegin << std::endl
-           << "  probabilityMismatchEnd:     " << options.probabilityMismatchEnd << std::endl
-           << "  positionRaise:              " << options.positionRaise << std::endl
-           << "  illuminaNoN:                " << options.illuminaNoN << std::endl
-           << "  meanQualityBegin:           " << options.meanQualityBegin << std::endl
-           << "  meanQualityEnd:             " << options.meanQualityEnd << std::endl
-           << "  stdDevQualityBegin:         " << options.stdDevQualityBegin << std::endl
-           << "  stdDevQualityEnd:           " << options.stdDevQualityEnd << std::endl
-           << "  meanMismatchQualityBegin:   " << options.meanMismatchQualityBegin << std::endl
-           << "  meanMismatchQualityEnd:     " << options.meanMismatchQualityEnd << std::endl
-           << "  stdDevMismatchQualityBegin: " << options.stdDevMismatchQualityBegin << std::endl
-           << "  stdDevMismatchQualityEnd:   " << options.stdDevMismatchQualityEnd << std::endl
+           << "  readLength:                  " << options.readLength << std::endl
+           << "  probabilityInsert:           " << options.probabilityInsert << std::endl
+           << "  probabilityDelete:           " << options.probabilityDelete << std::endl
+           << "  probabilityMismatchFromFile: " << options.probabilityMismatchFromFile << std::endl
+           << "  probabilityMismatchFile:     " << options.probabilityMismatchFile << std::endl
+           << "  probabilityMismatch:         " << options.probabilityMismatch << std::endl
+           << "  probabilityMismatchBegin:    " << options.probabilityMismatchBegin << std::endl
+           << "  probabilityMismatchEnd:      " << options.probabilityMismatchEnd << std::endl
+           << "  positionRaise:               " << options.positionRaise << std::endl
+           << "  illuminaNoN:                 " << options.illuminaNoN << std::endl
+           << "  meanQualityBegin:            " << options.meanQualityBegin << std::endl
+           << "  meanQualityEnd:              " << options.meanQualityEnd << std::endl
+           << "  stdDevQualityBegin:          " << options.stdDevQualityBegin << std::endl
+           << "  stdDevQualityEnd:            " << options.stdDevQualityEnd << std::endl
+           << "  meanMismatchQualityBegin:    " << options.meanMismatchQualityBegin << std::endl
+           << "  meanMismatchQualityEnd:      " << options.meanMismatchQualityEnd << std::endl
+           << "  stdDevMismatchQualityBegin:  " << options.stdDevMismatchQualityBegin << std::endl
+           << "  stdDevMismatchQualityEnd:    " << options.stdDevMismatchQualityEnd << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -153,6 +162,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
 
     addOption(parser, CommandLineOption("pi", "prob-insert", "Probability of an insertion.  Default: 0.001.", OptionType::Double));
     addOption(parser, CommandLineOption("pd", "prob-delete", "Probability of a deletion.  Default: 0.001.", OptionType::Double));
+    addOption(parser, CommandLineOption("pmmf", "prob-mismatch-file", "Mismatch probability path.  If set, probability distribution is loaded from argument.  Default: not set.", OptionType::String));
     addOption(parser, CommandLineOption("pmm", "prob-mismatch", "Average mismatch probability.  Default: 0.004.", OptionType::Double));
     addOption(parser, CommandLineOption("pmmb", "prob-mismatch-begin", "Probability of a mismatch at the first base.  Default: 0.003.", OptionType::Double));
     addOption(parser, CommandLineOption("pmme", "prob-mismatch-end", "Probability of a mismatch at the last base.  Default: 0.012.", OptionType::Double));
@@ -180,6 +190,10 @@ int parseCommandLineAndCheckModelSpecific(Options<IlluminaReads> & options,
         getOptionValueLong(parser, "prob-insert", options.probabilityInsert);
     if (isSetLong(parser, "prob-delete"))
         getOptionValueLong(parser, "prob-delete", options.probabilityDelete);
+    if (isSetLong(parser, "prob-mismatch-file")) {
+        options.probabilityMismatchFromFile = true;
+        getOptionValueLong(parser, "prob-mismatch-file", options.probabilityMismatchFile);
+    }
     if (isSetLong(parser, "prob-mismatch"))
         getOptionValueLong(parser, "prob-mismatch", options.probabilityMismatch);
     if (isSetLong(parser, "prob-mismatch-begin"))
@@ -228,20 +242,43 @@ int simulateReadsSetupModelSpecificData(ModelParameters<IlluminaReads> & paramet
                   << "  (0, " << options.probabilityMismatchBegin << ") -- (" << options.positionRaise << ", " << y_r << ") -- (1, " << options.probabilityMismatchEnd << ")" << std::endl;
     }
     // std::cout << "y_r = " << y_r << std::endl;
-    // Compute probability at each base.
-    for (unsigned i = 0; i < options.readLength; ++i) {
-        double x = static_cast<double>(i) / (options.readLength - 1);
-        if (x < options.positionRaise) {
-            double b = options.probabilityMismatchBegin;
-            double m = (y_r - options.probabilityMismatchBegin) / options.positionRaise;
-            parameters.mismatchProbabilities[i] = m * x + b;
-            // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
-        } else {
-            double b = y_r;
-            double m = (options.probabilityMismatchEnd - y_r) / (1 - options.positionRaise);
-            x -= options.positionRaise;
-            parameters.mismatchProbabilities[i] = m * x + b;
-            // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
+    // Compute mismatch probability at each base.
+    if (options.probabilityMismatchFromFile) {
+        // Open file.
+        std::fstream file;
+        file.open(toCString(options.probabilityMismatchFile), std::ios_base::in);
+        if (!file.is_open()) {
+            std::cerr << "Failed to load mismatch probabilities from " << options.probabilityMismatchFile << std::endl;
+            return 1;
+        }
+        // Load probabilities.
+        double x;
+        file >> x;
+        unsigned i;
+        for (i = 0; i < options.readLength && !file.eof(); ++i) {
+            parameters.mismatchProbabilities[i] = x;
+            file >> x;
+        }
+        if (i != options.readLength) {
+            std::cerr << "Not enough mismatch probabilites in " << options.probabilityMismatchFile << " (" << i << " < " << options.readLength << ")!" << std::endl;
+            return 1;
+        }
+    } else {
+        // Use piecewise linear function for mismatch probability simulation.
+        for (unsigned i = 0; i < options.readLength; ++i) {
+            double x = static_cast<double>(i) / (options.readLength - 1);
+            if (x < options.positionRaise) {
+                double b = options.probabilityMismatchBegin;
+                double m = (y_r - options.probabilityMismatchBegin) / options.positionRaise;
+                parameters.mismatchProbabilities[i] = m * x + b;
+                // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
+            } else {
+                double b = y_r;
+                double m = (options.probabilityMismatchEnd - y_r) / (1 - options.positionRaise);
+                x -= options.positionRaise;
+                parameters.mismatchProbabilities[i] = m * x + b;
+                // std::cout << "parameters.mismatchProbabilities[" << i << "] = " << parameters.mismatchProbabilities[i] << std::endl;
+            }
         }
     }
 
