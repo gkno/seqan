@@ -253,7 +253,7 @@ struct TMyConstraints {
 namespace seqan  {
 
 	typedef FragmentStore<> TFionaFragStore;
-	typedef Index<TFionaFragStore::TReadSeqStore> TFionaIndex; 
+	typedef Index<TFionaFragStore::TReadSeqStore, Index_Wotd<> > TFionaIndex; 
 	
 	template <>
 	struct Cargo<TFionaIndex> { 
