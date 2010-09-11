@@ -888,7 +888,7 @@ typedef Tag<TagRaw_> const Raw;
 	template < typename TSeq >
 	inline bool
 	guessFormat(
-		TSeq const & seq,
+		TSeq const &,
 		Raw)
 	{
 		return true;
