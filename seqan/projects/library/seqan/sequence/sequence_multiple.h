@@ -1415,7 +1415,12 @@ a single integer value between 0 and the sum of string lengths minus 1.
     inline typename Size< StringSet< TString, Owner<ConcatDirect<TSpec> > > >::Type 
 	resize(StringSet< TString, Owner<ConcatDirect<TSpec> > > &me, TSize new_size, Tag<TExpand> const tag) 
 	{
-		return fill(me.limits, new_size + 1, back(me.limits), tag) - 1;
+		if (new_size < length(me.limits))
+		{
+			resize(me.concat, me.limits[new_size]);
+			return resize(me.limits, new_size + 1, tag);
+		} else
+			return fill(me.limits, new_size + 1, back(me.limits), tag) - 1;
     }
 
 ///.Function.iter.param.object.type:Class.StringSet
