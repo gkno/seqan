@@ -1,13 +1,18 @@
+#define SEQAN_DEBUG_INDEX
 #define SEQAN_DEBUG
+#define SEQAN_VERBOSE
+#define SEQAN_VVERBOSE
 
 #include <iostream>
 #include <fstream>
-#include <seqan/index.h>
-#include <seqan/basic.h>
-#include <math.h>
-#include <time.h>
-#include <string.h>
+#include <cmath>
+#include <ctime>
+#include <string>
 #include <sstream>
+
+#include <seqan/basic.h>
+#include <seqan/index.h>
+#include <seqan/store.h>
 
 // TODO(holtgrew): This raises a warning with Boost 1.42. Deactivate warnings, activate again afterwards. The correct #pragma has to be used for each supported compiler.
 //#include <boost/math/distributions/normal.hpp>
@@ -16,6 +21,12 @@
 
 using namespace std;
 using namespace seqan;
+
+struct FionaPoisson_;
+struct FionaExpected_;
+
+typedef Tag<FionaPoisson_> const FionaPoisson;
+typedef Tag<FionaExpected_> const FionaExpected;
 
 /*TODO cumulative poisson distribution determinated just once for a level, not at each node like now*/
 
@@ -26,7 +37,7 @@ inline bool strContains(string const & inputStr, string const & searchStr)
 }
 
 /*save in table, information about the erroneous reads and the respective correct one */
-Pair<int,Pair<vector<int>, Dna> > 
+Pair<unsigned,Pair<vector<unsigned>, Dna> > 
 dataErroneousNodes(
 	int idCorr, 
 	int positionError, 
@@ -36,11 +47,11 @@ dataErroneousNodes(
 	int occurBest, 
 	Dna nucleotide)
 {													 
-	Pair<int,Pair<vector<int>, Dna> > pairCorrect;	
+	Pair<unsigned,Pair<vector<unsigned>, Dna> > pairCorrect;	
 
 	/*data for the erroneous node and correct one*/
 	/*position error, length parent(path-label), nb match after error position, nb mismatch, nb of occurrences */ 	
-	vector<int> data;	
+	vector<unsigned> data;	
 									
 	data.push_back(positionError);
 	data.push_back(lenParent);
@@ -48,7 +59,7 @@ dataErroneousNodes(
 	data.push_back(smallMismatch);
 	data.push_back(occurBest);
  
-	Pair<vector<int>, Dna> dataCorrection;
+	Pair<vector<unsigned>, Dna> dataCorrection;
 	dataCorrection.i1 = data;
 	dataCorrection.i2 = nucleotide; 
 	pairCorrect.i1 =  idCorr;
@@ -59,24 +70,24 @@ dataErroneousNodes(
 
 // Expected value - general, use if all reads have the same length
 template <typename TExpectedValues, typename TReadSet, typename TGenomeSize>
-void expectedValueEqualReadsLength(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize genomeLength)
+void expectedValueEqualReadsLength(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize const genomeLength)
 {
 	//
 	//	E(m) = (read_length - suffix_length + 1) * numberReads / genomeLength
 	//
 
 	// without reverse complement
-	unsigned numberReads = length(readSet) / 2;
+	unsigned readCount = length(readSet) / 2;
 	unsigned readLength = length(readSet[0]);
 
 	clear(expected);
 	for (unsigned suffixLength = 0; suffixLength <= readLength; ++suffixLength)
-		append(expected, (readLength - suffixLength + 1) * numberReads / (double)genomeLength);
+		append(expected, (readLength - suffixLength + 1) * readCount / (double)genomeLength);
 }
 
 // Expected value for set of reads with different length
 template <typename TExpectedValues, typename TReadSet, typename TGenomeSize>
-void expectedValueTheorical(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize genomeLength)
+void expectedValueTheorical(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize const genomeLength)
 {
 	//
 	//	E(m) = (read_length - suffix_length + 1) * numberReads / genomeLength
@@ -108,28 +119,27 @@ void expectedValueTheorical(TExpectedValues & expected, TReadSet const & readSet
 }
 
 /* Standard Deviation */
-vector <double> standardDeviation(StringSet<String<Dna>,Owner < > > readsTable, double genomeLength)
+template <typename TDeviationValues, typename TReadSet, typename TGenomeSize>
+void standardDeviation(TDeviationValues & deviation, TReadSet const & readSet, TGenomeSize const genomeLength)
 {
-		double read_length = length(readsTable[0]);
+	// without reverse complement
+	unsigned readCount = length(readSet) / 2;
+	unsigned readLength = length(readSet[0]);
 
-		/*without reverse complement*/
-		double numberReads = length(readsTable)/2;
+	//
+	//	SD(m)= numberReads*((read_length - suffix_length + 1)/genomeLength 
+	//			- (read_length - suffix_length + 1)^2/genomeLength ^2)
+	//
 
-		/* 
-			SD(m)= numberReads*((read_length - suffix_length + 1)/genomeLength 
-					- (read_length - suffix_length + 1)^2/genomeLength ^2)
-		*/
-
-		vector <double> standardDev;
-		double valueFirst;
-		double valueSecond;
-		for (double suffix_length=0; suffix_length < read_length+1; suffix_length++){
-			valueFirst  = (read_length - suffix_length + 1);
-			valueFirst  = valueFirst/genomeLength;
-			valueSecond = pow(valueFirst,2);
-			standardDev.push_back(sqrt(numberReads*(valueFirst - valueSecond)));		
-		}
-		return standardDev;
+	double valueFirst;
+	double valueSecond;
+	resize(deviation, readLength + 1);
+	for (unsigned suffixLength = 0; suffixLength <= readLength; ++suffixLength)
+	{
+		valueFirst  = (readLength - suffixLength + 1) / (double)genomeLength;
+		valueSecond = pow(valueFirst, 2);
+		deviation[suffixLength] = sqrt((valueFirst - valueSecond) * readCount);	
+	}
 }
 
 // factorial
@@ -165,19 +175,20 @@ double medianLevel(Iter< TIndex, VSTree<TSpec> > iter){
 	double median = 0.0;
 	double mediumTotalOccurence = 0.0;
 
-	map<int,int> vectorOccurences;
+	map<unsigned,unsigned> vectorOccurences;
 
 	goBegin(iter);
-	while (!atEnd(iter)){
+	while (!atEnd(iter))
+	{
 		nbOccurence = countOccurrences(iter);
 		vectorOccurences[nbOccurence]+=1.0;
 		totalOccurence+=nbOccurence;
-		iter++; 
+		++iter;
 	}
 	
 	mediumTotalOccurence = totalOccurence/2.0;
 	
-	map<int,int>::iterator iterMap;
+	map<unsigned,unsigned>::iterator iterMap;
 	for (iterMap = vectorOccurences.begin (); iterMap != vectorOccurences.end (); ++iterMap)
 	{
 		sommeMedian+= iterMap->second*iterMap->first;
@@ -192,54 +203,42 @@ double medianLevel(Iter< TIndex, VSTree<TSpec> > iter){
 template <typename TPercentage, typename TSize>
 inline double probabilityOneError(TPercentage percentageErr, TSize lenPath)
 {
-	return 1.0 - pow(1.0 - percentageErr,lenPath);
-
+	return 1.0 - pow(1.0 - percentageErr, lenPath);
 }
 
 /*change the erroneous nucleotide in all reads identify with errors*/
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > 
-correctErroneousRead(
-	map<int,Pair<int,Pair<vector<int>, Dna> > > allErrors,
-	StringSet<String<char> > fastaComment,
-	StringSet<String<Dna>,Owner < > > setReads)
+template <typename TFragmentStore>
+void correctErroneousReads(
+	map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > > allErrors,
+	TFragmentStore &store)
 {	
-	map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator iR;
-	int comment = 0;
+	map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > >::iterator iR;
+	unsigned readCount = length(store.	readSeqStore) / 2;
 	for (iR = allErrors.begin (); iR != allErrors.end (); ++iR)
 	{
-		Pair<int,Pair<vector<int>, Dna> > setR = (iR->second);
+		Pair<unsigned,Pair<vector<unsigned>, Dna> > setR = (iR->second);
 		int posErr = (setR.i2).i1[0];
 		
 		/*information about the read*/
 		ostringstream oss;
 		ostringstream m;
-		if (strContains(toCString(fastaComment[(iR->first)/2]), "corrected")){
+		unsigned readId = iR->first;
+		if (readId > readCount)
+			readId -= readCount;
+		if (strContains(toCString(store.readNameStore[readId]), "corrected")){
 			m << "," << posErr;
-			oss << toCString(fastaComment[iR->first/2]) << m.str();
+			oss << toCString(store.readNameStore[readId]) << m.str();
 			String<char> d = oss.str();
-			fastaComment[(iR->first)/2] = d;
+			store.readNameStore[readId] = d;
 		}else{
 			m << " corrected: " << posErr;
-			oss << toCString(fastaComment[iR->first/2])<< m.str();
+			oss << toCString(store.readNameStore[readId])<< m.str();
 			String<char> d = oss.str();
-			fastaComment[(iR->first)/2] = d;
+			store.readNameStore[readId] = d;
 		}
 
-		int pos=0;
-		typedef Iterator<String<Dna> >::Type TIterator;
-		for (TIterator it = begin(setReads[(iR->first)]); it != end(setReads[(iR->first)]); ++it){
-			if(pos==(setR.i2).i1[0]){
-				assignValue(it,(setR.i2).i2);
-				break;
-			}
-			pos++;
-		}
-
+		store.readSeqStore[iR->first][setR.i2.i1[0]] = setR.i2.i2;
 	}
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileData;
-	fileData.i1 = setReads;
-	fileData.i2 = fastaComment;
-	return fileData;
 }
 
 
@@ -247,26 +246,27 @@ correctErroneousRead(
 struct TMyConstraints { 
 	 unsigned int replen_max; 
 	 unsigned int replen_min;
-	 map<int,double> frequency;
+	 map<unsigned,double> frequency;
 	 bool _cachedPred; 
 }; 
  
 namespace seqan  {
 
-	struct TMyIndex; 
-	template <typename TText> 
-	 
-	struct Cargo<Index<TText> > { 
+	typedef FragmentStore<> TFionaFragStore;
+	typedef Index<TFionaFragStore::TReadSeqStore> TFionaIndex; 
+	
+	template <>
+	struct Cargo<TFionaIndex> { 
 		typedef TMyConstraints Type; 
 	}; 
 
 	/*TODO THIS FONCTION CAN BE CHANGED FOR THE FREQUENCY - here just one experience*/
 	/*by the use also the frequency for A,T,G,C*/
 	/*higher frequency - high level as min in which we will begin the searching*/
-	
+
 	/*hide the node between certain level*/
-	template <typename TText, typename TSpec>
-	bool nodePredicate(Iter<Index<TText >, TSpec> &it) 
+	template <>
+	bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<ParentLinks<Postorder> > > > &it)
 	{
 		TMyConstraints &cons = cargo(container(it));
 		unsigned int valueT = parentRepLength(it);
@@ -298,35 +298,72 @@ namespace seqan  {
 	}
 }
 
-/*complement of one nucleotide: A==T, G==C*/
-Dna complementaire(Dna nucleotide){
-
-	/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-	if(nucleotide == 0) return 3;
-	if(nucleotide == 1) return 2;
-	if(nucleotide == 2) return 1;
-	if(nucleotide == 3) return 0;
-	else{
-		cout << "Accepted Character :A,T,G and C";
-		exit(1);
-	}
+template <typename TObserved, typename TExpected, typename TStrictness>
+inline bool potentiallyErroneousNode(
+	TObserved observed, 
+	TExpected expected,
+	TStrictness strictness,
+	FionaPoisson const)
+{
+	// compare the cumulative poisson distribution with the p-value (strictness)
+	return pValue(observed, expected) <= strictness;
 }
 
+template <typename TObserved, typename TExpected, typename TStrictness>
+inline bool potentiallyErroneousNode(
+	TObserved observed, 
+	TExpected expected,
+	TStrictness,
+	FionaExpected const)
+{
+	// compare the weight for a node with its expected value (dependent on the length)
+	return observed < expected;
+}
 
-/*TODO make just one fonction for p-value and expected by just changing the tests if poisson or the other*/
 /*detect and repare the reads with errors*/
-template < typename TMyIndex, class TSpec >
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > >
-searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
-               	   StringSet<String<Dna>,Owner< > > setReads, StringSet<String<char> > fastaComment,
-		   double genomeLength, double strictness, int acceptMismatch){
+template < typename TFionaIndex, class TSpec, typename TFragmentStore, typename TAlgorithm >
+void searchNode(
+	Iter< TFionaIndex, VSTree<TSpec> > iter,
+	TFragmentStore &store,
+	double genomeLength, 
+	double strictness, 
+	unsigned acceptMismatch,
+	Tag<TAlgorithm> const alg)
+{
+	typedef typename Fibre<TFionaIndex, Fibre_Text>::Type TReadSet;
+	typedef typename Value<TReadSet>::Type TRead;
 	
-	cout << "Method with p-value and Poisson distribution" << endl;
+	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+		cout << "Method with expected value for each level" << endl;
+	else
+		cout << "Method with p-value and Poisson distribution" << endl;
 	cout << "Searching... " << endl;
 	
 	/*table with the theoricals values*/
 	String<double> expectedTheorical;
-	expectedValueTheorical(expectedTheorical, setReads, genomeLength);
+	expectedValueTheorical(expectedTheorical, store.readSeqStore, genomeLength);
+	unsigned readCount = length(store.readSeqStore) / 2;
+	
+	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+	{
+		String<double> sd;
+		standardDeviation(sd, store.readSeqStore, genomeLength);
+
+		/*The strictness value allows to estimate the confidential intervall*/
+		for (unsigned i = 0; i < length(expectedTheorical); ++i)
+		{
+			double expectedTemporary = expectedTheorical[i] - strictness * sd[i];
+			
+			/*If the connfidential intervall take value less than 1 ??? not sure for that*/
+			/*if(expectedTemporary < 1){
+				expectedTheorical[i] = 1.1;
+			}else{*/
+				expectedTheorical[i] = expectedTemporary;
+			//}
+			//if fixed
+			//expectedTheorical[i]=5;
+		}
+	}
 	
 	/*save reads with errors*/
 	vector<String<Dna> > readsErrors;
@@ -336,7 +373,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 			key - ID of read with errors;
 			value - pair of position in read and nucleotide for make change with
 	*/
-	map<int,Pair<int,Dna> > readsErrorsID;
+	map<unsigned,Pair<unsigned,Dna> > readsErrorsID;
 
 	String<Dna> nodeError ="";
 
@@ -349,50 +386,47 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 					position error, length parent(path-label), nb match after error position, nb mismatch, nb of occurrences 
 				and the second value is the correct nucleotide A,T,G or C
 	*/
-	map<int,Pair<int,Pair<vector<int>, Dna> > > allErrors;
+	map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > > allErrors;
 
 	/* length of parent label*/
 	int lenParent = 0;
 
 	/* length of label to root until courant node*/
 	int lenPath = 0;
-	
+
 	clock_t start1, end1;
 
 	start1 = clock();
-
+	
 	/*the bigining of the tree*/
 	goBegin(iter);
-	
-	for(int i=0;i<length(expectedTheorical);++i)
-		std::cout<<expectedTheorical[i]<<"\t";
-	std::cout<<"\n";
-	
-	while (!atEnd(iter)){
+	while (!atEnd(iter))
+	{
 
 		/*affectation*/
 		lenParent = parentRepLength(iter);
 		lenPath = repLength(iter);
-	
-	  SEQAN_ASSERT_LT(lenParent + 1, length(expectedTheorical));
-		double pValue_Poisson =  pValue(countOccurrences(iter), expectedTheorical[lenParent+1]);
-		
-		/*compare the cumulative poisson distribution with the p-value(strictness)*/
-		if(pValue_Poisson <= strictness){
+
+		SEQAN_ASSERT_LT(lenParent + 1, length(expectedTheorical));
+		if (potentiallyErroneousNode(countOccurrences(iter), expectedTheorical[lenParent+1], strictness, alg))
+		{
 			nodeError = representative(iter);
+	
 			/*
-				save the id and position(where the suffix begin in the reads) for the suspected reads belonging to this level
+				save the id and position (suffix begin) for suspected nodes
+				for which we can find a more optimal correction
 			*/
-			vector<Pair<int,int> > idReadsError;
+			vector<Pair<unsigned,unsigned> > idReadsError;
 
 			/*take all reads containing errors at that position in the tree*/
-			for(int i=0; i < length(getOccurrences(iter)); ++i){
+			for (unsigned i=0; i < length(getOccurrences(iter)); ++i){
 				idReadsError.push_back(getOccurrences(iter)[i]);
 			}
 			/*if there is a nodes detect as erroneus*/
 			if(idReadsError.size()>0){
+				
 				/*copy the iterator for iterate over the siblings*/
-				typename Iterator< TMyIndex, TopDown< ParentLinks<Postorder> > >::Type iterParent(iter);
+				typename Iterator< TFionaIndex, TopDown< ParentLinks<Postorder> > >::Type iterParent(iter);
 			 
 				/*go at the level of the parent node*/
 				goUp(iterParent);
@@ -401,20 +435,21 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 					potential reads for make the correction,
 					because at the same level, with the same prefix
 				*/
-				vector<Pair<Pair<int,int>,int> > idReadsCorrect;
+				vector<Pair<Pair<unsigned,unsigned>,unsigned> > idReadsCorrect;
 		
 				if(goDown(iterParent)){
 					/*the length of current node*/
 					int lenSiblings = lenParent+1;
 					/*nb occurrence for this node*/
 					int occur = countOccurrences(iterParent);
-					double pValue_Poisson_Sibling =  pValue(occur, expectedTheorical[lenParent+1]);
-					/*when different from the erroneous node & the probability to have an error is greater or equal from p-value*/
-					if(representative(iterParent) != nodeError && strictness <= pValue_Poisson_Sibling){
+					if (representative(iterParent) != nodeError && 
+						!potentiallyErroneousNode(occur, expectedTheorical[lenSiblings], strictness, alg))
+					 {
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
-								Pair<Pair<int,int>,int> dataCorrectRead;
+							for (unsigned i=0; i < length(getOccurrences(iterParent)); ++i)
+							{
+								Pair<Pair<unsigned,unsigned>,unsigned> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
 								idReadsCorrect.push_back(dataCorrectRead);
@@ -425,13 +460,14 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 						int lenSiblings = lenParent+1;
 
 						occur = countOccurrences(iterParent);
-						pValue_Poisson_Sibling =  pValue(occur, expectedTheorical[lenParent+1]);
-						/*when different from the erroneous node & the probability to have an error is greater or equal from p-value*/
-						if(representative(iterParent) != nodeError && strictness <= pValue_Poisson_Sibling ){
+						if	(representative(iterParent) != nodeError &&
+							!potentiallyErroneousNode(occur, expectedTheorical[lenSiblings], strictness, alg))
+						{
 							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
 							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
-								Pair<Pair<int,int>,int> dataCorrectRead;
+							for (unsigned i=0; i < length(getOccurrences(iterParent)); ++i)
+							{
+								Pair<Pair<unsigned,unsigned>,unsigned> dataCorrectRead;
 								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
 								dataCorrectRead.i2 = occur;
 								idReadsCorrect.push_back(dataCorrectRead);
@@ -441,19 +477,19 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 				}
 
 				/*make the comarison between the substrings(the suffix after the position of error*/
-				for(int s=0; s<idReadsError.size();s++){
+				for (unsigned s=0; s<idReadsError.size();s++){
 					/*the position where the error is*/
-					int positionError = idReadsError[s].i2+lenParent;
+					unsigned positionError = idReadsError[s].i2+lenParent;
 					/*is already identify as erroneus*/
-					map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapID;
+					map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > >::iterator mapID;
 					mapID = allErrors.find(idReadsError[s].i1);
 					
-					Pair<int,Pair<vector<int>, Dna> >  correctAndData;
+					Pair<unsigned,Pair<vector<unsigned>, Dna> >  correctAndData;
 					/*Branch and Bound*/
 					/*if already detect as erroneous(optimal)*/
 					if(mapID!=allErrors.end()){
 						/*the total length minus the position of error, and minus 1 mismatch*/
-						int maxFitPossible = length(setReads[idReadsError[s].i1])- positionError - 1;
+						int maxFitPossible = length(store.readSeqStore[idReadsError[s].i1])- positionError - 1;
 						int optimalDistance = lenParent + maxFitPossible;
 						correctAndData = (mapID->second);
 					    
@@ -462,20 +498,22 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 								vector with: position of errors, length parent and best fit;
 								nucleotide which is correct
 						*/
-						Pair<vector<int>, Dna>  data = correctAndData.i2;
+						Pair<vector<unsigned>, Dna>  data = correctAndData.i2;
 						
 						if(data.i1[1]+data.i1[2] > optimalDistance){
 							continue;
 						}
 					}else{
 						/*if this is the reverse complement*/
-						map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapIDrevCompl;
+						map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > >::iterator mapIDrevCompl;
 					
-						if(idReadsError[s].i1%2!=0){
-							mapIDrevCompl = allErrors.find(idReadsError[s].i1-1);
-							if(mapIDrevCompl!=allErrors.end()){
+						if (idReadsError[s].i1 >= readCount)
+						{
+							mapIDrevCompl = allErrors.find(idReadsError[s].i1-readCount);
+							if (mapIDrevCompl!=allErrors.end())
+							{
 							/*the total length minus the position of error, and minus 1 mismatch*/
-								int maxFitPossible = length(setReads[idReadsError[s].i1])- positionError - 1;
+								int maxFitPossible = length(store.readSeqStore[idReadsError[s].i1])- positionError - 1;
 								int optimalDistance = lenParent + maxFitPossible;
 								correctAndData = (mapIDrevCompl->second);
 					    
@@ -484,7 +522,7 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 									vector with: position of errors, length parent and best fit;
 									nucleotide which is correct
 								*/
-								Pair<vector<int>, Dna>  data = correctAndData.i2;
+								Pair<vector<unsigned>, Dna>  data = correctAndData.i2;
 						
 								if(data.i1[1]+data.i1[2] > optimalDistance){
 									continue;
@@ -494,17 +532,17 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 					}
 				
 					/*iterate over the sequence with error*/
-					typedef Iterator<String<Dna> >::Type TIterator;
+					typedef typename Iterator<TRead, Standard>::Type TIterator;
 
-					int pos_correct = 0;
-					int best = 0;
-					int smallMismatch = 0;
-					int occurBest = 0;
-					int idCorr = 0;
+					unsigned pos_correct = 0;
+					unsigned best = 0;
+					unsigned smallMismatch = 0;
+					unsigned occurBest = 0;
+					unsigned idCorr = 0;
 					Dna ntCorr; 
 					
 
-					for(int r=0; r<idReadsCorrect.size();r++){
+					for (unsigned r=0; r<idReadsCorrect.size();r++){
 						/*if not already correct by the same reads*/
 						/*if(mapID!=allErrors.end()){
 						
@@ -514,420 +552,54 @@ searchNodePoisson(Iter< TMyIndex, VSTree<TSpec> > iter,
 						}*/
 
 						/*the position in the read until which there is the same prefix*/
-						int positionCorrect = idReadsCorrect[r].i1.i2+lenParent;
+						unsigned positionCorrect = idReadsCorrect[r].i1.i2+lenParent;
 											
 						/*count to the position with error*/
-						int pos = 0;
+						unsigned pos = 0;
 						
 						/*search the position detect as erroneous at the level of the read*/
-						for (TIterator it = begin(setReads[idReadsError[s].i1]); it != end(setReads[idReadsError[s].i1]); ++it){
+						for (TIterator it = begin(store.readSeqStore[idReadsError[s].i1]); it != end(store.readSeqStore[idReadsError[s].i1]); ++it)
+						{
 							/* when we reache the position containig error*/	
-							if(pos == positionError){
+							if (pos == positionError)
+							{
 
-								/*copy iterator at the position where the error is*/
-								TIterator errITer = it;
 								/*go to next nucleotide*/
-								it++;
+								++it;
 								/*compare the nucleotides after the error position*/
-								int nbChar = 0;
-								int mismatch = 0;
+								unsigned nbChar = 0;
+								unsigned mismatch = 0;
 								/*compare until the end of the erroneous read or the corrected one*/
-								while(it!=end(setReads[idReadsError[s].i1]) && (positionCorrect+nbChar+1+mismatch)<(length(setReads[idReadsCorrect[r].i1.i1])-1)){
-									pos++;
-									Dna currentNtErrRead  = setReads[idReadsError[s].i1][pos];
-									Dna currentNtCorrRead = setReads[idReadsCorrect[r].i1.i1][positionCorrect+nbChar+1+mismatch];
-									/*the user can choice the number of mismatch*/
-									if(currentNtErrRead != currentNtCorrRead){
-										mismatch++;
-										if(mismatch>acceptMismatch){
-											break;
-										}
-									}else{
-										nbChar++;
-									}
-									it++;
-								}
-						
-
-							    int position = positionCorrect+nbChar+1;
-								/*
-									find the appopriate string if the end of the erroneous reads is reached  
-									or at the end of the correct read
-								*/
-								/*I change just +mismatch*/
-								if(it == end(setReads[idReadsError[s].i1])|| position==(length(setReads[idReadsCorrect[r].i1.i1]))){							
-									/*if more matched characters than the other sibling*/
-									if(nbChar+mismatch > best+smallMismatch){
-										best = nbChar;
-										smallMismatch = mismatch;
-										idCorr = idReadsCorrect[r].i1.i1;
-										ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
-										pos_correct = positionCorrect;
-										occurBest = idReadsCorrect[r].i2;
-									/*if the same number of characters*/
-									}else if (nbChar+mismatch == best+smallMismatch){
-										/*case when the number of mismatch is greater*/			
-										if(nbChar > best){
-											best = nbChar;
-											smallMismatch = mismatch;
-											idCorr = idReadsCorrect[r].i1.i1;
-											ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
-											pos_correct = positionCorrect;
-											occurBest = idReadsCorrect[r].i2;
-										/*when they are equal - test the number of ocurrences*/		
-										}else if(nbChar == best && occurBest < idReadsCorrect[r].i2){
-											best = nbChar;
-											smallMismatch = mismatch;
-											idCorr = idReadsCorrect[r].i1.i1;
-											ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
-											pos_correct = positionCorrect;
-											occurBest = idReadsCorrect[r].i2;
-										}
-									
-									}
-								}
-								break;
-							}
-							pos++;
-						}
-					}
-			
-			
-					if(idCorr !=0){
-					
-						/*the correct nucleotide*/
-						Dna nucleotide =  ntCorr;
-						
-						/*copy the ID*/
-						int idReadErrorPos = idReadsError[s].i1;
-						
-						/*if so: this is the reverse complement*/
-						if((idReadsError[s].i1)%2!=0){
-							/*	ID of read give by the user, 
-								which is the reverse complement of the identified 
-								as erroneous current read
-							*/
-							idReadErrorPos = idReadsError[s].i1 - 1;
-
-							/*position for correction in the complement - read user*/
-							positionError = length(setReads[idReadsError[s].i1]) - positionError - 1; 
-							nucleotide = complementaire(nucleotide);
-						}
-
-// debug					if(idReadsError[s].i1==176 || idReadsError[s].i1 ==177){cout << representative(iter);}
-
-						/*search if we have identify the same read already as erroneous*/
-						map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapID;
-						mapID = allErrors.find(idReadErrorPos);
-
-						if(mapID != allErrors.end()){
-			
-							Pair<int,Pair<vector<int>, Dna> > correctID = (mapID->second);
-							
-							Pair<vector<int>,Dna> number = correctID.i2;
-							/*This is maybe not necessary, because we search to maximisate*/
-							/*when the position or the nucleotide differ*/
-							//if(number.i1[0]!=positionError || number.i2 != nucleotide){
-							
-							/*find longer commun part with certain nb accepted mismatch*/
-							if(number.i1[1]+number.i1[2] + number.i1[3] < lenParent + best + smallMismatch){
-								
-								allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-							/*when they are equal*/
-							}else if(number.i1[1]+number.i1[2] + number.i1[3]==lenParent + best + smallMismatch){
-								/*looking for longer matching part without mismatch*/
-								if(number.i1[1]+number.i1[2]<lenParent + best){
-					
-									allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-								/*eqaul number of match and mismatch, but greater nb occurrences*/
-								}else if(number.i1[1]+number.i1[2]==lenParent + best &&number.i1[4]<occurBest){
-									
-									allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-								}
-							}
-							break;
-							//}
-						}else{
-							allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-						}
-					}
-				}
-		
-			}		
-		
-		}		
-		iter++;
-	}
-
-	end1 = clock();
-	cout << "Time for searching between given levels: "<< (double)(end1-start1)/CLOCKS_PER_SEC << " seconds." << endl;
-	ofstream out("id");
-	map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator it;
-
-	for (it = allErrors.begin (); it != allErrors.end (); ++it)
-    	{
-		out << ((it->first)/2)<< " 0"<<endl; 
-	}
-
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileData = correctErroneousRead(allErrors,fastaComment, setReads);
-
-	cout << "Total corrected reads number is "<< allErrors.size()<<"\n\n";
-	
-	return fileData;
-}
-
-/*detect and repare the reads with errors*/
-template < typename TMyIndex, class TSpec >
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > >
-searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
-		   StringSet<String<Dna>,Owner< > > setReads, StringSet<String<char> > fastaComment,
-		   double genomeLength, double strictness, int acceptMismatch){
-
-	cout << "Method with expected value for each level" << endl;
-	cout << "Searching... " << endl;
-	
-	/*table with the theoricals values*/
-	String<double> expectedTheorical;
-	expectedValueTheorical(expectedTheorical, setReads, genomeLength);
-	vector <double> sd = standardDeviation(setReads, genomeLength);
-
-	/*The strictness value allows to estimate the confidential intervall*/
-	for (int i=0; i < length(expectedTheorical); ++i){
-		double expectedTemporary = expectedTheorical[i] - strictness*sd[i];
-		
-		/*If the connfidential intervall take value less than 1 ??? not sure for that*/
-		/*if(expectedTemporary < 1){
-			expectedTheorical[i] = 1.1;
-		}else{*/
-			expectedTheorical[i] = expectedTemporary;
-		//}
-		//if fixed
-		//expectedTheorical[i]=5;
-	}
-	
-	/*save reads with errors*/
-	vector<String<Dna> > readsErrors;
-
-	/*
-		map contains : 
-			key - ID of read with errors;
-			value - pair of position in read and nucleotide for make change with
-	*/
-	map<int,Pair<int,Dna> > readsErrorsID;
-
-	String<Dna> nodeError ="";
-
-	/*
-		map contains : 
-			key - ID of read with errors;
-			value - pair which contains:
-				first value - ID of correct read
-				second value - pair with first value a vectors of 5 values : 
-					position error, length parent(path-label), nb match after error position, nb mismatch, nb of occurrences 
-				and the second value is the correct nucleotide A,T,G or C
-	*/
-	map<int,Pair<int,Pair<vector<int>, Dna> > > allErrors;
-
-	/* length of parent label*/
-	int lenParent = 0;
-
-	/* length of label to root until courant node*/
-	int lenPath = 0;
-
-	clock_t start1, end1;
-
-	start1 = clock();
-	
-	/*the bigining of the tree*/
-	goBegin(iter);
-	while (!atEnd(iter)){
-
-		/*affectation*/
-		lenParent = parentRepLength(iter);
-		lenPath = repLength(iter);
-	
-		/*compare the weight for a node with its expected value(dependent on the length)*/
-		if(countOccurrences(iter) < expectedTheorical[lenParent+1]){
-			nodeError = representative(iter);
-	
-			/*
-				save the id and position(where the suffix begin in the reads) for suspected nodes
-				for which can be find more optimal correction
-			*/
-			vector<Pair<int,int> > idReadsError;
-
-			/*take all reads containing errors at that position in the tree*/
-			for(int i=0; i < length(getOccurrences(iter)); ++i){
-				idReadsError.push_back(getOccurrences(iter)[i]);
-			}
-			/*if there is a nodes detect as erroneus*/
-			if(idReadsError.size()>0){
-				
-				typename Iterator< TMyIndex, TopDown< ParentLinks<Postorder> > >::Type iterParent(iter);
-			 
-				/*go at the level of the parent node*/
-				goUp(iterParent);
-					
-				/*
-					potential reads for make the correction,
-					because at the same level, with the same prefix
-				*/
-				vector<Pair<Pair<int,int>,int> > idReadsCorrect;
-		
-				if(goDown(iterParent)){
-					/*the length of current node*/
-					int lenSiblings = lenParent+1;
-					int occur = countOccurrences(iterParent);
-					if(representative(iterParent) != nodeError && occur >= expectedTheorical[lenSiblings]){
-							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
-							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
-								Pair<Pair<int,int>,int> dataCorrectRead;
-								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
-								dataCorrectRead.i2 = occur;
-								idReadsCorrect.push_back(dataCorrectRead);
-							}	
-					}
-					while(goRight(iterParent)){
-						/*the length of current node*/
-						int lenSiblings = lenParent+1;
-
-						occur = countOccurrences(iterParent);
-						if(representative(iterParent) != nodeError && occur >= expectedTheorical[lenSiblings]){
-							/*save the id and position(where the suffix begin in the reads) in the table of IDs correct*/
-							/*also the number of occurrences*/
-							for(int i=0; i < length(getOccurrences(iterParent)); ++i){
-								Pair<Pair<int,int>,int> dataCorrectRead;
-								dataCorrectRead.i1 = getOccurrences(iterParent)[i];
-								dataCorrectRead.i2 = occur;
-								idReadsCorrect.push_back(dataCorrectRead);
-							}
-						}
-					}
-				}
-
-				/*make the comarison between the substrings(the suffix after the position of error*/
-				for(int s=0; s<idReadsError.size();s++){
-					/*the position where the error is*/
-					int positionError = idReadsError[s].i2+lenParent;
-					/*is already identify as erroneus*/
-					map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapID;
-					mapID = allErrors.find(idReadsError[s].i1);
-					
-					Pair<int,Pair<vector<int>, Dna> >  correctAndData;
-					/*Branch and Bound*/
-					/*if already detect as erroneous(optimal)*/
-					if(mapID!=allErrors.end()){
-						/*the total length minus the position of error, and minus 1 mismatch*/
-						int maxFitPossible = length(setReads[idReadsError[s].i1])- positionError - 1;
-						int optimalDistance = lenParent + maxFitPossible;
-						correctAndData = (mapID->second);
-					    
-						/*
-							Pair contains:
-								vector with: position of errors, length parent and best fit;
-								nucleotide which is correct
-						*/
-						Pair<vector<int>, Dna>  data = correctAndData.i2;
-						
-						if(data.i1[1]+data.i1[2] > optimalDistance){
-							continue;
-						}
-					}else{
-						/*if this is the reverse complement*/
-						map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapIDrevCompl;
-					
-						if(idReadsError[s].i1%2!=0){
-							mapIDrevCompl = allErrors.find(idReadsError[s].i1-1);
-							if(mapIDrevCompl!=allErrors.end()){
-							/*the total length minus the position of error, and minus 1 mismatch*/
-								int maxFitPossible = length(setReads[idReadsError[s].i1])- positionError - 1;
-								int optimalDistance = lenParent + maxFitPossible;
-								correctAndData = (mapIDrevCompl->second);
-					    
-								/*
-									Pair contains:
-									vector with: position of errors, length parent and best fit;
-									nucleotide which is correct
-								*/
-								Pair<vector<int>, Dna>  data = correctAndData.i2;
-						
-								if(data.i1[1]+data.i1[2] > optimalDistance){
-									continue;
-								}
-							}
-						}
-					}
-				
-					/*iterate over the sequence with error*/
-					typedef Iterator<String<Dna> >::Type TIterator;
-
-					int pos_correct = 0;
-					int best = 0;
-					int smallMismatch = 0;
-					int occurBest = 0;
-					int idCorr = 0;
-					Dna ntCorr; 
-					
-
-					for(int r=0; r<idReadsCorrect.size();r++){
-						/*if not already correct by the same reads*/
-						/*if(mapID!=allErrors.end()){
-						
-							if(idReadsCorrect[r].i1.i1==correctAndData.i1){	
-								continue;
-							}
-						}*/
-
-						/*the position in the read until which there is the same prefix*/
-						int positionCorrect = idReadsCorrect[r].i1.i2+lenParent;
-											
-						/*count to the position with error*/
-						int pos = 0;
-						
-						/*search the position detect as erroneous at the level of the read*/
-						for (TIterator it = begin(setReads[idReadsError[s].i1]); it != end(setReads[idReadsError[s].i1]); ++it){
-							/* when we reache the position containig error*/	
-							if(pos == positionError){
-
-								/*copy iterator at the position where the error is*/
-								TIterator errITer = it;
-								/*go to next nucleotide*/
-								it++;
-								/*compare the nucleotides after the error position*/
-								int nbChar = 0;
-								int mismatch = 0;
-								/*compare until the end of the erroneous read or the corrected one*/
-								while(it!=end(setReads[idReadsError[s].i1]) && (positionCorrect+nbChar+1+mismatch)<(length(setReads[idReadsCorrect[r].i1.i1])-1)){
-									pos++;
-									Dna currentNtErrRead  = setReads[idReadsError[s].i1][pos];
-									Dna currentNtCorrRead = setReads[idReadsCorrect[r].i1.i1][positionCorrect+nbChar+1+mismatch];
+								while(it!=end(store.readSeqStore[idReadsError[s].i1]) && (positionCorrect+nbChar+1+mismatch)<(length(store.readSeqStore[idReadsCorrect[r].i1.i1])-1))
+								{
+									++pos;
+									Dna currentNtErrRead  = store.readSeqStore[idReadsError[s].i1][pos];
+									Dna currentNtCorrRead = store.readSeqStore[idReadsCorrect[r].i1.i1][positionCorrect+nbChar+1+mismatch];
 									/*TODO: the user can choice the number of mismatch*/
-									if(currentNtErrRead != currentNtCorrRead){
-										mismatch++;
-										if(mismatch>acceptMismatch){
+									if (currentNtErrRead != currentNtCorrRead)
+									{
+										++mismatch;
+										if (mismatch > acceptMismatch)
 											break;
-										}
-									}else{
-										nbChar++;
-									}
-									it++;
+									} else
+										++nbChar;
+									++it;
 								}
 						
 
-							    int position = positionCorrect+nbChar+1;
+							    unsigned position = positionCorrect+nbChar+1;
 								/*
 									find the appopriate string if the end of the erroneous reads is reached  
 									or at the end of the correct read
 								*/
 								/*I change just +mismatch*/
-								if(it == end(setReads[idReadsError[s].i1])|| position==(length(setReads[idReadsCorrect[r].i1.i1]))){							
+								if(it == end(store.readSeqStore[idReadsError[s].i1])|| position==(length(store.readSeqStore[idReadsCorrect[r].i1.i1]))){							
 									/*if more matched characters than the other sibling*/
 									if(nbChar+mismatch > best+smallMismatch){
 										best = nbChar;
 										smallMismatch = mismatch;
 										idCorr = idReadsCorrect[r].i1.i1;
-										ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
+										ntCorr = store.readSeqStore[idReadsCorrect[r].i1.i1][positionCorrect];
 										pos_correct = positionCorrect;
 										occurBest = idReadsCorrect[r].i2;
 									/*if the same number of characters, but the number of occurences is larger*/
@@ -936,14 +608,15 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 											best = nbChar;
 											smallMismatch = mismatch;
 											idCorr = idReadsCorrect[r].i1.i1;
-											ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
+											ntCorr = store.readSeqStore[idReadsCorrect[r].i1.i1][positionCorrect];
 											pos_correct = positionCorrect;
 											occurBest = idReadsCorrect[r].i2;
+										/*when they are equal - test the number of ocurrences*/		
 										}else if(nbChar == best && occurBest < idReadsCorrect[r].i2){
 											best = nbChar;
 											smallMismatch = mismatch;
 											idCorr = idReadsCorrect[r].i1.i1;
-											ntCorr = setReads[idReadsCorrect[r].i1.i1][positionCorrect];
+											ntCorr = store.readSeqStore[idReadsCorrect[r].i1.i1][positionCorrect];
 											pos_correct = positionCorrect;
 											occurBest = idReadsCorrect[r].i2;
 										}
@@ -952,7 +625,7 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 								}
 								break;
 							}
-							pos++;
+							++pos;
 						}
 					}
 			
@@ -962,43 +635,52 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 						/*the correct nucleotide*/
 						Dna nucleotide =  ntCorr;
 						
-						/*copie of the ID*/
-						int idReadErrorPos = idReadsError[s].i1;
+						/*copie the ID*/
+						unsigned idReadErrorPos = idReadsError[s].i1;
 						
 						/*if so: this is the reverse complement*/
-						if((idReadsError[s].i1)%2!=0){
+						if ((idReadsError[s].i1) >= readCount)
+						{
 							/*	ID of read give by the user, 
 								which is the reverse complement of the identified 
 								as erroneous current read
 							*/
-							idReadErrorPos = idReadsError[s].i1 - 1;
+							idReadErrorPos = idReadsError[s].i1 - readCount;
 
 							/*position for correction in the complement - read user*/
-							positionError = length(setReads[idReadsError[s].i1]) - positionError - 1; 
-							nucleotide = complementaire(nucleotide);
+							positionError = length(store.readSeqStore[idReadsError[s].i1]) - positionError - 1;
+							FunctorComplement<Dna5> comp;
+							nucleotide = comp(nucleotide);
 						}
 						
-						/*search if there is the same */
-						map<int,Pair<int,Pair<vector<int>, Dna> > >::iterator mapID;
+						/*search if we have identify the same read already as erroneous*/
+						map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > >::iterator mapID;
 						mapID = allErrors.find(idReadErrorPos);
 	
 
 						if(mapID != allErrors.end()){
 			
-							Pair<int,Pair<vector<int>, Dna> > correctID = (mapID->second);
+							Pair<unsigned,Pair<vector<unsigned>, Dna> > correctID = (mapID->second);
 							
-							Pair<vector<int>,Dna> number = correctID.i2;
+							Pair<vector<unsigned>,Dna> number = correctID.i2;
+							/*This is maybe not necessary, because we search to maximisate*/
+							/*when the position or the nucleotide differ*/
 							//if(number.i1[0]!=positionError || number.i2 != nucleotide){
-								if(number.i1[1]+number.i1[2] + number.i1[3] < lenParent + best + smallMismatch){
+							
+							/*find longer commun part with certain nb accepted mismatch*/
+							if(number.i1[1]+number.i1[2] + number.i1[3] < lenParent + best + smallMismatch)
+							{
 								
-									allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-									
-								}else if(number.i1[1]+number.i1[2] + number.i1[3]==lenParent + best + smallMismatch){
-									if(number.i1[1]+number.i1[2]<lenParent + best){
+								allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
+							/*when they are equal*/
+							} else if(number.i1[1]+number.i1[2] + number.i1[3]==lenParent + best + smallMismatch){
+								/*looking for longer matching part without mismatch*/
+								if(number.i1[1]+number.i1[2]<lenParent + best){
 					
-										allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
-									}else if(number.i1[1]+number.i1[2]==lenParent + best &&number.i1[4]<occurBest){
-									
+									allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
+								/*eqaul number of match and mismatch, but greater nb occurrences*/
+								}else if(number.i1[1]+number.i1[2]==lenParent + best &&number.i1[4]<occurBest){
+
 										allErrors[idReadErrorPos] = dataErroneousNodes(idCorr, positionError, lenParent, best, smallMismatch, occurBest, nucleotide);
 										
 									}
@@ -1014,31 +696,35 @@ searchNodeExpected(Iter< TMyIndex, VSTree<TSpec> > iter,
 			}		
 		
 		}		
-		iter++;
+		++iter;
 	}
 	end1 = clock();
 	cout << "Time for searching between given levels: "<< (double)(end1-start1)/CLOCKS_PER_SEC << " seconds." << endl;
-	
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileData = correctErroneousRead(allErrors,fastaComment, setReads);
+	ofstream out("id");
+	map<unsigned,Pair<unsigned,Pair<vector<unsigned>, Dna> > >::iterator it;
 
-	cout << "Total corrected reads number is "<< allErrors.size()<<endl;
+	for (it = allErrors.begin (); it != allErrors.end (); ++it)
+	{
+		unsigned readId = it->first;
+		if (readId > readCount)
+			readId -= readCount;
+		out << readId << " 0" << endl; 
+	}
 	
-	return fileData;
+	correctErroneousReads(allErrors, store);
+	cout << "Total corrected reads number is "<< allErrors.size() << endl;
 }
-
-
 
 
 /*GC-content*/
 /*fonction which allow to determine the frequency for each nucleotide*/
-template < typename TMyIndex, class TSpec >
-map<int,double>
-determineFrequency(Iter< TMyIndex, VSTree<TSpec> > iter,
-		   StringSet<String<Dna>,Owner< > > setReads){
-
+template < typename TFionaIndex, class TSpec >
+map<unsigned,double>
+determineFrequency(Iter< TFionaIndex, VSTree<TSpec> > iter)
+{
    /*calculate the frequency for each nucleotide*/
    /*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-   map<int, double> frequency;
+   map<unsigned, double> frequency;
 
    goBegin(iter);
 
@@ -1058,141 +744,127 @@ determineFrequency(Iter< TMyIndex, VSTree<TSpec> > iter,
 }
 
 
-
-/*take the total number of lines in the user file*/
-int getNbLine(String<char> fileName){
-
-	ifstream reads;
-	reads.open(toCString(fileName),ifstream::in);
-	string temp;
-	string str2="";
-	int count=0;
-	while(getline(reads,temp)){
-		str2 = temp.substr (0,1); 
-		if(str2.compare(">")==0 || temp.empty()){
-			continue;
-		}else{
-			count++;
-		}
-	}
-	/*number of lines*/
-	return(count);
-}
-
-/*read the file format Fasta, which contain all reads*/
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > createStringSetFromFile(String<char> Filename){
-
-	cout <<"Take all reads from file"<<endl;
-	
-	/*contain all reads - input reads and the respective reverse complement*/
-	StringSet<String<Dna> > setReads;
-	
-	/*sava the fasta commen(intformation) for each read*/
-	StringSet<String<char> > fastaComment;
-	
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileData;
-
-	int i = 0;
-	int nbLine = getNbLine(Filename);
-
-	/*because also reverse complement*/
-	nbLine = nbLine*2;
-	resize(setReads,nbLine);
-	
-	ifstream reads;
-	reads.open(toCString(Filename),ifstream::in);
-	string temp;
-	string str2="";
-	int nbComment = 0;
-	resize(fastaComment, nbLine);
-	/*initialisation with all reads and resp. all reverse complement*/
-	while(getline(reads,temp)){
-		str2 = temp.substr (0,1); 
-		if(str2.compare(">")==0 || temp.empty()){
-			fastaComment[nbComment] = temp;
-			nbComment++;
-			continue;
-		}else{
-			/*because a probleme with different file format*/
-			string a = temp.substr(length(temp)-1,1);
-			if(a.compare("A")!=0 && a.compare("T")!=0 && a.compare("C")!=0 && a.compare("G")!=0){
-				temp = temp.substr(0,length(temp)-1);
-			}
-			/* an input read*/
-			setReads[i] = temp;
-
-			/*the reverse complement*/
-			Dna5StringReverseComplement revCompl(temp);
-			setReads[i+1] = revCompl;
-
-			/*go two indice after*/
-			i=i+2;
-		}
-	}
-	
-	fileData.i1 = setReads;
-	fileData.i2 = fastaComment;
-	
-	return(fileData);
-}
-
-
 /*construction Suffix Array */
-Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > builtSuffixArray(StringSet<String<Dna>,Owner < > > setReads, 
-		   double genomeLength, bool poisson, double strictness, int fromLevel, int toLevel,
-		   String<char> fileOutPutReadsErrorsCorrected, StringSet<String<char> > fastaComment, int acceptMismatch){
-		   
+template <typename TFragmentStore>
+void correctReads(
+	TFragmentStore & store,
+	double genomeLength,
+	bool poisson,
+	double strictness,
+	int fromLevel,
+	int toLevel,
+	int acceptMismatch)
+{		   
 	clock_t start, end1;
 	start = clock(); 
 	
-	cout << "Construction suffix array"<<endl;
+	cout << "Construct suffix array"<<endl;
 
-	/* Suffix Array constrution with reads*/
-	typedef Index< StringSet<String<Dna> > > TMyIndex; 
-	TMyIndex myIndex(setReads); 
+	// append their reverse complements
+	unsigned readCount = length(store.readSeqStore);
+	Dna5String tmp;
+	if (genomeLength != 1.0)
+		for (unsigned i = 0; i < readCount; ++i)
+		{
+			tmp = store.readSeqStore[i];
+			reverseComplementInPlace(tmp);
+			appendValue(store.readSeqStore, tmp);
+		}
+
+	// construct suffix array of the set of reads
+	TFionaIndex myIndex(store.readSeqStore); 
 
 	/*iterator with restrictions*/
-	typedef Iterator< TMyIndex, TopDown<ParentLinks<Postorder> > >::Type TConstrainedIterator; 
+	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Postorder> > >::Type TConstrainedIterator; 
 	TConstrainedIterator myConstrainedIterator(myIndex); 
 
 	/*calculate the frequency for each nucleotide, didn't use for the moment*/
 	/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-	map<int,double> frequency;
-	frequency = determineFrequency(myConstrainedIterator,setReads);
+	map<unsigned,double> frequency;
+	frequency = determineFrequency(myConstrainedIterator);
 
 	/*restrictions just for estimate the genome length if there is no data*/
 
 #ifdef MEDIAN
-	int level = fromLevel;
+	unsigned level = fromLevel;
 	ofstream out("medianLevels.txt"); 
 	ofstream median("medianForEachLevel.txt");
 #endif
 
+	if (genomeLength == 1.0)
+	{
+		cout << "Generating Hugues' stats file." << endl;
+		ofstream stats("stats.txt");
+		Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it(myIndex);
+		goBegin(it);
+		CharString tmp;
+		String<int> freq;
+		stats << "branch\tlength\ttreeDep\tletter\treadPos\tfreq" << endl;
+		while (!atEnd(it))
+		{
+			unsigned ofs = parentRepLength(it);
+			tmp = parentEdgeLabel(it);
+
+			Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it2(it);
+			bool branch = goDown(it2) && goRight(it2);
+
+			for (unsigned i = 0; i < length(tmp); ++i)
+			{
+				clear(freq);
+				for (unsigned j = 0; j < countOccurrences(it); ++j)
+				{
+					unsigned posInRead = getOccurrences(it)[j].i2 + ofs + i;
+					if (length(freq) <= posInRead)
+						fill(freq, posInRead + 1, 0);
+					++freq[posInRead];
+				}
+				
+				for (int k = 0; k < length(freq); ++k)
+					if (freq[k] != 0)
+					{
+						if ((i + 1 == length(tmp)) && branch)
+							stats << "1\t";
+						else
+							stats << "0\t";
+						stats << ofs + i + 1 << '\t' << nodeDepth(it) << '\t' << tmp[i];
+						stats << '\t' << k << '\t' << freq[k] << '\t';// << representative(it) << '\t' << tmp << endl;
+						stats << endl;					}
+			}
+			++it;
+		}
+		stats.close();
+		cout << "Done." << endl;
+		exit(0);
+	}
+			
 	if (genomeLength == 0.0)
 	{
 #ifdef MEDIAN		
-		while(level < toLevel){
-		//int logRation = (log10(length(setReads)/2))/(log10(4));
-		//int l = logRation + 1;
-		//cout << l << endl;
+		for (; level < toLevel; ++level)
+		{
+			//int logRation = (log10(length(setReads)/2))/(log10(4));
+			//int l = logRation + 1;
+			//cout << l << endl;
+			
 			cargo(myIndex).replen_min = level;
 			cargo(myIndex).replen_max = level+2; 	
 			cargo(myIndex).frequency = frequency;
 			double nbOccurence = 0.0; 
 			
-			median << level <<" "<< medianLevel(myConstrainedIterator) << endl;
+			median << level << " " << medianLevel(myConstrainedIterator) << endl;
 			goBegin(myConstrainedIterator);
-			while (!atEnd(myConstrainedIterator)){
-				if(parentRepLength(myConstrainedIterator)>level){
+			while (!atEnd(myConstrainedIterator))
+			{
+				if (parentRepLength(myConstrainedIterator) > level)
+				{
 					nbOccurence = countOccurrences(myConstrainedIterator);
-					out << level<< " " << nbOccurence <<endl; 
+					out << level << " " << nbOccurence << endl; 
 				}
-				myConstrainedIterator++; 
+				++myConstrainedIterator;
 			}
-			level+=1;
 		}
 #else
-		//int logRation = (log10(length(setReads)/2))/(log10(4));
+		//int logRation = log10(readCount) / log10(4);
 		//int l = logRation + 1;
 		//cout << l << endl;
 		cargo(myIndex).replen_min = fromLevel;
@@ -1203,21 +875,20 @@ Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > builtSuffixAr
 
 		/*TODO the length for the reads is always the same, but for real cases it is better to change*/
 		/*estimate the genome length by the use of expected value*/
-		double readLength = length(setReads[0]);
-		double numberReads = length(setReads)/2;
+		unsigned readLength = length(store.readSeqStore[0]);
 
 		/* a = readLength - path_label + 1 */
 		/*here plus 1 also because the level is between fromLevel and toLevel*/
 		double a = readLength - fromLevel + 2;
-		double mult = numberReads*a;
+		double mult = readCount*a;
 		genomeLength = mult/expectedValueGivenLevel;
 		cout << "The estimated genome length is " << genomeLength << endl;
 #endif
 	}
 	end1 = clock();
-	cout << "#Time required for suffix array construction : "<< (double)(end1-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
+	cout << "Time required for suffix array construction : "<< (double)(end1-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
 	
-	vector<int> idCorrected;
+	vector<unsigned> idCorrected;
 	
 	/*restrictions for the searching levels*/
 	cargo(myIndex).replen_min = fromLevel;
@@ -1225,17 +896,19 @@ Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > builtSuffixAr
 	cargo(myIndex).frequency = frequency;
 
 	/*the core of the correction method*/
-	if(poisson){
+	if (poisson)
 		/*use of p-value like a limit*/
-		return searchNodePoisson(myConstrainedIterator, setReads, fastaComment, genomeLength, strictness, acceptMismatch);
-	}else{
+		searchNode(myConstrainedIterator, store, genomeLength, strictness, acceptMismatch, FionaPoisson());
+	else
 		/*use an expected value for a certain level*/
-		return searchNodeExpected(myConstrainedIterator, setReads, fastaComment, genomeLength, strictness, acceptMismatch);
-	}
+		searchNode(myConstrainedIterator, store, genomeLength, strictness, acceptMismatch, FionaExpected());
+	
+	// remove reverse complements
+	resize(store.readSeqStore, readCount);
 }
 
-int main(int argc, char* argv[]) { 
-
+int main(int argc, char* argv[]) 
+{ 
 	clock_t start, end;
 	
 	start = clock();
@@ -1249,8 +922,8 @@ int main(int argc, char* argv[]) {
 	bool programmeOprions = true;
 
 	/*the levels between the search will take place*/
-	int fromLevel = 0;
-	int toLevel = 0;
+	unsigned fromLevel = 0;
+	unsigned toLevel = 0;
 
 	/*the methode that will be use*/
 	bool poisson=false;
@@ -1261,15 +934,15 @@ int main(int argc, char* argv[]) {
 	double strictness = 0.0001;
 	
 	/**number accepted mismatch - default value 1*/
-	int acceptMismatch = 1;
+	unsigned acceptMismatch = 1;
 
-	String<char> file = "";
-	String<char> fileOutPutReadsErrorsCorrected = "";
+	String<char> inFileName = "";
+	String<char> outFileName = "";
 
 	/*default value*/
-	int nbcycle = 3;
+	unsigned numCycles = 3;
 	bool expected = false;
-	for(int i = 1; i < length(argv); ++i){
+	for (unsigned i = 1; i < length(argv); ++i){
 		String<char> option = argv[i];
 		
 		if(strcmp(toCString(option[0]), "-")==0){
@@ -1300,8 +973,8 @@ int main(int argc, char* argv[]) {
 					cout << "The p-value is set to " << strictness << endl;
 					i+=2;
 				}else if(strcmp(toCString(option),"-i")==0){
-					nbcycle = atoi(argv[i+1]);
-					cout << "The number of cycle is set to " << nbcycle << endl;
+					numCycles = atoi(argv[i+1]);
+					cout << "The number of cycle is set to " << numCycles << endl;
 					i+=2;
 				}else if(strcmp(toCString(option),"-l")==0){
 					fromLevel = atoi(argv[i+1]);
@@ -1333,90 +1006,58 @@ int main(int argc, char* argv[]) {
 		if(!poisson && !expected){
 			poisson = true;
 		}
-		file = argv[i];
-		fileOutPutReadsErrorsCorrected = argv[i+1];
+		inFileName = argv[i];
+		outFileName = argv[i+1];
 		break;		
 	}
 	
 	
-	cout << " " <<endl;
-	/*reading the input file and initialisation an array with all reads and their reverse complement*/
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileData = createStringSetFromFile(file);
+	cout << endl;
 	
-	/*reads*/
-	StringSet<String<Dna> > setReads = fileData.i1;
-	/*the comments from input file for each reads*/
-	StringSet<String<char> > fastaComment = fileData.i2;
+	// load original set of reads
+	TFionaFragStore store;
+	loadReads(store, inFileName);
 	
-	/*initialise the top and down level by using the log4 from the total number of reads*/
-	if(fromLevel==0){
-		
-		int logRation = (log10(length(setReads)/2.0))/(log10(4.0));
+	// initialise the top and down level by using the log4 from the total number of reads
+	if (fromLevel==0)
+	{
+		int logRation = log10(length(store.readSeqStore)) / log10(4.0);
 		fromLevel = logRation + 2;
 		toLevel   = fromLevel + 10;
 		cout << "The top level is " << fromLevel << " and the down level is " << toLevel <<endl;
 	}
-	cout << " " <<endl;
-	int cmp = 0;
+	cout << endl;
 
-	Pair<StringSet<String<Dna>,Owner < > >, StringSet<String<char> > > fileReadsAndComment;
-	while(nbcycle > cmp){
-		cmp++;
-		cout << "Cycle "<< cmp <<" from "<< nbcycle<<endl;
- 
-		/*if that is last cycle or if nbcycle equal 1*/
-		if(cmp==nbcycle){
-			fileReadsAndComment = builtSuffixArray(setReads,genomeLength, poisson, strictness, fromLevel, toLevel, fileOutPutReadsErrorsCorrected, fastaComment, acceptMismatch);
-			setReads = fileReadsAndComment.i1;
-			fastaComment = fileReadsAndComment.i2;
-		}else{
-			fileReadsAndComment = builtSuffixArray(setReads,genomeLength, poisson, strictness, fromLevel, toLevel, fileOutPutReadsErrorsCorrected, fastaComment, acceptMismatch);
-			setReads = fileReadsAndComment.i1;
-			fastaComment = fileReadsAndComment.i2;
-			
-			/*make a new table with the data, because certain are changed*/
-			StringSet<String<Dna> > newSetReads;
-			resize(newSetReads,length(setReads));
-			
-			for(int i=0; i < length(setReads); ++i){
-				newSetReads[i] = setReads[i];
-				Dna5StringReverseComplement revCompl(setReads[i]);
-				newSetReads[i+1] = revCompl;
-				i+=1;
-			}
-			setReads = newSetReads;
-			if(acceptMismatch>0){
-				acceptMismatch--;
-			} 
-			
-		}
+	for (unsigned cycle = 1; cycle <= numCycles; ++cycle)
+	{
+		cout << "Cycle "<< cycle <<" from "<< numCycles << endl;
+		correctReads(store, genomeLength, poisson, strictness, fromLevel, toLevel, acceptMismatch);
+		
+		if (acceptMismatch > 0) --acceptMismatch;			
+
 		/*TODO maybe to stop if there is not reads corrected in the cycle before*/
 		/*if so after each iteration must save the ID for the reads which are corrected*/
 		/*thus we can also show the total number of reads that are corrected at the final stage*/
 	}
 	
 	/*write in file all input reads with the corrected one*/
-	ofstream out(toCString(fileOutPutReadsErrorsCorrected));
-	int comment = 0;
-	int nbCorrected = 0;
-	for(int i=0; i < length(setReads); ++i){
+	ofstream out(toCString(outFileName));
+	int numCorrected = 0;
+	for (unsigned i = 0; i < length(store.readNameStore); ++i)
+	{
 		/*to give the number of reads corrected for several iteration*/ 
-		if(strContains(toCString(fastaComment[comment]), "corrected")){
-			nbCorrected+=1;
-		}
-		out << fastaComment[comment]<<endl;
-		out << setReads[i]<<endl;
-		i+=1;
-		comment++;
-	}
-	end = clock();
-	cout << " "<< endl;
-	if(nbcycle != 1){
-		cout << "Total number reads corrected for " <<nbcycle << " cycles is " << nbCorrected <<endl; 
-	}
-		
+		if (strContains(toCString(store.readNameStore[i]), "corrected"))
+			++numCorrected;
 
-	cout << "Time required for execution: "<< (double)(end-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
+		out << ">" << store.readNameStore[i]<<endl;
+		out << store.readSeqStore[i] << endl;
+	}
+
+	if (numCycles > 1)
+		cout << "Total number reads corrected for " << numCycles << " cycles is " << numCorrected <<endl; 
+
+	end = clock();
+	cout << endl << "Time required for execution: "<< (double)(end-start)/CLOCKS_PER_SEC << " seconds." << "\n\n";
 
 	return 0;
 }
