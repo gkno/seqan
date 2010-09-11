@@ -873,6 +873,145 @@ typedef Tag<TagFastq_> const Fastq;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
+// File Formats - Raw (multiple sequences, separated by line breaks)
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.File Format.tag.Raw:
+	Raw file format for sequences.
+..include:seqan/file.h
+*/
+struct TagRaw_;
+typedef Tag<TagRaw_> const Raw;
+
+	// test for Fastq format
+	template < typename TSeq >
+	inline bool
+	guessFormat(
+		TSeq const & seq,
+		Raw)
+	{
+		return true;
+	}
+	
+	template < typename TFilename >
+	inline bool
+	guessFormatFromFilename(
+		TFilename const & fname,
+		Raw)
+	{
+		typedef typename Value<TFilename>::Type									TValue;
+		typedef ModifiedString<TFilename, ModView<FunctorLowcase<TValue> > >	TLowcase;
+		
+		typename Size<TFilename>::Type len = length(fname);
+		TLowcase lowcaseFname(fname);
+
+		if (len >= 3)
+		{
+			if (suffix(lowcaseFname, len - 3) == ".txt") return true;
+		}
+		if (len >= 6)
+		{
+			if (suffix(lowcaseFname, len - 6) == ".seq") return true;
+		}
+		return false;
+	}
+	
+	// split stringset into single Fasta sequences
+	template < typename TValue, typename TConfig, typename TDelimiter >
+	inline void
+	split(
+		StringSet<String<TValue, MMap<TConfig> >, Owner<ConcatDirect<TDelimiter> > > &me, 
+		Raw)
+	{
+		typedef String<TValue, MMap<TConfig> >						TString;
+		typedef StringSet<TString, ConcatDirect<TDelimiter> >		TStringSet;
+		typedef typename Iterator<TString const, Standard>::Type	TIterator;
+
+		clear(me.limits);
+
+		TIterator itBeg = begin(me.concat, Standard());
+		TIterator itEnd = end(me.concat, Standard());
+		bool newLine = true;
+		for (TIterator it = itBeg; it != itEnd; ++it)
+		{
+			if (newLine)
+				appendValue(me.limits, it - itBeg, Generous());
+			newLine = _isLineBreak(*it);
+		}
+		appendValue(me.limits, itEnd - itBeg);
+	}
+
+	template <typename TSeq, typename TRawSeq>
+	inline void
+	assignSeq(
+		TSeq & dst,
+		TRawSeq const & fasta,
+		Raw)
+	{
+		typedef typename Iterator<TRawSeq const, Standard>::Type	TIterator;
+		typedef typename Iterator<TSeq, Standard>::Type				TDstIterator;
+
+		TIterator it = begin(fasta, Standard());
+		TIterator itEnd = end(fasta, Standard());
+
+		clear(dst);
+		if (it == itEnd) return;
+
+		// copy sequence
+		resize(dst, itEnd - it);		
+		TDstIterator dit = begin(dst, Standard());
+		for (; it != itEnd; ++it) 
+		{
+			if (_isLineBreak(*it)) continue;
+			*dit = *it;
+			++dit;
+		}
+		resize(dst, dit - begin(dst, Standard()));
+	}
+	
+  	template <typename TSeq, typename TRawSeq>
+	inline void
+	assignSeqId(
+		TSeq & dst,
+		TRawSeq const &,
+		Raw)
+	{
+		clear(dst);
+	}
+	
+  	template <typename TSeq, typename TRawSeq>
+	inline void
+	assignCroppedSeqId(
+		TSeq & dst,
+		TRawSeq const &,
+		Raw)
+	{
+		clear(dst);
+	}
+	
+  	template <typename TSeq, typename TRawSeq>
+	inline void
+	assignQual(
+		TSeq & dst,
+		TRawSeq const &,
+		Raw)
+	{
+		clear(dst);
+	}
+	
+  	template <typename TSeq, typename TRawSeq>
+	inline void
+	assignQualId(
+		TSeq & dst,
+		TRawSeq const &,
+		Raw)
+	{
+		clear(dst);
+	}
+	
+
+//////////////////////////////////////////////////////////////////////////////
 // File Formats - Auto-Format
 //////////////////////////////////////////////////////////////////////////////
 
@@ -887,13 +1026,15 @@ typedef Tag<TagFastq_> const Fastq;
 	typedef
 		TagList<Fastq,
 		TagList<Fasta,
-		TagList<QSeq> > >  SeqFormats;
+		TagList<QSeq,
+		TagList<Raw> > > > 						SeqFormats;
 */
 
 	typedef
 		TagList<Fastq,
 		TagList<Fasta,
-		TagList<QSeq> > > 						SeqFormats;
+		TagList<QSeq,
+		TagList<Raw> > > > 						SeqFormats;
 	typedef TagSelector<SeqFormats>				AutoSeqFormat;
 
 //____________________________________________________________________________
