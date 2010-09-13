@@ -452,7 +452,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 appendValue(tmp, read[j]);
                 assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
-                // std::cout << back(tmp) << " " << read[j] << std::endl;
+                //std::cout << back(tmp) << " " << read[j] << " " << inst.qualities[i] << std::endl;
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
@@ -470,16 +470,23 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 //x = ordValue(c);
                 appendValue(tmp, c);
                 if (options.illuminaNoN)  // Ns can be introduced through quality, too.
-                  assignQualityValue(back(tmp), _min(1, inst.qualities[i]));
+                  assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
                 else
                   assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
-                // std::cout << back(tmp) << std::endl;
+                //std::cout << "MM " << c << " " << back(tmp) << " " << inst.qualities[i] << std::endl;
                 j += 1;
+                break;
             case ERROR_TYPE_INSERT:
-                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.illuminaNoN)
+                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
+                else
+                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
+                if (options.illuminaNoN)  // Ns can be introduced through quality, too.
+                  assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
+                else
+                  assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " insertion" << std::endl;
                 break;
             case ERROR_TYPE_DELETE:
