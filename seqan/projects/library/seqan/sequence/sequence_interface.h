@@ -1134,6 +1134,65 @@ SEQAN_CHECKPOINT
 } 
 
 //////////////////////////////////////////////////////////////////////////////
+// insert
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.insert:
+..cat:Content Manipulation
+..summary:Inserts a sequence into a container.
+..signature:insert(target, pos, insertSeq [, resize_tag])
+..param.target:The container
+..param.pos:Position within $target$ at which $insertSeq$ is to be inserted.
+..param.insertSeq:Sequence that will be inserted into $target$.
+..param.resize_tag:Strategy that is applied if $target$ has not enough capacity to store the complete content.
+...type:Tag.Overflow Strategy
+..see:Function.insertValue
+..see:Function.append
+*/
+
+template <typename T, typename TPosition, typename TSeq, typename TExpand>
+inline void
+insert(T & me, 
+       TPosition pos, 
+       TSeq const & insertSeq,
+       Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+	replace(me, pos, pos, insertSeq, Tag<TExpand>());
+}
+
+template <typename T, typename TPosition, typename TSeq, typename TExpand>
+inline void
+insert(T const & me, 
+       TPosition pos, 
+       TSeq const & insertSeq,
+       Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+	replace(me, pos, pos, insertSeq, Tag<TExpand>());
+}
+
+template <typename T, typename TPosition, typename TSeq>
+inline void
+insert(T & me, 
+       TPosition pos, 
+       TSeq const & insertSeq)
+{
+SEQAN_CHECKPOINT
+	replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T>::Type());
+}
+
+template <typename T, typename TPosition, typename TSeq>
+inline void
+insert(T const & me, 
+       TPosition pos, 
+       TSeq const & insertSeq)
+{
+SEQAN_CHECKPOINT
+	replace(me, pos, pos, insertSeq, typename DefaultOverflowImplicit<T const>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // insertValue
 //////////////////////////////////////////////////////////////////////////////
 /**
@@ -1146,7 +1205,7 @@ SEQAN_CHECKPOINT
 ..param.value:Value that will be inserted into $target$.
 ..param.resize_tag:Strategy that is applied if $target$ has not enough capacity to store the complete content.
 ...type:Tag.Overflow Strategy
-..see:Function.assignValue
+..see:Function.insert
 ..see:Function.appendValue
 */
 
