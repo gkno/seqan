@@ -259,7 +259,7 @@ int main(int argc, const char *argv[]) {
     // Perform Counting On Result Indices, Yield ComparisonResult.
     // =================================================================
     ComparisonResult comparisonResult;
-    evaluateFoundIntervals(comparisonResult, witStore, result, options);
+    evaluateFoundIntervals(comparisonResult, witStore, result, fragments, options);
 
     // =================================================================
     // Write Output.

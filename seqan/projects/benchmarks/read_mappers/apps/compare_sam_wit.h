@@ -491,16 +491,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     if (options.showHitIntervals || options.showMissedIntervals) {
         for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
             bool found = intervalsInResult.find(value(it).id) != intervalsInResult.end();
-            // TODO(holtgrew): Missed intervals are buggy. Shows missed for this read, but does not take hits of other reads into consideration.  Can only be shown after all reads have been matched.
-            if (!found && options.showMissedIntervals) {
-                std::cout << "log> {\"type\": \"log.missed_interval"
-                          << "\", \"interval_id\": " << value(it).id
-                          << ", \"contig_id\": \"" << fragments.contigNameStore[contigId]
-                          << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
-                          << "\", \"read_id\": \"" << fragments.readNameStore[readId]
-                          << "\", \"interval_first\": " << value(it).firstPos
-                          << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
-            } else if (found && options.showHitIntervals) {
+			if (found && options.showHitIntervals) {
                 std::cout << "log> {\"type\": \"log.hit_interval"
                           << "\", \"interval_id\": " << value(it).id
                           << ", \"contig_id\": \"" << fragments.contigNameStore[contigId]
@@ -640,11 +631,13 @@ typedef Tag<_CategoryAllBest> CategoryAllBest;
 // [beginIntervalsForRead, endIntervalsForRead) that have the error
 // rate options.maxError.  The intervals are sorted by (read id,
 // error rate).
+template <typename TFragmentStore>
 void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
                                                WitStore & witStore,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
+                                               TFragmentStore const & fragments,
                                                Options const & options,
                                                CategoryAll const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
@@ -663,17 +656,29 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
 
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
         comparisonResult.totalIntervalCount += 1;
-        comparisonResult.foundIntervalCount += std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+        bool found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+        comparisonResult.foundIntervalCount += found;
+        if (!found && options.showMissedIntervals) {
+            std::cout << "log> {\"type\": \"log.missed_interval"
+                      << "\", \"interval_id\": " << value(it).id
+                      << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
+                      << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
+                      << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
+                      << "\", \"interval_first\": " << value(it).firstPos
+                      << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
+        }
     }
 }
 
 
+template <typename TFragmentStore>
 void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
                                                WitStore & witStore,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
-                                               Options const & /*options*/,
+                                               TFragmentStore const & fragments,
+                                               Options const & options,
                                                CategoryAnyBest const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
         return;  // Guard: Skip if interval range empty.
@@ -697,21 +702,35 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
     comparisonResult.totalIntervalCount += 1;
 
     // Now, try to find one of the intervals.
+    bool found = true;
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
         if (std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id)) {
             comparisonResult.foundIntervalCount += 1;
             break;
         }
     }
+    if (!found && options.showMissedIntervals) {
+      for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
+          std::cout << "log> {\"type\": \"log.missed_interval"
+                    << "\", \"interval_id\": " << value(it).id
+                    << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
+                    << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
+                    << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
+                    << "\", \"interval_first\": " << value(it).firstPos
+                    << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
+      }
+    }
 }
 
 
+template <typename TFragmentStore>
 void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResult,
                                                WitStore & witStore,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
-                                               Options const & /*options*/,
+                                               TFragmentStore const & fragments,
+                                               Options const & options,
                                                CategoryAllBest const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
         return;  // Guard: Skip if interval range empty.
@@ -734,16 +753,29 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
     // Now, try to find one of the intervals.
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
         comparisonResult.totalIntervalCount += 1;
-        comparisonResult.foundIntervalCount += std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+        bool found = false;
+        found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+        comparisonResult.foundIntervalCount += found;
+        if (!found && options.showMissedIntervals) {
+            std::cout << "log> {\"type\": \"log.missed_interval"
+                      << "\", \"interval_id\": " << value(it).id
+                      << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
+                      << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
+                      << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
+                      << "\", \"interval_first\": " << value(it).firstPos
+                      << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
+        }
     }
 }
 
 
 // Evaluate the ids in result pointing to intervals in witStore.
 // Result is written to comparisonResult.
+template <typename TFragmentStore>
 void evaluateFoundIntervals(ComparisonResult & comparisonResult,
                             WitStore & witStore,
                             String<size_t> & result,
+                            TFragmentStore const & fragments,
                             Options const & options)
 {
     typedef Iterator<String<size_t>, Standard>::Type TIdIterator;
@@ -777,11 +809,11 @@ void evaluateFoundIntervals(ComparisonResult & comparisonResult,
         // Now, depending on the configured benchmark category, perform the
         // evaluation.
         if (options.benchmarkCategory == "all") {
-            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAll());
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, fragments, options, CategoryAll());
         } else if (options.benchmarkCategory == "any-best") {
-            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAnyBest());
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, fragments, options, CategoryAnyBest());
         } else if (options.benchmarkCategory == "all-best") {
-            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, options, CategoryAllBest());
+            evaluateFoundIntervals_compareToIntervals(comparisonResult, witStore, boundsForRead.first, boundsForRead.second, result, fragments, options, CategoryAllBest());
         } else {
             SEQAN_ASSERT_FAIL("Invalid benchmark category '%s'.", toCString(options.benchmarkCategory));
         }
