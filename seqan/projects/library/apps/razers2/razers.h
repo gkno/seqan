@@ -1318,8 +1318,9 @@ matchVerify(
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
 #ifdef RAZERS_NOOUTERREADGAPS
+	TGenomeInfix origInf(inf);
 	setEndPosition(inf, endPosition(inf) - 1);
-#endif		
+#endif
 	
 	// find end of best semi-global alignment
 	while (find(myersFinder, myersPattern, minScore))
@@ -1330,7 +1331,8 @@ matchVerify(
 #ifdef RAZERS_NOOUTERREADGAPS
 		// manually adapt score depending on the last bases
 		++pos;
-		if ((pos == length(inf)) || ((verifier.options.compMask[ordValue(inf[pos])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0))
+		SEQAN_ASSERT_LT(pos, length(origInf));
+		if ((verifier.options.compMask[ordValue(origInf[pos])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
 			if (--score < minScore) continue;
 #endif		
 		if (lastPos + minDistance < pos)
@@ -1605,8 +1607,8 @@ void mapSingleReads(
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		//-i 98 -vv -id -rr 100    -of 4 -o razers100_02.sam data/saccharomyces/genome.fasta.cut    data/saccharomyces/reads_454/SRR001317.1k.fasta
-		if (store.readNameStore[verifier.m.readId] == "SRR001317.770.1")
-			std::cout<<"gotit"<<std::endl;
+//		if (store.readNameStore[verifier.m.readId] == "SRR001317.770.1")
+//			std::cout<<"gotit"<<std::endl;
 		if (!options.spec.DONT_VERIFY)
 			matchVerify(verifier, infix(swiftFinder), verifier.m.readId, readSet, TSwiftSpec());
 		++options.countFiltration;
