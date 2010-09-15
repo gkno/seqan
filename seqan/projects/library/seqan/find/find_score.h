@@ -307,6 +307,7 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPat
 	TTab & string_tab = me.data_tab;
 
 	//allocate enough memory for one column of DP matrix
+
 	TSize need_length = length(needle(me));
 	SEQAN_ASSERT(need_length);
 
