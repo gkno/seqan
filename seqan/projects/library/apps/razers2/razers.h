@@ -1288,6 +1288,7 @@ matchVerify(
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type					TRead;
+	typedef typename Prefix<TRead>::Type					TReadPrefix;
 	typedef typename Position<TGenomeInfix>::Type			TPosition;
 
 	// find read match end
@@ -1297,9 +1298,15 @@ matchVerify(
 
 	// find read match begin
 	typedef ModifiedString<TGenomeInfix, ModReverse>		TGenomeInfixRev;
-	typedef ModifiedString<TRead, ModReverse>				TReadRev;
 	typedef Finder<TGenomeInfixRev>							TMyersFinderRev;
+
+#ifdef RAZERS_NOOUTERREADGAPS
+	typedef ModifiedString<TReadPrefix, ModReverse>			TReadPrefixRev;
+	typedef Pattern<TReadPrefixRev, MyersUkkonenGlobal>		TMyersPatternRev;
+#else
+	typedef ModifiedString<TRead, ModReverse>				TReadRev;
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
+#endif
 
 	TMyersFinder myersFinder(inf);
 	TMyersPattern &myersPattern = verifier.preprocessing[readId];
@@ -1320,6 +1327,7 @@ matchVerify(
 #ifdef RAZERS_NOOUTERREADGAPS
 	TGenomeInfix origInf(inf);
 	setEndPosition(inf, endPosition(inf) - 1);
+	--ndlLength;
 #endif
 	
 	// find end of best semi-global alignment
@@ -1329,10 +1337,14 @@ matchVerify(
 		int score = getScore(myersPattern);
 		
 #ifdef RAZERS_NOOUTERREADGAPS
-		// manually adapt score depending on the last bases
-		++pos;
-		SEQAN_ASSERT_LT(pos, length(origInf));
-		if ((verifier.options.compMask[ordValue(origInf[pos])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
+		// Manually align the last base of the read
+		//
+		// In this case myersPattern contains the whole read without the
+		// last base. We compare the bases and adjust the score.
+		// We also have to adjust inf and remove the last base of the
+		// genomic region that has to be verified.
+		SEQAN_ASSERT_LT(pos + 1, length(origInf));
+		if ((verifier.options.compMask[ordValue(origInf[pos + 1])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
 			if (--score < minScore) continue;
 #endif		
 		if (lastPos + minDistance < pos)
@@ -1345,22 +1357,36 @@ matchVerify(
 				verifier.q.errors = -maxScore;
 
 				// find beginning of best semi-global alignment
-				TGenomeInfixRev		infRev(inf);
 				setEndPosition(inf, verifier.m.endPos = (beginPosition(inf) + maxPos + 1));
+
+#ifdef RAZERS_NOOUTERREADGAPS
+				// The best score must be corrected to hold the score of the prefix w/o the last read base
+				if ((verifier.options.compMask[ordValue(origInf[maxPos + 1])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
+					++maxScore;
+
+				TReadPrefixRev		readRev(prefix(readSet[readId], ndlLength));
+				TMyersPatternRev	myersPatternRev(readRev);
+#else
+				TReadRev			readRev(readSet[readId]);
+				TMyersPatternRev	myersPatternRev(readRev);
+#endif
 
 				// limit the beginning to needle length plus errors (== -maxScore)
 				if (length(inf) > ndlLength - maxScore)
 					setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
 				
-				TReadRev			readRev(readSet[readId]);
+				TGenomeInfixRev		infRev(inf);
 				TMyersFinderRev		myersFinderRev(infRev);
-				TMyersPatternRev	myersPatternRev(readRev);
 
 				_patternMatchNOfPattern(myersPatternRev, verifier.options.matchN);
 				_patternMatchNOfFinder(myersPatternRev, verifier.options.matchN);
 				while (find(myersFinderRev, myersPatternRev, /*score*/maxScore))
 					verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
+#ifdef RAZERS_NOOUTERREADGAPS
+				// The match end position must be increased by the omitted base.
+				++verifier.m.endPos;
+#endif
 				verifier.push();
 				setBeginPosition(inf, infBeginPos);
 				setEndPosition(inf, infEndPos);
@@ -1374,12 +1400,24 @@ matchVerify(
 		}
 		lastPos = pos;
 	}
-	
+
 	if (minScore <= maxScore)
 	{
 		verifier.q.pairScore = verifier.q.score = maxScore;
 		verifier.q.errors = -maxScore;
 		setEndPosition(inf, verifier.m.endPos = (beginPosition(inf) + maxPos + 1));
+
+#ifdef RAZERS_NOOUTERREADGAPS
+		// The best score must be corrected to hold the score of the prefix w/o the last read base
+		if ((verifier.options.compMask[ordValue(origInf[maxPos + 1])] & verifier.options.compMask[ordValue(back(readSet[readId]))]) == 0)
+			++maxScore;
+
+		TReadPrefixRev		readRev(prefix(readSet[readId], ndlLength));
+		TMyersPatternRev	myersPatternRev(readRev);
+#else
+		TReadRev			readRev(readSet[readId]);
+		TMyersPatternRev	myersPatternRev(readRev);
+#endif
 
 		// limit the beginning to needle length plus errors (== -maxScore)
 		if (length(inf) > ndlLength - maxScore)
@@ -1387,15 +1425,17 @@ matchVerify(
 		
 		// find beginning of best semi-global alignment
 		TGenomeInfixRev		infRev(inf);
-		TReadRev			readRev(readSet[readId]);
 		TMyersFinderRev		myersFinderRev(infRev);
-		TMyersPatternRev	myersPatternRev(readRev);
 
 		_patternMatchNOfPattern(myersPatternRev, verifier.options.matchN);
 		_patternMatchNOfFinder(myersPatternRev, verifier.options.matchN);
 		while (find(myersFinderRev, myersPatternRev, maxScore))
 			verifier.m.beginPos = verifier.m.endPos - (position(myersFinderRev) + 1);
 
+#ifdef RAZERS_NOOUTERREADGAPS
+		// The match end position must be increased by the omitted base.
+		++verifier.m.endPos;
+#endif
 		if (!verifier.oneMatchPerBucket)
 			verifier.push();
 		return true;

@@ -633,7 +633,9 @@ void dumpMatches(
 	}
 
 	
+#ifndef RAZERS_DONTMASKDUPLICATES
 	maskDuplicates(store);
+#endif
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
