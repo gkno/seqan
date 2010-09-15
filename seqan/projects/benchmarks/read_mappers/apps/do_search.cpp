@@ -32,7 +32,8 @@ int main(int argc, char **argv) {
             continue;
         if (endPosition(finder) > length(contig))
             continue;
-        findBegin(finder, pattern, getScore(pattern));
+		while (findBegin(finder, pattern, getScore(pattern)))
+			continue;
 
         std::cout << "end = " << endPosition(finder) << ", begin = " << beginPosition(finder) << ", last = " << endPosition(finder) - 1 << ", score = " << getScore(pattern) << std::endl;
         Align<Segment<Dna5String, InfixSegment> > ali;

@@ -253,11 +253,13 @@ inline bool findBegin(TFinder & finder,
     int lastCharScore = - (me._lastCharacter != haystack(finder)[endPos]);
     // Go back one with the finder because of the "last character is compared manually" trick.
     goPrevious(finder);
+	finder.data_endPos -= 1;
     finder.data_length -= 1;
     // We have to incorporate the last character's score into limit
     // used for the wrapped pattern's findBegin().
     bool res = findBegin(finder, me._wrappedPattern, limit - lastCharScore);
     goNext(finder);
+	finder.data_endPos += 1;
     finder.data_length += 1;
     return res;
 }
