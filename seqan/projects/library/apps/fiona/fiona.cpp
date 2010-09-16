@@ -1,5 +1,5 @@
-#define SEQAN_DEBUG_INDEX
-#define SEQAN_DEBUG
+//#define SEQAN_DEBUG_INDEX
+//#define SEQAN_DEBUG
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
 #define SEQAN_PROFILE					// enable time measuring
@@ -76,14 +76,14 @@ struct FionaOptions
 	};
 
 	typedef FragmentStore<void, FionaStoreConfig> TFionaFragStore;
-	
+
 #else
-	
+
 	typedef FragmentStore<> TFionaFragStore;
-	
+
 #endif
 
-typedef Index<TFionaFragStore::TReadSeqStore/*, Index_Wotd<>*/ > TFionaIndex; 
+typedef Index<TFionaFragStore::TReadSeqStore, Index_Wotd<> > TFionaIndex; 
 
 namespace seqan  {
 
@@ -94,7 +94,7 @@ namespace seqan  {
 		 map<unsigned,double> frequency;
 		 bool _cachedPred; 
 	}; 
-		
+
 	template <>
 	struct Cargo<TFionaIndex> { 
 		typedef FionaNodeConstraints Type; 
@@ -358,7 +358,6 @@ void applyReadErrorCorrections(
 	for (unsigned readId = 0; it != itEnd; ++it, ++readId)
 		if ((*it).overlap != 0)
 		{
-			
 			ostringstream m;
 			if (strContains(toCString(store.readNameStore[readId]), "corrected"))
 				m << "," << (*it).errorPos;
@@ -369,6 +368,10 @@ void applyReadErrorCorrections(
 			_dumpCorrection(store, *it, readId);
 #endif
 			append(store.readNameStore[readId], m.str());
+			
+			if (store.readSeqStore[readId] == "AGGGGGAAATATGATCGCGTATGCGAGAGTAGTGCC")
+				cout<<"OK"<<endl;
+			
 			if ((*it).indelLength == 0)
 				store.readSeqStore[readId][(*it).errorPos] = store.readSeqStore[(*it).correctReadId][(*it).correctPos];
 #ifdef FIONA_ALLOWINDELS
@@ -458,7 +461,7 @@ void traverseAndSearchCorrections(
 	}
 	
 	String<TCorrected> corrections;
-	TCorrected zeroCorr = {0, 0, 0, 0, 0, 0, 0};
+	TCorrected zeroCorr = {0, 0, 0, 0, 0, 0, 0, 0};
 	fill(corrections, readCount, zeroCorr);
 
 	String<TOccs> correctCandidates;
@@ -512,9 +515,9 @@ void traverseAndSearchCorrections(
 		TOccsIterator errorReadEnd = end(errorCandidates, Standard());
 		for (; errorRead != errorReadEnd; ++errorRead)
 		{
-			bool dbg = store.readSeqStore[(*errorRead).i1] == "AACAATACTCAATAGCATAACTTTTCCACCGTTCG";
 			unsigned errorReadId = (*errorRead).i1;
 			if (errorReadId >= readCount) errorReadId -= readCount;
+//			bool dbg = store.readSeqStore[errorReadId] == "AGGGGGAAATATGATCGCGTATGCGAGAGTAGTGCC";
 
 			// is already identify as erroneus
 			TCorrected &corr = corrections[errorReadId];
@@ -527,10 +530,11 @@ void traverseAndSearchCorrections(
 			// the position where the error is
 			unsigned positionError = (*errorRead).i2 + commonPrefix;
 			int maxOverlapPossible = commonPrefix + length(store.readSeqStore[errorReadId]) - positionError - 1;
-			if (dbg) std::cout<<"errorReadId:"<<errorReadId<<std::endl;
-			if (dbg) std::cout<<"maxOverlapPossible:"<<maxOverlapPossible<<std::endl;
-			if (dbg) std::cout<<"corr.overlap:"<<corr.overlap<<std::endl;
-			if (dbg) std::cout<<"positionError:"<<positionError<<std::endl;
+//			if (dbg) std::cout<<"errorReadId:"<<errorReadId<<std::endl;
+//			if (dbg) std::cout<<"maxOverlapPossible:"<<maxOverlapPossible<<std::endl;
+//			if (dbg) std::cout<<"corr.overlap:"<<corr.overlap<<std::endl;
+//			if (dbg) 
+//			std::cout<<"positionError:"<<positionError<<std::endl;
 			if (corr.overlap > maxOverlapPossible) continue;
 
 			unsigned bestReadId = 0;
@@ -607,7 +611,7 @@ void traverseAndSearchCorrections(
 								if (mismatches > bestMismatches)
 									continue;
 								
-								if (mismatches == bestMismatches && length(correctCandidates[c]) > bestOccurrences)
+								if (mismatches == bestMismatches && length(correctCandidates[c]) < bestOccurrences)
 									continue;
 							}
 
@@ -617,11 +621,13 @@ void traverseAndSearchCorrections(
 							bestOverlap = overlap;
 							bestMismatches = mismatches;
 							bestIndelLength = indel;
-			if (dbg) std::cout<<"bestReadId:"<<bestReadId<<std::endl;
-			if (dbg) std::cout<<"bestOccurrences:"<<bestOccurrences<<std::endl;
-			if (dbg) std::cout<<"bestCorrectPos:"<<bestCorrectPos<<std::endl;
-			if (dbg) std::cout<<"bestOverlap:"<<bestOverlap<<std::endl;
-			if (dbg) std::cout<<"bestIndelLength:"<<bestIndelLength<<std::endl;
+//			if (dbg) std::cout<<"bestReadId:"<<bestReadId<<std::endl;
+//			if (dbg) std::cout<<"bestOccurrences:"<<bestOccurrences<<std::endl;
+//			if (dbg) std::cout<<"bestCorrectPos:"<<bestCorrectPos<<std::endl;
+//			if (dbg) std::cout<<"bestOverlap:"<<bestOverlap<<std::endl;
+//			if (dbg)
+//			 std::cout<<"bestIndelLength:"<<bestIndelLength<<std::endl;
+
 //					cout <<"corr:"<<store.readSeqStore[(*corrRead).i1]<<endl;
 //					cout <<"err: "<<store.readSeqStore[(*errorRead).i1]<<endl;
 						}
@@ -688,7 +694,8 @@ void traverseAndSearchCorrections(
 				corr.overlap = bestOverlap;
 				corr.mismatches = bestMismatches;
 				corr.indelLength = bestIndelLength;
-			if (dbg) _dumpCorrection(store, corr, errorReadId);			}
+//			if (dbg) _dumpCorrection(store, corr, errorReadId);			
+			}
 		}
 	}
 	cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << endl;
@@ -913,7 +920,7 @@ int main(int argc, const char* argv[])
 	addOption(parser, CommandLineOption("p",  "pvalue",            "use p-value correction with given strictness", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "levels", 2,         "set lower and upper bound for suffix tree DFS", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("g",  "genome-length",     "set the length of the underlying genome", OptionType::Int | OptionType::Label));
-	addOption(parser, CommandLineOption("m",  "mismatches",        "set the number of accepted mismatches per read", OptionType::Int | OptionType::Label));
+	addOption(parser, CommandLineOption("m",  "mismatches",        "set the number of accepted mismatches per read", OptionType::Int | OptionType::Label, options.acceptedMismatches));
 	addOption(parser, CommandLineOption("i",  "iterations",        "set the number of error correction iterations", OptionType::Int | OptionType::Label, options.cycles));
 #ifdef FIONA_ALLOWINDELS
 	addOption(parser, CommandLineOption("id", "indel-length",      "set the maximum length of an indel", OptionType::Int | OptionType::Label, options.maxIndelLength));
@@ -1006,7 +1013,7 @@ int main(int argc, const char* argv[])
 		if (strContains(toCString(store.readNameStore[i]), "corrected"))
 			++numCorrected;
 
-		out << /*">" << */store.readNameStore[i]<<endl;
+		out << '>' << store.readNameStore[i]<<endl;
 		out << store.readSeqStore[i] << endl;
 	}
 
