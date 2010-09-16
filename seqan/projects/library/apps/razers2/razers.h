@@ -276,7 +276,7 @@ struct MicroRNA{};
 		typedef Pair<
 			unsigned,				
 			unsigned,
-			BitCompressed<24, 8>	// max. 16M reads of length < 256
+			BitCompressed<22, 10>	// max. 4M reads of length < 1024
 		> Type;
 	};
 	
