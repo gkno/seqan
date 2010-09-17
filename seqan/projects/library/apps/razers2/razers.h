@@ -1371,9 +1371,17 @@ matchVerify(
 				TMyersPatternRev	myersPatternRev(readRev);
 #endif
 
-				// limit the beginning to needle length plus errors (== -maxScore)
-				if (length(inf) > ndlLength - maxScore)
+//				// limit the beginning to needle length plus errors (== -maxScore)
+//				if (length(inf) > ndlLength - maxScore)
+//					setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+
+				// we eventually have to search before the beginning of our parallelogram
+				// otherwise alignments of an island in the previous parallelogram
+				// could be cut and prevent that an island in this parallelgram is found
+				if (endPosition(inf) > (unsigned)(ndlLength - maxScore))
 					setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+				else
+					setBeginPosition(inf, 0);
 				
 				TGenomeInfixRev		infRev(inf);
 				TMyersFinderRev		myersFinderRev(infRev);
@@ -1419,9 +1427,17 @@ matchVerify(
 		TMyersPatternRev	myersPatternRev(readRev);
 #endif
 
-		// limit the beginning to needle length plus errors (== -maxScore)
-		if (length(inf) > ndlLength - maxScore)
+//		// limit the beginning to needle length plus errors (== -maxScore)
+//		if (length(inf) > ndlLength - maxScore)
+//			setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+
+		// we eventually have to search before the beginning of our parallelogram
+		// otherwise alignments of an island in the previous parallelogram
+		// could be cut and prevent that an island in this parallelgram is found
+		if (endPosition(inf) > (unsigned)(ndlLength - maxScore))
 			setBeginPosition(inf, endPosition(inf) - ndlLength + maxScore);
+		else
+			setBeginPosition(inf, 0);
 		
 		// find beginning of best semi-global alignment
 		TGenomeInfixRev		infRev(inf);
