@@ -3,7 +3,7 @@
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
 #define SEQAN_PROFILE					// enable time measuring
-//#define FIONA_ALLOWINDELS
+#define FIONA_ALLOWINDELS
 
 #include <iostream>
 #include <fstream>
@@ -40,7 +40,6 @@ struct FionaCorrectedError
 	unsigned short overlap;
 	unsigned char  mismatches;
 	signed   char  indelLength;		// 0..mismatch, <0..deletion, >0..insertion
-	bool reverse;
 };
 
 struct FionaOptions
@@ -326,7 +325,6 @@ inline void _dumpCorrection(
 {
 	cout << endl;
 	cout << "indelLen: " << (int)correction.indelLength << endl;
-	cout << "reversed: " << correction.reverse << endl;
 	cout << "corrId:   " << correction.correctReadId << endl;
 	cout << "errorId:  " << errorReadId << endl;
 	cout << "overlap:  " << correction.overlap << endl;
@@ -368,9 +366,6 @@ void applyReadErrorCorrections(
 			_dumpCorrection(store, *it, readId);
 #endif
 			append(store.readNameStore[readId], m.str());
-			
-			if (store.readSeqStore[readId] == "AGGGGGAAATATGATCGCGTATGCGAGAGTAGTGCC")
-				cout<<"OK"<<endl;
 			
 			if ((*it).indelLength == 0)
 				store.readSeqStore[readId][(*it).errorPos] = store.readSeqStore[(*it).correctReadId][(*it).correctPos];
@@ -425,6 +420,7 @@ void traverseAndSearchCorrections(
 	typedef typename Infix<TSA const>::Type TOccs;
 	typedef typename Iterator<TOccs, Standard>::Type TOccsIterator;
 	typedef typename Value<TReadSet>::Type TRead;
+	typedef typename Value<TRead>::Type TValue;
 	typedef typename Iterator<TRead, Standard>::Type TReadIterator;
 	typedef FionaCorrectedError TCorrected;
 	
@@ -461,10 +457,11 @@ void traverseAndSearchCorrections(
 	}
 	
 	String<TCorrected> corrections;
-	TCorrected zeroCorr = {0, 0, 0, 0, 0, 0, 0, 0};
+	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
 	fill(corrections, readCount, zeroCorr);
 
 	String<TOccs> correctCandidates;
+	const TValue unknownChar = unknownValue<TValue>();
 
 	SEQAN_PROTIMESTART(search);
 	for (goBegin(iter); !atEnd(iter); goNext(iter))		// do a DFS walk
@@ -472,7 +469,8 @@ void traverseAndSearchCorrections(
 		int commonPrefix = parentRepLength(iter);			// length of parent label
 
 		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheorical));
-		if (!potentiallyErroneousNode(countOccurrences(iter), expectedTheorical[commonPrefix+1], options.strictness, alg))
+		if (parentEdgeFirstChar(iter) != unknownChar &&
+			!potentiallyErroneousNode(countOccurrences(iter), expectedTheorical[commonPrefix+1], options.strictness, alg))
 			continue;
 		
 		//
@@ -499,6 +497,7 @@ void traverseAndSearchCorrections(
 		do
 		{
 			if (value(iter).range != value(iterSibling).range &&
+				parentEdgeFirstChar(iterSibling) != unknownChar &&
 				!potentiallyErroneousNode(countOccurrences(iterSibling), expectedTheorical[commonPrefix + 1], options.strictness, alg))
 			{
 				// save the id and position(where the suffix begin in the reads) in the table of IDs correct
@@ -517,7 +516,7 @@ void traverseAndSearchCorrections(
 		{
 			unsigned errorReadId = (*errorRead).i1;
 			if (errorReadId >= readCount) errorReadId -= readCount;
-//			bool dbg = store.readSeqStore[errorReadId] == "AGGGGGAAATATGATCGCGTATGCGAGAGTAGTGCC";
+//			bool dbg = store.readSeqStore[errorReadId] == "AGAGATATTCAGATTGCCTCTCATTGTCTCTCCCAT";
 
 			// is already identify as erroneus
 			TCorrected &corr = corrections[errorReadId];
@@ -544,12 +543,19 @@ void traverseAndSearchCorrections(
 			unsigned bestMismatches = 0;
 			int bestIndelLength = 0;
 			
+			TReadIterator itEBegin = begin(store.readSeqStore[(*errorRead).i1], Standard());
+			TReadIterator itEEnd = end(store.readSeqStore[(*errorRead).i1], Standard());
+			
 			for (unsigned c = 0; c < length(correctCandidates); ++c)
 			{
 				TOccsIterator corrRead = begin(correctCandidates[c], Standard());
 				TOccsIterator corrReadEnd = end(correctCandidates[c], Standard());
 				for (; corrRead != corrReadEnd; ++corrRead)
 				{
+//				if (store.readSeqStore[(*corrRead).i1] == "TTCAGATTGCCTCTCATTGTCTCACCCATATTATGG")
+//			std::cout<<"ok"<<std::endl;
+//				if (dbg) std::cout<<store.readSeqStore[(*corrRead).i1]<<std::endl;
+			
 					/*if not already correct by the same reads*/
 					/*if(mapID!=allErrors.end()){
 					
@@ -562,12 +568,12 @@ void traverseAndSearchCorrections(
 					unsigned positionCorrect = (*corrRead).i2 + commonPrefix;
 										
 					/*search the position detect as erroneous at the level of the read*/
-					TReadIterator itEEnd = end(store.readSeqStore[(*errorRead).i1], Standard());
 					TReadIterator itCEnd = end(store.readSeqStore[(*corrRead).i1], Standard());
+					unsigned acceptedMismatches;
 					
 					for (int indel = -options.maxIndelLength; indel <= options.maxIndelLength; ++indel)
 					{
-						TReadIterator itE = begin(store.readSeqStore[(*errorRead).i1], Standard());
+						TReadIterator itE = itEBegin;
 						TReadIterator itC = begin(store.readSeqStore[(*corrRead).i1], Standard());
 						
 						if (indel == 0)
@@ -575,32 +581,35 @@ void traverseAndSearchCorrections(
 							// mismatch
 							itE += positionError + 1;
 							itC += positionCorrect + 1;
+							acceptedMismatches = options.acceptedMismatches;
 						}
 						else if (indel > 0)
 						{
 							// insert in erroneous read
 							itE += positionError + indel;
 							itC += positionCorrect;
+							acceptedMismatches = 0;
 						} 
 						else
 						{
 							// deletion in erroneous read
 							itE += positionError;
 							itC += positionCorrect - indel;
+							acceptedMismatches = 0;
 						}
 						
-						unsigned overlap = commonPrefix;
 						unsigned mismatches = 0;
-						
-						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC, ++overlap)
+						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC)
 							if (*itE != *itC)
 							{
-								if (++mismatches > options.acceptedMismatches)
+								if (++mismatches > acceptedMismatches)
 									break;
 							}
 
-						if (itE == itEEnd || itC == itCEnd)
+						if (mismatches <= acceptedMismatches)
 						{
+							unsigned overlap = commonPrefix + (itE - itEBegin);
+							
 							if (overlap < bestOverlap)
 								continue;
 							
@@ -627,6 +636,8 @@ void traverseAndSearchCorrections(
 //			if (dbg) std::cout<<"bestOverlap:"<<bestOverlap<<std::endl;
 //			if (dbg)
 //			 std::cout<<"bestIndelLength:"<<bestIndelLength<<std::endl;
+//			
+//			if(dbg) std::cout<<"corrRead:"<<store.readSeqStore[bestReadId]<<std::endl;
 
 //					cout <<"corr:"<<store.readSeqStore[(*corrRead).i1]<<endl;
 //					cout <<"err: "<<store.readSeqStore[(*errorRead).i1]<<endl;
@@ -658,8 +669,8 @@ void traverseAndSearchCorrections(
 					else
 						bestCorrectPos -= -bestIndelLength;
 					rev = true;
-		TTreeIterator iterSibling(iter);
-		goUp(iterSibling);
+//		TTreeIterator iterSibling(iter);
+//		goUp(iterSibling);
 //					std::cout << "common:"<<representative(iterSibling)<<endl;
 //					cout <<"corr:"<<store.readSeqStore[bestReadId]<<endl;
 //					cout <<"err: "<<store.readSeqStore[errorReadId]<<endl;
@@ -687,7 +698,6 @@ void traverseAndSearchCorrections(
 
 				// update best correction
 				corr.correctReadId = bestReadId;
-				corr.reverse = rev;
 				corr.occurrences = bestOccurrences;
 				corr.errorPos = positionError;
 				corr.correctPos = bestCorrectPos;
@@ -881,8 +891,6 @@ void correctReads(
 		cout << "The estimated genome length is " << options.genomeLength << endl;
 #endif
 	}
-	
-	vector<unsigned> idCorrected;
 	
 	/*restrictions for the searching levels*/
 	cargo(myIndex).replen_min = options.fromLevel;
