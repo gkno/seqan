@@ -37,6 +37,8 @@
     -ss, --sequences START END      select sequences (default: select all)
     -i,  --infix START END          extract infix
     -rc, --revcomp                  reverse complement
+    -l, --max-length                maximal number of sequence characters to
+                                    write out
   ===========================================================================*/
 
 #include <fstream>
@@ -65,6 +67,7 @@ using namespace seqan;
 	bool		optionFastQ = false;
     bool        optionSeqNameSet = false;
     CharString  optionSeqName = "";
+    int         optionMaxLength = -1;
 
 	typedef Dna5 TAlphabet;
 	typedef String<TAlphabet> TSeqString;
@@ -147,9 +150,12 @@ template <
 	typename TSeq >
 void dumpFastaSeq(
 	TStream &out,
+    int &n,
 	TSeq &seq)
 {
-	unsigned size = length(seq);
+    SEQAN_ASSERT_GEQ(n, 0);
+	unsigned size = _min(length(seq), static_cast<unsigned>(n));
+    n -= size;
 	unsigned i;
 	for (i = 0; i + 60 < size; i += 60)
 		out << infix(seq, i, i + 60) << endl;
@@ -175,16 +181,16 @@ void saveFasta(
 			return;
 		}
 		else
-			cout << "Writing reads to " << optionOutput << "\n";
+			cout << "Writing sequences to " << optionOutput << "\n";
 		out = &file;
 	}
 
 	unsigned reads = length(readSet);
-	for(unsigned i = 0; i < reads; ++i)
+	for(unsigned i = 0; i < reads && optionMaxLength != 0; ++i)
 	{
 		(*out) << '>';
 		dumpFastaId(*out, readIDs[i]);
-		dumpFastaSeq(*out, readSet[i]);
+		dumpFastaSeq(*out, optionMaxLength, readSet[i]);
 	}
 	
 	file.close();
@@ -215,14 +221,15 @@ void saveFastq(
 	}
 
 	unsigned reads = length(readSet);
-	for(unsigned i = 0; i < reads; ++i)
+	for(unsigned i = 0; i < reads && optionMaxLength != 0; ++i)
 	{
+        int tmp = optionMaxLength;
 		(*out) << '@';
 		dumpFastaId(*out, readIDs[i]);
-		dumpFastaSeq(*out, readSet[i]);
+		dumpFastaSeq(*out, optionMaxLength, readSet[i]);
 		(*out) << '+';
 		dumpFastaId(*out, readIDs[i]);
-		dumpFastaSeq(*out, qualSet[i]);
+		dumpFastaSeq(*out, tmp, qualSet[i]);
 	}
 	
 	file.close();
@@ -248,6 +255,7 @@ void printHelp(int, const char *[], bool longHelp = false)
 		cerr << "  -ss, --sequences START END    \t" << "select sequences (default: select all)" << endl;
 		cerr << "  -i,  --infix START END        \t" << "extract infix" << endl;
 		cerr << "  -rc, --revcomp                \t" << "reverse complement" << endl;
+		cerr << "  -l, --max-length              \t" << "maximal number of sequence characters" << endl;
 	} else {
 		cerr << "Try 'sak --help' for more information." << endl;
 	}
@@ -374,6 +382,15 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 
+            if (strcmp(argv[arg], "-l") == 0 || strcmp(argv[arg], "--max-length") == 0) {
+                if (arg + 1 < argc) {
+                    ++arg;
+					istringstream istr(argv[arg]);
+					istr >> optionMaxLength;
+                    continue;
+                }
+			}
+            
 			if (strcmp(argv[arg], "-h") == 0 || strcmp(argv[arg], "--help") == 0) {
 				// print help
 				printHelp(argc, argv, true);
