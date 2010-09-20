@@ -484,7 +484,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
             readAlignmentCount = alignedReadsBeginEnd.second - alignedReadsBeginEnd.first;
 
             // Ignore reads that have more than 10% errors.
-            unsigned maxErrors = static_cast<unsigned>(0.1 * length(fragmentStore.readSeqStore[refAlignedRead.readId]));
+            //unsigned maxErrors = static_cast<unsigned>(0.1 * length(fragmentStore.readSeqStore[refAlignedRead.readId]));
             // computeBogusReads(bogusAlignmentIds, alignedReadId, alignedReadsBeginEnd.first, alignedReadsBeginEnd.second, fragmentStore, maxErrors);
             // size_t bogusAlignmentCount = bogusAlignmentIds.size();
             // readAlignmentCount -= bogusAlignmentCount;
