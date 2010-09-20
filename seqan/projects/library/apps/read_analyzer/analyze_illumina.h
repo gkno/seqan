@@ -449,7 +449,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
     typedef typename Iterator<TAlignedReadStore, Standard>::Type TAlignedReadsIter;
     typedef typename TFragmentStore::TContigStore TContigStore;
     typedef typename TFragmentStore::TReadSeqStore TReadSeqStore;
-    typedef typename TFragmentStore::TReadSeq TReadSeq;
+    typedef typename Value<TReadSeqStore>::Type TReadSeq;
     typedef typename Value<TContigStore>::Type TContigStoreElement;
     typedef typename Value<TAlignedReadStore>::Type TAlignedReadStoreElement;
     typedef typename TAlignedReadStoreElement::TGapAnchors TReadGapAnchors;
@@ -471,7 +471,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
 
     size_t alignedReadId = 0;
     unsigned readAlignmentCount = 0;
-    std::set<size_t> bogusAlignmentIds;
+    // std::set<size_t> bogusAlignmentIds;
     for (TAlignedReadsIter it = begin(fragmentStore.alignedReadStore, Standard()); it != end(fragmentStore.alignedReadStore, Standard()); ++it, ++alignedReadId) {
         // Maybe need to re-count number of reads, if at next read id.
         if (it->readId != refAlignedRead.readId) {
@@ -485,15 +485,15 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
 
             // Ignore reads that have more than 10% errors.
             unsigned maxErrors = static_cast<unsigned>(0.1 * length(fragmentStore.readSeqStore[refAlignedRead.readId]));
-            computeBogusReads(bogusAlignmentIds, alignedReadId, alignedReadsBeginEnd.first, alignedReadsBeginEnd.second, fragmentStore, maxErrors);
-            size_t bogusAlignmentCount = bogusAlignmentIds.size();
-            readAlignmentCount -= bogusAlignmentCount;
+            // computeBogusReads(bogusAlignmentIds, alignedReadId, alignedReadsBeginEnd.first, alignedReadsBeginEnd.second, fragmentStore, maxErrors);
+            // size_t bogusAlignmentCount = bogusAlignmentIds.size();
+            // readAlignmentCount -= bogusAlignmentCount;
         }
         // Maybe ignore bogus read.
-        if (bogusAlignmentIds.find(alignedReadId) != bogusAlignmentIds.end())
-            continue;
+        // if (bogusAlignmentIds.find(alignedReadId) != bogusAlignmentIds.end())
+        //     continue;
         // Get contig and read sequences.
-        TContigSeq const & contigSeq = fragmentStore.contigStore[it->contigId].seq;
+        TContigSeq & contigSeq = fragmentStore.contigStore[it->contigId].seq;
         TReadSeq readSeq = fragmentStore.readSeqStore[it->readId];
         // Get gaps for contig and read.
         TContigGaps contigGaps(contigSeq, fragmentStore.contigStore[it->contigId].gaps);
