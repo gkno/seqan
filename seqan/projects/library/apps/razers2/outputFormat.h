@@ -1159,7 +1159,7 @@ void dumpMatches(
 			}
 			break;
 		case 4: // SAM
-			convertMatchesToGlobalAlignment(store, scoreType);
+			convertMatchesToGlobalAlignment(store, scoreType, True());
 			/*{
 			String<String<unsigned> > layout;
 			layoutAlignment(layout, store, 0);
@@ -1169,7 +1169,7 @@ void dumpMatches(
 			write(file, store, SAM());
 			break;
 		case 5: // AFG
-			convertMatchesToGlobalAlignment(store, scoreType);
+			convertMatchesToGlobalAlignment(store, scoreType, True());
 			write(file, store, Amos());
 			break;
 	}
