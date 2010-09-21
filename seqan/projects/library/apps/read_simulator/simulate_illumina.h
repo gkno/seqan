@@ -1,3 +1,26 @@
+/*==========================================================================
+  SeqAn - The Library for Sequence Analysis
+  http://www.seqan.de 
+  ===========================================================================
+  Copyright (C) 2010
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+  
+  ===========================================================================
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ===========================================================================
+  Code specific to the simulation of Illumina reads.
+  ===========================================================================
+*/
+
 #ifndef SIMULATE_ILLUMINA_H_
 #define SIMULATE_ILLUMINA_H_
 
@@ -392,7 +415,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     // Adjust Positions.
     //
 
-    // If the number of reads does not equal the number of inserts
+    // If the number of deletions does not equal the number of inserts
     // then we have to adjust the read positions.
     if (inst.delCount != inst.insCount) {
         int delta = static_cast<int>(inst.delCount) - static_cast<int>(inst.insCount);

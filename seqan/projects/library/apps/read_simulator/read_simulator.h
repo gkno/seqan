@@ -1,4 +1,25 @@
-/* Globally shared code. */
+/*==========================================================================
+  SeqAn - The Library for Sequence Analysis
+  http://www.seqan.de 
+  ===========================================================================
+  Copyright (C) 2010
+  
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 3 of the License, or (at your option) any later version.
+  
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  Lesser General Public License for more details.
+  
+  ===========================================================================
+  Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+  ===========================================================================
+  Globally shared code for the read simulator.
+  ===========================================================================
+*/
 
 #ifndef READ_SIMULATOR_H_
 #define READ_SIMULATOR_H_
@@ -20,7 +41,8 @@ using namespace seqan;
 // Enum describing the read type to be simulated.
 enum ReadsType {
     READS_TYPE_ILLUMINA,
-    READS_TYPE_454
+    READS_TYPE_454,
+    READS_TYPE_SANGER
 };
 
 typedef void Global;
@@ -472,91 +494,6 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     }
     return 0;
 }
-
-// Taken from akemde's read simulator.
-#ifdef USE_LOGVALUES
-
-	template <typename TValue>
-	inline long double
-	_transform(TValue a)
-	{
-		return log(a);
-	}
-
-	template <typename TValue>
-	inline long double
-	_transformBack(TValue a)
-	{
-		return exp(a);
-	}
-
-	//////////////////////////////////////////////////////////////////////////////
-	// Returns the sum of two probability values in log space
-	template <typename TValue>
-	inline void
-	_probAdd(TValue &a, TValue b)
-	{
-		if (isinf(a)) {
-			a = b;
-			return;
-		}
-		if (isinf(b)) return;
-		if (isnan(a + log(1 + exp(b - a)))) return;
-		a += log(1 + exp(b - a));
-	}
-
-	template <typename TValue>
-	inline TValue
-	_probMul(TValue a, TValue b)
-	{
-		return a + b;
-	}
-
-	template <typename TValue>
-	inline TValue
-	_probDiv(TValue a, TValue b)
-	{
-		return a - b;
-	}
-
-#else  // USE_LOGVALUES
-
-	template <typename TValue>
-	inline TValue
-	_transform(TValue a)
-	{
-		return a;
-	}
-
-	template <typename TValue>
-	inline TValue
-	_transformBack(TValue a)
-	{
-		return a;
-	}
-
-	template <typename TValue>
-	inline void
-	_probAdd(TValue &a, TValue b)
-	{
-		a += b;
-	}
-
-	template <typename TValue>
-	inline TValue
-	_probMul(TValue a, TValue b)
-	{
-		return a * b;
-	}
-
-	template <typename TValue>
-	inline TValue
-	_probDiv(TValue a, TValue b)
-	{
-		return a / b;
-	}
-
-#endif  // USE_LOGVALUES
 
 template <typename TRNG>
 void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
