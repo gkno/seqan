@@ -1605,8 +1605,8 @@ Gaps introduced by these pair-wise alignments are then inserted to the affected 
 ..remarks:The invariant that positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space holds before (there were no gaps in alignments) and after calling this functions.
 */
 
-template <typename TSpec, typename TConfig, typename TScore>
-void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore const & score)
+template <typename TSpec, typename TConfig, typename TScore, typename TShrinkMatches>
+void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScore const & score, TShrinkMatches const &)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 
@@ -1660,7 +1660,11 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		resize(rows(align), 2);
 		assignSource(row(align, 0), infix(store.contigStore[(*it).contigId].seq, cBegin, cEnd));
 		assignSource(row(align, 1), readSeq);
-		globalAlignment(align, score);
+		if (TYPECMP<TShrinkMatches, True>::VALUE) {
+		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
+        } else {
+		    globalAlignment(align, score);
+        }
 
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGaps, cBegin);
