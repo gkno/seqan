@@ -52,12 +52,12 @@ typedef Tag<UCSC_<UCSC_KNOWN_ISOFORMS_> > const UCSC_ISOFORMS;
     _parse_readUCSCIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
-        append(str, c);
+        appendValue(str, c);
         while (!_streamEOF(file)) 
 		{
             c = _streamGet(file);
             if (c == ' ' || c == '\t' || c == '\n') return;
-            append(str, c);
+            appendValue(str, c);
         }
     }
 

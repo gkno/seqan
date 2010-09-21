@@ -1878,7 +1878,7 @@ void convertPairWiseToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TCon
 
 		// 3. Iterate over alignment
 		setBeginPosition(contigGapsGlobal, cBegin);
-		
+
 		TContigGlobalIter cIt = begin(contigGapsGlobal);
 		TContigPWIter pIt = begin(contigGapsPW);
 		TReadIter rIt = begin(readGaps);

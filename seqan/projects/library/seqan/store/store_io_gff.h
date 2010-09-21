@@ -48,12 +48,12 @@ typedef Tag<TagGTF_> const GTF;
     _parse_readGffIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
-        append(str, c);
+        appendValue(str, c);
         while (!_streamEOF(file)) 
 		{
             c = _streamGet(file);
             if (c == ' ' || c == '\t' || c == '\n') return;
-            append(str, c);
+            appendValue(str, c);
         }
     }
 	
@@ -79,12 +79,12 @@ typedef Tag<TagGTF_> const GTF;
     _parse_readGFFKeyValue(TFile & file, TKeyString & key, TValueString & value, TChar& c)
     {
 		if (c == ' ' || c == '\t' || c == '\n' || c == '=') return false;
-        append(key, c);
+        appendValue(key, c);
         while (!_streamEOF(file)) 
 		{
             c = _streamGet(file);
             if (c == ' ' || c == '\t' || c == '\n' || c == '=') break;
-            append(key, c);
+            appendValue(key, c);
         }
 		_parse_skipSpace(file, c);
 		if (c == '=')
@@ -96,7 +96,7 @@ typedef Tag<TagGTF_> const GTF;
 		if (c == '"')
 		{
 			c = _streamGet(file);
-			append(value, c);
+			appendValue(value, c);
 			while (!_streamEOF(file)) 
 			{
 				c = _streamGet(file);
@@ -106,7 +106,7 @@ typedef Tag<TagGTF_> const GTF;
 					if (!_streamEOF(file)) c = _streamGet(file);
 					break;
 				}
-				append(value, c);
+				appendValue(value, c);
 			}
 			if (c == ';')
 			{
@@ -115,7 +115,7 @@ typedef Tag<TagGTF_> const GTF;
 		}
 		else
 		{
-			append(value, c);
+			appendValue(value, c);
 			while (!_streamEOF(file)) 
 			{
 				c = _streamGet(file);
@@ -125,7 +125,7 @@ typedef Tag<TagGTF_> const GTF;
 					if (!_streamEOF(file)) c = _streamGet(file);
 					return true;
 				}
-				append(value, c);
+				appendValue(value, c);
 			}
 		}
 		return true;

@@ -53,6 +53,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TOperation			operation;
 		TCount				count;
+
+		CigarElement() : operation(0), count(0) {}
 		
 		CigarElement(TOperation o, TCount c):
 			operation(o),
@@ -149,7 +151,7 @@ namespace SEQAN_NAMESPACE_MAIN
             TCount count = _parse_readNumber(file, c);
 			if (c >= 'a' && c <= 'z')
 				c = c + 'A' - 'a';
-            append(cigar, TCigarElement(c, count));
+            appendValue(cigar, TCigarElement(c, count));
             
             c = _streamGet(file);
             if (c == ' ' || c == '\t' || c == '\n') break;
@@ -164,12 +166,12 @@ namespace SEQAN_NAMESPACE_MAIN
     _parse_readSamIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
-        append(str, c);
+        appendValue(str, c);
         while (!_streamEOF(file)) 
 		{
             c = _streamGet(file);
             if (c == ' ' || c == '\t' || c == '\n') return;
-            append(str, c);
+            appendValue(str, c);
         }
     }
     
@@ -196,10 +198,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
         if (!_parse_is_dna(first))
 			return;
-        append(str, first, Generous());
+        appendValue(str, first, Generous());
         
         for (; !_streamEOF(file) && _parse_is_dna(c); c = _streamGet(file))
-            append(str, c, Generous());
+            appendValue(str, c, Generous());
     }
         
 //////////////////////////////////////////////////////////////////////////////
@@ -259,7 +261,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // read all chars till '\n'
         while (c != '\n')
         {
-            append(str, c, Generous());
+            appendValue(str, c, Generous());
 			if (_streamEOF(file)) return;
 	        c = _streamGet(file);
         }
@@ -287,7 +289,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
         TId id = length(fragStore.alignedReadStore);
         TAlignedElement alignedElem = TAlignedElement(id, readId, contigId, beginPos, endPos, gaps);
-        append(fragStore.alignedReadStore, alignedElem);
+        appendValue(fragStore.alignedReadStore, alignedElem);
 		
 		return id;
     }
@@ -471,7 +473,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		q.score = supremumValue(q.score);
         int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
         for(int i = 0; i < diff; ++i)
-            append(fragStore.alignQualityStore, q, Generous());
+            appendValue(fragStore.alignQualityStore, q, Generous());
 		
         diff = length(fragStore.alignedReadStore) - length(fragStore.alignedReadTagStore);
         for(int i = 0; i < diff; ++i)
@@ -653,7 +655,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (flag & 0x40)	// store mate info only for the first read in the pair
 			{
 				TMatchMateInfo matchMateInfo = {readId, mcontigId, pairMatchId, mPos};
-				append(matchMateInfos, matchMateInfo);
+				appendValue(matchMateInfos, matchMateInfo);
 				back(fragStore.alignedReadStore).pairMatchId = pairMatchId;
 			}
 		}
