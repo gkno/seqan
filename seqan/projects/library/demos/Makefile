@@ -8,9 +8,9 @@ endif
 CPPFLAGS += -I$(SEQAN)
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CPPFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
-CPPFLAGS += -O3
+#CPPFLAGS += -O3
 CPPFLAGS += -W -Wall -pedantic -Wno-variadic-macros
-
+CPPFLAGS += -g -O0
 all: $(basename $(wildcard *.cpp))
 index: $(basename $(wildcard index_*.cpp))
 graph: $(basename $(wildcard graph_*.cpp))

@@ -93,12 +93,12 @@ int main()
 {
 	resize(block1, blockSize);
 	resize(block2, blockSize);
-	cout << "awrite() using FILE*        ";		testThroughput< FILE* >				("file_speed1.bin");
-	cout << "awrite() using sync. File   ";		testThroughput< File< Sync<> > >	("file_speed2.bin");
-	cout << "awrite() using async. File  ";		testThroughput< File< Async<> > >	("file_speed3.bin");
-	cout << "ExtString using FILE*       ";		testExtString< FILE* >				("file_speed4.bin");
-	cout << "ExtString using sync. File  ";		testExtString< File< Sync<> > >		("file_speed5.bin");
-	cout << "ExtString using async. File ";		testExtString< File< Async<> > >	("file_speed6.bin");
-	cout << "Memory Mapped String        ";		testMMapString< File< Async<> > >	("file_speed7.bin");
+	cout << "awrite() using FILE*        ";		testThroughput< FILE* >				("/tmp/file_speed1.bin");
+	cout << "awrite() using sync. File   ";		testThroughput< File< Sync<> > >	("/tmp/file_speed2.bin");
+	cout << "awrite() using async. File  ";		testThroughput< File< Async<> > >	("/tmp/file_speed3.bin");
+	cout << "ExtString using FILE*       ";		testExtString< FILE* >				("/tmp/file_speed4.bin");
+	cout << "ExtString using sync. File  ";		testExtString< File< Sync<> > >		("/tmp/file_speed5.bin");
+	cout << "ExtString using async. File ";		testExtString< File< Async<> > >	("/tmp/file_speed6.bin");
+	cout << "Memory Mapped String        ";		testMMapString< File< Async<> > >	("/tmp/file_speed7.bin");
 	return 0;
 }
