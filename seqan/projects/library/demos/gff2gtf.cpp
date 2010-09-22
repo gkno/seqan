@@ -30,22 +30,27 @@ int main(int argc, const char *argv[])
 	std::ifstream inFile(toCString(getArgumentValue(parser, 0)), std::ios_base::in);
 	std::ofstream outFile(toCString(getArgumentValue(parser, 1)), std::ios_base::out);
 
-	if (!read(inFile, store, GFF()) && (stop = true))
-		std::cerr << "Failed to load annotation." << std::endl;
+	if (!inFile.is_open() && (stop = true))
+		std::cerr << "Failed to open annotation infile for reading." << std::endl;
+	else
+		read(inFile, store, GFF());
 
 	if (!stop)
-		if (isSetLong(parser, "gff"))
+	{
+		if (!outFile.is_open() && (stop = true))
+			std::cerr << "Failed to open annotation outfile for writing." << std::endl;
+		else
 		{
-			if (!write(outFile, store, GFF()) && (stop = true))
-				std::cerr << "Failed to write annotation." << std::endl;
-		} else {
-			if (!write(outFile, store, GTF()) && (stop = true))
-				std::cerr << "Failed to write annotation." << std::endl;
+			if (isSetLong(parser, "gff"))
+				write(outFile, store, GFF());
+			else
+				write(outFile, store, GTF());
 		}
+	}
 	
 	if (stop)
 	{
-		cerr << "Exiting ..." << endl;
+		std::cerr << "Exiting ..." << std::endl;
 		return 1;
 	}
 
