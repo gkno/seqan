@@ -1,7 +1,7 @@
 /*==========================================================================
   SeqAn - The Library for Sequence Analysis
   http://www.seqan.de 
-  ===========================================================================
+ ===========================================================================
   Copyright (C) 2010
   
   This library is free software; you can redistribute it and/or
@@ -14,11 +14,11 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
   
-  ===========================================================================
+ ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-  ===========================================================================
+ ===========================================================================
   Code for uniformly distributed random number generation.
-  ===========================================================================
+ ===========================================================================
 */
 
 #ifndef SEQAN_RANDOM_RANDOM_UNIFORM_H_
@@ -30,6 +30,7 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
+// Specialization tag for uniform distribution.
 template <typename T>
 struct Uniform;
 
@@ -37,6 +38,15 @@ struct Uniform;
 // Classes
 // ===========================================================================
 
+/**
+.Spec.Uniform PDF
+..signature:PDF<Uniform<T> >
+..general:Class.PDF
+..summary:Uniform distribution probability density function over a closed interval [min, max].
+..param.T:Type of the values the PDF is defined on.
+..cat:Random
+..include:seqan/random.h
+*/
 template <typename T>
 class PDF<Uniform<T> >
 {
@@ -44,6 +54,17 @@ public:
     T _min;
     T _max;
 
+// TODO(holtgrew): Switch to [begin, end) instead of [min, max] style?
+/**
+.MemfuncUniform PDF #PDF
+..class:Spec.Uniform PDF
+..summary:Constructor for uniform PDF.
+..signature:PDF<Uniform<T> >(min, max)
+..param.min:Smallest value of interval.
+...type:nolink:T
+..param.max:Largest value of interval.
+...type:nolink:T
+*/
     PDF(T min, T max)
             : _min(min), _max(max)
     {
@@ -96,9 +117,6 @@ _pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, False const &)
     return pdf._min + (x - pdf._min) * (pdf._max - pdf._min);
 }
 
-/*
-..summary:Pick a uniformly distributed random number.
-*/
 template <typename TRNG, typename T>
 inline
 typename Value<PDF<Uniform<T> > >::Type

@@ -29,25 +29,44 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
+// Tag for selecting a mersenne twister.
 struct MersenneTwister {};
 
+// Forward declaration for mersenne twister, needed for _initialize.
 template <>
 class RNG<MersenneTwister>;
 
+// Forward declaration for _initialize, needed for RNG<MersenneTwister>'s
+// constructor.
 inline void _initialize(RNG<MersenneTwister> & mt, unsigned seed);
 
 // ===========================================================================
 // Classes
 // ===========================================================================
 
+/**
+.Spec.Mersenne Twister RNG
+..general:Class.RNG
+..summary:Mersenne Twister 19937 Random Number Generator
+..cat:Random
+..include:seqan/random.h
+*/
 template <>
 class RNG<MersenneTwister>
 {
 public:
     unsigned long _buffer[SEQAN_MERSENNE_MT_LEN];
-	int _index;
+	  int _index;
 
 
+/**
+.Memfunc.Mersenne Twister RNG#RNG
+..class:Spec.Mersenne Twister RNG
+..summary:Constructor Mersenne Twister RNG.
+..signature:RNG<MersenneTwister>([seed])
+..param.seed:Seed for the initialization of the Mersenne Twister, defaults to 0.
+...type:nolink:double.
+*/
     RNG() : _index(0)
     {
         SEQAN_CHECKPOINT;
@@ -97,7 +116,6 @@ struct InfimumValue<RNG<MersenneTwister> >
 
 const Value<RNG<MersenneTwister> >::Type InfimumValue<RNG<MersenneTwister> >::VALUE = InfimumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
 
-
 template <>
 struct InfimumValue<const RNG<MersenneTwister> > : InfimumValue<RNG<MersenneTwister> > {};
 
@@ -105,9 +123,6 @@ struct InfimumValue<const RNG<MersenneTwister> > : InfimumValue<RNG<MersenneTwis
 // Functions
 // ===========================================================================
 
-/*
-..summary:Pick a random number from the mersenne twister.
-*/
 inline unsigned
 pickRandomNumber(RNG<MersenneTwister> & mt)
 {
@@ -139,8 +154,16 @@ pickRandomNumber(RNG<MersenneTwister> & mt)
 }
 
 
-/*
+/**
+.Internal._initalize
 ..summary:Initialize Mersenne Twister's state with the given seed.
+..cat:Random
+..include:seqan/random.h
+..signature:_initialize(mt, seed)
+..param.mt:Mersenne Twister to initialize.
+...type:Spec.Mersenne Twister RNG
+..param.seed:Seed for the initialization.
+...type:nolink:unsigned
 */
 inline void
 _initialize(RNG<MersenneTwister> & mt, unsigned seed)

@@ -166,7 +166,7 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
     RNG<MersenneTwister> mt(42);
     PDF<Uniform<double> > pdf(0, 1);
 
-    double sum;
+    double sum = 0;
     for (unsigned i = 0; i < 10000; ++i) {
         double x = pickRandomNumber(mt, pdf);
         sum += x;

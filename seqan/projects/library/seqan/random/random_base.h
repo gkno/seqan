@@ -26,11 +26,17 @@
 
 namespace seqan {
 
+// ===========================================================================
+// Forwards, Tags.
+// ===========================================================================
+
 /**
 .Class.RNG:
 ..summary:Random Number Generator
 ..signature:RNG<TSpec>
+..cat:Random
 ..param.TSpec:Random Number Generator specialization.
+..include:seqan/random.h
 */
 template <typename TSpec>
 class RNG;
@@ -39,10 +45,50 @@ class RNG;
 .Class.PDF:
 ..summary:ProbabilityDensityFunction
 ..signature:PDF<TSpec>
+..cat:Random
 ..param.TSpec:Specialization.
+..include:seqan/random.h
 */
 template <typename TSpec>
 class PDF;
+
+// ===========================================================================
+// Classes
+// ===========================================================================
+
+// ===========================================================================
+// Metafunctions
+// ===========================================================================
+
+/**
+.Metafunction.Value.param.T.type:Class.PDF
+*/
+// specification only
+
+/**
+.Metafunction.Value.param.T.type:Class.RNG
+.Metafunction.InfimumValue.param.T.type:Class.RNG
+.Metafunction.SupremumValue.param.T.type:Class.RNG
+*/
+// specification only
+
+// ===========================================================================
+// Functions
+// ===========================================================================
+
+/**
+.Function.pickRandomNumber
+..summary:Pick a random number using a random number generator object, possibly following the given distribution.
+..cat:Random
+..include:seqan/random.h
+..signature:pickRandomNumber(rng[, pdf])
+..param.rng:Random number generator to use.
+...type:Class.RNG
+..param.pdf:Probability density function to use, if any.
+...type:Class.PDF
+..returns:Random number as specified in pdf, if any, or rng.
+*/
+// specification only
 
 }  // namespace seqan
 

@@ -1,7 +1,7 @@
 /*==========================================================================
   SeqAn - The Library for Sequence Analysis
   http://www.seqan.de 
-  ===========================================================================
+ ===========================================================================
   Copyright (C) 2010
   
   This library is free software; you can redistribute it and/or
@@ -13,12 +13,12 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
-  
-  ===========================================================================
+ 
+ ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
-  ===========================================================================
+ ===========================================================================
   Code for normally distributed random number generation.
-  ===========================================================================
+ ===========================================================================
 */
 
 #ifndef SEQAN_RANDOM_RANDOM_NORMAL_H_
@@ -30,12 +30,21 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
+// Specialization Tag for normal distribution.
 struct Normal {};
 
 // ===========================================================================
 // Classes
 // ===========================================================================
 
+/**
+.Spec.Normal PDF
+..signature:PDF<Normal>
+..general:Class.PDF
+..summary:Normal probability density function.
+..cat:Random
+..include:seqan/random.h
+*/
 template <>
 class PDF<Normal>
 {
@@ -43,6 +52,16 @@ public:
     double _mu;
     double _sigma;
 
+/**
+.Memfunc.Normal PDF#PDF
+..class:Spec.Normal PDF
+..summary:Constructor for normal PDF.
+..signature:PDF<LogNormal>(mu, sigma)
+..param.mu:Mean of the normal distribution.
+...type:nolink:double
+..param.sigma:Standard deviation of the normal distribution.
+...type:nolink:double
+*/
     PDF(double mu, double sigma)
             : _mu(mu), _sigma(sigma)
     {
