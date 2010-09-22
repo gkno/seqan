@@ -115,10 +115,7 @@ typedef Tag<TagGTF_> const GTF;
 		}
 		else
 		{
-			appendValue(value, c);
-			while (!_streamEOF(file)) 
-			{
-				c = _streamGet(file);
+			do {
 				if (c == ' ' || c == '\t' || c == '\n') return true;
 				if (c == ';')
 				{
@@ -126,7 +123,9 @@ typedef Tag<TagGTF_> const GTF;
 					return true;
 				}
 				appendValue(value, c);
-			}
+				if (_streamEOF(file)) break;
+				c = _streamGet(file);
+			} while (true);
 		}
 		return true;
 	}

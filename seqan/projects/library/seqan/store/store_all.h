@@ -598,6 +598,8 @@ _storeRemoveTempAnnoNames(FragmentStore<TSpec, TConfig> & me)
 	TPosition pos = it - itBegin;
 	for (; itBegin <= it; --it, --pos)
 	{
+		if ((*it).typeId >= length(me.annotationTypeStore))
+			continue;
 		TName name = me.annotationNameStore[pos];
 		TType type = me.annotationTypeStore[(*it).typeId];
 		if (length(name) > length(type) + 3)
