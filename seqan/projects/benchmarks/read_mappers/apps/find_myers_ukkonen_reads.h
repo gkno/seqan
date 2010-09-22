@@ -88,6 +88,9 @@ public:
     // Boolean flag "find() has not been called".
     bool _firstFind;
 
+    // Mask that determines whether N is matched against all/none.
+    String<int> _matchNMask;
+
     // The whole needle, wrapped has one char less.
     //Holder<TNeedle> data_host;
 
@@ -105,8 +108,21 @@ public:
               _score(score),
               _scoreLimit(score),
               data_host(ndl),
-              _firstFind(true) /*,
+              _firstFind(true)/*,
                                 data_host(needle)*/ {
+        typedef typename Value<TNeedle>::Type TAlphabet;
+        resize(_matchNMask, ValueSize<TAlphabet>::VALUE * ValueSize<TAlphabet>::VALUE);
+
+        for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i) {
+          for (unsigned j = 0; j < ValueSize<TAlphabet>::VALUE; ++j) {
+            if (i == ordValue(TAlphabet('N')) || j == ordValue(TAlphabet('N')))
+              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = -1;
+            else if (i == j)
+              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = 0;
+            else
+              _matchNMask[ValueSize<TAlphabet>::VALUE * i + j] = -1;
+          }
+        }
         SEQAN_CHECKPOINT;
     }
 };
@@ -117,6 +133,10 @@ void _patternMatchNOfPattern(Pattern<TNeedle, MyersUkkonenReads> & me, bool matc
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfPattern(me._wrappedPattern, match);
+
+    typedef typename Value<TNeedle>::Type TAlphabet;
+    for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i)
+        me._matchNMask[ValueSize<TAlphabet>::VALUE * i + ordValue(TAlphabet('N'))] = match ? 0 : -1;
 }
 
 
@@ -125,6 +145,10 @@ void _patternMatchNOfFinder(Pattern<TNeedle, MyersUkkonenReads> & me, bool match
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfFinder(me._wrappedPattern, match);
+    
+    typedef typename Value<TNeedle>::Type TAlphabet;
+    for (unsigned i = 0; i < ValueSize<TAlphabet>::VALUE; ++i)
+        me._matchNMask[ValueSize<TAlphabet>::VALUE * ordValue(TAlphabet('N')) + i] = match ? 0 : -1;
 }
 
 
@@ -216,7 +240,8 @@ inline bool find(TFinder &finder, Pattern<TNeedle, MyersUkkonenReads> &me) {
         if (endPos == length(haystack(finder)))
             return false;
         // Compute the current score.
-        int lastCharScore = - (me._lastCharacter != haystack(finder)[endPos]);
+        typedef typename Value<TNeedle>::Type TAlphabet;
+        int lastCharScore = me._matchNMask[ordValue(me._lastCharacter) + ValueSize<TAlphabet>::VALUE * ordValue(haystack(finder)[endPos])];
         me._score = getScore(me._wrappedPattern) + lastCharScore;
     } while (me._score < scoreLimit(me));
 

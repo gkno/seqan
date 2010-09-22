@@ -230,8 +230,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_EQ(endPos, endPosition(finder));
         SEQAN_ASSERT_GEQ(getScore(pattern), -maxError);
-        ret = findBegin(finder, pattern, getScore(pattern));
-        SEQAN_ASSERT_TRUE(ret);
+        while (findBegin(finder, pattern, getScore(pattern)))
+            continue;  // Find leftmost begin position.
         SEQAN_ASSERT_GT(endPos, beginPosition(finder));
         SEQAN_ASSERT_EQ(getScore(pattern), getBeginScore(pattern));
 
@@ -248,8 +248,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         // Now extend to the first hit with too low score.
         bool foundWithTooLowScore = false;
         while (find(finder, pattern)) {
-            ret = findBegin(finder, pattern, getScore(pattern));
-            SEQAN_ASSERT_TRUE(ret);
+	        while (findBegin(finder, pattern, getScore(pattern)))
+    	        continue;  // Find leftmost begin position.
             if (getScore(pattern) < -maxError && beginPosition(finder) != back(tempMatches).beginPos) {
                 foundWithTooLowScore = true;
                 if (ENABLE && (ALL || readId == READID)) {
@@ -280,7 +280,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 // for the quality based DP algorithm which can suffer
                 // from "infinite inserts").
                 for (unsigned i = 0; find(finder, pattern) && i < length(read); ++i) {
-                    ret = findBegin(finder, pattern, getScore(pattern));
+			        while (findBegin(finder, pattern, getScore(pattern)))
+			            continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);
                     if (beginPosition(finder) != currentBeginPosition)
                         break;
@@ -345,8 +346,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 if (endPosition(finder) > oldTentativeLeft)
                     break;  // Could not set position of the finder left of old tentative left.
-                ret = findBegin(finder, pattern, getScore(pattern));
-                SEQAN_ASSERT_TRUE(ret);
+			    while (findBegin(finder, pattern, getScore(pattern)))
+			        continue;  // Find leftmost begin position.
                 int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                 appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 if (ENABLE && (ALL || readId == READID)) {
@@ -355,7 +356,8 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 foundTooLowScore = foundTooLowScore || (relativeScore < relativeMinScore);
                 while (find(finder, pattern) and endPosition(finder) != oldTentativeLeft) {
-                    ret = findBegin(finder, pattern, getScore(pattern));
+			        while (findBegin(finder, pattern, getScore(pattern)))
+            			continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);
                     relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));

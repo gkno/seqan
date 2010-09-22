@@ -637,7 +637,7 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
-                                               TFragmentStore const & fragments,
+                                               TFragmentStore const & /*fragments*/,
                                                Options const & options,
                                                CategoryAll const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
@@ -655,17 +655,18 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
         return;  // Guard:  Skip if there are no required intervals.
 
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
+        SEQAN_ASSERT_EQ(value(it).distance, options.maxError);
         comparisonResult.totalIntervalCount += 1;
         bool found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
         comparisonResult.foundIntervalCount += found;
         if (!found && options.showMissedIntervals) {
-            std::cout << "log> {\"type\": \"log.missed_interval"
-                      << "\", \"interval_id\": " << value(it).id
-                      << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
-                      << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
-                      << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
-                      << "\", \"interval_first\": " << value(it).firstPos
-                      << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
+            std::cout << "log> {\"type\": \"log.missed_interval";
+            std::cout          << "\", \"interval_id\": " << value(it).id;
+            std::cout          << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId];
+            std::cout          << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse");
+            std::cout          << "\", \"read_id\": \"" << value(witStore.readNames)[value(it).readId];
+            std::cout          << "\", \"interval_first\": " << value(it).firstPos;
+            std::cout           << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
         }
     }
 }
@@ -677,7 +678,7 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
-                                               TFragmentStore const & fragments,
+                                               TFragmentStore const & /*fragments*/,
                                                Options const & options,
                                                CategoryAnyBest const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
@@ -713,9 +714,9 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
       for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
           std::cout << "log> {\"type\": \"log.missed_interval"
                     << "\", \"interval_id\": " << value(it).id
-                    << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
+                    << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId]
                     << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
-                    << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
+                    << "\", \"read_id\": \"" << value(witStore.readNames)[value(it).readId]
                     << "\", \"interval_first\": " << value(it).firstPos
                     << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
       }
@@ -729,7 +730,7 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & beginIntervalsForRead,
                                                Iterator<WitStore::TIntervalStore, Standard>::Type & endIntervalsForRead,
                                                String<size_t> & result,
-                                               TFragmentStore const & fragments,
+                                               TFragmentStore const & /*fragments*/,
                                                Options const & options,
                                                CategoryAllBest const &) {
     if (beginIntervalsForRead == endIntervalsForRead)
@@ -759,9 +760,9 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
         if (!found && options.showMissedIntervals) {
             std::cout << "log> {\"type\": \"log.missed_interval"
                       << "\", \"interval_id\": " << value(it).id
-                      << ", \"contig_id\": \"" << fragments.contigNameStore[value(it).contigId]
+                      << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId]
                       << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
-                      << "\", \"read_id\": \"" << fragments.readNameStore[value(it).readId]
+                      << "\", \"read_id\": \"" << value(witStore.readNames)[value(it).readId]
                       << "\", \"interval_first\": " << value(it).firstPos
                       << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
         }

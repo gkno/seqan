@@ -45,7 +45,7 @@ TStream & operator<<(TStream & stream, IntervalOfReadOnContig const & record) {
 
 
 struct WitStore {
-    typedef StringSet<CharString> TNameSet;
+    typedef StringSet<CharString, Owner<> > TNameSet;
     typedef String<IntervalOfReadOnContig> TIntervalStore;
 
     Holder<TNameSet> readNames;
@@ -206,9 +206,9 @@ void loadWitFile(WitStore & store,
 
     // Build mapping from existing read and contig names to their indices
     // (ids) in readNames and contigNames.
-    NameStoreCache<StringSet<CharString> > readNameCache(readNames);
+    NameStoreCache<StringSet<CharString> > readNameCache(value(store.readNames));
     refresh(readNameCache);
-    NameStoreCache<StringSet<CharString> > contigNameCache(contigNames);
+    NameStoreCache<StringSet<CharString> > contigNameCache(value(store.contigNames));
     refresh(contigNameCache);
 
     // Then, load the file.
@@ -257,16 +257,20 @@ void loadWitFile(WitStore & store,
 
         // Insert record into read store.
         IntervalOfReadOnContig record;
-        getIdByName(value(store.readNames), readName, record.readId, readNameCache);
+        if (!getIdByName(value(store.readNames), readName, record.readId, readNameCache)) {
+          record.readId = length(value(store.readNames));
+          appendName(value(store.readNames), readName, readNameCache);
+          SEQAN_ASSERT_TRUE(getIdByName(value(store.readNames), readName, record.readId, readNameCache));
+        }
         record.distance = distance;
-        getIdByName(value(store.contigNames), contigName, record.contigId, contigNameCache);
+        if (!getIdByName((store.contigNames), contigName, record.contigId, contigNameCache)) {
+          record.contigId = length(value(store.contigNames));
+          appendName(value(store.contigNames), contigName, contigNameCache);
+        }
         record.isForward = isForward;
         record.firstPos = firstPos;
         record.lastPos = lastPos;
-        if (record.isForward)
-          SEQAN_ASSERT_LEQ(record.firstPos, record.lastPos);
-        else
-          SEQAN_ASSERT_LEQ(record.lastPos, record.firstPos);
+        SEQAN_ASSERT_LEQ(record.firstPos, record.lastPos);
         appendValue(store, record);
     }
 }
