@@ -38,7 +38,7 @@ int main(int argc, const char *argv[])
 	if (!stop)
 	{
 		if (!outFile.is_open() && (stop = true))
-			std::cerr << "Failed to open annotation outfile for writing." << std::endl;
+			std::cerr << "Failed to open annotation outfile for writing." << std::endl ;
 		else
 		{
 			if (isSetLong(parser, "gff"))
