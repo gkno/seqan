@@ -1365,7 +1365,10 @@ _reallocateStorage(
 	Generous)
 {
     typedef typename Size<String<TValue, TSpec> >::Type TStringSize;
-	if (static_cast<TStringSize>(new_capacity) <= capacity(me)) return 0;
+	if (static_cast<TStringSize>(new_capacity) <= capacity(me))
+	{
+		return 0;
+	}
 	else
 	{
 SEQAN_CHECKPOINT
