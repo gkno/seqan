@@ -569,12 +569,12 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
-		//std::cout << "Score: " << score << std::endl;
+		std::cout << "Score: " << score << std::endl;
 		oldScore = score;
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
-	//std::cout << "Score: " << score << std::endl;
+	std::cout << "Score: " << score << std::endl;
 
 
 

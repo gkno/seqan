@@ -157,6 +157,7 @@ value(String<TValue, TSpec> & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
+  SEQAN_ASSERT_LT(pos, length(me));
 	return *(begin(me, Standard()) + pos);
 }
 
@@ -166,6 +167,7 @@ value(String<TValue, TSpec> const & me,
 	  TPos pos)
 {
 SEQAN_CHECKPOINT
+  SEQAN_ASSERT_LT(pos, length(me));
 	return *(begin(me, Standard()) + pos);
 }
 
