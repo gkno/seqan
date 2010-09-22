@@ -45,17 +45,37 @@
 
 using namespace seqan;
 
+
+// Clear all but the contigs from the fragment store.
+template <typename TFragmentStore>
+void clearAllButContigs(TFragmentStore & fragmentStore)
+{
+  clear(fragmentStore.alignedReadStore);
+  clear(fragmentStore.alignedReadTagStore);
+  clear(fragmentStore.alignQualityStore);
+  clear(fragmentStore.annotationNameStore);
+  clear(fragmentStore.annotationStore);
+  clear(fragmentStore.libraryNameStore);
+  clear(fragmentStore.libraryStore);
+  clear(fragmentStore.matePairNameStore);
+  clear(fragmentStore.matePairStore);
+  clear(fragmentStore.readNameStore);
+  clear(fragmentStore.readSeqStore);
+  clear(fragmentStore.readStore);
+}
+
+
 int main(int argc, char **argv) {
     // Check arguments.
-    if (argc != 4 ||
+    if (argc < 4 ||
         ((argc > 2) && (CharString(argv[1]) != "illumina" && CharString(argv[1]) != "454"))) {
-        std::cerr << "Usage: read_analyzer illumina GENOME.FASTA FILE.SAM" << std::endl
+        std::cerr << "Usage: read_analyzer illumina GENOME.FASTA FILE.SAM+" << std::endl
                   << "       read_analyzer 454 GENOME.FASTA FILE.SAM" << std::endl;
         return 1;
     }
 
     // =======================================================================
-    // Load files.
+    // Load Contigs
     // =======================================================================
     typedef FragmentStore<> TFragmentStore;
     TFragmentStore fragmentStore;
@@ -67,35 +87,49 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // Load SAM file.
-    std::cerr << "Reading SAM file file " << argv[3] << " ..." << std::endl;
-    {
+    // =======================================================================
+    // Perform evaluation for each SAM file and print results.
+    // =======================================================================
+    if (CharString(argv[1]) == "illumina") {
+        ReadEvaluationResult<Illumina> readResult;
+        AlignmentEvaluationResult<Illumina> alignmentResult;
+    
+        for (int i = 3; i < argc; ++i) {
+            clearAllButContigs(fragmentStore);
+
+            // Read next SAM file.
+            std::cerr << "Reading SAM file file " << argv[i] << " ..." << std::endl;
+            std::fstream fstrm(argv[i], std::ios_base::in | std::ios_base::binary);
+            if (!fstrm.is_open()) {
+                std::cerr << "Could not open SAM file." << std::endl;
+                return 1;
+            }
+            read(fstrm, fragmentStore, SAM());
+
+            // Initialize counters.
+            if (i == 3) {
+              setReadLength(readResult, length(fragmentStore.readSeqStore[0]));
+              setReadLength(alignmentResult, length(fragmentStore.readSeqStore[0]), length(fragmentStore.contigStore));
+            }
+
+            std::cerr << "Evaluating Illumina reads..." << std::endl;
+            performReadEvaluation(readResult, fragmentStore);
+            performAlignmentEvaluation(alignmentResult, fragmentStore);
+        }
+
+        // Print evaluation results.
+        printReadEvaluationResults(readResult);
+        printAlignmentEvaluationResults(alignmentResult, fragmentStore);
+    } else {
+        // Load SAM file.
+        std::cerr << "Reading SAM file file " << argv[3] << " ..." << std::endl;
         std::fstream fstrm(argv[3], std::ios_base::in | std::ios_base::binary);
         if (!fstrm.is_open()) {
             std::cerr << "Could not open SAM file." << std::endl;
             return 1;
         }
         read(fstrm, fragmentStore, SAM());
-    }
-    std::cout << "length(fragmentStore.alignedReadStore) == " << length(fragmentStore.alignedReadStore) << std::endl;
 
-    // =======================================================================
-    // Perform evaluation and print results.
-    // =======================================================================
-    if (CharString(argv[1]) == "illumina") {
-        std::cerr << "Evaluating Illumina reads..." << std::endl;
-
-        ReadEvaluationResult<Illumina> readResult;
-        setReadLength(readResult, length(fragmentStore.readSeqStore[0]));
-        performReadEvaluation(readResult, fragmentStore);
-
-        AlignmentEvaluationResult<Illumina> alignmentResult;
-        setReadLength(alignmentResult, length(fragmentStore.readSeqStore[0]));
-        performAlignmentEvaluation(alignmentResult, fragmentStore);
-
-        printReadEvaluationResults(readResult);
-        printAlignmentEvaluationResults(alignmentResult, fragmentStore);
-    } else {
         std::cerr << "Evaluating 454 reads..." << std::endl;
 
         ReadEvaluationResult<LS454> readResult;

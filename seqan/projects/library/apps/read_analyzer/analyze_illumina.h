@@ -1,4 +1,4 @@
-/*==========================================================================
+/*====================================mismatchCountsPerMismatchPerPosition======================================
                 SeqAn - The Library for Sequence Analysis
                           http://www.seqan.de 
   ============================================================================
@@ -50,7 +50,7 @@ template <>
 struct AlignmentEvaluationResult<Illumina>
 {
 public:
-    // "Mismatch" also stores matches.
+    // Note: "Mismatch" also stores matches.
 
     String<double> insertCountsPerBase;  // arr[base]
     String<double> deleteCountsPerBase;  // arr[base]
@@ -67,6 +67,12 @@ public:
     String<String<String<double> > > qualityCountsForMismatchPerMismatchPerPosition;  // arr[src*5+tgt][quality][pos]
     String<String<String<double> > > qualityCountsBeforeDeletesPerBasePerPosition;  // arr[base][quality][pos]
     String<String<String<double> > > qualityCountsAfterDeletesPerBasePerPosition;  // arr[base][quality][pos]
+
+    String<double> readsOnContig;
+    String<size_t> alignmentsOnContig;
+
+    String<double> readsWithErrors;
+    String<size_t> alignmentsWithErrors;
 
     AlignmentEvaluationResult() {}
 };
@@ -231,7 +237,7 @@ void printReadEvaluationResults(ReadEvaluationResult<Illumina> const & result)
 .Function.setReadLength
 ..summary:Set the maximal read lenth for an AlignmentEvaluationResult<Illumina> object.  This adjusts the internal buffer sizes and has to be called before using the object.
 */
-void setReadLength(AlignmentEvaluationResult<Illumina> & result, unsigned readLength)
+void setReadLength(AlignmentEvaluationResult<Illumina> & result, unsigned readLength, unsigned contigCount)
 {
     clear(result.insertCountsPerBase);
     fill(result.insertCountsPerBase, 5, 0);
@@ -298,6 +304,16 @@ void setReadLength(AlignmentEvaluationResult<Illumina> & result, unsigned readLe
         for (int j = 0; j < 63; ++j)
             fill(result.qualityCountsForMismatchPerMismatchPerPosition[i][j], readLength, 0);
     }
+
+    clear(result.readsOnContig);
+    fill(result.readsOnContig, contigCount, 0);
+    clear(result.alignmentsOnContig);
+    fill(result.alignmentsOnContig, contigCount, 0);
+
+    clear(result.readsWithErrors);
+    fill(result.readsWithErrors, 2 * readLength, 0);
+    clear(result.alignmentsWithErrors);
+    fill(result.alignmentsWithErrors, 2 * readLength, 0);
 }
 
 inline void
@@ -313,7 +329,7 @@ countInsertAtPositionWithBase(AlignmentEvaluationResult<Illumina> & result,
 
     result.insertCountsPerBase[b] += x;
     result.qualityCountsForInsertPerBase[b][q] += x;
-    SEQAN_ASSERT_LT(position, length(result.mismatchCountsPerMismatchPerPosition[b]));
+    SEQAN_ASSERT_LT(position, length(result.insertCountsPerBasePerPosition[b]));
     result.insertCountsPerBasePerPosition[b][position] += x;
     result.qualityCountsForInsertPerBasePerPosition[b][q][position] += x;
 }
@@ -336,7 +352,7 @@ countDeleteAtPositionWithBase(AlignmentEvaluationResult<Illumina> & result,
     double x = 1.0 / readAlignmentCount;
 
     result.deleteCountsPerBase[b] += x;
-    SEQAN_ASSERT_LT(position, length(result.mismatchCountsPerMismatchPerPosition[b]));
+    SEQAN_ASSERT_LT(position, length(result.deleteCountsPerBasePerPosition[b]));
     result.deleteCountsPerBasePerPosition[b][position] += x;
     if (hasBefore)
         result.qualityCountsBeforeDeletesPerBasePerPosition[b][qb][position] += x;
@@ -407,7 +423,7 @@ void computeBogusReads(
 
     for (TAlignedReadsIterator it = alignedReadsBegin; it != alignedReadsEnd; ++it, ++alignedReadId) {
         // Get contig and read sequences.
-        TContigSeq const & contigSeq = fragmentStore.contigStore[it->contigId].seq;
+        TContigSeq const & contigSeq = fragmentStore.contigSeqStore[it->contigId].seq;
         TReadSeq readSeq = fragmentStore.readSeqStore[it->readId];
         // Get gaps for contig and read.
         TContigGaps contigGaps(contigSeq, fragmentStore.contigStore[it->contigId].gaps);
@@ -449,7 +465,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
     typedef typename Iterator<TAlignedReadStore, Standard>::Type TAlignedReadsIter;
     typedef typename TFragmentStore::TContigStore TContigStore;
     typedef typename TFragmentStore::TReadSeqStore TReadSeqStore;
-    typedef typename Value<TReadSeqStore>::Type TReadSeq;
+    typedef typename TFragmentStore::TReadSeq TReadSeq;
     typedef typename Value<TContigStore>::Type TContigStoreElement;
     typedef typename Value<TAlignedReadStore>::Type TAlignedReadStoreElement;
     typedef typename TAlignedReadStoreElement::TGapAnchors TReadGapAnchors;
@@ -492,6 +508,9 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
         // Maybe ignore bogus read.
         // if (bogusAlignmentIds.find(alignedReadId) != bogusAlignmentIds.end())
         //     continue;
+        // Count alignment / read on contig.
+        result.readsOnContig[it->contigId] += 1.0 / readAlignmentCount;
+        result.alignmentsOnContig[it->contigId] += 1;
         // Get contig and read sequences.
         TContigSeq & contigSeq = fragmentStore.contigStore[it->contigId].seq;
         TReadSeq readSeq = fragmentStore.readSeqStore[it->readId];
@@ -509,20 +528,28 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
             reverseComplementInPlace(readSeq);
         }
         // std::cout << "Evaluating" << std::endl;
-        // std::cout << "  " << fragmentStore.readNameStore[it->readId] << ", flipped = " << flipped << std::endl; 
+        // std::cout << "  " << fragmentStore.readNameStore[it->readId] << ", flipped = " << flipped << std::endl;
 
-        std::stringstream contigInfix;
-        std::stringstream matches;
-        std::stringstream read;
-        
+        unsigned errorCount = 0;
+        TReadGapAnchorsIterator readGapsIt = begin(readGaps);
         TContigGapAnchorsIterator contigGapsIt = begin(contigGaps);
         unsigned readPos = 0;
-        for (TReadGapAnchorsIterator readGapsIt = begin(readGaps); readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt) {
-            if (isGap(readGapsIt) && isGap(contigGapsIt))
+
+        // Skip leading gaps in contig and reads. 
+        //std::cout << "beginPosition(contigGaps) == " << beginPosition(contigGaps) << ", endPosition(contigGaps) == " << endPosition(contigGaps) << std::endl;
+        //std::cout << "positionGapToSeq(beginPosition(contigGaps)) == " << positionGapToSeq(contigGaps, beginPosition(contigGaps)) << ", positionGapToSeq(endPosition(contigGaps)) == " << positionGapToSeq(contigGaps, endPosition(contigGaps)) << std::endl;
+        //for (unsigned i = 0; i < beginPosition(row(align, 1)); ++i)
+        //  ++readGapsIt;
+
+        for (; readGapsIt != end(readGaps); ++contigGapsIt, ++readGapsIt) {
+            if (isGap(readGapsIt) && isGap(contigGapsIt)) {
+                //std::cout << "padding" << std::endl;
                 continue;  // Skip paddings.
+            }
             SEQAN_ASSERT_LT(readPos, readLength);
             unsigned reportedPos = flipped ? (readLength - readPos - 1) : readPos;
             if (isGap(readGapsIt)) {
+                //std::cout << "read gap" << std::endl;
                 // Deletion
                 bool hasBefore = false;
                 Dna5Q baseBefore('N');
@@ -547,25 +574,76 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
                     }
                 }
                 countDeleteAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), hasBefore, baseBefore, hasAfter, baseAfter, readAlignmentCount);
+                errorCount += 1;
             } else if (isGap(contigGapsIt)) {
+                //std::cout << "contig gap" << std::endl;
                 // Insert
                 countInsertAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*readGapsIt), readAlignmentCount);
                 readPos += 1;
+                errorCount += 1;
             } else {
+                //std::cout << "match/mismatch" << std::endl;
                 // Match / Mismatch.
                 // if (*readGapsIt != *contigGapsIt) {
                 //     std::cout << "it->contigId == " << it->contigId << ", it->beginPos == " << it->beginPos << ", _it->endPos == " << it->endPos << std::endl;
                 // }
+                //std::cout << ">>> contig " << convert<Dna5>(*contigGapsIt) << " vs read " << convert<Dna5>(*readGapsIt) << std::endl;
+                errorCount += convert<Dna5Q>(*contigGapsIt) != convert<Dna5>(*readGapsIt);
                 countMismatchAtPositionWithBase(result, reportedPos, convert<Dna5Q>(*contigGapsIt), convert<Dna5Q>(*readGapsIt), readAlignmentCount);
                 readPos += 1;
             }
         }
+        //if (errorCount > 20) {
+          //std::cout << "errors: " << errorCount << ", read: " << fragmentStore.readNameStore[it->readId] << ", contig " << fragmentStore.contigNameStore[it->contigId] << ", beginPos: " << it->beginPos << std::endl;
+        //}
+        if (errorCount >= length(result.readsWithErrors)) {
+          std::cerr << "errorCount >= length(result.readsWithErrors)!!" << std::endl;
+          exit(-1);
+        }
+        result.readsWithErrors[errorCount] += 1.0 / readAlignmentCount;
+        result.alignmentsWithErrors[errorCount] += 1;
     }
 }
 
 template <typename TFragmentStore>
-void printAlignmentEvaluationResults(AlignmentEvaluationResult<Illumina> const & result, TFragmentStore const & /*fragmentStore*/)  // TODO(holtgrew): Remove parameter fragmentStore.
+void printAlignmentEvaluationResults(AlignmentEvaluationResult<Illumina> const & result, TFragmentStore const & fragmentStore)  // TODO(holtgrew): Remove parameter fragmentStore.
 {
+    // Print alignments / reads on contigs.
+    {
+        std::cout << std::endl << std::endl << "#--file:counts-per-contig.dat" << std::endl;
+        std::cout << "#contig                            reads reads% alignments alignments%" << std::endl;
+        double totalReads = 0;
+        size_t totalAlignments = 0;
+        for (unsigned i = 0; i < length(result.readsOnContig); ++i) {
+          totalAlignments += result.alignmentsOnContig[i];
+          totalReads += result.readsOnContig[i];
+        }
+        for (unsigned i = 0; i < length(result.readsOnContig); ++i) {
+          printf("%-30s %9.0f %6.2f  %9lu      %6.2f\n", toCString(fragmentStore.contigNameStore[i]),
+                 result.readsOnContig[i], 100.0 * result.readsOnContig[i] / totalReads,
+                 result.alignmentsOnContig[i], 100.0 * result.alignmentsOnContig[i] / totalAlignments);
+        }
+        printf("%-30s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, totalAlignments, 100.0);
+    }
+
+    // Print alignments / reads with errors.
+    {
+        std::cout << std::endl << std::endl << "#--file:reads-with-errors.dat" << std::endl;
+        std::cout << "#Errors    reads reads% alignments alignments%" << std::endl;
+        double totalReads = 0;
+        size_t totalAlignments = 0;
+        for (unsigned i = 0; i < length(result.alignmentsWithErrors); ++i) {
+          totalAlignments += result.alignmentsWithErrors[i];
+          totalReads += result.readsWithErrors[i];
+        }
+        for (unsigned i = 0; i < length(result.alignmentsWithErrors); ++i) {
+          printf("%2d %9.0f %6.2f  %9lu      %6.2f\n", i,
+                 result.readsWithErrors[i], 100.0 * result.readsWithErrors[i] / totalReads,
+                 result.alignmentsWithErrors[i], 100.0 * result.alignmentsWithErrors[i] / totalAlignments);
+        }
+        printf("%-8s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, totalAlignments, 100.0);
+    }
+
     // Print error counts per base.
     std::cout << std::endl << std::endl << "#--file:error-counts-base.dat" << std::endl;
     printf("#base       insert insert%%       delete delete%%        mismatch mismatch%%        match  match%%\n");
