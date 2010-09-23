@@ -204,6 +204,7 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 		TFileReaderIt fit(_dataFile(me), false);
 
 		unsigned int len;
+		resize(me.data_buf, static_cast<TFileSize>(TString::BLOCK_SIZE));  // Maybe too large, but will shrink below.
 		for (len = 0; !atEnd(fit) && (fit.data_file_pos < end_filepos); goNext(fit))
 		{
 			me.data_buf[len] = value(fit);
