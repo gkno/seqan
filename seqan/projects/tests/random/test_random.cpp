@@ -27,6 +27,7 @@
 
 #include "test_random_rng.h"
 #include "test_random_dists.h"
+#include "test_random_shuffle.h"
 
 
 SEQAN_BEGIN_TESTSUITE(test_random) {
@@ -46,10 +47,13 @@ SEQAN_BEGIN_TESTSUITE(test_random) {
     SEQAN_CALL_TEST(test_random_uniform_double_constructors);
     SEQAN_CALL_TEST(test_random_uniform_double_pick);
 
+    SEQAN_CALL_TEST(test_random_shuffle);
+
     // Verify Checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/random.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/random/random_lognormal.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/random/random_mt19937.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/random/random_normal.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/random/random_shuffle.h");
 }
 SEQAN_END_TESTSUITE
