@@ -45,6 +45,9 @@
 #include <seqan/random/random_normal.h>
 #include <seqan/random/random_lognormal.h>  // uses normal.h, uniform.h
 
+// Functions with randomness.
+#include <seqan/random/random_shuffle.h>
+
 //____________________________________________________________________________
 
 #endif  // SEQAN_RANDOM_H_
