@@ -21,6 +21,8 @@
   ===========================================================================
 */
 
+// TODO(holtgrew): Implement linear quality values as in Illumina model.
+
 #ifndef SIMULATE_SANGER_H_
 #define SIMULATE_SANGER_H_
 
@@ -80,7 +82,7 @@ struct ReadSimulationInstruction<SangerReads> : public ReadSimulationInstruction
 };
 
 template<>
-struct ModelParameters<SangerReads>
+struct ModelParameters<SangerReads> : public ModelParameters<Global>
 {
 };
 

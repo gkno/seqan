@@ -91,6 +91,11 @@ struct Options<Global>
     bool simulateQualities;
     // true iff additional information is to be included in the reads file.
     bool includeReadInformation;
+    // Path to file with sample counts from each contig.  The file is a
+    // TSV file containing pairs mapping the contig id (non-whitespace
+    // sequence in FASTA header) to a read count.  Overrides parameter
+    // numReads if given.
+    CharString sampleCountsFilename;
 
     // Mate-Pair Related Options.
 
@@ -158,6 +163,12 @@ struct Options<Global>
 template <typename TTag>
 struct ModelParameters;
 
+template <>
+struct ModelParameters<Global>
+{
+    String<size_t> sampleCounts;
+};
+
 // Enum describing the type of an error.
 enum ErrorType {
     ERROR_TYPE_MATCH    = 0,
@@ -216,6 +227,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  haplotypeIndelRangeMin: " << options.haplotypeIndelRangeMin << std::endl
            << "  haplotypeIndelRangeMax: " << options.haplotypeIndelRangeMax << std::endl
            << "  haplotypeNoN:           " << options.haplotypeNoN << std::endl
+           << "  sampleCountsFilename:   " << options.sampleCountsFilename << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -258,6 +270,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("i", "include-read-information", "Include additional read information in reads file.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("scf", "sample-counts-file", "Path to TSV file that maps contig ids to read counts.", OptionType::String));
 
     addSection(parser, "Mate-Pair Options");
 
@@ -339,6 +352,9 @@ int parseCommandLineAndCheck(TOptions & options,
     if (isSetLong(parser, "haplotype-no-N"))
         options.haplotypeNoN = true;
 
+    if (isSetLong(parser, "sample-counts-file"))
+        getOptionValueLong(parser, "sample-counts-file", options.sampleCountsFilename);
+
     // First argument is "illumina", second one name of reference file.
     referenceFilename = getArgumentValue(parser, 1);
 
@@ -355,6 +371,7 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) 
     reserve(randomSequence, length);
 
     // TODO(holtgrew): When generating Dna5 sequences, interpret options.sourceNoN.
+    // TODO(holtgrew): Allow background probabilities.
 
     for (size_t i = 0; i < length; ++i) {
         Dna c = static_cast<Dna>(pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, ValueSize<Dna>::VALUE - 1)));
@@ -369,6 +386,47 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) 
     }
     write(file, randomSequence, "random_sequence", Fasta());
     file.close();
+    return 0;
+}
+
+
+template <typename TFragmentStore, typename TSpec, typename TOptions>
+int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*const*/ & fragmentStore, TOptions const & options)
+{
+    std::ifstream file;
+    file.open(toCString(options.sampleCountsFilename), std::ios_base::in);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open sample counts file " << options.sampleCountsFilename << std::endl;
+        return 1;
+    }
+
+    fill(modelParameters.sampleCounts, length(fragmentStore.contigNameStore), 0);
+
+    char c = _streamGet(file);
+    CharString contigName;
+    size_t sampleCount;
+
+    refresh(fragmentStore.contigNameStoreCache);
+
+    while (!_streamEOF(file)) {
+        clear(contigName);
+
+        _parse_readSamIdentifier(file, contigName, c);
+        _parse_skipUntilChar(file, '\t', c);
+        sampleCount = _parse_readNumber(file, c);
+        _parse_skipLine(file, c);
+
+        size_t contigId = 0;
+        if (!getIdByName(fragmentStore.contigNameStore, contigName, contigId, fragmentStore.contigNameStoreCache)) {
+            std::cerr << "ERROR: Could not find contig with name \"" << contigName << "\" (from read counts file) in contigs." << std::endl;
+            return 1;
+        }
+
+        if (options.veryVerbose)
+            std::cout << "Sample count for contig " << contigName << " (id=" << contigId << ") is " << sampleCount << std::endl;
+        modelParameters.sampleCounts[contigId] = sampleCount;
+    }
+
     return 0;
 }
 
@@ -414,6 +472,13 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     int ret = simulateReadsSetupModelSpecificData(modelParameters, options);
     if (ret != 0)
         return ret;
+
+    // Load sample counts file if given.
+    if (length(options.sampleCountsFilename) > 0) {
+        ret = loadSampleCounts(modelParameters, fragmentStore, options);
+        if (ret != 0)
+            return ret;
+    }
     
     // Kick off the read generation.
     ret = simulateReadsMain(fragmentStore, rng, options, modelParameters);
@@ -567,6 +632,8 @@ int buildReadSimulationInstruction(
         unsigned const & haplotypeId,
         StringSet<String<Dna5, Journaled<Alloc<> > > > const & haplotype,
         String<double> const & relativeContigLengths,
+        size_t const & contigId,
+        bool fixedContigId,
         ModelParameters<TReadsTag> const & parameters,
         Options<TReadsTag> const & options)
 {
@@ -578,12 +645,17 @@ int buildReadSimulationInstruction(
     do {
 		clear(instructions);
         invalid = false;  // By default, we do not want to repeat.
-        // Pick contig id, probability is proportional to the length.
-        double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
-        for (unsigned i = 0; i < length(relativeContigLengths); ++i) {
-            if (x < relativeContigLengths[i]) {
-                inst.contigId = i -1;
-                break;
+        if (fixedContigId) {
+            // Use precomputed contig id.
+            inst.contigId = contigId;
+        } else {
+            // Pick contig id, probability is proportional to the length.
+            double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+            for (unsigned i = 0; i < length(relativeContigLengths); ++i) {
+                if (x < relativeContigLengths[i]) {
+                    inst.contigId = i - 1;
+                    break;
+                }
             }
         }
         // Pick whether on forward or reverse strand.
@@ -688,21 +760,45 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
     typedef Position<CharString>::Type TPos;
 
-    // First, we randomly pick the haplotype for each read to be simulated.
+    // Number of reads comes from command line by default.  If sample
+    // counts are given, we compute it from this instead.
+    size_t numReads = options.numReads;
+    if (length(parameters.sampleCounts) > 0u) {
+        numReads = 0;
+        for (unsigned i = 0; i < length(parameters.sampleCounts); ++i)
+            numReads += parameters.sampleCounts[i];
+    }
+
+    // First, we randomly pick the haplotype for each read to be
+    // simulated or read it from the sample counts in parameters.
     String<unsigned> haplotypeIds;
-    reserve(haplotypeIds, options.numReads);
-    for (size_t i = 0; i < options.numReads; ++i)
+    // Pick random haplotype origin.
+    reserve(haplotypeIds, numReads);
+    for (size_t i = 0; i < numReads; ++i)
         appendValue(haplotypeIds, pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, options.numHaplotypes - 1)));
+
+    // Maybe pick contig ids to sample from.
+    String<unsigned> contigIds;
+    if (length(parameters.sampleCounts) > 0) {
+        for (unsigned i = 0; i < length(fragmentStore.contigNameStore); ++i) {
+            fill(contigIds, length(contigIds) + parameters.sampleCounts[i], i);
+            if (options.veryVerbose)
+                std::cerr << parameters.sampleCounts[i] << " reads from haplotype " << i << "..." << std::endl;
+        }
+        shuffle(contigIds, rng);
+    }
 
     // We do not build all haplotypes at once since this could cost a
     // lot of memory.
+    //
+    // TODO(holtgrew): Would only have to switch pointers to journals...
     //
     // for each haplotype id
     //   simulate haplotype
     //   for each simulation instruction for this haplotype:
     //     build simulated read
-    reserve(fragmentStore.readSeqStore, options.numReads, Exact());
-    reserve(fragmentStore.readNameStore, options.numReads, Exact());
+    reserve(fragmentStore.readSeqStore, numReads, Exact());
+    reserve(fragmentStore.readNameStore, numReads, Exact());
     char readName[1024];
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.outputFile));
@@ -738,7 +834,17 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
             // Build simulation instructions.
             String<ReadSimulationInstruction<TReadsTag> > instructions;
-            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigs, relativeContigLengths, parameters, options);
+            // TODO(holtgrew): Pick contig id outside of instructions.
+            size_t contigId = 0;
+            bool fixedContigId = false;
+            if (length(parameters.sampleCounts) > 0) {
+                fixedContigId = true;
+                if (options.generateMatePairs)
+                    contigId = contigIds[length(fragmentStore.readSeqStore) / 2];
+                else
+                    contigId = contigIds[length(fragmentStore.readSeqStore)];
+            }
+            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigs, relativeContigLengths, contigId, fixedContigId, parameters, options);
             if (res != 0)
                 return res;
 
@@ -888,7 +994,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     }
 
     // Last but not least, convert the matches collected before to a global alignment.
-    convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
+    convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>(), True());
 	
 	// AlignedReadLayout layout;
 	// layoutAlignment(layout, fragmentStore);

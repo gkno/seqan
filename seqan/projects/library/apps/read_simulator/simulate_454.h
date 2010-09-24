@@ -89,7 +89,7 @@ struct ReadSimulationInstruction<LS454Reads> : public ReadSimulationInstruction<
 };
 
 template<>
-struct ModelParameters<LS454Reads>
+struct ModelParameters<LS454Reads> : public ModelParameters<Global>
 {
     ThresholdMatrix thresholdMatrix;
 };

@@ -117,7 +117,7 @@ struct Options<IlluminaReads> : public Options<Global>
 };
 
 template<>
-struct ModelParameters<IlluminaReads>
+struct ModelParameters<IlluminaReads> : public ModelParameters<Global>
 {
     // Probabilities for a mismatch at a given position.
     String<double> mismatchProbabilities;
