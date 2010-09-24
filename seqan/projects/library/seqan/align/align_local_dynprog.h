@@ -646,15 +646,17 @@ SEQAN_CHECKPOINT
     }
 
     // check if matrix entry of topScore did not change while declumping
-	while (!empty(sw.pQ) && (top(sw.pQ).value_ != topScore)) {
-		if (topScore >= cutoff) {
-			((sw.pQ).heap[0]).value_ = topScore;
-			adjustTop(sw.pQ); 
-        } else {
-            pop(sw.pQ);
-        }
-
-		topScore = getValue(sw.matrix, top(sw.pQ).id_);
+	if (!empty(sw.pQ)) {
+		while (top(sw.pQ).value_ != topScore) {
+			if (topScore >= cutoff) {
+				((sw.pQ).heap[0]).value_ = topScore;
+				adjustTop(sw.pQ); 
+			} else {
+				pop(sw.pQ);
+			}
+			if (!empty(sw.pQ)) topScore = getValue(sw.matrix, top(sw.pQ).id_);
+			else break;
+		}
 	}
 
     // priority queue with top scores is empty
