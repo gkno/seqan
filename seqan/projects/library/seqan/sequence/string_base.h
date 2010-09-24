@@ -156,8 +156,9 @@ inline typename Reference< String<TValue, TSpec> >::Type
 value(String<TValue, TSpec> & me, 
 	  TPos pos)
 {
-SEQAN_CHECKPOINT
-  SEQAN_ASSERT_LT(pos, length(me));
+    SEQAN_CHECKPOINT;
+    typedef typename Position<String<TValue, TSpec> >::Type TPosition;
+    SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
 	return *(begin(me, Standard()) + pos);
 }
 
@@ -166,9 +167,9 @@ inline typename Reference< String<TValue, TSpec> const >::Type
 value(String<TValue, TSpec> const & me, 
 	  TPos pos)
 {
-SEQAN_CHECKPOINT
-  SEQAN_ASSERT_LT(pos, length(me));
-	return *(begin(me, Standard()) + pos);
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
+    return *(begin(me, Standard()) + pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////
