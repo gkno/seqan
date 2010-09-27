@@ -95,6 +95,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					insertGaps(it, cigar[i].count);
 				case 'I':
 				case 'M':
+        case 'S':
 					it += cigar[i].count;
 			}
 		}
@@ -114,6 +115,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				case 'D':
 				case 'M':
 				case 'N':
+        case 'S':
 					it += cigar[i].count;
 			}
 		}
@@ -182,7 +184,8 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool
     _parse_is_dna(TChar const & c)
     {
-        return c == (TChar)(Dna5)c;
+        char x = TChar(Dna5(c));
+        return (c == x) || (c + 'A' - 'a' == x);
     }
     
 //////////////////////////////////////////////////////////////////////////////
@@ -601,6 +604,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// read in sequence
         TReadSeq2 readSeq;
         _parse_readDnaSeq(file, readSeq, c);
+        SEQAN_ASSERT_GT(length(readSeq), 0u);
 		if (reverse)
 			reverseComplementInPlace(readSeq);
         _parse_skipWhitespace(file, c);
