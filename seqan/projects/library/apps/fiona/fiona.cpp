@@ -1,9 +1,15 @@
+#define SEQAN_PROFILE		// enable time measuring
+#define FIONA_ALLOWINDELS	// allow for indels (chooses a less compact FragmentStore)
+#define FIONA_MEMOPT		// small suffix array values (<16mio reads of length <256)
+#define FIONA_PARALLEL		// divide suffix tree into subtrees for each possible 3-gram
+							// and use process subtrees in parallel
+
+// debugging
+
 //#define SEQAN_DEBUG_INDEX
 //#define SEQAN_DEBUG
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
-#define SEQAN_PROFILE					// enable time measuring
-#define FIONA_ALLOWINDELS
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +17,11 @@
 #include <ctime>
 #include <string>
 #include <sstream>
+
+#ifdef FIONA_PARALLEL
+#include <omp.h>
+#define SEQAN_PARALLEL
+#endif
 
 #include <seqan/basic.h>
 #include <seqan/index.h>
@@ -25,49 +36,12 @@
 using namespace std;
 using namespace seqan;
 
-struct FionaPoisson_;
-struct FionaExpected_;
-
-typedef Tag<FionaPoisson_> const FionaPoisson;
-typedef Tag<FionaExpected_> const FionaExpected;
-
-struct FionaCorrectedError
-{
-	unsigned int   correctReadId;
-	unsigned int   occurrences;
-	unsigned short errorPos;
-	unsigned short correctPos;
-	unsigned short overlap;
-	unsigned char  mismatches;
-	signed   char  indelLength;		// 0..mismatch, <0..deletion, >0..insertion
-};
-
-struct FionaOptions
-{
-	__int64 genomeLength;
-	double strictness;
-	unsigned acceptedMismatches;
-	enum { Poisson = 0, Expected = 1} method;
-	int maxIndelLength;
-	int fromLevel;
-	int toLevel;
-	unsigned cycles;
-
-	FionaOptions()
-	{
-		method = Poisson;
-		genomeLength = 0;
-		strictness = 0.0001;
-		acceptedMismatches = 1;
-		maxIndelLength = 0;
-		cycles = 3;
-		fromLevel = 0;
-		toLevel = 0;
-	}
-};
-
 #ifdef FIONA_ALLOWINDELS
 
+	// NOTE:
+	// Currently we have to change the StringSet spec of the readSeqStore
+	// to Owner as ConcatDirect<> (default) is not able to notice if a read
+	// changes its size (after correction).
 	struct FionaStoreConfig:
 		public FragmentStoreConfig<>
 	{
@@ -83,15 +57,56 @@ struct FionaOptions
 #endif
 
 typedef Index<TFionaFragStore::TReadSeqStore, Index_Wotd<> > TFionaIndex; 
+typedef Index<TFionaFragStore::TReadSeqStore, Index_QGram< Shape<Dna5, UngappedShape<4> > > > TFionaQgramIndex;
+
+
+struct FionaPoisson_;
+struct FionaExpected_;
+
+typedef Tag<FionaPoisson_> const FionaPoisson;
+typedef Tag<FionaExpected_> const FionaExpected;
+
+struct FionaCorrectedError
+{
+	unsigned int   correctReadId;
+	unsigned int   occurrences;
+	unsigned short errorPos;
+	unsigned short correctPos;
+	unsigned short overlap;
+	signed   char  indelLength;		// 0..mismatch, <0..deletion, >0..insertion
+	unsigned char  mismatches;
+};
+
+struct FionaOptions
+{
+	__int64 genomeLength;
+	double strictness;
+	unsigned acceptedMismatches;
+	int maxIndelLength;
+	int fromLevel;
+	int toLevel;
+	unsigned cycles;
+
+	FionaOptions()
+	{
+		genomeLength = 0;
+		strictness = 0.0001;
+		acceptedMismatches = 1;
+		maxIndelLength = 0;
+		cycles = 3;
+		fromLevel = 0;
+		toLevel = 0;
+	}
+};
 
 namespace seqan  {
 
 /*restriction for certain levels - between max and min, also table with frequency may be to use eventually TODO*/
-	struct FionaNodeConstraints { 
+	struct FionaNodeConstraints 
+	{ 
 		 int replen_max; 
 		 int replen_min;
 		 map<unsigned,double> frequency;
-		 bool _cachedPred; 
 	}; 
 
 	template <>
@@ -99,13 +114,61 @@ namespace seqan  {
 		typedef FionaNodeConstraints Type; 
 	}; 
 
+#ifdef FIONA_MEMOPT
+
+	typedef Pair<
+		unsigned,				
+		unsigned,
+		BitCompressed<24, 8>	// max. 16M reads of length < 256
+	> TSAValue;
+
+#else
+
+	typedef Pair<
+		unsigned,			// many reads
+		unsigned,			// of arbitrary length
+		Compressed
+	> TSAValue;
+
+#endif
+
+	template <>
+	struct SAValue< TFionaIndex > 
+	{
+		typedef TSAValue Type;
+	};
+
+	template <>
+	struct SAValue< TFionaQgramIndex > 
+	{
+		typedef TSAValue Type;
+	};
+
+	// use a mmap string for storing the q-grams
+	template <>
+	struct Fibre< TFionaQgramIndex, QGram_SA > 
+	{
+		typedef String<TSAValue, MMap<> > Type;
+	};
+
+#ifdef FIONA_PARALLEL
+
+	template <>
+	struct Fibre< TFionaIndex, QGram_SA > 
+	{
+		typedef Fibre< TFionaQgramIndex, QGram_SA >::Type TSA;
+		typedef Infix<TSA>::Type Type;
+	};
+
+#endif
+
 	/*TODO THIS FONCTION CAN BE CHANGED FOR THE FREQUENCY - here just one experience*/
 	/*by the use also the frequency for A,T,G,C*/
 	/*higher frequency - high level as min in which we will begin the searching*/
 
 	/*hide the node between certain level*/
-	template <>
-	bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<ParentLinks<Postorder> > > > &it)
+	template <typename TSpec>
+	bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
 	{
 		FionaNodeConstraints &cons = cargo(container(it));
 		int valueT = parentRepLength(it);
@@ -132,8 +195,7 @@ namespace seqan  {
 		}*/
 
 		/*TODO may utilise >=*/
-		if (valueT > level_min && valueT < cons.replen_max) return cons._cachedPred = true;
-		return cons._cachedPred = false;
+		return valueT > level_min && valueT < cons.replen_max;
 	}
 }
 
@@ -146,37 +208,6 @@ namespace seqan  {
 inline bool strContains(string const & inputStr, string const & searchStr)
 {
 	return inputStr.find(searchStr) != string::npos;
-}
-
-/*save in table, information about the erroneous reads and the respective correct one */
-Pair<unsigned,Pair<vector<unsigned>, Dna> > 
-dataErroneousNodes(
-	int bestReadId, 
-	int positionError, 
-	int commonPrefix, 
-	int bestOverlap, 
-    int bestMismatches, 
-	int bestOccurrences, 
-	Dna nucleotide)
-{													 
-	Pair<unsigned,Pair<vector<unsigned>, Dna> > pairCorrect;	
-
-	/*data for the erroneous node and correct one*/
-	/*position error, length parent(path-label), nb match after error position, nb mismatch, nb of occurrences */ 	
-	vector<unsigned> data;	
-									
-	data.push_back(positionError);
-	data.push_back(commonPrefix);
-	data.push_back(bestOverlap);
-	data.push_back(bestMismatches);
-	data.push_back(bestOccurrences);
- 
-	Pair<vector<unsigned>, Dna> dataCorrection;
-	dataCorrection.i1 = data;
-	dataCorrection.i2 = nucleotide; 
-	pairCorrect.i1 =  bestReadId;
-	pairCorrect.i2 = dataCorrection;
-	return pairCorrect;
 }
 
 
@@ -199,7 +230,7 @@ void expectedValueEqualReadsLength(TExpectedValues & expected, TReadSet const & 
 
 // Expected value for set of reads with different length
 template <typename TExpectedValues, typename TReadSet, typename TGenomeSize>
-void expectedValueTheorical(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize const genomeLength)
+void expectedValueTheoretical(TExpectedValues & expected, TReadSet const & readSet, TGenomeSize const genomeLength)
 {
 	//
 	//	E(m) = (read_length - suffix_length + 1) * numberReads / genomeLength
@@ -348,40 +379,58 @@ void applyReadErrorCorrections(
 	TFragmentStore &store,
 	TCorrections const &corrections)
 {	
-	typedef typename Iterator<TCorrections, Standard>::Type TIter;
+	typedef typename Value<TCorrections>::Type TCorrection;
+	int readCount = length(corrections);
 	
-	TIter it = begin(corrections, Standard());
-	TIter itEnd = end(corrections, Standard());
+	// we have to make a temp-copy in order to use original (not corrected) reads for correction
+	StringSet<typename TFragmentStore::TReadSeq> originalReads;
+	resize(originalReads, length(store.readSeqStore), Exact());
+
+#ifdef FIONA_PARALLEL
+	#pragma omp parallel for
+#endif
+	for (int readId = 0; readId < readCount; ++readId)
+	{
+		TCorrection const &corr = corrections[readId];
+		if (corr.overlap > 0)
+			originalReads[corr.correctReadId] = store.readSeqStore[corr.correctReadId];
+	}
+
 	
-	for (unsigned readId = 0; it != itEnd; ++it, ++readId)
-		if ((*it).overlap != 0)
-		{
-			ostringstream m;
-			if (strContains(toCString(store.readNameStore[readId]), "corrected"))
-				m << "," << (*it).errorPos;
-			else
-				m << " corrected: " << (*it).errorPos;
+#ifdef FIONA_PARALLEL
+	#pragma omp parallel for
+#endif
+	for (int readId = 0; readId < readCount; ++readId)
+	{
+		TCorrection const &corr = corrections[readId];
+		if (corr.overlap == 0) continue;
+
+		ostringstream m;
+		if (strContains(toCString(store.readNameStore[readId]), "corrected"))
+			m << "," << corr.errorPos;
+		else
+			m << " corrected: " << corr.errorPos;
 
 #ifdef SEQAN_VERBOSE
-			_dumpCorrection(store, *it, readId);
+		_dumpCorrection(store, corr, readId);
 #endif
-			append(store.readNameStore[readId], m.str());
-			
-			if ((*it).indelLength == 0)
-				store.readSeqStore[readId][(*it).errorPos] = store.readSeqStore[(*it).correctReadId][(*it).correctPos];
+		append(store.readNameStore[readId], m.str());
+		
+		if (corr.indelLength == 0)
+			store.readSeqStore[readId][corr.errorPos] = originalReads[corr.correctReadId][corr.correctPos];
 #ifdef FIONA_ALLOWINDELS
-			else if ((*it).indelLength > 0)
-				erase(store.readSeqStore[readId], (*it).errorPos, (*it).errorPos + (*it).indelLength);
-			else
-				insert(store.readSeqStore[readId], (*it).errorPos, infix(store.readSeqStore[(*it).correctReadId], (*it).correctPos, (*it).correctPos + -(*it).indelLength));
+		else if (corr.indelLength > 0)
+			erase(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
+		else
+			insert(store.readSeqStore[readId], corr.errorPos, infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength));
 #endif		
 #ifdef SEQAN_VERBOSE
-			cout << "corrected:";
-			for (unsigned i = 0; i < (*it).correctPos; ++i)
-				cout << ' ';
-			cout << store.readSeqStore[readId] << endl;
+		cout << "corrected:";
+		for (unsigned i = 0; i < corr.correctPos; ++i)
+			cout << ' ';
+		cout << store.readSeqStore[readId] << endl;
 #endif
-		}
+	}
 }
 
 template <typename TObserved, typename TExpected, typename TStrictness>
@@ -407,11 +456,13 @@ inline bool potentiallyErroneousNode(
 }
 
 /*detect and repare the reads with errors*/
-template <typename TTreeIterator, typename TFragmentStore, typename TAlgorithm>
+template <typename TTreeIterator, typename TFragmentStore, typename TCorrections, typename TAlgorithm>
 void traverseAndSearchCorrections(
 	TTreeIterator iter,
 	TFragmentStore &store,
-	FionaOptions const &options,
+	TCorrections & corrections,
+	String<double> & expectedTheoretical,
+	FionaOptions const & options,
 	Tag<TAlgorithm> const alg)
 {
 	typedef typename Container<TTreeIterator>::Type TFionaIndex;
@@ -422,55 +473,20 @@ void traverseAndSearchCorrections(
 	typedef typename Value<TReadSet>::Type TRead;
 	typedef typename Value<TRead>::Type TValue;
 	typedef typename Iterator<TRead, Standard>::Type TReadIterator;
-	typedef FionaCorrectedError TCorrected;
-	
-	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
-		cout << endl << "Method with expected value for each level" << endl;
-	else
-		cout << endl << "Method with p-value and Poisson distribution" << endl;
-	cout << "Searching... " << endl;
-	
-	/*table with the theoricals values*/
-	String<double> expectedTheorical;
-	expectedValueTheorical(expectedTheorical, store.readSeqStore, options.genomeLength);
-	unsigned readCount = length(store.readSeqStore) / 2;
-		
-	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
-	{
-		String<double> sd;
-		standardDeviation(sd, store.readSeqStore, options.genomeLength);
+	typedef typename Value<TCorrections>::Type TCorrection;
 
-		/*The strictness value allows to estimate the confidential intervall*/
-		for (unsigned i = 0; i < length(expectedTheorical); ++i)
-		{
-			double expectedTemporary = expectedTheorical[i] - options.strictness * sd[i];
-			
-			/*If the connfidential intervall take value less than 1 ??? not sure for that*/
-			/*if(expectedTemporary < 1){
-				expectedTheorical[i] = 1.1;
-			}else{*/
-				expectedTheorical[i] = expectedTemporary;
-			//}
-			//if fixed
-			//expectedTheorical[i]=5;
-		}
-	}
-	
-	String<TCorrected> corrections;
-	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
-	fill(corrections, readCount, zeroCorr);
+	unsigned readCount = length(store.readSeqStore) / 2;
 
 	String<TOccs> correctCandidates;
 	const TValue unknownChar = unknownValue<TValue>();
 
-	SEQAN_PROTIMESTART(search);
 	for (goBegin(iter); !atEnd(iter); goNext(iter))		// do a DFS walk
 	{
 		int commonPrefix = parentRepLength(iter);			// length of parent label
 
-		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheorical));
+		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheoretical));
 		if (parentEdgeFirstChar(iter) != unknownChar &&
-			!potentiallyErroneousNode(countOccurrences(iter), expectedTheorical[commonPrefix+1], options.strictness, alg))
+			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, alg))
 			continue;
 		
 		//
@@ -498,7 +514,7 @@ void traverseAndSearchCorrections(
 		{
 			if (value(iter).range != value(iterSibling).range &&
 				parentEdgeFirstChar(iterSibling) != unknownChar &&
-				!potentiallyErroneousNode(countOccurrences(iterSibling), expectedTheorical[commonPrefix + 1], options.strictness, alg))
+				!potentiallyErroneousNode(countOccurrences(iterSibling), expectedTheoretical[commonPrefix + 1], options.strictness, alg))
 			{
 				// save the id and position(where the suffix begin in the reads) in the table of IDs correct
 				// also the number of occurrences
@@ -516,10 +532,9 @@ void traverseAndSearchCorrections(
 		{
 			unsigned errorReadId = (*errorRead).i1;
 			if (errorReadId >= readCount) errorReadId -= readCount;
-//			bool dbg = store.readSeqStore[errorReadId] == "AGAGATATTCAGATTGCCTCTCATTGTCTCTCCCAT";
 
 			// is already identify as erroneus
-			TCorrected &corr = corrections[errorReadId];
+			TCorrection &corr = corrections[errorReadId];
 
 			// Branch and Bound
 			//
@@ -529,11 +544,9 @@ void traverseAndSearchCorrections(
 			// the position where the error is
 			unsigned positionError = (*errorRead).i2 + commonPrefix;
 			int maxOverlapPossible = commonPrefix + length(store.readSeqStore[errorReadId]) - positionError - 1;
-//			if (dbg) std::cout<<"errorReadId:"<<errorReadId<<std::endl;
-//			if (dbg) std::cout<<"maxOverlapPossible:"<<maxOverlapPossible<<std::endl;
-//			if (dbg) std::cout<<"corr.overlap:"<<corr.overlap<<std::endl;
-//			if (dbg) 
-//			std::cout<<"positionError:"<<positionError<<std::endl;
+			if (options.maxIndelLength > 0)
+				++maxOverlapPossible;
+
 			if (corr.overlap > maxOverlapPossible) continue;
 
 			unsigned bestReadId = 0;
@@ -543,7 +556,7 @@ void traverseAndSearchCorrections(
 			unsigned bestMismatches = 0;
 			int bestIndelLength = 0;
 			
-			TReadIterator itEBegin = begin(store.readSeqStore[(*errorRead).i1], Standard());
+			TReadIterator itEBegin = begin(store.readSeqStore[(*errorRead).i1], Standard()) + positionError;
 			TReadIterator itEEnd = end(store.readSeqStore[(*errorRead).i1], Standard());
 			
 			for (unsigned c = 0; c < length(correctCandidates); ++c)
@@ -552,18 +565,6 @@ void traverseAndSearchCorrections(
 				TOccsIterator corrReadEnd = end(correctCandidates[c], Standard());
 				for (; corrRead != corrReadEnd; ++corrRead)
 				{
-//				if (store.readSeqStore[(*corrRead).i1] == "TTCAGATTGCCTCTCATTGTCTCACCCATATTATGG")
-//			std::cout<<"ok"<<std::endl;
-//				if (dbg) std::cout<<store.readSeqStore[(*corrRead).i1]<<std::endl;
-			
-					/*if not already correct by the same reads*/
-					/*if(mapID!=allErrors.end()){
-					
-						if(idReadsCorrect[r].i1.i1==correctAndData.i1){	
-							continue;
-						}
-					}*/
-
 					/*the position in the read until which there is the same prefix*/
 					unsigned positionCorrect = (*corrRead).i2 + commonPrefix;
 										
@@ -574,30 +575,29 @@ void traverseAndSearchCorrections(
 					for (int indel = -options.maxIndelLength; indel <= options.maxIndelLength; ++indel)
 					{
 						TReadIterator itE = itEBegin;
-						TReadIterator itC = begin(store.readSeqStore[(*corrRead).i1], Standard());
+						TReadIterator itC = begin(store.readSeqStore[(*corrRead).i1], Standard()) + positionCorrect;
 						
 						if (indel == 0)
 						{
 							// mismatch
-							itE += positionError + 1;
-							itC += positionCorrect + 1;
+							++itE;
+							++itC;
 							acceptedMismatches = options.acceptedMismatches;
 						}
 						else if (indel > 0)
 						{
 							// insert in erroneous read
-							itE += positionError + indel;
-							itC += positionCorrect;
+							itE += indel;
 							acceptedMismatches = 0;
 						} 
 						else
 						{
 							// deletion in erroneous read
-							itE += positionError;
-							itC += positionCorrect - indel;
+							itC += -indel;
 							acceptedMismatches = 0;
 						}
 						
+						TReadIterator itEFirst = itE;
 						unsigned mismatches = 0;
 						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC)
 							if (*itE != *itC)
@@ -608,7 +608,7 @@ void traverseAndSearchCorrections(
 
 						if (mismatches <= acceptedMismatches)
 						{
-							unsigned overlap = commonPrefix + (itE - itEBegin);
+							unsigned overlap = commonPrefix + (itE - itEFirst);
 							
 							if (overlap < bestOverlap)
 								continue;
@@ -630,17 +630,6 @@ void traverseAndSearchCorrections(
 							bestOverlap = overlap;
 							bestMismatches = mismatches;
 							bestIndelLength = indel;
-//			if (dbg) std::cout<<"bestReadId:"<<bestReadId<<std::endl;
-//			if (dbg) std::cout<<"bestOccurrences:"<<bestOccurrences<<std::endl;
-//			if (dbg) std::cout<<"bestCorrectPos:"<<bestCorrectPos<<std::endl;
-//			if (dbg) std::cout<<"bestOverlap:"<<bestOverlap<<std::endl;
-//			if (dbg)
-//			 std::cout<<"bestIndelLength:"<<bestIndelLength<<std::endl;
-//			
-//			if(dbg) std::cout<<"corrRead:"<<store.readSeqStore[bestReadId]<<std::endl;
-
-//					cout <<"corr:"<<store.readSeqStore[(*corrRead).i1]<<endl;
-//					cout <<"err: "<<store.readSeqStore[(*errorRead).i1]<<endl;
 						}
 					}
 				}
@@ -648,12 +637,8 @@ void traverseAndSearchCorrections(
 	
 			if (bestOverlap != 0)
 			{
-				bool rev = false;
-			
 				if ((*errorRead).i1 >= readCount)
 				{
-//					cout <<"0corr:"<<store.readSeqStore[bestReadId]<<endl;
-//					cout <<"0err: "<<store.readSeqStore[(*errorRead).i1]<<endl;
 					// switch to reverse-complements
 					if (bestReadId < readCount)
 						bestReadId += readCount;
@@ -668,62 +653,38 @@ void traverseAndSearchCorrections(
 						positionError -= bestIndelLength;
 					else
 						bestCorrectPos -= -bestIndelLength;
-					rev = true;
-//		TTreeIterator iterSibling(iter);
-//		goUp(iterSibling);
-//					std::cout << "common:"<<representative(iterSibling)<<endl;
-//					cout <<"corr:"<<store.readSeqStore[bestReadId]<<endl;
-//					cout <<"err: "<<store.readSeqStore[errorReadId]<<endl;
 				}
 				
 				/*This is maybe not necessary, because we search to maximisate*/
 				/*when the position or the nucleotide differ*/
-				//if(number.i1[0]!=positionError || number.i2 != nucleotide){
 				
 				/*find longer commun part with certain nb accepted mismatch*/
-				if (corr.overlap > bestOverlap)
-					continue;
-				
-				// if they are equal
-				if (corr.overlap == bestOverlap)
+#ifdef FIONA_PARALLEL
+				#pragma omp critical
+#endif
 				{
-					// looking for longer matching part without mismatch
-					if (corr.mismatches < bestMismatches)
-						continue;
-						
-					// equal number of match and mismatch, but greater nb occurrences
-					if (corr.mismatches == bestMismatches && corr.occurrences > bestOccurrences)
-						continue;
+					if  (corr.overlap < bestOverlap ||
+						(corr.overlap == bestOverlap &&
+							(corr.mismatches > bestMismatches ||
+							(corr.mismatches == bestMismatches && 
+								(corr.occurrences < bestOccurrences ||
+								(corr.occurrences == bestOccurrences &&
+									(corr.correctReadId > bestReadId || 
+									(corr.correctReadId == bestReadId && corr.correctPos > bestCorrectPos))))))))
+					{
+						// update best correction
+						corr.correctReadId = bestReadId;
+						corr.occurrences = bestOccurrences;
+						corr.errorPos = positionError;
+						corr.correctPos = bestCorrectPos;
+						corr.overlap = bestOverlap;
+						corr.mismatches = bestMismatches;
+						corr.indelLength = bestIndelLength;
+					}
 				}
-
-				// update best correction
-				corr.correctReadId = bestReadId;
-				corr.occurrences = bestOccurrences;
-				corr.errorPos = positionError;
-				corr.correctPos = bestCorrectPos;
-				corr.overlap = bestOverlap;
-				corr.mismatches = bestMismatches;
-				corr.indelLength = bestIndelLength;
-//			if (dbg) _dumpCorrection(store, corr, errorReadId);			
 			}
 		}
 	}
-	cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << endl;
-
-	ofstream out("id");
-	unsigned totalCorrections = 0;
-	for (unsigned i = 0; i < length(corrections); ++i)
-	{
-		if (corrections[i].overlap == 0) continue;
-		unsigned readId = i;
-		if (readId >= readCount)
-			readId -= readCount;
-		out << readId << " 0" << endl;
-		++totalCorrections;
-	}
-	
-	applyReadErrorCorrections(store, corrections);
-	cout << "Total corrected reads number is "<< totalCorrections << endl;
 }
 
 
@@ -756,15 +717,15 @@ determineFrequency(Iter< TFionaIndex, VSTree<TSpec> > iter)
 
 
 /*construction Suffix Array */
-template <typename TFragmentStore>
+template <typename TFragmentStore, typename TAlgorithm>
 void correctReads(
 	TFragmentStore & store,
-	FionaOptions & options)
+	FionaOptions & options,
+	Tag<TAlgorithm> const alg)
 {		   
 	/*iterator with restrictions*/
 	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Postorder> > >::Type TConstrainedIterator; 
-
-	cout << "Construct suffix array" << endl;
+	typedef FionaCorrectedError TCorrected;
 
 	// append their reverse complements
 	unsigned readCount = length(store.readSeqStore);
@@ -777,11 +738,50 @@ void correctReads(
 			appendValue(store.readSeqStore, tmp);
 		}
 
-	SEQAN_PROTIMESTART(construct);
+	/*table with the theoreticals values*/
+	String<double> expectedTheoretical;
+	expectedValueTheoretical(expectedTheoretical, store.readSeqStore, options.genomeLength);
+		
+	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+	{
+		String<double> sd;
+		standardDeviation(sd, store.readSeqStore, options.genomeLength);
 
+		/*The strictness value allows to estimate the confidential intervall*/
+		for (unsigned i = 0; i < length(expectedTheoretical); ++i)
+		{
+			double expectedTemporary = expectedTheoretical[i] - options.strictness * sd[i];
+			
+			/*If the connfidential intervall take value less than 1 ??? not sure for that*/
+			/*if(expectedTemporary < 1){
+				expectedTheoretical[i] = 1.1;
+			}else{*/
+				expectedTheoretical[i] = expectedTemporary;
+			//}
+			//if fixed
+			//expectedTheoretical[i]=5;
+		}
+	}
+	
+	String<TCorrected> corrections;
+	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
+	fill(corrections, readCount, zeroCorr);
+	
+	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+		cout << endl << "Method with expected value for each level" << endl;
+	else
+		cout << endl << "Method with p-value and Poisson distribution" << endl;
+	cout << "Searching... " << endl;
+	SEQAN_PROTIMESTART(search);
+
+#ifndef FIONA_PARALLEL
+	// FIONA NON-PARALLEL SEARCH
+		
 	// construct suffix array of the set of reads
+	cout << "Construct suffix array" << endl;
+	SEQAN_PROTIMESTART(construct);
 	TFionaIndex myIndex(store.readSeqStore);
-	TConstrainedIterator myConstrainedIterator(myIndex); 
+	TConstrainedIterator myConstrainedIterator(myIndex);
 
 	/*calculate the frequency for each nucleotide, didn't use for the moment*/
 	/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
@@ -891,20 +891,95 @@ void correctReads(
 		cout << "The estimated genome length is " << options.genomeLength << endl;
 #endif
 	}
-	
+
 	/*restrictions for the searching levels*/
 	cargo(myIndex).replen_min = options.fromLevel;
 	cargo(myIndex).replen_max = options.toLevel; 	
 	cargo(myIndex).frequency = frequency;
-
-	/*the core of the correction method*/
-	if (options.method == options.Poisson)
-		/*use of p-value like a limit*/
-		traverseAndSearchCorrections(myConstrainedIterator, store, options, FionaPoisson());
-	else
-		/*use an expected value for a certain level*/
-		traverseAndSearchCorrections(myConstrainedIterator, store, options, FionaExpected());
 	
+	/*the core of the correction method*/
+	traverseAndSearchCorrections(myConstrainedIterator, store, corrections, expectedTheoretical, options, alg);
+	cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << endl;
+
+#else 
+	// FIONA PARALLEL SEARCH
+
+	// construct q-gram index
+	TFionaQgramIndex qgramIndex(store.readSeqStore);
+	String<size_t> packages;
+
+	SEQAN_PROTIMESTART(constructQgramExt);
+	cout << "Construct external q-gram index ... " << flush;
+	resize(indexSA(qgramIndex), _qgramQGramCount(qgramIndex), Exact());
+	resize(indexDir(qgramIndex), _fullDirLength(qgramIndex), Exact());
+	createQGramIndexExt(indexSA(qgramIndex), indexDir(qgramIndex), indexText(qgramIndex), indexShape(qgramIndex), stringSetLimits(indexText(qgramIndex)));
+	cout << "done. (" << SEQAN_PROTIMEDIFF(constructQgramExt) << " seconds)" << endl;
+
+	String<Dna5> tuple;
+	resize(tuple, length(indexShape(qgramIndex)));
+	appendValue(packages, 0);
+	for (unsigned i = 0; i < 5; ++i)
+	{
+		tuple[0] = i;
+		for (unsigned j = 0; j < 5; ++j)
+		{
+			tuple[1] = j;
+			for (unsigned k = 0; k < 5; ++k)
+			{
+				tuple[2] = k;
+				size_t border = indexDir(qgramIndex)[hashUpper(indexShape(qgramIndex), begin(tuple,Standard()), 3)];
+				if (border != back(packages))
+					appendValue(packages, border);
+			}
+		}
+	}
+	clear(indexDir(qgramIndex));
+
+	unsigned finished = 0;
+	bool inTerm = isatty(fileno(stdout));
+
+	cout << "Suffix tree traversal ............. ";
+	if (inTerm)	cout << "  0%";
+	cout << flush;
+#pragma omp parallel for
+	for (int i = 1; i < (int)length(packages); ++i)
+	{
+		if (packages[i-1] == packages[i]) continue;
+		TFionaIndex myIndex(store.readSeqStore);
+		indexSA(myIndex) = infix(indexSA(qgramIndex), packages[i-1], packages[i]);
+		cargo(myIndex).replen_min = options.fromLevel;
+		cargo(myIndex).replen_max = options.toLevel;
+
+		TConstrainedIterator myConstrainedIterator(myIndex);
+		traverseAndSearchCorrections(myConstrainedIterator, store, corrections, expectedTheoretical, options, alg);
+		mmapAdvise(indexSA(qgramIndex), MMAP_DONTNEED, packages[i-1], packages[i]);
+#pragma omp critical
+		{
+			++finished;
+			if (inTerm)
+				cout << "\b\b\b\b" << setw(3) << (100 * finished) / (length(packages) - 1) << '%' << flush;
+		}
+	}
+	if (inTerm)
+		cout << "\b\b\b\b";
+	cout << "done. (" << SEQAN_PROTIMEDIFF(search) << " seconds)" << endl;
+
+#endif
+	
+	ofstream out("id");
+	unsigned totalCorrections = 0;
+	for (unsigned i = 0; i < length(corrections); ++i)
+	{
+		if (corrections[i].overlap == 0) continue;
+		unsigned readId = i;
+		if (readId >= readCount)
+			readId -= readCount;
+		out << readId << " 0" << endl;
+		++totalCorrections;
+	}
+	applyReadErrorCorrections(store, corrections);
+	cout << "Total corrected reads number is "<< totalCorrections << endl;
+
 	// remove reverse complements
 	resize(store.readSeqStore, readCount);
 }
@@ -916,6 +991,7 @@ int main(int argc, const char* argv[])
 	addVersionLine(parser, "Fiona version 1.1 2010912 [" + rev.substr(11, 4) + "]");
 
 	FionaOptions options;
+	enum { Poisson = 0, Expected = 1} method = Poisson;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
@@ -933,6 +1009,9 @@ int main(int argc, const char* argv[])
 #ifdef FIONA_ALLOWINDELS
 	addOption(parser, CommandLineOption("id", "indel-length",      "set the maximum length of an indel", OptionType::Int | OptionType::Label, options.maxIndelLength));
 #endif
+#ifdef FIONA_PARALLEL
+	addOption(parser, CommandLineOption("nt", "num-threads",       "set the number of threads used", OptionType::Int | OptionType::Label));
+#endif
 	requiredArguments(parser, 2);
 
 	bool stop = !parse(parser, argc, argv, cerr);
@@ -947,13 +1026,13 @@ int main(int argc, const char* argv[])
 		}
 		else
 		{
-			options.method = options.Expected;
+			method = Expected;
 			getOptionValueLong(parser, "expected", options.strictness);
 		}
 	} 
 	else if (isSetLong(parser, "pvalue"))
 	{
-		options.method = options.Poisson;
+		method = Poisson;
 		getOptionValueLong(parser, "pvalue", options.strictness);
 	}
 
@@ -972,6 +1051,17 @@ int main(int argc, const char* argv[])
 	getOptionValueLong(parser, "indel-length", options.maxIndelLength);
 #endif
 	
+#ifdef FIONA_PARALLEL
+	if ((options.genomeLength < 2) && (stop = true))
+		cerr << "A genome length must be given.		estimation does not work in parallel mode." << endl;
+	if (isSetLong(parser, "num-threads"))
+	{
+		unsigned numThreads = 1;
+		getOptionValueLong(parser, "num-threads", numThreads);
+		omp_set_num_threads(numThreads);
+	}
+#endif
+
 	// something went wrong
 	if (stop)
 	{
@@ -998,12 +1088,16 @@ int main(int argc, const char* argv[])
 		options.toLevel   = options.fromLevel + 10;
 		cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << endl;
 	}
-	cout << endl;
-
+	
 	for (unsigned cycle = 1; cycle <= options.cycles; ++cycle)
 	{
-		cout << "Cycle "<< cycle << " of " << options.cycles << endl;
-		correctReads(store, options);
+		cout << endl << "Cycle "<< cycle << " of " << options.cycles << endl;
+		if (method == Poisson)
+			/*use of p-value like a limit*/
+			correctReads(store, options, FionaPoisson());
+		else
+			/*use an expected value for a certain level*/
+			correctReads(store, options, FionaExpected());
 		
 		if (options.acceptedMismatches > 0) --options.acceptedMismatches;			
 
@@ -1032,5 +1126,3 @@ int main(int argc, const char* argv[])
 
 	return 0;
 }
-
-	
