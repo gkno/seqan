@@ -29,7 +29,7 @@
 using namespace seqan;
 
 template<typename TSequence, typename TId, typename TPattern, typename TFile>
-inline bool
+inline int
 _swiftLocalOnOne(TSequence & database,
 				TId & databaseID,
 				TPattern & pattern_swift,
@@ -63,17 +63,15 @@ _swiftLocalOnOne(TSequence & database,
 								  options.compactThresh, options.numMatches, queryIDs, matches, BandedGlobalExtend());
 	else {
 		std::cerr << "Unknown verification strategy: " << options.fastOption << std::endl;
-		return false;
+		return 0;
 	}
 
 	// file output
-	_outputMatches(matches, numSwiftHits, databaseID, databaseStrand, queryIDs, file);
-
-	return true;
+	return _outputMatches(matches, numSwiftHits, databaseID, databaseStrand, queryIDs, file);
 }
 
 template<typename TSequence, typename TId, typename TFile>
-inline bool
+inline int
 _swiftLocalOnAll(StringSet<TSequence> & databases,
 				StringSet<TId> & databaseIDs,
 				StringSet<TSequence> & queries,
@@ -90,9 +88,10 @@ _swiftLocalOnAll(StringSet<TSequence> & databases,
 	std::cout << "Aligning all query sequences to database sequence";
 	std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
 
+	int numMatches = 0;
+
     for(unsigned i = 0; i < length(databases); ++i) {
-		if(!_swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, true, options, file))
-			return false;
+		numMatches += _swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, true, options, file);
     }
 	std::cout << std::endl;
 
@@ -104,13 +103,12 @@ _swiftLocalOnAll(StringSet<TSequence> & databases,
         reverseComplementInPlace(databases);
 
         for(unsigned i = 0; i < length(databases); ++i) {
-			if(!_swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, false, options, file))
-				return false;
+			numMatches += _swiftLocalOnOne(databases[i], databaseIDs[i], pattern_swift, queryIDs, false, options, file);
         }
 		std::cout << std::endl;
     }
 
-    return true;
+    return numMatches;
 }
 
 template<typename TSequence, typename TId>
@@ -295,7 +293,7 @@ int main(int argc, const char *argv[]) {
 	_writeCalculatedParams(options);
 
     // import query sequences
-    StringSet<TSequence > queries;
+    StringSet<TSequence> queries;
     StringSet<CharString> queryIDs;
 	if (!_importSequences(options.queryFile, "query", queries, queryIDs)) return 1;
 
@@ -316,8 +314,9 @@ int main(int argc, const char *argv[]) {
 
 	// local swift on all databases and queries writing results to file
     SEQAN_PROTIMESTART(timeLocalSwift);
-	if(!_swiftLocalOnAll(databases, databaseIDs, queries, queryIDs, options, file))
-		return 1;
+	int numMatches = _swiftLocalOnAll(databases, databaseIDs, queries, queryIDs, options, file);
+
+	std::cout << "Eps-matches: " << numMatches << std::endl;
     std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
 
     file.close();

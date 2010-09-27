@@ -24,16 +24,16 @@
 
 using namespace seqan;
 
-template<typename TAlign, typename TString>
+template<typename TRow, typename TString>
 void
-_getCigarLine(TAlign const & align, TString & cigar, TString & mutations) { 
-    typedef typename Size<typename Row<TAlign>::Type >::Type TSize;
+_getCigarLine(TRow const & row0, TRow const & row1, TString & cigar, TString & mutations) { 
+    typedef typename Size<TRow>::Type TSize;
 
-    TSize dbPos = beginPosition(row(align, 0));
-    TSize queryPos = beginPosition(row(align, 1));
+    TSize dbPos = beginPosition(row0);
+    TSize queryPos = beginPosition(row1);
 
-    TSize dbEndPos = endPosition(row(align, 0));
-    TSize queryEndPos = endPosition(row(align, 1));
+    TSize dbEndPos = endPosition(row0);
+    TSize queryEndPos = endPosition(row1);
 
     bool first = true;
     TSize readBasePos = queryPos;
@@ -43,12 +43,12 @@ _getCigarLine(TAlign const & align, TString & cigar, TString & mutations) {
 		int inserted = 0;
 		int deleted = 0;
 		while (dbPos != dbEndPos && queryPos != queryEndPos &&
-               !isGap(row(align, 0), dbPos) && !isGap(row(align, 1), queryPos)) {
+               !isGap(row0, dbPos) && !isGap(row1, queryPos)) {
             ++readPos;
-			if (value(row(align, 0), dbPos) != value(row(align, 1), queryPos)) {
+			if (value(row0, dbPos) != value(row1, queryPos)) {
 				if (first) first = false;
 				else mutations << ",";
-				mutations << readPos << value(source(row(align, 1)), readBasePos);
+				mutations << readPos << value(source(row1), readBasePos);
 			}
 			++readBasePos;
 			++dbPos;
@@ -56,19 +56,19 @@ _getCigarLine(TAlign const & align, TString & cigar, TString & mutations) {
 			++matched;
 		}
 		if (matched > 0) cigar << matched << "M" ;
-		while (queryPos != queryEndPos && isGap(row(align, 1), queryPos)) {
+		while (queryPos != queryEndPos && isGap(row1, queryPos)) {
 			++dbPos;
 			++queryPos;
 			++deleted;
 		}
 		if (deleted > 0) cigar << deleted << "D";
-		while (dbPos != dbEndPos && isGap(row(align, 0), dbPos)) {
+		while (dbPos != dbEndPos && isGap(row0, dbPos)) {
 			++dbPos;
 			++queryPos;
 			++readPos;
 			if (first) first = false;
 			else mutations << ",";
-			mutations << readPos << value(source(row(align, 1)), readBasePos);
+			mutations << readPos << value(source(row1), readBasePos);
 			++readBasePos;
 			++inserted;
 		}
@@ -76,22 +76,22 @@ _getCigarLine(TAlign const & align, TString & cigar, TString & mutations) {
 	}
 }
 
-template<typename TAlign>
+template<typename TRow>
 double
-_calculateIdentity(TAlign const & align) {
-    typedef typename Size<typename Row<TAlign>::Type >::Type TSize;
+_calculateIdentity(TRow const & row0, TRow const & row1) {
+    typedef typename Size<TRow>::Type TSize;
     TSize matches = 0;
-    TSize len = _max(length(row(align, 0)), length(row(align, 1)));
+    TSize len = _max(length(row0), length(row1));
 
-    TSize pos0 = beginPosition(row(align, 0));
-    TSize pos1 = beginPosition(row(align, 1));
+    TSize pos0 = beginPosition(row0);
+    TSize pos1 = beginPosition(row1);
 
-    TSize end0 = endPosition(row(align, 0));
-    TSize end1 = endPosition(row(align, 1));
+    TSize end0 = endPosition(row0);
+    TSize end1 = endPosition(row1);
 
     while ((pos0 < end0) && (pos1 < end1)) {
-        if (!isGap(row(align, 0), pos0) && !isGap(row(align, 1), pos1)) {
-            if (value(row(align, 0), pos0) == value(row(align , 1), pos1)) {
+        if (!isGap(row0, pos0) && !isGap(row1, pos1)) {
+            if (value(row0, pos0) == value(row1, pos1)) {
                 ++matches;
             }
         }
@@ -102,16 +102,17 @@ _calculateIdentity(TAlign const & align) {
     return ((double)matches/(double)len)*100.0;
 }
 
-template<typename TId, typename TAlign, typename TFile>
+template<typename TId, typename TRow, typename TFile>
 void
 _writeGffLine(TId const & databaseID,
               TId const & patternID,
               bool const databaseStrand,
-              TAlign const & match,
+              TRow const & row0,
+              TRow const & row1,
               TFile & file) {
-	typedef typename Row<TAlign>::Type TRow;
-	TRow row0 = row(match, 0);
-	TRow row1 = row(match, 1);
+	//typedef typename Row<TAlign>::Type TRow;
+	//TRow row0 = row(match, 0);
+	//TRow row1 = row(match, 1);
     
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
@@ -132,7 +133,7 @@ _writeGffLine(TId const & databaseID,
             (toSourcePosition(row0, beginPosition(row0)) + beginPosition(source(row0)));
     }
 
-    file << "\t" << _calculateIdentity(match);
+    file << "\t" << _calculateIdentity(row0, row1);
 
     file << "\t" << (databaseStrand ? '+' : '-');
 
@@ -149,20 +150,21 @@ _writeGffLine(TId const & databaseID,
 		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1));
 
     std::stringstream cigar, mutations;
-    _getCigarLine(match, cigar, mutations);
+    _getCigarLine(row0, row1, cigar, mutations);
     file << ";cigar=" << cigar.str();
     file << ";mutations=" << mutations.str();
     file << "\n";
 }
 
-template<typename TAlign, typename TStrand, typename TFile>
+template<typename TRow, typename TStrand, typename TFile>
 void
-_writeMatch(TAlign & match,
+_writeMatch(TRow & row0,
+			TRow & row1,
 			TStrand databaseStrand,
 			TFile & aliFile) {
-	typedef typename Row<TAlign>::Type TRow;
-	TRow row0 = row(match, 0);
-	TRow row1 = row(match, 1);
+	//typedef typename Row<TAlign>::Type TRow;
+	//TRow row0 = row(match, 0);
+	//TRow row1 = row(match, 1);
 
 	// write database positions
 	if (databaseStrand) {
@@ -183,11 +185,11 @@ _writeMatch(TAlign & match,
 		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1)) << " >\n";
 
 	// write match
-	aliFile << match;
+	//aliFile << match;
 }
 
 template<typename TInfix, typename TQueryId, typename TNumber, typename TId, typename TIds, typename TFile>
-void
+int
 _outputMatches(//StringSet<String<Align<TInfix> > > const & matches, 
 			   StringSet<String<SwiftLocalMatch<TInfix, TQueryId> > > const & matches, 
 			   TNumber const /*numSwiftHits*/,
@@ -203,7 +205,7 @@ _outputMatches(//StringSet<String<Align<TInfix> > > const & matches,
 
     //TSize maxLength = 0;
     //TSize totalLength = 0;
-    //TSize numMatches = 0;
+    TSize numMatches = 0;
 
     //aliFile << "Database sequence: " << databaseID;
     //if (!databaseStrand) aliFile << " complement\n";
@@ -220,10 +222,10 @@ _outputMatches(//StringSet<String<Align<TInfix> > > const & matches,
             //totalLength += len;
             //if(len > maxLength) maxLength = len;
 
-            _writeGffLine(databaseID, ids[i], databaseStrand, m.align, file);
+            _writeGffLine(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
 			//_writeMatch(m.align, databaseStrand, aliFile);
         }
-        //numMatches += length(value(matches, i));
+        numMatches += length(value(matches, i));
         //std::cout << "  # Eps-matches: " << length(value(matches, i)) << std::endl;
     }
 
@@ -235,4 +237,5 @@ _outputMatches(//StringSet<String<Align<TInfix> > > const & matches,
  //   std::cout << "    # Eps-matches    : " << numMatches << std::endl;
 
     //aliFile.close();
+	return numMatches;
 }

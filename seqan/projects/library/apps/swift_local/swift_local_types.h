@@ -19,6 +19,7 @@
  ==========================================================================*/
 
 #include <seqan/align.h>
+#include <seqan/store.h>
 
 using namespace seqan;
 
@@ -64,31 +65,34 @@ struct SwiftLocalMatch {
 	typedef _TSequence							TSequence;
 	typedef _TId								TId;
 	typedef typename Position<TSequence>::Type	TPos;
+
 	typedef Align<TSequence>					TAlign;
+	typedef typename Row<TAlign>::Type			TRow;
 
 	static const TId INVALID_ID;
 
 	TPos begin1;
 	TPos end1;
+	TRow row1;
 
 	TId id;
 	TPos begin2;
 	TPos end2;
-
-	TAlign align; // TODO: replace by some gaps type?
+	TRow row2;
 
 	SwiftLocalMatch() {}
 
 	template<typename TAlign, typename TId>
 	SwiftLocalMatch(TAlign & _align, TId _id) {
-		align = _align;
 		id = _id;
+		row1 = row(_align, 0);
+		row2 = row(_align, 1);
 
-		begin1 = beginPosition(sourceSegment(row(align, 0)));
-		end1 = endPosition(sourceSegment(row(align, 0)));
+		begin1 = beginPosition(sourceSegment(row1));
+		end1 = endPosition(sourceSegment(row1));
 
-		begin2 = beginPosition(sourceSegment(row(align, 1)));
-		end2 = endPosition(sourceSegment(row(align, 1)));
+		begin2 = beginPosition(sourceSegment(row2));
+		end2 = endPosition(sourceSegment(row2));
 	}
 };
 
@@ -212,5 +216,5 @@ sortMatches(TMatches & swiftLocalMatches, TFunctorLess const & less) {
 template <typename TSequence, typename TId>
 inline typename Size<TSequence>::Type
 length(SwiftLocalMatch<TSequence, TId> & match) {
-	return _max(length(row(match.align, 0)), length(row(match.align, 1)));
+	return _max(length(match.row1), length(match.row2));
 }

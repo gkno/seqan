@@ -284,10 +284,59 @@ _isEpsMatch(Triple<TPos, TPos, TPos> const & left,
 SEQAN_CHECKPOINT
     // compute mismatches/indels and length
     TPos errors = right.i3 - left.i3 - (right.i2 - right.i1);
-    TPos length = right.i1 - left.i2;
+    TPos len = right.i1 - left.i2;
 
     // check error rate
-    return errors/(TFloat)(length) <= eps;
+    return errors/(TFloat)(len) <= eps;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Identifies the longest epsilon match in align from possEndsLeft and possEndsRight and sets the view positions of
+// align to start and end position of the longest epsilon match
+template<typename TPos, typename TCoord, typename TSize, typename TEps>
+Pair<typename Iterator<String<Triple<TPos, TPos, TCoord> > >::Type>
+longestEpsMatch(String<Triple<TPos, TPos, TCoord> > const & possEndsLeft,
+				String<Triple<TPos, TPos, TCoord> > const & possEndsRight,
+				TPos const alignLen,
+				TPos const alignErr,
+				TSize const matchMinLength,
+				TEps const epsilon) {
+SEQAN_CHECKPOINT
+	typedef Triple<TPos, TPos, TCoord> TPossibleEnd;
+	typedef typename Iterator<String<TPossibleEnd> >::Type	TIterator;
+
+    // Identify longest eps match by iterating over combinations of left and right positions
+    TIterator rightIt = end(possEndsRight) - 1;
+    TIterator leftIt = end(possEndsLeft) - 1;
+	TIterator right, left;
+
+    TSize minLength = matchMinLength - 1;
+	bool found = false;
+
+	TSize totalLen = (*leftIt).i1 + alignLen + (*rightIt).i1;
+	while (leftIt >= begin(possEndsLeft)) {
+		totalLen = (*leftIt).i1 + alignLen + (*rightIt).i1;
+		if (totalLen < minLength) break;
+		while (rightIt >= begin(possEndsRight)) {
+			totalLen = (*leftIt).i1 + alignLen + (*rightIt).i1;
+			if (totalLen < minLength) break;
+			TSize totalErr = (*leftIt).i2 + alignErr + (*rightIt).i2;
+			if ((TEps)totalErr/(TEps)totalLen <= epsilon) {
+				right = rightIt;
+				left = leftIt;
+				//std::cout << totalLen << std::endl;
+				minLength = totalLen;
+				found = true;
+				break;
+			}
+			--rightIt;
+		}
+		rightIt = end(possEndsRight) - 1;
+		--leftIt;
+	}
+
+	if (found) return Pair<TIterator>(left, right);
+	else return Pair<TIterator>(0,0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -350,7 +399,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Identifies the longest epsilon match in align that spans seedBegin and seedEnd and sets the view positions of
+// Identifies the longest epsilon match in align and sets the view positions of
 // align to start and end position of the longest epsilon match
 template<typename TSource, typename TSize, typename TFloat>
 void 
@@ -397,6 +446,418 @@ SEQAN_CHECKPOINT
 	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
+template<typename TPos, typename TCoord>
+void
+_possibleEnds(String<Triple<TPos, TPos, TCoord> > & possEnds,
+			  String<Pair<TPos, TCoord> > const & bestEnds) {
+SEQAN_CHECKPOINT
+	typedef Pair<TPos, TCoord>	TBestEnd;
+	typedef Triple<TPos, TPos, TCoord> TPossibleEnd;
+	typedef typename Iterator<String<TBestEnd> >::Type	TBestEndIterator;
+
+	TBestEndIterator lengthsIt = begin(bestEnds);
+	TBestEndIterator lengthsEnd = end(bestEnds);
+	TPos len = 0;
+
+	/*for (unsigned i = 0; i < length(bestEnds); ++i) {
+		std::cout << i << ": " << bestEnds[i].i1;
+		std::cout << " (" << bestEnds[i].i2.i1 << "," << bestEnds[i].i2.i2 << ")" << std::endl;
+	}
+	std::cout << std::endl;*/
+
+	if (lengthsIt < lengthsEnd) {
+		bool match = false;
+		if ((*lengthsIt).i1 == 0) match = true;
+
+		TBestEndIterator prevLength = begin(bestEnds);
+		++lengthsIt;
+		++len;
+
+		for (; lengthsIt < lengthsEnd; ++lengthsIt, ++prevLength, ++len) {
+			if ((*lengthsIt).i1 == (*prevLength).i1 && (*lengthsIt).i1 <= length(bestEnds)) match = true;
+			else {
+				if (match) {
+					appendValue(possEnds, TPossibleEnd(len-1, (*prevLength).i1, (*prevLength).i2));
+				}
+				match = false;
+			}
+		}
+
+		if (match) {
+			appendValue(possEnds, TPossibleEnd(len-1, (*prevLength).i1, (*prevLength).i2));
+		}
+	}
+
+	/*for (unsigned i = 0; i < length(possEnds); ++i) {
+		std::cout << possEnds[i].i1 << ": " << possEnds[i].i2;
+		std::cout << " (" << possEnds[i].i3.i1 << "," << possEnds[i].i3.i2 << ")" << std::endl;
+	}*/
+}
+
+template <typename TTrace, typename TPos, typename TCoord, typename TStringSet, typename TScore, typename TDiagonal>
+inline void
+_align_banded_nw_best_ends(TTrace& trace,
+						   String<Pair<TPos, TCoord> > & bestEnds,
+						   TStringSet const& str,
+						   TScore const & sc,
+						   TDiagonal const diagL,
+						   TDiagonal const diagU)
+{
+	SEQAN_CHECKPOINT
+	typedef typename Value<TTrace>::Type TTraceValue;
+	typedef typename Value<TScore>::Type TScoreValue;
+	typedef typename Value<TStringSet>::Type TString;
+	typedef typename Size<TTrace>::Type TSize;
+
+	// Initialization
+	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+	TString const& str1 = str[0];
+	TString const& str2 = str[1];		
+	TSize len1 = length(str1) + 1;
+	TSize len2 = length(str2) + 1;
+	TSize diagonalWidth = (TSize) (diagU - diagL + 1);
+	TSize hi_diag = diagonalWidth;
+	TSize lo_diag = 0;
+	if (diagL > 0) lo_diag = 0;
+	else lo_diag = (diagU < 0) ? hi_diag : (TSize) (1 - diagL); 
+	TSize lo_row = (diagU <= 0) ? -diagU : 0;
+	TSize hi_row = len2;
+	if (len1 - diagL < hi_row) hi_row = len1 - diagL;
+	TSize height = hi_row - lo_row;
+
+	typedef String<TScoreValue> TRow;
+	TRow mat, len;
+	resize(mat, diagonalWidth);
+	resize(len, diagonalWidth);
+	resize(trace, height * diagonalWidth);
+	fill(bestEnds, len1+len2-2, Pair<TPos, TCoord>(len1+len2+1, TCoord()));
+	
+	//// Debug stuff
+	//String<TScoreValue> originalMat;
+	//resize(originalMat, len1 * len2);
+	//TSize count = 0;
+	//for(TSize i=0; i<len2; ++i) {
+	//	for(TSize j=0; j<len1; ++j) {
+	//		value(originalMat, i * len1 + j) = count;
+	//		std::cerr << count << ',';
+	//		++count;
+	//	}
+	//	std::cerr << std::endl;
+	//}
+	//std::cerr << std::endl;
+
+	// Classical DP with affine gap costs
+	typedef typename Iterator<TRow, Standard>::Type TRowIter;
+	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
+	TSize actualCol = 0;
+	TSize actualRow = 0;
+	TScoreValue verti_val = 0;
+	TScoreValue hori_val = 0;
+	TScoreValue hori_len = len1+len2+1;
+
+	for(TSize row = 0; row < height; ++row) {
+		actualRow = row + lo_row;
+		if (lo_diag > 0) --lo_diag;
+		if ((TDiagonal)actualRow >= (TDiagonal)len1 - diagU) --hi_diag;
+		TTraceIter traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
+		TRowIter matIt = begin(mat, Standard()) + lo_diag;
+		TRowIter lenIt = begin(len, Standard()) + lo_diag;
+		hori_val = InfimumValue<TScoreValue>::VALUE;
+		hori_len = len1+len2+1;
+		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt, ++lenIt) {
+			actualCol = col + diagL + actualRow;
+			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
+
+			if ((actualRow != 0) && (actualCol != 0)) {
+				// Get the new maximum for mat
+				*matIt += score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
+				*traceIt = Diagonal;
+				++(*lenIt);
+				if ((verti_val = (col < diagonalWidth - 1) ? *(matIt+1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+					*matIt = verti_val;
+					*traceIt = Vertical;
+					*lenIt = *(lenIt+1) + 1;
+				}						
+				if ((hori_val = (col > 0) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+					*matIt = hori_val;
+					*traceIt = Horizontal;
+					*lenIt = hori_len + 1;
+				}
+				hori_val = *matIt;
+				hori_len = *lenIt;
+			} else {			
+				// Usual initialization for first row and column
+				if (actualRow == 0) {
+					*matIt = actualCol * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2);
+					*lenIt = actualCol;
+				}
+				else {
+					*matIt = actualRow * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2);
+					*lenIt = actualRow;
+					hori_val = *matIt;
+					hori_len = actualRow;
+				}
+			}
+			TPos errors = (*matIt - (*lenIt * scoreMatch(const_cast<TScore&>(sc)))) /
+						(scoreGap(const_cast<TScore&>(sc)) - scoreMatch(const_cast<TScore&>(sc)));
+			if (*lenIt >= 0 && errors < value(bestEnds, *lenIt).i1)
+				value(bestEnds, *lenIt) = Pair<TPos, TCoord>(errors, TCoord(row, col));
+			//std::cerr << row << ',' << col << ':' << *matIt << std::endl;
+		}
+	}
+}
+
+template<typename TInfixA, typename TInfixB, typename TSeed>
+void
+_reverseLeftExtension(TInfixA const & a,
+					  TInfixB const & b,
+					  TSeed & seed,
+					  TSeed & seedOld) {
+SEQAN_CHECKPOINT
+	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
+	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+	reverseInPlace(infixA);
+	reverseInPlace(infixB);
+}
+
+template<typename TMatrix, typename TPossEnd, typename TInfixA, typename TInfixB, typename TSeed, typename TScore>
+void
+_fillMatrixBestEndsLeft(TMatrix & matrixLeft,
+							String<TPossEnd> & possibleEndsLeft,
+							TInfixA const & a,
+							TInfixB const & b,
+							TSeed & seed,
+							TSeed & seedOld,
+							TScore const & scoreMatrix) {
+SEQAN_CHECKPOINT
+	typedef StringSet<TInfixB>		TInfixSet;
+	typedef typename TPossEnd::T1	TPos;
+	typedef typename TPossEnd::T3	TCoord;
+	typedef Pair<TPos, TCoord>		TBestEnd; // number of errors and coordinate in alignment matrix for a given trace length
+
+	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
+	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+
+	reverseInPlace(infixA);
+	reverseInPlace(infixB);
+
+	TInfixSet str;
+	appendValue(str, infixA);
+	appendValue(str, infixB);
+
+	String<TBestEnd> bestEnds;
+	_align_banded_nw_best_ends(matrixLeft, bestEnds, str, scoreMatrix, 
+							   leftDiagonal(seedOld) - leftDiagonal(seed),
+							   leftDiagonal(seedOld) - rightDiagonal(seed));
+	_possibleEnds(possibleEndsLeft, bestEnds);
+}
+
+template<typename TMatrix, typename TPossEnd, typename TInfixA, typename TInfixB, typename TSeed, typename TScore>
+void
+_fillMatrixBestEndsRight(TMatrix & matrixRight,
+							String<TPossEnd> & possibleEndsRight,
+							TInfixA const & a,
+							TInfixB const & b,
+							TSeed & seed,
+							TSeed & seedOld,
+							TScore const & scoreMatrix) {
+SEQAN_CHECKPOINT
+	typedef StringSet<TInfixB>		TInfixSet;
+	typedef typename TPossEnd::T1	TPos;
+	typedef typename TPossEnd::T3	TCoord;
+	typedef Pair<TPos, TCoord>		TBestEnd; // number of errors and coordinate in alignment matrix for a given trace length
+
+	TInfixSet str;
+	appendValue(str, infix(host(a), rightPosition(seedOld, 0)+1, rightPosition(seed, 0)+1));
+	appendValue(str, infix(host(b), rightPosition(seedOld, 1)+1, rightPosition(seed, 1)+1));
+
+	String<TBestEnd> bestEnds;
+	_align_banded_nw_best_ends(matrixRight, bestEnds, str, scoreMatrix, 
+							   rightDiagonal(seedOld) - leftDiagonal(seed),
+							   rightDiagonal(seedOld) - rightDiagonal(seed)); 
+	_possibleEnds(possibleEndsRight, bestEnds);
+}
+
+template<typename TMatrix, typename TCoord, typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TAlign>
+void
+_tracebackLeft(TMatrix const & matrixLeft,
+			   TCoord const & coordinate,
+			   TInfixA const & a,
+			   TInfixB const & b,
+			   TSeed & seed,
+			   TSeed & seedOld,
+			   TPos const endLeftA,
+			   TPos const endLeftB,
+			   TAlign & align) {
+SEQAN_CHECKPOINT
+	typedef StringSet<TInfixB>							TInfixSet;
+	typedef typename Size<TInfixSet>::Type				TSize;
+	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
+
+	TInfixSet str;
+	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
+	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+	appendValue(str, infixA);
+	appendValue(str, infixB);
+
+	bool overallMaxValue[2]; // only needed for standard traceback function
+	overallMaxValue[0] = 1; overallMaxValue[1] = 0;
+	TPos overallMaxIndex[4];
+	overallMaxIndex[0] = coordinate.i1;
+	overallMaxIndex[1] = coordinate.i2;
+
+	_Align_Traceback<TPos> traceBack;
+	_align_banded_nw_trace(traceBack, str, matrixLeft, overallMaxValue, overallMaxIndex,
+				   leftDiagonal(seedOld) - leftDiagonal(seed), leftDiagonal(seedOld) - rightDiagonal(seed));
+	
+	reverseInPlace(traceBack.sizes);
+	reverseInPlace(traceBack.tvs);
+
+	TIterator tvsIt = end(traceBack.tvs) - 1;
+	TIterator tvsBegin = begin(traceBack.tvs);
+	TSize newLen = length(traceBack.tvs);
+	while (tvsIt >= tvsBegin && (*tvsIt) != (TraceBack)0) {
+		--newLen;
+		--tvsIt;
+	}
+	resize(traceBack.tvs, newLen);
+	resize(traceBack.sizes, newLen);
+
+	Align<TInfixB> infixAlign;
+	resize(rows(infixAlign), 2);
+	assignSource(row(infixAlign, 0), infix(str[0], length(str[0]) - endLeftA, length(str[0])));
+	assignSource(row(infixAlign, 1), infix(str[1], length(str[1]) - endLeftB, length(str[1])));
+
+	_pump_trace_2_Align(infixAlign, traceBack);
+	integrateAlign(align, infixAlign);
+}
+
+
+template<typename TMatrix, typename TCoord, typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TAlign>
+void
+_tracebackRight(TMatrix const & matrixRight,
+			   TCoord const & coordinate,
+			   TInfixA const & a,
+			   TInfixB const & b,
+			   TSeed & seed,
+			   TSeed & seedOld,
+			   TPos const endRightA,
+			   TPos const endRightB,
+			   TAlign & align) {
+SEQAN_CHECKPOINT
+	typedef StringSet<TInfixB>							TInfixSet;
+	typedef typename Size<TInfixSet>::Type				TSize;
+	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
+		
+	TInfixSet str;
+	appendValue(str, infix(host(a), rightPosition(seedOld, 0)+1, rightPosition(seed, 0)+1));
+	appendValue(str, infix(host(b), rightPosition(seedOld, 1)+1, rightPosition(seed, 1)+1));
+
+	bool overallMaxValue[2]; // only needed for standard traceback function
+	overallMaxValue[0] = 1; overallMaxValue[1] = 0;
+	TPos overallMaxIndex[4];
+	overallMaxIndex[0] = coordinate.i1;
+	overallMaxIndex[1] = coordinate.i2;
+
+	_Align_Traceback<TPos> traceBack;
+	_align_banded_nw_trace(traceBack, str, matrixRight, overallMaxValue, overallMaxIndex,
+				   rightDiagonal(seedOld) - leftDiagonal(seed), rightDiagonal(seedOld) - rightDiagonal(seed));
+
+	TSize skipLen = 0;
+	TIterator tvsIt = begin(traceBack.tvs);
+	TIterator tvsEnd = end(traceBack.tvs);
+	while (tvsIt < tvsEnd && (*tvsIt) != (TraceBack)0) {
+		++skipLen;
+		++tvsIt;
+	}
+	replace(traceBack.tvs, 0, skipLen, String<TraceBack>());
+	replace(traceBack.sizes, 0, skipLen, String<TPos>());
+
+	Align<TInfixB> infixAlign;
+	resize(rows(infixAlign), 2);
+	assignSource(row(infixAlign, 0), infix(str[0], 0, endRightA));
+	assignSource(row(infixAlign, 1), infix(str[1], 0, endRightB));
+
+	_pump_trace_2_Align(infixAlign, traceBack);
+	integrateAlign(align, infixAlign);
+}
+
+template<typename TInfixA, typename TInfixB, typename TSeed, typename TPos, typename TDir, typename TScore,
+		 typename TSize, typename TEps, typename TAlign>
+bool
+_bestExtension(TInfixA const & a,
+			   TInfixB const & b,
+			   TSeed & seed,
+			   TSeed & seedOld,
+			   TPos const alignLen,
+			   TPos const alignErr,
+			   TScore const & scoreMatrix,
+			   TDir const direction,
+			   TSize const minLength,
+			   TEps const eps,
+			   TAlign & align) {
+SEQAN_CHECKPOINT
+	typedef String<TraceBack>				TAlignmentMatrix;
+	typedef Pair<TPos>						TCoord; // coordinate in alignment matrix
+	typedef Triple<TPos, TPos, TCoord>		TEndInfo;  // trace length, number of errors, coordinate in alignment matrix
+	typedef typename Iterator<String<TEndInfo> >::Type	TEndIterator;
+	typedef typename Value<TScore>::Type	TScoreValue;
+	typedef StringSet<TInfixB>	TInfixSet;
+
+	// variables for banded alignment, possible ends of matches
+	TAlignmentMatrix matrixRight, matrixLeft;
+	String<TEndInfo> possibleEndsLeft, possibleEndsRight;
+
+	// fill banded matrix and gaps string for ...
+	if (direction != 1) { // ... extension to the left
+		_fillMatrixBestEndsLeft(matrixLeft, possibleEndsLeft, a, b, seed, seedOld, scoreMatrix);
+		// Caution: left extension infix is now reversed in host(a and b) !!!
+	} else appendValue(possibleEndsLeft, TEndInfo(0, 0, TCoord(0, 0)));
+	if (direction != 0) { // ... extension to the right
+		_fillMatrixBestEndsRight(matrixRight, possibleEndsRight, a, b, seed, seedOld, scoreMatrix);
+	} else appendValue(possibleEndsRight, TEndInfo(0, 0, TCoord(0, 0)));
+
+	// longest eps match on poss ends string
+	Pair<TEndIterator> endPair = longestEpsMatch(possibleEndsLeft, possibleEndsRight, alignLen, alignErr, minLength, eps);
+
+	if (endPair == Pair<TEndIterator>(0, 0)) { // no eps-match found
+		if (direction != 1) 
+			_reverseLeftExtension(a, b, seed, seedOld); // back to original orientation
+		return false;
+	}
+
+	// end positions of maximal eps-match
+	TPos endLeftB = (*endPair.i1).i3.i1;
+	if (leftDiagonal(seedOld) - rightDiagonal(seed) <= 0)
+		endLeftB -= (TPos)(leftDiagonal(seedOld) - rightDiagonal(seed));
+	TPos endLeftA = (TPos)((*endPair.i1).i3.i2 + endLeftB + leftDiagonal(seedOld) - leftDiagonal(seed));
+	TPos endRightB = (*endPair.i2).i3.i1;
+	if (rightDiagonal(seedOld) - rightDiagonal(seed) <= 0)
+		endRightB -= (TPos)(rightDiagonal(seedOld) - rightDiagonal(seed));
+	TPos endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + rightDiagonal(seedOld) - leftDiagonal(seed));
+
+	// set begin and end positions of align
+	setSourceBeginPosition(row(align, 0), leftPosition(seedOld, 0) - endLeftA);
+	setSourceBeginPosition(row(align, 1), leftPosition(seedOld, 1) - endLeftB);
+	setBeginPosition(row(align, 0), 0);
+	setBeginPosition(row(align, 1), 0);
+	setSourceEndPosition(row(align, 0), rightPosition(seedOld, 0) + 1 + endRightA);
+	setSourceEndPosition(row(align, 1), rightPosition(seedOld, 1) + 1 + endRightB);
+
+	// traceback through matrix from begin/end pos on ...
+	if((*endPair.i1).i1 != 0) { // ... extension to the left
+		_tracebackLeft(matrixLeft, (*endPair.i1).i3, a, b, seed, seedOld, endLeftA, endLeftB, align);
+	}
+	if((*endPair.i2).i1 != 0) { // ... extension to the right
+		_tracebackRight(matrixRight, (*endPair.i2).i3, a, b, seed, seedOld, endRightA, endRightB, align);
+	}
+
+	if (direction != 1) 
+		_reverseLeftExtension(a, b, seed, seedOld); // back to original orientation
+
+	return true;
+}
+
 template<typename TScoreValue, typename TScore, typename TInfixA, typename TInfixB, typename TDir, typename TSize, typename TEps, typename TAlign>
 bool
 _extendAndExtract(Align<TInfixB> const & localAlign,
@@ -428,147 +889,31 @@ SEQAN_CHECKPOINT
 		setBeginPosition(row(align, 1), 0);
 		setSourceEndPosition(row(align, 0), seedEndA);
 		setSourceEndPosition(row(align, 1), seedEndB);
+
+    if ((TSize)length(row(align, 0)) < minLength)
+		return false;
+
+		/*TODO longest eps match?*/
 	} else {
 		// gapped X-drop extension of seed alignments
 		TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
+		TSeed seedOld(seed);
 		extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
 
 		if (length(seed) < minLength - (int)floor(minLength*eps))
 			return false;
 
-		// set extended begin and end positions of align
-		setSourceBeginPosition(row(align, 0), leftPosition(seed, 0));
-		setSourceBeginPosition(row(align, 1), leftPosition(seed, 1));
-		setBeginPosition(row(align, 0), 0);
-		setBeginPosition(row(align, 1), 0);
-		setSourceEndPosition(row(align, 0), rightPosition(seed, 0)+1);
-		setSourceEndPosition(row(align, 1), rightPosition(seed, 1)+1);
+		TPos alignLen = length(row(localAlign, 0)); // TODO not length(row0)!
+		TPos alignErr = 0;
+		for (TPos i = 0; i < alignLen; ++i) {
+			if (!isMatch(localAlign, i)) ++alignErr;
+		}
 
-		// banded alignment on ...
-		__int64 startDiag = leftPosition(seed, 1) - leftPosition(seed, 0);
-		if (direction != 1) { // ... extension to the left
-			StringSet<TInfixB> str;
-			appendValue(str, infix(host(a), leftPosition(seed, 0), seedBeginA));
-			appendValue(str, infix(host(b), leftPosition(seed, 1), seedBeginB));
-			_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
-		}
-		if (direction != 0) { // ... extension to the right
-			StringSet<TInfixB> str;
-			appendValue(str, infix(host(a), seedEndA, rightPosition(seed, 0)+1));
-			appendValue(str, infix(host(b), seedEndB, rightPosition(seed, 1)+1));
-			_bandedInfixAlignment(str, seed, scoreMatrix, startDiag, align);
-		}
+		if (!_bestExtension(a, b, seed, seedOld, alignLen, alignErr, scoreMatrix, direction, minLength, eps, align))
+			return false;
 	}
-
-	if ((TSize)length(row(align, 0)) < minLength)
-		return false;
-
-	// cut ends to obtain longest epsilon-match that contains the seed alignment
-	TPos extBegin = beginPosition(source(row(align, 0))) + sourceBeginPosition(row(align, 0));
-	longestEpsMatch(align, seedBeginA - extBegin, seedEndA - extBegin, minLength, eps);
-
-
-    if ((TSize)length(row(align, 0)) < minLength)
-		return false;
-
 	return true;
 }
-
-//template<typename TRow, typename TSize>
-//inline bool
-//_isUpstream(TRow & row1, TRow & row2, TSize minLength) {
-//SEQAN_CHECKPOINT
-//    typedef typename Position<TRow>::Type TPos;
-//    
-//    TPos end1 = endPosition(sourceSegment(row1));
-//    TPos begin2 = beginPosition(sourceSegment(row2));
-//    if (end1 <= begin2) return true;
-//    
-//    TPos begin1 = beginPosition(sourceSegment(row1));
-//    if (begin1 < begin2 && (begin2 - begin1 >= (TPos)minLength)) {
-//        TPos end2 = endPosition(sourceSegment(row2));
-//        if ((end1 < end2) && (end2 - end1 >= (TPos)minLength)) return true;
-//    }
-//    
-//    return false;
-//}
-
-//template<TRow>
-//inline bool
-//_isDownstream(TRow & row1, TRow & row2) {
-//QAN_CHECKPOINT
-//    _isUpstream(row2, row1);
-//}
-
-//template<typename TSource, typename TId, typename TSize>
-//inline void
-//_insertMatch(String<SwiftLocalMatch<TSource, TId> >/*String<Align<TSource> >*/ & matches, SwiftLocalMatch<TSource, TId> match, /*Align<TSource> & align,*/ TSize minLength) {
-//SEQAN_CHECKPOINT
-//	typedef SwiftLocalMatch<TSource, TId> TMatch;
-//    typedef typename Position<String<typename TMatch::TAlign/*Align<TSource> */> >::Type TPosString;
-//    //typedef typename Row<Align<TSource> >::Type TRow;
-//
-//    TPosString maxPos = length(matches);
-//    TPosString minPos = 0;
-//
-//    if(maxPos == 0) {
-//        // matches string is empty
-//        appendValue(matches, match);
-//        return;
-//    }
-//
-//    //TRow matchRow0 = row(match.align, 0);
-//    //TRow matchRow1 = row(match.align, 1);
-//
-//    // determine insertion position
-//    TPosString pos = maxPos / 2;
-//    while (pos < maxPos) {
-//        //TRow row0 = row(value(matches, pos).align, 0);
-//        if (_isUpstream(value(matches, pos), match, 0, minLength)) {
-//        //if (_isUpstream(row0, matchRow0, minLength)) {
-//            // match is downstream of matches[pos] in first row
-//            if (minPos == pos) {
-//                ++pos;
-//                break;
-//            }
-//            minPos = pos;
-//        } else if (_isUpstream(match, value(matches, pos), 0, minLength)) {
-//        //} else if (_isUpstream(matchRow0, row0, minLength)) {
-//            // match is upstream of matches[pos] in first row
-//            maxPos = pos;
-//        } else {
-//            // match overlaps in first row with another match
-//            //TRow row1 = row(value(matches, pos).align, 1);
-//            if (_isUpstream(value(matches, pos), match, 1, minLength)) {
-//            //if (_isUpstream(row1, matchRow1, minLength)) {
-//                // match is downstream of matches[pos] in second row
-//                if (minPos == pos) {
-//                    ++pos;
-//                    break;
-//                }
-//                minPos = pos;
-//            } else if (_isUpstream(match, value(matches, pos), 1, minLength)) {
-//            //} else if (_isUpstream(matchRow1, row1, minLength)) {
-//                // match is upstream of matches[pos] in second row
-//                maxPos = pos;
-//            } else {
-//                // match overlaps in both rows with another match -> keep longer match
-//                if (length(row(match.align, 0)/*matchRow0*/) > length(row(value(matches, pos).align, 0)/*row0*/)) {
-//                    // new match is longer
-//                    replace(matches, pos, pos+1, String<TMatch/*Align<TSource>*/ >());
-//                    --maxPos;
-//                } else {
-//                    return;
-//                }
-//            }
-//        }
-//        pos = minPos + ((maxPos-minPos) / 2);
-//    }
-//    // insert match in matches at position pos
-//    String<TMatch/*Align<TSource>*/ > str;
-//    appendValue(str, match);
-//    replace(matches, pos, pos, str);
-//}
 
 // checks if two matches overlap also in seq2 and 
 // whether the non-overlaping parts are shorter than minLength
@@ -951,6 +1296,11 @@ SEQAN_CHECKPOINT
 	while (find(finder, pattern, epsilon, minLength)) {
         ++numSwiftHits;
 
+		//std::cout << beginPosition(infix(finder)) << ",";
+		//std::cout << endPosition(infix(finder)) << "  ";
+		//std::cout << beginPosition(infix(pattern, value(host(needle(pattern)), pattern.curSeqNo))) << ",";
+		//std::cout << endPosition(infix(pattern, value(host(needle(pattern)), pattern.curSeqNo))) << std::endl;
+
         // verification
 		verifySwiftHit(infix(finder), infix(pattern, value(host(needle(pattern)), pattern.curSeqNo)), epsilon,
 					   minLength, pattern.bucketParams[0].delta + pattern.bucketParams[0].overlap, xDrop, compactThresh,
@@ -970,8 +1320,10 @@ SEQAN_CHECKPOINT
 	TIterator itEnd = end(matches, Standard());
 
 	for(; it < itEnd; ++it) {
-		maskOverlaps(*it, minLength);		// remove overlaps and duplicates
-		compactMatches(*it, numMatches);	// keep only the <numMatches> longest matches
+		if (length(*it) > 0) {
+			maskOverlaps(*it, minLength);		// remove overlaps and duplicates
+			compactMatches(*it, numMatches);	// keep only the <numMatches> longest matches
+		}
 	}
     
     return numSwiftHits;
