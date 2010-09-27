@@ -11,17 +11,20 @@
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
 
+#ifdef FIONA_PARALLEL
+#include <omp.h>
+#define SEQAN_PARALLEL
+#define _GLIBCXX_PARALLEL
+#endif
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
 #include <ctime>
 #include <string>
 #include <sstream>
+#include <sys/resource.h>
 
-#ifdef FIONA_PARALLEL
-#include <omp.h>
-#define SEQAN_PARALLEL
-#endif
 
 #include <seqan/basic.h>
 #include <seqan/index.h>
@@ -771,7 +774,7 @@ void correctReads(
 		cout << endl << "Method with expected value for each level" << endl;
 	else
 		cout << endl << "Method with p-value and Poisson distribution" << endl;
-	cout << "Searching... " << endl;
+	cout << "Searching..." << endl;
 	SEQAN_PROTIMESTART(search);
 
 #ifndef FIONA_PARALLEL
@@ -997,7 +1000,7 @@ int main(int argc, const char* argv[])
 	// Define options
 	addTitleLine(parser, "**********************************************");
 	addTitleLine(parser, "***   Fiona - SHREC's Significant Other    ***");
-	addTitleLine(parser, "*** (c) Copyright 2010 by Gingerbread Man  ***");
+	addTitleLine(parser, "*** (c) Copyright 2010 by Gingerbread Men  ***");
 	addTitleLine(parser, "**********************************************");
 	addUsageLine(parser, "[OPTION]... <INPUT READS> <CORRECTED READS>");
 	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given strictness", OptionType::Double | OptionType::Label));
@@ -1122,7 +1125,11 @@ int main(int argc, const char* argv[])
 	if (options.cycles > 1)
 		cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << endl; 
 
-	cout << endl << "Time required for execution: " << SEQAN_PROTIMEDIFF(correction) << " seconds." << endl;
+	struct rusage usage;
+	getrusage(RUSAGE_SELF, &usage);
+	cout << endl;
+	cout << "Time required for execution: " << SEQAN_PROTIMEDIFF(correction) << " seconds." << endl;
+	cout << "Peak resident memory usage:  " << usage.ru_maxrss / (1024*1024) << " Mb." << endl;
 
 	return 0;
 }
