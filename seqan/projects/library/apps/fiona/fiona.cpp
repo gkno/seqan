@@ -1,11 +1,10 @@
 #define SEQAN_PROFILE		// enable time measuring
 #define FIONA_ALLOWINDELS	// allow for indels (chooses a less compact FragmentStore)
-#define FIONA_MEMOPT		// small suffix array values (<16mio reads of length <256)
+//#define FIONA_MEMOPT		// small suffix array values (<16mio reads of length <256)
 #define FIONA_PARALLEL		// divide suffix tree into subtrees for each possible 3-gram
 							// and use process subtrees in parallel
 
 // debugging
-
 //#define SEQAN_DEBUG_INDEX
 //#define SEQAN_DEBUG
 //#define SEQAN_VERBOSE
@@ -128,8 +127,8 @@ namespace seqan  {
 #else
 
 	typedef Pair<
-		unsigned,			// many reads
-		unsigned,			// of arbitrary length
+		unsigned,				// many reads
+		unsigned short,			// of arbitrary length
 		Compressed
 	> TSAValue;
 
@@ -1081,7 +1080,8 @@ int main(int argc, const char* argv[])
 		cerr << "Failed to open reads file " << getArgumentValue(parser, 0) << endl;
 		cerr << "Exiting ..." << endl;
 		return 1;
-	}
+	} else
+		cout << "Loaded " << length(store.readSeqStore) << " reads." << endl;
 	
 	// initialise the top and down level by using the log4 from the total number of reads
 	if (options.fromLevel == 0)
