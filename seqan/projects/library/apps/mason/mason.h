@@ -4,25 +4,27 @@
   ===========================================================================
   Copyright (C) 2010
   
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 3 of the License, or (at your option) any later version.
-  
-  This library is distributed in the hope that it will be useful,
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  Lesser General Public License for more details.
-  
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  Globally shared code for the read simulator.
+  Globally shared code for the Mason read simulator.
   ===========================================================================
 */
 
-#ifndef READ_SIMULATOR_H_
-#define READ_SIMULATOR_H_
+#ifndef MASON_H_
+#define MASON_H_
 
 #include <numeric>
 
@@ -39,14 +41,18 @@ using namespace seqan;
 // ============================================================================
 
 // Enum describing the read type to be simulated.
-enum ReadsType {
+enum ReadsType
+{
     READS_TYPE_ILLUMINA,
     READS_TYPE_454,
     READS_TYPE_SANGER
 };
 
+// Tag for global options.
 typedef void Global;
 
+// Class options.  We will use template inheritance for specializing
+// the options class and C++ inheritance to prevent redundant code.
 template <typename TTag>
 struct Options;
 
@@ -72,10 +78,12 @@ struct Options<Global>
     unsigned numReads;
     // true iff a random reference sequence is to be used.
     bool useRandomSequence;
+    // Probability for A, C, G in the random simulated sequence.
+    double sourceProbabilityA;
+    double sourceProbabilityC;
+    double sourceProbabilityG;
     // Length of random sequence to be simulated.
     unsigned randomSourceLength;
-    // If true then no Ns are generated for the seource sequence.
-    bool sourceNoN;
     // true iff only the forward strand is to be simulated.
     bool onlyForward;
     // true iff only the reverse strand is to be simulated.
@@ -91,6 +99,11 @@ struct Options<Global>
     bool simulateQualities;
     // true iff additional information is to be included in the reads file.
     bool includeReadInformation;
+    // Path to file with sample counts from each contig.  The file is a
+    // TSV file containing pairs mapping the contig id (non-whitespace
+    // sequence in FASTA header) to a read count.  Overrides parameter
+    // numReads if given.
+    CharString sampleCountsFilename;
 
     // Mate-Pair Related Options.
 
@@ -105,10 +118,6 @@ struct Options<Global>
     // distributed library lengths, interval length around mean for uniform
     // distribution.
     double libraryLengthError;
-
-    // Source Sequence Repeat Parameters.
-
-    // TODO(holtgrew): Mostly interesting for randomly generated source sequences.
 
     // Haplotype parameters.
 
@@ -132,8 +141,10 @@ struct Options<Global>
               seed(0),
               numReads(1000),
               useRandomSequence(false),
+              sourceProbabilityA(0.25),
+              sourceProbabilityC(0.25),
+              sourceProbabilityG(0.25),
               randomSourceLength(1000*1000),
-              sourceNoN(false),
               onlyForward(false),
               onlyReverse(false),
               outputFile(""),
@@ -158,28 +169,49 @@ struct Options<Global>
 template <typename TTag>
 struct ModelParameters;
 
+// Global model parameters.
+template <>
+struct ModelParameters<Global>
+{
+    // If non-empty, sampleCounts[i] gives the number of reads to
+    // sample from contig i (the i-th sequence in the FASTA input
+    // file).
+    String<size_t> sampleCounts;
+};
+
 // Enum describing the type of an error.
-enum ErrorType {
+enum ErrorType
+{
     ERROR_TYPE_MATCH    = 0,
     ERROR_TYPE_MISMATCH = 1,
     ERROR_TYPE_INSERT   = 2,
     ERROR_TYPE_DELETE   = 3
 };
 
+// Class for storing the read simulation instructions.  Will be
+// specialized for each technology to simulate.
 template <typename TReadTypeTag>
 struct ReadSimulationInstruction;
 
+// Read simulation instructions used by all simulated technologies.
 template <>
-struct ReadSimulationInstruction<Global> {
+struct ReadSimulationInstruction<Global>
+{
+    // Index of the haplotype to sample the read from.
     unsigned haplotype;
+    // Index of the contig to sample the read from.
     unsigned contigId;
+    // Whether or not the read is to be sampled from the forward strand.
     bool isForward;
+    // Begin and end position of the infix to sample the read from.
     size_t beginPos;
     size_t endPos;
     // Number of characters added/removed to the string by indels.
     unsigned delCount;
     unsigned insCount;
+    // Edit string of the read.
     String<ErrorType> editString;
+    // String of qualities for the bases written out.
     String<int> qualities;
 
     ReadSimulationInstruction() : delCount(0), insCount(0) {}
@@ -193,14 +225,18 @@ struct ReadSimulationInstruction<Global> {
 // Functions
 // ============================================================================
 
+// Prints the global options to stream.
 template <typename TStream>
 TStream & operator<<(TStream & stream, Options<Global> const & options) {
     stream << "global-options {" << std::endl
            << "  seed:                   " << options.seed << std::endl
            << "  numReads:               " << options.numReads << std::endl
            << "  useRandomSequence:      " << (options.useRandomSequence ? "true" : "false") << std::endl
+           << "  sourceProbabilityA:     " << options.sourceProbabilityA << std::endl
+           << "  sourceProbabilityC:     " << options.sourceProbabilityC << std::endl
+           << "  sourceProbabilityG:     " << options.sourceProbabilityG << std::endl
+           << "  useRandomSequence:      " << (options.useRandomSequence ? "true" : "false") << std::endl
            << "  randomSourceLength:     " << options.randomSourceLength << std::endl
-           << "  sourceNoN :             " << options.sourceNoN << std::endl
            << "  onlyForward:            " << (options.onlyForward ? "true" : "false") << std::endl
            << "  onlyReverse:            " << (options.onlyReverse ? "true" : "false") << std::endl
            << "  outputFile:             \"" << options.outputFile << "\"" << std::endl
@@ -216,10 +252,12 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
            << "  haplotypeIndelRangeMin: " << options.haplotypeIndelRangeMin << std::endl
            << "  haplotypeIndelRangeMax: " << options.haplotypeIndelRangeMax << std::endl
            << "  haplotypeNoN:           " << options.haplotypeNoN << std::endl
+           << "  sampleCountsFilename:   " << options.sampleCountsFilename << std::endl
            << "}" << std::endl;
     return stream;
 }
 
+// Stream operator for simulation instructions.
 template <typename TStream>
 TStream & operator<<(TStream & stream, ReadSimulationInstruction<Global> const & inst) {
     stream << "(haplotype=" << inst.haplotype << ", contigId=" << inst.contigId << ", isForward=" << inst.isForward << ", beginPos=" << inst.beginPos << ", endPos=" << inst.endPos << ", insCount=" << inst.insCount << ", delCount=" << inst.delCount << ", editString=";
@@ -236,11 +274,12 @@ TStream & operator<<(TStream & stream, ReadSimulationInstruction<Global> const &
     return stream;
 }
 
+// Initialize the command line parser for the global options.
 void setUpCommandLineParser(CommandLineParser & parser)
 {
-    addVersionLine(parser, "SeqAn read simulator 0.1");
+    addVersionLine(parser, "0.1");
 
-    addTitleLine(parser, "SeqAn read simulator");
+    addTitleLine(parser, "Mason - A Read Simulator");
     addUsageLine(parser, "illumina [OPTIONS] SEQUENCE");
     addLine(parser, "");
     addLine(parser, "Use 'random' for the SEQUENCE file name to generate it randomly.");
@@ -250,6 +289,9 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("s",  "seed", "The seed for RNG.  Default: 0.", OptionType::Integer | OptionType::Label));
     addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
+    addOption(parser, CommandLineOption("spA", "source-probability-A", "Propabilibty for A in randomly generated sequence. Default: 0.25", OptionType::Double));
+    addOption(parser, CommandLineOption("spC", "source-probability-C", "Propabilibty for C in randomly generated sequence. Default: 0.25", OptionType::Double));
+    addOption(parser, CommandLineOption("spG", "source-probability-G", "Propabilibty for G in randomly generated sequence. Default: 0.25", OptionType::Double));
     addOption(parser, CommandLineOption("snN", "source-no-N", "If set then no Ns are generated in the random source sequence.", OptionType::Bool));
     addOption(parser, CommandLineOption("f",  "forward-only", "Simulate from forward strand only.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("r",  "reverse-only", "Simulate from reverse strand only.  Default: false.", OptionType::Bool));
@@ -258,6 +300,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addOption(parser, CommandLineOption("i", "include-read-information", "Include additional read information in reads file.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("v", "verbose", "Verbosity mode.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("vv", "very-verbose", "High verbosity mode, implies verbosity mode.  Default: false.", OptionType::Bool));
+    addOption(parser, CommandLineOption("scf", "sample-counts-file", "Path to TSV file that maps contig ids to read counts.", OptionType::String));
 
     addSection(parser, "Mate-Pair Options");
 
@@ -278,6 +321,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     requiredArguments(parser, 2);
 }
 
+// Parse command line for global options and perform some checks.
 template <typename TOptions>
 int parseCommandLineAndCheck(TOptions & options,
                              CharString & referenceFilename,
@@ -300,8 +344,12 @@ int parseCommandLineAndCheck(TOptions & options,
         getOptionValueLong(parser, "num-reads", options.numReads);
     if (isSetLong(parser, "source-length"))
         getOptionValueLong(parser, "source-length", options.randomSourceLength);
-    if (isSetLong(parser, "source-no-N"))
-        options.sourceNoN = true;
+    if (isSetLong(parser, "source-probability-A"))
+        getOptionValueLong(parser, "source-probability-A", options.sourceProbabilityA);
+    if (isSetLong(parser, "source-probability-C"))
+        getOptionValueLong(parser, "source-probability-C", options.sourceProbabilityC);
+    if (isSetLong(parser, "source-probability-G"))
+        getOptionValueLong(parser, "source-probability-G", options.sourceProbabilityG);
     if (isSetLong(parser, "forward-only"))
         options.onlyForward = true;
     if (isSetLong(parser, "reverse-only"))
@@ -339,6 +387,9 @@ int parseCommandLineAndCheck(TOptions & options,
     if (isSetLong(parser, "haplotype-no-N"))
         options.haplotypeNoN = true;
 
+    if (isSetLong(parser, "sample-counts-file"))
+        getOptionValueLong(parser, "sample-counts-file", options.sampleCountsFilename);
+
     // First argument is "illumina", second one name of reference file.
     referenceFilename = getArgumentValue(parser, 1);
 
@@ -349,16 +400,28 @@ int parseCommandLineAndCheck(TOptions & options,
 }
 
 // Write a random DNA sequence of the given length to the file with the given name.
-template <typename TRNG>
-int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) {
+template <typename TRNG, typename TOptions>
+int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, TOptions const & options)
+{
     DnaString randomSequence;
     reserve(randomSequence, length);
 
-    // TODO(holtgrew): When generating Dna5 sequences, interpret options.sourceNoN.
+    // Simulate the random sequence with the given background probabilities.
+    double xA = options.sourceProbabilityA;
+    double xC = xA + options.sourceProbabilityC;
+    double xG = xC + options.sourceProbabilityG;
 
+    PDF<Uniform<double> > pdf(0, 1);
     for (size_t i = 0; i < length; ++i) {
-        Dna c = static_cast<Dna>(pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, ValueSize<Dna>::VALUE - 1)));
-        appendValue(randomSequence, c);
+        double x = pickRandomNumber(rng, pdf);
+        if (x < xA)
+            appendValue(randomSequence, Dna('A'));
+        else if (x < xC)
+            appendValue(randomSequence, Dna('C'));
+        else if (x < xG)
+            appendValue(randomSequence, Dna('G'));
+        else
+            appendValue(randomSequence, Dna('T'));
     }
 
     std::ofstream file;
@@ -372,6 +435,50 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName) 
     return 0;
 }
 
+// Load sample counts as integers from a file.
+template <typename TFragmentStore, typename TSpec, typename TOptions>
+int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*const*/ & fragmentStore, TOptions const & options)
+{
+    std::ifstream file;
+    file.open(toCString(options.sampleCountsFilename), std::ios_base::in);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open sample counts file " << options.sampleCountsFilename << std::endl;
+        return 1;
+    }
+
+    fill(modelParameters.sampleCounts, length(fragmentStore.contigNameStore), 0);
+
+    char c = _streamGet(file);
+    CharString contigName;
+    size_t sampleCount;
+
+    refresh(fragmentStore.contigNameStoreCache);
+
+    while (!_streamEOF(file)) {
+        clear(contigName);
+
+        _parse_readSamIdentifier(file, contigName, c);
+        _parse_skipUntilChar(file, '\t', c);
+        sampleCount = _parse_readNumber(file, c);
+        _parse_skipLine(file, c);
+
+        size_t contigId = 0;
+        if (!getIdByName(fragmentStore.contigNameStore, contigName, contigId, fragmentStore.contigNameStoreCache)) {
+            std::cerr << "ERROR: Could not find contig with name \"" << contigName << "\" (from read counts file) in contigs." << std::endl;
+            return 1;
+        }
+
+        if (options.veryVerbose)
+            std::cout << "Sample count for contig " << contigName << " (id=" << contigId << ") is " << sampleCount << std::endl;
+        modelParameters.sampleCounts[contigId] = sampleCount;
+    }
+
+    return 0;
+}
+
+// Top level dispatched function that mainly contains the input/output
+// logic and dispatches to simulateReadsMain() for the actual
+// simulation steps.
 template <typename TOptions, typename TReadsTypeTag>
 int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag const &) {
     // Print options.
@@ -387,7 +494,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         referenceFilename = "random.fasta";
         std::cerr << "Generating random sequence of length " << options.randomSourceLength
                   << " to file \"" << referenceFilename << "\"." << std::endl;
-        int ret = writeRandomSequence(rng, options.randomSourceLength, referenceFilename);
+        int ret = writeRandomSequence(rng, options.randomSourceLength, referenceFilename, options);
         if (ret != 0)
             return ret;
     }
@@ -414,6 +521,13 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     int ret = simulateReadsSetupModelSpecificData(modelParameters, options);
     if (ret != 0)
         return ret;
+
+    // Load sample counts file if given.
+    if (length(options.sampleCountsFilename) > 0) {
+        ret = loadSampleCounts(modelParameters, fragmentStore, options);
+        if (ret != 0)
+            return ret;
+    }
     
     // Kick off the read generation.
     ret = simulateReadsMain(fragmentStore, rng, options, modelParameters);
@@ -495,6 +609,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     return 0;
 }
 
+// Build a haplotype, based on the contigs from the given fragment store.
 template <typename TRNG>
 void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     FragmentStore<MyFragmentStoreConfig> & fragmentStore,
@@ -567,6 +682,8 @@ int buildReadSimulationInstruction(
         unsigned const & haplotypeId,
         StringSet<String<Dna5, Journaled<Alloc<> > > > const & haplotype,
         String<double> const & relativeContigLengths,
+        size_t const & contigId,
+        bool fixedContigId,
         ModelParameters<TReadsTag> const & parameters,
         Options<TReadsTag> const & options)
 {
@@ -578,12 +695,17 @@ int buildReadSimulationInstruction(
     do {
 		clear(instructions);
         invalid = false;  // By default, we do not want to repeat.
-        // Pick contig id, probability is proportional to the length.
-        double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
-        for (unsigned i = 0; i < length(relativeContigLengths); ++i) {
-            if (x < relativeContigLengths[i]) {
-                inst.contigId = i -1;
-                break;
+        if (fixedContigId) {
+            // Use precomputed contig id.
+            inst.contigId = contigId;
+        } else {
+            // Pick contig id, probability is proportional to the length.
+            double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+            for (unsigned i = 0; i < length(relativeContigLengths); ++i) {
+                if (x < relativeContigLengths[i]) {
+                    inst.contigId = i - 1;
+                    break;
+                }
             }
         }
         // Pick whether on forward or reverse strand.
@@ -649,6 +771,7 @@ int buildReadSimulationInstruction(
     return 0;
 }
 
+// Pick library length, based on the configuration in options.
 template <typename TRNG>
 inline
 unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
@@ -666,13 +789,7 @@ unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
     }
 }
 
-/**
-..param.fragmentStore:FragmentStore with the contigs and where to write reads to.
-..param.rng:Random number generator to use.
-..param.options:Options for the simulation.
-..param.errorDistribution:Error distribution, indexed by pos * 4 + ERROR_TYPE_{MATCH,MISMATCH,INSERT,DELETE}.
-..param.tag:Tag for specifying reads to simulate.
-*/
+// Performs the actual read simulation.
 template <typename TRNG, typename TReadsTag, typename TOptions>
 int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                       TRNG & rng,
@@ -688,21 +805,45 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
     typedef Position<CharString>::Type TPos;
 
-    // First, we randomly pick the haplotype for each read to be simulated.
+    // Number of reads comes from command line by default.  If sample
+    // counts are given, we compute it from this instead.
+    size_t numReads = options.numReads;
+    if (length(parameters.sampleCounts) > 0u) {
+        numReads = 0;
+        for (unsigned i = 0; i < length(parameters.sampleCounts); ++i)
+            numReads += parameters.sampleCounts[i];
+    }
+
+    // First, we randomly pick the haplotype for each read to be
+    // simulated or read it from the sample counts in parameters.
     String<unsigned> haplotypeIds;
-    reserve(haplotypeIds, options.numReads);
-    for (size_t i = 0; i < options.numReads; ++i)
+    // Pick random haplotype origin.
+    reserve(haplotypeIds, numReads);
+    for (size_t i = 0; i < numReads; ++i)
         appendValue(haplotypeIds, pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, options.numHaplotypes - 1)));
+
+    // Maybe pick contig ids to sample from.
+    String<unsigned> contigIds;
+    if (length(parameters.sampleCounts) > 0) {
+        for (unsigned i = 0; i < length(fragmentStore.contigNameStore); ++i) {
+            fill(contigIds, length(contigIds) + parameters.sampleCounts[i], i);
+            if (options.veryVerbose)
+                std::cerr << parameters.sampleCounts[i] << " reads from haplotype " << i << "..." << std::endl;
+        }
+        shuffle(contigIds, rng);
+    }
 
     // We do not build all haplotypes at once since this could cost a
     // lot of memory.
+    //
+    // TODO(holtgrew): Would only have to switch pointers to journals which is possible.
     //
     // for each haplotype id
     //   simulate haplotype
     //   for each simulation instruction for this haplotype:
     //     build simulated read
-    reserve(fragmentStore.readSeqStore, options.numReads, Exact());
-    reserve(fragmentStore.readNameStore, options.numReads, Exact());
+    reserve(fragmentStore.readSeqStore, numReads, Exact());
+    reserve(fragmentStore.readNameStore, numReads, Exact());
     char readName[1024];
     char outFileName[151];
     snprintf(outFileName, 150, "%s", toCString(options.outputFile));
@@ -738,7 +879,17 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
 
             // Build simulation instructions.
             String<ReadSimulationInstruction<TReadsTag> > instructions;
-            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigs, relativeContigLengths, parameters, options);
+            // TODO(holtgrew): Pick contig id outside of instructions.
+            size_t contigId = 0;
+            bool fixedContigId = false;
+            if (length(parameters.sampleCounts) > 0) {
+                fixedContigId = true;
+                if (options.generateMatePairs)
+                    contigId = contigIds[length(fragmentStore.readSeqStore) / 2];
+                else
+                    contigId = contigIds[length(fragmentStore.readSeqStore)];
+            }
+            int res = buildReadSimulationInstruction(instructions, rng, haplotypeId, haplotypeContigs, relativeContigLengths, contigId, fixedContigId, parameters, options);
             if (res != 0)
                 return res;
 
@@ -814,28 +965,6 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                               << "`-- " << std::endl;
                 }
 
-                // Align haplotype infix with the read sequence, then copy over gaps.
-                //
-                // TODO(holtgrew): A better way to do this would be to build the gaps by copying over gaps from differences of haplotype and original sequence and then apply the edit string.
-                // TReadGapAnchors readGapAnchors;
-                // TReadGaps readGaps(fragmentStore.readSeqStore[readId], readGapAnchors);
-                // Align<Dna5String> alignment;
-                // resize(rows(alignment), 2);
-                // assignSource(row(alignment, 0), infix(haplotypeContigs[inst.contigId], inst.beginPos, inst.endPos));
-                // assignSource(row(alignment, 1), fragmentStore.readSeqStore[readId]);
-                // globalAlignment(alignment, Score<int, EditDistance>(), NeedlemanWunsch());
-                // typedef typename Row<Align<Dna5String> >::Type TRow;
-                // typedef typename Iterator<TRow>::Type TAlignmentIterator;
-                // for (unsigned i = 0; i < length(columns(alignment)); ++i) {
-                //     TAlignmentIterator it0 = iter(row(alignemnt, 0), i);
-                //     TAlignmentIterator it1 = iter(row(alignemnt, 1), i);
-                //     SEQAN_ASSERT_TRUE(!isGap(it0) || !isGap(it1));
-                //     if (isGap(it0)) {
-                //     } else if (isGap(it1)) {
-                //     } else {
-                //     }
-                // }
-
                 // Tentatively add matches to aligned read store.  We will
                 // maybe flip begin and end position below in the "flipping and
                 // reordering" step and convert the matches to a global
@@ -888,7 +1017,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     }
 
     // Last but not least, convert the matches collected before to a global alignment.
-    convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>());
+    convertMatchesToGlobalAlignment(fragmentStore, Score<int, EditDistance>(), True());
 	
 	// AlignedReadLayout layout;
 	// layoutAlignment(layout, fragmentStore);
@@ -900,4 +1029,4 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     return 0;
 }
 
-#endif  // READ_SIMULATOR_H_
+#endif  // MASON_H_
