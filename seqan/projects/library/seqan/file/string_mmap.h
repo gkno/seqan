@@ -27,7 +27,14 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-    template < typename TConfig = ExternalConfig<> >
+    template < typename TFile_ = File<>,				// default file type
+               typename TSize_ = size_t >				// size type
+    struct MMapConfig {
+        typedef TFile_ TFile;
+        typedef TSize_ TSize;
+    };
+
+    template < typename TConfig = MMapConfig<> >
     struct MMap;
 	
 	
@@ -57,6 +64,28 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 ..include:seqan/file.h
 */
 
+#ifdef PLATFORM_WINDOWS
+
+		enum MMapAdviseScheme {
+			MMAP_NORMAL = 0,
+			MMAP_RANDOM = 0,
+			MMAP_SEQUENTIAL = 0,
+			MMAP_WILLNEED = 0,
+			MMAP_DONTNEED = 0
+		};
+
+#else
+
+		enum MMapAdviseScheme {
+			MMAP_NORMAL = POSIX_MADV_NORMAL,
+			MMAP_RANDOM = POSIX_MADV_RANDOM,
+			MMAP_SEQUENTIAL = POSIX_MADV_SEQUENTIAL,
+			MMAP_WILLNEED = POSIX_MADV_WILLNEED,
+			MMAP_DONTNEED = POSIX_MADV_DONTNEED
+		};
+
+#endif
+
     template < typename TValue,
                typename TConfig >
 	class String<TValue, MMap<TConfig> >
@@ -77,6 +106,7 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 #ifdef PLATFORM_WINDOWS
         HANDLE				handle;
 #endif
+		MMapAdviseScheme	scheme;
 
 		String(TSize size = 0):
 			data_begin(0),
@@ -298,6 +328,13 @@ SEQAN_CHECKPOINT
         true
     };
 
+    template < typename TValue, typename TConfig, typename TScheme, typename TBeginPos, typename TEndPos >
+	inline int
+	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme, TBeginPos, TEndPos);
+	{
+		return 0;
+	}
+		
     template < typename TValue, typename TConfig >
     inline void 
 	flush(String<TValue, MMap<TConfig> > &) 
@@ -313,9 +350,10 @@ SEQAN_CHECKPOINT
 
 	// flush and free all allocated pages
     template < typename TValue, typename TConfig >
-	inline void 
+	inline int
 	flushAndFree(String<TValue, MMap<TConfig> > &)
 	{
+		return 0;
 	}
 //____________________________________________________________________________
 
@@ -462,6 +500,17 @@ SEQAN_CHECKPOINT
 
 ///.Function.flush.param.string.type:Spec.MMap String
 
+    template < typename TValue, typename TConfig, typename TScheme, typename TBeginPos, typename TEndPos >
+	inline int
+	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme, TBeginPos beginPos, TEndPos endPos)
+	{
+		me.scheme = scheme;
+//		posix_fadvise(me.file.handle, beginPos * sizeof(TValue), (endPos - beginPos) * sizeof(TValue), scheme);
+		if (scheme == MMAP_DONTNEED)
+			msync(me.data_begin + beginPos, (endPos - beginPos) * sizeof(TValue), MS_INVALIDATE);
+		return posix_madvise(me.data_begin + beginPos, (endPos - beginPos) * sizeof(TValue), scheme);
+	}
+		
     template < typename TValue, typename TConfig >
     inline void 
 	flush(String<TValue, MMap<TConfig> > &me) 
@@ -479,11 +528,12 @@ SEQAN_CHECKPOINT
 
 	// flush and free all allocated pages
     template < typename TValue, typename TConfig >
-	inline void 
+	inline int
 	flushAndFree(String<TValue, MMap<TConfig> > &me)
 	{
-		madvise(me.data_begin, capacity(me) * sizeof(TValue), MADV_DONTNEED);
+		return posix_madvise(me.data_begin, capacity(me) * sizeof(TValue), MADV_DONTNEED);
 	}
+	
 //____________________________________________________________________________
 
 	template < typename TValue, typename TConfig >
@@ -492,11 +542,13 @@ SEQAN_CHECKPOINT
 	{
 		if (new_capacity > 0) 
 		{
+			_ensureFileIsOpen(me);
 			resize(me.file, new_capacity * sizeof(TValue));
 			int prot = 0;
 			if (me._openMode & OPEN_RDONLY) prot |= PROT_READ;
 			if (me._openMode & OPEN_WRONLY) prot |= PROT_WRITE;
 			void *addr = mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
+			mmapAdvise(me, me.scheme);
 			
 			if (addr == MAP_FAILED)
 			{
@@ -548,11 +600,13 @@ SEQAN_CHECKPOINT
 			{
 				TSize seq_length = length(me);
 				
+				_ensureFileIsOpen(me);
 				if (capacity(me) < new_capacity)
 					resize(me.file, new_capacity * sizeof(TValue));
 
 #ifdef MREMAP_MAYMOVE
 				void *addr = mremap(me.data_begin, capacity(me) * sizeof(TValue), new_capacity * sizeof(TValue), MREMAP_MAYMOVE);
+				mmapAdvise(me, me.scheme);
 #else
 				// for BSD systems without mremap(..) like Mac OS X ...
 				int prot = 0;
@@ -561,6 +615,7 @@ SEQAN_CHECKPOINT
 	//			void *addr = mmap(me.data_begin, new_capacity * sizeof(TValue), prot, MAP_SHARED | MAP_FIXED, me.file.handle, 0);
 				munmap(me.data_begin, capacity(me) * sizeof(TValue));
 				void *addr = mmap(NULL, new_capacity * sizeof(TValue), prot, MAP_SHARED, me.file.handle, 0);
+				mmapAdvise(me, me.scheme);
 #endif
 
 				if (addr == MAP_FAILED) 
@@ -594,6 +649,15 @@ SEQAN_CHECKPOINT
 		_unmap(me);
 		resize(me.file, 0);
 	}
+//____________________________________________________________________________
+
+    template < typename TValue, typename TConfig, typename TScheme >
+	inline int
+	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme)
+	{
+		return mmapAdvise(me, scheme, 0, capacity(me));
+	}
+		
 //____________________________________________________________________________
 
 	template < typename TValue, typename TConfig, typename TSize >
@@ -686,6 +750,8 @@ SEQAN_CHECKPOINT
 		if (!me.file)
 		{
 			me._temporary = true;
+			me._openMode = OPEN_RDWR;
+
 			if (!(me._ownFile = openTemp(me.file)))
 				::std::cerr << "Memory Mapped String couldn't open temporary file" << ::std::endl;
 		}
