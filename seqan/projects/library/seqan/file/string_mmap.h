@@ -112,7 +112,8 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 			data_begin(0),
 			data_end(0),
 			data_capacity(0),
-            file(NULL)
+            file(NULL),
+			scheme(MMAP_NORMAL)
         {
             _temporary = true;
             _ownFile = false;
@@ -124,7 +125,8 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 			data_begin(0),
 			data_end(0),
 			data_capacity(0),
-            file(NULL)
+            file(NULL),
+			scheme(MMAP_NORMAL)
         {
 			open(*this, _file);
         }
@@ -133,7 +135,8 @@ See the @Memfunc.ExtString#String.constructor@ for more details.
 			data_begin(0),
 			data_end(0),
 			data_capacity(0),
-            file(NULL)
+            file(NULL),
+			scheme(MMAP_NORMAL)
         {
 			open(*this, fileName, openMode);
         }
