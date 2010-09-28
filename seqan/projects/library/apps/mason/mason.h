@@ -542,7 +542,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
         for (size_t i = 0; i < length(mateFilename); ++i)
             if (mateFilename[i] == '.')
                 dotPos = i;
-        infix(mateFilename, dotPos, dotPos + 1) = ".1.";
+        infix(mateFilename, dotPos, dotPos + 1) = "_1.";
         // Write out first mates.
         std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/1" << std::endl;
         StringSet<String<Dna5Q>, Dependent<> > reads;
@@ -563,7 +563,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
             else
                 write(fstrm, readNames, reads, Fasta());
         }
-        // Build filename with '.2.' infix.
+        // Build filename with '_2.' infix.
         infix(mateFilename, dotPos + 1, dotPos + 2) = "2";
         // Write out second mates.
         std::cerr << "Writing resulting reads to \"" << mateFilename << "\" mates/2" << std::endl;
