@@ -28,7 +28,7 @@
 
 #include <seqan/store.h>
 
-#include "read_simulator.h"
+#include "mason.h"
 
 using namespace seqan;
 

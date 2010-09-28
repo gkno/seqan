@@ -46,7 +46,7 @@
 #include <seqan/sequence.h>
 #include <seqan/store.h>
 
-#include "read_simulator.h"
+#include "mason.h"
 #include "simulate_illumina.h"
 #include "simulate_454.h"
 #include "simulate_sanger.h"
@@ -92,8 +92,6 @@ int parseOptions(Options<Global> & options, const int argc, const char * argv[])
 }
 
 int main(const int argc, const char * argv[]) {
-    printDebugLevel(std::cerr);
-    
     // Switch command type (which reads to simulate) or show global help.
     Options<Global> globalOptions;
     int ret = parseOptions(globalOptions, argc, argv);
