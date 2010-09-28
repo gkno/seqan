@@ -1,7 +1,7 @@
 /*==========================================================================
   SeqAn - The Library for Sequence Analysis
   http://www.seqan.de 
-  ===========================================================================
+ ===========================================================================
   Copyright (C) 2010
   
   This library is free software; you can redistribute it and/or
@@ -14,23 +14,22 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
   
-  ===========================================================================
+ ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  A simple read simulator.
+  Mason - A read simulator.
 
-  Usage: read_simulator --help
-         read_simulator illumina [options] source file
+  Usage: mason --help
+         mason illumina [options] source file
              Simulation of Illumina reads.
-         read_simulator 454 [options] source file
+         mason 454 [options] source file
              Simulation of 454 reads.
-         read_simulator sanger [options] source file
+         mason sanger [options] source file
              Simulation of Sanger reads.
   ===========================================================================
-  This file only contains code to parse command line parameters and delegates
-  the actual simulation to the simulate_*.h headers.  The Illumina simulation
-  code is based on "readsim" by Anne-Katrin Emde, which is itself based on
-  the read simulator by Tobias Rausch.
+  This file only contains code to parse the first command line
+  argument and delegates the actual simulation to the simulate_*.h
+  headers.
   ===========================================================================*/
 
 #include <algorithm>
@@ -54,16 +53,19 @@
 
 using namespace seqan;
 
+/* Print global help.  This function is called when the user specifies
+ * a wrong simulation command.
+ */
 void printHelpGlobal() {
-    std::cerr << "SeqAn read simulator" << std::endl
+    std::cerr << "Mason - A Read Simulator" << std::endl
+              << "(c) 2010 by Manuel Holtgrewe" << std::endl
               << std::endl
-              << "Usage: read_simulator illumina [OPTIONS] [SEQUENCE.fasta]" << std::endl
-              << "       read_simulator 454 [OPTIONS] [SEQUENCE.fasta]" << std::endl
-              << "       read_simulator sanger [OPTIONS] [SEQUENCE.fasta]" << std::endl
+              << "Usage: mason illumina [OPTIONS] [SEQUENCE.fasta]" << std::endl
+              << "       mason 454 [OPTIONS] [SEQUENCE.fasta]" << std::endl
+              << "       mason sanger [OPTIONS] [SEQUENCE.fasta]" << std::endl
               << std::endl
-              << "Call with 'read_simulator READS-TYPE --help' to get detailed help." << std::endl;
+              << "Call with 'mason READS-TYPE --help' to get detailed help." << std::endl;
 }
-
 
 int parseOptions(Options<Global> & options, const int argc, const char * argv[]) {
     if (argc == 1 ||
@@ -98,7 +100,10 @@ int main(const int argc, const char * argv[]) {
     if (ret != 0)
         return ret;
 
-    // Kick off read simulation, depending on the chosen command.
+    // Kick off read simulation, depending on the chosen command.  We
+    // use a type-based compile-time dispatch for selecting the
+    // appropriate function for simulation.  This if/then/else switch
+    // selects the right code path.
     if (globalOptions.readsType == READS_TYPE_ILLUMINA) {
         CommandLineParser parser;
         setUpCommandLineParser(parser, IlluminaReads());

@@ -17,12 +17,12 @@
   ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
   ===========================================================================
-  Globally shared code for the read simulator.
+  Globally shared code for the Mason read simulator.
   ===========================================================================
 */
 
-#ifndef READ_SIMULATOR_H_
-#define READ_SIMULATOR_H_
+#ifndef MASON_H_
+#define MASON_H_
 
 #include <numeric>
 
@@ -39,14 +39,18 @@ using namespace seqan;
 // ============================================================================
 
 // Enum describing the read type to be simulated.
-enum ReadsType {
+enum ReadsType
+{
     READS_TYPE_ILLUMINA,
     READS_TYPE_454,
     READS_TYPE_SANGER
 };
 
+// Tag for global options.
 typedef void Global;
 
+// Class options.  We will use template inheritance for specializing
+// the options class and C++ inheritance to prevent redundant code.
 template <typename TTag>
 struct Options;
 
@@ -163,34 +167,49 @@ struct Options<Global>
 template <typename TTag>
 struct ModelParameters;
 
+// Global model parameters.
 template <>
 struct ModelParameters<Global>
 {
+    // If non-empty, sampleCounts[i] gives the number of reads to
+    // sample from contig i (the i-th sequence in the FASTA input
+    // file).
     String<size_t> sampleCounts;
 };
 
 // Enum describing the type of an error.
-enum ErrorType {
+enum ErrorType
+{
     ERROR_TYPE_MATCH    = 0,
     ERROR_TYPE_MISMATCH = 1,
     ERROR_TYPE_INSERT   = 2,
     ERROR_TYPE_DELETE   = 3
 };
 
+// Class for storing the read simulation instructions.  Will be
+// specialized for each technology to simulate.
 template <typename TReadTypeTag>
 struct ReadSimulationInstruction;
 
+// Read simulation instructions used by all simulated technologies.
 template <>
-struct ReadSimulationInstruction<Global> {
+struct ReadSimulationInstruction<Global>
+{
+    // Index of the haplotype to sample the read from.
     unsigned haplotype;
+    // Index of the contig to sample the read from.
     unsigned contigId;
+    // Whether or not the read is to be sampled from the forward strand.
     bool isForward;
+    // Begin and end position of the infix to sample the read from.
     size_t beginPos;
     size_t endPos;
     // Number of characters added/removed to the string by indels.
     unsigned delCount;
     unsigned insCount;
+    // Edit string of the read.
     String<ErrorType> editString;
+    // String of qualities for the bases written out.
     String<int> qualities;
 
     ReadSimulationInstruction() : delCount(0), insCount(0) {}
@@ -204,6 +223,7 @@ struct ReadSimulationInstruction<Global> {
 // Functions
 // ============================================================================
 
+// Prints the global options to stream.
 template <typename TStream>
 TStream & operator<<(TStream & stream, Options<Global> const & options) {
     stream << "global-options {" << std::endl
@@ -235,6 +255,7 @@ TStream & operator<<(TStream & stream, Options<Global> const & options) {
     return stream;
 }
 
+// Stream operator for simulation instructions.
 template <typename TStream>
 TStream & operator<<(TStream & stream, ReadSimulationInstruction<Global> const & inst) {
     stream << "(haplotype=" << inst.haplotype << ", contigId=" << inst.contigId << ", isForward=" << inst.isForward << ", beginPos=" << inst.beginPos << ", endPos=" << inst.endPos << ", insCount=" << inst.insCount << ", delCount=" << inst.delCount << ", editString=";
@@ -251,11 +272,12 @@ TStream & operator<<(TStream & stream, ReadSimulationInstruction<Global> const &
     return stream;
 }
 
+// Initialize the command line parser for the global options.
 void setUpCommandLineParser(CommandLineParser & parser)
 {
-    addVersionLine(parser, "SeqAn read simulator 0.1");
+    addVersionLine(parser, "0.1");
 
-    addTitleLine(parser, "SeqAn read simulator");
+    addTitleLine(parser, "Mason - A Read Simulator");
     addUsageLine(parser, "illumina [OPTIONS] SEQUENCE");
     addLine(parser, "");
     addLine(parser, "Use 'random' for the SEQUENCE file name to generate it randomly.");
@@ -297,6 +319,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     requiredArguments(parser, 2);
 }
 
+// Parse command line for global options and perform some checks.
 template <typename TOptions>
 int parseCommandLineAndCheck(TOptions & options,
                              CharString & referenceFilename,
@@ -376,7 +399,8 @@ int parseCommandLineAndCheck(TOptions & options,
 
 // Write a random DNA sequence of the given length to the file with the given name.
 template <typename TRNG, typename TOptions>
-int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, TOptions const & options) {
+int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, TOptions const & options)
+{
     DnaString randomSequence;
     reserve(randomSequence, length);
 
@@ -409,7 +433,7 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, 
     return 0;
 }
 
-
+// Load sample counts as integers from a file.
 template <typename TFragmentStore, typename TSpec, typename TOptions>
 int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*const*/ & fragmentStore, TOptions const & options)
 {
@@ -450,6 +474,9 @@ int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*
     return 0;
 }
 
+// Top level dispatched function that mainly contains the input/output
+// logic and dispatches to simulateReadsMain() for the actual
+// simulation steps.
 template <typename TOptions, typename TReadsTypeTag>
 int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag const &) {
     // Print options.
@@ -580,6 +607,7 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     return 0;
 }
 
+// Build a haplotype, based on the contigs from the given fragment store.
 template <typename TRNG>
 void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     FragmentStore<MyFragmentStoreConfig> & fragmentStore,
@@ -741,6 +769,7 @@ int buildReadSimulationInstruction(
     return 0;
 }
 
+// Pick library length, based on the configuration in options.
 template <typename TRNG>
 inline
 unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
@@ -758,13 +787,7 @@ unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
     }
 }
 
-/**
-..param.fragmentStore:FragmentStore with the contigs and where to write reads to.
-..param.rng:Random number generator to use.
-..param.options:Options for the simulation.
-..param.errorDistribution:Error distribution, indexed by pos * 4 + ERROR_TYPE_{MATCH,MISMATCH,INSERT,DELETE}.
-..param.tag:Tag for specifying reads to simulate.
-*/
+// Performs the actual read simulation.
 template <typename TRNG, typename TReadsTag, typename TOptions>
 int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                       TRNG & rng,
@@ -1004,4 +1027,4 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     return 0;
 }
 
-#endif  // READ_SIMULATOR_H_
+#endif  // MASON_H_

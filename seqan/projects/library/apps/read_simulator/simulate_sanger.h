@@ -218,7 +218,7 @@ int simulateReadsSetupModelSpecificData(ModelParameters<SangerReads> & /*paramet
     return 0;
 }
 
-// TODO(holtgrew): Same as 454 reads!
+// TODO(holtgrew): Same as 454 reads! Remove redundancy.
 template <typename TRNG>
 inline
 unsigned pickReadLength(TRNG & rng, Options<SangerReads> const & options)
@@ -353,31 +353,23 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
         SEQAN_ASSERT_LEQ(j, i);
 
         TAlphabet c;
-        //int x, xold;
         switch (inst.editString[i]) {
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 appendValue(tmp, read[j]);
                 if (options.simulateQualities)
                     assignQualityValue(back(tmp), inst.qualities[k]);
-                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
-                //std::cout << back(tmp) << " " << read[j] << " " << inst.qualities[i] << std::endl;
                 k += 1;
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
                 c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
-                //xold = ordValue(c);
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
-                //x = ordValue(c);
                 appendValue(tmp, c);
                 if (options.simulateQualities)
                     assignQualityValue(back(tmp), inst.qualities[k]);
-                // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
-                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
-                //std::cout << "MM " << c << " " << back(tmp) << " " << inst.qualities[i] << std::endl;
                 k += 1;
                 j += 1;
                 break;
@@ -385,7 +377,6 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
                 if (options.simulateQualities)
                     assignQualityValue(back(tmp), inst.qualities[k]);
-                // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " insertion" << std::endl;
                 k += 1;
                 break;
             case ERROR_TYPE_DELETE:

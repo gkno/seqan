@@ -189,8 +189,6 @@ unsigned pickReadLength(TRNG & rng, Options<LS454Reads> const & options)
 template <typename TRNG, typename TContig>
 void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, TRNG & rng, unsigned readLength, TContig const & contig, ModelParameters<LS454Reads> const & parameters, Options<LS454Reads> const & options)
 {
-//     std::cout << __FILE__ << ":" << __LINE__ << " -- inst == " << inst << std::endl;
-
     typedef Iterator<String<Dna5>, Standard>::Type TIterator;
     
     if (inst.endPos == inst.beginPos)
@@ -299,7 +297,6 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
 template <typename TRNG, typename TString>
 void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationInstruction<LS454Reads> const & inst, Options<LS454Reads> const & options)
 {
-//     std::cout << __FILE__ << ":" << __LINE__ << " -- length(read) == " << length(read) << std::endl;
     typedef typename Value<TString>::Type TAlphabet;
 
     SEQAN_ASSERT_EQ(length(inst.insertionNucleotides), inst.insCount);
