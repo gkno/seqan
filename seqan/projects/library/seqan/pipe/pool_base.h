@@ -886,8 +886,9 @@ namespace SEQAN_NAMESPACE_MAIN
             _lastPageSize = _size % pageSize;
         }
 
-		void _init(PoolParameters _conf = PoolParameters()) {
-            _conf.absolutize(sectorSize(file), (Type*)NULL);
+		void _init(PoolParameters _conf = PoolParameters()) 
+		{
+            _conf.absolutize(16*1024/*sectorSize(file)*/, (Type*)NULL);
             memBufferSize    = _conf.memBufferSize;
             pageSize		 = _conf.pageSize;
             bucketBufferSize = _conf.bucketBufferSize;
