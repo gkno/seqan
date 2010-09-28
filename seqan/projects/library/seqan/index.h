@@ -93,6 +93,7 @@
 #include <seqan/index/shape_gapped.h>
 #include <seqan/index/shape_onegapped.h>
 #include <seqan/index/shape_predefined.h>
+#include <seqan/index/shape_threshold.h>
 #include <seqan/index/index_qgram.h>
 #include <seqan/index/index_qgram_openaddressing.h>
 //#include <seqan/index/index_qgram_nested.h>
