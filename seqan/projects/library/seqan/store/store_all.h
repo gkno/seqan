@@ -1355,6 +1355,20 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 
 //////////////////////////////////////////////////////////////////////////////
 
+/**
+.Class.AlignedReadLayout
+..summary:Stores a 2-dimensional visible layout of a multi-read alignment.
+..cat:Fragment Store
+..signature:AlignedReadLayout
+
+.Memvar.AlignedReadLayout#contigRows
+..class:Class.AlignedReadLayout
+..summary:2-D multi-read layout
+..remarks:Stores for a contig and a row the ids of aligned reads from left to right.
+$contigRows[contigId][row]$ stores the $alignId$ of all aligned reads from left to right assigned to the same row
+$row$ is the row of the alignment in the multiple sequence alignment and $contigId$ the id of the reference contig.
+*/
+	
 struct AlignedReadLayout
 {
 	typedef String<unsigned>	TRow;
@@ -1370,14 +1384,12 @@ struct AlignedReadLayout
 ..summary:Calculates a visible layout of reads aligned to a contig.
 ..cat:Fragment Store
 ..signature:layoutAlignment(layout, store, contigId)
-..param.layout:The resulting layout string. Must be a $String<String<unsigned> >$.
-...remarks:This string is accordingly resized and can be addressed by the $readId$.
+..param.layout:The resulting layout structure.
+...type:Class.AlignedReadLayout
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..param.contigId:The $contigId$ of the affected contig.
 ..remarks:This function layouts all reads aligned to a contig in rows from up to down reusing empty row spaces.
-$layout[row]$ stores the $alignId$ of all aligned reads from left to right assigned to the same row.
-$row$ is the row of the alignment in the multiple sequence alignment.
 ..see:Function.printAlignment
 */
 
@@ -1440,7 +1452,8 @@ void layoutAlignment(AlignedReadLayout &layout, FragmentStore<TSpec, TConfig> &s
 ..cat:Fragment Store
 ..signature:layoutAlignment(stream, layout, store, contigId, posBegin, posEnd, lineBegin, lineEnd)
 ..param.stream:A C++ outstream, e.g. std::cout.
-..param.layout:A layout string created by a previous call of @Function.layoutAlignment@.
+..param.layout:A layout structure created by a previous call of @Function.layoutAlignment@.
+...type:Class.AlignedReadLayout
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..param.contigId:The $contigId$ of the affected contig.
