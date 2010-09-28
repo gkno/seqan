@@ -29,6 +29,15 @@ namespace SEQAN_NAMESPACE_MAIN
 // Gap extension score is taken as the constant gap score!!!
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
+inline void
+_align_needleman_wunsch_matrix(TAlign&,
+							  TStringSet const&,
+							  TTrace const&,
+							  TIndexPair const&)
+{
+	// empty by default
+}
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
 void
@@ -41,10 +50,13 @@ _align_needleman_wunsch_trace(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename Id<TStringSet>::Type TId;
 	typedef typename Value<TTrace>::Type TTraceValue;
+	
 
-
+	_align_needleman_wunsch_matrix(align, str, trace, overallMaxIndex);
+	
 	// TraceBack values
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
+	static const TTraceValue tvmap[] = { Diagonal, Diagonal, Horizontal, Diagonal, Vertical, Diagonal, Horizontal, Diagonal };
 	
 	// Initialization
 	TId id1 = positionToId(const_cast<TStringSet&>(str), 0);
@@ -59,7 +71,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 	if ((len1 != 0) && (len2 !=0)) {
 	
 		// Initialize everything
-		TTraceValue tv = trace[(len1-1)*numRows + (len2-1)];
+		TTraceValue tv = tvmap[(int)trace[(len1-1)*numRows + (len2-1)]];
 		TTraceValue tvOld = tv;  // We need to know when the direction of the trace changes
 
 		TSize segLen = 1;
@@ -72,7 +84,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 		// Now follow the trace
 		if ((len1 != 0) && (len2 !=0)) {
 			do {
-				tv = value(trace, (len1-1)*numRows + (len2-1));
+				tv = tvmap[(int)trace[(len1-1)*numRows + (len2-1)]];
 				if (tv == Diagonal) {
 					if (tv != tvOld) {
 						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
@@ -123,9 +135,9 @@ _align_needleman_wunsch(TTrace & trace,
 	typedef typename Value<TTrace>::Type TTraceValue;
 
 	// TraceBack values
-	TTraceValue Diagonal = 0;
-	TTraceValue Horizontal = 1;
-	TTraceValue Vertical = 2;
+	const int Diagonal = 0;
+	const int Horizontal = 1;
+	const int Vertical = 2;
 
 	// One DP Matrix column
 	typedef typename Value<TScore>::Type TScoreValue;
@@ -144,7 +156,8 @@ _align_needleman_wunsch(TTrace & trace,
 	overallMaxIndex[1] = len2;
 
 	resize(column, len2 + 1);
-	resize(trace, len1*len2);
+//	resize(trace, len1*len2);
+	fill(trace, len1*len2, 0);
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator coit = begin(column, Standard());
 	TColIterator col_end = end(column, Standard());
@@ -160,6 +173,7 @@ _align_needleman_wunsch(TTrace & trace,
 	TScoreValue max_diag = 0;
 	TScoreValue max_verti = 0;
 	TScoreValue max_hori = 0;
+	TScoreValue max_all;
 	TSize col2 = 0;
 	for(TSize col = 0; col < len1; ++col) 
 	{
@@ -177,8 +191,14 @@ _align_needleman_wunsch(TTrace & trace,
 			max_diag = diagVal + score(_sc, col, col2++, str1, str2); //compute the maximum in vertiVal 
 			
 			diagVal = *coit;
-			// Choose the max
-			if (max_diag >= _max(max_verti, max_hori)) {
+			
+			// Choose the max values
+			max_all = _max(_max(max_verti, max_hori), max_diag);
+			if (max_verti == max_all) *it |= 1 << Vertical;
+			if (max_diag == max_all)  *it |= 1 << Diagonal;
+			if (max_hori == max_all)  *it |= 1 << Horizontal;
+			*coit = max_verti = max_all;
+/*			if (max_diag >= _max(max_verti, max_hori)) {
 				*it = Diagonal;
 				max_verti = *coit = max_diag;
 			} else if (max_hori >= max_verti) {
@@ -188,7 +208,7 @@ _align_needleman_wunsch(TTrace & trace,
 				*it = Vertical;
 				*coit = max_verti;
 			}
-		}
+*/		}
 		_lastRow(TAlignConfig(), overallMaxValue, overallMaxIndex, max_verti, col+1);
 	}
 	_lastColumn(TAlignConfig(), overallMaxValue, overallMaxIndex, column);
@@ -219,7 +239,7 @@ _globalAlignment(TAlign& align,
 	typedef typename Size<TStringSet>::Type TSize;
 
 	// Create the trace
-	String<TraceBack> trace;
+	String<char> trace;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
 	TScoreValue	maxScore = _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
@@ -244,7 +264,7 @@ _globalAlignment(TStringSet const& str,
 	typedef typename Value<TScore>::Type TScoreValue;
 	typedef typename Size<TStringSet>::Type TSize;
 	
-	String<TraceBack> trace;
+	String<char> trace;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
 	return _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
