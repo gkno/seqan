@@ -1641,9 +1641,9 @@ The resulting tables must have appropriate size before calling this function.
 			typedef typename Value<TValue, 2>::Type	TQGram;
 			TResult hash = 0;
 			unsigned len = length(a.i2);
-            for(unsigned i = 0; i < len; ++i) {
+            for (unsigned i = 0; i < len; ++i) {
 				hash *= ValueSize< typename Value<TQGram>::Type >::VALUE;
-				hash += (TResult)a.i2[i];
+				hash += ordValue(a.i2[i]);
             }
             return hash;
         }
@@ -1654,23 +1654,25 @@ The resulting tables must have appropriate size before calling this function.
 		typename TSA, 
 		typename TDir,
 		typename TText,
-		typename TShape >
+		typename TValue,
+		unsigned q >
 	void createQGramIndexExt(
 		TSA &suffixArray,
 		TDir &dir,
 		TText &text,
-		TShape)
+		Shape<TValue, UngappedShape<q> >)
 	{
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
-        typedef typename _MakeUnsigned< typename Host<TShape>::Type >::Type TUValue;
+		typedef Shape<TValue, UngappedShape<q> >					TShape;
+        typedef typename _MakeUnsigned<TValue>::Type				TUValue;
 
         // *** SPECIALIZATION ***
 
-		typedef Pipe< TText, Source<> >				TSource;
-        typedef Pipe< TSource, Caster<TUValue> >    TUnsigner;
-		typedef Pipe< TUnsigner, Tupler<7> >	    TTupler;
+		typedef Pipe< TText, Source<> >								TSource;
+        typedef Pipe< TSource, Caster<TUValue, CasterConvert> >		TUnsigner;
+		typedef Pipe< TUnsigner, Tupler<q> >						TTupler;
 						                typedef _qgram_comp<_TypeOf(TTupler)> qcomp_t;
         typedef Pool< 
 					_TypeOf(TTupler), 
@@ -1702,10 +1704,12 @@ The resulting tables must have appropriate size before calling this function.
         typename Size<TSortTuples>::Type	leftToRead = length(sorter);
 		bool first = true;
 
-		while (leftToRead) {
+		for (leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++itSA)
+		{
 			// copy occurence position
 			*itSA = (*sorter).i1;
-			if (first || qcomp(old_qgram, *sorter) != 0) {
+			if (first || qcomp(old_qgram, *sorter) != 0) 
+			{
 				old_qgram = *sorter;
 				hash = qhash(old_qgram);
 
@@ -1717,8 +1721,6 @@ The resulting tables must have appropriate size before calling this function.
 					*itDir = i;
 				first = false;
 			}
-			++src;
-			--leftToRead;
 		}
 
 		// fill bucket table
@@ -1739,30 +1741,32 @@ The resulting tables must have appropriate size before calling this function.
 		typename TDir,
 		typename TString,
 		typename TSpec,
-		typename TShape,
+		typename TValue,
+		unsigned q,
 		typename TLimitsString >
 	void createQGramIndexExt(
 		TSA &suffixArray,
 		TDir &dir,
 		StringSet<TString, TSpec> const &stringSet,
-		TShape,
+		Shape<TValue, UngappedShape<q> >,
 		TLimitsString &limits)
 	{
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
-		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
-        typedef typename _MakeUnsigned< typename Host<TShape>::Type >::Type		TUValue;
+		typedef typename Concatenator<StringSet<TString, TSpec> >::Type	TConcat;
+		typedef Shape<TValue, UngappedShape<q> >						TShape;
+        typedef typename _MakeUnsigned<TValue>::Type					TUValue;
 		typedef Multi<
-			Tupler<7, true, Compressed>, 
+			Tupler<q, true, Compressed>, 
 			typename Value<TSA>::Type,
 			typename StringSetLimits< StringSet<TString, TSpec> >::Type >		TTuplerSpec;
 
         // *** SPECIALIZATION ***
 
-		typedef Pipe< TConcat, Source<> >			TSource;
-        typedef Pipe< TSource, Caster<TUValue> >    TUnsigner;
-		typedef Pipe< TUnsigner, TTuplerSpec >	    TTupler;
+		typedef Pipe< TConcat, Source<> >							TSource;
+        typedef Pipe< TSource, Caster<TUValue, CasterConvert> >		TUnsigner;
+		typedef Pipe< TUnsigner, TTuplerSpec >						TTupler;
 						                typedef _qgram_comp<_TypeOf(TTupler)> qcomp_t;
         typedef Pool< 
 					_TypeOf(TTupler), 
@@ -1791,17 +1795,20 @@ The resulting tables must have appropriate size before calling this function.
 
 		typename Value<TSortTuples>::Type	old_qgram;
 		typename Size<TDir>::Type			hash, old_hash = 0;
-        typename Size<TSortTuples>::Type	leftToRead = length(sorter);
+        typename Size<TSortTuples>::Type	leftToRead;
 		bool first = true;
 
-		while (leftToRead) {
+		for (leftToRead = length(sorter); leftToRead > 0; --leftToRead, ++sorter, ++itSA)
+		{
 			// copy occurence position
 			*itSA = (*sorter).i1;
-			if (first || qcomp(old_qgram, *sorter) != 0) {
+			
+			if (first || qcomp(old_qgram, *sorter) != 0) 
+			{
 				old_qgram = *sorter;
 				hash = qhash(old_qgram);
-
-				SEQAN_ASSERT(old_hash < hash);
+				
+				SEQAN_ASSERT_LEQ(old_hash, hash);
 
 				// copy bucket begin
 				typename Size<TSortTuples>::Type i = length(sorter) - leftToRead;
@@ -1809,8 +1816,6 @@ The resulting tables must have appropriate size before calling this function.
 					*itDir = i;
 				first = false;
 			}
-			++src;
-			--leftToRead;
 		}
 
 		// fill bucket table
