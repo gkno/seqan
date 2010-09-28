@@ -33,7 +33,7 @@ typedef Tag<ThreshExact_> const			ThreshExact;
 typedef Tag<ThreshHeuristic_> const		ThreshHeuristic;
 
 template <typename TShape, typename TPatternLength, typename TErrors, typename TDistance>
-int qgramThreshold(TShape const & shape, TPatternLength patternLength, TErrors errors, TDistance const, ThreshQGramLemma const)
+inline int qgramThreshold(TShape const & shape, TPatternLength patternLength, TErrors errors, TDistance const, ThreshQGramLemma const)
 {
 	return patternLength - length(shape) + 1 - errors * weight(shape);
 }

@@ -188,12 +188,12 @@ namespace SEQAN_NAMESPACE_MAIN
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, Index_Wotd<TSpec> >, Fibre_SA> {
+	struct DefaultIndexCreator<Index<TText, Index_Wotd<TSpec> >, Fibre_Dir> {
         typedef Default Type;
     };
 
 	template < typename TText, typename TSSetSpec, typename TSpec >
-	struct DefaultIndexCreator<Index<StringSet<TText, TSSetSpec>, Index_Wotd<TSpec> >, Fibre_SA> {
+	struct DefaultIndexCreator<Index<StringSet<TText, TSSetSpec>, Index_Wotd<TSpec> >, Fibre_Dir> {
         typedef Default Type;
     };
 
@@ -257,7 +257,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec >
 	void _indexRequireTopDownIteration(Index<TText, Index_Wotd<TSpec> > &index) 
 	{
-		indexRequire(index, Wotd_SA());
+		indexRequire(index, Wotd_Dir());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1152,11 +1152,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	// - brings the bucket with the longest suffix (lpBucket) to front
 	// - all other buckets are in lexicographical order
 	// - adds prefixLen to all SA entries in SA[left,right)
-	template < typename TText, typename TSize >
+	template < typename TText, typename TBeginPos, typename TEndPos, typename TSize >
 	TSize _sortWotdBucket(
 		Index<TText, Index_Wotd<WotdOriginal> > &index,
-		TSize left, 
-		TSize right,
+		TBeginPos left, 
+		TEndPos right,
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
@@ -1266,11 +1266,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	// - SA[left,right) contains real SA entries (the beginning positions of the suffices)
 
 	// single sequence
-	template < typename TIndex, typename TSize >
+	template < typename TIndex, typename TBeginPos, typename TEndPos, typename TSize >
 	TSize _sortWotdBucket(
 		TIndex &index,
-		TSize left, 
-		TSize right,
+		TBeginPos left, 
+		TEndPos right,
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
@@ -1332,11 +1332,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	// multiple sequences
-	template < typename TText, typename TSpec, typename TIndexSpec, typename TSize >
+	template < typename TText, typename TSpec, typename TIndexSpec, typename TBeginPos, typename TEndPos, typename TSize >
 	TSize _sortWotdBucket(
 		Index<StringSet<TText, TSpec>, TIndexSpec> &index,
-		TSize left, 
-		TSize right,
+		TBeginPos left, 
+		TEndPos right,
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
@@ -1859,11 +1859,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TIndex>::Type		TValue;
 		typedef typename Size<TIndex>::Type			TSize;
 
-		resize(indexSA(index), length(indexRawText(index)));
 		resize(index.tempOcc, ValueSize<TValue>::VALUE + 1);
 		resize(index.tempBound, ValueSize<TValue>::VALUE + 1);
 
-		TSize size = _sortFirstWotdBucket(index);
+		TSize size;
+		if (empty(indexSA(index)))
+		{
+			resize(indexSA(index), length(indexRawText(index)));
+			size = _sortFirstWotdBucket(index);
+		} else
+		{
+			size = _sortWotdBucket(index, 0, length(indexSA(index)), 0);
+		}
+		
 		if (size > 0) 
 		{
 			resize(indexDir(index), size + 2, Generous());
@@ -1884,7 +1892,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, Index_Wotd<TSpec> > &index, Wotd_SA const, Default const)
+	inline bool indexCreate(Index<TText, Index_Wotd<TSpec> > &index, Wotd_Dir const, Default const)
 	{
 		_wotdCreateFirstLevel(index);
 		return true;

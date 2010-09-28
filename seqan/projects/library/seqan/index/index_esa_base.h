@@ -179,6 +179,18 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 			range(other.range),
 			parentRight(other.parentRight) {}
 	};
+	
+	template <typename TSize>
+	inline bool operator==(VertexESA<TSize> const &a, VertexESA<TSize> const &b)
+	{
+		return a.range == b.range;
+	}
+
+	template <typename TSize>
+	inline bool operator!=(VertexESA<TSize> const &a, VertexESA<TSize> const &b)
+	{
+		return a.range != b.range;
+	}
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Metafunction.VertexDescriptor.param.T.type:Spec.Index_ESA

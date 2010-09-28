@@ -488,9 +488,7 @@ _qgramLemma(Pattern<TIndex, Swift<TSpec> > const & pattern, TSeqNo seqNo, int er
 {
 	// q-gram lemma: How many conserved q-grams we see at least?
 	// each error destroys at most <weight> many (gapped) q-grams
-	return 
-		sequenceLength(seqNo, host(pattern)) - length(indexShape(host(pattern))) + 1 
-		- errors * weight(indexShape(host(pattern)));
+	return qgramThreshold(indexShape(host(pattern)), sequenceLength(seqNo, host(pattern)), errors, EditDistance(), ThreshQGramLemma());
 }
 
 template <typename TIndex, typename TSpec, typename TSeqNo, typename TThreshold>
