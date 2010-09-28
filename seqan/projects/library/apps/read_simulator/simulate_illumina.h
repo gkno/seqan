@@ -434,22 +434,24 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     //
 
     SEQAN_ASSERT_GT(length(inst.editString), 0u);
-    clear(inst.qualities);
-    fill(inst.qualities, length(inst.editString), 0, Exact());
+    if (options.simulateQualities) {
+        clear(inst.qualities);
+        fill(inst.qualities, length(inst.editString), 0, Exact());
 
-    for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
-        SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
-        if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
-            // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
-            PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
-            inst.qualities[i] = pickRandomNumber(rng, pdf);
-        } else {
-            PDF<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
-            inst.qualities[i] = pickRandomNumber(rng, pdf);
+        for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
+            SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
+            if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
+                // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
+                PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
+                inst.qualities[i] = pickRandomNumber(rng, pdf);
+            } else {
+                PDF<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
+                inst.qualities[i] = pickRandomNumber(rng, pdf);
+            }
+
+            if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_MATCH)
+                j += 1;
         }
-
-        if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_MATCH)
-            j += 1;
     }
 }
 
@@ -459,7 +461,8 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
 {
     typedef typename Value<TString>::Type TAlphabet;
 
-    SEQAN_ASSERT_EQ(length(inst.qualities), length(inst.editString));
+    if (options.simulateQualities)
+        SEQAN_ASSERT_EQ(length(inst.qualities), length(inst.editString));
     
     TString tmp;
     reserve(tmp, length(read) + inst.insCount - inst.delCount);
@@ -473,7 +476,8 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 appendValue(tmp, read[j]);
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[i]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
                 //std::cout << back(tmp) << " " << read[j] << " " << inst.qualities[i] << std::endl;
                 j += 1;
@@ -492,10 +496,12 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                     SEQAN_ASSERT_TRUE(c != TAlphabet('N'));
                 //x = ordValue(c);
                 appendValue(tmp, c);
-                if (options.illuminaNoN)  // Ns can be introduced through quality, too.
-                  assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
-                else
-                  assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities) {
+                    if (options.illuminaNoN)  // Ns can be introduced through quality, too.
+                        assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
+                    else
+                        assignQualityValue(back(tmp), inst.qualities[i]);
+                }
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
                 //std::cout << "MM " << c << " " << back(tmp) << " " << inst.qualities[i] << std::endl;
@@ -506,10 +512,12 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                     appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
                 else
                     appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
-                if (options.illuminaNoN)  // Ns can be introduced through quality, too.
-                  assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
-                else
-                  assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities) {
+                    if (options.illuminaNoN)  // Ns can be introduced through quality, too.
+                        assignQualityValue(back(tmp), _max(1, inst.qualities[i]));
+                    else
+                        assignQualityValue(back(tmp), inst.qualities[i]);
+                }
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " insertion" << std::endl;
                 break;
             case ERROR_TYPE_DELETE:

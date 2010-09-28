@@ -201,8 +201,10 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
     //
     reserve(inst.editString, readLength, Generous());
     clear(inst.editString);
-    reserve(inst.qualities, readLength, Generous());
-    clear(inst.qualities);
+    if (options.simulateQualities) {
+        reserve(inst.qualities, readLength, Generous());
+        clear(inst.qualities);
+    }
 
     // Get a copy of the haplotype region we are considering.
     String<Dna5> haplotypeInfix = infix(contig, inst.beginPos, inst.endPos);
@@ -278,21 +280,24 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
             appendValue(inst.editString, ERROR_TYPE_DELETE);
             inst.delCount += 1;
         }
-        // Compute likelihood for calling the bases, given this intensity and the Phred score from this.
-        double densitySum = 0;
-        for (unsigned j = 0; j <= _max(4u, 2 * MAX_HOMOPOLYMER_LEN); ++j)  // Anecdotally through plot in maple: Enough to sum up to 4 or 2 times the maximal homopolymer length.
-            densitySum += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
-        double x = 0;  // Probability of seeing < (j+1) bases.
-        for (j = 0; j < calledBaseCount; ++j) {
-            x += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
-            unsigned phredScore = -static_cast<int>(10 * ::std::log10(x / densitySum));
-            appendValue(inst.qualities, phredScore);
+        // Simulate qualities if configured to do so.
+        if (options.simulateQualities) {
+            // Compute likelihood for calling the bases, given this intensity and the Phred score from this.
+            double densitySum = 0;
+            for (unsigned j = 0; j <= _max(4u, 2 * MAX_HOMOPOLYMER_LEN); ++j)  // Anecdotally through plot in maple: Enough to sum up to 4 or 2 times the maximal homopolymer length.
+                densitySum += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
+            double x = 0;  // Probability of seeing < (j+1) bases.
+            for (unsigned j = 0; j < calledBaseCount; ++j) {
+                x += dispatchDensityFunction(parameters.thresholdMatrix, j, *it);
+                unsigned phredScore = -static_cast<int>(10 * ::std::log10(x / densitySum));
+                appendValue(inst.qualities, phredScore);
+            }
         }
     }
 }
 
 template <typename TRNG, typename TString>
-void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationInstruction<LS454Reads> const & inst, Options<LS454Reads> const & /*options*/)
+void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationInstruction<LS454Reads> const & inst, Options<LS454Reads> const & options)
 {
 //     std::cout << __FILE__ << ":" << __LINE__ << " -- length(read) == " << length(read) << std::endl;
     typedef typename Value<TString>::Type TAlphabet;
@@ -314,7 +319,8 @@ void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationI
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 appendValue(tmp, read[j]);
-                assignQualityValue(back(tmp), inst.qualities[l++]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[l++]);
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
@@ -322,7 +328,8 @@ void applySimulationInstructions(TString & read, TRNG & /*rng*/, ReadSimulationI
                 break;
             case ERROR_TYPE_INSERT:
                 appendValue(tmp, inst.insertionNucleotides[k++]);
-                assignQualityValue(back(tmp), inst.qualities[l++]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[l++]);
                 break;
             case ERROR_TYPE_DELETE:
                 j += 1;

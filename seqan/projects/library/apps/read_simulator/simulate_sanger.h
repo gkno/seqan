@@ -21,8 +21,6 @@
   ===========================================================================
 */
 
-// TODO(holtgrew): Implement linear quality values as in Illumina model.
-
 #ifndef SIMULATE_SANGER_H_
 #define SIMULATE_SANGER_H_
 
@@ -64,6 +62,18 @@ struct Options<SangerReads> : public Options<Global>
     double probabilityDeleteBegin;
     double probabilityDeleteEnd;
 
+    // Quality mean and standard deviation ramp specification for matches.
+    double qualityMatchStartMean;
+    double qualityMatchEndMean;
+    double qualityMatchStartStdDev;
+    double qualityMatchEndStdDev;
+
+    // Quality mean and standard deviation ramp specification for errors.
+    double qualityErrorStartMean;
+    double qualityErrorEndMean;
+    double qualityErrorStartStdDev;
+    double qualityErrorEndStdDev;
+
     Options()
             : readLengthIsUniform(false),
               readLengthMean(400),
@@ -73,7 +83,15 @@ struct Options<SangerReads> : public Options<Global>
               probabilityInsertBegin(0.0025),
               probabilityInsertEnd(0.005),
               probabilityDeleteBegin(0.0025),
-              probabilityDeleteEnd(0.005)
+              probabilityDeleteEnd(0.005),
+              qualityMatchStartMean(40),
+              qualityMatchEndMean(39),
+              qualityMatchStartStdDev(0.1),
+              qualityMatchEndStdDev(2),
+              qualityErrorStartMean(30),
+              qualityErrorEndMean(20),
+              qualityErrorStartStdDev(2),
+              qualityErrorEndStdDev(5)
     {}
 };
 
@@ -107,6 +125,14 @@ TStream & operator<<(TStream & stream, Options<SangerReads> const & options) {
            << "  probabilityInsertEnd:     " << options.probabilityInsertEnd << std::endl
            << "  probabilityDeleteBegin:   " << options.probabilityInsertEnd << std::endl
            << "  probabilityDeleteEnd:     " << options.probabilityDeleteEnd << std::endl
+           << "  qualityMatchStartMean:    " << options.qualityMatchStartMean << std::endl
+           << "  qualityMatchEndMean:      " << options.qualityMatchEndMean << std::endl
+           << "  qualityMatchStartStdDev:  " << options.qualityMatchStartStdDev << std::endl
+           << "  qualityMatchEndStdDev:    " << options.qualityMatchEndStdDev << std::endl
+           << "  qualityErrorStartMean:    " << options.qualityErrorStartMean << std::endl
+           << "  qualityErrorEndMean:      " << options.qualityErrorEndMean << std::endl
+           << "  qualityErrorStartStdDev:  " << options.qualityErrorStartStdDev << std::endl
+           << "  qualityErrorEndStdDev:    " << options.qualityErrorEndStdDev << std::endl
            << "}" << std::endl;
     return stream;
 }
@@ -130,6 +156,16 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addOption(parser, CommandLineOption("pie",  "probability-insert-begin", "Probability for a insert at end of read.  Default: 0.005.", OptionType::Double));
     addOption(parser, CommandLineOption("pdb",  "probability-delete-begin", "Probability for a delete at begin of read.  Default: 0.0025.", OptionType::Double));
     addOption(parser, CommandLineOption("pde",  "probability-delete-begin", "Probability for a delete at end of read.  Default: 0.005.", OptionType::Double));
+
+    addSection(parser, "Base Quality Model Parameters");
+    addOption(parser, CommandLineOption("qmsm",  "quality-match-start-mean", "Mean quality for matches at start of read.  Default: 40.", OptionType::Double));
+    addOption(parser, CommandLineOption("qmem",  "quality-match-end-mean", "Mean quality for matches at end of read.  Default: 39.", OptionType::Double));
+    addOption(parser, CommandLineOption("qmss",  "quality-match-start-std-dev", "Quality standard deviation for matches at start of read.  Default: 0.1.", OptionType::Double));
+    addOption(parser, CommandLineOption("qmes",  "quality-match-end-std-dev", "Quality standard deviation for matches at end of read.  Default: 2.", OptionType::Double));
+    addOption(parser, CommandLineOption("qesm",  "quality-error-start-mean", "Mean quality for errors at start of read.  Default: 40.", OptionType::Double));
+    addOption(parser, CommandLineOption("qeem",  "quality-error-end-mean", "Mean quality for errors at end of read.  Default: 39.", OptionType::Double));
+    addOption(parser, CommandLineOption("qess",  "quality-error-start-std-dev", "Quality standard deviation for errors at start of read.  Default: 0.1.", OptionType::Double));
+    addOption(parser, CommandLineOption("qees",  "quality-error-end-std-dev", "Quality standard deviation for errors at end of read.  Default: 2.", OptionType::Double));
 }
 
 int parseCommandLineAndCheckModelSpecific(Options<SangerReads> & options,
@@ -154,6 +190,23 @@ int parseCommandLineAndCheckModelSpecific(Options<SangerReads> & options,
         getOptionValueLong(parser, "probability-delete-begin", options.probabilityDeleteBegin);
     if (isSetLong(parser, "probability-delete-end"))
         getOptionValueLong(parser, "probability-delete-end", options.probabilityDeleteEnd);
+
+    if (isSetLong(parser, "quality-match-start-mean"))
+        getOptionValueLong(parser, "quality-match-start-mean", options.qualityMatchStartMean);
+    if (isSetLong(parser, "quality-match-end-mean"))
+        getOptionValueLong(parser, "quality-match-end-mean", options.qualityMatchEndMean);
+    if (isSetLong(parser, "quality-match-start-std-dev"))
+        getOptionValueLong(parser, "quality-match-start-std-dev", options.qualityMatchStartStdDev);
+    if (isSetLong(parser, "quality-match-end-std-dev"))
+        getOptionValueLong(parser, "quality-match-end-std-dev", options.qualityMatchEndStdDev);
+    if (isSetLong(parser, "quality-Error-start-mean"))
+        getOptionValueLong(parser, "quality-Error-start-mean", options.qualityErrorStartMean);
+    if (isSetLong(parser, "quality-Error-end-mean"))
+        getOptionValueLong(parser, "quality-Error-end-mean", options.qualityErrorEndMean);
+    if (isSetLong(parser, "quality-Error-start-std-dev"))
+        getOptionValueLong(parser, "quality-Error-start-std-dev", options.qualityErrorStartStdDev);
+    if (isSetLong(parser, "quality-Error-end-std-dev"))
+        getOptionValueLong(parser, "quality-Error-end-std-dev", options.qualityErrorEndStdDev);
 
     return 0;
 }
@@ -191,6 +244,10 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
     reserve(inst.editString, static_cast<size_t>(1.2 * readLength), Generous());
     inst.delCount = 0;
     inst.insCount = 0;
+    if (options.simulateQualities) {
+        reserve(inst.qualities, readLength, Generous());
+        clear(inst.qualities);
+    }
 
     //
     // Build Edit String.
@@ -258,25 +315,41 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
     //
     // Quality Simulation.
     //
-    // TODO(holtgrew): Need something that makes sense here.
-    //
+    if (options.simulateQualities) {
+        reserve(inst.qualities, readLength + inst.insCount - inst.delCount, Exact());
+        clear(inst.qualities);
 
-    SEQAN_ASSERT_GT(length(inst.editString), 0u);
-    clear(inst.qualities);
-    fill(inst.qualities, length(inst.editString), 40, Exact());
+        for (unsigned i = 0; i < length(inst.editString); ++i) {
+            double mean, stdDev;
+            double pos = 1.0 * i / (readLength + inst.insCount - inst.delCount - 1);
+            if (inst.editString[i] ==  ERROR_TYPE_DELETE) {
+                continue;  // No quality to give out.
+            } else if (inst.editString[i] ==  ERROR_TYPE_INSERT || inst.editString[i] ==  ERROR_TYPE_MISMATCH) {
+                mean = options.qualityMatchStartMean + pos * (options.qualityMatchEndMean - options.qualityMatchStartMean);
+                stdDev = options.qualityMatchStartStdDev + pos * (options.qualityMatchEndStdDev - options.qualityMatchStartStdDev);
+            } else {
+                mean = options.qualityErrorStartMean + pos * (options.qualityErrorEndMean - options.qualityErrorStartMean);
+                stdDev = options.qualityErrorStartStdDev + pos * (options.qualityErrorEndStdDev - options.qualityErrorStartStdDev);
+            }
+            PDF<Normal> pdf(mean, stdDev);
+            appendValue(inst.qualities, pickRandomNumber(rng, pdf));
+        }
+    }
 }
 
 template <typename TRNG, typename TString>
-void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstruction<SangerReads> const & inst, Options<SangerReads> const & /*options*/)
+void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstruction<SangerReads> const & inst, Options<SangerReads> const & options)
 {
     typedef typename Value<TString>::Type TAlphabet;
 
-    SEQAN_ASSERT_EQ(length(inst.qualities), length(inst.editString));
+    if (options.simulateQualities)
+        SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
     
     TString tmp;
     reserve(tmp, length(read) + inst.insCount - inst.delCount);
-    unsigned j = 0;
-    for (unsigned i = 0; i < length(inst.editString); ++i) {
+    unsigned j = 0;  // Index in string.
+    unsigned k = 0;  // Index in qualities.
+    for (unsigned i = 0; i < length(inst.editString); ++i) {  // Index in edit string.
         SEQAN_ASSERT_LEQ(j, i);
 
         TAlphabet c;
@@ -285,9 +358,11 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
             case ERROR_TYPE_MATCH:
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 appendValue(tmp, read[j]);
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[k]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " match" << std::endl;
                 //std::cout << back(tmp) << " " << read[j] << " " << inst.qualities[i] << std::endl;
+                k += 1;
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
@@ -298,16 +373,20 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                     c = TAlphabet(ordValue(c) + 1);
                 //x = ordValue(c);
                 appendValue(tmp, c);
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[k]);
                 // std::cout << i << " q(q_i)=" << getQualityValue(back(tmp)) << " q(i)=" << inst.qualities[i] << " char=" << convert<char>(back(tmp)) << " c_old=" << xold << " c=" << x << " r_j=" << ordValue(read[j]) << std::endl;
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " mismatch" << std::endl;
                 //std::cout << "MM " << c << " " << back(tmp) << " " << inst.qualities[i] << std::endl;
+                k += 1;
                 j += 1;
                 break;
             case ERROR_TYPE_INSERT:
                 appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
-                assignQualityValue(back(tmp), inst.qualities[i]);
+                if (options.simulateQualities)
+                    assignQualityValue(back(tmp), inst.qualities[k]);
                 // std::cout << i << " " << getQualityValue(back(tmp)) << " " << inst.qualities[i] << " " << convert<char>(back(tmp)) << " insertion" << std::endl;
+                k += 1;
                 break;
             case ERROR_TYPE_DELETE:
                 j += 1;
