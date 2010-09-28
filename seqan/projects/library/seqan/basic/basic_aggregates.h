@@ -382,9 +382,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template <> struct _BitVector<8> { typedef unsigned char Type; };
     template <> struct _BitVector<16> { typedef unsigned short Type; };
-    template <> struct _BitVector<32> { typedef unsigned int Type; };
-    template <> struct _BitVector<64> { typedef __int64 Type; };
-    template <> struct _BitVector<255> { typedef __int64 Type; };
+    template <> struct _BitVector<32> { typedef unsigned long Type; };
+    template <> struct _BitVector<64> { typedef __uint64 Type; };
+    template <> struct _BitVector<255> { typedef __uint64 Type; };
 
 /**
 .Spec.Bit Packed Tuple:
