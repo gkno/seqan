@@ -121,6 +121,15 @@ char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C',
 
 
 template <>
+struct FunctorComplement<char> : public ::std::unary_function<Dna5,Dna5> 
+{
+    inline Dna5 operator()(Dna5 x) const {
+        SEQAN_CHECKPOINT;
+        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+    }
+};
+
+template <>
 struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna> 
 {
     inline Dna operator()(Dna x) const {

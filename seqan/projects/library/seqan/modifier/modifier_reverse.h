@@ -505,11 +505,12 @@ namespace SEQAN_NAMESPACE_MAIN
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)
 		// OpenMP does not support for loop with iterators. Therefore use index variables.
 		typedef typename Position<TSequence>::Type				TPos;
+		typedef typename _MakeSigned<TPos>::Type				TSignedPos;
 
-		TPos pMid = length(sequence) / 2;
+		TSignedPos pMid = length(sequence) / 2;
 
 		#pragma omp parallel for if(length(sequence) > 1000000)
-		for(TPos p1 = 0; p1 < pMid; ++p1) {
+		for(TSignedPos p1 = 0; p1 < pMid; ++p1) {
 			TPos p2 = length(sequence) - 1 - p1;
 			TValue tmp = sequence[p1];
 			sequence[p1] = sequence[p2];
