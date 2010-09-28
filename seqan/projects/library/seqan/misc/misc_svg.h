@@ -78,7 +78,7 @@ private:
 	{
 		clear(style);
 		readText = dpSequence = length(style);
-		appendValue(style, "style=\"text-anchor:middle; font-family:Verdana,sans-serif;\" font-size=\"18px\"");
+		appendValue(style, "style=\"text-anchor:middle; font-family:Bitstream Vera Sans,Verdana,sans-serif;\" font-size=\"18px\"");
 		text = length(style);
 		appendValue(style, "style=\"text-anchor:middle; font-family:Courier New,Verdana,sans-serif; font-weight:bold;\" font-size=\"20px\"");
 		rulerTextTicks = length(style);
@@ -417,10 +417,10 @@ SEQAN_CHECKPOINT
 
 	// Print sequences
 	for (TSize pos0 = 0; pos0 < numCols; ++pos0)
-		svg.file << "<g transform=\"translate(" << pos0*20+30 << ",10)\"><text y=\"0.3em\" " << svg.style[svg.dpSequence] << '>' << str[0][pos0] << "</text></g>" << std::endl;
+		svg.file << "<g transform=\"translate(" << pos0*20+20 << ",5)\"><text y=\"0.3em\" " << svg.style[svg.dpSequence] << '>' << str[0][pos0] << "</text></g>" << std::endl;
 
 	for (TSize pos1 = 0; pos1 < numRows; ++pos1)
-		svg.file << "<g transform=\"translate(10," << pos1*20+30 << ")\"><text y=\"0.3em\" " << svg.style[svg.dpSequence] << '>' << str[1][pos1] << "</text></g>" << std::endl;
+		svg.file << "<g transform=\"translate(0," << pos1*20+25 << ")\"><text y=\"0.3em\" " << svg.style[svg.dpSequence] << '>' << str[1][pos1] << "</text></g>" << std::endl;
 }
 
 template <typename TStringSet, typename TId, typename TPos, typename TTraceValue>
