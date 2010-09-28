@@ -1461,29 +1461,29 @@ SEQAN_CHECKPOINT
 this could be $size$ or less than $size$ if $object$ has not enough @Function.capacity@.
 */
 
-template<typename T, typename TSize, typename TPosition>
+template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition>
 inline TSize 
 resizeSpace(T & me, 
 			TSize size, 
-			TPosition pos_begin, 
-			TPosition pos_end)
+			TBeginPosition pos_begin, 
+			TEndPosition pos_end)
 {
 SEQAN_CHECKPOINT
 	return resizeSpace(me, size, pos_begin, pos_end, typename DefaultOverflowExplicit<T>::Type());
 }
-
-template<typename T, typename TSize, typename TPosition>
+/*
+template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition, typename TLimitSize>
 inline TSize 
 resizeSpace(T & me, 
 			TSize size, 
-			TPosition pos_begin, 
-			TPosition pos_end,
-			TSize limit)
+			TBeginPosition pos_begin, 
+			TEndPosition pos_end,
+			TLimitSize limit)
 {
 SEQAN_CHECKPOINT
 	return resizeSpace(me, size, pos_begin, pos_end, limit, typename DefaultOverflowExplicit<T>::Type());
 }
-
+*/
 //////////////////////////////////////////////////////////////////////////////
 // erase
 //////////////////////////////////////////////////////////////////////////////
@@ -1503,11 +1503,22 @@ SEQAN_CHECKPOINT
 ..see:Function.eraseBack
 */
 
-template<typename T, typename TPosition>
+template<typename T, typename TBeginPosition, typename TEndPosition>
 inline void 
 erase(T & me, 
-	  TPosition pos, 
-	  TPosition pos_end)
+	  TBeginPosition pos, 
+	  TEndPosition pos_end)
+{
+SEQAN_CHECKPOINT
+	resizeSpace(me, 0, pos, pos_end);
+}
+
+// for segments
+template<typename T, typename TBeginPosition, typename TEndPosition>
+inline void 
+erase(T const & me, 
+	  TBeginPosition pos, 
+	  TEndPosition pos_end)
 {
 SEQAN_CHECKPOINT
 	resizeSpace(me, 0, pos, pos_end);
@@ -1516,6 +1527,15 @@ SEQAN_CHECKPOINT
 template<typename T, typename TPosition>
 inline void 
 erase(T & me, 
+	  TPosition pos)
+{
+SEQAN_CHECKPOINT
+	resizeSpace(me, 0, pos, pos + 1);
+}
+
+template<typename T, typename TPosition>
+inline void 
+erase(T const & me, 
 	  TPosition pos)
 {
 SEQAN_CHECKPOINT

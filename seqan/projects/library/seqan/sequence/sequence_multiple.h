@@ -1381,14 +1381,14 @@ a single integer value between 0 and the sum of string lengths minus 1.
     template < typename TString, typename TSpec >
     inline typename Size< StringSet< TString, TSpec > >::Type 
 	length(StringSet< TString, TSpec > const &me) {
-        return length(me.limits) - 1;
+		return length(me.strings);
     }
 
-	template <typename TString>
-	inline typename Size<StringSet<TString, Dependent<Tight> > >::Type 
-	length(StringSet<TString, Dependent<Tight> > const &me) 
+	template <typename TString, typename TDelimiter>
+	inline typename Size<StringSet<TString, Owner<ConcatDirect<TDelimiter> > > >::Type 
+	length(StringSet<TString, Owner<ConcatDirect<TDelimiter> > > const &me) 
 	{
-		return length(me.strings);
+        return length(me.limits) - 1;
 	}
 
 ///.Function.resize.param.object.type:Class.StringSet
@@ -1418,7 +1418,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		if (new_size < length(me.limits))
 		{
 			resize(me.concat, me.limits[new_size]);
-			return resize(me.limits, new_size + 1, tag);
+			return resize(me.limits, new_size + 1, tag) - 1;
 		} else
 			return fill(me.limits, new_size + 1, back(me.limits), tag) - 1;
     }

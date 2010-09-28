@@ -678,31 +678,33 @@ SEQAN_CHECKPOINT
 .Function.resizeSpace.param.object.type:Class.String
 */
 
-template<typename TValue, typename TSpec, typename TPosition, typename TExpand>
+template<typename TValue, typename TSpec, typename TBeginPosition, typename TEndPosition, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type 
 resizeSpace(String<TValue, TSpec> & me, 
 			typename Size< String<TValue, TSpec> >::Type size, 
-			TPosition pos_begin, 
-			TPosition pos_end, 
+			TBeginPosition pos_begin, 
+			TEndPosition pos_end, 
 			Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, pos_begin, pos_end, tag);
+	typedef typename Position<String<TValue, TSpec> >::Type TPos;
+	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, static_cast<TPos>(pos_begin), static_cast<TPos>(pos_end), tag);
 	arrayConstruct(iter(me, pos_begin), iter(me, pos_begin) + ret_);
 	return ret_;
 }
 
-template<typename TValue, typename TSpec, typename TPosition, typename TExpand>
+template<typename TValue, typename TSpec, typename TBeginPosition, typename TEndPosition, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type 
 resizeSpace(String<TValue, TSpec> & me, 
 			typename Size< String<TValue, TSpec> >::Type size, 
-			TPosition pos_begin, 
-			TPosition pos_end, 
+			TBeginPosition pos_begin, 
+			TEndPosition pos_end, 
 			typename Size< String<TValue, TSpec> >::Type limit, 
 			Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, pos_begin, pos_end, limit, tag);
+	typedef typename Position<String<TValue, TSpec> >::Type TPos;
+	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, static_cast<TPos>(pos_begin), static_cast<TPos>(pos_end), limit, tag);
 	arrayConstruct(iter(me, pos_begin), iter(me, pos_begin) + ret_);
 	return ret_;
 }
