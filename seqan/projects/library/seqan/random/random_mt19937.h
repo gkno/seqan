@@ -150,7 +150,8 @@ pickRandomNumber(RNG<MersenneTwister> & mt)
 		b[SEQAN_MERSENNE_MT_LEN-1] = b[SEQAN_MERSENNE_MT_IA-1] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
 	}
 	mt._index = idx + sizeof(unsigned long);
-	return *(unsigned long *)((unsigned char *)b + idx);
+    // TODO(holtgrew): 2* is ugly fix for generator not producing full range...
+	return 2 * *(unsigned long *)((unsigned char *)b + idx);
 }
 
 
