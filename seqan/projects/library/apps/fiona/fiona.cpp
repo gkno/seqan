@@ -1056,7 +1056,7 @@ int main(int argc, const char* argv[])
 	
 #ifdef FIONA_PARALLEL
 	if ((options.genomeLength < 2) && (stop = true))
-		cerr << "A genome length must be given.		estimation does not work in parallel mode." << endl;
+		cerr << "A genome length must be given. Length estimation does not work in parallel mode." << endl;
 	if (isSetLong(parser, "num-threads"))
 	{
 		unsigned numThreads = 1;
