@@ -21,11 +21,11 @@ endif
 
 CXXFLAGS += -I$(SEQAN_BASE)
 #CXXFLAGS += -I~/Documents/Development/
-CXXFLAGS += -O9 -fopenmp
-# CXXFLAGS += -O0 -g -fopenmp
+CXXFLAGS += -O9 -fopenmp -march=native -DSEQAN_ENABLE_DEBUG=0
+#CXXFLAGS += -O0 -g -fopenmp -DSEQAN_ENABLE_DEBUG=1
 CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-CXXFLAGS += -DSEQAN_ENABLE_DEBUG=0 -DSEQAN_ENABLE_TESTING=0
+CXXFLAGS += -DSEQAN_ENABLE_TESTING=0
 CXXFLAGS += ${CXXEXTRAFLAGS}
 
 # Intel Threading Building Blocks
@@ -36,6 +36,7 @@ TARGETS = dfi/dfi seqan_tcoffee/seqan_tcoffee seqcons/seqcons razers/paramChoose
 
 all:           check_seqan_base $(TARGETS)
 dfi:           check_seqan_base dfi/dfi
+fiona:         check_seqan_base fiona/fiona
 razers:        check_seqan_base razers/razers razers/paramChooser
 razers2:       check_seqan_base razers2/razers
 razers3:       check_seqan_base razers3/razers
