@@ -20,11 +20,14 @@ link_directories (${SEQAN_LIBRARY}/lib)
 # Demos
 ################################################################################
 
+add_custom_target(demos)
+
 file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/[A-z]*.cpp)
 foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	add_executable (${DEMO} ${DEMOFILE})
 	add_dependencies (${DEMO} ${SEQAN_TARGET})
+	add_dependencies (demos ${DEMO})
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		target_link_libraries (${DEMO} rt)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -34,12 +37,15 @@ endforeach (DEMOFILE)
 # Tutorials
 ################################################################################
 
+add_custom_target(tutorials)
+
 file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/tutorial/[A-z]*.cpp
                       ${SEQAN_LIBRARY}/demos/tutorial/*/[A-z]*.cpp)
 foreach (DEMOFILE ${SEQAN_DEMOS})
 	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
 	add_executable (tutorial_${DEMO} ${DEMOFILE})
 	add_dependencies (tutorial_${DEMO} ${SEQAN_TARGET})
+	add_dependencies (tutorials tutorial_${DEMO})
 	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		target_link_libraries (tutorial_${DEMO} rt)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
