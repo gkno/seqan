@@ -1,3 +1,4 @@
+// FRAGMENT(header)
 #include <iostream>
 
 #include <seqan/basic.h>
