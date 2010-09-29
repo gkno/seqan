@@ -149,7 +149,7 @@ SEQAN_DEFINE_TEST(test_random_uniform_int_pick)
         SEQAN_ASSERT_LEQ(x, 10);
     }
 
-    SEQAN_ASSERT_LEQ(fabs(sum / 100000.0), 0.02);
+    SEQAN_ASSERT_LEQ(fabs(sum / 100000.0), 0.03);
 }
 
 SEQAN_DEFINE_TEST(test_random_uniform_double_constructors)
