@@ -1,6 +1,8 @@
 //FRAGMENT(includes)
 #include <iostream>
+
 #include <seqan/sequence.h>
+#include <seqan/file.h>
 
 using namespace seqan;
 
