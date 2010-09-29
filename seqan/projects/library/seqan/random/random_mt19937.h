@@ -101,7 +101,7 @@ struct SupremumValue<RNG<MersenneTwister> >
     static const _TValue VALUE;
 };
 
-const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
+const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE / 2;
 
 template <>
 struct SupremumValue<const RNG<MersenneTwister> > : SupremumValue<RNG<MersenneTwister> > {};
@@ -150,8 +150,7 @@ pickRandomNumber(RNG<MersenneTwister> & mt)
 		b[SEQAN_MERSENNE_MT_LEN-1] = b[SEQAN_MERSENNE_MT_IA-1] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
 	}
 	mt._index = idx + sizeof(unsigned long);
-    // TODO(holtgrew): 2* is ugly fix for generator not producing full range...
-	return 2 * *(unsigned long *)((unsigned char *)b + idx);
+	return *(unsigned long *)((unsigned char *)b + idx);
 }
 
 
