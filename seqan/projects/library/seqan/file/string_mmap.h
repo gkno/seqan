@@ -333,7 +333,7 @@ SEQAN_CHECKPOINT
 
     template < typename TValue, typename TConfig, typename TScheme, typename TBeginPos, typename TEndPos >
 	inline int
-	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme, TBeginPos, TEndPos);
+	mmapAdvise(String<TValue, MMap<TConfig> > &me, TScheme scheme, TBeginPos, TEndPos)
 	{
 		return 0;
 	}
