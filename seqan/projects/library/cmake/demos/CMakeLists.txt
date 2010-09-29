@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.6)
 project (Seqan_Demos)
 
 ################################################################################
@@ -29,3 +29,19 @@ foreach (DEMOFILE ${SEQAN_DEMOS})
 		target_link_libraries (${DEMO} rt)
 	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endforeach (DEMOFILE)
+
+################################################################################
+# Tutorials
+################################################################################
+
+file(GLOB SEQAN_DEMOS ${SEQAN_LIBRARY}/demos/tutorial/[A-z]*.cpp
+                      ${SEQAN_LIBRARY}/demos/tutorial/*/[A-z]*.cpp)
+foreach (DEMOFILE ${SEQAN_DEMOS})
+	get_filename_component (DEMO ${DEMOFILE} NAME_WE)
+	add_executable (tutorial_${DEMO} ${DEMOFILE})
+	add_dependencies (tutorial_${DEMO} ${SEQAN_TARGET})
+	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		target_link_libraries (tutorial_${DEMO} rt)
+	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+endforeach (DEMOFILE)
+
