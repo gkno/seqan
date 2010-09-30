@@ -22,7 +22,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
-#include <sys/resource.h>
+//#include <sys/resource.h>
 
 
 #include <seqan/basic.h>
@@ -1125,11 +1125,11 @@ int main(int argc, const char* argv[])
 	if (options.cycles > 1)
 		cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << endl; 
 
-	struct rusage usage;
-	getrusage(RUSAGE_SELF, &usage);
+//	struct rusage usage;
+//	getrusage(RUSAGE_SELF, &usage);
 	cout << endl;
 	cout << "Time required for execution: " << SEQAN_PROTIMEDIFF(correction) << " seconds." << endl;
-	cout << "Peak resident memory usage:  " << usage.ru_maxrss / (1024*1024) << " Mb." << endl;
+//	cout << "Peak resident memory usage:  " << usage.ru_maxrss / (1024*1024) << " Mb." << endl;
 
 	return 0;
 }
