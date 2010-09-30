@@ -23,6 +23,8 @@
 #ifndef SEQAN_RANDOM_RANDOM_MT19937_H_
 #define SEQAN_RANDOM_RANDOM_MT19937_H_
 
+#include <seqan/random/ext_MersenneTwister.h>
+
 namespace seqan {
 
 // ===========================================================================
@@ -31,14 +33,6 @@ namespace seqan {
 
 // Tag for selecting a mersenne twister.
 struct MersenneTwister {};
-
-// Forward declaration for mersenne twister, needed for _initialize.
-template <>
-class RNG<MersenneTwister>;
-
-// Forward declaration for _initialize, needed for RNG<MersenneTwister>'s
-// constructor.
-inline void _initialize(RNG<MersenneTwister> & mt, unsigned seed);
 
 // ===========================================================================
 // Classes
@@ -55,8 +49,7 @@ template <>
 class RNG<MersenneTwister>
 {
 public:
-    unsigned long _buffer[SEQAN_MERSENNE_MT_LEN];
-	  int _index;
+    ext::MTRand _mtRand;
 
 
 /**
@@ -67,17 +60,11 @@ public:
 ..param.seed:Seed for the initialization of the Mersenne Twister, defaults to 0.
 ...type:nolink:double.
 */
-    RNG() : _index(0)
-    {
-        SEQAN_CHECKPOINT;
-        _initialize(*this, 0);
-    }
+    RNG() : _mtRand(0lu)
+    { SEQAN_CHECKPOINT; }
 
-    RNG(unsigned seed) : _index(0)
-    {
-        SEQAN_CHECKPOINT;
-        _initialize(*this, seed);
-    }
+    RNG(unsigned seed) : _mtRand(seed)
+    { SEQAN_CHECKPOINT; }
 };
 
 // ===========================================================================
@@ -128,53 +115,7 @@ pickRandomNumber(RNG<MersenneTwister> & mt)
 {
     SEQAN_CHECKPOINT;
 
-	unsigned long * b = mt._buffer;
-	int idx = mt._index;
-	unsigned long s;
-	int i;
-	
-	if (idx == SEQAN_MERSENNE_MT_LEN*sizeof(unsigned long))
-	{
-		idx = 0;
-		i = 0;
-		for (; i < SEQAN_MERSENNE_MT_IB; i++) {
-			s = SEQAN_MERSENNE_TWIST(b, i, i+1);
-			b[i] = b[i + SEQAN_MERSENNE_MT_IA] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
-		}
-		for (; i < SEQAN_MERSENNE_MT_LEN-1; i++) {
-			s = SEQAN_MERSENNE_TWIST(b, i, i+1);
-			b[i] = b[i - SEQAN_MERSENNE_MT_IB] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
-		}
-        
-		s = SEQAN_MERSENNE_TWIST(b, SEQAN_MERSENNE_MT_LEN-1, 0);
-		b[SEQAN_MERSENNE_MT_LEN-1] = b[SEQAN_MERSENNE_MT_IA-1] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
-	}
-	mt._index = idx + sizeof(unsigned long);
-	return *(unsigned long *)((unsigned char *)b + idx);
-}
-
-
-/**
-.Internal._initalize
-..summary:Initialize Mersenne Twister's state with the given seed.
-..cat:Random
-..include:seqan/random.h
-..signature:_initialize(mt, seed)
-..param.mt:Mersenne Twister to initialize.
-...type:Spec.Mersenne Twister RNG
-..param.seed:Seed for the initialization.
-...type:nolink:unsigned
-*/
-inline void
-_initialize(RNG<MersenneTwister> & mt, unsigned seed)
-{
-    SEQAN_CHECKPOINT;
-
-    // Initialize C stdlib standard number generator with the given seed.
-    ::std::srand(seed);
-
-	for (int i = 0; i < SEQAN_MERSENNE_MT_LEN; i++)
-		mt._buffer[i] = ::std::rand();
+    return mt._mtRand.randInt();
 }
 
 }  // namespace seqan
