@@ -160,7 +160,7 @@ SEQAN_CHECKPOINT
 	TSource s1 = sourceSegment(row(align_, 0));
 	TSource s2 = sourceSegment(row(align_, 1));
 	
-	TScoreValue total_score;
+	TScoreValue total_score=0;
 
 	typedef typename Value<TSource>::Type TStringValue;
 	typedef typename Size<TSource>::Type TStringSize;
