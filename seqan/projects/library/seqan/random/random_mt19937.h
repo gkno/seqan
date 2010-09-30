@@ -101,7 +101,7 @@ struct SupremumValue<RNG<MersenneTwister> >
     static const _TValue VALUE;
 };
 
-const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE / 2;
+const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
 
 template <>
 struct SupremumValue<const RNG<MersenneTwister> > : SupremumValue<RNG<MersenneTwister> > {};

@@ -141,13 +141,19 @@ SEQAN_DEFINE_TEST(test_random_uniform_int_pick)
     RNG<MersenneTwister> mt(42);
     PDF<Uniform<int> > pdf(-10, 10);
 
+    unsigned gt = 0;  // Greater than 0.
+
     int sum = 0;
     for (unsigned i = 0; i < 100000; ++i) {
         int x = pickRandomNumber(mt, pdf);
         sum += x;
+        gt += x > 0;
         SEQAN_ASSERT_GEQ(x, -10);
         SEQAN_ASSERT_LEQ(x, 10);
     }
+
+    SEQAN_ASSERT_GT(gt, 0u);
+    SEQAN_ASSERT_LT(gt, 100000u);
 
     SEQAN_ASSERT_LEQ(fabs(sum / 100000.0), 0.03);
 }
@@ -166,13 +172,19 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
     RNG<MersenneTwister> mt(42);
     PDF<Uniform<double> > pdf(0, 1);
 
+    unsigned gt = 0;  // Greater than 0.5
+
     double sum = 0;
     for (unsigned i = 0; i < 10000; ++i) {
         double x = pickRandomNumber(mt, pdf);
         sum += x;
-        SEQAN_ASSERT_GEQ(x, -10);
-        SEQAN_ASSERT_LEQ(x, 10);
+        gt += x > 0.5;
+        SEQAN_ASSERT_GEQ(x, 0);
+        SEQAN_ASSERT_LEQ(x, 1);
     }
+
+    SEQAN_ASSERT_GT(gt, 0u);
+    SEQAN_ASSERT_LT(gt, 10000u);
 
     SEQAN_ASSERT_LEQ(fabs(sum / 10000.0 - 0.5), 0.02);
 }
