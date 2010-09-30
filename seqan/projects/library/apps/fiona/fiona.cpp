@@ -10,7 +10,7 @@
 //#define SEQAN_VERBOSE
 //#define SEQAN_VVERBOSE
 
-#ifdef FIONA_PARALLEL
+#ifdef _OPENMP
 #include <omp.h>
 #define SEQAN_PARALLEL
 #define _GLIBCXX_PARALLEL
@@ -1011,7 +1011,7 @@ int main(int argc, const char* argv[])
 #ifdef FIONA_ALLOWINDELS
 	addOption(parser, CommandLineOption("id", "indel-length",      "set the maximum length of an indel", OptionType::Int | OptionType::Label, options.maxIndelLength));
 #endif
-#if defined(FIONA_PARALLEL) && defined(_OPENMP)
+#ifdef _OPENMP
 	addOption(parser, CommandLineOption("nt", "num-threads",       "set the number of threads used", OptionType::Int | OptionType::Label));
 #endif
 	requiredArguments(parser, 2);
@@ -1053,7 +1053,7 @@ int main(int argc, const char* argv[])
 	getOptionValueLong(parser, "indel-length", options.maxIndelLength);
 #endif
 
-#if defined(FIONA_PARALLEL) && defined(_OPENMP)
+#ifdef _OPENMP
 	if ((options.genomeLength < 2) && (stop = true))
 		cerr << "A genome length must be given. Length estimation does not work in parallel mode." << endl;
 	if (isSetLong(parser, "num-threads"))
