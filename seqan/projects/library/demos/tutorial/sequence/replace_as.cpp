@@ -14,7 +14,7 @@ void replaceAs(CharString & str) {
 }
 
 
-int main(int argc, char **argv) {
+int main() {
     CharString str1 = "abcdefghijklmnopqrstuvwxyz";
     replaceAs(str1);
     std::cout << str1 << std::endl;

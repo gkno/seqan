@@ -8,7 +8,7 @@ using namespace seqan;
 
 // FRAGMENT(print-strings-rec)
 // Helper function for printPermutations().
-void printStringsRec(String<char> &current, int pos) {
+void printStringsRec(String<char> &current, unsigned int pos) {
   if (pos < length(current)) {
     for (char c = 'a'; c <= 'z'; ++c) {
       current[pos] = c;
@@ -37,7 +37,7 @@ void printStrings(int len) {
 
 
 //FRAGMENT(main)
-int main(int argc, char **argv) {
+int main() {
   printStrings(3);
   return 0;
 }

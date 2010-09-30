@@ -10,12 +10,12 @@ void countOneMers(CharString const & str) {
 	fill(table, 'z' - 'a' + 1, 0);
 	
 	//FRAGMENT(count-one-mers-count-chars)
-	for (int i = 0; i < length(str); ++i) {
+	for (unsigned int i = 0; i < length(str); ++i) {
 		table[str[i] - 'a'] += 1;
 	}
 	
 	//FRAGMENT(count-one-mers-print-chars)
-	for (int i = 0; i < 'z' - 'a' + 1; ++i) {
+	for (unsigned int i = 0; i < 'z' - 'a' + 1; ++i) {
 		if (table[i] == 0)
 			continue;
 		std::cout << static_cast<char>('a' + i) << " " << table[i] << std::endl;
@@ -23,7 +23,7 @@ void countOneMers(CharString const & str) {
 }
 
 //FRAGMENT(main)
-int main(int argc, char **argv) {
+int main() {
 	std::cout << "String: helloworld" << std::endl;
 	countOneMers("helloworld");
 	
