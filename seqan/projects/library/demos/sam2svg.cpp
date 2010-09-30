@@ -13,13 +13,13 @@ int main(int argc, const char *argv[])
 {
 	typedef FragmentStore<> TFragStore;
 	typedef TFragStore::TContigPos TContigPos;
-	
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
 	CommandLineParser parser;
 	addUsageLine(parser, "[OPTION]... <SAM file> <SVG file>");
 	addUsageLine(parser, "[OPTION]... <SAM file> <GENOME file> <SVG file>");
-	
+
 	addOption(parser, CommandLineOption("c",  "contig",    "display only contig #NUM (default: show all contigs)", OptionType::Int | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("p",  "pos",    2, "set begin and end position (default: show whole strands)", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "lines",  2, "set first and last line of the alignment (default: show whole alignment)", OptionType::Int | OptionType::Label));
@@ -30,14 +30,14 @@ int main(int argc, const char *argv[])
 	if (stop) return 0;
 
 	//////////////////////////////////////////////////////////////////////////////
-	// Extract and check options	
+	// Extract and check options
 	String<unsigned> contigs;
 	TContigPos left = 0;
 	TContigPos right = SupremumValue<TContigPos>::VALUE;
 	unsigned firstLine = 0;
 	unsigned lastLine = SupremumValue<unsigned>::VALUE;
 	bool inASCII = false;
-	
+
 	if (isSetLong(parser, "pos"))
 	{
 		__int64 l = 0, r = 0;
@@ -61,10 +61,10 @@ int main(int argc, const char *argv[])
 	std::ifstream samFile(toCString(getArgumentValue(parser, 0)), std::ios_base::in | std::ios_base::binary);
 	std::ofstream ascii;
 	SVGFile svg;
-	
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Optionally load genome file
-	uint outArgNo = 1;
+	unsigned outArgNo = 1;
 	if (argumentCount(parser) > 2)
 	{
 		if (!loadContigs(store, getArgumentValue(parser, 1)) && (stop = true))
@@ -75,7 +75,7 @@ int main(int argc, const char *argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Load SAM file
 	if (!stop) read(samFile, store, SAM());
-	
+
 	//////////////////////////////////////////////////////////////////////////////
 	// Choose contigs
 	if (isSetLong(parser, "contig"))
@@ -102,17 +102,17 @@ int main(int argc, const char *argv[])
 			if (!ascii.is_open()) stop = true;
 		} else
 			if (!open(svg, toCString(getArgumentValue(parser, outArgNo)))) stop = true;
-		
+
 		if (stop) std::cerr << "Failed to open output file for writing." << std::endl;
 	}
-	
+
 	// something went wrong
 	if (stop)
 	{
 		std::cerr << "Exiting ..." << std::endl;
 		return 1;
 	}
-	
+
 	for(unsigned o=0;o<length(store.contigStore);++o)
 	std::cerr<<store.contigNameStore[o]<<std::endl;
 
@@ -145,7 +145,7 @@ int main(int argc, const char *argv[])
 				printAlignment(ascii, Raw(), layout, store, contigs[i], left, right_, firstLine, lastLine);
 			else
 				printAlignment(svg, Raw(), layout, store, contigs[i], left, right_, firstLine, lastLine);
-			
+
 			std::cout << "done" << std::endl;
 		}
 
