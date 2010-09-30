@@ -119,7 +119,7 @@ namespace seqan  {
 #ifdef FIONA_MEMOPT
 
 	typedef Pair<
-		unsigned,				
+		unsigned,
 		unsigned,
 		BitCompressed<24, 8>	// max. 16M reads of length < 256
 	> TSAValue;
@@ -1011,7 +1011,7 @@ int main(int argc, const char* argv[])
 #ifdef FIONA_ALLOWINDELS
 	addOption(parser, CommandLineOption("id", "indel-length",      "set the maximum length of an indel", OptionType::Int | OptionType::Label, options.maxIndelLength));
 #endif
-#ifdef FIONA_PARALLEL
+#if defined(FIONA_PARALLEL) && defined(_OPENMP)
 	addOption(parser, CommandLineOption("nt", "num-threads",       "set the number of threads used", OptionType::Int | OptionType::Label));
 #endif
 	requiredArguments(parser, 2);
@@ -1031,7 +1031,7 @@ int main(int argc, const char* argv[])
 			method = Expected;
 			getOptionValueLong(parser, "expected", options.strictness);
 		}
-	} 
+	}
 	else if (isSetLong(parser, "pvalue"))
 	{
 		method = Poisson;
@@ -1052,8 +1052,8 @@ int main(int argc, const char* argv[])
 #ifdef FIONA_ALLOWINDELS
 	getOptionValueLong(parser, "indel-length", options.maxIndelLength);
 #endif
-	
-#ifdef FIONA_PARALLEL
+
+#if defined(FIONA_PARALLEL) && defined(_OPENMP)
 	if ((options.genomeLength < 2) && (stop = true))
 		cerr << "A genome length must be given. Length estimation does not work in parallel mode." << endl;
 	if (isSetLong(parser, "num-threads"))
@@ -1070,9 +1070,9 @@ int main(int argc, const char* argv[])
 		cerr << "Exiting ..." << endl;
 		return 1;
 	}
-	
+
 	SEQAN_PROTIMESTART(correction);
-	
+
 	// load original set of reads
 	TFionaFragStore store;
 	if (!loadReads(store, getArgumentValue(parser, 0)))
@@ -1082,7 +1082,7 @@ int main(int argc, const char* argv[])
 		return 1;
 	} else
 		cout << "Loaded " << length(store.readSeqStore) << " reads." << endl;
-	
+
 	// initialise the top and down level by using the log4 from the total number of reads
 	if (options.fromLevel == 0)
 	{
@@ -1091,7 +1091,7 @@ int main(int argc, const char* argv[])
 		options.toLevel   = options.fromLevel + 10;
 		cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << endl;
 	}
-	
+
 	for (unsigned cycle = 1; cycle <= options.cycles; ++cycle)
 	{
 		cout << endl << "Cycle "<< cycle << " of " << options.cycles << endl;
@@ -1101,14 +1101,14 @@ int main(int argc, const char* argv[])
 		else
 			/*use an expected value for a certain level*/
 			correctReads(store, options, FionaExpected());
-		
-		if (options.acceptedMismatches > 0) --options.acceptedMismatches;			
+
+		if (options.acceptedMismatches > 0) --options.acceptedMismatches;
 
 		// TODO maybe to stop if there is not reads corrected in the cycle before
 		// if so after each iteration must save the ID for the reads which are corrected
 		// thus we can also show the total number of reads that are corrected at the final stage
 	}
-	
+
 	// write in file all input reads with the corrected one
 	ofstream out(toCString(getArgumentValue(parser, 1)));
 	int numCorrected = 0;
