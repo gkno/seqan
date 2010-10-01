@@ -530,7 +530,7 @@ _align_banded_nw_best_ends(TTrace& trace,
 	resize(mat, diagonalWidth);
 	resize(len, diagonalWidth);
 	resize(trace, height * diagonalWidth);
-	fill(bestEnds, len1+len2-2, Pair<TPos, TCoord>(len1+len2+1, TCoord()));
+	fill(bestEnds, _max(len1+len2-2, diagonalWidth), Pair<TPos, TCoord>(_max(len1+len2-1, diagonalWidth+1), TCoord()));
 	
 	//// Debug stuff
 	//String<TScoreValue> originalMat;
@@ -566,6 +566,7 @@ _align_banded_nw_best_ends(TTrace& trace,
 		hori_len = len1+len2+1;
 		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt, ++lenIt) {
 			actualCol = col + diagL + actualRow;
+			if (actualCol >= len2) break;
 			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
