@@ -55,7 +55,11 @@ const double EPSILON = 0.08;
 //FRAGMENT(main-input)
 int main(int argc, char *argv[]) {
     // 0) Handle command line arguments.
-    if (argc < 3) return 1;
+    if (argc < 3) {
+        std::cerr << "Invalid number of arguments." << std::endl
+                  << "USAGE: minimapper GENOME.fasta READS.fasta OUT.sam" << std::endl;
+        return 1;
+    }
 
     // 1) Load contigs and reads.
     FragmentStore<> fragStore;
