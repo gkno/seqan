@@ -177,8 +177,18 @@ typedef Tag<Lcs_> const Lcs;
 	Triggers a Smith Waterman local alignment algorithm.
 ..include:seqan/basic.h
 */
-struct SmithWaterman_;
-typedef Tag<SmithWaterman_> const SmithWaterman;
+struct _SmithWaterman;
+typedef Tag<_SmithWaterman> const SmithWaterman;
+
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Tag.Local Alignment Algorithms.value.BandedSmithWaterman:
+	Triggers a banded version of the Smith Waterman local alignment algorithm.
+..include:seqan/basic.h
+*/
+struct _BandedSmithWaterman;
+typedef Tag<_BandedSmithWaterman> const BandedSmithWaterman;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -189,27 +199,22 @@ typedef Tag<SmithWaterman_> const SmithWaterman;
 	Same as $WatermanEggert$.
 ..include:seqan/basic.h
 */
-struct SmithWatermanClump_;
-typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
-typedef Tag<SmithWatermanClump_> const WatermanEggert;
+struct _SmithWatermanClump;
+typedef Tag<_SmithWatermanClump> const SmithWatermanClump;
+typedef Tag<_SmithWatermanClump> const WatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Tag.Local Alignment Algorithms.value.BandedWatermanEggert:
 	Triggers a banded version of the local alignment algorithm by Waterman and Eggert with "declumping".
-*/
-struct BandedWatermanEggert_;
-typedef Tag<BandedWatermanEggert_> const BandedWatermanEggert;
-
-//////////////////////////////////////////////////////////////////////////////
-
-/*DISABLED
 .Tag.Local Alignment Algorithms.value.BandedSmithWatermanClump:
-	Triggers a banded version of the local alignment algorithm by Waterman and Eggert with "declumping".
+	Same as $BandedWatermanEggert$.
+..include:seqan/basic.h
 */
-struct BandedSmithWatermanClump_;
-typedef Tag<BandedSmithWatermanClump_> const BandedSmithWatermanClump;
+struct _BandedWatermanEggert;
+typedef Tag<_BandedWatermanEggert> const BandedSmithWatermanClump;
+typedef Tag<_BandedWatermanEggert> const BandedWatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 

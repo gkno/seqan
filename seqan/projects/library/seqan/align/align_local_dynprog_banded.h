@@ -44,6 +44,7 @@ SEQAN_CHECKPOINT
     TSize len0 = length(value(str, 0));
     if (len0 - lowerDiag < hi_row) hi_row = static_cast<TSize>(len0 - lowerDiag);
     TSize height = hi_row - lo_row + 1;
+	SEQAN_ASSERT_GEQ(upperDiag, lowerDiag);
     TSize diagonalWidth = (TSize) (upperDiag - lowerDiag + 1);
 
     setDimension(finder.matrix, 2);
@@ -489,6 +490,42 @@ SEQAN_CHECKPOINT
     _finishAlign(align, alignmentPositions.i1.i1, alignmentPositions.i1.i2, alignmentPositions.i2.i1, alignmentPositions.i2.i2);
 
     return maxScore;
+}
+
+//1. only Align object
+template <typename TSource, typename TSpec, typename TScoreValue, typename TDiagonal>
+inline TScoreValue
+localAlignment(Align<TSource, TSpec> & align,
+			   Score<TScoreValue, Simple> const & score, 
+               TDiagonal lowerDiag,
+               TDiagonal upperDiag,
+			   BandedSmithWaterman) {
+SEQAN_CHECKPOINT
+	clearGaps(row(align, 0));
+	clearGaps(row(align, 1));
+    setSourceBeginPosition(row(align, 0), 0);
+    setSourceBeginPosition(row(align, 1), 0);
+	setSourceEndPosition(row(align, 0), length(source(row(align, 0))));
+	setSourceEndPosition(row(align, 1), length(source(row(align, 1))));
+
+    StringSet<TSource> str;
+    for (unsigned i = 0; i < length(rows(align)); ++i) {
+        appendValue(str, sourceSegment(row(align, i)));
+    }
+	LocalAlignmentFinder<TScoreValue> finder(align);
+	_initLocalAlignmentFinder(str, finder, BandedWatermanEggert(), lowerDiag, upperDiag);
+	finder.needReinit = false;
+
+	return _localAlignment(finder, str, align, score, 0, lowerDiag, upperDiag, BandedWatermanEggert());
+}
+
+template <typename TSource, typename TSpec, typename TScoreValue, typename TDiagonal>
+inline TScoreValue
+localAlignment(Align<TSource, TSpec> & align_,
+			   Score<TScoreValue, Simple> const & score_,
+               TDiagonal lowerDiag,
+               TDiagonal upperDiag) {
+	return localAlignment(align_, score_, lowerDiag, upperDiag, BandedSmithWaterman());
 }
 
 //////////////////////////////////////////////////////////////////////////////
