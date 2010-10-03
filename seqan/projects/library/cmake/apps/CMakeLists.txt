@@ -43,8 +43,8 @@ link_directories (${SEQAN_LIBRARY}/lib
                   ${TBB_LIBRARY_DIRS})
 
 # Make sure the compiler can find object files from the TBB library.
-link_directories (${SEQAN_LIBRARY}/lib)
-
+##link_directories (${SEQAN_LIBRARY}/lib)
+# ^-- currently not working because cmake appends Debug|Release to ../lib/
 
 ################################################################################
 # Applications
