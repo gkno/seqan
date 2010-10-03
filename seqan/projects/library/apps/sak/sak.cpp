@@ -135,6 +135,7 @@ void dumpFastaId(
 	TStream &out,
 	TId &id)
 {
+  /*
 	unsigned size = length(id);
 	for (unsigned i = 0; i < size; ++i)
 		if (id[i] == ' ')
@@ -143,6 +144,8 @@ void dumpFastaId(
 			break;
 		}
 	out << infix(id, 0, size) << endl;
+	*/
+	out << id << endl;
 }
 
 template < 
@@ -156,10 +159,7 @@ void dumpFastaSeq(
     SEQAN_ASSERT_GEQ(n, 0);
 	unsigned size = _min(length(seq), static_cast<unsigned>(n));
     n -= size;
-	unsigned i;
-	for (i = 0; i + 60 < size; i += 60)
-		out << infix(seq, i, i + 60) << endl;
-	out << infix(seq, i, size) << endl;
+    out << infix(seq, 0, size) << endl;
 }
 
 
