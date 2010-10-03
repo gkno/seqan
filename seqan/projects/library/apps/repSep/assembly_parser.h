@@ -29,6 +29,42 @@
 
 using namespace seqan;
 
+template<typename TGapsAnchorArray, typename TUngappedSequence, typename TReadPos, typename TGappedSequence>
+inline void 
+_gap_sequence(TGapsAnchorArray const & gaps,
+             TUngappedSequence const & ungapped_sequence,
+             TReadPos beginClr,
+             TReadPos endClr,
+             TGappedSequence & seq)
+{
+    clear(seq);
+    typedef typename Size<TGapsAnchorArray>::Type TSize;
+    typedef typename Value<TGappedSequence>::Type TGappedValue;
+
+    TSize ungapped_position = beginClr;
+    TSize gapped_position = 0;
+
+    for(TSize g = 0; g < length(gaps) ; ++g) {
+        while(ungapped_position < gaps[g].seqPos && ungapped_position < endClr) {
+            // put 
+            append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
+            ++ungapped_position;
+            ++gapped_position;
+        }
+        while(gapped_position < gaps[g].gapPos) {
+            append(seq, TGappedValue('-', endClr + 1));        
+            ++gapped_position;
+        }
+    }
+
+    // fill up the rest
+    while(ungapped_position < endClr) {
+        append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
+        ++ungapped_position;
+    }
+}
+
+
 // build alignment matrix based on Amos-Assembly -- the main worker
 template<typename TSpec, typename TConfig, typename TId, typename TAnnotatedCandidateColumn, typename TScannerType>
 inline void 
@@ -170,41 +206,6 @@ parseContig(FragmentStore<TSpec, TConfig> const& fragStore,
     }
 }
 
-
-template<typename TGapsAnchorArray, typename TUngappedSequence, typename TReadPos, typename TGappedSequence>
-inline void 
-_gap_sequence(TGapsAnchorArray const & gaps,
-             TUngappedSequence const & ungapped_sequence,
-             TReadPos beginClr,
-             TReadPos endClr,
-             TGappedSequence & seq)
-{
-    clear(seq);
-    typedef typename Size<TGapsAnchorArray>::Type TSize;
-    typedef typename Value<TGappedSequence>::Type TGappedValue;
-
-    TSize ungapped_position = beginClr;
-    TSize gapped_position = 0;
-
-    for(TSize g = 0; g < length(gaps) ; ++g) {
-        while(ungapped_position < gaps[g].seqPos && ungapped_position < endClr) {
-            // put 
-            append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
-            ++ungapped_position;
-            ++gapped_position;
-        }
-        while(gapped_position < gaps[g].gapPos) {
-            append(seq, TGappedValue('-', endClr + 1));        
-            ++gapped_position;
-        }
-    }
-
-    // fill up the rest
-    while(ungapped_position < endClr) {
-        append(seq, TGappedValue(ungapped_sequence[ungapped_position] , ungapped_position));
-        ++ungapped_position;
-    }
-}
 
 
 
