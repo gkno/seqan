@@ -1168,7 +1168,7 @@ int dumpMatches(
 			}
 			break;
 */		case 4: // SAM
-			convertMatchesToGlobalAlignment(store, scoreType);
+			convertMatchesToGlobalAlignment(store, scoreType, True());
 //			String<String<unsigned> > layout;
 //			layoutAlignment(layout, store, 0);
 //			printAlignment(std::cout, layout, store, 0, 0, 2000, 0, 100);

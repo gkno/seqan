@@ -679,33 +679,46 @@ SEQAN_CHECKPOINT
 .Function.resizeSpace.param.object.type:Class.String
 */
 
-template<typename TValue, typename TSpec, typename TBeginPosition, typename TEndPosition, typename TExpand>
+template<typename TValue, typename TSpec, typename TSize, typename TBeginPosition, typename TEndPosition, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type 
 resizeSpace(String<TValue, TSpec> & me, 
-			typename Size< String<TValue, TSpec> >::Type size, 
+			TSize size, 
 			TBeginPosition pos_begin, 
 			TEndPosition pos_end, 
 			Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typedef typename Position<String<TValue, TSpec> >::Type TPos;
-	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, static_cast<TPos>(pos_begin), static_cast<TPos>(pos_end), tag);
+	typedef typename Size< String<TValue, TSpec> >::Type TSize_;
+	typedef typename Position<String<TValue, TSpec> >::Type TPos_;
+	TSize_ ret_ = _clearSpace(
+		me, 
+		static_cast<TSize_>(size), 
+		static_cast<TPos_>(pos_begin), 
+		static_cast<TPos_>(pos_end), 
+		tag);
 	arrayConstruct(iter(me, pos_begin), iter(me, pos_begin) + ret_);
 	return ret_;
 }
 
-template<typename TValue, typename TSpec, typename TBeginPosition, typename TEndPosition, typename TExpand>
+template<typename TValue, typename TSpec, typename TSize, typename TBeginPosition, typename TEndPosition, typename TLimit, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type 
 resizeSpace(String<TValue, TSpec> & me, 
-			typename Size< String<TValue, TSpec> >::Type size, 
+			TSize size, 
 			TBeginPosition pos_begin, 
 			TEndPosition pos_end, 
-			typename Size< String<TValue, TSpec> >::Type limit, 
+			TLimit limit, 
 			Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
-	typedef typename Position<String<TValue, TSpec> >::Type TPos;
-	typename Size<String<TValue, TSpec> >::Type ret_ =_clearSpace(me, size, static_cast<TPos>(pos_begin), static_cast<TPos>(pos_end), limit, tag);
+	typedef typename Size< String<TValue, TSpec> >::Type TSize_;
+	typedef typename Position<String<TValue, TSpec> >::Type TPos_;
+	TSize_ ret_ = _clearSpace(
+		me, 
+		static_cast<TSize_>(size), 
+		static_cast<TPos_>(pos_begin), 
+		static_cast<TPos_>(pos_end), 
+		static_cast<TSize_>(limit), 
+		tag);
 	arrayConstruct(iter(me, pos_begin), iter(me, pos_begin) + ret_);
 	return ret_;
 }

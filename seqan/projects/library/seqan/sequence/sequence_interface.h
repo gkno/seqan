@@ -1471,19 +1471,19 @@ resizeSpace(T & me,
 SEQAN_CHECKPOINT
 	return resizeSpace(me, size, pos_begin, pos_end, typename DefaultOverflowExplicit<T>::Type());
 }
-/*
-template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition, typename TLimitSize>
+
+template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition, typename TLimit>
 inline TSize 
 resizeSpace(T & me, 
 			TSize size, 
 			TBeginPosition pos_begin, 
 			TEndPosition pos_end,
-			TLimitSize limit)
+			TLimit limit)
 {
 SEQAN_CHECKPOINT
 	return resizeSpace(me, size, pos_begin, pos_end, limit, typename DefaultOverflowExplicit<T>::Type());
 }
-*/
+
 //////////////////////////////////////////////////////////////////////////////
 // erase
 //////////////////////////////////////////////////////////////////////////////
