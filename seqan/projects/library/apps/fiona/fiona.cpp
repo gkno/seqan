@@ -1086,7 +1086,7 @@ int main(int argc, const char* argv[])
 	// initialise the top and down level by using the log4 from the total number of reads
 	if (options.fromLevel == 0)
 	{
-		int logRation = log10(length(store.readSeqStore)) / log10(4.0);
+		int logRation = static_cast<int>(log10(length(store.readSeqStore)) / log10(4.0));
 		options.fromLevel = logRation + 2;
 		options.toLevel   = options.fromLevel + 10;
 		cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << endl;
