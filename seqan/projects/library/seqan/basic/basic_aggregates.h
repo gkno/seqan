@@ -461,7 +461,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline tmpS const assignValueAt(TPos k, tmpS const source) {
 			typedef Tuple<_T, _size, Compressed> Tup;
 			typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * bitSize);
-			i = (i & ~mask) | ((CT)source << ((_size - 1 - k) * bitSize));
+			i = (i & ~mask) | ((CT)ordValue(source) << ((_size - 1 - k) * bitSize));
 			return source;
 		}
     }
