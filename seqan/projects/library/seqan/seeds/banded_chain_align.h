@@ -58,7 +58,7 @@ bandedChainAlignment(TContainer const &seedChain,
 			if (leftDim0(*it) < leftDim0(*it2))
 			{
 				TContainer copyChain(seedChain);
-				std::reverse(begin(copyChain), end(copyChain));
+				reverse(copyChain);
 
 				if(scoreGapOpen(scoreMatrix)==scoreGapExtend(scoreMatrix))
 					return chain_to_alignment_needlemanwunsch(copyChain, k, whole_alignment, scoreMatrix);

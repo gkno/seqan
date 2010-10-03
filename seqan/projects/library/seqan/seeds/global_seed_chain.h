@@ -149,8 +149,8 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 		pElement = (TChainElement*)pElement->i3;
 		delete(delete_pointer);
 	}
-	
-	::std::reverse(begin(result), end(result));
+
+	reverse(result);
 	return best;
 }
 
