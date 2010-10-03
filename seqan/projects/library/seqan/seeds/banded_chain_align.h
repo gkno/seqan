@@ -50,10 +50,10 @@ bandedChainAlignment(TContainer const &seedChain,
 	//teste die Reihenfolge der seeds und erstelle gegebenenfalls eine die rueckwaerts laeuft
 	typedef typename Iterator<const TContainer, Standard>::Type TIterator;	//Iterator for the seed chain
 	TIterator it = begin(seedChain);
-	if (it != end(seedChain))
+	if (it != end(seedChain, Standard()))
 	{
 		TIterator it2 = it; ++it2;
-		if (it2 != end(seedChain))
+		if (it2 != end(seedChain, Standard()))
 		{
 			if (leftDim0(*it) < leftDim0(*it2))
 			{
@@ -102,7 +102,7 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 	
 	TValue score_length = 0;
 	TMatrix matrix_;
-	TIterator it = begin(seedChain);
+	TIterator it = begin(seedChain, Standard());
 
 	//calculation begins at the end
 	//rectangle between last seed and end
@@ -114,7 +114,7 @@ chain_to_alignment_needlemanwunsch(TContainer const &seedChain,
 	_calculateLastRectangle(*it, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoreMatrix);
 	_calculateBandedSeed(*it, k_end, matrix_, p_seq1, p_seq2, score_str, score_length, alignmentVector, scoreMatrix);
 
-	TIterator it_begin = end(seedChain);
+	TIterator it_begin = end(seedChain, Standard());
 	TIterator it2 = it;
 	++it2;
 	while (it2 != it_begin)
@@ -228,7 +228,7 @@ _banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 	setLength(matrix_, 1, str2_length + 1);
 	resize(matrix_);
 	
-	TMatrixIterator col_ = begin(matrix_);
+	TMatrixIterator col_ = begin(matrix_, Standard());
 	TMatrixIterator finger1;
 	TMatrixIterator finger2;
 	TMatrixIterator finger3;
