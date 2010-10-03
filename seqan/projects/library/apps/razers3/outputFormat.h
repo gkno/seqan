@@ -1177,7 +1177,7 @@ int dumpMatches(
 			write(file, store, SAM());
 			break;
 		case 5: // AFG
-			convertMatchesToGlobalAlignment(store, scoreType);
+			convertMatchesToGlobalAlignment(store, scoreType, True());
 			write(file, store, Amos());
 			break;
 	}
