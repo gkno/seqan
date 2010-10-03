@@ -377,6 +377,18 @@ const _Ty& _max(const _Ty& _Left, const _Ty& _Right)
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename T>
+inline
+T _abs(T const & x)
+{
+    if (x < static_cast<T>(0))
+        return -x;
+    else
+        return x;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 template <typename T1, typename T2>
 struct _IsSameType
 {

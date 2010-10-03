@@ -27,15 +27,6 @@
 
 namespace seqan {
 
-template <typename T>
-T _abs(T const & x)
-{
-    if (x < static_cast<T>(0))
-        return -x;
-    else
-        return x;
-}
-
 // ===========================================================================
 // Enums, Tags, Classes, Specializations
 // ===========================================================================

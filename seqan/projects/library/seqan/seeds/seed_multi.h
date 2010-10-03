@@ -395,7 +395,7 @@ _mergeTwoSeedsScore(Seed<TPosition, ChainedSeed> &firstSeed,
 			score1 -=(abs(rightDim0(firstSeed)-x1)+abs(rightDim1(firstSeed)-x2))*scoreGap(scoreMatrix); 
 		}
 		score1 += abs(endDiagonal(firstSeed) - dPos + qPos)*scoreGap(scoreMatrix);
-		score1 -=(max(abs(rightDim0(firstSeed)- qPos),abs(rightDim1(firstSeed)-dPos))+1)*scoreMatch(scoreMatrix);
+		score1 -=(_max(abs(rightDim0(firstSeed)- qPos),abs(rightDim1(firstSeed)-dPos))+1)*scoreMatch(scoreMatrix);
 
 		if ((rightDim0(firstSeed) < qPos) && (rightDim1(firstSeed) < dPos)) {
 			appendDiag(firstSeed,Triple<TPosition, TPosition, TPosition>(qPos, dPos, length));
@@ -463,7 +463,7 @@ _mergeTwoSeedsScore(Seed<TPosition, ChainedSeed> &firstSeed,
 			score1 -= (abs(rightDim0(firstSeed)-x1)+abs(rightDim1(firstSeed)-x2))*scoreGap(scoreMatrix); 
 		}
 		score1 += abs(endDiagonal(firstSeed) - startDiagonal(secondSeed))*scoreGap(scoreMatrix);
-		score1 -= (max(abs(rightDim0(firstSeed)- leftDim0(secondSeed)),abs(rightDim1(firstSeed)-leftDim1(secondSeed)))+1)*scoreMatch(scoreMatrix);
+		score1 -= (_max(abs(rightDim0(firstSeed)- leftDim0(secondSeed)),abs(rightDim1(firstSeed)-leftDim1(secondSeed)))+1)*scoreMatch(scoreMatrix);
 
 		if ((rightDim0(firstSeed) < leftDim0(secondSeed)) && (rightDim1(firstSeed) < leftDim1(secondSeed))) {
 			for (it = begin1; it != end2; it++){

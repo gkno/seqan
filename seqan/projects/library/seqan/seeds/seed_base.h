@@ -613,7 +613,7 @@ _mergeTwoSeedsScore(Seed<TPosition, TSpecSeed> &firstSeed,
 	SEQAN_CHECKPOINT
 	score1 += score2;
 	score1 += abs(endDiagonal(firstSeed)-startDiagonal(secondSeed))*scoreGap(scoreMatrix);
-	score1 -= (max(abs(rightDim0(firstSeed)-leftDim0(secondSeed)),abs(rightDim1(firstSeed)-leftDim1(secondSeed)))+1)*scoreMatch(scoreMatrix);
+	score1 -= (_max(abs(rightDim0(firstSeed)-leftDim0(secondSeed)),abs(rightDim1(firstSeed)-leftDim1(secondSeed)))+1)*scoreMatch(scoreMatrix);
 	if (rightDim0(secondSeed) > rightDim0(firstSeed)){
 		setRightDim0(firstSeed,rightDim0(secondSeed));
 		setRightDim1(firstSeed,rightDim1(secondSeed));
@@ -668,7 +668,7 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 		
 		score1 += score2;
 		score1 += abs(endDiagonal(firstSeed) - dlPos + qlPos)*scoreGap(scoreMatrix);
-		score1 -= (max(abs(rightDim0(firstSeed)- qlPos),abs(rightDim1(firstSeed)-dlPos))+1)*scoreMatch(scoreMatrix);
+		score1 -= (_max(abs(rightDim0(firstSeed)- qlPos),abs(rightDim1(firstSeed)-dlPos))+1)*scoreMatch(scoreMatrix);
 
 		setRightDim0(firstSeed,qrPos);
 		setRightDim1(firstSeed,drPos);
