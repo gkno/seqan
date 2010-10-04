@@ -328,9 +328,9 @@ double medianLevel(Iter<TIndex, VSTree<TSpec> > iter){
 		++vectorOccurences[numOccs];
 		totalOccs += numOccs;
 	}
-	
+
 	mediumTotalOccs = totalOccs / 2.0;
-	
+
 	map<unsigned,unsigned>::iterator iterMap;
 	for (iterMap = vectorOccurences.begin (); iterMap != vectorOccurences.end (); ++iterMap)
 	{
@@ -341,7 +341,7 @@ double medianLevel(Iter<TIndex, VSTree<TSpec> > iter){
 			break;
 		}
 	}
-	return median;	
+	return median;
 }
 
 template <typename TPercentage, typename TSize>
@@ -380,16 +380,16 @@ template <typename TFragmentStore, typename TCorrections>
 void applyReadErrorCorrections(
 	TFragmentStore &store,
 	TCorrections const &corrections)
-{	
+{
 	typedef typename Value<TCorrections>::Type TCorrection;
 	int readCount = length(corrections);
-	
+
 	// we have to make a temp-copy in order to use original (not corrected) reads for correction
 	StringSet<typename TFragmentStore::TReadSeq> originalReads;
 	resize(originalReads, length(store.readSeqStore), Exact());
 
 #ifdef FIONA_PARALLEL
-	#pragma omp parallel for
+	#pragma omp parallel for schedule(guided)
 #endif
 	for (int readId = 0; readId < readCount; ++readId)
 	{
@@ -398,7 +398,7 @@ void applyReadErrorCorrections(
 			originalReads[corr.correctReadId] = store.readSeqStore[corr.correctReadId];
 	}
 
-	
+
 #ifdef FIONA_PARALLEL
 	#pragma omp parallel for
 #endif
@@ -417,7 +417,7 @@ void applyReadErrorCorrections(
 		_dumpCorrection(store, corr, readId);
 #endif
 		append(store.readNameStore[readId], m.str());
-		
+
 		if (corr.indelLength == 0)
 			store.readSeqStore[readId][corr.errorPos] = originalReads[corr.correctReadId][corr.correctPos];
 #ifdef FIONA_ALLOWINDELS
@@ -425,7 +425,7 @@ void applyReadErrorCorrections(
 			erase(store.readSeqStore[readId], corr.errorPos, corr.errorPos + corr.indelLength);
 		else
 			insert(store.readSeqStore[readId], corr.errorPos, infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength));
-#endif		
+#endif
 #ifdef SEQAN_VERBOSE
 		cout << "corrected:";
 		for (unsigned i = 0; i < corr.correctPos; ++i)
@@ -437,18 +437,26 @@ void applyReadErrorCorrections(
 
 template <typename TObserved, typename TExpected, typename TStrictness>
 inline bool potentiallyErroneousNode(
-	TObserved observed, 
+	TObserved observed,
 	TExpected expected,
 	TStrictness strictness,
 	FionaPoisson const)
 {
 	// compare the cumulative poisson distribution with the p-value (strictness)
-	return pValue(observed, expected) <= strictness;
+//	return pValue(observed, expected) <= strictness;
+    double negExp = exp(-expected);
+    double pValue = 0.0;
+	double pow = 1.0;
+	double fact = 1.0;
+
+    for (TObserved i = 0; i <= observed && pValue <= strictness; ++i, fact *= i, pow *= expected)
+        pValue += pow * negExp / fact;
+	return pValue <= strictness;
 }
 
 template <typename TObserved, typename TExpected, typename TStrictness>
 inline bool potentiallyErroneousNode(
-	TObserved observed, 
+	TObserved observed,
 	TExpected expected,
 	TStrictness,
 	FionaExpected const)
@@ -490,18 +498,18 @@ void traverseAndSearchCorrections(
 		if (parentEdgeFirstChar(iter) != unknownChar &&
 			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, alg))
 			continue;
-		
+
 		//
 		//	get the id and position (suffix begin) for suspected nodes
 		//	for which we can find a more optimal correction
 		//
 		TOccs errorCandidates = getOccurrences(iter);
-					
+
 		/*copy the iterator for iterate over the siblings*/
 //		typename Iterator<TFionaIndex, TopDown<> >::Type iterSibling(container(iter), nodeUp(iter));
 		TTreeIterator iterSibling(iter);
 		goUp(iterSibling);
-		
+
 		//
 		//	potential reads for make the correction,
 		//	because at the same level, with the same prefix
@@ -510,7 +518,7 @@ void traverseAndSearchCorrections(
 		clear(correctCandidates);
 		if (!goDown(iterSibling))
 			SEQAN_ASSERT_FAIL("going up and down failed!?");
-		
+
 		// pick potentially correct reads
 		do
 		{
@@ -523,10 +531,10 @@ void traverseAndSearchCorrections(
 				appendValue(correctCandidates, getOccurrences(iterSibling));
 			}
 		} while (goRight(iterSibling));
-		
+
 		// continue if we haven't found any correct read
 		if (empty(correctCandidates)) continue;
-		
+
 		// make the comarison between the substrings(the suffix after the position of error
 		TOccsIterator errorRead = begin(errorCandidates, Standard());
 		TOccsIterator errorReadEnd = end(errorCandidates, Standard());
