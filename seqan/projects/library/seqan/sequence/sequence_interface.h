@@ -814,6 +814,16 @@ SEQAN_CHECKPOINT
 	move(value(me, pos), _value);
 } 
 
+template <typename T, typename TValue, typename TPos>
+inline void
+moveValue(T const & me,
+		  TPos pos, 
+		  TValue const & _value)
+{
+SEQAN_CHECKPOINT
+	move(value(me, pos), _value);
+} 
+
 //////////////////////////////////////////////////////////////////////////////
 // length
 //////////////////////////////////////////////////////////////////////////////
