@@ -356,7 +356,7 @@ struct FragmentStoreConfig
 ..remarks:Value type is @Class.AlignedReadStoreElement@.
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#annotationStore
-..summary:String that maps from $annoId$ to $<parentId, contigId, beginPos, endPos>$.
+..summary:String that maps from $annoId$ to $<contigId, typeId, beginPos, endPos, parentId, lastChildId, nextSiblingId, values>$.
 ..type:Typedef.FragmentStore#TAnnotationStore
 ..class:Class.FragmentStore
 .Memvar.FragmentStore#alignQualityStore
@@ -1381,15 +1381,14 @@ struct AlignedReadLayout
 
 /**
 .Function.layoutAlignment
-..summary:Calculates a visible layout of reads aligned to a contig.
+..summary:Calculates a visible layout of aligned reads.
 ..cat:Fragment Store
-..signature:layoutAlignment(layout, store, contigId)
+..signature:layoutAlignment(layout, store)
 ..param.layout:The resulting layout structure.
 ...type:Class.AlignedReadLayout
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
-..param.contigId:The $contigId$ of the affected contig.
-..remarks:This function layouts all reads aligned to a contig in rows from up to down reusing empty row spaces.
+..remarks:For each contig this function layouts all reads in rows from up to down reusing empty row spaces.
 ..see:Function.printAlignment
 */
 
@@ -1446,26 +1445,6 @@ void layoutAlignment(AlignedReadLayout &layout, FragmentStore<TSpec, TConfig> &s
 	}
 }
 
-/**
-.Function.printAlignment
-..summary:Prints a window of the visible layout of reads into a outstream.
-..cat:Fragment Store
-..signature:layoutAlignment(stream, layout, store, contigId, posBegin, posEnd, lineBegin, lineEnd)
-..param.stream:A C++ outstream, e.g. std::cout.
-..param.layout:A layout structure created by a previous call of @Function.layoutAlignment@.
-...type:Class.AlignedReadLayout
-..param.store:The fragment store.
-...type:Class.FragmentStore
-..param.contigId:The $contigId$ of the affected contig.
-..param.posBegin:Window begin position in gap-space.
-..param.posEnd:Window end position in gap-space.
-..param.lineBegin:Begin line of the window.
-..param.lineEnd:End line of the window.
-..remarks:The window coordinates ($beginPos$, ...) may be chosen bigger than the layout.
-The empty space is then filled with whitespaces.
-..see:Function.layoutAlignment
-*/
-
 template <typename TStream, typename TFormatTag, typename TContigGaps, typename TReadGaps, typename TAlignedRead, typename TLine>
 inline void _printRead(
 	TStream &stream, 
@@ -1489,6 +1468,29 @@ inline void _printContig(
 {
 	write(stream, contigGaps, "", format);
 }
+
+/**
+.Function.printAlignment
+..summary:Prints a window of the visible layout of reads into a outstream.
+..cat:Fragment Store
+..signature:printAlignment(stream, format, layout, store, contigId, posBegin, posEnd, lineBegin, lineEnd)
+..param.stream:A C++ outstream, e.g. std::cout.
+..param.layout:A layout structure created by a previous call of @Function.layoutAlignment@.
+...type:Class.AlignedReadLayout
+..param.format:Output format.
+...type:Tag.Raw
+...remarks: This tag is used for subsequent calls of @Function.write@ for contig and read gaps data structures.
+..param.store:The fragment store.
+...type:Class.FragmentStore
+..param.contigId:The $contigId$ of the affected contig.
+..param.posBegin:Window begin position in gap-space.
+..param.posEnd:Window end position in gap-space.
+..param.lineBegin:Begin line of the window.
+..param.lineEnd:End line of the window.
+..remarks:The window coordinates ($beginPos$, ...) may be chosen bigger than the layout.
+The empty space is then filled with whitespaces.
+..see:Function.layoutAlignment
+*/
 
 template <typename TStream, typename TFormatTag, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
 void printAlignment(
