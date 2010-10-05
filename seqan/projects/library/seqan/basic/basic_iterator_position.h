@@ -209,10 +209,16 @@ SEQAN_CHECKPOINT
 // moveValue
 //////////////////////////////////////////////////////////////////////////////
 
+// manual forwards
+template <typename T, typename TValue, typename TPos>
+inline void moveValue(T & me, TPos pos, TValue const & _value);
+template <typename T, typename TValue, typename TPos>
+inline void moveValue(T const & me, TPos pos, TValue const & _value);
+
 template <typename TContainer, typename TValue>
 inline void
 moveValue(Iter<TContainer, PositionIterator> & me,
-		  TValue _value)
+		  TValue const & _value)
 {
 SEQAN_CHECKPOINT
 	moveValue(container(me), position(me), _value);
@@ -220,7 +226,7 @@ SEQAN_CHECKPOINT
 template <typename TContainer, typename TValue>
 inline void
 moveValue(Iter<TContainer, PositionIterator> const & me,
-		  TValue _value)
+		  TValue const & _value)
 {
 SEQAN_CHECKPOINT
 	moveValue(container(me), position(me), _value);

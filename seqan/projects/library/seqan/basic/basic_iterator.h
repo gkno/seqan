@@ -328,7 +328,7 @@ SEQAN_CHECKPOINT
 */
 
 template <typename T>
-inline typename Container<T>::Type 
+inline typename Container<T>::Type &
 container(T me)
 {
 SEQAN_CHECKPOINT
