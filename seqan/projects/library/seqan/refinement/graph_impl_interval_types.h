@@ -195,6 +195,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.getCargo:
+..signature:getCargo(me)
 ..param.me:
 ...type:Class.IntervalAndCargo
 ..see:Function.cargo

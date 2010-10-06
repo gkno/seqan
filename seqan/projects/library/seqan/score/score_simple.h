@@ -137,7 +137,7 @@ scoreMatch(Score<TValue, TSpec> const & me) {
 ..summary:Set match score.
 ..signature:setScoreMatch(object, value)
 ..param.object.type:Spec.Simple Score
-..param.value.type:TValue
+..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
@@ -177,7 +177,7 @@ scoreMismatch(Score<TValue, TSpec> const & me) {
 ..summary:Set mismatch score.
 ..signature:setScoreMismatch(object, value)
 ..param.object.type:Spec.Simple Score
-..param.value.type:TValue
+..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
@@ -218,7 +218,7 @@ scoreGapExtend(Score<TValue, TSpec> const & me) {
 ..summary:Set gap extension score.
 ..signature:setScoreGapExtend(object, value)
 ..param.object.type:Spec.Simple Score
-..param.value.type:TValue
+..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
@@ -259,7 +259,7 @@ scoreGapOpen(Score<TValue, TSpec> const & me) {
 ..summary:Set gap opening score.
 ..signature:setScoreGapOpen(object, value)
 ..param.object.type:Spec.Simple Score
-..param.value.type:TValue
+..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
@@ -303,7 +303,7 @@ scoreGap(Score<TValue, TSpec> const & me) {
 ..summary:Set gap opening and extension score.
 ..signature:setScoreGap(object, value)
 ..param.object.type:Spec.Simple Score
-..param.value.type:TValue
+..param.value.type:nolink:TValue
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen

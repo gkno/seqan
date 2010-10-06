@@ -15,7 +15,9 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  $Id: markov_model.h 2009-03-10 utro@math.unipa.it srombo@deis.unical.it $
+  Author: utro@math.unipa.it
+  Author: srombo@deis.unical.it
+  Author: Jonathan Göke
  ==========================================================================*/
 
 //////////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,7 @@ with matrix calss matrices
 .Class.MarkovModel:
 ..summary:Gives a suitable representation of a Marcov Chain.
 ..cat:MarkovModel
-..signature:MarkovModel<TAlphabet,[TFloat, TSpec]>
+..signature:MarkovModel<TAlphabet[, TFloat, TSpec]>
 ..param.TAlphabet:The alphabet type
 ..param.TFloat:The type of the exploited arrays
 ..param.TSpec:The MarkovModel type
@@ -43,15 +45,15 @@ with matrix calss matrices
 ..class:Class.MarkovModel
 ..summary:The MarkovModel order
 ..type:nolink:int
-.Memvar.MarkovModel#transition:
+.Memvar.MarkovModel#transition
 ..class:Class.MarkovModel
-..summary:The transition matrix
-...type:Class.Matrix
-.Memvar.MarkovModel#stationaryDistribution:
+..summary:The transition matrix.
+..type:Class.Matrix
+.Memvar.MarkovModel#stationaryDistribution
 ..class:Class.MarkovModel
 ..summary:The vector of character distribution
 ..type:Class.String
-.Memfunc.MarkovModel#MarkovModel:
+.Memfunc.MarkovModel#MarkovModel
 ..class:Class.MarkovModel
 ..summary:Constructor
 ..signature:MarkovModel(order_)

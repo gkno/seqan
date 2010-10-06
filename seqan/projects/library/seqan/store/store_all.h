@@ -1013,7 +1013,7 @@ getRead(
 ..param.pairMatchId:Id of alignedRead pair.
 ...default:$INVALID_ID$, which corresponds to an unmated read.
 ..returns:The $alignedReadId$ of the aligned read.
-..remarks:This function appends a single aligned read to the @Memvar.FragmentStore#alignedReadId@.
+..remarks:This function appends a single aligned read to the @Memvar.FragmentStore#alignedReadStore@.
 Note that this really only adds a match.
 To generate a global alignment out of all of these matches, use @Function.convertMatchesToGlobalAlignment@.
 ..see:Function.appendRead
@@ -1478,7 +1478,7 @@ inline void _printContig(
 ..param.layout:A layout structure created by a previous call of @Function.layoutAlignment@.
 ...type:Class.AlignedReadLayout
 ..param.format:Output format.
-...type:Tag.Raw
+...type:Tag.File Format.tag.Raw
 ...remarks: This tag is used for subsequent calls of @Function.write@ for contig and read gaps data structures.
 ..param.store:The fragment store.
 ...type:Class.FragmentStore

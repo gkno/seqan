@@ -85,7 +85,7 @@ public:
 // Functions
 // ============================================================================
 
-/**
+/*
 .Function.setReadLength
 ..summary:Set the maximal read lenth for an ReadEvaluationResult<Illumina> object.  This adjusts the internal buffer sizes and has to be called before using the object.
 */
@@ -109,7 +109,7 @@ void setReadLength(ReadEvaluationResult<Illumina> & result, unsigned readLength)
     }
 }
 
-/**
+/*
 .Function.countBaseWithQualityAtPosition
 ..summary:Tally the given (quality, base, position) combination in the EvaluationResult object.
 */
@@ -127,7 +127,7 @@ inline void countBaseWithQualityAtPosition(ReadEvaluationResult<Illumina> & resu
     result.qualityCountsPerPositionAndBase[b][quality][position] += 1;
 }
 
-/**
+/*
 .Function.performReadEvaluation
 ..summary:Perform an evaluation of the read base counts and qualities.
 */
@@ -143,7 +143,7 @@ void performReadEvaluation(ReadEvaluationResult<Illumina> & result, TFragmentSto
     }
 }
 
-/**
+/*
 .Function.printReadEvaluationResult<Illumina>s
 ..summary:Print statistical metrics about the read evaluation results.
 */
@@ -233,7 +233,7 @@ void printReadEvaluationResults(ReadEvaluationResult<Illumina> const & result)
     }
 }
 
-/**
+/*
 .Function.setReadLength
 ..summary:Set the maximal read lenth for an AlignmentEvaluationResult<Illumina> object.  This adjusts the internal buffer sizes and has to be called before using the object.
 */

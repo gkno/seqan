@@ -22,7 +22,7 @@ This scoring scheme is the default for @Spec.Simple Score@.
 The functions @Function.scoreMatch@ and @Function.scoreMismatch@ access these two values.
 ..table:Scoring matrices|These scoring schemes store a score value for each pair of characters. 
 This value can be accessed using @Function.score@.
-Examples for this kind of scoring scheme are @Spec.Pam@ and @Shortcut.Blosum62@. 
+Examples for this kind of scoring scheme are @Shortcut.Pam120@ and @Shortcut.Blosum62@. 
 The class @Spec.Score Matrix@ can be used to store arbitrary scoring matrices.
 
 ..section:# Gap Scores

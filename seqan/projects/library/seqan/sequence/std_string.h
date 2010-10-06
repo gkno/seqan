@@ -31,10 +31,16 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
+/**
+.Adaption."std::basic_string"
+..summary:Adaption for STL strings.
+ */
+
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
 
+    
 ///.Metafunction.IsContiguous.param.T.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct IsContiguous< ::std::basic_string<TChar, TCharTraits, TAlloc> >

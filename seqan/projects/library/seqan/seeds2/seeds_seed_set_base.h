@@ -132,7 +132,7 @@ struct DefaultSeedSetConfigScore
 .Class.SeedSet:
 ..summary:Handles a set of seeds with local chaining on adding seeds.
 ..cat:Seed Handling
-..signature:SeedSet<TSeedSpec, TScored, TSpec[, TSeedSetConfig]>
+..signature:SeedSet<TSeedSpec, TScored, TSpec[, TSeedConfig]>
 ..param.TSeedSpec:Specialization of the seed to use.
 ..param.TScored:Either UnScored or a seed set scoring scheme specification.
 ..param.TSpec:Specialization of the seed set.
@@ -190,7 +190,7 @@ class SeedSet;
 .Function.end.param.object.type:Class.SeedSet
 .Function.length.param.object.type:Class.SeedSet
 .Function.front.param.object.type:Class.SeedSet
-.Function.back.param.object.type:Class.SeedSet
+.Function.back.param.container.type:Class.SeedSet
  */
 // TODO(holtgrew): dddoc {begin,end,length,front,back}All(T)
 

@@ -720,9 +720,10 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 
 //____________________________________________________________________________
 	
-/**.Function.reverse:
+/**
+.Function.reverse:
 ..cat:Index
-..summary:Reverses a given shape.
+..summary:Reverses an object.
 ..signature:reverse(shape)
 ..param.shape:Shape object.
 ...type:Spec.SimpleShape

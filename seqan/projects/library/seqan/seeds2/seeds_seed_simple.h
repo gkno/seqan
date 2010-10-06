@@ -199,7 +199,7 @@ getBeginDim1(Seed<Simple, TConfig> const & seed)
 ..cat:Seed Handling
 ..signature:setBeginDim1(seed, start)
 ..param.seed:The seed whose start position should be updated.
-...type:Spec.SimpleType
+...type:Spec.SimpleSeed
 ..param.start:The database position where the seed should start.
 ..include:seqan/seeds.h
 */
@@ -245,7 +245,7 @@ setEndDim0(Seed<Simple, TConfig> & seed,
 ..cat:Seed Handling
 ..signature:setEndDim1(seed, end)
 ..param.seed:The seed whose end position should be updated.
-...type:Spec.Simple Seed
+...type:Spec.SimpleSeed
 ..param.end:The database position where the seed should end.
 ..include:seqan/seeds.h
 */

@@ -56,7 +56,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // DFI - The Deferred Frequency Index
 
 /**
-.Spec.DFI:
+.Spec.Index_DFI:
 ..summary:The Deferred Frequency Index (see Weese and Schulz, "Efficient string mining under constraints via the
 deferred frequency index").
 ..cat:Index

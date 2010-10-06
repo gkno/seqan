@@ -1466,7 +1466,6 @@ swiftInfix(TSwiftHit const &hit, TText &text)
 
 ///.Function.infix.remarks:For finders or patterns of filtering algorithms (e.g. @Spec.Swift@) the returned infix is a potential match.
 ///.Function.infix.param.finder.type:Spec.Swift
-///.Function.infix.param.pattern.type:Spec.Swift
 
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
@@ -1801,8 +1800,8 @@ find(
 ..param.finder:A SWIFT finder.
 ..param.pattern: A SWIFT pattern.
 ..param.errorRate:Error rate that is allowed between reads and reference.
- Schould be the same in as in @Function.windowFindNext@.
-...type:Class.Double
+ Should be the same in as in @Function.windowFindNext@.
+...type:nolink:double
 */
 template <typename THaystack, typename TIndex, typename TSpec>
 inline bool 

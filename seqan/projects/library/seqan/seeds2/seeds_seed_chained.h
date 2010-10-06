@@ -239,7 +239,7 @@ length(Seed<ChainedSeed, TConfig> const & seed)
 ..param.seed: The seed to which the diagonal should be added.
 ...type:Spec.ChainedSeed
 ..param.diag: The diagonal to add.
-...type:Class.SeedDiagonal.
+...type:Class.SeedDiagonal
 ...remarks: A diagonal consists of three values: 1: start in 1. sequence, 2: start in 2. sequence, 3: length of match
 */
 template <typename TConfig>
@@ -315,7 +315,7 @@ front(Seed<ChainedSeed, TConfig> const & seed)
 }
 
 /**
-.Function.back.param.object.type:Spec.ChainedSeed
+.Function.back.param.container.type:Spec.ChainedSeed
 */
 template <typename TConfig>
 inline typename Reference<Seed<ChainedSeed, TConfig> >::Type

@@ -29,7 +29,8 @@ namespace seqan {
 // ============================================================================
 
 /**
-.Spec.Journaled String:Journaled versions of arbitrary underlying string.
+.Spec.Journaled String
+..summary:Journaled versions of arbitrary underlying string.
 ..signature:String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
  */
 
@@ -85,7 +86,7 @@ public:
 
 /**
 .Metafunction.Host:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Host<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -101,7 +102,8 @@ struct Host<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
 
 /**
 .Metafunction.InsertionBuffer:
-..param.TValue:Spec.Journaled String
+..summary:Type of the insertion buffer of the Journaled String.
+..param.T:Spec.Journaled String
  */
 template <typename T>
 struct InsertionBuffer;
@@ -120,7 +122,7 @@ struct InsertionBuffer<String<TValue, Journaled<THostSpec, TJournalSpec, TBuffer
 
 /**
 .Metafunction.Size:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Size<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -134,7 +136,7 @@ struct Size<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
 
 /**
 .Metafunction.Position:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -148,7 +150,7 @@ struct Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 
 /**
 .Metafunction.Value:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -164,7 +166,7 @@ struct Value<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > co
 
 /**
 .Metafunction.GetValue:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -180,7 +182,7 @@ struct GetValue<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 
 /**
 .Metafunction.Reference:
-..param.TValue:Spec.Journaled String
+..param.T:Spec.Journaled String
  */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
@@ -195,8 +197,9 @@ struct Reference<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> 
 };
 
 /**
-.Metafunction.JournalType:
-..param.TValue:Spec.Journaled String
+.Metafunction.JournalType
+..summary:Metafunction for returning the type of the journal of a Journaled String.
+..param.T:Spec.Journaled String
  */
 template <typename T>
 struct JournalType;

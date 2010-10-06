@@ -31,6 +31,11 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
+/**
+.Adaption."std::list"
+..summary:Adaption for STL list objects.
+*/
+    
 // ===========================================================================
 // Metafunctions
 // ===========================================================================
@@ -121,7 +126,12 @@ template <typename TValue, typename TAlloc>
 struct Size< ::std::list<TValue, TAlloc> const>
         : Size< ::std::list<TValue, TAlloc> > {};
 
-///.Metafunction.StdContainerIterator.param.T.type:Adaption.std::list
+/**
+.Metafunction.StdContainerIterator
+..summary:Returns type of the STL container iterator.
+..signature:StdContainerIterator<T>::Type
+..param.T.type:Adaption.std::list
+*/
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
 {
@@ -140,7 +150,7 @@ struct StdContainerIterator< ::std::list<TValue, TAlloc> const>
 // Functions
 // ===========================================================================
 
-///.Function.begin.param.T.type:Adaption.std::list
+///.Function.begin.param.object.type:Adaption.std::list
 template<typename TValue>
 inline
 typename Iterator<std::list<TValue>, Standard>::Type
@@ -161,7 +171,7 @@ begin(std::list<TValue> const & list,
 	return list.begin();
 }
 
-///.Function.end.param.T.type:Adaption.std::list
+///.Function.end.param.object.type:Adaption.std::list
 template<typename TValue>
 inline
 typename Iterator<std::list<TValue>, Standard>::Type
@@ -182,7 +192,7 @@ end(std::list<TValue> const & list,
 	return list.end();
 }
 
-///.Function.front.param.container.type:Adaption.std::list
+///.Function.Container#front.param.container.type:Adaption.std::list
 template <typename TValue>
 inline typename Reference<std::list<TValue> >::Type
 front(std::list<TValue> & list)
@@ -216,7 +226,7 @@ back(std::list<TValue> const & list)
     return list.back();
 }
 
-///.Function.length.param.container.type:Adaption.std::list
+///.Function.length.param.object.type:Adaption.std::list
 template <typename TValue>
 inline typename Size<std::list<TValue> >::Type
 length(std::list<TValue> & list)
@@ -250,7 +260,7 @@ prependValue(std::list<T> & list,
 	list.push_front(value);
 }
 
-///.Function.appendValue.param.container.type:Adaption.std::list
+///.Function.appendValue.param.target.type:Adaption.std::list
 template <typename T, typename T2>
 inline void
 appendValue(std::list<T> & list, 
@@ -260,7 +270,7 @@ appendValue(std::list<T> & list,
 	list.push_back(value);
 }
 
-///.Function.clear.param.container.type:Adaption.std::list
+///.Function.clear.param.object.type:Adaption.std::list
 template <typename T>
 inline void
 clear(std::list<T> & list)
@@ -271,7 +281,7 @@ clear(std::list<T> & list)
 
 /**
 .Function.reverse:
-..summary:Reverse the values in a container.
+..cat:Containers
 ..signature:reverse(container)
 ..param.container:The container whose elements to reverse.
 ...type:Concept.Container

@@ -29,8 +29,8 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-/*
-.Class.SeedDiagonal:
+/**
+.Class.SeedDiagonal
 ..summary:Store the information about a seed segment.
 ..signature:SeedDiagonal<TPosition, TSize>
 ..cat:Seed Handling

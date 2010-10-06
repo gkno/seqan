@@ -59,10 +59,10 @@ The following table lists the @glos:specializations@ of @Class.Pattern@ that can
 ..table:@Spec.Horspool@|A common and rather simple algorithm that uses a bad character rule to speed up the search.
 Works very nice in practice for most applications, though the worst case running time is $O(n\squared)$.
 Not optimal for small alphabets or very long patterns.
-..table:@Class.BFAM@|The Backward Oracle Matching algorithm that uses a special automaton to scan through the @glos:haystack@.
+..table:@Spec.BFAM@|The Backward Oracle Matching algorithm that uses a special automaton to scan through the @glos:haystack@.
 A good choice for long patterns.
 ..table:@Spec.BndmAlgo@|The Backward Nondeterministic DAWG (Directed Acyclic Word Graph) Matching algorithm uses 
-another special automaton to scan through the @glos:haystack@. An alternative to @Class.BFAM@ for long patterns.
+another special automaton to scan through the @glos:haystack@. An alternative to @Spec.BFAM@ for long patterns.
 ..table:@Spec.ShiftOr@|An algorithm that uses bit parallelism. 
 Should only be used for patterns that are not longer than a machine word, i.e. 32 or 64 characters.
 Even for small patterns, it is outperformed by @Spec.Horspool@ for alphabets larger than @Spec.Dna@.

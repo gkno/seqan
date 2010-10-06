@@ -165,7 +165,7 @@ SEQAN_CHECKPOINT
 
 
 /**
-..tag.ComputeCenter
+..Tag.ComputeCenter
 ...summary:For intervals that are more or less uniformly distributed in the value range, using the ComputeCenter tag may result in a more balanced tree compared to using the RandomCenter tag.
 ...signature:ComputeCenter
 ...remarks:center = minbegin + (maxend-minbegin)/2
@@ -176,7 +176,7 @@ typedef Tag<_TagComputeCenter> const ComputeCenter;
 
 
 /**
-..tag.RandomCenter
+..Tag.RandomCenter
 ...summary:The RandomCenter tag guarantees that each node contains at least one interval, therefore the size of the tree is limited by the nummer of intervals. This may lead to an unbalanced tree, but is the most space-efficient and in practice the fastest method.
 ...signature:RandomCenter
 ...remarks:center = center of random interval
@@ -219,7 +219,7 @@ SEQAN_CHECKPOINT
 ..param.intervals:Container of intervals.
 ...type:Class.String
 ...remark:Should be a String of @Class.Interval@ or @Class.IntervalAndCargo@ objects.
-..param.tag:Tag for tree construction method. @tag.RandomCenter@ or @tag.ComputeCenter@
+..param.tag:Tag for tree construction method. @Tag.IntervalTree Centers.Tag.RandomCenter@ or @Tag.IntervalTree Centers.@Tag.ComputeCenter@
 ..remark:center of root node is computed by _calcIntervalTreeRootCenter
 ..include:seqan/refinement.h
  */
