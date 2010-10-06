@@ -23,11 +23,14 @@
 #ifndef SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
 #define SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
 
-namespace seqan
+#include<seqan/align.h>
+#include <seqan/index.h>
+
+namespace seqan//SEQAN_NAMESPACE_MAIN
 {
-
-unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigned int ncol);
-
+/*
+with matrix calss matrices
+*/
 /**
 .Class.MarkovModel:
 ..summary:Gives a suitable representation of a Marcov Chain.
@@ -43,7 +46,7 @@ unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigne
 .Memvar.MarkovModel#transition:
 ..class:Class.MarkovModel
 ..summary:The transition matrix
-..type:Class.String
+...type:Class.Matrix
 .Memvar.MarkovModel#stationaryDistribution:
 ..class:Class.MarkovModel
 ..summary:The vector of character distribution
@@ -66,7 +69,7 @@ unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigne
 ..signature:set(iTransition)
 ..signature:set(iTransition, iStationaryDistribution)
 ..param.iTransition:The transition matrix.
-...type:Class.String
+...type:Class.Matrix
 ..param.iStationaryDistribution:The vector of character distributions.
 ...type:Class.String
 
@@ -98,28 +101,43 @@ class MarkovModel
 {
 
 public:
-	typedef String<TFloat> TMatrix;
+
+	//Definition of matrix types, could be set to two dimensional as soon as implemented
+	typedef Matrix<TFloat, 2> TMatrix;
+	//typedef String<TFloat> TMatrix;
 	typedef String<TFloat> TVector;
 
 	unsigned int order;
 	TMatrix transition;
 	TVector stationaryDistribution;
 	//The following matrices are only for internal use of the class
-	TMatrix _q;
-	TMatrix _qppp;
-	TMatrix _qppqpp;
+	TMatrix _q;			//QPP^(morder-1)
+	TMatrix _qppp;		//QPP^(morder-1)
+	TMatrix _qppqpp;	//QPPQP^(morder-1)
 
 
-	MarkovModel(unsigned int order_) :
-		order(order_)
+	MarkovModel(unsigned int order_):
+	order(order_)
 	{
-		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
-		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
-		unsigned int const matrix_size = column_size * column_size;
 
-		clear(transition);
+		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
+		//unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
+		unsigned int column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
+
+		//Special case of order 0 marko model:
+		//A Bernoulli scheme is a special case of a Markov chain where the transition probability matrix has identical rows, which means that the next state is even independent of the current state (in addition to being independent of the past states).
+		if(order==0)
+		{
+			column_size=alphabet_size;
+
+		}
+		//resize the matrix
+		setLength(transition, 0, column_size);
+		setLength(transition, 1, column_size);
+
+		fill(transition,(TFloat) 0);
+
 		clear(stationaryDistribution);
-		fill(transition, matrix_size, 0);
 		resize(stationaryDistribution, column_size);
 	}
 
@@ -127,15 +145,32 @@ public:
 	///////////////////////////////////////////////////////////////
 	///// BUILD THE MODEL
 	///////////////////////////////////////////////////////////////
+	typedef String<Dna> TText;
+	typedef Size<TText>::Type TSize;
+	typedef StringSet<TText > TStringSet;
 
-	template <typename TStringSet>
-	void build(TStringSet & strings)
+	//template <typename TAlphabet>
+	void build(StringSet<String<TAlphabet> > const &strings)
 	{
+
+		typedef String<TAlphabet> TText;
+		//typedef Size<TText>::Type TSize;
+		typedef StringSet<TText > TStringSet;
+
 		typedef Index<TStringSet, Index_QGram<SimpleShape> > TIndex;
 		typedef typename Fibre<TIndex, QGram_Dir>::Type TDir;
 		typedef typename Iterator<TDir, Standard>::Type TIter;
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
-		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
+		//unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
+		unsigned int column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
+
+		//Special case of order 0 marko model:
+		//A Bernoulli scheme is a special case of a Markov chain where the transition probability matrix has identical rows, which means that the next state is even independent of the current state (in addition to being independent of the past states).
+		if(order==0)
+		{
+			column_size=alphabet_size;
+
+		}
 
 		TIndex ind(strings);
 		resize(indexShape(ind), order + 1);
@@ -144,40 +179,83 @@ public:
 		TIter itBegin = begin(indexDir(ind), Standard());
 		TIter itEnd = end(indexDir(ind), Standard()) - 1;
 
+		//Frequency of all q-grams for a markov model of order q-1 to calculate transition probabilitiesof (q-1) gram to next (q-1)gram
 		String<TAlphabet> qgram;
 		Shape<TAlphabet, SimpleShape> orderShape;
 		resize(orderShape, order);
-		for(TIter itA = itBegin; itA != itEnd; ++itA) {
-			unhash(qgram, itA - itBegin, weight(indexShape(ind)));
-			value(transition, hash(orderShape, begin(qgram)) * column_size + hash(orderShape, begin(qgram) + 1)) = *(itA+1) - *itA;
+		if(order==0)
+		{
+			resize(orderShape, order+1);
 		}
 
-		//normalization
-		for(unsigned int row = 0; row < column_size;++row) {
-		TFloat sum = 0;
-		for(unsigned int col = 0; col < column_size;++col) {
-			sum += value(transition, (row * column_size) + col);
+		//count transition of sequences according to model order
+		for(TIter itA = itBegin; itA != itEnd; ++itA)
+		{
+			unhash(qgram, itA - itBegin, weight(indexShape(ind)));
+			//std::cout<<"\n"<<qgram<<"\n"<<(*(itA+1) - *itA)<<"\n"<<hash(orderShape, begin(qgram));
+			//old for the array: value(transition, hash(orderShape, begin(qgram)) * column_size + hash(orderShape, begin(qgram) + 1)) = *(itA+1) - *itA;
+
+			if(order==0)
+			{
+				for(unsigned int row=0;row<column_size;++row)
+				{
+					value(transition, row,hash(orderShape, begin(qgram))) = *(itA+1) - *itA;
+
+				}
+			}
+			else
+			{
+				//new for the matrix
+				value(transition, hash(orderShape, begin(qgram)),hash(orderShape, begin(qgram) + 1)) = *(itA+1) - *itA;
+
+			}
 		}
-		if (sum != 0) {
-				for(unsigned int col = 0; col < column_size;++col) {
-					value(transition, row * column_size + col) /= sum;
+		//std::cout<<"\n"<<transition<<"\n\n";
+
+		//normalization, rows have to sum up to 1
+		for(unsigned int row = 0; row < column_size;++row)
+		{
+			TFloat sum = 0;
+			for(unsigned int col = 0; col < column_size;++col)
+			{
+				sum += value(transition, row,col);	//sum of the rows
+			}
+			if (sum != 0)
+			{
+				for(unsigned int col = 0; col < column_size;++col)
+				{
+					value(transition, row, col) /= sum;	//normalize by dividing by sum of rows
 				}
 			}
 		}
-
-		String<TFloat> temp = transition;
-		//initialize a variable t representing a good trashold to extimate the vector
-		//after multiplying e times the transition matrix with itself
+//std::cout<<transition<<"\n\n";
+		//Special case of order 0 marko model:
+		//A Bernoulli scheme is a special case of a Markov chain where the transition probability matrix has identical rows, which means that the next state is even independent of the current state (in addition to being independent of the past states).
+		if(order==0)
+		{
+			order=1;
+		}
+		//----Calculation of stationary Distribution-----
+		TMatrix temp = transition;
+		//initialise a variable t representing a good threshold to estimate the vector
+		//after multiplying t times the transition matrix with itself
 		unsigned int t=6;
-		for (unsigned int i=0; i<t; i++){
-			temp=_matricialProduct(temp,temp,column_size);
+		for (unsigned int i=0; i<t; i++)
+		{
+			temp=temp*temp;
 		}
 
 		for (unsigned int i=0; i<column_size; i++){
-			value(stationaryDistribution,i)=value(temp, i);
-		}
+			value(stationaryDistribution,i)=value(temp, 0,i);
 
-		_computeAuxiliaryMatrices();
+		}
+		//std::cout<<temp<<"\n\n";
+
+		//for(unsigned int i=0;i<length(stationaryDistribution);++i){std::cout<<stationaryDistribution[i]<<"\t";}
+		//!is commented since I dont use it and it makes everything very slow for k>3 or 4 
+		//!call ensureAuxMatrices(markovModel);
+		//_computeAuxiliaryMatrices();
+
 
 	}
 
@@ -188,76 +266,75 @@ public:
 
 
 	template <typename TString, typename TSetSpec>
-	TFloat emittedProbability(StringSet<TString, TSetSpec> const &string)
+	TFloat emittedProbability(StringSet<TString, TSetSpec > const &stringSet)
 	{
 		TFloat p = 0;
 
-		for(unsigned int i=0; i<length(string); i++)
+		for(unsigned int i=0; i<length(stringSet); i++)
 		{
-			p+= emittedProbability(getValueById(string, i));
+			p+= emittedProbability(stringSet[i]);
 		}
 
 		return p;
 	}
-
 
 	template <typename TString>
     TFloat emittedProbability(TString const &string)
 	{
 		Shape<TAlphabet, SimpleShape> orderShape;
 		resize(orderShape, order);
-		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
-		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
 
 		int row = hash(orderShape,begin(string));
 		TFloat p = value(stationaryDistribution,row);
 
-		for(unsigned int i=1; i<length(string)-order+1; i++)
+		for(unsigned int i=1; i<(length(string)-order+1); i++)
 		{
 			int column=hash(orderShape,begin(string)+i);
-			p*=value(transition,_getStringIndexFromMatrix(row,column,column_size));
+			p*=value(transition,row,column);
+
 			row = column;
 		}
 
 		return p;
 	}
 
+
 	///////////////////////////////////////////////////////////////
 	///// SET THE MODEL
 	///////////////////////////////////////////////////////////////
 
 
-	void set(String<TFloat> &iTransition)
+	void set(Matrix<TFloat,2> &iTransition)
 	{
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
 		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
 
 		transition = iTransition;
 
-		String<TFloat> temp = transition;
-		//initialize a variable t representing a good trashold to extimate the vector
+		Matrix<TFloat,2> temp = transition;
+		//initialise a variable t representing a good threshold to estimate the vector
 		//after multiplying e times the transition matrix with itself
 		unsigned int t=6;
 		for (unsigned int i=0; i<t; i++){
-			temp=_matricialProduct(temp,temp,column_size);
+			temp=temp*temp;
 		}
 
 		for (unsigned int i=0; i<column_size; i++){
-			value(stationaryDistribution,i)=value(temp, i);
+			value(stationaryDistribution,i)=value(temp, 0,i);	//Set stationary distribution to row of transition^6
 		}
 
-		_computeAuxiliaryMatrices();
+		//_computeAuxiliaryMatrices();
 	}
 
 
 
-	void set(String<TFloat> &iTransition, String<TFloat> &iStationaryDistribution)
+	void set(Matrix<TFloat,2> &iTransition, String<TFloat> &iStationaryDistribution)
 	{
 		transition = iTransition;
 
 		stationaryDistribution = iStationaryDistribution;
 
-		_computeAuxiliaryMatrices();
+		//_computeAuxiliaryMatrices();
 	}
 
 
@@ -268,13 +345,14 @@ public:
 
 	void write(FILE *file)
 	{
+		ensureAuxMatrices(*this);
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
 		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
 
 		//write the transition matrix
 		for(unsigned int row=0; row<column_size; row++){
 			for(unsigned int col=0; col<column_size; col++){
-			  fprintf(file,"%f ",value(transition, _getStringIndexFromMatrix(row,col,column_size)));
+			  fprintf(file,"%f ",value(transition, row,col));
 			}
 			fprintf(file,"\n");
 		}
@@ -288,21 +366,21 @@ public:
 			//write the auxiliary matrix
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-					fprintf(file,"%f ",value(_q, _getStringIndexFromMatrix(row,col,column_size)));
+					fprintf(file,"%f ",value(_q, row,col));
 				}
 				fprintf(file,"\n");
 			}
 
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-				  fprintf(file,"%f ",value(_qppp, _getStringIndexFromMatrix(row,col,column_size)));
+				  fprintf(file,"%f ",value(_qppp,row,col));
 				}
 				fprintf(file,"\n");
 			}
 
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-				fprintf(file,"%f ",value(_qppqpp, _getStringIndexFromMatrix(row,col,column_size)));
+				fprintf(file,"%f ",value(_qppqpp, row,col));
 				}
 				fprintf(file,"\n");
 			}
@@ -318,50 +396,59 @@ public:
 	{
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
 		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
-		unsigned int const matrix_size = column_size * column_size;
 
 		//read the transition matrix
-		for(unsigned int row=0; row<column_size; row++){
-			for(unsigned int col=0; col<column_size; col++){
-			  fscanf(file,"%lf ", & value(transition, _getStringIndexFromMatrix(row,col,column_size)));
+		for(unsigned int row=0; row<column_size; row++)
+		{
+			for(unsigned int col=0; col<column_size; col++)
+			{
+			  fscanf(file,"%lf ", & value(transition, row,col));
 			}
 			fscanf(file,"\n");
 		}
 		//read the stationary distribution vector
-		for(unsigned int row=0; row<column_size; row++){
+		for(unsigned int row=0; row<column_size; row++)
+		{
 			  fscanf(file,"%lf ",&value(stationaryDistribution, row));
-			}
+		}
 		fscanf(file,"\n");
 
-		if (!feof(file)){
-
-			resize(_q, matrix_size);
+		if (!feof(file))
+		{
+			setLength(_q, 0, column_size);
+			setLength(_q, 1, column_size);
+			resize(_q);
 
 			//read the auxiliary matrix
-			for(unsigned int row=0; row<column_size; row++){
-				for(unsigned int col=0; col<column_size; col++){
-					fscanf(file,"%lf ",&value(_q, _getStringIndexFromMatrix(row,col,column_size)));
+			for(unsigned int row=0; row<column_size; row++)
+			{
+				for(unsigned int col=0; col<column_size; col++)
+				{
+					fscanf(file,"%lf ",&value(_q, row,col));
 				}
 				fscanf(file,"\n");
 			}
-
-			resize(_qppp, matrix_size);
+			setLength(_qppp, 0, column_size);
+			setLength(_qppp, 1, column_size);
+			resize(_qppp);
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-				  fscanf(file,"%lf ",&value(_qppp, _getStringIndexFromMatrix(row,col,column_size)));
+				  fscanf(file,"%lf ",&value(_qppp, row,col));
 				}
 				fscanf(file,"\n");
 			}
-
-			resize(_qppqpp, matrix_size);
+			setLength(_qppqpp, 0, column_size);
+			setLength(_qppqpp, 1, column_size);
+			resize(_qppqpp);
 			for(unsigned int row=0; row<column_size; row++){
 				for(unsigned int col=0; col<column_size; col++){
-					fscanf(file,"%lf ",&value(_qppqpp, _getStringIndexFromMatrix(row,col,column_size)));
+					fscanf(file,"%lf ",&value(_qppqpp, row,col));
 				}
 				fscanf(file,"\n");
 			}
 		}
 	}
+
 
 	/////////////////////////////////////////////////////////////////////////////
 	///// COMPUTE THE AUXILIARY MATRICES FOR THE VARIANCE AND Z-SCORE COMPUTATION
@@ -376,199 +463,49 @@ public:
 
 	void _computeAuxiliaryMatrices()
 	{
-
-		clear(_q);
-		clear(_qppp);
-		clear(_qppqpp);
+	//std::cout<<"auxMat\n";
+		//clear(_q);
+		//clear(_qppp);
+		//clear(_qppqpp);
 
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
 		unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
-		unsigned int const matrix_size = column_size * column_size;
 		TMatrix I;
 		TMatrix Ip;
-		fill(Ip,matrix_size,0);
-		fill(I,matrix_size,0);
+
+		//resize the matrices
+		setLength(I, 0, column_size);
+		setLength(I, 1, column_size);
+		fill(I, 0.0);
+
+		setLength(Ip, 0, column_size);
+		setLength(Ip, 1, column_size);
+		fill(Ip, 0.0);
 
 		for(unsigned int i=0; i<column_size; i++){
-			value(I,_getStringIndexFromMatrix(i,i,column_size))=1;
+			value(I,i,i)=1.0;
 			 for (unsigned int j=0; j<column_size; j++)
-			    value(Ip,_getStringIndexFromMatrix(i,j,column_size))=value(stationaryDistribution,j);
+			    value(Ip,i,j)=value(stationaryDistribution,j);
 		}
 
 
+		_q=transition-I;
+		_q=_q+Ip;
+		_q=_computeInverseMatrix(_q);//works for simple non singular matrices, others not checked
+		//original code: _q=_computeInverseMatrix(_matricialSum(_matricialDifference(transition, I), Ip));
 
-		_q=_computeInverseMatrix(_matricialSum(_matricialDifference(transition, I, column_size), Ip, column_size), column_size);
-
-		_qppp=_matricialProduct(_q,transition,column_size);
-		_qppqpp = _matricialProduct(_matricialProduct(_qppp,transition, column_size),_q,column_size);
-		for(unsigned int i=1; i<order; i++){
-			_qppp=_matricialProduct(_qppp,transition,column_size);
-			_qppqpp=_matricialProduct(_qppqpp,transition,column_size);
+		_qppp=_q*transition;
+		_qppqpp = _qppp*transition;
+		_qppqpp = _qppqpp*_q;
+		for(unsigned int i=1; i<order; i++)
+		{
+			_qppp=_qppp*transition;
+			_qppqpp=_qppqpp*transition;
 		}
-
 	}
+
 
 };
-
-
-//CODE TO MANAGE MATRICES
-
-/*
-.Function._getMatrixRowFromString:
-..summary:Gets the row index of a matrix stored as a string, given a string position
-..signature:_getMatrixRowFromString(stringPosition, ncol)
-..param.stringPosition:The string position.
-...type:nolink:unsigned int
-..param.ncol:The number of columns of the matrix.
-...type:nolink:unsigned int
-..returns:The matrix row index.
-*/
-
- unsigned int _getMatrixRowFromString(unsigned int stringPosition, unsigned int ncol)
-{
-	return (int)(stringPosition/ncol);
-}
-
-
-/*
-.Function._getMatrixColumnFromString:
-..summary:Gets the column index of a matrix stored as a string, given a string position
-..signature:_getMatrixRowFromString(stringPosition, ncol)
-..param.stringPosition:The string position.
-...type:nolink:unsigned int
-..param.ncol:The number of columns of the matrix.
-...type:nolink:unsigned int
-..returns:The matrix row index.
-*/
-
- unsigned int _getMatrixColumnFromString(unsigned int stringPosition, unsigned int ncol)
-{
-	unsigned int row_index=_getMatrixRowFromString(stringPosition, ncol);
-	return (int)(stringPosition-(ncol*row_index));
-}
-
-
-/*
-.Function._getStringIndexFromMatrix:
-..summary:Gets the string index of a matrix stored as a string, given the row and column indexes
-..signature:_getStringIndexFromMatrix(ri, ci, ncol)
-..param.ri:The row index.
-...type:nolink:unsigned int
-..param.ci:The column index.
-...type:nolink:unsigned int
-..param.ncol:The number of columns of the matrix.
-...type:nolink:unsigned int
-..returns:The string index of the matrix.
-*/
-
- unsigned int _getStringIndexFromMatrix(unsigned int ri, unsigned int ci, unsigned int ncol)
-{
-	return ((ri*ncol)+ci);
-}
-
-
-/*
-.Function._matricialProduct:
-..summary:Computes the matricial product between two matrixes
-..signature:_matricialProduct(matrix1,matrix2,n)
-..param.matrix1:The first matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.matrix2:The second matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.n:The number of rows and columns of the first and of the second matrix, resp..
-...type:nolink:unsigned int
-..returns:The products of the two matrices (another matrix).
-..remarks:The number of rows of matrix1 must be equal to the number of columns of matrix2.
-*/
-
-template <typename TAlphabet, typename TSpec1, typename TSpec2>
-String<TAlphabet> _matricialProduct(String<TAlphabet, TSpec1>& matrix1,
-					  String<TAlphabet, TSpec2>& matrix2, unsigned int n)
-{
-	//SEQAN_ASSERT(((length(matrix1)%n)==0)&&((length(matrix2)%n)==0));
-	unsigned int nrow1=length(matrix1)/n;
-	unsigned int ncol2=length(matrix2)/n;
-	String<TAlphabet> result;
-	unsigned int lenghtnew=nrow1*ncol2;
-	fill(result,lenghtnew,0);
-
-	for(unsigned int row = 0; row < nrow1; row++){
-			for(unsigned int col = 0; col < ncol2; col++){
-				for(unsigned int colRes = 0; colRes < n; colRes++){
-
-					value(result, _getStringIndexFromMatrix(row,col,ncol2))+=value(matrix1, _getStringIndexFromMatrix(row,colRes,n))*value(matrix2, _getStringIndexFromMatrix(colRes,col,ncol2));
-				}
-			}
-	}
-	return result;
-}
-
-/*
-.Function._matricialSum:
-..summary:Computes the matricial sum between two matrixes
-..signature:_matricialSum(matrix1,matrix2,ncol)
-..param.matrix1:The first matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.matrix2:The second matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.ncol:The number of columns of both the matrices.
-...type:nolink:unsigned int
-..returns:The sum of the two matrices (another matrix).
-..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
-*/
-
-template <typename TAlphabet, typename TSpec1, typename TSpec2>
-String<TAlphabet> _matricialSum(String<TAlphabet, TSpec1>& matrix1,
-					  String<TAlphabet, TSpec2>& matrix2, unsigned int ncol)
-{
-	unsigned int nrow=length(matrix1)/ncol;
-	String<TAlphabet> result;
-	unsigned int lenghtnew=ncol*nrow;
-	fill(result,lenghtnew,0);
-
-	for(unsigned int row = 0; row < nrow; row++){
-			for(unsigned int col = 0; col < ncol; col++){
-					value(result, _getStringIndexFromMatrix(row,col,ncol))=value(matrix1, _getStringIndexFromMatrix(row,col,ncol))+ value(matrix2, _getStringIndexFromMatrix(row,col,ncol));
-			}
-	}
-	return result;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// _matricialDifference
-//////////////////////////////////////////////////////////////////////////////
-
-/*
-.Function._matricialDifference:
-..summary:Computes the matricial difference between two matrixes
-..signature:_matricialDifference(matrix1,matrix2,n)
-..param.matrix1:The first matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.matrix2:The second matrix.
-...type:String<TAlphabet, TSpec1>&
-..param.ncol:The number of columns of both the matrices.
-...type:nolink:unsigned int
-..returns:The difference of the two matrices (another matrix).
-..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
-*/
-
-template <typename TAlphabet, typename TSpec1, typename TSpec2>
-String<TAlphabet> _matricialDifference(String<TAlphabet, TSpec1>& matrix1,
-					  String<TAlphabet, TSpec2>& matrix2, unsigned int ncol)
-{
-	unsigned int nrow=length(matrix1)/ncol;
-	String<TAlphabet> result;
-	unsigned int lenghtnew=ncol*nrow;
-	resize(result,lenghtnew);
-
-	for(unsigned int row = 0; row < nrow; row++){
-			for(unsigned int col = 0; col < ncol; col++){
-					value(result, _getStringIndexFromMatrix(row,col,ncol))=value(matrix1, _getStringIndexFromMatrix(row,col,ncol))- value(matrix2, _getStringIndexFromMatrix(row,col,ncol));
-			}
-	}
-
-	return result;
-}
 
 //////////////////////////////////////////////////////////////////////////////
 // _computeInverseMatrix
@@ -585,242 +522,187 @@ String<TAlphabet> _matricialDifference(String<TAlphabet, TSpec1>& matrix1,
 ..returns:The inverse matrix of the matrix.
 */
 
-template <typename TAlphabet, typename TSpec1>
-String<TAlphabet> _computeInverseMatrix(String<TAlphabet, TSpec1>& matrix, unsigned int n)
+template <typename TValue>
+Matrix<TValue,2> _computeInverseMatrix(Matrix<TValue,2> &matrix)
 {
-	String<TAlphabet> result;
-	unsigned int lengthnew=n*n;
-	fill(result,lengthnew,0);
+	typedef Matrix<TValue,2> TMatrix;
+	unsigned int n = length(matrix,0);
+	TMatrix result;
+	//resize the matrix
+	setLength(result, 0, n);
+	setLength(result, 1, n);
+	fill(result, 0.0);
 
 	//copy the matrix in result, since the procedure is in-place
-	String<TAlphabet> tmp = matrix;
+	TMatrix tmp = matrix;
 
 	//lu decomposition of a in-place
-	String<TAlphabet> indx=_ludcmp(tmp,n);
+	String<TValue> indx=_ludcmp(tmp);
 
-	String<TAlphabet> col;
+	String<TValue> col;
 
 	unsigned int i;
 
 	// inverse by columns
-	for (unsigned int j=0; j<n; j++) {
+	for (unsigned int j=0; j<n; j++)
+	{
 		fill(col,n,0);
-		if(j>0){
-			for(i=0; i<n; i++){
+		if(j>0)
+		{
+			for(i=0; i<n; i++)
+			{
 				value(col,i)=0;
 			}
 		}
 		value(col,j) = 1;
 
-		_lubksb(tmp,n,indx,col);
+		_lubksb(tmp,indx,col);
 
-		for (i=0; i<n; i++) {
-			value(result, _getStringIndexFromMatrix(i,j,n))= value(col,i);
+		for (i=0; i<n; i++)
+		{
+			value(result, i,j)= value(col,i);
 		}
+
 	}
+
 	return result;
 }
 
-
-template <typename TAlphabet>
-void _lubksb(String<TAlphabet> &a, int n, String<TAlphabet> &indx, String<TAlphabet>  &b)
-{
-  int i, ii=0,ip,j;
-  double sum;
-
-  for (i=1; i<=n; i++) {
-    ip = value(indx,i-1);
-    sum = value(b,ip-1);
-    value(b,ip-1) = value(b,i-1);
-    if (ii) {
-      for (j=ii;j<=i-1;j++)
-	  {
-		  sum -=value(a,_getStringIndexFromMatrix(i-1,j-1,n))*value(b,j-1);
-	  }
-    }
-    else
-		if (sum){
-			ii=i;
-		}
-    value(b,i-1) = sum;
-  }
-  for (i=n; i>=1; i--) {
-    sum = value(b,i-1);
-	for (j=i+1; j<=n; j++){
-		sum -= value(a,_getStringIndexFromMatrix(i-1,j-1,n))*value(b,j-1);
-	}
-    value(b,i-1) = sum/value(a,_getStringIndexFromMatrix(i-1,i-1,n));
-  }
-}
+/*
+ *
+ * LU decomposition
+ *
+ */
 
 #define TINY 1.0e-20
-template <typename TAlphabet>
-String<TAlphabet> _ludcmp(String<TAlphabet> &result, int n)
+template <typename TValue>
+String<TValue> _ludcmp(Matrix<TValue,2> &result)
 {
-  int i, imax, j, k,d;
-  double big,dum,sum,temp;
-  String<TAlphabet> vv;
-  fill(vv, n, 1.0);
+	int n = length(result,0);
+	int i, imax, j, k,d;
+	double big,dum,sum,temp;
+	String<TValue> vv;
+	fill(vv, n, 1.0);
 
 
-  d = 1.0;
-  for (i=1; i<=n; i++) {
-	big = 0.0;
-	for (j=1; j<=n; j++){
-		if ((temp=fabs(value(result, _getStringIndexFromMatrix(i-1,j-1,n))))>big){
-			big = temp;
+	d = 1;
+	for (i=1; i<=n; i++)
+	{
+		big = 0.0;
+		for (j=1; j<=n; j++)
+		{
+			if ((temp=fabs(value(result, i-1,j-1)))>big)
+			{
+				big = temp;
+			}
 		}
-	}
-	if (big==0.0) {
-		std::cout<<"Singular matrix in routine ludcmp" << std::endl;
-		exit(1);
-	}
+		if (big==0.0)
+		{
+			std::cout<<"Singular matrix in routine ludcmp" << std::endl;
+			exit(1);
+		}
 
-	value(vv, _getStringIndexFromMatrix(0,i-1,n)) = 1.0/big;
-  }
-  String<TAlphabet> indx;
-  resize(indx,n);
-  for (j=1; j<=n; j++) {
-    for (i=1; i<j; i++) {
-      sum = value(result, _getStringIndexFromMatrix(i-1,j-1,n));
-	  for (k=1; k<i; k++) {
-		  sum -= value(result, _getStringIndexFromMatrix(i-1,k-1,n))*value(result, _getStringIndexFromMatrix(k-1,j-1,n));
-	  }
-	  value(result, _getStringIndexFromMatrix(i-1,j-1,n)) = sum;
-    }
-    big = 0.0;
-    for (i=j; i<=n; i++) {
-      sum = value(result, _getStringIndexFromMatrix(i-1,j-1,n));
-	  for (k=1; k<j; k++){
-		sum -= value(result, _getStringIndexFromMatrix(i-1,k-1,n))*value(result, _getStringIndexFromMatrix(k-1,j-1,n));
-	  }
-  	  value(result, _getStringIndexFromMatrix(i-1,j-1,n)) = sum;
-      if ((dum = value(vv, _getStringIndexFromMatrix(0,i-1,n))*fabs(sum))>=big) {
-		big = dum;
-		imax = i;
-      }
-    }
-    if (j != imax) {
-      for (k=1; k<=n; k++) {
-		dum = value(result, _getStringIndexFromMatrix(imax-1,k-1,n));
-		value(result, _getStringIndexFromMatrix(imax-1,k-1,n)) = value(result, _getStringIndexFromMatrix(j-1,k-1,n));
-		value(result, _getStringIndexFromMatrix(j-1,k-1,n)) = dum;
-      }
-      d = -(d);
-	  value(vv, _getStringIndexFromMatrix(0,imax-1,n))=value(vv, _getStringIndexFromMatrix(0,j-1,n));
-    }
-
-	value(indx, _getStringIndexFromMatrix(0,j-1,n)) = imax;
-
-	if (value(result, _getStringIndexFromMatrix(j-1,j-1,n)) == 0.0){
-		value(result, _getStringIndexFromMatrix(j-1,j-1,n)) = TINY;
+		value(vv,i-1) = 1.0/big;
 	}
-    if (j!=n) {
-      dum = 1.0/(value(result, _getStringIndexFromMatrix(j-1,j-1,n)));
-	  for (i=j+1; i<=n; i++){
-		  value(result, _getStringIndexFromMatrix(i-1,j-1,n)) *= dum;
-	  }
-    }
+	String<TValue> indx;
+	resize(indx,n);
+
+	for (j=1; j<=n; j++)
+	{
+		for (i=1; i<j; i++)
+		{
+			sum = value(result,i-1,j-1);
+			for (k=1; k<i; k++)
+			{
+				sum -= value(result, i-1,k-1)*value(result, k-1,j-1);
+			}
+			value(result, i-1,j-1) = sum;
+		}
+		big = 0.0;
+		for (i=j; i<=n; i++)
+		{
+			sum = value(result,i-1,j-1);
+			for (k=1; k<j; k++)
+			{
+				sum -= value(result, i-1,k-1)*value(result, k-1,j-1);
+			}
+			value(result, i-1,j-1) = sum;
+			if ((dum = value(vv, i-1)*fabs(sum))>=big)
+			{
+				big = dum;
+				imax = i;
+			}
+		}
+		if (j != imax)
+		{
+			for (k=1; k<=n; k++)
+			{
+				dum = value(result,imax-1,k-1);
+				value(result, imax-1,k-1) = value(result, j-1,k-1);
+				value(result,j-1,k-1) = dum;
+			}
+			d = -(d);
+			value(vv, imax-1)=value(vv,j-1);
+		}
+
+		value(indx, j-1) = imax;
+
+		if (value(result, j-1,j-1) == 0.0)
+		{
+			value(result, j-1,j-1) = TINY;
+		}
+		if (j!=n)
+		{
+			dum = 1.0/(value(result,j-1,j-1));
+			for (i=j+1; i<=n; i++)
+			{
+				value(result, i-1,j-1) *= dum;
+			}
+		}
   }
 
  return indx;
+
 }
 
-//AUXILIARY CODE
 
-//////////////////////////////////////////////////////////////////////////////
-// printAllLetters
-//////////////////////////////////////////////////////////////////////////////
-
-/*
-	Only a test function
-*/
-
-/*
-template<typename TAlphabet>
-void
-printAllLetters(String<TAlphabet>& str1) {
-	typedef typename Iterator<String<TAlphabet> >::Type TIter;
-	TIter itStr = begin(str1);
-	TIter itStrEnd = end(str1);
-	for(;itStr != itStrEnd; ++itStr)
-	{
-		std::cout << value(itStr) << ',';
-	}
-	std::cout << std::endl;
-}
-
-template<typename TAlphabet>
-void
-printAllLetters(String<TAlphabet>& str1, int n) {
-	typedef typename Iterator<String<TAlphabet> >::Type TIter;
-	TIter itStr = begin(str1);
-	TIter itStrEnd = end(str1);
-	int count=1;
-	for(;itStr != itStrEnd; ++itStr)
-	{
-		std::cout << value(itStr) << ',';
-		if ((count%n)==0)
-		{
-				std::cout << std::endl;
-		}
-		count++;
-	}
-	std::cout << std::endl;
-}
-
-template<typename TAlphabet>
-void
-printAllLettersFile(String<TAlphabet>& str1, int n, FILE *f) {
-	typedef typename Iterator<String<TAlphabet> >::Type TIter;
-	TIter itStr = begin(str1);
-	TIter itStrEnd = end(str1);
-	int count=1;
-	for(;itStr != itStrEnd; ++itStr)
-	{
-		fprintf(f,"%lf ",value(itStr));
-		if ((count%n)==0)
-		{
-				fprintf(f,"\n");
-		}
-		count++;
-	}
-}
-*/
-
-//////////////////////////////////////////////////////////////////////////////
-// printMarkovModel
-//////////////////////////////////////////////////////////////////////////////
-
-/*
-	Only a test function
-*/
-
-/*
-template <typename TAlphabet, typename TFloat, typename TSpec>
-void printMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm)
+template <typename TValue>
+void _lubksb(Matrix<TValue,2> &a, String<TValue> &indx, String<TValue>  &b)
 {
-	unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
-	unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) mm.order);
+	int n =length(a,0);	//Number of columns in matrix a
+	int i, ii=0,ip,j;
+	double sum;
 
-	for(unsigned int col = 0; col < column_size;++col) {
-		String<TAlphabet> qgram;
-		unhash(qgram, col, mm.order);
-		std::cout << qgram << ",";
-	}
-	std::cout << std::endl;
-	for(unsigned int row = 0; row < column_size;++row) {
-		String<TAlphabet> qgram;
-		unhash(qgram, row, mm.order);
-		std::cout << qgram << ",";
-		for(unsigned int col = 0; col < column_size;++col) {
-			std::cout << value(mm.transition, row * column_size + col) << ",";
+	for (i=1; i<=n; i++)
+	{
+		ip = value(indx,i-1);
+		sum = value(b,ip-1);
+		value(b,ip-1) = value(b,i-1);
+		if (ii)
+		{
+			for (j=ii;j<=i-1;j++)
+			{
+				sum -=value(a,i-1,j-1)*value(b,j-1);
+			}
 		}
-		std::cout << std::endl;
+		else
+		if (sum)
+		{
+			ii=i;
+		}
+		value(b,i-1) = sum;
 	}
-
+	for (i=n; i>=1; i--)
+	{
+		sum = value(b,i-1);
+		for (j=i+1; j<=n; j++)
+		{
+			sum -= value(a,i-1,j-1)*value(b,j-1);
+		}
+		value(b,i-1) = sum/value(a,i-1,i-1);
+	}
 }
-*/
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Interface
@@ -829,20 +711,30 @@ void printMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm)
 
 ///////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TFloat, typename TSpec, typename TStringSet>
-void buildMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-					  TStringSet & strings)
+template <typename TAlphabet, typename TFloat, typename TSpec>
+void buildMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> &mm,
+		StringSet<String<TAlphabet > > &stringSet)
 {
-	mm.build(strings);
+
+	mm.build(stringSet);
+
 }
 
+template <typename TAlphabet, typename TFloat, typename TSpec>
+void buildMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> &mm,
+		StringSet<String<TAlphabet > > const &stringSet)
+{
+
+	mm.build(stringSet);
+
+}
 
 
 ///////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TFloat, typename TSpec>
 void setMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-					String<TFloat> &iTransition)
+					Matrix<TFloat,2> &iTransition)
 {
 	mm.set(iTransition);
 }
@@ -851,7 +743,7 @@ void setMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
 
 template <typename TAlphabet, typename TFloat, typename TSpec>
 void setMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-					String<TFloat> &iTransition, 
+					Matrix<TFloat,2> &iTransition,
 					String<TFloat> &iStationaryDistribution)
 {
 	mm.set(iTransition, iStationaryDistribution);
@@ -859,13 +751,27 @@ void setMarkovModel(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
 
 ///////////////////////////////////////////////////////////////
 
-template <typename TAlphabet, typename TFloat, typename TSpec, typename TString, typename TSetSpec>
+template <typename TAlphabet, typename TFloat, typename TSpec>
 TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-						  StringSet<TString, TSetSpec> const &string)
+		StringSet<String<TAlphabet > > & stringSet)
+{
+	return mm.emittedProbability(stringSet);
+}
+
+template <typename TAlphabet, typename TFloat, typename TSpec>
+TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
+						  String<TAlphabet> &string)
 {
 	return mm.emittedProbability(string);
 }
 
+//const
+template <typename TAlphabet, typename TFloat, typename TSpec, typename TString, typename TSetSpec>
+TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
+		StringSet<TString, TSetSpec> const &stringSet)
+{
+	return mm.emittedProbability(stringSet);
+}
 
 template <typename TAlphabet, typename TFloat, typename TSpec, typename TString>
 TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
@@ -874,28 +780,34 @@ TFloat emittedProbability(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
 	return mm.emittedProbability(string);
 }
 
-
 ///////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TFloat, typename TSpec>
-void write(FILE *file, 
+void write(FILE *file,
 		   MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
 	mm.write(file);
 }
 
-
 ///////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TFloat, typename TSpec>
-void read(FILE *file, 
+void read(FILE *file,
 		  MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 {
 	mm.read(file);
 }
-
 //////////////////////////////////////////////////////////////////////////////
+template <typename TAlphabet, typename TFloat, typename TSpec>
+void ensureAuxMatrices(MarkovModel<TAlphabet, TFloat, TSpec> & mm )
+{
 
-} //namespace seqan
+	if(empty(mm._q)){
+		mm._computeAuxiliaryMatrices();
+	}
+}
+
+
+}
 
 #endif //#ifndef SEQAN_HEADER_...

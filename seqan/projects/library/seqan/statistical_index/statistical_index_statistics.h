@@ -21,11 +21,13 @@
 #ifndef SEQAN_HEADER_STATISTICAL_INDEX_INTERFACE_H
 #define SEQAN_HEADER_STATISTICAL_INDEX_INTERFACE_H
 
+#include "statistical_index_markov_model.h"
+
 namespace seqan
 {
 
-template <typename TAlgorithm, typename TFloat, typename TAlphabet, typename TStringSet>
-void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle);
+template <typename TAlgorithm, typename TFloat, typename TAlphabet>
+void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, StringSet<String<TAlphabet> >& needle, TAlgorithm const &);
 
 /*
 .Function._zscore:
@@ -45,32 +47,96 @@ void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
 */
 
+//<<<<<<< .mine
+//template <typename TAlgorithm, typename TAlphabet, typename TFloat, typename TSpec>
+//TFloat _zscore(StringSet<String<TAlphabet > > &W,  StringSet<String<TAlphabet > > &X, MarkovModel<TAlphabet, TFloat, TSpec> &M)
+//=======
 template <typename TAlgorithm, typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat _zscore(TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M, TAlgorithm const &)
+TFloat _zscore(TStringSet W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M, TAlgorithm const &)
+//>>>>>>> .r7767
 {
 
 
- TFloat z_score=0;
- TFloat nW=0;
- //compute occurrances
- for(unsigned int i=0; i< length(X); i++)
- {
-	 String<TAlphabet> temp = getValueById(X, i);
-	_numOccurrences<TAlgorithm>(nW, temp, W);
- }
+	TFloat z_score=0;
+	TFloat nW=0;
+	//compute occurrances
+	for(unsigned int i=0; i< length(X); i++)
+	{
+		String<TAlphabet> temp = getValueById(X, i);
+		_numOccurrences(nW, temp, W, TAlgorithm());
+	}
 
-  //compute expectation
-  TFloat E = expectation(W, X, M);
+	//compute expectation
+	TFloat E = expectation(W, X, M);
+//std::cout<<"\nE:"<<E;
+	//compute variance
+	TFloat V = _computeVariance(W, X, M, E);
+//std::cout<<"\nV:"<<V;
+	//compute z-score
+	z_score=(nW-E)/sqrt(V);
 
-  //compute variance
-  TFloat V = _computeVariance(W, X, M, E);
-
-  //compute z-score
-  z_score=(nW-E)/sqrt(V);
-
-  return z_score;
+	return z_score;
 
 }
+
+/*
+.Function._numOccurrences:
+..summary:Auxiliary function to compute the number of occurrences of a set of patterns in a set of text strings
+..signature:template <tTAlgorithm,TFloat,TAlphabet,TStringSet>_numOccurrences(W,haystack,needle)
+..param.TAlgorithm:The algorithm to exploit to compute the number of occurrences of patterns in the text strings.
+..param.TFloat:The type of the exploited arrays.
+..param.TAlphabet:The type of the alphabet.
+..param.TStringSet:A set of strings.
+..param.W:The set of patterns.
+...type:Class.StringSet
+..param.haystack:The text strings.
+...type:Metafunction.Haystack
+..param.needle:The sequence that is searched in the @Metafunction.Haystack@.
+*/
+
+//Fixed to  AhoCorasick in original code, reason???
+template <typename TAlgorithm, typename TFloat, typename TAlphabet>
+void _numOccurrences(TFloat &nW, String<TAlphabet> &haystack, StringSet<String<TAlphabet> > &needle, TAlgorithm const &)
+{
+	SEQAN_CHECKPOINT;
+	Finder<String<TAlphabet> > finder(haystack);
+	Pattern<StringSet<String<TAlphabet> >, TAlgorithm> pattern(needle);
+	while (find(finder, pattern))
+	{
+		nW++;
+	}
+}
+
+
+/*
+.Function._computeExpectation:
+..summary:Auxiliary function to compute the expectation for a set of patterns w.r.t. a text string  and a MarkovModel
+..signature:template <TAlphabet,TFloat,TSpec,TStringSet>_computeExpectation(mm,W,n)
+..param.TAlphabet:The type of the alphabet.
+..param.TFloat:The type of the exploited arrays.
+..param.TStringSet:A set of strings.
+..param.mm:The @MarkovModel@ object.
+...type:Class.MarkovModel
+..param.W:The set of patterns.
+...type:Class.StringSet
+..param.n:The length of the string.
+...type:nolink:unsigned int
+
+..returns:The expectation for W w.r.t. a string and M.
+*/
+
+template <typename TAlphabet, typename TFloat, typename TSpec>
+TFloat _computeExpectation(MarkovModel<TAlphabet, TFloat, TSpec> &mm,
+					 StringSet<String<TAlphabet> > &W, unsigned int n)
+{
+	TFloat E=0;
+	for (unsigned int i=0; i<length(W); i++){
+		String<TAlphabet> temp = getValueById(W, i);
+		E += (n - length(temp) + 1)*mm.emittedProbability(temp);
+	}
+	return E;
+}
+
 
 /*
 .Function._computevariance:
@@ -89,8 +155,8 @@ TFloat _zscore(TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSp
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
 */
 
-template <typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M, TFloat &E)
+template <typename TFloat, typename TAlphabet, typename TSpec>
+TFloat _computeVariance( StringSet<String<TAlphabet> > W,  StringSet<String<TAlphabet> > &X, MarkovModel<TAlphabet, TFloat, TSpec> &M, TFloat &E)
 {
 	//V=B+2C-E^2
 	TFloat V = E;
@@ -110,8 +176,6 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 
 	Shape<TAlphabet, SimpleShape> orderShape;
 	resize(orderShape, M.order);
-	unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
-	unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) M.order);
 
 	for(unsigned int j=0; j<sizeW; j++){
 		String<TAlphabet> string =getValueById(W, j);
@@ -121,7 +185,7 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 		for(unsigned int i=1; i<length(string)-M.order+1; i++)
 		{
 			int column=hash(orderShape,begin(string)+i);
-			p*=value(M.transition,_getStringIndexFromMatrix(row,column,column_size));
+			p*=value(M.transition,row,column);
 			row = column;
 		}
 		value(pStar, j) = p;
@@ -139,7 +203,7 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 
 			String<TAlphabet> Wj =getValueById(W, j);
 
-			TFloat q = (TFloat)(n-(2*length(Wj))+2);
+			TFloat q = (TFloat) (n-(2*length(Wj))+2);
 
 			for(unsigned int k=0; k<sizeW; k++){
 
@@ -153,9 +217,9 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 
 				kfirst = hash(orderShape,begin(getValueById(W, k)));
 
-				eQPPPe = value(M._qppp, _getStringIndexFromMatrix(jlast,kfirst,column_size));
+				eQPPPe = value(M._qppp, jlast,kfirst);
 
-				eQPPQPPe = value(M._qppqpp, _getStringIndexFromMatrix(jlast,kfirst,column_size));
+				eQPPQPPe = value(M._qppqpp, jlast,kfirst);
 
 				tmpA  *= value(M.stationaryDistribution, jfirst) * ((q*(q+1)/2)* value(M.stationaryDistribution, kfirst) - (q-1)*eQPPPe - eQPPQPPe);
 
@@ -178,6 +242,7 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 	return V;
 }
 
+
 /*
 .Function._overlapExpectation:
 ..summary:Auxiliary function necessary when correction factors have to be computed
@@ -194,8 +259,8 @@ TFloat _computeVariance( TStringSet& W,  TStringSet& X, MarkovModel<TAlphabet, T
 ..returns:A value of overlapping for the expectation.
 */
 
-template <typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat _overlapExpectation(TStringSet& W, MarkovModel<TAlphabet, TFloat, TSpec> &M, unsigned int n)
+template <typename TFloat, typename TAlphabet, typename TSpec>
+TFloat _overlapExpectation(StringSet<String<TAlphabet> > W, MarkovModel<TAlphabet, TFloat, TSpec> &M, unsigned int n)
 {
 	TFloat E_overlap = 0;
 	unsigned int sizeW = length(W);
@@ -227,78 +292,22 @@ TFloat _overlapExpectation(TStringSet& W, MarkovModel<TAlphabet, TFloat, TSpec> 
 }
 
 /*
-.Function._numOccurrences:
-..summary:Auxiliary function to compute the number of occurrences of a set of patterns in a set of text strings
-..signature:template <tTAlgorithm,TFloat,TAlphabet,TStringSet>_numOccurrences(W,haystack,needle)
-..param.TAlgorithm:The algorithm to exploit to compute the number of occurrences of patterns in the text strings.
-..param.TFloat:The type of the exploited arrays.
-..param.TAlphabet:The type of the alphabet.
-..param.TStringSet:A set of strings.
-..param.W:The set of patterns.
-...type:Class.StringSet
-..param.haystack:The text strings.
-...type:Metafunction.Haystack
-..param.needle:The sequence that is searched in the @Metafunction.Haystack@.
-*/
-
-template <typename TAlgorithm, typename TFloat, typename TAlphabet, typename TStringSet>
-void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, TStringSet& needle)
-{
-	Finder<String<TAlphabet> > finder(haystack);
-	Pattern<TStringSet, AhoCorasick> pattern(needle);
-	while (find(finder, pattern))
-	{
-		nW++;
-	}
-}
-
-/*
 .Function._addReveseComplements:
 ..summary:Computes the reverse complements of a set of strings in input.
 ..signature:<TStringSet> void _addReveseComplements(needle)
 ..param.needle:The sequence to be computed the reverse complement.
 */
 
-template <typename TStringSet>
-void _addReveseComplements(TStringSet& needle)
+template <typename TAlphabet>
+void _addReveseComplements(StringSet<String<TAlphabet> > &stringSet)
 {
-	unsigned int num= length(needle);
+	unsigned int num= length(stringSet);
 
 	for(unsigned int i=0; i< num; i++){
-  	     DnaStringReverseComplement mycom(getValueById(needle, i));
-		 appendValue(needle, mycom);
+  	     DnaStringReverseComplement mycom(getValueById(stringSet, i));
+		 appendValue(stringSet, mycom);
 	}
 }
-
-/*
-.Function._computeExpectation:
-..summary:Auxiliary function to compute the expectation for a set of patterns w.r.t. a text string  and a MarkovModel
-..signature:template <TAlphabet,TFloat,TSpec,TStringSet>_computeExpectation(mm,W,n)
-..param.TAlphabet:The type of the alphabet.
-..param.TFloat:The type of the exploited arrays.
-..param.TStringSet:A set of strings.
-..param.mm:The @MarkovModel@ object.
-...type:Class.MarkovModel
-..param.W:The set of patterns.
-...type:Class.StringSet
-..param.n:The length of the string.
-...type:nolink:unsigned int
-
-..returns:The expectation for W w.r.t. a string and M.
-*/
-
-template <typename TAlphabet, typename TFloat, typename TSpec, typename TStringSet>
-TFloat _computeExpectation(MarkovModel<TAlphabet, TFloat, TSpec> & mm,
-					 TStringSet & W, unsigned int n)
-{
-	TFloat E=0;
-	for (unsigned int i=0; i<length(W); i++){
-		String<TAlphabet> temp = getValueById(W, i);
-		E += (n - length(temp) + 1)*mm.emittedProbability(temp);
-	}
-	return E;
-}
-
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -323,17 +332,37 @@ typedef String<TDnaAlphabet> TDnaSequence;
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
 */
 
+//<<<<<<< .mine
+//&W oder nur W???, im original code nur W
+//template <typename TAlgorithm, typename TFloat, typename TAlphabet, typename TSpec>
+//TFloat zscore(StringSet<String<TAlphabet> > &W,  StringSet<String<TAlphabet> >  &X, MarkovModel<TAlphabet, TFloat, TSpec> &M)
+//=======
 template <typename TAlgorithm, typename TFloat, typename TSpec, typename TStringSet, typename TAlphabet>
 TFloat zscore(TStringSet W,  TStringSet &X, MarkovModel<TAlphabet, TFloat, TSpec> &M, TAlgorithm const & algorithmTag)
+//>>>>>>> .r7767
 {
-   return _zscore(W,X,M, algorithmTag);
+//<<<<<<< .mine
+//   return _zscore<TAlgorithm>(W,X,M);
+//=======
+
+	ensureAuxMatrices(M);
+   	return _zscore(W,X,M, algorithmTag);
+//>>>>>>> .r7767
 }
 
+//<<<<<<< .mine
+//special case for dna sequences and a given dna markov model, the reverse complement words are added and counted
+//template <typename TAlgorithm, typename TFloat, typename TSpec>
+//TFloat zscore(StringSet<String<Dna> > &W,  StringSet<String<Dna> > &X, MarkovModel<Dna, TFloat, TSpec> &M)
+//=======
 template <typename TAlgorithm, typename TFloat, typename TSpec, typename TDnaSequence>
 TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovModel<Dna, TFloat, TSpec> &M, TAlgorithm const &)
+//>>>>>>> .r7767
 {
    //add-reverse complements
    _addReveseComplements(W);
+
+	ensureAuxMatrices(M);
 
    TFloat z_score=0;
    TFloat nW=0;
@@ -341,15 +370,15 @@ TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovMode
    for(unsigned int i=0; i < length(X); i++)
    {
 		 String<Dna> temp = getValueById(X, i);
-		_numOccurrences<TAlgorithm>(nW, temp, W);
+		_numOccurrences(nW, temp, W, TAlgorithm());
 	}
 
 	//compute expectation
 	TFloat E = expectation(W, X, M);
-
+	//std::cout<<"\nE: "<<E<<"\n";
 	//compute variance
 	TFloat V = _computeVariance(W, X, M, E);
-
+	//std::cout<<"\nV: "<<V<<"\n";
 	//compute correction factor
 	TFloat correction = 0;
 
@@ -376,9 +405,11 @@ TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovMode
 
 	//compute z-score
 	z_score=(nW-E)/sqrt(V);
-
+	//std::cout<<"\nnW: "<<nW<<"\n";
+	//std::cout<<"\nZ: "<<z_score<<"\n";
 	return z_score;
 }
+
 
 /**
 .Function.variance:
@@ -394,16 +425,17 @@ TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovMode
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
 */
 
-template <typename TFloat,  typename TStringSet, typename TAlphabet, typename TSpec>
-TFloat variance(TStringSet W, TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpec> & M)
+template <typename TFloat, typename TAlphabet, typename TSpec>
+TFloat variance(StringSet<String<TAlphabet> > &W, StringSet<String<TAlphabet> >& X, MarkovModel<TAlphabet, TFloat, TSpec> & M)
 {
    TFloat E = expectation(W, X, M);
 
    return _computeVariance(W,X,M,E);
 }
 
+//Special case for DNA sequences, reverse complement sequences are added
 template <typename TFloat, typename TSpec>
-TFloat variance(StringSet<TDnaSequence> W, StringSet<TDnaSequence> &X, MarkovModel<Dna, TFloat, TSpec> & M)
+TFloat variance(StringSet<String<Dna> > W, StringSet<String<Dna> > &X, MarkovModel<Dna, TFloat, TSpec> & M)
 {
 
    //add-reverse complements
@@ -453,8 +485,8 @@ TFloat variance(StringSet<TDnaSequence> W, StringSet<TDnaSequence> &X, MarkovMod
 ..returns:The expectation for W w.r.t. X and M.
 */
 
-template <typename TAlphabet, typename TFloat, typename TSpec, typename TStringSet>
-TFloat expectation(TStringSet & W, TStringSet & X, MarkovModel<TAlphabet, TFloat, TSpec> & M)
+template <typename TAlphabet, typename TFloat, typename TSpec>
+TFloat expectation(StringSet<String<TAlphabet> > & W, StringSet<String<TAlphabet> > &X, MarkovModel<TAlphabet, TFloat, TSpec> &M)
 {
 	unsigned int n;
 	TFloat E = 0;
@@ -467,7 +499,5 @@ TFloat expectation(TStringSet & W, TStringSet & X, MarkovModel<TAlphabet, TFloat
     return E;
 }
 
-
-} //namespace seqan
-
+}  // namespace seqan
 #endif //#ifndef SEQAN_HEADER_...

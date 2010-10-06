@@ -25,7 +25,8 @@
 // prerequisites
 
 #include <cmath>
-
+#include <seqan/align.h>
+#include <seqan/index.h>
 //____________________________________________________________________________
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS

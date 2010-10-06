@@ -400,6 +400,12 @@ length(Matrix<TValue, DIMENSION> const & me)
 	return length(host(me));
 }
 
+template <typename TValue, unsigned DIMENSION>
+inline bool empty(Matrix<TValue, DIMENSION> const & me)
+{
+	return empty(host(me));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, unsigned DIMENSION, typename TSize>
@@ -1052,6 +1058,30 @@ template < typename TValue >
     return out;
 }
 //////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///// READ
+/*
+ * TODO(goeke) only square matrices of fixed size can be read in...
+ */
+///////////////////////////////////////////////////////////////
+// template < typename TValue >
+// void read(FILE *file, Matrix<TValue,2> & matrix)
+// {
+// 	//unsigned int column_size=3;
+// 	unsigned int column_size=pow(4,5);
+// 	//read the transition matrix
+// 	setLength(matrix, 0, column_size);
+// 	setLength(matrix, 1, column_size);
+// fill(matrix,0.0);
+// 	for(unsigned int row=0; row<column_size; row++)
+// 	{
+// 		for(unsigned int col=0; col<column_size; col++)
+// 		{
+// 		  fscanf(file,"%lf ", & value(matrix, row,col));
+// 		}
+// 		fscanf(file,"\n");
+// 	}
+// }
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
