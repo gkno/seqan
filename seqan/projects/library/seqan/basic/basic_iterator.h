@@ -408,6 +408,29 @@ SEQAN_CHECKPOINT
 	return it == begin(cont, Standard());	
 }
 
+template <typename T, typename TContainer>
+inline bool
+atBegin(T const & it, TContainer & cont)
+{
+SEQAN_CHECKPOINT
+	return it == begin(cont, Standard());
+}
+
+template <typename T, typename TContainer>
+inline bool
+atBegin(T & it, TContainer & cont)
+{
+SEQAN_CHECKPOINT
+	return it == begin(cont, Standard());
+}
+
+template <typename T, typename TContainer>
+inline bool
+atBegin(T & it, TContainer const & cont)
+{
+SEQAN_CHECKPOINT
+	return it == begin(cont, Standard());
+}
 //____________________________________________________________________________
 
 template <typename T>
@@ -456,6 +479,23 @@ atEnd(T const & it,
 {
 SEQAN_CHECKPOINT
 	return it == end(cont, Standard());	
+}
+
+template <typename T, typename TContainer>
+inline bool
+atEnd(T & it,
+	  TContainer & cont)
+{
+SEQAN_CHECKPOINT
+	return it == end(cont, Standard());
+}
+template <typename T, typename TContainer>
+inline bool
+atEnd(T const & it,
+	  TContainer & cont)
+{
+SEQAN_CHECKPOINT
+	return it == end(cont, Standard());
 }
 //____________________________________________________________________________
 
