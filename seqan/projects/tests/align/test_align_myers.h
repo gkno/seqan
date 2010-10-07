@@ -1,3 +1,6 @@
+#ifndef TESTS_ALIGN_TEST_ALIGN_MYERS_H_
+#define TESTS_ALIGN_TEST_ALIGN_MYERS_H_
+
 #define SEQAN_TEST
 
 #include <seqan/sequence.h>
@@ -217,3 +220,5 @@ SEQAN_DEFINE_TEST(test_align_hirschberger) {
         ++test_count;
     }
 }
+
+#endif

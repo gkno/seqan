@@ -1,3 +1,6 @@
+#ifndef TESTS_ALIGN_TEST_LOCAL_ALIGN_H_
+#define TESTS_ALIGN_TEST_LOCAL_ALIGN_H_
+
 #include <iostream>
 #include <cstdio>
 #include <vector>
@@ -249,3 +252,6 @@ SEQAN_DEFINE_TEST(testBandedLocalAlign) {
 	score = localAlignment(align1, finder1, score_type1, 7, -20, 0, BandedWatermanEggert());
     SEQAN_ASSERT_EQ(score, 0);
 }
+
+
+#endif

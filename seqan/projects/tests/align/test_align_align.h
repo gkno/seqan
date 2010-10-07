@@ -1,3 +1,6 @@
+#ifndef TESTS_ALIGN_TEST_ALIGN_ALIGN_H_
+#define TESTS_ALIGN_TEST_ALIGN_ALIGN_H_
+
 #include <iostream>
 #include <cstdio>
 #include <vector>
@@ -320,3 +323,4 @@ SEQAN_DEFINE_TEST(test_align_align_dna_sumlist_gaps) {
 }
 
 
+#endif

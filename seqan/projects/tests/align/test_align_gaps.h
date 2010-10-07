@@ -1,3 +1,6 @@
+#ifndef TESTS_ALIGN_TEST_ALIGN_GAPS_H_
+#define TESTS_ALIGN_TEST_ALIGN_GAPS_H_
+
 #include <iostream>
 #include <cstdio>
 #include <vector>
@@ -586,3 +589,5 @@ SEQAN_DEFINE_TEST(test_align_gaps_test_count_characters_char_string_array_gaps) 
 	TestCountCharacters<String<char>, ArrayGaps >();
 }
 
+
+#endif
