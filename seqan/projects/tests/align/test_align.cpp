@@ -41,7 +41,6 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     SEQAN_CALL_TEST(test_align_gaps_test_gaps_iterator);
     SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps);
-    SEQAN_CALL_TEST(test_align_gaps_test_sequence_gaps_base);
     SEQAN_CALL_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps);
     SEQAN_CALL_TEST(test_align_gaps_test_count_characters_char_string_array_gaps);
 
@@ -65,7 +64,6 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/gaps_array.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/gaps_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/gaps_iterator_base.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/gaps_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/gaps_sumlist.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/hirschberg_set.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/matrix_base.h");

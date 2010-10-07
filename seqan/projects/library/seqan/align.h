@@ -47,7 +47,6 @@
 
 #include <seqan/align/gaps_array.h>
 #include <seqan/align/gaps_sumlist.h>
-#include <seqan/align/gaps_simple.h>
 
 #include <seqan/align/align_base.h>
 #include <seqan/align/align_cols_base.h>

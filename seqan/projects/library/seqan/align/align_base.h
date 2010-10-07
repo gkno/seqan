@@ -279,19 +279,6 @@ struct StringSetType<Align<TSource, TSpec> const >
 };
 
 
-//Use StringSet<Owner> for SequenceGaps to store temporary source strings
-template <typename TSource>
-struct StringSetType<Align<TSource, SequenceGaps> >
-{
-	typedef StringSet<TSource, Owner<> > Type;
-};
-template <typename TSource>
-struct StringSetType<Align<TSource, SequenceGaps> const>
-{
-	typedef StringSet<TSource, Owner<> > Type;
-};
-
-
 //////////////////////////////////////////////////////////////////////////////
 // Functions
 //////////////////////////////////////////////////////////////////////////////

@@ -58,26 +58,26 @@ public:
 	TSumlist data_sumlist; 
 
 	Holder<TSource> data_source;
-	TSourcePosition data_source_begin_position;
-	TSourcePosition data_source_end_position;
+	TSourcePosition clipped_source_begin;
+	TSourcePosition clipped_source_end;
 
 public:
 	Gaps():
-		data_source_begin_position(0),
-		data_source_end_position(0)
+		clipped_source_begin(0),
+		clipped_source_end(0)
 	{
 SEQAN_CHECKPOINT
 	}
 	Gaps(TSize _size):
-		data_source_begin_position(0),
-		data_source_end_position(0)
+		clipped_source_begin(0),
+		clipped_source_end(0)
 	{
 		_init_to_resize(*this, _size);
 	}
 	Gaps(TSource & source_):
 		data_source(source_),
-		data_source_begin_position(beginPosition(source_)),
-		data_source_end_position(endPosition(source_))
+		clipped_source_begin(beginPosition(source_)),
+		clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
 		_init_to_resize(*this, length(source_));
@@ -85,8 +85,8 @@ SEQAN_CHECKPOINT
 
 	template <typename TSource2>
 	Gaps(TSource2 const & source_):
-		data_source_begin_position(beginPosition(source_)),
-		data_source_end_position(endPosition(source_))
+		clipped_source_begin(beginPosition(source_)),
+		clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
 		data_source = source_;
@@ -97,8 +97,8 @@ SEQAN_CHECKPOINT
 		data_sumlist(other_.data_sumlist),
 //		data_source(value(other_.data_source)), //variant: setValue => Align benutzen gemeinsame Sources
 		data_source(other_.data_source),		//variant: assignValue => Align kopieren Sources
-		data_source_begin_position(other_.data_source_begin_position),
-		data_source_end_position(other_.data_source_end_position)
+		clipped_source_begin(other_.clipped_source_begin),
+		clipped_source_end(other_.clipped_source_end)
 	{
 SEQAN_CHECKPOINT
 	}
@@ -107,8 +107,8 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		data_sumlist = other_.data_sumlist;
 		setValue(data_source, source(other_));
-		data_source_begin_position = other_.data_source_begin_position;
-		data_source_end_position = other_.data_source_end_position; 
+		clipped_source_begin = other_.clipped_source_begin;
+		clipped_source_end = other_.clipped_source_end; 
 		return *this;
 	}
 
@@ -203,10 +203,10 @@ SEQAN_CHECKPOINT
 
 template <typename TSource>
 inline typename Position<TSource>::Type
-sourceBeginPosition(Gaps<TSource, SumlistGaps> const & me)
+clippedBeginPosition(Gaps<TSource, SumlistGaps> const & me)
 {
 SEQAN_CHECKPOINT
-	return me.data_source_begin_position;
+	return me.clipped_source_begin;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -216,17 +216,17 @@ inline void
 _setSourceBeginPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
-	me.data_source_begin_position = _pos;
+	me.clipped_source_begin = _pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSource>
 inline typename Position<TSource>::Type
-sourceEndPosition(Gaps<TSource, SumlistGaps> const & me)
+clippedEndPosition(Gaps<TSource, SumlistGaps> const & me)
 {
 SEQAN_CHECKPOINT
-	return me.data_source_end_position;
+	return me.clipped_source_end;
 }
 //////////////////////////////////////////////////////////////////////////////
 
@@ -235,7 +235,7 @@ inline void
 _setSourceEndPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
-	me.data_source_end_position = _pos;
+	me.clipped_source_end = _pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -263,7 +263,7 @@ inline void
 clearGaps(Gaps<TSource, SumlistGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, sourceEndPosition(me) - sourceBeginPosition(me));
+	_init_to_resize(me, clippedEndPosition(me) - clippedBeginPosition(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -293,8 +293,8 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 	TGaps & gaps = const_cast<TGaps &>(gaps_);
 
-	SEQAN_ASSERT(pos >= sourceBeginPosition(gaps))
-	pos -= sourceBeginPosition(gaps);
+	SEQAN_ASSERT(pos >= clippedBeginPosition(gaps))
+	pos -= clippedBeginPosition(gaps);
 
 	if (pos >= getSum(gaps.data_sumlist, 1))
 	{
@@ -325,11 +325,11 @@ SEQAN_CHECKPOINT
 
 	if (pos - getSum(it, 0) > dif)
 	{//view position within a non-gap
-		return sourceBeginPosition(gaps) + getSum(it, 1) + (pos - getSum(it, 0) - dif);
+		return clippedBeginPosition(gaps) + getSum(it, 1) + (pos - getSum(it, 0) - dif);
 	}
 	else
 	{//view position within a gap
-		return sourceBeginPosition(gaps) + getSum(it, 1);
+		return clippedBeginPosition(gaps) + getSum(it, 1);
 	}
 }
 
@@ -396,7 +396,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TPosition>
 inline typename Size< Gaps<TSource, SumlistGaps> >::Type
-setSourceBeginPosition(Gaps<TSource, SumlistGaps> & me,
+setClippedBeginPosition(Gaps<TSource, SumlistGaps> & me,
 					   TPosition source_position)
 {
 	typedef Gaps<TSource, SumlistGaps> TGaps;
@@ -406,7 +406,7 @@ setSourceBeginPosition(Gaps<TSource, SumlistGaps> & me,
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 	typedef SumListValues<2, TSize> TValues;
 
-	TSourcePosition old_begin_position = sourceBeginPosition(me);
+	TSourcePosition old_begin_position = clippedBeginPosition(me);
 
 	TSize ret_value = 0;
 
@@ -454,7 +454,7 @@ setSourceBeginPosition(Gaps<TSource, SumlistGaps> & me,
 
 template <typename TSource, typename TPosition>
 inline void
-setSourceEndPosition(Gaps<TSource, SumlistGaps> & me,
+setClippedEndPosition(Gaps<TSource, SumlistGaps> & me,
 					 TPosition source_position)
 {
 	typedef Gaps<TSource, SumlistGaps> TGaps;
@@ -464,7 +464,7 @@ setSourceEndPosition(Gaps<TSource, SumlistGaps> & me,
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 	typedef SumListValues<2, TSize> TValues;
 
-	TSourcePosition old_end_position = sourceEndPosition(me);
+	TSourcePosition old_end_position = clippedEndPosition(me);
 
 	if (old_end_position < (TSourcePosition) source_position)
 	{//expand end to right: just add the difference to the last block
@@ -478,8 +478,8 @@ setSourceEndPosition(Gaps<TSource, SumlistGaps> & me,
 		TSumlistIterator it(me.data_sumlist);
 
 		//ajust the new last block
-		searchSumList(it, source_position - sourceBeginPosition(me), 1);
-		TSize diff = getValue(it, 1) + getSum(it, 1) - source_position + sourceBeginPosition(me);
+		searchSumList(it, source_position - clippedBeginPosition(me), 1);
+		TSize diff = getValue(it, 1) + getSum(it, 1) - source_position + clippedBeginPosition(me);
 		assignValue(it, 0, getValue(it, 0) - diff);
 		assignValue(it, 1, getValue(it, 1) - diff);
 
@@ -625,11 +625,11 @@ sourcePosition(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
 SEQAN_CHECKPOINT
 	if (isGap(me))
 	{
-		return getSum(me.iter, 1) + me.data_container->data_source_begin_position;
+		return getSum(me.iter, 1) + me.data_container->clipped_source_begin;
 	}
 	else
 	{
-		return getSum(me.iter, 1) + (me.pos - (getValue(me.iter, 0) - getValue(me.iter, 1))) + me.data_container->data_source_begin_position;
+		return getSum(me.iter, 1) + (me.pos - (getValue(me.iter, 0) - getValue(me.iter, 1))) + me.data_container->clipped_source_begin;
 	}
 }
 

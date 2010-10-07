@@ -59,29 +59,29 @@ public:
 	TViewPosition data_unclipped_end_position;
 
 	Holder<TSource> data_source;
-	TSourcePosition data_source_begin_position;
-	TSourcePosition data_source_end_position;
+	TSourcePosition clipped_source_begin;
+	TSourcePosition clipped_source_end;
 
 public:
 	Gaps():
 		data_unclipped_end_position(0),
-		data_source_begin_position(0),
-		data_source_end_position(0)
+		clipped_source_begin(0),
+		clipped_source_end(0)
 	{
 SEQAN_CHECKPOINT
 	}
 	Gaps(TSize _size):
 		data_unclipped_end_position(0),
-		data_source_begin_position(0),
-		data_source_end_position(0)
+		clipped_source_begin(0),
+		clipped_source_end(0)
 	{
 		_init_to_resize(*this, _size);
 	}
 	Gaps(TSource & source_):
 		data_unclipped_end_position(0),
 		data_source(source_),
-		data_source_begin_position(beginPosition(source_)),
-		data_source_end_position(endPosition(source_))
+		clipped_source_begin(beginPosition(source_)),
+		clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
 		_init_to_resize(*this, length(source_));
@@ -90,10 +90,10 @@ SEQAN_CHECKPOINT
 	template <typename TSource2>
 	Gaps(TSource2 const & source_):
 		data_unclipped_end_position(0),
-		data_source_begin_position(0),
-		data_source_end_position(length(source_))
-		//data_source_begin_position(beginPosition(source_)),
-		//data_source_end_position(endPosition(source_))
+		clipped_source_begin(0),
+		clipped_source_end(length(source_))
+		//clipped_source_begin(beginPosition(source_)),
+		//clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
 		data_source = source_;
@@ -106,8 +106,8 @@ SEQAN_CHECKPOINT
 		data_unclipped_end_position(other_.data_unclipped_end_position),
 //		data_source(value(other_.data_source)), //variant: setValue => Align benutzen gemeinsame Sources
 		data_source(other_.data_source),		//variant: assignValue => Align kopieren Sources
-		data_source_begin_position(other_.data_source_begin_position),
-		data_source_end_position(other_.data_source_end_position)
+		clipped_source_begin(other_.clipped_source_begin),
+		clipped_source_end(other_.clipped_source_end)
 	{
 SEQAN_CHECKPOINT
 	}
@@ -118,8 +118,8 @@ SEQAN_CHECKPOINT
 		data_end_position = other_.data_end_position;
 		data_unclipped_end_position = other_.data_unclipped_end_position,
 		setValue(data_source, source(other_));
-		data_source_begin_position = other_.data_source_begin_position;
-		data_source_end_position = other_.data_source_end_position; 
+		clipped_source_begin = other_.clipped_source_begin;
+		clipped_source_end = other_.clipped_source_end; 
 		return *this;
 	}
 
@@ -244,24 +244,24 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceBeginPosition:
+.Function.clippedBeginPosition:
 ..summary:Begin position of the source segment.
 ..cat:Alignments
-..signature:sourceBeginPosition(object)
+..signature:clippedBeginPosition(object)
 ..param.object:An object that has a source
 ...type:Class.Gaps
 ..returns:The position of the first item in @Function.source.source(object)@ that is used in object.
 ..see:Function.begin
 ..see:Function.source
-..see:Function.sourceEndPosition
+..see:Function.clippedEndPosition
 ..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position<TSource>::Type
-sourceBeginPosition(Gaps<TSource, ArrayGaps> const & me)
+clippedBeginPosition(Gaps<TSource, ArrayGaps> const & me)
 {
 SEQAN_CHECKPOINT
-	return me.data_source_begin_position;
+	return me.clipped_source_begin;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -271,30 +271,30 @@ inline void
 _setSourceBeginPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
-	me.data_source_begin_position = _pos;
+	me.clipped_source_begin = _pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.sourceEndPosition:
+.Function.clippedEndPosition:
 ..summary:Position of the end of the source segment.
 ..cat:Alignments
-..signature:sourceEndPosition(object)
+..signature:clippedEndPosition(object)
 ..param.object:An object that has a source
 ...type:Class.Gaps
 ..returns:The position behind the last element of the source segment.
 ..see:Function.end
 ..see:Function.sourceEnd
-..see:Function.sourceBeginPosition
+..see:Function.clippedBeginPosition
 ..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position<TSource>::Type
-sourceEndPosition(Gaps<TSource, ArrayGaps> const & me)
+clippedEndPosition(Gaps<TSource, ArrayGaps> const & me)
 {
 SEQAN_CHECKPOINT
-	return me.data_source_end_position;
+	return me.clipped_source_end;
 }
 //////////////////////////////////////////////////////////////////////////////
 
@@ -303,7 +303,7 @@ inline void
 _setSourceEndPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
-	me.data_source_end_position = _pos;
+	me.clipped_source_end = _pos;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -328,7 +328,7 @@ inline void
 clearGaps(Gaps<TSource, ArrayGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, sourceEndPosition(me) - sourceBeginPosition(me));
+	_init_to_resize(me, clippedEndPosition(me) - clippedBeginPosition(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -364,8 +364,8 @@ toViewPosition(Gaps<TSource, ArrayGaps> const & gaps,
 {
 SEQAN_CHECKPOINT
 
-	SEQAN_ASSERT(pos >= sourceBeginPosition(gaps))
-	pos -= sourceBeginPosition(gaps);
+	SEQAN_ASSERT(pos >= clippedBeginPosition(gaps))
+	pos -= clippedBeginPosition(gaps);
 
 	typedef Gaps<TSource, ArrayGaps> const TGaps;
 	typedef typename Size<TGaps>::Type TSize;
@@ -418,7 +418,7 @@ SEQAN_CHECKPOINT
 
 	typename Iterator<TArr, Standard>::Type arr_begin = begin(_dataArr(gaps));
 	typename Iterator<TArr, Standard>::Type arr_end = end(_dataArr(gaps));
-	typename Position<TSource>::Type source_pos = sourceBeginPosition(gaps);
+	typename Position<TSource>::Type source_pos = clippedBeginPosition(gaps);
 	typename Position<TGaps>::Type view_pos = pos;
 	
 	while (true)
@@ -474,7 +474,7 @@ _iterator_gaps_array(TGaps & gaps,
 	}
 	else
 	{
-		typename Position<TSource>::Type source_pos = sourceBeginPosition(gaps);
+		typename Position<TSource>::Type source_pos = clippedBeginPosition(gaps);
 
 		while (true)
 		{
@@ -565,7 +565,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TPosition>
 inline void
-setSourceBeginPosition(Gaps<TSource, ArrayGaps> & me,
+setClippedBeginPosition(Gaps<TSource, ArrayGaps> & me,
 					   TPosition source_position)
 {
 	SEQAN_ASSERT(length(_dataArr(me)))
@@ -574,7 +574,7 @@ setSourceBeginPosition(Gaps<TSource, ArrayGaps> & me,
 	typedef typename Position<TGaps>::Type TViewPosition;
 	typedef typename TGaps::TArr TArr;
 
-	TPosition old_source_begin_pos = sourceBeginPosition(me);
+	TPosition old_source_begin_pos = clippedBeginPosition(me);
 	if (old_source_begin_pos == source_position) return;
 	else if (source_position < old_source_begin_pos)
 	{
@@ -597,7 +597,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		TViewPosition view_pos = toViewPosition(me, source_position);
-		TViewPosition source_pos_left = source_position - sourceBeginPosition(me);
+		TViewPosition source_pos_left = source_position - old_source_begin_pos;
 		TViewPosition gaps_count = 0;
 
 		typename Iterator<TArr, Standard>::Type it_arr_begin = begin(_dataArr(me));
@@ -632,7 +632,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TPosition>
 inline void
-setSourceEndPosition(Gaps<TSource, ArrayGaps> & me,
+setClippedEndPosition(Gaps<TSource, ArrayGaps> & me,
 					 TPosition source_position)
 {
 	typedef Gaps<TSource, ArrayGaps> TGaps;
@@ -642,7 +642,7 @@ setSourceEndPosition(Gaps<TSource, ArrayGaps> & me,
 	TArr arr = _dataArr(me);
 	SEQAN_ASSERT(length(arr));
 
-	TPosition old_end_begin_pos = sourceEndPosition(me);
+	TPosition old_end_begin_pos = clippedEndPosition(me);
 	if (old_end_begin_pos == source_position) return;
 	else if (source_position < old_end_begin_pos)
 	{
@@ -651,7 +651,7 @@ SEQAN_CHECKPOINT
 		typename Iterator<TArr, Standard>::Type it_arr_end = end(_dataArr(me));
 		typename Iterator<TArr, Standard>::Type it_arr = it_arr_begin;
 		TViewPosition end_pos = 0;
-		TViewPosition chars_to_scan = source_position - sourceBeginPosition(me);
+		TViewPosition chars_to_scan = source_position - clippedBeginPosition(me);
 
 		while (it_arr != it_arr_end)
 		{
@@ -685,7 +685,7 @@ inline typename Size<TSource>::Type
 sourceLength(Gaps<TSource, ArrayGaps> & me)
 {
 SEQAN_CHECKPOINT
-	return sourceEndPosition(me) - sourceBeginPosition(me);
+	return clippedEndPosition(me) - clippedBeginPosition(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -580,8 +580,16 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 	typedef typename std::list<Triple< TPosition, TPosition, TPosition> >::iterator TIterator;
 
 	resize(rows(aligned), 2);
-	assignSource(row(aligned, 0), query, leftDim0(seed), rightDim0(seed)+1);
-	assignSource(row(aligned, 1), database, leftDim1(seed), rightDim1(seed)+1);
+	assignSource(row(aligned, 0), query);
+	assignSource(row(aligned, 1), database);
+
+	setClippedBeginPosition(row(aligned, 0), leftDim0(seed));
+	setClippedBeginPosition(row(aligned, 1), leftDim1(seed));
+	setBeginPosition(row(aligned, 0), 0);
+	setBeginPosition(row(aligned, 1), 0);
+	setClippedEndPosition(row(aligned, 0), rightDim0(seed)+1);
+	setClippedEndPosition(row(aligned, 1), rightDim1(seed)+1);
+
 	TIterator it1 = seedList.begin();
 	TIterator it2 = ++seedList.begin();
 	
@@ -612,8 +620,16 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 				{
 					Align<String<TText>, ArrayGaps> alignSeg;
 					resize(rows(alignSeg), 2);
-					assignSource(row(alignSeg, 0), query, (*it1).i1+(*it1).i3, (*it2).i1);
-					assignSource(row(alignSeg, 1), database, (*it1).i2+(*it1).i3, (*it2).i2);
+					assignSource(row(alignSeg, 0), query);
+					assignSource(row(alignSeg, 1), database);
+					
+					setClippedBeginPosition(row(alignSeg, 0), (*it1).i1+(*it1).i3);
+					setClippedBeginPosition(row(alignSeg, 1), (*it1).i2+(*it1).i3);
+					setBeginPosition(row(alignSeg, 0), 0);
+					setBeginPosition(row(alignSeg, 1), 0);
+					setClippedEndPosition(row(alignSeg, 0), (*it2).i1);
+					setClippedEndPosition(row(alignSeg, 1), (*it2).i2);
+
 					seedScore += globalAlignment(alignSeg,scoreMatrix,NeedlemanWunsch());//needlemanWunsch(alignSeg,scoreMatrix);
 			
 					unsigned int j;

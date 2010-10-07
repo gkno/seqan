@@ -203,10 +203,10 @@ SEQAN_CHECKPOINT
                 TPos end = value(queue, 1).i2;
 
                 TAlign ali(align);
-                setSourceBeginPosition(row(ali, 0), toSourcePosition(row(ali, 0), begin));
-                setSourceBeginPosition(row(ali, 1), toSourcePosition(row(ali, 1), begin));
-                setSourceEndPosition(row(ali, 0), toSourcePosition(row(ali, 0), end));
-                setSourceEndPosition(row(ali, 1), toSourcePosition(row(ali, 1), end));
+                setClippedBeginPosition(row(ali, 0), toSourcePosition(row(ali, 0), begin));
+                setClippedBeginPosition(row(ali, 1), toSourcePosition(row(ali, 1), begin));
+                setClippedEndPosition(row(ali, 0), toSourcePosition(row(ali, 0), end));
+                setClippedEndPosition(row(ali, 1), toSourcePosition(row(ali, 1), end));
                 appendValue(alignmentString, ali);
             }
             replace(queue, 0, 2, String<TMerger>());
@@ -390,12 +390,12 @@ SEQAN_CHECKPOINT
     }
 
     // Set view positions to the eps-match
-	setSourceBeginPosition(row(align, 0), toSourcePosition(row(align, 0), beginPos));
-	setSourceBeginPosition(row(align, 1), toSourcePosition(row(align, 1), beginPos));
+	setClippedBeginPosition(row(align, 0), toSourcePosition(row(align, 0), beginPos));
+	setClippedBeginPosition(row(align, 1), toSourcePosition(row(align, 1), beginPos));
 	setBeginPosition(row(align, 0), beginPos);
 	setBeginPosition(row(align, 1), beginPos);
-	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
-	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
+	setClippedEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
+	setClippedEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -438,12 +438,12 @@ SEQAN_CHECKPOINT
     }
 
     // Set view positions to the eps-match
-	setSourceBeginPosition(row(align, 0), toSourcePosition(row(align, 0), beginPos));
-	setSourceBeginPosition(row(align, 1), toSourcePosition(row(align, 1), beginPos));
+	setClippedBeginPosition(row(align, 0), toSourcePosition(row(align, 0), beginPos));
+	setClippedBeginPosition(row(align, 1), toSourcePosition(row(align, 1), beginPos));
 	setBeginPosition(row(align, 0), beginPos);
 	setBeginPosition(row(align, 1), beginPos);
-	setSourceEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
-	setSourceEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
+	setClippedEndPosition(row(align, 0), toSourcePosition(row(align, 0), endPos));
+	setClippedEndPosition(row(align, 1), toSourcePosition(row(align, 1), endPos));
 }
 
 template<typename TPos, typename TCoord>
@@ -838,12 +838,12 @@ SEQAN_CHECKPOINT
 	TPos endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + rightDiagonal(seedOld) - leftDiagonal(seed));
 
 	// set begin and end positions of align
-	setSourceBeginPosition(row(align, 0), leftPosition(seedOld, 0) - endLeftA);
-	setSourceBeginPosition(row(align, 1), leftPosition(seedOld, 1) - endLeftB);
+	setClippedBeginPosition(row(align, 0), leftPosition(seedOld, 0) - endLeftA);
+	setClippedBeginPosition(row(align, 1), leftPosition(seedOld, 1) - endLeftB);
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), rightPosition(seedOld, 0) + 1 + endRightA);
-	setSourceEndPosition(row(align, 1), rightPosition(seedOld, 1) + 1 + endRightB);
+	setClippedEndPosition(row(align, 0), rightPosition(seedOld, 0) + 1 + endRightA);
+	setClippedEndPosition(row(align, 1), rightPosition(seedOld, 1) + 1 + endRightB);
 
 	// traceback through matrix from begin/end pos on ...
 	if((*endPair.i1).i1 != 0) { // ... extension to the left
@@ -884,12 +884,12 @@ SEQAN_CHECKPOINT
 
 	if (direction == 3) {
 		// set begin and end positions of align
-		setSourceBeginPosition(row(align, 0), seedBeginA);
-		setSourceBeginPosition(row(align, 1), seedBeginB);
+		setClippedBeginPosition(row(align, 0), seedBeginA);
+		setClippedBeginPosition(row(align, 1), seedBeginB);
 		setBeginPosition(row(align, 0), 0);
 		setBeginPosition(row(align, 1), 0);
-		setSourceEndPosition(row(align, 0), seedEndA);
-		setSourceEndPosition(row(align, 1), seedEndB);
+		setClippedEndPosition(row(align, 0), seedEndA);
+		setClippedEndPosition(row(align, 1), seedEndB);
 
     if ((TSize)length(row(align, 0)) < minLength)
 		return false;
@@ -1100,12 +1100,12 @@ SEQAN_CHECKPOINT
 	integrateAlign(align, bandedAlign);
 
 	// set begin and end positions of align
-	setSourceBeginPosition(row(align, 0), beginPosition(a) + sourceBeginPosition(row(bandedAlign, 0)));
-	setSourceBeginPosition(row(align, 1), beginPosition(b) + sourceBeginPosition(row(bandedAlign, 1)));
+	setClippedBeginPosition(row(align, 0), beginPosition(a) + sourceBeginPosition(row(bandedAlign, 0)));
+	setClippedBeginPosition(row(align, 1), beginPosition(b) + sourceBeginPosition(row(bandedAlign, 1)));
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), beginPosition(a) + sourceEndPosition(row(bandedAlign, 0)));
-	setSourceEndPosition(row(align, 1), beginPosition(b) + sourceEndPosition(row(bandedAlign, 1)));
+	setClippedEndPosition(row(align, 0), beginPosition(a) + sourceEndPosition(row(bandedAlign, 0)));
+	setClippedEndPosition(row(align, 1), beginPosition(b) + sourceEndPosition(row(bandedAlign, 1)));
 
 	if ((TSize)length(row(align, 0)) < minLength)
 		return;

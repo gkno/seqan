@@ -124,8 +124,14 @@ void test_banded_chain_align()
 
 	Align<String<char>,ArrayGaps> alignment2;
 	resize(rows(alignment2), 2);
-	assignSource(row(alignment2, 0), query, 1, length(query));
-	assignSource(row(alignment2, 1), database, 2, length(database));
+	assignSource(row(alignment2, 0), query);
+	assignSource(row(alignment2, 1), database);
+	setClippedBeginPosition(row(alignment2, 0), 1);
+	setClippedBeginPosition(row(alignment2, 1), 2);
+	setBeginPosition(row(alignment2, 0), 0);
+	setBeginPosition(row(alignment2, 1), 0);
+	setClippedEndPosition(row(alignment2, 0), length(query));
+	setClippedEndPosition(row(alignment2, 1), length(database));
 
     //cout << "Score: " << bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix) << endl;
 	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain1, 2, alignment2, scoreMatrix), 11);
@@ -161,8 +167,14 @@ void test_banded_chain_align()
 	
     Align<String<char>,ArrayGaps> alignment4;
 	resize(rows(alignment4), 2);
-	assignSource(row(alignment4, 0), query, 1, length(query));
-	assignSource(row(alignment4, 1), database, 2, length(database));
+	assignSource(row(alignment4, 0), query);
+	assignSource(row(alignment4, 1), database);
+	setClippedBeginPosition(row(alignment2, 0), 1);
+	setClippedBeginPosition(row(alignment2, 1), 2);
+	setBeginPosition(row(alignment2, 0), 0);
+	setBeginPosition(row(alignment2, 1), 0);
+	setClippedEndPosition(row(alignment2, 0), length(query));
+	setClippedEndPosition(row(alignment2, 1), length(database));
 
 	//cout << "Score: " << bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2) << endl;
 	SEQAN_ASSERT_EQ(bandedChainAlignment(seedChain2, 2, alignment4, scoreMatrix2), 21);

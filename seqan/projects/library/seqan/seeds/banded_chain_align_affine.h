@@ -440,8 +440,8 @@ _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
 		++target_1;
 	}
 
-	setSourceEndPosition(row(target_,1),position(it_1));
-	setSourceEndPosition(row(target_,0),position(it_0));
+	setClippedEndPosition(row(target_,1),position(it_1));
+	setClippedEndPosition(row(target_,0),position(it_0));
 	
 	return length(diag_matrix_,0) - (pos % dim_0_len)-2;
 }
@@ -1402,8 +1402,8 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 
 
 
-	setSourceEndPosition(row(target_,1),position(it_1));
-	setSourceEndPosition(row(target_,0),position(it_0));
+	setClippedEndPosition(row(target_,1),position(it_1));
+	setClippedEndPosition(row(target_,0),position(it_0));
 
 	return length(diag_matrix_,0) - (pos % dim_0_len) + position(it_1) - height_stop -1;
 }

@@ -425,12 +425,12 @@ _finishAlign(Align<TSource, TSpec>& align,
              TPos const begin2,
              TPos const end2) {
 SEQAN_CHECKPOINT
-	setSourceBeginPosition(row(align, 0), begin1);
-	setSourceBeginPosition(row(align, 1), begin2);
+	setClippedBeginPosition(row(align, 0), begin1);
+	setClippedBeginPosition(row(align, 1), begin2);
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), end1);
-	setSourceEndPosition(row(align, 1), end2);
+	setClippedEndPosition(row(align, 0), end1);
+	setClippedEndPosition(row(align, 1), end2);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -503,10 +503,10 @@ localAlignment(Align<TSource, TSpec> & align,
 SEQAN_CHECKPOINT
 	clearGaps(row(align, 0));
 	clearGaps(row(align, 1));
-    setSourceBeginPosition(row(align, 0), 0);
-    setSourceBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), length(source(row(align, 0))));
-	setSourceEndPosition(row(align, 1), length(source(row(align, 1))));
+    setClippedBeginPosition(row(align, 0), 0);
+    setClippedBeginPosition(row(align, 1), 0);
+	setClippedEndPosition(row(align, 0), length(source(row(align, 0))));
+	setClippedEndPosition(row(align, 1), length(source(row(align, 1))));
 
     StringSet<TSource> str;
     for (unsigned i = 0; i < length(rows(align)); ++i) {
@@ -542,10 +542,10 @@ localAlignment(Align<TSource, TSpec> & align,
 SEQAN_CHECKPOINT
 	clearGaps(row(align, 0));
 	clearGaps(row(align, 1));
-    setSourceBeginPosition(row(align, 0), 0);
-    setSourceBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), length(source(row(align, 0))));
-	setSourceEndPosition(row(align, 1), length(source(row(align, 1))));
+    setClippedBeginPosition(row(align, 0), 0);
+    setClippedBeginPosition(row(align, 1), 0);
+	setClippedEndPosition(row(align, 0), length(source(row(align, 0))));
+	setClippedEndPosition(row(align, 1), length(source(row(align, 1))));
 
     StringSet<TSource> str;
     for (unsigned i = 0; i < length(rows(align)); ++i) {

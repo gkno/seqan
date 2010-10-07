@@ -156,7 +156,7 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 		if (length(source(row(align,i))) < count) {
 			count = length(source(row(align,i)));
 		}
-		setSourceEndPosition(row(align,i),count);
+		setClippedEndPosition(row(align,i),count);
 		
 		//Read sequence
 		_streamSeekG(file, begin);

@@ -100,12 +100,12 @@ int main() {
 	}
 
 	// set extended begin and end positions of align
-	setSourceBeginPosition(row(align, 0), leftPosition(seed, 0));
-	setSourceBeginPosition(row(align, 1), leftPosition(seed, 1));
+	setClippedBeginPosition(row(align, 0), leftPosition(seed, 0));
+	setClippedBeginPosition(row(align, 1), leftPosition(seed, 1));
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setSourceEndPosition(row(align, 0), rightPosition(seed, 0) + 1);
-	setSourceEndPosition(row(align, 1), rightPosition(seed, 1) + 1);
+	setClippedEndPosition(row(align, 0), rightPosition(seed, 0) + 1);
+	setClippedEndPosition(row(align, 1), rightPosition(seed, 1) + 1);
 
 	std::cout << align;
 	return 0;

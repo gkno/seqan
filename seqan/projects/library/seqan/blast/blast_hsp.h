@@ -1025,10 +1025,10 @@ SEQAN_CHECKPOINT
 		++ali_1;
 	}
 
-	setSourceBeginPosition(row(ali,0),queryBegin(hsp)-1);
-	setSourceBeginPosition(row(ali,1),databaseBegin(hsp)-1);
-	setSourceEndPosition(row(ali,0),queryEnd(hsp));
-	setSourceEndPosition(row(ali,1),databaseEnd(hsp));
+	setClippedBeginPosition(row(ali,0),queryBegin(hsp)-1);
+	setClippedBeginPosition(row(ali,1),databaseBegin(hsp)-1);
+	setClippedEndPosition(row(ali,0),queryEnd(hsp));
+	setClippedEndPosition(row(ali,1),databaseEnd(hsp));
 
 	return length(databaseAlignmentString(hsp));
 

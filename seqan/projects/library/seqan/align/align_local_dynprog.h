@@ -359,8 +359,8 @@ SEQAN_CHECKPOINT
 
 	TStringIterator x_begin = begin(source(row0))-1; 
 	TStringIterator y_begin = begin(source(row1))-1; 
-	TStringIterator x_end = iter(source(row0),sourceEndPosition(row0))-1;
-	TStringIterator y_end = iter(source(row1),sourceEndPosition(row1))-1;
+	TStringIterator x_end = iter(source(row0),clippedEndPosition(row0))-1;
+	TStringIterator y_end = iter(source(row1),clippedEndPosition(row1))-1;
 
 	TStringIterator x = x_end;
 	TStringIterator y = y_end;
@@ -395,8 +395,8 @@ SEQAN_CHECKPOINT
  		std::cout <<"\n";
  	}*/
 	
-	setSourceBeginPosition(row(align_, 0),0);
-	setSourceBeginPosition(row(align_, 1),0);
+	setClippedBeginPosition(row(align_, 0),0);
+	setClippedBeginPosition(row(align_, 1),0);
 	
 
 	for (y = y_end; (y != y_begin) ; --y)
@@ -622,12 +622,12 @@ SEQAN_CHECKPOINT
 		++target_1;
 	}
 
-	setSourceBeginPosition(row(target_, 0),pos_0);
-	setSourceBeginPosition(row(target_, 1),pos_1);
+	setClippedBeginPosition(row(target_, 0),pos_0);
+	setClippedBeginPosition(row(target_, 1),pos_1);
 	setBeginPosition(row(target_, 0),0);
 	setBeginPosition(row(target_, 1),0);
-	setSourceEndPosition(row(target_, 0),position(it_0, str_0));
-	setSourceEndPosition(row(target_, 1),position(it_1, str_1));
+	setClippedEndPosition(row(target_, 0),position(it_0, str_0));
+	setClippedEndPosition(row(target_, 1),position(it_1, str_1));
 	
 	return source_;
 
@@ -773,8 +773,8 @@ SEQAN_CHECKPOINT
 
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
-	setSourceEndPosition(row(align_, 0),endPosition(source(row(align_,0))));
-	setSourceEndPosition(row(align_, 1),endPosition(source(row(align_,1))));
+	setClippedEndPosition(row(align_, 0),endPosition(source(row(align_,0))));
+	setClippedEndPosition(row(align_, 1),endPosition(source(row(align_,1))));
 
 	typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition next_best_end;
 	next_best_end = _get_next_best_end_position(sw_finder,cutoff);

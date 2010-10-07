@@ -160,9 +160,7 @@ struct Source<Gaps<TSource, TSpec> >
 ..param.T:Type for which the source is retrieved by @Function.source@.
 ...type:Class.Gaps
 ..returns.param.Type:The type returned by the @Function.source@ function.
-...remarks:This type is a reference to @Metafunction.Source@ by default,
-with the exception of @Spec.SequenceGaps@ data structure, which returns
-a temporary.
+...remarks:This type is a reference to @Metafunction.Source@.
 ..include:seqan/align.h
 */
 template <typename T>
@@ -357,7 +355,7 @@ sourceBegin(Gaps<TSource, TSpec> const & me,
 			Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(source(me), sourceBeginPosition(me), tag_);
+	return iter(source(me), clippedBeginPosition(me), tag_);
 }
 template <typename TSource, typename TSpec>
 inline typename Iterator<TSource, typename DefaultGetIteratorSpec<TSource>::Type>::Type 
@@ -365,7 +363,7 @@ sourceBegin(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename DefaultGetIteratorSpec<TSource>::Type TDefaultGetIteratorSpec;
-	return iter(source(me), sourceBeginPosition(me), TDefaultGetIteratorSpec());
+	return iter(source(me), clippedBeginPosition(me), TDefaultGetIteratorSpec());
 }
 
 
@@ -392,7 +390,7 @@ sourceEnd(Gaps<TSource, TSpec> const & me,
 		  Tag<TTag> const tag_)
 {
 SEQAN_CHECKPOINT
-	return iter(source(me), sourceEndPosition(me), tag_);
+	return iter(source(me), clippedEndPosition(me), tag_);
 }
 template <typename TSource, typename TSpec>
 inline typename Iterator<TSource, typename DefaultGetIteratorSpec<TSource>::Type>::Type 
@@ -400,7 +398,7 @@ sourceEnd(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename DefaultGetIteratorSpec<TSource>::Type TDefaultGetIteratorSpec;
-	return iter(source(me), sourceEndPosition(me), TDefaultGetIteratorSpec());
+	return iter(source(me), clippedEndPosition(me), TDefaultGetIteratorSpec());
 }
 
 
@@ -951,7 +949,7 @@ inline typename Infix<TSource>::Type
 sourceSegment(Gaps<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return infix(source(me), sourceBeginPosition(me), sourceEndPosition(me));
+	return infix(source(me), clippedBeginPosition(me), clippedEndPosition(me));
 }
 
 template <typename TSource, typename TSpec>
@@ -959,7 +957,7 @@ inline typename Infix<TSource>::Type
 sourceSegment(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return infix(source(me), sourceBeginPosition(me), sourceEndPosition(me));
+	return infix(source(me), clippedBeginPosition(me), clippedEndPosition(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -973,24 +971,24 @@ SEQAN_CHECKPOINT
 ...type:Class.Gaps
 ..returns:Length of the used part of the source.
 ...metafunction:Metafunction.Size
-..remarks:This function is equivalent to $sourceEndPosition(gaps) - sourceBeginPosition(gaps)$.
+..remarks:This function is equivalent to $clippedEndPosition(gaps) - clippedBeginPosition(gaps)$.
 ..include:seqan/align.h
 */
-//..see:Function.sourceEndPosition
-//..see:Function.sourceBeginPosition
+//..see:Function.clippedEndPosition
+//..see:Function.clippedBeginPosition
 template <typename TSource, typename TSpec>
 inline typename Size<TSource>::Type
 sourceLength(Gaps<TSource, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return sourceEndPosition(me) - sourceBeginPosition(me);
+	return clippedEndPosition(me) - clippedBeginPosition(me);
 }
 template <typename TSource, typename TSpec>
 inline typename Size<TSource>::Type
 sourceLength(Gaps<TSource, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
-	return sourceEndPosition(me) - sourceBeginPosition(me);
+	return clippedEndPosition(me) - clippedBeginPosition(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -999,7 +997,7 @@ SEQAN_CHECKPOINT
 .Function.assignSource:
 ..summary:Assigns the source to a new value. 
 ..cat:Alignments
-..signature:assignSource(object, source_in [, begin_pos, end_pos])
+..signature:assignSource(object, source_in)
 ..param.object:An object.
 ...type:Class.Gaps
 ..param.source_in:An object that is assigned to the source of $object$.
@@ -1020,19 +1018,6 @@ If you want $object$ to drop its current source and take another object as sourc
 ..see:Function.assign
 ..include:seqan/align.h
 */
-template <typename TSource, typename TSpec, typename TSource2, typename TPosition1, typename TPosition2>
-inline void
-assignSource(Gaps<TSource, TSpec> & me,
-			 TSource2 const & source_,
-			 TPosition1 source_begin_pos,
-			 TPosition2 source_end_pos)
-{
-SEQAN_CHECKPOINT
-	assignValue(me.data_source, source_);
-	_setSourceBeginPosition(me, source_begin_pos);
-	_setSourceEndPosition(me, source_end_pos);
-	clearGaps(me);
-}
 
 //____________________________________________________________________________
 
@@ -1042,7 +1027,10 @@ assignSource(Gaps<TSource, TSpec> & me,
 			 TSource2 const & source_)
 {
 SEQAN_CHECKPOINT
-	assignSource(me, source_, 0, length(source_));
+	assignValue(me.data_source, source_);
+	_setSourceBeginPosition(me, 0);
+	_setSourceEndPosition(me, length(source_));
+	clearGaps(me);
 }
 
 

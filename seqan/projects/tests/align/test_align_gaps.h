@@ -35,7 +35,10 @@ void TestGapsBase()
     SEQAN_ASSERT_TRUE(source(gaps1) == "blabla");
     SEQAN_ASSERT_TRUE(src1 == "blabla");
 
-	assignSource(gaps1, "abcdef", 1, 5);	//assignSource
+	assignSource(gaps1, "abcdef");	//assignSource
+	setClippedBeginPosition(gaps1, 1);
+	setBeginPosition(gaps1, 0);
+	setClippedEndPosition(gaps1, 5);
     SEQAN_ASSERT_TRUE(source(gaps1) == "abcdef");
 	SEQAN_ASSERT_TRUE(sourceSegment(gaps1) == "bcde"); //sourceSegment
 
@@ -76,26 +79,26 @@ void TestGapsBase()
 	SEQAN_ASSERT_TRUE(length(gaps3) == length(src1));		//length
 	SEQAN_ASSERT_TRUE(sourceLength(gaps3) == length(src1));	//sourceLength
 
-	SEQAN_ASSERT_TRUE(sourceBeginPosition(gaps3) == 0);		//sourceBeginPosition
+	SEQAN_ASSERT_TRUE(clippedBeginPosition(gaps3) == 0);		//clippedBeginPosition
 	SEQAN_ASSERT_TRUE(sourceBegin(gaps3) == begin(source(gaps3)));		//sourceBegin
-    SEQAN_ASSERT_TRUE(sourceBegin(gaps3, Rooted()) == begin(source(gaps3), Rooted()));
+	SEQAN_ASSERT_TRUE(sourceBegin(gaps3, Rooted()) == begin(source(gaps3), Rooted()));
 
-	SEQAN_ASSERT_TRUE(sourceEndPosition(gaps3) == length(src1));	//sourceEndPosition
+	SEQAN_ASSERT_TRUE(clippedEndPosition(gaps3) == length(src1));	//clippedEndPosition
 	SEQAN_ASSERT_TRUE(sourceEnd(gaps3) == end(source(gaps3)));		//sourceEnd
-    SEQAN_ASSERT_TRUE(sourceEnd(gaps3, Rooted()) == end(source(gaps3), Rooted()));
+	SEQAN_ASSERT_TRUE(sourceEnd(gaps3, Rooted()) == end(source(gaps3), Rooted()));
 
 	SEQAN_ASSERT_TRUE(*(--end(gaps3)) == 'o'); //end
 	SEQAN_ASSERT_TRUE(*(--end(c_gaps3)) == 'o'); //end
 
-	setSourceBeginPosition(gaps3, 3); //"---lo"			//setSourceBeginPosition
+	setClippedBeginPosition(gaps3, 3); //"---lo"			//setClippedBeginPosition
 	SEQAN_ASSERT_TRUE(gaps3 == "lo");
-	SEQAN_ASSERT_EQ(sourceBeginPosition(gaps3), 3u);		//sourceBeginPosition
+	SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 3u);		//clippedBeginPosition
 	SEQAN_ASSERT_EQ(beginPosition(gaps3), 3u);			//beginPosition
 	SEQAN_ASSERT_EQ(length(gaps3), 2u);					//length
 	
-	setSourceBeginPosition(gaps3, 1); //"-ello"			//setSourceBeginPosition
+	setClippedBeginPosition(gaps3, 1); //"-ello"			//setClippedBeginPosition
 	SEQAN_ASSERT_TRUE(gaps3 == "ello");
-	SEQAN_ASSERT_EQ(sourceBeginPosition(gaps3), 1u);		//sourceBeginPosition
+	SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 1u);		//clippedBeginPosition
 	SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);			//beginPosition
 	SEQAN_ASSERT_EQ(length(gaps3),  4u);					//length
 	SEQAN_ASSERT_TRUE(isGap(gaps3, 0u));						//isGap
@@ -105,28 +108,28 @@ void TestGapsBase()
 	SEQAN_ASSERT_TRUE(getValue(gaps3, 1) == 'e');			//getValue
 	SEQAN_ASSERT_TRUE(getValue(c_gaps3, 1) == 'e');
 
-	setSourceEndPosition(gaps3, 3); //"-el"				//setSourceEndPosition
+	setClippedEndPosition(gaps3, 3); //"-el"				//setClippedEndPosition
     SEQAN_ASSERT_TRUE(gaps3 == "el");
-	SEQAN_ASSERT_EQ(sourceEndPosition(gaps3), 3u);		//sourceEndPosition
+	SEQAN_ASSERT_EQ(clippedEndPosition(gaps3), 3u);		//clippedEndPosition
 	SEQAN_ASSERT_EQ(endPosition(gaps3), 3u);				//endPosition
     SEQAN_ASSERT_EQ(length(gaps3), 2u);
 
 	setBeginPosition(gaps3, 0);	//"el"					//setBeginPosition
     SEQAN_ASSERT_TRUE(gaps3[0] == 'e');
     SEQAN_ASSERT_EQ(beginPosition(gaps3), 0u);
-    SEQAN_ASSERT_EQ(sourceBeginPosition(gaps3), 1u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 1u);
     SEQAN_ASSERT_EQ(endPosition(gaps3), 2u);
-    SEQAN_ASSERT_EQ(sourceEndPosition(gaps3), 3u);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps3), 3u);
 
 
 //____________________________________________________________________________
 
 	clear(gaps3);										//clear
 	SEQAN_ASSERT_EQ(length(gaps3), 0u);	
-    SEQAN_ASSERT_EQ(sourceBeginPosition(gaps3), 0u);
-    SEQAN_ASSERT_EQ(sourceEndPosition(gaps3), 0u);
+    SEQAN_ASSERT_EQ(clippedBeginPosition(gaps3), 0u);
+    SEQAN_ASSERT_EQ(clippedEndPosition(gaps3), 0u);
 
-	setSourceEndPosition(gaps3, length(source(gaps3))); //reactivate after clear
+	setClippedEndPosition(gaps3, length(source(gaps3))); //reactivate after clear
     SEQAN_ASSERT_TRUE(gaps3 == "hello");
 
 	insertGaps(gaps3, 2, 3);
@@ -177,8 +180,8 @@ void TestGapsBase()
 
 	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"hello"
 
-	setSourceBeginPosition(gaps3, 1);
-	setSourceEndPosition(gaps3, 3); //"el"
+	setClippedBeginPosition(gaps3, 1);
+	setClippedEndPosition(gaps3, 3); //"el"
     SEQAN_ASSERT_TRUE(gaps3 == "el");
 	SEQAN_ASSERT_TRUE(sourceSegment(gaps3) == "el"); //sourceSegment
     SEQAN_ASSERT_TRUE(sourceSegment(c_gaps3) == "el");
@@ -333,75 +336,6 @@ void TestGapManipulation()
 
 }
 //////////////////////////////////////////////////////////////////////////////
-
-template <typename TSource, typename TSpec>
-void TestSequenceGapsBase()
-{
-	typedef Gaps<TSource, TSpec> TGaps;
-
-	TGaps gaps3;
-	assignSource(gaps3, "hello");
-
-	insertGaps(gaps3, 2, 3);
-	setBeginPosition(gaps3, 2);
-	SEQAN_ASSERT_TRUE(gaps3 == "he---llo"); //"--he---llo"
-    SEQAN_ASSERT_EQ(beginPosition(gaps3), 2u);
-
-	//toSourcePosition
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 0), 0u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 1), 0u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 2), 0u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 3), 1u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 4), 2u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 5), 2u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 6), 2u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 7), 2u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 8), 3u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 9), 4u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 10), 5u);
-    SEQAN_ASSERT_EQ(toSourcePosition(gaps3, 11), 5u);
-
-	//toViewPosition
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 0), 2u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 1), 3u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 2), 7u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 3), 8u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 4), 9u);
-    SEQAN_ASSERT_EQ(toViewPosition(gaps3, 5), 10u);
-
-//____________________________________________________________________________
-
-	SEQAN_ASSERT_TRUE(gaps3 == "he---llo"); //"--he---llo"
-    SEQAN_ASSERT_EQ(beginPosition(gaps3), 2u);
-
-	clearGaps(gaps3, 1, 5);
-	SEQAN_ASSERT_TRUE(gaps3 == "he--llo"); //"-he--llo"
-    SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);
-
-	clearGaps(gaps3, 1, 5);
-	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"-hello"
-    SEQAN_ASSERT_EQ(beginPosition(gaps3), 1u);
-
-	clearGaps(gaps3);
-	SEQAN_ASSERT_TRUE(gaps3 == "hello"); //"hello"
-    SEQAN_ASSERT_EQ(beginPosition(gaps3), 0u);
-
-	assign(gaps3, "el");
-	SEQAN_ASSERT_TRUE(gaps3 == "el"); //"el"
-
-//____________________________________________________________________________
-// Comparison Functions
-
-    SEQAN_ASSERT_TRUE(gaps3 == "el") ;
-    SEQAN_ASSERT_TRUE(gaps3 != "ello");
-    SEQAN_ASSERT_TRUE(gaps3 <= "el");
-    SEQAN_ASSERT_TRUE(gaps3 < "ello");
-    SEQAN_ASSERT_TRUE(gaps3 > "a");
-    SEQAN_ASSERT_TRUE(gaps3 >= "el");
-
-}
-
-//____________________________________________________________________________
 
 template <typename TSource, typename TSpec>
 void TestTrailingGaps()
@@ -575,11 +509,6 @@ SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_array_gaps) 
 
 SEQAN_DEFINE_TEST(test_align_gaps_test_gap_manipulation_char_string_sumlist_gaps) {
     TestGapManipulation<String<char>, SumlistGaps>(); 
-}
-
-
-SEQAN_DEFINE_TEST(test_align_gaps_test_sequence_gaps_base) {
-    TestSequenceGapsBase<String<char>, SequenceGaps>();
 }
 
 SEQAN_DEFINE_TEST(test_align_gaps_test_trailing_gaps_char_string_array_gaps) {

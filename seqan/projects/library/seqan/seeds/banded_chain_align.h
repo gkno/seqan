@@ -431,8 +431,8 @@ SEQAN_CHECKPOINT
 		++target_1;
 	}
 
-	setSourceEndPosition(row(target_,1),position(it_1));
-	setSourceEndPosition(row(target_,0),position(it_0));
+	setClippedEndPosition(row(target_,1),position(it_1));
+	setClippedEndPosition(row(target_,0),position(it_0));
 
 	return length(matrix,0) - coordinate(source_,0) -2;
 }
@@ -1147,8 +1147,8 @@ SEQAN_CHECKPOINT
 		++target_1;
 	}
 
-	setSourceEndPosition(row(target_,1),position(it_1));
-	setSourceEndPosition(row(target_,0),position(it_0));
+	setClippedEndPosition(row(target_,1),position(it_1));
+	setClippedEndPosition(row(target_,0),position(it_0));
 
 	return length(matrix,0) - coordinate(source_,0) + position(it_1) - height_stop -1;
 }
