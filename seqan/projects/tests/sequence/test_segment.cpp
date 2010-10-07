@@ -220,9 +220,9 @@ int mainTestSegment()
 	Test_Infix();
 	Test_Suffix();
 
-	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_infix.h");
-	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_suffix.h");
-	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_prefix.h");
+//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_infix.h");
+//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_suffix.h");
+//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_prefix.h");
 	//debug::verifyCheckpoints("projects/library/seqan/sequence/segment_gram.h");
 
 	SEQAN_TREPORT("TEST SEGMENT END")
