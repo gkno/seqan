@@ -618,6 +618,14 @@ scanValues(/*IN and OUT*/ Iter< TSumList, _MiniSumListValueIterator > & it,
 template <typename TSumList, typename TSumList2>
 inline bool
 atEnd(Iter< TSumList, _MiniSumListValueIterator > & it,
+	  TSumList2 & container)
+{
+	return (!it.data_ptr) || (it.data_ptr == container.data_ + container.data_size);
+}
+
+template <typename TSumList, typename TSumList2>
+inline bool
+atEnd(Iter< TSumList, _MiniSumListValueIterator > & it,
 	  TSumList2 const & container)
 {
 	return (!it.data_ptr) || (it.data_ptr == container.data_ + container.data_size);
