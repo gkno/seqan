@@ -43,7 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/sequence.h
 */
 
-struct InfixSegment;
+struct InfixSegment {};
 
 template <typename THost, typename TSpec = InfixSegment>
 class Segment
@@ -294,6 +294,29 @@ hasNoHost(Segment<THost, TSpec> const & target)
 //                wurde bereits von test_operation_2_set gemacht
 // returns false: keine set Funktion verwenden 
 //                muss noch assign/append gemacht werden.
+template <typename TTarget, typename TSource, typename TTargetSpec, typename TSourceSpec>
+inline bool 
+operation_2_set_checkSpec(TTarget &target, TSource &source, TTargetSpec, TSourceSpec)
+{
+	return false;
+}
+
+template <typename TTarget, typename TSource, typename TSourceSpec>
+inline bool 
+operation_2_set_checkSpec(TTarget &target, TSource &source, TSourceSpec, TSourceSpec)
+{
+	set(target, source);
+	return true;
+}
+
+template <typename TTarget, typename TSource, typename TSourceSpec>
+inline bool 
+operation_2_set_checkSpec(TTarget &target, TSource &source, InfixSegment, TSourceSpec)
+{
+	set(target, host(source), beginPosition(source), endPosition(source));
+	return true;
+}
+
 template <typename THost, typename TSpec, typename TSource>
 inline bool 
 operation_2_set(Segment<THost, TSpec> &, 
@@ -307,10 +330,7 @@ operation_2_set(Segment<THost, TSpec> & target,
 				Segment<THost, TSpec2> & source)
 {
 	if (hasNoHost(target))
-	{
-		set(target, host(source), beginPosition(source), endPosition(source));
-		return true;
-	}
+		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -319,10 +339,7 @@ operation_2_set(Segment<THost const, TSpec> & target,
 				Segment<THost, TSpec2> & source)
 {
 	if (hasNoHost(target))
-	{
-		set(target, host(source), beginPosition(source), endPosition(source));
-		return true;
-	}
+		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -331,10 +348,7 @@ operation_2_set(Segment<THost const, TSpec> & target,
 				Segment<THost, TSpec2> const & source)
 {
 	if (hasNoHost(target))
-	{
-		set(target, host(source), beginPosition(source), endPosition(source));
-		return true;
-	}
+		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -343,10 +357,7 @@ operation_2_set(Segment<THost, TSpec> & target,
 				Segment<THost, TSpec2> const & source)
 {
 	if (hasNoHost(target))
-	{
-		set(target, host(source), beginPosition(source), endPosition(source));
-		return true;
-	}
+		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
 	return false;
 }
 template <typename THost, typename TSpec>

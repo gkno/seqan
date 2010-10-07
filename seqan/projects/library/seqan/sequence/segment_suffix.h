@@ -47,7 +47,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/sequence.h
 */
 
-struct SuffixSegment;
+struct SuffixSegment {};
 
 template <typename THost_>
 class Segment<THost_, SuffixSegment>
