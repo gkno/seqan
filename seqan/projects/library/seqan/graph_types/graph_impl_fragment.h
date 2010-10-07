@@ -163,7 +163,7 @@ class Fragment<TSize, ExactReversableFragment<TSpec> > {
 	 Fragment()	 {}
 
 	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l) :
-	 iseqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(false) 
+	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(false) 
 	 {
 		 SEQAN_CHECKPOINT
 	 }
