@@ -40,7 +40,6 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:@Spec.InfixSegment@.
-..include:seqan/sequence.h
 */
 
 struct InfixSegment {};
@@ -294,28 +293,38 @@ hasNoHost(Segment<THost, TSpec> const & target)
 //                wurde bereits von test_operation_2_set gemacht
 // returns false: keine set Funktion verwenden 
 //                muss noch assign/append gemacht werden.
-template <typename TTarget, typename TSource, typename TTargetSpec, typename TSourceSpec>
-inline bool 
-operation_2_set_checkSpec(TTarget &target, TSource &source, TTargetSpec, TSourceSpec)
-{
-	return false;
-}
 
-template <typename TTarget, typename TSource, typename TSourceSpec>
-inline bool 
-operation_2_set_checkSpec(TTarget &target, TSource &source, TSourceSpec, TSourceSpec)
+template <typename TSameSpec, typename TTargetInfix>
+struct SegmentSetImpl_
 {
-	set(target, source);
-	return true;
-}
+	template <typename TTarget, typename TSource>
+	static inline bool operation_2_set(TTarget &, TSource &)
+	{
+		return false;
+	}
+};
 
-template <typename TTarget, typename TSource, typename TSourceSpec>
-inline bool 
-operation_2_set_checkSpec(TTarget &target, TSource &source, InfixSegment, TSourceSpec)
+template <typename TTargetInfix>
+struct SegmentSetImpl_<True, TTargetInfix>
 {
-	set(target, host(source), beginPosition(source), endPosition(source));
-	return true;
-}
+	template <typename TTarget, typename TSource>
+	static inline bool operation_2_set(TTarget &target, TSource &source)
+	{
+		set(target, source);
+		return true;
+	}
+};
+
+template <>
+struct SegmentSetImpl_<False, True>
+{
+	template <typename TTarget, typename TSource>
+	static inline bool operation_2_set(TTarget &target, TSource &source)
+	{
+		set(target, host(source), beginPosition(source), endPosition(source));
+		return true;
+	}
+};
 
 template <typename THost, typename TSpec, typename TSource>
 inline bool 
@@ -330,7 +339,10 @@ operation_2_set(Segment<THost, TSpec> & target,
 				Segment<THost, TSpec2> & source)
 {
 	if (hasNoHost(target))
-		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
+		return SegmentSetImpl_<
+			typename TYPECMP<TSpec, TSpec2>::Type, 
+			typename TYPECMP<TSpec, InfixSegment>::Type
+		>::operation_2_set(target, source);
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -339,7 +351,10 @@ operation_2_set(Segment<THost const, TSpec> & target,
 				Segment<THost, TSpec2> & source)
 {
 	if (hasNoHost(target))
-		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
+		return SegmentSetImpl_<
+			typename TYPECMP<TSpec, TSpec2>::Type, 
+			typename TYPECMP<TSpec, InfixSegment>::Type
+		>::operation_2_set(target, source);
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -348,7 +363,10 @@ operation_2_set(Segment<THost const, TSpec> & target,
 				Segment<THost, TSpec2> const & source)
 {
 	if (hasNoHost(target))
-		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
+		return SegmentSetImpl_<
+			typename TYPECMP<TSpec, TSpec2>::Type, 
+			typename TYPECMP<TSpec, InfixSegment>::Type
+		>::operation_2_set(target, source);
 	return false;
 }
 template <typename THost, typename TSpec, typename TSpec2>
@@ -357,7 +375,10 @@ operation_2_set(Segment<THost, TSpec> & target,
 				Segment<THost, TSpec2> const & source)
 {
 	if (hasNoHost(target))
-		return operation_2_set_checkSpec(target, source, TSpec(), TSpec2());
+		return SegmentSetImpl_<
+			typename TYPECMP<TSpec, TSpec2>::Type, 
+			typename TYPECMP<TSpec, InfixSegment>::Type
+		>::operation_2_set(target, source);
 	return false;
 }
 template <typename THost, typename TSpec>
@@ -431,7 +452,6 @@ operation_2_set(Segment<THost, TSpec> & target,
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
-..include:seqan/sequence.h
 */
 
 //overload of binary version for strings: 
@@ -714,7 +734,6 @@ SEQAN_CHECKPOINT
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
-..include:seqan/sequence.h
 */
 
 
@@ -973,7 +992,6 @@ SEQAN_CHECKPOINT
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
-..include:seqan/sequence.h
 */
 
 template <typename TExpand>
