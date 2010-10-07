@@ -18,10 +18,12 @@
 #include <seqan/misc/misc_map.h>
 #include <seqan/misc/misc_random.h>
 #include <seqan/misc/misc_set.h>
+#include <seqan/misc/misc_interval_tree.h>
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
 
 #include "test_misc_long_word.h"
+#include "test_misc_interval_tree.h"
 
 using namespace std;
 using namespace seqan;
@@ -51,6 +53,21 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_CALL_TEST(test_misc_long_word_static_interface);
     SEQAN_CALL_TEST(test_misc_long_word_dynamic_interface);
 
+
+    // Test IntervalTree class
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_IntervalTree__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_IntervalTreeFromIterator__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_NonFullLength__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_AddInterval__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_TreeStructure__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_FindIntervalExcludeTouching__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_FindNoInterval__int);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_GraphMap__int_ComputeCenter_StoreIntervals);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_FindIntervalsIntervals__int_ComputeCenter);
+    SEQAN_CALL_TEST(Interval_Tree__IntervalTreeTest_Random__int_RandomCenter_StorePointsOnly);
+
+
+
     // Verify checkpoints.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/edit_environment.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_base.h");
@@ -63,6 +80,7 @@ SEQAN_BEGIN_TESTSUITE(test_misc) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_set.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/priority_type_heap.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/misc/misc_interval_tree.h");
 }
 SEQAN_END_TESTSUITE
 

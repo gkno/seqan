@@ -39,8 +39,7 @@
 #include <seqan/refinement/graph_impl_align_adapt.h>
 
 // Intervall trees
-#include <seqan/refinement/graph_impl_interval_types.h>
-#include <seqan/refinement/graph_impl_interval_tree.h>
+#include <seqan/misc/misc_interval_tree.h>
 
 // Refinement
 //#include <seqan/refinement/graph_algorithm_refine.h>

@@ -44,7 +44,6 @@
 // Test files
 #include "test_graph_impl_align.h"
 #include "test_graph_match_refinement.h"
-#include "test_graph_interval_tree.h"
 
 using namespace seqan;
 
@@ -73,18 +72,6 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_CALL_TEST(RefineAlign);
 
 
-    // Test IntervalTree class.
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_IntervalTree__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_IntervalTreeFromIterator__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_NonFullLength__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_AddInterval__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_TreeStructure__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalExcludeTouching__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindNoInterval__int);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_GraphMap__int_ComputeCenter_StoreIntervals);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_FindIntervalsIntervals__int_ComputeCenter);
-    SEQAN_CALL_TEST(Graph_Interval_Tree__IntervalTreeTest_Random__int_RandomCenter_StorePointsOnly);
-
     // Restore std::cout
 //      std::cout.rdbuf(strm_puffer);
 
@@ -98,8 +85,6 @@ SEQAN_BEGIN_TESTSUITE(test_refinement)
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_algorithm_refine_scoring.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_align_adapt.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_tree.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/refinement/graph_impl_interval_types.h");
 
 }
 SEQAN_END_TESTSUITE
