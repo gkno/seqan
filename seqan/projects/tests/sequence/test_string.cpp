@@ -492,7 +492,7 @@ void Test_String_Stack()
 	SEQAN_TASSERT(str2[4] == 'o');
 	SEQAN_TASSERT(capacity(str2) >= length(str2));
 
-//	resize(str1, 30);
+	resize(str1, 30);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -688,7 +688,7 @@ void Test_Segment()
 	SEQAN_TASSERT(infix_2 == "this is a")
 
 	Infix<String<char> >::Type infix_3(str_1);
-	SEQAN_TASSERT(infix_3 == getValue(str_1, 0))
+	SEQAN_TASSERT(infix_3 == str_1)
 	SEQAN_TASSERT(id(infix_3) == id(str_1))
 
 	Infix<String<char> >::Type infix_4(str_1, 5, 9);

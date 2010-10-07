@@ -43,7 +43,7 @@ void Test_Infix()
 	SEQAN_TASSERT(infix_2 == "this is a")
 
 	Infix<String<char> >::Type infix_3(str_1);
-	SEQAN_TASSERT(infix_3 == getValue(str_1, 0))
+	SEQAN_TASSERT(infix_3 == str_1)
 	SEQAN_TASSERT(id(infix_3) == id(str_1))
 
 	Infix<String<char> >::Type infix_4(str_1, 5, 9);
