@@ -18,7 +18,7 @@ CPP_EXTS = ['c', 'C', 'cpp', 'CPP', 'c++', 'C++', 'h', 'H', 'hpp', 'HPP',
 DDDOC_EXTS = ['dddoc', 'DDDOC']
 
 # List of ignored directory names.
-IGNORED_DIRS = ['CSV', '.svn', 'seeds2', 'find2']
+IGNORED_DIRS = ['CSV', '.svn', 'seeds2', 'find2', 'cmake']
 
 DATA = None
 ID = 0
