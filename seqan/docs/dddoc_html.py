@@ -1706,10 +1706,13 @@ def warningPage(cat, key, data):
     title = getPageTitle(data)
     
     if (convention == 'bigsmall' and ((title[0] < 'A') or (title[0] > 'Z'))):
-        WARNING_COUNT += 1
-        print
-        print "\n!!  WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
-        print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
+        # Ugly hack: Allowing to violate bigsmall convention for tag groups that
+        # have the substring ' Tags'
+        if ' Tags' not in title:
+            WARNING_COUNT += 1
+            print
+            print "\n!!  WARNING: \"" + title + "\" breaks naming convention: " + cat + " must start with capital letter."
+            print '        Location: %s:%d' % (data.lines[0].file_name, data.lines[0].line_no)
     elif (convention == 'smallbig' and ((title[0] < 'a') or (title[0] > 'z'))):
         WARNING_COUNT += 1
         print
