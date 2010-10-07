@@ -61,6 +61,7 @@ SEQAN_CHECKPOINT
 
 	//pump trace into align_ (note: this is relatively slow code here. it could be improved if specialized to the Align Specs)
 	clearGaps(align_);
+	clearClipping(align_);
 
 	TSize i = length(trace.sizes); //scan trace backwards
 	TRowIterator it0 = begin(row(align_, 0));

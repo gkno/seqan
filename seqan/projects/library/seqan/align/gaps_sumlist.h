@@ -280,6 +280,17 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSource>
+inline void
+clearClipping(Gaps<TSource, SumlistGaps> & me)
+{
+SEQAN_CHECKPOINT
+	_setSourceBeginPosition(me, 0);
+	_setSourceEndPosition(me, length(source(me)));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 // transforms source- to view-position
 template <typename TSource>
 inline typename Position< Gaps<TSource, SumlistGaps> >::Type

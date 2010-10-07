@@ -345,6 +345,19 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename TSource>
+inline void
+clearClipping(Gaps<TSource, ArrayGaps> & me)
+{
+SEQAN_CHECKPOINT
+	_setEndPosition(me, length(source(me)));
+	_setTrailingGaps(me, 0);
+	_setSourceBeginPosition(me, 0);
+	_setSourceEndPosition(me, length(source(me)));
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 /**
 .Function.toViewPosition:
 ..summary:Transforms source to view position.

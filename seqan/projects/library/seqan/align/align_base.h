@@ -508,6 +508,20 @@ SEQAN_CHECKPOINT
 	_streamPut(target, '\n');
 }
 
+template <typename TSource, typename TSpec>
+inline void
+clearClipping(Align<TSource, TSpec> & align_)
+{
+SEQAN_CHECKPOINT
+	typedef typename Rows<Align<TSource, TSpec> >::Type TRows;
+	typedef typename Iterator<TRows>::Type TRowsIterator;
+
+	for (TRowsIterator it = begin(rows(align_)); it != end(rows(align_)); goNext(it))
+	{
+		clearClipping(*it);
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // stream operators
 //////////////////////////////////////////////////////////////////////////////
