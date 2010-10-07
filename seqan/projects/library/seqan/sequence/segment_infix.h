@@ -105,7 +105,7 @@ SEQAN_CHECKPOINT
 	Segment(typename _Parameter<THost>::Type _host):
 		data_host(_toPointer(_host)),
 		data_begin_position(0),
-		data_end_position(length(value(_host)))
+		data_end_position(length(value(data_host)))
 	{
 SEQAN_CHECKPOINT
         _checkMemberVariables();
