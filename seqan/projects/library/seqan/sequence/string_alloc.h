@@ -410,14 +410,7 @@ inline void
 move(String<TValue, Alloc<TSpec> > & target, 
 	 String<TValue, Alloc<TSpec> > const & source)
 {
-	clear(target);
-	target.data_begin = source.data_begin;
-	target.data_end = source.data_end;
-	target.data_capacity = source.data_capacity;
-
-	source.data_begin = 0;
-	source.data_end = 0;
-	source.data_capacity = 0;
+	move(target, const_cast<String<TValue, Alloc<TSpec> > &>(source));
 }
 
 //////////////////////////////////////////////////////////////////////////////
