@@ -654,7 +654,7 @@ def pageIndexpage(fl, cat):
     fl.write('</div>')
     fl.write('</td></tr>')
     fl.write('</table>')
-    fl.write('<p style="font-size:50%; color: #909090">Page built @%s</p>' %
+    fl.write('<p style="font-size:50%%; color: #909090">Page built @%s</p>' %
              datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
     fl.write('</body>')
     fl.write('</html>')
@@ -751,7 +751,7 @@ def pageContent(fl, data):
     fl.write('</div>')
     fl.write('</td></tr>')
     fl.write('</table>')
-    fl.write('<p style="font-size:50%; color: #909090">Page built @%s</p>' %
+    fl.write('<p style="font-size:50%%; color: #909090">Page built @%s</p>' %
              datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
     fl.write('</body>')
     fl.write('</html>')
