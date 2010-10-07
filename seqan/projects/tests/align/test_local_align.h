@@ -33,9 +33,9 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 
 	int score = _smithWaterman(ali,sw_finder,score_type,cutoff);
 	
-	SEQAN_TASSERT(score == 9);
-	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
-	SEQAN_TASSERT(row(ali,1) == "ata-gagt");
+	SEQAN_ASSERT_EQ(score, 9);
+	SEQAN_ASSERT_TRUE(row(ali,0) == "ataagcgt");
+	SEQAN_ASSERT_TRUE(row(ali,1) == "ata-gagt");
 	
 	int i = 1;
 	while (true){
@@ -47,94 +47,94 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 			break;
 		}
 		if(i == 1){
-			SEQAN_TASSERT(score == 5);
-			SEQAN_TASSERT(row(ali,0) == "tc-tcg");
-			SEQAN_TASSERT(row(ali,1) == "tcatag");
+			SEQAN_ASSERT_EQ(score, 5);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "tc-tcg");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "tcatag");
 		}
 		if(i == 2){
-			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "tc");
-			SEQAN_TASSERT(row(ali,1) == "tc");
+			SEQAN_ASSERT_EQ(score, 4);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "tc");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "tc");
 		}
 		if(i == 3){
-			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "gc");
-			SEQAN_TASSERT(row(ali,1) == "gc");
+			SEQAN_ASSERT_EQ(score, 4);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "gc");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "gc");
 		}
 		if(i == 4){
-			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "ag");
-			SEQAN_TASSERT(row(ali,1) == "ag");
+			SEQAN_ASSERT_EQ(score, 4);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "ag");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "ag");
 		}
 		if(i == 5){
-			SEQAN_TASSERT(score == 4);
-			SEQAN_TASSERT(row(ali,0) == "taagcgtctcg");
-			SEQAN_TASSERT(row(ali,1) == "tcatagagttg");
+			SEQAN_ASSERT_EQ(score, 4);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "taagcgtctcg");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "tcatagagttg");
 		}
 		if(i == 6){
-			SEQAN_TASSERT(score == 3);
-			SEQAN_TASSERT(row(ali,0) == "ata");
-			SEQAN_TASSERT(row(ali,1) == "aga");
+			SEQAN_ASSERT_EQ(score, 3);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "ata");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "aga");
 		}
 		if(i == 7){
-			SEQAN_TASSERT(score == 3);
-			SEQAN_TASSERT(row(ali,0) == "cgt");
-			SEQAN_TASSERT(row(ali,1) == "cat");
+			SEQAN_ASSERT_EQ(score, 3);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "cgt");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "cat");
 		}
 		if(i == 8){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "g");
-			SEQAN_TASSERT(row(ali,1) == "g");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "g");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "g");
 		}
 		if(i == 9){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "t");
-			SEQAN_TASSERT(row(ali,1) == "t");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "t");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "t");
 		}
 		if(i == 10){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "a");
-			SEQAN_TASSERT(row(ali,1) == "a");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "a");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "a");
 		}
 		if(i == 11){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "c");
-			SEQAN_TASSERT(row(ali,1) == "c");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "c");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "c");
 		}
 		if(i == 12){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "a");
-			SEQAN_TASSERT(row(ali,1) == "a");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "a");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "a");
 		}
 		if(i == 13){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "t");
-			SEQAN_TASSERT(row(ali,1) == "t");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "t");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "t");
 		}
 		if(i == 14){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "c");
-			SEQAN_TASSERT(row(ali,1) == "c");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "c");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "c");
 		}
 		if(i == 15){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "g");
-			SEQAN_TASSERT(row(ali,1) == "g");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "g");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "g");
 		}
 		if(i == 16){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "t");
-			SEQAN_TASSERT(row(ali,1) == "t");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "t");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "t");
 		}
 		if(i == 17){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "a");
-			SEQAN_TASSERT(row(ali,1) == "a");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "a");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "a");
 		}
 		if(i == 18){
-			SEQAN_TASSERT(score == 2);
-			SEQAN_TASSERT(row(ali,0) == "t");
-			SEQAN_TASSERT(row(ali,1) == "t");
+			SEQAN_ASSERT_EQ(score, 2);
+			SEQAN_ASSERT_TRUE(row(ali,0) == "t");
+			SEQAN_ASSERT_TRUE(row(ali,1) == "t");
 		}
 		++i;
 	}
@@ -153,15 +153,15 @@ SEQAN_DEFINE_TEST(testLocalAlign) {
 			}
 		}
 
-		SEQAN_TASSERT(check == true);
+		SEQAN_ASSERT_TRUE(check == true);
 
 	}
 
 //desweiteren nur so:
 	push(sw_finder.pQ,LocalAlignmentFinder<int>::TPQEntry());
-	SEQAN_TASSERT(empty(sw_finder.pQ) == false);
+	SEQAN_ASSERT_TRUE(empty(sw_finder.pQ) == false);
 	clear(sw_finder.pQ);
-	SEQAN_TASSERT(empty(sw_finder.pQ) == true);
+	SEQAN_ASSERT_TRUE(empty(sw_finder.pQ) == true);
 
 
 
@@ -184,14 +184,14 @@ SEQAN_DEFINE_TEST(testLocalAlign2) {
 	LocalAlignmentFinder<int> sw_finder = LocalAlignmentFinder<int>();
 	
 	int score = localAlignment(ali, sw_finder, score_type, 5);
-	SEQAN_TASSERT(score == 9);
-	SEQAN_TASSERT(row(ali,0) == "ataagcgt");
-	SEQAN_TASSERT(row(ali,1) == "ata-gagt");
+	SEQAN_ASSERT_EQ(score, 9);
+	SEQAN_ASSERT_TRUE(row(ali,0) == "ataagcgt");
+	SEQAN_ASSERT_TRUE(row(ali,1) == "ata-gagt");
 	
 	score = localAlignment(ali, sw_finder, score_type, 5);
-	SEQAN_TASSERT(score == 5);
-	SEQAN_TASSERT(row(ali,0) == "tc-tcg");
-	SEQAN_TASSERT(row(ali,1) == "tcatag");
+	SEQAN_ASSERT_EQ(score, 5);
+	SEQAN_ASSERT_TRUE(row(ali,0) == "tc-tcg");
+	SEQAN_ASSERT_TRUE(row(ali,1) == "tcatag");
 
 	score = localAlignment(ali, sw_finder, score_type, 5, WatermanEggert());
 	SEQAN_ASSERT_EQ(score, 0);

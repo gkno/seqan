@@ -122,7 +122,7 @@ SEQAN_DEFINE_TEST(test_align_myers_test_short) {
         assignSource(row(s_m_ali, 1), s_str1);
 
         m_score = globalAlignment(s_m_ali,SimpleScore(), MyersBitVector());
-        SEQAN_TASSERT(nw_score == m_score);
+        SEQAN_ASSERT_EQ(nw_score, m_score);
 		
         // compute complete alignments
         Align<String<ALPHABET>, ArrayGaps> s_hm_ali;
@@ -131,8 +131,8 @@ SEQAN_DEFINE_TEST(test_align_myers_test_short) {
         assignSource(row(s_hm_ali, 1), s_str1);
 
         hm_score = globalAlignment(s_hm_ali,SimpleScore(), MyersHirschberg());
-        SEQAN_TASSERT(nw_score == hm_score);
-        SEQAN_TASSERT(edit_distance(s_hm_ali) == hm_score);
+        SEQAN_ASSERT_EQ(nw_score, hm_score);
+        SEQAN_ASSERT_EQ(edit_distance(s_hm_ali), hm_score);
 
         ++test_count;
     }
@@ -167,7 +167,7 @@ SEQAN_DEFINE_TEST(test_align_myers_test_long) {
 
         m_score = globalAlignment(l_m_ali,SimpleScore(), MyersBitVector());
 
-        SEQAN_TASSERT(nw_score == m_score);
+        SEQAN_ASSERT_EQ(nw_score, m_score);
 		
         // compute complete alignments
         Align<String<ALPHABET>, ArrayGaps> l_hm_ali;
@@ -177,8 +177,8 @@ SEQAN_DEFINE_TEST(test_align_myers_test_long) {
 
         hm_score = globalAlignment(l_hm_ali, SimpleScore(), MyersHirschberg());
 
-        SEQAN_TASSERT(nw_score == hm_score);
-        SEQAN_TASSERT(edit_distance(l_hm_ali) == hm_score);
+        SEQAN_ASSERT_EQ(nw_score, hm_score);
+        SEQAN_ASSERT_EQ(edit_distance(l_hm_ali), hm_score);
 
         ++test_count;
     }
@@ -214,8 +214,8 @@ SEQAN_DEFINE_TEST(test_align_hirschberger) {
 
         hm_score = globalAlignment(hirsch_ali,SimpleScore(), Hirschberg());
 
-        SEQAN_TASSERT(nw_score == hm_score);
-        SEQAN_TASSERT(edit_distance(hirsch_ali) == hm_score);
+        SEQAN_ASSERT_EQ(nw_score,  hm_score);
+        SEQAN_ASSERT_EQ(edit_distance(hirsch_ali), hm_score);
 
         ++test_count;
     }
