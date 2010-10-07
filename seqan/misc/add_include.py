@@ -28,6 +28,7 @@ USAGE: add_include.py PATH_TO_SEQAN.
 def processHeaderFile(base_path, relative_path):
   """Process the header and insert the .include line if it is not already there."""
   full_path = os.path.join(base_path, relative_path)
+  print full_path
   # Read file.
   with open(full_path, 'r') as f:
     contents = f.readlines()
@@ -60,8 +61,9 @@ def processHeaderFile(base_path, relative_path):
         in_doc = False
         has_include = False
     else:
-      if line.startswith('.Functionma') or line.startswith('.Metafunction') or \
-            line.startswith('.Tag') or line.startswith('.Spec'):
+      if line.startswith('.Function') or line.startswith('.Metafunction') or \
+            line.startswith('.Tag') or line.startswith('.Spec') or \
+            line.startswith('.Class'):
         in_doc = True
     result.append(line)
 
@@ -78,6 +80,8 @@ def collectHeaderFilenames(base_path):
     for f in files:
       if not f.endswith('.h'):
         continue  # Ignore non-headers.
+      if f.startswith('.'):
+        continue  # Ignore hidden files
       result.append(os.path.join(root, f)[len(base_path) + 1:])
     # Do not visit .svn directories.
     if '.svn' in dirs:
