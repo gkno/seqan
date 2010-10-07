@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Use @Metafunction.Value@ to get the value type for a given class.
 ..param.size:A positive integer that specifies the number of values in each allocated block.
 ...remarks: Size has to be a power of 2, e.g., 1024.
+..include:seqan/seeds.h
 */
 struct _Free_Pointer;
 typedef Tag<_Free_Pointer> const FreeMemoryPointer;	
@@ -285,6 +286,7 @@ _raiseMemory(MemoryManager<TValue,Block<SPACE>, TFree > &manager,
 ...type:Class.MemoryManager
 ..param.pos: The ID that should be released.
 ..remarks: The value at this position is not deleted.
+..include:seqan/seeds.h
 */
 template<typename TValue, unsigned int SPACE, typename TFree, typename TPosition> 
 void
@@ -306,6 +308,7 @@ releaseID(MemoryManager<TValue,Block<SPACE>, TFree > &manager,
 ..param.manager: The MemoryManager
 ...type:Class.MemoryManager
 ..return: A unused ID.
+..include:seqan/seeds.h
 */
 template<typename TValue, unsigned int SPACE, typename TFree> 
 inline typename Size<String<TValue, Block<SPACE> > >::Type

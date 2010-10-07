@@ -337,6 +337,7 @@ SEQAN_CHECKPOINT
 ..returns:$true$ if $object$ depends one some other object, $false$ otherwise.
 ..remarks:An object "$a$" depends on another object "$b$", if changing "$b$" can invalidate "$a$";
 especially the destruction of "$b$" invalidates "$a$".
+..include:seqan/sequence.h
 */
 template <typename TValue>
 inline bool
@@ -568,6 +569,7 @@ clear(String<TValue, CStyle> & me)
 ...default:Specified by @Metafunction.DefaultOverflowImplicit@ of the $target$ type.
 ..remarks.text:It is guaranteed, that after calling this function $source$ and $target$ can be used independently.
 ..see:Spec.CStyle String
+..include:seqan/sequence.h
 */
 
 template <typename TExpand>
@@ -817,6 +819,7 @@ SEQAN_CHECKPOINT
 ...type:Adaption.char array
 ..returns:A temporary @Spec.CStyle String@ object of that was constructed for $object$.
 ..remarks:Notational sugar.
+..include:seqan/sequence.h
 */
 
 template <typename TValue>

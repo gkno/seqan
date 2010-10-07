@@ -217,6 +217,7 @@ public:
 ..param.l:The size of the motif.
 ..param.d:The number of substitutions.
 ..param.m:The total number of possible l-mers of a given dataset.
+..include:seqan/find_motif.h
 */
 
 template<typename TType> 
@@ -258,6 +259,7 @@ _computeProjectionSize(TType const & alp_size,
 ..param.d:The number of substitutions.
 ..param.m:The total number of possible l-mers of a given dataset.
 ..param.k:The projection size.
+..include:seqan/find_motif.h
 */
 
 template<typename TType> 
@@ -309,6 +311,7 @@ _computeBucketThreshold(TType const & alp_size,
 ..remarks:tr>= log(1-q)/log(B), where p is the probability that each motif occurence hashes 
           to the planted bucket and B is the probability that fewer than s planted occurences hash
           to the planted buckes in a given trial
+..include:seqan/find_motif.h
 */
 
 template<typename TType> 
@@ -369,6 +372,7 @@ _computeNumOfTrials(TType const & t,
           is able to run in OOPS, ZOOPS and TCM mode.
 ..remarks:The algorithm uses the EM procedure during the refinement phase which was introduced by Bailey 
           and Elkan.
+..include:seqan/find_motif.h
 */
 
 template<typename TSeqType, typename TStrings, typename TModel>
@@ -493,6 +497,7 @@ findMotif(MotifFinder<TSeqType, Projection> & finder,
 		  bucket which is labeled with the specific projection value.
 ..cat:Motif Search
 ..signature:_filteringStep(buckets,count_ar,num_of_relevant_buckets,dataset,shape,l,s)
+..include:seqan/find_motif.h
 */
 
 template<typename TBucketAr, typename TArray, typename TType, typename TStrings, typename TPositions>
@@ -557,6 +562,7 @@ _filteringStep(TBucketAr & buckets,
 ..summary:Refines the collection of l-mers in each relevant bucket which contains at least s l-mers.
 ..cat:Motif Search
 ..signature:_refinementStep(consensus_seq,positions,l_mers,dataset,t,l,d,is_exact,model_type)
+..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -931,6 +937,7 @@ _refinementStep(TString & consensus_seq,
 ...type:$set<int>$
 ..param.l:The size of the motif.
 ..param.k:The projection size.
+..include:seqan/find_motif.h
 */
 
 template<typename TAssociativeContainer, typename TType>
@@ -956,6 +963,7 @@ choosePositions(TAssociativeContainer & positions, TType const & l, TType const 
 ..param.positions:The set of k chosen positions.
 ...remarks:$positions$ is of type $set<int>$
 ..param.k:An iterator pointing to the first positions of a given sequence.
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TIter>
@@ -1002,6 +1010,7 @@ projectLMer(std::set<int> & positions, TIter it)
 ...type:Class.String
 ....signature:String<TFrequencyDistribution>
 ..param.l:The size of the motif.
+..include:seqan/find_motif.h
 */
 
 template<typename TStrings, typename TIter, typename TType, typename TProfile>
@@ -1071,6 +1080,7 @@ _getLMersWithTheLargestLikelihoodRatio(TStrings & l_mers,
 ...type:Class.String
 ....signature:String<TFrequencyDistribution>
 ..remarks:Computes the sum of log probabilites instead of the product of probabilites
+..include:seqan/find_motif.h
 */
 
 template<typename TStrIter, typename TProfile>
@@ -1113,6 +1123,7 @@ _computeLikelihoodRatioOfLMer(TStrIter l_mer_begin,
 ..param.profile:The profile object which is a set of frequency distributions.
 ...type:Class.String
 ....signature:String<TFrequencyDistribution>
+..include:seqan/find_motif.h
 */
 
 template<typename TStrings, typename TProfile>
@@ -1147,6 +1158,7 @@ _computeLikelihoodRatioOfLMers(TStrings const & l_mers,
 ..param.profile:A StringSet of @Class.FrequencyDistribution|frequency distributions@.
 ...type:Class.StringSet
 ..param.l:The size of the motif.
+..include:seqan/find_motif.h
 */
 
 template<typename TString, typename TProfile>
@@ -1193,6 +1205,7 @@ determineConsensusSeq(TString & consensus_seq,
 ...signature:String<TString>
 ...param.TString:A @Class.String@ type
 ....type:Class.String
+..include:seqan/find_motif.h
 */
 
 template<typename TValue>

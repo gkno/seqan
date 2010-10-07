@@ -54,6 +54,7 @@ Note: Without edge ids external property maps do not work for edges!
 ..remarks:The default EdgeStump in all graph types does not consider a cargo. 
 However, in default usage every graph does store an edge id. 
 Edge ids are used to append additional properties to edges with the help of external property maps.
+..include:seqan/graph_types.h
 */
 template<typename TCargo, typename TSpec>
 class EdgeStump<TCargo, true, false, false, TSpec> 
@@ -327,6 +328,7 @@ struct Spec<EdgeStump<TCargo, TList, TSource, TId, TSpec> const>
 ..remarks:If cargo is not present the return value is (void*) 0.
 ..see:Function.cargo
 ..see:Function.assignCargo
+..include:seqan/graph_types.h
 */
 
 
@@ -383,6 +385,7 @@ getCargo(EdgeStump<void, TList, TSource, TId, TSpec>*)
 ..remarks:If cargo is not present the return value is (void*) 0.
 ..see:Function.getCargo
 ..see:Function.assignCargo
+..include:seqan/graph_types.h
 */
 
 
@@ -442,6 +445,7 @@ cargo(EdgeStump<void, TList, TSource, TId, TSpec> const*)
 ..remarks:In cargoless EdgeStumps this operation is a NOP.
 ..see:Function.cargo
 ..see:Function.getCargo
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec, typename TCargo2>
@@ -477,6 +481,7 @@ assignCargo(EdgeStump<void, TList, TSource, TId, TSpec>*,
 ..returns:void
 ..see:Function.target
 ..see:Function.getTarget
+..include:seqan/graph_types.h
 */
 
 
@@ -501,6 +506,7 @@ assignTarget(EdgeStump<TCargo, TList, TSource, TId, TSpec>* es,
 ..returns:Reference to the target vertex.
 ..see:Function.assignTarget
 ..see:Function.getTarget
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
@@ -533,6 +539,7 @@ target(EdgeStump<TCargo, TList, TSource, TId, TSpec> const* es)
 ..returns:Target vertex.
 ..see:Function.assignTarget
 ..see:Function.target
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TList, bool TSource, bool TId, typename TSpec>
@@ -569,6 +576,7 @@ However, EdgeStumps can be configured to contain a source vertex, e.g., in undir
 ..returns:void
 ..see:Function.source
 ..see:Function.getSource
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TList, bool TId, typename TSpec, typename TVertexDescriptor>
@@ -649,6 +657,7 @@ However, EdgeStumps can be configured to contain a source vertex, e.g., in undir
 ..returns:Source vertex.
 ..see:Function.Graph#assignSource
 ..see:Function.source
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TList, bool TId, typename TSpec>
@@ -708,6 +717,7 @@ getSource(EdgeStump<TCargo, TList, false, TId, TSpec>*)
 ..returns:void
 ..see:Function.nextT
 ..see:Function.getNextT
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -731,6 +741,7 @@ assignNextT(EdgeStump<TCargo, true, TSource, TId, TSpec>* es,
 ..returns:Reference to the next target pointer.
 ..see:Function.assignNextT
 ..see:Function.getNextT
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -763,6 +774,7 @@ nextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 ..returns:Pointer to the next edge stump in target list.
 ..see:Function.assignNextT
 ..see:Function.nextT
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TSource, bool TId, typename TSpec>
@@ -798,6 +810,7 @@ getNextT(EdgeStump<TCargo, true, TSource, TId, TSpec> const* es)
 ..returns:void
 ..see:Function.nextS
 ..see:Function.getNextS
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TId, typename TSpec>
@@ -834,6 +847,7 @@ assignNextS(EdgeStump<TCargo, true, false, TId, TSpec>*,
 ..returns:Reference to the next source pointer.
 ..see:Function.assignNextS
 ..see:Function.getNextS
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TId, typename TSpec>
@@ -887,6 +901,7 @@ nextS(EdgeStump<TCargo, true, false, TId, TSpec> const*)
 ..returns:Pointer to the next edge stump in source list.
 ..see:Function.assignNextS
 ..see:Function.nextS
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, bool TId, typename TSpec>

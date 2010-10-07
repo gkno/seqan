@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.GapAnchor#gapPos
 ..summary:Sequence character position in the gapped sequence.
 ..class:Class.GapAnchor
+..include:seqan/store.h
 */
 
 // We store gap anchors only for the first text character behind a gap or a clipped sequence character

@@ -200,6 +200,7 @@ The length is set to 0.
 The capacity can be changed, depending on the implementation.
 ..see:Function.resize
 ..see:Function.length
+..include:seqan/sequence.h
 */
 
 template <typename TValue, typename TSpec>
@@ -677,6 +678,7 @@ SEQAN_CHECKPOINT
 
 /**
 .Function.resizeSpace.param.object.type:Class.String
+..include:seqan/sequence.h
 */
 
 template<typename TValue, typename TSpec, typename TSize, typename TBeginPosition, typename TEndPosition, typename TExpand>
@@ -1152,6 +1154,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.insertValue:
+..include:seqan/sequence.h
 */
 
 template <typename TExpand>

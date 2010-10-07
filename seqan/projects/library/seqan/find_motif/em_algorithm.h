@@ -54,6 +54,7 @@ namespace SEQAN_NAMESPACE_MAIN
           variant of the basic EM which allows multiple occurrences of a motif in any sequence and can 
 		  therefore be performed on sequences of one of the model types @Tag.OOPS@, @Tag.ZOOPS@ and 
 		  @Tag.TCM@. We use the EM algorithm of MEME for the refinement step of PROJECTION.
+..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -108,6 +109,7 @@ em(TProfile & profile,
 ...type:Tag.OOPS
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
+..include:seqan/find_motif.h
 */
 
 template<typename TMatrix, typename TProfile, typename TIter, typename TType>
@@ -207,6 +209,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.oops_model:The oops_model object.
 ...type:Tag.OOPS
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile, typename TIter, typename TMatrix, typename TType>
@@ -333,6 +336,7 @@ em(TProfile & profile,
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
 ..remarks:The parameter gamma is reestimated during the E-step to save calculation time.
+..include:seqan/find_motif.h
 */
 
 template<typename TMatrix, typename TProfile, typename TIter, typename TType>
@@ -464,6 +468,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.zoops_model:The zoops_model object.
 ...type:Tag.ZOOPS
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile, typename TIter, typename TMatrix, typename TType>
@@ -598,6 +603,7 @@ em(TProfile & profile,
 ..remarks:The joint log likelihood is not computed in the M-step as MEME does, but rather in the E-step
           of the algorithm.
 ..remarks:The parameter lambda is reestimated during the E-step to save calculation time.
+..include:seqan/find_motif.h
 */
 
 template<typename TMatrix, typename TProfile, typename TIter, typename TType>
@@ -696,6 +702,7 @@ _computeEStep(TMatrix & matrix_w,
 ..param.tcm_model:The tcm_model object.
 ...type:Tag.TCM
 ..remarks:The joint log likelihood is computed in the E-step of the algorithm.
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile, typename TIter, typename TMatrix, typename TType>
@@ -772,6 +779,7 @@ _computeMStep(TProfile & profile,
 ..param.t:The number of input sequences.
 ..param.l:The size of the motif.
 ..remarks:Function is used by the EM algorithm for TCM models.
+..include:seqan/find_motif.h
 */
 
 template<typename TMatrix, typename TIter, typename TType>

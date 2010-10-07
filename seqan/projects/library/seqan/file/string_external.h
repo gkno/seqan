@@ -1534,6 +1534,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 ..signature:flush(string)
 ..param.string:An external string. All dirty pages are flushed to disk.
 ...type:Spec.External String
+..include:seqan/file.h
 */
     template < typename TValue, typename TConfig >
     inline void 
@@ -1636,6 +1637,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 ..signature:open(string, fileName[, openMode]))
 ..param.string:An external string.
 ...type:Spec.External String
+..include:seqan/file.h
 */
 
 	template < typename TValue, typename TConfig >
@@ -1701,6 +1703,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 ..signature:openTemp(string)
 ..param.string:An external string.
 ...type:Spec.External String
+..include:seqan/file.h
 */
 	template < typename TValue, typename TConfig >
     inline bool 
@@ -1743,6 +1746,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 ..signature:close(string)
 ..param.string:An external string.
 ...type:Spec.External String
+..include:seqan/file.h
 */
 	template < typename TValue, typename TConfig >
     inline bool 

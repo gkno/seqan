@@ -1069,6 +1069,7 @@ write(TFile & file,
 ..param.str:A string set.
 ..see:Function.getStringSet
 ..see:Function.stringSet
+..include:seqan/refinement.h
 */
 template<typename TString, typename TDefault, typename TCargo, typename TSpec, typename TDefault2>
 inline void
@@ -1114,6 +1115,7 @@ assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo
 ..returns:A string set.
 ..see:Function.assignStringSet
 ..see:Function.stringSet
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec>
 inline typename Host<Graph<Alignment<TStringSet, TCargo, TSpec> > const>::Type&
@@ -1136,6 +1138,7 @@ getStringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 ..returns:A reference or temporary of @Class.StringSet.string set@ type.
 ..see:Function.assignStringSet
 ..see:Function.getStringSet
+..include:seqan/refinement.h
 */
 
 template <typename T>
@@ -1168,6 +1171,7 @@ stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The label.
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Infix<typename Value<TStringSet>::Type>::Type
@@ -1200,6 +1204,7 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The sequence id.
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Id<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
@@ -1223,6 +1228,7 @@ sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The begin position.
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
@@ -1245,6 +1251,7 @@ fragmentBegin(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:The length of the fragment represented by this vertex descriptor.
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline typename Size<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type&
@@ -1267,6 +1274,7 @@ fragmentLength(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..param.id:A sequence id.
 ..param.pos:A position.
 ..returns:The vertex covering the given position on the specified sequence.
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId, typename TPos> 
 inline typename VertexDescriptor<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
@@ -1387,6 +1395,7 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 ..param.id:A sequence id.
 ..returns:A sequence position
 ..see:Function.getLastCoveredPosition
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId> 
 inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
@@ -1430,6 +1439,7 @@ getFirstCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ..param.id:A sequence id.
 ..returns:A sequence position
 ..see:Function.getFirstCoveredPosition
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSeqId> 
 inline typename Position<Graph<Alignment<TStringSet, TCargo, TSpec> > >::Type 
@@ -1574,6 +1584,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 ...type:Spec.Alignment Graph
 ..param.matrix:Out-parameter: A string that represents an alignment matrix.
 ..returns: A bool that is true iff the alignment graph is a valid alignment
+..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix> 
 inline bool

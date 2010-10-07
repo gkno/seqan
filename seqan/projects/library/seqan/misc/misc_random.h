@@ -88,6 +88,7 @@ bool _MersenneBuffer<T>::is_initialized = false;
 ..param.doSRand:If $true$, the Mersenne-Twister is initialized with a random number from $std::rand$.
 ...type:nolink:bool
 ..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
+..include:seqan/misc.h
 */
 
 inline void 
@@ -133,6 +134,7 @@ mtRandInit()
 ...type:nolink:unsigned
 ..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
 ..see:Function.mtRandInit
+..include:seqan/misc.h
 */
 
 inline unsigned 
@@ -167,6 +169,7 @@ mtRand()
 .Function.mtRandDouble:
 ..summary:Return a random number between 0 and 1 using mtRand.
 ..see:Function.mtRand
+..include:seqan/misc.h
 */
 inline double
 mtRandDouble()

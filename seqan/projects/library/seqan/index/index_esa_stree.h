@@ -451,6 +451,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ...type:Spec.VSTree Iterator
 ..returns:The length of the sequence returned by @Function.representative@
 ...type:Metafunction.Size|Size type of the underlying index
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -499,6 +500,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ...type:Spec.TopDownHistory Iterator
 ..returns:The length of the path from root to $iterator$ node, e.g. 0 is returned for the root node.
 ...type:Metafunction.Size|Size type of the underlying index
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -518,6 +520,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ...type:Spec.TopDown Iterator
 ..returns:The length of the sequence returned by @Function.representative@ of the parent node.
 ...type:Metafunction.Size|Size type of the underlying index
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -538,6 +541,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ...type:Spec.TopDown Iterator
 ..returns:$true$ if @Function.parentEdgeLength@$ returns 0, otherwise $false$.
 ...type:Metafunction.Size|Size type of the underlying index
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -566,6 +570,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..param.result:A reference to the resulting lca node.
 ...type:Spec.TopDownHistory Iterator
 ..returns:$false$ if the lca of $a$ and $b$ is the root node, otherwise $true$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec1, class TSpec2 >
@@ -622,6 +627,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..param.b:The second node.
 ...type:Spec.TopDownHistory Iterator
 ..returns:The lcp-length of $a$ and $b$.
+..include:seqan/index.h
 */
 
 	// return the lcp of a and b by seeking the lca of them
@@ -706,6 +712,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ..signature:resizeVertexMap(index, pm)
 ..param.index:An index with a suffix tree interface.
 ...type:Spec.Index_ESA
+..include:seqan/index.h
 */
 
 	template < typename TText, typename TSpec, typename TPropertyMap >
@@ -759,6 +766,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 ...type:Spec.VSTree Iterator
 ..returns:A position where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $SAValue<TIndex>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -779,6 +787,7 @@ If $iterator$'s container type is $TIndex$ the return type is $SAValue<TIndex>::
 ...type:Spec.VSTree Iterator
 ..returns:The number of positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -803,6 +812,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Size<TIndex>::Typ
 are stored in a contiguous range of the suffix array.
 $range$ returns begin and end position of this range for occurrences of @Function.representative@.
 If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>::Type>.
+..include:seqan/index.h
 */
 
 	template < typename TText, typename TSpec, typename TDesc >
@@ -835,6 +845,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Pair<Size<TIndex>
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_SA>::Type const>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -858,6 +869,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..returns:A local alignment corresponding to the seed of the $iterator$.
 ..remarks:The @Function.representative@ must uniquely occur in every sequence (e.g. in MUMs), 
 otherwise the seed returned is one many.
+..include:seqan/index.h
 */
 
 	template < typename TString, typename TSSetSpec, typename TIndexSpec, class TSpec >
@@ -939,6 +951,7 @@ otherwise the seed returned is one many.
 ...type:Spec.VSTree Iterator
 ..returns:All positions where the @Function.representative@ of $iterator$ occurs in the text (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_BWT>::Type const>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -961,6 +974,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_Text>::Type const>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -981,6 +995,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:The number of children of a tree node.
 If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, typename TSpec >
@@ -1105,6 +1120,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1123,6 +1139,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1141,6 +1158,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..signature:goRoot(iterator)
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
+..include:seqan/index.h
 */
 
 	template < typename TText, typename TIndexSpec, class TSpec >
@@ -1263,6 +1281,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ...type:Class.Segment
 ..remarks:$goDown(iterator)$ goes down the leftmost edge in the suffix tree, i.e. the edge beginning with the lexicographically smallest character.
 ..returns:$true$ if the edge or path to go down exists, otherwise $false$.
+..include:seqan/index.h
 */
 
     //////////////////////////////////////////////////////////////////////////////
@@ -1501,6 +1520,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..signature:goUp(iterator)
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
+..include:seqan/index.h
 */
 
 	// go up one edge (returns false if in root node)
@@ -1551,6 +1571,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 ..returns:The vertex descriptor of the parent node. The type is $VertexDescriptor<TIndex>::Type$.
 If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($value(iterator)$) is returned.
 ...type:Metafunction.VertexDescriptor
+..include:seqan/index.h
 */
 
 	// return vertex descriptor of parent's node
@@ -1583,6 +1604,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..signature:goRight(iterator)
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDown Iterator
+..include:seqan/index.h
 */
 
 	// go right to the lexic. next sibling
@@ -1633,6 +1655,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:The returned value is equal to $length(parentEdgeLabel(iterator))$.
+..include:seqan/index.h
 */
 
 	template < typename TText, class TIndexSpec, class TSpec >
@@ -1653,6 +1676,7 @@ If $iterator$ points at the root node, the vertex descriptor of $iterator$ ($val
 ...type:Spec.TopDownHistory Iterator
 ..returns:An @Spec.InfixSegment@ of the text of an index (see @Tag.ESA Index Fibres.ESA_Text@).
 If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TIndex, ESA_Text>::Type const>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1673,6 +1697,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.TopDownHistory Iterator
 ..returns:A single character of type $Value<TIndex>::Type$ which is identical to $Value<Fibre<TIndex, ESA_RawText>::Type>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1786,6 +1811,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the root of the tree, otherwise $false$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1815,6 +1841,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to the node representing a suffix, otherwise $false$.
 ..remarks:Every leaf is also a right terminal (see @Function.Index#isLeaf@), but not vice versa.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1838,6 +1865,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
 ..see:Function.getOccurrences
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -1886,6 +1914,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
 ..see:Function.getOccurrences
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec, typename TSet >
@@ -1938,6 +1967,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if there are at least two different characters left of the occurences, otherwise $false$.
 ..see:Function.getOccurrences
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec, typename TSet >
@@ -1982,6 +2012,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ...type:Spec.VSTree Iterator
 ..returns:The number of different sequences containing the @Function.representative@.
 ..see:Function.getOccurrences
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec, typename TSet >
@@ -2031,6 +2062,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to an inner node of the tree, whose children are leaves. Otherwise it is $false$.
+..include:seqan/index.h
 */
 
 	template < typename TIndex, class TSpec >
@@ -2047,6 +2079,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 ..param.iterator:An iterator of a suffix tree.
 ...type:Spec.VSTree Iterator
 ..returns:$true$ if $iterator$ points to a leaf of the tree, otherwise $false$.
+..include:seqan/index.h
 */
 
 	template < typename TSize >

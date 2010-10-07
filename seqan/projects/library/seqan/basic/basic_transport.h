@@ -43,6 +43,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:Specified by @Metafunction.DefaultOverflowImplicit@ of the $target$ type.
 ...remarks:This arguments can be applied if $target$ is a container.
 ..remarks:$assign(target, source)$ is semantically equivalent to $target = source$. 
+..include:seqan/basic.h
 */
 
 template <typename TTarget, typename TSource>
@@ -99,6 +100,7 @@ SEQAN_CHECKPOINT
 If this is possible, $source$ losts its content and will therefore be empty after this operation.
 Otherwise, the function behaves like @Function.assign@ and $source$ is copied to $target$. 
 ..see:Function.assign
+..include:seqan/basic.h
 */
 
 template<typename TTarget, typename TSource>
@@ -149,6 +151,7 @@ SEQAN_CHECKPOINT
 ..param.source: Content source.
 ..remarks:$set(target, source)$ is semantically equivalent to $target = source$.
 If possible, $set$ copies content references instead of the content itself.
+..include:seqan/basic.h
 */
 
 //TODO: rename set to ...

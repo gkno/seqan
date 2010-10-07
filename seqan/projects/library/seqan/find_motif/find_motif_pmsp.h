@@ -162,6 +162,7 @@ findMotif(MotifFinder<TSeqType ,PMSP> & finder,
 ...type:Tag.TCM
 ..remarks:The PMSP algorithm is able to run in OOPS, OMOPS, ZOOPS and TCM mode.
 ..remarks:The resulted motif candidates found by the PMSP algorithm will be stored in the result_set object.
+..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -736,6 +737,7 @@ pmsp(TStrings & result,
 ..param.d:The number of substitutions.
 ..param.is_exact:The size of Hamming distance
 ...type:$bool$
+..include:seqan/find_motif.h
 */
 
 template<typename TStringIter, typename TType>

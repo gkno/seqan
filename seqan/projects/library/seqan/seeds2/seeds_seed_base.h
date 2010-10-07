@@ -183,6 +183,7 @@ struct SeedScore<Seed<TSpec, TConfig> const>
 .Function.assign.param.target.type:Class.Seed
 .Function.move.param.source.type:Class.Seed
 .Function.move.param.target.type:Class.Seed
+..include:seqan/seeds2.h
 */
 
 /**
@@ -308,6 +309,7 @@ setUpperDiagonal(Seed<TSpec, TConfig> & seed,
 .Function.getSeedSize
 ..summary:Returns the number of matches and mismatches of the seed.  This is the longest true diagonal fitting into its dimensions.
 ..remark:"Seed size" is mostly called "seed length" in the literature.  However, in SeqAn reverse "length" is reserved to be the size of a container.
+..include:seqan/seeds2.h
 */
 template <typename TSpec, typename TConfig>
 inline typename Size<Seed<TSpec, TConfig> >::Type

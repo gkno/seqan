@@ -147,6 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.Score
 ..remarks: The Computation of the Alignment-Score is based on Myers-Bitvektor-Algorihm for Approximate Stringmatching. The Algorithm was customized,
 as proposed by Hyrroe to compute edit distance. To compute a complete Alignment use @Function.hirschberg_myers@ or @Function.hirschberg@ for smaller Instances of the Problem.
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TScoreValue>
 TScoreValue
@@ -348,6 +349,7 @@ globalAlignment(Align<TSource, TSpec> & align_,
 ...type:Class.Score
 ..remarks: The Computation of the Alignment-Score is based on a combination of Myers-Bitvektor-Algorihm for Approximate Stringmatching and
 the Algorithm proposed by Hirschberg to compute Sequence Alignments with linear space.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TScoreValue>

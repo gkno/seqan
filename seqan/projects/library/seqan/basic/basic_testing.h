@@ -91,6 +91,7 @@ namespace seqan {
 ..summary:Print the current SeqAn debug level and the compiler flags to the given stream.
 ..signature:printDebugLevel(stream)
 ..param.stream:The stream to print to, e.g. $std::cout$.
+..include:seqan/basic.h
  */
 template <typename TStream>
 void printDebugLevel(TStream &stream) {

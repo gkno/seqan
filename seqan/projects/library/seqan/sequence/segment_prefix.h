@@ -525,6 +525,7 @@ operator --(Segment<THost, PrefixSegment> & segment)
 ..see:Spec.PrefixSegment
 ..see:Function.suffix
 ..see:Function.infix
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosEnd>

@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:Specialization tag for determining the pseudocount method.
 ...type:Spec.CMode 
 ...type:Spec.PMode
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>

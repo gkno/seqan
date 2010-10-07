@@ -1043,6 +1043,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
 ..param.dir:The resulting array that indicates at which position in index the corresponding q-grams can be found.
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
+..include:seqan/index.h
 */
 
 	// single sequence

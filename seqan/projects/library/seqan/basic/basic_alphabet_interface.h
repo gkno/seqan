@@ -76,6 +76,7 @@ typedef wchar_t Unicode;
 ...remarks:If the @Tag.Move Switch.move switch tag@ is specified, it is forwarded to the constructor,
 so the constructed object must support move construction.
 ..remarks:The type of the destructed object is the @Metafunction.Value.value type@ of $iterator$.
+..include:seqan/basic.h
 */
 
 struct _ValueConstructor 
@@ -213,6 +214,7 @@ SEQAN_CHECKPOINT
 ..param.iterator:Pointer or iterator to position where the object should be constructed.
 ..remarks:The type of the constructed object is the @Metafunction.Value.value type@ of $iterator$.
 ..see:Function.valueConstruct
+..include:seqan/basic.h
 */
 template <typename TIterator>
 inline void
@@ -245,6 +247,7 @@ SEQAN_CHECKPOINT
 ..param.param:Parameter that is moved to the new constructed object.
 ..remarks:The type of the destructed object is the @Metafunction.Value.value type@ of $iterator$.
 ..remarks:The default implementation just calls @Function.valueConstruct@.
+..include:seqan/basic.h
 */
 template <typename TIterator, typename TValue>
 inline void
@@ -276,6 +279,7 @@ of $begin$ and $end$.
 ..see:Function.arrayFill
 ..see:Class.SimpleType
 ..see:Function.valueConstruct
+..include:seqan/basic.h
 */
 template<typename TIterator1, typename TIterator2>
 inline void 
@@ -344,6 +348,7 @@ An appropriate (copy-) constructor that constructs an target objects given a sou
 ..see:Function.arrayCopyForward
 ..see:Function.arrayCopy
 ..see:Function.valueConstruct
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -392,6 +397,7 @@ An appropriate move constructor that constructs an target objects given a source
 ..see:Function.arrayMoveForward
 ..see:Function.arrayMove
 ..see:Function.valueConstruct
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -432,6 +438,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function does not deallocates the memory.
 ..see:Class.SimpleType
 ..see:Function.valueDestruct
+..include:seqan/basic.h
 */
 template<typename TIterator1, typename TIterator2>
 inline void 
@@ -469,6 +476,7 @@ SEQAN_CHECKPOINT
 ..remarks:All objects $target_begin[0]$ to $target_begin[count-1]$ are set to $value$.
 ..see:Function.arrayCopy
 ..see:Function.arrayCopyForward
+..include:seqan/basic.h
 */
 template<typename TIterator1, typename TIterator2, typename TValue>
 inline void 
@@ -499,6 +507,7 @@ SEQAN_CHECKPOINT
 ..remarks:If there is no need for the source elements to persist, consider to use 
 @Function.arrayMoveForward@ instead to improve performance.
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -542,6 +551,7 @@ SEQAN_CHECKPOINT
 ..remarks.note:The semantic of this function's argument $target$ differ from the arguments of $::std::copy_backward$.
 ..see:Function.arrayCopyForward
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -587,6 +597,7 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayCopyForward
 ..see:Function.arrayCopyBackward
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void arrayCopy(TSource1 source_begin, 
@@ -625,6 +636,7 @@ SEQAN_CHECKPOINT
 	some source elements could be accidently overwritten before they are moved.
 ..see:Function.arrayCopyForward
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -674,6 +686,7 @@ SEQAN_CHECKPOINT
 ..see:Function.arrayMoveForward
 ..see:Function.arrayCopyBackward
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -727,6 +740,7 @@ resembles @Function.arrayCopy@.
 ..see:Function.arrayMoveBackward
 ..see:Function.arrayCopy
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
@@ -769,6 +783,7 @@ are free and dont contain objects.
 ..see:Function.arrayDestruct
 ..see:Function.arrayCopyForward
 ..see:Class.SimpleType
+..include:seqan/basic.h
 */
 template <typename TIterator>
 void _arrayClearSpace_Default(TIterator array_begin, 

@@ -45,6 +45,7 @@ struct Skiplist;
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:@Spec.Skiplist@
+..include:seqan/map.h
 */
 template <typename TElement, typename TSpec = Skiplist<> >
 class Map;
@@ -149,6 +150,7 @@ If you need a key type that holds two members, define your own key type.
 ..see:Function.map#value
 ..see:Function.map#cargo
 ..see:Function.map#hasKey
+..include:seqan/map.h
 */
 
 template <typename TMap, typename TKey>

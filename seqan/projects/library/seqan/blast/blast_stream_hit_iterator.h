@@ -190,6 +190,7 @@ struct GetValue<Iter<TBlastReport const, StreamBlastIterator<HitIterator> > >
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport, typename TFile>
 inline bool
@@ -212,6 +213,7 @@ SEQAN_CHECKPOINT
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport, typename TFile>
 inline void
@@ -239,6 +241,7 @@ goBegin(TFile &,
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport, typename TFile>
 inline void
@@ -312,6 +315,7 @@ SEQAN_CHECKPOINT
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport, typename TFile>
 inline typename GetValue<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >::Type
@@ -340,6 +344,7 @@ SEQAN_CHECKPOINT
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport, typename TFile>
 inline typename Reference<Iter<TBlastReport, StreamBlastIterator<HitIterator> > >::Type
@@ -374,6 +379,7 @@ hostReport(Iter<TBlastReport, StreamBlastIterator<HitIterator> >& it)
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 
 template<typename TBlastReport, typename TFile>

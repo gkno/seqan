@@ -439,6 +439,7 @@ namespace seqan
 ..returns:A @Class.SkipBaseElement.$SkipBaseElement*$@, pointing to $element1$ preceding $element$. NULL if no such $element1$ exists.
 ..remarks:If the containing SkipList is Deferred and not completely sorted, it is unlikely that the ordering of the keys is already established. 
 ..So $key( _getPred( element ) ) >= key( element )$ does not hold for sure.
+..include:seqan/chaining.h
 */
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * 

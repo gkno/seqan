@@ -38,6 +38,7 @@ namespace seqan
 ..signature:_ChainPoint< TFragType, TSpec >
 ..param.TFragType:Type of the class which represents the limits (multidimensional point) of an fragment.
 ..param.TSpec:Spec of the _ChainPoint.
+..include:seqan/chaining.h
 */
 	template< typename TFragType, typename TSpec >
 	struct Spec< _ChainPoint< TFragType, TSpec > >

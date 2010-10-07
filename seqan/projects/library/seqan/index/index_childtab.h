@@ -187,6 +187,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.lcp:A given lcp table.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
 ..remarks:The size of $childTab$ must be at least $length(text)$ before calling this function.
+..include:seqan/index.h
 */
 	template < typename TLCPTable,
                typename TValue,

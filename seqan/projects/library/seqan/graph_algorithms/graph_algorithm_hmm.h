@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Probability of the path.
 ..see:Function.forwardAlgorithm
 ..see:Function.backwardAlgorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TPath>
 inline TProbability
@@ -314,6 +315,7 @@ __forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 ...remarks:Probability of the sequence.
 ..see:Function.viterbiAlgorithm
 ..see:Function.backwardAlgorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
 inline TProbability
@@ -476,6 +478,7 @@ __backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 ...remarks:Probability of the sequence.
 ..see:Function.viterbiAlgorithm
 ..see:Function.forwardAlgorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence>
 inline TProbability
@@ -505,6 +508,7 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 ...remarks:Sequences might be shorter if the end state is reached prior to maxLength. 
 ..remarks: Because of silent states, generated alphabet and state sequences might have different length.
 ..returns:void
+..include:seqan/graph_algorithms.h
 */
 template<typename TAlphabet, typename TProbability, typename TSpec,typename TSequenceSet, typename TStateSeqSet, typename TSize>
 inline void

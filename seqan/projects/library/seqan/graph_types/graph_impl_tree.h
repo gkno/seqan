@@ -808,6 +808,7 @@ isRoot(Graph<Tree<TCargo, TSpec> > const& g,
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:True if vertex is a leaf.
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -833,6 +834,7 @@ isLeaf(Graph<Tree<TCargo, TSpec> > const& g,
 ..param.g:A tree.
 ...type:Spec.Tree
 ..returns:Number of tree edges. Faster than numEdges for trees.
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec>
@@ -856,6 +858,7 @@ numTreeEdges(Graph<Tree<TCargo, TSpec> > const& g)
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..returns:Number of children
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor> 
@@ -886,6 +889,7 @@ Optionally a cargo can be attached to the parent-child edge.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.removeChild
 ..see:Function.removeAllChildren
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor> 
@@ -931,6 +935,7 @@ addChild(Graph<Tree<TCargo, TSpec> >& g,
 ..returns:void
 ..see:Function.addChild
 ..see:Function.removeAllChildren
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor> 
@@ -959,6 +964,7 @@ removeChild(Graph<Tree<TCargo, TSpec> >& g,
 ..returns:void
 ..see:Function.addChild
 ..see:Function.removeChild
+..include:seqan/graph_types.h
 */
 
 template<typename TCargo, typename TSpec, typename TVertexDescriptor> 
@@ -993,6 +999,7 @@ removeAllChildren(Graph<Tree<TCargo, TSpec> >& g,
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parentVertex
+..include:seqan/graph_types.h
 */
 template<typename TCargo, typename TSpec, typename TEdgeDescriptor>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
@@ -1017,6 +1024,7 @@ childVertex(Graph<Tree<TCargo, TSpec> > const&,
 ..returns:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parentVertex
+..include:seqan/graph_types.h
 */
 template<typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Tree<TCargo, TSpec> > >::Type 
@@ -1052,6 +1060,7 @@ parentVertex(Graph<Tree<TCargo, TSpec> > const& g,
 ...type:Metafunction.VertexDescriptor
 ..param.group:A group of vertex descriptors
 ...type:Class.String
+..include:seqan/graph_types.h
 */
 template<typename TCargo, typename TSpec, typename TVertexDescriptor, typename TGroup>
 inline void

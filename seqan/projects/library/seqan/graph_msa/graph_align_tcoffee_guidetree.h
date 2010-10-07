@@ -51,6 +51,7 @@ njTree(mat, graph)
 ..param.graph:Out-parameter:The guide tree.
 ...type:Spec.Tree
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TValue, typename TStringSpec, typename TCargo, typename TSpec>
 inline void
@@ -852,6 +853,7 @@ upgmaTree(sparse_mat, graph [,tag])
 ...type:Tag.Upgma Configurator
 ...default:UpgmaWeightAvg
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TDistance, typename TCargo, typename TSpec>
 inline void

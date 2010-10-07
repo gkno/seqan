@@ -49,6 +49,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 ..remarks:$key( obj )$: returns the key of the object.
 ..remarks:$setKey( obj, k )$: set the key of the object to k.
 ..remarks:In contrast to STL-like containers, the objects are not cloned by the SkipList. It only supports searching operations on a set of objects. This set must be handled by the user.
+..include:seqan/chaining.h
 */
 	
 		// no append operations on skip lists

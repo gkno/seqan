@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default: $double$
 ...remarks: It is preferable to use $double$.
 ..remarks:The number of objects in @Class.FrequencyDistribution@ equals the size of the sequence alphabet.
+..include:seqan/find_motif.h
 */
 
 template <typename TValue, typename TSpec = double>
@@ -307,6 +308,7 @@ struct Value< FrequencyDistribution<TValue, TSpec> const>
 ...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec, typename TSeqIter> 
@@ -337,6 +339,7 @@ absFreqOfLettersInSeq(FrequencyDistribution<TValue, TSpec> & fd,
 ...type:Concept.Iterator
 ..remarks.text:This function is similar to @Function.absFreqOfLettersInSeq@ except that the function is performed
                on a set of sequences.
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec, typename TIter>
@@ -363,6 +366,7 @@ absFreqOfLettersInSetOfSeqs(FrequencyDistribution<TValue, TSpec> & fd,
 ...type:Class.FrequencyDistribution
 ..param.value:The value object which is added to each element of a @Class.FrequencyDistribution@ object.
 ...remarks:The $value$ object should be identical in type to the elements of the @Class.FrequencyDistribution@ object.
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec, typename TType>
@@ -389,6 +393,7 @@ addValue(FrequencyDistribution<TValue, TSpec> & fd, TType const & val)
 ...type:Concept.Iterator
 ..param.end:An iterator pointing to the last sequence of a given dataset (set of sequences) which is considered. 
 ...type:Concept.Iterator
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec,typename TDatasetIter> 
@@ -452,6 +457,7 @@ clear(FrequencyDistribution<TValue, TSpec> & fd)
 ...type:Spec.AminoAcid
 ..remarks:This function is used to convert a sequence pattern into a profile.
 ..see:Function.convertPatternToProfile
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>
@@ -519,6 +525,7 @@ length(FrequencyDistribution<TValue, TSpec> const & me)
 ..signature:logarithmize(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>
@@ -543,6 +550,7 @@ logarithmize(FrequencyDistribution<TValue, TSpec> & fd)
 ..signature:normalize(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>
@@ -568,6 +576,7 @@ normalize(FrequencyDistribution<TValue, TSpec> & fd)
 ..signature:posOfMax(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>
@@ -600,6 +609,7 @@ posOfMax(FrequencyDistribution<TValue, TSpec> & me)
 ..signature:sum(frequencies)
 ..param.frequencies:The @Class.FrequencyDistribution@ object.
 ...type:Class.FrequencyDistribution
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TSpec>

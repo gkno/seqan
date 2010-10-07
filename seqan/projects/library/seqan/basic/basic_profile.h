@@ -159,6 +159,7 @@
 ...type:nolink:double
 ..remarks:Calls $clock$ to retrieve the processor time used by the running thread.
 ..see:Function.sysTime
+..include:seqan/basic.h
 */
 
 
@@ -186,6 +187,7 @@
 Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 ..remarks:Calls $clock_gettime$ under Linux and $gettimeofday$ under Mac OS X.
 ..see:Function.cpuTime
+..include:seqan/basic.h
 */
 
     #ifdef PLATFORM_WINDOWS

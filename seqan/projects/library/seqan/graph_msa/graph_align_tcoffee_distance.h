@@ -192,6 +192,7 @@ getDistanceMatrix(graph, mat [, ktup] [, alphabet], KmerDistance)
 ...remarks:Possible values are LibraryDistance or KmerDistance.
 ...default:KmerDistance
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TMatrix>
 inline void 

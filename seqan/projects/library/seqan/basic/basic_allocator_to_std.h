@@ -55,6 +55,7 @@ but the host object that was given to the constructor.
 ..remarks:
 ..see:Function.allocate
 ..see:Function.deallocate
+..include:seqan/basic.h
 */
 template <typename THost, typename TValue>
 struct ToStdAllocator
@@ -100,6 +101,7 @@ struct ToStdAllocator
 ..param.object:An object.
 ...type:Class.ToStdAllocator
 ..returns:The host object.
+..include:seqan/basic.h
 */
 	pointer allocate(size_type count)
 	{

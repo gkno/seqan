@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.Simple Score
 ...remarks: Depending on the score matrix the Needleman-Wunsch or the Gotoh algorithm is used. For a description of the algorithm see the masters thesis of C. Kemena, Section 5.3.3 LAGAN Alignment.
 ..returns: The score of the alignment.
+..include:seqan/seeds.h
 */
 
 template<typename TContainer, typename TValue, typename TScore, typename TAlign>

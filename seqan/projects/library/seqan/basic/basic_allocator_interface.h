@@ -121,6 +121,7 @@ A $new$ operator which is part of the C++ standard (defined in $<new>$)
 ..see:Function.arrayFill
 ..see:Function.arrayConstruct
 ..see:Function.arrayConstructCopy
+..include:seqan/basic.h
 */
 template <typename T, typename TValue, typename TSize>
 inline void
@@ -220,6 +221,7 @@ $delete$ and $delete []$ operators which are part of the C++ standard (defined i
  can also be used to destruct objects at a given memory address.
 ..see:Function.valueDestruct
 ..see:Function.arrayDestruct
+..include:seqan/basic.h
 */
 template <typename T, typename TValue, typename TSize>
 inline void 

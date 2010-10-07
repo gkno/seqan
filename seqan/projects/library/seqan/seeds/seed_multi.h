@@ -185,6 +185,7 @@ setRightDim1(Seed<TPosition,ChainedSeed> & seed,
 ..param.seed: The seed whose end position2 should be updated.
 ...type:Spec.ChainedSeed
 ..returns: A reference to the list of seed diagonals.
+..include:seqan/seeds.h
 */
 template<typename TPosition>
 inline const std::list<Triple<TPosition, TPosition, TPosition> >&
@@ -210,6 +211,7 @@ _getDiagSet(Seed<TPosition,ChainedSeed> & seed){
 ..param.diag: The diagonal to add.
 ...type:Class.Triple
 ...remarks: A diagonal consists of three values: 1: start in 1. sequence, 2: start in 2. sequence, 3: length of match
+..include:seqan/seeds.h
 */
 template<typename TPosition>
 void
@@ -562,6 +564,7 @@ _setExtendedSeedDimensions(Seed<TPosition, ChainedSeed> & seed,
 ..param.scoreMatrix:The scoring matrix.
 ...type:Spec.Simple Score
 ..returns: Score of the alignment.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TText, typename TPosition2>
 int
@@ -692,6 +695,7 @@ getAlignment(Seed<TPosition,ChainedSeed> &seed,
 ...type:Spec.Simple Score
 ..returns: Score of the seed.
 ..remarks: Score has not the same value as the resulting alignment. Gaps between diagonals matches are scored as full length gaps.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TText, typename TScore>
 TScore

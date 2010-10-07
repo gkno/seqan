@@ -120,6 +120,7 @@ that was allocated using @Function.allocate@ for $allocator$.
 The memory is not pooled but directly passed back to the heap manager.
 ..see:Function.allocate
 ..see:Function.deallocate
+..include:seqan/basic.h
 */
 template <typename TParentAllocator>
 void

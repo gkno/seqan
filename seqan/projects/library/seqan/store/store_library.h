@@ -55,6 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.LibraryStoreElement#std
 ..summary:The library size standard deviation.
 ..class:Class.LibraryStoreElement
+..include:seqan/store.h
 */
 
 template <typename TMean = double, typename TStd = double, typename TSpec = void>

@@ -938,6 +938,7 @@ SEQAN_CHECKPOINT
 ..signature:findIntervals(intervalTree, query_begin, query_end, result)
 ..param.query_begin:The begin position of the query interval.
 ..param.query_end:The end position of the query interval.
+..include:seqan/refinement.h
 */
 template<typename TValue,typename TCargo>
 void

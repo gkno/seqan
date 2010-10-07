@@ -193,6 +193,7 @@ operator * (Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 ..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline bool
@@ -212,6 +213,7 @@ SEQAN_CHECKPOINT
 ..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void
@@ -231,6 +233,7 @@ goBegin(Iter<TBlastObject, SimpleBlastIterator<TIteratorSpec> >& it)
 ..param.iterator
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastObject, typename TIteratorSpec>
 inline void
@@ -261,6 +264,7 @@ SEQAN_CHECKPOINT
 ..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 
 template<typename TBlastObject, typename TIteratorSpec>
@@ -328,6 +332,7 @@ SEQAN_CHECKPOINT
 ..param.object:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 inline typename GetValue<Iter<TBlastReport, SimpleBlastIterator<HitIterator> > >::Type
@@ -345,6 +350,7 @@ SEQAN_CHECKPOINT
 ..param.object:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 inline typename Reference<Iter<TBlastReport, SimpleBlastIterator<HitIterator> > >::Type 
@@ -364,6 +370,7 @@ SEQAN_CHECKPOINT
 ..param.it:An iterator.
 ...type:Spec.HitIterator
 ..returns:A pointer to the host BlastReport.
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 inline typename Host<Iter<TBlastReport, SimpleBlastIterator<HitIterator> > >::Type/* const*/ &
@@ -382,6 +389,7 @@ hostReport(Iter<TBlastReport, SimpleBlastIterator<HitIterator> > & it)
 ..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 inline bool
@@ -399,6 +407,7 @@ SEQAN_CHECKPOINT
 ..param.iterator:
 ...type:Spec.HitIterator
 ...type:Spec.HspIterator
+..include:seqan/blast.h
 */
 template<typename TBlastReport>
 inline void

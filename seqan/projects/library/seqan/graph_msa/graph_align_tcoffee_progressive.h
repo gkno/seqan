@@ -114,6 +114,7 @@ progressiveAlignment(inputGraph, guideTree, outputGraph)
 ..param.outputGraph:An alignment graph for the final MSA.
 ...type:Spec.Alignment Graph
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TGuideTree, typename TOutGraph>
 inline void 

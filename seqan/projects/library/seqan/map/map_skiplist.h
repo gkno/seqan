@@ -538,6 +538,7 @@ _skiplistFind(Map<TValue, Skiplist<TSpec> > & me,
 An iterator to the fist value in $map$ with key > $key$, otherwise
 ...metafunction:Metafunction.Iterator
 ..see:Function.map#value
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TFind>
@@ -618,6 +619,7 @@ Otherwise, a new value that is inserted to $map$.
 ...note:Do not change the key of a value in the map.
 ..see:Function.map#find
 ..see:Function.map#insert
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TKey2>
@@ -665,6 +667,7 @@ Otherwise, the cargo of a new value that is inserted to $map$.
 ..see:Function.map#value
 ..see:Function.map#find
 ..see:Function.map#insert
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TKey2>
@@ -697,6 +700,7 @@ If there is already a value of that key in $map$, the value of this element is c
 the cargo of this value is changed to @Function.cargo.cargo(value)@.
 ...text:Use @Function.map#add@ instead to insert multiple values of the same key
 ..see:Function.map#add
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TValue2>
@@ -733,6 +737,7 @@ insert(Map<TValue, Skiplist<TSpec> > & me,
 ..param.cargo:A cargo.
 ...metafunction:Metafunction.Cargo
 ..remarks:If $key$ and $cargo$ are specified, a new value of that key and value is added.
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TValue2>
@@ -800,6 +805,7 @@ _skiplistUnlinkElement(Map<TValue, Skiplist<TSpec> > & me,
 ...text:Use @Function.map#eraseAll@ to remove all values of the given key in a multi map.
 ..see:Function.map#add
 ..see:Function.map#insert
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TMap2>
@@ -840,6 +846,7 @@ erase(Map<TValue, Skiplist<TSpec> > & me,
 ..see:Function.map#add
 ..see:Function.map#insert
 ..see:Function.map#erase
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TToRemove>
@@ -980,6 +987,7 @@ mapValue(Map<TValue, Skiplist<TSpec> > & me,
 ..param.key:A key.
 ...metafunction:Metafunction.Key
 ..returns:$true$, if there is a value in $map$ of that key, $false$ otherwise.
+..include:seqan/map.h
 */
 
 template <typename TValue, typename TSpec, typename TKey2>

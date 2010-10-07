@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type of the underlying @Class.String@.
 ...metafunction:Metafunction.Spec
 ...default:$Alloc<>$, see @Spec.Alloc String@
+..include:seqan/misc.h
 */
 template <typename TValue, typename TSpec = Alloc<> >
 class Dequeue

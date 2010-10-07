@@ -269,6 +269,7 @@ SEQAN_CHECKPOINT
 ...type:Metafunction.Iterator
 ..see:Function.begin
 ..see:Function.beginPosition
+..include:seqan/sequence.h
 */
 template <typename THost_, typename TIterator>
 inline void 
@@ -294,6 +295,7 @@ SEQAN_CHECKPOINT
 ..see:Function.begin
 ..see:Function.beginPosition
 ..see:Function.setBegin
+..include:seqan/sequence.h
 */
 
 template <typename THost_, typename TPosition>
@@ -359,6 +361,7 @@ SEQAN_CHECKPOINT
 ..see:Function.end
 ..see:Function.endPosition
 ..see:Function.setBegin
+..include:seqan/sequence.h
 */
 
 template <typename THost_, typename TIterator>
@@ -386,6 +389,7 @@ SEQAN_CHECKPOINT
 ..see:Function.endPosition
 ..see:Function.setBeginPosition
 ..see:Function.setEnd
+..include:seqan/sequence.h
 */
 
 template <typename THost_, typename TPosition>
@@ -424,6 +428,7 @@ SEQAN_CHECKPOINT
 For example, if one changes the host of a @Class.Segment@ object, it is possible
 that begin- and end-position of the segment does not fit into the new host sequence.
 ..see:Function.host
+..include:seqan/sequence.h
 */
 template <typename THost_>
 inline void 
@@ -723,6 +728,7 @@ SEQAN_CHECKPOINT
 ...remarks:The type of the infix is given by @Metafunction.Infix@.
 ..remarks:Notational sugar.
 ..see:Spec.InfixSegment
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosBegin, typename TPosEnd>
@@ -781,6 +787,7 @@ SEQAN_CHECKPOINT
 ...remarks:The type of the infix is given by @Metafunction.Infix@.
 ..remarks:Notational sugar.
 ..see:Spec.InfixSegment
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosBegin, typename TSize>

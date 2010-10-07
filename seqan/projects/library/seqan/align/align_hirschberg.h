@@ -148,6 +148,7 @@ namespace SEQAN_NAMESPACE_MAIN
 to compute a global alignment in linear space. Instead of computing half of the
 DP matrix in forward direction and the other half in reverse, a pointer to the cell of the DP matrix, were the actual, optimal alignment
 passes the mid column ist saved, during the computation of the second part of the Matrix.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TScoreValue>

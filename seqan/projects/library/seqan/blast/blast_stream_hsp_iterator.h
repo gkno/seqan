@@ -340,6 +340,7 @@ SEQAN_CHECKPOINT
 ..param.it:An iterator.
 ...type:Spec.HspIterator
 ..returns:A pointer to the host BlastHit.
+..include:seqan/blast.h
 */
 template<typename TBlastHit>
 inline typename Host<Iter<TBlastHit, StreamBlastIterator<HspIterator> > >::Type const&

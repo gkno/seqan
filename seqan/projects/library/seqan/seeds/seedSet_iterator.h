@@ -270,6 +270,7 @@ operator !=(Iter<TSeedSet, SeedIterator > it1, Iter<TSeedSet, SeedIterator > it2
 ..signature:seedScore(it);
 ..param.it: The seedSet iterator.
 ..return:Score of the seed.
+..include:seqan/seeds.h
 */
 template<typename TSeedSet>
 inline typename ScoreType<typename ScoringScheme<TSeedSet>::Type>::Type &

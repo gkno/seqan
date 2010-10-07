@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Constructor
 ..signature:Pipe<TInput, TSpec> (in)
 ..param.in:Reference to an input pipe.
+..include:seqan/pipe.h
 */
 
     template < typename TInput, typename TSpec >
@@ -72,6 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Bundle2#in2:
 ..class:Class.Bundle2
 ..summary:TInput2 reference
+..include:seqan/pipe.h
 */
     // pipe input adapter 2->1 pipe
     template < typename TInput1, typename TInput2 >
@@ -92,6 +94,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.in2:Second object.
 ..returns:A @Class.Bundle2@ with references to $in1$ and $in2$.
 ..see:Class.Bundle2
+..include:seqan/pipe.h
 */
 	template < typename TInput1, typename TInput2 >
 	inline Bundle2< TInput1, TInput2 >
@@ -117,6 +120,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Bundle3#in3:
 ..class:Class.Bundle3
 ..summary:TInput3 reference
+..include:seqan/pipe.h
 */
     // pipe input adapter 3->1 pipe
     template < typename TInput1, typename TInput2, typename TInput3 >
@@ -140,6 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.in3:Third object.
 ..returns:A @Class.Bundle3@ with references to $in1$, $in2$, and $in3$.
 ..see:Class.Bundle3
+..include:seqan/pipe.h
 */
 	template < typename TInput1, typename TInput2, typename TInput3 >
 	inline Bundle3< TInput1, TInput2, TInput3 >
@@ -173,6 +178,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Bundle5#in5:
 ..class:Class.Bundle5
 ..summary:TInput5 reference
+..include:seqan/pipe.h
 */
     // pipe input adapter 5->1 pipe
     template < typename TIn1, typename TIn2, typename TIn3, typename TIn4, typename TIn5 >
@@ -199,6 +205,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.in5:Fifth object.
 ..returns:A @Class.Bundle5@ with references to $in1$, $in2$, $in3$, $in4$, and $in5$.
 ..see:Class.Bundle5
+..include:seqan/pipe.h
 */
     template < typename TIn1, typename TIn2, typename TIn3, typename TIn4, typename TIn5 >
 	inline Bundle5< TIn1, TIn2, TIn3, TIn4, TIn5 >
@@ -360,6 +367,7 @@ SEQAN_CHECKPOINT
 Return type is $Value<TObject>::Type$ for $object$ type $TObject$.
 ..remarks:@Function.Pipelining#front@ or @Function.pop@ can only be called within a read process surrounded by @Function.beginRead@ and @Function.endRead@.
 ..see:Function.pop
+..include:seqan/pipe.h
 */
 
     template < typename TInput, typename TSpec, typename TValue >
@@ -381,6 +389,7 @@ SEQAN_CHECKPOINT
 ..remarks:In contrast to @Function.Pipelining#front@ this function also steps one element further.
 ..remarks:@Function.Pipelining#front@ or @Function.pop@ can only be called within a read process surrounded by @Function.beginRead@ and @Function.endRead@.
 ..DISABLED.see:Function.top
+..include:seqan/pipe.h
 */
 
     template < typename TInput, typename TSpec, typename TValue >
@@ -450,6 +459,7 @@ SEQAN_CHECKPOINT
 ..remarks:$beginRead$ rewinds the output stream, prepares $object$ for succeeding reads, and typically calls $beginRead$ of the input pipeline modules.
 ..remarks:A read process must be terminated with @Function.endRead@. Nested read processes are not allowed.
 ..see:Function.endRead
+..include:seqan/pipe.h
 */
 
     template < typename TInput, typename TSpec >
@@ -468,6 +478,7 @@ SEQAN_CHECKPOINT
 ..returns:A $bool$ which is $true$ on success.
 ..remarks:$endRead$ closes the output stream, frees resources possibly allocated by @Function.beginRead@, and typically calls $endRead$ of the input pipeline modules.
 ..see:Function.beginRead
+..include:seqan/pipe.h
 */
 
     template < typename TInput, typename TSpec >

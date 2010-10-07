@@ -44,6 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:The $data$-argument is used here as a tag to determine the type of the target.
 ..see:Function.Fileformat#read
 ..see:Tag.File Format
+..include:seqan/file.h
 */
 template <typename TFile, typename TData, typename TMeta>
 inline FileFormat<TFile, TData, TMeta, void> 

@@ -35,6 +35,7 @@ struct SeedIterator;
 ..param.dPos: The leftPosition in dimension 1.
 ..param.length: The length of the seed. ?
 ..param.tag: The tags define the distance to use.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeed>
 inline TValue
@@ -68,6 +69,7 @@ _calculateScoringValue(TSeed &, TValue &, TValue &, TValue &, NoGapCost){
 ..param.score: The score of the seed. (If no scores are used, the value will be 0.
 ..param.qualityValue: The value that shall be reached.
 ..param.tag: The tags define the kind of quality check to use.
+..include:seqan/seeds.h
 */
 
 template<typename TSeed, typename TScore>
@@ -93,6 +95,7 @@ _qualityReached(TSeed const &seed, TScore , TScore qualityValue, SeedLength){
 ...remarks: Positive and negative values are needed.
 ..param.TSeedSpec:The @Class.Seed@ specialization.
 ..param.TScoringScheme:The scoring sheme to use.
+..include:seqan/seeds.h
 */
 
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec = void> 
@@ -371,6 +374,7 @@ clear(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCo
 ..param.set: The set of seeds.
 ...type:Class.SeedSet
 ..param.distance: The maximal distance between to seeds.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline void
@@ -390,6 +394,7 @@ setMaximumDistance(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set,
 ..param.set: The set of seeds.
 ...type:Class.SeedSet
 ..param.distance: The minimum length of a seed.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline void
@@ -408,6 +413,7 @@ setQualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set,
 ..param.set: The set of seeds.
 ...type:Class.SeedSet
 ..returns:The maximum distance.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline TValue
@@ -425,6 +431,7 @@ maximumDistance(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 ..param.set: The set of seeds.
 ...type:Class.SeedSet
 ..resturns: The minimum length.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpecScoring, typename TSpec>
 inline TValue
@@ -461,6 +468,7 @@ qualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 ...remarks: The seed is copied and then added.
 ..returns:Boolean if succesfully added.
 ...remarks:Always true for Tag Single.
+..include:seqan/seeds.h
 */
 
 /**
@@ -478,6 +486,7 @@ qualityValue(SeedSet<TValue, TSeedSpec, TSpecScoring, TSpec> &set)
 ..param.tag: The algorithm that should be used to add the new @Class.Seed@.
 ...type:Tag.Seed Adding
 ...remarks: Note that not every algorithm can be used with each specialization of @Class.Seed@.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TSpec, typename TQualityFactor, typename TGapCosts>
 bool
@@ -1597,6 +1606,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 ...type:Tag.Seed Extension.MatchExtend
 ...type:Tag.Seed Extension.tag.UngappedXDrop
 ...type:Tag.Seed Extension.tag.GappedXDrop
+..include:seqan/seeds.h
 */
 
 template<typename TContainer, typename TQuery, typename TDatabase, typename TDirection>

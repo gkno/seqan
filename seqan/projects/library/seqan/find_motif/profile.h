@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:e.g.:$profile[0]$ represents the frequency distribution for the first residue of
           the given sequence.
 ..see:Function.convertResidueToFrequencyDist
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile, typename TIterStr>
@@ -87,6 +88,7 @@ convertPatternToProfile(TProfile & profile,
 ...type:Class.Pseudocount
 ..remarks:This function is used, for example, in the refinement step of the PROJECTION algorithm to convert
           the collection of l-mers inside the corresponding buckets into a profile. 
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile, typename TStrings, typename TPseudocountMode>
@@ -136,6 +138,7 @@ convertSetOfPatternsToProfile(TProfile & profile,
 ...type:Class.Pseudocount
 ..remarks:If necessary, pseudocounts are first added to the frequency values before normalizing them 
           when the parameter $container$ is a StringSet of @Class.FrequencyDistribution|frequency distributions@ (profile).
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile>
@@ -163,6 +166,7 @@ normalize(TProfile & profile)
 ..param.background_distribution:The @Class.FrequencyDistribution@ object which represents the backround distribution.
 ...type:Class.FrequencyDistribution
 ..remarks:The first row of the final profile (probability matrix) represents the @Class.FrequencyDistribution|background distribution@.
+..include:seqan/find_motif.h
 */
 
 template<typename TProfile>
@@ -194,6 +198,7 @@ completeProfile(TProfile & profile,
 ...type:Class.StringSet
 ..remarks:This function can also be used to display a profile (probability matrix) 
           which is a set of @Class.FrequencyDistribution|frequency distributions@.
+..include:seqan/find_motif.h
 */
 
 

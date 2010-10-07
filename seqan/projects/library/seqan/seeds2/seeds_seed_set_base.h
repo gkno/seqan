@@ -179,6 +179,7 @@ class SeedSet;
 .Function.length.param.object.type:Class.SeedSet
 .Function.front.param.object.type:Class.SeedSet
 .Function.back.param.container.type:Class.SeedSet
+..include:seqan/seeds2.h
  */
 // TODO(holtgrew): dddoc {begin,end,length,front,back}All(T)
 
@@ -206,6 +207,7 @@ class SeedSet;
 ...remarks: The seed is copied and then added.
 ..returns:Boolean if succesfully added.
 ...remarks:Always true for Tag Single.
+..include:seqan/seeds2.h
 */
 
 /**
@@ -223,6 +225,7 @@ class SeedSet;
 ..param.tag: The algorithm that should be used to add the new @Class.Seed@.
 ...type:Tag.Local Chaining
 ...remarks: Note that not every algorithm can be used with each specialization of @Class.Seed@.
+..include:seqan/seeds2.h
 */
 
 // Debugging / TikZ Output

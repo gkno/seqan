@@ -214,6 +214,7 @@ getEndDim1(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.length.param.object.type:Spec.ChainedSeed
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline typename Size<Seed<ChainedSeed, TConfig> >::Type
@@ -233,6 +234,7 @@ length(Seed<ChainedSeed, TConfig> const & seed)
 ..param.diag: The diagonal to add.
 ...type:Class.SeedDiagonal
 ...remarks: A diagonal consists of three values: 1: start in 1. sequence, 2: start in 2. sequence, 3: length of match
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline void
@@ -257,6 +259,7 @@ appendDiagonal(Seed<ChainedSeed, TConfig> & seed,
 ..param.seed: The seed to which the diagonal should be added.
 ...type:Spec.ChainedSeed
 ..param.first: Iterator the first diagonal to remove.
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline void
@@ -270,6 +273,7 @@ truncateDiagonals(Seed<ChainedSeed, TConfig> & seed,
 
 /**
 .Function.begin.param.object.type:Spec.ChainedSeed
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline typename Iterator<Seed<ChainedSeed, TConfig> >::Type
@@ -289,6 +293,7 @@ begin(Seed<ChainedSeed, TConfig> const & seed, Standard const &)
 
 /**
 .Function.front.param.object.type:Spec.ChainedSeed
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline typename Reference<Seed<ChainedSeed, TConfig> >::Type
@@ -308,6 +313,7 @@ front(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.back.param.container.type:Spec.ChainedSeed
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline typename Reference<Seed<ChainedSeed, TConfig> >::Type
@@ -327,6 +333,7 @@ back(Seed<ChainedSeed, TConfig> const & seed)
 
 /**
 .Function.end.param.object.type:Spec.ChainedSeed
+..include:seqan/seeds2.h
 */
 template <typename TConfig>
 inline typename Iterator<Seed<ChainedSeed, TConfig> >::Type

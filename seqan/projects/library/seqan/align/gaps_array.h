@@ -254,6 +254,7 @@ SEQAN_CHECKPOINT
 ..see:Function.begin
 ..see:Function.source
 ..see:Function.sourceEndPosition
+..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position<TSource>::Type
@@ -286,6 +287,7 @@ SEQAN_CHECKPOINT
 ..see:Function.end
 ..see:Function.sourceEnd
 ..see:Function.sourceBeginPosition
+..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position<TSource>::Type
@@ -353,6 +355,7 @@ SEQAN_CHECKPOINT
 ..param.pos:Position in the original sequence to get the view position for.
 ..returns:The position in the view/gaps position.
 ..see:Function.toSourcePosition
+..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position< Gaps<TSource, ArrayGaps> >::Type
@@ -401,6 +404,7 @@ SEQAN_CHECKPOINT
 ..param.pos:Position in the view sequence to get the original position for.
 ..returns:The position in the source sequence.
 ..see:Function.toViewPosition
+..include:seqan/align.h
 */
 template <typename TSource>
 inline typename Position<TSource>::Type

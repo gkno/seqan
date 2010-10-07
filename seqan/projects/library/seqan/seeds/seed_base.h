@@ -80,6 +80,7 @@ typedef Tag<_extendSeed_GappedXDrop> const GappedXDrop;
 ..signature:Seed<TPosition, TSpecSeed>
 ..param.TPosition:The type number that schuld be used. Must have negative numbers (e.g. int/long).
 ..param.TSpec:The seed type used.
+..include:seqan/seeds.h
 */
 
 /**
@@ -179,6 +180,7 @@ struct Key< Seed< TPosition, TSpec > >
 ..param.seed: The seed whose start diagonal should be returned.
 ...type:Class.Seed
 ..returns: The diagonal of the start point.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -196,6 +198,7 @@ startDiagonal(Seed<TPosition, TSpecSeed> const &me)
 ..param.seed: The seed whose end diagonal should be returned.
 ...type:Class.Seed
 ..returns: The diagonal of the end point.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -315,6 +318,7 @@ dimension( Seed< TPosition, TSpec > & /*me*/ )
 ..param.seed: The seed whose query position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -332,6 +336,7 @@ leftDim0(Seed<TPosition, TSpecSeed> const &seed)
 ..param.seed: The seed whose last in the query position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -349,6 +354,7 @@ rightDim0(Seed<TPosition,TSpecSeed> const & seed)
 ..param.seed: The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns: Begin of the seed.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -366,6 +372,7 @@ leftDim1(Seed<TPosition, TSpecSeed> const &seed)
 ..param.seed: The seed whose last in the database position should be returned.
 ...type:Class.Seed
 ..returns: End of the seed.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -383,6 +390,7 @@ rightDim1(Seed<TPosition,TSpecSeed> const & seed)
 ..param.seed: The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns: The most left diagonal.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -400,6 +408,7 @@ leftDiagonal(Seed<TPosition, TSpecSeed> const &seed)
 ..param.seed: The seed whose database position should be returned.
 ...type:Class.Seed
 ..returns: The most right diagonal.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline TPosition 
@@ -427,6 +436,7 @@ length(Seed<TPosition, TSpecSeed> const & seed)
 ..param.seed: The seed whose start position should be updated.
 ...type:Class.Seed
 ..param.start: The query position where the seed should start.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -445,6 +455,7 @@ setLeftDim0(Seed<TPosition, TSpecSeed> &me,
 ..param.seed: The seed whose end position should be updated.
 ...type:Class.Seed
 ..param.end: The query position where the seed should end.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -463,6 +474,7 @@ setRightDim0(Seed<TPosition,TSpecSeed> & me,
 ..param.seed: The seed whose start position should be updated.
 ...type:Class.Seed
 ..param.start: The database position where the seed should start.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -481,6 +493,7 @@ setLeftDim1(Seed<TPosition, TSpecSeed> &me,
 ..param.seed: The seed whose end position should be updated.
 ...type:Class.Seed
 ..param.end: The database position where the seed should end.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -499,6 +512,7 @@ setRightDim1(Seed<TPosition,TSpecSeed> & me,
 ..param.seed: The seed whose left diagonal value should be updated.
 ...type:Class.Seed
 ..param.diag: The new value for the most left diagonal.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -517,6 +531,7 @@ setLeftDiagonal(Seed<TPosition, TSpecSeed> &me,
 ..param.seed: The seed whose right diagonal value should be updated.
 ...type:Class.Seed
 ..param.diag: The new value for the most right diagonal.
+..include:seqan/seeds.h
 */
 template<typename TPosition, typename TSpecSeed>
 inline void 
@@ -711,6 +726,7 @@ _mergeTwoSeedsScore(Seed<TPosition, SimpleSeed> &firstSeed,
 ...type:Tag.Seed Extension.MatchExtend
 ...type:Tag.Seed Extension.UngappedXDrop
 ...type:Tag.Seed Extension.GappedXDrop
+..include:seqan/seeds.h
 */
 
 

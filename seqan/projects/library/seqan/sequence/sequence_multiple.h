@@ -156,6 +156,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ..returns:A reference to a string.
 ...remarks:If $me$ is a @Class.StringSet@ then the returned string is of size $length(me)+1$ and contains the ascending (virtual) delimiter positions of the concatenation of all strings in the string set.
 ...remarks:If $me$ is a @Class.String@, @Tag.Nothing@ is returned.
+..include:seqan/sequence.h
 */
 
     template <typename TStringSet>
@@ -196,6 +197,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ...remarks:If $limits$ is omitted or @Tag.Nothing@ $getSeqNo$ returns 0.
 ...remarks:If $pos$ is a local position (of class @Class.Pair@) then $i1$ is returned.
 ...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position and $i1$ is returned.
+..include:seqan/sequence.h
 */
 
 /**
@@ -210,6 +212,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ...remarks:If $limits$ is omitted or @Tag.Nothing@ $getSeqNo$ returns $pos$.
 ...remarks:If $pos$ is a local position (of class @Class.Pair@) then $i2$ is returned.
 ...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position and $i2$ is returned.
+..include:seqan/sequence.h
 */
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -299,6 +302,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ..returns:The corresponding global position of $pos$.
 ...remarks:If $pos$ is an integral type $pos$ is returned.
 ...remarks:If not, $limits[getSeqNo(pos, limits)] + getSeqOffset(pos, limits)$ is returned.
+..include:seqan/sequence.h
 */
 
 	// any_position and no limits_string -> any_position
@@ -340,6 +344,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ..param.localPos:A local position (pair).
 ...type:Class.Pair
 ..param.limits:The limits string returned by @Function.stringSetLimits@.
+..include:seqan/sequence.h
 */
 	template <typename TDest, typename TLimitsString, typename T1, typename T2, typename TCompression>
 	inline void
@@ -369,6 +374,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ...remarks:If $pos$ is an integral type and $limits$ is omitted or @Tag.Nothing@, $pos$ is returned.
 ...remarks:If $pos$ is a local position (of class @Class.Pair@) then $pos$ is returned.
 ...remarks:If $pos$ is a global position (integer type and $limits$ is a @Class.String@) then $pos$ is converted to a local position.
+..include:seqan/sequence.h
 */
 
 	// any_position and no limits_string -> any_position
@@ -1578,6 +1584,7 @@ end(StringSet< TString, TSpec > const & me,
 ..returns:A reference to a string.
 ..see:Function.assignValueById
 ..see:Function.valueById
+..include:seqan/sequence.h
 */
 
 	template <typename TString, typename TSpec, typename TId>
@@ -1628,6 +1635,7 @@ end(StringSet< TString, TSpec > const & me,
 ..returns:A reference to a string.
 ..see:Function.assignValueById
 ..see:Function.getValueById
+..include:seqan/sequence.h
 */
 
 	template<typename TString, typename TSpec, typename TId>
@@ -1661,6 +1669,7 @@ end(StringSet< TString, TSpec > const & me,
 ...type:Metafunction.Id
 ..see:Function.getValueById
 ..see:Function.valueById
+..include:seqan/sequence.h
 */
 
 	template<typename TString, typename TSpec, typename TString2>
@@ -1773,6 +1782,7 @@ end(StringSet< TString, TSpec > const & me,
 ...type:Metafunction.Id
 ..returns:void
 ..see:Function.assignValueById
+..include:seqan/sequence.h
 */
 
 	template<typename TString, typename TSpec, typename TId>
@@ -1839,6 +1849,7 @@ end(StringSet< TString, TSpec > const & me,
 ..returns:An id that corresponds to $pos$ within $string_set$
 ..see:Function.assignValueById
 ..see:Function.valueById
+..include:seqan/sequence.h
 */
 
 	template <typename TString, typename TSpec, typename TPos>
@@ -1909,6 +1920,7 @@ end(StringSet< TString, TSpec > const & me,
 ..returns:A reference to a string.
 ..see:Function.assignValueById
 ..see:Function.valueById
+..include:seqan/sequence.h
 */
 
 	template <typename TString, typename TSpec, typename TId>

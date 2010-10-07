@@ -118,6 +118,7 @@ algorithm if one pattern is a suffix of another pattern! Hence, we must associat
 ...type:Class.String
 ..returns:void
 ..see:Function.createTrieOnReverse
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeywords>
 inline void
@@ -156,6 +157,7 @@ algorithm if one pattern is a suffix of another pattern! Hence, we must associat
 ...type:Class.String
 ..returns:void
 ..see:Function.createTrie
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TKeywords>
 inline void
@@ -202,6 +204,7 @@ createTrieOnReverse(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..returns:void
 ..see:Function.createTrie
 ..see:Function.createTrieOnReverse
+..include:seqan/graph_types.h
 */
 template <typename TAlphabet, typename TCargo, typename TSpec, typename TTerminalStateMap, typename TText>
 inline void

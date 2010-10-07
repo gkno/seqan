@@ -44,6 +44,7 @@ struct PriorityHeap;
 ...default:std::less<TValue>
 ..param.TSpec:The specializing type.
 ...default:@Spec.PriorityHeap@
+..include:seqan/misc.h
 */
 template <typename TValue = int, typename TLess = ::std::less<TValue>, typename TSpec = PriorityHeap>
 class PriorityType;

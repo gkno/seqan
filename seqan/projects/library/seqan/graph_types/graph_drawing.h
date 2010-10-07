@@ -467,6 +467,7 @@ _writeEdgeType(TFile & file,
 ..param.edgeMap:A mapping from edge descriptor to edge label.
 ..param.tag:A tag to select the output format.
 ...type:Tag.DotDrawing
+..include:seqan/graph_types.h
  */
 template <typename TFile, typename TSpec, typename TNodeAttributes, typename TEdgeAttributes>
 void 
@@ -530,6 +531,7 @@ write(TFile & file,
 /**
 .Function.write:
 ..signature:write(file, graph, nodeMap, tag)
+..include:seqan/graph_types.h
  */
 template <typename TFile, typename TSpec, typename TNodeAttributes>
 inline void
@@ -550,6 +552,7 @@ write(TFile & file,
 /**
 .Function.write:
 ..signature:write(file, graph, tag)
+..include:seqan/graph_types.h
  */
 template <typename TFile, typename TSpec>
 inline void

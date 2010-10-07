@@ -62,6 +62,7 @@ _findPrev(Map<TValue, Skiplist<TSpec> > & me,
 ..param.xLength: Length of the first sequence.
 ..param.yLength: Length of the second sequence.
 ..returns: The score of the chain.
+..include:seqan/seeds.h
 */
 
 /**
@@ -82,6 +83,7 @@ _findPrev(Map<TValue, Skiplist<TSpec> > & me,
 ...value:$Default$: Compiler selects best algorithm.
 ...value:$GenericChaining$: A simple generic chaining algorithm.
 ...value:$RangetreeChaining$: An elaborated chaining algorithm for @Spec.Score Zero@, @Spec.Score Manhattan@, and @Spec.Score ChainSoP@ scoring schemes.
+..include:seqan/seeds.h
 */
 template<typename TValue, typename TSeedSpec, typename TScoreSpec, typename TSpec, typename TTargetContainer>
 typename ScoreType<TScoreSpec>::Type

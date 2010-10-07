@@ -36,6 +36,7 @@ namespace seqan {
 ..cat:Seed Handling
 ..param.TPosition:The type to use for positions.
 ..param.TSize:The type to use for the seed length.
+..include:seqan/seeds2.h
 */
 template <typename TPosition, typename TSize>
 class SeedDiagonal

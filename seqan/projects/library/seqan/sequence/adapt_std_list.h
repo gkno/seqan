@@ -131,6 +131,7 @@ struct Size< ::std::list<TValue, TAlloc> const>
 ..summary:Returns type of the STL container iterator.
 ..signature:StdContainerIterator<T>::Type
 ..param.T.type:Adaption.std::list
+..include:seqan/sequence.h
 */
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
@@ -250,6 +251,7 @@ length(std::list<TValue> const & list)
 ..param.container:The container to prepend to.
 ...type:Adaption.std::list
 ..param.value:The value to prepend to the container.
+..include:seqan/sequence.h
 */
 template <typename T, typename T2>
 inline void
@@ -286,6 +288,7 @@ clear(std::list<T> & list)
 ..param.container:The container whose elements to reverse.
 ...type:Concept.Container
 ...type:Adaption.std::list
+..include:seqan/sequence.h
  */
 template <typename TContainer>
 void reverse(TContainer & container)

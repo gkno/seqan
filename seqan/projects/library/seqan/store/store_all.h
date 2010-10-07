@@ -81,6 +81,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.nameStore:A name store, e.g. @Memvar.FragmentStore#readNameStore@
 ...see:Class.FragmentStore
 ..class:Class.NameStoreCache
+..include:seqan/store.h
 */
 	
 	template <typename TNameStore, typename TName = typename Value<TNameStore>::Type>
@@ -114,6 +115,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.cache:A @Class.NameStoreCache@ object.
 ...type:Class.NameStoreCache
 ..see:Function.getIdByName
+..include:seqan/store.h
 */
     
     template <typename TNameStore, typename TName>
@@ -144,6 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.NameStoreCache
 ..returns:$true$ if the name was found and $false$ if not.
 ..see:Function.getIdByName
+..include:seqan/store.h
 */
 
     template <typename TNameStore, typename TName, typename TPos>
@@ -210,6 +213,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:Tag.Nothing
 ...type:Class.NameStoreCache
 ..see:Function.getIdByName
+..include:seqan/store.h
 */
 
     template <typename TNameStore, typename TName>
@@ -388,6 +392,7 @@ struct FragmentStoreConfig
 ..summary:String that maps from $annoId$ to $annoName$.
 ..type:Typedef.FragmentStore#TAnnotationNameStore
 ..class:Class.FragmentStore
+..include:seqan/store.h
 */
 
 
@@ -884,6 +889,7 @@ annotationGetValueByKey (
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..remarks:This function clears the @Memvar.FragmentStore#readStore@, @Memvar.FragmentStore#readSeqStore@ and @Memvar.FragmentStore#readNameStore@.
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig>
@@ -912,6 +918,7 @@ clearReads(FragmentStore<TSpec, TConfig> &me)
 ..remarks:This function appends a single read to the @Memvar.FragmentStore#readStore@ and @Memvar.FragmentStore#readSeqStore@.
 If name is given, it is appended to the @Memvar.FragmentStore#readNameStore@.
 ..see:Function.getRead
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TRead, typename TId>
@@ -986,6 +993,7 @@ appendRead(
 ...type:Class.FragmentStore
 ..param.readId:The read id.
 ..returns:The sequence of the read with id $readId$ from the @Memvar.FragmentStore#readSeqStore@.
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TId>
@@ -1017,6 +1025,7 @@ getRead(
 Note that this really only adds a match.
 To generate a global alignment out of all of these matches, use @Function.convertMatchesToGlobalAlignment@.
 ..see:Function.appendRead
+..include:seqan/store.h
 */
 template <typename TSpec, typename TConfig, typename TReadId, typename TContigId, typename TPos, typename TPairMatchId>
 inline typename Size<typename FragmentStore<TSpec, TConfig>::TAlignedReadStore>::Type
@@ -1073,6 +1082,7 @@ appendAlignedRead(
 and a mate-pair entry between both of them to the @Memvar.FragmentStore#matePairStore@.
 If names are given, they are appended to the @Memvar.FragmentStore#readNameStore@.
 ..see:Function.appendRead
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TRead>
@@ -1145,6 +1155,7 @@ appendMatePair(
 in @Memvar.FragmentStore#alignQualityStore@.
 Afterwards the alignIds are renamed sequentially beginning with 0.
 This function can be used to remove alignments which are selected by previously setting their id to $INVALID_ID$.
+..include:seqan/store.h
 */
 
 // 1. remove aligned reads with invalid ids
@@ -1201,6 +1212,7 @@ compactAlignedReads(FragmentStore<TSpec, TConfig> &me)
 Two read alignments can be identified to be a pair match if they have the same $pairMatchId$.
 Please note that paired reads not necessarily have to mapped as a pair match, 
 e.g. if they are on different contigs or have the same orientation or a wrong insert size.
+..include:seqan/store.h
 */
 
 // rename pair match ids beginning with 0, returns the number of pair matches
@@ -1248,6 +1260,7 @@ compactPairMatchIds(FragmentStore<TSpec, TConfig> &me)
 ...type:Class.FragmentStore
 ..remarks:This function calls @Function.compactPairMatchIds@ first and calculate the insert size for every pair match.
 The insert size of a pair match is the outer distance between the two matches.
+..include:seqan/store.h
 */
 
 template <typename TLibSizeString, typename TSpec, typename TConfig>
@@ -1290,6 +1303,7 @@ calculateInsertSizes(TLibSizeString &insertSizes, FragmentStore<TSpec, TConfig> 
 ...type:Class.FragmentStore
 ..param.readId:The read id.
 ..returns:The mate number (0..first mate, 1..second mate) of the read in its mate-pair or -1 if the read is not paired.
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TId>
@@ -1326,6 +1340,7 @@ getMateNo(FragmentStore<TSpec, TConfig> const &me, TId readId)
 ..param.store:The fragment store.
 ...type:Class.FragmentStore
 ..remarks:Entries of reads without a mate contain $INVALID_ID$.
+..include:seqan/store.h
 */
 
 // calculate index of the other mate for each pair match
@@ -1367,6 +1382,7 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 ..remarks:Stores for a contig and a row the ids of aligned reads from left to right.
 $contigRows[contigId][row]$ stores the $alignId$ of all aligned reads from left to right assigned to the same row
 $row$ is the row of the alignment in the multiple sequence alignment and $contigId$ the id of the reference contig.
+..include:seqan/store.h
 */
 	
 struct AlignedReadLayout
@@ -1390,6 +1406,7 @@ struct AlignedReadLayout
 ...type:Class.FragmentStore
 ..remarks:For each contig this function layouts all reads in rows from up to down reusing empty row spaces.
 ..see:Function.printAlignment
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig>
@@ -1490,6 +1507,7 @@ inline void _printContig(
 ..remarks:The window coordinates ($beginPos$, ...) may be chosen bigger than the layout.
 The empty space is then filled with whitespaces.
 ..see:Function.layoutAlignment
+..include:seqan/store.h
 */
 
 template <typename TStream, typename TFormatTag, typename TSpec, typename TConfig, typename TContigId, typename TPos, typename TNum>
@@ -1620,6 +1638,7 @@ void printAlignment(
 This function iterates over entries in the @Memvar.FragmentStore#alignedReadStore@ and semi-global aligns each read to its contig segments given by begin and end position.
 Gaps introduced by these pair-wise alignments are then inserted to the affected contig and reads correspondingly.
 ..remarks:The invariant that positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space holds before (there were no gaps in alignments) and after calling this functions.
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TScore, typename TShrinkMatches>
@@ -1825,6 +1844,7 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 ..remarks:Before calling this function the $gaps$ structures in the @Memvar.FragmentStore#contigStore@ must be empty, i.e. there are no gaps in the contig.
 The pairwise alignment gaps of the reads are stored in the $gaps$ structure in the @Memvar.FragmentStore#alignedReadStore@, whereas the pairwise alignment gaps of the contig are stored in the $pairwiseContigGaps$ string.
 ..remarks:After calling this functions all positions in the @Memvar.FragmentStore#alignedReadStore@ are in gap-space.
+..include:seqan/store.h
 */
 
 template <typename TSpec, typename TConfig, typename TContigGapsString>

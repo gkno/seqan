@@ -105,6 +105,7 @@ SEQAN_CHECKPOINT
 ..see:Function.getLeftBoundary
 ..see:Function.rightBoundary
 ..see:Function.getRightBoundary
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TValue &
@@ -126,6 +127,7 @@ SEQAN_CHECKPOINT
 ..see:Function.getRightBoundary
 ..see:Function.leftBoundary
 ..see:Function.getLeftBoundary
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TValue &
@@ -147,6 +149,7 @@ SEQAN_CHECKPOINT
 ..see:Function.leftBoundary
 ..see:Function.getRightBoundary
 ..see:Function.rightBoundary
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TValue
@@ -168,6 +171,7 @@ SEQAN_CHECKPOINT
 ..see:Function.rightBoundary
 ..see:Function.getLeftBoundary
 ..see:Function.leftBoundary
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TValue
@@ -184,6 +188,7 @@ SEQAN_CHECKPOINT
 ..param.me:
 ...type:Class.IntervalAndCargo
 ..see:Function.getCargo
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TCargo &
@@ -199,6 +204,7 @@ SEQAN_CHECKPOINT
 ..param.me:
 ...type:Class.IntervalAndCargo
 ..see:Function.cargo
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TCargo
@@ -289,6 +295,7 @@ SEQAN_CHECKPOINT
 .Function.leftBoundary:
 ..signature:leftBoundary(point)
 ..param.point.type:Class.PointAndCargo
+..include:seqan/refinement.h
  */
 template<typename TValue, typename TCargo>
 TValue &
@@ -303,6 +310,7 @@ SEQAN_CHECKPOINT
 .Function.rightBoundary:
 ..signature:rightBoundary(point)
 ..param.point.type:Class.PointAndCargo
+..include:seqan/refinement.h
  */
 template<typename TValue, typename TCargo>
 TValue &
@@ -317,6 +325,7 @@ SEQAN_CHECKPOINT
 .Function.getLeftBoundary:
 ..signature:getLeftBoundary(point)
 ..param.point.type:Class.PointAndCargo
+..include:seqan/refinement.h
  */
 template<typename TValue, typename TCargo>
 TValue
@@ -331,6 +340,7 @@ SEQAN_CHECKPOINT
 .Function.getRightBoundary:
 ..signature:getRightBoundary(point)
 ..param.point.type:Class.PointAndCargo
+..include:seqan/refinement.h
  */
 template<typename TValue, typename TCargo>
 TValue
@@ -345,6 +355,7 @@ SEQAN_CHECKPOINT
 .Function.cargo:
 ..signature:cargo(point)
 ..param.point.type:Class.PointAndCargo
+..include:seqan/refinement.h
  */
 template<typename TValue, typename TCargo>
 TCargo &
@@ -361,6 +372,7 @@ SEQAN_CHECKPOINT
 ..param.point:
 ...type:Class.IntervalAndCargo
 ..see:Function.getCargo
+..include:seqan/refinement.h
 */
 template<typename TValue, typename TCargo>
 TCargo

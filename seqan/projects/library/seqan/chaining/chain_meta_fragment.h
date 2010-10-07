@@ -35,6 +35,7 @@ namespace seqan{
 ..cat:Chaining
 ..signature:_MetaFragment< TFragType >
 ..param.TFragType:Type of the fragment
+..include:seqan/chaining.h
 */
 
 		// get/set the weight of the related fragment

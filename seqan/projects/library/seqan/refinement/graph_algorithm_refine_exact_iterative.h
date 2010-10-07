@@ -605,6 +605,7 @@ SEQAN_CHECKPOINT
 edges in the refined Alignment Graph).
 ...remarks:If no scoring scheme is given, all edges get weight 1.
 ...type:Class.Score
+..include:seqan/refinement.h
 */
 //exact refinement, score type given
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec,typename TOutGraph, typename TSequence, typename TSetSpec>
@@ -633,6 +634,7 @@ identical (fully overlapping) or non-overlapping.
 ...type:Class.StringSet
 ..param.refinedGraph:The resulting refined set of matches stored in a graph.
 ...type:Spec.Alignment Graph
+..include:seqan/refinement.h
 */
 //exact refinement, score type not given
 template<typename TFragmentString, typename TOutGraph, typename TSequence, typename TSetSpec>

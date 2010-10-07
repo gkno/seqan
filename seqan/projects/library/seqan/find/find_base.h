@@ -151,6 +151,7 @@ struct Needle<Segment<THost, TSpec> const>
 ...remarks:Differences are deletions, insertions and substitutions.
 ..returns:$boolean$ that indicates whether an occurence of $pattern$ was found or not.
 ..remarks:Repeated calls of this function iterate through all occurences of $pattern$.
+..include:seqan/find.h
 */
 
 /**
@@ -169,6 +170,7 @@ struct Needle<Segment<THost, TSpec> const>
 If $THaystack$ is a set of strings or an index of a set of strings, then $position(finder)$ returns a @Class.Pair@ $(hayNo, pos)$,
 in which $hayNo$ is the haystack index and $pos$ the local position of the hit.
 ..remarks:Use $clear(finder)$ to reset a finder object and search from the beginning.
+..include:seqan/find.h
 */
 
 ///.Function.clear.param.object.type:Class.Finder
@@ -430,6 +432,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Infix
 ..remarks:This function works only correct if the begin position of the match was already found,
 see @Function.findBegin@.
+..include:seqan/find.h
 */
 template <typename THaystack, typename TSpec>
 inline typename Infix<THaystack>::Type
@@ -584,6 +587,7 @@ SEQAN_CHECKPOINT
 .Function.goBegin
 ..signature:goBegin(finder)
 ...param.finder:Finder object to go to beginning in.
+..include:seqan/find.h
  */
 template <typename THaystack, typename TSpec>
 inline void
@@ -598,6 +602,7 @@ SEQAN_CHECKPOINT
 .Function.goEnd
 ..signature:goEnd(finder)
 ...param.finder:Finder object to go to end in.
+..include:seqan/find.h
  */
 template <typename THaystack, typename TSpec>
 inline void
@@ -639,6 +644,7 @@ SEQAN_CHECKPOINT
 ..param.pos:A position.
 ...metafunction:Metafunction.Position
 ..see:Function.position
+..include:seqan/find.h
 */
 
 template <typename THaystack, typename TSpec, typename TPosition>
@@ -744,6 +750,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Finder
 ..param.haystack:The haystack object the finder searches through.
 ...type:Class.String
+..include:seqan/find.h
 */
 
 template < typename THaystack, typename TSpec >
@@ -761,6 +768,7 @@ setHaystack(Finder<THaystack, TSpec> &obj, THaystack const &hstk) {
 ...type:Class.Finder
 ..returns:The haystack object.
 ..remarks:The result type is @Metafunction.Haystack@$<TFinder>::Type$ for finder of type $TFinder$.
+..include:seqan/find.h
 */
 
 template < typename TObject >

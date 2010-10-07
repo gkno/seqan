@@ -57,6 +57,7 @@ struct Hmm;
 ..param.TSpec:The specializing type determines the kind of graph, e.g., directed, undirected, tree, or automaton.
 ...remarks:The default Graph<> corresponds to a directed graph.
 ...default:Directed<>
+..include:seqan/graph_types.h
 */
 template<typename TSpec = Directed<> >
 class Graph;
@@ -311,6 +312,7 @@ struct Alphabet<Graph<Hmm<TAlphabet, TCargo, TSpec> > const> {
 Useful for various graph algorithms, e.g., missing predecessors, vertices that have not been visited, etc.
 ..signature:getNil<T>()
 ..returns:Pseudo nil value for type T.
+..include:seqan/graph_types.h
 */
 template <typename T>
 inline T
@@ -412,6 +414,7 @@ For a tree the root must be the first vertex in this array and the enumeration i
 ...type:Metafunction.Size
 ..returns:void
 ..see:Function.addEdge
+..include:seqan/graph_types.h
 */
 template<typename TSpec, typename TEdgeArray, typename TSize>
 inline void

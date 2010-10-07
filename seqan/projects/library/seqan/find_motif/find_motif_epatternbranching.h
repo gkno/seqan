@@ -167,6 +167,7 @@ public:
 ...type:$bool$
 ..param.n_ar:The array with the sequence lengths of each input sequence.
 ...remarks:If all input sequences have the same sequence lengths n_ar consists of t equal values.
+..include:seqan/find_motif.h
 */
 
 template<typename TType, typename TIntAr>
@@ -264,6 +265,7 @@ findMotif(MotifFinder<TSeqType ,EPatternBranching> & epb2,
 ...type:Tag.OOPS
 ...type:Tag.OMOPS
 ..remarks:The ePatternBranching algorithm is able to run in OOPS and OMOPS mode.
+..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -492,6 +494,7 @@ ePatternBranching(TStrings & result_set,
 ...param.TString:A @Class.String@ type
 ....type:Class.String
 ..remarks:The function uses equations formulated in theorem 1.
+..include:seqan/find_motif.h
 */
 
 template<typename TIntSet, typename TType, typename TStrings>
@@ -710,6 +713,7 @@ bestNeighbors(TIntSet & neighbors,
 ..param.d:The number of substitutions.
 ..param.is_exact:The size of Hamming distance
 ...type:$bool$
+..include:seqan/find_motif.h
 */
 
 template<typename TStringIter, typename TType>

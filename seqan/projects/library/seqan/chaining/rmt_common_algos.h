@@ -49,6 +49,7 @@ namespace seqan{
 ...type:RangeMaximumTree
 ..param.border:The object that stores the borders for all dimensions.
 ..returns:A pointer to the object witch maximal priority in the given intervall.
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TBorder >
@@ -89,6 +90,7 @@ namespace seqan{
 ..param.obj:The object.
 ..param.prio:The new priority (optional). $prio > priority( obj )$ must hold.
 ...type:$Metafunction.Weight< TObject >::Type$.
+..include:seqan/chaining.h
 */
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void

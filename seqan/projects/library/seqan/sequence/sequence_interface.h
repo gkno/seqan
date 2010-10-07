@@ -207,6 +207,7 @@ is just a filter and uses the buffer of it's host object $str$.
 strings have different id values.
 ..example.text:The result of the last comparison depends on the implementation of $toCString$
 and cannot be predicted at compile time.
+..include:seqan/sequence.h
 */
 template <typename T>
 inline void const * 
@@ -227,6 +228,7 @@ SEQAN_CHECKPOINT
 ..returns:$false$ if it can be guaranteed that $sequence1$ and $sequence2$ can be modified without changing each other, $true$ otherwise.
 ..remarks:Non-sequences are interpreted as sequences of size 1. 
 ..remarks:Note that this function may not work properly for argument types that are not listed here.
+..include:seqan/sequence.h
 */
 
 template <typename T1, typename T2>
@@ -258,6 +260,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:If the container does not contain any items at all, the function may return 0.
 ..see:Function.end
 ..see:Metafunction.Iterator
+..include:seqan/sequence.h
 */
 template <typename T>
 inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
@@ -407,6 +410,7 @@ SEQAN_CHECKPOINT
 ..remarks
 ...text:For most classes $beginPosition$ always returns 0. Exceptions are e.g. @Spec.InfixSegment@ and @Spec.SuffixSegment@.
 ..see:Function.begin
+..include:seqan/sequence.h
 */
 template <typename T>
 inline typename Position<T>::Type 
@@ -443,6 +447,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:If the container does not contain any items at all, the function may return 0.
 ..see:Function.begin
 ..see:Metafunction.Iterator
+..include:seqan/sequence.h
 */
 template <typename T>
 inline typename Iterator<T, typename DefaultGetIteratorSpec<T>::Type>::Type 
@@ -536,6 +541,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Position
 ..see:Function.end
 ..see:Function.beginPosition
+..include:seqan/sequence.h
 */
 template <typename T>
 inline typename Position<T>::Type 
@@ -566,6 +572,7 @@ SEQAN_CHECKPOINT
 ..param.position:A position in $container$ on which the value should be accessed.
 ..returns:A reference or proxy to the value.
 ...metafunction:Metafunction.Reference
+..include:seqan/sequence.h
 */
 
 //* ???Anti Default Sequences
@@ -609,6 +616,7 @@ This can either be a reference to the item or a temporary copy of the item.
 ..see:Metafunction.GetValue
 ..see:Metafunction.Position
 ..see:Function.value
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPos>
@@ -644,6 +652,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function is equivalent to $value(me, 0)$.
 ..see:Function.value
 ..see:Function.begin
+..include:seqan/sequence.h
 */
 
 
@@ -679,6 +688,7 @@ SEQAN_CHECKPOINT
 ..see:Function.value
 ..see:Function.end
 ..see:Function.Container#front
+..include:seqan/sequence.h
 */
 
 template <typename T>
@@ -719,6 +729,7 @@ SEQAN_CHECKPOINT
 ..see:Function.value
 ..see:Metafunction.Iterator
 ..see:Metafunction.Position
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPos>
@@ -773,6 +784,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:
 	If $value$ is not used again after calling this function, 
 	then consider to use @Function.moveValue@ that could be faster in some cases instead.
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TValue, typename TPos>
@@ -802,6 +814,7 @@ the whole content of $object$ is replaced by $value$.
 ..remarks.text:
 	This function possibly clears $value$.
 	If $value$ should be used further, consider to use @Function.assignValue@ instead.
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TValue, typename TPos>
@@ -838,6 +851,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Size
 ..remarks.text:The length of a sequence can never exceed it's capacity.
 ..see:Function.capacity
+..include:seqan/sequence.h
 */
 
 //* ???Anti Default Sequences
@@ -867,6 +881,7 @@ SEQAN_CHECKPOINT
 resizing of the capacity. 
 Some functions do that implicitely if they are called with a suitable @Tag.Overflow Strategy.overflow strategy@.
 The function @Function.reserve@ can be used to change the capacity explicitely.
+..include:seqan/sequence.h
 */
 template <typename T> 
 inline typename Size<T const>::Type
@@ -890,6 +905,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:$empty(x)$ is guaranteed to be at least as fast as $length(me) == 0$, 
 but can be significantly faster in some cases.
 ..see:Function.length
+..include:seqan/sequence.h
 */
 template <typename T>
 inline bool
@@ -938,6 +954,7 @@ SEQAN_CHECKPOINT
 when it is expanded using the @Tag.Overflow Strategy."Generous" overflow strategy@.
 ...metafunction:Metafunction.Size
 ..see:Tag.Overflow Strategy
+..include:seqan/sequence.h
 */
 template <typename T, typename TSize>
 inline TSize 
@@ -1036,6 +1053,7 @@ SEQAN_CHECKPOINT
 ...default:Specified by @Metafunction.DefaultOverflowImplicit@ of the $target$ type.
 ..remarks:The result of this operation is stored in $target$.
 ..see:Function.assign
+..include:seqan/sequence.h
 */
 template<typename TTarget, typename TSource>
 inline void 
@@ -1124,6 +1142,7 @@ SEQAN_CHECKPOINT
 ..param.resize_tag: Specifies the strategy that is applied if $target$ has not enough capacity to store the complete content. (optional)
 ...type:Tag.Overflow Strategy
 ...default:Specified by @Metafunction.DefaultOverflowImplicit@ of the $target$ type.
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TValue>
@@ -1158,6 +1177,7 @@ SEQAN_CHECKPOINT
 ...type:Tag.Overflow Strategy
 ..see:Function.insertValue
 ..see:Function.append
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosition, typename TSeq, typename TExpand>
@@ -1217,6 +1237,7 @@ SEQAN_CHECKPOINT
 ...type:Tag.Overflow Strategy
 ..see:Function.insert
 ..see:Function.appendValue
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosition, typename TValue>
@@ -1263,6 +1284,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:Some compilers have difficulties if $pos_begin$ and $pos_end$ are both 0, since 0 can be
 both a position or an iterator. The workaround is to convert at least one of these arguments
 explicite to the position or to the interator type.
+..include:seqan/sequence.h
 */
 template<typename TTarget, typename TPositionBegin, typename TPositionEnd, typename TSource>
 inline void 
@@ -1368,6 +1390,7 @@ the operation need not to change the capacity at all.
 ..remarks:This operation does not changes the content of $object$.
 ...note:This operation may invalidate iterators of $object$.
 ..see:Function.capacity
+..include:seqan/sequence.h
 */
 template <typename T, typename TSize, typename TExpand>
 inline typename Size<T>::Type
@@ -1436,6 +1459,7 @@ If $new_length$ is larger than $length(object)$, this function will not initiali
 calling any constructor. To resize and initialize the new elements, use @Function.fill@ instead.
 ..see:Function.length
 ..see:Function.reserve
+..include:seqan/sequence.h
 */
 template <typename T, typename TSize>
 inline typename Size<T>::Type  
@@ -1469,6 +1493,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Size
 ...remarks:Depeding on the @Tag.Overflow Strategy.overflow strategy@ specified by $resize_tag$,
 this could be $size$ or less than $size$ if $object$ has not enough @Function.capacity@.
+..include:seqan/sequence.h
 */
 
 template<typename T, typename TSize, typename TBeginPosition, typename TEndPosition>
@@ -1511,6 +1536,7 @@ SEQAN_CHECKPOINT
 ...remarks:If $pos_end$ is omitted, only one element in $object$ at position $pos$ is destroyed.
 ..remarks:$erase(object, pos, pos_end)$ is semantically the same as @Function.resizeSpace.resizeSpace(object, 0, pos, pos_end)@.
 ..see:Function.eraseBack
+..include:seqan/sequence.h
 */
 
 template<typename T, typename TBeginPosition, typename TEndPosition>
@@ -1561,6 +1587,7 @@ SEQAN_CHECKPOINT
 ...type:Class.String
 ..remarks:$erase(object)$ is semantically the same as @Function.erase.erase(me, length(me) - 1)@.
 ..see:Function.erase
+..include:seqan/sequence.h
 */
 
 template <typename T>
@@ -1599,6 +1626,7 @@ new items in $object$.
 ..see:Function.length
 ..see:Function.reserve
 ..see:Function.resize
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TSize, typename TValue>
@@ -1627,6 +1655,7 @@ SEQAN_CHECKPOINT
 ..see:Function.capacity
 ..see:Function.length
 ..see:Function.reserve
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TSize, typename TValue>

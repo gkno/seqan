@@ -106,6 +106,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Spec
 ..remarks:An index contains various arrays or objects, also called fibres (see @Metafunction.Fibre@).
 ..remarks:These fibres are created on demand depending on the requirements of an algorithm.
+..include:seqan/index.h
 */
 
 ///.Function.setHaystack.param.haystack.type:Class.Index
@@ -508,6 +509,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ...type:Class.Index
 ..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A reference to the @Metafunction.Fibre@ object.
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -770,6 +772,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -791,6 +794,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -818,6 +822,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -839,6 +844,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -860,6 +866,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -881,6 +888,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -914,6 +922,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_Text@ fibre (original text).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -956,6 +965,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawText@ fibre (concatenated input text).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -972,6 +982,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_SA@ fibre (suffix array).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -988,6 +999,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawSA@ fibre (suffix array).
+..include:seqan/index.h
 */
 /*
 	template <typename TText, typename TSpec>
@@ -1009,6 +1021,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCP@ fibre (lcp table).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -1025,6 +1038,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCPE@ fibre (enhanced lcp table).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -1041,6 +1055,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_BWT@ fibre (Burrows-Wheeler table).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -1057,6 +1072,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_ESA
 ..returns:A reference to the @Tag.ESA Index Fibres.ESA_ChildTab@ fibre (child table).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>

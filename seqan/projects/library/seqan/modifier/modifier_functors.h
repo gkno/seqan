@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:FunctorUpcase<TValue>
 ..param.TValue:The input value type.
 ..remarks:This Functor is a derivation of the STL unary function.
+..include:seqan/modifier.h
 */
 template <typename InType, typename Result = InType>
 struct FunctorUpcase : public ::std::unary_function<InType,Result> 
@@ -56,6 +57,7 @@ struct FunctorUpcase : public ::std::unary_function<InType,Result>
 ..signature:FunctorLowcase<TValue>
 ..param.TValue:The input value type.
 ..remarks:This Functor is a derivation of the STL unary function.
+..include:seqan/modifier.h
 */
 template <typename InType, typename Result = InType>
 struct FunctorLowcase : public ::std::unary_function<InType,Result> 
@@ -80,6 +82,7 @@ struct FunctorLowcase : public ::std::unary_function<InType,Result>
 ..param.TInValue:The input value type.
 ..param.TOutValue:The output value type.
 ..remarks:This Functor is a derivation of the STL unary function.
+..include:seqan/modifier.h
 */
 template <typename InType, typename OutType>
 struct FunctorConvert : public ::std::unary_function<InType,OutType> 
@@ -104,6 +107,7 @@ struct FunctorConvert : public ::std::unary_function<InType,OutType>
 ...type:Spec.Dna
 ...type:Spec.Dna5
 ..remarks:This Functor is a derivation of the STL unary function.
+..include:seqan/modifier.h
 */
 template <typename TValue>
 struct FunctorComplement;

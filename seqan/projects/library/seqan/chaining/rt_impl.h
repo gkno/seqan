@@ -42,6 +42,7 @@ namespace seqan
 ..remarks:$setKey( obj, dim, k )$: set the key of the object to $k$ for dimension $dim$.
 ..remarks:In contrast to STL-like containers, the objects are not cloned by the RangeTree. It only supports searching operations on a set of objects. This set must be handled by the user.
 ..remarks:The $MaxTree$ specialization offers the abbility to perform Range Maximum Queries.
+..include:seqan/chaining.h
 */
 
 		

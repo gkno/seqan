@@ -106,6 +106,7 @@ _addLetterToOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ...type:Class.String
 ..returns:void
 ..see:Function.createOracleOnReverse
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TText>
 inline void
@@ -139,6 +140,7 @@ createOracle(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ...type:Class.String
 ..returns:void
 ..see:Function.createOracle
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TText>
 inline void

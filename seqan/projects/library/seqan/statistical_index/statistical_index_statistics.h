@@ -45,6 +45,7 @@ void _numOccurrences(TFloat &nW, String<TAlphabet>& haystack, StringSet<String<T
 ...type:Class.MarkovModel
 ..returns:The z-score for W w.r.t. X and M.
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
+..include:seqan/statistical_index.h
 */
 
 //<<<<<<< .mine
@@ -92,6 +93,7 @@ TFloat _zscore(TStringSet W,  TStringSet& X, MarkovModel<TAlphabet, TFloat, TSpe
 ..param.haystack:The text strings.
 ...type:Metafunction.Haystack
 ..param.needle:The sequence that is searched in the @Metafunction.Haystack@.
+..include:seqan/statistical_index.h
 */
 
 //Fixed to  AhoCorasick in original code, reason???
@@ -123,6 +125,7 @@ void _numOccurrences(TFloat &nW, String<TAlphabet> &haystack, StringSet<String<T
 ...type:nolink:unsigned int
 
 ..returns:The expectation for W w.r.t. a string and M.
+..include:seqan/statistical_index.h
 */
 
 template <typename TAlphabet, typename TFloat, typename TSpec>
@@ -153,6 +156,7 @@ TFloat _computeExpectation(MarkovModel<TAlphabet, TFloat, TSpec> &mm,
 ...type:Class.MarkovModel
 ..returns:The variance for W w.r.t. X and M.
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
+..include:seqan/statistical_index.h
 */
 
 template <typename TFloat, typename TAlphabet, typename TSpec>
@@ -257,6 +261,7 @@ TFloat _computeVariance( StringSet<String<TAlphabet> > W,  StringSet<String<TAlp
 ..param.M:The @MarkovModel@ object.
 ...type:Class.MarkovModel
 ..returns:A value of overlapping for the expectation.
+..include:seqan/statistical_index.h
 */
 
 template <typename TFloat, typename TAlphabet, typename TSpec>
@@ -296,6 +301,7 @@ TFloat _overlapExpectation(StringSet<String<TAlphabet> > W, MarkovModel<TAlphabe
 ..summary:Computes the reverse complements of a set of strings in input.
 ..signature:<TStringSet> void _addReveseComplements(needle)
 ..param.needle:The sequence to be computed the reverse complement.
+..include:seqan/statistical_index.h
 */
 
 template <typename TAlphabet>
@@ -330,6 +336,7 @@ typedef String<TDnaAlphabet> TDnaSequence;
 ..param.algorithmTag:The algorithm to exploit to compute the number of occurrences of patterns in the text strings (see @Spec.AhoCorasick@ etc.).
 ..returns:The z-score for W w.r.t. X and M.
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
+..include:seqan/statistical_index.h
 */
 
 //<<<<<<< .mine
@@ -423,6 +430,7 @@ TFloat zscore(StringSet<TDnaSequence> W,  StringSet<TDnaSequence> &X, MarkovMode
 ...type:Class.MarkovModel
 ..returns:The variance for W w.r.t. X and M.
 ..remarks:If the alphabet is Dna, then the suitable correction factors are computed.
+..include:seqan/statistical_index.h
 */
 
 template <typename TFloat, typename TAlphabet, typename TSpec>
@@ -483,6 +491,7 @@ TFloat variance(StringSet<String<Dna> > W, StringSet<String<Dna> > &X, MarkovMod
 ..param.M:The MarkovModel object.
 ...type:Class.MarkovModel
 ..returns:The expectation for W w.r.t. X and M.
+..include:seqan/statistical_index.h
 */
 
 template <typename TAlphabet, typename TFloat, typename TSpec>

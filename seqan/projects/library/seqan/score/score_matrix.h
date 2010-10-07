@@ -154,6 +154,7 @@ score(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc, TVal1 val1,
 ..param.val1:First value.
 ..param.val2:Second value.
 ..param.score:The value to set the score to.
+..include:seqan/score.h
  */
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TVal1, typename TVal2, typename T>
 inline void
@@ -178,6 +179,7 @@ setScore(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TVal1 val1, TV
 ...type:Shortcut.Blosum30
 ...type:Shortcut.Blosum62
 ...type:Shortcut.Blosum80
+..include:seqan/score.h
  */
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TTag>
 inline void
@@ -194,6 +196,7 @@ setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, T
 ..param.tag:
 ...type:Tag.Default
 ...remark:If @Tag.Default@, then the matrix will be filled with default constructed $TValue$ values.
+..include:seqan/score.h
  */
 template <typename TValue, typename TSequenceValue, typename TSpec>
 inline void
@@ -213,6 +216,7 @@ setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, D
 ...type:const char *
 ..param.value:Variable to parse the value from $buffer$ to.
 ...type:unsigned int
+..include:seqan/score.h
  */
 inline void
 _sscanfValue(const char * buf, unsigned int & val) {
@@ -223,6 +227,7 @@ _sscanfValue(const char * buf, unsigned int & val) {
 
 /*
 .Function._sscanfValue.param.value.type:int
+..include:seqan/score.h
  */
 inline void
 _sscanfValue(const char * buf, int & val) {
@@ -233,6 +238,7 @@ _sscanfValue(const char * buf, int & val) {
 
 /*
 .Function._sscanfValue.param.value.type:float
+..include:seqan/score.h
  */
 inline void
 _sscanfValue(const char * buf, float & val) {
@@ -243,6 +249,7 @@ _sscanfValue(const char * buf, float & val) {
 
 /*
 .Function._sscanfValue.param.value.type:double
+..include:seqan/score.h
  */
 inline void
 _sscanfValue(const char * buf, double & val) {
@@ -372,6 +379,7 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc) {
 ..signature:loadScoreMatrix(score, filename)
 ..remark:TODO, comment this better/at all.
 ..includes:seqan/score.h
+..include:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString>
 inline void
@@ -389,6 +397,7 @@ loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TString
 ..signature:loadScoreMatrix(score, filename, meta)
 ..remark:TODO, comment this better/at all.
 ..includes:seqan/score.h
+..include:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString, typename TMeta>
 inline void
@@ -413,6 +422,7 @@ loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TString
 ..param.value:Variable for which to write the string value to $buffer$.
 ...type:unsigned int
 ..includes:seqan/score.h
+..include:seqan/score.h
  */
 inline void
 _sprintfValue(char * buf, unsigned int val) {
@@ -424,6 +434,7 @@ _sprintfValue(char * buf, unsigned int val) {
 
 /*
 .Function._sprintfValue.param.value.type:int
+..include:seqan/score.h
  */
 inline void
 _sprintfValue(char * buf, int val) {
@@ -435,6 +446,7 @@ _sprintfValue(char * buf, int val) {
 
 /*
 .Function._sprintfValue.param.value.type:float
+..include:seqan/score.h
  */
 inline void
 _sprintfValue(char * buf, float val) {
@@ -447,6 +459,7 @@ _sprintfValue(char * buf, float val) {
 
 /*
 .Function._sprintfValue.param.value.type:float
+..include:seqan/score.h
  */
 inline void
 _sprintfValue(char * buf, double val) {
@@ -462,6 +475,7 @@ _sprintfValue(char * buf, double val) {
 ..summary:Write the data of a scoring matrix to a file.
 ..signature:_writeScoringMatrix(file, table, meta)
 ..remark:TODO(holtgrew):More documentation.
+..include:seqan/score.h
 */
 template <typename TSequenceValue, typename TFile, typename TValue, typename TMeta>
 void
@@ -543,6 +557,7 @@ _writeScoringMatrix(TFile & fl, TValue * tab, TMeta & meta) {
 ..signature:write(file, scoreMatrix, meta)
 ..remark:TODO, comment better/at all.
 ..includes:seqan/score.h
+..include:seqan/score.h
  */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec, typename TMeta>
 inline void
@@ -558,6 +573,7 @@ write(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > const & sc,
 ..signature:write(file, scoreMatrix)
 ..remark:TODO, comment better/at all.
 ..includes:seqan/score.h
+..include:seqan/score.h
  */
 template <typename TFile, typename TValue, typename TSequenceValue, typename TSpec>
 inline void

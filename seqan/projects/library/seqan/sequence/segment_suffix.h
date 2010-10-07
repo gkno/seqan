@@ -521,6 +521,7 @@ operator --(Segment<THost, SuffixSegment> & segment)
 ..remarks:Notational sugar.
 ..see:Spec.SuffixSegment
 ..see:Function.infix
+..include:seqan/sequence.h
 */
 
 template <typename T, typename TPosBegin>

@@ -121,6 +121,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.AutoSeqFormat
 ..returns:$true$ if the format represented by $formatTag$ was recognized in $text$.
 ..see:Function.guessFormatFromFilename
+..include:seqan/file.h
 */
 
 	// test for Fasta format
@@ -145,6 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.AutoSeqFormat
 ..returns:$true$ if the format represented by $formatTag$ was recognized in $fileName$.
 ..see:Function.guessFormatFromFilename
+..include:seqan/file.h
 */
 
 	template < typename TFilename >
@@ -194,6 +196,7 @@ namespace SEQAN_NAMESPACE_MAIN
 sequence fragments separated by a file format specific delimiter.
 After calling this function, the StringSet length is the number of sequence fragments and each fragment can be retrieved by @Function.value@ or @Function.getValue@.
 ..see:Function.guessFormat
+..include:seqan/file.h
 */
 
 	// split stringset into single Fasta sequences
@@ -239,6 +242,7 @@ After calling this function, the StringSet length is the number of sequence frag
 ..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
 this function can be used to extract the sequence of every fragment in the StringSet.
 ..see:Function.split
+..include:seqan/file.h
 */
 
 	template <typename TSeq, typename TFastaSeq>
@@ -291,6 +295,7 @@ this function can be used to extract the sequence of every fragment in the Strin
 ..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
 this function can be used to extract the sequence id of every fragment in the StringSet.
 ..see:Function.split
+..include:seqan/file.h
 */
 
 	template <typename TSeq, typename TFastaSeq>
@@ -331,6 +336,7 @@ this function can be used to extract the sequence id of every fragment in the St
 ..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
 this function can be used to extract the sequence id up to the first whitespace of every fragment in the StringSet.
 ..see:Function.split
+..include:seqan/file.h
 */
 
 	// Assign sequence id up to first whitespace.
@@ -372,6 +378,7 @@ this function can be used to extract the sequence id up to the first whitespace 
 ..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
 this function can be used to extract the sequence quality values of every fragment in the StringSet.
 ..see:Function.split
+..include:seqan/file.h
 */
 
   	template <typename TSeq, typename TFastaSeq>
@@ -399,6 +406,7 @@ this function can be used to extract the sequence quality values of every fragme
 ..remarks:After calling @Function.split@ on a @Spec.ConcatDirect@ StringSet to divide a file into fragments, 
 this function can be used to extract the quality value id of every fragment in the StringSet.
 ..see:Function.split
+..include:seqan/file.h
 */
 
 	template <typename TSeq, typename TFastaSeq>
@@ -1029,6 +1037,7 @@ typedef Tag<TagRaw_> const Raw;
 		TagList<Fasta,
 		TagList<QSeq,
 		TagList<Raw> > > > 						SeqFormats;
+..include:seqan/file.h
 */
 
 	typedef
@@ -1269,6 +1278,7 @@ typedef Tag<TagRaw_> const Raw;
 opens them and append their contained sequences to the $seqSet$.
 If $formatTag$ is a @Class.AutoSeqFormat@ object, the file format is set to the first known sequence format guessed from a file name.
 ..see:Function.assignSeq
+..include:seqan/file.h
 */
 
 	template <typename TSeqSet, typename TFilename, typename TSeqFormat>

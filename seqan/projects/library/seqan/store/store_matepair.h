@@ -58,6 +58,7 @@ The insert size of a mate-pair is the size of the fragment.
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.MatePairStoreElement
+..include:seqan/store.h
 */
 
 template <typename TSpec = void>

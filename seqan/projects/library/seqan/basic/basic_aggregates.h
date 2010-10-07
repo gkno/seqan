@@ -57,6 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Pair#i2:
 ..class:Class.Pair
 ..summary:T2 object
+..include:seqan/basic.h
 */
 
 	// standard storage 
@@ -221,6 +222,7 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Triple#i3:
 ..class:Class.Triple
 ..summary:T3 object
+..include:seqan/basic.h
 */
 
 	// standard storage 
@@ -348,6 +350,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:In contrast to @Class.String@ the length of Tuple is fixed.
 ..param.TSpec:The specializing type.
 ...default:$void$, no compression (faster access).
+..include:seqan/basic.h
 */
 
 	// standard storage 

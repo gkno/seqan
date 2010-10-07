@@ -118,6 +118,7 @@ struct Row<T const> {
 ...XXdefault:@Spec.ArrayGaps@
 ..remarks:The default implementation of $Align$ stores the alignment in a set of @Class.Gaps.Gaps<TSource.TSpec>@ objects.
  Hence, the default implementation is row-based, so it will be faster to access the alignment row-wise than column-wise.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec = ArrayGaps>
@@ -306,6 +307,7 @@ struct StringSetType<Align<TSource, SequenceGaps> const>
 ...metafunction:Metafunction.Rows
 ..see:Function.cols
 ..see:Metafunction.Rows
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline typename Rows< Align<TSource, TSpec> >::Type &
@@ -338,6 +340,7 @@ SEQAN_CHECKPOINT
 ..see:Function.rows
 ..see:Function.col
 ..see:Metafunction.Row
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename Row< Align<TSource, TSpec> >::Type &
@@ -368,6 +371,7 @@ SEQAN_CHECKPOINT
 ..returns:The container of columns in $align$. 
 ...metafunction:Metafunction.Cols
 ..see:Metafunction.Cols
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline typename Cols< Align<TSource, TSpec> >::Type
@@ -399,6 +403,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function is equivalent to $value(cols(align), position)$.
 ..see:Function.cols
 ..see:Metafunction.Col
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition>
 inline typename Col< Align<TSource, TSpec> >::Type
@@ -555,6 +560,7 @@ SEQAN_CHECKPOINT
 ...type:Class.StringSet
 ..remarks:The function clears $align$ and creates an new global alignment between strings in $stringset$ that contains only trainling gaps.
 The alignment will be dependent from the strings in the stringset; use @Function.detach@ to make $align$ the owner of its strings.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TSpec2>
@@ -601,6 +607,7 @@ clearGaps(Align<TSource, TSpec> & me)
 /**
 .Function.stringSet:
 ..param.g.type:Class.Align
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline typename StringSetType<Align<TSource, TSpec> >::Type 

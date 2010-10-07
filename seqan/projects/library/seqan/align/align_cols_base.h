@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
   Note that accessing a row-based alignment column-wise can be significantly
   slower than accessing the alignment row-wise.
 ..see:Class.Align
+..include:seqan/align.h
 */
 
 template <typename TAlign>

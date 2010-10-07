@@ -49,6 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Object that stores a file format.
 ..signature:FileFormat<File, Data [, Format [, Meta] ]>
 ..see:Tag.File Format
+..include:seqan/file.h
 */
 
 template <
@@ -192,6 +193,7 @@ SEQAN_CHECKPOINT
 ..remarks:The result of this operation is stored in $data$.
 ..remarks:The function leaves $file$ at the position for reading the next record.
 ..see:Function.assign
+..include:seqan/file.h
 */
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
 inline void
@@ -226,6 +228,7 @@ SEQAN_CHECKPOINT
 ..param.file_format:A file format.
 ..returns.param.meta:The meta data read from $file$.
 ...type:Tag.File Format
+..include:seqan/file.h
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
@@ -243,6 +246,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.goNext:
 ..cat:Input/Output
+..include:seqan/file.h
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
@@ -259,6 +263,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.length:
 ..cat:Input/Output
+..include:seqan/file.h
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>
@@ -284,6 +289,7 @@ SEQAN_CHECKPOINT
 ..param.begin: Iterator to the first character of the range.
 ..param.end: Iterator behind the last character of the range.
 ..remarks:The content of $source$ is written 'as-is' to $stream$.
+..include:seqan/file.h
 */
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat>

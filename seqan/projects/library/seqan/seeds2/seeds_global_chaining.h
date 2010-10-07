@@ -55,6 +55,7 @@ typedef Tag<_SparseChaining> SparseChaining;
 .Function.chainSeedsGlobally
 ..summary:Global chaining of seeds.
 ..signature:chainSeedsGlobally(target, seedSet, tag)
+..include:seqan/seeds2.h
 */
 template <typename TTargetContainer, typename TSeedSpec, typename TSeedSetSpec, typename TSeedConfig>
 void

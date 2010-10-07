@@ -49,6 +49,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Shape<TValue, TSpec> ()
 ..signature:Shape<TValue, TSpec> (shape)
 ..param.shape:Other Shape object. (copy constructor)
+..include:seqan/index.h
 */
 	template <typename TValue = Dna, typename TSpec = SimpleShape>
 	class Shape;
@@ -489,6 +490,7 @@ The hash value corresponds to the maximal @Function.hash@ value of a shape begin
 ..param.it:Sequence iterator pointing to the first character of the adjacent shape.
 ..returns:Hash value of the q-gram.
 ..remarks:@Function.hash@ has to be called before.
+..include:seqan/index.h
 */
 
 	template <typename TValue, typename TSpec, typename TIter>
@@ -610,6 +612,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 ..param.it:Sequence iterator pointing to the first character of the adjacent shape.
 ..returns:Hash value of the shape.
 ..remarks:@Function.hash@ has to be called before with $shape$ on the left adjacent q-gram.
+..include:seqan/index.h
 */
 
 	template <typename TValue, typename TSpec, typename TIter, typename TSize>
@@ -728,6 +731,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 ..param.shape:Shape object.
 ...type:Spec.SimpleShape
 ..see:Function.stringToShape
+..include:seqan/index.h
 */
 
 	template <typename TValue, typename TSpec>

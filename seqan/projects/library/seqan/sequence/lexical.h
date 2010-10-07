@@ -112,6 +112,7 @@ else
 ...text:The state of a default constructed $Lexical$ instance is undefined until
 it is set by a call of @Function.compare@.
 ..see:Metafunction.Comparator
+..include:seqan/sequence.h
 */
 
 template <typename TSpec = size_t>
@@ -230,6 +231,7 @@ struct Spec<Lexical<TSpec> const>
 ..param.comparator:Object that stores the results.
 ...type:Class.Lexical
 ..see:Metafunction.Comparator
+..include:seqan/sequence.h
 */
 
 template <typename TSpec, typename TLeft, typename TRight>
@@ -325,6 +327,7 @@ compare(Lexical<TSpec> & lexical,
 ...type:Class.Lexical
 ..returns:$true$ if $left$ equals $right$, $false$ otherwise.
 ..see:Metafunction.Comparator
+..include:seqan/sequence.h
 */
 template <typename TLeft, typename TRight >
 inline bool
@@ -359,6 +362,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Lexical
 ..returns:$true$ if $left$ is not equal to $right$, $false$ otherwise.
 ..see:Metafunction.Comparator
+..include:seqan/sequence.h
 */
 template <typename TLeft, typename TRight >
 inline bool
@@ -400,6 +404,7 @@ SEQAN_CHECKPOINT
 ...text:Sequences are compared in lexicographical order.
 ..see:Tag.Prefix Order
 ..see:Metafunction.DefaultPrefixOrder
+..include:seqan/sequence.h
 */
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
@@ -467,6 +472,7 @@ SEQAN_CHECKPOINT
 ...text:Sequences are compared in lexicographical order.
 ..see:Tag.Prefix Order
 ..see:Metafunction.DefaultPrefixOrder
+..include:seqan/sequence.h
 */
 
 template <typename TLeft, typename TRight, typename TPrefixOrder >
@@ -535,6 +541,7 @@ SEQAN_CHECKPOINT
 ...text:Sequences are compared in lexicographical order.
 ..see:Tag.Prefix Order
 ..see:Metafunction.DefaultPrefixOrder
+..include:seqan/sequence.h
 */
 template <typename TLeft, typename TRight, typename TPrefixOrder >
 inline bool
@@ -602,6 +609,7 @@ SEQAN_CHECKPOINT
 ...text:Sequences are compared in lexicographical order.
 ..see:Tag.Prefix Order
 ..see:Metafunction.DefaultPrefixOrder
+..include:seqan/sequence.h
 */
 
 template <typename TLeft, typename TRight, typename TPrefixOrder >
@@ -664,6 +672,7 @@ SEQAN_CHECKPOINT
 ..returns:$true$ if $left$ is a prefix of $right$, $false$ otherwise.
 ..see:Metafunction.Comparator
 ..remarks:By definition, the whole sequence is a prefix of itself too: $isPrefix("abc", "abc") == true$.
+..include:seqan/sequence.h
 */
 
 template <typename TLeft, typename TRight >
@@ -702,6 +711,7 @@ SEQAN_CHECKPOINT
 ..see:Metafunction.Comparator
 ..see:Function.isPrefix
 ..remarks:By definition, the whole sequence is a prefix of itself too: $hasPrefix("abc", "abc") == true$.
+..include:seqan/sequence.h
 */
 
 template <typename TLeft, typename TRight >
@@ -736,6 +746,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Lexical
 ..returns:The length of the longest common prefix of $left$ and $right$.
 ..see:Metafunction.Comparator
+..include:seqan/sequence.h
 */
 template <typename TLeft, typename TRight >
 inline typename Size<TLeft>::Type
@@ -767,6 +778,7 @@ SEQAN_CHECKPOINT
 ..returns:An $unsigned int$ between 0 and @Metafunction.ValueSize@ of the type of value.
 ..note:This function first converts value to its unsigned value type and after that to an $unsigned int$.
 You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is signed and a $-1$ would be mapped to $0xffffffff$ instead of $0x000000ff$.
+..include:seqan/sequence.h
 */
 
 template <typename TValue>

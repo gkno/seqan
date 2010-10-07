@@ -683,6 +683,7 @@ write(TFile & target,
 ...type:Spec.Automaton
 ...type:Spec.Tree
 ..returns:void
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
@@ -709,6 +710,7 @@ createRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g)
 ..see:Function.getRoot
 ..see:Function.root
 ..see:Function.Graph#isRoot
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -735,6 +737,7 @@ assignRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> >& g,
 ..see:Function.getRoot
 ..see:Function.assignRoot
 ..see:Function.Graph#isRoot
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
@@ -760,6 +763,7 @@ root(Graph<Automaton<TAlphabet, TCargo, TSpec> > & g)
 ..see:Function.assignRoot
 ..see:Function.root
 ..see:Function.Graph#isRoot
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec>
@@ -786,6 +790,7 @@ getRoot(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g)
 ..see:Function.getRoot
 ..see:Function.assignRoot
 ..see:Function.root
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -820,6 +825,7 @@ For an automaton a single character is required whereas for a word graph getSucc
 ...type:Metafunction.VertexDescriptor
 ..see:Function.parseString
 ..see:Function.getNil
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TChar>
@@ -859,6 +865,7 @@ getSuccessor(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 ..remarks:The parsing stops before @Function.getSuccessor@ reaches the $nil$ state, 
 	or if the the complete sequences is read.
 ..see:Function.getSuccessor
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TIterator>
@@ -935,6 +942,7 @@ parseString(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 ..returns:$true$ if $g$ parses $str$ starting at $v$ completely, $false$ otherwise.
 ..see:Function.getSuccessor
 ..see:Function.parseString
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo,  typename TSpec, typename TVertexDescriptor, typename TCharacters>

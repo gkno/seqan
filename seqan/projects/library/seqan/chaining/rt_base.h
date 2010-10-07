@@ -252,6 +252,7 @@ namespace seqan{
 ..param.lower_border:The object that stores the upper borders for all dimensions, i.e. $key( point in range ) <= key( upper_border )$
 ..param.dest:A container to save the objects.
 ..remarks:The size of $dest$ should be sufficient.
+..include:seqan/chaining.h
 */
 
 		// perform a range query

@@ -116,6 +116,7 @@ namespace seqan
 ...remarks:The TObject parameter of the SkipList.
 ..remarks:If the list is in a initial state, i.e. no search operation has been performed since the time of construction, the objects in the list are in an unsorted state.
 ..The object is therefore inserted at the end of the list. After the first search operation, the objects are sorted. Pbjects from following insert operations will then be inserted at the correct place. 
+..include:seqan/chaining.h
 */
 		// two cases:
 			// 1. list is empty apart from bording element or is not sorted 
@@ -243,6 +244,7 @@ namespace seqan
 ..param.key:A key.
 ...type:A key. All entries with the given theKeywill be deleted.
 ..remarks.text:Returns true, if at least one element is deleted, false otherwise.
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TSpec, typename TStructuring, typename TParam >

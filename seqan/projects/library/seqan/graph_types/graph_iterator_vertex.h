@@ -179,6 +179,7 @@ struct Spec<Iter<TGraph const, GraphIterator<InternalVertexIterator<TIteratorSpe
 ...type:Spec.Adjacency Iterator
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -201,6 +202,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.Adjacency Iterator
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -236,6 +238,7 @@ operator * (Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
 ..returns:A pointer to the host graph.
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -259,6 +262,7 @@ hostGraph(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
 ..see:Function.goBegin
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -281,6 +285,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.Adjacency Iterator
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -304,6 +309,7 @@ goBegin(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
 ..see:Function.goEnd
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -326,6 +332,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.Adjacency Iterator
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 template<typename TGraph, typename TSpec>
 inline void
@@ -347,6 +354,7 @@ goEnd(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it)
 ...type:Spec.Adjacency Iterator
 ...type:Spec.Bfs Iterator
 ...type:Spec.Dfs Preorder Iterator
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>
@@ -391,6 +399,7 @@ operator ++(Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > >& it, in
 ...type:Spec.Out-Edge Iterator
 ...type:Spec.Edge Iterator
 ...type:Spec.Adjacency Iterator
+..include:seqan/graph_types.h
 */
 
 template<typename TGraph, typename TSpec>

@@ -124,6 +124,7 @@ typedef Score<int, Simple> SimpleScore;
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline TValue
@@ -143,6 +144,7 @@ scoreMatch(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline void
@@ -163,6 +165,7 @@ setScoreMatch(Score<TValue, TSpec> & me, TValue const & value) {
 ..see:Function.scoreMatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline TValue
@@ -183,6 +186,7 @@ scoreMismatch(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline void
@@ -204,6 +208,7 @@ setScoreMismatch(Score<TValue, TSpec> & me, TValue const & value) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreMatch
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline TValue
@@ -224,6 +229,7 @@ scoreGapExtend(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline void
@@ -245,6 +251,7 @@ setScoreGapExtend(Score<TValue, TSpec> & me, TValue const & value) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreMatch
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline TValue
@@ -265,6 +272,7 @@ scoreGapOpen(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline void
@@ -288,6 +296,7 @@ setScoreGapOpen(Score<TValue, TSpec> & me, TValue const & value) {
 ..see:Function.scoreMatch
 ..see:Function.scoreGapOpen
 ..see:Function.scoreGapExtend
+..include:seqan/score.h
 */
 // TODO(holtgrew): This shortcut/forward should live in score_base.h.
 template <typename TValue, typename TSpec>
@@ -309,6 +318,7 @@ scoreGap(Score<TValue, TSpec> const & me) {
 ..see:Function.scoreMismatch
 ..see:Function.scoreGapExtend
 ..see:Function.scoreGapOpen
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec>
 inline void
@@ -330,6 +340,7 @@ setScoreGap(Score<TValue, TSpec> & me, TValue const & value) {
 ..param.value1:first value.
 ..param.value2:second value.
 ..returns:The score for comparing the two values.
+..include:seqan/score.h
 */
 template <typename TValue, typename TSpec, typename TVal1, typename TVal2>
 inline TValue

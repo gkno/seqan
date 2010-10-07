@@ -80,6 +80,7 @@ vertices. It also produces a breath-first tree where each node has a predecessor
 ...remarks:The distance map indicates at what depth a vertex was discovered.
 ..returns:void.
 ..see:Function.depth_first_search
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TPredecessorMap, typename TDistanceMap>
 void
@@ -191,6 +192,7 @@ discovery and finishing time.
 ...remarks:The time when v's adjacency list has been fully explored.
 ..returns:void.
 ..see:Function.breadth_first_search
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TPredecessorMap, typename TDiscoveryTimeMap, typename TFinishingTimeMap>
 void
@@ -250,6 +252,7 @@ depth_first_search(Graph<TSpec> const& g,
 ..param.topSort:Out-parameter:A linear ordering of the vertices.
 ...type:Class.String
 ..returns:void.
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor>
 void
@@ -302,6 +305,7 @@ topological_sort(Graph<TSpec> const& g,
 ..param.components:Out-parameter:A property map.
 ...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
 ..returns:void.
+..include:seqan/graph_algorithms.h
 */
 
 template<typename TSpec, typename TComponents>
@@ -415,6 +419,7 @@ _cc_visit(Graph<TSpec> const& g,
 ..param.components:Out-parameter:A property map.
 ...remarks:Each vertex is mapped to a component id. If two vertices share the same id they are in the same component.
 ..returns: The number of components.
+..include:seqan/graph_algorithms.h
 */
 
 template<typename TSpec, typename TComponents>
@@ -477,6 +482,7 @@ connected_components(Graph<TSpec> const& g_source,
 ...remarks:A property map that represents predecessor relationships among vertices. It determines a minimum spanning tree.
 ..returns:void.
 ..see:Function.kruskals_algorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap>
 void
@@ -619,6 +625,7 @@ struct __callLessPair :
 ...remarks:Array or string where two consecutive entries are an edge.
 ..returns:void.
 ..see:Function.prims_algorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TEdges>
 void
@@ -848,6 +855,7 @@ _relax(Graph<TSpec> const& g,
 ..returns:void.
 ..see:Function.bellman_ford_algorithm
 ..see:Function.dijkstra
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void
@@ -911,6 +919,7 @@ The out parameters are only valid if the algorithm returns true.
 ..returns:True if the graph has no negative weight cycles, false otherwise.
 ..see:Function.dag_shortest_path
 ..see:Function.dijkstra
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 bool 
@@ -983,6 +992,7 @@ bellman_ford_algorithm(Graph<TSpec> const& g,
 ..returns:void
 ..see:Function.dag_shortest_path
 ..see:Function.bellman_ford_algorithm
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TWeightMap, typename TPredecessorMap, typename TDistanceMap>
 void 
@@ -1234,6 +1244,7 @@ _extend_shortest_paths(TMatrix& local,
 You can use _print_all_pairs_shortest_path(g, predecessor, i, j) to print the shortest path from i to j.
 ..returns:void
 ..see:Function.floyd_warshall
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
@@ -1283,6 +1294,7 @@ all_pairs_shortest_path(Graph<TSpec> const& g,
 You can use _print_all_pairs_shortest_path(g, predecessor, i, j) to print the shortest path from i to j.
 ..returns:void
 ..see:Function.all_pairs_shortest_path
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TWeightMap, typename TMatrix, typename TPredecessor>
 void 
@@ -1335,6 +1347,7 @@ floyd_warshall(Graph<TSpec> const& g,
 ...type:Class.Matrix
 ...remarks:Entry (i,j) in this matrix indicates whether there is a path from i to j in the graph or not.
 ..returns:void
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TMatrix>
 void 
@@ -1477,6 +1490,7 @@ _get_minimum_aug(Graph<TSpec> const& rG,
 ..param.capacity:In-parameter:A property map of edge capacities.
 ..param.flow:Out-parameter:A property map with the flow of each edge.
 ..returns:The value of the flow.
+..include:seqan/graph_algorithms.h
 */
 template<typename TSpec, typename TVertexDescriptor, typename TCapMap, typename TFlowMap>
 typename Value<TFlowMap>::Type

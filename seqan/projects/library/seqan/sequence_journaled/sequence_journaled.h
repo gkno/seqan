@@ -230,6 +230,7 @@ operator<<(TStream & stream, String<TValue, Journaled<THostSpec, TJournalSpec, T
 .Function.setHost:
 ..param.object.type:Spec.Journaled String
 ..param.host.type:Class.String
+..include:seqan/sequence_journaled.h
 */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec, typename TSequence2>
 inline
@@ -245,6 +246,7 @@ setHost(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journ
 /**
 .Function.host:
 ..param.object.type:Spec.Journaled String
+..include:seqan/sequence_journaled.h
 */
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 inline
@@ -267,6 +269,7 @@ host(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > const & jo
 /**
 .Function.clear:
 ..param.object.type:Spec.Journaled String
+..include:seqan/sequence_journaled.h
  */
 // TODO(holtgrew): Behaviour is to clear the journal, not the string!
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
@@ -283,6 +286,7 @@ clear(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
 ..signature:flatten(journaledString)
 ..param.journaledString:The journaled string to flatten.
 ...type:Spec.Journaled String
+..include:seqan/sequence_journaled.h
  */
 // TODO(holtgrew): Write me! What about non-destructive version that creates a new copy and sets holder to it?
 

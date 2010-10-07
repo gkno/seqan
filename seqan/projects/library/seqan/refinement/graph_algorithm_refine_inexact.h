@@ -241,6 +241,7 @@ SEQAN_CHECKPOINT
 ...remarks:If in the refinement process a cut would result in
 a segment shorter than minFragmentLen, then the cut is not made and a heuristic is applied to refine this short overlap.
 ...remarks:If no minFragmentLen is given, then all cuts are made. This corresponds to a minFragmentLen of 1.
+..include:seqan/refinement.h
 */
 //score type given, min fragment length given, if > 1 ==> inexact refinement
 template<typename TAlignmentString, typename TScoreValue,typename TScoreSpec, typename TOutGraph, typename TSequence, typename TSetSpec>
@@ -263,6 +264,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.matchRefinement:
 ..signature:matchRefinement(matches,stringSet,refinedGraph,minFragmentLen)
+..include:seqan/refinement.h
 */
 //score type not given, min fragment length given, if > 1 ==> inexact refinement
 template<typename TAlignmentString, typename TOutGraph, typename TSequence, typename TSetSpec>

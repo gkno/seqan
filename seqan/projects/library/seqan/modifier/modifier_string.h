@@ -35,6 +35,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Spec
 ..implements:Concept.Container
 ..remarks:$THost$ can also be a modified string, so you can create custom strings by combining predefined ones.
+..include:seqan/modifier.h
 */
 
 template < typename THost, typename TSpec = void >

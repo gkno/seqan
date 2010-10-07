@@ -485,6 +485,7 @@ SEQAN_CHECKPOINT
 /**
 .Function.read:
 ..cat:Blast
+..include:seqan/blast.h
 */
 template<typename TFile, typename TBlastHsp, typename TInfoSpec>
 void 
@@ -712,6 +713,7 @@ SEQAN_CHECKPOINT
 ...type:Shortcut.CharString
 ..see:Function.getQueryName
 ..see:Function.databaseName
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> & 
@@ -732,6 +734,7 @@ SEQAN_CHECKPOINT
 ...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> 
@@ -752,6 +755,7 @@ SEQAN_CHECKPOINT
 ...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> & 
@@ -772,6 +776,7 @@ SEQAN_CHECKPOINT
 ...type:Shortcut.CharString
 ..see:Function.queryName
 ..see:Function.getDatabaseName
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec>
 inline String<char> 
@@ -792,6 +797,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The number of hits (unsigned int).
 ..see:Function.numHsps
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TInfoSpec>
 inline unsigned int
@@ -811,6 +817,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The number of hsps (unsigned int)
 ..see:Function.numHits
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TInfoSpec>
 inline unsigned int
@@ -855,6 +862,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The E-value cutoff (read from the Blast report file).
 ...type:nolink:double
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline double
@@ -897,6 +905,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The gap open penalty.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float 
@@ -924,6 +933,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The gap open penalty.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float 
@@ -960,6 +970,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The lambda value.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float
@@ -987,6 +998,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The gapped lambda value.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float
@@ -1016,6 +1028,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The kappa value.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float
@@ -1043,6 +1056,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.StoreReport
 ..returns:The gapped kappa value.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastHsp>
 inline float
@@ -1098,6 +1112,7 @@ SEQAN_CHECKPOINT
 ..param.it:A Blast report.
 ...type:Class.BlastReport
 ..see:Function.getNext
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec, typename TFile>
 inline bool
@@ -1120,6 +1135,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastReport
 ..returns:The result is stored in parameter blastReport.
 ..see:Function.atEnd
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec, typename TFile>
 inline void

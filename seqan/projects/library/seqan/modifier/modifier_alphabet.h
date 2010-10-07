@@ -35,6 +35,7 @@ namespace seqan
 ..param.TSpec:The modifier type.
 ...metafunction:Metafunction.Spec
 ...remarks:There is no default specialization.
+..include:seqan/modifier.h
 */
 
 template <typename THost, typename TSpec>

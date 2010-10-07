@@ -1144,6 +1144,7 @@ sourceVertex(Iter<TGraph, GraphIterator<InternalOutEdgeIterator<TSpec> > >& it)
 ..returns:A label.
 ...type:Metafunction.Alphabet.
 ..remarks:The label function only works for out-edge iterators on automatons.
+..include:seqan/graph_types.h
 */
 
 template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpec>

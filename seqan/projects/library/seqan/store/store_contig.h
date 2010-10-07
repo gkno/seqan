@@ -88,6 +88,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.ContigStoreElement
+..include:seqan/store.h
 */
 
 template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec = void>
@@ -145,6 +146,7 @@ ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = SupremumValue
 ..summary:The $contigId$ of the first sequence in the file. Subsequent contig sequences have an increasing $contigId$.
 ..type:Metafunction.Id
 ..class:Class.ContigFile
+..include:seqan/store.h
 */
 
 template <typename _TSpec = void>

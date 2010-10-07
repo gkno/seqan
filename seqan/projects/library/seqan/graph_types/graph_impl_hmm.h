@@ -623,6 +623,7 @@ write(TFile & target,
 ..param.vertex:The new begin state.
 ...type:Metafunction.VertexDescriptor
 ..returns:void.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void
@@ -648,6 +649,7 @@ assignBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ..param.vertex:The new end state.
 ...type:Metafunction.VertexDescriptor
 ..returns:void.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void
@@ -671,6 +673,7 @@ assignEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..returns:Reference to begin state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type&
@@ -690,6 +693,7 @@ beginState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..returns:Reference to end state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type&
@@ -709,6 +713,7 @@ endState(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g)
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..returns:Returns the begin state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type
@@ -728,6 +733,7 @@ getBeginState(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g)
 ..param.g:A HMM.
 ...type:Spec.Hmm
 ..returns:Returns the end state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec>
 inline typename VertexDescriptor<Graph<Hmm<TAlphabet, TCargo, TSpec> > >::Type
@@ -753,6 +759,7 @@ getEndState(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g)
 ..param.e:Edge between two states.
 ...type:Metafunction.EdgeDescriptor
 ..returns:Returns the transition probability.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline TCargo
@@ -795,6 +802,7 @@ getTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const&,
 ..param.e:Edge connecting two states.
 ...type:Metafunction.EdgeDescriptor
 ..returns:Returns a reference to the transition probability.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline TCargo&
@@ -835,6 +843,7 @@ transitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 ...type:Metafunction.VertexDescriptor
 ..param.prob:New probability.
 ..returns:void.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TTransProb>
 inline void
@@ -876,6 +885,7 @@ assignTransitionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >&,
 ..param.symbol:A given symbol.
 ...type:Metafunction.Alphabet
 ..returns:Returns the emission probability.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline TCargo
@@ -904,6 +914,7 @@ getEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> > const& g,
 ..param.symbol:A given symbol.
 ...type:Metafunction.Alphabet
 ..returns:Returns a reference to the emission probability.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline TCargo&
@@ -933,6 +944,7 @@ emissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ...type:Metafunction.Alphabet
 ..param.prob:The new emission probability.
 ..returns:void.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TEmisProb>
 inline void
@@ -963,6 +975,7 @@ assignEmissionProbability(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ...type:Metafunction.VertexDescriptor
 ..param.silent:A boolean value which is true for silent states.
 ..returns:void.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline void
@@ -987,6 +1000,7 @@ assignSilentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ..param.vertex:A state.
 ...type:Metafunction.VertexDescriptor
 ..returns:Reference to silent status of the given state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline bool&
@@ -1010,6 +1024,7 @@ silentStatus(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 ..param.vertex:A state.
 ...type:Metafunction.VertexDescriptor
 ..returns:The silent status of that state.
+..include:seqan/graph_types.h
 */
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TVertexDescriptor>
 inline bool

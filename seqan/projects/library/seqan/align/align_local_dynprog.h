@@ -99,6 +99,7 @@ bool operator <(const ScoreAndID<TValue,TID> & a,
 ..summary:Constructor
 ..signature:LocalAlignmentFinder(align)
 ..param.align:An @Class.Align@ object that is already initialized with the sequences.
+..include:seqan/align.h
 */
 template<typename TScoreValue = int>
 class LocalAlignmentFinder{
@@ -694,6 +695,7 @@ ts being useful when
 ..remarks:So far, only linear gap costs are allowed.
 ..see:Function.smithWatermanGetNext
 ..see:Function.localAlignment
+..include:seqan/align.h
 */
 ///////////////////////////////////////////////////////////////////////////////////
 //wrapper that computes the matrix and does the backtracking for the best alignment
@@ -754,6 +756,7 @@ in previously found alignment to be used again.
 ..returns:The corresponding alignment can be found in align.
 ..see:Function.smithWaterman
 ..see:Function.localAlignment
+..include:seqan/align.h
 */
 ///////////////////////////////////////////////////////////////////////////
 // wrapper that declumps the matrix and traces back the next best alignment
@@ -805,6 +808,7 @@ SEQAN_CHECKPOINT
 ...type:Tag.Local Alignment Algorithms.value.WatermanEggert
 ...type:Tag.Local Alignment Algorithms.value.BandedWatermanEggert
 .remarks:TODO
+..include:seqan/align.h
  */	
 
 //1. only Align object

@@ -110,6 +110,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The size of $suffixArray$ must be at least $length(text)$ before calling this function.
+..include:seqan/index.h
 */
 
     template < typename TSA,
@@ -244,6 +245,7 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The size of $lcp$ must be at least $length(text)$ before calling this function.
+..include:seqan/index.h
 */
 
 	template < 
@@ -419,6 +421,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 ..param.algo_tag:A tag that identifies the algorithm which is used for creation.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The size of $bwt$ must be at least $length(text)$ before calling this function.
+..include:seqan/index.h
 */
 
 	// default
@@ -471,6 +474,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..remarks:The occurrences are sorted by increasing positions.
 ..see:Function.getOccurrences
 ..see:Metafunction.SAValue
+..include:seqan/index.h
 */
 	template <typename TValue, typename TSpec>
 	inline void orderOccurrences(String<TValue, TSpec> &occString)
@@ -495,6 +499,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ...default:The result of @Metafunction.DefaultIndexCreator@.
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:$indexCreate$ calls the fibre corresponding $createXXX(..)$ function (e.g. @Function.createSuffixArray@).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
@@ -557,6 +562,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ...type:Class.Index
 ..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
 ..returns:A $bool$ which is $true$, iff the fibre is present.
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec, typename TFibre>
@@ -578,6 +584,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:If the fibre already exists (@Function.indexSupplied@ is true) then $indexRequire$ does nothing.
 If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec, typename TFibre>

@@ -161,6 +161,7 @@ findMotif(MotifFinder<TSeqType, PMS1> & finder,
 ...type:Tag.TCM
 ..remarks:The PMS1 algorithm is able to run in OOPS, OMOPS, ZOOPS and TCM mode.
 ..remarks:The resulted motif candidates found by the PMS1 algorithm will be stored in the result_set object.
+..include:seqan/find_motif.h
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -609,6 +610,7 @@ pms1(TStrings & result_set,
 ..remarks: #d-variants = 
                   - sum(i,0,d,binomialCoefficient(l,i)*(alp_size-1)^i), if is_exact=false
                   - binomialCoefficient(l.d)*(alp_size-1)^d),           else
+..include:seqan/find_motif.h
 */
 
 template<typename TIntVect, typename TIterString, typename TType, typename TShape>
@@ -676,6 +678,7 @@ createDVariants(TIntVect & variants,
 ..param.l:The size of the motif.
 ..param.d:The number of substitutions.
 ..remarks: #bitsets = binomialCoefficient(l,d).
+..include:seqan/find_motif.h
 */
 
 template<typename TStrings, typename TType>
@@ -733,6 +736,7 @@ _getVariantsOfBitset(TStrings & bitsets,
 ...signature:Shape<TValue, SimpleShape>
 ...remarks:Is used for computing the hash-value of each variant.
 ..remarks: #variants = (alp_size-1)^d for a given bitset, d-value and l-mer.
+..include:seqan/find_motif.h
 */
 
 template<typename TIntVect, typename TStringIter, typename TType, typename TBitset, typename TValue, typename TSpec>

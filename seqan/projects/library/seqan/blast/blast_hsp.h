@@ -955,6 +955,7 @@ SEQAN_CHECKPOINT
 ..param.alignment:An Alignment object to be filled.
 ...type:Class.Align
 ...type:Spec.Alignment Graph
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec, typename TSource>
 inline unsigned int
@@ -1043,6 +1044,7 @@ SEQAN_CHECKPOINT
 ..signature:getAlignment(hsp,alignment,id0,id1)
 ..param.id0:The Id of the query sequence in the StringSet of the Alignment Graph.
 ..param.id1:The Id of the hit sequence in the StringSet of the Alignment Graph.
+..include:seqan/blast.h
 */
 /////////////////////////////////////////////////////////////
 // get Alignment for Graph<TAlign>
@@ -1287,6 +1289,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..returns:The begin position.
 ...type:nolink:unsigned
+..include:seqan/blast.h
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1315,6 +1318,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..returns:The begin position.
 ...type:nolink:unsigned
+..include:seqan/blast.h
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1343,6 +1347,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..returns:The end position.
 ...type:nolink:unsigned
+..include:seqan/blast.h
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int
@@ -1363,6 +1368,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..returns:The end position.
 ...type:nolink:unsigned
+..include:seqan/blast.h
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline unsigned int &
@@ -1434,6 +1440,7 @@ SEQAN_CHECKPOINT
 ...type:Class.BlastHsp
 ..returns:The e-value.
 ...type:nolink:double
+..include:seqan/blast.h
 */
 template<typename TBlastSpec, typename TInfoSpec>
 inline double
@@ -1463,6 +1470,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.FullInfo
 ..returns:The score.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastSpec>
 inline float 
@@ -1490,6 +1498,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.FullInfo
 ..returns:The bit score.
 ...type:nolink:float
+..include:seqan/blast.h
 */
 template<typename TBlastSpec>
 inline float 
@@ -1553,6 +1562,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.FullInfo
 ..returns:The number of gaps.
 ...type:nolink:unsigned
+..include:seqan/blast.h
 */
 template<typename TBlastSpec>
 inline unsigned int
@@ -1573,6 +1583,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.FullInfo
 ..returns:True if the query is in forward orientation.
 ...type:nolink:bool
+..include:seqan/blast.h
 */
 template<typename TBlastSpec>
 inline bool
@@ -1591,6 +1602,7 @@ SEQAN_CHECKPOINT
 ...type:Spec.FullInfo
 ..returns:True if the database sequence is in forward orientation.
 ...type:nolink:bool
+..include:seqan/blast.h
 */
 template<typename TBlastSpec>
 inline bool
@@ -1657,6 +1669,7 @@ SEQAN_CHECKPOINT
 ..cat:Blast
 ..param.object:
 ...type:Class.BlastHsp
+..include:seqan/blast.h
 */
 template<typename TBlast, typename TSpec>
 inline unsigned int

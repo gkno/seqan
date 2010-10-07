@@ -287,6 +287,7 @@ tripletLibraryExtension(graph, [,guideTree, minMembers])
 ..param.minMembers:Minimum number of sequences per group.
 ...remarks:If a guide tree and a minimum number of memebers is given, the triplet extension is limited to groups of sequences.
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec>
 inline void 
@@ -740,6 +741,7 @@ sumOfPairsScore(graph, score_type)
 That is, gap openings are properly scored. 
 If you want the fast version assuming independ columns use sumOfPairsScoreInd.
 ..returns:void
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore> 
 inline typename Value<TScore>::Type
@@ -853,6 +855,7 @@ alignmentEvaluation(graph, score_type, gapExCount, gapCount, pairCount, numPairs
 ..param.numPairs:Counter for each pair.
 ..param.len:Alignment length.
 ..returns:Score of the alignment.
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TScore, typename TSize> 
 inline typename Value<TScore>::Type

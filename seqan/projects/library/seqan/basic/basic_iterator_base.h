@@ -36,6 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ..implements:Concept.Iterator
+..include:seqan/basic.h
 */
 template <typename TContainer, typename TSpec>
 class Iter;

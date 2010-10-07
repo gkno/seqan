@@ -67,6 +67,7 @@ struct Convert
 ...metafunction:Metafunction.Convert
 ..remarks:This function implements @Function.convert@. 
 It is recommended to use @Function.convert@ rather than $convertImpl$.
+..include:seqan/basic.h
 */
 //??? Spezialisiere convertImpl, verwende convert
 //??? Konversion eines einzelnen Zeichens in ein einzelnes Zeichen. Konversion von Sequenzen in Sequenzen finden wo anders statt.
@@ -96,6 +97,7 @@ Otherwise the function returns a temporary object.
 ..remarks:This function is implemented in @Function.convertImpl@. 
 Do not specialize $convert$, specialize @Function.convertImpl@ instead.
 ..see:Function.convertImpl
+..include:seqan/basic.h
 */
 template <typename TTarget, typename TSource>
 inline typename Convert<TTarget, TSource>::Type

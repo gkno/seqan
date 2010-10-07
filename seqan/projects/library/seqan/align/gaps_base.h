@@ -90,6 +90,7 @@ struct GapsIterator;
 ..remarks:The gaps are stored separately from the sequence.
 The ungapped sequence is called the @Function.source@ of the gaps object.
 $Gaps$ either stores the source (then it is the owner of the source), or refers to an external source (then it is @Function.dependent@).
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec/* = ArrayGaps*/>
@@ -347,6 +348,7 @@ SEQAN_CHECKPOINT
 ..returns:An iterator that points to the first item in @Function.source.source(object)@ that is used in object.
 ..see:Function.begin
 ..see:Function.source
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TTag>
@@ -381,6 +383,7 @@ SEQAN_CHECKPOINT
 ..see:Function.end
 ..see:Function.source
 ..see:Function.sourceBegin
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TTag>
@@ -412,6 +415,7 @@ SEQAN_CHECKPOINT
 ..param.gapped_sequence:A gapped sequence.
 ...type:Class.Gaps
 ..param.view_position:The view position at which the blank is inserted.
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition>
 inline void
@@ -434,6 +438,7 @@ SEQAN_CHECKPOINT
 ..param.view_position:The view position at which $count$ blanks are inserted.
 ..param.count:Number of blanks to insert.
 ..see:Function.insertGap
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition, typename TSize>
 inline void
@@ -457,6 +462,7 @@ SEQAN_CHECKPOINT
 ..param.view_position:The view position at which the blank is removed.
 ..remarks:If there is no gap at position $view_position$ in $gapped_sequence$, then nothing happens.
 ..see:Function.insertGap
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition>
 inline void
@@ -483,6 +489,7 @@ If there is no gap at position $view_position$ in $gapped_sequence$, nothing hap
 If there are only $x < count$ consecutive blanks starting at position $view_position$ in $gappend_sequence$, then only $x$ blanks are removed.
 ..see:Function.insertGaps
 ..see:Function.removeGap
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TPosition, typename TSize>
@@ -506,6 +513,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Gaps
 ..param.view_position:The view position at which $gapped_sequence$ is tested.
 ..returns:$true$, if there is a gap at position $view_position$ in $gapped_sequence$, $false$ otherwise.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TPosition>
@@ -539,6 +547,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Size
 ..remarks:If there is no gap at position $view_position$, the function returns $0$.
 ...text:If $view_position \geq $@Function.endPosition@$(gapped_sequence)$, the function returns $0$.
+..include:seqan/align.h
 */
 
 // count gaps beginning at given view position
@@ -573,6 +582,7 @@ SEQAN_CHECKPOINT
 ...metafunction:Metafunction.Size
 ..remarks:If there is no character at position $view_position$, the function returns $0$.
 ...text:If $view_position \geq $@Function.endPosition@$(gapped_sequence)$, the function returns $0$.
+..include:seqan/align.h
 */
 
 // count characters beginning at given view position
@@ -608,6 +618,7 @@ SEQAN_CHECKPOINT
 ..param.view_end_pos:View Position behind the last item that is scanned for blanks. (optional)
 ..remarks:All blanks after $view_begin_pos$ and before $view_end_pos$ are removed.
 ...text:If no $view_begin_pos$ and $view_end_pos$ are specified, all gaps are removed from $gapped_sequence$.
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec, typename TPosition1, typename TPosition2>
@@ -744,6 +755,7 @@ SEQAN_CHECKPOINT
 ..returns:$true$ if $object$ has a @Function.source@, $false$ otherwise.
 ..see:Function.source
 ..see:Metafunction.Source
+..include:seqan/align.h
 */
 
 template <typename TSource, typename TSpec>
@@ -778,6 +790,7 @@ not managed by $object$. $false$ otherwise.
 ..see:Function.source
 ..see:Metafunction.Source
 ..see:Function.emptySource
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline bool
@@ -814,6 +827,7 @@ and $source$ is the new source of $object$.
 ..see:Function.source
 ..see:Function.dependentSource
 ..see:Metafunction.Source
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TPosition1, typename TPosition2>
 inline void
@@ -859,6 +873,7 @@ $object$ is thereupon the owner of the source.
 ..see:Function.source
 ..see:Function.dependentSource
 ..see:Metafunction.Source
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline void
@@ -874,6 +889,7 @@ SEQAN_CHECKPOINT
 .Function.detach:
 ..cat:Alignments
 ..param.object.type:Class.Gaps
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline void
@@ -896,6 +912,7 @@ SEQAN_CHECKPOINT
 ...type:Metafunction.Source
 ..remarks:The source of a @Class.Gaps@ instance is the underlying sequence without gaps.
 ..see:Metafunction.Source
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline TSource &
@@ -927,6 +944,7 @@ SEQAN_CHECKPOINT
 $sourceSegment$ is useful since @Class.Gaps@ can be limited to work on a subsequence of the source.
 ..see:Metafunction.Source
 ..see:Function.source
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec>
 inline typename Infix<TSource>::Type
@@ -956,6 +974,7 @@ SEQAN_CHECKPOINT
 ..returns:Length of the used part of the source.
 ...metafunction:Metafunction.Size
 ..remarks:This function is equivalent to $sourceEndPosition(gaps) - sourceBeginPosition(gaps)$.
+..include:seqan/align.h
 */
 //..see:Function.sourceEndPosition
 //..see:Function.sourceBeginPosition
@@ -999,6 +1018,7 @@ If you want $object$ to drop its current source and take another object as sourc
 ..see:Function.emptySource
 ..see:Function.dependentSource
 ..see:Function.assign
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TSource2, typename TPosition1, typename TPosition2>
 inline void
@@ -1054,6 +1074,7 @@ If you want $source_in$ not to become empty, use @Function.assignSource@ instead
 ..see:Function.dependentSource
 ..see:Function.move
 ..see:Function.assignSource
+..include:seqan/align.h
 */
 template <typename TSource, typename TSpec, typename TSource2, typename TPosition1, typename TPosition2>
 inline void

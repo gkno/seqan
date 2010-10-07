@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...note:The shape $1100101$ corresponds to $HardwiredShape<1,3,2>$.
 ...note:The following predefined shapes are already available in $seqan/index/shape_predefined.h$:
 ..file:../projects/library/seqan/index/shape_predefined.h
+..include:seqan/index.h
 */
 
 	// Pxx = spaces between '1's

@@ -233,6 +233,7 @@ namespace seqan
 ..signature:key(element)
 ..param.element:The desired object.
 ..returns:The the key of the element.  Type is @Metafunction.Key.$Key< "element-type" >::Type$@.
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > __inline 
@@ -260,6 +261,7 @@ namespace seqan
 ...type:Class.SkipElement
 ..param.key:The desired object.
 ...type:Metafunction.Key.$Key< "element-type" >::Type
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey >
@@ -295,6 +297,7 @@ Can be used to perform operation s
 ...type:Class.SkipElement
 ...type:Class.SkipBaseElement
 ..returns:A reference to the cargo of the element. Type is $TKey$.
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > __inline

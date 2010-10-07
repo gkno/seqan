@@ -40,6 +40,7 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Alloc<>$, see @Spec.Alloc String@.
+..include:seqan/graph_types.h
 */
 
 
@@ -63,6 +64,7 @@ It is indexed via VertexDescriptors or EdgeDescriptors.
 ...remarks:For every vertex descriptor there must be an entry in the array.
 ..returns:void
 ..see:Function.resizeEdgeMap
+..include:seqan/graph_types.h
 */
 
 template<typename TSpec, typename TPropertyMap>
@@ -92,6 +94,7 @@ resizeVertexMap(Graph<TSpec> const& g,
 ...remarks:For every edge id there must be an entry in the array.
 ..returns:void
 ..see:Function.resizeVertexMap
+..include:seqan/graph_types.h
 */
 
 template<typename TSpec, typename TPropertyMap>
@@ -125,6 +128,7 @@ See @Metafunction.Value@.
 ..returns:void
 ..see:Function.getProperty
 ..see:Function.property
+..include:seqan/graph_types.h
 */
 
 template<typename TPropertyMap, typename TDescriptor, typename TValue>
@@ -156,6 +160,7 @@ assignProperty(TPropertyMap& pm,
 ..returns:Reference to the item in the property map.
 ..see:Function.getProperty
 ..see:Function.assignProperty
+..include:seqan/graph_types.h
 */
 
 template<typename TPropertyMap, typename TDescriptor>
@@ -197,6 +202,7 @@ property(TPropertyMap const& pm,
 ..returns:Value of the item in the property map.
 ..see:Function.property
 ..see:Function.assignProperty
+..include:seqan/graph_types.h
 */
 
 template<typename TPropertyMap, typename TDescriptor>
@@ -229,6 +235,7 @@ getProperty(TPropertyMap const& pm,
 ...remarks:Specifies the position of the member in the cargo.
 Note: If zero it is assumed that the cargo is a simple type (e.g., int).
 ...default:$0$.
+..include:seqan/graph_types.h
 */
 template<typename TContainer, unsigned int const MemberId = 0>
 struct InternalMap 
@@ -489,6 +496,7 @@ getProperty(InternalMap<T, 0>&,
 ..signature:InternalPointerMap<TPropmap, Instance>
 ..param.TPropmap:A pointer to member type.
 ..param.Instance:A pointer to a member of type TPropmap.
+..include:seqan/graph_types.h
 */
 template <typename TPropmap, TPropmap const Instance> 
 struct InternalPointerMap 
@@ -608,6 +616,7 @@ getProperty(InternalPointerMap<TValue TClass::*, TPMember>&,
 ..cat:Graph
 ..summary:An internal property map using raw pointer to members.
 ..remarks:Internal property maps are used to access internal edge cargos.
+..include:seqan/graph_types.h
 */
 
 //////////////////////////////////////////////////////////////////////////////

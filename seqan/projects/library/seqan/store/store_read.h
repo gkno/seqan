@@ -52,6 +52,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.ReadStoreElement
+..include:seqan/store.h
 */
 
 template <typename TSpec = void>

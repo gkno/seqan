@@ -38,6 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...metafunction:Metafunction.Spec
 ..implements:Concept.Iterator
 ..remarks:$THost$ can also be a modified iterator, so you can create custom iterators by combining predefined ones.
+..include:seqan/modifier.h
 */
 
 	template < typename THost, typename TSpec = void >

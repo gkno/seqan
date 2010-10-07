@@ -35,6 +35,7 @@ namespace seqan{
 ..cat:Chaining
 ..signature:_WrapperPoint<TBorder>
 ..param.TBorder:Type of the class that represents the limits (multidimensional point) of an fragment.
+..include:seqan/chaining.h
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

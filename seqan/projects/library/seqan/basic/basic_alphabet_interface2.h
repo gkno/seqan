@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..returns:A gap character.
 ..remarks.text:This function implements @Function.getValue@. 
 It is recommended to use @Function.gapValue@ rather than $gapValueImpl$.
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -70,6 +71,7 @@ SEQAN_CHECKPOINT
 ..remarks.text:The function is implemented in @Function.gapValueImpl@. 
 Do not specialize $gapValue$, specialize @Function.gapValueImpl@ instead!
 ..see:Function.gapValueImpl
+..include:seqan/basic.h
 */
 
 /*
@@ -116,6 +118,7 @@ SEQAN_CHECKPOINT
 ..returns:A value $inf$ that holds: $inf >= i$ for all values $i$.
 ..remarks.text:This function implements @Function.supremumValue@. 
 It is recommended to use @Function.supremumValue@ rather than $supremumValueImpl$.
+..include:seqan/basic.h
 */
 
 /*
@@ -138,6 +141,7 @@ supremumValueImpl(T *)
 ..remarks.text:The function is implemented in @Function.supremumValueImpl@. 
 Do not specialize $supremumValue$, specialize @Function.supremumValueImpl@ instead!
 ..see:Function.supremumValueImpl
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -173,6 +177,7 @@ SEQAN_CHECKPOINT
 ..returns:A value $inf$ that holds: $inf <= i$ for all values $i$.
 ..remarks.text:This function implements @Function.infimumValue@. 
 It is recommended to use @Function.infimumValue@ rather than $infimumValueImpl$.
+..include:seqan/basic.h
 */
 
 /*
@@ -196,6 +201,7 @@ infimumValueImpl(T *)
 Do not specialize $infimumValue$, specialize @Function.infimumValueImpl@ instead!
 ..see:Function.infimumValueImpl
 ..see:Function.supremumValue
+..include:seqan/basic.h
 */
 
 template <typename T>

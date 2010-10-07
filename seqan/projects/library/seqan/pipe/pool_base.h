@@ -92,6 +92,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...default:PoolSpec<>, see @Spec.PoolSpec@.
 ..remarks:Use @Metafunction.Value@ to get the output type of a given Pipe (returns $Value<TInput>::Type$ by default).
 ..remarks:Use @Metafunction.Size@ to get the size type of a given Pipe (returns $Size<TInput>::Type$ by default).
+..include:seqan/pipe.h
 */
 
     template < typename TValue,
@@ -1039,6 +1040,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Class.Pool
 ..param.val:Item to be pushed.
 ..remarks:@Function.push@ can only be called within a write process surrounded by @Function.beginWrite@ and @Function.endWrite@.
+..include:seqan/pipe.h
 */
 
     template < typename TValue, typename TSpec >
@@ -1110,6 +1112,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..remarks:$beginWrite$ prepares a @Class.Pool@ for succeeding writes.
 ..remarks:A write process must be terminated with @Function.endWrite@. Nested write processes are not allowed.
 ..see:Function.endWrite
+..include:seqan/pipe.h
 */
 
 		template < typename TValue, typename TSpec >
@@ -1128,6 +1131,7 @@ SEQAN_CHECKPOINT
 ..returns:A $bool$ which is $true$ on success.
 ..remarks:$endWrite$ closes the input stream and frees resources possibly allocated by @Function.beginWrite@.
 ..see:Function.beginWrite
+..include:seqan/pipe.h
 */
 
 		template < typename TValue, typename TSpec >

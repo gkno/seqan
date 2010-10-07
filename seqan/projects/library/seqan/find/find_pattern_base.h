@@ -42,6 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks:Leave empty for index-based pattern matching (see @Class.Index@).
 ...default:The result of @Metafunction.DefaultPattern@
 ..remarks:If $TNeedle$ is a set of strings, then $position(pattern)$ returns the index of the currently matching needle.
+..include:seqan/find.h
 */
 
 template < typename TNeedle, typename TSpec = typename DefaultPattern<TNeedle>::Type >
@@ -269,6 +270,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Pattern
 ..returns:The needle object to search for.
 ..remarks:The result type is @Metafunction.Needle@$<TPattern>::Type$ for pattern of type $TPattern$.
+..include:seqan/find.h
 */
 
 template < typename TObject >
@@ -311,6 +313,7 @@ needle(Pattern<TNeedle, TSpec> const & obj)
 ...type:Class.Pattern
 ..param.needle:The needle object to search for.
 ...type:Class.String
+..include:seqan/find.h
 */
 
 template < typename TNeedle, typename TSpec >

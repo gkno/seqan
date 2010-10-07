@@ -340,6 +340,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGram_Dir@ fibre (q-gram directory).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -363,6 +364,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:A reference or proxy to the value.
+..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
@@ -386,6 +388,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGram_Counts@ fibre (counts array).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -408,6 +411,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGram_CountsDir@ fibre (counts directory).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -430,6 +434,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Spec.Index_QGram
 ..returns:A reference to the @Tag.QGram Index Fibres.QGram_BucketMap@ fibre (maps q-gram hashes to buckets).
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -454,6 +459,7 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 ..returns:Returns a reference to the @Class.Shape@ object of a q-gram index.
 Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 ...type:Class.Shape
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
@@ -476,6 +482,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 ..param.index:A q-gram index.
 ...type:Spec.Index_QGram
 ..returns:The step size. If $x$ is returned every $x$'th q-gram is stored in the index.
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TShapeSpec, typename TSpec>
@@ -498,6 +505,7 @@ Formally, this is a reference to the @Tag.QGram Index Fibres.QGram_Shape@ fibre.
 To take effect of changing the $stepSize$ the q-gram index should be empty or recreated. 
 ..remarks:A $stepSize$ of 0 corresponds to $stepSize=length(indexShape(index))$, i.e. all non-overlapping q-grams.
 ..see:Function.getStepSize
+..include:seqan/index.h
 */
 
 	template <typename TText, typename TShapeSpec, typename TSpec, typename TSize>
@@ -1152,6 +1160,7 @@ If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket 
 ..returns:Index contains the sorted list of qgrams. For each q-gram $dir$ contains the first position in index that corresponds to this q-gram.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The resulting tables must have appropriate size before calling this function.
+..include:seqan/index.h
 */
 
 	template < typename TIndex >
@@ -1261,6 +1270,7 @@ The resulting tables must have appropriate size before calling this function.
 ..param.stepSize:Store every $stepSize$'th q-gram in the index.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The resulting tables must have appropriate size before calling this function.
+..include:seqan/index.h
 */
 
 	template < 
@@ -1409,6 +1419,7 @@ If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket 
 ..returns:Index contains the sorted list of qgrams. For each possible q-gram pos contains the first position in index that corresponds to this q-gram. 
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The resulting tables must have appropriate size before calling this function.
+..include:seqan/index.h
 */
 
 	template <
@@ -1480,6 +1491,7 @@ If bucketMap is of the type @Tag.Nothing@ the q-gram hash determines the bucket 
 ..param.stepSize:Store every $stepSize$'th q-gram in the index.
 ..remarks:This function should not be called directly. Please use @Function.indexCreate@ or @Function.indexRequire@.
 The resulting tables must have appropriate size before calling this function.
+..include:seqan/index.h
 */
 
 	template < 
@@ -1919,6 +1931,7 @@ The resulting tables must have appropriate size before calling this function.
 ..remarks:$distMat$ will be resized to $seqCount*seqCount$, where $seqCount$ is the number of sequences in the index/in $seqSet$.
 The number of common q-grams between sequence $i$ and $j$ is stored at position $i*seqCount + j$.
 It sums up the minimum number of q-gram occurrences between both sequences for each q-gram.
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TDistMatrix >
@@ -2148,6 +2161,7 @@ are stored in a contiguous range of the suffix array.
 $range$ returns begin and end position of this range.
 If the type of $index$ is $TIndex$ the return type is $Pair<Size<TIndex>::Type>.
 ..note:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
@@ -2183,6 +2197,7 @@ If the type of $index$ is $TIndex$ the return type is $Pair<Size<TIndex>::Type>.
 ...type:Class.Shape
 ..returns:A position where the q-gram stored in $shape$ occurs in the text (see @Tag.QGram Index Fibres.QGram_Text@).
 If the type of $index$ is $TIndex$ the return type is $SAValue<TIndex>::Type$.
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
@@ -2216,6 +2231,7 @@ If the type of $index$ is $TIndex$ the return type is $SAValue<TIndex>::Type$.
 ..returns:All positions where the q-gram stored in $shape$ occurs in the text (see @Tag.QGram Index Fibres.QGram_Text@).
 If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram_SA>::Type const>::Type$.
 ..remarks:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
@@ -2251,6 +2267,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 ..returns:The number of positions where the q-gram stored in $shape$ occurs in the text (see @Tag.QGram Index Fibres.QGram_Text@).
 If the type of $index$ is $TIndex$ the return type is $Size<TIndex>::Type$.
 ..note:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >
@@ -2289,6 +2306,7 @@ For every @Class.StringSet@ sequence the q-gram occurs in, seqNo is the sequence
 If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram_Counts>::Type const>::Type$.
 ..remarks:The necessary index tables are built on-demand via @Function.indexRequire@ if index is not $const$.
 ..see:Function.countOccurrences
+..include:seqan/index.h
 */
 
 	template < typename TObject, typename TShapeSpec, typename TSpec, typename TShapeSpec2, typename TValue >

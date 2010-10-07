@@ -1372,6 +1372,7 @@ endPosition(Pattern<TIndex, Swift<TSpec> > & pattern)
 be negative or beyond the end of $finder$ or $pattern$ when using filter algorithms.
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
 ..see:Function.positionRange
+..include:seqan/index.h
 */
 ///.Function.positionRangeNoClip.param.finder.type:Spec.Swift
 ///.Function.positionRangeNoClip.param.pattern.type:Spec.Swift
@@ -1406,6 +1407,7 @@ positionRangeNoClip(Finder<THaystack, Swift<TSpec> > & finder)
 ...remarks:The return type is $Pair<typename SAValue<THost>::Type>$ if $THost$ is the type of haystack or needle.
 ..see:Function.beginPosition
 ..see:Function.endPosition
+..include:seqan/index.h
 */
 ///.Function.positionRange.param.finder.type:Spec.Swift
 ///.Function.positionRange.param.pattern.type:Spec.Swift
@@ -1805,6 +1807,7 @@ find(
 ..param.errorRate:Error rate that is allowed between reads and reference.
  Should be the same in as in @Function.windowFindNext@.
 ...type:nolink:double
+..include:seqan/index.h
 */
 template <typename THaystack, typename TIndex, typename TSpec>
 inline bool 
@@ -1842,6 +1845,7 @@ windowFindBegin(
 ..see:Function.windowFindBegin
 ..see:Function.windowFindEnd
 ..see:Function.getSwiftHits
+..include:seqan/index.h
 */
 template <typename THaystack, typename TIndex, typename TSpec, typename TSize>
 inline bool 
@@ -1894,6 +1898,7 @@ windowFindNext(
 ..param.finder:A SWIFT finder.
 ..param.pattern: A SWIFT pattern.
 ..see:Function.windowFindBegin
+..include:seqan/index.h
 */
 template <typename THaystack, typename TIndex, typename TSpec>
 inline void 
@@ -1914,6 +1919,7 @@ windowFindEnd(
 ..signature:getSwiftHits(finder)
 ..param.finder:A SWIFT finder.
 ..returns:@Class.String@ of Hits (use Finder<...>::THitString as Type).
+..include:seqan/index.h
 */
 template <typename THaystack, typename TSpec>
 inline typename Finder<THaystack, Swift<TSpec> >::THitString &

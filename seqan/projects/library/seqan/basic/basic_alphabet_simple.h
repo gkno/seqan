@@ -52,6 +52,7 @@ But for classes derived from $SimpleType$, optimized variants of array manipulat
 ...text:Note that simple types need not to be derived or specialized from $SimpleType$, but
 it could be convenient to do so.
 ..implements:Concept.Simple Type
+..include:seqan/basic.h
 */
 template <typename TValue, typename TSpec>
 struct SimpleType

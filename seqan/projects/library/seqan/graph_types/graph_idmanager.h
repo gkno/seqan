@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:$Default$, see @Tag.Default@.
+..include:seqan/graph_types.h
 */
 template<typename TIdType, typename TSpec>
 class IdManager 
@@ -134,6 +135,7 @@ struct Spec<IdManager<TIdType, TSpec> const>
 ..returns:Returns a new unique id.
 ..remarks:If it is a dummy id manager, i.e., IdManager<void>, the return type is (void*) 0.
 ..see:Function.releaseId
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec>
@@ -168,6 +170,7 @@ obtainId(IdManager<TIdType, TSpec>& idm)
 ..param.id:The id that is to be released.
 ..returns:void
 ..see:Function.obtainId
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec, typename TId>
@@ -200,6 +203,7 @@ releaseId(IdManager<TIdType, TSpec>& idm,
 ...type:Class.IdManager
 ..returns:void
 ..see:Function.releaseId
+..include:seqan/graph_types.h
 */
 
 
@@ -223,6 +227,7 @@ releaseAll(IdManager<TIdType, TSpec>& idm)
 ...type:Class.IdManager
 ..returns:An upper bound on all distributed ids.
 ..see:Function.getIdLowerBound
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec>
@@ -244,6 +249,7 @@ getIdUpperBound(IdManager<TIdType, TSpec> const& idm)
 ...type:Class.IdManager
 ..returns:The smallest obtained id.
 ..see:Function.getIdUpperBound
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec>
@@ -268,6 +274,7 @@ getIdLowerBound(IdManager<TIdType, TSpec> const& idm)
 ..param.idm:The IdManager.
 ...type:Class.IdManager
 ..returns:Number of ids in use.
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec>
@@ -290,6 +297,7 @@ idCount(IdManager<TIdType, TSpec> const& idm)
 ...type:Class.IdManager
 ..param.id:The given id.
 ..returns:True if the id was distributed, false otherwise.
+..include:seqan/graph_types.h
 */
 
 template<typename TIdType, typename TSpec, typename TId>

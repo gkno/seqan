@@ -67,6 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:File<TSpec>
 ..param.TSpec:The specializing type.
 ...default:$Async<>$, see @Spec.Async@.
+..include:seqan/file.h
 */
 
 	template <typename TSpec = Async<> >
@@ -153,6 +154,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..signature:aRequest<TFile>
 ..param.TFile:A File type.
 ..remarks:This structure is used to identify asynchronous requests after their initiation.
+..include:seqan/file.h
 */
 
     template < typename T >
@@ -213,6 +215,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ...remarks:To append a file if existing add $OPEN_APPEND$.
 ...default:$OPEN_RDWR | OPEN_CREATE | OPEN_APPEND$
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -237,6 +240,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..remarks:After closing this file will automatically be deleted.
 ..remarks:The openmode (see @Function.open@) is $OPEN_RDWR | OPEN_CREATE$.
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -264,6 +268,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -293,6 +298,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be read.
 ..returns:A $bool$ which is $true$ on success.
 ..remarks:The records are read from the position pointed by the current file pointer (see @Function.seek@).
+..include:seqan/file.h
 */
 
 	template < typename TSpec, typename TValue, typename TSize >
@@ -312,6 +318,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be written.
 ..returns:A $bool$ which is $true$ on success.
 ..remarks:The records are written at the position pointed by the current file pointer (see @Function.seek@).
+..include:seqan/file.h
 */
 
 	template < typename TSpec, typename TValue, typename TSize >
@@ -331,6 +338,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be read.
 ..param.fileOfs:The absolute file position in bytes measured from the beginning.
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TFile, typename TValue, typename TSize, typename TPos >
@@ -352,6 +360,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be written.
 ..param.fileOfs:The absolute file position in bytes measured from the beginning.
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TFile, typename TValue, typename TSize, typename TPos >
@@ -379,6 +388,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ...default:$SEEK_BEGIN$
 ...remarks:For $SEEK_BEGIN$, $SEEK_CURRENT$, or $SEEK_END$ the origin is the beginning, the current pointer, or the end of the file.
 ..returns:The new file position measured in bytes from the beginning.
+..include:seqan/file.h
 */
 
 	template < typename TSpec, typename TPos >
@@ -407,6 +417,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..returns:The current file position measured in bytes from the beginning.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -423,6 +434,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..remarks:Calls @Function.seek@$(file, 0)$ by default.
+..include:seqan/file.h
 */
 
     template < typename File >
@@ -439,6 +451,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..returns:The file size measured in bytes.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -457,6 +470,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..param.new_length:The new file size measured in bytes.
+..include:seqan/file.h
 */
 
     template < typename TSpec, typename TSize >
@@ -475,6 +489,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..signature:setEOF(file)
 ..param.file:A File object.
 ...type:Class.File
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -600,6 +615,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.request:Reference to a structure that will be associated with this asynchronous request.
 ...type:Class.aRequest
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename File, typename TValue, typename TSize, typename TPos,
@@ -624,6 +640,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.request:Reference to a structure that will be associated with this asynchronous request.
 ...type:Class.aRequest
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename File, typename TValue, typename TSize, typename TPos,
@@ -647,6 +664,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.file:A File object.
 ...type:Class.File
 ..remarks:$flush$ returns after all pending requests are completed.
+..include:seqan/file.h
 */
 
     template < typename TSpec >
@@ -666,6 +684,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ...default:Infinity.
 ..returns:A $bool$ which is $true$ on completion and $false$ on timeout.
 ..remarks:$waitFor$ suspends the calling process until $request$ is completed or after $timeout_millis$ milliseconds.
+..include:seqan/file.h
 */
 
     inline bool waitFor(aDummyRequest &) 
@@ -695,6 +714,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.request:Reference to an aRequest object.
 ...type:Class.aRequest
 ..returns:A $bool$ which is $true$ on success.
+..include:seqan/file.h
 */
 
     template < typename TSpec, typename aRequest >

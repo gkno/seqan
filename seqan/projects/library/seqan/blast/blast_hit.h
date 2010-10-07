@@ -38,6 +38,7 @@ class BlastHit;
 ...type:Spec.StreamReport
 ...type:Spec.StoreReport
 ..remarks:Use Metafunction.Hit to get the BlastHit type used in a BlastReport object.
+..include:seqan/blast.h
 */
 template<typename TBlastHsp, typename TSpec>
 class BlastHit<TBlastHsp, StoreReport<TSpec> > 

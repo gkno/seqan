@@ -37,6 +37,7 @@ namespace SEQAN_NAMESPACE_MAIN
 dependent on $host$.
 ..remarks.text:The default behavior is: Do nothing.
 ..see:Class.Holder
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -66,6 +67,7 @@ ceases to be dependent on $host$.
 ..remarks.text:The default behavior is: Do nothing.
 ..see:Class.Holder
 ..see:Function.addRef
+..include:seqan/basic.h
 */
 template <typename T>
 inline void 
@@ -106,6 +108,7 @@ member objects. If we want class $A$ to be dependent on or the owner of another 
 then we add a data member of type $Holder<B>$ to $A$. 
 $Holder$ offers some useful access functions, stores the kind of relationship between $A$ and $B$,
 and executes all needed @Function.addRef@ and @Function.releaseRef@ calls.
+..include:seqan/basic.h
 */
 
 template <typename TValue, typename TSpec = Tristate>
@@ -702,6 +705,7 @@ If $object$ is not specified, the action depends on the former state of $holder$
 ..remarks.text:- If the state of $holder$ was 'dependent', a copy of the former object is made and stored into $holder$. 
 ..remarks.text:- If the state of $holder$ was already 'owner', nothing happens.
 ..see:Class.Holder
+..include:seqan/basic.h
 */
 
 template <typename TValue>
@@ -859,6 +863,7 @@ like a @Function.source@ or a @Function.host@, and @Function.dependent.dependent
 ..see:Function.host
 ..see:Function.createSource
 ..see:Function.create
+..include:seqan/basic.h
 */
 
 template <typename TValue>
@@ -881,6 +886,7 @@ SEQAN_CHECKPOINT
 ...type:Metafunction.Value.Value<Holder>::Type
 ..remarks.text:After this operation, $holder$ will be dependent in state 'dependent'.
 ..see:Class.Holder
+..include:seqan/basic.h
 */
 
 template <typename TValue>

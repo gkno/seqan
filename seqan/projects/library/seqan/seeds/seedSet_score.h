@@ -1795,6 +1795,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 ...type:Tag.Seed Extension.MatchExtend
 ...type:Tag.Seed Extension.UngappedXDrop
 ...type:Tag.Seed Extension.GappedXDrop
+..include:seqan/seeds.h
 */
 
 /**
@@ -1824,6 +1825,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 ...type:Tag.Seed Extension.MatchExtend
 ...type:Tag.Seed Extension.tag.UngappedXDrop
 ...type:Tag.Seed Extension.tag.GappedXDrop
+..include:seqan/seeds.h
 */
 
 template<typename TContainer, typename TContainer2, typename TText, typename TValue, typename TDirection>

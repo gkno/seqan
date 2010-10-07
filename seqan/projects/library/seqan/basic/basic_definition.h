@@ -289,6 +289,7 @@ SEQAN_CHECKPOINT
 ..param.i:An integer type.
 ..returns:The largest integer smaller or equal than
 the logarithm of $i$.
+..include:seqan/basic.h
 */
 
 template <int BITS_MAX>

@@ -199,6 +199,7 @@ __appendSegmentMatches(StringSet<String<TValue, TStrSpec>, Dependent<TSpec> > co
 ...type:Class.Score
 ..returns:void
 ...remarks:The resulting alignment is stored in $align$.
+..include:seqan/graph_msa.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TStringSet1, typename TNames, typename TAlphabet, typename TScore>
 inline void

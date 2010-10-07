@@ -497,6 +497,7 @@ SEQAN_CHECKPOINT
 ..returns:The corresponding alignment can be found in align.
 ..remarks:Depending on the Score object either the regular Needleman Wunsch algorithm (gap open = 0) or the Gotoh algorithm (gap open != 0) is applied.
 ..see:Function.smithWaterman
+..include:seqan/align.h
 */
 /*
 template <typename TSource, typename TSpec, typename TScoreValue>

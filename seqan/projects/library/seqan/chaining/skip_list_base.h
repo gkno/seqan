@@ -652,6 +652,7 @@ namespace seqan
 ..param.list:The list to be searched.
 ...type:Class.SkipList
 ..param.search_key:The key.
+..include:seqan/chaining.h
 */
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey > inline

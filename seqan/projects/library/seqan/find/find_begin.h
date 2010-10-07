@@ -333,6 +333,7 @@ _findBeginInit(TPattern & pattern)
 ..remarks:The function @Function.find@ successfully called be called - that is an end position was found - before calling $findBegin$ to find a begin position.
 ..see:Function.getBeginScore
 ..see:Function.find
+..include:seqan/find.h
 */
 template <typename TFinder, typename TPattern>
 inline bool

@@ -57,6 +57,7 @@ is true, the maximum is searched in the last row. All options can be combined in
 ...param.align:An optimal global alignment.
 ....remarks:If there was an alignment stored in $align$ before $globalAlignment$ was called, it will be replaced.
 ...param.result:An optimal global alignment.
+..include:seqan/graph_align.h
 */
 template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
 inline TScoreValue
@@ -341,6 +342,7 @@ localAlignment(file, strSet, score, tag)
 ..param.tag:A tag indicating the alignment algorithm to use
 ...remarks:SmithWaterman
 ..returns:The maximum score of the best local alignment.
+..include:seqan/graph_align.h
 */
 template<typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTag>
 inline TScoreValue
@@ -401,6 +403,7 @@ multiLocalAlignment(strSet, alignments, scores, scType, minScore, diagLow, diagH
 ..param.tag:A tag indicating the alignment algorithm to use
 ...remarks: $SmithWatermanClump$ or $BandedSmithWatermanClump$
 ..returns:void
+..include:seqan/graph_align.h
 */
 
 //////////////////////////////////////////////////////////////////////////////

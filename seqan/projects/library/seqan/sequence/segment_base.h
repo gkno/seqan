@@ -40,6 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TSpec:The specializing type.
 ...metafunction:Metafunction.Spec
 ...default:@Spec.InfixSegment@.
+..include:seqan/sequence.h
 */
 
 struct InfixSegment;
@@ -419,6 +420,7 @@ operation_2_set(Segment<THost, TSpec> & target,
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
+..include:seqan/sequence.h
 */
 
 //overload of binary version for strings: 
@@ -701,6 +703,7 @@ SEQAN_CHECKPOINT
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
+..include:seqan/sequence.h
 */
 
 
@@ -959,6 +962,7 @@ SEQAN_CHECKPOINT
 $limit$ denotes the maximal length of @Function.host.$host(target)$@ after the operation.
 ..param.target.type:Class.Segment
 ..param.source.type:Class.Segment
+..include:seqan/sequence.h
 */
 
 template <typename TExpand>

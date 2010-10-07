@@ -42,6 +42,7 @@ $Proxy$ can be used as reference type (see @Metafunction.Reference@).
 ..remarks.text:Note that functions that are both general and specialized for 
 the value type should be specialized for $Proxy<TSpec>$ too, 
 since otherwise the general version will be called.
+..include:seqan/basic.h
 */
 
 template <typename TSpec>

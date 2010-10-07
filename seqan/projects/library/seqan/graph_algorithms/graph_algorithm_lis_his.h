@@ -86,6 +86,7 @@ _nextInSortedSequence(TSortedSequence const& list, TIterator const& prev) {
 ...remarks:
 The last position in pos indicates the first element in the longest increasing subsequence.
 That's why pos should be a Block-String (Stack).
+..include:seqan/graph_algorithms.h
 */
 template<typename TString, typename TPositions>
 inline void
@@ -161,6 +162,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 ...type:Class.String
 ..param.pos:Out-parameter: A String with pairs of positions that indicate the longest common subsequence.
 ...remarks:
+..include:seqan/graph_algorithms.h
 */
 template<typename TString1, typename TString2, typename TNeighborhoodSize, typename TFinalPos>
 inline void
@@ -297,6 +299,7 @@ globalAlignment(TAlign& align,
 The last position in pos indicates the first member of the heaviest increasing subsequence.
 That's why pos should be a Block-String (Stack).
 Note that only members that contribute a weight are selected, that is, positions with associated weight=0 are ignored.
+..include:seqan/graph_algorithms.h
 */
 template<typename TString, typename TWeightMap, typename TPositions>
 inline typename Value<TWeightMap>::Type

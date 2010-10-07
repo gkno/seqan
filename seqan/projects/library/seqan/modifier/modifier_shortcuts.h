@@ -90,6 +90,7 @@ inline void complementInPlace(TSequence const & sequence)
 ..signature:complementInPlace(stringSet)
 ..param.stringSet:The @Class.StringSet@ to complement.
 ...type:Class.StringSet
+..include:seqan/modifier.h
  */
 template < typename TSequence, typename TSpec >
 inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
@@ -144,6 +145,7 @@ inline void reverseComplementInPlace(TSequence const & sequence)
 ..signature:reverseComplementInPlace(stringSet)
 ..param.stringSet:The @Class.StringSet@ to complement.
 ...type:Class.StringSet
+..include:seqan/modifier.h
  */
 template < typename TSequence, typename TSpec >
 inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
@@ -199,6 +201,7 @@ inline void toLowerInPlace(TSequence const & sequence)
 ..signature:toLowerInPlace(stringSet)
 ..param.stringSet:The @Class.StringSet@ to convert into lowercase.
 ...type:Class.StringSet
+..include:seqan/modifier.h
  */	
 template < typename TSequence, typename TSpec >
 inline void toLowerInPlace(StringSet<TSequence, TSpec> & stringSet)
@@ -252,6 +255,7 @@ inline void toUpperInPlace(TSequence const & sequence)
 ..signature:toUpperInPlace(stringSet)
 ..param.stringSet:The @Class.StringSet@ to convert into uppercase.
 ...type:Class.StringSet
+..include:seqan/modifier.h
  */	
 template < typename TSequence, typename TSpec >
 inline void toUpperInPlace(StringSet<TSequence, TSpec> & stringSet)

@@ -63,6 +63,7 @@ struct Host<Matrix<TValue, DIMENSION> >
 ..param.TValue:Type of matrix entries.
 ..param.unsigned DIMENSION:The specializing type (0: NDimensional matrix; 2: two dimensional matrix).
 ..remarks: The following operators and functions are supported: A*B, A*a, A+B,A-B,<<, transpose
+..include:seqan/align.h
 */
 
 
@@ -874,6 +875,7 @@ operator == (Matrix<TValue, DIMENSION1> const & matrix1, Matrix<TValue, DIMENSIO
 ...type:Matrix<TValue, 2>&
 ..returns:The sum of the two matrices (another nxm matrix).
 ..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
+..include:seqan/align.h
 */
 /*
 template <typename TValue>
@@ -920,6 +922,7 @@ matricialSum(Matrix<TValue,2> &matrix1,Matrix<TValue,2> &matrix2)
 ...type:Matrix<TValue, 2>&
 ..returns:The difference of the two matrices (another matrix).
 ..remarks:The number of rows and columns of matrix1 must be equal to the number of rows and columns of matrix2.
+..include:seqan/align.h
 */
 /*
 template <typename TValue>
@@ -965,6 +968,7 @@ matricialDifference(Matrix<TValue,2> & matrix1, Matrix<TValue,2> & matrix2)
 ...type:Matrix<TValue,2>&
 ..returns:The products of the two matrices (another matrix, mxp).
 ..remarks:The number of columns of matrix1 (left matrix) must be equal to the number of rows of matrix2(right matrix).
+..include:seqan/align.h
 */
 /*
 template <typename TValue>
@@ -1011,6 +1015,7 @@ matricialProduct(Matrix<TValue, 2> &matrix1,
 ...remarks: must be of type Matrix<TValue,2> (two dimensional)
 ..returns:Transposed matrix
 ..remarks:Only works on two dimensional matrices
+..include:seqan/align.h
 */
 template <typename TValue>
 Matrix<TValue,2>

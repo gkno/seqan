@@ -168,6 +168,7 @@ struct Container
 ..param.object:An object that holds a value or an iterator that points to a value.
 ...type:Class.Iter
 ...concept:Concept.Iterator
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -207,6 +208,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Iter
 ...concept:Concept.Iterator
 ..see:Metafunction.GetValue
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -254,6 +256,7 @@ SEQAN_CHECKPOINT
 The difference is, that $assignValue$ just changes a value stored in $object$ or the value $object$ points to, 
 while @Function.assign@ changes the whole object.
 ..see:Function.assign
+..include:seqan/basic.h
 */
 
 template <typename T, typename TValue>
@@ -293,6 +296,7 @@ The difference is, that $moveValue$ just changes a value stored in $object$ or t
 while @Function.move@ changes the whole object.
 ..see:Function.move
 ..see:Function.assignValue
+..include:seqan/basic.h
 */
 
 template <typename T, typename TValue>
@@ -325,6 +329,7 @@ SEQAN_CHECKPOINT
 ...concept:Concept.Rooted Iterator
 ..returns:The container that $iterator$ traverses.
 ...metafunction:Metafunction.Container
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -351,6 +356,7 @@ SEQAN_CHECKPOINT
 ...remarks:If $container$ is specified, $iterator$ must be a container of $container$.
 ..returns:The position of the value in the container $iterator$ points to.
 ...metafunction:Metafunction.Position
+..include:seqan/basic.h
 */
 
 template <typename T>
@@ -389,6 +395,7 @@ SEQAN_CHECKPOINT
 ...remarks.text:If $iterator$ implements @Concept.Rooted Iterator@ then $container$ is optional otherwise $container$ is required.
 ..returns:$true$ if $iterator$ points to the fist item of the container, otherwise $false$.
 ..see:Function.begin
+..include:seqan/basic.h
 */
 
 //TODO???: Was, wenn der Container leer ist?
@@ -431,6 +438,7 @@ SEQAN_CHECKPOINT
 ..returns:$true$ if $iterator$ points behind the last item of the container, otherwise $false$.
 ..see:Function.atBegin
 ..see:Function.end
+..include:seqan/basic.h
 */
 
 template <typename T, typename TContainer>
@@ -485,6 +493,7 @@ otherwise $container$ is required.
 ..see:Function.begin
 ..see:Function.atBegin
 ..see:Function.goEnd
+..include:seqan/basic.h
 */
 template <typename TIterator, typename TContainer>
 inline void
@@ -533,6 +542,7 @@ otherwise $container$ is required.
 ..see:Function.atEnd
 ..see:Function.goBegin
 ..see:Function.goEnd
+..include:seqan/basic.h
 */
 template <typename TIterator, typename TContainer>
 inline void
@@ -574,6 +584,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function is equivalent to $++iterator$.
 ..see:Function.goBegin
 ..see:Function.goEnd
+..include:seqan/basic.h
 */
 template <typename TIterator>
 inline void
@@ -600,6 +611,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function is equivalent to $iterator += steps$ for random access iterators.
 ..see:Function.goNext
 ..see:Function.goPrevious
+..include:seqan/basic.h
 */
 
 template <typename TIterator, typename TDiff> inline
@@ -624,6 +636,7 @@ void goFurther(TIterator & it, TDiff steps)
 ..see:Function.goBegin
 ..see:Function.goEnd
 ..see:Function.goNext
+..include:seqan/basic.h
 */
 template <typename TIterator>
 inline void
@@ -653,6 +666,7 @@ SEQAN_CHECKPOINT
 ..see:Function.begin
 ..see:Function.end
 ..see:Function.length
+..include:seqan/basic.h
 */
 
 template <typename TIterator> inline
@@ -678,6 +692,7 @@ SEQAN_CHECKPOINT
 ...type:Class.String
 ..remarks:$iterator$ is set to an invalid position, e.g. $NULL$ for pointer types.
 ..see:Function.clear
+..include:seqan/basic.h
 */
 
 template <typename TIterator>
@@ -711,6 +726,7 @@ SEQAN_CHECKPOINT
 ..returns:$true$ if $iterator$ points to an ivalid position, e.g. $iterator$ is a $NULL$ pointer.
 $false$ otherwise.
 ..see:Function.goNil
+..include:seqan/basic.h
 */
 
 template <typename TIterator>

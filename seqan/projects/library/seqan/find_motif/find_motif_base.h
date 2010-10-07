@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ...type:Spec.EPatternBranching
 ...type:Spec.PMS1
 ...type:Spec.PMSP
+..include:seqan/find_motif.h
 */
 
 template <typename TValue, typename TSpec>
@@ -88,6 +89,7 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ..remarks:The ePatternBranching algorithm is able to run in @Tag.OOPS@ and @Tag.OMOPS@ mode.
 ..remarks:The PMS1 and PMSP algorithm is able to run in  @Tag.OOPS@,  @Tag.OMOPS@,  @Tag.ZOOPS@ and  
           @Tag.TCM@ mode.
+..include:seqan/find_motif.h
 */
 
 /**
@@ -99,6 +101,7 @@ struct Value< MotifFinder<TValue, TSpec> const>
 ...remarks:$value$ must be a positive integer.
 ..remarks:The factorial of a non-negative integer $value$ is 
           the product of all positive integers less than or equal to $value$.  
+..include:seqan/find_motif.h
 */
 
 template<typename TType>
@@ -133,6 +136,7 @@ TType factorial(TType n)
 ...remarks:$k$ must be a positive integer.
 ..remarks:The binomial coefficient of $n$ and $k$ is equal to zero 
           if $k$ is greater than $n$.   
+..include:seqan/find_motif.h
 */
 
 template<typename TType>
@@ -174,6 +178,7 @@ TType binomialCoefficient(TType n, TType k)
 ...type:Concept.Iterator
 ...type:Shortcut.DnaIterator
 ...type:Shortcut.PeptideIterator
+..include:seqan/find_motif.h
 */
 
 template<typename TType, typename TStringIterator>
@@ -206,6 +211,7 @@ TType hammingDistance(TStringIterator start1, TStringIterator end1, TStringItera
 ..param.alphabet_size:The alphabet_size object.
 ...remarks:$alphabet_size$ is four for nucleotide sequences and twenty for amino acid sequences.
 ..param.seq_size:The seq_size object representing the size of the corresponding sequence.
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TType>
@@ -243,6 +249,7 @@ inverseHash(TType const & hash_value,
 ..signature:displayResult(motif_finder)
 ..param.motif_finder:The @Class.MotifFinder@ object.
 ...type:Class.MotifFinder
+..include:seqan/find_motif.h
 */
 
 template<typename TValue, typename TAlgorithm>
@@ -299,6 +306,7 @@ struct Motif< MotifFinder<TValue,TSpec> >
 ..param.motifFinder:
 ...type:Class.MotifFinder
 ..param.pos:Position 
+..include:seqan/find_motif.h
 */
 
 template <typename TValue, typename TSpec, typename TPosition>
@@ -327,6 +335,7 @@ getMotif(MotifFinder<TValue, TSpec> & me)
 ..signature:motifCount(motifFinder)
 ..param.motifFinder:
 ...type:Class.MotifFinder
+..include:seqan/find_motif.h
 */
 
 template <typename TValue, typename TSpec>

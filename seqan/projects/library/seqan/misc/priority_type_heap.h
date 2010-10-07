@@ -120,6 +120,7 @@ SEQAN_CHECKPOINT
 ..remarks:To delete this item and adjust the priority queue use @Function.PriorityType#pop@.
 ..see:Function.PriorityType#pop
 ..see:Function.PriorityType#push
+..include:seqan/misc.h
 */
 template <typename TValue, typename TLess>
 inline TValue & 
@@ -164,6 +165,7 @@ SEQAN_CHECKPOINT
 ..summary:Adjusts the priority of the first item.
 ..param.object
 ...type:Class.PriorityType
+..include:seqan/misc.h
 */
 template <typename TValue, typename TLess>
 inline void 
@@ -192,6 +194,7 @@ SEQAN_CHECKPOINT
 ..remarks:The result of this operation is stored in $object$.
 ..see:Function.PriorityType#top
 ..see:Function.PriorityType#pop
+..include:seqan/misc.h
 */
 template <typename TValue, typename TLess>
 inline void 
@@ -243,6 +246,7 @@ SEQAN_CHECKPOINT
 ..remarks:This function only deletes this item, but does not return it. To access the item use @Function.PriorityType#top@.
 ..see:Function.PriorityType#top
 ..see:Function.PriorityType#push
+..include:seqan/misc.h
 */
 template <typename TValue, typename TLess>
 inline void 

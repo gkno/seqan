@@ -246,6 +246,7 @@ SEQAN_CHECKPOINT
 ..param.key:The two-character code specifying the file entry to be read, e.g. "AC" for the acession number line or "DE" for the description line. 
 ..see:Function.readMeta
 ..see:Function.readFeature
+..include:seqan/file.h
 */
 template<typename TFile, typename TData, typename TKey>
 inline void
@@ -368,6 +369,7 @@ obtained by calling readLineType with the two-character code "FT").
 ..return:The position behind the feature if found, 0 otherwise.
 ..see:Function.readMeta
 ..see:Function.readFeature
+..include:seqan/file.h
 */
 //read parts of feature table (those that belong to key)
 template<typename TData, typename TKey, typename TString>

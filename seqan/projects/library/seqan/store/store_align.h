@@ -98,6 +98,7 @@ If $INVALID_ID$ the read is either not paired or could not be aligned as part of
 ..summary:Constant to represent an invalid id.
 ..type:Metafunction.Id
 ..class:Class.AlignedReadStoreElement
+..include:seqan/store.h
 */
 
 template <typename _TPos, typename _TGapAnchor, typename _TSpec = void>
@@ -181,6 +182,7 @@ AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typ
 ..summary:Absolute number of errors in the alignment.
 ..type:nolink:unsigned char
 ..class:Class.AlignQualityStoreElement
+..include:seqan/store.h
 */
 
 template <typename TScore, typename TSpec = void>
@@ -333,6 +335,7 @@ struct _LessAlignedRead<TAlignedRead, SortReadId> :
 ...type:Tag.sortAlignedRead Tags
 ..param.lessFunctor:STL-less functor to compare two @Class.AlignedReadStoreElement.AlignedReadStoreElements@.
 ..remarks:This function calls $std::stable_sort$ to sort $alignStore$.
+..include:seqan/store.h
 */
 
 template <typename TAlign, typename TSortSpec>
