@@ -10,9 +10,11 @@ using namespace std;
 // FRAGMENT(swap-declaration)
 template <typename T> void swap(T& container, int i, int j)
 {
+
 // FRAGMENT(swap-metafunction)
 	typename Value<T>::Type help = value(container,i);
-// FRAGMENT(swap-work)
+
+// FRAGMENT(swap-work)	
 	value(container,i) = value(container,j);
 	value(container,j) = help;
 	return;
