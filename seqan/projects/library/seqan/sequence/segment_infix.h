@@ -91,9 +91,6 @@ source object; the host object is not modified.
 Note that this is a special case, since all other copy operations result in changes 
 of the host object.
 ...text:$begin$ and $end$ must be valid positions/iterators in $host$.
-If $begin$ und $end$ are omitted, the infix segment corresponding to
-the first character of $host$ is constructed.
-This is the same segment that is returned by @Function.goBegin@.
 ...text:The predicate $begin <= end$ must be true.
 */
 	Segment():
@@ -108,7 +105,7 @@ SEQAN_CHECKPOINT
 	Segment(typename _Parameter<THost>::Type _host):
 		data_host(_toPointer(_host)),
 		data_begin_position(0),
-		data_end_position(1)
+		data_end_position(length(value(_host)))
 	{
 SEQAN_CHECKPOINT
         _checkMemberVariables();
