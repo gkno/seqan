@@ -62,20 +62,10 @@ public:
 public:
 	Pattern() {}
 
-	Pattern(Pattern const & other_):
-		data_map(other_.data_map) {}
-
 	template <typename TNeedle2>
 	Pattern(TNeedle2 const & ndl)
 	{
 		setHost(*this, ndl);
-	}
-
-	Pattern const &
-	operator = (Pattern const & other_)
-	{
-		data_map = other_.data_map;
-		return *this;
 	}
 //____________________________________________________________________________
 };

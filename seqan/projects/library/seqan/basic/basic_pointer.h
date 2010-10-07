@@ -52,7 +52,7 @@ struct Value< TValue [SIZE] >
 template <typename TValue, size_t SIZE>
 struct Value< TValue const [SIZE] >
 {
-	typedef TValue const Type;
+	typedef TValue Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -82,11 +82,6 @@ typedef BFAM<Oracle> BomAlgo; //deprecated, still there for compatibility reason
 template <typename TNeedle, typename TSpec>
 class Pattern<TNeedle, BFAM<TSpec> > {
 //____________________________________________________________________________
-private:
-	Pattern(Pattern const& other);
-	Pattern const& operator=(Pattern const & other);
-
-//____________________________________________________________________________
 public:
 	typedef typename Value<TNeedle>::Type TAlphabet;
 	typedef typename Size<TNeedle>::Type TSize;
@@ -146,6 +141,7 @@ setHost (Pattern<TNeedle, BFAM<Oracle> > & me, TNeedle2 const& needle)
 	createOracleOnReverse(me.automaton,needle);
 	setValue(me.data_host, needle);
 }
+
 //BFAM<Trie>: BTM Algorithm (the same as BOM, but with an trie)
 template <typename TNeedle, typename TNeedle2>
 inline void 
@@ -157,6 +153,7 @@ setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle)
 
 	String<String<unsigned int> > terminal_state_map; //dummy
 	typedef typename Value<TNeedle2 const>::Type TValue;
+    //typedef typename KlmrFoo<TNeedle2 const>::Type TValue;
 	String<TValue> reverse_string = needle;
 	reverseInPlace(reverse_string);
 
