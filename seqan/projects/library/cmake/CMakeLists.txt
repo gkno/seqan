@@ -125,7 +125,7 @@ include_directories (${SEQAN_LIBRARY})
 if (CMAKE_COMPILER_IS_GNUCXX)
   # For the GCC, enable warnings.
   set (CMAKE_CXX_WARNING_LEVEL 4)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wno-long-long")
 
   # Determine GCC version.
   message("Determining GCC version.")
