@@ -224,6 +224,7 @@ struct AlignQualityStoreElement
 ..tag.SortReadId:
 ...summary:Sort alignedReads by $readId$.
 ...signature:SortReadId
+..include:seqan/store.h
 */
 
 struct _SortContigId;

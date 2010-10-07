@@ -29,6 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 .Tag.Simple:
 ..cat:Scoring
 ..summary:Tag for the @Class.Score@ to mark it as a simple score.
+..include:seqan/score.h
  */
 struct Simple;
 
@@ -41,6 +42,7 @@ struct Simple;
 ...default:int
 ..general:Class.Score
 ..summary:Simple scoring scheme that has scores for matches, mismatches, opening gaps and extending gaps.
+..include:seqan/score.h
 */
 template <typename TValue>
 class Score<TValue, Simple> {

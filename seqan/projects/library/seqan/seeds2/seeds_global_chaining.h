@@ -37,6 +37,7 @@ namespace seqan {
 ..see:Function.chainSeedsGlobally
 ..tag:SparseChaining:
     Chaining as described in (Gusfield, 1997) section 13.3.
+..include:seqan/seeds2.h
  */
 struct _SparseChaining;
 typedef Tag<_SparseChaining> SparseChaining;

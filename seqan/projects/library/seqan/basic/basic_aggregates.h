@@ -85,6 +85,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.T2:The type of the second object.
 ..notes:Useful for external storage.
 ..remarks:Memory access could be slower. Direct access to members by pointers is not allowed on all platforms.
+..include:seqan/basic.h
 .Memfunc.Pair#Pair.class:Spec.Packed Pair
 .Memvar.Pair#i1.class:Spec.Packed Pair
 .Memvar.Pair#i2.class:Spec.Packed Pair
@@ -129,6 +130,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.BITSIZE2:Number of bits to store $T2$.
 ..notes:Useful for external storage.
 ..remarks:Memory access could be slower. Direct access to members by pointers is not allowed.
+..include:seqan/basic.h
 .Memfunc.Pair#Pair.class:Spec.Bit Compressed Pair
 .Memvar.Pair#i1.class:Spec.Bit Compressed Pair
 .Memvar.Pair#i2.class:Spec.Bit Compressed Pair
@@ -270,6 +272,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.T3:The type of the third object.
 ..notes:Useful for external storage.
 ..remarks:Memory access could be slower. Direct access to members by pointers is not allowed on all platforms.
+..include:seqan/basic.h
 .Memfunc.Triple#Triple.class:Spec.Packed Triple
 .Memvar.Triple#i1.class:Spec.Packed Triple
 .Memvar.Triple#i2.class:Spec.Packed Triple
@@ -398,6 +401,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..notes:The characters are stored as a bit sequence in an ordinal type (char, ..., __int64).
 ..remarks:Only useful for small alphabets and small tuple sizes (|Sigma|^size <= 2^64) as for @Spec.Dna@ or @Spec.AminoAcid@ m-grams)
 ..see:Spec.Sampler
+..include:seqan/basic.h
 */
 
 	// bit-compressed storage (space efficient)

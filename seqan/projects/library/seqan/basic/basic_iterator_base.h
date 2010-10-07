@@ -47,6 +47,7 @@ class Iter;
 ..summary:Complement the "constness" of the container of an iterator.
 ..signature:IterComplementConst<TIterator>
 ..param.TIterator:The iterator to toggle the constness of its container for.
+..include:seqan/basic.h
 */
 template <typename TIterator>
 struct IterComplementConst;
@@ -73,6 +74,7 @@ struct IterComplementConst<Iter<TContainer, TSpec> const>
 ..summary:Make the container of an Iter const.
 ..signature:IterMakeConst<TIterator>
 ..param.TIterator:The iterator make the container const for.
+..include:seqan/basic.h
 */
 template <typename TIterator>
 struct IterMakeConst;

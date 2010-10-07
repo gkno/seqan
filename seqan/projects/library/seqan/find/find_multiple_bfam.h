@@ -39,6 +39,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TAutomaton:A tag that specifies the used automaton.
 ...default:@Spec.MultiBFAM<Oracle>@
 ..see:Spec.BFAM
+..include:seqan/find.h
 */
 /**
 .Spec.MultiBFAM<Oracle>:

@@ -146,24 +146,12 @@ class SeedSet;
 // Metafunctions
 // ===========================================================================
 
-/**
-.Metafunction.Position.param.T:Class.SeedSet
-*/
-/**
-.Metafunction.Size.param.T:Class.SeedSet
-*/
-/**
-.Metafunction.Value.param.T:Class.SeedSet
-*/
-/**
-.Metafunction.GetValue.param.T:Class.SeedSet
-*/
-/**
-.Metafunction.Reference.param.T:Class.SeedSet
-*/
-/**
-.Metafunction.Iterator.param.T:Class.SeedSet
-*/
+///.Metafunction.Position.param.T:Class.SeedSet
+///.Metafunction.Size.param.T:Class.SeedSet
+///.Metafunction.Value.param.T:Class.SeedSet
+///.Metafunction.GetValue.param.T:Class.SeedSet
+///.Metafunction.Reference.param.T:Class.SeedSet
+///.Metafunction.Iterator.param.T:Class.SeedSet
 /**
 .Metafunction.Seed:
 ..summary:Return the type of the underlying seed.

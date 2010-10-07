@@ -58,6 +58,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 .Memvar.OpenAddressing#alpha
 ..summary:Load factor. Controls space/time-tradeoff and must be greater 1. Default value is 1.6.
 ..class:Spec.OpenAddressing
+..include:seqan/index.h
 */	
 
 #ifdef PLATFORM_WINDOWS_VS

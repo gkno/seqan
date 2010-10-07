@@ -60,16 +60,12 @@ class PDF;
 // Metafunctions
 // ===========================================================================
 
-/**
-.Metafunction.Value.param.T.type:Class.PDF
-*/
+///.Metafunction.Value.param.T.type:Class.PDF
 // specification only
 
-/**
-.Metafunction.Value.param.T.type:Class.RNG
-.Metafunction.InfimumValue.param.T.type:Class.RNG
-.Metafunction.SupremumValue.param.T.type:Class.RNG
-*/
+///.Metafunction.Value.param.T.type:Class.RNG
+///.Metafunction.InfimumValue.param.T.type:Class.RNG
+///.Metafunction.SupremumValue.param.T.type:Class.RNG
 // specification only
 
 // ===========================================================================

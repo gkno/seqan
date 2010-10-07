@@ -44,6 +44,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
 ..param.TSpec: Specifies the type of Swift filter.
+..include:seqan/index.h
 */
 ///.Class.Pattern.param.TSpec.type:Spec.Swift
 
@@ -56,6 +57,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..signature:Pattern<TIndex, Swift<SwiftLocal> >
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
+..include:seqan/index.h
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftLocal
 /**
@@ -67,6 +69,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..signature:Pattern<TIndex, Swift<SwiftSemiGlobal> >
 ..param.TIndex: A q-gram index of needle(s).
 ...type:Spec.Index_QGram
+..include:seqan/index.h
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftSemiGlobal
 

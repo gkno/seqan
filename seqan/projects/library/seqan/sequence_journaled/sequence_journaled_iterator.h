@@ -102,10 +102,7 @@ public:
 
 // For String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 
-/**
-.Metafunction.Iterator:
-..param.T:Spec.Journal String
- */
+///.Metafunction.Iterator.param.T:Spec.Journal String
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct Iterator<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >, Standard>
 {

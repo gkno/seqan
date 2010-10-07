@@ -67,9 +67,7 @@ public:
 // Metafunctions
 // ===========================================================================
   
-/**
-.Metafunction.Position.param.T:SeedDiagonal
-*/
+///.Metafunction.Position.param.T:SeedDiagonal
 template <typename TPosition, typename TSize>
 struct Position<SeedDiagonal<TPosition, TSize> >
 {
@@ -80,9 +78,7 @@ template <typename TPosition, typename TSize>
 struct Position<SeedDiagonal<TPosition, TSize> const>
   : Position<SeedDiagonal<TPosition, TSize> > {};
 
-/**
-.Metafunction.Size.param.T:SeedDiagonal
-*/
+///.Metafunction.Size.param.T:SeedDiagonal
 template <typename TPosition, typename TSize>
 struct Size<SeedDiagonal<TPosition, TSize> >
 {

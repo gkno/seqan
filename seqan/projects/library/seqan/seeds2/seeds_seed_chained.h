@@ -83,9 +83,7 @@ public:
 // Metafunctions
 // ===========================================================================
 
-/**
-.Metafunction.Value.param.T:Spec.ChainedSeed
- */
+///.Metafunction.Value.param.T:Spec.ChainedSeed
 template <typename TConfig>
 struct Value<Seed<ChainedSeed, TConfig> >
 {
@@ -106,9 +104,7 @@ struct Value<Seed<ChainedSeed, TConfig> const>
     typedef SeedDiagonal<_TPosition, _TSize> const Type;
 };
 
-/**
-.Metafunction.Size.param.T:Spec.ChainedSeed
- */
+///.Metafunction.Size.param.T:Spec.ChainedSeed
 template <typename TConfig>
 struct Size<Seed<ChainedSeed, TConfig> >
 {
@@ -119,9 +115,7 @@ template <typename TConfig>
 struct Size<Seed<ChainedSeed, TConfig> const>
         : Size<Seed<ChainedSeed, TConfig> > {};
 
-/**
-.Metafunction.Iterator.param.T:Spec.ChainedSeed
- */
+///.Metafunction.Iterator.param.T:Spec.ChainedSeed
 template <typename TConfig>
 struct Iterator<Seed<ChainedSeed, TConfig>, Standard>
 {
@@ -138,9 +132,7 @@ struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
     typedef typename ::std::list<_TSeedDiagonal>::const_iterator Type;
 };
 
-/**
-.Metafunction.Reference.param.T:Spec.ChainedSeed
- */
+///.Metafunction.Reference.param.T:Spec.ChainedSeed
 template <typename TConfig>
 struct Reference<Seed<ChainedSeed, TConfig> >
 {

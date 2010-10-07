@@ -656,7 +656,7 @@ struct WEIGHT<T const>:
 ..param.T:Type that is tested.
 ..returns.param.Type:@Tag.Logical Values.True@, if $T$ is a simple type, @Tag.Logical Values.False@ otherwise.
 ...default:@Tag.Logical Values.False@
-..includes:seqan/basic/basic_types.h, seqan/basic.h
+..include:seqan/basic.h
  */
 template <typename T>
 struct IsIntegral {

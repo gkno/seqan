@@ -40,6 +40,7 @@ struct ScoreMatrix;
 
 /**
 .Tag.File Format.tag.ScoreMatrixFile:Score matrix file.
+..include:seqan/score.h
 */
 struct TagScoreMatrixFile_;
 typedef Tag<TagScoreMatrixFile_> const ScoreMatrixFile;

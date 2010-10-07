@@ -84,9 +84,7 @@ class Seed;
 // Metafunctions
 // ===========================================================================
 
-/**
-.Metafunction.Position.param.T:type:Class.Seed
- */
+///.Metafunction.Position.param.T:type:Class.Seed
 template <typename TSpec, typename TConfig>
 struct Position<Seed<TSpec, TConfig> >
 {
@@ -97,9 +95,7 @@ template <typename TSpec, typename TConfig>
 struct Position<Seed<TSpec, TConfig> const>
         : Position<Seed<TSpec, TConfig> > {};
 
-/**
-.Metafunction.Size.param.T:type:Class.Seed
- */
+///Metafunction.Size.param.T:type:Class.Seed
 template <typename TSpec, typename TConfig>
 struct Size<Seed<TSpec, TConfig> >
 {
@@ -117,6 +113,7 @@ struct Size<Seed<TSpec, TConfig> const>
 ..signature:Diagonal<T>::Type
 ..param.T:Type of the seed to retrieve the diagonal for.
 ...type:Class.Seed
+..include:seqan/seeds2.h
  */
 template <typename T>
 struct Diagonal;
@@ -138,6 +135,7 @@ struct Diagonal<Seed<TSpec, TConfig> const>
 ..signature:HasScore<T>::Type
 ..param.T:Type of the seed to retrieve whether it has a score for.
 ...type:Class.Seed
+..include:seqan/seeds2.h
  */
 template <typename T>
 struct HasScore;
@@ -159,6 +157,7 @@ struct HasScore<Seed<TSpec, TConfig> const>
 ..signature:SeedScore<T>::Type
 ..param.T:Type of the seed to retrieve the score for.
 ...type:Class.Seed
+..include:seqan/seeds2.h
  */
 template <typename T>
 struct SeedScore;

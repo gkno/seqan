@@ -40,9 +40,7 @@ template <typename TValue = int, typename TSpec = Simple>
 class Score;
 
 
-/**
-.Metafunction.Value.param.T.type:Class.Score
- */
+///.Metafunction.Value.param.T.type:Class.Score
 template <typename TValue, typename TSpec>
 struct Value<Score<TValue, TSpec> > {
     typedef TValue Type;

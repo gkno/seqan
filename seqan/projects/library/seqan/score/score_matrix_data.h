@@ -46,6 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 .Tag._Blosum30:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM30 matrix.
+..include:seqan/score.h
  */
 struct _Blosum30 {};
 
@@ -113,6 +114,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum30> {
 .Tag._Blosum45:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM45 matrix.
+..include:seqan/score.h
  */
 struct _Blosum45 {};
 
@@ -179,6 +181,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum45> {
 .Tag._Blosum62:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM62 matrix.
+..include:seqan/score.h
  */
 struct _Blosum62 {};
 
@@ -245,6 +248,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum62> {
 .Tag._Blosum80:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM80 matrix.
+..include:seqan/score.h
  */
 struct _Blosum80 {};
 
@@ -311,6 +315,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum80> {
 .Tag._Pam40:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM40 matrix.
+..include:seqan/score.h
  */
 struct _Pam40 {};
 
@@ -380,6 +385,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam40> {
 .Tag._Pam120:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM120 matrix.
+..include:seqan/score.h
  */
 struct _Pam120 {};
 
@@ -448,6 +454,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam120> {
 .Tag._Pam200:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM200 matrix.
+..include:seqan/score.h
  */
 struct _Pam200 {};
 
@@ -516,6 +523,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam200> {
 .Tag._Pam250:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM250 matrix.
+..include:seqan/score.h
  */
 struct _Pam250 {};
 
@@ -584,6 +592,7 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam250> {
 .Tag._Vtml200:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM200 matrix.
+..include:seqan/score.h
  */
 struct _Vtml200 {};
 
