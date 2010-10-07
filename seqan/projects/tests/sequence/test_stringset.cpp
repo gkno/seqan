@@ -16,6 +16,7 @@ using namespace seqan;
 //test sequence default interface:
 //non-container objects are treated like containers of length 1
 
+
 template <typename TSpec>
 void Test_StringSet()
 {	
@@ -49,7 +50,14 @@ void Test_StringSet()
 		SEQAN_TASSERT(*it == set[i]);
 		++i;
 	}
-	SEQAN_TASSERT(i == 3)
+
+	TIterator itBegin = begin(set);
+	SEQAN_TASSERT(atBegin(itBegin) == true);
+	SEQAN_TASSERT(atEnd(itBegin) == false);
+	TIterator itEnd = end(set);
+	SEQAN_TASSERT(atBegin(itEnd) == false);
+	SEQAN_TASSERT(atEnd(itEnd) == true);
+	SEQAN_TASSERT(i == 3);
 }
 
 //____________________________________________________________________________
@@ -94,6 +102,8 @@ void Test_StringSet_Concat()
 template <typename TStringSet>
 void Test_StringSetIdHolder() {
 	typedef	typename Id<TStringSet>::Type TId;
+	typedef StringSet<String<char>, Dependent<Tight> > TSetTight;
+	typedef StringSet<String<char>, Dependent<Generous> > TSetGenerous;
 
 	TStringSet str;
 	String<char> bla("a");
@@ -128,11 +138,26 @@ void Test_StringSetIdHolder() {
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id2) == "c")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
-	SEQAN_TASSERT(length(str) == 3)
+	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 3)
+	}
+	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 4)
+	}
 	removeValueById(str,id2);
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
-	SEQAN_TASSERT(length(str) == 2)
+	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 2)
+	}
+	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 4)
+	}
+
 	String<char> bla4("e");
 	TId id4 = assignValueById(str, bla4, 100);
 	SEQAN_TASSERT(id4 == 100)
@@ -142,7 +167,14 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id3);
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id4) == "e")
-	SEQAN_TASSERT(length(str) == 2)
+	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 2)
+	}
+	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 101)
+	}
 	String<char> bla5("f");
 	TId id5 = assignValueById(str, bla5); 
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
@@ -155,7 +187,14 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id4);
 	SEQAN_TASSERT(getValueById(str, id0) == "a")
 	SEQAN_TASSERT(getValueById(str, id5) == "f")
-	SEQAN_TASSERT(length(str) == 2)
+	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 2)
+	}
+	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 102);
+	}
 	clear(str);
 	id1 = assignValueById(str, bla1);
 	id2 = assignValueById(str, bla2);
@@ -163,7 +202,14 @@ void Test_StringSetIdHolder() {
 	SEQAN_TASSERT(getValueById(str, id1) == "b")
 	SEQAN_TASSERT(getValueById(str, id2) == "c")
 	SEQAN_TASSERT(getValueById(str, id3) == "d")
-	SEQAN_TASSERT(length(str) == 3)
+	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 3)
+	}
+	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	{
+		SEQAN_TASSERT(length(str) == 3)
+	}
 }
 
 //____________________________________________________________________________
@@ -204,8 +250,6 @@ void Test_StringSet_Id()
 	all = concat(cset);
 	SEQAN_TASSERT(concat(cset)[10] == 'a');
 	SEQAN_TASSERT(isEqual(all, "Hallo schlauer Hamster!"))
-
-	Test_StringSetIdHolder<StringSet<String<char>, TSpec> >();
 }
 
 //____________________________________________________________________________
@@ -222,7 +266,10 @@ int mainTestStringSet()
 	Test_StringSet_Id< Dependent<Tight> >();
 	Test_StringSet_Id< Dependent<Generous> >();
 
-	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
+	Test_StringSetIdHolder<StringSet<String<char>, Dependent<Tight> > >();
+	Test_StringSetIdHolder<StringSet<String<char>, Dependent<Generous> > >();
+
+//	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_multiple.h");
 
 	SEQAN_TREPORT("TEST STRINGSET END")
 
