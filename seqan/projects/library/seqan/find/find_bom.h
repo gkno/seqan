@@ -153,7 +153,6 @@ setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle)
 
 	String<String<unsigned int> > terminal_state_map; //dummy
 	typedef typename Value<TNeedle2 const>::Type TValue;
-    //typedef typename KlmrFoo<TNeedle2 const>::Type TValue;
 	String<TValue> reverse_string = needle;
 	reverseInPlace(reverse_string);
 
