@@ -1,5 +1,6 @@
 # coding: latin-1
 import os
+import datetime
 import dddoc
 import dddoc_html_trans
 import xml.sax
