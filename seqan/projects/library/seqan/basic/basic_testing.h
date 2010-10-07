@@ -429,6 +429,80 @@ const char *tempFileName() {
     }
 
 
+
+    // Called by the macro SEQAN_ASSERT_IN_DELTA.
+    //
+    // Tests that the given two value are equal.  Returns true iff the
+    // two values are equal.
+    template <typename T1, typename T2, typename T3>
+    bool testInDelta(const char *file, int line,
+                     const T1 &value1, const char *expression1,
+                     const T2 &value2, const char *expression2,
+                     const T3 &value3, const char *expression3,
+                     const char *comment, ...) {
+        if (!(value1 >= value2 - value3 && value1 <= value2 + value3)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " in [" << expression2 << " - " << expression3
+                      << ", " << expression2 << " + " << expression3 << "] was: " << value1
+                      << " not in [" << value2 - value3 << ", " << value2 + value3 << "]";
+            if (comment) {
+                std::cerr << " (";
+                va_list args;
+                va_start(args, comment);
+                vfprintf(stderr, comment, args);
+                va_end(args);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Similar to testEqual above, but accepts a va_list instead of variadic
+    // parameters.
+    template <typename T1, typename T2, typename T3>
+    bool vtestInDelta(const char *file, int line,
+                      const T1 &value1, const char *expression1,
+                      const T2 &value2, const char *expression2,
+                      const T3 &value3, const char *expression3,
+                      const char *comment, va_list argp) {
+        if (!(value1 >= value2 - value3 && value1 <= value2 + value3)) {
+            // Increase global error count.
+            StaticData::thisTestOk() = false;
+            StaticData::errorCount() += 1;
+            // Print assertion failure text, with comment if any is given.
+            std::cerr << file << ":" << line << " Assertion failed : "
+                      << expression1 << " in [" << expression2 << " - " << expression3
+                      << ", " << expression2 << " + " << expression3 << "] was: " << value1
+                      << " not in [" << value2 - value3 << ", " << value2 + value3 << "]";
+            if (comment) {
+                std::cerr << " (";
+                vfprintf(stderr, comment, argp);
+                std::cerr << ")";
+            }
+            std::cerr << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+
+    // Same as testEqual above, but with comment set to 0.
+    template <typename T1, typename T2, typename T3>
+    bool testInDelta(const char *file, int line,
+                     const T1 &value1, const char *expression1,
+                     const T2 &value2, const char *expression2,
+                     const T3 &value3, const char *expression3) {
+        return testInDelta(file, line, value1, expression1, value2, expression2, value3, expression3, 0);
+    }
+
+
     // Called by the macro SEQAN_ASSERT_NEQ.
     //
     // Tests that the given two value are not equal.  Returns true iff
@@ -1079,6 +1153,35 @@ const char *tempFileName() {
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
                                               ## __VA_ARGS__)) {        \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// In-delta-environment assertion without a comment.
+//
+// Usage:  SEQAN_ASSERT_IN_DELTA(4.1, 4, 0.1);
+#define SEQAN_ASSERT_IN_DELTA(_arg1, _arg2, _arg3)                      \
+    do {                                                                \
+        if (!::seqan::ClassTest::testInDelta(__FILE__, __LINE__,        \
+                                             (_arg1), #_arg1,           \
+                                             (_arg2), #_arg2,           \
+                                             (_arg3), #_arg3)) {        \
+            ::seqan::ClassTest::fail();                                 \
+        }                                                               \
+    } while (false)
+
+
+// In-delta-environment assertion witha comment.
+//
+// Usage:  SEQAN_ASSERT_IN_DELTA_MSG(4.1, 4, 0.1, "3.9 <= 4.1 <= 4.1");
+#define SEQAN_ASSERT_IN_DELTA_MSG(_arg1, _arg2, _arg3, ...)             \
+    do {                                                                \
+        if (!::seqan::ClassTest::testInDelta(__FILE__, __LINE__,        \
+                                             (_arg1), #_arg1,           \
+                                             (_arg2), #_arg2,           \
+                                             (_arg3), #_arg3,           \
+                                                ## __VA_ARGS__)) {      \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
