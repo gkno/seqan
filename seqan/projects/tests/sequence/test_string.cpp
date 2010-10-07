@@ -6,7 +6,8 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
-#include "seqan/sequence.h"
+#include <seqan/sequence.h>
+#include <seqan/file.h>
 
 using namespace std;
 using namespace seqan;
@@ -455,7 +456,13 @@ void Test_String_Alloc()
 	SEQAN_TASSERT(str3 == "hello");
 	SEQAN_TASSERT(length(str1) == 0);
 
-
+  {
+    String<char, Alloc<> > left = "left";
+    String<char, Alloc<> > right = "right";
+    seqan::swap(left, right);
+    SEQAN_ASSERT_EQ(left, "right");
+    SEQAN_ASSERT_EQ(right, "left");
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////

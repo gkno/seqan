@@ -86,6 +86,35 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// swap
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.swap:
+..summary:Swaps the contents of two values.
+..cat:Content Manipulation
+..signature:swap(left, right)
+..param.left:The first value.
+..param.right:The second value.
+..remarks:The function swaps the values of variables left and right.
+This is equivalent to using move three times with a temporary variable.
+..see:Function.move
+..include:seqan/basic.h
+*/
+
+template <typename T>
+inline void
+swap(T & left, T & right)
+{
+    SEQAN_CHECKPOINT;
+    T tmp;
+    move(tmp, left);
+    move(left, right);
+    move(right, tmp);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // move
 //////////////////////////////////////////////////////////////////////////////
 
@@ -195,5 +224,3 @@ SEQAN_CHECKPOINT
 } //namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
-
-
