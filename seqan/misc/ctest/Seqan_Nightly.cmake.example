@@ -56,7 +56,7 @@ ENDIF (MODEL)
 # ------------------------------------------------------------
 # Perform the dashboard/testings steps.
 # ------------------------------------------------------------
-CTEST_START     (${MODEL} ${CTEST_SOURCE_DIRECTORY}/projects/library/cmake)
+CTEST_START     (${MODEL} ${CTEST_SOURCE_DIRECTORY})
 CONFIGURE_FILE  (${CTEST_SOURCE_DIRECTORY}/CTestConfig.cmake ${CTEST_SOURCE_ROOT_DIRECTORY}/CTestConfig.cmake COPYONLY)
 CTEST_UPDATE    (SOURCE "${CTEST_SOURCE_ROOT_DIRECTORY}")
 CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
