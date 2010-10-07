@@ -374,7 +374,7 @@ namespace SEQAN_NAMESPACE_MAIN
         PageFrame< TValue, typename TConfig::File, Dynamic<> > &buf,
         BufferHandler< Pool< TValue, SorterSpec<TConfig> >, WriteFileSpec > &me)
     {
-		sort(buf.begin, buf.end, AdaptorCompare2Less<typename TConfig::Compare>(me.pool.handlerArgs));
+      std::sort(buf.begin, buf.end, AdaptorCompare2Less<typename TConfig::Compare>(me.pool.handlerArgs));
 		return buf;
     }
 
@@ -387,7 +387,7 @@ namespace SEQAN_NAMESPACE_MAIN
         SimpleBuffer< TValue > &buf,
         BufferHandler< Pool< TValue, SorterSpec<TConfig> >, MemorySpec > &me)
     {
-        sort(buf.begin, buf.end, AdaptorCompare2Less<typename TConfig::Compare>(me.pool.handlerArgs));
+      std::sort(buf.begin, buf.end, AdaptorCompare2Less<typename TConfig::Compare>(me.pool.handlerArgs));
 		return buf;
     }
 
