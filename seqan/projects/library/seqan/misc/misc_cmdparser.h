@@ -1453,57 +1453,48 @@ inline bool
 _convertOptionValue(CommandLineOption const & opt, int & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
-	dst = atoi(toCString(src));
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 inline bool
 _convertOptionValue(CommandLineOption const & opt, unsigned int & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
-	dst = atoi(toCString(src));
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 inline bool
 _convertOptionValue(CommandLineOption const & opt, __int64 & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
-#ifdef PLATFORM_WINDOWS
-	dst = _atoi64(toCString(src));
-#else
-	dst = atoll(toCString(src));
-#endif
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 inline bool
 _convertOptionValue(CommandLineOption const & opt, __uint64 & dst, CharString const & src)
 {
     if (!isIntOption(opt)) return false;
-#ifdef PLATFORM_WINDOWS
-	dst = _atoi64(toCString(src));
-#else
-	dst = atoll(toCString(src));
-#endif
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 inline bool
 _convertOptionValue(CommandLineOption const & opt, float & dst, CharString const & src)
 {
     if (!isDoubleOption(opt)) return false;
-	dst = (float)atof(toCString(src));
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 inline bool
 _convertOptionValue(CommandLineOption const & opt, double & dst, CharString const & src)
 {
     if (!isDoubleOption(opt)) return false;
-
-	dst = atof(toCString(src));
-	return length(src) > 0;
+	std::istringstream stream(toCString(src));
+	return !(stream >> dst).fail();
 }
 
 template <typename TObject>
