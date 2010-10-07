@@ -88,7 +88,7 @@ def collectHeaderFilenames(base_path):
 def main():
   if len(sys.argv) != 2:
     print >>sys.stderr, "ERROR: Wrong argument count."""
-    print >>sys.stderr, USAGE
+    print >>sys.stderr, USAGE_STR
     return 1
 
   base_path = sys.argv[1]
