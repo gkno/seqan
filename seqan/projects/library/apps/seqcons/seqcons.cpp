@@ -257,6 +257,7 @@ int main(int argc, const char *argv[]) {
 			if (consOpt.method == 0) {
 				Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > combinedScore;
 				reAlign(fragStore, combinedScore, currentContig, consOpt.rmethod, consOpt.bandwidth, consOpt.include);
+				if (consOpt.include) reAlign(fragStore, combinedScore, currentContig, consOpt.rmethod, consOpt.bandwidth, false);
 			} else {
                 std::cerr << "Performing consensus alignment..." << std::endl;
 				// Import all reads of the given contig
