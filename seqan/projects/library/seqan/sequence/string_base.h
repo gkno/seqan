@@ -121,6 +121,59 @@ struct _TempCopy
 
 
 //////////////////////////////////////////////////////////////////////////////
+// swap
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.swap:
+..summary:Swaps the contents of two values.
+..cat:Content Manipulation
+..signature:swap(left, right)
+..param.left:The first value.
+...type:Class.String
+...type:Class.StringSet
+..param.right:The second value.
+...type:Class.String
+...type:Class.StringSet
+..remarks:The function swaps the values of variables left and right.
+This is equivalent to using move three times with a temporary variable.
+
+Note that this function has the same name as the STL function $std::swap$.
+We only specialize it for Class.String and Class.StringSet.
+With Koenig-lookup, this function is then used within the STL for efficient swapping of strings and string sets within $std::sort$, for example.
+..see:Function.move
+..include:seqan/sequence.h
+*/
+
+template <typename TAlphabet, typename TSpec>
+inline void
+swap(String<TAlphabet, TSpec> & left,
+     String<TAlphabet, TSpec> & right)
+{
+    SEQAN_CHECKPOINT;
+
+    typedef String<TAlphabet, TSpec> TString;
+
+    TString tmp(left, Move());
+    move(left, right);
+    move(right, tmp);
+}
+
+template <typename TString, typename TSpec>
+inline void
+swap(StringSet<TString, TSpec> & left,
+     StringSet<TString, TSpec> & right)
+{
+    SEQAN_CHECKPOINT;
+    typedef StringSet<TString, TSpec> TStringSet;
+
+    TStringSet tmp(left, Move());
+    move(left, right);
+    move(right, tmp);
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 //shareResources
 
 ///.Function.shareResources.param.sequence1, sequence2.type:Class.String
