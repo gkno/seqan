@@ -12,6 +12,7 @@ template <typename T> void swap(T& container, int i, int j)
 {
 
 // FRAGMENT(swap-metafunction)
+	// define helper variable
 	typename Value<T>::Type help = value(container,i);
 
 // FRAGMENT(swap-work)	
