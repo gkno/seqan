@@ -2,11 +2,9 @@
 #define SEQAN_HEADER_TEST_BLAST_PARSING_H
 
 using namespace std;
+using namespace seqan;
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-
-
+			
 //////////////////////////////////////////////////////////////////////////////
 template<typename T>
 void Test_BlastStoreReport() {
@@ -21,8 +19,12 @@ void Test_BlastStoreReport() {
 	typedef StringSet<String<AminoAcid>,Dependent<> > TStringSet;
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 	
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecolip.out");
+
 	std::fstream strm;
-	strm.open(TEST_PATH "ecolip.out",ios_base::in | ios_base::binary);
+	strm.open(buffer, ios_base::in | ios_base::binary);
 
 	TBlastReport blast;
 	TBlastReport blast2;
@@ -155,9 +157,13 @@ void Test_BlastStoreReportBasic() {
 	typedef StringSet<String<AminoAcid>,Dependent<> > TStringSet;
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 	
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecolip.out");
+	
 	std::fstream strm;
-	strm.open(TEST_PATH "ecolip.out",ios_base::in | ios_base::binary);
-
+	strm.open(buffer, ios_base::in | ios_base::binary);
+	
 	TBlastReport blast;
 	TBlastReport blast2;
 
@@ -239,10 +245,14 @@ void Test_BlastParsing(BlastN)
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
 	
-	std::fstream strm2;
-	strm2.open(TEST_PATH "ecoln.out",ios_base::in | ios_base::binary);
-	//strm2.open("C:\\seqan\\projects\\tests\\blast\\ecoln.out",ios_base::in | ios_base::binary);
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecoln.out");
 	
+	std::fstream strm2;
+	strm2.open(buffer, ios_base::in | ios_base::binary);
+	
+		
 	int alicount = 0;
 	int hitcount = 0;
 	int hspcount = 0;
@@ -330,11 +340,13 @@ void Test_BlastParsing(BlastP) {
 	typedef StringSet<String<AminoAcid>,Dependent<> > TStringSet;
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecolip.out");
 	
 	std::fstream strm;
-	//strm.open("C:\\seqan\\projects\\tests\\blast\\ecolip.out",ios_base::in | ios_base::binary);
-	strm.open(TEST_PATH "ecolip.out",ios_base::in | ios_base::binary);
-
+	strm.open(buffer, ios_base::in | ios_base::binary);
+	
 	int alicount = 0;
 	int hitcount = 0;
 	int hspcount = 0;
@@ -415,9 +427,7 @@ void Test_BlastParsing(BlastP) {
 				
 			}
 		}
-/*		std::cout << "hits: "<< hitcount <<"\n";
-		std::cout << "hsps: "<< hspcount <<"\n";
-		std::cout << "alis: "<< alicount <<"\n";*/
+
 		++repcount;
 	}
 	TBlastReport blast2(blast);
@@ -431,6 +441,7 @@ void Test_BlastParsing(BlastP) {
 
 
 }
+
 
 
 template<typename T>
@@ -448,11 +459,13 @@ void Test_BlastParsingBasic(BlastN)
 	typedef StringSet<String<Dna>,Dependent<> > TStringSet;
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecoln.out");
 	
 	std::fstream strm2;
-	strm2.open(TEST_PATH "ecoln.out",ios_base::in | ios_base::binary);
-	//strm2.open("C:\\seqan\\projects\\tests\\blast\\ecoln.out",ios_base::in | ios_base::binary);
-	
+	strm2.open(buffer, ios_base::in | ios_base::binary);
+		
 	int alicount = 0;
 	int hitcount = 0;
 	int hspcount = 0;
@@ -543,10 +556,13 @@ void Test_BlastParsingBasic(BlastP) {
 	typedef StringSet<String<AminoAcid>,Dependent<> > TStringSet;
  	typedef Graph<Alignment<TStringSet> > TAliGraph;
 
+	char buffer[1024];
+	strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+	strcat(buffer, "/projects/tests/blast/ecolip.out");
 	
 	std::fstream strm;
-	//strm.open("C:\\seqan\\projects\\tests\\blast\\ecolip.out",ios_base::in | ios_base::binary);
-	strm.open(TEST_PATH "ecolip.out",ios_base::in | ios_base::binary);
+	strm.open(buffer, ios_base::in | ios_base::binary);
+
 
 	int alicount = 0;
 	int hitcount = 0;
@@ -652,9 +668,7 @@ void Test_BlastParsingBasic(BlastP) {
 				
 			}
 		}
-/*		std::cout << "hits: "<< hitcount <<"\n";
-		std::cout << "hsps: "<< hspcount <<"\n";
-		std::cout << "alis: "<< alicount <<"\n";*/
+
 		++repcount;
 	}
 	TBlastReport blast2(blast);
@@ -666,12 +680,44 @@ void Test_BlastParsingBasic(BlastP) {
 	SEQAN_TASSERT(alicount==15)
 	SEQAN_TASSERT(repcount==16)
 
+}
 
+
+	
+SEQAN_DEFINE_TEST(test_blast_store_report_int)
+{
+	Test_BlastStoreReport<int>();
+}
+	
+SEQAN_DEFINE_TEST(test_blast_store_report_basic_int)
+{
+	Test_BlastStoreReportBasic<int>();
+}
+
+SEQAN_DEFINE_TEST(test_blast_parsing_int_blastn)
+{
+	Test_BlastParsing<int>(BlastN());
+}
+
+SEQAN_DEFINE_TEST(test_blast_parsing_int_blastp)
+{
+	Test_BlastParsing<int>(BlastP());
+}
+
+
+SEQAN_DEFINE_TEST(test_blast_parsing_basic_int_blastn)
+{
+	Test_BlastParsingBasic<int>(BlastN());
+}
+
+SEQAN_DEFINE_TEST(test_blast_parsing_basic_int_blastp)
+{
+	Test_BlastParsingBasic<int>(BlastP());
 }
 
 
 
-}
+
 
 #endif
 
