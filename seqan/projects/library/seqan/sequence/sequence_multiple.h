@@ -1720,13 +1720,13 @@ end(StringSet< TString, TSpec > const & me,
 					TId id) 
 	{
 	SEQAN_CHECKPOINT
-		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+		SEQAN_ASSERT(length(stringSetLimits(me)) == length(me) + 1);
 		if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
 		if ((TString*) me.strings[id] == (TString*) 0)
 			resize(me.limits, length(me.limits) + 1, Generous());
 		me.strings[id] = &obj;
 		me.limitsValid = false;
-		SEQAN_ASSERT(length(me.limits) == length(me) + 1);
+		SEQAN_ASSERT(length(stringSetLimits(me)) == length(me) + 1);
 		return id;
 	}
 
