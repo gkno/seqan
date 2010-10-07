@@ -41,6 +41,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TString:The string type.
 ...type:Class.String
 ..param.TSpec:The specializing type for the dependent string set.
+...default:$Tight$
 ...remarks:Possible values are $Tight$ or $Generous$
 ...remarks:$Tight$ is very space efficient whereas $Generous$ provides fast access to the strings in the container via ids.
 ..include:seqan/sequence.h
@@ -779,7 +780,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 ...type:Class.String
 ..param.TSpec:The specializing type for the StringSet.
 ...metafunction:Metafunction.Spec
-...default:$Generous$.
+...default:$Owner<Generous>$.
 ..include:sequence.h
 */
 

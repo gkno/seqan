@@ -47,7 +47,7 @@ struct Alloc {};
 ...metafunction:Metafunction.Spec
 ...default:$Alloc<>$, see @Spec.Alloc String@.
 ..implements:Concept.Container
-..include:sequence.h
+..include:seqan/sequence.h
 */
 
 template <typename TValue, typename TSpec = Alloc<> >
@@ -676,10 +676,7 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**
-.Function.resizeSpace.param.object.type:Class.String
-..include:seqan/sequence.h
-*/
+///.Function.resizeSpace.param.object.type:Class.String
 
 template<typename TValue, typename TSpec, typename TSize, typename TBeginPosition, typename TEndPosition, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type 
