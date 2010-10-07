@@ -660,4 +660,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 }
 
+// Adapt SeqAn modified to std.
+namespace std
+{
+	template<typename THost, typename TSpec>
+	struct iterator_traits<seqan::ModifiedIterator<THost, TSpec> >
+	{
+		typedef ::seqan::ModifiedIterator<THost, TSpec> TIter;
+
+		typedef random_access_iterator_tag iterator_category;
+		typedef typename ::seqan::Value<TIter>::Type value_type;
+		typedef typename ::seqan::Difference<TIter>::Type difference_type;
+		typedef typename ::seqan::Value<TIter>::Type * pointer;
+		typedef typename ::seqan::Reference<TIter>::Type reference;
+	};
+}
+
 #endif
