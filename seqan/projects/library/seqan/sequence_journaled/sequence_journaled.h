@@ -98,7 +98,12 @@ struct Host<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > con
     typedef String<TValue, THostSpec> const Type;
 };
 
-///.Metafunction.InsertionBuffer.param.T:Spec.Journaled String
+/**
+.Metafunction.InsertionBuffer
+..summary:Return type of insertion buffer string for a journaled string.
+..param.T:Spec.Journaled String
+..include:sequan/sequence_journal.h
+*/
 template <typename T>
 struct InsertionBuffer;
 
