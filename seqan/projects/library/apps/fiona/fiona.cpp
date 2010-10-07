@@ -35,7 +35,6 @@
 
 //#define MEDIAN
 
-using namespace std;
 using namespace seqan;
 
 #ifdef FIONA_ALLOWINDELS
@@ -108,7 +107,7 @@ namespace seqan  {
 	{ 
 		 int replen_max; 
 		 int replen_min;
-		 map<unsigned,double> frequency;
+     std::map<unsigned,double> frequency;
 	}; 
 
 	template <>
@@ -207,9 +206,9 @@ namespace seqan  {
 /*TODO cumulative poisson distribution determinated just once for a level, not at each node like now*/
 
 /*matching string*/
-inline bool strContains(string const & inputStr, string const & searchStr)
+inline bool strContains(std::string const & inputStr, std::string const & searchStr)
 {
-	return inputStr.find(searchStr) != string::npos;
+	return inputStr.find(searchStr) != std::string::npos;
 }
 
 
@@ -319,7 +318,7 @@ double medianLevel(Iter<TIndex, VSTree<TSpec> > iter){
 	double median = 0.0;
 	double mediumTotalOccs = 0.0;
 
-	map<unsigned, unsigned> vectorOccurences;
+  std::map<unsigned, unsigned> vectorOccurences;
 
 	goBegin(iter);
 	for (; !atEnd(iter); ++iter)
@@ -331,7 +330,7 @@ double medianLevel(Iter<TIndex, VSTree<TSpec> > iter){
 
 	mediumTotalOccs = totalOccs / 2.0;
 
-	map<unsigned,unsigned>::iterator iterMap;
+  std::map<unsigned,unsigned>::iterator iterMap;
 	for (iterMap = vectorOccurences.begin (); iterMap != vectorOccurences.end (); ++iterMap)
 	{
 		sumMedian += iterMap->second*iterMap->first;
@@ -356,23 +355,23 @@ inline void _dumpCorrection(
 	TCorrection const &correction,
 	unsigned errorReadId)
 {
-	cout << endl;
-	cout << "indelLen: " << (int)correction.indelLength << endl;
-	cout << "corrId:   " << correction.correctReadId << endl;
-	cout << "errorId:  " << errorReadId << endl;
-	cout << "overlap:  " << correction.overlap << endl;
-	cout << "errors:   " << (unsigned)correction.mismatches << endl;
-	cout << "occur:    " << correction.occurrences << endl;
-	cout << "corrPos:  " << correction.correctPos << endl;
-	cout << "errPos:   " << correction.errorPos << endl;
-	cout << "corrRead: ";
+	std::cout << std::endl;
+	std::cout << "indelLen: " << (int)correction.indelLength << std::endl;
+	std::cout << "corrId:   " << correction.correctReadId << std::endl;
+	std::cout << "errorId:  " << errorReadId << std::endl;
+	std::cout << "overlap:  " << correction.overlap << std::endl;
+	std::cout << "errors:   " << (unsigned)correction.mismatches << std::endl;
+	std::cout << "occur:    " << correction.occurrences << std::endl;
+	std::cout << "corrPos:  " << correction.correctPos << std::endl;
+	std::cout << "errPos:   " << correction.errorPos << std::endl;
+	std::cout << "corrRead: ";
 	for (unsigned i = 0; i < correction.errorPos; ++i)
-		cout << ' ';
-	cout << store.readSeqStore[correction.correctReadId] << endl;
-	cout << "errRead:  ";
+		std::cout << ' ';
+	std::cout << store.readSeqStore[correction.correctReadId] << std::endl;
+	std::cout << "errRead:  ";
 	for (unsigned i = 0; i < correction.correctPos; ++i)
-		cout << ' ';
-	cout << store.readSeqStore[errorReadId] << endl;
+		std::cout << ' ';
+	std::cout << store.readSeqStore[errorReadId] << std::endl;
 }
 
 /*change the erroneous nucleotide in all reads identify with errors*/
@@ -407,7 +406,7 @@ void applyReadErrorCorrections(
 		TCorrection const &corr = corrections[readId];
 		if (corr.overlap == 0) continue;
 
-		ostringstream m;
+    std::ostringstream m;
 		if (strContains(toCString(store.readNameStore[readId]), "corrected"))
 			m << "," << corr.errorPos;
 		else
@@ -427,10 +426,10 @@ void applyReadErrorCorrections(
 			insert(store.readSeqStore[readId], corr.errorPos, infix(originalReads[corr.correctReadId], corr.correctPos, corr.correctPos + -corr.indelLength));
 #endif
 #ifdef SEQAN_VERBOSE
-		cout << "corrected:";
+		std::cout << "corrected:";
 		for (unsigned i = 0; i < corr.correctPos; ++i)
-			cout << ' ';
-		cout << store.readSeqStore[readId] << endl;
+			std::cout << ' ';
+		std::cout << store.readSeqStore[readId] << std::endl;
 #endif
 	}
 }
@@ -701,12 +700,12 @@ void traverseAndSearchCorrections(
 /*GC-content*/
 /*fonction which allow to determine the frequency for each nucleotide*/
 template < typename TFionaIndex, class TSpec >
-map<unsigned,double>
+std::map<unsigned,double>
 determineFrequency(Iter< TFionaIndex, VSTree<TSpec> > iter)
 {
    /*calculate the frequency for each nucleotide*/
    /*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-   map<unsigned, double> frequency;
+  std::map<unsigned, double> frequency;
 
    goBegin(iter);
 
@@ -778,27 +777,27 @@ void correctReads(
 	fill(corrections, readCount, zeroCorr);
 	
 	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
-		cout << endl << "Method with expected value for each level" << endl;
+		std::cout << std::endl << "Method with expected value for each level" << std::endl;
 	else
-		cout << endl << "Method with p-value and Poisson distribution" << endl;
-	cout << "Searching..." << endl;
+		std::cout << std::endl << "Method with p-value and Poisson distribution" << std::endl;
+	std::cout << "Searching..." << std::endl;
 	SEQAN_PROTIMESTART(search);
 
 #ifndef FIONA_PARALLEL
 	// FIONA NON-PARALLEL SEARCH
 		
 	// construct suffix array of the set of reads
-	cout << "Construct suffix array" << endl;
+	std::cout << "Construct suffix array" << std::endl;
 	SEQAN_PROTIMESTART(construct);
 	TFionaIndex myIndex(store.readSeqStore);
 	TConstrainedIterator myConstrainedIterator(myIndex);
 
 	/*calculate the frequency for each nucleotide, didn't use for the moment*/
 	/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-	map<unsigned,double> frequency;
+  std::map<unsigned,double> frequency;
 	frequency = determineFrequency(myConstrainedIterator);
 	
-	cout << "Time required for suffix array construction : " << SEQAN_PROTIMEDIFF(construct) << " seconds." << endl;
+	std::cout << "Time required for suffix array construction : " << SEQAN_PROTIMEDIFF(construct) << " seconds." << std::endl;
 
 	/*restrictions just for estimate the genome length if there is no data*/
 
@@ -810,13 +809,13 @@ void correctReads(
 
 	if (options.genomeLength == 1)
 	{
-		cout << "Generating Hugues' stats file." << endl;
+		std::cout << "Generating Hugues' stats file." << std::endl;
 		ofstream stats("stats.txt");
 		Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it(myIndex);
 		goBegin(it);
 		CharString tmp;
 		String<int> freq;
-		stats << "branch\tlength\ttreeDep\tletter\treadPos\tfreq" << endl;
+		stats << "branch\tlength\ttreeDep\tletter\treadPos\tfreq" << std::endl;
 		while (!atEnd(it))
 		{
 			unsigned ofs = parentRepLength(it);
@@ -844,13 +843,13 @@ void correctReads(
 						else
 							stats << "0\t";
 						stats << ofs + i + 1 << '\t' << nodeDepth(it) << '\t' << tmp[i];
-						stats << '\t' << k << '\t' << freq[k] << '\t';// << representative(it) << '\t' << tmp << endl;
-						stats << endl;					}
+						stats << '\t' << k << '\t' << freq[k] << '\t';// << representative(it) << '\t' << tmp << std::endl;
+						stats << std::endl;					}
 			}
 			++it;
 		}
 		stats.close();
-		cout << "Done." << endl;
+		std::cout << "Done." << std::endl;
 		exit(0);
 	}
 			
@@ -861,21 +860,21 @@ void correctReads(
 		{
 			//int logRation = (log10(length(setReads)/2))/(log10(4));
 			//int l = logRation + 1;
-			//cout << l << endl;
+			//std::cout << l << std::endl;
 			
 			cargo(myIndex).replen_min = level;
 			cargo(myIndex).replen_max = level+2; 	
 			cargo(myIndex).frequency = frequency;
 			double numOccs = 0.0; 
 			
-			median << level << " " << medianLevel(myConstrainedIterator) << endl;
+			median << level << " " << medianLevel(myConstrainedIterator) << std::endl;
 			goBegin(myConstrainedIterator);
 			while (!atEnd(myConstrainedIterator))
 			{
 				if (parentRepLength(myConstrainedIterator) > level)
 				{
 					numOccs = countOccurrences(myConstrainedIterator);
-					out << level << " " << numOccs << endl; 
+					out << level << " " << numOccs << std::endl; 
 				}
 				++myConstrainedIterator;
 			}
@@ -883,7 +882,7 @@ void correctReads(
 #else
 		//int logRation = log10(readCount) / log10(4);
 		//int l = logRation + 1;
-		//cout << l << endl;
+		//std::cout << l << std::endl;
 		cargo(myIndex).replen_min = options.fromLevel;
 		cargo(myIndex).replen_max = options.fromLevel + 2; 	
 		cargo(myIndex).frequency = frequency;
@@ -898,7 +897,7 @@ void correctReads(
 		/*here plus 1 also because the level is between fromLevel and toLevel*/
 		double a = readLength - options.fromLevel + 2;
 		options.genomeLength = readCount * a / expectedValueGivenLevel;
-		cout << "The estimated genome length is " << options.genomeLength << endl;
+		std::cout << "The estimated genome length is " << options.genomeLength << std::endl;
 #endif
 	}
 
@@ -909,7 +908,7 @@ void correctReads(
 	
 	/*the core of the correction method*/
 	traverseAndSearchCorrections(myConstrainedIterator, store, corrections, expectedTheoretical, options, alg);
-	cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << endl;
+	std::cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << std::endl;
 
 #else 
 	// FIONA PARALLEL SEARCH
@@ -919,11 +918,11 @@ void correctReads(
 	String<size_t> packages;
 
 	SEQAN_PROTIMESTART(constructQgramExt);
-	cout << "Construct external q-gram index ... " << flush;
+	std::cout << "Construct external q-gram index ... " << std::flush;
 	resize(indexSA(qgramIndex), _qgramQGramCount(qgramIndex), Exact());
 	resize(indexDir(qgramIndex), _fullDirLength(qgramIndex), Exact());
 	createQGramIndexExt(indexSA(qgramIndex), indexDir(qgramIndex), indexText(qgramIndex), indexShape(qgramIndex), stringSetLimits(indexText(qgramIndex)));
-	cout << "done. (" << SEQAN_PROTIMEDIFF(constructQgramExt) << " seconds)" << endl;
+	std::cout << "done. (" << SEQAN_PROTIMEDIFF(constructQgramExt) << " seconds)" << std::endl;
 
 	String<Dna5> tuple;
 	resize(tuple, length(indexShape(qgramIndex)));
@@ -948,9 +947,9 @@ void correctReads(
 	unsigned finished = 0;
 	bool inTerm = isatty(fileno(stdout));
 
-	cout << "Suffix tree traversal ............. ";
-	if (inTerm)	cout << "  0%";
-	cout << flush;
+	std::cout << "Suffix tree traversal ............. ";
+	if (inTerm)	std::cout << "  0%";
+	std::cout << std::flush;
 #pragma omp parallel for
 	for (int i = 1; i < (int)length(packages); ++i)
 	{
@@ -967,16 +966,16 @@ void correctReads(
 		{
 			++finished;
 			if (inTerm)
-				cout << "\b\b\b\b" << setw(3) << (100 * finished) / (length(packages) - 1) << '%' << flush;
+				std::cout << "\b\b\b\b" << std::setw(3) << (100 * finished) / (length(packages) - 1) << '%' << std::flush;
 		}
 	}
 	if (inTerm)
-		cout << "\b\b\b\b";
-	cout << "done. (" << SEQAN_PROTIMEDIFF(search) << " seconds)" << endl;
+		std::cout << "\b\b\b\b";
+	std::cout << "done. (" << SEQAN_PROTIMEDIFF(search) << " seconds)" << std::endl;
 
 #endif
 	
-	ofstream out("id");
+  std::ofstream out("id");
 	unsigned totalCorrections = 0;
 	for (unsigned i = 0; i < length(corrections); ++i)
 	{
@@ -984,11 +983,11 @@ void correctReads(
 		unsigned readId = i;
 		if (readId >= readCount)
 			readId -= readCount;
-		out << readId << " 0" << endl;
+		out << readId << " 0" << std::endl;
 		++totalCorrections;
 	}
 	applyReadErrorCorrections(store, corrections);
-	cout << "Total corrected reads number is "<< totalCorrections << endl;
+	std::cout << "Total corrected reads number is "<< totalCorrections << std::endl;
 
 	// remove reverse complements
 	resize(store.readSeqStore, readCount);
@@ -997,7 +996,7 @@ void correctReads(
 int main(int argc, const char* argv[]) 
 {
 	CommandLineParser parser;
-	string rev = "$Revision  0000$";
+  std::string rev = "$Revision  0000$";
 	addVersionLine(parser, "Fiona version 1.1 2010912 [" + rev.substr(11, 4) + "]");
 
 	FionaOptions options;
@@ -1024,15 +1023,15 @@ int main(int argc, const char* argv[])
 #endif
 	requiredArguments(parser, 2);
 
-	bool stop = !parse(parser, argc, argv, cerr);
+	bool stop = !parse(parser, argc, argv, std::cerr);
 	if (stop) return 0;
 
 	if (isSetLong(parser, "expected"))
 	{
 		if (isSetLong(parser, "pvalue") && (stop = true))
 		{
-			cout << "You have already chosen the p-value correction method." << endl;
-			cout << "Please use only one of the options -f or -p, for more details see README.txt" << endl;
+			std::cout << "You have already chosen the p-value correction method." << std::endl;
+			std::cout << "Please use only one of the options -f or -p, for more details see README.txt" << std::endl;
 		}
 		else
 		{
@@ -1051,7 +1050,7 @@ int main(int argc, const char* argv[])
 		getOptionValueLong(parser, "levels", 0, options.fromLevel);
 		getOptionValueLong(parser, "levels", 1, options.toLevel);
 		if ((options.fromLevel > options.toLevel) && (stop = true))
-			cerr << "Lower bound must be less or equal upper bound." << endl;
+			std::cerr << "Lower bound must be less or equal upper bound." << std::endl;
 	}
 
 	getOptionValueLong(parser, "genome-length", options.genomeLength);
@@ -1063,7 +1062,7 @@ int main(int argc, const char* argv[])
 
 #ifdef _OPENMP
 	if ((options.genomeLength < 2) && (stop = true))
-		cerr << "A genome length must be given. Length estimation does not work in parallel mode." << endl;
+		std::cerr << "A genome length must be given. Length estimation does not work in parallel mode." << std::endl;
 	if (isSetLong(parser, "num-threads"))
 	{
 		unsigned numThreads = 1;
@@ -1075,7 +1074,7 @@ int main(int argc, const char* argv[])
 	// something went wrong
 	if (stop)
 	{
-		cerr << "Exiting ..." << endl;
+		std::cerr << "Exiting ..." << std::endl;
 		return 1;
 	}
 
@@ -1085,11 +1084,11 @@ int main(int argc, const char* argv[])
 	TFionaFragStore store;
 	if (!loadReads(store, getArgumentValue(parser, 0)))
 	{
-		cerr << "Failed to open reads file " << getArgumentValue(parser, 0) << endl;
-		cerr << "Exiting ..." << endl;
+		std::cerr << "Failed to open reads file " << getArgumentValue(parser, 0) << std::endl;
+		std::cerr << "Exiting ..." << std::endl;
 		return 1;
 	} else
-		cout << "Loaded " << length(store.readSeqStore) << " reads." << endl;
+		std::cout << "Loaded " << length(store.readSeqStore) << " reads." << std::endl;
 
 	// initialise the top and down level by using the log4 from the total number of reads
 	if (options.fromLevel == 0)
@@ -1097,12 +1096,12 @@ int main(int argc, const char* argv[])
 		int logRation = static_cast<int>(log10(length(store.readSeqStore)) / log10(4.0));
 		options.fromLevel = logRation + 2;
 		options.toLevel   = options.fromLevel + 10;
-		cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << endl;
+		std::cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << std::endl;
 	}
 
 	for (unsigned cycle = 1; cycle <= options.cycles; ++cycle)
 	{
-		cout << endl << "Cycle "<< cycle << " of " << options.cycles << endl;
+		std::cout << std::endl << "Cycle "<< cycle << " of " << options.cycles << std::endl;
 		if (method == Poisson)
 			/*use of p-value like a limit*/
 			correctReads(store, options, FionaPoisson());
@@ -1118,7 +1117,7 @@ int main(int argc, const char* argv[])
 	}
 
 	// write in file all input reads with the corrected one
-	ofstream out(toCString(getArgumentValue(parser, 1)));
+  std::ofstream out(toCString(getArgumentValue(parser, 1)));
 	int numCorrected = 0;
 	for (unsigned i = 0; i < length(store.readNameStore); ++i)
 	{
@@ -1126,18 +1125,18 @@ int main(int argc, const char* argv[])
 		if (strContains(toCString(store.readNameStore[i]), "corrected"))
 			++numCorrected;
 
-		out << '>' << store.readNameStore[i]<<endl;
-		out << store.readSeqStore[i] << endl;
+		out << '>' << store.readNameStore[i]<<std::endl;
+		out << store.readSeqStore[i] << std::endl;
 	}
 
 	if (options.cycles > 1)
-		cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << endl; 
+		std::cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << std::endl; 
 
 //	struct rusage usage;
 //	getrusage(RUSAGE_SELF, &usage);
-	cout << endl;
-	cout << "Time required for execution: " << SEQAN_PROTIMEDIFF(correction) << " seconds." << endl;
-//	cout << "Peak resident memory usage:  " << usage.ru_maxrss / (1024*1024) << " Mb." << endl;
+	std::cout << std::endl;
+	std::cout << "Time required for execution: " << SEQAN_PROTIMEDIFF(correction) << " seconds." << std::endl;
+//	std::cout << "Peak resident memory usage:  " << usage.ru_maxrss / (1024*1024) << " Mb." << std::endl;
 
 	return 0;
 }
