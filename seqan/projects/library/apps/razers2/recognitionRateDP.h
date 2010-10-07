@@ -116,6 +116,26 @@ namespace SEQAN_NAMESPACE_MAIN
 		return log(1 + value);
 	}
 
+#else
+
+	template<typename TValue>
+	inline bool isnan(TValue value)
+	{
+		return std::isnan(value);
+	}
+
+	template<typename TValue>
+	inline bool isinf(TValue value)
+	{
+		return std::isinf(value);
+	}
+
+	template<typename TValue>
+	inline TValue log1p(TValue value)
+	{
+		return std::log1p(value);
+	}
+
 #endif
 
 #ifdef USE_LOGVALUES

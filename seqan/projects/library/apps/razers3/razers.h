@@ -1757,14 +1757,14 @@ void _mapSingleReadsToContig(
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
 	TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
-    
+
 	// initialize verifier
 	verifier.onReverseComplement = (orientation == 'R');
 	verifier.genomeLength = length(contigSeq);
 	verifier.m.contigId = contigId;
-		
+
 	// iterate all verification regions returned by SWIFT
-	while (find(swiftFinder, swiftPattern, options.errorRate)) 
+	while (find(swiftFinder, swiftPattern, options.errorRate))
 	{
 		verifier.m.readId = (*swiftFinder.curHit).ndlSeqNo;
 		if (!options.spec.DONT_VERIFY)

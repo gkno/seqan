@@ -227,10 +227,18 @@ int qgramThreshold(TShape const & shape, TPatternSize patternLength, TErrors err
 		return value == log(0.0);
 	}
 
+#else
+
 	template<typename TValue>
-	inline TValue log1p(TValue value)
+	inline bool isnan(TValue value)
 	{
-		return log(1 + value);
+		return std::isnan(value);
+	}
+
+	template<typename TValue>
+	inline bool isinf(TValue value)
+	{
+		return std::isinf(value);
 	}
 
 #endif
@@ -871,6 +879,183 @@ void computeExactQGramThreshold(
 
 
 //////////////////////////////////////////////////////////////////////////////
+// Compute filtering loss of any q-gram filter (given a states-string)
+template <
+	typename TLossString, 
+	typename TLogErrorDistr, 
+	typename TStateString >
+void computeQGramFilteringSensitivity(
+	TLossString &found,
+	TStateString const &states,
+	int span,
+	int maxT,
+	int maxErrors,
+	TLogErrorDistr const &logError,
+//	bool optionAbsolute = false,
+	bool optionMinOutput)
+{
+	typedef typename Value<TLossString>::Type		TFloat;
+	typedef typename Value<TLogErrorDistr>::Type	TProbValue;
+	typedef typename Value<TStateString>::Type		TState;
+
+	typedef String<TFloat>							TMatrixCol;
+	typedef String<int>								TIntCol;
+
+	SEQAN_ASSERT((length(logError) % 4) == 0);
+
+	int maxN = length(logError) / 4;
+	int statesCount = length(states);
+	const bool optionAbsolute = false;
+//	int span = length(bitShape);
+
+	// columns n-1 and n for recursion 
+	TMatrixCol col0;
+	TMatrixCol col1;
+	fill(col0, maxErrors * statesCount * maxT, (TFloat)_transform(0.0));
+	resize(col1, maxErrors * statesCount * maxT);
+
+#ifdef COUNT_LOSSES
+	TFloat positive = _transform(0.0);
+	TFloat negative = _transform(1.0);
+#else
+	TFloat positive = _transform(1.0);
+	TFloat negative = _transform(0.0);
+#endif
+
+	// RECURSION BEGIN
+	for (int s = 0; s < statesCount; ++s) 
+	{
+		TState const &state = states[s];
+
+		if (state.skipFirst) continue;
+
+		// we miss no match if threshold t is 0
+		col0[s*maxT] = positive;
+
+		// for n==0
+		if (state.qgramHit)
+		{
+			// we miss no match if read q-gram is recognized
+			// --> probability of finding this MMP is 1, if t=1
+			col0[s*maxT+1] = positive;
+			// --> probability of finding this MMP is 0, if t>1
+			for (int t = 2; t < maxT; ++t)
+				col0[s*maxT+t] = negative;
+		} else
+		{
+			// we miss 1 match if t>0 and read q-gram is not recognized
+			// --> probability of finding this MMP is 0, if t>=1
+			for (int t = 1; t < maxT; ++t)
+				col0[s*maxT+t] = negative;
+		}
+	}
+
+	// iterate over sequence length n
+	TMatrixCol *col = &col1;
+	TMatrixCol *colPrev = &col0;
+
+#ifdef DEBUG_RECOG_DP
+	::std::cout << span << ":0";
+	dump(col0, 0,statesCount);
+	::std::cout << " :1";
+	dump(col0, 1,statesCount);
+#endif
+	
+
+	// RECURSION
+	//
+	// found(n,q,t,e) = (1-errorProb[n-span]) * found(n-1,0|(q>>1),t-delta,e) delta=1/0 <-> q hat 0/>0 fehler
+	//               + errorProb[n-span] * found(n-1,1|(q>>1),t-delta,e-1)
+	
+	// rekursion (fuer q-gram matches <=1 fehler)
+	// found(n,q,t,e) = (1-errorProb[n-span]) * found(n-1,0|(q>>1),t-delta,e) delta=1/0 <-> q hat <=1/>1 fehler
+	//               + errorProb[n-span] * found(n-1,1|(q>>1),t-delta,e-1)
+	
+	for (int n = span; n < maxN; ++n)
+	{
+		for (int e = 0; e < maxErrors * statesCount; e += statesCount)
+		{		
+			for (int s = 0; s < statesCount; ++s)
+			{
+				TState const &state = states[s];				
+				for (int t = 0; t < maxT; ++t)
+				{
+					int _t = t;
+					if (_t > 0 && state.qgramHit) --_t;
+
+					// MATCH
+					TFloat recovered = _probMul(
+						_getProb(logError, SEQAN_MATCH, n-span),
+						(*colPrev)[(e+state.transition[SEQAN_MATCH])*maxT+_t]);
+
+					// MISMATCH, INSERT, DELETE
+					for (int m = SEQAN_MISMATCH; m < 4; ++m)
+						if (e > 0)
+						{
+							int prevState = state.transition[m];
+							if (prevState >= 0)
+							{
+								if (m == SEQAN_INSERT)
+									_probAdd(recovered, _probMul(_getProb(logError,m,n-span), (*col)[((e-statesCount)+prevState)*maxT+t]));
+								else
+									_probAdd(recovered, _probMul(_getProb(logError,m,n-span), (*colPrev)[((e-statesCount)+prevState)*maxT+_t]));
+							}
+						}
+					(*col)[(e+s)*maxT+t] = recovered;
+				}
+			}
+			if (!optionMinOutput)
+				::std::cout << '.' << ::std::flush;
+		}
+
+		TMatrixCol *tmp = col;
+		col = colPrev;
+		colPrev = tmp;
+
+#ifdef DEBUG_RECOG_DP
+		::std::cout << n+1 << ":0";
+		dump(*colPrev, 0,statesCount);
+		::std::cout << " :1";
+		dump(*colPrev, 1,statesCount);
+		::std::cout << " :2";
+		dump(*colPrev, 2,statesCount);
+#endif
+	}
+	
+	if (!optionMinOutput)
+		::std::cout << ::std::endl;
+
+	// RECURSION END
+	for (int eSum = 0; eSum < maxErrors; ++eSum)
+		for (int t = 0; t < maxT; ++t) 
+		{
+			TFloat recovered = _transform(0.0);
+			for (int s = 0; s < statesCount; ++s)
+			{
+				TState const &state = states[s];
+
+				// skip intermediate results
+				if (state.intermediate || state.skipLast) continue;
+				if (state.errors <= eSum)
+				{
+					int e = eSum - state.errors;
+					// multiply probability for the trailing pattern
+					_probAdd(recovered, _probMul(state.prob, (*colPrev)[(e*statesCount+s)*maxT+t]));
+				}
+			}
+
+#ifndef COUNT_LOSSES
+			// we can only normalize probs if t==0 contains all k-pattern probs
+			if (t > 0 && !optionAbsolute)
+				recovered = _probDiv(recovered, found[eSum*maxT]);
+#endif
+
+			found[eSum*maxT+t] = recovered;
+		}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // q-gram threshold DP algorithm
 //
 // - exact threshold
@@ -888,6 +1073,36 @@ int qgramThreshold(TShape const & shape, TPatternSize patternLength, TErrors err
 	computeExactQGramThreshold(thresh, states, length(bitString), errors + 1, patternLength, true);
 	
 	return thresh[errors];
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// q-gram filter sensitivity DP algorithm
+//
+// - exact threshold
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename TSensitivityMatrix, typename TShape, typename TPatternSize, typename TErrors, typename TThresh, typename TDistance, typename TErrorDist>
+void qgramFilteringSensitivity(
+	TSensitivityMatrix & sensMat, 
+	TShape const & shape, 
+	TPatternSize patternLength, 
+	TErrors errors, 
+	TThresh maxThresh, 
+	TDistance const dist, 
+	ThreshExact const,
+	TErrorDist const & logErrorDistribution)
+{
+	typedef typename Value<TSensitivityMatrix>::Type TFloat;
+	String<SensitivityDPState_<TDistance, TFloat> > states;
+	String<unsigned> thresh;
+	String<char> bitString;
+	
+	maxThresh = _min(maxThresh, patternLength - length(shape) + 1);
+	resize(sensMat, (maxThresh + 1) * (errors + 1));
+	shapeToString(bitString, shape);
+
+	initPatterns(states, bitString, errors, logErrorDistribution, dist, true);
+	computeQGramFilteringSensitivity(sensMat, states, length(bitString), maxThresh + 1, errors + 1, logErrorDistribution, true);
 }
 
 }	// namespace seqan

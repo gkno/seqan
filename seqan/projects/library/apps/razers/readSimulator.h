@@ -31,8 +31,6 @@
 #include <seqan/find.h>
 #include <seqan/modifier.h>
 
-#include "recognitionRateDP.h"
-
 
 namespace SEQAN_NAMESPACE_MAIN
 {

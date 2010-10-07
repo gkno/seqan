@@ -30,7 +30,6 @@
 
 #include <seqan/sequence.h>
 #include "razers.h"
-#include "recognitionRateDP.h"
 #include "readSimulator.h"
 
 #include <seqan/misc/misc_parsing.h>
@@ -712,17 +711,19 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		if(length(shapeStrings[i])>totalN) continue;
 		
 		unsigned maxT = totalN-length(shapeStrings[i])+2;
-		
-		String<TFloat> found;
-		resize(found,maxT*maxErrors);
-		
-		String< State<TFloat> > states;
+		String<TFloat> sensMat;
+
 		//if(pm_options.verbose)::std::cout << "do DP\n";
 //		if(pm_options.verbose)::std::cerr << "do loss rate DP" << std::endl;
 		try 
 		{
-			initPatterns(states, shapeStrings[i], maxErrors-1, logErrorDistribution, pm_options.optionHammingOnly);
-			computeFilteringLoss(found, states, length(shapeStrings[i]), maxT, maxErrors,  logErrorDistribution);
+			Shape<Dna, GenericShape> shape;
+			stringToShape(shape, shapeStrings[i]);
+			if (pm_options.optionHammingOnly)
+				qgramFilteringSensitivity(sensMat, shape, totalN, maxErrors - 1, maxT - 1, HammingDistance(), ThreshExact(), logErrorDistribution);
+			else
+				qgramFilteringSensitivity(sensMat, shape, totalN, maxErrors - 1, maxT - 1, EditDistance(), ThreshExact(), logErrorDistribution);
+
 		}
 		catch (std::bad_alloc&) 
 		{
@@ -733,7 +734,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 		for(unsigned e = minErrors; e < maxErrors; ++e) {
 			bool highestOptimalFound = false;
 			for(unsigned t = maxT-1; t > minT; --t) {
-				TFloat lossrate = (TFloat)1.0 - (TFloat)_transformBack(found[e*maxT+t]);
+				TFloat lossrate = (TFloat)1.0 - (TFloat)_transformBack(sensMat[e*maxT+t]);
 				if (lossrate <= 0.0){
 					if(highestOptimalFound) break;
 					else highestOptimalFound = true;
