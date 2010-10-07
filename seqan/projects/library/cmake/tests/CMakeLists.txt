@@ -18,6 +18,8 @@ link_directories (${SEQAN_LIBRARY}/lib)
 # Tests
 ################################################################################
 
+add_custom_target(tests)
+
 #-----------------------------------------------------------------------------
 # Configure Dart testing support.  This should be done before any
 # MESSAGE(FATAL_ERROR ...) commands are invoked.
@@ -39,6 +41,7 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 			add_executable (test_${TEST_DIR_REL} ${TEST_SOURCES})
 			add_dependencies (test_${TEST_DIR_REL} ${TEST_SOURCES})
 			add_dependencies (test_${TEST_DIR_REL} ${SEQAN_TARGET})
+	    add_dependencies (tests test_${TEST_DIR_REL})
 			add_test (test_${TEST_DIR_REL} test_${TEST_DIR_REL})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (test_${TEST_DIR_REL} rt)
