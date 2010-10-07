@@ -212,6 +212,16 @@ SEQAN_CHECKPOINT
 	source.data_size = 0;
 }
 
+template <typename TValue>
+inline void 
+move(
+	String <TValue, CStyle > & target,
+	String <TValue, CStyle > const & source)
+{
+SEQAN_CHECKPOINT
+	move(target, const_cast<String<TValue, CStyle> &>(source));	
+}
+
 //____________________________________________________________________________
 
 template <typename TValue>
