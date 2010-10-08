@@ -37,8 +37,8 @@ SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
 	TAliGraph ali_graph(seq_set);
 	matchRefinement(matches,seq_set,ali_graph);
 
-	SEQAN_TASSERT(numVertices(ali_graph) == 12)
-	SEQAN_TASSERT(numEdges(ali_graph) == 7)
+	SEQAN_ASSERT_TRUE(numVertices(ali_graph) == 12);
+	SEQAN_ASSERT_TRUE(numEdges(ali_graph) == 7);
 
 	// with within-sequence-match: 24 vertices, 20 edges
 	appendValue(matches,TFragment(1,0,1,10,4));
@@ -46,8 +46,8 @@ SEQAN_DEFINE_TEST(RefineMatchesSelfEdges)
 	TAliGraph ali_graph2(seq_set);
 	matchRefinement(matches,seq_set,ali_graph2);
 
-	SEQAN_TASSERT(numVertices(ali_graph2) == 24)
-	SEQAN_TASSERT(numEdges(ali_graph2) == 20)
+	SEQAN_ASSERT_TRUE(numVertices(ali_graph2) == 24);
+	SEQAN_ASSERT_TRUE(numEdges(ali_graph2) == 20);
 
 //	std::cout << "\nnumEdges: "<<numEdges(ali_graph)<<"\n";
 //	std::cout << "\nnumVertices: "<<numVertices(ali_graph)<<"\n";
@@ -352,7 +352,6 @@ SEQAN_DEFINE_TEST(RefineAlign)
 
 
 
-
 	int numAlignments = 1;
 	int numSequencePairs = 0;
 	int cutoff = 4;
@@ -382,122 +381,122 @@ SEQAN_DEFINE_TEST(RefineAlign)
 	VertexDescriptor<TAliGraph>::Type vd;
 
 	vd = findVertex(ali_graph,0,0);
-	SEQAN_TASSERT(vd == 0)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	SEQAN_ASSERT_TRUE(vd == 0);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8);
 	vd = findVertex(ali_graph,0,8);
-	SEQAN_TASSERT(vd == 1)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 1);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,0,11);
-	SEQAN_TASSERT(vd == 2)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 2);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,0,14);
-	SEQAN_TASSERT(vd == 3)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 3);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	vd = findVertex(ali_graph,0,15);
-	SEQAN_TASSERT(vd == 4)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 4);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,0,17);
-	SEQAN_TASSERT(vd == 5)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 5);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	vd = findVertex(ali_graph,0,18);
-	SEQAN_TASSERT(vd == 6)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 6);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,0,20);
-	SEQAN_TASSERT(vd == 7)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 7);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 
 	vd = findVertex(ali_graph,1,0);
-	SEQAN_TASSERT(vd == 8)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	SEQAN_ASSERT_TRUE(vd == 8);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8);
 	vd = findVertex(ali_graph,1,8);
-	SEQAN_TASSERT(vd == 9)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 9);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,1,11);
-	SEQAN_TASSERT(vd == 10)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 10);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 11);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,1,14);
-	SEQAN_TASSERT(vd == 11)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 14)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 11);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 14);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	vd = findVertex(ali_graph,1,15);
-	SEQAN_TASSERT(vd == 12)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 15)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 12);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 15);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,1,17);
-	SEQAN_TASSERT(vd == 13)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 17)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 13);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 17);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 
 	vd = findVertex(ali_graph,2,0);
-	SEQAN_TASSERT(vd == 14)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+	SEQAN_ASSERT_TRUE(vd == 14);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8);
 	vd = findVertex(ali_graph,2,8);
-	SEQAN_TASSERT(vd == 15)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 15);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,2,11);
-	SEQAN_TASSERT(vd == 16)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 7)
+	SEQAN_ASSERT_TRUE(vd == 16);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 11);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 7);
 	vd = findVertex(ali_graph,2,18);
-	SEQAN_TASSERT(vd == 17)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 18)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 17);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 18);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	vd = findVertex(ali_graph,2,19);
-	SEQAN_TASSERT(vd == 18)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 19)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 18);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 19);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,2,21);
-	SEQAN_TASSERT(vd == 19)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 21)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 19);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 21);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 
 	vd = findVertex(ali_graph,3,0);
-	SEQAN_TASSERT(vd == 20)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+	SEQAN_ASSERT_TRUE(vd == 20);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3);
 	vd = findVertex(ali_graph,3,3);
-	SEQAN_TASSERT(vd == 21)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 3)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 21);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 3);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,3,5);
-	SEQAN_TASSERT(vd == 22)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 5)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 22);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 5);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	vd = findVertex(ali_graph,3,6);
-	SEQAN_TASSERT(vd == 23)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 6)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+	SEQAN_ASSERT_TRUE(vd == 23);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 6);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2);
 	vd = findVertex(ali_graph,3,8);
-	SEQAN_TASSERT(vd == 24)
-	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+	SEQAN_ASSERT_TRUE(vd == 24);
+	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8);
+	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1);
 	
-	SEQAN_TASSERT(findEdge(ali_graph,0,14)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,0,8)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,1,15)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,1,9)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,2,10)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,3,11)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
-	SEQAN_TASSERT(findEdge(ali_graph,4,21)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,5,22)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,5,13)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,6,23)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,7,24)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,17,22)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,18,23)!=0)
-	SEQAN_TASSERT(findEdge(ali_graph,19,24)!=0)
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,0,14)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,0,8)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,1,15)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,1,9)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,2,10)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,3,11)!=0);
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,4,21)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,5,22)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,5,13)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,6,23)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,7,24)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,8,14)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,9,20)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,9,15)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,11,22)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,12,23)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,13,24)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,17,22)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,18,23)!=0);
+	SEQAN_ASSERT_TRUE(findEdge(ali_graph,19,24)!=0);
 
 
 	//clear(ali_graph);
@@ -613,122 +612,122 @@ SEQAN_DEFINE_TEST(RefineAlign)
 //	VertexDescriptor<TAliGraph>::Type vd;
 //
 //	vd = findVertex(ali_graph,0,0);
-//	SEQAN_TASSERT(vd == 0)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(vd == 0)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8)
 //	vd = findVertex(ali_graph,0,8);
-//	SEQAN_TASSERT(vd == 1)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 1)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,0,11);
-//	SEQAN_TASSERT(vd == 2)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 2)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,0,14);
-//	SEQAN_TASSERT(vd == 3)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 3)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	vd = findVertex(ali_graph,0,15);
-//	SEQAN_TASSERT(vd == 4)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 4)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,0,17);
-//	SEQAN_TASSERT(vd == 5)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 5)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	vd = findVertex(ali_graph,0,18);
-//	SEQAN_TASSERT(vd == 6)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 6)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,0,20);
-//	SEQAN_TASSERT(vd == 7)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 7)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //
 //	vd = findVertex(ali_graph,1,0);
-//	SEQAN_TASSERT(vd == 8)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(vd == 8)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8)
 //	vd = findVertex(ali_graph,1,8);
-//	SEQAN_TASSERT(vd == 9)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 9)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,1,11);
-//	SEQAN_TASSERT(vd == 10)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 10)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 11)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,1,14);
-//	SEQAN_TASSERT(vd == 11)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 14)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 11)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 14)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	vd = findVertex(ali_graph,1,15);
-//	SEQAN_TASSERT(vd == 12)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 15)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 12)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 15)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,1,17);
-//	SEQAN_TASSERT(vd == 13)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 17)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 13)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 17)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //
 //	vd = findVertex(ali_graph,2,0);
-//	SEQAN_TASSERT(vd == 14)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(vd == 14)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 8)
 //	vd = findVertex(ali_graph,2,8);
-//	SEQAN_TASSERT(vd == 15)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 15)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,2,11);
-//	SEQAN_TASSERT(vd == 16)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 11)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 7)
+//	SEQAN_ASSERT_TRUE(vd == 16)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 11)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 7)
 //	vd = findVertex(ali_graph,2,18);
-//	SEQAN_TASSERT(vd == 17)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 18)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 17)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 18)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	vd = findVertex(ali_graph,2,19);
-//	SEQAN_TASSERT(vd == 18)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 19)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 18)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 19)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,2,21);
-//	SEQAN_TASSERT(vd == 19)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 21)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 19)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 21)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //
 //	vd = findVertex(ali_graph,3,0);
-//	SEQAN_TASSERT(vd == 20)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 0)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(vd == 20)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 0)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 3)
 //	vd = findVertex(ali_graph,3,3);
-//	SEQAN_TASSERT(vd == 21)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 3)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 21)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 3)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,3,5);
-//	SEQAN_TASSERT(vd == 22)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 5)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 22)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 5)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	vd = findVertex(ali_graph,3,6);
-//	SEQAN_TASSERT(vd == 23)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 6)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 2)
+//	SEQAN_ASSERT_TRUE(vd == 23)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 6)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 2)
 //	vd = findVertex(ali_graph,3,8);
-//	SEQAN_TASSERT(vd == 24)
-//	SEQAN_TASSERT(fragmentBegin(ali_graph,vd) == 8)
-//	SEQAN_TASSERT(fragmentLength(ali_graph,vd) == 1)
+//	SEQAN_ASSERT_TRUE(vd == 24)
+//	SEQAN_ASSERT_TRUE(fragmentBegin(ali_graph,vd) == 8)
+//	SEQAN_ASSERT_TRUE(fragmentLength(ali_graph,vd) == 1)
 //	
-//	SEQAN_TASSERT(findEdge(ali_graph,0,14)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,0,8)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,1,15)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,1,9)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,2,10)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,3,11)!=0)
-////	SEQAN_TASSERT(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
-//	SEQAN_TASSERT(findEdge(ali_graph,4,21)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,5,22)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,5,13)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,6,23)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,7,24)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,8,14)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,9,20)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,9,15)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,11,22)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,12,23)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,13,24)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,17,22)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,18,23)!=0)
-//	SEQAN_TASSERT(findEdge(ali_graph,19,24)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,0,14)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,0,8)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,1,15)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,1,9)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,2,10)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,3,11)!=0)
+////	SEQAN_ASSERT_TRUE(findEdge(ali_graph,4,12)!=0)  //doesnt exist if edges with score <= 0 are kicked out
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,4,21)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,5,22)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,5,13)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,6,23)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,7,24)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,8,14)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,9,20)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,9,15)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,11,22)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,12,23)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,13,24)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,17,22)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,18,23)!=0)
+//	SEQAN_ASSERT_TRUE(findEdge(ali_graph,19,24)!=0)
 //
 //
 //}
