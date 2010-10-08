@@ -457,10 +457,32 @@ void SEQAN_TEST_testSimpleAllocator();
 void SEQAN_TEST_testPoolAllocator();
 void SEQAN_TEST_testMultiPoolAllocator();
 
+SEQAN_DEFINE_TEST(test_basic_suprema_infima)
+{
+  using namespace seqan;
+
+  {
+    double x = SupremumValue<double>::VALUE;
+    SEQAN_ASSERT_EQ(x, 1);
+  }
+  {
+    double x = InfimumValue<double>::VALUE;
+    SEQAN_ASSERT_EQ(x, 1);
+  }
+  {
+    float x = SupremumValue<float>::VALUE;
+    SEQAN_ASSERT_EQ(x, 1);
+  }
+  {
+    float x = InfimumValue<float>::VALUE;
+    SEQAN_ASSERT_EQ(x, 1);
+  }
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
 SEQAN_BEGIN_TESTSUITE(test_basic) {
+	SEQAN_CALL_TEST(test_basic_suprema_infima);
 	SEQAN_CALL_TEST(Test_Proxy_Iterator);
 	SEQAN_CALL_TEST(Test_Holder);
 	SEQAN_CALL_TEST(Test_Iterator_Basic);

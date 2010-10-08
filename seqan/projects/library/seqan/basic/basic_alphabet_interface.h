@@ -22,6 +22,7 @@
 #define SEQAN_HEADER_BASIC_ALPHABET_INTERFACE_H
 
 #include <new>
+#include <float.h>
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -978,26 +979,41 @@ struct _SupremumValueUnsigned {	static const T VALUE; };
 template < typename T >
 struct _SupremumValueSigned {	static const T VALUE; };
 
+template < typename T = void >
+struct _SupremumValueFloat {	static const float VALUE; };
+template < typename T = void >
+struct _SupremumValueDouble {	static const double VALUE; };
+
 template < typename T >
 struct _InfimumValueUnsigned {	static const T VALUE; };
 template < typename T >
 struct _InfimumValueSigned {	static const T VALUE; };
 
+template < typename T = void >
+struct _InfimumValueFloat {	static const float VALUE; };
+template < typename T = void >
+struct _InfimumValueDouble {	static const double VALUE; };
 
 
 template < typename T >
 const T _SupremumValueUnsigned<T>::VALUE = ~(T)0;
 template < typename T >
 const T _SupremumValueSigned<T>::VALUE = ( (((T)1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1;
+template < typename T >
+const float _SupremumValueFloat<T>::VALUE = FLT_MAX;
+template < typename T >
+const double _SupremumValueDouble<T>::VALUE = DBL_MAX;
 
 template < typename T >
 const T _InfimumValueUnsigned<T>::VALUE = 0;
 template < typename T >
 const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
+template < typename T >
+const float _InfimumValueFloat<T>::VALUE = -FLT_MAX;
+template < typename T >
+const double _InfimumValueDouble<T>::VALUE = -DBL_MAX;
 
 
-// TODO(holtgrew): Mathematically, "maximum" would be more specific.
-// TODO(holtgrew): What about std::numeric_limits<T>::max()?
 /**
 .Metafunction.SupremumValue:
 ..cat:Miscellaneous
@@ -1009,19 +1025,27 @@ const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
 ..see:Function.supremumValue
 ..include:seqan/basic.h
  */
-template < 
-	typename T, 
+template <
+	typename T,
 	typename TParent = typename IF<
-		TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
-		_SupremumValueSigned<T>,
-		_SupremumValueUnsigned<T> >::Type >
+	  TYPECMP<double, T>::VALUE,
+	  _SupremumValueDouble<>,
+	  typename IF<
+      TYPECMP<float, T>::VALUE,
+      _SupremumValueFloat<>,
+      typename IF<
+        TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
+        _SupremumValueSigned<T>,
+        _SupremumValueUnsigned<T>
+        >::Type
+      >::Type
+    >::Type
+  >
 struct SupremumValue:
 	public TParent 
 {
 };
 
-// TODO(holtgrew): Mathematically, "minimum" would be more specific.
-// TODO(holtgrew): What about std::numeric_limits<T>::min()?
 /**
 .Metafunction.InfimumValue:
 ..cat:Miscellaneous
@@ -1033,14 +1057,24 @@ struct SupremumValue:
 ..see:Function.infimumValue
 ..include:seqan/basic.h
  */
-template < 
-	typename T, 
+template <
+	typename T,
 	typename TParent = typename IF<
-		TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
-		_InfimumValueSigned<T>,
-		_InfimumValueUnsigned<T> >::Type >
+	  TYPECMP<double, T>::VALUE,
+	  _SupremumValueDouble<>,
+	  typename IF<
+      TYPECMP<float, T>::VALUE,
+      _SupremumValueFloat<>,
+      typename IF<
+        TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
+        _InfimumValueSigned<T>,
+        _InfimumValueUnsigned<T>
+        >::Type
+      >::Type
+    >::Type
+  >
 struct InfimumValue:
-	public TParent 
+	public TParent
 {
 };
 
