@@ -1001,8 +1001,6 @@ SEQAN_CHECKPOINT
 ..param.object:An object.
 ...type:Class.Gaps
 ..param.source_in:An object that is assigned to the source of $object$.
-..param.begin_pos:Position of the first item in the source that is used in $object$. (optional)
-..param.end_pos:Position behind the last item in the source that is used in $object$. (optional)
 ..remarks:
 ...note:$source_in$ is not the new @Function.source@ of $object$, but $source_in$ is assigned (copied) to @Function.source.source(object)@.
 That means that the current source of $object$ is modified by this function. 
