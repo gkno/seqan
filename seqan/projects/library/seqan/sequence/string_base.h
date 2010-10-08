@@ -124,6 +124,11 @@ struct _TempCopy
 // swap
 //////////////////////////////////////////////////////////////////////////////
 
+// forwards for swap
+
+template<typename TAlphabet, typename TSpec> class String;
+template<typename TString, typename TSpec> class StringSet;
+
 /**
 .Function.swap:
 ..summary:Swaps the contents of two values.
