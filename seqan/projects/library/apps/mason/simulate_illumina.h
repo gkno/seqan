@@ -445,10 +445,10 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
             if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
                 // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
                 PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
-                inst.qualities[i] = pickRandomNumber(rng, pdf);
+                inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
             } else {
                 PDF<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
-                inst.qualities[i] = pickRandomNumber(rng, pdf);
+                inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
             }
 
             if (inst.editString[i] == ERROR_TYPE_MISMATCH || inst.editString[i] == ERROR_TYPE_MATCH)

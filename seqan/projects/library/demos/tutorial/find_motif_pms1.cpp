@@ -16,7 +16,6 @@ int main()
 	appendValue(dataset, DnaString("ACAGCA"));
 	appendValue(dataset, DnaString("AGGCAG"));
 	appendValue(dataset, DnaString("TCAGTC"));
-    TSize seqCount = length(dataset);
 
 // FRAGMENT(initialization)
 	TSize motifLength = 4;		//length of motif

@@ -1041,7 +1041,7 @@ inline bool _swiftMultiProcessQGram(
 
 		do 
 		{
-			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + pattern.finderPosOffset)
+			if ((__int64)(*bkt).lastIncrement < bktBeginHstk + (__int64)pattern.finderPosOffset)
 			{
 				// last increment was before the beginning of the current bucket
 				// (we must ensure that bucketIdx doesn't collide)

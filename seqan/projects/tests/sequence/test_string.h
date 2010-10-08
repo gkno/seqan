@@ -459,17 +459,11 @@ SEQAN_DEFINE_TEST(String_Alloc)
 	SEQAN_ASSERT_TRUE(str3 == "hello");
 	SEQAN_ASSERT_TRUE(length(str1) == 0);
 
-#pragma message "No swap test invoked."
-    SEQAN_TREPORT("No swap test invoked")
-#if 0
-  {
     String<char, Alloc<> > left = "left";
     String<char, Alloc<> > right = "right";
     seqan::swap(left, right);
     SEQAN_ASSERT_EQ(left, "right");
     SEQAN_ASSERT_EQ(right, "left");
-  }
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////
