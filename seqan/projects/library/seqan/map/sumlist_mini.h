@@ -703,14 +703,14 @@ public:
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TIteratorSpec>
 struct Iterator< SumList<DIM, TValue, MiniSumList<SIZE, TSpec> >, TIteratorSpec>
 {
-	typedef SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > TSumList;
-	typedef Iter<TSumList, MiniSumListIterator> Type;
+	typedef SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > TSumList_;
+	typedef Iter<TSumList_, MiniSumListIterator> Type;
 };
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TIteratorSpec>
 struct Iterator< SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const, TIteratorSpec>
 {
-	typedef SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const TSumList;
-	typedef Iter<TSumList, MiniSumListIterator> Type;
+	typedef SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const TSumList_;
+	typedef Iter<TSumList_, MiniSumListIterator> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

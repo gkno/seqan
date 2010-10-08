@@ -42,7 +42,7 @@ struct _SkipSumList;
 
 /*
 template <typename TValue, unsigned int DIM, typename TSpec>
-struct _SKIP_LIST_BLOCK_SIZE<Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > >
+struct SkipListBlockSize_<Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > >
 {
 	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
@@ -655,14 +655,14 @@ public:
 template <unsigned int DIM, typename TValue, typename TSpec, typename TIteratorSpec>
 struct Iterator< SumList<DIM, TValue, SkipSumList<TSpec> >, TIteratorSpec>
 {
-	typedef SumList<DIM, TValue, SkipSumList<TSpec> > TSumList;
-	typedef Iter<TSumList, SkipSumListIterator> Type;
+	typedef SumList<DIM, TValue, SkipSumList<TSpec> > TSumList_;
+	typedef Iter<TSumList_, SkipSumListIterator> Type;
 };
 template <unsigned int DIM, typename TValue, typename TSpec, typename TIteratorSpec>
 struct Iterator< SumList<DIM, TValue, SkipSumList<TSpec> > const, TIteratorSpec>
 {
-	typedef SumList<DIM, TValue, SkipSumList<TSpec> > const TSumList;
-	typedef Iter<TSumList, SkipSumListIterator> Type;
+	typedef SumList<DIM, TValue, SkipSumList<TSpec> > const TSumList_;
+	typedef Iter<TSumList_, SkipSumListIterator> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

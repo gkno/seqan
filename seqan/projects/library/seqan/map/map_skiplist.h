@@ -121,8 +121,8 @@ struct Cargo<Map<TValue, Skiplist<TSpec> > >:
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 struct Iterator<Map<TValue, Skiplist<TSpec> >, TIteratorSpec >
 {
-	typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
-	typedef Iter<TSkiplist, SkiplistIterator> Type;
+	typedef Map<TValue, Skiplist<TSpec> > TSkiplist_;
+	typedef Iter<TSkiplist_, SkiplistIterator> Type;
 };
 
 

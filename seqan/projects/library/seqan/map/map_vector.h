@@ -78,10 +78,10 @@ struct _VectorSetElements
 template <typename TValue, typename TSpec>
 struct _VectorSetElements<Map<TValue, VectorSet<TSpec> > >
 {
-	typedef Map<TValue, VectorSet<TSpec> > TMap;
-	typedef typename Cargo<TMap>::Type TCargo;
-	typedef _VectorSetElement<TCargo> TElement;
-	typedef String<TElement, TSpec> Type;
+	typedef Map<TValue, VectorSet<TSpec> > TMap_;
+	typedef typename Cargo<TMap_>::Type TCargo_;
+	typedef _VectorSetElement<TCargo_> TElement_;
+	typedef String<TElement_, TSpec> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -131,9 +131,9 @@ struct Value< Map<TValue, VectorSet<TSpec> > >
 template <typename TValue, typename TSpec>
 struct Reference< Map<TValue, VectorSet<TSpec> > > 
 {
-	typedef Map<TValue, VectorSet<TSpec> > TMap;
-	typedef typename Iterator<TMap>::Type TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef Map<TValue, VectorSet<TSpec> > TMap_;
+	typedef typename Iterator<TMap_>::Type TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 
 
@@ -215,8 +215,8 @@ public:
 template <typename TObject, typename TSpec, typename TIteratorSpec>
 struct Iterator< Map<TObject, VectorSet<TSpec> >, TIteratorSpec > 
 {
-	typedef Map<TObject, VectorSet<TSpec> > TMap;
-	typedef Iter<TMap, VectorSetIterator> Type;
+	typedef Map<TObject, VectorSet<TSpec> > TMap_;
+	typedef Iter<TMap_, VectorSetIterator> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
