@@ -193,11 +193,11 @@ struct JournalType;
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
 struct JournalType<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >
 {
-    typedef typename Size<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type _TSize;
-    typedef typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type _TPosition;
-    typedef JournalEntry<_TSize, _TPosition> _TJournalEntry;
+    typedef typename Size<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type TSize_;
+    typedef typename Position<String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > >::Type TPosition_;
+    typedef JournalEntry<TSize_, TPosition_> TJournalEntry_;
 
-    typedef JournalEntries<_TJournalEntry, TJournalSpec> Type;
+    typedef JournalEntries<TJournalEntry_, TJournalSpec> Type;
 };
 
 template <typename TValue, typename THostSpec, typename TJournalSpec, typename TBufferSpec>
