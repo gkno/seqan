@@ -66,32 +66,6 @@ int countDeallocs(TestAllocator & me)
 } 
  
 
-//____________________________________________________________________________
-
-/*
-void test()
-{
-	printf("start Test\n");
-
-	int somewhat;
-
-	char * s;
-	allocate(somewhat, s, 100);
-	deallocate(somewhat, s, 100);
-
-	ToStdAllocator<int, char> std_alloc(somewhat);
-	vector<char, ToStdAllocator<int, char> > vec( std_alloc );
-
-	char c;
-	for (c='A'; c <= 'Z'; ++c)
-	{
-		vec.push_back(c);
-	}
-
-	printf("\nend Test\n");
-}
-*/
-//____________________________________________________________________________
 
 SEQAN_DEFINE_TEST(testSimpleAllocator) {
 	int * dat1;

@@ -6,8 +6,12 @@
 #define SEQAN_TEST
 
 #include "seqan/basic.h"
-
 #include "seqan/sequence.h"
+
+#include "test_allocator.h"
+#include "test_common.h"
+#include "test_alphabet.h"
+
 
 using namespace std;
 using namespace seqan;
@@ -439,23 +443,6 @@ SEQAN_DEFINE_TEST(Test_Transport) {
 	SEQAN_ASSERT_EQ(o1.data_dat, 10);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-// TODO(holtgrew): This is highly temporary!
-// Forward-declarations of tests defined elsewhere.
-void SEQAN_TEST_Test_Definition();
-void SEQAN_TEST_Test_Type();
-void SEQAN_TEST_Test_Iterator_Adapt_Std();
-
-void SEQAN_TEST_TestAlphabetInterface();
-void SEQAN_TEST_TestSimpleTypeConversions();
-void SEQAN_TEST_TestExtremeValues();
-void SEQAN_TEST_Test_Simple_Types();
-void SEQAN_TEST_Test_Array_Functions();
-
-void SEQAN_TEST_testSimpleAllocator();
-void SEQAN_TEST_testPoolAllocator();
-void SEQAN_TEST_testMultiPoolAllocator();
 
 SEQAN_DEFINE_TEST(test_basic_suprema_infima)
 {
