@@ -13,7 +13,7 @@ set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 # Use CMake's package location functionality to find the directories of
 # TBB and Boost.
 find_package (TBB)
-find_package (OpenMP QUIET)
+find_package (OpenMP)
 find_package (Boost 1.35.0)  # >= 1.35 for math/distributions, however broken?
 
 # We need Boost >= 1.35.0.  However, the FindBoost module seems to be
