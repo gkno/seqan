@@ -213,10 +213,10 @@ SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	MotifFinder<Dna, PMSP> motif_finder2(l,d,is_exact);
 	findMotif(motif_finder2,dataset1,OOPS());
 
-	SEQAN_TASSERT(length(motif_finder1.set_of_motifs)==length(motif_finder2.set_of_motifs));
+	SEQAN_ASSERT_TRUE(length(motif_finder1.set_of_motifs)==length(motif_finder2.set_of_motifs));
 	for(i=0; i<length(motif_finder1.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(motif_finder1.set_of_motifs[i]==motif_finder2.set_of_motifs[i]);
+		SEQAN_ASSERT_TRUE(motif_finder1.set_of_motifs[i]==motif_finder2.set_of_motifs[i]);
 	}
 
 //____________________________________________________________________________
@@ -242,10 +242,10 @@ SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	MotifFinder<Dna, PMSP> motif_finder4(l,d,is_exact);
 	findMotif(motif_finder4,dataset2,OMOPS());
 
-	SEQAN_TASSERT(length(motif_finder3.set_of_motifs)==length(motif_finder4.set_of_motifs));
+	SEQAN_ASSERT_TRUE(length(motif_finder3.set_of_motifs)==length(motif_finder4.set_of_motifs));
 	for(i=0; i<length(motif_finder3.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(motif_finder3.set_of_motifs[i]==motif_finder4.set_of_motifs[i]);
+		SEQAN_ASSERT_TRUE(motif_finder3.set_of_motifs[i]==motif_finder4.set_of_motifs[i]);
 	}
 
 //____________________________________________________________________________
@@ -271,10 +271,10 @@ SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	MotifFinder<Dna, PMSP> motif_finder6(l,d,is_exact);
 	findMotif(motif_finder6,dataset3,ZOOPS());
 
-	SEQAN_TASSERT(length(motif_finder5.set_of_motifs)==length(motif_finder6.set_of_motifs));
+	SEQAN_ASSERT_TRUE(length(motif_finder5.set_of_motifs)==length(motif_finder6.set_of_motifs));
 	for(i=0; i<length(motif_finder5.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(motif_finder5.set_of_motifs[i]==motif_finder6.set_of_motifs[i]);
+		SEQAN_ASSERT_TRUE(motif_finder5.set_of_motifs[i]==motif_finder6.set_of_motifs[i]);
 	}
 
 //____________________________________________________________________________
@@ -297,10 +297,10 @@ SEQAN_DEFINE_TEST(test_find_motif_exact_algorithms) {
 	MotifFinder<Dna, PMSP> motif_finder8(l,d,is_exact);
 	findMotif(motif_finder8,dataset4,TCM());
 	
-	SEQAN_TASSERT(length(motif_finder7.set_of_motifs)==length(motif_finder8.set_of_motifs));
+	SEQAN_ASSERT_TRUE(length(motif_finder7.set_of_motifs)==length(motif_finder8.set_of_motifs));
 	for(i=0; i<length(motif_finder7.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(motif_finder7.set_of_motifs[i]==motif_finder8.set_of_motifs[i]);
+		SEQAN_ASSERT_TRUE(motif_finder7.set_of_motifs[i]==motif_finder8.set_of_motifs[i]);
 	}
 
 }
@@ -340,7 +340,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
     MotifFinder<Dna, Projection> motif_finder1(t,l,m,d,is_exact);
 	findMotif(motif_finder1, dataset1, OOPS());
 	//check whether found motif is really an OOPS motif
-	SEQAN_TASSERT(isOOPSMotif(begin(dataset1),
+	SEQAN_ASSERT_TRUE(isOOPSMotif(begin(dataset1),
 				  end(dataset1),
 				  getMotif(motif_finder1,0),
 				  d,
@@ -354,7 +354,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
 	//check whether found motif is really an OOPS motif
 	for(i=0; i<length(motif_finder2.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(isOOPSMotif(begin(dataset1),
+		SEQAN_ASSERT_TRUE(isOOPSMotif(begin(dataset1),
 					  end(dataset1),
 				      motif_finder2.set_of_motifs[i],
 				      d,
@@ -371,7 +371,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
     MotifFinder<Dna, Projection> motif_finder3(t,l,m,d,is_exact);
 	findMotif(motif_finder3, dataset1, OMOPS());
 	//check whether found motif is really an OMOPS motif
-	SEQAN_TASSERT(isOMOPSMotif(begin(dataset1),
+	SEQAN_ASSERT_TRUE(isOMOPSMotif(begin(dataset1),
 				  end(dataset1),
 				  getMotif(motif_finder3, 0),
 				  d,
@@ -386,7 +386,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
 	//check whether found motif is really an OMOPS motif
 	for(i=0; i<length(motif_finder4.set_of_motifs); ++i)
 	{
-		SEQAN_TASSERT(isOMOPSMotif(begin(dataset1),
+		SEQAN_ASSERT_TRUE(isOMOPSMotif(begin(dataset1),
 					  end(dataset1),
 				      motif_finder4.set_of_motifs[i],
 				      d,
@@ -401,7 +401,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
     MotifFinder<Dna, Projection> motif_finder5(t,l,m,d,is_exact);
 	findMotif(motif_finder5, dataset1, ZOOPS());
 	//check whether found motif is really a ZOOPS motif
-	SEQAN_TASSERT(isZOOPSMotif(begin(dataset1),
+	SEQAN_ASSERT_TRUE(isZOOPSMotif(begin(dataset1),
 				  end(dataset1),
 				  getMotif(motif_finder5, 0),
 				  d,
@@ -417,7 +417,7 @@ SEQAN_DEFINE_TEST(test_find_motif_approximation_algorithms) {
     MotifFinder<Dna, Projection> motif_finder6(t,l,m,d,is_exact);
 	findMotif(motif_finder6, dataset1, TCM());
 	//check whether found motif is really a TCM motif
-	SEQAN_TASSERT(isTCMMotif(begin(dataset1),
+	SEQAN_ASSERT_TRUE(isTCMMotif(begin(dataset1),
 				  end(dataset1),
 				  getMotif(motif_finder6),
 				  d,
