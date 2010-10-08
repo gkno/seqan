@@ -190,7 +190,7 @@ template < typename TMatches, typename TCounts, typename TSpec, typename TSwiftL
 void compactSplicedMatches(TMatches &matches, 
 			TCounts & /*cnts*/, 
 			RazerSOptions<TSpec> &options, 
-			bool compactFinal, 
+			bool , 
 			TSwiftL &swiftL, 
 			TSwiftR &swiftR)
 {
@@ -284,7 +284,7 @@ template < typename TMatches, typename TCounts, typename TSpec>
 void compactAndCountSplicedMatches(TMatches &matches, 
 			TCounts & states, 
 			RazerSOptions<TSpec> &options, 
-			bool compactFinal)
+			bool )
 {
 	typedef typename Value<TMatches>::Type				TMatch;
 	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
@@ -2032,7 +2032,7 @@ void mapSplicedReads(
 	
 	
 	// Check?
-	TSignedGPos maxGap = options.maxGap;// + 2 * (int)options.minMatchLength - (int)length(indexShape(host(swiftPatternL)));
+//	TSignedGPos maxGap = options.maxGap;// + 2 * (int)options.minMatchLength - (int)length(indexShape(host(swiftPatternL)));
 	TSignedGPos minGap = options.minGap;// + 2*options.minMatchLen;
 
 	TSignedGPos maxDistance = options.maxGap + (int)options.maxReadLength;

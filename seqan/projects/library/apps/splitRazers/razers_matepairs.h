@@ -701,7 +701,7 @@ void mapMatePairReads(
 		0, 0,
 #endif
 #ifdef RAZERS_SPLICED
-		0,
+		0, 0,
 #endif
 		0
 	};

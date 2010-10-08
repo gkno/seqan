@@ -1361,7 +1361,8 @@ void dumpMatches(
 				//file << ";pairId=" << mR.pairId;
 				int pairIdR = mR.pairId;
 				int pairIdL = mL.pairId;
-						
+				SEQAN_ASSERT_TRUE(pairIdR == pairIdL);
+	
 				int indelLen = mR.mScore + mL.mScore - readLen;
 				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;
 				
