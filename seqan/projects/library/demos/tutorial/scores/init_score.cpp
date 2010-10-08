@@ -39,6 +39,8 @@ namespace seqan {
 // We have to create a new specialization of the _ScoringMatrix class
 // for amino acids.  For this, we first create a new tag.
 struct UserDefinedMatrix {};
+// We also do this for the DNA alphabet.
+struct AnotherUserDefinedMatrix {};
 
 // Then, we specialize the class _ScoringMatrix.
 template <>
@@ -79,6 +81,27 @@ struct _ScoringMatrixData<int, AminoAcid, UserDefinedMatrix> {
         return _data;
     }
 };
+
+// And we do this for the Dna5 alphabet.
+template <>
+struct _ScoringMatrixData<int, Dna5, AnotherUserDefinedMatrix> {
+    enum {
+        VALUE_SIZE = ValueSize<Dna5>::VALUE,
+        TAB_SIZE = VALUE_SIZE * VALUE_SIZE
+    };
+
+    static inline int const * getData() {
+        // The user defined data table.  In this case, we use the data from BLOSUM-30.
+        static int const _data[TAB_SIZE] = {
+          1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0,
+          0, 0, 1, 0, 0,
+          0, 0, 0, 1, 0,
+          0, 0, 0, 0, 0
+        };
+        return _data;
+    }
+};
 }  // namespace seqan
 
 // FRAGMENT(show-scoring-matrix)
@@ -103,6 +126,8 @@ void showScoringMatrix(Score<TScoreValue, ScoreMatrix<TSequenceValue, TSpec> > c
 // FRAGMENT(main)
 int main()
 {
+    // 1. Define type and constants.
+    //
     // Define types for the score value and the scoring scheme.
     typedef int TValue;
     typedef Score<TValue, ScoreMatrix<AminoAcid, Default> > TScoringScheme;
@@ -110,20 +135,24 @@ int main()
     int const gapOpenScore = -1;
     int const gapExtendScore = -1;
 
+    // 2. Construct scoring scheme with default/empty matrix.
+    //
     // Construct new scoring scheme, alternatively only give one score
     // that is used for both opening and extension.
     TScoringScheme scoringScheme(gapOpenScore, gapExtendScore);
 
+    // 3. Fill the now-existing ScoreMatrix
+    //
     // The scoring scheme now already has a matrix of the size
     // ValueSize<AminoAcid>::VALUE x ValueSize<AminoAcid>::VALUE which
     // we can now fill.
 
-    // First, fill it with BLOSUM30.
+    // 3.1 First, fill it with BLOSUM30.
     std::cout << "BLOSUM 30" << std::endl;
     setDefaultScoreMatrix(scoringScheme, _Blosum30());
     showScoringMatrix(scoringScheme);
 
-    // Now, we fill it with the product of the coordinates.
+    // 3.2 Now, we fill it with the product of the coordinates.
     std::cout << std::endl << "Coordinate Products" << std::endl;
     for (unsigned i = 0; i < ValueSize<AminoAcid>::VALUE; ++i) {
         for (unsigned j = 0; j < ValueSize<AminoAcid>::VALUE; ++j) {
@@ -132,10 +161,20 @@ int main()
     }
     showScoringMatrix(scoringScheme);
 
-    // Now, we fill it with the user defined matrix above.
+    // 3.3 Now, we fill it with the user defined matrix above.
     std::cout << "User defined matrix (also BLOSUM 30)..." << std::endl;
     setDefaultScoreMatrix(scoringScheme, UserDefinedMatrix());
     showScoringMatrix(scoringScheme);
+
+    // 4. Create ScoreMatrix object with user-defined matrix.
+    std::cout << "User scoring scheme..." << std::endl;
+    Score<TValue, ScoreMatrix<AminoAcid, UserDefinedMatrix> > userScoringScheme;
+    showScoringMatrix(userScoringScheme);
+
+    // 5. Show our Dna5 scoring matrix.
+    std::cout << "User DNA scoring scheme..." << std::endl;
+    Score<TValue, ScoreMatrix<Dna5, AnotherUserDefinedMatrix> > userScoringSchemeDna;
+    showScoringMatrix(userScoringSchemeDna);
 
 	return 0;
 }
