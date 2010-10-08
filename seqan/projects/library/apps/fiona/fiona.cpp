@@ -491,7 +491,7 @@ void traverseAndSearchCorrections(
 
 	for (goBegin(iter); !atEnd(iter); goNext(iter))		// do a DFS walk
 	{
-		int commonPrefix = parentRepLength(iter);			// length of parent label
+		unsigned commonPrefix = parentRepLength(iter);			// length of parent label
 
 		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheoretical));
 		if (parentEdgeFirstChar(iter) != unknownChar &&
