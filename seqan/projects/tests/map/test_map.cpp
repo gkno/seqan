@@ -1,29 +1,35 @@
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-#define SEQAN_NOSRAN
+/*==========================================================================
+ SeqAn - The Library for Sequence Analysis
+ http://www.seqan.de 
+ ===========================================================================
+ Copyright (C) 2010
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ ===========================================================================
+ Author: @@Your Name@@ <@@Your Email@@>
+ ===========================================================================
+ @@Description of what is tested here@@
+ ===========================================================================
+ */
 
 #include <seqan/basic.h>
 
-using namespace seqan;
+#include "test_map_map.h"
+#include "test_map_sumlist.h"
 
-//////////////////////////////////////////////////////////////////////////////
 
-void Main_Test_Map();
-void Main_TestSumlist();
-
-//////////////////////////////////////////////////////////////////////////////
-
-int main() 
-{
-	SEQAN_TREPORT("TEST BEGIN")
-//____________________________________________________________________________
-
-    Main_Test_Map();
-    Main_TestSumlist();
-
-//____________________________________________________________________________
-
-	SEQAN_TREPORT("TEST END")
-
-	return 0;
+SEQAN_BEGIN_TESTSUITE(test_map) {
+    // Call Tests.
+    SEQAN_CALL_TEST(test_map_map);
+    SEQAN_CALL_TEST(test_map_sumlist);
 }
+SEQAN_END_TESTSUITE

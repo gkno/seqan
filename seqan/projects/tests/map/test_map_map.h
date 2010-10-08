@@ -7,14 +7,8 @@
 #include <map>
 #include <set>
 
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-#define SEQAN_NOSRAN
-
 #include <seqan/map.h>
-
 #include <seqan/misc/misc_set.h>
-
 #include <seqan/find.h>
 
 using namespace std;
@@ -30,17 +24,17 @@ void Test_STLSet()
 
 	TMap map;
 
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 
 	insert(map, 2);
-	SEQAN_TASSERT(hasKey(map,2));
-	SEQAN_TASSERT(!hasKey(map,5));
+	SEQAN_ASSERT_TRUE(hasKey(map,2));
+	SEQAN_ASSERT_TRUE(!hasKey(map,5));
 
 	insert(map, 5);
-	SEQAN_TASSERT(hasKey(map,5));
+	SEQAN_ASSERT_TRUE(hasKey(map,5));
 
 	insert(map, 1);
-	SEQAN_TASSERT(hasKey(map, 1));
+	SEQAN_ASSERT_TRUE(hasKey(map, 1));
 
 	int arr1[] = {1, 2, 5};
 	TIterator it;
@@ -48,30 +42,30 @@ void Test_STLSet()
     int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
-		SEQAN_TASSERT(i < 3)
-		SEQAN_TASSERT(key(it) == arr1[i])
+		SEQAN_ASSERT_TRUE(i < 3);
+		SEQAN_ASSERT_TRUE(key(it) == arr1[i]);
         goNext(it);
 	}
-    SEQAN_TASSERT(i == 3)
+    SEQAN_ASSERT_TRUE(i == 3);
 
 	it = find(map, 2);
 
     TIterator it2(it);
-    SEQAN_TASSERT(it == it2);
-    SEQAN_TASSERT(key(it) == 2);
-    SEQAN_TASSERT(key(it2) == 2);
+    SEQAN_ASSERT_TRUE(it == it2);
+    SEQAN_ASSERT_TRUE(key(it) == 2);
+    SEQAN_ASSERT_TRUE(key(it2) == 2);
     
     goNext(it2);
-    SEQAN_TASSERT(it != it2);
+    SEQAN_ASSERT_TRUE(it != it2);
 
 	erase(map, it);
-	SEQAN_TASSERT(!hasKey(map,2));
+	SEQAN_ASSERT_TRUE(!hasKey(map,2));
 
     erase(map, 5);
-    SEQAN_TASSERT(!hasKey(map,5));
+    SEQAN_ASSERT_TRUE(!hasKey(map,5));
 
     clear(map);
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 }
 
 
@@ -83,37 +77,37 @@ void Test_NoCargo_Single()
 
 	TMap map;
 
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 
 	insert(map, 2);
-	SEQAN_TASSERT(map[2]);
-	SEQAN_TASSERT(!map[5]);
+	SEQAN_ASSERT_TRUE(map[2]);
+	SEQAN_ASSERT_TRUE(!map[5]);
 
     TMap map2;
     map2 = map;
-	SEQAN_TASSERT(map2[2]);
-	SEQAN_TASSERT(!map2[5]);
+	SEQAN_ASSERT_TRUE(map2[2]);
+	SEQAN_ASSERT_TRUE(!map2[5]);
 
 	insert(map, 5);
-	SEQAN_TASSERT(map[5]);
+	SEQAN_ASSERT_TRUE(map[5]);
 
 	insert(map, 1);
-	SEQAN_TASSERT(hasKey(map, 1));
+	SEQAN_ASSERT_TRUE(hasKey(map, 1));
 
 	int arr1[] = {1, 2, 5};
 	TIterator it = begin(map);
     int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
-		SEQAN_TASSERT(i < 3)
-		SEQAN_TASSERT(key(it) == arr1[i])
+		SEQAN_ASSERT_TRUE(i < 3);
+		SEQAN_ASSERT_TRUE(key(it) == arr1[i]);
         goNext(it);
 	}
-    SEQAN_TASSERT(i == 3)
+    SEQAN_ASSERT_TRUE(i == 3);
 
 	it = find(map, 2);
 	erase(map, it);
-	SEQAN_TASSERT(!map[2]);
+	SEQAN_ASSERT_TRUE(!map[2]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -126,7 +120,7 @@ void Test_STLMap()
 
 	TMap map;
 
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 
 	insert(map, TValue(3, 1) );
 	insert(map, TValue(1, 2) );
@@ -135,7 +129,7 @@ void Test_STLMap()
 
 	insert(map, 2, 4);
 
-	SEQAN_TASSERT(length(map) == 4)
+	SEQAN_ASSERT_TRUE(length(map) == 4);
 
 	int arr1[] = {2, 4, 1, 3};
 	int arr2[] = {1, 2, 3, 10};
@@ -144,64 +138,64 @@ void Test_STLMap()
 	int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
-		SEQAN_TASSERT(i < 4)
-		SEQAN_TASSERT(cargo(it) == arr1[i])
-		SEQAN_TASSERT(key(it) == arr2[i])
-		//SEQAN_TASSERT(key(value(it)) == arr2[i])
+		SEQAN_ASSERT_TRUE(i < 4);
+		SEQAN_ASSERT_TRUE(cargo(it) == arr1[i]);
+		SEQAN_ASSERT_TRUE(key(it) == arr2[i]);
+		//SEQAN_ASSERT_TRUE(key(value(it)) == arr2[i]);
 		goNext(it);
 	}
-    SEQAN_TASSERT(i == 4)
+    SEQAN_ASSERT_TRUE(i == 4);
 
 	map[8] = 5;
 	map[2] = 6;
 
-	SEQAN_TASSERT(mapValue(map, 8) == 5);
+	SEQAN_ASSERT_TRUE(mapValue(map, 8) == 5);
 
 	int arr3[] = {2, 6, 1, 5, 3};
 	int arr4[] = {1, 2, 3, 8, 10};
 	i = 0;
 	for (it = begin(map); it != end(map); ++it)
 	{
-		SEQAN_TASSERT(i < 5)
-		SEQAN_TASSERT(cargo(it) == arr3[i])
-		SEQAN_TASSERT(key(it) == arr4[i])
+		SEQAN_ASSERT_TRUE(i < 5);
+		SEQAN_ASSERT_TRUE(cargo(it) == arr3[i]);
+		SEQAN_ASSERT_TRUE(key(it) == arr4[i]);
 		++i;
 	}
-    SEQAN_TASSERT(i == 5)
+    SEQAN_ASSERT_TRUE(i == 5);
 
 	it = find(map, 7);
-	SEQAN_TASSERT(it)
-	SEQAN_TASSERT(key(it) == 8)
-	SEQAN_TASSERT(cargo(it) == 5)
+	SEQAN_ASSERT_TRUE(it);
+	SEQAN_ASSERT_TRUE(key(it) == 8);
+	SEQAN_ASSERT_TRUE(cargo(it) == 5);
 
     TIterator it2(it);
-	SEQAN_TASSERT(it2)
-	SEQAN_TASSERT(key(it2) == 8)
-	SEQAN_TASSERT(cargo(it2) == 5)
+	SEQAN_ASSERT_TRUE(it2);
+	SEQAN_ASSERT_TRUE(key(it2) == 8);
+	SEQAN_ASSERT_TRUE(cargo(it2) == 5);
 
-	//SEQAN_TASSERT(key(value(it)) == 8)
-	//SEQAN_TASSERT(cargo(*it) == 5)
+	//SEQAN_ASSERT_TRUE(key(value(it)) == 8);
+	//SEQAN_ASSERT_TRUE(cargo(*it) == 5);
 	//cargo(value(it)) = 20;
-	//SEQAN_TASSERT(cargo(it) == 20)
+	//SEQAN_ASSERT_TRUE(cargo(it) == 20);
 
-	SEQAN_TASSERT(it != begin(map))
-	SEQAN_TASSERT(it == it);
+	SEQAN_ASSERT_TRUE(it != begin(map));
+	SEQAN_ASSERT_TRUE(it == it);
 
-	SEQAN_TASSERT(hasKey(map, 8));
-	SEQAN_TASSERT(length(map) == 5)
+	SEQAN_ASSERT_TRUE(hasKey(map, 8));
+	SEQAN_ASSERT_TRUE(length(map) == 5);
 	erase(map, it);
-	SEQAN_TASSERT(!hasKey(map, 8));
-	SEQAN_TASSERT(length(map) == 4)
+	SEQAN_ASSERT_TRUE(!hasKey(map, 8));
+	SEQAN_ASSERT_TRUE(length(map) == 4);
 
 	erase(map, 2);
-	SEQAN_TASSERT(!hasKey(map, 2));
-	SEQAN_TASSERT(length(map) == 3)
+	SEQAN_ASSERT_TRUE(!hasKey(map, 2));
+	SEQAN_ASSERT_TRUE(length(map) == 3);
 
 	erase(map, 8);
-	SEQAN_TASSERT(length(map) == 3)
+	SEQAN_ASSERT_TRUE(length(map) == 3);
 
 	clear(map);
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -214,14 +208,14 @@ void Test_Cargo_Single()
 
 	TMap map;
 
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 
 	insert(map, TValue(3, 1) );
 	insert(map, TValue(1, 2) );
 	insert(map, 10, 3);
 	insert(map, 2, 4);
 
-	SEQAN_TASSERT(length(map) == 4)
+	SEQAN_ASSERT_TRUE(length(map) == 4);
 
 	int arr1[] = {2, 4, 1, 3};
 	int arr2[] = {1, 2, 3, 10};
@@ -229,59 +223,59 @@ void Test_Cargo_Single()
 	int i;
 	for (i = 0; !atEnd(it); ++i)
 	{
-		SEQAN_TASSERT(i < 4)
-		SEQAN_TASSERT(cargo(it) == arr1[i])
-		SEQAN_TASSERT(key(it) == arr2[i])
-		SEQAN_TASSERT(key(value(it)) == arr2[i])
+		SEQAN_ASSERT_TRUE(i < 4);
+		SEQAN_ASSERT_TRUE(cargo(it) == arr1[i]);
+		SEQAN_ASSERT_TRUE(key(it) == arr2[i]);
+		SEQAN_ASSERT_TRUE(key(value(it)) == arr2[i]);
 		goNext(it);
 	}
-    SEQAN_TASSERT(i == 4)
+    SEQAN_ASSERT_TRUE(i == 4);
 
 	map[8] = 5;
 	map[2] = 6;
 
-	SEQAN_TASSERT(mapValue(map, 8) == 5);
+	SEQAN_ASSERT_TRUE(mapValue(map, 8) == 5);
 
 	int arr3[] = {2, 6, 1, 5, 3};
 	int arr4[] = {1, 2, 3, 8, 10};
 	i = 0;
 	for (it = begin(map); it != end(map); ++it)
 	{
-		SEQAN_TASSERT(i < 5)
-		SEQAN_TASSERT(cargo(it) == arr3[i])
-		SEQAN_TASSERT(key(it) == arr4[i])
+		SEQAN_ASSERT_TRUE(i < 5);
+		SEQAN_ASSERT_TRUE(cargo(it) == arr3[i]);
+		SEQAN_ASSERT_TRUE(key(it) == arr4[i]);
 		++i;
 	}
-    SEQAN_TASSERT(i == 5)
+    SEQAN_ASSERT_TRUE(i == 5);
 
 	it = find(map, 7);
-	SEQAN_TASSERT(it)
-	SEQAN_TASSERT(key(it) == 8)
-	SEQAN_TASSERT(cargo(it) == 5)
+	SEQAN_ASSERT_TRUE(it != 0);
+	SEQAN_ASSERT_TRUE(key(it) == 8);
+	SEQAN_ASSERT_TRUE(cargo(it) == 5);
 
-	SEQAN_TASSERT(key(value(it)) == 8)
-	SEQAN_TASSERT(cargo(*it) == 5)
+	SEQAN_ASSERT_TRUE(key(value(it)) == 8);
+	SEQAN_ASSERT_TRUE(cargo(*it) == 5);
 	cargo(value(it)) = 20;
-	SEQAN_TASSERT(cargo(it) == 20)
+	SEQAN_ASSERT_TRUE(cargo(it) == 20);
 
-	SEQAN_TASSERT(it != begin(map))
-	SEQAN_TASSERT(it == it);
+	SEQAN_ASSERT_TRUE(it != begin(map));
+	SEQAN_ASSERT_TRUE(it == it);
 
-	SEQAN_TASSERT(hasKey(map, 8));
-	SEQAN_TASSERT(length(map) == 5)
+	SEQAN_ASSERT_TRUE(hasKey(map, 8));
+	SEQAN_ASSERT_TRUE(length(map) == 5);
 	erase(map, it);
-	SEQAN_TASSERT(!hasKey(map, 8));
-	SEQAN_TASSERT(length(map) == 4)
+	SEQAN_ASSERT_TRUE(!hasKey(map, 8));
+	SEQAN_ASSERT_TRUE(length(map) == 4);
 
 	erase(map, 2);
-	SEQAN_TASSERT(!hasKey(map, 2));
-	SEQAN_TASSERT(length(map) == 3)
+	SEQAN_ASSERT_TRUE(!hasKey(map, 2));
+	SEQAN_ASSERT_TRUE(length(map) == 3);
 
 	erase(map, 8);
-	SEQAN_TASSERT(length(map) == 3)
+	SEQAN_ASSERT_TRUE(length(map) == 3);
 
 	clear(map);
-	SEQAN_TASSERT(length(map) == 0)
+	SEQAN_ASSERT_TRUE(length(map) == 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -295,19 +289,19 @@ void Test_Cargo_Multiple()
 	TMap map;
 
 	insert(map, 2, 4);
-	SEQAN_TASSERT(length(map) == 1)
+	SEQAN_ASSERT_TRUE(length(map) == 1);
 
 	insert(map, 2, 5);
-	SEQAN_TASSERT(length(map) == 1)
+	SEQAN_ASSERT_TRUE(length(map) == 1);
 
 	add(map, 2, 6);
-	SEQAN_TASSERT(length(map) == 2)
+	SEQAN_ASSERT_TRUE(length(map) == 2);
 
 	add(map, 3, 7);
-	SEQAN_TASSERT(length(map) == 3)
+	SEQAN_ASSERT_TRUE(length(map) == 3);
 
 	eraseAll(map, 2);
-	SEQAN_TASSERT(length(map) == 1)
+	SEQAN_ASSERT_TRUE(length(map) == 1);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -319,13 +313,13 @@ void Test_Skiplist_Extra()
 	TMap map;
 
 	map[8] = 5;
-	SEQAN_TASSERT(value(map, 8) == TValue(8, 5) )
+	SEQAN_ASSERT_TRUE(value(map, 8) == TValue(8, 5) );
 
 	map[2] = 3;
 	TMap map2 = map;
-	SEQAN_TASSERT(length(map2) == 2)
-	SEQAN_TASSERT(map2[8] == 5)
-	SEQAN_TASSERT(map2[2] == 3)
+	SEQAN_ASSERT_TRUE(length(map2) == 2);
+	SEQAN_ASSERT_TRUE(map2[8] == 5);
+	SEQAN_ASSERT_TRUE(map2[2] == 3);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -336,22 +330,22 @@ void _CompareMaps(TMap1 & map1, TMap2 & map2)
 	typedef typename Iterator<TMap1>::Type TIter1;
 	typedef typename Iterator<TMap2>::Type TIter2;
 
-	SEQAN_TASSERT(length(map1) == length(map2))
+	SEQAN_ASSERT_TRUE(length(map1) == length(map2));
 
 	TIter1 it1(map1);
 	TIter2 it2(map2);
 
 	while (!atEnd(it1))
 	{
-		SEQAN_TASSERT(!atEnd(it2))
-		SEQAN_TASSERT(key(it1) == key(it2))
-		SEQAN_TASSERT(cargo(it1) == cargo(it2))
+		SEQAN_ASSERT_TRUE(!atEnd(it2));
+		SEQAN_ASSERT_TRUE(key(it1) == key(it2));
+		SEQAN_ASSERT_TRUE(cargo(it1) == cargo(it2));
 
 		goNext(it1);
 		goNext(it2);
 	}
 
-	SEQAN_TASSERT(atEnd(it2))
+	SEQAN_ASSERT_TRUE(atEnd(it2));
 }
 
 //____________________________________________________________________________
@@ -394,11 +388,11 @@ void Test_Skiplist_Stress()
 			sl_it = find(sl, _key);
 			stdmap_it = find(stdmap, _key);
 
-			SEQAN_TASSERT(atEnd(sl_it) == atEnd(stdmap_it))
+			SEQAN_ASSERT_TRUE(atEnd(sl_it) == atEnd(stdmap_it));
 			if (! atEnd(sl_it))
 			{
-				SEQAN_TASSERT(key(sl_it) == key(stdmap_it))
-				SEQAN_TASSERT(cargo(sl_it) == cargo(stdmap_it))
+				SEQAN_ASSERT_TRUE(key(sl_it) == key(stdmap_it));
+				SEQAN_ASSERT_TRUE(cargo(sl_it) == cargo(stdmap_it));
 
 				erase(sl, key(sl_it));
 				erase(stdmap, key(stdmap_it));
@@ -418,10 +412,6 @@ void Test_Skiplist_Stress()
 
 void Main_Test_Map() 
 {
-	SEQAN_TREPORT("TEST MAP BEGIN")
-//____________________________________________________________________________
-
-
 	Test_Cargo_Single< Map< Pair<char, int>, Skiplist< > > >();
 	Test_Cargo_Single< Map< Pair<char, int>, VectorSet< > > >();
     
@@ -437,7 +427,11 @@ void Main_Test_Map()
 	Test_Skiplist_Extra();
 
 	Test_Skiplist_Stress();
-//____________________________________________________________________________
-
-	SEQAN_TREPORT("TEST MAP END")
 }
+
+
+SEQAN_DEFINE_TEST(test_map_map)
+{
+	Main_Test_Map();
+}
+
