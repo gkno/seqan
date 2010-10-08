@@ -1665,6 +1665,49 @@ SEQAN_DEFINE_TEST(test_myers_find_begin) {
     }
 }
 
+template <typename TPatternSpec>
+void test_pattern_copycon() {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<CharString, TPatternSpec> TPattern;
+    TPattern p1("Some needle");
+    TPattern p2(p1);
+}
+
+template <typename TPatternSpec>
+void test_pattern_assign() {
+    SEQAN_CHECKPOINT;
+    typedef Pattern<CharString, TPatternSpec> TPattern;
+    TPattern p1("Some needle");
+    TPattern p2;
+    p2 = p1;
+}
+
+SEQAN_DEFINE_TEST(test_pattern_copycon) {
+    // Test whether the needle is preserved in copying a pattern.
+    // See http://trac.mi.fu-berlin.de/seqan/ticket/318
+    test_pattern_copycon<Simple>();
+    test_pattern_copycon<Horspool>();
+    test_pattern_copycon<ShiftAnd>();
+    test_pattern_copycon<ShiftOr>();
+    test_pattern_copycon<HammingSimple>();
+    test_pattern_copycon<WildShiftAnd>();
+    test_pattern_copycon<BFAM<Oracle> >();
+    test_pattern_copycon<BFAM<Trie> >();
+}
+
+SEQAN_DEFINE_TEST(test_pattern_assign) {
+    // Test whether the needle is preserved in assigning a pattern.
+    // See http://trac.mi.fu-berlin.de/seqan/ticket/318
+    test_pattern_assign<Simple>();
+    test_pattern_assign<Horspool>();
+    test_pattern_assign<ShiftAnd>();
+    test_pattern_assign<ShiftOr>();
+    test_pattern_assign<HammingSimple>();
+    test_pattern_assign<WildShiftAnd>();
+    test_pattern_assign<BFAM<Oracle> >();
+    test_pattern_assign<BFAM<Trie> >();
+}
+
 
 SEQAN_BEGIN_TESTSUITE(test_find) {
 //     SEQAN_CALL_TEST(test_myers_trigger_bug);
@@ -1713,6 +1756,9 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_CALL_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam);
     // Test for hamming distance approximate matching.
     SEQAN_CALL_TEST(test_find_hamming_simple);
+
+    SEQAN_CALL_TEST(test_pattern_copycon);
+    SEQAN_CALL_TEST(test_pattern_assign);
 
     // Verify checkpoints in all files in this module.
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_simple.h");
