@@ -136,6 +136,64 @@ typedef Iterator<Dna5String, Rooted>::Type Dna5Iterator;
 
 //////////////////////////////////////////////////////////////////////////////
 /**
+.Shortcut.RnaString:
+..cat:Strings
+..summary:A string of @Spec.Rna@.
+..signature:RnaString
+..shortcutfor:Spec.Alloc String
+...signature:String<Rna, Alloc<> >
+..see:Spec.Rna
+*/
+
+typedef String<Rna, Alloc<void> > RnaString;
+
+//____________________________________________________________________________
+
+/**
+.Shortcut.RnaIterator:
+..cat:Iterators
+..summary:Iterator for @Shortcut.RnaString@.
+..signature:RnaIterator
+..shortcutfor:Concept.Rooted Iterator
+...signature:Iterator<RnaString, Rooted>::Type
+..see:Spec.Rna
+..see:Shortcut.RnaString
+*/
+
+typedef Iterator<RnaString, Rooted>::Type RnaIterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Shortcut.Rna5String:
+..cat:Strings
+..summary:A string of @Spec.Rna5@.
+..signature:Rna5String
+..shortcutfor:Spec.Alloc String
+...signature:String<Rna5, Alloc<> >
+..see:Spec.Rna5
+..see:Shortcut.RnaString
+*/
+
+typedef String<Rna5, Alloc<void> > Rna5String;
+
+//____________________________________________________________________________
+
+/**
+.Shortcut.Rna5Iterator:
+..cat:Iterators
+..summary:Iterator for @Shortcut.Rna5String@.
+..signature:Rna5Iterator
+..shortcutfor:Concept.Rooted Iterator
+...signature:Iterator<Rna5String, Rooted>::Type
+..see:Spec.Rna5
+..see:Shortcut.Rna5String
+..see:Shortcut.RnaIterator
+*/
+
+typedef Iterator<Rna5String, Rooted>::Type Rna5Iterator;
+
+//////////////////////////////////////////////////////////////////////////////
+/**
 .Shortcut.IupacString:
 ..cat:Strings
 ..summary:A string of @Spec.Iupac@.

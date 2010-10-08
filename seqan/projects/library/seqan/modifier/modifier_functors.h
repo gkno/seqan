@@ -95,7 +95,7 @@ struct FunctorConvert : public ::std::unary_function<InType,OutType>
 
 
 //////////////////////////////////////////////////////////////////////////////
-// DNA complement
+// DNA/RNA complement
 //////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -106,6 +106,8 @@ struct FunctorConvert : public ::std::unary_function<InType,OutType>
 ..param.TValue:The input value type.
 ...type:Spec.Dna
 ...type:Spec.Dna5
+...type:Spec.Rna
+...type:Spec.Rna5
 ..remarks:This Functor is a derivation of the STL unary function.
 ..include:seqan/modifier.h
 */
@@ -122,6 +124,17 @@ struct _Translate_Table_Dna5_2_Dna5Complement
 
 template <typename T>
 char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
+
+
+template <typename T = void>
+struct _Translate_Table_Rna5_2_Rna5Complement
+{
+    static char const VALUE[5];
+};
+
+
+template <typename T>
+char const _Translate_Table_Rna5_2_Rna5Complement<T>::VALUE[5] = {'U', 'G', 'C', 'A', 'N'};
 
 
 template <>
@@ -149,6 +162,26 @@ struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5>
     inline Dna5 operator()(Dna5 x) const {
         SEQAN_CHECKPOINT;
         return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+    }
+};
+
+
+template <>
+struct FunctorComplement<Rna> : public ::std::unary_function<Rna,Rna> 
+{
+    inline Rna operator()(Rna x) const {
+        SEQAN_CHECKPOINT;
+        return _Translate_Table_Rna5_2_Rna5Complement<>::VALUE[x.value]; 
+    }
+};
+
+
+template <>
+struct FunctorComplement<Rna5> : public ::std::unary_function<Rna5,Rna5> 
+{
+    inline Dna5 operator()(Rna5 x) const {
+        SEQAN_CHECKPOINT;
+        return _Translate_Table_Rna5_2_Rna5Complement<>::VALUE[x.value]; 
     }
 };
 

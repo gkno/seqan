@@ -30,6 +30,26 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_dna5_string_reverse) {
 }
 
 
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna_string_reverse) {
+    RnaString str = "CGAU";
+    RnaString kExpectedStr = "UAGC";
+
+    RnaStringReverseComplement modifiedString(str);
+    RnaString modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna5_string_reverse) {
+    Rna5String str = "CGAUN";
+    Rna5String kExpectedStr = "NUAGC";
+
+    Rna5StringReverseComplement modifiedString(str);
+    Rna5String modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
 SEQAN_DEFINE_TEST(test_modifer_shortcuts_dna_string_complement) {
     DnaString str = "CGAT";
     DnaString kExpectedStr = "GCTA";
@@ -50,6 +70,26 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_dna5_string_complement) {
 }
 
 
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna_string_complement) {
+    RnaString str = "CGAU";
+    RnaString kExpectedStr = "GCUA";
+
+    RnaStringReverseComplement modifiedString(str);
+    RnaString modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna5_string_complement) {
+    Rna5String str = "CGAUN";
+    Rna5String kExpectedStr = "GCUAN";
+
+    Rna5StringReverseComplement modifiedString(str);
+    Rna5String modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
 SEQAN_DEFINE_TEST(test_modifer_shortcuts_dna_string_reverse_complement) {
     DnaString str = "CGAT";
     DnaString kExpectedStr = "ATCG";
@@ -66,6 +106,26 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_dna5_string_reverse_complement) {
 
     Dna5StringReverseComplement modifiedString(str);
     Dna5String modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna_string_reverse_complement) {
+    RnaString str = "CGAU";
+    RnaString kExpectedStr = "AUCG";
+
+    RnaStringReverseComplement modifiedString(str);
+    RnaString modifiedStringCopy = modifiedString;
+    SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
+}
+
+
+SEQAN_DEFINE_TEST(test_modifer_shortcuts_rna5_string_reverse_complement) {
+    Rna5String str = "CGAUN";
+    Rna5String kExpectedStr = "NAUCG";
+
+    Rna5StringReverseComplement modifiedString(str);
+    Rna5String modifiedStringCopy = modifiedString;
     SEQAN_ASSERT_EQ(kExpectedStr, modifiedStringCopy);
 }
 

@@ -39,10 +39,16 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     // Tests for modifier_shortcuts.h.
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_reverse);
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_reverse);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna_string_reverse);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna5_string_reverse);
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_complement);
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna_string_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna5_string_complement);
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna_string_reverse_complement);
     SEQAN_CALL_TEST(test_modifer_shortcuts_dna5_string_reverse_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna_string_reverse_complement);
+    SEQAN_CALL_TEST(test_modifer_shortcuts_rna5_string_reverse_complement);
     SEQAN_CALL_TEST(test_modifer_shortcuts_complement_in_place_string);
     SEQAN_CALL_TEST(test_modifer_shortcuts_complement_in_place_string_set);
     SEQAN_CALL_TEST(test_modifer_shortcuts_reverse_in_place_string);
