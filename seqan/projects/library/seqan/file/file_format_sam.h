@@ -240,7 +240,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 		_streamPut(target, '\t');
 		_streamWrite(target, meta.rName); // RNAME
 		_streamPut(target, '\t');
-		_streamPutInt(target, sourceBeginPosition(row(source, ref_row_pos_int))); // POS
+		_streamPutInt(target, clippedBeginPosition(row(source, ref_row_pos_int))); // POS
         _streamPut(target, '\t');
 		_streamPutInt(target, meta.mapQ); // MAPQ
 		_streamPut(target, '\t');

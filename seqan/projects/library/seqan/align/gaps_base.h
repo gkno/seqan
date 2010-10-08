@@ -831,13 +831,13 @@ template <typename TSource, typename TSpec, typename TPosition1, typename TPosit
 inline void
 setSource(Gaps<TSource, TSpec> & me,
 		  TSource & source_,
-		  TPosition1 source_begin_pos,
-		  TPosition2 source_end_pos)
+		  TPosition1 clipped_begin_pos,
+		  TPosition2 clipped_end_pos)
 {
 SEQAN_CHECKPOINT
 	setValue(_dataSource(me), source_);
-	_setSourceBeginPosition(me, source_begin_pos);
-	_setSourceEndPosition(me, source_end_pos);
+	_setClippedBeginPosition(me, clipped_begin_pos);
+	_setClippedEndPosition(me, clipped_end_pos);
 	clearGaps(me);
 }
 
@@ -1028,8 +1028,8 @@ assignSource(Gaps<TSource, TSpec> & me,
 {
 SEQAN_CHECKPOINT
 	assignValue(me.data_source, source_);
-	_setSourceBeginPosition(me, 0);
-	_setSourceEndPosition(me, length(source_));
+	_setClippedBeginPosition(me, 0);
+	_setClippedEndPosition(me, length(source_));
 	clearGaps(me);
 }
 
@@ -1068,13 +1068,13 @@ template <typename TSource, typename TSpec, typename TSource2, typename TPositio
 inline void
 moveSource(Gaps<TSource, TSpec> & me,
 		   TSource2 const & source_,
-		   TPosition1 source_begin_pos,
-		   TPosition2 source_end_pos)
+		   TPosition1 clipped_begin_pos,
+		   TPosition2 clipped_end_pos)
 {
 SEQAN_CHECKPOINT
 	moveValue(_dataSource(me), source_);
-	_setSourceBeginPosition(me, source_begin_pos);
-	_setSourceEndPosition(me, source_end_pos);
+	_setClippedBeginPosition(me, clipped_begin_pos);
+	_setClippedEndPosition(me, clipped_end_pos);
 	clearGaps(me);
 }
 

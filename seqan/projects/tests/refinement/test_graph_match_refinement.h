@@ -306,8 +306,8 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 			if(score==0) continue;
 			//cout << ali<<"\n";
 			//cout <<"Seq "<<i<<" - Seq "<<j<<"\n"<<score<< ali;
-			//cout << sourceBeginPosition(row(ali,0)) <<"   ";
-			//cout << sourceBeginPosition(row(ali,1)) <<"\n";
+			//cout << clippedBeginPosition(row(ali,0)) <<"   ";
+			//cout << clippedBeginPosition(row(ali,1)) <<"\n";
 			appendValue(alis,ali);
 			++gesamt;
 			int k = 1;
@@ -316,8 +316,8 @@ getAlignments(String<TAlign> & alis, StringSet<TSequence, TSeqSpec> & seq, TScor
 				score = _smithWatermanGetNext(ali,sw_finder,score_type,cutoff);
 				if(score==0) break;
 				//cout <<score<< ali;
-				//cout << sourceBeginPosition(row(ali,0)) <<"   ";
-				//cout << sourceBeginPosition(row(ali,1)) <<"\n";
+				//cout << clippedBeginPosition(row(ali,0)) <<"   ";
+				//cout << clippedBeginPosition(row(ali,1)) <<"\n";
 				appendValue(alis,ali);
 				++gesamt;
 				++k;

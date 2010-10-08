@@ -368,11 +368,11 @@ SEQAN_CHECKPOINT
 
 	typename Row<Align<TSource > >::Type row0 = row(align, 0);
 
-	TPosition seedBeginView = (TPosition)toViewPosition(row0, seedBegin + sourceBeginPosition(row0));
-	TPosition seedEndView = (TPosition)toViewPosition(row0, seedEnd + sourceBeginPosition(row0));
-	if (sourceBeginPosition(row0) > 0) {
-		seedBeginView -= (TPosition)toViewPosition(row0, sourceBeginPosition(row0));
-		seedEndView -= (TPosition)toViewPosition(row0, sourceBeginPosition(row0));
+	TPosition seedBeginView = (TPosition)toViewPosition(row0, seedBegin + clippedBeginPosition(row0));
+	TPosition seedEndView = (TPosition)toViewPosition(row0, seedEnd + clippedBeginPosition(row0));
+	if (clippedBeginPosition(row0) > 0) {
+		seedBeginView -= (TPosition)toViewPosition(row0, clippedBeginPosition(row0));
+		seedEndView -= (TPosition)toViewPosition(row0, clippedBeginPosition(row0));
 	}
     
     while ((*leftIt).i2 + minLength < (*rightIt).i1 && (*leftIt).i2 <= seedBeginView) {

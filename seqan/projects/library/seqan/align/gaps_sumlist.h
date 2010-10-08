@@ -213,7 +213,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSourcePosition>
 inline void
-_setSourceBeginPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
+_setClippedBeginPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
 	me.clipped_source_begin = _pos;
@@ -232,7 +232,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSourcePosition>
 inline void
-_setSourceEndPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
+_setClippedEndPosition(Gaps<TSource, SumlistGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
 	me.clipped_source_end = _pos;
@@ -274,8 +274,8 @@ clear(Gaps<TSource, SumlistGaps> & me)
 {
 SEQAN_CHECKPOINT
 	_init_to_resize(me, 0);
-	_setSourceBeginPosition(me, 0);
-	_setSourceEndPosition(me, 0);
+	_setClippedBeginPosition(me, 0);
+	_setClippedEndPosition(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -285,8 +285,8 @@ inline void
 clearClipping(Gaps<TSource, SumlistGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_setSourceBeginPosition(me, 0);
-	_setSourceEndPosition(me, length(source(me)));
+	_setClippedBeginPosition(me, 0);
+	_setClippedEndPosition(me, length(source(me)));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -456,7 +456,7 @@ setClippedBeginPosition(Gaps<TSource, SumlistGaps> & me,
 		return 0;
 	}
 
-	_setSourceBeginPosition(me, source_position);
+	_setClippedBeginPosition(me, source_position);
 
 	return ret_value;
 }
@@ -506,7 +506,7 @@ setClippedEndPosition(Gaps<TSource, SumlistGaps> & me,
 		return;
 	}
 
-	_setSourceEndPosition(me, source_position);
+	_setClippedEndPosition(me, source_position);
 
 }
 

@@ -268,7 +268,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSourcePosition>
 inline void
-_setSourceBeginPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
+_setClippedBeginPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
 	me.clipped_source_begin = _pos;
@@ -300,7 +300,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSourcePosition>
 inline void
-_setSourceEndPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
+_setClippedEndPosition(Gaps<TSource, ArrayGaps> & me, TSourcePosition _pos)
 {
 SEQAN_CHECKPOINT
 	me.clipped_source_end = _pos;
@@ -339,8 +339,8 @@ clear(Gaps<TSource, ArrayGaps> & me)
 {
 SEQAN_CHECKPOINT
 	_init_to_resize(me, 0);
-	_setSourceBeginPosition(me, 0);
-	_setSourceEndPosition(me, 0);
+	_setClippedBeginPosition(me, 0);
+	_setClippedEndPosition(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -352,8 +352,8 @@ clearClipping(Gaps<TSource, ArrayGaps> & me)
 SEQAN_CHECKPOINT
 	_setEndPosition(me, length(source(me)));
 	_setTrailingGaps(me, 0);
-	_setSourceBeginPosition(me, 0);
-	_setSourceEndPosition(me, length(source(me)));
+	_setClippedBeginPosition(me, 0);
+	_setClippedEndPosition(me, length(source(me)));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -587,12 +587,12 @@ setClippedBeginPosition(Gaps<TSource, ArrayGaps> & me,
 	typedef typename Position<TGaps>::Type TViewPosition;
 	typedef typename TGaps::TArr TArr;
 
-	TPosition old_source_begin_pos = clippedBeginPosition(me);
-	if (old_source_begin_pos == source_position) return;
-	else if (source_position < old_source_begin_pos)
+	TPosition old_clipped_begin_pos = clippedBeginPosition(me);
+	if (old_clipped_begin_pos == source_position) return;
+	else if (source_position < old_clipped_begin_pos)
 	{
 SEQAN_CHECKPOINT
-		TViewPosition delta = old_source_begin_pos - source_position;
+		TViewPosition delta = old_clipped_begin_pos - source_position;
 		TViewPosition view_begin_pos = beginPosition(me);
 		if (view_begin_pos <= delta)
 		{
@@ -604,13 +604,13 @@ SEQAN_CHECKPOINT
 		}
 		_setEndPosition(me, endPosition(me) + delta);
 		_dataArr(me)[1] += delta;
-		_setSourceBeginPosition(me, source_position);
+		_setClippedBeginPosition(me, source_position);
 	}
-	else //(source_position > old_source_begin_pos)
+	else //(source_position > old_clipped_begin_pos)
 	{
 SEQAN_CHECKPOINT
 		TViewPosition view_pos = toViewPosition(me, source_position);
-		TViewPosition source_pos_left = source_position - old_source_begin_pos;
+		TViewPosition source_pos_left = source_position - old_clipped_begin_pos;
 		TViewPosition gaps_count = 0;
 
 		typename Iterator<TArr, Standard>::Type it_arr_begin = begin(_dataArr(me));
@@ -629,7 +629,7 @@ SEQAN_CHECKPOINT
 				{
 					replace(_dataArr(me), 1, it_arr - it_arr_begin, "");
 				}
-				_setSourceBeginPosition(me, source_position);
+				_setClippedBeginPosition(me, source_position);
 				return;
 			}
 			gaps_count += *it_arr;
@@ -688,7 +688,7 @@ SEQAN_CHECKPOINT
 		*(end(_dataArr(me)) - 1) += (source_position - old_end_begin_pos);
 		_setEndPosition(me, endPosition(me) + source_position - old_end_begin_pos);
 	}
-	_setSourceEndPosition(me, source_position);
+	_setClippedEndPosition(me, source_position);
 }
 
 //////////////////////////////////////////////////////////////////////////////
