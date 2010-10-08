@@ -1,6 +1,7 @@
+// FRAGMENT(header)
 /*==========================================================================
                 SeqAn - The Library for Sequence Analysis
-                          http://www.seqan.de 
+                          http://www.seqan.de
  ============================================================================
   Copyright (C) 2010
 
@@ -22,7 +23,7 @@
    - arbitrary values
    - a new, built-in matrix.
  ==========================================================================*/
-
+// FRAGMENT(includes)
 #include <iostream>
 
 #include <seqan/basic.h>
@@ -31,6 +32,7 @@
 
 using namespace seqan;
 
+// FRAGMENT(user-defined-matrix)
 // Extend SeqAn by a user-define scoring matrix.
 namespace seqan {
 
@@ -79,7 +81,7 @@ struct _ScoringMatrixData<int, AminoAcid, UserDefinedMatrix> {
 };
 }  // namespace seqan
 
-
+// FRAGMENT(show-scoring-matrix)
 // Print a scoring scheme matrix to stdout.
 template <typename TScoreValue, typename TSequenceValue, typename TSpec>
 void showScoringMatrix(Score<TScoreValue, ScoreMatrix<TSequenceValue, TSpec> > const & scoringScheme)
@@ -98,7 +100,7 @@ void showScoringMatrix(Score<TScoreValue, ScoreMatrix<TSequenceValue, TSpec> > c
     }
 }
 
-
+// FRAGMENT(main)
 int main()
 {
     // Define types for the score value and the scoring scheme.
