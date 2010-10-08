@@ -524,7 +524,6 @@ SEQAN_BEGIN_TESTSUITE(test_basic) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_debug.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_definition.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_forwards.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_generated_forwards.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_holder_dynamic.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/basic/basic_host.h");
