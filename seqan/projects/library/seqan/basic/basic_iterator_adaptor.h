@@ -500,10 +500,10 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-template <typename TContainer, typename TIterator, typename TSpec>
+template <typename TContainer, typename TIterator, typename TSpec, typename TContainer2, typename TIterator2, typename TSpec2>
 inline typename Difference<Iter<TContainer, AdaptorIterator<TIterator, TSpec> > >::Type  
 operator - (Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & left,
-			Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & right)
+			Iter<TContainer2, AdaptorIterator<TIterator2, TSpec2> > const & right)
 {
 SEQAN_CHECKPOINT
 	return hostIterator(left) - hostIterator(right);
