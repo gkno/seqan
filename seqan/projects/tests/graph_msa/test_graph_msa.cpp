@@ -24,7 +24,7 @@ using namespace seqan;
 //////////////////////////////////////////////////////////////////////////////
 
 
-SEQAN_BEGIN_TESTSUITE(test_random) {
+SEQAN_BEGIN_TESTSUITE(test_graph_msa) {
     // Call Tests.
 	SEQAN_CALL_TEST(test_guide_tree);
     SEQAN_CALL_TEST(test_distances);
