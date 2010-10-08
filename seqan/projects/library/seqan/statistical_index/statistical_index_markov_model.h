@@ -25,7 +25,7 @@
 #ifndef SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
 #define SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
 
-#include<seqan/align.h>
+#include <seqan/align.h>
 #include <seqan/index.h>
 
 namespace seqan//SEQAN_NAMESPACE_MAIN
@@ -578,10 +578,10 @@ Matrix<TValue,2> _computeInverseMatrix(Matrix<TValue,2> &matrix)
  *
  */
 
-#define TINY 1.0e-20
 template <typename TValue>
 String<TValue> _ludcmp(Matrix<TValue,2> &result)
 {
+    double const TINY = 1.0e-20;
 	int n = length(result,0);
 	int i, imax, j, k,d;
 	double big,dum,sum,temp;
