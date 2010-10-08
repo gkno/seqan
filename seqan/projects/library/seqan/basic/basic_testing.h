@@ -1126,7 +1126,7 @@ const char *tempFileName() {
 #define SEQAN_ASSERT_FAIL(...)                                          \
     do {                                                                \
         ::seqan::ClassTest::forceFail(__FILE__, __LINE__,               \
-                                      ## __VA_ARGS__);                  \
+                                      __VA_ARGS__);                  \
         ::seqan::ClassTest::fail();                                     \
     } while (false)
 
@@ -1152,7 +1152,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testEqual(__FILE__, __LINE__,          \
                                            (_arg1), #_arg1,             \
                                            (_arg2), #_arg2,             \
-                                              ## __VA_ARGS__)) {        \
+                                              __VA_ARGS__)) {        \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1181,7 +1181,7 @@ const char *tempFileName() {
                                              (_arg1), #_arg1,           \
                                              (_arg2), #_arg2,           \
                                              (_arg3), #_arg3,           \
-                                                ## __VA_ARGS__)) {      \
+                                                __VA_ARGS__)) {      \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1208,7 +1208,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testNotEqual(__FILE__, __LINE__,       \
                                               (_arg1), #_arg1,          \
                                               (_arg2), #_arg2,          \
-                                              ## __VA_ARGS__)) {        \
+                                              __VA_ARGS__)) {        \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1231,7 +1231,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testLeq(__FILE__, __LINE__,            \
                                          (_arg1), #_arg1,               \
                                          (_arg2), #_arg2,               \
-                                         ## __VA_ARGS__)) {             \
+                                         __VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1254,7 +1254,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testLt(__FILE__, __LINE__,             \
                                         (_arg1), #_arg1,                \
                                         (_arg2), #_arg2,                \
-                                        ## __VA_ARGS__)) {              \
+                                        __VA_ARGS__)) {              \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1277,7 +1277,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testGeq(__FILE__, __LINE__,            \
                                          (_arg1), #_arg1,               \
                                          (_arg2), #_arg2,               \
-                                         ## __VA_ARGS__)) {             \
+                                         __VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1300,7 +1300,7 @@ const char *tempFileName() {
         if (!::seqan::ClassTest::testGt(__FILE__, __LINE__,             \
                                         (_arg1), #_arg1,                \
                                         (_arg2), #_arg2,                \
-                                        ## __VA_ARGS__)) {              \
+                                        __VA_ARGS__)) {              \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
