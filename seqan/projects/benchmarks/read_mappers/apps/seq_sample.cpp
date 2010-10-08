@@ -15,6 +15,7 @@
 #include <seqan/misc/misc_random.h>
 #include <seqan/sequence.h>
 #include <seqan/store.h>
+#include <seqan/random.h>
 
 using namespace seqan;
 
@@ -49,9 +50,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // TODO(holtgrew): Actually, we want to seed this!
     const unsigned SEED = 42;
-    mtRandInit(SEED);
+	RNG<MersenneTwister> rng(SEED);
 
     unsigned n = atoi(argv[1]);
 
@@ -77,7 +77,8 @@ int main(int argc, char **argv) {
     // Pick ids to select.
     std::set<unsigned> selectedIds;
     while (length(selectedIds) < n) {
-        unsigned x = mtRand() % matePairCount;
+		PDF<Uniform<unsigned> > pdf(0, matePairCount - 1);
+		unsigned x = pickRandomNumber(rng, pdf);
         selectedIds.insert(x);
     }
     // Actually build result.
