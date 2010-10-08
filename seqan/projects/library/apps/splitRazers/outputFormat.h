@@ -612,6 +612,7 @@ void dumpMatches(
 	if (options.maqMapping) options.outputFormat = 3;
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength); //without + 1 here, used to check whether match should be supported if noBelowIdentity option is switched on
 #endif
+^	if (options.minMatchLen > 0) options.outputFormat = 33;
 	if (options.outputFormat == 3)
 	{
 		options.sortOrder = 1;		//  sort according to gPos
