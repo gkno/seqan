@@ -1164,13 +1164,13 @@ stringSet(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g)
 /**
 .Function.label:
 ..cat:Graph
-..summary:Gets the label that is associated with this vertex descriptor.
+..summary:Gets the label that is associated with this vertex descriptor or the sequence that is associated with a fragment.
 ..signature:label(g, v)
 ..param.g:An alignment graph.
 ...type:Spec.Alignment Graph
 ..param.v:A vertex descriptor.
 ...type:Metafunction.VertexDescriptor
-..returns:The label.
+..returns:An infix representing the sequence label.
 ..include:seqan/refinement.h
 */
 template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor>
@@ -1197,7 +1197,7 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 /**
 .Function.sequenceId:
 ..cat:Graph
-..summary:Gets the sequence id that is associated with this vertex descriptor.
+..summary:Gets the sequence id that is associated with this vertex descriptor or with a sequence of a fragment.
 ..signature:sequenceId(g, v)
 ..param.g:An alignment graph.
 ...type:Spec.Alignment Graph
@@ -1221,7 +1221,7 @@ sequenceId(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 /**
 .Function.fragmentBegin:
 ..cat:Graph
-..summary:Gets the begin position for this vertex descriptor in the sequence.
+..summary:Gets the begin position for this fragment or this vertex descriptor in the sequence.
 ..signature:fragmentBegin(g, v)
 ..param.g:An alignment graph.
 ...type:Spec.Alignment Graph
