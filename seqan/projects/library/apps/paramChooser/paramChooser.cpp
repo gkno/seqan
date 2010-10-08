@@ -37,10 +37,7 @@
 #include <seqan/file.h>
 #include <seqan/find_motif.h>
 
-//#include "recognitionRateDP.h"
-//#include "readSimulator.h"
-//#include "razers.h"
-#include "paramChooser.h"
+#include "../splitRazers/paramChooser.h"
 
 
 
