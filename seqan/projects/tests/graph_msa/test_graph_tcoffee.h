@@ -104,24 +104,24 @@ void Test_GuideTree() {
 	njTree(mat, guideTreeOut);
 	//std::cout << guideTreeOut << std::endl;
 
-	SEQAN_TASSERT(numVertices(guideTreeOut) == 15)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 1) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 8, 0) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 9, 5) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 9, 4) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 2) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 8) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 2) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 10, 8) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 11, 3) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 11, 10) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 12, 9) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 12, 11) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 13, 12) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 13, 6) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 13) != 0)
-	SEQAN_TASSERT(findEdge(guideTreeOut, 14, 7) != 0)
-	SEQAN_TASSERT(getRoot(guideTreeOut) == 14)
+	SEQAN_ASSERT_TRUE(numVertices(guideTreeOut) == 15);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 8, 1) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 8, 0) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 9, 5) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 9, 4) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 2) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 8) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 2) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 10, 8) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 11, 3) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 11, 10) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 12, 9) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 12, 11) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 13, 12) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 13, 6) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 13) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 7) != 0);
+	SEQAN_ASSERT_TRUE(getRoot(guideTreeOut) == 14);
 
 //____________________________________________________________________________
 // UPGMA
@@ -152,9 +152,9 @@ void Test_Distances() {
 
 	String<double> distanceMatrix;
 	getDistanceMatrix(g,distanceMatrix);
-	SEQAN_TASSERT(distanceMatrix[3] ==  1.0 - 5.0 / 7.0)
-	SEQAN_TASSERT(distanceMatrix[1 * length(strSet) + 3] == 1.0 - 5.0 / 7.0)
-	SEQAN_TASSERT(distanceMatrix[2 * length(strSet) + 3] == 1.0 - 3.0 / 7.0)
+	SEQAN_ASSERT_TRUE(distanceMatrix[3] ==  1.0 - 5.0 / 7.0);
+	SEQAN_ASSERT_TRUE(distanceMatrix[1 * length(strSet) + 3] == 1.0 - 5.0 / 7.0);
+	SEQAN_ASSERT_TRUE(distanceMatrix[2 * length(strSet) + 3] == 1.0 - 3.0 / 7.0);
 	clear(distanceMatrix);
 	String<unsigned int> pList;
 	selectPairs(strSet, pList);
@@ -165,8 +165,8 @@ void Test_Distances() {
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, dist, GlobalPairwise_Library() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	getDistanceMatrix(g,distanceMatrix,LibraryDistance());
-	SEQAN_TASSERT(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3))
-	SEQAN_TASSERT(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3))
+	SEQAN_ASSERT_TRUE(getValue(distanceMatrix, 0 * length(strSet) + 1) < getValue(distanceMatrix, 2 * length(strSet) + 3));
+	SEQAN_ASSERT_TRUE(getValue(distanceMatrix, 1 * length(strSet) + 2) < getValue(distanceMatrix, 2 * length(strSet) + 3));
 }
 
 
@@ -186,10 +186,10 @@ __testquickAlign(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, uns
 	String<char> alignMat;	
 	convertAlignment(gOut,alignMat);
 	unsigned int len = length(alignMat) / 4;
-	SEQAN_TASSERT(String<char>(infix(alignMat, 0, 8)) == "GARFIELD");
-	SEQAN_TASSERT(String<char>(infix(alignMat, 1*len + 0, 1*len+8)) == "GARFIELD");
-	SEQAN_TASSERT(String<char>(infix(alignMat, 2*len + 0, 2*len+8)) == "GARFIELD");
-	SEQAN_TASSERT(String<char>(infix(alignMat, 3*len + 0, 3*len+8)) == "--------");
+	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 0, 8)) == "GARFIELD");
+	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 1*len + 0, 1*len+8)) == "GARFIELD");
+	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 2*len + 0, 2*len+8)) == "GARFIELD");
+	SEQAN_ASSERT_TRUE(String<char>(infix(alignMat, 3*len + 0, 3*len+8)) == "--------");
 
 	//std::cout << gOut << std::endl;
 }
@@ -374,10 +374,10 @@ void Test_TripletExtension() {
 	addEdge(g, findVertex(g, 1, 8), addVertex(g, 3, 0, 3), 20);
 	addEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0), 40);
 	tripletLibraryExtension(g);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
-	SEQAN_TASSERT(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
+	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 1, 0), findVertex(g, 2, 0))) == 30);
+	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 3, 0))) == 20);
+	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 0, 8), findVertex(g, 2, 8))) == 30);
+	SEQAN_ASSERT_TRUE(cargo(findEdge(g, findVertex(g, 2, 8), findVertex(g, 3, 0))) == 60);
 }
 
 void Test_SumOfPairsScore() {
@@ -411,8 +411,8 @@ void Test_SumOfPairsScore() {
 	njTree(distanceMatrix, guideTree);
 	TGraph gOut(seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, score_type) == -8)
-	SEQAN_TASSERT(sumOfPairsScoreInd(gOut, score_type) == 16)
+	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, score_type) == -8);
+	SEQAN_ASSERT_TRUE(sumOfPairsScoreInd(gOut, score_type) == 16);
 
 	seqSet[1] = "AAG";
 	Score<int> scType = Score<int>(5,-4,-1,-2);
@@ -427,7 +427,7 @@ void Test_SumOfPairsScore() {
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 20)
+	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 20);
 
 	resize(seqSet, 2);
 	seqSet[0] = "TTT";
@@ -446,7 +446,7 @@ void Test_SumOfPairsScore() {
 	clear(gOut);
 	assignStringSet(gOut, seqSet);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == -8)
+	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == -8);
 
 	seqSet[0] = "TTTAAATTT";
 	seqSet[1] = "AAA";
@@ -462,7 +462,7 @@ void Test_SumOfPairsScore() {
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 7)
+	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 7);
 
 	seqSet[0] = "AAAAAA";
 	seqSet[1] = "TTTAAATTTAAATTT";
@@ -478,7 +478,7 @@ void Test_SumOfPairsScore() {
 	njTree(distanceMatrix, guideTree);
 	clearVertices(gOut);
 	progressiveAlignment(g, guideTree, gOut);
-	SEQAN_TASSERT(sumOfPairsScore(gOut, scType) == 18)
+	SEQAN_ASSERT_TRUE(sumOfPairsScore(gOut, scType) == 18);
 }
 
 
@@ -545,40 +545,53 @@ void Test_ReversableFragments() {
 	typedef Graph<Alignment<TDepSequenceSet, TSize> > TGraph;
 	TGraph g(strSet);
 	matchRefinement(matches,strSet,g);
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 2)) == 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 4)) != 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 3)) != 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 2)) != 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 4)) == 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0)) != 0)
-	SEQAN_ASSERT(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 1)) != 0)
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 2)) == 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 4)) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 2), findVertex(g, 1, 3)) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 2)) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 3), findVertex(g, 1, 4)) == 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 0), findVertex(g, 1, 0)) != 0);
+	SEQAN_ASSERT_TRUE(findEdge(g, findVertex(g, 0, 1), findVertex(g, 1, 1)) != 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-
-void Test_GraphTCoffee() {
+SEQAN_DEFINE_TEST(test_guide_tree)
+{
 	Test_GuideTree();
-	Test_Distances();
-	Test_Libraries();
-	Test_ExternalLibraries();
-	Test_TripletExtension();
-	Test_SumOfPairsScore();
-	Test_Progressive();
-	Test_ReversableFragments();
-	
-	
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_kmer.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_distance.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_guidetree.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_library.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_io.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_base.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_progressive.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_msa/graph_align_tcoffee_msa.h");
 }
-
-
+	
+SEQAN_DEFINE_TEST(test_distances)
+{
+	Test_Distances();
+}
+	
+SEQAN_DEFINE_TEST(test_libraries)
+{
+	Test_Libraries();	
+}
+SEQAN_DEFINE_TEST(test_external_libraries)
+{
+	Test_ExternalLibraries();	
+}
+SEQAN_DEFINE_TEST(test_triplet_extension)
+{
+	Test_TripletExtension();	
+}
+SEQAN_DEFINE_TEST(test_sop)
+{
+	Test_SumOfPairsScore();
+}
+SEQAN_DEFINE_TEST(test_progressive)
+{
+	Test_Progressive();
+}
+SEQAN_DEFINE_TEST(test_reversable_fragments)
+{
+	Test_ReversableFragments();
+}
+	
+	
 }
 
 #endif
