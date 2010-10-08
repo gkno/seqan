@@ -9,6 +9,7 @@ using namespace seqan;
 template<typename T>
 void Test_BlastStoreReport() {
 
+
 	typedef BlastHsp<BlastP,BasicInfo> TBlastHsp;
 	typedef BlastReport<TBlastHsp,StoreReport<FullInfo> > TBlastReport;
 	typedef typename Hit<TBlastReport>::Type TBlastHit;
@@ -266,7 +267,7 @@ void Test_BlastParsing(BlastN)
 		{
 			++hitcount;
 			TBlastHit hit = getValue(strm2,hit_it);
-			SEQAN_ASSERT_TRUE((hitcount!=8) || (hitcount==8 && name(hit) == "gb|AE000167.1|AE000167 Escherichia coli K-12 MG1655 section 57 of 400 of the complete genome"));
+			SEQAN_ASSERT_TRUE((hitcount!=8) || (hitcount==8 && name(hit) == "gb|AE000167.1|AE000167 Escherichia coli K-12 MG1655 section 57 of 400 of the complete genome"));;
 			THspIterator hsp_it(hit);
 			for(; !atEnd(strm2,hsp_it); goNext(strm2,hsp_it)) 
 			{
@@ -319,6 +320,7 @@ void Test_BlastParsing(BlastN)
 	SEQAN_ASSERT_TRUE(hitcount==28);
 	SEQAN_ASSERT_TRUE(hspcount==34);
 	SEQAN_ASSERT_TRUE(alicount==5);
+
 }
 
 
@@ -484,7 +486,7 @@ void Test_BlastParsingBasic(BlastN)
 			SEQAN_ASSERT_TRUE(hit_it == hit_it2);
 			++hitcount;
 			TBlastHit hit = value(strm2,hit_it);
-			SEQAN_ASSERT_TRUE((hitcount!=8) || (hitcount==8 && name(hit) == "gb|AE000167.1|AE000167 Escherichia coli K-12 MG1655 section 57 of 400 of the complete genome"));
+			SEQAN_ASSERT_TRUE((hitcount!=8) || (hitcount==8 && name(hit) == "gb|AE000167.1|AE000167 Escherichia coli K-12 MG1655 section 57 of 400 of the complete genome"));;
 			THspIterator hsp_it2(hit);
 			SEQAN_ASSERT_TRUE(atBegin(strm2,hsp_it2));
 			for(; !atEnd(strm2,hsp_it2); goNext(strm2,hsp_it2)) 
@@ -510,8 +512,8 @@ void Test_BlastParsingBasic(BlastN)
 				SEQAN_ASSERT_TRUE(&hostReport(hit_it)==&blast2);
 				SEQAN_ASSERT_TRUE(&hostHit(hsp_it)==&hit);
 				SEQAN_ASSERT_TRUE(&hostHit(hsp_it2)==&hostHit(hsp_it));
-//				SEQAN_ASSERT_TRUE(&hostReport(hsp_it)==&blast2)
-//				SEQAN_ASSERT_TRUE(&hostReport(hsp_it2)==&blast2)
+//				SEQAN_ASSERT_TRUE(&hostReport(hsp_it)==&blast2);
+//				SEQAN_ASSERT_TRUE(&hostReport(hsp_it2)==&blast2);
 				if(hspcount == 8 || hspcount == 19)
 				{
 					TBlastHsp hsp2;
