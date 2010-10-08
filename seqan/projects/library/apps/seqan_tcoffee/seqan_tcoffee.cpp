@@ -18,7 +18,6 @@ Lesser General Public License for more details.
 
 #include <seqan/basic.h>
 #include <seqan/graph_msa.h>
-#include "rna_alphabet.h"
 #include <seqan/modifier.h>
 #include <seqan/misc/misc_cmdparser.h>
 
