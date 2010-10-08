@@ -118,6 +118,7 @@ SEQAN_CHECKPOINT
 ..returns:A value $inf$ that holds: $inf >= i$ for all values $i$.
 ..remarks.text:This function implements @Function.supremumValue@. 
 It is recommended to use @Function.supremumValue@ rather than $supremumValueImpl$.
+..status:deprecated, will be removed in favour of @Metafunction.SupremumValue@
 ..include:seqan/basic.h
 */
 
@@ -141,6 +142,7 @@ supremumValueImpl(T *)
 ..remarks.text:The function is implemented in @Function.supremumValueImpl@. 
 Do not specialize $supremumValue$, specialize @Function.supremumValueImpl@ instead!
 ..see:Function.supremumValueImpl
+..status:deprecated, will be removed in favour of @Metafunction.SupremumValue@
 ..include:seqan/basic.h
 */
 
@@ -177,6 +179,7 @@ SEQAN_CHECKPOINT
 ..returns:A value $inf$ that holds: $inf <= i$ for all values $i$.
 ..remarks.text:This function implements @Function.infimumValue@. 
 It is recommended to use @Function.infimumValue@ rather than $infimumValueImpl$.
+..status:deprecated, will be removed in favour of @Metafunction.InfimumValue@
 ..include:seqan/basic.h
 */
 
@@ -201,6 +204,7 @@ infimumValueImpl(T *)
 Do not specialize $infimumValue$, specialize @Function.infimumValueImpl@ instead!
 ..see:Function.infimumValueImpl
 ..see:Function.supremumValue
+..status:deprecated, will be removed in favour of @Metafunction.InfimumValue@
 ..include:seqan/basic.h
 */
 

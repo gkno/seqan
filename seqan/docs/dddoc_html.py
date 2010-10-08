@@ -793,6 +793,7 @@ def writePage(fl, data):
 
     printSignature(fl, data, "signature")
     printList(fl, data, "include")
+    printTextblock(fl, data, "status")
     printTable(fl, data, "param")
     printTextblock(fl, data, "returns")
     printLink(fl, data, "class")
@@ -1592,6 +1593,7 @@ def subprintField(fl, text):
     elif (field == "file"): printFile(fl, data, "file")
     
     elif (field == "concept"): printLink(fl, data, "concept", False)
+    elif (field == "status"): printTextblock(fl, data, "status", False)
     elif (field == "include"): printList(fl, data, "include", False)
     elif (field == "demofor"): printLink(fl, data, "demofor", False)
     elif (field == "see"): printLink(fl, data, "see", False)
