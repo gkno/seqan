@@ -1,8 +1,7 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_UTILS_H
 #define SEQAN_HEADER_TEST_GRAPH_UTILS_H
 
-namespace SEQAN_NAMESPACE_MAIN
-{
+using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -65,12 +64,13 @@ void  Test_GraphDrawing() {
 
 void Test_GraphUtils() {
 	Test_GraphDrawing();
-
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_drawing.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_utility_parsing.h");
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
+SEQAN_DEFINE_TEST(test_graph_utils)
+{
+	Test_GraphUtils();
 }
 
 #endif

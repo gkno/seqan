@@ -1,9 +1,7 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_ITERATORS_H
 #define SEQAN_HEADER_TEST_GRAPH_ITERATORS_H
 
-
-namespace SEQAN_NAMESPACE_MAIN
-{
+using namespace seqan;
 
 //////////////////////////////////////////////////////////////////////////////
 template <typename TGraphType>
@@ -27,46 +25,46 @@ void Test_VertexIterator() {
 	removeVertex(g,3);
 	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
-	SEQAN_TASSERT(atBegin(it)==true)
-	SEQAN_TASSERT(getValue(it)==1)
-	SEQAN_TASSERT(value(it)==1)
-	SEQAN_TASSERT(getValue(it)==1)
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
+	SEQAN_ASSERT_TRUE(value(it)==1);
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
 	goNext(it);
-	SEQAN_TASSERT(atBegin(it)==false)
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	++it;
-	SEQAN_TASSERT(getValue(it)==4)
-	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==4);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
 	it++; 
-	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
 	++it; 
-	SEQAN_TASSERT(atEnd(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
 	goPrevious(it);
 	// No assignment to vertex iterators
 	// *it = 3;
-	SEQAN_TASSERT((*it)==4)
-	SEQAN_TASSERT(atEnd(it)==false)
+	SEQAN_ASSERT_TRUE((*it)==4);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
 	it--;
-	SEQAN_TASSERT(getValue(it)==2)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	--it;
-	SEQAN_TASSERT(atBegin(it)==true)
-	SEQAN_TASSERT(getValue(it)==1)
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
 	--it;
-	SEQAN_TASSERT(atBegin(it)==true)
-	SEQAN_TASSERT(getValue(it)==1)
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
 	TVertexIterator it2(g);
 	TVertexIterator it3;
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
+	SEQAN_ASSERT_TRUE(it2 != it);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -87,22 +85,22 @@ void Test_TreeInternalVertexIterator() {
 
 	typedef Iterator<TTree, VertexIterator>::Type TVertexIterator;
 	TVertexIterator itV(gV);
-	SEQAN_TASSERT(atBegin(itV)==true)
-	SEQAN_TASSERT(getValue(itV)==0)
-	SEQAN_TASSERT(value(itV)==0)
-	SEQAN_TASSERT(getValue(itV)==0)
+	SEQAN_ASSERT_TRUE(atBegin(itV)==true);
+	SEQAN_ASSERT_TRUE(getValue(itV)==0);
+	SEQAN_ASSERT_TRUE(value(itV)==0);
+	SEQAN_ASSERT_TRUE(getValue(itV)==0);
 	goNext(itV);
-	SEQAN_TASSERT(atBegin(itV)==false)
-	SEQAN_TASSERT(getValue(itV)==1)
+	SEQAN_ASSERT_TRUE(atBegin(itV)==false);
+	SEQAN_ASSERT_TRUE(getValue(itV)==1);
 	++itV;
-	SEQAN_TASSERT(getValue(itV)==2)
-	SEQAN_TASSERT(atEnd(itV)==false)
+	SEQAN_ASSERT_TRUE(getValue(itV)==2);
+	SEQAN_ASSERT_TRUE(atEnd(itV)==false);
 	goPrevious(itV);
-	SEQAN_TASSERT((*itV)==1)
-	SEQAN_TASSERT(atEnd(itV)==false)
+	SEQAN_ASSERT_TRUE((*itV)==1);
+	SEQAN_ASSERT_TRUE(atEnd(itV)==false);
 	itV--;
-	SEQAN_TASSERT(getValue(itV)==0)
-	SEQAN_TASSERT(atBegin(itV)==true)
+	SEQAN_ASSERT_TRUE(getValue(itV)==0);
+	SEQAN_ASSERT_TRUE(atBegin(itV)==true);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -126,53 +124,53 @@ void Test_OutEdgeIterator() {
 
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	TOutEdgeIterator it(g, v0);
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
-	SEQAN_TASSERT(sourceVertex(g, value(it))==0)
-	SEQAN_TASSERT(targetVertex(g, *it)==1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==1);
+	SEQAN_ASSERT_TRUE(sourceVertex(g, value(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, *it)==1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
 	// Slow
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==2);
 	// Fast
-	SEQAN_TASSERT(sourceVertex(it)==0)
-	SEQAN_TASSERT(targetVertex(it)==2)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(sourceVertex(it)==0);
+	SEQAN_ASSERT_TRUE(targetVertex(it)==2);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	++it;
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goPrevious(it);
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==2);
 	--it;
 	// Slow
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==1);
 	// Fast
-	SEQAN_TASSERT(sourceVertex(it)==0)
-	SEQAN_TASSERT(targetVertex(it)==1)
+	SEQAN_ASSERT_TRUE(sourceVertex(it)==0);
+	SEQAN_ASSERT_TRUE(targetVertex(it)==1);
 	it++; 
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==2);
 	it--;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==1);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	TOutEdgeIterator it2(g, v0);
 	TOutEdgeIterator it3;
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
-	SEQAN_TASSERT(&g == &hostGraph(it))
+	SEQAN_ASSERT_TRUE(it2 != it);
+	SEQAN_ASSERT_TRUE(&g == &hostGraph(it));
 }
 
 
@@ -202,59 +200,59 @@ void Test_EdgeIterator() {
 
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
 	TEdgeIterator it(g);
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==1)
-	SEQAN_TASSERT(sourceVertex(g, value(it))==0)
-	SEQAN_TASSERT(targetVertex(g, *it)==1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==1);
+	SEQAN_ASSERT_TRUE(sourceVertex(g, value(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, *it)==1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==0)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==2)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==0);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==2);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	++it;
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	// Slow
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==3)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==2);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==3);
 	// Fast
-	SEQAN_TASSERT(sourceVertex(it)==2)
-	SEQAN_TASSERT(targetVertex(it)==3)
+	SEQAN_ASSERT_TRUE(sourceVertex(it)==2);
+	SEQAN_ASSERT_TRUE(targetVertex(it)==3);
 	it++;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==3);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==4);
 	it++;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==5)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==4);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==5);
 	++it;
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	++it;
 	++it;
 	goPrevious(it);
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==4)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==5)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==4);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==5);
 	--it;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==3)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==4)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==3);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==4);
 	it--;
-	SEQAN_TASSERT(sourceVertex(g, getValue(it))==2)
-	SEQAN_TASSERT(targetVertex(g, getValue(it))==3)
+	SEQAN_ASSERT_TRUE(sourceVertex(g, getValue(it))==2);
+	SEQAN_ASSERT_TRUE(targetVertex(g, getValue(it))==3);
 	TEdgeIterator it2(g);
 	TEdgeIterator it3;
 	goBegin(it);
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
+	SEQAN_ASSERT_TRUE(it2 != it);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -282,45 +280,45 @@ void Test_AdjacencyIterator() {
 
 	typedef typename Iterator<TGraph, AdjacencyIterator>::Type TAdjacencyIterator;
 	TAdjacencyIterator it(g,3);
-	SEQAN_TASSERT(getValue(it) == 4)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
-	SEQAN_TASSERT(value(it) == 4)
-	SEQAN_TASSERT(*it == 4)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it) == 4);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
+	SEQAN_ASSERT_TRUE(value(it) == 4);
+	SEQAN_ASSERT_TRUE(*it == 4);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==2)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	++it;
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goBegin(it);
 	it++;
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	it++;
 	goPrevious(it);
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	--it;
-	SEQAN_TASSERT(getValue(it)==4)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it)==4);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goEnd(it);
 	it--;
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	goBegin(it);
 	TAdjacencyIterator it2(g, 3);
 	TAdjacencyIterator it3;
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -343,26 +341,26 @@ void Test_BfsIter() {
 	
 	typedef typename Iterator<TGraph, BfsIterator>::Type TBfsIterator;
 	TBfsIterator it(g,0);
-	SEQAN_TASSERT(getValue(it) == 0)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
-	SEQAN_TASSERT(value(it) == 0)
-	SEQAN_TASSERT(*it == 0)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it) == 0);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
+	SEQAN_ASSERT_TRUE(value(it) == 0);
+	SEQAN_ASSERT_TRUE(*it == 0);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==3)
+	SEQAN_ASSERT_TRUE(getValue(it)==3);
 	goNext(it);
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goBegin(it);
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -390,45 +388,45 @@ void Test_BfsIterator() {
 	addEdge(g,3,7);
 	typedef Iterator<Graph<>, BfsIterator>::Type TBfsIterator;
 	TBfsIterator it(g,1);
-	SEQAN_TASSERT(getValue(it) == 1)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
-	SEQAN_TASSERT(value(it) == 1)
-	SEQAN_TASSERT(*it == 1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it) == 1);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
+	SEQAN_ASSERT_TRUE(value(it) == 1);
+	SEQAN_ASSERT_TRUE(*it == 1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==5)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==5);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==0)
+	SEQAN_ASSERT_TRUE(getValue(it)==0);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==6)
+	SEQAN_ASSERT_TRUE(getValue(it)==6);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	++it;
-	SEQAN_TASSERT(getValue(it)==4)
+	SEQAN_ASSERT_TRUE(getValue(it)==4);
 	it++;
-	SEQAN_TASSERT(getValue(it)==7)
+	SEQAN_ASSERT_TRUE(getValue(it)==7);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==3)
+	SEQAN_ASSERT_TRUE(getValue(it)==3);
 	goNext(it);
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goBegin(it);
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	TBfsIterator it2(g, 1);
 	TBfsIterator it3;
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -452,26 +450,26 @@ void Test_DfsPreorderIter() {
 	
 	typedef typename Iterator<TGraph, DfsPreorder>::Type TDfsIterator;
 	TDfsIterator it(g,0);
-	SEQAN_TASSERT(getValue(it) == 0)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
-	SEQAN_TASSERT(value(it) == 0)
-	SEQAN_TASSERT(*it == 0)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it) == 0);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
+	SEQAN_ASSERT_TRUE(value(it) == 0);
+	SEQAN_ASSERT_TRUE(*it == 0);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==3)
+	SEQAN_ASSERT_TRUE(getValue(it)==3);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	goNext(it);
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goBegin(it);
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 }
 
 
@@ -501,46 +499,46 @@ void Test_DfsPreorderIterator() {
 
 	typedef Iterator<Graph<>, DfsPreorder>::Type TDfsPreorder;
 	TDfsPreorder it(g,1);
-	SEQAN_TASSERT(getValue(it) == 1)
-	SEQAN_TASSERT(&hostGraph(it) == &g)
-	SEQAN_TASSERT(value(it) == 1)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(getValue(it) == 1);
+	SEQAN_ASSERT_TRUE(&hostGraph(it) == &g);
+	SEQAN_ASSERT_TRUE(value(it) == 1);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==0)
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(getValue(it)==0);
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==4)
+	SEQAN_ASSERT_TRUE(getValue(it)==4);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==5)
-	SEQAN_TASSERT(value(it)==5)
-	SEQAN_TASSERT(*it == 5)
+	SEQAN_ASSERT_TRUE(getValue(it)==5);
+	SEQAN_ASSERT_TRUE(value(it)==5);
+	SEQAN_ASSERT_TRUE(*it == 5);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==2)
+	SEQAN_ASSERT_TRUE(getValue(it)==2);
 	++it;
-	SEQAN_TASSERT(getValue(it)==3)
+	SEQAN_ASSERT_TRUE(getValue(it)==3);
 	it++;
-	SEQAN_TASSERT(getValue(it)==7)
+	SEQAN_ASSERT_TRUE(getValue(it)==7);
 	goNext(it);
-	SEQAN_TASSERT(getValue(it)==6)
+	SEQAN_ASSERT_TRUE(getValue(it)==6);
 	goNext(it);
-	SEQAN_TASSERT(atEnd(it)==true)
-	SEQAN_TASSERT(atBegin(it)==false)
+	SEQAN_ASSERT_TRUE(atEnd(it)==true);
+	SEQAN_ASSERT_TRUE(atBegin(it)==false);
 	goBegin(it);
-	SEQAN_TASSERT(atEnd(it)==false)
-	SEQAN_TASSERT(atBegin(it)==true)
+	SEQAN_ASSERT_TRUE(atEnd(it)==false);
+	SEQAN_ASSERT_TRUE(atBegin(it)==true);
 	TDfsPreorder it2(g, 1);
 	TDfsPreorder it3;
 	it3 = it;
-	SEQAN_TASSERT(it == it2)
-	SEQAN_TASSERT(it2 == it3)
+	SEQAN_ASSERT_TRUE(it == it2);
+	SEQAN_ASSERT_TRUE(it2 == it3);
 	goEnd(it);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 	goEnd(it2);
-	SEQAN_TASSERT(it2 == it)
+	SEQAN_ASSERT_TRUE(it2 == it);
 	goBegin(it2);
-	SEQAN_TASSERT(it2 != it)
+	SEQAN_ASSERT_TRUE(it2 != it);
 }
 
 
@@ -585,17 +583,13 @@ void Test_GraphIterators() {
 	Test_DfsPreorderIter<Automaton<char> >();
 	Test_DfsPreorderIter<Hmm<Dna, char> >();
 	Test_DfsPreorderIterator();
-
-
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_vertex.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_outedge.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_adjacency.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_edge.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_bfs.h");
-	debug::verifyCheckpoints("projects/library/seqan/graph_types/graph_iterator_dfs.h");
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
+SEQAN_DEFINE_TEST(test_graph_iterators)
+{
+	Test_GraphIterators();
 }
 
 #endif
