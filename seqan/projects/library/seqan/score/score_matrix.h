@@ -377,8 +377,9 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc) {
 ..cat:Input/Output
 ..summary:Load a score matrix from a file.
 ..signature:loadScoreMatrix(score, filename)
-..remark:TODO, comment this better/at all.
-..includes:seqan/score.h
+..param.score:Score matrix object to load into.
+...type:Spec.Score Matrix
+..param.filename:Path to the file to load.
 ..include:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString>
@@ -395,8 +396,8 @@ loadScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TString
 /**
 .Function.loadScoreMatrix
 ..signature:loadScoreMatrix(score, filename, meta)
-..remark:TODO, comment this better/at all.
-..includes:seqan/score.h
+..param.meta:Meta information read from the file.
+..status:The order of the parameters filename and meta will switch.
 ..include:seqan/score.h
 **/
 template <typename TValue, typename TSequenceValue, typename TSpec, typename TString, typename TMeta>
