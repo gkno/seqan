@@ -95,7 +95,7 @@ SEQAN_CHECKPOINT
 		assign(*this, source);
                 _checkMembers();
 	}
-	String(String const & source, Move):
+	String(String & source, Move const &):
 		data_begin(0),
 		data_end(0),
 		data_capacity(0)
