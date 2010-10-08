@@ -1081,6 +1081,56 @@ template <> struct BitsPerValue< Dna5 > { enum { VALUE = 3 }; };
 //____________________________________________________________________________
 
 /**
+.Spec.Rna:
+..cat:Alphabets
+..summary:Alphabet for RNA.
+..general:Class.SimpleType
+..signature:Rna
+..remarks:
+...text:The @Metafunction.ValueSize@ of $Rna$ is 4. 
+The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'U' = 3$.
+...text:Objects of type $Rna$ can be converted to various other types and vice versa. 
+An object that has a value not in ${'A', 'C', 'G', 'U'}$ is converted to $'A'$.
+...text:$Rna$ is typedef for $SimpleType<char,_Rna>$, while $_Rna$ is a helper
+specialization tag class.
+..see:Metafunction.ValueSize
+..see:Spec.Rna5
+..include:seqan/basic.h
+*/
+struct _Rna {};
+typedef SimpleType<unsigned char,_Rna> Rna;
+
+template <> struct ValueSize< Rna > { enum { VALUE = 4 }; };
+template <> struct BitsPerValue< Rna > { enum { VALUE = 2 }; };
+
+//____________________________________________________________________________
+
+/**
+.Spec.Rna5:
+..cat:Alphabets
+..summary:Alphabet for RNA including 'N' character.
+..general:Class.SimpleType
+..signature:Rna5
+..remarks:
+...text:The @Metafunction.ValueSize@ of $Rna5$ is 5. 
+The nucleotides are enumerated this way: $'A' = 0, 'C' = 1, 'G' = 2, 'U' = 3$. 
+The 'N' character ("unkown nucleotide") is encoded by 4.
+...text:Objects of type $Rna5$ can be converted to various other types and vice versa. 
+An object that has a value not in ${'A', 'C', 'G', 'U'}$ is converted to $'N'$.
+...text:$Rna5$ is typedef for $SimpleType<char,_Rna5>$, while $_Rna5$ is a helper
+specialization tag class.
+..see:Metafunction.ValueSize
+..include:seqan/basic.h
+*/
+struct _Rna5 {};
+typedef SimpleType<unsigned char, _Rna5> Rna5;
+
+template <> struct ValueSize< Rna5 > { enum { VALUE = 5 }; };
+template <> struct BitsPerValue< Rna5 > { enum { VALUE = 3 }; };
+
+//____________________________________________________________________________
+
+/**
 .Spec.Iupac:
 ..cat:Alphabets
 ..summary:Iupac code for DNA.
@@ -1170,6 +1220,22 @@ inline void assign(Ascii & c_target,
 {
 SEQAN_CHECKPOINT
 	c_target = _Translate_Table_Dna5_2_Ascii<>::VALUE[source.value];
+}
+//____________________________________________________________________________
+
+inline void assign(Ascii& target,
+				   Rna const & source)
+{
+	SEQAN_CHECKPOINT
+	target = _Translate_Table_Rna5_2_Ascii<>::VALUE[source.value];
+}
+//____________________________________________________________________________
+
+inline void assign(Ascii& target,
+				   Rna5 const & source)
+{
+	SEQAN_CHECKPOINT
+	target = _Translate_Table_Rna5_2_Ascii<>::VALUE[source.value];
 }
 //____________________________________________________________________________
 
@@ -1270,12 +1336,87 @@ inline void assign(Dna5 & target, Iupac const & source)
 SEQAN_CHECKPOINT
 	target.value = _Translate_Table_Iupac_2_Dna5<>::VALUE[source.value];
 }
-
 //____________________________________________________________________________
 
 template <>
 struct CompareType<Dna5, Dna> { typedef Dna Type; };
 inline void assign(Dna5 & target, Dna const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//RNA (4 letters)
+
+template <>
+struct CompareType<Rna, Byte> { typedef Rna Type; };
+inline void assign(Rna & target, Byte c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Byte_2_Rna<>::VALUE[c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna, Ascii> { typedef Rna Type; };
+inline void assign(Rna & target, Ascii c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Ascii_2_Rna<>::VALUE[(unsigned char)c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna, Unicode> { typedef Rna Type; };
+inline void assign(Rna & target, Unicode c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Ascii_2_Rna<>::VALUE[(unsigned char) c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna, Rna5> { typedef Rna Type; };
+inline void assign(Rna & target, Rna5 const & c_source)
+{
+SEQAN_CHECKPOINT
+	target.value = c_source.value & 0x03;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//RNA (5 letters)
+
+template <>
+struct CompareType<Rna5, Byte> { typedef Rna5 Type; };
+inline void assign(Rna5 & target, Byte c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Byte_2_Rna5<>::VALUE[c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna5, Ascii> { typedef Rna5 Type; };
+inline void assign(Rna5 & target, Ascii c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Ascii_2_Rna5<>::VALUE[(unsigned char)c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna5, Unicode> { typedef Rna5 Type; };
+inline void assign(Rna5 & target, Unicode c_source)
+{
+	SEQAN_CHECKPOINT
+	target.value = _Translate_Table_Ascii_2_Rna5<>::VALUE[(unsigned char) c_source];
+}
+//____________________________________________________________________________
+
+template <>
+struct CompareType<Rna5, Rna> { typedef Dna Type; };
+inline void assign(Rna5 & target, Rna const & c_source)
 {
 SEQAN_CHECKPOINT
 	target.value = c_source.value;

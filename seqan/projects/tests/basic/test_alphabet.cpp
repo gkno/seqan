@@ -355,6 +355,8 @@ void TestConversion()
 SEQAN_DEFINE_TEST(TestSimpleTypeConversions) {
 	TestConversion<Ascii, Dna>();
 	TestConversion<Ascii, Dna5>();
+	TestConversion<Ascii, Rna>();
+	TestConversion<Ascii, Rna5>();
 	TestConversion<Ascii, Iupac>();
 	TestConversion<Ascii, AminoAcid>();
 
@@ -370,6 +372,17 @@ SEQAN_DEFINE_TEST(TestSimpleTypeConversions) {
 	TestConversion<Dna5, Unicode>();
 	TestConversion<Dna5, Dna>();
 	TestConversion<Dna5, Iupac>();
+
+	TestConversion<Rna, Ascii>();
+	TestConversion<Rna, Byte>();
+	TestConversion<Rna, Unicode>();
+	TestConversion<Rna, int>();
+	TestConversion<Rna, Rna5>();
+
+	TestConversion<Rna5, Ascii>();
+	TestConversion<Rna5, Byte>();
+	TestConversion<Rna5, Unicode>();
+	TestConversion<Rna5, Rna>();
 
 	TestConversion<Iupac, Ascii>();
 	TestConversion<Iupac, Byte>();
@@ -475,6 +488,8 @@ SEQAN_DEFINE_TEST(TestExtremeValues) {
 SEQAN_DEFINE_TEST(Test_Simple_Types) {
     TestSimpleType<Dna>();
     TestSimpleType<Dna5>();
+    TestSimpleType<Rna>();
+    TestSimpleType<Rna5>();
     TestSimpleType<Iupac>();
     TestSimpleType<AminoAcid>();
     TestSimpleType<bool>();
