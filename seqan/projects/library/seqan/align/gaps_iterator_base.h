@@ -31,14 +31,14 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TGaps, typename TSpec>
 struct Source<Iter<TGaps, GapsIterator<TSpec> > >
 {
-	typedef typename Source<TGaps>::Type TSource;
-	typedef typename Iterator<TSource, Rooted>::Type Type;
+	typedef typename Source<TGaps>::Type TSource_;
+	typedef typename Iterator<TSource_, Rooted>::Type Type;
 };
 template <typename TGaps, typename TSpec>
 struct Source<Iter<TGaps, GapsIterator<TSpec> > const>
 {
-	typedef typename Source<TGaps>::Type TSource;
-	typedef typename Iterator<TSource, Rooted>::Type Type;
+	typedef typename Source<TGaps>::Type TSource_;
+	typedef typename Iterator<TSource_, Rooted>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -48,17 +48,17 @@ struct Source<Iter<TGaps, GapsIterator<TSpec> > const>
 template <typename TGaps, typename TSpec>
 struct Value<Iter<TGaps, GapsIterator<TSpec> > >
 {
-	typedef typename Source<Iter<TGaps, GapsIterator<TSpec> > >::Type TSource;
-	typedef typename Value<TSource>::Type TSourceValue;
-	typedef typename GappedValueType<TSourceValue>::Type Type;
+	typedef typename Source<Iter<TGaps, GapsIterator<TSpec> > >::Type TSource_;
+	typedef typename Value<TSource_>::Type TSourceValue_;
+	typedef typename GappedValueType<TSourceValue_>::Type Type;
 
 };
 template <typename TGaps, typename TSpec>
 struct Value<Iter<TGaps, GapsIterator<TSpec> > const>
 {
-	typedef typename Source<Iter<TGaps, GapsIterator<TSpec> > const>::Type TSource;
-	typedef typename Value<TSource>::Type TSourceValue;
-	typedef typename GappedValueType<TSourceValue>::Type Type;
+	typedef typename Source<Iter<TGaps, GapsIterator<TSpec> > const>::Type TSource_;
+	typedef typename Value<TSource_>::Type TSourceValue_;
+	typedef typename GappedValueType<TSourceValue_>::Type Type;
 
 };
 
@@ -84,14 +84,14 @@ struct GetValue<Iter<TGaps, GapsIterator<TSpec> > const>:
 template <typename TGaps, typename TSpec>
 struct Reference<Iter<TGaps, GapsIterator<TSpec> > >
 {
-	typedef Iter<TGaps, GapsIterator<TSpec> > TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef Iter<TGaps, GapsIterator<TSpec> > TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 template <typename TGaps, typename TSpec>
 struct Reference<Iter<TGaps, GapsIterator<TSpec> > const>
 {
-	typedef Iter<TGaps, GapsIterator<TSpec> > TIterator; //remove const
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef Iter<TGaps, GapsIterator<TSpec> > TIterator_; //remove const
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

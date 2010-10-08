@@ -39,9 +39,9 @@ template <typename T> struct _SizeArr;
 template <typename TValue, unsigned DIMENSION>
 struct _SizeArr<Matrix<TValue, DIMENSION> >
 {
-	typedef Matrix<TValue, DIMENSION> TMatrix;
-	typedef typename Size<TMatrix>::Type TSize;
-	typedef String<TSize> Type;
+	typedef Matrix<TValue, DIMENSION> TMatrix_;
+	typedef typename Size<TMatrix_>::Type TSize_;
+	typedef String<TSize_> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

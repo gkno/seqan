@@ -42,8 +42,8 @@ struct GappedValueType
 template <typename TValue, typename TSpec>
 struct GappedValueType< SimpleType<TValue, TSpec> >
 {
-	typedef SimpleType<TValue, TSpec> THost;
-	typedef ModifiedAlphabet<THost, ModExpand<'-'> > Type;
+	typedef SimpleType<TValue, TSpec> THost_;
+	typedef ModifiedAlphabet<THost_, ModExpand<'-'> > Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -245,15 +245,15 @@ struct GetValue<Gaps<TSource, TSpec> const>:
 template <typename TSource, typename TSpec>
 struct Reference<Gaps<TSource, TSpec> >
 {
-	typedef typename Iterator<Gaps<TSource, TSpec>, Standard>::Type TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef typename Iterator<Gaps<TSource, TSpec>, Standard>::Type TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 
 template <typename TSource, typename TSpec>
 struct Reference<Gaps<TSource, TSpec> const>
 {
-	typedef typename Iterator<Gaps<TSource, TSpec> const, Standard>::Type TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef typename Iterator<Gaps<TSource, TSpec> const, Standard>::Type TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

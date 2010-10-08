@@ -516,15 +516,15 @@ setClippedEndPosition(Gaps<TSource, SumlistGaps> & me,
 template <typename TGaps>
 struct _SumList_of_Gaps
 {
-	typedef typename Size<TGaps>::Type TSize;
-	typedef SumList<2, TSize> Type;
+	typedef typename Size<TGaps>::Type TSize_;
+	typedef SumList<2, TSize_> Type;
 };
 
 template <typename TGaps>
 struct _SumList_of_Gaps<TGaps const>
 {
-	typedef typename Size<TGaps const>::Type TSize;
-	typedef SumList<2, TSize> const Type;
+	typedef typename Size<TGaps const>::Type TSize_;
+	typedef SumList<2, TSize_> const Type;
 };
 
 
@@ -586,14 +586,14 @@ SEQAN_CHECKPOINT
 template <typename TGaps>
 struct Source< Iter<TGaps, GapsIterator<SumlistGaps> > >
 {
-	typedef typename Source<TGaps>::Type TGapsSource;
-	typedef typename Iterator<TGapsSource>::Type Type;
+	typedef typename Source<TGaps>::Type TGapsSource_;
+	typedef typename Iterator<TGapsSource_>::Type Type;
 };
 template <typename TGaps>
 struct Source< Iter<TGaps, GapsIterator<SumlistGaps> > const>
 {
-	typedef typename Source<TGaps>::Type TGapsSource;
-	typedef typename Iterator<TGapsSource>::Type Type;
+	typedef typename Source<TGaps>::Type TGapsSource_;
+	typedef typename Iterator<TGapsSource_>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
