@@ -79,8 +79,8 @@ _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 				  TValue seq)
 {
 	seq_i_id = seq_map[id(source(row(segment,seq)))];
-	begin_i = sourceBeginPosition(row(segment,seq));
-	end_i = sourceEndPosition(row(segment,seq));
+	begin_i = clippedBeginPosition(row(segment,seq));
+	end_i = clippedEndPosition(row(segment,seq));
 }
 
 

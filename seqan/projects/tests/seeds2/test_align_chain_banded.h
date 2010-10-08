@@ -226,8 +226,12 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_linear)
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
         // TODO(holtgrew): This infix assignment for alignments is a bit creepy, maybe one of the too many shortcuts?
-        assignSource(row(alignment, 0), sequence0, 1, length(sequence0));
-        assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
+        assignSource(row(alignment, 0), sequence0);
+        setClippedBeginPosition(row(alignment, 0), 1);
+        setClippedEndPosition(row(alignment, 0), length(sequence0));
+        assignSource(row(alignment, 1), sequence1);
+        setClippedBeginPosition(row(alignment, 1), 2);
+        setClippedEndPosition(row(alignment, 1), length(sequence1));
 
         int result = bandedChainAlignment(alignment, seedChain, 1, scoringScheme, AlignConfig<false, false, false, false>());
         SEQAN_ASSERT_EQ(result, 5);
@@ -313,8 +317,12 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
-        assignSource(row(alignment, 0), query, 1, length(query));
-        assignSource(row(alignment, 1), database, 2, length(database));
+        assignSource(row(alignment, 0), query);
+        setClippedBeginPosition(row(alignment, 0), 1);
+        setClippedEndPosition(row(alignment, 0), length(query));
+        assignSource(row(alignment, 1), database);
+        setClippedBeginPosition(row(alignment, 1), 2);
+        setClippedEndPosition(row(alignment, 1), length(database));
         
         int result = _bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
         SEQAN_ASSERT_EQ(result, 24);
@@ -373,8 +381,12 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_align_affine)
         Align<CharString, ArrayGaps> alignment;
         resize(rows(alignment), 2);
         // TODO(holtgrew): This infix assignment for alignments is a bit creepy, maybe one of the too many shortcuts?
-        assignSource(row(alignment, 0), sequence0, 1, length(sequence0));
-        assignSource(row(alignment, 1), sequence1, 2, length(sequence1));
+        assignSource(row(alignment, 0), sequence0);
+        setClippedBeginPosition(row(alignment, 0), 1);
+        setClippedEndPosition(row(alignment, 0), length(sequence0));
+        assignSource(row(alignment, 1), sequence1);
+        setClippedBeginPosition(row(alignment, 1), 2);
+        setClippedEndPosition(row(alignment, 1), length(sequence1));
 
         int result = _bandedChainAlignment(alignment, seedChain, 2, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
         SEQAN_ASSERT_EQ(result, 5);

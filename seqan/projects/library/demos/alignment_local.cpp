@@ -12,8 +12,8 @@ int main()
 	appendValue(rows(ali), "bizarreamphibology");
     ::std::cout << "Score = " << localAlignment(ali, Score<int>(3,-3,-2, -2), SmithWaterman()) << ::std::endl;
 	::std::cout << ali;
-	::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali, 0)) << ":" << (sourceEndPosition(row(ali, 0))-1) << "]";
-	::std::cout << " and Seq2[" << sourceBeginPosition(row(ali, 1)) << ":" <<  (sourceEndPosition(row(ali, 1))-1) << "]" << ::std::endl << ::std::endl;
+	::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali, 0)) << ":" << (clippedEndPosition(row(ali, 0))-1) << "]";
+	::std::cout << " and Seq2[" << clippedBeginPosition(row(ali, 1)) << ":" <<  (clippedEndPosition(row(ali, 1))-1) << "]" << ::std::endl << ::std::endl;
 
 
 ///Example 2: This program applies the Waterman-Eggert algorithm to compute all non-overlapping local alignments with score better or equal 2.
@@ -26,8 +26,8 @@ int main()
 	while (localAlignment(ali2, finder, scoring, 2, WatermanEggert())) {
 		::std::cout << "Score = " << getScore(finder) << ::std::endl;
 		::std::cout << ali2;
-		::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali2, 0)) << ":" << (sourceEndPosition(row(ali2, 0))-1) << "]";
-		::std::cout << " and Seq2[" << sourceBeginPosition(row(ali2, 1)) << ":" <<  (sourceEndPosition(row(ali2, 1))-1) << "]" << ::std::endl << ::std::endl;
+		::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali2, 0)) << ":" << (clippedEndPosition(row(ali2, 0))-1) << "]";
+		::std::cout << " and Seq2[" << clippedBeginPosition(row(ali2, 1)) << ":" <<  (clippedEndPosition(row(ali2, 1))-1) << "]" << ::std::endl << ::std::endl;
 	}
 
 ///Example 3
@@ -39,8 +39,8 @@ int main()
     while (localAlignment(ali3, finder3, scoring3, 5, WatermanEggert())) {
         ::std::cout << "Score = " << getScore(finder3) << ::std::endl;
 	    ::std::cout << ali3;
-	    ::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali3, 0)) << ":" << (sourceEndPosition(row(ali3, 0))-1) << "]";
-	    ::std::cout << " and Seq2[" << sourceBeginPosition(row(ali3, 1)) << ":" <<  (sourceEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
+	    ::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali3, 0)) << ":" << (clippedEndPosition(row(ali3, 0))-1) << "]";
+	    ::std::cout << " and Seq2[" << clippedBeginPosition(row(ali3, 1)) << ":" <<  (clippedEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
     }
 
 ///Example 4: This program applies the banded Waterman-Eggert algorithm to compute all non-overlapping local alignments with score or equal 5
@@ -54,8 +54,8 @@ int main()
     while (localAlignment(ali4, finder4, scoring4, 5, -1, 8, BandedWatermanEggert())) {
         ::std::cout << "Score = " << getScore(finder4) << ::std::endl;
         ::std::cout << ali4;
-        ::std::cout << "Aligns Seq1[" << sourceBeginPosition(row(ali4, 0)) << ":" << (sourceEndPosition(row(ali4, 0))-1) << "]";
-        ::std::cout << " and Seq2[" << sourceBeginPosition(row(ali4, 1)) << ":" <<  (sourceEndPosition(row(ali4, 1))-1) << "]" << ::std::endl << ::std::endl;
+        ::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali4, 0)) << ":" << (clippedEndPosition(row(ali4, 0))-1) << "]";
+        ::std::cout << " and Seq2[" << clippedBeginPosition(row(ali4, 1)) << ":" <<  (clippedEndPosition(row(ali4, 1))-1) << "]" << ::std::endl << ::std::endl;
     }
 
 	return 0;

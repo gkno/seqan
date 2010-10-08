@@ -172,7 +172,7 @@ SEQAN_CHECKPOINT
 	String<TPos> viewPos;
 	TPos pos;
 	for (TSize i = 0; i < length(rows(infixAlign)); ++i) {
-		pos = beginPosition(source(row(infixAlign, i))) + sourceBeginPosition(row(infixAlign, i));
+		pos = beginPosition(source(row(infixAlign, i))) + clippedBeginPosition(row(infixAlign, i));
 		appendValue(viewPos, toViewPosition(row(align, i), pos));
 	}
 

@@ -53,10 +53,10 @@ int main() {
 	// ---------- seed extension with local alignment as seed ----------
 
 	// begin and end position of local alignment in sequences
-	TPos locAliBegin_0 = sourceBeginPosition(row(localAlign, 0)) + beginPosition(infix_0);
-	TPos locAliBegin_1 = sourceBeginPosition(row(localAlign, 1)) + beginPosition(infix_1);
-	TPos locAliEnd_0 = sourceEndPosition(row(localAlign, 0)) + beginPosition(infix_0);
-	TPos locAliEnd_1 = sourceEndPosition(row(localAlign, 1)) + beginPosition(infix_1);
+	TPos locAliBegin_0 = clippedBeginPosition(row(localAlign, 0)) + beginPosition(infix_0);
+	TPos locAliBegin_1 = clippedBeginPosition(row(localAlign, 1)) + beginPosition(infix_1);
+	TPos locAliEnd_0 = clippedEndPosition(row(localAlign, 0)) + beginPosition(infix_0);
+	TPos locAliEnd_1 = clippedEndPosition(row(localAlign, 1)) + beginPosition(infix_1);
 
 	// seed extension (gapped X-drop)
 	Seed<int, SimpleSeed> seed(locAliBegin_0, locAliBegin_1, locAliEnd_0 - 1, locAliEnd_1 - 1);

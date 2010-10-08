@@ -178,12 +178,12 @@ SEQAN_CHECKPOINT
     
     // initialization
     String<TMerger> queue;
-    TPos pos = _min(toViewPosition(row(align, 0), sourceBeginPosition(row(align, 0))),
-                    toViewPosition(row(align, 1), sourceBeginPosition(row(align, 1))));
+    TPos pos = _min(toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0))),
+                    toViewPosition(row(align, 1), clippedBeginPosition(row(align, 1))));
     appendValue(queue, TMerger(pos, pos, infimumValue<TScoreValue1>()+1));
 
-    TPos aliLength = _max(toViewPosition(row(align, 0), sourceEndPosition(row(align, 0))),
-                          toViewPosition(row(align, 1), sourceEndPosition(row(align, 1))));
+    TPos aliLength = _max(toViewPosition(row(align, 0), clippedEndPosition(row(align, 0))),
+                          toViewPosition(row(align, 1), clippedEndPosition(row(align, 1))));
     TPos len;
     while ((pos < aliLength) || (length(queue) > 1)) {
         // construct useful tree
@@ -877,10 +877,10 @@ SEQAN_CHECKPOINT
 	integrateAlign(align, localAlign);
 
 	// begin and end position of local alignment (seed)
-	TPos seedBeginA = sourceBeginPosition(row(localAlign, 0)) + beginPosition(a);
-	TPos seedBeginB = sourceBeginPosition(row(localAlign, 1)) + beginPosition(b);
-	TPos seedEndA = sourceEndPosition(row(localAlign, 0)) + beginPosition(a);
-	TPos seedEndB = sourceEndPosition(row(localAlign, 1)) + beginPosition(b);
+	TPos seedBeginA = clippedBeginPosition(row(localAlign, 0)) + beginPosition(a);
+	TPos seedBeginB = clippedBeginPosition(row(localAlign, 1)) + beginPosition(b);
+	TPos seedEndA = clippedEndPosition(row(localAlign, 0)) + beginPosition(a);
+	TPos seedEndB = clippedEndPosition(row(localAlign, 1)) + beginPosition(b);
 
 	if (direction == 3) {
 		// set begin and end positions of align
@@ -1100,12 +1100,12 @@ SEQAN_CHECKPOINT
 	integrateAlign(align, bandedAlign);
 
 	// set begin and end positions of align
-	setClippedBeginPosition(row(align, 0), beginPosition(a) + sourceBeginPosition(row(bandedAlign, 0)));
-	setClippedBeginPosition(row(align, 1), beginPosition(b) + sourceBeginPosition(row(bandedAlign, 1)));
+	setClippedBeginPosition(row(align, 0), beginPosition(a) + clippedBeginPosition(row(bandedAlign, 0)));
+	setClippedBeginPosition(row(align, 1), beginPosition(b) + clippedBeginPosition(row(bandedAlign, 1)));
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setClippedEndPosition(row(align, 0), beginPosition(a) + sourceEndPosition(row(bandedAlign, 0)));
-	setClippedEndPosition(row(align, 1), beginPosition(b) + sourceEndPosition(row(bandedAlign, 1)));
+	setClippedEndPosition(row(align, 0), beginPosition(a) + clippedEndPosition(row(bandedAlign, 0)));
+	setClippedEndPosition(row(align, 1), beginPosition(b) + clippedEndPosition(row(bandedAlign, 1)));
 
 	if ((TSize)length(row(align, 0)) < minLength)
 		return;
