@@ -824,11 +824,15 @@ SEQAN_CHECKPOINT
 ..cat:Containers
 ..summary:Access sequence as c-style string.
 ..signature:toCString(object)
-..param.object:A sequence.
+..param.object:A string.
 ...type:Class.String
 ...type:Adaption.char array
-..returns:A temporary @Spec.CStyle String@ object of that was constructed for $object$.
-..remarks:Notational sugar.
+..returns:For strings that store their elements in a contiguous block (see @Metafunction.IsContiguous@)
+a pointer to first element of $object$ is returned.
+The last element is followed by a default constructed element.
+..remarks:If the alphabet of $object$ is $char$ or $wchar_t$ the return value is a c-style string representing the contents of $object$.
+Calling this function for non-contiguous containers will raise a compilation error.
+To create c-style strings for non-contiguous strings or strings with different alphabets, use a @Spec.CStyle String@ as an intermediate.
 ..include:seqan/sequence.h
 */
 
@@ -864,13 +868,12 @@ SEQAN_CHECKPOINT
 	return me;
 }
 
-template <typename T>
-inline typename Value<T>::Type *
-toCString(T & me)
+template <typename TValue, typename TSpec>
+inline TValue *
+_toCStringImpl(String<TValue, TSpec> & me, True)
 {
 SEQAN_CHECKPOINT
-	typedef typename Value<T>::Type TValue;
-	typename Size<T>::Type len = length(me);
+	typename Size< String<TValue, TSpec> >::Type len = length(me);
 	if (len >= capacity(me))
 		reserve(me, len + 1);
 	if (end(me) != NULL)
@@ -878,13 +881,29 @@ SEQAN_CHECKPOINT
 	return begin(me);
 }
 
-template <typename T>
-inline typename Value<T>::Type *
-toCString(T const & me)
+// You called toCString with non-contiguous strings.
+// Convert to String<..., CStyle> and try again!
+template <typename TValue, typename TSpec>
+inline TValue *
+_toCStringImpl(String<TValue, TSpec> & me, False);
+
+
+template <typename TValue, typename TSpec>
+inline TValue *
+toCString(String<TValue, TSpec> & me)
 {
 SEQAN_CHECKPOINT
-	return toCString(const_cast<T&>(me));
+	return _toCStringImpl(me, typename IsContiguous<String<TValue, TSpec> >::Type());
 }
+
+template <typename TValue, typename TSpec>
+inline TValue *
+toCString(String<TValue, TSpec> const & me)
+{
+SEQAN_CHECKPOINT
+	return toCString(const_cast<String<TValue, TSpec> &>(me));
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 } //namespace SEQAN_NAMESPACE_MAIN
