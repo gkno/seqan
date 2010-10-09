@@ -40,7 +40,7 @@ struct GraphCargo {
 
     TColumns spanned_columns;
 
-    GraphCargo() {};
+    GraphCargo() {}
     GraphCargo(GraphCargo const& other) 
     {
         alignedRead = other.alignedRead;
