@@ -40,10 +40,10 @@ typedef Tag<Dense_> Dense;
 ..remark:The size is automatically updated.
 */
 template <typename TSpec>
-class Histogram;
+struct Histogram;
 
 template <>
-class Histogram<Dense>
+struct Histogram<Dense>
 {
 public:
     String<double> counters;

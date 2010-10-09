@@ -36,14 +36,14 @@ using namespace seqan;
 ..summary:Stores base and quality counts for reads.
 */
 template <typename TSpec>
-class ReadEvaluationResult;
+struct ReadEvaluationResult;
 
 /*
 .Class.AlignmentEvaluationResult
 ..summary:Stores base and quality counts for reads.
 */
 template <typename TSpec>
-class AlignmentEvaluationResult;
+struct AlignmentEvaluationResult;
 
 // ============================================================================
 // Metafunctions

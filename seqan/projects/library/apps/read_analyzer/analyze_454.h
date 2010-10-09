@@ -35,7 +35,7 @@ struct LS454_ {};
 typedef Tag<LS454_> LS454;
 
 template<>
-class ReadEvaluationResult<LS454>
+struct ReadEvaluationResult<LS454>
 {
 public:
     // Histogram over the length of reads.

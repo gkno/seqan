@@ -35,7 +35,7 @@ typedef Tag<Illumina_> Illumina;
 
 
 template <>
-class ReadEvaluationResult<Illumina>
+struct ReadEvaluationResult<Illumina>
 {
 public:
     String<size_t> baseCountOverall;  // arr[base]
