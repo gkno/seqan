@@ -1,8 +1,10 @@
 #define SEQAN_PROFILE		// enable time measuring
 #define FIONA_ALLOWINDELS	// allow for indels (chooses a less compact FragmentStore)
 //#define FIONA_MEMOPT		// small suffix array values (<16mio reads of length <256)
+#if defined(_OPENMP)        // Only enable parallelism in fiona if OpenMP is enabled.
 #define FIONA_PARALLEL		// divide suffix tree into subtrees for each possible 3-gram
 							// and use process subtrees in parallel
+#endif  // defined(_OPENMP)
 
 // debugging
 //#define SEQAN_DEBUG_INDEX
@@ -810,7 +812,7 @@ void correctReads(
 	if (options.genomeLength == 1)
 	{
 		std::cout << "Generating Hugues' stats file." << std::endl;
-		ofstream stats("stats.txt");
+        std::ofstream stats("stats.txt");
 		Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type it(myIndex);
 		goBegin(it);
 		CharString tmp;

@@ -56,6 +56,7 @@
 #include <seqan/basic/basic_debug.h>
 #include <seqan/basic/basic_testing.h>  // new, better debug
 #include <seqan/basic/basic_profile.h>
+#include <seqan/basic/basic_parallelism.h>  // include after basic_testing.h!
 #include <seqan/basic/basic_metaprogramming.h>
 #include <seqan/basic/basic_definition.h>
 #include <seqan/basic/basic_type.h>
