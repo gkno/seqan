@@ -1121,8 +1121,8 @@ SEQAN_CHECKPOINT
 		++act_len;
 
 	}
-	SEQAN_TASSERT(act0_pos+act_len == getQueryEnd(hsp))
-	SEQAN_TASSERT(act1_pos+act_len == getDatabaseEnd(hsp))
+	SEQAN_ASSERT_TRUE(act0_pos+act_len == getQueryEnd(hsp));
+	SEQAN_ASSERT_TRUE(act1_pos+act_len == getDatabaseEnd(hsp));
 	if(act_len>0)
 	{
 		TVertexDescriptor vd0 = addVertex(ali,id0,act0_pos,act_len);

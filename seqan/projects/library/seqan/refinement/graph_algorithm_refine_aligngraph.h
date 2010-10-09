@@ -106,7 +106,7 @@ SEQAN_CHECKPOINT
 //	int pseudo_map = 0;
 //	TValue pos_j_check,seq_j_id;
 //	_getOtherSequenceAndProject(segment,pseudo_map,seq_i_id,pos_i,seq_j_id,pos_j_check);
-//	SEQAN_TASSERT(pos_j_check==pos_j)
+//	SEQAN_ASSERT_TRUE(pos_j_check==pos_j);
 //	TValue last_pos_i = pos_i + len;
 //	TValue last_pos_j;
 //	_getOtherSequenceAndProject(segment,pseudo_map,seq_i_id,last_pos_i,seq_j_id,last_pos_j);
@@ -194,7 +194,7 @@ SEQAN_CHECKPOINT
 	int pseudo_map = 0;
 	TValue pos_j_check,seq_j_id;
 	_getOtherSequenceAndProject(segment,pseudo_map,seq_i_id,pos_i,seq_j_id,pos_j_check);
-	SEQAN_TASSERT(pos_j_check==pos_j)
+	SEQAN_ASSERT_TRUE(pos_j_check==pos_j);
 	TValue last_pos_j = pos_j + len_j;
 		
 	TScoreValue ret_score = 0;

@@ -487,11 +487,11 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	// Store the new fragment
 	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(TKey(id, begin + len));
 	// Segment does not belong to Sequence anymore
-	SEQAN_TASSERT(interval != g.data_pvMap.end());
+	SEQAN_ASSERT_TRUE(interval != g.data_pvMap.end());
 	// Segment end must be assigned to nil so far
-	SEQAN_TASSERT(interval->second == nilVertex);
+	SEQAN_ASSERT_TRUE(interval->second == nilVertex);
 	// Segment must belong to the whole old interval
-	SEQAN_TASSERT(*interval == *g.data_pvMap.upper_bound(TKey(id, begin)));
+	SEQAN_ASSERT_TRUE(*interval == *g.data_pvMap.upper_bound(TKey(id, begin)));
 
 	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
@@ -1300,7 +1300,7 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					 TSeqId2& id2,
 					 TPosition2& pos2)
 {
-	SEQAN_TASSERT(length(stringSet(g)) == 2);
+	SEQAN_ASSERT_TRUE(length(stringSet(g)) == 2);
 
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -1347,7 +1347,7 @@ getProjectedPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 					 TSeqId2& id2,
 					 TPosition2& pos2)
 {
-	SEQAN_TASSERT(length(stringSet(g)) == 2);
+	SEQAN_ASSERT_TRUE(length(stringSet(g)) == 2);
 
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -1623,7 +1623,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TIdType currentSeq = it->first.first;
 	for(; it != g.data_pvMap.end(); ++it) {
 		if (it->first.first != currentSeq) {
-			SEQAN_TASSERT(col <= len);
+			SEQAN_ASSERT_TRUE(col <= len);
 			//std::cout << std::endl;
 			++row;col=0;
 			compIndex = 0;
@@ -1644,7 +1644,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			mat[row*len + col] = (TValue) (*itStr);
 		++compIndex;
 	}
-	SEQAN_TASSERT(row + 1 == nseq);
+	SEQAN_ASSERT_TRUE(row + 1 == nseq);
 	//std::cout << std::endl;
 
 	return true;

@@ -104,7 +104,7 @@ SEQAN_DEFINE_TEST(AlignmentGraphFunctions)
 	addEdge(g,3,4);
 	TEdgeDescriptor my_edge = addEdge(g,3,1);
 	addEdge(g,3,0);
-	SEQAN_ASSERT_TRUE(v3 == 3);;
+	SEQAN_ASSERT_TRUE(v3 == 3);
 	SEQAN_ASSERT_TRUE(numVertices(g) == 5);
 	SEQAN_ASSERT_TRUE(targetVertex(g, my_edge) == 3);
 	SEQAN_ASSERT_TRUE(sourceVertex(g, my_edge) == 1);

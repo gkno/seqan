@@ -446,8 +446,8 @@ void testFind()
 		while (find(finder, pattern))
 			append(pos,position(finder));
 
-		SEQAN_TASSERT(pos[0] == 5);
-		SEQAN_TASSERT(pos[1] == 31);
+		SEQAN_ASSERT_TRUE(pos[0] == 5);
+		SEQAN_ASSERT_TRUE(pos[1] == 31);
 
 	//____________________________________________________________________________
 	// Test2 - large needle
@@ -463,8 +463,8 @@ void testFind()
 		while (find(finder, pattern))
 			append(pos,position(finder));
 
-		SEQAN_TASSERT(pos[1] == 0);
-		SEQAN_TASSERT(pos[0] == 26);
+		SEQAN_ASSERT_TRUE(pos[1] == 0);
+		SEQAN_ASSERT_TRUE(pos[0] == 26);
 }
 
 void dumpStatus(bool status) {

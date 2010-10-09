@@ -352,7 +352,7 @@ SEQAN_CHECKPOINT
 	TAlignIterator ali_it0_stop = iter(row0,beginPosition(row0));
 	TAlignIterator ali_it1_stop = iter(row1,beginPosition(row1));
 
-	SEQAN_TASSERT( endPosition(row0)- beginPosition(row0) == endPosition(row1)- beginPosition(row1) )
+	SEQAN_ASSERT_TRUE( endPosition(row0)- beginPosition(row0) == endPosition(row1)- beginPosition(row1) );
 
 	TAlignIterator ali_it0 = iter(row0,endPosition(row0));
 	TAlignIterator ali_it1 = iter(row1,endPosition(row1));

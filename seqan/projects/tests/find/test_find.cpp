@@ -916,7 +916,7 @@ void Test_Approx_EditDist() {
     SEQAN_ASSERT_EQ(host(reinterpret_cast<Pattern<String<char>, TPatternSpec> const &>(pat)), ndl);
 
     SEQAN_ASSERT_EQ(scoreLimit(pat), -2);
-    setScoreLimit(pat, -1);;
+    setScoreLimit(pat, -1);
     SEQAN_ASSERT_EQ(scoreLimit(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));

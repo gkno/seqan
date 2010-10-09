@@ -230,8 +230,8 @@ void Test_Directed() {
 	SEQAN_ASSERT_TRUE(numVertices(g3) == 5);
 	SEQAN_ASSERT_TRUE(numEdges(g3) == 1);
 	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
-	//SEQAN_ASSERT_TRUE(_getId(edge3) == 0);;
-	SEQAN_ASSERT_TRUE(getCargo(edge3) == (void*) 0);;
+	//SEQAN_ASSERT_TRUE(_getId(edge3) == 0);
+	SEQAN_ASSERT_TRUE(getCargo(edge3) == (void*) 0);
 	addEdge(g3,0,2);
 	addEdge(g3,0,0);
 	removeEdge(g3,0,4);
@@ -460,8 +460,8 @@ void Test_Undirected() {
 	SEQAN_ASSERT_TRUE(numVertices(g3) == 5);
 	SEQAN_ASSERT_TRUE(numEdges(g3) == 1);
 	TEdgeDescriptor3 edge3 = addEdge(g3,0,4);
-	SEQAN_ASSERT_TRUE(_getId(edge3) == 0);;
-	SEQAN_ASSERT_TRUE(getCargo(edge3) == (void*) 0);;
+	SEQAN_ASSERT_TRUE(_getId(edge3) == 0);
+	SEQAN_ASSERT_TRUE(getCargo(edge3) == (void*) 0);
 	addEdge(g3,0,2);
 	addEdge(g3,0,1);
 	removeEdge(g3,0,4);
@@ -1312,7 +1312,7 @@ void Test_Tree() {
 	SEQAN_ASSERT_TRUE(numVertices(g2) == 1);
 	SEQAN_ASSERT_TRUE(numEdges(g2) == 0);
 	TVertexDescriptor2 ver1 = addChild(g2, getRoot(g2), TPair('a',3));
-	SEQAN_ASSERT_TRUE(numChildren(g2, getRoot(g2)) == 1);;
+	SEQAN_ASSERT_TRUE(numChildren(g2, getRoot(g2)) == 1);
 	SEQAN_ASSERT_TRUE(ver1 == 1);
 	SEQAN_ASSERT_TRUE(numVertices(g2) == 2);
 	TVertexDescriptor2 ver2 = addChild(g2, getRoot(g2));

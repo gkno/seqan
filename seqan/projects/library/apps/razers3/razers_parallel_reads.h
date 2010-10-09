@@ -194,7 +194,7 @@ void partitionHits(
 		myPos = i * partSize;
 		
 		unsigned now = 0;
-		unsigned last = hits[myPos - 1].ndlSeqNo;;
+		unsigned last = hits[myPos - 1].ndlSeqNo;
 		
 		for(; myPos < length(hits); ++myPos){
 			now = hits[myPos].ndlSeqNo;
@@ -228,7 +228,7 @@ void partitionHits(
 	
 	positions[0] = 0;
 	for (int i = 1; i < noOfParts; ++i){
-		positions[i] = i * partSize;;
+		positions[i] = i * partSize;
 	}
 	positions[noOfParts] = length(hits);
 }

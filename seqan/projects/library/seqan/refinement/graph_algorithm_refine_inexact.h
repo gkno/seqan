@@ -100,7 +100,7 @@ SEQAN_CHECKPOINT
 	{
 		cut_end_pos = _getClosestRefinedNeighbor(ali_g,end_knot,seq,end_pos);
 		end_knot =  findVertex(ali_g,seq,cut_end_pos-1);
-		SEQAN_TASSERT(cut_end_pos == fragmentBegin(ali_g,end_knot)+fragmentLength(ali_g,end_knot))
+		SEQAN_ASSERT_TRUE(cut_end_pos == fragmentBegin(ali_g,end_knot)+fragmentLength(ali_g,end_knot));
 	}
 		
 }
@@ -124,7 +124,7 @@ SEQAN_CHECKPOINT
 	{
 		cut_act_pos = _getClosestRefinedNeighbor(ali_g,act_knot,seq,act_pos);
 		act_knot =  findVertex(ali_g,seq,cut_act_pos);
-		SEQAN_TASSERT(cut_act_pos == fragmentBegin(ali_g,act_knot))
+		SEQAN_ASSERT_TRUE(cut_act_pos == fragmentBegin(ali_g,act_knot));
 	}
 }
 

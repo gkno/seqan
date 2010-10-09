@@ -125,7 +125,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 			}
 			// Set traceback vertex
 			if (maxVertex != nilVertex) {
-				value(vMat, i * numRows + value(itRealState)) = maxValue * getEmissionProbability(hmm, value(itRealState), value(seq, i-1));;
+				value(vMat, i * numRows + value(itRealState)) = maxValue * getEmissionProbability(hmm, value(itRealState), value(seq, i-1));
 				value(traceback, i * numRows + value(itRealState)) = maxVertex;
 			}
 		}

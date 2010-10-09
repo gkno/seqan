@@ -253,7 +253,7 @@ SEQAN_DEFINE_TEST(test_split_xDrop_align) {
     SEQAN_ASSERT_TRUE(row(value(aliString, 0), 0) == "cgataa");
     SEQAN_ASSERT_TRUE(row(value(aliString, 0), 1) == "cgataa");
     SEQAN_ASSERT_TRUE(row(value(aliString, 1), 0) == "tcagttggacta");
-    SEQAN_TASSERT(row(value(aliString, 2), 1) == "tca-ctggacta"); // TODO: Warum geht SEQAN_ASSERT_TRUE hier nicht?    
+    SEQAN_ASSERT_TRUE(row(value(aliString, 1), 1) == "tca-ctggacta");
     
     seq1 = "aaaaaa";
     seq2 = "ccaaaaaa";

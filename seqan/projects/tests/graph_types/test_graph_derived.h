@@ -114,7 +114,7 @@ void Test_SetOracle()
 		String<char> & str = keywords[i];
 		for (unsigned int j = 0; j < length(str); ++j)
 		{
-			SEQAN_ASSERT_TRUE(canParseString(g, prefix(str, i)));;
+			SEQAN_ASSERT_TRUE(canParseString(g, prefix(str, i)));
 		}
 	}
 

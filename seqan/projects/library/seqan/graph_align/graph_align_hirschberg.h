@@ -405,7 +405,7 @@ _align_hirschberg(TTrace& trace,
 					wasVertical = false;
 				} else {
 					maxVal = vert;
-					tmpPointer = getValue(verticalPointer, inf_len2);;
+					tmpPointer = getValue(verticalPointer, inf_len2);
 					wasHorizontal = false;
 					wasVertical = true;
 				}

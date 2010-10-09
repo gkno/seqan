@@ -69,14 +69,17 @@ bool testShape(TShape1 shape1, TShape2 shape2, bool dump)
 void testShapes() 
 {
 	Shape<Dna, SimpleShape > shapeA(6);
-	SEQAN_TASSERT(testShape(shapeA, Shape<Dna, UngappedShape<6> >(), true));
+    bool b = testShape(shapeA, Shape<Dna, UngappedShape<6> >(), true);
+	SEQAN_ASSERT_TRUE(b);
 
 	                   // 012345678  len=9
 	CharString pattern = "11100110100";
 	Shape<Dna, GenericShape> shapeB(pattern);
-	SEQAN_TASSERT(testShape(shapeB, Shape<Dna, GappedShape<HardwiredShape<1,1,3,1,2> > >(), true));
+	b = testShape(shapeB, Shape<Dna, GappedShape<HardwiredShape<1,1,3,1,2> > >(), true);
+    SEQAN_ASSERT_TRUE(b);
 
 	pattern = "11110011";
 	Shape<Dna, OneGappedShape> shapeC(pattern);
-	SEQAN_TASSERT(testShape(shapeC, Shape<Dna, GappedShape<HardwiredShape<1,1,1,3,1> > >(), true));
+	bool b = testShape(shapeC, Shape<Dna, GappedShape<HardwiredShape<1,1,1,3,1> > >(), true);
+    SEQAN_ASSERT_TRUE(b);
 }

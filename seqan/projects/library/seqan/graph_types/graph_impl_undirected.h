@@ -273,7 +273,7 @@ clearEdges(Graph<Undirected<TCargo, TSpec> >& g)
 		}
 		*it = (TEdgeStump*) 0;
 	}
-	SEQAN_TASSERT(numEdges(g) == length(edges))
+	SEQAN_ASSERT_TRUE(numEdges(g) == length(edges));
 
 	// Release all edges
 	typedef typename Iterator<String<TEdgeDescriptor>, Standard>::Type TStringIter;

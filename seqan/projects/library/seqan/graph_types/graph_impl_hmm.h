@@ -351,7 +351,7 @@ addVertex(Graph<Hmm<TAlphabet, TCargo, TSpec> >& g,
 	typedef typename Iterator<String<TEmission>, Standard>::Type TInputIter;
 	TSize alph_size = ValueSize<TAlphabet>::VALUE;
 
-	SEQAN_TASSERT(alph_size == length(emis))
+	SEQAN_ASSERT_TRUE(alph_size == length(emis));
 
 	TVertexDescriptor vd = addVertex(g);
 	TEmisIter it = begin(g.data_emission, Standard());

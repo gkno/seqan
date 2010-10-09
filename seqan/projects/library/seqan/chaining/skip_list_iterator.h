@@ -255,7 +255,7 @@ namespace seqan
 			goPrevious( left );
 			--right;
 		}
-		return left;;
+		return left;
 	}
 
 } // namespace ...

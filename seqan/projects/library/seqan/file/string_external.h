@@ -1167,7 +1167,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     				writePage(pf, pf.pageNo, file);
                 else {
                     lastDiskPage = data_size / PAGE_SIZE;
-                    lastDiskPageSize = data_size % PAGE_SIZE;;
+                    lastDiskPageSize = data_size % PAGE_SIZE;
 				    writeLastPage(pf, pf.pageNo, file, lastDiskPageSize);
                 }
                 pf.dataStatus = TPageFrame::ON_DISK;
@@ -1195,7 +1195,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
                 } else {
 				    writeLastPage(pf, pf.pageNo, file, data_size % PAGE_SIZE);
                     lastDiskPage = data_size / PAGE_SIZE;
-                    lastDiskPageSize = data_size % PAGE_SIZE;;
+                    lastDiskPageSize = data_size % PAGE_SIZE;
                 }
 				pager[pf.pageNo] = TPageFrame::ON_DISK;		// page is marked to be on disk
 				waitFor(pf);

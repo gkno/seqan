@@ -1313,7 +1313,7 @@ const char *tempFileName() {
     } while (false)
 
 
-// TODO(holtgrew): Rename to SEQAN_TASSERT once that name is free.
+// TODO(holtgrew): Rename to SEQAN_ASSERT_TRUE once that name is free.;
 // Trueness assertion with a comment.
 //
 // Usage:  SEQAN_ASSERT_TRUE(false);
@@ -1326,7 +1326,7 @@ const char *tempFileName() {
     } while (false)
 
 
-// TODO(holtgrew): Rename to SEQAN_TASSERT once that name is free.
+// TODO(holtgrew): Rename to SEQAN_ASSERT_TRUE once that name is free.;
 // Trueness assertion with a comment.
 #define SEQAN_ASSERT_TRUE_MSG(_arg1, ...)                               \
     do {                                                                \

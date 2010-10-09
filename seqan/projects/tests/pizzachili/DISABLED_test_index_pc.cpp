@@ -1,4 +1,4 @@
-// To build this test, type:
+;// To build this test, type:
 // make Platform=gcc Mode=Debug Project=pizzachili LDFlags="-lpizzachili -Lprojects/library/lib/"
 
 #include <iostream>
@@ -163,18 +163,18 @@ struct TestHelper {
         try {
             {
                 ifstream ifs("../example.txt");
-                SEQAN_TASSERT(ifs);
+                SEQAN_ASSERT_TRUE(ifs);
 
                 string text((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
                 index_t idx = test_index_create(text);
 
                 cout << "---------- Searching with arbitrary needle ..." << endl;
                 string_t needle = "est";
-                SEQAN_TASSERT(test_index_find(idx, needle) == 14);
+                SEQAN_ASSERT_TRUE(test_index_find(idx, needle) == 14);
 
                 cout << "---------- Searching with char* needle ..." << endl;
                 char const* pc_needle = "Ishmael";
-                SEQAN_TASSERT(test_index_find(idx, pc_needle) == 2);
+                SEQAN_ASSERT_TRUE(test_index_find(idx, pc_needle) == 2);
 
                 cout << "---------- Saving:" << endl;
                 test_index_save(idx, "indexdata");

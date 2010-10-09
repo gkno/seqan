@@ -225,11 +225,11 @@ void testQGramFind()
 	TQGramIndex idx("to be or not to be");
 	Finder<TQGramIndex> finder(idx);
 
-	SEQAN_TASSERT(find(finder, "be"))
-	SEQAN_TASSERT(position(finder) == 3);
-	SEQAN_TASSERT(find(finder, "be"))
-	SEQAN_TASSERT(position(finder) == 16);
-	SEQAN_TASSERT(!find(finder, "be"))
+	SEQAN_ASSERT_TRUE(find(finder, "be"));
+	SEQAN_ASSERT_TRUE(position(finder) == 3);
+	SEQAN_ASSERT_TRUE(find(finder, "be"));
+	SEQAN_ASSERT_TRUE(position(finder) == 16);
+	SEQAN_ASSERT_TRUE(!find(finder, "be"));
 /*
 	while (find(finder, "be"))
 	{

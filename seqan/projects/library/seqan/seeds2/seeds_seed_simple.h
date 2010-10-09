@@ -181,7 +181,7 @@ template <typename TConfig>
 inline typename Position<Seed<Simple, TConfig> >::Type
 getEndDim0(Seed<Simple, TConfig> const & seed)
 {
-	SEQAN_CHECKPOINT;;
+	SEQAN_CHECKPOINT;
 	return seed._endDim0;
 }
 

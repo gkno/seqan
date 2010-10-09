@@ -484,24 +484,24 @@ SEQAN_DEFINE_TEST(test_file_raw)
 	fclose(file_3);
     
 	FILE * file_4 = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_4);;
+	SEQAN_ASSERT_TRUE(file_4);
     
 	//readID
 	String<char> str_4("init");
 	readID(file_4, str_4, Raw() );
-	SEQAN_ASSERT_TRUE(str_4 == "");;
+	SEQAN_ASSERT_TRUE(str_4 == "");
     
 	//read
 	read(file_4, str_4);
-	SEQAN_ASSERT_TRUE(str_4 == str_3);;
+	SEQAN_ASSERT_TRUE(str_4 == str_3);
 	fclose(file_4);
     
 	//read limit
 	FILE * file_4b = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_4b);;
+	SEQAN_ASSERT_TRUE(file_4b);
     
 	read(file_4b, str_4, 4);
-	SEQAN_ASSERT_TRUE(str_4 == "this");;
+	SEQAN_ASSERT_TRUE(str_4 == "this");
 	fclose(file_4b);
     
     //____________________________________________________________________________
@@ -512,14 +512,14 @@ SEQAN_DEFINE_TEST(test_file_raw)
 	write(ss_1, str_3);
     
 	read(ss_1, str_4, Raw());
-	SEQAN_ASSERT_TRUE(str_4 == str_3);;
+	SEQAN_ASSERT_TRUE(str_4 == str_3);
     
     
 	str_3 = "gogogo dududu";
 	stringstream ss_2;
 	write(ss_2, str_3);
 	read(ss_2, str_4, 5);
-	SEQAN_ASSERT_TRUE(str_4 == "gogog");;
+	SEQAN_ASSERT_TRUE(str_4 == "gogog");
     
     
     //	::std::cout << sstream_1;
@@ -552,22 +552,22 @@ void Test_Fasta_Read(const char * path)
     // FASTA from C stream
     
 	FILE * file_1 = fopen(path, "rb");
-	SEQAN_ASSERT_TRUE(file_1);;
+	SEQAN_ASSERT_TRUE(file_1);
     
 	String<Dna> str_1;
 	read(file_1, str_1, Fasta());
-	SEQAN_ASSERT_TRUE(str_1 == "ACGT");;
+	SEQAN_ASSERT_TRUE(str_1 == "ACGT");
     
 	String<char> str_2;
     
 	read(file_1, str_2, Fasta());
-	SEQAN_ASSERT_TRUE(length(str_2) == 0);;
+	SEQAN_ASSERT_TRUE(length(str_2) == 0);
     
 	read(file_1, str_2, Fasta());
-	SEQAN_ASSERT_TRUE(length(str_2) == 1065);;
+	SEQAN_ASSERT_TRUE(length(str_2) == 1065);
     
 	read(file_1, str_2, Fasta());
-	SEQAN_ASSERT_TRUE(length(str_2) == 200);;
+	SEQAN_ASSERT_TRUE(length(str_2) == 200);
     
 	fclose(file_1);
     
@@ -578,7 +578,7 @@ void Test_Fasta_Read(const char * path)
 	strm_1.open(path, ios_base::in | ios_base::binary);
 	read(strm_1, str_2, Fasta());
 	strm_1.close();
-	SEQAN_ASSERT_TRUE(str_2 == "ACGT");;
+	SEQAN_ASSERT_TRUE(str_2 == "ACGT");
 }
 
 SEQAN_DEFINE_TEST(test_file_fasta_crlf)
@@ -622,22 +622,22 @@ SEQAN_DEFINE_TEST(test_file_fasta_write)
     
 	//test it
 	FILE * file_4 = fopen(tmpFilename, "rb");
-	SEQAN_ASSERT_TRUE(file_4);;
+	SEQAN_ASSERT_TRUE(file_4);
     
 	String<char> str_4;
 	readID(file_4, str_4, Fasta());
-	SEQAN_ASSERT_TRUE(str_4 == "Identifier1");;
+	SEQAN_ASSERT_TRUE(str_4 == "Identifier1");
     
 	String<Dna> str_4a;
 	read(file_4, str_4a, Fasta());
-	SEQAN_ASSERT_TRUE(str_4a == str_3);;
+	SEQAN_ASSERT_TRUE(str_4a == str_3);
     
 	String<Dna> str_empty;
 	read(file_4, str_empty, Fasta());
 	SEQAN_ASSERT_TRUE(length(str_empty) == 0);
     
 	read(file_4, str_4a, Fasta());
-	SEQAN_ASSERT_TRUE(str_4a == str_3);;
+	SEQAN_ASSERT_TRUE(str_4a == str_3);
     
     //____________________________________________________________________________
     // Test virtual file format object //outdated!!
@@ -656,41 +656,41 @@ SEQAN_DEFINE_TEST(test_file_fasta_write)
      
      //readID
      FILE * file_6 = fopen(TEST_PATH "my_fasta.txt", "r");
-     SEQAN_ASSERT_TRUE(file_6);;
+     SEQAN_ASSERT_TRUE(file_6);
      
      String<char> str_6;
      readID(file_6, str_6, ff);
-     SEQAN_ASSERT_TRUE(str_6 == "Identifier3");;
+     SEQAN_ASSERT_TRUE(str_6 == "Identifier3");
      
      char str_6b[100];
      readID(file_6, str_6b, ff);
-     SEQAN_ASSERT_TRUE(isEqual(str_6b, "Identifier3"));;
+     SEQAN_ASSERT_TRUE(isEqual(str_6b, "Identifier3"));
      
      //read
      String<Dna> str_7;
      read(file_6, str_7, ff);
-     SEQAN_ASSERT_TRUE(str_7 == str_5);;
+     SEQAN_ASSERT_TRUE(str_7 == str_5);
      
      read(file_6, str_7, 2, ff);
-     SEQAN_ASSERT_TRUE(str_7 == "ac");;
+     SEQAN_ASSERT_TRUE(str_7 == "ac");
      
      readID(file_6, str_6, ff);
-     SEQAN_ASSERT_TRUE(str_6 == "Identifier5");;
+     SEQAN_ASSERT_TRUE(str_6 == "Identifier5");
      
      //goNext
      goNext(file_6, ff);
      
      readID(file_6, str_6, ff);
-     SEQAN_ASSERT_TRUE(str_6 == "Identifier6");;
+     SEQAN_ASSERT_TRUE(str_6 == "Identifier6");
      
      //comparison
-     SEQAN_ASSERT_TRUE(ff == fasta_format);;
-     SEQAN_ASSERT_TRUE(ff == Fasta());;
-     SEQAN_ASSERT_TRUE(Fasta() == ff);;
+     SEQAN_ASSERT_TRUE(ff == fasta_format);
+     SEQAN_ASSERT_TRUE(ff == Fasta());
+     SEQAN_ASSERT_TRUE(Fasta() == ff);
      
-     SEQAN_ASSERT_TRUE(!(ff != fasta_format));;
-     SEQAN_ASSERT_TRUE(ff != Raw());;
-     SEQAN_ASSERT_TRUE(Raw() != ff);;
+     SEQAN_ASSERT_TRUE(!(ff != fasta_format));
+     SEQAN_ASSERT_TRUE(ff != Raw());
+     SEQAN_ASSERT_TRUE(Raw() != ff);
      */
 }
 
@@ -706,18 +706,18 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
     strcat(buffer, "/projects/tests/file/fasta_align.txt");
     
 	FILE * file_1 = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_1);;
+	SEQAN_ASSERT_TRUE(file_1);
 	
 	Align<String<char>, ArrayGaps> align;
 	read(file_1, align, FastaAlign());
-	SEQAN_ASSERT_TRUE(source(row(align,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");;
-	SEQAN_ASSERT_TRUE(length(source(row(align,1))) == 362);;
-	SEQAN_ASSERT_TRUE(length(source(row(align,2))) == 335);;
+	SEQAN_ASSERT_TRUE(source(row(align,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");
+	SEQAN_ASSERT_TRUE(length(source(row(align,1))) == 362);
+	SEQAN_ASSERT_TRUE(length(source(row(align,2))) == 335);
 	String<String<char> > str_ids1;
 	readIDs(file_1, str_ids1, FastaAlign());
-	SEQAN_ASSERT_TRUE(value(str_ids1,0) == "CYS1_DICDI");;
-	SEQAN_ASSERT_TRUE(value(str_ids1,1) == "ALEU_HORVU");;
-	SEQAN_ASSERT_TRUE(value(str_ids1,2) == "CATH_HUMAN");;
+	SEQAN_ASSERT_TRUE(value(str_ids1,0) == "CYS1_DICDI");
+	SEQAN_ASSERT_TRUE(value(str_ids1,1) == "ALEU_HORVU");
+	SEQAN_ASSERT_TRUE(value(str_ids1,2) == "CATH_HUMAN");
     
 	fclose(file_1);
     
@@ -725,16 +725,16 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
     strcat(buffer, "/projects/tests/file/fasta_align_dna.txt");
     
 	FILE * file_11 = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_11);;
+	SEQAN_ASSERT_TRUE(file_11);
 	
 	Align<String<Dna>, ArrayGaps> align11;
 	read(file_11, align11, FastaAlign());
-	SEQAN_ASSERT_TRUE(source(row(align11,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");;
-	SEQAN_ASSERT_TRUE(source(row(align11,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");;
+	SEQAN_ASSERT_TRUE(source(row(align11,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");
+	SEQAN_ASSERT_TRUE(source(row(align11,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");
 	String<String<char> > str_ids11;
 	readIDs(file_11, str_ids11, FastaAlign());
-	SEQAN_ASSERT_TRUE(value(str_ids11,0) == "SEQ1");;
-	SEQAN_ASSERT_TRUE(value(str_ids11,1) == "SEQ2");;
+	SEQAN_ASSERT_TRUE(value(str_ids11,0) == "SEQ1");
+	SEQAN_ASSERT_TRUE(value(str_ids11,1) == "SEQ2");
 	fclose(file_11);
     
     strcpy(buffer, SEQAN_TEMP_FILENAME());
@@ -755,17 +755,17 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
 	strm_1.open(buffer, ios_base::in);
 	read(strm_1, align2, FastaAlign());
 	strm_1.close();
-	SEQAN_ASSERT_TRUE(source(row(align2,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");;
-	SEQAN_ASSERT_TRUE(length(source(row(align2,1))) == 362);;
-	SEQAN_ASSERT_TRUE(length(source(row(align2,2))) == 335);;
+	SEQAN_ASSERT_TRUE(source(row(align2,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");
+	SEQAN_ASSERT_TRUE(length(source(row(align2,1))) == 362);
+	SEQAN_ASSERT_TRUE(length(source(row(align2,2))) == 335);
     
 	Align<String<Dna>, ArrayGaps> align22;
 	fstream strm_12;
 	strm_12.open(buffer, ios_base::in);
 	read(strm_12, align22, FastaAlign());
 	strm_12.close();
-	SEQAN_ASSERT_TRUE(source(row(align22,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");;
-	SEQAN_ASSERT_TRUE(source(row(align22,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");;
+	SEQAN_ASSERT_TRUE(source(row(align22,0)) == "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");
+	SEQAN_ASSERT_TRUE(source(row(align22,1)) == "CTTAATGTCCCGCGTACAAGGGATAGCATGTGGCATAGAGGAATAGAATAGCAGCCTACGAAA");
     
     //____________________________________________________________________________
     // FASTA Align to C stream
@@ -790,15 +790,15 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
     
 	//test it
 	FILE * file_3 = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_3);;
+	SEQAN_ASSERT_TRUE(file_3);
     
 	String<String<char> > str_ids2;
 	readIDs(file_3, str_ids2, FastaAlign());
-	SEQAN_ASSERT_TRUE(value(str_ids2,0) == "Seq1");;
-	SEQAN_ASSERT_TRUE(value(str_ids2,1) == "Seq2");;
+	SEQAN_ASSERT_TRUE(value(str_ids2,0) == "Seq1");
+	SEQAN_ASSERT_TRUE(value(str_ids2,1) == "Seq2");
 	Align<String<char>, ArrayGaps> align4;
 	read(file_3, align4, FastaAlign());
-	SEQAN_ASSERT_TRUE(source(row(align4,1)) == "xyz");;
+	SEQAN_ASSERT_TRUE(source(row(align4,1)) == "xyz");
     
 	fclose(file_3);
     
@@ -852,18 +852,18 @@ SEQAN_DEFINE_TEST(test_file_cgviz)
     strcat(buffer, "/projects/tests/file/fasta_align.txt");
     
 	FILE * file_1 = fopen(buffer, "r");
-	SEQAN_ASSERT_TRUE(file_1);;
+	SEQAN_ASSERT_TRUE(file_1);
 	
 	Align<String<char>, ArrayGaps> align;
 	read(file_1, align, FastaAlign());
-	SEQAN_ASSERT_TRUE(source(row(align,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");;
-	SEQAN_ASSERT_TRUE(length(source(row(align,1))) == 362);;
-	SEQAN_ASSERT_TRUE(length(source(row(align,2))) == 335);;
+	SEQAN_ASSERT_TRUE(source(row(align,0)) == "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");
+	SEQAN_ASSERT_TRUE(length(source(row(align,1))) == 362);
+	SEQAN_ASSERT_TRUE(length(source(row(align,2))) == 335);
 	String<String<char> > str_ids1;
 	readIDs(file_1, str_ids1, FastaAlign());
-	SEQAN_ASSERT_TRUE(value(str_ids1,0) == "CYS1_DICDI");;
-	SEQAN_ASSERT_TRUE(value(str_ids1,1) == "ALEU_HORVU");;
-	SEQAN_ASSERT_TRUE(value(str_ids1,2) == "CATH_HUMAN");;
+	SEQAN_ASSERT_TRUE(value(str_ids1,0) == "CYS1_DICDI");
+	SEQAN_ASSERT_TRUE(value(str_ids1,1) == "ALEU_HORVU");
+	SEQAN_ASSERT_TRUE(value(str_ids1,2) == "CATH_HUMAN");
 	fclose(file_1);
     
     
@@ -896,10 +896,10 @@ SEQAN_DEFINE_TEST(test_file_embl)
     strcpy(fl_out_path, SEQAN_TEMP_FILENAME());
     
 	FILE * fl = fopen(fl_path, "rb");
-	SEQAN_ASSERT_TRUE(fl);;
+	SEQAN_ASSERT_TRUE(fl);
     
 	FILE *fl_out = fopen(fl_out_path, "wb");
-	SEQAN_ASSERT_TRUE(fl_out);;
+	SEQAN_ASSERT_TRUE(fl_out);
     
 	String<char> data;
 	String<char> meta;
@@ -928,7 +928,7 @@ SEQAN_DEFINE_TEST(test_file_embl)
     // test reading data without reading meta before
     
 	fl = fopen(fl_path, "rb");
-	SEQAN_ASSERT_TRUE(fl);;
+	SEQAN_ASSERT_TRUE(fl);
     
 	read(fl, data, Embl());
     
@@ -949,10 +949,10 @@ SEQAN_DEFINE_TEST(test_file_genbank)
     strcpy(fl_out_path, SEQAN_TEMP_FILENAME());
 
 	FILE * fl = fopen(fl_path, "rb");
-	SEQAN_ASSERT_TRUE(fl);;
+	SEQAN_ASSERT_TRUE(fl);
     
 	FILE *fl_out = fopen(fl_out_path, "wb");
-	SEQAN_ASSERT_TRUE(fl_out);;
+	SEQAN_ASSERT_TRUE(fl_out);
     
 	String<char> data;
 	String<char> meta;
@@ -995,22 +995,22 @@ SEQAN_DEFINE_TEST(test_file_reader_iterator)
     strcat(buffer, "/projects/tests/file/fasta_crlf.txt");
 
 	FILE * file_fasta = fopen(buffer, "rb");
-	SEQAN_ASSERT_TRUE(file_fasta);;
+	SEQAN_ASSERT_TRUE(file_fasta);
     
 	Iter<FILE *, FileReader<Fasta> > it_fasta(file_fasta);
     
 	//read the first record "ACGT" from file
 	SEQAN_ASSERT_TRUE(!atEnd(it_fasta));
-	SEQAN_ASSERT_TRUE(value(it_fasta) == 'A');;
+	SEQAN_ASSERT_TRUE(value(it_fasta) == 'A');
 	goNext(it_fasta);
 	SEQAN_ASSERT_TRUE(!atEnd(it_fasta));
-	SEQAN_ASSERT_TRUE(value(it_fasta) == 'C');;
+	SEQAN_ASSERT_TRUE(value(it_fasta) == 'C');
 	goNext(it_fasta);
 	SEQAN_ASSERT_TRUE(!atEnd(it_fasta));
-	SEQAN_ASSERT_TRUE(value(it_fasta) == 'G');;
+	SEQAN_ASSERT_TRUE(value(it_fasta) == 'G');
 	goNext(it_fasta);
 	SEQAN_ASSERT_TRUE(!atEnd(it_fasta));
-	SEQAN_ASSERT_TRUE(value(it_fasta) == 'T');;
+	SEQAN_ASSERT_TRUE(value(it_fasta) == 'T');
 	goNext(it_fasta);
 	SEQAN_ASSERT_TRUE(atEnd(it_fasta));
     
@@ -1064,7 +1064,7 @@ SEQAN_DEFINE_TEST(test_file_reader_string)
 		SEQAN_ASSERT_TRUE(*it == value(str, pos));
 	} while (!atBegin(it));
     
-	SEQAN_ASSERT_TRUE(pos == 0);;
+	SEQAN_ASSERT_TRUE(pos == 0);
     
 	while (it < end(str))
 	{
@@ -1170,13 +1170,13 @@ void Test_FileReader_String2(TFormat const &)
 		bool found = find(fnd, pat);
         
         ::std::cout << ".";
-		SEQAN_ASSERT_TRUE(found);;
-		SEQAN_ASSERT_TRUE(!fr.data_scanned);;
-		SEQAN_ASSERT_TRUE(position(fnd) == (50021 + i * 100000));;
+		SEQAN_ASSERT_TRUE(found);
+		SEQAN_ASSERT_TRUE(!fr.data_scanned);
+		SEQAN_ASSERT_TRUE(position(fnd) == (50021 + i * 100000));
 	}
     
-	SEQAN_ASSERT_TRUE(!find(fnd, pat));;
-	SEQAN_ASSERT_TRUE(fr.data_scanned);;
+	SEQAN_ASSERT_TRUE(!find(fnd, pat));
+	SEQAN_ASSERT_TRUE(fr.data_scanned);
     
 	::std::cout << "\n";
     
@@ -1194,8 +1194,8 @@ void Test_FileReader_String2(TFormat const &)
 		bool found = find(fnd2, pat);
         
         ::std::cout << ".";
-		SEQAN_ASSERT_TRUE(found);;
-		SEQAN_ASSERT_TRUE(position(fnd2) == (50021 + i * 100000));;
+		SEQAN_ASSERT_TRUE(found);
+		SEQAN_ASSERT_TRUE(position(fnd2) == (50021 + i * 100000));
 	}
     
 }
@@ -1231,10 +1231,10 @@ SEQAN_DEFINE_TEST(test_file_reader_string3)
 	String<AminoAcid, FileReader<Fasta> > str(file_fasta);
 	String<AminoAcid> str2(str);
     
-	SEQAN_ASSERT_TRUE(str == str2);;
+	SEQAN_ASSERT_TRUE(str == str2);
     
 	append(str2, str);
-	SEQAN_ASSERT_TRUE(str2 == "ACGTACGT");;
+	SEQAN_ASSERT_TRUE(str2 == "ACGTACGT");
     
 	fclose(file_fasta);
 }
