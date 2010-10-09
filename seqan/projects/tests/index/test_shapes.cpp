@@ -80,6 +80,6 @@ void testShapes()
 
 	pattern = "11110011";
 	Shape<Dna, OneGappedShape> shapeC(pattern);
-	bool b = testShape(shapeC, Shape<Dna, GappedShape<HardwiredShape<1,1,1,3,1> > >(), true);
+	b = testShape(shapeC, Shape<Dna, GappedShape<HardwiredShape<1,1,1,3,1> > >(), true);
     SEQAN_ASSERT_TRUE(b);
 }
