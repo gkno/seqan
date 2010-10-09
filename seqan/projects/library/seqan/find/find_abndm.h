@@ -215,7 +215,7 @@ inline void _patternInit (Pattern<TNeedle, AbndmAlgo> & me)
     fill(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
     me.findNext = false;
     me.last = 0;
-	_findBeginInit(me);
+	_findBeginInit(me, needle(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////

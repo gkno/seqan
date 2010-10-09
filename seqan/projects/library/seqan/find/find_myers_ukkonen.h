@@ -131,8 +131,8 @@ private:
 
 public:
 	TFindBeginPattern data_findBeginPattern;
- 	Holder<TNeedle>	data_host;	//defines the 
-	typedef True HasHost;
+// 	Holder<TNeedle>	data_host;	//defines the 
+	typedef False HasHost;
 };
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
@@ -448,12 +448,12 @@ SEQAN_CHECKPOINT
 	// encoding the letters as bit-vectors
     for (unsigned j = 0; j < pattern.needleSize; j++)
 		pattern.bitMasks[
-			blockCount * ordValue((typename Value<TNeedle>::Type) value(needle, j))
+			blockCount * ordValue(convert<typename Value<TNeedle>::Type>(getValue(needle, j)))
 			+ j / pattern.MACHINE_WORD_SIZE
 		] |= (TWord)1 << (j % pattern.MACHINE_WORD_SIZE);
 		//pattern.bitMasks[pattern.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/pattern.MACHINE_WORD_SIZE] = pattern.bitMasks[pattern.blockCount * ordValue((CompareType< Value< TNeedle >::Type, Value< Container< THaystack >::Type >::Type >::Type) needle[j]) + j/MACHINE_WORD_SIZE] | ((TWord)1 << (j%MACHINE_WORD_SIZE));
 		
-	_findBeginInit(pattern);
+	_findBeginInit(pattern, needle);
 }
 
 
@@ -466,7 +466,7 @@ SEQAN_CHECKPOINT
 	me.needleSize = length(ndl);
 	me.finalScoreMask = (TWord)1 << (me.MACHINE_WORD_SIZE - 1);
 
-	_findBeginInit(me);
+	_findBeginInit(me, ndl);
 }
 
 
@@ -507,8 +507,8 @@ inline void _patternMatchNOfPatternImpl(Pattern<TNeedle, Myers<TSpec, THasState,
 
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
-void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, 
-							 bool match)
+inline void 
+_patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, bool match)
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfPatternImpl(pattern, match);
@@ -517,8 +517,8 @@ void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, TFindBegin
 
 
 template <typename TNeedle, typename TSpec, typename THasState>
-void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, void> > & pattern, 
-							 bool match)
+inline void 
+_patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, void> > & pattern, bool match)
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfPatternImpl(pattern, match);
@@ -526,8 +526,8 @@ void _patternMatchNOfPattern(Pattern<TNeedle, Myers<TSpec, THasState, void> > & 
 
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
-inline void _patternMatchNOfFinderImpl(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, 
-									   bool match)
+inline void 
+_patternMatchNOfFinderImpl(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, bool match)
 {
 	SEQAN_CHECKPOINT;
 
@@ -547,7 +547,8 @@ inline void _patternMatchNOfFinderImpl(Pattern<TNeedle, Myers<TSpec, THasState, 
 
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
-void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & me, bool match)
+inline void 
+_patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & me, bool match)
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfFinderImpl(me, match);
@@ -556,102 +557,54 @@ void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginP
 
 
 template <typename TNeedle, typename TSpec, typename THasState>
-void _patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, THasState, void> > & pattern, 
-							bool match)
+inline void 
+_patternMatchNOfFinder(Pattern<TNeedle, Myers<TSpec, THasState, void> > & pattern, bool match)
 {
     SEQAN_CHECKPOINT;
     _patternMatchNOfFinderImpl(pattern, match);
 }
 
-
+/*
+// data_host is not used anymore, the needle can be reconstructed from the bitmasks
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TNeedle2>
-void _myersSetHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
-				   TNeedle2 const & ndl,
-				   True) 
+inline void 
+_myersSetHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, TNeedle2 const & ndl, True) 
 {
 	setValue(pattern.data_host, ndl);
 }
 
-
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TNeedle2>
-void _myersSetHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & ,
-				   TNeedle2 const & ,
-				   False) 
+inline void 
+_myersSetHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > &, TNeedle2 const &, False) 
 {
-	
 }
-
+*/
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
-			 TNeedle2 & ndl)
+inline void 
+setHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, TNeedle2 & ndl)
 {
 	SEQAN_CHECKPOINT;
 	typedef Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > TPattern;
-	_myersSetHost(pattern, ndl, typename TPattern::HasHost());
+//	_myersSetHost(pattern, ndl, typename TPattern::HasHost());
 	_patternFirstInit(pattern, ndl);
 }
 
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TNeedle2>
-void setHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
-			 TNeedle2 const & ndl) 
+inline void 
+setHost(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, TNeedle2 const & ndl) 
 {
 	SEQAN_CHECKPOINT;
 	typedef Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > TPattern;
-	_myersSetHost(pattern, ndl, typename TPattern::HasHost());
+//	_myersSetHost(pattern, ndl, typename TPattern::HasHost());
 	_patternFirstInit(pattern, ndl);
 }
 
 
 //____________________________________________________________________________
+
 /*
-template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline TNeedle
-host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> > & me)
-{
-SEQAN_CHECKPOINT
-
-	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
-	typedef typename Value<TNeedle>::Type TValue;
-
-	TNeedle temp;
-	resize(temp, me.needleSize, Exact());
-
-	TValue v = TValue();
-	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
-	{
-		for (unsigned j = 0; j < me.needleSize; j++)
-			if ((me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE)) != (TWord)0)
-				temp[j] = v;
-		++v;
-	}
-}
-
-template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-inline TNeedle
-host(Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >  const & me)
-{
-SEQAN_CHECKPOINT
-
-	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
-	typedef typename Value<TNeedle>::Type TValue;
-
-	TNeedle temp;
-	resize(temp, me.needleSize, Exact());
-
-	TValue v = TValue();
-	for (unsigned i = 0; i < length(me.bitMasks); i += me.blockCount)
-	{
-		for (unsigned j = 0; j < me.needleSize; j++)
-			if ((me.bitMasks[i + j / me.MACHINE_WORD_SIZE] & (TWord)1 << (j % me.MACHINE_WORD_SIZE)) != (TWord)0)
-				temp[j] = v;
-		++v;
-	}
-}
-*/
-
-
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
 inline typename Host<Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > >::Type & 
 host(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern)
@@ -668,7 +621,59 @@ host(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & p
 SEQAN_CHECKPOINT
 	return value(pattern.data_host);
 }
+*/
 
+template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
+inline TNeedle
+host(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern)
+{
+SEQAN_CHECKPOINT
+
+	typedef typename Pattern<TNeedle, Myers<TSpec, TFindBeginPatternSpec> >::TWord TWord;
+	typedef typename Value<TNeedle>::Type TValue;
+
+	TNeedle temp;
+	resize(temp, pattern.needleSize, Exact());
+
+	unsigned blockCount = (pattern.needleSize + pattern.MACHINE_WORD_SIZE - 1) / pattern.MACHINE_WORD_SIZE;
+	TValue v = TValue();
+	for (unsigned i = 0; i < length(pattern.bitMasks); i += blockCount)
+	{
+		for (unsigned j = 0; j < pattern.needleSize; j++)
+			if ((pattern.bitMasks[i + j / pattern.MACHINE_WORD_SIZE] & (TWord)1 << (j % pattern.MACHINE_WORD_SIZE)) != (TWord)0)
+				temp[j] = v;
+		++v;
+	}
+	return temp;
+}
+
+template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
+inline TNeedle
+host(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern)
+{
+SEQAN_CHECKPOINT
+	typedef Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > TPattern;
+	return host(const_cast<TPattern const &>(pattern));
+}
+
+//____________________________________________________________________________
+
+template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
+inline TNeedle
+needle(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > const & pattern)
+{
+SEQAN_CHECKPOINT
+	return host(pattern);
+}
+
+template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec>
+inline TNeedle
+needle(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern)
+{
+SEQAN_CHECKPOINT
+	typedef Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > TPattern;
+	return host(const_cast<TPattern const &>(pattern));
+}
 
 //____________________________________________________________________________
 
@@ -702,23 +707,26 @@ SEQAN_CHECKPOINT
 ///.Function.getScore.param.pattern.type:Spec.Myers
 
 template<typename TSpec, typename TFindBeginPatternSpec>
-int getScore(_PatternState<Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
+inline int 
+getScore(_PatternState<Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
 {
 	return -(int)state.score;
 }
 
 
 template<typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
-int getScore(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
+inline int 
+getScore(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
 {
 	return -(int)state.score;
 }
 
 
 template <typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TFinder>
-void _patternInit(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, 
-				  _PatternState<Myers<TSpec, True, TFindBeginPatternSpec> > & state,
-				  TFinder &)
+inline void 
+_patternInit(Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern, 
+		     _PatternState<Myers<TSpec, True, TFindBeginPatternSpec> > & state,
+		     TFinder &)
 {
 SEQAN_CHECKPOINT
 	typedef typename Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> >::TWord TWord;
@@ -758,8 +766,8 @@ SEQAN_CHECKPOINT
 
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TFinder>
-void _patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & pattern, 
-				  TFinder & finder)
+inline void 
+_patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & pattern, TFinder & finder)
 {
     SEQAN_CHECKPOINT;
     _patternInit(pattern, pattern, finder);

@@ -344,7 +344,7 @@ SEQAN_CHECKPOINT
   me.patternNeedsInit = false;
   me.findNext = false;
   
-  _findBeginInit(me);
+  _findBeginInit(me, needle(me));
 
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;
@@ -579,7 +579,7 @@ SEQAN_CHECKPOINT
   me.patternNeedsInit = false;
   me.findNext = false;
 
-  _findBeginInit(me);
+  _findBeginInit(me, needle(me));
 
 #ifdef SEQAN_DEBUG_PEX
   ::std::cout << " -------------------------------------------------  " << ::std::endl;

@@ -110,12 +110,12 @@ struct _FindBegin <TPattern, void>
 template <typename TFindBeginPatternSpec>
 struct _FindBegin_Impl
 {
-	template <typename TPattern>
+	template <typename TPattern, typename TNeedle>
 	static inline void
-	_findBeginInit(TPattern & pattern)
+	_findBeginInit(TPattern & pattern, TNeedle & needle_)
 	{
 //		setNeedle(pattern.data_findBeginPattern, reverseString(needle(pattern)));
-		setHost(needle(pattern.data_findBeginPattern), needle(pattern));
+		setHost(needle(pattern.data_findBeginPattern), needle_);
 		setScoringScheme(pattern.data_findBeginPattern, scoringScheme(pattern));
 	}
 //____________________________________________________________________________
@@ -186,12 +186,12 @@ struct _FindBegin_Impl
 template <typename THasState>
 struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
 {
-	template <typename TPattern>
+	template <typename TPattern, typename TNeedle>
 	static inline void
-	_findBeginInit(TPattern & pattern)
+	_findBeginInit(TPattern & pattern, TNeedle & needle_)
 	{
 //		setNeedle(pattern.data_findBeginPattern, reverseString(needle(pattern)));
-		setHost(pattern.data_findBeginPattern, reverseString(needle(pattern)));
+		setHost(pattern.data_findBeginPattern, reverseString(needle_));
 //         _patternFirstInit(pattern.data_findBeginPattern, host(pattern));
 	}
 //____________________________________________________________________________
@@ -268,9 +268,9 @@ struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
 template <>
 struct _FindBegin_Impl<void>
 {
-	template <typename TPattern>
+	template <typename TPattern, typename TNeedle>
 	static inline void
-	_findBeginInit(TPattern &)
+	_findBeginInit(TPattern &, TNeedle &)
 	{
 	}
 
@@ -304,12 +304,12 @@ struct _FindBegin_Impl<void>
 //////////////////////////////////////////////////////////////////////////////
 
 //initialize pattern of begin finding
-template <typename TPattern>
+template <typename TPattern, typename TNeedle>
 inline void
-_findBeginInit(TPattern & pattern)
+_findBeginInit(TPattern & pattern, TNeedle & needle_)
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	return _FindBegin_Impl<TFindBeginPatternSpec>::_findBeginInit(pattern);
+	return _FindBegin_Impl<TFindBeginPatternSpec>::_findBeginInit(pattern, needle_);
 }
 
 //////////////////////////////////////////////////////////////////////////////

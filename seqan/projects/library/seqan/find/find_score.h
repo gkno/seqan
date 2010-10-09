@@ -342,7 +342,7 @@ inline void _patternInit (Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPat
 
 	}
 
-	_findBeginInit(me);
+	_findBeginInit(me, needle(me));
 }
 
 
