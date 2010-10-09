@@ -146,6 +146,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     // optimized for bitvectors
+    /*
     template <typename T1, typename T2, typename T, const int _size, const int EXT_LENGTH, typename Result>
     struct skew7_extend_comp< Triple<T1,T2,Tuple<T,_size,Compressed>, Compressed>, EXT_LENGTH, Result> :
         public ::std::binary_function<
@@ -162,6 +163,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return (a.i2[0] < b.i2[0])? -1 : 1;
         }
     };
+    */
 
 	template < typename TInput >
     struct Value< Pipe< TInput, Skew7 > > {
