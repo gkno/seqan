@@ -888,7 +888,7 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 		TVertexDescriptor const source = pos;
 		while(current != (TEdgeStump*) 0) {
 			TVertexDescriptor target = targetVertex(g,current);
-			++mat[source*len+target];
+			mat[source*len+target] += 1;
 			current = getNextT(current);
 		}
 	}
