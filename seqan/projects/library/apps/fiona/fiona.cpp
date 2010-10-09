@@ -898,7 +898,7 @@ void correctReads(
 		/* a = readLength - path_label + 1 */
 		/*here plus 1 also because the level is between fromLevel and toLevel*/
 		double a = readLength - options.fromLevel + 2;
-		options.genomeLength = static_count<__int64>(readCount * a / expectedValueGivenLevel);
+		options.genomeLength = static_cast<__int64>(readCount * a / expectedValueGivenLevel);
 		std::cout << "The estimated genome length is " << options.genomeLength << std::endl;
 #endif
 	}
