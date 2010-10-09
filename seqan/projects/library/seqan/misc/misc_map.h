@@ -109,7 +109,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //		typedef ::std::map<TKey> Type;
 //	};
 	template <typename TKey, typename TObject>
-	struct Map< Pair<TKey, TObject> > {
+	class Map< Pair<TKey, TObject> > {
 //		typedef ::std::set< Pair<TKey, TObject>, SetLess< Pair<TKey, TObject> > > Type;
 	};
 
