@@ -146,13 +146,12 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
 
 	template < 
 		typename TSA, 
-		typename TValue, 
-		typename TSpec,
+		typename TString, 
 		typename TSSetSpec,
 		typename TAlgSpec >
 	inline void createSuffixArray(
 		TSA &SA,
-		StringSet< String<TValue, TSpec>, TSSetSpec > const &s,
+		StringSet< TString, TSSetSpec > const &s,
 		TAlgSpec const)
 	{
 	SEQAN_CHECKPOINT
