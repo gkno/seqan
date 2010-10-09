@@ -47,7 +47,7 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-o', ph.outFile('adeno.all.out')],
         to_diff=[(ph.inFile('adeno.all.out'),
                   ph.outFile('adeno.all.out'))])
@@ -55,7 +55,7 @@ def main(source_base, binary_base):
     
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-s', '1',
               '-o', ph.outFile('adeno.seq1.out')],
         to_diff=[(ph.inFile('adeno.seq1.out'),
@@ -64,7 +64,7 @@ def main(source_base, binary_base):
     
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-ss', '1', '2',
               '-o', ph.outFile('adeno.seq1-2.out')],
         to_diff=[(ph.inFile('adeno.seq1-2.out'),
@@ -73,7 +73,7 @@ def main(source_base, binary_base):
     
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-s', '3',
               '-o', ph.outFile('adeno.seq3.out')],
         to_diff=[(ph.inFile('adeno.seq3.out'),
@@ -82,7 +82,7 @@ def main(source_base, binary_base):
     
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-sn', 'gi|9626621',
               '-o', ph.outFile('adeno.sn.out')],
         to_diff=[(ph.inFile('adeno.sn.out'),
@@ -91,7 +91,7 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-s', '1',
               '-i', '5', '25',
               '-o', ph.outFile('adeno.s1i5-25.out')],
@@ -101,7 +101,7 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-ss', '1', '2',
               '-i', '5', '25',
               '-o', ph.outFile('adeno.s1-2i5-25.out')],
@@ -111,7 +111,7 @@ def main(source_base, binary_base):
 
     conf = app_tests.TestConf(
         program=path_to_program,
-        args=['adeno.fasta',
+        args=[ph.inFile('adeno.fasta'),
               '-s', '1',
               '-rc',
               '-o', ph.outFile('adeno.s1rc.out')],
@@ -141,7 +141,7 @@ def main(source_base, binary_base):
 
 
 if __name__ == '__main__':
-#    logging.root.setLevel(logging.DEBUG)
+  #logging.root.setLevel(logging.DEBUG)
     if len(sys.argv) != 3:
         print >>sys.stderr, 'ERROR: Invalid arguments!'
         print >>sys.stderr, 'Usage: run_tests SOURCE_ROOT_PATH BINARY_ROOT_PATH'
