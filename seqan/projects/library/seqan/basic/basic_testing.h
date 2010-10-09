@@ -1332,7 +1332,7 @@ const char *tempFileName() {
     do {                                                                \
         if (!::seqan::ClassTest::testTrue(__FILE__, __LINE__,           \
                                           (_arg1), #_arg1,              \
-                                          ##__VA_ARGS__)) {             \
+                                          __VA_ARGS__)) {             \
             ::seqan::ClassTest::fail();                                 \
         }                                                               \
     } while (false)
@@ -1355,7 +1355,7 @@ const char *tempFileName() {
     do {                                                              \
         if (!::seqan::ClassTest::testFalse(__FILE__, __LINE__,        \
                                            (_arg1), #_arg1,           \
-                                           ##__VA_ARGS__)) {          \
+                                           __VA_ARGS__)) {          \
             ::seqan::ClassTest::fail();                               \
         }                                                             \
     } while (false)
