@@ -1,23 +1,39 @@
-#ifndef SEQAN_HEADER_TEST_EMBL_H
-#define SEQAN_HEADER_TEST_EMBL_H
+/*==========================================================================
+ SeqAn - The Library for Sequence Analysis
+ http://www.seqan.de 
+ ============================================================================
+ Copyright (C) 2007
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ ============================================================================
+ Author: Andreas Gogol-Doering <andreas.doering@mdc-berlin.de>
+ Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
+ ==========================================================================*/
 
-#define TEST_PATH "projects/tests/file/"
-#define LIB_PATH "projects/library/seqan/file/"
+#ifndef TESTS_FILE_TEST_FILE_EMBL_H_
+#define TESTS_FILE_TEST_FILE_EMBL_H_
 
 using namespace std;
+using namespace seqan;
 
-namespace SEQAN_NAMESPACE_MAIN
-{
-
-	
-
-	
 //////////////////////////////////////////////////////////////////////////////
-void Test_EmblOnFile() {
-
+SEQAN_DEFINE_TEST(test_file_embl_file)
+{
+    char buffer[1023];
+    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcat(buffer, "/projects/tests/file/takifugu_scl_embl.txt");
 
 	std::fstream strm; 
-	strm.open(TEST_PATH "takifugu_scl_embl.txt", ios_base::in | ios_base::binary);
+	strm.open(buffer, ios_base::in | ios_base::binary);
 
 	String<char> line;
 	String<char> feature_line;
@@ -35,16 +51,17 @@ void Test_EmblOnFile() {
 	}
 
 	SEQAN_TASSERT(count == 3)
-
-
 }
 
 
-void Test_EmblOnMeta() {
-
-
+SEQAN_DEFINE_TEST(test_file_embl_meta)
+{
+    char buffer[1023];
+    strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
+    strcat(buffer, "/projects/tests/file/takifugu_scl_embl.txt");
+    
 	std::fstream strm; 
-	strm.open(TEST_PATH "takifugu_scl_embl.txt", ios_base::in | ios_base::binary);
+	strm.open(buffer, ios_base::in | ios_base::binary);
 
 	String<char> line;
 
@@ -63,8 +80,6 @@ void Test_EmblOnMeta() {
 	readLineType(meta, feature_line, "FT", Embl());
 	//cout << feature_line << "\n";
 
-
-
 	int count = 0;
 	int next_pos = readFeature(feature_line, 0, line, "CDS", Embl());
 	while(next_pos != 0)
@@ -75,19 +90,6 @@ void Test_EmblOnMeta() {
 	}
 
 	SEQAN_TASSERT(count == 1)
-
-
 }
 
-
-void Test_Embl() 
-{
-	Test_EmblOnFile();
-	Test_EmblOnMeta();
-}
-
-
-}
-
-#endif
-
+#endif  // TESTS_FILE_TEST_FILE_EMBL_H_

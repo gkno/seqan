@@ -31,6 +31,11 @@ namespace SEQAN_NAMESPACE_MAIN
 template <typename TFormat, typename TFile = FILE*, typename TSpec = Default>
 struct FileReader;
 
+// Manual forward for the skipMeta goBegin() overload.
+//template <typename TFile, typename TFormat, typename TFile2, typename TSpec>
+//void
+//goBegin(Iter<TFile, FileReader<TFormat, TFile2, TSpec> > & it, bool skip_meta);
+
 //////////////////////////////////////////////////////////////////////////////
 // FileReader: an iterator that scans through the data of a file
 // note: this is not the iterator of the FileReader string (see file_filereader.h)
