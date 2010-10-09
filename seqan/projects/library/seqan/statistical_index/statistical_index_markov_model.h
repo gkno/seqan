@@ -679,7 +679,7 @@ void _lubksb(Matrix<TValue,2> &a, String<TValue> &indx, String<TValue>  &b)
 
 	for (i=1; i<=n; i++)
 	{
-		ip = value(indx,i-1);
+		ip = static_cast<int>(value(indx,i-1));
 		sum = value(b,ip-1);
 		value(b,ip-1) = value(b,i-1);
 		if (ii)

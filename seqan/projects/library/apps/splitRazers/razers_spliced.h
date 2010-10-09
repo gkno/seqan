@@ -149,7 +149,7 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 	//numReads = 10000000;
 	genomeLen = options.specifiedGenomeLen;
 	TSize readLen = (numReads > 0) ? length(readSet[0]) : 0;
-	TSize numErrors = (int) readLen * options.errorRate;
+	TSize numErrors = static_cast<int>(readLen * options.errorRate);
 	
 	//expected number of random deletion matches:
 	double delMatches = _expMatchesDel(readLen,M1,M2,numErrors,d_m1, d_m2, genomeLen, numReads);
@@ -735,7 +735,7 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	unsigned rDim1 = m.gEnd - beginPosition(inf)-1;
 	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
 	Score<int> scoreMatrix(0,-1,-1,-1);
-	int scoreDropOff = (sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist;
+	int scoreDropOff = static_cast<int>((sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist);
 
 #ifdef RAZERS_DEBUG
 	::std::cout << "beginPos = " << beginPosition(inf) << std::endl;
@@ -784,7 +784,7 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	unsigned rDim1 = m.gEnd - beginPosition(inf) - 1;
 	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
 	Score<int> scoreMatrix(0,-1,-1,-1);
-	int scoreDropOff = (sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist;
+	int scoreDropOff = static_cast<int>((sequenceLength(rseqNo,readSet) * options.errorRate) - m.editDist);
 
 #ifdef RAZERS_DEBUG
 	::std::cout << "beginPos = " << beginPosition(inf) << std::endl;
@@ -1255,7 +1255,7 @@ combineLeftRight(TMatch & mR,
 #endif
 
 	int readLength = length(read);
-	unsigned maxErrors = readLength * options.errorRate;
+	unsigned maxErrors = static_cast<unsigned>(readLength * options.errorRate);
 
 	// neither insertion nor deletion
 	if(mR.gEnd - mL.gBegin == readLength)
@@ -1492,7 +1492,7 @@ combineLeftRight(TMatch & mR,
 #endif
 
 	}
-	maxErrors = (mR.mScore + mL.mScore) * options.errorRate;
+	maxErrors = static_cast<unsigned>((mR.mScore + mL.mScore) * options.errorRate);
 	if(mR.editDist + mL.editDist > maxErrors) return false; //make sure percent identity critrium is fulfilled on matched part of the read
 
 	return true;
@@ -1525,7 +1525,7 @@ combineLeftRight(TMatch & mR,
 	typedef typename Infix<TGenome>::Type TGenomeInf;
 	TGenomeInf genomeInf = infix(genome, mL.gBegin, mR.gEnd);
 	int readLength = length(read);
-	unsigned maxErrors = readLength * options.errorRate;
+	unsigned maxErrors = static_cast<unsigned>(readLength * options.errorRate);
 
 
 #ifdef RAZERS_DEBUG
@@ -1642,7 +1642,7 @@ combineLeftRight(TMatch & mR,
 	std::cout << "mR.editDist =" << mR.editDist << "\n";
 #endif
 
-	maxErrors = (mR.mScore + mL.mScore) * options.errorRate;
+	maxErrors = static_cast<unsigned>((mR.mScore + mL.mScore) * options.errorRate);
 	if(mR.editDist + mL.editDist > maxErrors) return false; //make sure percent identity critrium is fulfilled on matched part of the read
 
 	return true;
@@ -2139,7 +2139,7 @@ void mapSplicedReads(
 			// verify left mate (equal seqNo), if not done already
 			if ((*it).i2.rseqNo & NOT_VERIFIED)
 			{
-				TGPos maxEndPos = (*it).i2.gEnd + length(read)-2*options.minMatchLen + floor(options.errorRate*length(read));
+				TGPos maxEndPos = (*it).i2.gEnd + length(read)-2*options.minMatchLen + static_cast<TGPos>(floor(options.errorRate*length(read)));
 				if(maxEndPos > length(genome)) maxEndPos = length(genome);
 				if (matchVerify( (*it).i2,
 						infix(genome, (*it).i2.gBegin, maxEndPos),
@@ -2183,7 +2183,7 @@ void mapSplicedReads(
 					notYetVerifiedRight = false;
 					TGPos minBeginPos = beginPosition(infix(swiftFinderR, genomeInf));
 					if((int)minBeginPos - length(read)+2*options.minMatchLen - floor(options.errorRate*length(read)) > 0)
-						minBeginPos = minBeginPos - length(read)+2*options.minMatchLen - floor(options.errorRate*length(read));
+						minBeginPos = minBeginPos - length(read)+2*options.minMatchLen - static_cast<int>(floor(options.errorRate*length(read)));
 					else minBeginPos = 0;
 					if (!matchVerify(mR, 
 						infix(genome,minBeginPos,endPosition(infix(swiftFinderR, genomeInf))),

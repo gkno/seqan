@@ -334,7 +334,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
                 stdDev = options.qualityErrorStartStdDev + pos * (options.qualityErrorEndStdDev - options.qualityErrorStartStdDev);
             }
             PDF<Normal> pdf(mean, stdDev);
-            appendValue(inst.qualities, pickRandomNumber(rng, pdf));
+            appendValue(inst.qualities, static_cast<int>(pickRandomNumber(rng, pdf)));
         }
     }
 }
