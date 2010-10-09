@@ -157,9 +157,13 @@ void dumpFastaSeq(
 	TSeq &seq)
 {
     SEQAN_ASSERT_GEQ(n, 0);
-	unsigned size = _min(length(seq), static_cast<unsigned>(n));
-    n -= size;
-    out << infix(seq, 0, size) << endl;
+    if (n == -1) {
+        out << seq << endl;
+    } else {
+        unsigned size = _min(length(seq), static_cast<unsigned>(n));
+        n -= size;
+        out << infix(seq, 0, size) << endl;
+    }
 }
 
 
