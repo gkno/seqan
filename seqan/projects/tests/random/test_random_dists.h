@@ -70,6 +70,27 @@ SEQAN_DEFINE_TEST(test_random_normal_pick)
     }
 }
 
+SEQAN_DEFINE_TEST(test_random_geometric_fair_coin_constructors)
+{
+    using namespace seqan;
+    PDF<GeometricFairCoin> pdf;
+}
+
+SEQAN_DEFINE_TEST(test_random_geometric_fair_coin_pick)
+{
+    using namespace seqan;
+
+    {
+        RNG<MersenneTwister> mt(42);
+        PDF<GeometricFairCoin> pdf;
+        
+        double sum = 0;
+        for (unsigned i = 0; i < 100000; ++i)
+            sum += pickRandomNumber(mt, pdf);
+        SEQAN_ASSERT_IN_DELTA(sum / 100000.0, 1, 0.01);
+    }
+}
+
 SEQAN_DEFINE_TEST(test_random_lognormal_constructors)
 {
     using namespace seqan;

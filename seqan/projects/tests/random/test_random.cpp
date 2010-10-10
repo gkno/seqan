@@ -38,6 +38,9 @@ SEQAN_BEGIN_TESTSUITE(test_random) {
     SEQAN_CALL_TEST(test_random_normal_constructors);
     SEQAN_CALL_TEST(test_random_normal_pick);
 
+    SEQAN_CALL_TEST(test_random_geometric_fair_coin_constructors);
+    SEQAN_CALL_TEST(test_random_geometric_fair_coin_pick);
+
     SEQAN_CALL_TEST(test_random_lognormal_constructors);
     SEQAN_CALL_TEST(test_random_lognormal_pick);
 

@@ -17,12 +17,12 @@
  ===========================================================================
   Author: Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>
  ===========================================================================
-  Code for normally distributed random number generation.
+  Code for geometrically distributed random number generation, p=0.5.
  ===========================================================================
 */
 
-#ifndef SEQAN_RANDOM_RANDOM_NORMAL_H_
-#define SEQAN_RANDOM_RANDOM_NORMAL_H_
+#ifndef SEQAN_RANDOM_RANDOM_GEOMETRIC_H_
+#define SEQAN_RANDOM_RANDOM_GEOMETRIC_H_
 
 namespace seqan {
 
@@ -30,43 +30,36 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
-// Specialization Tag for normal distribution.
-struct Normal {};
+// Specialization Tag for geometric distribution.
+struct GeometricFairCoin {};
 
 // ===========================================================================
 // Classes
 // ===========================================================================
 
 /**
-.Spec.Normal PDF
-..signature:PDF<Normal>
+.Spec.Geometric PDF
+..signature:PDF<GeometricFairCoin>
 ..general:Class.PDF
-..summary:Normal probability density function.
+..summary:Geometric probability density function with $p=0.5$.
+
+This can be implemented efficiently not using any floating point arithmetics.
+Just bit operations are needed.
 ..cat:Random
 ..include:seqan/random.h
 */
 template <>
-class PDF<Normal>
+class PDF<GeometricFairCoin>
 {
 public:
-    double _mu;
-    double _sigma;
 
 /**
-.Memfunc.Normal PDF#PDF
-..class:Spec.Normal PDF
-..summary:Constructor for normal PDF.
-..signature:PDF<Normal>(mu, sigma)
-..param.mu:Mean of the normal distribution.
-...type:nolink:double
-..param.sigma:Standard deviation of the normal distribution.
-...type:nolink:double
+.Memfunc.Geometric PDF#PDF
+..class:Spec.Geometric PDF
+..summary:Constructor for geometric PDF.
+..signature:PDF<Geometric>()
 */
-    PDF(double mu, double sigma)
-            : _mu(mu), _sigma(sigma)
-    {
-        SEQAN_CHECKPOINT;
-    }
+    PDF() { SEQAN_CHECKPOINT; }
 };
 
 // ===========================================================================
@@ -74,48 +67,50 @@ public:
 // ===========================================================================
 
 template <>
-struct Value<PDF<Normal> >
+struct Value<PDF<GeometricFairCoin> >
 {
-    typedef double Type;
+    typedef unsigned Type;
 };
 
 template <>
-struct Value<const PDF<Normal> > : Value<PDF<Normal> > {};
+struct Value<const PDF<GeometricFairCoin> > : Value<PDF<GeometricFairCoin> > {};
 
 // ===========================================================================
 // Functions
 // ===========================================================================
 
 /*
-..summary:Pick a normally distributed random number.
+..summary:Pick a geometricly distributed random number.
 */
 template <typename TRNG>
 inline
-typename Value<PDF<Normal> >::Type
-pickRandomNumber(TRNG & rng, PDF<Normal> const & pdf)
+typename Value<PDF<GeometricFairCoin> >::Type
+pickRandomNumber(TRNG & rng, PDF<GeometricFairCoin> const & /*pdf*/)
 {
     SEQAN_CHECKPOINT;
 
-    // Normal Distribution Heuristics, ported from Python.
-    //
-    // Kinderman and Monahan method. Reference: Kinderman, A.J. and
-    // Monahan, J.F., "Computer generation of random variables using
-    // the ratio of uniform deviates", ACM Trans Math Software, 3,
-    // (1977), pp257-260.
+    const int RG_IB1 = 1;
+    const int RG_IB2 = 2;
+    const int RG_IB5 = 16;
+    const int RG_IB18 = 131072;
+    const int RG_MASK = RG_IB1 + RG_IB2 + RG_IB5;
+    
+    typename Value<TRNG>::Type seed = pickRandomNumber(rng);
+    typename Value<PDF<GeometricFairCoin> >::Type value = 0;
 
-    double z;
-    PDF<Uniform<double> > pdfUniform(0, 1);
     while (true) {
-        double u1 = pickRandomNumber(rng, pdfUniform);
-        double u2 = 1 - pickRandomNumber(rng, pdfUniform);
-        z = SEQAN_NV_MAGICCONST * (u1 - 0.5) / u2;
-        double zz = z * z / 4.0;
-        if (zz < -::std::log10(u2))
+        if ((seed & RG_IB18)) {
+            seed = ((seed ^ RG_MASK) << 1) | RG_IB1;
+            ++value;
+        } else {
+            seed <<= 1;
             break;
+        }
     }
-    return pdf._mu + z * pdf._sigma;
+
+    return value;
 }
 
 }  // namespace seqan
 
-#endif  // SEQAN_RANDOM_RANDOM_NORMAL_H_
+#endif  // SEQAN_RANDOM_RANDOM_GEOMETRIC_H_
