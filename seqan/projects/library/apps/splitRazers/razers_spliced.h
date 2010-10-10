@@ -1299,7 +1299,7 @@ combineLeftRight(TMatch & mR,
 #ifdef RAZERS_DEBUG
 		::std::cout << "insertion\n";
 #endif
-		if(mR.gEnd - mL.gBegin < 2*options.minMatchLen)  //too close together // actually minus allowed seed errors
+		if(mR.gEnd - mL.gBegin < static_cast<long int>(2*options.minMatchLen))  //too close together // actually minus allowed seed errors
 			return false; 
 
 		if(mL.gEnd < mR.gBegin)  //prefix and suffix match do not meet
@@ -1587,7 +1587,7 @@ combineLeftRight(TMatch & mR,
 		::std::cout << "insertion\n";
 #endif
 
-		if(mR.gEnd - mL.gBegin < 2*options.minMatchLen)//too close together
+		if(mR.gEnd - mL.gBegin < static_cast<long int>(2*options.minMatchLen))//too close together
 			 return false; 
 
 		if(mR.mScore + mL.mScore < mR.gEnd - mL.gBegin) //prefix and suffix match do not meet
@@ -1829,7 +1829,7 @@ int mapSplicedReads(
 
 	if(options._debugLevel > 0)
 	{
-		__int64 genomeLen = 3000000000 * 2;					// ufff make that an option
+		__int64 genomeLen = 3000000000lu * 2;					// ufff make that an option
 		expNumRandomMatches(readSet, genomeLen, options);
 	}
 	

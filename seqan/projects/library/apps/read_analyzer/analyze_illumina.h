@@ -157,7 +157,7 @@ void printReadEvaluationResults(ReadEvaluationResult<Illumina> const & result)
     std::cout << "#base  ratio [%]      count" << std::endl;
     for (unsigned i = 0; i < 5; ++i) {
         std::cout << "    " << Dna5(i) << " ";
-        printf("%10.2f %9lu\n", 100.0 * result.baseCountOverall[i] / sum, result.baseCountOverall[i]);
+        printf("%10.2f %9lu\n", 100.0 * result.baseCountOverall[i] / sum, static_cast<long unsigned>(result.baseCountOverall[i]));
     }
 
     std::cout << std::endl << std::endl << "#--file:base-frequencies-position.dat" << std::endl;
@@ -621,9 +621,9 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult<Illumina> const &
         for (unsigned i = 0; i < length(result.readsOnContig); ++i) {
           printf("%-30s %9.0f %6.2f  %9lu      %6.2f\n", toCString(fragmentStore.contigNameStore[i]),
                  result.readsOnContig[i], 100.0 * result.readsOnContig[i] / totalReads,
-                 result.alignmentsOnContig[i], 100.0 * result.alignmentsOnContig[i] / totalAlignments);
+                 static_cast<long unsigned>(result.alignmentsOnContig[i]), 100.0 * result.alignmentsOnContig[i] / totalAlignments);
         }
-        printf("%-30s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, totalAlignments, 100.0);
+        printf("%-30s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, static_cast<long unsigned>(totalAlignments), 100.0);
     }
 
     // Print alignments / reads with errors.
@@ -639,9 +639,9 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult<Illumina> const &
         for (unsigned i = 0; i < length(result.alignmentsWithErrors); ++i) {
           printf("%2d %9.0f %6.2f  %9lu      %6.2f\n", i,
                  result.readsWithErrors[i], 100.0 * result.readsWithErrors[i] / totalReads,
-                 result.alignmentsWithErrors[i], 100.0 * result.alignmentsWithErrors[i] / totalAlignments);
+                 static_cast<long unsigned>(result.alignmentsWithErrors[i]), 100.0 * result.alignmentsWithErrors[i] / totalAlignments);
         }
-        printf("%-8s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, totalAlignments, 100.0);
+        printf("%-8s %9.0f %6.2f  %9lu      %6.2f\n", "*", totalReads, 100.0, static_cast<long unsigned>(totalAlignments), 100.0);
     }
 
     // Print error counts per base.
