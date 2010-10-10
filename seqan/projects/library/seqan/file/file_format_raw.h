@@ -52,49 +52,8 @@ struct _Read_Raw;
 template <typename TFile, typename TData>
 struct _Read_Raw<TFile, TData, True>
 {
-	static void
-	read_(TFile & file,	
-		TData & data)
-	{
-SEQAN_CHECKPOINT
-		SEQAN_ASSERT(!_streamEOF(file))
-
-		//determine length
-		typename Position<TFile>::Type begin_pos = _streamTellG(file);
-		typename Size<TData>::Type count = 0;
-		typename Value<TFile>::Type c = _streamGet(file);
-
-		while (!_streamEOF(file))
-		{
-			c = _streamGet(file);
-			++count;
-		}
-
-		//reserve space
-		resize(data, count);
-
-		if (!count) return;
-
-		if (length(data) < count)
-		{
-			count = length(data);
-		}
-
-		//read sequence
-		_streamSeekG(file, begin_pos);
-
-		typename Position<TData>::Type pos;
-		for (pos = 0; pos < count; )
-		{
-			c = _streamGet(file);
-			assignValue(data, pos, c);
-			++pos;
-		}
-	}
-//____________________________________________________________________________
-
 	template <typename TSize>
-	static void
+	inline static void
 	read_(TFile & file,
 		TData & data,
 		TSize _limit)
@@ -106,15 +65,11 @@ SEQAN_CHECKPOINT
 
 		//determine length
 		typename Position<TFile>::Type begin_pos = _streamTellG(file);
-		typename Size<TData>::Type count = 0;
-		typename Value<TFile>::Type c = _streamGet(file);
+		typename Size<TData>::Type count;
+		typename Position<TData>::Type pos;
 
-		while (!_streamEOF(file))
-		{
-			c = _streamGet(file);
-			++count;
-			if (count == limit) break;
-		}
+		for (count = 0; !_streamEOF(file) && count != limit; ++count)
+			_streamGet(file);
 
 		//reserve space
 		resize(data, count);
@@ -122,21 +77,26 @@ SEQAN_CHECKPOINT
 		if (!count) return;
 
 		if (length(data) < count)
-		{
 			count = length(data);
-		}
 
 		//read sequence
 		_streamSeekG(file, begin_pos);
 
-		typename Position<TData>::Type pos;
-		for (pos = 0; pos < count; )
-		{
-			c = _streamGet(file);
-			assignValue(data, pos, c);
-			++pos;
-		}
+		for (pos = 0; pos < count; ++pos)
+			assignValue(data, pos, _streamGet(file));
 	}
+
+//____________________________________________________________________________
+
+	inline static void
+	read_(TFile & file,	
+		TData & data)
+	{
+SEQAN_CHECKPOINT
+		typedef typename Size<TData>::Type TSize;
+		read(file, data, supremumValue<TSize>());
+	}
+
 };
 
 //____________________________________________________________________________

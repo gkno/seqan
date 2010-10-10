@@ -50,7 +50,7 @@ SEQAN_DEFINE_TEST(test_file_embl_file)
 		next_pos = readFeature(feature_line, next_pos, line, "exon", Embl());
 	}
 
-	SEQAN_ASSERT_TRUE(count == 3);
+	SEQAN_ASSERT_EQ(count, 3);
 }
 
 
@@ -70,11 +70,11 @@ SEQAN_DEFINE_TEST(test_file_embl_meta)
 	readMeta(strm,meta,Embl());
 	
 	readLineType(meta, line, "KW", Embl());
-	SEQAN_ASSERT_TRUE(line == "SCL gene.");
+	SEQAN_ASSERT_EQ(line, "SCL gene.");
 
 	readLineType(meta, line, "RX", Embl());
-	SEQAN_ASSERT_TRUE(infix(line,0,28) == "DOI; 10.1073/pnas.101532998.");
-	SEQAN_ASSERT_TRUE(length(line)==46 ||length(line)==47);
+	SEQAN_ASSERT_EQ(infix(line,0,28), "DOI; 10.1073/pnas.101532998.");
+	SEQAN_ASSERT_TRUE(length(line) == 46u || length(line) == 47u);
 
 	clear(line);
 	readLineType(meta, feature_line, "FT", Embl());
@@ -89,7 +89,7 @@ SEQAN_DEFINE_TEST(test_file_embl_meta)
 		next_pos = readFeature(feature_line, next_pos, line, "CDS", Embl());
 	}
 
-	SEQAN_ASSERT_TRUE(count == 1);
+	SEQAN_ASSERT_EQ(count, 1);
 }
 
 #endif  // TESTS_FILE_TEST_FILE_EMBL_H_

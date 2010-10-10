@@ -107,7 +107,9 @@ inline bool
 _streamEOF(::std::FILE * me)
 {
 SEQAN_CHECKPOINT
-	return feof(me) || ferror(me);
+	int c = fgetc(me);
+    ungetc(c, me);
+	return (c == EOF) || ferror(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////

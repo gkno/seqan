@@ -436,7 +436,7 @@ goNext(TFile & file,
 SEQAN_CHECKPOINT
 	SEQAN_ASSERT(!_streamEOF(file))
 
-	bool found_data = false;
+//	bool found_data = false;
 	while (true)
 	{
 		typename Value<TFile>::Type c = _streamGet(file);
@@ -449,12 +449,22 @@ SEQAN_CHECKPOINT
 				c = _streamGet(file);
 				if (_streamEOF(file)) return;
 			} while (c == '\n' || c == '\r');
-
+/*
+// weese: I changed the following lines, as otherwises empty
+//        sequences (seq1) will be overread. See:
+// >seq1
+// >seq2
+// ACTGGT
 			if (c != '>')
 			{
 				found_data = true;
 			}
 			else if (found_data)
+			{
+				_streamUnget(file);
+				return;
+			}
+*/			if (c == '>')
 			{
 				_streamUnget(file);
 				return;
