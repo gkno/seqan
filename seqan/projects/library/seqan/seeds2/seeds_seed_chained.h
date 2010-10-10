@@ -87,21 +87,21 @@ public:
 template <typename TConfig>
 struct Value<Seed<ChainedSeed, TConfig> >
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Position<_TSeed>::Type _TPosition;
-    typedef typename Size<_TSeed>::Type _TSize;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Position<TSeed_>::Type TPosition_;
+    typedef typename Size<TSeed_>::Type TSize_;
 
-    typedef SeedDiagonal<_TPosition, _TSize> Type;
+    typedef SeedDiagonal<TPosition_, TSize_> Type;
 };
 
 template <typename TConfig>
 struct Value<Seed<ChainedSeed, TConfig> const>
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Position<_TSeed>::Type _TPosition;
-    typedef typename Size<_TSeed>::Type _TSize;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Position<TSeed_>::Type TPosition_;
+    typedef typename Size<TSeed_>::Type TSize_;
 
-    typedef SeedDiagonal<_TPosition, _TSize> const Type;
+    typedef SeedDiagonal<TPosition_, TSize_> const Type;
 };
 
 ///.Metafunction.Size.param.T:Spec.ChainedSeed
@@ -119,34 +119,34 @@ struct Size<Seed<ChainedSeed, TConfig> const>
 template <typename TConfig>
 struct Iterator<Seed<ChainedSeed, TConfig>, Standard>
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
-    typedef typename ::std::list<_TSeedDiagonal>::iterator Type;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Value<TSeed_>::Type TSeedDiagonal_;
+    typedef typename ::std::list<TSeedDiagonal_>::iterator Type;
 };
 
 template <typename TConfig>
 struct Iterator<Seed<ChainedSeed, TConfig> const, Standard>
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
-    typedef typename ::std::list<_TSeedDiagonal>::const_iterator Type;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Value<TSeed_>::Type TSeedDiagonal_;
+    typedef typename ::std::list<TSeedDiagonal_>::const_iterator Type;
 };
 
 ///.Metafunction.Reference.param.T:Spec.ChainedSeed
 template <typename TConfig>
 struct Reference<Seed<ChainedSeed, TConfig> >
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
-    typedef _TSeedDiagonal & Type;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Value<TSeed_>::Type TSeedDiagonal_;
+    typedef TSeedDiagonal_ & Type;
 };
 
 template <typename TConfig>
 struct Reference<Seed<ChainedSeed, TConfig> const>
 {
-    typedef Seed<ChainedSeed, TConfig> _TSeed;
-    typedef typename Value<_TSeed>::Type _TSeedDiagonal;
-    typedef _TSeedDiagonal const & Type;
+    typedef Seed<ChainedSeed, TConfig> TSeed_;
+    typedef typename Value<TSeed_>::Type TSeedDiagonal_;
+    typedef TSeedDiagonal_ const & Type;
 };
 
 // ===========================================================================

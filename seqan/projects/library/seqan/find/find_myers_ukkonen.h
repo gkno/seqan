@@ -63,6 +63,7 @@ struct AlignTextBanded; // search query in a parallelogram
 
 /**
 .Shortcut.MyersUkkonen:
+..status:deprecated, use $Myers<FindInfix>$
 ..cat:Pattern Matching
 ..summary:Semin-global (query-global, text-local) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
@@ -77,6 +78,7 @@ typedef Myers<FindInfix, True, void> MyersUkkonen;
 
 /**
 .Shortcut.MyersUkkonenGlobal:
+..status:deprecated, use $Myers<FindPrefix>$
 ..cat:Pattern Matching
 ..summary:Global (query-global, text-global) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
@@ -91,6 +93,7 @@ typedef Myers<FindPrefix, True, void> MyersUkkonenGlobal;
 
 /**
 .Shortcut.MyersUkkonenBanded:
+..status:deprecated, use $Myers<AlignTextBanded>$
 ..cat:Pattern Matching
 ..summary:Semin-global (query-global, text-local) pattern matching without findBegin() support.
 ..signature:MyersUkkonen

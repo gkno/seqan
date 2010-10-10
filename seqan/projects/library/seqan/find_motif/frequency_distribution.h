@@ -228,8 +228,8 @@ struct Spec< FrequencyDistribution<TValue, double> const>
 template <typename TValue, typename TSpec, typename TIteratorSpec>
 struct Iterator< FrequencyDistribution<TValue, TSpec>, TIteratorSpec >
 {
-	typedef String<TSpec> TString;
-	typedef typename Iterator<TString, TIteratorSpec>::Type Type;
+	typedef String<TSpec> TString_;
+	typedef typename Iterator<TString_, TIteratorSpec>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -239,14 +239,14 @@ struct Iterator< FrequencyDistribution<TValue, TSpec>, TIteratorSpec >
 template<typename TValue, typename TSpec>
 struct Position< FrequencyDistribution<TValue, TSpec> >
 {
-	typedef String<TSpec> TString;
-	typedef typename Position<TString>::Type Type;
+	typedef String<TSpec> TString_;
+	typedef typename Position<TString_>::Type Type;
 };
 template<typename TValue, typename TSpec>
 struct Position< FrequencyDistribution<TValue, TSpec> const>
 {
-	typedef String<TSpec> TString;
-	typedef typename Position<TString const>::Type Type;
+	typedef String<TSpec> TString_;
+	typedef typename Position<TString_ const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -256,14 +256,14 @@ struct Position< FrequencyDistribution<TValue, TSpec> const>
 template<typename TValue, typename TSpec>
 struct Size< FrequencyDistribution<TValue, TSpec> >
 {
-	typedef String<TSpec> TString;
-	typedef typename Size<TString>::Type Type;
+	typedef String<TSpec> TString_;
+	typedef typename Size<TString_>::Type Type;
 };
 template<typename TValue, typename TSpec>
 struct Size<FrequencyDistribution<TValue, TSpec> const>
 {
-	typedef String<TSpec> TString;
-	typedef typename Size<TString const>::Type Type;
+	typedef String<TSpec> TString_;
+	typedef typename Size<TString_ const>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

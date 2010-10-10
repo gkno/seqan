@@ -79,10 +79,10 @@ struct FindBeginPatternSpec
 template <typename TPattern>
 struct FindBeginPattern
 {
-	typedef typename Needle<TPattern>::Type TNeedle;
-	typedef ModifiedString<TNeedle, ModReverse> TReverseNeedle;
-	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	typedef Pattern<TReverseNeedle, TFindBeginPatternSpec> Type;
+	typedef typename Needle<TPattern>::Type TNeedle_;
+	typedef ModifiedString<TNeedle_, ModReverse> TReverseNeedle_;
+	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec_;
+	typedef Pattern<TReverseNeedle_, TFindBeginPatternSpec_> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -91,11 +91,9 @@ struct FindBeginPattern
 template <typename TPattern, typename TFindBeginPatternSpec = typename FindBeginPatternSpec<TPattern>::Type >
 struct _FindBegin
 {
-private:
-	typedef typename FindBeginPattern<TPattern>::Type TFindBeginPattern;
+	typedef typename FindBeginPattern<TPattern>::Type TFindBeginPattern_;
 
-public:
-	TFindBeginPattern data_findBeginPattern;
+	TFindBeginPattern_ data_findBeginPattern;
 };
 
 template <typename TPattern>
