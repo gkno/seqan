@@ -733,9 +733,10 @@ __fillHmmUniform(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TProbability, typename TSpec>
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TRNG>
 inline void
-__fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
+__fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+                TRNG & rng)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
@@ -744,7 +745,7 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	
 	// Initialization
-	mtRandInit();
+    PDF<Uniform<TSize> > pdf(20, 99);
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
 	
 	// Iterate over all states
@@ -755,7 +756,7 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 			String<TSize> counts;
 			TSize sum = 0;
 			for(TSize i = 0;i<oD;++i) {
-				TSize rd = (mtRand() % 80) + 20;
+				TSize rd = pickRandomNumber(rng, pdf);
 				sum += rd;
 				appendValue(counts, rd);
 			}
@@ -767,7 +768,7 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 			String<TSize> counts;
 			TSize sum = 0;
 			for(TSize i = 0;i<alphSize;++i) {
-				TSize rd = (mtRand() % 80) + 20;
+				TSize rd = pickRandomNumber(rng, pdf);
 				sum += rd;
 				appendValue(counts, rd);
 			}
@@ -778,11 +779,12 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TProbability, typename TSpec>
+template<typename TAlphabet, typename TProbability, typename TSpec, typename TRNG>
 inline void
-randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
+randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+             TRNG & rng)
 {
-	//__fillHmmRandom(hmm);
+	//__fillHmmRandom(hmm, rng);
 	__fillHmmUniform(hmm);
 }
 
