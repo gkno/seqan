@@ -97,7 +97,7 @@ SEQAN_CHECKPOINT
 ..param.target:A container $source$ is moved to.
 ..param.source:A container that is moved to $target$.
 ..remarks:The function tries to hand over the contents of $source$ to $target$.
-If this is possible, $source$ losts its content and will therefore be empty after this operation.
+If this is possible, $source$ looses its content and will therefore be empty after this operation.
 Otherwise, the function behaves like @Function.assign@ and $source$ is copied to $target$. 
 ..see:Function.assign
 ..include:seqan/basic.h
