@@ -6,11 +6,11 @@
 
 #include <seqan/seeds.h>
 
-void Main_BandedAlign();
-void Main_GlobalSeedChain();
-void Main_MemoryManager();
-void Main_Seeds();
-void Main_SeedSet();
+#include "test_seeds.h"
+#include "test_seeds_global_seed_chain.h"
+#include "test_seeds_seed_set.h"
+#include "test_seeds_banded_align.h"
+#include "test_seeds_memory_manager.h"
 
 SEQAN_DEFINE_TEST(test_seed_banded_align) {
     Main_BandedAlign();
