@@ -27,6 +27,7 @@
 #include "test_align_align.h"
 #include "test_align_gaps.h"
 #include "test_align_myers.h"
+#include "test_align_matrix.h"
 #include "test_local_align.h"
 
 SEQAN_BEGIN_TESTSUITE("test_align") {
@@ -51,6 +52,8 @@ SEQAN_BEGIN_TESTSUITE("test_align") {
     SEQAN_CALL_TEST(test_align_myers_test_short);
     SEQAN_CALL_TEST(test_align_myers_test_long);
     SEQAN_CALL_TEST(test_align_hirschberger);
+
+    SEQAN_CALL_TEST(test_align_matrix);
 
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/align_algorithms.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/align/align_base.h");
