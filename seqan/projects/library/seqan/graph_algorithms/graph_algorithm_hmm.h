@@ -782,7 +782,7 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TRNG>
 inline void
 randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
-             TRNG & rng)
+             TRNG & /*rng*/)
 {
 	//__fillHmmRandom(hmm, rng);
 	__fillHmmUniform(hmm);
