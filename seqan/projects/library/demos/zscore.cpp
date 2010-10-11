@@ -2,7 +2,7 @@
 #include <fstream>
 
 #include <seqan/index.h>
-#include <seqan/statistical_index.h>
+#include <seqan/statistics.h>
 
 using namespace std;
 using namespace seqan;
