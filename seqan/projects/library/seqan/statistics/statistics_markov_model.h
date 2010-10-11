@@ -22,14 +22,14 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
-#define SEQAN_HEADER_STATISTICAL_INDEX_MARKOV_MODEL_H
+#ifndef SEQAN_STATISTICS_STATISTICS_MARKOV_MODEL_H_
+#define SEQAN_STATISTICS_STATISTICS_MARKOV_MODEL_H_
 
 #include <seqan/align.h>
 #include <seqan/index.h>
 
-namespace seqan//SEQAN_NAMESPACE_MAIN
-{
+namespace seqan {
+
 /*
 with matrix calss matrices
 */
@@ -97,7 +97,7 @@ with matrix calss matrices
 ..summary: Loads an instance of MarkovModel from a file
 ..signature:read(file)
 ..param.file:The file from which loading the MarkovModel.
-..include:seqan/statistical_index.h
+..include:seqan/statistics.h
 */
 template <typename TAlphabet, typename TFloat = double, typename TSpec = Default>
 class MarkovModel
@@ -523,7 +523,7 @@ public:
 ..param.n:The number of columns of the matrix.
 ...type:nolink:unsigned int
 ..returns:The inverse matrix of the matrix.
-..include:seqan/statistical_index.h
+..include:seqan/statistics.h
 */
 
 template <typename TValue>
@@ -814,4 +814,4 @@ void ensureAuxMatrices(MarkovModel<TAlphabet, TFloat, TSpec> & mm )
 
 }
 
-#endif //#ifndef SEQAN_HEADER_...
+#endif  // #ifndef SEQAN_STATISTICS_STATISTICS_MARKOV_MODEL_H_

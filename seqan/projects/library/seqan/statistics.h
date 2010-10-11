@@ -18,8 +18,8 @@
   $Id: sequence.h 2596 2008-08-25 16:17:13Z rausch@PCPOOL.MI.FU-BERLIN.DE $
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_STATISTICAL_INDEX_H
-#define SEQAN_HEADER_STATISTICAL_INDEX_H
+#ifndef SEQAN_HEADER_STATISTICS_H
+#define SEQAN_HEADER_STATISTICS_H
 
 //____________________________________________________________________________
 // prerequisites
@@ -30,11 +30,11 @@
 //____________________________________________________________________________
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
-#include <seqan/statistical_index/statistical_index_generated_forwards.h>
+#include <seqan/statistics/statistics_generated_forwards.h>
 #endif
 
-#include <seqan/statistical_index/statistical_index_markov_model.h>
-#include <seqan/statistical_index/statistical_index_statistics.h>
+#include <seqan/statistics/statistics_markov_model.h>
+#include <seqan/statistics/statistics_base.h>
 
 //____________________________________________________________________________
 
