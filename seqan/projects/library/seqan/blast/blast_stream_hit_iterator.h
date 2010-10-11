@@ -44,13 +44,13 @@ template<typename TBlastHsp, typename TFile>
 class Iter<BlastReport<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HitIterator> > 
 {
 public:
-	typedef BlastReport<TBlastHsp, StreamReport<TFile> > TBlastReport;
-	typedef typename Hit<TBlastReport>::Type TBlastHit;
-	typedef typename Position<TFile>::Type TPosition;
+	typedef BlastReport<TBlastHsp, StreamReport<TFile> > TBlastReport_;
+	typedef typename Hit<TBlastReport_>::Type TBlastHit_;
+	typedef typename Position<TFile>::Type TPosition_;
 
-	TBlastHit data_hit;
-	TBlastReport* data_host;
-	TPosition data_pos, data_next_pos;
+	TBlastHit_ data_hit;
+	TBlastReport_* data_host;
+	TPosition_ data_pos, data_next_pos;
 	bool data_at_end;
 
 	Iter()	
@@ -58,7 +58,7 @@ public:
 		data_at_end = false;
 	}
 	
-	Iter(TBlastReport & blast)  
+	Iter(TBlastReport_ & blast)  
 	{
 	SEQAN_CHECKPOINT
 		data_host = &blast; 

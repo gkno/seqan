@@ -33,12 +33,12 @@ template<typename TBlastHsp, typename TFile>
 class BlastHit<TBlastHsp, StreamReport<TFile> > 
 {
 	public:
-		typedef typename Position<TFile>::Type TPosition;
+		typedef typename Position<TFile>::Type TPosition_;
 
 		String<char> name;
 		unsigned int length; //length of whole sequence  
 		TBlastHsp act_hsp;
-		TPosition begin_pos, first_hsp_pos;
+		TPosition_ begin_pos, first_hsp_pos;
 		
 		BlastReport<TBlastHsp,StreamReport<TFile> >* data_host;
 

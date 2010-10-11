@@ -46,12 +46,12 @@ class Iter<BlastHit<TBlastHsp,StreamReport<TFile> >, StreamBlastIterator<HspIter
 {
 public:
 
-	typedef BlastHit<TBlastHsp,StreamReport<TFile> > TBlastHit;
-	typedef typename Position<TFile>::Type TPosition;
+	typedef BlastHit<TBlastHsp,StreamReport<TFile> > TBlastHit_;
+	typedef typename Position<TFile>::Type TPosition_;
 
 	TBlastHsp data_hsp;
-	TBlastHit* data_host;
-	TPosition data_pos, data_next_pos, data_hsp_begin_pos;
+	TBlastHit_* data_host;
+	TPosition_ data_pos, data_next_pos, data_hsp_begin_pos;
 	bool data_at_end;
 
 
@@ -60,13 +60,13 @@ public:
 	data_at_end = false;
 	}
 	
-	Iter(TBlastHit & blast) 
+	Iter(TBlastHit_ & blast) 
 	{
 	SEQAN_CHECKPOINT
 		data_host = &blast; 
 		data_pos = blast.first_hsp_pos;
 		data_next_pos = data_pos;
-		data_hsp_begin_pos = (TPosition) 0;
+		data_hsp_begin_pos = (TPosition_) 0;
 		data_at_end = false;
 	}
 

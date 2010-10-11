@@ -589,7 +589,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 		// Fill in the segments
 		typedef typename Infix<TString>::Type TInfix;
 		typedef typename Iterator<TInfix, Standard>::Type TInfixIter;
-		typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+		typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 		for(typename TPosToVertexMap::const_iterator it = g.data_pvMap.begin();it != g.data_pvMap.end(); ++it) {
 			TInfix str = label(g,it->second);
 			TSize c = property(component, it->second);

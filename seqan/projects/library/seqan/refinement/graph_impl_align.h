@@ -188,12 +188,12 @@ template<typename TString, typename TSpecial, typename TCargo, typename TSpec>
 class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
-		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename Size<Graph>::Type TSize;
-		typedef std::pair<TIdType, TSize> TKey;
-		typedef std::map<TKey, TVertexDescriptor> TPosToVertexMap;
-		typedef FragmentInfo<TIdType, TSize> TFragmentInfo;
+		typedef typename Id<Graph>::Type TIdType_;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor_;
+		typedef typename Size<Graph>::Type TSize_;
+		typedef std::pair<TIdType_, TSize_> TKey_;
+		typedef std::map<TKey_, TVertexDescriptor_> TPosToVertexMap_;
+		typedef FragmentInfo<TIdType_, TSize_> TFragmentInfo_;
 
 		// Alignment graph
 		Graph<Undirected<TCargo, TSpec> > data_align;
@@ -202,10 +202,10 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 		Holder<StringSet<TString, Dependent<TSpecial> > > data_sequence;
 		
 		// Alignment specific members
-		String<TFragmentInfo> data_fragment;
+		String<TFragmentInfo_> data_fragment;
 
 		// STL Map to retrieve a vertex given SeqId, Position
-		TPosToVertexMap data_pvMap;
+		TPosToVertexMap_ data_pvMap;
 
 
 		Graph() {
@@ -218,10 +218,10 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 			data_sequence = sSet;
 
 			// Cover all sequences with nil vertices
-			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-			TSize lenSet = length(sSet);
-			for(TSize k=0; k<lenSet;++k) 
-				data_pvMap.insert(std::make_pair(TKey(positionToId(sSet,k), length(sSet[k])), nilVertex));
+			TVertexDescriptor_ nilVertex = getNil<TVertexDescriptor_>();
+			TSize_ lenSet = length(sSet);
+			for(TSize_ k=0; k<lenSet;++k) 
+				data_pvMap.insert(std::make_pair(TKey_(positionToId(sSet,k), length(sSet[k])), nilVertex));
 		}
 
 		template <typename TDefault>
@@ -231,10 +231,10 @@ class Graph<Alignment<StringSet<TString, Dependent<TSpecial> >, TCargo, TSpec> >
 			data_sequence = depStr;
 
 			// Cover all sequences with nil vertices
-			TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
-			TSize lenSet = length(sSet);
-			for(TSize k=0; k<lenSet;++k) 
-				data_pvMap.insert(std::make_pair(TKey(positionToId(const_cast<StringSet<TString, Owner<TDefault> >&>(sSet),k), length(sSet[k])), nilVertex));
+			TVertexDescriptor_ nilVertex = getNil<TVertexDescriptor_>();
+			TSize_ lenSet = length(sSet);
+			for(TSize_ k=0; k<lenSet;++k) 
+				data_pvMap.insert(std::make_pair(TKey_(positionToId(const_cast<StringSet<TString, Owner<TDefault> >&>(sSet),k), length(sSet[k])), nilVertex));
 		}
 
 
@@ -399,7 +399,7 @@ clearVertices(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Size<TStringSet>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename TGraph::TKey TKey;
+	typedef typename TGraph::TKey_ TKey;
 
 	clear(g.data_fragment);
 	g.data_pvMap.clear();
@@ -474,9 +474,9 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename TGraph::TFragmentInfo TFragmentInfo;
-	typedef typename TGraph::TKey TKey;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TFragmentInfo_ TFragmentInfo;
+	typedef typename TGraph::TKey_ TKey;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 
 	//for(TPosToVertexMap::const_iterator p = g.data_pvMap.begin(); p != g.data_pvMap.end(); ++p) {
 	//	std::cout << p->first.first << ',' << p->first.second << ':' << p->second << std::endl;
@@ -542,8 +542,8 @@ removeVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename TGraph::TKey TKey;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TKey_ TKey;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 	typename TPosToVertexMap::iterator interval = (g.data_pvMap.lower_bound(TKey(sequenceId(g,v), fragmentBegin(g,v) + fragmentLength(g,v))));
 
 	// Clear the interval
@@ -697,7 +697,7 @@ write(TFile & target,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename TGraph::TFragmentInfo TSegment;
+	typedef typename TGraph::TFragmentInfo_ TSegment;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
@@ -1079,7 +1079,7 @@ assignStringSet(Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<StringSet<TString, Dependent<TDefault> >, TCargo, TSpec> > TGraph;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename TGraph::TKey TKey;
+	typedef typename TGraph::TKey_ TKey;
 	typedef typename Size<TGraph>::Type TSize;
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
@@ -1182,7 +1182,7 @@ label(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
-	typedef typename TGraph::TFragmentInfo TSegment;
+	typedef typename TGraph::TFragmentInfo_ TSegment;
 	TSegment seg = getProperty(g.data_fragment, v);
 	//std::cout << seg.data_seq_id << ",";
 	//std::cout << seg.data_begin << ",";
@@ -1284,7 +1284,7 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
-	typedef typename TGraph::TKey TKey;
+	typedef typename TGraph::TKey_ TKey;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
 	return (pos >= (TPos) length(getValueById(stringSet(g),id))) ? getNil<TVertexDescriptor>() : g.data_pvMap.upper_bound(TKey(id, pos))->second;
@@ -1408,7 +1408,7 @@ getFirstCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 
 
 	typename TPosToVertexMap::const_iterator it = g.data_pvMap.upper_bound(std::make_pair(id, 0));
@@ -1452,7 +1452,7 @@ getLastCoveredPosition(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 	typename TPosToVertexMap::const_iterator it = g.data_pvMap.lower_bound(std::make_pair(id, length(getValueById(stringSet(g), id))));
@@ -1487,7 +1487,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TComponentMap>::Type TComponent;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Check for empty graph
@@ -1597,7 +1597,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Id<TGraph>::Type TIdType;
-	typedef typename TGraph::TPosToVertexMap TPosToVertexMap;
+	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
 	typedef std::map<unsigned int, unsigned int> TComponentLength;
 	
 	// Strongly Connected Components, topological sort, and length of each component

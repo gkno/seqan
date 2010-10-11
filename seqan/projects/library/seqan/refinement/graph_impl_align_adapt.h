@@ -44,19 +44,20 @@ template<typename TStringSet, typename TCargo, typename TGraphSpec, typename TIt
 class Iter<Graph<Alignment<TStringSet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TIteratorSpec> > > 
 {
 public:
-	typedef Graph<Alignment<TStringSet, TCargo, TGraphSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TGraph const* data_host;
-	TVertexDescriptor data_source;
-	TEdgeDescriptor data_edge;
+	typedef Graph<Alignment<TStringSet, TCargo, TGraphSpec> > TGraph_;
+	typedef typename EdgeDescriptor<TGraph_>::Type TEdgeDescriptor_;
+	typedef typename VertexDescriptor<TGraph_>::Type TVertexDescriptor_;
+	
+	TGraph_ const* data_host;
+	TVertexDescriptor_ data_source;
+	TEdgeDescriptor_ data_edge;
 
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+	Iter(TGraph_ const& _graph, TVertexDescriptor_ const v) : 
 		data_host(&_graph),
 		data_source(v)
 	{

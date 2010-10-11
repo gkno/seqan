@@ -31,18 +31,18 @@ template<typename TBlastHsp, typename TFile>
 class BlastReport<TBlastHsp, StreamReport<TFile> > 
 {
 	public:
-		typedef BlastHit<TBlastHsp,StreamReport<TFile> > TBlastHit;
-		typedef typename Position<TFile>::Type TPosition;
+		typedef BlastHit<TBlastHsp,StreamReport<TFile> > TBlastHit_;
+		typedef typename Position<TFile>::Type TPosition_;
 	
 		String<char> query_name;
 		String<char> db_name;
 	
 	
-		TPosition first_hit_pos;
+		TPosition_ first_hit_pos;
 		char act_c; 
 		bool hits_found;
 		bool next_report;
-		TPosition next_report_pos;
+		TPosition_ next_report_pos;
 
 
 		BlastReport()

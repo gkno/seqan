@@ -43,19 +43,19 @@ class Annotation;
 ..param.TLabel:The label type (e.g. int or String<char>)
 ..param.TSpec:The specializing type.
 ...default:Simple
-..include:blast.h
+..include:refinement.h
 */
 template<typename TSequence,typename TValue>
 class Annotation<TSequence,TValue,Simple>{
 
 public:
-	typedef typename Id<TSequence>::Type TId;
-	typedef typename Position<TSequence>::Type TPos;
-	typedef typename Size<TSequence>::Type TSize;
+	typedef typename Id<TSequence>::Type TId_;
+	typedef typename Position<TSequence>::Type TPos_;
+	typedef typename Size<TSequence>::Type TSize_;
 
-	TId data_seq_id;
-	TPos data_begin;
-	TSize data_length;
+	TId_ data_seq_id;
+	TPos_ data_begin;
+	TSize_ data_length;
 	//String<char> data_label;
 	TValue data_label;
 
@@ -63,7 +63,7 @@ public:
 	{
 	}
 
-	Annotation(TId seqId, TPos begin, TSize len, TValue label) :
+	Annotation(TId_ seqId, TPos_ begin, TSize_ len, TValue label) :
 			data_seq_id(seqId),
 			data_begin(begin), 
 			data_length(len),
