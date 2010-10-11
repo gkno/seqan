@@ -152,7 +152,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 		delete(delete_pointer);
 	}
 
-	reverse(result);
+	reverseInPlace(result);
 	return best;
 }
 
@@ -226,7 +226,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Se
 		delete(delete_pointer);
 	}
 
-	::std::reverse(begin(result), end(result));
+	reverseInPlace(result);
 	return best;
 }
 

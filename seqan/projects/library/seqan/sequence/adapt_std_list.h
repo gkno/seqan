@@ -281,29 +281,6 @@ clear(std::list<T> & list)
     list.clear();
 }
 
-/**
-.Function.reverse:
-..cat:Containers
-..signature:reverse(container)
-..param.container:The container whose elements to reverse.
-...type:Concept.Container
-...type:Adaption.std::list
-..include:seqan/sequence.h
- */
-template <typename TContainer>
-void reverse(TContainer & container)
-{    
-    SEQAN_CHECKPOINT;
-    std::reverse(begin(container, Standard()), end(container, Standard()));
-}
-
-template <typename TElement>
-void reverse(std::list<TElement> & container)
-{
-    SEQAN_CHECKPOINT;
-    container.reverse();
-}
-
 }  // namespace seqan
 
 #endif  // #ifndef SEQAN_SEQUENCE_ADAPT_STD_LIST_H_

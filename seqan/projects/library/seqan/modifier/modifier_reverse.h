@@ -496,6 +496,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	// reverseInPlace
 	//////////////////////////////////////////////////////////////////////////////
 
+/**
+.Function.reverseInPlace:
+..cat:Modifiers
+..signature:reverseInPlace(container)
+..param.container:The container whose elements to reverse.
+...type:Concept.Container
+...type:Adaption.std::list
+..include:seqan/modifier.h
+ */
 	template < typename TSequence >
 	inline void
 	reverseInPlace(TSequence & sequence) 
