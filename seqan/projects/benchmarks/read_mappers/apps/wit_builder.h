@@ -96,7 +96,7 @@ void intervalizeErrorCurves(String<WitRecord> & result,
              it != end(sortedMatches); ++it) {
             // Skip it if (it - 1) pointed to same pos (and must point to
             // one with smaller absolute distance.
-            if (it->pos == previousPos and it->contigId == previousContigId)
+            if (it->pos == previousPos && it->contigId == previousContigId)
                 continue;
             // Consider all currently open intervals with a greater error
             // than the error in *it and extend them or create a new one.
@@ -355,7 +355,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << std::endl;
                 }
                 foundTooLowScore = foundTooLowScore || (relativeScore < relativeMinScore);
-                while (find(finder, pattern) and endPosition(finder) != oldTentativeLeft) {
+                while (find(finder, pattern) && endPosition(finder) != oldTentativeLeft) {
 			        while (findBegin(finder, pattern, getScore(pattern)))
             			continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);

@@ -103,7 +103,7 @@ void intervalizeMatches(String<std::map<size_t, std::pair<size_t, bool> > > & in
     typedef Iterator<TWeightedMatches>::Type TWeightedMatchesIter;
     String<ContigInterval> intervals;
     for (TWeightedMatchesIter it = begin(matches); it != end(matches); ++it) {
-        if (it->pos == previousPos and it->contigId == previousContigId)
+        if (it->pos == previousPos && it->contigId == previousContigId)
             continue;
         if (length(intervals) == 0) {
             appendValue(intervals, ContigInterval(it->contigId, it->pos, it->pos));

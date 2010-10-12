@@ -71,7 +71,7 @@ int parseCommandLineAndCheck(Options &options,
                              const int argc, const char *argv[]) {
     // Show short help on invalid arguments and long help if help
     // argument was given.
-    if (not parse(parser, argc, argv)) {
+    if (!parse(parser, argc, argv)) {
         shortHelp(parser, std::cerr);
         return kRetArgsErr;
     } else if (isSetShort(parser, 'h')) {
@@ -97,7 +97,7 @@ int parseCommandLineAndCheck(Options &options,
         std::cerr << "ERROR: Invalid maximum error value: " << options.maxError << std::endl;
         return kRetArgsErr;
     }
-    if (not options.validDistanceFunction()) {      
+    if (!options.validDistanceFunction()) {      
       std::cerr << "ERROR: Invalid distance function: " << options.distanceFunction << std::endl;
       return kRetArgsErr;
     }
@@ -128,7 +128,7 @@ int loadContigsAndSamFile(TFragmentStore & fragmentStore,
     {
         std::fstream fstrm(toCString(samFilename),
                            std::ios_base::in | std::ios_base::binary);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open SAM file." << std::endl;
             return kRetIoErr;
         }
@@ -218,7 +218,7 @@ int main(int argc, const char *argv[]) {
             std::cout << *it << std::endl;
     } else {
         std::fstream fstrm(toCString(outFile), std::ios_base::out);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open out file \"" << outFile << "\""
                       << std::endl;
             return kRetIoErr;

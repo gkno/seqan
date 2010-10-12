@@ -301,7 +301,7 @@ bool verifyMatchesToErrorFunctionResults(TFragmentStore /*const*/ & fragments,
                                               begin(result), end(result),
                                               begin(missing));
             // And check.
-            if (end_missing != begin(missing) or end_superflous != begin(superflous)) {
+            if (end_missing != begin(missing) || end_superflous != begin(superflous)) {
                 std::cerr << "read id = " << readId << ", read name = " << fragments.readNameStore[readId] << std::endl;
                 std::cerr << "Matches are:" << std::endl;
                 for (TIter it = begin(result); it != end(result); ++it)
@@ -348,7 +348,7 @@ bool verifyMatchesToErrorFunctionResults(TFragmentStore /*const*/ & fragments,
                     std::cerr << value(it) << std::endl;
                 }
             }
-            if (end_superflous - begin(superflous) != 0 or
+            if (end_superflous - begin(superflous) != 0 ||
                 end_missing - begin(missing) != 0)
                 std::cerr << "-----" << std::endl;
         }

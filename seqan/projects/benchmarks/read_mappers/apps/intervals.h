@@ -62,16 +62,16 @@ struct WitRecord {
     bool operator<(WitRecord const & other) const {
         if (readId < other.readId)
             return true;
-        if (readId == other.readId and distance < other.distance)
+        if (readId == other.readId && distance < other.distance)
             return true;
-        if (readId == other.readId and distance == other.distance and
+        if (readId == other.readId && distance == other.distance &&
             contigId < other.contigId)
             return true;
-        if (readId == other.readId and distance == other.distance and
-            contigId == other.contigId and firstPos < other.firstPos)
+        if (readId == other.readId && distance == other.distance &&
+            contigId == other.contigId && firstPos < other.firstPos)
             return true;
-        if (readId == other.readId and distance == other.distance and
-            contigId == other.contigId and firstPos == other.firstPos and
+        if (readId == other.readId && distance == other.distance &&
+            contigId == other.contigId && firstPos == other.firstPos &&
             lastPos < other.lastPos)
             return true;
         return false;
@@ -191,7 +191,7 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
     String<char> tmp;
 
     // Maybe skip comments.
-    while (not _streamEOF(stream) and c == '#')
+    while (not _streamEOF(stream) && c == '#')
         _parse_skipLine(stream, c);
     if (_streamEOF(stream))
         return false;

@@ -314,7 +314,7 @@ inline bool setEndPosition(Finder<THaystack, void> & finder,
     // Clear the pattern, and search until we are at pos.
     _patternInit(pattern._wrappedPattern, finder);
     bool result;
-    while ((result = find(finder, pattern)) and
+    while ((result = find(finder, pattern)) &&
            endPosition(finder) < pos)
         continue;
     return result;
