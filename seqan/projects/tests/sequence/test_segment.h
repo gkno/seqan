@@ -1,18 +1,3 @@
-#include <iostream>
-#include <fstream>
-#include <typeinfo>
-#include <time.h>
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
-#include "seqan/sequence.h"
-
-using namespace std;
-using namespace seqan;
-
-//////////////////////////////////////////////////////////////////////////////
-
 SEQAN_DEFINE_TEST(Infix)
 {
     SEQAN_CHECKPOINT;
@@ -22,54 +7,54 @@ SEQAN_DEFINE_TEST(Infix)
 	Infix<String<char> >::Type infix_1;
 	String<char> str_1 = "this is a string";
 	setHost(infix_1, str_1);
-	SEQAN_ASSERT_TRUE(length(infix_1) == 0);
-	SEQAN_ASSERT_TRUE(id(infix_1) == id(str_1));
+	SEQAN_ASSERT_EQ(length(infix_1), 0u);
+	SEQAN_ASSERT_EQ(id(infix_1), id(str_1));
 
 	setEnd(infix_1, end(str_1));
-	SEQAN_ASSERT_TRUE(infix_1 == str_1);
-	SEQAN_ASSERT_TRUE(length(infix_1) == length(infix_1));
+	SEQAN_ASSERT_EQ(infix_1, str_1);
+	SEQAN_ASSERT_EQ(length(infix_1), length(infix_1));
 
 	setEndPosition(infix_1, 9);
-	SEQAN_ASSERT_TRUE(infix_1 == infix(str_1, 0, 9));
+	SEQAN_ASSERT_EQ(infix_1, infix(str_1, 0, 9));
 
 	Infix<String<char> >::Type infix_2(infix_1);
-	SEQAN_ASSERT_TRUE(infix_2 == infix(str_1, 0, 9));
-	SEQAN_ASSERT_TRUE(infix_2 == infix_1);
-	SEQAN_ASSERT_TRUE(id(infix_1) == id(infix_2));
+	SEQAN_ASSERT_EQ(infix_2, infix(str_1, 0, 9));
+	SEQAN_ASSERT_EQ(infix_2, infix_1);
+	SEQAN_ASSERT_EQ(id(infix_1), id(infix_2));
 
 	setBeginPosition(infix_2, 5);
-	SEQAN_ASSERT_TRUE(infix_2 == "is a");
+	SEQAN_ASSERT_EQ(infix_2, "is a");
 
 	setBegin(infix_2, begin(str_1));
-	SEQAN_ASSERT_TRUE(infix_2 == "this is a");
+	SEQAN_ASSERT_EQ(infix_2, "this is a");
 
 	Infix<String<char> >::Type infix_3(str_1);
-	SEQAN_ASSERT_TRUE(infix_3 == str_1);
-	SEQAN_ASSERT_TRUE(id(infix_3) == id(str_1));
+	SEQAN_ASSERT_EQ(infix_3, str_1);
+	SEQAN_ASSERT_EQ(id(infix_3), id(str_1));
 
 	Infix<String<char> >::Type infix_4(str_1, 5, 9);
-	SEQAN_ASSERT_TRUE(infix_4 == "is a");
+	SEQAN_ASSERT_EQ(infix_4, "is a");
 
-	SEQAN_ASSERT_TRUE(capacity(infix_4) == capacity(str_1) - length(str_1) + length(infix_4));
+	SEQAN_ASSERT_EQ(capacity(infix_4), capacity(str_1) - length(str_1) + length(infix_4));
 
 	Infix<String<char> >::Type infix_5(str_1, begin(str_1), end(str_1));
-	SEQAN_ASSERT_TRUE(infix_5 == str_1);
+	SEQAN_ASSERT_EQ(infix_5, str_1);
 
 	SEQAN_ASSERT_TRUE(begin(infix_5) == begin(str_1));
-	SEQAN_ASSERT_TRUE(beginPosition(infix_5) == 0);
+	SEQAN_ASSERT_EQ(beginPosition(infix_5), 0u);
 	SEQAN_ASSERT_TRUE(end(infix_5) == end(str_1));
-	SEQAN_ASSERT_TRUE(endPosition(infix_5) == length(str_1));
+	SEQAN_ASSERT_EQ(endPosition(infix_5), length(str_1));
 
 	SEQAN_ASSERT_TRUE(begin(infix(str_1, 0, length(str_1))) == begin(str_1));
 	SEQAN_ASSERT_TRUE(end(infix(str_1, 0, length(str_1))) == end(str_1));
-	SEQAN_ASSERT_TRUE(length(infix(str_1, 0, length(str_1))) == length(str_1));
+	SEQAN_ASSERT_EQ(length(infix(str_1, 0, length(str_1))), length(str_1));
 
 	str_1 = "begin middle end";
 	assign(infix(str_1, 6, 12),  "to");
-	SEQAN_ASSERT_TRUE(str_1 == "begin to end");
+	SEQAN_ASSERT_EQ(str_1, "begin to end");
 
 	assign(infix(str_1, 6, 8), "the test", 14);
-	SEQAN_ASSERT_TRUE(str_1 == "begin the test");
+	SEQAN_ASSERT_EQ(str_1, "begin the test");
 
 //	setEnd(infix_1);
 //	SEQAN_ASSERT_TRUE(infix_1 == "");
@@ -79,19 +64,19 @@ SEQAN_DEFINE_TEST(Infix)
 
 	str_1 = "begin middle end";
 	goBegin(infix_1);
-	SEQAN_ASSERT_TRUE(infix_1 == "b");
+	SEQAN_ASSERT_EQ(infix_1, "b");
 
 	goBegin(infix_1, str_1);
-	SEQAN_ASSERT_TRUE(infix_1 == "b");
+	SEQAN_ASSERT_EQ(infix_1, "b");
 
 	goPrevious(infix_1);
 	SEQAN_ASSERT_TRUE(atBegin(infix_1));
 
 	goEnd(infix_1);
-	SEQAN_ASSERT_TRUE(infix_1 == str_1);
+	SEQAN_ASSERT_EQ(infix_1, str_1);
 
 	goEnd(infix_1, str_1);
-	SEQAN_ASSERT_TRUE(infix_1 == str_1);
+	SEQAN_ASSERT_EQ(infix_1, str_1);
 
 	goNext(infix_1);
 	SEQAN_ASSERT_TRUE(atEnd(infix_1));
@@ -101,29 +86,29 @@ SEQAN_DEFINE_TEST(Infix)
 	str_1 = "hello";
 	Infix<String<char> >::Type infix_6(str_1, 0, 5);
 
-	SEQAN_ASSERT_TRUE(infix_6 == str_1);
+	SEQAN_ASSERT_EQ(infix_6, str_1);
 
 	infix_6 += str_1;
 	SEQAN_ASSERT_TRUE(isEqual(infix_6, "hellohello"));
 
-	SEQAN_ASSERT_TRUE(infix_6 != "bla");
-	SEQAN_ASSERT_TRUE(!isNotEqual(infix_6, "hellohello"));
+	SEQAN_ASSERT_NEQ(infix_6, "bla");
+	SEQAN_ASSERT_NOT(isNotEqual(infix_6, "hellohello"));
 
-	SEQAN_ASSERT_TRUE(!(infix_6 < "hello"));
-	SEQAN_ASSERT_TRUE(!isLess(infix_6, "hello"));
+	SEQAN_ASSERT_NOT(infix_6 < "hello");
+	SEQAN_ASSERT_NOT(isLess(infix_6, "hello"));
 
-	SEQAN_ASSERT_TRUE(!(infix_6 <= "hello"));
-	SEQAN_ASSERT_TRUE(!isLessOrEqual(infix_6, "hello"));
+	SEQAN_ASSERT_NOT(infix_6 <= "hello");
+	SEQAN_ASSERT_NOT(isLessOrEqual(infix_6, "hello"));
 
-	SEQAN_ASSERT_TRUE(infix_6 > "hello");
+	SEQAN_ASSERT_GT(infix_6, "hello");
 	SEQAN_ASSERT_TRUE(isGreater(infix_6, "hello"));
 
-	SEQAN_ASSERT_TRUE(infix_6 >= "hello");
+	SEQAN_ASSERT_GEQ(infix_6, "hello");
 	SEQAN_ASSERT_TRUE(isGreaterOrEqual(infix_6, "hello"));
 //____________________________________________________________________________
 
 	clear(infix_6);
-	SEQAN_ASSERT_TRUE(infix_6 == "");
+	SEQAN_ASSERT_EQ(infix_6, "");
 //____________________________________________________________________________
 }
 
@@ -139,46 +124,46 @@ SEQAN_DEFINE_TEST(Suffix)
 
 	Suffix<String<char> >::Type suffix_1;
 	setHost(suffix_1, str_1);
-	SEQAN_ASSERT_TRUE(length(suffix_1) == length(str_1));
-	SEQAN_ASSERT_TRUE(id(suffix_1) == id(str_1));
+	SEQAN_ASSERT_EQ(length(suffix_1), length(str_1));
+	SEQAN_ASSERT_EQ(id(suffix_1), id(str_1));
 
 	Suffix<String<char> >::Type suffix_2(suffix_1);
-	SEQAN_ASSERT_TRUE(suffix_2 == suffix_1);
-	SEQAN_ASSERT_TRUE(id(suffix_1) == id(suffix_2));
+	SEQAN_ASSERT_EQ(suffix_2, suffix_1);
+	SEQAN_ASSERT_EQ(id(suffix_1), id(suffix_2));
 
 	setBeginPosition(suffix_2, 5);
-	SEQAN_ASSERT_TRUE(suffix_2 == "is a string");
+	SEQAN_ASSERT_EQ(suffix_2, "is a string");
 
 	setBegin(suffix_2, begin(str_1));
-	SEQAN_ASSERT_TRUE(suffix_2 == "this is a string");
+	SEQAN_ASSERT_EQ(suffix_2, "this is a string");
 
 	Suffix<String<char> >::Type suffix_3(str_1);
-	SEQAN_ASSERT_TRUE(suffix_3 == str_1);
-	SEQAN_ASSERT_TRUE(id(suffix_3) == id(str_1));
+	SEQAN_ASSERT_EQ(suffix_3, str_1);
+	SEQAN_ASSERT_EQ(id(suffix_3), id(str_1));
 
 	Suffix<String<char> >::Type suffix_4(str_1, 5);
-	SEQAN_ASSERT_TRUE(suffix_4 == "is a string");
+	SEQAN_ASSERT_EQ(suffix_4, "is a string");
 
-	SEQAN_ASSERT_TRUE(capacity(suffix_4) == capacity(str_1) - length(str_1) + length(suffix_4));
+	SEQAN_ASSERT_EQ(capacity(suffix_4), capacity(str_1) - length(str_1) + length(suffix_4));
 
 	Suffix<String<char> >::Type suffix_5(str_1, begin(str_1));
-	SEQAN_ASSERT_TRUE(suffix_5 == str_1);
+	SEQAN_ASSERT_EQ(suffix_5, str_1);
 
 	SEQAN_ASSERT_TRUE(begin(suffix_5) == begin(str_1));
-	SEQAN_ASSERT_TRUE(beginPosition(suffix_5) == 0);
+	SEQAN_ASSERT_EQ(beginPosition(suffix_5), 0u);
 	SEQAN_ASSERT_TRUE(end(suffix_5) == end(str_1));
-	SEQAN_ASSERT_TRUE(endPosition(suffix_5) == length(str_1));
+	SEQAN_ASSERT_EQ(endPosition(suffix_5), length(str_1));
 
 	SEQAN_ASSERT_TRUE(begin(suffix(str_1, 0)) == begin(str_1));
 	SEQAN_ASSERT_TRUE(end(suffix(str_1, 3)) == end(str_1));
-	SEQAN_ASSERT_TRUE(length(suffix(str_1, 0)) == length(str_1));
+	SEQAN_ASSERT_EQ(length(suffix(str_1, 0)), length(str_1));
 
 	str_1 = "begin middle end";
 	assign(suffix(str_1, 6), "to panic");
-	SEQAN_ASSERT_TRUE(str_1 == "begin to panic");
+	SEQAN_ASSERT_EQ(str_1, "begin to panic");
 
 	assign(suffix(str_1, 6), "the test", 9);
-	SEQAN_ASSERT_TRUE(str_1 == "begin the");
+	SEQAN_ASSERT_EQ(str_1, "begin the");
 
 	char str_2[200] = "begin middle end";
 	assign(suffix(str_2, 6), "to panic");

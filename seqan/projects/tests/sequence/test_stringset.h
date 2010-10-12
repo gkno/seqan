@@ -1,21 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <typeinfo>
-#include <time.h>
-
-#define SEQAN_DEBUG
-#define SEQAN_TEST
-
-#include "seqan/sequence.h"
-#include "seqan/file.h"
-
-using namespace std;
-using namespace seqan;
-
-//////////////////////////////////////////////////////////////////////////////
 //test sequence default interface:
 //non-container objects are treated like containers of length 1
-
 
 template <typename TSpec>
 void Test_StringSet()
@@ -28,7 +12,7 @@ void Test_StringSet()
 	set[1] = "schlauer ";
 	set[2] = "Hamster!";
 
-	SEQAN_ASSERT_TRUE(length(set) == 3);
+	SEQAN_ASSERT_EQ(length(set), 3u);
 
 	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
 	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
@@ -47,17 +31,17 @@ void Test_StringSet()
 	int i = 0;
 	for (TIterator it = begin(set); it != end(set); goNext(it))
 	{
-		SEQAN_ASSERT_TRUE(*it == set[i]);
+		SEQAN_ASSERT_EQ(*it, set[i]);
 		++i;
 	}
 
 	TIterator itBegin = begin(set);
-	SEQAN_ASSERT_TRUE(atBegin(itBegin) == true);
-	SEQAN_ASSERT_TRUE(atEnd(itBegin) == false);
+	SEQAN_ASSERT_TRUE(atBegin(itBegin));
+	SEQAN_ASSERT_NOT(atEnd(itBegin));
 	TIterator itEnd = end(set);
-	SEQAN_ASSERT_TRUE(atBegin(itEnd) == false);
-	SEQAN_ASSERT_TRUE(atEnd(itEnd) == true);
-	SEQAN_ASSERT_TRUE(i == 3);
+	SEQAN_ASSERT_NOT(atBegin(itEnd));
+	SEQAN_ASSERT_TRUE(atEnd(itEnd));
+	SEQAN_ASSERT_EQ(i, 3);
 }
 
 //____________________________________________________________________________
@@ -74,25 +58,25 @@ void Test_StringSet_Concat()
 	appendValue(set, "schlauer ");
 	appendValue(set, "Hamster!");
 
-	SEQAN_ASSERT_TRUE(length(set) == 3);
+	SEQAN_ASSERT_EQ(length(set), 3u);
 
 	CharString all = concat(set);
 
-	SEQAN_ASSERT_TRUE(concat(set)[10] == 'a');
+	SEQAN_ASSERT_EQ(concat(set)[10], 'a');
 	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
 	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
 	SEQAN_ASSERT_TRUE(isEqual(set[2], "Hamster!"));
 	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
 
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[0] == 0);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[1] == 6);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[2] == 15);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[3] == 23);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[0], 0u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[1], 6u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[2], 15u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[3], 23u);
 
 	StringSet<CharString, TSpec> const &cset = set;
 	
 	all = concat(cset);
-	SEQAN_ASSERT_TRUE(concat(cset)[10] == 'a');
+	SEQAN_ASSERT_EQ(concat(cset)[10], 'a');
 	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
 }
 
@@ -108,107 +92,107 @@ void Test_StringSetIdHolder() {
 	TStringSet str;
 	String<char> bla("a");
 	TId id0 = assignValueById(str, bla);
-	SEQAN_ASSERT_TRUE(id0 == 0);
-	SEQAN_ASSERT_TRUE(idToPosition(str, id0) == 0);
-	SEQAN_ASSERT_TRUE(positionToId(str, 0) == id0);
-	SEQAN_ASSERT_TRUE(length(str) == 1);
-	SEQAN_ASSERT_TRUE(str[0] == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
+	SEQAN_ASSERT_EQ(id0, 0u);
+	SEQAN_ASSERT_EQ(idToPosition(str, id0), 0u);
+	SEQAN_ASSERT_EQ(positionToId(str, 0), id0);
+	SEQAN_ASSERT_EQ(length(str), 1u);
+	SEQAN_ASSERT_EQ(str[0], "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	String<char> bla1("b");
 	TId id1 = assignValueById(str, bla1);
-	SEQAN_ASSERT_TRUE(id1 == 1);
-	SEQAN_ASSERT_TRUE(idToPosition(str, id1) == 1);
-	SEQAN_ASSERT_TRUE(positionToId(str, 1) == id1);
-	SEQAN_ASSERT_TRUE(str[1] == "b");
-	SEQAN_ASSERT_TRUE(length(str) == 2);
-	SEQAN_ASSERT_TRUE(getValueById(str, id1) == "b");
+	SEQAN_ASSERT_EQ(id1, 1u);
+	SEQAN_ASSERT_EQ(idToPosition(str, id1), 1u);
+	SEQAN_ASSERT_EQ(positionToId(str, 1), id1);
+	SEQAN_ASSERT_EQ(str[1], "b");
+	SEQAN_ASSERT_EQ(length(str), 2u);
+	SEQAN_ASSERT_EQ(getValueById(str, id1), "b");
 	String<char> bla2("c");
 	TId id2 = assignValueById(str, bla2);
-	SEQAN_ASSERT_TRUE(id2 == 2);
-	SEQAN_ASSERT_TRUE(str[2] == "c");
-	SEQAN_ASSERT_TRUE(length(str) == 3);
-	SEQAN_ASSERT_TRUE(getValueById(str, id2) == "c");
+	SEQAN_ASSERT_EQ(id2, 2U);
+	SEQAN_ASSERT_EQ(str[2], "c");
+	SEQAN_ASSERT_EQ(length(str), 3u);
+	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
 	String<char> bla3("d");
 	TId id3 = assignValueById(str, bla3);
-	SEQAN_ASSERT_TRUE(id3 == 3);
-	SEQAN_ASSERT_TRUE(str[3] == "d");
-	SEQAN_ASSERT_TRUE(length(str) == 4);
-	SEQAN_ASSERT_TRUE(getValueById(str, id3) == "d");
+	SEQAN_ASSERT_EQ(id3, 3u);
+	SEQAN_ASSERT_EQ(str[3], "d");
+	SEQAN_ASSERT_EQ(length(str), 4u);
+	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
 	removeValueById(str,id1);
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id2) == "c");
-	SEQAN_ASSERT_TRUE(getValueById(str, id3) == "d");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
+	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
 	if (TYPECMP<TStringSet, TSetTight>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 3);
+		SEQAN_ASSERT_EQ(length(str), 3u);
 	}
 	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 4);
+		SEQAN_ASSERT_EQ(length(str), 4u);
 	}
 	removeValueById(str,id2);
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id3) == "d");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
 	if (TYPECMP<TStringSet, TSetTight>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 2);
+		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
 	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 4);
+		SEQAN_ASSERT_EQ(length(str), 4u);
 	}
 
 	String<char> bla4("e");
 	TId id4 = assignValueById(str, bla4, 100);
-	SEQAN_ASSERT_TRUE(id4 == 100);
-	SEQAN_ASSERT_TRUE(getValueById(str, id4) == "e");
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id3) == "d");
+	SEQAN_ASSERT_EQ(id4, 100u);
+	SEQAN_ASSERT_EQ(getValueById(str, id4), "e");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
 	removeValueById(str,id3);
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id4) == "e");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id4), "e");
 	if (TYPECMP<TStringSet, TSetTight>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 2);
+		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
 	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 101);
+		SEQAN_ASSERT_EQ(length(str), 101u);
 	}
 	String<char> bla5("f");
 	TId id5 = assignValueById(str, bla5); 
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id4) == "e");
-	SEQAN_ASSERT_TRUE(getValueById(str, id5) == "f");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id4), "e");
+	SEQAN_ASSERT_EQ(getValueById(str, id5), "f");
 	assignValueById(str, bla5, id4); 
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id4) == "f");
-	SEQAN_ASSERT_TRUE(getValueById(str, id5) == "f");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id4), "f");
+	SEQAN_ASSERT_EQ(getValueById(str, id5), "f");
 	removeValueById(str,id4);
-	SEQAN_ASSERT_TRUE(getValueById(str, id0) == "a");
-	SEQAN_ASSERT_TRUE(getValueById(str, id5) == "f");
+	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
+	SEQAN_ASSERT_EQ(getValueById(str, id5), "f");
 	if (TYPECMP<TStringSet, TSetTight>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 2);
+		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
 	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 102);
+		SEQAN_ASSERT_EQ(length(str), 102u);
 	}
 	clear(str);
 	id1 = assignValueById(str, bla1);
 	id2 = assignValueById(str, bla2);
 	id3 = assignValueById(str, bla3);	
-	SEQAN_ASSERT_TRUE(getValueById(str, id1) == "b");
-	SEQAN_ASSERT_TRUE(getValueById(str, id2) == "c");
-	SEQAN_ASSERT_TRUE(getValueById(str, id3) == "d");
+	SEQAN_ASSERT_EQ(getValueById(str, id1), "b");
+	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
+	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
 	if (TYPECMP<TStringSet, TSetTight>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 3);
+		SEQAN_ASSERT_EQ(length(str), 3u);
 	}
 	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
 	{
-		SEQAN_ASSERT_TRUE(length(str) == 3);
+		SEQAN_ASSERT_EQ(length(str), 3u);
 	}
 }
 
@@ -230,25 +214,25 @@ void Test_StringSet_Id()
 	appendValue(set, origin[1]);
 	appendValue(set, origin[2]);
 
-	SEQAN_ASSERT_TRUE(length(set) == 3);
+	SEQAN_ASSERT_EQ(length(set), 3u);
 
 	CharString all = concat(set);
 
-	SEQAN_ASSERT_TRUE(concat(set)[10] == 'a');
+	SEQAN_ASSERT_EQ(concat(set)[10], 'a');
 	SEQAN_ASSERT_TRUE(isEqual(set[0], "Hallo "));
 	SEQAN_ASSERT_TRUE(isEqual(set[1], "schlauer "));
 	SEQAN_ASSERT_TRUE(isEqual(set[2], "Hamster!"));
 	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
 
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[0] == 0);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[1] == 6);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[2] == 15);
-	SEQAN_ASSERT_TRUE(stringSetLimits(set)[3] == 23);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[0], 0u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[1], 6u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[2], 15u);
+	SEQAN_ASSERT_EQ(stringSetLimits(set)[3], 23u);
 
 	StringSet<CharString, TSpec> const &cset = set;
 	
 	all = concat(cset);
-	SEQAN_ASSERT_TRUE(concat(cset)[10] == 'a');
+	SEQAN_ASSERT_EQ(concat(cset)[10], 'a');
 	SEQAN_ASSERT_TRUE(isEqual(all, "Hallo schlauer Hamster!"));
 }
 

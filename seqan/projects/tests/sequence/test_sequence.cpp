@@ -1,21 +1,15 @@
-#include <iostream>
-#include <fstream>
-#include <typeinfo>
-#include <time.h>
-
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
 #include <seqan/basic.h>
+#include <seqan/sequence.h>
+#include <seqan/file.h>
+
+using namespace seqan;
 
 #include "test_string.h"
 #include "test_stringset.h"
 #include "test_segment.h"
-
-using namespace std;
-using namespace seqan;
-
-//////////////////////////////////////////////////////////////////////////////
 
 SEQAN_BEGIN_TESTSUITE(Sequence tests)
 {
