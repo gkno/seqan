@@ -860,7 +860,7 @@ void correctReads(
 #ifdef MEDIAN		
 		for (; level < toLevel; ++level)
 		{
-			//int logRation = (log10(length(setReads)/2))/(log10(4));
+			//int logRation = (log10(static_cast<double>(length(setReads)/2))/(log10(4.0)));
 			//int l = logRation + 1;
 			//std::cout << l << std::endl;
 			
@@ -882,7 +882,7 @@ void correctReads(
 			}
 		}
 #else
-		//int logRation = log10(readCount) / log10(4);
+		//int logRation = log10(static_cast<double>(readCount)) / log10(4.0);
 		//int l = logRation + 1;
 		//std::cout << l << std::endl;
 		cargo(myIndex).replen_min = options.fromLevel;
@@ -1095,7 +1095,7 @@ int main(int argc, const char* argv[])
 	// initialise the top and down level by using the log4 from the total number of reads
 	if (options.fromLevel == 0)
 	{
-		int logRation = static_cast<int>(log10(length(store.readSeqStore)) / log10(4.0));
+		int logRation = static_cast<int>(log10(static_cast<double>(length(store.readSeqStore))) / log10(4.0));
 		options.fromLevel = logRation + 2;
 		options.toLevel   = options.fromLevel + 10;
 		std::cout << "The estimated top level is " << options.fromLevel << " and the down level is " << options.toLevel << std::endl;
