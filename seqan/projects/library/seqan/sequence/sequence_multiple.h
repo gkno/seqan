@@ -130,14 +130,14 @@ a single integer value between 0 and the sum of string lengths minus 1.
 
 	template <typename TString, typename TSpec>
 	struct StringSetLimits< StringSet<TString, TSpec> > {
-		typedef typename Size<TString>::Type	TSize;
-		typedef String<TSize>					Type;
+		typedef typename Size<TString>::Type	TSize_;
+		typedef String<TSize_>					Type;
 	};
 
 	template <typename TString, typename TSpec>
 	struct StringSetPosition< StringSet<TString, TSpec> > {
-		typedef typename Size<TString>::Type	TSize;
-		typedef Pair<TSize>						Type;
+		typedef typename Size<TString>::Type	TSize_;
+		typedef Pair<TSize_>						Type;
 	};
 
 

@@ -119,16 +119,16 @@ struct GetValue<Segment<THost, TSpec> const >
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec>, Rooted>
 {
-	typedef Segment<THost, TSpec> TSequence;
-	typedef typename Iterator<THost, Standard>::Type TIterator;
-	typedef Iter<TSequence, AdaptorIterator<TIterator> > Type;
+	typedef Segment<THost, TSpec> TSequence_;
+	typedef typename Iterator<THost, Standard>::Type TIterator_;
+	typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
 };
 template <typename THost, typename TSpec>
 struct Iterator<Segment<THost, TSpec> const, Rooted>
 {
-	typedef Segment<THost, TSpec> const TSequence;
-	typedef typename Iterator<THost const, Standard>::Type TIterator;
-	typedef Iter<TSequence, AdaptorIterator<TIterator> > Type;
+	typedef Segment<THost, TSpec> const TSequence_;
+	typedef typename Iterator<THost const, Standard>::Type TIterator_;
+	typedef Iter<TSequence_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename THost, typename TSpec>

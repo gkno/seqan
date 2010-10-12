@@ -48,9 +48,9 @@ struct Packed;
 ..include:seqan/sequence.h
 */
 
-/*???TODO Optimierungsmöglichkeiten:
+/*???TODO Optimierungsmï¿½glichkeiten:
 - _clearSpace kopiert Zeichenweise im Packed-String, und nicht im Host-String
-- _clearSpace verwendet resize, um den Host zu vergrößern, d.h. der Inhalt wird eventuell doppelt kopiert.
+- _clearSpace verwendet resize, um den Host zu vergrï¿½ï¿½ern, d.h. der Inhalt wird eventuell doppelt kopiert.
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -775,14 +775,14 @@ struct HostIterator;
 template <typename TContainer, typename THostspec>
 struct HostIterator<Iter<TContainer, Packed<THostspec> > >
 {
-	typedef typename Host<TContainer>::Type THost;
-	typedef typename Iterator<THost, Standard>::Type Type;
+	typedef typename Host<TContainer>::Type THost_;
+	typedef typename Iterator<THost_, Standard>::Type Type;
 };
 template <typename TContainer, typename THostspec>
 struct HostIterator<Iter<TContainer, Packed<THostspec> > const>
 {
-	typedef typename Host<TContainer>::Type THost;
-	typedef typename Iterator<THost, Standard>::Type const Type;
+	typedef typename Host<TContainer>::Type THost_;
+	typedef typename Iterator<THost_, Standard>::Type const Type;
 };
 
 

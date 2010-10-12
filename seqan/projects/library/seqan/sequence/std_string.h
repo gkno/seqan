@@ -95,17 +95,17 @@ struct Reference< ::std::basic_string<TChar, TCharTraits, TAlloc> const>
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc>, Rooted>
 {
-	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TString;
-	typedef Iter<TString, StdIteratorAdaptor> TIterator;
-	typedef Iter<TString, AdaptorIterator<TIterator> > Type;
+	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> TString_;
+	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>
 struct Iterator< ::std::basic_string<TChar, TCharTraits, TAlloc> const, Rooted>
 {
-	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> const TString;
-	typedef Iter<TString, StdIteratorAdaptor> TIterator;
-	typedef Iter<TString, AdaptorIterator<TIterator> > Type;
+	typedef ::std::basic_string<TChar, TCharTraits, TAlloc> const TString_;
+	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TChar, typename TCharTraits, typename TAlloc>

@@ -129,16 +129,16 @@ struct GetValue<String< TValue, ValueExpand<THost, TMap, TSpec> > const>:
 template <typename TValue, typename THost, typename TMap, typename TSpec>
 struct Reference<String< TValue, ValueExpand<THost, TMap, TSpec> > >	
 {
-	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > TMe;
-	typedef typename Iterator<TMe, Standard>::Type TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > TMe_;
+	typedef typename Iterator<TMe_, Standard>::Type TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 template <typename TValue, typename THost, typename TMap, typename TSpec>
 struct Reference<String< TValue, ValueExpand<THost, TMap, TSpec> > const>	
 {
-	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > const TMe;
-	typedef typename Iterator<TMe, Standard>::Type TIterator;
-	typedef Proxy<IteratorProxy<TIterator> > Type;
+	typedef String< TValue, ValueExpand<THost, TMap, TSpec> > const TMe_;
+	typedef typename Iterator<TMe_, Standard>::Type TIterator_;
+	typedef Proxy<IteratorProxy<TIterator_> > Type;
 };
 
 //____________________________________________________________________________
@@ -146,20 +146,20 @@ struct Reference<String< TValue, ValueExpand<THost, TMap, TSpec> > const>
 template <typename TValue, typename THost, typename TMap, typename TSpec, typename TIteratorSpec>
 struct Iterator<String< TValue, ValueExpand<THost, TMap, TSpec> >, TIteratorSpec>	
 {
-	typedef ValueExpand<THost, TMap, TSpec> TValueExpand;
-	typedef String< TValue, TValueExpand> TMe;
-	typedef typename Iterator<THost, Standard>::Type THostIterator;
+	typedef ValueExpand<THost, TMap, TSpec> TValueExpand_;
+	typedef String< TValue, TValueExpand_> TMe_;
+	typedef typename Iterator<THost, Standard>::Type THostIterator_;
 
-	typedef Iter<TMe, AdaptorIterator<THostIterator, ValueExpandIter> > Type;
+	typedef Iter<TMe_, AdaptorIterator<THostIterator_, ValueExpandIter> > Type;
 };
 template <typename TValue, typename THost, typename TMap, typename TSpec, typename TIteratorSpec>
 struct Iterator<String< TValue, ValueExpand<THost, TMap, TSpec> > const, TIteratorSpec>	
 {
-	typedef ValueExpand<THost, TMap, TSpec> TValueExpand;
-	typedef String< TValue, TValueExpand> const TMe;
-	typedef typename Iterator<THost, Standard>::Type THostIterator;
+	typedef ValueExpand<THost, TMap, TSpec> TValueExpand_;
+	typedef String< TValue, TValueExpand_> const TMe_;
+	typedef typename Iterator<THost, Standard>::Type THostIterator_;
 
-	typedef Iter<TMe, AdaptorIterator<THostIterator, ValueExpandIter> > Type;
+	typedef Iter<TMe_, AdaptorIterator<THostIterator_, ValueExpandIter> > Type;
 };
 
 //____________________________________________________________________________

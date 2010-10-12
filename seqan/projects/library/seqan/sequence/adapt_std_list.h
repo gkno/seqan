@@ -79,17 +79,17 @@ struct GetValue< ::std::list<TValue, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc>, Rooted>
 {
-	typedef ::std::list<TValue, TAlloc> _TString;
-	typedef Iter<_TString, StdIteratorAdaptor> _TIterator;
-	typedef Iter<_TString, AdaptorIterator<_TIterator> > Type;
+	typedef ::std::list<TValue, TAlloc> TString_;
+	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct Iterator< ::std::list<TValue, TAlloc> const, Rooted>
 {
-	typedef ::std::list<TValue, TAlloc> const _TString;
-	typedef Iter<_TString, StdIteratorAdaptor> _TIterator;
-	typedef Iter<_TString, AdaptorIterator<_TIterator> > Type;
+	typedef ::std::list<TValue, TAlloc> const TString_;
+	typedef Iter<TString_, StdIteratorAdaptor> TIterator_;
+	typedef Iter<TString_, AdaptorIterator<TIterator_> > Type;
 };
 
 template <typename TValue, typename TAlloc>
@@ -136,15 +136,15 @@ struct Size< ::std::list<TValue, TAlloc> const>
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> >
 {
-	typedef ::std::list<TValue, TAlloc> _TContainer;
-	typedef typename _TContainer::iterator Type;
+	typedef ::std::list<TValue, TAlloc> TContainer_;
+	typedef typename TContainer_::iterator Type;
 };
 
 template <typename TValue, typename TAlloc>
 struct StdContainerIterator< ::std::list<TValue, TAlloc> const>
 {
-	typedef ::std::list<TValue, TAlloc> _TContainer;
-	typedef typename _TContainer::const_iterator Type;
+	typedef ::std::list<TValue, TAlloc> TContainer_;
+	typedef typename TContainer_::const_iterator Type;
 };
 
 // ===========================================================================
