@@ -1395,6 +1395,23 @@ inline void SEQAN_ASSERT_FAIL(const char *comment, ...)
 	va_end(args);
 }
 
+template <typename T1, typename T2, typename T3>
+void SEQAN_ASSERT_IN_DELTA(T1 const &_arg1, T2 const &_arg2, T3 const &_arg3)
+{
+	if (!::seqan::ClassTest::testInDelta("", 0, _arg1, "", _arg2, "", _arg3, ""))
+		::seqan::ClassTest::fail();
+}
+
+template <typename T1, typename T2, typename T3>
+void SEQAN_ASSERT_IN_DELTA_MSG(T1 const &_arg1, T2 const &_arg2, T3 const &_arg3, const char *comment, ...)
+{
+	va_list args;
+	va_start(args, comment);
+	if (!::seqan::ClassTest::vtestInDelta("", 0, _arg1, "", _arg2, "", _arg3, "", comment, args))
+		::seqan::ClassTest::fail();
+	va_end(args);
+}
+
 template <typename T1, typename T2>
 void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2)
 {
@@ -1534,6 +1551,8 @@ void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *comment, ...)
 #else // #if SEQAN_ENABLE_DEBUG
 
 inline void SEQAN_ASSERT_FAIL(const char *comment, ...) {}
+template <typename T1, typename T2, typename T3> void SEQAN_ASSERT_IN_DELTA(T1 const &_arg1, T2 const &_arg2, T3 const &_arg3) {}
+template <typename T1, typename T2, typename T3> void SEQAN_ASSERT_IN_DELTA_MSG(T1 const &_arg1, T2 const &_arg2, T3 const &_arg3, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_EQ(T1 const &_arg1, T2 const &_arg2) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_EQ_MSG(T1 const &_arg1, T2 const &_arg2, const char *comment, ...) {}
 template <typename T1, typename T2> void SEQAN_ASSERT_NEQ(T1 const &_arg1, T2 const &_arg2) {}
