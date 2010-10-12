@@ -58,10 +58,8 @@ template<typename TAlphabet, typename TCargo, typename TSpec>
 class Graph<Hmm<TAlphabet, TCargo, TSpec> > 
 {
 	public:
-		typedef typename Id<Graph>::Type TIdType;
-		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename Size<Graph>::Type TSize;
-
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor_;
+		
 		//HMM Model
 		Graph<Directed<TCargo, TSpec> > data_model;
 
@@ -72,8 +70,8 @@ class Graph<Hmm<TAlphabet, TCargo, TSpec> >
 		String<bool> data_silent;
 
 		//Begin and end state
-		TVertexDescriptor data_begin;
-		TVertexDescriptor data_end;
+		TVertexDescriptor_ data_begin;
+		TVertexDescriptor_ data_end;
 
 	
 //____________________________________________________________________________

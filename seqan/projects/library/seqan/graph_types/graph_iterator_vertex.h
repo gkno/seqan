@@ -49,9 +49,9 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalVertexIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor_;
 	TGraph const* data_host;
-	TVertexDescriptor data_pos;
+	TVertexDescriptor_ data_pos;
 
 	Iter()	
 	{

@@ -54,19 +54,19 @@ template<typename TCargo, typename TGraphSpec, typename TSpec>
 class Iter<Graph<Directed<TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > > 
 {
 public:
-	typedef Graph<Directed<TCargo, TGraphSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TGraph const* data_host;
-	TVertexDescriptor data_source;
-	TEdgeDescriptor data_edge;
+	typedef Graph<Directed<TCargo, TGraphSpec> > TGraph_;
+	typedef typename EdgeDescriptor<TGraph_>::Type TEdgeDescriptor_;
+	typedef typename VertexDescriptor<TGraph_>::Type TVertexDescriptor_;
+	TGraph_ const* data_host;
+	TVertexDescriptor_ data_source;
+	TEdgeDescriptor_ data_edge;
 
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+	Iter(TGraph_ const& _graph, TVertexDescriptor_ const v) : 
 		data_host(&_graph),
 		data_source(v),
 		data_edge(getValue(_graph.data_vertex,v))
@@ -265,29 +265,29 @@ template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TIte
 class Iter<Graph<Automaton<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TIteratorSpec> > > 
 {
 public:
-	typedef Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Size<TAlphabet>::Type TSize;
-	TGraph const* data_host;
-	TVertexDescriptor data_source;
-	TSize data_pos;
-	TSize data_begin;
-	TSize data_end;
+	typedef Graph<Automaton<TAlphabet, TCargo, TGraphSpec> > TGraph_;
+	typedef typename EdgeDescriptor<TGraph_>::Type TEdgeDescriptor_;
+	typedef typename VertexDescriptor<TGraph_>::Type TVertexDescriptor_;
+	typedef typename Size<TAlphabet>::Type TSize_;
+	TGraph_ const* data_host;
+	TVertexDescriptor_ data_source;
+	TSize_ data_pos;
+	TSize_ data_begin;
+	TSize_ data_end;
 
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
 	}
 
-	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+	Iter(TGraph_ const& _graph, TVertexDescriptor_ const v) : 
 		data_host(&_graph),
 		data_source(v)
 	{
 		SEQAN_CHECKPOINT
-		TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
-		TSize table_length = ValueSize<TAlphabet>::VALUE;
-		TSize pos = 0;
+		TVertexDescriptor_ nilVal = getNil<TVertexDescriptor_>();
+		TSize_ table_length = ValueSize<TAlphabet>::VALUE;
+		TSize_ pos = 0;
 		while (	(pos < table_length) &&
 				(_graph.data_vertex[v].data_edge[pos].data_target == nilVal))
 		{
@@ -355,19 +355,19 @@ template<typename TAlphabet, typename TCargo, typename TGraphSpec, typename TSpe
 class Iter<Graph<Hmm<TAlphabet, TCargo, TGraphSpec> >, GraphIterator<InternalOutEdgeIterator<TSpec> > > 
 {
 public:
-	typedef Graph<Hmm<TAlphabet, TCargo, TGraphSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	TGraph const* data_host;
-	TVertexDescriptor data_source;
-	TEdgeDescriptor data_edge;
+	typedef Graph<Hmm<TAlphabet, TCargo, TGraphSpec> > TGraph_;
+	typedef typename EdgeDescriptor<TGraph_>::Type TEdgeDescriptor_;
+	typedef typename VertexDescriptor<TGraph_>::Type TVertexDescriptor_;
+	TGraph_ const* data_host;
+	TVertexDescriptor_ data_source;
+	TEdgeDescriptor_ data_edge;
 
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+	Iter(TGraph_ const& _graph, TVertexDescriptor_ const v) : 
 		data_host(&_graph),
 		data_source(v),
 		data_edge(getValue(_graph.data_model.data_vertex,v))

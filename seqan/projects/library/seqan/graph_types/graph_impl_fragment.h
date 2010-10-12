@@ -152,17 +152,17 @@ class Fragment<TSize, ExactFragment<TSpec> > {
 template<typename TSize, typename TSpec>
 class Fragment<TSize, ExactReversableFragment<TSpec> > {
  public:
-	 typedef typename Id<Fragment>::Type TId;
-	 TId seqId1;
+	 typedef typename Id<Fragment>::Type TId_;
+	 TId_ seqId1;
 	 TSize begin1;
-	 TId seqId2;
+	 TId_ seqId2;
 	 TSize begin2;
 	 TSize len;
 	 bool reversed;
   
 	 Fragment()	 {}
 
-	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l) :
+	 Fragment(TId_ sqId1, TSize beg1, TId_ sqId2, TSize beg2, TSize l) :
 	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(false) 
 	 {
 		 SEQAN_CHECKPOINT
@@ -174,7 +174,7 @@ class Fragment<TSize, ExactReversableFragment<TSpec> > {
 ..param.reversed:True if the segments match in reverse orientation, false otherwise.
 */
 	
- 	 Fragment(TId sqId1, TSize beg1, TId sqId2, TSize beg2, TSize l, bool rev) :
+ 	 Fragment(TId_ sqId1, TSize beg1, TId_ sqId2, TSize beg2, TSize l, bool rev) :
 	 seqId1(sqId1), begin1(beg1), seqId2(sqId2), begin2(beg2), len(l), reversed(rev) 
 	 {
 		 SEQAN_CHECKPOINT

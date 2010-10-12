@@ -52,15 +52,15 @@ template<typename TCargo, typename TSpec>
 class Graph<Directed<TCargo, TSpec> > 
 {
 	public:
-		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
-		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
-		typedef typename EdgeType<Graph>::Type TEdgeStump;	
-		typedef Allocator<SinglePool<sizeof(TEdgeStump)> > TAllocator;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager_;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager_;
+		typedef typename EdgeType<Graph>::Type TEdgeStump_;	
+		typedef Allocator<SinglePool<sizeof(TEdgeStump_)> > TAllocator_;
 		
-		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStump lists
-		TVertexIdManager data_id_managerV;
-		TEdgeIdManager data_id_managerE;		
-		TAllocator data_allocator;
+		String<TEdgeStump_*> data_vertex;			// Pointers to EdgeStump lists
+		TVertexIdManager_ data_id_managerV;
+		TEdgeIdManager_ data_id_managerE;		
+		TAllocator_ data_allocator;
 
 //____________________________________________________________________________
 

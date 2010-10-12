@@ -73,15 +73,15 @@ template<typename TAlphabet, typename TCargo, typename TSpec>
 class Graph<Automaton<TAlphabet, TCargo, TSpec> > 
 {
 	public:
-		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
-		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager;
-		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename EdgeType<Graph>::Type TEdge;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager_;
+		typedef typename EdgeIdHandler<Graph>::Type TEdgeIdManager_;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor_;
+		typedef typename EdgeType<Graph>::Type TEdge_;
 
-		String<AutomatonEdgeArray<TEdge, TAlphabet> > data_vertex;		// List of tables
-		TVertexIdManager data_id_managerV;
-		TEdgeIdManager data_id_managerE;
-		TVertexDescriptor data_root;
+		String<AutomatonEdgeArray<TEdge_, TAlphabet> > data_vertex;		// List of tables
+		TVertexIdManager_ data_id_managerV;
+		TEdgeIdManager_ data_id_managerE;
+		TVertexDescriptor_ data_root;
 	
 
 //____________________________________________________________________________

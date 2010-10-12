@@ -48,11 +48,11 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalDfsIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor_;
 	TGraph const* data_host;
-	TVertexDescriptor data_source;
+	TVertexDescriptor_ data_source;
 	String<bool> data_tokenMap;			// Which vertices have been visited
-	String<TVertexDescriptor> data_stack;
+	String<TVertexDescriptor_> data_stack;
 	
 	void _init() {
 		resizeVertexMap(*data_host,data_tokenMap);
@@ -71,7 +71,7 @@ public:
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph& _graph, TVertexDescriptor v) : 
+	Iter(TGraph& _graph, TVertexDescriptor_ v) : 
 		data_host(&_graph),
 		data_source(v)
 	{

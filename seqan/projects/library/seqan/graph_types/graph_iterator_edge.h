@@ -49,12 +49,12 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalEdgeIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	TVertexIterator data_vertex_it;
-	TOutEdgeIterator data_edge_it;
-	TVertexDescriptor data_first_slot;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor_;
+	typedef typename Iterator<TGraph, VertexIterator>::Type TVertexIterator_;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator_;
+	TVertexIterator_ data_vertex_it;
+	TOutEdgeIterator_ data_edge_it;
+	TVertexDescriptor_ data_first_slot;
 
 
 	Iter()	
@@ -70,8 +70,8 @@ public:
 		while((atEnd(data_edge_it)) && (!atEnd(data_vertex_it))) 
 		{
 				goNext(data_vertex_it);
-				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-				data_edge_it = TOutEdgeIterator(hostGraph(*this), value(data_vertex_it));			
+				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator_;
+				data_edge_it = TOutEdgeIterator_(hostGraph(*this), value(data_vertex_it));			
 		}
 		data_first_slot = value(data_vertex_it);
 	}

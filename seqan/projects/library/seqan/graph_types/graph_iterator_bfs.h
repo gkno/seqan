@@ -47,11 +47,11 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalBfsIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor_;
 	TGraph const* data_host;
-	TVertexDescriptor data_source;
+	TVertexDescriptor_ data_source;
 	String<bool> data_tokenMap;
-	std::deque<TVertexDescriptor> data_queue;
+	std::deque<TVertexDescriptor_> data_queue;
 
 	void _init() {
 		resizeVertexMap(*data_host,data_tokenMap);
@@ -70,7 +70,7 @@ public:
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph const& _graph, TVertexDescriptor v) : 
+	Iter(TGraph const& _graph, TVertexDescriptor_ v) : 
 		data_host(&_graph),
 		data_source(v)
 	{

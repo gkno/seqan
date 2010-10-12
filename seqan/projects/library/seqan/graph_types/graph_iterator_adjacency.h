@@ -47,16 +47,16 @@ template<typename TGraph, typename TSpec>
 class Iter<TGraph, GraphIterator<InternalAdjacencyIterator<TSpec> > > 
 {
 public:
-	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
-	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
-	TOutEdgeIterator data_edge_it;
+	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor_;
+	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator_;
+	TOutEdgeIterator_ data_edge_it;
 
 	Iter()	
 	{
 		SEQAN_CHECKPOINT
 	}
 	
-	Iter(TGraph const& _graph, TVertexDescriptor const v) : 
+	Iter(TGraph const& _graph, TVertexDescriptor_ const v) : 
 		data_edge_it(_graph, v)
 	{
 		SEQAN_CHECKPOINT

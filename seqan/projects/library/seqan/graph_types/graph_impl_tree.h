@@ -51,22 +51,22 @@ template<typename TCargo, typename TSpec>
 class Graph<Tree<TCargo, TSpec> > 
 {
 	public:
-		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager;
-		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor;
-		typedef typename EdgeType<Graph>::Type TEdgeStump;	
-		typedef Allocator<SinglePool<sizeof(TEdgeStump)> > TAllocator;
+		typedef typename VertexIdHandler<Graph>::Type TVertexIdManager_;
+		typedef typename VertexDescriptor<Graph>::Type TVertexDescriptor_;
+		typedef typename EdgeType<Graph>::Type TEdgeStump_;	
+		typedef Allocator<SinglePool<sizeof(TEdgeStump_)> > TAllocator_;
 		
-		TVertexDescriptor data_root;
-		String<TEdgeStump*> data_vertex;			// Pointers to EdgeStumpT lists
-		String<TVertexDescriptor> data_parent;		// Map to the parents of each node
-		TVertexIdManager data_id_managerV;
-		TAllocator data_allocator;
+		TVertexDescriptor_ data_root;
+		String<TEdgeStump_*> data_vertex;			// Pointers to EdgeStumpT lists
+		String<TVertexDescriptor_> data_parent;		// Map to the parents of each node
+		TVertexIdManager_ data_id_managerV;
+		TAllocator_ data_allocator;
 		
 
 //____________________________________________________________________________
 
 
-		Graph() : data_root(getNil<TVertexDescriptor>()) {
+		Graph() : data_root(getNil<TVertexDescriptor_>()) {
 			SEQAN_CHECKPOINT
 		}
 
@@ -77,7 +77,7 @@ class Graph<Tree<TCargo, TSpec> >
 		}
 
 		Graph(Graph const & _other) :
-			data_root(getNil<TVertexDescriptor>()),
+			data_root(getNil<TVertexDescriptor_>()),
 			data_allocator(_other.data_allocator)
 		{
 			SEQAN_CHECKPOINT
