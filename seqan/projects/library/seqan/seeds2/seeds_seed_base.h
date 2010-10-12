@@ -412,7 +412,7 @@ _updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> c
     double fracSeed = static_cast<double>(getSeedSize(seed) - 0.5 * overlap) / static_cast<double>(total);
     double fracOther = static_cast<double>(getSeedSize(other) - 0.5 * overlap) / static_cast<double>(total);
     typedef typename SeedScore<TSeed>::Type TScoreValue;
-    TScoreValue newScore = static_cast<TScoreValue>(round(fracSeed * getScore(seed) + fracOther * getScore(other)));
+	TScoreValue newScore = static_cast<TScoreValue>(round(fracSeed * getScore(seed) + fracOther * getScore(other)));
     setScore(seed, newScore);
 }
 

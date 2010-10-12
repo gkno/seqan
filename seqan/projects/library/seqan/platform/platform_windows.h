@@ -35,5 +35,12 @@
 
 typedef unsigned __int64 __uint64;
 
+// Workaround for missing round() from C99 in Visual Studio.
+template <typename T>
+inline T round(T const & x)
+{
+	return floor(x + 0.5);
+}
+
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 //#define SEQAN_SWITCH_USE_FORWARDS
