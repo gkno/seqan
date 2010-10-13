@@ -670,8 +670,8 @@ SEQAN_CHECKPOINT
 	typedef Pair<TPos, TCoord>		TBestEnd; // number of errors and coordinate in alignment matrix for a given trace length
 
 	TInfixSet str;
-	appendValue(str, infix(host(a), getEndDim0(seedOld)+1, getEndDim0(seed)+1));
-	appendValue(str, infix(host(b), getEndDim1(seedOld)+1, getEndDim1(seed)+1));
+	appendValue(str, infix(host(a), getEndDim0(seedOld), getEndDim0(seed)));
+	appendValue(str, infix(host(b), getEndDim1(seedOld), getEndDim1(seed)));
 
 	String<TBestEnd> bestEnds;
 	_align_banded_nw_best_ends(matrixRight, bestEnds, str, scoreMatrix, 
@@ -752,8 +752,8 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
 		
 	TInfixSet str;
-	appendValue(str, infix(host(a), getEndDim0(seedOld)+1, getEndDim0(seed)+1));
-	appendValue(str, infix(host(b), getEndDim1(seedOld)+1, getEndDim1(seed)+1));
+	appendValue(str, infix(host(a), getEndDim0(seedOld), getEndDim0(seed)));
+	appendValue(str, infix(host(b), getEndDim1(seedOld), getEndDim1(seed)));
 
 	bool overallMaxValue[2]; // only needed for standard traceback function
 	overallMaxValue[0] = 1; overallMaxValue[1] = 0;
@@ -843,8 +843,8 @@ SEQAN_CHECKPOINT
 	setClippedBeginPosition(row(align, 1), getBeginDim1(seedOld) - endLeftB);
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setClippedEndPosition(row(align, 0), getEndDim0(seedOld) + 1 + endRightA);
-	setClippedEndPosition(row(align, 1), getEndDim1(seedOld) + 1 + endRightB);
+	setClippedEndPosition(row(align, 0), getEndDim0(seedOld) + endRightA);
+	setClippedEndPosition(row(align, 1), getEndDim1(seedOld) + endRightB);
 
 	// traceback through matrix from begin/end pos on ...
 	if((*endPair.i1).i1 != 0) { // ... extension to the left
