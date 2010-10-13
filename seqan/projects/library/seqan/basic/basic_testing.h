@@ -471,7 +471,7 @@ const char *tempFileName() {
     }
 
 
-    // Similar to testEqual above, but accepts a va_list instead of variadic
+    // Similar to testInDelta above, but accepts a va_list instead of variadic
     // parameters.
     template <typename T1, typename T2, typename T3>
     bool vtestInDelta(const char *file, int line,
@@ -500,7 +500,7 @@ const char *tempFileName() {
     }
 
 
-    // Same as testEqual above, but with comment set to 0.
+    // Same as testInDelta above, but with comment set to 0.
     template <typename T1, typename T2, typename T3>
     bool testInDelta(const char *file, int line,
                      const T1 &value1, const char *expression1,

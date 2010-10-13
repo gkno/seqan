@@ -297,7 +297,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline bool
-atEnd(TValue * pos, 
+atEnd(TValue const * pos, 
 	  TValue const * /*container*/)
 {
 SEQAN_CHECKPOINT

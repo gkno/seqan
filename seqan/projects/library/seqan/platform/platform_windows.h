@@ -43,7 +43,9 @@ inline T round(T const & x)
 }
 
 // Rename some underscore-functions in Windows.
-#define _snprintf snprintf
+#ifndef snprintf
+#define snprintf _snprintf
+#endif  // #ifndef snprintf
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 //#define SEQAN_SWITCH_USE_FORWARDS

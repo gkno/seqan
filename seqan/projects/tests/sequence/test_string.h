@@ -13,11 +13,11 @@ SEQAN_DEFINE_TEST(Sequence_Interface)
 	DummyClass d;
 	DummyClass e;
 
-    void* const nullptr = 0;
+    void* const nullPtr = 0;
 	SEQAN_ASSERT_NEQ(id(c), id(e));
 	SEQAN_ASSERT_NEQ(id(d), id(e));
-	SEQAN_ASSERT_NEQ(id(c), nullptr);
-	SEQAN_ASSERT_NEQ(id(d), nullptr);
+	SEQAN_ASSERT_NEQ(id(c), nullPtr);
+	SEQAN_ASSERT_NEQ(id(d), nullPtr);
 
 	SEQAN_ASSERT_EQ(begin(c, Standard()), & c);		//begin
 	SEQAN_ASSERT_EQ(begin(d, Standard()), & d);
@@ -597,12 +597,12 @@ SEQAN_DEFINE_TEST(String_CStyle)
 	SEQAN_ASSERT_EQ(str1, str5);
 
 	char * cp1 = str1;
-    void* const nullptr = 0;
-	SEQAN_ASSERT_NEQ(cp1, nullptr);
+    void* const nullPtr = 0;
+	SEQAN_ASSERT_NEQ(cp1, nullPtr);
 
 	String<char, CStyle> const str6(strq);
 	char const * cp2 = str6;
-	SEQAN_ASSERT_NEQ(cp2, nullptr);
+	SEQAN_ASSERT_NEQ(cp2, nullPtr);
 
 	str1 = str6;
 	SEQAN_ASSERT_EQ(str1, str6);
@@ -854,10 +854,15 @@ SEQAN_DEFINE_TEST(Std_String)
 //____________________________________________________________________________
 
 	::std::string str_1("hamster");
-	SEQAN_ASSERT_EQ((size_t)(end(str_1) - begin(str_1)), length(str_1));
+    SEQAN_ASSERT_EQ(0, 0);
+    size_t len1 = end(str_1) - begin(str_1);
+    size_t len2 = length(str_1);
+    SEQAN_ASSERT_EQ(len1, len2);
 
 	::std::string const str_2("goldfish");
-	SEQAN_ASSERT_EQ((size_t)(end(str_2) - begin(str_2)), length(str_2));
+    len1 = end(str_2) - begin(str_2);
+    len2 = length(str_2);
+    SEQAN_ASSERT_EQ(len1, len2);
 
 	SEQAN_ASSERT_EQ(getValue(str_1, 0), 'h');
 	SEQAN_ASSERT_EQ(getValue(str_1, 1), 'a');
