@@ -3,7 +3,7 @@
 
 #include <seqan/basic.h>
 #include <seqan/index.h>
-#include <seqan/seeds.h>
+#include <seqan/seeds2.h>
 
 #include "../../library/apps/swift_local/swift_local.h"
 
