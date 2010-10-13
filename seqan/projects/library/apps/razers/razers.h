@@ -539,13 +539,7 @@ bool loadReads(
 #endif
 
 		// store dna and quality together
-		for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
-			assignQualityValue(seq[j], (int)(ordValue(qual[j]) - 33));
-/*			if(ordValue(seq[j])>3)
-				setValue(hybridSeq[j],(unsigned int)164); //N=164 such that &3 == 0
-			else
-				setValue(hybridSeq[j],(unsigned int)((ordValue(qual[j]) - 33) * 4 + ordValue(seq[j])));
-*/
+		assignQualities(seq, qual); 
 		if (options.trimLength > 0 && length(seq) > (unsigned)options.trimLength)
 			resize(seq, options.trimLength);
 #ifdef RAZERS_CONCATREADS

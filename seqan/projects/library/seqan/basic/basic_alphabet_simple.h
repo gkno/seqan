@@ -1566,7 +1566,16 @@ struct BaseAlphabet<Dna5Q>
 	typedef Dna5 Type;
 };
 
+template <typename TValue>
+struct QualityValueSize {
+	enum { VALUE = ValueSize<TValue>::VALUE };
+};
+template <typename TValue>
+struct QualityValueSize<TValue const>:
+	public QualityValueSize<TValue> {};
 
+template <> struct QualityValueSize< DnaQ >  { enum { VALUE = 63 }; };		// 64 - 1 (N)
+template <> struct QualityValueSize< Dna5Q > { enum { VALUE = 63 }; };
 
 
 // template <typename TValue, typename TValue2>
@@ -2232,7 +2241,7 @@ inline int getQualityValue(Dna5Q const &c)
 inline 
 void convertQuality(Ascii & c, int q) 
 {
-	c = '0' + Ascii(q);
+	c = '!' + Ascii(q);
 }
 
 
@@ -2241,16 +2250,18 @@ void convertQuality(Ascii & c, int q)
 inline 
 void assignQualityValue(DnaQ &c, int q)
 {
-    if (q >= _InternalValueSize<DnaQ>::VALUE / 4)
-        q = (_InternalValueSize<DnaQ>::VALUE / 4) - 1;
+	if (q < 0) q = 0;
+    if (q >= QualityValueSize<DnaQ>::VALUE)
+        q = QualityValueSize<DnaQ>::VALUE - 1;
 	c.value = (c.value & 3) | (q << 2);
 }
 
 inline 
 void assignQualityValue(Dna5Q &c, int q) 
 {
-    if (q >= _InternalValueSize<Dna5Q>::VALUE / 4)
-        q = (_InternalValueSize<Dna5Q>::VALUE / 4) - 1;
+	if (q < 0) q = 0;
+    if (q >= QualityValueSize<Dna5Q>::VALUE)
+        q = QualityValueSize<Dna5Q>::VALUE - 1;
 	if (c.value != _Dna5QValueN)
 		c.value = (c.value & 3) | (q << 2);
 }
@@ -2258,21 +2269,36 @@ void assignQualityValue(Dna5Q &c, int q)
 inline 
 void assignQualityValue(DnaQ &c, Ascii q)
 {
-    int q1 = static_cast<int>(q - '0');
-    if (q1 >= _InternalValueSize<DnaQ>::VALUE / 4)
-        q1 = (_InternalValueSize<DnaQ>::VALUE / 4) - 1;
+    int q1 = static_cast<int>(q - '!');
+	if (q1 < 0) q1 = 0;
+    if (q1 >= QualityValueSize<DnaQ>::VALUE)
+        q1 = QualityValueSize<DnaQ>::VALUE - 1;
 	assignQualityValue(c, q1);
 }
 
 inline 
 void assignQualityValue(Dna5Q &c, Ascii q) 
 {
-    int q1 = static_cast<int>(q - '0');
-    if (q1 >= _InternalValueSize<Dna5Q>::VALUE / 4)
-        q1 = (_InternalValueSize<Dna5Q>::VALUE / 4) - 1;
+    int q1 = static_cast<int>(q - '!');
+	if (q1 < 0) q1 = 0;
+	if (q1 >= QualityValueSize<Dna5Q>::VALUE)
+        q1 = QualityValueSize<Dna5Q>::VALUE - 1;
 	assignQualityValue(c, q1);
 }
 
+template <typename TDest, typename TSource>
+void assignQualities(TDest &dst, TSource const &src)
+{
+	typedef typename Iterator<TDest>::Type TDestIter;
+	typedef typename Iterator<TSource>::Type TSourceIter;
+
+	TDestIter itDst = begin(dst, Standard());
+	TDestIter itDstEnd = end(dst, Standard());
+	TSourceIter itSrcEnd = end(src, Standard());
+	
+	for (TSourceIter itSrc = begin(src, Standard()); itDst != itDstEnd && itSrc != itSrcEnd; ++itDst, ++itSrc)
+		assignQualityValue(*itDst, *itSrc);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -234,19 +234,16 @@ namespace SEQAN_NAMESPACE_MAIN
         int q = 0;
         for (TIter it = itBegin; rest != 0 && _parse_is_PhredQual(c); --rest, ++it)
         {
-            q = c - 33;
+            q = c - '!';
 			if (!_streamEOF(file)) 
 				c = _streamGet(file);
 			else
 				if (rest > 1)
 					rest = 1;
 			
-			if (q == '*' - 33 && !_parse_is_PhredQual(c) && it == itBegin)
+			if (q == '*' - '!' && !_parse_is_PhredQual(c) && it == itBegin)
 				return;
 			
-			// As the DNA5Q data structure can only store quality values till 60, all
-			// qualities over this threshold are changed to 60
-            if (q > 60) q = 60;
             assignQualityValue(*it, q);
         }
     }

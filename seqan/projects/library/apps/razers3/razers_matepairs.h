@@ -182,8 +182,7 @@ bool loadReads(
 		for (int j = 0; j < 2; ++j)
 		{
 			// store dna and quality together
-			for (unsigned p = 0; p < length(qual[j]) && p < length(seq[j]); ++p)
-				assignQualityValue(seq[j][p], (int)(ordValue(qual[j][p]) - 33));
+			assignQualities(seq[j], qual[j]);
 			
 			if (options.trimLength > 0 && length(seq[j]) > (unsigned)options.trimLength)
 				resize(seq[j], options.trimLength);

@@ -270,12 +270,7 @@ read(TFile & file,
 					}
 				}
 				// Set quality
-				typedef typename Iterator<TReadSeq, Standard>::Type TReadIter;
-				typedef typename Iterator<String<char> >::Type TQualIter;
-				TReadIter begIt = begin(seq, Standard() );
-				TQualIter qualIt = begin(qual);
-				TQualIter qualItEnd = end(qual);
-				for(;qualIt != qualItEnd; goNext(qualIt), goNext(begIt)) assignQualityValue(value(begIt), value(qualIt));
+				assignQualities(seq, qual);
 
 				// Insert the read
 				readIdMap.insert(std::make_pair(id, length(fragStore.readStore)));
@@ -1137,9 +1132,7 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> &store, TFileName &fileName)
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
 		// TODO: support different ASCII represenations of quality values
-		for (unsigned j = 0; j < length(qual) && j < length(seq); ++j)
-			assignQualityValue(seq[j], (int)(ordValue(qual[j]) - 33));
-
+		assignQualities(seq, qual);
 		appendRead(store, seq, id);
 	}
 	return true;
@@ -1193,11 +1186,9 @@ bool loadReads(FragmentStore<TFSSpec, TFSConfig> & store, TFileName & fileNameL,
 		// convert ascii to values from 0..62
 		// store dna and quality together in Dna5Q
 		// TODO: support different ASCII represenations of quality values
-		for (int j = 0; j < 2; ++j) {
-            for (unsigned k = 0; k < length(qual[j]) && k < length(seq[j]); ++k)
-                assignQualityValue(seq[j][k], (int)(ordValue(qual[j][k]) - 33));
-        }
-        
+		for (int j = 0; j < 2; ++j)
+			assignQualities(seq[j], qual[j]);
+		
 		appendMatePair(store, seq[0], seq[1], id[0], id[1]);
 	}
 	return true;
