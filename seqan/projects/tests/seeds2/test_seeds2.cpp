@@ -149,10 +149,10 @@ SEQAN_BEGIN_TESTSUITE(test_seeds)
     // Tests for seed algorithms
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_simple);
     SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_simple);
-    // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_simple);
+    SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_simple);
     SEQAN_CALL_TEST(test_seeds_extension_match_extension_chained);
     SEQAN_CALL_TEST(test_seeds_extension_ungapped_xdrop_extension_chained);
-    // SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
+    SEQAN_CALL_TEST(test_seeds_extension_gapped_xdrop_extension_chained);
 
     // Tests for the banded chain alignment algorithms.
     SEQAN_CALL_TEST(test_align_chain_banded_compute_upper_left_overlap);
