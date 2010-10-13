@@ -65,7 +65,8 @@ enum ExtensionDirection
 {
     EXTEND_LEFT,
     EXTEND_RIGHT,
-    EXTEND_BOTH
+    EXTEND_BOTH,
+	EXTEND_NONE
 };
 
 // ===========================================================================
@@ -348,399 +349,278 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
     // TODO(holtgrew): Update score?!
 }
 
-
-// Helper function for gapped X-drop extension for Simple Seeds.
-template <typename TConfig, typename TQuerySegment, typename TDatabaseSegment, typename TScoreValue>
+template<typename TAntiDiag, typename TDropOff, typename TScoreValue>
 inline void
+_initAntiDiags(TAntiDiag & ,
+               TAntiDiag & antiDiag2,
+               TAntiDiag & antiDiag3,
+               TDropOff dropOff,
+               TScoreValue gapCost,
+               TScoreValue undefined) {
+SEQAN_CHECKPOINT
+	// antiDiagonals will be swaped in while loop BEFORE computation of antiDiag3 entries
+	//  -> no initialization of antiDiag1 necessary
+
+    resize(antiDiag2, 1);
+    antiDiag2[0] = 0;
+
+    resize(antiDiag3, 2);
+    if (-gapCost > dropOff) {
+        antiDiag3[0] = undefined;
+        antiDiag3[1] = undefined;
+    } else {
+        antiDiag3[0] = gapCost;
+        antiDiag3[1] = gapCost;
+    }
+}
+
+template<typename TAntiDiag>
+inline void
+_swapAntiDiags(TAntiDiag & antiDiag1,
+               TAntiDiag & antiDiag2,
+			   TAntiDiag & antiDiag3) {
+SEQAN_CHECKPOINT
+    TAntiDiag temp;
+    move(temp, antiDiag1);
+    move(antiDiag1, antiDiag2);
+    move(antiDiag2, antiDiag3);
+    move(antiDiag3, temp);
+}
+
+template<typename TAntiDiag, typename TSize, typename TScoreValue>
+inline TSize
+_initAntiDiag3(TAntiDiag & antiDiag3,
+			   TSize offset,
+			   TSize maxCol,
+			   TSize antiDiagNo,
+			   TScoreValue minScore,
+               TScoreValue gapCost,
+               TScoreValue undefined) {
+SEQAN_CHECKPOINT
+	resize(antiDiag3, maxCol + 1 - offset);
+
+    antiDiag3[0] = undefined;
+	antiDiag3[maxCol - offset] = undefined;
+
+	if ((int)antiDiagNo * gapCost > minScore) {
+		if (offset == 0) {
+			// init first column
+			antiDiag3[0] = antiDiagNo * gapCost;
+		}
+		if (antiDiagNo - maxCol == 0) {
+			// init first row
+			antiDiag3[maxCol - offset] = antiDiagNo * gapCost;
+		}
+	}
+	return offset;
+}
+
+template<typename TDiagonal, typename TSize>
+inline void
+_calcExtendedLowerDiag(TDiagonal & lowerDiag,
+					   TSize minCol,
+					   TSize antiDiagNo) {
+SEQAN_CHECKPOINT
+	TSize minRow = antiDiagNo - minCol;
+	if ((TDiagonal)minCol - (TDiagonal)minRow < lowerDiag) {
+		lowerDiag = (TDiagonal)minCol - (TDiagonal)minRow;
+    }
+}
+
+template<typename TDiagonal, typename TSize>
+inline void
+_calcExtendedUpperDiag(TDiagonal & upperDiag,
+					   TSize maxCol,
+					   TSize antiDiagNo) {
+SEQAN_CHECKPOINT
+	TSize maxRow = antiDiagNo + 1 - maxCol;
+	if ((TDiagonal)maxCol - 1 - (TDiagonal)maxRow > upperDiag) {
+		upperDiag = maxCol - 1 - maxRow;
+    }
+}
+
+template<typename TSeed, typename TSize, typename TDiagonal>
+inline void
+_updateExtendedSeed(TSeed & seed,
+					ExtensionDirection direction,
+					TSize cols,
+					TSize rows,
+					TDiagonal lowerDiag,
+					TDiagonal upperDiag) {
+SEQAN_CHECKPOINT
+	if (direction == EXTEND_LEFT) {
+		// Set lower and upper diagonals.
+		TDiagonal startDiag = getStartDiagonal(seed);
+		if (getLowerDiagonal(seed) > startDiag + lowerDiag)
+			setLowerDiagonal(seed, startDiag + lowerDiag);
+		if (getUpperDiagonal(seed) < startDiag + upperDiag)
+			setUpperDiagonal(seed, startDiag + upperDiag);
+
+		// Set new start position of seed.
+		setBeginDim0(seed, getBeginDim0(seed) - cols);
+		setBeginDim1(seed, getBeginDim1(seed) - rows);
+	} else {  // direction == EXTEND_RIGHT
+		// Set new lower and upper diagonals.
+		TDiagonal endDiag = getEndDiagonal(seed);
+		if (getUpperDiagonal(seed) < endDiag - lowerDiag)
+			setUpperDiagonal(seed, endDiag - lowerDiag);
+		if (getLowerDiagonal(seed) > endDiag - upperDiag)
+			setLowerDiagonal(seed, endDiag - upperDiag);
+
+		// Set new end position of seed.
+		setEndDim0(seed, getEndDim0(seed) + cols);
+		setEndDim1(seed, getEndDim1(seed) + rows);
+	}
+    SEQAN_ASSERT_GEQ(getUpperDiagonal(seed), getLowerDiagonal(seed));
+    SEQAN_ASSERT_GEQ(getUpperDiagonal(seed), getStartDiagonal(seed));
+    SEQAN_ASSERT_GEQ(getUpperDiagonal(seed), getEndDiagonal(seed));
+    SEQAN_ASSERT_GEQ(getStartDiagonal(seed), getLowerDiagonal(seed));
+    SEQAN_ASSERT_GEQ(getEndDiagonal(seed), getLowerDiagonal(seed));
+}
+
+template<typename TConfig, typename TQuerySegment, typename TDatabaseSegment, typename TScoreValue>
+TScoreValue
 _extendSeedGappedXDropOneDirection(
         Seed<Simple, TConfig> & seed,
         TQuerySegment const & querySeg,
         TDatabaseSegment const & databaseSeg,
         ExtensionDirection direction,
         Score<TScoreValue, Simple> const & scoringScheme,
-        TScoreValue scoreDropOff)
-{
-    SEQAN_CHECKPOINT;
-	
-	typedef Seed<Simple, TConfig> TSeed;
-	typedef __int64 TDiagonal;
-	typedef __int64 TPosition;
-	typedef __int64 TScore;
-	
-	
-	// TODO(holtgrew): Adapt to new begin/end interface, requires a +1 on each right border.
-    TScore gapCost = scoreGap(scoringScheme);
-    // TODO(holtgrew): Why is this +1-gapCost here?
-    TPosition infimum = infimumValue<TPosition>()+1-gapCost;
-	
-    // TODO(holtgrew): rename to upperDiagonal/lowerDiagonal? Initialize to seed's values?
-    TPosition upperBound = 0;
-    TPosition lowerBound = 0;
-	
-    // TODO(holtgrew): Rename to lengthDim{0,1}?
-    TPosition xLength = length(querySeg);
-    TPosition yLength = length(databaseSeg);
-	
-    // set variables for calculating the sequence positions
-    int factor, xSummand, ySummand;
-    if(direction == 0) {
-        factor = -1;
-        xSummand = xLength;
-        ySummand = yLength;
-    } else {
-        factor = 1;
-        xSummand = -1;
-        ySummand = -1;
-    }
-	
-    // antidiagonals of DP matrix
-    String<TPosition> antiDiagonal1;
-    String<TPosition> antiDiagonal2;
-    String<TPosition> antiDiagonal3;
-	
-    fill(antiDiagonal1, 1, 0);
-    fill(antiDiagonal2, 2, infimum);
-    fill(antiDiagonal3, _min(3, xLength+1), infimum);
-	
-    // TODO(holtgrew): Is there a better way to do this? Probably not...
-    String<TPosition> *antiDiag1 = &antiDiagonal1;	//smallest diagonal
-	String<TPosition> *antiDiag2 = &antiDiagonal2;
-	String<TPosition> *antiDiag3 = &antiDiagonal3;	//current diagonal
-	String<TPosition> *tmpDiag;
-	
-	//Matrix initialization
-	if (gapCost >= -scoreDropOff) {
-		(*antiDiag2)[0] = gapCost;
-		(*antiDiag2)[1] = gapCost;
-	}
-	if (2 * gapCost >= -scoreDropOff) {
-		(*antiDiag3)[0] = 2*gapCost;
-		(*antiDiag3)[2] = 2*gapCost;
-	}
-	
-    // TODO(holtgrew): Probably rename to reflect the letters from (Zhang et al., 2000) and the SeqAn book?
-	TPosition b = 1; // lower bound for i
-	TPosition u = 0; // upper bound for i
-	TPosition k = 1; // current antidiagonal
-    // TODO(holtgrew): Maybe move declarations of the tmp variables to their usage scopes?
-    // TODO(holtgrew): Probably rename these to best, M_i_j?
-	TPosition tmp;   // for calculating the maximum for a single matrix entry
-	TPosition tmpMax1 = 0; // maximum score without the current diagonal
-	TPosition tmpMax2 = 0; // maximum score including the current diagonal
-	
-	//Extension as proposed by Zhang et al, following Figure 2.
-	while(true) {
-		++k;
-		for (TPosition i = b; i <= u+1; ++i) {
-            // calculate matrix entry
-			tmp = infimum;  // TODO(holtgrew): Superflous? Move declaration of tmp in here.
-			tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i]) + gapCost;
-			tmp = _max(tmp, (*antiDiag1)[i-1] + score(scoringScheme, xSummand + factor*i, ySummand + factor*(k-i), querySeg, databaseSeg));
-			
-			tmpMax2 = _max(tmpMax2, tmp);
-			if (tmp < tmpMax1-scoreDropOff)
-				(*antiDiag3)[i] = infimum;
-			else
-				(*antiDiag3)[i] = tmp;
-		}
-        
-        // narrow the relevant matrix region
-		while ((b < (TPosition)length(*antiDiag3)-1) && ((*antiDiag3)[b] == infimum) && (*antiDiag2)[b-1] == infimum) {
-			++b;
-		}
-		++u;
-		while ((u >= 0) && ((*antiDiag3)[u] == infimum) && (*antiDiag2)[u] == infimum) {
-			--u;
-        }
-		
-		//borders for lower triangle of edit matrix
-		b = _max(b, k-yLength);
-		u = _min(u, xLength-1);
-		
-        if (b > u+1) break;
-		
-	    // Calculate upper/lower bound for diagonals.  The modulo operation is used here because of the "1/2 shift" between adjacent antidiagonals.  Zhang solves this by iterating in 1/2 steps.
-        // TODO(holtgrew): Rename to lowerDiagonal/upperDiagonal?
-        if (2*((k+1)/2 - b) - (k%2) > lowerBound) {
-			lowerBound = 2*((k+1)/2 - b) - (k%2);
-        }
-        if (2*(u - k/2) - (k%2) > upperBound) {
-            upperBound = 2*(u - k/2) - (k%2);
-        }
-		
-        // swap diagonals
-		tmpDiag = antiDiag1;
-		antiDiag1 = antiDiag2;
-		antiDiag2 = antiDiag3;
-		antiDiag3 = tmpDiag;
-		
-        // extend last diagonal diagonal to be the new longest and initialize
-		// TODO(holtgrew): Maybe limit diagonal size.  This requires an offset computation.
-		int d = 0;
-        // TODO(holtgrew): Replace the following while-loop with fill(*andiDiag3, _min(length(*antiDiag3) + 3, xLength), 0)?.
-		while ((d < 3) && ((TPosition)length(*antiDiag3) <= xLength)) {
-			appendValue(*antiDiag3, 0);
-			++d;
-		}
-        // TODO(holtgrew): What about clear(), fill() or std::fill()?
-		for (unsigned int eu = 0; eu < length(*antiDiag3); ++eu)
-			(*antiDiag3)[eu] = infimum;
-		
-		if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-			(*antiDiag3)[0] = (*antiDiag2)[0] + gapCost;
-		if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
-			(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
-		
-		tmpMax1 = tmpMax2;
-	}
-	
-	//  // print anti diagonals
-	//  for(int ii = length(*antiDiag1)-1; ii >= 0 ; --ii) {
-	//      for(int jj = ii; jj > 0 ; --jj) std::cout << "  ";
-	//      std::cout << " ";
-	//      if ((*antiDiag1)[ii] == infimum ) std::cout << "i" << " ";
-	//      else std::cout << (*antiDiag1)[ii] << " ";
-	//      if (length(*antiDiag2) <= ii+1 ) std::cout << " ";
-	//      else if ((*antiDiag2)[ii+1] == infimum ) std::cout << "i" << " ";
-	//      else std::cout << (*antiDiag2)[ii+1] << " ";
-	//if (length(*antiDiag3) <= ii+2 ) std::cout << std::endl;
-	//      else if ((*antiDiag3)[ii+2] == infimum ) std::cout << "i" << std::endl;
-	//      else std::cout << (*antiDiag3)[ii+2] << std::endl;
-	//  }
-	
-	//Find seed start/end
-	// TODO(holtgrew): With some more work at this point, this could maybe be simplified and made more robust.
-	TPosition extLengthQuery = 0; // length of extension in query
-    TPosition extLengthDatabase = 0; // length of extension in database
-	TPosition tmpMax = infimum;
-	if ((k >= xLength+yLength) && ((*antiDiag2)[u+1] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of both sequences
-		extLengthQuery = xLength;
-        extLengthDatabase = yLength;
-		tmpMax = (*antiDiag2)[u+1];
-    } else if ((b >= xLength) && b < (TPosition)length(*antiDiag2) && ((*antiDiag2)[b] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of query
-        tmpMax = (*antiDiag2)[b];
-        extLengthQuery = xLength;
-        extLengthDatabase = k-(xLength+1);
-    } else if ((k-u-1 >= yLength) && u >= 0 && ((*antiDiag2)[u] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of database
-        tmpMax = (*antiDiag2)[u];
-        extLengthQuery = u;
-        extLengthDatabase = yLength;
-    } else {
-        for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
-            if ((*antiDiag1)[eu] > tmpMax) {
-                // extension ends with mismatch
-		        tmpMax = (*antiDiag1)[eu];
-		        extLengthQuery = _min(xLength, (TPosition)eu);
-                extLengthDatabase = _min(yLength, (TPosition)(k - (eu+2)));
-		    }
-        }
-	}	
-	
-	/*
+		TScoreValue scoreDropOff) {
+SEQAN_CHECKPOINT
+    typedef typename Size<TQuerySegment>::Type TSize;
+	typedef typename Seed<Simple,TConfig>::TDiagonal TDiagonal;
 
-    typedef Seed<Simple, TConfig> TSeed;
-//    typedef typename Position<TSeed>::Type TPosition;
-//    typedef typename Size<TSeed>::Type TSize;
-//    typedef typename Diagonal<TSeed>::Type TDiagonal;
-    typedef typename Diagonal<TSeed>::Type TPosition;
-    typedef typename Diagonal<TSeed>::Type TSize;
-    typedef typename Diagonal<TSeed>::Type TDiagonal;
-	
-    // Can either extend left or right.
-    SEQAN_ASSERT_NEQ(direction, EXTEND_BOTH);
+    TSize cols = length(querySeg)+1;
+    TSize rows = length(databaseSeg)+1;
+	if (rows == 1 || cols == 1) return 0;
 
-    // TODO(holtgrew): Adapt to new begin/end interface, requires a +1 on each right border.
     TScoreValue gapCost = scoreGap(scoringScheme);
-    // TODO(holtgrew): Why is this +1-gapCost here?
-    TScoreValue infimum = infimumValue<TScoreValue>() + 1 - gapCost;
+    TScoreValue undefined = infimumValue<TScoreValue>() - gapCost;
 
-    // TODO(holtgrew): rename to upperDiagonal/lowerDiagonal? Initialize to seed's values?
-    TPosition upperBound = 0;
-    TPosition lowerBound = 0;
+    // DP matrix is calculated by anti-diagonals
+    String<TScoreValue> antiDiag1;	//smallest anti-diagonal
+	String<TScoreValue> antiDiag2;
+	String<TScoreValue> antiDiag3;	//current anti-diagonal
 
-    // TODO(holtgrew): Rename to lengthDim{0,1}?
-    TPosition xLength = length(querySeg);
-    TPosition yLength = length(databaseSeg);
+	// Indices on anti-diagonals include gap column/gap row:
+	//   - decrease indices by 1 for position in query/database segment
+	//   - first calculated entry is on anti-diagonal n° 2
 
-    // Set variables for calculating the sequence positions depending
-    // on the extension direction.  This way, we do not have to write
-    // this function once for right and left.
-    int factor, xSummand, ySummand;
-    if (direction == EXTEND_LEFT) {
-        factor = -1;
-        xSummand = xLength;
-        ySummand = yLength;
-    } else {  // direction == EXTEND_RIGHT
-        factor = 1;
-        xSummand = -1;
-        ySummand = -1;
+    TSize minCol = 1;
+    TSize maxCol = 2;
+
+	TSize offset1 = 0; // number of leading columns that need not be calculated in antiDiag1
+	TSize offset2 = 0; //                                                       in antiDiag2
+	TSize offset3 = 0; //                                                       in antiDiag3
+
+    _initAntiDiags(antiDiag1, antiDiag2, antiDiag3, scoreDropOff, gapCost, undefined);
+    TSize antiDiagNo = 1; // the currently calculated anti-diagonal
+
+	TScoreValue best = 0; // maximal score value in the DP matrix (for drop-off calculation)
+
+	TDiagonal lowerDiag = 0;
+	TDiagonal upperDiag = 0;
+
+    while (minCol < maxCol) {
+        ++antiDiagNo;
+		_swapAntiDiags(antiDiag1, antiDiag2, antiDiag3);
+		offset1 = offset2;
+		offset2 = offset3;
+		offset3 = minCol-1;
+		_initAntiDiag3(antiDiag3, offset3, maxCol, antiDiagNo, best - scoreDropOff, gapCost, undefined);
+
+		TScoreValue antiDiagBest = antiDiagNo * gapCost;
+        for (TSize col = minCol; col < maxCol; ++col) {
+			// indices on anti-diagonals
+			TSize i3 = col - offset3;
+			TSize i2 = col - offset2;
+			TSize i1 = col - offset1;
+
+			// indices in query and database segments
+			TSize queryPos, dbPos;
+			if (direction == EXTEND_RIGHT) {
+				queryPos = col - 1;
+				dbPos = antiDiagNo - col - 1;
+			} else { // direction == EXTEND_LEFT
+				queryPos = cols - 1 - col;
+				dbPos = rows - 1 + col - antiDiagNo;
+			}
+
+			// Calculate matrix entry (-> antiDiag3[col])
+			TScoreValue tmp = _max(antiDiag2[i2-1], antiDiag2[i2]) + gapCost;
+			tmp = _max(tmp, antiDiag1[i1-1] + score(scoringScheme, queryPos, dbPos, querySeg, databaseSeg));
+			if (tmp < best - scoreDropOff) {
+				antiDiag3[i3] = undefined;
+			} else {
+				antiDiag3[i3] = tmp;
+				antiDiagBest = _max(antiDiagBest, tmp);
+			}
+        }
+		best = _max(best, antiDiagBest);
+
+		// Calculate new minCol and minCol
+		while (minCol - offset3 < length(antiDiag3) && antiDiag3[minCol - offset3] == undefined &&
+			   minCol - offset2 - 1 < length(antiDiag2) && antiDiag2[minCol - offset2 - 1] == undefined) {
+			++minCol;
+		}
+
+		// Calculate new maxCol
+		while (maxCol - offset3 > 0 && (antiDiag3[maxCol - offset3 - 1] == undefined) &&
+			                           (antiDiag2[maxCol - offset2 - 1] == undefined)) {
+			--maxCol;
+		}
+		++maxCol;
+
+        // Calculate new lowerDiag and upperDiag of extended seed
+		_calcExtendedLowerDiag(lowerDiag, minCol, antiDiagNo);
+		_calcExtendedUpperDiag(upperDiag, maxCol - 1, antiDiagNo);
+
+		// end of databaseSeg reached?
+		minCol = _max((int)minCol, (int)antiDiagNo + 2 - (int)rows);
+		// end of querySeg reached?
+		maxCol = _min(maxCol, cols);
     }
 
-    // Declare and initialize the antidiagonals of DP matrix.
-    String<TScoreValue> antiDiagonal1;
-    String<TScoreValue> antiDiagonal2;
-    String<TScoreValue> antiDiagonal3;
-    fill(antiDiagonal1, 1, 0);
-    fill(antiDiagonal2, 2, infimum);
-    fill(antiDiagonal3, _min(3u, xLength + 1), infimum);
+	// find positions of longest extension
 
-    // We keep pointers to the antidiagonals so we can rotate them
-    // later on.  antiDiag1 is the smallest/leftmost one while
-    // antiDiag3 is the current/rightmost one.
-    String<TScoreValue> * antiDiag1 = &antiDiagonal1;
-	String<TScoreValue> * antiDiag2 = &antiDiagonal2;
-	String<TScoreValue> * antiDiag3 = &antiDiagonal3;
-	String<TScoreValue> * tmpDiag;
+	// reached ends of both segments
+	TSize longestExtensionCol = length(antiDiag3) + offset3 - 2;
+	TSize longestExtensionRow = antiDiagNo - longestExtensionCol;
+	TScoreValue longestExtensionScore = antiDiag3[longestExtensionCol - offset3];
 
-	// Matrix initialization.
-	if (gapCost >= -scoreDropOff) {
-		(*antiDiag2)[0] = gapCost;
-		(*antiDiag2)[1] = gapCost;
-	}
-	if (2 * gapCost >= -scoreDropOff) {
-		(*antiDiag3)[0] = 2 * gapCost;
-		(*antiDiag3)[2] = 2 * gapCost;
-	}
-		
-    // TODO(holtgrew): Probably rename to reflect the letters from (Zhang et al., 2000) and the SeqAn book?
-	TPosition b = 1; // lower bound for i
-	TPosition u = 0; // upper bound for i
-	TPosition k = 1; // current antidiagonal
-    // TODO(holtgrew): Maybe move declarations of the tmp variables to their usage scopes?
-    // TODO(holtgrew): Probably rename these to best, M_i_j?
-	TScoreValue tmp;   // for calculating the maximum for a single matrix entry
-	TScoreValue tmpMax1 = 0; // maximum score without the current diagonal
-	TScoreValue tmpMax2 = 0; // maximum score including the current diagonal
-
-	// Extension as proposed in Figure 2 of (Zhang et al., 2000).
-	while(true) {
-		++k;
-		for (TPosition i = b; i <= u+1; ++i) {
-            // calculate matrix entry
-			tmp = infimum;  // TODO(holtgrew): Superflous? Move declaration of tmp in here.
-			tmp = _max((*antiDiag2)[i-1], (*antiDiag2)[i]) + gapCost;
-			tmp = _max(tmp, (*antiDiag1)[i-1] + score(scoringScheme, xSummand + factor*i, ySummand + factor*(k-i), querySeg, databaseSeg));
-
-			tmpMax2 = _max(tmpMax2, tmp);
-			if (tmp < tmpMax1-scoreDropOff)
-				(*antiDiag3)[i] = infimum;
-			else
-				(*antiDiag3)[i] = tmp;
+	if (longestExtensionScore == undefined) {
+		if (antiDiag2[length(antiDiag2)-2] != undefined) {
+			// reached end of query segment
+			longestExtensionCol = length(antiDiag2) + offset2 - 2;
+			longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
+			longestExtensionScore = antiDiag2[longestExtensionCol - offset2];
 		}
-        
-        // Narrow the relevant matrix region.
-		while ((b < (TPosition)length(*antiDiag3)-1) && ((*antiDiag3)[b] == infimum) && (*antiDiag2)[b-1] == infimum)
-			++b;
-		++u;
-		while ((u >= 1) && ((*antiDiag3)[u] == infimum) && (*antiDiag2)[u] == infimum)
-			--u;
-			
-		// Borders for lower triangle of edit matrix.
-		b = _max(b, k > yLength ? k-yLength : 0);
-		u = _min(u, xLength-1);
-
-        if (b > u + 1)
-            break;
-
-	    // Calculate upper/lower bound for diagonals.  The modulo
-	    // operation is used here because of the "1/2 shift" between
-	    // adjacent antidiagonals.  Zhang et al. solve this by
-	    // iterating in 1/2 steps.
-        if (2 * ((k + 1) / 2 - b) - (k % 2) > lowerBound)
-			lowerBound = 2 * ((k + 1) / 2 - b) - (k % 2);
-        if (2 * (u - k / 2) - (k % 2) > upperBound)
-            upperBound = 2 * (u - k / 2) - (k % 2);
-
-        // Cycle-swap pointers to anti-diagonals.
-		tmpDiag = antiDiag1;
-		antiDiag1 = antiDiag2;
-		antiDiag2 = antiDiag3;
-		antiDiag3 = tmpDiag;
-
-        // Extend last anti-diagonal to be the new longest and
-        // initialize with infimum values.
-        //
-		// TODO(holtgrew): Maybe limit diagonal size.  This requires an offset computation.
-		int d = 0;
-        // TODO(holtgrew): Replace the following while-loop with fill(*andiDiag3, _min(length(*antiDiag3) + 3, xLength), 0)?.
-		while ((d < 3) && ((TPosition)length(*antiDiag3) <= xLength)) {
-			appendValue(*antiDiag3, 0);
-			++d;
+		else if (antiDiag2[length(antiDiag2)-3] != undefined) {
+			// reached end of database segment
+			longestExtensionCol = length(antiDiag2) + offset2 - 3;
+			longestExtensionRow = antiDiagNo - 1 - longestExtensionCol;
+			longestExtensionScore = antiDiag2[longestExtensionCol - offset2];
 		}
-        // TODO(holtgrew): What about clear(), fill() or std::fill()?
-		for (unsigned int eu = 0; eu < length(*antiDiag3); ++eu)
-			(*antiDiag3)[eu] = infimum;
-
-		if ((*antiDiag2)[0]+ gapCost >= tmpMax1-scoreDropOff)
-			(*antiDiag3)[0] = (*antiDiag2)[0] + gapCost;
-		if ((*antiDiag2)[length(*antiDiag2)-1] + gapCost >= tmpMax1-scoreDropOff)
-			(*antiDiag3)[length(*antiDiag3)-1] = (*antiDiag2)[length(*antiDiag2)-1] + gapCost;
-
-		tmpMax1 = tmpMax2;
 	}
 
-	// Find start and end of the seed.
-    //
-	// TODO(holtgrew): With some more work at this point, this could maybe be simplified and made more robust.
-	TPosition extLengthQuery = 0; // length of extension in query
-    TPosition extLengthDatabase = 0; // length of extension in database
-	TScoreValue tmpMax = infimum;
-	if ((k >= xLength+yLength) && ((*antiDiag2)[u+1] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of both sequences
-		extLengthQuery = xLength;
-        extLengthDatabase = yLength;
-		tmpMax = (*antiDiag2)[u+1];
-    } else if ((b >= xLength) && b < (TPosition)length(*antiDiag2) && ((*antiDiag2)[b] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of query
-        tmpMax = (*antiDiag2)[b];
-        extLengthQuery = xLength;
-        extLengthDatabase = k-(xLength+1);
-    } else if ((k-u-1 >= yLength) && u >= 0 && ((*antiDiag2)[u] >= tmpMax1-scoreDropOff)) {
-        // extension ends at end of database
-        tmpMax = (*antiDiag2)[u];
-        extLengthQuery = u;
-        extLengthDatabase = yLength;
-    } else {
-        for (unsigned int eu = 0; eu < length(*antiDiag1); ++eu) {
-            if ((*antiDiag1)[eu] > tmpMax) {
-                // extension ends with mismatch
-		        tmpMax = (*antiDiag1)[eu];
-		        extLengthQuery = _min(xLength, (TPosition)eu);
-                extLengthDatabase = _min(yLength, (TPosition)(k - (eu+2)));
-		    }
-        }
-	}*/
+	if (longestExtensionScore == undefined) {
+		// general case
+		for (TSize i = 0; i < length(antiDiag1); ++i) {
+			if (antiDiag1[i] > longestExtensionScore) {
+				longestExtensionScore = antiDiag1[i];
+				longestExtensionCol = i + offset1;
+				longestExtensionRow = antiDiagNo - 2 - longestExtensionCol;
+			}
+		}
+	}
 
-    // If we reached a higher score then update the seed to reflect
-    // the extension.
-    if (tmpMax != infimum) {
-        if (direction == EXTEND_LEFT) {
-            // Set lower and upper diagonals.
-            if (getLowerDiagonal(seed) < getStartDiagonal(seed) + static_cast<TDiagonal>(upperBound))
-                setLowerDiagonal(seed, getStartDiagonal(seed) + upperBound);
-            if (getUpperDiagonal(seed) > getStartDiagonal(seed) - static_cast<TDiagonal>(lowerBound))
-                setUpperDiagonal(seed, getStartDiagonal(seed) - lowerBound);
-            
-            // Set new start position of seed.
-            setBeginDim0(seed, getBeginDim0(seed) - extLengthQuery);
-            setBeginDim1(seed, getBeginDim1(seed) - extLengthDatabase);
-        } else {  // direction == EXTEND_RIGHT
-            // Set new lower and upper diagonals.
-            if (getUpperDiagonal(seed) > getEndDiagonal(seed) - static_cast<TDiagonal>(upperBound))
-                setUpperDiagonal(seed, getEndDiagonal(seed) - upperBound);
-            if (getLowerDiagonal(seed) < getEndDiagonal(seed) + static_cast<TDiagonal>(lowerBound))
-                setLowerDiagonal(seed, getEndDiagonal(seed) + lowerBound);
-            
-            // Set new end position of seed.
-            setEndDim0(seed, getEndDim0(seed) + extLengthQuery);
-            setEndDim1(seed, getEndDim1(seed) + extLengthDatabase);
-        }
+	// update seed
+    if (longestExtensionScore != undefined) {
+		_updateExtendedSeed(seed, direction, longestExtensionCol, longestExtensionRow, lowerDiag, upperDiag);
     }
+	return longestExtensionScore;
 }
-
 
 template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
 inline void 
@@ -753,7 +633,7 @@ extendSeed(Seed<Simple, TConfig> & seed,
 		   GappedXDrop const &)
 {
     // For gapped X-drop extension of Simple Seeds, we can simply
-    // update the begin and end values in each dimension.
+    // update the begin and end values in each dimension as well as the diagonals.
 	SEQAN_CHECKPOINT;
 
     typedef Seed<Simple, TConfig> TSeed;
@@ -771,35 +651,29 @@ extendSeed(Seed<Simple, TConfig> & seed,
 	if (direction == EXTEND_LEFT || direction == EXTEND_BOTH) {
         // Do not extend to the left if we are already at the beginning of an
         // infix or the sequence itself.
-        //
-        // TODO(holtgrew): Can this be handled more elegantly, maybe in _extendSeedGappedXDropOneDirection?
-        if (getBeginDim0(seed) != beginPosition(query) && getBeginDim1(seed) != beginPosition(database)) {
-            typedef typename Prefix<TQuery const>::Type TQueryPrefix;
-            typedef typename Prefix<TDatabase const>::Type TDatabasePrefix;
 
-            TQueryPrefix queryPrefix = prefix(query, getBeginDim0(seed));
-            TDatabasePrefix databasePrefix = prefix(database, getBeginDim1(seed));
-            _extendSeedGappedXDropOneDirection(seed, queryPrefix, databasePrefix, EXTEND_LEFT, scoringScheme, scoreDropOff);
-        }
+        typedef typename Prefix<TQuery const>::Type TQueryPrefix;
+        typedef typename Prefix<TDatabase const>::Type TDatabasePrefix;
+
+        TQueryPrefix queryPrefix = prefix(query, getBeginDim0(seed));
+        TDatabasePrefix databasePrefix = prefix(database, getBeginDim1(seed));
+        _extendSeedGappedXDropOneDirection(seed, queryPrefix, databasePrefix, EXTEND_LEFT, scoringScheme, scoreDropOff);
     }
 
 	if (direction == EXTEND_RIGHT || direction == EXTEND_BOTH) {
         // Do not extend to the right if we are already at the beginning of an
         // infix or the sequence itself.
-        //
-        // TODO(holtgrew): Can this be handled more elegantly, maybe in _extendSeedGappedXDropOneDirection?
-        if (getEndDim0(seed) < endPosition(query) && (getEndDim1(seed) < endPosition(database))) {
-            typedef typename Suffix<TQuery const>::Type TQuerySuffix;
-            typedef typename Suffix<TDatabase const>::Type TDatabaseSuffix;
-            
-            TQuerySuffix querySuffix = suffix(query, getEndDim0(seed));
-            TDatabaseSuffix databaseSuffix = suffix(database, getEndDim1(seed));
-			// std::cout << "database = " << database << std::endl;
-			// std::cout << "database Suffix = " << databaseSuffix << std::endl;
-			// std::cout << "query = " << query << std::endl;
-			// std::cout << "query Suffix = " << querySuffix << std::endl;
-            _extendSeedGappedXDropOneDirection(seed, querySuffix, databaseSuffix, EXTEND_RIGHT, scoringScheme, scoreDropOff);
-        }
+
+        typedef typename Suffix<TQuery const>::Type TQuerySuffix;
+        typedef typename Suffix<TDatabase const>::Type TDatabaseSuffix;
+        
+        TQuerySuffix querySuffix = suffix(query, getEndDim0(seed));
+        TDatabaseSuffix databaseSuffix = suffix(database, getEndDim1(seed));
+		// std::cout << "database = " << database << std::endl;
+		// std::cout << "database Suffix = " << databaseSuffix << std::endl;
+		// std::cout << "query = " << query << std::endl;
+		// std::cout << "query Suffix = " << querySuffix << std::endl;
+        _extendSeedGappedXDropOneDirection(seed, querySuffix, databaseSuffix, EXTEND_RIGHT, scoringScheme, scoreDropOff);
     }
 
     // TODO(holtgrew): Update seed's score?!
