@@ -60,33 +60,32 @@ public:
 	// constructor & destructor
 	FrequencyDistribution()
 	{
-		resize(frequency_list, (unsigned int) SIZE);
-		std::fill(begin(frequency_list), end(frequency_list), (TSpec)0);
+        fill(frequency_list, static_cast<unsigned>(SIZE), 0);
 	}
-	FrequencyDistribution(TValue const & letter_)
-	{
-		resize(frequency_list, (unsigned int) SIZE);
-		convertResidueToFrequencyDist(*this, letter_);
-	}
-	FrequencyDistribution(FrequencyDistribution const & other_)
-	{
-		frequency_list = other_.frequency_list; 
-	}
-	~FrequencyDistribution()
-	{
-	}
+//	FrequencyDistribution(TValue const & letter_)
+//	{
+//		resize(frequency_list, (unsigned int) SIZE);
+//		convertResidueToFrequencyDist(*this, letter_);
+//	}
+//	FrequencyDistribution(FrequencyDistribution const & other_)
+//	{
+//		frequency_list = other_.frequency_list; 
+//	}
+//	~FrequencyDistribution()
+//	{
+//	}
 
-	// overloading operators
-	FrequencyDistribution & 
-	operator = (FrequencyDistribution const & other_)
-	{
-		if(this!=&other_)
-		{
-			clear(frequency_list);
-			frequency_list = other_.frequency_list; 
-		}
-		return *this;
-	}
+//	// overloading operators
+//	FrequencyDistribution & 
+//	operator = (FrequencyDistribution const & other_)
+//	{
+//		if(this!=&other_)
+//		{
+//			clear(frequency_list);
+//			frequency_list = other_.frequency_list; 
+//		}
+//		return *this;
+//	}
 
 	FrequencyDistribution &
 	operator += (FrequencyDistribution const & other_)

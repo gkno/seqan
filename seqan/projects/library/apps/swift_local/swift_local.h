@@ -902,7 +902,7 @@ SEQAN_CHECKPOINT
 		TSeed seedOld(seed);
 		extendSeed(seed, host(a), host(b), direction, scoreMatrix, scoreDropOff, GappedXDrop());
 
-		if (getSeedSize(seed) < minLength - (int)floor(minLength*eps))
+		if (static_cast<__int64>(getSeedSize(seed)) < minLength - (int)floor(minLength*eps))
 			return false;
 
 		TPos alignLen = length(row(localAlign, 0)); // TODO not length(row0)!
