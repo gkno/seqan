@@ -367,7 +367,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
 		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, ESA_Text()), fileName), openMode)) return false;
+			(!open(getFibre(index, ESA_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
@@ -396,7 +396,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
 		if ((!save(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, ESA_Text()), fileName), openMode)) return false;
+			(!save(getFibre(index, ESA_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name), openMode);

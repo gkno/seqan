@@ -1921,7 +1921,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		String<char> name;
 		name = fileName;	append(name, ".txt");
 		if ((!open(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, Wotd_Text()), fileName), openMode)) return false;
+			(!open(getFibre(index, Wotd_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	open(getFibre(index, Wotd_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	open(getFibre(index, Wotd_Dir()), toCString(name), openMode);
@@ -1948,7 +1948,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
 		if ((!save(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, Wotd_Text()), fileName), openMode)) return false;
+			(!save(getFibre(index, Wotd_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	save(getFibre(index, Wotd_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	save(getFibre(index, Wotd_Dir()), toCString(name), openMode);

@@ -2355,7 +2355,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
 		if ((!open(getFibre(index, QGram_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, QGram_Text()), fileName), openMode)) return false;
+			(!open(getFibre(index, QGram_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	open(getFibre(index, QGram_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	open(getFibre(index, QGram_Dir()), toCString(name), openMode);
@@ -2382,7 +2382,7 @@ If the type of $index$ is $TIndex$ the return type is $Infix<Fibre<TIndex, QGram
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
 		if ((!save(getFibre(index, QGram_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, QGram_Text()), fileName), openMode)) return false;
+			(!save(getFibre(index, QGram_Text()), fileName, openMode))) return false;
 
 		name = fileName;	append(name, ".sa");	save(getFibre(index, QGram_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	save(getFibre(index, QGram_Dir()), toCString(name), openMode);
