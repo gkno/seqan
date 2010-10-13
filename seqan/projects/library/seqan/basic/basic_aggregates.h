@@ -367,7 +367,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 		template <typename TPos>
         inline const _T& operator[](TPos k) const {
-            SEQAN_ASSERT(k >= 0 && k < size);
+            SEQAN_ASSERT(static_cast<__int64>(k) >= 0 && k < size);
             return i[k];
         }
 		inline _T* operator&() { return i; }
