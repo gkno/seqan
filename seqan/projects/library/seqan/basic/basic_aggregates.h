@@ -362,12 +362,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		template <typename TPos>
         inline _T& operator[](TPos k) {
-            SEQAN_ASSERT(k >= 0 && k < size);
+            SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
+			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return i[k];
         }
 		template <typename TPos>
         inline const _T& operator[](TPos k) const {
-            SEQAN_ASSERT(static_cast<__int64>(k) >= 0 && k < size);
+            SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
+			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return i[k];
         }
 		inline _T* operator&() { return i; }
@@ -428,7 +430,8 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 		template <typename TPos>
         inline const _T operator[](TPos k) const {
-            SEQAN_ASSERT(k >= 0 && k < size);
+            SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
+			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
 		template <unsigned __size>
