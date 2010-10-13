@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <seqan/index.h>
-#include <seqan/seeds.h>
+#include <seqan/seeds2.h>
 #include "swift_local_types.h"
 
 using namespace seqan;
@@ -37,7 +37,6 @@ typedef Tag<_VerifyBandedGlobal> const BandedGlobal;
 
 struct _VerifyBandedGlobalExtend;
 typedef Tag<_VerifyBandedGlobalExtend> const BandedGlobalExtend;
-
 
 inline bool _verifyFast(BestLocal) {
 	return true;
@@ -509,6 +508,8 @@ _align_banded_nw_best_ends(TTrace& trace,
 	typedef typename Value<TStringSet>::Type TString;
 	typedef typename Size<TTrace>::Type TSize;
 
+	SEQAN_ASSERT_GEQ(diagU, diagL);
+
 	// Initialization
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
 	TString const& str1 = str[0];
@@ -566,7 +567,7 @@ _align_banded_nw_best_ends(TTrace& trace,
 		hori_len = len1+len2+1;
 		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt, ++lenIt) {
 			actualCol = col + diagL + actualRow;
-			if (actualCol >= len2) break;
+			if (actualCol >= len1) break;
 			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
 
 			if ((actualRow != 0) && (actualCol != 0)) {
@@ -615,8 +616,8 @@ _reverseLeftExtension(TInfixA const & a,
 					  TSeed & seed,
 					  TSeed & seedOld) {
 SEQAN_CHECKPOINT
-	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
-	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 	reverseInPlace(infixA);
 	reverseInPlace(infixB);
 }
@@ -636,8 +637,8 @@ SEQAN_CHECKPOINT
 	typedef typename TPossEnd::T3	TCoord;
 	typedef Pair<TPos, TCoord>		TBestEnd; // number of errors and coordinate in alignment matrix for a given trace length
 
-	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
-	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 
 	reverseInPlace(infixA);
 	reverseInPlace(infixB);
@@ -648,8 +649,8 @@ SEQAN_CHECKPOINT
 
 	String<TBestEnd> bestEnds;
 	_align_banded_nw_best_ends(matrixLeft, bestEnds, str, scoreMatrix, 
-							   leftDiagonal(seedOld) - leftDiagonal(seed),
-							   leftDiagonal(seedOld) - rightDiagonal(seed));
+							   getUpperDiagonal(seedOld) - getUpperDiagonal(seed),
+							   getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
 	_possibleEnds(possibleEndsLeft, bestEnds);
 }
 
@@ -669,13 +670,13 @@ SEQAN_CHECKPOINT
 	typedef Pair<TPos, TCoord>		TBestEnd; // number of errors and coordinate in alignment matrix for a given trace length
 
 	TInfixSet str;
-	appendValue(str, infix(host(a), rightPosition(seedOld, 0)+1, rightPosition(seed, 0)+1));
-	appendValue(str, infix(host(b), rightPosition(seedOld, 1)+1, rightPosition(seed, 1)+1));
+	appendValue(str, infix(host(a), getEndDim0(seedOld)+1, getEndDim0(seed)+1));
+	appendValue(str, infix(host(b), getEndDim1(seedOld)+1, getEndDim1(seed)+1));
 
 	String<TBestEnd> bestEnds;
 	_align_banded_nw_best_ends(matrixRight, bestEnds, str, scoreMatrix, 
-							   rightDiagonal(seedOld) - leftDiagonal(seed),
-							   rightDiagonal(seedOld) - rightDiagonal(seed)); 
+							   getLowerDiagonal(seedOld) - getUpperDiagonal(seed),
+							   getLowerDiagonal(seedOld) - getLowerDiagonal(seed)); 
 	_possibleEnds(possibleEndsRight, bestEnds);
 }
 
@@ -696,8 +697,8 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
 
 	TInfixSet str;
-	TInfixB infixA = infix(host(a), leftPosition(seed, 0), leftPosition(seedOld, 0));
-	TInfixB infixB = infix(host(b), leftPosition(seed, 1), leftPosition(seedOld, 1));
+	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
+	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 	appendValue(str, infixA);
 	appendValue(str, infixB);
 
@@ -709,7 +710,7 @@ SEQAN_CHECKPOINT
 
 	_Align_Traceback<TPos> traceBack;
 	_align_banded_nw_trace(traceBack, str, matrixLeft, overallMaxValue, overallMaxIndex,
-				   leftDiagonal(seedOld) - leftDiagonal(seed), leftDiagonal(seedOld) - rightDiagonal(seed));
+				   getUpperDiagonal(seedOld) - getUpperDiagonal(seed), getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
 	
 	reverseInPlace(traceBack.sizes);
 	reverseInPlace(traceBack.tvs);
@@ -751,8 +752,8 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<String<TraceBack> >::Type	TIterator;
 		
 	TInfixSet str;
-	appendValue(str, infix(host(a), rightPosition(seedOld, 0)+1, rightPosition(seed, 0)+1));
-	appendValue(str, infix(host(b), rightPosition(seedOld, 1)+1, rightPosition(seed, 1)+1));
+	appendValue(str, infix(host(a), getEndDim0(seedOld)+1, getEndDim0(seed)+1));
+	appendValue(str, infix(host(b), getEndDim1(seedOld)+1, getEndDim1(seed)+1));
 
 	bool overallMaxValue[2]; // only needed for standard traceback function
 	overallMaxValue[0] = 1; overallMaxValue[1] = 0;
@@ -762,7 +763,7 @@ SEQAN_CHECKPOINT
 
 	_Align_Traceback<TPos> traceBack;
 	_align_banded_nw_trace(traceBack, str, matrixRight, overallMaxValue, overallMaxIndex,
-				   rightDiagonal(seedOld) - leftDiagonal(seed), rightDiagonal(seedOld) - rightDiagonal(seed));
+				   getLowerDiagonal(seedOld) - getUpperDiagonal(seed), getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
 
 	TSize skipLen = 0;
 	TIterator tvsIt = begin(traceBack.tvs);
@@ -829,21 +830,21 @@ SEQAN_CHECKPOINT
 
 	// end positions of maximal eps-match
 	TPos endLeftB = (*endPair.i1).i3.i1;
-	if (leftDiagonal(seedOld) - rightDiagonal(seed) <= 0)
-		endLeftB -= (TPos)(leftDiagonal(seedOld) - rightDiagonal(seed));
-	TPos endLeftA = (TPos)((*endPair.i1).i3.i2 + endLeftB + leftDiagonal(seedOld) - leftDiagonal(seed));
+	if (getUpperDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
+		endLeftB -= (TPos)(getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
+	TPos endLeftA = (TPos)((*endPair.i1).i3.i2 + endLeftB + getUpperDiagonal(seedOld) - getUpperDiagonal(seed));
 	TPos endRightB = (*endPair.i2).i3.i1;
-	if (rightDiagonal(seedOld) - rightDiagonal(seed) <= 0)
-		endRightB -= (TPos)(rightDiagonal(seedOld) - rightDiagonal(seed));
-	TPos endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + rightDiagonal(seedOld) - leftDiagonal(seed));
+	if (getLowerDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
+		endRightB -= (TPos)(getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
+	TPos endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + getLowerDiagonal(seedOld) - getUpperDiagonal(seed));
 
 	// set begin and end positions of align
-	setClippedBeginPosition(row(align, 0), leftPosition(seedOld, 0) - endLeftA);
-	setClippedBeginPosition(row(align, 1), leftPosition(seedOld, 1) - endLeftB);
+	setClippedBeginPosition(row(align, 0), getBeginDim0(seedOld) - endLeftA);
+	setClippedBeginPosition(row(align, 1), getBeginDim1(seedOld) - endLeftB);
 	setBeginPosition(row(align, 0), 0);
 	setBeginPosition(row(align, 1), 0);
-	setClippedEndPosition(row(align, 0), rightPosition(seedOld, 0) + 1 + endRightA);
-	setClippedEndPosition(row(align, 1), rightPosition(seedOld, 1) + 1 + endRightB);
+	setClippedEndPosition(row(align, 0), getEndDim0(seedOld) + 1 + endRightA);
+	setClippedEndPosition(row(align, 1), getEndDim1(seedOld) + 1 + endRightB);
 
 	// traceback through matrix from begin/end pos on ...
 	if((*endPair.i1).i1 != 0) { // ... extension to the left
@@ -859,20 +860,20 @@ SEQAN_CHECKPOINT
 	return true;
 }
 
-template<typename TScoreValue, typename TScore, typename TInfixA, typename TInfixB, typename TDir, typename TSize, typename TEps, typename TAlign>
+template<typename TScoreValue, typename TScore, typename TInfixA, typename TInfixB, typename TSize, typename TEps, typename TAlign>
 bool
 _extendAndExtract(Align<TInfixB> const & localAlign,
 				  TScoreValue scoreDropOff,
 				  TScore const & scoreMatrix,
 				  TInfixA const & a,
 				  TInfixB const & b,
-				  TDir direction,
+				  ExtensionDirection direction,
 				  TSize minLength,
 				  TEps eps,
 				  TAlign & align) {
 SEQAN_CHECKPOINT
-    typedef Seed<int, SimpleSeed> TSeed;
     typedef typename Position<TInfixB>::Type TPos;
+    typedef Seed<Simple> TSeed;
 
 	integrateAlign(align, localAlign);
 
@@ -891,17 +892,17 @@ SEQAN_CHECKPOINT
 		setClippedEndPosition(row(align, 0), seedEndA);
 		setClippedEndPosition(row(align, 1), seedEndB);
 
-    if ((TSize)length(row(align, 0)) < minLength)
-		return false;
+		if ((TSize)length(row(align, 0)) < minLength)
+			return false;
 
 		/*TODO longest eps match?*/
 	} else {
 		// gapped X-drop extension of seed alignments
 		TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
 		TSeed seedOld(seed);
-		extendSeed(seed, scoreDropOff, scoreMatrix, host(a), host(b), direction, GappedXDrop());
+		extendSeed(seed, host(a), host(b), direction, scoreMatrix, scoreDropOff, GappedXDrop());
 
-		if (length(seed) < minLength - (int)floor(minLength*eps))
+		if (getSeedSize(seed) < minLength - (int)floor(minLength*eps))
 			return false;
 
 		TPos alignLen = length(row(localAlign, 0)); // TODO not length(row0)!
@@ -1167,7 +1168,7 @@ SEQAN_CHECKPOINT
 
 	// extend alignment and obtain longest contained eps-match
 	// TODO: something is wrong here, e.g. extract around seed, but also something else
-	if (!_extendAndExtract(bandedAlign, scoreDropOff, scoreMatrix, a, b, 2, minLength, eps, align))
+	if (!_extendAndExtract(bandedAlign, scoreDropOff, scoreMatrix, a, b, EXTEND_BOTH, minLength, eps, align))
 		return;
 
 	// insert eps-match in matches string
@@ -1244,18 +1245,18 @@ SEQAN_CHECKPOINT
 
         typename Iterator<String<Align<TInfixB> > >::Type aliIt = begin(seedAlignments);
         while (aliIt != end(seedAlignments)) {
-            // determine extension direction
-            char direction;
-            if (length(seedAlignments) == 1) direction = 2;
-            else if (aliIt == begin(seedAlignments)) direction = 0;
-            else if (aliIt == end(seedAlignments)-1) direction = 1;
-            else direction = 3;
-
 			// create alignment object for the complete sequences
 			TAlign align;
 			resize(rows(align), 2);
 			setSource(row(align, 0), host(a));
 			setSource(row(align, 1), host(b));
+
+            // determine extension direction
+            ExtensionDirection direction;
+            if (length(seedAlignments) == 1) direction = EXTEND_BOTH;
+            else if (aliIt == begin(seedAlignments)) direction = EXTEND_RIGHT;
+            else if (aliIt == end(seedAlignments)-1) direction = EXTEND_LEFT;
+            else direction = EXTEND_NONE;
 
 			// extend alignment and obtain longest contained eps-match
 			if (!_extendAndExtract(*aliIt, scoreDropOff, scoreMatrix, a, b, direction, minLength, eps, align)) {
