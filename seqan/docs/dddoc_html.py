@@ -793,8 +793,9 @@ def writePage(fl, data):
 
     printSignature(fl, data, "signature")
     printList(fl, data, "include")
-    printTextblock(fl, data, "status")
     printTable(fl, data, "param")
+    printTextblock(fl, data, "remarks")
+    printTextblock(fl, data, "status")
     printTextblock(fl, data, "returns")
     printLink(fl, data, "class")
     printLink(fl, data, "general")
@@ -817,7 +818,6 @@ def writePage(fl, data):
 
     printMember(fl, data, "shortcut")
 
-    printTextblock(fl, data, "remarks")
     printTextblock(fl, data, "example")
     printLinkRek(fl, data, "demo")
     printFile(fl, data, "file")
