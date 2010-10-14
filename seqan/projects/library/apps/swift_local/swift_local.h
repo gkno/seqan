@@ -204,6 +204,8 @@ SEQAN_CHECKPOINT
                 TAlign ali(align);
                 setClippedBeginPosition(row(ali, 0), toSourcePosition(row(ali, 0), begin));
                 setClippedBeginPosition(row(ali, 1), toSourcePosition(row(ali, 1), begin));
+				setBeginPosition(row(ali, 0), 0);
+				setBeginPosition(row(ali, 1), 0);
                 setClippedEndPosition(row(ali, 0), toSourcePosition(row(ali, 0), end));
                 setClippedEndPosition(row(ali, 1), toSourcePosition(row(ali, 1), end));
                 appendValue(alignmentString, ali);
@@ -806,16 +808,16 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TScore>::Type	TScoreValue;
 	typedef StringSet<TInfixB>	TInfixSet;
 
-	// variables for banded alignment, possible ends of matches
+	// variables for banded alignment, possible ends of match
 	TAlignmentMatrix matrixRight, matrixLeft;
 	String<TEndInfo> possibleEndsLeft, possibleEndsRight;
 
 	// fill banded matrix and gaps string for ...
-	if (direction != 1) { // ... extension to the left
+	if (direction == EXTEND_BOTH || direction == EXTEND_LEFT) { // ... extension to the left
 		_fillMatrixBestEndsLeft(matrixLeft, possibleEndsLeft, a, b, seed, seedOld, scoreMatrix);
 		// Caution: left extension infix is now reversed in host(a and b) !!!
 	} else appendValue(possibleEndsLeft, TEndInfo(0, 0, TCoord(0, 0)));
-	if (direction != 0) { // ... extension to the right
+	if (direction == EXTEND_BOTH || direction == EXTEND_RIGHT) { // ... extension to the right
 		_fillMatrixBestEndsRight(matrixRight, possibleEndsRight, a, b, seed, seedOld, scoreMatrix);
 	} else appendValue(possibleEndsRight, TEndInfo(0, 0, TCoord(0, 0)));
 
@@ -829,14 +831,20 @@ SEQAN_CHECKPOINT
 	}
 
 	// end positions of maximal eps-match
-	TPos endLeftB = (*endPair.i1).i3.i1;
-	if (getUpperDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
-		endLeftB -= (TPos)(getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
-	TPos endLeftA = (TPos)((*endPair.i1).i3.i2 + endLeftB + getUpperDiagonal(seedOld) - getUpperDiagonal(seed));
-	TPos endRightB = (*endPair.i2).i3.i1;
-	if (getLowerDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
-		endRightB -= (TPos)(getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
-	TPos endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + getLowerDiagonal(seedOld) - getUpperDiagonal(seed));
+	TPos endLeftA = 0, endLeftB = 0;
+	TPos endRightA = 0, endRightB = 0;
+	if((*endPair.i1).i1 != 0) { // extension to the left
+		endLeftB = (*endPair.i1).i3.i1;
+		if (getUpperDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
+			endLeftB -= (TPos)(getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
+		endLeftA = (TPos)((*endPair.i1).i3.i2 + endLeftB + getUpperDiagonal(seedOld) - getUpperDiagonal(seed));
+	}
+	if((*endPair.i2).i1 != 0) { // ... extension to the right
+		endRightB = (*endPair.i2).i3.i1;
+		if (getLowerDiagonal(seedOld) - getLowerDiagonal(seed) <= 0)
+			endRightB -= (TPos)(getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
+		endRightA = (TPos)((*endPair.i2).i3.i2 + endRightB + getLowerDiagonal(seedOld) - getUpperDiagonal(seed));
+	}
 
 	// set begin and end positions of align
 	setClippedBeginPosition(row(align, 0), getBeginDim0(seedOld) - endLeftA);
@@ -854,7 +862,7 @@ SEQAN_CHECKPOINT
 		_tracebackRight(matrixRight, (*endPair.i2).i3, a, b, seed, seedOld, endRightA, endRightB, align);
 	}
 
-	if (direction != 1) 
+	if (direction == EXTEND_BOTH || direction == EXTEND_LEFT) 
 		_reverseLeftExtension(a, b, seed, seedOld); // back to original orientation
 
 	return true;
@@ -883,7 +891,7 @@ SEQAN_CHECKPOINT
 	TPos seedEndA = clippedEndPosition(row(localAlign, 0)) + beginPosition(a);
 	TPos seedEndB = clippedEndPosition(row(localAlign, 1)) + beginPosition(b);
 
-	if (direction == 3) {
+	if (direction == EXTEND_NONE) {
 		// set begin and end positions of align
 		setClippedBeginPosition(row(align, 0), seedBeginA);
 		setClippedBeginPosition(row(align, 1), seedBeginB);
