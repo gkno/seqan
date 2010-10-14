@@ -259,13 +259,13 @@ SEQAN_CHECKPOINT
 
                 // horizontal
 				if (col > 0) {
-	                --matIt;
-		            newVal = _max(newVal, *matIt + scoreGapExtendHorizontal(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
-			        ++matIt;
+		            newVal = _max(newVal, *(matIt-1) + scoreGapExtendHorizontal(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
 				}
 
                 // vertical
-                newVal = _max(newVal, *matIt2 + scoreGapExtendVertical(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
+				if (col+1 < maxCol) {
+					newVal = _max(newVal, *matIt2 + scoreGapExtendVertical(sc, ((int)actualCol-1), ((int)actualRow-1), str1, str2));
+				}
 
                 if (newVal != *matIt) {
                     // matrix entry changed
@@ -305,11 +305,13 @@ SEQAN_CHECKPOINT
   //      for(TSize j = 0; j < diagonalWidth; ++j) {
   //          std::cerr << value(finder.matrix, j, i) << ',';
   //      }
-		//std::cerr << " " << str2[i-1] << "    ";
+		//if (i > 0) std::cerr << " " << str2[i-1] << "    ";
+		//else std::cerr << "      ";
   //      for (TSize j= 0; j<diagonalWidth; ++j) {
   //          std::cerr << value(finder.forbidden, j+i*diagonalWidth) << ',';
   //      }
-  //      std::cerr << " " << str2[i-1] << std::endl;
+  //      if (i > 0) std::cerr << " " << str2[i-1] << std::endl;
+		//else std::cerr << std::endl;
   //  }
 }
 
@@ -403,7 +405,8 @@ SEQAN_CHECKPOINT
 	//	for(TSize j= 0; j<diagonalWidth; ++j) {
 	//		std::cerr << value(finder.matrix, j, i) << ',';
 	//	}
-	//	std::cerr << " " << str2[i-1] << std::endl;
+	//	if (i > 0) std::cerr << " " << str2[i-1] << std::endl;
+	//	else std::cerr << std::endl;
 	//}
  //   if(length(finder.pQ) > 0) std::cerr << "Max score: " << top(finder.pQ).value_ << std::endl;
 
