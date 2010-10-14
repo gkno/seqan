@@ -43,8 +43,8 @@ int main()
 	    ::std::cout << " and Seq2[" << clippedBeginPosition(row(ali3, 1)) << ":" <<  (clippedEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
     }
 
-///Example 4: This program applies the banded Waterman-Eggert algorithm to compute all non-overlapping local alignments
-///           in the band from diagonal -1 to diagonal 8 with score better or equal 5.
+///Example 4: This program applies the banded Waterman-Eggert algorithm to compute all non-overlapping local alignments with score or equal 5
+///           in the band from diagonal -1 to diagonal 8.
     Align< String<Dna5> > ali4;
     appendValue(rows(ali4), "AAAAAAANAAAGGGNGGGGGGGGNGGGGGANAA");
     appendValue(rows(ali4), "GGGGGGCGGGGGGGA");

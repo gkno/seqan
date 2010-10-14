@@ -253,7 +253,7 @@ template <typename TAction>
 void Error(const char * file, int line, const char * comment)
 {
 	std::fprintf(stderr, "%s(%i) : SEQAN: %s\nSEQAN: execution aborted\n", file, line, comment);
-	abort();
+	exit(1);
 }
 
 template <typename TAction>
