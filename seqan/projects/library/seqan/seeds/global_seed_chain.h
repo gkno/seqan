@@ -106,10 +106,16 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 
 	TMultiMap pointArray, test; //sorted by x-coodinate
 	
+    String<TChainElement> chainElements;
+    resize(chainElements, length(source));
+
 	TSeedSetIterator it_end = end(source);
-	for (TSeedSetIterator it = begin(source); it != it_end; ++it)
+    unsigned i = 0;
+	for (TSeedSetIterator it = begin(source); it != it_end; ++it, ++i)
 	{
+        chainElements[i] = TChainElement(it, seedScore(it), 0);
 		pElement = new TChainElement(it, seedScore(it), 0);
+//        pElement = &(chainElements[i]);
 		pointArray.insert(std::make_pair(leftDim0(*it), Pair<bool, TChainElement*>(true, pElement)));
 		test.insert(std::make_pair(rightDim0(*it), Pair<bool, TChainElement*>(false, pElement)));
 	}

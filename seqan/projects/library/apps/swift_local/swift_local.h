@@ -898,7 +898,7 @@ SEQAN_CHECKPOINT
 		/*TODO longest eps match?*/
 	} else {
 		// gapped X-drop extension of seed alignments
-		TSeed seed(seedBeginA, seedBeginB, seedEndA - 1, seedEndB - 1);
+		TSeed seed(seedBeginA, seedBeginB, seedEndA, seedEndB);
 		TSeed seedOld(seed);
 		extendSeed(seed, host(a), host(b), direction, scoreMatrix, scoreDropOff, GappedXDrop());
 

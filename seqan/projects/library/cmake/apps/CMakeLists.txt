@@ -7,7 +7,7 @@ project (Seqan_Apps)
 ################################################################################
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0 -g")
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 
 # Use CMake's package location functionality to find the directories of
@@ -86,6 +86,13 @@ else (Boost_FOUND)
   set (APP_transquant_NOBUILD TRUE)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/transquant)
 endif (Boost_FOUND)
+
+# Determine architecture. 
+if (CMAKE_SIZEOF_VOID_P MATCHES "8")
+	message ("64 bits architecture")
+else()
+	message ("32 bits architecture")
+endif()
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
