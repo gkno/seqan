@@ -505,7 +505,7 @@ _glueAlignmentChain(
     TTargetIterator alignmentIt0 = end(row(alignment, 0));
     TTargetIterator alignmentIt1 = end(row(alignment, 1));
     TMatrixStringIterator matricesIt = end(alignmentChain.alignmentMatrices_) - 1;
-    TSeedChainIterator seedChainIt = end(seedChain);
+    TSeedChainIterator seedChainIt = end(seedChain, Standard());
     --seedChainIt;
 
     // Traceback through trailing rectangle and seed.

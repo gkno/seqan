@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
             write(std::cout, resultSeqsL, resultIdsL, Fastq());
         } else {
             std::fstream fstrm(argv[3], std::ios_base::out);
-            if (not fstrm.is_open()) {
+            if (! fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << argv[3] << "\"" << std::endl;
                 return 1;
             }
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
             write(std::cout, resultSeqsL, resultIdsL, Fastq());
         } else {
             std::fstream fstrm(argv[4], std::ios_base::out);
-            if (not fstrm.is_open()) {
+            if (! fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << argv[4] << "\"" << std::endl;
                 return 1;
             }
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
             write(std::cout, resultSeqsR, resultIdsR, Fastq());
         } else {
             std::fstream fstrm(argv[5], std::ios_base::out);
-            if (not fstrm.is_open()) {
+            if (! fstrm.is_open()) {
                 std::cerr << "Could not open out file \"" << argv[5] << "\"" << std::endl;
                 return 1;
             }

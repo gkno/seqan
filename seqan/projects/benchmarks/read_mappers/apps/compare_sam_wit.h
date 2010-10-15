@@ -282,7 +282,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
 
 // Return maximum error count for maximum error rate
 inline int maxErrorRateToMaxErrors(int maxErrorRate, size_t len) {
-    return floor(maxErrorRate / 100.0 * len);
+    return (int)floor(maxErrorRate / 100.0 * len);
 }
 
 

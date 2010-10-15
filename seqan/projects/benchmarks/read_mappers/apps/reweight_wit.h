@@ -142,7 +142,7 @@ void intervalizeErrorCurves(WitStore & store,
          it != end(sortedMatches); ++it) {
         // Skip it if (it - 1) pointed to same pos (and must point to
         // one with smaller absolute distance.
-        if (it->pos == previousPos and it->contigId == previousContigId)
+        if (it->pos == previousPos && it->contigId == previousContigId)
             continue;
         // Consider all currently open intervals with a greater error
         // than the error in *it and extend them or create a new one.

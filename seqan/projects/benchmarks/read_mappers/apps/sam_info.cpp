@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     std::cerr << "Reading SAM file file " << argv[2] << " ..." << std::endl;
     {
         std::fstream fstrm(argv[2], std::ios_base::in | std::ios_base::binary);
-        if (not fstrm.is_open()) {
+        if (! fstrm.is_open()) {
             std::cerr << "Could not open SAM file." << std::endl;
             return 1;
         }

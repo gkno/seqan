@@ -78,7 +78,7 @@ int parseCommandLineAndCheck(Options &options,
                              int argc, const char *argv[]) {
     // Show short help on invalid arguments and long help if help
     // argument was given.
-    if (not parse(parser, argc, argv)) {
+    if (! parse(parser, argc, argv)) {
         shortHelp(parser, std::cerr);
         return kRetArgsErr;
     } else if (isSetShort(parser, 'h')) {
@@ -93,7 +93,7 @@ int parseCommandLineAndCheck(Options &options,
     if (isSetLong(parser, "max-weighted-error"))
         getOptionValueLong(parser, "max-weighted-error", options.maxWeightedError);
 
-    if (not options.validDistanceFunction()) {      
+    if (! options.validDistanceFunction()) {      
       std::cerr << "ERROR: Invalid distance function: " <<
         options.distanceFunction << std::endl;
       return kRetArgsErr;
