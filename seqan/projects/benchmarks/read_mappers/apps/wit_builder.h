@@ -80,7 +80,7 @@ void intervalizeErrorCurves(String<WitRecord> & result,
     
         // intervals[e] holds the intervals for error e of the current read.
         String<String<ContigInterval> > intervals;
-        int maxError = options.oracleSamMode ? 0 : options.maxError;
+        int maxError = options.oracleSamMode ? 0 : (int)options.maxError;
         resize(intervals, maxError + 1);
 
         // Join the intervals stored in sortedMatches.
@@ -167,7 +167,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     if (maxError == -1) {
         oracleSamMode = true;
         Finder<TContigSeq> finder(contig);
-        Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
+        Pattern<TReadSeq, TPatternSpec> pattern(read, -(int)length(read) * 40);
         bool ret = setEndPosition(finder, pattern, endPos);
         (void) ret; // If compiled without assertions.
         SEQAN_ASSERT_TRUE(ret);
@@ -196,11 +196,11 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
     }
 
     bool ret;  // Flag used for assertions below.
-    int relativeMinScore = ceilAwayFromZero(100.0 * -maxError / length(read));
+    int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / length(read));
 
     // Setup the finder and pattern.
     Finder<TContigSeq> finder(contig);
-    Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 40);
+    Pattern<TReadSeq, TPatternSpec> pattern(read, -(int)length(read) * 40);
     // If configured so, match N against all other values, otherwise match
     // against none.
     _patternMatchNOfPattern(pattern, matchN);
@@ -236,7 +236,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         SEQAN_ASSERT_EQ(getScore(pattern), getBeginScore(pattern));
 
         // Add original hit to the error curve points.
-        int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
+        int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
         appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
         hitBeginPosition = beginPosition(finder);
         if (ENABLE && (ALL || readId == READID)) {
@@ -258,7 +258,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 break;
             }
-            int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
+            int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
             appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
             if (ENABLE && (ALL || readId == READID)) {
                 std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -285,7 +285,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     SEQAN_ASSERT_TRUE(ret);
                     if (beginPosition(finder) != currentBeginPosition)
                         break;
-                    relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
+                    relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -348,7 +348,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                     break;  // Could not set position of the finder left of old tentative left.
 			    while (findBegin(finder, pattern, getScore(pattern)))
 			        continue;  // Find leftmost begin position.
-                int relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
+                int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                 appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -359,7 +359,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
 			        while (findBegin(finder, pattern, getScore(pattern)))
             			continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);
-                    relativeScore = ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
+                    relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- raw score is " << getScore(pattern) << std::endl;
@@ -575,7 +575,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
                     maxError = -1;
                 } else {
                     // In normal mode, convert from error rate from options to error count.
-                    maxError = floor(0.01 * options.maxError * length(read));
+                    maxError = (int)floor(0.01 * options.maxError * length(read));
                 }
                 
                 if (isForward) {
@@ -608,12 +608,12 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
         // Compute relative min score for the read.
         String<WeightedMatch> filtered;
         TReadSeq read = readSeqs[i];
-        int maxError = floor(options.maxError / 100.0 * length(read));
+        int maxError = (int)floor(options.maxError / 100.0 * length(read));
         if (options.oracleSamMode) {
             SEQAN_ASSERT_NEQ(readAlignmentDistances[i], -1);
             maxError = readAlignmentDistances[i];
         }
-        int relativeMinScore = ceilAwayFromZero(100.0 * -maxError / length(read));
+        int relativeMinScore = (int)ceilAwayFromZero(100.0 * -maxError / length(read));
 
         // Filter out low scoring ones.
         typedef typename Iterator<String<WeightedMatch> >::Type TIterator;

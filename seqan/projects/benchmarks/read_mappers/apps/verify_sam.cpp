@@ -59,7 +59,7 @@ void mapReadOnline(TWeightedMatches & matches,
                    double maxErrorRate) {
     typedef typename TFragmentStore::TContigSeq        TContigSeq;
     TString readCopy(read);
-    int minScore = -floor(maxErrorRate / 100.0 * length(read));
+    int minScore = (int)-floor(maxErrorRate / 100.0 * length(read));
     std::cout << "  min score == " << minScore << std::endl;
     for (size_t contigId = 0; contigId < length(fragments.contigStore); ++contigId) {
         std::cout << "  contig " << fragments.contigNameStore[contigId] << " (#" << contigId << ")..." << std::endl;

@@ -82,7 +82,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         // Skip this hit if the score is not good enough.
         if (score < -maxError)
             continue;
-        int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
+        int relativeScore = (int)ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         (void)options;  // Supress warnings in non-debug mode.
         // std::cout << "append value(expected, WeightedMatch(" << contigId << ", " << endPosition(finder) + 1 << ", " << relativeScore << ") delta = " << (back(reversedAndComplementedRead) != contig[endPosition(finder) - 1]) << ", score " << score << std::endl;
@@ -173,7 +173,7 @@ void verifyMatchestoErrorFunctionResults_FindReads(
         int score = getScore(pattern);
         if (score < -maxError)
             continue;
-        int relativeScore = ceilAwayFromZero(100.0 * score / length(read));
+        int relativeScore = (int)ceilAwayFromZero(100.0 * score / length(read));
         SEQAN_ASSERT_GEQ(relativeScore, -options.maxError);
         (void)options;  // Supress warnings in non-debug mode.
         bool ret = findBegin(finder, pattern, getScore(pattern));  // Compute begin position for smoothing.
@@ -263,7 +263,7 @@ bool verifyMatchesToErrorFunctionResults(TFragmentStore /*const*/ & fragments,
             std::cerr << "    read " << readId << "/" << length(reads) << std::endl;
             String<WeightedMatch> expected;
             TReadSeq /*const*/ read = readSeqs[readId];
-            int maxError = floor(options.maxError / 100.0 * length(read));
+            int maxError = (int)floor(options.maxError / 100.0 * length(read));
 
             // Search read in contig and reverse complemented contig.
             verifyMatchestoErrorFunctionResults_FindReads(contig, true, read, options, maxError, contigId, expected, TPatternSpec());
