@@ -50,7 +50,7 @@ bandedChainAlignment(TContainer const &seedChain,
 
 	//teste die Reihenfolge der seeds und erstelle gegebenenfalls eine die rueckwaerts laeuft
 	typedef typename Iterator<const TContainer, Standard>::Type TIterator;	//Iterator for the seed chain
-	TIterator it = begin(seedChain);
+	TIterator it = begin(seedChain, Standard());
 	if (it != end(seedChain, Standard()))
 	{
 		TIterator it2 = it; ++it2;

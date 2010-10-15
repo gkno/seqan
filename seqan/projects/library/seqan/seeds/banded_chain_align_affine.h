@@ -60,7 +60,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 	setDimension(matrix_vert, 2);
 	setDimension(matrix_hori, 2);
 	setDimension(matrix_diag, 2);
-	TIterator it = begin(seedChain);
+	TIterator it = begin(seedChain, Standard());
 
 	//calculation begins at the end
 	//rectangle between last seed and end
@@ -81,7 +81,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 
 	_calculateBandedSeedGotoh(*it, k_end, matrix_diag, matrix_vert, matrix_hori, p_seq1, p_seq2, score_str_diag, score_str_vert, score_str_hori, score_length, alignmentVector, scoreMatrix);
 	
-	TIterator it_begin = end(seedChain);
+	TIterator it_begin = end(seedChain, Standard());
 	TIterator it2 = it;
 	++it2;
 	while (it2 != it_begin)
