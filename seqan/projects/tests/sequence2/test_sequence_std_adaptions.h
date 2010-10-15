@@ -241,13 +241,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
 
         // The command sequence in the following is a bit arbitrary
         // but should robustly test that the iterators work correctly.
-        TIterator it = begin(list);
+        TIterator it = seqan::begin(list);
         SEQAN_ASSERT_EQ(1, *it);
         ++it;
         SEQAN_ASSERT_EQ(2, *it);
         --it;
         SEQAN_ASSERT_EQ(1, *it);
-        TIterator itEnd = end(list);
+        TIterator itEnd = seqan::end(list);
         SEQAN_ASSERT_NOT(it == itEnd);
         ++it;
         ++it;
@@ -255,8 +255,8 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
         SEQAN_ASSERT_TRUE(it == itEnd);
 
         // The following does not apply to const iterators.
-        it = begin(list);
-        *begin(list) = 4;
+        it = seqan::begin(list);
+        *seqan::begin(list) = 4;
         SEQAN_ASSERT_EQ(4, *it);
     }
     // Test Standard, const iterators.
@@ -273,13 +273,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
 
         // The command sequence in the following is a bit arbitrary
         // but should robustly test that the iterators work correctly.
-        TIterator it = begin(list);
+        TIterator it = seqan::begin(list);
         SEQAN_ASSERT_EQ(1, *it);
         ++it;
         SEQAN_ASSERT_EQ(2, *it);
         --it;
         SEQAN_ASSERT_EQ(1, *it);
-        TIterator itEnd = end(list);
+        TIterator itEnd = seqan::end(list);
         SEQAN_ASSERT_NOT(it == itEnd);
         ++it;
         ++it;
@@ -298,13 +298,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
 
         // The command sequence in the following is a bit arbitrary
         // but should robustly test that the iterators work correctly.
-        TIterator it = begin(list);
+        TIterator it = seqan::begin(list);
         SEQAN_ASSERT_EQ(1, *it);
         ++it;
         SEQAN_ASSERT_EQ(2, *it);
         --it;
         SEQAN_ASSERT_EQ(1, *it);
-        TIterator itEnd = end(list);
+        TIterator itEnd = seqan::end(list);
         SEQAN_ASSERT_NOT(it == itEnd);
         ++it;
         ++it;
@@ -312,8 +312,8 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
         SEQAN_ASSERT_TRUE(it == itEnd);
 
         // The following does not apply to const iterators.
-        it = begin(list);
-        *begin(list) = 4;
+        it = seqan::begin(list);
+        *seqan::begin(list) = 4;
         SEQAN_ASSERT_EQ(4, *it);
     }
     // Test Rooted, const iterators.
@@ -330,13 +330,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_list)
 
         // The command sequence in the following is a bit arbitrary
         // but should robustly test that the iterators work correctly.
-        TIterator it = begin(list);
+        TIterator it = seqan::begin(list);
         SEQAN_ASSERT_EQ(1, *it);
         ++it;
         SEQAN_ASSERT_EQ(2, *it);
         --it;
         SEQAN_ASSERT_EQ(1, *it);
-        TIterator itEnd = end(list);
+        TIterator itEnd = seqan::end(list);
         SEQAN_ASSERT_NOT(it == itEnd);
         ++it;
         ++it;
@@ -372,7 +372,7 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_list)
         front(list) = -1;
         back(list) = -3;
 
-        TIterator it = begin(list);
+        TIterator it = seqan::begin(list);
         SEQAN_ASSERT_EQ(-1, *it);
         ++it;
         SEQAN_ASSERT_EQ(2, *it);

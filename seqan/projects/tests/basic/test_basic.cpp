@@ -315,7 +315,7 @@ void Test_Iter()
 	char arr1[] = "XYZ";
 	char arr2[] = "abcdefg";
 
-	TIterator it1 = begin(arr1);
+	TIterator it1 = seqan::begin(arr1);
 	SEQAN_ASSERT_EQ(container(it1), arr1);
 	SEQAN_ASSERT_EQ(*it1, 'X');
 
@@ -389,7 +389,7 @@ SEQAN_DEFINE_TEST(Test_Iterator_Adaptor) {
 	Test_Iter<TSpec>();
 
 	char arr1[] = "abc";
-	TIterator it1 = begin(arr1);
+	TIterator it1 = seqan::begin(arr1);
 	char * ptr1 = it1;
 	SEQAN_ASSERT_EQ(*ptr1, 'a');
 }
