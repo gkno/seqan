@@ -306,7 +306,8 @@ void writeOrderings(TStream &target, TOrderings &orderings, TFragmentStore &stor
 	typedef typename Value<TAnnotationStore>::Type TAnnotation;
 
 #ifdef COMPACT_NODE_IDS
-		std::sort(begin(nodeIds, Standard()), end(nodeIds, Standard()));	
+	std::sort(begin(nodeIds, Standard()), end(nodeIds, Standard()));
+	removeEqualElements(nodeIds);
 #endif
 
 	CharString nodeId;
