@@ -31,6 +31,11 @@
 // Disable warning for identifer name truncation.
 #pragma warning( disable : 4503 )
 
+// Disabling warning 4267 assigning variables with different size on 32 and 64 bit.
+#pragma warning( disable : 4267 )
+// Disabling warning 4244, loss of data when values with different domain sizes.
+#pragma warning( disable : 4244 )
+
 #define finline __forceinline
 
 typedef unsigned __int64 __uint64;
