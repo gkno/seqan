@@ -83,13 +83,15 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 	
 	typedef typename Value<TSource>::Type TSourceValue;
 	typedef typename Size<TSourceValue>::Type TSize;
+	typedef typename Position<TFile>::Type TFilePos;
+	typedef Triple<TFilePos, TFilePos, TSize> TTriple;
 	TSize limit = supremumValue<TSize>();
 
 	//Determine begin position, end position and length of each sequence
-	String<TSize> beg_end_length;
+	String<TTriple> beg_end_length;
 	
-	typename Position<TFile>::Type begin_pos;
-	typename Position<TFile>::Type end_pos;
+	TFilePos begin_pos;
+	TFilePos end_pos;
 	typename Value<TFile>::Type c;
 	TSize count;
 
@@ -132,22 +134,20 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 			count = limit;
 		}
 
-		append(beg_end_length, begin_pos);
-		append(beg_end_length, end_pos);
-		append(beg_end_length, count);
+		appendValue(beg_end_length, TTriple(begin_pos, end_pos, count));
 	}
 
 	// Resize alignment data structure
-	TSize numRows=length(beg_end_length) / 3;
+	TSize numRows=length(beg_end_length);
 	resize(rows(align), numRows);	//rows
 		
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Row<TAlign>::Type TRow;
 	
 	for(TSize i=0;i<numRows;++i) {
-		TSize begin = beg_end_length[i*3];
-//		TSize end = beg_end_length[i*3+1];
-		count = beg_end_length[i*3+2];
+		TSize begin = beg_end_length[i].i1;
+//		TSize end = beg_end_length[i].i2;
+		count = beg_end_length[i].i3;
 		
 		//Reserve space
 		clear(row(align,i));
