@@ -212,9 +212,9 @@ SEQAN_DEFINE_TEST(Ticket317)
     SEQAN_ASSERT_EQ(sub2, "si");
 
     // operator - (triggered the ticket)
-    SEQAN_ASSERT_EQ(begin(sub1) - begin(text), 2u);
-    SEQAN_ASSERT_EQ(begin(sub2) - begin(text), 3u);
-    SEQAN_ASSERT_EQ(begin(sub2) - begin(sub1), 1u);
+    SEQAN_ASSERT_EQ(begin(sub1) - begin(text), 2);
+    SEQAN_ASSERT_EQ(begin(sub2) - begin(text), 3);
+    SEQAN_ASSERT_EQ(begin(sub2) - begin(sub1), 1);
 
     // operator == and !=
 #   define TEST_IT(a, b) \
