@@ -463,7 +463,7 @@ void testFind()
 		seqan::Pattern<String<char> > pattern(needle1);	
 
 		while (find(finder, pattern))
-			append(pos,position(finder));
+			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_TRUE(pos[0] == 5);
 		SEQAN_ASSERT_TRUE(pos[1] == 31);
@@ -480,7 +480,7 @@ void testFind()
 
 		clear(pos);
 		while (find(finder, pattern))
-			append(pos,position(finder));
+			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_TRUE(pos[1] == 0);
 		SEQAN_ASSERT_TRUE(pos[0] == 26);
