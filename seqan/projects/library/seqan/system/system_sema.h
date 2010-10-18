@@ -44,18 +44,26 @@ namespace SEQAN_NAMESPACE_MAIN
 
         Semaphore(Type init = 0, Type max = MAX_VALUE) {
 			// Disable warnings on side-effect free operator!= in Release mode.
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( push )
 #pragma warning( disable : 4552 )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
             SEQAN_DO_SYS2((hSemaphore = CreateSemaphore(&SemaphoreDefaultAttributes, init, max, NULL)) != NULL, "Could not create Semaphore");
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( pop )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
 		}
 
         ~Semaphore() {
 			// Disable warnings on side-effect free operator!= in Release mode.
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( push )
 #pragma warning( disable : 4552 )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
             SEQAN_DO_SYS2(CloseHandle(hSemaphore) != 0, "Could not destroy Semaphore");
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( pop )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
         }
 
         bool lock(DWORD timeout_millis = INFINITE) {
@@ -64,10 +72,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
         void unlock() {
 			// Disable warnings on side-effect free operator!= in Release mode.
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( push )
 #pragma warning( disable : 4552 )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
             SEQAN_DO_SYS2(ReleaseSemaphore(hSemaphore, 1, NULL) != 0, "Could not unlock Semaphore");
+#ifdef PLATFORM_WINDOWS_VS
 #pragma warning( pop )
+#endif  // #ifdef PLATFORM_WINDOWS_VS
         }
 
     private:
