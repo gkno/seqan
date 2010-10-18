@@ -241,7 +241,7 @@ SEQAN_DEFINE_TEST(test_find_myers_ukkonen_set_end_position2) {
     DnaString hstck = "ATTTCGGTCATCAAATAATCATTTATTTTGCCACAACATAAAAATAATTGTCTGAATATGGAATTGTCTGAACCTCACTGAGCTCGTAATAAAATTTCCA";
     Finder<DnaString> finder(hstck);
     DnaString ndl = "CACAACATAAAAAATAATTGTCTGAATATGGAATGT";
-    Pattern<DnaString, Myers<FindInfix> > pattern(ndl, -length(ndl));
+    Pattern<DnaString, Myers<FindInfix> > pattern(ndl, -static_cast<int>(length(ndl)));
 
     bool ret = setEndPosition(finder, pattern, 66u);
     SEQAN_ASSERT_TRUE(ret);
