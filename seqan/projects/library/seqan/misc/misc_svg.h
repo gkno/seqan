@@ -312,7 +312,7 @@ inline void _printRead(
 	for (; it != itEnd; ++it, ++cit, xEnd += 20)
 	{
 		inGap = isGap(it);
-		if (lastWasGap != inGap || inGap != isGap(cit) || (!inGap && convert<Dna5>(*cit) != convert<Dna5>(*it)))
+		if (lastWasGap != inGap || inGap != static_cast<int>(isGap(cit)) || (!inGap && convert<Dna5>(*cit) != convert<Dna5>(*it)))
 		{
 			if (x < xEnd && lastWasGap != -1)
 			{
