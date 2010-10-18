@@ -1,6 +1,8 @@
 #ifndef SEQAN_HEADER_TEST_GRAPH_TCOFFEE_H
 #define SEQAN_HEADER_TEST_GRAPH_TCOFFEE_H
 
+#include <seqan/random.h>
+
 using namespace seqan;
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -10,13 +12,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TTag>
 void 
-Test_UpgmaGuideTree() {
+Test_UpgmaGuideTree(int seed) {
 	typedef unsigned int TSize;
-	
-	mtRandInit();
+
+    RNG<MersenneTwister> rng(seed);
+
 	for(TSize i = 0; i < 10; ++i) {
 		// Set-up a sparse distance matrix
-		TSize n = mtRand() % 10 + 2;
+        PDF<Uniform<TSize> > pdfN(2, 11);
+		TSize n = pickRandomNumber(rng, pdfN);
 		Graph<Undirected<double> > distGraph;
 		String<double> distMatrix;
 		fill(distMatrix, n * n, 0);
@@ -27,8 +31,8 @@ Test_UpgmaGuideTree() {
 		String<double> myDist;
 		typedef Iterator<String<double> >::Type TStringIter;
 		while (distances.size() < all) {
-			double newVal = mtRand() % 1000000;
-			//double newVal = mtRand() % 100;
+            PDF<Uniform<double> > pdf(0, 1000000);
+			double newVal = pickRandomNumber(rng, pdf);
 			if (distances.insert(newVal).second) {
 				appendValue(myDist, newVal);
 			}
@@ -47,7 +51,8 @@ Test_UpgmaGuideTree() {
 		//removeEdge(distGraph, 0, 1);removeEdge(distGraph, 0, 2);
 		for(TSize row = 0; row < n; ++row) {
 			for(TSize col = n - 1; col > row; --col) {
-				if (mtRand() % 100 < 50) {
+                PDF<Uniform<double> > pdf(0, 1.0);
+				if (pickRandomNumber(rng, pdf) < 0.5) {
 					value(distMatrix, row * n + col) = infCargo;
 					removeEdge(distGraph, row, col);
 				}
@@ -270,10 +275,12 @@ void Test_ExternalLibraries() {
 	//std::cout << g << std::endl;
 
 	// T-Coffee lib format
+    char fileName[1024];
+    strcpy(fileName, SEQAN_TEMP_FILENAME());
 
 	// Writing
 	std::fstream strm;
-	strm.open(TEST_PATH "test.lib", std::ios_base::out | std::ios_base::trunc);
+	strm.open(fileName, std::ios_base::out | std::ios_base::trunc);
 	write(strm, g, nameSet, TCoffeeLib());
 	strm.close();
 	//_debugRefinedMatches(g);
@@ -283,30 +290,32 @@ void Test_ExternalLibraries() {
 	clear(seqSet);
 	clear(nameSet);
 	std::fstream strmRead;
-	strmRead.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
+	strmRead.open(fileName, std::ios_base::in | std::ios_base::binary);
 	read(strmRead,seqSet,nameSet,TCoffeeLib());
 	strmRead.close();
 	std::cout << g << std::endl;
 
 
 	// Blast format
+    strcpy(fileName, SEQAN_TEMP_FILENAME());
 
 	// Writing
 	std::fstream strm2;
-	strm2.open(TEST_PATH "test.blast", std::ios_base::out | std::ios_base::trunc);
+	strm2.open(fileName, std::ios_base::out | std::ios_base::trunc);
 	write(strm2, g, nameSet, BlastLib());
 	strm2.close();
 
 	// Reading
 	std::fstream strmRead2;
-	strmRead2.open(TEST_PATH "test.blast", std::ios_base::in | std::ios_base::binary);
+	strmRead2.open(fileName, std::ios_base::in | std::ios_base::binary);
 	clearVertices(g);
 	clear(matches);
 	clear(scores);
 	read(strmRead2, matches, scores, nameSet,BlastLib());
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	strmRead2.close();
-	std::cout << g << std::endl;
+    // TODO(holtgrew): Disabled output here, need to compare g before writing out and a g2 after reading in.
+	// std::cout << g << std::endl;
 
 	clear(g);
 	assignStringSet(g, seqSet);
@@ -317,8 +326,9 @@ void Test_ExternalLibraries() {
 	// Blast lib format
 
 	// Writing
+    strcpy(fileName, SEQAN_TEMP_FILENAME());
 	std::fstream strmBlast;
-	strmBlast.open(TEST_PATH "test.lib", std::ios_base::out | std::ios_base::trunc);
+	strmBlast.open(fileName, std::ios_base::out | std::ios_base::trunc);
 	write(strmBlast, g, nameSet, BlastLib());
 	strmBlast.close();
 	//_debugRefinedMatches(g);
@@ -328,7 +338,7 @@ void Test_ExternalLibraries() {
 	clear(g);
 	assignStringSet(g, seqSet);
 	std::fstream strmBlastLib;
-	strmBlastLib.open(TEST_PATH "test.lib", std::ios_base::in | std::ios_base::binary);
+	strmBlastLib.open(fileName, std::ios_base::in | std::ios_base::binary);
 	clear(matches);
 	clear(scores);
 	read(strmBlastLib, matches, scores, nameSet,BlastLib());
@@ -556,22 +566,26 @@ SEQAN_DEFINE_TEST(test_guide_tree_neighbour_joining)
 
 SEQAN_DEFINE_TEST(test_guide_tree_upgma_weight_avg)
 {
-	Test_UpgmaGuideTree<UpgmaWeightAvg>();
+    for (int i = 0; i < 10; ++i)
+        Test_UpgmaGuideTree<UpgmaWeightAvg>(i);
 }
 
 SEQAN_DEFINE_TEST(test_guide_tree_upgma_avg)
 {
-	Test_UpgmaGuideTree<UpgmaAvg>();
+    for (int i = 0; i < 10; ++i)
+        Test_UpgmaGuideTree<UpgmaAvg>(i);
 }
 
 SEQAN_DEFINE_TEST(test_guide_tree_upgma_min)
 {
-	Test_UpgmaGuideTree<UpgmaMin>();
+    for (int i = 0; i < 10; ++i)
+        Test_UpgmaGuideTree<UpgmaMin>(i);
 }
 
 SEQAN_DEFINE_TEST(test_guide_tree_upgma_max)
 {
-	Test_UpgmaGuideTree<UpgmaMax>();
+    for (int i = 0; i < 10; ++i)
+        Test_UpgmaGuideTree<UpgmaMax>(i);
 }
 
 SEQAN_DEFINE_TEST(test_distances)
