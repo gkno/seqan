@@ -1073,7 +1073,7 @@ void dumpMatches(
 #ifdef RAZERS_SPLICED
 						if(options.minMatchLen > 0 &&  -(*it).pairScore > 0)
 						{
-							for(unsigned d = 0; d < -(unsigned)(*it).pairScore; ++d)
+							for(unsigned d = 0; d < static_cast<unsigned>(-(*it).pairScore); ++d)
 								if (stats[d][currReadNo]>0) suboptimal=true;
 						}
 #endif
