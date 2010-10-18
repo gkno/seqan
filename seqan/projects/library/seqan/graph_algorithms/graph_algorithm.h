@@ -1368,10 +1368,10 @@ transitive_closure(Graph<TSpec> const& g,
 	for (TSize k=0;k<len;++k) {
 		for(TSize i=0;i<len;++i) {
 			for(TSize j=0;j<len;++j) {
-				TMatrixVal t_ij = getValue(closure, i*len+j);
-				TMatrixVal t_ik = getValue(closure, i*len+k);
-				TMatrixVal t_kj = getValue(closure, k*len+j);
-				assignValue(local, i*len+j, t_ij | (t_ik & t_kj));
+				bool t_ij = getValue(closure, i*len+j) > 0;
+				bool t_ik = getValue(closure, i*len+k) > 0;
+				bool t_kj = getValue(closure, k*len+j) > 0;
+				assignValue(local, i*len+j, t_ij || (t_ik && t_kj));
 			}
 		}
 		closure = local;
