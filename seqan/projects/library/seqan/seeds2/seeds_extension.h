@@ -695,25 +695,24 @@ extendSeed(Seed<ChainedSeed, TConfig> & seed,
     // the first and last one of the current set of seed diagonals.
 	SEQAN_CHECKPOINT;
 
-    SEQAN_ASSERT_GT(length(seed), 0u);
-
-    typedef Seed<ChainedSeed, TConfig> TSeed;
-    typedef typename Value<TSeed>::Type TSeedDiagonal;
-    typedef typename Position<TSeedDiagonal>::Type TPosition;
-    typedef typename Size<TSeedDiagonal>::Type TSize;
-    
-    // The algorithm only works for linear gap scores < 0, mismatch scores < 0
-    // and match scores > 0.
-    SEQAN_ASSERT_GT(scoreMatch(scoringScheme), 0);
-    SEQAN_ASSERT_LT(scoreMismatch(scoringScheme), 0);
-    SEQAN_ASSERT_LT(scoreGapOpen(scoringScheme), 0);
-    SEQAN_ASSERT_LT(scoreGapExtend(scoringScheme), 0);
-    SEQAN_ASSERT_EQ(scoreGapExtend(scoringScheme), scoreGapOpen(scoringScheme));
-
-    SEQAN_ASSERT_FAIL("Write me!");
+    SEQAN_ASSERT_FAIL("Write me! Look into the function where this assertion fails for instructions on how to do this.");
+    // TODO(holtgrew): Implement gapped X-drop extension with Chained seeds. As follows:
+    //
+    // Create a simple seed, copy over from chained seed.  Then,
+    // performed gapped x-drop extension on the simple seed.  Perform
+    // banded alignment on the left and right extended parts.  Use the
+    // internal functions for this instead of the user-level functions
+    // to initialize, fill the matrix, and compute the traceback
+    // object.  Construct the correct SeedDiagonal objects from the
+    // traceback objects and add them to the list of diagonals for the
+    // diagonal seed.
+    //
+    // An alternative implementation with storing the banded extension
+    // matrix would be too much work and it is questionable if this
+    // was faster.  The banded seed alignment code from Tobias Rausch
+    // is very optimized.
 
     // TODO(holtgrew): Update seed's score?!
-    // TODO(holtgrew): For chained seeds, the code is similar to the code for simple seeds.  However, we need to store the whole matrix to compute the traceback, from this the edit script and from this compute how to add/update diagonals.
 }
 
 }  // namespace seqan
