@@ -84,7 +84,7 @@ Test_UpgmaGuideTree() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-void Test_GuideTree() {
+void Test_GuideTree_NeighbourJoining() {
 //____________________________________________________________________________
 // Neighbor Joining
 
@@ -122,13 +122,6 @@ void Test_GuideTree() {
 	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 13) != 0);
 	SEQAN_ASSERT_TRUE(findEdge(guideTreeOut, 14, 7) != 0);
 	SEQAN_ASSERT_TRUE(getRoot(guideTreeOut) == 14);
-
-//____________________________________________________________________________
-// UPGMA
-	Test_UpgmaGuideTree<UpgmaWeightAvg>();
-	Test_UpgmaGuideTree<UpgmaAvg>();
-	Test_UpgmaGuideTree<UpgmaMin>();
-	Test_UpgmaGuideTree<UpgmaMax>();
 }
 
 
@@ -556,11 +549,31 @@ void Test_ReversableFragments() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_DEFINE_TEST(test_guide_tree)
+SEQAN_DEFINE_TEST(test_guide_tree_neighbour_joining)
 {
-	Test_GuideTree();
+	Test_GuideTree_NeighbourJoining();
 }
-	
+
+SEQAN_DEFINE_TEST(test_guide_tree_upgma_weight_avg)
+{
+	Test_UpgmaGuideTree<UpgmaWeightAvg>();
+}
+
+SEQAN_DEFINE_TEST(test_guide_tree_upgma_avg)
+{
+	Test_UpgmaGuideTree<UpgmaAvg>();
+}
+
+SEQAN_DEFINE_TEST(test_guide_tree_upgma_min)
+{
+	Test_UpgmaGuideTree<UpgmaMin>();
+}
+
+SEQAN_DEFINE_TEST(test_guide_tree_upgma_max)
+{
+	Test_UpgmaGuideTree<UpgmaMax>();
+}
+
 SEQAN_DEFINE_TEST(test_distances)
 {
 	Test_Distances();
@@ -590,8 +603,7 @@ SEQAN_DEFINE_TEST(test_reversable_fragments)
 {
 	Test_ReversableFragments();
 }
-	
-	
+
 }
 
 #endif

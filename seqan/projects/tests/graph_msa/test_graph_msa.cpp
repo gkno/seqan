@@ -26,7 +26,11 @@ using namespace seqan;
 
 SEQAN_BEGIN_TESTSUITE(test_graph_msa) {
     // Call Tests.
-	SEQAN_CALL_TEST(test_guide_tree);
+    SEQAN_CALL_TEST(test_guide_tree_neighbour_joining);
+    SEQAN_CALL_TEST(test_guide_tree_upgma_weight_avg);
+    SEQAN_CALL_TEST(test_guide_tree_upgma_avg);
+    SEQAN_CALL_TEST(test_guide_tree_upgma_min);
+    SEQAN_CALL_TEST(test_guide_tree_upgma_max);
     SEQAN_CALL_TEST(test_distances);
 	SEQAN_CALL_TEST(test_libraries);
 	SEQAN_CALL_TEST(test_external_libraries);
