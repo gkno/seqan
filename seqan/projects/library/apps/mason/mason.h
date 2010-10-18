@@ -916,6 +916,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                 TPos origEndPos = virtualToHostPosition(haplotypeContigs[inst.contigId], inst.endPos);
 
                 // Generate read name.
+                // TODO(holtgrew): Remove mateNum, not required?
                 if (options.generateMatePairs) {
                     // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have different nums.  This also decides about the flipping.
                     int mateNum = 3 - previousMateNum;
@@ -930,9 +931,9 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         appendValue(flipped, mateNum == 1);
                     }
                     if (options.includeReadInformation)
-                        sprintf(readName, "%s.%09u/%d contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, mateNum, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
+                        sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId / 2, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
                     else
-                        sprintf(readName, "%s.%09u/%d", outFileName, readId / 2, mateNum);
+                        sprintf(readName, "%s.%09u", outFileName, readId / 2);
                 } else {
                     if (options.includeReadInformation)
                         sprintf(readName, "%s.%09u contig=%s haplotype=%u length=%lu orig_begin=%lu orig_end=%lu haplotype_infix=%s edit_string=", outFileName, readId, toCString(fragmentStore.contigNameStore[inst.contigId]), haplotypeId, static_cast<long unsigned>(length(read)), static_cast<long unsigned>(origBeginPos), static_cast<long unsigned>(origEndPos), toCString(CharString(haplotypeInfix)));
