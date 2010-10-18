@@ -873,6 +873,7 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 	SEQAN_CHECKPOINT
 
 	typedef Graph<Directed<TCargo, TSpec> > TGraph;
+    typedef typename Size<TGraph>::Type TGraphSize;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TMatrix>::Type TSize;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
@@ -881,6 +882,7 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 	TSize len = getIdUpperBound(g.data_id_managerV);
 	TIterConst it = begin(g.data_vertex, Standard());
 	TIterConst itEnd = end(g.data_vertex, Standard());
+    clear(mat);
 	fill(mat, len * len, (TMatValue) 0);
 	TVertexDescriptor pos = 0;
 	for(;it!=itEnd; ++it, ++pos) {
@@ -888,7 +890,7 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 		TVertexDescriptor const source = pos;
 		while(current != (TEdgeStump*) 0) {
 			TVertexDescriptor target = targetVertex(g,current);
-			mat[source*len+target] += 1;
+			mat[source * len + target] = static_cast<TMatValue>(static_cast<TGraphSize>(mat[source * len + target]) + 1);
 			current = getNextT(current);
 		}
 	}
