@@ -452,19 +452,19 @@ SEQAN_DEFINE_TEST(test_basic_suprema_infima)
     // InfimumValue Metafunctions for double and float.
     {
         double x = SupremumValue<double>::VALUE;
-        SEQAN_ASSERT_GT(x, 1);
+        SEQAN_ASSERT_GT(x, 0);
     }
     {
         double x = InfimumValue<double>::VALUE;
-        SEQAN_ASSERT_LT(x, 1);
+        SEQAN_ASSERT_LT(x, 0);
     }
     {
         float x = SupremumValue<float>::VALUE;
-        SEQAN_ASSERT_GT(x, 1);
+        SEQAN_ASSERT_GT(x, 0);
     }
     {
         float x = InfimumValue<float>::VALUE;
-        SEQAN_ASSERT_LT(x, 1);
+        SEQAN_ASSERT_LT(x, 0);
     }
 }
 
