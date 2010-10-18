@@ -21,6 +21,9 @@
 #ifndef SEQAN_HEADER_BASIC_HOLDER_H
 #define SEQAN_HEADER_BASIC_HOLDER_H
 
+// TODO(holtgrew): Are holders on pointers used anywhere?
+// TODO(holtgrew): What about Simple holders? What about Tristate2?
+
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -728,7 +731,8 @@ SEQAN_CHECKPOINT
 	case THolder::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-		releaseRef(_dataValue(me));
+        // releaseRef is not necessary since create() implies a clear(me)
+		// releaseRef(_dataValue(me));
 		create(me, _dataValue(me));
 		}
 		break;
@@ -756,7 +760,8 @@ SEQAN_CHECKPOINT
 	case THolder::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-		releaseRef(_dataValue(me));
+        // releaseRef is not necessary since create() implies a clear(me)
+		// releaseRef(_dataValue(me));
 		create(me, _dataValue(me));
 		}
 		break;
