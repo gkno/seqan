@@ -1127,12 +1127,12 @@ int main(int argc, const char* argv[])
 		if (strContains(toCString(store.readNameStore[i]), "corrected"))
 			++numCorrected;
 
-		out << '>' << store.readNameStore[i]<<std::endl;
+		out << '>' << store.readNameStore[i] << std::endl;
 		out << store.readSeqStore[i] << std::endl;
 	}
 
 	if (options.cycles > 1)
-		cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << endl;
+		std::cout << "Total number reads corrected for " << options.cycles << " cycles is " << numCorrected << std::endl;
 
 //	struct rusage usage;
 //	getrusage(RUSAGE_SELF, &usage);
