@@ -108,6 +108,7 @@ template <typename TExonBoundString, typename TFragmentStore, typename TNodeIds>
 void refineExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store, TNodeIds &nodeIds)
 {
 	typedef typename Value<TExonBoundString>::Type TContigExonBounds;
+	typedef typename  Value<TContigExonBounds>::Type TContigExonBound;
 	typedef typename Iterator<TContigExonBounds, Standard>::Type TContigExonBoundIterator;
 	typedef typename TFragmentStore::TAnnotationStore TAnnotationStore;
 	typedef typename  Iterator<TFragmentStore, AnnotationTree<> >::Type TAnnoTreeIter;
@@ -146,8 +147,8 @@ void refineExonBoundaries(TExonBoundString &exonBounds, TFragmentStore &store, T
 			
 			// determine exon orientation and order boundaries
 			bool forward = true;
-			TContigPos beginPos = anno.beginPos;
-			TContigPos endPos = anno.endPos;
+			TContigExonBound beginPos = anno.beginPos;
+			TContigExonBound endPos = anno.endPos;
 			if (beginPos > endPos)
 			{
 				forward = false;
