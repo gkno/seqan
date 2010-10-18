@@ -1061,10 +1061,10 @@ template <
 	typename T,
 	typename TParent = typename IF<
 	  TYPECMP<double, T>::VALUE,
-	  _SupremumValueDouble<>,
+	  _InfimumValueDouble<>,
 	  typename IF<
       TYPECMP<float, T>::VALUE,
-      _SupremumValueFloat<>,
+      _InfimumValueFloat<>,
       typename IF<
         TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
         _InfimumValueSigned<T>,
