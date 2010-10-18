@@ -452,7 +452,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Value<TSTree>::Type	TValue;
 		typedef typename Size<TSTree>::Type		TSize;
-		typedef	Pair<TSize>						TPair;
+		typedef typename SAValue<TSTree>::Type	TSAValue;
+		typedef	Pair<TSAValue>					TPair;
 
 		typedef _FractionCompound<TValue, TSize> const	TFractionCompound;
 		typedef typename TFractionCompound::TSet const	TSet;
@@ -640,7 +641,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 	};
 
-/*
+
 	template < typename TRepeat >
 	inline typename Value< Iter<TRepeat, MultiMEMOccurences> >::Type &
 	value(Iter<TRepeat, MultiMEMOccurences> const &it)  {
@@ -652,19 +653,20 @@ namespace SEQAN_NAMESPACE_MAIN
 	value(Iter<TRepeat, MultiMEMOccurences> &it)  {
 		return it.tmp;
 	}
-*/
+
+//TODO:fix me
 	template < typename TRepeat >
 	inline Iter<TRepeat, MultiMEMOccurences> &
 	goNext(Iter<TRepeat, MultiMEMOccurences> &it)  {
 		if (it._innerStep()) {
-/*			it.tmp.i1 = saAt(it.parentPtr, container(*it.mmemIt));
-			it.tmp.i2 = saAt(it.childPtr, container(*it.mmemIt));
-*/			return it;
+//			it.tmp.i1 = saAt(it.subState.parentPtr, container(*it.mmemIt));
+//			it.tmp.i2 = saAt(it.subState.childPtr, container(*it.mmemIt));
+			return it;
 		}
 		if (it._outerStep()) {
-/*			it.tmp.i1 = saAt(it.parentPtr, container(*it.mmemIt));
-			it.tmp.i2 = saAt(it.childPtr, container(*it.mmemIt));
-*/		}
+//			it.tmp.i1 = saAt(it.subState.parentPtr, container(*it.mmemIt));
+//			it.tmp.i2 = saAt(it.subState.childPtr, container(*it.mmemIt));
+		}
 		return it;
 	}
 
