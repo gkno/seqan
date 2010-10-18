@@ -275,7 +275,7 @@ inline bool findBegin(TFinder & finder,
 
     // Compute score of last character.
     size_t endPos = endPosition(finder) - 1;
-    int lastCharScore = - (me._lastCharacter != haystack(finder)[endPos]);
+	int lastCharScore = (me._lastCharacter == haystack(finder)[endPos])? 0: -1;
     // Go back one with the finder because of the "last character is compared manually" trick.
     goPrevious(finder);
 	finder.data_endPos -= 1;

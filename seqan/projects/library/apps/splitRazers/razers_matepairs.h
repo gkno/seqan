@@ -737,7 +737,7 @@ void mapMatePairReads(
 		// add within-window left mates to fifo
 		while (empty(fifo) || back(fifo).i2.gEnd + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
-			if (find(swiftFinderL, swiftPatternL, options.errorRate, false))
+			if (find(swiftFinderL, swiftPatternL, options.errorRate))
 			{
 				gPair = positionRange(swiftFinderL);
 				if ((TSignedGPos)gPair.i2 + maxDistance + (TSignedGPos)doubleParWidth >= (TSignedGPos)rEndPos)
