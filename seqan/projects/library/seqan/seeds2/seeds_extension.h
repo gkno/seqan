@@ -682,11 +682,11 @@ extendSeed(Seed<Simple, TConfig> & seed,
 
 template <typename TConfig, typename TQuery, typename TDatabase, typename TScoreValue>
 inline void 
-extendSeed(Seed<ChainedSeed, TConfig> & seed,
+extendSeed(Seed<ChainedSeed, TConfig> & /*seed*/,
 		   TQuery const & /*query*/,
 		   TDatabase const & /*database*/,
 		   ExtensionDirection /*direction*/,
-           Score<TScoreValue, Simple> const & scoringScheme,
+           Score<TScoreValue, Simple> const & /*scoringScheme*/,
            TScoreValue /*scoreDropOff*/,
 		   GappedXDrop const &)
 {
