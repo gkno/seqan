@@ -1307,7 +1307,7 @@ calculateInsertSizes(TLibSizeString &insertSizes, FragmentStore<TSpec, TConfig> 
 */
 
 template <typename TSpec, typename TConfig, typename TId>
-inline signed char
+inline int
 getMateNo(FragmentStore<TSpec, TConfig> const &me, TId readId)
 {
 	typedef FragmentStore<TSpec, TConfig>			TFragmentStore;
