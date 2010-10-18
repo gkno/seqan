@@ -1313,9 +1313,9 @@ combineLeftRight(TMatch & mR,
 //		if((mR.gEnd - mL.gBegin <= mL.mScore) || (mR.gEnd - mL.gBegin <= mR.mScore))//too close together // heuristic way to kick out repeat matches early on
 //			return false;
 
-		int diag1L = -maxErrors + mL.seedEditDist;
+		int diag1L = -static_cast<int>(maxErrors) + mL.seedEditDist;
 		int diag2L = maxErrors - mL.seedEditDist;
-		int diag1R = -maxErrors + mR.seedEditDist;
+		int diag1R = -static_cast<int>(maxErrors) + mR.seedEditDist;
 		int diag2R = maxErrors - mR.seedEditDist;
  		int minColNum = 0;
 
@@ -1409,9 +1409,9 @@ combineLeftRight(TMatch & mR,
 		if(mR.mScore + mL.mScore == readLength && mR.editDist + mL.editDist > maxErrors) //the prefix and suffix match meet, but too many errors
 			return false;
 		
-		int diag1L = -maxErrors + mL.seedEditDist;
+		int diag1L = -static_cast<int>(maxErrors) + mL.seedEditDist;
 		int diag2L = maxErrors - mL.seedEditDist;
-		int diag1R = -maxErrors + mR.seedEditDist;
+		int diag1R = -static_cast<int>(maxErrors) + mR.seedEditDist;
 		int diag2R = maxErrors - mR.seedEditDist;
 		int minColNum = 0;
 		
@@ -1829,7 +1829,7 @@ int mapSplicedReads(
 
 	if(options._debugLevel > 0)
 	{
-		__int64 genomeLen = 3000000000lu * 2;					// ufff make that an option
+		__int64 genomeLen = static_cast<__int64>(3000000000lu) * 2;					// ufff make that an option
 		expNumRandomMatches(readSet, genomeLen, options);
 	}
 	
