@@ -127,11 +127,19 @@ void intervalizeErrorCurves(String<WitRecord> & result,
         for (TIntervalContainerIter it = begin(intervals);
              it != end(intervals); ++it, ++distance) {
             typedef Iterator<String<ContigInterval> >::Type TIntervalIter;
-            for (TIntervalIter it2 = begin(*it); it2 != end(*it); ++it2)
+            for (TIntervalIter it2 = begin(*it); it2 != end(*it); ++it2) {
+                int flags = 0;
+                int mateNo = getMateNo(fragments, readId);
+                if (mateNo == 0)
+                  flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_FIRST_MATE;
+                else if (mateNo == 1)
+                  flags = WitRecord::FLAG_PAIRED | WitRecord::FLAG_SECOND_MATE;
+
                 appendValue(result,
-                            WitRecord(fragments.readNameStore[readId],
+                            WitRecord(fragments.readNameStore[readId], flags,
                                       distance, fragments.contigNameStore[it2->contigId],
                                       it2->isForward, it2->first, it2->last));
+            }
         }
     }
 }

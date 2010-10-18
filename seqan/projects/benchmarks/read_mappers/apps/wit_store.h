@@ -48,6 +48,8 @@ struct WitStore {
     typedef StringSet<CharString, Owner<> > TNameSet;
     typedef String<IntervalOfReadOnContig> TIntervalStore;
 
+    char mateSeparator;
+
     Holder<TNameSet> readNames;
     Holder<TNameSet> contigNames;
 
@@ -188,21 +190,24 @@ sortWitRecords(WitStore const & store, TSortTag &) {
 }
 
 
-inline
-void appendValue(WitStore & store, IntervalOfReadOnContig const & record) {
+inline size_t
+appendValue(WitStore & store, IntervalOfReadOnContig const & record) {
     IntervalOfReadOnContig tmp(record);
     tmp.id = length(store.intervals);
     appendValue(store.intervals, tmp);
+    return tmp.id;
 }
 
 
+template <typename TFragmentStore>
 void loadWitFile(WitStore & store,
-                 StringSet<CharString> /*const*/ & readNames,
-                 StringSet<CharString> /*const*/ & contigNames,
+                 TFragmentStore /*const*/ & fragments,
                  CharString const & fileName) {
+    typedef typename Value<typename TFragmentStore::TMatePairStore>::Type TMatePairElement;
+
     // Assign read and contig names into wit store members.
-    set(store.readNames, readNames);
-    set(store.contigNames, contigNames);
+    setValue(store.readNames, fragments.readNameStore);
+    setValue(store.contigNames, fragments.contigNameStore);
 
     // Build mapping from existing read and contig names to their indices
     // (ids) in readNames and contigNames.
@@ -220,15 +225,20 @@ void loadWitFile(WitStore & store,
 
     // Read header.
     char c = '\0';
+    // Separator char of read name and mate identifier, index of first mate id.
+    char mateSeparator = '/';  // TODO(holtgrew): Un-hardcode.
+    int mateStart = 0;  // TODO(holtgrew): Un-hardcode.
     readWitHeader(fstrm, c);
 
     // Temporary data for one record.
     CharString readName;
+    int mateNo;
     size_t distance;
     CharString contigName;
     bool isForward;
     size_t firstPos;
     size_t lastPos;
+    bool wasInSam = true;
 
     // Read WIT file.
     while (!_streamEOF(fstrm)) {
@@ -240,9 +250,15 @@ void loadWitFile(WitStore & store,
 
         clear(readName);
         clear(contigName);
+        mateNo = -1;
 
         // Read line.
         _parse_readIdentifier(fstrm, readName, c);
+        //std::cout << "readName " << readName << ", " << mateNo << std::endl;
+        if (readName[length(readName) - 2] == mateSeparator) {
+          mateNo = readName[length(readName) - 1] - '0' - mateStart;
+          resize(readName, length(readName) - 2);
+        }
         _parse_skipWhitespace(fstrm, c);
         distance = _parse_readNumber(fstrm, c);
         _parse_skipWhitespace(fstrm, c);
@@ -256,12 +272,50 @@ void loadWitFile(WitStore & store,
         _parse_skipLine(fstrm, c);
 
         // Insert record into read store.
+        //
+        // We also need to insert it into the fragment store if it does not
+        // exist there yet.
         IntervalOfReadOnContig record;
         if (!getIdByName(value(store.readNames), readName, record.readId, readNameCache)) {
+          wasInSam = false;
           record.readId = length(value(store.readNames));
           appendName(value(store.readNames), readName, readNameCache);
-          SEQAN_ASSERT_TRUE(getIdByName(value(store.readNames), readName, record.readId, readNameCache));
+
+          if (mateNo != -1) {
+            // If read is paired, create new entry in read name store.
+            TMatePairElement mateElem;
+            // set the first or second read ID in the mate pair element
+            size_t matePairId = length(fragments.matePairStore);
+            mateElem.readId[mateNo] = record.readId;
+            // get a new mate pair ID and add the new mate pair element
+            appendValue(fragments.matePairStore, mateElem);
+            // set the new mate pair ID in the read element
+            appendRead(fragments, "", matePairId);
+            SEQAN_ASSERT_TRUE(getIdByName(value(store.readNames), readName, record.readId, readNameCache));
+          }
+        } else if (mateNo != -1) {
+          // Handle case if we know this read's mate but not the read itself.
+          size_t matePairId = fragments.readStore[record.readId].matePairId;
+          SEQAN_ASSERT_NEQ(matePairId, TMatePairElement::INVALID_ID);
+          record.readId = fragments.matePairStore[matePairId].readId[mateNo];
+          if (record.readId == TMatePairElement::INVALID_ID) {
+            // create new entry in read and read name store
+            // set sequence and mate pair ID in new read store element
+            record.readId = appendRead(fragments, "", matePairId);
+            // add the identifier to the read name store
+            appendName(fragments.readNameStore, readName, fragments.readNameStoreCache);
+            // set the ID in the mate pair store
+            fragments.matePairStore[matePairId].readId[mateNo] = record.readId;
+          }
         }
+        // Handle case of mate-paired read.
+        //std::cerr << "-  " << readName << ", " << mateNo << std::endl;
+        //std::cerr << "-  " << fragments.readNameStore[record.readId] << "/" << getMateNo(fragments, record.readId) << std::endl;
+        if (mateNo != -1 && getMateNo(fragments, record.readId) != mateNo)
+          record.readId = fragments.matePairStore[fragments.readStore[record.readId].matePairId].readId[mateNo];
+        //std::cerr << "+  " << readName << ", " << mateNo << std::endl;
+        //std::cerr << "+  " << fragments.readNameStore[record.readId] << "/" << getMateNo(fragments, record.readId) << std::endl;
+        // end of "handle case of mate-paired read"
         record.distance = distance;
         if (!getIdByName((store.contigNames), contigName, record.contigId, contigNameCache)) {
           record.contigId = length(value(store.contigNames));
@@ -271,7 +325,8 @@ void loadWitFile(WitStore & store,
         record.firstPos = firstPos;
         record.lastPos = lastPos;
         SEQAN_ASSERT_LEQ(record.firstPos, record.lastPos);
-        appendValue(store, record);
+        /*int id = */appendValue(store, record);
+        //std::cerr << "   record.id == " << id << std::endl;
     }
 }
 

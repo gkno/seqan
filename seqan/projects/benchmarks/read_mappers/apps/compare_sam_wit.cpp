@@ -231,6 +231,9 @@ int main(int argc, const char *argv[]) {
         read(fstrm, fragments, SAM());
     }
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
+    //for (unsigned i = 0; i < length(fragments.readNameStore); ++i) {
+      //std::cerr << ">>>" << fragments.readNameStore[i] << " " << i << std::endl;
+    //}
 
     // =================================================================
     // Load WIT file.
@@ -238,7 +241,7 @@ int main(int argc, const char *argv[]) {
     std::cerr << "Loading intervals from " << options.witFileName << std::endl;
     startTime = sysTime();
     WitStore witStore;
-    loadWitFile(witStore, fragments.readNameStore, fragments.contigNameStore, options.witFileName);
+    loadWitFile(witStore, fragments, options.witFileName);
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
 
     // =================================================================

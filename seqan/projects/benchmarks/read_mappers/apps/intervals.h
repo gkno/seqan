@@ -26,6 +26,17 @@ struct WitRecord {
     // Name of the read in question.
     CharString readName;
 
+    enum {
+      FLAG_PAIRED = 0x01,
+      FLAG_FIRST_MATE = 0x40,
+      FLAG_SECOND_MATE = 0x80,
+      FLAG_MATE_MASK = 0x01 | 0x04 | 0x80
+    };
+
+    // Flags, 0x01 - paired, 0x40 - first read in pair, 0x80 - second read in
+    // pair.
+    int flags;
+
     // Id of the read, possibly not set.
     size_t readId;
 
@@ -51,10 +62,11 @@ struct WitRecord {
     WitRecord() {}
 
     // Complete constructor for all properties.
-    WitRecord(CharString const & _readName, int const & _distance,
+    WitRecord(CharString const & _readName, int const & _flags,
+              int const & _distance,
               CharString const & _contigName, bool const & _isForward,
               size_t const & _firstPos, size_t const & _lastPos)
-            : readName(_readName), readId(0), distance(_distance),
+            : readName(_readName), flags(_flags), readId(0), distance(_distance),
               contigName(_contigName), contigId(0), isForward(_isForward),
               firstPos(_firstPos), lastPos(_lastPos) {}
 
@@ -99,7 +111,17 @@ struct WitRecord_Lt_ContigIdReadIdLastPos {
 // stream -- Stream to write to.
 template <typename TStream>
 TStream & operator<<(TStream & stream, WitRecord const & record) {
-    stream << record.readName << "\t"
+    stream << record.readName;
+    if (record.flags & WitRecord::FLAG_PAIRED) {
+      if (record.flags & WitRecord::FLAG_FIRST_MATE) {
+        stream << "/0";
+      } else if (record.flags & WitRecord::FLAG_SECOND_MATE) {
+        stream << "/1";
+      } else {
+        stream << "/?";
+      }
+    }
+    stream << "\t"
            << record.distance << "\t"
            << record.contigName << "\t"
            << (record.isForward ? "F" : "R") << "\t"
@@ -109,14 +131,15 @@ TStream & operator<<(TStream & stream, WitRecord const & record) {
 }
 
 
-// Write WIT header line ("@HD\tVN:1.0") to stream.
+// Write WIT header line ("@WIT\tVN:1.0") to stream.
 //
 // TStream -- type of the stream.
 //
 // stream -- Stream to write to.
 template <typename TStream>
 TStream &writeWitHeader(TStream & stream) {
-    stream << "@HD\tVN:1.0" << std::endl;
+    stream << "@WIT\tVN:1.0" << std::endl;
+    stream << "@MATES\tSEP:/\tTYPE:01" << std::endl;
     return stream;
 }
 
@@ -147,7 +170,7 @@ TStream &writeWitRecord(TStream & stream, WitRecord const & record) {
 }
 
 
-// Read WIT header line ("@HD\tVN:1.0") from stream.
+// Read WIT header line ("@WIT\tVN:1.0") from stream.
 //
 // TStream -- type of the stream.
 // TChar   -- type of lookahead character.
@@ -157,11 +180,11 @@ TStream &writeWitRecord(TStream & stream, WitRecord const & record) {
 template <typename TStream, typename TChar>
 void readWitHeader(TStream &stream, TChar &c) {
     CharString tmp;
-    // Read "@HD".
+    // Read "@WIT".
     c = _streamGet(stream);
     tmp = _parse_readWordUntilWhitespace(stream, c);
-    if (tmp != CharString("@HD"))
-        std::cerr << "WARNING: File did not begin with \"@HD\", was: \"" << tmp << "\"" << std::endl;
+    if (tmp != CharString("@WIT"))
+        std::cerr << "WARNING: File did not begin with \"@WIT\", was: \"" << tmp << "\"" << std::endl;
     // Skip "\t".
     _parse_skipWhitespace(stream, c);
     // Read "VN:1.0".
@@ -170,6 +193,9 @@ void readWitHeader(TStream &stream, TChar &c) {
         std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
     // Skip to and after end of line.
     _parse_skipLine(stream, c);
+    // Maybe read/skip additional header lines.
+    while (c == '@')
+      _parse_skipLine(stream, c);
 }
 
 
@@ -198,6 +224,7 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
 
     // Read line.
     _parse_readIdentifier(stream, record.readName, c);
+    _parse_readIdentifier(stream, record.readName, c);
     _parse_skipWhitespace(stream, c);
     record.distance = _parse_readNumber(stream, c);
     _parse_skipWhitespace(stream, c);
@@ -215,3 +242,4 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
 }
 
 #endif  // WIT_BUILDER_INTERVALS_H_
+

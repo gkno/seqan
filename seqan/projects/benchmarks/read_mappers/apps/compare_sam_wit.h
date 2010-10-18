@@ -132,10 +132,14 @@ struct ComparisonResult {
     // Number of intervals with a good score that the read mapper
     // found which were not in our golden standard.
     size_t additionalIntervalCount;
+
+    size_t totalReadCount;
+    double normalizedIntervals;
     
     ComparisonResult()
             : totalIntervalCount(0), foundIntervalCount(0),
-              superflousIntervalCount(0), additionalIntervalCount(0) {}
+              superflousIntervalCount(0), additionalIntervalCount(0),
+              totalReadCount(0), normalizedIntervals(0) {}
 };
 
 
@@ -146,6 +150,8 @@ TStream & operator<<(TStream & stream, ComparisonResult const & result) {
            << ", \"found_intervals\": " << result.foundIntervalCount
            << ", \"superflous_intervals\": " << result.superflousIntervalCount
            << ", \"additional_intervals\": " << result.additionalIntervalCount
+           << ", \"total_reads\": " << result.totalReadCount
+           << ", \"normalized_intervals\": " << result.normalizedIntervals
            << "}";
     return stream;
 }
@@ -157,6 +163,8 @@ void clear(ComparisonResult & result) {
     result.foundIntervalCount = 0;
     result.superflousIntervalCount = 0;
     result.additionalIntervalCount = 0;
+    result.totalReadCount = 0;
+    result.normalizedIntervals = 0;
 }
 
 
@@ -334,22 +342,28 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     }
 
     // Build interval tree.
+    //std::cerr << ">>> readId == " << readId << ", contigId == " << contigId << std::endl;
+    //std::cerr << "-----------" << std::endl;
     typedef IntervalAndCargo<size_t, size_t> TInterval;
     String<TInterval> intervals;
     for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
         // Skip aligned reads on other strand.
         if (it->isForward != isForward) continue;
         // Skip intervals with too high distance, ignore distance in oracle wit mode.
+        //std::cerr << "it->distance == " << it->distance << std::endl;
         if (!options.oracleWitMode && static_cast<int>(it->distance) > options.maxError) continue;
+        //std::cerr << "insert(intervals, TInterval(" << value(it).firstPos << ", " << value(it).lastPos + 1 << ", " << value(it).id << "))" << std::endl;
 
         SEQAN_ASSERT_LEQ(value(it).firstPos, value(it).lastPos);
         appendValue(intervals, TInterval(value(it).firstPos, value(it).lastPos + 1, value(it).id));
     }
     IntervalTree<size_t, size_t> intervalTree(intervals, ComputeCenter());
+    //std::cerr << "-----------" << std::endl;
 
     // Now, try to hit all entries in interval tree with the aligned reads on this strand.
     std::set<size_t> intervalsInResult;
     for (TAlignedReadIter it = alignedReadsBegin; it != alignedReadsEnd; ++it) {
+        SEQAN_ASSERT_EQ(it->readId, readId);
         // Skip aligned reads on other strand.
         if (isForward && it->beginPos > it->endPos)
             continue;
@@ -420,7 +434,8 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
 
         // Query interval tree with lastPos.
         String<size_t> foundIntervalIds;
-        findIntervals(intervalTree, lastPos, foundIntervalIds);
+        if (length(intervals) > 0u)
+          findIntervals(intervalTree, lastPos, foundIntervalIds);
 
         // Handle alignment out of target intervals.
         if (length(foundIntervalIds) == 0) {
@@ -457,6 +472,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 Dna5String rcRead(fragments.readSeqStore[it->readId]);
                 reverseComplementInPlace(rcRead);
                 std::cerr << "          " << rcRead << std::endl;
+                std::cerr << "mate no is = " << static_cast<int>(getMateNo(fragments, it->readId)) << std::endl;
                 std::cerr << "on forward strand? " << isForward << std::endl;
                 std::cerr << "original begin pos = " << it->beginPos << std::endl;
                 std::cerr << "original end pos = " << it->endPos << std::endl;
@@ -488,11 +504,11 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     }
 
     // If configured so, show hit and missed intervals.
-    if (options.showHitIntervals || options.showMissedIntervals) {
+    if (options.showHitIntervals) {
         for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
             bool found = intervalsInResult.find(value(it).id) != intervalsInResult.end();
 			if (found && options.showHitIntervals) {
-                std::cout << "log> {\"type\": \"log.hit_interval"
+                std::cerr << "log> {\"type\": \"log.hit_interval"
                           << "\", \"interval_id\": " << value(it).id
                           << ", \"contig_id\": \"" << fragments.contigNameStore[contigId]
                           << "\", \"strand\": \"" << (isForward ? "forward" : "reverse")
@@ -654,21 +670,33 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
     if (boundsForDistance.first == boundsForDistance.second)
         return;  // Guard:  Skip if there are no required intervals.
 
+    // Intervals to be found for this read and counter for found intervals.
+    size_t intervalsForRead = boundsForDistance.second - boundsForDistance.first;
+    size_t intervalsFound = 0;
+
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
-        SEQAN_ASSERT_EQ(value(it).distance, options.maxError);
-        comparisonResult.totalIntervalCount += 1;
+        SEQAN_ASSERT_EQ(static_cast<int>(value(it).distance), options.maxError);
         bool found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
-        comparisonResult.foundIntervalCount += found;
+        intervalsFound += found;
         if (!found && options.showMissedIntervals) {
-            std::cout << "log> {\"type\": \"log.missed_interval";
-            std::cout          << "\", \"interval_id\": " << value(it).id;
-            std::cout          << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId];
-            std::cout          << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse");
-            std::cout          << "\", \"read_id\": \"" << value(witStore.readNames)[value(it).readId];
-            std::cout          << "\", \"interval_first\": " << value(it).firstPos;
-            std::cout           << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
+            std::cerr << "log> {\"type\": \"log.missed_interval"
+                      << "\", \"interval_id\": " << value(it).id
+                      << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId]
+                      << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
+                      << "\", \"read_id\": " << value(it).readId
+                      << ", \"read_name\": \"" << value(witStore.readNames)[value(it).readId]
+                      << "\", \"interval_first\": " << value(it).firstPos
+                      << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
         }
     }
+    if (intervalsFound > intervalsForRead)
+      exit(-1);
+
+    // Update comparison results.
+    comparisonResult.totalIntervalCount += intervalsForRead;
+    comparisonResult.foundIntervalCount += intervalsFound;
+    comparisonResult.totalReadCount += 1;
+    comparisonResult.normalizedIntervals += 1.0 * intervalsFound / intervalsForRead;
 }
 
 
@@ -694,6 +722,8 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
     // range.
     IntervalOfReadOnContig refInterval;
     refInterval.distance = value(beginIntervalsForRead).distance;
+    if (static_cast<int>(refInterval.distance) > options.maxError)
+        return;  // Guard: Skip if best has too large distance.
     std::pair<TIntervalIterator, TIntervalIterator> boundsForDistance;
     boundsForDistance = std::equal_range(beginIntervalsForRead, endIntervalsForRead, refInterval, WitStoreLess<SortDistance>(witStore));
     if (boundsForDistance.first == boundsForDistance.second)
@@ -701,23 +731,27 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
 
     // One interval is to be found.
     comparisonResult.totalIntervalCount += 1;
+    comparisonResult.totalReadCount += 1;
 
     // Now, try to find one of the intervals.
-    bool found = true;
+    bool found = false;
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
         if (std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id)) {
+            found = true;
             comparisonResult.foundIntervalCount += 1;
+            comparisonResult.normalizedIntervals += 1;
             break;
         }
     }
     if (!found && options.showMissedIntervals) {
       for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
-          std::cout << "log> {\"type\": \"log.missed_interval"
+          std::cerr << "log> {\"type\": \"log.missed_interval"
                     << "\", \"interval_id\": " << value(it).id
                     << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId]
                     << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
                     << "\", \"read_id\": \"" << value(witStore.readNames)[value(it).readId]
-                    << "\", \"interval_first\": " << value(it).firstPos
+                    << "\", \"distance\": " << value(beginIntervalsForRead).distance
+                    << ", \"interval_first\": " << value(it).firstPos
                     << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
       }
     }
@@ -745,20 +779,26 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
     // smallest error rate first, then get the subrange with the smallest
     // range.
     IntervalOfReadOnContig refInterval;
-    refInterval.distance = value(beginIntervalsForRead).distance;
+    refInterval.distance = value(beginIntervalsForRead).distance;  // Difference to all: Distance of smallest here not options.maxError.
+    if (static_cast<int>(refInterval.distance) > options.maxError)
+        return;  // Guard: Skip if best has too large distance.
     std::pair<TIntervalIterator, TIntervalIterator> boundsForDistance;
     boundsForDistance = std::equal_range(beginIntervalsForRead, endIntervalsForRead, refInterval, WitStoreLess<SortDistance>(witStore));
     if (boundsForDistance.first == boundsForDistance.second)
         return;  // Guard:  Skip if there are no required intervals.
 
+    comparisonResult.totalReadCount += 1;
+    size_t foundReads = 0;
+    size_t bestReadCount = boundsForDistance.second - boundsForDistance.first;
+
     // Now, try to find one of the intervals.
     for (TIntervalIterator it = boundsForDistance.first; it != boundsForDistance.second; ++it) {
         comparisonResult.totalIntervalCount += 1;
-        bool found = false;
-        found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
+        bool found = std::binary_search(begin(result, Standard()), end(result, Standard()), value(it).id);
         comparisonResult.foundIntervalCount += found;
+        foundReads += found;
         if (!found && options.showMissedIntervals) {
-            std::cout << "log> {\"type\": \"log.missed_interval"
+            std::cerr << "log> {\"type\": \"log.missed_interval"
                       << "\", \"interval_id\": " << value(it).id
                       << ", \"contig_id\": \"" << value(witStore.contigNames)[value(it).contigId]
                       << "\", \"strand\": \"" << (value(it).isForward ? "forward" : "reverse")
@@ -767,6 +807,8 @@ void evaluateFoundIntervals_compareToIntervals(ComparisonResult & comparisonResu
                       << ", \"interval_last\": " << value(it).lastPos << "}" << std::endl;
         }
     }
+
+    comparisonResult.normalizedIntervals += 1.0 * foundReads / bestReadCount;
 }
 
 
