@@ -121,6 +121,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNeedle>::Type TSize;
+	typedef typename Position<TNeedle>::Type TPosition;
 	typedef typename Value<TNeedle>::Type TKeyword;
 	typedef typename Value<TKeyword>::Type TAlphabet;
 	typedef Graph<Automaton<TAlphabet> > TGraph;
@@ -136,7 +137,7 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 	String<TAlphabet> parentCharMap;
 	resizeVertexMap(me.data_graph,parentMap);
 	resizeVertexMap(me.data_graph,parentCharMap);
-	for(unsigned int i = 0;i<length(parentMap);++i) {
+	for(TPosition i = 0;i<length(parentMap);++i) {
 		assignProperty(parentMap, i, nilVal);
 	}
 	typedef typename Iterator<TGraph, EdgeIterator>::Type TEdgeIterator;
@@ -166,10 +167,10 @@ _createAcTrie(Pattern<TNeedle, AhoCorasick> & me)
 		}
 		if (down != nilVal) {
 			assignProperty(me.data_supplyMap, *it, getSuccessor(me.data_graph, down, sigma));
-			String<unsigned int> endPositions = getProperty(me.data_terminalStateMap, getProperty(me.data_supplyMap, *it));
+			String<TPosition> endPositions = getProperty(me.data_terminalStateMap, getProperty(me.data_supplyMap, *it));
 			if (!empty(endPositions)) {
-				String<unsigned int> endPositionsCurrent = getProperty(me.data_terminalStateMap, *it);
-				typedef typename Iterator<String<unsigned int>, Rooted >::Type TStringIterator;
+				String<TPosition> endPositionsCurrent = getProperty(me.data_terminalStateMap, *it);
+				typedef typename Iterator<String<TPosition>, Rooted >::Type TStringIterator;
 				TStringIterator sit = begin(endPositions);
 				for(;!atEnd(sit);goNext(sit)) {
 					appendValue(endPositionsCurrent, *sit);
