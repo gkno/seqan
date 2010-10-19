@@ -68,6 +68,7 @@ strcmp(toCString(str), "compare it to this string");
 struct CStyle;
 
 #ifdef PLATFORM_WINDOWS_VS
+#pragma warning( push )
 // Disable warning C4521 locally (multiple copy constructors).
 #pragma warning( disable: 4521 )
 // Disable warning C4522 locally (multiple assignment operators).
@@ -186,10 +187,8 @@ SEQAN_CHECKPOINT
 };
 
 #ifdef PLATFORM_WINDOWS_VS
-// Enable warning C4521 again (multiple copy operators).
-#pragma warning( default: 4521 )
-// Enable warning C4522 again (multiple assignment operators).
-#pragma warning( default: 4522 )
+// Reset warning state to previous one for C4521, C4522.
+#pragma warning( pop )
 #endif  // PLATFORM_WINDOWS_VS
 
 

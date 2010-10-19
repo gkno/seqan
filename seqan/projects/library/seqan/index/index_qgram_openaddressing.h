@@ -62,6 +62,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 */	
 
 #ifdef PLATFORM_WINDOWS_VS
+#pragma warning( push )
 // Disable warning C4521 locally (multiple copy constructors).
 #pragma warning( disable: 4521 )
 #endif  // PLATFORM_WINDOWS_VS
@@ -148,7 +149,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 	};
 #ifdef PLATFORM_WINDOWS_VS
 // Enable warning C4521 again (multiple copy operators).
-#pragma warning( default: 4521 )
+#pragma warning( pop )
 #endif  // PLATFORM_WINDOWS_VS
 
 

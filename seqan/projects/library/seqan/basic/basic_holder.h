@@ -1152,6 +1152,7 @@ SEQAN_CHECKPOINT
 
 #ifdef PLATFORM_WINDOWS_VS
 // Disable warning C4521 locally (multiple copy constructors).
+#pragma warning( push )
 #pragma warning( disable: 4521 )
 #endif  // PLATFORM_WINDOWS_VS
 
@@ -1229,8 +1230,8 @@ SEQAN_CHECKPOINT
 };
 
 #ifdef PLATFORM_WINDOWS_VS
-// Enable warning C4521 again (multiple copy constructors).
-#pragma warning( default: 4521 )
+// Set old warning C4521 state again (multiple copy constructors).
+#pragma warning( pop )
 #endif  // PLATFORM_WINDOWS_VS
 
 
