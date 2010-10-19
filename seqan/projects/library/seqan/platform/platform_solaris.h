@@ -44,3 +44,12 @@ typedef uint64_t __uint64;
 #ifndef SEQAN_HEADER_PLATFORM_GENERATED_FORWARDS_H
 #error To use the SeqAn library you first have to execute 'make forwards' in the root directory
 #endif
+
+// Define warning disabling macros as empty.
+#ifndef SEQAN_PUSH_WARNING_DISABLE
+#define SEQAN_PUSH_WARNING_DISABLE
+#endif  // #ifndef SEQAN_PUSH_WARNING_DISABLE
+
+#ifndef SEQAN_POP_WARNING_DISABLE
+#define SEQAN_POP_WARNING_DISABLE
+#endif  // #ifndef SEQAN_POP_WARNING_DISABLE

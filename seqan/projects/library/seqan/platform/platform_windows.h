@@ -54,3 +54,34 @@ inline T round(T const & x)
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 //#define SEQAN_SWITCH_USE_FORWARDS
+
+// Define warning disabling macros as empty.
+#ifndef SEQAN_PUSH_WARNING_DISABLE
+// C4675: Disable warning "'function' : resolved overload was found by
+// argument-dependent lookup".  Visual Studio warns because Koenig
+// lookup was introduced in later version and behaviour has changed at
+// some point.
+//
+// C4503: Disable warning for identifer name truncation.
+//
+// C4267: Disabling warning 4267 assigning variables with different
+// size on 32 and 64 bit.  Need to re-enable this later.
+//
+// C4244: Disabling warning 4244, loss of data when values with
+// different domain sizes.
+//
+// C4996: Do not warn against deprecated functions.
+// TODO(holtgrew): Disable here, not on command line!
+#define SEQAN_PUSH_WARNING_DISABLE \
+    _Pragma("warning ( push )") \
+    _Pragma("warning ( disable : 4675 )") \
+    _Pragma("warning ( disable : 4503 )") \
+    _Pragma("warning ( disable : 4267 )") \
+    _Pragma("warning ( disable : 4244 )") \
+    _Pragma("warning ( disable : 4996 )")
+#endif  // #ifndef SEQAN_PUSH_WARNING_DISABLE
+
+#ifndef SEQAN_POP_WARNING_DISABLE
+#define SEQAN_POP_WARNING_DISABLE \
+    _Pragma("warning ( pop )")
+#endif  // #ifndef SEQAN_POP_WARNING_DISABLE
