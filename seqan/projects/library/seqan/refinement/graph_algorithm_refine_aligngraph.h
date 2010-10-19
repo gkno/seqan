@@ -114,7 +114,6 @@ SEQAN_CHECKPOINT
 ////	typename Infix<typename Value<TStringSet>::Type>::Type label0 = infix(getValueById(seqs,seq_i_id),pos_i,last_pos_i);
 ////	typename Infix<typename Value<TStringSet>::Type>::Type label1 = infix(getValueById(seqs,seq_j_id),pos_j,last_pos_j);
 //	
-////b����������������������
 //	typename Value<TScore>::Type score = 0;
 //	TValue i = 0;
 //	while (i < len)

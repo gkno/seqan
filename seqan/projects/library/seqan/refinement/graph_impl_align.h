@@ -1488,6 +1488,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Size<TGraph>::Type TSize;
 	typedef typename Value<TComponentMap>::Type TComponent;
 	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
+	typedef typename TComponentLength::mapped_type TMappedType;
+	typedef typename TComponentLength::key_type TKeyType;
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Check for empty graph
@@ -1560,8 +1562,8 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			compIndex = 0;
 			currentSeq = it->first.first;
 		}
-		unsigned int c = getProperty(component, it->second);
-		compLength.insert(std::make_pair(c, fragmentLength(g, it->second)));
+		TKeyType c = (TKeyType) getProperty(component, it->second);
+		compLength.insert(std::make_pair(c, (TMappedType) fragmentLength(g, it->second)));
 		while ((compIndex < compIndexLen) && (order[compIndex] != c)) ++compIndex;
 		// Crossing components -> no alignment
 		if (compIndex >= compIndexLen) return false;
