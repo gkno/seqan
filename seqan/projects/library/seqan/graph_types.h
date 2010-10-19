@@ -30,6 +30,7 @@
 #include <seqan/sequence.h>
 #include <seqan/file.h>
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_types/graph_types_generated_forwards.h>
@@ -73,5 +74,7 @@
 #include <seqan/graph_types/graph_drawing.h>
 #include <seqan/misc/misc_parsing.h>
 #include <seqan/graph_types/graph_utility_parsing.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

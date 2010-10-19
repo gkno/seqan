@@ -37,6 +37,8 @@
 
 //____________________________________________________________________________
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/find_motif/find_motif_generated_forwards.h>
 #endif
@@ -59,5 +61,6 @@
 #include <seqan/find_motif/find_motif_epatternbranching.h>
 #include <seqan/find_motif/em_algorithm.h>
 
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

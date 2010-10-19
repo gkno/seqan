@@ -47,6 +47,8 @@
 
 //____________________________________________________________________________
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #include <seqan/basic/basic_forwards.h>
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/basic/basic_generated_forwards.h>
@@ -126,5 +128,7 @@
 #include <seqan/basic/basic_volatile_ptr.h>
 
 #include <seqan/basic/basic_aggregates.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

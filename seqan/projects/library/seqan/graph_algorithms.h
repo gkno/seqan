@@ -29,6 +29,8 @@
 #include <seqan/graph_types.h>
 #include <seqan/random.h>
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_algorithms/graph_algorithms_generated_forwards.h>
 #endif
@@ -39,5 +41,6 @@
 #include <seqan/graph_algorithms/graph_algorithm_hmm.h>
 #include <seqan/graph_algorithms/graph_algorithm_lis_his.h>
 
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

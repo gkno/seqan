@@ -28,6 +28,8 @@
 #include <seqan/refinement.h>
 #include <seqan/graph_align.h>
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_msa/graph_msa_generated_forwards.h>
 #endif
@@ -43,5 +45,7 @@
 #include <seqan/graph_msa/graph_align_tcoffee_library.h>
 #include <seqan/graph_msa/graph_align_tcoffee_progressive.h>
 #include <seqan/graph_msa/graph_align_tcoffee_refinement.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

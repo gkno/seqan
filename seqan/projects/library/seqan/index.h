@@ -47,6 +47,7 @@
 // INDEX CONSTRUCTION
 //////////////////////////////////////////////////////////////////////////////
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/index/index_manual_forwards.h>
@@ -145,5 +146,7 @@
 #include <seqan/index/find_index.h>
 #include <seqan/index/find_quasar.h>
 #include <seqan/index/find_swift.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

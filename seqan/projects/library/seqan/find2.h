@@ -38,6 +38,8 @@
 //#include <seqan/map.h>
 //#include <seqan/find.h>
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/find2/find2_generated_forwards.h>
 #endif
@@ -61,5 +63,7 @@
 // Approximate matching with linear/affine gap costs, edit distance etc.
 #include <seqan/find2/find_approx_find_begin.h>  // findBegin() support
 #include <seqan/find2/find_approx_dpsearch.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif  // SEQAN_SEQAN_FIND_H_

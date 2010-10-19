@@ -29,6 +29,8 @@
 
 //____________________________________________________________________________
 
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
+
 #include <seqan/sequence/sequence_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -68,5 +70,7 @@
 // Adaptions
 
 #include <seqan/sequence/adapt_std_list.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

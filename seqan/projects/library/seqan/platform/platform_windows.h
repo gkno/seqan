@@ -23,6 +23,7 @@
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 
+/* Disabled through push/pop macros now.
 // Disable warning "'function' : resolved overload was found by
 // argument-dependent lookup".  Visual Studio warns because Koenig
 // lookup was introduced in later version and behaviour has changed at some
@@ -35,6 +36,7 @@
 #pragma warning( disable : 4267 )
 // Disabling warning 4244, loss of data when values with different domain sizes.
 #pragma warning( disable : 4244 )
+*/
 
 #define finline __forceinline
 
@@ -73,15 +75,15 @@ inline T round(T const & x)
 // C4996: Do not warn against deprecated functions.
 // TODO(holtgrew): Disable here, not on command line!
 #define SEQAN_PUSH_WARNING_DISABLE \
-    _Pragma("warning ( push )") \
-    _Pragma("warning ( disable : 4675 )") \
-    _Pragma("warning ( disable : 4503 )") \
-    _Pragma("warning ( disable : 4267 )") \
-    _Pragma("warning ( disable : 4244 )") \
-    _Pragma("warning ( disable : 4996 )")
+    __pragma(warning( push )) \
+    __pragma(warning( disable : 4675 )) \
+    __pragma(warning( disable : 4503 )) \
+    __pragma(warning( disable : 4267 )) \
+    __pragma(warning( disable : 4244 )) \
+    __pragma(warning( disable : 4996 ))
 #endif  // #ifndef SEQAN_PUSH_WARNING_DISABLE
 
 #ifndef SEQAN_POP_WARNING_DISABLE
 #define SEQAN_POP_WARNING_DISABLE \
-    _Pragma("warning ( pop )")
+    __pragma(warning( pop ))
 #endif  // #ifndef SEQAN_POP_WARNING_DISABLE

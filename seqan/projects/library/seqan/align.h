@@ -28,6 +28,8 @@
 #include <stack>
 #include <ostream>
 
+#include <seqan/platform.h>
+
 #include <seqan/sequence.h>
 #include <seqan/score.h>
 
@@ -37,6 +39,8 @@
 
 // ----------------------------------------------------------------------
 // The module's headers.
+
+SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/align/align_generated_forwards.h>
@@ -63,5 +67,7 @@
 #include <seqan/align/hirschberg_set.h>
 #include <seqan/align/align_myers.h>
 #include <seqan/align/align_hirschberg.h>
+
+SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif  // SEQAN_ALIGN_H_
