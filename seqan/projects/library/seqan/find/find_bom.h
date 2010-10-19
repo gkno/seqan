@@ -148,7 +148,7 @@ inline void
 setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle) 
 {
 	SEQAN_CHECKPOINT;
-	typedef Position<TNeedle>::Type TPosition;
+	typedef typename Position<TNeedle>::Type TPosition;
 	me.needleLength = length(needle);
 	clear(me.automaton);
 
