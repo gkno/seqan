@@ -72,6 +72,9 @@ struct Options<Global>
 
     // Basic Read Simulation Parameters.
 
+    // If set to true then reads are also sampled from regions in the
+    // genome that have Ns in them.
+    bool allowNFromGenome;
     // Seed to use for the random number generator.
     unsigned seed;
     // Number of reads (pairs) to simulate.
@@ -138,6 +141,7 @@ struct Options<Global>
             : showHelp(false),
               verbose(false),
               veryVerbose(false),
+              allowNFromGenome(false),
               seed(0),
               numReads(1000),
               useRandomSequence(false),
@@ -229,6 +233,7 @@ struct ReadSimulationInstruction<Global>
 template <typename TStream>
 TStream & operator<<(TStream & stream, Options<Global> const & options) {
     stream << "global-options {" << std::endl
+           << "  allowNFromGenome:       " << (options.allowNFromGenome ? "true" : "false") << std::endl
            << "  seed:                   " << options.seed << std::endl
            << "  numReads:               " << options.numReads << std::endl
            << "  useRandomSequence:      " << (options.useRandomSequence ? "true" : "false") << std::endl
@@ -286,6 +291,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
 
     addSection(parser, "Main Options");
     
+    addOption(parser, CommandLineOption("aNg",  "allow-N-from-genome", "Allow N from genome.  Default: false.", OptionType::Bool));
     addOption(parser, CommandLineOption("s",  "seed", "The seed for RNG.  Default: 0.", OptionType::Integer | OptionType::Label));
     addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
@@ -338,6 +344,8 @@ int parseCommandLineAndCheck(TOptions & options,
         return 0;
     }
 
+    if (isSetLong(parser, "allow-N-from-genome"))
+        options.allowNFromGenome = true;
     if (isSetLong(parser, "seed"))
         getOptionValueLong(parser, "seed", options.seed);
     if (isSetLong(parser, "num-reads"))
@@ -760,6 +768,24 @@ int buildReadSimulationInstruction(
             buildSimulationInstructions(inst, rng, readLength, haplotype[inst.contigId], parameters, options);
             // Append read to result list.
             appendValue(instructions, inst);
+        }
+
+        // Check whether there are Ns in the selected areas.
+        if (!options.allowNFromGenome) {
+            for (unsigned i = 0; i < length(instructions); ++i) {
+                String<Dna5, Journaled<Alloc<> > > const & contig = haplotype[instructions[i].contigId];
+                typedef typename Position<Dna5String>::Type TPosition;
+                TPosition beginPos = instructions[i].beginPos;
+                TPosition endPos = instructions[i].endPos;
+                if (beginPos > endPos)
+                    std::swap(beginPos, endPos);
+                for (unsigned i = beginPos; i != endPos; ++i) {
+                    if (contig[i] == Dna5('N')) {
+                        invalid = true;
+                        break;
+                    }
+                }
+            }
         }
     } while (invalid);
 	
