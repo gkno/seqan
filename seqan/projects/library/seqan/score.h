@@ -25,8 +25,6 @@
 
 #include <seqan/basic.h>
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/score/score_generated_forwards.h>
 #endif
@@ -36,7 +34,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/score/score_matrix.h>
 #include <seqan/score/score_matrix_data.h>
 #include <seqan/score/score_simple.h>
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif  // SEQAN_SCORE_H_

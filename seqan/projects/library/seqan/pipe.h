@@ -38,8 +38,6 @@
 //____________________________________________________________________________
 // pipes
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #define SEQAN_NAMESPACE_PIPELINING pipe
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -69,7 +67,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/misc/priority_type_base.h>
 #include <seqan/misc/priority_type_heap.h>
 #include <seqan/pipe/pool_sorter.h>
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

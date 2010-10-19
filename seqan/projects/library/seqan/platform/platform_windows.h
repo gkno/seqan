@@ -23,7 +23,6 @@
 #define PLATFORM_WINDOWS
 #define PLATFORM_WINDOWS_VS
 
-/* Disabled through push/pop macros now.
 // Disable warning "'function' : resolved overload was found by
 // argument-dependent lookup".  Visual Studio warns because Koenig
 // lookup was introduced in later version and behaviour has changed at some
@@ -36,7 +35,6 @@
 #pragma warning( disable : 4267 )
 // Disabling warning 4244, loss of data when values with different domain sizes.
 #pragma warning( disable : 4244 )
-*/
 
 #define finline __forceinline
 
@@ -56,34 +54,3 @@ inline T round(T const & x)
 
 //define SEQAN_SWITCH_USE_FORWARDS to use generated forwards 
 //#define SEQAN_SWITCH_USE_FORWARDS
-
-// Define warning disabling macros as empty.
-#ifndef SEQAN_PUSH_WARNING_DISABLE
-// C4675: Disable warning "'function' : resolved overload was found by
-// argument-dependent lookup".  Visual Studio warns because Koenig
-// lookup was introduced in later version and behaviour has changed at
-// some point.
-//
-// C4503: Disable warning for identifer name truncation.
-//
-// C4267: Disabling warning 4267 assigning variables with different
-// size on 32 and 64 bit.  Need to re-enable this later.
-//
-// C4244: Disabling warning 4244, loss of data when values with
-// different domain sizes.
-//
-// C4996: Do not warn against deprecated functions.
-// TODO(holtgrew): Disable here, not on command line!
-#define SEQAN_PUSH_WARNING_DISABLE \
-    __pragma(warning( push )) \
-    __pragma(warning( disable : 4675 )) \
-    __pragma(warning( disable : 4503 )) \
-    __pragma(warning( disable : 4267 )) \
-    __pragma(warning( disable : 4244 )) \
-    __pragma(warning( disable : 4996 ))
-#endif  // #ifndef SEQAN_PUSH_WARNING_DISABLE
-
-#ifndef SEQAN_POP_WARNING_DISABLE
-#define SEQAN_POP_WARNING_DISABLE \
-    __pragma(warning( pop ))
-#endif  // #ifndef SEQAN_POP_WARNING_DISABLE

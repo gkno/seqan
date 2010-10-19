@@ -38,8 +38,6 @@
 
 //____________________________________________________________________________
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #include <seqan/file/file_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -101,7 +99,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/file/string_external.h>
 #include <seqan/file/string_mmap.h>
 #include <seqan/file/file_format_mmap.h>
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

@@ -31,7 +31,6 @@
 #include <seqan/graph_msa.h>
 #include <seqan/store.h>
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/consensus/consensus_generated_forwards.h>
@@ -42,7 +41,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/consensus/consensus_score.h>
 #include <seqan/consensus/consensus_realign.h>
 #include <seqan/consensus/consensus_library.h>
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

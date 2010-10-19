@@ -31,8 +31,6 @@
 
 #include <seqan/misc/misc_random.h>
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 //____________________________________________________________________________
 // Module Headers
 
@@ -52,7 +50,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/random/random_shuffle.h>
 
 //____________________________________________________________________________
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif  // SEQAN_RANDOM_H_

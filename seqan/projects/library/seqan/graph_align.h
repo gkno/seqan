@@ -26,8 +26,6 @@
 #include <seqan/graph_algorithms.h>
 #include <seqan/refinement.h>
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/graph_align/graph_align_generated_forwards.h>
 #endif
@@ -45,6 +43,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/graph_align/graph_align_smith_waterman_clump.h>
 #include <seqan/graph_align/graph_align_banded_smith_waterman_clump.h>
 
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

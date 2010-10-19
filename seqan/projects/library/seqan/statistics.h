@@ -29,8 +29,6 @@
 #include <seqan/index.h>
 //____________________________________________________________________________
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #ifdef SEQAN_SWITCH_USE_FORWARDS
 #include <seqan/statistics/statistics_generated_forwards.h>
 #endif
@@ -39,7 +37,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/statistics/statistics_base.h>
 
 //____________________________________________________________________________
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

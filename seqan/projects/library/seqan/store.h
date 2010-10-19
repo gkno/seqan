@@ -34,8 +34,6 @@
 // FRAGMENT STORE SUB-CONTAINERS
 //////////////////////////////////////////////////////////////////////////////
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #include <seqan/store/store_base.h>
 #include <seqan/store/store_read.h>
 #include <seqan/store/store_matepair.h>
@@ -52,7 +50,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 #include <seqan/store/store_io_sam.h>
 #include <seqan/store/store_io_gff.h>
 #include <seqan/store/store_io_ucsc.h>
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif //#ifndef SEQAN_HEADER_...

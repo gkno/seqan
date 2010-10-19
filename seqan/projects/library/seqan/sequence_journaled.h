@@ -39,8 +39,6 @@
 // Forwards.
 // ============================================================================
 
-SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
-
 #include <seqan/sequence_journaled/sequence_journaled_forwards.h>
 
 #ifdef SEQAN_SWITCH_USE_FORWARDS
@@ -64,7 +62,5 @@ SEQAN_PUSH_WARNING_DISABLE  // Disable warnings from here.
 // ============================================================================
 
 // TODO(holtgrew): Port back the incremental index stuff to the new code.
-
-SEQAN_POP_WARNING_DISABLE  // Enable warnings again.
 
 #endif  // SEQAN_HEADER_SEQUENCE_JOURNALED_H
