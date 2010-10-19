@@ -73,6 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	readNaming;			// 0..use Fasta id
 										// 1..enumerate reads beginning with 1
 										// 2..use the read sequence (only for short reads!)
+										// 3..use Fasta id, do not append /L and /R for mate pairs.
 		unsigned	sortOrder;			// 0..sort keys: 1. read number, 2. genome position
 										// 1..           1. genome pos50ition, 2. read number
 		unsigned	positionFormat;		// 0..gap space

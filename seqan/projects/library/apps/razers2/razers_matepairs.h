@@ -145,12 +145,15 @@ bool loadReads(
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0)
+		if (options.readNaming == 0 || options.readNaming == 3)
 		{
 			assignSeqId(id[0], leftMates[i], formatL);				// read left Fasta id
 			assignSeqId(id[1], rightMates[i], formatR);				// read right Fasta id
-			append(id[0], "/L");
-			append(id[1], "/R");
+			if (options.readNaming == 0)
+			{
+				append(id[0], "/L");
+				append(id[1], "/R");
+			}
 		}
 		
 		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence

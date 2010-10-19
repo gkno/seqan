@@ -308,6 +308,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = use Fasta id");
 	addHelpLine(parser, "1 = enumerate beginning with 1");
 	addHelpLine(parser, "2 = use the read sequence (only for short reads!)");
+	addHelpLine(parser, "3 = use the Fasta id, do NOT append '/L' or '/R' for mate pairs");
 	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = 1. read number, 2. genome position");
 	addHelpLine(parser, "1 = 1. genome position, 2. read number");
@@ -414,7 +415,7 @@ int main(int argc, const char *argv[])
 		cerr << "Invalid sort order options." << endl;
 	if ((options.genomeNaming > 1) && (stop = true))
 		cerr << "Invalid genome naming options." << endl;
-	if ((options.readNaming > 2) && (stop = true))
+	if ((options.readNaming > 3) && (stop = true))
 		cerr << "Invalid read naming options." << endl;
 	if ((options.positionFormat > 1) && (stop = true))
 		cerr << "Invalid position format options." << endl;
