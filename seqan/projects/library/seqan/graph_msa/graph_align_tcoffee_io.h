@@ -165,7 +165,7 @@ read(TFile & file,
 			_parse_skipWhitespace(file,c);
 			TSize res2 = _parse_readNumber(file, c);
 			_parse_skipWhitespace(file,c);
-			TSize weight = _parse_readNumber(file, c);
+			TScoreValue weight = _parse_readNumber(file, c);
 			_parse_skipLine(file,c);
 
 			if (seq1 < seq2) {

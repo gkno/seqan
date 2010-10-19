@@ -1256,8 +1256,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		SEQAN_CHECKPOINT
 		typedef typename Position<StringSet<TString, Dependent<Tight> > >::Type TPos;
         appendValue(me.limits, lengthSum(me) + length(obj), tag);
+		typedef typename StringSet<TString, Dependent<Tight> >::TIdType TIdType;
 		appendValue(me.strings, const_cast<TString*>(&obj));
-		TPos last = me.lastId++;
+		TIdType last = me.lastId++;
 		appendValue(me.ids, last, tag);
 		me.id_pos_map.insert(std::make_pair(last, (TPos)(length(me.strings) - 1)));
 	}
