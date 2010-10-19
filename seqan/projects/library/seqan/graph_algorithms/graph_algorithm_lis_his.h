@@ -95,7 +95,7 @@ longestIncreasingSubsequence(TString const& str, TPositions& pos) {
 
 	// The list of decreasing covers, only the smallest number must be remembered
 	// See Gusfield
-	typedef std::pair<typename Value<TString>::Type, typename Value<TPositions>::Type> TKey;
+	typedef std::pair<typename Value<TString>::Type, typename Position<TPositions>::Type> TKey;
 	typedef std::set<TKey, std::less<TKey> > TSortedSequence;
 	typedef typename TSortedSequence::const_iterator TSortedSequenceIter;
 	TSortedSequence list;

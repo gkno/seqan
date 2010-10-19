@@ -20,6 +20,8 @@ void  Test_GraphDrawing_Tmp() {
 //////////////////////////////////////////////////////////////////////////////
 
 void  Test_GraphDrawing() {
+	typedef Position<String<char> >::Type TPosition;
+
 	Test_GraphDrawing_Tmp<Graph<Directed<> > >();
 	Test_GraphDrawing_Tmp<Graph<Undirected<> > >();
 	Test_GraphDrawing_Tmp<Graph<Tree<> > >();
@@ -33,7 +35,7 @@ void  Test_GraphDrawing() {
 
 	// Trie
 	Graph<Automaton<char> > trie;
-	String<String<unsigned int> > pos;
+	String<String<TPosition> > pos;
 	String<String<char> > keywords;
 	appendValue(keywords, String<char>("announce"));
 	appendValue(keywords, String<char>("annual"));

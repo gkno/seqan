@@ -97,10 +97,10 @@ _markRootVertex(Graph<Tree<TCargo, TSpec> > const& g,
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename TAlphabet, typename TCargo, typename TSpec, typename TNodeMap>
+template<typename TAlphabet, typename TCargo, typename TSpec, typename TPosition, typename TNodeMap>
 inline void
 _createTrieNodeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
-						  String<String<unsigned int> > pos,
+						  String<String<TPosition> > pos,
 						  TNodeMap& nodeMap)
 {
 	SEQAN_CHECKPOINT
@@ -112,12 +112,12 @@ _createTrieNodeAttributes(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 		String<char> tmp;
 		std::stringstream s;
 		s << *it;
-		String<unsigned int> endPositions = getProperty(pos,*it);
+		String<TPosition> endPositions = getProperty(pos,*it);
 		if (!empty(endPositions)) {
 			s <<  " {";
 			append(tmp, "shape = box, ");
-			typename Iterator<String<unsigned int>, Rooted>::Type itP = begin(endPositions);
-			typename Iterator<String<unsigned int>, Rooted>::Type beginP = itP;
+			typename Iterator<String<TPosition>, Rooted>::Type itP = begin(endPositions);
+			typename Iterator<String<TPosition>, Rooted>::Type beginP = itP;
 			for(;!atEnd(itP);goNext(itP)) {
 				if (beginP != itP) s << ", ";
 				s << *itP;

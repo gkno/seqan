@@ -147,11 +147,12 @@ template <typename TNeedle, typename TNeedle2>
 inline void 
 setHost (Pattern<TNeedle, BFAM<Trie> > & me, TNeedle2 const& needle) 
 {
-	SEQAN_CHECKPOINT
+	SEQAN_CHECKPOINT;
+	typedef Position<TNeedle>::Type TPosition;
 	me.needleLength = length(needle);
 	clear(me.automaton);
 
-	String<String<unsigned int> > terminal_state_map; //dummy
+	String<String<TPosition> > terminal_state_map; //dummy
 	typedef typename Value<TNeedle2 const>::Type TValue;
 	String<TValue> reverse_string = needle;
 	reverseInPlace(reverse_string);

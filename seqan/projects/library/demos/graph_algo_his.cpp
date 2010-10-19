@@ -12,7 +12,8 @@ int main() {
 	fill(weights, length(seq), 1);
 	assignProperty(weights, 2, 10);
 ///Out-parameter: A string of positions belonging to the heaviest increasing subsequence
-	String<unsigned int> pos;
+	typedef Position<String<unsigned int> >::Type TPosition;
+	String<TPosition> pos;
 ///Heaviest increasing subsequence and the corresponding weight
 	unsigned int w = heaviestIncreasingSubsequence(seq, weights, pos);
 ///Console Output

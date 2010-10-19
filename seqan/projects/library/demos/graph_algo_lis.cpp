@@ -12,7 +12,8 @@ int main() {
 	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
 	appendValue(seq, 10);
 ///Out-parameter: A string of positions belonging to the longest increasing subsequence
-	String<unsigned int, Block<> > pos;
+	typedef Position<String<unsigned int> >::Type TPosition;
+	String<TPosition, Block<> > pos;
 ///Longest increasing subsequence
 	longestIncreasingSubsequence(seq,pos);
 ///Output the longest increasing subsequence

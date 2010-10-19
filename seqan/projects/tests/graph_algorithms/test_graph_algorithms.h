@@ -209,8 +209,8 @@ void Test_BreadthFirstSearch() {
 	addEdges(g,edges, numEdges);
 
 	// Predecessor and distance map
-	String<unsigned int> predMap;
-	String<unsigned int> distMap;
+	String<TVertexDescriptor> predMap;
+	String<TVertexDescriptor> distMap;
 
 	// Bfs
 	breadth_first_search(g, 1, predMap, distMap);
@@ -926,8 +926,10 @@ void Test_PathGrowingAlgorithm() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_LongestIncreasingSubsequence() {
+	typedef Position<String<char> >::Type TPosition;
+
 	String<char> seq1("zeitgeist");
-	String<unsigned int, Block<> > pos1;
+	String<TPosition, Block<> > pos1;
 	longestIncreasingSubsequence(seq1,pos1);
 	// Trace is backwards
 	SEQAN_ASSERT_TRUE(seq1[pos1[4]] == 'e');
@@ -936,12 +938,12 @@ void Test_LongestIncreasingSubsequence() {
 	SEQAN_ASSERT_TRUE(seq1[pos1[1]] == 's');
 	SEQAN_ASSERT_TRUE(seq1[pos1[0]] == 't');
 
-	String<unsigned int> seq;
+	String<TPosition> seq;
 	appendValue(seq, 5); appendValue(seq, 3); appendValue(seq, 4);
 	appendValue(seq, 9); appendValue(seq, 6); appendValue(seq, 2);
 	appendValue(seq, 1); appendValue(seq, 8); appendValue(seq, 7);
 	appendValue(seq, 10);
-	String<unsigned int, Block<> > pos;
+	String<TPosition, Block<> > pos;
 	longestIncreasingSubsequence(seq,pos);
 	SEQAN_ASSERT_TRUE(seq[pos[4]] == 3);
 	SEQAN_ASSERT_TRUE(seq[pos[3]] == 4);
@@ -953,9 +955,11 @@ void Test_LongestIncreasingSubsequence() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_LongestCommonSubsequence() {
+	typedef Position<String<char> >::Type TPosition;
+
 	String<char> seq1("abacx");
 	String<char> seq2("baabca");
-	String<std::pair<unsigned int, unsigned int> > pos;
+	String<std::pair<TPosition, TPosition> > pos;
 	longestCommonSubsequence(seq1, seq2, 100, pos);
 	SEQAN_ASSERT_TRUE(seq1[pos[2].first] == 'b');
 	SEQAN_ASSERT_TRUE(seq2[pos[2].second] == 'b');
@@ -969,9 +973,11 @@ void Test_LongestCommonSubsequence() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_HeaviestIncreasingSubsequence() {
+	typedef Position<String<char> >::Type TPosition;
+
 	String<char> seq1("zeitgeist");
 	String<unsigned int> weights1;
-	String<unsigned int> pos1;
+	String<TPosition> pos1;
 	fill(weights1, length(seq1), 1);
 	unsigned int w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
 	// Trace is backwards
@@ -1010,7 +1016,7 @@ void Test_HeaviestIncreasingSubsequence() {
 	appendValue(weights, 15); appendValue(weights, 10);
 	appendValue(weights, 10); appendValue(weights, 10);
 	appendValue(weights, 10); appendValue(weights, 15);
-	String<unsigned int> pos;
+	String<TPosition> pos;
 	w = heaviestIncreasingSubsequence(seq, weights, pos);
 	SEQAN_ASSERT_TRUE(w == 20);
 	SEQAN_ASSERT_TRUE(seq[pos[1]] == 0);

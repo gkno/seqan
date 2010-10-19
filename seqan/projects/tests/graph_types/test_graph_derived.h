@@ -24,8 +24,10 @@ void Test_Oracle() {
 //////////////////////////////////////////////////////////////////////////////
 
 void Test_Trie() {
+	typedef Position<String<char> >::Type TPosition;
+
 	Graph<Automaton<char> > g;
-	String<String<unsigned int> > pos;
+	String<String<TPosition> > pos;
 	String<String<char> > keywords;
 	appendValue(keywords, String<char>("announce"));
 	appendValue(keywords, String<char>("annual"));
@@ -101,8 +103,10 @@ void Test_Trie() {
 
 void Test_SetOracle() 
 {
+	typedef Position<String<char> >::Type TPosition;
+
 	Graph<Automaton<char> > g;
-	String<String<unsigned int> > pos;
+	String<String<TPosition> > pos;
 	String<String<char> > keywords;
 	appendValue(keywords, String<char>("announce"));
 	appendValue(keywords, String<char>("annual"));

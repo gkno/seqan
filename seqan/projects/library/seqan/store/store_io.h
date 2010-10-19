@@ -130,7 +130,7 @@ read(TFile & file,
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
 
 	// All maps to mirror file ids to our ids
-	typedef std::map<TId, TId> TIdMap;
+	typedef std::map<TId, TSize> TIdMap;
 	TIdMap libIdMap;
 	TIdMap frgIdMap;
 	TIdMap readIdMap;

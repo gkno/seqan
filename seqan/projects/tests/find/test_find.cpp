@@ -43,7 +43,9 @@ using namespace seqan;
 
 template <typename TAlgorithmSpec>
 void Test_OnlineAlg() {
-    String<unsigned int> pos;
+		typedef typename Position<CharString>::Type TPosition;
+
+    String<TPosition> pos;
 
     //____________________________________________________________________________
     // Test1 - small needle
@@ -55,7 +57,7 @@ void Test_OnlineAlg() {
     Pattern<String<char>, TAlgorithmSpec> pattern(needle);
 
     while (find(finder, pattern)) {
-        append(pos,position(finder));
+        appendValue(pos,position(finder));
         SEQAN_ASSERT_EQ(position(finder), beginPosition(finder));
         SEQAN_ASSERT_EQ(endPosition(finder), beginPosition(finder) + length(finder));
         SEQAN_ASSERT_EQ(length(finder), length(needle));
@@ -181,7 +183,9 @@ void Test_OnlineAlg() {
 
 template <typename TAlgorithmSpec>
 void Test_OnlineAlgMulti(bool order_by_begin_position) {
-    String<unsigned int> pos;
+	typedef typename Position<CharString>::Type TPosition;
+
+    String<TPosition> pos;
 
     //____________________________________________________________________________
     // Test1 - Single keyword
@@ -301,8 +305,8 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
     appendValue(kyw, String<char>("annually"));
     Pattern<TN, TAlgorithmSpec> pt(kyw);
 
-    String<unsigned int> finderPos;
-    String<unsigned int> keywordIndex;
+    String<TPosition> finderPos;
+    String<TPosition> keywordIndex;
     while (find(fd, pt)) {
         append(finderPos,position(fd));
         append(keywordIndex,position(pt));
@@ -578,7 +582,9 @@ void Test_OnlineAlgMulti(bool order_by_begin_position) {
 
 template <typename TAlgorithmSpec>
 void Test_OnlineAlgWildcards() {
-    String<unsigned int> pos;
+	typedef typename Position<CharString>::Type TPosition;
+
+	String<TPosition> pos;
 
     //____________________________________________________________________________
     // Test1 - simple find wo wildcards
