@@ -251,7 +251,7 @@ SEQAN_DEFINE_TEST(GraphMatchRefine)
 	typedef Graph<Alignment<TAlignmentStringSet> > TAliGraph;
 	typedef VertexDescriptor<TAliGraph>::Type TVD;
 	TAlignmentStringSet aliStr;
-	for(TSize i = 0; i<length(str); ++i) {
+	for(TId i = 0; i<length(str); ++i) {
 		assignValueById(aliStr, str, i);
 	}
 	Score<int> score_type = Score<int>(1,-1,-2,0) ;
