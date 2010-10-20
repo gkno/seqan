@@ -747,7 +747,7 @@ int buildReadSimulationInstruction(
             // Pick a library length, according to the options.
             size_t libraryLength = pickLibraryLength(rng, options);
             // Compute start and end position.
-            inst.endPos = inst.beginPos + readLength + libraryLength;
+            inst.endPos = inst.beginPos + libraryLength;
             inst.beginPos = inst.endPos - readLength;
             // Verify that the mate fits right of the originally simulated read.
             size_t contigLength = length(haplotype[inst.contigId]);
