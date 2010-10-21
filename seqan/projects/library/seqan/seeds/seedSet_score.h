@@ -357,7 +357,7 @@ addSeed(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
     if (_qualityReached(set.manager[position],set.scoreMap[position], set.qualityValue, TQuality()))
 		set.result.insert(position);
 
-	set.fragmentMap.insert( std::pair<TValue, TSize >(dPos-qPos, position));
+	set.fragmentMap.insert( std::make_pair(static_cast<int>(dPos-qPos), position));
     return true;
 }
 

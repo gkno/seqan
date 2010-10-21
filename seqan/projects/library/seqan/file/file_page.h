@@ -253,7 +253,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < unsigned _PageSize >
     struct Fixed;
 
-    typedef ::std::list<int>		PageLRUList;    // least recently usage list
+    typedef ::std::list<Position<String<void*> >::Type>		PageLRUList;    // least recently usage list
 	typedef PageLRUList::iterator	PageLRUEntry;
 
     template < typename TValue,
@@ -291,7 +291,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline TValue       & operator[](TSize i)       { return begin[i]; }
         inline TValue const & operator[](TSize i) const { return begin[i]; }
 	};
-
 
 	//////////////////////////////////////////////////////////////////////////////
 	// meta-function interface
