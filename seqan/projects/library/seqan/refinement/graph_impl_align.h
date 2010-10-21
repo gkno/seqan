@@ -477,6 +477,7 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef typename TGraph::TFragmentInfo_ TFragmentInfo;
 	typedef typename TGraph::TKey_ TKey;
 	typedef typename TGraph::TPosToVertexMap_ TPosToVertexMap;
+	//typedef typename TPosToVertexMap::key_type TKey;
 
 	//for(TPosToVertexMap::const_iterator p = g.data_pvMap.begin(); p != g.data_pvMap.end(); ++p) {
 	//	std::cout << p->first.first << ',' << p->first.second << ':' << p->second << std::endl;
@@ -485,13 +486,13 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	TVertexDescriptor nilVertex = getNil<TVertexDescriptor>();
 
 	// Store the new fragment
-	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(TKey(id, begin + len));
+	typename TPosToVertexMap::iterator interval = g.data_pvMap.lower_bound(TKey((TIdType)id, (TSize)begin + (TSize)len));
 	// Segment does not belong to Sequence anymore
 	SEQAN_ASSERT_TRUE(interval != g.data_pvMap.end());
 	// Segment end must be assigned to nil so far
 	SEQAN_ASSERT_TRUE(interval->second == nilVertex);
 	// Segment must belong to the whole old interval
-	SEQAN_ASSERT_TRUE(*interval == *g.data_pvMap.upper_bound(TKey(id, begin)));
+	SEQAN_ASSERT_TRUE(*interval == *g.data_pvMap.upper_bound(TKey((TIdType)id, (TSize)begin)));
 
 	// Insert new vertex
 	TVertexDescriptor vd = addVertex(g.data_align);
@@ -503,29 +504,29 @@ addVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	if ( (TSize) begin + len == (TSize) interval->first.second) {
 		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
-			(g.data_pvMap.find(TKey(id, begin)) != g.data_pvMap.end())) {
+			(g.data_pvMap.find(TKey((TIdType)id, (TSize)begin)) != g.data_pvMap.end())) {
 			// Replace interval
 			interval->second = vd;
 		} else {
 			// Split interval once
-			g.data_pvMap.insert(std::make_pair(TKey(interval->first.first,begin), interval->second));
+			g.data_pvMap.insert(std::make_pair(TKey(interval->first.first,(TSize)begin), interval->second));
 			g.data_pvMap.erase(interval);
-			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey((TIdType)id,(TSize)begin+len), vd));
 		}
 	} else {
 		// Does the beginning of the new fragment coincides with the beginning of the interval?
 		if ((begin == 0) ||
-			(g.data_pvMap.find(TKey(id, begin)) != g.data_pvMap.end())) {
+			(g.data_pvMap.find(TKey((TIdType)id, (TSize)begin)) != g.data_pvMap.end())) {
 			// Split interval once
 			// Just insert here because we store interval ends
-			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey((TIdType)id,(TSize)begin+len), vd));
 		} else {
 			// Split interval twice
-			TIdType tmp = interval->first.second;
+			TSize tmp = interval->first.second;
 			g.data_pvMap.insert(std::make_pair(TKey(interval->first.first,begin), interval->second));
 			g.data_pvMap.erase(interval);
-			g.data_pvMap.insert(std::make_pair(TKey(id,begin+len), vd));
-			g.data_pvMap.insert(std::make_pair(TKey(id,tmp), nilVertex));
+			g.data_pvMap.insert(std::make_pair(TKey((TIdType)id,(TSize)begin+len), vd));
+			g.data_pvMap.insert(std::make_pair(TKey((TIdType)id,tmp), nilVertex));
 		}
 	}
 	return vd;
@@ -1285,9 +1286,11 @@ findVertex(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	SEQAN_CHECKPOINT
 	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename TGraph::TKey_ TKey;
+	typedef typename Size<TGraph>::Type TSize;
+	typedef typename Id<TGraph>::Type TIdType;
 	typedef typename VertexDescriptor<TGraph>::Type TVertexDescriptor;
 	
-	return (pos >= (TPos) length(getValueById(stringSet(g),id))) ? getNil<TVertexDescriptor>() : g.data_pvMap.upper_bound(TKey(id, pos))->second;
+	return (pos >= (TPos) length(getValueById(stringSet(g),id))) ? getNil<TVertexDescriptor>() : g.data_pvMap.upper_bound(TKey((TIdType)id, (TSize)pos))->second;
 }
 
 //////////////////////////////////////////////////////////////////////////////
