@@ -5,6 +5,7 @@ import os
 import os.path
 
 INVALID_IDENTIFIER = re.compile(r'\b_[A-Z_]\w*\b')
+REPLACEMENT_ID = re.compile(r'\b(__?)(\w*)\b')
 VALID_IDENTIFIERS = map(
         lambda rx: re.compile(rx),
         [ '___+',
@@ -129,6 +130,14 @@ def test_file_type(filename):
 
     return ext in ["c", "C", "cpp", "CPP", "c++", "C++", "h", "H", "hpp", "HPP", "h++", "H++"]
 
+
+def replacement(orig):
+    return REPLACEMENT_ID.sub(r'\2\1', orig)
+
+
+def generate_replacements(ids):
+    return dict([(original, replacement(original)) for original in ids])
+
 def main():
     results = {}
     project_path = sys.argv[1]
@@ -150,11 +159,14 @@ def main():
     for ids in results.values():
         all_ids |= ids
 
-    #for id in sorted(all_ids):
-    #    print id
-    for file in sorted(results.keys()):
-        for id in results[file]:
-            print '%s: %s' % (file, id)
+    replacements = generate_replacements(all_ids)
+
+    for id in sorted(all_ids):
+        print '%s: %s' % (id, replacements[id])
+
+    #for file in sorted(results.keys()):
+    #    for id in results[file]:
+    #        print '%s: %s' % (file, id)
 
     return 0
 
