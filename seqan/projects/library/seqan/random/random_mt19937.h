@@ -41,6 +41,7 @@ struct MersenneTwister {};
 /**
 .Spec.Mersenne Twister RNG
 ..general:Class.RNG
+..signature:RNG<MersenneTwister>
 ..summary:Mersenne Twister 19937 Random Number Generator
 ..cat:Random
 ..include:seqan/random.h

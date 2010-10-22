@@ -33,9 +33,11 @@ namespace seqan {
 /**
 .Class.RNG:
 ..summary:Random Number Generator
+..signature:RNG<>
 ..signature:RNG<TSpec>
 ..cat:Random
 ..param.TSpec:Random Number Generator specialization.
+...default:@Spec.Mersenne Twister RNG@
 ..include:seqan/random.h
 */
 template <typename TSpec>
