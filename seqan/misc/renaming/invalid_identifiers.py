@@ -4,8 +4,18 @@ import re
 
 from helpers import *
 
+PROGRAM_USAGE = """
+SeqAn invalid identifiers detection script.
+
+USAGE: invalid_identifiers.py BASE_PATH
+
+BASE_PATH is the root path of all the folders to be searched.
+""".strip()
+
 INVALID_IDENTIFIER = re.compile(r'\b_[A-Z_]\w*\b')
 REPLACEMENT_ID = re.compile(r'\b(__?)(\w*)\b')
+# The following IDs are exempted from replacement since they are either defined
+# by some compiler (-specific library) or are solely used within a string.
 VALID_IDENTIFIERS = map(
         lambda rx: re.compile(rx),
         [ '___+',
@@ -111,9 +121,15 @@ VALID_IDENTIFIERS = map(
           '_MSC_VER' ])
 
 def valid(id):
+    """
+    Returns whether the given ``id`` is in fact valid and shouldn't be replaced.
+    """
     return any(VALID_ID.match(id) for VALID_ID in VALID_IDENTIFIERS)
 
 def find_all(file):
+    """
+    Returns all invalid identifiers found in a given ``file``.
+    """
     f = open(file, 'r')
     result = []
     for line in f:
@@ -125,14 +141,26 @@ def find_all(file):
 
 
 def replacement(orig):
+    """
+    Returns the replacement string for a given invalid identifier.
+    """
     return REPLACEMENT_ID.sub(r'\2\1', orig)
 
 
 def generate_replacements(ids):
+    """
+    Generates a dictionary of replacement strings for a list of invalid
+    identifiers.
+    """
     return dict([(original, replacement(original)) for original in ids])
 
 
 def main():
+    if len(sys.argv) != 2:
+        print >>sys.stderr, 'ERROR: Invalid number of arguments.'
+        print >>sys.stderr, PROGRAM_USAGE
+        return 1
+
     results = {}
     project_path = sys.argv[1]
 
@@ -148,9 +176,9 @@ def main():
     for id in sorted(all_ids):
         print '%s: %s' % (id, replacements[id])
 
-    #for file in sorted(results.keys()):
-    #    for id in results[file]:
-    #        print '%s: %s' % (file, id)
+    for file in sorted(results.keys()):
+        for id in results[file]:
+            print '%s: %s' % (file, id)
 
     return 0
 
