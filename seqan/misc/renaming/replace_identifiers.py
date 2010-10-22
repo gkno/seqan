@@ -30,8 +30,8 @@ def build_subst_table(file):
     table = {}
 
     for line in f:
-        old, new = line.rstrip('\r\n').split(': ')
-        table[re.compile(r'\b%s\b' % old)] = new
+        old, new = line.rstrip('\r\n').split(':')
+        table[re.compile(r'\b%s\b' % old.strip())] = new.strip()
 
     return table
 
