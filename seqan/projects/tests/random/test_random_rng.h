@@ -30,6 +30,9 @@ SEQAN_DEFINE_TEST(test_random_mt19937_constructors)
     using namespace seqan;
 
     {
+        RNG<> mt;
+    }
+    {
         RNG<MersenneTwister> mt;
     }
     {

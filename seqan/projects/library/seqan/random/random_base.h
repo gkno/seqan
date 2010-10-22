@@ -30,6 +30,9 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
+// Forward to MersenneTwister, really defined in random_mt19937.h.
+struct MersenneTwister;
+
 /**
 .Class.RNG:
 ..summary:Random Number Generator
@@ -40,7 +43,7 @@ namespace seqan {
 ...default:@Spec.Mersenne Twister RNG@
 ..include:seqan/random.h
 */
-template <typename TSpec>
+template <typename TSpec = MersenneTwister>
 class RNG;
 
 /**
