@@ -1176,7 +1176,6 @@ void Test_Approx_Prefix_EditDist() {
         Finder<String<char> > finder(haystack);
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
-        SEQAN_ASSERT_LEQ(static_cast<size_t>(-getScore(pattern)), length(needle));
         while (find(finder, pattern)) {
             SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
         }
@@ -1195,7 +1194,6 @@ void Test_Approx_Prefix_EditDist() {
         Finder<String<char> > finder(haystack);
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
-        SEQAN_ASSERT_LEQ(static_cast<size_t>(-getScore(pattern)), length(needle));
         while (find(finder, pattern)) {
             SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
         }
@@ -1278,8 +1276,6 @@ SEQAN_DEFINE_TEST(test_find_online_multi_MultiBFAM_Trie) {
 
 
 SEQAN_DEFINE_TEST(test_find_approx_prefix_edit_dist_dpsearch) {
-    SEQAN_ASSERT_TRUE_MSG(false, "TODO(holtgrew): Fix test_find_approx_prefix_edit_dist_dpsearch, segfaults.");
-    return;
     Test_Approx_Prefix_EditDist<DPSearch<Score<>, FindPrefix> >();
 }
 
