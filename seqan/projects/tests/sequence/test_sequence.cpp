@@ -10,9 +10,25 @@ using namespace seqan;
 #include "test_string.h"
 #include "test_stringset.h"
 #include "test_segment.h"
+#include "test_sequence_std_adaptions.h"
 
 SEQAN_BEGIN_TESTSUITE(Sequence tests)
 {
+    // -----------------------------------------------------------------------
+    // Tests for STL adaptions.
+    // -----------------------------------------------------------------------
+    //
+    // Test adaptions for std::string.
+    SEQAN_CALL_TEST(test_sequence_adaptions_metafunctions_std_string);
+    SEQAN_CALL_TEST(test_sequence_adaptions_iterators_std_string);
+    SEQAN_CALL_TEST(test_sequence_adaptions_sequence_interface_std_string);
+    SEQAN_CALL_TEST(test_sequence_adaptions_sequence_memory_std_string);
+
+    // Test adaptions for std::list.
+    SEQAN_CALL_TEST(test_sequence_adaptions_metafunctions_std_list);
+    SEQAN_CALL_TEST(test_sequence_adaptions_iterators_std_list);
+    SEQAN_CALL_TEST(test_sequence_adaptions_sequence_interface_std_list);
+    
     // Use the constant EMPTY_STRING once to get rid of linker error in Visual Studio.
     (void)seqan::String<char const ,struct seqan::CStyle>::EMPTY_STRING;
 
@@ -31,16 +47,6 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
 
 	SEQAN_CALL_TEST(Segment);
 
-//	debug::verifyCheckpoints("projects/library/seqan/sequence.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/sequence_interface.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/string_base.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/string_alloc.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/string_pointer.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/string_array.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/string_cstyle.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/lexical.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/std_string.h");
-
     SEQAN_CALL_TEST(StringSet_Owner_Default);
     SEQAN_CALL_TEST(StringSet_Concat_Owner_Default);
     SEQAN_CALL_TEST(StringSet_Concat_Owner_ConcatDirect);
@@ -55,14 +61,11 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     SEQAN_CALL_TEST(Suffix);
     SEQAN_CALL_TEST(Ticket317);
 
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_infix.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_suffix.h");
-//	debug::verifyCheckpoints("projects/library/seqan/sequence/segment_prefix.h");
-	//debug::verifyCheckpoints("projects/library/seqan/sequence/segment_gram.h");
-
-#define ROOT "projects/tests/sequence/"
-    SEQAN_VERIFY_CHECKPOINTS(ROOT"test_string.h");
-    SEQAN_VERIFY_CHECKPOINTS(ROOT"test_stringset.h");
-    SEQAN_VERIFY_CHECKPOINTS(ROOT"test_segment.h");
-#undef ROOT
-} SEQAN_END_TESTSUITE
+    // -----------------------------------------------------------------------
+    // Checkpoint Verification
+    // -----------------------------------------------------------------------
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/std_string.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_list.h");
+    // TODO(holtgrew): Add more checkpoints.
+}
+SEQAN_END_TESTSUITE
