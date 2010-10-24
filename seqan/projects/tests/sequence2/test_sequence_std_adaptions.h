@@ -113,8 +113,31 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_string)
 // Test iterators for STL strings.
 SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_string)
 {
-    // TODO(holtgrew): Write tests for this...
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+    
+    // Test const iterator.
+    {
+        std::string const str = "Unimportant contents.";
+        typedef Iterator<std::string const>::Type TIterator;
+
+        std::string strCopy;
+        for (TIterator it = begin(str, Standard()); it != end(str, Standard()); ++it)
+            appendValue(strCopy, value(it));
+
+        SEQAN_ASSERT_EQ(str, strCopy);
+    }
+
+    // Test non-const iterator.
+    {
+        std::string str = "Unimportant contents.";
+        typedef Iterator<std::string>::Type TIterator;
+
+        std::string strCopy;
+        for (TIterator it = begin(str, Standard()); it != end(str, Standard()); ++it)
+            appendValue(strCopy, value(it));
+
+        SEQAN_ASSERT_EQ(str, strCopy);
+    }
 }
 
 
@@ -122,8 +145,24 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_string)
 // e.g. value(), front(), back().
 SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_string)
 {
-    // TODO(holtgrew): Write tests for this...
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+
+    std::string str = "Hello World!";
+
+    // value(str, i), getValue(str, i)
+    SEQAN_ASSERT_EQ(value(str, 0), 'H');
+    SEQAN_ASSERT_EQ(value(str, 4), 'o');
+    SEQAN_ASSERT_EQ(getValue(str, 0), 'H');
+    SEQAN_ASSERT_EQ(getValue(str, 4), 'o');
+
+    // front(), back()
+    SEQAN_ASSERT_EQ(front(str), 'H');
+    SEQAN_ASSERT_EQ(back(str), '!');
+
+    // length()
+    SEQAN_ASSERT_EQ(length(str), 12u);
+
+    // TODO(holtgrew): Anything else missing? Probably...
 }
 
 
@@ -131,8 +170,40 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_string)
 // for STL strings.
 SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_string)
 {
-    // TODO(holtgrew): Write tests for this...
-    SEQAN_ASSERT_FAIL("Write me!");
+    using namespace seqan;
+
+    // Test resize function -- resize down.
+    {
+        std::string str = "Hello world!";
+        resize(str, 5);
+        SEQAN_ASSERT_EQ(str, "Hello");
+    }
+
+    // Test resize function -- resize up.
+    {
+        std::string str = "12345";
+        resize(str, 6);
+        // The following gives an assertion in positional setValue() if not resized properly.
+        str[5] = '6';
+        SEQAN_ASSERT_EQ(str, "123456");
+    }
+
+    // Tests reserve function.
+    {
+        std::string str;
+        reserve(str, 10);
+        SEQAN_ASSERT_GEQ(capacity(str), 10u);
+    }
+    {
+        std::string str;
+        reserve(str, 10, Generous());
+        SEQAN_ASSERT_GEQ(capacity(str), 10u);
+    }
+    {
+        std::string str;
+        reserve(str, 10, Exact());
+        SEQAN_ASSERT_EQ(capacity(str), 10u);
+    }
 }
 
 
