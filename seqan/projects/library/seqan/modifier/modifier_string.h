@@ -240,8 +240,8 @@ template <typename TDest, typename TSource>
 inline void _copyCargo(TDest & me, TSource & _origin) {
     SEQAN_CHECKPOINT;
     _copyCargoImpl(me, _origin, typename _IsSameType<
-            typename Cargo<TDest>::Type, 
-            typename Cargo<TSource>::Type >::Type());
+                   typename _RemoveConst<typename Cargo<TDest>::Type >::Type, 
+                   typename _RemoveConst<typename Cargo<TSource>::Type>::Type >::Type());
 }
 
 

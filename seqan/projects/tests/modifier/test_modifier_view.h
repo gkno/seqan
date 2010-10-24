@@ -34,7 +34,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_iterator_metafunctions) {
         SEQAN_ASSERT_TRUE(res);
     }
     {
-        typedef char TExpected;
+        typedef char & TExpected;
         typedef Reference<TModifiedIterator>::Type TResult;
         bool res = TYPECMP<TExpected, TResult>::VALUE;
         SEQAN_ASSERT_TRUE(res);
@@ -266,7 +266,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
     typedef ModifiedString<ModifiedString<String<char>, ModView<TFunctor> >, ModView<TFunctor> > TModifiedString;
 
     CharString originalStr = "This is a test!";
-    Dna5String const kExpectedResult = "Vjku ku vguv!";
+    CharString const kExpectedResult = "wklv lv whv!";
 
     TModifiedString modifiedStr(originalStr);
     TFunctor func1(1), func2(2);
@@ -275,6 +275,8 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
 
     // TODO(holtgrew): The following does not compile.
 //    SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
+    // TODO(holtgrew): The next assertion fails. The reason is the catch-all copy constructor of modified iterator. Why do we allow this anyway?
+    SEQAN_ASSERT_FAIL("Problem with copy constructor of modified iterator.");
     CharString modifiedStrCopy = modifiedStr;
     SEQAN_ASSERT_EQ(kExpectedResult, modifiedStrCopy);
 }
@@ -282,17 +284,31 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
 
 // Test the convertInPlace() function.
 SEQAN_DEFINE_TEST(test_modifier_convert_in_place) {
-    CharString originalStr = "This is a test!";
-    CharString expectedResult = "Uijt jt b uftu!";
+    CharString const originalStr = "This is a test!";
+    CharString const expectedResult = "Uijt jt b uftu!";
 
-    convertInPlace(originalStr, CaesarChiffre<char>(1));
-    SEQAN_ASSERT_EQ(expectedResult, originalStr);
+    // Non-const variant on string.
+    {
+        CharString strCopy = originalStr;
+        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        SEQAN_ASSERT_EQ(expectedResult, strCopy);
+    }
 
-    // TODO(holtgrew): convertInPlace as a const function does not make any sense.
-    SEQAN_ASSERT_TRUE_MSG(false, "convertInPlace() on const strings is just plain wrong!");
-    CharString const kOriginalStr = originalStr;
-    convertInPlace(kOriginalStr, CaesarChiffre<char>(1));
-    SEQAN_ASSERT_EQ(expectedResult, kOriginalStr);
+    // Non-const variant on segment.
+    {
+        CharString strCopy = originalStr;
+        Segment<CharString, InfixSegment> stringInfix(strCopy);
+        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        SEQAN_ASSERT_EQ(expectedResult, strCopy);
+    }
+
+    // Const variant on segment.
+    {
+        CharString strCopy = originalStr;
+        Segment<CharString, InfixSegment> const stringInfix(strCopy);
+        convertInPlace(strCopy, CaesarChiffre<char>(1));
+        SEQAN_ASSERT_EQ(expectedResult, strCopy);
+    }
 }
 
 #endif  // TESTS_MODIFIER_TEST_MODIFIER_VIEW_H_

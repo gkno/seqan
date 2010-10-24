@@ -546,7 +546,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		unsigned seqCount = length(stringSet);
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-			reverseComplementInPlace(stringSet[seqNo]);
+			reverseInPlace(stringSet[seqNo]);
 	}
 
 	template < typename TSequence, typename TSpec >
@@ -555,7 +555,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		unsigned seqCount = length(stringSet);
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-			reverseComplementInPlace(stringSet[seqNo]);
+			reverseInPlace(stringSet[seqNo]);
 	}
 
     template <typename TValue>
