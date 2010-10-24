@@ -139,7 +139,7 @@ bool _validate(TNeedle2 const & needle)
 	while (i < nl){
 		if (convert<char>(getValue(needle,i)) == '['){
 			// check if class ends
-			while(convert<char>(getValue(needle,i)) != ']' && i < nl)++i;
+		  while(i < nl && convert<char>(getValue(needle,i)) != ']')++i;
 			if(i == nl)	return false;
 		}
 		else if(convert<char>(getValue(needle,i)) == '*' || convert<char>(getValue(needle,i)) == '+' || convert<char>(getValue(needle,i)) == '?'){
@@ -155,7 +155,7 @@ SEQAN_CHECKPOINT
 			TWord n,m;
 			n = m = 0;
 			--len;++i; // get to the first number
-			while(convert<char>(getValue(needle,i)) != '}' && convert<char>(getValue(needle,i)) != ',' && i < nl) {			
+			while(i < nl && convert<char>(getValue(needle,i)) != '}' && convert<char>(getValue(needle,i)) != ',') {			
 SEQAN_CHECKPOINT
 				append(number,convert<char>(getValue(needle,i)));
 				--len;++i;
@@ -172,7 +172,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 				--len;++i;
 				clear(number);
-				while(convert<char>(getValue(needle,i)) != '}' && i < nl) {			
+				while(i < nl && convert<char>(getValue(needle,i)) != '}') {			
 SEQAN_CHECKPOINT
 					append(number,convert<char>(getValue(needle,i)));
 					--len;++i;
