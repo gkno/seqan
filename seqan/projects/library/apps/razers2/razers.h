@@ -462,7 +462,7 @@ bool loadReads(
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0
+		if (options.readNaming == 0 || options.readNaming == 3
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 			|| options.fastaIdQual
 #endif
@@ -474,7 +474,7 @@ bool loadReads(
 		if(options.fastaIdQual)
 		{
 			qual = suffix(id, length(id) - length(seq));
-			if (options.readNaming == 0)
+			if (options.readNaming == 0 || options.readNaming == 3)
 				id = prefix(id,length(id) - length(seq));
 			else 
 				clear(id);
