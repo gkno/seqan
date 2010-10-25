@@ -340,6 +340,9 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
             setScore(matrixScore, Dna5('N'), Dna5(x), 0);
         }
     }
+        
+    //if (readId == 71)
+    //    std::cout << "stop here" << std::endl;
 
     // Build interval tree.
     //std::cerr << ">>> readId == " << readId << ", contigId == " << contigId << std::endl;
@@ -348,7 +351,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     String<TInterval> intervals;
     for (TWitRecordIter it = witRecordsBegin; it != witRecordsEnd; ++it) {
         // Skip aligned reads on other strand.
-        if (it->isForward != isForward) continue;
+        //if (it->isForward != isForward) continue;
         // Skip intervals with too high distance, ignore distance in oracle wit mode.
         //std::cerr << "it->distance == " << it->distance << std::endl;
         if (!options.oracleWitMode && static_cast<int>(it->distance) > options.maxError) continue;
@@ -434,6 +437,10 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
 
         // Query interval tree with lastPos.
         String<size_t> foundIntervalIds;
+        //if (lastPos == 470875) {
+        //  std::cout << "stop here" << std::endl;
+        //  std::cout << "readId == " << readId << ", getMateNo() == " << getMateNo(fragments, readId) << std::endl;
+        //}
         if (length(intervals) > 0u)
           findIntervals(intervalTree, lastPos, foundIntervalIds);
 
@@ -448,6 +455,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                               << ", \"strand\": \"" << (isForward ? "forward" : "reverse")
                               << "\", \"begin_pos\": " << beginPos
                               << ", \"end_pos\": " << endPos
+                              << ", \"mate_no\": " << getMateNo(fragments, readId)
                               << ", \"read_seq\": \"" << fragments.readSeqStore[it->readId]
                               << "\", \"contig_infix_seq\": \"" << infix(contig, beginPos, endPos);
                     std::cerr << "\", \"qualities\": [";
@@ -480,6 +488,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 std::cerr << "end pos = " << endPos << std::endl;
                 std::cerr << "last pos = " << lastPos << std::endl;
                 std::cerr << "contigId = " << it->contigId << std::endl;
+                std::cerr << "mateNo " << getMateNo(fragments, it->readId) << std::endl;
                 std::cerr << "max error rate is " << options.maxError << std::endl;
                 std::cerr << "contig_infix_seq = " << infix(contig, beginPos, endPos) << std::endl;
                 std::cerr << "read length is " << length(fragments.readSeqStore[it->readId]) << std::endl;

@@ -29,8 +29,7 @@ struct WitRecord {
     enum {
       FLAG_PAIRED = 0x01,
       FLAG_FIRST_MATE = 0x40,
-      FLAG_SECOND_MATE = 0x80,
-      FLAG_MATE_MASK = 0x01 | 0x04 | 0x80
+      FLAG_SECOND_MATE = 0x80
     };
 
     // Flags, 0x01 - paired, 0x40 - first read in pair, 0x80 - second read in
