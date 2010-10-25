@@ -13,6 +13,7 @@
 #include "test_seeds_memory_manager.h"
 
 SEQAN_DEFINE_TEST(test_seed_banded_align) {
+	SEQAN_SKIP_TEST;
     Main_BandedAlign();
 }
 
@@ -23,16 +24,19 @@ SEQAN_DEFINE_TEST(test_seed_global_seed_chain) {
 
 
 SEQAN_DEFINE_TEST(test_seed_memory_manager) {
+	SEQAN_SKIP_TEST;
     Main_MemoryManager();
 }
 
 
 SEQAN_DEFINE_TEST(test_seed_seeds) {
+	SEQAN_SKIP_TEST;
     Main_Seeds();
 }
 
 
 SEQAN_DEFINE_TEST(test_seed_seed_set) {
+	SEQAN_SKIP_TEST;
     Main_SeedSet();
 }
 
