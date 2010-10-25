@@ -197,17 +197,20 @@ SEQAN_CHECKPOINT
         len = length(queue);
         if ((len == 3) && (value(queue, 2).i3 < scoreDropOff * (-1))) {
             if (value(queue, 1).i3 >= minScore) {
-                // append new sub-alignment
-                TPos begin = value(queue, 1).i1;
-                TPos end = value(queue, 1).i2;
-
+				// create new sub-alignment
                 TAlign ali(align);
-                setClippedBeginPosition(row(ali, 0), toSourcePosition(row(ali, 0), begin));
-                setClippedBeginPosition(row(ali, 1), toSourcePosition(row(ali, 1), begin));
+                TPos begin0 = toSourcePosition(row(ali, 0), value(queue, 1).i1);
+                TPos begin1 = toSourcePosition(row(ali, 1), value(queue, 1).i1);
+                TPos end0 = toSourcePosition(row(ali, 0), value(queue, 1).i2);
+                TPos end1 = toSourcePosition(row(ali, 1), value(queue, 1).i2);
+                setClippedBeginPosition(row(ali, 0), begin0);
+                setClippedBeginPosition(row(ali, 1), begin1);
 				setBeginPosition(row(ali, 0), 0);
 				setBeginPosition(row(ali, 1), 0);
-                setClippedEndPosition(row(ali, 0), toSourcePosition(row(ali, 0), end));
-                setClippedEndPosition(row(ali, 1), toSourcePosition(row(ali, 1), end));
+                setClippedEndPosition(row(ali, 0), end0);
+                setClippedEndPosition(row(ali, 1), end1);
+
+                // append sub-alignment
                 appendValue(alignmentString, ali);
             }
             replace(queue, 0, 2, String<TMerger>());
