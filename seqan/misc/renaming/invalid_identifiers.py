@@ -10,6 +10,10 @@ SeqAn invalid identifiers detection script.
 USAGE: invalid_identifiers.py BASE_PATH
 
 BASE_PATH is the root path of all the folders to be searched.
+This script generates a list of invalid identifiers found in the code base,
+paired with their suggested replacement string in the format ``"old: new"``,
+one identifier per line.
+The result is written to the standard output.
 """.strip()
 
 INVALID_IDENTIFIER = re.compile(r'\b_[A-Z_]\w*\b')
@@ -176,9 +180,9 @@ def main():
     for id in sorted(all_ids):
         print '%s: %s' % (id, replacements[id])
 
-    for file in sorted(results.keys()):
-        for id in results[file]:
-            print '%s: %s' % (file, id)
+    #for file in sorted(results.keys()):
+    #    for id in results[file]:
+    #        print '%s: %s' % (file, id)
 
     return 0
 

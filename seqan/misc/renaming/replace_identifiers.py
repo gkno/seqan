@@ -9,11 +9,13 @@ PROGRAM_USAGE = """
 SeqAn script to replace invalid identifiers (previously collected) in the SeqAn
 codebase.
 
-USAGE: replace_identifiers.py BASE_PATH REPLACEMENTS
+USAGE: replace_identifiers.py BASE_PATH [REPLACEMENTS]
 
 BASE_PATH is the root path of all the folders to be searched.
-REPLACEMENTS is a file of `key:value' pairs which contain the invalid
+REPLACEMENTS is a file of ``"key:value"`` pairs which contain the invalid
     identifier and the replacement string.
+    If this file is not given, it is attemped to read the replacements from the
+    standard input stream.
 """.strip()
 
 def replace_all(text, subst):
@@ -46,10 +48,9 @@ def build_subst_table(file):
     """
     Read the substitutions defined in ``file`` and build a substitution table.
     """
-    f = open(file, 'r')
     table = {}
 
-    for line in f:
+    for line in file:
         old, new = line.rstrip('\r\n').split(':')
         table[re.compile(r'\b%s\b' % old.strip())] = new.strip()
 
@@ -57,13 +58,20 @@ def build_subst_table(file):
 
 
 def main():
-    if len(sys.argv) != 3:
+    # Either read from stdin or expect a file path in the second argument.
+    # Since there is no reliable way of checking for an attached stdin on
+    # Windows, just assume good faith if the file name isn't given.
+    use_stdin = len(sys.argv) == 2
+    if not (len(sys.argv) == 3 or use_stdin):
         print >>sys.stderr, 'ERROR: Invalid number of arguments.'
         print >>sys.stderr, PROGRAM_USAGE
         return 1
 
+    if use_stdin:
+        print >>sys.stderr, "Attempting to read from stdin ..."
+
     project_path = sys.argv[1]
-    replacements_file = sys.argv[2]
+    replacements_file = sys.stdin if use_stdin else open(sys.argv[2], 'r')
 
     substitutions = build_subst_table(replacements_file)
 
