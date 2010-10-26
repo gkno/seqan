@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..param.TCargo:The cargo type.
 ...default:int.
 ...metafunction:Metafunction.Cargo
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 template<typename TValue = int, typename TCargo = int>
 class IntervalAndCargo
@@ -110,7 +110,7 @@ SEQAN_CHECKPOINT
 ..param.TCargo:
 ...default:int.
 ...metafunction:Metafunction.Value
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 template<typename TValue=int, typename TCargo=int>
 class PointAndCargo {
@@ -164,7 +164,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 
 ..tag.StorePointsOnly:The tree nodes store points.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 struct StorePointsOnly {};
 
@@ -182,7 +182,7 @@ struct StoreIntervals {};
 ..param.TSpec:The type of interval to store.
 ...default:StorePointsOnly.
 ...metafunction:Metafunction.Spec
-..include: seqan/refinement.h
+..include: seqan/misc/misc_interval_tree.h
 
 .Memvar.IntervalTreeNode#center:
 ..class:Class.IntervalTreeNode
@@ -207,7 +207,7 @@ class IntervalTreeNode;
 ..summary:An Interval Tree Node that stores intervals explicitely in each node.
 ..signature:IntervalTreeNode<TInterval, StoreIntervals>
 ..param.TInterval:The interval type to store in the node.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 template<typename TInterval>
 class IntervalTreeNode<TInterval, StoreIntervals> {
@@ -227,7 +227,7 @@ public:
 ..summary:Spec for IntervalTreeNode that stores only the relevant point in each node meaning the endpoint of the interval in the list sorted by endpoints (list2) and only the beginpoint of the interval in the list sorted by beginpoints (list1).
 ..signature:IntervalTreeNode<TInterval, StorePointsOnly>
 ..param.TInterval:The interval type to store in the node.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 template<typename TInterval>
 class IntervalTreeNode<TInterval, StorePointsOnly> {
@@ -276,7 +276,7 @@ SEQAN_CHECKPOINT
 ..param.TCargo:The cargo/id type.
 ...default:int
 ...remarks:If the intervals are not associated with cargos/IDs, they will be numbered consecutively.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 template<typename TValue=int, typename TCargo=unsigned int>
 class IntervalTree
@@ -398,7 +398,7 @@ SEQAN_CHECKPOINT
 ..cat:Miscellaneous
 ..summary:Tag to select a specific way to compute the center of an interval tree node.
 ..see:Class.IntervalTree
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 
 
@@ -772,7 +772,7 @@ struct Cargo<IntervalTreeNode<TInterval,TSpec> >
 ..summary:Type of lists in tree nodes.
 ..param.T:The type to retrieve the list type for.
 ..returns:Returns the type of the the lists in @Class.IntervalTreeNode@ objects.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 template<typename T>
 struct ListType;
@@ -816,7 +816,7 @@ struct ListType<IntervalTreeNode<TInterval,StoreIntervals> >
 ...remark:Should be a String of @Class.Interval@ or @Class.IntervalAndCargo@ objects.
 ..param.tag:Tag for tree construction method. @Tag.IntervalTree Centers.Tag.RandomCenter@ or @Tag.IntervalTree Centers.@Tag.ComputeCenter@
 ..remark:center of root node is computed by _calcIntervalTreeRootCenter
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 template<typename TGraph, typename TPropertyMap, typename TIntervals, typename TSpec>
 void 
@@ -1201,7 +1201,7 @@ _calcIntervalTreeRootCenter(TIntervals & intervals)
 ..param.propertyMap:The property map containing the node properties of the interval tree.
 ..param.interval:The interval to be added to the interval tree.
 ..summary:Adds an interval to an interval tree.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 template<typename TGraph, typename TPropertyMap, typename TInterval>
 void
@@ -1353,7 +1353,7 @@ SEQAN_CHECKPOINT
 ..summary:Find all intervals that contain the query point or overlap with the query interval.
 ..signature:findIntervals(graph, propertyMap, query, result)
 ..param.query:A query point.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
 */
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
 void
@@ -1454,7 +1454,7 @@ SEQAN_CHECKPOINT
 ..param.result:The resulting string of cargos/ids of the intervals that contain the query point.
 ...type:Class.String
 ...remark:Should be a string of TCargo.
-..include:seqan/refinement.h
+..include:seqan/misc/misc_interval_tree.h
  */
 template<typename TGraph, typename TPropertyMap, typename TValue,typename TCargo>
 void
