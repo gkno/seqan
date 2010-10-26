@@ -570,7 +570,7 @@ write(TFile & file,
 
 
 
-/*
+
 
 //////////////////////////////////////////////////////////////////////////////
 // READING
@@ -628,24 +628,6 @@ _addEdge(Graph<Undirected<TCargo, TSpec> >& g,
 		 TStatement& attr_list)
 {
 	typedef Graph<Undirected<TCargo, TSpec> > TGraph;
-	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
-	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
-	resizeEdgeMap(g, edgeMap);
-	assignProperty(edgeMap, e, attr_list);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-template<typename TStringSet, typename TCargo, typename TSpec, typename TVertexDescriptor, typename TNodeAttributes, typename TEdgeAttributes, typename TStatement>
-inline void
-_addEdge(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
-		 TVertexDescriptor sourceV,
-		 TVertexDescriptor targetV,
-		 TNodeAttributes&,
-		 TEdgeAttributes& edgeMap,
-		 TStatement& attr_list)
-{
-	typedef Graph<Alignment<TStringSet, TCargo, TSpec> > TGraph;
 	typedef typename EdgeDescriptor<TGraph>::Type TEdgeDescriptor;
 	TEdgeDescriptor e = addEdge(g, sourceV, targetV);
 	resizeEdgeMap(g, edgeMap);
@@ -820,7 +802,8 @@ _processEdgeStatement(Graph<TSpec>& g,
 	String<TValue> attr_list;  // Multiple attribute lists are ignored
 	bool inAttr = false;
 	TIter it = begin(stmt);
-	for(;!atEnd(it);goNext(it)) {
+	unsigned int localPos = 0;
+	for(;!atEnd(it);goNext(it), ++localPos) {
 		if (*it == '[') {
 			inAttr = true;
 			continue;
@@ -833,12 +816,13 @@ _processEdgeStatement(Graph<TSpec>& g,
 		}
 		if (inAttr) {
 			append(attr_list, *it);
-		} else if (position(it) < pos) {
+		} else if (localPos < pos) {
 			append(left_node_id, *it);
-		} else if (position(it) > pos+1) {
+		} else if (localPos > pos+1) {
 			append(right_node_id, *it);
 		}
 	}
+	//std::cout << left_node_id << "," << right_node_id << "," << std::endl;
 	_addEdge(g, left_node_id, right_node_id, attr_list, nodeMap, edgeMap, nodeIdMap);
 }
 
@@ -853,52 +837,42 @@ _processStatement(Graph<TSpec>& g,
 				  TNodeIdMap& nodeIdMap) 
 {
 	// Clear everything up to the last line
-	Finder<TStatement> finder(stmt);
-	TStatement needle("\n");
-	Pattern<TStatement, ShiftOr> pattern(needle);
-	String<unsigned int> pos;
-	while (find(finder, pattern))
-		append(pos,position(finder));
-	if (!empty(pos)) {
-		stmt = suffix(stmt, pos[length(pos) - 1] + 1);
+	typedef typename Value<TStatement>::Type TValue;
+	typedef typename Iterator<TStatement>::Type TIter;
+
+	// Exclude header and empty lines
+	TIter it = begin(stmt);
+	String<TValue> id;
+	for(;!atEnd(it);goNext(it)) {
+	  if ((*it != '\t') && (*it != ' ') && (*it != '\n') && (*it != '\r')) {
+	    append(id, *it);
+	  } else {
+	    // Exclude any graph, subgraph, node and edge processing attributes
+	    if ((id == "graph") || (id == "node") || (id == "edge") || (id == "subgraph") || (length(id)<1)) {
+	      clear(stmt);
+	      return;
+	    } else break; 
+	  }
 	}
 
-	// Ignore all statements about attributes or subgraphs
-	if ((prefix(stmt, 5) == "graph") ||
-		(prefix(stmt, 4) == "node") ||
-		(prefix(stmt, 4) == "edge") ||
-		(prefix(stmt, 8) == "subgraph") ||
-		(prefix(stmt, 1) == "\n") ||
-		(prefix(stmt, 1) == "\r")) {
-			clear(stmt);
-			return;
+	// Process Edges
+	it = begin(stmt);
+	clear(id);
+	id = "00";
+	unsigned int pos = 0;
+	for(;!atEnd(it);goNext(it), ++pos) {
+	  id[pos % 2] = *it;
+	  if ((id == "--") || (id == "->")) {
+	    //std::cout << stmt << std::endl;
+	    _processEdgeStatement(g, stmt, nodeMap, edgeMap, pos - 1, nodeIdMap);
+	    clear(stmt);
+	    return;
+	  }
 	}
 
-	// Node or Edge statement ?
-	Finder<TStatement> finder2(stmt);
-	needle = "--";
-	setHost(pattern, needle);
-	clear(pos);
-	while (find(finder2, pattern))
-		append(pos,position(finder2));
-	if (!empty(pos)) {
-		// Undirected Edge
-		_processEdgeStatement(g, stmt, nodeMap, edgeMap, pos[0], nodeIdMap);
-	} else {
-		Finder<TStatement> finder3(stmt);
-		needle = "->";
-		setHost(pattern, needle);
-		clear(pos);
-		while (find(finder3, pattern))
-			append(pos,position(finder3));
-		if (!empty(pos)) {
-			// Directed edge
-			_processEdgeStatement(g, stmt, nodeMap, edgeMap, pos[0], nodeIdMap);
-		} else {
-			// process node statement
-			_processNodeStatement(g, stmt, nodeMap, edgeMap, nodeIdMap);
-		}
-	}	
+	// Process nodes
+	//std::cout << stmt << std::endl;
+	_processNodeStatement(g, stmt, nodeMap, edgeMap, nodeIdMap);
 	clear(stmt);
 }
 
@@ -945,7 +919,6 @@ void read(TFile & file,
 	read(file,g,nodeMap,edgeMap,DotDrawing());
 }
 
-*/
 
 }// namespace SEQAN_NAMESPACE_MAIN
 
