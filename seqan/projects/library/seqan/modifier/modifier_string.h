@@ -476,6 +476,124 @@ end(ModifiedString<THost, TSpec> & me, Tag<TTagSpec> const tag_) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight >
+inline bool
+operator == (ModifiedString<THost, TSpec> const & left, 
+			TRight const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<ModifiedString<THost, TSpec> >::Type _lex(left, right);
+    return isEqual(_lex);
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator == (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<ModifiedString<THost, TSpec> >::Type _lex(left, right);
+    return isEqual(_lex);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight >
+inline bool
+operator !=(ModifiedString<THost, TSpec> const & left, 
+			TRight const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<ModifiedString<THost, TSpec> >::Type _lex(left, right);
+    return isNotEqual(_lex);
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator != (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	typename Comparator<ModifiedString<THost, TSpec> >::Type _lex(left, right);
+    return isNotEqual(_lex);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight>
+inline bool
+operator < (ModifiedString<THost, TSpec> const & left, 
+			TRight const & right)
+{
+SEQAN_CHECKPOINT
+	return isLess(left, right, typename DefaultPrefixOrder<ModifiedString<THost, TSpec> >::Type());
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator < (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isLess(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight>
+inline bool
+operator <= (ModifiedString<THost, TSpec> const & left, 
+			 TRight const & right)
+{
+SEQAN_CHECKPOINT
+	return isLessOrEqual(left, right, typename DefaultPrefixOrder<ModifiedString<THost, TSpec> >::Type());
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator <= (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isLessOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight>
+inline bool
+operator > (ModifiedString<THost, TSpec> const & left, 
+		TRight const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreater(left, right, typename DefaultPrefixOrder<ModifiedString<THost, TSpec> >::Type());
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator > (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreater(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+template <typename THost, typename TSpec, typename TRight>
+inline bool
+operator >= (ModifiedString<THost, TSpec> const & left, 
+		TRight const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<ModifiedString<THost, TSpec> >::Type());
+}
+template <typename TLeftValue, typename THost, typename TSpec >
+inline bool
+operator >= (TLeftValue * left,
+			 ModifiedString<THost, TSpec> const & right)
+{
+SEQAN_CHECKPOINT
+	return isGreaterOrEqual(left, right, typename DefaultPrefixOrder<TLeftValue *>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // stream operators
 //////////////////////////////////////////////////////////////////////////////
 

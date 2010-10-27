@@ -288,13 +288,27 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// assign
 	//////////////////////////////////////////////////////////////////////////////
+    
+    template <typename TTarget, typename TSource>
+    inline void 
+    _assignModifiedIterator(TTarget &me, TSource &_origin, True)
+    {
+		host(me) = _origin;
+    }
+
+    template <typename TTarget, typename TSource>
+    inline void 
+    _assignModifiedIterator(TTarget &me, TSource &_origin, False)
+    {
+		host(me) = host(_origin);
+		cargo(me) = cargo(_origin);
+    }
 
 	template <typename THost, typename TSpec, typename THost2>
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> & _origin) {
         SEQAN_CHECKPOINT;
-		host(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+        _assignModifiedIterator(me, _origin, typename _IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
 		return me;
 	}
 
@@ -302,8 +316,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> const & _origin) {
         SEQAN_CHECKPOINT;
-		host(me) = host(_origin);
-		cargo(me) = cargo(_origin);
+        _assignModifiedIterator(me, _origin, typename _IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
 		return me;
 	}
 

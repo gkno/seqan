@@ -265,20 +265,15 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
     typedef ModifiedString<ModifiedString<CharString, ModView<TFunctor> >, ModView<TFunctor> > TModifiedString;
 
     CharString originalStr = "This is a test!";
-    CharString const kExpectedResult = "wklv lv whv!";
+    CharString const kExpectedResult = "Wklv lv d whvw!";
 
     TModifiedString modifiedStr(originalStr);
     TFunctor func1(1), func2(2);
     assignModViewFunctor(modifiedStr, func1);
     assignModViewFunctor(host(modifiedStr), func2);
 
-    CharString modifiedStrCopy1 = modifiedStr;
-    std::cout<<modifiedStrCopy1<<std::endl;
-
-    // TODO(holtgrew): The following does not compile.
     SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
-    // TODO(holtgrew): The next assertion fails. The reason is the catch-all copy constructor of modified iterator. Why do we allow this anyway?
-    SEQAN_ASSERT_FAIL("Problem with copy constructor of modified iterator.");
+
     CharString modifiedStrCopy = modifiedStr;
     SEQAN_ASSERT_EQ(kExpectedResult, modifiedStrCopy);
 }

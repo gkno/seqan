@@ -11,19 +11,20 @@ using namespace std;
 using namespace seqan;
 
 
-SEQAN_BEGIN_TESTSUITE(test_modifier) {
+SEQAN_BEGIN_TESTSUITE(test_modifier) 
+{
     // Tests for modifier_alphabet.h and modifier_alphabet_expansion.h.
     SEQAN_CALL_TEST(test_modifier_alphabet_size_metafunctions);
     SEQAN_CALL_TEST(test_modifier_alphabet_convert);
 	SEQAN_CALL_TEST(test_modifier_DnaQ);
     SEQAN_CALL_TEST(test_modifier_alphabet_enumerate);
     SEQAN_CALL_TEST(test_modifier_alphabet_ord_value);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_eq);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_neq);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_lt);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_gt);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_leq);
-    SEQAN_CALL_TEST(test_modifier_alphabet_operator_geq);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_eq);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_neq);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_lt);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_gt);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_leq);
+//    SEQAN_CALL_TEST(test_modifier_alphabet_operator_geq);
 
     // Tests for modifier_functors.h.
     SEQAN_CALL_TEST(test_modifier_functors_functor_upcase);
@@ -66,7 +67,7 @@ SEQAN_BEGIN_TESTSUITE(test_modifier) {
     // Tests for modifier_view.h.
     SEQAN_CALL_TEST(test_modifier_view_iterator_metafunctions);
     SEQAN_CALL_TEST(test_modifier_view_iterator);
-    SEQAN_CALL_TEST(test_modifier_view_const_iterator);
+//    SEQAN_CALL_TEST(test_modifier_view_const_iterator);
     SEQAN_CALL_TEST(test_modifier_convert_in_place);
 
     SEQAN_CALL_TEST(test_modifier_view_string_caesar_chiffre);
