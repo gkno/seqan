@@ -67,7 +67,7 @@
 #define SEQAN_CHECK1(_cond) {}
 #define SEQAN_CHECK2(_cond, _comment) {}
 
-#define SEQAN_DO(_cond) { _cond; }
+#define SEQAN_DO(_cond) { if (_cond) {} }
 #define SEQAN_DO1(_cond) SEQAN_DO(_cond)
 #define SEQAN_DO2(_cond, _comment) { _cond; }
 

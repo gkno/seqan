@@ -1088,7 +1088,7 @@ const char *tempFileName() {
 
 // This macro expands to function header for one test.
 #define SEQAN_DEFINE_TEST(test_name)                    \
-    void SEQAN_TEST_ ## test_name ()
+    template <bool speed_up_dummy_to_prevent_compilation_of_unused_tests_> void SEQAN_TEST_ ## test_name ()
 
 #if SEQAN_ENABLE_TESTING
 // This macro expands to startup code for a test file.
@@ -1109,7 +1109,7 @@ const char *tempFileName() {
     do {                                                                \
         ::seqan::ClassTest::beginTest(#test_name);                      \
         try {                                                           \
-            SEQAN_TEST_ ## test_name();                                 \
+            SEQAN_TEST_ ## test_name<true>();                           \
         } catch(::seqan::ClassTest::AssertionFailedException e) {       \
             /* Swallow exception, go on with next test. */              \
             (void) e;  /* Get rid of unused variable warning. */        \
