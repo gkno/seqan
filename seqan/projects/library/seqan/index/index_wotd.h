@@ -137,7 +137,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool			interSentinelNodes;	// should virtually one (true) $-sign or many (false) $_i-signs be appended to the strings in text 
 
 		Index():
-			interSentinelNodes(true) {}
+			interSentinelNodes(false) {}
 
 		Index(Index &other):
 			text(other.text),
@@ -164,12 +164,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename _TText>
 		Index(_TText &_text):
 			text(_text),
-			interSentinelNodes(true) {}
+			interSentinelNodes(false) {}
 
 		template <typename _TText>
 		Index(_TText const &_text):
 			text(_text),
-			interSentinelNodes(true) {}
+			interSentinelNodes(false) {}
 	};
 /*
     template < typename TText, typename TSpec >
@@ -470,7 +470,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					indexText(index),
 					vDesc.parentRepLen) - vDesc.parentRepLen;
 		else
-			return (dirAt(w1, index) & index.BITMASK0) - vDesc.parentRepLen;
+			return (dirAt(w1 & index.BITMASK1, index) & index.BITMASK0) - vDesc.parentRepLen;
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
@@ -1544,7 +1544,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TPos w1 = dirAt(pos + 1, index);
 		if (w1 & index.UNEVALUATED)
-			return saAt(w0 & index.BITMASK1, index);
+			return saAt(w0 & index.BITMASK0, index);
 		else
 			return w0 & index.BITMASK0;
 	}
@@ -1561,6 +1561,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_Wotd<WotdOriginal> >		TIndex;
 		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
+		typedef typename Size<TDir>::Type					TDirSize;
 		typedef typename TIndex::TCounter					TCounter;
 		typedef typename Iterator<TCounter, Standard>::Type	TCntIterator;
 
@@ -1577,15 +1578,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		TValue occ;
 		if (index.sentinelOcc != 0)
 		{
-			if (index.sentinelOcc > 1) { // occurs on multiseqs
+			if (index.sentinelOcc > 1 && index.interSentinelNodes)	// occurs on multiseqs
+			{
 				itPrev = itDir;
 				*itDir = index.sentinelBound - index.sentinelOcc;	++itDir;
 				*itDir = index.sentinelBound | index.UNEVALUATED;	++itDir;
-			} else {
-				itPrev = itDir;
-				*itDir = saAt(index.sentinelBound - index.sentinelOcc, index) | index.LEAF;
-				++itDir;
-			}
+			} else
+				for (TDirSize d = index.sentinelBound - index.sentinelOcc; d != index.sentinelBound; ++d)
+				{
+					itPrev = itDir;
+					*itDir = saAt(d, index) | index.LEAF;			++itDir;
+				}
 		}
 		for (; it != itEnd; ++it, ++bit)
 		{
@@ -1618,6 +1621,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Index<TText, Index_Wotd<TSpec> >			TIndex;
 		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
+		typedef typename Size<TDir>::Type					TDirSize;
 		typedef typename TIndex::TCounter					TCounter;
 		typedef typename Iterator<TCounter, Standard>::Type	TCntIterator;
 
@@ -1635,15 +1639,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		TValue occ;
 		if (index.sentinelOcc != 0)
 		{
-			if (index.sentinelOcc > 1) { // occurs on multiseqs
+			if (index.sentinelOcc > 1 && index.interSentinelNodes)	// occurs on multiseqs
+			{ 
 				itPrev = itDir;
 				*itDir = index.sentinelBound - index.sentinelOcc;	++itDir;
 				*itDir = index.sentinelBound | index.UNEVALUATED;	++itDir;
-			} else {
-				itPrev = itDir;
-				*itDir = (index.sentinelBound - index.sentinelOcc) | index.LEAF;
-				++itDir;
-			}
+			} else
+				for (TDirSize d = index.sentinelBound - index.sentinelOcc; d != index.sentinelBound; ++d)
+				{
+					itPrev = itDir;
+					*itDir = d | index.LEAF;						++itDir;
+				}
 		}
 		for (; it != itEnd; ++it, ++bit)
 		{

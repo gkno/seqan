@@ -67,7 +67,9 @@ template < typename TText, typename TTag, typename TValue>
 bool check_sa_algorithm(TText& text, const False&) {
 	String<TValue> sa;
 	resize(sa, length(text));
+//	std::cout << "check_sa_algorithm<" << typeid(TTag).name() << "," << typeid(TValue).name() << ",False> ... " << std::flush;
 	createSuffixArray(sa, text, TTag());
+//	std::cout << "done" << std::endl;
 	return isSuffixArray(sa, text);
 }
 
@@ -79,7 +81,9 @@ bool check_sa_algorithm(TText& text, const True&) {
 	remove("sa.out");
 	String<TValue, External<> > sa("sa.out");
 	resize(sa, length(text));
+//	std::cout << "check_sa_algorithm<" << typeid(TTag).name() << "," << typeid(TValue).name() << ",True> ... " << std::flush;
 	createSuffixArray(sa, text, TTag());
+//	std::cout << "done" << std::endl;
 	bool ok = isSuffixArray(sa, text);
 	remove("sa.out");
 	return ok;
@@ -89,13 +93,13 @@ bool check_sa_algorithm(TText& text, const True&) {
 
 SEQAN_DEFINE_TEST(testBWTWalk)
 {
-#if defined(__GNUC__)
-#  if defined(__OPTIMIZE__)
-	std::cout << "Optimized build: Yes\n";
-#  else
-	std::cout << "Optimized build: No\n";
-#  endif
-#endif
+//#if defined(__GNUC__)
+//#  if defined(__OPTIMIZE__)
+//	std::cout << "Optimized build: Yes\n";
+//#  else
+//	std::cout << "Optimized build: No\n";
+//#  endif
+//#endif
 
     char buffer[1023];
     strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
@@ -104,7 +108,8 @@ SEQAN_DEFINE_TEST(testBWTWalk)
 	std::fstream inputFile(buffer);
 	CharString text;
 	read(inputFile, text, Raw());
-	std::cout << "filesize: " << length(text) << std::endl;
+//	resize(text, 10000);
+//	std::cout << "textsize: " << length(text) << std::endl;
 
 	MYASSERT(BwtWalkFast, unsigned, False);
 	MYASSERT(BwtWalkFast, unsigned, True);

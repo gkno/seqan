@@ -168,38 +168,35 @@ SEQAN_DEFINE_TEST(testMultiIndex)
 			while (goDown(it))
 				_printNode(it);
 		}
-/*
-		indexRequire(esa, ESA_SA());
-		indexRequire(esa, ESA_BWT());
-		for(int i=0; i<length(indexRawSA(esa)); ++i)
-			std::cout << saAt(i,esa) << " " << bwtAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
 
-//		resize(indexLCP(esa), length(indexRawText(esa)));
-//		createLCPTableExt(indexLCP(esa), indexText(esa), indexSA(esa), Kasai());
-		indexRequire(esa, ESA_LCP());
-		for(int i=0; i<length(indexRawSA(esa)); ++i)
-			std::cout << lcpAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
+//		indexRequire(esa, ESA_SA());
+//		indexRequire(esa, ESA_BWT());
+//		for(int i=0; i<length(indexRawSA(esa)); ++i)
+//			std::cout << saAt(i,esa) << " " << bwtAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
+//
+////		resize(indexLCP(esa), length(indexRawText(esa)));
+////		createLCPTableExt(indexLCP(esa), indexText(esa), indexSA(esa), Kasai());
+//		indexRequire(esa, ESA_LCP());
+//		for(int i=0; i<length(indexRawSA(esa)); ++i)
+//			std::cout << lcpAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
+//
+//		for(int i=0; i<length(indexRawSA(esa)); ++i)
+//			std::cout << saAt(i,esa) << " = " << indexRawSA(esa)[i] << "    " << std::endl;
+//		for(int i=0; i<length(indexRawSA(esa)); ++i)
+//			std::cout << bwtAt(i,esa) << " = " << indexBWT(esa).tab[i] << "    " << std::endl;
+//		for(int i=0; i<length(indexRawSA(esa)); ++i)
+//			std::cout << lcpAt(i,esa) << " = " << indexLCP(esa)[i] << "    " << std::endl;
 
-		for(int i=0; i<length(indexRawSA(esa)); ++i)
-			std::cout << saAt(i,esa) << " = " << indexRawSA(esa)[i] << "    " << std::endl;
-		for(int i=0; i<length(indexRawSA(esa)); ++i)
-			std::cout << bwtAt(i,esa) << " = " << indexBWT(esa).tab[i] << "    " << std::endl;
-		for(int i=0; i<length(indexRawSA(esa)); ++i)
-			std::cout << lcpAt(i,esa) << " = " << indexLCP(esa)[i] << "    " << std::endl;
-*/
 
-/*
-
-		resize(sa, length(indexRawText(esa)));
-		createSuffixArrayExt(sa, indexText(esa), Skew7());
-
-		for(int i=0; i<length(indexRawText(esa)); ++i)
-			std::cout << indexRawText(esa)[i] << "    ";
-
-		String<unsigned> lcp;
-		resize(lcp, length(indexRawText(esa)));
-		createLCPTableExt(lcp, indexText(esa), sa, Kasai());
-*/
+//		resize(sa, length(indexRawText(esa)));
+//		createSuffixArrayExt(sa, indexText(esa), Skew7());
+//
+//		for(int i=0; i<length(indexRawText(esa)); ++i)
+//			std::cout << indexRawText(esa)[i] << "    ";
+//
+//		String<unsigned> lcp;
+//		resize(lcp, length(indexRawText(esa)));
+//		createLCPTableExt(lcp, indexText(esa), sa, Kasai());
 }
 
 template <typename TIndex1, typename TIndex2>
@@ -212,6 +209,9 @@ void compareTreeIterators(TIndex1 &index1, TIndex2 &index2)
 	{
 		SEQAN_ASSERT_EQ(representative(it1), representative(it2));
 		SEQAN_ASSERT_EQ(parentEdgeLabel(it1), parentEdgeLabel(it2));
+		SEQAN_ASSERT_EQ(countOccurrences(it1), countOccurrences(it2));
+		SEQAN_ASSERT_EQ(isRoot(it1), isRoot(it2));
+//		SEQAN_ASSERT_EQ(isLeaf(it1), isLeaf(it2));
 		goNext(it1);
 		goNext(it2);
 	}
@@ -290,16 +290,16 @@ void testSTreeIterators()
 		}
 			std::cout << std::endl;
 		_dump(index);
-/*		goBegin(it);
-		while (!atEnd(it)) {
-			std::cout << countOccurrences(it) << "\t";
-			std::cout << representative(it) << "\t";
-			std::cout << "parentEdgeLabel: " << parentEdgeLabel(it) << " " << value(it).node << "  " << value(it).range;
-			std::cout << std::endl;
-			goNext(it);
-		}
-		_dump(index);
-*/}
+//		goBegin(it);
+//		while (!atEnd(it)) {
+//			std::cout << countOccurrences(it) << "\t";
+//			std::cout << representative(it) << "\t";
+//			std::cout << "parentEdgeLabel: " << parentEdgeLabel(it) << " " << value(it).node << "  " << value(it).range;
+//			std::cout << std::endl;
+//			goNext(it);
+//		}
+//		_dump(index);
+}
 
 SEQAN_DEFINE_TEST(testSTreeIterators_Wotd)
 {
@@ -317,6 +317,18 @@ SEQAN_DEFINE_TEST(testSTreeIterators_Esa)
 }
 
 
+template <typename TPair>
+struct PairLess_ :
+        public ::std::binary_function<TPair, TPair, bool>
+{
+        inline bool 
+        operator() (TPair const& a1, TPair const& a2) const
+		{
+                if (a1.i1 == a2.i1) return (a1.i2 < a2.i2);
+                else return (a1.i1 < a2.i1);
+        }
+};
+
 SEQAN_DEFINE_TEST(testMaxRepeats)
 {
 //		typedef String<char, External<> > TText;
@@ -324,24 +336,68 @@ SEQAN_DEFINE_TEST(testMaxRepeats)
 
         Index<TText> esa;
 //        open(esa, "corpus/NC_000117.txt");
+		//                01234567890123456789
 		indexText(esa) = "HALLOBALLOHALLEBALLO";
 
-		FILE* dotFile = fopen("stree.dot","w");
-		write(dotFile, esa, DotDrawing());
-		fclose(dotFile);
+//		FILE* dotFile = fopen("stree.dot","w");
+//		write(dotFile, esa, DotDrawing());
+//		fclose(dotFile);
 
         Iterator< Index<TText>, MaxRepeats >::Type it(esa, 3);
 		typedef MaxRepeat< Index<TText> > TRepeat;
-        while (!atEnd(it)) {
+		typedef Value<TRepeat>::Type TPair;
+		
+		int found = 0;
+		while (!atEnd(it)) 
+		{
 //			std::cout << representative(it) << ":";
 			Iterator<TRepeat, MaxRepeatOccurrences>::Type mit(it);
+			String<TPair> occs;
 			while (!atEnd(mit)) {
-//				std::cout << "\t" << *mit;
+//				std::cout << "\t" << *mit << std::flush;
+				appendValue(occs, *mit);
+				if (back(occs).i1 > back(occs).i2)
+				{
+					Value<TPair, 1>::Type tmp = back(occs).i1;
+					back(occs).i1 = back(occs).i2;
+					back(occs).i2 = tmp;
+				}
 				++mit;
 			}
-//			std::cout << std::endl;
+
+			std::sort(begin(occs, Standard()), end(occs, Standard()), PairLess_<TPair>());
+			if (representative(it) == "ALL")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 2u);
+				SEQAN_ASSERT_EQ(occs[0], TPair(6,11));
+				SEQAN_ASSERT_EQ(occs[1], TPair(11,16));
+			} else
+			if (representative(it) == "HALL")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 1u);
+				SEQAN_ASSERT_EQ(occs[0], TPair(0,10));
+			} else
+			if (representative(it) == "BALLO")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 1u);
+				SEQAN_ASSERT_EQ(occs[0], TPair(5,15));
+			} else
+			if (representative(it) == "ALLO")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 1u);
+				if (occs[0].i2 == 6)
+					SEQAN_ASSERT_EQ(occs[0], TPair(1,6));
+				else
+					SEQAN_ASSERT_EQ(occs[0], TPair(1,16));
+			} else 
+			{
+				SEQAN_ASSERT_FAIL("Unknown maximal repeat found!");
+			}
+
             ++it;
+			++found;
         }
+		SEQAN_ASSERT_EQ(found, 5);
 }
 
 
@@ -389,13 +445,38 @@ void _testSuperMaxRepeats()
 		indexText(esa) = "HALLOBALLOHALLEBALLO";
 
         typename Iterator< Index<TText>, TIteratorSpec >::Type it(esa);
-        while (!atEnd(it)) {
+
+		int found = 0;
+        while (!atEnd(it)) 
+		{
+			String<int> occs = getOccurrences(it);
+			std::sort(begin(occs, Standard()), end(occs, Standard()));
+
 //			std::cout << representative(it) << ":";
 //			for(typename Size<Index<TText> >::Type i = 0; i < countOccurrences(it); ++i)
 //				std::cout << "\t" << getOccurrences(it)[i];
 //			std::cout << std::endl;
+
+			if (representative(it) == "BALLO")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 2u);
+				SEQAN_ASSERT_EQ(occs[0], 5);
+				SEQAN_ASSERT_EQ(occs[1], 15);
+			} else 
+			if (representative(it) == "HALL")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 2u);
+				SEQAN_ASSERT_EQ(occs[0], 0);
+				SEQAN_ASSERT_EQ(occs[1], 10);
+			} else 
+			{
+				SEQAN_ASSERT_FAIL("Unknown supermaximal repeat found!");
+			}
+
             ++it;
+			++found;
         }
+		SEQAN_ASSERT_EQ(found, 2);
 }
 
 SEQAN_DEFINE_TEST(testSuperMaxRepeats)
@@ -421,28 +502,42 @@ SEQAN_DEFINE_TEST(testMUMs)
 		t[1] = "halloballefser";
 		t[2] = "grballoballo";
 
-
         TIndex esa;
 		for(int i = 0; i < 3; ++i)
 			appendValue(indexText(esa), t[i]);			// add sequences to multiple index
 
 		Iterator<TIndex, MUMs>::Type  it(esa, 3);		// set minimum MUM length to 3
-		String< SAValue<TIndex>::Type > occs;			// temp. string storing the hit positions
+		typedef SAValue<TIndex>::Type TPair;
+		String<TPair> occs;								// temp. string storing the hit positions
 
-		std::cout << std::resetiosflags(std::ios::left);
+		int found = 0;
+//		std::cout << std::resetiosflags(std::ios::left);
 		while (!atEnd(it)) 
 		{
-//			std::cout << representative(it) << ":";
 			occs = getOccurrences(it);					// gives hit positions (seqNo,seqOfs)
 			orderOccurrences(occs);						// order them by seqNo
-			
+
+//			std::cout << representative(it) << ":";
 //			for(unsigned i = 0; i < length(occs); ++i)
 //				std::cout << "\t" << getValueI2(occs[i]);
 //			std::cout << std::endl;
 //			std::cout << alignment(it) << std::endl;
+			
+			if (representative(it) == "alloball")
+			{
+				SEQAN_ASSERT_EQ(length(occs), 3u);
+				SEQAN_ASSERT_EQ(occs[0], TPair(0,4));
+				SEQAN_ASSERT_EQ(occs[1], TPair(1,1));
+				SEQAN_ASSERT_EQ(occs[2], TPair(2,3));
+			} else {
+				SEQAN_ASSERT_FAIL("Unknown MUM found!");
+			}
+
 
 			++it;
+			++found;
 		}
+		SEQAN_ASSERT_EQ(found, 1);
 }
 
 
@@ -465,6 +560,7 @@ void testFind()
 		while (find(finder, pattern))
 			appendValue(pos,position(finder));
 
+		SEQAN_ASSERT_EQ(length(pos), 2u);
 		SEQAN_ASSERT_TRUE(pos[0] == 5);
 		SEQAN_ASSERT_TRUE(pos[1] == 31);
 
@@ -482,6 +578,7 @@ void testFind()
 		while (find(finder, pattern))
 			appendValue(pos,position(finder));
 
+		SEQAN_ASSERT_EQ(length(pos), 2u);
 		SEQAN_ASSERT_TRUE(pos[1] == 0);
 		SEQAN_ASSERT_TRUE(pos[0] == 26);
 }

@@ -467,13 +467,24 @@ namespace SEQAN_NAMESPACE_MAIN
 					typename TFractionCompound::TFractionHeader head = objectOf(sit);
 					TSize i = head.begin;
 					while (!_isSizeInval(i)) {
-						::std::cerr << i << "  ";
+						::std::cerr << saAt(i,container(*this)) << "  ";
 						i = posList[i];
 					}
 					::std::cerr << ::std::endl;
 					++sit;
 				}
-
+				
+				if ((*it).leftmost.size > 0)
+				{
+					::std::cerr << "\"\"::";
+					TSize i = (*it).leftmost.begin;
+					while (!_isSizeInval(i)) {
+						::std::cerr << saAt(i,container(*this)) << "  ";
+						i = posList[i];
+					}
+					::std::cerr << ::std::endl;
+				}
+				
 				::std::cerr << "_________________________" << ::std::endl;
 				++it;
 			}
@@ -546,20 +557,20 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TSTree &index = container(it);
 
-		TSize		gPos = posGlobalize(_dfsRange(it).i1, stringSetLimits(index));
+		TSize       i = _dfsRange(it).i1;
 		TSAValue	lPos;
-		posLocalize(lPos, _dfsRange(it).i1, stringSetLimits(index));
+		posLocalize(lPos, getOccurrence(it), stringSetLimits(index));
 
 		if (!posAtFirstLocal(lPos))
 			insert(
 				TFraction(
-					bwtAt(gPos, container(it)),
-					TFractionHeader(gPos, gPos, 1)), 
+					bwtAt(i, container(it)),
+					TFractionHeader(i, i, 1)), 
 				top(it.setStack).set);
 		else
-			top(it.setStack).leftmost = TFractionHeader(gPos, gPos, 1);
+			top(it.setStack).leftmost = TFractionHeader(i, i, 1);
 
-		_setSizeInval(it.posList[gPos]);
+		_setSizeInval(it.posList[i]);
 /*
 		::std::cerr << "LEAF ";
 		_dumpHistoryStack(it);
@@ -715,9 +726,22 @@ namespace SEQAN_NAMESPACE_MAIN
 			maxIt(&_maxIt),
 			_atEnd(true) {}
 		
+		inline void _reinitParentFraction() {
+			if (leftmostParent)
+			{
+				TFractionCompound const &parent = topPrev(maxIt->setStack);
+				parentPtr = parent.leftmost.begin;
+			} else
+				parentPtr = objectOf(parentFraction).begin;
+		}
+
 		inline bool _innerStep() {
 			if (_isSizeInval(childPtr = maxIt->posList[childPtr])) {
-				if (_isSizeInval(parentPtr = maxIt->posList[parentPtr])) return false;
+				if (_isSizeInval(parentPtr = maxIt->posList[parentPtr]))
+				{
+					_reinitParentFraction();
+					return false;
+				}
 				childPtr = objectOf(childFraction).begin;
 			}
 			return true;

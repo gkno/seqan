@@ -120,7 +120,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 
 		// top down traversal iterators
 		template <typename TSpec = Preorder>
-		struct TopDown;						// starts in the suffix tree root and can go down and go right
+		struct TopDown {};					// starts in the suffix tree root and can go down and go right
 
 			// allows an top-down iterator to go up
 			template < typename TSpec = Preorder >
@@ -128,7 +128,7 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 
 		// bottom up traversal iterators
 		template <typename TSpec = Postorder>
-		struct BottomUp;					// starts in the first node of a depth-first-search and can go next
+		struct BottomUp {};					// starts in the first node of a depth-first-search and can go next
 
 			struct	SuperMaxRepeats;					// maximal repeat and not part of a longer repeat
 			struct	SuperMaxRepeatsFast;

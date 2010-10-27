@@ -392,7 +392,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 				_dfsClear(it);
 				return;
 			}
-
+			
 			if (_dfsRange(it).i2)
 			{
 				typedef typename Size<TIndex>::Type TSize;
@@ -418,8 +418,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	// wenn Pop, aber kein Push -> verlasse Wurzel des mind. 2.Teilbaums
 	// wenn Pop und Push        -> verlasse ersten Teilbaum (sieht Vater zum ersten Mal und pusht jenen)
 
-	// wenn nach Pop ein Pop folgen w¸rde	-> Vater ist Top of Stack
-	// wenn nach Pop ein Push folgen w¸rde	-> Vater erst beim Push auf Stack (-> zwischenspeichern)
+	// wenn nach Pop ein Pop folgen wuerde	-> Vater ist Top of Stack
+	// wenn nach Pop ein Push folgen wuerde	-> Vater erst beim Push auf Stack (-> zwischenspeichern)
 			}
 
 			// last lcp entry (== 0) causes removal of toplevel interval
@@ -1440,7 +1440,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			return true;
 		}
 
-		TSize parentRepLen = 0;
+		TSize parentRepLen = repLength(node);
 		// go down the edge beginning with a pattern character
 		while (_goDownChar(node, *p_begin))
 		{

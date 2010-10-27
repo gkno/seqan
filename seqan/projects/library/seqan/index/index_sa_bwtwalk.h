@@ -126,18 +126,21 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
 		typedef String<TValue> TArray;
 		const TValue NIL = SupremumValue<TValue>::VALUE;
+		
+		if (empty(s)) return;
+		
 		TArray lexnextpos;
 		// Since SA is capable of fast random access, we can temporarily use it as lexprevpos array.
 		TArray &lexprevpos = SA;
 
 		fill(lexnextpos, length(s), NIL, Exact());
-		std::fill(begin(lexprevpos), end(lexprevpos), NIL);
+		std::fill(begin(lexprevpos, Standard()), end(lexprevpos, Standard()), NIL);
 
 		// finally create suffix array
 		//   1) first suffix is returned...
 		TValue p = _createSuffixList(lexprevpos, lexnextpos, s);
 		//   2) sequentially write out suffix array
-		TSaIter saIt = begin(SA);
+		TSaIter saIt = begin(SA, Standard());
 		while (p != NIL) {
 			*saIt = p;
 			p = getValue(lexnextpos, p);
@@ -158,6 +161,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
 		const TValue NIL = SupremumValue<TValue>::VALUE;
 		typedef String<TValue> TArray;
+
+		if (empty(s)) return;
+
 		TArray lexnextpos;
 		TArray lexprevpos;
 
@@ -168,7 +174,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		//   1) first suffix is returned...
 		TValue p = _createSuffixList(lexprevpos, lexnextpos, s);
 		//   2) sequentially write out suffix array
-		TSaIter saIt = begin(SA);
+		TSaIter saIt = begin(SA, Standard());
 		while (p != NIL) {
 			*saIt = p;
 			p = getValue(lexnextpos, p);
@@ -189,8 +195,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
 		const TValue NIL = SupremumValue<TValue>::VALUE;
 		typedef String<TValue> TArray;
-		TArray lexxorpos;
 
+		if (empty(s)) return;
+		
+		TArray lexxorpos;
 		// invalid ^ invalid == 0
 		fill(lexxorpos, length(s), 0, Exact());
 
@@ -199,7 +207,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TValue p = _createXoredSuffixList(lexxorpos, s);
 		//   2) sequentially write out suffix array
 		TValue previous = NIL;
-		TSaIter saIt = begin(SA);
+		TSaIter saIt = begin(SA, Standard());
 		while (p != NIL) {
 			*saIt = p;
 			TValue tmp = p;
@@ -228,9 +236,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		const TValue NOTFLAGBIT = ~FLAGBIT;
 
 		typedef String<TValue> TArray;
+
+		if (empty(s)) return;
+		
 		// since SA is capable of fast random access, we can temporarily use it as the lexxorpos array
 		TArray &lexxorpos = SA;
-		std::fill(begin(lexxorpos), end(lexxorpos), 0);
+		std::fill(begin(lexxorpos, Standard()), end(lexxorpos, Standard()), 0);
 
 		// finally create suffix array
 		//   1) first suffix is returned ...
@@ -365,9 +376,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		fill(lexlastpos, ALPHABETSIZE, NIL, Exact());
 
 		// main loop
-		TTextIter it = end(s);
+		TTextIter it = end(s, Standard());
 		TValue p = length(s);
-		while (it != begin(s)) {
+		while (it != begin(s, Standard())) {
 			--it;
 			--p;
 			TChar c = *it;
@@ -435,7 +446,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 		}
 
-		typename Iterator<TAlphabetArray>::Type fit = begin(lexfirstpos);
+		typename Iterator<TAlphabetArray, Standard>::Type fit = begin(lexfirstpos, Standard());
 		while (*fit == NIL) ++fit;
 		return *fit;
 	}
@@ -460,12 +471,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		fill(lexlastpos, ALPHABETSIZE, NIL, Exact());
 
 		// main loop
-		TTextIter it = end(s);
+		TTextIter it = end(s, Standard());
 		TValue p = length(s);
 		// store predecessor and successor from last round (p+1)
 		TValue lastPredecessor = NIL;
 		TValue lastSuccessor = NIL;
-		while (it != begin(s)) {
+		while (it != begin(s, Standard())) {
 			--it;
 			--p;
 			TChar c = *it;
@@ -561,7 +572,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			lastSuccessor = successor;
 		}
 
-		typename Iterator<TArray>::Type fit = begin(lexfirstpos);
+		typename Iterator<TArray, Standard>::Type fit = begin(lexfirstpos, Standard());
 		while (*fit == NIL) ++fit;
 		return *fit;
 	}

@@ -276,11 +276,11 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 	// sort bucket using radixsort
 	// - all buckets are in lexicographical order
 	// - SA[left,right) contains real SA entries (the beginning positions of the suffices)
-	template < typename TText, typename TSpec, typename TPredHull, typename TPred, typename TSize >
+	template < typename TText, typename TSpec, typename TPredHull, typename TPred, typename TBeginPos, typename TEndPos, typename TSize >
 	TSize _sortWotdBucket(
 		Index<StringSet<TText, TSpec>, Index_Wotd<DFI<TPredHull, TPred> > > &index,
-		TSize left, 
-		TSize right,
+		TBeginPos left, 
+		TEndPos right,
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
@@ -371,8 +371,11 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 
 		// 3. cumulative sum
 		TSize requiredSize = 0;
-		if (index.sentinelOcc != 0)
-			requiredSize = (index.sentinelOcc > 1)? 2: 1;
+		if (index.interSentinelNodes) {
+			if (index.sentinelOcc != 0)
+				requiredSize = (index.sentinelOcc > 1)? 2: 1;	// insert *one* $-edge for all $_i suffices
+		} else
+			requiredSize = index.sentinelOcc;					// insert each $_i suffix one-by-one
 
 		requiredSize += _wotdCummulativeSum(bound, occ, left + index.sentinelOcc);
 		index.sentinelBound = left;
@@ -434,6 +437,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		typedef typename TIndex::TDFIEntries				TEntries;
 
 		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
+		typedef typename Size<TDir>::Type					TDirSize;
 		typedef typename Iterator<TCounter, Standard>::Type	TCntIterator;
 		typedef typename Iterator<TEntries, Standard>::Type	TEntriesIterator;
 
@@ -453,18 +457,21 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 		TCntValue occ;
 		if (index.sentinelOcc != 0)
 		{
-			TDirValue orMask = 0; //(index.predHull(*itEntry))? index.DFI_PRED_HULL: 0;
-			//if (index.pred(*itEntry)) orMask |= index.DFI_PRED;
+			TDirValue orMask = (index.predHull(*itEntry))? index.DFI_PRED_HULL: 0;
+			if (index.pred(*itEntry)) orMask |= index.DFI_PRED;
 
-			if (index.sentinelOcc > 1) { // occurs on multiseqs
+			if (index.sentinelOcc > 1 && index.interSentinelNodes)	// occurs on multiseqs
+			{
 				itPrev = itDir;
 				*itDir = (index.sentinelBound - index.sentinelOcc) | orMask;	++itDir;
 				*itDir = index.sentinelBound | index.UNEVALUATED;				++itDir;
-			} else {
-				itPrev = itDir;
-				*itDir = (index.sentinelBound - index.sentinelOcc) | index.LEAF | orMask;
-				++itDir;
-			}
+			} else
+				orMask |= index.LEAF;
+				for (TDirSize d = index.sentinelBound - index.sentinelOcc; d != index.sentinelBound; ++d)
+				{
+					itPrev = itDir;
+					*itDir = d | orMask;										++itDir;
+				}
 		}
 
 		for (; it != itEnd; ++it, ++bit, ++itEntry)
@@ -554,7 +561,7 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 // interface for automatic index creation 
 
 	template <typename TText, typename TPredHull, typename TPred>
-	inline bool indexCreate(Index<TText, Index_Wotd<DFI<TPredHull, TPred> > > &index, Wotd_SA const, Default const)
+	inline bool indexCreate(Index<TText, Index_Wotd<DFI<TPredHull, TPred> > > &index, Wotd_Dir const, Default const)
 	{
 		typedef Index<TText, Index_Wotd<DFI<TPredHull, TPred> > >	TIndex;
 		typedef typename Value<TIndex>::Type							TValue;
