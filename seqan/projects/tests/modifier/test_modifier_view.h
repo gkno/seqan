@@ -45,7 +45,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_iterator_metafunctions) {
 // Test the modifier view iterator.
 SEQAN_DEFINE_TEST(test_modifier_view_iterator) {
     typedef CaesarChiffre<char> TFunctor;
-    typedef Iterator<CharString, Rooted> TIterator;
+    typedef Iterator<CharString, Rooted>::Type TIterator;
     typedef ModifiedIterator<TIterator, ModView<TFunctor> > TModifiedIterator;
 
     // The string and functor we will work with.
@@ -66,43 +66,42 @@ SEQAN_DEFINE_TEST(test_modifier_view_iterator) {
         TModifiedIterator it;
         assignModViewFunctor(it, myFunctor);
     }
-    SEQAN_ASSERT_FAIL("The following does not compile!");
     {
-//         TModifiedIterator it(begin(myString, Rooted()));
-//         assignModViewFunctor(it, myFunctor);
+         TModifiedIterator it(begin(myString, Rooted()));
+         assignModViewFunctor(it, myFunctor);
     }
     {
-//         TFunctor const & kMyFunctor = myFunctor;
-//         TModifiedIterator it(kMyFunctor);
-//         it = begin(myString, Rooted());
+         TFunctor const & kMyFunctor = myFunctor;
+         TModifiedIterator it(kMyFunctor);
+         it = begin(myString, Rooted());
     }
     {
-//         TModifiedIterator it(myFunctor);
-//         it = begin(myString);
+         TModifiedIterator it(myFunctor);
+         it = begin(myString);
     }
     {
-//         TModifiedIterator it;
-//         TModifiedIterator it2(it);
-//         assignModViewFunctor(it, myFunctor);
+         TModifiedIterator it;
+         TModifiedIterator it2(it);
+         assignModViewFunctor(it, myFunctor);
     }
     {
-//         const TModifiedIterator kIt;
-//         TModifiedIterator it(kIt);
-//         assignModViewFunctor(it, myFunctor);
+         const TModifiedIterator kIt;
+         TModifiedIterator it(kIt);
+         assignModViewFunctor(it, myFunctor);
     }
 
     // Test value() and getValue().
     {
-//         TModifiedIterator it(begin(myString, Rooted()));
-//         assignModViewFunctor(it, myFunctor);
-//         const TModifiedIterator kIt = it;
+         TModifiedIterator it(begin(myString, Rooted()));
+         assignModViewFunctor(it, myFunctor);
+         const TModifiedIterator kIt = it;
 
         // TODO(holtgrew): The following does not compile.
-//         SEQAN_ASSERT_EQ('U', value(it));
-//         SEQAN_ASSERT_EQ('U', value(kIt));
+         SEQAN_ASSERT_EQ('U', value(it));
+         SEQAN_ASSERT_EQ('U', value(kIt));
 
-//         SEQAN_ASSERT_EQ('U', getValue(it));
-//         SEQAN_ASSERT_EQ('U', getValue(kIt));
+         SEQAN_ASSERT_EQ('U', getValue(it));
+         SEQAN_ASSERT_EQ('U', getValue(kIt));
     }
 }
 
@@ -263,7 +262,7 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_alphabet_conversion) {
 // Test the modified string class with nested modifier.
 SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
     typedef CaesarChiffre<char> TFunctor;
-    typedef ModifiedString<ModifiedString<String<char>, ModView<TFunctor> >, ModView<TFunctor> > TModifiedString;
+    typedef ModifiedString<ModifiedString<CharString, ModView<TFunctor> >, ModView<TFunctor> > TModifiedString;
 
     CharString originalStr = "This is a test!";
     CharString const kExpectedResult = "wklv lv whv!";
@@ -273,8 +272,11 @@ SEQAN_DEFINE_TEST(test_modifier_view_string_nested_modifier) {
     assignModViewFunctor(modifiedStr, func1);
     assignModViewFunctor(host(modifiedStr), func2);
 
+    CharString modifiedStrCopy1 = modifiedStr;
+    std::cout<<modifiedStrCopy1<<std::endl;
+
     // TODO(holtgrew): The following does not compile.
-//    SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
+    SEQAN_ASSERT_EQ(modifiedStr, kExpectedResult);
     // TODO(holtgrew): The next assertion fails. The reason is the catch-all copy constructor of modified iterator. Why do we allow this anyway?
     SEQAN_ASSERT_FAIL("Problem with copy constructor of modified iterator.");
     CharString modifiedStrCopy = modifiedStr;
