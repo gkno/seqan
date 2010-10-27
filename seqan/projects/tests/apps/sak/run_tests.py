@@ -141,9 +141,4 @@ def main(source_base, binary_base):
 
 
 if __name__ == '__main__':
-  #logging.root.setLevel(logging.DEBUG)
-    if len(sys.argv) != 3:
-        print >>sys.stderr, 'ERROR: Invalid arguments!'
-        print >>sys.stderr, 'Usage: run_tests SOURCE_ROOT_PATH BINARY_ROOT_PATH'
-        sys.exit(2)
-    sys.exit(main(sys.argv[1], sys.argv[2]))
+    sys.exit(app_tests.main(main))

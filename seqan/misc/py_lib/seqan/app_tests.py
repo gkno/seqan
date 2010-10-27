@@ -24,12 +24,17 @@ __author__ = 'Manuel Holtgrewe <manuel.holtgrewe@fu-berlin.de>'
 
 import difflib
 import logging
+import optparse
 import os
 import os.path
 import subprocess
 import sys
 import tempfile
 
+
+# Valgrind flags, taken from CMake output, ideally given to test script by CMake?
+VALGRIND_FLAGS = '-q --tool=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50 --'.split()
+VALGRIND_PATH = '/usr/bin/valgrind'
 
 class TestConf(object):
     """Configuration for one tests.
@@ -56,6 +61,10 @@ class TestConf(object):
         self.to_diff = to_diff
         self.name = name
         self.redir_stdout = redir_stdout
+        if not hasattr(TestConf, 'valgrind'):
+            self.valgrind = False
+        else:
+            self.valgrind = TestConf.valgrind
 
     def __str__(self):
         fmt = 'TestConf(%s, %s, %s, %s, %s)'
@@ -156,6 +165,9 @@ def runTest(test_conf):
     # Execute the program.
     logging.debug('runTest(%s)', test_conf)
     args = [test_conf.program] + test_conf.args
+    if test_conf.valgrind:
+        # Call through valgrind.
+        args = [VALGRIND_PATH] + VALGRIND_FLAGS + args
     logging.debug('Executing "%s"', ' '.join(args))
     stdout_file = subprocess.PIPE
     if test_conf.redir_stdout:
@@ -219,3 +231,18 @@ def runTest(test_conf):
             result = False
     return result
 
+
+def main(main_func):
+    """Run main_func with the first and second positional parameter.""" 
+    parser = optparse.OptionParser("usage: run_tests [options] SOURCE_ROOT_PATH BINARY_ROOT_PATH")
+    parser.add_option('-v', '--verbose', dest='verbose', action='store_true')
+    parser.add_option('--valgrind', dest='valgrind', action='store_true')
+    (options, args) = parser.parse_args()
+    if len(args) != 2:
+        parser.error('Incorrect number of arguments!')
+        return 2
+    if options.verbose:
+        logging.root.setLevel(logging.DEBUG)
+    if options.valgrind:
+        TestConf.valgrind = True
+    return main_func(args[0], args[1])
