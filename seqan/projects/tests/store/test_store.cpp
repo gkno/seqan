@@ -20,11 +20,13 @@
   Tests for the SeqAn model store.
   ===========================================================================*/
 
+#define SEQAN_ENABLE_CHECKPOINTS 0
+
 #include <seqan/basic.h>
 #include "test_store_io.h"
 
 SEQAN_BEGIN_TESTSUITE(test_store) {
-    SEQAN_CALL_TEST(test_store_io_writeme);
+    SEQAN_CALL_TEST(test_store_io_sam);
 }
 SEQAN_END_TESTSUITE
 
