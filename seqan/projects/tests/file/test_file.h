@@ -639,6 +639,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_write)
     
 	read(file_4, str_4a, Fasta());
 	SEQAN_ASSERT_EQ(str_4a, str_3);
+	fclose(file_4);
     
     //____________________________________________________________________________
     // Test virtual file format object //outdated!!
