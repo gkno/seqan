@@ -59,10 +59,10 @@ set (SEQAN_TESTS_APPS_DIR "${SEQAN_TESTS_ABS}/apps")
 file(GLOB SEQAN_TESTS ${SEQAN_TESTS_APPS_DIR}/[A-z]*)
 foreach (TEST_DIR ${SEQAN_TESTS})
   file (RELATIVE_PATH TEST_DIR_REL ${SEQAN_TESTS_APPS_DIR} ${TEST_DIR})
-  if (MODEL STREQUAL "NightlyMemoryCheck")
+  if (MODEL MATCHES "Mem.*Check")
     # Do not run app tests when memory checking (yet). If we did, the wrapper python scripts were valgrind'ed.
-  else (MODEL STREQUAL "NightlyMemoryCheck")
+  else (MODEL MATCHES "Mem.*Check")
     add_test(test_apps_${TEST_DIR_REL} ${PYTHON_EXECUTABLE} ${TEST_DIR}/run_tests.py ${SEQAN_SOURCE_ROOT} ${SEQAN_BINARY_ROOT})
-  endif (MODEL STREQUAL "NightlyMemoryCheck")
+  endif (MODEL MATCHES "Mem.*Check")
 endforeach (TEST_DIR)
 
