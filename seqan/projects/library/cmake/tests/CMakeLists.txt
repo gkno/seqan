@@ -43,9 +43,12 @@ get_filename_component (SEQAN_TESTS_ABS ${SEQAN_LIBRARY}/../tests ABSOLUTE)
 	    add_dependencies (tests test_${TEST_DIR_REL})
       # Create a variable with the paths to the tests for memory checks.
       # TODO(holtgrew): For MSVC the paths are different, but does not matter as not run on Windows yet.
+      message("MODEL = ${MODEL}")
       if (MODEL STREQUAL "ExperimentalMemCheck")
-        set(TEST_PATH ${SEQAN_BINARY_ROOT}/projects/library/cmake/tests)
+        set(TEST_PATH ${SEQAN_BINARY_ROOT}/projects/library/cmake/tests/)
       endif (MODEL STREQUAL "ExperimentalMemCheck")
+      message("TEST_PATH = ${TEST_PATH}")
+			message("add_test (test_${TEST_DIR_REL} ${TEST_PATH}test_${TEST_DIR_REL})")
 			add_test (test_${TEST_DIR_REL} ${TEST_PATH}test_${TEST_DIR_REL})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (test_${TEST_DIR_REL} rt)
