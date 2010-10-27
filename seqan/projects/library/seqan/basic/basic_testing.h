@@ -70,6 +70,10 @@
 #define SEQAN_ENABLE_DEBUG 1
 #endif  // #if SEQAN_ENABLE_TESTING
 
+// Allow disabling checkpoints independent of testing.
+#ifndef SEQAN_ENABLE_CHECKPOINTS
+#define SEQAN_ENABLE_CHECKPOINTS SEQAN_ENABLE_TESTING
+#endif  // #ifndef SEQAN_ENABLE_CHECKPOINTS
 
 namespace seqan {
 
@@ -97,6 +101,7 @@ template <typename TStream>
 void printDebugLevel(TStream &stream) {
     stream << "SEQAN_ENABLE_DEBUG == " << SEQAN_ENABLE_DEBUG << std::endl;
     stream << "SEQAN_ENABLE_TESTING == " << SEQAN_ENABLE_TESTING << std::endl;
+    stream << "SEQAN_ENABLE_CHECKPOINTS == " << SEQAN_ENABLE_CHECKPOINTS << std::endl;
     stream << "SEQAN_CXX_FLAGS == \"" << SEQAN_CXX_FLAGS << "\"" << std::endl;
 }
 
@@ -1594,39 +1599,44 @@ template <typename T1> void SEQAN_ASSERT_NOT_MSG(T1 const &_arg1, const char *co
 #define SEQAN_TEMP_FILENAME() (::seqan::ClassTest::tempFileName())
 
 
-#if SEQAN_ENABLE_TESTING
+#if SEQAN_ENABLE_CHECKPOINTS
 
 // Create a check point at the point where the macro is placed.
 // TODO(holtgrew): Should be called SEQAN_CHECK_POINT to be consistent.
 #define SEQAN_CHECKPOINT                                        \
     ::seqan::ClassTest::registerCheckPoint(__LINE__, __FILE__);
 
-
 // Call the check point verification code for the given file.
 #define SEQAN_VERIFY_CHECKPOINTS(filename)          \
     ::seqan::ClassTest::verifyCheckPoints(filename)
 
-#else  // #if SEQAN_ENABLE_TESTING
+#else  // #if SEQAN_ENABLE_CHECKPOINTS
 
 #define SEQAN_CHECKPOINT
-#define SEQAN_BEGIN_TESTSUITE(suite_name)                       \
-    int main(int argc, char **argv) {                           \
-    (void) argc;                                                \
-    (void) argv;
-#define SEQAN_END_TESTSUITE }
-#define SEQAN_CALL_TEST(test_name) do { SEQAN_TEST_ ## test_name(); } while (false)
-#define SEQAN_SKIP_TEST do {} while (false)
 
 // If checkpoints are to be verified if testing is disabled then print
 // a warning.
 #define SEQAN_VERIFY_CHECKPOINTS(filename)                              \
     do {                                                                \
         fprintf(stderr, ("WARNING: Check point verification is "        \
-                         "disabled. Trying to verify %s from %s:%d."),  \
+                         "disabled. Trying to verify %s from %s:%d.\n"), \
                 filename, __FILE__, __LINE__);                          \
     } while(false)
 
-#endif  // #if SEQAN_ENABLE_TESTING
+#endif  // #if SEQAN_ENABLE_CHECKPOINTS
+
+#if !SEQAN_ENABLE_TESTING
+
+#define SEQAN_BEGIN_TESTSUITE(suite_name)                               \
+    int main(int argc, char **argv) {                                   \
+    (void) argc;                                                        \
+    (void) argv;                                                        \
+    fprintf(stderr, "Warning: SEQAN_ENABLE_TESTING is wrong and you used the macro SEQAN_BEGIN_TESTSUITE!\n");
+#define SEQAN_END_TESTSUITE }
+#define SEQAN_CALL_TEST(test_name) do { SEQAN_TEST_ ## test_name(); } while (false)
+#define SEQAN_SKIP_TEST do {} while (false)
+
+#endif  // #if !SEQAN_ENABLE_TESTING
 
 }  // namespace seqan
 
