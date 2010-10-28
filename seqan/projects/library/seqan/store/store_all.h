@@ -528,8 +528,8 @@ public:
 template < typename TSpec, typename TConfig >
 struct VertexDescriptor< FragmentStore<TSpec, TConfig> > 
 {
-	typedef FragmentStore<TSpec, TConfig>		TFragmentStore;
-	typedef typename Id<TFragmentStore>::Type	Type;
+	typedef FragmentStore<TSpec, TConfig>		TFragmentStore_;
+	typedef typename Id<TFragmentStore_>::Type	Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
