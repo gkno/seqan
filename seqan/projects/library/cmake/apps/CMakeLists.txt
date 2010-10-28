@@ -27,6 +27,18 @@ if (Boost_FOUND)
 endif (Boost_FOUND)
 
 ################################################################################
+# Set CUDA variables
+################################################################################
+
+set(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE OFF)
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+#  set (CUDA_NVCC_FLAGS "-arch sm_11")
+endif (CMAKE_COMPILER_IS_GNUCXX)
+
+CUDA_INCLUDE_DIRECTORIES(${CUDA_SDK_ROOT_DIR}/common/inc/)
+
+################################################################################
 # Set path variables
 ################################################################################
 
@@ -97,7 +109,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 	# if there is no predefined set of files for this target
 	# find the source files automatically
 	if (NOT APP_${APP_DIR_REL}_SOURCES)
-		file (GLOB APP_${APP_DIR_REL}_SOURCES ${APP_DIR}/[A-z]*.h ${APP_DIR}/[A-z]*.cpp)
+		file (GLOB APP_${APP_DIR_REL}_SOURCES ${APP_DIR}/[A-z]*.h ${APP_DIR}/[A-z]*.cpp ${APP_DIR}/[A-z]*.cu)
 	endif (NOT APP_${APP_DIR_REL}_SOURCES)
 
 	foreach (SRC ${APP_${APP_DIR_REL}_SOURCES})
@@ -107,13 +119,27 @@ foreach (APP_DIR ${SEQAN_APPS})
 		endif (NOT EXISTS ${SRC})
 	endforeach (SRC)
 
+  # auto-detect CUDA targets
+	foreach (SRC ${APP_${APP_DIR_REL}_SOURCES})
+		get_filename_component(SRC_EXT ${SRC} EXT)
+		if (${SRC_EXT} STREQUAL ".cu")
+#			message ("Found CUDA target: ${APP_DIR_REL}")
+			set (APP_${APP_DIR_REL}_CUDA TRUE)
+		endif (${SRC_EXT} STREQUAL ".cu")
+	endforeach (SRC)
+
 	# add target, dependencies and linked libraries
 	if (APP_${APP_DIR_REL}_SOURCES)
 		if (APP_${APP_DIR_REL}_NOBUILD)
 			message ("Not building ${APP_DIR_REL} -- it is deactivated.")
 		else (APP_${APP_DIR_REL}_NOBUILD)
 			list (SORT APP_${APP_DIR_REL}_SOURCES)
-			add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+			if (APP_${APP_DIR_REL}_CUDA)
+			  message ("Found CUDA target: ${APP_DIR_REL}")
+			  CUDA_ADD_EXECUTABLE(${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+			else (APP_${APP_DIR_REL}_CUDA)
+			  add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+			endif (APP_${APP_DIR_REL}_CUDA)
 			add_dependencies (${APP_DIR_REL} ${SEQAN_TARGET})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (${APP_DIR_REL} rt)
