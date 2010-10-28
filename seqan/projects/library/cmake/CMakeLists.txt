@@ -8,7 +8,7 @@ project (Seqan)
 # Add FindTBB directory to CMake's module path
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindTBB/"
-    ${CMAKE_MODULE_PATH})
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cuda" ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
 ################################################################################
