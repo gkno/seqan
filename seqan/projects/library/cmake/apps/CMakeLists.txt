@@ -119,7 +119,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 		endif (NOT EXISTS ${SRC})
 	endforeach (SRC)
 
-  # auto-detect CUDA targets
+	# auto-detect CUDA targets
 	foreach (SRC ${APP_${APP_DIR_REL}_SOURCES})
 		get_filename_component(SRC_EXT ${SRC} EXT)
 		if (${SRC_EXT} STREQUAL ".cu")
