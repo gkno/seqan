@@ -28,64 +28,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// addRef
-//////////////////////////////////////////////////////////////////////////////
-/**
-.Function.addRef:
-..summary:Called when dependency is added. 
-..cat:Dependent Objects
-..signature:addRef(host)
-..param.host:The host object.
-..remarks.text:A call of this function denotes that a client object is about to become
-dependent on $host$.
-..remarks.text:The default behavior is: Do nothing.
-..see:Class.Holder
-..include:seqan/basic.h
-*/
-
-template <typename T>
-inline void 
-addRef(T & /*me*/)
-{// general: do nothing
-SEQAN_CHECKPOINT
-}
-template <typename T>
-inline void 
-addRef(T const & /*me*/)
-{// general: do nothing
-SEQAN_CHECKPOINT
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// releaseRef
-//////////////////////////////////////////////////////////////////////////////
-/**
-.Function.releaseRef:
-..summary:Called when dependency is released. 
-..cat:Dependent Objects
-..signature:releaseRef(host)
-..param.host:The host object.
-..remarks.text:A call of this function denotes that a former dependent client object 
-ceases to be dependent on $host$.
-..remarks.text:The default behavior is: Do nothing.
-..see:Class.Holder
-..see:Function.addRef
-..include:seqan/basic.h
-*/
-template <typename T>
-inline void 
-releaseRef(T & /*me*/)
-{// general: do nothing
-SEQAN_CHECKPOINT
-}
-template <typename T>
-inline void 
-releaseRef(T const & /*me*/)
-{// general: do nothing
-SEQAN_CHECKPOINT
-}
-
-//////////////////////////////////////////////////////////////////////////////
 // Tags
 
 struct Simple;
@@ -109,8 +51,7 @@ struct Tristate;
 ..remarks.text:The main purpose of this class is to facilitate the handling of
 member objects. If we want class $A$ to be dependent on or the owner of another object of class $B$, 
 then we add a data member of type $Holder<B>$ to $A$. 
-$Holder$ offers some useful access functions, stores the kind of relationship between $A$ and $B$,
-and executes all needed @Function.addRef@ and @Function.releaseRef@ calls.
+$Holder$ offers some useful access functions and stores the kind of relationship between $A$ and $B$.
 ..include:seqan/basic.h
 */
 
@@ -674,7 +615,6 @@ clear(Holder<TValue, Tristate> & me)
 	case Holder<TValue, Tristate>::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-		releaseRef(_dataValue(me));
 		me.data_state = Holder<TValue, Tristate>::EMPTY;
 		}
 		break;
@@ -731,8 +671,6 @@ SEQAN_CHECKPOINT
 	case THolder::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-        // releaseRef is not necessary since create() implies a clear(me)
-		// releaseRef(_dataValue(me));
 		create(me, _dataValue(me));
 		}
 		break;
@@ -760,8 +698,6 @@ SEQAN_CHECKPOINT
 	case THolder::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-        // releaseRef is not necessary since create() implies a clear(me)
-		// releaseRef(_dataValue(me));
 		create(me, _dataValue(me));
 		}
 		break;
@@ -788,7 +724,6 @@ SEQAN_CHECKPOINT
 	case THolder::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-		releaseRef(_dataValue(me));
 		create(me, _dataValue(me));
 		}
 		break;
@@ -903,7 +838,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = & value_;
 	me.data_state = Holder<TValue, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 //____________________________________________________________________________
@@ -917,7 +851,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = & value_;
 	me.data_state = Holder<TValue const, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 //____________________________________________________________________________
@@ -931,7 +864,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue>
@@ -943,7 +875,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue>
@@ -955,7 +886,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue>
@@ -967,7 +897,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 //____________________________________________________________________________
@@ -981,7 +910,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue, size_t I>
@@ -993,7 +921,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue, size_t I>
@@ -1005,7 +932,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 template <typename TValue, size_t I>
@@ -1017,7 +943,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = value_;
 	me.data_state = Holder<TValue *, Tristate>::DEPENDENT;
-	addRef(_dataValue(me));
 }
 
 //____________________________________________________________________________
@@ -1489,7 +1414,6 @@ clear(Holder<TValue, Tristate2> & me)
 	case Holder<TValue, Tristate2>::DEPENDENT:
 		{
 SEQAN_CHECKPOINT
-		releaseRef(*(me.data_value));
 		me.data_state = Holder<TValue, Tristate2>::EMPTY;
 		}
 		break;
@@ -1532,7 +1456,6 @@ SEQAN_CHECKPOINT
 		allocate(me, me.data_value, 1);
 		valueConstruct(me.data_value, old_value);
 		me.data_state = THolder::OWNER;
-		releaseRef(old_value);
 		}
 		break;
 	default:;
@@ -1585,7 +1508,6 @@ SEQAN_CHECKPOINT
 	clear(me);
 	me.data_value = & value_;
 	me.data_state = Holder<TValue, Tristate2>::DEPENDENT;
-	addRef(value_);
 }
 
 //////////////////////////////////////////////////////////////////////////////

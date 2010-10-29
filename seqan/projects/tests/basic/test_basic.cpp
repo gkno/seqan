@@ -60,74 +60,39 @@ SEQAN_DEFINE_TEST(Test_Proxy_Iterator) {
 
 
 //////////////////////////////////////////////////////////////////////////////
-//helper class for reference counting
-//this is needed for test of Holder
+// Helper class for constructor/destructor call counting.
+// This is needed for test of Holder.
 
-struct RefCountObj
+struct CtorDtorCounter
 {
-	static int static_addrefs;
-	static int static_releaserefs;
 	static int static_ctors;
 	static int static_dtors;
 
-	mutable int data_addrefs;
-	mutable int data_releaserefs;
-
 	int data_value;
 
-	RefCountObj():
-		data_addrefs(0),
-		data_releaserefs(0),
+	CtorDtorCounter():
 		data_value(0)
 	{
 		++static_ctors;
 	}
-	RefCountObj(RefCountObj const & other_):
-		data_addrefs(0),
-		data_releaserefs(0),
+	CtorDtorCounter(CtorDtorCounter const & other_):
 		data_value(other_.data_value)
 	{
 		++static_ctors;
 	}
-	~RefCountObj()
+	~CtorDtorCounter()
 	{
-SEQAN_ASSERT_EQ(data_addrefs, data_releaserefs);
-
 		++static_dtors;
 	}
-	RefCountObj & operator = (RefCountObj const & other_)
+	CtorDtorCounter & operator = (CtorDtorCounter const & other_)
 	{
-		data_addrefs = data_releaserefs = 0;
 		data_value = other_.data_value;
 		return *this;
 	}
 };
 
-int RefCountObj::static_addrefs = 0;
-int RefCountObj::static_releaserefs = 0;
-int RefCountObj::static_ctors = 0;
-int RefCountObj::static_dtors = 0;
-
-void addRef(RefCountObj & me)
-{
-	++me.data_addrefs;
-	++RefCountObj::static_addrefs;
-}
-void addRef(RefCountObj const & me)
-{
-	++me.data_addrefs;
-	++RefCountObj::static_addrefs;
-}
-void releaseRef(RefCountObj & me)
-{
-	++me.data_releaserefs;
-	++RefCountObj::static_releaserefs;
-}
-void releaseRef(RefCountObj const & me)
-{
-	++me.data_releaserefs;
-	++RefCountObj::static_releaserefs;
-}
+int CtorDtorCounter::static_ctors = 0;
+int CtorDtorCounter::static_dtors = 0;
 
 //____________________________________________________________________________
 // test for holder class
@@ -135,7 +100,7 @@ void releaseRef(RefCountObj const & me)
 SEQAN_DEFINE_TEST(Test_Holder) {
 	{
 //ctors
-		Holder<RefCountObj> ho1;
+		Holder<CtorDtorCounter> ho1;
 		SEQAN_ASSERT_TRUE(empty(ho1));
 		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
@@ -143,37 +108,30 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 		SEQAN_ASSERT_TRUE(!empty(ho1));
 		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
-		Holder<RefCountObj> ho2(ho1);
+		Holder<CtorDtorCounter> ho2(ho1);
 
-		Holder<RefCountObj> ho3(value(ho1));
-		SEQAN_ASSERT_EQ(value(ho1).data_addrefs, 1);
-		SEQAN_ASSERT_EQ(value(ho1).data_releaserefs, 0);
+		Holder<CtorDtorCounter> ho3(value(ho1));
 		SEQAN_ASSERT_TRUE(!dependent(ho1));
 
 
 //create
-		RefCountObj rco1;
+		CtorDtorCounter rco1;
 		create(ho3, rco1);
-		SEQAN_ASSERT_EQ(value(ho3).data_addrefs, 0);
-		SEQAN_ASSERT_EQ(value(ho1).data_addrefs, 1);
-		SEQAN_ASSERT_EQ(value(ho1).data_releaserefs, 1);
 
 //setValue
 		setValue(ho3, rco1);
 		SEQAN_ASSERT_TRUE(dependent(ho3));
-		SEQAN_ASSERT_EQ(value(ho3).data_addrefs, 1);
 
 		rco1.data_value = 10;
 		create(ho3);
 		SEQAN_ASSERT_EQ(value(ho3).data_value, 10);
 
-		RefCountObj rco2;
+		CtorDtorCounter rco2;
 		rco2.data_value = 20;
 
 //operator = (value) => assignValue
 		ho2 = rco2;
 		SEQAN_ASSERT_EQ(value(ho2).data_value, 20);
-		SEQAN_ASSERT_EQ(rco2.data_addrefs, 0);
 		SEQAN_ASSERT_TRUE(!dependent(ho2));
 
 		rco2.data_value = 30;
@@ -183,7 +141,6 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 		setValue(ho1, rco1);
 		ho1 = ho2;
 		SEQAN_ASSERT_EQ(value(ho1).data_value, 20);
-		SEQAN_ASSERT_EQ(rco2.data_addrefs, 0);
 
 //clear
 		clear(ho3);
@@ -202,19 +159,10 @@ SEQAN_DEFINE_TEST(Test_Holder) {
 
 	}
 
-	SEQAN_ASSERT_EQ(RefCountObj::static_addrefs, RefCountObj::static_releaserefs);
-	SEQAN_ASSERT_EQ(RefCountObj::static_ctors, RefCountObj::static_dtors);
+	SEQAN_ASSERT_EQ(CtorDtorCounter::static_ctors, CtorDtorCounter::static_dtors);
 
 
 //test default implementations of addRef and releaseRef
-
-	int i1;
-	int const i2 = 0;
-
-	addRef(i1);
-	addRef(i2);
-	releaseRef(i1);
-	releaseRef(i2);
 
 //test const object holders
 /*
