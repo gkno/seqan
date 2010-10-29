@@ -92,6 +92,8 @@ struct DefaultPattern
 ..param.TFinder:A @Class.Finder@ type.
 ...type:Class.Finder
 ..returns:The haystack type of $TFinder$, i.e. $THaystack$ for $Finder<THaystack, TSpec>$.
+This is an alias to function @Function.host@ of the pattern function.
+..see:Function.host
 ..include:seqan/find.h
 */
 

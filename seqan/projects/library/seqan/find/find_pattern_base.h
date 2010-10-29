@@ -270,8 +270,12 @@ SEQAN_CHECKPOINT
 ...type:Class.Pattern
 ..returns:The needle object to search for.
 ..remarks:The result type is @Metafunction.Needle@$<TPattern>::Type$ for pattern of type $TPattern$.
+This is an alias to function @Function.host@ of the pattern function.
+..see:Function.host
 ..include:seqan/find.h
 */
+///.Function.host.remarks:Aliased to @Function.needle@ and @Function.haystack@ for classes @Class.Pattern@ and @Class.Finder@.
+
 
 template < typename TObject >
 inline typename Needle<TObject>::Type &

@@ -93,6 +93,7 @@ struct ToStdAllocator
 	{
 	}
 
+// TODO(holtgrew): Move to basic_host.h?
 /**
 .Function.host:
 ..summary:The object a given object depends on.
