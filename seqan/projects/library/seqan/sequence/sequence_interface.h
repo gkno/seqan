@@ -1594,7 +1594,7 @@ template <typename T>
 inline void eraseBack(T & me)
 {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_GT(length(me), 0u);
+    SEQAN_ASSERT_GT_MSG(length(me), 0u, "Must erase more than 0 characters in eraseBack()!");
     erase(me, length(me) - 1);
 }
 

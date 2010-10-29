@@ -216,7 +216,7 @@ value(String<TValue, TSpec> & me,
 {
 	typedef typename Position< String<TValue, TSpec> >::Type TStringPos;
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_LT(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)));
+    SEQAN_ASSERT_LT_MSG(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)), "Trying to acces an element behind the last one!");
 	return *(begin(me, Standard()) + pos);
 }
 
@@ -227,7 +227,7 @@ value(String<TValue, TSpec> const & me,
 {
 	typedef typename Position< String<TValue, TSpec> const >::Type TStringPos;
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_LT(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)));
+    SEQAN_ASSERT_LT_MSG(static_cast<TStringPos>(pos), static_cast<TStringPos>(length(me)), "Trying to acces an element behind the last one!");
     return *(begin(me, Standard()) + pos);
 }
 

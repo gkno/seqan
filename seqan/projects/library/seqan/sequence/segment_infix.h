@@ -691,8 +691,8 @@ inline typename Reference< Segment<THost, TSpec> >::Type
 value(Segment<THost, TSpec> & me, 
 	  TPos pos)
 {
-SEQAN_CHECKPOINT
-  SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LT_MSG(pos, static_cast<TPos>(length(me)), "Trying to acces an element behind the last one!");
 	return *(begin(me, Standard()) + pos);
 }
 
@@ -701,8 +701,8 @@ inline typename Reference< Segment<THost, TSpec> const >::Type
 value(Segment<THost, TSpec> const & me, 
 	  TPos pos)
 {
-SEQAN_CHECKPOINT
-  SEQAN_ASSERT_LT(pos, static_cast<TPos>(length(me)));
+    SEQAN_CHECKPOINT;
+    SEQAN_ASSERT_LT_MSG(pos, static_cast<TPos>(length(me)), "Trying to acces an element behind the last one!");
 	return *(begin(me, Standard()) + pos);
 }
 
