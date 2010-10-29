@@ -36,7 +36,10 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 #  set (CUDA_NVCC_FLAGS "-arch sm_11")
 endif (CMAKE_COMPILER_IS_GNUCXX)
 
-CUDA_INCLUDE_DIRECTORIES(${CUDA_SDK_ROOT_DIR}/common/inc/)
+cuda_include_directories(${CUDA_SDK_ROOT_DIR}/common/inc/)
+#find_library(CUDA_CUTIL_LIBRARY cutil "${CUDA_SDK_ROOT_DIR}/C/lib")
+#			message ("CUDA: ${CUDA_SDK_ROOT_DIR}.")
+#			message ("CUDA: ${CUDA_LIBRARIES}.")
 
 ################################################################################
 # Set path variables
@@ -136,7 +139,8 @@ foreach (APP_DIR ${SEQAN_APPS})
 			list (SORT APP_${APP_DIR_REL}_SOURCES)
 			if (APP_${APP_DIR_REL}_CUDA)
 			  message ("Found CUDA target: ${APP_DIR_REL}")
-			  CUDA_ADD_EXECUTABLE(${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+			  cuda_add_executable(${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
+        #			  target_link_libraries(${APP_DIR_REL} ${CUDA_CUTIL_LIBRARY})
 			else (APP_${APP_DIR_REL}_CUDA)
 			  add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
 			endif (APP_${APP_DIR_REL}_CUDA)

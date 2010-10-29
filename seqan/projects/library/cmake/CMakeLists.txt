@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.6)
 project (Seqan)
 
 ################################################################################
@@ -8,7 +8,8 @@ project (Seqan)
 # Add FindTBB directory to CMake's module path
 set(CMAKE_MODULE_PATH
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindTBB/"
-    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cuda" ${CMAKE_MODULE_PATH})
+    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/cuda"
+    ${CMAKE_MODULE_PATH})
 find_package (PythonInterp)
 
 ################################################################################
@@ -169,6 +170,26 @@ IF(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: Debug Release."
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
+
+################################################################################
+# Define Convenience Macros
+################################################################################
+
+macro(SEQAN_ADD_EXECUTABLE seqan_target)
+
+	# create a new target
+	add_executable(${seqan_target} ${ARGN})
+
+	# add dependency to SeqAn library
+	add_dependencies (${seqan_target} ${SEQAN_TARGET})
+
+	# optionally link against runtime-library
+	if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		target_link_libraries (${seqan_target} rt)
+	endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+
+endmacro(SEQAN_ADD_EXECUTABLE seqan_target)
+
 
 ################################################################################
 # Include Sub-Projects
