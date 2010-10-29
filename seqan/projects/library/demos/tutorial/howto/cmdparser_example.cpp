@@ -6,7 +6,6 @@
 int main(int argc, const char *argv[]) {
     using namespace seqan;
 
-    // FRAGMENT(cmdparser-header)
     CommandLineParser parser("<your application name>"); // if you do not pass the name to the c'tor it will guess it from argv
 
     addTitleLine(parser, "*************************************");
