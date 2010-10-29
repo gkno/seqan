@@ -35,7 +35,6 @@ SEQAN_BEGIN_TESTSUITE(test_index)
 //	SEQAN_CALL_TEST(testSTreeIterators_Wotd);
 //	SEQAN_CALL_TEST(testSTreeIterators_WotdOriginal);
 //	SEQAN_CALL_TEST(testSTreeIterators_Esa);
-
 	SEQAN_CALL_TEST(testFind_Esa_Mlr);
 	SEQAN_CALL_TEST(testCompareIndices_Esa_Wotd);
 	SEQAN_CALL_TEST(testMultiIndex);

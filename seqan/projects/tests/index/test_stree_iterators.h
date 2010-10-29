@@ -444,12 +444,14 @@ void _testSuperMaxRepeats()
 //        open(esa, "corpus/NC_000117.txt");
 		indexText(esa) = "HALLOBALLOHALLEBALLO";
 
-        typename Iterator< Index<TText>, TIteratorSpec >::Type it(esa);
+		typedef Index<TText> TIndex;
+		typedef SAValue<TIndex>::Type TSAValue;
+        typename Iterator<TIndex, TIteratorSpec >::Type it(esa);
 
 		int found = 0;
-        while (!atEnd(it)) 
+        while (!atEnd(it))
 		{
-			String<int> occs = getOccurrences(it);
+			String<TSAValue> occs = getOccurrences(it);
 			std::sort(begin(occs, Standard()), end(occs, Standard()));
 
 //			std::cout << representative(it) << ":";
