@@ -18,8 +18,7 @@
 #
 # TODO(holtgrew): Run with different match file variants.
 
-# seqan-apps was a checkout of September 25, 2009 as advocated by T. Rausch.
-TCOFFEE=../../../../../seqan-apps/projects/library/cmake/apps/seqan_tcoffee
+TCOFFEE=../../../library/cmake/Release/apps/seqan_tcoffee
 
 # ============================================================
 # Run on Proteins (Balibase).
