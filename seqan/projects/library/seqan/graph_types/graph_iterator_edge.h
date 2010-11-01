@@ -71,7 +71,8 @@ public:
 		{
 				goNext(data_vertex_it);
 				typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator_;
-				data_edge_it = TOutEdgeIterator_(hostGraph(*this), value(data_vertex_it));			
+				if(!atEnd(data_vertex_it))
+					data_edge_it = TOutEdgeIterator_(hostGraph(*this), value(data_vertex_it));			
 		}
 		data_first_slot = value(data_vertex_it);
 	}
