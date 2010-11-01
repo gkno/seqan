@@ -84,7 +84,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Tag<WotdOriginal_> const WotdOriginal;
 
 	template < typename TSpec = void >
-	struct Index_Wotd;
+	struct Index_Wotd {};
 
 /*
 	template < typename TObject, typename TSpec >
@@ -197,6 +197,13 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef Default Type;
     };
 
+//////////////////////////////////////////////////////////////////////////////
+// default finder
+
+	template < typename TText, typename TSpec >
+	struct DefaultFinder< Index<TText, Index_Wotd<TSpec> > > {
+        typedef FinderSTree Type;	// standard suffix array finder is mlr-heuristic
+    };
 
 //////////////////////////////////////////////////////////////////////////////
 

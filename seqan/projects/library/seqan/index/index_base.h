@@ -46,7 +46,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct BWT;
 
 	template <typename TSpec = void>
-	struct Index_ESA;
+	struct Index_ESA {};
 
 
 //////////////////////////////////////////////////////////////////////////////

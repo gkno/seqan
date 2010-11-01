@@ -48,9 +48,11 @@ for @Class.Index@ based substring searches.
 
 	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic
 	struct _Finder_LCPE;	// Suffix Array finder using an enhanced LCP-Table
+	struct FinderSTree_;	// Suffix Array finder using an enhanced LCP-Table
 
 	typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
 	typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
+	typedef Tag<FinderSTree_> const FinderSTree;
 
 //____________________________________________________________________________
 
@@ -1757,6 +1759,32 @@ for @Class.Index@ based substring searches.
 		indexRequire(index, ESA_SA());
 		indexRequire(index, ESA_LCPE());
 		finder.range = equalRangeLCPEIterator(indexText(index), indexSA(index), indexLCPE(index), pattern);
+	}
+
+	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
+	inline void
+	_findFirstIndex(
+		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
+		TPattern const &pattern,
+		FinderSTree const)
+	{
+        typedef Index<TText, TSpec>                             TIndex;
+		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
+		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
+        
+		TIndex &index = haystack(finder);
+        typename Iterator<TIndex, TopDown<EmptyEdges> >::Type it(index);
+        TIterator saIt = begin(indexSA(index), Standard());
+        if (goDown(it, pattern))
+        {
+            Pair<typename Size<TIndex>::Type> rng = range(it);
+			finder.range.i1 = saIt + rng.i1;
+			finder.range.i2 = saIt + rng.i2;
+        } else
+        {
+            finder.range.i1 = saIt;
+            finder.range.i2 = saIt;
+        }
 	}
 
 
