@@ -322,7 +322,11 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 		strm_tree.close();
 	} else {
 		// Check if we have a valid distance matrix
-		if (empty(distanceMatrix)) getDistanceMatrix(g, distanceMatrix, KmerDistance());
+		if (empty(distanceMatrix))
+		  getDistanceMatrix(g, distanceMatrix, KmerDistance());
+		// Get distance matrix values for a precision of 10 decimal digits.
+		for (unsigned i = 0; i < length(distanceMatrix); ++i)
+		  distanceMatrix[i] = static_cast<__int64>(distanceMatrix[i] * 1e10) / 1e10;
 		if (msaOpt.build == 0) njTree(distanceMatrix, guideTree);
 		else if (msaOpt.build == 1) upgmaTree(distanceMatrix, guideTree, UpgmaMin());
 		else if (msaOpt.build == 2) upgmaTree(distanceMatrix, guideTree, UpgmaMax());
