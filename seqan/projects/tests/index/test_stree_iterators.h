@@ -462,14 +462,14 @@ void _testSuperMaxRepeats()
 			if (representative(it) == "BALLO")
 			{
 				SEQAN_ASSERT_EQ(length(occs), 2u);
-				SEQAN_ASSERT_EQ(occs[0], 5);
-				SEQAN_ASSERT_EQ(occs[1], 15);
+				SEQAN_ASSERT_EQ(occs[0], 5u);
+				SEQAN_ASSERT_EQ(occs[1], 15u);
 			} else 
 			if (representative(it) == "HALL")
 			{
 				SEQAN_ASSERT_EQ(length(occs), 2u);
-				SEQAN_ASSERT_EQ(occs[0], 0);
-				SEQAN_ASSERT_EQ(occs[1], 10);
+				SEQAN_ASSERT_EQ(occs[0], 0u);
+				SEQAN_ASSERT_EQ(occs[1], 10u);
 			} else 
 			{
 				SEQAN_ASSERT_FAIL("Unknown supermaximal repeat found!");
@@ -563,8 +563,8 @@ void testFind()
 			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_EQ(length(pos), 2u);
-		SEQAN_ASSERT_TRUE(pos[0] == 5);
-		SEQAN_ASSERT_TRUE(pos[1] == 31);
+		SEQAN_ASSERT_TRUE(pos[0] == 5u);
+		SEQAN_ASSERT_TRUE(pos[1] == 31u);
 
 	//____________________________________________________________________________
 	// Test2 - large needle
@@ -581,8 +581,8 @@ void testFind()
 			appendValue(pos,position(finder));
 
 		SEQAN_ASSERT_EQ(length(pos), 2u);
-		SEQAN_ASSERT_TRUE(pos[1] == 0);
-		SEQAN_ASSERT_TRUE(pos[0] == 26);
+		SEQAN_ASSERT_TRUE(pos[1] == 0u);
+		SEQAN_ASSERT_TRUE(pos[0] == 26u);
 }
 
 SEQAN_DEFINE_TEST(testFind_Esa_Mlr)
