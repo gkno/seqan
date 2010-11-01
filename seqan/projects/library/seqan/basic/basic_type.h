@@ -659,38 +659,38 @@ struct WEIGHT<T const>:
 ..include:seqan/basic.h
  */
 template <typename T>
-struct IsIntegral {
-    typedef False Type;
+struct IsIntegral
+{
+	typedef
+		// Implicitely signed.
+		typename IF< TYPECMP<T, char>::VALUE,  True,
+		typename IF< TYPECMP<T, char>::VALUE,  True,
+		typename IF< TYPECMP<T, short>::VALUE, True,
+		typename IF< TYPECMP<T, int>::VALUE,   True,
+		typename IF< TYPECMP<T, long>::VALUE,  True,
+		typename IF< TYPECMP<T, __int64>::VALUE,      True,
+		// Explicitely signed.
+		typename IF< TYPECMP<T, signed char>::VALUE,    True,
+		typename IF< TYPECMP<T, signed char>::VALUE,    True,
+		typename IF< TYPECMP<T, signed short>::VALUE,   True,
+		typename IF< TYPECMP<T, signed int>::VALUE,     True,
+		typename IF< TYPECMP<T, signed long>::VALUE,    True,
+		// Explicitely unsigned.
+		typename IF< TYPECMP<T, unsigned char>::VALUE,  True,
+		typename IF< TYPECMP<T, unsigned char>::VALUE,  True,
+		typename IF< TYPECMP<T, unsigned short>::VALUE, True,
+		typename IF< TYPECMP<T, unsigned int>::VALUE,   True,
+		typename IF< TYPECMP<T, unsigned long>::VALUE,  True,
+		typename IF< TYPECMP<T, __uint64>::VALUE,       True,
+		False
+		>::Type>::Type>::Type>::Type>::Type>::Type
+		>::Type>::Type>::Type>::Type>::Type
+		>::Type>::Type>::Type>::Type>::Type>::Type Type;
 };
 
-
-template <>
-struct IsIntegral<char> {
-    typedef True Type;
-};
-
-
-template <>
-struct IsIntegral<int> {
-    typedef True Type;
-};
-
-
-template <>
-struct IsIntegral<long int> {
-    typedef True Type;
-};
-
-
-template <>
-struct IsIntegral<unsigned> {
-    typedef True Type;
-};
-
-
-template <>
-struct IsIntegral<long unsigned> {
-    typedef True Type;
+template <typename T>
+struct IsIntegral<T const> {
+	typedef typename IsIntegral<T>::Type Type;
 };
 
 }// namespace SEQAN_NAMESPACE_MAIN
