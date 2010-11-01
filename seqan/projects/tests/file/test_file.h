@@ -37,7 +37,7 @@ SEQAN_DEFINE_TEST(test_file_stream)
     strcpy(buffer, SEQAN_TEMP_FILENAME());
     
 	fstream strm_1;
-	strm_1.open(buffer, ios_base::out | ios_base::trunc);
+	strm_1.open(buffer, ios_base::out | ios_base::trunc | ios_base::binary);
     
 	strm_1 << str_1;
 	strm_1.close();
@@ -45,7 +45,7 @@ SEQAN_DEFINE_TEST(test_file_stream)
 	//assign stream => string
 	String<char> str_3 = "";
 	fstream strm_3;
-	strm_3.open(buffer, ios_base::in);
+	strm_3.open(buffer, ios_base::in | ios_base::binary);
 	strm_3 >> str_3;
 	strm_3.close();
 	SEQAN_ASSERT_EQ(length(str_3), length(str_1));
@@ -55,13 +55,13 @@ SEQAN_DEFINE_TEST(test_file_stream)
 
 	//const string => stream
 	fstream strm_4;
-	strm_4.open(buffer, ios_base::out | ios_base::trunc);
+	strm_4.open(buffer, ios_base::out | ios_base::trunc | ios_base::binary);
 	strm_4 << "Testfile";
 	strm_4.close();
     
 	String<char> str_5 = "";
 	fstream strm_5;
-	strm_5.open(buffer, ios_base::in);
+	strm_5.open(buffer, ios_base::in | ios_base::binary);
 	strm_5 >> str_5;
 	strm_5.close();
 	SEQAN_ASSERT_EQ(str_5, "Testfile");
@@ -72,48 +72,48 @@ SEQAN_DEFINE_TEST(test_file_stream)
     /*
      str_2 = "";
      fstream strm_3;
-     strm_3.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_3.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_2, strm_3, Insist());
      strm_3.close();
      SEQAN_ASSERT_EQ(str_2, str_1);
      
      str_2 = "";
      fstream strm_4;
-     strm_4.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_4.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_2, strm_4, 9, Insist());
      strm_4.close();
      SEQAN_ASSERT_EQ(str_2, "This test");
      
      String<char> str_3;
      fstream strm_5;
-     strm_5.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_5.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_3, strm_5, 9, Generous());
      strm_5.close();
      SEQAN_ASSERT_EQ(str_3, "This test");
      
      str_2 = "";
      fstream strm_6;
-     strm_6.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_6.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_2, strm_6, Limit());
      strm_6.close();
      SEQAN_ASSERT_EQ(str_2, str_1);
      
      str_2 = "";
      fstream strm_7;
-     strm_7.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_7.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_2, strm_7, 9, Limit());
      strm_7.close();
      SEQAN_ASSERT_EQ(str_2, "This test");
      
      char str_4[200];
      fstream strm_8;
-     strm_8.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_8.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_4, strm_8);
      strm_8.close();
      SEQAN_ASSERT_EQ(str_4, str_1);
      
      fstream strm_9;
-     strm_9.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_9.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      assign(str_4, strm_9, 9);
      strm_9.close();
      SEQAN_ASSERT_TRUE(isEqual(str_4, "This test"));
@@ -125,63 +125,63 @@ SEQAN_DEFINE_TEST(test_file_stream)
      
      String<char> str_6("Start");
      fstream strm_10;
-     strm_10.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_10.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_6, strm_10);
      strm_10.close();
      SEQAN_ASSERT_EQ(str_6, str_5);
      
      String<char> str_7("Start");
      fstream strm_11;
-     strm_11.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_11.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_7, strm_11, 14, Generous());
      strm_11.close();
      SEQAN_ASSERT_EQ(str_7, "StartThis test");
      
      String<char> str_8("Start");
      fstream strm_11a;
-     strm_11a.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_11a.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_8, strm_11a, 200, Generous());
      strm_11a.close();
      SEQAN_ASSERT_EQ(str_8, str_5);
      
      str_2 = "Start";
      fstream strm_12;
-     strm_12.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_12.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_2, strm_12, Insist());
      strm_12.close();
      SEQAN_ASSERT_EQ(str_2, str_5);
      
      str_2 = "Start";
      fstream strm_13;
-     strm_13.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_13.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_2, strm_13, 14, Insist());
      strm_13.close();
      SEQAN_ASSERT_EQ(str_2, "StartThis test");
      
      str_2 = "Start";
      fstream strm_14;
-     strm_14.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_14.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_2, strm_14, Limit());
      strm_14.close();
      SEQAN_ASSERT_EQ(str_2, str_5);
      
      str_2 = "Start";
      fstream strm_15;
-     strm_15.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_15.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_2, strm_15, 14, Limit());
      strm_15.close();
      SEQAN_ASSERT_EQ(str_2, "StartThis test");
      
      assign(str_4, "Start");
      fstream strm_16;
-     strm_16.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_16.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_4, strm_16);
      strm_16.close();
      SEQAN_ASSERT_EQ(str_4, str_5);
      
      assign(str_4, "Start");
      fstream strm_17;
-     strm_17.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_17.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(str_4, strm_17, 14);
      strm_17.close();
      SEQAN_ASSERT_EQ(isEqual(str_4, "StartThis test"));
@@ -194,42 +194,42 @@ SEQAN_DEFINE_TEST(test_file_stream)
      
      String<char> str_10("start middle end");
      fstream strm_18;
-     strm_18.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_18.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_10, 6, 12, strm_18);
      strm_18.close();
      SEQAN_ASSERT_TRUE(str_10 == str_9);
      
      str_10 = "start middle end";
      fstream strm_19;
-     strm_19.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_19.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_10, 6, 12, strm_19, 15);
      strm_19.close();
      SEQAN_ASSERT_TRUE(str_10 == "start This test");
      
      str_10 = "start middle end";
      fstream strm_20;
-     strm_20.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_20.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_10, 6, 12, strm_20, Limit());
      strm_20.close();
      SEQAN_ASSERT_TRUE(str_10 == str_9);
      
      str_10 = "start middle end";
      fstream strm_21;
-     strm_21.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_21.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_10, 6, 12, strm_21, 15, Limit());
      strm_21.close();
      SEQAN_ASSERT_TRUE(str_10 == "start This test");
      
      assign(str_4, "start middle end");
      fstream strm_22;
-     strm_22.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_22.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_4, 6, 12, strm_22);
      strm_22.close();
      SEQAN_ASSERT_TRUE(str_4 == str_9);
      
      assign(str_4, "start middle end");
      fstream strm_23;
-     strm_23.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_23.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(str_4, 6, 12, strm_23, 15);
      strm_23.close();
      SEQAN_ASSERT_TRUE(isEqual(str_4, "start This test"));
@@ -238,12 +238,12 @@ SEQAN_DEFINE_TEST(test_file_stream)
      //Test limited string => stream
      
      fstream strm_24;
-     strm_24.open(TEST_PATH "testfile.txt", ios_base::out | ios_base::trunc);
+     strm_24.open(TEST_PATH "testfile.txt", ios_base::out | ios_base::trunc | ios_base::binary);
      write(strm_24, str_1, 9);
      strm_24.close();
      
      fstream strm_25;
-     strm_25.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_25.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      strm_25 >> str_2;
      strm_25.close();
      SEQAN_ASSERT_TRUE(isEqual(str_2, "This test"));
@@ -254,7 +254,7 @@ SEQAN_DEFINE_TEST(test_file_stream)
      str_2 = "begin middle end";
      Segment<String<char> > seg_1(str_2, 6, 12);
      fstream strm_26;
-     strm_26.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_26.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      strm_26 >> seg_1;
      strm_26.close();
      SEQAN_ASSERT_TRUE(isEqual(str_2, "begin This test end"));
@@ -262,7 +262,7 @@ SEQAN_DEFINE_TEST(test_file_stream)
      str_2 = "begin middle end";
      Segment<String<char> > seg_2(str_2, 6, 12);
      fstream strm_27;
-     strm_27.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_27.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      append(seg_2, strm_27);
      strm_27.close();
      SEQAN_ASSERT_TRUE(isEqual(str_2, "begin middleThis test end"));
@@ -270,7 +270,7 @@ SEQAN_DEFINE_TEST(test_file_stream)
      str_2 = "begin one two three end";
      Segment<String<char> > seg_3(str_2, 6, 19);
      fstream strm_28;
-     strm_28.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_28.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      replace(seg_3, 4, 7, strm_28);
      strm_28.close();
      SEQAN_ASSERT_TRUE(isEqual(str_2, "begin one This test three end"));
@@ -530,14 +530,14 @@ SEQAN_DEFINE_TEST(test_file_raw)
      String<char> str_1("The first test file string.");
      
      fstream strm_1;
-     strm_1.open(TEST_PATH "testfile.txt", ios_base::out | ios_base::trunc);
+     strm_1.open(TEST_PATH "testfile.txt", ios_base::out | ios_base::trunc | ios_base::binary);
      strm_1 << str_1;
      strm_1.close();
      
      //assign stream => string
      String<char> str_3 = "";
      fstream strm_3;
-     strm_3.open(TEST_PATH "testfile.txt", ios_base::in);
+     strm_3.open(TEST_PATH "testfile.txt", ios_base::in | ios_base::binary);
      strm_3 >> str_3;
      strm_3.close();
      SEQAN_ASSERT_TRUE(str_3 == str_1);
@@ -753,7 +753,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
     
     strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
     strcat(buffer, "/projects/tests/file/fasta_align.txt");
-	strm_1.open(buffer, ios_base::in);
+	strm_1.open(buffer, ios_base::in | ios_base::binary);
 	read(strm_1, align2, FastaAlign());
 	strm_1.close();
 	SEQAN_ASSERT_EQ(source(row(align2,0)), "MKVILLFVLAVFTVFVSSRGIPPEEQSQFLEFQDKFNKKYSHEEYLERFEIFKSNLGKIEELNLIAINHKADTKFGVNKFADLSSDEFKNYYLNNKEAIFTDDLPVADYLDDEFINSIPTAFDWRTRGAVTPVKNQGQCGSCWSFSTTGNVEGQHFISQNKLVSLSEQNLVDCDHECMEYEGEEACDEGCNGGLQPNAYNYIIKNGGIQTESSYPYTAETGTQCNFNSANIGAKISNFTMIPKNETVMAGYIVSTGPLAIAADAVEWQFYIGGVFDIPCNPNSLDHGILIVGYSAKNTIFRKNMPYWIVKNSWGADWGEQGYIYLRRGKNTCGVSNFVSTSII");
@@ -765,7 +765,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_align)
 
     strcpy(buffer, SEQAN_PATH_TO_PROJECTS());
     strcat(buffer, "/projects/tests/file/fasta_align_dna.txt");
-	strm_12.open(buffer, ios_base::in);
+	strm_12.open(buffer, ios_base::in | ios_base::binary);
 	read(strm_12, align22, FastaAlign());
 	strm_12.close();
 	SEQAN_ASSERT_EQ(source(row(align22,0)), "CTACGAAAGGTCGTGTCACGATGTCCGCAAGGGATGGCATTGCATAGAGGAATTGATTGCAACCTACGAAA");
