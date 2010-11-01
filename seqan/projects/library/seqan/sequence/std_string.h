@@ -612,6 +612,7 @@ replace(::std::basic_string<TChar, TCharTraits, TAlloc> & target,
 */
 
 ///.Function.reserve.param.object.type:Adaption.std::basic_string
+///.Function.reserve.remarks:For @Adaption.std::basic_string|STL Adaptions@, $reserve$ is only guaranteed to have the specified behaviour with $Insist$ and $Generous$.
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
 inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
 reserve(

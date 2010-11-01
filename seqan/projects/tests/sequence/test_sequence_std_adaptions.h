@@ -199,11 +199,13 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_string)
         reserve(str, 10, Generous());
         SEQAN_ASSERT_GEQ(capacity(str), 10u);
     }
-    {
-        std::string str;
-        reserve(str, 10, Exact());
-        SEQAN_ASSERT_EQ(capacity(str), 10u);
-    }
+    // We cannot guarantee that the behaviour is supported by the STL
+    // implementation with the Exact() tag.
+//    {
+//        std::string str;
+//        reserve(str, 10, Exact());
+//        SEQAN_ASSERT_EQ(capacity(str), 10u);
+//    }
 }
 
 
