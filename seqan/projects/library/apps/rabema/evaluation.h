@@ -807,7 +807,7 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     {
         std::fstream fstrm(toCString(options.samFileName),
                            std::ios_base::in | std::ios_base::binary);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open SAM file." << std::endl;
             return 1;
         }
@@ -861,7 +861,7 @@ int evaluateReadMapperResult(Options<EvaluateResults> const & options)
     } else {
         // Write output to file.
         std::fstream fstrm(toCString(options.outFileName), std::ios_base::out);
-        if (not fstrm.is_open()) {
+        if (!fstrm.is_open()) {
             std::cerr << "Could not open output JSON file." << std::endl;
             return 1;
         }
