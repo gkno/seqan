@@ -6,16 +6,16 @@ project (Seqan_Apps)
 # release mode and never go into testing mode.
 ################################################################################
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
-
 # Use CMake's package location functionality to find the directories of
 # TBB and Boost.
 find_package (TBB QUIET)
 find_package (CUDA)
 find_package (OpenMP QUIET)
 find_package (Boost 1.35.0)  # >= 1.35 for math/distributions, however broken?
+
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DSEQAN_ENABLE_TESTING=0")
+set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DSEQAN_ENABLE_DEBUG=0")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DSEQAN_ENABLE_DEBUG=1")
 
 # We need Boost >= 1.35.0.  However, the FindBoost module seems to be
 # broken in this respect, so we will set Boost_FOUND to FALSE if the version
