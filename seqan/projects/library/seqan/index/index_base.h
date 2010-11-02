@@ -45,6 +45,37 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct ChildTab;
 	struct BWT;
 
+/**
+.Tag.Index Find Algorithm
+..summary:Tag to specify the index search algorithm.
+..remarks:These tag can be used to specify the @Function.find@ algorithm 
+for @Class.Index@ based substring searches.
+..cat:Index
+
+..tag.ESA_FIND_MLR:Binary search with mlr-heuristic.
+...remarks:Exact string matching using a suffix array binary search with the mlr-heuristic.
+
+..tag.ESA_FIND_LCPE:Binary search using lcp values.
+...remarks:Exact string matching using a suffix array binary search and a lcp-interval tree.
+
+..tag.FinderSTree:Suffix tree search.
+...remarks:Exact string matching using a suffix tree.
+
+..see:Class.Finder
+..see:Spec.Index_ESA
+..see:Spec.Index_QGram
+..include:seqan/index.h
+*/
+
+	// finder tags
+    struct _Finder_MLR;     // simple Suffix Array finder with mlr-heuristic
+    struct _Finder_LCPE;    // Suffix Array finder using an enhanced LCP-Table
+    struct FinderSTree_;    // Suffix Array finder using an enhanced LCP-Table
+
+    typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
+    typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
+    typedef Tag<FinderSTree_> const FinderSTree;
+
 	template <typename TSpec = void>
 	struct Index_ESA {};
 

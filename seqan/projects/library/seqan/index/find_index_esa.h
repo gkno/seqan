@@ -27,36 +27,6 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // ESA finders
 
-/**
-.Tag.Index Find Algorithm
-..summary:Tag to specify the index search algorithm.
-..remarks:These tag can be used to specify the @Function.find@ algorithm 
-for @Class.Index@ based substring searches.
-..cat:Index
-
-..tag.ESA_FIND_MLR:Binary search with mlr-heuristic.
-...remarks:Exact string matching using a suffix array binary search with the mlr-heuristic.
-
-..tag.ESA_FIND_LCPE:Binary search using lcp values.
-...remarks:Exact string matching using a suffix array binary search and a lcp-interval tree.
-
-..see:Class.Finder
-..see:Spec.Index_ESA
-..see:Spec.Index_QGram
-..include:seqan/index.h
-*/
-
-	struct _Finder_MLR;		// simple Suffix Array finder with mlr-heuristic
-	struct _Finder_LCPE;	// Suffix Array finder using an enhanced LCP-Table
-	struct FinderSTree_;	// Suffix Array finder using an enhanced LCP-Table
-
-	typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
-	typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
-	typedef Tag<FinderSTree_> const FinderSTree;
-
-//____________________________________________________________________________
-
-
 	template < typename TText, typename TSpec >
 	struct DefaultFinder< Index<TText, Index_ESA<TSpec> > > {
         typedef ESA_FIND_MLR Type;	// standard suffix array finder is mlr-heuristic
