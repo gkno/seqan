@@ -37,28 +37,36 @@ using namespace seqan;
 // Enums, Tags, Classes.
 // ============================================================================
 
+// Tag for global options.
 struct Global_ {};
 typedef Tag<Global_> Global;
 
+// Tag for the build golden standard subprogram, also used for
+// specializing the Options class for the subprogram.
 struct BuildGoldStandard_ {};
 typedef Tag<BuildGoldStandard_> BuildGoldStandard;
 
+// Tag for the evaluation subprogram, also used for specializing the
+// Options class for the subprogram.
 struct EvaluateResults_ {};
 typedef Tag<EvaluateResults_> EvaluateResults;
 
+// Enum for selecting a subprogram.
 enum SelectedCommand {
     COMMAND_NONE,
     COMMAND_BUILD_STANDARD,
     COMMAND_EVALUATE
 };
 
+// Class for storing options.
 template <typename TSpec>
-struct Options;
+class Options;
 
-
+// Global options used in rabema.cpp.
 template <>
-struct Options<Global>
+class Options<Global>
 {
+public:
     // True iff verbose mode is enabled.
     bool verbose;
     // True iff very verbose mode is enabled.

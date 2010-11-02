@@ -98,6 +98,7 @@ bool validBenchmarkCategory(Options<EvaluateResults> const & options)
     return false;
 }
 
+// Set up the command line parser, adding options for the evaluation subprogram.
 void setUpCommandLineParser(CommandLineParser & parser, EvaluateResults const & /*tag*/)
 {
     setUpCommandLineParser(parser);
@@ -126,6 +127,8 @@ void setUpCommandLineParser(CommandLineParser & parser, EvaluateResults const & 
     requiredArguments(parser, 4);
 }
 
+// Parse command line parameters and validate them for the build
+// standard building subprogram.
 int parseCommandLineAndCheck(Options<EvaluateResults> & options, CommandLineParser & parser, int const argc, char const * argv[])
 {
     if (!parse(parser, argc, argv)) {
@@ -188,6 +191,7 @@ int parseCommandLineAndCheck(Options<EvaluateResults> & options, CommandLinePars
     return 0;
 }
 
+// Entry point for the read mapper evaluation subprogram.
 int evaluateReadMapperResult(Options<EvaluateResults> const & options)
 {
     return 0;

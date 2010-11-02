@@ -7,9 +7,11 @@
 // Enums, Tags, Classes.
 // ============================================================================
 
+// Options specialization for the build gold standard subprogram.
 template <>
-struct Options<BuildGoldStandard>
+class Options<BuildGoldStandard>
 {
+public:
     // True iff help is to be shown.
     bool showHelp;
 
@@ -52,6 +54,8 @@ struct Options<BuildGoldStandard>
 // Functions
 // ============================================================================
 
+// Check whether the distanceFunction member variable of the build
+// gold standard options specialization is valid.
 bool validDistanceFunction(Options<BuildGoldStandard> const & options)
 {
     if (options.distanceFunction == "hamming")
@@ -61,6 +65,8 @@ bool validDistanceFunction(Options<BuildGoldStandard> const & options)
     return false;
 }
 
+// Set up the command line parser, adding options for the gold
+// standard building subprogram.
 void setUpCommandLineParser(CommandLineParser & parser, BuildGoldStandard const & /*tag*/)
 {
     setUpCommandLineParser(parser);
@@ -81,6 +87,8 @@ void setUpCommandLineParser(CommandLineParser & parser, BuildGoldStandard const 
     requiredArguments(parser, 3);
 }
 
+// Parse command line parameters and validate them for the build
+// standard building subprogram.
 int parseCommandLineAndCheck(Options<BuildGoldStandard> & options, CommandLineParser & parser, int const argc, char const * argv[])
 {
     if (!parse(parser, argc, argv)) {
@@ -124,6 +132,7 @@ int parseCommandLineAndCheck(Options<BuildGoldStandard> & options, CommandLinePa
     return 0;
 }
 
+// Entry point for the gold standard building subprogram.
 int buildGoldStandard(Options<BuildGoldStandard> const & options)
 {
     return 0;
