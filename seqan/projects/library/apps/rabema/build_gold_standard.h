@@ -43,7 +43,15 @@ public:
     // Name of SAM file with golden reads.
     String<char> perfectMapFilename;
 
-    Options() : showHelp(false) {}
+    Options()
+            : showHelp(false),
+              verify(false),
+              matchN(false),
+              oracleSamMode(false),
+              maxError(0),
+              distanceFunction("edit"),
+              outFileName("-")
+    {}
 };
 
 // ============================================================================

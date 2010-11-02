@@ -63,7 +63,22 @@ struct Options<EvaluateResults>
     // Name of SAM file.
     CharString samFileName;
 
-    Options() : showHelp(false) {}
+    Options()
+            : showHelp(false),
+              maxError(0),
+              showMissedIntervals(false),
+              showSuperflousIntervals(false),
+              showAdditionalIntervals(false),
+              showHitIntervals(false),
+              showTryHitIntervals(false),
+              dontPanic(false),
+              oracleWitMode(false),
+              matchN(false),
+              weightedDistances(false),
+              benchmarkCategory("all"),
+              distanceFunction("edit"),
+              outFileName("-")
+    {}
 };
 
 // ============================================================================
