@@ -221,8 +221,8 @@ def runTest(test_conf):
             fmt = 'Comparing %s against %s'
             print >>sys.stderr, fmt % (expected_path, result_path)
             differ = difflib.Differ()
-            diff = differ.compare(expected_str.splitlines() + ['asdf', 'qwez'],
-                                  result_str.splitlines() + ['qwe', 'qwe'])
+            diff = differ.compare(expected_str.splitlines(),
+                                  result_str.splitlines())
             print >>sys.stderr, '\n'.join(list(diff))
             result = False
         except Exception, e:
