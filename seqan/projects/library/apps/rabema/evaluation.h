@@ -162,7 +162,7 @@ int bestScoreForAligned(TFragmentStore & fragments,
     // Initialize finder and pattern, configure to match N with none or all,
     // depending on configuration.
     Finder<TContigSeq2> finder(contig2);
-    Pattern<TReadSeq, TPatternSpec> pattern(read, -length(read) * 1000);
+    Pattern<TReadSeq, TPatternSpec> pattern(read, -static_cast<int>(length(read)) * 1000);
     _patternMatchNOfPattern(pattern, options.matchN);
     _patternMatchNOfFinder(pattern, options.matchN);
     bool ret = setEndPosition(finder, pattern, endPos);
@@ -234,8 +234,8 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options<EvaluateResults> const 
     int gapOpenScore = -1;
     if (TYPECMP<TPatternSpec, HammingSimple>::VALUE) {
         // No gaps for hamming distance.
-        gapOpenScore = -length(fragments.readSeqStore[readId]);
-        gapExtensionScore = -length(fragments.readSeqStore[readId]);
+        gapOpenScore = -static_cast<int>(length(fragments.readSeqStore[readId]));
+        gapExtensionScore = -static_cast<int>(length(fragments.readSeqStore[readId]));
     }
     // Build scoring matrix.
     Score<int, ScoreMatrix<Dna5> > matrixScore(gapExtensionScore, gapOpenScore);

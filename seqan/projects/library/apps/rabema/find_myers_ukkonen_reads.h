@@ -209,7 +209,7 @@ inline void _patternInit(Pattern<TNeedle, MyersUkkonenReads> &me) {
 
 
 template <typename TNeedle>
-inline bool getScoreLimit(Pattern<TNeedle, MyersUkkonenReads> &me) {
+inline int getScoreLimit(Pattern<TNeedle, MyersUkkonenReads> &me) {
     SEQAN_CHECKPOINT;
     return me._scoreLimit;
 }

@@ -1,6 +1,8 @@
 #ifndef BENCHMARKS_READ_MAPPERS_APPS_WIT_STORE_H_
 #define BENCHMARKS_READ_MAPPERS_APPS_WIT_STORE_H_
 
+#include <algorithm>
+
 #include <seqan/basic.h>
 #include <seqan/file.h>
 #include <seqan/sequence.h>
@@ -103,7 +105,7 @@ struct WitStoreLess<SortReadId>
 
 
 template <>
-struct WitStoreLess<SortId>
+struct WitStoreLess<seqan::SortId>
 {
     WitStore const & store;
 
@@ -117,7 +119,7 @@ struct WitStoreLess<SortId>
 
 
 template <>
-struct WitStoreLess<SortContigId>
+struct WitStoreLess<seqan::SortContigId>
 {
     WitStore const & store;
 
@@ -185,8 +187,9 @@ struct WitStoreLess<SortLastPos>
 
 template <typename TSortTag>
 void
-sortWitRecords(WitStore const & store, TSortTag &) {
-    std::stable_sort(begin(store.intervals, Standard()), end(store.intervals, Standard()), WitStoreLess<TSortTag>(store));
+sortWitRecords(WitStore const & store, TSortTag const &) {
+    WitStoreLess<TSortTag const> less(store);
+    std::stable_sort(begin(store.intervals, Standard()), end(store.intervals, Standard()), less);
 }
 
 
