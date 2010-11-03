@@ -260,7 +260,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         // changes.
         if (foundWithTooLowScore) {
             if (beginPosition(finder) == hitBeginPosition) {
-                relativeScore = static_cast<int>(ceilAwayFromZero(100.0 * getScore(pattern) / length(read)));
+                relativeScore = static_cast<int>(ceilAwayFromZero(100.0 * static_cast<double>(getScore(pattern)) / static_cast<double>(length(read))));
                 appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 TPosition currentBeginPosition = beginPosition(finder);
                 // Add the rest until we hit one with a different begin position.

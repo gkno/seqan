@@ -110,7 +110,7 @@ int computeQualityAlignmentScore(TAlign const & align,
                 int x = 0;
                 x += getQualityValue(read[toSourcePosition(rowRead, i) - 1]);
                 x += getQualityValue(read[toSourcePosition(rowRead, i)]);
-                result -= static_cast<int>(ceil(1.0 * x / 2));
+                result -= static_cast<int>(ceil(static_cast<double>(x) / 2.0));
             }
         } else {
             result += score(scoreMatrix, readChar, contigChar) * getQualityValue(read[toSourcePosition(rowRead, i)]);
