@@ -388,7 +388,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
     setMinScoreThreshold(set, -2);
 
     // Add a low-quality seed.
-    TSeed s1(1, 1, 3);
+    TSeed s1(1, 1, 4);
     setScore(s1, -3);
     addSeed(set, s1, Single());
     SEQAN_ASSERT_EQ(0u, length(set));
@@ -403,8 +403,8 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
     SEQAN_ASSERT_EQ(1u, length(set));
     SEQAN_ASSERT_EQ(0u, getBeginDim0(front(set)));
     SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
-    SEQAN_ASSERT_EQ(4u, getEndDim0(front(set)));
-    SEQAN_ASSERT_EQ(4u, getEndDim1(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim0(front(set)));
+    SEQAN_ASSERT_EQ(5u, getEndDim1(front(set)));
     SEQAN_ASSERT_EQ(-2, getScore(front(set)));
 }
 
