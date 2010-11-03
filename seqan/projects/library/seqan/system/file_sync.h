@@ -248,23 +248,64 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
-			char tmpFileName[] = "/SQNXXXXXXX";
-			if ((handle = ::mkstemp(tmpFileName)) == -1) {
+            // Construct the pattern for the temporary file.
+            //
+            // First, try to get the temporary directory from the environment
+            // variables TMPDIR, TMP.
+            std::string tmpDir;
+            if ((getuid() == geteuid()) && (getgid() ==getegid())) {
+                char * res = getenv("TMPDIR");
+                if (res) {
+                    tmpDir = res;
+                } else {
+                    res = getenv("TMP");
+                    if (res)
+                        tmpDir = res;
+                }
+            }
+            // If this does not work, try to use the constant
+            // SEQAN_DEFAULT_TMPDIR, fall back to "/tmp", if this does not
+            // work.
+#ifdef SEQAN_DEFAULT_TMPDIR
+            if (tmpDir.empty())
+                tmpDir = SEQAN_DEFAULT_TMPDIR;
+#else  // #ifdef SEQAN_DEFAULT_TMPDIR
+            if (tmpDir.empty())
+                tmpDir = "/tmp";
+#endif  // #ifdef SEQAN_DEFAULT_TMPDIR
+
+            // At this point, we have a temporary directory.  Now, we add the
+            // file name template to get the full path template.
+            std::string tmpFileName = tmpDir + "/SQNXXXXXX";
+            
+            // Open temporary file and unlink it immediately afterwards so the
+            // memory is released when the program exits.
+            int oldMode = umask(077);  // Create with restrictive permissions.
+            char * buffer = new char[tmpFileName.size() + 1];
+            strncpy(buffer, tmpFileName.c_str(), tmpFileName.size() + 1);
+            std::cerr << "buffer == " << buffer << std::endl;
+			if ((handle = ::mkstemp(buffer)) == -1) {
+			    delete [] buffer;
+			    umask(oldMode);  // Reset umask mode.
 				if (!(openMode & OPEN_QUIET))
-					::std::cerr << "Cannot create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
+					::std::cerr << "Couldn't create temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
-			if (!(close() && open(tmpFileName, openMode))) return false;
-			#ifdef SEQAN_DEBUG
-				int result = 
-            #endif
-			::unlink(tmpFileName);
+			umask(oldMode);  // Reset umask mode.
+			if (!(close() && open(buffer, openMode))) {
+			    delete [] buffer;
+			    return false;
+            }
             #ifdef SEQAN_DEBUG
-				if (result == -1 && !(openMode & OPEN_QUIET))
-					::std::cerr << "Cannot unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
-            #endif
+				if (::unlink(buffer) == -1 && !(openMode & OPEN_QUIET))
+					::std::cerr << "Couldn't unlink temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
+            #else
+				::unlink(buffer);
+			#endif
+			delete [] buffer;
 			return true;
         }
+
 
         inline bool close() {
             if (::close(this->handle) == -1) return false;

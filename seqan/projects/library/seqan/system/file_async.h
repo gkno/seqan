@@ -660,24 +660,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
-#ifdef SEQAN_DEFAULT_TMPDIR
-			char tmpFileName[] = SEQAN_DEFAULT_TMPDIR "/GNDXXXXXXX";
-#else
-			char tmpFileName[] = "/var/tmp/GNDXXXXXXX";
-#endif
-			if ((handle = handleAsync = ::mkstemp(tmpFileName)) == -1) {
-				if (!(openMode & OPEN_QUIET))
-					::std::cerr << "Couldn't create temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
-				return false;
-			}
-			if (!(close() && open(tmpFileName, openMode))) return false;
-            #ifdef SEQAN_DEBUG
-				if (::unlink(tmpFileName) == -1 && !(openMode & OPEN_QUIET))
-					::std::cerr << "Couldn't unlink temporary file " << tmpFileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
-            #else
-				::unlink(tmpFileName);
-			#endif
-			return true;
+            bool ret = File<Sync<TSpec> >::openTemp(openMode);
+            handleAsync = handle;
+            return ret;
         }
 
         inline bool close() {
