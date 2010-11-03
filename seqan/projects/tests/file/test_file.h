@@ -684,6 +684,7 @@ SEQAN_DEFINE_TEST(test_file_fasta_write)
      
      readID(file_6, str_6, ff);
      SEQAN_ASSERT_TRUE(str_6 == "Identifier6");
+     fclose(file_6)
      
      //comparison
      SEQAN_ASSERT_TRUE(ff == fasta_format);
