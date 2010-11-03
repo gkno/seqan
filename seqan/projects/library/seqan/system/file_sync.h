@@ -283,7 +283,6 @@ namespace SEQAN_NAMESPACE_MAIN
             int oldMode = umask(077);  // Create with restrictive permissions.
             char * buffer = new char[tmpFileName.size() + 1];
             strncpy(buffer, tmpFileName.c_str(), tmpFileName.size() + 1);
-            std::cerr << "buffer == " << buffer << std::endl;
 			if ((handle = ::mkstemp(buffer)) == -1) {
 			    delete [] buffer;
 			    umask(oldMode);  // Reset umask mode.
