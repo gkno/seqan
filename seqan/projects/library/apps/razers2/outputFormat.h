@@ -966,8 +966,6 @@ void dumpMatches(
 							++it;
 							continue;
 						}
-#else
-						file << (unsigned)qual.errors << "\t";
 #endif
 
 						unsigned currReadNo = (*it).readId;
@@ -1116,7 +1114,7 @@ void dumpMatches(
 								assignSource(row(align, 0), store.readSeqStore[currReadNo]);
 								TContigPos left = (*it).beginPos;
 								TContigPos right = (*it).endPos;
-								
+
 								if (left < right)
 									assignSource(row(align, 1), infix(currGenome, left, right));
 								else
