@@ -6,6 +6,19 @@ project (Seqan_Tests)
 ################################################################################
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSEQAN_ENABLE_DEBUG=1 -DSEQAN_ENABLE_TESTING=1")
+# Also enable flags for coverage analysis.
+if (MODEL STREQUAL "NightlyCoverage")
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+  endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (MODEL STREQUAL "NightlyCoverage")
+if (MODEL STREQUAL "ExperimentalCoverage")
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+    set (LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+  endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (MODEL STREQUAL "ExperimentalCoverage")
 
 ################################################################################
 # Set path variables
