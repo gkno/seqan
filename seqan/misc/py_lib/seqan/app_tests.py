@@ -33,7 +33,7 @@ import tempfile
 
 
 # Valgrind flags, taken from CMake output, ideally given to test script by CMake?
-VALGRIND_FLAGS = '-q --tool=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50 --'.split()
+VALGRIND_FLAGS = '--error-exitcode=1 -q --tool=memcheck --leak-check=yes --show-reachable=yes --workaround-gcc296-bugs=yes --num-callers=50 --'.split()
 VALGRIND_PATH = '/usr/bin/valgrind'
 
 class TestConf(object):
