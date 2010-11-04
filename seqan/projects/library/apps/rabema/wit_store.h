@@ -359,9 +359,9 @@ performIntervalScoreLowering(WitStore & witStore, unsigned const maxError)
   sortWitRecords(witStore, SortReadId());
 
   IntervalOfReadOnContig sentinel(back(witStore.intervals));
-  sentinel.firstPos = -1;
-  sentinel.lastPos = -1;
-  sentinel.id = -1;
+  sentinel.firstPos = SupremumValue<size_t>::VALUE;
+  sentinel.lastPos = SupremumValue<size_t>::VALUE;
+  sentinel.id = SupremumValue<size_t>::VALUE;
   appendValue(witStore.intervals, sentinel);
 
   //std::cout << witStore;
