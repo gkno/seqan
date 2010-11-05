@@ -459,11 +459,11 @@ template <typename TObserved, typename TExpected, typename TStrictness>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
 	TExpected expected,
-	TStrictness,
+	TStrictness cutoff,
 	FionaExpected const)
 {
 	// compare the weight for a node with its expected value (dependent on the length)
-	return observed < expected;
+	return observed < cutoff;
 }
 
 /*detect and repare the reads with errors*/
