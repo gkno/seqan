@@ -624,13 +624,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
             handle = ::open(fileName, Base::_getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
-			if (handle == -1) {
+			if (handle == -1) 
+			{
+				handleAsync = handle;
 				if (!(openMode & OPEN_QUIET))
 					::std::cerr << "Open failed on file " << fileName << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
 
-			if (Base::_getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) {
+			if (Base::_getOFlag(openMode | OPEN_ASYNC) & O_DIRECT) 
+			{
 				handleAsync = ::open(fileName, Base::_getOFlag(openMode | (OPEN_ASYNC & ~OPEN_CREATE)), S_IREAD | S_IWRITE);
 				if (handleAsync == -1 || errno == EINVAL) {	// fall back to cached access
 					#ifdef SEQAN_DEBUG_OR_TEST_
@@ -659,13 +662,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-        bool openTemp(int openMode = DefaultOpenTempMode<File>::VALUE) {
-            bool ret = File<Sync<TSpec> >::openTemp(openMode);
-            handleAsync = handle;
-            return ret;
-        }
-
-        inline bool close() {
+		bool close() {
 			bool result = true;
 			if (handle != handleAsync)
 	            result &= (::close(handleAsync) == 0);

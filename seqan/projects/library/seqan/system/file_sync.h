@@ -220,7 +220,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			return result;
         }
 
-        bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
+        virtual bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
             handle = ::open(fileName, _getOFlag(openMode), S_IREAD | S_IWRITE);
 			if (handle == -1 && errno == EINVAL) {	// fall back to cached access
 	            #ifdef SEQAN_DEBUG_OR_TEST_
@@ -253,7 +253,8 @@ namespace SEQAN_NAMESPACE_MAIN
             // First, try to get the temporary directory from the environment
             // variables TMPDIR, TMP.
             std::string tmpDir;
-            if ((getuid() == geteuid()) && (getgid() ==getegid())) {
+            if ((getuid() == geteuid()) && (getgid() == getegid())) 
+			{
                 char * res = getenv("TMPDIR");
                 if (res) {
                     tmpDir = res;
@@ -290,11 +291,13 @@ namespace SEQAN_NAMESPACE_MAIN
 					::std::cerr << "Couldn't create temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
-			umask(oldMode);  // Reset umask mode.
-			if (!(close() && open(buffer, openMode))) {
+			if (!(close() && open(buffer, openMode))) 
+			{
+				umask(oldMode);  // Reset umask mode.
 			    delete [] buffer;
 			    return false;
             }
+			umask(oldMode);  // Reset umask mode.
             #ifdef SEQAN_DEBUG
 				if (::unlink(buffer) == -1 && !(openMode & OPEN_QUIET))
 					::std::cerr << "Couldn't unlink temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
@@ -306,7 +309,7 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
 
-        inline bool close() {
+        virtual bool close() {
             if (::close(this->handle) == -1) return false;
             handle = -1;
 			SEQAN_PROSUB(SEQAN_PROOPENFILES, 1);
