@@ -22,6 +22,9 @@ def main(args):
     binary = args[2]
     arguments = args[3:]
 
+    print 'Executing', binary, ' '.join(arguments)
+    print 'target file:', target_file
+
     c.Task(commands=[c.Command(binary, arguments)], result=target_file).execute()
 
     return 0
