@@ -252,59 +252,51 @@ namespace SEQAN_NAMESPACE_MAIN
             //
             // First, try to get the temporary directory from the environment
             // variables TMPDIR, TMP.
-            std::string tmpDir;
+            CharString tmpDir;
             if ((getuid() == geteuid()) && (getgid() == getegid())) 
 			{
-                char * res = getenv("TMPDIR");
-                if (res) {
+                char * res;
+                if ((res = getenv("TMPDIR")) != NULL)
                     tmpDir = res;
-                } else {
-                    res = getenv("TMP");
-                    if (res)
+                else
+                    if ((res = getenv("TMP")) != NULL)
                         tmpDir = res;
-                }
             }
             // If this does not work, try to use the constant
             // SEQAN_DEFAULT_TMPDIR, fall back to "/tmp", if this does not
             // work.
 #ifdef SEQAN_DEFAULT_TMPDIR
-            if (tmpDir.empty())
+            if (empty(tmpDir))
                 tmpDir = SEQAN_DEFAULT_TMPDIR;
 #else  // #ifdef SEQAN_DEFAULT_TMPDIR
-            if (tmpDir.empty())
+            if (empty(tmpDir))
                 tmpDir = "/tmp";
 #endif  // #ifdef SEQAN_DEFAULT_TMPDIR
 
             // At this point, we have a temporary directory.  Now, we add the
             // file name template to get the full path template.
-            std::string tmpFileName = tmpDir + "/SQNXXXXXX";
-            
+            append(tmpDir, "/SQNXXXXXX");
             // Open temporary file and unlink it immediately afterwards so the
             // memory is released when the program exits.
             int oldMode = umask(077);  // Create with restrictive permissions.
-            char * buffer = new char[tmpFileName.size() + 1];
-            strncpy(buffer, tmpFileName.c_str(), tmpFileName.size() + 1);
-			if ((handle = ::mkstemp(buffer)) == -1) {
-			    delete [] buffer;
+			if ((handle = ::mkstemp(toCString(tmpDir))) == -1) {
 			    umask(oldMode);  // Reset umask mode.
 				if (!(openMode & OPEN_QUIET))
-					::std::cerr << "Couldn't create temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
+					::std::cerr << "Couldn't create temporary file " << tmpDir << ". (" << ::strerror(errno) << ")" << ::std::endl;
 				return false;
 			}
-			if (!(close() && open(buffer, openMode))) 
+			if (!(close() && open(toCString(tmpDir), openMode))) 
 			{
 				umask(oldMode);  // Reset umask mode.
-			    delete [] buffer;
 			    return false;
             }
 			umask(oldMode);  // Reset umask mode.
             #ifdef SEQAN_DEBUG
-				if (::unlink(buffer) == -1 && !(openMode & OPEN_QUIET))
-					::std::cerr << "Couldn't unlink temporary file " << buffer << ". (" << ::strerror(errno) << ")" << ::std::endl;
+				if (::unlink(toCString(tmpDir)) == -1 && !(openMode & OPEN_QUIET))
+					::std::cerr << "Couldn't unlink temporary file " << tmpDir << ". (" << ::strerror(errno) << ")" << ::std::endl;
             #else
-				::unlink(buffer);
+				::unlink(toCString(tmpDir));
 			#endif
-			delete [] buffer;
 			return true;
         }
 

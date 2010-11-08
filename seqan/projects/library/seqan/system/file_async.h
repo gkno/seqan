@@ -664,7 +664,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		bool close() {
 			bool result = true;
-			if (handle != handleAsync)
+			if (handleAsync != handle && handleAsync != -1)
 	            result &= (::close(handleAsync) == 0);
             result &= (::close(handle) == 0);
             handleAsync = -1;
