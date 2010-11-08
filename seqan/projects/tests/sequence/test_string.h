@@ -622,6 +622,10 @@ SEQAN_DEFINE_TEST(String_CStyle)
 	SEQAN_ASSERT_EQ(id(str2), id(stra));
 	SEQAN_ASSERT_EQ(str2, toCString(stra));
 
+//  weese: Is there a reason why CStyle strings don't support append?
+//	append(str2, " whatever");
+//	SEQAN_ASSERT_EQ(str2, "const alloc string whatever");
+
 	str2 = strac;
 	SEQAN_ASSERT_EQ(str2, strac);
 	SEQAN_ASSERT_NEQ(id(str2), id(strac));

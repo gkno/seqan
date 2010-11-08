@@ -5,7 +5,9 @@
 #include <cstdio>
 #include <vector>
 
+#include <seqan/file.h>
 #include <seqan/pipe.h>
+#include <seqan/system.h>
 
 #include "test_pipe.h"
 
@@ -20,21 +22,26 @@ const size_t MAX_SIZE = 1u << 20;
 // TODO(holtgrew): The following test* functions should actually be defined with SEQAN_DEFINE_TEST().
 
 
-void testExternalString(unsigned maxSize = 16*1024*1024) {
-    typedef Iterator< String<unsigned,External<> > const >::Type TIter;
+template <typename TStringSpec>
+void testExternalString(unsigned maxSize = 16*1024*1024) 
+{
+	typedef String<unsigned, TStringSpec> TExtString;
+    typedef typename Iterator<TExtString const, Standard>::Type TIter;
+
     SimpleBuffer<unsigned> buf;
     allocPage(buf, maxSize, buf);
 
-    String<unsigned,External<> > vector;
-    for(unsigned i = 1; i <= maxSize; i = i << 1) {
+    TExtString extString;
+    for(unsigned i = 1; i <= maxSize; i = i << 1) 
+	{
         // ::std::cout << i << " "; ::std::cout.flush();
         resize(buf, i);
         randomize(buf);
 
         Pipe<SimpleBuffer<unsigned>, Source<> > src(buf);
-        vector << src;
+        extString << src;
 
-        TIter I = begin(vector);
+        TIter I = begin(extString);
         for(unsigned *cur = buf.begin; cur != buf.end; ++cur) {
             if (*cur != *I) {
                 SEQAN_ASSERT_FAIL("testExternalString failed at position %u", cur - buf.begin);
@@ -234,8 +241,9 @@ void testSorter(unsigned maxSize = 16*1024*1024) {
 }
 
 
-SEQAN_DEFINE_TEST(test_pipe_test_external_vector) {
-    testExternalString(MAX_SIZE);
+SEQAN_DEFINE_TEST(test_pipe_test_external_string) {
+    testExternalString<MMap<> >(MAX_SIZE);
+    testExternalString<External<> >(MAX_SIZE);
 }
 
 
@@ -260,7 +268,7 @@ SEQAN_DEFINE_TEST(test_pipe_test_sorter) {
 
 
 SEQAN_BEGIN_TESTSUITE(test_pipe) {
-    SEQAN_CALL_TEST(test_pipe_test_external_vector);
+    SEQAN_CALL_TEST(test_pipe_test_external_string);
     SEQAN_CALL_TEST(test_pipe_test_simple_pool);
     SEQAN_CALL_TEST(test_pipe_test_mapper);
     SEQAN_CALL_TEST(test_pipe_test_mapper_partially_filled);
