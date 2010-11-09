@@ -953,7 +953,7 @@ void correctReads(
 	if (inTerm)	std::cout << "  0%";
 	std::cout << std::flush;
 #pragma omp parallel for
-	for (int i = 1; i < (int)length(packages); ++i)
+	for (int i = 1; i < (int)length(packages) - 1; ++i)
 	{
 		if (packages[i-1] == packages[i]) continue;
 		TFionaIndex myIndex(store.readSeqStore);
@@ -976,7 +976,7 @@ void correctReads(
 	std::cout << "done. (" << SEQAN_PROTIMEDIFF(search) << " seconds)" << std::endl;
 
 #endif
-	
+
   std::ofstream out("id");
 	unsigned totalCorrections = 0;
 	for (unsigned i = 0; i < length(corrections); ++i)
