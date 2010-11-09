@@ -1264,6 +1264,26 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		goNextImpl(it, traits);
 	}
 
+	template < typename TIndex, typename TSpec >
+	inline void goNextRight(Iter<TIndex, VSTree<TSpec> > &it) {
+		goNextRight(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree<TSpec> > >::Type());
+	}
+
+	template < typename TIndex, typename TSpec, typename TTraits >
+	inline void goNextRight(Iter<TIndex, VSTree<TSpec> > &it, TTraits const traits) {
+		goNextRightImpl(it, traits);
+	}
+
+	template < typename TIndex, typename TSpec >
+	inline void goNextUp(Iter<TIndex, VSTree<TSpec> > &it) {
+		goNextUp(it, typename GetVSTreeIteratorTraits< Iter<TIndex, VSTree<TSpec> > >::Type());
+	}
+
+	template < typename TIndex, typename TSpec, typename TTraits >
+	inline void goNextUp(Iter<TIndex, VSTree<TSpec> > &it, TTraits const traits) {
+		goNextUpImpl(it, traits);
+	}
+
 
 /**
 .Function.goDown:
@@ -1744,6 +1764,36 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	}
 
 	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
+    inline void goNextRightImpl(
+		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, 
+		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
+    {
+        // preorder dfs
+        if (!goRight(it))
+            while (goUp(it) && !goRight(it)) ;
+        if (isRoot(it)) {
+            clear(it);
+            return;
+        }
+    }
+
+	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
+    inline void goNextUpImpl(
+		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, 
+		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
+    {
+        // preorder dfs
+        while (goUp(it) && !goRight(it)) ;
+        if (isRoot(it)) {
+            clear(it);
+            return;
+        }
+    }
+
+
+
+
+	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
 	inline void goNextImpl(
 		Iter< TIndex, VSTree< TopDown< ParentLinks<TSpec> > > > &it, 
 		VSTreeIteratorTraits<_Postorder, THideEmptyEdges> const)
@@ -1759,7 +1809,6 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 				}
 		} while (!nodePredicate(it));
 	}
-
 
     //////////////////////////////////////////////////////////////////////////////
 	// boolean functions

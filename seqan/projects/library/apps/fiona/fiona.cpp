@@ -491,14 +491,20 @@ void traverseAndSearchCorrections(
 	String<TOccs> correctCandidates;
 	const TValue unknownChar = unknownValue<TValue>();
 
-	for (goBegin(iter); !atEnd(iter); goNext(iter))		// do a DFS walk
+	for (goBegin(iter); !atEnd(iter); )                     // do a DFS walk
 	{
 		unsigned commonPrefix = parentRepLength(iter);			// length of parent label
 
 		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheoretical));
-		if (parentEdgeFirstChar(iter) != unknownChar &&
+		TValue firstEdgeChar = parentEdgeFirstChar(iter);
+		if (firstEdgeChar != unknownChar &&
 			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, alg))
+		{
+			// don't descent edges beginning with N
+			if (firstEdgeChar == unknownChar)
+				goNextRight(iter);
 			continue;
+		}
 
 		//
 		//	get the id and position (suffix begin) for suspected nodes
@@ -534,7 +540,11 @@ void traverseAndSearchCorrections(
 		} while (goRight(iterSibling));
 
 		// continue if we haven't found any correct read
-		if (empty(correctCandidates)) continue;
+		if (empty(correctCandidates))
+		{
+			goNext(iter);
+			continue;
+		}
 
 		// make the comarison between the substrings(the suffix after the position of error
 		TOccsIterator errorRead = begin(errorCandidates, Standard());
@@ -695,6 +705,7 @@ void traverseAndSearchCorrections(
 				}
 			}
 		}
+		goNext(iter);
 	}
 }
 
@@ -735,7 +746,7 @@ void correctReads(
 	Tag<TAlgorithm> const alg)
 {		   
 	/*iterator with restrictions*/
-	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Postorder> > >::Type TConstrainedIterator; 
+	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type TConstrainedIterator; 
 	typedef FionaCorrectedError TCorrected;
 
 	// append their reverse complements
