@@ -503,6 +503,8 @@ void traverseAndSearchCorrections(
 			// don't descent edges beginning with N
 			if (firstEdgeChar == unknownChar)
 				goNextRight(iter);
+			else
+				goNext(iter);
 			continue;
 		}
 
@@ -561,7 +563,7 @@ void traverseAndSearchCorrections(
 			//
 			// if already detect as erroneous(optimal)
 			// the total length minus the position of error, and minus 1 mismatch
-			
+
 			// the position where the error is
 			unsigned positionError = (*errorRead).i2 + commonPrefix;
 			int maxOverlapPossible = commonPrefix + length(store.readSeqStore[errorReadId]) - positionError - 1;
@@ -576,10 +578,10 @@ void traverseAndSearchCorrections(
 			unsigned bestOverlap = 0;
 			unsigned bestMismatches = 0;
 			int bestIndelLength = 0;
-			
+
 			TReadIterator itEBegin = begin(store.readSeqStore[(*errorRead).i1], Standard()) + positionError;
 			TReadIterator itEEnd = end(store.readSeqStore[(*errorRead).i1], Standard());
-			
+
 			for (unsigned c = 0; c < length(correctCandidates); ++c)
 			{
 				TOccsIterator corrRead = begin(correctCandidates[c], Standard());
@@ -588,16 +590,16 @@ void traverseAndSearchCorrections(
 				{
 					/*the position in the read until which there is the same prefix*/
 					unsigned positionCorrect = (*corrRead).i2 + commonPrefix;
-										
+
 					/*search the position detect as erroneous at the level of the read*/
 					TReadIterator itCEnd = end(store.readSeqStore[(*corrRead).i1], Standard());
 					unsigned acceptedMismatches;
-					
+
 					for (int indel = -options.maxIndelLength; indel <= options.maxIndelLength; ++indel)
 					{
 						TReadIterator itE = itEBegin;
 						TReadIterator itC = begin(store.readSeqStore[(*corrRead).i1], Standard()) + positionCorrect;
-						
+
 						if (indel == 0)
 						{
 							// mismatch
@@ -610,14 +612,14 @@ void traverseAndSearchCorrections(
 							// insert in erroneous read
 							itE += indel;
 							acceptedMismatches = 0;
-						} 
+						}
 						else
 						{
 							// deletion in erroneous read
 							itC += -indel;
 							acceptedMismatches = 0;
 						}
-						
+
 						TReadIterator itEFirst = itE;
 						unsigned mismatches = 0;
 						for (; itE < itEEnd && itC < itCEnd; ++itE, ++itC)
@@ -630,17 +632,17 @@ void traverseAndSearchCorrections(
 						if (mismatches <= acceptedMismatches)
 						{
 							unsigned overlap = commonPrefix + (itE - itEFirst);
-							
+
 							if (overlap < bestOverlap)
 								continue;
-							
+
 							mismatches += (indel > 0)? indel: -indel;
 
 							if (overlap == bestOverlap)
 							{
 								if (mismatches > bestMismatches)
 									continue;
-								
+
 								if (mismatches == bestMismatches && length(correctCandidates[c]) < bestOccurrences)
 									continue;
 							}
@@ -655,7 +657,7 @@ void traverseAndSearchCorrections(
 					}
 				}
 			}
-	
+
 			if (bestOverlap != 0)
 			{
 				if ((*errorRead).i1 >= readCount)
@@ -665,7 +667,7 @@ void traverseAndSearchCorrections(
 						bestReadId += readCount;
 					else
 						bestReadId -= readCount;
-					
+
 					// mirror positions
 					positionError = length(store.readSeqStore[errorReadId]) - positionError - 1;
 					bestCorrectPos = length(store.readSeqStore[bestReadId]) - bestCorrectPos - 1;
@@ -675,10 +677,10 @@ void traverseAndSearchCorrections(
 					else
 						bestCorrectPos -= -bestIndelLength;
 				}
-				
+
 				/*This is maybe not necessary, because we search to maximisate*/
 				/*when the position or the nucleotide differ*/
-				
+
 				/*find longer commun part with certain nb accepted mismatch*/
 #ifdef FIONA_PARALLEL
 				#pragma omp critical
@@ -687,10 +689,10 @@ void traverseAndSearchCorrections(
 					if  (corr.overlap < bestOverlap ||
 						(corr.overlap == bestOverlap &&
 							(corr.mismatches > bestMismatches ||
-							(corr.mismatches == bestMismatches && 
+							(corr.mismatches == bestMismatches &&
 								(corr.occurrences < bestOccurrences ||
 								(corr.occurrences == bestOccurrences &&
-									(corr.correctReadId > bestReadId || 
+									(corr.correctReadId > bestReadId ||
 									(corr.correctReadId == bestReadId && corr.correctPos > bestCorrectPos))))))))
 					{
 						// update best correction
@@ -730,7 +732,7 @@ determineFrequency(Iter< TFionaIndex, VSTree<TSpec> > iter)
    frequency[position] = (countOccurrences(iter)/total);
    while(goRight(iter)){
 	   position+=1;
-	   frequency[position] = (countOccurrences(iter)/total);	
+	   frequency[position] = (countOccurrences(iter)/total);
    }
 
    /*table of frequency for each nucleotide*/
@@ -744,9 +746,9 @@ void correctReads(
 	TFragmentStore & store,
 	FionaOptions & options,
 	Tag<TAlgorithm> const alg)
-{		   
+{
 	/*iterator with restrictions*/
-	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type TConstrainedIterator; 
+	typedef Iterator<TFionaIndex, TopDown<ParentLinks<Preorder> > >::Type TConstrainedIterator;
 	typedef FionaCorrectedError TCorrected;
 
 	// append their reverse complements
@@ -763,7 +765,7 @@ void correctReads(
 	/*table with the theoreticals values*/
 	String<double> expectedTheoretical;
 	expectedValueTheoretical(expectedTheoretical, store.readSeqStore, options.genomeLength);
-		
+
 	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
 	{
 		String<double> sd;
@@ -916,9 +918,9 @@ void correctReads(
 
 	/*restrictions for the searching levels*/
 	cargo(myIndex).replen_min = options.fromLevel;
-	cargo(myIndex).replen_max = options.toLevel; 	
+	cargo(myIndex).replen_max = options.toLevel;
 	cargo(myIndex).frequency = frequency;
-	
+
 	/*the core of the correction method*/
 	traverseAndSearchCorrections(myConstrainedIterator, store, corrections, expectedTheoretical, options, alg);
 	std::cout << "Time for searching between given levels: "<< SEQAN_PROTIMEDIFF(search) << " seconds." << std::endl;
