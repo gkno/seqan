@@ -377,7 +377,7 @@ toViewPosition(Gaps<TSource, ArrayGaps> const & gaps,
 {
 SEQAN_CHECKPOINT
 
-	SEQAN_ASSERT(pos >= clippedBeginPosition(gaps))
+	SEQAN_ASSERT_GEQ(pos, clippedBeginPosition(gaps));
 	pos -= clippedBeginPosition(gaps);
 
 	typedef Gaps<TSource, ArrayGaps> const TGaps;
