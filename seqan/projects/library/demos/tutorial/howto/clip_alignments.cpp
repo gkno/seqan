@@ -69,6 +69,8 @@ int main(int argc, const char *argv[]) {
     std::cout << "toSourcePosition(row1, 4): " << toSourcePosition(row(align, 1), 4) << std::endl;
     std::cout << std::endl;
 
+// FRAGMENT(tasks)
+
     std::cout << "TASK 1 (clipped view pos cvp of clipped source pos csp in row 0): " << std::endl;
     std::cout << "  csp = 2 -> cvp = ";
     std::cout << toViewPosition(row(align, 0), 2 + clippedBeginPosition(row(align, 0))) - toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0))) << std::endl;
