@@ -1933,12 +1933,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");
+		bool result = true;
 		if ((!open(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, Wotd_Text()), fileName, openMode))) return false;
-
+			(!open(getFibre(index, Wotd_Text()), fileName, openMode)));
+			result = false;
 		name = fileName;	append(name, ".sa");	open(getFibre(index, Wotd_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".dir");	open(getFibre(index, Wotd_Dir()), toCString(name), openMode);
-		return true;
+		return result;
 	}
 	template < typename TText, typename TSpec >
 	inline bool open(
@@ -1959,7 +1960,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		int openMode)
 	{
 		String<char> name;
-		name = fileName;	append(name, ".txt");	
+		name = fileName;	append(name, ".txt");
 		if ((!save(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
 			(!save(getFibre(index, Wotd_Text()), fileName, openMode))) return false;
 
