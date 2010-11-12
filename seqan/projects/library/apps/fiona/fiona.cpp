@@ -171,35 +171,21 @@ namespace seqan  {
 
 	/*hide the node between certain level*/
 	template <typename TSpec>
-	bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
+	inline bool nodeHullPredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
+	{
+		return parentRepLength(it) < cargo(container(it)).replen_max;
+	}
+
+	template <typename TSpec>
+	inline bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
 	{
 		FionaNodeConstraints &cons = cargo(container(it));
-		int valueT = parentRepLength(it);
-		
-		/*necessary if we use the frequency*/
-		int level_min = cons.replen_min;
-		
-		/*'A' = 0, 'C' = 1, 'G' = 2, 'T' = 3*/
-		/*
-		String<Dna> d = representative(it);
-		typedef Iterator<String<Dna> >::Type TIterator;
-		for (TIterator ic = begin(d); ic != end(d); ++ic){
-			if(value(ic)==0 || value(ic)==3){
-				if((cons.frequency[0]+cons.frequency[3])>(0.1+cons.frequency[1]+cons.frequency[2])){
-					level_min = cons.replen_min + 3;
-					cons.replen_max = cons.replen_max;
-				}
-			}else{
-				if((cons.frequency[1] + cons.frequency[2])>(0.1 + cons.frequency[1] + cons.frequency[2]) ){level_min = cons.replen_min + 3;	
-					level_min = cons.replen_min + 3;
-				}
-			}
-			break;
-		}*/
+		int repLen = parentRepLength(it);
 
 		/*TODO may utilise >=*/
-		return valueT > level_min && valueT < cons.replen_max;
+		return cons.replen_min < repLen && repLen < cons.replen_max;
 	}
+
 }
 
 
@@ -500,11 +486,7 @@ void traverseAndSearchCorrections(
 		if (firstEdgeChar != unknownChar &&
 			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, alg))
 		{
-			// don't descent edges beginning with N
-			if (firstEdgeChar == unknownChar)
-				goNextRight(iter);
-			else
-				goNext(iter);
+			goNext(iter);
 			continue;
 		}
 
@@ -544,7 +526,11 @@ void traverseAndSearchCorrections(
 		// continue if we haven't found any correct read
 		if (empty(correctCandidates))
 		{
-			goNext(iter);
+			// don't descent edges beginning with N
+			if (firstEdgeChar == unknownChar)
+				goNextRight(iter);
+			else
+				goNext(iter);
 			continue;
 		}
 
@@ -707,7 +693,11 @@ void traverseAndSearchCorrections(
 				}
 			}
 		}
-		goNext(iter);
+		// don't descent edges beginning with N
+		if (firstEdgeChar == unknownChar)
+			goNextRight(iter);
+		else
+			goNext(iter);
 	}
 }
 
