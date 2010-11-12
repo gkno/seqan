@@ -45,7 +45,7 @@
 #include <seqan/score.h>
 #include <seqan/seeds.h>
 #include <seqan/sequence.h>
-#include <seqan/statistical_index.h>
+//#include <seqan/statistical_index.h> //vanished
 #include <seqan/system.h>
 
 #endif  // SEQAN_H_
