@@ -51,23 +51,23 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 
 		// fields to keep track of minimum elements and state
-		TValue *min = new TValue[treeLevels];
+		TValue *minVal = new TValue[treeLevels];
 		bool *half = new bool[treeLevels];
 		for(unsigned i = 0; i < treeLevels; ++i)
 			half[i] = false;
 
 		// it works like a binary counter of half[n]...half[1]half[0]
 		for(TSize j = 0; j < size; ++j, ++_First) {
-			*(level[0]) = min[0] = *_First;
+			*(level[0]) = minVal[0] = *_First;
 			++(level[0]);
 			for(unsigned i = 1; i < treeLevels; ++i) {
 				if (half[i]) {
-					if (min[i-1] < min[i]) min[i] = min[i-1];
-					*(level[i]) = min[i];	// min[i] is the minimum of last 2 values in min[i-1]
+					if (minVal[i-1] < minVal[i]) minVal[i] = minVal[i-1];
+					*(level[i]) = minVal[i];	// min[i] is the minimum of last 2 values in min[i-1]
 					++(level[i]);
 					half[i] = false;
 				} else {
-					min[i] = min[i-1];
+					minVal[i] = minVal[i-1];
 					half[i] = true;
 					break;
 				}
@@ -79,10 +79,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(unsigned i = 1; i < treeLevels; ++i)
 			if (half[i] || carry) {
 				if (half[i]) {
-					if (min[i-1] < min[i]) min[i] = min[i-1];
+					if (minVal[i-1] < minVal[i]) minVal[i] = minVal[i-1];
 				} else
-					min[i] = min[i-1];
-				*(level[i]) = min[i];
+					minVal[i] = minVal[i-1];
+				*(level[i]) = minVal[i];
 				++(level[i]);
 				carry = true;
 			}
@@ -92,7 +92,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		++_Dest;
 
 		delete[] half;
-		delete[] min;
+		delete[] minVal;
 		delete[] level;
 
 		return _Dest;
@@ -137,7 +137,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TLCPE, typename TLCP >
     inline void createLCPBinTree(TLCPE &lcp_enhanced, TLCP &lcp) {
-        createLCPBinTree(begin(lcp), end(lcp), begin(lcp_enhanced));
+        createLCPBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced, Standard()));
     }
 
 
@@ -156,7 +156,7 @@ namespace SEQAN_NAMESPACE_MAIN
         unsigned writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
         if (lcp_enhanced.cache.size() < writeHeads)
             lcp_enhanced.resizeCache(writeHeads);
-        createLCPBinTree(begin(lcp), end(lcp), begin(lcp_enhanced));
+        createLCPBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced));
     }
 
 }

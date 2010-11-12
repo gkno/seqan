@@ -135,9 +135,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		TIterator	it;
 		TSize		size;
 
-		inline SearchTreeIterator(TString &string):
+		inline SearchTreeIterator(TString &string, TSize _size):
 			it(begin(string, Standard())),
-			size(length(string))
+			size(_size)
 		{
 			_left = 0;
 			_lSize = 1;
@@ -490,6 +490,48 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
+	_lowerBoundSANaive(
+		TText &text,
+		SearchTreeIterator< TSA, TSpec > treeIter,
+		TQuery &query)
+	{	// find first element not before query, using operator<
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+
+		for (; !treeIter.eof(); )
+		{	// divide and conquer, find half that contains answer
+
+			TSuffix		suf = suffix(text, *treeIter);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
+			while (t != tEnd && q != qEnd && *t == *q) {
+				++t;
+				++q;
+			}
+			
+            // is text < query ?
+			if (q != qEnd && (t == tEnd || *t < *q)) {
+				treeIter.right();
+			} else {
+				treeIter.left();
+			}
+		}
+		return treeIter;
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TSpec,
+		typename TQuery
+	>
+	inline typename Iterator<TSA, Standard>::Type
 	_lowerBoundSA(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
@@ -544,6 +586,49 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
+	_upperBoundSANaive(
+		TText &text,
+		SearchTreeIterator< TSA, TSpec > treeIter,
+		TQuery &query)
+	{	// find first element that query is before, using operator<
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+
+		for (; !treeIter.eof(); )
+		{	// divide and conquer, find half that contains answer
+
+			TSuffix		suf = suffix(text, *treeIter);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
+
+			while (t != tEnd && q != qEnd && *t == *q) {
+				++t;
+				++q;
+			}
+			
+            // is text <= query ?
+			if (q == qEnd || t == tEnd || !(*q < *t)) {
+				treeIter.right();
+			} else {
+				treeIter.left();
+			}
+		}
+		return treeIter;
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TSpec,
+		typename TQuery
+	>
+	inline typename Iterator<TSA, Standard>::Type
 	_upperBoundSA(
 		TText &text,
 		SearchTreeIterator< TSA, TSpec > treeIter,
@@ -590,7 +675,63 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
+    // binary search without mlr-heuristic
+	template <
+		typename TText,
+		typename TSA,
+		typename TSpec,
+		typename TQuery
+	>
+	inline Pair< typename Iterator<TSA, Standard>::Type >
+	_equalRangeSANaive(
+		TText &text,
+		SearchTreeIterator< TSA, TSpec > treeIter,
+		TQuery &query)
+	{	// find range equivalent to query, using operator<
+		typedef typename Difference<TText>::Type			TDiff;
+		typedef typename Suffix<TText>::Type				TSuffix;
+		typedef typename Iterator<TSuffix, Standard>::Type	TTextIter;
+		typedef typename Iterator<TQuery, Standard>::Type	TQueryIter;
+		typedef typename Iterator<TSA, Standard>::Type		TSAIter;
 
+		TQueryIter qBegin = begin(query, Standard());
+		TQueryIter qEnd = end(query, Standard());
+
+		for (; !treeIter.eof(); )
+		{	// divide and conquer, check midpoint
+
+			TSuffix		suf = suffix(text, *treeIter);
+			TTextIter	t = begin(suf, Standard());
+			TTextIter	tEnd = end(suf, Standard());
+			TQueryIter	q = qBegin;
+			while (t != tEnd && q != qEnd && *t == *q) {
+				++t;
+				++q;
+			}
+			
+            // is text < query ?
+			if (q != qEnd && (t == tEnd || *t < *q))
+			{	// range begins above mid, loop
+				treeIter.right();
+			}
+            // is text > query ?
+			else if (q != qEnd && (t != tEnd && *q < *t))
+			{	// range in first half, loop
+				treeIter.left();
+			} else
+            // is text == query ?
+			{	// range straddles mid, find each end and return
+				return Pair<TSAIter> (
+					_lowerBoundSANaive(text, treeIter.leftChild(), query),
+					_upperBoundSANaive(text, treeIter.rightChild(), query)
+				);
+			}
+		}
+		return Pair<TSAIter> (treeIter, treeIter);	// empty range
+	}
+
+	//////////////////////////////////////////////////////////////////////////////
+    // binary search with mlr-heuristic
 	template <
 		typename TText,
 		typename TSA,
@@ -665,6 +806,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA const, Standard>::Type
+	lowerBoundSANaiveIterator(
+		TText const &text,
+		TSA const &sa,
+		TQuery const &query)
+	{	// find range equivalent to query, using operator<
+		return _lowerBoundSANaive(text, SearchTreeIterator<TSA const, SortedList>(sa), query);
+	}
+
+	template <
+		typename TText,
+		typename TSA,
+		typename TQuery
+	>
+	inline typename Iterator<TSA const, Standard>::Type
 	lowerBoundSAIterator(
 		TText const &text,
 		TSA const &sa,
@@ -701,6 +856,19 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _equalRangeSA(text, SearchTreeIterator<TSA const, SortedList>(sa), query);
 	}
 
+	template <
+		typename TText,
+		typename TSA,
+		typename TQuery
+	>
+	inline Pair< typename Iterator<TSA const, Standard>::Type >
+	equalRangeSANaiveIterator(
+		TText const &text,
+		TSA const &sa,
+		TQuery const &query)
+	{	// find range equivalent to query, using operator<
+		return _equalRangeSANaive(text, SearchTreeIterator<TSA const, SortedList>(sa), query);
+	}
 
 	//////////////////////////////////////////////////////////////////////////////
 	// workarounds for the Visual Studio array problem
@@ -1485,7 +1653,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCP &lcp,
 		TQuery &query)
 	{
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCP, LeftCompleteTree>(lcp), query);
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCP, LeftCompleteTree>(lcp, (length(text)>1)?length(text)-1:0), query);
 	}
 
 
@@ -1525,7 +1693,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1541,7 +1709,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1558,7 +1726,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQuery const &query)
 	{	// find range equivalent to query, using operator<
 		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
-			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 		return Pair< typename Position<TSA>::Type >
 			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
 	}
@@ -1576,7 +1744,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0);
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0);
 	}
 
 	template <
@@ -1592,7 +1760,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1608,7 +1776,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find range equivalent to query, using operator<
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -1627,7 +1795,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1643,7 +1811,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1660,7 +1828,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQuery *query)
 	{	// find range equivalent to query, using operator<
 		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
-			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 		return Pair< typename Position<TSA>::Type >
 			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
 	}
@@ -1678,7 +1846,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find range equivalent to query, using operator<
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe), query);
+		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -1698,7 +1866,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		return _equalRangeLCPE(
 			begin(text), end(text),
 			begin(sa), end(sa),
-            SearchTreeIterator<typename Iterator<TLCPE const>::Type, LeftCompleteTree>(begin(lcpe), (length(text)>1)?length(text)-1:0),
+            SearchTreeIterator<typename Iterator<TLCPE const>::Type, LeftCompleteTree>(begin(lcpe, (length(text)>1)?length(text)-1:0), (length(text)>1)?length(text)-1:0),
 			begin(subtext), end(subtext));
 	}
 */

@@ -295,11 +295,13 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TSpec,
 		typename TObject, 
         typename TSA,
+        typename TLCP,
 		typename TAlgSpec >
 	void createLCPETableExt(
 		String< TValue, TSpec > &LCPE,
 		TObject const &text,
 		TSA const &suffixArray,
+        TLCP const &LCP,
 		TAlgSpec const)
 	{
 	SEQAN_CHECKPOINT
@@ -328,23 +330,22 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TSpec,
         typename TText,
         typename TSA,
+        typename TLCP,
 		typename TAlgSpec >
     void createLCPETable(
 		String< TValue, TSpec > &LCPE,
 		TText const &s,
-		TSA const &SA,
-		TAlgSpec const alg)
+		TSA const &,
+        TLCP const &LCP,
+		TAlgSpec const)
 	{
 	SEQAN_CHECKPOINT
         //TSA LCP;
         //resize(LCP, length(s), Exact());
 		// we use LCPE[n-lcpSize..n-1] as a temporary buffer instead of allocating one
-		typename Suffix<String< TValue, TSpec > >::Type LCP = suffix(LCPE, length(LCPE) - length(s));
-
-		createLCPTable(LCP, s, SA, alg);
-		#ifdef SEQAN_TEST_INDEX
-			isLCPTable(LCP, SA, s);
-		#endif
+        typename Size<TText>::Type lcpSize = length(s) > 1? length(s) - 1: 0;
+		typename Suffix<String< TValue, TSpec > >::Type LCPcopy = suffix(LCPE, length(LCPE) - lcpSize);
+        LCPcopy = prefix(LCP, lcpSize);
         createLCPBinTree(LCPE, LCP);
     }
 
@@ -353,29 +354,33 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TConfig,
         typename TText,
         typename TSA,
+        typename TLCP,
 		typename TAlgSpec >
     void createLCPETable(
 		String< TValue, External<TConfig> > &LCPE,
 		TText const &s,
 		TSA const &SA,
+        TLCP const &LCP,
 		TAlgSpec const alg)
 	{
 	SEQAN_CHECKPOINT
-        createLCPETableExt(LCPE, s, SA, alg);
+        createLCPETableExt(LCPE, s, SA, LCP, alg);
     }
 
     template <
         typename TValue,
         typename TSpec,
         typename TText,
-        typename TSA>
+        typename TSA,
+        typename TLCP>
     inline void createLCPETable(
 		String< TValue, TSpec > &LCPE,
 		TText &s,
-		TSA &SA)
+		TSA &SA,
+        TLCP &LCP)
 	{
 	SEQAN_CHECKPOINT
-		CreateLCPETable(LCPE, s, SA, Kasai());
+		createLCPETable(LCPE, s, SA, LCP, Kasai());
     }
 
 
@@ -518,12 +523,13 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &/*index*/, Fibre_LCPE, TSpecAlg const /*alg*/) {
+	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCPE, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
-//		resize(indexLCP(index), length(indexRawText(index)), Exact());
-//		createLCPETable(indexLCPE(index), indexRawText(index), indexSA(index), alg);
-		return false;
+		resize(indexLCPE(index), sizeofLCPE(lengthSum(index)), Exact());
+		createLCPETable(indexLCPE(index), indexRawText(index), indexSA(index), indexLCP(index), alg);
+		return true;
+//		return false;
 	}
 
 	template <typename TText, typename TSpec>
@@ -655,7 +661,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	inline bool open(String<TValue, TSpec> &string, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		String<TValue, External< ExternalConfigLarge<> > > extString;
-		if (!open(extString, fileName, openMode)) return false;
+		if (!open(extString, fileName, openMode & ~OPEN_CREATE)) return false;
 		assign(string, extString);
 		return true;
 	}
@@ -669,7 +675,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	inline bool open(Segment<THost, TSpec> &string, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		String<typename Value<THost>::Type, External< ExternalConfigLarge<> > > extString;
-		if (!open(extString, fileName, openMode)) return false;
+		if (!open(extString, fileName, openMode & ~OPEN_CREATE)) return false;
 		assign(string, extString);
 		return true;
 	}
@@ -679,26 +685,53 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 		return open(string, fileName, OPEN_RDONLY);
 	}
 
+	// ATTENTION:
+	// This implementation of open doesn't work with external memory StringSets (External<>, MMap<>)
+	// If you need a persistent external StringSet you have to use a Owner<ConcatDirect<> > StringSet.
 	template < typename TValue, typename TSpec, typename TSSSpec >
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
 		char id[12]; // 2^32 has 10 decimal digits + 1 (0x00)
 		unsigned i = 0;
 		clear(multi);
-		while (true) {
+		CharString name;
+		while (true)
+		{
 			sprintf(id, ".%u", i);
-			String<char> name;
-			name = fileName;	append(name, id);
+			name = fileName;
+			append(name, id);
 			{
-				String<TValue, External< ExternalConfigLarge<> > > extString;
-				if (!open(extString, toCString(name), openMode | OPEN_QUIET)) break;
 				resize(multi, i + 1);
-				assign(value(multi, i), extString);
+				if (!open(multi[i], toCString(name), (openMode & ~OPEN_CREATE) | OPEN_QUIET))
+				{
+					resize(multi, i - 1);
+					break;
+				}
 			}
 			++i;
 		}
 		return i > 1;
 	}
+	template < typename TValue, typename TSpec, typename TSSSpec >
+	inline bool open(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
+		CharString name;
+		name = fileName;
+		append(name, ".concat");
+		if (!open(multi.concat, toCString(name), openMode | OPEN_QUIET)) return false;
+		name = fileName;
+		append(name, ".limits");
+		if (!open(multi.limits, toCString(name), openMode | OPEN_QUIET) && !empty(multi.concat))
+		{
+			clear(multi);
+			return false;
+		}
+		// limits file was just created
+		if (empty(multi.limits))
+			appendValue(multi.limits, 0);
+		return true;
+	}
+
 	template < typename TValue, typename TSpec, typename TSSSpec>
 	inline bool open(StringSet<String<TValue, TSpec>, TSSSpec> &multi, const char *fileName) {
 	SEQAN_CHECKPOINT
@@ -712,7 +745,7 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	template < typename TValue, typename TSpec >
 	inline bool save(String<TValue, TSpec> const &string, const char *fileName, int openMode) {
 	SEQAN_CHECKPOINT
-// 
+//
 //		if (length(string) == 0) return true;
 		String<TValue, External< ExternalConfigLarge<> > > extString;
 		if (!open(extString, fileName, openMode)) return false;
@@ -745,14 +778,27 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	SEQAN_CHECKPOINT
 		if (length(multi) == 0) return true;
 		char id[12]; // 2^32 has 10 decimal digits + 2 ('.' and 0x00)
-		for(unsigned i = 0; i < length(multi); ++i) {
+		CharString name;
+		for(unsigned i = 0; i < length(multi); ++i)
+		{
 			sprintf(id, ".%u", i);
-			String<char> name;
-			name = fileName;	
+			name = fileName;
 			append(name, &(id[0]));
-			if (!save(getValue(multi, i), toCString(name), openMode))
+			if (!save(multi[i], toCString(name), openMode))
 				return false;
 		}
+		return true;
+	}
+	template < typename TValue, typename TSpec, typename TSSSpec >
+	inline bool save(StringSet<String<TValue, TSpec>, Owner<ConcatDirect<TSSSpec> > > &multi, const char *fileName, int openMode) {
+	SEQAN_CHECKPOINT
+		CharString name;
+		name = fileName;
+		append(name, ".concat");
+		if (!save(multi.concat, toCString(name), openMode)) return false;
+		name = fileName;
+		append(name, ".limits");
+		if (!save(multi.limits, toCString(name), openMode)) return false;
 		return true;
 	}
 	template < typename TValue, typename TSpec, typename TSSSpec>

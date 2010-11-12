@@ -606,6 +606,20 @@ a single integer value between 0 and the sum of string lengths minus 1.
 		return getSeqOffset(pos) == 0;
 	}
 
+	// posAtEnd
+	template <typename T1, typename T2, typename TCompression, typename TSequence, typename TSpec>
+	inline bool posAtEnd(Pair<T1, T2, TCompression> const & pos, StringSet<TSequence, TSpec> const &stringSet) {
+		return pos.i2 == sequenceLength(pos.i1, stringSet);
+	}
+	template <typename TPos, typename TSequence, typename TSpec>
+	inline bool posAtEnd(TPos pos, StringSet<TSequence, TSpec> const &stringSet) {
+		return getSeqOffset(pos, stringSetLimits(stringSet)) == 0;
+	}
+	template <typename TPos, typename TSequence>
+	inline bool posAtEnd(TPos pos, TSequence const &seq) {
+		return pos == length(seq);
+	}
+
 
 	// posPrev
 	template <typename TPos>
@@ -641,6 +655,38 @@ a single integer value between 0 and the sum of string lengths minus 1.
 	posAdd(Pair<T1, T2, TCompression> const &pos, TDelta delta) {
 		return Pair<T1, T2, TCompression>(getValueI1(pos), getValueI2(pos) + delta);
 	}
+    
+    
+	// posAddAndCheck
+	template <typename TPos, typename TDelta, typename TSequence>
+	inline TPos posAddAndCheck(TPos &pos, TDelta delta, TSequence const &sequence) {
+        return (pos += delta) < length(sequence);
+	}
+
+	template <typename TPos, typename TDelta, typename TSequence, typename TSpec>
+	inline TPos posAddAndCheck(TPos &pos, TDelta delta, StringSet<TSequence, TSpec> const &stringSet) 
+    {
+        typedef StringSet<TSequence, TSpec> TStringSet;
+        typedef typename StringSetLimits<TStringSet const>::Type TLimits;
+		typedef typename Iterator<TLimits, Standard>::Type TIter;
+		typedef typename Value<TLimits>::Type TSize;
+        
+        TLimits &limits = stringSetLimits(stringSet);
+        TIter _end = end(limits, Standard());
+		TIter _endMark = ::std::upper_bound(begin(limits, Standard()), _end, (TSize)pos);
+        pos += delta;
+        if (_endMark < _end)
+            return pos < *_endMark;
+        else
+            return false;
+	}
+
+	template <typename T1, typename T2, typename TCompression, typename TDelta, typename TStringSet>
+	inline bool
+	posAddAndCheck(Pair<T1, T2, TCompression> &pos, TDelta delta, TStringSet const &stringSet) {
+        return (pos.i2 += delta) < length(stringSet[pos.i1]);
+	}
+
 
 	// posSub
 	template <typename TA, typename TB>

@@ -366,14 +366,17 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
+
+		bool result = true;
 		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, ESA_Text()), fileName, openMode))) return false;
+			(!open(getFibre(index, ESA_Text()), fileName, openMode))) 
+			result = false;
 
 		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
 		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
 		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
 		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
-		return true;
+		return result;
 	}
 	template < typename TObject, typename TSpec >
 	inline bool open(

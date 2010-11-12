@@ -1065,7 +1065,7 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 		return result;
 	}
-
+    
 	// get the interval of SA of the subtree under the edge beginning with character c
 	template < typename TText, class TIndexSpec, class TSpec, typename TValue >
 	inline bool 
@@ -1076,6 +1076,8 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 	{
 		typedef Index<TText, Index_ESA<TIndexSpec> >		TIndex;
 		typedef typename Size<TIndex>::Type					TSize;
+        typedef typename Fibre<TIndex, ESA_SA>::Type const  TSA;
+		typedef typename Value<TSA>::Type                   TSAValue;
 
 		if (_isLeaf(it, EmptyEdges())) return false;
 
@@ -1084,7 +1086,12 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 			child.i2 = _getDown(value(it).range.i1, container(it));
 
 		TSize _lcp = lcpAt(child.i2 - 1, container(it));
-		if (textAt(posAdd(saAt(child.i1, container(it)), _lcp), container(it)) == c) {
+        TIndex const &index = container(it);
+        TText const &text = indexText(index);
+
+        TSAValue pos = saAt(child.i1, container(it));
+		if (posAddAndCheck(pos, _lcp, text) && (textAt(pos, container(it)) == c)) 
+        {
 			childDesc.range = child;
 			childDesc.parentRight = value(it).range.i2;
 			return true;
@@ -1093,7 +1100,9 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		while (_isNextl(child.i2, container(it))) 
 		{
 			child.i2 = _getNextl(child.i2, container(it));
-			if (textAt(posAdd(saAt(child.i1, container(it)), _lcp), container(it)) == c) {
+            pos = saAt(child.i1, container(it));
+			if (posAddAndCheck(pos, _lcp, text) && (textAt(pos, container(it)) == c)) 
+            {
 				childDesc.range = child;
 				childDesc.parentRight = value(it).range.i2;
 				return true;
@@ -1102,7 +1111,9 @@ If $iterator$'s container type is $TIndex$, the return type is $Size<TIndex>::Ty
 		}
 
 		if (!isRoot(it)) {
-			if (textAt(posAdd(saAt(child.i1, container(it)), _lcp), container(it)) == c) {
+            pos = saAt(child.i1, container(it));
+			if (posAddAndCheck(pos, _lcp, text) && (textAt(pos, container(it)) == c))
+            {
 				childDesc.range.i1 = child.i1;
 				childDesc.range.i2 = childDesc.parentRight = value(it).range.i2;
 				return true;
