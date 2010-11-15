@@ -681,9 +681,9 @@ a single integer value between 0 and the sum of string lengths minus 1.
             return false;
 	}
 
-	template <typename T1, typename T2, typename TCompression, typename TDelta, typename TStringSet>
+	template <typename T1, typename T2, typename TCompression, typename TDelta, typename TSequence, typename TSpec>
 	inline bool
-	posAddAndCheck(Pair<T1, T2, TCompression> &pos, TDelta delta, TStringSet const &stringSet) {
+	posAddAndCheck(Pair<T1, T2, TCompression> &pos, TDelta delta, StringSet<TSequence, TSpec> const &stringSet) {
         return (pos.i2 += delta) < length(stringSet[pos.i1]);
 	}
 
