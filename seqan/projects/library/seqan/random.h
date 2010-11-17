@@ -29,6 +29,7 @@
 #include <cmath>
 #include <cstdlib>
 
+#include <seqan/basic.h>
 #include <seqan/misc/misc_random.h>
 
 //____________________________________________________________________________
