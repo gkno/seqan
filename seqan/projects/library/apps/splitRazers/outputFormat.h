@@ -570,6 +570,40 @@ void assignMappingQuality(TMatches &matches, TReads & reads, TCooc & cooc, TCoun
 
 
 //////////////////////////////////////////////////////////////////////////////
+// Dump an alignment
+template <typename TFile, typename TSource, typename TSpec>
+inline void
+dumpAlignment(TFile & target, Align<TSource, TSpec> const & source)
+{
+	typedef Align<TSource, TSpec> const TAlign;
+	typedef typename Row<TAlign>::Type TRow;
+	typedef typename Position<typename Rows<TAlign>::Type>::Type TRowsPosition;
+	typedef typename Position<TAlign>::Type TPosition;
+
+	TRowsPosition row_count = length(rows(source));
+	TPosition begin_ = beginPosition(cols(source));
+	TPosition end_ = endPosition(cols(source));
+	
+	// Print sequences
+	for(TRowsPosition i=0;i<row_count;++i) {
+		if (i == 0)
+			_streamWrite(target, "#Read:   ");
+		else
+			_streamWrite(target, "#Genome: ");
+		TRow& row_ = row(source, i);
+		typedef typename Iterator<typename Row<TAlign>::Type const>::Type TIter;
+		TIter begin1_ = iter(row_, begin_);
+		TIter end1_ = iter(row_, end_);
+		for (; begin1_ != end1_; ++begin1_) {
+			if (isGap(begin1_)) _streamPut(target, gapValue<char>());
+			else _streamPut(target, *begin1_);
+		}
+		_streamPut(target, '\n');
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Output matches
 template <
 	typename TMatches,
@@ -617,7 +651,7 @@ void dumpMatches(
 	{
 		options.sortOrder = 1;		//  sort according to gPos
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
-		options.dumpAlignment = false;
+		//options.dumpAlignment = false;
 	}
 	if (options.outputFormat == 33)
 	{
@@ -689,9 +723,9 @@ void dumpMatches(
 	
 #ifdef RAZERS_SPLICED
 	String<short> ambiStates;
-#else
-	maskDuplicates(matches);
+	if(options.minMatchLen == 0)
 #endif
+		maskDuplicates(matches);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
@@ -1036,7 +1070,7 @@ void dumpMatches(
 						unsigned currReadNo = (*it).rseqNo;
 						int unique = 1;
 						unsigned bestMatches = 0;
-
+					
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 						if(options.maqMapping)
 							bestMatches = stats[0][currReadNo] >> 5;
@@ -1096,6 +1130,7 @@ void dumpMatches(
 						if(options.minMatchLen > 0)
 							readLen = (*it).mScore;
 #endif
+
 						String<Dna5Q> readInf = infix(reads[currReadNo],0,readLen);
 #ifdef RAZERS_SPLICED
 						if(options.minMatchLen > 0)
@@ -1127,6 +1162,7 @@ void dumpMatches(
 						if (!options.hammingOnly)
 						{
 							assignSource(row(align, 0), readInf);
+							//std::cout << "begin=" << (*it).gBegin <<" end="<< (*it).gEnd << std::endl;
 							assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
 							if ((*it).orientation == 'R')
 								reverseComplementInPlace(source(row(align, 1)));
@@ -1137,7 +1173,11 @@ void dumpMatches(
 							else
 #endif
 								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+								
+							//std::cout << align << std::endl; 
+							//dumpAlignment(::std::cout, align);
 
+							//std::cout << "vorher begin=" << (*it).gBegin <<" end="<< (*it).gEnd << std::endl;
 							// transform first and last read character to genomic positions
 							viewPosReadFirst  = toViewPosition(row(align, 0), 0);
 							viewPosReadLast   = toViewPosition(row(align, 0), readLen - 1);
@@ -1149,15 +1189,40 @@ void dumpMatches(
 							{
 								if ((*it).orientation == 'R')
 								{
-									(*it).gBegin = (*it).gEnd - (genomePosReadLast + 1);
+									// watch out at chromosome borders
+									(*it).gBegin = (*it).gEnd - _min((TGPos)(genomePosReadLast + 1),(*it).gEnd); 
 									(*it).gEnd -= genomePosReadFirst;
 								}
 								else
 								{
-									(*it).gEnd = (*it).gBegin + (genomePosReadLast + 1);
+									(*it).gEnd = (*it).gBegin + _min((TGPos)(genomePosReadLast + 1),length(currGenome)-(*it).gBegin);
 									(*it).gBegin += genomePosReadFirst;
 								}
 							}
+							
+							clear(row(align,1));
+							clear(row(align,0));
+							assignSource(row(align, 0), readInf);
+							//std::cout << "begin=" << (*it).gBegin <<" end="<< (*it).gEnd << std::endl;
+							assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
+							if ((*it).orientation == 'R')
+								reverseComplementInPlace(source(row(align, 1)));
+
+#ifdef RAZERS_SPLICED
+							if(options.minMatchLen > 0)
+								globalAlignment(align, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
+							else
+#endif
+								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+								
+							//std::cout << align << std::endl; 
+							//dumpAlignment(::std::cout, align);
+
+							// transform first and last read character to genomic positions
+							viewPosReadFirst  = toViewPosition(row(align, 0), 0);
+							viewPosReadLast   = toViewPosition(row(align, 0), readLen - 1);
+							
+							
 						}
 						
 						//file <<  options.runID << "_razers\tread";
@@ -1269,6 +1334,23 @@ void dumpMatches(
 						}
 
 						file << ::std::endl;
+						if(options.dumpAlignment)
+						{
+							if((*it).editDist > 0 && !options.hammingOnly)
+								file << align;
+							else
+							{
+								clear(row(align,1));
+								clear(row(align,0));
+								assignSource(row(align, 0), readInf);
+								assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
+								if ((*it).orientation == 'R')
+									reverseComplementInPlace(source(row(align, 1)));
+								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+								file << align;
+
+							}
+						}
 						++it;
 					}
 				}
