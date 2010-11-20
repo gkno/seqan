@@ -414,15 +414,18 @@ public:
 	typedef typename TConfig::TMean					TMean;
 	typedef typename TConfig::TStd					TStd;
 	typedef typename TConfig::TMappingQuality		TMappingQuality;
-	
+
 	typedef typename TConfig::TReadSeq				TReadSeq;
 	typedef typename TConfig::TContigSeq			TContigSeq;
-	typedef typename Position<TReadSeq>::Type		TReadPos;
-	typedef typename Position<TContigSeq>::Type		TContigPos;
-	
+
+	typedef typename Position<TReadSeq>::Type       TRSeqPos_;
+	typedef typename Position<TContigSeq>::Type     TCSeqPos_;
+	typedef typename _MakeSigned<TRSeqPos_>::Type   TReadPos;
+	typedef typename _MakeSigned<TCSeqPos_>::Type   TContigPos;
+
 	typedef GapAnchor<TReadPos>						TReadGapAnchor;
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
-	
+
 	typedef StringSet<CharString>					TNameStore;
 
 	typedef AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec >	TAnnotationStoreElement;
@@ -1696,11 +1699,10 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		resize(rows(align), 2);
 		assignSource(row(align, 0), infix(store.contigStore[(*it).contigId].seq, cBegin, cEnd));
 		assignSource(row(align, 1), readSeq);
-		if (TYPECMP<TShrinkMatches, True>::VALUE) {
+		if (TYPECMP<TShrinkMatches, True>::VALUE)
 		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
-        } else {
+        else
 		    globalAlignment(align, score);
-        }
 
 		// 2. Skip non-overlapping matches
 		cBegin = positionSeqToGap(contigGaps, cBegin);
