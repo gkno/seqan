@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename InType, typename Result = typename InType::T2::T>
-	struct map_inverse : public ::std::unary_function<InType,Result> {
+	struct map_inverse : public std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
@@ -105,7 +105,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			TInverter					inverter(echoer);
 
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "  invert suffix array" << ::std::endl;
+                std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
+                std::cerr << "Start Kasai [pipelining]" << std::endl;
+                std::cerr << "  invert suffix array" << std::endl;
             #endif
 			inverter << echoer;
 			SEQAN_PROMARK("Suffix-Array invertiert");
@@ -145,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
-	struct map_inverse_multi : public ::std::unary_function<InType,Result> {
+	struct map_inverse_multi : public std::unary_function<InType,Result> {
 		TLimitsString const &limits;
 		map_inverse_multi(TLimitsString const &_limits) : limits(_limits) {}
         inline Result operator()(const InType& x) const
@@ -208,7 +210,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			TInverter					inverter(echoer, map_inverse);
 
             #ifdef SEQAN_DEBUG_INDEX
-                ::std::cerr << "  invert suffix array" << ::std::endl;
+                std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
+                std::cerr << "Start Kasai [pipelining,stringset]" << std::endl;
+                std::cerr << "  invert suffix array" << std::endl;
             #endif
 			inverter << echoer;
 			SEQAN_PROMARK("Suffix-Array invertiert");
@@ -241,11 +245,22 @@ namespace SEQAN_NAMESPACE_MAIN
     // internal Kasai algorithm
     //////////////////////////////////////////////////////////////////////////////
 
+	template < 
+        typename TLCP,
+		typename TText,
+		typename TSA >
+    struct LCPCreatorRandomAccess_<TLCP, TText, TSA, Kasai>
+    {
+        typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
+        typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
+        typedef typename AND<TRandomLCP, TRandomSA>::Type Type;
+    };
+
 
     template < typename TLCPTable,
                typename TText,
                typename TSA >
-    void createLCPTable(
+    void _createLCPTableRandomAccess(
 		TLCPTable &LCP,
 		TText const &s,
 		TSA const &SA,
@@ -254,8 +269,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSA>::Type TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
+            std::cerr << "Start Kasai [random access]" << std::endl;
 			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << ::std::endl;
+				std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << std::endl;
         #endif
 
 		TSize n = length(s);
@@ -294,10 +311,10 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 		LCP[n - 1] = 0;
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cerr << "  n: " << n;
-            ::std::cerr << "  lcpMax: " << lcpMax;
-            ::std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cerr << "  sigma: " << sigma << ::std::endl;
+            std::cerr << "  n: " << n;
+            std::cerr << "  lcpMax: " << lcpMax;
+            std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
+            std::cerr << "  sigma: " << sigma << std::endl;
         #endif
 	}
 
@@ -307,7 +324,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TLCPTable,
                typename TText,
                typename TSA >
-    void createLCPTable(
+    void _createLCPTableRandomAccess(
 		TLCPTable &LCP,
 		TText const &s,
 		TSA const &SA,
@@ -316,8 +333,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSA>::Type TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
+            std::cerr << "Start Kasai [random access,inplace]" << std::endl;
 			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << ::std::endl;
+				std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << std::endl;
         #endif
 
 		TSize n = length(s);
@@ -335,7 +354,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		SEQAN_PROMARK("Suffix-Array invertiert");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "Suffix-Array invertiert" << ::std::endl;
+			std::cerr << "Suffix-Array invertiert" << std::endl;
 		#endif
 
 		typename Iterator<TText const>::Type Ibegin = begin(s);
@@ -360,7 +379,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		LCP[SA[n - 1]] = mark;
 		SEQAN_PROMARK("permutierte LCP-Tabelle erzeugt");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "permutierte LCP-Tabelle erzeugt" << ::std::endl;
+			std::cerr << "permutierte LCP-Tabelle erzeugt" << std::endl;
 		#endif
         for(TSize i = 0, j, tmp; i < n; ++i)
 			if (LCP[i] & mark) {
@@ -373,14 +392,14 @@ namespace SEQAN_NAMESPACE_MAIN
 				LCP[j] = tmp & mask;
 			}
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "LCP-Tabelle erzeugt" << ::std::endl;
+			std::cerr << "LCP-Tabelle erzeugt" << std::endl;
 		#endif
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cerr << "  n: " << n;
-            ::std::cerr << "  lcpMax: " << lcpMax;
-            ::std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cerr << "  sigma: " << sigma << ::std::endl;
+            std::cerr << "  n: " << n;
+            std::cerr << "  lcpMax: " << lcpMax;
+            std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
+            std::cerr << "  sigma: " << sigma << std::endl;
         #endif
 	}
 
@@ -390,7 +409,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			   typename TString,
 			   typename TSpec,
                typename TSA >
-    void createLCPTable(
+    void _createLCPTableRandomAccess(
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> const &sset,
 		TSA const &SA,
@@ -403,8 +422,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TLCPTable>::Type									TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
+            std::cerr << "Start Kasai [random access,inplace,stringset]" << std::endl;
 			if (sizeof(TSize) > 4)
-				::std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << ::std::endl;
+				std::cerr << "WARNING: TSize size is greater 4 (Kasai)" << std::endl;
         #endif
 
 		TText &s = concat(sset);
@@ -428,7 +449,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		SEQAN_PROMARK("Suffix-Array invertiert");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "Suffix-Array invertiert" << ::std::endl;
+			std::cerr << "Suffix-Array invertiert" << std::endl;
 		#endif
 
 		typename Iterator<TText const>::Type Ibegin = begin(s);
@@ -462,7 +483,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		SEQAN_PROMARK("permutierte LCP-Tabelle erzeugt");
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "permutierte LCP-Tabelle erzeugt" << ::std::endl;
+			std::cerr << "permutierte LCP-Tabelle erzeugt" << std::endl;
 		#endif
         for(TSize sa_j, i = 0, j, tmp; i < n; ++i)
 			if (LCP[i] & mark) {
@@ -477,14 +498,14 @@ namespace SEQAN_NAMESPACE_MAIN
 				LCP[j] = tmp & mask;
 			}
         #ifdef SEQAN_DEBUG_INDEX
-			::std::cerr << "LCP-Tabelle erzeugt" << ::std::endl;
+			std::cerr << "LCP-Tabelle erzeugt" << std::endl;
 		#endif
 
         #ifdef SEQAN_DEBUG_INDEX
-            ::std::cerr << "  n: " << n;
-            ::std::cerr << "  lcpMax: " << lcpMax;
-            ::std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
-            ::std::cerr << "  sigma: " << sigma << ::std::endl;
+            std::cerr << "  n: " << n;
+            std::cerr << "  lcpMax: " << lcpMax;
+            std::cerr << "  lcpAvrg: " << (TSize)(lcpAvrg + (lcpNumer + n/2) / n);
+            std::cerr << "  sigma: " << sigma << std::endl;
         #endif
 	}
 

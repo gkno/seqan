@@ -33,7 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TSA, 
 		typename TObject, 
 		typename TAlgSpec >
-	void createSuffixArrayExt(
+	void _createSuffixArrayPipelining(
 		TSA &suffixArray,
 		TObject const &text,
 		TAlgSpec const)
@@ -67,7 +67,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TString, 
 		typename TSpec,
 		typename TAlgSpec >
-	void createSuffixArrayExt(
+	void _createSuffixArrayPipelining(
 		TSA &suffixArray,
 		StringSet<TString, TSpec> const &stringSet,
 		TAlgSpec const)
@@ -116,47 +116,76 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
     template < typename TSA,
                typename TText,
 			   typename TAlgSpec >
-    inline void createSuffixArray(
-		TSA &SA,
+    inline void _createSuffixArrayRandomAccess(
+		TSA &sa,
 		TText const &s,
 		TAlgSpec const &alg)
 	{
 	SEQAN_CHECKPOINT
 		// -> call internal memory algorithm with an extended interface (+ alphabet size, max_depth)
 		if (BitsPerValue< typename Value<TText>::Type >::VALUE > 16)
-			createSuffixArray(SA, s, alg, length(s), 0);
+			createSuffixArray(sa, s, alg, length(s), 0);
 		else
-			createSuffixArray(SA, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
+			createSuffixArray(sa, s, alg, ValueSize< typename Value<TText>::Type >::VALUE, 0);
 	}
 
 	template < 
 		typename TSA, 
-		typename TValue, 
-		typename TConfig,
+		typename TText, 
 		typename TAlgSpec >
-	inline void createSuffixArray(
-		TSA &SA,
-		String< TValue, External<TConfig> > const &s,
-		TAlgSpec const alg)
+	inline void _createSuffixArrayWrapper(
+		TSA &sa,
+		TText const &s,
+		TAlgSpec const &alg,
+        True)
 	{
 	SEQAN_CHECKPOINT
-		// -> explicitly create SA using external memory
-        createSuffixArrayExt(SA, s, alg);
+        _createSuffixArrayRandomAccess(sa, s, alg);
+	}
+
+    // always use external Skew7 for multiple strings
+	template < 
+		typename TSA, 
+		typename TSequence, 
+		typename TSetSpec,
+		typename TAlgSpec >
+	inline void _createSuffixArrayWrapper(
+		TSA &sa,
+		StringSet<TSequence, TSetSpec> const &s,
+		TAlgSpec const &,
+        True)
+	{
+	SEQAN_CHECKPOINT
+        _createSuffixArrayPipelining(sa, s, Skew7());
 	}
 
 	template < 
 		typename TSA, 
-		typename TString, 
-		typename TSSetSpec,
+		typename TText,
 		typename TAlgSpec >
-	inline void createSuffixArray(
-		TSA &SA,
-		StringSet< TString, TSSetSpec > const &s,
-		TAlgSpec const)
+	inline void _createSuffixArrayWrapper(
+		TSA &sa,
+		TText const &s,
+		TAlgSpec const &alg,
+        False)
 	{
 	SEQAN_CHECKPOINT
-        createSuffixArrayExt(SA, s, Skew7());
+        _createSuffixArrayPipelining(sa, s, alg);
 	}
+
+	template < 
+		typename TSA,
+		typename TText,
+        typename TAlgSpec >
+	inline void createSuffixArray(
+		TSA &sa,
+		TText const &s,
+		TAlgSpec const &alg)
+	{
+	SEQAN_CHECKPOINT
+        _createSuffixArrayWrapper(sa, s, alg, typename SACreatorRandomAccess_<TSA, TText, TAlgSpec>::Type());
+    }
+
 
 
 //____________________________________________________________________________
@@ -172,7 +201,7 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
 		typename TObject, 
         typename TSA,
 		typename TAlgSpec >
-	void createLCPTableExt(
+	void _createLCPTablePipelining(
 		TLCPTable &LCP,
 		TObject const &text,
 		TSA const &suffixArray,
@@ -203,7 +232,7 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
 		typename TSpec,
         typename TSA,
 		typename TAlgSpec >
-	void createLCPTableExt(
+	void _createLCPTablePipelining(
 		TLCPTable &LCP,
 		StringSet<TString, TSpec> const &stringSet,
 		TSA const &suffixArray,
@@ -248,34 +277,51 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 */
 
 	template < 
-        typename TLCPTable,
-        typename TValue,
-		typename TConfig,
-		typename TSA >
-	void createLCPTable(
-		TLCPTable &LCP,
-		String< TValue, External<TConfig> > const &s,
-		TSA const &SA,
-		Kasai const)
+        typename TLCP,
+		typename TText,
+		typename TSA,
+        typename TAlgSpec >
+	inline void _createLCPTableWrapper(
+		TLCP &lcp,
+		TText const &s,
+		TSA const &sa,
+		TAlgSpec const &alg,
+        True)
 	{
 	SEQAN_CHECKPOINT
-        createLCPTableExt(LCP, s, SA, Kasai());
+        _createLCPTableRandomAccess(lcp, s, sa, alg);
 	}
 
 	template < 
-        typename TLCPTable,
-        typename TValue,
-		typename TConfig,
-		typename TSSetSpec,
-		typename TSA >
-	void createLCPTable(
-		TLCPTable &LCP,
-		StringSet< String<TValue, External<TConfig> >, TSSetSpec > const &s,
-		TSA const &SA,
-		Kasai const)
+        typename TLCP,
+		typename TText,
+		typename TSA,
+        typename TAlgSpec >
+	inline void _createLCPTableWrapper(
+		TLCP &lcp,
+		TText const &s,
+		TSA const &sa,
+		TAlgSpec const &alg,
+        False)
 	{
-        createLCPTableExt(LCP, s, SA, Kasai());
+	SEQAN_CHECKPOINT
+        _createLCPTablePipelining(lcp, s, sa, alg);
 	}
+
+	template < 
+        typename TLCP,
+		typename TText,
+		typename TSA,
+        typename TAlgSpec >
+	inline void createLCPTable(
+		TLCP &lcp,
+		TText const &s,
+		TSA const &sa,
+		TAlgSpec const &alg)
+	{
+	SEQAN_CHECKPOINT
+        _createLCPTableWrapper(lcp, s, sa, alg, typename LCPCreatorRandomAccess_<TLCP, TText, TSA, TAlgSpec>::Type());
+    }
 
 
 //____________________________________________________________________________

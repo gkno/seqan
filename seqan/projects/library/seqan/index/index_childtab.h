@@ -51,6 +51,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		TStack stack_updown;
 		TStack stack_nextl;
 
+        #ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE CHILD TABLE ---" << std::endl;
+            std::cerr << "Start stack-processing [pipelining]" << std::endl;
+        #endif
+
 		stack_updown.push(TPair(0, 0));
 		stack_nextl.push(TPair(0, 0));
 
@@ -214,6 +219,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef Pair<TSize, TValue>							TPair;		// (i, lcptab[i])
 		typedef ::std::stack<TPair> 						TStack;
+
+        #ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE CHILD TABLE ---" << std::endl;
+            std::cerr << "Start stack-processing [random access]" << std::endl;
+        #endif
 
 		TStack stack_updown;
 		TStack stack_nextl;

@@ -405,20 +405,6 @@ namespace SEQAN_NAMESPACE_MAIN
         return me.process(textIn);
     }
 
-	template < 
-		typename TSA, 
-		typename TValue, 
-		typename TConfig >
-	inline void createSuffixArray(
-		TSA &SA,
-		String< TValue, External<TConfig> > &s,
-		Skew7 const &spec,
-		unsigned /*K*/,
-        unsigned /*maxdepth*/)
-	{
-        createSuffixArrayExt(SA, s, spec);
-	}
-
 
     //////////////////////////////////////////////////////////////////////////////
     // internal Skew7 algorithm
@@ -496,6 +482,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		SEQAN_ASSERT(IsContiguous<TText>::VALUE);
 		SEQAN_ASSERT(IsContiguous<TSA>::VALUE);
+
+        #ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE SUFFIX ARRAY ---" << std::endl;
+            std::cerr << "Skew7 [random access]" << std::endl;
+        #endif
 
 		TSize n = length(s);
         if (n < 1) return;

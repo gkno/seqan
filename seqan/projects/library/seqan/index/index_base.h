@@ -218,6 +218,34 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 		typedef Default Type;
 	};
 
+
+//////////////////////////////////////////////////////////////////////////////
+
+	template < 
+		typename TSA,
+		typename TText,
+        typename TAlgSpec >
+    struct SACreatorRandomAccess_
+    {
+        typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
+        typedef typename AllowsFastRandomAccess<TText>::Type TRandomText;
+        typedef typename AND<TRandomText,TRandomSA>::Type Type;
+    };
+
+	template < 
+        typename TLCP,
+		typename TText,
+		typename TSA,
+        typename TAlgSpec >
+    struct LCPCreatorRandomAccess_
+    {
+        typedef typename AllowsFastRandomAccess<TText>::Type TRandomText;
+        typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
+        typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
+        typedef typename AND<TRandomLCP, typename AND<TRandomText,TRandomSA>::Type>::Type Type;
+    };
+
+
 //////////////////////////////////////////////////////////////////////////////
 /**
 	.Class.Bundle:

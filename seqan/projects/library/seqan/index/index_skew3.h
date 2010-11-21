@@ -343,6 +343,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSA>::Type TSize;
 		typedef typename Value<TText>::Type TValue;
 
+        #ifdef SEQAN_DEBUG_INDEX
+            std::cerr << "--- CREATE SUFFIX ARRAY ---" << std::endl;
+            std::cerr << "Skew3 [random access]" << std::endl;
+        #endif
+
 		TSize n = length(s);
         if (n < 1) return;
 

@@ -38,6 +38,40 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
+	// generic "or" (using meta-programming)
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TBool1, typename TBool2>
+	struct OR
+	{
+		typedef True Type;
+	};
+
+	template <>
+	struct OR<False, False>
+	{
+		typedef False Type;
+	};
+
+
+	//////////////////////////////////////////////////////////////////////////////
+	// generic "and" (using meta-programming)
+	//////////////////////////////////////////////////////////////////////////////
+
+	template <typename TBool1, typename TBool2>
+	struct AND
+	{
+		typedef False Type;
+	};
+
+	template <>
+	struct AND<True, True>
+	{
+		typedef True Type;
+	};
+
+
+	//////////////////////////////////////////////////////////////////////////////
 	// generic "if" (using meta-programming)
 	// if Flag is true,  the resulting type is Type1
 	// if Flag is false, the resulting type is Type2
