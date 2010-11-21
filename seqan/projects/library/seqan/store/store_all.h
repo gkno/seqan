@@ -414,18 +414,18 @@ public:
 	typedef typename TConfig::TMean					TMean;
 	typedef typename TConfig::TStd					TStd;
 	typedef typename TConfig::TMappingQuality		TMappingQuality;
-
+	
 	typedef typename TConfig::TReadSeq				TReadSeq;
 	typedef typename TConfig::TContigSeq			TContigSeq;
 
-	typedef typename Position<TReadSeq>::Type       TRSeqPos_;
+	typedef typename Position<TReadSeq>::Type		TRSeqPos_;
 	typedef typename Position<TContigSeq>::Type     TCSeqPos_;
-	typedef typename _MakeSigned<TRSeqPos_>::Type   TReadPos;
-	typedef typename _MakeSigned<TCSeqPos_>::Type   TContigPos;
-
+	typedef typename _MakeSigned<TRSeqPos_>::Type	TReadPos;
+	typedef typename _MakeSigned<TCSeqPos_>::Type	TContigPos;
+	
 	typedef GapAnchor<TReadPos>						TReadGapAnchor;
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
-
+	
 	typedef StringSet<CharString>					TNameStore;
 
 	typedef AnnotationStoreElement< TContigPos, TAnnotationStoreElementSpec >	TAnnotationStoreElement;
