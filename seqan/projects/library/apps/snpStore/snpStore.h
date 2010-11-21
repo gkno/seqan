@@ -37,6 +37,52 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Default options
 
+struct SnpStoreSpec_;
+template <>
+struct FragmentStoreConfig<SnpStoreSpec_ > 
+{
+	typedef String<Dna5Q>		TReadSeq;
+	typedef String<Dna5Q>		TContigSeq;
+	
+	typedef double			TMean;
+	typedef double			TStd;
+	typedef signed char		TMappingQuality;
+		
+	typedef void			TReadStoreElementSpec;
+	typedef Owner<>			TReadSeqStoreSpec;
+	typedef void			TMatePairStoreElementSpec;
+	typedef void			TLibraryStoreElementSpec;
+	typedef void			TContigStoreElementSpec;
+	typedef void			TContigFileSpec;
+	typedef void			TAlignedReadStoreElementSpec;
+	typedef Owner<>			TAlignedReadTagStoreSpec;
+	typedef void			TAnnotationStoreElementSpec;
+};
+
+
+struct SnpStoreGroupSpec_;
+template <>
+struct FragmentStoreConfig<SnpStoreGroupSpec_ > 
+{
+	typedef String<Dna5Q>		TReadSeq;
+	typedef String<Dna5Q>		TContigSeq;
+	
+	typedef double			TMean;
+	typedef double			TStd;
+	typedef signed char		TMappingQuality;
+		
+	typedef void			TReadStoreElementSpec;
+	typedef Dependent<>		TReadSeqStoreSpec;
+	typedef void			TMatePairStoreElementSpec;
+	typedef void			TLibraryStoreElementSpec;
+	typedef void			TContigStoreElementSpec;
+	typedef void			TContigFileSpec;
+	typedef void			TAlignedReadStoreElementSpec;
+	typedef Owner<>			TAlignedReadTagStoreSpec;
+	typedef void			TAnnotationStoreElementSpec;
+};
+
+
 
 	template <typename _TGPos>
 	struct SimplePosition
@@ -130,7 +176,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		double 		priorHetQ;
 		bool 		realign;
 		int 		forceCallCount;
-		
+		int		realignAddBorder;
+
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
 		unsigned 	maxHitLength;
@@ -226,6 +273,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			minMapQual = 1;
 			priorHetQ = 0;
 			realign = false;
+			realignAddBorder = 5;
 
 			stepInterval = 1;
 			coverageFile = "";
@@ -938,14 +986,14 @@ struct TagThresholdMethod_;
 typedef Tag<TagThresholdMethod_> const ThresholdMethod;
 
 
-template<typename TFragmentStore, typename TGroupStore, typename TMatchIterator, typename TGPos>
+template<typename TFragmentStore, typename TGroupStore, typename TMatchIterator>
 void
 copyFragmentStore(TGroupStore &fragStoreGroup,
-				  TFragmentStore &fragmentStore,
-				  TMatchIterator matchItBatchBegin,
-				  TMatchIterator matchItBatchEnd,
-				  TGPos groupStartPos,
-				  TGPos groupEndPos)
+				  TFragmentStore 			&fragmentStore,
+				  TMatchIterator 			matchItBatchBegin,
+				  TMatchIterator 			matchItBatchEnd,
+				  typename TFragmentStore::TContigPos	groupStartPos,
+				  typename TFragmentStore::TContigPos	groupEndPos)
 {
 	//TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
 	
@@ -982,21 +1030,20 @@ template <
 	typename TReadCigars,
 	typename TReadCounts,
 	typename TGenomeName,
-	typename TGPos,
 	typename TFile,
 	typename TOptions
 >
 void dumpVariantsRealignBatchWrap(
-	TFragmentStore		&fragmentStore,				// forward/reverse matches
-	TReadCigars		&readCigars,
-	TReadCounts const	&readCounts,
-	TGenomeName const 	genomeID,					// genome name
-	TGPos			startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
-	TGPos			currWindowBegin,
-	TGPos			currWindowEnd,
-	TFile			&fileSNPs,
-	TFile			&fileIndels,
-	TOptions 		&options)
+	TFragmentStore				&fragmentStore,				// forward/reverse matches
+	TReadCigars				&readCigars,
+	TReadCounts const			&readCounts,
+	TGenomeName const 			genomeID,					// genome name
+	typename TFragmentStore::TContigPos	startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
+	typename TFragmentStore::TContigPos	currWindowBegin,
+	typename TFragmentStore::TContigPos	currWindowEnd,
+	TFile					&fileSNPs,
+	TFile					&fileIndels,
+	TOptions 				&options)
 {
 
 	typedef typename TFragmentStore::TAlignedReadStore 	TMatches;
@@ -1006,8 +1053,8 @@ void dumpVariantsRealignBatchWrap(
 	typedef typename TFragmentStore::TReadSeqStore	 	TReads;
 	typedef typename Value<TReads>::Type 				TRead;
 	typedef typename TFragmentStore::TContigStore 		TContigStore;
-	typedef typename Value<TContigStore>::Type	 		TContig;
 	typedef typename TFragmentStore::TContigPos 		TContigPos;
+	typedef typename Value<TContigStore>::Type	 		TContig;
 	typedef typename TFragmentStore::TContigSeq 		TContigSeq;
 	typedef typename Iterator<TMatches,Standard>::Type	TMatchIterator;
 	
@@ -1037,12 +1084,12 @@ void dumpVariantsRealignBatchWrap(
 	while(matchIt != matchItEnd)
 	{
 		TMatchIterator matchItBatchBegin = matchIt;
-		TGPos groupEndPos = _max((*matchIt).endPos,(*matchIt).beginPos);
-		TGPos groupStartPos = _min((*matchIt).endPos,(*matchIt).beginPos);
+		TContigPos groupEndPos = _max((*matchIt).endPos,(*matchIt).beginPos);
+		TContigPos groupStartPos = _min((*matchIt).endPos,(*matchIt).beginPos);
 
 			//check
-		//	TGPos groupStartCoordLocal = _max(0,(int)groupStartPos-15);
-			TGPos groupStartCoordLocal = groupStartPos;//_max(0,(int)groupStartPos-15);
+		//	TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-15);
+			TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-options.realignAddBorder);
 	
 		int indelReadCount = 0; // how many reads have indels in the current group
 		while(matchIt != matchItEnd && _min((*matchIt).beginPos,(*matchIt).endPos) < groupEndPos)
@@ -1058,8 +1105,8 @@ void dumpVariantsRealignBatchWrap(
 		unsigned numMatches = matchItBatchEnd -matchItBatchBegin;
 
 			//check
-			//TGPos groupEndCoordLocal = /*groupEndPos;//*/_min(groupEndPos+15,length(fragmentStore.contigStore[0].seq));
-			TGPos groupEndCoordLocal = groupEndPos;//_min(groupEndPos+15,length(fragmentStore.contigStore[0].seq));
+			//TContigPos groupEndCoordLocal = /*groupEndPos;//*/_min(groupEndPos+15,length(fragmentStore.contigStore[0].seq));
+			TContigPos groupEndCoordLocal = _min(groupEndPos+(TContigPos)options.realignAddBorder,(TContigPos)length(fragmentStore.contigStore[0].seq));
 		
 		if(numMatches >= options.minCoverage)
 		{
@@ -1086,7 +1133,7 @@ void dumpVariantsRealignBatchWrap(
 			groupStartPos += startCoord;
 			groupEndPos += startCoord;
 			//groupStartCoord = groupStartPos;
-			TGPos groupStartCoord = startCoord + groupStartCoordLocal;
+			TContigPos groupStartCoord = startCoord + groupStartCoordLocal;
 			groupStartPos = _max(groupStartPos,currWindowBegin);
 			groupEndPos = _min(groupEndPos,currWindowEnd);
 		
@@ -1508,21 +1555,20 @@ template <
 	typename TReadCounts,
 	typename TReadCigars,
 	typename TGenomeName,
-	typename TGPos,
 	typename TFile,
 	typename TOptions
 >
 void dumpVariantsRealignBatch(
-	TFragmentStore		&fragmentStore,				// forward/reverse matches
-	TReadCigars		&,
-	TReadCounts const	&,
-	TGenomeName const 	genomeID,					// genome name
-	TGPos				startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
-	TGPos				currStart,
-	TGPos				currEnd,
-	TFile				&file,
-	TFile				&indelfile,
-	TOptions 			&options)
+	TFragmentStore				&fragmentStore,				// forward/reverse matches
+	TReadCigars				&,
+	TReadCounts const			&,
+	TGenomeName const	 		genomeID,					// genome name
+	typename TFragmentStore::TContigPos	startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
+	typename TFragmentStore::TContigPos	currStart,
+	typename TFragmentStore::TContigPos	currEnd,
+	TFile					&file,
+	TFile					&indelfile,
+	TOptions 				&options)
 {
 
 	typedef typename TFragmentStore::TAlignedReadStore 	TMatches;
@@ -1551,7 +1597,7 @@ void dumpVariantsRealignBatch(
 	TReads &reads					= fragmentStore.readSeqStore;
 	TMatches &matches				= fragmentStore.alignedReadStore;
 	TMatchQualities &matchQualities = fragmentStore.alignQualityStore;
-	TGPos genomeLen					= length(fragmentStore.contigStore[0].seq);
+	TContigPos genomeLen				= (TContigPos)length(fragmentStore.contigStore[0].seq);
 
 	::std::sort(begin(matches, Standard()),	end(matches, Standard()), LessGPos<TMatch>());		
 
@@ -1642,9 +1688,9 @@ void dumpVariantsRealignBatch(
 #endif
 
 #ifdef READS_454
-		reAlign(fragmentStore,consScore,0,1,bandWidth,true);
+		reAlign(fragmentStore,consScore,0,1,bandWidth+options.realignAddBorder,true);
 #else
-		reAlign(fragmentStore,consScore,0,1,bandWidth,true);
+		reAlign(fragmentStore,consScore,0,1,bandWidth+options.realignAddBorder,true);
 #endif
 
 #ifdef SNPSTORE_DEBUG
@@ -1735,7 +1781,7 @@ void dumpVariantsRealignBatch(
 #endif
 	// look for reference sequence and move it to the end of alignedreads
 	bool refFound = false;
-	TMatchIterator matchItKeep;
+	TMatchIterator matchItKeep = matchIt;
 	TMatch tempRef;
 	while(matchIt != matchItEnd)
 	{
@@ -1814,7 +1860,7 @@ void dumpVariantsRealignBatch(
 	
 	TRead		&reference = fragmentStore.readSeqStore[fragmentStore.alignedReadStore[numReads].readId]; // last read is reference sequence
 	TReadGaps	referenceGaps(reference, fragmentStore.alignedReadStore[numReads].gaps);
-	TGPos       refStart =  fragmentStore.alignedReadStore[numReads].beginPos;
+	TContigPos      refStart = (TContigPos)fragmentStore.alignedReadStore[numReads].beginPos;
 	TContigGaps	contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
 	SingleBaseVariant snp = {0,0,0,0,0};
 
@@ -1834,7 +1880,7 @@ void dumpVariantsRealignBatch(
 	//              TACA--AGCATCATT--ACT
 	//                          ATTTTACTAGCATCATA
 	if(options._debugLevel>1) std::cout << "Start inspecting alignment..." << std::endl;
-//	for(TGPos candidateViewPos = 0; candidateViewPos < length(referenceGaps); ++candidateViewPos)
+//	for(TContigPos candidateViewPos = 0; candidateViewPos < length(referenceGaps); ++candidateViewPos)
 	
 	// i1 keeps track of consensus character
 	// i2 keeps track of coverage (last 8 bits) and indelcount (first 8 bits)
@@ -1845,7 +1891,7 @@ void dumpVariantsRealignBatch(
 		indelConsens[i].i1 = 6;
 		indelConsens[i].i2 = 0;
 	}
-	for(TGPos candidateViewPos = refStart; candidateViewPos < refStart + length(referenceGaps); ++candidateViewPos)
+	for(TContigPos candidateViewPos = refStart; candidateViewPos < refStart + (TContigPos)length(referenceGaps); ++candidateViewPos)
 	{
 		// first check if reference has a gap (potential insertion in reads) at this position
 		TContigGapIter refIt = iter(referenceGaps,candidateViewPos-refStart);
@@ -1869,7 +1915,7 @@ void dumpVariantsRealignBatch(
 		//else refGap = false;
 
 		//get position in sequence space
-		TGPos candidatePos = positionGapToSeq(referenceGaps, candidateViewPos-refStart);
+		TContigPos candidatePos = positionGapToSeq(referenceGaps, candidateViewPos-refStart);
 	
 		// not in the current window yet
 		if(candidatePos + startCoord < currStart) continue;
@@ -1923,8 +1969,8 @@ void dumpVariantsRealignBatch(
 		// now check reads
 		while(matchIt != matchRangeEnd)
 		{
-			TGPos currViewBegin = _min((*matchIt).beginPos,(*matchIt).endPos);
-			TGPos currViewEnd = _max((*matchIt).beginPos,(*matchIt).endPos);
+			TContigPos currViewBegin = _min((*matchIt).beginPos,(*matchIt).endPos);
+			TContigPos currViewEnd = _max((*matchIt).beginPos,(*matchIt).endPos);
 
 			// make sure this match is really spanning the position 
 			if(!(currViewBegin <= candidateViewPos && candidateViewPos < currViewEnd))
@@ -2006,7 +2052,7 @@ void dumpVariantsRealignBatch(
 		matchIt = matchRangeBegin; //set iterator back to where we started from, same matches might be involved in next cand pos
 		
 		// too few reads actually cover the position
-		if(positionCoverage < options.minCoverage) 
+		if(positionCoverage < (int)options.minCoverage) 
 			continue;
 
 		//all observed bases match the reference allele or there were too few indels
@@ -2049,7 +2095,7 @@ void dumpVariantsRealignBatch(
 		}
 
 		// do indel calling
-		if (indelfile.is_open() && numIndelsObserved >= options.indelCountThreshold 
+		if (indelfile.is_open() && numIndelsObserved >= (int)options.indelCountThreshold 
 			&& ((float)numIndelsObserved/(float)positionCoverage) >= options.indelPercentageT)
 		{
 			char mostCommonBase = 5; // 5 represents gap char "-", potential deletion
@@ -2057,7 +2103,7 @@ void dumpVariantsRealignBatch(
 			{
 				SEQAN_ASSERT_TRUE(!observedAtLeastOneMut);
 				mostCommonBase = 0;
-				int maxCount = countF[0] + countR[0];
+				unsigned maxCount = countF[0] + countR[0];
 				for(unsigned j = 0; j < length(countF); ++j)
 					if(countF[j] + countR[j] > maxCount)
 					{
@@ -2095,12 +2141,12 @@ void dumpVariantsRealignBatch(
 	if(indelfile.is_open())	//indelcalling
 	{
 		if(options._debugLevel > 1) std::cout << "Calling indels..." << std::endl;
-		TGPos candidateViewPos = refStart;
+		TContigPos candidateViewPos = refStart;
 		Dna5String insertionSeq;
-		while(candidateViewPos < refStart + length(referenceGaps))
+		while(candidateViewPos < refStart + (TContigPos)length(referenceGaps))
 		{
 
-			if(candidateViewPos < refStart + length(referenceGaps) &&
+			if(candidateViewPos < refStart + (TContigPos)length(referenceGaps) &&
 				indelConsens[candidateViewPos].i1==6) // not a relevant position
 			{
 				++candidateViewPos;
@@ -2108,12 +2154,12 @@ void dumpVariantsRealignBatch(
 			}
 		
 			//get position in sequence space
-			TGPos candidatePos = positionGapToSeq(referenceGaps, candidateViewPos-refStart);
+			TContigPos candidatePos = positionGapToSeq(referenceGaps, candidateViewPos-refStart);
 			int indelSize = 0;
 			unsigned depth = 0;
 			float percentage = 0.0;
 			// gap position
-			while(candidateViewPos < refStart + length(referenceGaps) && // shouldnt happen actually
+			while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
 				(indelConsens[candidateViewPos].i1==5 || 		// deletion in consens
 				(indelConsens[candidateViewPos].i1==6 && positionGapToSeq(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
 				) 													// and reference is a gap (same candidatePosition as before)
@@ -2150,7 +2196,7 @@ void dumpVariantsRealignBatch(
 				percentage = 0.0;
 			}
 			clear(insertionSeq);
-			while(candidateViewPos < refStart + length(referenceGaps) && // shouldnt happen actually
+			while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
 				(indelConsens[candidateViewPos].i1<5 ||		     // insertion in consensus
 				(indelConsens[candidateViewPos].i1==6 && positionGapToSeq(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
 				) 													// and reference is a gap (same candidatePosition as before)
@@ -2207,18 +2253,17 @@ template <
 	typename TReadCigars,
 	typename TReadCounts,
 	typename TGenomeName,
-	typename TGPos,
 	typename TFile,
 	typename TOptions
 >
 void dumpSNPsBatch(
-	TFragmentStore		&fragmentStore,				// forward/reverse matches
-	TReadCigars		&readCigars,
-	TReadCounts const	&readCounts,
-	TGenomeName const 	genomeID,					// genome name
-	TGPos				startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
-	TGPos				currStart,
-	TGPos				currEnd,
+	TFragmentStore				&fragmentStore,				// forward/reverse matches
+	TReadCigars				&,
+	TReadCounts const			&readCounts,
+	TGenomeName const 			genomeID,					// genome name
+	typename TFragmentStore::TContigPos	startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
+	typename TFragmentStore::TContigPos	currStart,
+	typename TFragmentStore::TContigPos	currEnd,
 	TFile				&file,
 	TOptions 			&options)
 {
@@ -2582,7 +2627,6 @@ template <
 	typename TReadCigars,
 	typename TGenome,
 	typename TGenomeName,
-	typename TGPos,
 	typename TFile,
 	typename TOptions
 >
@@ -2590,10 +2634,10 @@ void dumpShortIndelPolymorphismsBatch(
 	TFragmentStore 				&fragmentStore,				// forward/reverse matches
 	TReadCigars				&readCigars,
 	TGenome 				&genome,				// genome sequence
-	TGenomeName const 		genomeID,				// genome name
-	TGPos				startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
-	TGPos					currStart,
-	TGPos					currEnd,
+	TGenomeName const 			genomeID,				// genome name
+	typename TFragmentStore::TContigPos	startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
+	typename TFragmentStore::TContigPos	currStart,
+	typename TFragmentStore::TContigPos	currEnd,
 	TFile					&indelfile,
 	TOptions 				&options)
 {
@@ -3071,16 +3115,15 @@ void dumpShortIndelPolymorphismsBatch(
 template <
 	typename TFragmentStore,
 	typename TGenomeName,
-	typename TGPos,
 	typename TFile,
 	typename TOptions
 >
 void dumpCopyNumberPolymorphismsBatch(
-	TFragmentStore 		&fragmentStore,				// forward/reverse matches
-	TGenomeName const 	genomeID,				// genome name
-	TGPos			startCoord,
-	TGPos			currStart,
-	TGPos			currEnd,
+	TFragmentStore 				&fragmentStore,				// forward/reverse matches
+	TGenomeName const 			genomeID,				// genome name
+	typename TFragmentStore::TContigPos	startCoord,
+	typename TFragmentStore::TContigPos	currStart,
+	typename TFragmentStore::TContigPos	currEnd,
 	TFile			&file,
 	TOptions 		&options)
 {

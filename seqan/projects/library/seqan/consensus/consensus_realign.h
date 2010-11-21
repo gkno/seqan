@@ -33,9 +33,9 @@ removeGap(AlignedReadStoreElement<TPos, TGapAnchor, TSpec>& alignedRead,
 {
 	typedef String<TGapAnchor> TGaps;
 	typedef typename Iterator<TGaps, Standard>::Type TGapIter;
-	if (gapPos < alignedRead.beginPos) {
+	if (gapPos < (TGapPos) alignedRead.beginPos) {
 		--alignedRead.beginPos; --alignedRead.endPos;
-	} else if (gapPos < alignedRead.endPos) {
+	} else if (gapPos < (TGapPos) alignedRead.endPos) {
 		--alignedRead.endPos;
 		TGapIter gapIt = upperBoundGapAnchor(alignedRead.gaps, gapPos - alignedRead.beginPos, SortGapPos() );
 		TGapIter gapItEnd = end(alignedRead.gaps, Standard());
@@ -205,8 +205,6 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		//for(TSize i = 0; i<length(consensus); ++i) {
 		//	std::cout << consensus[i] << std::endl;
 		//}
-		//std::cout << std::endl;
-		//std::cout << consensus << std::endl;
 		//TAlignedReadIter debugIt = begin(contigReads, Standard() );
 		//TAlignedReadIter debugItEnd = end(contigReads, Standard() );
 		//for(;debugIt != debugItEnd; goNext(debugIt)) {
@@ -225,6 +223,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		TConsIter itConsEnd = end(consensus, Standard() );
 
 		// Initialize the consensus of the band
+		clear(myRead);
 		fill(myRead, length(fragStore.readSeqStore[alignIt->readId]), TProfileChar());
 		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos), Generous());
 		TConsIter bandConsIt = begin(bandConsensus);
@@ -233,6 +232,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		if (bandwidth < (TBandwidth) alignIt->beginPos) {
 			bandOffset = alignIt->beginPos - bandwidth;
 			itCons += bandOffset; itConsPos += bandOffset;
+			SEQAN_ASSERT_LEQ(itCons, itConsEnd);
 		}
 		int leftDiag = (alignIt->beginPos - bandOffset) - bandwidth;
 		int rightDiag = leftDiag + 2 * bandwidth;
@@ -240,8 +240,8 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		int removedBeginPos = 0;
 		int removedEndPos = 0;
 		for(TReadPos iPos = bandOffset; iPos < alignIt->beginPos && itCons != itConsEnd; ++itCons, ++bandConsIt, ++itConsPos, ++iPos)
-			*bandConsIt = *itCons;
-		TSize itConsPosBegin = itConsPos;
+			*bandConsIt = *itCons; // fill in positions left of readbegin
+		TSize itConsPosBegin = itConsPos;  // start position of read basically, right? if(itConsPosBegin != alignIt->beginPos) std::cout <<"nicht unbedingt gleich\n";
 		alignIt->beginPos = alignIt->endPos = 0; // So this read is discarded in all gap operations
 
 
@@ -256,22 +256,27 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		int diff = 0;
 		TReadPos clippedBeginPos = 0;
 		TReadPos clippedEndPos = 0;
+		SEQAN_ASSERT_LT(itRead, itReadEnd);
 		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
 			old = itGaps->seqPos;
 			clippedBeginPos = old;
 			itRead += old;
 			diff -= old;
 			++itGaps;
+	        	SEQAN_ASSERT_LT(itRead, itReadEnd);
 		}
 		for(;itGaps != itGapsEnd && itCons != itConsEnd; ++itGaps) {
+			// limit should never be larger than read length 
 			TReadPos limit = itGaps->seqPos;
+			SEQAN_ASSERT_LT(itGaps->seqPos, length(fragStore.readSeqStore[alignIt->readId]));
 			int newDiff = (itGaps->gapPos - limit);
+			SEQAN_ASSERT_LT(itGaps->gapPos, length(consensus));
 			if (diff > newDiff) {
 				clippedEndPos = diff - newDiff;
-				limit -= clippedEndPos;				
+				limit -= clippedEndPos;
 			}
-			for(;old < limit && itCons != itConsEnd; ++old, ++itRead) {
-                SEQAN_ASSERT_LT(itCons, itConsEnd);
+			for(;old < limit && itCons != itConsEnd && itRead != itReadEnd; ++old, ++itRead) {
+		                //SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[ordValue(*itRead)];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -288,10 +293,11 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				(*myReadIt).count[0] = ordValue(*itRead); 
 				++myReadIt;
 				++itCons;
+                		//SEQAN_ASSERT_LT(itRead, itReadEnd);
 			}
 			for(;diff < newDiff && itCons != itConsEnd; ++diff) {
 				++increaseBand;
-                SEQAN_ASSERT_LT(itCons, itConsEnd);
+				//SEQAN_ASSERT_LT(itCons, itConsEnd);
 				--(*itCons).count[gapPos];
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
@@ -303,21 +309,22 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		if (!clippedEndPos) {
 			for(;itRead!=itReadEnd && itCons != itConsEnd; ++itRead) {
-                SEQAN_ASSERT_LT(itCons, itConsEnd);
-				--(*itCons).count[ordValue(*itRead)];
+				//SEQAN_ASSERT_LT(itCons, itConsEnd);
+        		        //SEQAN_ASSERT_LT(itRead, itReadEnd);
+				--(*itCons).count[ordValue(*itRead)];//subtract the read base to get bandConsensus wo myRead
 				if (!empty(*itCons)) {
 					*bandConsIt = *itCons; 
 					++bandConsIt;
 					++itConsPos;
 					removedEndPos = 0;
-				} else {
+				} else {// only gaps left in this column after removing myRead
 					if (itConsPosBegin != itConsPos) {
 						++increaseBand;
-						++removedEndPos;
+						++removedEndPos; 
 					} else ++removedBeginPos;
 					removeGap(contigReads, itConsPos);
 				}
-				(*myReadIt).count[0] = ordValue(*itRead); 
+				(*myReadIt).count[0] = ordValue(*itRead);   
 				++myReadIt;
 				++itCons;
 			}
@@ -387,7 +394,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				--fragIt;
 				int gapLen = fragIt->begin1 - consPos;
 				if (firstMatch) gapLen = 0;
-				while(consPos < fragIt->begin1) {
+				while(consPos < (TReadPos)fragIt->begin1) {
+					SEQAN_ASSERT_LT(bandIt, bandItEnd);
+					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (!firstMatch) ++(*bandIt).count[gapPos];
 					*newConsIt = *bandIt;
 					++newConsIt;
@@ -395,7 +404,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					++consPos; 
 					++alignPos;
 				}
-				while(readPos < fragIt->begin2) {
+				while(readPos < (TReadPos)fragIt->begin2) {
+					SEQAN_ASSERT_LT(readPos, readLen);
+					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (gapLen) {
 						diff += gapLen;
 						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
@@ -409,6 +420,9 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 					++readPos; ++alignPos;
 				}
 				for(TSize i = 0; i<fragIt->len; ++i, ++bandIt, ++consPos, ++readPos, ++alignPos, ++newConsIt) {
+					SEQAN_ASSERT_LT(bandIt, bandItEnd);
+					SEQAN_ASSERT_LT(readPos, readLen);
+					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (firstMatch) {
 						firstMatch = false;
 						alignIt->beginPos = bandOffset + consPos;
@@ -417,16 +431,18 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
 						gapLen = 0;
 					}
+					SEQAN_ASSERT_LT(bandIt, bandItEnd);
 					++(*bandIt).count[myRead[readPos].count[0]];
 					*newConsIt = *bandIt; 
 				}
 			} while (fragIt != fragItEnd);
 		}
-		for(; readPos < length(myRead); ++readPos) {
+		for(; readPos < (TReadPos)length(myRead); ++readPos) {
 			int numGaps = insertGap(contigReads, bandOffset + alignPos);
 			TProfileChar tmpChar;
 			++tmpChar.count[myRead[readPos].count[0]];
 			tmpChar.count[gapPos] += numGaps;
+			SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 			*newConsIt = tmpChar; ++newConsIt;
 			++alignPos;
 		}
@@ -437,7 +453,10 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos + clippedEndPos, clippedBeginPos + readPos + clippedEndPos + diff), Generous() );
 		}
 		for(;bandIt != bandItEnd; ++bandIt, ++newConsIt) 
+		{
+			SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 			*newConsIt = *bandIt;
+		}
 		resize(newConsensus, newConsIt - begin(newConsensus, Standard()), Generous());
 
 		infix(consensus, bandOffset, itCons - begin(consensus)) = newConsensus;
@@ -460,7 +479,13 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename Size<TFragmentStore>::Type TSize;
 	typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
 	typedef typename TFragmentStore::TReadPos TReadPos;
-	typedef typename TFragmentStore::TContigPos TContigPos;
+	
+	typedef typename TFragmentStore::TContigStore		TContigStore;
+	typedef typename Value<TContigStore>::Type		TContig;
+	typedef typename TFragmentStore::TContigPos 		TContigPos;
+	typedef typename TFragmentStore::TContigSeq 		TContigSeq;
+	typedef Gaps<TContigSeq, AnchorGaps<typename TContig::TGapAnchors> >	TContigGaps;
+	
 	typedef typename TFragmentStore::TReadSeq TReadSeq;
 	typedef typename TFragmentStore::TReadGapAnchor TGapAnchor;
 	typedef typename Value<typename TFragmentStore::TReadSeq>::Type TStoreAlphabet;
@@ -501,7 +526,8 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 	}
 	if (includeReference) {
-		TId dummyReadId = length(fragStore.readStore);
+		TId dummyReadId = length(fragStore.readSeqStore);
+
 		appendRead(fragStore, fragStore.contigStore[contigId].seq);
 		appendValue(fragStore.readNameStore, fragStore.contigNameStore[contigId], Generous());
 		fragStore.contigNameStore[contigId] += "_Consensus";
@@ -509,8 +535,12 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		el.readId = dummyReadId;
 		el.contigId = contigId;
 		minPos = el.beginPos = 0;
-		maxPos = el.endPos = length(fragStore.contigStore[contigId].seq);
+		TContigGaps contigGaps(fragStore.contigStore[contigId].seq, fragStore.contigStore[contigId].gaps);
+		maxPos = el.endPos = _max(maxPos,(TReadPos)positionSeqToGap(contigGaps,length(fragStore.contigStore[contigId].seq)-1)+1);
+		maxPos = el.endPos = _max(maxPos,(TReadPos)length(fragStore.contigStore[contigId].seq));
+		el.gaps = fragStore.contigStore[contigId].gaps;
 		appendValue(contigReads, el, Generous() );
+		SEQAN_ASSERT_EQ(length(fragStore.readSeqStore[dummyReadId]), length(fragStore.readSeqStore[el.readId]));
 	}
 
 	// Create the consensus sequence
@@ -520,6 +550,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef typename Iterator<TProfileString, Standard>::Type TConsIter;
 	TProfileString consensus;
 	fill(consensus, maxPos - minPos, TProfile());
+
 	TConsIter itCons = begin(consensus, Standard() );
 	TConsIter itConsEnd = end(consensus, Standard());
 	TAlignIter contigReadsIt = begin(contigReads, Standard() );
@@ -549,12 +580,16 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		for(;itGaps != itGapsEnd; ++itGaps) {
 			TReadPos limit = itGaps->seqPos;
 			int newDiff = (itGaps->gapPos - limit);
+			SEQAN_ASSERT_LT(itGaps->gapPos, length(consensus));
 			if (diff > newDiff) {
 				limit -= (diff - newDiff);
 				clippedEnd = true;
 			}
-			for(;old < limit; ++old, ++itRead) 
+			for(;old < limit && itRead != itReadEnd && itCons != itConsEnd; ++old, ++itRead) 
+			{
+				SEQAN_ASSERT_LT(itRead, itReadEnd);
 				++(value(itCons++)).count[ordValue(*itRead)];
+			}
 			for(;diff < newDiff; ++diff) 
 				++(value(itCons++)).count[gapPos];
 		}
@@ -564,19 +599,19 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 	}
 
-
+	
 	reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 	int score = scoreConsensus(consensus);
 	int oldScore = score + 1;
 	while(score < oldScore) {
-		std::cout << "Score: " << score << std::endl;
+	//	std::cout << "Score: " << score << std::endl;
 		oldScore = score;
 		reAlign(fragStore, contigReads, consensus, consScore, rmethod, bandwidth, includeReference);
 		score = scoreConsensus(consensus);
 	}
-	std::cout << "Score: " << score << std::endl;
+	//std::cout << "FinalScore: " << score << std::endl;
 
-
+	
 
 	// Update all the aligned reads and the new consensus
 	alignIt = lowerBoundAlignedReads(fragStore.alignedReadStore, contigId, SortContigId());
@@ -632,7 +667,6 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 		}
 
 	}
-
 	if (includeReference) 
 		appendValue(fragStore.alignedReadStore, contigReads[length(contigReads) - 1], Generous() );
 }

@@ -19,7 +19,7 @@
 #define TRACE_PIPELINE
 //#define READS_454
 
-#define SNPSTORE_DEBUG
+//#define SNPSTORE_DEBUG
 //#define SNPSTORE_DEBUG_CANDPOS
 
 #ifdef SNPSTORE_DEBUG
@@ -147,8 +147,10 @@ int detectSNPs(
 	typedef FragmentStore<SnpStoreSpec_>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeq		TReadSeq;				// TRead
 	typedef typename TFragmentStore::TContigSeq		TContigSeq;				// TGenome
-	typedef typename Position<TReadSeq>::Type		TReadPos;				// TPos
-	typedef typename Position<TContigSeq>::Type		TContigPos;				// TContigPos
+	//typedef typename Position<TReadSeq>::Type		TReadPos;				// TPos
+	typedef typename TFragmentStore::TReadPos		TReadPos;				// TPos
+	//typedef typename Position<TContigSeq>::Type		TContigPos;				// TContigPos
+	typedef typename TFragmentStore::TContigPos 		TContigPos;
 	typedef typename TFragmentStore::TAlignedReadStore	TAlignedReadStore;	 	// TMatches
 	typedef typename TFragmentStore::TAlignQualityStore	TAlignQualityStore;	 	// TMatchQualities
 	typedef typename TFragmentStore::TReadStore		TReadStore;				// TReadSet
@@ -314,10 +316,10 @@ int detectSNPs(
 		options.maxCoord = 0;
 
 		// snp calling is done for all positions between windowBegin and windowEnd
-		while(currentWindowBegin < length(genomes[i]))
+		while(currentWindowBegin < (TContigPos)length(genomes[i]))
 		{
 			TContigPos currentWindowEnd = currentWindowBegin + options.windowSize;
-			if(currentWindowEnd >  length(genomes[i])) currentWindowEnd = length(genomes[i]);
+			if(currentWindowEnd > (TContigPos)length(genomes[i])) currentWindowEnd = (TContigPos)length(genomes[i]);
 
 			if(options._debugLevel > 0)
 				::std::cout << "Sequence number " << i << " window " << currentWindowBegin << ".." << currentWindowEnd << "\n";
@@ -390,13 +392,18 @@ int detectSNPs(
 				applyPileupCorrection(fragmentStore,(unsigned)0,(unsigned)length(fragmentStore.alignedReadStore),options);
 
 			// these were set while parsing matches, first and last position of parsed matches
-			TContigPos startCoord = options.minCoord;// can be < currentWindowBegin
-			TContigPos endCoord = options.maxCoord; // can be > currentWindoEnd
+//			TContigPos startCoord = options.minCoord;// can be < currentWindowBegin
+//			TContigPos endCoord = options.maxCoord; // can be > currentWindoEnd
+
+			// check
+			TContigPos startCoord = _max((int)options.minCoord-options.realignAddBorder,0);// can be < currentWindowBegin
+			TContigPos endCoord = _min(options.maxCoord+options.realignAddBorder,length(genomes[i])); // can be > currentWindoEnd
+
 
 			if(!empty(fragmentStore.alignedReadStore))
 			{
 				//initial values of min and max coords for next round are set here
-				if(currentWindowEnd != length(genomes[i]))
+				if(currentWindowEnd != (TContigPos)length(genomes[i]))
 				{
 					clear(tmpMatches);
 					clear(tmpQualities);
@@ -569,9 +576,9 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
 	//_dumpMatches(fragmentStore, str);
 		
 	// look for matches that are inside our window of interest, copy corresponding matches,reads,qualities
-	while(mIt >= mItBegin && _min((*mIt).beginPos,(*mIt).endPos) + options.maxHitLength + options.windowBuff >= currentWindowEnd )
+	while(mIt >= mItBegin && _min((*mIt).beginPos,(*mIt).endPos) + (TContigPos)options.maxHitLength + (TContigPos)options.windowBuff >= currentWindowEnd )
 	{
-		if( _max((*mIt).beginPos,(*mIt).endPos) + options.windowBuff > currentWindowEnd )
+		if( _max((*mIt).beginPos,(*mIt).endPos) + (TContigPos)options.windowBuff > currentWindowEnd )
 		{
 			TId id = length(tmpMatches);
 			appendValue(tmpMatches,*mIt);
@@ -1062,8 +1069,8 @@ int readMatchesFromGFF_Batch(
 		
 		unsigned pos= 0;
 		unsigned pos2 = 0;
-		unsigned clipLeft = 0;
-		unsigned clipRight = 0;
+		int clipLeft = 0;
+		int clipRight = 0;
 		unsigned readCount = 0;
 		bool qualityFound = false;
 		bool readFound = false;
@@ -1390,7 +1397,7 @@ int readMatchesFromGFF_Batch(
 				temp_read = infix(readTemplate,0,gMatchLen);
 				curr_read = temp_read;
 			}
-			if(clipLeft + clipRight > (int)length(curr_read) - options.minClippedLength)
+			if(clipLeft + clipRight > (int)length(curr_read) - (int)options.minClippedLength)
 			{
 				if (options._debugLevel>1)cout <<"Discarding read "<<readName<<", too short after clipping.."<<std::endl;
 				_parse_skipWhitespace(*file, c); continue;
