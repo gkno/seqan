@@ -141,6 +141,7 @@
 // index based finders
 
 #include <seqan/index/find_index_esa.h>
+#include <seqan/index/find_index_approx.h>
 #include <seqan/index/find_index_qgram.h>
 #include <seqan/index/find_index.h>
 #include <seqan/index/find_quasar.h>
