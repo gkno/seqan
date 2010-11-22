@@ -1191,9 +1191,15 @@ int main(int argc, const char* argv[])
 		if (method == Poisson)
 			/*use of p-value like a limit*/
 			correctReads(store, options, FionaPoisson());
-		else
+		else if (method == Count)
+			correctReads(store, options, FionaCount()) ;
+		else if (method == PoissonSens)
+			correctReads(store, options, FionaPoissonSens()) ;
+		else {
 			/*use an expected value for a certain level*/
 			correctReads(store, options, FionaExpected());
+		}
+
 
 		if (options.acceptedMismatches > 0) --options.acceptedMismatches;
 
