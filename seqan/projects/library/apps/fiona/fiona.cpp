@@ -65,11 +65,13 @@ typedef Index<TFionaFragStore::TReadSeqStore, Index_QGram< Shape<Dna5, UngappedS
 
 struct FionaPoisson_;
 struct FionaExpected_;
+struct FionaCount_ ;
 struct FionaPoissonSens_ ;
 
 typedef Tag<FionaPoisson_> const FionaPoisson;
 typedef Tag<FionaPoissonSens_> const FionaPoissonSens;
 typedef Tag<FionaExpected_> const FionaExpected;
+typedef Tag<FionaCount_> const FionaCount;
 
 
 struct FionaCorrectedError
@@ -457,9 +459,24 @@ inline bool potentiallyErroneousNode(
 	Tprefixlen  ,
 	FionaExpected const)
 {
+	// compare the weight for a node with a cutoff given by the strictness param.
+	return observed < cutoff;
+}
+
+template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+inline bool potentiallyErroneousNode(
+	TObserved observed,
+	TExpected ,
+	TStrictness cutoff,
+	Terrorrate	,
+	Tprefixlen  ,
+	FionaCount const)
+{
 	// compare the weight for a node with a fixed cutoff
 	return observed < cutoff;
 }
+
+
 
 template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
 inline bool potentiallyErroneousNode(
@@ -486,8 +503,8 @@ inline bool potentiallyErroneousNode(
 	double fact = 1.0;
 	
     for (TObserved i = 0; i <= observed && probaerror >= falsenegrate; ++i, fact *= i, pow *= expected){
-        probaerror -= pow * negExp1err / fact;
-		probaerror -= pow * negExp2err / fact;
+        probaerror -= perr1 * pow * negExp1err / fact;
+		probaerror -= perr2 * pow * negExp2err / fact;
 	}
 	return probaerror >= falsenegrate;
 }
@@ -819,14 +836,25 @@ void correctReads(
 		}
 	}
 	
+	if (TYPECMP<TAlgorithm, FionaCount_>::VALUE)
+		for (unsigned i = 0; i < length(expectedTheoretical); ++i)
+			expectedTheoretical[i] = options.strictness ;
+	
+	
 	String<TCorrected> corrections;
 	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
 	fill(corrections, readCount, zeroCorr);
 	
 	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
 		std::cout << std::endl << "Method with expected value for each level" << std::endl;
-	else
+	if (TYPECMP<TAlgorithm, FionaPoisson_>::VALUE) 
 		std::cout << std::endl << "Method with p-value and Poisson distribution" << std::endl;
+	if (TYPECMP<TAlgorithm, FionaPoissonSens_>::VALUE)
+		std::cout << std::endl << "Method with sensitivity and Poisson distribution" << std::endl;
+	if (TYPECMP<TAlgorithm, FionaCount_>::VALUE)
+		std::cout << std::endl << "Method with fixed count for each level" << std::endl;
+
+	
 	std::cout << "Searching..." << std::endl;
 	SEQAN_PROTIMESTART(search);
 
@@ -1047,7 +1075,7 @@ int main(int argc, const char* argv[])
 	addVersionLine(parser, "Fiona version 1.1 2010912 [" + rev.substr(11, 4) + "]");
 
 	FionaOptions options;
-	enum { Poisson = 0, Expected = 1, PoissonSens = 2} method = Poisson;
+	enum { Poisson = 0, Expected = 1, PoissonSens = 2, Count = 3} method = Poisson;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
@@ -1056,9 +1084,10 @@ int main(int argc, const char* argv[])
 	addTitleLine(parser, "*** (c) Copyright 2010 by Gingerbread Men  ***");
 	addTitleLine(parser, "**********************************************");
 	addUsageLine(parser, "[OPTION]... <INPUT READS> <CORRECTED READS>");
-	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given cutoff", OptionType::Double | OptionType::Label));
-	addOption(parser, CommandLineOption("e", "error-rate" ,         "Give expected error-rate of reads, activate sensitivity mode", OptionType::Double | OptionType::Label ));
-	addOption(parser, CommandLineOption("p",  "pvalue",            "set p-value for error detection, (default is false discovery rate, switch to false negative rate in sensitivity mode)", OptionType::Double | OptionType::Label));
+	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given strictness cutoff", OptionType::Double | OptionType::Label));
+	addOption(parser, CommandLineOption("c",  "count",			   "use fixed count correction cutoff", OptionType::Double | OptionType::Label)) ;
+	addOption(parser, CommandLineOption("e", "error-rate" ,        "Give expected error-rate of reads, activate sensitivity mode", OptionType::Double | OptionType::Label ));
+	addOption(parser, CommandLineOption("p",  "pvalue",            "set p-value for error detection, (default is false discovery rate,\n\t switch to false negative rate in sensitivity mode)", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "levels", 2,         "set lower and upper bound for suffix tree DFS", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("g",  "genome-length",     "set the length of the underlying genome", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("m",  "mismatches",        "set the number of accepted mismatches per read", OptionType::Int | OptionType::Label, options.acceptedMismatches));
@@ -1076,9 +1105,9 @@ int main(int argc, const char* argv[])
 
 	if (isSetLong(parser, "expected"))
 	{
-		if (isSetLong(parser, "pvalue") && (stop = true))
+		if ((isSetLong(parser, "pvalue") || isSetLong(parser, "count")) && (stop = true))
 		{
-			std::cout << "You have already chosen the p-value correction method." << std::endl;
+			std::cout << "You have already chosen the p-value or count correction method." << std::endl;
 			std::cout << "Please use only one of the options -f or -p, for more details see README.txt" << std::endl;
 		}
 		else
@@ -1086,6 +1115,10 @@ int main(int argc, const char* argv[])
 			method = Expected;
 			getOptionValueLong(parser, "expected", options.strictness);
 		}
+	}
+	else if (isSetLong(parser, "count")){
+		method = Count; 
+		getOptionValueLong(parser, "count", options.strictness) ;
 	}
 	else if (isSetLong(parser, "pvalue"))
 	{
