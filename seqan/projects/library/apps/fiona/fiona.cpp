@@ -445,8 +445,10 @@ inline bool potentiallyErroneousNode(
 	double pow = 1.0;
 	double fact = 1.0;
 
-    for (TObserved i = 0; i <= observed && pValue <= strictness; ++i, fact *= i, pow *= expected)
+    for (TObserved i = 0; i <= observed && pValue <= strictness; ++i, fact *= i){
         pValue += pow * negExp / fact;
+		pow *= expected ;
+	}
 	return pValue <= strictness;
 }
 
@@ -487,26 +489,37 @@ inline bool potentiallyErroneousNode(
     Tprefixlen prefixlen,
 	FionaPoissonSens const)
 {
-	// Poisson based threshold, given a fixed percentage of missed errors (min sensitivity)
+	// Poisson based threshold, given a fixed percentage of missed errors (1 - min sensitivity)
 	// consider only the cases with one and two errors
 	// the average error rate and the expected value allow to compute the expected count for an error.
+	double sensitivity = 1 - falsenegrate ;
 	double noerrlm2 = pow(1-errorrate, prefixlen - 2) ;
 	double noerrlm1 = noerrlm2 * (1-errorrate) ;
 	double errexp1err = expected * noerrlm1 * errorrate ;
 	double errexp2err = expected * noerrlm2 * errorrate *errorrate ;
 	double perr1 = prefixlen * noerrlm1* errorrate  ;
 	double perr2 = (prefixlen * (prefixlen -1) / 2 ) * noerrlm2 * errorrate *errorrate ;
+	double sc = perr1 + perr2 ;
+	perr1 /= (sc) ; 
+	perr2 /= (sc) ; 
 	double negExp1err = exp(-errexp1err); //
 	double negExp2err = exp(-errexp2err) ;
-    double probaerror = 1.0;
-	double pow = 1.0;
+    double probaerror = 0.0;
+	double pow1err = 1.0;
+	double pow2err = 1.0;
 	double fact = 1.0;
-	
-    for (TObserved i = 0; i <= observed && probaerror >= falsenegrate; ++i, fact *= i, pow *= expected){
-        probaerror -= perr1 * pow * negExp1err / fact;
-		probaerror -= perr2 * pow * negExp2err / fact;
+	//std::cout << "Level " << prefixlen << " and params for correc\n" ;
+	//std::cout << "Expected and comp: " << expected << " - " << errexp1err << " - " << errexp2err << "\n" ;
+	//std::cout << "the basic observed count: " << observed << ", perr is " << perr1 << " - " << perr2  << "\n";
+	TObserved i = 0 ;
+    for (i = 0; i <= observed && probaerror <= sensitivity; ++i, fact *= i){
+        probaerror += perr1 * pow1err * negExp1err / fact;
+		probaerror += perr2 * pow2err * negExp2err / fact;
+		pow1err *= errexp1err ; 
+		pow2err *= errexp2err ;
 	}
-	return probaerror >= falsenegrate;
+	//std::cout << "Stopped at observed value **" << i-1 << "** for a sens. of " << probaerror << "and a thr at " << sensitivity << "\n" ;
+	return probaerror <= sensitivity;
 }
 
 
