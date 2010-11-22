@@ -65,9 +65,12 @@ typedef Index<TFionaFragStore::TReadSeqStore, Index_QGram< Shape<Dna5, UngappedS
 
 struct FionaPoisson_;
 struct FionaExpected_;
+struct FionaPoissonSens_ ;
 
 typedef Tag<FionaPoisson_> const FionaPoisson;
+typedef Tag<FionaPoissonSens_> const FionaPoissonSens;
 typedef Tag<FionaExpected_> const FionaExpected;
+
 
 struct FionaCorrectedError
 {
@@ -89,6 +92,7 @@ struct FionaOptions
 	int fromLevel;
 	int toLevel;
 	unsigned cycles;
+	double errorrate ;
 
 	FionaOptions()
 	{
@@ -99,6 +103,7 @@ struct FionaOptions
 		cycles = 3;
 		fromLevel = 0;
 		toLevel = 0;
+		errorrate = 0 ;
 	}
 };
 
@@ -422,11 +427,13 @@ void applyReadErrorCorrections(
 	}
 }
 
-template <typename TObserved, typename TExpected, typename TStrictness>
+template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
 	TExpected expected,
 	TStrictness strictness,
+	Terrorrate ,
+	Tprefixlen ,
 	FionaPoisson const)
 {
 	// compare the cumulative poisson distribution with the p-value (strictness)
@@ -441,16 +448,51 @@ inline bool potentiallyErroneousNode(
 	return pValue <= strictness;
 }
 
-template <typename TObserved, typename TExpected, typename TStrictness>
+template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+inline bool potentiallyErroneousNode(
+	TObserved observed,
+	TExpected ,
+	TStrictness cutoff,
+	Terrorrate	,
+	Tprefixlen  ,
+	FionaExpected const)
+{
+	// compare the weight for a node with a fixed cutoff
+	return observed < cutoff;
+}
+
+template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
 	TExpected expected,
-	TStrictness cutoff,
-	FionaExpected const)
+	TStrictness falsenegrate,
+	Terrorrate errorrate,
+    Tprefixlen prefixlen,
+	FionaPoissonSens const)
 {
-	// compare the weight for a node with its expected value (dependent on the length)
-	return observed < cutoff;
+	// Poisson based threshold, given a fixed percentage of missed errors (min sensitivity)
+	// consider only the cases with one and two errors
+	// the average error rate and the expected value allow to compute the expected count for an error.
+	double noerrlm2 = pow(1-errorrate, prefixlen - 2) ;
+	double noerrlm1 = noerrlm2 * (1-errorrate) ;
+	double errexp1err = expected * noerrlm1 * errorrate ;
+	double errexp2err = expected * noerrlm2 * errorrate *errorrate ;
+	double perr1 = prefixlen * noerrlm1* errorrate  ;
+	double perr2 = (prefixlen * (prefixlen -1) / 2 ) * noerrlm2 * errorrate *errorrate ;
+	double negExp1err = exp(-errexp1err); //
+	double negExp2err = exp(-errexp2err) ;
+    double probaerror = 1.0;
+	double pow = 1.0;
+	double fact = 1.0;
+	
+    for (TObserved i = 0; i <= observed && probaerror >= falsenegrate; ++i, fact *= i, pow *= expected){
+        probaerror -= pow * negExp1err / fact;
+		probaerror -= pow * negExp2err / fact;
+	}
+	return probaerror >= falsenegrate;
 }
+
+
 
 /*detect and repare the reads with errors*/
 template <typename TTreeIterator, typename TFragmentStore, typename TCorrections, typename TAlgorithm>
@@ -484,7 +526,7 @@ void traverseAndSearchCorrections(
 		SEQAN_ASSERT_LT(commonPrefix + 1, length(expectedTheoretical));
 		TValue firstEdgeChar = parentEdgeFirstChar(iter);
 		if (firstEdgeChar != unknownChar &&
-			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, alg))
+			!potentiallyErroneousNode(countOccurrences(iter), expectedTheoretical[commonPrefix+1], options.strictness, options.errorrate, commonPrefix + 1 ,alg))
 		{
 			goNext(iter);
 			continue;
@@ -515,7 +557,7 @@ void traverseAndSearchCorrections(
 		{
 			if (value(iter).range != value(iterSibling).range &&
 				parentEdgeFirstChar(iterSibling) != unknownChar &&
-				!potentiallyErroneousNode(countOccurrences(iterSibling), expectedTheoretical[commonPrefix + 1], options.strictness, alg))
+				!potentiallyErroneousNode(countOccurrences(iterSibling), expectedTheoretical[commonPrefix + 1], options.strictness, options.errorrate,commonPrefix +1, alg))
 			{
 				// save the id and position(where the suffix begin in the reads) in the table of IDs correct
 				// also the number of occurrences
@@ -1005,7 +1047,7 @@ int main(int argc, const char* argv[])
 	addVersionLine(parser, "Fiona version 1.1 2010912 [" + rev.substr(11, 4) + "]");
 
 	FionaOptions options;
-	enum { Poisson = 0, Expected = 1} method = Poisson;
+	enum { Poisson = 0, Expected = 1, PoissonSens = 2} method = Poisson;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Define options
@@ -1014,8 +1056,9 @@ int main(int argc, const char* argv[])
 	addTitleLine(parser, "*** (c) Copyright 2010 by Gingerbread Men  ***");
 	addTitleLine(parser, "**********************************************");
 	addUsageLine(parser, "[OPTION]... <INPUT READS> <CORRECTED READS>");
-	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given strictness", OptionType::Double | OptionType::Label));
-	addOption(parser, CommandLineOption("p",  "pvalue",            "use p-value correction with given strictness", OptionType::Double | OptionType::Label));
+	addOption(parser, CommandLineOption("f",  "expected",          "use expected value correction with given cutoff", OptionType::Double | OptionType::Label));
+	addOption(parser, CommandLineOption("e", "error-rate" ,         "Give expected error-rate of reads, activate sensitivity mode", OptionType::Double | OptionType::Label ));
+	addOption(parser, CommandLineOption("p",  "pvalue",            "set p-value for error detection, (default is false discovery rate, switch to false negative rate in sensitivity mode)", OptionType::Double | OptionType::Label));
 	addOption(parser, CommandLineOption("l",  "levels", 2,         "set lower and upper bound for suffix tree DFS", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("g",  "genome-length",     "set the length of the underlying genome", OptionType::Int | OptionType::Label));
 	addOption(parser, CommandLineOption("m",  "mismatches",        "set the number of accepted mismatches per read", OptionType::Int | OptionType::Label, options.acceptedMismatches));
@@ -1050,6 +1093,11 @@ int main(int argc, const char* argv[])
 		getOptionValueLong(parser, "pvalue", options.strictness);
 	}
 
+	if (isSetLong(parser, "error-rate")){
+		method = PoissonSens ;
+		getOptionValueLong(parser, "error-rate", options.errorrate) ;
+	}
+	
 	if (isSetLong(parser, "levels"))
 	{
 		getOptionValueLong(parser, "levels", 0, options.fromLevel);
