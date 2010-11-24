@@ -54,6 +54,7 @@ endif (Boost_FOUND)
 # Make sure the compiler can find include files from the SeqAn, Boost and TBB library.
 include_directories (${SEQAN_LIBRARY}
                      ${TBB_INCLUDE_DIRS}
+                     ${CUDA_CUT_INCLUDE_DIR}
                      ${BOOST_INCLUDE_DIRS})
 link_directories (${SEQAN_LIBRARY}/lib
                   ${TBB_LIBRARY_DIRS})
@@ -143,7 +144,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 			if (APP_${APP_DIR_REL}_CUDA)
 			  message ("Found CUDA target: ${APP_DIR_REL}")
 			  cuda_add_executable(${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
-        #			  target_link_libraries(${APP_DIR_REL} ${CUDA_CUTIL_LIBRARY})
+			  target_link_libraries(${APP_DIR_REL} ${CUDA_CUT_LIBRARY})
 			else (APP_${APP_DIR_REL}_CUDA)
 			  add_executable (${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
 			endif (APP_${APP_DIR_REL}_CUDA)
