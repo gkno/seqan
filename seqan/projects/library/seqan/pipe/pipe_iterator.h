@@ -155,6 +155,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		iterator operator= (const_reference _v) {
 			out->push(_v);
+			return *this;
 		}
     
 		iterator& operator++ () {
