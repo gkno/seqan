@@ -376,13 +376,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSize >
 	inline TSize waitForAny(aiocb_win32 const * const contexts[], TSize count, DWORD timeout_millis = Event::Infinite) {
-        Event::Handle handles[count];
+        Event::Handle *handles = new Event::Handle[count];
         for(TSize i = 0; i < count; ++i)
             handles[i] = contexts[i]->xmitDone.hEvent;
 
         SEQAN_PROTIMESTART(tw);
-        DWORD result = WaitForMultipleObjects(count, &handles, false, timeout_millis);
+        DWORD result = WaitForMultipleObjects(count, handles, false, timeout_millis);
         SEQAN_PROADD(SEQAN_PROCWAIT, SEQAN_PROTIMEDIFF(tw));
+		delete[] handles;
         if (/*result >= WAIT_OBJECT_0 && */result < WAIT_OBJECT_0 + count)
     		return result - WAIT_OBJECT_0;
         return count;

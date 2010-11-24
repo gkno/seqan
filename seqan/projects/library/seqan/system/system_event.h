@@ -79,7 +79,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            return CloseHandle(hEvent) && !(hEvent = NULL);
+            if (CloseHandle(hEvent)) return true;
+			hEvent = NULL;
+			return false;
         }
 
         inline bool wait(DWORD timeout_millis = Infinite) {
@@ -115,17 +117,22 @@ namespace SEQAN_NAMESPACE_MAIN
     
     inline bool waitForAll(Event eventList[], DWORD count)
 	{
-		return WaitForMultipleObjects(count, &eventList[0].hEvent, true, Event::Infinite) != WAIT_TIMEOUT;
+		return waitForAll(eventList, count, Event::Infinite);
 	}
     
 	inline int waitForAny(Event eventList[], DWORD count, DWORD timeout_millis)
 	{
-        DWORD result = WaitForMultipleObjects(count, &eventList[0].hEvent, false, timeout_millis = Event::Infinite);
+        DWORD result = WaitForMultipleObjects(count, &eventList[0].hEvent, false, timeout_millis);
 
         if (/*result >= WAIT_OBJECT_0 && */result < WAIT_OBJECT_0 + count)
     		return result - WAIT_OBJECT_0;
 
         return -1;
+	}
+    
+	inline int waitForAny(Event eventList[], DWORD count)
+	{
+		return waitForAny(eventList, count, Event::Infinite);
 	}
     
 #else

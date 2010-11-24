@@ -67,7 +67,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            return CloseHandle(hThread) && !(hThread = NULL);
+            if (CloseHandle(hThread)) return true;
+			hThread = NULL;
+			return false;
         }
 
         inline bool cancel(DWORD exitCode = 0) {

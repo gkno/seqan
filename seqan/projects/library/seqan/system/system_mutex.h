@@ -57,7 +57,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool close() {
-            return CloseHandle(hMutex) && !(hMutex = NULL);
+            if (CloseHandle(hMutex)) return true;
+			hMutex = NULL;
+			return false;
         }
 
         inline bool lock(DWORD timeout_millis = INFINITE) {
