@@ -165,7 +165,7 @@
 #     and will link in the resulting object file automatically.
 #
 #     This script will also generate a separate cmake script that is used at
-#     build time to invoke nvcc.  This is for serveral reasons.
+#     build time to invoke nvcc.  This is for several reasons.
 #
 #       1. nvcc can return negative numbers as return values which confuses
 #       Visual Studio into thinking that the command succeeded.  The script now
@@ -418,6 +418,10 @@ if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_VERSION CACHE)
   unset(CUDA_TOOLKIT_INCLUDE CACHE)
   unset(CUDA_CUDART_LIBRARY CACHE)
+  if(CUDA_VERSION VERSION_EQUAL "3.0")
+    # This only existed in the 3.0 version of the CUDA toolkit
+    unset(CUDA_CUDARTEMU_LIBRARY CACHE)
+  endif()
   unset(CUDA_CUDA_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
@@ -484,6 +488,10 @@ if(CUDA_NVCC_EXECUTABLE AND NOT CUDA_VERSION)
   string(REGEX REPLACE ".*release ([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR ${NVCC_OUT})
   set(CUDA_VERSION "${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR}" CACHE STRING "Version of CUDA as computed from nvcc.")
   mark_as_advanced(CUDA_VERSION)
+else()
+  # Need to set these based off of the cached value
+  string(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\1" CUDA_VERSION_MAJOR "${CUDA_VERSION}")
+  string(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR "${CUDA_VERSION}")
 endif()
 
 # Always set this convenience variable
@@ -529,11 +537,19 @@ set (CUDA_INCLUDE_DIRS ${CUDA_TOOLKIT_INCLUDE})
 
 macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_cuda_64bit_lib_dir "${CUDA_TOOLKIT_ROOT_DIR}/lib64")
+    # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
+    # and old paths.
+    set(_cuda_64bit_lib_dir
+      "${CUDA_TOOLKIT_ROOT_DIR}/lib/x64"
+      "${CUDA_TOOLKIT_ROOT_DIR}/lib64"
+      )
   endif()
+  # CUDA 3.2+ on Windows moved the library directories, so we need to new
+  # (lib/Win32) and the old path (lib).
   find_library(${_var}
     NAMES ${_names}
     PATHS ${_cuda_64bit_lib_dir}
+          "${CUDA_TOOLKIT_ROOT_DIR}/lib/Win32"
           "${CUDA_TOOLKIT_ROOT_DIR}/lib"
     ENV CUDA_LIB_PATH
     DOC ${_doc}
@@ -545,11 +561,28 @@ endmacro()
 
 # CUDA_LIBRARIES
 find_library_local_first(CUDA_CUDART_LIBRARY cudart "\"cudart\" library")
-set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+if(CUDA_VERSION VERSION_EQUAL "3.0")
+  # The cudartemu library only existed for the 3.0 version of CUDA.
+  find_library_local_first(CUDA_CUDARTEMU_LIBRARY cudartemu "\"cudartemu\" library")
+  mark_as_advanced(
+    CUDA_CUDARTEMU_LIBRARY
+    )
+endif()
+# If we are using emulation mode and we found the cudartemu library then use
+# that one instead of cudart.
+if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
+  set(CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+else()
+  set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+endif()
 if(APPLE)
   # We need to add the path to cudart to the linker using rpath, since the
   # library name for the cuda libraries is prepended with @rpath.
-  get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
+  if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
+    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDARTEMU_LIBRARY}" PATH)
+  else()
+    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
+  endif()
   if(_cuda_path_to_cudart)
     list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
   endif()
@@ -576,9 +609,20 @@ macro(FIND_CUDA_HELPER_LIBS _name)
   mark_as_advanced(CUDA_${_name}_LIBRARY)
 endmacro(FIND_CUDA_HELPER_LIBS)
 
+#######################
+# Disable emulation for v3.1 onward
+if(CUDA_VERSION VERSION_GREATER "3.0")
+  if(CUDA_BUILD_EMULATION)
+    message(FATAL_ERROR "CUDA_BUILD_EMULATION is not supported in version 3.1 and onwards.  You must disable it to proceed.  You have version ${CUDA_VERSION}.")
+  endif()
+endif()
+
 # Search for cufft and cublas libraries.
-find_cuda_helper_libs(cufftemu)
-find_cuda_helper_libs(cublasemu)
+if(CUDA_VERSION VERSION_LESS "3.1")
+  # Emulation libraries aren't available in version 3.1 onward.
+  find_cuda_helper_libs(cufftemu)
+  find_cuda_helper_libs(cublasemu)
+endif()
 find_cuda_helper_libs(cufft)
 find_cuda_helper_libs(cublas)
 
@@ -591,8 +635,10 @@ else()
 endif()
 
 ########################
-# Look for the SDK stuff
+# Look for the SDK stuff.  As of CUDA 3.0 NVSDKCUDA_ROOT has been replaced with
+# NVSDKCOMPUTE_ROOT with the old CUDA C contents moved into the C subdirectory
 find_path(CUDA_SDK_ROOT_DIR common/inc/cutil.h
+  "$ENV{NVSDKCOMPUTE_ROOT}/C"
   "$ENV{NVSDKCUDA_ROOT}"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Installed Products\\NVIDIA SDK 10\\Compute;InstallDir]"
   "/Developer/GPU\ Computing/C"
@@ -607,48 +653,57 @@ set(CUDA_SDK_SEARCH_PATH
   "${CUDA_TOOLKIT_ROOT_DIR}/NV_CUDA_SDK"
   "$ENV{HOME}/NVIDIA_CUDA_SDK"
   "$ENV{HOME}/NVIDIA_CUDA_SDK_MACOSX"
+  "$ENV{HOME}/NVIDIA_GPU_Computing_SDK/C"
   "/Developer/CUDA"
   )
 
 # Example of how to find an include file from the CUDA_SDK_ROOT_DIR
 
-# find_path(CUDA_CUT_INCLUDE_DIR
-#   cutil.h
-#   PATHS ${CUDA_SDK_SEARCH_PATH}
-#   PATH_SUFFIXES "common/inc"
-#   DOC "Location of cutil.h"
-#   NO_DEFAULT_PATH
-#   )
-# # Now search system paths
-# find_path(CUDA_CUT_INCLUDE_DIR cutil.h DOC "Location of cutil.h")
+find_path(CUDA_CUT_INCLUDE_DIR
+  cutil.h
+  PATHS ${CUDA_SDK_SEARCH_PATH}
+  PATH_SUFFIXES "common/inc"
+  DOC "Location of cutil.h"
+  NO_DEFAULT_PATH
+  )
+# Now search system paths
+find_path(CUDA_CUT_INCLUDE_DIR cutil.h DOC "Location of cutil.h")
 
-# mark_as_advanced(CUDA_CUT_INCLUDE_DIR)
+mark_as_advanced(CUDA_CUT_INCLUDE_DIR)
 
 
 # Example of how to find a library in the CUDA_SDK_ROOT_DIR
 
-# # cutil library is called cutil64 for 64 bit builds on windows.  We don't want
-# # to get these confused, so we are setting the name based on the word size of
-# # the build.
+# cutil library is called cutil64 for 64 bit builds on windows.  We don't want
+# to get these confused, so we are setting the name based on the word size of
+# the build.
 
-# if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-#   set(cuda_cutil_name cutil64)
-# else(CMAKE_SIZEOF_VOID_P EQUAL 8)
-#   set(cuda_cutil_name cutil32)
-# endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+if (CMAKE_HOST_WIN32)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(cuda_cutil_name cutil64)
+  else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(cuda_cutil_name cutil32)
+  endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+else (CMAKE_HOST_WIN32)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(cuda_cutil_name cutil_i386)
+  else(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(cuda_cutil_name cutil_x86_64)
+  endif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+endif (CMAKE_HOST_WIN32)
 
-# find_library(CUDA_CUT_LIBRARY
-#   NAMES cutil ${cuda_cutil_name}
-#   PATHS ${CUDA_SDK_SEARCH_PATH}
-#   # The new version of the sdk shows up in common/lib, but the old one is in lib
-#   PATH_SUFFIXES "common/lib" "lib"
-#   DOC "Location of cutil library"
-#   NO_DEFAULT_PATH
-#   )
-# # Now search system paths
-# find_library(CUDA_CUT_LIBRARY NAMES cutil ${cuda_cutil_name} DOC "Location of cutil library")
-# mark_as_advanced(CUDA_CUT_LIBRARY)
-# set(CUDA_CUT_LIBRARIES ${CUDA_CUT_LIBRARY})
+find_library(CUDA_CUT_LIBRARY
+  NAMES cutil ${cuda_cutil_name}
+  PATHS ${CUDA_SDK_SEARCH_PATH}
+  # The new version of the sdk shows up in common/lib, but the old one is in lib
+  PATH_SUFFIXES "common/lib" "lib"
+  DOC "Location of cutil library"
+  NO_DEFAULT_PATH
+  )
+# Now search system paths
+find_library(CUDA_CUT_LIBRARY NAMES cutil ${cuda_cutil_name} DOC "Location of cutil library")
+mark_as_advanced(CUDA_CUT_LIBRARY)
+set(CUDA_CUT_LIBRARIES ${CUDA_CUT_LIBRARY})
 
 
 
@@ -786,7 +841,7 @@ endfunction()
 ##############################################################################
 # This helper macro populates the following variables and setups up custom
 # commands and targets to invoke the nvcc compiler to generate C or PTX source
-# dependant upon the format parameter.  The compiler is invoked once with -M
+# dependent upon the format parameter.  The compiler is invoked once with -M
 # to generate a dependency file and a second time with -cuda or -ptx to generate
 # a .cpp or .ptx file.
 # INPUT:
