@@ -271,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		operator=(Shape<TValue, UngappedShape<q> > const &other)
 		{
 			span = length(other);
-			weight = weight(other);
+			weight = seqan::weight(other);
 			resize(diffs, weight);
 			for(unsigned i = 1; i < weight; ++i)
 				diffs[i] = 1;

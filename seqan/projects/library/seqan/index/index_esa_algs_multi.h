@@ -411,7 +411,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSTree>
 	struct MultiMEM {
-		Iter< TSTree, VSTree<BottomUp<MultiMEMs> > > &it;
+//		Iter< TSTree, VSTree<BottomUp<MultiMEMs> > > &it;
 	};
 
 	template <typename TSTree>

@@ -106,7 +106,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return SearchTreeIterator(*this).right();
         }
 
-        inline bool eof() {
+        inline bool atEnd() {
             return !count;
         }
 
@@ -241,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
         //    return it;
         //}
 
-        inline bool eof() {
+        inline bool atEnd() {
             return !_xSize;
         }
 
@@ -398,14 +398,14 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
         inline bool operator==(SearchTreeIterator const &I) {
-			return it == I.it || (eof() && I.eof());
+			return (it == I.it) || (atEnd() && I.atEnd());
         }
 
         //operator FlatFwdIt() {
         //    return it;
         //}
 
-        inline bool eof() {
+        inline bool atEnd() const {
             return !_heightHigh;
         }
 
@@ -503,7 +503,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, find half that contains answer
 
 			TSuffix		suf = suffix(text, *treeIter);
@@ -548,7 +548,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, find half that contains answer
 
 			TSuffix		suf = suffix(text, *treeIter);
@@ -599,7 +599,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, find half that contains answer
 
 			TSuffix		suf = suffix(text, *treeIter);
@@ -645,7 +645,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, find half that contains answer
 
 			TSuffix		suf = suffix(text, *treeIter);
@@ -697,7 +697,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, check midpoint
 
 			TSuffix		suf = suffix(text, *treeIter);
@@ -756,7 +756,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TQueryIter qBegin = begin(query, Standard());
 		TQueryIter qEnd = end(query, Standard());
 
-		for (; !treeIter.eof(); )
+		for (; !treeIter.atEnd(); )
 		{	// divide and conquer, check midpoint
 
 			TSuffix		suf = suffix(text, *treeIter);

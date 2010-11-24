@@ -650,7 +650,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TSTree>
 	struct MaxRepeat {
-		Iter< TSTree, VSTree<BottomUp<MaxRepeats> > > &it;
+//		Iter< TSTree, VSTree<BottomUp<MaxRepeats> > > &it;
 	};
 
 	template <typename TSTree>
@@ -878,7 +878,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template < typename TRepeat >
-	inline Iter<TRepeat, MaxRepeatOccurrences> &
+	inline void
 	goBegin(Iter<TRepeat, MaxRepeatOccurrences> &it) 
 	{
 		it._init;
@@ -887,7 +887,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template < typename TRepeat >
-	inline Iter<TRepeat, MaxRepeatOccurrences> &
+	inline void
 	goEnd(Iter<TRepeat, MaxRepeatOccurrences> &it) 
 	{
 		it._atEnd = true;
