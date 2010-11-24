@@ -1105,7 +1105,7 @@ SEQAN_CHECKPOINT
 	typedef typename Iterator<Gaps<TSource, TSpec> const>::Type TIter;
 	TIter begin_ = begin(source);
 	TIter end_ = end(source);
-	for (; begin_ < end_; ++begin_) {
+	for (; begin_ != end_; ++begin_) {
 		if (isGap(begin_))
 			_streamPut(target, gapValue<char>());
 		else 
