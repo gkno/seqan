@@ -1105,7 +1105,6 @@ typedef Tag<TagRaw_> const Raw;
 				return true;
 			} else
 				return format.tagId == Length<TTagList>::VALUE;	// if tagId != 0 then compare detected format with tagId
-			return true;
 		}
 		return guessFormatFromFilename(fname, static_cast<typename TagSelector<TTagList>::Base &>(format));
 	}

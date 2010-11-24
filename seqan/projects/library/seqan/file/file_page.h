@@ -740,7 +740,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline void erase(int frameNo) 
 		{
 			lruList[pages[frameNo].priority].erase(pages[frameNo].lruEntry);
-            erase(pages, frameNo);
+            seqan::erase(pages, frameNo);
 		}
 
         inline void rename(int frameNo) 
@@ -751,7 +751,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		inline void pop_back() 
 		{
 			lruList[back(pages).priority].erase(back(pages).lruEntry);
-            erase(pages, endPosition(pages) - 1);
+			seqan::erase(pages, endPosition(pages) - 1);
 		}
 
 

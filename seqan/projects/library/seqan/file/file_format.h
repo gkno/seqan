@@ -66,7 +66,7 @@ public:
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
 	~FileFormat() {}
-	FileFormat const & operator =(FileFormat const &) {}
+	FileFormat const & operator =(FileFormat const &) { return *this; }
 
 	inline void * 
 	formatID_() const
@@ -136,7 +136,7 @@ public:
 	FileFormat() {}
 	FileFormat(FileFormat const &) {}
 	~FileFormat() {}
-	FileFormat const & operator =(FileFormat const &) {}
+	FileFormat const & operator =(FileFormat const &) { return *this; }
 
 	virtual void *
 	formatID_() const = 0;

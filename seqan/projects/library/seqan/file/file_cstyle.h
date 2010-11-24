@@ -83,9 +83,9 @@ namespace SEQAN_NAMESPACE_MAIN
                         return "r+";
                 else
                     return "a+";
-				break;
+			default:
+		        return "r";
 		}
-        return "r";
     }
 
     inline bool 
