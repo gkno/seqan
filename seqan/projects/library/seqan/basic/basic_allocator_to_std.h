@@ -88,6 +88,7 @@ struct ToStdAllocator
 	ToStdAllocator & operator= (ToStdAllocator const & alloc)
 	{
 		m_host = alloc.m_host;
+		return *this;
 	}
 	~ToStdAllocator()
 	{

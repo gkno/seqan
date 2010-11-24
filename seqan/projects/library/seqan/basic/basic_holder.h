@@ -33,6 +33,8 @@ namespace SEQAN_NAMESPACE_MAIN
 struct Simple;
 struct Tristate;
 
+template <typename T>
+struct IsSimple;
 
 //////////////////////////////////////////////////////////////////////////////
 // Holder
