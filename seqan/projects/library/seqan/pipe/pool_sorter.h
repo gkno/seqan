@@ -191,20 +191,27 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *(top(pqueue).cur);
         }
 
-        inline void pop(Type &_Ref) {
+        inline void pop(Type &_Ref) 
+		{
             PageBucket &pb = top(pqueue);
+			SEQAN_ASSERT_LEQ(pb.cur, pb.end);
+			
             _Ref = *pb.cur;
             if (++pb.cur == pb.end)
+			{
                 // bucket is empty, we have to fetch the next bucket
 				if (!readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
 					::seqan::pop(pqueue);
 					return;
 				}
+			}
 			adjustTop(pqueue);
         }
 
         inline void pop() {
             PageBucket &pb = top(pqueue);
+			SEQAN_ASSERT_LEQ(pb.cur, pb.end);
+
             if (++pb.cur == pb.end)
                 // bucket is empty, we have to fetch the next bucket
 				if (!readBucket(pb, pb.pageNo, pool.pageSize, pool.dataSize(pb.pageNo), pool.file)) {
