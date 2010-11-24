@@ -304,7 +304,7 @@ SEQAN_CHECKPOINT
     ++c;
     ++i;
   }
-/*/
+*/
   //split pattern (improved)
   unsigned k = me.limit + 1;
 

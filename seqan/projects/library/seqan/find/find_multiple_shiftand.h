@@ -415,7 +415,6 @@ inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	} else {
 		return _findShiftAnd_LargeNeedle(finder, me);
 	}
-	return false;
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN
