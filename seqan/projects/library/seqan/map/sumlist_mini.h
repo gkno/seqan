@@ -312,6 +312,7 @@ _MiniSumList_assignValue(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 	}
 	me.data_sum[dim] += (new_value - old_entr.getValue());
 	old_entr.assignValue(new_value);
+	return true;
 }
 
 
