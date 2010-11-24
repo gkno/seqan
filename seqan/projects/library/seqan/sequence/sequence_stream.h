@@ -84,9 +84,9 @@ _streamPut(Iter<TContainer, TSpec> & target,
 SEQAN_CHECKPOINT
 	if (atEnd(target))
 	{
-		typename Container<Iter<TContainer, TSpec> >::Type & container = container(target);
-		appendValue(container, character);
-		target = begin(container) + (length(container) - 1);
+		typename Container<Iter<TContainer, TSpec> >::Type & container_ = container(target);
+		appendValue(container_, character);
+		target = begin(container_) + (length(container_) - 1);
 	} else
 		*target = character;
 }

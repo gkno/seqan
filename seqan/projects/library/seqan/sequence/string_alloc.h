@@ -131,15 +131,15 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
-		return *this;
                 _checkMembers();
+		return *this;
 	}
 	String & operator =(String const & source)
 	{
 SEQAN_CHECKPOINT
 		assign(*this, source);
-		return *this;
                 _checkMembers();
+		return *this;
 	}
 
 	~String()

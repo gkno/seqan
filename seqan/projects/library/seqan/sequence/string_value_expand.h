@@ -65,6 +65,7 @@ public:
 	{
 		data_host = other_.data_host;
 		data_map = other_.data_map;
+		return *this;
 	}
 //____________________________________________________________________________
 
