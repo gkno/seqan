@@ -30,16 +30,11 @@ endif (Boost_FOUND)
 # Set CUDA variables
 ################################################################################
 
-set(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE OFF)
-
-if (CMAKE_COMPILER_IS_GNUCXX)
-#  set (CUDA_NVCC_FLAGS "-arch sm_11")
-endif (CMAKE_COMPILER_IS_GNUCXX)
-
-cuda_include_directories(${CUDA_SDK_ROOT_DIR}/common/inc/)
-#find_library(CUDA_CUTIL_LIBRARY cutil "${CUDA_SDK_ROOT_DIR}/C/lib")
-#			message ("CUDA: ${CUDA_SDK_ROOT_DIR}.")
-#			message ("CUDA: ${CUDA_LIBRARIES}.")
+set (CUDA_PROPAGATE_HOST_FLAGS OFF)
+set (CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE OFF)
+cuda_include_directories(${CUDA_CUT_INCLUDE_DIR})
+#string (REGEX REPLACE "\\-(W( |all)|pedantic)" "" CUDA_CXX_FLAGS ${CUDA_NVCC_FLAGS} ${CMAKE_CXX_FLAGS})
+string (REGEX REPLACE "\\-pedantic" "" CUDA_CXX_FLAGS ${CUDA_NVCC_FLAGS} ${CMAKE_CXX_FLAGS})
 
 ################################################################################
 # Set path variables
@@ -54,7 +49,6 @@ endif (Boost_FOUND)
 # Make sure the compiler can find include files from the SeqAn, Boost and TBB library.
 include_directories (${SEQAN_LIBRARY}
                      ${TBB_INCLUDE_DIRS}
-                     ${CUDA_CUT_INCLUDE_DIR}
                      ${BOOST_INCLUDE_DIRS})
 link_directories (${SEQAN_LIBRARY}/lib
                   ${TBB_LIBRARY_DIRS})
@@ -136,6 +130,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 	endforeach (SRC)
 
 	# add target, dependencies and linked libraries
+	set (SAVED_FLAGS ${CMAKE_CXX_FLAGS})
 	if (APP_${APP_DIR_REL}_SOURCES)
 		if (APP_${APP_DIR_REL}_NOBUILD)
 			message ("Not building ${APP_DIR_REL} -- it is deactivated.")
@@ -143,6 +138,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 			list (SORT APP_${APP_DIR_REL}_SOURCES)
 			if (APP_${APP_DIR_REL}_CUDA)
 			  message ("Found CUDA target: ${APP_DIR_REL}")
+			  set (CMAKE_CXX_FLAGS ${CUDA_CXX_FLAGS})
 			  cuda_add_executable(${APP_DIR_REL} ${APP_${APP_DIR_REL}_SOURCES})
 			  target_link_libraries(${APP_DIR_REL} ${CUDA_CUT_LIBRARY})
 			else (APP_${APP_DIR_REL}_CUDA)
@@ -152,6 +148,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 			if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 				target_link_libraries (${APP_DIR_REL} rt)
 			endif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+			set (CMAKE_CXX_FLAGS ${SAVED_FLAGS})
 		endif (APP_${APP_DIR_REL}_NOBUILD)
 	endif (APP_${APP_DIR_REL}_SOURCES)
 endforeach (APP_DIR)
