@@ -19,7 +19,7 @@ void printDataArray(TRow & row, TString & name) {
 }
 
 // FRAGMENT(main)
-int main(int argc, const char *argv[]) {
+int main(int, const char *[]) {
 
 // FRAGMENT(unclipped)
     Align<DnaString> align;
@@ -77,19 +77,19 @@ int main(int argc, const char *argv[]) {
     std::cout << "  csp = 6 -> cvp = ";
     std::cout << toViewPosition(row(align, 0), 6 + clippedBeginPosition(row(align, 0))) - toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0))) << std::endl;
     std::cout << std::endl;
-    
+
     std::cout << "TASK 2 (source pos sp of clipped view pos cvp in row 0): " << std::endl;
     std::cout << "  cvp = 2 -> sp = ";
     std::cout << toSourcePosition(row(align, 0), 2 + toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0)))) << std::endl;
     std::cout << "  cvp = 6 -> sp = ";
     std::cout << toSourcePosition(row(align, 0), 6 + toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0)))) << std::endl;
     std::cout << std::endl;
-    
+
     std::cout << "TASK 3 (clipped source pos csp of source pos sp in row 0): " << std::endl;
     std::cout << "  sp = 4 -> csp = ";
     std::cout << 4 - clippedBeginPosition(row(align, 0)) << std::endl;
     std::cout << "  sp = 8 -> csp = ";
     std::cout << 8 - clippedBeginPosition(row(align, 0)) << std::endl;
-    std::cout << std::endl;    
+    std::cout << std::endl;
 }
 
