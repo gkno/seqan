@@ -34,6 +34,12 @@ int main()
 
 	TIntervalTree tree(intervals);
 
+	// add another interval 
+	TInterval interval;
+        interval.i1 = 200; interval.i2 = 600;
+        interval.cargo = "intron";
+
+	addInterval(tree,interval);
 
 	TValue delBegin = 300;				
 	TValue delEnd   = 500;
