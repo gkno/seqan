@@ -1216,6 +1216,14 @@ SEQAN_CHECKPOINT
 	typedef typename ListType<TProperty>::Type TList;
 	
 
+	if(empty(pm))
+	{
+		TVertexDescriptor vd = addVertex(g);
+		resizeVertexMap(g,pm);
+		_setIntervalTreeNode(property(pm,vd),(rightBoundary(interval)+leftBoundary(interval))/2,interval);
+		return;
+		
+	}
 	// start at root
 	TVertexDescriptor act_knot = 0;
 	TProperty act_prop = property(pm,act_knot);
