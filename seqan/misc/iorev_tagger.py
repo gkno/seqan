@@ -27,24 +27,30 @@ from collections import defaultdict
 #from functools import cmp_to_key
 
 
-FUNCS = {}
-CLASSES = {}
-TYPEDEFS = {}
+#FUNCS = {}
+#CLASSES = {}
+#TYPEDEFS = {}
 
 
 FILES_COMPLETELY_IORELATED = [ r'.*/seqan/file/.*\.h' ] # todo finish
 
-FUNCTION_KEYWORDS = [ ".*read.*", ".*_read.*", ".*write.*" ] # todo finish
+FUNCTION_KEYWORDS = [ ".*read.*", \
+                      ".*read.*", \
+                      ".*write.*", \
+                      "_stream.*", \
+                      "_parse.*", \
+                      "_is.*"] # todo finish
 
-FILES_LINES = {}
+#FILES_LINES = {}
+
+FILTERED_SIGS = []
 
 PROGRAM_USAGE = """
 SeqAn IO-Revision code tagger step1
 
-USAGE: build_forwards.py BASE_PATH [all]
+USAGE: iorev_tagger.py BASE_PATH
 
-BASE_PATH is the path up to and including "seqan".  The option "all"
-forces a rebuild.
+BASE_PATH is the path up to and including "seqan".
 """.strip()
 
 
@@ -52,19 +58,19 @@ def buildProject(project_path):
     if not os.path.exists(project_path):
         return
 
-    print "parsing: ", project_path
+    #print "parsing: ", project_path
 
-    global FUNCS
-    FUNCS = {}
+    #global FUNCS
+    #FUNCS = {}
     
-    global CLASSES
-    CLASSES = {}
+    #global CLASSES
+    #CLASSES = {}
     
-    global TYPEDEFS
-    TYPEDEFS = {}
+    #global TYPEDEFS
+    #TYPEDEFS = {}
 
-    global FILE_LINES
-    FILE_LINES = {}
+    #global FILE_LINES
+    #FILE_LINES = {}
     
     pos1 = project_path.rfind('/')
     if (pos1 < 0):
@@ -116,7 +122,7 @@ def parseFile(filename):
             #print "-",
             #return
     
-    print ".",
+#    print ".",
 
     sigs = preprocess(lines, filename);
     
@@ -136,6 +142,7 @@ def preprocess(lines, filename):
     inComment = False
     inString = False
     inDefine = False
+    inClass = 0
     curlyCount = 0
     namespaces = []
     lineNumber = 0
@@ -208,14 +215,45 @@ def preprocess(lines, filename):
                         str += ' ' + line[0:pos3].strip()
                     line = line[pos3 + 1:]
                     inString = True
+
+                ## attempt to traverse classes
+                #elif (pos4 >= 0) and ((pos5 < 0) or (pos4 < pos5)) and ((pos6 < 0) or (pos4 < pos6)):
+                    #if curlyCount == 0:
+                        #entry = process2(str + ' ' + line[:pos4])
+                        #nam = isNamespace(entry)
+                        #if nam != "":
+                            #namespaces += [nam]
+                        #else:             
+                            #ret = ret + [[filename, lineNumber, entry, namespaces + []]]
+                            #if isStuctDeclaration(entry):
+                                #inClass += 1
+                            #else:
+                                #curlyCount = 1
+                                
+                        #str = ""
+                    #else:
+                        #curlyCount += 1
+
+                    #line = line[pos4 + 1:]
                     
+                #elif (pos5 >= 0) and ((pos6 < 0) or (pos5 < pos6)):
+                    #line = line[pos5 + 1:]
+                    #if curlyCount > 0:
+                        #curlyCount -= 1
+                    #elif len(namespaces) > 0:
+                        #namespaces = namespaces[:len(namespaces)-1]
+                    #elif inClass > 0:
+                        #inClass -= 1
+                    #else:
+                        #print "ERROR in" , filename , "(", lineNumber, "): Too many }"
+
                 elif (pos4 >= 0) and ((pos5 < 0) or (pos4 < pos5)) and ((pos6 < 0) or (pos4 < pos6)):
                     if curlyCount == 0:
                         entry = process2(str + ' ' + line[:pos4])
                         nam = isNamespace(entry)
                         if nam != "":
                             namespaces += [nam]
-                        else:             
+                        else:
                             ret = ret + [[filename, lineNumber, entry, namespaces + []]]
                             curlyCount = 1
                         str = ""
@@ -223,7 +261,7 @@ def preprocess(lines, filename):
                         curlyCount += 1
 
                     line = line[pos4 + 1:]
-                    
+
                 elif (pos5 >= 0) and ((pos6 < 0) or (pos5 < pos6)):
                     line = line[pos5 + 1:]
                     if curlyCount > 0:
@@ -352,142 +390,45 @@ def createEntries(sigs):
     re2 = compile_res(FUNCTION_KEYWORDS)
 
     
-    for data in sorted(sigs, key=lambda x:(x[0],int(x[1]))):
+    for data in sigs: #sorted(sigs, key=lambda x:(x[0],int(x[1]))):
         filename = data[0]
-        lineNumber = data[1]
+        lineNumber = int(data[1])
         sig = data[2]
         namespaces = data[3]
-
+        t = ''
 
         name = getTypedefName(sig)
-        if name == '':
+        if name != '':
+            t= "t"
+        else:
             name = getStructName(sig)
-            if name == '':
+            if name != '':
+                t="s"
+            else:
                 name = getFuncName(sig)
-                
-        if (name == ''):
-            continue
+                if name != '':
+                    t="f"
+                else:
+                    continue
+
+        if matchesAny(filename, re1) or matchesAny(name, re2):
+            FILTERED_SIGS.append((filename, lineNumber, t, name, namespaces))
+            
         
 
         #print filename
         #print re1
         
-        if filename in completefile_lines.keys() or matchesAny(filename, re1):
-            completefile_lines[filename].append(int(lineNumber))
-        elif matchesAny(name, re2):
-            noncompletefile_lines[filename].append(int(lineNumber))
+        #if filename in completefile_lines.keys() or matchesAny(filename, re1):
+            #completefile_lines[filename].append(int(lineNumber))
+        #elif matchesAny(name, re2):
+            #noncompletefile_lines[filename].append(int(lineNumber))
 
-    #print completefile_lines
-    FILES_LINES.update(completefile_lines)
-    FILES_LINES.update(noncompletefile_lines)
+    ##print completefile_lines
+    #FILES_LINES.update(completefile_lines)
+    #FILES_LINES.update(noncompletefile_lines)
     
-        #entry = makeEntry(filename, lineNumber, sig)
 
-        #name = getTypedefName(sig)
-        #if name != '':
-            #addEntry(TYPEDEFS, name, entry, namespaces)
-        #else:
-            #name = getStructName(sig)
-            #if name != '':
-                #addEntry(CLASSES, name, deleteDefaultArguments(entry, '<'), namespaces)
-            #else:
-                #name = getFuncName(sig)
-                #if name != '':
-                    #addEntry(FUNCS, name, deleteDefaultArguments(entry, '('), namespaces)
-
-
-#def deleteDefaultArguments(str, start_delim):
-    #"""Deletes all default arguments from argument lists.
-    
-    #Use delim = '>' for template argument lists and ')' for function argument lists.
-    #"""
-    #ret = ""
-
-    #start = str.find(start_delim);
-    #if start >= 0: 
-        #ret = str[:start+1]
-        #str = str[start+1:]
-        
-    #str = str.replace("<<", "")
-    #str = str.replace(">>", "")
-
-    #while str != "":
-        #pos1 = findCharOutsideBrackets(str, 0, "=")
-        #if (pos1 < 0) or (str[pos1] != "="):
-            #ret += str
-            #break
-        #ret += str[:pos1]
-        #pos2 = findCharOutsideBrackets(str, pos1, ",")
-        #if pos2 >= 0:
-            #str = str[pos2:]
-        #else:
-            #print "ERROR while deleting default arguments"
-            #break
-            
-    #return ret
-
-
-#def findCharOutsideBrackets(str, start_pos, char, verbose = False):
-    #"""Returns position of the first occurence of "char", or the position of the
-    #first closing bracket, whatever comes first.
-    
-    #Areas in brackets are ignored.
-    #"""
-    #pos = start_pos
-    #edge_count = 0
-    #while pos < len(str):
-        #if verbose: 
-            #print pos, edge_count
-            #print str[pos:]
-        
-        #p1 = str.find(char, pos)
-        #p2 = str.find("<", pos)
-        #p2a = str.find("(", pos)
-        #p3 = str.find(">", pos)
-        #p3a = str.find(")", pos)
-        
-        #if (p2 < 0) or ((p2a >= 0) and (p2a < p2)): p2 = p2a
-         
-        #if (p3 < 0) or ((p3a >= 0) and (p3a < p3)): p3 = p3a
-
-        #if (p1 >= 0) and ((p2 < 0) or (p1 < p2)) and ((p3 < 0) or (p1 < p3)):
-            #if edge_count == 0:
-                #return p1
-            #else:
-                #pos = p1 + 1
-            
-        #elif (p2 >= 0) and ((p3 < 0) or (p2 < p3)):
-            #edge_count += 1
-            #pos = p2 + 1
-            
-        #elif (p3 >= 0):
-            #if edge_count == 0:
-                #return p3
-            #else:
-                #edge_count -= 1
-                #pos = p3 + 1
-            
-        #else:
-            #return -1
-
-
-#def makeEntry(filename, lineNumber, sig):
-    #"""Returns the string that is inserted into the header."""
-    #text = sig + ";       \t// \"" + filename + "\"(" + str(lineNumber) + ")"
-    #return text
-
-
-#def getSortKey(name, namespaces):
-    #"""Returns the key the functions and structs are sorted for."""
-    #return str(namespaces) + name
-
-
-#def addEntry(arr, name, entry, namespaces):
-    #"""Adds a signature to FUNCS or CLASSES."""
-    #key = getSortKey(name, namespaces)
-    #if not arr.has_key(key):
-        #arr[key] = []
-    #arr[key] += [[name, entry, namespaces]]
     
 
 def getFuncName(sig):
@@ -534,103 +475,26 @@ def printOutFilesAndLines():
     print FILES_LINES["projects/library/seqan/statistics/statistics_markov_model.h"]
     #TODO further processing
 
+def display(order="ntfl"):
+    #TODO implement proper parsing of display and sort order
 
-#def outAll(path, project):
-    #"""Main Function for output of forward header."""
+    if order == "fltn": # file line type name
+        for i in sorted(FILTERED_SIGS, key=lambda x:(x[0],x[1],x[2],x[3])):
+            print i[0], "\t", i[1], "\t", i[2], "\t", i[3]
+    elif order == "ntfl": # name type file line
+        for i in sorted(FILTERED_SIGS, key=lambda x:(x[3],x[2],x[0],x[1])):
+            print i[3], "\t", i[2], "\t", i[0], "\t", i[1]
+    elif order == "fl": # file and lines in one line
+        lastfilename = ""
+        for i in sorted(FILTERED_SIGS, key=lambda x:(x[0],x[1])):
+                if i[0] != lastfilename:
+                    lastfilename = i[0]
+                    print "\n", i[0],
+                print  " ", i[1],
+
+        print
+
     
-    #header_switch = "SEQAN_HEADER_" + project + "_GENERATED_FORWARDS_H"
-
-    #str = ""
-    #str += " /*==========================================================================\n"
-    #str += "                SeqAn - The Library for Sequence Analysis\n"
-    #str += "                          http://www.seqan.de \n"
-    #str += " ============================================================================\n"
-    #str += "  Copyright (C) 2007\n"
-    #str += "\n"
-    #str += "  This library is free software; you can redistribute it and/or\n"
-    #str += "  modify it under the terms of the GNU Lesser General Public\n"
-    #str += "  License as published by the Free Software Foundation; either\n"
-    #str += "  version 3 of the License, or (at your option) any later version.\n"
-    #str += "\n"
-    #str += "  This library is distributed in the hope that it will be useful,\n"
-    #str += "  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    #str += "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-    #str += "  Lesser General Public License for more details.\n"
-    #str += "\n"
-    #str += " ==========================================================================*/\n"
-    #str += "\n"
-
-    #str += "#ifndef " + header_switch.upper() + " \n"
-    #str += "#define " + header_switch.upper() + " \n\n"
-    
-    #str += "//////////////////////////////////////////////////////////////////////////////\n"
-    #str += "// NOTE: This file is automatically generated by build_forwards.py\n"
-    #str += "//       Do not edit this file manually!\n"
-    #str += "//////////////////////////////////////////////////////////////////////////////\n\n\n"
-
-    #str += "//////////////////////////////////////////////////////////////////////////////\n"
-    #str += "// CLASSES\n"
-    #str += outList(CLASSES)
-    
-    #str += "\n//////////////////////////////////////////////////////////////////////////////\n"
-    #str += "// TYPEDEFS\n"
-    #str += outList(TYPEDEFS)
-
-    #str += "\n//////////////////////////////////////////////////////////////////////////////\n"
-    #str += "// FUNCTIONS\n"
-    #str += outList(FUNCS)
-    
-    #str += "#endif\n"
-
-    #filename = os.path.join(path, forwardFilename(project))
-    #fl = file(filename, "w")
-    #fl.write(str + "\n")
-    #fl.close()
-
-#def outList(lst):
-    #keys = lst.keys()
-    #keys.sort()
-    
-    #namespaces = []
-    #str = ""
-    
-    #for key in keys:
-        #first_entry = lst[key][0]
-        #new_namespaces = first_entry[2]
-        #str += outChangeNamespaces(namespaces, new_namespaces)
-        #namespaces = new_namespaces
-            
-        #str += "//____________________________________________________________________________\n"
-        #str += "// " + first_entry[0] + "\n\n"
-        
-        #for entry in lst[key]:
-            #str += entry[1] + "\n"
-            
-    #str += outChangeNamespaces(namespaces, [])
-    
-    #return str
-    
-
-#def outChangeNamespaces(old_namespaces, new_namespaces):
-    #"""If old_namespaces != new_namespaces, close old namespace and open new one."""
-    #str = ""
-    #if old_namespaces != new_namespaces:
-        #if len(old_namespaces) > 0: 
-            #str += "\n"
-        
-        #while len(old_namespaces) > 0:
-            #str += "} //namespace " + old_namespaces[len(old_namespaces)-1] + "\n"
-            #old_namespaces = old_namespaces[:len(old_namespaces)-1]
-            
-        #if len(new_namespaces) > 0:
-            #str += "//////////////////////////////////////////////////////////////////////////////\n\n"
-            
-        #while len(new_namespaces) > 0:
-            #str += "namespace " + new_namespaces[0] + " {\n"
-            #new_namespaces = new_namespaces[1:]
-            
-    #return str + "\n"
-
 
 def forwardsNeedsRebuild(module_path, forwards_filename):
     """Determine whether the given forwards header needs rebuild.
@@ -690,7 +554,7 @@ def main():
 
   buildAllForwards(sys.argv[1], force_rebuild)
 
-  printOutFilesAndLines()
+  display()
 
   return 0
 
