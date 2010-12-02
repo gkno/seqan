@@ -34,46 +34,26 @@
 #include <seqan/file.h>
 #include <seqan/index.h>
 #include <seqan/store.h>
-#include <seqan/misc/misc_cmdparser.h>
 
 using namespace seqan;
 
 //FRAGMENT(typedefs)
 // Some typedefs.
-typedef FragmentStore<>::TReadSeqStore              TReadSeqStore;
-typedef Value<TReadSeqStore>::Type                  TReadSeq;
-typedef FragmentStore<>::TContigStore               TContigStore;
-typedef Value<TContigStore>::Type                   TContigStoreElement;
-typedef TContigStoreElement::TContigSeq             TContigSeq;
+typedef FragmentStore<>::TReadSeqStore TReadSeqStore;
+typedef Value<TReadSeqStore>::Type TReadSeq;
+typedef FragmentStore<>::TContigStore TContigStore;
+typedef Value<TContigStore>::Type TContigStoreElement;
+typedef TContigStoreElement::TContigSeq TContigSeq;
 typedef Index<TReadSeqStore, Index_QGram<Shape<Dna, UngappedShape<11> >, OpenAddressing> > TIndex;
-typedef Pattern<TIndex, Swift<SwiftSemiGlobal> >    TPattern;
+typedef Pattern<TIndex, Swift<SwiftSemiGlobal> > TPattern;
 typedef Finder<TContigSeq, Swift<SwiftSemiGlobal> > TFinder;
-typedef FragmentStore<>::TAlignedReadStore          TAlignedReadStore;
-typedef Value<TAlignedReadStore>::Type              TAlignedRead;
+typedef FragmentStore<>::TAlignedReadStore TAlignedReadStore;
+typedef Value<TAlignedReadStore>::Type TAlignedRead;
 
-// const double EPSILON = 0.08;
-
-
-
-struct Options
-{
-    double  epsilon;
-    bool    rev_comp;
-
-    Options()
-    {
-        epsilon = 0.08;
-        rev_comp = false;
-    }
-    
-};
-
-
-
-
+const double EPSILON = 0.08;
 
 //FRAGMENT(main-input)
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
     // 0) Handle command line arguments.
     if (argc < 3) {
         std::cerr << "Invalid number of arguments." << std::endl
@@ -81,94 +61,34 @@ int main(int argc, const char *argv[]) {
         return 1;
     }
 
-    CommandLineOption eps = CommandLineOption("e",
-                                              "epsilon",
-                                              1,
-                                              "maximum error rate",
-                                              OptionType::Double,
-                                              0.08);
-
-    CommandLineOption revcomp = CommandLineOption("rc",
-                                              "reverse-complement",
-                                              1,
-                                              "align against both strands",
-                                              OptionType::Bool,
-                                              false);
-
-    CommandLineParser parser;
-    addOption(parser, eps);
-    addOption(parser, revcomp);
-    parse(parser, argc, argv);
-
-    Options MyOptions;
-    getOptionValueShort(parser, "e", MyOptions.epsilon);
-
     // 1) Load contigs and reads.
     FragmentStore<> fragStore;
     if (!loadContigs(fragStore, argv[1])) return 1;
     if (!loadReads(fragStore, argv[2])) return 1;
 
-//     if (MyOptions.rev_comp)
-//     {
-//         int orglength = length(fragStore.contigStore);
-//         resize(fragStore.contigStore, orglength *2);
-//         for (int i=0; i < orglength; ++i)
-//             assign(fragStore.contigStore[i+orglength],
-//                       DnaStringReverseComplement(fragStore.contigStore[i]));
-//     }
-            
-
-    
 //FRAGMENT(pattern-finder)
     // 2) Build an index over all reads and a SWIFT pattern over this index.
     TIndex index(fragStore.readSeqStore);
     TPattern pattern(index);
 
-    // String<TVerifyPattern> patterns
-    // resize()
-    // for ... setHost()
-    
 //FRAGMENT(swift)
     // 3) Enumerate all epsilon matches.
     for (unsigned i = 0; i < length(fragStore.contigStore); ++i) {
         TFinder finder(fragStore.contigStore[i].seq);
-        // Verify Finder defined here
-        while (find(finder, pattern, MyOptions.epsilon)) {
+        while (find(finder, pattern, EPSILON)) {
 //FRAGMENT(verification)
             // Verify match.
-            // clear(verifyFinder)
-            // pattern = patterns[i]
             Finder<TContigSeq> verifyFinder(fragStore.contigStore[i].seq);
             setPosition(verifyFinder, beginPosition(finder));
-//             Pattern<TReadSeq, HammingSimple> verifyPattern(fragStore.readSeqStore[position(pattern).i1]);
-            Pattern<TReadSeq, Myers<> > verifyPattern(fragStore.readSeqStore[position(pattern).i1]);
-            setScoreLimit(verifyPattern,
-                          -floor(
-                              MyOptions.epsilon
-                              * length(fragStore.readSeqStore[position(pattern).i1])));
-                              
-            while (find(verifyFinder, verifyPattern)
-                    && position(verifyFinder) < endPosition(infix(finder))
-                  )
-            {
-                bool b = findBegin(verifyFinder, verifyPattern, getScore(verifyPattern));
-                SEQAN_ASSERT_TRUE(b);
-                TAlignedRead match(length(fragStore.alignedReadStore),
-                                   position(pattern).i1,
-                                   i,
-                                   beginPosition(verifyFinder),
-                                   endPosition(verifyFinder));
-                std::cout << "BEGIN: " << beginPosition(verifyFinder)
-                          << " END: " << endPosition(verifyFinder) << std::endl; 
-                
+            Pattern<TReadSeq, HammingSimple> verifyPattern(fragStore.readSeqStore[position(pattern).i1]);
+            while (find(verifyFinder, verifyPattern) && position(verifyFinder) < endPosition(infix(finder))) {
+                TAlignedRead match(length(fragStore.alignedReadStore), position(pattern).i1, i,
+                                   beginPosition(verifyFinder), endPosition(verifyFinder));
                 appendValue(fragStore.alignedReadStore, match);
-//                 std::cout << fragStore.readSeqStore[position(pattern).i1] << std::endl;
-//                 std::cout << infix(verifyFinder) << std::endl;
             }
         }
     }
 
-    convertMatchesToGlobalAlignment(fragStore, Score<int>(0, -999, -1001, -1000), True());
 //FRAGMENT(main-output)
     // 4) Write out SAM file.
     std::ofstream samFile(argv[3], std::ios_base::out);
