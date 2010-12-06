@@ -104,7 +104,7 @@ struct OptionType
 ..summary:Stores information for a specific command line option.
 ..signature:CommandLineOption
 ..remarks:A @Class.CommandLineOption@ object can be added to a @Class.CommandLineParser@ via @Function.addOption@.
-..include:seqan/misc.h
+..include:seqan/misc_cmdparser.h
 */
 
 class CommandLineOption
