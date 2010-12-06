@@ -663,6 +663,7 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
                     k += indelLen;
                 } else {
                     // Deletion.
+                    indelLen = _min(indelLen, length(haplotypeContig) - k);
                     erase(haplotypeContig, k, k + indelLen);
                     j += indelLen;
                 }
@@ -701,7 +702,7 @@ int buildReadSimulationInstruction(
     // We have to retry simulation if the mate pair did not fit in.
     bool invalid = false;
     do {
-		clear(instructions);
+        clear(instructions);
         invalid = false;  // By default, we do not want to repeat.
         if (fixedContigId) {
             // Use precomputed contig id.

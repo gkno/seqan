@@ -208,6 +208,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
 
     // Get a copy of the haplotype region we are considering.
     String<Dna5> haplotypeInfix = infix(contig, inst.beginPos, inst.endPos);
+	SEQAN_ASSERT_LEQ(inst.endPos, length(contig));
     SEQAN_ASSERT_EQ(readLength, inst.endPos - inst.beginPos);
 
     // In the flow cell simulation, we will simulate light intensities which
@@ -239,10 +240,12 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
             appendValue(realBaseCount, homopolymerLength);
             // Get begin pos and length of next homopolymer.
             i += homopolymerLength;
-            homopolymerType = haplotypeInfix[i];
-            homopolymerLength = 0;
-            while (haplotypeInfix[i + homopolymerLength] == homopolymerType && ((i + homopolymerLength) < (inst.endPos - inst.beginPos)))
-                ++homopolymerLength;
+			if (i < length(haplotypeInfix)) {
+				homopolymerType = haplotypeInfix[i];
+				homopolymerLength = 0;
+				while (((i + homopolymerLength) < length(haplotypeInfix)) && haplotypeInfix[i + homopolymerLength] == homopolymerType)
+					++homopolymerLength;
+			}
         } else {
             // Simulate negative flow observation.
             //
@@ -256,12 +259,13 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
 
     inst.insCount = 0;
     inst.delCount = 0;
+	clear(inst.insertionNucleotides);
 
     // Call bases, from this build the edit string and maybe qualities.  We
     // only support the "inter" base calling method which was published by
     // the MetaSim authors in the PLOS paper.
     typedef Iterator<String<double>, Standard>::Type IntensitiesIterator;
-    int i = 0;  // Flow round, Dna(i) gives base.
+    int i = 0;  // Flow round, Dna(i % 4) gives base.
     for (IntensitiesIterator it = begin(observedIntensities); it != end(observedIntensities); ++it, ++i) {
         double threshold = getThreshold(parameters.thresholdMatrix, static_cast<unsigned>(floor(*it)), static_cast<unsigned>(ceil(*it)));
         unsigned calledBaseCount = static_cast<unsigned>(*it < threshold ? floor(*it) : ceil(*it));
@@ -294,6 +298,9 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
             }
         }
     }
+	
+    SEQAN_ASSERT_EQ(length(inst.insertionNucleotides), inst.insCount);
+    SEQAN_ASSERT_EQ(length(inst.qualities) + inst.delCount, length(inst.editString));
 }
 
 template <typename TRNG, typename TString>

@@ -302,6 +302,8 @@ erase(String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> > & journal
       TPos const & posEnd)
 {
     SEQAN_CHECKPOINT;
+	SEQAN_ASSERT_GEQ(static_cast<TPos>(journaledString._length), pos);
+	SEQAN_ASSERT_GEQ(static_cast<TPos>(journaledString._length), posEnd);
     SEQAN_ASSERT_GEQ(static_cast<TPos>(journaledString._length), posEnd - pos);
     journaledString._length -= posEnd - pos;
     recordErase(journaledString._journalEntries, pos, posEnd);
