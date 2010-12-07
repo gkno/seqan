@@ -18,14 +18,14 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SWIFT_LOCAL_H
-#define SEQAN_HEADER_SWIFT_LOCAL_H
+#ifndef SEQAN_HEADER_STELLAR_H
+#define SEQAN_HEADER_STELLAR_H
 
 #include <iostream>
 #include <seqan/index.h>
 #include <seqan/seeds2.h>
-#include "swift_local_types.h"
-#include "swift_local_extension.h"
+#include "stellar_types.h"
+#include "stellar_extension.h"
 
 using namespace seqan;
 
@@ -628,7 +628,7 @@ SEQAN_CHECKPOINT
 // Calls swift filter and verifies swift hits. = Computes eps-matches.
 template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSize1,
          typename TSource, typename TId, typename TTag>
-int localSwift(Finder<TText, Swift<SwiftLocal> > & finder,
+int stellar(Finder<TText, Swift<SwiftLocal> > & finder,
                Pattern<TIndex, Swift<SwiftLocal> > & pattern,
                double epsilon,
                TSize minLength,

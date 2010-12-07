@@ -22,14 +22,14 @@
 
 #include <seqan/index.h>
 #include <seqan/misc/misc_cmdparser.h>
-#include "swift_local.h"
-#include "swift_local_output.h"
+#include "stellar.h"
+#include "stellar_output.h"
 
 using namespace seqan;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Finder object for a database sequence,
-//  calls localSwift, and writes matches to file
+//  calls stellar, and writes matches to file
 template<typename TSequence, typename TId, typename TPattern, typename TQueries, typename TFile>
 inline int
 _stellarOnOne(TSequence & database,
@@ -50,21 +50,21 @@ _stellarOnOne(TSequence & database,
     // container for eps-matches
 	StringSet<QueryMatches<StellarMatch<TSequence, TId> > > matches;
 
-	// local swift
+	// stellar
 	if (options.fastOption == CharString("exact"))
-		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
+		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
 								  options.disableThresh, options.compactThresh, options.numMatches, 
 								  queryIDs, matches, AllLocal());
 	else if (options.fastOption == "bestLocal")
-		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
+		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
 								  options.disableThresh, options.compactThresh, options.numMatches,
 								  queryIDs, matches, BestLocal());
 	else if (options.fastOption == "bandedGlobal")
-		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
+		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
 								  options.disableThresh, options.compactThresh, options.numMatches,
 								  queryIDs, matches, BandedGlobal());
 	else if (options.fastOption == "bandedGlobalExtend")
-		numSwiftHits = localSwift(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
+		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
 								  options.disableThresh, options.compactThresh, options.numMatches,
 								  queryIDs, matches, BandedGlobalExtend());
 	else {
@@ -399,12 +399,12 @@ _setParser(TParser & parser) {
 	addHelpLine(parser, "Choose a smaller value for saving space.");
 
 	addSection(parser, "Output Options:");
-    addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "swift_local.gff"));
+    addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "stellar.gff"));
 	addOption(parser, CommandLineOption('f', "outFormat", "Output format", OptionType::String, "gff"));
 	addHelpLine(parser, "possible formats: gff");
 	addOption(parser, CommandLineOption("od", "outDisabled",
 		"Name of output file containing disabled query sequences", OptionType::String));
-	addHelpLine(parser, "(default swift_local.disabled.fasta)");
+	addHelpLine(parser, "(default stellar.disabled.fasta)");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -416,7 +416,7 @@ int main(int argc, const char *argv[]) {
 //-d "Z:\GenomeData\simulated\longReads\seq_1Mb.fa" -q "Z:\seqan-trunk\seqan\projects\library\cmake\linux\tailReads.fa" -k 7 -l 50 -e 0.05
 
     // command line parsing
-    CommandLineParser parser("swift_local");
+    CommandLineParser parser("stellar");
 
     _setParser(parser);
     if (!parse(parser, argc, argv)) {
@@ -466,12 +466,12 @@ int main(int argc, const char *argv[]) {
 		return 1;
 	}
 
-	// local swift on all databases and queries writing results to file
-    SEQAN_PROTIMESTART(timeLocalSwift);
+	// stellar on all databases and queries writing results to file
+    SEQAN_PROTIMESTART(timeStellar);
 	int numMatches = _stellarOnAll(databases, databaseIDs, queries, queryIDs, options, file);
 
 	std::cout << "Eps-matches: " << numMatches << std::endl;
-    std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeLocalSwift) << "s" << std::endl;
+    std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 
     file.close();
 	

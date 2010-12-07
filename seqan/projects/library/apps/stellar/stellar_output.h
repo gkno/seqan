@@ -18,8 +18,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SWIFT_LOCAL_OUTPUT_H
-#define SEQAN_HEADER_SWIFT_LOCAL_OUTPUT_H
+#ifndef SEQAN_HEADER_STELLAR_OUTPUT_H
+#define SEQAN_HEADER_STELLAR_OUTPUT_H
 
 #include <iostream>
 #include <seqan/align.h>

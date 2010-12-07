@@ -18,8 +18,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
-#ifndef SEQAN_HEADER_SWIFT_LOCAL_EXTENSION_H
-#define SEQAN_HEADER_SWIFT_LOCAL_EXTENSION_H
+#ifndef SEQAN_HEADER_STELLAR_EXTENSION_H
+#define SEQAN_HEADER_STELLAR_EXTENSION_H
 
 #include <seqan/seeds2.h>
 
