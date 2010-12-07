@@ -316,12 +316,11 @@ SEQAN_CHECKPOINT
   {
     _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
     pr.start = pos;
-	pos = me.needleLength * (i+1) / k;
-    pr.end = pos;
+    pr.end = (pos = me.needleLength * (i + 1) / k);
     pr.error = 0;
 
-	insert(me.range_table,i,pr);
-    appendValue(me.splitted_needles,infix(value(me.data_host),pr.start,pr.end));
+	insert(me.range_table, i, pr);
+    appendValue(me.splitted_needles, infix(value(me.data_host), pr.start, pr.end));
   }
 //*/
 
@@ -343,7 +342,6 @@ SEQAN_CHECKPOINT
   
   me.patternNeedsInit = false;
   me.findNext = false;
-  
   _findBeginInit(me, needle(me));
 
 #ifdef SEQAN_DEBUG_PEX
@@ -351,7 +349,7 @@ SEQAN_CHECKPOINT
   ::std::cout << "                   PATTERN INIT                     " << ::std::endl;
   ::std::cout << "Needle:   " << value(me.data_host) << ::std::endl;
   ::std::cout << "|Needle|: " << me.needleLength << ::std::endl;
-  ::std::cout << "seg_len:  " << seg_len << ::std::endl;
+  ::std::cout << "seg_len:  " << me.needleLength / k << ::std::endl;
   ::std::cout << "limit:    " << me.limit << ::std::endl;
   ::std::cout << "k:        " << k << ::std::endl;
   ::std::cout << "computed following needles for multipattern search: " << ::std::endl;
