@@ -138,8 +138,8 @@ int parseCommandLineAndCheck(Options<BuildGoldStandard> & options, CommandLinePa
     }
     
     // Get positional arguments.
-    options.referenceSeqFilename = getArgumentValue(parser, 0);
-    options.perfectMapFilename = getArgumentValue(parser, 1);
+    options.referenceSeqFilename = getArgumentValue(parser, 1);
+    options.perfectMapFilename = getArgumentValue(parser, 2);
 
     return 0;
 }
