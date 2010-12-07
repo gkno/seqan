@@ -107,7 +107,7 @@ foreach (APP_DIR ${SEQAN_APPS})
 	# if there is no predefined set of files for this target
 	# find the source files automatically
 	if (NOT APP_${APP_DIR_REL}_SOURCES)
-		file (GLOB APP_${APP_DIR_REL}_SOURCES ${APP_DIR}/[A-z]*.h ${APP_DIR}/[A-z]*.cpp ${APP_DIR}/[A-z]*.cu)
+		file (GLOB APP_${APP_DIR_REL}_SOURCES ${APP_DIR}/[A-z]*.cpp ${APP_DIR}/[A-z]*.h ${APP_DIR}/[A-z]*.cu)
 	endif (NOT APP_${APP_DIR_REL}_SOURCES)
 
 	foreach (SRC ${APP_${APP_DIR_REL}_SOURCES})
