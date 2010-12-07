@@ -1,5 +1,5 @@
  /*==========================================================================
-                     SwiftLocal - Fast Local Alignment
+                     STELLAR - Fast Local Alignment
 
  ============================================================================
   Copyright (C) 2010 by Birte Kehr
@@ -18,18 +18,23 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
+#ifndef SEQAN_HEADER_SWIFT_LOCAL_TYPES_H
+#define SEQAN_HEADER_SWIFT_LOCAL_TYPES_H
+
 #include <seqan/align.h>
-#include <seqan/store.h>
 
 using namespace seqan;
 
-struct SwiftLocalOptions {
+///////////////////////////////////////////////////////////////////////////////
+// Options for SwiftLocAl
+struct StellarOptions {
 	// i/o options
-	CharString databaseFile;	// name of database file
-	CharString queryFile;		// name of query file
-	CharString outputFile;		// name of result file
-	unsigned outputFormat;		// 1..gff
-								// 2..??
+	CharString databaseFile;		// name of database file
+	CharString queryFile;			// name of query file
+	CharString outputFile;			// name of result file
+	CharString disabledQueriesFile;	// name of result file containing disabled queries
+	unsigned outputFormat;			// 1..gff
+									// 2..??
 
 	// main options
 	unsigned qGram;				// length of the q-grams
@@ -40,12 +45,17 @@ struct SwiftLocalOptions {
 	// more options
 	bool reverse;				// compute also matches to reverse complemented database
 	CharString fastOption;		// verification strategy: exact, bestLocal, bandedGlobal
-	unsigned compactThresh;			// number of matches after which removal of overlaps and duplicates is started
+	unsigned disableThresh;		// maximal number of matches allowed per query before disabling verification of hits for that query
+	unsigned compactThresh;		// number of matches after which removal of overlaps and duplicates is started
 	unsigned numMatches;		// maximal number of matches per query and database
+	unsigned maxRepeatPeriod;	// maximal period of low complexity repeats to be filtered
+	unsigned minRepeatLength;	// minimal length of low complexity repeats to be filtered
+	double qgramAbundanceCut;
 
 
-	SwiftLocalOptions() {
-		outputFile = "swift_local.gff";
+	StellarOptions() {
+		outputFile = "stellar.gff";
+		disabledQueriesFile = "stellar.disabled.fasta";
 		outputFormat = 1;
 
 		qGram = 10;
@@ -55,13 +65,32 @@ struct SwiftLocalOptions {
 
 		reverse = false;
 		fastOption = "exact";		// exact verification
+		disableThresh = (unsigned)-1;
 		compactThresh = 500;
 		numMatches = 50;
+		maxRepeatPeriod = 1;
+		minRepeatLength = 1000;
+		qgramAbundanceCut = 1;
 	}
 }; 
 
+
+///////////////////////////////////////////////////////////////////////////////
+// Container for storing local alignment matches of one query sequence
+template<typename _TMatch>
+struct QueryMatches {
+	String<_TMatch> matches;
+	bool disabled;
+
+	QueryMatches() {
+		disabled = false;
+	}
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// Container for storing a local alignment match
 template<typename _TSequence, typename _TId>
-struct SwiftLocalMatch {
+struct StellarMatch {
 	typedef _TSequence							TSequence;
 	typedef _TId								TId;
 	typedef typename Position<TSequence>::Type	TPos;
@@ -80,27 +109,31 @@ struct SwiftLocalMatch {
 	TPos end2;
 	TRow row2;
 
-	SwiftLocalMatch() {}
+	StellarMatch() {}
 
 	template<typename TAlign, typename TId>
-	SwiftLocalMatch(TAlign & _align, TId _id) {
+	StellarMatch(TAlign & _align, TId _id) {
 		id = _id;
 		row1 = row(_align, 0);
 		row2 = row(_align, 1);
 
-		begin1 = beginPosition(sourceSegment(row1));
-		end1 = endPosition(sourceSegment(row1));
+		begin1 = clippedBeginPosition(row1);
+		end1 = clippedEndPosition(row1);
 
-		begin2 = beginPosition(sourceSegment(row2));
-		end2 = endPosition(sourceSegment(row2));
+		begin2 = clippedBeginPosition(row2);
+		end2 = clippedEndPosition(row2);
 	}
 };
 
 template <typename TSequence, typename TId> 
 const TId
-SwiftLocalMatch<TSequence, TId>::INVALID_ID = "###########";
+StellarMatch<TSequence, TId>::INVALID_ID = "###########";
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
 // to sort matches by position and remove overlapping matches
 template <typename TMatch>
 struct LessPos : public ::std::binary_function <TMatch, TMatch, bool> {		
@@ -148,6 +181,7 @@ struct LessPos : public ::std::binary_function <TMatch, TMatch, bool> {
 	}
 };
 
+///////////////////////////////////////////////////////////////////////////////
 // to sort matches by length
 template <typename TMatch>
 struct LessLength : public ::std::binary_function <TMatch, TMatch, bool> {		
@@ -171,11 +205,14 @@ struct LessLength : public ::std::binary_function <TMatch, TMatch, bool> {
 	}
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// Determines whether match1 is upstream of match2 in specified row.
+//  If matches overlap, the non-overlapping parts have to be longer than minLenght.
 template<typename TSequence, typename TId, typename TRowNo, typename TSize>
 inline bool
-_isUpstream(SwiftLocalMatch<TSequence, TId> & match1, SwiftLocalMatch<TSequence, TId> & match2, TRowNo row, TSize minLength) {
+_isUpstream(StellarMatch<TSequence, TId> & match1, StellarMatch<TSequence, TId> & match2, TRowNo row, TSize minLength) {
 SEQAN_CHECKPOINT 
-	typedef typename SwiftLocalMatch<TSequence, TId>::TPos TPos;
+	typedef typename StellarMatch<TSequence, TId>::TPos TPos;
 
 	TPos e1, b2;
 	if (row == 0) {
@@ -204,17 +241,23 @@ SEQAN_CHECKPOINT
     return false;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// sorts StellarMatchees by specified functor
 template <typename TMatches, typename TFunctorLess>
 inline void
-sortMatches(TMatches & swiftLocalMatches, TFunctorLess const & less) {
+sortMatches(TMatches & stellarMatches, TFunctorLess const & less) {
 	std::stable_sort(
-		begin(swiftLocalMatches, Standard()), 
-		end(swiftLocalMatches, Standard()), 
+		begin(stellarMatches, Standard()), 
+		end(stellarMatches, Standard()), 
 		less);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// returns the length of the longer row from StellarMatch
 template <typename TSequence, typename TId>
 inline typename Size<TSequence>::Type
-length(SwiftLocalMatch<TSequence, TId> & match) {
+length(StellarMatch<TSequence, TId> & match) {
 	return _max(length(match.row1), length(match.row2));
 }
+
+#endif

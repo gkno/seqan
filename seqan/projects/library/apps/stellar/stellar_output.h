@@ -1,5 +1,5 @@
  /*==========================================================================
-                     SwiftLocal - Fast Local Alignment
+                     STELLAR - Fast Local Alignment
 
  ============================================================================
   Copyright (C) 2010 by Birte Kehr
@@ -18,53 +18,54 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ==========================================================================*/
 
+#ifndef SEQAN_HEADER_SWIFT_LOCAL_OUTPUT_H
+#define SEQAN_HEADER_SWIFT_LOCAL_OUTPUT_H
+
 #include <iostream>
 #include <seqan/align.h>
-//#include "swift_local_types.h"
 
 using namespace seqan;
 
+///////////////////////////////////////////////////////////////////////////////
+// Computes a CIGAR string and mutations from rows of StellarMatch.
 template<typename TRow, typename TString>
 void
 _getCigarLine(TRow const & row0, TRow const & row1, TString & cigar, TString & mutations) { 
+SEQAN_CHECKPOINT
     typedef typename Size<TRow>::Type TSize;
 
-    TSize dbPos = beginPosition(row0);
-    TSize queryPos = beginPosition(row1);
+    TSize pos = 0;
 
     TSize dbEndPos = endPosition(row0);
     TSize queryEndPos = endPosition(row1);
 
     bool first = true;
-    TSize readBasePos = queryPos;
+    TSize readBasePos = pos;
     TSize readPos = 0;
-	while (dbPos != dbEndPos && queryPos != queryEndPos) {
+	while (pos != dbEndPos && pos != queryEndPos) {
 		int matched = 0;
 		int inserted = 0;
 		int deleted = 0;
-		while (dbPos != dbEndPos && queryPos != queryEndPos &&
-               !isGap(row0, dbPos) && !isGap(row1, queryPos)) {
+		while (pos != dbEndPos && pos != queryEndPos &&
+               !isGap(row0, pos) && !isGap(row1, pos)) {
             ++readPos;
-			if (value(row0, dbPos) != value(row1, queryPos)) {
+			if (value(row0, pos) != value(row1, pos)) {
 				if (first) first = false;
 				else mutations << ",";
 				mutations << readPos << value(source(row1), readBasePos);
 			}
 			++readBasePos;
-			++dbPos;
-			++queryPos;
+			++pos;
 			++matched;
 		}
 		if (matched > 0) cigar << matched << "M" ;
-		while (queryPos != queryEndPos && isGap(row1, queryPos)) {
-			++dbPos;
-			++queryPos;
+		while (pos != queryEndPos && isGap(row1, pos)) {
+			++pos;
 			++deleted;
 		}
 		if (deleted > 0) cigar << deleted << "D";
-		while (dbPos != dbEndPos && isGap(row0, dbPos)) {
-			++dbPos;
-			++queryPos;
+		while (pos != dbEndPos && isGap(row0, pos)) {
+			++pos;
 			++readPos;
 			if (first) first = false;
 			else mutations << ",";
@@ -76,32 +77,35 @@ _getCigarLine(TRow const & row0, TRow const & row1, TString & cigar, TString & m
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Calculates the identity of two alignment rows (percentage of matching positions).
 template<typename TRow>
 double
 _calculateIdentity(TRow const & row0, TRow const & row1) {
+SEQAN_CHECKPOINT
     typedef typename Size<TRow>::Type TSize;
     TSize matches = 0;
     TSize len = _max(length(row0), length(row1));
 
-    TSize pos0 = beginPosition(row0);
-    TSize pos1 = beginPosition(row1);
+    TSize pos = 0;
 
     TSize end0 = endPosition(row0);
     TSize end1 = endPosition(row1);
 
-    while ((pos0 < end0) && (pos1 < end1)) {
-        if (!isGap(row0, pos0) && !isGap(row1, pos1)) {
-            if (value(row0, pos0) == value(row1, pos1)) {
+    while ((pos < end0) && (pos < end1)) {
+        if (!isGap(row0, pos) && !isGap(row1, pos)) {
+            if (value(row0, pos) == value(row1, pos)) {
                 ++matches;
             }
         }
-        ++pos0;
-        ++pos1;
+        ++pos;
     }
 
     return ((double)matches/(double)len)*100.0;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Writes rows of a StellarMatch in gff format to a file.
 template<typename TId, typename TRow, typename TFile>
 void
 _writeGffLine(TId const & databaseID,
@@ -110,15 +114,12 @@ _writeGffLine(TId const & databaseID,
               TRow const & row0,
               TRow const & row1,
               TFile & file) {
-	//typedef typename Row<TAlign>::Type TRow;
-	//TRow row0 = row(match, 0);
-	//TRow row1 = row(match, 1);
-    
+SEQAN_CHECKPOINT    
     for (typename Position<TId>::Type i = 0; i < length(databaseID) && value(databaseID, i) > 32; ++i) {
         file << value(databaseID, i);
     }
 
-    file << "\tSwiftLocal";
+    file << "\tStellar";
     file << "\teps-matches";
 
     if (databaseStrand) {
@@ -156,16 +157,15 @@ _writeGffLine(TId const & databaseID,
     file << "\n";
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Writes rows of a StellarMatch in human readable format to file.
 template<typename TRow, typename TStrand, typename TFile>
 void
 _writeMatch(TRow & row0,
 			TRow & row1,
 			TStrand databaseStrand,
 			TFile & aliFile) {
-	//typedef typename Row<TAlign>::Type TRow;
-	//TRow row0 = row(match, 0);
-	//TRow row1 = row(match, 1);
-
+SEQAN_CHECKPOINT
 	// write database positions
 	if (databaseStrand) {
 		aliFile << "< " <<
@@ -185,57 +185,129 @@ _writeMatch(TRow & row0,
 		toSourcePosition(row1, endPosition(row1)) + beginPosition(source(row1)) << " >\n";
 
 	// write match
-	//aliFile << match;
+	Align<typename Source<TRow>::Type> align;
+	appendValue(align.data_rows, row0);
+	appendValue(align.data_rows, row1);
+	aliFile << align;
 }
 
-template<typename TInfix, typename TQueryId, typename TNumber, typename TId, typename TIds, typename TFile>
+///////////////////////////////////////////////////////////////////////////////
+// Calls _writeGffLine for each match in StringSet of String of matches.
+//   = Writes matches in gff format to a file.
+template<typename TInfix, typename TQueryId, typename TId, typename TIds, typename TFile>
 int
-_outputMatches(//StringSet<String<Align<TInfix> > > const & matches, 
-			   StringSet<String<SwiftLocalMatch<TInfix, TQueryId> > > const & matches, 
-			   TNumber const /*numSwiftHits*/,
+_outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const & matches,
 			   TId const & databaseID,
 			   bool const databaseStrand,
 			   TIds const & ids,
 			   TFile & file) {
-	typedef SwiftLocalMatch<TInfix, TQueryId> TMatch;
+SEQAN_CHECKPOINT
+	typedef StellarMatch<TInfix, TQueryId> TMatch;
 	typedef typename Size<typename TMatch::TAlign>::Type TSize;
 
-    //std::ofstream aliFile;
-    //aliFile.open("swift_local.align"/*, std::ios::app*/);
+	TSize numMatches = 0;
+	TSize totalLength = 0;
+    TSize maxLength = 0;
 
-    //TSize maxLength = 0;
-    //TSize totalLength = 0;
+	for (TSize i = 0; i < length(matches); i++) {
+		QueryMatches<TMatch> queryMatches = value(matches, i);
+		if (length(queryMatches.matches) == 0) continue;
+
+		for (TSize j = 0; j < length(queryMatches.matches); j++) {
+			TMatch m = value(queryMatches.matches, j);
+			_writeGffLine(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
+
+			TSize len = _max(length(m.row1), length(m.row2));
+			totalLength += len;
+			if(len > maxLength) maxLength = len;
+		}
+		numMatches += length(queryMatches.matches);
+	}
+
+	//if (numMatches > 0) {
+	//	std::cout << "    # matches         : " << numMatches << std::endl;
+	//	std::cout << "    Longest eps-match : " << maxLength << std::endl;
+	//	std::cout << "    Avg match length  : " << totalLength / numMatches << std::endl;
+	//}
+
+	return numMatches;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Calls _writeGffLine for each match in StringSet of String of matches.
+//   = Writes matches in gff format to a file.
+// Writes disabled query sequences to disabledFile.
+template<typename TInfix, typename TQueryId, typename TNumber, typename TId, typename TQueries, typename TIds, typename TFile, typename TString>
+int
+_outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const & matches, 
+			   TNumber const /*numSwiftHits*/,
+			   TId const & databaseID,
+			   bool const databaseStrand,
+			   TQueries & queries,
+			   TIds const & ids,
+			   TFile & file,
+			   TString & disabledFile) {
+SEQAN_CHECKPOINT
+	typedef StellarMatch<TInfix, TQueryId> TMatch;
+	typedef typename Size<typename TMatch::TAlign>::Type TSize;
+
+    TSize maxLength = 0;
+    TSize totalLength = 0;
     TSize numMatches = 0;
+    TSize numDisabled = 0;
+
+    std::ofstream daFile, aliFile;
+    //aliFile.open("stellar.align");
+
+	daFile.open(toCString(disabledFile), ::std::ios_base::out | ::std::ios_base::app);
+	if (!daFile.is_open()) {
+		std::cerr << "Could not file for diabled queries." << std::endl;
+		return 1;
+	}
 
     //aliFile << "Database sequence: " << databaseID;
     //if (!databaseStrand) aliFile << " complement\n";
     //else aliFile << "\n";
 
     for (TSize i = 0; i < length(matches); i++) {
-        if (length(value(matches, i)) == 0) continue;
+		QueryMatches<TMatch> queryMatches = value(matches, i);
+		if (queryMatches.disabled) {
+			if (numDisabled == 0) {
+				daFile << "Database sequence " << databaseID << ":\n\n";
+			}
+			daFile << ">" << ids[i] << "\n";
+			daFile << queries[i] << "\n\n";
+			++numDisabled;
+		}
+        if (length(queryMatches.matches) == 0) continue;
         //std::cout << "Pattern sequence: " << ids[i] << "\n";
         //aliFile << "Pattern sequence: " << ids[i] << "\n\n";
-        for (TSize j = 0; j < length(value(matches, i)); j++) {
-            TMatch m = value(value(matches, i), j);
+        for (TSize j = 0; j < length(queryMatches.matches); j++) {
+            TMatch m = value(queryMatches.matches, j);
 
-            //TSize len = _max(length(row(m.align, 0)), length(row(m.align, 1)));
-            //totalLength += len;
-            //if(len > maxLength) maxLength = len;
+            TSize len = _max(length(m.row1), length(m.row2));
+            totalLength += len;
+            if(len > maxLength) maxLength = len;
 
             _writeGffLine(databaseID, ids[i], databaseStrand, m.row1, m.row2, file);
-			//_writeMatch(m.align, databaseStrand, aliFile);
+			//_writeMatch(m.row1, m.row2, databaseStrand, aliFile);
         }
-        numMatches += length(value(matches, i));
-        //std::cout << "  # Eps-matches: " << length(value(matches, i)) << std::endl;
+        numMatches += length(queryMatches.matches);
+        //std::cout << "  # Eps-matches: " << length(queryMatches.matches) << std::endl;
     }
 
 	//if (numMatches > 0) {
-	//	std::cout << "    Longest eps-match: " << maxLength << std::endl;
- //       std::cout << "    Avg match length : " << totalLength / numMatches << std::endl;
+	//	std::cout << "    Longest eps-match : " << maxLength << std::endl;
+ //       std::cout << "    Avg match length  : " << totalLength / numMatches << std::endl;
 	//}
- //   std::cout << "    # SWIFT hits     : " << numSwiftHits << std::endl;
- //   std::cout << "    # Eps-matches    : " << numMatches << std::endl;
+ //   std::cout << "    # SWIFT hits      : " << numSwiftHits << std::endl;
+ //   std::cout << "    # Eps-matches     : " << numMatches << std::endl;
+	//
+ //   std::cout << "    # disabled queries: " << numDisabled << std::endl;
 
+	daFile.close();
     //aliFile.close();
 	return numMatches;
 }
+
+#endif
