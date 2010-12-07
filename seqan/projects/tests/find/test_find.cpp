@@ -32,10 +32,15 @@
 #define SEQAN_DEBUG
 #define SEQAN_TEST
 
+#define SEQAN_DEBUG_MYERSBITVECTOR
+//#define SEQAN_DEBUG_MYERSBITVECTOR_DUMP
+//#define SEQAN_TEST_MYERS_STRICTBANDED
+
 #include <seqan/basic.h>
 #include <seqan/find.h>
 
 #include "test_find_hamming.h"
+#include "test_find_myers_banded.h"
 
 using namespace std;
 using namespace seqan;
@@ -900,6 +905,7 @@ void Test_Approx_EditDist() {
     Finder<String<char> > fd(hstk);
 
     Pattern<String<char>, TPatternSpec> pt(nl, -2);
+
     SEQAN_ASSERT_TRUE(find(fd, pt));
     SEQAN_ASSERT_EQ(position(fd), 8u);
     SEQAN_ASSERT_EQ(getScore(pt), -2);
@@ -1356,11 +1362,10 @@ SEQAN_DEFINE_TEST(test_regression_rmbench) {
 
     // The following invariant should always hold: The pattern score
     // should be smaller than the needle size.
-    SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
     while (find(finder, pattern)) {
-        SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
+        SEQAN_ASSERT_LEQ(pattern.errors, pattern.needleSize);
     }
-    SEQAN_ASSERT_LEQ(pattern.score, pattern.needleSize);
+    SEQAN_ASSERT_LEQ(pattern.errors, pattern.needleSize);
 }
 
 
@@ -1714,6 +1719,7 @@ SEQAN_DEFINE_TEST(test_pattern_assign) {
 SEQAN_BEGIN_TESTSUITE(test_find) {
 //     SEQAN_CALL_TEST(test_myers_trigger_bug);
     SEQAN_CALL_TEST(test_myers_find_begin);
+    SEQAN_CALL_TEST(test_myers_find_banded);
     
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
