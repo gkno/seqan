@@ -114,8 +114,8 @@ namespace seqan  {
 /*restriction for certain levels - between max and min, also table with frequency may be to use eventually TODO*/
 	struct FionaNodeConstraints 
 	{ 
-		 int replen_max; 
-		 int replen_min;
+		 unsigned replen_max; 
+		 unsigned replen_min;
      std::map<unsigned,double> frequency;
 	}; 
 
@@ -493,7 +493,7 @@ inline bool potentiallyErroneousNode(
 	// consider only the cases with one and two errors
 	// the average error rate and the expected value allow to compute the expected count for an error.
 	double sensitivity = 1 - falsenegrate ;
-	double noerrlm2 = pow(1-errorrate, prefixlen - 2) ;
+	double noerrlm2 = pow(1-errorrate, prefixlen - 2.0);
 	double noerrlm1 = noerrlm2 * (1-errorrate) ;
 	double errexp1err = expected * noerrlm1 * errorrate ;
 	double errexp2err = expected * noerrlm2 * errorrate *errorrate ;
