@@ -36,6 +36,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct True { enum { VALUE = true }; };
 	struct False { enum { VALUE = false }; };
 
+	template <bool b>
+	struct Eval
+	{
+		typedef False Type;
+	};
+
+	template <>
+	struct Eval<true>
+	{
+		typedef True Type;
+	};
 
 	//////////////////////////////////////////////////////////////////////////////
 	// generic "or" (using meta-programming)
