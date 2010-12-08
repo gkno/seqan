@@ -1720,7 +1720,8 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
 //     SEQAN_CALL_TEST(test_myers_trigger_bug);
     SEQAN_CALL_TEST(test_myers_find_begin);
     SEQAN_CALL_TEST(test_myers_find_banded);
-    
+    SEQAN_CALL_TEST(test_myers_find_banded_csp);
+
     // Testing Myers<FindInfix> with findBegin().
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_at_start);
     SEQAN_CALL_TEST(test_myers_find_infix_find_begin_within);

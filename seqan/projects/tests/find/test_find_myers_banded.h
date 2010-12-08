@@ -34,7 +34,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 {
 	Finder<TString> finder(seq2);
 //	Pattern<TString, MyersUkkonenBanded> pattern(seq1);
-	_PatternState<TString, MyersUkkonenBanded> state;
+	_PatternState<TString,  Myers<AlignTextBanded<NMatchesN_,NMatchesN_>, True, void> > state;
 
 	bool equal = true;
 	int delta = length(seq2) - length(seq1);
@@ -127,15 +127,42 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 	return equal;
 }
 
+template <typename TFinderCSP, typename TPatternCSP, typename TText, typename TNeedle>
+void testCSPImpl(TText &text, TNeedle &needle, int errors)
+{
+	_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP,TPatternCSP>, True, void> > state;
+	Finder<TText> finder(text);
+    SEQAN_ASSERT_TRUE(find(finder, needle, state, -1000));
+    SEQAN_ASSERT_EQ(position(finder), length(text) - 1) ;
+    SEQAN_ASSERT_EQ(getScore(state), -errors);
+}
+
+SEQAN_DEFINE_TEST(test_myers_find_banded_csp)
+{
+    {
+        Dna5String text   = "ACAGTNNTAAGNNNNA";
+        Dna5String needle = "ACNGTACTAAGNNNNG";
+        testCSPImpl<NMatchesAll_,  NMatchesAll_>  (text, needle, 1);
+        testCSPImpl<NMatchesAll_,  NMatchesN_>    (text, needle, 2);
+        testCSPImpl<NMatchesN_,    NMatchesAll_>  (text, needle, 3);
+        testCSPImpl<NMatchesN_,    NMatchesN_>    (text, needle, 4);
+        testCSPImpl<NMatchesNone_, NMatchesNone_> (text, needle, 8);
+    }
+    {
+        CharString text   = "ACAGTNNTAAGNNNNA";
+        CharString needle = "ACNGTACTAAGNNNNG";
+        testCSPImpl<NMatchesAll_,  NMatchesAll_>  (text, needle, 1);
+        testCSPImpl<NMatchesAll_,  NMatchesN_>    (text, needle, 2);
+        testCSPImpl<NMatchesN_,    NMatchesAll_>  (text, needle, 3);
+        testCSPImpl<NMatchesN_,    NMatchesN_>    (text, needle, 4);
+        testCSPImpl<NMatchesNone_, NMatchesNone_> (text, needle, 8);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 SEQAN_DEFINE_TEST(test_myers_find_banded)
 {
-	String<char> seqc1 = "halloballo";
-	String<char> seqc2 = "hellobello";
-	if (!testMyersUkkonen(seqc1, seqc2, true))
-		std::cerr << "DIFFERENCE for " << seqc1 << "," << seqc2 << std::endl;
-
 	typedef Dna TValue;
 	String<Dna> seq1 = "tgtaaaggagt";
 	String<Dna> seq2 = "tgtgtaaaggagttgtggagttgtaaaaaggagt";
