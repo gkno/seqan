@@ -181,7 +181,7 @@ SEQAN_CHECKPOINT
 
     TSize diagonalWidth = (TSize) (diagU - diagL + 1);
     TSize lo_row = (diagU <= 0) ? static_cast<TSize>(-diagU) : 0;
-    TSize hi_row = length(value(str, 1)) + 1;
+    TSize hi_row = length(value(str, 1));// + 1;
     if (len1 - diagL < hi_row) hi_row = static_cast<TSize>(len1 - diagL);
     TSize height = hi_row - lo_row + 1;
 
@@ -337,7 +337,7 @@ SEQAN_CHECKPOINT
     TSize len2 = length(str2);
 
     TSize lo_row = (diagU <= 0) ? static_cast<TSize>(-diagU) : 0;
-    TSize hi_row = len2 + 1;
+    TSize hi_row = len2;// + 1;
     if (len1 - diagL < hi_row) hi_row = static_cast<TSize>(len1 - diagL);
 
     TSize height = hi_row - lo_row + 1;
