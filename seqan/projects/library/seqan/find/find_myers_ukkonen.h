@@ -15,7 +15,7 @@
   Lesser General Public License for more details.
 
  ============================================================================
-  Author: Martin Riese
+  Author: David Weese <david.weese@fu-berlin.de>
  ==========================================================================*/
 
 #ifndef SEQAN_HEADER_FIND_MYERS_UKKONEN_H
@@ -174,8 +174,17 @@ struct _MyersSmallState
     unsigned int errors;		// the current number of errors
     unsigned int maxErrors;		// the maximal number of errors allowed
 };
+
+template <typename TNeedle, typename TSmallAlphabet>
+struct MyersSmallStateBandedShift_ {};
+template <typename TNeedle>
+struct MyersSmallStateBandedShift_<TNeedle, False> {
+    typedef typename Value<TNeedle>::Type TValue;
+    unsigned short shift[ValueSize<TValue>::VALUE];
+};
 template <typename TNeedle, typename TFinderCSP, typename TPatternCSP>
-struct _MyersSmallState<TNeedle, AlignTextBanded<TFinderCSP, TPatternCSP> >
+struct _MyersSmallState<TNeedle, AlignTextBanded<TFinderCSP, TPatternCSP> >:
+    public MyersSmallStateBandedShift_<TNeedle, typename _MyersSmallAlphabet<typename Value<TNeedle>::Type>::Type>
 {
 #ifdef SEQAN_SSE2_INT128
 	typedef SSE2_int128 TWord;
@@ -188,10 +197,9 @@ struct _MyersSmallState<TNeedle, AlignTextBanded<TFinderCSP, TPatternCSP> >
 #endif
     typedef typename Value<TNeedle>::Type TValue;
 
+    TWord bitMasks[ValueSize<TValue>::VALUE];
 	TWord VP0;					// VP[0] (saves one dereferentiation)
 	TWord VN0;					// VN[0]
-    TWord bitMasks[ValueSize<TValue>::VALUE + 1];
-    unsigned short shift[ValueSize<TValue>::VALUE];
     unsigned short errors;      // the current number of errors
     unsigned short maxErrors;   // the maximal number of errors allowed
 
@@ -826,23 +834,40 @@ _myersPostInit(_PatternState<TNeedle, TSpec> &state, True)
 		state.bitMasks[i] >>= 1;
 }
 
-template <typename TNeedle, typename TSpec, typename TOrdValue, typename TShift>
+template <typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec, typename TValue, typename TShift>
 finline void 
-_myersAdjustBitmask(_PatternState<TNeedle, TSpec> &state, TOrdValue const ord, TShift, True) 
+_myersAdjustBitmask(_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > &state, TValue const value, TShift, True) 
 {
-	typedef typename Value<TNeedle>::Type TValue;
-	typedef typename _PatternState<TNeedle, TSpec>::TWord TWord;
-	for (unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
-		state.bitMasks[i] >>= 1;
-	state.bitMasks[ord] |= (TWord)1 << BitsPerValue<TWord>::VALUE - 1;
+	typedef typename _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> >::TWord TWord;
+    
+    // compiler will optimize that
+    if (TYPECMP<TPatternCSP, NMatchesAll_>::VALUE && value == unknownValue<TValue>())
+    {
+        for (unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
+            state.bitMasks[i] = (state.bitMasks[i] >> 1) | ((TWord)1 << (BitsPerValue<TWord>::VALUE - 1));
+    } 
+    else
+    {
+        for (unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
+            state.bitMasks[i] >>= 1;
+        if (!(TYPECMP<TPatternCSP, NMatchesNone_>::VALUE && value == unknownValue<TValue>()))
+            state.bitMasks[ordValue(value)] |= (TWord)1 << (BitsPerValue<TWord>::VALUE - 1);
+    }
+
+    if (TYPECMP<TFinderCSP, NMatchesAll_>::VALUE)
+        state.bitMasks[ordValue(unknownValue<TValue>())] |= (TWord)1 << (BitsPerValue<TWord>::VALUE - 1);
+    if (TYPECMP<TFinderCSP, NMatchesNone_>::VALUE)
+        state.bitMasks[ordValue(unknownValue<TValue>())] &= ~((TWord)1 << (BitsPerValue<TWord>::VALUE - 1));
 }
 
-template <typename TNeedle, typename TSpec, typename TOrdValue, typename TShift>
+template <typename TNeedle, typename TSpec, typename TValue, typename TShift>
 finline typename _PatternState<TNeedle, TSpec>::TWord
-_myersGetBitmask(_PatternState<TNeedle, TSpec> &state, TOrdValue const ord, TShift, True) 
+_myersGetBitmask(_PatternState<TNeedle, TSpec> &state, TValue const value, TShift, True) 
 {
-	return state.bitMasks[ord];
+	return state.bitMasks[ordValue(value)];
 }
+
+
 
 //____________________________________________________________________________
 // bitmask operations - large alphabet
@@ -862,29 +887,52 @@ _myersPostInit(_PatternState<TNeedle, TSpec> &, False)
 {
 }
 
-template <typename TNeedle, typename TSpec, typename TOrdValue, typename TShift>
+template <typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec, typename TValue, typename TShift>
 finline void 
-_myersAdjustBitmask(_PatternState<TNeedle, TSpec> &state, TOrdValue const ord, TShift const shift, False) 
+_myersAdjustBitmask(_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > &state, TValue const value, TShift const shift, False) 
 {
-	typedef typename _PatternState<TNeedle, TSpec>::TWord TWord;
+	typedef typename _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> >::TWord TWord;
+    
+    if (TYPECMP<TPatternCSP, NMatchesNone_>::VALUE && value == unknownValue<TValue>())
+        return;
+    
+    register unsigned ord = ordValue(value);
 	register unsigned short x = shift - state.shift[ord];
 	if (x < BitsPerValue<TWord>::VALUE)
-		state.bitMasks[ord] = (state.bitMasks[ord] >> x) | ((TWord)1 << BitsPerValue<TWord>::VALUE - 1);
+		state.bitMasks[ord] = (state.bitMasks[ord] >> x) | ((TWord)1 << (BitsPerValue<TWord>::VALUE - 1));
 	else
-		state.bitMasks[ord] = (TWord)1 << BitsPerValue<TWord>::VALUE - 1;
+		state.bitMasks[ord] = (TWord)1 << (BitsPerValue<TWord>::VALUE - 1);
 	state.shift[ord] = shift;
 }
 
-template <typename TNeedle, typename TSpec, typename TOrdValue, typename TShift>
-finline typename _PatternState<TNeedle, TSpec>::TWord
-_myersGetBitmask(_PatternState<TNeedle, TSpec> &state, TOrdValue const ord, TShift const shift, False) 
+template <typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec, typename TValue, typename TShift>
+finline typename _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> >::TWord
+_myersGetBitmask(_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > &state, TValue const value, TShift const shift, False) 
 {
-	typedef typename _PatternState<TNeedle, TSpec>::TWord TWord;
-	register TShift x = shift - state.shift[ord];
+	typedef typename _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> >::TWord TWord;
+
+    if (TYPECMP<TFinderCSP, NMatchesNone_>::VALUE && value == unknownValue<TValue>())
+        return 0;
+
+    if (TYPECMP<TFinderCSP, NMatchesAll_>::VALUE && value == unknownValue<TValue>())
+        return (shift < BitsPerValue<TWord>::VALUE)? -1 << shift: -1;
+    
+    register unsigned ord = ordValue(value);
+    register TWord res;
+    register TShift x = shift - state.shift[ord];
 	if (x < BitsPerValue<TWord>::VALUE) 
-		return state.bitMasks[ord] >> x;
+		res = state.bitMasks[ord] >> x;
 	else
-		return 0;
+		res = 0;
+    
+    if (TYPECMP<TPatternCSP, NMatchesAll_>::VALUE)
+    {
+        ord = ordValue(unknownValue<TValue>());
+        x = shift - state.shift[ord];
+        if (x < BitsPerValue<TWord>::VALUE) 
+            res |= state.bitMasks[ord] >> x;
+    }
+    return res;
 }
 
 
@@ -931,7 +979,7 @@ _patternInitSmallStateBanded(
         // PART 1: go down the parallelogram
         
         // adjust bitmask
-        _myersAdjustBitmask(state, ordValue(*ndlIter), shift, typename _MyersSmallAlphabet<TValue>::Type());
+        _myersAdjustBitmask(state, getValue(ndlIter), shift, typename _MyersSmallAlphabet<TValue>::Type());
         
         // diagonal Myers
         register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename _MyersSmallAlphabet<TValue>::Type()) | VN;
@@ -946,7 +994,7 @@ _patternInitSmallStateBanded(
         VP = HN | ~(X | HP);
     //    std::cerr << "\t  "<<std::setw(PADDING)<<' '<<"\tVN"<<std::setw(PADDING)<<(__uint64)VN<<"\tVP"<<std::setw(PADDING)<<(__uint64)VP << std::endl;
     //    std::cerr << std::dec;
-        errors += (~D0 >> BitsPerValue<TWord>::VALUE - 1) & 1;
+        errors += (~D0 >> (BitsPerValue<TWord>::VALUE - 1)) & 1;
         if (errors > cutOff) return false;
 
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
@@ -1278,8 +1326,8 @@ SEQAN_CHECKPOINT
 		VP = (HN << 1) | ~(X | D0);
 	//    std::cerr << "\t  "<<std::setw(PADDING)<<' '<<"\tVN"<<std::setw(PADDING)<<(__uint64)VN<<"\tVP"<<std::setw(PADDING)<<(__uint64)VP<<std::endl;
 	//    std::cerr << std::dec;
-		errors += (HP >> BitsPerValue<TWord>::VALUE - 2) & 1;
-        errors -= (HN >> BitsPerValue<TWord>::VALUE - 2) & 1;
+		errors += (HP >> (BitsPerValue<TWord>::VALUE - 2)) & 1;
+        errors -= (HN >> (BitsPerValue<TWord>::VALUE - 2)) & 1;
 
         // shift bitmasks and states
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
