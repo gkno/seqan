@@ -1098,7 +1098,7 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec, typename TFinder>
 inline bool 
-_patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & pattern, TFinder & finder)
+_patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & pattern, TFinder & finder)
 {
     SEQAN_CHECKPOINT;
     return _patternInit(pattern, pattern, finder);
