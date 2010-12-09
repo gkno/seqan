@@ -164,6 +164,13 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 };
 
+template <typename TSource, typename TSpec>
+inline
+void move(Align<TSource, TSpec> & target, Align<TSource, TSpec> & source)
+{
+    SEQAN_CHECKPOINT;
+    move(target.data_rows, source.data_rows);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //ALIGN INTERFACE
