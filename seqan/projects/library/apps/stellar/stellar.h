@@ -253,39 +253,6 @@ SEQAN_CHECKPOINT
 	return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//// Checks whether two matches overlap in seq2 and 
-////  whether the non-overlaping parts are shorter than minLength.
-//template<typename TMatch, typename TSize>
-//bool
-//checkOverlap(TMatch & matchA, TMatch & matchB, TSize minLength) {
-//SEQAN_CHECKPOINT
-//	// check overlap in seq2
-//	if (((TSize)matchA.begin2 - (TSize)matchB.begin2 > minLength &&
-//		 (TSize)matchA.end2 - (TSize)matchB.end2 > minLength) ||
-//		((TSize)matchB.begin2 - (TSize)matchA.begin2 > minLength &&
-//		 (TSize)matchB.end2 - (TSize)matchA.end2 > minLength)) {
-//		// non-overlapping parts of both matches are longer than minLength
-//		return false;
-//	}
-//
-//	// same offset in both sequences?
-//	if ((TSize)matchA.begin1 - (TSize)matchB.begin1 != (TSize)matchA.begin2 - (TSize)matchB.begin2) {
-//		return false;
-//	}
-//
-//	// check length of non-overlapping parts in seq1
-//	if (((TSize)matchA.begin1 - (TSize)matchB.begin1 > minLength &&
-//		 (TSize)matchA.end1 - (TSize)matchB.end1 > minLength) ||
-//		((TSize)matchB.begin1 - (TSize)matchA.begin1 > minLength &&
-//		 (TSize)matchB.end1 - (TSize)matchA.end1 > minLength)) {
-//		// non-overlapping parts of both matches are longer than minLength
-//		return false;
-//	}
-//
-//	return true;
-//}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Marks matches that overlap in both sequences with a longer match as invalid.
 template<typename TSequence, typename TId, typename TSize>
@@ -293,52 +260,59 @@ void
 maskOverlaps(String<StellarMatch<TSequence, TId> > & matches,
 			 TSize minLength) {
 SEQAN_CHECKPOINT
-	typedef StellarMatch<TSequence, TId>						TMatch;
-	typedef typename TMatch::TPos								TPos;
-	
-	typedef unsigned											TCargo;
-	typedef IntervalAndCargo<TPos, TCargo>						TInterval;
-	typedef IntervalTree<TPos, TCargo>							TIntervalTree;
+	typedef StellarMatch<TSequence, TId>					TMatch;
+	typedef typename TMatch::TPos							TPos;
+	typedef typename Iterator<String<TMatch>, Rooted>::Type	TIter;
+	typedef typename Iterator<String<TSize>, Rooted>::Type	TOverlapIter;
 
-	typedef typename Iterator<String<TCargo>, Standard>::Type	TIntervalIterator;
-	typedef typename Iterator<String<TMatch>, Rooted>::Type		TIterator;
+	// sort matches by begin position in row0
+	sortMatches(matches, LessPos<TMatch>());
 
-	// put matches into interval tree
-	String<TInterval> intervals;
-	for (unsigned i = 0; i < length(matches); ++i) {
-		TMatch m = value(matches, i);
-		appendValue(intervals, TInterval(m.begin1, m.end1, i));
-	}
-	TIntervalTree tree(intervals);
+	// list of "open" matches in row0
+	String<TSize> overlaps;
 
-	TIterator it = begin(matches, Rooted());
-	TIterator itEnd = end(matches, Rooted());
+	TIter it = begin(matches);
+	TIter itEnd = end(matches);
 
 	for (; it != itEnd; ++it) {
 		if ((*it).id == TMatch::INVALID_ID) continue;
+
+		TOverlapIter overlapIt = begin(overlaps);
+		TOverlapIter overlapEnd = end(overlaps);
 		
-		// find overlapping matches (overlap in seq1)
-		String<TCargo> overlaps;
-		findIntervals(tree, (*it).begin1, (*it).end1, overlaps);
+		while (overlapIt != overlapEnd && matches[*overlapIt].end1 >= (*it).end1) {
+			if (matches[*overlapIt].id == TMatch::INVALID_ID) {
+				++overlapIt;
+				continue;
+			}
+			if (checkOverlap(*it,  matches[*overlapIt], minLength)) {
+				// set shorter match invalid (*it is here shorter than *overlapIt)
+				(*it).id = TMatch::INVALID_ID;
+			}
+			++overlapIt;
+		}
 
-		TIntervalIterator overlapIt = begin(overlaps, Standard());
-		TIntervalIterator overlapItEnd = end(overlaps, Standard());
-
-		for (; overlapIt != overlapItEnd; ++overlapIt) {
-			TMatch overlap = value(matches, *overlapIt);
-			if (overlap.id == TMatch::INVALID_ID || position(it) == *overlapIt) continue;
-
-			// check for overlap in both sequences and small non-overlapping parts
-			if (checkOverlap(*it, overlap, minLength)) {
+		TPos insertPos = position(overlapIt);
+		while (overlapIt != overlapEnd &&  matches[*overlapIt].end1 >= (*it).begin1) {
+			if (matches[*overlapIt].id == TMatch::INVALID_ID) {
+				++overlapIt;
+				continue;
+			}
+			if (checkOverlap(*it,  matches[*overlapIt], minLength)) {
 				// set shorter match invalid
-				if (length((*it)) > length(overlap)) {
-					overlap.id = TMatch::INVALID_ID;
+				if (length((*it)) > length(matches[*overlapIt])) {
+					 matches[*overlapIt].id = TMatch::INVALID_ID;
 				} else {
 					(*it).id = TMatch::INVALID_ID;
-					break;
 				}
 			}
+			++overlapIt;
 		}
+		resize(overlaps, position(overlapIt));
+
+		// insert match into list
+		if ((*it).id != TMatch::INVALID_ID)
+			insertValue(overlaps, insertPos, position(it));
 	}
 }
 
