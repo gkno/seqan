@@ -144,7 +144,7 @@ struct Options<Lagan> : Options<PairwiseAlignment>
               qMax(6),
               qMin(3),
               seedScoreThreshold(5), // was 30
-              chainingMaxDistance(200),
+              chainingMaxDistance(5),
               chainingMaxDiagonalDistance(5),
               chainAlignmentBandwidthDelta(2)
     {}
@@ -258,6 +258,7 @@ void setUpCommandLineParser(CommandLineParser & parser,
     addUsageLine(parser, "lagan LEFT.fasta RIGHT.fasta");
     addLine(parser, "");
     addLine(parser, "At the moment, only the first sequences in each FASTA file is interpreted.");
+    addOption(parser, CommandLineOption("bd", "bandwidth-delta", "Bandwidth delta.", OptionType::Int));
 
     setUpCommandLineParser(parser, PairwiseAlignment());
 
@@ -273,7 +274,7 @@ int parseCommandLineAndCheck(Options<AlignmentScores> & options,
     if (isSetLong(parser, "score-match"))
         getOptionValueLong(parser, "score-match", options.scoreMatch);
     if (isSetLong(parser, "score-mismatch"))
-        getOptionValueLong(parser, "score-mismatch", options.scoreMatch);
+        getOptionValueLong(parser, "score-mismatch", options.scoreMismatch);
     if (isSetLong(parser, "score-gap")) {
         getOptionValueLong(parser, "score-gap", options.scoreGapOpen);
         getOptionValueLong(parser, "score-gap", options.scoreGapExtend);
@@ -362,6 +363,9 @@ int parseCommandLineAndCheck(Options<Lagan> & options,
     if (ret != 0)
         return ret;
 
+    if (isSetLong(parser, "bandwidth-delta"))
+        getOptionValueLong(parser, "bandwidth-delta", options.chainAlignmentBandwidthDelta);
+
     // First argument is "lagan", second and third ones are file name.
     leftFilename = getArgumentValue(parser, 1);
     rightFilename = getArgumentValue(parser, 2);
@@ -417,10 +421,10 @@ void constructLaganChain(
                 TSeed seed(pos0, pos1, q);
                 setScore(seed, q * scoreMatch(scoringScheme));
                 // std::cerr << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
-                // if (addSeed(seedSet, seed, options.chainingMaxDistance, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
-                //     // std::cerr << "  by merging" << std::endl;
-                //     continue;
-                // }
+                if (addSeed(seedSet, seed, 0u, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
+                    // std::cerr << "  by merging" << std::endl;
+                    continue;
+                }
 				if (addSeed(seedSet, seed, options.chainingMaxDistance, options.chainingMaxDiagonalDistance, scoringScheme, sequence0, sequence1, Chaos())) {
                     // std::cerr << "  by CHAOS chaining" << std::endl;
                     continue;
@@ -439,7 +443,7 @@ void constructLaganChain(
     std::cerr << "Global chaining..." << std::endl;
     // std::cerr << "length(seedSet) == " << length(seedSet) << std::endl;
     chainSeedsGlobally(chain, seedSet, SparseChaining());
-    std::cout << "# of seeds: " << length(chain) << std::endl;
+    std::cerr << "# of seeds: " << length(chain) << std::endl;
 
     // -----------------------------------------------------------------------
     // Recursively fill gaps
@@ -536,6 +540,11 @@ int performPairwiseAlignment(
         std::cerr << "ERROR: No similarity found!" << std::endl;
         return 1;
     }
+
+    // for (std::list<TSeed>::iterator it = seedChain.begin(); it != seedChain.end(); ++it)
+    // {
+    //     std::cerr << *it << std::endl;
+    // }
 
     // Perform banded alignment around this seed.
     Score<int, Simple> scoringScheme(options.scoreMatch, options.scoreMismatch, options.scoreGapExtend, options.scoreGapOpen);
