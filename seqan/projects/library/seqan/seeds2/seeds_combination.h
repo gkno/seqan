@@ -85,7 +85,7 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
     // If the distance between the diagonals exceeds the threshold
     // then the seeds cannot be merged.
     typedef typename _MakeUnsigned<TThreshold>::Type TUnsignedThreshold;
-    if (static_cast<TUnsignedThreshold>(_abs(getEndDiagonal(a) - getStartDiagonal(b))) >= static_cast<TUnsignedThreshold>(maxDiagonalDistance))
+    if (static_cast<TUnsignedThreshold>(_abs(getEndDiagonal(a) - getStartDiagonal(b))) > static_cast<TUnsignedThreshold>(maxDiagonalDistance))
         return false;
     // Otherwise, the seeds can be merged.
     return true;
