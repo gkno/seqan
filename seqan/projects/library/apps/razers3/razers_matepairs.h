@@ -145,15 +145,12 @@ bool loadReads(
 	unsigned kickoutcount = 0;
 	for(unsigned i = 0; i < seqCount; ++i) 
 	{
-		if (options.readNaming == 0 || options.readNaming == 3)
+		if (options.readNaming == 0)
 		{
 			assignSeqId(id[0], leftMates[i], formatL);				// read left Fasta id
 			assignSeqId(id[1], rightMates[i], formatR);				// read right Fasta id
-			if (options.readNaming == 0)
-			{
-				append(id[0], "/L");
-				append(id[1], "/R");
-			}
+			append(id[0], "/L");
+			append(id[1], "/R");
 		}
 		
 		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
@@ -764,15 +761,8 @@ int _mapMatePairReads(
 		resize(forwardPatternsR, pairCount, Exact());
 		for(unsigned i = 0; i < pairCount; ++i)
 		{
-#ifdef RAZERS_NOOUTERREADGAPS
-			if (!empty(readSetL[i]) && !empty(readSetR[i])) {
-				setHost(forwardPatternsL[i], prefix(readSetL[i], length(readSetL[i]) - 1));
-				setHost(forwardPatternsR[i], prefix(readSetR[i], length(readSetR[i]) - 1));
-			}
-#else
 			setHost(forwardPatternsL[i], readSetL[i]);
 			setHost(forwardPatternsR[i], readSetR[i]);
-#endif
 			_patternMatchNOfPattern(forwardPatternsL[i], options.matchN);
 			_patternMatchNOfPattern(forwardPatternsR[i], options.matchN);
 			_patternMatchNOfFinder(forwardPatternsL[i], options.matchN);

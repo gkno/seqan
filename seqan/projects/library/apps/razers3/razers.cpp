@@ -41,9 +41,6 @@
 #define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
-//#define RAZERS_DONTMASKDUPLICATES
-#define RAZERS_NOOUTERREADGAPS			// enforce the alignment of the first and last base (determines the lakes)
-#define RAZERS_OPENADDRESSING
 
 #include <seqan/platform.h>
 #ifdef PLATFORM_WINDOWS
@@ -307,7 +304,6 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = use Fasta id");
 	addHelpLine(parser, "1 = enumerate beginning with 1");
 	addHelpLine(parser, "2 = use the read sequence (only for short reads!)");
-	addHelpLine(parser, "3 = use the Fasta id, do NOT append '/L' or '/R' for mate pairs");
 	addOption(parser, CommandLineOption("so", "sort-order",        "select how matches are sorted", OptionType::Int | OptionType::Label, options.sortOrder));
 	addHelpLine(parser, "0 = 1. read number, 2. genome position");
 	addHelpLine(parser, "1 = 1. genome position, 2. read number");
@@ -427,7 +423,7 @@ int main(int argc, const char *argv[])
 		cerr << "Invalid sort order options." << endl;
 	if ((options.genomeNaming > 1) && (stop = true))
 		cerr << "Invalid genome naming options." << endl;
-	if ((options.readNaming > 3) && (stop = true))
+	if ((options.readNaming > 2) && (stop = true))
 		cerr << "Invalid read naming options." << endl;
 	if ((options.positionFormat > 1) && (stop = true))
 		cerr << "Invalid position format options." << endl;
@@ -494,7 +490,7 @@ int main(int argc, const char *argv[])
 	}
 
 	options.errorRate = (100.0 - options.errorRate) / 100.0;
-	pm_options.optionLossRate = (ParamChooserOptions::TFloat)(100.0 - pm_options.optionLossRate) / 100.0;
+	pm_options.optionLossRate = (100.0 - pm_options.optionLossRate) / 100.0;
 	if (stop)
 	{
 		cerr << "Exiting ..." << endl;
@@ -524,7 +520,7 @@ int main(int argc, const char *argv[])
 	{
 		if (options.lowMemory) pm_options.maxWeight = 13;
 		pm_options.verbose = (options._debugLevel >= 1);
-		pm_options.optionErrorRate = (ParamChooserOptions::TFloat)options.errorRate;
+		pm_options.optionErrorRate = options.errorRate;
 		if (options.gapMode == RAZERS_UNGAPPED)
 		{
 			pm_options.optionProbINSERT = (ParamChooserOptions::TFloat)0.0;
