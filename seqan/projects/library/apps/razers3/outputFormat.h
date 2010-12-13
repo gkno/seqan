@@ -649,8 +649,16 @@ int dumpMatches(
 		return false;
 	}
 
-	TBinFunctor binFunctor(store.alignQualityStore);
-	maskDuplicates(store, mode);
+// TODO(holtgrew): Remove commented out conflicts when it is clear that it is not required to understand the changes any more.
+//<<<<<<< .working
+//	TBinFunctor binFunctor(store.alignQualityStore);
+//	maskDuplicates(store, mode);
+//=======
+	
+#ifndef RAZERS_DONTMASKDUPLICATES
+	maskDuplicates(store);
+//>>>>>>> .merge-right.r8305
+#endif
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	 && !options.maqMapping
@@ -666,13 +674,28 @@ int dumpMatches(
 	if(options.maqMapping)
 	{
 		String<int> cooc;
-		compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);	//only best two matches per read are kept
-		countCoocurrences(store,cooc,options);	//coocurrence statistics are filled
-		assignMappingQuality(store,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
+//<<<<<<< .working
+//		compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);	//only best two matches per read are kept
+//		countCoocurrences(store,cooc,options);	//coocurrence statistics are filled
+//		assignMappingQuality(store,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
+//=======
+		compactMatches(matches, stats, options, true, nothing, false); //only best two matches per read are kept
+		countCoocurrences(matches,cooc,options);	//coocurrence statistics are filled
+		assignMappingQuality(matches,reads,cooc,stats,options);//mapping qualities are assigned and only one match per read is kept
+//>>>>>>> .merge-right.r8305
 	}
 	else	 
 #endif
-	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
+//<<<<<<< .working
+//	compactMatches(store, stats, options, mode, nothing, COMPACT_FINAL);
+//=======
+	
+#ifdef RAZERS_MICRO_RNA
+	if(options.microRNA)purgeAmbiguousRnaMatches(store,options);
+	else
+#endif
+	compactMatches(store, stats, options, true, nothing);
+//>>>>>>> .merge-right.r8305
 
 	String<int> libSize;	// store outer library size for each pair match (indexed by pairMatchId)
 	calculateInsertSizes(libSize, store);
@@ -715,6 +738,7 @@ int dumpMatches(
 				{
 					// 0..filename is the read's Fasta id
 					case 0:
+					case 3:  // same as 0 if non-paired
 						file << store.readNameStore[(*it).readId];
 						break;
 
@@ -865,6 +889,7 @@ int dumpMatches(
 				{
 					// 0..filename is the read's Fasta id
 					case 0:
+					case 3:  // same as 0 if non-paired
 						file << '>' << store.readNameStore[readNo] << _sep_;
 						break;
 
@@ -973,8 +998,6 @@ int dumpMatches(
 							++it;
 							continue;
 						}
-#else
-						file << (unsigned)qual.errors << "\t";
 #endif
 
 						unsigned currReadNo = (*it).readId;
@@ -1060,6 +1083,7 @@ int dumpMatches(
 						{
 							// 0..filename is the read's Fasta id
 							case 0:
+							case 3:  // same as 0 if non-paired
 								file << "ID=" <<store.readNameStore[currReadNo];
 								break;
 							
@@ -1122,7 +1146,7 @@ int dumpMatches(
 								assignSource(row(align, 0), store.readSeqStore[currReadNo]);
 								TContigPos left = (*it).beginPos;
 								TContigPos right = (*it).endPos;
-								
+
 								if (left < right)
 									assignSource(row(align, 1), infix(currGenome, left, right));
 								else
@@ -1167,13 +1191,15 @@ int dumpMatches(
 				++filecount;
 			}
 			break;
-*/		case 4: // SAM
+*/
+		case 4: // SAM
 			convertMatchesToGlobalAlignment(store, scoreType, True());
-//			String<String<unsigned> > layout;
-//			layoutAlignment(layout, store, 0);
-//			printAlignment(std::cout, layout, store, 0, 0, 2000, 0, 100);
-//			printAlignment(std::cout, layout, store, 1, 0, 2000, 0, 100);
-			
+			/*{
+			String<String<unsigned> > layout;
+			layoutAlignment(layout, store, 0);
+			for (unsigned i=0;i<length(store.contigStore);++i)
+				printAlignment(std::cout, layout, store, i, 0, 2000, 0, 100, -1);
+			}*/
 			write(file, store, SAM());
 			break;
 		case 5: // AFG
