@@ -232,8 +232,8 @@ SEQAN_CHECKPOINT
 			}
 		}
 		// check whether offset is the same in both sequences
-		if (toViewPosition(matchB.row2, matchA.begin2) - toViewPosition(matchB.row2, matchB.begin2) != 
-			toViewPosition(matchB.row1, matchA.begin1) - toViewPosition(matchB.row1, matchB.begin1)) {
+		if (toViewPosition(matchA.row2, matchA.begin2) - toViewPosition(matchB.row2, matchB.begin2) != 
+			toViewPosition(matchA.row1, matchA.begin1) - toViewPosition(matchB.row1, matchB.begin1)) {
 			return false;
 		}
 	} else {
@@ -245,8 +245,8 @@ SEQAN_CHECKPOINT
 			}
 		}
 		// check whether offset is the same in both sequences
-		if (toViewPosition(matchA.row2, matchB.begin2) - toViewPosition(matchA.row2, matchA.begin2) != 
-			toViewPosition(matchA.row1, matchB.begin1) - toViewPosition(matchA.row1, matchA.begin1)) {
+		if (toViewPosition(matchB.row2, matchB.begin2) - toViewPosition(matchA.row2, matchA.begin2) != 
+			toViewPosition(matchB.row1, matchB.begin1) - toViewPosition(matchA.row1, matchA.begin1)) {
 			return false;
 		}
 	}
