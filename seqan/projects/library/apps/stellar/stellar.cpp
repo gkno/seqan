@@ -53,19 +53,19 @@ _stellarOnOne(TSequence & database,
 	// stellar
 	if (options.fastOption == CharString("exact"))
 		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches, 
+								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
 								  queryIDs, matches, AllLocal());
 	else if (options.fastOption == "bestLocal")
 		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches,
+								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
 								  queryIDs, matches, BestLocal());
 	else if (options.fastOption == "bandedGlobal")
 		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches,
+								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
 								  queryIDs, matches, BandedGlobal());
 	else if (options.fastOption == "bandedGlobalExtend")
 		numSwiftHits = stellar(finder_swift, pattern_swift, options.epsilon, options.minLength, options.xDrop, 
-								  options.disableThresh, options.compactThresh, options.numMatches,
+								  options.disableThresh, options.compactThresh, options.numMatches, options.verbose,
 								  queryIDs, matches, BandedGlobalExtend());
 	else {
 		std::cerr << "Unknown verification strategy: " << options.fastOption << std::endl;
@@ -74,9 +74,11 @@ _stellarOnOne(TSequence & database,
 
 	// file output
 	if (options.disableThresh != (unsigned)-1)
-		return _outputMatches(matches, numSwiftHits, databaseID, databaseStrand, queries, queryIDs, file, options.disabledQueriesFile);
+		return _outputMatches(matches, databaseID, databaseStrand, queries, queryIDs, options.verbose,
+		                      file, options.outputFormat, options.disabledQueriesFile);
 	else
-		return _outputMatches(matches, databaseID, databaseStrand, queryIDs, file);
+		return _outputMatches(matches, databaseID, databaseStrand, queryIDs, options.verbose,
+		                      file, options.outputFormat);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -147,26 +149,29 @@ _stellarOnAll(StringSet<TSequence> & databases,
 	indexRequire(index_qgram, QGram_SADir());
 	std::cout << std::endl;
 
-	// positive database strand
-	std::cout << "Aligning all query sequences to database sequence";
-	std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
-
 	int numMatches = 0;
+	// positive database strand
+    if (options.forward) {
+		std::cout << "Aligning all query sequences to forward database sequence";
+		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
 
-    for(unsigned i = 0; i < length(databases); ++i) {
-		numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs, true, options, file);
-    }
-	std::cout << std::endl;
+		for(unsigned i = 0; i < length(databases); ++i) {
+			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
+				                        true, options, file);
+		}
+		std::cout << std::endl;
+	}
 
 	// negative (reverse complemented) database strand
     if (options.reverse) {
-        std::cout << "Aligning all query sequences to reverse complement of database sequence";
+        std::cout << "Aligning all query sequences to reverse complemented database sequence";
 		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
 
         reverseComplementInPlace(databases);
 
         for(unsigned i = 0; i < length(databases); ++i) {
-			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs, false, options, file);
+			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
+				                        false, options, file);
         }
 		std::cout << std::endl;
     }
@@ -222,8 +227,10 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringS
 	TSize queryLength = length(concat(queries));
 
 	if (options.qgramAbundanceCut != 1) {
-		std::cout << "  q-gram expected abundance : " << queryLength/(double)(1<<(options.qGram<<1)) << std::endl;
-		std::cout << "  q-gram abundance threshold: " << _max(100,(int)(queryLength*options.qgramAbundanceCut)) << std::endl;
+		std::cout << "  q-gram expected abundance : ";
+		std::cout << queryLength/(double)(1<<(options.qGram<<1)) << std::endl;
+		std::cout << "  q-gram abundance threshold: ";
+		std::cout << _max(100,(int)(queryLength*options.qgramAbundanceCut)) << std::endl;
 		std::cout << std::endl;
 	}
 }
@@ -232,10 +239,14 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringS
 // Calculates parameters from parameters in options object and writes them to std::cout
 void _writeCalculatedParams(StellarOptions & options) {
 	// Calculate parameters
-	int n = (int) ceil((floor(options.epsilon * options.minLength) + 1) / options.epsilon);
-	int threshold = (int) _max(1, (int) _min(
-		(n + 1) - options.qGram * (floor(options.epsilon * n) + 1),
-		(options.minLength + 1) - options.qGram * (floor(options.epsilon * options.minLength) + 1)));
+	int errMinLen = (int) floor(options.epsilon * options.minLength);
+	int n = (int) ceil((errMinLen + 1) / options.epsilon);
+	int errN = (int) floor(options.epsilon * n);
+	unsigned smin = (unsigned) _min(ceil((double)(options.minLength-errMinLen)/(errMinLen+1)),
+		                            ceil((double)(n-errN)/(errN+1)));
+
+	int threshold = (int) _max(1, (int) _min((n + 1) - options.qGram * (errN + 1),
+											 (options.minLength + 1) - options.qGram * (errMinLen + 1)));
 	int overlap = (int) floor((2 * threshold + options.qGram - 3) / (1 / options.epsilon - options.qGram));
 	int distanceCut = (threshold - 1) + options.qGram * overlap + options.qGram;
 	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
@@ -243,6 +254,11 @@ void _writeCalculatedParams(StellarOptions & options) {
 
 	// Output calculated parameters
 	std::cout << "Calculated parameters:" << std::endl;
+	if (options.qGram == (unsigned)-1) {
+		options.qGram = (unsigned)_min(smin, 32u);
+		std::cout << "  k-mer length: " << options.qGram << std::endl;
+	}
+	std::cout << "  s^min       : " << smin << std::endl;
 	std::cout << "  threshold   : " << threshold << std::endl;
 	std::cout << "  distance cut: " << distanceCut << std::endl;
 	std::cout << "  delta       : " << delta << std::endl;
@@ -260,8 +276,10 @@ _writeSpecifiedParams(TOptions & options) {
 	std::cout << "  minimal match length             : " << options.minLength << std::endl;
 	std::cout << "  maximal error rate (epsilon)     : " << options.epsilon << std::endl;
 	std::cout << "  maximal x-drop                   : " << options.xDrop << std::endl;
-	std::cout << "  q-gram (k-mer) length            : " << options.qGram << std::endl;
-	std::cout << "  reverse complement database      : " << ((options.reverse)?"yes":"no") << std::endl;
+	if (options.qGram != (unsigned)-1)
+		std::cout << "  k-mer (q-gram) length            : " << options.qGram << std::endl;
+	std::cout << "  search forward strand            : " << ((options.forward)?"yes":"no") << std::endl;
+	std::cout << "  search reverse complement        : " << ((options.reverse)?"yes":"no") << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "  verification strategy            : " << options.fastOption << std::endl;
@@ -288,10 +306,17 @@ _writeFileNames(TOptions & options) {
 	std::cout << "Database file   : " << options.databaseFile << std::endl;
 	std::cout << "Query file      : " << options.queryFile << std::endl;
 	std::cout << "Output file     : " << options.outputFile << std::endl;
+	std::cout << "Output format   : " << options.outputFormat << std::endl;
 	if (options.disableThresh != (unsigned)-1) {
 		std::cout << "Disabled queries: " << options.disabledQueriesFile << std::endl;
 	}
 	std::cout << std::endl;
+}
+
+inline void
+_addVersion(CommandLineParser& parser) {
+	::std::string rev = "$Revision: 8300 $";
+	addVersionLine(parser, "Version 1.0 (December 5th 2010) SeqAn Revision: " + rev.substr(11, 4) + "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -304,6 +329,7 @@ _parseOptions(TParser & parser, TOptions & options) {
     getOptionValueShort(parser, 'q', options.queryFile);
     if (isSetShort(parser, 'o')) getOptionValueShort(parser, 'o', options.outputFile);
     if (isSetShort(parser, "od")) getOptionValueShort(parser, "od", options.disabledQueriesFile);
+	if (isSetShort(parser, "of")) getOptionValueShort(parser, "of", options.outputFormat);
 
 	// main options
 	if (isSetLong(parser, "kmer")) getOptionValueLong(parser, "kmer", options.qGram);
@@ -311,8 +337,10 @@ _parseOptions(TParser & parser, TOptions & options) {
 	if (isSetShort(parser, 'e')) getOptionValueShort(parser, 'e', options.epsilon);
     if (isSetShort(parser, 'x')) getOptionValueShort(parser, 'x', options.xDrop);
 
-	if (isSetShort(parser, 'r')) getOptionValueShort(parser, 'r', options.reverse);
-	if (isSetShort(parser, 'v')) getOptionValueShort(parser, 'v', options.fastOption);
+	if (isSetShort(parser, 'f')) if (!isSetShort(parser, 'r')) options.reverse = false;
+	if (isSetShort(parser, 'r')) if (!isSetShort(parser, 'f')) options.forward = false;
+
+	if (isSetShort(parser, "vs")) getOptionValueShort(parser, "vs", options.fastOption);
 	if (isSetShort(parser, "dt")) getOptionValueShort(parser, "dt", options.disableThresh);
 	if (isSetShort(parser, 'n')) getOptionValueShort(parser, 'n', options.numMatches);
 	if (isSetShort(parser, 's')) getOptionValueShort(parser, 's', options.compactThresh);
@@ -320,8 +348,31 @@ _parseOptions(TParser & parser, TOptions & options) {
 	if (isSetShort(parser, "rl")) getOptionValueShort(parser, "rl", options.minRepeatLength);
 	if (isSetShort(parser, 'a')) getOptionValueShort(parser, 'a', options.qgramAbundanceCut);
 
-	if (options.qGram > 32) {
-		std::cerr << "Invalid parameter value: Please choose a smaller q-gram length." << std::endl;
+	if (isSetShort(parser, 'v')) options.verbose = 1;
+
+	if (options.outputFormat != "gff" && options.outputFormat != "text") {
+		std::cerr << "Invalid parameter value: Unknown output format." << std::endl;
+		return 0;
+	}
+
+	if (options.fastOption != "exact" && options.fastOption != "bestLocal"
+		 && options.fastOption != "bandedGlobal") {
+		std::cerr << "Invalid parameter value: Unknown verification strategy." << std::endl;
+		return 0;
+	}
+
+	if (isSetShort(parser, 'k') && options.qGram < 1) {
+		std::cerr << "Invalid parameter value: Please choose a greater k-mer length." << std::endl;
+		return 0;
+	}
+
+	if (isSetShort(parser, 'k') && options.qGram > 32) {
+		std::cerr << "Invalid parameter value: Please choose a smaller k-mer length." << std::endl;
+		return 0;
+	}
+
+	if (options.epsilon < 0.0) {
+		std::cerr << "Invalid parameter value: Please choose a greater error rate." << std::endl;
 		return 0;
 	}
 
@@ -329,13 +380,13 @@ _parseOptions(TParser & parser, TOptions & options) {
 		std::cerr << "Invalid parameter value: Please choose a smaller error rate." << std::endl;
 		return 0;
 	}
-	if (options.qGram >= 1/options.epsilon) {
+	if (isSetShort(parser, 'k') && options.qGram >= 1/options.epsilon) {
 		std::cerr << "Invalid parameter value: Please choose q-gram length lower than 1/epsilon." << std::endl; 
 		return 0;
 	}
 
 	if (options.qgramAbundanceCut > 1 || options.qgramAbundanceCut < 0) {
-		std::cerr << "Invalid parameter value: Please choose a k-mer overabundance cut ration between 0 and 1." << std::endl;
+		std::cerr << "Invalid parameter value: Please choose a k-mer overabundance cut ration between 0 and 1.\n";
 		return 0;
 	}
 
@@ -351,6 +402,8 @@ _parseOptions(TParser & parser, TOptions & options) {
 template<typename TParser>
 void
 _setParser(TParser & parser) {
+	_addVersion(parser);
+
     addTitleLine(parser, "*******************************************");
 	addTitleLine(parser, "* STELLAR - the SwifT Exact LocaL AligneR *");
 	addTitleLine(parser, "* (c) Copyright 2010 by Birte Kehr        *");
@@ -368,29 +421,34 @@ _setParser(TParser & parser) {
               (OptionType::String | OptionType::Mandatory)));
     addOption(parser, CommandLineOption('q', "query", "Fasta file containing the query sequences", 
               (OptionType::String | OptionType::Mandatory)));
+
+	addSection(parser, "Main Options:");
+    addOption(parser, CommandLineOption('e', "epsilon", "Maximal error rate (max 0.25)", OptionType::Double, "0.05"));
+    addOption(parser, CommandLineOption('l', "minLength", "Minimal length of epsilon-matches", OptionType::Int, 100));
+	addOption(parser, CommandLineOption('f', "forward", "Search only in forward strand of database",
+		OptionType::Boolean, "both"));
+	addOption(parser, CommandLineOption('r', "reverse", "Search only in reverse complement of database",
+		OptionType::Boolean, "both"));
+    addOption(parser, CommandLineOption('v', "verbose", "Verbosity mode.", OptionType::Bool, "false"));
     
 	addSection(parser, "Filtering Options:");
-    addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32(", OptionType::Int, 10));
-    addOption(parser, CommandLineOption('l', "minLength", "Minimal length of epsilon-matches", OptionType::Int, 100));
-    addOption(parser, CommandLineOption('e', "epsilon", "Maximal error rate (max 0.25)", OptionType::Double, "0.05"));
+    addOption(parser, CommandLineOption('k', "kmer", "Length of the q-grams (max 32)", OptionType::Int, 10));
     addOption(parser, CommandLineOption("rp", "repeatPeriod",
 		"Maximal period of low complexity reapeats to be filtered", OptionType::Int, 1));
     addOption(parser, CommandLineOption("rl", "repeatLength",
 		"Minimal length of low complexity reapeats to be filtered", OptionType::Int, 1000));
     addOption(parser, CommandLineOption('a', "abundanceCut",
 		"k-mer overabundance cut ratio", OptionType::Double, "1"));
-	addOption(parser, CommandLineOption('r', "reverseComplement", "Search also in reverse complement of database",
-		OptionType::Boolean, false));
 
 	addSection(parser, "Verification Options:");
     addOption(parser, CommandLineOption('x', "xDrop", "Maximal x-drop for extension", OptionType::Double, 5));
-	addOption(parser, CommandLineOption('v', "verification", "Verification strategy", OptionType::String, "exact"));
+	addOption(parser, CommandLineOption("vs", "verification", "Verification strategy", OptionType::String, "exact"));
 	addHelpLine(parser, "exact        = compute and extend all local alignments in SWIFT hits");
 	addHelpLine(parser, "bestLocal    = compute and extend only best local alignment in SWIFT hits");
 	addHelpLine(parser, "bandedGlobal = banded global alignment on SWIFT hits");
 	addOption(parser, CommandLineOption("dt", "disableThresh",
 		"Maximal number of verified matches before disabling verification", OptionType::Int));
-	addHelpLine(parser, "for one query sequence (default no disabling)");
+	addHelpLine(parser, "for one query sequence (default infinity)");
 	addOption(parser, CommandLineOption('n', "numMatches",
 		"Maximal number of kept matches per query and database", OptionType::Int, 50));
 	addHelpLine(parser, "If there are more matches, only the longest ones are kept.");
@@ -400,8 +458,8 @@ _setParser(TParser & parser) {
 
 	addSection(parser, "Output Options:");
     addOption(parser, CommandLineOption('o', "out", "Name of output file", OptionType::String, "stellar.gff"));
-	addOption(parser, CommandLineOption('f', "outFormat", "Output format", OptionType::String, "gff"));
-	addHelpLine(parser, "possible formats: gff");
+	addOption(parser, CommandLineOption("of", "outFormat", "Output format", OptionType::String, "gff"));
+	addHelpLine(parser, "Possible formats: gff, text");
 	addOption(parser, CommandLineOption("od", "outDisabled",
 		"Name of output file containing disabled query sequences", OptionType::String));
 	addHelpLine(parser, "(default stellar.disabled.fasta)");
@@ -411,16 +469,12 @@ _setParser(TParser & parser) {
 // Parses and outputs parameters, calls _stellarOnAll
 int main(int argc, const char *argv[]) {
 
-//-d "Z:\GenomeData\NC_001405_short.fa" -q "Z:\GenomeData\NC_001460_short.fa" -k 5 -l 30 -e 0.1 -x 10 -r
-//-d "Z:\GenomeData\adenoviruses\NC_001405.fa" -q "Z:\GenomeData\adenoviruses\NC_001460.fa" -k 5 -l 30 -e 0.1 -x 5 -r -s 500 -n 100
-//-d "Z:\GenomeData\simulated\longReads\seq_1Mb.fa" -q "Z:\seqan-trunk\seqan\projects\library\cmake\linux\tailReads.fa" -k 7 -l 50 -e 0.05
-
     // command line parsing
     CommandLineParser parser("stellar");
 
     _setParser(parser);
     if (!parse(parser, argc, argv)) {
-		if (isSetShort(parser, 'h')) return 0; 
+		if (isSetShort(parser, 'h') || isSetShort(parser, 'v')) return 0; 
         shortHelp(parser, std::cerr);
         return 1;
     }
@@ -457,13 +511,16 @@ int main(int argc, const char *argv[]) {
 	_writeMoreCalculatedParams(options, databases, queries);
 
     // open output files
-    std::ofstream file, daFile;
-	daFile.open(toCString(options.disabledQueriesFile));
-	daFile.close();
+    std::ofstream file;
     file.open(toCString(options.outputFile));
 	if (!file.is_open()) {
 		std::cerr << "Could not open output file." << std::endl;
 		return 1;
+	}
+	if(options.disableThresh != (unsigned)-1) {
+		std::ofstream daFile;
+		daFile.open(toCString(options.disabledQueriesFile));
+		daFile.close();
 	}
 
 	// stellar on all databases and queries writing results to file
@@ -471,7 +528,8 @@ int main(int argc, const char *argv[]) {
 	int numMatches = _stellarOnAll(databases, databaseIDs, queries, queryIDs, options, file);
 
 	std::cout << "Eps-matches: " << numMatches << std::endl;
-    std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
+    if (options.verbose > 0) 
+		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
 
     file.close();
 	

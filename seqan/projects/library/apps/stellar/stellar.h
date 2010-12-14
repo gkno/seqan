@@ -601,7 +601,7 @@ SEQAN_CHECKPOINT
 ///////////////////////////////////////////////////////////////////////////////
 // Calls swift filter and verifies swift hits. = Computes eps-matches.
 template<typename TText, typename TIndex, typename TSize, typename TDrop, typename TSize1,
-         typename TSource, typename TId, typename TTag>
+         typename TSource, typename TMode, typename TId, typename TTag>
 int stellar(Finder<TText, Swift<SwiftLocal> > & finder,
                Pattern<TIndex, Swift<SwiftLocal> > & pattern,
                double epsilon,
@@ -610,6 +610,7 @@ int stellar(Finder<TText, Swift<SwiftLocal> > & finder,
 			   TSize1 & disableThresh,
 			   TSize1 & compactThresh,
 			   TSize1 numMatches,
+			   TMode verbose,
 			   StringSet<TId> & queryIDs,
                StringSet<QueryMatches<StellarMatch<TSource, TId> > > & matches,
 			   TTag tag) {
@@ -646,11 +647,11 @@ SEQAN_CHECKPOINT
 
 	}
 
-	//if (numSwiftHits > 0) {
-	//	std::cout << "    # hits           : " << numSwiftHits << std::endl;
-	//	std::cout << "    Longest hit      : " << maxLength << std::endl;
-	//	std::cout << "    Avg hit length   : " << totalLength/numSwiftHits << std::endl;
-	//}
+	if (verbose > 0 && numSwiftHits > 0) {
+		std::cout << "    # SWIFT hits      : " << numSwiftHits << std::endl;
+		std::cout << "    Longest hit       : " << maxLength << std::endl;
+		std::cout << "    Avg hit length    : " << totalLength/numSwiftHits << std::endl;
+	}
 	
 	typedef typename Iterator<StringSet<QueryMatches<TMatch> >, Standard>::Type TIterator;
 	TIterator it = begin(matches, Standard());

@@ -33,8 +33,7 @@ struct StellarOptions {
 	CharString queryFile;			// name of query file
 	CharString outputFile;			// name of result file
 	CharString disabledQueriesFile;	// name of result file containing disabled queries
-	unsigned outputFormat;			// 1..gff
-									// 2..??
+	CharString outputFormat;		// Possible formats: gff, text
 
 	// main options
 	unsigned qGram;				// length of the q-grams
@@ -43,7 +42,8 @@ struct StellarOptions {
 	double xDrop;				// maximal x-drop
 
 	// more options
-	bool reverse;				// compute also matches to reverse complemented database
+	bool forward;				// compute matches to forward strand of database
+	bool reverse;				// compute matches to reverse complemented database
 	CharString fastOption;		// verification strategy: exact, bestLocal, bandedGlobal
 	unsigned disableThresh;		// maximal number of matches allowed per query before disabling verification of hits for that query
 	unsigned compactThresh;		// number of matches after which removal of overlaps and duplicates is started
@@ -51,19 +51,21 @@ struct StellarOptions {
 	unsigned maxRepeatPeriod;	// maximal period of low complexity repeats to be filtered
 	unsigned minRepeatLength;	// minimal length of low complexity repeats to be filtered
 	double qgramAbundanceCut;
+	char verbose;				// verbosity mode: 0 - low, 1 - medium (, 2 - high)
 
 
 	StellarOptions() {
 		outputFile = "stellar.gff";
 		disabledQueriesFile = "stellar.disabled.fasta";
-		outputFormat = 1;
+		outputFormat = "gff";
 
-		qGram = 10;
+		qGram = (unsigned)-1;
 		epsilon = 0.05;
 		minLength = 100;
 		xDrop = 5;
 
-		reverse = false;
+		forward = true;
+		reverse = true;
 		fastOption = "exact";		// exact verification
 		disableThresh = (unsigned)-1;
 		compactThresh = 500;
@@ -71,6 +73,7 @@ struct StellarOptions {
 		maxRepeatPeriod = 1;
 		minRepeatLength = 1000;
 		qgramAbundanceCut = 1;
+		verbose = 0;
 	}
 }; 
 
