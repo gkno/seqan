@@ -444,7 +444,7 @@ struct MicroRNA{};
 		bool			onReverseComplement;
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
-		// TPatternState	patternState;
+		TPatternState	patternState;
 		
 		MatchVerifier() {}
                
@@ -1468,7 +1468,7 @@ matchVerify(
 	typedef Finder<TGenomeInfix>							TMyersFinder;
 	typedef typename TMatchVerifier::TPreprocessing			TPreprocessing;
 	typedef typename Value<TPreprocessing>::Type			TMyersPattern;
-	// typedef typename PatternState<TMyersPattern>::Type		TPatternState;
+	typedef typename PatternState<TMyersPattern>::Type		TPatternState;
 
 	// find read match begin
 	typedef ModifiedString<TGenomeInfix, ModReverse>		TGenomeInfixRev;
@@ -1478,7 +1478,7 @@ matchVerify(
 
 	TMyersFinder myersFinder(inf);
 	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
-	// TPatternState & state = verifier.patternState;
+	TPatternState & state = verifier.patternState;
 	// TPatternState state;
 	
 #ifdef RAZERS_DEBUG
@@ -1495,8 +1495,8 @@ matchVerify(
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
 	// find end of best semi-global alignment
-	// while (find(myersFinder, myersPattern, state, minScore))
-	while (find(myersFinder, myersPattern, minScore))
+	while (find(myersFinder, myersPattern, state, minScore))
+	// while (find(myersFinder, myersPattern, minScore))
 	{
 		TPosition pos = position(hostIterator(myersFinder));
 		if (lastPos + minDistance < pos)
@@ -1538,11 +1538,11 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
-		if (getScore(myersPattern) >= maxScore)
-		// if (getScore(state) >= maxScore)
+		// if (getScore(myersPattern) >= maxScore)
+		if (getScore(state) >= maxScore)
 		{
-			// maxScore = getScore(state);
-			maxScore = getScore(myersPattern);
+			maxScore = getScore(state);
+			// maxScore = getScore(myersPattern);
 			maxPos = pos;
 		}
 		lastPos = pos;

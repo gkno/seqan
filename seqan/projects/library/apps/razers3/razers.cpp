@@ -40,23 +40,22 @@
 //#define RAZERS_TIMER					// output information on how fast filtration and verification as well as waiting times
 //#define RAZERS_WINDOW					// use the findWindownext function on the "normal" index
 
-#define RAZERS_MATEPAIRS				// enable paired-end matching
+//#define RAZERS_MATEPAIRS				// enable paired-end matching
 //#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 
-#include <seqan/platform.h>
-#ifdef PLATFORM_WINDOWS
-	#define SEQAN_DEFAULT_TMPDIR "C:\\TEMP\\"
-#else
-	#define SEQAN_DEFAULT_TMPDIR "./"
-#endif
+#include <iostream>
+#include <sstream>
 
+#include <seqan/basic.h>
+#include <seqan/sequence.h>
+#include <seqan/file.h>
+#include <seqan/store.h>
 #include <seqan/misc/misc_cmdparser.h>
+
 #include "razers.h"
 #include "outputFormat.h"
 #include "paramChooser.h"
-#include <seqan/file.h>
-#include <seqan/store.h>
 
 #ifdef RAZERS_PARALLEL
 	#include "razers_parallel_reads.h"
@@ -71,10 +70,6 @@
 #ifdef RAZERS_MATEPAIRS
 #include "razers_matepairs.h"
 #endif
-
-
-#include <iostream>
-#include <sstream>
 
 using namespace std;
 using namespace seqan;
@@ -103,9 +98,11 @@ int mapReads(
 		
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
-		if (empty(readFileNames[1]))
+		if (length(readFileNames) < 2)
+        {
 			cerr << "Read file:                       \t" << readFileNames[0] << endl;
-		else
+        } 
+        else
 		{
 			cerr << "Read files:                      \t" << readFileNames[0] << endl;
 			for (unsigned i = 1; i < length(readFileNames); ++i)
