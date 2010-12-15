@@ -388,7 +388,7 @@ template <
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode >
-   void _mapSingleReadsToContig(
+void _mapSingleReadsToContig(
 	TFragmentStore										& store,
 	String<TFragmentStore>								& threadStores,
 	int													  contigId,
