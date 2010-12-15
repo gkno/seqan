@@ -22,13 +22,6 @@
 #ifndef SEQAN_HEADER_RAZERS_PARALLEL_READS_H
 #define SEQAN_HEADER_RAZERS_PARALLEL_READS_H
 
-#include <iostream>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <parallel/algorithm>
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 	
@@ -181,7 +174,7 @@ void partitionHits(
 	
 	THitStringIter i1 = begin(hits);
 	THitStringIter i2 = end(hits);
-	__gnu_parallel::sort(i1, i2, SwiftHitComparison<TSwiftHit>(), __gnu_parallel::default_parallel_tag(2));
+	std::sort(i1, i2, SwiftHitComparison<TSwiftHit>());
 
 	resize(positions, noOfParts + 1, Exact());
 	positions[0] = 0;

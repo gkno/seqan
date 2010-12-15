@@ -31,6 +31,8 @@
 #define RAZERS_OPENADDRESSING			// enables open addressing for the q-gram index as well as the possibility to set the load factor (-lf)
 
 #ifdef _OPENMP
+#include <omp.h>
+#define _GLIBCXX_PARALLEL               // parallel STL if available
 #define RAZERS_PARALLEL					// parallelize razerS
 #define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING	
