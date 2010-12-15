@@ -1112,10 +1112,10 @@ _patternInit(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & patt
 //////////////////////////////////////////////////////////////////////////////
 
 
-template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TSize>
+template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename THasState2, typename TFindBeginPatternSpec, typename TSize>
 inline bool _findMyersLargePatterns (TFinder & finder, 
 									 Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
-									 _PatternState<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & state,
+									 _PatternState<TNeedle, Myers<TSpec, THasState2, TFindBeginPatternSpec> > & state,
 									 TSize haystack_length) 
 {
 SEQAN_CHECKPOINT
@@ -1226,12 +1226,12 @@ SEQAN_CHECKPOINT
 }
 
 
-template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename TFindBeginPatternSpec, typename TSize>
+template <typename TFinder, typename TNeedle, typename TSpec, typename THasState, typename THasState2, typename TFindBeginPatternSpec, typename TSize>
 inline bool 
 _findMyersSmallPatterns(
 	TFinder & finder, 
 	Pattern<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & pattern,
-	_PatternState<TNeedle, Myers<TSpec, THasState, TFindBeginPatternSpec> > & state,
+	_PatternState<TNeedle, Myers<TSpec, THasState2, TFindBeginPatternSpec> > & state,
 	TSize haystack_length) 
 {
 SEQAN_CHECKPOINT
