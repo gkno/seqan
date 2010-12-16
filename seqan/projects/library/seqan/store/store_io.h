@@ -73,7 +73,7 @@ getClrRange(FragmentStore<TSpec, TConfig> const& fragStore,
 		begClr = (itGap->gapPos == 0) ? itGap->seqPos : 0;
 		// End clear range
 		--itGapEnd;
-		if (itGapEnd->seqPos != lenRead) endClr = lenRead;
+		if (static_cast<TSize>(itGapEnd->seqPos) != lenRead) endClr = lenRead;
 		else {
 			int diff = (itGap != itGapEnd) ? (*(itGapEnd - 1)).gapPos - (*(itGapEnd-1)).seqPos : 0;
 			int newDiff = itGapEnd->gapPos - itGapEnd->seqPos;
