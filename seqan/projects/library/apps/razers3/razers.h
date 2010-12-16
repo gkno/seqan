@@ -29,12 +29,6 @@
 #include <seqan/index.h>
 #include <seqan/store.h>
 
-#ifdef RAZERS_PARALLEL
-	#ifdef _OPENMP
-		#include <omp.h>
-	#endif
-#endif
-
 namespace SEQAN_NAMESPACE_MAIN
 {
 
@@ -161,18 +155,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool		lowMemory;		// set maximum shape weight to 13 to limit size of q-gram index
 		bool		fastaIdQual;		// hidden option for special fasta+quality format we use
 
-
 	// misc
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
 
 	// multi-threading
 
-#ifdef RAZERS_PARALLEL
-        unsigned	windowSize;
-		unsigned	numberOfCores;
-		unsigned	numberOfBlocks;
-		unsigned	blockSize;
-#endif
+        unsigned    threadCount;  // Number of threads to use in the parallel version.
+
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
 #endif
@@ -237,15 +226,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
 			fastaIdQual = false;
-            
-#ifdef RAZERS_PARALLEL
-            windowSize = 50000;
+
 #ifdef _OPENMP
-			numberOfCores = omp_get_num_procs();
-#endif
-			numberOfBlocks = numberOfCores;
-			blockSize = 0;
-#endif
+            threadCount = omp_get_max_threads();
+#else  // #ifdef _OPENMP
+            threadCount = 1;
+#endif  // #ifdef _OPENMP
+
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
 #endif
@@ -1964,22 +1951,12 @@ int _mapReads(
 	TShape const							& shape,
 	TRazerSMode						  const & mode)
 {
-
-#ifndef RAZERS_PARALLEL
 	#ifdef RAZERS_MATEPAIRS
 	if (options.libraryLength >= 0)
 		return _mapMatePairReads(store, cnts, options, shape, mode);
 	else
-	#endif
+    #endif  // #ifndef RAZERS_MATEPAIRS
 		return _mapSingleReads(store, cnts, options, shape, mode);
-#else
-	#ifdef RAZERS_MATEPAIRS
-	if (options.libraryLength >= 0)
-		return _mapMatePairReadsParallel(store, cnts, options, shape, mode);
-	else
-	#endif
-		return _mapSingleReadsParallel(store, cnts, options, shape, mode);
-#endif
 }
 
 

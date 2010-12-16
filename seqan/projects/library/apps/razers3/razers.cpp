@@ -33,7 +33,6 @@
 #ifdef _OPENMP
 #include <omp.h>
 #define _GLIBCXX_PARALLEL               // parallel STL if available
-#define RAZERS_PARALLEL					// parallelize razerS
 #define SEQAN_PARALLEL
 #define RAZERS_OPENADDRESSING	
 #endif
@@ -57,12 +56,6 @@
 #include "outputFormat.h"
 #include "paramChooser.h"
 
-#ifdef RAZERS_PARALLEL
-	#include "razers_parallel_reads.h"
-	#ifdef RAZERS_MATEPAIRS
-		#include "razers_matepairs_parallel.h"
-	#endif
-#endif
 #ifdef RAZERS_WINDOW
 #include "razers_window.h"
 #endif
@@ -207,12 +200,6 @@ inline void whichMacros(){
 	std::cerr << "Index:   Normal" << std::endl;
 #endif
 	
-#ifdef RAZERS_PARALLEL
-	std::cerr << "Version: Parallel by reads" << std::endl;
-#else
-	std::cerr << "Version: Serial" << std::endl;
-#endif
-	
 #ifdef RAZERS_TIMER
 	std::cerr << "Timer:   ON" << std::endl;
 #else
@@ -327,8 +314,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
 #ifdef RAZERS_PARALLEL
 	addSection(parser, "Parallel Options:");
-    addOption(parser, CommandLineOption("ws", "window-size",       "set the size of the window that is used to scan the reference sequence", OptionType::Int | OptionType::Label, options.windowSize));
-	addOption(parser, CommandLineOption("nc", "number-of-cores",   "set the number of cores that is available (this many threads will be started)", OptionType::Int | OptionType::Label, options.numberOfCores));
+	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use.", OptionType::Int | OptionType::Label, options.threadCount));
 #endif
 #ifdef RAZERS_OPENADDRESSING
 	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
