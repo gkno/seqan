@@ -32,7 +32,8 @@ from collections import defaultdict
 #TYPEDEFS = {}
 
 
-FILES_COMPLETELY_IORELATED = [ r'.*/seqan/file/.*\.h' ] # todo finish
+FILES_COMPLETELY_IORELATED = [ r'.*/seqan/file/.*\.h', \
+                               ".*parsing.h" ] # todo finish
 
 FUNCTION_KEYWORDS = [ ".*read.*", \
                       ".*read.*", \
@@ -475,6 +476,35 @@ def printOutFilesAndLines():
     print FILES_LINES["projects/library/seqan/statistics/statistics_markov_model.h"]
     #TODO further processing
 
+
+
+
+def addTags():
+    lastfilename = ""
+    lines_func_class = ""
+    lines_typedef = ""
+    for i in sorted(FILTERED_SIGS, key=lambda x:(x[0],x[1])):
+            if i[0] != lastfilename:
+                if (lastfilename != ""):
+                    cmd = 'awk -f ' + sys.path[0] + '/iorev_tagger_level2.awk'
+                    if (lines_fc != ""):
+                        cmd += " -v lines_fc=" + lines_func_class
+                    if (lines_t != ""):
+                        cmd += " -v lines_t=" + lines_typedef
+                    cmd += " " + lastfilename + " > " + lastfilename + ".new"
+                    print cmd
+                    if (lastfilename.find("file") >= 0):
+                        os.system(cmd)
+                    
+                lastfilename = i[0]
+                lines_func_class = ""
+                lines_typedef = ""
+            if i[2] != "t":
+                lines_func_class = lines_func_class + "_" + str(i[1])
+            else:
+                lines_typedef = lines_typedef + "_" + str(i[1])
+            
+
 def display(order="ntfl"):
     #TODO implement proper parsing of display and sort order
 
@@ -554,7 +584,8 @@ def main():
 
   buildAllForwards(sys.argv[1], force_rebuild)
 
-  display()
+  #display()
+  addTags()
 
   return 0
 
