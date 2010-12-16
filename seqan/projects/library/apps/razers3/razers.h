@@ -25,9 +25,14 @@
 #include <iostream>
 #include <fstream>
 
+#include <omp.h>
+
 #include <seqan/find.h>
 #include <seqan/index.h>
 #include <seqan/store.h>
+
+// No parallelism for less than MIN_PARALLEL_WORK reads.
+const unsigned MIN_PARALLEL_WORK = 100/*0*/;
 
 namespace SEQAN_NAMESPACE_MAIN
 {
@@ -161,6 +166,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	// multi-threading
 
         unsigned    threadCount;  // Number of threads to use in the parallel version.
+        unsigned    splitFactor;  // This many blocks per thread.
+        unsigned    windowSize;  // Collect SWIFT hits in windows of this length.
+        unsigned    verificationPackageSize;  // This number of SWIFT hits per verification.
 
 #ifdef RAZERS_OPENADDRESSING
 		double		loadFactor;
@@ -232,6 +240,10 @@ namespace SEQAN_NAMESPACE_MAIN
 #else  // #ifdef _OPENMP
             threadCount = 1;
 #endif  // #ifdef _OPENMP
+            splitFactor = 1;
+            // TODO(holtgrew): Tune this!
+            windowSize = 500000;
+            verificationPackageSize = 1000;
 
 #ifdef RAZERS_OPENADDRESSING
             loadFactor = 1.6;
@@ -1934,7 +1946,6 @@ int _mapSingleReads(
 	return _mapSingleReads(store, cnts, options, mode, swiftIndex);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for single/mate-pair mapping
 template <
@@ -1951,12 +1962,24 @@ int _mapReads(
 	TShape const							& shape,
 	TRazerSMode						  const & mode)
 {
-	#ifdef RAZERS_MATEPAIRS
-	if (options.libraryLength >= 0)
-		return _mapMatePairReads(store, cnts, options, shape, mode);
-	else
-    #endif  // #ifndef RAZERS_MATEPAIRS
-		return _mapSingleReads(store, cnts, options, shape, mode);
+    if (options.threadCount == 1 || length(store.readNameStore) < MIN_PARALLEL_WORK) {
+        // Sequential RazerS
+        #ifdef RAZERS_MATEPAIRS
+        if (options.libraryLength >= 0)
+            return _mapMatePairReads(store, cnts, options, shape, mode);
+        else
+        #endif  // #ifndef RAZERS_MATEPAIRS
+            return _mapSingleReads(store, cnts, options, shape, mode);
+    } else {
+        // Parallel RazerS
+        #ifdef RAZERS_MATEPAIRS
+        if (options.libraryLength >= 0)
+            // TODO(holtgrew): Parallelize mate pair mapping.
+            return _mapMatePairReads(store, cnts, options, shape, mode);
+        else
+        #endif  // #ifndef RAZERS_MATEPAIRS
+            return _mapSingleReadsParallel(store, cnts, options, shape, mode);
+    }
 }
 
 

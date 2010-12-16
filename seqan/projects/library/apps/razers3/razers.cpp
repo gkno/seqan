@@ -64,6 +64,8 @@
 #include "razers_matepairs.h"
 #endif
 
+#include "razers_parallel.h"
+
 using namespace std;
 using namespace seqan;
 
@@ -302,6 +304,9 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("oc", "overabundance-cut", "set k-mer overabundance cut ratio", OptionType::Int | OptionType::Label, options.abundanceCut));
 	addOption(parser, CommandLineOption("rl", "repeat-length",     "set simple-repeat length threshold", OptionType::Int | OptionType::Label, options.repeatLength));
 	addOption(parser, CommandLineOption("tl", "taboo-length",      "set taboo length", OptionType::Int | OptionType::Label, options.tabooLength));
+#ifdef RAZERS_OPENADDRESSING
+	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
+#endif
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 	addOption(parser, CommandLineOption("lm", "low-memory",        "decrease memory usage at the expense of runtime", OptionType::Boolean));
 	addSection(parser, "Mapping Quality Options:");
@@ -312,13 +317,11 @@ int main(int argc, const char *argv[])
 	addSection(parser, "Verification Options:");
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
-#ifdef RAZERS_PARALLEL
-	addSection(parser, "Parallel Options:");
+	addSection(parser, "Parallelism Options:");
 	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use.", OptionType::Int | OptionType::Label, options.threadCount));
-#endif
-#ifdef RAZERS_OPENADDRESSING
-	addOption(parser, CommandLineOption("lf", "load-factor", "set the load factor for the open addressing q-gram index", OptionType::Double | OptionType::Label, options.loadFactor));
-#endif
+	addOption(parser, CommandLineOption("psf", "parallel-split-factor",   "Use this many blocks per thread.", OptionType::Int | OptionType::Label, options.splitFactor));
+	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
+	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));
 	bool stop = !parse(parser, argc, argv, cerr);
 	
 	//////////////////////////////////////////////////////////////////////////////
@@ -359,10 +362,10 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "total-mism-quality", options.absMaxQualSumErrors);
 	getOptionValueLong(parser, "low-memory", options.lowMemory);
 #endif
-#ifdef RAZERS_PARALLEL
-    getOptionValueLong(parser, "window-size", options.windowSize);
-    getOptionValueLong(parser, "number-of-cores", options.numberOfCores);
-#endif
+    getOptionValueLong(parser, "thread-count", options.threadCount);
+    getOptionValueLong(parser, "parallel-split-factor", options.splitFactor);
+    getOptionValueLong(parser, "parallel-window-size", options.windowSize);
+    getOptionValueLong(parser, "parallel-verification-size", options.verificationPackageSize);
 #ifdef RAZERS_OPENADDRESSING
 	getOptionValueLong(parser, "load-factor", options.loadFactor);
 #endif 
