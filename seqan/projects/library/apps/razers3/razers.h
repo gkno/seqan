@@ -1962,7 +1962,7 @@ int _mapReads(
 	TShape const							& shape,
 	TRazerSMode						  const & mode)
 {
-    if (options.threadCount == 1 || length(store.readNameStore) < MIN_PARALLEL_WORK) {
+    if (/*options.threadCount == 1 || */length(store.readNameStore) < MIN_PARALLEL_WORK) {
         // Sequential RazerS
         #ifdef RAZERS_MATEPAIRS
         if (options.libraryLength >= 0)

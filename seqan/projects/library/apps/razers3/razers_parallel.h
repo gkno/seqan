@@ -30,7 +30,7 @@ template <typename TFragmentStore>
 class GlobalState
 {
 public:
-    String<std::tr1::shared_ptr<TFragmentStore> > localStores;
+    std::vector<TFragmentStore *> localStores;
     omp_lock_t lock;
 
     GlobalState()
@@ -40,6 +40,8 @@ public:
 
     ~GlobalState()
     {
+        for (typename std::vector<TFragmentStore *>::iterator it = localStores.begin(); it != localStores.end(); ++it)
+            delete *it;
         omp_destroy_lock(&lock);
     }
 
@@ -50,21 +52,24 @@ private:
 };
 
 template <typename TFragmentStore>
-void allocateStore(std::tr1::shared_ptr<TFragmentStore> & result, GlobalState<TFragmentStore> & globalState)
+void allocateStore(TFragmentStore * & result, GlobalState<TFragmentStore> & globalState)
 {
     omp_set_lock(&globalState.lock);
-    if (length(globalState.localStores) == 0u) {
+    // if (length(globalState.localStores) == 0u) {
+    if (globalState.localStores.size() == 0u) {
         omp_unset_lock(&globalState.lock);
-        result = std::tr1::shared_ptr<TFragmentStore>(new TFragmentStore());
+        result = new TFragmentStore();
         return;
     }
-    result = back(globalState.localStores);
-    eraseBack(globalState.localStores);
+    result = globalState.localStores.back();
+    globalState.localStores.pop_back();
+    // result = back(globalState.localStores);
+    // eraseBack(globalState.localStores);
     omp_unset_lock(&globalState.lock);
 }
 
 template <typename TFragmentStore>
-void deallocateStore(GlobalState<TFragmentStore> & globalState, std::tr1::shared_ptr<TFragmentStore> & store)
+void deallocateStore(GlobalState<TFragmentStore> & globalState, TFragmentStore * const & store)
 {
     omp_set_lock(&globalState.lock);
     appendValue(globalState.localStores, store);
@@ -72,7 +77,7 @@ void deallocateStore(GlobalState<TFragmentStore> & globalState, std::tr1::shared
 }
 
 template <typename TFragmentStore>
-void deallocateStores(GlobalState<TFragmentStore> & globalState, String<std::tr1::shared_ptr<TFragmentStore> > & stores)
+void deallocateStores(GlobalState<TFragmentStore> & globalState, std::vector<TFragmentStore *> & stores)
 {
     omp_set_lock(&globalState.lock);
     for (unsigned i = 0; i < length(stores); ++i)
@@ -121,10 +126,10 @@ class VerificationResults
 {
 public:
     omp_lock_t lock_;
+    GlobalState<TFragmentStore> * globalState;
     volatile unsigned blocksTotal;
     volatile unsigned blocksDone;
-    GlobalState<TFragmentStore> * globalState;
-    String<std::tr1::shared_ptr<TFragmentStore> > localStores;
+    std::vector<TFragmentStore *> localStores;
 
     VerificationResults(GlobalState<TFragmentStore> * globalState_)
             : globalState(globalState_), blocksTotal(0), blocksDone(0)
@@ -145,12 +150,13 @@ private:
 template <typename TFragmentStore>
 inline
 void
-allocateLocalStore(std::tr1::shared_ptr<TFragmentStore> & localStorePtr, VerificationResults<TFragmentStore> & verificationResults)
+allocateLocalStore(TFragmentStore * & localStorePtr, VerificationResults<TFragmentStore> & verificationResults)
 {
     omp_set_lock(&verificationResults.lock_);
     verificationResults.blocksTotal += 1;
     allocateStore(localStorePtr, *verificationResults.globalState);
-    appendValue(verificationResults.localStores, localStorePtr);
+    verificationResults.localStores.push_back(localStorePtr);
+    // appendValue(verificationResults.localStores, localStorePtr);
     omp_unset_lock(&verificationResults.lock_);
 }
 
@@ -188,8 +194,8 @@ public:
 
     // TODO(holtgrew): "active" flag to mark non-stealable
     int jobId;
-    TFragmentStore * fragmentStore;  // global FragmentStore
     unsigned contigId;
+    TFragmentStore * fragmentStore;  // global FragmentStore
     TSize readBeginIndex;
     TSize readEndIndex;
 
@@ -211,15 +217,15 @@ public:
 	typedef typename TSwiftFinder::THitString THitString;
     typedef typename Position<typename TSwiftFinder::THitString>::Type TPosition;
 
+    std::tr1::shared_ptr<VerificationResults<TFragmentStore> > verificationResults;
+    TFragmentStore * localStore;
+
     std::tr1::shared_ptr<THitString> & hitString;
     TPosition matchBeginIndex;
     TPosition matchEndIndex;
 
-    std::tr1::shared_ptr<VerificationResults<TFragmentStore> > verificationResults;
-    std::tr1::shared_ptr<TFragmentStore> localStore;
-
     // first could be weak
-    JobData(std::tr1::shared_ptr<VerificationResults<TFragmentStore> > & verificationResults_, std::tr1::shared_ptr<TFragmentStore> & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
+    JobData(std::tr1::shared_ptr<VerificationResults<TFragmentStore> > & verificationResults_, TFragmentStore * & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
             : verificationResults(verificationResults_), localStore(localStore_), hitString(hitString_), matchBeginIndex(matchBeginIndex_), matchEndIndex(matchEndIndex_)
     {
     }
@@ -372,6 +378,7 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Filtration<TFragmentStore> > & jobData)
 {
+    fprintf(stderr, "Filtration\n");
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
     typedef JobData<Verification<TFragmentStore, TSwiftFinder> > TVerificationJobData;
 
@@ -407,7 +414,7 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     std::swap(*swiftHitsPtr, hits);
     for (unsigned i = 1; i < length(splitters); ++i) {
         // Each verification job gets a local FragmentStore from the free list in the global state.
-        std::tr1::shared_ptr<TFragmentStore> localStorePtr;
+        TFragmentStore * localStorePtr;
         allocateLocalStore(localStorePtr, *jobData.verificationResults);
         appendValue(jobs, TJob(new TVerificationJobData(jobData.verificationResults, localStorePtr, swiftHitsPtr, splitters[i - 1], splitters[i])));
     }
@@ -418,6 +425,7 @@ template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typenam
 void
 workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Verification<TFragmentStore, TSwiftFinder> > & jobData, TThreadId thisThreadId, TThreadId jobThreadId)
 {
+    fprintf(stderr, "Verification\n");
     (void) tls;
     (void) jobData;
     (void) thisThreadId;
@@ -461,11 +469,11 @@ void _mapSingleReadsParallelToContig(
     GlobalState<FragmentStore<TFSSpec, TFSConfig> >         & globalState,
     TContigId const                                         & contigId,
     String<TSplitter> const                                 & splitters,
-	TCounts													& cnts,
+	TCounts													& /*cnts*/,
     char                                                      orientation,
 	RazerSOptions<TSpec>									& options,
 	TShape const											& shape,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode> const      & mode)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode> const      & /*mode*/)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>						TFragmentStore;
 	typedef typename TFragmentStore::TContigSeq				TContigSeq;
@@ -474,6 +482,8 @@ void _mapSingleReadsParallelToContig(
 	typedef StringSet<TRead>										TReadSet;
 	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 	typedef typename Size<TReadSeqStore>::Type						TSize;
+
+    // TODO(holtgrew): What about cnts, mode?
 
 	typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
 	typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
@@ -499,7 +509,7 @@ void _mapSingleReadsParallelToContig(
         threadLocalStorages[i].shape = &shape;
         threadLocalStorages[i].options = &options;
         threadLocalStorages[i].globalState = &globalState;
-        for (int j = 0; j < options.splitFactor; ++j, ++k) {
+        for (unsigned j = 0; j < options.splitFactor; ++j, ++k) {
             TJob job(new TFiltrationJobData(k, contigId, &store, &globalState, splitters[0], splitters[k + 1]));
             pushBack(jobQueue(threadLocalStorages[i]), job);
         }
@@ -541,6 +551,7 @@ int _mapSingleReadsParallel(
 
     // Store global state we change below so we are side-effect free.
     int oldMaxThreads = omp_get_max_threads();
+    omp_set_num_threads(options.threadCount);
 
     // Compute initial load balancing / number of blocks.
     SEQAN_ASSERT_EQ_MSG(options.splitFactor, 1u, "For now...");
