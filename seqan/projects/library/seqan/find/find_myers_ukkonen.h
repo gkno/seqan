@@ -103,7 +103,7 @@ typedef Myers<FindPrefix, True, void> MyersUkkonenGlobal;
 ..summary:Semin-global (query-global, text-local) pattern matching without findBegin() support.
 ..signature:MyersUkkonen
 ..shortcutfor:Spec.Myers
-...signature:Myers<AlignedTextBanded, void>
+...signature:Myers<AlignTextBanded, void>
 ..see:Spec.Myers
 ..see:Shortcut.MyersUkkonen
 ..see:Shortcut.MyersUkkonenGlobal
