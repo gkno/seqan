@@ -364,10 +364,10 @@ initializeFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSw
     // Re-initialize the index.
     TIndex & index = host(tls.swiftPattern);
     clear(index);
+    clear(indexText(index));
     for (TPosition i = jobData.readBeginIndex; i < jobData.readEndIndex; ++i)
         appendValue(value(index.text), tls.globalStore->readSeqStore[i]);
     index.shape = *tls.shape;
-    // TODO(holtgrew): Rebuild index?!
 
     // 3) Call windowFindBegin.
     bool res = windowFindBegin(tls.swiftFinder, tls.swiftPattern, tls.options->errorRate);
@@ -497,6 +497,7 @@ void _mapSingleReadsParallelToContig(
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
 
     // Lock contig and possibly reverse-complement it.
+	lockContig(store, contigId);
 	TContigSeq & contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')
 		reverseComplementInPlace(contigSeq);
