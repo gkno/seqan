@@ -199,7 +199,7 @@ public:
     TSize readBeginIndex;
     TSize readEndIndex;
 
-    std::tr1::shared_ptr<VerificationResults<TFragmentStore> > verificationResults;
+    VerificationResults<TFragmentStore> * verificationResults;
 
     JobData(int jobId_, unsigned contigId_, TFragmentStore *fragmentStore_, GlobalState<TFragmentStore> * globalState_, TSize readBeginIndex_, TSize readEndIndex_)
             : jobId(jobId_), contigId(contigId_), fragmentStore(fragmentStore_), readBeginIndex(readBeginIndex_),
@@ -217,7 +217,7 @@ public:
 	typedef typename TSwiftFinder::THitString THitString;
     typedef typename Position<typename TSwiftFinder::THitString>::Type TPosition;
 
-    std::tr1::shared_ptr<VerificationResults<TFragmentStore> > verificationResults;
+    VerificationResults<TFragmentStore> * verificationResults;
     TFragmentStore * localStore;
 
     std::tr1::shared_ptr<THitString> & hitString;
@@ -225,7 +225,7 @@ public:
     TPosition matchEndIndex;
 
     // first could be weak
-    JobData(std::tr1::shared_ptr<VerificationResults<TFragmentStore> > & verificationResults_, TFragmentStore * & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
+    JobData(VerificationResults<TFragmentStore> * & verificationResults_, TFragmentStore * & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
             : verificationResults(verificationResults_), localStore(localStore_), hitString(hitString_), matchBeginIndex(matchBeginIndex_), matchEndIndex(matchEndIndex_)
     {
     }
@@ -247,7 +247,7 @@ public:
         if (jobType == JOB_FILTRATION)
             jobData = new TFiltrationJobData(*static_cast<TFiltrationJobData *>(jobData));
         else if (jobType == JOB_VERIFICATION)
-            jobData = new TFiltrationJobData(*static_cast<TFiltrationJobData *>(other.jobData));
+            jobData = new TVerificationJobData(*static_cast<TVerificationJobData *>(other.jobData));
     }
     
     Job() : jobType(JOB_NONE), jobData(0) {}
@@ -343,6 +343,7 @@ void
 initializeFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Filtration<TFragmentStore> > const & jobData)
 {
     // No need to initialize if we are doing the same filtration job as previously.
+    fprintf(stderr, "INITIALIZE: jobData.jobId == %d, tls.previousFiltrationJobId == %d\n", jobData.jobId, tls.previousFiltrationJobId);
     if (jobData.jobId == tls.previousFiltrationJobId)
         return;
     tls.previousFiltrationJobId = jobData.jobId;
