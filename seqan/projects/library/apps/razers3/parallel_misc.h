@@ -13,7 +13,7 @@ void computeSplittersBySlotCount(String<TPos> & splitters, TSize size, TCount co
     for (TCount i = 1; i <= count; ++i)
     {
         splitters[i] = splitters[i - 1] + blockLength;
-        if (i < rest)
+        if (i <= rest)
             splitters[i] += 1;
     }
 

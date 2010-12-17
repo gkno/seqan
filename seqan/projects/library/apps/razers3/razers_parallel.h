@@ -20,7 +20,7 @@ struct RazerSStats
     RazerSStats() : countFiltration(0), countVerification(0) {}
 };
 
-template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 struct MapSingleReads {};
 
 // Global state goes here.
@@ -86,8 +86,8 @@ void deallocateStores(GlobalState<TFragmentStore> & globalState, std::vector<TFr
 }
 
 // Simple thread local storage implementation.
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
-class ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> >
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
+class ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> >
 {
 public:
     // The following members are only accessed through the TLS interface.
@@ -217,6 +217,9 @@ public:
 	typedef typename TSwiftFinder::THitString THitString;
     typedef typename Position<typename TSwiftFinder::THitString>::Type TPosition;
 
+    TFragmentStore * fragmentStore;
+    unsigned contigId;
+    
     VerificationResults<TFragmentStore> * verificationResults;
     TFragmentStore * localStore;
 
@@ -225,14 +228,14 @@ public:
     TPosition matchEndIndex;
 
     // first could be weak
-    JobData(VerificationResults<TFragmentStore> * & verificationResults_, TFragmentStore * & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
-            : verificationResults(verificationResults_), localStore(localStore_), hitString(hitString_), matchBeginIndex(matchBeginIndex_), matchEndIndex(matchEndIndex_)
+    JobData(TFragmentStore * fragmentStore_, unsigned contigId_, VerificationResults<TFragmentStore> * & verificationResults_, TFragmentStore * & localStore_, std::tr1::shared_ptr<THitString> & hitString_, TPosition matchBeginIndex_, TPosition matchEndIndex_)
+            : fragmentStore(fragmentStore_), contigId(contigId_), verificationResults(verificationResults_), localStore(localStore_), hitString(hitString_), matchBeginIndex(matchBeginIndex_), matchEndIndex(matchEndIndex_)
     {
     }
 };
 
-template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
-class Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> >
+template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
+class Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> >
 {
 public:
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
@@ -290,14 +293,14 @@ public:
 // Metafunctions
 // ===========================================================================
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
-struct JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > >
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
+struct JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > >
 {
     typedef TaskQueue<TJob, OmpLock> Type;
 };
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
-struct JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > const>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
+struct JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > const>
 {
     typedef TaskQueue<TJob, OmpLock> const Type;
 };
@@ -306,44 +309,45 @@ struct JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFi
 // Functions
 // ===========================================================================
 
-template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 inline
 bool
-onlyVerificationStealable(Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > const & job)
+onlyVerificationStealable(Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > const & job)
 {
     return job.jobType == JOB_VERIFICATION;
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 inline
-typename JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > >::Type &
-jobQueue(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls)
+typename JobQueue<ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > >::Type &
+jobQueue(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls)
 {
     return tls.jobQueue_;
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 inline
 bool
-isWorking(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls)
+isWorking(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls)
 {
     return tls.working_;
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 inline
 void
-setWorking(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, bool b)
+setWorking(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls, bool b)
 {
     tls.working_ = b;
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 void
-initializeFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Filtration<TFragmentStore> > const & jobData)
+initializeFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore> > const & jobData)
 {
+    // TODO(holtgrew): Keep one swift filter per block!
     // No need to initialize if we are doing the same filtration job as previously.
-    fprintf(stderr, "INITIALIZE: jobData.jobId == %d, tls.previousFiltrationJobId == %d\n", jobData.jobId, tls.previousFiltrationJobId);
+    // fprintf(stderr, "INITIALIZE: jobData.jobId == %d, tls.previousFiltrationJobId == %d\n", jobData.jobId, tls.previousFiltrationJobId);
     if (jobData.jobId == tls.previousFiltrationJobId)
         return;
     tls.previousFiltrationJobId = jobData.jobId;
@@ -375,9 +379,9 @@ initializeFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSw
         std::cerr << "ERROR: windowFindBegin() failed in thread " << tls.threadId << std::endl;
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TRazerSMode>
 void
-workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Filtration<TFragmentStore> > & jobData)
+workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls, JobData<Filtration<TFragmentStore> > & jobData)
 {
     fprintf(stderr, "Filtration\n");
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
@@ -394,10 +398,10 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
     bool referenceLeft = windowFindNext(tls.swiftFinder, tls.swiftPattern, tls.options->windowSize);
     THitString & hits = getSwiftHits(tls.swiftFinder);
     tls.stats.countFiltration += length(hits);
-    {
-        int swiftHits = length(hits);
-        fprintf(stderr, "Thread %ud Found %d SWIFT hits!\n", tls.threadId, swiftHits);
-    }
+    // {
+    //     int swiftHits = length(hits);
+    //     fprintf(stderr, "Thread %ud Found %d SWIFT hits!\n", tls.threadId, swiftHits);
+    // }
 
     // Enqueue filtration job for remaining sequence, if any.  We simply copy over the data.
     if (referenceLeft)
@@ -417,16 +421,45 @@ workFiltration(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFin
         // Each verification job gets a local FragmentStore from the free list in the global state.
         TFragmentStore * localStorePtr;
         allocateLocalStore(localStorePtr, *jobData.verificationResults);
-        appendValue(jobs, TJob(new TVerificationJobData(jobData.verificationResults, localStorePtr, swiftHitsPtr, splitters[i - 1], splitters[i])));
+        appendValue(jobs, TJob(new TVerificationJobData(jobData.fragmentStore, jobData.contigId, jobData.verificationResults, localStorePtr, swiftHitsPtr, splitters[i - 1], splitters[i])));
     }
     pushFront(jobQueue(tls), jobs);
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId>
+template<
+	typename TVerifier,
+	typename THitString,
+	typename TReadId,
+	typename TContigSeq,
+	typename TReadSet,
+	typename TRazerSMode>
+inline void verifyHits(
+		TVerifier									& verifier,
+		THitString									& hits,
+		typename Position<THitString>::Type const	  startPos,
+		typename Position<THitString>::Type const	  endPos,
+		TReadId const								  offSet,
+		TContigSeq									& contigSeq,
+		TReadSet									& readSet,
+		TRazerSMode									& mode)
+{
+	typedef typename Position<THitString>::Type		THitStringPos;
+	
+	for(THitStringPos h = startPos; h < endPos; ++h){
+		TReadId absReadId = offSet + hits[h].ndlSeqNo;
+		verifier.m.readId = absReadId;
+		
+		matchVerify(verifier, swiftInfix(hits[h], contigSeq), absReadId, readSet, mode);
+	}
+}
+
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId, typename TRazerSMode>
 void
-workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, JobData<Verification<TFragmentStore, TSwiftFinder> > & jobData, TThreadId thisThreadId, TThreadId jobThreadId)
+workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls, JobData<Verification<TFragmentStore, TSwiftFinder> > & jobData, TThreadId thisThreadId, TThreadId jobThreadId)
 {
     fprintf(stderr, "Verification\n");
+    // TODO(holtgrew): What about mriese's parallel swift handler?
+    // verifyHits(VERIFIER, *jobData.hitString, jobData.matchBeginIndex, jobData.matchEndIndex, OFFSET, jobData.fragmentStore->contigStore[jobData.contigId].seq, TRazerSMode());
     (void) tls;
     (void) jobData;
     (void) thisThreadId;
@@ -437,9 +470,9 @@ workVerification(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     //   create verification jobs for these X reads
 }
 
-template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId>
+template <typename TJob, typename TFragmentStore, typename TSwiftFinder, typename TSwiftPattern, typename TShape, typename TOptions, typename TThreadId, typename TRazerSMode>
 void
-work(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > & tls, TJob & job, TThreadId thisThreadId, TThreadId jobThreadId)
+work(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > & tls, TJob & job, TThreadId thisThreadId, TThreadId jobThreadId)
 {
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
     typedef JobData<Verification<TFragmentStore, TSwiftFinder> > TVerificationJobData;
@@ -484,6 +517,8 @@ void _mapSingleReadsParallelToContig(
 	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 	typedef typename Size<TReadSeqStore>::Type						TSize;
 
+    typedef RazerSMode<TAlignMode, TGapMode, TScoreMode> TRazerSMode;
+
     // TODO(holtgrew): What about cnts, mode?
 
 	typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
@@ -491,8 +526,8 @@ void _mapSingleReadsParallelToContig(
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;
     typedef RazerSOptions<TSpec> TOptions;
 
-    typedef Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > TJob;
-    typedef ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions> > TThreadLocalStorage;
+    typedef Job<MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > TJob;
+    typedef ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode> > TThreadLocalStorage;
     typedef String<TThreadLocalStorage> TThreadLocalStorages;
     typedef JobData<Filtration<TFragmentStore> > TFiltrationJobData;
 
@@ -518,7 +553,7 @@ void _mapSingleReadsParallelToContig(
     }
 
     // Fire up filtration jobs.
-    work(threadLocalStorages, onlyVerificationStealable<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions>, StealOne());
+    work(threadLocalStorages, onlyVerificationStealable<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TRazerSMode>, StealOne());
 
     // Restore orientation of contig
     // TODO(holtgrew): Always reverse-complemented again since outer caller locks!
