@@ -936,11 +936,11 @@ _myersGetBitmask(_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatte
 }
 
 
-template <typename TFinder, typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
+template <typename TFinder, typename TNeedle, typename TNeedle2, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
 inline bool 
 _patternInitSmallStateBanded(
     TFinder &finder,
-	TNeedle const & needle, 
+	TNeedle2 const & needle, 
     _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 	typedef Pattern<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > TPattern;
@@ -1046,14 +1046,14 @@ _patternInitSmallStateBanded(
 }
 
 
-template <typename TFinder, typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
+template <typename TFinder, typename TNeedle, typename TNeedle2, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
 bool _stateInit(
 	TFinder &finder,
 	TNeedle const & needle, 
-	_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
+	_PatternState<TNeedle2, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 SEQAN_CHECKPOINT
-	typedef _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > TState;
+	typedef _PatternState<TNeedle2, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > TState;
     typedef typename TState::TWord TWord;
     typedef typename TState::TLargeState TLargeState;
 	typedef typename Value<TNeedle>::Type TValue;
@@ -1286,12 +1286,12 @@ SEQAN_CHECKPOINT
 // the band width is (blockCount * MACHINE_WORD_SIZE)
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename TFinder, typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
+template <typename TFinder, typename TNeedle, typename TNeedle2, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
 finline bool 
 _findMyersSmallPatternsBanded(
 	TFinder & finder, 
 	TNeedle const & needle,
-    _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
+    _PatternState<TNeedle2, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 SEQAN_CHECKPOINT
 	typedef _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > TState;
@@ -1377,10 +1377,10 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 // find
 
-template <typename TFinder, typename TNeedle, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
+template <typename TFinder, typename TNeedle, typename TNeedle2, typename TFinderCSP, typename TPatternCSP, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder, 
-				  TNeedle & needle,
-                  _PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
+				  TNeedle const & needle,
+                  _PatternState<TNeedle2, Myers<AlignTextBanded<TFinderCSP, TPatternCSP>, True, TFindBeginPatternSpec> > & state)
 {
 	typedef typename Haystack<TFinder>::Type THaystack;
 	typedef typename Size<THaystack>::Type TSize;
@@ -1485,10 +1485,10 @@ inline bool find (TFinder & finder,
 	return find(finder, pattern, state);
 }
 
-template <typename TFinder, typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
+template <typename TFinder, typename TNeedle, typename TNeedle2, typename TSpec, typename TFindBeginPatternSpec>
 inline bool find (TFinder & finder,
-				  TNeedle & needle,
-				  _PatternState<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > & state,
+				  TNeedle const & needle,
+				  _PatternState<TNeedle2, Myers<TSpec, True, TFindBeginPatternSpec> > & state,
 				  int const minScore)
 {
 	setScoreLimit(state, minScore);
