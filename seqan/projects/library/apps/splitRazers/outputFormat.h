@@ -630,6 +630,10 @@ void dumpMatches(
 	typedef typename Value<TGenomeSet>::Type	TGenome;
 	typedef typename TMatch::TGPos				TGPos;
 
+#ifdef RAZERS_SPLICED
+	if (options.minMatchLen > 0) options.outputFormat = 33;
+#endif
+
 	if (options.outputFormat == 2)
 	{
 		options.sortOrder = 0;		// ... to count multiple matches
@@ -646,7 +650,7 @@ void dumpMatches(
 	if (options.maqMapping) options.outputFormat = 3;
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength); //without + 1 here, used to check whether match should be supported if noBelowIdentity option is switched on
 #endif
-	if (options.minMatchLen > 0) options.outputFormat = 33;
+
 	if (options.outputFormat == 3)
 	{
 		options.sortOrder = 1;		//  sort according to gPos
@@ -1077,16 +1081,8 @@ void dumpMatches(
 						else
 #endif
 						{
-#ifdef RAZERS_SPLICED
-							if (options.minMatchLen > 0)
-							{
-								if( -(*it).pairScore < (int)length(stats))
-									bestMatches = stats[-(*it).pairScore][currReadNo]/2;
-							}
-							else 
-#endif
-								if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
-								bestMatches = stats[(*it).editDist][currReadNo];
+							if (bestMatches == 0 && (unsigned)(*it).editDist < length(stats))
+							bestMatches = stats[(*it).editDist][currReadNo];
 
 						}
 						
@@ -1095,23 +1091,12 @@ void dumpMatches(
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 							!options.maqMapping && 
 #endif
-							(unsigned)(*it).editDist > 0
-#ifdef RAZERS_SPLICED
-							&& options.minMatchLen == 0
-#endif
-							)
+							(unsigned)(*it).editDist > 0 )
 						{
 							for(unsigned d = 0; d < (unsigned)(*it).editDist; ++d)
 								if (stats[d][currReadNo]>0) suboptimal=true;
 						}
-#ifdef RAZERS_SPLICED
-						if(options.minMatchLen > 0 &&  -(*it).pairScore > 0)
-						{
-							for(unsigned d = 0; d < static_cast<unsigned>(-(*it).pairScore); ++d)
-								if (stats[d][currReadNo]>0) suboptimal=true;
-						}
-#endif
-						
+	
 						if (bestMatches !=  1)
 						{
 							unique = 0;
@@ -1126,25 +1111,8 @@ void dumpMatches(
 //							continue; // TODO: output non-unique matches (concerns maq mapping only)
 						}
 						unsigned readLen = length(reads[currReadNo]);
-#ifdef RAZERS_SPLICED
-						if(options.minMatchLen > 0)
-							readLen = (*it).mScore;
-#endif
 
 						String<Dna5Q> readInf = infix(reads[currReadNo],0,readLen);
-#ifdef RAZERS_SPLICED
-						if(options.minMatchLen > 0)
-						{
-							if(((*it).orientation == 'F' && (*it).mateDelta < 0)
-								|| ((*it).orientation == 'R' && (*it).mateDelta > 0))
-							{
-								readInf = infix(reads[currReadNo],
-									length(reads[currReadNo])-readLen,
-									length(reads[currReadNo]));
-							}
-						}
- #endif
-
 						switch (options.genomeNaming)
 						{
 							// 0..filename is the read's Fasta id
@@ -1167,37 +1135,26 @@ void dumpMatches(
 							if ((*it).orientation == 'R')
 								reverseComplementInPlace(source(row(align, 1)));
 
-#ifdef RAZERS_SPLICED
-							if(options.minMatchLen > 0)
-								globalAlignment(align, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
-							else
-#endif
-								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+							globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
 								
 							//std::cout << align << std::endl; 
 							//dumpAlignment(::std::cout, align);
 
-							//std::cout << "vorher begin=" << (*it).gBegin <<" end="<< (*it).gEnd << std::endl;
 							// transform first and last read character to genomic positions
 							viewPosReadFirst  = toViewPosition(row(align, 0), 0);
 							viewPosReadLast   = toViewPosition(row(align, 0), readLen - 1);
 							unsigned genomePosReadFirst = toSourcePosition(row(align, 1), viewPosReadFirst);
 							unsigned genomePosReadLast  = toSourcePosition(row(align, 1), viewPosReadLast);
-#ifdef RAZERS_SPLICED
-							if(options.minMatchLen == 0)
-#endif
+							if ((*it).orientation == 'R')
 							{
-								if ((*it).orientation == 'R')
-								{
-									// watch out at chromosome borders
-									(*it).gBegin = (*it).gEnd - _min((TGPos)(genomePosReadLast + 1),(*it).gEnd); 
-									(*it).gEnd -= genomePosReadFirst;
-								}
-								else
-								{
-									(*it).gEnd = (*it).gBegin + _min((TGPos)(genomePosReadLast + 1),length(currGenome)-(*it).gBegin);
-									(*it).gBegin += genomePosReadFirst;
-								}
+								// watch out at chromosome borders
+								(*it).gBegin = (*it).gEnd - _min((TGPos)(genomePosReadLast + 1),(*it).gEnd); 
+								(*it).gEnd -= genomePosReadFirst;
+							}
+							else
+							{
+								(*it).gEnd = (*it).gBegin + _min((TGPos)(genomePosReadLast + 1),length(currGenome)-(*it).gBegin);
+								(*it).gBegin += genomePosReadFirst;
 							}
 							
 							clear(row(align,1));
@@ -1208,12 +1165,7 @@ void dumpMatches(
 							if ((*it).orientation == 'R')
 								reverseComplementInPlace(source(row(align, 1)));
 
-#ifdef RAZERS_SPLICED
-							if(options.minMatchLen > 0)
-								globalAlignment(align, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
-							else
-#endif
-								globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
+							globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
 								
 							//std::cout << align << std::endl; 
 							//dumpAlignment(::std::cout, align);
@@ -1261,14 +1213,7 @@ void dumpMatches(
 							if(unique==0) file << ";multi";
 						}
 						
-#ifdef RAZERS_SPLICED
-						if(options.minMatchLen > 0)
-						{
-							file << ";delta=" << (*it).mateDelta << ";pairId="<<(*it).pairId;
-							file << ";pairErr=" << -(*it).pairScore;
-						}
-#endif
-						
+					
 						if ((*it).editDist > 0)
 						{
 							if (options.hammingOnly)
@@ -1298,15 +1243,6 @@ void dumpMatches(
 								TAlignIterator ali_it0stop = iter(row(align,0),viewPosReadLast + 1);
 								TAlignIterator ali_it1stop = iter(row(align,1),viewPosReadLast + 1);
 
-#ifdef RAZERS_SPLICED
-								if(options.minMatchLen > 0)
-								{
-									ali_it0 = begin(row(align,0));
-									ali_it1 = begin(row(align,1));
-									ali_it0stop = end(row(align,0));
-									ali_it1stop = end(row(align,1));
-								}
-#endif
 								getCigarLine(align,cigar,mutations,ali_it0,ali_it0stop,ali_it1,ali_it1stop);
 								file << ";cigar="<<cigar.str();
 								if(length(mutations.str())>0)
@@ -1441,10 +1377,7 @@ void dumpMatches(
 				if(ambiStates[jj] == 2) file << ";suboptimal";
 				++jj;
 					
-				//file << ";pairId=" << mR.pairId;
-				int pairIdR = mR.pairId;
-				int pairIdL = mL.pairId;
-				SEQAN_ASSERT_TRUE(pairIdR == pairIdL); 
+				SEQAN_ASSERT_TRUE(mL.pairId == mR.pairId); 
 		
 				int indelLen = mR.mScore + mL.mScore - readLen;
 				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;

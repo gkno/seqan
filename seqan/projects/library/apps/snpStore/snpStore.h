@@ -27,8 +27,6 @@
 #include <fstream>
 #include <math.h>
 #include <cmath>
-//#include <cfloat>
-//#include "../razers/razers_utils.h"
 
 
 namespace SEQAN_NAMESPACE_MAIN
@@ -273,7 +271,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 			minMapQual = 1;
 			priorHetQ = 0;
 			realign = false;
-			realignAddBorder = 5;
+			realignAddBorder = 20;
 
 			stepInterval = 1;
 			coverageFile = "";
@@ -964,7 +962,7 @@ struct SingleBaseVariant{
 };
 
 
-
+/*
 struct IndelVariant{
 	bool called;   // did this variant pass calling criteria?
 	int indelSize; // called diploid genotype (allele1 << 2 | allele2) 
@@ -973,7 +971,7 @@ struct IndelVariant{
 	int coverage;  // totalCoverage at position
 	DnaString sequence;
 };
-
+*/
 
 
 
@@ -997,7 +995,7 @@ copyFragmentStore(TGroupStore &fragStoreGroup,
 {
 	//TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
 	
-	// pointers would actually be enough
+	// pointers are enough
 	fragStoreGroup.readSeqStore = fragmentStore.readSeqStore;
 	fragStoreGroup.readStore = fragmentStore.readStore;
 	fragStoreGroup.readNameStore = fragmentStore.readNameStore;
@@ -1034,10 +1032,10 @@ template <
 	typename TOptions
 >
 void dumpVariantsRealignBatchWrap(
-	TFragmentStore				&fragmentStore,				// forward/reverse matches
+	TFragmentStore				&fragmentStore,			// forward/reverse matches
 	TReadCigars				&readCigars,
 	TReadCounts const			&readCounts,
-	TGenomeName const 			genomeID,					// genome name
+	TGenomeName const 			genomeID,			// genome name
 	typename TFragmentStore::TContigPos	startCoord,			// startCoordinate + posOnGenomeInfix = real coordinate on whole chromosome
 	typename TFragmentStore::TContigPos	currWindowBegin,
 	typename TFragmentStore::TContigPos	currWindowEnd,
@@ -1047,19 +1045,19 @@ void dumpVariantsRealignBatchWrap(
 {
 
 	typedef typename TFragmentStore::TAlignedReadStore 	TMatches;
-	typedef typename Value<TMatches>::Type 				TMatch;
-	typedef typename TFragmentStore::TAlignQualityStore TMatchQualities;
+	typedef typename Value<TMatches>::Type 			TMatch;
+	typedef typename TFragmentStore::TAlignQualityStore 	TMatchQualities;
 	typedef typename Value<TMatchQualities>::Type 		TMatchQuality;
 	typedef typename TFragmentStore::TReadSeqStore	 	TReads;
-	typedef typename Value<TReads>::Type 				TRead;
+	typedef typename Value<TReads>::Type 			TRead;
 	typedef typename TFragmentStore::TContigStore 		TContigStore;
 	typedef typename TFragmentStore::TContigPos 		TContigPos;
-	typedef typename Value<TContigStore>::Type	 		TContig;
+	typedef typename Value<TContigStore>::Type	 	TContig;
 	typedef typename TFragmentStore::TContigSeq 		TContigSeq;
 	typedef typename Iterator<TMatches,Standard>::Type	TMatchIterator;
 	
 	
-	TMatches &matches				= fragmentStore.alignedReadStore;
+	TMatches &matches		= fragmentStore.alignedReadStore;
 	TMatchQualities &matchQualities = fragmentStore.alignQualityStore;
 
 	::std::sort(begin(matches, Standard()),	end(matches, Standard()), LessGPos<TMatch>());		
@@ -1087,26 +1085,22 @@ void dumpVariantsRealignBatchWrap(
 		TContigPos groupEndPos = _max((*matchIt).endPos,(*matchIt).beginPos);
 		TContigPos groupStartPos = _min((*matchIt).endPos,(*matchIt).beginPos);
 
-			//check
-		//	TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-15);
-			TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-options.realignAddBorder);
+		TContigPos groupStartCoordLocal = _max(0,(int)groupStartPos-options.realignAddBorder);
 	
 		int indelReadCount = 0; // how many reads have indels in the current group
 		while(matchIt != matchItEnd && _min((*matchIt).beginPos,(*matchIt).endPos) < groupEndPos)
 		{
 			groupEndPos = (_max((*matchIt).beginPos,(*matchIt).endPos) > groupEndPos) ? _max((*matchIt).beginPos,(*matchIt).endPos) : groupEndPos;
 			// reads wont be needed anymore! (make sure this is the case!!!)
-			(*matchIt).beginPos -= groupStartPos;
-			(*matchIt).endPos -= groupStartPos;
+			(*matchIt).beginPos -= groupStartCoordLocal;
+			(*matchIt).endPos -= groupStartCoordLocal;
 			if(matchQualities[(*matchIt).id].pairScore == 1 ) ++indelReadCount;
 			++matchIt;
 		}
 		TMatchIterator matchItBatchEnd = matchIt;
 		unsigned numMatches = matchItBatchEnd -matchItBatchBegin;
 
-			//check
-			//TContigPos groupEndCoordLocal = /*groupEndPos;//*/_min(groupEndPos+15,length(fragmentStore.contigStore[0].seq));
-			TContigPos groupEndCoordLocal = _min(groupEndPos+(TContigPos)options.realignAddBorder,(TContigPos)length(fragmentStore.contigStore[0].seq));
+		TContigPos groupEndCoordLocal = _min(groupEndPos+(TContigPos)options.realignAddBorder,(TContigPos)length(fragmentStore.contigStore[0].seq));
 		
 		if(numMatches >= options.minCoverage)
 		{
@@ -1116,18 +1110,18 @@ void dumpVariantsRealignBatchWrap(
 			//FragmentStore<SnpStoreGroupSpec_> fragStoreGroup;
 			//copyFragmentStore(fragStoreGroup,fragmentStore,matchItBatchBegin,matchItBatchEnd,groupStartPos,groupEndPos);
 
-				TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
-				resize(fragStoreGroup.alignedReadStore,numMatches,Exact());
-				arrayMoveForward(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
-//				fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartPos,groupEndPos);
-				fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartCoordLocal,groupEndCoordLocal);
+			TFragmentStore fragStoreGroup = fragmentStore; //clear(fragStoreGroup.alignedReadStore); resize; arrayCopy(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
+			resize(fragStoreGroup.alignedReadStore,numMatches,Exact());
+			arrayMoveForward(matchItBatchBegin,matchItBatchEnd,begin(fragStoreGroup.alignedReadStore,Standard())); // reads wont be needed anymore
+//			fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartPos,groupEndPos);
+			fragStoreGroup.contigStore[0].seq = infix(fragmentStore.contigStore[0].seq,groupStartCoordLocal,groupEndCoordLocal);
 	
 #ifdef SNPSTORE_DEBUG
 			std::cout << "in realign wrap: groupEndPos = " <<  groupEndPos << " groupStartPos=" <<  groupStartPos << std::endl;
 			std::cout << "genomeLength= " <<  length(fragmentStore.contigStore[0].seq) << std::endl;
 
-	CharString strstre = "testgroup";
-	_dumpMatches(fragStoreGroup,strstre);
+			CharString strstre = "testgroup";
+			_dumpMatches(fragStoreGroup,strstre);
 
 #endif
 			groupStartPos += startCoord;
@@ -1148,13 +1142,7 @@ void dumpVariantsRealignBatchWrap(
 			}
 			else
 			{
-				//options.realign = false; // switch of realignment for
-				//dumpVariantsRealignBatch(fragStoreGroup,readCigars,
-				//	readCounts,genomeID,
-				//	groupStartCoord,groupStartPos,groupEndPos,
-				//	fileSNPs,fileIndels,options);
-				//options.realign = true;
-
+				// todo: switch between with or without realignment in dumpSNPsBatch.. make global in any case
 /*				dumpVariantsRealignBatch(fragStoreGroup,readCigars,
 					readCounts,genomeID,
 					groupStartCoord,groupStartPos,groupEndPos,
@@ -1632,13 +1620,13 @@ void dumpVariantsRealignBatch(
 #endif
 
 //	std::fstream tmpfile;
-//  tmpfile.open("Z:/seqan071010/projects/library/apps/chr4.before.sam", ::std::ios_base::out);
-//  write(tmpfile, fragmentStore, SAM());
-//  tmpfile.close();
-//cout << ">4\n" << fragmentStore.contigStore[0].seq << std::endl;
+//  	tmpfile.open("Z:/seqan071010/projects/library/apps/chr4.before.sam", ::std::ios_base::out);
+//  	write(tmpfile, fragmentStore, SAM());
+//  	tmpfile.close()
+;
 	// convert matches in fragmentstore into a globally consistent alignment
 	//Score<int> scoreType = Score<int>(0, -999, -1001, -1000);	// levenshtein-score (match, mismatch, gapOpen, gapExtend)
-	Score<int> scoreType = Score<int>(0, -1, -2, -6);	// (match, mismatch, gapOpen, gapExtend)
+	Score<int> scoreType = Score<int>(0, -1, -2, -10);	// (match, mismatch,gapExtend,gapOpen) 
 	convertMatchesToGlobalAlignment(fragmentStore, scoreType, Nothing());
 
 //	std::fstream tmpfile2;
@@ -1651,7 +1639,7 @@ void dumpVariantsRealignBatch(
 	{
 		TContigGaps contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
 		TContigPos maxPos = positionSeqToGap(contigGaps,length(fragmentStore.contigStore[0].seq)-1)+1;
-		maxPos = _max(maxPos,length(fragmentStore.contigStore[0].seq));
+		maxPos = _max(maxPos,(TContigPos)length(fragmentStore.contigStore[0].seq));
 		std::cout << "maxPos visual = " << maxPos;
 		std::cout << " genomeLen = " << genomeLen << std::endl;
 
@@ -1667,40 +1655,40 @@ void dumpVariantsRealignBatch(
 	}
 #endif
 
-	//do realignment
+	//todo: do realignment here if options.realign, else work on global alignment
 //	if(options.realign)
 //	{
-		// TODO: check out if a different scoring scheme makes more sense
-		Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore;
-		int bandWidth = 10;
-		if(options._debugLevel > 1)
-		{
-			::std::cout << "Realigning "<< length(matches)<<" reads to genome of length " <<genomeLen << std::flush;
-			::std::cout << " StartCoord="<< startCoord << std::endl;
-		}
-	//	if(startCoord == 1653542)
-	//	{
-	//		CharString strstr = "befReal";
-	//		_dumpMatches(fragmentStore,strstr);
-	//	}
+	// TODO: check out if a different scoring scheme makes more sense
+	Score<int, WeightedConsensusScore<Score<int, FractionalScore>, Score<int, ConsensusScore> > > consScore;
+	int bandWidth = 10; // ad hoc
+
+	if(options._debugLevel > 1)
+	{
+		::std::cout << "Realigning "<< length(matches)<<" reads to genome of length " <<genomeLen << std::flush;
+//		::std::cout << " StartCoord="<< startCoord << std::endl;
+	}
+
+
 #ifndef TRACE_PIPELINE
-	bandWidth = 25;
+	bandWidth = 25; // allow for some more bandWidth in general
 #endif
 
 #ifdef READS_454
-		reAlign(fragmentStore,consScore,0,1,bandWidth+options.realignAddBorder,true);
+	reAlign(fragmentStore,consScore,0,1,bandWidth,true);
 #else
-		reAlign(fragmentStore,consScore,0,1,bandWidth+options.realignAddBorder,true);
+	reAlign(fragmentStore,consScore,0,1,bandWidth,true);
 #endif
 
+
+
 #ifdef SNPSTORE_DEBUG
-		if(extraV)
-		{
-			CharString strstr = "befRefRal";
-			_dumpMatches(fragmentStore,strstr);
+	if(extraV)
+	{
+		CharString strstr = "befRefRal";
+		_dumpMatches(fragmentStore,strstr);
 		TContigGaps contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
 		TContigPos maxPos = positionSeqToGap(contigGaps,length(fragmentStore.contigStore[0].seq)-1)+1;
-		maxPos = _max(maxPos,length(fragmentStore.contigStore[0].seq));
+		maxPos = _max(maxPos,(TContigPos)length(fragmentStore.contigStore[0].seq));
 		std::cout << "maxPos visual = " << maxPos;
 		std::cout << " genomeLen = " << genomeLen << std::endl;
 			AlignedReadLayout layout;
@@ -1708,42 +1696,38 @@ void dumpVariantsRealignBatch(
 			printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 150);
 		}
 #endif		
+
 		
-		if(options._debugLevel > 1)::std::cout << "Realigning reads including reference..." << std::flush;
-	/*	if(startCoord == 1653542)
-		{
-			CharString strstr = "aftReal";
-			_dumpMatches(fragmentStore,strstr);
-		TContigGaps contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
-		TContigPos maxPos = _max(maxPos,positionSeqToGap(contigGaps,length(fragmentStore.contigStore[0].seq)-1)+1);
-		maxPos = _max(maxPos,length(fragmentStore.contigStore[0].seq));
-			AlignedReadLayout layout;
-			layoutAlignment(layout, fragmentStore);
-			printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 50);
-		}*/
-//		std::cout << "consensus contig length = " << length(fragmentStore.contigStore[0].seq);
-//		std::cout << "consensus contig length incl gaps = " << positionSeqToGap(TContigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps),length(fragmentStore.contigStore[0].seq)-1)+1 << std::endl;
+	if(options._debugLevel > 1)::std::cout << "Realigning reads including reference..." << std::flush;
+
 #ifdef READS_454
-		reAlign(fragmentStore,consScore,0,1,bandWidth,false);
+	reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,false);
 #else
-		reAlign(fragmentStore,consScore,0,1,bandWidth,false);
+	reAlign(fragmentStore,consScore,0,1,/*bandWidth*/5,false);
 #endif
-		if(options._debugLevel > 1) ::std::cout << "Finished realigning." << std::endl;	
+
+	if(options._debugLevel > 1) ::std::cout << "Finished realigning." << std::endl;	
+
+
 
 #ifdef SNPSTORE_DEBUG
-		::std::cout << "Realignment done.\n";
-		if(extraV)
-		{
+	::std::cout << "Realignment done.\n";
+	if(extraV)
+	{
 		TContigGaps contigGaps(fragmentStore.contigStore[0].seq, fragmentStore.contigStore[0].gaps);
 		TContigPos maxPos = positionSeqToGap(contigGaps,length(fragmentStore.contigStore[0].seq)-1)+1;
-		maxPos = _max(maxPos,length(fragmentStore.contigStore[0].seq));
+		maxPos = _max(maxPos,(TContigPos)length(fragmentStore.contigStore[0].seq));
 		std::cout << "maxPos visual = " << maxPos;
 		std::cout << " genomeLen = " << genomeLen << std::endl;
-			AlignedReadLayout layout;
-			layoutAlignment(layout, fragmentStore);
-			printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 150);
-		}
-		::std::cout << "done." << std::flush;
+		AlignedReadLayout layout;
+		layoutAlignment(layout, fragmentStore);
+		printAlignment(std::cout, Raw(), layout, fragmentStore, 0, (TContigPos)0, (TContigPos)maxPos, 0, 150);
+		std::fstream tmpfile3;
+		tmpfile3.open("test.realigned.sam", ::std::ios_base::out);
+		write(tmpfile3, fragmentStore, SAM());
+		tmpfile3.close();
+	}
+	::std::cout << "done." << std::flush;
 
 	//	std::fstream tmpfile2;
 	//	tmpfile2.open("tmpfile_realigned.sam", ::std::ios_base::out);
@@ -1773,19 +1757,13 @@ void dumpVariantsRealignBatch(
 	unsigned numReads = length(matches)-1; // exclude reference sequence
 	unsigned refId = length(matchQualities); // reference id (there may be more matchQs than matches due to pile up correction)
 
-#ifdef SNPSTORE_DEBUG
-	::std::cout << "look for ref" << std::flush << std::endl;
-	CharString strstr="problem";
-//	_dumpMatches(fragmentStore,strstr);
-	
-#endif
 	// look for reference sequence and move it to the end of alignedreads
+	// todo: only do this when realignment was done
 	bool refFound = false;
 	TMatchIterator matchItKeep = matchIt;
 	TMatch tempRef;
 	while(matchIt != matchItEnd)
 	{
-//		if(!refFound) ::std::cout << "ref not Found!\n";
 		if((*matchIt).readId == refId) // this is the reference
 		{
 			refFound = true;
@@ -1803,52 +1781,7 @@ void dumpVariantsRealignBatch(
 	}
 	*matchItKeep = tempRef;
 	SEQAN_ASSERT_TRUE(refFound);
-
-/*
-	unsigned maxLen = 0;
-	unsigned maxLenPos = 0;
-	unsigned count = 0;
-	while(matchIt != matchItEnd)
-	{
-		unsigned len = _max((*matchIt).beginPos,(*matchIt).endPos) - _min((*matchIt).beginPos,(*matchIt).endPos);
-		//std::cout << "len=" << len << std::endl;
-		if(len> maxLen)
-		{
-			maxLen = len;
-			maxLenPos = count;
-		}
-		++matchIt;
-		++count;
-	}
-	std::cout << "maxLen = " << maxLen <<  "\n";
-	matchIt         = begin(matches, Standard());
-	TMatchIterator matchItKeep;
-	
-	count = 0;
-	while(count < maxLenPos)
-	{
-		++count;
-		++matchIt;
-	}
-	TMatch tempRef = *matchIt;
-	matchItKeep = matchIt;
-	++matchIt;
-	while(matchIt != matchItEnd)
-	{
-		*matchItKeep = *matchIt;
-		++matchIt;++matchItKeep;
-	}
-	*matchItKeep = tempRef;
-*/
-
 		
-/*	if(extraV)	// dont do this here!!! read printing resorts matches!
-	{
-		AlignedReadLayout layout;
-		layoutAlignment(layout, fragmentStore);
-		printAlignment(std::cout, Raw(), layout, fragmentStore, 0, 0, 1200, 0, 150);
-	}
-*/	
 #ifdef SNPSTORE_DEBUG
 	if(!refFound) ::std::cout << "ref not Found!\n";
 	::std::cout << "done looking for ref." << std::flush << std::endl;
@@ -1872,16 +1805,8 @@ void dumpVariantsRealignBatch(
 	}
 #endif
 
-	// now walk through the reference sequence in gaps view space,
-	// i.e. position may be a gap
-	// example:
-	// Ref      ACCGTGCACTAGCATCATT--ACTAGCATCATA
-	// Reads    ACCGTACA--AGCATCAT
-	//              TACA--AGCATCATT--ACT
-	//                          ATTTTACTAGCATCATA
-	if(options._debugLevel>1) std::cout << "Start inspecting alignment..." << std::endl;
-//	for(TContigPos candidateViewPos = 0; candidateViewPos < length(referenceGaps); ++candidateViewPos)
-	
+
+	// for indels:
 	// i1 keeps track of consensus character
 	// i2 keeps track of coverage (last 8 bits) and indelcount (first 8 bits)
 	String<Pair<short unsigned,short unsigned> > indelConsens;
@@ -1891,29 +1816,22 @@ void dumpVariantsRealignBatch(
 		indelConsens[i].i1 = 6;
 		indelConsens[i].i2 = 0;
 	}
+
+	if(options._debugLevel>1) std::cout << "Start inspecting alignment..." << std::endl;
+	// now walk through the reference sequence in gaps view space,
+	// i.e. position may be a gap
+	// example:
+	// Ref      ACCGTGCACTAGCATCATT--ACTAGCATCATA
+	// Reads    ACCGTACA--AGCATCAT
+	//              TACA--AGCATCATT--ACT
+	//                          ATTTTACTAGCATCATA
 	for(TContigPos candidateViewPos = refStart; candidateViewPos < refStart + (TContigPos)length(referenceGaps); ++candidateViewPos)
 	{
 		// first check if reference has a gap (potential insertion in reads) at this position
 		TContigGapIter refIt = iter(referenceGaps,candidateViewPos-refStart);
 		bool refGap = false; 
 		if(isGap(refIt)) refGap = true;
-		//bool refGapExtension = false;
-		//if(isGap(refIt))
-		//{
-		//	if (refGap) // this gap is an extension of a previous one
-		//	{
-		//		refGapExtension = true;
-		//		refGapLen = reafGapLen - 1; 
-		//	}
-		//	else 
-		//	{
-		//		refGapLen = 0;
-		//		for(;!atEnd(refIt) && isGap(refIt); ++refIt) ++refGapLen;
-		//	}
-		//    refGap = true;
-		//}
-		//else refGap = false;
-
+			
 		//get position in sequence space
 		TContigPos candidatePos = positionGapToSeq(referenceGaps, candidateViewPos-refStart);
 	
@@ -1929,6 +1847,9 @@ void dumpVariantsRealignBatch(
 		std::cout << "candidateViewPos = " << candidateViewPos << std::endl;
 		std::cout << "candidatePos = " << candidatePos << std::endl;
 		std::cout << "candidatePosMitStart = " << candidatePos + startCoord << " refBase = " << refBase << std::endl;
+		if(refGap) std::cout << "refGap!" << std::endl;
+		bool extraVVVV = false;
+		if(candidatePos + startCoord == 19388258) extraVVVV=true;
 #endif		
 
 		//find range of relevant read matches 
@@ -1942,6 +1863,9 @@ void dumpVariantsRealignBatch(
 		matchIt = matchRangeBegin;
 		
 		int coverage = matchRangeEnd-matchRangeBegin;
+#ifdef SNPSTORE_DEBUG
+		if(extraVVVV) std::cout <<"cov=" << coverage << std::endl;
+#endif
 		if(coverage<(int)options.minCoverage) 
 			continue; // coverage too low
 		
@@ -1963,7 +1887,7 @@ void dumpVariantsRealignBatch(
 
 		bool observedAtLeastOneMut = false;
 		int numIndelsObserved = 0;  // if refGap then this counts the number of insertions
-									// else it counts the number of deletions
+						// else it counts the number of deletions
 		int positionCoverage = 0;   // how many reads actually span the position?
 
 		// now check reads
@@ -2002,8 +1926,6 @@ void dumpVariantsRealignBatch(
 			if(readPos != -1) //-1 indicates gap in read
 			{
 				if(options.minDifferentReadPos > 0)
-//					if((unsigned)(length(reads[(*matchIt).readId]) - readPos) <= options.excludeBorderPos || 
-//							(unsigned) readPos <= options.excludeBorderPos )
 					if((unsigned)(length(reads[(*matchIt).readId]) - readPos) > options.excludeBorderPos  &&
 							(unsigned) readPos >= options.excludeBorderPos )
 						readPosMap.insert(readPos);
@@ -2036,21 +1958,27 @@ void dumpVariantsRealignBatch(
 			}
 			else
 			{	//potential deletions
+#ifdef SNPSTORE_DEBUG
+				if(extraVVVV) std::cout <<"readPos = -1 " << std::endl;
+#endif
+
 				if(!refGap)
 					++numIndelsObserved;
 				
 			}
-			//if(extraV)
-			//{
-			//	TReadGapIter it1 = begin(readGaps);
-			//	TReadGapIter it2 = begin(referenceGaps);
-			//
-			//}
 
 			++matchIt;
 		}
 		matchIt = matchRangeBegin; //set iterator back to where we started from, same matches might be involved in next cand pos
 		
+#ifdef SNPSTORE_DEBUG
+		if(extraVVVV)
+		{
+			std::cout << "posCov=" << positionCoverage << "numIndels = " << numIndelsObserved << std::endl;
+			if(observedAtLeastOneMut) std::cout << "observed at least one mut " << std::endl;
+		}
+#endif
+
 		// too few reads actually cover the position
 		if(positionCoverage < (int)options.minCoverage) 
 			continue;
@@ -2101,6 +2029,9 @@ void dumpVariantsRealignBatch(
 			char mostCommonBase = 5; // 5 represents gap char "-", potential deletion
 			if(refGap) // potential insertion
 			{
+#ifdef SNPSTORE_DEBUG
+				if(extraVVVV) std::cout << "potential insertion" << std::endl;
+#endif
 				SEQAN_ASSERT_TRUE(!observedAtLeastOneMut);
 				mostCommonBase = 0;
 				unsigned maxCount = countF[0] + countR[0];
@@ -2112,10 +2043,17 @@ void dumpVariantsRealignBatch(
 					}
 			}
 			indelConsens[candidateViewPos].i1 = mostCommonBase;
+#ifdef SNPSTORE_DEBUG
+				if(extraVVVV) std::cout << "mosCommonBase = " << (int)mostCommonBase << std::endl;
+#endif
 			if(positionCoverage > 255) //downscaling if numbers get too large
 			{
-				numIndelsObserved *= (float)255.0/(float)positionCoverage;
+				numIndelsObserved *= (int)((float)255.0/(float)positionCoverage);
 				positionCoverage = 255;
+#ifdef SNPSTORE_DEBUG
+				if(extraVVVV) std::cout << "downscaled to " << numIndelsObserved << std::endl;
+#endif
+
 			}
 			indelConsens[candidateViewPos].i2 = numIndelsObserved << 8 | positionCoverage;
 		}
@@ -2149,6 +2087,9 @@ void dumpVariantsRealignBatch(
 			if(candidateViewPos < refStart + (TContigPos)length(referenceGaps) &&
 				indelConsens[candidateViewPos].i1==6) // not a relevant position
 			{
+#ifdef SNPSTORE_DEBUG
+				::std::cout << candidateViewPos << "not relevant for indels" <<  std::endl;
+#endif
 				++candidateViewPos;
 				continue;
 			}
@@ -2159,11 +2100,17 @@ void dumpVariantsRealignBatch(
 			unsigned depth = 0;
 			float percentage = 0.0;
 			// gap position
+#ifdef SNPSTORE_DEBUG
+			::std::cout << candidateViewPos << " indel?" <<  std::endl;
+#endif
 			while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
 				(indelConsens[candidateViewPos].i1==5 || 		// deletion in consens
-				(indelConsens[candidateViewPos].i1==6 && positionGapToSeq(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
+				(indelConsens[candidateViewPos].i1==6 && isGap(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
 				) 													// and reference is a gap (same candidatePosition as before)
 			{
+#ifdef SNPSTORE_DEBUG
+				::std::cout << startCoord + candidateViewPos << " del!!" <<  std::endl;
+#endif
 				if(indelConsens[candidateViewPos].i1==5) 
 				{
 					++indelSize;
@@ -2176,13 +2123,13 @@ void dumpVariantsRealignBatch(
 			if(indelSize>0)
 			{
 				percentage = percentage/(float)depth; // low coverage positions get a lower weight here
-				depth = round(depth/indelSize);   // coverage is spread over all positions
+				depth = (unsigned)round(depth/indelSize);   // coverage is spread over all positions
 				//print deletion
 				indelfile << chrPrefix << genomeID << '\t' << runID << "\tdeletion\t";
-				indelfile << candidatePos + startCoord + options.positionFormat << '\t';
-				indelfile << candidatePos + startCoord + options.positionFormat  + indelSize - 1;
+				indelfile << candidatePos + startCoord + options.positionFormat  << '\t';
+				indelfile << candidatePos + startCoord + options.positionFormat + indelSize - 1;
 				indelfile << "\t" << percentage;
-				indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat;
+				indelfile << "\t+\t.\tID=" << candidatePos + startCoord + options.positionFormat ;
 				indelfile << ";size=" << indelSize;
 				indelfile << ";depth=" << depth;
 				//if(splitSupport>0) indelfile << ";splitSupport=" << splitSupport;
@@ -2198,9 +2145,12 @@ void dumpVariantsRealignBatch(
 			clear(insertionSeq);
 			while(candidateViewPos < refStart + (TContigPos)length(referenceGaps) && // shouldnt happen actually
 				(indelConsens[candidateViewPos].i1<5 ||		     // insertion in consensus
-				(indelConsens[candidateViewPos].i1==6 && positionGapToSeq(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
+				(indelConsens[candidateViewPos].i1==6 && candidatePos == positionGapToSeq(referenceGaps, candidateViewPos-refStart)))	// position in consensus is the same as in reference
 				) 													// and reference is a gap (same candidatePosition as before)
 			{
+#ifdef SNPSTORE_DEBUG
+				::std::cout << candidateViewPos << " ins!!!" <<  std::endl;
+#endif
 				if(indelConsens[candidateViewPos].i1<5)
 				{
 					--indelSize;
@@ -2213,7 +2163,7 @@ void dumpVariantsRealignBatch(
 			if(indelSize<0)
 			{
 				percentage = percentage/(float)depth; // low coverage positions get a lower weight here
-				depth = round(depth/-indelSize);   // coverage is spread over all positions
+				depth = (unsigned) round(depth/-indelSize);   // coverage is spread over all positions
 		
 				//print insertion
 				indelfile << chrPrefix <<genomeID << '\t' << runID << "\tinsertion\t";
@@ -2335,7 +2285,7 @@ void dumpSNPsBatch(
 #endif
 	SingleBaseVariant snp = {0,0,0,0,0};
 
-	for(unsigned candidatePos = 0; candidatePos < length(genome); ++candidatePos)
+	for(TContigPos candidatePos = 0; candidatePos < (TContigPos)length(genome); ++candidatePos)
 	{
 		if(options._debugLevel > 1) ::std::cout << "Next pos\n";
 		
@@ -2446,8 +2396,6 @@ void dumpSNPsBatch(
 					if(options.minDifferentReadPos > 0)
 						if((unsigned)(length(reads[(*matchIt).readId]) - readPos) > options.excludeBorderPos  &&
 							(unsigned) readPos >= options.excludeBorderPos )
-	//					if((unsigned)(length(reads[(*matchIt).readId]) - readPos) <= options.excludeBorderPos || 
-	//							(unsigned) readPos <= options.excludeBorderPos )
 							readPosMap.insert(readPos);
 					candidateBase = f((Dna5)reads[(*matchIt).readId][readPos]);
 #ifdef SNPSTORE_DEBUG
@@ -2486,8 +2434,6 @@ void dumpSNPsBatch(
 					if(options.minDifferentReadPos > 0)
 						if((unsigned)(length(reads[(*matchIt).readId]) - readPos) > options.excludeBorderPos  &&
 							(unsigned) readPos >= options.excludeBorderPos )
-			//			if((unsigned)(length(reads[(*matchIt).readId])-readPos) <= options.excludeBorderPos || 
-			//					(unsigned) readPos <= options.excludeBorderPos )
 							readPosMap.insert(readPos);
 							
 					candidateBase = (Dna5)reads[(*matchIt).readId][readPos];
@@ -2649,7 +2595,7 @@ void dumpShortIndelPolymorphismsBatch(
 	typedef typename Value<TReads>::Type 				TRead;
 	typedef typename Infix<TRead>::Type				TReadInf;
 	typedef typename Iterator<TMatches, Standard>::Type TMatchIterator;
-
+	typedef typename TFragmentStore::TContigPos TContigPos;
 	// matches need to be ordered accordign to genome position
 	TReads &reads = fragmentStore.readSeqStore;
 	TMatches &matches = fragmentStore.alignedReadStore;
@@ -2979,11 +2925,6 @@ void dumpShortIndelPolymorphismsBatch(
 #ifdef SNPSTORE_DEBUG
 			debug=true;
 #endif
-			//if(it->first  + startCoord> 153323960 && it->first  + startCoord< 153323967) 
-			//{
-			//	debug = true;
-			//	std::cout << "Pos=" << it->first  + startCoord << " count=" <<  it->second;
-			//}
 			int splitSupport = 0;
 			if(splitCountIt != splitEndIt && 
 				(splitCountIt->first.i1 == indelIt->first.i1) && (splitCountIt->first.i2 == indelIt->first.i2))
@@ -2997,26 +2938,23 @@ void dumpShortIndelPolymorphismsBatch(
 				if(debug)::std::cout << "indel: count too low "<<indelIt->second.i1<<"\n";
 				continue;
 			}
-			if(indelIt->first.i1 + startCoord < currStart || indelIt->first.i1 + startCoord >= currEnd)
+			if((TContigPos)indelIt->first.i1 + startCoord < currStart || (TContigPos)indelIt->first.i1 + startCoord >= currEnd)
 			{
 				if(debug)::std::cout << "indel: pos outside range "<<indelIt->first.i1<<"\n";
 				continue;
 			}
-		//	if(1165440 == it->first + startCoord) std::cout << "it->second = " << it->second << std::endl;
 			unsigned candidatePos = indelIt->first.i1;
-			while(matchIt != currSeqMatchItEnd && _max((*matchIt).endPos,(*matchIt).beginPos) <= candidatePos)
+			while(matchIt != currSeqMatchItEnd && _max((*matchIt).endPos,(*matchIt).beginPos) <= (TContigPos) candidatePos)
 				++matchIt;
 			
 			TMatchIterator matchRangeBegin = matchIt;
-			while(matchIt != currSeqMatchItEnd && _min((*matchIt).endPos,(*matchIt).beginPos) <= candidatePos)
+			while(matchIt != currSeqMatchItEnd && _min((*matchIt).endPos,(*matchIt).beginPos) <= (TContigPos) candidatePos)
 				++matchIt;
 			TMatchIterator matchRangeEnd = matchIt;
 
 			int coverage = matchRangeEnd-matchRangeBegin;
-		//	if(1165440 == it->first + startCoord) std::cout << "coverage = " << coverage << std::endl;
 			if(coverage<(int)options.minCoverage)
 			{
-//				::std::cout << "indel:cov too low"<<coverage<<"\n";
 				matchIt = matchRangeBegin;
 				continue;
 			
@@ -3032,8 +2970,8 @@ void dumpShortIndelPolymorphismsBatch(
 			while(matchIt != matchRangeEnd)
 			{
 				
-				if(!(_min((*matchIt).beginPos,(*matchIt).endPos) <= candidatePos 
-					&& candidatePos < _max((*matchIt).beginPos,(*matchIt).endPos)))
+				if(!(_min((*matchIt).beginPos,(*matchIt).endPos) <= (TContigPos)candidatePos 
+					&& (TContigPos)candidatePos < _max((*matchIt).beginPos,(*matchIt).endPos)))
 				{
 					++matchIt;
 					continue;

@@ -843,7 +843,7 @@ clipReads(TFragmentStore 	&fragmentStore,
 				reverseComplementInPlace(source(row(align, 1)));
 				
 			int score = globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());		
-			aliQ.errors = round(-score/1000);
+			aliQ.errors = (unsigned char) round(-score/1000);
 
 #ifdef SNPSTORE_DEBUG
 			if(extraV) ::std::cout << align << std::endl;
@@ -1038,7 +1038,7 @@ int readMatchesFromGFF_Batch(
 		return 10;
 	}
 	int readCount = length(fragmentStore.readSeqStore);
-	unsigned genomeLen = length(genome);
+	TContigPos genomeLen = length(genome);
 	
 	// general stuff that is needed
 	typename TGenomeIdMap::const_iterator it;
@@ -1133,7 +1133,7 @@ int readMatchesFromGFF_Batch(
 		// skip whitespaces and read entry in column 4  --> genomic begin position
 		_parse_skipWhitespace(*file, c);
 		TContigPos beginPos = _parse_readNumber(*file,c) - options.positionFormat;
-		if(beginPos > currentEnd + options.windowBuff)	// we have passed the relevant match positions
+		if(beginPos > currentEnd + (TContigPos)options.windowBuff)	// we have passed the relevant match positions
 		{
 			if(options._debugLevel > 1)
 				std::cout  << "gBegin "<< beginPos<<"  of match is too large, seeking "<<lineStart<<"\n";
@@ -1149,7 +1149,7 @@ int readMatchesFromGFF_Batch(
 
 		if(options._debugLevel > 1) 
 			::std::cout << endPos << "\t";
-		if(endPos + options.windowBuff < currentBegin)	//we havent reached a relevant read yet
+		if(endPos + (TContigPos)options.windowBuff < currentBegin)	//we havent reached a relevant read yet
 		{
 			_parse_skipLine(*file,c);
 			continue;
@@ -1170,7 +1170,7 @@ int readMatchesFromGFF_Batch(
 			mScore = 100;  //not used, but needs to be >= options.minMapQual (default 1)
 			c = _streamGet(*file);
 		}
-		else mScore = _parse_readDouble(*file,c); 
+		else mScore = (int)_parse_readDouble(*file,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << mScore << "\t";
 		
@@ -1422,7 +1422,7 @@ int readMatchesFromGFF_Batch(
 			if(options._debugLevel > 1) 
 				::std::cout<<fragmentStore.readSeqStore[rSeq]<<" with edit="<<editDist<<" at position "<< beginPos <<"\n";
 
-			if(endPos - beginPos > options.maxHitLength)
+			if(endPos - beginPos > (TContigPos)options.maxHitLength)
 				options.maxHitLength = endPos - beginPos;
 
 			// remember min and max positions seen

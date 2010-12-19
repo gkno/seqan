@@ -141,12 +141,9 @@ expNumRandomMatches(TReadSet &readSet, TSize genomeLen, TOptions & options)
 {
 	TSize M1 = options.minMatchLen;
 	TSize M2 = options.minMatchLen;
-//	TSize d_m1 = (int) M1 * options.errorRate;
-//	TSize d_m2 = (int) M2 * options.errorRate;
 	TSize d_m1 = (int) options.maxPrefixErrors;
 	TSize d_m2 = (int) options.maxSuffixErrors;
 	TSize numReads = length(readSet);
-	//numReads = 10000000;
 	genomeLen = options.specifiedGenomeLen;
 	TSize readLen = (numReads > 0) ? length(readSet[0]) : 0;
 	TSize numErrors = static_cast<int>(readLen * options.errorRate);
@@ -278,8 +275,7 @@ void compactSplicedMatches(TMatches &matches,
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Remove low quality matches # necessary to have an own splicedmatch function? 
-// planned specs: SpliceSite, General, ... 
+// final compacting of spliced matches
 template < typename TMatches, typename TCounts, typename TSpec>
 void compactAndCountSplicedMatches(TMatches &matches, 
 			TCounts & states, 
@@ -393,145 +389,6 @@ void compactAndCountSplicedMatches(TMatches &matches,
 }
 
 
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Remove low quality matches # necessary to have an own splicedmatch function? 
-template < typename TMatches, typename TCounts, typename TSpec, typename TSwiftL, typename TSwiftR >
-void compactSplicedMatchesPurgeAmbiguous(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSpec> &options, TSwiftL &, TSwiftR &)
-{
-	typedef typename Value<TMatches>::Type				TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type		TIterator;
-	
-	unsigned readNo = -1;
-	unsigned hitCount = 0;
-	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
-	
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-	TIterator dit = it;
-	TIterator ditBeg = it;
-	
-	// sort
-//	::std::sort(it, itEnd, LessSplicedErrors<TMatch>());
-	::std::sort(it, itEnd, LessSplicedScore<TMatch>());
-	int counter = 0;
-	for (; it != itEnd; ++it) 
-	{
-		++counter;
-		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo)
-		{ 
-			if ((*it).pairScore <= scoreDistCutOff)
-			{
-				++it;
-				continue;
-			}
-			if (++hitCount >= hitCountCutOff)
-			{
-				if (hitCount == hitCountCutOff)
-					dit = ditBeg;
-				++it;
-				continue;
-			}
-		}
-		else
-		{
-			readNo = (*it).rseqNo;
-			hitCount = 0;
-			if (options.distanceRange > 0)
-				scoreDistCutOff = (*it).pairScore - options.distanceRange;
-			ditBeg = dit;
-		}
-		*dit = *it;	++dit; ++it;
-		*dit = *it;	++dit;
-	}
-	resize(matches, dit - begin(matches, Standard()));
-}
-
-
-	template <typename TReadMatch>
-	struct LessReadNoPairErrors : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// quality
-			if (a.pairScore > b.pairScore) return true;
-			if (a.pairScore < b.pairScore) return false;
-			if (a.pairId < b.pairId) return true;
-			if (a.pairId > b.pairId) return false;
-			return a.editDist < b.editDist;
-		}
-	};
-
-	template <typename TReadMatch>
-	struct LessReadNoGPos : public ::std::binary_function < TReadMatch, TReadMatch, bool >
-	{
-		inline bool operator() (TReadMatch const &a, TReadMatch const &b) const 
-		{
-			// read number
-			if (a.rseqNo < b.rseqNo) return true;
-			if (a.rseqNo > b.rseqNo) return false;
-
-			// quality
-			if (a.pairScore > b.pairScore) return true;
-			if (a.pairScore < b.pairScore) return false;
-			if (a.pairId < b.pairId) return true;
-			if (a.pairId > b.pairId) return false;
-			if (a.gBegin < b.gBegin) return true;
-			if (a.gBegin > b.gBegin) return false;
-			return a.editDist < b.editDist;
-		}
-	};
-
-
-//////////////////////////////////////////////////////////////////////////////
-// Count matches for each number of errors
-template < typename TMatches, typename TCounts >
-void countSplitMatches(TMatches &matches, TCounts &cnt)
-{
-	typedef typename Value<TMatches>::Type					TMatch;
-	typedef typename Iterator<TMatches, Standard>::Type			TIterator;
-	typedef typename Value<TCounts>::Type					TRow;
-	typedef typename Value<TRow>::Type					TValue;
-
-
-	TIterator it = begin(matches, Standard());
-	TIterator itEnd = end(matches, Standard());
-
-	::std::sort(it, itEnd, LessReadNoPairErrors<TMatch>());
-	
-	unsigned readNo = -1;
-	short editDist = -1;
-	__int64 count = 0;
-	__int64 maxVal = SupremumValue<TValue>::VALUE;
-
-	for (; it != itEnd; ++it) 
-	{
-		if ((*it).orientation == '-') continue;
-		if (readNo == (*it).rseqNo &&
-			-editDist == (*it).pairScore)
-			++count;
-		else
-		{
-			if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
-				cnt[editDist][readNo] = (maxVal < count)? maxVal : count;
-			readNo = (*it).rseqNo;
-			editDist = -(*it).pairScore;
-			count = 1;
-		}
-	}
-	if (readNo != (unsigned)-1 && (unsigned)editDist < length(cnt))
-		cnt[editDist][readNo] = count;
-}
-
-
 template<typename TAlign, typename TPosition>
 int
 countErrorsInAlign(TAlign & align, TPosition end_)
@@ -633,7 +490,6 @@ matchVerify(
 	
 	unsigned ndlLength = _min(sequenceLength(rseqNo, readSet),options.minMatchLen);
 	int maxScore = InfimumValue<int>::VALUE;
-	//int minScore = -(int)(ndlLength * options.errorRate);
 	int minScore = - maxNumSeedErrors(options,TSufPrefSpec());
 
 	TMyersFinder maxPos;
@@ -729,8 +585,12 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 	::std::cout << " extending match left" << ::std::endl;
 #endif
 
+//  XXXIMPROV
+//	unsigned lDim0 = _max(0,(int)length(readSet[rseqNo])- 2 * (int)options.minMatchLen);
 	unsigned lDim0 = _max(0,(int)length(readSet[rseqNo])-(int)options.minMatchLen);
 	unsigned lDim1 = m.gBegin - beginPosition(inf);
+//  XXXIMPROV
+//	unsigned rDim0 = length(readSet[rseqNo])-1-options.minMatchLen;
 	unsigned rDim0 = length(readSet[rseqNo])-1;
 	unsigned rDim1 = m.gEnd - beginPosition(inf)-1;
 	Seed<int,SimpleSeed> seed(lDim0, lDim1, rDim0, rDim1);
@@ -753,6 +613,8 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 
 	int extScore = 0;
 	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,0,GappedXDrop());
+//  XXXIMPROV
+//	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, suffix(readSet[rseqNo],options.minMatchLen),inf,0,GappedXDrop());
 	m.gBegin = leftDim1(seed) + beginPosition(inf);
 	m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
 	m.editDist -= extScore;
@@ -801,6 +663,8 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 #endif
 
 	int extScore = 0;
+//  XXXIMPROV
+//	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, prefix(readSet[rseqNo],length(readSet[rseqNo])-options.minMatchLen),inf,1,GappedXDrop());
 	extendSeedScore(seed,extScore,scoreDropOff,scoreMatrix, readSet[rseqNo],inf,1,GappedXDrop());
 	m.gEnd = rightDim1(seed) + 1 + beginPosition(inf);
 	m.mScore = rightDim0(seed) - leftDim0(seed) + 1;
@@ -820,58 +684,6 @@ extendMatch(TReadSet &readSet, TSize rseqNo, TInf & inf, TMatch &m, TOptions &op
 }
 
 
-//template <
-//	typename TMatch, 
-//	typename TGenomeSegment, 
-//	typename TReadSet, 
-//	typename TDummy,
-//	typename TSpec >
-//inline bool
-//matchVerify(
-//	TMatch &m,					// resulting match
-//	TGenomeSegment inf,				// potential match genome region
-//	unsigned rseqNo,				// read number
-//	TReadSet &readSet,				// reads
-//	TDummy&,
-//	RazerSOptions<TSpec> const &options,		// RazerS options
-//	LongestSuffix)				// LongestEditPrefix within errorRate
-//{
-//	::std::cout << "vcejsfhkjdfhksh11111\n";
-//	if( matchVerify(m,inf,rseqNo,
-//		readSet, false,
-//		options,LongestHammingSuffix()))
-//	{
-//	//	unsigned tmp = m.gBegin;
-//	//	m.gBegin = m.gEnd;
-//	//	m.gEnd = tmp;
-//		return true;
-//	}
-//	else return false;
-//	
-//}
-//
-//
-//template <
-//	typename TMatch, 
-//	typename TGenomeSegment, 
-//	typename TReadSet, 
-//	typename TDummy,
-//	typename TSpec >
-//inline bool
-//matchVerify(
-//	TMatch &m,					// resulting match
-//	TGenomeSegment inf,		// potential match genome region
-//	unsigned rseqNo,				// read number
-//	TReadSet &readSet,				// reads
-//	TDummy & ,
-//	RazerSOptions<TSpec> const &options,		// RazerS options
-//	LongestPrefix)				// LongestEditPrefix within errorRate
-//{
-//	::std::cout << "vcejsfhkjdfhksh222222\n";
-//	return matchVerify(m,inf,rseqNo,
-//		readSet, true,
-//		options,LongestHammingPrefix());	
-//}
 
 
 template <
@@ -944,7 +756,7 @@ matchVerify(
 				{
 					if(++totalErrors > maxTotalErrors)
 					{
-						// we are excluding this last error position 
+						// we exclude this last error position 
 						--totalErrors;
 						break;
 					}
@@ -1011,15 +823,17 @@ matchVerify(
 	typedef typename Iterator<TReadInf, Standard>::Type	TReadIterator;
 	
 	if (length(genomeInf) < options.minMatchLen) return false;
-	bool debug = false;
 	TRead read = infix(readSet[rseqNo],options.minMatchLen,length(readSet[rseqNo]));
 	
 		
+#ifdef RAZERS_DEBUG
+	bool debug = true;
 	if(debug)
 	{
 		::std::cout<< "suffixmatching\n";
 		::std::cout << "genome=" << genomeInf << "\nread  =" << read <<"\n";
 	}
+#endif
 
 	TReadIterator ritEnd	= end(read, Standard())-1;
 	TReadIterator ritBeg	= begin(read, Standard());
@@ -1045,7 +859,7 @@ matchVerify(
 		TGenomeIterator g = git;	
 		for(TReadIterator r = ritEnd; r >= ritBeg; --r, --g)
 		{
-			if(debug)::std::cout << *r << "\t" << *g << "\n";
+			//if(debug)::std::cout << *r << "\t" << *g << "\n";
 			if ((options.compMask[ordValue(*g)] & options.compMask[ordValue(*r)]) == 0)
 			{
 				if (count < options.minMatchLen)
@@ -1053,7 +867,6 @@ matchVerify(
 					++totalErrors;
 					if(++seedErrors > maxErrorsSeed)
 					{
-					//	if(debug) ::std::cout << "-->no\n";
 						hit = false;
 						break;
 					}
@@ -1062,7 +875,7 @@ matchVerify(
 				{
 					if(++totalErrors > maxTotalErrors)
 					{
-						// we are excluding this last error position 
+						// we exclude this last error position 
 						--totalErrors;
 						break;
 					}
@@ -1077,7 +890,6 @@ matchVerify(
 			minTotalErrors = totalErrors;
 			bestHitLength = hitLength;
 			m.gEnd = git - begin(host(genomeInf), Standard()) + 1;
-			if(debug) ::std::cout << "m.gEnd=" << m.gEnd << ::std::endl;
 			
 		}
 	}
@@ -1107,7 +919,7 @@ matchVerify(
 
 
 
-
+// Edit distance match combination forward
 template <typename TScore>
 bool
 findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
@@ -1164,7 +976,7 @@ findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
 
 	
 
-// Edit distance match combination
+// Edit distance match combination reverse
 template <typename TScore>
 bool
 findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
@@ -1217,7 +1029,7 @@ findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
 
 
 
-
+// Edit distance match combination wrapper
 template <typename TMatch, typename TRead, typename TGenome, typename TSpec>
 bool
 combineLeftRight(TMatch & mR,
@@ -1293,7 +1105,7 @@ combineLeftRight(TMatch & mR,
 
 	}
 
-	//potential insertion
+	//potential insertion // for edit distance this is a heuristic
 	if(mR.gEnd - mL.gBegin < readLength)
 	{
 #ifdef RAZERS_DEBUG
@@ -1309,9 +1121,6 @@ combineLeftRight(TMatch & mR,
 			if(mL.gEnd == mR.gBegin)
 				if(mR.editDist + mL.editDist <= maxErrors ) //prefix and suffix match meet and do not overlap --> perfect
 					return true;
-
-//		if((mR.gEnd - mL.gBegin <= mL.mScore) || (mR.gEnd - mL.gBegin <= mR.mScore))//too close together // heuristic way to kick out repeat matches early on
-//			return false;
 
 		int diag1L = -static_cast<int>(maxErrors) + mL.seedEditDist;
 		int diag2L = maxErrors - mL.seedEditDist;
@@ -2031,53 +1840,38 @@ void mapSplicedReads(
 		return;
 	
 	
-	// Check?
-//	TSignedGPos maxGap = options.maxGap;// + 2 * (int)options.minMatchLength - (int)length(indexShape(host(swiftPatternL)));
-	TSignedGPos minGap = options.minGap;// + 2*options.minMatchLen;
-
 	TSignedGPos maxDistance = options.maxGap + (int)options.maxReadLength;
-	TSignedGPos minDistance = options.minGap;// + options.minMatchLen -3;
+	TSignedGPos minDistance = options.minGap;// + 2*options.minMatchLen ;
 
 	// exit if contig is shorter than minDistance
-	if (length(genome) <= (unsigned) minGap)
+	if (length(genome) <= (unsigned)2*options.minMatchLen)
 		return;
 	
 	TGenomeInf genomeInf = infix(genome, 0, length(genome));
 	TSwiftFinderL swiftFinderL(genome, options.repeatLength, 1);
 	TSwiftFinderR swiftFinderR(genomeInf, options.repeatLength, 1);
 	
-	TDequeue fifo;				// stores left-mate potential matches
-	String<__int64> lastPotMatchNo;		// last number of a left-mate potential
-	__int64 lastNo = 0;			// last number over all left-mate pot. matches in the queue
-	__int64 firstNo = 0;			// first number over all left-mate pot. match in the queue
+	TDequeue fifo;						// stores potential prefix matches
+	String<__int64> lastPotMatchNo;		// last number of a potential prefix match
+	__int64 lastNo = 0;					// last number over all potential prefix matches in the queue
+	__int64 firstNo = 0;				// first number over all potential prefix matches in the queue
 	Pair<TGPos> gPair;
 	
 	fill(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
 	
-	String<Pair<TGPos> > lastRightMatch;		// begin and end of last verified right match
+	String<Pair<TGPos> > lastRightMatch;		// begin and end of last verified suffix match
 	fill(lastRightMatch, length(host(swiftPatternL)), Pair<TGPos>(0,0), Exact());
 	
 	TSize gLength = length(genome);
-	TMatch mR = {	// to supress uninitialized warnings
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	TDequeueValue fL(-1, mR);	// to supress uninitialized warnings
+	TMatch mR = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	TDequeueValue fL(-1, mR);	
 	fL.i2.gseqNo = gseqNo;
 	mR.gseqNo = gseqNo;
 	fL.i2.orientation = orientation;
 	mR.orientation = orientation;
 	
-	double maxErrorRate = options.errorRate;
-	double prefixErrorRate = (double)floor(options.minMatchLen * options.errorRate)/options.minMatchLen;
-	if(prefixErrorRate > maxErrorRate) maxErrorRate = prefixErrorRate;
-	if(!empty(readSet))
-	{
-		double extPrefixErrorRate = (double) floor(length(readSet[0]) * options.errorRate)/(length(readSet[0]) - options.minMatchLen);
-		if(extPrefixErrorRate > maxErrorRate) maxErrorRate = extPrefixErrorRate;
-	}
-	double maxErrorRateL = maxErrorRate;
-	double maxErrorRateR = maxErrorRate;
-	maxErrorRateL = (double)options.maxPrefixErrors/options.minMatchLen;
-	maxErrorRateR = (double)options.maxSuffixErrors/options.minMatchLen;
+	double maxErrorRateL = (double)options.maxPrefixErrors/options.minMatchLen;
+	double maxErrorRateR = (double)options.maxSuffixErrors/options.minMatchLen;
 
 	Pair<TGPos,TGPos> lastLeftMatch(0,0);
 	// iterate all verification regions returned by SWIFT
@@ -2087,7 +1881,8 @@ void mapSplicedReads(
 		TGPos rEndPos = endPosition(swiftFinderR);	
 		TGPos doubleParWidth = 2 * (*swiftFinderR.curHit).bucketWidth;
 	
-		// remove out-of-window left mates from fifo
+		// Check this again... 
+		// remove out-of-window prefixes from fifo
 		while (!empty(fifo) && front(fifo).i2.gBegin + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		//while (!empty(fifo) && front(fifo).i2.gEnd + maxDistance + (TSignedGPos)doubleParWidth < (TSignedGPos)rEndPos)
 		{
@@ -2095,7 +1890,8 @@ void mapSplicedReads(
 			++firstNo;
 		}
 		
-		// add within-window left mates to fifo
+		// Check this again... 
+		// add within-window prefixes to fifo
 		while (empty(fifo) || back(fifo).i2.gBegin + minDistance < (TSignedGPos)(rEndPos + doubleParWidth))
 		{
 			if (find(swiftFinderL, swiftPatternL, maxErrorRateL)) 
@@ -2107,8 +1903,8 @@ void mapSplicedReads(
 					fL.i1 = lastPotMatchNo[swiftPatternL.curSeqNo]; //link to last previous potential match
 					lastPotMatchNo[swiftPatternL.curSeqNo] = lastNo++; //++ general counter and remember last pot match of curSeqNo
 					
-					fL.i2.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED; //das erste bit wird gestetzt
-					fL.i2.gBegin = gPair.i1;	//begin und end auf die potential match region
+					fL.i2.rseqNo = swiftPatternL.curSeqNo | NOT_VERIFIED; // set first bit
+					fL.i2.gBegin = gPair.i1;			
 					fL.i2.gEnd = gPair.i2;
 					pushBack(fifo, fL);
 				}
@@ -2130,7 +1926,7 @@ void mapSplicedReads(
 		lastLeftMatch.i1 = 0;
 		lastLeftMatch.i2 = 0;
 		
-		// walk through all potential left matches, verify if not verfied already, mark as positive or negative
+		// walk through all potential prefix matches, verify if not verfied already, mark as positive or negative
 		for (__int64 i = lastPotMatchNo[rseqNo]; firstNo <= i; i = (*it).i1)
 		{
 			it = &value(fifo, i - firstNo);
@@ -2151,7 +1947,7 @@ void mapSplicedReads(
 						LongestPrefix()) && 
 						!(lastLeftMatch.i1 == (TGPos)(*it).i2.gBegin && lastLeftMatch.i2 == (TGPos)(*it).i2.gEnd ))
 				{
-					(*it).i2.rseqNo &= ~NOT_VERIFIED; // has been verified positively // go back to regular rseqNo
+					(*it).i2.rseqNo &= ~NOT_VERIFIED; // has been verified positively // unset first bit
 					lastLeftMatch.i1 = (*it).i2.gBegin;
 					lastLeftMatch.i2 = (*it).i2.gEnd;
 					// short-cut negative matches
@@ -2163,21 +1959,21 @@ void mapSplicedReads(
 				} 
 				else
 				{
-					(*it).i2.rseqNo = ~NOT_VERIFIED;		// has been verified negatively // 01111111....111
+					(*it).i2.rseqNo = ~NOT_VERIFIED;		// has been verified negatively
 				}
 			}
 			
-			// verify right mate, if left match was found
+			// verify suffix, if prefix match was found
 			if ((*it).i2.rseqNo == rseqNo)
 			{
 				lastLeftMatch.i1 = (*it).i2.gBegin;
 				lastLeftMatch.i2 = (*it).i2.gEnd;
 
-				// dont want to shortcut too much
+				// dont shortcut too much
 				if (lastPositive == (__int64)-1 || i < lastPositive)
 					lastPositive = i;
 
-				// first left match --> do right verification
+				// first prefix match --> do suffix match verification
 				if(notYetVerifiedRight)
 				{
 					notYetVerifiedRight = false;
@@ -2206,7 +2002,7 @@ void mapSplicedReads(
 					}
 				}
 
-				//else check if left and right match fit together
+				//else check if prefix and suffix match fit together
 				if(!noMatchRight)
 				{
 					int outerDistance = mR.gEnd - (*it).i2.gBegin;
@@ -2222,16 +2018,14 @@ void mapSplicedReads(
 					std::cout << "mR.editDist =" << mR.editDist << "\n";
 					std::cout << "outerDist =" << outerDistance << "\n";
 #endif
-					if (outerDistance < (int)(2 * options.minMatchLen))
+					if (outerDistance < (int)(2 * options.minMatchLen)) //subtract suffix/prefix-errors in case of edit distance
 						continue;
-//					::std::cout << options.minMatchLen << "<-minMatchLen  outerDistance->" << outerDistance << std::endl;
+//					::std::cout << "outerDistance->" << outerDistance << std::endl;
 					int outerDistanceError = length(readSet[rseqNo]) - (int)(outerDistance);
 					if (outerDistanceError < 0) outerDistanceError = -outerDistanceError;
 					if ((outerDistanceError > (int) options.maxGap) ||
 						(outerDistanceError < (int) options.minGap))
 						continue;
-
-//					::std::cout <<"hier!"<<options.minDistance <<" "<<options.maxDistance<<"\n";
 
 					TMatch mRtmp = mR;
 					TMatch mLtmp = (*it).i2;
@@ -2376,7 +2170,7 @@ void mapSplicedReads(
 		if (length(matches) > options.compactThresh)
 		{
 			typename Size<TMatches>::Type oldSize = length(matches);
-//			maskDuplicates(matches);	// overlapping parallelograms cause duplicates //TODO: implement!
+//			maskDuplicates(matches);	// overlapping parallelograms cause duplicates for edit distance //TODO: implement!
 			compactSplicedMatches(matches, cnts, options, false, swiftPatternL, swiftPatternR);
 			options.compactThresh += (options.compactThresh >> 1);
 			if (options._debugLevel >= 2)
