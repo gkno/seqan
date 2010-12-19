@@ -318,7 +318,7 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("mN", "match-N",           "\'N\' matches with all other characters", OptionType::Boolean));
 	addOption(parser, addArgumentText(CommandLineOption("ed", "error-distr",       "write error distribution to FILE", OptionType::String), "FILE"));
 	addSection(parser, "Parallelism Options:");
-	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use.", OptionType::Int | OptionType::Label, options.threadCount));
+	addOption(parser, CommandLineOption("tc", "thread-count",   "Set the number of threads to use (0 to force sequential mode).", OptionType::Int | OptionType::Label, options.threadCount));
 	addOption(parser, CommandLineOption("psf", "parallel-split-factor",   "Use this many blocks per thread.", OptionType::Int | OptionType::Label, options.splitFactor));
 	addOption(parser, CommandLineOption("pws", "parallel-window-size",   "Collect SWIFT hits in windows of this length.", OptionType::Int | OptionType::Label, options.windowSize));
 	addOption(parser, CommandLineOption("pvs", "parallel-verification-size",   "Verify SWIFT hits in packages of this size.", OptionType::Int | OptionType::Label, options.verificationPackageSize));

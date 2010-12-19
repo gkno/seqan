@@ -57,12 +57,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec = Default>
 	struct RazerSQuality;
 
-	template <typename _TAlignMode, typename _TGapMode, typename _TScoreMode>
+    template <typename _TAlignMode, typename _TGapMode, typename _TScoreMode, typename _TMatchNPolicy>
 	struct RazerSMode
 	{
 		typedef _TAlignMode	TAlignMode;
 		typedef _TGapMode	TGapMode;
 		typedef _TScoreMode	TScoreMode;
+		typedef _TMatchNPolicy	TMatchNPolicy;
 	};
 	
 	enum AlignMode			{ RAZERS_LOCAL, RAZERS_PREFIX, RAZERS_GLOBAL };
@@ -410,7 +411,6 @@ struct MicroRNA{};
 		typename _TFragmentStore, 
 		typename _TRazerSOptions,
 		typename _TRazerSMode,
-		typename _TPreprocessing,
 		typename _TSwiftPattern,
 		typename _TCounts
 	>
@@ -419,9 +419,10 @@ struct MicroRNA{};
 		typedef _TFragmentStore									TFragmentStore;
 		typedef _TRazerSOptions									TOptions;
 		typedef _TRazerSMode									TRazerSMode;
-		typedef _TPreprocessing									TPreprocessing;
 		typedef _TSwiftPattern									TSwiftPattern;
 		typedef _TCounts										TCounts;
+
+        typedef typename TRazerSMode::TMatchNPolicy             TMatchNPolicy;
 		
 		typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
 		typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
@@ -429,12 +430,10 @@ struct MicroRNA{};
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
 		
-		typedef Pattern<TRead, Myers<FindInfix, False, void>  >  TMyersPattern;
-		typedef typename PatternState<TMyersPattern>::Type      TPatternState;
+		typedef _PatternState<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
 
 		TFragmentStore	*store;
 		TOptions		*options;			// RazerS options
-		TPreprocessing	*preprocessing;
 		TSwiftPattern	*swiftPattern;
 		TCounts			*cnts;
 
@@ -447,10 +446,9 @@ struct MicroRNA{};
 		
 		MatchVerifier() {}
                
-		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
-			preprocessing(&_preprocessing),
 			swiftPattern(&_swiftPattern),
 			cnts(&_cnts)
 			// , patternState()
@@ -776,8 +774,8 @@ inline int estimateReadLength(char const *fileName)
 	};
 	
 	// longest prefix mapping
-	template <typename TAlignedReadStore, typename TAlignedReadQualityStore, typename TGapMode, typename TScoreMode>
-	struct LessScore<TAlignedReadStore, TAlignedReadQualityStore, RazerSMode<RazerSPrefix, TGapMode, TScoreMode> > : 
+    template <typename TAlignedReadStore, typename TAlignedReadQualityStore, typename TGapMode, typename TScoreMode, typename TMatchNPolicy>
+	struct LessScore<TAlignedReadStore, TAlignedReadQualityStore, RazerSMode<RazerSPrefix, TGapMode, TScoreMode, TMatchNPolicy> > : 
 		public ::std::binary_function < typename Value<TAlignedReadStore>::Type, typename Value<TAlignedReadStore>::Type, bool >
 	{
 		TAlignedReadQualityStore &qualStore;
@@ -965,7 +963,7 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TBinFunctor &binF, TRazer
 //////////////////////////////////////////////////////////////////////////////
 // Count matches for each number of errors
 template <typename TFragmentStore, typename TCounts, typename TRazerSMode>
-void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode)
+void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 {
 	typedef typename TFragmentStore::TAlignedReadStore				TAlignedReadStore;
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
@@ -1035,13 +1033,14 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-	typename TSwift 
+	typename TSwift,
+    typename TMatchNPolicy
 >
 void compactMatches(
 	TFragmentStore &store,
 	TCounts &, 
 	RazerSOptions<TSpec> &options, 
-	RazerSMode<TAlignMode, TGapMode, TScoreMode> const,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &,
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
@@ -1049,7 +1048,7 @@ void compactMatches(
 	typedef typename TFragmentStore::TAlignQualityStore				TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type					TAlignedRead;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type	TIterator;
-	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode>			TRazerSMode;
+	typedef RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> TRazerSMode;
 
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
@@ -1133,13 +1132,14 @@ template <
 	typename TCounts,
 	typename TSpec,
 	typename TGapMode,
-	typename TSwift 
+	typename TSwift,
+    typename TMatchNPolicy
 >
 void compactMatches(
 	TFragmentStore &store,
 	TCounts & cnts, 
 	RazerSOptions<TSpec> &options, 
-	RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ> > const,
+	RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy> const &,
 	TSwift & swift, 
 	CompactMatchesMode compactMode)
 {
@@ -1147,7 +1147,7 @@ void compactMatches(
 	typedef typename TFragmentStore::TAlignQualityStore						TAlignQualityStore;
 	typedef typename Value<TAlignedReadStore>::Type							TAlignedRead;
 	typedef typename Iterator<TAlignedReadStore, Standard>::Type			TIterator;
-	typedef RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ> >	TRazerSMode;
+	typedef RazerSMode<RazerSGlobal, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy> TRazerSMode;
 	
 	unsigned readNo = -1;
 
@@ -1237,14 +1237,15 @@ void compactMatches(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet >
+	typename TReadSet,
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
 	unsigned readId,													// read number
 	TReadSet &readSet,													// reads
-	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors> const)		// Hamming only
+	RazerSMode<RazerSPrefix, RazerSUngapped, RazerSErrors, TMatchNPolicy> const &)		// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
@@ -1320,8 +1321,8 @@ matchVerify(
 
 template <typename TRazerSMode>
 struct __UseQualityValues { enum { VALUE = false }; };
-template <typename TAlignMode, typename TGapMode, typename TSpec>
-struct __UseQualityValues<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec> > > {  enum { VALUE = true }; };
+template <typename TAlignMode, typename TGapMode, typename TSpec, typename TMatchNPolicy>
+struct __UseQualityValues<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec>, TMatchNPolicy> > {  enum { VALUE = true }; };
 
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
@@ -1329,20 +1330,21 @@ template <
 	typename TMatchVerifier,
 	typename TGenome, 
 	typename TReadSet,
-	typename TScoreMode >
+	typename TScoreMode,
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,								// potential match genome region
 	unsigned readId,												// read number
 	TReadSet &readSet,												// reads
-	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode> const)		// Semi-global, no gaps
+	RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> const &) // Semi-global, no gaps
 {
 	typedef Segment<TGenome, InfixSegment>							TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const					TRead;
 	typedef typename Iterator<TGenomeInfix, Standard>::Type			TGenomeIterator;
 	typedef typename Iterator<TRead, Standard>::Type				TReadIterator;
-	typedef RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode>	TRazerSMode;
+	typedef RazerSMode<RazerSGlobal, RazerSUngapped, TScoreMode, TMatchNPolicy> TRazerSMode;
 
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
@@ -1450,14 +1452,15 @@ matchVerify(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet >
+	typename TReadSet,
+    typename TMatchNPolicy >
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,									// potential match genome region
 	unsigned readId,														// read number
 	TReadSet &readSet,													// reads
-	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors> const)		// Mismatches and Indels
+	RazerSMode<RazerSGlobal, RazerSGapped, RazerSErrors, TMatchNPolicy> const &) // Mismatches and Indels
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type					TRead;
@@ -1465,20 +1468,17 @@ matchVerify(
 
 	// find read match end
 	typedef Finder<TGenomeInfix>							TMyersFinder;
-	typedef typename TMatchVerifier::TPreprocessing			TPreprocessing;
-	typedef typename Value<TPreprocessing>::Type			TMyersPattern;
-	typedef typename PatternState<TMyersPattern>::Type		TPatternState;
+	typedef typename TMatchVerifier::TPatternState			TPatternState;
 
 	// find read match begin
+    // TODO(holtgrew): Use reverse-search here, as well!
 	typedef ModifiedString<TGenomeInfix, ModReverse>		TGenomeInfixRev;
 	typedef ModifiedString<TRead, ModReverse>				TReadRev;
 	typedef Finder<TGenomeInfixRev>							TMyersFinderRev;
 	typedef Pattern<TReadRev, MyersUkkonenGlobal>			TMyersPatternRev;
 
 	TMyersFinder myersFinder(inf);
-	TMyersPattern &myersPattern = (*verifier.preprocessing)[readId];
 	TPatternState & state = verifier.patternState;
-	// TPatternState state;
 	
 #ifdef RAZERS_DEBUG
 	::std::cout<<"Verify: "<<::std::endl;
@@ -1494,7 +1494,8 @@ matchVerify(
 	unsigned minDistance = (verifier.oneMatchPerBucket)? lastPos: 1;
 
 	// find end of best semi-global alignment
-	while (find(myersFinder, myersPattern, state, minScore))
+    TRead read(readSet[readId]);  // TODO(holtgrew): Copying unnecessary!
+	while (find(myersFinder, read, state, minScore))
 	// while (find(myersFinder, myersPattern, minScore))
 	{
 		TPosition pos = position(hostIterator(myersFinder));
@@ -1595,14 +1596,15 @@ matchVerify(
 template <
 	typename TMatchVerifier,
 	typename TGenome, 
-	typename TReadSet >
+	typename TReadSet,
+    typename TMatchNPolicy>
 inline bool
 matchVerify(
 	TMatchVerifier &verifier,
 	Segment<TGenome, InfixSegment> inf,												// potential match genome region
 	unsigned readId,																	// read number
 	TReadSet &readSet,																// reads
-	RazerSMode<RazerSGlobal, RazerSUngapped, RazerSQuality<RazerSMAQ> > const)	// Hamming only
+	RazerSMode<RazerSGlobal, RazerSUngapped, RazerSQuality<RazerSMAQ>, TMatchNPolicy> const &)	// Hamming only
 {
 	typedef Segment<TGenome, InfixSegment>					TGenomeInfix;
 	typedef typename Value<TReadSet>::Type const			TRead;
@@ -1692,14 +1694,15 @@ template <
 	typename TReadSet,
 	typename TAlignMode,
 	typename TGapMode,
-	typename TScoreMode >
+	typename TScoreMode,
+    typename TMatchNPolicy>
 inline bool
 matchVerify(
 	TMatchVerifier &,
 	Segment<TGenome, InfixSegment>,								// potential match genome region
 	unsigned,													// read number
 	TReadSet &,													// reads
-	RazerSMode<TAlignMode, TGapMode, TScoreMode> const)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const &)
 {
 	std::cerr << "Verification not implemenented!" << std::endl;
 	return false;
@@ -1712,7 +1715,6 @@ template <
 	typename TFragmentStore, 
 	typename TReadIndex, 
 	typename TSwiftSpec, 
-	typename TPreprocessing,
 	typename TCounts,
 	typename TRazerSOptions,
 	typename TRazerSMode >
@@ -1720,7 +1722,6 @@ void _mapSingleReadsToContig(
 	TFragmentStore							& store,
 	unsigned								  contigId,				// ... and its sequence number
 	Pattern<TReadIndex, Swift<TSwiftSpec> >	& swiftPattern,
-	TPreprocessing							& preprocessing,
 	TCounts									& cnts,
 	char									  orientation,				// q-gram index of reads
 	TRazerSOptions							& options,
@@ -1736,7 +1737,6 @@ void _mapSingleReadsToContig(
 		TFragmentStore, 
 		TRazerSOptions, 
 		TRazerSMode,
-		TPreprocessing, 
 		TSwiftPattern,
 		TCounts >											TVerifier;
 	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
@@ -1754,7 +1754,7 @@ void _mapSingleReadsToContig(
 
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
-	TVerifier		verifier(store, options, preprocessing, swiftPattern, cnts);
+	TVerifier		verifier(store, options, swiftPattern, cnts);
 
 	// initialize verifier
 	verifier.onReverseComplement = (orientation == 'R');
@@ -1784,12 +1784,13 @@ template <
 	typename TAlignMode,
 	typename TGapMode,
 	typename TScoreMode,
-	typename TReadIndex>
+	typename TReadIndex,
+    typename TMatchNPolicy >
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode,
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy>  const & mode,
 	TReadIndex											& readIndex)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
@@ -1809,18 +1810,7 @@ int _mapSingleReads(
 
 	// init edit distance verifiers
 	unsigned readCount = countSequences(readIndex);
-	String<TMyersPattern> forwardPatterns;
 	options.compMask[4] = (options.matchN)? 15: 0;
-	if (options.gapMode == RAZERS_GAPPED)
-	{
-		resize(forwardPatterns, readCount, Exact());
-		for(unsigned i = 0; i < readCount; ++i)
-		{
-			setHost(forwardPatterns[i], indexText(readIndex)[i]);
-			_patternMatchNOfPattern(forwardPatterns[i], options.matchN);
-			_patternMatchNOfFinder(forwardPatterns[i], options.matchN);
-		}
-	}
 	
 	if (options.maqMapping)
 	{
@@ -1837,21 +1827,21 @@ int _mapSingleReads(
 	SEQAN_PROTIMESTART(find_time);
 	
 	// iterate over genome sequences
-    for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId)
+    for (unsigned contigId = 0; contigId < length(store.contigStore); ++contigId)
 	{
 		// lock to prevent releasing and loading the same contig twice
 		// (once per _mapSingleReadsToContig call)
 		lockContig(store, contigId);
 #ifndef RAZERS_WINDOW
 		if (options.forward)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'F', options, mode);
 		if (options.reverse)
-			_mapSingleReadsToContig(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+			_mapSingleReadsToContig(store, contigId, swiftPattern, cnts, 'R', options, mode);
 #else
 		if (options.forward)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, forwardPatterns, cnts, 'F', options, mode);
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'F', options, mode);
 		if (options.reverse)
-			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, forwardPatterns, cnts, 'R', options, mode);
+			_mapSingleReadsToContigWindow(store, contigId, swiftPattern, cnts, 'R', options, mode);
 #endif
 		unlockAndFreeContig(store, contigId);
 	}
@@ -1879,13 +1869,14 @@ template <
 	typename TShape,
 	typename TAlignMode,
 	typename TGapMode,
-	typename TScoreMode >
+	typename TScoreMode,
+    typename TMatchNPolicy >
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>					& store,
 	TCounts												& cnts,
 	RazerSOptions<TSpec>								& options,
 	TShape const										& shape,
-	RazerSMode<TAlignMode, TGapMode, TScoreMode>  const & mode)
+	RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
@@ -1915,13 +1906,14 @@ template <
 	typename TSpec, 
 	typename TShape,
 	typename TGapMode,
-	typename TScoreMode >
+	typename TScoreMode,
+    typename TMatchNPolicy >
 int _mapSingleReads(
 	FragmentStore<TFSSpec, TFSConfig>						& store,
 	TCounts													& cnts,
 	RazerSOptions<TSpec>									& options,
 	TShape const											& shape,
-	RazerSMode<RazerSPrefix, TGapMode, TScoreMode>    const & mode)
+	RazerSMode<RazerSPrefix, TGapMode, TScoreMode, TMatchNPolicy> const & mode)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore			TReadSeqStore;
@@ -1962,7 +1954,7 @@ int _mapReads(
 	TShape const							& shape,
 	TRazerSMode						  const & mode)
 {
-    if (/*options.threadCount == 1 || */length(store.readNameStore) < MIN_PARALLEL_WORK) {
+    if (options.threadCount == 0 || length(store.readNameStore) < MIN_PARALLEL_WORK) {
         // Sequential RazerS
         #ifdef RAZERS_MATEPAIRS
         if (options.libraryLength >= 0)
@@ -2010,24 +2002,24 @@ int _mapReads(
 
 //////////////////////////////////////////////////////////////////////////////
 // Wrapper for different score modes
-template <typename TFSSpec, typename TFSConfig, typename TCounts, typename TSpec, typename TAlignMode, typename TGapMode>
+template <typename TFSSpec, typename TFSConfig, typename TCounts, typename TSpec, typename TAlignMode, typename TGapMode, typename TMatchNPolicy>
 int _mapReads(
 	FragmentStore<TFSSpec, TFSConfig>		& store,
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options,
-	RazerSMode<TAlignMode, TGapMode, Nothing> const)
+	RazerSMode<TAlignMode, TGapMode, Nothing, TMatchNPolicy> const)
 {
 	if (options.scoreMode == RAZERS_ERRORS)
-		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors>());
+		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors, TMatchNPolicy>());
 	if (options.scoreMode == RAZERS_SCORE)
-		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSScore>());
+		return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSScore, TMatchNPolicy>());
 	if (options.scoreMode == RAZERS_QUALITY)
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		if (options.maqMapping)
-			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ> >());
+			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy>());
 		else
 #endif
-			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
+			return _mapReads(store, cnts, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<>, TMatchNPolicy>());
 	return RAZERS_INVALID_OPTIONS;
 }
 
@@ -2039,23 +2031,41 @@ int _mapReads(
 	TCounts									& cnts,
 	RazerSOptions<TSpec>					& options)
 {
-	if (options.gapMode == RAZERS_GAPPED)
-	{
-		if (options.alignMode == RAZERS_LOCAL)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing>());
-		if (options.alignMode == RAZERS_PREFIX)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing>());
-		if (options.alignMode == RAZERS_GLOBAL)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing>());
-	} else 
-	{
-		if (options.alignMode == RAZERS_LOCAL)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing>());
-		if (options.alignMode == RAZERS_PREFIX)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing>());
-		if (options.alignMode == RAZERS_GLOBAL)
-			return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing>());
-	}
+    // if (options.matchN) {
+    //     if (options.gapMode == RAZERS_GAPPED)
+    //     {
+    //         if (options.alignMode == RAZERS_LOCAL)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_PREFIX)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_GLOBAL)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+    //     } else {
+    //         if (options.alignMode == RAZERS_LOCAL)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_PREFIX)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_GLOBAL)
+    //             return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
+    //     }
+    // } else {
+        if (options.gapMode == RAZERS_GAPPED)
+        {
+            if (options.alignMode == RAZERS_LOCAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_GLOBAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
+        } else {
+            if (options.alignMode == RAZERS_LOCAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_GLOBAL)
+                return _mapReads(store, cnts, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
+        }
+    // }
 	return RAZERS_INVALID_OPTIONS;
 }
 

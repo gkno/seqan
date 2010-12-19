@@ -1230,7 +1230,8 @@ template <
 	typename TCounts,
 	typename TSpec,
 	typename TAlignMode,
-	typename TGapMode
+	typename TGapMode,
+    typename TMatchNPolicy
 >
 int dumpMatches(
 	FragmentStore<TFSSpec, TFSConfig> &store,		// forward/reverse matches
@@ -1238,19 +1239,19 @@ int dumpMatches(
 	CharString readFName,							// read name (e.g. "reads.fa"), used for file/read naming
 	CharString errorPrbFileName,
 	RazerSOptions<TSpec> &options,
-	RazerSMode<TAlignMode, TGapMode, Nothing> const)
+	RazerSMode<TAlignMode, TGapMode, Nothing, TMatchNPolicy> const)
 {
 	if (options.scoreMode == RAZERS_ERRORS)
-		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors>());
+		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSErrors, TMatchNPolicy>());
 	if (options.scoreMode == RAZERS_SCORE)
-		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSScore>());
+		return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSScore, TMatchNPolicy>());
 	if (options.scoreMode == RAZERS_QUALITY)
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
 		if (options.maqMapping)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ> >());
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<RazerSMAQ>, TMatchNPolicy>());
 		else
 #endif
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<> >());
+			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<TAlignMode, TGapMode, RazerSQuality<>, TMatchNPolicy>());
 	return RAZERS_INVALID_OPTIONS;
 }
 
@@ -1267,23 +1268,41 @@ int dumpMatches(
 	CharString errorPrbFileName,
 	RazerSOptions<TSpec> &options)
 {
-	if (options.gapMode == RAZERS_GAPPED)
-	{
-		if (options.alignMode == RAZERS_LOCAL)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing>());
-		if (options.alignMode == RAZERS_PREFIX)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing>());
-		if (options.alignMode == RAZERS_GLOBAL)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing>());
-	} else 
-	{
-		if (options.alignMode == RAZERS_LOCAL)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing>());
-		if (options.alignMode == RAZERS_PREFIX)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing>());
-		if (options.alignMode == RAZERS_GLOBAL)
-			return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing>());
-	}
+    // if (options.matchN) {
+    //     if (options.gapMode == RAZERS_GAPPED)
+    //     {
+    //         if (options.alignMode == RAZERS_LOCAL)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_PREFIX)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_GLOBAL)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesAll_>());
+    //     } else 	{
+    //         if (options.alignMode == RAZERS_LOCAL)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_PREFIX)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesAll_>());
+    //         if (options.alignMode == RAZERS_GLOBAL)
+    //             return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesAll_>());
+    //     }
+    // } else {
+        if (options.gapMode == RAZERS_GAPPED)
+        {
+            if (options.alignMode == RAZERS_LOCAL)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSGapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSGapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_GLOBAL)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSGapped, Nothing, NMatchesNone_>());
+        } else 	{
+            if (options.alignMode == RAZERS_LOCAL)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSLocal, RazerSUngapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_PREFIX)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSPrefix, RazerSUngapped, Nothing, NMatchesNone_>());
+            if (options.alignMode == RAZERS_GLOBAL)
+                return dumpMatches(store, stats, readFName, errorPrbFileName, options, RazerSMode<RazerSGlobal, RazerSUngapped, Nothing, NMatchesNone_>());
+        }
+    // }
 	return RAZERS_INVALID_OPTIONS;
 }
 
