@@ -30,7 +30,7 @@ using namespace seqan;
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Finder object for a database sequence,
 //  calls stellar, and writes matches to file
-template<typename TSequence, typename TId, typename TPattern, typename TQueries, typename TFile>
+template<typename TSequence, typename TId, typename TPattern, typename TQueries>
 inline int
 _stellarOnOne(TSequence & database,
 				TId & databaseID,
@@ -38,8 +38,7 @@ _stellarOnOne(TSequence & database,
 				TQueries & queries,
 				StringSet<TId> & queryIDs,
 				bool databaseStrand,
-				StellarOptions & options,
-				TFile & file) {
+				StellarOptions & options) {
 	std::cout << "  " << databaseID << std::endl;
     int numSwiftHits;
 
@@ -75,10 +74,10 @@ _stellarOnOne(TSequence & database,
 	// file output
 	if (options.disableThresh != (unsigned)-1)
 		return _outputMatches(matches, databaseID, databaseStrand, queries, queryIDs, options.verbose,
-		                      file, options.outputFormat, options.disabledQueriesFile);
+		                      options.outputFile, options.outputFormat, options.disabledQueriesFile);
 	else
 		return _outputMatches(matches, databaseID, databaseStrand, queryIDs, options.verbose,
-		                      file, options.outputFormat);
+		                      options.outputFile, options.outputFormat);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -129,14 +128,13 @@ inline bool _qgramDisableBuckets(Index<TStringSet, Index_QGram<TShape, TSpec> > 
 ///////////////////////////////////////////////////////////////////////////////
 // Initializes a Pattern object with the query sequences, 
 //  and calls _stellarOnOne for each database sequence
-template<typename TSequence, typename TId, typename TFile>
+template<typename TSequence, typename TId>
 inline int
 _stellarOnAll(StringSet<TSequence> & databases,
 				StringSet<TId> & databaseIDs,
 				StringSet<TSequence> & queries,
 				StringSet<TId> & queryIDs,
-				StellarOptions & options,
-				TFile & file) {
+				StellarOptions & options) {
     // pattern
     typedef Index<StringSet<TSequence, Dependent<> >, Index_QGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex index_qgram(queries);
@@ -157,7 +155,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 
 		for(unsigned i = 0; i < length(databases); ++i) {
 			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
-				                        true, options, file);
+				                        true, options);
 		}
 		std::cout << std::endl;
 	}
@@ -171,7 +169,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 
         for(unsigned i = 0; i < length(databases); ++i) {
 			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,
-				                        false, options, file);
+				                        false, options);
         }
 		std::cout << std::endl;
     }
@@ -228,7 +226,7 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringS
 
 	if (options.qgramAbundanceCut != 1) {
 		std::cout << "  q-gram expected abundance : ";
-		std::cout << queryLength/(double)(1<<(options.qGram<<1)) << std::endl;
+		std::cout << queryLength/(double)((long)1<<(options.qGram<<1)) << std::endl;
 		std::cout << "  q-gram abundance threshold: ";
 		std::cout << _max(100,(int)(queryLength*options.qgramAbundanceCut)) << std::endl;
 		std::cout << std::endl;
@@ -238,12 +236,17 @@ void _writeMoreCalculatedParams(StellarOptions & options, TStringSet &, TStringS
 ///////////////////////////////////////////////////////////////////////////////
 // Calculates parameters from parameters in options object and writes them to std::cout
 void _writeCalculatedParams(StellarOptions & options) {
-	// Calculate parameters
 	int errMinLen = (int) floor(options.epsilon * options.minLength);
 	int n = (int) ceil((errMinLen + 1) / options.epsilon);
 	int errN = (int) floor(options.epsilon * n);
 	unsigned smin = (unsigned) _min(ceil((double)(options.minLength-errMinLen)/(errMinLen+1)),
 		                            ceil((double)(n-errN)/(errN+1)));
+
+	std::cout << "Calculated parameters:" << std::endl;
+	if (options.qGram == (unsigned)-1) {
+		options.qGram = (unsigned)_min(smin, 32u);
+		std::cout << "  k-mer length: " << options.qGram << std::endl;
+	}
 
 	int threshold = (int) _max(1, (int) _min((n + 1) - options.qGram * (errN + 1),
 											 (options.minLength + 1) - options.qGram * (errMinLen + 1)));
@@ -252,12 +255,6 @@ void _writeCalculatedParams(StellarOptions & options) {
 	int logDelta = _max(4, (int) ceil(log((double)overlap + 1) / log(2.0)));
 	int delta = 1 << logDelta;
 
-	// Output calculated parameters
-	std::cout << "Calculated parameters:" << std::endl;
-	if (options.qGram == (unsigned)-1) {
-		options.qGram = (unsigned)_min(smin, 32u);
-		std::cout << "  k-mer length: " << options.qGram << std::endl;
-	}
 	std::cout << "  s^min       : " << smin << std::endl;
 	std::cout << "  threshold   : " << threshold << std::endl;
 	std::cout << "  distance cut: " << distanceCut << std::endl;
@@ -517,21 +514,25 @@ int main(int argc, const char *argv[]) {
 		std::cerr << "Could not open output file." << std::endl;
 		return 1;
 	}
+    file.close();
+
 	if(options.disableThresh != (unsigned)-1) {
 		std::ofstream daFile;
 		daFile.open(toCString(options.disabledQueriesFile));
+		if (!daFile.is_open()) {
+			std::cerr << "Could not open file for disabled queries." << std::endl;
+			return 1;
+		}
 		daFile.close();
 	}
 
 	// stellar on all databases and queries writing results to file
     SEQAN_PROTIMESTART(timeStellar);
-	int numMatches = _stellarOnAll(databases, databaseIDs, queries, queryIDs, options, file);
+	int numMatches = _stellarOnAll(databases, databaseIDs, queries, queryIDs, options);
 
 	std::cout << "Eps-matches: " << numMatches << std::endl;
     if (options.verbose > 0) 
 		std::cout << "Running time: " << SEQAN_PROTIMEDIFF(timeStellar) << "s" << std::endl;
-
-    file.close();
 	
 	return 0;
 }

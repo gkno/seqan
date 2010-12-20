@@ -214,7 +214,7 @@ _outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const &
 			   bool const databaseStrand,
 			   TIds const & ids,
 			   TMode verbose,
-			   TFile & file,
+			   TFile & fileName,
 			   TString & format) {
 SEQAN_CHECKPOINT
 	typedef StellarMatch<TInfix, TQueryId> TMatch;
@@ -223,6 +223,13 @@ SEQAN_CHECKPOINT
 	TSize numMatches = 0;
 	TSize totalLength = 0;
     TSize maxLength = 0;
+
+	std::ofstream file;
+	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::app);
+	if (!file.is_open()) {
+		std::cerr << "Could not open output file." << std::endl;
+		return 1;
+	}
 
 	for (TSize i = 0; i < length(matches); i++) {
 		QueryMatches<TMatch> queryMatches = value(matches, i);
@@ -241,6 +248,8 @@ SEQAN_CHECKPOINT
 		}
 		numMatches += length(queryMatches.matches);
 	}
+
+	file.close();
 
 	if (verbose > 0) {
 		if (numMatches > 0) {
@@ -266,7 +275,7 @@ _outputMatches(StringSet<QueryMatches<StellarMatch<TInfix, TQueryId> > > const &
 			   TQueries & queries,
 			   TIds const & ids,
 			   TMode verbose,
-			   TFile & file,
+			   TFile & fileName,
 			   TString & format,
 			   TString & disabledFile) {
 SEQAN_CHECKPOINT
@@ -278,7 +287,12 @@ SEQAN_CHECKPOINT
     TSize numMatches = 0;
     TSize numDisabled = 0;
 
-    std::ofstream daFile, aliFile;
+    std::ofstream daFile, file;
+	file.open(toCString(fileName), ::std::ios_base::out | ::std::ios_base::app);
+	if (!file.is_open()) {
+		std::cerr << "Could not open output file." << std::endl;
+		return 1;
+	}
 
 	daFile.open(toCString(disabledFile), ::std::ios_base::out | ::std::ios_base::app);
 	if (!daFile.is_open()) {
@@ -313,6 +327,8 @@ SEQAN_CHECKPOINT
         numMatches += length(queryMatches.matches);
         //std::cout << "  # Eps-matches: " << length(queryMatches.matches) << std::endl;
     }
+	daFile.close();
+	file.close();
 
 	if (verbose > 0 ) {
 		if (numMatches > 0) {
@@ -323,7 +339,6 @@ SEQAN_CHECKPOINT
 		std::cout << "    # Disabled queries: " << numDisabled << std::endl;
 	}
 
-	daFile.close();
 	return numMatches;
 }
 
