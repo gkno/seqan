@@ -1780,12 +1780,14 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
     {
         // preorder dfs
-        if (!goRight(it))
-            while (goUp(it) && !goRight(it)) ;
-        if (isRoot(it)) {
-            clear(it);
-            return;
-        }
+		do {
+			if (!goRight(it))
+				while (goUp(it) && !goRight(it)) ;
+			if (isRoot(it)) {
+				clear(it);
+				return;
+			}
+		} while (!nodePredicate(it));
     }
 
 	template < typename TIndex, typename TSpec, typename THideEmptyEdges >
@@ -1794,11 +1796,13 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 		VSTreeIteratorTraits<_Preorder, THideEmptyEdges> const)
     {
         // preorder dfs
-        while (goUp(it) && !goRight(it)) ;
-        if (isRoot(it)) {
-            clear(it);
-            return;
-        }
+		do {
+			while (goUp(it) && !goRight(it)) ;
+			if (isRoot(it)) {
+				clear(it);
+				return;
+			}
+		} while (!nodePredicate(it));
     }
 
 

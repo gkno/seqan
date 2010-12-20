@@ -116,7 +116,7 @@ namespace seqan{
 /////////////////////////////////////////////////////////////////////////////////////////
 		
 
-	const size_t _rt_thresh = 16;
+	const size_t RANGE_TREE_THRESH_ = 16;
 
 		
 	template< typename TObject, typename TSpec, typename TStructuring > inline
@@ -125,7 +125,7 @@ namespace seqan{
 						SkipBaseElement< TObject, SkipListStatic, TSpec, TStructuring > * second )
 	{
 		SEQAN_CHECKPOINT
-		return ( ( second - first ) > _rt_thresh );
+		return ( ( second - first ) > RANGE_TREE_THRESH_ );
 	}
 
 	template< typename TTarget, typename TSource > inline
