@@ -504,7 +504,7 @@ appendValue(::std::vector<TChar,  TAlloc> & me,
 ///.Function.replace.param.target.type:Adaption.std::vector
 ///.Function.replace.param.source.type:Adaption.std::vector
 
-/*template <typename TChar,  typename TAlloc, typename TSource>
+template <typename TChar,  typename TAlloc, typename TSource>
 inline void 
 replace(::std::vector<TChar, TAlloc> & target,
 		typename Position< ::std::vector<TChar, TAlloc> >::Type pos_begin,
@@ -513,11 +513,24 @@ replace(::std::vector<TChar, TAlloc> & target,
 		Generous)
 {
     SEQAN_CHECKPOINT;
-	copy(begin(source, Standard()),begin(source, Standard())+pos_end-pos_begin, pos_begin);
-	target.insert(pos_end,begin(source,Standard())+pos_end-pos_begin,end(source,Standard());
+	typename Size< ::std::vector<TChar, TAlloc> >::Type target_size = pos_end-pos_begin;
+	typename Size< ::std::vector<TChar, TAlloc> >::Type source_size =length(source);
+	
+	if(target_size >= source_size)
+		{
+			copy(source.begin(),source.end(), target.begin()+pos_begin);
+			if( target_size > source_size )
+				target.erase(target.begin()+pos_begin+source_size,target.begin()+pos_end);
+ 	    }
+	else			
+		{
+			copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
+			target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
+		}
 	//target.replace(target.begin() + pos_begin, target.begin() + pos_end, begin(source, Standard()), end(source, Standard()));
 }
 
+/*
 template <typename TChar, typename TAlloc, typename TSource>
 inline void 
 replace(::std::vector<TChar, TAlloc> & target, 
