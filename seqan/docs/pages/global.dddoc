@@ -119,6 +119,7 @@
 ..type.baseconcept:conceptusedbymeta
 ..memvar.base
 ..typedef.base
+..memfunc.general
 ..function.general
 ..function.implements:conceptusedbyfunc
 ..function.baseconcept:conceptusedbyfunc
