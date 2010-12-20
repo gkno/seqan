@@ -630,9 +630,7 @@ void dumpMatches(
 	typedef typename Value<TGenomeSet>::Type	TGenome;
 	typedef typename TMatch::TGPos				TGPos;
 
-#ifdef RAZERS_SPLICED
 	if (options.minMatchLen > 0) options.outputFormat = 33;
-#endif
 
 	if (options.outputFormat == 2)
 	{
@@ -661,12 +659,9 @@ void dumpMatches(
 	{
 		options.positionFormat = 1;	// bases in file are numbered starting at 1
 		options.dumpAlignment = false;
+		options.sortOrder = 1;
 	}
 
-#ifdef RAZERS_SPLICED
-	if(options.minMatchLen > 0)
-		options.sortOrder = 1;
-#endif
 
 	// error profile
 	unsigned maxReadLength = options.maxReadLength;
@@ -725,10 +720,8 @@ void dumpMatches(
 	}
 
 	
-#ifdef RAZERS_SPLICED
 	String<short> ambiStates;
 	if(options.minMatchLen == 0)
-#endif
 		maskDuplicates(matches);
 	if (options.outputFormat > 0
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -765,18 +758,13 @@ void dumpMatches(
 	else
 #endif
 	{
-#ifdef RAZERS_SPLICED
 		if(options.minMatchLen>0)
 			compactAndCountSplicedMatches(matches, ambiStates, options, true);
-			//compactSplicedMatches(matches, stats, options, true, nothing,nothing);
 		else
-#endif
 			compactMatches(matches, stats, options, true, nothing);
 	}
-#ifdef RAZERS_SPLICED
         int jj = 0;
-        if(!(options.minMatchLen > 0 && options.outputFormat == 33))
-#endif
+        if(!(options.minMatchLen > 0 ))
 	  switch (options.sortOrder) {
 		case 0:
 			::std::sort(
@@ -1294,7 +1282,6 @@ void dumpMatches(
 				++filecount;
 			}
 			break;
-#ifdef RAZERS_SPLICED
 		case 33: // special GFF for split reads
 			while(it != itEnd)// && (*it).gseqNo == currSeqNo)
 			{
@@ -1502,7 +1489,6 @@ void dumpMatches(
 				++it;
 			}
 			break;
-#endif 
 
 
 	}

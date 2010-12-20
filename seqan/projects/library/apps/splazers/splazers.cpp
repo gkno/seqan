@@ -58,9 +58,7 @@
 #include "razers_matepairs.h"
 #endif
 
-#ifdef RAZERS_SPLICED
 #include "razers_spliced.h" 
-#endif
 
 
 
@@ -141,7 +139,6 @@ int mapReads(
 		Shape<Dna, GenericShape> shape;
 		stringToShape(shape, options.shape);
 		shapeToString(bitmap, shape);
-#ifdef RAZERS_SPLICED
 		CharString bitmapR;
 		Shape<Dna, GenericShape> shapeR;
 		if(options.minMatchLen > 0)
@@ -149,7 +146,6 @@ int mapReads(
 			stringToShape(shapeR, options.shapeR);
 			shapeToString(bitmapR, shapeR);
 		}		
-#endif
 
 		cerr << "___SETTINGS____________" << endl;
 		cerr << "Genome file:                     \t" << genomeFileNames[0] << endl;
@@ -170,13 +166,11 @@ int mapReads(
 		cerr << "Error rate:                      \t" << options.errorRate << endl;
 		cerr << "Minimal threshold:               \t" << options.threshold << endl;
 		cerr << "Shape:                           \t" << bitmap << endl;
-#ifdef RAZERS_SPLICED
 		if(options.minMatchLen > 0)
 		{
 			cerr << "Suffix Minimal threshold:        \t" << options.thresholdR << endl;
 			cerr << "Suffix Shape:                    \t" << bitmapR << endl;
 		}
-#endif
 		cerr << "Repeat threshold:                \t" << options.repeatLength << endl;
 		cerr << "Overabundance threshold:         \t" << options.abundanceCut << endl;
 		cerr << "Taboo length:                    \t" << options.tabooLength << endl;
@@ -341,15 +335,13 @@ int main(int argc, const char *argv[])
 	addOption(parser, CommandLineOption("mcl", "min-clipped-len",  "min. read length for read clipping", OptionType::Int | OptionType::Label, options.minClippedLen));
 	addOption(parser, CommandLineOption("qih", "quality-in-header","quality string in fasta header", OptionType::Boolean));
 
-#ifdef RAZERS_SPLICED
 	addSection(parser, "Split Mapping Options:");
-	addOption(parser, CommandLineOption("sm", "split-mapping",   "min. match length for prefix/suffix mapping", OptionType::Int | OptionType::Label, options.minMatchLen));
+	addOption(parser, CommandLineOption("sm", "split-mapping",   "min. match length for prefix/suffix mapping (to disable split mapping, set to 0)", OptionType::Int | OptionType::Label, options.minMatchLen));
 	addOption(parser, CommandLineOption("maxG", "max-gap",    "max. length of middle gap", OptionType::Int | OptionType::Label, options.maxGap));
 	addOption(parser, CommandLineOption("minG", "min-gap",    "min. length of middle gap (for edit distance mapping about 10% of read length is recommended)", OptionType::Int | OptionType::Label, options.minGap));
 	addOption(parser, CommandLineOption("ep", "errors-prefix",    "max. number of errors in prefix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
 	addOption(parser, CommandLineOption("es", "errors-suffix",    "max. number of errors in suffix match", OptionType::Int | OptionType::Label, options.maxPrefixErrors));
 	addOption(parser, CommandLineOption("gl","genome-len",    "genome length, for expected match num computation", OptionType::Int | OptionType::Label, options.specifiedGenomeLen));
-#endif
 
 
 
@@ -421,14 +413,12 @@ int main(int argc, const char *argv[])
 	getOptionValueLong(parser, "match-N", options.matchN);
 	getOptionValueLong(parser, "error-distr", errorPrbFileName);
 	
-#ifdef RAZERS_SPLICED
  	getOptionValueLong(parser, "split-mapping", options.minMatchLen);
  	getOptionValueLong(parser, "max-gap", options.maxGap);
  	getOptionValueLong(parser, "min-gap", options.minGap);
  	getOptionValueLong(parser, "errors-prefix", options.maxPrefixErrors);
  	getOptionValueLong(parser, "errors-suffix", options.maxSuffixErrors);
  	getOptionValueLong(parser, "genome-len", options.specifiedGenomeLen);
-#endif
 	
 	getOptionValueLong(parser, "min-clipped-len", options.minClippedLen);
 	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
@@ -506,10 +496,8 @@ int main(int argc, const char *argv[])
 #endif
 		if ((ones < 7 || ones > maxOnes) && !stop)
 			cerr << "Warning: Shape should contain at least 7 and at most " << maxOnes << " '1's" << endl;
-#ifdef RAZERS_SPLICED
 		options.shapeR = options.shape;
 		options.thresholdR = options.threshold;
-#endif
 
 	}
 	if ((options.abundanceCut <= 0 || options.abundanceCut > 1) && (stop = true))
@@ -553,7 +541,6 @@ int main(int argc, const char *argv[])
 		return RAZERS_INVALID_OPTIONS;
 	}
 
-#ifdef RAZERS_SPLICED
 	if ((options.minMatchLen != 0 && options.minMatchLen < 6) && (stop = true))
 		cerr << "Minimal match length in spliced mapping must be a value greater than 5" << endl;
 	if ((options.maxGap <= 0) && (stop = true))
@@ -565,9 +552,6 @@ int main(int argc, const char *argv[])
 	if(options.maxSuffixErrors == -1)
 		options.maxSuffixErrors = (int)(options.minMatchLen * options.errorRate);
 
-//	if (options.minMatchLen > 0)
-//		options.minDistance = 2 * options.minMatchLen;
-#endif
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// get read length
@@ -622,7 +606,6 @@ int main(int argc, const char *argv[])
 				pm_options.totalN = options.artSeedLength;
 			else*/
 				pm_options.totalN = readLength;
-#ifdef RAZERS_SPLICED
 			if(options.minMatchLen>0)
  			{
 				pm_options.totalN = options.minMatchLen;
@@ -639,7 +622,6 @@ int main(int argc, const char *argv[])
 				pm_options.totalN = options.minMatchLen;
 				pm_options.optionErrorRate = (double)options.maxPrefixErrors/options.minMatchLen + 0.001;
 			}
-#endif
 			if (options._debugLevel >= 1)
 				cerr << "___PARAMETER_CHOOSING__" << endl;
 			if (!chooseParams(options,pm_options))

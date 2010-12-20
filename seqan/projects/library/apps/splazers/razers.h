@@ -130,7 +130,6 @@ namespace SEQAN_NAMESPACE_MAIN
 		unsigned	compactThresh;		// compact match array if larger than compactThresh
  		int 		maxReadLength;
 
-#ifdef RAZERS_SPLICED
 		unsigned        minMatchLen;
  		int		maxPrefixErrors;
  		int		maxSuffixErrors;
@@ -138,9 +137,8 @@ namespace SEQAN_NAMESPACE_MAIN
  		int	        minGap;
  		::std::string 	shapeR;			// shape (e.g. 11111111111)
  		int		thresholdR;			// threshold
- 		int		specifiedGenomeLen;
+ 		unsigned int	specifiedGenomeLen;
 
-#endif
 		
 	// multi-threading
 
@@ -206,16 +204,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			rnaSeedLength = 16;
 			exactSeed = true;
 #endif			
-#ifdef RAZERS_SPLICED
-			minMatchLen = 0;
+			minMatchLen = 23;
  			shapeR = "11111111111";
  			thresholdR = 1;
- 			maxGap = 100000;
+ 			maxGap = 10000;
  			minGap = 0;
  			maxPrefixErrors = -1;
  			maxSuffixErrors = -1;
- 			specifiedGenomeLen = 150000000; //chrX default
-#endif
+ 			specifiedGenomeLen = 3000000000; //whole human genome default
 
  			maxReadLength = 0;
 			lowMemory = false;		// set maximum shape weight to 13 to limit size of q-gram index
@@ -760,7 +756,6 @@ bool loadGenomes(TGenomeSet &genomes, StringSet<CharString> &fileNameList)
 		}
 	};
 	
-#ifdef RAZERS_SPLICED
 template <typename TReadMatch>
 struct LessSplicedScore : public ::std::binary_function < TReadMatch, TReadMatch, bool >
 {
@@ -802,7 +797,6 @@ struct LessSplicedScoreGPos : public ::std::binary_function < TReadMatch, TReadM
 	}
 };
 
-#endif	
 	
 	
 #ifdef RAZERS_DIRECT_MAQ_MAPPING
@@ -2188,11 +2182,9 @@ int mapReads(
 	TCounts &				cnts,
 	RazerSOptions<TSpec> &	options)
 {
-#ifdef RAZERS_SPLICED
         // first check whether split mapping (--> two shapes) or normal mapping
         if (options.minMatchLen > 0)
                 return mapSplicedReads(matches, genomeFileNameList, genomeNames, gnoToFileMap, readSet, cnts, options);
-#endif
 
 
 	Shape<Dna, SimpleShape>		ungapped;
@@ -2238,11 +2230,9 @@ int mapReads(
 {
 
 
-#ifdef RAZERS_SPLICED
         // first check whether split mapping (--> two shapes) or normal mapping
         if (options.minMatchLen > 0)
                 return mapSplicedReads(matches, genomeSet, readSet, cnts, options);
-#endif
 
 
 
