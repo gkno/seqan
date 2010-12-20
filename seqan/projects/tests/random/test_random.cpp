@@ -35,6 +35,9 @@ SEQAN_BEGIN_TESTSUITE(test_random) {
     SEQAN_CALL_TEST(test_random_mt19937_constructors);
     SEQAN_CALL_TEST(test_random_mt19937_pick);
 
+    SEQAN_CALL_TEST(test_random_rng_functor_constructors);
+    SEQAN_CALL_TEST(test_random_rng_functor_pick);
+
     SEQAN_CALL_TEST(test_random_normal_constructors);
     SEQAN_CALL_TEST(test_random_normal_pick);
 
