@@ -207,6 +207,22 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_vector)
         reserve(vec, 10, Exact());
         SEQAN_ASSERT_EQ(capacity(vec), 10u);
     }
+	// test first replace
+	{
+		std::vector<int> vec_target(5,100);
+		std::vector<int> vec_source(3,10);
+		typename Position< ::std::vector<int> >::Type pos_begin = 3;
+		typename Position< ::std::vector<int> >::Type pos_end = 4;
+		
+		replace(vec_target,pos_begin,pos_end,vec_source);
+	
+        SEQAN_ASSERT_EQ(vec_target[2],100);
+		SEQAN_ASSERT_EQ(vec_target[3],10);
+		SEQAN_ASSERT_EQ(vec_target[5],10);
+		SEQAN_ASSERT_EQ(vec_target[6],100);
+	}
+	
+	
 }
 
 
