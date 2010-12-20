@@ -66,6 +66,14 @@ public:
 
     RNG(unsigned seed) : _mtRand(seed)
     { SEQAN_CHECKPOINT; }
+    
+    inline
+    unsigned
+    operator()()
+    {
+        SEQAN_CHECKPOINT;
+        return _mtRand.randInt();
+    }
 };
 
 // ===========================================================================
