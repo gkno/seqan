@@ -821,7 +821,7 @@ finline void
 _myersPreInit(_PatternState<TNeedle, TSpec> &state, True) 
 {
 	typedef typename Value<TNeedle>::Type TValue;
-    for (unsigned i = 0; i <= ValueSize<TValue>::VALUE; ++i)
+    for (unsigned i = 0; i < ValueSize<TValue>::VALUE; ++i)
         state.bitMasks[i] = 0;
 }
 
@@ -1506,3 +1506,4 @@ inline bool find (TFinder & finder,
 }// namespace SEQAN_NAMESPACE_MAIN
 
 #endif //#ifndef SEQAN_HEADER_...
+
