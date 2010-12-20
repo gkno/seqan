@@ -22,8 +22,6 @@
 #ifndef SEQAN_HEADER_STD_VECTOR_H
 #define SEQAN_HEADER_STD_VECTOR_H
 
-#include <vector>
-
 namespace seqan {
 
 // ===========================================================================
