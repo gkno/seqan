@@ -367,6 +367,7 @@ SEQAN_CHECKPOINT
 ...type:Class.Gaps
 ..param.pos:Position in the original sequence to get the view position for.
 ..returns:The position in the view/gaps position.
+..remarks:If $gap$ is a clipped alignment row, gaps in the clipped part will influence the result. The position $pos$ is counted from the unclipped begin position and must be greater or equal the clipped begin position of $gap$.
 ..see:Function.toSourcePosition
 ..include:seqan/align.h
 */
@@ -414,8 +415,9 @@ SEQAN_CHECKPOINT
 ..signature:toSourcePosition(gaps, pos)
 ..param.gap:A Gaps object, e.g. a row in the alignment.
 ...type:Class.Gaps
-..param.pos:Position in the view sequence to get the original position for.
+..param.pos:Position in the view sequence (this includes gaps) to get the original position for.
 ..returns:The position in the source sequence.
+..remarks:If $gap$ is a clipped alignment row, gaps in the clipped part will influence the result. The position $pos$ is counted from the unclipped begin position.
 ..see:Function.toViewPosition
 ..include:seqan/align.h
 */
