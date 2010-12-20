@@ -589,7 +589,6 @@ replace(::std::vector<TChar, TAlloc> & target,
 //////////////////////////////////////////////////////////////////////////////
 // handling of iterators as begin and end
 
-/*
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
 inline void 
 replace(::std::vector<TChar, TCharTraits, TAlloc> & target,
