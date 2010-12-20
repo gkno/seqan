@@ -32,15 +32,19 @@ def validate_file(file, subst):
     """
     Perform the substitutions given by the dictionary ``subst`` on ``file``.
     """
+
+    #print file
+
     code = ''
-    with open(file, 'r') as f:
+    try:
+        f = open(file, 'r') 
+    finally:
         code = f.read()
 
     old_len = len(code)
-
     replaced = replace_all(code, subst)
-    assert old_len == len(replaced)
-
+    #assert old_len == len(replaced)    
+    
     open(file, 'w').write(replaced)
 
 
