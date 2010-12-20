@@ -12,6 +12,7 @@
 
 #include "curve_smoothing.h"
 #include "build_gold_standard_options.h"
+#include "build_gold_standard.h"
 #include "find_myers_ukkonen_reads.h"
 #include "find_myers_ukkonen_ext.h"
 #include "find_approx_dp_quality.h"
