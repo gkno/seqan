@@ -259,11 +259,12 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 		SEQAN_ASSERT_LT(itRead, itReadEnd);
 		if ((itGaps != itGapsEnd) && (itGaps->gapPos == 0)) {
 			old = itGaps->seqPos;
-			clippedBeginPos = old;
+			clippedBeginPos = old; // gaps at beginning? or really clipped?
+			//std::cout << "clippedBeginPos = " << clippedBeginPos << std::endl;
 			itRead += old;
 			diff -= old;
 			++itGaps;
-	        	SEQAN_ASSERT_LT(itRead, itReadEnd);
+			SEQAN_ASSERT_LT(itRead, itReadEnd);
 		}
 		for(;itGaps != itGapsEnd && itCons != itConsEnd; ++itGaps) {
 			// limit should never be larger than read length 
@@ -389,28 +390,28 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 			diff -= clippedBeginPos;
 		}
 		bool firstMatch = true;
-		if (fragIt != fragItEnd) {
+		if (fragIt != fragItEnd) { // walk through segment matches that represent read-msa alignment
 			do {
 				--fragIt;
 				int gapLen = fragIt->begin1 - consPos;
-				if (firstMatch) gapLen = 0;
-				while(consPos < (TReadPos)fragIt->begin1) {
+				if (firstMatch) gapLen = 0; // gap between two adjacent segment matches
+				while(consPos < (TReadPos)fragIt->begin1) { // cons stretch before newCons start
 					SEQAN_ASSERT_LT(bandIt, bandItEnd);
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
-					if (!firstMatch) ++(*bandIt).count[gapPos];
+					if (!firstMatch) ++(*bandIt).count[gapPos]; // fill with gaps if we are between two segment matches
 					*newConsIt = *bandIt;
 					++newConsIt;
 					++bandIt; 
 					++consPos; 
 					++alignPos;
 				}
-				while(readPos < (TReadPos)fragIt->begin2) {
+				while(readPos < (TReadPos)fragIt->begin2) { // read stretch before newCons start
 					SEQAN_ASSERT_LT(readPos, (TReadPos)length(fragStore.readSeqStore[alignIt->readId]));
 					SEQAN_ASSERT_LT(newConsIt, end(newConsensus,Standard()));
 					if (gapLen) {
-						diff += gapLen;
+						diff += gapLen; // add gap of length gaplen to readGaps
 						appendValue(alignIt->gaps, TGapAnchor(clippedBeginPos + readPos, clippedBeginPos + readPos + diff), Generous() );
-						gapLen = 0;
+						gapLen = 0; // do this only once
 					}
 					int numGaps = insertGap(contigReads, bandOffset + alignPos);
 					TProfileChar tmpChar;
@@ -437,6 +438,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 				}
 			} while (fragIt != fragItEnd);
 		}
+		
 		for(; readPos < (TReadPos)length(myRead); ++readPos) {
 			int numGaps = insertGap(contigReads, bandOffset + alignPos);
 			TProfileChar tmpChar;
