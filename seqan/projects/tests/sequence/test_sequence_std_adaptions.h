@@ -24,6 +24,193 @@
 #ifndef TEST_SEQUENCE_TEST_SEQUENCE_STD_ADAPTIONS_H_
 #define TEST_SEQUENCE_TEST_SEQUENCE_STD_ADAPTIONS_H_
 
+
+// Tests the return types and existence of the metafunctions for STL vectors.
+SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_vector)
+{
+    using namespace seqan;
+    
+    typedef int TElement;
+    typedef std::vector<TElement> TVector;
+    typedef TVector const TConstVector;
+	
+    // Test IsContiguous<>::VALUE
+    {
+        bool b = IsContiguous<TVector>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        b = IsContiguous<TConstVector>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test Value<>::VALUE
+    {
+        typedef Value<TVector>::Type TValue;
+        bool b = TYPECMP<TValue, TElement>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Value<TConstVector>::Type TConstValue;
+        b = TYPECMP<TConstValue, TElement>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test GetValue<>::VALUE
+    {
+        typedef GetValue<TVector>::Type TGetValue;
+        bool b = TYPECMP<TGetValue, TElement &>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef GetValue<TConstVector>::Type TConstGetValue;
+        b = TYPECMP<TConstGetValue, TElement const &>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test GetReference<>::VALUE
+    {
+        typedef Reference<TVector>::Type TReference;
+        bool b = TYPECMP<TReference, TElement &>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Reference<TConstVector>::Type TConstReference;
+        b = TYPECMP<TConstReference, TElement const &>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test Iterator<, Rooted>::VALUE
+    {
+        typedef Iterator<TVector, Rooted>::Type TIterator;
+        typedef Iter<TVector, AdaptorIterator<Iter<TVector, StdIteratorAdaptor> > > TExpected;
+        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Iterator<TConstVector, Rooted>::Type TConstIterator;
+        typedef Iter<TConstVector, AdaptorIterator<Iter<TConstVector, StdIteratorAdaptor> > > TExpectedConst;
+        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test Iterator<, Standard>::VALUE
+    {
+        typedef Iterator<TVector, Standard>::Type TIterator;
+        typedef Iter<TVector, StdIteratorAdaptor> TExpected;
+        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Iterator<TConstVector, Standard>::Type TConstIterator;
+        typedef Iter<TConstVector, StdIteratorAdaptor> TExpectedConst;
+        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test Position<>::VALUE
+    {
+        typedef Position<TVector>::Type TPosition;
+        bool b = TYPECMP<TPosition, TVector::size_type>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Position<TConstVector>::Type TConstPosition;
+        b = TYPECMP<TConstPosition, TVector::size_type>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+    // Test Size<>::VALUE
+    {
+        typedef Size<TVector>::Type TPosition;
+        bool b = TYPECMP<TPosition, TVector::size_type>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+        typedef Size<TConstVector>::Type TConstPosition;
+        b = TYPECMP<TConstPosition, TVector::size_type>::VALUE;
+        SEQAN_ASSERT_TRUE(b);
+    }
+}
+
+
+// Test iterators for STL strings.
+SEQAN_DEFINE_TEST(test_sequence_adaptions_iterators_std_vector)
+{
+    using namespace seqan;
+    
+    // Test const iterator.
+    {
+		std::vector<int> const vec(2,100);
+        typedef Iterator<std::vector<int> const>::Type TIterator;
+		
+        std::vector<int> vecCopy;
+		vecCopy.resize(2);
+		copy(vec.begin(), vec.begin()+2, vecCopy.begin());
+				
+        SEQAN_ASSERT_EQ(vecCopy[0],vec[0]);
+		SEQAN_ASSERT_EQ(vecCopy[1],vec[1]);
+	
+    }
+	
+    // Test non-const iterator.
+    {
+		std::vector<int> vec(2,100);
+        typedef Iterator<std::vector<int> >::Type TIterator;
+		
+        std::vector<int> vecCopy;
+		vecCopy.resize(2);
+		copy(vec.begin(), vec.begin()+2, vecCopy.begin());
+		
+        SEQAN_ASSERT_EQ(vecCopy[0],vec[0]);
+		SEQAN_ASSERT_EQ(vecCopy[1],vec[1]);
+    }
+}
+
+
+// Tests for the basic sequence functions for STL strings,
+// e.g. value(), front(), back().
+SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_interface_std_vector)
+{
+    using namespace seqan;
+	
+	std::vector<int> vec(2,100);	
+ 	
+    // value(str, i), getValue(str, i)
+    SEQAN_ASSERT_EQ(value(vec, 0), 100);
+    SEQAN_ASSERT_EQ(value(vec, 1), 100);
+      // front(), back()
+    SEQAN_ASSERT_EQ(front(vec),100);
+    SEQAN_ASSERT_EQ(back(vec),100);
+	
+    // length()
+    SEQAN_ASSERT_EQ(length(vec), 2u);
+	
+    // TODO(holtgrew): Anything else missing? Probably...
+}
+
+
+// Tests for the memory allocation and reservation related functions
+// for STL strings.
+SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_vector)
+{
+    using namespace seqan;
+	
+    // Test resize function -- resize down.
+    {
+		std::vector<int> vec(8,100);	
+		resize(vec, 5);
+
+        SEQAN_ASSERT_EQ(vec.size(),5u);
+    }
+	
+    // Test resize function -- resize up.
+    {
+ 		std::vector<int>  vec(2,100);	
+        resize(vec, 6);
+ 
+          SEQAN_ASSERT_EQ(vec.size(),6u);
+    }
+	
+    // Tests reserve function.
+	{
+		std::vector<int> vec;
+		reserve(vec, 10);
+		SEQAN_ASSERT_GEQ(capacity(vec), 10u);
+	}
+	{
+		std::vector<int> vec;
+		reserve(vec, 10, Generous());
+		SEQAN_ASSERT_GEQ(capacity(vec), 10u);
+	}
+	// We cannot guarantee that the behaviour is supported by the STL
+	// implementation with the Exact() tag.
+    {
+        std::vector<int> vec;
+        reserve(vec, 10, Exact());
+        SEQAN_ASSERT_EQ(capacity(vec), 10u);
+    }
+}
+
+
+// **************************************************************************
 // Tests the return types and existence of the metafunctions for STL strings.
 SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_string)
 {
@@ -34,7 +221,8 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_string)
     typedef TString const TConstString;
 
     // Test IsContiguous<>::VALUE
-    {
+    // WATCHOUT ! SHOULDN'T WE TEST TRUE IN THE TWO ASSERTS
+	{
         bool b = IsContiguous<TString>::VALUE;
         SEQAN_ASSERT_NOT(b);
         b = IsContiguous<TConstString>::VALUE;
@@ -209,6 +397,7 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_string)
 }
 
 
+// *******************************************************************
 // Tests the return types and existence of the metafunctions for STL lists.
 SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_list)
 {

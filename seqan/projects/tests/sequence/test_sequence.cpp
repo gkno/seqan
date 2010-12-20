@@ -12,6 +12,7 @@ using namespace seqan;
 #include "test_segment.h"
 #include "test_sequence_std_adaptions.h"
 
+
 SEQAN_BEGIN_TESTSUITE(Sequence tests)
 {
     // -----------------------------------------------------------------------
@@ -23,6 +24,12 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     SEQAN_CALL_TEST(test_sequence_adaptions_iterators_std_string);
     SEQAN_CALL_TEST(test_sequence_adaptions_sequence_interface_std_string);
     SEQAN_CALL_TEST(test_sequence_adaptions_sequence_memory_std_string);
+	
+	// Test adaptions for std::vector.
+    SEQAN_CALL_TEST(test_sequence_adaptions_metafunctions_std_vector);
+    SEQAN_CALL_TEST(test_sequence_adaptions_iterators_std_vector);
+    SEQAN_CALL_TEST(test_sequence_adaptions_sequence_interface_std_vector);
+    SEQAN_CALL_TEST(test_sequence_adaptions_sequence_memory_std_vector);
 
     // Test adaptions for std::list.
     SEQAN_CALL_TEST(test_sequence_adaptions_metafunctions_std_list);
