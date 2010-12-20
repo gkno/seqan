@@ -576,6 +576,7 @@ SEQAN_CHECKPOINT
 */
 
 //* ???Anti Default Sequences
+	
 template <typename T, typename TPos>
 inline typename Reference<T>::Type
 value(T & me, 
