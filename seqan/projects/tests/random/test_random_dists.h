@@ -36,7 +36,6 @@ SEQAN_DEFINE_TEST(test_random_normal_constructors)
 SEQAN_DEFINE_TEST(test_random_normal_pick)
 {
     using namespace seqan;
-
     
     // mean = 1.0, stddev = 1.0
     {
@@ -190,24 +189,50 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
 {
     using namespace seqan;
 
-    RNG<MersenneTwister> mt(42);
-    PDF<Uniform<double> > pdf(0, 1);
+    // Important case: In [0, 1]
+    {
+        RNG<MersenneTwister> mt(42);
+        PDF<Uniform<double> > pdf(0, 1);
 
-    unsigned gt = 0;  // Greater than 0.5
+        unsigned gt = 0;  // Greater than 0.5
 
-    double sum = 0;
-    for (unsigned i = 0; i < 10000; ++i) {
-        double x = pickRandomNumber(mt, pdf);
-        sum += x;
-        gt += x > 0.5;
-        SEQAN_ASSERT_GEQ(x, 0);
-        SEQAN_ASSERT_LEQ(x, 1);
+        double sum = 0;
+        for (unsigned i = 0; i < 10000; ++i) {
+            double x = pickRandomNumber(mt, pdf);
+            sum += x;
+            gt += x > 0.5;
+            SEQAN_ASSERT_GEQ(x, 0);
+            SEQAN_ASSERT_LEQ(x, 1);
+        }
+
+        SEQAN_ASSERT_GT(gt, 0u);
+        SEQAN_ASSERT_LT(gt, 10000u);
+
+        SEQAN_ASSERT_LEQ(fabs(sum / 10000.0 - 0.5), 0.02);
     }
-
-    SEQAN_ASSERT_GT(gt, 0u);
-    SEQAN_ASSERT_LT(gt, 10000u);
-
-    SEQAN_ASSERT_LEQ(fabs(sum / 10000.0 - 0.5), 0.02);
+    // Try something else...: In [-20, 30]
+    {
+        RNG<MersenneTwister> mt(42);
+        PDF<Uniform<double> > pdf(-20, 30);
+        
+        unsigned gt = 0;  // Greater than 0.5
+        
+        double sum = 0;
+        for (unsigned i = 0; i < 10000; ++i) {
+            double x = pickRandomNumber(mt, pdf);
+            sum += x;
+            gt += x > 0.5;
+            SEQAN_ASSERT_GEQ(x, -20);
+            SEQAN_ASSERT_LEQ(x, 30);
+        }
+        
+        std::cerr << sum << std::endl;
+        
+        SEQAN_ASSERT_GT(gt, 0u);
+        SEQAN_ASSERT_LT(gt, 50000u);
+        
+        SEQAN_ASSERT_LEQ(fabs(sum / 10000.0 - 5.0), 0.05);
+    }
 }
 
 #endif  // TEST_RANDOM_TEST_RANDOM_DISTS_H_

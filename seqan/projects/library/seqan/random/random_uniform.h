@@ -113,8 +113,9 @@ typename Value<PDF<Uniform<T> > >::Type
 _pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, False const &)
 {
     SEQAN_CHECKPOINT;
-    T x = static_cast<T>(pickRandomNumber(rng) - InfimumValue<TRNG>::VALUE) / static_cast<T>(SupremumValue<TRNG>::VALUE - InfimumValue<TRNG>::VALUE);
-    return pdf._min + (x - pdf._min) * (pdf._max - pdf._min);
+    T x = static_cast<T>(pickRandomNumber(rng) - InfimumValue<TRNG>::VALUE);
+    x /= static_cast<T>(SupremumValue<TRNG>::VALUE) - static_cast<T>(InfimumValue<TRNG>::VALUE);
+    return pdf._min + x * (pdf._max - pdf._min);
 }
 
 template <typename TRNG, typename T>

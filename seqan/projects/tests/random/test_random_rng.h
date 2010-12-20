@@ -82,7 +82,7 @@ SEQAN_DEFINE_TEST(test_random_rng_functor_pick)
     typedef RNG<RngFunctor<TMersenneTwister, TUniformPdf> > TRngFunctor;
 
     // Compute by using the raw MT and uniform PDF.
-    String<unsigned> rawInts;
+    String<int> rawInts;
     {
 	    TMersenneTwister mt(SEED);
     	TUniformPdf uniform(10, 100);
@@ -98,7 +98,7 @@ SEQAN_DEFINE_TEST(test_random_rng_functor_pick)
 	    TRngFunctor rngFunctor(mt, uniform);
         
         for (int i = 0; i < 100; ++i) {
-            SEQAN_ASSERT_EQ_MSG(rawInts[i], pickRandomNumber(rngFunctor), "i = %d", i);
+            SEQAN_ASSERT_EQ_MSG(unsigned(rawInts[i]), pickRandomNumber(rngFunctor), "i = %d", i);
         }
     }
     
