@@ -25,14 +25,14 @@ int main() {
 ///Out-parameter: Predecessor map to recover the tree
 	String<TVertexDescriptor> predMap;
 ///Prim's algorithm
-	prims_algorithm(g, 0, weightMap, predMap);
+	primsAlgorithm(g, 0, weightMap, predMap);
 ///Console Output
 	::std::cout << "Minimum Spanning Tree (Prim's algorithm): " << ::std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		::std::cout << "Path from " << getProperty(nameMap, 0) << " to " << getProperty(nameMap, getValue(it)) << ": ";
-		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it), nameMap);
+		_printPath(g,predMap,(TVertexDescriptor) 0, getValue(it), nameMap);
 		::std::cout << ::std::endl;
 		goNext(it);
 	}

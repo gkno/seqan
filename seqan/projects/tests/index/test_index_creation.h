@@ -183,7 +183,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			resize(lcp, size);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
-			createLCPTable(lcp, text, sa, KasaiOriginal());
+			createLcpTable(lcp, text, sa, KasaiOriginal());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				std::cout << "suffix array creation (internal Kasai) failed" << std::endl;
@@ -193,7 +193,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			blank(lcp);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
-			createLCPTable(lcp, text, sa, Kasai());
+			createLcpTable(lcp, text, sa, Kasai());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				std::cout << "suffix array creation (internal in-place Kasai) failed" << std::endl;
@@ -203,7 +203,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			blank(lcp);
 			timeDelta[TI] = -SEQAN_PROGETTIME;
-			createLCPTableExt(lcp, text, sa, Kasai());
+			createLcpTableExt(lcp, text, sa, Kasai());
 			timeDelta[TI++] += SEQAN_PROGETTIME;
 			if (!isLCPTable(lcp, sa, text)) {
 				std::cout << "suffix array creation (external Kasai) failed" << std::endl;
@@ -215,7 +215,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			resize(child, size);
 			for(int i=0; i<size; ++i)
-				child[i] = supremumValue<unsigned>();
+				child[i] = maxValue<unsigned>();
 			timeDelta[TI] = -SEQAN_PROGETTIME;
 			createChildTable(child, lcp);
 			timeDelta[TI++] += SEQAN_PROGETTIME;
@@ -223,7 +223,7 @@ SEQAN_DEFINE_TEST(testIndexCreation)
 
 			unsigned undefs=0;
 			for(int i=0; i<size; ++i)
-				if (child[i] == supremumValue<unsigned>()) ++undefs;
+				if (child[i] == maxValue<unsigned>()) ++undefs;
 			if (undefs) ::std::cout << undefs << " undefined values";
 
 			resize(childExt, size);

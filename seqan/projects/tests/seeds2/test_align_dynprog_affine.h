@@ -35,7 +35,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_resize_matrix)
 
     Matrix<int, 3> matrix;
 
-    _align_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), Gotoh());
+    _alignResizeMatrix(matrix, CharString("length 9"), CharString("length    11"), Gotoh());
 
     SEQAN_ASSERT_EQ(9u, length(matrix, 0));
     SEQAN_ASSERT_EQ(13u, length(matrix, 1));
@@ -54,7 +54,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_free)
     setLength(matrix, 2, 3);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), Gotoh());
+    _alignInitGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), Gotoh());
 
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
@@ -73,9 +73,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_init_gutter_not_free)
     setLength(matrix, 2, 3);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -1, -2), AlignConfig<false, false, false, false>(), Gotoh());
+    _alignInitGutter(matrix, Score<int, Simple>(1, -1, -1, -2), AlignConfig<false, false, false, false>(), Gotoh());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // Check M.
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0, 0));
@@ -102,11 +102,11 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_fill_matrix)
     DnaString const sequence1 = "CAA";
     Score<int, Simple> const scoringScheme(1, -1, -1, -2);
 
-    _align_resizeMatrix(matrix, sequence0, sequence1, Gotoh());
-    _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
-    _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
+    _alignResizeMatrix(matrix, sequence0, sequence1, Gotoh());
+    _alignInitGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+    _alignFillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // // TODO(holtgrew): Debug code, remove when working.
     // {
@@ -117,7 +117,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_fill_matrix)
     //             // for (unsigned j = 0; j < i; ++j)
     //             //     std::cout << "\t";
     //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+    //                 if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
     //                     std::cout << "\tinf";
     //                 else
     //                     std::cout << "\t" << value(matrix, i, j, k);
@@ -201,9 +201,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -2, -1);
         
-        _align_resizeMatrix(matrix, sequence0, sequence1, Gotoh());
-        _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
-        _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
+        _alignResizeMatrix(matrix, sequence0, sequence1, Gotoh());
+        _alignInitGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+        _alignFillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
 
         // Perform the traceback.
         Align<TString> alignment;
@@ -217,7 +217,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
+        int score = _alignTraceback(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
 
         SEQAN_ASSERT_EQ(score, 1);
         SEQAN_ASSERT_TRUE(seq0It + 1 == begin(sequence0));
@@ -249,9 +249,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -1, -1);
         
-        _align_resizeMatrix(matrix, sequence0, sequence1, Gotoh());
-        _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
-        _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
+        _alignResizeMatrix(matrix, sequence0, sequence1, Gotoh());
+        _alignInitGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), Gotoh());
+        _alignFillMatrix(matrix, sequence0, sequence1, scoringScheme, Gotoh());
 
         // Perform the traceback.
         Align<TString> alignment;
@@ -265,7 +265,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_affine_traceback)
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
+        int score = _alignTraceback(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 1, 1, 0, 0, true, AlignConfig<false, false, false, false>(), Gotoh());
 
         SEQAN_ASSERT_EQ(score, 1);
         SEQAN_ASSERT_TRUE(seq0It + 1 == begin(sequence0));

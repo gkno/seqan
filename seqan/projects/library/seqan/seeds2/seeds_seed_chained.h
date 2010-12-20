@@ -28,8 +28,8 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-struct _Chained;
-typedef Tag<_Chained> ChainedSeed;  // TODO(holtgrew): Chained already taken as template in file. Maybe prefer non-parameterized types for simpler names.
+struct Chained_;
+typedef Tag<Chained_> ChainedSeed;  // TODO(holtgrew): Chained already taken as template in file. Maybe prefer non-parameterized types for simpler names.
 
 /**
 .Spec.ChainedSeed
@@ -388,7 +388,7 @@ assign(Seed<ChainedSeed, TConfig> & target, Seed<ChainedSeed, TConfig> & source)
 
 template <typename TStream, typename TConfig>
 inline void
-_write(TStream & stream, Seed<ChainedSeed, TConfig> const & seed, _Tikz const &)
+_write(TStream & stream, Seed<ChainedSeed, TConfig> const & seed, Tikz_ const &)
 {
     // Overall seed.
     stream << "\\draw[seed] (" << getBeginDim1(seed) << ", -" << getBeginDim0(seed) << ") -- (" << (getEndDim1(seed) - 1) << ", -" << (getEndDim0(seed) - 1) << ");" << std::endl;

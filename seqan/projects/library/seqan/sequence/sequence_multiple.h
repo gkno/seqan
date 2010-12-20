@@ -2088,39 +2088,39 @@ end(StringSet< TString, TSpec > const & me,
 
 
 /**
-.Class.ConcatenatorNto1:
+.Class.ConcatenatorManyToOne:
 ..summary:A sequence class that virtually concatenates all sequences in a @Class.StringSet@.
 ..cat:Sequences
-..signature:ConcatenatorNto1<TStringSet>
+..signature:ConcatenatorManyToOne<TStringSet>
 ..param.TStringSet:The @Class.StringSet@ type.
 ...type:Class.StringSet
 ..remarks:This container can be iterated like the concatenation string of all sequences in a @Class.StringSet@.
 ..include:seqan/sequence.h
-.Memfunc.ConcatenatorNto1#ConcatenatorNto1
+.Memfunc.ConcatenatorManyToOne#ConcatenatorManyToOne
 ..summary:Constructor
-..signature:ConcatenatorNto1<TStringSet> (stringSet)
+..signature:ConcatenatorManyToOne<TStringSet> (stringSet)
 ..param.stringSet:The @Class.StringSet@ object to be concatenated.
-..class:Class.ConcatenatorNto1
+..class:Class.ConcatenatorManyToOne
 */
 
 	//////////////////////////////////////////////////////////////////////////////
-	// ConcatenatorNto1 - a StringSet to String converter
+	// ConcatenatorManyToOne - a StringSet to String converter
 	//////////////////////////////////////////////////////////////////////////////
 
     template <typename TStringSet>
-	struct ConcatenatorNto1 {
+	struct ConcatenatorManyToOne {
 		TStringSet *set;
-		ConcatenatorNto1 () {}
-		ConcatenatorNto1 (TStringSet &_set): set(&_set) {}
+		ConcatenatorManyToOne () {}
+		ConcatenatorManyToOne (TStringSet &_set): set(&_set) {}
 
 //____________________________________________________________________________
 // WARNING: 
 // operator[] conducts a binary search and should be avoided
 // you better use StringSet<.., Owner<ConcatDirect<..> > > for random access
-// or ConcatenatorNto1's iterators for sequential access
+// or ConcatenatorManyToOne's iterators for sequential access
 
 		template <typename TPos>
-		inline typename Reference<ConcatenatorNto1>::Type
+		inline typename Reference<ConcatenatorManyToOne>::Type
 		operator [] (TPos pos)
 		{
 	SEQAN_CHECKPOINT
@@ -2128,7 +2128,7 @@ end(StringSet< TString, TSpec > const & me,
 		}
 
 		template <typename TPos>
-		inline typename Reference<ConcatenatorNto1 const>::Type 
+		inline typename Reference<ConcatenatorManyToOne const>::Type 
 		operator [] (TPos pos) const
 		{
 	SEQAN_CHECKPOINT
@@ -2138,23 +2138,23 @@ end(StringSet< TString, TSpec > const & me,
 //____________________________________________________________________________
 
     template <typename TStringSet>
-	struct Value< ConcatenatorNto1<TStringSet> > {
+	struct Value< ConcatenatorManyToOne<TStringSet> > {
 		typedef typename Value< typename Value<TStringSet>::Type >::Type Type;
 	};
 
     template <typename TStringSet>
-	struct Value< ConcatenatorNto1<TStringSet> const >:
-		Value< ConcatenatorNto1<TStringSet> > {};
+	struct Value< ConcatenatorManyToOne<TStringSet> const >:
+		Value< ConcatenatorManyToOne<TStringSet> > {};
 //____________________________________________________________________________
 
     template <typename TStringSet>
-    struct Size< ConcatenatorNto1<TStringSet> > {
+    struct Size< ConcatenatorManyToOne<TStringSet> > {
 		typedef typename Size< typename Value<TStringSet>::Type >::Type Type;
     };
 //____________________________________________________________________________
 
     template <typename TStringSet>
-	struct AllowsFastRandomAccess< ConcatenatorNto1<TStringSet> >
+	struct AllowsFastRandomAccess< ConcatenatorManyToOne<TStringSet> >
 	{
 		typedef False Type;
 		enum { VALUE = false };
@@ -2164,8 +2164,8 @@ end(StringSet< TString, TSpec > const & me,
 // value
 
 	template < typename TStringSet, typename TPos >
-	inline typename Reference< ConcatenatorNto1<TStringSet> >::Type
-	value(ConcatenatorNto1<TStringSet> &me, TPos globalPos)
+	inline typename Reference< ConcatenatorManyToOne<TStringSet> >::Type
+	value(ConcatenatorManyToOne<TStringSet> &me, TPos globalPos)
 	{
 		Pair<unsigned, typename Size< typename Value<TStringSet>::Type >::Type> localPos;
 		posLocalize(localPos, globalPos, stringSetLimits(*me.set));
@@ -2173,8 +2173,8 @@ end(StringSet< TString, TSpec > const & me,
 	}
 
 	template < typename TStringSet, typename TPos >
-	inline typename Reference< ConcatenatorNto1<TStringSet> const >::Type
-	value(ConcatenatorNto1<TStringSet> const &me, TPos globalPos)
+	inline typename Reference< ConcatenatorManyToOne<TStringSet> const >::Type
+	value(ConcatenatorManyToOne<TStringSet> const &me, TPos globalPos)
 	{
 		typedef typename Value<TStringSet>::Type TString;
 		Pair<unsigned, typename Size<TString>::Type> localPos;
@@ -2186,8 +2186,8 @@ end(StringSet< TString, TSpec > const & me,
 // length
 
 	template < typename TStringSet >
-    inline typename Size< ConcatenatorNto1<TStringSet> >::Type 
-	length(ConcatenatorNto1<TStringSet> const &me) {
+    inline typename Size< ConcatenatorManyToOne<TStringSet> >::Type 
+	length(ConcatenatorManyToOne<TStringSet> const &me) {
         return lengthSum(*me.set);
     }
 
@@ -2195,35 +2195,35 @@ end(StringSet< TString, TSpec > const & me,
 // begin
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type
-	begin(ConcatenatorNto1<TStringSet const> concat, Tag<TSpec> const)
+	inline typename Iterator< ConcatenatorManyToOne<TStringSet const>, Tag<TSpec> const >::Type
+	begin(ConcatenatorManyToOne<TStringSet const> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type (*concat.set);
+		return typename Iterator< ConcatenatorManyToOne<TStringSet const>, Tag<TSpec> const >::Type (*concat.set);
 	}
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type
-	begin(ConcatenatorNto1<TStringSet> concat, Tag<TSpec> const)
+	inline typename Iterator< ConcatenatorManyToOne<TStringSet>, Tag<TSpec> const >::Type
+	begin(ConcatenatorManyToOne<TStringSet> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type (*concat.set);
+		return typename Iterator< ConcatenatorManyToOne<TStringSet>, Tag<TSpec> const >::Type (*concat.set);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // end
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet const>, Tag<TSpec> const >::Type
-	end(ConcatenatorNto1<TStringSet const> concat, Tag<TSpec> const)
+	inline typename Iterator< ConcatenatorManyToOne<TStringSet const>, Tag<TSpec> const >::Type
+	end(ConcatenatorManyToOne<TStringSet const> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type 
+		return typename Iterator< ConcatenatorManyToOne<TStringSet>, Tag<TSpec> const >::Type 
 			(*concat.set, length(*concat.set), 0);
 	}
 
 	template < typename TStringSet, typename TSpec >
-	inline typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type
-	end(ConcatenatorNto1<TStringSet> concat, Tag<TSpec> const)
+	inline typename Iterator< ConcatenatorManyToOne<TStringSet>, Tag<TSpec> const >::Type
+	end(ConcatenatorManyToOne<TStringSet> concat, Tag<TSpec> const)
 	{
-		return typename Iterator< ConcatenatorNto1<TStringSet>, Tag<TSpec> const >::Type 
+		return typename Iterator< ConcatenatorManyToOne<TStringSet>, Tag<TSpec> const >::Type 
 			(*concat.set, length(*concat.set), 0);
 	}
 
@@ -2240,7 +2240,7 @@ end(StringSet< TString, TSpec > const & me,
 
 	template < typename TString, typename TSpec >
 	struct Concatenator< StringSet<TString, TSpec> > {
-		typedef ConcatenatorNto1< StringSet<TString, TSpec> > Type;
+		typedef ConcatenatorManyToOne< StringSet<TString, TSpec> > Type;
 	};
 
 	template < typename TString, typename TSpec >
@@ -2257,7 +2257,7 @@ end(StringSet< TString, TSpec > const & me,
 ...type:Class.StringSet
 ..returns:A container that can be iterated like the concatenation string of all sequences in a @Class.StringSet@.
 ..remarks:If $stringSet$ is a @Spec.ConcatDirect@ StringSet a reference to $stringSet.concat$ is returned.
-For all other StringSets a @Class.ConcatenatorNto1@ object is returned.
+For all other StringSets a @Class.ConcatenatorManyToOne@ object is returned.
 ...type:Metafunction.Concatenator
 ..include:seqan/sequence.h
 */
@@ -2405,40 +2405,40 @@ For all other StringSets a @Class.ConcatenatorNto1@ object is returned.
     };
 
 	//////////////////////////////////////////////////////////////////////////////
-	// ConcatenatorNto1 meta functions
+	// ConcatenatorManyToOne meta functions
 	//////////////////////////////////////////////////////////////////////////////
 //____________________________________________________________________________
 // default concatenator iterators
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Standard > {
+    struct Iterator< ConcatenatorManyToOne< StringSet<TString, TSpec> >, Standard > {
         typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
     };
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Standard > {
+    struct Iterator< ConcatenatorManyToOne< StringSet<TString, TSpec> const >, Standard > {
         typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
     };
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> >, Rooted > {
+    struct Iterator< ConcatenatorManyToOne< StringSet<TString, TSpec> >, Rooted > {
         typedef Iter<StringSet<TString, TSpec>, ConcatVirtual<> > Type;
     };
 
     template <typename TString, typename TSpec >
-    struct Iterator< ConcatenatorNto1< StringSet<TString, TSpec> const >, Rooted > {
+    struct Iterator< ConcatenatorManyToOne< StringSet<TString, TSpec> const >, Rooted > {
         typedef Iter<StringSet<TString, TSpec> const, ConcatVirtual<> > Type;
     };
 //____________________________________________________________________________
 
 	template <typename TStringSet >
-    struct Iterator< ConcatenatorNto1<TStringSet> const, Standard > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet>, Standard >::Type Type;
+    struct Iterator< ConcatenatorManyToOne<TStringSet> const, Standard > {
+		typedef typename Iterator< ConcatenatorManyToOne<TStringSet>, Standard >::Type Type;
     };
 
     template <typename TStringSet >
-    struct Iterator< ConcatenatorNto1<TStringSet> const, Rooted > {
-		typedef typename Iterator< ConcatenatorNto1<TStringSet>, Rooted >::Type Type;
+    struct Iterator< ConcatenatorManyToOne<TStringSet> const, Rooted > {
+		typedef typename Iterator< ConcatenatorManyToOne<TStringSet>, Rooted >::Type Type;
     };
 
 	//////////////////////////////////////////////////////////////////////////////

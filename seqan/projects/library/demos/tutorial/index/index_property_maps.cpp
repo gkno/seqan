@@ -9,7 +9,7 @@ int main ()
 {
 	String<char> myString = "abracadabra";
 
-	typedef Index< String<char>, Index_Wotd<> > TMyIndex;
+	typedef Index< String<char>, IndexWotd<> > TMyIndex;
 	TMyIndex myIndex(myString);
 	String<int> propMap;
 

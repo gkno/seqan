@@ -38,9 +38,9 @@ struct GeometricFairCoin {};
 // ===========================================================================
 
 /**
-.Spec.Geometric PDF
-..signature:PDF<GeometricFairCoin>
-..general:Class.PDF
+.Spec.Geometric Pdf
+..signature:Pdf<GeometricFairCoin>
+..general:Class.Pdf
 ..summary:Geometric probability density function with $p=0.5$.
 
 This can be implemented efficiently not using any floating point arithmetics.
@@ -49,17 +49,17 @@ Just bit operations are needed.
 ..include:seqan/random.h
 */
 template <>
-class PDF<GeometricFairCoin>
+class Pdf<GeometricFairCoin>
 {
 public:
 
 /**
-.Memfunc.Geometric PDF#PDF
-..class:Spec.Geometric PDF
-..summary:Constructor for geometric PDF.
-..signature:PDF<Geometric>()
+.Memfunc.Geometric Pdf#Pdf
+..class:Spec.Geometric Pdf
+..summary:Constructor for geometric Pdf.
+..signature:Pdf<Geometric>()
 */
-    PDF() { SEQAN_CHECKPOINT; }
+    Pdf() { SEQAN_CHECKPOINT; }
 };
 
 // ===========================================================================
@@ -67,13 +67,13 @@ public:
 // ===========================================================================
 
 template <>
-struct Value<PDF<GeometricFairCoin> >
+struct Value<Pdf<GeometricFairCoin> >
 {
     typedef unsigned Type;
 };
 
 template <>
-struct Value<const PDF<GeometricFairCoin> > : Value<PDF<GeometricFairCoin> > {};
+struct Value<const Pdf<GeometricFairCoin> > : Value<Pdf<GeometricFairCoin> > {};
 
 // ===========================================================================
 // Functions
@@ -84,8 +84,8 @@ struct Value<const PDF<GeometricFairCoin> > : Value<PDF<GeometricFairCoin> > {};
 */
 template <typename TRNG>
 inline
-typename Value<PDF<GeometricFairCoin> >::Type
-pickRandomNumber(TRNG & rng, PDF<GeometricFairCoin> const & /*pdf*/)
+typename Value<Pdf<GeometricFairCoin> >::Type
+pickRandomNumber(TRNG & rng, Pdf<GeometricFairCoin> const & /*pdf*/)
 {
     SEQAN_CHECKPOINT;
 
@@ -96,7 +96,7 @@ pickRandomNumber(TRNG & rng, PDF<GeometricFairCoin> const & /*pdf*/)
     const int RG_MASK = RG_IB1 + RG_IB2 + RG_IB5;
     
     typename Value<TRNG>::Type seed = pickRandomNumber(rng);
-    typename Value<PDF<GeometricFairCoin> >::Type value = 0;
+    typename Value<Pdf<GeometricFairCoin> >::Type value = 0;
 
     while (true) {
         if ((seed & RG_IB18)) {

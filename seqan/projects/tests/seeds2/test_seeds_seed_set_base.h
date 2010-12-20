@@ -405,7 +405,7 @@ void testSeedsSeedSetAddSeedMergeLeftMergingPossibleThresholdReachedScored(TSeed
     SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
     SEQAN_ASSERT_EQ(5u, getEndDim0(front(set)));
     SEQAN_ASSERT_EQ(5u, getEndDim1(front(set)));
-    SEQAN_ASSERT_EQ(-2, getScore(front(set)));
+    SEQAN_ASSERT_EQ(-2, _getMatchScore(front(set)));
 }
 
 
@@ -622,7 +622,7 @@ void testSeedsSeedSetAddSeedSimpleChainLeftChainingPossibleThresholdReachedScore
     SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
     SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
     SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
-    SEQAN_ASSERT_EQ(3, getScore(front(set)));
+    SEQAN_ASSERT_EQ(3, _getMatchScore(front(set)));
 }
 
 
@@ -863,7 +863,7 @@ void testSeedsSeedSetAddSeedChaosLeftChainingPossibleThresholdReachedScored(TSee
     SEQAN_ASSERT_EQ(0u, getBeginDim1(front(set)));
     SEQAN_ASSERT_EQ(6u, getEndDim0(front(set)));
     SEQAN_ASSERT_EQ(6u, getEndDim1(front(set)));
-    SEQAN_ASSERT_EQ(5, getScore(front(set)));
+    SEQAN_ASSERT_EQ(5, _getMatchScore(front(set)));
 }
 
 

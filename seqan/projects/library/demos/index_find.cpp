@@ -20,7 +20,7 @@ int main ()
 ///Now we explicitly create a q-gram index using an ungapped 2-gram and do the same.
 ///Instead of this @Spec.UngappedShape.fixed-size shape@ you can use arbitrary 
 ///@Class.Shape.shapes@ and assign them before calling @Function.find@ via @Function.indexShape@.
-	typedef Index< String<char>, Index_QGram< UngappedShape<2> > > TQGramIndex;
+	typedef Index< String<char>, IndexQGram< UngappedShape<2> > > TQGramIndex;
 	TQGramIndex index_2gram("tobeornottobe");
 	Finder< TQGramIndex > finder_2gram(index_2gram);
 

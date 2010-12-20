@@ -85,7 +85,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 	template <typename _TGPos>
 	struct SimplePosition
 	{
-		typedef typename _MakeSigned<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<_TGPos>::Type TGPos;
 		
 		TGPos			gBegin;			// begin position in the genome 
 		unsigned		gseqNo;
@@ -239,7 +239,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 			//compMask[4] = 0;
 			toIupac = "AMRWMCSYRSGKWYKT";
 			
-			windowSize = 5000000;
+			windowSize = 1000000;
 			windowBuff = 70;
 
 			forceReadLength = 0;
@@ -319,7 +319,7 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 	template <typename _TGPos>
 	struct MappedReadMatch 
 	{
-		typedef typename _MakeSigned<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<_TGPos>::Type TGPos;
 		
 // 		TGPos		Batch	gBegin;			// begin position of the match in the genome			--> beginPos
 		TGPos			gEnd;			// end position of the match in the genome				--> endPos
@@ -2373,7 +2373,7 @@ void dumpSNPsBatch(
 			{
 				Dna5String gInf = infix(genome, currentBegin, currentEnd);
 				if (orientation == 'R')
-					reverseComplementInPlace(gInf);
+					reverseComplement(gInf);
 
 				assignSource(row(align, 0), reads[(*matchIt).readId]);
 				assignSource(row(align, 1), gInf);
@@ -2664,7 +2664,7 @@ void dumpShortIndelPolymorphismsBatch(
 			assignSource(row(align, 0), reads[(*matchIt).readId]);
 			assignSource(row(align, 1), infix(genome, min((*matchIt).beginPos,(*matchIt).endPos), max((*matchIt).beginPos,(*matchIt).endPos)));
 			if ((*matchIt).beginPos > (*matchIt).endPos)
-				reverseComplementInPlace(source(row(align, 0))); // check if reversing read is better for gap placement
+				reverseComplement(source(row(align, 0))); // check if reversing read is better for gap placement
 			
 			globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
 //			globalAlignment(align, scoreType, AlignConfig<false,false,false,false>(), Gotoh());
@@ -2776,7 +2776,7 @@ void dumpShortIndelPolymorphismsBatch(
 					rInf = infix(read,
 					readLen - (readInserts[i].i2).i1-(readInserts[i].i2).i2,
 					readLen - (readInserts[i].i2).i1);
-				if((*matchIt).beginPos > (*matchIt).endPos) reverseComplementInPlace(rInf);
+				if((*matchIt).beginPos > (*matchIt).endPos) reverseComplement(rInf);
 				
 				indels.insert(std::make_pair<Pair<unsigned,int>,Pair<unsigned,TReadInf> >
 					(Pair<unsigned,int>(indelCandPos,-(int)(readInserts[i].i2).i2),
@@ -2801,7 +2801,7 @@ void dumpShortIndelPolymorphismsBatch(
 						readLen - (readInserts[i].i2).i1-(readInserts[i].i2).i2,
 						readLen - (readInserts[i].i2).i1);
 					if((*matchIt).beginPos > (*matchIt).endPos) 
-						reverseComplementInPlace(rInf);
+						reverseComplement(rInf);
 					if(extraV)std::cout << rInf << " <-" << (*matchIt).id<<std::endl;
 					indelIt->second.i2 = rInf;
 				}*/

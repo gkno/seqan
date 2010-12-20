@@ -190,7 +190,7 @@ void compactSplicedMatches(TMatches &matches,
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
+	int scoreDistCutOff = MinValue<int>::VALUE;
 	
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -271,7 +271,7 @@ void compactSplicedMatchesPurgeAmbiguous(TMatches &matches, TCounts & /*cnts*/, 
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
+	int scoreDistCutOff = MinValue<int>::VALUE;
 	
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -355,7 +355,7 @@ void countSplitMatches(TMatches &matches, TCounts &cnt)
 	unsigned readNo = -1;
 	short editDist = -1;
 	__int64 count = 0;
-	__int64 maxVal = SupremumValue<TValue>::VALUE;
+	__int64 maxVal = MaxValue<TValue>::VALUE;
 
 	for (; it != itEnd; ++it) 
 	{
@@ -477,16 +477,16 @@ matchVerify(
 #endif
 	
 	unsigned ndlLength = _min(sequenceLength(rseqNo, readSet),options.minMatchLen);
-	int maxScore = InfimumValue<int>::VALUE;
+	int maxScore = MinValue<int>::VALUE;
 	int minScore = -(int)(ndlLength * options.errorRate);
 	TMyersFinder maxPos;
 	
 	// find end of best semi-global alignment
 	while (find(myersFinder, myersPattern, minScore))
 	{
-		if (maxScore <= getScore(myersPattern)) 
+		if (maxScore <= _getMatchScore(myersPattern)) 
 		{
-			maxScore = getScore(myersPattern);
+			maxScore = _getMatchScore(myersPattern);
 			maxPos = myersFinder;
 		}
 	}
@@ -507,7 +507,7 @@ matchVerify(
 	TGenomeInfixRev		infRev(inf);
 	TMyersFinderRev		myersFinderRev(infRev);
 	TReadRev			readRev;
-	if(TYPECMP<TSufPrefSpec,LongestSuffix>::VALUE)
+	if(IsSameType<TSufPrefSpec,LongestSuffix>::VALUE)
 		setHost(readRev,infix(readSet[rseqNo],length(readSet[rseqNo])-options.minMatchLen,length(readSet[rseqNo])));
 	else
 		setHost(readRev,infix(readSet[rseqNo],0,options.minMatchLen));
@@ -948,7 +948,7 @@ findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
 	::std::cout << "findBestSplitEditForward\n";
 #endif
 
-	TScore maxSum = infimumValue<TScore>();
+	TScore maxSum = minValue<TScore>();
 	int bestL = rowPosL1;
 	int bestR = rowPosR1;
 	while (rowPosL1 <= rowPosL2 && rowPosR1 >= rowPosR2)
@@ -989,7 +989,7 @@ findBestSplitPosition(String<Pair<TScore,int> > & maxColsL,
 	::std::cout << "findBestSplitEditReverse\n";
 #endif
 
-	TScore maxSum = infimumValue<TScore>();
+	TScore maxSum = minValue<TScore>();
 	int bestL = rowPosL2;
 	int bestR = rowPosR2;
 
@@ -1564,7 +1564,7 @@ int mapSplicedReads(
 
 	typedef typename Value<TReadSet_>::Type								TRead;
 	typedef StringSet<typename Infix<TRead>::Type>						TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape, TQGramIndexSpec> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, TQGramIndexSpec> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >							TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>								TMyersPattern;	// verifier
 	
@@ -1691,7 +1691,7 @@ int mapSplicedReads(
 	
 			if (options.reverse)
 			{
-				reverseComplementInPlace(genome);
+				reverseComplement(genome);
 				mapSplicedReads(matches, genome, gseqNo, readSet, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
@@ -1741,10 +1741,10 @@ void mapSplicedReads(
 	RazerSOptions<TSpec> &options)
 {
 	typedef typename Value<TOriReadSet>::Type TRead;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type			TSize;
 	typedef typename Position<TGenome>::Type		TGPos;
-	typedef typename _MakeSigned<TGPos>::Type		TSignedGPos;
+	typedef typename MakeSigned_<TGPos>::Type		TSignedGPos;
 	typedef typename Value<TMatches>::Type			TMatch;
 	typedef typename Infix<TGenome>::Type			TGenomeInf;
 	
@@ -2061,7 +2061,7 @@ void mapSplicedReads(
 					assignSource(row(alignL, 0), infix(readSet[rseqNo],0,mLtmp.mScore));
 					assignSource(row(alignL, 1), infix(genome,mLtmp.gBegin, mLtmp.gEnd));
 					if (orientation == 'R')
-						reverseComplementInPlace(source(row(alignL, 1)));
+						reverseComplement(source(row(alignL, 1)));
 
 					globalAlignment(alignL, scoreType);
 					std::cout << alignL;
@@ -2071,7 +2071,7 @@ void mapSplicedReads(
 					assignSource(row(alignR, 0), infix(readSet[rseqNo],length(readSet[rseqNo])-mRtmp.mScore,length(readSet[rseqNo])));
 					assignSource(row(alignR, 1), infix(genome,mRtmp.gBegin, mRtmp.gEnd));
 					if (orientation == 'R')
-						reverseComplementInPlace(source(row(alignR, 1)));
+						reverseComplement(source(row(alignR, 1)));
 
 					globalAlignment(alignR, scoreType);
 					std::cout << alignR;
@@ -2082,7 +2082,7 @@ void mapSplicedReads(
 					assignSource(row(align, 0), infix(readSet[rseqNo],0,length(readSet[rseqNo])));
 					assignSource(row(align, 1), infix(genome,_min(mRtmp.gBegin,mLtmp.gBegin), _max(mRtmp.gEnd,mLtmp.gEnd)));
 					if (orientation == 'R')
-						reverseComplementInPlace(source(row(align, 1)));
+						reverseComplement(source(row(align, 1)));
 
 					globalAlignment(align, scoreType);
 					std::cout << align;

@@ -65,24 +65,24 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct
-	_DynamicStruct
+	DynamicStruct_
 	{};
 
 	template< typename TObject, typename TSpec, typename TStructuring >
 	struct
-	_DynamicStruct< TObject, SkipListDynamic, TSpec, TStructuring >
+	DynamicStruct_< TObject, SkipListDynamic, TSpec, TStructuring >
 	{
 			// predecessing element in the skip list
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * _pred;
 			// succeeding element
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * _succ;
 
-		_DynamicStruct()
+		DynamicStruct_()
 			: _pred( NULL )
 			, _succ( NULL )
 		{}
 
-		_DynamicStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * goPrevious, 
+		DynamicStruct_( SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * goPrevious, 
 						SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * succ )
 			: _pred( goPrevious )
 			, _succ( succ )
@@ -93,7 +93,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct
-	_DeferredStruct
+	DeferredStruct_
 	{
 		union{
 				// number of unsorted elements to the right of this
@@ -102,18 +102,18 @@ namespace seqan
 			typename Size< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type _height;
 		};
 
-		_DeferredStruct()
+		DeferredStruct_()
 			: _height( 0 )
 		{}
 
-		_DeferredStruct( typename Size< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type h )
+		DeferredStruct_( typename Size< SkipBaseElement< TObject, TModus, TSpec, TStructuring > >::Type h )
 			: _height( h )
 		{}
 	};
 	
 	template< typename TObject, typename TSpec >
 	struct
-	_DeferredStruct< TObject, SkipListDynamic, TSpec, Deferred >
+	DeferredStruct_< TObject, SkipListDynamic, TSpec, Deferred >
 	{
 			// next sorted element on the left side
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * _left;
@@ -124,14 +124,14 @@ namespace seqan
 			// height of related tower
 		typename Size< SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > >::Type _height;
 
-		_DeferredStruct()
+		DeferredStruct_()
 			: _left( NULL )
 			, _right( NULL )
 			, _count( 0 )
 			, _height( 0 )
 		{}
 
-		_DeferredStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
+		DeferredStruct_( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
 							SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right )
 			: _left( left )
 			, _right( right )
@@ -140,7 +140,7 @@ namespace seqan
 		{}
 
 		template< typename TSize >
-		_DeferredStruct( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
+		DeferredStruct_( SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * left, 
 							SkipBaseElement< TObject, SkipListDynamic, TSpec, Deferred > * right,
 							TSize _count,
 							TSize _height )
@@ -154,7 +154,7 @@ namespace seqan
 
 	template< typename TObject, typename TSpec >
 	struct
-	_DeferredStruct< TObject, SkipListStatic, TSpec, Deferred >
+	DeferredStruct_< TObject, SkipListStatic, TSpec, Deferred >
 	{
 		//	// next sorted element on the left side
 		//SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > * _left;
@@ -163,7 +163,7 @@ namespace seqan
 			// height of related tower
 		typename Size< SkipBaseElement< TObject, SkipListStatic, TSpec, Deferred > >::Type _height;
 
-		_DeferredStruct()
+		DeferredStruct_()
 			: _count( 0 )
 			, _height( 0 )
 		{}
@@ -807,9 +807,9 @@ template< typename TObject, typename TModus, typename TSpec, typename TStructuri
 struct SkipBaseElement
 {
 	
-	_DynamicStruct< TObject, TModus, TSpec, TStructuring > _dynStruct;
+	DynamicStruct_< TObject, TModus, TSpec, TStructuring > _dynStruct;
 
-	_DeferredStruct< TObject, TModus, TSpec, TStructuring > _defStruct;
+	DeferredStruct_< TObject, TModus, TSpec, TStructuring > _defStruct;
 	
 		// pointer to tower in the upper layers
 	union{

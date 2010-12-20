@@ -1087,9 +1087,9 @@ template <typename TValue>
 struct Holder<TValue, Simple>
 {
 	typedef typename Value<Holder>::Type THolderValue;
-	typedef typename _Parameter<THolderValue>::Type THolderParameter;
+	typedef typename Parameter_<THolderValue>::Type THolderParameter;
 
-	mutable typename _RemoveConst<THolderValue>::Type data_value;
+	mutable typename RemoveConst_<THolderValue>::Type data_value;
 //____________________________________________________________________________
 
 	Holder()
@@ -1325,14 +1325,14 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 		assign(*this, source_);
 	}
-	Holder(typename _Parameter<THostValue>::Type value_):
+	Holder(typename Parameter_<THostValue>::Type value_):
 		data_state(EMPTY)
 	{
 SEQAN_CHECKPOINT
 		setValue(*this, value_);
 	}
 	/*
-	Holder(typename _ConstParameter<THostValue>::Type value_):
+	Holder(typename ConstParameter_<THostValue>::Type value_):
 		data_state(EMPTY)
 	{
 SEQAN_CHECKPOINT

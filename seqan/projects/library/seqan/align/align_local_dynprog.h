@@ -129,7 +129,7 @@ public:
 	//position where traceback ended and where declumping begins
 	TMatrixPosition bestBeginPos;
     //traceback path that is set to forbidden while declumping
-    _Align_Traceback<TSize> trace;
+    AlignTraceback<TSize> trace;
 
 	bool needReinit; //true: call "smithWaterman", false: call "smithWatermanGetNext" 
 
@@ -185,8 +185,8 @@ SEQAN_CHECKPOINT
 
     fill(finder.forbidden, (len0 + 1) * (len1 + 1), false);
 
-	finder.bestEndPos = infimumValue<typename TFinder::TMatrixPosition>();
-	finder.bestBeginPos = infimumValue<typename TFinder::TMatrixPosition>();
+	finder.bestEndPos = minValue<typename TFinder::TMatrixPosition>();
+	finder.bestBeginPos = minValue<typename TFinder::TMatrixPosition>();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -200,10 +200,10 @@ void clear(LocalAlignmentFinder<TScoreValue> & sw_finder)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TScoreValue>
-TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
+TScoreValue _getMatchScore(LocalAlignmentFinder<TScoreValue> & sw)
 {
 	typedef LocalAlignmentFinder<TScoreValue> TFinder;
-	if(sw.bestEndPos !=  infimumValue<typename TFinder::TMatrixPosition>())
+	if(sw.bestEndPos !=  minValue<typename TFinder::TMatrixPosition>())
 		return getValue(sw.matrix,sw.bestEndPos);
 	return 0;
 }
@@ -212,7 +212,7 @@ TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
 //Smith-Waterman algorithm
 template <typename TScoreValue, typename TString>
 TScoreValue
-_smith_waterman_get_matrix(LocalAlignmentFinder<TScoreValue> & sw,
+_smithWatermanGetMatrix(LocalAlignmentFinder<TScoreValue> & sw,
 						  TString const & str1_,
 						  TString const & str2_,
 						  Score<TScoreValue, Simple> const & score_,
@@ -326,7 +326,7 @@ SEQAN_CHECKPOINT
 // declumping
 template <typename TScoreValue, typename TSource, typename TSpec>
 void
-_smith_waterman_declump(LocalAlignmentFinder<TScoreValue> & sw ,
+_smithWatermanDeclump(LocalAlignmentFinder<TScoreValue> & sw ,
 				Align<TSource, TSpec> & align_,
 				Score<TScoreValue, Simple> const & score_)
 {
@@ -528,7 +528,7 @@ SEQAN_CHECKPOINT
 //traceback
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 typename Iterator<Matrix<TScoreValue, DIMENSION>, Standard >::Type
-_smith_waterman_trace(Align<TTargetSource, TTargetSpec> & target_,
+_smithWatermanTrace(Align<TTargetSource, TTargetSpec> & target_,
 					 typename LocalAlignmentFinder<TScoreValue>::TBoolMatrix & fb_matrix, 
 					 Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 					 Score<TScoreValue, Simple> const & scoring_) {
@@ -637,7 +637,7 @@ SEQAN_CHECKPOINT
 //adjust the priority queue of scores until the true maximum is found
 template <typename TScoreValue>
 typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition
-_get_next_best_end_position(LocalAlignmentFinder<TScoreValue> & sw ,
+_getNextBestEndPosition(LocalAlignmentFinder<TScoreValue> & sw ,
                             TScoreValue cutoff) {
 SEQAN_CHECKPOINT
     // get maximal score from priority queue
@@ -717,7 +717,7 @@ SEQAN_CHECKPOINT
     }
     _initLocalAlignmentFinder(str, sw_finder, SmithWaterman());
 	
-	TScoreValue ret = _smith_waterman_get_matrix(sw_finder, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_,cutoff);
+	TScoreValue ret = _smithWatermanGetMatrix(sw_finder, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_,cutoff);
 	
 	if(ret==0)
 		return ret;
@@ -727,7 +727,7 @@ SEQAN_CHECKPOINT
 	TMatrixIterator best_begin;
 	
 	// TODO: sw_finder statt kram
-	best_begin = _smith_waterman_trace(align_,sw_finder.forbidden,iter(sw_finder.matrix,(top(sw_finder.pQ)).id_), score_);
+	best_begin = _smithWatermanTrace(align_,sw_finder.forbidden,iter(sw_finder.matrix,(top(sw_finder.pQ)).id_), score_);
 
 	sw_finder.bestBeginPos = position(best_begin);
 	
@@ -769,7 +769,7 @@ _smithWatermanGetNext(Align<TSource, TSpec> & align_,
 {	
 SEQAN_CHECKPOINT
 
-	_smith_waterman_declump(sw_finder, align_, score_);
+	_smithWatermanDeclump(sw_finder, align_, score_);
 
 	clearGaps(row(align_,0));
 	clearGaps(row(align_,1));
@@ -777,11 +777,11 @@ SEQAN_CHECKPOINT
 	setClippedEndPosition(row(align_, 1),endPosition(source(row(align_,1))));
 
 	typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition next_best_end;
-	next_best_end = _get_next_best_end_position(sw_finder,cutoff);
+	next_best_end = _getNextBestEndPosition(sw_finder,cutoff);
 	if(next_best_end==0)
 		return 0;
 	typename LocalAlignmentFinder<TScoreValue>::TMatrixIterator next_best_begin;
-	next_best_begin= _smith_waterman_trace(align_,sw_finder.forbidden,iter(sw_finder.matrix,next_best_end), score_);
+	next_best_begin= _smithWatermanTrace(align_,sw_finder.forbidden,iter(sw_finder.matrix,next_best_end), score_);
 	sw_finder.bestBeginPos = position(next_best_begin);
 	
 	return getValue(sw_finder.matrix,next_best_end);

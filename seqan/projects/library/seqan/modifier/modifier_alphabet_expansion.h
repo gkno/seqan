@@ -179,9 +179,9 @@ struct ValueSize<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >
 };
 
 template <typename THost, char CHAR, typename TSpec>
-struct _InternalValueSize<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >
+struct InternalValueSize_<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > >
 {
-	enum { VALUE = _InternalValueSize<THost>::VALUE + 1 };
+	enum { VALUE = InternalValueSize_<THost>::VALUE + 1 };
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -218,22 +218,22 @@ _initializeAlphabetConversionTable(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
 
 	//assure that the conversion from TSource to THost is possible
-//	_AlphabetConversionTable<THost, TSource>::initialize();
+//	AlphabetConversionTable_<THost, TSource>::initialize();
 	
 	//copy the conversion table for converting TSouce => THost
 	//maybe, if there is no CHAR in TSource, the entry for CHAR is overwritten now
-	for (int i = _InternalValueSize<TSource>::VALUE; i > 0; )
+	for (int i = InternalValueSize_<TSource>::VALUE; i > 0; )
 	{
 		--i;
 		buf[i].data = _internalOrdValue(convert<THost>(_internalCreateChar(TSource(), i)));
 	}
 
 	//add the new character CHAR to the table
-	buf[_internalOrdValue(convert<TSource>(CHAR))].data = _InternalValueSize<THost>::VALUE;
+	buf[_internalOrdValue(convert<TSource>(CHAR))].data = InternalValueSize_<THost>::VALUE;
 }
 
 template <int SIZE_OF_SOURCE>
-struct _ConvertImpl_ModExpand
+struct ConvertImplModExpand_
 {
 	//default implementation for large source types
 	template <typename THost, char CHAR, typename TSpec, typename T, typename TSource>
@@ -246,7 +246,7 @@ struct _ConvertImpl_ModExpand
 		if (source_ == ValueSize<THost>::VALUE)
 		{// the extra character
 			TTarget tmp;
-			tmp.data = _InternalValueSize<THost>::VALUE;
+			tmp.data = InternalValueSize_<THost>::VALUE;
 			return tmp;
 		}
 		return convert<TTarget>(convert<THost>(source_));
@@ -255,7 +255,7 @@ struct _ConvertImpl_ModExpand
 
 //for 1 byte source: use translation table
 template <>
-struct _ConvertImpl_ModExpand<1>
+struct ConvertImplModExpand_<1>
 {
 	template <typename THost, char CHAR, typename TSpec, typename T, typename TSource>
 	inline 
@@ -264,7 +264,7 @@ struct _ConvertImpl_ModExpand<1>
 		TSource const & source_)
 	{
 		typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
-		TTarget * table = _AlphabetConversionTable<TTarget, TSource>::table;
+		TTarget * table = AlphabetConversionTable_<TTarget, TSource>::table;
 		return table[_internalOrdValue(source_)];
 	}
 };
@@ -275,7 +275,7 @@ inline typename Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TSourc
 convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const convert_,
 			TSource const & source_)
 {
-	return _ConvertImpl_ModExpand<BytesPerValue<TSource>::VALUE>::_convertImpl(convert_, source_);
+	return ConvertImplModExpand_<BytesPerValue<TSource>::VALUE>::_convertImpl(convert_, source_);
 }
 
 //for SimpleType sources
@@ -287,7 +287,7 @@ convertImpl(Convert<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, T> const,
 SEQAN_CHECKPOINT
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TTarget;
 	typedef SimpleType<TSourceValue, TSourceSpec> TSource;
-	return _AlphabetConversionTable<TTarget, TSource>::table[_internalOrdValue(source_)];
+	return AlphabetConversionTable_<TTarget, TSource>::table[_internalOrdValue(source_)];
 }
 
 
@@ -329,17 +329,17 @@ _initializeAlphabetConversionTable(TTarget * buf,
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
 
 	//assure that the conversion from THost to TTarget is possible
-	_AlphabetConversionTable<TTarget, THost>::initialize(); 
+	AlphabetConversionTable_<TTarget, THost>::initialize(); 
 	
 	//copy the conversion table for converting THost => TTarget
-	for (int i = _InternalValueSize<THost>::VALUE; i > 0; )
+	for (int i = InternalValueSize_<THost>::VALUE; i > 0; )
 	{
 		--i;
 		buf[i] = convert<TTarget>(_internalCreateChar(THost(), i));
 	}
 
 	//add the new character CHAR to the table
-	buf[_InternalValueSize<THost>::VALUE] = convert<TTarget, char>(CHAR);
+	buf[InternalValueSize_<THost>::VALUE] = convert<TTarget, char>(CHAR);
 }
 
 template <typename TTarget, typename THost, char CHAR, typename TSpec>
@@ -350,17 +350,17 @@ _initializeAlphabetOrdTable(TTarget * buf,
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
 
 	//assure that the conversion from THost to TTarget is possible
-	_AlphabetOrdTable<THost>::initialize(); 
+	AlphabetOrdTable_<THost>::initialize(); 
 	
 	//copy the conversion table for converting THost => TTarget
-	for (int i = _InternalValueSize<THost>::VALUE; i > 0; )
+	for (int i = InternalValueSize_<THost>::VALUE; i > 0; )
 	{
 		--i;
 		buf[i] = ordValue(_internalCreateChar(THost(), i));
 	}
 
 	//add the new character CHAR to the table
-	buf[_InternalValueSize<THost>::VALUE] = ValueSize<THost>::VALUE;
+	buf[InternalValueSize_<THost>::VALUE] = ValueSize<THost>::VALUE;
 }
 
 
@@ -376,7 +376,7 @@ convertImpl(Convert<TTarget, T> const,
 {
     SEQAN_CHECKPOINT;
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
-	return _AlphabetConversionTable<TTarget, TSource>::table[_internalOrdValue(source_)];
+	return AlphabetConversionTable_<TTarget, TSource>::table[_internalOrdValue(source_)];
 }
 
 
@@ -389,7 +389,7 @@ convertImpl(Convert<SimpleType<TTargetValue, TTargetSpec>, ModifiedAlphabet<Simp
     SEQAN_CHECKPOINT;
     typedef SimpleType<TTargetValue, TTargetSpec> TTarget;
     TTarget target;
-	if (source_.data == _InternalValueSize<TTarget>::VALUE)
+	if (source_.data == InternalValueSize_<TTarget>::VALUE)
 		assign(target, CHAR);
 	else
 		target.value = source_.data;
@@ -441,7 +441,7 @@ ordValue(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & c)
 {
     SEQAN_CHECKPOINT;
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TSource;
-	return _AlphabetOrdTable<TSource>::table[_internalOrdValue(c)];
+	return AlphabetOrdTable_<TSource>::table[_internalOrdValue(c)];
 }
 
 //////////////////////////////////////////////////////////////////////////////

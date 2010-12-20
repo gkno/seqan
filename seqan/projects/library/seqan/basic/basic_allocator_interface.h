@@ -76,14 +76,14 @@ struct Spec<Allocator<TSpec> >
 ..see:Function.deallocate
 ..include:seqan/basic.h
 */
-struct TagAllocateUnspecified_; //< usage not specified
-typedef Tag<TagAllocateUnspecified_> const TagAllocateUnspecified;
+struct AllocateUnspecified_; //< usage not specified
+typedef Tag<AllocateUnspecified_> const TagAllocateUnspecified;
 
-struct TagAllocateTemp_; //< allocate temporary memory
-typedef Tag<TagAllocateTemp_> const TagAllocateTemp;
+struct AllocateTemp_; //< allocate temporary memory
+typedef Tag<AllocateTemp_> const TagAllocateTemp;
 
-struct TagAllocateStorage_; //< allocate memory for storing member data
-typedef Tag<TagAllocateStorage_> const TagAllocateStorage;
+struct AllocateStorage_; //< allocate memory for storing member data
+typedef Tag<AllocateStorage_> const TagAllocateStorage;
 
 
 //////////////////////////////////////////////////////////////////////////////

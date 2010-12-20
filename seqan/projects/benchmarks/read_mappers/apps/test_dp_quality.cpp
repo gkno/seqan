@@ -24,32 +24,32 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_infix_simple_high_limit) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-50, getScore(pattern));
+    SEQAN_ASSERT_EQ(-50, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-30, getScore(pattern));
+    SEQAN_ASSERT_EQ(-30, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-30, getScore(pattern));
+    SEQAN_ASSERT_EQ(-30, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-10, getScore(pattern));
+    SEQAN_ASSERT_EQ(-10, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-30, getScore(pattern));
+    SEQAN_ASSERT_EQ(-30, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-10, getScore(pattern));
+    SEQAN_ASSERT_EQ(-10, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
@@ -74,12 +74,12 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_infix_simple) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-10, getScore(pattern));
+    SEQAN_ASSERT_EQ(-10, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-10, getScore(pattern));
+    SEQAN_ASSERT_EQ(-10, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
@@ -103,32 +103,32 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_infix_not_increasing_high_limit) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-17, getScore(pattern));
+    SEQAN_ASSERT_EQ(-17, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
@@ -152,27 +152,27 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_infix_not_increasing) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
@@ -196,32 +196,32 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_prefix_not_increasing) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-17, getScore(pattern));
+    SEQAN_ASSERT_EQ(-17, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-9, getScore(pattern));
+    SEQAN_ASSERT_EQ(-9, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-11, getScore(pattern));
+    SEQAN_ASSERT_EQ(-11, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_NOT(ret);
@@ -245,97 +245,97 @@ SEQAN_DEFINE_TEST(test_dp_quality_find_begin_not_increasing) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_NOT(ret);
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-5, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-5, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_NOT(ret);
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(3u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(2u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_NOT(ret);
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-5, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(3u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-5, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(2u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_NOT(ret);
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(5u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(4u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(3u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(-7, getFindBeginScore(pattern));
     SEQAN_ASSERT_EQ(2u, beginPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_NOT(ret);
 
     ret = find(finder, pattern);
@@ -360,22 +360,22 @@ SEQAN_DEFINE_TEST(test_dp_quality_set_end_position_not_increasing) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = setEndPosition(finder, pattern, 3u);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 
     ret = setEndPosition(finder, pattern, 2u);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(2u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-7, getScore(pattern));
+    SEQAN_ASSERT_EQ(-7, _getMatchScore(pattern));
 
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(3u, endPosition(finder));
-    SEQAN_ASSERT_EQ(-5, getScore(pattern));
+    SEQAN_ASSERT_EQ(-5, _getMatchScore(pattern));
 }
 
 

@@ -76,7 +76,7 @@ SEQAN_CHECKPOINT
         }
         ++pos;
     }
-    if (pos == len) appendValue(queue, TMerger(beginPos, pos, infimumValue<TScoreValue>()+1));
+    if (pos == len) appendValue(queue, TMerger(beginPos, pos, minValue<TScoreValue>()+1));
     else appendValue(queue, TMerger(beginPos, pos, score));
 }
 
@@ -174,7 +174,7 @@ SEQAN_CHECKPOINT
     String<TMerger> queue;
     TPos pos = _min(toViewPosition(row(align, 0), clippedBeginPosition(row(align, 0))),
                     toViewPosition(row(align, 1), clippedBeginPosition(row(align, 1))));
-    appendValue(queue, TMerger(pos, pos, infimumValue<TScoreValue1>()+1));
+    appendValue(queue, TMerger(pos, pos, minValue<TScoreValue1>()+1));
 
     TPos aliLength = _max(toViewPosition(row(align, 0), clippedEndPosition(row(align, 0))),
                           toViewPosition(row(align, 1), clippedEndPosition(row(align, 1))));
@@ -466,7 +466,7 @@ SEQAN_CHECKPOINT
     TScore match = 1;
     TScore mismatchIndel = (TScore)_max((TScore) ceil(-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
-    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
+    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), minValue<TScore>()+1);
 
     // diagonals for banded alignment
     __int64 upperDiag = 0;
@@ -534,7 +534,7 @@ SEQAN_CHECKPOINT
     TScore match = 1;
     TScore mismatchIndel = (TScore)_max((TScore) ceil(-1/eps) + 1, -(TScore)length(host(a)));
     Score<TScore> scoreMatrix(match, mismatchIndel, mismatchIndel);
-    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), infimumValue<TScore>()+1);
+    TScore scoreDropOff = (TScore) _max((TScore) xDrop * (-mismatchIndel), minValue<TScore>()+1);
 
     // calculate minimal score for local alignments
     TEpsilon e = floor(eps*minLength);

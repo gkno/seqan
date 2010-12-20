@@ -46,11 +46,11 @@ that are available for rooted iterators.
 ..include:seqan/basic.h
 */
 
-struct TagRooted_;
-typedef Tag<TagRooted_> const Rooted;
+struct Rooted_;
+typedef Tag<Rooted_> const Rooted;
 
-struct TagStandard_;
-typedef Tag<TagStandard_> const Standard;
+struct Standard_;
+typedef Tag<Standard_> const Standard;
 
 
 //////////////////////////////////////////////////////////////////////////////

@@ -660,8 +660,8 @@ typedef Tag<TagFastq_> const Fastq;
 	QSeq format, used for most of the Illumina read files.
 ..include:seqan/file.h
 */
-	struct _QSeq;
-	typedef Tag<_QSeq> const QSeq;
+	struct QSeq_;
+	typedef Tag<QSeq_> const QSeq;
 
 	// FIXME The following enum is more or less arbitrary since the information
 	// in a QSeq file may differ depending on where they come from. Not sure if

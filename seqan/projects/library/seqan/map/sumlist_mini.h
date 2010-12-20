@@ -294,7 +294,7 @@ end(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > const& me)
 //changes the value at ptr (which is at the dim-th tuple position) to new_value
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TValue2>
 inline bool 
-_MiniSumList_assignValue(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
+_miniSumListAssignValue(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 						 unsigned char * ptr,
 						 int dim,
 						 TValue2 new_value)
@@ -321,7 +321,7 @@ _MiniSumList_assignValue(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 //computes the size needed to store the values in the DIM-tupel vals
 template <unsigned int DIM, typename TValue>
 inline TValue
-_MiniSumList_sizeOfValues(SumListValues<DIM, TValue> const & vals)
+_miniSumListSizeOfValues(SumListValues<DIM, TValue> const & vals)
 {
 	unsigned int sum = 0;
 	for (unsigned int i = 0; i < DIM; ++i)
@@ -337,14 +337,14 @@ _MiniSumList_sizeOfValues(SumListValues<DIM, TValue> const & vals)
 //returns false on capacity owerflow, true otherwise
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TPosition, typename TValue2>
 inline bool 
-_MiniSumList_insertValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
+_miniSumListInsertValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 						  TPosition byte_pos,
 						  TValue2 const & new_values,
 						  /*OUT*/ unsigned int & new_values_size)
 {
 	typedef _MiniListEntry<TValue> TEntry;
 
-	new_values_size = _MiniSumList_sizeOfValues<DIM>(new_values);
+	new_values_size = _miniSumListSizeOfValues<DIM>(new_values);
 	unsigned int new_size = me.data_size + new_values_size;
 	if (new_size > SIZE) return false; //not enough space
 
@@ -375,7 +375,7 @@ _insertValues(TSumList & me,
 			  TValues const & new_values,
 			  /*OUT*/ unsigned int & new_values_size)
 {
-	return _MiniSumList_insertValues(me, it.data_ptr - me.data_, new_values, new_values_size);
+	return _miniSumListInsertValues(me, it.data_ptr - me.data_, new_values, new_values_size);
 }
 template <typename TSumList, typename TValue>
 inline bool 
@@ -385,7 +385,7 @@ _insertValues(TSumList & me,
 			  /*OUT*/ unsigned int & new_values_size)
 {
 	SumListValues<DIMENSION<TSumList>::VALUE, typename Value<TSumList>::Type > vals(new_values);
-	return _MiniSumList_insertValues(me, it.data_ptr - me.data_, vals, new_values_size);
+	return _miniSumListInsertValues(me, it.data_ptr - me.data_, vals, new_values_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -397,7 +397,7 @@ appendValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 			 TValues const & new_values)
 {
 	unsigned int dummy;
-	return _MiniSumList_insertValues(me, me.data_size, new_values, dummy);
+	return _miniSumListInsertValues(me, me.data_size, new_values, dummy);
 }
 template <unsigned int DIM, typename TValue, unsigned short SIZE, typename TSpec, typename TValue2>
 inline bool 
@@ -407,7 +407,7 @@ appendValues(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 	typedef SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > TSumList;
 	SumListValues<DIMENSION<TSumList>::VALUE, typename Value<TSumList>::Type > vals(new_values);
 	unsigned int dummy;
-	return _MiniSumList_insertValues(me, me.data_size, vals, dummy);
+	return _miniSumListInsertValues(me, me.data_size, vals, dummy);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -463,7 +463,7 @@ splitSumList(SumList<DIM, TValue, MiniSumList<SIZE, TSpec> > & me,
 //finds tupel in which the dim-th sum would exceed val
 //template <typename TSumList, typename TValue2, typename TValues>
 //inline Iter<TSumList, _MiniSumListValueIterator>
-//_MiniSumList_searchSumList(TSumList & me,
+//_miniSumListSearchSumList(TSumList & me,
 //						   TValue2 val,
 //						   int dim,
 //						   /*OUT*/ TValues const & sums)
@@ -540,7 +540,7 @@ template <typename TSumList>
 class Iter<TSumList, _MiniSumListValueIterator>
 {
 public:
-	typedef typename _CopyConst<TSumList, unsigned char>::Type TUnsignedChar;
+	typedef typename CopyConst_<TSumList, unsigned char>::Type TUnsignedChar;
 	mutable TUnsignedChar * data_ptr;
 
 	Iter()
@@ -645,7 +645,7 @@ class Iter<TSumList, MiniSumListIterator>
 {
 public:
 	typedef Iter<TSumList, _MiniSumListValueIterator> TValueIterator;
-//	typedef typename _CopyConst<TSumList, TValueIterator_>::Type TValueIterator;
+//	typedef typename CopyConst_<TSumList, TValueIterator_>::Type TValueIterator;
 	typedef typename Value<TSumList>::Type TValue;
 	typedef SumListValues<DIMENSION<TSumList>::VALUE, TValue> TValues;
 

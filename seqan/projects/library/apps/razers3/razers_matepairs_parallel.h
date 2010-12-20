@@ -68,13 +68,13 @@ void goOverContig(
 	typedef typename Value<TMatePairStore>::Type			TMatePair;
 	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Id<TAlignedRead>::Type					TId;
 
 	typedef typename TFragmentStore::TContigSeq				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
-	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
+	typedef typename MakeSigned_<TGPos>::Type				TSignedGPos;
 	typedef typename Infix<TGenome>::Type					TGenomeInf;
 
 	// FILTRATION
@@ -172,8 +172,8 @@ void goOverContig(
 				break;
 		}
 		
-		int	bestLeftScore = InfimumValue<int>::VALUE;
-		int bestLibSizeError = SupremumValue<int>::VALUE;
+		int	bestLeftScore = MinValue<int>::VALUE;
+		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 		
 		TDequeueIterator it;
@@ -243,7 +243,7 @@ void goOverContig(
 			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
 		
 		// verify right mate, if left mate matches
-		if (bestLeftScore != InfimumValue<int>::VALUE)
+		if (bestLeftScore != MinValue<int>::VALUE)
 		{
 			if (matchVerify(verifierR, infix(swiftFinderR), 
 					mainStore.matePairStore[globalMatePairId].readId[1], mainStore.readSeqStore, mode))
@@ -350,13 +350,13 @@ void _mapMatePairReadsParallel(
 	typedef typename Value<TMatePairStore>::Type			TMatePair;
 	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Id<TAlignedRead>::Type					TId;
 
 	typedef typename TFragmentStore::TContigSeq				TGenome;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
-	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
+	typedef typename MakeSigned_<TGPos>::Type				TSignedGPos;
 	typedef typename Infix<TGenome>::Type					TGenomeInf;
 
 	// FILTRATION
@@ -387,7 +387,7 @@ void _mapMatePairReadsParallel(
 	
 	lockContig(store, contigId);
 	TGenome &genome = store.contigStore[contigId].seq;
-	if (orientation == 'R')	reverseComplementInPlace(genome);
+	if (orientation == 'R')	reverseComplement(genome);
 		
 	// Create a verifier for each thread. This way each thread gets its own store to dump the matches in.
 	String<TVerifier> verifierL, verifierR;
@@ -421,7 +421,7 @@ void _mapMatePairReadsParallel(
 	}
 		
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
-		if (orientation == 'R')	reverseComplementInPlace(genome);	// we have to restore original orientation
+		if (orientation == 'R')	reverseComplement(genome);	// we have to restore original orientation
 	
 }
 
@@ -446,8 +446,8 @@ int _mapMatePairReadsParallelCreatePatterns(
 	SEQAN_CHECKPOINT
 
 	typedef FragmentStore<TFSSpec, TFSConfig>					TFragmentStore;
-	typedef typename IF<
-				TYPECMP<TGapMode,RazerSGapped>::VALUE,
+	typedef typename If<
+				IsSameType<TGapMode,RazerSGapped>::VALUE,
 	 			SwiftSemiGlobal, 
 				SwiftSemiGlobalHamming>::Type 					TSwiftSpec;
 	typedef typename Value<TReadIndexString>::Type				TReadIndex;
@@ -584,9 +584,9 @@ int _mapMatePairReadsParallel(
 	typedef typename Value<TReadSeqStore>::Type			TRead;
 	typedef StringSet<TRead>							TReadSet;
 #ifndef RAZERS_OPENADDRESSING
-	typedef Index<TReadSet, Index_QGram<TShape> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape> >	TIndex;			// q-gram index
 #else
-	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;
+	typedef Index<TReadSet, IndexQGram<TShape, OpenAddressing> >	TIndex;
 #endif
 
 	if (options._debugLevel >= 1){
@@ -629,7 +629,7 @@ int _mapMatePairReadsParallel(
 				assign(readSetR[i], store.readSeqStore[store.matePairStore[readID].readId[1]]);
 				++readID;
 			}
-			reverseComplementInPlace(readSetR);
+			reverseComplement(readSetR);
 			
 			// configure q-gram indices
 			intiIndex(indicesL[threadID], readSetL, shape);

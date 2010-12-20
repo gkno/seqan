@@ -784,7 +784,7 @@ You can't use $(unsigned int)c$ for a character $c$ as on some systems $char$ is
 template <typename TValue>
 inline unsigned ordValue(TValue const &c) 
 {
-	return (typename _MakeUnsigned<TValue>::Type const &)c;
+	return (typename MakeUnsigned_<TValue>::Type const &)c;
 }
 
 template <typename TValue, typename TSpec>

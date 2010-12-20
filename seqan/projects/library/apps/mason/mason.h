@@ -292,7 +292,7 @@ void setUpCommandLineParser(CommandLineParser & parser)
     addSection(parser, "Main Options");
     
     addOption(parser, CommandLineOption("aNg",  "allow-N-from-genome", "Allow N from genome.  Default: false.", OptionType::Bool));
-    addOption(parser, CommandLineOption("s",  "seed", "The seed for RNG.  Default: 0.", OptionType::Integer | OptionType::Label));
+    addOption(parser, CommandLineOption("s",  "seed", "The seed for Rng.  Default: 0.", OptionType::Integer | OptionType::Label));
     addOption(parser, CommandLineOption("N",  "num-reads", "Number of reads (or mate pairs) to simulate.  Default: 1000.", OptionType::Integer));
     addOption(parser, CommandLineOption("sn", "source-length", "Length of random source sequence.  Default: 1,000,000.", OptionType::Integer));
     addOption(parser, CommandLineOption("spA", "source-probability-A", "Propabilibty for A in randomly generated sequence. Default: 0.25", OptionType::Double));
@@ -419,7 +419,7 @@ int writeRandomSequence(TRNG & rng, size_t length, CharString const & fileName, 
     double xC = xA + options.sourceProbabilityC;
     double xG = xC + options.sourceProbabilityG;
 
-    PDF<Uniform<double> > pdf(0, 1);
+    Pdf<Uniform<double> > pdf(0, 1);
     for (size_t i = 0; i < length; ++i) {
         double x = pickRandomNumber(rng, pdf);
         if (x < xA)
@@ -465,9 +465,9 @@ int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*
     while (!_streamEOF(file)) {
         clear(contigName);
 
-        _parse_readSamIdentifier(file, contigName, c);
-        _parse_skipUntilChar(file, '\t', c);
-        sampleCount = _parse_readNumber(file, c);
+        _parseReadSamIdentifier(file, contigName, c);
+        _parseSkipUntilChar(file, '\t', c);
+        sampleCount = _parseReadNumber(file, c);
         _parse_skipLine(file, c);
 
         size_t contigId = 0;
@@ -493,8 +493,8 @@ int simulateReads(TOptions options, CharString referenceFilename, TReadsTypeTag 
     std::cerr << options;
     std::cerr << "reference file: " << referenceFilename << std::endl;
 
-    // Create a RNG with the given seed.
-    RNG<MersenneTwister> rng(options.seed);
+    // Create a Rng with the given seed.
+    Rng<MersenneTwister> rng(options.seed);
 
     // Load or randomly generate the reference sequence.
     FragmentStore<MyFragmentStoreConfig> fragmentStore;
@@ -639,10 +639,10 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
 
         // j is position in original sequence, k is position in haplotype
         for (size_t j = 0, k = 0; j < length(contig);) {
-            double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+            double x = pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1));
             if (x < options.haplotypeSnpRate) {
                 // SNP
-                Dna5 c = Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, maxOrdValue - 1)));
+                Dna5 c = Dna5(pickRandomNumber(rng, Pdf<Uniform<int> >(0, maxOrdValue - 1)));
                 if (c == contig[j])
                     c = Dna5(ordValue(c) + 1);
                 if (options.haplotypeNoN)
@@ -653,12 +653,12 @@ void buildHaplotype(StringSet<String<Dna5, Journaled<Alloc<> > > > & haplotype,
             } else if (x < options.haplotypeSnpRate + options.haplotypeIndelRate) {
                 // Indel of random length.
                 unsigned rangeLen = options.haplotypeIndelRangeMax - options.haplotypeIndelRangeMin;
-                unsigned indelLen = options.haplotypeIndelRangeMin + static_cast<unsigned>(pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) * rangeLen);
-                if (pickRandomNumber(rng, PDF<Uniform<double> >(0, 1)) < 0.5) {
+                unsigned indelLen = options.haplotypeIndelRangeMin + static_cast<unsigned>(pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) * rangeLen);
+                if (pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1)) < 0.5) {
                     // Insertion.
                     clear(buffer);
                     for (unsigned ii = 0; ii < indelLen; ++ii)
-                        appendValue(buffer, Dna5(pickRandomNumber(rng, PDF<Uniform<int> >(0, maxOrdValue))));
+                        appendValue(buffer, Dna5(pickRandomNumber(rng, Pdf<Uniform<int> >(0, maxOrdValue))));
                     insert(haplotypeContig, k, buffer);
                     k += indelLen;
                 } else {
@@ -709,7 +709,7 @@ int buildReadSimulationInstruction(
             inst.contigId = contigId;
         } else {
             // Pick contig id, probability is proportional to the length.
-            double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+            double x = pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1));
             for (unsigned i = 0; i < length(relativeContigLengths); ++i) {
                 if (x < relativeContigLengths[i]) {
                     inst.contigId = i - 1;
@@ -723,7 +723,7 @@ int buildReadSimulationInstruction(
         else if (options.onlyReverse)
             inst.isForward = false;
         else
-            inst.isForward = pickRandomNumber(rng, PDF<Uniform<int> >(0, 1));
+            inst.isForward = pickRandomNumber(rng, Pdf<Uniform<int> >(0, 1));
         // Pick the length in the haplotype infix the read comes from, possibly randomly.
         unsigned readLength = pickReadLength(rng, options);
         // This cannot work if the haplotype is shorter than the length of the read to simulate.
@@ -732,7 +732,7 @@ int buildReadSimulationInstruction(
             return 1;
         }
         // Pick a start and end position.
-        inst.beginPos = pickRandomNumber(rng, PDF<Uniform<size_t> >(0, length(haplotype[inst.contigId]) - readLength - 1));
+        inst.beginPos = pickRandomNumber(rng, Pdf<Uniform<size_t> >(0, length(haplotype[inst.contigId]) - readLength - 1));
         inst.endPos = inst.beginPos + readLength;
         // Simulate the read with these parameters.
         buildSimulationInstructions(inst, rng, readLength, haplotype[inst.contigId], parameters, options);
@@ -807,11 +807,11 @@ unsigned pickLibraryLength(TRNG & rng, Options<Global> const & options)
         // Pick uniformly.
         double minLen = options.libraryLengthMean - options.libraryLengthError;
         double maxLen = options.libraryLengthMean + options.libraryLengthError;
-        double len = pickRandomNumber(rng, PDF<Uniform<double> >(minLen, maxLen));
+        double len = pickRandomNumber(rng, Pdf<Uniform<double> >(minLen, maxLen));
         return static_cast<unsigned>(_max(0.0, round(len)));
     } else {
         // Pick normally distributed.
-        double len = pickRandomNumber(rng, PDF<Normal>(options.libraryLengthMean, options.libraryLengthError));
+        double len = pickRandomNumber(rng, Pdf<Normal>(options.libraryLengthMean, options.libraryLengthError));
         return static_cast<unsigned>(_max(0.0, round(len)));
     }
 }
@@ -847,7 +847,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     // Pick random haplotype origin.
     reserve(haplotypeIds, numReads);
     for (size_t i = 0; i < numReads; ++i)
-        appendValue(haplotypeIds, pickRandomNumber(rng, PDF<Uniform<unsigned> >(0, options.numHaplotypes - 1)));
+        appendValue(haplotypeIds, pickRandomNumber(rng, Pdf<Uniform<unsigned> >(0, options.numHaplotypes - 1)));
 
     // Maybe pick contig ids to sample from.
     String<unsigned> contigIds;
@@ -948,7 +948,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                     // Generate the mate num \in {1, 2}, randomly but consistent so two entries belonging together have different nums.  This also decides about the flipping.
                     int mateNum = 3 - previousMateNum;
                     if (readId % 2 == 0) {
-                        mateNum = pickRandomNumber(rng, PDF<Uniform<int> >(1, 2));
+                        mateNum = pickRandomNumber(rng, Pdf<Uniform<int> >(1, 2));
 						SEQAN_ASSERT_GEQ(mateNum, 1);
 						SEQAN_ASSERT_LEQ(mateNum, 2);
                         previousMateNum = mateNum;
@@ -1016,15 +1016,15 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
                         if (options.includeReadInformation)
                             append(fragmentStore.readNameStore[readId - 1], " strand=forward");
                         // The second read always comes from the reverse strand.
-                        reverseComplementInPlace(fragmentStore.readSeqStore[readId]);
+                        reverseComplement(fragmentStore.readSeqStore[readId]);
                         if (options.includeReadInformation)
                             append(fragmentStore.readNameStore[readId], " strand=reverse");
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!
                         std::swap(fragmentStore.alignedReadStore[readId].beginPos, fragmentStore.alignedReadStore[readId].endPos);
                     }
                 } else {
-                    if (pickRandomNumber(rng, PDF<Uniform<double> >(0.0, 1.0)) < 0.5) {
-                        reverseComplementInPlace(back(fragmentStore.readSeqStore));
+                    if (pickRandomNumber(rng, Pdf<Uniform<double> >(0.0, 1.0)) < 0.5) {
+                        reverseComplement(back(fragmentStore.readSeqStore));
                         if (options.includeReadInformation)
                             append(back(fragmentStore.readNameStore), " strand=reverse");
                         // Note: readId is also last index of aligned read store because we only have one alignment per read!

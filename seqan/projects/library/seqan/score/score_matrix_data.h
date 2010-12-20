@@ -43,12 +43,12 @@
 namespace SEQAN_NAMESPACE_MAIN {
 
 /*
-.Tag._Blosum30:
+.Tag.Blosum30_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM30 matrix.
 ..include:seqan/score.h
  */
-struct _Blosum30 {};
+struct Blosum30_ {};
 
 
 /**
@@ -57,14 +57,14 @@ struct _Blosum30 {};
 ..summary:Blosum30 scoring matrix.
 ..signature:Blosum30
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Blosum30> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Blosum30_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Blosum30> > Blosum30;
+typedef Score<int, ScoreMatrix<AminoAcid, Blosum30_> > Blosum30;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Blosum30> {
+struct ScoringMatrixData_<int, AminoAcid, Blosum30_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -111,12 +111,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum30> {
 
 
 /*
-.Tag._Blosum45:
+.Tag.Blosum45_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM45 matrix.
 ..include:seqan/score.h
  */
-struct _Blosum45 {};
+struct Blosum45_ {};
 
 
 /**
@@ -125,14 +125,14 @@ struct _Blosum45 {};
 ..summary:Blosum45 scoring matrix.
 ..signature:Blosum45
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Blosum45> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Blosum45_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Blosum45> > Blosum45;
+typedef Score<int, ScoreMatrix<AminoAcid, Blosum45_> > Blosum45;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Blosum45> {
+struct ScoringMatrixData_<int, AminoAcid, Blosum45_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -178,12 +178,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum45> {
 
 
 /*
-.Tag._Blosum62:
+.Tag.Blosum62_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM62 matrix.
 ..include:seqan/score.h
  */
-struct _Blosum62 {};
+struct Blosum62_ {};
 
 
 /**
@@ -192,14 +192,14 @@ struct _Blosum62 {};
 ..summary:Blosum62 scoring matrix.
 ..signature:Blosum62
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Blosum62> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Blosum62_> >
 ..include:seqan/score.h
  */
-typedef Score<int, ScoreMatrix<AminoAcid, _Blosum62> > Blosum62;
+typedef Score<int, ScoreMatrix<AminoAcid, Blosum62_> > Blosum62;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Blosum62> {
+struct ScoringMatrixData_<int, AminoAcid, Blosum62_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -245,12 +245,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum62> {
 
 
 /*
-.Tag._Blosum80:
+.Tag.Blosum80_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a BLOSUM80 matrix.
 ..include:seqan/score.h
  */
-struct _Blosum80 {};
+struct Blosum80_ {};
 
 
 /**
@@ -259,14 +259,14 @@ struct _Blosum80 {};
 ..summary:Blosum80 scoring matrix.
 ..signature:Blosum80
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Blosum80> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Blosum80_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Blosum80> > Blosum80;
+typedef Score<int, ScoreMatrix<AminoAcid, Blosum80_> > Blosum80;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Blosum80> {
+struct ScoringMatrixData_<int, AminoAcid, Blosum80_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -312,12 +312,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Blosum80> {
 
 
 /*
-.Tag._Pam40:
+.Tag.Pam40_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM40 matrix.
 ..include:seqan/score.h
  */
-struct _Pam40 {};
+struct Pam40_ {};
 
 
 /**
@@ -326,14 +326,14 @@ struct _Pam40 {};
 ..summary:Pam40 scoring matrix.
 ..signature:Pam40
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Pam40> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Pam40_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Pam40> > Pam40;
+typedef Score<int, ScoreMatrix<AminoAcid, Pam40_> > Pam40;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Pam40> {
+struct ScoringMatrixData_<int, AminoAcid, Pam40_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -382,12 +382,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam40> {
 
 
 /*
-.Tag._Pam120:
+.Tag.Pam120_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM120 matrix.
 ..include:seqan/score.h
  */
-struct _Pam120 {};
+struct Pam120_ {};
 
 
 /**
@@ -396,14 +396,14 @@ struct _Pam120 {};
 ..summary:Pam120 scoring matrix.
 ..signature:Pam120
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Pam120> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Pam120_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Pam120> > Pam120;
+typedef Score<int, ScoreMatrix<AminoAcid, Pam120_> > Pam120;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Pam120> {
+struct ScoringMatrixData_<int, AminoAcid, Pam120_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -451,12 +451,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam120> {
 
 
 /*
-.Tag._Pam200:
+.Tag.Pam200_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM200 matrix.
 ..include:seqan/score.h
  */
-struct _Pam200 {};
+struct Pam200_ {};
 
 
 /**
@@ -465,14 +465,14 @@ struct _Pam200 {};
 ..summary:Pam200 scoring matrix.
 ..signature:Pam200
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Pam200> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Pam200_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Pam200> > Pam200;
+typedef Score<int, ScoreMatrix<AminoAcid, Pam200_> > Pam200;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Pam200> {
+struct ScoringMatrixData_<int, AminoAcid, Pam200_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -520,12 +520,12 @@ struct _ScoringMatrixData<int, AminoAcid, _Pam200> {
 
 
 /*
-.Tag._Pam250:
+.Tag.Pam250_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM250 matrix.
 ..include:seqan/score.h
  */
-struct _Pam250 {};
+struct Pam250_ {};
 
 
 /**
@@ -534,14 +534,14 @@ struct _Pam250 {};
 ..summary:Pam250 scoring matrix.
 ..signature:Pam250
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Pam250> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Pam250_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Pam250> > Pam250;
+typedef Score<int, ScoreMatrix<AminoAcid, Pam250_> > Pam250;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Pam250> {
+struct ScoringMatrixData_<int, AminoAcid, Pam250_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -610,7 +610,7 @@ typedef Score<int, ScoreMatrix<AminoAcid, _Vtml200> > Vtml200;
 
 
 template <>
-struct _ScoringMatrixData<int, AminoAcid, _Vtml200> {
+struct ScoringMatrixData_<int, AminoAcid, _Vtml200> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE

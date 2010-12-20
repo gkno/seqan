@@ -55,7 +55,7 @@ class Segment<THost_, SuffixSegment>
 public:
 	typedef typename Host<Segment>::Type THost;
 
-	typename _Pointer<THost>::Type data_host;
+	typename Pointer_<THost>::Type data_host;
 	typename Position<THost>::Type data_begin_position;
 
 //____________________________________________________________________________
@@ -102,21 +102,21 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 	}
 
-	Segment(typename _Parameter<THost>::Type _host, typename Position<THost>::Type _begin_index):
+	Segment(typename Parameter_<THost>::Type _host, typename Position<THost>::Type _begin_index):
 		data_host(_toPointer(_host)),
 		data_begin_position(_begin_index)
 	{
 SEQAN_CHECKPOINT
 	}
 /*
-	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin):
+	Segment(typename Parameter_<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin))
 	{
 SEQAN_CHECKPOINT
 	}
 */
-	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin):
+	Segment(typename Parameter_<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin, _host))
 	{
@@ -185,7 +185,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost_>
-inline typename _Parameter<THost_>::Type 
+inline typename Parameter_<THost_>::Type 
 host(Segment<THost_, SuffixSegment> & me)
 {
 SEQAN_CHECKPOINT
@@ -193,7 +193,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THost_>
-inline typename _Parameter<THost_>::Type 
+inline typename Parameter_<THost_>::Type 
 host(Segment<THost_, SuffixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -204,7 +204,7 @@ SEQAN_CHECKPOINT
 
 template <typename THost_>
 inline void 
-setHost(Segment<THost_, SuffixSegment> & me, typename _Parameter<THost_>::Type _host)
+setHost(Segment<THost_, SuffixSegment> & me, typename Parameter_<THost_>::Type _host)
 {
 SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);
@@ -212,7 +212,7 @@ SEQAN_CHECKPOINT
 
 template <typename THost_>
 inline void 
-setHost(Segment<THost_ const, SuffixSegment> & me, typename _Parameter<THost_>::Type _host)
+setHost(Segment<THost_ const, SuffixSegment> & me, typename Parameter_<THost_>::Type _host)
 {
 SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);

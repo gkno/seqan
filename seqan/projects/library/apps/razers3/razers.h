@@ -270,7 +270,7 @@ struct MicroRNA{};
 	template <typename _TGPos>
 	struct ReadMatch 
 	{
-		typedef typename _MakeSigned<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<_TGPos>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
@@ -315,7 +315,7 @@ struct MicroRNA{};
 */
 
 	template <typename TReadSet, typename TShape, typename TSpec>
-	struct Cargo< Index<TReadSet, Index_QGram<TShape, TSpec> > > {
+	struct Cargo< Index<TReadSet, IndexQGram<TShape, TSpec> > > {
 		typedef struct {
 			double		abundanceCut;
 			int			_debugLevel;
@@ -328,7 +328,7 @@ struct MicroRNA{};
 #ifdef RAZERS_MEMOPT
 
 	template <typename TReadSet, typename TShape, typename TSpec>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
+	struct SAValue< Index<TReadSet, IndexQGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,				
@@ -340,7 +340,7 @@ struct MicroRNA{};
 #else
 
 	template <typename TReadSet, typename TShape, typename TSpec>
-	struct SAValue< Index<TReadSet, Index_QGram<TShape, TSpec> > > 
+	struct SAValue< Index<TReadSet, IndexQGram<TShape, TSpec> > > 
 	{
 		typedef Pair<
 			unsigned,			// many reads
@@ -358,13 +358,13 @@ struct MicroRNA{};
 	};
 
 	template <typename TReadSet, typename TShape>
-	struct Size< Index<TReadSet, Index_QGram<TShape> > >
+	struct Size< Index<TReadSet, IndexQGram<TShape> > >
 	{
 		typedef unsigned Type;
 	};
 
 	template <typename TReadSet, typename TShape>
-	struct Size< Index<TReadSet, Index_QGram<TShape, OpenAddressing> > >
+	struct Size< Index<TReadSet, IndexQGram<TShape, OpenAddressing> > >
 	{
 		typedef unsigned Type;
 	};
@@ -375,10 +375,10 @@ struct MicroRNA{};
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
 	template <typename TReadSet, typename TShape, typename TSpec>
-	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape, TSpec> > &index) 
+	inline bool _qgramDisableBuckets(Index<TReadSet, IndexQGram<TShape, TSpec> > &index) 
 	{
-		typedef Index<TReadSet, Index_QGram<TShape, TSpec> >	TReadIndex;
-		typedef typename Fibre<TReadIndex, QGram_Dir>::Type		TDir;
+		typedef Index<TReadSet, IndexQGram<TShape, TSpec> >	TReadIndex;
+		typedef typename Fibre<TReadIndex, QGramDir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
 		typedef typename Value<TDir>::Type						TSize;
 
@@ -430,7 +430,7 @@ struct MicroRNA{};
 		typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
 		typedef typename Size<TGenome>::Type					TSize;
 		
-		typedef _PatternState<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
+		typedef PatternState_<TRead, Myers<AlignTextBanded<TMatchNPolicy, TMatchNPolicy>, True, void> > TPatternState;
 
 		TFragmentStore	*store;
 		TOptions		*options;			// RazerS options
@@ -479,7 +479,7 @@ struct MicroRNA{};
 					{
 						typename Size<TAlignedReadStore>::Type oldSize = length(store->alignedReadStore);
 
-						if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+						if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
 							maskDuplicates(*store, TRazerSMode());	// overlapping parallelograms cause duplicates
 		
 						compactMatches(*store, *cnts, *options, TRazerSMode(), *swiftPattern, COMPACT);
@@ -526,15 +526,15 @@ int getGenomeFileNameList(CharString filename, StringSet<CharString> & genomeFil
 		unsigned i = 1;
 		while(!_streamEOF(file))
 		{ 
-			_parse_skipWhitespace(file, c);
-			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			_parseSkipWhitespace(file, c);
+			appendValue(genomeFileNames,_parseReadFilepath(file,c));
 			//CharString currentGenomeFile(filePrefix);
-			//append(currentGenomeFile,_parse_readFilepath(file,c));
+			//append(currentGenomeFile,_parseReadFilepath(file,c));
 			//appendValue(genomeFileNames,currentGenomeFile);
 			if(options._debugLevel >=2)
 				std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << std::endl;
 			++i;
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 		}
 		if(options._debugLevel >=1)
 			std::cout << i-1 << " genome files total." << std::endl;
@@ -979,7 +979,7 @@ void countMatches(TFragmentStore &store, TCounts &cnt, TRazerSMode const &)
 	unsigned readId = TAlignedRead::INVALID_ID;
 	short errors = -1;
 	__int64 count = 0;
-	__int64 maxVal = SupremumValue<TValue>::VALUE;
+	__int64 maxVal = MaxValue<TValue>::VALUE;
 
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
@@ -1019,7 +1019,7 @@ setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 	if (minT > 1)
 	{
 //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
-		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+		if (maxErrors < 0) minT = MaxValue<int>::VALUE;
 		setMinThreshold(swift, readNo, (unsigned)minT);
 	}
 }
@@ -1053,10 +1053,10 @@ void compactMatches(
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int scoreCutOff = InfimumValue<int>::VALUE;
-	int errorCutOff = SupremumValue<int>::VALUE;
-	int errorRangeBest = options.errorDistanceRange;// (TYPECMP<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
-	int scoreRangeBest = (TYPECMP<TAlignMode, RazerSGlobal>::VALUE && !TYPECMP<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : SupremumValue<int>::VALUE;
+	int scoreCutOff = MinValue<int>::VALUE;
+	int errorCutOff = MaxValue<int>::VALUE;
+	int errorRangeBest = options.errorDistanceRange;// (IsSameType<TScoreMode, RazerSErrors>::VALUE)? options.scoreDistanceRange: 0;
+	int scoreRangeBest = (IsSameType<TAlignMode, RazerSGlobal>::VALUE && !IsSameType<TScoreMode, RazerSScore>::VALUE)? -(int)options.scoreDistanceRange : MaxValue<int>::VALUE;
 
 	sortAlignedReads(store.alignedReadStore, LessScore<TAlignedReadStore, TAlignQualityStore, TRazerSMode>(store.alignQualityStore));
 
@@ -1088,7 +1088,7 @@ void compactMatches(
 					}
 					else
 						// we only need better matches
-						if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+						if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 						{
 							setMaxErrors(swift, readNo, errors - 1);
 							if (errors == 0 && options._debugLevel >= 2)
@@ -1264,7 +1264,7 @@ matchVerify(
 	
 	unsigned maxErrors = (unsigned)(verifier.options->prefixSeedLength * verifier.options->errorRate);
 	unsigned minErrors = maxErrors + 2;
-	unsigned errorThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: maxErrors;
+	unsigned errorThresh = (verifier.oneMatchPerBucket)? MaxValue<unsigned>::VALUE: maxErrors;
 	int bestHitLength = 0;
 
 	for (; git < gitEnd; ++git)
@@ -1364,11 +1364,11 @@ matchVerify(
 	
 	int mismatchDelta, scoreInit;
 	int minScore;
-	if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+	if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 		minScore = -(int)(ndlLength * verifier.options->errorRate);
 	else if (__UseQualityValues<TRazerSMode>::VALUE)
 		minScore = -verifier.options->absMaxQualSumErrors;
-	else if (TYPECMP<TScoreMode, RazerSScore>::VALUE)
+	else if (IsSameType<TScoreMode, RazerSScore>::VALUE)
 	{
 		minScore = verifier.options->minScore;
 		mismatchDelta = scoreMatch(verifier.options->scoringScheme) - scoreMismatch(verifier.options->scoringScheme);
@@ -1376,24 +1376,24 @@ matchVerify(
 	}
 	
 	int maxScore = minScore - 1;
-	int scoreThresh = (verifier.oneMatchPerBucket)? SupremumValue<int>::VALUE: minScore;
+	int scoreThresh = (verifier.oneMatchPerBucket)? MaxValue<int>::VALUE: minScore;
 	int score, errors;
 	
 	for (; git < gitEnd; ++git)
 	{
-		if (!TYPECMP<TScoreMode, RazerSScore>::VALUE)
+		if (!IsSameType<TScoreMode, RazerSScore>::VALUE)
 			score = 0;
 		else
 			score = scoreInit;
 		
-		if (!TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+		if (!IsSameType<TScoreMode, RazerSErrors>::VALUE)
 			errors = 0;
 		
 		TGenomeIterator g = git;
 		for (TReadIterator r = ritBeg; r != ritEnd; ++r, ++g)
 			if ((verifier.options->compMask[ordValue(*g)] & verifier.options->compMask[ordValue(*r)]) == 0)
 			{
-				if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+				if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 				{
 					// A. Count mismatches only
 					--score;
@@ -1403,7 +1403,7 @@ matchVerify(
 					if (__UseQualityValues<TRazerSMode>::VALUE)
 						// B. Count mismatches and mismatch qualities
 						score -= getQualityValue(*g);
-					else if (TYPECMP<TScoreMode, RazerSScore>::VALUE)
+					else if (IsSameType<TScoreMode, RazerSScore>::VALUE)
 						// C. Count mismatches and alignment score
 						score -= mismatchDelta;
 					else
@@ -1416,7 +1416,7 @@ matchVerify(
 		if (score > maxScore)
 		{
 			maxScore = score;
-			if (TYPECMP<TScoreMode, RazerSErrors>::VALUE)
+			if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 				verifier.q.errors = -score;
 			else
 				verifier.q.errors = errors;
@@ -1487,7 +1487,7 @@ matchVerify(
 #endif
 
     unsigned ndlLength = sequenceLength(readId, readSet);
-	int maxScore = InfimumValue<int>::VALUE;
+	int maxScore = MinValue<int>::VALUE;
 	int minScore = -(int)(ndlLength * verifier.options->errorRate);
 	TPosition maxPos = 0;
 	TPosition lastPos = length(inf);
@@ -1538,11 +1538,11 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
-		// if (getScore(myersPattern) >= maxScore)
-		if (getScore(state) >= maxScore)
+		// if (_getMatchScore(myersPattern) >= maxScore)
+		if (_getMatchScore(state) >= maxScore)
 		{
-			maxScore = getScore(state);
-			// maxScore = getScore(myersPattern);
+			maxScore = _getMatchScore(state);
+			// maxScore = _getMatchScore(myersPattern);
 			maxPos = pos;
 		}
 		lastPos = pos;
@@ -1624,7 +1624,7 @@ matchVerify(
 	unsigned maxErrors = (unsigned)(verifier.options->prefixSeedLength * verifier.options->errorRate);
 	unsigned minErrors = 0;
 	unsigned minQualSum = verifier.options->absMaxQualSumErrors + 1;
-	unsigned qualSumThresh = (verifier.oneMatchPerBucket)? SupremumValue<unsigned>::VALUE: verifier.options->absMaxQualSumErrors;
+	unsigned qualSumThresh = (verifier.oneMatchPerBucket)? MaxValue<unsigned>::VALUE: verifier.options->absMaxQualSumErrors;
 	unsigned bestHitLength = 0;
 
 	for (; git < gitEnd; ++git)
@@ -1739,7 +1739,7 @@ void _mapSingleReadsToContig(
 		TRazerSMode,
 		TSwiftPattern,
 		TCounts >											TVerifier;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	
 	// iterate all genomic sequences
 	if (options._debugLevel >= 1)
@@ -1750,7 +1750,7 @@ void _mapSingleReadsToContig(
 	}
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
-	if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+	if (orientation == 'R')	reverseComplement(contigSeq);
 
 	TReadSet		&readSet = host(host(swiftPattern));
 	TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
@@ -1770,7 +1770,7 @@ void _mapSingleReadsToContig(
 		++options.countFiltration;
 	}
 	if (!unlockAndFreeContig(store, contigId))							// if the contig is still used
-		if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+		if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
 }
 
 
@@ -1794,8 +1794,8 @@ int _mapSingleReads(
 	TReadIndex											& readIndex)
 {
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
-	typedef typename IF<
-				TYPECMP<TGapMode,RazerSGapped>::VALUE,
+	typedef typename If<
+				IsSameType<TGapMode,RazerSGapped>::VALUE,
 				SwiftSemiGlobal,
 				SwiftSemiGlobalHamming>::Type			TSwiftSpec;
 	typedef Pattern<TReadIndex, Swift<TSwiftSpec> >		TSwiftPattern;	// filter
@@ -1881,9 +1881,9 @@ int _mapSingleReads(
 	typedef FragmentStore<TFSSpec, TFSConfig>			TFragmentStore;
 	typedef typename TFragmentStore::TReadSeqStore		TReadSeqStore;
 #ifndef RAZERS_OPENADDRESSING
-	typedef Index<TReadSeqStore, Index_QGram<TShape> >	TIndex;			// q-gram index
+	typedef Index<TReadSeqStore, IndexQGram<TShape> >	TIndex;			// q-gram index
 #else
-	typedef Index<TReadSeqStore, Index_QGram<TShape, OpenAddressing> >	TIndex;
+	typedef Index<TReadSeqStore, IndexQGram<TShape, OpenAddressing> >	TIndex;
 #endif
 	
 	// configure q-gram index
@@ -1921,7 +1921,7 @@ int _mapSingleReads(
 	typedef typename Value<TReadSeqStore>::Type				TRead;
 	typedef typename Infix<TRead>::Type						TReadInfix;
 	typedef StringSet<TReadInfix>							TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape> >			TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape> >			TIndex;			// q-gram index
 
 	TReadSet readSet;
 	unsigned readCount = length(store.readSeqStore);

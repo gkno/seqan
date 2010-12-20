@@ -30,7 +30,7 @@
 SEQAN_DEFINE_TEST(test_random_normal_constructors)
 {
     using namespace seqan;
-    PDF<Normal> pdf(1, 1);
+    Pdf<Normal> pdf(1, 1);
 }
 
 SEQAN_DEFINE_TEST(test_random_normal_pick)
@@ -39,8 +39,8 @@ SEQAN_DEFINE_TEST(test_random_normal_pick)
     
     // mean = 1.0, stddev = 1.0
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<Normal> pdf(1, 1);
+        Rng<MersenneTwister> mt(42);
+        Pdf<Normal> pdf(1, 1);
         
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -49,8 +49,8 @@ SEQAN_DEFINE_TEST(test_random_normal_pick)
     }
     // mean = -3.4, stddev = 0.3
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<Normal> pdf(-3.4, 0.3);
+        Rng<MersenneTwister> mt(42);
+        Pdf<Normal> pdf(-3.4, 0.3);
         
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -59,8 +59,8 @@ SEQAN_DEFINE_TEST(test_random_normal_pick)
     }
     // mean = 4, stddev = 0.1
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<Normal> pdf(4, 0.1);
+        Rng<MersenneTwister> mt(42);
+        Pdf<Normal> pdf(4, 0.1);
         
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -72,7 +72,7 @@ SEQAN_DEFINE_TEST(test_random_normal_pick)
 SEQAN_DEFINE_TEST(test_random_geometric_fair_coin_constructors)
 {
     using namespace seqan;
-    PDF<GeometricFairCoin> pdf;
+    Pdf<GeometricFairCoin> pdf;
 }
 
 SEQAN_DEFINE_TEST(test_random_geometric_fair_coin_pick)
@@ -80,8 +80,8 @@ SEQAN_DEFINE_TEST(test_random_geometric_fair_coin_pick)
     using namespace seqan;
 
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<GeometricFairCoin> pdf;
+        Rng<MersenneTwister> mt(42);
+        Pdf<GeometricFairCoin> pdf;
         
         double sum = 0;
         for (unsigned i = 0; i < 100000; ++i)
@@ -95,17 +95,17 @@ SEQAN_DEFINE_TEST(test_random_lognormal_constructors)
     using namespace seqan;
 
     {
-        PDF<LogNormal> pdf(1, 1);
+        Pdf<LogNormal> pdf(1, 1);
         SEQAN_ASSERT_EQ(pdf._normalDist._mu, 1);
         SEQAN_ASSERT_EQ(pdf._normalDist._sigma, 1);
     }
     {
-        PDF<LogNormal> pdf(1, 1, MuSigma());
+        Pdf<LogNormal> pdf(1, 1, MuSigma());
         SEQAN_ASSERT_EQ(pdf._normalDist._mu, 1);
         SEQAN_ASSERT_EQ(pdf._normalDist._sigma, 1);
     }
     {
-        PDF<LogNormal> pdf(1, 1, MeanStdDev());
+        Pdf<LogNormal> pdf(1, 1, MeanStdDev());
         SEQAN_ASSERT_NEQ(pdf._normalDist._mu, 1);
         SEQAN_ASSERT_NEQ(pdf._normalDist._sigma, 1);
     }
@@ -117,8 +117,8 @@ SEQAN_DEFINE_TEST(test_random_lognormal_pick)
 
     // mean = 1.0, stddev = 0.2
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<LogNormal> pdf(1, 0.2, MeanStdDev());
+        Rng<MersenneTwister> mt(42);
+        Pdf<LogNormal> pdf(1, 0.2, MeanStdDev());
         
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -127,8 +127,8 @@ SEQAN_DEFINE_TEST(test_random_lognormal_pick)
     }
     // mean = 0.4, stddev = 0.1
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<LogNormal> pdf(0.4, 0.1, MeanStdDev());
+        Rng<MersenneTwister> mt(42);
+        Pdf<LogNormal> pdf(0.4, 0.1, MeanStdDev());
         
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -137,8 +137,8 @@ SEQAN_DEFINE_TEST(test_random_lognormal_pick)
     }
     // mean = 4, stddev = 0.1
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<LogNormal> pdf(4, 0.1, MeanStdDev());
+        Rng<MersenneTwister> mt(42);
+        Pdf<LogNormal> pdf(4, 0.1, MeanStdDev());
 
         double sum = 0;
         for (unsigned i = 0; i < 10000; ++i)
@@ -151,15 +151,15 @@ SEQAN_DEFINE_TEST(test_random_uniform_int_constructors)
 {
     using namespace seqan;
 
-    PDF<Uniform<int> > pdf(-10, 10);
+    Pdf<Uniform<int> > pdf(-10, 10);
 }
 
 SEQAN_DEFINE_TEST(test_random_uniform_int_pick)
 {
     using namespace seqan;
 
-    RNG<MersenneTwister> mt(42);
-    PDF<Uniform<int> > pdf(-10, 10);
+    Rng<MersenneTwister> mt(42);
+    Pdf<Uniform<int> > pdf(-10, 10);
 
     unsigned gt = 0;  // Greater than 0.
 
@@ -182,7 +182,7 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_constructors)
 {
     using namespace seqan;
 
-    PDF<Uniform<int> > pdf(0, 1);
+    Pdf<Uniform<int> > pdf(0, 1);
 }
 
 SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
@@ -191,8 +191,8 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
 
     // Important case: In [0, 1]
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<Uniform<double> > pdf(0, 1);
+        Rng<MersenneTwister> mt(42);
+        Pdf<Uniform<double> > pdf(0, 1);
 
         unsigned gt = 0;  // Greater than 0.5
 
@@ -212,8 +212,8 @@ SEQAN_DEFINE_TEST(test_random_uniform_double_pick)
     }
     // Try something else...: In [-20, 30]
     {
-        RNG<MersenneTwister> mt(42);
-        PDF<Uniform<double> > pdf(-20, 30);
+        Rng<MersenneTwister> mt(42);
+        Pdf<Uniform<double> > pdf(-20, 30);
         
         unsigned gt = 0;  // Greater than 0.5
         

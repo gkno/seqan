@@ -383,10 +383,10 @@ struct Cargo< Index<TMPReadSet, TShape> > {
 //////////////////////////////////////////////////////////////////////////////
 // Repeat masker
 template <typename TShape>
-inline bool _qgramDisableBuckets(Index<TMPReadSet, Index_QGram<TShape> > &index) 
+inline bool _qgramDisableBuckets(Index<TMPReadSet, IndexQGram<TShape> > &index) 
 {
-	typedef Index<TReadSet, Index_QGram<TShape>	>		TReadIndex;
-	typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
+	typedef Index<TReadSet, IndexQGram<TShape>	>		TReadIndex;
+	typedef typename Fibre<TReadIndex, QGramDir>::Type	TDir;
 	typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
 	typedef typename Value<TDir>::Type					TSize;
 	
@@ -470,11 +470,11 @@ bool loadReads(
 		
 		assignSeq(seq[0], leftMates[i], formatL);					// read left Read sequence
 		assignSeq(seq[1], rightMates[i], formatR);					// read right Read sequence
-		reverseComplementInPlace(seq[1]);
+		reverseComplement(seq[1]);
 
 		assignQual(qual[0], leftMates[i], formatL);					// read left ascii quality values  
 		assignQual(qual[1], rightMates[i], formatR);				// read right ascii quality values  
-		reverseInPlace(qual[1]);
+		reverse(qual[1]);
 		
 		if (countN)
 		{
@@ -554,7 +554,7 @@ void compactPairMatches(TMatches &matches, TCounts & /*cnts*/, RazerSOptions<TSp
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
+	int scoreDistCutOff = MinValue<int>::VALUE;
 
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -632,10 +632,10 @@ void mapMatePairReads(
 	char orientation,				// q-gram index of reads
 	RazerSOptions<TSpec> &options)
 {
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
-	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
+	typedef typename MakeSigned_<TGPos>::Type				TSignedGPos;
 	typedef typename Value<TMatches>::Type					TMatch;
 	typedef typename Infix<TGenome>::Type					TGenomeInf;
 
@@ -756,8 +756,8 @@ void mapMatePairReads(
 				break;
 		}
 
-		int	bestLeftErrors = SupremumValue<int>::VALUE;
-		int bestLibSizeError = SupremumValue<int>::VALUE;
+		int	bestLeftErrors = MaxValue<int>::VALUE;
+		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
 		TDequeueIterator it;
@@ -829,7 +829,7 @@ void mapMatePairReads(
 			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
 		
 		// verify right mate, if left mate matches
-		if (bestLeftErrors != SupremumValue<int>::VALUE)
+		if (bestLeftErrors != MaxValue<int>::VALUE)
 		{
 			if (matchVerify(
 					mR, infix(swiftFinderR),
@@ -933,7 +933,7 @@ int mapMatePairReads(
 	typedef typename Value<TReadSet_ const>::Type		TRead;
 	typedef StringSet<TRead, Dependent<> >				TReadSet;
 #endif
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -1043,7 +1043,7 @@ int mapMatePairReads(
 
 			if (options.reverse)
 			{
-				reverseComplementInPlace(genome);
+				reverseComplement(genome);
 				mapMatePairReads(matches, genome, gseqNo, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;

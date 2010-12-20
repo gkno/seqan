@@ -32,7 +32,7 @@ SEQAN_DEFINE_TEST(test_random_shuffle)
 {
     using namespace seqan;
 
-    RNG<MersenneTwister> mt(0);
+    Rng<MersenneTwister> mt(0);
     CharString container = "Hello!";
     CharString const before = container;
     

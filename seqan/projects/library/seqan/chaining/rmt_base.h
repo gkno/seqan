@@ -66,7 +66,7 @@ namespace seqan{
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct Cargo< SkipList< TObject, TModus, RT< MaxTree< TSpec > >, TStructuring > >
 	{
-		typedef _Empty Type;
+		typedef EmptyCargo_ Type;
 	};
 
 	
@@ -215,7 +215,7 @@ namespace seqan{
 				--temp;
 				while( _pointsTo( temp ) != _pointsTo( end( *list ) ) ){
 					std::cout.width(3);
-					if( key( *temp, dim ) == infimumValue< typename Key< TObject >::Type >( ) )
+					if( key( *temp, dim ) == minValue< typename Key< TObject >::Type >( ) )
 						std::cout << std::left << "L";
 					else
 						std::cout << std::left << key( *temp, dim );
@@ -234,7 +234,7 @@ namespace seqan{
 				if( _getHeight( *temp ) >= layer ){
 					if( _getRight( *( &_getUp( *temp ) + layer - 1) ) ){
 						std::stringstream s;
-						if( priority( &_getUp( *temp ) + layer - 1 ) == infimumValue< typename Weight< TObject >::Type >() )
+						if( priority( &_getUp( *temp ) + layer - 1 ) == minValue< typename Weight< TObject >::Type >() )
 							s << std::left << "L";
 						else
 							s << priority( &_getUp( *temp ) + layer - 1 );
@@ -249,7 +249,7 @@ namespace seqan{
 				else if( temp == _getBaseStore( *list ) )
 				{
 					std::stringstream s;
-					if( priority( &_getUp( *temp ) + layer - 1 ) == infimumValue< typename Weight< TObject >::Type >() )
+					if( priority( &_getUp( *temp ) + layer - 1 ) == minValue< typename Weight< TObject >::Type >() )
 						s << std::left << "L";
 					else
 						s << priority( &_getUp( *temp ) + layer - 1 );
@@ -283,7 +283,7 @@ namespace seqan{
 		temp = _getBaseStore( list );
 		for( typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type i = 0; i < length( list ) + 1; ++i ){
 			std::cout.width(3);
-			if( priority( temp ) == infimumValue< typename Weight< TObject >::Type >() )
+			if( priority( temp ) == minValue< typename Weight< TObject >::Type >() )
 				std::cout << std::left << "L";
 			else
 				std::cout << priority( temp );

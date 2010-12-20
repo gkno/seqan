@@ -54,18 +54,18 @@ _readPhylipMatrix(TFile& file,
 	else c = _streamGet(file);
 	while (!_streamEOF(file)) {
 		if (_streamEOF(file)) break;
-		_parse_skipWhitespace(file, c);
-		TSize nseq = _parse_readNumber(file, c);
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		TSize nseq = _parseReadNumber(file, c);
+		_parseSkipWhitespace(file, c);
 		resize(matrix, nseq * nseq);
 		resize(names, nseq);
 		TMatIter it = begin(matrix, Standard());
 		for(TSize row = 0; row<nseq; ++row) {
-			_parse_readIdentifier(file, names[row], c);
-			_parse_skipWhitespace(file, c);
+			_parseReadIdentifier(file, names[row], c);
+			_parseSkipWhitespace(file, c);
 			for(TSize col = 0; col<nseq; ++col, ++it) {
-				*it = _parse_readDouble(file, c);
-				_parse_skipWhitespace(file, c);
+				*it = _parseReadDouble(file, c);
+				_parseSkipWhitespace(file, c);
 			}
 		}
 	}

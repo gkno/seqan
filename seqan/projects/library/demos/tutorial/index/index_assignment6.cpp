@@ -11,14 +11,14 @@ template <typename TStringSet, typename TIndexSpec>
 void qgramCounting(TStringSet &set, TIndexSpec)
 {
 	typedef Index<TStringSet, TIndexSpec> TIndex;
-	typedef typename Fibre<TIndex, QGram_Counts>::Type TCounts;
-	typedef typename Fibre<TIndex, QGram_CountsDir>::Type TCountsDir;
+	typedef typename Fibre<TIndex, QGramCounts>::Type TCounts;
+	typedef typename Fibre<TIndex, QGramCountsDir>::Type TCountsDir;
 	typedef typename Value<TCountsDir>::Type TDirValue;
 	typedef typename Iterator<TCounts, Standard>::Type TIterCounts;
 	typedef typename Iterator<TCountsDir, Standard>::Type TIterCountsDir;
 
 	TIndex index(set);
-	indexRequire(index, QGram_Counts());
+	indexRequire(index, QGramCounts());
 
 	// initialize distance matrix
 	int seqNum = countSequences(index);
@@ -59,7 +59,7 @@ void qgramCounting(TStringSet &set, TIndexSpec)
 int main ()
 {
 	//  for the sake of reproducibility
-	RNG<MersenneTwister> rng;
+	Rng<MersenneTwister> rng;
 
 	// create StringSet of 3 random sequences
 	StringSet<DnaString> stringSet;
@@ -74,8 +74,8 @@ int main ()
 		std::cout << ">Seq" << seqNo << std::endl << tmp << std::endl;
 	}
 
-	qgramCounting(stringSet, Index_QGram<UngappedShape<5> >());
-	qgramCounting(stringSet, Index_QGram<UngappedShape<5>, OpenAddressing>());
+	qgramCounting(stringSet, IndexQGram<UngappedShape<5> >());
+	qgramCounting(stringSet, IndexQGram<UngappedShape<5>, OpenAddressing>());
 	return 0;
 }
 

@@ -261,7 +261,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TInput, typename TSpec >
     struct Difference< Pipe<TInput, TSpec> > {
-		typedef typename _MakeSigned<typename Size<Pipe<TInput, TSpec> >::Type>::Type Type;
+		typedef typename MakeSigned_<typename Size<Pipe<TInput, TSpec> >::Type>::Type Type;
     };
 /*
     template < typename TInput, typename TSpec >
@@ -411,17 +411,17 @@ SEQAN_CHECKPOINT
     //////////////////////////////////////////////////////////////////////////////
     // pipe flow control
 
-	struct _ControlEof;			// end of stream
-	struct _ControlEos;			// end of sequence (for multiple sequences)
-	struct _ControlClear;		// clear previous pool
-	struct _ControlBeginRead;	// begin read process
-	struct _ControlEndRead;		// end read process
+	struct ControlEof_;			// end of stream
+	struct ControlEos_;			// end of sequence (for multiple sequences)
+	struct ControlClear_;		// clear previous pool
+	struct ControlBeginRead_;	// begin read process
+	struct ControlEndRead_;		// end read process
 
-	typedef Tag<_ControlEof>		ControlEof;
-	typedef Tag<_ControlEos>		ControlEos;
-	typedef Tag<_ControlClear>		ControlClear;
-	typedef Tag<_ControlBeginRead>	ControlBeginRead;
-	typedef Tag<_ControlEndRead>	ControlEndRead;
+	typedef Tag<ControlEof_>		ControlEof;
+	typedef Tag<ControlEos_>		ControlEos;
+	typedef Tag<ControlClear_>		ControlClear;
+	typedef Tag<ControlBeginRead_>	ControlBeginRead;
+	typedef Tag<ControlEndRead_>	ControlEndRead;
 
     template < typename TInput, typename TSpec, typename TCommand >
 	inline bool control(Pipe<TInput, TSpec> &me, TCommand const &command) {
@@ -661,9 +661,9 @@ SEQAN_CHECKPOINT
 	// for generating pairs (seqNo, seqOffs)
 
 	template <typename TPair, typename TLimits>
-	struct _PairIncrementer {
+	struct PairIncrementer_ {
 		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
-		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+		typename RemoveConst_<typename Value<TLimits>::Type>::Type	old;
 		typename Value<TPair, 2>::Type								localEnd;
 
 		TPair pos;
@@ -692,7 +692,7 @@ SEQAN_CHECKPOINT
 	};
 
 	template <typename TPair, typename TLimits>
-	void setHost(_PairIncrementer<TPair, TLimits> &me, TLimits const &limits) {
+	void setHost(PairIncrementer_<TPair, TLimits> &me, TLimits const &limits) {
 		me.it = begin(limits);
 		me.itEnd = end(limits);
 		me.old = 0;
@@ -708,12 +708,12 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	template <typename TPair, typename TLimits>
-	TPair const & value(_PairIncrementer<TPair, TLimits> const &me) {
+	TPair const & value(PairIncrementer_<TPair, TLimits> const &me) {
 		return me.pos;
 	}
 
 	template <typename TPair, typename TLimits>
-	TPair & value(_PairIncrementer<TPair, TLimits> &me) {
+	TPair & value(PairIncrementer_<TPair, TLimits> &me) {
 		return me.pos;
 	}
 
@@ -725,15 +725,15 @@ SEQAN_CHECKPOINT
 	// for generating pairs (seqNo, seqOffs)
 
 	template <typename TPair, typename TLimits, unsigned m = 0>
-	struct _PairDecrementer {
+	struct PairDecrementer_ {
 		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
-		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+		typename RemoveConst_<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;
 		unsigned	residue;
 
-		_PairDecrementer() {}
-		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+		PairDecrementer_() {}
+		PairDecrementer_(TLimits const &_limits) { setHost(*this, _limits); }
 
 		inline operator TPair () const {
 			return pos;
@@ -764,7 +764,7 @@ SEQAN_CHECKPOINT
 	};
 
 	template <typename TPair, typename TLimits, unsigned m, typename TLimits2>
-	void setHost(_PairDecrementer<TPair, TLimits, m> &me, TLimits2 const &limits) {
+	void setHost(PairDecrementer_<TPair, TLimits, m> &me, TLimits2 const &limits) {
 		me.it = begin(limits);
 		me.itEnd = end(limits);
 		me.old = 0;
@@ -780,14 +780,14 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	template <typename TPair, typename TLimits>
-	struct _PairDecrementer<TPair, TLimits, 0> {
+	struct PairDecrementer_<TPair, TLimits, 0> {
 		typename Iterator<TLimits const, Standard>::Type			it, itEnd;
-		typename _RemoveConst<typename Value<TLimits>::Type>::Type	old;
+		typename RemoveConst_<typename Value<TLimits>::Type>::Type	old;
 
 		TPair		pos;
 
-		_PairDecrementer() {}
-		_PairDecrementer(TLimits const &_limits) { setHost(*this, _limits); }
+		PairDecrementer_() {}
+		PairDecrementer_(TLimits const &_limits) { setHost(*this, _limits); }
 
 		inline operator TPair () const {
 			return pos;
@@ -814,7 +814,7 @@ SEQAN_CHECKPOINT
 	};
 
 	template <typename TPair, typename TLimits, typename TLimits2>
-	void setHost(_PairDecrementer<TPair, TLimits, 0> &me, TLimits2 const &limits) {
+	void setHost(PairDecrementer_<TPair, TLimits, 0> &me, TLimits2 const &limits) {
 		me.it = begin(limits);
 		me.itEnd = end(limits);
 		me.old = 0;
@@ -829,12 +829,12 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 	template <typename TPair, typename TLimits, unsigned m>
-	TPair const & value(_PairDecrementer<TPair, TLimits, m> const &me) {
+	TPair const & value(PairDecrementer_<TPair, TLimits, m> const &me) {
 		return me.pos;
 	}
 
 	template <typename TPair, typename TLimits, unsigned m>
-	TPair & value(_PairDecrementer<TPair, TLimits, m> &me) {
+	TPair & value(PairDecrementer_<TPair, TLimits, m> &me) {
 		return me.pos;
 	}
 

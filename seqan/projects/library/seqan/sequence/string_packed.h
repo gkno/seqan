@@ -33,7 +33,7 @@ template <typename THostspec = Alloc<> >
 struct Packed;
 
 template <typename TPackedContainer>
-struct _PackedConsts;
+struct PackedConsts_;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -192,7 +192,7 @@ _setLength(
 SEQAN_CHECKPOINT
 	typedef String<TValue, Packed<THostspec> > TString;
 	me.data_length = new_length;
-	_setLength(host(me), _PackedConsts<TString>::toHostLength(new_length));
+	_setLength(host(me), PackedConsts_<TString>::toHostLength(new_length));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ struct Size<String<TValue, Packed<THostspec> > const>
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TPackedContainer>
-struct _PackedConsts
+struct PackedConsts_
 {
 	typedef typename Value<TPackedContainer>::Type TValue;
 	typedef typename Host<TPackedContainer>::Type THost;
@@ -319,10 +319,10 @@ struct _PackedConsts
 //////////////////////////////////////////////////////////////////////////////
 // Temporary Copy
 //////////////////////////////////////////////////////////////////////////////
-//note: this works only, if the copy assignment is done without using _TempCopy
+//note: this works only, if the copy assignment is done without using TempCopy_
 
 template <typename TValue, typename THostspec>
-struct _TempCopy<String<TValue, Packed<THostspec> > >
+struct TempCopy_<String<TValue, Packed<THostspec> > >
 {
 	typedef String<TValue, Packed<THostspec> > Type;
 };
@@ -333,14 +333,14 @@ struct _TempCopy<String<TValue, Packed<THostspec> > >
 
 template <typename TTarget, typename TSource, typename TTag>
 inline void 
-_assign_copy_packed_string(TTarget & target,
+_assignCopyPackedString(TTarget & target,
 						   TSource & source,
 						   Tag<TTag> const tag)
 {
 	typedef typename Size<TTarget>::Type TSize2;
 
 	assign(host(target), host(source), tag);
-	TSize2 new_length_limit = length(host(target)) * _PackedConsts<TTarget>::VALUES_PER_WORD;
+	TSize2 new_length_limit = length(host(target)) * PackedConsts_<TTarget>::VALUES_PER_WORD;
 	TSize2 new_length = length(source);
 	if (new_length > new_length_limit)
 	{
@@ -350,16 +350,16 @@ _assign_copy_packed_string(TTarget & target,
 }
 template <typename TTarget, typename TSource, typename TSize, typename TTag>
 inline void 
-_assign_copy_packed_string(TTarget & target,
+_assignCopyPackedString(TTarget & target,
 						   TSource & source,
 						   TSize limit,
 						   Tag<TTag> const tag)
 {
 	typedef typename Size<TTarget>::Type TSize2;
 
-	TSize2 host_limit = _PackedConsts<TTarget>::toHostLength(limit);
+	TSize2 host_limit = PackedConsts_<TTarget>::toHostLength(limit);
 	assign(host(target), host(source), host_limit, tag);
-	TSize2 new_length_limit = length(host(target)) * _PackedConsts<TTarget>::VALUES_PER_WORD;
+	TSize2 new_length_limit = length(host(target)) * PackedConsts_<TTarget>::VALUES_PER_WORD;
 	TSize2 new_length = length(source);
 	if (new_length > new_length_limit)
 	{
@@ -379,7 +379,7 @@ assign(String<TValue, Packed<THostspec> > & target,
 	   String<TValue, Packed<THostspec> > & source,
 	   Tag<TTag> const tag)
 {
-	_assign_copy_packed_string(target, source, tag);
+	_assignCopyPackedString(target, source, tag);
 }
 template <typename TValue, typename THostspec, typename TTag>
 inline void 
@@ -387,7 +387,7 @@ assign(String<TValue, Packed<THostspec> > & target,
 	   String<TValue, Packed<THostspec> > const & source,
 	   Tag<TTag> const tag)
 {
-	_assign_copy_packed_string(target, source, tag);
+	_assignCopyPackedString(target, source, tag);
 }
 
 template <typename TValue, typename THostspec, typename TSize, typename TTag>
@@ -396,7 +396,7 @@ void assign(String<TValue, Packed<THostspec> > & target,
 			TSize limit,
 			Tag<TTag> const tag)
 {
-	_assign_copy_packed_string(target, source, limit, tag);
+	_assignCopyPackedString(target, source, limit, tag);
 }
 template <typename TValue, typename THostspec, typename TSize, typename TTag>
 void assign(String<TValue, Packed<THostspec> > & target,
@@ -404,7 +404,7 @@ void assign(String<TValue, Packed<THostspec> > & target,
 			TSize limit,
 			Tag<TTag> const tag)
 {
-	_assign_copy_packed_string(target, source, limit, tag);
+	_assignCopyPackedString(target, source, limit, tag);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -518,7 +518,7 @@ capacity(String<TValue, Packed<THostspec> > const & me)
 SEQAN_CHECKPOINT
 	typedef typename Size<String<TValue, Packed<THostspec> > const>::Type TSize;
 	TSize len = capacity(host(me));
-	len *= _PackedConsts<String<TValue, Packed<THostspec> > >::VALUES_PER_WORD;
+	len *= PackedConsts_<String<TValue, Packed<THostspec> > >::VALUES_PER_WORD;
 	return len;
 }
 
@@ -541,7 +541,7 @@ SEQAN_CHECKPOINT
 
 //implementation for all expand tags other than "limit"
 template <typename TExpand>
-struct _ClearSpace_String_Packed_
+struct ClearSpaceStringPacked_
 {
 	template <typename T>
 	static inline typename Size<T>::Type
@@ -551,11 +551,11 @@ struct _ClearSpace_String_Packed_
 	{
 SEQAN_CHECKPOINT
 		typedef typename Size<T>::Type TSize;
-		TSize wanted_host_length = _PackedConsts<T>::toHostLength(size);
+		TSize wanted_host_length = PackedConsts_<T>::toHostLength(size);
 		TSize new_host_length = resize(host(seq), wanted_host_length, TExpand());
 		if (new_host_length < wanted_host_length)
 		{
-			size = new_host_length * _PackedConsts<T>::VALUES_PER_WORD;
+			size = new_host_length * PackedConsts_<T>::VALUES_PER_WORD;
 		}
 		_setLength(seq, size);
 		return size;
@@ -585,7 +585,7 @@ SEQAN_CHECKPOINT
 		typename Size<T>::Type end)
 	{
 SEQAN_CHECKPOINT
-		return _clearSpace_(seq, size, start, end, supremumValue<typename Size<T>::Type >());
+		return _clearSpace_(seq, size, start, end, maxValue<typename Size<T>::Type >());
 	}
 
 	template <typename T>
@@ -614,13 +614,13 @@ SEQAN_CHECKPOINT
 			wanted_new_length = limit;
 		}
 
-		TSize wanted_host_length = _PackedConsts<T>::toHostLength(wanted_new_length);
+		TSize wanted_host_length = PackedConsts_<T>::toHostLength(wanted_new_length);
 		TSize new_host_length = resize(host(seq), wanted_host_length, TExpand());
 
 		TSize new_length;
 		if (new_host_length < wanted_host_length)
 		{
-			new_length = new_host_length * _PackedConsts<T>::VALUES_PER_WORD;
+			new_length = new_host_length * PackedConsts_<T>::VALUES_PER_WORD;
 			if (new_length <= start + size)
 			{
 				goto FINISH;
@@ -693,7 +693,7 @@ _clearSpace(String<TValue, Packed<THostspec> > & me,
 		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Packed_<Tag<TExpand> const>::_clearSpace_(me, size);
+	return ClearSpaceStringPacked_<Tag<TExpand> const>::_clearSpace_(me, size);
 }
 
 template<typename TValue, typename THostspec, typename TExpand>
@@ -704,7 +704,7 @@ _clearSpace(String<TValue, Packed<THostspec> > & me,
 		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Packed_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
+	return ClearSpaceStringPacked_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
 }
 
 template<typename TValue, typename THostspec, typename TPosition, typename TExpand>
@@ -716,7 +716,7 @@ _clearSpace(String<TValue, Packed<THostspec> > & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Packed_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
+	return ClearSpaceStringPacked_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
 }
 
 template<typename TValue, typename THostspec, typename TPosition, typename TExpand>
@@ -729,7 +729,7 @@ _clearSpace(String<TValue, Packed<THostspec> > & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Packed_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
+	return ClearSpaceStringPacked_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
 }
 
 
@@ -749,8 +749,8 @@ SEQAN_CHECKPOINT
 
 	typedef String<TValue, Packed<TSpec> > TString;
 	typedef typename Size<TString>::Type TSize;
-	TSize ret_value = reserve(host(seq), _PackedConsts<TString>::toHostLength(new_capacity), tag);
-	return ret_value * _PackedConsts<TString>::VALUES_PER_WORD;
+	TSize ret_value = reserve(host(seq), PackedConsts_<TString>::toHostLength(new_capacity), tag);
+	return ret_value * PackedConsts_<TString>::VALUES_PER_WORD;
 }
 
 
@@ -803,7 +803,7 @@ public:
 	typedef typename HostIterator<Iter>::Type THostIterator;
 	typedef typename Position<TContainer>::Type TPosition;
 
-	typename _Pointer<TContainer>::Type data_container;
+	typename Pointer_<TContainer>::Type data_container;
 	THostIterator data_iterator;
 	unsigned char data_bitpos;
 
@@ -814,14 +814,14 @@ public:
 	{
 SEQAN_CHECKPOINT
 	}
-	Iter(typename _Parameter<TContainer>::Type container_):
+	Iter(typename Parameter_<TContainer>::Type container_):
 		data_container(_toPointer(container_)),
 		data_iterator(begin(host(container_))),
 		data_bitpos(0)
 	{
 SEQAN_CHECKPOINT
 	}
-	Iter(typename _Parameter<TContainer>::Type container_, TPosition pos_):
+	Iter(typename Parameter_<TContainer>::Type container_, TPosition pos_):
 		data_container(_toPointer(container_))
 	{
 SEQAN_CHECKPOINT
@@ -854,14 +854,14 @@ SEQAN_CHECKPOINT
 };
 
 template <typename TContainer, typename THostspec>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, Packed<THostspec> > & me)
 {
 SEQAN_CHECKPOINT
 	return _toParameter<TContainer>(me.data_container);
 }
 template <typename TContainer, typename THostspec>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, Packed<THostspec> > const & me)
 {
 SEQAN_CHECKPOINT
@@ -925,7 +925,7 @@ position(Iter<TContainer, Packed<THostspec> > const & me)
 SEQAN_CHECKPOINT
 	typedef typename Host<TContainer>::Type THost;
 	THost const & host_ = host(container(me));
-	return (hostIterator(me) - begin(host_)) * _PackedConsts<TContainer>::VALUES_PER_WORD + _bitpos(me) / _PackedConsts<TContainer>::BITS_PER_VALUE;
+	return (hostIterator(me) - begin(host_)) * PackedConsts_<TContainer>::VALUES_PER_WORD + _bitpos(me) / PackedConsts_<TContainer>::BITS_PER_VALUE;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -938,8 +938,8 @@ setPosition(Iter<TContainer, Packed<THostspec> > & me,
 			TPosition pos_)
 {
 SEQAN_CHECKPOINT
-	hostIterator(me) = begin(host(container(me))) + pos_ / _PackedConsts<TContainer>::VALUES_PER_WORD;
-	_bitpos(me) = (pos_ % _PackedConsts<TContainer>::VALUES_PER_WORD) * _PackedConsts<TContainer>::BITS_PER_VALUE;
+	hostIterator(me) = begin(host(container(me))) + pos_ / PackedConsts_<TContainer>::VALUES_PER_WORD;
+	_bitpos(me) = (pos_ % PackedConsts_<TContainer>::VALUES_PER_WORD) * PackedConsts_<TContainer>::BITS_PER_VALUE;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -970,14 +970,14 @@ inline typename GetValue<Iter<TContainer, Packed<THostspec> > >::Type
 getValue(Iter<TContainer, Packed<THostspec> > & me)
 {
 SEQAN_CHECKPOINT
-	return (value(hostIterator(me)) >> _bitpos(me)) & _PackedConsts<TContainer>::VALUE_MASK;
+	return (value(hostIterator(me)) >> _bitpos(me)) & PackedConsts_<TContainer>::VALUE_MASK;
 }
 template <typename TContainer, typename THostspec>
 inline typename GetValue<Iter<TContainer, Packed<THostspec> > const>::Type 
 getValue(Iter<TContainer, Packed<THostspec> > const & me)
 {
 SEQAN_CHECKPOINT
-	return (value(hostIterator(me)) >> _bitpos(me)) & _PackedConsts<TContainer>::VALUE_MASK;
+	return (value(hostIterator(me)) >> _bitpos(me)) & PackedConsts_<TContainer>::VALUE_MASK;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -986,13 +986,13 @@ SEQAN_CHECKPOINT
 
 template <typename TIter, typename TValue>
 inline void
-_assignValue_packed_string_iterator(TIter & me,
+_assignValuePackedStringIterator(TIter & me,
 									TValue & _value)
 {
 	typedef typename Container<TIter>::Type TContainer;
 	typedef typename Host<TContainer>::Type THost;
 	typedef typename Value<THost>::Type THostValue;
-	THostValue mask_ = _PackedConsts<TContainer>::VALUE_MASK << _bitpos(me);
+	THostValue mask_ = PackedConsts_<TContainer>::VALUE_MASK << _bitpos(me);
 	THostValue val_;
 	assign(val_, _value);
 	val_ <<= _bitpos(me);
@@ -1009,7 +1009,7 @@ assignValue(Iter<TContainer, Packed<THostspec> > & me,
 SEQAN_CHECKPOINT
 	typedef Iter<TContainer, Packed<THostspec> > TIterator;
 	typename Value<TIterator>::Type _temp_value = _value; //conversion
-	_assignValue_packed_string_iterator(me, _temp_value);
+	_assignValuePackedStringIterator(me, _temp_value);
 }
 template <typename TContainer, typename THostspec, typename TValue>
 inline void
@@ -1019,7 +1019,7 @@ assignValue(Iter<TContainer, Packed<THostspec> > const & me,
 SEQAN_CHECKPOINT
 	typedef Iter<TContainer, Packed<THostspec> > const TIterator;
 	typename Value<TIterator>::Type _temp_value = _value; //conversion
-	_assignValue_packed_string_iterator(me, _temp_value);
+	_assignValuePackedStringIterator(me, _temp_value);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1166,8 +1166,8 @@ inline void
 goNext(Iter<TContainer, Packed<THostspec> > & me)
 {
 SEQAN_CHECKPOINT
-	int new_bitpos = _bitpos(me) + _PackedConsts<TContainer>::BITS_PER_VALUE;
-	if (new_bitpos <= _PackedConsts<TContainer>::MAX_BIT_POS)
+	int new_bitpos = _bitpos(me) + PackedConsts_<TContainer>::BITS_PER_VALUE;
+	if (new_bitpos <= PackedConsts_<TContainer>::MAX_BIT_POS)
 	{
 		_bitpos(me) = (unsigned char) new_bitpos;
 	}
@@ -1187,14 +1187,14 @@ inline void
 goPrevious(Iter<TContainer, Packed<THostspec> > & me)
 {
 SEQAN_CHECKPOINT
-	int new_bitpos = _bitpos(me) - _PackedConsts<TContainer>::BITS_PER_VALUE;
+	int new_bitpos = _bitpos(me) - PackedConsts_<TContainer>::BITS_PER_VALUE;
 	if (new_bitpos >= 0)
 	{
 		_bitpos(me) = (unsigned char) new_bitpos;
 	}
 	else
 	{
-		_bitpos(me) = _PackedConsts<TContainer>::MAX_BIT_POS;
+		_bitpos(me) = PackedConsts_<TContainer>::MAX_BIT_POS;
 		goPrevious(hostIterator(me));
 	}
 }

@@ -28,8 +28,8 @@ namespace SEQAN_NAMESPACE_MAIN
 // ESA finders
 
 	template < typename TText, typename TSpec >
-	struct DefaultFinder< Index<TText, Index_ESA<TSpec> > > {
-        typedef ESA_FIND_MLR Type;	// standard suffix array finder is mlr-heuristic
+	struct DefaultFinder< Index<TText, IndexEsa<TSpec> > > {
+        typedef EsaFindMlr Type;	// standard suffix array finder is mlr-heuristic
     };
 
 
@@ -1123,7 +1123,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TDiff_
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	_lowerBoundLCPE(
+	_lowerBoundLcpe(
 		TText &text,
 		TSA &sa,
 		SearchTreeIterator< TLCP, TSpec > treeIter,
@@ -1302,13 +1302,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	_lowerBoundLCPE(
+	_lowerBoundLcpe(
 		TText &text,
 		TSA &sa,
 		SearchTreeIterator< TLCP, TSpec > &treeIter,
 		TQuery &query)
 	{
-		return _lowerBoundLCPE(text, sa, treeIter, query, 0, 0);
+		return _lowerBoundLcpe(text, sa, treeIter, query, 0, 0);
 	}
 
 
@@ -1323,7 +1323,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TDiff_
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	_upperBoundLCPE(
+	_upperBoundLcpe(
 		TText &text,
 		TSA &sa,
 		SearchTreeIterator< TLCP, TSpec > treeIter,
@@ -1475,13 +1475,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	_upperBoundLCPE(
+	_upperBoundLcpe(
 		TText &text,
 		TSA &sa,
 		SearchTreeIterator< TLCP, TSpec > &treeIter,
 		TQuery &query)
 	{
-		return _upperBoundLCPE(text, sa, treeIter, query, 0, 0);
+		return _upperBoundLcpe(text, sa, treeIter, query, 0, 0);
 	}
 
 
@@ -1495,7 +1495,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Iterator<TSA, Standard>::Type >
-	_equalRangeLCPE(
+	_equalRangeLcpe(
 		TText &text,
 		TSA &sa,
 		SearchTreeIterator< TLCP, TSpec > treeIter,
@@ -1615,7 +1615,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			else
 			{	// range straddles mid, find each end and return
 				typename Infix<TSA>::Type leftRange(sa, first, mid);
-				TSAIter First2 = _lowerBoundLCPE(
+				TSAIter First2 = _lowerBoundLcpe(
 					text, leftRange, treeIter.leftChild(), query, lcpLower, lcp);
 
 				treeIter.right();
@@ -1625,7 +1625,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 
 				typename Infix<TSA>::Type rightRange(sa, mid, last);
-				TSAIter Last2 = _upperBoundLCPE(
+				TSAIter Last2 = _upperBoundLcpe(
 					text, rightRange, treeIter, query, lcp, lcpUpper);
 
 				return Pair<TSAIter> (First2, Last2);
@@ -1635,8 +1635,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		// range straddles mid, find each end and return
 		typename Infix<TSA>::Type midRange(sa, first, last);
 		return Pair<TSAIter> (
-			_lowerBoundLCPE(text, midRange, treeIter, query, lcpLower, lcpUpper),
-			_upperBoundLCPE(text, midRange, treeIter, query, lcpLower, lcpUpper)
+			_lowerBoundLcpe(text, midRange, treeIter, query, lcpLower, lcpUpper),
+			_upperBoundLcpe(text, midRange, treeIter, query, lcpLower, lcpUpper)
 		);
 	}
 
@@ -1647,13 +1647,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Iterator<TSA, Standard>::Type >
-	_equalRangeLCPE(
+	_equalRangeLcpe(
 		TText &text,
 		TSA &sa,
 		TLCP &lcp,
 		TQuery &query)
 	{
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCP, LeftCompleteTree>(lcp, (length(text)>1)?length(text)-1:0), query);
+		return _equalRangeLcpe(text, sa, SearchTreeIterator<TLCP, LeftCompleteTree>(lcp, (length(text)>1)?length(text)-1:0), query);
 	}
 
 
@@ -1687,13 +1687,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Position<TLCPE>::Type 
-	lowerBoundLCPE(
+	lowerBoundLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
+		return _lowerBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1703,13 +1703,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Position<TLCPE>::Type 
-	upperBoundLCPE(
+	upperBoundLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1719,14 +1719,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Position<TSA>::Type >
-	equalRangeLCPE(
+	equalRangeLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find range equivalent to query, using operator<
 		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
-			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
+			_equalRangeLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 		return Pair< typename Position<TSA>::Type >
 			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
 	}
@@ -1738,13 +1738,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	lowerBoundLCPEIterator(
+	lowerBoundLcpeIterator(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0);
+		return _lowerBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0);
 	}
 
 	template <
@@ -1754,13 +1754,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Iterator<TSA, Standard>::Type
-	upperBoundLCPEIterator(
+	upperBoundLcpeIterator(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1770,13 +1770,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Iterator<TSA, Standard>::Type >
-	equalRangeLCPEIterator(
+	equalRangeLcpeIterator(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery const &query)
 	{	// find range equivalent to query, using operator<
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
+		return _equalRangeLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -1789,13 +1789,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Position<TLCPE>::Type 
-	lowerBoundLCPE(
+	lowerBoundLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find first element not before query, using operator<
-		return _lowerBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
+		return _lowerBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1805,13 +1805,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline typename Position<TLCPE>::Type 
-	upperBoundLCPE(
+	upperBoundLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find first element that query is before, using operator<
-		return upperBoundLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
+		return upperBoundLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query, 0, 0) - begin(sa, Standard());
 	}
 
 	template <
@@ -1821,14 +1821,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Position<TSA>::Type >
-	equalRangeLCPE(
+	equalRangeLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find range equivalent to query, using operator<
 		Pair< typename Iterator<TSA, Standard>::Type > itPair = 
-			_equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
+			_equalRangeLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 		return Pair< typename Position<TSA>::Type >
 			(itPair.i1 - begin(sa, Standard()), itPair.i2 - begin(sa, Standard()));
 	}
@@ -1840,13 +1840,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TQuery
 	>
 	inline Pair< typename Iterator<TSA, Standard>::Type >
-	equalRangeLCPEIterator(
+	equalRangeLcpeIterator(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TQuery *query)
 	{	// find range equivalent to query, using operator<
-		return _equalRangeLCPE(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
+		return _equalRangeLcpe(text, sa, SearchTreeIterator<TLCPE const, LeftCompleteTree>(lcpe, (length(text)>1)?length(text)-1:0), query);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -1857,13 +1857,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TSA,
 		typename TLCPE,
 		typename TSubText >
-	inline Pair<typename Iterator<TSA const>::Type> equalRangeLCPE(
+	inline Pair<typename Iterator<TSA const>::Type> equalRangeLcpe(
 		TText const &text,
 		TSA const &sa,
 		TLCPE const &lcpe,
 		TSubText const &subtext)
 	{
-		return _equalRangeLCPE(
+		return _equalRangeLcpe(
 			begin(text), end(text),
 			begin(sa), end(sa),
             SearchTreeIterator<typename Iterator<TLCPE const>::Type, LeftCompleteTree>(begin(lcpe, (length(text)>1)?length(text)-1:0), (length(text)>1)?length(text)-1:0),
@@ -1879,10 +1879,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	_findFirstIndex(
 		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
 		TPattern const &pattern,
-		ESA_FIND_MLR const)
+		EsaFindMlr const)
 	{
 		Index<TText, TSpec> &index = haystack(finder);
-		indexRequire(index, ESA_SA());
+		indexRequire(index, EsaSA());
 		finder.range = equalRangeSAIterator(indexText(index), indexSA(index), pattern);
 	}
 
@@ -1891,12 +1891,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	_findFirstIndex(
 		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
 		TPattern const &pattern,
-		ESA_FIND_LCPE const)
+		EsaFindLcpe const)
 	{
 		Index<TText, TSpec> &index = haystack(finder);
-		indexRequire(index, ESA_SA());
-		indexRequire(index, ESA_LCPE());
-		finder.range = equalRangeLCPEIterator(indexText(index), indexSA(index), indexLCPE(index), pattern);
+		indexRequire(index, EsaSA());
+		indexRequire(index, EsaLcpe());
+		finder.range = equalRangeLcpeIterator(indexText(index), indexSA(index), indexLcpe(index), pattern);
 	}
 
 	template < typename TText, typename TSpec, typename TSpecFinder, typename TPattern >
@@ -1907,7 +1907,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		FinderSTree const)
 	{
         typedef Index<TText, TSpec>                             TIndex;
-		typedef typename Fibre<TIndex, Fibre_SA>::Type			TSA;
+		typedef typename Fibre<TIndex, FibreSA>::Type			TSA;
 		typedef typename Iterator<TSA const, Standard>::Type	TIterator;
         
 		TIndex &index = haystack(finder);

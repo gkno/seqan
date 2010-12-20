@@ -24,8 +24,8 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-struct _Seed_multi;
-typedef Tag<_Seed_multi> const ChainedSeed;
+struct SeedMulti_;
+typedef Tag<SeedMulti_> const ChainedSeed;
 
 /**
 ..Spec.ChainedSeed

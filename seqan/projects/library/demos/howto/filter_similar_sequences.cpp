@@ -17,7 +17,7 @@ int main (int argc, char const * argv[])
 
 	typedef FragmentStore<>::TReadSeqStore TReadSeqStore;
 	typedef GetValue<TReadSeqStore>::Type TReadSeq;
-	typedef Index<TReadSeqStore, Index_QGram<Shape<Dna, UngappedShape<11> >, OpenAddressing> > TIndex;
+	typedef Index<TReadSeqStore, IndexQGram<Shape<Dna, UngappedShape<11> >, OpenAddressing> > TIndex;
 	typedef Pattern<TIndex, Swift<SwiftSemiGlobal> > TPattern;
 	typedef Finder<TReadSeq, Swift<SwiftSemiGlobal> > TFinder;
 

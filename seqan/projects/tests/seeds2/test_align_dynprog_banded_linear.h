@@ -35,7 +35,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_resize_matrix)
 
     Matrix<int, 2> matrix;
 
-    _alignBanded_resizeMatrix(matrix, CharString("length   11"), CharString("length 8"), -3, 1, NeedlemanWunsch());
+    _alignBandedResizeMatrix(matrix, CharString("length   11"), CharString("length 8"), -3, 1, NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(12u, length(matrix, 0));
     SEQAN_ASSERT_EQ(7u, length(matrix, 1));
@@ -52,9 +52,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_free)
     setLength(matrix, 1, 5);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), NeedlemanWunsch());
+    _alignBandedInitGutter(matrix, Score<int, Simple>(1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), NeedlemanWunsch());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // Diagonal below the lower one.
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0));
@@ -86,9 +86,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_init_gutter_not_free)
 
     Score<int, Simple> const scoringScheme(1, -1, -2);
 
-    _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, true, true>(), NeedlemanWunsch());
+    _alignBandedInitGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, true, true>(), NeedlemanWunsch());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // Diagonal below the lower one.
     SEQAN_ASSERT_EQ(inf, value(matrix, 0, 0));
@@ -118,11 +118,11 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_fill_matrix)
     DnaString const sequence1 = "CCACCC";
     Score<int, Simple> const scoringScheme(1, -1, -1);
 
-    _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -1, 1, NeedlemanWunsch());
-    _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-    _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, NeedlemanWunsch());
+    _alignBandedResizeMatrix(matrix, sequence0, sequence1, -1, 1, NeedlemanWunsch());
+    _alignBandedInitGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+    _alignBandedFillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, NeedlemanWunsch());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // First, the gutters and border diagonals should not have been touched.
     //
@@ -191,9 +191,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -1);
         
-        _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -2, 1, NeedlemanWunsch());
-        _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-        _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, NeedlemanWunsch());
+        _alignBandedResizeMatrix(matrix, sequence0, sequence1, -2, 1, NeedlemanWunsch());
+        _alignBandedInitGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        _alignBandedFillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, NeedlemanWunsch());
 
         // // TODO(holtgrew): Debug output, remove when not needed any more.
         // {
@@ -203,7 +203,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         //         for (unsigned j = 0; j < i; ++j)
         //             std::cout << "\t";
         //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-        //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+        //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
         //                 std::cout << "\tinf";
         //             else
         //                 std::cout << "\t" << value(matrix, i, j);
@@ -225,7 +225,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_linear_traceback)
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        int score = _alignBandedTraceback(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
 
         // std::cout << alignment;
         SEQAN_ASSERT_EQ(score, 1);

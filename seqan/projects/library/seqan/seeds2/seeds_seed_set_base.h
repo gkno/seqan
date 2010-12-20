@@ -29,11 +29,11 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-struct _MinSeedSize;
-typedef Tag<_MinSeedSize> MinSeedSize;
+struct MinSeedSize_;
+typedef Tag<MinSeedSize_> MinSeedSize;
 
-struct _MinScore;
-typedef Tag<_MinScore> MinScore;
+struct MinScore_;
+typedef Tag<MinScore_> MinScore;
 
 // TODO(holtgrew): Put configs and mixins into their own header.
 // TODO(holtgrew): Add metafunctions for mixin classes?
@@ -59,7 +59,7 @@ struct _MinSeedSizeMixin
 {
     TSize _minSeedSizeThreshold;
 
-    _MinSeedSizeMixin() : _minSeedSizeThreshold(InfimumValue<TSize>::VALUE) {}
+    _MinSeedSizeMixin() : _minSeedSizeThreshold(MinValue<TSize>::VALUE) {}
 };
 
 template <typename TSeedSet, typename TSize>
@@ -91,10 +91,10 @@ struct DefaultSeedSetConfigLength
 };
 
 template <typename TScore>
-struct _MinScoreMixin
+struct MinScoreMixin_
 {
     TScore _minScoreThreshold;
-    _MinScoreMixin() : _minScoreThreshold(InfimumValue<TScore>::VALUE) {}
+    MinScoreMixin_() : _minScoreThreshold(MinValue<TScore>::VALUE) {}
 };
 
 template <typename TSeedSet, typename TScore>
@@ -105,7 +105,7 @@ void setMinScoreThreshold(TSeedSet & seedSet, TScore const & score)
 }
 
 template <typename TScore>
-TScore getMinScoreThreshold(_MinScoreMixin<TScore> const & mixin)
+TScore getMinScoreThreshold(MinScoreMixin_<TScore> const & mixin)
 {
     SEQAN_CHECKPOINT;
     return mixin._minScoreThreshold;
@@ -116,7 +116,7 @@ template <typename TSeed, typename TSeedSet>
 bool _qualityReached(TSeed const & seed, TSeedSet const & seedSet, MinScore const &)
 {
     SEQAN_CHECKPOINT;
-    return getScore(seed) >= getMinScoreThreshold(seedSet);
+    return _getMatchScore(seed) >= getMinScoreThreshold(seedSet);
 }
 
 
@@ -124,7 +124,7 @@ struct DefaultSeedSetConfigScore
 {
     typedef DefaultSeedConfigScore TSeedConfig;
     typedef MinScore TQualityThreshold;
-    typedef _MinScoreMixin<TSeedConfig::TScoreValue> TQualityThresholdMixin;
+    typedef MinScoreMixin_<TSeedConfig::TScoreValue> TQualityThresholdMixin;
 };
 
 
@@ -236,7 +236,7 @@ _write(TStream & stream,
        TQuerySequence & sequence0,
        TDatabaseSequence & sequence1,
        SeedSet<TSeedSpec, TSeedSetSpec, TSeedConfig> const & seedSet,
-       _Tikz const &)
+       Tikz_ const &)
 {
     typedef SeedSet<TSeedSpec, TSeedSetSpec, TSeedConfig> TSeedSet;
 
@@ -259,7 +259,7 @@ _write(TStream & stream,
     // Draw seeds.
     typedef typename Iterator<TSeedSet const, Standard>::Type TIterator;
     for (TIterator it = begin(seedSet); it != end(seedSet); ++it)
-        _write(stream, value(it), _Tikz());
+        _write(stream, value(it), Tikz_());
     stream << "\\end{tikzpicture}" << std::endl;
 }
 

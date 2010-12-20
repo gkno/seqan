@@ -280,7 +280,7 @@ _align_banded_nw_best_ends(TTrace& trace,
 		TTraceIter traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
 		TRowIter matIt = begin(mat, Standard()) + lo_diag;
 		TRowIter lenIt = begin(len, Standard()) + lo_diag;
-		hori_val = InfimumValue<TScoreValue>::VALUE;
+		hori_val = MinValue<TScoreValue>::VALUE;
 		hori_len = len1+len2+1;
 		for(TSize col = lo_diag; col<hi_diag; ++col, ++matIt, ++traceIt, ++lenIt) {
 			actualCol = col + diagL + actualRow;
@@ -291,12 +291,12 @@ _align_banded_nw_best_ends(TTrace& trace,
 				*matIt += score(const_cast<TScore&>(sc), ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
 				*traceIt = Diagonal;
 				++(*lenIt);
-				if ((verti_val = (col < diagonalWidth - 1) ? *(matIt+1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+				if ((verti_val = (col < diagonalWidth - 1) ? *(matIt+1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : MinValue<TScoreValue>::VALUE) > *matIt) {
 					*matIt = verti_val;
 					*traceIt = Vertical;
 					*lenIt = *(lenIt+1) + 1;
 				}						
-				if ((hori_val = (col > 0) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE) > *matIt) {
+				if ((hori_val = (col > 0) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : MinValue<TScoreValue>::VALUE) > *matIt) {
 					*matIt = hori_val;
 					*traceIt = Horizontal;
 					*lenIt = hori_len + 1;
@@ -344,8 +344,8 @@ _reverseLeftExtension(TInfixA const & a,
 SEQAN_CHECKPOINT
 	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
 	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
-	reverseInPlace(infixA);
-	reverseInPlace(infixB);
+	reverse(infixA);
+	reverse(infixB);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -365,8 +365,8 @@ SEQAN_CHECKPOINT
 	TInfixB infixA = infix(host(a), getBeginDim0(seed), getBeginDim0(seedOld));
 	TInfixB infixB = infix(host(b), getBeginDim1(seed), getBeginDim1(seedOld));
 
-	reverseInPlace(infixA);
-	reverseInPlace(infixB);
+	reverse(infixA);
+	reverse(infixB);
 
 	StringSet<TInfixB> str;
 	appendValue(str, infixA);
@@ -403,7 +403,7 @@ SEQAN_CHECKPOINT
 // Traceback from an arbitrary point (coordinate) in the banded alignment trace matrix (trace).
 template <typename TAlign, typename TStringSet, typename TTrace, typename TCoord, typename TDiagonal>
 inline void
-_align_banded_nw_trace(TAlign& align,
+_alignBandedNeedlemanWunschTrace(TAlign& align,
 					   TStringSet const& str,
 					   TTrace const& trace,
 					   TCoord const& coordinate,
@@ -454,10 +454,10 @@ _align_banded_nw_trace(TAlign& align,
 				//std::cout << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl; 
 				if (tv == Diagonal) {
 					if (newTv == Horizontal) {
-						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+						_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 						--col; seqLen = 1;
 					} else if (newTv == Vertical) {
-						_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+						_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 						--row; ++col; seqLen = 1;
 					} else {
 						--row; ++seqLen;
@@ -465,20 +465,20 @@ _align_banded_nw_trace(TAlign& align,
 				} else {
 					if (tv == Horizontal) { 
 						if (newTv == Diagonal) {
-							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--row; seqLen = 1;
 						} else if (newTv == Vertical) {
-							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--row; ++col; seqLen = 1;
 						} else {
 							--col; ++seqLen;
 						}
 					} else { 
 						if (newTv == Diagonal) {
-							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--row; seqLen = 1;
 						} else if (newTv == Horizontal) {
-							_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+							_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 							--col; seqLen = 1;
 						} else {
 							--row; ++col; ++seqLen;
@@ -490,12 +490,12 @@ _align_banded_nw_trace(TAlign& align,
 		}
 	
 		// Align left overs
-		if (seqLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+		if (seqLen) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 	}
 
 	// Handle the remaining sequence
-	if (actualCol != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
-	else if (actualRow != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow,  Vertical);
+	if (actualCol != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
+	else if (actualRow != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow,  Vertical);
 
 }
 
@@ -524,19 +524,19 @@ SEQAN_CHECKPOINT
 	appendValue(str, infixA);
 	appendValue(str, infixB);
 
-	_Align_Traceback<TPos> traceBack;
-	_align_banded_nw_trace(traceBack, str, matrixLeft, coordinate,
+	AlignTraceback<TPos> traceBack;
+	_alignBandedNeedlemanWunschTrace(traceBack, str, matrixLeft, coordinate,
 				   getUpperDiagonal(seedOld) - getUpperDiagonal(seed), getUpperDiagonal(seedOld) - getLowerDiagonal(seed));
 	
-	reverseInPlace(traceBack.sizes);
-	reverseInPlace(traceBack.tvs);
+	reverse(traceBack.sizes);
+	reverse(traceBack.tvs);
 
 	Align<TInfixB> infixAlign;
 	resize(rows(infixAlign), 2);
 	assignSource(row(infixAlign, 0), infix(str[0], length(str[0]) - endLeftA, length(str[0])));
 	assignSource(row(infixAlign, 1), infix(str[1], length(str[1]) - endLeftB, length(str[1])));
 
-	_pump_trace_2_Align(infixAlign, traceBack);
+	_pumpTraceToAlign(infixAlign, traceBack);
 	integrateAlign(align, infixAlign);
 }
 
@@ -564,8 +564,8 @@ SEQAN_CHECKPOINT
 	appendValue(str, infix(host(a), getEndDim0(seedOld), getEndDim0(seed)));
 	appendValue(str, infix(host(b), getEndDim1(seedOld), getEndDim1(seed)));
 
-	_Align_Traceback<TPos> traceBack;
-	_align_banded_nw_trace(traceBack, str, matrixRight, coordinate,
+	AlignTraceback<TPos> traceBack;
+	_alignBandedNeedlemanWunschTrace(traceBack, str, matrixRight, coordinate,
 				   getLowerDiagonal(seedOld) - getUpperDiagonal(seed), getLowerDiagonal(seedOld) - getLowerDiagonal(seed));
 
 	Align<TInfixB> infixAlign;
@@ -573,7 +573,7 @@ SEQAN_CHECKPOINT
 	assignSource(row(infixAlign, 0), infix(str[0], 0, endRightA));
 	assignSource(row(infixAlign, 1), infix(str[1], 0, endRightB));
 
-	_pump_trace_2_Align(infixAlign, traceBack);
+	_pumpTraceToAlign(infixAlign, traceBack);
 	integrateAlign(align, infixAlign);
 }
 

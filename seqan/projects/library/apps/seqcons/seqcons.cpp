@@ -293,7 +293,7 @@ int main(int argc, const char *argv[]) {
 				//	name << value(begEndPos, i).i1 << "," << value(begEndPos, i).i2;
 				//	String<char> myTitle = name.str();
 				//	write(strm3, origStrSet[i], myTitle, Fasta());			
-				//	if (value(begEndPos, i).i1 > value(begEndPos, i).i2) reverseComplementInPlace(origStrSet[i]);
+				//	if (value(begEndPos, i).i1 > value(begEndPos, i).i2) reverseComplement(origStrSet[i]);
 				//}
 				//strm3.close();
 			}

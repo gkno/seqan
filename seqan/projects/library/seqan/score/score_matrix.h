@@ -31,7 +31,7 @@
 namespace SEQAN_NAMESPACE_MAIN {
 
 template <typename TValue, typename TSequenceValue, typename TSpec>
-struct _ScoringMatrixData;
+struct ScoringMatrixData_;
 
 
 template <typename TSequenceValue = AminoAcid, typename TSpec = Default>
@@ -186,7 +186,7 @@ inline void
 setDefaultScoreMatrix(Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, TTag) {
     SEQAN_CHECKPOINT;
     typedef Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > TScore;
-    TValue const * tab = _ScoringMatrixData<TValue, TSequenceValue, TTag>::getData();
+    TValue const * tab = ScoringMatrixData_<TValue, TSequenceValue, TTag>::getData();
     arrayCopy(tab, tab + TScore::TAB_SIZE, sc.data_tab);
 }
 
@@ -270,7 +270,7 @@ readMeta(TFile & fl, TMeta & meta, ScoreMatrixFile) {
 
     while (!_streamEOF(fl) && (c == '#')) {
         c = _streamGet(fl);
-        _stream_appendLine(fl, meta, c);
+        _streamAppendLine(fl, meta, c);
         appendValue(meta, '\n');
     }
     _streamUnget(fl);
@@ -299,7 +299,7 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreM
     // " A R N D C Q E G H I L K M F P S T W Y V B Z X *"
     do {
         clear(s);
-        _stream_appendLine(fl, s, c);
+        _streamAppendLine(fl, s, c);
     } while (!_streamEOF(fl) && (empty(s) || (s[0] == '#')));
 
     if (_streamEOF(fl)) return;
@@ -323,7 +323,7 @@ read(TFile & fl, Score<TValue, ScoreMatrix<TSequenceValue, TSpec> > & sc, ScoreM
     // Read the matrix itself.
     while (!_streamEOF(fl)) {
         clear(s);
-        _stream_appendLine(fl, s, c);
+        _streamAppendLine(fl, s, c);
 
         if (empty(s) || (s[0] == '#')) continue;  // Skip empty lines and comments.
 

@@ -284,7 +284,7 @@ void writeTranscripts(TStream &target, TContigOrderings &orderings, TFragmentSto
 					else
 					{
 						tmp = infix(store.contigStore[anno.contigId].seq, anno.endPos, anno.beginPos);
-						reverseComplementInPlace(tmp);
+						reverseComplement(tmp);
 						toLowerInPlace(tmp);
 						append(transcript, tmp);
 					}
@@ -428,7 +428,7 @@ int main(int argc, char const * argv[])
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 2: Reading the annotation
-	if (argumentCount(parser) == 3) // GTF/GFF?
+	if (argumentCount(parser) == 3) // Gtf/Gff?
 	{
 		std::ifstream annotationFile(toCString(getArgumentValue(parser, 1)), ::std::ios_base::in | ::std::ios_base::binary);
 		if (!annotationFile.is_open())
@@ -436,7 +436,7 @@ int main(int argc, char const * argv[])
 			std::cerr << "Could not open " << getArgumentValue(parser, 1) << std::endl;
 			return 1;
 		}
-		read(annotationFile, store, GFF());
+		read(annotationFile, store, Gff());
 	} 
 	else 
 	{
@@ -452,8 +452,8 @@ int main(int argc, char const * argv[])
 			std::cerr << "Could not open " << getArgumentValue(parser, 2) << std::endl;
 			return 1;
 		}
-		read(knownGenes, store, UCSC());
-		read(knownIsoforms, store, UCSC());
+		read(knownGenes, store, Ucsc());
+		read(knownIsoforms, store, Ucsc());
 	}
 	double t2 = sysTime();		std::cout << "Reading the annotation took "<< t2-t1 << " seconds." << std::endl;	
 
@@ -489,7 +489,7 @@ int main(int argc, char const * argv[])
 	//////////////////////////////////////////////////////////////////////////////
 	// Step 7: Write the annotation enhanced by subexons
 	std::ofstream file2(toCString(refinedFileName), ::std::ios_base::out | ::std::ios_base::binary);
-	write(file2, store, GFF());
+	write(file2, store, Gff());
 	file2.close();
 	double t7 = sysTime();		std::cout << "Writing the enhanced annotation took "<< t7-t6 << " seconds." << std::endl;
 

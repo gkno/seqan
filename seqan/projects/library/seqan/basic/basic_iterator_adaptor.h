@@ -60,7 +60,7 @@ template <typename TContainer, typename TIterator, typename TSpec>
 class Iter<TContainer, AdaptorIterator<TIterator, TSpec> >
 {
 public:
-	typename _Pointer<TContainer>::Type data_container;
+	typename Pointer_<TContainer>::Type data_container;
 	TIterator data_iterator;
 //____________________________________________________________________________
 
@@ -85,14 +85,14 @@ SEQAN_CHECKPOINT
 		data_iterator = TIterator();
 	}
 /*//TODO: welches "begin" zur initialisierung von "data_iterator" aufrufen?
-	Iter(typename _Parameter<TContainer>::Type container_):
+	Iter(typename Parameter_<TContainer>::Type container_):
 		data_container(_toPointer(container_)),
 		data_iterator(begin(container_))
 	{
 SEQAN_CHECKPOINT
 	}
 */
-	Iter(typename _Parameter<TContainer>::Type container_, TIterator it_):
+	Iter(typename Parameter_<TContainer>::Type container_, TIterator it_):
 		data_container(_toPointer(container_)),
 		data_iterator(it_)
 	{
@@ -165,14 +165,14 @@ SEQAN_CHECKPOINT
 };
 
 template <typename TContainer, typename TIterator, typename TSpec>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me)
 {
 SEQAN_CHECKPOINT
 	return _toParameter<TContainer>(me.data_container);
 }
 template <typename TContainer, typename TIterator, typename TSpec>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > const & me)
 {
 SEQAN_CHECKPOINT
@@ -182,7 +182,7 @@ SEQAN_CHECKPOINT
 
 template <typename TContainer, typename TIterator, typename TSpec>
 inline void
-setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,	typename _Parameter<TContainer>::Type container_)
+setContainer(Iter<TContainer, AdaptorIterator<TIterator, TSpec> > & me,	typename Parameter_<TContainer>::Type container_)
 {
 SEQAN_CHECKPOINT
    typedef Iter<TContainer, AdaptorIterator<TIterator, TSpec> > TIter;

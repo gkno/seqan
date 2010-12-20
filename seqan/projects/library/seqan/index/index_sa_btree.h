@@ -75,7 +75,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TSize >
-	inline TSize sizeofSAB(TSize n, unsigned BlockSize)
+	inline TSize sizeofSABTree(TSize n, unsigned BlockSize)
 	{
 		TSize size = 0;
 		for(TSize _xSize = 1; _xSize <= n; _xSize *= BlockSize)
@@ -86,9 +86,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <
 		class SAFwdIt,		// suffix array input iterator
 		typename TSize >
-	inline void sizeofSAB(SAFwdIt _First, SAFwdIt _Last, TSize &_Size, unsigned BlockSize)
+	inline void sizeofSABTree(SAFwdIt _First, SAFwdIt _Last, TSize &_Size, unsigned BlockSize)
 	{
-		_Size = sizeofSAB(difference(_First, _Last), BlockSize);
+		_Size = sizeofSABTree(difference(_First, _Last), BlockSize);
 	}
 
 

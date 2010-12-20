@@ -136,11 +136,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize> TModifier;
         
 		TObject									&orig;
-//		typename _RemoveConst<TObject>::Type	tmp;
+//		typename RemoveConst_<TObject>::Type	tmp;
 		String<TValue>							tmp;
 
 		TModifier	mod[DISTANCE];
@@ -197,7 +197,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		if (empty(it.orig) || it.minDist > DISTANCE || it.minDist > length(it.orig)) {
@@ -255,7 +255,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	goEnd(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> & it)
 	{
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
@@ -270,7 +270,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	atEnd(Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const & it)
 	{
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
@@ -294,7 +294,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; true;)
@@ -403,11 +403,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	public:
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize> TModifier;
         
 		TObject									&orig;
-//		typename _RemoveConst<TObject>::Type	tmp;
+//		typename RemoveConst_<TObject>::Type	tmp;
 		String<TValue>							tmp;
 
 		TModifier	mod[DISTANCE + 1];
@@ -543,7 +543,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
 
 		if (empty(it.orig) || it.minDist > DISTANCE || it.minDist > length(it.orig)) {
@@ -569,7 +569,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	goEnd(Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> & it)
 	{
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
@@ -587,7 +587,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
 		typedef typename TModifier::TState					TState;
 
@@ -778,7 +778,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const & b)
 	{
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return false;
@@ -800,7 +800,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> const & b)
 	{
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return false;
@@ -828,7 +828,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter<Enumerator<TObject, EditEnvironment<HammingDistance, DISTANCE> >, Standard> const & b)
 	{
 		typedef typename Size<TObject>::Type			TSize;
-		typedef typename _MakeSigned<TSize>::Type		TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
 		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return true;
@@ -850,7 +850,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Iter<Enumerator<TObject, EditEnvironment<LevenshteinDistance, DISTANCE> >, Standard> const & b)
 	{
 		typedef typename Size<TObject>::Type				TSize;
-		typedef typename _MakeSigned<TSize>::Type			TSignedSize;
+		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
 		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return true;

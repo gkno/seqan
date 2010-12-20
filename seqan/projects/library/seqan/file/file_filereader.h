@@ -88,7 +88,7 @@ public:
 
 		data_file = &fl_;
 		data_file_owner = false;
-		_FileReaderString_construct(*this);
+		_constructFileReaderString(*this);
 	}
 	template <typename TString>
 	String(TString const & str_)
@@ -104,7 +104,7 @@ public:
 		}
 		else
 		{
-			_FileReaderString_construct(*this);
+			_constructFileReaderString(*this);
 		}
 	}
 	~String()
@@ -172,7 +172,7 @@ _dataFile(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition>
 inline void
-_FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+_loadBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							TPosition blocknum)
 {
 	typedef String<TValue, FileReader<TFormat, TFile, TSpec> > TString;
@@ -186,13 +186,13 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 	{
 		if (me.data_scanned)
 		{
-			_FileReaderString_loadblock(me, length(me.data_abl) - 1);
+			_loadBlockFileReaderString(me, length(me.data_abl) - 1);
 		}
 		else
 		{
 			for (TABLPosition bp = length(me.data_abl); !me.data_scanned && (bp <= blocknum2); ++bp)
 			{
-				_FileReaderString_loadblock(me, bp);
+				_loadBlockFileReaderString(me, bp);
 			}
 		}
 	}
@@ -239,14 +239,14 @@ _FileReaderString_loadblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TPosition>
 inline unsigned int
-_FileReaderString_findblock(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+_findBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							TPosition pos)
 {
 	typedef typename Size<TFile>::Type TFileSize;
 
 	while (!me.data_scanned && (me.data_abl[length(me.data_abl) - 1] <= static_cast<TFileSize>(pos)))
 	{
-		_FileReaderString_loadblock(me, length(me.data_abl));
+		_loadBlockFileReaderString(me, length(me.data_abl));
 	}
 
 	if (static_cast<TFileSize>(pos) >= me.data_abl[length(me.data_abl) - 1])
@@ -261,14 +261,14 @@ _FileReaderString_findblock(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void
-_FileReaderString_construct(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
+_constructFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
 	//find begin of data in file
 	typedef Iter<TFile, FileReader<TFormat> > TFileReaderIt;
 	TFileReaderIt fit(_dataFile(me));
 	me.data_file_begin = fit.data_file_pos;
 
-	_FileReaderString_loadblock(me, 0);
+	_loadBlockFileReaderString(me, 0);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@ _FileReaderString_construct(String<TValue, FileReader<TFormat, TFile, TSpec> > &
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec, typename TUint>
 inline bool
-_FileReaderString_isValidBlock(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
+_isValidBlockFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 							   TUint block_number)
 {
 	typedef typename Size<TFile>::Type TFileSize;
@@ -285,7 +285,7 @@ _FileReaderString_isValidBlock(String<TValue, FileReader<TFormat, TFile, TSpec> 
 
 	while (!me.data_scanned && (length(me.data_abl) <= block_number2))
 	{
-		_FileReaderString_loadblock(me, length(me.data_abl));
+		_loadBlockFileReaderString(me, length(me.data_abl));
 	}
 	return (length(me.data_abl) > block_number2);
 
@@ -295,12 +295,12 @@ _FileReaderString_isValidBlock(String<TValue, FileReader<TFormat, TFile, TSpec> 
 
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline void
-_FileReaderString_loadComplete(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
+_loadCompleteFileReaderString(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
 	if (!me.data_scanned)
 	{//scan the whole sequence
 		typedef typename Position<TFile>::Type TPosition;
-		_FileReaderString_loadblock(me, supremumValue<TPosition>());
+		_loadBlockFileReaderString(me, maxValue<TPosition>());
 	}
 }
 
@@ -326,7 +326,7 @@ value(String<TValue, FileReader<TFormat, TFile, TSpec> > & me,
 
 	if ((me.data_active_block_begin > pos2) || (me.data_active_block_end <= pos2))
 	{//change block
-		_FileReaderString_loadblock(me, _FileReaderString_findblock(me, pos2));
+		_loadBlockFileReaderString(me, _findBlockFileReaderString(me, pos2));
 	}
 	return me.data_buf[pos2 - me.data_active_block_begin];
 }
@@ -337,7 +337,7 @@ template <typename TValue, typename TFormat, typename TFile, typename TSpec>
 inline typename Size< String<TValue, FileReader<TFormat, TFile, TSpec> > >::Type
 length(String<TValue, FileReader<TFormat, TFile, TSpec> > & me)
 {
-	_FileReaderString_loadComplete(me);
+	_loadCompleteFileReaderString(me);
 
 	return me.data_abl[length(me.data_abl) - 1];
 }
@@ -413,17 +413,17 @@ iter(String<TValue, FileReader<TFormat, TFile, TSpec> > const & me,
 struct FileReaderIterator;
 
 //helper meta function for storing types associated with file reader string.
-//Due to a bug in VC++, _FileReader_Types is instantiated for arbitrary TContainer types
+//Due to a bug in VC++, FileReaderTypes_ is instantiated for arbitrary TContainer types
 //when instantiating Iter<TContainer, FileReaderIterator>
 //"ABL" = "active buffer lengths" table
 template <typename T>
-struct _FileReader_Types
+struct FileReaderTypes_
 {// dummy implementation to make VC++ happy
 	typedef int TABLPosition;
 	typedef int TBuf;
 };
 template <typename TValue, typename TFormat, typename TFile, typename TSpec>
-struct _FileReader_Types<String<TValue, FileReader<TFormat, TFile, TSpec> > >
+struct FileReaderTypes_<String<TValue, FileReader<TFormat, TFile, TSpec> > >
 {
 	typedef typename Size<TFile>::Type TFileSize;
 	typedef String<TFileSize> TABL;
@@ -436,8 +436,8 @@ template <typename TContainer>
 class Iter<TContainer, FileReaderIterator>
 {
 public:
-	typedef typename _FileReader_Types<TContainer>::TABLPosition TABLPosition;
-	typedef typename _FileReader_Types<TContainer>::TBuf TBuf;
+	typedef typename FileReaderTypes_<TContainer>::TABLPosition TABLPosition;
+	typedef typename FileReaderTypes_<TContainer>::TBuf TBuf;
 
 	typedef typename Position<TBuf>::Type TBufPosition;
 	typedef typename Size<TBuf>::Type TBufSize;
@@ -545,7 +545,7 @@ getValue(Iter<TContainer, FileReaderIterator> & it)
 	TContainer & cont = *(it.data_container);
 	if (cont.data_active_block != it.data_abl_pos)
 	{
-		_FileReaderString_loadblock(cont, it.data_abl_pos);
+		_loadBlockFileReaderString(cont, it.data_abl_pos);
 	}
 	return cont.data_buf[it.data_buf_pos];
 }
@@ -556,7 +556,7 @@ getValue(Iter<TContainer, FileReaderIterator> const & it)
 	TContainer & cont = *(it.data_container);
 	if (cont.data_active_block != it.data_abl_pos)
 	{
-		_FileReaderString_loadblock(cont, it.data_abl_pos);
+		_loadBlockFileReaderString(cont, it.data_abl_pos);
 	}
 	return cont.data_buf[it.data_buf_pos];
 }
@@ -624,7 +624,7 @@ setPosition(Iter<TContainer, FileReaderIterator> & it,
 {
     typedef typename Size<TContainer>::Type TSize;
 	TContainer & cont = *(it.data_container);
-	it.data_abl_pos = _FileReaderString_findblock(cont, pos);
+	it.data_abl_pos = _findBlockFileReaderString(cont, pos);
 	it.data_atEnd = (cont.data_scanned && (static_cast<TSize>(pos) >= length(cont)));
 	if (it.data_atEnd)
 	{
@@ -643,7 +643,7 @@ setPosition(Iter<TContainer, FileReaderIterator> & it,
 		}
 		if (cont.data_active_block != it.data_abl_pos)
 		{
-			_FileReaderString_loadblock(cont, it.data_abl_pos);
+			_loadBlockFileReaderString(cont, it.data_abl_pos);
 		}
 		it.data_buf_len = length(cont.data_buf);
 	}
@@ -664,7 +664,7 @@ goNext(Iter<TContainer, FileReaderIterator> & it)
 			++it.data_abl_pos;
 
 			TContainer & cont = *(it.data_container);
-			it.data_atEnd = !_FileReaderString_isValidBlock(cont, it.data_abl_pos);
+			it.data_atEnd = !_isValidBlockFileReaderString(cont, it.data_abl_pos);
 			if (it.data_atEnd)
 			{//at end
 				it.data_buf_len = 0;
@@ -673,7 +673,7 @@ goNext(Iter<TContainer, FileReaderIterator> & it)
 			{//not at end
 				if (cont.data_active_block != it.data_abl_pos)
 				{
-					_FileReaderString_loadblock(cont, it.data_abl_pos);
+					_loadBlockFileReaderString(cont, it.data_abl_pos);
 				}
 				it.data_buf_len = length(cont.data_buf);
 			}
@@ -696,7 +696,7 @@ goPrevious(Iter<TContainer, FileReaderIterator> & it)
 		TContainer & cont = *(it.data_container);
 		if (it.data_atEnd)
 		{
-			//_FileReaderString_loadComplete(cont);// length(cont) will do it
+			//_loadCompleteFileReaderString(cont);// length(cont) will do it
 			it.data_atEnd = (length(cont) == 0);
 			it.data_abl_pos = length(cont.data_abl) - 1;
 		}
@@ -708,7 +708,7 @@ goPrevious(Iter<TContainer, FileReaderIterator> & it)
 
 		if (cont.data_active_block != it.data_abl_pos)
 		{
-			_FileReaderString_loadblock(cont, it.data_abl_pos);
+			_loadBlockFileReaderString(cont, it.data_abl_pos);
 		}
 		it.data_buf_len = length(cont.data_buf);
 		it.data_buf_pos = it.data_buf_len - 1;
@@ -725,7 +725,7 @@ goBegin(Iter<TContainer, FileReaderIterator> & it)
 	it.data_buf_pos = 0;
 
 	TContainer & cont = *(it.data_container);
-	if (_FileReaderString_isValidBlock(cont, 0))
+	if (_isValidBlockFileReaderString(cont, 0))
 	{
 		it.data_buf_len = cont.data_abl[0];
 		it.data_atEnd = false;

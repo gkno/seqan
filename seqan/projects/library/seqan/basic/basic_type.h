@@ -245,8 +245,8 @@ template <
 	typename T1 >
 struct DeepestSpec< T<T1> > {
 	typedef typename 
-		IF<
-			TYPECMP<T1, void>::VALUE,										// is T1 void?
+		If<
+			IsSameType<T1, void>::VALUE,										// is T1 void?
 			T<T1>,															// yes, end of recursion
 			typename DeepestSpec< typename Spec< T<T1> >::Type >::Type		// no,  recurse
 		>::Type Type;
@@ -417,28 +417,28 @@ struct Source<T const>:
 //____________________________________________________________________________
 
 /**
-.Internal._Parameter:
+.Internal.Parameter_:
 ..cat:Metafunctions
 ..summary:Type for function parameters and return values.
-..signature:_Parameter<T>::Type
+..signature:Parameter_<T>::Type
 ..param.T:A type.
 ..returns.param.Type:The parameter type for arguments of type $T$.
-...text:If $T$ is a pointer or array type, then $_Parameter<T>::Type$ is $T$, 
-otherwise $_Parameter<T>::Type$ is $T &$.
+...text:If $T$ is a pointer or array type, then $Parameter_<T>::Type$ is $T$, 
+otherwise $Parameter_<T>::Type$ is $T &$.
 */
 template <typename T>
-struct _Parameter
+struct Parameter_
 {
 	typedef T & Type;
 };
 
 template <typename T>
-struct _Parameter<T *>
+struct Parameter_<T *>
 {
 	typedef T * Type;
 };
 template <typename T, size_t I>
-struct _Parameter<T [I]>
+struct Parameter_<T [I]>
 {
 	typedef T * Type;
 };
@@ -451,20 +451,20 @@ struct _Parameter<T [I]>
 ..signature:_toParameter<T>(pointer)
 ..param.pointer:A pointer.
 ..param.T:A Type.
-...text:$object$ is transformed into the parameter type of $T$ that is given by @Internal._Parameter@.
+...text:$object$ is transformed into the parameter type of $T$ that is given by @Internal.Parameter_@.
 ...note:This type must be explicitely specified.
 ..returns:To $TParameter$ transformed $object$.
-..see:Internal._Parameter
+..see:Internal.Parameter_
 */
 template <typename T>
-typename _Parameter<T>::Type
+typename Parameter_<T>::Type
 _toParameter(T * _object)
 {
 SEQAN_CHECKPOINT
 	return * _object;
 }
 template <typename T>
-typename _Parameter<T>::Type
+typename Parameter_<T>::Type
 _toParameter(T _object)
 {
 SEQAN_CHECKPOINT
@@ -474,43 +474,43 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 /**
-.Internal._ConstParameter:
+.Internal.ConstParameter_:
 ..cat:Metafunctions
 ..summary:Type for constant function parameters and return values.
-..signature:_ConstParameter<T>::Type
+..signature:ConstParameter_<T>::Type
 ..param.T:A type.
 ..returns.param.Type:The const parameter type for arguments of type $T$.
-...text:If $T$ is a pointer or array type, then $_Parameter<T>::Type$ is a pointer to a const array, 
-otherwise $_Parameter<T>::Type$ is $T const &$.
-..see:Internal._Parameter
+...text:If $T$ is a pointer or array type, then $Parameter_<T>::Type$ is a pointer to a const array, 
+otherwise $Parameter_<T>::Type$ is $T const &$.
+..see:Internal.Parameter_
 */
 template <typename T>
-struct _ConstParameter
+struct ConstParameter_
 {
 	typedef T const & Type;
 };
 template <typename T>
-struct _ConstParameter<T const>:
-	public _ConstParameter<T> {};
+struct ConstParameter_<T const>:
+	public ConstParameter_<T> {};
 
 template <typename T>
-struct _ConstParameter<T *>
+struct ConstParameter_<T *>
 {
 	typedef T const * Type;
 };
 template <typename T>
-struct _ConstParameter<T const *>
+struct ConstParameter_<T const *>
 {
 	typedef T const * Type;
 };
 
 template <typename T, size_t I>
-struct _ConstParameter<T [I]>
+struct ConstParameter_<T [I]>
 {
 	typedef T const * Type;
 };
 template <typename T, size_t I>
-struct _ConstParameter<T const [I]>
+struct ConstParameter_<T const [I]>
 {
 	typedef T const * Type;
 };
@@ -518,49 +518,49 @@ struct _ConstParameter<T const [I]>
 //____________________________________________________________________________
 
 /**
-.Internal._Pointer:
+.Internal.Pointer_:
 ..cat:Metafunctions
 ..summary:The associated pointer type.
-..signature:_Pointer<T>::Type
+..signature:Pointer_<T>::Type
 ..param.T:A type.
 ..returns.param.Type:A pointer type for $T$.
-...text:if $T$ is already a pointer type, then $_Pointer<T>::Type$ is $T$,
-otherwise $_Pointer<T>::Type$ is $T *$.
-..see:Internal._Parameter
+...text:if $T$ is already a pointer type, then $Pointer_<T>::Type$ is $T$,
+otherwise $Pointer_<T>::Type$ is $T *$.
+..see:Internal.Parameter_
 ..see:Internal._toParameter
 */
 template <typename T>
-struct _Pointer
+struct Pointer_
 {
 	typedef T * Type;
 };
 
 template <typename T>
-struct _Pointer<T *>
+struct Pointer_<T *>
 {
 	typedef T * Type;
 };
 template <typename T>
-struct _Pointer<T * const>
+struct Pointer_<T * const>
 {
 	typedef T * Type;
 };
 
 template <typename T, size_t I>
-struct _Pointer<T [I]>
+struct Pointer_<T [I]>
 {
 	typedef T * Type;
 };
 
-//non const version of _Pointer for return values
+//non const version of Pointer_ for return values
 
 template <typename T>
-struct _NonConstPointer:
-	_Pointer<T>
+struct NonConstPointer_:
+	Pointer_<T>
 {
 };
 template <typename T>
-struct _NonConstPointer<T * const>
+struct NonConstPointer_<T * const>
 {
 	typedef T * Type;
 };
@@ -572,18 +572,18 @@ struct _NonConstPointer<T * const>
 ..signature:_toPointer(object)
 ..param.object:An object.
 ..returns:$object$, transformed to a pointer. 
-...text:The type of the returned pointer is given by @Internal._Pointer@.
-..see:Internal._Pointer
+...text:The type of the returned pointer is given by @Internal.Pointer_@.
+..see:Internal.Pointer_
 */
 template <typename T>
-typename _NonConstPointer<T>::Type
+typename NonConstPointer_<T>::Type
 _toPointer(T & _object)
 {
 SEQAN_CHECKPOINT
 	return & _object;
 }
 template <typename T>
-typename _NonConstPointer<T const>::Type
+typename NonConstPointer_<T const>::Type
 _toPointer(T const & _object)
 {
 SEQAN_CHECKPOINT
@@ -591,7 +591,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename T>
-typename _NonConstPointer<T *>::Type
+typename NonConstPointer_<T *>::Type
 _toPointer(T * _object)
 {
 SEQAN_CHECKPOINT
@@ -663,25 +663,25 @@ struct IsIntegral
 {
 	typedef
 		// Implicitely signed.
-		typename IF< TYPECMP<T, char>::VALUE,  True,
-		typename IF< TYPECMP<T, char>::VALUE,  True,
-		typename IF< TYPECMP<T, short>::VALUE, True,
-		typename IF< TYPECMP<T, int>::VALUE,   True,
-		typename IF< TYPECMP<T, long>::VALUE,  True,
-		typename IF< TYPECMP<T, __int64>::VALUE,      True,
+		typename If< IsSameType<T, char>::VALUE,  True,
+		typename If< IsSameType<T, char>::VALUE,  True,
+		typename If< IsSameType<T, short>::VALUE, True,
+		typename If< IsSameType<T, int>::VALUE,   True,
+		typename If< IsSameType<T, long>::VALUE,  True,
+		typename If< IsSameType<T, __int64>::VALUE,      True,
 		// Explicitely signed.
-		typename IF< TYPECMP<T, signed char>::VALUE,    True,
-		typename IF< TYPECMP<T, signed char>::VALUE,    True,
-		typename IF< TYPECMP<T, signed short>::VALUE,   True,
-		typename IF< TYPECMP<T, signed int>::VALUE,     True,
-		typename IF< TYPECMP<T, signed long>::VALUE,    True,
+		typename If< IsSameType<T, signed char>::VALUE,    True,
+		typename If< IsSameType<T, signed char>::VALUE,    True,
+		typename If< IsSameType<T, signed short>::VALUE,   True,
+		typename If< IsSameType<T, signed int>::VALUE,     True,
+		typename If< IsSameType<T, signed long>::VALUE,    True,
 		// Explicitely unsigned.
-		typename IF< TYPECMP<T, unsigned char>::VALUE,  True,
-		typename IF< TYPECMP<T, unsigned char>::VALUE,  True,
-		typename IF< TYPECMP<T, unsigned short>::VALUE, True,
-		typename IF< TYPECMP<T, unsigned int>::VALUE,   True,
-		typename IF< TYPECMP<T, unsigned long>::VALUE,  True,
-		typename IF< TYPECMP<T, __uint64>::VALUE,       True,
+		typename If< IsSameType<T, unsigned char>::VALUE,  True,
+		typename If< IsSameType<T, unsigned char>::VALUE,  True,
+		typename If< IsSameType<T, unsigned short>::VALUE, True,
+		typename If< IsSameType<T, unsigned int>::VALUE,   True,
+		typename If< IsSameType<T, unsigned long>::VALUE,  True,
+		typename If< IsSameType<T, __uint64>::VALUE,       True,
 		False
 		>::Type>::Type>::Type>::Type>::Type>::Type
 		>::Type>::Type>::Type>::Type>::Type

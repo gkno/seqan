@@ -246,28 +246,28 @@ buildAlignmentGraph(String<TFragment, TSpec1>& matches,
 
 
 template<typename TVertexDescriptor, typename TCargo>
-struct __EdgeCargo {
+struct MsaEdgeCargo_ {
  public:
 	 TVertexDescriptor v1;
 	 TVertexDescriptor v2;
 	 TCargo c;
 
-	 __EdgeCargo() {}
+	 MsaEdgeCargo_() {}
 
 	
-	 __EdgeCargo(TVertexDescriptor vert1, TVertexDescriptor vert2, TCargo carg) :
+	 MsaEdgeCargo_(TVertexDescriptor vert1, TVertexDescriptor vert2, TCargo carg) :
 	 v1(vert1), v2(vert2), c(carg) {}
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TVertexDescriptor, typename TCargo>
-struct __LessEdgeCargo :
+struct LessMsaEdgeCargo_ :
 	public ::std::binary_function<TVertexDescriptor, TCargo, bool>
 {
 	inline bool 
-	operator() (__EdgeCargo<TVertexDescriptor, TCargo> const& a1, 
-				__EdgeCargo<TVertexDescriptor, TCargo> const& a2) const 
+	operator() (MsaEdgeCargo_<TVertexDescriptor, TCargo> const& a1, 
+				MsaEdgeCargo_<TVertexDescriptor, TCargo> const& a2) const 
 	{
 		return (a1.v1 == a2.v1) ? (a1.v2 < a2.v2) : (a1.v1 < a2.v1);
 	}
@@ -304,7 +304,7 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 	typedef std::map<TNewEdge, TCargo> TEdgeMap;
 	typedef typename TEdgeMap::iterator TEdgeMapIter;
 	TEdgeMap newEMap;
-	typedef __EdgeCargo<TVertexDescriptor, TCargo> TEdge;
+	typedef MsaEdgeCargo_<TVertexDescriptor, TCargo> TEdge;
 	typedef String<TEdge> TEdgeString;
 	TEdgeString fullEdges;
 	TEdgeIterator itE(g);
@@ -317,7 +317,7 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 		newEMap.insert(std::make_pair(TNewEdge(sV, tV), c));
 	}
 	clearEdges(g);
-	::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), __LessEdgeCargo<TVertexDescriptor, TCargo>() );
+	::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), LessMsaEdgeCargo_<TVertexDescriptor, TCargo>() );
 	
 	// Perform triplet extension
 	typedef typename Iterator<TEdgeString, Standard>::Type TEdgeIter;
@@ -522,7 +522,7 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 	typedef std::map<TNewEdge, TCargo> TEdgeMap;
 	typedef typename TEdgeMap::iterator TEdgeMapIter;
 	TEdgeMap newEMap;
-	typedef __EdgeCargo<TVertexDescriptor, TCargo> TEdge;
+	typedef MsaEdgeCargo_<TVertexDescriptor, TCargo> TEdge;
 	typedef String<TEdge> TEdgeString;
 	TEdgeString initialEdges;
 	TEdgeIterator itE(g);
@@ -550,7 +550,7 @@ tripletLibraryExtension(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				appendValue(fullEdges, TEdge((*itInitial).v2, (*itInitial).v1, (*itInitial).c), Generous());
 			}
 		}
-		::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), __LessEdgeCargo<TVertexDescriptor, TCargo>() );
+		::std::sort(begin(fullEdges, Standard()), end(fullEdges, Standard()), LessMsaEdgeCargo_<TVertexDescriptor, TCargo>() );
 		typedef typename Iterator<TEdgeString, Standard>::Type TEdgeIter;
 		TEdgeIter itEdges1 = begin(fullEdges, Standard());
 		TEdgeIter itEdgesEnd = end(fullEdges, Standard());

@@ -71,7 +71,7 @@ namespace seqan{
 				height = _throwCoin< TObject, TModus, RT< TSpec >, TStructuring  >( list, max_height );
 				if( height > 0 ){
 					_add( list, buffer, height, search_path );
-					_connect_actualize( list, buffer, height, search_path, dim );
+					_connectUpdate( list, buffer, height, search_path, dim );
 				}
 				buffer_theKey = key( *buffer, dim );
 			}

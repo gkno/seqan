@@ -283,7 +283,7 @@ SEQAN_CHECKPOINT
 // TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
 inline typename Iterator<T, Standard>::Type 
-_begin_default(T & me,
+_beginDefault(T & me,
 			   Standard)
 {
 SEQAN_CHECKPOINT
@@ -292,7 +292,7 @@ SEQAN_CHECKPOINT
 // TODO(holtgrew): Evil -- each value is a container of length 1.
 template <typename T>
 inline typename Iterator<T const, Standard>::Type 
-_begin_default(T const & me,
+_beginDefault(T const & me,
 			   Standard)
 {
 SEQAN_CHECKPOINT
@@ -304,7 +304,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline typename Iterator<T, Rooted>::Type 
-_begin_default(T & me,
+_beginDefault(T & me,
 			   Rooted)
 {
 SEQAN_CHECKPOINT
@@ -313,7 +313,7 @@ SEQAN_CHECKPOINT
 }
 template <typename T>
 inline typename Iterator<T const, Rooted>::Type 
-_begin_default(T const & me,
+_beginDefault(T const & me,
 			   Rooted)
 {
 SEQAN_CHECKPOINT
@@ -337,7 +337,7 @@ begin(T & me,
 	  Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return _begin_default(me, tag_);
+	return _beginDefault(me, tag_);
 }
 template <typename T, typename TSpec>
 inline typename Iterator<T const, Tag<TSpec> const>::Type 
@@ -345,7 +345,7 @@ begin(T const & me,
 	  Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return _begin_default(me, tag_);
+	return _beginDefault(me, tag_);
 }
 
 
@@ -469,7 +469,7 @@ SEQAN_CHECKPOINT
 //* ???Anti Default Sequences
 template <typename T>
 inline typename Iterator<T, Standard>::Type 
-_end_default(T & me,
+_endDefault(T & me,
 			 Standard)
 {
 SEQAN_CHECKPOINT
@@ -477,7 +477,7 @@ SEQAN_CHECKPOINT
 }
 template <typename T>
 inline typename Iterator<T const, Standard>::Type 
-_end_default(T const & me,
+_endDefault(T const & me,
 			 Standard)
 {
 SEQAN_CHECKPOINT
@@ -489,7 +489,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline typename Iterator<T, Rooted>::Type 
-_end_default(T & me,
+_endDefault(T & me,
 			 Rooted)
 {
 SEQAN_CHECKPOINT
@@ -498,7 +498,7 @@ SEQAN_CHECKPOINT
 }
 template <typename T>
 inline typename Iterator<T const, Rooted>::Type 
-_end_default(T const & me,
+_endDefault(T const & me,
 			 Rooted)
 {
 SEQAN_CHECKPOINT
@@ -514,7 +514,7 @@ end(T & me,
 	Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return _end_default(me, tag_);
+	return _endDefault(me, tag_);
 }
 template <typename T, typename TSpec>
 inline typename Iterator<T const, Tag<TSpec> const>::Type 
@@ -522,7 +522,7 @@ end(T const & me,
 	Tag<TSpec> const tag_)
 {
 SEQAN_CHECKPOINT
-	return _end_default(me, tag_);
+	return _endDefault(me, tag_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -917,7 +917,7 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// _computeSize4Capacity
+// _computeSizeForCapacity
 //////////////////////////////////////////////////////////////////////////////
 
 // note: for value types of size 1 or 2,
@@ -930,7 +930,7 @@ SEQAN_CHECKPOINT
 
 template <typename T, typename TSize>
 inline TSize 
-_computeSize4Capacity(T const & /*me*/, 
+_computeSizeForCapacity(T const & /*me*/, 
 					  TSize capacity)
 {
 SEQAN_CHECKPOINT

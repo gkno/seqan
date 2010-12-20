@@ -231,7 +231,7 @@ SEQAN_DEFINE_TEST(testUngappedQGramIndex)
 
 SEQAN_DEFINE_TEST(testQGramFind)
 {
-	typedef Index<String<char>, Index_QGram<UngappedShape<2> > > TQGramIndex;
+	typedef Index<String<char>, IndexQGram<UngappedShape<2> > > TQGramIndex;
 	TQGramIndex idx("to be or not to be");
 	Finder<TQGramIndex> finder(idx);
 

@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     }
 
     const unsigned SEED = 42;
-	RNG<MersenneTwister> rng(SEED);
+	Rng<MersenneTwister> rng(SEED);
 
     unsigned n = atoi(argv[1]);
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
     // Pick ids to select.
     std::set<unsigned> selectedIds;
     while (length(selectedIds) < n) {
-		PDF<Uniform<unsigned> > pdf(0, matePairCount - 1);
+		Pdf<Uniform<unsigned> > pdf(0, matePairCount - 1);
 		unsigned x = pickRandomNumber(rng, pdf);
         selectedIds.insert(x);
     }

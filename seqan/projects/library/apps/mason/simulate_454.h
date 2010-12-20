@@ -178,11 +178,11 @@ unsigned pickReadLength(TRNG & rng, Options<LS454Reads> const & options)
         // Pick uniformly.
         double minLen = options.readLengthMean - options.readLengthError;
         double maxLen = options.readLengthMean + options.readLengthError;
-        double len = pickRandomNumber(rng, PDF<Uniform<double> >(minLen, maxLen));
+        double len = pickRandomNumber(rng, Pdf<Uniform<double> >(minLen, maxLen));
         return static_cast<unsigned>(round(len));
     } else {
         // Pick normally distributed.
-        double len = pickRandomNumber(rng, PDF<Normal>(options.readLengthMean, options.readLengthError));
+        double len = pickRandomNumber(rng, Pdf<Normal>(options.readLengthMean, options.readLengthError));
         return static_cast<unsigned>(round(len));
     }
 }
@@ -220,7 +220,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
     String<unsigned> realBaseCount;
 
     // Probability density function to use for the background noise.
-    PDF<LogNormal> noisePdf(options.backgroundNoiseMean, options.backgroundNoiseStdDev, MeanStdDev());
+    Pdf<LogNormal> noisePdf(options.backgroundNoiseMean, options.backgroundNoiseStdDev, MeanStdDev());
 
     // Initialize information about the current homopolymer length.
     unsigned homopolymerLength = 0;
@@ -234,7 +234,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<LS454Reads> & inst, T
             // Simulate positive flow observation.
             double l = homopolymerLength;
             double sigma = options.k * (options.sqrtInStdDev ? sqrt(l) : l);
-            double intensity = pickRandomNumber(rng, PDF<Normal>(homopolymerLength, sigma));
+            double intensity = pickRandomNumber(rng, Pdf<Normal>(homopolymerLength, sigma));
             intensity += pickRandomNumber(rng, noisePdf);  // Add noise.
             appendValue(observedIntensities, intensity);
             appendValue(realBaseCount, homopolymerLength);

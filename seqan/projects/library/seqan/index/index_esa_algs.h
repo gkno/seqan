@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Iterator<TContainer, SuperMaxRepeats>::Type
 ..signature:Iter<TContainer, VSTree< BottomUp<SuperMaxRepeats> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
@@ -80,8 +80,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TBase(_tree),
 			minLength(1)
 		{
-			indexRequire(_tree, ESA_ChildTab());
-			indexRequire(_tree, ESA_BWT());
+			indexRequire(_tree, EsaChildtab());
+			indexRequire(_tree, EsaBwt());
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a repeat
 		}
 
@@ -92,8 +92,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			TBase(_tree),
 			minLength(_minLength)
 		{
-			indexRequire(_tree, ESA_ChildTab());
-			indexRequire(_tree, ESA_BWT());
+			indexRequire(_tree, EsaChildtab());
+			indexRequire(_tree, EsaBwt());
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a repeat
 		}
 
@@ -122,7 +122,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Iterator<TContainer, SuperMaxRepeatsFast>::Type
 ..signature:Iter<TContainer, VSTree< BottomUp<SuperMaxRepeatsFast> > >
 ..param.TContainer:Type of an index based on enhanced suffix array.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
@@ -147,16 +147,16 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TText, typename TSpec >
-	class Iter< Index<TText, Index_ESA<TSpec> >, VSTree< BottomUp<SuperMaxRepeatsFast> > >:
-		public Iter< Index<TText, Index_ESA<TSpec> >, VSTree< BottomUp<> > > 
+	class Iter< Index<TText, IndexEsa<TSpec> >, VSTree< BottomUp<SuperMaxRepeatsFast> > >:
+		public Iter< Index<TText, IndexEsa<TSpec> >, VSTree< BottomUp<> > > 
 	{
 	public:
-		typedef Index< TText, Index_ESA<TSpec> >		TIndex;
+		typedef Index< TText, IndexEsa<TSpec> >		TIndex;
 		typedef Iter< TIndex, VSTree< BottomUp<> > >	TBase;
 		typedef typename Size<TIndex>::Type				TSize;
 		typedef typename Value<TIndex>::Type			TValue;
 
-		typedef typename Iterator<typename Fibre<TIndex, ESA_LCP>::Type const>::Type	TLCPIter;
+		typedef typename Iterator<typename Fibre<TIndex, EsaLcp>::Type const>::Type	TLCPIter;
 //____________________________________________________________________________
 
 		TSize		minLength;
@@ -173,9 +173,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			rising(true)
 		{
 			this->vDesc.range = Pair<TSize>(0,0);
-			indexRequire(_index, ESA_BWT());
-			lIter = begin(indexLCP(container(*this)));
-			lEnd  = end(indexLCP(container(*this)));
+			indexRequire(_index, EsaBwt());
+			lIter = begin(indexLcp(container(*this)));
+			lEnd  = end(indexLcp(container(*this)));
 			goNext(*this);
 		}
 
@@ -189,9 +189,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			rising(true)
 		{
 			this->vDesc.i1 = Pair<TSize>(0,0);
-			indexRequire(_index, ESA_BWT());
-			lIter = begin(indexLCP(container(*this)));
-			lEnd  = end(indexLCP(container(*this)));
+			indexRequire(_index, EsaBwt());
+			lIter = begin(indexLcp(container(*this)));
+			lEnd  = end(indexLcp(container(*this)));
 			goNext(*this);
 		}
 
@@ -205,9 +205,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TText, typename TSpec >
-	inline void goNext(Iter< Index<TText, Index_ESA<TSpec> >, VSTree< BottomUp<SuperMaxRepeatsFast> > > &it) 
+	inline void goNext(Iter< Index<TText, IndexEsa<TSpec> >, VSTree< BottomUp<SuperMaxRepeatsFast> > > &it) 
 	{
-		typedef Index<TText, Index_ESA<TSpec> >		TIndex;
+		typedef Index<TText, IndexEsa<TSpec> >		TIndex;
 		typename Size<TIndex>::Type					lcp;
 
 		while (it.lIter != it.lEnd) {
@@ -216,7 +216,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			if (lcp < it.lValueLast) {
 				if (it.rising) {
 					if (it.lValueLast > it.minLength) {
-						_dfsLCP(it) = it.lValueLast;
+						_dfsLcp(it) = it.lValueLast;
 						++_dfsRange(it).i2;
 						++it.lIter;
 						it.lValueLast = lcp;
@@ -248,7 +248,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Iterator<TContainer, MaxRepeats>::Type
 ..signature:Iter<TContainer, VSTree< BottomUp<MaxRepeats> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
@@ -269,26 +269,26 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// contains a list of indices of the same bwt value (fraction)
 	template <typename TSize>
-	struct _FractionHeader {
+	struct FractionHeader_ {
 		TSize	begin, end;
 		TSize	size;
-		_FractionHeader() {}
-		_FractionHeader(TSize _begin, TSize _end, TSize _size):
+		FractionHeader_() {}
+		FractionHeader_(TSize _begin, TSize _end, TSize _size):
 			begin(_begin), end(_end), size(_size) {}
 	};
 
 	// contains a set of fractions (one for each bwt value) 
 	// and a fraction for the undefined bwt value (for the virtual character at position -1)
 	template <typename TValue, typename TSize>
-	struct _FractionCompound {
-		typedef _FractionHeader<TSize>			TFractionHeader;
+	struct FractionCompound_ {
+		typedef FractionHeader_<TSize>			TFractionHeader;
 		typedef Pair<TValue, TFractionHeader>	TFraction;	// TFraction = (c,(begin,end))
 		typedef typename Set<TFraction>::Type	TSet;		// c..char, begin/end indices in posList
 
 		TSet			set;
 		TFractionHeader	leftmost;
 
-		_FractionCompound():
+		FractionCompound_():
 			leftmost(0,0,0) {}
 	};
 
@@ -296,8 +296,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// right maximality is implicitly given
 	template <typename TValue, typename TSize>
 	int _haveMaximalRepeats(
-		_FractionCompound<TValue, TSize> const &a,
-		_FractionCompound<TValue, TSize> const &b)
+		FractionCompound_<TValue, TSize> const &a,
+		FractionCompound_<TValue, TSize> const &b)
 	{
 		TSize cs = length(a.set), ps = length(b.set);
 
@@ -316,8 +316,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TValue, typename TSize>
 	int _haveMaximalRepeats(
-		_FractionCompound<TValue, TSize> const &a,
-		_FractionCompound<TValue, TSize> const &b,
+		FractionCompound_<TValue, TSize> const &a,
+		FractionCompound_<TValue, TSize> const &b,
 		TValue &equalKey)
 	{
 		TSize cs = length(a.set), ps = length(b.set);
@@ -339,12 +339,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TSTree, typename TSpec >
-	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
+	struct GetVSTreeIteratorTraits< Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > > {
 		typedef PostorderEmptyEdges	Type;
 	};
 
 	template < typename TSTree, typename TSpec >
-	class Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >:
+	class Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > >:
 		public Iter< TSTree, VSTree< BottomUp<> > > 
 	{
 	public:
@@ -352,7 +352,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSTree>::Type			TValue;
 		typedef typename Size<TSTree>::Type				TSize;
 
-		typedef _FractionCompound<TValue, TSize>		TFractionCompound;
+		typedef FractionCompound_<TValue, TSize>		TFractionCompound;
 		typedef String<TFractionCompound, Block<> >		TSetStack;
 		typedef String<TSize>							TPositionList;
 		
@@ -375,9 +375,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			minLength(1),
 			canMerge(true)
 		{
-			indexRequire(_index, ESA_SA());
-			indexRequire(_index, ESA_LCP());
-			indexRequire(_index, ESA_BWT());
+			indexRequire(_index, EsaSA());
+			indexRequire(_index, EsaLcp());
+			indexRequire(_index, EsaBwt());
 			resize(posList, length(_index));
 
 			if (!empty(indexSA(_index))) 
@@ -398,9 +398,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			minLength(_minLength),
 			canMerge(true)
 		{
-			indexRequire(_index, ESA_SA());
-			indexRequire(_index, ESA_LCP());
-			indexRequire(_index, ESA_BWT());
+			indexRequire(_index, EsaSA());
+			indexRequire(_index, EsaLcp());
+			indexRequire(_index, EsaBwt());
 			resize(posList, length(_index));
 
 			if (!empty(indexSA(_index))) 
@@ -496,10 +496,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TSTree, typename TSpec, typename TValue, typename TSize >
 	inline void _fractionMerge(
 		Iter<TSTree, VSTree< BottomUp<TSpec> > > &it, 
-		_FractionCompound<TValue, TSize> &parent,
-		_FractionCompound<TValue, TSize> &child)
+		FractionCompound_<TValue, TSize> &parent,
+		FractionCompound_<TValue, TSize> &child)
 	{
-		typedef _FractionCompound<TValue, TSize>	TCompound;
+		typedef FractionCompound_<TValue, TSize>	TCompound;
 		typedef typename TCompound::TFraction		TFraction;
 		typedef typename TCompound::TFractionHeader	TFractionHeader;
 		typedef typename TCompound::TSet			TSet;
@@ -528,7 +528,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// maximal repeat push/leaf handlers of lcp-dfs-traversal
 	template < typename TSTree, typename TElement, typename TSpec >
-	inline void _dfsOnPush(Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it, TElement const &e) 
+	inline void _dfsOnPush(Iter<TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it, TElement const &e) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
 		_dfsOnPush((TBase&)it, e);
@@ -542,7 +542,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */	}
 
 	template < typename TSTree, typename TSpec >
-	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
+	inline void _dfsOnLeaf(Iter<TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) 
 	{
 		typedef Iter<TSTree, VSTree< BottomUp<> > > TBase;
 		_dfsOnLeaf((TBase&)it);
@@ -550,7 +550,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSTree>::Type	TValue;
 		typedef typename Size<TSTree>::Type		TSize;
 		typedef typename SAValue<TSTree>::Type	TSAValue;
-		typedef _FractionHeader<TSize>			TFractionHeader;
+		typedef FractionHeader_<TSize>			TFractionHeader;
 		typedef Pair<TValue, TFractionHeader>	TFraction;
 
 		push(it.setStack);
@@ -580,7 +580,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	template < typename TSTree, typename TSpec >
-	inline void goNext(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) {
+	inline void goNext(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) {
 		do {
 			if (it.canMerge && length(it.setStack) >= 2) {
 				_fractionMerge(it, topPrev(it.setStack), top(it.setStack));
@@ -597,7 +597,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSTree, typename TSpec >
 	inline typename VertexDescriptor<TSTree>::Type 
-	value(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
+	value(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > const &it) 
 	{
 		if (empty(it.history))
 			return it.vDesc;
@@ -608,7 +608,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSTree, typename TSpec >
 	inline typename Size<TSTree>::Type 
-	repLength(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) 
+	repLength(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > const &it) 
 	{
 		return top(it.history).range.i2;
 	}
@@ -617,27 +617,27 @@ namespace SEQAN_NAMESPACE_MAIN
 ///.Function.length.param.object.type:Spec.MaxRepeats Iterator
 	template < typename TSTree, typename TSpec >
 	inline typename Size<TSTree>::Type 
-	length(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > const &it) {
+	length(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > const &it) {
 		return it.countRepeats();
 	}
 //____________________________________________________________________________
 
 ///.Function.begin.param.object.type:Spec.MaxRepeats Iterator
 	template < typename TSTree, class TSpec >
-	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > >::Type
-	begin(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
+	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > >::Type
+	begin(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) 
 	{
-		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >	TIter;
+		typedef Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > >	TIter;
 		return typename Iterator<TIter>::Type(it);
 	}
 //____________________________________________________________________________
 
 ///.Function.end.param.object.type:Spec.MaxRepeats Iterator
 	template < typename TSTree, class TSpec >
-	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > >::Type
-	end(Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > &it) 
+	inline typename Iterator< Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > >::Type
+	end(Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > &it) 
 	{
-		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > >	TIter;
+		typedef Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > >	TIter;
 		return typename Iterator<TIter>::Type(it, MinimalCtor());
 	}
 
@@ -693,7 +693,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Size<TSTree>::Type		TSize;
 		typedef	Pair<TSize>						TPair;
 
-		typedef _FractionCompound<TValue, TSize>	TFractionCompound;
+		typedef FractionCompound_<TValue, TSize>	TFractionCompound;
 		typedef typename TFractionCompound::TSet	TSet;
 		typedef typename Iterator<TSet const>::Type	TSetIterator;
 
@@ -930,7 +930,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename TSTree, typename TSpec>
-	struct Size< Iter<TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
+	struct Size< Iter<TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > > {
 		typedef typename Size<TSTree>::Type Type;
 	};
 
@@ -960,8 +960,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// iterates over all maximal repeat structures
 	template <typename TSTree, typename TSpec>
-	struct Iterator< TSTree, _MaxRepeats<TSpec> > {
-		typedef Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > Type;
+	struct Iterator< TSTree, MaxRepeats_<TSpec> > {
+		typedef Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > Type;
 	};
 //____________________________________________________________________________
 
@@ -974,7 +974,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <typename TSTree, typename TSpec>
-	struct DefaultIteratorSpec< Iter< TSTree, VSTree< BottomUp<_MaxRepeats<TSpec> > > > > {
+	struct DefaultIteratorSpec< Iter< TSTree, VSTree< BottomUp<MaxRepeats_<TSpec> > > > > {
 		typedef MaxRepeatOccurrences Type;
 	};
 

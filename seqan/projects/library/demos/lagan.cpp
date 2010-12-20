@@ -29,7 +29,7 @@ void laganChaining(std::list<TSeed> & chain,
 	typedef SeedSet<TPosition, SimpleSeed, DefaultScore> TSeedSet;
 	TSeedSet seedset(limit, score_min, scoring_scheme);
 
-	typedef Index< TSegment, Index_QGram<SimpleShape > > TQGramIndex;
+	typedef Index< TSegment, IndexQGram<SimpleShape > > TQGramIndex;
 	TQGramIndex index_qgram(b);
 
 	typedef Finder<TQGramIndex> TFinder;

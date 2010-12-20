@@ -190,7 +190,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 	if (_streamEOF(file)) return;
 
 	char c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	int kickout = 0;
 	String<int> tempReadQual;
@@ -201,14 +201,14 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 		int avgReadQual = 0;
 		for (unsigned pos = 0; (!_streamEOF(file)) && (pos < pm_options.totalN); ++pos)
 		{
-			_parse_skipBlanks(file,c);
-			int qualA = (int) _parse_readDouble(file,c);
-			_parse_skipBlanks(file,c);
-			int qualC = (int) _parse_readDouble(file,c);
-			_parse_skipBlanks(file,c);
-			int qualG = (int) _parse_readDouble(file,c);
-			_parse_skipBlanks(file,c);
-			int qualT = (int) _parse_readDouble(file,c);
+			_parseSkipBlanks(file,c);
+			int qualA = (int) _parseReadDouble(file,c);
+			_parseSkipBlanks(file,c);
+			int qualC = (int) _parseReadDouble(file,c);
+			_parseSkipBlanks(file,c);
+			int qualG = (int) _parseReadDouble(file,c);
+			_parseSkipBlanks(file,c);
+			int qualT = (int) _parseReadDouble(file,c);
 			int qual = _max( _max(qualA, qualC), _max(qualG, qualT) );
 
 			avgReadQual += qual;
@@ -223,7 +223,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 		if((int)(avgReadQual/pm_options.totalN) < pm_options.qualityCutoff) 
 		{
 			++kickout;
-			_parse_skipLine2(file, c);
+			_parseSkipLine2(file, c);
 			continue;
 		}
 		else{
@@ -236,7 +236,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 		}
 //		::std::cout << ::std::endl;
 			
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 	}
 	::std::cout << " Readcount = " << count[0] << "\t";
 	::std::cout << " kicked out " << kickout << " low quality reads." << std::endl;
@@ -264,14 +264,14 @@ qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooser
 	if (_streamEOF(file)) return;
 
 	signed char c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	while (!_streamEOF(file))
 	{
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 		if (_streamEOF(file) || c != '+') continue;
 
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 
 		unsigned i = 0;
 		while (!(_streamEOF(file) || c == '\n' || c == '\r'))
@@ -307,22 +307,22 @@ qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChoo
 	if (_streamEOF(file)) return;
 
 	signed char c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	while (!_streamEOF(file))
 	{
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 		if (_streamEOF(file) || c != '+') continue;
 
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 
 		unsigned i = 0;
 		while (!(_streamEOF(file) || c == '\n' || c == '\r'))
 		{
-			int num = _parse_readNumber(file, c);
+			int num = _parseReadNumber(file, c);
 			qualitySum[i] += num;
 			++count[i];
-			_parse_skipBlanks(file,c);
+			_parseSkipBlanks(file,c);
 			if (++i == pm_options.totalN) break;
 		};
 	}
@@ -453,14 +453,14 @@ parseShapesFromFile(TShapes & shapeStrings,
 	if (_streamEOF(file)) return 0;
 	
 	signed char c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	while (!_streamEOF(file))
 	{
 		CharString shape;
 		_parse_readShape(file, c, shape);
 		appendValue(shapeStrings, shape);
-		_parse_skipLine2(file, c);
+		_parseSkipLine2(file, c);
 	}
 	return length(shapeStrings);
 }
@@ -897,8 +897,8 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 	bool atLeastOneFound = false;
 	while(!_streamEOF(file))
 	{
-		unsigned numErrors = _parse_readNumber(file,c);
-		_parse_skipWhitespace(file,c);
+		unsigned numErrors = _parseReadNumber(file,c);
+		_parseSkipWhitespace(file,c);
 		if(numErrors != errorsWanted)
 		{
 			_parse_skipLine(file,c);
@@ -912,13 +912,13 @@ parseGappedParams(RazerSOptions<TSpec> & r_options,TFile & file, ParamChooserOpt
 			_parse_skipLine(file,c); 
 			continue;
 		}
-		_parse_skipWhitespace(file,c);
-		unsigned currThreshold = (unsigned)(_parse_readNumber(file,c) * extrapolFactor); //when extrapolating from shorter read lengths, threshold can be at least linearly increased
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
+		unsigned currThreshold = (unsigned)(_parseReadNumber(file,c) * extrapolFactor); //when extrapolating from shorter read lengths, threshold can be at least linearly increased
+		_parseSkipWhitespace(file,c);
 
-		TFloat currLossrate = _parse_readEValue(file,c);
-		_parse_skipWhitespace(file,c);
-		unsigned currMeasure = _parse_readNumber(file,c); // potential matches measured on simulated reads
+		TFloat currLossrate = _parseReadEValue(file,c);
+		_parseSkipWhitespace(file,c);
+		unsigned currMeasure = _parseReadNumber(file,c); // potential matches measured on simulated reads
 
 		//std::cout << numErrors << "\t" << currShape << "\t" << currThreshold << "\t" << currLossrate << "\t" << currMeasure << std::endl;
 		if(currThreshold >= pm_options.minThreshold && currLossrate <= pm_options.optionLossRate /*&& val > bestSoFar*/)
@@ -1119,8 +1119,8 @@ chooseParams(RazerSOptions<TSpec> & r_options, ParamChooserOptions & pm_options)
 			char c = _streamGet(file);
 			while(!_streamEOF(file) && count < pm_options.totalN)
 			{
-				_parse_skipWhitespace(file,c);
-				errorDistribution[count] = _parse_readEValue(file,c);// + (TFloat) 1.0/maxN;
+				_parseSkipWhitespace(file,c);
+				errorDistribution[count] = _parseReadEValue(file,c);// + (TFloat) 1.0/maxN;
 				++count;
 			}
 			file.close();

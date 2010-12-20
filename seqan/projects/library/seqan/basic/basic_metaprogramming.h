@@ -53,13 +53,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TBool1, typename TBool2>
-	struct OR
+	struct Or
 	{
 		typedef True Type;
 	};
 
 	template <>
-	struct OR<False, False>
+	struct Or<False, False>
 	{
 		typedef False Type;
 	};
@@ -70,13 +70,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename TBool1, typename TBool2>
-	struct AND
+	struct And
 	{
 		typedef False Type;
 	};
 
 	template <>
-	struct AND<True, True>
+	struct And<True, True>
 	{
 		typedef True Type;
 	};
@@ -89,13 +89,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <bool Flag,class Type1, class Type2>
-	struct IF
+	struct If
 	{
 		typedef Type1 Type;
 	};
 
 	template <class Type1, class Type2>
-	struct IF<false,Type1,Type2>
+	struct If<false,Type1,Type2>
 	{
 		typedef Type2 Type;
 	};
@@ -108,14 +108,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <class Type1, class Type2>
-	struct TYPECMP
+	struct IsSameType
 	{
 		typedef False Type;
 		enum { VALUE = false };
 	};
 
 	template <class Type1>
-	struct TYPECMP<Type1, Type1>
+	struct IsSameType<Type1, Type1>
 	{
 		typedef True Type;
 		enum { VALUE = true };
@@ -130,7 +130,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct NilCase {};
 	  
 	template <int tag_,class Type_,class Next_ = NilCase>
-	struct CASE
+	struct Case
 	{
 		enum { tag = tag_ };
 		typedef Type_ Type;
@@ -138,7 +138,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <int tag,class Case>
-	class SWITCH
+	class Switch
 	{
 		typedef typename Case::Next NextCase;
 		enum
@@ -148,15 +148,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		};
 	public:
 		typedef typename 
-			IF<
+			If<
 				found,
 				typename Case::Type,
-				typename SWITCH<tag,NextCase>::Type
+				typename Switch<tag,NextCase>::Type
 			>::Type Type;
 	};
 
 	template <int tag>
-	class SWITCH<tag,NilCase>
+	class Switch<tag,NilCase>
 	{
 	public:
 		typedef NilCase Type;
@@ -176,17 +176,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <typename Worker, int I>
-	class LOOP {
+	class Loop {
 	public:
 		template <typename Arg>
 		static inline void run(Arg &arg) {
-			LOOP<Worker, I - 1>::run(arg);
+			Loop<Worker, I - 1>::run(arg);
 			Worker::body(arg, I);
 		}
 	};
 
 	template <typename Worker>
-	class LOOP<Worker, 0> {
+	class Loop<Worker, 0> {
 	public:
 		// end of loop
 		template <typename Arg>
@@ -199,17 +199,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 
 	template <typename Worker, int I>
-	class LOOP_REVERSE {
+	class LoopReverse {
 	public:
 		template <typename Arg>
 		static inline void run(Arg &arg) {
 			Worker::body(arg, I);
-			LOOP_REVERSE<Worker, I - 1>::run(arg);
+			LoopReverse<Worker, I - 1>::run(arg);
 		}
 	};
 
 	template <typename Worker>
-	class LOOP_REVERSE<Worker, 0> {
+	class LoopReverse<Worker, 0> {
 	public:
 		// end of loop
 		template <typename Arg>

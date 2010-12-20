@@ -39,16 +39,16 @@ struct Uniform;
 // ===========================================================================
 
 /**
-.Spec.Uniform PDF
-..signature:PDF<Uniform<T> >
-..general:Class.PDF
+.Spec.Uniform Pdf
+..signature:Pdf<Uniform<T> >
+..general:Class.Pdf
 ..summary:Uniform distribution probability density function over a closed interval [min, max].
-..param.T:Type of the values the PDF is defined on.
+..param.T:Type of the values the Pdf is defined on.
 ..cat:Random
 ..include:seqan/random.h
 */
 template <typename T>
-class PDF<Uniform<T> >
+class Pdf<Uniform<T> >
 {
 public:
     T _min;
@@ -56,16 +56,16 @@ public:
 
 // TODO(holtgrew): Switch to [begin, end) instead of [min, max] style?
 /**
-.MemfuncUniform PDF #PDF
-..class:Spec.Uniform PDF
-..summary:Constructor for uniform PDF.
-..signature:PDF<Uniform<T> >(min, max)
+.MemfuncUniform Pdf #Pdf
+..class:Spec.Uniform Pdf
+..summary:Constructor for uniform Pdf.
+..signature:Pdf<Uniform<T> >(min, max)
 ..param.min:Smallest value of interval.
 ...type:nolink:T
 ..param.max:Largest value of interval.
 ...type:nolink:T
 */
-    PDF(T min, T max)
+    Pdf(T min, T max)
             : _min(min), _max(max)
     {
         SEQAN_CHECKPOINT;
@@ -78,13 +78,13 @@ public:
 // ===========================================================================
 
 template <typename T>
-struct Value<PDF<Uniform<T> > >
+struct Value<Pdf<Uniform<T> > >
 {
     typedef T Type;
 };
 
 template <typename T>
-struct Value<const PDF<Uniform<T> > > : Value<PDF<Uniform<T> > > {};
+struct Value<const Pdf<Uniform<T> > > : Value<Pdf<Uniform<T> > > {};
 
 // ===========================================================================
 // Functions
@@ -93,11 +93,11 @@ struct Value<const PDF<Uniform<T> > > : Value<PDF<Uniform<T> > > {};
 // Pick an integral random number uniformly distributed.
 template <typename TRNG, typename T>
 inline
-typename Value<PDF<Uniform<T> > >::Type
-_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, True const &)
+typename Value<Pdf<Uniform<T> > >::Type
+_pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf, True const &)
 {
     SEQAN_CHECKPOINT;
-    typename Value<TRNG>::Type limit = (SupremumValue<TRNG>::VALUE / (pdf._max - pdf._min)) * (pdf._max - pdf._min);
+    typename Value<TRNG>::Type limit = (MaxValue<TRNG>::VALUE / (pdf._max - pdf._min)) * (pdf._max - pdf._min);
     typename Value<TRNG>::Type x;
     do {
         x = pickRandomNumber(rng);
@@ -109,19 +109,19 @@ _pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, True const &)
 // Pick a continuous random number uniformly distributed.
 template <typename TRNG, typename T>
 inline
-typename Value<PDF<Uniform<T> > >::Type
-_pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf, False const &)
+typename Value<Pdf<Uniform<T> > >::Type
+_pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf, False const &)
 {
     SEQAN_CHECKPOINT;
-    T x = static_cast<T>(pickRandomNumber(rng) - InfimumValue<TRNG>::VALUE);
-    x /= static_cast<T>(SupremumValue<TRNG>::VALUE) - static_cast<T>(InfimumValue<TRNG>::VALUE);
+    T x = static_cast<T>(pickRandomNumber(rng) - MinValue<TRNG>::VALUE);
+    x /= static_cast<T>(MaxValue<TRNG>::VALUE) - static_cast<T>(MinValue<TRNG>::VALUE);
     return pdf._min + x * (pdf._max - pdf._min);
 }
 
 template <typename TRNG, typename T>
 inline
-typename Value<PDF<Uniform<T> > >::Type
-pickRandomNumber(TRNG & rng, PDF<Uniform<T> > const & pdf)
+typename Value<Pdf<Uniform<T> > >::Type
+pickRandomNumber(TRNG & rng, Pdf<Uniform<T> > const & pdf)
 {
     SEQAN_CHECKPOINT;
     if (pdf._min == pdf._max)

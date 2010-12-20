@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //{
 
 	template <int I, typename T = void>
-	struct _SkewDC;
+	struct SkewDC_;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -96,8 +96,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-                filter[_SkewDC<m>::VALUE[i]] = true;
+			for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+                filter[SkewDC_<m>::VALUE[i]] = true;
 
             idx = length(in);
             idxMod = idx % m;
@@ -194,8 +194,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-            for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-                filter[_SkewDC<m>::VALUE[i]] = true;
+            for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+                filter[SkewDC_<m>::VALUE[i]] = true;
 
             tmp.i1 = length(in);
             idxMod = tmp.i1 % m;
@@ -274,9 +274,9 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
     inline typename Size< Pipe< TInput, Sampler<m, TCompression> > >::Type
 	length(Pipe< TInput, Sampler<m, TCompression> > const &me) {
         typename Size< Pipe< TInput, Sampler<m> > >::Type _size = 0, n = length(me.in);
-        for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-            if (_SkewDC<m>::VALUE[i])
-                _size += (n + m - _SkewDC<m>::VALUE[i]) / m;
+        for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+            if (SkewDC_<m>::VALUE[i])
+                _size += (n + m - SkewDC_<m>::VALUE[i]) / m;
             else
                 _size += n / m;
         return _size;
@@ -295,7 +295,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         typedef typename Value<Pipe>::Type  OutType;
         typedef typename Size<Pipe>::Type   SizeType;
 
-		typedef _PairDecrementer<TPair, TLimitsString, m>	Decrementer;
+		typedef PairDecrementer_<TPair, TLimitsString, m>	Decrementer;
 
 		TInput		&in;
         bool		filter[m];
@@ -315,8 +315,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
        
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-                filter[_SkewDC<m>::VALUE[i]] = true;
+			for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+                filter[SkewDC_<m>::VALUE[i]] = true;
 
 			setHost(localPos, limits);
 
@@ -396,7 +396,7 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         typedef typename Size<Pipe>::Type   SizeType;
         typedef typename OutType::T2        TTuple;
 
-		typedef _PairDecrementer<TPair, TLimitsString, m>	Decrementer;
+		typedef PairDecrementer_<TPair, TLimitsString, m>	Decrementer;
 
 		TInput		&in;
         bool		filter[m];
@@ -413,8 +413,8 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
         
         inline void prepare() {
             memset<sizeof(filter), 0>(filter);
-            for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-                filter[_SkewDC<m>::VALUE[i]] = true;
+            for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+                filter[SkewDC_<m>::VALUE[i]] = true;
 
 			setHost(localPos, limits);
 
@@ -508,9 +508,9 @@ The m-tuples are substrings of the input stream beginning at positions $i$, with
 			size = *it - old;
 			old = *it;
 			
-			for(unsigned i = 1; i <= _SkewDC<m>::VALUE[0]; i++)
-				if (_SkewDC<m>::VALUE[i])
-					sum += (size + m - _SkewDC<m>::VALUE[i]) / m;
+			for(unsigned i = 1; i <= SkewDC_<m>::VALUE[0]; i++)
+				if (SkewDC_<m>::VALUE[i])
+					sum += (size + m - SkewDC_<m>::VALUE[i]) / m;
 				else
 					sum += size / m;
 

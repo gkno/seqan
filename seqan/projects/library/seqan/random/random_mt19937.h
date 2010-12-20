@@ -39,32 +39,32 @@ struct MersenneTwister {};
 // ===========================================================================
 
 /**
-.Spec.Mersenne Twister RNG
-..general:Class.RNG
-..signature:RNG<MersenneTwister>
+.Spec.Mersenne Twister Rng
+..general:Class.Rng
+..signature:Rng<MersenneTwister>
 ..summary:Mersenne Twister 19937 Random Number Generator
 ..cat:Random
 ..include:seqan/random.h
 */
 template <>
-class RNG<MersenneTwister>
+class Rng<MersenneTwister>
 {
 public:
     ext::MTRand _mtRand;
 
 
 /**
-.Memfunc.Mersenne Twister RNG#RNG
-..class:Spec.Mersenne Twister RNG
-..summary:Constructor Mersenne Twister RNG.
-..signature:RNG<MersenneTwister>([seed])
+.Memfunc.Mersenne Twister Rng#Rng
+..class:Spec.Mersenne Twister Rng
+..summary:Constructor Mersenne Twister Rng.
+..signature:Rng<MersenneTwister>([seed])
 ..param.seed:Seed for the initialization of the Mersenne Twister, defaults to 0.
 ...type:nolink:double.
 */
-    RNG() : _mtRand(0lu)
+    Rng() : _mtRand(0lu)
     { SEQAN_CHECKPOINT; }
 
-    RNG(unsigned seed) : _mtRand(seed)
+    Rng(unsigned seed) : _mtRand(seed)
     { SEQAN_CHECKPOINT; }
     
     inline
@@ -81,46 +81,46 @@ public:
 // ===========================================================================
 
 template <>
-struct Value<RNG<MersenneTwister> >
+struct Value<Rng<MersenneTwister> >
 {
     typedef unsigned Type;
 };
 
 template <>
-struct Value<const RNG<MersenneTwister> > : Value<RNG<MersenneTwister> > {};
+struct Value<const Rng<MersenneTwister> > : Value<Rng<MersenneTwister> > {};
 
 template <>
-struct SupremumValue<RNG<MersenneTwister> >
+struct MaxValue<Rng<MersenneTwister> >
 {
-    typedef RNG<MersenneTwister> _TMT;
+    typedef Rng<MersenneTwister> _TMT;
     typedef Value<_TMT>::Type _TValue;
     static const _TValue VALUE;
 };
 
-const Value<RNG<MersenneTwister> >::Type SupremumValue<RNG<MersenneTwister> >::VALUE = SupremumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
+const Value<Rng<MersenneTwister> >::Type MaxValue<Rng<MersenneTwister> >::VALUE = MaxValue<Value<Rng<MersenneTwister> >::Type>::VALUE;
 
 template <>
-struct SupremumValue<const RNG<MersenneTwister> > : SupremumValue<RNG<MersenneTwister> > {};
+struct MaxValue<const Rng<MersenneTwister> > : MaxValue<Rng<MersenneTwister> > {};
 
 template <>
-struct InfimumValue<RNG<MersenneTwister> >
+struct MinValue<Rng<MersenneTwister> >
 {
-    typedef RNG<MersenneTwister> _TMT;
+    typedef Rng<MersenneTwister> _TMT;
     typedef Value<_TMT>::Type _TValue;
     static const _TValue VALUE;
 };
 
-const Value<RNG<MersenneTwister> >::Type InfimumValue<RNG<MersenneTwister> >::VALUE = InfimumValue<Value<RNG<MersenneTwister> >::Type>::VALUE;
+const Value<Rng<MersenneTwister> >::Type MinValue<Rng<MersenneTwister> >::VALUE = MinValue<Value<Rng<MersenneTwister> >::Type>::VALUE;
 
 template <>
-struct InfimumValue<const RNG<MersenneTwister> > : InfimumValue<RNG<MersenneTwister> > {};
+struct MinValue<const Rng<MersenneTwister> > : MinValue<Rng<MersenneTwister> > {};
 
 // ===========================================================================
 // Functions
 // ===========================================================================
 
 inline unsigned
-pickRandomNumber(RNG<MersenneTwister> & mt)
+pickRandomNumber(Rng<MersenneTwister> & mt)
 {
     SEQAN_CHECKPOINT;
 

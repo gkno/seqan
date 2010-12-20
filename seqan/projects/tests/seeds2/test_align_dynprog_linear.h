@@ -35,7 +35,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_resize_matrix)
 
     Matrix<int, 2> matrix;
 
-    _align_resizeMatrix(matrix, CharString("length 9"), CharString("length    11"), NeedlemanWunsch());
+    _alignResizeMatrix(matrix, CharString("length 9"), CharString("length    11"), NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(9u, length(matrix, 0));
     SEQAN_ASSERT_EQ(13u, length(matrix, 1));
@@ -52,7 +52,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_init_gutter_free)
     setLength(matrix, 1, 3);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), NeedlemanWunsch());
+    _alignInitGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<true, true, true, true>(), NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 1));
@@ -71,7 +71,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_init_gutter_not_free)
     setLength(matrix, 1, 3);
     resize(matrix);
 
-    _align_initGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), NeedlemanWunsch());
+    _alignInitGutter(matrix, Score<int, Simple>(1, -1, -2), AlignConfig<false, false, true, true>(), NeedlemanWunsch());
 
     SEQAN_ASSERT_EQ(0, value(matrix, 0, 0));
     SEQAN_ASSERT_EQ(-2, value(matrix, 0, 1));
@@ -90,9 +90,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_fill_matrix)
     DnaString const sequence1 = "CAA";
     Score<int, Simple> const scoringScheme(1, -1, -1);
 
-    _align_resizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
-    _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-    _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
+    _alignResizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
+    _alignInitGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+    _alignFillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
 
     int const expected[16] = {
          0, -1, -2, -3,
@@ -128,9 +128,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -1);
         
-        _align_resizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
-        _align_initGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
-        _align_fillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
+        _alignResizeMatrix(matrix, sequence0, sequence1, NeedlemanWunsch());
+        _alignInitGutter(matrix, scoringScheme, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        _alignFillMatrix(matrix, sequence0, sequence1, scoringScheme, NeedlemanWunsch());
 
         // Perform the traceback.
         Align<TString> alignment;
@@ -144,7 +144,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _align_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 0, 0, 0, 0, true, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
+        int score = _alignTraceback(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 0, 0, 0, 0, true, AlignConfig<false, false, false, false>(), NeedlemanWunsch());
         // std::cout << alignment;
         // // TODO(holtgrew): Debug code, remove when working.
         // {
@@ -153,7 +153,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_linear_traceback)
         //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
         //             std::cout << "| ";
         //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-        //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+        //                 if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
         //                     std::cout << "\tinf";
         //                 else
         //                     std::cout << "\t" << value(matrix, i, j, k);

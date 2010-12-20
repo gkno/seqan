@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TScore, typename TSc>
 inline void
-__matchScore(TScore&, 
+_matchScore(TScore&, 
 			 TSc) 
 {
 	// No operation
@@ -38,7 +38,7 @@ __matchScore(TScore&,
 
 template<typename TScore, typename TSc>
 inline void
-__mismatchScore(TScore&, 
+_mismatchScore(TScore&, 
 				TSc) 
 {
 	// No operation
@@ -48,7 +48,7 @@ __mismatchScore(TScore&,
 
 template<typename TValue, typename TSc>
 inline void
-__matchScore(Score<TValue, Simple>& sc, 
+_matchScore(Score<TValue, Simple>& sc, 
 			 TSc msc) 
 {
 	sc.data_match = msc;
@@ -58,7 +58,7 @@ __matchScore(Score<TValue, Simple>& sc,
 
 template<typename TValue, typename TSc>
 inline void
-__mismatchScore(Score<TValue, Simple>& sc, 
+_mismatchScore(Score<TValue, Simple>& sc, 
 				TSc mmsc) 
 {
 	sc.data_mismatch = mmsc;
@@ -92,8 +92,8 @@ public:
 	{
 		sc.data_gap_extend = scoreGapExtend(old_sc);
 		sc.data_gap_open = scoreGapOpen(old_sc);
-		__matchScore(sc, scoreMatch(old_sc));
-		__mismatchScore(sc, scoreMismatch(old_sc));
+		_matchScore(sc, scoreMatch(old_sc));
+		_mismatchScore(sc, scoreMismatch(old_sc));
 	}
 
 	Score(TValue gap_extend, TValue gap_open) 
@@ -106,8 +106,8 @@ public:
 	{
 		sc.data_gap_extend = gap_extend;
 		sc.data_gap_open = gap_open;
-		__matchScore(sc, match);
-		__mismatchScore(sc, mismatch);
+		_matchScore(sc, match);
+		_mismatchScore(sc, mismatch);
 	}
 };
 

@@ -24,7 +24,7 @@ int main()
 	LocalAlignmentFinder<> finder(ali2);
 	Score<int> scoring(2, -1, -2, 0);
 	while (localAlignment(ali2, finder, scoring, 2, WatermanEggert())) {
-		::std::cout << "Score = " << getScore(finder) << ::std::endl;
+		::std::cout << "Score = " << _getMatchScore(finder) << ::std::endl;
 		::std::cout << ali2;
 		::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali2, 0)) << ":" << (clippedEndPosition(row(ali2, 0))-1) << "]";
 		::std::cout << " and Seq2[" << clippedBeginPosition(row(ali2, 1)) << ":" <<  (clippedEndPosition(row(ali2, 1))-1) << "]" << ::std::endl << ::std::endl;
@@ -37,7 +37,7 @@ int main()
 	LocalAlignmentFinder<> finder3(ali3);
 	Score<int> scoring3(1, -1, -1, -1);
     while (localAlignment(ali3, finder3, scoring3, 5, WatermanEggert())) {
-        ::std::cout << "Score = " << getScore(finder3) << ::std::endl;
+        ::std::cout << "Score = " << _getMatchScore(finder3) << ::std::endl;
 	    ::std::cout << ali3;
 	    ::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali3, 0)) << ":" << (clippedEndPosition(row(ali3, 0))-1) << "]";
 	    ::std::cout << " and Seq2[" << clippedBeginPosition(row(ali3, 1)) << ":" <<  (clippedEndPosition(row(ali3, 1))-1) << "]" << ::std::endl << ::std::endl;
@@ -52,7 +52,7 @@ int main()
     LocalAlignmentFinder<> finder4(ali4);
     Score<int> scoring4(1, -1, -1, -1);
     while (localAlignment(ali4, finder4, scoring4, 5, -1, 8, BandedWatermanEggert())) {
-        ::std::cout << "Score = " << getScore(finder4) << ::std::endl;
+        ::std::cout << "Score = " << _getMatchScore(finder4) << ::std::endl;
         ::std::cout << ali4;
         ::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali4, 0)) << ":" << (clippedEndPosition(row(ali4, 0))-1) << "]";
         ::std::cout << " and Seq2[" << clippedBeginPosition(row(ali4, 1)) << ":" <<  (clippedEndPosition(row(ali4, 1))-1) << "]" << ::std::endl << ::std::endl;

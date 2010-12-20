@@ -31,20 +31,20 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 	
-//	#define __int128 SSE2_int128
+//	#define __int128 Sse2Int128
 	
 	#ifndef SEQAN_SSE2_INT128
 	#define SEQAN_SSE2_INT128
 	#endif
 		
 	// ATTENTION:
-	// The SSE2_int128 struct must be 16-byte aligned. Some allocators
+	// The Sse2Int128 struct must be 16-byte aligned. Some allocators
 	// don't ensure the correct alignment, e.g. the STL allocators.
-	// Either avoid STL classes holding SSE2_int128 structs (maps in find_pex.h)
+	// Either avoid STL classes holding Sse2Int128 structs (maps in find_pex.h)
 	// or avoid the SEQAN_USE_SSE2_WORDS define above.
 
 	// may become obsolete when 128-bit integers will be introduced
-	struct SSE2_int128
+	struct Sse2Int128
 	{
 	public:
 		union {
@@ -56,20 +56,20 @@ namespace SEQAN_NAMESPACE_MAIN
 //____________________________________________________________________________
 
 	public:
-		SSE2_int128();
-		SSE2_int128(SSE2_int128 const &);
-		SSE2_int128(__m128i const &);
-		SSE2_int128(__int64, __int64);
-		SSE2_int128(int, int, int, int);
-		SSE2_int128(short, short, short, short, short, short, short, short);
+		Sse2Int128();
+		Sse2Int128(Sse2Int128 const &);
+		Sse2Int128(__m128i const &);
+		Sse2Int128(__int64, __int64);
+		Sse2Int128(int, int, int, int);
+		Sse2Int128(short, short, short, short, short, short, short, short);
 
 		template <typename TValue>
-		SSE2_int128(TValue const &);
+		Sse2Int128(TValue const &);
 		
 		//____________________________________________________________________________
 		
 		template <typename TValue>
-		SSE2_int128 & operator = (TValue const &);
+		Sse2Int128 & operator = (TValue const &);
 		
 		//____________________________________________________________________________
 
@@ -86,14 +86,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		operator unsigned char ();
 */	};
 	
-	template <> struct _IsSimple<__m128i> { typedef True Type; };
-	template <> struct _IsSimple<SSE2_int128> { typedef True Type; };
+	template <> struct IsSimple_<__m128i> { typedef True Type; };
+	template <> struct IsSimple_<Sse2Int128> { typedef True Type; };
 
 //____________________________________________________________________________
 // clear
 
 inline void
-clear(SSE2_int128 &me)
+clear(Sse2Int128 &me)
 {
 	me.data.v = _mm_setzero_si128();
 }
@@ -102,158 +102,158 @@ clear(SSE2_int128 &me)
 // assign
 
 inline void
-assign(SSE2_int128 &me, SSE2_int128 const &other)
+assign(Sse2Int128 &me, Sse2Int128 const &other)
 {
 	me.data = other.data;
 }
 
 // 1x 128bit
 inline void
-assign(SSE2_int128 &me, __m128i const &other)
+assign(Sse2Int128 &me, __m128i const &other)
 {
 	me.data.v = other;
 }
-inline SSE2_int128::operator __m128i () const
+inline Sse2Int128::operator __m128i () const
 {
 	return data.v;
 }
 	
 // 64bit => 128bit
 inline void
-assign(SSE2_int128 &me, __int64 other)
+assign(Sse2Int128 &me, __int64 other)
 {
 	me.data.v = _mm_set_epi32(0, 0, other >> 32, other);
 }
 inline void
-assign(SSE2_int128 &me, __uint64 other)
+assign(Sse2Int128 &me, __uint64 other)
 {
 	me.data.v = _mm_set_epi32(0, 0, other >> 32, other);
 }
 // 64bit <= 128bit
-inline SSE2_int128::operator __int64 () const
+inline Sse2Int128::operator __int64 () const
 {
 	return data.v64[0];
 }
-/*inline SSE2_int128::operator __uint64 ()
+/*inline Sse2Int128::operator __uint64 ()
 {
 	return data.v64[0];
 }
 */
 // 32bit => 128bit
 inline void
-assign(SSE2_int128 &me, int other)
+assign(Sse2Int128 &me, int other)
 {
 	me.data.v = _mm_set_epi32(0, 0, 0, other);
 }
 inline void
-assign(SSE2_int128 &me, unsigned int other)
+assign(Sse2Int128 &me, unsigned int other)
 {
 	me.data.v = _mm_set_epi32(0, 0, 0, other);
 }
 // 32bit <= 128bit
-/*inline SSE2_int128::operator int ()
+/*inline Sse2Int128::operator int ()
 {
 	return data.v32[0];
 }
-inline SSE2_int128::operator unsigned int ()
+inline Sse2Int128::operator unsigned int ()
 {
 	return data.v32[0];
 }
 */
 // 16bit => 128bit
 inline void
-assign(SSE2_int128 &me, short other)
+assign(Sse2Int128 &me, short other)
 {
 	me.data.v = _mm_set_epi16(0, 0, 0, 0, 0, 0, 0, other);
 }
 inline void
-assign(SSE2_int128 &me, unsigned short other)
+assign(Sse2Int128 &me, unsigned short other)
 {
 	me.data.v = _mm_set_epi16(0, 0, 0, 0, 0, 0, 0, other);
 }
 // 16bit <= 128bit
-/*inline SSE2_int128::operator short ()
+/*inline Sse2Int128::operator short ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
-inline SSE2_int128::operator unsigned short ()
+inline Sse2Int128::operator unsigned short ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
 */
 // 8bit => 128bit
 inline void
-assign(SSE2_int128 &me, char other)
+assign(Sse2Int128 &me, char other)
 {
 	me.data.v = _mm_set_epi8(
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, other);
 }
 inline void
-assign(SSE2_int128 &me, signed char other)
+assign(Sse2Int128 &me, signed char other)
 {
 	me.data.v = _mm_set_epi8(
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, other);
 }
 inline void
-assign(SSE2_int128 &me, unsigned char other)
+assign(Sse2Int128 &me, unsigned char other)
 {
 	me.data.v = _mm_set_epi8(
 		0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, other);
 }
 // 8bit <= 128bit
-/*inline SSE2_int128::operator char ()
+/*inline Sse2Int128::operator char ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
-inline SSE2_int128::operator signed char ()
+inline Sse2Int128::operator signed char ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
-inline SSE2_int128::operator unsigned char ()
+inline Sse2Int128::operator unsigned char ()
 {
 	return _mm_extract_epi16(data.v, 0);
 }
 	
-inline SSE2_int128::operator bool () const
+inline Sse2Int128::operator bool () const
 {
-	return (__int64)(SSE2_int128)_mm_or_si128(data.v, _mm_unpackhi_epi64(data.v, data.v));
+	return (__int64)(Sse2Int128)_mm_or_si128(data.v, _mm_unpackhi_epi64(data.v, data.v));
 }
 */
 //____________________________________________________________________________
 // constructors
 
-inline SSE2_int128::SSE2_int128()
+inline Sse2Int128::Sse2Int128()
 {
 	clear(*this);
 }
 	
-inline SSE2_int128::SSE2_int128(SSE2_int128 const &other)
+inline Sse2Int128::Sse2Int128(Sse2Int128 const &other)
 {
 	assign(*this, other);
 }
 
-inline SSE2_int128::SSE2_int128(__m128i const &other)
+inline Sse2Int128::Sse2Int128(__m128i const &other)
 {
 	assign(*this, other);
 }
 
 // 2x 64bit
-inline SSE2_int128::SSE2_int128(__int64 q1, __int64 q0)
+inline Sse2Int128::Sse2Int128(__int64 q1, __int64 q0)
 {
 	data.v = _mm_set_epi32(q1 >> 32, q1, q0 >> 32, q0);
 }
 
 // 4x 32bit
-inline SSE2_int128::SSE2_int128(int q3, int q2, int q1, int q0)
+inline Sse2Int128::Sse2Int128(int q3, int q2, int q1, int q0)
 {
 	data.v = _mm_set_epi32(q3, q2, q1, q0);
 }
 
 // 8x 16bit
-inline SSE2_int128::SSE2_int128(
+inline Sse2Int128::Sse2Int128(
 				   short q7, short q6, short q5, short q4,
 				   short q3, short q2, short q1, short q0)
 {
@@ -261,7 +261,7 @@ inline SSE2_int128::SSE2_int128(
 }
 	
 template <typename TValue>
-inline SSE2_int128::SSE2_int128(TValue const &other)
+inline Sse2Int128::Sse2Int128(TValue const &other)
 {
 	assign(*this, other);
 }
@@ -270,8 +270,8 @@ inline SSE2_int128::SSE2_int128(TValue const &other)
 // operator =
 
 template <typename TValue>
-inline SSE2_int128 &
-SSE2_int128::operator = (TValue const &other)
+inline Sse2Int128 &
+Sse2Int128::operator = (TValue const &other)
 {
 	assign(*this, other);
 	return *this;
@@ -280,44 +280,44 @@ SSE2_int128::operator = (TValue const &other)
 //____________________________________________________________________________
 // logical operators
 
-inline SSE2_int128
-operator & (SSE2_int128 const &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator & (Sse2Int128 const &a, Sse2Int128 const &b)
 {
 	return _mm_and_si128((__m128i)a, (__m128i)b);
 }
-inline SSE2_int128
-operator &= (SSE2_int128 &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator &= (Sse2Int128 &a, Sse2Int128 const &b)
 {
 	a.data.v = _mm_and_si128((__m128i)a, (__m128i)b);
 	return a;
 }
 
-inline SSE2_int128
-operator | (SSE2_int128 const &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator | (Sse2Int128 const &a, Sse2Int128 const &b)
 {
 	return _mm_or_si128((__m128i)a, (__m128i)b);
 }
-inline SSE2_int128
-operator |= (SSE2_int128 &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator |= (Sse2Int128 &a, Sse2Int128 const &b)
 {
 	a.data.v = _mm_or_si128((__m128i)a, (__m128i)b);
 	return a;
 }
 
-inline SSE2_int128
-operator ^ (SSE2_int128 const &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator ^ (Sse2Int128 const &a, Sse2Int128 const &b)
 {
 	return _mm_xor_si128((__m128i)a, (__m128i)b);
 }
-inline SSE2_int128
-operator ^= (SSE2_int128 &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator ^= (Sse2Int128 &a, Sse2Int128 const &b)
 {
 	a.data.v = _mm_xor_si128((__m128i)a, (__m128i)b);
 	return a;
 }
 
-inline SSE2_int128
-operator ~ (SSE2_int128 const &a)
+inline Sse2Int128
+operator ~ (Sse2Int128 const &a)
 {
 	__m128i _a = (__m128i)a;
 	return _mm_xor_si128(_a, _mm_cmpeq_epi32(_a, _a));
@@ -326,102 +326,102 @@ operator ~ (SSE2_int128 const &a)
 //____________________________________________________________________________
 // shift operators
 
-inline SSE2_int128
-operator << (SSE2_int128 const &a, int n)
+inline Sse2Int128
+operator << (Sse2Int128 const &a, int n)
 {
 	return _mm_or_si128(
 		// n <= 64
 		_mm_or_si128(
-			_mm_sll_epi64((__m128i)a, (SSE2_int128)n),
+			_mm_sll_epi64((__m128i)a, (Sse2Int128)n),
 			_mm_srl_epi64(
 				_mm_unpacklo_epi64(_mm_setzero_si128(), (__m128i)a),
-				(SSE2_int128)(64-n)
+				(Sse2Int128)(64-n)
 			)
 		),
 		// n >= 64
 		_mm_sll_epi64(
 			_mm_unpacklo_epi64(_mm_setzero_si128(), (__m128i)a),
-			(SSE2_int128)(n-64)
+			(Sse2Int128)(n-64)
 		)
 	);
 }
-inline SSE2_int128
-operator <<= (SSE2_int128 &a, int n)
+inline Sse2Int128
+operator <<= (Sse2Int128 &a, int n)
 {
 	a.data.v = _mm_or_si128(
 		// n <= 64
 		_mm_or_si128(
-			_mm_sll_epi64((__m128i)a, (SSE2_int128)n),
+			_mm_sll_epi64((__m128i)a, (Sse2Int128)n),
 			_mm_srl_epi64(
 				_mm_unpacklo_epi64(_mm_setzero_si128(), (__m128i)a),
-				(SSE2_int128)(64-n)
+				(Sse2Int128)(64-n)
 			)
 		),
 		// n >= 64
 		_mm_sll_epi64(
 			_mm_unpacklo_epi64(_mm_setzero_si128(), (__m128i)a),
-			(SSE2_int128)(n-64)
+			(Sse2Int128)(n-64)
 		)
 	);
 	return a;
 }
-inline SSE2_int128
-operator << (SSE2_int128 const &a, unsigned int n)
+inline Sse2Int128
+operator << (Sse2Int128 const &a, unsigned int n)
 {
 	return a << (int)n;
 }
-inline SSE2_int128
-operator <<= (SSE2_int128 &a, unsigned int n)
+inline Sse2Int128
+operator <<= (Sse2Int128 &a, unsigned int n)
 {
 	return a <<= (int)n;
 }
 
-inline SSE2_int128
-operator >> (SSE2_int128 const &a, int n)
+inline Sse2Int128
+operator >> (Sse2Int128 const &a, int n)
 {
 	return _mm_or_si128(
 		// n <= 64
 		_mm_or_si128(
-			_mm_srl_epi64((__m128i)a, (SSE2_int128)n),
+			_mm_srl_epi64((__m128i)a, (Sse2Int128)n),
 			_mm_sll_epi64(
 				_mm_unpackhi_epi64(a.data.v, _mm_setzero_si128()),
-				(SSE2_int128)(64-n)
+				(Sse2Int128)(64-n)
 			)
 		),
 		// n >= 64
 		_mm_srl_epi64(
 			_mm_unpackhi_epi64((__m128i)a, _mm_setzero_si128()),
-			(SSE2_int128)(n-64)
+			(Sse2Int128)(n-64)
 		)
 	);
 }
-inline SSE2_int128
-operator >>= (SSE2_int128 &a, int n)
+inline Sse2Int128
+operator >>= (Sse2Int128 &a, int n)
 {
 	a.data.v = _mm_or_si128(
 		// n <= 64
 		_mm_or_si128(
-			_mm_srl_epi64((__m128i)a, (SSE2_int128)n),
+			_mm_srl_epi64((__m128i)a, (Sse2Int128)n),
 			_mm_sll_epi64(
 				_mm_unpackhi_epi64((__m128i)a, _mm_setzero_si128()),
-				(SSE2_int128)(64-n)
+				(Sse2Int128)(64-n)
 			)
 		),
 		// n >= 64
 		_mm_srl_epi64(
 			_mm_unpackhi_epi64((__m128i)a, _mm_setzero_si128()),
-			(SSE2_int128)(n-64)
+			(Sse2Int128)(n-64)
 		)
 	);
 	return a;
 }
-inline SSE2_int128
-operator >> (SSE2_int128 const &a, unsigned int n)
+inline Sse2Int128
+operator >> (Sse2Int128 const &a, unsigned int n)
 {
 	return a >> (int)n;
 }
-inline SSE2_int128
-operator >>= (SSE2_int128 &a, unsigned int n)
+inline Sse2Int128
+operator >>= (Sse2Int128 &a, unsigned int n)
 {
 	return a >>= (int)n;
 }
@@ -430,10 +430,10 @@ operator >>= (SSE2_int128 &a, unsigned int n)
 // artihmetic operators
 
 //template <typename T>
-inline SSE2_int128
-operator + (SSE2_int128 const &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator + (Sse2Int128 const &a, Sse2Int128 const &b)
 {
-	static const __m128i carry = SSE2_int128(0, 1, 0, 0);
+	static const __m128i carry = Sse2Int128(0, 1, 0, 0);
 
 	union {
 		__uint64 v64[2];
@@ -448,10 +448,10 @@ operator + (SSE2_int128 const &a, SSE2_int128 const &b)
 }
 
 //template <typename T>
-inline SSE2_int128
-operator - (SSE2_int128 const &a, SSE2_int128 const &b)
+inline Sse2Int128
+operator - (Sse2Int128 const &a, Sse2Int128 const &b)
 {
-	static const __m128i carry = SSE2_int128(0, 1, 0, 0);
+	static const __m128i carry = Sse2Int128(0, 1, 0, 0);
 
 	union {
 		__uint64 v64[2];
@@ -471,17 +471,17 @@ operator - (SSE2_int128 const &a, SSE2_int128 const &b)
 // compares
 
 inline bool
-operator == (SSE2_int128 const &a, SSE2_int128 const &b)
+operator == (Sse2Int128 const &a, Sse2Int128 const &b)
 {
 	__m128i _e = _mm_cmpeq_epi32((__m128i)a, (__m128i)b);
-	return ((__int64)(SSE2_int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) == ~(__int64)0;
+	return ((__int64)(Sse2Int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) == ~(__int64)0;
 }
 
 inline bool
-operator != (SSE2_int128 const &a, SSE2_int128 const &b)
+operator != (Sse2Int128 const &a, Sse2Int128 const &b)
 {
 	__m128i _e = _mm_cmpeq_epi32((__m128i)a, (__m128i)b);
-	return ((__int64)(SSE2_int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) != ~(__int64)0;
+	return ((__int64)(Sse2Int128)_mm_and_si128(_e, _mm_unpackhi_epi64(_e, _e))) != ~(__int64)0;
 }
 	
 // TODO: operator <, <=, >, >=

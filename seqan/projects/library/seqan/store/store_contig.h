@@ -120,7 +120,7 @@ struct ContigStoreElement
 
 template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec> 
 const typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type 
-ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = SupremumValue<typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type>::VALUE; 
+ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = MaxValue<typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -165,7 +165,7 @@ struct ContigFile
 
 template <typename _TSpec> 
 const typename Id<ContigFile<_TSpec> >::Type 
-ContigFile<_TSpec>::INVALID_ID = SupremumValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE; 
+ContigFile<_TSpec>::INVALID_ID = MaxValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 

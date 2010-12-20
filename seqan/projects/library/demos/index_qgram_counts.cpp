@@ -16,8 +16,8 @@ int main ()
 
 ///Then we create an @Class.Index@ of our @Class.StringSet@ and
 ///a @Class.Finder@ of the @Class.Index@.
-	typedef Index< StringSet<String<char> >, Index_QGram<UngappedShape<2> > > TIndex;
-	typedef Infix<Fibre<TIndex, QGram_Counts>::Type const>::Type TCounts;
+	typedef Index< StringSet<String<char> >, IndexQGram<UngappedShape<2> > > TIndex;
+	typedef Infix<Fibre<TIndex, QGramCounts>::Type const>::Type TCounts;
 
   TIndex myIndex(mySet);
 

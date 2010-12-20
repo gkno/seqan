@@ -30,8 +30,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //DISABLED .Class.Pattern.param.TSpec.type:Spec.Quasar
 
-struct _Quasar;
-typedef Tag<_Quasar> Quasar;
+struct Quasar_;
+typedef Tag<Quasar_> Quasar;
 
 //////////////////////////////////////////////////////////////////////////////
 

@@ -239,7 +239,7 @@ goNext(TFile & file,
 	if (!atEnd(file,it)) 
 	{
 		if(it.data_pos == it.data_next_pos)
-			getNextHspFilePos(file,it);
+			_getNextHspFilePos(file,it);
 		if(it.data_pos == it.data_next_pos)
 			it.data_at_end = true;
 		else
@@ -377,7 +377,7 @@ SEQAN_CHECKPOINT
 
 template<typename TBlastHsp, typename TFile>
 inline void
-getNextHspFilePos(TFile & file,
+_getNextHspFilePos(TFile & file,
 				  Iter<BlastHit<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HspIterator> >& it)
 {
 	typedef typename Position<TFile>::Type TPosition;
@@ -386,13 +386,13 @@ getNextHspFilePos(TFile & file,
 	char c = 'e';
 	(it.data_host->data_host)->act_c = c;
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	_parse_skipLine(file,c);
 
 	TPosition next_event_pos;
 	bool last_hit = true;
 	String<char> delim = ">";
-	if(_parse_untilBeginLine(file,c,'>'))
+	if(_parseUntilBeginLine(file,c,'>'))
 	{
 		last_hit = false;
 		next_event_pos = _streamTellG(file);
@@ -403,7 +403,7 @@ getNextHspFilePos(TFile & file,
 	c = 'e';
 
 	String<char> search = "Score";
-	if(_parse_untilBeginLine(file,c,search,5))
+	if(_parseUntilBeginLine(file,c,search,5))
 	{
 		if(!last_hit && (_streamTellG(file) > next_event_pos))
 	        _streamSeekG(file,it.data_pos);

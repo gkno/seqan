@@ -156,13 +156,13 @@ template <typename TStream, typename TChar>
     CharString tmp;
     // Read "@HD".
     c = _streamGet(stream);
-    tmp = _parse_readWordUntilWhitespace(stream, c);
+    tmp = _parseReadWordUntilWhitespace(stream, c);
     if (tmp != CharString("@HD"))
         std::cerr << "WARNING: File did not begin with \"@HD\", was: \"" << tmp << "\"" << std::endl;
     // Skip "\t".
-    _parse_skipWhitespace(stream, c);
+    _parseSkipWhitespace(stream, c);
     // Read "VN:1.0".
-    tmp = _parse_readWordUntilWhitespace(stream, c);
+    tmp = _parseReadWordUntilWhitespace(stream, c);
     if (tmp != CharString("VN:1.0"))
         std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
     // Skip to and after end of line.
@@ -244,15 +244,15 @@ bool readWitRecord(TStream &stream, TString &readName,
         return false;
 
     // Read line.
-    _parse_readIdentifier(stream, readName, c);
-    _parse_skipWhitespace(stream, c);
-    score = _parse_readNumber(stream, c);
-    _parse_skipWhitespace(stream, c);
-    _parse_readIdentifier(stream, referenceSequenceName, c);
-    _parse_skipWhitespace(stream, c);
-    first = _parse_readNumber(stream, c);
-    _parse_skipWhitespace(stream, c);
-    last = _parse_readNumber(stream, c);
+    _parseReadIdentifier(stream, readName, c);
+    _parseSkipWhitespace(stream, c);
+    score = _parseReadNumber(stream, c);
+    _parseSkipWhitespace(stream, c);
+    _parseReadIdentifier(stream, referenceSequenceName, c);
+    _parseSkipWhitespace(stream, c);
+    first = _parseReadNumber(stream, c);
+    _parseSkipWhitespace(stream, c);
+    last = _parseReadNumber(stream, c);
 //     std::cout << "readName, score, first, last, " << readName << ", " << score << ", " << first << ", " << last << std::endl;
     
     // Skip to and after end of line.

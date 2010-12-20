@@ -183,50 +183,50 @@ SEQAN_CHECKPOINT
     String<char> query_string;
 	String<char> db_string;
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	c = _streamGet(file);
-	_parse_skipWhitespace(file,c);
-	pfloat = (float)_parse_readEValue(file, c);
+	_parseSkipWhitespace(file,c);
+	pfloat = (float)_parseReadEValue(file, c);
 	hsp.bits = pfloat;
-	if(_parse_lineUntil(file,c,'('))
+	if(_parseLineUntil(file,c,'('))
 	{
 		c = _streamGet(file);
-		pfloat = _parse_readFloat(file, c);
+		pfloat = _parseReadFloat(file, c);
 		hsp.score = pfloat;
 	}
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	String<char> query = "Expect";
-	if(_parse_lineUntil(file,c,query,6))
+	if(_parseLineUntil(file,c,query,6))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '=')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pdouble = _parse_readEValue(file, c);
+		_parseSkipWhitespace(file,c);
+		pdouble = _parseReadEValue(file, c);
 		hsp.expect = pdouble;
 	}
 
 	query = "Identities";
-	if(_parse_untilBeginLine(file,c,query,10,3))
+	if(_parseUntilBeginLine(file,c,query,10,3))
 	{
-		_parse_lineUntil(file,c,'(');
+		_parseLineUntil(file,c,'(');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.identity = pint;
 	}
 
 	query = "Gaps";
-	if(_parse_lineUntil(file,c,query,4))
+	if(_parseLineUntil(file,c,query,4))
 	{
-		_parse_lineUntil(file,c,'=');
+		_parseLineUntil(file,c,'=');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.abs_gaps = pint;
-		_parse_lineUntil(file,c,'(');
+		_parseLineUntil(file,c,'(');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.gaps = pint;
 	}
 	//else
@@ -236,24 +236,24 @@ SEQAN_CHECKPOINT
 	//}
 
 	query = "Strand";
-	if(_parse_untilBeginLine(file,c,query,6,3))
+	if(_parseUntilBeginLine(file,c,query,6,3))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '=')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pword = _parse_readWord(file, c);
+		_parseSkipWhitespace(file,c);
+		pword = _parseReadWord(file, c);
 		if(pword == "Plus")
 			hsp.query_strand = true;
 		else
 			hsp.query_strand = false;
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '/')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pword = _parse_readWord(file, c);
+		_parseSkipWhitespace(file,c);
+		pword = _parseReadWord(file, c);
 		if(pword == "Plus")
 			hsp.db_strand = true;
 		else
@@ -262,44 +262,44 @@ SEQAN_CHECKPOINT
 
 	bool first = true;
 	query = "Query";
-	if(_parse_untilBeginLine(file,c,query,5))
+	if(_parseUntilBeginLine(file,c,query,5))
 	{
 		bool in_hsp = true;
 		while(in_hsp)
 		{
 			int end_query,end_db = -1;
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
 			if(c == ':')
 				c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			//TPosition act_posQ = _streamTellG(file);
 			if(first)
 				hsp.query_begin = pint;
-			query_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_query = _parse_readNumber(file,c);
+			query_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_query = _parseReadNumber(file,c);
 			query = "Sbjct";
-			_parse_untilBeginLine(file,c,query,5);
-			_parse_skipWhitespace(file,c);
+			_parseUntilBeginLine(file,c,query,5);
+			_parseSkipWhitespace(file,c);
 			if(c == ':')
 				c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			//TPosition act_posS = _streamTellG(file);
 			if(first)
 				hsp.db_begin = pint;
-			db_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_db = _parse_readNumber(file,c);
+			db_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_db = _parseReadNumber(file,c);
 			first = false;
 			String<TChar> delim = "QS>R";
-			if(_parse_untilBeginLineOneOf(file,c,delim,4))
+			if(_parseUntilBeginLineOneOf(file,c,delim,4))
 			{
 				TPosition pos = _streamTellG(file);
-				pword = _parse_readWord(file,c);
+				pword = _parseReadWord(file,c);
 				
 				//still in the same HSP
 				if(pword == "Query")
@@ -472,87 +472,87 @@ SEQAN_CHECKPOINT
 	act_pos = _streamTellG(file);
 
 	//String<char> query = "Score";
-	//if(_parse_untilBeginLine(file,c,query,6))
+	//if(_parseUntilBeginLine(file,c,query,6))
 	//{
 	String<char> query_string;
 	String<char> db_string;
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	if(c == '=')
 		c = _streamGet(file);
-	_parse_skipWhitespace(file,c);
-	pfloat = (float)_parse_readEValue(file, c);
+	_parseSkipWhitespace(file,c);
+	pfloat = (float)_parseReadEValue(file, c);
 	hsp.bits = pfloat;
-	if(_parse_lineUntil(file,c,'('))
+	if(_parseLineUntil(file,c,'('))
 	{
 		c = _streamGet(file);
-		pfloat = _parse_readFloat(file, c);
+		pfloat = _parseReadFloat(file, c);
 		hsp.score = pfloat;
 	}
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	String<char> query = "Expect";
-	if(_parse_lineUntil(file,c,query,6))
+	if(_parseLineUntil(file,c,query,6))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '=')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pdouble = _parse_readEValue(file, c);
+		_parseSkipWhitespace(file,c);
+		pdouble = _parseReadEValue(file, c);
 		hsp.expect = pdouble;
 	}
 
 	query = "Identities";
-	if(_parse_untilBeginLine(file,c,query,10,3))
+	if(_parseUntilBeginLine(file,c,query,10,3))
 	{
-		_parse_lineUntil(file,c,'(');
+		_parseLineUntil(file,c,'(');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.identity = pint;
 	}
 
 	query = "Positives";
-	if(_parse_lineUntil(file,c,query,9))
+	if(_parseLineUntil(file,c,query,9))
 	{
-		_parse_until(file,c,'(');
+		_parseUntil(file,c,'(');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.positives = pint;
 	}
 
 	query = "Gaps";
-	if(_parse_lineUntil(file,c,query,4))
+	if(_parseLineUntil(file,c,query,4))
 	{
-		_parse_lineUntil(file,c,'=');
+		_parseLineUntil(file,c,'=');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.abs_gaps = pint;
-		_parse_lineUntil(file,c,'(');
+		_parseLineUntil(file,c,'(');
 		c = _streamGet(file);
-		pint = _parse_readNumber(file, c);
+		pint = _parseReadNumber(file, c);
 		hsp.gaps = pint;
 	}
 
 	query = "Strand";
-	if(_parse_untilBeginLine(file,c,query,6,3))
+	if(_parseUntilBeginLine(file,c,query,6,3))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '=')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pword = _parse_readWord(file, c);
+		_parseSkipWhitespace(file,c);
+		pword = _parseReadWord(file, c);
 		if(pword == "Plus")
 			hsp.query_strand = true;
 		else
 			hsp.query_strand = false;
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		if(c == '/')
 			c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		pword = _parse_readWord(file, c);
+		_parseSkipWhitespace(file,c);
+		pword = _parseReadWord(file, c);
 		if(pword == "Plus")
 			hsp.db_strand = true;
 		else
@@ -561,44 +561,44 @@ SEQAN_CHECKPOINT
 
 	bool first = true;
 	query = "Query";
-	if(_parse_untilBeginLine(file,c,query,5))
+	if(_parseUntilBeginLine(file,c,query,5))
 	{
 		bool in_hsp = true;
 		while(in_hsp)
 		{
 			int end_query,end_db = -1;
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
 			if(c == ':')
 				c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			//TPosition act_posQ = _streamTellG(file);
 			if(first)
 				hsp.query_begin = pint;
-			query_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_query = _parse_readNumber(file,c);
+			query_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_query = _parseReadNumber(file,c);
 			query = "Sbjct";
-			_parse_untilBeginLine(file,c,query,5);
-			_parse_skipWhitespace(file,c);
+			_parseUntilBeginLine(file,c,query,5);
+			_parseSkipWhitespace(file,c);
 			if(c == ':')
 				c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			//TPosition act_posS = _streamTellG(file);
 			if(first)
 				hsp.db_begin = pint;
-			db_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_db = _parse_readNumber(file,c);
+			db_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_db = _parseReadNumber(file,c);
 			first = false;
 			String<TChar> delim = "QS>R";
-			if(_parse_untilBeginLineOneOf(file,c,delim,4))
+			if(_parseUntilBeginLineOneOf(file,c,delim,4))
 			{
 				TPosition pos = _streamTellG(file);
-				pword = _parse_readWord(file,c);
+				pword = _parseReadWord(file,c);
 			//	_streamSeekG(file,pos);
 				
 				//still in the same HSP
@@ -755,54 +755,54 @@ SEQAN_CHECKPOINT
 	String<char> query_string;
 	String<char> db_string;
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	String<char> query = "Expect";
-	if(_parse_lineUntil(file,c,query,6))
+	if(_parseLineUntil(file,c,query,6))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		c = _streamGet(file); // = 
-		_parse_skipWhitespace(file,c);
-		pdouble = _parse_readEValue(file, c);
+		_parseSkipWhitespace(file,c);
+		pdouble = _parseReadEValue(file, c);
 		hsp.expect = pdouble;
 	}
 
 	bool first = true;
 	query = "Query";
-	if(_parse_untilBeginLine(file,c,query,5))
+	if(_parseUntilBeginLine(file,c,query,5))
 	{
 		bool in_hsp = true;
 		while(in_hsp)
 		{
 			int end_query,end_db = -1;
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
 			c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			if(first)
 				hsp.query_begin = pint;
-			query_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_query = _parse_readNumber(file,c);
+			query_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_query = _parseReadNumber(file,c);
 			query = "Sbjct";
-			_parse_untilBeginLine(file,c,query,5);
-			_parse_skipWhitespace(file,c);
+			_parseUntilBeginLine(file,c,query,5);
+			_parseSkipWhitespace(file,c);
 			c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file,c);
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file,c);
+			_parseSkipWhitespace(file,c);
 			if(first)
 				hsp.db_begin = pint;
-			db_string += _parse_readAlignmentString(file,c);
-			_parse_skipWhitespace(file,c);
-			end_db = _parse_readNumber(file,c);
+			db_string += _parseReadAlignmentString(file,c);
+			_parseSkipWhitespace(file,c);
+			end_db = _parseReadNumber(file,c);
 			first = false;
 			String<TChar> delim = "QS>R";
-			if(_parse_untilBeginLineOneOf(file,c,delim,4))
+			if(_parseUntilBeginLineOneOf(file,c,delim,4))
 			{
 				TPosition pos = _streamTellG(file);
-				pword = _parse_readWord(file,c);
+				pword = _parseReadWord(file,c);
 				
 				//still in the same HSP
 				if(pword == "Query")
@@ -1462,10 +1462,10 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.Blast#getScore:
+.Function.Blast#_getMatchScore:
 ..cat:Blast
 ..summary:The Smith-Waterman score associated with a Blast HSP.
-..signature:getScore(object);
+..signature:_getMatchScore(object);
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:The score.
@@ -1474,7 +1474,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TBlastSpec>
 inline float 
-getScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
+_getMatchScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
 {
 SEQAN_CHECKPOINT
 	return blastHsp.score;

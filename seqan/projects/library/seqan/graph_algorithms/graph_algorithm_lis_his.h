@@ -252,12 +252,12 @@ globalAlignment(TAlign& align,
 			{
 				++lenMatch;
 			} else {
-				if (oldI < iBegin) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
-				if (oldJ < jBegin) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
+				if (oldI < iBegin) _alignTracePrint(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
+				if (oldJ < jBegin) _alignTracePrint(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
 				oldI = iBegin + lenMatch;
 				oldJ = jBegin + lenMatch;
 			
-				_align_trace_print(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
+				_alignTracePrint(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
 				totalLen += lenMatch;
 				lenMatch = 1;
 				iBegin = pos1[z].first;
@@ -265,16 +265,16 @@ globalAlignment(TAlign& align,
 			}
 		}
 		// Process last match
-		if (oldI < iBegin) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
-		if (oldJ < jBegin) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
+		if (oldI < iBegin) _alignTracePrint(align, str, id1, oldI, id2, (TSize) 0, (TSize) iBegin - oldI, 1);
+		if (oldJ < jBegin) _alignTracePrint(align, str, id1, (TSize) 0, id2, oldJ, (TSize) jBegin - oldJ, 2);
 		oldI = iBegin + lenMatch;
 		oldJ = jBegin + lenMatch;
-		_align_trace_print(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
+		_alignTracePrint(align, str, id1, iBegin, id2, jBegin, lenMatch, 0);
 		totalLen += lenMatch;
 	}
 	// Process left overs
-	if (oldI < length(str[0])) _align_trace_print(align, str, id1, oldI, id2, (TSize) 0, (TSize) length(str[0]) - oldI,  1);
-	if (oldJ < length(str[1])) _align_trace_print(align, str, id1, (TSize) 0, id2, oldJ, (TSize) length(str[1]) - oldJ, 2);
+	if (oldI < length(str[0])) _alignTracePrint(align, str, id1, oldI, id2, (TSize) 0, (TSize) length(str[0]) - oldI,  1);
+	if (oldJ < length(str[1])) _alignTracePrint(align, str, id1, (TSize) 0, id2, oldJ, (TSize) length(str[1]) - oldJ, 2);
 	
 	return (int) totalLen;
 }

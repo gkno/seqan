@@ -51,7 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename Iterator<TInput const, Rooted>::Type cur;
 		typename Value<TInput>::Type val;
 
-		Pipe(typename _RemoveConst<TInput>::Type &_cont):
+		Pipe(typename RemoveConst_<TInput>::Type &_cont):
 			in(_cont) {}
 
 		Pipe(TInput const &_cont):
@@ -167,8 +167,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// handler that emulates a buffer by using a container buffer
-    struct _SourceNonCachingSpec;
-	typedef Tag<_SourceNonCachingSpec> SourceNonCachingSpec;
+    struct SourceNonCachingSpec_;
+	typedef Tag<SourceNonCachingSpec_> SourceNonCachingSpec;
 
 	template < typename TPipe >
 	struct BufferHandler< TPipe, SourceNonCachingSpec >
@@ -206,8 +206,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// caching buffer handler
-    struct _SourceCachingSpec;
-	typedef Tag<_SourceCachingSpec> SourceCachingSpec;
+    struct SourceCachingSpec_;
+	typedef Tag<SourceCachingSpec_> SourceCachingSpec;
 
 	template < typename TPipe >
 	struct BufferHandler< TPipe, SourceCachingSpec >
@@ -265,8 +265,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// buffer handler optimized for external string sources
-    struct _ExtStringSourceCachingSpec;
-	typedef Tag<_ExtStringSourceCachingSpec> ExtStringSourceCachingSpec;
+    struct ExtStringSourceCachingSpec_;
+	typedef Tag<ExtStringSourceCachingSpec_> ExtStringSourceCachingSpec;
 
 	template < typename TSequence, typename TSpec >
 	struct BufferHandler< Pipe<TSequence, TSpec>, ExtStringSourceCachingSpec >
@@ -330,7 +330,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, typename TSpec >
     struct BufReadHandler< Pipe<TInput, TSpec> > {
 		typedef			
-			typename IF<
+			typename If<
 				AllowsFastRandomAccess<TInput>::VALUE,
 				SourceNonCachingSpec,
 //				SourceCachingSpec>

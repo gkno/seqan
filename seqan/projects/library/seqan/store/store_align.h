@@ -152,7 +152,7 @@ TStream & operator<<(TStream & stream, AlignedReadStoreElement<TPos, TGapAnchor,
 
 template <typename TPos, typename TGapAnchor, typename TSpec> 
 const typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type 
-AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = SupremumValue<typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type>::VALUE; 
+AlignedReadStoreElement<TPos, TGapAnchor, TSpec>::INVALID_ID = MaxValue<typename Id<AlignedReadStoreElement<TPos, TGapAnchor, TSpec> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -697,8 +697,8 @@ inline void
 _assignSourceLength(TSize & size, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me)
 {
 SEQAN_CHECKPOINT
-	if (_IsSameType<TSource, Nothing>::VALUE)
-		size = supremumValue<TSize>();
+	if (IsSameType<TSource, Nothing>::VALUE)
+		size = maxValue<TSize>();
 	else
 		size = length(value(me.data_source));
 }
@@ -744,13 +744,13 @@ _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, 
 			{
 				// if there is no sequence but anchors -> assume infinite sequence
 				if (anchor.seqPos == 0)
-					anchor.seqPos = supremumValue(anchor.gapPos);
+					anchor.seqPos = maxValue(anchor.gapPos);
 				// if the sequence has a length > 0, but there is an anchor behind the end
 				// -> elongate sequence
 				else if ((TPos)anchor.seqPos < back(_dataAnchors(me)).seqPos)
 					anchor.seqPos = back(_dataAnchors(me)).seqPos;
 			}
-			anchor.gapPos = supremumValue(anchor.gapPos);
+			anchor.gapPos = maxValue(anchor.gapPos);
 		}
 	}
 	else if (idx > 0)
@@ -761,7 +761,7 @@ _getAnchor(TAnchor &anchor, Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, 
 		if (idx == 0)
 			anchor.gapPos = 0;
 		else
-			anchor.gapPos = infimumValue(anchor.gapPos);
+			anchor.gapPos = minValue(anchor.gapPos);
 	}
 }
 
@@ -899,7 +899,7 @@ positionGapToSeq(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 	TPosition			seqPos;
 	int					anchorIdx;
 
-	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
+	if (_helperIsNegative(pos, typename IsSameType<TPosition, typename MakeSigned_<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
@@ -936,7 +936,7 @@ positionSeqToGap(Gaps<TSource, AnchorGaps<TGapAnchors> > const & me, TPosition p
 	TPosition			gapPos;
 	int					anchorIdx;
 
-	if (_helperIsNegative(pos, typename TYPECMP<TPosition, typename _MakeSigned<TPosition>::Type>::Type()))
+	if (_helperIsNegative(pos, typename IsSameType<TPosition, typename MakeSigned_<TPosition>::Type>::Type()))
 		anchorIdx = -1;
 	else
 	{
@@ -1009,7 +1009,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		_assignSourceLength(seqLength, container_);
-		_goTo_gapAnchorIterator(*this, data_container->data_viewCutBegin);
+		_goToGapAnchorIterator(*this, data_container->data_viewCutBegin);
 		viewBegin = current;
 		viewEnd.gapPos = _unclippedLength(*data_container) - data_container->data_viewCutEnd;
 		viewEnd.seqPos = positionGapToSeq(*data_container, viewEnd.gapPos);
@@ -1019,7 +1019,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		_assignSourceLength(seqLength, container_);
-		_goTo_gapAnchorIterator(*this, position + data_container->data_viewCutBegin);
+		_goToGapAnchorIterator(*this, position + data_container->data_viewCutBegin);
 		viewBegin.gapPos = data_container->data_viewCutBegin;
 		viewEnd.gapPos   = _unclippedLength(*data_container) - data_container->data_viewCutEnd;
 		viewBegin.seqPos = positionGapToSeq(*data_container, viewBegin.gapPos);
@@ -1297,7 +1297,7 @@ removeGaps(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > const & me,
 
 template <typename T>
 inline void 
-_goNext_gapAnchorIterator(T & me)
+_goNextGapAnchorIterator(T & me)
 {
 	if (me.current.gapPos < me.nextAnchor.gapPos)
 	{
@@ -1314,7 +1314,7 @@ _goNext_gapAnchorIterator(T & me)
 
 template <typename T>
 inline void 
-_goPrevious_gapAnchorIterator(T & me)
+_goPreviousGapAnchorIterator(T & me)
 {	
 	while (me.current.gapPos == me.prevAnchor.gapPos)
 	{
@@ -1331,13 +1331,13 @@ _goPrevious_gapAnchorIterator(T & me)
 
 template <typename T, typename TPos>
 inline void 
-_goTo_gapAnchorIterator(T & me, TPos pos)
+_goToGapAnchorIterator(T & me, TPos pos)
 {
 	typedef typename T::TGapAnchors	TGapAnchors;
 	typedef typename T::TGapAnchor	TGapAnchor;
 	typedef typename Position<typename Value<TGapAnchors>::Type >::Type TAnchorPos;
 
-	if (_helperIsNegative(pos, typename TYPECMP<TPos, typename _MakeSigned<TPos>::Type>::Type()))
+	if (_helperIsNegative(pos, typename IsSameType<TPos, typename MakeSigned_<TPos>::Type>::Type()))
 		me.anchorIdx = -1;
 	else
 	{
@@ -1368,21 +1368,21 @@ template <typename TGaps, typename TGapAnchors>
 inline void
 goNext(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me)
 {
-	_goNext_gapAnchorIterator(me);
+	_goNextGapAnchorIterator(me);
 }
 
 template <typename TGaps, typename TGapAnchors>
 inline void
 goPrevious(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me)
 {
-	_goPrevious_gapAnchorIterator(me);
+	_goPreviousGapAnchorIterator(me);
 }
 
 template <typename TGaps, typename TGapAnchors, typename TSize>
 inline void
 goFurther(Iter<TGaps, GapsIterator<AnchorGaps<TGapAnchors> > > & me, TSize steps)
 {
-	_goTo_gapAnchorIterator(me, me.current.gapPos + steps);
+	_goToGapAnchorIterator(me, me.current.gapPos + steps);
 }
 
 //____________________________________________________________________________

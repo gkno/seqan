@@ -30,8 +30,8 @@ namespace SEQAN_NAMESPACE_MAIN {
 .Tag.Pizza & Chili Index Fibres
 ..summary:Tag to select a specific fibre (e.g. table, object, ...) of a @Spec.Pizza & Chili Index@ index.
 ..cat:Index
-..tag.PizzaChili_Text:The original text the index is based on.
-..tag.PizzaChili_Compressed:The compressed suffix array.
+..tag.PizzaChiliText:The original text the index is based on.
+..tag.PizzaChiliCompressed:The compressed suffix array.
 ...remarks:Pizza & Chili indices are compressed indices. Hence, this fibre is used for searching in the index.
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
@@ -39,13 +39,13 @@ namespace SEQAN_NAMESPACE_MAIN {
 ..include:seqan/index.h
 */
 
-struct _Fibre_PizzaChili_Compressed;
+struct FibrePizzaChiliCompressed_;
 
-typedef Tag<_Fibre_Text> const Fibre_PizzaChili_Text;
-typedef Tag<_Fibre_PizzaChili_Compressed> const Fibre_PizzaChili_Compressed;
+typedef Tag<FibreText_> const FibrePizzaChiliText;
+typedef Tag<FibrePizzaChiliCompressed_> const FibrePizzaChiliCompressed;
 
-typedef Fibre_PizzaChili_Text PizzaChili_Text;
-typedef Fibre_PizzaChili_Compressed PizzaChili_Compressed;
+typedef FibrePizzaChiliText PizzaChiliText;
+typedef FibrePizzaChiliCompressed PizzaChiliCompressed;
 
 /**
 .Spec.Pizza & Chili Index:
@@ -117,12 +117,12 @@ private:
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TText, typename TSpec>
-struct Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChili_Text> {
+struct Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChiliText> {
     typedef String<typename Value<TText>::Type, PizzaChili<TSpec> >& Type;
 };
 
 template <typename TText, typename TSpec>
-struct Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChili_Text> {
+struct Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChiliText> {
     typedef String<typename Value<TText>::Type, PizzaChili<TSpec> > const& Type;
 };
 
@@ -168,21 +168,21 @@ SEQAN_CHECKPOINT
 
     template <typename TText>
     inline char const*
-    getOptionsString(Index<TText, PizzaChili<PizzaChili_SA> >& /*me*/) {
+    getOptionsString(Index<TText, PizzaChili<PizzaChiliSA> >& /*me*/) {
 SEQAN_CHECKPOINT
         return "copy_text";
     }
 
     template <typename TText>
     inline char const*
-    getOptionsString(Index<TText, PizzaChili<PizzaChili_FM> >& /*me*/) {
+    getOptionsString(Index<TText, PizzaChili<PizzaChiliFM> >& /*me*/) {
 SEQAN_CHECKPOINT
         return "-a 0";
     }
 
     template <typename TText>
     inline char const*
-    getOptionsString(Index<TText, PizzaChili<PizzaChili_RSA> >& /*me*/) {
+    getOptionsString(Index<TText, PizzaChili<PizzaChiliRsa> >& /*me*/) {
 SEQAN_CHECKPOINT
         return "copy_text";
     }
@@ -192,31 +192,31 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TText, typename TSpec>
-inline typename Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChili_Text>::Type
+inline typename Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChiliText>::Type
 indexText(Index<TText, PizzaChili<TSpec> >& me) {
 SEQAN_CHECKPOINT
-    return getFibre(me, PizzaChili_Text());
+    return getFibre(me, PizzaChiliText());
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChili_Text>::Type
+inline typename Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChiliText>::Type
 indexText(Index<TText, PizzaChili<TSpec> > const& me) {
 SEQAN_CHECKPOINT
-    return getFibre(me, PizzaChili_Text());
+    return getFibre(me, PizzaChiliText());
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TText, typename TSpec>
-inline typename Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChili_Text>::Type
-getFibre(Index<TText, PizzaChili<TSpec> > const& me, PizzaChili_Text const) {
+inline typename Fibre<Index<TText, PizzaChili<TSpec> > const, PizzaChiliText>::Type
+getFibre(Index<TText, PizzaChili<TSpec> > const& me, PizzaChiliText const) {
 SEQAN_CHECKPOINT
     return value(me.text);
 }
 
 template <typename TText, typename TSpec>
-inline typename Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChili_Text>::Type
-getFibre(Index<TText, PizzaChili<TSpec> >& me, PizzaChili_Text const) {
+inline typename Fibre<Index<TText, PizzaChili<TSpec> >, PizzaChiliText>::Type
+getFibre(Index<TText, PizzaChili<TSpec> >& me, PizzaChiliText const) {
 SEQAN_CHECKPOINT
     return value(me.text);
 }
@@ -225,14 +225,14 @@ SEQAN_CHECKPOINT
 
 template <typename TText, typename TSpec>
 inline bool
-indexSupplied(Index<TText, PizzaChili<TSpec> >& me, PizzaChili_Compressed const) {
+indexSupplied(Index<TText, PizzaChili<TSpec> >& me, PizzaChiliCompressed const) {
 SEQAN_CHECKPOINT
     return me.index_handle != 0;
 }
 
 template <typename TText, typename TSpec>
 inline bool
-indexSupplied(Index<TText, PizzaChili<TSpec> >& me, PizzaChili_Text const) {
+indexSupplied(Index<TText, PizzaChili<TSpec> >& me, PizzaChiliText const) {
 SEQAN_CHECKPOINT
     return length(value(me.text)) > 0;
 }
@@ -241,9 +241,9 @@ SEQAN_CHECKPOINT
 
 template <typename TText, typename TSpec>
 inline bool
-indexSolveDependencies(Index<TText, PizzaChili<TSpec> >& me, PizzaChili_Compressed const) {
+indexSolveDependencies(Index<TText, PizzaChili<TSpec> >& me, PizzaChiliCompressed const) {
 SEQAN_CHECKPOINT
-    return indexSupplied(me, PizzaChili_Text());
+    return indexSupplied(me, PizzaChiliText());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -277,16 +277,16 @@ namespace impl {
 
 template <typename TText, typename TSpec>
 inline bool
-indexCreate(Index<TText, PizzaChili<TSpec> >& me, PizzaChili_Compressed const) {
+indexCreate(Index<TText, PizzaChili<TSpec> >& me, PizzaChiliCompressed const) {
 SEQAN_CHECKPOINT
     typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
     typedef
-        typename _RemoveConst<
+        typename RemoveConst_<
             typename Index<TText, PizzaChili<TSpec> >::TValue
         >::Type alph_t;
 
     SEQAN_ASSERT(sizeof (alph_t) == 1);
-    SEQAN_ASSERT((TYPECMP<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     impl::clearIndex(me);
 
@@ -306,7 +306,7 @@ setIndexText(Index<TText, PizzaChili<TSpec> >& me, TOtherText& text) {
 SEQAN_CHECKPOINT
     typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
     typedef
-        typename _RemoveConst<
+        typename RemoveConst_<
             typename Value<TOtherText>::Type
         >::Type alph_t;
     clear(me);
@@ -314,7 +314,7 @@ SEQAN_CHECKPOINT
     /*
     SEQAN_ASSERT(IsContiguous<TOtherText>::VALUE)
     SEQAN_ASSERT(BitsPerValue<alph_t>::VALUE == 8)
-    SEQAN_ASSERT((TYPECMP<typename IsSimple<alph_t>::Type, True>::VALUE));
+    SEQAN_ASSERT((IsSameType<typename IsSimple<alph_t>::Type, True>::VALUE));
 
     String<alph_t, CStyle> cstr = text;
     impl::uchar_t* textstart =
@@ -324,7 +324,7 @@ SEQAN_CHECKPOINT
     impl::ulong_t textlength = length(text);
     impl::createPizzaChiliIndex(me, textstart, textlength);
     */
-    getFibre(me, PizzaChili_Text()) = text;
+    getFibre(me, PizzaChiliText()) = text;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -356,7 +356,7 @@ SEQAN_CHECKPOINT
     typedef typename PizzaChiliCodeProvider<TSpec>::Type TCodeProvider;
     // Before we can save the index we have to construct it, in case it isn't
     // already constructed.
-    indexRequire(me, PizzaChili_Compressed());
+    indexRequire(me, PizzaChiliCompressed());
     impl::error_t e =
         TCodeProvider::save_index(me.index_handle, const_cast<char*>(filename));
     if (e != 0) {

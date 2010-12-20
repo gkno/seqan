@@ -73,11 +73,11 @@ Test_UpgmaGuideTree(int seed) {
 
 	typedef unsigned int TSize;
 
-    RNG<MersenneTwister> rng(seed);
+    Rng<MersenneTwister> rng(seed);
 
 	for(TSize i = 0; i < 10; ++i) {
 		// Set-up a sparse distance matrix
-        PDF<Uniform<TSize> > pdfN(2, 11);
+        Pdf<Uniform<TSize> > pdfN(2, 11);
 		TSize n = pickRandomNumber(rng, pdfN);
 		Graph<Undirected<double> > distGraph;
 		String<double> distMatrix;
@@ -89,7 +89,7 @@ Test_UpgmaGuideTree(int seed) {
 		String<double> myDist;
 		typedef Iterator<String<double> >::Type TStringIter;
 		while (distances.size() < all) {
-            PDF<Uniform<double> > pdf(0, 1000000);
+            Pdf<Uniform<double> > pdf(0, 1000000);
 			double newVal = pickRandomNumber(rng, pdf);
 			if (distances.insert(newVal).second) {
 				appendValue(myDist, newVal);
@@ -115,14 +115,14 @@ Test_UpgmaGuideTree(int seed) {
                 distGraphCopy = distGraph;
                 distMatrixCopy = distMatrix;
 
-                PDF<Uniform<double> > pdf(0, 1.0);
+                Pdf<Uniform<double> > pdf(0, 1.0);
 				if (pickRandomNumber(rng, pdf) < 0.5) {
 					value(distMatrix, row * n + col) = infCargo;
 					removeEdge(distGraph, row, col);
 				}
 
                 String<size_t> _;
-                if (connected_components(distGraph, _)) {
+                if (connectedComponents(distGraph, _)) {
                     move(distGraph, distGraphCopy);
                     move(distMatrix, distMatrixCopy);
                 }

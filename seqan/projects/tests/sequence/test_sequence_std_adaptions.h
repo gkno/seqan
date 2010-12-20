@@ -44,68 +44,68 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_vector)
     // Test Value<>::VALUE
     {
         typedef Value<TVector>::Type TValue;
-        bool b = TYPECMP<TValue, TElement>::VALUE;
+        bool b = IsSameType<TValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Value<TConstVector>::Type TConstValue;
-        b = TYPECMP<TConstValue, TElement>::VALUE;
+        b = IsSameType<TConstValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetValue<>::VALUE
     {
         typedef GetValue<TVector>::Type TGetValue;
-        bool b = TYPECMP<TGetValue, TElement &>::VALUE;
+        bool b = IsSameType<TGetValue, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef GetValue<TConstVector>::Type TConstGetValue;
-        b = TYPECMP<TConstGetValue, TElement const &>::VALUE;
+        b = IsSameType<TConstGetValue, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetReference<>::VALUE
     {
         typedef Reference<TVector>::Type TReference;
-        bool b = TYPECMP<TReference, TElement &>::VALUE;
+        bool b = IsSameType<TReference, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Reference<TConstVector>::Type TConstReference;
-        b = TYPECMP<TConstReference, TElement const &>::VALUE;
+        b = IsSameType<TConstReference, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Rooted>::VALUE
     {
         typedef Iterator<TVector, Rooted>::Type TIterator;
         typedef Iter<TVector, AdaptorIterator<Iter<TVector, StdIteratorAdaptor> > > TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstVector, Rooted>::Type TConstIterator;
         typedef Iter<TConstVector, AdaptorIterator<Iter<TConstVector, StdIteratorAdaptor> > > TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Standard>::VALUE
     {
         typedef Iterator<TVector, Standard>::Type TIterator;
         typedef Iter<TVector, StdIteratorAdaptor> TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstVector, Standard>::Type TConstIterator;
         typedef Iter<TConstVector, StdIteratorAdaptor> TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Position<>::VALUE
     {
         typedef Position<TVector>::Type TPosition;
-        bool b = TYPECMP<TPosition, TVector::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TVector::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Position<TConstVector>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TVector::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TVector::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Size<>::VALUE
     {
         typedef Size<TVector>::Type TPosition;
-        bool b = TYPECMP<TPosition, TVector::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TVector::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Size<TConstVector>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TVector::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TVector::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
 }
@@ -247,68 +247,68 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_string)
     // Test Value<>::VALUE
     {
         typedef Value<TString>::Type TValue;
-        bool b = TYPECMP<TValue, TElement>::VALUE;
+        bool b = IsSameType<TValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Value<TConstString>::Type TConstValue;
-        b = TYPECMP<TConstValue, TElement>::VALUE;
+        b = IsSameType<TConstValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetValue<>::VALUE
     {
         typedef GetValue<TString>::Type TGetValue;
-        bool b = TYPECMP<TGetValue, TElement &>::VALUE;
+        bool b = IsSameType<TGetValue, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef GetValue<TConstString>::Type TConstGetValue;
-        b = TYPECMP<TConstGetValue, TElement const &>::VALUE;
+        b = IsSameType<TConstGetValue, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetReference<>::VALUE
     {
         typedef Reference<TString>::Type TReference;
-        bool b = TYPECMP<TReference, TElement &>::VALUE;
+        bool b = IsSameType<TReference, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Reference<TConstString>::Type TConstReference;
-        b = TYPECMP<TConstReference, TElement const &>::VALUE;
+        b = IsSameType<TConstReference, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Rooted>::VALUE
     {
         typedef Iterator<TString, Rooted>::Type TIterator;
         typedef Iter<TString, AdaptorIterator<Iter<TString, StdIteratorAdaptor> > > TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstString, Rooted>::Type TConstIterator;
         typedef Iter<TConstString, AdaptorIterator<Iter<TConstString, StdIteratorAdaptor> > > TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Standard>::VALUE
     {
         typedef Iterator<TString, Standard>::Type TIterator;
         typedef Iter<TString, StdIteratorAdaptor> TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstString, Standard>::Type TConstIterator;
         typedef Iter<TConstString, StdIteratorAdaptor> TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Position<>::VALUE
     {
         typedef Position<TString>::Type TPosition;
-        bool b = TYPECMP<TPosition, TString::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TString::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Position<TConstString>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TString::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TString::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Size<>::VALUE
     {
         typedef Size<TString>::Type TPosition;
-        bool b = TYPECMP<TPosition, TString::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TString::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Size<TConstString>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TString::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TString::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
 }
@@ -433,68 +433,68 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_metafunctions_std_list)
     // Test Value<>::VALUE
     {
         typedef Value<TList>::Type TValue;
-        bool b = TYPECMP<TValue, TElement>::VALUE;
+        bool b = IsSameType<TValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Value<TConstList>::Type TConstValue;
-        b = TYPECMP<TConstValue, TElement>::VALUE;
+        b = IsSameType<TConstValue, TElement>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetValue<>::VALUE
     {
         typedef GetValue<TList>::Type TGetValue;
-        bool b = TYPECMP<TGetValue, TElement &>::VALUE;
+        bool b = IsSameType<TGetValue, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef GetValue<TConstList>::Type TConstGetValue;
-        b = TYPECMP<TConstGetValue, TElement const &>::VALUE;
+        b = IsSameType<TConstGetValue, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test GetReference<>::VALUE
     {
         typedef Reference<TList>::Type TReference;
-        bool b = TYPECMP<TReference, TElement &>::VALUE;
+        bool b = IsSameType<TReference, TElement &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Reference<TConstList>::Type TConstReference;
-        b = TYPECMP<TConstReference, TElement const &>::VALUE;
+        b = IsSameType<TConstReference, TElement const &>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Rooted>::VALUE
     {
         typedef Iterator<TList, Rooted>::Type TIterator;
         typedef Iter<TList, AdaptorIterator<Iter<TList, StdIteratorAdaptor> > > TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstList, Rooted>::Type TConstIterator;
         typedef Iter<TConstList, AdaptorIterator<Iter<TConstList, StdIteratorAdaptor> > > TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Iterator<, Standard>::VALUE
     {
         typedef Iterator<TList, Standard>::Type TIterator;
         typedef Iter<TList, StdIteratorAdaptor> TExpected;
-        bool b = TYPECMP<TIterator, TExpected>::VALUE;
+        bool b = IsSameType<TIterator, TExpected>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Iterator<TConstList, Standard>::Type TConstIterator;
         typedef Iter<TConstList, StdIteratorAdaptor> TExpectedConst;
-        b = TYPECMP<TConstIterator, TExpectedConst>::VALUE;
+        b = IsSameType<TConstIterator, TExpectedConst>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Position<>::VALUE
     {
         typedef Position<TList>::Type TPosition;
-        bool b = TYPECMP<TPosition, TList::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TList::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Position<TConstList>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TList::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TList::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test Size<>::VALUE
     {
         typedef Size<TList>::Type TPosition;
-        bool b = TYPECMP<TPosition, TList::size_type>::VALUE;
+        bool b = IsSameType<TPosition, TList::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
         typedef Size<TConstList>::Type TConstPosition;
-        b = TYPECMP<TConstPosition, TList::size_type>::VALUE;
+        b = IsSameType<TConstPosition, TList::size_type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
 }

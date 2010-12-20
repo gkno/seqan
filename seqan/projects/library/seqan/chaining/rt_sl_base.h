@@ -59,7 +59,7 @@ namespace seqan{
 	//{
 	//	SEQAN_CHECKPOINT
 	//	SkipElement< TObject, SkipListDynamic, RT< TSpec >, TStructuring > * border = _getRoot( me );
-	//	while( key( *border ) < supremumValue< typename Key< TObject >::Type >() )
+	//	while( key( *border ) < maxValue< typename Key< TObject >::Type >() )
 	//		border = _getRight( *border );
 	//	return border;
 	//}
@@ -162,7 +162,7 @@ namespace seqan{
 		allocate( _getBaseAlloc( list ), firstBase, numEntries + 2 );
 		list._baseStore = firstBase;
 
-		valueConstruct( firstBase, _getLBorderObj( *_getMainTree( list ) ), infimumValue< typename Key< TObject >::Type >() );
+		valueConstruct( firstBase, _getLBorderObj( *_getMainTree( list ) ), minValue< typename Key< TObject >::Type >() );
 		
 		++firstBase;
 
@@ -174,7 +174,7 @@ namespace seqan{
 		}
 		lastBase = firstBase;
 		firstBase = list._baseStore;
-		valueConstruct( lastBase, _getRBorderObj( *_getMainTree( list ) ), supremumValue< typename Key< TObject >::Type >() );
+		valueConstruct( lastBase, _getRBorderObj( *_getMainTree( list ) ), maxValue< typename Key< TObject >::Type >() );
 	}
 
 
@@ -198,7 +198,7 @@ namespace seqan{
 		_setHeight( *first_base, 1 );
 		_setUp( *first_base, *list._leftSideStore );
 
-		typename Key< TObject >::Type left_border_key = infimumValue< typename Key< TObject >::Type >();
+		typename Key< TObject >::Type left_border_key = minValue< typename Key< TObject >::Type >();
 		SkipElement< TObject, TModus, RT< TSpec >, TStructuring > * buffer = list._leftSideStore;
 		for( typename Size< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >::Type i = 0; i < _getMaximalSLTowerHeight( numEntries ); ++i )
 		{
@@ -210,7 +210,7 @@ namespace seqan{
 		_setDown( *_rightBorder, r_base);
 		_setHeight( *r_base, 1 );
 		_setRight( * _rightBorder, _rightBorder );
-		setKey( *_rightBorder, supremumValue< typename Key< TObject >::Type >() );
+		setKey( *_rightBorder, maxValue< typename Key< TObject >::Type >() );
 		_setUp( *r_base, *_rightBorder );
 
 		_setCount( *first_base, numEntries );
@@ -224,7 +224,7 @@ namespace seqan{
 
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & /*list*/,
+	_connectUpdate(	SkipList< TObject, TModus, RT< TSpec >, Deferred > & /*list*/,
 						SkipBaseElement< TObject, TModus, RT< TSpec >, Deferred > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< TSpec >, Deferred > ** search_path,
@@ -270,7 +270,7 @@ namespace seqan{
 
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, SemiDeferred > & /*list*/,
+	_connectUpdate(	SkipList< TObject, TModus, RT< TSpec >, SemiDeferred > & /*list*/,
 						SkipBaseElement< TObject, TModus, RT< TSpec >, SemiDeferred > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< TSpec >, SemiDeferred > ** search_path,
@@ -295,7 +295,7 @@ namespace seqan{
 		// the complete case
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< TSpec >, Complete > & list,
+	_connectUpdate(	SkipList< TObject, TModus, RT< TSpec >, Complete > & list,
 						SkipBaseElement< TObject, TModus, RT< TSpec >, Complete > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< TSpec >, Complete > ** search_path,

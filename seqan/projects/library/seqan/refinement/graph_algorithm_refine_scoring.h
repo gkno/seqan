@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //fake score function 
 template<typename TScoreValue,typename TStringSet,typename TAlign,typename TValue, typename TSize>
 TScoreValue
-getScore(TScoreValue &,
+_getMatchScore(TScoreValue &,
 		 TStringSet &,
 		 TAlign &,
 		 TValue,

@@ -228,7 +228,7 @@ void simulateReads(
 		resize(readTemplate,maxEnd-startPos);
 		arrayCopy(iter(currentSource,startPos), iter(currentSource,maxEnd), begin(readTemplate)); //infix(currentSource,startPos,maxEnd);
 		
-		if(revComp) reverseComplementInPlace(readTemplate);
+		if(revComp) reverseComplement(readTemplate);
 
 		int lastOp = 0;
 		int currOp = 0;
@@ -371,18 +371,18 @@ void simulateReads(
 			TMyersFinder myersFinder(genomeInfix);
 
 			// init forward verifiers
-			if(revComp) reverseComplementInPlace(read);
+			if(revComp) reverseComplement(read);
 			TMyersPattern forwardPattern(read);
 			TMyersPattern &myersPattern = forwardPattern;
 			
 			// find end of best semi-global alignment
-			int maxScore = InfimumValue<int>::VALUE;
+			int maxScore = MinValue<int>::VALUE;
 			int minScore = -(int)countErrors;
 			TMyersFinder maxPos;
 			while (find(myersFinder, myersPattern, minScore))
-				if (maxScore < getScore(myersPattern)) 
+				if (maxScore < _getMatchScore(myersPattern)) 
 				{
-					maxScore = getScore(myersPattern);
+					maxScore = _getMatchScore(myersPattern);
 					maxPos = myersFinder;
 				}
 			
@@ -410,7 +410,7 @@ void simulateReads(
 				}
 			
 			} 
-			if(revComp) reverseComplementInPlace(read);
+			if(revComp) reverseComplement(read);
 			SEQAN_ASSERT_TRUE(maxScore >= -(int)countErrors);
 			if(maxScore != -(int)countErrors)
 				kickOut = true;*/

@@ -160,8 +160,8 @@ public:
 		//typedef Size<TText>::Type TSize;
 		typedef StringSet<TText > TStringSet;
 
-		typedef Index<TStringSet, Index_QGram<SimpleShape> > TIndex;
-		typedef typename Fibre<TIndex, QGram_Dir>::Type TDir;
+		typedef Index<TStringSet, IndexQGram<SimpleShape> > TIndex;
+		typedef typename Fibre<TIndex, QGramDir>::Type TDir;
 		typedef typename Iterator<TDir, Standard>::Type TIter;
 		unsigned int const alphabet_size = ValueSize<TAlphabet>::VALUE;
 		//unsigned int const column_size = (unsigned int) std::pow((double) alphabet_size, (int) order);
@@ -177,7 +177,7 @@ public:
 
 		TIndex ind(strings);
 		resize(indexShape(ind), order + 1);
-		indexRequire(ind, QGram_SADir());
+		indexRequire(ind, QGramSADir());
 
 		TIter itBegin = begin(indexDir(ind), Standard());
 		TIter itEnd = end(indexDir(ind), Standard()) - 1;
@@ -454,7 +454,7 @@ public:
 
 
 	/////////////////////////////////////////////////////////////////////////////
-	///// COMPUTE THE AUXILIARY MATRICES FOR THE VARIANCE AND Z-SCORE COMPUTATION
+	///// COMPUTE THE AUXILIARY MATRICES FOR THE VARIANCE And Z-SCORE COMPUTATION
 	/////////////////////////////////////////////////////////////////////////////
 
 	/*

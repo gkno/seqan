@@ -70,7 +70,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
     template < typename TTextInput, typename TNameInput,
                typename TOut0, typename TOut3, typename TOut5, typename TOut6, typename TOut124 >
-    static bool skew7_extend(TTextInput &textIn, TNameInput &nameIn,
+    static bool _skew7Extend(TTextInput &textIn, TNameInput &nameIn,
                              TOut0 &out0, TOut3 &out3, TOut5 &out5, TOut6 &out6, TOut124 &out124)
     {
         resize(out0, length(textIn) / 7);
@@ -150,7 +150,7 @@ namespace SEQAN_NAMESPACE_MAIN
         case 0:;
         }
 
-            // BEGIN II: PREFILL AND PUSH FULLY FILLED TRIPLES
+            // BEGIN II: PREFILL And PUSH FULLY FILLED TRIPLES
 
         if (!eof(nameIn)) {
 /* 0 */  __cp_(o0,0,__cp_(o1,1,__cp_(o2,2,__cp_(o3,3,                                     *textIn)))); ++textIn; o0.i1 = p--;
@@ -179,7 +179,7 @@ namespace SEQAN_NAMESPACE_MAIN
             r = 7;
         }
 
-        // MAIN LOOP: PUSH FULLY FILLED TRIPLES
+        // MAIN Loop: PUSH FULLY FILLED TRIPLES
         
         while (!eof(nameIn)) {
 /* 0 */  __cp_(o0,0,__cp_(o1,1,__cp_(o2,2,__cp_(o3,3,                                     *textIn)))); ++textIn; o0.i1 -= 7;
@@ -275,7 +275,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TTextInput, typename TLimitsString, typename TNameInput,
                typename TOut0, typename TOut3, typename TOut5, typename TOut6, typename TOut124 >
-    static bool skew7_extend_multi(
+    static bool _skew7ExtendMulti(
 		TTextInput &textIn, TLimitsString const &limits, 
 		TNameInput &nameIn1, TNameInput &nameIn2, TNameInput &nameIn4, 
 		TOut0 &out0, TOut3 &out3, TOut5 &out5, TOut6 &out6, TOut124 &out124)
@@ -360,7 +360,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize old = *it; ++it;
 
 		typedef typename Value<TOut0>::Type::T1 TPair;
-		_PairIncrementer<TPair, TLimitsString> p;
+		PairIncrementer_<TPair, TLimitsString> p;
 		setHost(p, limits);
 
 		while (it != itEnd) {
@@ -400,7 +400,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			case 0:;
 			}
 
-				// BEGIN II: PREFILL AND PUSH FULLY FILLED TRIPLES
+				// BEGIN II: PREFILL And PUSH FULLY FILLED TRIPLES
 
 			if (rounds != 0) {
 	/* 0 */  __cp_(o0,0,__cp_(o1,1,__cp_(o2,2,__cp_(o3,3,                                     *textIn)))); ++textIn; o0.i1 = p; ++p;
@@ -430,7 +430,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				--rounds;
 			}
 
-			// MAIN LOOP: PUSH FULLY FILLED TRIPLES
+			// MAIN Loop: PUSH FULLY FILLED TRIPLES
 	        
 			while (rounds != 0) {
 	/* 0 */  __cp_(o0,0,__cp_(o1,1,__cp_(o2,2,__cp_(o3,3,                                     *textIn)))); ++textIn; o0.i1 = p; ++p;

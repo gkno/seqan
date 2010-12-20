@@ -72,7 +72,7 @@ public:
 	formatID_() const
 	{
 SEQAN_CHECKPOINT
-		return _ClassIdentifier<TFormat>::getID();
+		return ClassIdentifier_<TFormat>::getID();
 	}
 
 	virtual void
@@ -334,7 +334,7 @@ operator == (FileFormat<TFile, TData, TMeta, TFormat> const & left,
 			 Tag<TFormat2> const)
 {
 SEQAN_CHECKPOINT
-	return formatID(left) == _ClassIdentifier<Tag<TFormat2> const>::getID();
+	return formatID(left) == ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
@@ -343,7 +343,7 @@ operator == (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
 SEQAN_CHECKPOINT
-	return _ClassIdentifier<Tag<TFormat2> const>::getID() == formatID(right);
+	return ClassIdentifier_<Tag<TFormat2> const>::getID() == formatID(right);
 }
 
 //____________________________________________________________________________
@@ -363,7 +363,7 @@ operator != (FileFormat<TFile, TData, TMeta, TFormat> const & left,
 			 Tag<TFormat2> const)
 {
 SEQAN_CHECKPOINT
-	return formatID(left) != _ClassIdentifier<Tag<TFormat2> const>::getID();
+	return formatID(left) != ClassIdentifier_<Tag<TFormat2> const>::getID();
 }
 
 template <typename TFile, typename TData, typename TMeta, typename TFormat, typename TFormat2>
@@ -372,7 +372,7 @@ operator != (Tag<TFormat2> const,
 			 FileFormat<TFile, TData, TMeta, TFormat> const & right)
 {
 SEQAN_CHECKPOINT
-	return _ClassIdentifier<Tag<TFormat2> const>::getID() != formatID(right);
+	return ClassIdentifier_<Tag<TFormat2> const>::getID() != formatID(right);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -433,7 +433,7 @@ write(TStream & target,
 
 template <typename TFile, typename TString, typename TChar>
 inline void
-_stream_appendLine(TFile & file,
+_streamAppendLine(TFile & file,
 				   TString & str,
 				   TChar & c)
 {
@@ -465,7 +465,7 @@ _stream_appendLine(TFile & file,
 
 template <typename TFile, typename TChar>
 inline void
-_stream_countLine(TFile & file,
+_streamCountLine(TFile & file,
 				  TChar & c)
 
 {
@@ -496,7 +496,7 @@ _stream_countLine(TFile & file,
 
 template <typename TFile, typename TChar>
 inline typename Size<TFile>::Type
-_stream_skipLine(TFile & file,
+_streamSkipLine(TFile & file,
 				 TChar & c)
 
 {
@@ -537,7 +537,7 @@ _stream_skipLine(TFile & file,
 //new ones for streams
 template<typename TFile, typename TChar>
 inline void 
-_stream_skipWhitespace(TFile& file, TChar& c)
+_streamSkipWhitespace(TFile& file, TChar& c)
 {
 	if ((c!=' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
@@ -551,13 +551,13 @@ _stream_skipWhitespace(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline String<char>
-_stream_readWord(TFile & file, TChar& c)
+_streamReadWord(TFile & file, TChar& c)
 {
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_stream_isLetter(c)) break;
+		if (!_streamIsLetter(c)) break;
 		append(str, c);
 	}
 	return str;
@@ -567,7 +567,7 @@ _stream_readWord(TFile & file, TChar& c)
 
 template<typename TChar>
 inline bool
-_stream_isLetter(TChar const c)
+_streamIsLetter(TChar const c)
 {
 	return ((c == 'a') || (c == 'b') || (c == 'c') || (c == 'd') || (c == 'e') || 
 			(c == 'f') || (c == 'g') || (c == 'h') || (c == 'i') || (c == 'j') ||
@@ -589,7 +589,7 @@ _stream_isLetter(TChar const c)
 
 template <typename TString, typename TIter>
 inline typename Size<TString>::Type
-_string_skipLine(TString & str,
+_stringSkipLine(TString & str,
 				 TIter & it)
 
 {
@@ -625,7 +625,7 @@ _string_skipLine(TString & str,
 
 template <typename TString1, typename TString2, typename TIter>
 inline void
-_string_appendLine(TString1 & str,
+_stringAppendLine(TString1 & str,
 				   TString2 & a_str,
 				   TIter & it)
 {
@@ -658,7 +658,7 @@ _string_appendLine(TString1 & str,
 
 template<typename TString, typename TIter>
 inline void 
-_string_skipWhitespace(TString& str, TIter& it)
+_stringSkipWhitespace(TString& str, TIter& it)
 {
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	while (it != end_it) {
@@ -671,14 +671,14 @@ _string_skipWhitespace(TString& str, TIter& it)
 
 template<typename TString, typename TIter>
 inline int
-_string_readNumber(TString & str, TIter& it)
+_stringReadNumber(TString & str, TIter& it)
 {
 	// Read number
 	typename Iterator<TString,Standard>::Type end_it = end(str,Standard())-1;
 	String<char> numstr(getValue(it));
 	while (it != end_it) {
 		++it;
-		if (!_parse_isDigit(*it)) break;
+		if (!_parseIsDigit(*it)) break;
 		append(numstr, getValue(it));
 	}
  	return atoi(toCString(numstr));

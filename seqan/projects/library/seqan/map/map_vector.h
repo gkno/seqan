@@ -239,7 +239,7 @@ clear(Map<TValue, VectorSet<TSpec> > & me)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo>
-struct _VectorSet_Insert
+struct VectorSetInsert_
 {
 	template <typename TValue, typename TSpec, typename TElement>
 	static inline void 
@@ -255,7 +255,7 @@ struct _VectorSet_Insert
 	}
 };
 template <>
-struct _VectorSet_Insert<Nothing>
+struct VectorSetInsert_<Nothing>
 {
 	template <typename TValue, typename TSpec, typename TElement>
 	static inline void 
@@ -277,7 +277,7 @@ insert(Map<TValue, VectorSet<TSpec> > & set,
 {
 	typedef Map<TValue, VectorSet<TSpec> > TMap;
 	typedef typename Cargo<TMap>::Type TCargo;
-	_VectorSet_Insert<TCargo>::insert_(set, element);
+	VectorSetInsert_<TCargo>::insert_(set, element);
 }
 template <typename TValue, typename TSpec, typename TKey, typename TCargo>
 inline void 
@@ -290,7 +290,7 @@ insert(Map<TValue, VectorSet<TSpec> > &set,
 	TValue2 new_val;
 	key(new_val) = _key;
 	cargo(new_val) = _cargo;
-	_VectorSet_Insert<TCargo>::insert_(set, new_val);
+	VectorSetInsert_<TCargo>::insert_(set, new_val);
 }
 
 //////////////////////////////////////////////////////////////////////////////

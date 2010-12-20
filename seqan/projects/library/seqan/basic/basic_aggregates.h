@@ -26,8 +26,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //____________________________________________________________________________
 
-    struct _Compressed;
-	typedef Tag<_Compressed> Compressed;
+    struct Compressed_;
+	typedef Tag<Compressed_> Compressed;
 
 	template <unsigned BITSIZE1 = 16, unsigned BITSIZE2 = 16>
 	struct BitCompressed;
@@ -384,15 +384,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
     template < unsigned char _size >
-	struct _BitVector {
-        typedef typename _BitVector<_size + 1>::Type Type;
+	struct BitVector_ {
+        typedef typename BitVector_<_size + 1>::Type Type;
     };
 
-    template <> struct _BitVector<8> { typedef unsigned char Type; };
-    template <> struct _BitVector<16> { typedef unsigned short Type; };
-    template <> struct _BitVector<32> { typedef unsigned long Type; };
-    template <> struct _BitVector<64> { typedef __uint64 Type; };
-    template <> struct _BitVector<255> { typedef __uint64 Type; };
+    template <> struct BitVector_<8> { typedef unsigned char Type; };
+    template <> struct BitVector_<16> { typedef unsigned short Type; };
+    template <> struct BitVector_<32> { typedef unsigned long Type; };
+    template <> struct BitVector_<64> { typedef __uint64 Type; };
+    template <> struct BitVector_<255> { typedef __uint64 Type; };
 
 /**
 .Spec.Bit Packed Tuple:
@@ -420,7 +420,7 @@ namespace SEQAN_NAMESPACE_MAIN
         enum { bitSize = BitsPerValue<_T>::VALUE };
         enum { bitMask = (1 << bitSize) - 1 };
         enum { mask = (1 << (size * bitSize)) - 1 };
-        typedef typename _BitVector< bitSize * size >::Type CT;
+        typedef typename BitVector_< bitSize * size >::Type CT;
         
         CT i;
 /*
@@ -570,14 +570,14 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // optimized shifts
 
-    struct _TupleShiftLeftWorker {
+    struct TupleShiftLeftWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
             arg[I-1] = arg[I];
         }
     };
 
-    struct _TupleShiftRightWorker {
+    struct TupleShiftRightWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
             arg[I] = arg[I-1];
@@ -586,12 +586,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename _T, unsigned _size, typename TSpec>
 	inline void shiftLeft(Tuple<_T, _size, TSpec> &me) {
-		LOOP<_TupleShiftLeftWorker, _size - 1>::run(me);
+		Loop<TupleShiftLeftWorker_, _size - 1>::run(me);
 	}
 
 	template <typename _T, unsigned _size, typename TSpec>
 	inline void shiftRight(Tuple<_T, _size, TSpec> &me) {
-		LOOP_REVERSE<_TupleShiftRightWorker, _size - 1>::run(me);
+		LoopReverse<TupleShiftRightWorker_, _size - 1>::run(me);
 	}
 
 	template <typename _T, unsigned _size>

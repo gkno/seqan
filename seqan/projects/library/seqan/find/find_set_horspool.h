@@ -42,8 +42,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.SetHorspool
 
-struct _SetHorspool;
-typedef Tag<_SetHorspool> SetHorspool;
+struct SetHorspool_;
+typedef Tag<SetHorspool_> SetHorspool;
 
 //////////////////////////////////////////////////////////////////////////////
 

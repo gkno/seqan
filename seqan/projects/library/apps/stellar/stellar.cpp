@@ -85,7 +85,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 template <typename TStringSet, typename TShape, typename TSpec>
-struct Cargo<Index<TStringSet, Index_QGram<TShape, TSpec> > > {
+struct Cargo<Index<TStringSet, IndexQGram<TShape, TSpec> > > {
 	typedef struct {
 		double		abundanceCut;
 	} Type;
@@ -94,10 +94,10 @@ struct Cargo<Index<TStringSet, Index_QGram<TShape, TSpec> > > {
 //////////////////////////////////////////////////////////////////////////////
 // Repeat masker
 template <typename TStringSet, typename TShape, typename TSpec>
-inline bool _qgramDisableBuckets(Index<TStringSet, Index_QGram<TShape, TSpec> > &index) 
+inline bool _qgramDisableBuckets(Index<TStringSet, IndexQGram<TShape, TSpec> > &index) 
 {
-	typedef Index<TStringSet, Index_QGram<TShape, TSpec> >	TReadIndex;
-	typedef typename Fibre<TStringSet, QGram_Dir>::Type		TDir;
+	typedef Index<TStringSet, IndexQGram<TShape, TSpec> >	TReadIndex;
+	typedef typename Fibre<TStringSet, QGramDir>::Type		TDir;
 	typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
 	typedef typename Value<TDir>::Type						TSize;
 
@@ -136,7 +136,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 				StringSet<TId> & queryIDs,
 				StellarOptions & options) {
     // pattern
-    typedef Index<StringSet<TSequence, Dependent<> >, Index_QGram<SimpleShape, OpenAddressing> > TQGramIndex;
+    typedef Index<StringSet<TSequence, Dependent<> >, IndexQGram<SimpleShape, OpenAddressing> > TQGramIndex;
     TQGramIndex index_qgram(queries);
     resize(indexShape(index_qgram), options.qGram);
 	cargo(index_qgram).abundanceCut = options.qgramAbundanceCut;
@@ -144,7 +144,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
 
 	// Construct index
 	std::cout << "Constructing index..." << std::endl;
-	indexRequire(index_qgram, QGram_SADir());
+	indexRequire(index_qgram, QGramSADir());
 	std::cout << std::endl;
 
 	int numMatches = 0;
@@ -165,7 +165,7 @@ _stellarOnAll(StringSet<TSequence> & databases,
         std::cout << "Aligning all query sequences to reverse complemented database sequence";
 		std::cout << ((length(databases)>1)?"s...":"...") << std::endl;
 
-        reverseComplementInPlace(databases);
+        reverseComplement(databases);
 
         for(unsigned i = 0; i < length(databases); ++i) {
 			numMatches += _stellarOnOne(databases[i], databaseIDs[i], pattern_swift, queries, queryIDs,

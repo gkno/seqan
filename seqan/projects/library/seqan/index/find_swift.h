@@ -42,7 +42,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..signature:Finder<TIndex, Swift<TSpec> >
 ..signature:Pattern<TIndex, Swift<TSpec> >
 ..param.TIndex: A q-gram index of needle(s).
-...type:Spec.Index_QGram
+...type:Spec.IndexQGram
 ..param.TSpec: Specifies the type of Swift filter.
 ..include:seqan/index.h
 */
@@ -56,7 +56,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..signature:Finder<TIndex, Swift<SwiftLocal> >
 ..signature:Pattern<TIndex, Swift<SwiftLocal> >
 ..param.TIndex: A q-gram index of needle(s).
-...type:Spec.Index_QGram
+...type:Spec.IndexQGram
 ..include:seqan/index.h
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftLocal
@@ -68,7 +68,7 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 ..signature:Finder<TIndex, Swift<SwiftSemiGlobal> >
 ..signature:Pattern<TIndex, Swift<SwiftSemiGlobal> >
 ..param.TIndex: A q-gram index of needle(s).
-...type:Spec.Index_QGram
+...type:Spec.IndexQGram
 ..include:seqan/index.h
 */
 ///.Spec.Swift.param.TSpec.type:Spec.SwiftSemiGlobal
@@ -76,15 +76,15 @@ An \epsilon-match is a matching region of minimal length and an error rate of at
 template < typename TObject, typename TSpec > class Index;
 template < typename TObject > struct SAValue;
 
-struct _SwiftLocal;
-typedef Tag<_SwiftLocal> SwiftLocal;
+struct SwiftLocal_;
+typedef Tag<SwiftLocal_> SwiftLocal;
 
 template <typename TSpec = void>
-struct _SwiftSemiGlobal;
-typedef Tag<_SwiftSemiGlobal<void> > SwiftSemiGlobal;
+struct SwiftSemiGlobal_;
+typedef Tag<SwiftSemiGlobal_<void> > SwiftSemiGlobal;
 
-struct _Hamming;
-typedef Tag<_SwiftSemiGlobal<_Hamming> > SwiftSemiGlobalHamming;
+struct Hamming_;
+typedef Tag<SwiftSemiGlobal_<Hamming_> > SwiftSemiGlobalHamming;
 
 
 template <typename TSpec = SwiftSemiGlobal>
@@ -133,7 +133,7 @@ struct SwiftParameters {
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
-	struct _SwiftBucket 
+	struct SwiftBucket_ 
 	{
 		typedef _TSize			TSize;
 		typedef _TShortSize		TShortSize;
@@ -149,7 +149,7 @@ struct SwiftParameters {
 	};
 
 	template <typename _TSpec, typename _TSize, typename _TShortSize>
-	struct _SwiftBucket<_SwiftSemiGlobal<_TSpec>, _TSize, _TShortSize>
+	struct SwiftBucket_<SwiftSemiGlobal_<_TSpec>, _TSize, _TShortSize>
 	{
 		typedef _TSize			TSize;
 		typedef _TShortSize		TShortSize;
@@ -163,12 +163,12 @@ struct SwiftParameters {
 	};
 
 	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
-	struct _SwiftBucketParams 
+	struct SwiftBucketParams_ 
 	{
 		typedef _TSize			TSize;
 		typedef _TShortSize		TShortSize;
 
-		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
+		TSize			firstBucket;	// first SwiftBucket_ entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
 		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 		TShortSize		distanceCut;	// if lastIncrement is this far or farer away, threshold can't be reached
@@ -179,12 +179,12 @@ struct SwiftParameters {
 	};
 
 	template <typename _TSpec, typename _TSize, typename _TShortSize>
-	struct _SwiftBucketParams< Swift<Tag<_SwiftSemiGlobal<_TSpec> > >, _TSize, _TShortSize>
+	struct SwiftBucketParams_< Swift<Tag<SwiftSemiGlobal_<_TSpec> > >, _TSize, _TShortSize>
 	{
 		typedef _TSize			TSize;
 		typedef _TShortSize		TShortSize;
 
-		TSize			firstBucket;	// first _SwiftBucket entry in pattern.buckets
+		TSize			firstBucket;	// first SwiftBucket_ entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
 		TShortSize		threshold;		// at least threshold q-gram hits induce an approx match
 		TShortSize		delta;			// buckets begin at multiples of delta
@@ -197,7 +197,7 @@ struct SwiftParameters {
 
 
 	template <typename TSpec, typename THstkPos>
-	struct _SwiftHit 
+	struct SwiftHit_ 
 	{
 		THstkPos	hstkPos;			// parallelogram begin in haystack 
 		unsigned	ndlSeqNo;			// needle sequence number
@@ -207,7 +207,7 @@ struct SwiftParameters {
 	};
 
 	template <typename TSpec, typename THstkPos>
-	struct _SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos>
+	struct SwiftHit_<Tag<SwiftSemiGlobal_<TSpec> >, THstkPos>
 	{
 		THstkPos	hstkPos;			// parallelogram begin in haystack 
 		unsigned	ndlSeqNo;			// needle sequence number
@@ -223,7 +223,7 @@ struct SwiftParameters {
 	public:
 		typedef typename Iterator<THaystack, Rooted>::Type			TIterator;
 		typedef typename Position<THaystack>::Type					THstkPos;
-		typedef _SwiftHit<TSpec, __int64>							TSwiftHit;
+		typedef SwiftHit_<TSpec, __int64>							TSwiftHit;
 		typedef String<TSwiftHit>									THitString;
 		typedef typename Iterator<THitString, Standard>::Type		THitIterator;
 		typedef typename SAValue<THaystack>::Type					TSAValue;
@@ -323,7 +323,7 @@ struct SwiftParameters {
 	public:
 		typedef Pipe<TTuples, TPipeSpec>						TInput;
 		typedef typename Size<TInput>::Type						THstkPos;
-		typedef _SwiftHit<TSpec, __int64>						TSwiftHit;
+		typedef SwiftHit_<TSpec, __int64>						TSwiftHit;
 		typedef String<TSwiftHit>								THitString;
 		typedef typename Iterator<THitString, Standard>::Type	THitIterator;
 
@@ -375,13 +375,13 @@ struct SwiftParameters {
 	public:
 		typedef typename Size<TIndex>::Type								TSize;
 		typedef unsigned												TShortSize;
-		typedef typename Fibre<TIndex, Tag<_Fibre_SA> const >::Type		TSA;
-		typedef typename Fibre<TIndex, Tag<_Fibre_Shape> const >::Type	TShape;
+		typedef typename Fibre<TIndex, Tag<FibreSA_> const >::Type		TSA;
+		typedef typename Fibre<TIndex, Tag<Fibre_Shape_> const >::Type	TShape;
 		typedef typename Iterator<TSA const, Standard>::Type			TIterator;
 		
-		typedef _SwiftBucket<TSpec, TSize, TShortSize>					TBucket;
+		typedef SwiftBucket_<TSpec, TSize, TShortSize>					TBucket;
 		typedef String<TBucket>											TBucketString;
-		typedef _SwiftBucketParams<TSpec, TSize, TShortSize>			TBucketParams;
+		typedef SwiftBucketParams_<TSpec, TSize, TShortSize>			TBucketParams;
 		typedef String<TBucketParams>									TBucketParamsString;
 		typedef String<Pair<unsigned> >									TVerifyList;
 		
@@ -419,7 +419,7 @@ struct SwiftParameters {
 
 
 template <typename _TSpec, typename TSize, typename TShortSize>
-inline void _printSwiftParams(_SwiftBucketParams<_TSpec, TSize, TShortSize > &bucketParams)
+inline void _printSwiftParams(SwiftBucketParams_<_TSpec, TSize, TShortSize > &bucketParams)
 {
 	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
 	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
@@ -431,7 +431,7 @@ inline void _printSwiftParams(_SwiftBucketParams<_TSpec, TSize, TShortSize > &bu
 }
 
 template <typename _TSpec, typename TSize, typename TShortSize>
-inline void _printSwiftParams(_SwiftBucketParams<Tag<_SwiftSemiGlobal<_TSpec> >, TSize, TShortSize > &bucketParams)
+inline void _printSwiftParams(SwiftBucketParams_<Tag<SwiftSemiGlobal_<_TSpec> >, TSize, TShortSize > &bucketParams)
 {
 	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
 	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
@@ -514,7 +514,7 @@ setMinThreshold(Pattern<TIndex, Swift<TSpec> > & pattern, TSeqNo seqNo, TThresho
 
 template <typename TSpec, typename TSize, typename TShortSize, typename TPos>
 inline void
-_resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement)
+_resetBucket(SwiftBucket_<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
@@ -523,7 +523,7 @@ _resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement)
 
 template <typename TSpec, typename TSize, typename TShortSize, typename TPos, typename TThresh>
 inline void
-_resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
+_resetBucket(SwiftBucket_<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
@@ -533,7 +533,7 @@ _resetBucket(_SwiftBucket<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement, T
 
 template <typename _TSpec, typename TSize, typename TShortSize, typename TPos>
 inline void
-_resetBucket(_SwiftBucket<_SwiftSemiGlobal<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement)
+_resetBucket(SwiftBucket_<SwiftSemiGlobal_<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
@@ -541,7 +541,7 @@ _resetBucket(_SwiftBucket<_SwiftSemiGlobal<_TSpec>, TSize, TShortSize> & bkt, TP
 
 template <typename _TSpec, typename TSize, typename TShortSize, typename TPos, typename TThresh>
 inline void
-_resetBucket(_SwiftBucket<_SwiftSemiGlobal<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
+_resetBucket(SwiftBucket_<SwiftSemiGlobal_<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
@@ -575,7 +575,7 @@ inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRa
 		pattern.finderPosOffset = 0;
 		pattern.finderPosNextOffset = pattern.finderLength;
 
-		indexRequire(host(pattern), QGram_SADir());
+		indexRequire(host(pattern), QGramSADir());
 		pattern.shape = indexShape(host(pattern));
 
 		TSize span = length(pattern.shape);
@@ -914,7 +914,7 @@ inline bool _swiftMultiProcessQGram(
 				|| (__int64)((*bkt).lastIncrement + bucketParams.distanceCut) < curPos)
 			{
 				// last increment was before the beginning of the current bucket => bucket is reused
-				// OR last increment was in the same bucket but lies more than distanceCut away
+				// Or last increment was in the same bucket but lies more than distanceCut away
                 
                 if ((*bkt).counter >= (*bkt).threshold)
                 {
@@ -989,10 +989,10 @@ template <
 >
 inline bool _swiftMultiProcessQGram(
 	TFinder &finder, 
-	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &pattern,
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > > &pattern,
 	THValue hash)
 {
-	typedef Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > >	TPattern;
+	typedef Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > >	TPattern;
 
 	typedef typename Size<TIndex>::Type							TSize;
 	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
@@ -1030,7 +1030,7 @@ inline bool _swiftMultiProcessQGram(
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, getSeqNo(ndlPos));
 
 		__int64 diag = finder.curPos;
-		if (Swift<Tag<_SwiftSemiGlobal<_TSpec> > >::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
+		if (Swift<Tag<SwiftSemiGlobal_<_TSpec> > >::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
 		
 		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
 		unsigned bktOfs = diag & (bucketParams.delta - 1);
@@ -1064,7 +1064,7 @@ inline bool _swiftMultiProcessQGram(
 			{
 
 				TSize height = 0;
-				if (Swift<Tag<_SwiftSemiGlobal<_TSpec> > >::DIAGONAL == 1)
+				if (Swift<Tag<SwiftSemiGlobal_<_TSpec> > >::DIAGONAL == 1)
 					height = sequenceLength(getSeqNo(ndlPos), host(pattern)) - 1;
 
 #ifdef SEQAN_DEBUG_SWIFT
@@ -1189,7 +1189,7 @@ template <
 >
 inline bool _swiftMultiFlushBuckets(
 	TFinder &, 
-	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<_TSpec> > > > &)
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > > &)
 {
     // there is nothing to be done here as we dump matches immediately after reaching the threshold
     return false;
@@ -1249,7 +1249,7 @@ position(Pattern<TIndex, Swift<TSpec> > const & pattern)
 
 template <typename TIndex, typename TSpec>
 inline typename SAValue<TIndex>::Type
-position(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
+position(Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > const & pattern)
 {
 	typedef typename Size<TIndex>::Type TSize;
     typename SAValue<TIndex >::Type pos;
@@ -1296,7 +1296,7 @@ beginPosition(Pattern<TIndex, Swift<TSpec> > const & pattern)
 
 template <typename TIndex, typename TSpec>
 inline typename SAValue<TIndex >::Type
-beginPosition(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
+beginPosition(Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > const & pattern)
 {
     typename SAValue<TIndex >::Type pos;
 	posLocalToX(pos, Pair<unsigned>(pattern.curSeqNo, 0), stringSetLimits(host(pattern)));
@@ -1344,7 +1344,7 @@ endPosition(Pattern<TIndex, Swift<TSpec> > const & pattern)
 
 template <typename TIndex, typename TSpec>
 inline typename SAValue<TIndex >::Type
-endPosition(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
+endPosition(Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > const & pattern)
 {
 	typedef typename Size<TIndex>::Type TSize;
 	typename SAValue<TIndex >::Type pos;
@@ -1527,7 +1527,7 @@ infix(Pattern<TIndex, Swift<TSpec> > const & pattern)
 
 template <typename TIndex, typename TSpec>
 inline typename Infix< typename GetSequenceByNo< TIndex const >::Type >::Type
-infix(Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > const & pattern)
+infix(Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > const & pattern)
 {
 	return infix(getSequenceByNo(pattern.curSeqNo, needle(pattern)), 0, sequenceLength(pattern.curSeqNo, needle(pattern)));
 }
@@ -1638,7 +1638,7 @@ template <typename TFinder, typename TIndex, typename TSpec>
 inline void 
 _copySwiftHit(
 	TFinder &finder,
-	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > &pattern)
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > &pattern)
 {
 	pattern.curSeqNo = (*finder.curHit).ndlSeqNo;
 	pattern.curBeginPos = 0;
@@ -1649,7 +1649,7 @@ template <typename TFinder, typename TIndex, typename TSpec>
 inline bool 
 find(
 	TFinder &finder,
-	Pattern<TIndex, Swift<Tag<_SwiftSemiGlobal<TSpec> > > > &pattern, 
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec> > > > &pattern, 
 	double errorRate)
 {
 	return find(finder, pattern, errorRate, 0);
@@ -1663,7 +1663,7 @@ find(
 	double errorRate,
 	TSize minLength)
 {
-	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
+	typedef typename Fibre<TIndex, QGramShape>::Type	TShape;
 	typedef	typename Value<TShape>::Type				THashValue;
 
 	if (empty(finder)) 
@@ -1857,7 +1857,7 @@ windowFindNext(
 {
 	SEQAN_CHECKPOINT
 	
-	typedef typename Fibre<TIndex, QGram_Shape>::Type	TShape;
+	typedef typename Fibre<TIndex, QGramShape>::Type	TShape;
 	typedef	typename Value<TShape>::Type				THashValue;
 	
 	typedef Finder<THaystack, Swift<TSpec> >			TFinder;

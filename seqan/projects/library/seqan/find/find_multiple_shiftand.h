@@ -42,8 +42,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.MultipleShiftAnd
 
-struct _MultipleShiftAnd;
-typedef Tag<_MultipleShiftAnd> MultipleShiftAnd;
+struct MultipleShiftAnd_;
+typedef Tag<MultipleShiftAnd_> MultipleShiftAnd;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -259,7 +259,7 @@ position(Pattern<TNeedle, MultipleShiftAnd> & me)
 
 
 template <typename TFinder, typename TNeedle>
-bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
+bool _findShiftAndSmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	typedef typename Size<TNeedle>::Type TSize;
@@ -313,7 +313,7 @@ bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftA
 }
 
 template <typename TFinder, typename TNeedle>
-bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
+bool _findShiftAndLargeNeedle(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 	SEQAN_CHECKPOINT
 	typedef typename Size<TNeedle>::Type TSize;
 	typedef unsigned int TWord;
@@ -411,9 +411,9 @@ inline bool find(TFinder & finder, Pattern<TNeedle, MultipleShiftAnd> & me) {
 
 	// Fast algorithm for needles < machine word?
 	if (me.blockCount == 1) {
-		return _findShiftAnd_SmallNeedle(finder, me);
+		return _findShiftAndSmallNeedle(finder, me);
 	} else {
-		return _findShiftAnd_LargeNeedle(finder, me);
+		return _findShiftAndLargeNeedle(finder, me);
 	}
 }
 

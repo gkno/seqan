@@ -510,10 +510,10 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	// Copy all reads belonging to this contig and reverse complement them if necessary
 	TAlignedReadStore contigReads;
 	TReadPos maxPos = 0;
-	TReadPos minPos = SupremumValue<TReadPos>::VALUE;
+	TReadPos minPos = MaxValue<TReadPos>::VALUE;
 	for(;alignIt != alignItEnd; ++alignIt) {
 		if (alignIt->beginPos > alignIt->endPos) {
-			reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
+			reverseComplement(fragStore.readSeqStore[alignIt->readId]);
 			TAlignedElement alignedEl = *alignIt;
 			TReadPos tmp = alignedEl.beginPos;
 			alignedEl.beginPos = alignedEl.endPos;
@@ -620,7 +620,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	TAlignIter contigReadIt = begin(contigReads, Standard());
 	for(;alignIt != alignItEnd; ++alignIt) {
 		if (alignIt->beginPos > alignIt->endPos) {
-			reverseComplementInPlace(fragStore.readSeqStore[alignIt->readId]);
+			reverseComplement(fragStore.readSeqStore[alignIt->readId]);
 			alignIt->beginPos = contigReadIt->endPos;
 			alignIt->endPos = contigReadIt->beginPos;
 		} else {

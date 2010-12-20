@@ -38,7 +38,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Iterator<TContainer, MUMs>::Type
 ..signature:Iter<TContainer, VSTree< BottomUp<MUMs> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
@@ -83,7 +83,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			seqCount(countSequences(_tree)),
 			seqSet(countSequences(_tree))
 		{
-			indexRequire(_tree, ESA_BWT());
+			indexRequire(_tree, EsaBwt());
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a MUM node (length(occ)<2<=seqCount)
 		}
 
@@ -96,7 +96,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			seqCount(countSequences(_tree)),
 			seqSet(countSequences(_tree))
 		{
-			indexRequire(_tree, ESA_BWT());
+			indexRequire(_tree, EsaBwt());
 			goNext(*this);	// the iterator starts in a suffix, i.e. not a MUM node (length(occ)<2<=seqCount)
 		}
 
@@ -129,7 +129,7 @@ namespace SEQAN_NAMESPACE_MAIN
 ..signature:Iterator<TContainer, MultiMEMs>::Type
 ..signature:Iter<TContainer, VSTree< BottomUp<MultiMEMs> > >
 ..param.TContainer:Type of an index that can be iterated with a bottom-up iterator.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ...metafunction:Metafunction.Container
 ..include:seqan/index.h
 
@@ -151,8 +151,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	// contains a set of fraction compounds
 	// one compound for each sequence
 	template <typename TValue, typename TSize>
-	struct _FractionMultiCompound {
-		typedef _FractionCompound<TValue, TSize>	TCompound;
+	struct FractionMultiCompound_ {
+		typedef FractionCompound_<TValue, TSize>	TCompound;
 		typedef String<TCompound>					TSet;	// seqNo..unsigned, compound: bwt character->suffixes
 
 		TSet	set;
@@ -168,7 +168,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSTree>::Type			TValue;
 		typedef typename Size<TSTree>::Type				TSize;
 
-		typedef _FractionMultiCompound<TValue, TSize>	TMultiCompound;
+		typedef FractionMultiCompound_<TValue, TSize>	TMultiCompound;
 		typedef String<TMultiCompound, Block<> >		TSetStack;
 		typedef String<TSize>							TPositionList;
 		
@@ -193,9 +193,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			maxSupport(countSequences(_index)),
 			canMerge(true)
 		{
-			indexRequire(_index, ESA_SA());
-			indexRequire(_index, ESA_LCP());
-			indexRequire(_index, ESA_BWT());
+			indexRequire(_index, EsaSA());
+			indexRequire(_index, EsaLcp());
+			indexRequire(_index, EsaBwt());
 			resize(posList, length(_index));
 
 			if (!empty(indexSA(_index))) 
@@ -218,9 +218,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			maxSupport(countSequences(_index)),
 			canMerge(true)
 		{
-			indexRequire(_index, ESA_SA());
-			indexRequire(_index, ESA_LCP());
-			indexRequire(_index, ESA_BWT());
+			indexRequire(_index, EsaSA());
+			indexRequire(_index, EsaLcp());
+			indexRequire(_index, EsaBwt());
 			resize(posList, length(_index));
 
 			if (!empty(indexSA(_index))) 
@@ -340,10 +340,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TSTree, typename TSpec, typename TValue, typename TSize >
 	inline void _fractionMerge(
 		Iter<TSTree, VSTree< BottomUp<TSpec> > > &it, 
-		_FractionMultiCompound<TValue, TSize> &parent,
-		_FractionMultiCompound<TValue, TSize> &child)
+		FractionMultiCompound_<TValue, TSize> &parent,
+		FractionMultiCompound_<TValue, TSize> &child)
 	{
-		typedef _FractionMultiCompound<TValue, TSize>	TCompound;
+		typedef FractionMultiCompound_<TValue, TSize>	TCompound;
 		typedef typename TCompound::TSet				TSet;
 		typedef typename Iterator<TSet, Standard>::Type	TSetIterator;
 
@@ -370,11 +370,11 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSTree>::Type		TValue;
 		typedef typename Size<TSTree>::Type			TSize;
 		typedef typename SAValue<TSTree>::Type		TSAValue;
-		typedef _FractionHeader<TSize>				TFractionHeader;
+		typedef FractionHeader_<TSize>				TFractionHeader;
 		typedef Pair<TValue, TFractionHeader>		TFraction;
 		typedef typename Set<TFraction>::Type		TFractionSet;
 
-		typedef _FractionCompound<TValue, TSize>	TCompound;
+		typedef FractionCompound_<TValue, TSize>	TCompound;
 		typedef Pair<unsigned, TCompound>			TCompoundPair;
 		typedef typename Set<TCompoundPair>::Type	TSet;
 
@@ -455,7 +455,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename SAValue<TSTree>::Type	TSAValue;
 		typedef	Pair<TSAValue>					TPair;
 
-		typedef _FractionCompound<TValue, TSize> const	TFractionCompound;
+		typedef FractionCompound_<TValue, TSize> const	TFractionCompound;
 		typedef typename TFractionCompound::TSet const	TSet;
 		typedef typename Iterator<TSet>::Type			TSetIterator;
 

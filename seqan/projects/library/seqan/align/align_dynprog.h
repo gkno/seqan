@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //needleman wunsch alignment
 template <typename TScoreValue, unsigned DIMENSION, typename TString>
 TScoreValue
-_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
+_needlemanWunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 				  TString const & str1_,
 				  TString const & str2_,
 				  Score<TScoreValue, Simple> const & score_)
@@ -129,7 +129,7 @@ SEQAN_CHECKPOINT
 //traceback through needleman wunsch matrix
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
-_needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
+_needlemanWunschTrace(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
@@ -365,7 +365,7 @@ SEQAN_CHECKPOINT
 //gotoh trace
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
-_gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
+_gotohTrace(Align<TTargetSource, TTargetSpec> & target_,
 			 Matrix<TScoreValue, DIMENSION> & diag_matrix_,
 			 Matrix<TScoreValue, DIMENSION> & vert_matrix_,
 			 Matrix<TScoreValue, DIMENSION> & hori_matrix_,
@@ -531,8 +531,8 @@ SEQAN_CHECKPOINT
 	TScoreValue ret;
 
 	Matrix<TScoreValue> matr;
-	ret = _needleman_wunsch(matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
-	_needleman_wunsch_trace(align_, begin(matr), score_);
+	ret = _needlemanWunsch(matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
+	_needlemanWunschTrace(align_, begin(matr), score_);
 
 	return ret;
 }
@@ -553,7 +553,7 @@ SEQAN_CHECKPOINT
 	Matrix<TScoreValue> v_matr;
 	Matrix<TScoreValue> h_matr;
 	ret = _gotoh(d_matr, v_matr, h_matr, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
-	_gotoh_trace(align_, d_matr, v_matr, h_matr, score_);	
+	_gotohTrace(align_, d_matr, v_matr, h_matr, score_);	
 
 	return ret;
 }

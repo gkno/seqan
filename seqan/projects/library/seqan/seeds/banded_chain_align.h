@@ -59,25 +59,25 @@ bandedChainAlignment(TContainer const &seedChain,
 			if (leftDim0(*it) < leftDim0(*it2))
 			{
 				TContainer copyChain(seedChain);
-				reverseInPlace(copyChain);
+				reverse(copyChain);
 
 				if(scoreGapOpen(scoreMatrix)==scoreGapExtend(scoreMatrix))
-					return chain_to_alignment_needlemanwunsch(copyChain, k, whole_alignment, scoreMatrix);
+					return _chainToAlignmentNeedlemanWunsch(copyChain, k, whole_alignment, scoreMatrix);
 				else
-					return chain_to_alignment_gotoh(copyChain, k, whole_alignment, scoreMatrix);
+					return _chainToAlignmentGotoh(copyChain, k, whole_alignment, scoreMatrix);
 			}
 		}
 	}
 
 	if(scoreGapOpen(scoreMatrix)==scoreGapExtend(scoreMatrix))
-		return chain_to_alignment_needlemanwunsch(seedChain, k, whole_alignment, scoreMatrix);
+		return _chainToAlignmentNeedlemanWunsch(seedChain, k, whole_alignment, scoreMatrix);
 	else
-		return chain_to_alignment_gotoh(seedChain, k, whole_alignment, scoreMatrix);
+		return _chainToAlignmentGotoh(seedChain, k, whole_alignment, scoreMatrix);
 }
 
 template<typename TContainer, typename TValue, typename TScore, typename TAlign>
 TScore
-chain_to_alignment_needlemanwunsch(TContainer const &seedChain, 
+_chainToAlignmentNeedlemanWunsch(TContainer const &seedChain, 
 						TValue k,
 						TAlign & whole_alignment, 
 						Score< TScore, Simple> const &scoreMatrix)
@@ -180,7 +180,7 @@ _constructAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > >con
 
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
-_banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
+_bandedNeedlemanWunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 						 Seed<TValue, TSpecSeed> const &seed,
 						 TValue2 k,
 						 TString const & str1_,
@@ -350,7 +350,7 @@ _banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 //Position berechnen!
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 typename Size<Matrix<TScoreValue, DIMENSION> >::Type
-_banded_needleman_wunsch_trace2(Align<TTargetSource, TTargetSpec> & target_,
+_bandedNeedlemanWunschTrace2(Align<TTargetSource, TTargetSpec> & target_,
 								Matrix<TScoreValue, DIMENSION> & matrix,
 								Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 								Score<TScoreValue, Simple> const & score_)
@@ -441,7 +441,7 @@ SEQAN_CHECKPOINT
 //changed version of usual trace-back
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 int
-_needleman_wunsch_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
+_needlemanWunschTraceLastRectangle(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
@@ -527,7 +527,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAlign, typename TValue>
 void
-_rec_delete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
+_recDelete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//alignment vector
 		   TValue index,										//position im vector
 		   TValue position)										//alignment to delete
 {
@@ -549,7 +549,7 @@ _rec_delete(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &vec,	//al
 			x = (it2->second.i1 != it->second.i1);
 		}
 		if (x)
-			_rec_delete(vec, index-1, it->second.i1);
+			_recDelete(vec, index-1, it->second.i1);
 		vec[index].erase(position);
 	}
 }
@@ -581,7 +581,7 @@ _deleteAlignment(::std::vector< ::std::map<TValue,Pair<TValue, TAlign> > > &me,
 			x = (it2->second.i1 != it->second.i1);
 		}
 		if (x)
-			_rec_delete(me, length-1, it->second.i1);
+			_recDelete(me, length-1, it->second.i1);
 		me[length].erase(i);
 		//cout << "me2: " << me[0].size() << endl;
 	}
@@ -606,7 +606,7 @@ _calculateBandedSeed(TSeed const &seed,
     typedef typename Infix<TString>::Type TSegment;
 	TSegment seg1_align = infix(host(*p_seq1), leftDim0(seed), rightDim0(seed)+1);
 	TSegment seg2_align = infix(host(*p_seq2), leftDim1(seed), rightDim1(seed)+1);
-	_banded_needleman_wunsch(matrix_, seed, k, seg1_align, seg2_align, scoreMatrix, score_str);
+	_bandedNeedlemanWunsch(matrix_, seed, k, seg1_align, seg2_align, scoreMatrix, score_str);
 
 	TValue height_diag = leftDiagonal(seed)-startDiagonal(seed)+k;
 	TValue width_diag = startDiagonal(seed)-rightDiagonal(seed)+k;
@@ -632,7 +632,7 @@ _calculateBandedSeed(TSeed const &seed,
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _banded_needleman_wunsch_trace2(mapIt->second.i2, matrix_,  matr_it, scoreMatrix);
+		new_connect = _bandedNeedlemanWunschTrace2(mapIt->second.i2, matrix_,  matr_it, scoreMatrix);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goPrevious(matr_it,0);
@@ -656,7 +656,7 @@ _calculateBandedSeed(TSeed const &seed,
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
 		
-		new_connect = _banded_needleman_wunsch_trace2(mapIt->second.i2, matrix_,  matr_it, scoreMatrix);
+		new_connect = _bandedNeedlemanWunschTrace2(mapIt->second.i2, matrix_,  matr_it, scoreMatrix);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goPrevious(matr_it,0);
@@ -688,7 +688,7 @@ _calculateFirstRectangle(TSeed const &seed,
 	TSegment seg1b_align = infix(host(*p_seq1), beginPosition(*p_seq1), leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
 	TSegment seg2b_align = infix(host(*p_seq2), beginPosition(*p_seq2), leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k);
 
-	_banded_needleman_wunsch_rectangle_first(matrix_, seed, k, seg1b_align, seg2b_align, scoreMatrix,score_str);
+	_bandedNeedlemanWunschRectangleFirst(matrix_, seed, k, seg1b_align, seg2b_align, scoreMatrix,score_str);
 
 	TValue w_d2 = startDiagonal(seed) - rightDiagonal(seed) + k;
 	TValue h_d2 = leftDiagonal(seed) - startDiagonal(seed) + k;
@@ -711,7 +711,7 @@ _calculateFirstRectangle(TSeed const &seed,
 	assignSource(row(mapIt->second.i2,0), seg1_align);
 	assignSource(row(mapIt->second.i2,1), seg2_align);
 
-	new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
+	new_connect = _needlemanWunschTraceRectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
 	score_str[0] = *matr_it;
 	mapIt->second.i1 = new_connect;
 	_deleteAlignment(alignmentVector, -1, new_connect);
@@ -746,7 +746,7 @@ _calculateLastRectangle(TSeed const &seed,
 	TSegment seg1 = infix(host(*p_seq1),seq1_end-width+1,seq1_end);
 	TSegment seg2 = infix(host(*p_seq2),seq2_end-height+1,seq2_end);
 
-	_needleman_wunsch(matrix_, seg1, seg2, scoreMatrix);
+	_needlemanWunsch(matrix_, seg1, seg2, scoreMatrix);
 
 	TValue width_align = seq1_end - width  + width_diag +1;
 	TValue height_align = seq2_end - height+1;
@@ -769,7 +769,7 @@ _calculateLastRectangle(TSeed const &seed,
 		setPosition(iter_, x);
 		score_str[i] = *iter_;
 		mapIt->second.i1 = -1;
-		_needleman_wunsch_trace_lastRectangle(mapIt->second.i2, iter_, scoreMatrix);
+		_needlemanWunschTraceLastRectangle(mapIt->second.i2, iter_, scoreMatrix);
 		x+=width;
 		++height_align;
 	}
@@ -787,7 +787,7 @@ _calculateLastRectangle(TSeed const &seed,
 		setPosition(iter_, x);
 		score_str[i] = *iter_;
 		mapIt->second.i1 = -1;
-		_needleman_wunsch_trace_lastRectangle(mapIt->second.i2, iter_, scoreMatrix);
+		_needlemanWunschTraceLastRectangle(mapIt->second.i2, iter_, scoreMatrix);
 		--x;
 		--width_align;
 	}
@@ -815,7 +815,7 @@ _calculateRectangle(TSeed const &seed,
 	TSegment seg1b_align = infix(host(*p_seq1), rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
 	TSegment seg2b_align = infix(host(*p_seq2), rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
 
-	_needleman_wunsch_rectangle(matrix_, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoreMatrix,score_str);
+	_needlemanWunschRectangle(matrix_, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoreMatrix,score_str);
 
 	TValue width_diag = leftDiagonal(seed2) - endDiagonal(seed2)+k_end;
 	TValue height_diag = endDiagonal(seed2) - rightDiagonal(seed2)+k_end;
@@ -849,7 +849,7 @@ _calculateRectangle(TSeed const &seed,
 		assignSource(row(mapIt->second.i2,1), seg2_align);
 
 		//cout << "ALL: " << length(seg1_align) << " " << length(seg2_align) << " " << width_stop << " " <<height_stop << endl;
-		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
+		new_connect = _needlemanWunschTraceRectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goNext(matr_it, 1);
@@ -871,7 +871,7 @@ _calculateRectangle(TSeed const &seed,
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _needleman_wunsch_trace_rectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
+		new_connect = _needlemanWunschTraceRectangle(mapIt->second.i2,  matr_it, scoreMatrix, matrix_, width_stop, height_stop);
 		score_str[j] = *matr_it;
 		mapIt->second.i1 = new_connect;
 		goPrevious(matr_it,0);
@@ -890,7 +890,7 @@ _calculateRectangle(TSeed const &seed,
 //Rectangle calculation between two seeds
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_needleman_wunsch_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_,			//edit matrix
+_needlemanWunschRectangle(Matrix<TScoreValue, DIMENSION> & matrix_,			//edit matrix
 							Seed<TValue, TSpecSeed> const &seed1,		//Seed nearer to the end
 							Seed<TValue, TSpecSeed> const &seed2,		//Seed nearer to the start
 							TValue2 k_begin,							//upper diagonal extension
@@ -1060,7 +1060,7 @@ SEQAN_CHECKPOINT
 //changed version of usual trace-back
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue, typename TMatrix>
 TValue
-_needleman_wunsch_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
+_needlemanWunschTraceRectangle(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_,
 						TMatrix matrix, 
@@ -1157,7 +1157,7 @@ SEQAN_CHECKPOINT
 //Rectangle calculation between two seeds
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_banded_needleman_wunsch_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_,	//edit matrix
+_bandedNeedlemanWunschRectangleFirst(Matrix<TScoreValue, DIMENSION> & matrix_,	//edit matrix
 								   Seed<TValue, TSpecSeed> const &seed,		//Seed
 								   TValue2 k,									//diagonal extension
 								   TString const & str1_,						//first sequence

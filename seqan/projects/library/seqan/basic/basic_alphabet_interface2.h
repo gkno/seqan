@@ -104,21 +104,21 @@ SEQAN_CHECKPOINT
 
 
 //////////////////////////////////////////////////////////////////////////////
-// supremumValue, supremumValueImpl
+// maxValue, supremumValueImpl
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Function.supremumValueImpl:
 ..hidefromindex
 ..cat:Alphabets
-..summary:Implements @Function.supremumValue@.
+..summary:Implements @Function.maxValue@.
 ..signature:supremumValueImpl(value_pointer_tag)
 ..param.value_pointer_tag:A pointer that is used as a tag to specify the value type.
 ...remarks:The pointer needs not to point to a valid object, so it is possible to use a null pointer here.
 ..returns:A value $inf$ that holds: $inf >= i$ for all values $i$.
-..remarks.text:This function implements @Function.supremumValue@. 
-It is recommended to use @Function.supremumValue@ rather than $supremumValueImpl$.
-..status:deprecated, will be removed in favour of @Metafunction.SupremumValue@
+..remarks.text:This function implements @Function.maxValue@. 
+It is recommended to use @Function.maxValue@ rather than $supremumValueImpl$.
+..status:deprecated, will be removed in favour of @Metafunction.MaxValue@
 ..include:seqan/basic.h
 */
 
@@ -133,22 +133,22 @@ supremumValueImpl(T *)
 */
 
 /**
-.Function.supremumValue:
+.Function.maxValue:
 ..cat:Alphabets
 ..summary:Supremum for a given type.
-..signature:supremumValue<T>()
+..signature:maxValue<T>()
 ..param.T:An ordered type.
 ..returns:A value $inf$ that holds: $inf >= i$ for all values $i$ of type $T$.
 ..remarks.text:The function is implemented in @Function.supremumValueImpl@. 
-Do not specialize $supremumValue$, specialize @Function.supremumValueImpl@ instead!
+Do not specialize $maxValue$, specialize @Function.supremumValueImpl@ instead!
 ..see:Function.supremumValueImpl
-..status:deprecated, will be removed in favour of @Metafunction.SupremumValue@
+..status:deprecated, will be removed in favour of @Metafunction.MaxValue@
 ..include:seqan/basic.h
 */
 
 template <typename T>
 inline T const &
-supremumValue()
+maxValue()
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;
@@ -157,7 +157,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline T const &
-supremumValue(T)
+maxValue(T)
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;
@@ -165,21 +165,21 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// infimumValue, infimumValueImpl
+// minValue, infimumValueImpl
 //////////////////////////////////////////////////////////////////////////////
 
 /**
 .Function.infimumValueImpl:
 ..hidefromindex
 ..cat:Alphabets
-..summary:Implements @Function.infimumValue@.
+..summary:Implements @Function.minValue@.
 ..signature:infimumValueImpl(value_pointer_tag)
 ..param.value_pointer_tag:A pointer that is used as a tag to specify the value type.
 ...remarks:The pointer needs not to point to a valid object, so it is possible to use a null pointer here.
 ..returns:A value $inf$ that holds: $inf <= i$ for all values $i$.
-..remarks.text:This function implements @Function.infimumValue@. 
-It is recommended to use @Function.infimumValue@ rather than $infimumValueImpl$.
-..status:deprecated, will be removed in favour of @Metafunction.InfimumValue@
+..remarks.text:This function implements @Function.minValue@. 
+It is recommended to use @Function.minValue@ rather than $infimumValueImpl$.
+..status:deprecated, will be removed in favour of @Metafunction.MinValue@
 ..include:seqan/basic.h
 */
 
@@ -194,23 +194,23 @@ infimumValueImpl(T *)
 */
 
 /**
-.Function.infimumValue:
+.Function.minValue:
 ..cat:Alphabets
 ..summary:Infimum for a given type.
-..signature:infimumValue<T>()
+..signature:minValue<T>()
 ..param.T:An ordered type.
 ..returns:A value $inf$ that holds: $inf <= i$ for all values $i$ of type $T$.
 ..remarks.text:The function is implemented in @Function.infimumValueImpl@. 
-Do not specialize $infimumValue$, specialize @Function.infimumValueImpl@ instead!
+Do not specialize $minValue$, specialize @Function.infimumValueImpl@ instead!
 ..see:Function.infimumValueImpl
-..see:Function.supremumValue
-..status:deprecated, will be removed in favour of @Metafunction.InfimumValue@
+..see:Function.maxValue
+..status:deprecated, will be removed in favour of @Metafunction.MinValue@
 ..include:seqan/basic.h
 */
 
 template <typename T>
 inline T const &
-infimumValue()
+minValue()
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;
@@ -219,7 +219,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline T const &
-infimumValue(T)
+minValue(T)
 {
 SEQAN_CHECKPOINT
 	T * _tag = 0;

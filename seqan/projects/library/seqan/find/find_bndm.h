@@ -141,7 +141,7 @@ SEQAN_CHECKPOINT
 
 
 template <typename TFinder, typename TNeedle>
-inline bool _findBndm_SmallNeedle(TFinder & finder, 
+inline bool _findBndmSmallNeedle(TFinder & finder, 
 								  Pattern<TNeedle, BndmAlgo> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
@@ -173,7 +173,7 @@ inline bool _findBndm_SmallNeedle(TFinder & finder,
 }
 
 template <typename TFinder, typename TNeedle>
-inline bool _findBndm_LargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
+inline bool _findBndmLargeNeedle(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	TWord carryPattern = (1<< (BitsPerValue<TWord>::VALUE - 1));
@@ -236,9 +236,9 @@ inline bool find(TFinder & finder, Pattern<TNeedle, BndmAlgo> & me) {
 
 	// Fast algorithm for needles < machine word?
 	if (me.blockCount == 1) {
-		return _findBndm_SmallNeedle(finder, me);
+		return _findBndmSmallNeedle(finder, me);
 	} else {
-		return _findBndm_LargeNeedle(finder, me);
+		return _findBndmLargeNeedle(finder, me);
 	}
 }
 

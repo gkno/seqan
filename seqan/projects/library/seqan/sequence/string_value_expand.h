@@ -250,7 +250,7 @@ inline typename Value<THost>::Type
 _getValueExpandFlagValue(String< TValue, ValueExpand<THost, TMap, TSpec> > const & /*me*/)
 {
 	typedef typename Value<THost>::Type TSmallValue;
-	return supremumValue<TSmallValue>();
+	return maxValue<TSmallValue>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

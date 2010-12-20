@@ -685,9 +685,9 @@ _initializeAlphabetConversionTable(TTarget *,
 
 
 template <typename TTarget, typename TSource>
-struct _AlphabetConversionTable
+struct AlphabetConversionTable_
 {
-	enum { SIZE = _InternalValueSize<TSource>::VALUE };
+	enum { SIZE = InternalValueSize_<TSource>::VALUE };
 private:
 	static TTarget table_store[SIZE];
 public:
@@ -706,11 +706,11 @@ public:
 };
 
 template <typename TTarget, typename TSource>
-TTarget _AlphabetConversionTable<TTarget, TSource>::table_store[_AlphabetConversionTable<TTarget, TSource>::SIZE];
+TTarget AlphabetConversionTable_<TTarget, TSource>::table_store[AlphabetConversionTable_<TTarget, TSource>::SIZE];
 
 
 template <typename TTarget, typename TSource>
-TTarget * _AlphabetConversionTable<TTarget, TSource>::table = _AlphabetConversionTable<TTarget, TSource>::initialize();
+TTarget * AlphabetConversionTable_<TTarget, TSource>::table = AlphabetConversionTable_<TTarget, TSource>::initialize();
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -727,9 +727,9 @@ _initializeAlphabetOrdTable(TTarget *,
 
 
 template <typename TSource>
-struct _AlphabetOrdTable
+struct AlphabetOrdTable_
 {
-	enum { SIZE = _InternalValueSize<TSource>::VALUE };
+	enum { SIZE = InternalValueSize_<TSource>::VALUE };
 private:
 	static unsigned table_store[SIZE];
 public:
@@ -749,11 +749,11 @@ public:
 
 
 template <typename TSource>
-unsigned _AlphabetOrdTable<TSource>::table_store[_AlphabetOrdTable<TSource>::SIZE];
+unsigned AlphabetOrdTable_<TSource>::table_store[AlphabetOrdTable_<TSource>::SIZE];
 
 
 template <typename TSource>
-unsigned * _AlphabetOrdTable<TSource>::table = _AlphabetOrdTable<TSource>::initialize();
+unsigned * AlphabetOrdTable_<TSource>::table = AlphabetOrdTable_<TSource>::initialize();
 
 }  // namespace seqan
 

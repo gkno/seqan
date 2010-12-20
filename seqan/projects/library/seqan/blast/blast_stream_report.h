@@ -108,7 +108,7 @@ SEQAN_CHECKPOINT
 	String<char> query_name, db_name;
 	
 	//get query and database names
-	_parse_readQueryAndDBName(file,c,query_name,db_name);
+	_parseReadQueryAndDBName(file,c,query_name,db_name);
 	blastObj.query_name = query_name;
 	blastObj.db_name = db_name;
 
@@ -119,14 +119,14 @@ SEQAN_CHECKPOINT
 	TPosition next_event_pos = after_dbquery_pos;
 
 	String<char> delim = "Reference";
-	if(_parse_untilBeginLine(file,c,delim,9))
+	if(_parseUntilBeginLine(file,c,delim,9))
 	{
 		blastObj.next_report_pos = _streamTellG(file);
 		blastObj.next_report = true;
 	}
 
 	_streamSeekG(file,after_dbquery_pos);
-	if(_parse_untilBeginLine(file,c,'>'))
+	if(_parseUntilBeginLine(file,c,'>'))
 	{
 		next_event_pos = _streamTellG(file);
 		if(!blastObj.next_report || next_event_pos < blastObj.next_report_pos)

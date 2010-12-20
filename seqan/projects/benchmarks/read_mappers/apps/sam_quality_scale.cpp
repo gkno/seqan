@@ -43,7 +43,7 @@ void computeQualityScale(const char * contigsFilename, const char * samFilename,
         // Can reverse complement readSeq in place since gaps store a holder.
         if (it->beginPos > it->endPos) {
 //             std::cerr << "complementing..." << std::endl;
-            reverseComplementInPlace(readSeq);
+            reverseComplement(readSeq);
         }
 
 //         std::cerr << "Read:      " << readSeq << std::endl;

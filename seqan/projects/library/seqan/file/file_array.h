@@ -56,9 +56,9 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template < __int64 FILE_SIZE, typename TFile >
-    struct aRequest< File< Chained<FILE_SIZE, TFile> > >
+    struct AsyncRequest< File< Chained<FILE_SIZE, TFile> > >
     {
-		typedef typename aRequest<TFile>::Type Type;
+		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
 
@@ -81,9 +81,9 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template < unsigned _FileCount, typename TFile >
-    struct aRequest< File< Striped<_FileCount, TFile> > >
+    struct AsyncRequest< File< Striped<_FileCount, TFile> > >
     {
-		typedef typename aRequest<TFile>::Type Type;
+		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
 

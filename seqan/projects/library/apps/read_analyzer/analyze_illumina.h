@@ -435,7 +435,7 @@ void computeBogusReads(
         bool flipped = false;
         if (it->beginPos > it->endPos) {
             flipped = true;
-            reverseComplementInPlace(readSeq);
+            reverseComplement(readSeq);
         }
 
         TContigGapAnchorsIterator contigGapsIt = begin(contigGaps);
@@ -525,7 +525,7 @@ void performAlignmentEvaluation(AlignmentEvaluationResult<Illumina> & result, TF
         bool flipped = false;  // TODO(holtgrew): Remove?
         if (it->beginPos > it->endPos) {
             flipped = true;
-            reverseComplementInPlace(readSeq);
+            reverseComplement(readSeq);
         }
         // std::cout << "Evaluating" << std::endl;
         // std::cout << "  " << fragmentStore.readNameStore[it->readId] << ", flipped = " << flipped << std::endl;

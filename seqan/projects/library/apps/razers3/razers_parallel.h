@@ -152,7 +152,7 @@ setMaxErrors(ParallelSwiftPatternHandler<TJob, TFragmentStore, TSwiftFinder, TSw
 
 	int minT = _qgramLemma(handler.threadLocalStorage.swiftPattern, localReadNo, maxErrors);
 	if (minT > 1){
-		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+		if (maxErrors < 0) minT = MaxValue<int>::VALUE;
 		setMinThreshold(handler.threadLocalStorage.swiftPattern, localReadNo, (unsigned)minT);
 	}
 }
@@ -443,7 +443,7 @@ writeBackToLocal(ThreadLocalStorage<TJob, MapSingleReads<TFragmentStore, TSwiftF
     typedef typename TFragmentStore::TAlignedReadStore TAlignedReadStore;
     typename Size<TAlignedReadStore>::Type oldSize = length(tls.localStore.alignedReadStore);
 
-    if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+    if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
       maskDuplicates(tls.localStore, TRazerSMode());  // overlapping parallelograms cause duplicates
 
     fprintf(stderr, "COMPACTING MATCHES\n");
@@ -582,14 +582,14 @@ void _mapSingleReadsParallelToContig(
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
 	typedef typename Value<TReadSeqStore>::Type						TRead;
 	typedef StringSet<TRead>										TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 	typedef typename Size<TReadSeqStore>::Type						TSize;
 
     typedef RazerSMode<TAlignMode, TGapMode, TScoreMode, TMatchNPolicy> TRazerSMode;
 
     // TODO(holtgrew): What about cnts, mode?
 
-	typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+	typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
 	typedef Finder<TContigSeq, Swift<TSwiftSpec> >			TSwiftFinder;
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;
     typedef RazerSOptions<TSpec> TOptions;
@@ -603,7 +603,7 @@ void _mapSingleReadsParallelToContig(
 	lockContig(store, contigId);
 	TContigSeq & contigSeq = store.contigStore[contigId].seq;
 	if (orientation == 'R')
-		reverseComplementInPlace(contigSeq);
+		reverseComplement(contigSeq);
 
     // Create thread local storages and fill with filtration jobs.
     TThreadLocalStorages threadLocalStorages;
@@ -632,14 +632,14 @@ void _mapSingleReadsParallelToContig(
 
     // Fire up filtration jobs.
     int oldThreshold = globalState.globalOptions->compactThresh;
-    globalState.globalOptions->compactThresh = SupremumValue<unsigned>::VALUE;
+    globalState.globalOptions->compactThresh = MaxValue<unsigned>::VALUE;
     work(threadLocalStorages, onlyVerificationStealable<TFragmentStore, TSwiftFinder, TSwiftPattern, TShape, TOptions, TCounts, TRazerSMode>, StealOne());
     globalState.globalOptions->compactThresh = oldThreshold;
 
     // Restore orientation of contig
     // TODO(holtgrew): Always reverse-complemented again since outer caller locks!
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
-        if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+        if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
 }
 
 // Performs splitting of reads, initialization of OpenMP and the calls
@@ -665,7 +665,7 @@ int _mapSingleReadsParallel(
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
 	typedef typename Value<TReadSeqStore>::Type						TRead;
 	typedef StringSet<TRead>										TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 	typedef typename Size<TReadSeqStore>::Type						TSize;
 
 	typedef RazerSOptions<TSpec> TOptions;

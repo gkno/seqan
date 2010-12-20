@@ -170,12 +170,12 @@ struct Nothing {};
 // returns TTo const, if TFrom is const, TTo otherwise
 
 template <typename TFrom, typename TTo>
-struct _CopyConst
+struct CopyConst_
 {
 	typedef TTo Type;
 };
 template <typename TFrom, typename TTo>
-struct _CopyConst<TFrom const, TTo>
+struct CopyConst_<TFrom const, TTo>
 {
 	typedef TTo const Type;
 };
@@ -183,93 +183,93 @@ struct _CopyConst<TFrom const, TTo>
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Internal._RemoveConst:
-..signature:_RemoveConst<T>
+.Internal.RemoveConst_:
+..signature:RemoveConst_<T>
 ..returns:$t$ if $T$ is $t const$, otherwise $T$.
 */
 template <typename T>
-struct _RemoveConst
+struct RemoveConst_
 {
 	typedef T Type;
 };
 template <typename T>
-struct _RemoveConst<T const>:
-	public _RemoveConst<T> {};
+struct RemoveConst_<T const>:
+	public RemoveConst_<T> {};
 
 template <typename T>
-struct _RemoveConst<T &>
+struct RemoveConst_<T &>
 {
-	typedef typename _RemoveConst<T>::Type & Type;
+	typedef typename RemoveConst_<T>::Type & Type;
 };
 template <typename T>
-struct _RemoveConst<T *>
+struct RemoveConst_<T *>
 {
-	typedef typename _RemoveConst<T>::Type * Type;
+	typedef typename RemoveConst_<T>::Type * Type;
 };
 template <typename T, size_t I>
-struct _RemoveConst<T const [I]>
+struct RemoveConst_<T const [I]>
 {
 	typedef T * Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Internal._MakeUnsigned:
-..signature:_MakeUnsigned<T>
+.Internal.MakeUnsigned_:
+..signature:MakeUnsigned_<T>
 ..returns:$unsigned t$ if $T$ is not $unsigned t$, otherwise $T$.
 */
 template <typename T>
-struct _MakeUnsigned
+struct MakeUnsigned_
 {
 	typedef
-		typename IF< TYPECMP<T, char>::VALUE,         unsigned char,
-		typename IF< TYPECMP<T, signed char>::VALUE,  unsigned char,
-		typename IF< TYPECMP<T, signed short>::VALUE, unsigned short,
-		typename IF< TYPECMP<T, signed int>::VALUE,   unsigned int,
-		typename IF< TYPECMP<T, signed long>::VALUE,  unsigned long,
-		typename IF< TYPECMP<T, __int64>::VALUE,      __uint64, T
+		typename If< IsSameType<T, char>::VALUE,         unsigned char,
+		typename If< IsSameType<T, signed char>::VALUE,  unsigned char,
+		typename If< IsSameType<T, signed short>::VALUE, unsigned short,
+		typename If< IsSameType<T, signed int>::VALUE,   unsigned int,
+		typename If< IsSameType<T, signed long>::VALUE,  unsigned long,
+		typename If< IsSameType<T, __int64>::VALUE,      __uint64, T
 		>::Type>::Type>::Type>::Type>::Type>::Type Type;
 };
 
 template <typename T>
-struct _MakeUnsigned<T const> {
-	typedef typename _MakeUnsigned<T>::Type const Type;
+struct MakeUnsigned_<T const> {
+	typedef typename MakeUnsigned_<T>::Type const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Internal._MakeSigned:
-..signature:_MakeSigned<T>
+.Internal.MakeSigned_:
+..signature:MakeSigned_<T>
 ..returns:$signed t$ if $T$ is not $signed t$, otherwise $T$.
 */
 template <typename T>
-struct _MakeSigned
+struct MakeSigned_
 {
 	typedef
-		typename IF< TYPECMP<T, char>::VALUE,           signed char,
-		typename IF< TYPECMP<T, unsigned char>::VALUE,  signed char,
-		typename IF< TYPECMP<T, unsigned short>::VALUE, signed short,
-		typename IF< TYPECMP<T, unsigned int>::VALUE,   signed int,
-		typename IF< TYPECMP<T, unsigned long>::VALUE,  signed long,
-		typename IF< TYPECMP<T, __uint64>::VALUE,       __int64, T
+		typename If< IsSameType<T, char>::VALUE,           signed char,
+		typename If< IsSameType<T, unsigned char>::VALUE,  signed char,
+		typename If< IsSameType<T, unsigned short>::VALUE, signed short,
+		typename If< IsSameType<T, unsigned int>::VALUE,   signed int,
+		typename If< IsSameType<T, unsigned long>::VALUE,  signed long,
+		typename If< IsSameType<T, __uint64>::VALUE,       __int64, T
 		>::Type>::Type>::Type>::Type>::Type>::Type Type;
 };
 
 template <typename T>
-struct _MakeSigned<T const> {
-	typedef typename _MakeSigned<T>::Type const Type;
+struct MakeSigned_<T const> {
+	typedef typename MakeSigned_<T>::Type const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Internal._ClassIdentifier:
-..signature:void * _ClassIdentifier<T>::getID()
+.Internal.ClassIdentifier_:
+..signature:void * ClassIdentifier_<T>::getID()
 ..returns:A void * that identifies $T$.
 ...text:The returned values of two calls of $getID$ are equal if and only if
 the used type $T$ was the same.
 */
 template <typename T>
-struct _ClassIdentifier
+struct ClassIdentifier_
 {
 	static inline void *
 	getID()
@@ -293,7 +293,7 @@ the logarithm of $i$.
 */
 
 template <int BITS_MAX>
-struct _Log2_Impl
+struct Log2Impl_
 {
 	template <typename T>
 	static inline unsigned int
@@ -305,12 +305,12 @@ struct _Log2_Impl
 			val = val2;
 			offset += BITS_MAX / 2;
 		}
-		return _Log2_Impl<BITS_MAX / 2>::log2(val, offset);
+		return Log2Impl_<BITS_MAX / 2>::log2(val, offset);
 	}
 };
 
 template <>
-struct _Log2_Impl<1>
+struct Log2Impl_<1>
 {
 	template <typename T>
 	static inline unsigned int
@@ -331,7 +331,7 @@ log2(T val)
 		BITS_PER_VALUE = sizeof(T) * 8
 	};
 
-	return _Log2_Impl<BITS_PER_VALUE>::log2(val, 0);
+	return Log2Impl_<BITS_PER_VALUE>::log2(val, 0);
 }
 
 template <typename TValue, typename TExponent>
@@ -391,24 +391,10 @@ T _abs(T const & x)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T1, typename T2>
-struct _IsSameType
-{
-	enum {VALUE = false};
-	typedef False Type;
-};
-
-template <typename T>
-struct _IsSameType<T, T>
-{
-	enum {VALUE = true};
-	typedef True Type;
-};
-
-template <typename T1, typename T2>
 inline bool 
 _isSameType()
 {
-	return _IsSameType<T1, T2>::VALUE;
+	return IsSameType<T1, T2>::VALUE;
 }
 
 //////////////////////////////////////////////////////////////////////////////

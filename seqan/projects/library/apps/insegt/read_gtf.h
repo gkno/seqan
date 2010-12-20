@@ -25,7 +25,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// Read GTF
+// Read Gtf
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSpec, typename TConfig>
@@ -50,7 +50,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	file.open(fileName, std::ios_base::in | std::ios_base::binary);
 	if(!file.is_open())
 	{
-		std::cerr << "ERROR: GFF-File could not be opened!"; 
+		std::cerr << "ERROR: Gff-File could not be opened!"; 
 	}
 	
 	char c;
@@ -77,7 +77,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	file.open(fileName, std::ios_base::in | std::ios_base::binary);
 	if(!file.is_open())
 	{ 
-		std::cerr << "ERROR: GTF-File could not be opened!";
+		std::cerr << "ERROR: Gtf-File could not be opened!";
 	}
 	c = _streamGet(file);
 	
@@ -89,50 +89,50 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	while (!_streamEOF(file))
 	{
 		// skip first entries:
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c); 
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c); 
+		_parseSkipEntryUntilWhitespace(file, c);
 		
 		// read column 9: name & parentName
-		_parse_skipWhitespace(file, c);
-		if (_parse_readIdentifier(file, c) != "gene_id") 
+		_parseSkipWhitespace(file, c);
+		if (_parseReadIdentifier(file, c) != "gene_id") 
 		{
 			std::cout << "first feature field should be 'gene_id'"<< std::endl; 
 			_parse_skipLine(file, c);
 			resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());
 			continue;
 		}
-		_parse_skipWhitespace(file, c); 
-		name = _parse_readIdentifier(file, c);
+		_parseSkipWhitespace(file, c); 
+		name = _parseReadIdentifier(file, c);
 		
 		if (c == ';') c = _streamGet(file);
-		_parse_skipWhitespace(file, c); 
+		_parseSkipWhitespace(file, c); 
 		
 		clear(parentName);       
 		if (!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
 		{
-			if(_parse_readIdentifier(file,c) != "transcript_id") 
+			if(_parseReadIdentifier(file,c) != "transcript_id") 
 			{
 				std::cout << "second feature field should be 'transcript_id'"<< std::endl;
 				_parse_skipLine(file, c);
 				resize(me.annotationNameStore, length(me.annotationNameStore) - 1, Generous());	
 				continue;
 			}
-			_parse_skipWhitespace(file, c); 
-			parentName = _parse_readIdentifier(file, c);
+			_parseSkipWhitespace(file, c); 
+			parentName = _parseReadIdentifier(file, c);
 		}
 	
 			
@@ -190,7 +190,7 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 	file.open(fileName, std::ios_base::in | std::ios_base::binary);
 	if(!file.is_open())
 	{ 
-		std::cerr << "ERROR: GTF-File could not be opened!";
+		std::cerr << "ERROR: Gtf-File could not be opened!";
 	}
 	c = _streamGet(file);
 
@@ -204,10 +204,10 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 
 	while (!_streamEOF(file))
 	{
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		
 		// read 1. column: contig name
-		contigName = _parse_readWordUntilWhitespace(file, c);
+		contigName = _parseReadWordUntilWhitespace(file, c);
 		
 		itContigName = begin(me.contigNameStore);
 		itContigNameEnd = end(me.contigNameStore);
@@ -225,36 +225,36 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		}
 		
 		// skip column 2 and 3
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 		
 		// read column 4: begin position
-		_parse_skipWhitespace(file, c);
-		if (_parse_isDigit(c)) beginPos = _parse_readNumber(file, c);
+		_parseSkipWhitespace(file, c);
+		if (_parseIsDigit(c)) beginPos = _parseReadNumber(file, c);
 		else 
 		{
-			_parse_skipEntryUntilWhitespace(file, c);
+			_parseSkipEntryUntilWhitespace(file, c);
 			beginPos = INVALID_POS;
 		}
 	
 		// read column 5: end position
-		_parse_skipWhitespace(file, c);
-		if (_parse_isDigit(c)) endPos = _parse_readNumber(file, c);
+		_parseSkipWhitespace(file, c);
+		if (_parseIsDigit(c)) endPos = _parseReadNumber(file, c);
 		else 
 		{
-			_parse_skipEntryUntilWhitespace(file, c);
+			_parseSkipEntryUntilWhitespace(file, c);
 			endPos = INVALID_POS;
 		}	
 		
 	
 		// skip column 6
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	
 		// read column 7: orientation
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		if (c == '+')
 		{	
 			orientation = 0;	
@@ -266,32 +266,32 @@ readAnnotationsFromGTF(FragmentStore<TSpec, TConfig> & me,
 		c = _streamGet(file);
 	
 		// skip column 8
-		_parse_skipWhitespace(file, c);
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 		
 		// read column 9: name
-		_parse_skipWhitespace(file, c);
-		if (_parse_readIdentifier(file, c) != "gene_id") 
+		_parseSkipWhitespace(file, c);
+		if (_parseReadIdentifier(file, c) != "gene_id") 
 		{
 			_parse_skipLine(file, c);
 			continue;
 		}
-		_parse_skipWhitespace(file, c); 
-		name = _parse_readIdentifier(file, c);
+		_parseSkipWhitespace(file, c); 
+		name = _parseReadIdentifier(file, c);
 		
 		if (c == ';') c = _streamGet(file);
-		_parse_skipWhitespace(file, c); 
+		_parseSkipWhitespace(file, c); 
 		
 		clear(parentName);       
 		if (!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n')))
 		{
-			if(_parse_readIdentifier(file,c) != "transcript_id") 
+			if(_parseReadIdentifier(file,c) != "transcript_id") 
 			{
 				_parse_skipLine(file, c);	
 				continue;
 			}
-			_parse_skipWhitespace(file, c); 
-			parentName = _parse_readIdentifier(file, c);
+			_parseSkipWhitespace(file, c); 
+			parentName = _parseReadIdentifier(file, c);
 		}
 		
 		// insert in AnnotationStore:

@@ -74,12 +74,12 @@ struct Cargo< Pair<TKey, TCargo, TSpec> >
 // Type for mapValue function that implements [] for map types 
 
 template <typename TMap, typename TCargo>
-struct _MapValue_Impl
+struct MapValueImpl_
 {
 	typedef TCargo & Type;
 };
 template <typename TMap>
-struct _MapValue_Impl<TMap, Nothing>
+struct MapValueImpl_<TMap, Nothing>
 {
 	typedef bool Type;
 };
@@ -97,14 +97,14 @@ struct _MapValue_Impl<TMap, Nothing>
  */
 template <typename TMap>
 struct MapValue :
-	_MapValue_Impl< TMap, typename Cargo<TMap>::Type >
+	MapValueImpl_< TMap, typename Cargo<TMap>::Type >
 {
 };
 
 
 
 template <typename TCargo>
-struct _Impl_mapValue
+struct ImplMapValue_
 {
 	template <typename TMap, typename TKey2>
 	static inline TCargo &
@@ -116,7 +116,7 @@ struct _Impl_mapValue
 };
 
 template <>
-struct _Impl_mapValue<Nothing>
+struct ImplMapValue_<Nothing>
 {
 	template <typename TMap, typename TKey2>
 	static inline bool
@@ -159,7 +159,7 @@ mapValue(TMap & me,
 		 TKey const & _key)
 {
 	typedef typename Cargo<TMap>::Type TCargo;
-	return _Impl_mapValue<TCargo>::mapValue_(me, _key);
+	return ImplMapValue_<TCargo>::mapValue_(me, _key);
 }
 
 //////////////////////////////////////////////////////////////////////////////

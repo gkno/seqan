@@ -45,8 +45,8 @@ namespace SEQAN_NAMESPACE_MAIN {
 
 ///.Class.Pattern.param.TSpec.type:Spec.HammingSimpleFinder
 
-struct _HammingSimple;
-typedef Tag<_HammingSimple> HammingSimple;
+struct HammingSimple_;
+typedef Tag<HammingSimple_> HammingSimple;
 
 
 template <typename TNeedle>
@@ -133,7 +133,7 @@ inline int score(const Pattern<TNeedle, HammingSimple> &me) {
 
 
 template <typename TNeedle>
-inline int getScore(const Pattern<TNeedle, HammingSimple> &me) {
+inline int _getMatchScore(const Pattern<TNeedle, HammingSimple> &me) {
     SEQAN_CHECKPOINT;
     return -me.distance;
 }
@@ -148,13 +148,13 @@ inline void setScoreLimit(Pattern<TNeedle, HammingSimple> & me, int _limit) {
 
 
 template <typename TAlphabet, typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(TAlphabet const & a, TAlphabet const & b, Pattern<TNeedle, HammingSimple> const &) {
+inline bool _findHammingSimpleCharsEqual(TAlphabet const & a, TAlphabet const & b, Pattern<TNeedle, HammingSimple> const &) {
     return a == b;
 }
 
 
 template <typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(Dna5 const & ndlChar, Dna5 const & hstckChar, Pattern<TNeedle, HammingSimple> const & pattern) {
+inline bool _findHammingSimpleCharsEqual(Dna5 const & ndlChar, Dna5 const & hstckChar, Pattern<TNeedle, HammingSimple> const & pattern) {
     if (ndlChar == Dna5('N') && pattern.matchNFlags & 1) {
         return true;
     } else if (hstckChar == Dna5('N') && pattern.matchNFlags & 2) {
@@ -166,20 +166,20 @@ inline bool _find_HammingSimple_charsEqual(Dna5 const & ndlChar, Dna5 const & hs
 
 
 template <typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(Dna5Q const & a, Dna5 const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
-    return _find_HammingSimple_charsEqual(convert<Dna5>(a), b, pattern);
+inline bool _findHammingSimpleCharsEqual(Dna5Q const & a, Dna5 const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _findHammingSimpleCharsEqual(convert<Dna5>(a), b, pattern);
 }
 
 
 template <typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(Dna5 const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
-    return _find_HammingSimple_charsEqual(a, convert<Dna5>(b), pattern);
+inline bool _findHammingSimpleCharsEqual(Dna5 const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _findHammingSimpleCharsEqual(a, convert<Dna5>(b), pattern);
 }
 
 
 template <typename TNeedle>
-inline bool _find_HammingSimple_charsEqual(Dna5Q const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
-    return _find_HammingSimple_charsEqual(convert<Dna5>(a), convert<Dna5>(b), pattern);
+inline bool _findHammingSimpleCharsEqual(Dna5Q const & a, Dna5Q const & b, Pattern<TNeedle, HammingSimple> const & pattern) {
+    return _findHammingSimpleCharsEqual(convert<Dna5>(a), convert<Dna5>(b), pattern);
 }
 
 
@@ -237,7 +237,7 @@ inline bool find(TFinder &finder,
         for (i = position(finder); i <= length(hstk) - length(ndl); ++i) {
             me.distance = 0;  // Reset mismatch count.
             for (TSize j = 0; j < length(ndl); ++j) {
-                me.distance += !(_find_HammingSimple_charsEqual(ndl[j], hstk[i + j], me));
+                me.distance += !(_findHammingSimpleCharsEqual(ndl[j], hstk[i + j], me));
                 if (me.distance > me.maxDistance)
                     break;
             }

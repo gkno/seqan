@@ -61,7 +61,7 @@ void goNext(TFile & file, CGViz) {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
-void _write_impl(TFile& target, Align<TSource, TSpec>& align, TStringContainer& ids, CGViz) {
+void _writeImpl(TFile& target, Align<TSource, TSpec>& align, TStringContainer& ids, CGViz) {
 	SEQAN_CHECKPOINT
 
 	typedef Align<TSource, TSpec> const TAlign;
@@ -191,7 +191,7 @@ void _write_impl(TFile& target, Align<TSource, TSpec>& align, TStringContainer& 
 template <typename TFile, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec>& align, CGViz) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, String<String<char> >(), CGViz());
+	_writeImpl(file, align, String<String<char> >(), CGViz());
 }
 
 //____________________________________________________________________________
@@ -199,7 +199,7 @@ void write(TFile & file, Align<TSource, TSpec>& align, CGViz) {
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, CGViz) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, ids, CGViz());
+	_writeImpl(file, align, ids, CGViz());
 }
 
 
@@ -207,7 +207,7 @@ void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, C
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, CGViz) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, ids, CGViz());
+	_writeImpl(file, align, ids, CGViz());
 }
 
 //____________________________________________________________________________
@@ -215,7 +215,7 @@ void write(TFile & file, Align<TSource, TSpec>* align, TStringContainer & ids, C
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec, typename TMeta>
 void write(TFile & file, Align<TSource, TSpec> & align, TStringContainer& ids, TMeta &, CGViz) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, ids, CGViz());
+	_writeImpl(file, align, ids, CGViz());
 }
 
 

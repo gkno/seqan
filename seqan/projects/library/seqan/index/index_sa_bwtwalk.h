@@ -48,7 +48,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// Public function
 	// NOTE: This function uses the supremum value of Value<TSA>::Type as NIL symbol
 	//       for temporary calculations. Therefore, the caller must ensure that
-	//       length(s) < SupremumValue<TValue>::VALUE. Otherwise, behaviour is undefined!
+	//       length(s) < MaxValue<TValue>::VALUE. Otherwise, behaviour is undefined!
 	template < typename TSA, typename TText, typename TSpec >
 	inline void createSuffixArray(
 		TSA &SA,
@@ -73,7 +73,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		value(lexprevpos, p) = predecessor;
 		value(lexnextpos, p) = successor;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		if (predecessor != NIL) value(lexnextpos, predecessor) = p;
 		if (successor != NIL) value(lexprevpos, successor) = p;
 	}
@@ -108,7 +108,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TValue predecessor,
 		TValue successor)
 	{
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		value(lexxorpos, p) = predecessor ^ successor;
 		if (predecessor != NIL) value(lexxorpos, predecessor) = getValue(lexxorpos, predecessor) ^ successor ^ p;
 		if (successor != NIL) value(lexxorpos, successor) = getValue(lexxorpos, successor) ^ predecessor ^ p;
@@ -125,7 +125,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TSA>::Type TValue;
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
 		typedef String<TValue> TArray;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		
 		if (empty(s)) return;
 		
@@ -159,7 +159,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TSA>::Type TValue;
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		typedef String<TValue> TArray;
 
 		if (empty(s)) return;
@@ -193,7 +193,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Value<TSA>::Type TValue;
 		typedef typename Iterator<TSA, Standard>::Type TSaIter;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		typedef String<TValue> TArray;
 
 		if (empty(s)) return;
@@ -230,7 +230,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		True const &)
 	{
 		typedef typename Value<TSA>::Type TValue;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 
 		const TValue FLAGBIT = (TValue)1 << (BitsPerValue<TValue>::VALUE-1);
 		const TValue NOTFLAGBIT = ~FLAGBIT;
@@ -331,7 +331,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TValue &pPlus,
 		unsigned int cOrd)
 	{
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 
 		// current char does not exist
 		// first find pMinus ...
@@ -367,7 +367,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Value<const TText>::Type TChar;
 		const unsigned int ALPHABETSIZE = ValueSize<TChar>::VALUE;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		typedef String<TValue, Array<ALPHABETSIZE> > TAlphabetArray;
 
 		TAlphabetArray lexfirstpos, lexlastpos;
@@ -462,7 +462,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef typename Value<const TText>::Type TChar;
 		const unsigned int ALPHABETSIZE = ValueSize<TChar>::VALUE;
-		const TValue NIL = SupremumValue<TValue>::VALUE;
+		const TValue NIL = MaxValue<TValue>::VALUE;
 		typedef String<TValue, Array<ALPHABETSIZE> > TAlphabetArray;
 
 		TAlphabetArray lexfirstpos;

@@ -116,13 +116,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	..remarks.text:The cargo type is used for additional cargo information.
 	*/
 
-	struct _Empty
+	struct EmptyCargo_
 	{};
 /*
 	template< typename T >
 	struct Cargo
 	{
-		typedef _Empty Type;
+		typedef EmptyCargo_ Type;
 	};
 */
 
@@ -350,7 +350,7 @@ struct Key< SkipBaseElement< TObject, TModus, TSpec, TStructuring > const >
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 struct Cargo< SkipList< TObject, TModus, TSpec, TStructuring > >
 {
-	typedef _Empty Type;	// default: no cargo
+	typedef EmptyCargo_ Type;	// default: no cargo
 };
 
 template< typename TObject, typename TModus, typename TSpec, typename TStructuring >

@@ -27,13 +27,13 @@ namespace seqan
 // Modifications of the struct SkipElement for use in a SkipListStatic< True, RT< MaxTag > >
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
-	struct _RangeMaxCargo
+	struct RangeMaxCargo_
 	{
 
 		SkipList< TObject, TModus, TSpec, TStructuring > * _assocStruct;
 		TObject * _maxObj;
 
-		_RangeMaxCargo()
+		RangeMaxCargo_()
 			: _assocStruct( NULL )
 			, _maxObj( NULL )
 		{}
@@ -42,14 +42,14 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	SkipList< TObject, TModus, TSpec, TStructuring > *
-	_getAssoc( _RangeMaxCargo< TObject, TModus, TSpec, TStructuring > & me )
+	_getAssoc( RangeMaxCargo_< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		return me._assocStruct;
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_setAssoc( _RangeMaxCargo< TObject, TModus, TSpec, TStructuring > & me,
+	_setAssoc( RangeMaxCargo_< TObject, TModus, TSpec, TStructuring > & me,
 				SkipList< TObject, TModus, TSpec, TStructuring > * list )
 	{
 		me._assocStruct = list;
@@ -60,14 +60,14 @@ namespace seqan
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	TObject *
-	_getMaxObject( _RangeMaxCargo< TObject, SkipListStatic, TSpec, TStructuring > & me )
+	_getMaxObject( RangeMaxCargo_< TObject, SkipListStatic, TSpec, TStructuring > & me )
 	{
 		return me._maxObj;
 	}
 
 	template< typename TObject, typename TSpec, typename TStructuring > inline
 	void
-	_setMaxObject( _RangeMaxCargo< TObject, SkipListStatic, TSpec, TStructuring > & me,
+	_setMaxObject( RangeMaxCargo_< TObject, SkipListStatic, TSpec, TStructuring > & me,
 				TObject * obj )
 	{
 		me._maxObj = obj;
@@ -91,7 +91,7 @@ namespace seqan
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct Cargo< SkipElement< TObject, TModus, RT< MaxTree< TSpec > >, TStructuring > >
 	{
-		typedef _RangeMaxCargo< TObject, TModus, RT< MaxTree< TSpec > >, TStructuring > Type;
+		typedef RangeMaxCargo_< TObject, TModus, RT< MaxTree< TSpec > >, TStructuring > Type;
 	};
 
 		// get the score value of the related object

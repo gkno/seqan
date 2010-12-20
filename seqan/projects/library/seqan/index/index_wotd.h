@@ -30,53 +30,53 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /**
 .Tag.WOTD Index Fibres
-..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_Wotd@ index.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an WOTD based @Spec.Index_Wotd@.
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.IndexWotd@ index.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an WOTD based @Spec.IndexWotd@.
 ..remarks:TODO(holtgrew): Ask David.
 ..cat:Index
 
-..tag.Wotd_Text:The original text the index should be based on.
+..tag.WotdText:The original text the index should be based on.
 ...remarks:TODO(holtgrew): Ask David.
 
-..tag.Wotd_RawText:The raw text the index is really based on.
+..tag.WotdRawText:The raw text the index is really based on.
 ...remarks:TODO(holtgrew): Ask David.
 
-..tag.Wotd_SA:The suffix array.
+..tag.WotdSA:The suffix array.
 ...remarks:TODO(holtgrew): Ask David.
 
-..tag.Wotd_RawSA:The raw suffix array.
+..tag.WotdRawSA:The raw suffix array.
 ...remarks:TODO(holtgrew): Ask David.
 
-..tag.Wotd_Dir:The child table.
+..tag.WotdDir:The child table.
 ...remarks:TODO(holtgrew): Ask David.
 
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
-..see:Spec.Index_Wotd
+..see:Spec.IndexWotd
 ..include:seqan/index.h
 */
-	typedef Fibre_Text		Wotd_Text;
-	typedef Fibre_RawText	Wotd_RawText;
-	typedef Fibre_SA		Wotd_SA;
-	typedef Fibre_RawSA		Wotd_RawSA;
-	typedef Fibre_Dir		Wotd_Dir;
+	typedef FibreText		WotdText;
+	typedef FibreRawText	WotdRawText;
+	typedef FibreSA		WotdSA;
+	typedef FibreRawSA		WotdRawSA;
+	typedef FibreDir		WotdDir;
 
-///.Spec.VSTree Iterator.param.TContainer.type:Spec.Index_Wotd
-///.Spec.TopDown Iterator.param.TContainer.type:Spec.Index_Wotd
-///.Spec.TopDownHistory Iterator.param.TContainer.type:Spec.Index_Wotd
+///.Spec.VSTree Iterator.param.TContainer.type:Spec.IndexWotd
+///.Spec.TopDown Iterator.param.TContainer.type:Spec.IndexWotd
+///.Spec.TopDownHistory Iterator.param.TContainer.type:Spec.IndexWotd
 
 //////////////////////////////////////////////////////////////////////////////
 // wotd tree index
 
 /**
-.Spec.Index_Wotd:
+.Spec.IndexWotd:
 ..summary:An index based on a lazy suffix tree (see Giegerich et al., "Efficient implementation of lazy suffix trees").
 ..cat:Index
 ..general:Class.Index
-..signature:Index<TText, Index_Wotd<> >
+..signature:Index<TText, IndexWotd<> >
 ..param.TText:The text type.
 ...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.WOTD Index Fibres.Wotd_SA@) and the wotd tree (see @Tag.WOTD Index Fibres.Wotd_Dir@).
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a partially sorted suffix array (see @Tag.WOTD Index Fibres.WotdSA@) and the wotd tree (see @Tag.WOTD Index Fibres.WotdDir@).
 ..include:seqan/index.h
 */
 
@@ -84,13 +84,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Tag<WotdOriginal_> const WotdOriginal;
 
 	template < typename TSpec = void >
-	struct Index_Wotd {};
+	struct IndexWotd {};
 
 /*
 	template < typename TObject, typename TSpec >
-	struct Fibre< Index<TObject, Index_Wotd<TSpec> >, Fibre_Dir> 
+	struct Fibre< Index<TObject, IndexWotd<TSpec> >, FibreDir> 
 	{
-		typedef Index<TObject, Index_Wotd<TSpec> > TIndex;
+		typedef Index<TObject, IndexWotd<TSpec> > TIndex;
 		typedef String< 
 			typename typename Size<TIndex>::Type,
 			Alloc<>
@@ -99,11 +99,11 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 	
 	template < typename TObject, typename TSpec >
-	class Index<TObject, Index_Wotd<TSpec> > {
+	class Index<TObject, IndexWotd<TSpec> > {
 	public:
-		typedef typename Fibre<Index, Wotd_Text>::Type		TText;
-		typedef typename Fibre<Index, Wotd_SA>::Type		TSA;
-		typedef typename Fibre<Index, Wotd_Dir>::Type		TDir;
+		typedef typename Fibre<Index, WotdText>::Type		TText;
+		typedef typename Fibre<Index, WotdSA>::Type		TSA;
+		typedef typename Fibre<Index, WotdDir>::Type		TDir;
 
 		typedef typename Value<Index>::Type					TValue;
 		typedef typename Size<TText>::Type					TSize;
@@ -173,13 +173,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 /*
     template < typename TText, typename TSpec >
-    struct Value< Index<TText, Index_Wotd<TSpec> > > {
-		typedef typename Value< typename Fibre< Index<TText, Index_Wotd<TSpec> >, Wotd_RawText >::Type >::Type Type;
+    struct Value< Index<TText, IndexWotd<TSpec> > > {
+		typedef typename Value< typename Fibre< Index<TText, IndexWotd<TSpec> >, WotdRawText >::Type >::Type Type;
     };
 
 	template < typename TText, typename TSpec >
-    struct Size< Index<TText, Index_Wotd<TSpec> > > {
-		typedef typename Size< typename Fibre< Index<TText, Index_Wotd<TSpec> >, Wotd_RawText >::Type >::Type Type;
+    struct Size< Index<TText, IndexWotd<TSpec> > > {
+		typedef typename Size< typename Fibre< Index<TText, IndexWotd<TSpec> >, WotdRawText >::Type >::Type Type;
     };
 */
 
@@ -188,12 +188,12 @@ namespace SEQAN_NAMESPACE_MAIN
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, Index_Wotd<TSpec> >, Fibre_Dir> {
+	struct DefaultIndexCreator<Index<TText, IndexWotd<TSpec> >, FibreDir> {
         typedef Default Type;
     };
 
 	template < typename TText, typename TSSetSpec, typename TSpec >
-	struct DefaultIndexCreator<Index<StringSet<TText, TSSetSpec>, Index_Wotd<TSpec> >, Fibre_Dir> {
+	struct DefaultIndexCreator<Index<StringSet<TText, TSSetSpec>, IndexWotd<TSpec> >, FibreDir> {
         typedef Default Type;
     };
 
@@ -201,7 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // default finder
 
 	template < typename TText, typename TSpec >
-	struct DefaultFinder< Index<TText, Index_Wotd<TSpec> > > {
+	struct DefaultFinder< Index<TText, IndexWotd<TSpec> > > {
         typedef FinderSTree Type;	// standard suffix array finder is mlr-heuristic
     };
 
@@ -209,13 +209,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename TSize>
-	struct _VertexWotdOriginal {
+	struct VertexWotdOriginal_ {
 		TSize		node;			// position of current node entry in directory
 		TSize		parentRepLen;	// representative length of parent node
 		TSize		edgeLen;		// length of edge above current node
 
-		_VertexWotdOriginal() {}
-		_VertexWotdOriginal(MinimalCtor):
+		VertexWotdOriginal_() {}
+		VertexWotdOriginal_(MinimalCtor):
 			parentRepLen(0),
 			edgeLen(0) 
 		{
@@ -224,21 +224,21 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template <typename TSize>
-	struct _VertexWotdModified {
+	struct VertexWotdModified_ {
 		TSize		node;			// position of current node entry in directory
 		TSize		parentRepLen;	// representative length of parent node
 		TSize		edgeLen;		// length of edge above current node
 		Pair<TSize> range;			// current SA interval of hits
 		TSize		parentRight;	// right boundary of parent node's range (allows to go right)
 
-		_VertexWotdModified() {}
-		_VertexWotdModified(MinimalCtor):
+		VertexWotdModified_() {}
+		VertexWotdModified_(MinimalCtor):
 			node(0),
 			parentRepLen(0),
 			edgeLen(0),
 			range(0,0),
 			parentRight(0) {}
-		_VertexWotdModified(Pair<TSize> const &otherRange, TSize otherParentRight):
+		VertexWotdModified_(Pair<TSize> const &otherRange, TSize otherParentRight):
 			node(0),
 			parentRepLen(0),
 			edgeLen(0),
@@ -247,38 +247,38 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 //////////////////////////////////////////////////////////////////////////////
-///.Metafunction.VertexDescriptor.param.T.type:Spec.Index_Wotd
+///.Metafunction.VertexDescriptor.param.T.type:Spec.IndexWotd
 
 	template < typename TText >
-	struct VertexDescriptor< Index<TText, Index_Wotd<WotdOriginal> > > {
-		typedef typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type TSize;
-		typedef _VertexWotdOriginal<TSize> Type;
+	struct VertexDescriptor< Index<TText, IndexWotd<WotdOriginal> > > {
+		typedef typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type TSize;
+		typedef VertexWotdOriginal_<TSize> Type;
 	};
 
 	template < typename TText, typename TSpec >
-	struct VertexDescriptor< Index<TText, Index_Wotd<TSpec> > > {
-		typedef typename Size< Index<TText, Index_Wotd<TSpec> > >::Type TSize;
-		typedef _VertexWotdModified<TSize> Type;
+	struct VertexDescriptor< Index<TText, IndexWotd<TSpec> > > {
+		typedef typename Size< Index<TText, IndexWotd<TSpec> > >::Type TSize;
+		typedef VertexWotdModified_<TSize> Type;
 	};
 
 	template < typename TText, typename TSpec >
-	void _indexRequireTopDownIteration(Index<TText, Index_Wotd<TSpec> > &index) 
+	void _indexRequireTopDownIteration(Index<TText, IndexWotd<TSpec> > &index) 
 	{
-		indexRequire(index, Wotd_Dir());
+		indexRequire(index, WotdDir());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // history stack functions
 
 	template <typename TSize>
-	struct _HistoryStackWotdOriginal
+	struct HistoryStackWotdOriginal_
 	{
 		TSize		node;		// position of current node entry in directory
 		TSize		edgeLen;	// length of edge above current node
 	};
 
 	template <typename TSize>
-	struct _HistoryStackWotdModified
+	struct HistoryStackWotdModified_
 	{
 		TSize		node;		// position of current node entry in directory
 		TSize		edgeLen;	// length of edge above current node
@@ -286,25 +286,25 @@ namespace SEQAN_NAMESPACE_MAIN
 	};
 
 	template < typename TText, typename TSpec >
-	struct _HistoryStackEntry< Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > > 
+	struct HistoryStackEntry_< Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > > 
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
-		typedef _HistoryStackWotdOriginal<TSize>		Type;
+		typedef HistoryStackWotdOriginal_<TSize>		Type;
 	};
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	struct _HistoryStackEntry< Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > >
+	struct HistoryStackEntry_< Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > >
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
-		typedef _HistoryStackWotdModified<TSize>		Type;
+		typedef HistoryStackWotdModified_<TSize>		Type;
 	};
 
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) 
+	_historyPush(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it) 
 	{
 		it._parentDesc = value(it);
 		value(it).parentRepLen += parentEdgeLength(it);
@@ -313,34 +313,34 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	_historyPush(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
-		typedef typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type TSize;
+		typedef typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
-		_HistoryStackWotdOriginal<TSize> entry = { value(it).node, edgeLen };
+		HistoryStackWotdOriginal_<TSize> entry = { value(it).node, edgeLen };
 		push(it.history, entry);
 		value(it).parentRepLen += edgeLen;
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void 
-	_historyPush(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	_historyPush(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
-		typedef typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type TSize;
+		typedef typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type TSize;
 		TSize edgeLen = parentEdgeLength(it);
-		_HistoryStackWotdModified<TSize> entry = { value(it).node, edgeLen, value(it).range };
+		HistoryStackWotdModified_<TSize> entry = { value(it).node, edgeLen, value(it).range };
 		push(it.history, entry);
 		value(it).parentRepLen += edgeLen;
 		value(it).parentRight = value(it).range.i2;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.resizeVertexMap.type:Spec.Index_Wotd
+///.Function.resizeVertexMap.type:Spec.IndexWotd
 
 	template < typename TText, typename TIndexSpec, typename TPropertyMap >
 	inline void
 	resizeVertexMap(
-		Index<TText, Index_Wotd<TIndexSpec> > const& index,
+		Index<TText, IndexWotd<TIndexSpec> > const& index,
 		TPropertyMap & pm)
 	{
 		resize(pm, length(indexDir(index)), Generous());
@@ -350,7 +350,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TIndexSpec, typename TPropertyMap, typename TProperty >
 	inline void
 	resizeVertexMap(
-		Index<TText, Index_Wotd<TIndexSpec> > const& index,
+		Index<TText, IndexWotd<TIndexSpec> > const& index,
 		TPropertyMap & pm,
 		TProperty const & prop)
 	{
@@ -358,52 +358,52 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 */
 	template < typename TSize >
-	inline typename Id< _VertexWotdOriginal<TSize> const >::Type
-	_getId(_VertexWotdOriginal<TSize> const &desc) 
+	inline typename Id< VertexWotdOriginal_<TSize> const >::Type
+	_getId(VertexWotdOriginal_<TSize> const &desc) 
 	{
 		return desc.node;
 	}
 
 	template < typename TSize >
-	inline typename Id< _VertexWotdOriginal<TSize> >::Type
-	_getId(_VertexWotdOriginal<TSize> &desc) 
+	inline typename Id< VertexWotdOriginal_<TSize> >::Type
+	_getId(VertexWotdOriginal_<TSize> &desc) 
 	{
-		return _getId(const_cast<_VertexWotdOriginal<TSize> const &>(desc));
+		return _getId(const_cast<VertexWotdOriginal_<TSize> const &>(desc));
 	}
 
 	template < typename TSize >
-	inline typename Id< _VertexWotdModified<TSize> const >::Type
-	_getId(_VertexWotdModified<TSize> const &desc) 
+	inline typename Id< VertexWotdModified_<TSize> const >::Type
+	_getId(VertexWotdModified_<TSize> const &desc) 
 	{
 		return desc.node;
 	}
 
 	template < typename TSize >
-	inline typename Id< _VertexWotdModified<TSize> >::Type
-	_getId(_VertexWotdModified<TSize> &desc) 
+	inline typename Id< VertexWotdModified_<TSize> >::Type
+	_getId(VertexWotdModified_<TSize> &desc) 
 	{
-		return _getId(const_cast<_VertexWotdModified<TSize> const &>(desc));
+		return _getId(const_cast<VertexWotdModified_<TSize> const &>(desc));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template < typename TSize >
-	inline bool _isRoot(_VertexWotdOriginal<TSize> const &value) {
+	inline bool _isRoot(VertexWotdOriginal_<TSize> const &value) {
 		return value.node == 0;
 	}
 
 	template < typename TSize >
-	inline bool _isRoot(_VertexWotdModified<TSize> const &value) {
+	inline bool _isRoot(VertexWotdModified_<TSize> const &value) {
 		return value.node == 0; 
 	}
 
 	// is this a leaf? (including empty $-edges)
 	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
 	inline bool _isLeaf(
-		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it,
+		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDFSOrder, False> const)
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 		TIndex const &index = container(it);
 		return (dirAt(value(it).node, index) & index.LEAF) != 0;
 	}
@@ -411,10 +411,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	// is this a leaf? (excluding empty $-edges)
 	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder >
 	inline bool _isLeaf(
-		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it,
+		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it,
 		VSTreeIteratorTraits<TDFSOrder, True> const)
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex const &index = container(it);
@@ -429,7 +429,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// parentEdgeLength - ORIGINAL VERSION
 	template < typename TIndex, typename TSize >
 	inline typename Size<TIndex>::Type
-	parentEdgeLength(TIndex const &index, _VertexWotdOriginal<TSize> &vDesc)
+	parentEdgeLength(TIndex const &index, VertexWotdOriginal_<TSize> &vDesc)
 	{
 		TSize edgeLen = vDesc.edgeLen;
 		if (edgeLen != (TSize)-1)
@@ -442,7 +442,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TSize w1 = dirAt(pos + 1, index);
 		if (w1 & index.UNEVALUATED)
-			return vDesc.edgeLen = _bucketLCP(
+			return vDesc.edgeLen = _bucketLcp(
 				infix(indexSA(index), w0 & index.BITMASK0, w1 & index.BITMASK1),
 				indexText(index));
 		else
@@ -452,7 +452,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// parentEdgeLength - MODIFIED VERSION
 	template < typename TIndex, typename TSize >
 	inline typename Size<TIndex>::Type
-	parentEdgeLength(TIndex const &index, _VertexWotdModified<TSize> &vDesc)
+	parentEdgeLength(TIndex const &index, VertexWotdModified_<TSize> &vDesc)
 	{
 		TSize edgeLen = vDesc.edgeLen;
 		if (edgeLen != (TSize)-1)
@@ -467,12 +467,12 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize w1 = dirAt(pos + 1, index);
 		if (w1 & index.UNEVALUATED)
 			if (_isSizeInval(vDesc.range.i2))
-				return vDesc.edgeLen = _bucketLCP(
+				return vDesc.edgeLen = _bucketLcp(
 					suffix(indexSA(index), vDesc.range.i1),
 					indexText(index),
 					vDesc.parentRepLen) - vDesc.parentRepLen;
 			else
-				return vDesc.edgeLen = _bucketLCP(
+				return vDesc.edgeLen = _bucketLcp(
 					infix(indexSA(index), vDesc.range.i1, vDesc.range.i2),
 					indexText(index),
 					vDesc.parentRepLen) - vDesc.parentRepLen;
@@ -481,37 +481,37 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type
+	inline typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type
 	parentEdgeLength(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
+		Index<TText, IndexWotd<TIndexSpec> >, 
 		VSTree< TopDown<TSpec> > > const &it)
 	{
-		typedef Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > TIter;
+		typedef Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > TIter;
 		return parentEdgeLength(container(it), value(const_cast<TIter&>(it)));
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type
+	inline typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type
 	parentRepLength(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
+		Index<TText, IndexWotd<TIndexSpec> >, 
 		VSTree< TopDown<TSpec> > > const &it)
 	{
 		return value(it).parentRepLen;
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type
+	inline typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type
 	parentRepLength(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
+		Index<TText, IndexWotd<TIndexSpec> >, 
 		VSTree< TopDown< ParentLinks<TSpec> > > > const &it)
 	{
 		return value(it).parentRepLen;
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type
+	inline typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type
 	repLength(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
+		Index<TText, IndexWotd<TIndexSpec> >, 
 		VSTree< TopDown<TSpec> > > const &it) 
 	{
 		return parentRepLength(it) + parentEdgeLength(it);
@@ -520,10 +520,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// parentEdgeLabel - ORIGINAL VERSION (doesn't work if TText is a StringSet)
 	template < typename TText, typename TSpec >
-	inline typename Infix< typename Fibre<Index<TText, Index_Wotd<WotdOriginal> >, ESA_Text>::Type const >::Type 
-	parentEdgeLabel(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > const &it) 
+	inline typename Infix< typename Fibre<Index<TText, IndexWotd<WotdOriginal> >, EsaText>::Type const >::Type 
+	parentEdgeLabel(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > const &it) 
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex const &index = container(it);
@@ -538,16 +538,16 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// getOccurrence - ORIGINAL VERSION
 	template < typename TText, typename TSpec >
-	inline typename SAValue<Index<TText, Index_Wotd<WotdOriginal> > >::Type 
-	getOccurrence(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > const &it) {
+	inline typename SAValue<Index<TText, IndexWotd<WotdOriginal> > >::Type 
+	getOccurrence(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree<TSpec> > const &it) {
 		return _getNodeLP(container(it), value(it).node) - value(it).parentRepLen;
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline bool
-	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TopDown<TSpec> > > const &it) 
+	emptyParentEdge(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TopDown<TSpec> > > const &it) 
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 
 		TIndex const &index = container(it);
 		typename SAValue<TIndex>::Type pos = getOccurrence(it);
@@ -558,9 +558,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	// to avoid ambiguity
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline bool
-	emptyParentEdge(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
+	emptyParentEdge(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TopDown<ParentLinks<TSpec> > > > const &it) 
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 
 		TIndex const &index = container(it);
 		typename SAValue<TIndex>::Type pos = getOccurrence(it);
@@ -573,7 +573,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec >
 	inline void 
 	goRoot(Iter<
-		Index<TText, Index_Wotd<WotdOriginal> >, 
+		Index<TText, IndexWotd<WotdOriginal> >, 
 		VSTree<TSpec> > &it) 
 	{
 		_historyClear(it);
@@ -585,7 +585,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void 
 	goRoot(Iter<
-		Index<TText, Index_Wotd<TIndexSpec> >, 
+		Index<TText, IndexWotd<TIndexSpec> >, 
 		VSTree<TSpec> > &it) 
 	{
 		_historyClear(it);
@@ -597,13 +597,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TText, typename TSpec >
-	inline bool atEnd(Iter<Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > &it) 
+	inline bool atEnd(Iter<Index<TText, IndexWotd<WotdOriginal> >, VSTree<TSpec> > &it) 
 	{
 		return _isSizeInval(value(it).node);
 	}
 
 	template < typename TText, typename TSpec >
-	inline bool atEnd(Iter<Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > const &it) 
+	inline bool atEnd(Iter<Index<TText, IndexWotd<WotdOriginal> >, VSTree<TSpec> > const &it) 
 	{
 		return _isSizeInval(value(it).node);
 	}
@@ -613,15 +613,15 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec >
 	inline void
 	_adjustRightBorder(
-		Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &) 
+		Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &) 
 	{}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline void
 	_adjustRightBorder(
-		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it)
+		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it)
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex	const &index = container(it);
@@ -643,10 +643,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
 	inline bool 
 	_goDown(
-		Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
+		Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const)
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		if (_isLeaf(it, EmptyEdges())) return false;
@@ -679,10 +679,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
 	inline bool 
 	_goDown(
-		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
+		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const)
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		if (_isLeaf(it, EmptyEdges())) return false;
@@ -715,10 +715,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
 	inline bool 
 	_goRight(
-		Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
+		Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex const &index = container(it);
@@ -739,10 +739,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TIndexSpec, typename TSpec, typename TDFSOrder, typename THideEmptyEdges >
 	inline bool 
 	_goRight(
-		Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
+		Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		VSTreeIteratorTraits<TDFSOrder, THideEmptyEdges> const) 
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex const &index = container(it);
@@ -765,7 +765,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	// can be used at most once, as no history stack is available
 	template < typename TText, typename TWotdSpec, typename TSpec >
 	inline bool 
-	_goUp(Iter< Index<TText, Index_Wotd<TWotdSpec> >, VSTree< TopDown<TSpec> > > &it) 
+	_goUp(Iter< Index<TText, IndexWotd<TWotdSpec> >, VSTree< TopDown<TSpec> > > &it) 
 	{
 		if (!isRoot(it)) {
 			value(it) = it._parentDesc;
@@ -777,12 +777,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	// go up one edge (returns false if in root node)
 	template < typename TText, typename TSpec >
 	inline bool 
-	_goUp(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	_goUp(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
-		typedef typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type TSize;
+		typedef typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type TSize;
 
 		if (!empty(it.history)) {
-			_HistoryStackWotdOriginal<TSize> const &entry = top(it.history);
+			HistoryStackWotdOriginal_<TSize> const &entry = top(it.history);
 			value(it).node = entry.node;
 			value(it).parentRepLen -= entry.edgeLen;
 			value(it).edgeLen = entry.edgeLen;
@@ -794,13 +794,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
 	inline bool 
-	_goUp(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
+	_goUp(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > &it) 
 	{
-		typedef typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type TSize;
+		typedef typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type TSize;
 
 		if (!empty(it.history)) 
 		{
-			_HistoryStackWotdModified<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
 			value(it).node = entry.node;
 			value(it).parentRepLen -= entry.edgeLen;
 			value(it).edgeLen = entry.edgeLen;
@@ -815,15 +815,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// return vertex descriptor of parent's node
 	template < typename TText, typename TSpec >
-	inline typename VertexDescriptor< Index<TText, Index_Wotd<WotdOriginal> > >::Type
-	nodeUp(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	inline typename VertexDescriptor< Index<TText, IndexWotd<WotdOriginal> > >::Type
+	nodeUp(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> > TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> > TIndex;
 		typedef typename Size<TIndex>::Type TSize;
 
 		if (!empty(it.history))
 		{
-			_HistoryStackWotdModified<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
 			typename VertexDescriptor<TIndex>::Type desc;
 
 			desc.node = entry.node;
@@ -840,15 +840,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// return vertex descriptor of parent's node
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename VertexDescriptor< Index<TText, Index_Wotd<TIndexSpec> > >::Type
-	nodeUp(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
+	inline typename VertexDescriptor< Index<TText, IndexWotd<TIndexSpec> > >::Type
+	nodeUp(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown< ParentLinks<TSpec> > > > const &it) 
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> > TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> > TIndex;
 		typedef typename Size<TIndex>::Type TSize;
 
 		if (!empty(it.history))
 		{
-			_HistoryStackWotdModified<TSize> const &entry = top(it.history);
+			HistoryStackWotdModified_<TSize> const &entry = top(it.history);
 			typename VertexDescriptor<TIndex>::Type desc;
 
 			desc.node = entry.node;
@@ -1059,8 +1059,8 @@ namespace SEQAN_NAMESPACE_MAIN
 	_sortFirstWotdBucket(TIndex &index)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Fibre<TIndex, Wotd_Text >::Type		TText;
-		typedef typename Fibre<TIndex, Wotd_SA >::Type			TSA;
+		typedef typename Fibre<TIndex, WotdText >::Type		TText;
+		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
 		typedef typename TIndex::TCounter						TCounter;
 
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1105,7 +1105,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		typedef Index<StringSet<TText, TSpec>, TIndexSpec>		TIndex;
-		typedef typename Fibre<TIndex, Wotd_SA >::Type			TSA;
+		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
 		typedef typename TIndex::TCounter						TCounter;
 
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1162,14 +1162,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	// - adds prefixLen to all SA entries in SA[left,right)
 	template < typename TText, typename TBeginPos, typename TEndPos, typename TSize >
 	TSize _sortWotdBucket(
-		Index<TText, Index_Wotd<WotdOriginal> > &index,
+		Index<TText, IndexWotd<WotdOriginal> > &index,
 		TBeginPos left, 
 		TEndPos right,
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
-		typedef Index<TText, Index_Wotd<WotdOriginal> >			TIndex;
-		typedef typename Fibre<TIndex, Wotd_SA >::Type			TSA;
+		typedef Index<TText, IndexWotd<WotdOriginal> >			TIndex;
+		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
 		typedef typename TIndex::TCounter						TCounter;
 
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1282,8 +1282,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
-		typedef typename Fibre<TIndex, Wotd_Text >::Type		TText;
-		typedef typename Fibre<TIndex, Wotd_SA >::Type			TSA;
+		typedef typename Fibre<TIndex, WotdText >::Type		TText;
+		typedef typename Fibre<TIndex, WotdSA >::Type			TSA;
 		typedef typename TIndex::TCounter						TCounter;
 
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1349,7 +1349,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 	SEQAN_CHECKPOINT
 		typedef Index<StringSet<TText, TSpec>, TIndexSpec>			TIndex;
-		typedef typename Fibre<TIndex, Wotd_SA >::Type				TSA;
+		typedef typename Fibre<TIndex, WotdSA >::Type				TSA;
 		typedef typename TIndex::TCounter							TCounter;
 		typedef typename TIndex::TTempSA							TTempSA;
 
@@ -1426,7 +1426,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSA, typename TText >
 	typename Size<TText>::Type 
-	_bucketLCP(TSA const &sa, TText const &text)
+	_bucketLcp(TSA const &sa, TText const &text)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1460,7 +1460,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSA, typename TText, typename TSize >
 	typename Size<TText>::Type 
-	_bucketLCP(TSA const &sa, TText const &text, TSize prefixLen)
+	_bucketLcp(TSA const &sa, TText const &text, TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1492,7 +1492,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSA, typename TText, typename TSpec, typename TSize >
 	typename Size<TText>::Type 
-	_bucketLCP(TSA const &sa, StringSet<TText, TSpec> const &stringSet, TSize prefixLen)
+	_bucketLcp(TSA const &sa, StringSet<TText, TSpec> const &stringSet, TSize prefixLen)
 	{
 	SEQAN_CHECKPOINT
 		typedef typename Iterator<TText const, Standard>::Type	TTextIterator;
@@ -1542,7 +1542,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec, typename TPos>
 	inline TPos
 	_getNodeLP(
-		Index<TText, Index_Wotd<TSpec> > const &index, 
+		Index<TText, IndexWotd<TSpec> > const &index, 
 		TPos pos)
 	{
 		TPos w0 = dirAt(pos, index);
@@ -1561,12 +1561,12 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TPos>
 	inline void 
 	_storeWotdChildren(
-		Index<TText, Index_Wotd<WotdOriginal> > &index,
+		Index<TText, IndexWotd<WotdOriginal> > &index,
 		TPos dirOfs)
 	{
 	SEQAN_CHECKPOINT
-		typedef Index<TText, Index_Wotd<WotdOriginal> >		TIndex;
-		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
+		typedef Index<TText, IndexWotd<WotdOriginal> >		TIndex;
+		typedef typename Fibre<TIndex, WotdDir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
 		typedef typename Size<TDir>::Type					TDirSize;
 		typedef typename TIndex::TCounter					TCounter;
@@ -1620,13 +1620,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TText, typename TSpec, typename TSize>
 	inline void 
 	_storeWotdChildren(
-		Index<TText, Index_Wotd<TSpec> > &index,
+		Index<TText, IndexWotd<TSpec> > &index,
 		TSize dirOfs,
 		TSize lcp)
 	{
 	SEQAN_CHECKPOINT
-		typedef Index<TText, Index_Wotd<TSpec> >			TIndex;
-		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
+		typedef Index<TText, IndexWotd<TSpec> >			TIndex;
+		typedef typename Fibre<TIndex, WotdDir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
 		typedef typename Size<TDir>::Type					TDirSize;
 		typedef typename TIndex::TCounter					TCounter;
@@ -1681,10 +1681,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TText, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<WotdOriginal> > >::Type 
-	_wotdEvaluate(Iter< Index<TText, Index_Wotd<WotdOriginal> >, VSTree<TSpec> > const &it)
+	inline typename Size< Index<TText, IndexWotd<WotdOriginal> > >::Type 
+	_wotdEvaluate(Iter< Index<TText, IndexWotd<WotdOriginal> >, VSTree<TSpec> > const &it)
 	{
-		typedef Index<TText, Index_Wotd<WotdOriginal> >	TIndex;
+		typedef Index<TText, IndexWotd<WotdOriginal> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex &index = const_cast<TIndex&>(container(it));
@@ -1722,10 +1722,10 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TText, typename TIndexSpec, typename TSpec >
-	inline typename Size< Index<TText, Index_Wotd<TIndexSpec> > >::Type 
-	_wotdEvaluate(Iter< Index<TText, Index_Wotd<TIndexSpec> >, VSTree<TSpec> > const &it)
+	inline typename Size< Index<TText, IndexWotd<TIndexSpec> > >::Type 
+	_wotdEvaluate(Iter< Index<TText, IndexWotd<TIndexSpec> >, VSTree<TSpec> > const &it)
 	{
-		typedef Index<TText, Index_Wotd<TIndexSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TIndexSpec> >	TIndex;
 		typedef typename Size<TIndex>::Type				TSize;
 
 		TIndex &index = const_cast<TIndex&>(container(it));
@@ -1766,10 +1766,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template <typename TText, typename TSpec>
 	inline void
-	_dump(Index<TText, Index_Wotd<TSpec> > &index)
+	_dump(Index<TText, IndexWotd<TSpec> > &index)
 	{
-		typedef Index<TText, Index_Wotd<TSpec> >			TIndex;
-		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
+		typedef Index<TText, IndexWotd<TSpec> >			TIndex;
+		typedef typename Fibre<TIndex, WotdDir>::Type		TDir;
 		typedef typename Value<TDir>::Type					TDirValue;
 
 		::std::cout << "  Dir (wotd)" << ::std::endl;
@@ -1794,10 +1794,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, class TSpec, typename TValue >
 	inline bool _goDownChar(
-		Iter<Index<TText, Index_Wotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
+		Iter<Index<TText, IndexWotd<WotdOriginal> >, VSTree< TopDown<TSpec> > > &it,
 		TValue c)
 	{
-		typedef Index<TText, Index_Wotd<TSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TSpec> >	TIndex;
 		typedef typename Value<TIndex>::Type		TIndexValue;
 
 		bool sorted = false;
@@ -1816,10 +1816,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, class TIndexSpec, class TSpec, typename TValue >
 	inline bool _goDownChar(
-		Iter<Index<TText, Index_Wotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
+		Iter<Index<TText, IndexWotd<TIndexSpec> >, VSTree< TopDown<TSpec> > > &it,
 		TValue c)
 	{
-		typedef Index<TText, Index_Wotd<TSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TSpec> >	TIndex;
 		typedef typename Value<TIndex>::Type		TIndexValue;
 
 		if (!goDown(it)) return false;
@@ -1838,13 +1838,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TText, typename TSpec, typename TValue >
 	inline bool
 	_getNodeByChar(
-		Iter< Index<TText, Index_Wotd<TSpec> >, VSTree<TSpec> > const &it,
+		Iter< Index<TText, IndexWotd<TSpec> >, VSTree<TSpec> > const &it,
 		TValue c, 
-		typename VertexDescriptor< Index<TText, Index_Wotd<TSpec> > >::Type &childDesc)
+		typename VertexDescriptor< Index<TText, IndexWotd<TSpec> > >::Type &childDesc)
 	{
-		typedef Index<TText, Index_Wotd<TSpec> >			TIndex;
-		typedef typename Fibre<TIndex, Wotd_Dir>::Type		TDir;
-		typedef typename Fibre<TIndex, Wotd_SA>::Type		TSA;
+		typedef Index<TText, IndexWotd<TSpec> >			TIndex;
+		typedef typename Fibre<TIndex, WotdDir>::Type		TDir;
+		typedef typename Fibre<TIndex, WotdSA>::Type		TSA;
 
 		typedef typename Value<TSA>::Type					TSAValue;
 		typedef typename Value<TDir>::Type					TDirValue;
@@ -1867,9 +1867,9 @@ namespace SEQAN_NAMESPACE_MAIN
 // interface for automatic index creation 
 
 	template <typename TText, typename TSpec>
-	inline void _wotdCreateFirstLevel(Index<TText, Index_Wotd<TSpec> > &index)
+	inline void _wotdCreateFirstLevel(Index<TText, IndexWotd<TSpec> > &index)
 	{
-		typedef Index<TText, Index_Wotd<TSpec> >	TIndex;
+		typedef Index<TText, IndexWotd<TSpec> >	TIndex;
 		typedef typename Value<TIndex>::Type		TValue;
 		typedef typename Size<TIndex>::Type			TSize;
 
@@ -1906,7 +1906,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, Index_Wotd<TSpec> > &index, Wotd_Dir const, Default const)
+	inline bool indexCreate(Index<TText, IndexWotd<TSpec> > &index, WotdDir const, Default const)
 	{
 		_wotdCreateFirstLevel(index);
 		return true;
@@ -1916,10 +1916,10 @@ namespace SEQAN_NAMESPACE_MAIN
 // clear
 
 	template < typename TText, typename TSpec >
-	inline void clear(Index<TText, Index_Wotd<TSpec> > &index)
+	inline void clear(Index<TText, IndexWotd<TSpec> > &index)
 	{
-		clear(getFibre(index, Wotd_SA()));
-		clear(getFibre(index, Wotd_Dir()));
+		clear(getFibre(index, WotdSA()));
+		clear(getFibre(index, WotdDir()));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1927,23 +1927,23 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	inline bool open(
-		Index< TText, Index_Wotd<TSpec> > &index, 
+		Index< TText, IndexWotd<TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");
 		bool result = true;
-		if ((!open(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, Wotd_Text()), fileName, openMode)))
+		if ((!open(getFibre(index, WotdText()), toCString(name), openMode)) && 
+			(!open(getFibre(index, WotdText()), fileName, openMode)))
 			result = false;
-		name = fileName;	append(name, ".sa");	open(getFibre(index, Wotd_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".dir");	open(getFibre(index, Wotd_Dir()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	open(getFibre(index, WotdSA()), toCString(name), openMode);
+		name = fileName;	append(name, ".dir");	open(getFibre(index, WotdDir()), toCString(name), openMode);
 		return result;
 	}
 	template < typename TText, typename TSpec >
 	inline bool open(
-		Index< TText, Index_Wotd<TSpec> > &index, 
+		Index< TText, IndexWotd<TSpec> > &index, 
 		const char *fileName) 
 	{
 		return open(index, fileName, OPEN_RDONLY);
@@ -1955,22 +1955,22 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TText, typename TSpec >
 	inline bool save(
-		Index< TText, Index_Wotd<TSpec> > &index, 
+		Index< TText, IndexWotd<TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");
-		if ((!save(getFibre(index, Wotd_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, Wotd_Text()), fileName, openMode))) return false;
+		if ((!save(getFibre(index, WotdText()), toCString(name), openMode)) && 
+			(!save(getFibre(index, WotdText()), fileName, openMode))) return false;
 
-		name = fileName;	append(name, ".sa");	save(getFibre(index, Wotd_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".dir");	save(getFibre(index, Wotd_Dir()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	save(getFibre(index, WotdSA()), toCString(name), openMode);
+		name = fileName;	append(name, ".dir");	save(getFibre(index, WotdDir()), toCString(name), openMode);
 		return true;
 	}
 	template < typename TText, typename TSpec >
 	inline bool save(
-		Index< TText, Index_Wotd<TSpec> > &index, 
+		Index< TText, IndexWotd<TSpec> > &index, 
 		const char *fileName)
 	{
 		return save(index, fileName, OPEN_WRONLY | OPEN_CREATE);

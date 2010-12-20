@@ -42,7 +42,7 @@ struct LogNormal {};
 ..summary:Tag to specify that the given parameters are mu and sigma of the underlying normal distribution for lognormal distributions.
 ..cat:Random
 ..include:seqan/random.h
-..see:Spec.Log-Normal PDF
+..see:Spec.Log-Normal Pdf
 ..see:Tag.MeanStdDev
 */
 struct MuSigma {};
@@ -52,7 +52,7 @@ struct MuSigma {};
 ..summary:Tag to specify that the given parameters are mean an standard deviation of the lognormal distribution.
 ..cat:Random
 ..include:seqan/random.h
-..see:Spec.Log-Normal PDF
+..see:Spec.Log-Normal Pdf
 ..see:Tag.MuSigma
 */
 struct MeanStdDev {};
@@ -62,26 +62,26 @@ struct MeanStdDev {};
 // ===========================================================================
 
 /**
-.Spec.Log-Normal PDF
-..general:Class.PDF
+.Spec.Log-Normal Pdf
+..general:Class.Pdf
 ..summary:Log-normal probability density function.
 ..remark:Note that you can construct this either with mu/sigma of the underlying normal distribution (default) or with the mean and standard deviation of the log-normal distribution.
 ..cat:Random
 ..include:seqan/random.h
 */
 template <>
-class PDF<LogNormal>
+class Pdf<LogNormal>
 {
 public:
-    PDF<Normal> _normalDist;
+    Pdf<Normal> _normalDist;
 
 /**
-.Memfunc.Log-Normal PDF#PDF
-..class:Spec.Log-Normal PDF
-..summary:Constructor for log-normal PDF.
+.Memfunc.Log-Normal Pdf#Pdf
+..class:Spec.Log-Normal Pdf
+..summary:Constructor for log-normal Pdf.
 Log-normal PDFs can either be initialized by the mean and standard deviation of the underlying normal distribution or directly of the log-normal distribution.
-..signature:PDF<LogNormal>(mu, sigma[, MuSigma()])
-..signature:PDF<LogNormal>(mean, stdDev, MeanStdDev())
+..signature:Pdf<LogNormal>(mu, sigma[, MuSigma()])
+..signature:Pdf<LogNormal>(mean, stdDev, MeanStdDev())
 ..param.mu:Mean of the underlying normal distribution.
 ...type:nolink:double
 ..param.sigma:Standard deviation of the underlying normal distribution.
@@ -93,20 +93,20 @@ Log-normal PDFs can either be initialized by the mean and standard deviation of 
 ..see:Tag.MuSigma
 ..see:Tag.MeanStdDev
 */
-    PDF(double mu, double sigma, MuSigma const &)
+    Pdf(double mu, double sigma, MuSigma const &)
             : _normalDist(mu, sigma)
     {
         SEQAN_CHECKPOINT;
     }
 
-    PDF(double mean, double stddev, MeanStdDev const &)
+    Pdf(double mean, double stddev, MeanStdDev const &)
             : _normalDist(::std::log(mean) - 0.5 * ::std::log(1.0 + stddev * stddev / mean / mean),
                           ::std::sqrt(::std::log(1.0 + stddev * stddev / mean / mean)))
     {
         SEQAN_CHECKPOINT;
     }
 
-    PDF(double mu, double sigma)
+    Pdf(double mu, double sigma)
             : _normalDist(mu, sigma)
     {
         SEQAN_CHECKPOINT;
@@ -118,13 +118,13 @@ Log-normal PDFs can either be initialized by the mean and standard deviation of 
 // ===========================================================================
 
 template <>
-struct Value<PDF<LogNormal> >
+struct Value<Pdf<LogNormal> >
 {
     typedef double Type;
 };
 
 template <>
-struct Value<const PDF<LogNormal> > : Value<PDF<LogNormal> > {};
+struct Value<const Pdf<LogNormal> > : Value<Pdf<LogNormal> > {};
 
 // ===========================================================================
 // Functions
@@ -132,8 +132,8 @@ struct Value<const PDF<LogNormal> > : Value<PDF<LogNormal> > {};
 
 template <typename TRandomNumberGenerator>
 inline
-typename Value<PDF<LogNormal> >::Type
-pickRandomNumber(TRandomNumberGenerator & rng, PDF<LogNormal> const & pdf)
+typename Value<Pdf<LogNormal> >::Type
+pickRandomNumber(TRandomNumberGenerator & rng, Pdf<LogNormal> const & pdf)
 {
     SEQAN_CHECKPOINT;
     return exp(pickRandomNumber(rng, pdf._normalDist));

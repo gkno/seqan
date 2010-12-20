@@ -18,7 +18,7 @@ template <typename TFile>
 void testThroughput(const char *fileName)
 {
 	TFile myFile;
-	typename aRequest<TFile>::Type req1, req2;
+	typename AsyncRequest<TFile>::Type req1, req2;
 
 	if (!open(myFile, fileName, OPEN_WRONLY | OPEN_CREATE)) {
 		cout << "Could not open for writing" << endl;
@@ -93,9 +93,9 @@ int main()
 {
 	resize(block1, blockSize);
 	resize(block2, blockSize);
-	cout << "awrite() using FILE*        ";		testThroughput< FILE* >				("file_speed1.bin");
-	cout << "awrite() using sync. File   ";		testThroughput< File< Sync<> > >	("file_speed2.bin");
-	cout << "awrite() using async. File  ";		testThroughput< File< Async<> > >	("file_speed3.bin");
+	cout << "asyncWrite() using FILE*        ";		testThroughput< FILE* >				("file_speed1.bin");
+	cout << "asyncWrite() using sync. File   ";		testThroughput< File< Sync<> > >	("file_speed2.bin");
+	cout << "asyncWrite() using async. File  ";		testThroughput< File< Async<> > >	("file_speed3.bin");
 	cout << "ExtString using FILE*       ";		testExtString< FILE* >				("file_speed4.bin");
 	cout << "ExtString using sync. File  ";		testExtString< File< Sync<> > >		("file_speed5.bin");
 	cout << "ExtString using async. File ";		testExtString< File< Async<> > >	("file_speed6.bin");

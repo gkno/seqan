@@ -43,17 +43,17 @@ namespace seqan {
 ..tag.Single:Add single seed without merging and chaining.
 ..include:seqan/seeds.h
 */
-struct _Merge;
-typedef Tag<_Merge> Merge;
+struct Merge_;
+typedef Tag<Merge_> Merge;
 
-struct _Chaos;
-typedef Tag<_Chaos> Chaos;
+struct Chaos_;
+typedef Tag<Chaos_> Chaos;
 
-struct _SimpleChain;
-typedef Tag<_SimpleChain> SimpleChain;
+struct SimpleChain_;
+typedef Tag<SimpleChain_> SimpleChain;
 
-struct _Single;
-typedef Tag<_Single> Single;
+struct Single_;
+typedef Tag<Single_> Single;
 
 // ===========================================================================
 // Metafunctions
@@ -84,7 +84,7 @@ _seedsCombineable(Seed<TSeedSpec, TSeedConfig> const & a,
         return false;
     // If the distance between the diagonals exceeds the threshold
     // then the seeds cannot be merged.
-    typedef typename _MakeUnsigned<TThreshold>::Type TUnsignedThreshold;
+    typedef typename MakeUnsigned_<TThreshold>::Type TUnsignedThreshold;
     if (static_cast<TUnsignedThreshold>(_abs(getEndDiagonal(a) - getStartDiagonal(b))) > static_cast<TUnsignedThreshold>(maxDiagonalDistance))
         return false;
     // Otherwise, the seeds can be merged.

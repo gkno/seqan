@@ -252,7 +252,7 @@ goNext(TFile & file,
 	if (!atEnd(file,it)) 
 	{
 		if(it.data_pos == it.data_next_pos)
-			getNextHitFilePos(file,it);
+			_getNextHitFilePos(file,it);
 		if(it.data_pos == it.data_next_pos)
 			it.data_at_end = true;
 		else
@@ -406,7 +406,7 @@ SEQAN_CHECKPOINT
 
 template<typename TBlastHsp, typename TFile>
 inline void
-getNextHitFilePos(TFile & file,
+_getNextHitFilePos(TFile & file,
 				  Iter<BlastReport<TBlastHsp, StreamReport<TFile> >, StreamBlastIterator<HitIterator> >& it)
 {
 	typedef typename Position<TFile>::Type TPosition;
@@ -415,11 +415,11 @@ getNextHitFilePos(TFile & file,
 	char c = '>';
 	it.data_host->act_c = c;
 
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	_parse_skipLine(file,c);
 
 //	String<char> delim = ">";
-	if(_parse_untilBeginLine(file,c,'>'))
+	if(_parseUntilBeginLine(file,c,'>'))
 	{
 		TPosition event_pos = _streamTellG(file);
 		if(c=='>' && ( !it.data_host->next_report || (it.data_host->next_report && event_pos < it.data_host->next_report_pos)))

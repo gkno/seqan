@@ -7,7 +7,7 @@ using namespace seqan;
 // FRAGMENT(initialization)
 int main()
 {
-	typedef Index<CharString, Index_QGram<UngappedShape<4>, OpenAddressing> > TIndex;
+	typedef Index<CharString, IndexQGram<UngappedShape<4>, OpenAddressing> > TIndex;
 	TIndex index("tobeornottobe");
 	Finder<TIndex> finder(index);
 

@@ -24,7 +24,7 @@ int main() {
 ///Out-parameters: Edge flows
 	String<unsigned int> flow;
 ///Ford-Fulkerson flow from source = 0 to sink = 3. valF is the value of the flow.
-	unsigned int valF = ford_fulkerson(g, 0, 3, capMap, flow);
+	unsigned int valF = fordFulkersonAlgorithm(g, 0, 3, capMap, flow);
 ///Console Output
 	::std::cout << "Ford-Fulkerson (Value of the flow = " << valF << ")" << ::std::endl;
 	TEdgeIterator itEdge(g);

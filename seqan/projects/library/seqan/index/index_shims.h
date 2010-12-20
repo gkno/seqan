@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // signed characters behave different than unsigned when compared
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
-        typedef typename _MakeUnsigned< typename Value<TObject>::Type >::Type TUValue;
+        typedef typename MakeUnsigned_< typename Value<TObject>::Type >::Type TUValue;
 
         // specialization
 		typedef Pipe< TObject, Source<> >				src_t;
@@ -77,7 +77,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // to get the same index with signed or unsigned chars we simply cast them to unsigned
         // before feeding them into the pipeline
 		typedef typename Concatenator<StringSet<TString, TSpec> >::Type			TConcat;
-        typedef typename _MakeUnsigned< typename Value<TConcat>::Type >::Type	TUValue;
+        typedef typename MakeUnsigned_< typename Value<TConcat>::Type >::Type	TUValue;
 		typedef Multi<
 			TAlgSpec, 
 			typename Value<TSA>::Type, 
@@ -263,10 +263,10 @@ The size of $suffixArray$ must be at least $length(text)$ before calling this fu
 
 
 /**
-.Function.createLCPTable:
+.Function.createLcpTable:
 ..summary:Creates a lcp table from a given text and suffix array.
 ..cat:Index
-..signature:createLCPTable(lcp, text, suffixArray[, algo_tag])
+..signature:createLcpTable(lcp, text, suffixArray[, algo_tag])
 ..param.lcp:The resulting lcp table.
 ..param.text:A given text.
 ..param.suffixArray:The suffix array of $text$.
@@ -313,7 +313,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		typename TText,
 		typename TSA,
         typename TAlgSpec >
-	inline void createLCPTable(
+	inline void createLcpTable(
 		TLCP &lcp,
 		TText const &s,
 		TSA const &sa,
@@ -343,7 +343,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TSA,
         typename TLCP,
 		typename TAlgSpec >
-	void createLCPETableExt(
+	void createLcpeTableExt(
 		String< TValue, TSpec > &LCPE,
 		TObject const &text,
 		TSA const &suffixArray,
@@ -366,7 +366,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		#ifdef SEQAN_TEST_INDEX
 			isLCPTable(creator, suffixArray, text);
 		#endif
-		createLCPBinTree(LCPE, creator);
+		createLcpBinTree(LCPE, creator);
 	}
 
     // build enhanced LCP table with an lcp algorithm
@@ -378,7 +378,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TSA,
         typename TLCP,
 		typename TAlgSpec >
-    void createLCPETable(
+    void createLcpeTable(
 		String< TValue, TSpec > &LCPE,
 		TText const &s,
 		TSA const &,
@@ -392,7 +392,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename Size<TText>::Type lcpSize = length(s) > 1? length(s) - 1: 0;
 		typename Suffix<String< TValue, TSpec > >::Type LCPcopy = suffix(LCPE, length(LCPE) - lcpSize);
         LCPcopy = prefix(LCP, lcpSize);
-        createLCPBinTree(LCPE, LCP);
+        createLcpBinTree(LCPE, LCP);
     }
 
     template <
@@ -402,7 +402,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TSA,
         typename TLCP,
 		typename TAlgSpec >
-    void createLCPETable(
+    void createLcpeTable(
 		String< TValue, External<TConfig> > &LCPE,
 		TText const &s,
 		TSA const &SA,
@@ -410,7 +410,7 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
 		TAlgSpec const alg)
 	{
 	SEQAN_CHECKPOINT
-        createLCPETableExt(LCPE, s, SA, LCP, alg);
+        createLcpeTableExt(LCPE, s, SA, LCP, alg);
     }
 
     template <
@@ -419,14 +419,14 @@ The size of $lcp$ must be at least $length(text)$ before calling this function.
         typename TText,
         typename TSA,
         typename TLCP>
-    inline void createLCPETable(
+    inline void createLcpeTable(
 		String< TValue, TSpec > &LCPE,
 		TText &s,
 		TSA &SA,
         TLCP &LCP)
 	{
 	SEQAN_CHECKPOINT
-		createLCPETable(LCPE, s, SA, LCP, Kasai());
+		createLcpeTable(LCPE, s, SA, LCP, Kasai());
     }
 
 
@@ -501,11 +501,11 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TOccValue>
-	struct _SAValueLess:
+	struct SAValueLess_:
 		public ::std::less<TOccValue> {};
 
 	template <typename T1, typename T2, typename TCompression>
-	struct _SAValueLess< Pair<T1,T2,TCompression> >:
+	struct SAValueLess_< Pair<T1,T2,TCompression> >:
 		public ::std::binary_function< Pair<T1,T2,TCompression>, Pair<T1,T2,TCompression>, bool> 
 	{
 		inline bool operator()(Pair<T1,T2,TCompression> const &a, Pair<T1,T2,TCompression> const &b) const {
@@ -530,7 +530,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	inline void orderOccurrences(String<TValue, TSpec> &occString)
 	{
 	SEQAN_CHECKPOINT
-		::std::sort(begin(occString, Standard()), end(occString, Standard()), _SAValueLess<TValue>());
+		::std::sort(begin(occString, Standard()), end(occString, Standard()), SAValueLess_<TValue>());
 	}
 
 
@@ -544,7 +544,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..signature:indexCreate(index, fibre_tag[, algo_tag])
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..param.algo_tag:A tag that identifies the algorithm which is used to create the fibre.
 ...default:The result of @Metafunction.DefaultIndexCreator@.
 ..returns:A $bool$ which is $true$ on a successful creation.
@@ -553,7 +553,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 */
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_SA, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreSA, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 		resize(indexSA(index), length(indexRawText(index)), Exact());
 		createSuffixArray(indexSA(index), indexText(index), alg);
@@ -561,36 +561,36 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCP, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreLcp, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
-		resize(indexLCP(index), length(indexRawText(index)), Exact());
-		createLCPTable(indexLCP(index), indexText(index), indexSA(index), alg);
+		resize(indexLcp(index), length(indexRawText(index)), Exact());
+		createLcpTable(indexLcp(index), indexText(index), indexSA(index), alg);
 		return true;
 	}
 
 	template <typename TText, typename TSpec, typename TSpecAlg>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_LCPE, TSpecAlg const alg) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreLcpe, TSpecAlg const alg) {
 	SEQAN_CHECKPOINT
 	//TODO: separate LCP from LCPE (for now LCPE = LCP + extra)
-		resize(indexLCPE(index), sizeofLCPE(lengthSum(index)), Exact());
-		createLCPETable(indexLCPE(index), indexRawText(index), indexSA(index), indexLCP(index), alg);
+		resize(indexLcpe(index), sizeofLcpe(lengthSum(index)), Exact());
+		createLcpeTable(indexLcpe(index), indexRawText(index), indexSA(index), indexLcp(index), alg);
 		return true;
 //		return false;
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_BWT, BWT const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreBwt, BWT const) {
 	SEQAN_CHECKPOINT
-		resize(indexBWT(index), length(indexRawText(index)), Exact());
-		createBWTable(indexBWT(index), indexText(index), indexRawSA(index));
+		resize(indexBwt(index), length(indexRawText(index)), Exact());
+		createBWTable(indexBwt(index), indexText(index), indexRawSA(index));
 		return true;
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexCreate(Index<TText, TSpec> &index, Fibre_ChildTab, ChildTab const) {
+	inline bool indexCreate(Index<TText, TSpec> &index, FibreChildtab, ChildTab const) {
 	SEQAN_CHECKPOINT
 		resize(indexChildTab(index), length(indexRawText(index)), Exact());
-		createChildTable(indexChildTab(index), indexLCP(index));
+		createChildTable(indexChildTab(index), indexLcp(index));
 		return true;
 	}
 
@@ -611,7 +611,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..signature:indexSupplied(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..returns:A $bool$ which is $true$, iff the fibre is present.
 ..include:seqan/index.h
 */
@@ -631,7 +631,7 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 ..signature:indexRequire(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..returns:A $bool$ which is $true$ on a successful creation.
 ..remarks:If the fibre already exists (@Function.indexSupplied@ is true) then $indexRequire$ does nothing.
 If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
@@ -676,27 +676,27 @@ If the fibre doesn't exist then @Function.indexCreate@ is called to create it.
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_LCP) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, FibreLcp) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Fibre_SA());
+		return indexRequire(index, FibreSA());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_LCPE) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, FibreLcpe) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Fibre_LCP());
+		return indexRequire(index, FibreLcp());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_ChildTab) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, FibreChildtab) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Fibre_LCP());
+		return indexRequire(index, FibreLcp());
 	}
 
 	template <typename TText, typename TSpec>
-	inline bool indexSolveDependencies(Index<TText, TSpec> &index, Fibre_BWT) {
+	inline bool indexSolveDependencies(Index<TText, TSpec> &index, FibreBwt) {
 	SEQAN_CHECKPOINT
-		return indexRequire(index, Fibre_SA());
+		return indexRequire(index, FibreSA());
 	}
 
 

@@ -44,42 +44,42 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 /**
-.Tag.Segment Match Generation.value.GlobalPairwise_Library:
+.Tag.Segment Match Generation.value.GlobalPairwiseLibrary:
 	Segment matches from pairwise global alignments.
 ..include:seqan/graph_msa.h
 */
 
-struct GlobalPairwise_Library_;
-typedef Tag<GlobalPairwise_Library_> const GlobalPairwise_Library;
+struct GlobalPairwiseLibrary_;
+typedef Tag<GlobalPairwiseLibrary_> const GlobalPairwiseLibrary;
 
 
 /**
-.Tag.Segment Match Generation.value.LocalPairwise_Library:
+.Tag.Segment Match Generation.value.LocalPairwiseLibrary:
 	Segment matches from pairwise local alignments.
 ..include:seqan/graph_msa.h
 */
 
-struct LocalPairwise_Library_;
-typedef Tag<LocalPairwise_Library_> const LocalPairwise_Library;
+struct LocalPairwiseLibrary_;
+typedef Tag<LocalPairwiseLibrary_> const LocalPairwiseLibrary;
 
 /**
-.Tag.Segment Match Generation.value.Kmer_Library:
+.Tag.Segment Match Generation.value.KmerLibrary:
 	Segment matches from pairwise kmer alignments.
 ..include:seqan/graph_msa.h
 */
 
-struct Kmer_Library_;
-typedef Tag<Kmer_Library_> const Kmer_Library;
+struct KmerLibrary_;
+typedef Tag<KmerLibrary_> const KmerLibrary;
 
 
 /**
-.Tag.Segment Match Generation.value.Lcs_Library:
+.Tag.Segment Match Generation.value.LcsLibrary:
 	Segment matches from pairwise longest common subsequence comparisons.
 ..include:seqan/graph_msa.h
 */
 
-struct Lcs_Library_;
-typedef Tag<Lcs_Library_> const Lcs_Library;
+struct LcsLibrary_;
+typedef Tag<LcsLibrary_> const LcsLibrary;
 
 
 
@@ -193,7 +193,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 String<TSize2, TSpec2> const& pList,
 					 TSegmentMatches& matches,
 					 TScores& scores,
-					 Lcs_Library)
+					 LcsLibrary)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
@@ -242,7 +242,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TScores& scores,
 					 TSize ktup,
 					 TAlphabet,
-					 Kmer_Library)
+					 KmerLibrary)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
@@ -301,10 +301,10 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScores& scores,
 					 TSize ktup,
-					 Kmer_Library)
+					 KmerLibrary)
 {
 	SEQAN_CHECKPOINT
-	appendSegmentMatches(str, matches, scores, ktup,  typename Value<TString>::Type(), Kmer_Library());
+	appendSegmentMatches(str, matches, scores, ktup,  typename Value<TString>::Type(), KmerLibrary());
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -314,10 +314,10 @@ inline void
 appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScores& scores,
-					 Kmer_Library)
+					 KmerLibrary)
 {
 	SEQAN_CHECKPOINT
-	appendSegmentMatches(str, matches, scores, 3, Kmer_Library());
+	appendSegmentMatches(str, matches, scores, 3, KmerLibrary());
 }
 
 
@@ -330,7 +330,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TScore const& score_type,
 					 TSegmentMatches& matches,
 					 TScores& scores,
-					 LocalPairwise_Library)
+					 LocalPairwiseLibrary)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
@@ -358,7 +358,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 
 template<typename TValue, typename TSpec, typename TSize>
 inline void
-__resizeWithRespectToDistance(String<TValue, TSpec>& dist, 
+_resizeWithRespectToDistance(String<TValue, TSpec>& dist, 
 							  TSize nseq)
 {
 	SEQAN_CHECKPOINT;
@@ -369,7 +369,7 @@ __resizeWithRespectToDistance(String<TValue, TSpec>& dist,
 
 template<typename TCargo, typename TSpec, typename TSize>
 inline void
-__resizeWithRespectToDistance(Graph<Undirected<TCargo, TSpec> >& dist, TSize nseq)
+_resizeWithRespectToDistance(Graph<Undirected<TCargo, TSpec> >& dist, TSize nseq)
 {
 	SEQAN_CHECKPOINT
 	clear(dist);
@@ -381,7 +381,7 @@ __resizeWithRespectToDistance(Graph<Undirected<TCargo, TSpec> >& dist, TSize nse
 
 template<typename TSize>
 inline void
-__resizeWithRespectToDistance(Nothing&, TSize)
+_resizeWithRespectToDistance(Nothing&, TSize)
 {
 	SEQAN_CHECKPOINT
 }
@@ -390,7 +390,7 @@ __resizeWithRespectToDistance(Nothing&, TSize)
 
 template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TValue,  typename TSpec, typename TSize>
 inline void 
-__setDistanceValue(String<TFragment, TSpec1>& matches,
+_setDistanceValue(String<TFragment, TSpec1>& matches,
 				   StringSet<TString, TSpec2>& pairSet,			
 				   String<TValue, TSpec>& dist,
 				   TSize i,
@@ -419,7 +419,7 @@ __setDistanceValue(String<TFragment, TSpec1>& matches,
 
 template<typename TFragment, typename TSpec1, typename TString, typename TSpec2, typename TCargo,  typename TSpec, typename TSize>
 inline void 
-__setDistanceValue(String<TFragment, TSpec1>& matches,
+_setDistanceValue(String<TFragment, TSpec1>& matches,
 				   StringSet<TString, TSpec2>& pairSet,
 				   Graph<Undirected<TCargo, TSpec> >& dist,
 				   TSize i,
@@ -446,7 +446,7 @@ __setDistanceValue(String<TFragment, TSpec1>& matches,
 
 template<typename TFragment, typename TSpec, typename TString, typename TSpec2, typename TSize>
 inline void 
-__setDistanceValue(String<TFragment, TSpec>&,
+_setDistanceValue(String<TFragment, TSpec>&,
 				   StringSet<TString, TSpec2>&,
 				   Nothing&,
 				   TSize,
@@ -468,7 +468,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TScoreValues& scores,
 					 TDistance& dist,
 					 TAlignConfig const& ac,
-					 GlobalPairwise_Library)
+					 GlobalPairwiseLibrary)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, Dependent<TSpec> > TStringSet;
@@ -479,7 +479,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 
 	// Initialization
 	TSize nseq = length(str);
-	__resizeWithRespectToDistance(dist, nseq);
+	_resizeWithRespectToDistance(dist, nseq);
 	
 	// Pairwise alignments
 	TPairIter itPair = begin(pList, Standard());
@@ -506,7 +506,7 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 		for(;itScore != itScoreEnd; ++itScore) *itScore = myScore;
 			
 		// Get the alignment statistics
-		__setDistanceValue(matches, pairSet, dist, (TSize) *(itPair-1), (TSize) *itPair, (TSize) nseq, (TSize)from);
+		_setDistanceValue(matches, pairSet, dist, (TSize) *(itPair-1), (TSize) *itPair, (TSize) nseq, (TSize)from);
 	}
 }
 
@@ -521,10 +521,10 @@ appendSegmentMatches(StringSet<TString, Dependent<TSpec> > const& str,
 					 TSegmentMatches& matches,
 					 TScoreValues& scores,
 					 TDistance& dist,					 
-					 GlobalPairwise_Library)
+					 GlobalPairwiseLibrary)
 {
 	SEQAN_CHECKPOINT
-	appendSegmentMatches(str, pList, score_type, matches, scores, dist, AlignConfig<>(), GlobalPairwise_Library() );
+	appendSegmentMatches(str, pList, score_type, matches, scores, dist, AlignConfig<>(), GlobalPairwiseLibrary() );
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TSize, typename TCargo1, typename TCargo2>
 inline void 
-__getAlignmentStatistics(Nothing&,
+_getAlignmentStatistics(Nothing&,
 						 TSize,
 						 TSize,
 						 TSize,
@@ -42,7 +42,7 @@ __getAlignmentStatistics(Nothing&,
 
 template<typename TValue, typename TSpec, typename TSize, typename TCargo1, typename TCargo2>
 inline void 
-__getAlignmentStatistics(String<TValue, TSpec>& dist,
+_getAlignmentStatistics(String<TValue, TSpec>& dist,
 						 TSize i,
 						 TSize j,
 						 TSize nseq,
@@ -57,7 +57,7 @@ __getAlignmentStatistics(String<TValue, TSpec>& dist,
 
 template<typename TCargo, typename TSpec, typename TSize, typename TCargo1, typename TCargo2>
 inline void 
-__getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
+_getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 						 TSize i,
 						 TSize j,
 						 TSize,
@@ -73,7 +73,7 @@ __getAlignmentStatistics(Graph<Undirected<TCargo, TSpec> >& dist,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TSize>
-struct _LessPair :
+struct LessPair_ :
 	public ::std::unary_function<Pair<TSize, TSize>, bool>
 {
 	inline bool 
@@ -299,7 +299,7 @@ selectPairs(StringSet<TString, TSpec> const& str,
 	}
 
 	// Sort the pairs, better expected overlaps come first
-	std::sort(begin(ovlIndex, Standard() ), end(ovlIndex, Standard() ), _LessPair<TSize>() );
+	std::sort(begin(ovlIndex, Standard() ), end(ovlIndex, Standard() ), LessPair_<TSize>() );
 	typedef typename Iterator<TOverlapIndexList, Standard>::Type TOVLIter;
 	TOVLIter itOvl = begin(ovlIndex, Standard());
 	TOVLIter itOvlEnd = end(ovlIndex, Standard());
@@ -367,7 +367,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 					 TSegmentMatches& matches,
 					 TScoreValues& scores,
 					 TDistance& dist,
-					 Overlap_Library)
+					 OverlapLibrary)
 {
 	SEQAN_CHECKPOINT
 	typedef StringSet<TString, Dependent<> > TStringSet;
@@ -378,7 +378,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 	// Initialization
 	TSize nseq = length(str);
-	__resizeWithRespectToDistance(dist, nseq);
+	_resizeWithRespectToDistance(dist, nseq);
 
 	// "Front" and "Back"-overlap counter for each read
 	String<TSize> frontOvl;
@@ -439,8 +439,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 			//std::cout << tmp << std::endl;
 
 			// Create a corresponding edge
-			if (seq1<seq2) __getAlignmentStatistics(dist, seq1, seq2, nseq, matchLen, (matchLen * 100) / overlapLen);
-			else __getAlignmentStatistics(dist, seq2, seq1, nseq, matchLen, (matchLen * 100) / overlapLen);
+			if (seq1<seq2) _getAlignmentStatistics(dist, seq1, seq2, nseq, matchLen, (matchLen * 100) / overlapLen);
+			else _getAlignmentStatistics(dist, seq2, seq1, nseq, matchLen, (matchLen * 100) / overlapLen);
 			
 			// Record the scores
 			resize(scores, to);
@@ -475,7 +475,7 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	typedef typename Iterator<TBegEndPos, Standard>::Type TBegEndIter;
 	TBegEndIter begEndIt = begin(begEndPos, Standard());
 	TBegEndIter begEndItEnd = end(begEndPos, Standard());
-	TSize minVal = supremumValue<TSize>();
+	TSize minVal = maxValue<TSize>();
 	TSize maxVal = 0;
 	for(;begEndIt != begEndItEnd; ++begEndIt) {
 		TSize pos1 = begEndIt->i1;
@@ -539,8 +539,8 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 
 			if (((matchLen * 100) / overlapLen >= 80) && (matchLen >= 5)) {
 				// Create a corresponding edge
-				if (seq1<seq2) __getAlignmentStatistics(dist, seq1, seq2, nseq, matchLen, (matchLen * 100) / overlapLen);
-				else __getAlignmentStatistics(dist, seq2, seq1, nseq, matchLen, (matchLen * 100) / overlapLen);
+				if (seq1<seq2) _getAlignmentStatistics(dist, seq1, seq2, nseq, matchLen, (matchLen * 100) / overlapLen);
+				else _getAlignmentStatistics(dist, seq2, seq1, nseq, matchLen, (matchLen * 100) / overlapLen);
 
 				// Record the scores
 				resize(scores, to);

@@ -146,7 +146,7 @@ read(TFile & file,
 		if (c == '{') {
 			c = _streamGet(file);
 			String<char> blockIdentifier;
-			_parse_readIdentifier(file, blockIdentifier, c);
+			_parseReadIdentifier(file, blockIdentifier, c);
 			_parse_skipLine(file, c);
 
 			// Library block
@@ -157,10 +157,10 @@ read(TFile & file,
 				String<char> eid;
 				while (c != '}') {
 					clear(fieldIdentifier);
-					_parse_readIdentifier(file, fieldIdentifier, c);
+					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parse_readNumber(file, c);
+						id = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -171,11 +171,11 @@ read(TFile & file,
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "mea") {
 						c = _streamGet(file);
-						libEl.mean = _parse_readDouble(file, c);
+						libEl.mean = _parseReadDouble(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "std") {
 						c = _streamGet(file);
-						libEl.std = _parse_readDouble(file, c);
+						libEl.std = _parseReadDouble(file, c);
 						_parse_skipLine(file, c);
 					} else {
 						_parse_skipLine(file, c);
@@ -192,10 +192,10 @@ read(TFile & file,
 				bool foundRds = false;
 				while (c != '}') {
 					clear(fieldIdentifier);
-					_parse_readIdentifier(file, fieldIdentifier, c);
+					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parse_readNumber(file, c);
+						id = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -206,14 +206,14 @@ read(TFile & file,
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "lib") {
 						c = _streamGet(file);
-						matePairEl.libId = _parse_readNumber(file, c);
+						matePairEl.libId = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "rds") {
 						foundRds = true;
 						c = _streamGet(file);
-						matePairEl.readId[0] = _parse_readNumber(file, c);
+						matePairEl.readId[0] = _parseReadNumber(file, c);
 						c = _streamGet(file);
-						matePairEl.readId[1] = _parse_readNumber(file, c);
+						matePairEl.readId[1] = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else {
 						_parse_skipLine(file, c);
@@ -234,10 +234,10 @@ read(TFile & file,
 				TReadSeq seq;
 				while (c != '}') {
 					clear(fieldIdentifier);
-					_parse_readIdentifier(file, fieldIdentifier, c);
+					_parseReadIdentifier(file, fieldIdentifier, c);
 					if (fieldIdentifier == "iid") {
 						c = _streamGet(file);
-						id = _parse_readNumber(file, c);
+						id = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "eid") {
 						c = _streamGet(file);
@@ -248,19 +248,19 @@ read(TFile & file,
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "frg") {
 						c = _streamGet(file);
-						matePairId = _parse_readNumber(file, c);
+						matePairId = _parseReadNumber(file, c);
 						_parse_skipLine(file, c);
 					} else if (fieldIdentifier == "seq") {
 						c = _streamGet(file);
-						_parse_skipWhitespace(file, c);
+						_parseSkipWhitespace(file, c);
 						while (c != '.') {
-							_parse_readSequenceData(file,c,seq);
-							_parse_skipWhitespace(file, c);
+							_parseReadSequenceData(file,c,seq);
+							_parseSkipWhitespace(file, c);
 						}
 					} else if (fieldIdentifier == "qlt") {
 						clear(qual);
 						c = _streamGet(file);
-						_parse_skipWhitespace(file, c);
+						_parseSkipWhitespace(file, c);
 						while (c != '.') {
 							if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) appendValue(qual, c, Generous() );
 							c = _streamGet(file);
@@ -296,28 +296,28 @@ read(TFile & file,
 						String<TContigPos> gaps;
 						while (c != '}') {
 							clear(fdIdentifier);
-							_parse_readIdentifier(file, fdIdentifier, c);
+							_parseReadIdentifier(file, fdIdentifier, c);
 							if (fdIdentifier == "src") {
 								c = _streamGet(file);
-								alignEl.readId = _parse_readNumber(file, c);
+								alignEl.readId = _parseReadNumber(file, c);
 								_parse_skipLine(file, c);
 							} else if (fdIdentifier == "off") {
 								c = _streamGet(file);
-								if (c != '-') offsetPos = _parse_readNumber(file, c);
+								if (c != '-') offsetPos = _parseReadNumber(file, c);
 								else offsetPos = 0;
 								_parse_skipLine(file, c);
 							} else if (fdIdentifier == "clr") {
 								c = _streamGet(file);
-								clr1 = _parse_readNumber(file, c);
+								clr1 = _parseReadNumber(file, c);
 								c = _streamGet(file);
-								clr2 = _parse_readNumber(file, c);
+								clr2 = _parseReadNumber(file, c);
 								_parse_skipLine(file, c);
 							} else if (fdIdentifier == "gap") {
 								c = _streamGet(file);
-								_parse_skipWhitespace(file, c);
+								_parseSkipWhitespace(file, c);
 								while (c != '.') {
 									if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
-										TSize nextGap = _parse_readNumber(file, c);
+										TSize nextGap = _parseReadNumber(file, c);
 										appendValue(gaps, nextGap, Generous() );
 									}
 									c = _streamGet(file);
@@ -388,10 +388,10 @@ read(TFile & file,
 						appendValue(fragStore.alignedReadStore, alignEl, Generous() );
 					} else {
 						clear(fieldIdentifier);
-						_parse_readIdentifier(file, fieldIdentifier, c);
+						_parseReadIdentifier(file, fieldIdentifier, c);
 						if (fieldIdentifier == "iid") {
 							c = _streamGet(file);
-							id = _parse_readNumber(file, c);
+							id = _parseReadNumber(file, c);
 							_parse_skipLine(file, c);
 						} else if (fieldIdentifier == "eid") {
 							c = _streamGet(file);
@@ -402,16 +402,16 @@ read(TFile & file,
 							_parse_skipLine(file, c);
 						} else if (fieldIdentifier == "seq") {
 							c = _streamGet(file);
-							_parse_skipWhitespace(file, c);
+							_parseSkipWhitespace(file, c);
 							while (c != '.') {
 								do {
-									_parse_readSequenceData(file,c,contigSeq);
+									_parseReadSequenceData(file,c,contigSeq);
 								} while (c == '-');
-								_parse_skipWhitespace(file, c);
+								_parseSkipWhitespace(file, c);
 							}
 						} else if (fieldIdentifier == "qlt") {
 							c = _streamGet(file);
-							_parse_skipWhitespace(file, c);
+							_parseSkipWhitespace(file, c);
 							while (c != '.') {
 								if ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r')) {
 									appendValue(contigQual, c, Generous() );

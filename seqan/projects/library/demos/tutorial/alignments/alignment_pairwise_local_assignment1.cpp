@@ -17,7 +17,7 @@ int main()
 	Score<int> sc(3,-2,-5,-1);
 	unsigned count = 0;
 	while (localAlignment(ali, finder, sc, 0, WatermanEggert()) && count < 3) {
-		::std::cout << "Score = " << getScore(finder) << ::std::endl;
+		::std::cout << "Score = " << _getMatchScore(finder) << ::std::endl;
 		::std::cout << ali;
 		++count;
 	}

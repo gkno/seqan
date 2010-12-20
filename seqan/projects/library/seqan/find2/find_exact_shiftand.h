@@ -28,8 +28,8 @@
 
 namespace seqan {
 
-struct _ShiftAnd;
-typedef Tag<_ShiftAnd> ShiftAnd;
+struct ShiftAnd_;
+typedef Tag<ShiftAnd_> ShiftAnd;
 
 
 template <typename _TNeedle>
@@ -220,7 +220,7 @@ typename Position<TNeedle>::Type endPosition(Pattern<TNeedle, ShiftAnd> & patter
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _find_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & finder,
+inline bool _findShiftAndSmallNeedle(Finder<THaystack, Default> & finder,
                                        Pattern<TNeedle, ShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
 	typedef typename Value<TNeedle>::Type TValue;
@@ -242,7 +242,7 @@ inline bool _find_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & finder,
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _find_ShiftAnd_LongNeedle(Finder<THaystack, Default> & finder,
+inline bool _findShiftAndLargeNeedle(Finder<THaystack, Default> & finder,
                                       Pattern<TNeedle, ShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
 	typedef typename Value<TNeedle>::Type TValue;
@@ -299,9 +299,9 @@ inline bool find(Finder<THaystack, Default> & finder,
 
     bool res;
     if (pattern._blockCount == 1)
-        res = _find_ShiftAnd_ShortNeedle(finder, pattern);
+        res = _findShiftAndSmallNeedle(finder, pattern);
     else
-        res = _find_ShiftAnd_LongNeedle(finder, pattern);
+        res = _findShiftAndLargeNeedle(finder, pattern);
     // Advance end position to make an "end" position from a "last" position.
     finder._endPosition += 1;
     if (res) {
@@ -341,7 +341,7 @@ bool findBegin(Finder<THaystack, Default> & finder,
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _setEndPosition_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & finder,
+inline bool _setEndPositionShiftAndSmallNeedle(Finder<THaystack, Default> & finder,
                                                  Pattern<TNeedle, ShiftAnd> & pattern,
                                                  typename Position<THaystack>::Type const & pos) {
     SEQAN_CHECKPOINT;
@@ -361,7 +361,7 @@ inline bool _setEndPosition_ShiftAnd_ShortNeedle(Finder<THaystack, Default> & fi
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _setEndPosition_ShiftAnd_LongNeedle(Finder<THaystack, Default> & finder,
+inline bool _setEndPositionShiftAndLargeNeedle(Finder<THaystack, Default> & finder,
                                                 Pattern<TNeedle, ShiftAnd> & pattern,
                                                 typename Position<THaystack>::Type const & pos) {
     SEQAN_CHECKPOINT;
@@ -400,9 +400,9 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
     // End position must not be right of the end of the haystack.
-    SEQAN_ASSERT_LEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(haystack(finder)));
+    SEQAN_ASSERT_LEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(haystack(finder)));
     // Begin position must not be left of the beginning of the haystack.
-    SEQAN_ASSERT_GEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(needle(pattern)));
+    SEQAN_ASSERT_GEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(needle(pattern)));
 
     // Set finder's end position if it is in the initial state.
     if (finder._state == TPattern::STATE_INITIAL)
@@ -417,9 +417,9 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
 
     bool ret;
     if (pattern._blockCount == 1)
-        ret = _setEndPosition_ShiftAnd_ShortNeedle(finder, pattern, pos);
+        ret = _setEndPositionShiftAndSmallNeedle(finder, pattern, pos);
     else
-        ret = _setEndPosition_ShiftAnd_LongNeedle(finder, pattern, pos);
+        ret = _setEndPositionShiftAndLargeNeedle(finder, pattern, pos);
 
     // Adjust state.
     if (ret) {

@@ -42,8 +42,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.ShiftOr
 
-struct _ShiftOr;
-typedef Tag<_ShiftOr> ShiftOr;
+struct ShiftOr_;
+typedef Tag<ShiftOr_> ShiftOr;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -197,7 +197,7 @@ SEQAN_CHECKPOINT
 
 /*
 template <typename TFinder, typename TNeedle>
-bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) {
+bool _findShiftOrSmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) {
 	SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
 	TWord compare= (~(1 << (me.needleLength-1)));
@@ -215,7 +215,7 @@ bool _findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 */
 template <typename TFinder, typename TNeedle>
 inline bool 
-_findShiftOr_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
+_findShiftOrSmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 {
 SEQAN_CHECKPOINT
 	typedef typename Haystack<TFinder>::Type THaystack;
@@ -251,7 +251,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle>
 inline bool 
-_findShiftOr_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
+_findShiftOrLargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftOr> & me) 
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
@@ -307,9 +307,9 @@ SEQAN_CHECKPOINT
 
 	// Fast algorithm for needles < machine word?
 	if (me.blockCount == 1) {
-		return _findShiftOr_SmallNeedle(finder, me);
+		return _findShiftOrSmallNeedle(finder, me);
 	} else {
-		return _findShiftOr_LargeNeedle(finder, me);
+		return _findShiftOrLargeNeedle(finder, me);
 	}
 }
 

@@ -156,24 +156,24 @@ int rectify(CharString const &src, CharString const &dst, TFragStore &fragStore,
 	
 	while (!_streamEOF(srcFile))
 	{
-		line.contig = _parse_readIdentifier(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.app = _parse_readIdentifier(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.type = _parse_readIdentifier(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.beginPos = _parse_readNumber(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.endPos = _parse_readNumber(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.extra1 = _parse_readIdentifier(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
+		line.contig = _parseReadIdentifier(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.app = _parseReadIdentifier(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.type = _parseReadIdentifier(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.beginPos = _parseReadNumber(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.endPos = _parseReadNumber(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.extra1 = _parseReadIdentifier(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
 		line.orientation = c;
 		c = _streamGet(srcFile);
-		_parse_skipBlanks(srcFile, c);
-		line.extra2 = _parse_readIdentifier(srcFile, c);
-		_parse_skipBlanks(srcFile, c);
-		line.ids = _parse_readFilepath(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.extra2 = _parseReadIdentifier(srcFile, c);
+		_parseSkipBlanks(srcFile, c);
+		line.ids = _parseReadFilepath(srcFile, c);
 		assign(ids, line.ids);
 		_parse_skipLine(srcFile, c);
 		
@@ -282,7 +282,7 @@ int main( int argc, const char *argv[] )
 	addTitleLine(parser, "***       Transcript Rectifier        ***");
 	addTitleLine(parser, "*** (c) Copyright 2010 by David Weese ***");
 	addTitleLine(parser, "*****************************************");
-	addUsageLine(parser, "[OPTION]... <transcript annotation GFF file>");
+	addUsageLine(parser, "[OPTION]... <transcript annotation Gff file>");
 	
 	addOption(parser, CommandLineOption("r",  "reference",        "reference sequence file", OptionType::String | OptionType::Label | OptionType::List));
 	addOption(parser, CommandLineOption("o",  "output",           "rectified annotation output file", OptionType::String | OptionType::Label));

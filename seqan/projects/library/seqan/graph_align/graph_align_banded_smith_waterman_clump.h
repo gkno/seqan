@@ -49,7 +49,7 @@ SEQAN_CHECKPOINT
 
 template <typename TStringSet, typename TAlign, typename TTrace, typename TVal, typename TIndexPair, typename TDiagonal, typename TForbidden>
 inline void
-_align_banded_sw_trace(TStringSet const& str,
+_alignBandedSmithWatermanTrace(TStringSet const& str,
                        TAlign& align,
                        TTrace const& trace,
                        TVal const initialDir,
@@ -85,8 +85,8 @@ SEQAN_CHECKPOINT
 	TSize actualRow = row + lo_row;
     TSize actualCol = col + diagL + actualRow;
     if ((actualCol == 0) || (actualRow == 0)) return;
-	if (actualCol < len1) _align_trace_print(align, str, id1, actualCol, id2, actualRow, len1 - actualCol, Horizontal);
-	if (actualRow < len2) _align_trace_print(align, str, id1, actualCol, id2, actualRow, len2 - actualRow, Vertical);
+	if (actualCol < len1) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, len1 - actualCol, Horizontal);
+	if (actualRow < len2) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, len2 - actualRow, Vertical);
 	_setForbiddenCell(forbidden, row+1, col+1, diagonalWidth);
 	
     TTraceValue traceValue = initialDir;
@@ -103,7 +103,7 @@ SEQAN_CHECKPOINT
         if (traceValue == nextTraceValue) {
             ++segLen;
         } else {
-            _align_trace_print(align, str, id1, actualCol, id2, actualRow, segLen, traceValue);
+            _alignTracePrint(align, str, id1, actualCol, id2, actualRow, segLen, traceValue);
             segLen = 1;
         }
         traceValue = nextTraceValue;
@@ -114,11 +114,11 @@ SEQAN_CHECKPOINT
         actualCol = col + diagL + actualRow;
 		if (nextTraceValue == Diagonal) _setForbiddenCell(forbidden, row+1, col+1, diagonalWidth);
     }
-    if (segLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, segLen, traceValue);
+    if (segLen) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, segLen, traceValue);
     
 	// Handle the remaining sequence
-	if (actualCol != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol, Horizontal);
-	if (actualRow != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow, Vertical);
+	if (actualCol != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol, Horizontal);
+	if (actualRow != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow, Vertical);
 
     _finishAlign(align, actualCol, endCol, actualRow, endRow);
 }
@@ -127,7 +127,7 @@ SEQAN_CHECKPOINT
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TIndexPair, typename TDiagonal, typename TForbidden>
 inline typename Value<TScore>::Type
-_align_banded_sw(TTrace& trace,
+_alignBandedSmithWaterman(TTrace& trace,
                  TStringSet const& str,
                  TScore const& sc,
                  typename Value<TTrace>::Type& initialDir,
@@ -280,10 +280,10 @@ SEQAN_CHECKPOINT
     // Create the trace
     TDir initialDir;
     String<TDir> trace;
-    maxScore = _align_banded_sw(trace, str, sc, initialDir, indexPair, diag1, diag2, forbidden);
+    maxScore = _alignBandedSmithWaterman(trace, str, sc, initialDir, indexPair, diag1, diag2, forbidden);
 
     // Follow the trace and create the alignment
-    _align_banded_sw_trace(str, align, trace, initialDir, indexPair, diag1, diag2, forbidden);
+    _alignBandedSmithWatermanTrace(str, align, trace, initialDir, indexPair, diag1, diag2, forbidden);
 
     return maxScore;
 }

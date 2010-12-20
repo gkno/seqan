@@ -193,10 +193,10 @@ namespace seqan{
 	
 
 /*DISABLED
-.Internal._connect_actualize_max:
-..summary:As _connect_actualize, additionaly updates the max-pointers in the lowest layer of the RMT.
+.Internal._connectUpdateMax:
+..summary:As _connectUpdate, additionaly updates the max-pointers in the lowest layer of the RMT.
 ..cat:RangeMaximumTree
-..signature:_connect_actualize_max( list, base, height, key, search_path, max_obj )
+..signature:_connectUpdateMax( list, base, height, key, search_path, max_obj )
 ..param.list:The Skip List of the RMT representing this layer.
 ...type:Class.SkipList
 ..param.base:The base element.
@@ -210,7 +210,7 @@ namespace seqan{
 	
 	template< typename TObject, typename TSpec, typename TStructuring, typename TSize, typename TKey >
 	void
-	_connect_actualize_max(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & list,
+	_connectUpdateMax(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > & list,
 							SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base, 
 							TSize height,
 							TKey searchKey,
@@ -275,8 +275,8 @@ namespace seqan{
 			{
 				height = _throwCoin< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >( list, max_height );
 				if( height > 0 ){
-					_add_max( list, buffer, height, search_path );
-					_connect_actualize_max( list, buffer, height, act_key, search_path, getObject( buffer ) );
+					_addMax( list, buffer, height, search_path );
+					_connectUpdateMax( list, buffer, height, act_key, search_path, getObject( buffer ) );
 				}
 				else
 					_activateScoreBuild( buffer, &list, search_path );
@@ -294,7 +294,7 @@ namespace seqan{
 		// adjusts the max pointers
 	template< typename TObject, typename TSpec, typename TStructuring, typename THeight > inline
 	void 
-	_add_max(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >  & list,
+	_addMax(	SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring >  & list,
 				SkipBaseElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * base,
 				THeight height,
 				SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > ** /*search_path*/ )

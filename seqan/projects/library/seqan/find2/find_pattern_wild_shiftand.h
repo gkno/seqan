@@ -33,8 +33,8 @@
 
 namespace seqan {
 
-struct _WildShiftAnd;
-typedef Tag<_WildShiftAnd> WildShiftAnd;
+struct WildShiftAnd_;
+typedef Tag<WildShiftAnd_> WildShiftAnd;
 
 
 template <typename _TNeedle>
@@ -226,9 +226,9 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
     // End position must not be right of the end of the haystack.
-    SEQAN_ASSERT_LEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(haystack(finder)));
+    SEQAN_ASSERT_LEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(haystack(finder)));
     // Begin position must not be left of the beginning of the haystack.
-    SEQAN_ASSERT_GEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(needle(pattern)));
+    SEQAN_ASSERT_GEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(needle(pattern)));
 
     // Set the end position.
     finder._endPosition = pos;
@@ -320,7 +320,7 @@ enum _Find_WildShiftAnd_ParserStates {
 //
 // We use a finite state machine for the validation with the states of
 // the enum _Find_WildShiftAnd_ParserStates.
-inline bool _find_WildShiftAnd_isValid(CharString const & needle) {
+inline bool _findWildShiftAndIsValid(CharString const & needle) {
     SEQAN_CHECKPOINT;
 
     if (length(needle) == 0)
@@ -439,9 +439,9 @@ inline bool _find_WildShiftAnd_isValid(CharString const & needle) {
 
 // Determine the pattern length without wildcard characters.  needle
 // must be a valid pattern.
-inline Position<CharString>::Type _find_WildShiftAnd_lengthWithoutWildcards(CharString const & needle) {
+inline Position<CharString>::Type _findWildShiftAndLengthWithoutWildcards(CharString const & needle) {
     SEQAN_CHECKPOINT;
-    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(needle));
+    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(needle));
 
     typedef Position<CharString>::Type TPosition;
     TPosition result = 0u;
@@ -505,7 +505,7 @@ inline Position<CharString>::Type _find_WildShiftAnd_lengthWithoutWildcards(Char
 // result.
 //
 // TODO(holtgrew): We could simply use segments in the caller and a template argument for host instead of begin/end here.
-inline void _find_WildShiftAnd_getCharacterClass(
+inline void _findWildShiftAndGetCharacterClass(
         CharString & result, CharString const & host,
         Position<CharString>::Type begin, Position<CharString>::Type end) {
     SEQAN_CHECKPOINT;
@@ -548,14 +548,14 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
     
     TNeedle const & needle = value(me.data_host);
 
-	SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(needle));
+	SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(needle));
 
 	typedef unsigned TWord;
     // TODO(holtgrew): TValue will always be char?!?!
 	typedef typename Value<TNeedle>::Type TValue;
 	
 	me.needleLength = length(needle);
-	me.character_count = _find_WildShiftAnd_lengthWithoutWildcards(needle);
+	me.character_count = _findWildShiftAndLengthWithoutWildcards(needle);
 
 	if (me.character_count<1) me.blockCount=1;
 	else me.blockCount=((me.character_count-1) / BitsPerValue<TWord>::VALUE)+1;
@@ -598,7 +598,7 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
 			TWord e = j;
 			while(convert<char>(getValue(needle,e)) != ']') ++e;
 			/* get character codes of class */
-			_find_WildShiftAnd_getCharacterClass(last_char, needle, j+1, e);
+			_findWildShiftAndGetCharacterClass(last_char, needle, j+1, e);
 			TWord len = length(last_char);			
 			
 			/* add class to the mask */
@@ -746,7 +746,7 @@ void _initializePattern(Pattern<TNeedle, WildShiftAnd> & me) {
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _find_WildShiftAnd_SmallNeedle(Finder<THaystack, Default> & finder,
+inline bool _findWildShiftAndSmallNeedle(Finder<THaystack, Default> & finder,
                                            Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
@@ -777,7 +777,7 @@ inline bool _find_WildShiftAnd_SmallNeedle(Finder<THaystack, Default> & finder,
 
 
 template <typename THaystack, typename TNeedle>
-inline bool _find_WildShiftAnd_LargeNeedle(Finder<THaystack, Default> & finder,
+inline bool _findWildShiftAndLargeNeedle(Finder<THaystack, Default> & finder,
                                            Pattern<TNeedle, WildShiftAnd> & pattern) {
     SEQAN_CHECKPOINT;
     typedef Finder<THaystack, Default> TFinder;
@@ -849,9 +849,9 @@ bool find(Finder<THaystack, Default> & finder,
 
 	// Use fast algorithm for needles < machine word if possible.
 	if (pattern.blockCount == 1)
-		return _find_WildShiftAnd_SmallNeedle(finder, pattern);
+		return _findWildShiftAndSmallNeedle(finder, pattern);
 	else
-		return _find_WildShiftAnd_LargeNeedle(finder, pattern);
+		return _findWildShiftAndLargeNeedle(finder, pattern);
     return false;
 }
 

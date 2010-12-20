@@ -48,14 +48,14 @@ struct PizzaChiliCodeProvider {
 @http://pizzachili.dcc.uchile.cl|original documentation@ (or the
 @http://pizzachili.di.unipi.it|Italian mirror@).
 ..cat:Index
-..tag.PizzaChili_AF:The alphabet-friendly FM index.
-..tag.PizzaChili_CCSA:The compressed compact suffix array index.
-..tag.PizzaChili_FM: The FM (full-text in minute space) index.
+..tag.PizzaChiliAF:The alphabet-friendly FM index.
+..tag.PizzaChiliCcsa:The compressed compact suffix array index.
+..tag.PizzaChiliFM: The FM (full-text in minute space) index.
 ..tag.PizzaChiili_RSA:The repair suffix array index.
 ...remarks:The index cannot be saved and loaded.
-..tag.PizzaChili_SA: The simple suffix array index.
+..tag.PizzaChiliSA: The simple suffix array index.
 ...remarks:The index cannot be saved and loaded.
-..tag.PizzaChili_SADA: the compressed suffix array index.
+..tag.PizzaChiliSada: the compressed suffix array index.
 ...remarks:The index cannot be saved and loaded.
 ..see:Spec.Pizza & Chili Index
 ..see:Spec.Pizza & Chili String
@@ -66,34 +66,34 @@ struct PizzaChiliCodeProvider {
 // for them to be included in the forward generated declarations.
 
 struct _PizzaChili_AF;
-typedef Tag<_PizzaChili_AF> const PizzaChili_AF;
+typedef Tag<_PizzaChili_AF> const PizzaChiliAF;
 
 struct _PizzaChili_CCSA;
-typedef Tag<_PizzaChili_CCSA> const PizzaChili_CCSA;
+typedef Tag<_PizzaChili_CCSA> const PizzaChiliCcsa;
 
 struct _PizzaChili_FM;
-typedef Tag<_PizzaChili_FM> const PizzaChili_FM;
+typedef Tag<_PizzaChili_FM> const PizzaChiliFM;
 
 struct _PizzaChili_LZ;
-typedef Tag<_PizzaChili_LZ> const PizzaChili_LZ;
+typedef Tag<_PizzaChili_LZ> const PizzaChiliLZ;
 
 struct _PizzaChili_RSA;
-typedef Tag<_PizzaChili_RSA> const PizzaChili_RSA;
+typedef Tag<_PizzaChili_RSA> const PizzaChiliRsa;
 
 struct _PizzaChili_RLFM;
-typedef Tag<_PizzaChili_RLFM> const PizzaChili_RLFM;
+typedef Tag<_PizzaChili_RLFM> const PizzaChiliRlfm;
 
 struct _PizzaChili_SA;
-typedef Tag<_PizzaChili_SA> const PizzaChili_SA;
+typedef Tag<_PizzaChili_SA> const PizzaChiliSA;
 
 struct _PizzaChili_SADA;
-typedef Tag<_PizzaChili_SADA> const PizzaChili_SADA;
+typedef Tag<_PizzaChili_SADA> const PizzaChiliSada;
 
 struct _PizzaChili_SSA;
-typedef Tag<_PizzaChili_SSA> const PizzaChili_SSA;
+typedef Tag<_PizzaChili_SSA> const PizzaChiliSsa;
 
 struct _PizzaChili_Test;
-typedef Tag<_PizzaChili_Test> const PizzaChili_Test;
+typedef Tag<_PizzaChili_Test> const PizzaChiliTest;
 
 #define SEQAN_MAKE_PIZZACHILI_PROVIDER(name) \
     class PizzaChiliApi##name { \
@@ -142,23 +142,23 @@ typedef Tag<_PizzaChili_Test> const PizzaChili_Test;
         static int init_ds_ssort(int adist, int bs_ratio); \
     }; \
     \
-    /*struct _PizzaChili_##name; \
-    typedef Tag<_PizzaChili_##name> const PizzaChili_##name;*/ \
+    /*struct PizzaChili##name_; \
+    typedef Tag<PizzaChili##name_> const PizzaChili##name;*/ \
     \
     template <> \
-    struct PizzaChiliCodeProvider<PizzaChili_##name> { \
+    struct PizzaChiliCodeProvider<PizzaChili##name> { \
         typedef PizzaChiliApi##name Type; \
     };
 
 SEQAN_MAKE_PIZZACHILI_PROVIDER(AF)
-SEQAN_MAKE_PIZZACHILI_PROVIDER(CCSA)
+SEQAN_MAKE_PIZZACHILI_PROVIDER(Ccsa)
 SEQAN_MAKE_PIZZACHILI_PROVIDER(FM)
 SEQAN_MAKE_PIZZACHILI_PROVIDER(LZ)
-SEQAN_MAKE_PIZZACHILI_PROVIDER(RSA)
-SEQAN_MAKE_PIZZACHILI_PROVIDER(RLFM)
+SEQAN_MAKE_PIZZACHILI_PROVIDER(Rsa)
+SEQAN_MAKE_PIZZACHILI_PROVIDER(Rlfm)
 SEQAN_MAKE_PIZZACHILI_PROVIDER(SA)
-SEQAN_MAKE_PIZZACHILI_PROVIDER(SADA)
-SEQAN_MAKE_PIZZACHILI_PROVIDER(SSA)
+SEQAN_MAKE_PIZZACHILI_PROVIDER(Sada)
+SEQAN_MAKE_PIZZACHILI_PROVIDER(Ssa)
 SEQAN_MAKE_PIZZACHILI_PROVIDER(Test)
 
 #undef SEQAN_MAKE_PIZZACHILI_PROVIDER

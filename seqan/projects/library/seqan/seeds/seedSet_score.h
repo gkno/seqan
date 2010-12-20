@@ -1626,7 +1626,7 @@ addSeedSet(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &target,
 
 template<typename TValue, typename TSeedSpec, typename TQualityFactor, typename TGapCosts, typename TScore>
 void
-delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> &deletionTarget, 
+_deleteEverything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> &deletionTarget, 
 				  TValue currentPos)
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, TScore> >, void> >::Type TSize;
@@ -1668,7 +1668,7 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 				int gapDistance)
 {
 //	if(set.last != qPos){
-//		delete_everything(set, qPos);
+//		_deleteEverything(set, qPos);
 //		set.last = qPos;
 //	}
 	SEQAN_CHECKPOINT
@@ -1676,7 +1676,7 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	TIterator itUp=set.fragmentMap.upper_bound(dPos-qPos+gapDistance);
 	TIterator tmp = set.fragmentMap.end();
-	typename ScoreType<TScoringSpec>::Type maxScore = infimumValue<TValue>();
+	typename ScoreType<TScoringSpec>::Type maxScore = minValue<TValue>();
 	typename ScoreType<TScoringSpec>::Type tmpScore;
 	for (TIterator it = set.fragmentMap.lower_bound(dPos-qPos-gapDistance); it != itUp; )
 	{
@@ -1721,14 +1721,14 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> &set,
 {
 	SEQAN_CHECKPOINT
 	if(set.last != qPos){
-		delete_everything(set, qPos);
+		_deleteEverything(set, qPos);
 		set.last = qPos;
 	}
 	typedef typename Size<String<TValue, Block<BLOCK_SIZE<SeedSet<TValue, TSeedSpec, TScoringSpec, TSpec> >::Value> > >::Type TSize;
 	typedef typename ScoreType<TScoringSpec>::Type TScore;
 	typedef typename std::multimap<TValue,TSize >::iterator TIterator;
 	
-	TScore maxScore = infimumValue<TScore>();
+	TScore maxScore = minValue<TScore>();
 	TScore tmpScore;
 	TValue diag = dPos-qPos;
 

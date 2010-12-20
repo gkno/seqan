@@ -167,7 +167,7 @@ getErrorDistribution(
 		Dna5String const &read = reads[(*it).rseqNo];
 		genome = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
 		if ((*it).orientation == 'R')
-			reverseComplementInPlace(genome);
+			reverseComplement(genome);
 		for (unsigned i = 0; i < length(posError) && i < length(read); ++i)
 			if ((options.compMask[ordValue(genome[i])] & options.compMask[ordValue(read[i])]) == 0)
 				++posError[i]; 
@@ -211,7 +211,7 @@ getErrorDistribution(
 		assignSource(row(align, 0), reads[(*it).rseqNo]);
 		assignSource(row(align, 1), infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd));
 		if ((*it).orientation == 'R')
-			reverseComplementInPlace(source(row(align, 1)));
+			reverseComplement(source(row(align, 1)));
 		globalAlignment(align, scoreType);
 		
 		TRow& row0 = row(align, 0);
@@ -743,10 +743,10 @@ void dumpMatches(
 					assignSource(row(align, 1), infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd));
 #ifdef RAZERS_MATEPAIRS
 					if ((*it).pairId != 0 && ((*it).rseqNo & 1))
-						reverseComplementInPlace(source(row(align, 0)));
+						reverseComplement(source(row(align, 0)));
 #endif
 					if ((*it).orientation == 'R')
-						reverseComplementInPlace(source(row(align, 1)));
+						reverseComplement(source(row(align, 1)));
 				
 					globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());
 
@@ -915,7 +915,7 @@ void dumpMatches(
 						{
 							gInf = infix(genomes[(*it).gseqNo], (*it).gBegin, (*it).gEnd);
 							if ((*it).orientation == 'R')
-								reverseComplementInPlace(gInf);
+								reverseComplement(gInf);
 							for (unsigned i = 0; i < length(gInf); ++i)
 								if ((options.compMask[ordValue(reads[readNo][i])] & 
 									options.compMask[ordValue(gInf[i])]) == 0)
@@ -927,7 +927,7 @@ void dumpMatches(
 				}
 			}
 			break;
-		case 3: // GFF:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
+		case 3: // Gff:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
 			for (unsigned filecount = 0; filecount < length(genomeFileNameList); ++filecount)
 			{
 				// open genome file	
@@ -1051,7 +1051,7 @@ void dumpMatches(
 							assignSource(row(align, 0), readInf);
 							assignSource(row(align, 1), infix(currGenome, (*it).gBegin, (*it).gEnd));
 							if ((*it).orientation == 'R')
-								reverseComplementInPlace(source(row(align, 1)));
+								reverseComplement(source(row(align, 1)));
 
 #ifdef RAZERS_SPLICED
 							if(options.minMatchLen > 0)
@@ -1132,7 +1132,7 @@ void dumpMatches(
 							{
 								gInf = infix(currGenome, (*it).gBegin, (*it).gEnd);
 								if ((*it).orientation == 'R')
-									reverseComplementInPlace(gInf);
+									reverseComplement(gInf);
 								bool first = true;
 								file << ";cigar=" << readLen << "M";
 								file << ";mutations=";

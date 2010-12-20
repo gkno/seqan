@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typename TInput, typename TFunctor,
 		typename TOut1, typename TOut2, typename TOut4 
 	>
-    static void skew7_separate_slices(
+    static void _skew7SeparateSlices(
 		TInput &in, TFunctor const &funcSlice,
 		TOut1 &out1, TOut2 &out2, TOut4 &out4)
     {

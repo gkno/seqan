@@ -25,7 +25,7 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_unsigned) {
 }
 
 
-// Tests the _find_WildShiftAnd_isValid function.
+// Tests the _findWildShiftAndIsValid function.
 SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_valid) {
     CharString const kValidString1 = "[A-Z0-9].*";
     CharString const kValidString2 = "x{3,4}";
@@ -40,29 +40,29 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_is_valid) {
     CharString const kInvalidString6 = "a\\";      // Wrong usage of escape character.
     CharString const kInvalidString7 = "[A-]+";    // Required chara after dash.
 
-    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(kValidString1));
-    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(kValidString2));
-    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(kValidString3));
-    SEQAN_ASSERT_TRUE(_find_WildShiftAnd_isValid(kValidString4));
+    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString1));
+    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString2));
+    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString3));
+    SEQAN_ASSERT_TRUE(_findWildShiftAndIsValid(kValidString4));
 
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString1));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString2));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString3));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString4));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString5));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString6));
-    SEQAN_ASSERT_NOT(_find_WildShiftAnd_isValid(kInvalidString7));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString1));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString2));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString3));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString4));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString5));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString6));
+    SEQAN_ASSERT_NOT(_findWildShiftAndIsValid(kInvalidString7));
 }
 
 
-// Tests the _find_WildShiftAnd_lengthWithoutWildcards function.
+// Tests the _findWildShiftAndLengthWithoutWildcards function.
 SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_length_without_wildcards) {
-    SEQAN_ASSERT_EQ(4u, _find_WildShiftAnd_lengthWithoutWildcards("asdf"));
-    SEQAN_ASSERT_EQ(3u, _find_WildShiftAnd_lengthWithoutWildcards("x{1,3}"));
-    SEQAN_ASSERT_EQ(3u, _find_WildShiftAnd_lengthWithoutWildcards("x{3,3}"));
-    SEQAN_ASSERT_EQ(1u, _find_WildShiftAnd_lengthWithoutWildcards("x*"));
-    SEQAN_ASSERT_EQ(2u, _find_WildShiftAnd_lengthWithoutWildcards(".*[A-Z]+"));
-    SEQAN_ASSERT_EQ(5u, _find_WildShiftAnd_lengthWithoutWildcards("a?b+c*de"));
+    SEQAN_ASSERT_EQ(4u, _findWildShiftAndLengthWithoutWildcards("asdf"));
+    SEQAN_ASSERT_EQ(3u, _findWildShiftAndLengthWithoutWildcards("x{1,3}"));
+    SEQAN_ASSERT_EQ(3u, _findWildShiftAndLengthWithoutWildcards("x{3,3}"));
+    SEQAN_ASSERT_EQ(1u, _findWildShiftAndLengthWithoutWildcards("x*"));
+    SEQAN_ASSERT_EQ(2u, _findWildShiftAndLengthWithoutWildcards(".*[A-Z]+"));
+    SEQAN_ASSERT_EQ(5u, _findWildShiftAndLengthWithoutWildcards("a?b+c*de"));
 }
 
 
@@ -70,16 +70,16 @@ SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_length_without_wildcards
 SEQAN_DEFINE_TEST(test_find2_find_pattern_wild_shiftand_get_character_class) {
     CharString buffer;
 
-    _find_WildShiftAnd_getCharacterClass(buffer, "[A-F]", 1, 4);
+    _findWildShiftAndGetCharacterClass(buffer, "[A-F]", 1, 4);
     SEQAN_ASSERT_EQ("ABCDEF", buffer);
 
-    _find_WildShiftAnd_getCharacterClass(buffer, "XX[ZA-F]XX", 3, 7);
+    _findWildShiftAndGetCharacterClass(buffer, "XX[ZA-F]XX", 3, 7);
     SEQAN_ASSERT_EQ("ZABCDEF", buffer);
 
-    _find_WildShiftAnd_getCharacterClass(buffer, "A-C\\*\\.", 0, 7);
+    _findWildShiftAndGetCharacterClass(buffer, "A-C\\*\\.", 0, 7);
     SEQAN_ASSERT_EQ("ABC*.", buffer);
 
-    _find_WildShiftAnd_getCharacterClass(buffer, "\\A-\\C\\*\\.", 0, 9);
+    _findWildShiftAndGetCharacterClass(buffer, "\\A-\\C\\*\\.", 0, 9);
     SEQAN_ASSERT_EQ("ABC*.", buffer);
 }
 

@@ -36,7 +36,7 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 template <typename TValue>
-struct _Context_LSS
+struct ContextLss_
 {
 	TValue *I,                   /* group array, ultimately suffix array.*/
 	*V,                          /* inverse array, ultimately inverse of I.*/
@@ -232,7 +232,7 @@ struct _Context_LSS
 	   
 	   for (s=0, i=k-l; i; i>>=1)
 		  ++s;                      /* s is number of bits in old symbol.*/
-	   e=SupremumValue<TValue>::VALUE>>s; /* e is for overflow checking.*/
+	   e=MaxValue<TValue>::VALUE>>s; /* e is for overflow checking.*/
 	   for (b=d=r=0; r<n && d<=e && (c=d<<s|(k-l))<=q; ++r) {
 		  b=b<<s|(x[r]-l+1);        /* b is start of x in chunk alphabet.*/
 		  d=c;                      /* d is max symbol in chunk alphabet.*/
@@ -293,7 +293,7 @@ struct _Context_LSS
 		  j=transform(V, I, n, k, l, n);
 		  bucketsort(V, I, n, j);   /* bucketsort on first r positions.*/
 	   } else {
-		  transform(V, I, n, k, l, SupremumValue<TValue>::VALUE);
+		  transform(V, I, n, k, l, MaxValue<TValue>::VALUE);
 		  for (i=0; i<=n; ++i)
 			 I[i]=i;                /* initialize I with suffix numbers.*/
 		  h=0;
@@ -351,8 +351,8 @@ struct _Context_LSS
 		unsigned K)
 	{
 		typedef typename Value<TSA>::Type			TValue;
-		typedef typename _MakeSigned<TValue>::Type	TSValue;	// LarssonSadakane expects signed values
-		_Context_LSS<TSValue> c;
+		typedef typename MakeSigned_<TValue>::Type	TSValue;	// LarssonSadakane expects signed values
+		ContextLss_<TSValue> c;
 		c.suffixsort(
 			(TSValue*)begin(s, Standard()),		// text
 			(TSValue*)begin(SA, Standard()),	// SA

@@ -122,7 +122,7 @@ void testChainer(int count,
 	int sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i)
 	{
-		SEQAN_ASSERT_TRUE(_chain_generic_chainable(ch[i-1], ch[i]));
+		SEQAN_ASSERT_TRUE(_chainGenericChainable(ch[i-1], ch[i]));
 		sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
 	//verify score of chain
@@ -137,7 +137,7 @@ void testChainer(int count,
     SEQAN_ASSERT_GT(length(ch), 0u);
 	sum = weight(ch[0]);
 	for (unsigned int i = 1; i < length(ch); ++i) {
-            SEQAN_ASSERT_TRUE(_chain_generic_chainable(ch[i-1], ch[i]));
+            SEQAN_ASSERT_TRUE(_chainGenericChainable(ch[i-1], ch[i]));
             sum += scoreChainGap(scoring, ch[i-1], ch[i]) + weight(ch[i]);
 	}
 	//verify score of generic chain

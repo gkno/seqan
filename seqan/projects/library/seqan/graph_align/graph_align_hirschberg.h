@@ -34,7 +34,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // Note: The hirschberg trace is different from all the other traces because it simply contains the trace points!!!
 template <typename TAlign, typename TStringSet, typename TScoreValue, typename TSpec, typename TTrace>
 void
-_align_hirschberg_trace(TAlign& align,
+_alignHirschbergTrace(TAlign& align,
 						TStringSet const& str,
 						Score<TScoreValue, TSpec> const& sc,
 						TTrace& trace)
@@ -67,13 +67,13 @@ _align_hirschberg_trace(TAlign& align,
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
 				else break;
 			}
-			_align_trace_print(align, str, id1, len1, id2, currentPointer, segLen, Diagonal);
+			_alignTracePrint(align, str, id1, len1, id2, currentPointer, segLen, Diagonal);
 		} // Diagonal walk, but gapOpen and gapOpen yields a higher score
 		// Note: The case gapExtension + gapOpen cannot occur because then we would have gotten a different trace point!!!
 		else if (((currentPointer - movePointer) == 1)  &&
 			(scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
-				_align_trace_print(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, Vertical);
-				_align_trace_print(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, Horizontal);
+				_alignTracePrint(align, str, id1, (TSize) 0, id2, --currentPointer, (TSize) 1, Vertical);
+				_alignTracePrint(align, str, id1, --len1, id2,(TSize) 0, (TSize) 1, Horizontal);
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
 		} // Horizontal walk 
 		else if ((currentPointer - movePointer) == 0) {
@@ -84,29 +84,29 @@ _align_hirschberg_trace(TAlign& align,
 				if (len1>0) movePointer = getValue(trace, len1 - 1);
 				else break;
 			}
-			_align_trace_print(align, str, id1, len1, id2, (TSize) 0, segLen, Horizontal);
+			_alignTracePrint(align, str, id1, len1, id2, (TSize) 0, segLen, Horizontal);
 		} // Vertical walk 
 		else {
 			// Vertical walk finishes with a horizontal vs. vertical gap
 			if ((len1 > 2) && 
 				(movePointer - getValue(trace, len1 - 2) == 0) &&
 				(scoreGapExtend(sc) + scoreGapExtend(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
-					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
+					_alignTracePrint(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
 					currentPointer = movePointer;
 			} // Vertical walk that finishes with a diagonal, but gapOpen + gapOpen is better
 			else if ((scoreGapOpen(sc) + scoreGapOpen(sc) > score(const_cast<Score<TScoreValue, TSpec>&>(sc), len1-1, movePointer, str[0], str[1]))) {
-					_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
+					_alignTracePrint(align, str, id1, (TSize) 0, id2, (TSize) movePointer, (TSize) currentPointer - movePointer, Vertical);
 					currentPointer = movePointer;
 			} // Normal vertical walk that continues with a diagonal walk
 			else {
-				_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) movePointer + 1, (TSize) currentPointer - (movePointer + 1), Vertical);
+				_alignTracePrint(align, str, id1, (TSize) 0, id2, (TSize) movePointer + 1, (TSize) currentPointer - (movePointer + 1), Vertical);
 				currentPointer = movePointer + 1;
 			}
 		}
 	} while (len1 != 0);
 	// Maybe we have to align the last vertical piece
 	if (getValue(trace, 0) != 0) {
-		_align_trace_print(align, str, id1, (TSize) 0, id2, (TSize) 0, (TSize) getValue(trace, 0), Vertical);
+		_alignTracePrint(align, str, id1, (TSize) 0, id2, (TSize) 0, (TSize) getValue(trace, 0), Vertical);
 	}
 }
 
@@ -115,7 +115,7 @@ _align_hirschberg_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScoreValue, typename TSpec>
 TScoreValue
-_align_hirschberg(TTrace& trace,
+_alignHirschberg(TTrace& trace,
 				  TStringSet const& str,
 				  Score<TScoreValue, TSpec> const& sc,
 				  Hirschberg) 
@@ -192,7 +192,7 @@ _align_hirschberg(TTrace& trace,
 			TSize inf_len2 = y2-y1;
 			TScoreValue tmp = 0;		
 
-			TScoreValue inf = infimumValue<TScoreValue>() / 2;
+			TScoreValue inf = minValue<TScoreValue>() / 2;
 			// The DP Matrix for diagonal walks
 			TColumn mat;
 			resize(mat, (inf_len2+1));   // One column for the diagonal matrix
@@ -489,10 +489,10 @@ _globalAlignment(TAlign& align,
 	
 	// Trace
 	String<TSize> trace;
-	TScoreValue maxScore = _align_hirschberg(trace, str, sc, Hirschberg());
+	TScoreValue maxScore = _alignHirschberg(trace, str, sc, Hirschberg());
 
 	// Follow the trace and create the graph
-	_align_hirschberg_trace(align, str, sc, trace);
+	_alignHirschbergTrace(align, str, sc, trace);
 
 	return maxScore;
 }
@@ -509,7 +509,7 @@ _globalAlignment(TStringSet const& str,
 	SEQAN_CHECKPOINT
 	typedef typename Size<TStringSet>::Type TSize;
 	String<TSize> trace;
-	return _align_hirschberg(trace, str, sc, Hirschberg());	
+	return _alignHirschberg(trace, str, sc, Hirschberg());	
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

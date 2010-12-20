@@ -919,7 +919,7 @@ write(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile, typename TStringSet, typename TSpec, typename TEdge>
 inline void
-__writeCargo(TFile & file,
+_writeCargo(TFile & file,
 			 Graph<Alignment<TStringSet, void, TSpec> > const&,
 			 TEdge const&)
 {
@@ -929,7 +929,7 @@ __writeCargo(TFile & file,
 //////////////////////////////////////////////////////////////////////////////
 template <typename TFile, typename TStringSet, typename TCargo, typename TSpec, typename TEdge>
 inline void
-__writeCargo(TFile & file,
+_writeCargo(TFile & file,
 			 Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 			 TEdge const& edge)
 {
@@ -1029,7 +1029,7 @@ write(TFile & file,
 						_streamPutInt(file, _getId(current));
 						_streamPut(file, ' ');
 						_streamWrite(file,"cargo=");
-						__writeCargo(file,g,current);
+						_writeCargo(file,g,current);
 						_streamPut(file, ' ');
 						_streamWrite(file,"label=");
 						_streamWrite(file,label(g,sourceV));
@@ -1499,7 +1499,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	if (empty(g)) return false;
 
 	// Connected Components
-	TSize numComponents = connected_components(g, component);
+	TSize numComponents = connectedComponents(g, component);
 
 	// Make a directed graph to represent the ordering of the components
 	// Note: Multiple vertices might have the same component
@@ -1546,7 +1546,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	}
 	
 	// Make a topological sort of the component graph
-	topological_sort(componentGraph, order);
+	topologicalSort(componentGraph, order);
 
 	//// Debug code
 	//std::cout << "Topological sort: " << std::endl;
@@ -1791,7 +1791,7 @@ rebuildGraph(Graph<Alignment<TStringSet, TCargo, TSpec> >& g)
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize2, typename TSpec2, typename TPositions, typename TSize, typename TVertexDescriptor, typename TString>
 inline void
-__heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
+_heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 							String<TSize2, TSpec2> const& /*slotToPos*/,
 							TPositions const&,
 							TSize const,
@@ -1808,7 +1808,7 @@ __heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const&,
 
 template<typename TStringSet, typename TCargo, typename TSpec, typename TSize2, typename TSpec2, typename TPositions, typename TSize, typename TString, typename TOutString>
 inline void
-__heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
+_heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 							String<TSize2, TSpec2> const& slotToPos,
 							TPositions const& positions,
 							TSize const m,
@@ -1951,7 +1951,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// Remember for each vertex descriptor the position in the sequence
 	typedef String<TSize> TMapVertexPos;
 	TMapVertexPos map;
-	fill(map, getIdUpperBound(_getVertexIdManager(g)), SupremumValue<TSize>::VALUE);
+	fill(map, getIdUpperBound(_getVertexIdManager(g)), MaxValue<TSize>::VALUE);
 	typedef typename Iterator<TString const, Standard>::Type TStringIterConst;
 	typedef typename Iterator<TVertexSet const, Standard>::Type TVertexSetIterConst;
 	TStringIterConst itStr1 = begin(str1, Standard());
@@ -1982,7 +1982,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			for(;!atEnd(itOut); ++itOut) {
 				// Target vertex must be in the map
 				pPos = map[targetVertex(itOut)];
-				if (pPos != SupremumValue<TSize>::VALUE) 
+				if (pPos != MaxValue<TSize>::VALUE) 
 					appendValue(occupiedPositions, pPos * n + (TSize) (n - posItStr2 - 1), Generous());
 			}
 		}
@@ -1993,7 +1993,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef typename Iterator<TSlotToPos, Standard>::Type TSlotToPosIter;
 	TSlotToPos slotToPos;
 	TSize counter = 0;
-	TSize oldVal = SupremumValue<TSize>::VALUE;
+	TSize oldVal = MaxValue<TSize>::VALUE;
 	TOccIter occIt = begin(occupiedPositions, Standard());
 	TOccIter occItEnd = end(occupiedPositions, Standard());
 	for(;occIt != occItEnd; ++occIt) {
@@ -2020,7 +2020,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 			for(;!atEnd(itOut); ++itOut) {
 				// Target vertex must be in the map
 				pPos = map[targetVertex(itOut)];
-				if ( pPos != SupremumValue<TSize>::VALUE) 
+				if ( pPos != MaxValue<TSize>::VALUE) 
 					weights[::std::distance(begin(slotToPos, Standard()), ::std::lower_bound(begin(slotToPos, Standard()), end(slotToPos, Standard()), pPos * n + (TSize) (n - posItStr2 - 1)))] += (TCargo) cargo(*itOut);
 			}
 		}
@@ -2043,7 +2043,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TCargo score = (TCargo) heaviestIncreasingSubsequence(seq, weights, positions);
 
 	// Retrieve the alignment sequence
-	__heaviestCommonSubsequence(g, slotToPos, positions, m, n, str1, str2, align);
+	_heaviestCommonSubsequence(g, slotToPos, positions, m, n, str1, str2, align);
 
 	return score;
 

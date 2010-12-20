@@ -125,18 +125,18 @@ int qgramThreshold(TShape const & shape, TPatternSize patternLength, TErrors err
 	template <> struct BitsPerValue< ErrorAlphabet > { enum { VALUE = 2 }; };
 
 	template <typename T = void>
-	struct _Translate_Table_Error_2_Ascii
+	struct TranslateTableErrorToAscii_
 	{
 		static char const VALUE[4];
 	};
 	template <typename T>
-	char const _Translate_Table_Error_2_Ascii<T>::VALUE[4] = {'.', 'M', 'I', 'D'};
+	char const TranslateTableErrorToAscii_<T>::VALUE[4] = {'.', 'M', 'I', 'D'};
 
 	inline void assign(Ascii & c_target, 
 					   ErrorAlphabet const & source)
 	{
 	SEQAN_CHECKPOINT
-		c_target = _Translate_Table_Error_2_Ascii<>::VALUE[source.value];
+		c_target = TranslateTableErrorToAscii_<>::VALUE[source.value];
 	}
 
 
@@ -447,7 +447,7 @@ void initPatterns(
 	typedef typename Iterator<TPattern, Standard>::Type			TIter;
 	typedef typename Value<TStateString>::Type					TState;
 	
-	ErrorType lastErrorType = (TYPECMP<TDistance, HammingDistance>::VALUE)? SEQAN_MISMATCH: SEQAN_DELETE;
+	ErrorType lastErrorType = (IsSameType<TDistance, HammingDistance>::VALUE)? SEQAN_MISMATCH: SEQAN_DELETE;
 
 	SEQAN_ASSERT(SEQAN_MATCH == 0);
 	SEQAN_ASSERT((length(logError) % 4) == 0);
@@ -772,7 +772,7 @@ void computeExactQGramThreshold(
 	// columns n-1 and n for recursion 
 	TMatrixCol col0;	// addressing is colx[errors * statesCount + state]
 	TMatrixCol col1;
-	const TThresh infty = SupremumValue<TThresh>::VALUE >> 1;
+	const TThresh infty = MaxValue<TThresh>::VALUE >> 1;
 	
 	fill(col0, maxErrors * statesCount, infty);
 	resize(col1, maxErrors * statesCount);

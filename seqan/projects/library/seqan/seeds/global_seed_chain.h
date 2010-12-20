@@ -139,7 +139,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 		}
 
 	}
-	TSkiplistIterator it_skip = _findPrev(list, supremumValue<TValue>());
+	TSkiplistIterator it_skip = _findPrev(list, maxValue<TValue>());
 	pElement = (*it_skip).i2;
 	TScore best = pElement->i2;
 	TChainElement* delete_pointer;
@@ -152,7 +152,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source,	//Se
 		delete(delete_pointer);
 	}
 
-	reverseInPlace(result);
+	reverse(result);
 	return best;
 }
 
@@ -226,7 +226,7 @@ globalChaining(SeedSet<TValue, TSeedSpec, TScoreSpec, TSpec> const &source, //Se
 		delete(delete_pointer);
 	}
 
-	reverseInPlace(result);
+	reverse(result);
 	return best;
 }
 

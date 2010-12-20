@@ -116,25 +116,25 @@ struct FunctorComplement;
 
 
 template <typename T = void>
-struct _Translate_Table_Dna5_2_Dna5Complement
+struct TranslateTableDna5ToDna5Complement_
 {
     static char const VALUE[5];
 };
 
 
 template <typename T>
-char const _Translate_Table_Dna5_2_Dna5Complement<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
+char const TranslateTableDna5ToDna5Complement_<T>::VALUE[5] = {'T', 'G', 'C', 'A', 'N'};
 
 
 template <typename T = void>
-struct _Translate_Table_Rna5_2_Rna5Complement
+struct TranslateTableRna5ToRna5Complement_
 {
     static char const VALUE[5];
 };
 
 
 template <typename T>
-char const _Translate_Table_Rna5_2_Rna5Complement<T>::VALUE[5] = {'U', 'G', 'C', 'A', 'N'};
+char const TranslateTableRna5ToRna5Complement_<T>::VALUE[5] = {'U', 'G', 'C', 'A', 'N'};
 
 
 template <>
@@ -142,7 +142,7 @@ struct FunctorComplement<char> : public ::std::unary_function<Dna5,Dna5>
 {
     inline Dna5 operator()(Dna5 x) const {
         SEQAN_CHECKPOINT;
-        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+        return TranslateTableDna5ToDna5Complement_<>::VALUE[x.value]; 
     }
 };
 
@@ -151,7 +151,7 @@ struct FunctorComplement<Dna> : public ::std::unary_function<Dna,Dna>
 {
     inline Dna operator()(Dna x) const {
         SEQAN_CHECKPOINT;
-        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+        return TranslateTableDna5ToDna5Complement_<>::VALUE[x.value]; 
     }
 };
 
@@ -161,7 +161,7 @@ struct FunctorComplement<Dna5> : public ::std::unary_function<Dna5,Dna5>
 {
     inline Dna5 operator()(Dna5 x) const {
         SEQAN_CHECKPOINT;
-        return _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[x.value]; 
+        return TranslateTableDna5ToDna5Complement_<>::VALUE[x.value]; 
     }
 };
 
@@ -171,7 +171,7 @@ struct FunctorComplement<Rna> : public ::std::unary_function<Rna,Rna>
 {
     inline Rna operator()(Rna x) const {
         SEQAN_CHECKPOINT;
-        return _Translate_Table_Rna5_2_Rna5Complement<>::VALUE[x.value]; 
+        return TranslateTableRna5ToRna5Complement_<>::VALUE[x.value]; 
     }
 };
 
@@ -181,7 +181,7 @@ struct FunctorComplement<Rna5> : public ::std::unary_function<Rna5,Rna5>
 {
     inline Dna5 operator()(Rna5 x) const {
         SEQAN_CHECKPOINT;
-        return _Translate_Table_Rna5_2_Rna5Complement<>::VALUE[x.value]; 
+        return TranslateTableRna5ToRna5Complement_<>::VALUE[x.value]; 
     }
 };
 
@@ -192,7 +192,7 @@ struct FunctorComplement<DnaQ> : public ::std::unary_function<DnaQ,DnaQ>
     inline DnaQ operator()(DnaQ x) const {
         SEQAN_CHECKPOINT;
         int qual = getQualityValue(x);
-        x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna)x)];
+        x = TranslateTableDna5ToDna5Complement_<>::VALUE[ordValue((Dna)x)];
         assignQualityValue(x, qual);
         return x;
     }
@@ -205,7 +205,7 @@ struct FunctorComplement<Dna5Q> : public ::std::unary_function<Dna5Q,Dna5Q>
     inline Dna5Q operator()(Dna5Q x) const {
         SEQAN_CHECKPOINT;
         int qual = getQualityValue(x);
-        x = _Translate_Table_Dna5_2_Dna5Complement<>::VALUE[ordValue((Dna5)x)];
+        x = TranslateTableDna5ToDna5Complement_<>::VALUE[ordValue((Dna5)x)];
         assignQualityValue(x, qual);
         return x;
     }

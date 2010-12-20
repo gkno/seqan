@@ -49,8 +49,8 @@ If you use for instance $String <Dna>$ instead you won't be able to specify wild
 
 ///.Class.Pattern.param.TSpec.type:Spec.WildShiftAnd
 
-struct _WildShiftAnd;
-typedef Tag<_WildShiftAnd> WildShiftAnd;
+struct WildShiftAnd_;
+typedef Tag<WildShiftAnd_> WildShiftAnd;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -207,7 +207,7 @@ SEQAN_CHECKPOINT
   currently supported +,*,[..],?,.,{n,m}
 */
 template <typename TNeedle>
-unsigned _length_wo_wild(TNeedle const & needle) {
+unsigned _lengthWithoutWildcards(TNeedle const & needle) {
 
 	typedef unsigned TWord;
 
@@ -317,7 +317,7 @@ SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
 	
 	me.needleLength = length(needle);
-	me.character_count = _length_wo_wild(needle);
+	me.character_count = _lengthWithoutWildcards(needle);
 
 	if (me.character_count<1) me.blockCount=1;
 	else me.blockCount=((me.character_count-1) / BitsPerValue<TWord>::VALUE)+1;
@@ -585,7 +585,7 @@ SEQAN_CHECKPOINT
 
 
 template <typename TFinder, typename TNeedle>
-inline bool _findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
+inline bool _findShiftAndSmallNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
 	typedef unsigned TWord;
 	TWord compare = (1 << (me.character_count-1));
@@ -608,7 +608,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TFinder, typename TNeedle>
-inline bool _findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
+inline bool _findShiftAndLargeNeedle(TFinder & finder, Pattern<TNeedle, WildShiftAnd> & me) {
 SEQAN_CHECKPOINT
 	typedef unsigned TWord;
 	const TWord all1 = ~0;	
@@ -664,9 +664,9 @@ SEQAN_CHECKPOINT
 
 	// Fast algorithm for needles < machine word?
 	if (me.blockCount == 1) {
-		return _findShiftAnd_SmallNeedle(finder, me);
+		return _findShiftAndSmallNeedle(finder, me);
 	} else {
-		return _findShiftAnd_LargeNeedle(finder, me);
+		return _findShiftAndLargeNeedle(finder, me);
 	}
 }
 

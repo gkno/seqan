@@ -99,7 +99,7 @@ TRazerSMode                      const & mode)
             TPreprocessing, 
             TSwiftPattern,
             TCounts >											TVerifier;
-        typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+        typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
         
         // HITS
         typedef typename TSwiftFinder::THitString               THitString;
@@ -118,7 +118,7 @@ TRazerSMode                      const & mode)
 		// lock contig
         lockContig(mainStore, contigId);
         TContigSeq &contigSeq = mainStore.contigStore[contigId].seq;
-        if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+        if (orientation == 'R')	reverseComplement(contigSeq);
         
 		// Create finder and verifier
         TSwiftFinder	swiftFinder(contigSeq, options.repeatLength, 1);
@@ -159,7 +159,7 @@ TRazerSMode                      const & mode)
 				if (length(blockStore.alignedReadStore) > options.compactThresh)
 				{
 					TAlignedReadStoreSize oldSize = length(blockStore.alignedReadStore);
-					if (TYPECMP<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
+					if (IsSameType<typename TRazerSMode::TGapMode, RazerSGapped>::VALUE)
 						maskDuplicates(blockStore, mode);	// overlapping parallelograms cause duplicates
 					
 					compactMatches(blockStore, cnts, options, mode, swiftPatternHandler, COMPACT);
@@ -175,7 +175,7 @@ TRazerSMode                      const & mode)
         }
 		
         if (!unlockAndFreeContig(mainStore, contigId))							// if the contig is still used
-            if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+            if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
     }
     
 }

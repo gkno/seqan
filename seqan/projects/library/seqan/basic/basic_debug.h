@@ -149,7 +149,7 @@ End:
 //a single line break is skipped.
 //the second line break is transformed into \n
 inline void 
-_compareTextFiles_readChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
+_compareTextFilesReadChar(FILE * fl, char & c, int & num_lb, bool & is_eof)
 {
 	num_lb = 0;
 	is_eof = false;
@@ -201,8 +201,8 @@ _compareTextFiles(const char * file1, const char * file2)
 
 	while (!feof(fl1) && !feof(fl2))
 	{
-		_compareTextFiles_readChar(fl1, c1, num_lb1, is_eof1);
-		_compareTextFiles_readChar(fl2, c2, num_lb2, is_eof2);
+		_compareTextFilesReadChar(fl1, c1, num_lb1, is_eof1);
+		_compareTextFilesReadChar(fl2, c2, num_lb2, is_eof2);
 
 		if (num_lb1 != num_lb2)
 		{

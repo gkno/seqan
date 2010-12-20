@@ -53,7 +53,7 @@ class Segment<THost_, InfixSegment>
 public:
 	typedef typename Host<Segment>::Type THost;
 
-	typename _Pointer<THost>::Type data_host;
+	typename Pointer_<THost>::Type data_host;
 	typename Position<THost>::Type data_begin_position;
 	typename Position<THost>::Type data_end_position;
 
@@ -102,7 +102,7 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
 	}
 
-	Segment(typename _Parameter<THost>::Type _host):
+	Segment(typename Parameter_<THost>::Type _host):
 		data_host(_toPointer(_host)),
 		data_begin_position(0),
 		data_end_position(length(value(data_host)))
@@ -111,7 +111,7 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
 	}
 
-	Segment(typename _Parameter<THost>::Type _host, typename Position<THost>::Type _begin_index, typename Position<THost>::Type _end_index):
+	Segment(typename Parameter_<THost>::Type _host, typename Position<THost>::Type _begin_index, typename Position<THost>::Type _end_index):
 		data_host(_toPointer(_host)),
 		data_begin_position(_begin_index),
 		data_end_position(_end_index)
@@ -120,7 +120,7 @@ SEQAN_CHECKPOINT
         _checkMemberVariables();
 	}
 /*
-	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin, typename Iterator<THost, Rooted>::Type _end):
+	Segment(typename Parameter_<THost>::Type _host, typename Iterator<THost, Rooted>::Type _begin, typename Iterator<THost, Rooted>::Type _end):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin)),
 		data_end_position(position(_end))
@@ -128,7 +128,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 	}
 */
-	Segment(typename _Parameter<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin, typename Iterator<THost, Standard>::Type _end):
+	Segment(typename Parameter_<THost>::Type _host, typename Iterator<THost, Standard>::Type _begin, typename Iterator<THost, Standard>::Type _end):
 		data_host(_toPointer(_host)),
 		data_begin_position(position(_begin, _host)),
 		data_end_position(position(_end, _host))
@@ -196,7 +196,7 @@ SEQAN_CHECKPOINT
 ///Function.host.param.object.type:Class.Segment
 
 template <typename THost_>
-inline typename _Parameter<THost_>::Type 
+inline typename Parameter_<THost_>::Type 
 host(Segment<THost_, InfixSegment> & me)
 {
 SEQAN_CHECKPOINT
@@ -204,7 +204,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THost_>
-inline typename _Parameter<THost_>::Type 
+inline typename Parameter_<THost_>::Type 
 host(Segment<THost_, InfixSegment> const & me)
 {
 SEQAN_CHECKPOINT
@@ -429,7 +429,7 @@ that begin- and end-position of the segment does not fit into the new host seque
 */
 template <typename THost_>
 inline void 
-setHost(Segment<THost_, InfixSegment> & me, typename _Parameter<THost_>::Type _host)
+setHost(Segment<THost_, InfixSegment> & me, typename Parameter_<THost_>::Type _host)
 {
 SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);
@@ -437,7 +437,7 @@ SEQAN_CHECKPOINT
 	
 template <typename THost_>
 inline void 
-setHost(Segment<THost_ const, InfixSegment> & me, typename _Parameter<THost_>::Type _host)
+setHost(Segment<THost_ const, InfixSegment> & me, typename Parameter_<THost_>::Type _host)
 {
 SEQAN_CHECKPOINT
 	me.data_host = _toPointer(_host);

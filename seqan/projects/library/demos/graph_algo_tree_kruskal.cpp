@@ -26,7 +26,7 @@ int main() {
 ///Out-parameter: Selected tree edges
 	String<TVertexDescriptor> treeEdges;
 ///Kruskal's algorithm
-	kruskals_algorithm(g, 0, weightMap, treeEdges);
+	kruskalsAlgorithm(g, 0, weightMap, treeEdges);
 ///Console output
 	::std::cout << "Minimum Spanning Tree (Kruskal's algorithm): " << ::std::endl;
 	::std::cout << "Tree Edges: ";

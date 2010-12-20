@@ -312,7 +312,7 @@ int detectSNPs(
 		TReadCounts tmpReadCounts;
 		TReadClips tmpReadClips;
 		TReadCigars tmpReadCigars;
-		options.minCoord = SupremumValue<unsigned>::VALUE;
+		options.minCoord = MaxValue<unsigned>::VALUE;
 		options.maxCoord = 0;
 
 		// snp calling is done for all positions between windowBegin and windowEnd
@@ -479,7 +479,7 @@ int detectSNPs(
 //read filename (read line and trim trailing whitespaces)
 template<typename TFile, typename TChar, typename TString>
 void
-_parse_readWordUntilWhitespace(TFile& file, TString& str, TChar& c)
+_parseReadWordUntilWhitespace(TFile& file, TString& str, TChar& c)
 {
         append(str,c);
         if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
@@ -570,7 +570,7 @@ copyNextWindowMatchesAndReads(TFragmentStore &fragmentStore,
 	TMatchIt mItBegin 	= begin(fragmentStore.alignedReadStore,Standard());
 	--mIt;
 
-	options.minCoord = SupremumValue<unsigned>::VALUE;
+	options.minCoord = MaxValue<unsigned>::VALUE;
 	options.maxCoord = 0;
 	//CharString str = "discBef";
 	//_dumpMatches(fragmentStore, str);
@@ -635,7 +635,7 @@ applyPileupCorrection(TFragmentStore	&fragmentStore,
 	typedef typename TFragmentStore::TContigPos 		TContigPos;
 	typedef typename Iterator<TMatches,Standard>::Type	TMatchIterator;
 	
-	if(TYPECMP<TReads, TFalseType >::VALUE)
+	if(IsSameType<TReads, TFalseType >::VALUE)
 		std::cout << "Hier stimmt was nciht. strinsetspec concat direct\n";
 
 	if(options._debugLevel > 0) std::cout << arrayEndPos - arrayBeginPos  << " matches subject to pile up correction." << std::endl;
@@ -840,7 +840,7 @@ clipReads(TFragmentStore 	&fragmentStore,
 			assignSource(row(align, 0), read);
 			assignSource(row(align, 1), infix(currGenome, beginPos, endPos));
 			if ((*it).endPos < (*it).beginPos)
-				reverseComplementInPlace(source(row(align, 1)));
+				reverseComplement(source(row(align, 1)));
 				
 			int score = globalAlignment(align, scoreType, AlignConfig<false,true,true,false>(), Gotoh());		
 			aliQ.errors = (unsigned char) round(-score/1000);
@@ -959,7 +959,7 @@ int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeF
 		while(!_streamEOF(file))
 		{
 			clear(nameStr);
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 			while ((c!=' ') && (c != '\t') && (c != '\n') && (c != '\r'))
 			{
 				appendValue(nameStr,c,Generous());
@@ -969,7 +969,7 @@ int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeF
 			if(options._debugLevel >=2)
 				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
 			++i;
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 		}
 		if(options._debugLevel >=1)
 			::std::cout << i-1 << " genome files total." <<::std::endl;
@@ -988,7 +988,7 @@ int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeF
 
 
 /////////////////////////////////////////////////////////////
-// read sorted(!) GFF input file containing mapped reads
+// read sorted(!) Gff input file containing mapped reads
 template <
 	typename TFile,
 	typename TFragmentStore,
@@ -1078,11 +1078,11 @@ int readMatchesFromGFF_Batch(
 		bool hasIndel = false;
 		int editDist = 0;
 		int mScore = 100;
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 	
 		// skip whitespaces just in case (actually there shouldnt be a whitespace at the beginning of a line)
 		// and read entry in column 1  --> genomeID
-		_parse_readWordUntilWhitespace(*file,temp_str,c); 
+		_parseReadWordUntilWhitespace(*file,temp_str,c); 
 		
 		//check if the genomeID is in our map of relevant genomeIDs, otherwise skip match
 		it = gIdStringToIdNumMap.find(temp_str);
@@ -1116,23 +1116,23 @@ int readMatchesFromGFF_Batch(
 
 
 		// skip whitespaces and read entry in column 2
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		clear(temp_str);
-		_parse_readWordUntilWhitespace(*file,temp_str,c); 
+		_parseReadWordUntilWhitespace(*file,temp_str,c); 
 		
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 
 		// skip whitespaces and read entry in column 3
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		clear(temp_str);
-		_parse_readWordUntilWhitespace(*file,temp_str,c); 
+		_parseReadWordUntilWhitespace(*file,temp_str,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 
 		// skip whitespaces and read entry in column 4  --> genomic begin position
-		_parse_skipWhitespace(*file, c);
-		TContigPos beginPos = _parse_readNumber(*file,c) - options.positionFormat;
+		_parseSkipWhitespace(*file, c);
+		TContigPos beginPos = _parseReadNumber(*file,c) - options.positionFormat;
 		if(beginPos > currentEnd + (TContigPos)options.windowBuff)	// we have passed the relevant match positions
 		{
 			if(options._debugLevel > 1)
@@ -1144,8 +1144,8 @@ int readMatchesFromGFF_Batch(
 			::std::cout << beginPos << "\t";
 
 		// skip whitespaces and read entry in column 5  --> genomic end position
-		_parse_skipWhitespace(*file, c);
-		TContigPos endPos = _parse_readNumber(*file,c);
+		_parseSkipWhitespace(*file, c);
+		TContigPos endPos = _parseReadNumber(*file,c);
 
 		if(options._debugLevel > 1) 
 			::std::cout << endPos << "\t";
@@ -1164,18 +1164,18 @@ int readMatchesFromGFF_Batch(
 		}
 
 		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		if(c=='.')
 		{
 			mScore = 100;  //not used, but needs to be >= options.minMapQual (default 1)
 			c = _streamGet(*file);
 		}
-		else mScore = (int)_parse_readDouble(*file,c); 
+		else mScore = (int)_parseReadDouble(*file,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << mScore << "\t";
 		
 		// skip whitespaces and read entry in column 7  --> strand information: '+' or '-' 
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		if (c=='+')
 			orientation = 'F';
 		else
@@ -1183,13 +1183,13 @@ int readMatchesFromGFF_Batch(
 		c = _streamGet(*file);
 		
 		// skip whitespaces and read entry in column 8  --> in razers output this is always a '.' 
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		c = _streamGet(*file);
 		
 		// skip whitespaces and read entry in column 9  --> tags, extra information. in razers output first tag is always "ID"
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 		clear(temp_str);
-		_parse_readIdentifier(*file,temp_str,c);
+		_parseReadIdentifier(*file,temp_str,c);
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\n";
 		if(temp_str!="ID") ::std::cout << "first feature field should be 'ID'"<<::std::endl;
@@ -1200,7 +1200,7 @@ int readMatchesFromGFF_Batch(
 		// read the readID
 		clear(temp_str);
 		CharString readName;
-		_parse_readIdentifier(*file,readName,c);
+		_parseReadIdentifier(*file,readName,c);
 		if(options._debugLevel > 1) 
 			::std::cout << "myID = "<<readName << "\n";
 #ifdef SNPSTORE_DEBUG
@@ -1209,13 +1209,13 @@ int readMatchesFromGFF_Batch(
 		// cut out the read template from the genomic coordinates
 		gInf = infix(genome, beginPos, endPos);
 		if (orientation == 'R')
-			reverseComplementInPlace(gInf);
+			reverseComplement(gInf);
 		readTemplate = gInf;
 		if(options._debugLevel > 1) cout << readTemplate << "\n";
 		
 		// process tags in a loop
 		CharString current_tag;
-		_parse_skipWhitespace(*file,c); 
+		_parseSkipWhitespace(*file,c); 
 		bool multi = false, suboptimal = false, unique = true, splitRead = false;
 		clipLeft = 0; clipRight = 0; 
 		clear(gAliPos);
@@ -1234,7 +1234,7 @@ int readMatchesFromGFF_Batch(
 			// get the current tag
 			clear(current_tag);
 			c = _streamGet(*file);
-			_parse_readIdentifier(*file,current_tag,c);
+			_parseReadIdentifier(*file,current_tag,c);
 #ifdef SNPSTORE_DEBUG
 			if(options._debugLevel > 1) 
 				::std::cout << current_tag << " in features\n";
@@ -1280,14 +1280,14 @@ int readMatchesFromGFF_Batch(
 				{
 					options.clipTagsInFile = true;
 					if(c=='=') c = _streamGet(*file);
-					clipLeft = _parse_readNumber(*file,c);
+					clipLeft = _parseReadNumber(*file,c);
 					c = _streamGet(*file);
-					clipRight = _parse_readNumber(*file,c);
+					clipRight = _parseReadNumber(*file,c);
 				}
 				else if (current_tag == "count")
 				{
 					if(c=='=') c = _streamGet(*file);
-					readCount = _parse_readNumber(*file,c);
+					readCount = _parseReadNumber(*file,c);
 				}
 				else if (current_tag == "read")
 				{
@@ -1315,7 +1315,7 @@ int readMatchesFromGFF_Batch(
 					while(c==',' || c=='=') // and add the mutated positions (misfragmentStore.alignedReadStore and insertions in read)
 					{
 						c = _streamGet(*file);
-						pos = _parse_readNumber(*file,c);
+						pos = _parseReadNumber(*file,c);
 						curr_read[pos-1]=(Dna5)c;
 						c = _streamGet(*file);
 						++editDist;
@@ -1329,7 +1329,7 @@ int readMatchesFromGFF_Batch(
 					while(c!=';'  && !(c == '\n' || (c == '\r' && _streamPeek(*file) != '\n')))
 					{
 						if(c=='=') c = _streamGet(*file);
-						pos2 = _parse_readNumber(*file,c);
+						pos2 = _parseReadNumber(*file,c);
 						if(c=='M')
 						{
 							unsigned k= 0;
@@ -1400,7 +1400,7 @@ int readMatchesFromGFF_Batch(
 			if(clipLeft + clipRight > (int)length(curr_read) - (int)options.minClippedLength)
 			{
 				if (options._debugLevel>1)cout <<"Discarding read "<<readName<<", too short after clipping.."<<std::endl;
-				_parse_skipWhitespace(*file, c); continue;
+				_parseSkipWhitespace(*file, c); continue;
 			}
 			if(options.realign && splitRead)
 			{
@@ -1408,7 +1408,7 @@ int readMatchesFromGFF_Batch(
 				{
 					
 					if (options._debugLevel>1)cout <<"Discarding split read "<<readName<<", deletion too large.."<<std::endl;
-					_parse_skipWhitespace(*file, c); continue;
+					_parseSkipWhitespace(*file, c); continue;
 				}
 			}
 			TId readId = length(fragmentStore.readSeqStore);
@@ -1496,7 +1496,7 @@ int readMatchesFromGFF_Batch(
 			}
 		}
 		
-		_parse_skipWhitespace(*file, c);
+		_parseSkipWhitespace(*file, c);
 	}
 	if(options._debugLevel > 0) 
 		::std::cout << ::std::endl << "Parsed "<<length(fragmentStore.alignedReadStore)<<" matches of "<<length(fragmentStore.readSeqStore)<<" reads." << ::std::endl;
@@ -2023,6 +2023,9 @@ int main(int argc, const char *argv[])
 		cerr << "Position analysis output specified, but no position file given." << endl << endl;
 		return 0;
 	}
+
+	if(options.realign || options.windowSize > 50000) 
+		options.windowSize = 10000;
 
 	if (*options.outputLog != 0)
 		writeLogFile(argc, argv, genomeFName, readFNames, qualityFNames, options);

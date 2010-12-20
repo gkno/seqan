@@ -26,7 +26,7 @@ void constrainedDFS ()
 
 int main ()
 {
-	constrainedDFS< Index_ESA<> > ();
-	constrainedDFS< Index_Wotd<> > ();
+	constrainedDFS< IndexEsa<> > ();
+	constrainedDFS< IndexWotd<> > ();
 	return 0;
 }

@@ -36,7 +36,7 @@ struct TestSmallSeedConfig
     typedef int TDiagonal;
     typedef seqan::True THasScore;
     typedef int TScoreValue;
-    typedef seqan::_ScoreMixin<int> TScoreMixin;
+    typedef seqan::ScoreMixin_<int> TScoreMixin;
 };
 
 // Test assignment of chained seeds.
@@ -63,20 +63,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
         typedef Seed<ChainedSeed> TSeed;
         typedef Value<TSeed>::Type TSeedDiagonal;
         bool b;
-        b = TYPECMP<size_t, Position<TSeedDiagonal>::Type>::VALUE;
+        b = IsSameType<size_t, Position<TSeedDiagonal>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<size_t, Size<TSeedDiagonal>::Type>::VALUE;
+        b = IsSameType<size_t, Size<TSeedDiagonal>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
 
-        b = TYPECMP<size_t, Position<TSeed>::Type>::VALUE;
+        b = IsSameType<size_t, Position<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<size_t, Size<TSeed>::Type>::VALUE;
+        b = IsSameType<size_t, Size<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<_MakeSigned<size_t>::Type, Diagonal<TSeed>::Type>::VALUE;
+        b = IsSameType<MakeSigned_<size_t>::Type, Diagonal<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<False, HasScore<TSeed>::Type>::VALUE;
+        b = IsSameType<False, HasScore<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<Nothing, SeedScore<TSeed>::Type>::VALUE;
+        b = IsSameType<Nothing, SeedScore<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
     // Test with other specialization.
@@ -84,20 +84,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_chained_metafunctions)
         typedef Seed<ChainedSeed, TestSmallSeedConfig> TSeed;
         typedef Value<TSeed>::Type TSeedDiagonal;
         bool b;
-        b = TYPECMP<unsigned, Position<TSeedDiagonal>::Type>::VALUE;
+        b = IsSameType<unsigned, Position<TSeedDiagonal>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<unsigned, Size<TSeedDiagonal>::Type>::VALUE;
+        b = IsSameType<unsigned, Size<TSeedDiagonal>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
 
-        b = TYPECMP<unsigned, Position<TSeed>::Type>::VALUE;
+        b = IsSameType<unsigned, Position<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<unsigned, Size<TSeed>::Type>::VALUE;
+        b = IsSameType<unsigned, Size<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<int, Diagonal<TSeed>::Type>::VALUE;
+        b = IsSameType<int, Diagonal<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<True, HasScore<TSeed>::Type>::VALUE;
+        b = IsSameType<True, HasScore<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
-        b = TYPECMP<int, SeedScore<TSeed>::Type>::VALUE;
+        b = IsSameType<int, SeedScore<TSeed>::Type>::VALUE;
         SEQAN_ASSERT_TRUE(b);
     }
 }

@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <
 		class LCPFwdIt,		// lcp table input iterator
 		class FlatOutIt >	// flat tree output iterator
-	inline FlatOutIt createLCPBinTree(
+	inline FlatOutIt createLcpBinTree(
 		LCPFwdIt _First, LCPFwdIt _Last,
 		FlatOutIt _Dest)
 	{
@@ -101,7 +101,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TSize >
-	inline TSize sizeofLCPE(TSize n)
+	inline TSize sizeofLcpe(TSize n)
 	{
 		if (n < 2) return n;	// 0 -> 0, 1 -> 1, 2 -> 2, 3 -> 4
 		--n;
@@ -112,32 +112,32 @@ namespace SEQAN_NAMESPACE_MAIN
 	}
 
 	template < typename TSize >
-	inline TSize sizeofLCPH(TSize n)
+	inline TSize sizeofLcph(TSize n)
 	{
-		return sizeofLCPE(n);
+		return sizeofLcpe(n);
 	}
 
 	template <
 		class LCPFwdIt,		// lcp table input iterator
 		typename TSize >
-	inline void sizeofLCPE(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
+	inline void sizeofLcpe(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
 	{
-		_Size = sizeofLCPE(difference(_First, _Last));
+		_Size = sizeofLcpe(difference(_First, _Last));
 	}
 
 	template <
 		class LCPFwdIt,		// lcp table input iterator
 		typename TSize >
-	inline void sizeofLCPH(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
+	inline void sizeofLcph(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
 	{
-		sizeofLCPE(_First, _Last, _Size);
+		sizeofLcpe(_First, _Last, _Size);
 		return;
 	}
 
 
     template < typename TLCPE, typename TLCP >
-    inline void createLCPBinTree(TLCPE &lcp_enhanced, TLCP &lcp) {
-        createLCPBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced, Standard()));
+    inline void createLcpBinTree(TLCPE &lcp_enhanced, TLCP &lcp) {
+        createLcpBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced, Standard()));
     }
 
 
@@ -152,11 +152,11 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TValue, typename TConfig, typename TLCP >
-    inline void createLCPBinTree(String<TValue, External<TConfig> > &lcp_enhanced, TLCP &lcp) {
+    inline void createLcpBinTree(String<TValue, External<TConfig> > &lcp_enhanced, TLCP &lcp) {
         unsigned writeHeads = _treeLevels(length(lcp)) + 1;   // plus 1 write back buffer
         if (lcp_enhanced.cache.size() < writeHeads)
             lcp_enhanced.resizeCache(writeHeads);
-        createLCPBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced));
+        createLcpBinTree(begin(lcp, Standard()), end(lcp, Standard()), begin(lcp_enhanced));
     }
 
 }

@@ -32,11 +32,11 @@ template<typename TFile, typename TChar>
 inline bool
 _parse_skipWord(TFile& file, TChar& c)
 {
-	if (!_parse_isLetter(c)) return false;
+	if (!_parseIsLetter(c)) return false;
 	
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isLetter(c)) break; 
+		if (!_parseIsLetter(c)) break; 
 	}
 	return true; 
 }

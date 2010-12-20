@@ -639,7 +639,7 @@ You can simply use them with $Shape<TValue, ShapePatternHunter>$ for example.
 	reverse(Shape<TValue, GappedShape<TSpec> > &me)
 	{
 	SEQAN_CHECKPOINT
-		reverseInPlace(me.diffs);
+		reverse(me.diffs);
 	}
 
 }	// namespace seqan

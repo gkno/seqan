@@ -213,7 +213,7 @@ void findReads(
 	char orientation,				// q-gram index of reads
 	RazerSOptions<TOptionSpec> &options)
 {
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Value<TMatches>::Type					TMatch;
 

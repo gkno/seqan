@@ -25,10 +25,10 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 	// dfs order
-	struct _Preorder;
-	struct _Postorder;
+	struct Preorder_;
+	struct Postorder_;
 
-	template <typename TDFSOrder = _Postorder, typename THideEmptyEdges = True>
+	template <typename TDFSOrder = Postorder_, typename THideEmptyEdges = True>
 	struct VSTreeIteratorTraits {
 		typedef TDFSOrder DFSOrder;
 		typedef THideEmptyEdges HideEmptyEdges;
@@ -98,19 +98,19 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 */
 
 	// predefined iterator traits
-	struct Preorder:			VSTreeIteratorTraits<_Preorder,  True> {};
-	struct Postorder:			VSTreeIteratorTraits<_Postorder, True> {};
-	struct PreorderEmptyEdges:	VSTreeIteratorTraits<_Preorder,  False> {};	// also iterate over
-	struct PostorderEmptyEdges:	VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
+	struct Preorder:			VSTreeIteratorTraits<Preorder_,  True> {};
+	struct Postorder:			VSTreeIteratorTraits<Postorder_, True> {};
+	struct PreorderEmptyEdges:	VSTreeIteratorTraits<Preorder_,  False> {};	// also iterate over
+	struct PostorderEmptyEdges:	VSTreeIteratorTraits<Postorder_, False> {};	// empty edges (with $-label)
 
 	// traits for TopDown iterators (w/o ParentLinks) for which postorder/preorder is ignored
-	struct HideEmptyEdges:		VSTreeIteratorTraits<_Postorder, True> {};
-	struct EmptyEdges:			VSTreeIteratorTraits<_Postorder, False> {};	// empty edges (with $-label)
+	struct HideEmptyEdges:		VSTreeIteratorTraits<Postorder_, True> {};
+	struct EmptyEdges:			VSTreeIteratorTraits<Postorder_, False> {};	// empty edges (with $-label)
 	
 	// MultiMEMs are more specialized MaxRepeats
 	template <typename TSpec = void>
-	struct _MaxRepeats;	// base class
-	struct _MultiMEMs;	// subclass tag
+	struct MaxRepeats_;	// base class
+	struct MultiMems_;	// subclass tag
 
 
 
@@ -134,9 +134,9 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 			struct	SuperMaxRepeatsFast;
 			struct	MUMs;								// Maximal Unique Match (unique in every sequence)
 
-			typedef _MaxRepeats<void>		MaxRepeats;	// maximal repeat
+			typedef MaxRepeats_<void>		MaxRepeats;	// maximal repeat
 			struct	MaxRepeatOccurrences;
-			typedef _MaxRepeats<_MultiMEMs> MultiMEMs;	// Multiple Maximal Exact Match
+			typedef MaxRepeats_<MultiMems_> MultiMEMs;	// Multiple Maximal Exact Match
 			struct	MultiMEMOccurences;					// i.e. maximal match over different sequences
 
 
@@ -193,11 +193,11 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 	}
 
 //////////////////////////////////////////////////////////////////////////////
-///.Metafunction.VertexDescriptor.param.T.type:Spec.Index_ESA
+///.Metafunction.VertexDescriptor.param.T.type:Spec.IndexEsa
 
 	template < typename TText, typename TSpec >
-	struct VertexDescriptor< Index<TText, Index_ESA<TSpec> > > {
-		typedef typename Size< Index<TText, Index_ESA<TSpec> > >::Type TSize;
+	struct VertexDescriptor< Index<TText, IndexEsa<TSpec> > > {
+		typedef typename Size< Index<TText, IndexEsa<TSpec> > >::Type TSize;
 		typedef VertexESA<TSize> Type;
 	};
 
@@ -216,64 +216,64 @@ Empty edges are traversed also, i.e. for every suffix there is a leaf node repre
 
 /**
 .Tag.ESA Index Fibres
-..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.Index_ESA.ESA@ index.
-..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an Enhanced Suffix Array based @Spec.Index_ESA.Index@.
+..summary:Tag to select a specific fibre (e.g. table, object, ...) of an @Spec.IndexEsa.ESA@ index.
+..remarks:These tags can be used to get @Metafunction.Fibre.Fibres@ of an Enhanced Suffix Array based @Spec.IndexEsa.Index@.
 ..cat:Index
 
-..tag.ESA_Text:The original text the index should be based on.
+..tag.EsaText:The original text the index should be based on.
 
-..tag.ESA_RawText:The raw text the index is really based on.
-...remarks:$ESA_Text$ and $ESA_RawText$ fibres are equal by default.
+..tag.EsaRawText:The raw text the index is really based on.
+...remarks:$EsaText$ and $EsaRawText$ fibres are equal by default.
 They differ if the index text is a set of strings. Then, raw text is the concatenation of all strings in this set.
 
-..tag.ESA_SA:The suffix array.
-...remarks:The suffix array contains the indices of all suffices of $ESA_RawText$ in lexicographical order.
+..tag.EsaSA:The suffix array.
+...remarks:The suffix array contains the indices of all suffices of $EsaRawText$ in lexicographical order.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of the @Metafunction.SAValue@ of $TIndex$.
 
-..tag.ESA_LCP:The lcp table.
-...remarks:The lcp table contains the lcp-value of two adjacent suffices in the suffix array $ESA_SA$.
+..tag.EsaLcp:The lcp table.
+...remarks:The lcp table contains the lcp-value of two adjacent suffices in the suffix array $EsaSA$.
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
 
-..tag.ESA_ChildTab:The child table.
+..tag.EsaChildtab:The child table.
 ...remarks:The child table contains structural information of the suffix tree (see Abhouelda et al.).
 ...remarks:@Metafunction.Fibre@ returns a @Class.String@ over the alphabet of a size type.
 
-..tag.ESA_BWT:The Burrows-Wheeler table.
-...remarks:The Burrows-Wheeler table contains the Burrows-Wheeler transformation of $ESA_RawText$.
-The entries are the characters left of the corresponding suffix in the suffix array $ESA_SA$.
-...remarks:@Metafunction.Fibre@ returns the same type for $ESA_RawText$ and for $ESA_BWT$.
+..tag.EsaBwt:The Burrows-Wheeler table.
+...remarks:The Burrows-Wheeler table contains the Burrows-Wheeler transformation of $EsaRawText$.
+The entries are the characters left of the corresponding suffix in the suffix array $EsaSA$.
+...remarks:@Metafunction.Fibre@ returns the same type for $EsaRawText$ and for $EsaBwt$.
 
 ..see:Metafunction.Fibre
 ..see:Function.getFibre
-..see:Spec.Index_ESA
+..see:Spec.IndexEsa
 ..include:seqan/index.h
 */
 
 ///.Metafunction.Fibre.param.TSpec.type:Tag.ESA Index Fibres
 
-	typedef Fibre_Text		ESA_Text;
-	typedef Fibre_RawText	ESA_RawText;
-	typedef Fibre_SA		ESA_SA;
-	typedef Fibre_RawSA		ESA_RawSA;
-	typedef Fibre_SAE		ESA_SAE;
-	typedef Fibre_LCP		ESA_LCP;
-	typedef Fibre_LCPE		ESA_LCPE;
-	typedef Fibre_ChildTab	ESA_ChildTab;
-	typedef Fibre_BWT		ESA_BWT;
+	typedef FibreText		EsaText;
+	typedef FibreRawText	EsaRawText;
+	typedef FibreSA		EsaSA;
+	typedef FibreRawSA		EsaRawSA;
+	typedef FibreSae		EsaSae;
+	typedef FibreLcp		EsaLcp;
+	typedef FibreLcpe		EsaLcpe;
+	typedef FibreChildtab	EsaChildtab;
+	typedef FibreBwt		EsaBwt;
 
 
 //////////////////////////////////////////////////////////////////////////////
 // ESA index
 
 /**
-.Spec.Index_ESA:
+.Spec.IndexEsa:
 ..summary:An index based on an enhanced suffix array.
 ..cat:Index
 ..general:Class.Index
-..signature:Index<TText, Index_ESA<> >
+..signature:Index<TText, IndexEsa<> >
 ..param.TText:The text type.
 ...type:Class.String
-..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA Index Fibres.ESA_SA@), a lcp table (see @Tag.ESA Index Fibres.ESA_LCP@), etc.
+..remarks:The fibres (see @Class.Index@ and @Metafunction.Fibre@) of this index are a suffix array (see @Tag.ESA Index Fibres.EsaSA@), a lcp table (see @Tag.ESA Index Fibres.EsaLcp@), etc.
 ..remarks:This index can be accessed as a Suffix Tree using the @Spec.VSTree Iterator@ classes.
 ..include:seqan/index.h
 */
@@ -282,18 +282,18 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 	already defined in index_base.h
 
 	template <typename TSpec = void>
-	struct Index_ESA;
+	struct IndexEsa;
 */
 
 	template < typename TText, typename TSpec >
-	class Index<TText, Index_ESA<TSpec> > {
+	class Index<TText, IndexEsa<TSpec> > {
 	public:
-		Holder<typename Fibre<Index, ESA_Text>::Type>	text;
-		typename Fibre<Index, ESA_SA>::Type				sa;			// suffix array 
-		typename Fibre<Index, ESA_LCP>::Type			lcp;		// longest-common-prefix table
-		typename Fibre<Index, ESA_LCPE>::Type			lcpe;		// extended lcp table
-		typename Fibre<Index, ESA_ChildTab>::Type		childtab;	// child table (tree topology)
-		typename Fibre<Index, ESA_BWT>::Type			bwt;		// burrows-wheeler table
+		Holder<typename Fibre<Index, EsaText>::Type>	text;
+		typename Fibre<Index, EsaSA>::Type				sa;			// suffix array 
+		typename Fibre<Index, EsaLcp>::Type			lcp;		// longest-common-prefix table
+		typename Fibre<Index, EsaLcpe>::Type			lcpe;		// extended lcp table
+		typename Fibre<Index, EsaChildtab>::Type		childtab;	// child table (tree topology)
+		typename Fibre<Index, EsaBwt>::Type			bwt;		// burrows-wheeler table
 		typename Cargo<Index>::Type						cargo;		// user-defined cargo
 
 		Index() {}
@@ -328,30 +328,30 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 //////////////////////////////////////////////////////////////////////////////
 
 	template < typename TText, typename TSpec >
-	void _indexRequireTopDownIteration(Index<TText, Index_ESA<TSpec> > &index) 
+	void _indexRequireTopDownIteration(Index<TText, IndexEsa<TSpec> > &index) 
 	{
-		indexRequire(index, ESA_SA());
-		indexRequire(index, ESA_LCP());
-		indexRequire(index, ESA_ChildTab());
+		indexRequire(index, EsaSA());
+		indexRequire(index, EsaLcp());
+		indexRequire(index, EsaChildtab());
 	}
 
 	template < typename TText, typename TSpec >
-	void _indexRequireBottomUpIteration(Index<TText, Index_ESA<TSpec> > &index) 
+	void _indexRequireBottomUpIteration(Index<TText, IndexEsa<TSpec> > &index) 
 	{
-		indexRequire(index, ESA_SA());
-		indexRequire(index, ESA_LCP());
+		indexRequire(index, EsaSA());
+		indexRequire(index, EsaLcp());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.clear.param.object.type:Class.Index
 
 	template <typename TText, typename TSpec>
-	inline void clear(Index<TText, Index_ESA<TSpec> > &index) {
-		clear(getFibre(index, ESA_SA()));
-		clear(getFibre(index, ESA_LCP()));
-		clear(getFibre(index, ESA_LCPE()));
-		clear(getFibre(index, ESA_ChildTab()));
-		clear(getFibre(index, ESA_BWT()));
+	inline void clear(Index<TText, IndexEsa<TSpec> > &index) {
+		clear(getFibre(index, EsaSA()));
+		clear(getFibre(index, EsaLcp()));
+		clear(getFibre(index, EsaLcpe()));
+		clear(getFibre(index, EsaChildtab()));
+		clear(getFibre(index, EsaBwt()));
 	}
 
 
@@ -360,7 +360,7 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 
 	template < typename TObject, typename TSpec >
 	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
+		Index< TObject, IndexEsa<TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
@@ -368,22 +368,22 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 		name = fileName;	append(name, ".txt");	
 
 		bool result = true;
-		if ((!open(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!open(getFibre(index, ESA_Text()), fileName, openMode))) 
+		if ((!open(getFibre(index, EsaText()), toCString(name), openMode)) && 
+			(!open(getFibre(index, EsaText()), fileName, openMode))) 
 			result = false;
 
-		name = fileName;	append(name, ".sa");	open(getFibre(index, ESA_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".lcp");	open(getFibre(index, ESA_LCP()), toCString(name), openMode);
-		name = fileName;	append(name, ".child");	open(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	open(getFibre(index, ESA_BWT()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	open(getFibre(index, EsaSA()), toCString(name), openMode);
+		name = fileName;	append(name, ".lcp");	open(getFibre(index, EsaLcp()), toCString(name), openMode);
+		name = fileName;	append(name, ".child");	open(getFibre(index, EsaChildtab()), toCString(name), openMode);
+		name = fileName;	append(name, ".bwt");	open(getFibre(index, EsaBwt()), toCString(name), openMode);
 		return result;
 	}
 	template < typename TObject, typename TSpec >
 	inline bool open(
-		Index< TObject, Index_ESA<TSpec> > &index, 
+		Index< TObject, IndexEsa<TSpec> > &index, 
 		const char *fileName) 
 	{
-		return open(index, fileName, DefaultOpenMode<Index< TObject, Index_ESA<TSpec> > >::VALUE);
+		return open(index, fileName, DefaultOpenMode<Index< TObject, IndexEsa<TSpec> > >::VALUE);
 	}
 
 
@@ -392,27 +392,27 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 
 	template < typename TObject, typename TSpec >
 	inline bool save(
-		Index< TObject, Index_ESA<TSpec> > &index, 
+		Index< TObject, IndexEsa<TSpec> > &index, 
 		const char *fileName,
 		int openMode)
 	{
 		String<char> name;
 		name = fileName;	append(name, ".txt");	
-		if ((!save(getFibre(index, ESA_Text()), toCString(name), openMode)) && 
-			(!save(getFibre(index, ESA_Text()), fileName, openMode))) return false;
+		if ((!save(getFibre(index, EsaText()), toCString(name), openMode)) && 
+			(!save(getFibre(index, EsaText()), fileName, openMode))) return false;
 
-		name = fileName;	append(name, ".sa");	save(getFibre(index, ESA_SA()), toCString(name), openMode);
-		name = fileName;	append(name, ".lcp");	save(getFibre(index, ESA_LCP()), toCString(name), openMode);
-		name = fileName;	append(name, ".child");	save(getFibre(index, ESA_ChildTab()), toCString(name), openMode);
-		name = fileName;	append(name, ".bwt");	save(getFibre(index, ESA_BWT()), toCString(name), openMode);
+		name = fileName;	append(name, ".sa");	save(getFibre(index, EsaSA()), toCString(name), openMode);
+		name = fileName;	append(name, ".lcp");	save(getFibre(index, EsaLcp()), toCString(name), openMode);
+		name = fileName;	append(name, ".child");	save(getFibre(index, EsaChildtab()), toCString(name), openMode);
+		name = fileName;	append(name, ".bwt");	save(getFibre(index, EsaBwt()), toCString(name), openMode);
 		return true;
 	}
 	template < typename TObject, typename TSpec >
 	inline bool save(
-		Index< TObject, Index_ESA<TSpec> > &index, 
+		Index< TObject, IndexEsa<TSpec> > &index, 
 		const char *fileName)
 	{
-		return save(index, fileName, DefaultOpenMode<Index< TObject, Index_ESA<TSpec> > >::VALUE);
+		return save(index, fileName, DefaultOpenMode<Index< TObject, IndexEsa<TSpec> > >::VALUE);
 	}
 
 }

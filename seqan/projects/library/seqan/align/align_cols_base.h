@@ -279,7 +279,7 @@ SEQAN_CHECKPOINT
 
 template <typename TAlignCols>
 inline typename Position<TAlignCols>::Type
-beginPosition_AlignCols(TAlignCols const & me)
+_beginPositionAlignCols(TAlignCols const & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename Host<TAlignCols>::Type TAlign;
@@ -310,14 +310,14 @@ inline typename Position<AlignCols<TAlign> >::Type
 beginPosition(AlignCols<TAlign> const & me)
 {
 SEQAN_CHECKPOINT
-	return beginPosition_AlignCols(me);
+	return _beginPositionAlignCols(me);
 }
 template <typename TAlign>
 inline typename Position<AlignCols<TAlign> >::Type
 beginPosition(AlignCols<TAlign> & me)
 {
 SEQAN_CHECKPOINT
-	return beginPosition_AlignCols(me);
+	return _beginPositionAlignCols(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -347,7 +347,7 @@ SEQAN_CHECKPOINT
 
 template <typename TAlignCols>
 inline typename Position<TAlignCols>::Type
-endPosition_AlignCols(TAlignCols const & me)
+_endPositionAlignCols(TAlignCols const & me)
 {
 SEQAN_CHECKPOINT
 	typedef typename Host<TAlignCols>::Type TAlign;
@@ -372,14 +372,14 @@ inline typename Position<AlignCols<TAlign> >::Type
 endPosition(AlignCols<TAlign> & me)
 {
 SEQAN_CHECKPOINT
-	return endPosition_AlignCols(me);
+	return _endPositionAlignCols(me);
 }
 template <typename TAlign>
 inline typename Position<AlignCols<TAlign> const>::Type
 endPosition(AlignCols<TAlign> const & me)
 {
 SEQAN_CHECKPOINT
-	return endPosition_AlignCols(me);
+	return _endPositionAlignCols(me);
 }
 
 //////////////////////////////////////////////////////////////////////////////

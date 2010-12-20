@@ -57,10 +57,10 @@ template <typename TContainer, typename TSpec>
 struct IterComplementConst<Iter<TContainer, TSpec> >
 {
     typedef Iter<
-        typename IF<
-            TYPECMP<typename _RemoveConst<TContainer>::Type, TContainer>::VALUE,
+        typename If<
+            IsSameType<typename RemoveConst_<TContainer>::Type, TContainer>::VALUE,
             TContainer const,
-            typename _RemoveConst<TContainer>::Type>::Type,
+            typename RemoveConst_<TContainer>::Type>::Type,
         TSpec> Type;
 };
 
@@ -83,7 +83,7 @@ struct IterMakeConst;
 template <typename TContainer, typename TSpec>
 struct IterMakeConst<Iter<TContainer, TSpec> >
 {
-    typedef Iter<typename _RemoveConst<TContainer>::Type const, TSpec> Type;
+    typedef Iter<typename RemoveConst_<TContainer>::Type const, TSpec> Type;
 };
 
 template <typename TContainer, typename TSpec>

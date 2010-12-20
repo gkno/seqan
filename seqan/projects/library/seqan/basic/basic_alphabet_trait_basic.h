@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TIterator>
 inline void 
-_arrayConstruct_Pointer(TIterator, 
+_arrayConstructPointer(TIterator, 
 						TIterator,
 						True)
 {
@@ -39,12 +39,12 @@ SEQAN_CHECKPOINT
 }
 template<typename TIterator>
 inline void 
-_arrayConstruct_Pointer(TIterator begin_, 
+_arrayConstructPointer(TIterator begin_, 
 						TIterator end_,
 						False)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Default(begin_, end_);
+	_arrayConstructDefault(begin_, end_);
 }
 template<typename TValue>
 inline void 
@@ -52,14 +52,14 @@ arrayConstruct(TValue * begin_,
 			   TValue * end_)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Pointer(begin_, end_, typename IsSimple<TValue>::Type() );
+	_arrayConstructPointer(begin_, end_, typename IsSimple<TValue>::Type() );
 }
 
 //____________________________________________________________________________
 
 template<typename TIterator, typename TParam>
 inline void 
-_arrayConstruct_Pointer(TIterator begin_, 
+_arrayConstructPointer(TIterator begin_, 
 						TIterator end_, 
 						TParam const & param_,
 						True)
@@ -69,13 +69,13 @@ SEQAN_CHECKPOINT
 }
 template<typename TIterator, typename TParam>
 inline void 
-_arrayConstruct_Pointer(TIterator begin_, 
+_arrayConstructPointer(TIterator begin_, 
 						TIterator end_, 
 						TParam const & param_,
 						False)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Default(begin_, end_, param_);
+	_arrayConstructDefault(begin_, end_, param_);
 }
 template<typename TValue, typename TParam>
 inline void 
@@ -84,7 +84,7 @@ arrayConstruct(TValue * begin_,
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Pointer(begin_, end_, param_, typename IsSimple<TValue>::Type() );
+	_arrayConstructPointer(begin_, end_, param_, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValueSource, typename TValueTarget>
 inline void 
-_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
 							TValueSource * source_end, 
 							TValueTarget * target_begin,
 							True)
@@ -103,7 +103,7 @@ SEQAN_CHECKPOINT
 }
 template<typename TValueSource, typename TValueTarget>
 inline void 
-_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
 							TValueSource * source_end, 
 							TValueTarget const* target_begin,
 							True)
@@ -114,13 +114,13 @@ SEQAN_CHECKPOINT
 
 template<typename TValueSource, typename TValueTarget>
 inline void 
-_arrayConstructCopy_Pointer(TValueSource * source_begin, 
+_arrayConstructCopyPointer(TValueSource * source_begin, 
 							TValueSource * source_end, 
 							TValueTarget * target_begin,
 							False)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructCopy_Default(source_begin, source_end, target_begin);
+	_arrayConstructCopyDefault(source_begin, source_end, target_begin);
 }
 template<typename TValueSource, typename TValueTarget>
 inline void 
@@ -129,7 +129,7 @@ arrayConstructCopy(TValueSource * source_begin,
 				   TValueTarget * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructCopy_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValueTarget>::Type() );
+	_arrayConstructCopyPointer(source_begin, source_end, target_begin, typename IsSimple<TValueTarget>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValue>
 inline void 
-_arrayConstructMove_Pointer(TValue * source_begin, 
+_arrayConstructMovePointer(TValue * source_begin, 
 							TValue * source_end, 
 							TValue * target_begin,
 							True)
@@ -148,13 +148,13 @@ SEQAN_CHECKPOINT
 }
 template<typename TValue>
 inline void 
-_arrayConstructMove_Pointer(TValue * source_begin, 
+_arrayConstructMovePointer(TValue * source_begin, 
 							TValue * source_end, 
 							TValue * target_begin,
 							False)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructMove_Default(source_begin, source_end, target_begin);
+	_arrayConstructMoveDefault(source_begin, source_end, target_begin);
 }
 template<typename TValue>
 inline void 
@@ -163,7 +163,7 @@ arrayConstructMove(TValue * source_begin,
 				   TValue * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructMove_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayConstructMovePointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValue>
 inline void 
-_arrayDestruct_Pointer(TValue * /*begin_*/, 
+_arrayDestructPointer(TValue * /*begin_*/, 
 					   TValue * /*end_*/,
 					   True)
 {
@@ -181,12 +181,12 @@ SEQAN_CHECKPOINT
 }
 template<typename TValue>
 inline void 
-_arrayDestruct_Pointer(TValue * begin_, 
+_arrayDestructPointer(TValue * begin_, 
 					   TValue * end_,
 					   False)
 {
 SEQAN_CHECKPOINT
-	_arrayDestruct_Default(begin_, end_);
+	_arrayDestructDefault(begin_, end_);
 }
 template<typename TValue>
 inline void 
@@ -194,7 +194,7 @@ arrayDestruct(TValue * begin_,
 			  TValue * end_)
 {
 SEQAN_CHECKPOINT
-	_arrayDestruct_Pointer(begin_, end_, typename IsSimple<TValue>::Type() );
+	_arrayDestructPointer(begin_, end_, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -209,7 +209,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValue>
 inline void 
-_arrayCopyForward_Pointer(TValue * source_begin, 
+_arrayCopyForwardPointer(TValue * source_begin, 
 						  TValue * source_end, 
 						  TValue * target_begin,
 						  True)
@@ -219,13 +219,13 @@ SEQAN_CHECKPOINT
 }
 template<typename TValue>
 inline void 
-_arrayCopyForward_Pointer(TValue * source_begin, 
+_arrayCopyForwardPointer(TValue * source_begin, 
 						  TValue * source_end, 
 						  TValue * target_begin,
 						  False)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyForward_Default(source_begin, source_end, target_begin);
+	_arrayCopyForwardDefault(source_begin, source_end, target_begin);
 }
 template<typename TValue>
 inline void 
@@ -234,7 +234,7 @@ arrayCopyForward(TValue * source_begin,
 				 TValue * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyForward_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayCopyForwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -243,7 +243,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void 
-_arrayCopyBackward_Pointer(TValue * source_begin, 
+_arrayCopyBackwardPointer(TValue * source_begin, 
 						   TValue * source_end, 
 						   TValue * target_begin,
 						   True)
@@ -253,13 +253,13 @@ SEQAN_CHECKPOINT
 }
 template <typename TValue>
 inline void 
-_arrayCopyBackward_Pointer(TValue * source_begin, 
+_arrayCopyBackwardPointer(TValue * source_begin, 
 						   TValue * source_end, 
 						   TValue * target_begin,
 						   False)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyBackward_Default(source_begin, source_end, target_begin); 
+	_arrayCopyBackwardDefault(source_begin, source_end, target_begin); 
 }
 template<typename TValue>
 inline void 
@@ -268,7 +268,7 @@ arrayCopyBackward(TValue * source_begin,
 				  TValue * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyBackward_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayCopyBackwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@ SEQAN_CHECKPOINT
 
 template<typename TValue>
 inline void 
-_arrayMoveForward_Pointer(TValue * source_begin, 
+_arrayMoveForwardPointer(TValue * source_begin, 
 						  TValue * source_end, 
 						  TValue * target_begin,
 						  True)
@@ -287,13 +287,13 @@ SEQAN_CHECKPOINT
 }
 template<typename TValue>
 inline void 
-_arrayMoveForward_Pointer(TValue * source_begin, 
+_arrayMoveForwardPointer(TValue * source_begin, 
 						  TValue * source_end, 
 						  TValue * target_begin,
 						  False)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveForward_Default(source_begin, source_end, target_begin);
+	_arrayMoveForwardDefault(source_begin, source_end, target_begin);
 }
 template<typename TValue>
 inline void 
@@ -302,7 +302,7 @@ arrayMoveForward(TValue * source_begin,
 				 TValue * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveForward_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayMoveForwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -311,7 +311,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void 
-_arrayMoveBackward_Pointer(TValue * source_begin, 
+_arrayMoveBackwardPointer(TValue * source_begin, 
 						   TValue * source_end, 
 						   TValue * target_begin,
 						   True)
@@ -321,13 +321,13 @@ SEQAN_CHECKPOINT
 }
 template <typename TValue>
 inline void 
-_arrayMoveBackward_Pointer(TValue * source_begin, 
+_arrayMoveBackwardPointer(TValue * source_begin, 
 						   TValue * source_end, 
 						   TValue * target_begin,
 						   False)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveBackward_Default(source_begin, source_end, target_begin); 
+	_arrayMoveBackwardDefault(source_begin, source_end, target_begin); 
 }
 template<typename TValue>
 inline void 
@@ -336,7 +336,7 @@ arrayMoveBackward(TValue * source_begin,
 				  TValue * target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveBackward_Pointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
+	_arrayMoveBackwardPointer(source_begin, source_end, target_begin, typename IsSimple<TValue>::Type() );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -345,7 +345,7 @@ SEQAN_CHECKPOINT
 
 template <typename TValue>
 inline void 
-_arrayClearSpace_Pointer(TValue * array_begin, 
+_arrayClearSpacePointer(TValue * array_begin, 
 						size_t array_length, 
 						size_t keep_from, 
 						size_t move_to,
@@ -357,13 +357,13 @@ SEQAN_CHECKPOINT
 }
 template <typename TValue>
 inline void 
-_arrayClearSpace_Pointer(TValue * array_begin, 
+_arrayClearSpacePointer(TValue * array_begin, 
 						size_t array_length, 
 						size_t keep_from, 
 						size_t move_to,
 						False)
 {
-	_arrayClearSpace_Default(array_begin, array_length, keep_from, move_to);
+	_arrayClearSpaceDefault(array_begin, array_length, keep_from, move_to);
 }
 template <typename TValue>
 void arrayClearSpace(TValue * array_begin, 
@@ -371,7 +371,7 @@ void arrayClearSpace(TValue * array_begin,
 					 size_t keep_from, 
 					 size_t move_to)
 {
-	_arrayClearSpace_Pointer(array_begin, array_length, keep_from, move_to, typename IsSimple<TValue>::Type() );
+	_arrayClearSpacePointer(array_begin, array_length, keep_from, move_to, typename IsSimple<TValue>::Type() );
 }
 
 
@@ -381,22 +381,22 @@ void arrayClearSpace(TValue * array_begin,
 //////////////////////////////////////////////////////////////////////////////
 
 // standard types
-template <> struct _IsSimple< bool > { typedef True Type; };
-template <> struct _IsSimple< char > { typedef True Type; };
+template <> struct IsSimple_< bool > { typedef True Type; };
+template <> struct IsSimple_< char > { typedef True Type; };
 
-template <> struct _IsSimple< unsigned char > { typedef True Type; };
-template <> struct _IsSimple< unsigned short > { typedef True Type; };
-template <> struct _IsSimple< unsigned int > { typedef True Type; };
-template <> struct _IsSimple< unsigned long > { typedef True Type; };
+template <> struct IsSimple_< unsigned char > { typedef True Type; };
+template <> struct IsSimple_< unsigned short > { typedef True Type; };
+template <> struct IsSimple_< unsigned int > { typedef True Type; };
+template <> struct IsSimple_< unsigned long > { typedef True Type; };
 
-template <> struct _IsSimple< signed char > { typedef True Type; };
-template <> struct _IsSimple< signed short > { typedef True Type; };
-template <> struct _IsSimple< signed int > { typedef True Type; };
-template <> struct _IsSimple< signed long > { typedef True Type; };
+template <> struct IsSimple_< signed char > { typedef True Type; };
+template <> struct IsSimple_< signed short > { typedef True Type; };
+template <> struct IsSimple_< signed int > { typedef True Type; };
+template <> struct IsSimple_< signed long > { typedef True Type; };
 
-template <> struct _IsSimple< float > { typedef True Type; };
-template <> struct _IsSimple< double > { typedef True Type; };
-template <> struct _IsSimple< long double > { typedef True Type; };
+template <> struct IsSimple_< float > { typedef True Type; };
+template <> struct IsSimple_< double > { typedef True Type; };
+template <> struct IsSimple_< long double > { typedef True Type; };
 
 // user defined types (re-specializations are allowed here)
 template <> struct IsSimple< wchar_t > { typedef True Type; };
@@ -446,14 +446,14 @@ inline T const &
 supremumValueImpl(T *)
 {
 SEQAN_CHECKPOINT
-	return SupremumValue<T>::VALUE;
+	return MaxValue<T>::VALUE;
 }
 template <typename T>
 inline T const &
 infimumValueImpl(T *)
 {
 SEQAN_CHECKPOINT
-	return InfimumValue<T>::VALUE;
+	return MinValue<T>::VALUE;
 }
 
 //////////////////////////////////////////////////////////////////////////////

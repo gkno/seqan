@@ -51,7 +51,7 @@ template<
 	typename TReadSet,
 	typename TShape>
 void intiIndex(
-		Index<TReadSet, Index_QGram<TShape, OpenAddressing> > & index,
+		Index<TReadSet, IndexQGram<TShape, OpenAddressing> > & index,
 		TReadSet & _text,
 		TShape const & _shape)
 {
@@ -76,7 +76,7 @@ setMaxErrors(ParallelSwiftPatternHandler<TSwiftPatterns> &swift, TReadNo readNo,
 
 	int minT = _qgramLemma(swift.swiftPatterns[indexNo], localReadNo, maxErrors);
 	if (minT > 1){
-		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+		if (maxErrors < 0) minT = MaxValue<int>::VALUE;
 		setMinThreshold(swift.swiftPatterns[indexNo], localReadNo, (unsigned)minT);
 	}
 }
@@ -163,12 +163,12 @@ template<
 	typename TErrors>
 void partitionHits(
 		String<TPosition>									& positions,
-		String<_SwiftHit<Tag<
-			_SwiftSemiGlobal<TSpec> >, THstkPos> > 			& hits,
+		String<SwiftHit_<Tag<
+			SwiftSemiGlobal_<TSpec> >, THstkPos> > 			& hits,
 		int const											  noOfParts,
 		RazerSMode<TAlignMode, RazerSGapped, TErrors> const)
 {
-	typedef String<_SwiftHit<Tag<_SwiftSemiGlobal<TSpec> >, THstkPos> >		THitString;
+	typedef String<SwiftHit_<Tag<SwiftSemiGlobal_<TSpec> >, THstkPos> >		THitString;
 	typedef typename Value<THitString>::Type									TSwiftHit;
 	typedef typename Iterator<THitString>::Type								THitStringIter;
 	
@@ -210,8 +210,8 @@ template<
 	typename TErrors>
 void partitionHits(
 		String<TPosition>									& positions,
-		String<_SwiftHit<Tag<
-			_SwiftSemiGlobal<TSpec> >, THstkPos> > const	& hits,
+		String<SwiftHit_<Tag<
+			SwiftSemiGlobal_<TSpec> >, THstkPos> > const	& hits,
 		int const											  noOfParts,
 		RazerSMode<TAlignMode, RazerSUngapped, TErrors> const)
 {
@@ -420,7 +420,7 @@ void _mapSingleReadsToContig(
 	typedef MatchVerifier <TFragmentStore, TRazerSOptions,
 		TRazerSMode, TPreprocessing,
 		TSwiftPatternHandler, TCounts >						TVerifier;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
 	typedef typename Size<TAlignedReadStore>::Type			TAlignedReadStoreSize;
 
@@ -435,9 +435,9 @@ void _mapSingleReadsToContig(
 	// lock contig
 	lockContig(store, contigId);
 	TContigSeq &contigSeq = store.contigStore[contigId].seq;
-	// if (orientation == 'R')	reverseComplementInPlace(contigSeq);
+	// if (orientation == 'R')	reverseComplement(contigSeq);
 	if (orientation == 'R'){
-		reverseComplementInPlace(contigSeq);
+		reverseComplement(contigSeq);
 	}
 	
 	// Finder and verifier strings of the same size as there are swift patterns
@@ -479,7 +479,7 @@ void _mapSingleReadsToContig(
 	}
 	
 	if (!unlockAndFreeContig(store, contigId))						// if the contig is still used
-	if (orientation == 'R')	reverseComplementInPlace(contigSeq);	// we have to restore original orientation
+	if (orientation == 'R')	reverseComplement(contigSeq);	// we have to restore original orientation
 	
 }
 
@@ -503,7 +503,7 @@ int _mapSingleReadsParallelCreatePatterns(
 	SEQAN_CHECKPOINT
 
 	typedef FragmentStore<TFSSpec, TFSConfig>                   TFragmentStore;
-	typedef typename IF<TYPECMP<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
+	typedef typename If<IsSameType<TGapMode,RazerSGapped>::VALUE, SwiftSemiGlobal, SwiftSemiGlobalHamming>::Type TSwiftSpec;
 	typedef typename Value<TReadIndexString>::Type              TReadIndex;
 
 	// filter
@@ -623,7 +623,7 @@ int _mapSingleReadsParallel(
 	typedef typename TFragmentStore::TReadSeqStore					TReadSeqStore;
 	typedef typename Value<TReadSeqStore>::Type						TRead;
 	typedef StringSet<TRead>										TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, OpenAddressing> >	TIndex;			// q-gram index
 	typedef typename Size<TReadSeqStore>::Type						TSize;
 
 	// number of cores and how many blocks there should be
@@ -679,7 +679,7 @@ int _mapSingleReadsParallel(
 			cargo(indices[blockID]).abundanceCut = options.abundanceCut;
 			cargo(indices[blockID])._debugLevel = options._debugLevel;
 			// build index
-			//indexRequire(indices[blockID], QGram_SADir());
+			//indexRequire(indices[blockID], QGramSADir());
 		}
 		return _mapSingleReadsParallelCreatePatterns(store, cnts, options, mode, indices);
 	}	

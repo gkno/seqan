@@ -26,7 +26,7 @@ int main()
 	String<unsigned int> discoveryTimeMap;
 	String<unsigned int> finishingTimeMap;
 ///Depth-frist search
-	depth_first_search(g, predMap, discoveryTimeMap, finishingTimeMap);
+	depthFirstSearch(g, predMap, discoveryTimeMap, finishingTimeMap);
 ///Console output
 	::std::cout << "Depth-First search: " << ::std::endl;
 	typedef Iterator<Graph<>, VertexIterator>::Type TVertexIterator;

@@ -75,7 +75,7 @@ SEQAN_CHECKPOINT
 		clipped_source_begin(0),
 		clipped_source_end(0)
 	{
-		_init_to_resize(*this, _size);
+		_initToResize(*this, _size);
 	}
 	Gaps(TSource & source_):
 		data_unclipped_end_position(0),
@@ -84,7 +84,7 @@ SEQAN_CHECKPOINT
 		clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
-		_init_to_resize(*this, length(source_));
+		_initToResize(*this, length(source_));
 	}
 
 	template <typename TSource2>
@@ -97,7 +97,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		data_source = source_;
-		_init_to_resize(*this, length(source_));
+		_initToResize(*this, length(source_));
 	}
 
 	Gaps(Gaps const & other_):
@@ -310,7 +310,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSize>
 inline void
-_init_to_resize(Gaps<TSource, ArrayGaps> & me,
+_initToResize(Gaps<TSource, ArrayGaps> & me,
 				TSize _size)
 {
 SEQAN_CHECKPOINT
@@ -328,7 +328,7 @@ inline void
 clearGaps(Gaps<TSource, ArrayGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, clippedEndPosition(me) - clippedBeginPosition(me));
+	_initToResize(me, clippedEndPosition(me) - clippedBeginPosition(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -338,7 +338,7 @@ inline void
 clear(Gaps<TSource, ArrayGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, 0);
+	_initToResize(me, 0);
 	_setClippedBeginPosition(me, 0);
 	_setClippedEndPosition(me, 0);
 }
@@ -459,7 +459,7 @@ SEQAN_CHECKPOINT
 
 template <typename TGaps, typename TPosition>
 inline typename Iterator<TGaps, Standard>::Type
-_iterator_gaps_array(TGaps & gaps, 
+_iteratorGapsArray(TGaps & gaps, 
 					 TPosition view_position)
 {
 	typedef typename Size<TGaps>::Type TSize;
@@ -528,7 +528,7 @@ iter(Gaps<TSource, ArrayGaps> & gaps,
 	 Tag<TTag> const)
 {
 SEQAN_CHECKPOINT
-	return _iterator_gaps_array(gaps, view_pos);
+	return _iteratorGapsArray(gaps, view_pos);
 }
 template <typename TSource, typename TPosition, typename TTag>
 inline typename Iterator<Gaps<TSource, ArrayGaps> const, Tag<TTag> const>::Type
@@ -537,7 +537,7 @@ iter(Gaps<TSource, ArrayGaps> const & gaps,
 	 Tag<TTag> const)
 {
 SEQAN_CHECKPOINT
-	return _iterator_gaps_array<Gaps<TSource, ArrayGaps> const>(gaps, view_pos);
+	return _iteratorGapsArray<Gaps<TSource, ArrayGaps> const>(gaps, view_pos);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -570,7 +570,7 @@ SEQAN_CHECKPOINT
 	TPosition old_pos = beginPosition(me);
 	if (length(_dataArr(me)) == 0)
 	{
-		_init_to_resize(me, length(source(me)));
+		_initToResize(me, length(source(me)));
 	}
 	_dataArr(me)[0] = view_position;
 	_setEndPosition(me, endPosition(me) + view_position - old_pos);
@@ -874,7 +874,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline void 
-_goNext_arrayGapsIterator(T const & me)
+_goNextArrayGapsIterator(T const & me)
 {
 	if (!isGap(me))
 	{
@@ -894,20 +894,20 @@ template <typename TGaps>
 inline void 
 goNext(Iter<TGaps, GapsIterator<ArrayGaps> > & me)
 {
-	_goNext_arrayGapsIterator(me);
+	_goNextArrayGapsIterator(me);
 }
 template <typename TGaps>
 inline void 
 goNext(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
-	_goNext_arrayGapsIterator(me);
+	_goNextArrayGapsIterator(me);
 }
 
 //____________________________________________________________________________
 
 template <typename T>
 inline void 
-_goPrevious_arrayGapsIterator(T const & me)
+_goPreviousArrayGapsIterator(T const & me)
 {
 	if (me.data_sub > 0)
 	{
@@ -933,13 +933,13 @@ template <typename TGaps>
 inline void 
 goPrevious(Iter<TGaps, GapsIterator<ArrayGaps> > & me)
 {
-	_goPrevious_arrayGapsIterator(me);
+	_goPreviousArrayGapsIterator(me);
 }
 template <typename TGaps>
 inline void 
 goPrevious(Iter<TGaps, GapsIterator<ArrayGaps> > const & me)
 {
-	_goPrevious_arrayGapsIterator(me);
+	_goPreviousArrayGapsIterator(me);
 }
 //____________________________________________________________________________
 

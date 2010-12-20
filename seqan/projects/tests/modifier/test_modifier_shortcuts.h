@@ -141,12 +141,12 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_complement_in_place_string) {
     Dna5String const kExpectedResult = "GCTAN";
 
     // Test non-const version.
-    complementInPlace(str);
+    complement(str);
     SEQAN_ASSERT_EQ(kExpectedResult, str);
 
     // Test const version.
     // TODO(holtgrew): This should not be possible!
-    complementInPlace(kStr);
+    complement(kStr);
     SEQAN_ASSERT_EQ(kExpectedResult, kStr);
 }
 
@@ -165,7 +165,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_complement_in_place_string_set) {
     {
         StringSet<Dna5String> strSetCopy(strSet);
 
-        complementInPlace(strSetCopy);
+        complement(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);
@@ -175,7 +175,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_complement_in_place_string_set) {
     {
         StringSet<Dna5String> const strSetCopy(strSet);
         
-        complementInPlace(strSetCopy);
+        complement(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);
@@ -189,12 +189,12 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_complement_in_place_string) {
     Dna5String const kExpectedResult = "NATCG";
 
     // Test non-const version.
-    reverseComplementInPlace(str);
+    reverseComplement(str);
     SEQAN_ASSERT_EQ(kExpectedResult, str);
 
     // Test const version.
     // TODO(holtgrew): This should not be possible!
-    reverseComplementInPlace(kStr);
+    reverseComplement(kStr);
     SEQAN_ASSERT_EQ(kExpectedResult, kStr);
 }
 
@@ -213,7 +213,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_complement_in_place_string_set)
     {
         StringSet<Dna5String> strSetCopy = strSet;
 
-        reverseComplementInPlace(strSetCopy);
+        reverseComplement(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);
@@ -223,7 +223,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_complement_in_place_string_set)
     {
         StringSet<Dna5String> const strSetCopy = strSet;
         
-        reverseComplementInPlace(strSetCopy);
+        reverseComplement(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);
@@ -237,12 +237,12 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_in_place_string) {
     Dna5String const kExpectedResult = "NTAGC";
 
     // Test non-const version.
-    reverseInPlace(str);
+    reverse(str);
     SEQAN_ASSERT_EQ(kExpectedResult, str);
 
     // Test const version.
     // TODO(holtgrew): This should not be possible!
-    reverseInPlace(kStr);
+    reverse(kStr);
     SEQAN_ASSERT_EQ(kExpectedResult, kStr);
 }
 
@@ -261,7 +261,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_in_place_string_set) {
     {
         StringSet<Dna5String> strSetCopy(strSet);
 
-        reverseInPlace(strSetCopy);
+        reverse(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);
@@ -271,7 +271,7 @@ SEQAN_DEFINE_TEST(test_modifer_shortcuts_reverse_in_place_string_set) {
     {
         StringSet<Dna5String> strSetCopy(strSet);
         
-        reverseInPlace(strSetCopy);
+        reverse(strSetCopy);
         SEQAN_ASSERT_EQ(2u, length(strSetCopy));
         SEQAN_ASSERT_EQ(EXPECTED_STRING1, strSetCopy[0]);
         SEQAN_ASSERT_EQ(EXPECTED_STRING2, strSetCopy[1]);

@@ -29,7 +29,7 @@ int main() {
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		::std::cout << "Path from 0 to " << getValue(it) << ": ";
-		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it));
+		_printPath(g,predMap,(TVertexDescriptor) 0, getValue(it));
 		::std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}
@@ -54,7 +54,7 @@ int main() {
 	TCargoVertexIterator itC(cargo_g);
 	while(!atEnd(itC)) {
 		::std::cout << "Path from 0 to " << getValue(itC) << ": ";
-		_print_path(cargo_g,predMap,(TVertexDescriptor) 0, getValue(itC));
+		_printPath(cargo_g,predMap,(TVertexDescriptor) 0, getValue(itC));
 		::std::cout << " (Distance: " << getProperty(distMap, getValue(itC)) << ")" << ::std::endl;
 		goNext(itC);
 	}

@@ -26,8 +26,8 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 
-struct _Seed_simple;
-typedef Tag<_Seed_simple> const SimpleSeed;
+struct SeedSimple_;
+typedef Tag<SeedSimple_> const SimpleSeed;
 
 
 
@@ -54,8 +54,8 @@ typedef Tag<_Seed_simple> const SimpleSeed;
 	Merging of Seeds.
 ..include:seqan/seeds.h
 */
-struct _Chain_Merge;
-typedef Tag<_Chain_Merge> const Merge;
+struct ChainMerge_;
+typedef Tag<ChainMerge_> const Merge;
 
 
 
@@ -66,8 +66,8 @@ typedef Tag<_extendSeed_Match> const MatchExtend;
 struct _extendSeed_UnGappedXDrop;
 typedef Tag<_extendSeed_UnGappedXDrop> const UngappedXDrop;
 
-struct _extendSeed_GappedXDrop;
-typedef Tag<_extendSeed_GappedXDrop> const GappedXDrop;
+struct ExtendSeedGappedXDrop_;
+typedef Tag<ExtendSeedGappedXDrop_> const GappedXDrop;
 
 //template<typename TPosition = int, typename TSpecSeed = SimpleSeed>class Seed;
 
@@ -875,7 +875,7 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
                        Score<TScore, Simple> const & scoreMatrix,
                        TSize direction) {
     TScore gapCost = scoreGap(scoreMatrix);
-    TScore infimum = infimumValue<TScore>()+1-gapCost;
+    TScore infimum = minValue<TScore>()+1-gapCost;
 
     TPosition upperBound = 0;
     TPosition lowerBound = 0;

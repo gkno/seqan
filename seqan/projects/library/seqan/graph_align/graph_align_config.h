@@ -398,14 +398,14 @@ _lastRow(AlignConfig<TTop, TLeft, TRight, true, TSpec> const,
 
 template<bool TLeft, bool TRight, bool TBottom, typename TSpec>
 inline bool
-__myInitTop(AlignConfig<true, TLeft, TRight, TBottom, TSpec> const)
+_configValueTop(AlignConfig<true, TLeft, TRight, TBottom, TSpec> const)
 {
 	return true;
 }
 
 template<bool TLeft, bool TRight, bool TBottom, typename TSpec>
 inline bool
-__myInitTop(AlignConfig<false, TLeft, TRight, TBottom, TSpec> const)
+_configValueTop(AlignConfig<false, TLeft, TRight, TBottom, TSpec> const)
 {
 	return false;
 }
@@ -414,14 +414,14 @@ __myInitTop(AlignConfig<false, TLeft, TRight, TBottom, TSpec> const)
 
 template<bool TTop, bool TRight, bool TBottom, typename TSpec>
 inline bool
-__myInitLeft(AlignConfig<TTop, true, TRight, TBottom, TSpec> const)
+_configValueLeft(AlignConfig<TTop, true, TRight, TBottom, TSpec> const)
 {
 	return true;
 }
 
 template<bool TTop, bool TRight, bool TBottom, typename TSpec>
 inline bool
-__myInitLeft(AlignConfig<TTop, false, TRight, TBottom, TSpec> const)
+_configValueLeft(AlignConfig<TTop, false, TRight, TBottom, TSpec> const)
 {
 	return false;
 }
@@ -430,14 +430,14 @@ __myInitLeft(AlignConfig<TTop, false, TRight, TBottom, TSpec> const)
 
 template<bool TTop, bool TLeft, bool TBottom, typename TSpec>
 inline bool
-__myInitRight(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const)
+_configValueRight(AlignConfig<TTop, TLeft, true, TBottom, TSpec> const)
 {
 	return true;
 }
 
 template<bool TTop, bool TLeft, bool TBottom, typename TSpec>
 inline bool
-__myInitRight(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const)
+_configValueRight(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const)
 {
 	return false;
 }
@@ -446,14 +446,14 @@ __myInitRight(AlignConfig<TTop, TLeft, false, TBottom, TSpec> const)
 
 template<bool TTop, bool TLeft, bool TRight, typename TSpec>
 inline bool
-__myInitBottom(AlignConfig<TTop, TLeft, TRight, true, TSpec> const)
+_configValueBottom(AlignConfig<TTop, TLeft, TRight, true, TSpec> const)
 {
 	return true;
 }
 
 template<bool TTop, bool TLeft, bool TRight, typename TSpec>
 inline bool
-__myInitBottom(AlignConfig<TTop, TLeft, TRight, false, TSpec> const)
+_configValueBottom(AlignConfig<TTop, TLeft, TRight, false, TSpec> const)
 {
 	return false;
 }
@@ -490,10 +490,10 @@ _pairWiseSumOfPairsScore(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TIter seqItEnd = end(mat, Standard() );
 	bool seq1GapOpen = false;
 	bool seq2GapOpen = false;
-	bool initialTop = __myInitTop(TAlignConfig());
-	bool initialLeft = __myInitLeft(TAlignConfig());
-	bool initialRight = __myInitRight(TAlignConfig());
-	bool initialBottom = __myInitBottom(TAlignConfig());
+	bool initialTop = _configValueTop(TAlignConfig());
+	bool initialLeft = _configValueLeft(TAlignConfig());
+	bool initialRight = _configValueRight(TAlignConfig());
+	bool initialBottom = _configValueBottom(TAlignConfig());
 	TSize col = 0;
 	TSize row = 0;
 	TScoreValue totalScore = 0;

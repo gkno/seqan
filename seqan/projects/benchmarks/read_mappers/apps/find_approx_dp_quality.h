@@ -40,7 +40,7 @@ public:
     String<TScoreValue> data_tab;
     TScoreValue data_maxscore;  // Score of the needle matching itself
 
-    typedef typename IF<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, _EmptyFindBegin>::Type TFindBeginPattern;
+    typedef typename If<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, _EmptyFindBegin>::Type TFindBeginPattern;
     TFindBeginPattern _findBeginPattern;
 
     Pattern() {}
@@ -118,7 +118,7 @@ setScoreLimit(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & m
 
 template <typename TNeedle, typename TSpec, bool HasFindBeginSupport>
 inline int
-getScore(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & me)
+_getMatchScore(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & me)
 {
 	return back(me.data_tab);
 }
@@ -185,7 +185,7 @@ find(TFinder & finder,
         // Update the column...
         int northWest = me.data_tab[0];  // "Western" fields are one step back.
         // First row.
-        if (TYPECMP<TSpec, FindInfix>::VALUE) {
+        if (IsSameType<TSpec, FindInfix>::VALUE) {
             me.data_tab[0] = (ndl[0] == *finder) ? 0 : -getQualityValue(ndl[0]);
         } else {
 //             std::cerr << "prefixBeginPosition = " << prefixBeginPosition << std::endl;
@@ -230,7 +230,7 @@ find(TFinder & finder,
 //         }
 
         // Check whether we can report a hit.
-        if (getScore(me) >= scoreLimit(me)) {
+        if (_getMatchScore(me) >= scoreLimit(me)) {
 			_setFinderEnd(finder);
             return true;
         }
@@ -303,7 +303,7 @@ template <typename TNeedle, typename TSpec>
 inline
 int getFindBeginScore(Pattern<TNeedle, QualityDpSearch<TSpec, true> > & pattern) {
     SEQAN_CHECKPOINT;
-    return getScore(pattern._findBeginPattern);
+    return _getMatchScore(pattern._findBeginPattern);
 }
 
 

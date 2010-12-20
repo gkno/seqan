@@ -273,7 +273,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		if (_streamEOF(file)) break;
 		
 		c = _streamGet(file);
-		assign(transName, _parse_readIdentifier(file, c));
+		assign(transName, _parseReadIdentifier(file, c));
 		size_t locusPos = transName.find("Locus_");
 		size_t transPos = transName.find("_Transcript_");
 		if (locusPos == transName.npos || transPos == transName.npos)
@@ -294,19 +294,19 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		int endPos = 0;
 		while (!_streamEOF(file))
 		{
-			if (!_parse_isDigit(c) && c !='-')
+			if (!_parseIsDigit(c) && c !='-')
 			{
 				std::cerr << "Ignoring entry " << transName << std::endl;
 				break;
 			}
-			int nodeId = _parse_readNumber(file, c);			
+			int nodeId = _parseReadNumber(file, c);			
 			if (c != ':')
 				std::cerr << "HUH1? " << transName << std::endl;
 
 			c = _streamGet(file);	// :
 			// quick fix for Hugues' bug
-			endPos = _parse_readNumber(file, c);
-			//int endPos = beginPos + _parse_readNumber(file, c);
+			endPos = _parseReadNumber(file, c);
+			//int endPos = beginPos + _parseReadNumber(file, c);
 			if (nodeId < 0) nodeId = -nodeId;
 
 			// rename nodeIds
@@ -340,7 +340,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 				std::cerr<<"HUH3?"<<std::endl;
 
 			c = _streamGet(file);
-			int gapLen = _parse_readNumber(file, c);	
+			int gapLen = _parseReadNumber(file, c);	
 			if (c != ')') 
 				std::cerr<<"HUH4?"<<std::endl;
 
@@ -951,16 +951,16 @@ loadAlignments(FragmentStore<TSpec, TConfig> & store, CharString const &fileName
 
 	while (!_streamEOF(file))
 	{
-		_parse_readIdentifier(file, c);		// read name
-		_parse_skipWhitespace(file, c);
-		_parse_readNumber(file, c);			// read begin
-		_parse_skipWhitespace(file, c);
-		_parse_readNumber(file, c);			// read end
-		_parse_skipWhitespace(file, c);
+		_parseReadIdentifier(file, c);		// read name
+		_parseSkipWhitespace(file, c);
+		_parseReadNumber(file, c);			// read begin
+		_parseSkipWhitespace(file, c);
+		_parseReadNumber(file, c);			// read end
+		_parseSkipWhitespace(file, c);
 		_streamGet(file);					// F/R
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 
-		header_ = _parse_readIdentifier(file, c);
+		header_ = _parseReadIdentifier(file, c);
 		assign(header, suffix(header_, 7));
 		std::istringstream iss(header);
 
@@ -975,10 +975,10 @@ loadAlignments(FragmentStore<TSpec, TConfig> & store, CharString const &fileName
 		for (int i = 0; i < 11; ++i) iss >> d;
 		iss >> confidence;
 
-		_parse_skipWhitespace(file, c);
-		int posBeg = _parse_readNumber(file, c);	// begin position in transcript
-		_parse_skipWhitespace(file, c);
-		int posEnd = _parse_readNumber(file, c);	// end position in transcript
+		_parseSkipWhitespace(file, c);
+		int posBeg = _parseReadNumber(file, c);	// begin position in transcript
+		_parseSkipWhitespace(file, c);
+		int posEnd = _parseReadNumber(file, c);	// end position in transcript
 
 		_parse_skipLine(file, c);
 	}

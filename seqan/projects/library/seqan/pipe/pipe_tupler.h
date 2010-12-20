@@ -57,17 +57,17 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// output only fully filled tuples
 	template < typename TTupler >
-	struct _TuplerLastTuples {
+	struct TuplerLastTuples_ {
 		enum { VALUE = 1 };
 	};
 
 	// output tupleLen-1 half filled tuples at the end
     template < typename TInput, unsigned tupleLen, typename TCompression >
-	struct _TuplerLastTuples< Pipe< TInput, Tupler<tupleLen, false, TCompression> > > {
+	struct TuplerLastTuples_< Pipe< TInput, Tupler<tupleLen, false, TCompression> > > {
 		enum { VALUE = tupleLen };
 	};
 
-    struct _ShiftLeftWorker {
+    struct ShiftLeftWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
             arg.i2[I-1] = arg.i2[I];
@@ -112,9 +112,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline Pipe& operator++() {
             if (eof(in)) --lastTuples;
-            LOOP<_ShiftLeftWorker, tupleLen - 1>::run(this->tmp);
+            Loop<ShiftLeftWorker_, tupleLen - 1>::run(this->tmp);
 			++tmp.i1;
-			if (lastTuples < _TuplerLastTuples<Pipe>::VALUE)
+			if (lastTuples < TuplerLastTuples_<Pipe>::VALUE)
 	            tmp.i2[tupleLen - 1] = TValue();
 			else {
 				tmp.i2[tupleLen - 1] = *in;
@@ -127,8 +127,8 @@ namespace SEQAN_NAMESPACE_MAIN
             unsigned i;
             for(i = 0; i < tupleLen && !eof(in); ++i, ++in)
                 tmp.i2.i[i] = *in;
-			if (_TuplerLastTuples<Pipe>::VALUE > tupleLen - i)
-				lastTuples = _TuplerLastTuples<Pipe>::VALUE - (tupleLen - i);
+			if (TuplerLastTuples_<Pipe>::VALUE > tupleLen - i)
+				lastTuples = TuplerLastTuples_<Pipe>::VALUE - (tupleLen - i);
 			else
 				lastTuples = 0;
             for(; i < tupleLen; ++i)
@@ -158,7 +158,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (eof(in)) --lastTuples;
 			tmp.i2 <<= 1;
 			++tmp.i1;
-			if (lastTuples == _TuplerLastTuples<Pipe>::VALUE) {
+			if (lastTuples == TuplerLastTuples_<Pipe>::VALUE) {
 				tmp.i2 |= *in;
 				++in;
 			}
@@ -172,8 +172,8 @@ namespace SEQAN_NAMESPACE_MAIN
                 tmp.i2 <<= 1;
                 tmp.i2 |= *in;
 			}
-			if (_TuplerLastTuples<Pipe>::VALUE > tupleLen - i)
-				lastTuples = _TuplerLastTuples<Pipe>::VALUE - (tupleLen - i);
+			if (TuplerLastTuples_<Pipe>::VALUE > tupleLen - i)
+				lastTuples = TuplerLastTuples_<Pipe>::VALUE - (tupleLen - i);
 			else
 				lastTuples = 0;
             tmp.i2 <<= (tupleLen - i);
@@ -196,7 +196,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
 
-		typedef _PairIncrementer<TPair, TLimitsString>	Incrementer;
+		typedef PairIncrementer_<TPair, TLimitsString>	Incrementer;
 
 		TInput                      &in;
         Incrementer					localPos;
@@ -223,10 +223,10 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 
 			// shift left 1 character
-            LOOP<_ShiftLeftWorker, tupleLen - 1>::run(this->tmp);
+            Loop<ShiftLeftWorker_, tupleLen - 1>::run(this->tmp);
 			assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
 
-			if (lastTuples < _TuplerLastTuples<Pipe>::VALUE) {
+			if (lastTuples < TuplerLastTuples_<Pipe>::VALUE) {
 	            tmp.i2[tupleLen - 1] = TValue();
 			} else {
 				tmp.i2[tupleLen - 1] = *in;
@@ -246,7 +246,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						++i;
 						++localPos;
 					} while ((i < tupleLen) && !eos());
-				lastTuples = _TuplerLastTuples<Pipe>::VALUE;
+				lastTuples = TuplerLastTuples_<Pipe>::VALUE;
 
 				// fill up with null chars
 				for(; i < tupleLen; ++i)
@@ -285,7 +285,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< typename Value<Pipe>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
 
-		typedef _PairIncrementer<TPair, TLimitsString>	Incrementer;
+		typedef PairIncrementer_<TPair, TLimitsString>	Incrementer;
 
 		TInput                      &in;
         Incrementer					localPos;
@@ -314,7 +314,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// shift left 1 character
 			tmp.i2 <<= 1;
 			assignValueI2(tmp.i1, getValueI2(tmp.i1) + 1);
-			if (lastTuples == _TuplerLastTuples<Pipe>::VALUE) {
+			if (lastTuples == TuplerLastTuples_<Pipe>::VALUE) {
 				tmp.i2 |= *in;
 				++localPos;
 				++in;
@@ -333,7 +333,7 @@ namespace SEQAN_NAMESPACE_MAIN
 						++i;
 						++localPos;
 					} while ((i < tupleLen) && !eos());
-				lastTuples = _TuplerLastTuples<Pipe>::VALUE;
+				lastTuples = TuplerLastTuples_<Pipe>::VALUE;
 
 				// fill up with null chars
 	            tmp.i2 <<= (tupleLen - i);
@@ -443,8 +443,8 @@ namespace SEQAN_NAMESPACE_MAIN
     length(Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > > const &me) 
 	{
 		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
-		if (length(me.in) >= (tupleLen - _TuplerLastTuples<TPipe>::VALUE))
-			return length(me.in) - (tupleLen - _TuplerLastTuples<TPipe>::VALUE);
+		if (length(me.in) >= (tupleLen - TuplerLastTuples_<TPipe>::VALUE))
+			return length(me.in) - (tupleLen - TuplerLastTuples_<TPipe>::VALUE);
 		else
 			return 0;
     }
@@ -462,8 +462,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef Pipe< TInput, Tupler< tupleLen, omitLast, TCompression > >	TPipe;
 		unsigned seqs = countSequences(me);
 		
-		if (length(me.in) >= seqs * (tupleLen - _TuplerLastTuples<TPipe>::VALUE))
-			return length(me.in) - seqs * (tupleLen - _TuplerLastTuples<TPipe>::VALUE);
+		if (length(me.in) >= seqs * (tupleLen - TuplerLastTuples_<TPipe>::VALUE))
+			return length(me.in) - seqs * (tupleLen - TuplerLastTuples_<TPipe>::VALUE);
 		else
 			return 0;
     }

@@ -46,35 +46,35 @@
 
 #else
 
-    #define SEQAN_PROSET(i,v)			_proSet(i,v)
-    #define SEQAN_PROADD(i,v)			_proAdd(i,v)
-    #define SEQAN_PROSUB(i,v)			_proSub(i,v)
-	#define SEQAN_PROVAL(i)				(_proData<>::_proValue[i])
-    #define SEQAN_PROEXTRAS(i)			{_proData<>::_proExtraCount = i;}
-    #define SEQAN_PROMARK(m)			_proMark(m)
-    #define SEQAN_PROENDMARK(m)			_proEndMark(m)
-    #define SEQAN_PRORESET				_proReset()
+    #define SEQAN_PROSET(i,v)			_profileSet(i,v)
+    #define SEQAN_PROADD(i,v)			_profileAdd(i,v)
+    #define SEQAN_PROSUB(i,v)			_profileSub(i,v)
+	#define SEQAN_PROVAL(i)				(ProfileData_<>::_proValue[i])
+    #define SEQAN_PROEXTRAS(i)			{ProfileData_<>::_proExtraCount = i;}
+    #define SEQAN_PROMARK(m)			_profileMark(m)
+    #define SEQAN_PROENDMARK(m)			_profileEndMark(m)
+    #define SEQAN_PRORESET				_profileReset()
 	#define SEQAN_PROGETTIME			sysTime()
     #define SEQAN_PROTIMESTART(a)		_proFloat a = sysTime()
     #define SEQAN_PROTIMEDIFF(a)		(sysTime() - a)
-	#define SEQAN_PROTIMEUPDATE(a)		(_proUpdate(a))
-    #define SEQAN_PROMALLOC(s)			_proMalloc(s)
-    #define SEQAN_PROFREE(p)			_proFree(p)
+	#define SEQAN_PROTIMEUPDATE(a)		(_profileUpdate(a))
+    #define SEQAN_PROMALLOC(s)			_profileMalloc(s)
+    #define SEQAN_PROFREE(p)			_profileFree(p)
 
 #endif
 
 #ifdef PLATFORM_WINDOWS
-    typedef __int64   _proInt;
+    typedef __int64   ProfileInt_;
 #else
-    typedef int64_t _proInt;
+    typedef int64_t ProfileInt_;
 #endif
 
     typedef double    _proFloat;
 
 
-    typedef _proFloat _proTValue;
+    typedef _proFloat ProfileTimeValue_;
 
-    enum _proConsts {
+    enum ProfileConstants_ {
         SEQAN_PROPAGESIZE         = 4096, // B in byte
         SEQAN_PROFLOAT            = 0,
         SEQAN_PROINT              = 1,
@@ -83,7 +83,7 @@
         SEQAN_PROSTATE            = 4
     };
 
-    enum _proValueIndex {
+    enum ProfileValueIndex_ {
 		SEQAN_PROSYSTIME		  = 0,
 		SEQAN_PROCPUTIME		  = 1,
         SEQAN_PROMEMORY           = 2,    // current memory usage (state value)
@@ -101,7 +101,7 @@
 		SEQAN_PROEXTRACOUNT       = 3
     };
 
-    const char _proValueType[] = {
+    const char ProfileValueType_[] = {
 		SEQAN_PROTIME, 
 		SEQAN_PROTIME, 
         SEQAN_PROINT + SEQAN_PROSTATE, 
@@ -117,38 +117,38 @@
         SEQAN_PROFLOAT + SEQAN_PROSTATE
     };
 
-    typedef _proTValue _proTStates[SEQAN_PROINDEXCOUNT];
-    typedef _proFloat  _proTTimes[SEQAN_PROINDEXCOUNT];
+    typedef ProfileTimeValue_ ProfileTStates_[SEQAN_PROINDEXCOUNT];
+    typedef _proFloat  ProfileTTimes[SEQAN_PROINDEXCOUNT];
 
 
 
-    struct _proFile;
+    struct ProfileFile_;
 
 	template <typename T = void>
-	struct _proData
+	struct ProfileData_
 	{
-		static _proTStates	_proValue;
-		static _proTTimes	_proLastUpdate;
+		static ProfileTStates_	_proValue;
+		static ProfileTTimes	_proLastUpdate;
 		static int			_proExtraCount;
 	    
 		static clock_t		_proCpuTimeLast;			// clock_t wraps around every 72mins
-		static _proInt		_proCpuTimeOffset;			// we have to work around this
+		static ProfileInt_		_proCpuTimeOffset;			// we have to work around this
 
-		static _proFile*	_proPFile;
-		static _proFile*	_proPFileStream;
+		static ProfileFile_*	_proPFile;
+		static ProfileFile_*	_proPFileStream;
 	};
 
-	template <typename T> _proTStates	_proData<T>::_proValue = {};
-	template <typename T> _proTStates	_proData<T>::_proLastUpdate = {};
-	template <typename T> int			_proData<T>::_proExtraCount = 0;
-	template <typename T> clock_t		_proData<T>::_proCpuTimeLast = 0;
-	template <typename T> _proInt		_proData<T>::_proCpuTimeOffset = 0;
-	template <typename T> _proFile*		_proData<T>::_proPFile = NULL;
-	template <typename T> _proFile*		_proData<T>::_proPFileStream = NULL;
+	template <typename T> ProfileTStates_	ProfileData_<T>::_proValue = {};
+	template <typename T> ProfileTStates_	ProfileData_<T>::_proLastUpdate = {};
+	template <typename T> int			ProfileData_<T>::_proExtraCount = 0;
+	template <typename T> clock_t		ProfileData_<T>::_proCpuTimeLast = 0;
+	template <typename T> ProfileInt_		ProfileData_<T>::_proCpuTimeOffset = 0;
+	template <typename T> ProfileFile_*		ProfileData_<T>::_proPFile = NULL;
+	template <typename T> ProfileFile_*		ProfileData_<T>::_proPFileStream = NULL;
 
 
-	inline _proFile* & _proPFile()			{ return _proData<>::_proPFile; }
-	inline _proFile* & _proPFileStream()	{ return _proData<>::_proPFileStream; }
+	inline ProfileFile_* & _proPFile()			{ return ProfileData_<>::_proPFile; }
+	inline ProfileFile_* & _proPFileStream()	{ return ProfileData_<>::_proPFileStream; }
 
 /**
 .Function.cpuTime:
@@ -166,13 +166,13 @@
 // HINT: The unit of all time functions is second.
     inline _proFloat cpuTime() {
     	clock_t now = clock();
-    	if (_proData<>::_proCpuTimeLast > now) {		// test for time wrap
-    		_proData<>::_proCpuTimeOffset += (~0u);		// got one
-    		_proData<>::_proCpuTimeOffset ++;
-//    		printf("\n!!WRAP!! old:%d, now:%d    ofs:%d\n",_proData<>::_proCpuTimeLast,now,_proData<>::_proCpuTimeOffset);
+    	if (ProfileData_<>::_proCpuTimeLast > now) {		// test for time wrap
+    		ProfileData_<>::_proCpuTimeOffset += (~0u);		// got one
+    		ProfileData_<>::_proCpuTimeOffset ++;
+//    		printf("\n!!WRAP!! old:%d, now:%d    ofs:%d\n",ProfileData_<>::_proCpuTimeLast,now,ProfileData_<>::_proCpuTimeOffset);
     	}
-   		_proData<>::_proCpuTimeLast = now;
-    	return (_proData<>::_proCpuTimeOffset + now) / (_proFloat)CLOCKS_PER_SEC;
+   		ProfileData_<>::_proCpuTimeLast = now;
+    	return (ProfileData_<>::_proCpuTimeOffset + now) / (_proFloat)CLOCKS_PER_SEC;
    	}
 
 
@@ -226,7 +226,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
     #endif
 
     
-    struct _proFile {
+    struct ProfileFile_ {
 
         FILE   *out;
         bool   running;
@@ -234,20 +234,20 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
         _proFloat dumpStep;            // 0 .. manual dump mode, >0 .. live stream
         _proFloat dumpNext;        
 
-        _proTStates all, last;
+        ProfileTStates_ all, last;
         ::std::string mark;
         unsigned	lines;
 
-        _proFile() {
+        ProfileFile_() {
             running = false;
         }
 
-        _proFile(char const *fname, _proFloat _dumpStep = 300.0) { // five minutes default dump interval
+        ProfileFile_(char const *fname, _proFloat _dumpStep = 300.0) { // five minutes default dump interval
             running = false;
             start(fname, _dumpStep);
         }
 
-        ~_proFile() {
+        ~ProfileFile_() {
             if (running) stop();
         }
 
@@ -261,7 +261,7 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
             if (!out) printf("WARNING: proFile could not be opened.\n");
 
-			setTime(_proData<>::_proValue);
+			setTime(ProfileData_<>::_proValue);
             syncAll(all);
             syncAll(last);
             running      = true;
@@ -282,26 +282,26 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
             running = false;
         }
 
-        inline void syncTime(_proTStates &dst) {
-			::std::memcpy(dst, _proData<>::_proValue, 2 * sizeof(_proTValue));
+        inline void syncTime(ProfileTStates_ &dst) {
+			::std::memcpy(dst, ProfileData_<>::_proValue, 2 * sizeof(ProfileTimeValue_));
         }
 
-        inline void sync(_proTStates &dst) {
-            ::std::memcpy(&(dst[2]), &(_proData<>::_proValue[2]), sizeof(_proTStates) - 2 * sizeof(_proTValue));
+        inline void sync(ProfileTStates_ &dst) {
+            ::std::memcpy(&(dst[2]), &(ProfileData_<>::_proValue[2]), sizeof(ProfileTStates_) - 2 * sizeof(ProfileTimeValue_));
         }
 
-        inline void syncAll(_proTStates &dst) {
-            ::std::memcpy(dst, _proData<>::_proValue, sizeof(_proTStates));
+        inline void syncAll(ProfileTStates_ &dst) {
+            ::std::memcpy(dst, ProfileData_<>::_proValue, sizeof(ProfileTStates_));
         }
 
-		inline static void setTime(_proTStates &dst) {
+		inline static void setTime(ProfileTStates_ &dst) {
             dst[0] = sysTime();
 			dst[1] = cpuTime();
 		}
 
-        inline void maximize(_proTStates &dst, _proTStates const &src) {
+        inline void maximize(ProfileTStates_ &dst, ProfileTStates_ const &src) {
             for(int i = 0; i < SEQAN_PROINDEXCOUNT; ++i)
-                if (((_proValueType[i] & SEQAN_PROSTATE) != 0))
+                if (((ProfileValueType_[i] & SEQAN_PROSTATE) != 0))
                     if (dst[i] < src[i])
                         dst[i] = src[i];
         }
@@ -337,12 +337,12 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
             fprintf(out, "%d:%02d:%02d.%03d", hours, mins, secs, milli);
         }
 
-        inline void dumpValue(_proTStates &stat, int valNum) {
+        inline void dumpValue(ProfileTStates_ &stat, int valNum) {
 			_proFloat f = stat[valNum];
-            if ((_proValueType[valNum] & SEQAN_PROSTATE) == 0)
-				f = _proData<>::_proValue[valNum] - f;
+            if ((ProfileValueType_[valNum] & SEQAN_PROSTATE) == 0)
+				f = ProfileData_<>::_proValue[valNum] - f;
 
-			switch (_proValueType[valNum] & SEQAN_PROTYPEMASK) {
+			switch (ProfileValueType_[valNum] & SEQAN_PROTYPEMASK) {
 				case SEQAN_PROINT:   									// state value -> print last seen maximum
 					fprintf(out, "%.0f", f);
 					break;
@@ -356,15 +356,15 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 			}
         }
 
-        inline void dumpSysValues(_proTStates &stat) {
+        inline void dumpSysValues(ProfileTStates_ &stat) {
             for(int i = 0; i < SEQAN_PROINDEXCOUNT - SEQAN_PROEXTRACOUNT; ++i) {
                 dumpTab();
                 dumpValue(stat, i);
             }
         }
 
-        inline void dumpExtraValues(_proTStates &stat) {
-            for(int i = 0; i < _proData<>::_proExtraCount; ++i) {
+        inline void dumpExtraValues(ProfileTStates_ &stat) {
+            for(int i = 0; i < ProfileData_<>::_proExtraCount; ++i) {
                 dumpTab();
                 dumpValue(stat, SEQAN_PROINDEXCOUNT - SEQAN_PROEXTRACOUNT + i);
             }
@@ -378,8 +378,8 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
             }
         }
 
-        inline void dump(_proTStates &stat) {
-			setTime(_proData<>::_proValue);
+        inline void dump(ProfileTStates_ &stat) {
+			setTime(ProfileData_<>::_proValue);
             dumpNext += dumpStep;
             bol = true;
             bool _flush = ((dumpStep == 0.0)) || ((lines & 16) == 0);
@@ -402,8 +402,8 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
         inline void signalNewMax(int valNum) {
             if (running)
-                if (last[valNum] < _proData<>::_proValue[valNum])
-                    last[valNum] = _proData<>::_proValue[valNum];
+                if (last[valNum] < ProfileData_<>::_proValue[valNum])
+                    last[valNum] = ProfileData_<>::_proValue[valNum];
         }
 
         inline void setMark(const char *text) {
@@ -436,102 +436,102 @@ Under Windows @Function.sysTime@ returns the result of @Function.cpuTime@.
 
 
 /*
-    inline void _proSignalDumpTest(_proFloat now);
-    inline void _proSignalNewMax(int valNum);
-    inline void _proMark(const char *text);
-    inline void _proEndMark(const char *text);
-    inline void _proReset();
+    inline void _profileSignalDumpTest(_proFloat now);
+    inline void _profileSignalNewMax(int valNum);
+    inline void _profileMark(const char *text);
+    inline void _profileEndMark(const char *text);
+    inline void _profileReset();
 
-    inline void _proSet(int valNum, _proFloat value);
-    inline void _proAdd(int valNum, _proFloat value);
-    inline void _proSub(int valNum, _proFloat value);
+    inline void _profileSet(int valNum, _proFloat value);
+    inline void _profileAdd(int valNum, _proFloat value);
+    inline void _profileSub(int valNum, _proFloat value);
     
     // simple interface for external programs
-    inline void *_proMalloc(size_t size);
-    inline void _proFree(void *_ptr);
+    inline void *_profileMalloc(size_t size);
+    inline void _profileFree(void *_ptr);
 */
 
-    inline void _proSignalDumpTest(_proFloat now) {
-        if (_proData<>::_proPFileStream) _proData<>::_proPFileStream->signalDumpTest(now);
+    inline void _profileSignalDumpTest(_proFloat now) {
+        if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->signalDumpTest(now);
     }
 
-    inline void _proSignalNewMax(int valNum) {
-        if (((_proValueType[valNum] & SEQAN_PROSTATE) != 0)) {
-            if (_proData<>::_proPFileStream) _proData<>::_proPFileStream->signalNewMax(valNum);
-            if (_proData<>::_proPFile)       _proData<>::_proPFile->signalNewMax(valNum);
+    inline void _profileSignalNewMax(int valNum) {
+        if (((ProfileValueType_[valNum] & SEQAN_PROSTATE) != 0)) {
+            if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->signalNewMax(valNum);
+            if (ProfileData_<>::_proPFile)       ProfileData_<>::_proPFile->signalNewMax(valNum);
         }
     }
 
-    inline void _proMark(const char *text) {
-        if (_proData<>::_proPFileStream) _proData<>::_proPFileStream->setMark(text);
-        if (_proData<>::_proPFile)       _proData<>::_proPFile->setMark(text);
+    inline void _profileMark(const char *text) {
+        if (ProfileData_<>::_proPFileStream) ProfileData_<>::_proPFileStream->setMark(text);
+        if (ProfileData_<>::_proPFile)       ProfileData_<>::_proPFile->setMark(text);
     }
 
-    inline void _proEndMark(const char *text) {
-        if (_proData<>::_proPFileStream) { _proData<>::_proPFileStream->setEndMark(text); }
-        if (_proData<>::_proPFile)       { _proData<>::_proPFile->setEndMark(text); }
+    inline void _profileEndMark(const char *text) {
+        if (ProfileData_<>::_proPFileStream) { ProfileData_<>::_proPFileStream->setEndMark(text); }
+        if (ProfileData_<>::_proPFile)       { ProfileData_<>::_proPFile->setEndMark(text); }
     }
 
-    inline void _proReset() {
-        if (_proData<>::_proPFileStream) { _proData<>::_proPFileStream->reset(); }
-        if (_proData<>::_proPFile)       { _proData<>::_proPFile->reset(); }
+    inline void _profileReset() {
+        if (ProfileData_<>::_proPFileStream) { ProfileData_<>::_proPFileStream->reset(); }
+        if (ProfileData_<>::_proPFile)       { ProfileData_<>::_proPFile->reset(); }
     }
 
 
 
 
 	template <typename TValue>
-    inline void _proSet(_proValueIndex valNum, TValue value) {
+    inline void _profileSet(ProfileValueIndex_ valNum, TValue value) {
         _proFloat now = sysTime();
-        _proData<>::_proLastUpdate[valNum] = now;
-        if (_proData<>::_proValue[valNum] < value) {
-            _proData<>::_proValue[valNum] = value;
-            _proSignalNewMax(valNum);
+        ProfileData_<>::_proLastUpdate[valNum] = now;
+        if (ProfileData_<>::_proValue[valNum] < value) {
+            ProfileData_<>::_proValue[valNum] = value;
+            _profileSignalNewMax(valNum);
         } else
-            _proData<>::_proValue[valNum] = value;
-        _proSignalDumpTest(now);
+            ProfileData_<>::_proValue[valNum] = value;
+        _profileSignalDumpTest(now);
     }
 
 	template <typename TValue>
-    inline void _proAdd(_proValueIndex valNum, TValue value) {
+    inline void _profileAdd(ProfileValueIndex_ valNum, TValue value) {
         _proFloat now = sysTime();
-        _proData<>::_proValue[valNum] += value;
-        _proData<>::_proLastUpdate[valNum] = now;
-        if (valNum == SEQAN_PROIO) _proAdd(SEQAN_PROIORANDOM, 1);
-        _proSignalNewMax(valNum);
-        _proSignalDumpTest(now);
+        ProfileData_<>::_proValue[valNum] += value;
+        ProfileData_<>::_proLastUpdate[valNum] = now;
+        if (valNum == SEQAN_PROIO) _profileAdd(SEQAN_PROIORANDOM, 1);
+        _profileSignalNewMax(valNum);
+        _profileSignalDumpTest(now);
     }
 
 	template <typename TValue>
-    inline void _proSub(_proValueIndex valNum, TValue value) {
+    inline void _profileSub(ProfileValueIndex_ valNum, TValue value) {
         _proFloat now = sysTime();
-        _proData<>::_proValue[valNum] -= value;
-        _proData<>::_proLastUpdate[valNum] = now;
-        _proSignalDumpTest(now);
+        ProfileData_<>::_proValue[valNum] -= value;
+        ProfileData_<>::_proLastUpdate[valNum] = now;
+        _profileSignalDumpTest(now);
     }
     
     // simple interface for external programs
-    inline void *_proMalloc(size_t size) {
+    inline void *_profileMalloc(size_t size) {
     	size_t *ptr = reinterpret_cast<size_t*>(malloc(size + sizeof(size_t)));
     	if (ptr) {
-    		_proAdd(SEQAN_PROMEMORY, (_proFloat)(*ptr = size));
-//			printf("_proMalloc %x size %d\n", ptr, size);
+    		_profileAdd(SEQAN_PROMEMORY, (_proFloat)(*ptr = size));
+//			printf("_profileMalloc %x size %d\n", ptr, size);
     		++ptr;
     	}
     	return ptr;
     }
 
-    inline void _proFree(void *_ptr) {
+    inline void _profileFree(void *_ptr) {
     	size_t *ptr = reinterpret_cast<size_t*>(_ptr);
     	if (ptr) {
     		--ptr;
-//			printf("_proFree   %x size %d\n", _ptr, *ptr);
-    		_proSub(SEQAN_PROMEMORY, (_proFloat)*ptr);
+//			printf("_profileFree   %x size %d\n", _ptr, *ptr);
+    		_profileSub(SEQAN_PROMEMORY, (_proFloat)*ptr);
     	}
     	free(ptr);
     }
 
-	inline _proFloat _proUpdate(_proFloat& a) {
+	inline _proFloat _profileUpdate(_proFloat& a) {
 		_proFloat x = sysTime() - a;
 		a += x;
 		return x;

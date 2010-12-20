@@ -41,7 +41,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_upper_left_overlap)
 
     CharString sequence0 = "unimportant";
     CharString sequence1 = "also unimportant";
-    _AlignmentChain<CharString, TScoringScheme, NeedlemanWunsch> alignmentChain(2, TScoringScheme(), sequence0, sequence1);
+    AlignmentChain_<CharString, TScoringScheme, NeedlemanWunsch> alignmentChain(2, TScoringScheme(), sequence0, sequence1);
 
     // Test with a seed where start/end = lower/upper diagonal
     {
@@ -102,7 +102,7 @@ SEQAN_DEFINE_TEST(test_align_chain_banded_compute_lower_right_overlap)
 
     CharString sequence0 = "unimportant";
     CharString sequence1 = "also unimportant";
-    _AlignmentChain<CharString, TScoringScheme, NeedlemanWunsch> alignmentChain(2, TScoringScheme(), sequence0, sequence1);
+    AlignmentChain_<CharString, TScoringScheme, NeedlemanWunsch> alignmentChain(2, TScoringScheme(), sequence0, sequence1);
 
     // Test with a seed where start/end = lower/upper diagonal
     {

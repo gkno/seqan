@@ -28,7 +28,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template<typename TContainer, typename TValue, typename TScore, typename TAlign>
 TScore
-chain_to_alignment_gotoh(TContainer const &seedChain, 
+_chainToAlignmentGotoh(TContainer const &seedChain, 
 						TValue k,
 						TAlign & whole_alignment, 
 						Score< TScore, Simple> const &scoreMatrix)
@@ -108,7 +108,7 @@ chain_to_alignment_gotoh(TContainer const &seedChain,
 
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 TScoreValue
-_banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
+_bandedGotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 			  Matrix<TScoreValue, DIMENSION> & matrix_vert,
 			  Matrix<TScoreValue, DIMENSION> & matrix_hori,
 			  Seed<TValue, TSpecSeed> const &seed,
@@ -378,7 +378,7 @@ _banded_gotoh(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 //Position berechnen!
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 typename Size<Matrix<TScoreValue, DIMENSION> >::Type
-_banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
+_bandedGotohTrace2(Align<TTargetSource, TTargetSpec> & target_,
 					 Matrix<TScoreValue, DIMENSION> & diag_matrix_,
 					 Matrix<TScoreValue, DIMENSION> & vert_matrix_,
 					 Matrix<TScoreValue, DIMENSION> & hori_matrix_,
@@ -450,7 +450,7 @@ _banded_gotoh_trace2(Align<TTargetSource, TTargetSpec> & target_,
 //changed version of usual trace-back
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 TScoreValue
-_gotoh_trace_lastRectangle(Align<TTargetSource, TTargetSpec> & target_,
+_gotohTraceLastRectangle(Align<TTargetSource, TTargetSpec> & target_,
 						Matrix<TScoreValue, DIMENSION> & diag_matrix_,
 						Matrix<TScoreValue, DIMENSION> & vert_matrix_,
 						Matrix<TScoreValue, DIMENSION> & hori_matrix_,
@@ -531,7 +531,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
     typedef typename Infix<TString>::Type TSegment;
 	TSegment seg1_align = infix(host(*p_seq1), leftDim0(seed), rightDim0(seed)+1);
 	TSegment seg2_align = infix(host(*p_seq2), leftDim1(seed), rightDim1(seed)+1);
-	_banded_gotoh(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1_align, seg2_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
+	_bandedGotoh(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1_align, seg2_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
 	//printMatrix(matrix_diag);
 	TValue height_diag = leftDiagonal(seed)-startDiagonal(seed)+k;
@@ -562,7 +562,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _banded_gotoh_trace2(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, matr_it);
+		new_connect = _bandedGotohTrace2(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, matr_it);
 		score_str_diag[j] = *matr_it;
 		score_str_vert[j] = getValue(matrix_vert, position(matr_it));
 		score_str_hori[j] = getValue(matrix_hori, position(matr_it));
@@ -588,7 +588,7 @@ _calculateBandedSeedGotoh(TSeed const &seed,
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
 		
-		new_connect = _banded_gotoh_trace2(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori,  matr_it);
+		new_connect = _bandedGotohTrace2(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori,  matr_it);
 		
 		score_str_diag[j] = *matr_it;
 		score_str_vert[j] = getValue(matrix_vert, position(matr_it));
@@ -629,7 +629,7 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 	TSegment seg1b_align = infix(host(*p_seq1), beginPosition(*p_seq1), leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k);
 	TSegment seg2b_align = infix(host(*p_seq2), beginPosition(*p_seq2), leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k);
 
-	_banded_gotoh_rectangle_first(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
+	_bandedGotohRectangleFirst(matrix_diag, matrix_vert, matrix_hori, seed, k, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
 	TValue w_d2 = startDiagonal(seed) - rightDiagonal(seed) + k;
 	TValue h_d2 = leftDiagonal(seed) - startDiagonal(seed) + k;
@@ -654,7 +654,7 @@ _calculateFirstRectangleGotoh(TSeed const &seed,
 	assignSource(row(mapIt->second.i2,0), seg1_align);
 	assignSource(row(mapIt->second.i2,1), seg2_align);
 
-	new_connect = _gotoh_trace_rectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
+	new_connect = _gotohTraceRectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
 
 	score_str_diag[0] = *matr_it;
 	mapIt->second.i1 = new_connect;
@@ -725,7 +725,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 		score_str_hori[i] = getValue(matrix_hori,position(iter_));
 
 		mapIt->second.i1 = -1;
-		_gotoh_trace_lastRectangle(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, iter_);
+		_gotohTraceLastRectangle(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, iter_);
 		x+=width;
 		++height_align;
 	}
@@ -745,7 +745,7 @@ _calculateLastRectangleGotoh(TSeed const &seed,
 		score_str_vert[i] = getValue(matrix_vert,position(iter_));
 		score_str_hori[i] = getValue(matrix_hori,position(iter_));
 		mapIt->second.i1 = -1;
-		_gotoh_trace_lastRectangle(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, iter_);
+		_gotohTraceLastRectangle(mapIt->second.i2, matrix_diag, matrix_vert, matrix_hori, iter_);
 		--x;
 		--width_align;
 	}
@@ -777,7 +777,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 	TSegment seg1b_align = infix(host(*p_seq1), rightDim0(seed2)-(leftDiagonal(seed2) - endDiagonal(seed2)   + k_end) + 1, leftDim0(seed) + startDiagonal(seed) - rightDiagonal(seed) + k_begin);
 	TSegment seg2b_align = infix(host(*p_seq2), rightDim1(seed2)-(endDiagonal(seed2) -  rightDiagonal(seed2) + k_end) + 1, leftDim1(seed) + leftDiagonal(seed)  - startDiagonal(seed) + k_begin);
 
-	_gotoh_rectangle(matrix_diag, matrix_vert, matrix_hori, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
+	_gotohRectangle(matrix_diag, matrix_vert, matrix_hori, seed, seed2, k_begin, k_end, seg1b_align, seg2b_align, scoreMatrix, score_str_diag, score_str_vert, score_str_hori);
 
 
 //	printMatrix(matrix_diag);
@@ -817,7 +817,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
 
-		new_connect = _gotoh_trace_rectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
+		new_connect = _gotohTraceRectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
 		score_str_diag[j] = *matr_it;
 		score_str_vert[j] = getValue(matrix_vert,position(matr_it));
 		score_str_hori[j] = getValue(matrix_hori,position(matr_it));
@@ -840,7 +840,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 		resize(rows(mapIt->second.i2),2);
 		assignSource(row(mapIt->second.i2,0), seg1_align);
 		assignSource(row(mapIt->second.i2,1), seg2_align);
-		new_connect = _gotoh_trace_rectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
+		new_connect = _gotohTraceRectangle(mapIt->second.i2,  matr_it, matrix_diag, matrix_vert, matrix_hori, width_stop, height_stop);
 		score_str_diag[j] = *matr_it;
 		score_str_vert[j] = getValue(matrix_vert,position(matr_it));
 		score_str_hori[j] = getValue(matrix_hori,position(matr_it));
@@ -861,7 +861,7 @@ _calculateRectangleGotoh(TSeed const &seed,
 //Rectangle calculation between two seeds
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_gotoh_rectangle(Matrix<TScoreValue, DIMENSION> & matrix_diag,
+_gotohRectangle(Matrix<TScoreValue, DIMENSION> & matrix_diag,
 				 Matrix<TScoreValue, DIMENSION> & matrix_vert,
 				 Matrix<TScoreValue, DIMENSION> & matrix_hori,	//edit matrix
 				 Seed<TValue, TSpecSeed> const &seed1,				//Seed nearer to the end
@@ -1340,7 +1340,7 @@ _gotoh2(Matrix<TScoreValue, DIMENSION> & matrix_diag,		//edit matrix
 //changed version of usual trace-back
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue, typename TMatrix>
 TValue
-_gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
+_gotohTraceRectangle(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > & diag_source,
 						TMatrix & diag_matrix_, 
 						TMatrix & vert_matrix_, 
@@ -1412,7 +1412,7 @@ _gotoh_trace_rectangle(Align<TTargetSource, TTargetSpec> & target_,
 //Rectangle calculation between two seeds
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TValue2, typename TSpecSeed>
 void
-_banded_gotoh_rectangle_first(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//edit matrix
+_bandedGotohRectangleFirst(Matrix<TScoreValue, DIMENSION> & matrix_diag,	//edit matrix
 							  Matrix<TScoreValue, DIMENSION> & matrix_vert,
 							  Matrix<TScoreValue, DIMENSION> & matrix_hori,
 							  Seed<TValue, TSpecSeed> const &seed,				//Seed

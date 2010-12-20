@@ -43,10 +43,10 @@ SEQAN_DEFINE_TEST(testBuild)
 		appendValue(indexText(esa), gen3);
 
 
-		indexRequire(esa, ESA_SA());
-		indexRequire(esa, ESA_LCP());
-		indexRequire(esa, ESA_BWT());
-		indexRequire(esa, ESA_ChildTab());
+		indexRequire(esa, EsaSA());
+		indexRequire(esa, EsaLcp());
+		indexRequire(esa, EsaBwt());
+		indexRequire(esa, EsaChildtab());
 
         save(esa, "corpus/chlamydia");
 }
@@ -169,23 +169,23 @@ SEQAN_DEFINE_TEST(testMultiIndex)
 				_printNode(it);
 		}
 
-//		indexRequire(esa, ESA_SA());
-//		indexRequire(esa, ESA_BWT());
+//		indexRequire(esa, EsaSA());
+//		indexRequire(esa, EsaBwt());
 //		for(int i=0; i<length(indexRawSA(esa)); ++i)
 //			std::cout << saAt(i,esa) << " " << bwtAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
 //
-////		resize(indexLCP(esa), length(indexRawText(esa)));
-////		createLCPTableExt(indexLCP(esa), indexText(esa), indexSA(esa), Kasai());
-//		indexRequire(esa, ESA_LCP());
+////		resize(indexLcp(esa), length(indexRawText(esa)));
+////		createLcpTableExt(indexLcp(esa), indexText(esa), indexSA(esa), Kasai());
+//		indexRequire(esa, EsaLcp());
 //		for(int i=0; i<length(indexRawSA(esa)); ++i)
 //			std::cout << lcpAt(i,esa) << "    " << suffix(t[getValueI1(saAt(i,esa))], getValueI2(saAt(i,esa))) << std::endl;
 //
 //		for(int i=0; i<length(indexRawSA(esa)); ++i)
 //			std::cout << saAt(i,esa) << " = " << indexRawSA(esa)[i] << "    " << std::endl;
 //		for(int i=0; i<length(indexRawSA(esa)); ++i)
-//			std::cout << bwtAt(i,esa) << " = " << indexBWT(esa).tab[i] << "    " << std::endl;
+//			std::cout << bwtAt(i,esa) << " = " << indexBwt(esa).tab[i] << "    " << std::endl;
 //		for(int i=0; i<length(indexRawSA(esa)); ++i)
-//			std::cout << lcpAt(i,esa) << " = " << indexLCP(esa)[i] << "    " << std::endl;
+//			std::cout << lcpAt(i,esa) << " = " << indexLcp(esa)[i] << "    " << std::endl;
 
 
 //		resize(sa, length(indexRawText(esa)));
@@ -196,7 +196,7 @@ SEQAN_DEFINE_TEST(testMultiIndex)
 //
 //		String<unsigned> lcp;
 //		resize(lcp, length(indexRawText(esa)));
-//		createLCPTableExt(lcp, indexText(esa), sa, Kasai());
+//		createLcpTableExt(lcp, indexText(esa), sa, Kasai());
 }
 
 template <typename TIndex1, typename TIndex2>
@@ -264,7 +264,7 @@ void compareIndices()
 
 SEQAN_DEFINE_TEST(testCompareIndices_Esa_Wotd)
 {
-	compareIndices<Index_ESA<>, Index_Wotd<> >();
+	compareIndices<IndexEsa<>, IndexWotd<> >();
 }
 
 
@@ -303,17 +303,17 @@ void testSTreeIterators()
 
 SEQAN_DEFINE_TEST(testSTreeIterators_Wotd)
 {
-	testSTreeIterators<Index_Wotd<> >();
+	testSTreeIterators<IndexWotd<> >();
 }
 
 SEQAN_DEFINE_TEST(testSTreeIterators_WotdOriginal)
 {
-	testSTreeIterators<Index_Wotd<WotdOriginal> >();
+	testSTreeIterators<IndexWotd<WotdOriginal> >();
 }
 
 SEQAN_DEFINE_TEST(testSTreeIterators_Esa)
 {
-	testSTreeIterators<Index_ESA<> >();
+	testSTreeIterators<IndexEsa<> >();
 }
 
 
@@ -496,7 +496,7 @@ SEQAN_DEFINE_TEST(testMUMs)
 {
 		typedef String<char> TText;
 		typedef StringSet< TText, Owner<ConcatDirect<> > > TMulti;
-		typedef Index<TMulti, Index_ESA<> > TIndex;
+		typedef Index<TMulti, IndexEsa<> > TIndex;
 
 		String<char> t[3];
 
@@ -587,7 +587,7 @@ void testFind()
 
 SEQAN_DEFINE_TEST(testFind_Esa_Mlr)
 {
-	testFind<ESA_FIND_MLR>();
+	testFind<EsaFindMlr>();
 }
 
 //////////////////////////////////////////////////////////////////////////////

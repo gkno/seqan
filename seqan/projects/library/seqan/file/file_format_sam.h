@@ -36,23 +36,23 @@ namespace SEQAN_NAMESPACE_MAIN {
 	//////////////////////////////////////////////////////////////////////////////
 	
 	template<typename TSpec>
-	struct TagSBAM_;
+	struct TagSBam_;
 		
 	/**
 	 .Tag.File Format.tag.Sam:
         SAM file format for alignments.
 	 ..remark:According to the http://samtools.sourceforge.net/|specification 0.1.2
 	 */
-	struct _SAM;
-	typedef Tag<TagSBAM_<_SAM> > const SAM;
+	struct Sam_;
+	typedef Tag<TagSBam_<Sam_> > const SAM;
 	
 	/**
 	 .Tag.File Format.tag.Bam:
         BAM file format for alignments.
 	 ..remark:According to the http://samtools.sourceforge.net/|specification 0.1.2
 	 */
-	struct _BAM;
-	typedef Tag<TagSBAM_<_BAM> > const BAM;
+	struct Bam_;
+	typedef Tag<TagSBam_<Bam_> > const BAM;
 	
 	/**
 	 .Class.SAMFileMeta
@@ -117,9 +117,9 @@ namespace SEQAN_NAMESPACE_MAIN {
 	inline void write(TFile & target,
 					  Align<DnaString, TGapsSpec> const & source,
 					  TIDString const & myId,
-					  Tag<TagSBAM_<TSAMSpec> > ) {
+					  Tag<TagSBam_<TSAMSpec> > ) {
 		
-		write(target, source, 0, myId, Tag<TagSBAM_<TSAMSpec> >());
+		write(target, source, 0, myId, Tag<TagSBam_<TSAMSpec> >());
 	
 	}
 	
@@ -129,7 +129,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 					  Align<DnaString, TGapsSpec> const & source,
 					  const int refPosition,
 					  TIDString const & myId,
-					  Tag<TagSBAM_<TSAMSpec> > ) {
+					  Tag<TagSBam_<TSAMSpec> > ) {
 	
         int nrOfReads = length(rows(source));
         
@@ -155,7 +155,7 @@ namespace SEQAN_NAMESPACE_MAIN {
             SAMMeta meta(ss.str());
             assignProperty(metas, i, meta);
 		}
-        write(target, source, refPosition, metas, IDs, myId, Tag<TagSBAM_<TSAMSpec> >());
+        write(target, source, refPosition, metas, IDs, myId, Tag<TagSBam_<TSAMSpec> >());
          
 	}
 	
@@ -167,7 +167,7 @@ namespace SEQAN_NAMESPACE_MAIN {
 					  const String<TMeta> & metas,
 					  const String<unsigned int> & IDs,
 					  TIDString const &,
-					  Tag<TagSBAM_<TSAMSpec> > ) {
+					  Tag<TagSBam_<TSAMSpec> > ) {
 
 		unsigned nrOfReads = length(rows(source));
 
@@ -177,23 +177,23 @@ namespace SEQAN_NAMESPACE_MAIN {
       for (unsigned int i = 0; i < static_cast<unsigned>(refPosition); ++i){
         unsigned int readID = getValue(IDs, i);
               SAMMeta meta = getProperty(metas, readID);
-        _write_alignment(target, source, refPosition, i, meta, Tag<TagSBAM_<TSAMSpec> >());
+        _writeAlignment(target, source, refPosition, i, meta, Tag<TagSBam_<TSAMSpec> >());
       }
     }
 		
 		for (unsigned int i = (refPosition + 1); i < nrOfReads; ++i){
 			unsigned int readID = getValue(IDs, i);
             SAMMeta meta = getProperty(metas, readID);
-			_write_alignment(target, source, refPosition, i, meta, Tag<TagSBAM_<TSAMSpec> >());
+			_writeAlignment(target, source, refPosition, i, meta, Tag<TagSBam_<TSAMSpec> >());
 		}
 	}
 	
     //TODO: documentation
     // function that writes addional meta data for an alignment
 	template<typename TFile>
-    inline void _write_additional_meta(TFile & target,
+    inline void _writeAdditionalMeta(TFile & target,
                                        String<Triple<CharString, char, CharString> > const & meta,
-                                       Tag<TagSBAM_<_SAM> > )
+                                       Tag<TagSBam_<Sam_> > )
     {
         typedef String<Triple<CharString, char, CharString> > TList;
         typedef typename Iterator<TList >::Type TIter;
@@ -216,12 +216,12 @@ namespace SEQAN_NAMESPACE_MAIN {
     //TODO: documentation
 	// function to write pair of rows is sam format alignment line
 	template<typename TFile, typename TGapsSpec, typename TMeta>
-	inline void _write_alignment(TFile & target,
+	inline void _writeAlignment(TFile & target,
             Align<DnaString,TGapsSpec> const & source,
             const int ref_row_pos_int,
             const int read_row_pos_int,
             const TMeta & meta,
-            Tag<TagSBAM_<_SAM> > ) {
+            Tag<TagSBam_<Sam_> > ) {
 		
 		typedef Align<DnaString, TGapsSpec> const TAlign;
 		typedef	typename Row<TAlign>::Type TRow;
@@ -360,7 +360,7 @@ namespace SEQAN_NAMESPACE_MAIN {
         _streamWrite(target, meta.qual);
 
         //======== Write addional Metadata ==
-        _write_additional_meta(target, meta.additional, SAM());
+        _writeAdditionalMeta(target, meta.additional, SAM());
         
         // end of line
 		_streamPut(target, '\n');
@@ -528,10 +528,10 @@ namespace SEQAN_NAMESPACE_MAIN {
     }
     
     template<typename TFile>
-    inline void write_header_line(TFile & target,
+    inline void writeHeaderLine(TFile & target,
                                   const CharString & /*cat*/, 
                                   const String<Pair<CharString, CharString> > & meta,
-                                  Tag<TagSBAM_<_SAM> > )
+                                  Tag<TagSBam_<Sam_> > )
     {
         typedef String<Pair<CharString, CharString> > TList;
         typedef typename Iterator<TList >::Type TIter;
@@ -555,7 +555,7 @@ namespace SEQAN_NAMESPACE_MAIN {
     template<typename TFile>
     inline void write(TFile & target,
                                   const String<Pair<CharString, String<Pair<CharString, CharString> > > > & meta,
-                                  const Tag<TagSBAM_<_SAM> > & sam)
+                                  const Tag<TagSBam_<Sam_> > & sam)
     {
         typedef String<Pair<CharString, String<Pair<CharString, CharString> > > > TList;
         typedef typename Iterator<TList>::Type TIter;
@@ -566,7 +566,7 @@ namespace SEQAN_NAMESPACE_MAIN {
             _streamWrite(target, value(line).i1);
             _streamPut(target, '\t');
             
-            write_header_line(target, value(line).i1, value(line).i2, sam);
+            writeHeaderLine(target, value(line).i1, value(line).i2, sam);
             
             _streamPut(target, '\n');
             

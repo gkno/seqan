@@ -40,7 +40,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TLCPInput, typename TDest >
-	inline void childtab_process(TLCPInput &lcpIn, TDest &dest)
+	inline void _childtabProcess(TLCPInput &lcpIn, TDest &dest)
 	{
 		typedef typename Value<TLCPInput>::Type				TValue;
 		typedef typename Size<TLCPInput>::Type				TSize;
@@ -59,7 +59,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		stack_updown.push(TPair(0, 0));
 		stack_nextl.push(TPair(0, 0));
 
-		dest.undefinedValue = TPair(SupremumValue<TSize>::VALUE, 0);		// undefined value for unused entries
+		dest.undefinedValue = TPair(MaxValue<TSize>::VALUE, 0);		// undefined value for unused entries
 		resize(dest, length(lcpIn));
 		beginRead(lcpIn);
 		beginWrite(dest);
@@ -149,7 +149,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
             // *** INSTANTIATION ***
 			
-			childtab_process(_lcpIn, mapper);
+			_childtabProcess(_lcpIn, mapper);
             return true;
         }
 

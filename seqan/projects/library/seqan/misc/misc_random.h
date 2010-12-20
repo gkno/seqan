@@ -81,7 +81,7 @@ bool _MersenneBuffer<T>::is_initialized = false;
 
 /**
 .Function.mtRandInit:
-..status:deprecated, use @Class.RNG@ and @Class.PDF@ from $<seqan/random.h>$ instead
+..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Initialize the Mersenne-Twister random number generator.
 ..cat:Misc
 ..signature:mtRandInit()
@@ -128,11 +128,11 @@ mtRandInit()
 
 /**
 .Function.mtRand:
-..status:deprecated, use @Class.RNG@ and @Class.PDF@ from $<seqan/random.h>$ instead
+..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Return a Mersenne-Twister random number.
 ..cat:Misc
 ..signature:mtRand()
-..returns:A random number between 0 and $SupremumValue<unsigned>::VALUE$.
+..returns:A random number between 0 and $MaxValue<unsigned>::VALUE$.
 ...type:nolink:unsigned
 ..remarks:@Function.mtRandInit@ must have been called at least once before @Function.mtRand@ is used.
 ..see:Function.mtRandInit
@@ -169,7 +169,7 @@ mtRand()
 
 /**
 .Function.mtRandDouble:
-..status:deprecated, use @Class.RNG@ and @Class.PDF@ from $<seqan/random.h>$ instead
+..status:deprecated, use @Class.Rng@ and @Class.Pdf@ from $<seqan/random.h>$ instead
 ..summary:Return a random number between 0 and 1 using mtRand.
 ..see:Function.mtRand
 ..include:seqan/misc.h
@@ -177,7 +177,7 @@ mtRand()
 inline double
 mtRandDouble()
 {
-    return static_cast<double>(mtRand()) / static_cast<double>(SupremumValue<unsigned>::VALUE);
+    return static_cast<double>(mtRand()) / static_cast<double>(MaxValue<unsigned>::VALUE);
 }
 
 //////////////////////////////////////////////////////////////////////////////

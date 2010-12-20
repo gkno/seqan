@@ -169,25 +169,25 @@ struct Value< ::std::basic_fstream<TValue, TTraits> >
 
 //////////////////////////////////////////////////////////////////////////////
 
-/**.interal._IsTellSeekStream:
+/**.interal.IsTellAndSeekStream_:
 ..summary:Determines whether stream supports tell and seek functions.
 ..cat:Metafunction
 */
 
 template <typename T>
-struct _IsTellSeekStream
+struct IsTellAndSeekStream_
 {
 	typedef False Type;
 };
 
 
 template <typename TValue, typename TTraits>
-struct _IsTellSeekStream< ::std::basic_ifstream<TValue, TTraits> >
+struct IsTellAndSeekStream_< ::std::basic_ifstream<TValue, TTraits> >
 {
 	typedef True Type;
 };
 template <typename TValue, typename TTraits>
-struct _IsTellSeekStream< ::std::basic_fstream<TValue, TTraits> >
+struct IsTellAndSeekStream_< ::std::basic_fstream<TValue, TTraits> >
 {
 	typedef True Type;
 };

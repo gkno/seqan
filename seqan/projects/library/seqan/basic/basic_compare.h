@@ -52,7 +52,7 @@ struct CompareType<TLeft const, TRight const>
 template<typename _T> inline
 bool lexLess(const _T& _Left, const _T& _Right)
 {	// return lexicographical _Left < _Right
-	typedef typename _MakeUnsigned<_T>::Type TUnsigned;
+	typedef typename MakeUnsigned_<_T>::Type TUnsigned;
     return (TUnsigned)_Left < (TUnsigned)_Right;
 }
 

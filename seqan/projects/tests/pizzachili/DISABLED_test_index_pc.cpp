@@ -104,7 +104,7 @@ struct TestHelper {
         cout << "New index: " << indexText(idx2) << endl;
 
         // Force index creation.
-        indexRequire(idx1, PizzaChili_Compressed());
+        indexRequire(idx1, PizzaChiliCompressed());
 
         index_t const& cr_idx1 = idx1;
         index_t idx3 = cr_idx1;
@@ -200,25 +200,25 @@ int main() {
     SEQAN_TREPORT("TEST BEGIN");
 
     cout << "Test AF" << endl;
-    TestHelper<PizzaChili_AF, char>::test_all();
+    TestHelper<PizzaChiliAF, char>::test_all();
 
     cout << endl << "Test CCSA" << endl;
-    TestHelper<PizzaChili_CCSA, char>::test_all();
+    TestHelper<PizzaChiliCcsa, char>::test_all();
 
     cout << endl << "Test FM" << endl;
-    TestHelper<PizzaChili_FM, char>::test_all();
+    TestHelper<PizzaChiliFM, char>::test_all();
 
     cout << endl << "Test RSA" << endl;
-    TestHelper<PizzaChili_RSA, char>::test_all();
+    TestHelper<PizzaChiliRsa, char>::test_all();
 
     cout << endl << "Test SA" << endl;
-    TestHelper<PizzaChili_SA, char>::test_all();
+    TestHelper<PizzaChiliSA, char>::test_all();
 
     cout << endl <<"Text SADA" << endl;
-    TestHelper<PizzaChili_SADA, char>::test_all();
+    TestHelper<PizzaChiliSada, char>::test_all();
 
     cout << endl << "Other tests" << endl;
-    TestHelper<PizzaChili_AF, char>::test_infix();
+    TestHelper<PizzaChiliAF, char>::test_infix();
 
     debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili.h");
     debug::verifyCheckpoints("projects/library/seqan/index/index_pizzachili_find.h");

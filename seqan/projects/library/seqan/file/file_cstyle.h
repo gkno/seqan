@@ -215,15 +215,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true; 
 	}
 
-    template < typename aRequest >
+    template < typename AsyncRequest >
 	inline void 
-	release(FILE*, aRequest &) 
+	release(FILE*, AsyncRequest &) 
 	{
 	}
 
-    template < typename aRequest >
+    template < typename AsyncRequest >
     inline bool 
-	cancel(FILE*, aRequest &) 
+	cancel(FILE*, AsyncRequest &) 
 	{
 		return true; 
 	}

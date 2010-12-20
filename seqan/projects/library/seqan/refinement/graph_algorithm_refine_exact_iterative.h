@@ -33,7 +33,7 @@ typedef Tag<TagExactRefinement_> const ExactRefinement;
 //exact method, every cut is made (unless it already exists)
 template<typename TValue>
 inline bool
-cutIsOk(String<std::set<TValue> > & all_nodes,
+_cutIsValid(String<std::set<TValue> > & all_nodes,
 		TValue seq_i_pos,
 		TValue,
 		typename std::set<TValue>::iterator iter,
@@ -50,14 +50,14 @@ SEQAN_CHECKPOINT
 
 template<typename TSize, typename TSpec,typename TPos>
 inline void
-updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > & f, TPos & pos_j)
+_updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > & f, TPos & pos_j)
 {
 	if(f.reversed)
 		++pos_j;
 }
 //template<typename TSize, typename TSpec,typename TPos>
 //inline void
-//updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f, TPos & pos_j)
+//_updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > const& f, TPos & pos_j)
 //{
 //	if(f.reversed)
 //		++pos_j;
@@ -66,7 +66,7 @@ updateCutPosition(Fragment<TSize, ExactReversableFragment<TSpec> > & f, TPos & p
 
 template<typename TFrag,typename TPos>
 inline void
-updateCutPosition(TFrag &, TPos &)
+_updateCutPosition(TFrag &, TPos &)
 {
 	return;
 }
@@ -109,13 +109,13 @@ SEQAN_CHECKPOINT
 		TValue seq_j_id, node_j;
 		_getOtherSequenceAndProject(alis[match_id],seg_num,seq_map,seq_i_id,node_i,seq_j_id,node_j);
 		TValue seq_j_pos = idToPosition(seqs,seq_j_id);
-		updateCutPosition(alis[match_id],node_j);
+		_updateCutPosition(alis[match_id],node_j);
 
 		typename std::set<TValue>::iterator iter;
 		iter = all_nodes[seq_j_pos].find(node_j);
 		
 		//if node does not exist yet ---> insert and continue cutting
-		if(cutIsOk(all_nodes,seq_j_pos,node_j,iter,min_len,tag))
+		if(_cutIsValid(all_nodes,seq_j_pos,node_j,iter,min_len,tag))
 		{
 			all_nodes[seq_j_pos].insert(node_j);
 			_refine(node_j,seq_j_id,seqs,seq_map,alis,gs,pms,all_nodes,min_len,tag);
@@ -189,7 +189,7 @@ SEQAN_CHECKPOINT
 //get all intervals from the alignments and construct an interval tree for each sequence
 template<typename TGraph, typename TPropertyMap, typename TAlignmentString, typename TSequence, typename TSetSpec, typename TValue, typename TSeqMap>
 void
-createTreesForAllSequences(String<TGraph> & gs, 
+_createTreesForAllSequences(String<TGraph> & gs, 
 						   String<TPropertyMap> & pms, 
 						   TAlignmentString & alis, 
 						   StringSet<TSequence,TSetSpec> & seqs,
@@ -321,9 +321,9 @@ SEQAN_CHECKPOINT
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 		
 			SEQAN_ASSERT_TRUE(fragmentBegin(ali_g,vd)==pos_j);
-			typename Value<TScore>::Type score = getScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
+			typename Value<TScore>::Type score = _getMatchScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
 	//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
-			score *= getAnnoScore(ali_g,pm,vd,act_knot,score_type);
+			score *= _getAnnoScore(ali_g,pm,vd,act_knot,score_type);
 		//this needs to be generalized (makes sense for positive scores only)
 			if(score <= 0) score = 1;
 			if(score > 0)
@@ -472,7 +472,7 @@ SEQAN_CHECKPOINT
 	//build interval trees
 	String<TGraph> gs;
 	String<TPropertyMap> pms;
-	createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences);
+	_createTreesForAllSequences(gs, pms, alis, seq, seq_map, numSequences);
 	
 	////////////////////////////////////////////////////////////////
 	//do refinement
@@ -538,7 +538,7 @@ SEQAN_CHECKPOINT
 						TValue seq_j_id, node_j;
 						_getOtherSequenceAndProject(alis[match_id],seg_num,seq_map,seq_i_id,node_i,seq_j_id,node_j);
 						TValue seq_j_pos = idToPosition(seq,seq_j_id);
-						updateCutPosition(alis[match_id],node_j);
+						_updateCutPosition(alis[match_id],node_j);
 
 						typename std::set<TValue>::iterator iter_j;
 						iter_j = all_nodes[seq_j_pos].find(node_j);

@@ -380,7 +380,7 @@ SEQAN_CHECKPOINT
 
 template <typename TStringSet, typename TTrace, typename TIndexPair>
 void
-_align_needleman_wunsch_matrix(SVGFile& svg,
+_alignNeedlemanWunschMatrix(SVGFile& svg,
 							  TStringSet const& str,
 							  TTrace const& trace,
 							  TIndexPair const&)
@@ -425,7 +425,7 @@ SEQAN_CHECKPOINT
 
 template <typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(SVGFile& svg,
+_alignTracePrint(SVGFile& svg,
 				   TStringSet const&,
 				   TId const,
 				   TPos pos1,

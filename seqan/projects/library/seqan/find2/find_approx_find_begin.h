@@ -77,14 +77,14 @@ struct _ApproxFindBegin<TNeedle, TScore, True> : public _FindState {
 
 // Tag for findBegin().  Use score of forward search result when doing
 // find begin.
-struct _UseScore;
-typedef Tag<_UseScore> UseScore;
+struct UseScore_;
+typedef Tag<UseScore_> UseScore;
 
 
 // Tag for findBegin().  Use score limit of forward search when
 // doing find begin.
-struct _UseScoreLimit;
-typedef Tag<_UseScoreLimit> UseScoreLimit;
+struct UseScoreLimit_;
+typedef Tag<UseScoreLimit_> UseScoreLimit;
 
 
 // Called to initialize a _ApproxFindBegin datastructure.

@@ -37,12 +37,12 @@
 
 namespace seqan {
 
-struct _FindInfix;
-typedef Tag<_FindInfix> FindInfix;
+struct FindInfix_;
+typedef Tag<FindInfix_> FindInfix;
 
 
-struct _FindPrefix;
-typedef Tag<_FindPrefix> FindPrefix;
+struct FindPrefix_;
+typedef Tag<FindPrefix_> FindPrefix;
 
 
 template <typename TScore, typename TSpec = FindInfix, typename TFindBeginPatternSpec = True>
@@ -320,8 +320,8 @@ bool find(Finder<THaystack, Default> & finder,
         // pattern._currentScore is the "v" from the book.  This
         // initialization depends on whether we are doing a prefix
         // search or an infix search.
-        TScoreValue d = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
-        pattern._currentScore = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
+        TScoreValue d = IsSameType<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
+        pattern._currentScore = IsSameType<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
         for (TPosition i = 0; i < length(pattern._matrixColumn); ++i) {
             TScoreValue h = pattern._matrixColumn[i];
             pattern._currentScore = _max(d + score(myScore, haystack(finder)[j], needle(pattern)[i]),
@@ -473,7 +473,7 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     // case if the gap penalty is non-negative or we are doing a
     // prefix search.  Otherwise, compute the search start position.
     TPosition searchStartPosition = 0;
-    if (!TYPECMP<TDPSearchSpec, FindPrefix>::VALUE) {
+    if (!IsSameType<TDPSearchSpec, FindPrefix>::VALUE) {
         double frac = (gapScore == 0) ? 1.0 : (1.0 * baseScore / gapScore);
         if (frac <= 0.0) {
             TPosition delta = length(needle(pattern)) - static_cast<TPosition>(frac);
@@ -492,8 +492,8 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     for (j = searchStartPosition; j < pos; ++j) {
         // Compute best score if the end of needle would align at j.
         // pattern._currentScore is the "v" from the book.
-        TScoreValue d = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
-        pattern._currentScore = TYPECMP<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
+        TScoreValue d = IsSameType<TDPSearchSpec, FindInfix>::VALUE ? 0 : (j * scoreGap(myScore));
+        pattern._currentScore = IsSameType<TDPSearchSpec, FindInfix>::VALUE ? 0 : ((j + 1) * scoreGap(myScore));
         for (TPosition i = 0; i < length(pattern._matrixColumn); ++i) {
             TScoreValue h = pattern._matrixColumn[i];
             pattern._currentScore = _max(d + score(myScore, haystack(finder)[j], needle(pattern)[i]),

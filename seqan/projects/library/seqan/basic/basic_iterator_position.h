@@ -52,7 +52,7 @@ class Iter<TContainer, PositionIterator>
 public:
 	typedef typename Position<TContainer>::Type TPosition;
 
-	typename _Pointer<TContainer>::Type data_container;
+	typename Pointer_<TContainer>::Type data_container;
 	TPosition data_position;
 //____________________________________________________________________________
 
@@ -75,7 +75,7 @@ public:
 	{
 SEQAN_CHECKPOINT
 	}
-	Iter(typename _Parameter<TContainer>::Type container_, TPosition position_ = 0):
+	Iter(typename Parameter_<TContainer>::Type container_, TPosition position_ = 0):
 		data_container(_toPointer(container_)),
 		data_position(position_)
 	{
@@ -113,14 +113,14 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TContainer>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, PositionIterator> & me)
 {
 SEQAN_CHECKPOINT
 	return _toParameter<TContainer>(me.data_container);
 }
 template <typename TContainer>
-inline typename _Parameter<TContainer>::Type 
+inline typename Parameter_<TContainer>::Type 
 container(Iter<TContainer, PositionIterator> const & me)
 {
 SEQAN_CHECKPOINT
@@ -130,7 +130,7 @@ SEQAN_CHECKPOINT
 
 template <typename TContainer>
 inline void
-setContainer(Iter<TContainer, PositionIterator> & me, typename _Parameter<TContainer>::Type container_)
+setContainer(Iter<TContainer, PositionIterator> & me, typename Parameter_<TContainer>::Type container_)
 {
 SEQAN_CHECKPOINT
 	typedef Iter<TContainer, PositionIterator> TIter;

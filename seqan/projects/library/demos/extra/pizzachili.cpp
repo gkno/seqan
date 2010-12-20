@@ -27,8 +27,8 @@ void testPizzaChili() {
 ///without any real content. The string is lazily evaluated in order to
 ///save memory. Only the substring we are actually displaying will be
 ///loaded into memory.
-/// $indexText(..)$ is a shortcut for $getFibre(.., PizzaChili_Text())$.
-    typename Fibre<index_t, PizzaChili_Text>::Type text = indexText(index_pc);
+/// $indexText(..)$ is a shortcut for $getFibre(.., PizzaChiliText())$.
+    typename Fibre<index_t, PizzaChiliText>::Type text = indexText(index_pc);
     ::std::cout << "infix(text, 12, 21): " << infix(text, 12, 21) << ::std::endl;
 
 ///We can save the index structure on disk and load it again.
@@ -43,8 +43,8 @@ void testPizzaChili() {
 
 int main() {
     ::std::cout << "Test the alphabet-friendly FM index:" << ::std::endl;
-    testPizzaChili<PizzaChili_AF>();
+    testPizzaChili<PizzaChiliAF>();
     ::std::cout << ::std::endl << "Test the compressed compact suffix array index:" << ::std::endl;
-    testPizzaChili<PizzaChili_CCSA>();
+    testPizzaChili<PizzaChiliCcsa>();
     return 0;
 }

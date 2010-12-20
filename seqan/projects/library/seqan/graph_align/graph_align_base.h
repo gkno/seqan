@@ -31,12 +31,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T = void>
-struct _Translate_Table_Byte_2_TraceBack
+struct TranslateTableByteToTraceback_
 {
 	static char const VALUE[256];
 };
 template <typename T>
-char const _Translate_Table_Byte_2_TraceBack<T>::VALUE[256] = 
+char const TranslateTableByteToTraceback_<T>::VALUE[256] = 
 {
 	0,   1,   2,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //0
 	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, //1
@@ -80,7 +80,7 @@ template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };
 // helper class to store traceback
 
 template <typename TSize>
-struct _Align_Traceback
+struct AlignTraceback
 {
 	String<TSize> sizes;
 	String<TraceBack> tvs; //trace values: 0 = diagonal, 1 = horizontal, 2 = vertical
@@ -94,7 +94,7 @@ struct _Align_Traceback
 
 template <typename TFile, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(TFile& file,
+_alignTracePrint(TFile& file,
 				   TStringSet const& str,
 				   TId const /*id1*/,
 				   TPos const pos1,
@@ -147,7 +147,7 @@ _align_trace_print(TFile& file,
 
 template <typename TStringSet, typename TCargo, typename TSpec, typename TStringSet2, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
+_alignTracePrint(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 				   TStringSet2 const&,
 				   TId const id1,
 				   TPos const pos1,
@@ -173,7 +173,7 @@ _align_trace_print(Graph<Alignment<TStringSet, TCargo, TSpec> >& g,
 
 template <typename TFragment, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(String<TFragment>& matches,
+_alignTracePrint(String<TFragment>& matches,
 				   TStringSet const&,
 				   TId const id1,
 				   TPos const pos1,
@@ -193,7 +193,7 @@ _align_trace_print(String<TFragment>& matches,
 
 template <typename TVertexDescriptor, typename TSpec, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(String<String<TVertexDescriptor, TSpec> >& nodeString,
+_alignTracePrint(String<String<TVertexDescriptor, TSpec> >& nodeString,
 				   TStringSet const& str,
 				   TId const,
 				   TPos const pos1,

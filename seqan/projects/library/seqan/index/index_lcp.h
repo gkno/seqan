@@ -42,7 +42,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename InType, typename Result = typename InType::T2::T>
-	struct map_inverse : public std::unary_function<InType,Result> {
+	struct _mapInverse : public std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
@@ -55,7 +55,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         typedef Pipe< TSuffixArrayInput, Echoer<2,false> > TEchoer;
-                                        typedef map_inverse<_TypeOf(TEchoer)> map_inverse_t;
+                                        typedef _mapInverse<_TypeOf(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
 		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
 		                                typedef Pair<TSize> TCoreType;
@@ -112,7 +112,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			inverter << echoer;
 			SEQAN_PROMARK("Suffix-Array invertiert");
 
-			lcp_process(textIn, inverter, mapper);
+			_lcpProcess(textIn, inverter, mapper);
             return true;
         }
 
@@ -147,9 +147,9 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
-	struct map_inverse_multi : public std::unary_function<InType,Result> {
+	struct _mapInverseMulti : public std::unary_function<InType,Result> {
 		TLimitsString const &limits;
-		map_inverse_multi(TLimitsString const &_limits) : limits(_limits) {}
+		_mapInverseMulti(TLimitsString const &_limits) : limits(_limits) {}
         inline Result operator()(const InType& x) const
         {
 			return posGlobalize(x.i2[0], limits);
@@ -164,7 +164,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         typedef Pipe< TSuffixArrayInput, Echoer<2,false> > TEchoer;
-                                        typedef map_inverse_multi<_TypeOf(TEchoer), TLimitsString, _TSizeOf(TEchoer)> map_inverse_t;
+                                        typedef _mapInverseMulti<_TypeOf(TEchoer), TLimitsString, _TSizeOf(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
 		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
 		                                typedef Pair<TSize> TCoreType;
@@ -206,8 +206,8 @@ namespace SEQAN_NAMESPACE_MAIN
             // *** INSTANTIATION ***
 			
 			TEchoer						echoer(suffixArrayIn);
-			map_inverse_t				map_inverse(limits);
-			TInverter					inverter(echoer, map_inverse);
+			map_inverse_t				_mapInverse(limits);
+			TInverter					inverter(echoer, _mapInverse);
 
             #ifdef SEQAN_DEBUG_INDEX
                 std::cerr << "--- CREATE LCP TABLE ---" << std::endl;
@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			inverter << echoer;
 			SEQAN_PROMARK("Suffix-Array invertiert");
 
-			lcp_process_multi(textIn, limits, inverter, mapper);
+			_lcpProcessMulti(textIn, limits, inverter, mapper);
             return true;
         }
 
@@ -253,7 +253,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
         typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
-        typedef typename AND<TRandomLCP, TRandomSA>::Type Type;
+        typedef typename And<TRandomLCP, TRandomSA>::Type Type;
     };
 
 
@@ -418,7 +418,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Concatenator<StringSet<TString, TSpec> const>::Type	TText;
 		typedef typename StringSetLimits<StringSet<TString, TSpec> const>::Type	TLimitsString;
 		typedef typename Value<TSA>::Type										TPair;
-		typedef _PairDecrementer<TPair, TLimitsString>							TDecrementer;
+		typedef PairDecrementer_<TPair, TLimitsString>							TDecrementer;
 		typedef typename Value<TLCPTable>::Type									TSize;
 
 		#ifdef SEQAN_DEBUG_INDEX

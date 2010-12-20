@@ -75,7 +75,7 @@ namespace seqan{
 		base = _getDown( *tower_buffer );
 
 				//  2 ) search downwards from highest element, sort all equal keys behind found object
-		_sort_equals( *list, _searchFrom( *list, tower_buffer, right_theKey, search_path, dim ), right_theKey );
+		_sortEquals( *list, _searchFrom( *list, tower_buffer, right_theKey, search_path, dim ), right_theKey );
 		
 				// II. the range is now limited by a sorted element
 				//	1 ) searching for highest layer again( may have changed ),
@@ -110,7 +110,7 @@ namespace seqan{
 			return;
 
 		SkipBaseElement< TObject, TModus, RT< TSpec >, Deferred > * right_base  = _searchFrom( *list, _getRoot( *list ), right_theKey, search_path, dim );
-		_sort_equals( *list, right_base, right_theKey );
+		_sortEquals( *list, right_base, right_theKey );
 
 			//  2 ) search downwards from highest element
 		while( base != right_base )

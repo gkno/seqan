@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TValPair, typename TIndexPair, typename TDiagonal>
 inline void
-_align_banded_gotoh_trace(TAlign& align,
+_alignBandedGotohTrace(TAlign& align,
 						  TStringSet const& str,
 						  TTrace const& trace,
 						  TValPair const& overallMaxValue,
@@ -81,8 +81,8 @@ _align_banded_gotoh_trace(TAlign& align,
 	// Handle the skipped sequence parts
 	TSize actualRow = row + lo_row;
 	TSize actualCol = col + diagL + actualRow;
-	if (actualCol + 1 < len1) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len1 - (actualCol + 1)),  Horizontal);
-	if (actualRow + 1 < len2) _align_trace_print(align, str, id1, actualCol, id2, actualRow, (len2 - (actualRow + 1)),  Vertical);
+	if (actualCol + 1 < len1) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, (len1 - (actualCol + 1)),  Horizontal);
+	if (actualRow + 1 < len2) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, (len2 - (actualRow + 1)),  Vertical);
 
 	// Walk until we hit a border
 	TTraceValue tv = (trace[row * diagonalWidth + col] & 3);
@@ -95,7 +95,7 @@ _align_banded_gotoh_trace(TAlign& align,
 
 		// Direction changed, so make aligned segments
 		if (oldTraceValue != tv) {
-			_align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
+			_alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, oldTraceValue);
 			seqLen = 0;
 		}
 
@@ -122,11 +122,11 @@ _align_banded_gotoh_trace(TAlign& align,
 	} while(!hitBorder);
 	
 	// Align left overs
-	if (seqLen) _align_trace_print(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
+	if (seqLen) _alignTracePrint(align, str, id1, actualCol, id2, actualRow, seqLen, tv);
 
 	// Handle the remaining sequence
-	if (actualCol != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
-	else if (actualRow != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow,  Vertical);
+	if (actualCol != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol,  Horizontal);
+	else if (actualRow != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow,  Vertical);
 
 }
 
@@ -135,7 +135,7 @@ _align_banded_gotoh_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TDiagonal, typename TAlignConfig>
 inline typename Value<TScore>::Type
-_align_banded_gotoh(TTrace& trace,
+_alignBandedGotoh(TTrace& trace,
 					TStringSet const& str,
 					TScore const & sc,
 					TValPair& overallMaxValue,
@@ -172,8 +172,8 @@ _align_banded_gotoh(TTrace& trace,
 	resize(mat, diagonalWidth);
 	resize(vertical, diagonalWidth);
 	resize(trace, height * diagonalWidth);
-	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
-	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[0] = MinValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = MinValue<TScoreValue>::VALUE;
 	overallMaxIndex[0] = diagonalWidth;
 	overallMaxIndex[1] = height;
 	overallMaxIndex[2] = diagonalWidth;
@@ -209,7 +209,7 @@ _align_banded_gotoh(TTrace& trace,
 		TTraceIter traceIt = begin(trace, Standard()) + row * diagonalWidth + lo_diag;
 		TColIter vertIt = begin(vertical, Standard()) + lo_diag;
 		TColIter matIt = begin(mat, Standard()) + lo_diag;
-		hori_val = InfimumValue<TScoreValue>::VALUE;
+		hori_val = MinValue<TScoreValue>::VALUE;
 		for(TSize col = lo_diag; col<hi_diag; ++col, ++vertIt, ++matIt, ++traceIt) {
 			actualCol = col + diagL + actualRow;
 			//std::cerr << row << ',' << col << ':' << value(originalMat, actualRow * len1 + actualCol) << std::endl;
@@ -219,19 +219,19 @@ _align_banded_gotoh(TTrace& trace,
 				*traceIt = 0;
 				if (col < diagonalWidth - 1) {
 					a = *(matIt + 1) + scoreGapOpenVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
-					b = (*(vertIt + 1) != InfimumValue<TScoreValue>::VALUE) ? *(vertIt + 1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
+					b = (*(vertIt + 1) != MinValue<TScoreValue>::VALUE) ? *(vertIt + 1) + scoreGapExtendVertical(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : MinValue<TScoreValue>::VALUE;
 					if (a > b) {*vertIt = a; *traceIt = 1;}
 					else *vertIt = b;
-				} else *vertIt = InfimumValue<TScoreValue>::VALUE;
+				} else *vertIt = MinValue<TScoreValue>::VALUE;
 
 				// Get the new maximum for horizontal
 				*traceIt <<= 1;
 				if (col > 0) {
 					a = *(matIt -1 ) + scoreGapOpenHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2);
-					b = (hori_val != InfimumValue<TScoreValue>::VALUE) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : InfimumValue<TScoreValue>::VALUE;
+					b = (hori_val != MinValue<TScoreValue>::VALUE) ? hori_val + scoreGapExtendHorizontal(sc, ((int) actualCol - 1), ((int) actualRow - 1), str1, str2) : MinValue<TScoreValue>::VALUE;
 					if (a > b) {hori_val = a; *traceIt |= 1;}
 					else hori_val = b;
-				} else hori_val = InfimumValue<TScoreValue>::VALUE;
+				} else hori_val = MinValue<TScoreValue>::VALUE;
 
 				*traceIt <<= 2;
 				// Get the new maximum for mat
@@ -252,16 +252,16 @@ _align_banded_gotoh(TTrace& trace,
 					if (actualCol != 0) {
 						_initFirstRow(TAlignConfig(), *matIt, scoreGapOpenHorizontal(sc, 0, -1, str1, str2) + (actualCol - 1) * scoreGapExtendHorizontal(sc, ((int) actualCol - 1), -1, str1, str2));
 						*vertIt = *matIt + scoreGapOpenVertical(sc, ((int) actualCol - 1), 0, str1, str2) - scoreGapExtendVertical(sc, ((int) actualCol - 1), 0, str1, str2);
-						hori_val = InfimumValue<TScoreValue>::VALUE;
+						hori_val = MinValue<TScoreValue>::VALUE;
 					} else {
 						*matIt = 0;
-						*vertIt = InfimumValue<TScoreValue>::VALUE;
-						hori_val = InfimumValue<TScoreValue>::VALUE;
+						*vertIt = MinValue<TScoreValue>::VALUE;
+						hori_val = MinValue<TScoreValue>::VALUE;
 					}
 				} else {
 					_initFirstColumn(TAlignConfig(), *matIt, scoreGapOpenVertical(sc, -1, 0, str1, str2) + (actualRow - 1) * scoreGapExtendVertical(sc, -1, ((int) actualRow - 1), str1, str2));
 					hori_val = *matIt + scoreGapOpenHorizontal(sc, 0, ((int) actualRow - 1), str1, str2) - scoreGapExtendHorizontal(sc, 0, ((int) actualRow - 1), str1, str2);
-					*vertIt = InfimumValue<TScoreValue>::VALUE;
+					*vertIt = MinValue<TScoreValue>::VALUE;
 				}
 			}
 
@@ -298,10 +298,10 @@ _globalAlignment(TAlign& align,
 
 	// Create the trace
 	String<unsigned char> trace;
-	TScoreValue maxScore = _align_banded_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
+	TScoreValue maxScore = _alignBandedGotoh(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 	
 	// Follow the trace and create the graph
-	_align_banded_gotoh_trace(align, str, trace, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
+	_alignBandedGotohTrace(align, str, trace, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2);
 
 	return maxScore;
 }
@@ -327,7 +327,7 @@ _globalAlignment(TStringSet const& str,
 
 	// Calculate the score
 	String<unsigned char> trace;
-	return _align_banded_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
+	return _alignBandedGotoh(trace, str, sc, overallMaxValue, overallMaxIndex, (int) diag1, (int) diag2, TAlignConfig());
 }
 
 

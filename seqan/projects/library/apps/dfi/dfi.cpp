@@ -49,7 +49,7 @@ using namespace seqan;
 		PredMinFreq(String<unsigned> _minFreq, TDataSet const &):
 			minFreq(_minFreq) {}
 			
-		inline bool operator()(_DFIEntry const &entry) const {
+		inline bool operator()(DfiEntry_ const &entry) const {
 			for (unsigned i = 0; i < length(entry.freq); ++i)
 				if (entry.freq[i] < minFreq[i])
 					return false;
@@ -66,7 +66,7 @@ using namespace seqan;
 		PredMaxFreq(String<unsigned> _maxFreq, TDataSet const &):
 			maxFreq(_maxFreq) {}
 			
-		inline bool operator()(_DFIEntry const &entry) const {
+		inline bool operator()(DfiEntry_ const &entry) const {
 			for (unsigned i = 0; i < length(entry.freq); ++i)
 				if (entry.freq[i] > maxFreq[i])
 					return false;
@@ -95,7 +95,7 @@ using namespace seqan;
 			minFreq = (unsigned) ceil(_minSupp * (double)ds[1] - DFI_EPSILON);
 		}
 			
-		inline bool operator()(_DFIEntry const &entry) const {
+		inline bool operator()(DfiEntry_ const &entry) const {
 			return entry.freq[0] >= minFreq;
 		}
 	};
@@ -111,7 +111,7 @@ using namespace seqan;
 		}
 			
 		// HINT: here growthRate is frequency-related, not support-related
-		inline bool operator()(_DFIEntry const &entry) const {
+		inline bool operator()(DfiEntry_ const &entry) const {
 			return (double)entry.freq[0] >= (double)entry.freq[1] * growthRate;
 		}
 	};
@@ -134,7 +134,7 @@ using namespace seqan;
 				minFreq[i - 1] = (unsigned) ceil(_minSupp * (double)(ds[i] - ds[i - 1]) - DFI_EPSILON);
 		}
 			
-		inline bool operator()(_DFIEntry const &entry) const {
+		inline bool operator()(DfiEntry_ const &entry) const {
 			for (unsigned i = 0; i < length(entry.freq); ++i)
 				if (entry.freq[i] >= minFreq[i])
 					return true;
@@ -159,7 +159,7 @@ using namespace seqan;
 
 		// support based entropy
 		inline double
-		getEntropy(_DFIEntry const &entry) const
+		getEntropy(DfiEntry_ const &entry) const
 		{
 			double sum = 0;
 			double H = 0;
@@ -179,7 +179,7 @@ using namespace seqan;
 			return H;
 		}
 			
-		inline bool operator()(_DFIEntry const &entry) const 
+		inline bool operator()(DfiEntry_ const &entry) const 
 		{
 			return getEntropy(entry) <= maxEntropy;
 		}
@@ -357,7 +357,7 @@ template <typename TMatchString, typename TIndex, typename TDBLookup, typename T
 inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &index, TDBLookup const &dbLookup, TSeen &seen, TEntry &entry)
 {
 	typedef typename Iterator<TMatchString, Standard>::Type TIter;
-	typedef typename Fibre<TIndex, Fibre_SA>::Type TSA;
+	typedef typename Fibre<TIndex, FibreSA>::Type TSA;
 	typedef typename Iterator<TSA, Standard>::Type TSAIter;
 
 	TIter src = begin(matches, Standard());
@@ -399,31 +399,31 @@ inline void compactSameSuffLinkFreqMatches(TMatchString &matches, TIndex const &
 namespace seqan {
 /*
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_SA> 
+	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreSA> 
 	{
-		typedef Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename SAValue<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > const, Fibre_SA>:
-		public struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_SA> {};
+	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > const, FibreSA>:
+		public struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreSA> {};
 */
 
 /*	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_Dir> 
+	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreDir> 
 	{
-		typedef Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > TIndex;
+		typedef Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > TIndex;
 		typedef String< 
 			typename Size<TIndex>::Type,
 			MMap<>
 		> Type;
 	};
 	template < typename TObject, typename TPredHull, typename TPred >
-	struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > > const, Fibre_Dir>: 
-		public struct Fibre< Index<TObject, Index_Wotd< DFI<TPredHull, TPred> > >, Fibre_Dir> {};
+	struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > > const, FibreDir>: 
+		public struct Fibre< Index<TObject, IndexWotd< DFI<TPredHull, TPred> > >, FibreDir> {};
 */
 }
 
@@ -454,7 +454,7 @@ int runDFI(
 {
 	typedef String<TAlphabet, Alloc<> >								TString;
 	typedef StringSet<TString>										TStringSet;
-	typedef Index<TStringSet, Index_Wotd<
+	typedef Index<TStringSet, IndexWotd<
 		DFI<TPredHull, TPred> > >								TIndex;
 	typedef Iter<TIndex, VSTree<TopDown<ParentLinks<> > > >			TIter;
 	typedef SubstringEntry<typename Size<TIndex>::Type>				TSubstringEntry;
@@ -477,11 +477,11 @@ int runDFI(
 	index.ds = ds;
 
 	// database lookup table
-	typedef typename Fibre<TIndex, Fibre_SA>::Type TSA;
+	typedef typename Fibre<TIndex, FibreSA>::Type TSA;
 	typedef typename Iterator<TSA, Standard>::Type TSAIter;
 	String<unsigned>	dbLookup;
 	String<bool>		seen;
-	_DFIEntry			entry;
+	DfiEntry_			entry;
 	
 	resize(dbLookup, length(mySet));
 	resize(seen, length(mySet));
@@ -584,7 +584,7 @@ int runDFI(
 			{
 #ifdef DEBUG_ENTROPY
 				// count frequencies (debug)
-				typedef typename Infix< typename Fibre<TIndex, Fibre_SA>::Type const >::Type TOccs;
+				typedef typename Infix< typename Fibre<TIndex, FibreSA>::Type const >::Type TOccs;
 				typedef typename Iterator<TOccs, Standard>::Type TOccIter;
 	            TOccs occs = getOccurrences(it);
 	            TOccIter oc = begin(occs, Standard()), ocEnd = end(occs, Standard());

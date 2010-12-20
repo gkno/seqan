@@ -26,11 +26,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TFile, typename TText, typename TESASpec>
 void write(TFile & file, 
-	   Index<TText, Index_ESA<TESASpec> > & stree,
+	   Index<TText, IndexEsa<TESASpec> > & stree,
 	   DotDrawing) 
 {
 	SEQAN_CHECKPOINT
-	typedef Index<TText, Index_ESA<TESASpec> > TIndex;
+	typedef Index<TText, IndexEsa<TESASpec> > TIndex;
 	
 	_streamWrite(file, "digraph G {\n");
 	_streamPut(file, '\n');

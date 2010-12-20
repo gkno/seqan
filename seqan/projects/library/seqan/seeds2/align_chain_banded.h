@@ -52,22 +52,22 @@ namespace seqan {
 // ===========================================================================
 
 template <typename AlignmentAlgorithm>
-struct _AlignmentMatrixDimension;
+struct AlignmentMatrixDimension_;
 
 template <>
-struct _AlignmentMatrixDimension<NeedlemanWunsch>
+struct AlignmentMatrixDimension_<NeedlemanWunsch>
 {
     enum { VALUE = 2 };
 };
 
 template <>
-struct _AlignmentMatrixDimension<Gotoh>
+struct AlignmentMatrixDimension_<Gotoh>
 {
     enum { VALUE = 3 };
 };
 
 template <typename TSegment, typename TScoringScheme, typename TAlignmentTag>
-class _AlignmentChain
+class AlignmentChain_
 {
 public:
     // TODO(holtgrew): Underscores should be in front of variable names, right?
@@ -92,11 +92,11 @@ public:
     // element is the alignment matrix for the rectangle to the upper
     // left right, followed by the one for the first seed in the chain
     // (left-uppermost one), the next rectangle and so on.
-    String<Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> > alignmentMatrices_;
+    String<Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> > alignmentMatrices_;
 
     // TODO(holtgrew): Default constructor + setSequence{0,1} missing for now.
 
-    _AlignmentChain(TPosition bandwidth, TScoringScheme const & scoringScheme, TSegment /*const*/ & sequence0, TSegment /*const*/ & sequence1)
+    AlignmentChain_(TPosition bandwidth, TScoringScheme const & scoringScheme, TSegment /*const*/ & sequence0, TSegment /*const*/ & sequence1)
             : bandwidth_(bandwidth), scoringScheme_(scoringScheme), sequence0_(sequence0), sequence1_(sequence1)
     { SEQAN_CHECKPOINT; }
 };
@@ -106,15 +106,15 @@ public:
 // ===========================================================================
 
 template <typename TSegment, typename TScoringScheme, typename TAlignmentTag>
-struct ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> >
+struct ScoringScheme<AlignmentChain_<TSegment, TScoringScheme, TAlignmentTag> >
 {
     typedef TScoringScheme Type;
 };
 
 
 template <typename TSegment, typename TScoringScheme, typename TAlignmentTag>
-struct ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> const>
-        : ScoringScheme<_AlignmentChain<TSegment, TScoringScheme, TAlignmentTag> > {};
+struct ScoringScheme<AlignmentChain_<TSegment, TScoringScheme, TAlignmentTag> const>
+        : ScoringScheme<AlignmentChain_<TSegment, TScoringScheme, TAlignmentTag> > {};
 
 // ===========================================================================
 // Functions
@@ -128,7 +128,7 @@ inline void
 _computeLowerRightOverlap(TSize & overlap0,
                           TSize & overlap1,
                           Seed<TSeedSpec, TSeedConfig> const & seed,
-                          _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
+                          AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
 {
     SEQAN_CHECKPOINT;
     overlap0 = getUpperDiagonal(seed) - getEndDiagonal(seed) + alignmentChain.bandwidth_ + 1;
@@ -147,7 +147,7 @@ inline void
 _computeUpperLeftOverlap(TSize & overlap0,
                          TSize & overlap1,
                          Seed<TSeedSpec, TSeedConfig> const & seed,
-                         _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
+                         AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain)
 {
     SEQAN_CHECKPOINT;
     overlap0 = getStartDiagonal(seed) - getLowerDiagonal(seed) + alignmentChain.bandwidth_ + 1;
@@ -163,7 +163,7 @@ _computeUpperLeftOverlap(TSize & overlap0,
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig, bool START1_FREE, bool START0_FREE, bool END1_FREE, bool END0_FREE>
 void
 _alignLeadingRectangle(
-        _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
+        AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
         Seed<TSeedSpec, TSeedConfig> const & rightSeed,
         AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
@@ -171,7 +171,7 @@ _alignLeadingRectangle(
     // std::cout << "_alignLeadingRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
+    typedef Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
 
@@ -194,11 +194,11 @@ _alignLeadingRectangle(
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
     // Resize the alignment matrix to the appropriate size.
-    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, TAlignmentTag());
+    _alignResizeMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, TAlignmentTag());
     // Initialize the matrix gutter.
-    _align_initGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, alignConfig, TAlignmentTag());
+    _alignInitGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, alignConfig, TAlignmentTag());
     // Fill the Matrix using standard dynamic programming.
-    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, alignmentChain.scoringScheme_, TAlignmentTag());
+    _alignFillMatrix(back(alignmentChain.alignmentMatrices_), prefix0, prefix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // TODO(holtgrew): Temporary debug code.
     // {
@@ -207,7 +207,7 @@ _alignLeadingRectangle(
     //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
     //         std::cout << "|";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else 
     //                 std::cout << "\t" <<value(matrix, i, j);
@@ -222,14 +222,14 @@ _alignLeadingRectangle(
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignTrailingRectangle(
-        _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
+        AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
         Seed<TSeedSpec, TSeedConfig> const & leftSeed)
 {
     SEQAN_CHECKPOINT;
     // std::cout << "_alignTrailingRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
+    typedef Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Suffix<TSequence>::Type TSuffix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -258,11 +258,11 @@ _alignTrailingRectangle(
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
     // Resize the alignment matrix to the appropriate size.
-    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, TAlignmentTag());
+    _alignResizeMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, TAlignmentTag());
     // Copy over the data from the banded seed alignment matrix into
     // the gutter and initialize the rest of it according to the
     // alignment config object.
-    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    _alignInitGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
     // // TODO(holtgrew): Temporary debug code.
     // {
     //     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
@@ -270,7 +270,7 @@ _alignTrailingRectangle(
     //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
     //         std::cout << "|";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else 
     //                 std::cout << "\t" <<value(matrix, i, j);
@@ -280,7 +280,7 @@ _alignTrailingRectangle(
     //     std::cout << "`--" << std::endl;
     // }
     // Fill the Matrix using standard dynamic programming.
-    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, alignmentChain.scoringScheme_, TAlignmentTag());
+    _alignFillMatrix(back(alignmentChain.alignmentMatrices_), suffix0, suffix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // // TODO(holtgrew): Temporary debug code.
     // {
@@ -289,7 +289,7 @@ _alignTrailingRectangle(
     //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
     //         std::cout << "|";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else 
     //                 std::cout << "\t" <<value(matrix, i, j);
@@ -304,7 +304,7 @@ _alignTrailingRectangle(
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignRectangle(
-        _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
+        AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
         Seed<TSeedSpec, TSeedConfig> const & leftSeed,
         Seed<TSeedSpec, TSeedConfig> const & rightSeed)
 {
@@ -312,7 +312,7 @@ _alignRectangle(
     // std::cout << "_alignRectangle ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
+    typedef Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -342,11 +342,11 @@ _alignRectangle(
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
     // Resize the alignment matrix to the appropriate size.
-    _align_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
+    _alignResizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, TAlignmentTag());
     // Copy over the data from the banded seed alignment matrix into
     // the gutter and initialize the rest of it according to the
     // alignment config object.
-    _align_initGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    _alignInitGutterFromBanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
     // // TODO(holtgrew): Temporary debug code.
     // {
     //     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
@@ -354,7 +354,7 @@ _alignRectangle(
     //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
     //         std::cout << "|";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else 
     //                 std::cout << "\t" <<value(matrix, i, j);
@@ -364,7 +364,7 @@ _alignRectangle(
     //     std::cout << "`--" << std::endl;
     // }
     // Fill the Matrix using standard dynamic programming.
-    _align_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
+    _alignFillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, TAlignmentTag());
 
     // // TODO(holtgrew): Temporary debug code.
     // {
@@ -373,7 +373,7 @@ _alignRectangle(
     //     for (unsigned i = 0; i < length(matrix, 0); ++i) {
     //         std::cout << "|";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else 
     //                 std::cout << "\t" <<value(matrix, i, j);
@@ -388,14 +388,14 @@ _alignRectangle(
 template <typename TSequence, typename TScoringScheme, typename TAlignmentTag, typename TSeedSpec, typename TSeedConfig>
 void
 _alignSeed(
-        _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
+        AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> & alignmentChain,
         Seed<TSeedSpec, TSeedConfig> const & seed)
 {
     SEQAN_CHECKPOINT;
     // std::cout << "_alignSeed ---------------------------------------------" << std::endl;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> TMatrix;
+    typedef Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> TMatrix;
     typedef typename Infix<TSequence>::Type TInfix;
     typedef typename Size<TSequence>::Type TSize;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
@@ -431,11 +431,11 @@ _alignSeed(
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
 
     // Resize the alignment matrix to the appropriate size.
-    _alignBanded_resizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, lowerDiagonal, upperDiagonal, TAlignmentTag());
+    _alignBandedResizeMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, lowerDiagonal, upperDiagonal, TAlignmentTag());
     // Initialize the banded DP matrix' gutter.  Some data is copied
     // in from the previous non-banded DP matrix.
-    // _alignBanded_initGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, AlignConfig<false, false, false, false>(), TAlignmentTag());
-    _alignBanded_initGutterFromUnbanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
+    // _alignBandedInitGutter(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, AlignConfig<false, false, false, false>(), TAlignmentTag());
+    _alignBandedInitGutterFromUnbanded(back(alignmentChain.alignmentMatrices_), alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, value(end(alignmentChain.alignmentMatrices_) - 2), leftOverlap0, leftOverlap1, TAlignmentTag());
     // // TODO(holtgrew): Debug output, remove when not needed any more.
     // {
     //     TMatrix & matrix = back(alignmentChain.alignmentMatrices_);
@@ -445,7 +445,7 @@ _alignSeed(
     //         for (unsigned j = 0; j < i; ++j)
     //             std::cout << "\t";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else
     //                 std::cout << "\t" << value(matrix, i, j);
@@ -455,7 +455,7 @@ _alignSeed(
     //     std::cout << "`--" << std::endl;
     // }
     // Fill the Matrix using banded dynamic programming.
-    _alignBanded_fillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, TAlignmentTag());
+    _alignBandedFillMatrix(back(alignmentChain.alignmentMatrices_), infix0, infix1, alignmentChain.scoringScheme_, lowerDiagonal, upperDiagonal, TAlignmentTag());
 
     // // TODO(holtgrew): Debug output, remove when not needed any more.
     // {
@@ -466,7 +466,7 @@ _alignSeed(
     //         for (unsigned j = 0; j < i; ++j)
     //             std::cout << "\t";
     //         for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //             if (value(matrix, i, j) == InfimumValue<int>::VALUE / 2)
+    //             if (value(matrix, i, j) == MinValue<int>::VALUE / 2)
     //                 std::cout << "\tinf";
     //             else
     //                 std::cout << "\t" << value(matrix, i, j);
@@ -482,14 +482,14 @@ template <typename TAlignment, typename TSequence, typename TScoringScheme, type
 typename Value<typename ScoringScheme<Alignment<TSequence, TScoringScheme, TAlignmentTag> >::Type >::Type
 _glueAlignmentChain(
         TAlignment & alignment,
-        _AlignmentChain<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain,
+        AlignmentChain_<TSequence, TScoringScheme, TAlignmentTag> const & alignmentChain,
         TSeedChain const & seedChain,
         AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const & alignConfig)
 {
     SEQAN_CHECKPOINT;
 
     typedef typename Value<TScoringScheme>::Type TScoreValue;
-    typedef String<Matrix<TScoreValue, _AlignmentMatrixDimension<TAlignmentTag>::VALUE> > const TMatrixString;
+    typedef String<Matrix<TScoreValue, AlignmentMatrixDimension_<TAlignmentTag>::VALUE> > const TMatrixString;
     typedef typename Iterator<TMatrixString, Standard>::Type TMatrixStringIterator;
     typedef typename Position<TMatrixString>::Type TPosition;
 
@@ -519,7 +519,7 @@ _glueAlignmentChain(
     std::cerr << "upperLeftOverlap0 = " << upperLeftOverlap0 << " upperLeftOverlap1 = " << upperLeftOverlap1 << std::endl;
     TPosition lowerRightOverlap0 = 1;
     TPosition lowerRightOverlap1 = 1;
-    TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, alignConfig, TAlignmentTag());
+    TScoreValue result = _alignTraceback(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl;
     // std::cout << alignment;
     // std::cout << result << std::endl;
@@ -546,7 +546,7 @@ _glueAlignmentChain(
             upperLeftOverlap1 = 0;
         }
     }
-    _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+    _alignBandedTraceback(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
     goPrevious(matricesIt);
 
     // std::cout << "Alignment so far:" << std::endl << alignment;
@@ -561,7 +561,7 @@ _glueAlignmentChain(
             goPrevious(seedChainItPrevious);
             _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainItPrevious), alignmentChain);
         }
-        _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        _alignTraceback(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         goPrevious(seedChainIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
@@ -577,7 +577,7 @@ _glueAlignmentChain(
         // std::cout << "maxTriangleEdgeLength == " << maxTriangleEdgeLength << std::endl;
         lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
         upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
-        _alignBanded_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
+        _alignBandedTraceback(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperTriangleEdgeLength, lowerTriangleEdgeLength, false, AlignConfig<false, false, false, false>(), TAlignmentTag());
         goPrevious(matricesIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
     }
@@ -588,7 +588,7 @@ _glueAlignmentChain(
     upperLeftOverlap0 = 0;
     upperLeftOverlap1 = 0;
     _computeUpperLeftOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
-    _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, true, alignConfig, TAlignmentTag());
+    _alignTraceback(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, true, alignConfig, TAlignmentTag());
     // std::cout << "Alignment so far:" << std::endl << alignment;
     return result;
 }
@@ -596,7 +596,7 @@ _glueAlignmentChain(
 
 template <typename TStream, typename TAlignment, typename TAlignmentChain, typename TSeedChain>
 void
-write(TStream & stream, TAlignment const & alignment, TAlignmentChain const & alignmentChain, TSeedChain const & seedChain, _Tikz const &)
+write(TStream & stream, TAlignment const & alignment, TAlignmentChain const & alignmentChain, TSeedChain const & seedChain, Tikz_ const &)
 {
     typedef typename Row<TAlignment const>::Type TRow;
     typedef typename Position<TAlignment>::Type TPosition;
@@ -726,7 +726,7 @@ _bandedChainAlignment(
     typedef typename Value<TContainer const>::Type TSeed;
     typedef typename Iterator<TContainer const, Standard>::Type TIterator;
     typedef Score<TScoreValue, Simple> TScoringScheme;
-    typedef _AlignmentChain<TSegment, TScoringScheme, TGlobalAlignmentTag> TAlignmentChain;
+    typedef AlignmentChain_<TSegment, TScoringScheme, TGlobalAlignmentTag> TAlignmentChain;
 
     //
     // Initialization
@@ -769,7 +769,7 @@ _bandedChainAlignment(
     // {
     //     std::ofstream file;
     //     file.open("/tmp/example.tex", std::ios::out);
-    //     write(file, alignment, alignmentChain, seedChain, _Tikz());
+    //     write(file, alignment, alignmentChain, seedChain, Tikz_());
     // }
 
     // Glue all alignments together.

@@ -175,7 +175,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return result.QuadPart;
         }
 
-        inline bool setEOF() const {
+        inline bool setEof() const {
             return SetEndOfFile(handle) != FALSE;
         }
 
@@ -237,7 +237,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename TSpec>
-    struct aRequest<File<Async<TSpec> > >
+    struct AsyncRequest<File<Async<TSpec> > >
     {
         typedef aiocb_win32 Type;
     };
@@ -274,8 +274,8 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template <typename TSpec>
-    inline bool setEOF(File<Async<TSpec> > &me) {
-        return me.setEOF();
+    inline bool setEof(File<Async<TSpec> > &me) {
+        return me.setEof();
     }
 
 	template <typename TSpec>
@@ -402,8 +402,8 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
     }
 
-    template < typename TSpec, typename aRequest >
-    inline void release(File<Async<TSpec> > & me, aRequest & request) { }
+    template < typename TSpec, typename AsyncRequest >
+    inline void release(File<Async<TSpec> > & me, AsyncRequest & request) { }
 
 
 /*        
@@ -412,12 +412,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TSpec> > >::Type
-    aread(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
+    asyncRead(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TSpec> > >::Type request = 
+        typename AsyncRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
                 me.handleAsync,
                 me.position,
@@ -431,12 +431,12 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < typename TSpec, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TSpec> > >::Type
-    awrite(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count,
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
+    asyncWrite(File<Async<TSpec> > & me, TValue const *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TSpec> > >::Type request = 
+        typename AsyncRequest<File<Async<TSpec> > >::Type request = 
             me.queue->awriteAt(
                 memPtr,
                 me.handleAsync,
@@ -450,7 +450,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TSpec> > >::Type
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
     areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
@@ -466,7 +466,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File<Async<TSpec> > >::Type
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
     awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
@@ -486,12 +486,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File<Async<TSpec> > >::Type
-    aread(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
+    asyncRead(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TSpec> > >::Type request = 
+        typename AsyncRequest<File<Async<TSpec> > >::Type request = 
             me.queue->areadAt(
                 me.handleAsync,
                 me.position,
@@ -504,12 +504,12 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < typename TSpec, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File<Async<TSpec> > >::Type
-    awrite(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
+    asyncWrite(File<Async<TSpec> > & me, TValue *memPtr, TSize const count,
         aEvent &event)
     {
         DWORD bsize = (DWORD)(count * sizeof(TValue));
-        typename aRequest<File<Async<TSpec> > >::Type request =  
+        typename AsyncRequest<File<Async<TSpec> > >::Type request =  
             me.queue->awriteAt(
                 memPtr,
                 me.handleAsync,
@@ -522,7 +522,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TSpec, typename TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File<Async<TSpec> > >::Type
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
     areadAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
@@ -537,7 +537,7 @@ namespace SEQAN_NAMESPACE_MAIN
     
     template < typename TSpec, TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File<Async<TSpec> > >::Type
+    inline typename AsyncRequest<File<Async<TSpec> > >::Type
     awriteAt(File<Async<TSpec> > & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
@@ -559,8 +559,8 @@ namespace SEQAN_NAMESPACE_MAIN
         me.queue->flush();
     }
 
-    template < typename TSpec, typename aRequest >
-    inline void release(File<Async<TSpec> > & me, aRequest & request) {
+    template < typename TSpec, typename AsyncRequest >
+    inline void release(File<Async<TSpec> > & me, AsyncRequest & request) {
         me.queue->release(request);
     }
 */
@@ -688,7 +688,7 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	template <typename TSpec>
-    struct aRequest<File<Async<TSpec> > >
+    struct AsyncRequest<File<Async<TSpec> > >
     {
 		typedef aiocb Type;
     };
@@ -889,7 +889,7 @@ namespace SEQAN_NAMESPACE_MAIN
         return aio_error(&request);
     }
 
-    inline int return_value(aiocb & request) {
+    inline int _returnValue(aiocb & request) {
         return aio_return(&request);
     }
 

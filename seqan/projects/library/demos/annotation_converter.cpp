@@ -17,12 +17,12 @@ int main(int argc, const char *argv[])
 	addTitleLine(parser, "*** Annotation Converter ***");
 	addTitleLine(parser, "****************************");
 	addHelpLine(parser, "");	
-	addOption(parser, CommandLineOption("rg",  "read-gff",      "read annotation in GFF/GTF format", OptionType::String | OptionType::Label));
-	addOption(parser, CommandLineOption("ru",  "read-ucsc",  2, "read annotation in UCSC format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("rg",  "read-gff",      "read annotation in Gff/Gtf format", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("ru",  "read-ucsc",  2, "read annotation in Ucsc format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
 	addHelpLine(parser, "");
-	addOption(parser, CommandLineOption("wg",  "write-gff",     "write annotation in GFF format", OptionType::String | OptionType::Label));
-	addOption(parser, CommandLineOption("wt",  "write-gtf",     "write annotation in GTF format", OptionType::String | OptionType::Label));
-	addOption(parser, CommandLineOption("wu",  "write-ucsc", 2, "write annotation in UCSC format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("wg",  "write-gff",     "write annotation in Gff format", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("wt",  "write-gtf",     "write annotation in Gtf format", OptionType::String | OptionType::Label));
+	addOption(parser, CommandLineOption("wu",  "write-ucsc", 2, "write annotation in Ucsc format (knownGenes.txt knownIsoforms.txt)", OptionType::String | OptionType::Label));
 
 	bool stop = !parse(parser, argc, argv, cerr);
 	if (argc == 1 || stop)
@@ -40,7 +40,7 @@ int main(int argc, const char *argv[])
 	{
 		getOptionValueLong(parser, "read-gff", fileName);
 		ifstream file(toCString(fileName), ios_base::in | ios_base::binary);
-		read(file, store, GFF());
+		read(file, store, Gff());
 	}
 	if (isSetLong(parser, "read-ucsc"))
 	{
@@ -48,8 +48,8 @@ int main(int argc, const char *argv[])
 		ifstream file1(toCString(fileName), ios_base::in | ios_base::binary);
 		fileName = getOptionValuesLong(parser, "read-ucsc")[1];
 		ifstream file2(toCString(fileName), ios_base::in | ios_base::binary);
-		read(file1, store, UCSC());
-		read(file2, store, UCSC());
+		read(file1, store, Ucsc());
+		read(file2, store, Ucsc());
 	}
 
 	// EXPORT
@@ -57,13 +57,13 @@ int main(int argc, const char *argv[])
 	{
 		getOptionValueLong(parser, "write-gff", fileName);
 		ofstream file(toCString(fileName), ios_base::out | ios_base::binary);
-		write(file, store, GFF());
+		write(file, store, Gff());
 	}
 	if (isSetLong(parser, "write-gtf"))
 	{
 		getOptionValueLong(parser, "write-gtf", fileName);
 		ofstream file(toCString(fileName), ios_base::out | ios_base::binary);
-		write(file, store, GTF());
+		write(file, store, Gtf());
 	}
 	if (isSetLong(parser, "write-ucsc"))
 	{
@@ -71,8 +71,8 @@ int main(int argc, const char *argv[])
 		ofstream file1(toCString(fileName), ios_base::out | ios_base::binary);
 		fileName = getOptionValuesLong(parser, "write-ucsc")[1];
 		ofstream file2(toCString(fileName), ios_base::out | ios_base::binary);
-		write(file1, store, UCSC());
-		write(file2, store, UCSC_ISOFORMS());
+		write(file1, store, Ucsc());
+		write(file2, store, UcscIsoforms());
 	}
 	
 	return 0;

@@ -57,7 +57,7 @@ SEQAN_CHECKPOINT
 			}
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				it.data_eof = true;
 				return;
 			}
@@ -66,7 +66,7 @@ SEQAN_CHECKPOINT
 				break;
 			}
 			//skip meta line
-			_stream_skipLine(host(it), it.data_char);
+			_streamSkipLine(host(it), it.data_char);
 		}
 	}
 
@@ -85,7 +85,7 @@ SEQAN_CHECKPOINT
 			it.data_char = _streamGet(host(it));
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				it.data_eof = true;
 				return;
 			}
@@ -141,7 +141,7 @@ SEQAN_CHECKPOINT
 
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				_streamUnget(host(it));
 				it.data_eof = true;
 				return;
@@ -221,12 +221,12 @@ SEQAN_CHECKPOINT
 		}
 		if (c == '/')
 		{//end of record
-			_stream_skipLine(file, c);
+			_streamSkipLine(file, c);
 			_streamUnget(file);
 			return;
 		}
 
-		_stream_appendLine(file, meta, c);
+		_streamAppendLine(file, meta, c);
 		appendValue(meta, '\n');
 	}
 }
@@ -284,19 +284,19 @@ SEQAN_CHECKPOINT
 			{
 				for(unsigned int i = 0; i < 4; ++i)
 					c = _streamGet(file);
-				_stream_appendLine(file, data, c);
-				while(!_streamEOF(file) && _stream_readWord(file,c) == key)
+				_streamAppendLine(file, data, c);
+				while(!_streamEOF(file) && _streamReadWord(file,c) == key)
 				{
 					appendValue(data, '\n');
 					for(unsigned int i = 0; i < 3; ++i)
 						c = _streamGet(file);
-					_stream_appendLine(file, data, c);
+					_streamAppendLine(file, data, c);
 				}
 				_streamSeekG(file,pos);
 				return;
 			}
 		}
-		_stream_skipLine(file, c);
+		_streamSkipLine(file, c);
 	}
 
 	_streamSeekG(file,pos);
@@ -339,17 +339,17 @@ SEQAN_CHECKPOINT
 			if(*it == key[1])
 			{
 				it+=4;
-				_string_appendLine(meta, data, it);
+				_stringAppendLine(meta, data, it);
 				while(it!=end_it && *it==key[0] && *(++it)==key[1])
 				{
 					appendValue(data, '\n');
 					it+=4;
-					_string_appendLine(meta, data, it);
+					_stringAppendLine(meta, data, it);
 				}
 				return;
 			}
 		}
-		_string_skipLine(meta, it);
+		_stringSkipLine(meta, it);
 	}
 
 	
@@ -410,18 +410,18 @@ SEQAN_CHECKPOINT
 			}
 			if(found)
 			{
-				_string_skipWhitespace(str,it);
-				_string_appendLine(str, data, it);
+				_stringSkipWhitespace(str,it);
+				_stringAppendLine(str, data, it);
 				while(it!=end_it && *it == ' ')
 				{
 					appendValue(data, '\n');
-					_string_skipWhitespace(str,it);
-					_string_appendLine(str, data, it);
+					_stringSkipWhitespace(str,it);
+					_stringAppendLine(str, data, it);
 				}
 				return position(it,str);
 			}
 		}
-		_string_skipLine(str, it);
+		_stringSkipLine(str, it);
 	}
 
 	return 0;
@@ -449,7 +449,7 @@ SEQAN_CHECKPOINT
 		TValue c = _streamGet(file);
 		if (c == '/')
 		{//end of record
-			_stream_skipLine(file, c);
+			_streamSkipLine(file, c);
 			_streamUnget(file);
 			return;
 		}

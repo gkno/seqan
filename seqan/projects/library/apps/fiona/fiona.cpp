@@ -59,8 +59,8 @@ using namespace seqan;
 
 #endif
 
-typedef Index<TFionaFragStore::TReadSeqStore, Index_Wotd<> > TFionaIndex; 
-typedef Index<TFionaFragStore::TReadSeqStore, Index_QGram< Shape<Dna5, UngappedShape<4> > > > TFionaQgramIndex;
+typedef Index<TFionaFragStore::TReadSeqStore, IndexWotd<> > TFionaIndex; 
+typedef Index<TFionaFragStore::TReadSeqStore, IndexQGram< Shape<Dna5, UngappedShape<4> > > > TFionaQgramIndex;
 
 
 struct FionaPoisson_;
@@ -535,8 +535,8 @@ void traverseAndSearchCorrections(
 	Tag<TAlgorithm> const alg)
 {
 	typedef typename Container<TTreeIterator>::Type TFionaIndex;
-	typedef typename Fibre<TFionaIndex, Fibre_Text>::Type TReadSet;
-	typedef typename Fibre<TFionaIndex, Fibre_SA>::Type TSA;
+	typedef typename Fibre<TFionaIndex, FibreText>::Type TReadSet;
+	typedef typename Fibre<TFionaIndex, FibreSA>::Type TSA;
 	typedef typename Infix<TSA const>::Type TOccs;
 	typedef typename Iterator<TOccs, Standard>::Type TOccsIterator;
 	typedef typename Value<TReadSet>::Type TRead;
@@ -820,7 +820,7 @@ void correctReads(
 		for (unsigned i = 0; i < readCount; ++i)
 		{
 			tmp = store.readSeqStore[i];
-			reverseComplementInPlace(tmp);
+			reverseComplement(tmp);
 			appendValue(store.readSeqStore, tmp);
 		}
 
@@ -828,7 +828,7 @@ void correctReads(
 	String<double> expectedTheoretical;
 	expectedValueTheoretical(expectedTheoretical, store.readSeqStore, options.genomeLength);
 
-	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+	if (IsSameType<TAlgorithm, FionaExpected_>::VALUE)
 	{
 		String<double> sd;
 		standardDeviation(sd, store.readSeqStore, options.genomeLength);
@@ -849,7 +849,7 @@ void correctReads(
 		}
 	}
 	
-	if (TYPECMP<TAlgorithm, FionaCount_>::VALUE)
+	if (IsSameType<TAlgorithm, FionaCount_>::VALUE)
 		for (unsigned i = 0; i < length(expectedTheoretical); ++i)
 			expectedTheoretical[i] = options.strictness ;
 	
@@ -858,13 +858,13 @@ void correctReads(
 	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
 	fill(corrections, readCount, zeroCorr);
 	
-	if (TYPECMP<TAlgorithm, FionaExpected_>::VALUE)
+	if (IsSameType<TAlgorithm, FionaExpected_>::VALUE)
 		std::cout << std::endl << "Method with expected value for each level" << std::endl;
-	if (TYPECMP<TAlgorithm, FionaPoisson_>::VALUE) 
+	if (IsSameType<TAlgorithm, FionaPoisson_>::VALUE) 
 		std::cout << std::endl << "Method with p-value and Poisson distribution" << std::endl;
-	if (TYPECMP<TAlgorithm, FionaPoissonSens_>::VALUE)
+	if (IsSameType<TAlgorithm, FionaPoissonSens_>::VALUE)
 		std::cout << std::endl << "Method with sensitivity and Poisson distribution" << std::endl;
-	if (TYPECMP<TAlgorithm, FionaCount_>::VALUE)
+	if (IsSameType<TAlgorithm, FionaCount_>::VALUE)
 		std::cout << std::endl << "Method with fixed count for each level" << std::endl;
 
 	

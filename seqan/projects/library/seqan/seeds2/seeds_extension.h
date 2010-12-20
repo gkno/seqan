@@ -52,14 +52,14 @@ namespace seqan {
 ..tag.GappedXDrop:Gapped extension of a seed until score drops below a Value. Only @Spec.SimpleSeed@s.
 ..include:seqan/seeds.h
 */
-struct _MatchExtend;
-typedef Tag<_MatchExtend> const MatchExtend;
+struct MatchExtend_;
+typedef Tag<MatchExtend_> const MatchExtend;
 
-struct _UnGappedXDrop;
-typedef Tag<_UnGappedXDrop> const UnGappedXDrop;
+struct UngappedXDrop_;
+typedef Tag<UngappedXDrop_> const UnGappedXDrop;
 
-struct _GappedXDrop;
-typedef Tag<_GappedXDrop> const GappedXDrop;
+struct GappedXDrop_;
+typedef Tag<GappedXDrop_> const GappedXDrop;
 
 enum ExtensionDirection
 {
@@ -496,7 +496,7 @@ SEQAN_CHECKPOINT
 	if (rows == 1 || cols == 1) return 0;
 
     TScoreValue gapCost = scoreGap(scoringScheme);
-    TScoreValue undefined = infimumValue<TScoreValue>() - gapCost;
+    TScoreValue undefined = minValue<TScoreValue>() - gapCost;
 
     // DP matrix is calculated by anti-diagonals
     String<TScoreValue> antiDiag1;	//smallest anti-diagonal

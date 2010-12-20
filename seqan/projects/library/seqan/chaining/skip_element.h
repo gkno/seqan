@@ -318,7 +318,7 @@ Can be used to perform operation s
 	dump( SkipElement< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		std::cout.width(5);
-		if( key( me ) == infimumValue< typename Key< TObject >::Type >( ) )
+		if( key( me ) == minValue< typename Key< TObject >::Type >( ) )
 			std::cout << std::left << "L";
 		else
 			std::cout<< key( me );

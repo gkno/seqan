@@ -124,7 +124,7 @@ public:
 template <typename THost, typename TFunctor>
 struct Value< ModifiedIterator<THost, ModView<TFunctor> > > {
     typedef typename TFunctor::result_type			TResult;
-    typedef typename _RemoveConst<TResult>::Type	Type;
+    typedef typename RemoveConst_<TResult>::Type	Type;
 };
 
 template <typename THost, typename TFunctor>
@@ -361,7 +361,7 @@ convertInPlace(TSequence & sequence, TFunctor const &F)
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)
 	// OpenMP does not support for loop with iterators. Therefore use index variables.
 	typedef typename Position<TSequence>::Type	TPos;
-	typedef typename _MakeSigned<TPos>::Type	TSignedPos;
+	typedef typename MakeSigned_<TPos>::Type	TSignedPos;
 
 	#pragma omp parallel for if(length(sequence) > 1000000)
 	for(TSignedPos p = 0; p < (TSignedPos)length(sequence); ++p)
@@ -385,7 +385,7 @@ convertInPlace(TSequence const & sequence, TFunctor const &F)
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)
 	// OpenMP does not support for loop with iterators. Therefore use index variables.
 	typedef typename Position<TSequence>::Type	TPos;
-	typedef typename _MakeSigned<TPos>::Type	TSignedPos;
+	typedef typename MakeSigned_<TPos>::Type	TSignedPos;
 
 	#pragma omp parallel for if(length(sequence) > 1000000)
 	for(TSignedPos p = 0; p < (TSignedPos)length(sequence); ++p)

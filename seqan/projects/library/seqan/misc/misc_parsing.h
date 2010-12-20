@@ -59,7 +59,7 @@ _parse_skipLine(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipWhitespace(TFile& file, TChar& c)
+_parseSkipWhitespace(TFile& file, TChar& c)
 {
 	if ((unsigned) c > 32) return;
 	while (!_streamEOF(file)) {
@@ -70,7 +70,7 @@ _parse_skipWhitespace(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipSpace(TFile& file, TChar& c)
+_parseSkipSpace(TFile& file, TChar& c)
 {
 	if (c != '\t' && c != ' ') return;
 	while (!_streamEOF(file)) {
@@ -81,17 +81,17 @@ _parse_skipSpace(TFile& file, TChar& c)
 
 
 /**
-.Internal._parse_skipUntilChar:
+.Internal._parseSkipUntilChar:
 ..summary:Skip to the next ocurrence of x in file.
 ..cat:Miscenalleous
-..signature:_parse_skipUntilChar(file, x, c)
+..signature:_parseSkipUntilChar(file, x, c)
 ..param.file:The file to read from.
 ..param.x:The character to skip to.
 ..param.c:Parser state character.
  */
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipUntilChar(TFile& file, const TChar &x, TChar& c)
+_parseSkipUntilChar(TFile& file, const TChar &x, TChar& c)
 {
 	if (c == x) return;
 	while (!_streamEOF(file)) {
@@ -104,7 +104,7 @@ _parse_skipUntilChar(TFile& file, const TChar &x, TChar& c)
 
 template<typename TChar>
 inline bool
-_parse_isDigit(TChar const c)
+_parseIsDigit(TChar const c)
 {
 	return (((unsigned) c >  47) && ((unsigned) c <  58));
 }
@@ -113,7 +113,7 @@ _parse_isDigit(TChar const c)
 
 template<typename TChar>
 inline bool
-_parse_isLetter(TChar const c)
+_parseIsLetter(TChar const c)
 {
 	return ( (((unsigned) c > 64) && ((unsigned) c < 91)) || (((unsigned) c > 96) && ((unsigned) c < 123)) );
 }
@@ -123,22 +123,22 @@ _parse_isLetter(TChar const c)
 // TODO(holtgrew): The name of this function is WRONG.
 template<typename TChar>
 inline bool
-_parse_isAlphanumericChar(TChar const c)
+_parseIsAlphanumericChar(TChar const c)
 {
-	return ((_parse_isDigit(c)) || (_parse_isLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|') || (c == '/') || (c == ':'));
+	return ((_parseIsDigit(c)) || (_parseIsLetter(c)) || (c == '_') || (c == '.') || (c == '-') || (c == '|') || (c == '/') || (c == ':'));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TFile, typename TChar>
 inline int
-_parse_readNumber(TFile & file, TChar& c)
+_parseReadNumber(TFile & file, TChar& c)
 {
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isDigit(c)) break;
+		if (!_parseIsDigit(c)) break;
 		append(str, c);
 	}
  	return atoi(toCString(str));
@@ -148,13 +148,13 @@ _parse_readNumber(TFile & file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline double
-_parse_readDouble(TFile & file, TChar& c)
+_parseReadDouble(TFile & file, TChar& c)
 {
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isDigit(c) && (c != '.')) break;
+		if (!_parseIsDigit(c) && (c != '.')) break;
 		append(str, c);
 	}
  	return atof(toCString(str));
@@ -164,13 +164,13 @@ _parse_readDouble(TFile & file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline String<char>
-_parse_readIdentifier(TFile & file, TChar& c)
+_parseReadIdentifier(TFile & file, TChar& c)
 {
 	// Read identifier
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isAlphanumericChar(c)) break;
+		if (!_parseIsAlphanumericChar(c)) break;
 		append(str, c);
 	}
 	return str;
@@ -180,7 +180,7 @@ _parse_readIdentifier(TFile & file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline char
-_parse_readChar(TFile & file, TChar& c)
+_parseReadChar(TFile & file, TChar& c)
 {
     char result = c;
     if (!_streamEOF(file))
@@ -192,13 +192,13 @@ _parse_readChar(TFile & file, TChar& c)
 
 template<typename TFile, typename TString, typename TChar>
 inline void
-_parse_readIdentifier(TFile & file, TString& str, TChar& c)
+_parseReadIdentifier(TFile & file, TString& str, TChar& c)
 {
 	// Read identifier
 	append(str, c, Generous());
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isAlphanumericChar(c)) break;
+		if (!_parseIsAlphanumericChar(c)) break;
 		append(str, c, Generous());
 	}
 }
@@ -207,13 +207,13 @@ _parse_readIdentifier(TFile & file, TString& str, TChar& c)
 
 template<typename TFile, typename TChar>
 inline String<char>
-_parse_readWord(TFile & file, TChar& c)
+_parseReadWord(TFile & file, TChar& c)
 {
 	// Read word
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isLetter(c)) break;
+		if (!_parseIsLetter(c)) break;
 		append(str, c);
 	}
 	return str;
@@ -223,7 +223,7 @@ _parse_readWord(TFile & file, TChar& c)
 // parse word up to a maximum length
 template<typename TFile, typename TChar, typename TSize>
 inline String<char>
-_parse_readWord(TFile & file, TChar& c, TSize max_len)
+_parseReadWord(TFile & file, TChar& c, TSize max_len)
 {
 	// Read word
 	String<char> str(c);
@@ -231,7 +231,7 @@ _parse_readWord(TFile & file, TChar& c, TSize max_len)
 	TSize i = 0;
 	while (!_streamEOF(file) ) {
 		c = _streamGet(file);
-		if (!_parse_isLetter(c) || i >= max_len) break;
+		if (!_parseIsLetter(c) || i >= max_len) break;
 		append(str, c);
 		++i;
 	}
@@ -244,7 +244,7 @@ _parse_readWord(TFile & file, TChar& c, TSize max_len)
 //read filename (read line and trim trailing whitespaces)
 template<typename TFile, typename TChar>
 inline String<char>
-_parse_readFilepath(TFile& file, TChar& c)
+_parseReadFilepath(TFile& file, TChar& c)
 {
 	String<char> str(c);
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
@@ -272,7 +272,7 @@ _parse_readFilepath(TFile& file, TChar& c)
 //read filename (read line and trim trailing whitespaces)
 template<typename TFile, typename TChar>
 inline String<char>
-_parse_readWordUntilWhitespace(TFile& file, TChar& c)
+_parseReadWordUntilWhitespace(TFile& file, TChar& c)
 {
 	String<char> str(c);
 	if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
@@ -292,7 +292,7 @@ _parse_readWordUntilWhitespace(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar, typename TString>
 inline void
-_parse_readSequenceData(TFile & file,
+_parseReadSequenceData(TFile & file,
 						TChar & c,
 						TString& str)
 {
@@ -303,7 +303,7 @@ _parse_readSequenceData(TFile & file,
 	// Read sequence
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (!_parse_isLetter(c)) break;
+		if (!_parseIsLetter(c)) break;
 		else append(str, c);
 	}
 }
@@ -312,7 +312,7 @@ _parse_readSequenceData(TFile & file,
 
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipBlanks(TFile& file, TChar& c)
+_parseSkipBlanks(TFile& file, TChar& c)
 {
 	if ((c != ' ') && (c != '\t')) return;
 	while (!_streamEOF(file)) {
@@ -323,7 +323,7 @@ _parse_skipBlanks(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar>
 inline void 
-_parse_skipLine2(TFile& file, TChar& c)
+_parseSkipLine2(TFile& file, TChar& c)
 {
 	if (c != '\n' && c != '\r')
 		while (!_streamEOF(file)) {
@@ -339,7 +339,7 @@ _parse_skipLine2(TFile& file, TChar& c)
 //////////////////////////////////////////////////////////////////////////////
 template<typename TFile, typename TChar>
 inline double
-_parse_readEValue(TFile & file, TChar& c)
+_parseReadEValue(TFile & file, TChar& c)
 {
 SEQAN_CHECKPOINT
 
@@ -355,7 +355,7 @@ SEQAN_CHECKPOINT
 			c = _streamGet(file);
 			resize(str,0);
 		}
-		if (!_parse_isDigit(c) && c != '.' && c != '-' && c != '+') break;
+		if (!_parseIsDigit(c) && c != '.' && c != '-' && c != '+') break;
 		append(str, c);
 	}
 	if(e)
@@ -374,14 +374,14 @@ SEQAN_CHECKPOINT
 // read floating point value
 template<typename TFile, typename TChar>
 inline float
-_parse_readFloat(TFile & file, TChar& c)
+_parseReadFloat(TFile & file, TChar& c)
 {
 SEQAN_CHECKPOINT
 	// Read number
 	String<char> str(c);
 	while (!_streamEOF(file)) {
 		c = _streamGet(file);
-		if (c != '.' && c != ',' && !_parse_isDigit(c)) break;
+		if (c != '.' && c != ',' && !_parseIsDigit(c)) break;
 		append(str, c);
 	}
  	return atof(toCString(str));
@@ -395,15 +395,15 @@ SEQAN_CHECKPOINT
 // zeigt am ende darauf!!!
 template<typename TFile, typename TChar>
 inline bool
-_parse_untilBeginLine(TFile & file, TChar& c, TChar x)
+_parseUntilBeginLine(TFile & file, TChar& c, TChar x)
 {
 SEQAN_CHECKPOINT
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	while (!_streamEOF(file) && c != x){
 		_parse_skipLine(file, c);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;
 	_streamSeekG(file,pos);
@@ -417,18 +417,18 @@ SEQAN_CHECKPOINT
 //zeigt am ende dahinter!
 template<typename TFile, typename TChar, typename TSize>
 inline bool
-_parse_untilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len)
+_parseUntilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
 SEQAN_CHECKPOINT
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	while (!_streamEOF(file)){
 		if(c == word[0])
-			if(word == _parse_readWord(file,c,len))
+			if(word == _parseReadWord(file,c,len))
 				break;
 		_parse_skipLine(file, c);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;
 	_streamSeekG(file,pos);
@@ -442,17 +442,17 @@ SEQAN_CHECKPOINT
 //zeigt am ende dahinter!
 template<typename TFile, typename TChar, typename TSize>
 inline bool
-_parse_untilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len, TSize num_lines)
+_parseUntilBeginLine(TFile & file, TChar& c, String<TChar> & word, TSize len, TSize num_lines)
 {
 SEQAN_CHECKPOINT
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	TSize i = 0;
 	bool found = false;
 	while (!_streamEOF(file)){
 		if(c == word[0])
-			if(word == _parse_readWord(file,c,len))
+			if(word == _parseReadWord(file,c,len))
 			{
 				found = true;
 				break;
@@ -461,7 +461,7 @@ SEQAN_CHECKPOINT
 			break;
 		++i;
 		_parse_skipLine(file, c);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file) && found) return true;
 	_streamSeekG(file,pos);
@@ -475,10 +475,10 @@ SEQAN_CHECKPOINT
 //zeigt am ende darauf!
 template<typename TFile, typename TChar, typename TSize>
 inline bool
-_parse_untilBeginLineOneOf(TFile & file, TChar& c, String<TChar> & x, TSize len)
+_parseUntilBeginLineOneOf(TFile & file, TChar& c, String<TChar> & x, TSize len)
 {
 SEQAN_CHECKPOINT
-	_parse_skipWhitespace(file,c);
+	_parseSkipWhitespace(file,c);
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	bool found = false;
@@ -491,7 +491,7 @@ SEQAN_CHECKPOINT
 			}
 		if(found) break;
 		_parse_skipLine(file, c);
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 	}
 	if(!_streamEOF(file)) return true;
 	_streamSeekG(file,pos);
@@ -505,7 +505,7 @@ SEQAN_CHECKPOINT
 //zeigt am ende darauf!
 template<typename TFile, typename TChar>
 inline bool
-_parse_until(TFile & file, TChar& c, TChar x)
+_parseUntil(TFile & file, TChar& c, TChar x)
 {
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -526,14 +526,14 @@ SEQAN_CHECKPOINT
 //zeigt am ende dahinter!
 template<typename TFile, typename TChar, typename TSize>
 inline bool
-_parse_until(TFile & file, TChar& c, String<TChar> & word, TSize len)
+_parseUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	while (!_streamEOF(file)){
 		if(c == word[0])
-			if(word == _parse_readWord(file,c,len))
+			if(word == _parseReadWord(file,c,len))
 				break;
 		c = _streamGet(file);
 	}
@@ -549,7 +549,7 @@ SEQAN_CHECKPOINT
 //zeigt am ende darauf!
 template<typename TFile, typename TChar>
 inline bool
-_parse_lineUntil(TFile & file, TChar& c, TChar x)
+_parseLineUntil(TFile & file, TChar& c, TChar x)
 {
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
@@ -575,14 +575,14 @@ SEQAN_CHECKPOINT
 //zeigt am ende hinter wort if true, oder auf ende der zeile
 template<typename TFile, typename TChar, typename TSize>
 inline bool
-_parse_lineUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
+_parseLineUntil(TFile & file, TChar& c, String<TChar> & word, TSize len)
 {
 SEQAN_CHECKPOINT
 	typename Position<TFile>::Type pos = _streamTellG(file);
 	TChar c_before = c;
 	while (!_streamEOF(file)){
 		if(c == word[0])
-		{	if(word == _parse_readWord(file,c,len))
+		{	if(word == _parseReadWord(file,c,len))
 				break;
 		}
 		else if (c == '\n' || c == '\r')

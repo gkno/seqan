@@ -957,10 +957,10 @@ SEQAN_CHECKPOINT
 	// one list of interval pointers for the intervals to the right of center
 	TIntervalPointers S_right;
 
-	TValue min1 = supremumValue<TValue>();
-	TValue min2 = supremumValue<TValue>();
-	TValue max1 = infimumValue<TValue>();
-	TValue max2 = infimumValue<TValue>();
+	TValue min1 = maxValue<TValue>();
+	TValue min2 = maxValue<TValue>();
+	TValue max1 = minValue<TValue>();
+	TValue max2 = minValue<TValue>();
 
 	value(pm,knot).center = center;
 	
@@ -1174,8 +1174,8 @@ _calcIntervalTreeRootCenter(TIntervals & intervals)
 	TIntervalIterator it = begin(intervals);
 	TIntervalIterator it_end = end(intervals);
 
-	TValue min = supremumValue<TValue>();
-	TValue max = infimumValue<TValue>();
+	TValue min = maxValue<TValue>();
+	TValue max = minValue<TValue>();
 
 	while(it != it_end)
 	{

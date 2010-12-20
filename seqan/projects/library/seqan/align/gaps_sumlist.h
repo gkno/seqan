@@ -72,7 +72,7 @@ SEQAN_CHECKPOINT
 		clipped_source_begin(0),
 		clipped_source_end(0)
 	{
-		_init_to_resize(*this, _size);
+		_initToResize(*this, _size);
 	}
 	Gaps(TSource & source_):
 		data_source(source_),
@@ -80,7 +80,7 @@ SEQAN_CHECKPOINT
 		clipped_source_end(endPosition(source_))
 	{
 SEQAN_CHECKPOINT
-		_init_to_resize(*this, length(source_));
+		_initToResize(*this, length(source_));
 	}
 
 	template <typename TSource2>
@@ -90,7 +90,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		data_source = source_;
-		_init_to_resize(*this, length(source_));
+		_initToResize(*this, length(source_));
 	}
 
 	Gaps(Gaps const & other_):
@@ -242,7 +242,7 @@ SEQAN_CHECKPOINT
 
 template <typename TSource, typename TSize2>
 inline void
-_init_to_resize(Gaps<TSource, SumlistGaps> & me,
+_initToResize(Gaps<TSource, SumlistGaps> & me,
 				TSize2 _size)
 {
 SEQAN_CHECKPOINT
@@ -263,7 +263,7 @@ inline void
 clearGaps(Gaps<TSource, SumlistGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, clippedEndPosition(me) - clippedBeginPosition(me));
+	_initToResize(me, clippedEndPosition(me) - clippedBeginPosition(me));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -273,7 +273,7 @@ inline void
 clear(Gaps<TSource, SumlistGaps> & me)
 {
 SEQAN_CHECKPOINT
-	_init_to_resize(me, 0);
+	_initToResize(me, 0);
 	_setClippedBeginPosition(me, 0);
 	_setClippedEndPosition(me, 0);
 }
@@ -514,14 +514,14 @@ setClippedEndPosition(Gaps<TSource, SumlistGaps> & me,
 
 
 template <typename TGaps>
-struct _SumList_of_Gaps
+struct SumListOfGaps_
 {
 	typedef typename Size<TGaps>::Type TSize_;
 	typedef SumList<2, TSize_> Type;
 };
 
 template <typename TGaps>
-struct _SumList_of_Gaps<TGaps const>
+struct SumListOfGaps_<TGaps const>
 {
 	typedef typename Size<TGaps const>::Type TSize_;
 	typedef SumList<2, TSize_> const Type;
@@ -537,7 +537,7 @@ class Iter<TGaps, GapsIterator<SumlistGaps> >
 {
 public:
 	typedef typename Size<TGaps>::Type TSize;
-	typedef typename _SumList_of_Gaps<TGaps>::Type TSumlist;
+	typedef typename SumListOfGaps_<TGaps>::Type TSumlist;
 //	typedef SumList<2, TSize> TSumlist;
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 
@@ -692,7 +692,7 @@ SEQAN_CHECKPOINT
 
 template <typename T>
 inline void 
-_goNext_sumlistGapsIterator(T & me)
+_goNextSumlistGapsIterator(T & me)
 {
 	++me.pos;
 	if (atEnd(me.iter)) return;
@@ -706,20 +706,20 @@ template <typename TGaps>
 inline void 
 goNext(Iter<TGaps, GapsIterator<SumlistGaps> > & me)
 {
-	_goNext_sumlistGapsIterator(me);
+	_goNextSumlistGapsIterator(me);
 }
 template <typename TGaps>
 inline void 
 goNext(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
 {
-	_goNext_sumlistGapsIterator(me);
+	_goNextSumlistGapsIterator(me);
 }
 
 //____________________________________________________________________________
 
 template <typename T>
 inline void 
-_goPrevious_sumlistGapsIterator(T & me)
+_goPreviousSumlistGapsIterator(T & me)
 {
 	if (me.pos > 0)
 	{
@@ -736,13 +736,13 @@ template <typename TGaps>
 inline void 
 goPrevious(Iter<TGaps, GapsIterator<SumlistGaps> > & me)
 {
-	_goPrevious_sumlistGapsIterator(me);
+	_goPreviousSumlistGapsIterator(me);
 }
 template <typename TGaps>
 inline void 
 goPrevious(Iter<TGaps, GapsIterator<SumlistGaps> > const & me)
 {
-	_goPrevious_sumlistGapsIterator(me);
+	_goPreviousSumlistGapsIterator(me);
 }
 //____________________________________________________________________________
 
@@ -810,7 +810,7 @@ removeGaps(Iter<TGaps, GapsIterator<SumlistGaps> > const & me,
 		   TCount _size)
 {
 	typedef typename Size<TGaps>::Type TSize;
-	typedef typename _SumList_of_Gaps<TGaps>::Type TSumlist;
+	typedef typename SumListOfGaps_<TGaps>::Type TSumlist;
 	typedef typename Iterator<TSumlist>::Type TSumlistIterator;
 
 	TCount gaps_here = countGaps(me);

@@ -308,7 +308,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> & _origin) {
         SEQAN_CHECKPOINT;
-        _assignModifiedIterator(me, _origin, typename _IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
+        _assignModifiedIterator(me, _origin, typename IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
 		return me;
 	}
 
@@ -316,7 +316,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline ModifiedIterator<THost, TSpec> const &
 	assign(ModifiedIterator<THost, TSpec> & me, ModifiedIterator<THost2, TSpec> const & _origin) {
         SEQAN_CHECKPOINT;
-        _assignModifiedIterator(me, _origin, typename _IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
+        _assignModifiedIterator(me, _origin, typename IsSameType<THost, ModifiedIterator<THost2, TSpec> >::Type());
 		return me;
 	}
 

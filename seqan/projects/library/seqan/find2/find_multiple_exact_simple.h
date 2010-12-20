@@ -26,8 +26,8 @@
 
 namespace seqan {
 
-struct _MultipleSimple;
-typedef Tag<_MultipleSimple> MultipleSimple;
+struct MultipleSimple_;
+typedef Tag<MultipleSimple_> MultipleSimple;
 
 
 template <typename _TNeedle, typename TStringSetSpec>

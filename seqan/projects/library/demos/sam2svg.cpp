@@ -33,9 +33,9 @@ int main(int argc, const char *argv[])
 	// Extract and check options
 	String<unsigned> contigs;
 	TContigPos left = 0;
-	TContigPos right = SupremumValue<TContigPos>::VALUE;
+	TContigPos right = MaxValue<TContigPos>::VALUE;
 	unsigned firstLine = 0;
-	unsigned lastLine = SupremumValue<unsigned>::VALUE;
+	unsigned lastLine = MaxValue<unsigned>::VALUE;
 	bool inASCII = false;
 
 	if (isSetLong(parser, "pos"))
@@ -128,7 +128,7 @@ int main(int argc, const char *argv[])
 		{
 			std::cout << "Writing contig " << contigs[i] << " ... " << std::flush;
 			TContigPos right_ = right;
-			if (right_ == SupremumValue<TContigPos>::VALUE)
+			if (right_ == MaxValue<TContigPos>::VALUE)
 			{
 				right_ = 0;
 				for (unsigned j = 0; j < length(layout.contigRows[i]); ++j)

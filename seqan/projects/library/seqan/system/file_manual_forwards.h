@@ -117,9 +117,9 @@ template <typename TSpec, typename TValue, typename TSize > inline bool read(Fil
 template <typename TSpec> inline void release(File<Async<TSpec> > & me, aiocb const &request);       	// "projects/library/seqan/file/file_async.h"(255)
 
 //____________________________________________________________________________
-// return_value
+// _returnValue
 
-inline int return_value(aiocb &request);       	// "projects/library/seqan/file/file_async.h"(250)
+inline int _returnValue(aiocb &request);       	// "projects/library/seqan/file/file_async.h"(250)
 
 //____________________________________________________________________________
 // waitFor

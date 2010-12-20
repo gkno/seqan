@@ -33,7 +33,7 @@ void testOneLocalSwiftHit() {
 	DnaString text = "aaaaaaacgatcgatgcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	TFinder finder_swift(text);
 
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
+    typedef Index<DnaString, IndexQGram<UngappedShape<4> > > TQGramIndexSimple;
 	TQGramIndexSimple index_4gram("tttcgatcgatgctttttttttttttttttttttttttttttt");
     Pattern<TQGramIndexSimple, Swift<SwiftLocal> > pattern_swift(index_4gram);
 
@@ -49,7 +49,7 @@ void testOneLocalSwiftHit2() {
 	DnaString text = "aaaaagagaccccccagagaaaaaa";
 	TFinder finder_swift(text);
 
-    typedef Index<DnaString, Index_QGram<UngappedShape<4> > > TQGramIndexSimple;
+    typedef Index<DnaString, IndexQGram<UngappedShape<4> > > TQGramIndexSimple;
 	TQGramIndexSimple index_4gram("tttttggccccccggtttttt");
     Pattern<TQGramIndexSimple, Swift<SwiftLocal> > pattern_swift(index_4gram);
 
@@ -65,7 +65,7 @@ void testOneLocalSwiftHitStringSet() {
 	DnaString text = "aaaaaaacgatcgatgcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	TFinder finder_swift(text);
 
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, IndexQGram< UngappedShape<4> > > TQGramIndex;
 	TQGramIndex index_4gram;
 	appendValue(indexText(index_4gram), "tttcgatcgatgctttttttttttttttttttttttttttttt");
     Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
@@ -82,7 +82,7 @@ void testOneLocalSwiftHitBucketBorder() {
 	DnaString text = "aaacgatcgatgcaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	TFinder finder_swift(text);
 
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, IndexQGram< UngappedShape<4> > > TQGramIndex;
 	TQGramIndex index_4gram;
 	appendValue(indexText(index_4gram), "tttcgatcgatgctttttttttttttttttttttttttttttt");
     Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
@@ -101,7 +101,7 @@ void testOneLocalSwiftHitNegDiag() {
 	DnaString text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacgatcgatgc";
 	TFinder finder_swift(text);
 
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, IndexQGram< UngappedShape<4> > > TQGramIndex;
 	TQGramIndex index_4gram;
 	appendValue(indexText(index_4gram), "ttttcgatcgatgctttttttttttttttttttttttttttttt");
     Pattern<TQGramIndex, Swift<SwiftLocal> > pattern_swift(index_4gram);
@@ -119,7 +119,7 @@ void testLocalSwiftTwoPatterns() {
     DnaString text = "aaaacgttccaaaaaaa";
 	TFinder finder_swift(text);
 
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, IndexQGram< UngappedShape<4> > > TQGramIndex;
 	TQGramIndex index_4gram;
 	appendValue(indexText(index_4gram), "ttttcgttcctttttttttttttttttttttt"); // length = 32
     appendValue(indexText(index_4gram), "ttcgttcctt"); // length = 10
@@ -140,7 +140,7 @@ void testLocalSwiftLongPatterns() {
 	DnaString text = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacgatcagtgacaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	TFinder finder_swift(text);
 
-	typedef Index<StringSet<DnaString>, Index_QGram< UngappedShape<4> > > TQGramIndex;
+	typedef Index<StringSet<DnaString>, IndexQGram< UngappedShape<4> > > TQGramIndex;
 	TQGramIndex index_4gram;
 	appendValue(indexText(index_4gram), "ttttttttttttttcgatcagtgacttttttttttttttttttttttttttttttttatcagt"); // length = 63
     appendValue(indexText(index_4gram), "ttttttttttttttcgatcagtgacttttttttttttttttttttttttttttttttatcagt"); // length = 63

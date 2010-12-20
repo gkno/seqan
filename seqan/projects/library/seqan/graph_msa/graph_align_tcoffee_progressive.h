@@ -337,7 +337,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	//write(strm,matchGraph,DotDrawing());
 	//strm.close();
 	
-	TCargo val = weighted_bipartite_matching(matchGraph, vertexMap, weights, edges);
+	TCargo val = weightedBipartiteMatching(matchGraph, vertexMap, weights, edges);
 	
 	// Retrieve the aligned segments
 	TSize seqsInStr1 = length(str1[0]);	 

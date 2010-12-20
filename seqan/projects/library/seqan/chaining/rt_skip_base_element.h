@@ -44,7 +44,7 @@ namespace seqan
 		typename Size< TObject >::Type counter = 0;
 		while( counter < dim )
 		{
-			if( key( &getObject( &me ), counter ) == infimumValue< typename Key< TObject >::Type >( ) )
+			if( key( &getObject( &me ), counter ) == minValue< typename Key< TObject >::Type >( ) )
 					std::cout << std::left << "L";
 			else
 				std::cout << key( getObject( &me ), counter );

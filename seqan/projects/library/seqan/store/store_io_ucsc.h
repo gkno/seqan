@@ -25,31 +25,31 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 template <typename TSpec>
-struct UCSC_;
+struct Ucsc_;
 
 /**
-.Tag.File Format.tag.UCSC:
-	UCSC Genome Browser annotation file (a.k.a. knownGene format).
+.Tag.File Format.tag.Ucsc:
+	Ucsc Genome Browser annotation file (a.k.a. knownGene format).
 ..include:seqan/store.h
 */
 
-struct UCSC_KNOWN_GENE_;
-typedef Tag<UCSC_<UCSC_KNOWN_GENE_> > const UCSC;
+struct UcscKnownGene_;
+typedef Tag<Ucsc_<UcscKnownGene_> > const Ucsc;
 
 /**
-.Tag.File Format.tag.UCSC_ISOFORMS:
-	UCSC Genome Browser isoforms file (a.k.a. knownIsoforms format).
+.Tag.File Format.tag.UcscIsoforms:
+	Ucsc Genome Browser isoforms file (a.k.a. knownIsoforms format).
 ..include:seqan/store.h
 */
-struct UCSC_KNOWN_ISOFORMS_;
-typedef Tag<UCSC_<UCSC_KNOWN_ISOFORMS_> > const UCSC_ISOFORMS;
+struct UcscKnownIsoforms_;
+typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
 	
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readUCSCIdentifier
+// _parseReadUcscIdentifier
     
     template<typename TFile, typename TString, typename TChar>
     inline void
-    _parse_readUCSCIdentifier(TFile & file, TString & str, TChar& c)
+    _parseReadUcscIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
@@ -63,7 +63,7 @@ typedef Tag<UCSC_<UCSC_KNOWN_ISOFORMS_> > const UCSC_ISOFORMS;
 
 	template<typename TFile, typename TChar>
 	inline void 
-	_parse_skipWhiteComma(TFile& file, TChar& c)
+	_parseSkipWhiteComma(TFile& file, TChar& c)
 	{
 		if (c != ',' && c != ' ') return;
 		while (!_streamEOF(file)) {
@@ -73,11 +73,11 @@ typedef Tag<UCSC_<UCSC_KNOWN_ISOFORMS_> > const UCSC_ISOFORMS;
 	}
 	
 //////////////////////////////////////////////////////////////////////////////
-// Read UCSC
+// Read Ucsc
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec = void>
-struct _IOContextUCSC
+struct _IOContextUcsc
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -96,7 +96,7 @@ struct _IOContextUCSC
 };
 
 template <typename TFragmentStore, typename TSpec>
-inline void clear(_IOContextUCSC<TFragmentStore, TSpec> &ctx)
+inline void clear(_IOContextUcsc<TFragmentStore, TSpec> &ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -112,14 +112,14 @@ inline void clear(_IOContextUCSC<TFragmentStore, TSpec> &ctx)
 //////////////////////////////////////////////////////////////////////////////
 // _readOneAnnotation
 //
-// reads in one annotation line from a GFF file
+// reads in one annotation line from a Gff file
 
 template <typename TFile, typename TChar, typename TFragmentStore, typename TSpec>
 inline bool 
 _readOneAnnotation (
 	TFile & file,
 	TChar & c,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx)
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
@@ -129,23 +129,23 @@ _readOneAnnotation (
 	clear(ctx);
 
 	// read fields of alignments line        
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 	
 	// read column 1: transcript name
 	// The letters until the first whitespace will be read.
 	// Then, we skip until we hit the first tab character.
-	_parse_readUCSCIdentifier(file, ctx.transName, c);
+	_parseReadUcscIdentifier(file, ctx.transName, c);
 	if (!empty(ctx.transName) && ctx.transName[0] == '#')
 	{
 		_parse_skipLine(file, c);
 		return false;
 	}
-	_parse_skipUntilChar(file, '\t', c);
+	_parseSkipUntilChar(file, '\t', c);
 	c = _streamGet(file);
 	
 	// read column 2: contig name
-	_parse_readUCSCIdentifier(file, ctx.contigName, c);
-	_parse_skipSpace(file, c);
+	_parseReadUcscIdentifier(file, ctx.contigName, c);
+	_parseSkipSpace(file, c);
 	
 	// read column 3: orientation
 	if (c != '+' && c != '-')
@@ -158,80 +158,80 @@ _readOneAnnotation (
 	ctx.format = ctx.KNOWN_GENE;
 	char orientation = c;
 	c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// read column 4: transcript begin position
-	if (_parse_isDigit(c))
-		ctx.annotation.beginPos = _parse_readNumber(file, c);
+	if (_parseIsDigit(c))
+		ctx.annotation.beginPos = _parseReadNumber(file, c);
 	else
 	{
 		ctx.annotation.beginPos = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// read column 5: transcript end position
-	if (_parse_isDigit(c))
-		ctx.annotation.endPos = _parse_readNumber(file, c);
+	if (_parseIsDigit(c))
+		ctx.annotation.endPos = _parseReadNumber(file, c);
 	else 
 	{
 		ctx.annotation.endPos = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);	
+	_parseSkipWhitespace(file, c);	
 
 	// read column 6: CDS begin position
-	if (_parse_isDigit(c))
-		ctx.cdsBegin = _parse_readNumber(file, c);
+	if (_parseIsDigit(c))
+		ctx.cdsBegin = _parseReadNumber(file, c);
 	else
 	{
 		ctx.cdsBegin = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 	
 	// read column 7: CDS end position
-	if (_parse_isDigit(c))
-		ctx.cdsEnd = _parse_readNumber(file, c);
+	if (_parseIsDigit(c))
+		ctx.cdsEnd = _parseReadNumber(file, c);
 	else 
 	{
 		ctx.cdsEnd = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);	
+	_parseSkipWhitespace(file, c);	
 	
 	// read column 8: exon count
 	int exons = -1;
-	if (_parse_isDigit(c))
-		exons = _parse_readNumber(file, c);
-	_parse_skipWhitespace(file, c);
+	if (_parseIsDigit(c))
+		exons = _parseReadNumber(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// read column 9: exon begin positions
 	for (int i = 0; i < exons; ++i)
 	{
-		appendValue(ctx.exonBegin, _parse_readNumber(file, c), Generous());
-		_parse_skipWhiteComma(file, c);
+		appendValue(ctx.exonBegin, _parseReadNumber(file, c), Generous());
+		_parseSkipWhiteComma(file, c);
 	}
-	_parse_skipUntilChar(file, '\t', c);
+	_parseSkipUntilChar(file, '\t', c);
 	c = _streamGet(file);
 	
 	// read column 10: exon end positions
 	for (int i = 0; i < exons; ++i)
 	{
-		appendValue(ctx.exonEnd, _parse_readNumber(file, c));
-		_parse_skipWhiteComma(file, c);
+		appendValue(ctx.exonEnd, _parseReadNumber(file, c));
+		_parseSkipWhiteComma(file, c);
 	}
-	_parse_skipUntilChar(file, '\t', c);
+	_parseSkipUntilChar(file, '\t', c);
 	c = _streamGet(file);
 	
 	// read column 10: protein name
-	_parse_readUCSCIdentifier(file, ctx.proteinName, c);
-	_parse_skipUntilChar(file, '\t', c);
+	_parseReadUcscIdentifier(file, ctx.proteinName, c);
+	_parseSkipUntilChar(file, '\t', c);
 	c = _streamGet(file);
 
 	// skip column 11
-	_parse_skipEntryUntilWhitespace(file, c);
-	_parse_skipWhitespace(file, c);
+	_parseSkipEntryUntilWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// adapt positions
 	if (orientation == '-')
@@ -255,9 +255,9 @@ _readOneAnnotation (
 
 template <typename TFragmentStore, typename TSpec>
 inline void 
-_storeOneAnnotation_KNOWN_GENE (
+_storeOneAnnotationKnownGene (
 	TFragmentStore & fragStore,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx)
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -317,9 +317,9 @@ _storeOneAnnotation_KNOWN_GENE (
 
 template <typename TFragmentStore, typename TSpec>
 inline void 
-_storeOneAnnotation_KNOWN_ISOFORMS (
+_storeOneAnnotationKnownIsoforms (
 	TFragmentStore & fragStore,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx)
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -361,12 +361,12 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx)
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
 {
 	if (ctx.format == ctx.KNOWN_GENE)
-		_storeOneAnnotation_KNOWN_GENE(fragStore, ctx);
+		_storeOneAnnotationKnownGene(fragStore, ctx);
 	else
-		_storeOneAnnotation_KNOWN_ISOFORMS(fragStore, ctx);
+		_storeOneAnnotationKnownIsoforms(fragStore, ctx);
 }
 
 template<typename TFile, typename TSpec, typename TConfig, typename TFormatSpec>
@@ -374,7 +374,7 @@ inline void
 read (
 	TFile & file,
 	FragmentStore<TSpec, TConfig> & fragStore,
-	Tag<UCSC_<TFormatSpec> > const)
+	Tag<Ucsc_<TFormatSpec> > const)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
@@ -382,7 +382,7 @@ read (
 
 	// get first character from the stream
 	char c = _streamGet(file);
-	_IOContextUCSC<TFragmentStore> ctx;
+	_IOContextUcsc<TFragmentStore> ctx;
 	
 	refresh(fragStore.contigNameStoreCache);
 	refresh(fragStore.annotationNameStoreCache);
@@ -399,17 +399,17 @@ read (
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Write UCSC
+// Write Ucsc
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec, typename TAnnotation, typename TId>
 inline bool 
 _retrieveOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx,
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx,
 	TAnnotation &annotation,
 	TId id,
-	UCSC)
+	Ucsc)
 {	
 	if (annotation.typeId != TFragmentStore::ANNO_MRNA) return false;
 	
@@ -450,10 +450,10 @@ template <typename TFragmentStore, typename TSpec, typename TAnnotation, typenam
 inline bool 
 _retrieveOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx,
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx,
 	TAnnotation &annotation,
 	TId id,
-	UCSC_ISOFORMS)
+	UcscIsoforms)
 {	
 	if (annotation.typeId != TFragmentStore::ANNO_MRNA) return false;
 	if (annotation.parentId == TAnnotation::INVALID_ID || annotation.parentId == 0) return false;
@@ -468,7 +468,7 @@ template<typename TTargetStream, typename TFragmentStore, typename TSpec>
 inline void 
 _writeOneAnnotation (
 	TTargetStream & file,
-	_IOContextUCSC<TFragmentStore, TSpec> & ctx)
+	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	
@@ -562,7 +562,7 @@ inline void
 write (
 	TTargetStream & target,
 	FragmentStore<TSpec, TConfig> & store,
-	Tag<UCSC_<TFormatSpec> > const format)
+	Tag<Ucsc_<TFormatSpec> > const format)
 {
 	typedef FragmentStore<TSpec, TConfig>							TFragmentStore;
 	typedef typename TFragmentStore::TAnnotationStore				TAnnotationStore;
@@ -570,7 +570,7 @@ write (
 	typedef typename Iterator<TAnnotationStore, Standard>::Type		TAnnoIter;
 	typedef typename Id<TAnnotation>::Type							TId;
 
-	_IOContextUCSC<TFragmentStore> ctx;
+	_IOContextUcsc<TFragmentStore> ctx;
 
 	TAnnoIter it = begin(store.annotationStore, Standard());
 	TAnnoIter itEnd = end(store.annotationStore, Standard());

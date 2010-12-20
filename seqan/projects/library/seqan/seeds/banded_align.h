@@ -29,7 +29,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //needleman wunsch alignment
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TSpecSeed>
 TScoreValue
-_banded_needleman_wunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
+_bandedNeedlemanWunsch(Matrix<TScoreValue, DIMENSION> & matrix_,
 						 Seed<TValue, TSpecSeed> const &seed,
 						 TValue k,
 						 TString const & str1_,
@@ -199,7 +199,7 @@ SEQAN_CHECKPOINT
 //Position berechnen!
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION>
 void
-_banded_needleman_wunsch_trace(Align<TTargetSource, TTargetSpec> & target_,
+_bandedNeedlemanWunschTrace(Align<TTargetSource, TTargetSpec> & target_,
 						Iter< Matrix<TScoreValue, DIMENSION>, PositionIterator > source_,
 						Score<TScoreValue, Simple> const & score_)
 {
@@ -279,7 +279,7 @@ SEQAN_CHECKPOINT
 //Banded alignment with affine gap costs
 template <typename TScoreValue, unsigned DIMENSION, typename TString, typename TValue, typename TSpecSeed>
 TScoreValue
-_banded_gotoh(Matrix<TScoreValue, DIMENSION> & diag_matrix_,
+_bandedGotoh(Matrix<TScoreValue, DIMENSION> & diag_matrix_,
 	   Matrix<TScoreValue, DIMENSION> & vert_matrix_,
 	   Matrix<TScoreValue, DIMENSION> & hori_matrix_,
 	   Seed<TValue, TSpecSeed> const &seed,
@@ -538,7 +538,7 @@ SEQAN_CHECKPOINT
 //gotoh trace
 template <typename TTargetSource, typename TTargetSpec, typename TScoreValue, unsigned DIMENSION, typename TValue>
 void
-_banded_gotoh_trace(Align<TTargetSource, TTargetSpec> & target_,
+_bandedGotohTrace(Align<TTargetSource, TTargetSpec> & target_,
 					Matrix<TScoreValue, DIMENSION> & diag_matrix_,
 					Matrix<TScoreValue, DIMENSION> & vert_matrix_,
 					Matrix<TScoreValue, DIMENSION> & hori_matrix_,
@@ -624,10 +624,10 @@ SEQAN_CHECKPOINT
 
 	TScoreValue ret;
 	Matrix<TScoreValue> matr;
-	ret = _banded_needleman_wunsch(matr, seed, k, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
+	ret = _bandedNeedlemanWunsch(matr, seed, k, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
 	Iter< Matrix<TScoreValue>, PositionIterator > iter_ = begin(matr);
 	setPosition(iter_, 1+k + leftDiagonal(seed) - startDiagonal(seed));
-	_banded_needleman_wunsch_trace(align_, iter_, score_);
+	_bandedNeedlemanWunschTrace(align_, iter_, score_);
 	return ret;
 }
 
@@ -648,8 +648,8 @@ SEQAN_CHECKPOINT
 	Matrix<TScoreValue> d_matr;
 	Matrix<TScoreValue> v_matr;
 	Matrix<TScoreValue> h_matr;
-	ret = _banded_gotoh(d_matr, v_matr, h_matr, seed, k, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
-	_banded_gotoh_trace(align_, d_matr, v_matr, h_matr, 1+k + leftDiagonal(seed) - startDiagonal(seed));	
+	ret = _bandedGotoh(d_matr, v_matr, h_matr, seed, k, sourceSegment(row(align_, 0)), sourceSegment(row(align_, 1)), score_);
+	_bandedGotohTrace(align_, d_matr, v_matr, h_matr, 1+k + leftDiagonal(seed) - startDiagonal(seed));	
 	return ret;
 }
 

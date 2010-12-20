@@ -396,22 +396,22 @@ SEQAN_DEFINE_TEST(test_basic_suprema_infima)
 {
   using namespace seqan;
 
-    // These tests are only here to instantiate the SupremumValue and
-    // InfimumValue Metafunctions for double and float.
+    // These tests are only here to instantiate the MaxValue and
+    // MinValue Metafunctions for double and float.
     {
-        double x = SupremumValue<double>::VALUE;
+        double x = MaxValue<double>::VALUE;
         SEQAN_ASSERT_GT(x, 0);
     }
     {
-        double x = InfimumValue<double>::VALUE;
+        double x = MinValue<double>::VALUE;
         SEQAN_ASSERT_LT(x, 0);
     }
     {
-        float x = SupremumValue<float>::VALUE;
+        float x = MaxValue<float>::VALUE;
         SEQAN_ASSERT_GT(x, 0);
     }
     {
-        float x = InfimumValue<float>::VALUE;
+        float x = MinValue<float>::VALUE;
         SEQAN_ASSERT_LT(x, 0);
     }
 }

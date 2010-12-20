@@ -34,7 +34,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 {
 	Finder<TString> finder(seq2);
 //	Pattern<TString, MyersUkkonenBanded> pattern(seq1);
-	_PatternState<TString,  Myers<AlignTextBanded<NMatchesN_,NMatchesN_>, True, void> > state;
+	PatternState_<TString,  Myers<AlignTextBanded<NMatchesN_,NMatchesN_>, True, void> > state;
 
 	bool equal = true;
 	int delta = length(seq2) - length(seq1);
@@ -130,11 +130,11 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 template <typename TFinderCSP, typename TPatternCSP, typename TText, typename TNeedle>
 void testCSPImpl(TText &text, TNeedle &needle, int errors)
 {
-	_PatternState<TNeedle, Myers<AlignTextBanded<TFinderCSP,TPatternCSP>, True, void> > state;
+	PatternState_<TNeedle, Myers<AlignTextBanded<TFinderCSP,TPatternCSP>, True, void> > state;
 	Finder<TText> finder(text);
     SEQAN_ASSERT_TRUE(find(finder, needle, state, -1000));
     SEQAN_ASSERT_EQ(position(finder), length(text) - 1) ;
-    SEQAN_ASSERT_EQ(getScore(state), -errors);
+    SEQAN_ASSERT_EQ(_getMatchScore(state), -errors);
 }
 
 SEQAN_DEFINE_TEST(test_myers_find_banded_csp)

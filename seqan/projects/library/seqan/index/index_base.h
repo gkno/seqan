@@ -52,32 +52,32 @@ namespace SEQAN_NAMESPACE_MAIN
 for @Class.Index@ based substring searches.
 ..cat:Index
 
-..tag.ESA_FIND_MLR:Binary search with mlr-heuristic.
+..tag.EsaFindMlr:Binary search with mlr-heuristic.
 ...remarks:Exact string matching using a suffix array binary search with the mlr-heuristic.
 
-..tag.ESA_FIND_LCPE:Binary search using lcp values.
+..tag.EsaFindLcpe:Binary search using lcp values.
 ...remarks:Exact string matching using a suffix array binary search and a lcp-interval tree.
 
 ..tag.FinderSTree:Suffix tree search.
 ...remarks:Exact string matching using a suffix tree.
 
 ..see:Class.Finder
-..see:Spec.Index_ESA
-..see:Spec.Index_QGram
+..see:Spec.IndexEsa
+..see:Spec.IndexQGram
 ..include:seqan/index.h
 */
 
 	// finder tags
-    struct _Finder_MLR;     // simple Suffix Array finder with mlr-heuristic
+    struct FinderMlr_;     // simple Suffix Array finder with mlr-heuristic
     struct _Finder_LCPE;    // Suffix Array finder using an enhanced LCP-Table
     struct FinderSTree_;    // Suffix Array finder using an enhanced LCP-Table
 
-    typedef Tag<_Finder_MLR> const ESA_FIND_MLR;
-    typedef Tag<_Finder_LCPE> const ESA_FIND_LCPE;
+    typedef Tag<FinderMlr_> const EsaFindMlr;
+    typedef Tag<_Finder_LCPE> const EsaFindLcpe;
     typedef Tag<FinderSTree_> const FinderSTree;
 
 	template <typename TSpec = void>
-	struct Index_ESA {};
+	struct IndexEsa {};
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -87,13 +87,13 @@ for @Class.Index@ based substring searches.
 ..summary:Default @Class.Index@ specialization type.
 ..signature:DefaultIndexSpec<TText>::Type
 ..param.TText:The given text type.
-..returns:Can be @Spec.Index_ESA@ or $Index_QGram$, etc.
-..remarks:Currently @Spec.Index_ESA@ is default if $TText$ is a @Class.String@.
+..returns:Can be @Spec.IndexEsa@ or $IndexQGram$, etc.
+..remarks:Currently @Spec.IndexEsa@ is default if $TText$ is a @Class.String@.
 ..include:seqan/index.h
 */
     template < typename TObject >
     struct DefaultIndexSpec {
-        typedef Index_ESA<> Type;
+        typedef IndexEsa<> Type;
     };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ for @Class.Index@ based substring searches.
 ..remarks:An @Class.Index@ can be seen as a bundle consisting of various fibres. In most cases this type is $String<Size<TIndex>::Type>$.
 The fibre interface was designed to unify the access to the members of different index data structures.
 To get a reference or the type of a specific fibre use @Function.getFibre@ or @Metafunction.Fibre@.		
-..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.ESA_RawText@).
+..remarks:A @Metafunction.Fibre@ need not to be a real container. It can also be view (see @Tag.ESA Index Fibres.EsaRawText@).
 ..include:seqan/index.h
 */
 	// meta function to get the type of a bundle fibre
@@ -208,7 +208,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 ..summary:Default algorithm to create a demanded and not yet existing @Metafunction.Fibre@.
 ..signature:DefaultIndexCreator<TIndex, TFibre>::Type
 ..param.TIndex:An @Class.Index@ Type.
-..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA Index Fibres.ESA_SA@).
+..param.TFibre:A tag specifying the fibre (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..returns:A tag specifying the default algorithm to create the fibre with.
 ..include:seqan/index.h
 */
@@ -229,7 +229,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
     {
         typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
         typedef typename AllowsFastRandomAccess<TText>::Type TRandomText;
-        typedef typename AND<TRandomText,TRandomSA>::Type Type;
+        typedef typename And<TRandomText,TRandomSA>::Type Type;
     };
 
 	template < 
@@ -242,7 +242,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
         typedef typename AllowsFastRandomAccess<TText>::Type TRandomText;
         typedef typename AllowsFastRandomAccess<TLCP>::Type  TRandomLCP;
         typedef typename AllowsFastRandomAccess<TSA>::Type   TRandomSA;
-        typedef typename AND<TRandomLCP, typename AND<TRandomText,TRandomSA>::Type>::Type Type;
+        typedef typename And<TRandomLCP, typename And<TRandomText,TRandomSA>::Type>::Type Type;
     };
 
 
@@ -265,7 +265,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 
 	template < typename TBundleSpec, typename TFibreSpec >
 	inline FibreRecord& getRecord(Bundle<TBundleSpec> &bundle, TFibreSpec const) {
-		unsigned id = (unsigned)_ClassIdentifier<TFibreSpec>::getID();
+		unsigned id = (unsigned)ClassIdentifier_<TFibreSpec>::getID();
 
 		typename Bundle<TBundleSpec>::TFibreRecords::iterator first = lower_bound(bundle.fibres.begin(), bundle.fibres.end(), id, FibreLess());
 		if (!first->id != id) {
@@ -281,7 +281,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 	template < typename TBundleSpec, typename TFibreSpec >
 	inline typename Fibre<Bundle<TBundleSpec>, TFibreSpec>::Type & getFibre(Bundle<TBundleSpec> &bundle, TFibreSpec const) {
 		typedef typename Fibre<Bundle<TBundleSpec>, TFibreSpec>::Type Type;
-		unsigned id = (unsigned)_ClassIdentifier<TFibreSpec>::getID();
+		unsigned id = (unsigned)ClassIdentifier_<TFibreSpec>::getID();
 
 		FibreRecord &rec = getRecord(bundle, TFibreSpec());
 		if (!rec.ptr)
@@ -292,7 +292,7 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 	template < typename TBundleSpec, typename TFibreSpec >
 	inline typename Fibre<Bundle<TBundleSpec>, TFibreSpec>::Type const & getFibre(Bundle<TBundleSpec> const &bundle, TFibreSpec const) {
 		typedef typename Fibre<Bundle<TBundleSpec>, TFibreSpec>::Type Type;
-		unsigned id = (unsigned)_ClassIdentifier<TFibreSpec>::getID();
+		unsigned id = (unsigned)ClassIdentifier_<TFibreSpec>::getID();
 
 		FibreRecord &rec = getRecord(bundle, TFibreSpec());
 		return *reinterpret_cast<Type*>(rec.ptr);
@@ -302,25 +302,25 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 //////////////////////////////////////////////////////////////////////////////
 // various fibre specs for enhanced suffix arrays
 
-	struct _Fibre_Text;		// Original text. Can be a String or a StringSet
-	struct _Fibre_RawText;	// Concatenation of the strings above
-	struct _Fibre_SA;		// suffix array (of raw text with virtual $-delimiters) with Pair entries
-	struct _Fibre_RawSA;	// suffix array with integer entries
-	struct _Fibre_SAE;		// suffix array reordered in a b-tree
-	struct _Fibre_LCP;		// lcp table of raw text
-	struct _Fibre_LCPE;		// lcp interval tree
-	struct _Fibre_ChildTab;	// childtab (Kurtz et al.) of raw text
-	struct _Fibre_BWT;		// burrows wheeler table of raw text
+	struct FibreText_;		// Original text. Can be a String or a StringSet
+	struct FibreRawText_;	// Concatenation of the strings above
+	struct FibreSA_;		// suffix array (of raw text with virtual $-delimiters) with Pair entries
+	struct FibreRawSA_;	// suffix array with integer entries
+	struct FibreSae_;		// suffix array reordered in a b-tree
+	struct FibreLcp_;		// lcp table of raw text
+	struct FibreLcpe_;		// lcp interval tree
+	struct FibreChildtab_;	// childtab (Kurtz et al.) of raw text
+	struct FibreBwt_;		// burrows wheeler table of raw text
 
-	typedef Tag<_Fibre_Text> const		Fibre_Text;
-	typedef Tag<_Fibre_RawText> const	Fibre_RawText;
-	typedef Tag<_Fibre_SA> const		Fibre_SA;
-	typedef Tag<_Fibre_RawSA> const		Fibre_RawSA;
-	typedef Tag<_Fibre_SAE> const		Fibre_SAE;
-	typedef Tag<_Fibre_LCP> const		Fibre_LCP;
-	typedef Tag<_Fibre_LCPE> const		Fibre_LCPE;
-	typedef Tag<_Fibre_ChildTab> const	Fibre_ChildTab;
-	typedef Tag<_Fibre_BWT> const		Fibre_BWT;
+	typedef Tag<FibreText_> const		FibreText;
+	typedef Tag<FibreRawText_> const	FibreRawText;
+	typedef Tag<FibreSA_> const		FibreSA;
+	typedef Tag<FibreRawSA_> const		FibreRawSA;
+	typedef Tag<FibreSae_> const		FibreSae;
+	typedef Tag<FibreLcp_> const		FibreLcp;
+	typedef Tag<FibreLcpe_> const		FibreLcpe;
+	typedef Tag<FibreChildtab_> const	FibreChildtab;
+	typedef Tag<FibreBwt_> const		FibreBwt;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -395,14 +395,14 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	template < typename TText, typename TSpec >
     struct Value< Index<TText, TSpec> > {
 		typedef typename Value<
-			typename Fibre< Index<TText, TSpec>, Fibre_RawText>::Type 
+			typename Fibre< Index<TText, TSpec>, FibreRawText>::Type 
 		>::Type Type;
     };
 
 	template < typename TText, typename TSpec >
     struct Size< Index<TText, TSpec> > {
 		typedef typename Size<
-			typename Fibre< Index<TText, TSpec>, Fibre_RawText>::Type 
+			typename Fibre< Index<TText, TSpec>, FibreRawText>::Type 
 		>::Type Type;
     };
 
@@ -436,7 +436,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // original text
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Fibre_Text> {
+	struct Fibre< Index<TText, TSpec>, FibreText> {
 		typedef TText Type;
 	};
 
@@ -444,7 +444,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // concatenated text
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Fibre_RawText> {
+	struct Fibre< Index<TText, TSpec>, FibreRawText> {
 		typedef typename Concatenator<TText>::Type Type;
 	};
 
@@ -452,7 +452,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // suffix array type
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Fibre_SA> {
+	struct Fibre< Index<TText, TSpec>, FibreSA> {
 		typedef String<
 			typename SAValue< Index<TText, TSpec> >::Type,
 			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type 
@@ -491,30 +491,30 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // raw suffix array contains integer offsets relative to raw text
 /*
 	template < typename TString, typename TSpec >
-	struct Fibre< Index<TString, TSpec>, Fibre_RawSA>:
-		public Fibre< Index<TString, TSpec> const, Fibre_SA> {};
+	struct Fibre< Index<TString, TSpec>, FibreRawSA>:
+		public Fibre< Index<TString, TSpec> const, FibreSA> {};
 
 	template < typename TString, typename TSSetSpec, typename TSpec >
-	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, Fibre_RawSA> 
+	struct Fibre< Index<StringSet<TString, TSSetSpec>, TSpec>, FibreRawSA> 
 	{
 		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		typedef ModifiedString<
-			typename Fibre<TIndex, Fibre_SA>::Type,
+			typename Fibre<TIndex, FibreSA>::Type,
 			ModView< FunctorGlobalize< 
-				typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+				typename Value< typename Fibre<TIndex, FibreSA>::Type >::Type,
 				typename StringSetLimits<TString>::Type >
 			>
 		> Type;
 	};
 */
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Fibre_RawSA> 
+	struct Fibre< Index<TText, TSpec>, FibreRawSA> 
 	{
 		typedef Index<TText, TSpec> TIndex;
 		typedef ModifiedString<
-			typename Fibre<TIndex, Fibre_SA>::Type,
+			typename Fibre<TIndex, FibreSA>::Type,
 			ModView< FunctorGlobalize< 
-				typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+				typename Value< typename Fibre<TIndex, FibreSA>::Type >::Type,
 				typename StringSetLimits<TText>::Type >
 			>
 		> Type;
@@ -524,7 +524,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // default burrows-wheeler table
 
 	template < typename TText, typename TSpec >
-	struct Fibre< Index<TText, TSpec>, Fibre_BWT> {
+	struct Fibre< Index<TText, TSpec>, FibreBwt> {
 		typedef String <
 			typename Value< Index<TText, TSpec> >::Type,
 			typename DefaultIndexStringSpec< Index<TText, TSpec> >::Type
@@ -536,22 +536,22 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // default fibre creators
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Fibre_SA> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, FibreSA> {
         typedef Skew7 Type;							// standard suffix array creator is skew7
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Fibre_LCP> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, FibreLcp> {
         typedef Kasai Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Fibre_BWT> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, FibreBwt> {
         typedef BWT Type;
     };
 
 	template < typename TText, typename TSpec >
-	struct DefaultIndexCreator<Index<TText, TSpec>, Fibre_ChildTab> {
+	struct DefaultIndexCreator<Index<TText, TSpec>, FibreChildtab> {
         typedef ChildTab Type;
     };
 
@@ -566,7 +566,7 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:getFibre(index, fibre_tag)
 ..param.index:The @Class.Index@ object holding the fibre.
 ...type:Class.Index
-..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.ESA_SA@).
+..param.fibre_tag:A tag that identifies the @Metafunction.Fibre@ (e.g. @Tag.ESA Index Fibres.EsaSA@).
 ..returns:A reference to the @Metafunction.Fibre@ object.
 ..include:seqan/index.h
 */
@@ -583,63 +583,63 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_Text>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_Text) {
+	inline typename Fibre<Index<TText, TSpec>, FibreText>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreText) {
 		return value(index.text);
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_Text>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_Text) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreText>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreText) {
 		return value(index.text);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawText>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_RawText) {
+	inline typename Fibre<Index<TText, TSpec>, FibreRawText>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreRawText) {
 		return concat(value(index.text));
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_RawText>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_RawText) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreRawText>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreRawText) {
 		return concat(value(index.text));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_SA) {
+	inline typename Fibre<Index<TText, TSpec>, FibreSA>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreSA) {
 		return index.sa;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_SA>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_SA) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreSA>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreSA) {
 		return index.sa;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 /*
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type const & 
-	getFibre(Index<TText, TSpec> &index, Fibre_RawSA) {
+	inline typename Fibre<Index<TText, TSpec>, FibreRawSA>::Type const & 
+	getFibre(Index<TText, TSpec> &index, FibreRawSA) {
 		return indexSA(index);
 	}
 
 	template <typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Fibre_RawSA>::Type
-	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, Fibre_RawSA) 
+	inline typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, FibreRawSA>::Type
+	getFibre(Index<StringSet<TString, TSSetSpec>, TSpec> &index, FibreRawSA) 
 	{
 		typedef Index< StringSet<TString, TSSetSpec>, TSpec> TIndex;
 		
 		typedef FunctorGlobalize<
-			typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+			typename Value< typename Fibre<TIndex, FibreSA>::Type >::Type,
 			typename StringSetLimits<StringSet<TString, TSSetSpec> >::Type
 		> TFunctor;
 		
 		typedef ModifiedString<
-			typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, Fibre_SA>::Type,
+			typename Fibre<Index<StringSet<TString, TSSetSpec>, TSpec>, FibreSA>::Type,
 			ModView< TFunctor >
 		> ModString;
 
@@ -648,18 +648,18 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type
-	getFibre(Index<TText, TSpec> &index, Fibre_RawSA) 
+	inline typename Fibre<Index<TText, TSpec>, FibreRawSA>::Type
+	getFibre(Index<TText, TSpec> &index, FibreRawSA) 
 	{
 		typedef Index<TText, TSpec> TIndex;
 		
 		typedef FunctorGlobalize<
-			typename Value< typename Fibre<TIndex, Fibre_SA>::Type >::Type,
+			typename Value< typename Fibre<TIndex, FibreSA>::Type >::Type,
 			typename StringSetLimits<TText>::Type
 		> TFunctor;
 		
 		typedef ModifiedString<
-			typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type,
+			typename Fibre<Index<TText, TSpec>, FibreSA>::Type,
 			ModView< TFunctor >
 		> ModString;
 
@@ -668,52 +668,52 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_LCP>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_LCP) {
+	inline typename Fibre<Index<TText, TSpec>, FibreLcp>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreLcp) {
 		return index.lcp;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_LCP>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_LCP) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreLcp>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreLcp) {
 		return index.lcp;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_LCPE>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_LCPE) {
+	inline typename Fibre<Index<TText, TSpec>, FibreLcpe>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreLcpe) {
 		return index.lcpe;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_LCPE>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_LCPE) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreLcpe>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreLcpe) {
 		return index.lcpe;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_ChildTab>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_ChildTab) {
+	inline typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreChildtab) {
 		return index.childtab;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_ChildTab>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_ChildTab) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreChildtab) {
 		return index.childtab;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_BWT>::Type & 
-	getFibre(Index<TText, TSpec> &index, Fibre_BWT) {
+	inline typename Fibre<Index<TText, TSpec>, FibreBwt>::Type & 
+	getFibre(Index<TText, TSpec> &index, FibreBwt) {
 		return index.bwt;
 	}
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_BWT>::Type & 
-	getFibre(Index<TText, TSpec> const &index, Fibre_BWT) {
+	inline typename Fibre<Index<TText, TSpec> const, FibreBwt>::Type & 
+	getFibre(Index<TText, TSpec> const &index, FibreBwt) {
 		return index.bwt;
 	}
 
@@ -785,23 +785,23 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 // unified textAt interface
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_RawText>::Type>::Type 
+	inline typename Reference<typename Fibre<TIndex, FibreRawText>::Type>::Type 
 	textAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_RawText()), i);
+		return value(getFibre(index, FibreRawText()), i);
 	}
 	template <typename TPos, typename TString, typename TSSetSpec, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec>, Fibre_RawText>::Type>::Type 
+	inline typename Reference<typename Fibre< Index< StringSet<TString, TSSetSpec>, TSpec>, FibreRawText>::Type>::Type 
 	textAt(TPos i, Index< StringSet<TString, TSSetSpec>, TSpec> &index) {
-		return value(getFibre(index, Fibre_RawText()), posGlobalize(i, stringSetLimits(index)));
+		return value(getFibre(index, FibreRawText()), posGlobalize(i, stringSetLimits(index)));
 	}
 	template <typename TPos, typename TString, typename TSpec>
-	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, Fibre_RawText>::Type>::Type 
+	inline typename Reference<typename Fibre< Index< StringSet<TString, Owner<Default> >, TSpec>, FibreRawText>::Type>::Type 
 	textAt(TPos i, Index< StringSet<TString, Owner<Default> >, TSpec> &index) {
 		Pair <
 			typename Size< StringSet<TString, Owner<Default> > >::Type,
 			typename Size< TString >::Type > locPos;
 		posLocalize(locPos, i, stringSetLimits(index));
-		return value(value(getFibre(index, Fibre_Text()), getValueI1(locPos)), getValueI2(locPos));
+		return value(value(getFibre(index, FibreText()), getValueI1(locPos)), getValueI2(locPos));
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -829,18 +829,18 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:rawtextAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_RawText>::Type>::Type rawtextAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_RawText()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreRawText>::Type>::Type rawtextAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreRawText()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_RawText>::Type>::Type rawtextAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_RawText()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreRawText>::Type>::Type rawtextAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreRawText()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -851,22 +851,22 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:saAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_SA>::Type>::Type saAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_SA()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreSA>::Type>::Type saAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreSA()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_SA>::Type>::Type saAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_SA()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreSA>::Type>::Type saAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreSA()), i);
 	}
 
 	template <typename TPos, typename TIndex>
-	inline typename Value<typename Fibre<TIndex const, Fibre_RawSA>::Type>::Type rawsaAt(TPos i, TIndex const &index) {
+	inline typename Value<typename Fibre<TIndex const, FibreRawSA>::Type>::Type rawsaAt(TPos i, TIndex const &index) {
 		return posGlobalize(saAt(i, index), stringSetLimits(indexText(index)));
 	}
 
@@ -874,45 +874,45 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lcpAt:
-..summary:Shortcut for $value(indexLCP(..), ..)$.
+..summary:Shortcut for $value(indexLcp(..), ..)$.
 ..cat:Index
 ..signature:lcpAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_LCP>::Type>::Type lcpAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_LCP()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreLcp()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_LCP>::Type>::Type lcpAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_LCP()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreLcp>::Type>::Type lcpAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreLcp()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.lcpeAt:
-..summary:Shortcut for $value(indexLCPE(..), ..)$.
+..summary:Shortcut for $value(indexLcpe(..), ..)$.
 ..cat:Index
 ..signature:lcpeAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_LCPE>::Type>::Type lcpeAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_LCPE()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreLcpe>::Type>::Type lcpeAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreLcpe()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_LCPE>::Type>::Type lcpeAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_LCPE()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreLcpe>::Type>::Type lcpeAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreLcpe()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -923,40 +923,40 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 ..signature:childAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_ChildTab>::Type>::Type childAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_ChildTab()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreChildtab>::Type>::Type childAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreChildtab()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_ChildTab>::Type>::Type childAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_ChildTab()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreChildtab>::Type>::Type childAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreChildtab()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.bwtAt:
-..summary:Shortcut for $value(indexBWT(..), ..)$.
+..summary:Shortcut for $value(indexBwt(..), ..)$.
 ..cat:Index
 ..signature:bwtAt(position, index)
 ..param.position:A position in the array on which the value should be accessed.
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
+...type:Spec.IndexEsa
 ..returns:A reference or proxy to the value.
 ..include:seqan/index.h
 */
 
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex, Fibre_BWT>::Type>::Type bwtAt(TPos i, TIndex &index) {
-		return value(getFibre(index, Fibre_BWT()), i);
+	inline typename Reference<typename Fibre<TIndex, FibreBwt>::Type>::Type bwtAt(TPos i, TIndex &index) {
+		return value(getFibre(index, FibreBwt()), i);
 	}
 	template <typename TPos, typename TIndex>
-	inline typename Reference<typename Fibre<TIndex const, Fibre_BWT>::Type>::Type bwtAt(TPos i, TIndex const &index) {
-		return value(getFibre(index, Fibre_BWT()), i);
+	inline typename Reference<typename Fibre<TIndex const, FibreBwt>::Type>::Type bwtAt(TPos i, TIndex const &index) {
+		return value(getFibre(index, FibreBwt()), i);
 	}
 
 //////////////////////////////////////////////////////////////////////////////
@@ -964,30 +964,30 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 	template <typename TValue>
 	inline void _setSizeInval(TValue &v) {
-		v = SupremumValue<TValue>::VALUE;
+		v = MaxValue<TValue>::VALUE;
 	}
 
 	template <typename TValue>
 	inline bool _isSizeInval(TValue const &v) {
-		return v == SupremumValue<TValue>::VALUE;
+		return v == MaxValue<TValue>::VALUE;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexText:
-..summary:Shortcut for $getFibre(.., ESA_Text)$.
+..summary:Shortcut for $getFibre(.., EsaText)$.
 ..cat:Index
 ..signature:indexText(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_Text@ fibre (original text).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaText@ fibre (original text).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_Text>::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, Fibre_Text()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreText>::Type & indexText(Index<TText, TSpec> &index) { return getFibre(index, FibreText()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_Text>::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_Text()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreText>::Type & indexText(Index<TText, TSpec> const &index) { return getFibre(index, FibreText()); }
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1018,126 +1018,126 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexRawText:
-..summary:Shortcut for $getFibre(.., ESA_RawText)$.
+..summary:Shortcut for $getFibre(.., EsaRawText)$.
 ..cat:Index
 ..signature:indexRawText(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawText@ fibre (concatenated input text).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaRawText@ fibre (concatenated input text).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawText>::Type & indexRawText(Index<TText, TSpec> &index) { return getFibre(index, Fibre_RawText()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreRawText>::Type & indexRawText(Index<TText, TSpec> &index) { return getFibre(index, FibreRawText()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_RawText>::Type & indexRawText(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_RawText()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreRawText>::Type & indexRawText(Index<TText, TSpec> const &index) { return getFibre(index, FibreRawText()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexSA:
-..summary:Shortcut for $getFibre(.., ESA_SA)$.
+..summary:Shortcut for $getFibre(.., EsaSA)$.
 ..cat:Index
 ..signature:indexSA(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_SA@ fibre (suffix array).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaSA@ fibre (suffix array).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_SA>::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, Fibre_SA()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreSA>::Type & indexSA(Index<TText, TSpec> &index) { return getFibre(index, FibreSA()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_SA>::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_SA()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreSA>::Type & indexSA(Index<TText, TSpec> const &index) { return getFibre(index, FibreSA()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexRawSA:
-..summary:Shortcut for $getFibre(.., ESA_RawSA)$.
+..summary:Shortcut for $getFibre(.., EsaRawSA)$.
 ..cat:Index
 ..signature:indexRawSA(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_RawSA@ fibre (suffix array).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaRawSA@ fibre (suffix array).
 ..include:seqan/index.h
 */
 /*
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type const & indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Fibre_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreRawSA>::Type const & indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, FibreRawSA()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_RawSA>::Type const & indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreRawSA>::Type const & indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, FibreRawSA()); }
 */
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_RawSA>::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, Fibre_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreRawSA>::Type indexRawSA(Index<TText, TSpec> &index) { return getFibre(index, FibreRawSA()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_RawSA>::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_RawSA()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreRawSA>::Type indexRawSA(Index<TText, TSpec> const &index) { return getFibre(index, FibreRawSA()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexLCP:
-..summary:Shortcut for $getFibre(.., ESA_LCP)$.
+.Function.indexLcp:
+..summary:Shortcut for $getFibre(.., EsaLcp)$.
 ..cat:Index
-..signature:indexLCP(index)
+..signature:indexLcp(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCP@ fibre (lcp table).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaLcp@ fibre (lcp table).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_LCP>::Type & indexLCP(Index<TText, TSpec> &index) { return getFibre(index, Fibre_LCP()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreLcp>::Type & indexLcp(Index<TText, TSpec> &index) { return getFibre(index, FibreLcp()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_LCP>::Type & indexLCP(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_LCP()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreLcp>::Type & indexLcp(Index<TText, TSpec> const &index) { return getFibre(index, FibreLcp()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexLCPE:
-..summary:Shortcut for $getFibre(.., ESA_LCPE)$.
+.Function.indexLcpe:
+..summary:Shortcut for $getFibre(.., EsaLcpe)$.
 ..cat:Index
-..signature:indexLCPE(index)
+..signature:indexLcpe(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_LCPE@ fibre (enhanced lcp table).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaLcpe@ fibre (enhanced lcp table).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_LCPE>::Type & indexLCPE(Index<TText, TSpec> &index) { return getFibre(index, Fibre_LCPE()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreLcpe>::Type & indexLcpe(Index<TText, TSpec> &index) { return getFibre(index, FibreLcpe()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_LCPE>::Type & indexLCPE(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_LCPE()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreLcpe>::Type & indexLcpe(Index<TText, TSpec> const &index) { return getFibre(index, FibreLcpe()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
-.Function.indexBWT:
-..summary:Shortcut for $getFibre(.., ESA_BWT)$.
+.Function.indexBwt:
+..summary:Shortcut for $getFibre(.., EsaBwt)$.
 ..cat:Index
-..signature:indexBWT(index)
+..signature:indexBwt(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_BWT@ fibre (Burrows-Wheeler table).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaBwt@ fibre (Burrows-Wheeler table).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_BWT>::Type & indexBWT(Index<TText, TSpec> &index) { return getFibre(index, Fibre_BWT()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreBwt>::Type & indexBwt(Index<TText, TSpec> &index) { return getFibre(index, FibreBwt()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_BWT>::Type & indexBWT(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_BWT()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreBwt>::Type & indexBwt(Index<TText, TSpec> const &index) { return getFibre(index, FibreBwt()); }
 
 //////////////////////////////////////////////////////////////////////////////
 /**
 .Function.indexChildTab:
-..summary:Shortcut for $getFibre(.., ESA_ChildTab)$.
+..summary:Shortcut for $getFibre(.., EsaChildtab)$.
 ..cat:Index
 ..signature:indexChildTab(index)
 ..param.index:The @Class.Index@ object holding the fibre.
-...type:Spec.Index_ESA
-..returns:A reference to the @Tag.ESA Index Fibres.ESA_ChildTab@ fibre (child table).
+...type:Spec.IndexEsa
+..returns:A reference to the @Tag.ESA Index Fibres.EsaChildtab@ fibre (child table).
 ..include:seqan/index.h
 */
 
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec>, Fibre_ChildTab>::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, Fibre_ChildTab()); }
+	inline typename Fibre<Index<TText, TSpec>, FibreChildtab>::Type & indexChildTab(Index<TText, TSpec> &index) { return getFibre(index, FibreChildtab()); }
 	template <typename TText, typename TSpec>
-	inline typename Fibre<Index<TText, TSpec> const, Fibre_ChildTab>::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, Fibre_ChildTab()); }
+	inline typename Fibre<Index<TText, TSpec> const, FibreChildtab>::Type & indexChildTab(Index<TText, TSpec> const &index) { return getFibre(index, FibreChildtab()); }
 
 }
 

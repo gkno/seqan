@@ -280,7 +280,7 @@ SEQAN_CHECKPOINT
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, MMap<TConfig> > >
     {
-		typedef typename _MakeSigned<size_t>::Type Type;
+		typedef typename MakeSigned_<size_t>::Type Type;
     };
 //____________________________________________________________________________
 
@@ -667,7 +667,7 @@ SEQAN_CHECKPOINT
     inline typename Value<String<TValue, MMap<TConfig> > >::Type * 
     _allocateStorage(String<TValue, MMap<TConfig> > &me, TSize new_capacity) 
 	{
-		TSize size = _computeSize4Capacity(me, new_capacity);
+		TSize size = _computeSizeForCapacity(me, new_capacity);
 		_map(me, size);
 		return NULL;
 	}
@@ -678,7 +678,7 @@ SEQAN_CHECKPOINT
 		String<TValue, MMap<TConfig> > &me,
 		TSize new_capacity) 
 	{
-		TSize size = _computeSize4Capacity(me, new_capacity);
+		TSize size = _computeSizeForCapacity(me, new_capacity);
 		_remap(me, size);
 		return NULL;
 	}

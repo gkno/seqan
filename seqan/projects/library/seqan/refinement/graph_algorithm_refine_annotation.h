@@ -170,14 +170,14 @@ SEQAN_CHECKPOINT
 		
 		//refine begin
 		TSetIterator iter = all_nodes[seq_i_pos].find(begin_i);		
-		if(cutIsOk(all_nodes,seq_i_pos,begin_i,iter,min_fragment_len,tag))
+		if(_cutIsValid(all_nodes,seq_i_pos,begin_i,iter,min_fragment_len,tag))
 		{
 			all_nodes[seq_i_pos].insert(begin_i);
 			_refine(begin_i, seq_i_id, seq, seq_map, alis, gs,pms,all_nodes,min_fragment_len,tag);//TStop());
 		}
 		//and end position
 		iter = all_nodes[seq_i_pos].find(end_i);		
-		if(cutIsOk(all_nodes,seq_i_pos,end_i,iter,min_fragment_len,tag))
+		if(_cutIsValid(all_nodes,seq_i_pos,end_i,iter,min_fragment_len,tag))
 		{
 			all_nodes[seq_i_pos].insert(end_i);
 			_refine(end_i, seq_i_id, seq, seq_map, alis, gs,pms,all_nodes,min_fragment_len,tag);//TStop());
@@ -244,7 +244,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAliGraph,typename TScore, typename TPropertyMap>
 typename Value<TScore>::Type 
-getAnnoScore(TAliGraph &,
+_getAnnoScore(TAliGraph &,
 			 TPropertyMap & pm,
 			 typename VertexDescriptor<TAliGraph>::Type vd1,
 			 typename VertexDescriptor<TAliGraph>::Type vd2,
@@ -276,7 +276,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAliGraph,typename TScore>
 typename Value<TScore>::Type 
-getAnnoScore(TAliGraph &,
+_getAnnoScore(TAliGraph &,
 			 bool,
 			 typename VertexDescriptor<TAliGraph>::Type,
 			 typename VertexDescriptor<TAliGraph>::Type,

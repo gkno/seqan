@@ -46,13 +46,13 @@ non-POD types could be simple too, e.g. some specializations of @Class.SimpleTyp
 */
 
 template <typename T>
-struct _IsSimple {
+struct IsSimple_ {
 	typedef False Type;
 };
 
 template <typename T>
 struct IsSimple:
-	public _IsSimple<T> {};
+	public IsSimple_<T> {};
 template <typename T>
 struct IsSimple<T const>:
 	public IsSimple<T> {};
@@ -80,14 +80,14 @@ so the constructed object must support move construction.
 ..include:seqan/basic.h
 */
 
-struct _ValueConstructor 
+struct ValueConstructor_ 
 {
 	template <typename TIterator>
 	static inline void
 	construct(TIterator it)
 	{
 		typedef typename Value<TIterator>::Type		TValue;
-		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		typedef typename RemoveConst_<TValue>::Type	TNonConstValue;
 		new( (void*) & value(it) ) TNonConstValue;
 	}
 
@@ -97,7 +97,7 @@ struct _ValueConstructor
 			  TParam const & param_)
 	{
 		typedef typename Value<TIterator>::Type		TValue;
-		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		typedef typename RemoveConst_<TValue>::Type	TNonConstValue;
 		new( (void*) & value(it) ) TNonConstValue(param_);
 	}
 
@@ -108,12 +108,12 @@ struct _ValueConstructor
 			  Move tag)
 	{
 		typedef typename Value<TIterator>::Type		TValue;
-		typedef typename _RemoveConst<TValue>::Type	TNonConstValue;
+		typedef typename RemoveConst_<TValue>::Type	TNonConstValue;
 		new( (void*) & value(it) ) TNonConstValue(param_, tag);
 	}
 };
 
-struct _ValueConstructorProxy 
+struct ValueConstructorProxy_ 
 {
 	template <typename TIterator>
 	static inline void construct(TIterator) {}
@@ -127,7 +127,7 @@ struct _ValueConstructorProxy
 
 //____________________________________________________________________________
 
-struct _ValueDestructor 
+struct ValueDestructor_ 
 {
 	template <typename TIterator>
 	static inline void
@@ -137,7 +137,7 @@ struct _ValueDestructor
 		value(it).~TValue();
 	}
 };
-struct _ValueDestructorProxy 
+struct ValueDestructorProxy_ 
 {
 	template <typename TIterator>
 	static inline void destruct(TIterator) {}
@@ -150,15 +150,15 @@ inline void
 valueConstruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	typedef typename IF<
-		TYPECMP<
+	typedef typename If<
+		IsSameType<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
 		>::VALUE,
 	// THEN
-		_ValueConstructor,			// true,  types are equal
+		ValueConstructor_,			// true,  types are equal
 	// ELSE
-		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+		ValueConstructorProxy_		// false, types differ -> value() returns a proxy
 	>::Type TConstructor;
 
 	TConstructor::construct(it);
@@ -170,15 +170,15 @@ valueConstruct(TIterator it,
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
-	typedef typename IF<
-		TYPECMP<
+	typedef typename If<
+		IsSameType<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
 		>::VALUE,
 	// THEN
-		_ValueConstructor,			// true,  types are equal
+		ValueConstructor_,			// true,  types are equal
 	// ELSE
-		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+		ValueConstructorProxy_		// false, types differ -> value() returns a proxy
 	>::Type TConstructor;
 
 	TConstructor::construct(it, param_);
@@ -191,15 +191,15 @@ valueConstruct(TIterator it,
 			   Move tag)
 {
 SEQAN_CHECKPOINT
-	typedef typename IF<
-		TYPECMP<
+	typedef typename If<
+		IsSameType<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
 		>::VALUE,
 	// THEN
-		_ValueConstructor,			// true,  types are equal
+		ValueConstructor_,			// true,  types are equal
 	// ELSE
-		_ValueConstructorProxy		// false, types differ -> value() returns a proxy
+		ValueConstructorProxy_		// false, types differ -> value() returns a proxy
 	>::Type TConstructor;
 
 	TConstructor::construct(it, param_, tag);
@@ -222,15 +222,15 @@ inline void
 valueDestruct(TIterator it)
 {
 SEQAN_CHECKPOINT
-	typedef typename IF<
-		TYPECMP<
+	typedef typename If<
+		IsSameType<
 			typename Value<TIterator>::Type &,
 			typename Reference<TIterator>::Type
 		>::VALUE,
 	// THEN
-		_ValueDestructor,			// true,  types are equal
+		ValueDestructor_,			// true,  types are equal
 	// ELSE
-		_ValueDestructorProxy		// false, types differ -> value() returns a proxy
+		ValueDestructorProxy_		// false, types differ -> value() returns a proxy
 	>::Type TDestructor;
 
 	TDestructor::destruct(it);
@@ -284,7 +284,7 @@ of $begin$ and $end$.
 */
 template<typename TIterator1, typename TIterator2>
 inline void 
-_arrayConstruct_Default(TIterator1 begin_, 
+_arrayConstructDefault(TIterator1 begin_, 
 						TIterator2 end_)
 {
 SEQAN_CHECKPOINT
@@ -300,14 +300,14 @@ arrayConstruct(TIterator1 begin_,
 			   TIterator2 end_)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Default(begin_, end_);
+	_arrayConstructDefault(begin_, end_);
 }
 
 //____________________________________________________________________________
 
 template<typename TIterator1, typename TIterator2, typename TParam>
 inline void 
-_arrayConstruct_Default(TIterator1 begin_, 
+_arrayConstructDefault(TIterator1 begin_, 
 						TIterator2 end_, 
 						TParam const & param_)
 {
@@ -325,7 +325,7 @@ arrayConstruct(TIterator1 begin_,
 			   TParam const & param_)
 {
 SEQAN_CHECKPOINT
-	_arrayConstruct_Default(begin_, end_, param_);
+	_arrayConstructDefault(begin_, end_, param_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -353,7 +353,7 @@ An appropriate (copy-) constructor that constructs an target objects given a sou
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayConstructCopy_Default(TSource1 source_begin, 
+_arrayConstructCopyDefault(TSource1 source_begin, 
 							TSource2 source_end, 
 							TTarget target_begin)
 {
@@ -373,7 +373,7 @@ arrayConstructCopy(TSource1 source_begin,
 				   TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayConstructCopy_Default(source_begin, source_end, target_begin);
+	_arrayConstructCopyDefault(source_begin, source_end, target_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -402,7 +402,7 @@ An appropriate move constructor that constructs an target objects given a source
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayConstructMove_Default(TSource1 source_begin, 
+_arrayConstructMoveDefault(TSource1 source_begin, 
 							TSource2 source_end, 
 							TTarget target_begin)
 {
@@ -443,7 +443,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TIterator1, typename TIterator2>
 inline void 
-_arrayDestruct_Default(TIterator1 begin_, 
+_arrayDestructDefault(TIterator1 begin_, 
 					   TIterator2 end_)
 {
 SEQAN_CHECKPOINT
@@ -459,7 +459,7 @@ arrayDestruct(TIterator1 begin_,
 			  TIterator2 end_)
 {
 SEQAN_CHECKPOINT
-	_arrayDestruct_Default(begin_, end_);
+	_arrayDestructDefault(begin_, end_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -512,7 +512,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayCopyForward_Default(TSource1 source_begin, 
+_arrayCopyForwardDefault(TSource1 source_begin, 
 						  TSource2 source_end, 
 						  TTarget target_begin)
 {
@@ -526,7 +526,7 @@ arrayCopyForward(TSource1 source_begin,
 				 TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyForward_Default(source_begin, source_end, target_begin);	
+	_arrayCopyForwardDefault(source_begin, source_end, target_begin);	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -556,7 +556,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayCopyBackward_Default(TSource1 source_begin, 
+_arrayCopyBackwardDefault(TSource1 source_begin, 
 						   TSource2 source_end, 
 						   TTarget target_begin)
 {
@@ -570,7 +570,7 @@ arrayCopyBackward(TSource1 source_begin,
 				  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayCopyBackward_Default(source_begin, source_end, target_begin);
+	_arrayCopyBackwardDefault(source_begin, source_end, target_begin);
 }
 
 
@@ -641,7 +641,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayMoveForward_Default(TSource1 source_begin, 
+_arrayMoveForwardDefault(TSource1 source_begin, 
 						  TSource2 source_end, 
 						  TTarget target_begin)
 {
@@ -660,7 +660,7 @@ arrayMoveForward(TSource1 source_begin,
 				 TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveForward_Default(source_begin, source_end, target_begin);	
+	_arrayMoveForwardDefault(source_begin, source_end, target_begin);	
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -691,7 +691,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TTarget, typename TSource1, typename TSource2>
 inline void 
-_arrayMoveBackward_Default(TSource1 source_begin, 
+_arrayMoveBackwardDefault(TSource1 source_begin, 
 						   TSource2 source_end, 
 						   TTarget target_begin)
 {
@@ -711,7 +711,7 @@ arrayMoveBackward(TSource1 source_begin,
 				  TTarget target_begin)
 {
 SEQAN_CHECKPOINT
-	_arrayMoveBackward_Default(source_begin, source_end, target_begin);
+	_arrayMoveBackwardDefault(source_begin, source_end, target_begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -787,7 +787,7 @@ are free and dont contain objects.
 ..include:seqan/basic.h
 */
 template <typename TIterator>
-void _arrayClearSpace_Default(TIterator array_begin, 
+void _arrayClearSpaceDefault(TIterator array_begin, 
 							  size_t array_length, 
 							  size_t keep_from, 
 							  size_t move_to)
@@ -836,7 +836,7 @@ void arrayClearSpace(TIterator array_begin,
 					 size_t keep_from, 
 					 size_t move_to)
 {
-	_arrayClearSpace_Default(array_begin, array_length, keep_from, move_to);
+	_arrayClearSpaceDefault(array_begin, array_length, keep_from, move_to);
 }
 
 
@@ -912,34 +912,34 @@ struct BytesPerValue
 
 
 template <int SIZE>
-struct _IntegralForValue_Impl
+struct IntegralForValueImpl_
 {
 	typedef __int64 Type;
 };
 template <>
-struct _IntegralForValue_Impl<1>
+struct IntegralForValueImpl_<1>
 {
 	typedef unsigned char Type;
 };
 template <>
-struct _IntegralForValue_Impl<2>
+struct IntegralForValueImpl_<2>
 {
 	typedef unsigned short Type;
 };
 template <>
-struct _IntegralForValue_Impl<3>
+struct IntegralForValueImpl_<3>
 {
 	typedef unsigned int Type;
 };
 template <>
-struct _IntegralForValue_Impl<4>
+struct IntegralForValueImpl_<4>
 {
 	typedef unsigned int Type;
 };
 
 template <typename TValue>
 struct IntegralForValue:
-	_IntegralForValue_Impl<BytesPerValue<TValue>::VALUE>
+	IntegralForValueImpl_<BytesPerValue<TValue>::VALUE>
 {
 };
 
@@ -967,7 +967,7 @@ struct ValueSize<TValue const>:
 	public ValueSize<TValue> {};
 
 template <typename TValue> 
-struct _InternalValueSize:
+struct InternalValueSize_:
 	public ValueSize<TValue> {};
 
 
@@ -975,105 +975,105 @@ struct _InternalValueSize:
 //////////////////////////////////////////////////////////////////////////////
 
 template < typename T >
-struct _SupremumValueUnsigned {	static const T VALUE; };
+struct MaximumValueUnsigned_ {	static const T VALUE; };
 template < typename T >
-struct _SupremumValueSigned {	static const T VALUE; };
+struct MaximumValueSigned_ {	static const T VALUE; };
 
 template < typename T = void >
-struct _SupremumValueFloat {	static const float VALUE; };
+struct MaximumValueFloat_ {	static const float VALUE; };
 template < typename T = void >
-struct _SupremumValueDouble {	static const double VALUE; };
+struct MaximumValueDouble_ {	static const double VALUE; };
 
 template < typename T >
-struct _InfimumValueUnsigned {	static const T VALUE; };
+struct MinimumValueUnsigned_ {	static const T VALUE; };
 template < typename T >
-struct _InfimumValueSigned {	static const T VALUE; };
+struct MinimumValueSigned_ {	static const T VALUE; };
 
 template < typename T = void >
-struct _InfimumValueFloat {	static const float VALUE; };
+struct MinimumValueFloat_ {	static const float VALUE; };
 template < typename T = void >
-struct _InfimumValueDouble {	static const double VALUE; };
+struct MinimumValueDouble_ {	static const double VALUE; };
 
 
 template < typename T >
-const T _SupremumValueUnsigned<T>::VALUE = ~(T)0;
+const T MaximumValueUnsigned_<T>::VALUE = ~(T)0;
 template < typename T >
-const T _SupremumValueSigned<T>::VALUE = ( (((T)1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1;
+const T MaximumValueSigned_<T>::VALUE = ( (((T)1 << (BitsPerValue<T>::VALUE - 2)) - 1) << 1) + 1;
 template < typename T >
-const float _SupremumValueFloat<T>::VALUE = FLT_MAX;
+const float MaximumValueFloat_<T>::VALUE = FLT_MAX;
 template < typename T >
-const double _SupremumValueDouble<T>::VALUE = DBL_MAX;
+const double MaximumValueDouble_<T>::VALUE = DBL_MAX;
 
 template < typename T >
-const T _InfimumValueUnsigned<T>::VALUE = 0;
+const T MinimumValueUnsigned_<T>::VALUE = 0;
 template < typename T >
-const T _InfimumValueSigned<T>::VALUE = ~(T)_SupremumValueSigned<T>::VALUE;
+const T MinimumValueSigned_<T>::VALUE = ~(T)MaximumValueSigned_<T>::VALUE;
 template < typename T >
-const float _InfimumValueFloat<T>::VALUE = -FLT_MAX;
+const float MinimumValueFloat_<T>::VALUE = -FLT_MAX;
 template < typename T >
-const double _InfimumValueDouble<T>::VALUE = -DBL_MAX;
+const double MinimumValueDouble_<T>::VALUE = -DBL_MAX;
 
 
 /**
-.Metafunction.SupremumValue:
+.Metafunction.MaxValue:
 ..cat:Miscellaneous
 ..summary:Supremum for a given type.
-..signature:SupremumValue<T>::VALUE
+..signature:MaxValue<T>::VALUE
 ..param.T:An ordered type.
 ..returns.param.VALUE:A value $sup$ for which holds: $sup >= i$ for all values $i$ of type $T$.
 ..remarks:Note tat
-..see:Function.supremumValue
+..see:Function.maxValue
 ..include:seqan/basic.h
  */
 template <
 	typename T,
-	typename TParent = typename IF<
-	  TYPECMP<double, T>::VALUE,
-	  _SupremumValueDouble<>,
-	  typename IF<
-      TYPECMP<float, T>::VALUE,
-      _SupremumValueFloat<>,
-      typename IF<
-        TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
-        _SupremumValueSigned<T>,
-        _SupremumValueUnsigned<T>
+	typename TParent = typename If<
+	  IsSameType<double, T>::VALUE,
+	  MaximumValueDouble_<>,
+	  typename If<
+      IsSameType<float, T>::VALUE,
+      MaximumValueFloat_<>,
+      typename If<
+        IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
+        MaximumValueSigned_<T>,
+        MaximumValueUnsigned_<T>
         >::Type
       >::Type
     >::Type
   >
-struct SupremumValue:
+struct MaxValue:
 	public TParent 
 {
 };
 
 /**
-.Metafunction.InfimumValue:
+.Metafunction.MinValue:
 ..cat:Miscellaneous
 ..summary:Infimum for a given type.
 ..signature:Infimum<T>::VALUE
 ..param.T:An ordered type.
 ..returns.param.VALUE:A value $inf$ for which holds: $inf <= i$ for all values $i$ of type $T$.
 ..remarks:Note tat
-..see:Function.infimumValue
+..see:Function.minValue
 ..include:seqan/basic.h
  */
 template <
 	typename T,
-	typename TParent = typename IF<
-	  TYPECMP<double, T>::VALUE,
-	  _InfimumValueDouble<>,
-	  typename IF<
-      TYPECMP<float, T>::VALUE,
-      _InfimumValueFloat<>,
-      typename IF<
-        TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE,
-        _InfimumValueSigned<T>,
-        _InfimumValueUnsigned<T>
+	typename TParent = typename If<
+	  IsSameType<double, T>::VALUE,
+	  MinimumValueDouble_<>,
+	  typename If<
+      IsSameType<float, T>::VALUE,
+      MinimumValueFloat_<>,
+      typename If<
+        IsSameType< typename MakeSigned_<T>::Type, T >::VALUE,
+        MinimumValueSigned_<T>,
+        MinimumValueUnsigned_<T>
         >::Type
       >::Type
     >::Type
   >
-struct InfimumValue:
+struct MinValue:
 	public TParent
 {
 };

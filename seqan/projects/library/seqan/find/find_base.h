@@ -60,7 +60,7 @@ struct FindPrefix;
 ..summary:Default @Class.Finder@ specialization type.
 ..signature:DefaultFinder<THaystack>::Type
 ..param.THaystack:The given haystack type.
-..returns:Is $void$ by default and @Tag.Index Find Algorithm.ESA_FIND_MLR@ if $THaystack$ is an @Class.Index@.
+..returns:Is $void$ by default and @Tag.Index Find Algorithm.EsaFindMlr@ if $THaystack$ is an @Class.Index@.
 ..include:seqan/find.h
 */
 template < typename TObject >
@@ -457,7 +457,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THaystack, typename TSpec>
-inline typename _Parameter<THaystack>::Type 
+inline typename Parameter_<THaystack>::Type 
 host(Finder<THaystack, TSpec> & me)
 {
 SEQAN_CHECKPOINT
@@ -465,7 +465,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THaystack, typename TSpec>
-inline typename _Parameter<THaystack>::Type 
+inline typename Parameter_<THaystack>::Type 
 host(Finder<THaystack, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
@@ -473,7 +473,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THaystack, typename TSpec>
-inline typename _Parameter<THaystack>::Type 
+inline typename Parameter_<THaystack>::Type 
 container(Finder<THaystack, TSpec> & me)
 {
 SEQAN_CHECKPOINT
@@ -481,7 +481,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename THaystack, typename TSpec>
-inline typename _Parameter<THaystack>::Type 
+inline typename Parameter_<THaystack>::Type 
 container(Finder<THaystack, TSpec> const & me)
 {
 SEQAN_CHECKPOINT
@@ -493,7 +493,7 @@ SEQAN_CHECKPOINT
 template <typename THaystack, typename TSpec>
 inline void
 setHost(Finder<THaystack, TSpec> & me, 
-		typename _Parameter<THaystack>::Type container_)
+		typename Parameter_<THaystack>::Type container_)
 {
 SEQAN_CHECKPOINT
 	setContainer(hostIterator(me), container_);
@@ -503,7 +503,7 @@ SEQAN_CHECKPOINT
 template <typename THaystack, typename TSpec>
 inline void
 setContainer(Finder<THaystack, TSpec> & me, 
-			 typename _Parameter<THaystack>::Type container_)
+			 typename Parameter_<THaystack>::Type container_)
 {
 SEQAN_CHECKPOINT
 	setContainer(hostIterator(me), container_);

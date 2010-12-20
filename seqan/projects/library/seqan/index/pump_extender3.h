@@ -50,7 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
     };
         
     template < typename TTextInput, typename TNameInput, typename TOut0, typename TOut12 >
-    static bool skew3_extend(TTextInput &textIn, TNameInput &nameIn, TOut0 &out0, TOut12 &out12)
+    static bool _skew3Extend(TTextInput &textIn, TNameInput &nameIn, TOut0 &out0, TOut12 &out12)
     {
         resize(out0, length(textIn) / 3);
         resize(out12, length(nameIn));

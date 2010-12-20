@@ -1,4 +1,4 @@
-///A simple annotation converter. Convert a GFF to GTF or vice versa.
+///A simple annotation converter. Convert a Gff to Gtf or vice versa.
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,8 +17,8 @@ int main(int argc, const char *argv[])
 	CommandLineParser parser;
 	addUsageLine(parser, "[OPTION]... <infile> <outfile>");
 	
-	addOption(parser, CommandLineOption("gff",  "",    "write annotation in GFF format", OptionType::Bool));
-	addOption(parser, CommandLineOption("gtf",  "",    "write annotation in GTF format (default)", OptionType::Bool));
+	addOption(parser, CommandLineOption("gff",  "",    "write annotation in Gff format", OptionType::Bool));
+	addOption(parser, CommandLineOption("gtf",  "",    "write annotation in Gtf format (default)", OptionType::Bool));
 	requiredArguments(parser, 2);
 
 	bool stop = !parse(parser, argc, argv, std::cerr);
@@ -33,7 +33,7 @@ int main(int argc, const char *argv[])
 	if (!inFile.is_open() && (stop = true))
 		std::cerr << "Failed to open annotation infile for reading." << std::endl;
 	else
-		read(inFile, store, GFF());
+		read(inFile, store, Gff());
 
 	if (!stop)
 	{
@@ -42,9 +42,9 @@ int main(int argc, const char *argv[])
 		else
 		{
 			if (isSetLong(parser, "gff"))
-				write(outFile, store, GFF());
+				write(outFile, store, Gff());
 			else
-				write(outFile, store, GTF());
+				write(outFile, store, Gtf());
 		}
 	}
 	

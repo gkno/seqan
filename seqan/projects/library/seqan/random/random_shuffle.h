@@ -50,7 +50,7 @@ namespace seqan {
 ..signature:shuffle(container, rng)
 ..param.container:Container to shuffle elements of.
 ..param.rng:Random number generator to use.
-...type:Class.RNG
+...type:Class.Rng
 */
 template <typename TContainer, typename TRNG>
 void shuffle(TContainer & container, TRNG & rng)
@@ -61,7 +61,7 @@ void shuffle(TContainer & container, TRNG & rng)
 
     TValue tmp;
     for (TPosition i = 0, iend = length(container); i < iend; ++i) {
-        PDF<Uniform<TPosition> > uniformDist(i, iend - 1);
+        Pdf<Uniform<TPosition> > uniformDist(i, iend - 1);
         TPosition j = pickRandomNumber(rng, uniformDist);
         // swap
         move(tmp, container[i]);

@@ -60,21 +60,21 @@ SEQAN_CHECKPOINT
 		{
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				it.data_eof = true;
 				return;
 			}
 			if ((it.data_char == 'O') || (it.data_char == 'o'))
 			{
 				clear(line);
-				_stream_appendLine(host(it), line, it.data_char);
+				_streamAppendLine(host(it), line, it.data_char);
 				if ((prefix(line, 6) == "ORIGIN") || (prefix(line, 6) == "origin"))
 				{//end of metadata
 					break;
 				}
 			}
 			//skip meta line
-			_stream_skipLine(host(it), it.data_char);
+			_streamSkipLine(host(it), it.data_char);
 
 			if (_streamEOF(host(it)))
 			{//end of file
@@ -102,7 +102,7 @@ SEQAN_CHECKPOINT
 			it.data_char = _streamGet(host(it));
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				it.data_eof = true;
 				return;
 			}
@@ -158,7 +158,7 @@ SEQAN_CHECKPOINT
 
 			if (it.data_char == '/')
 			{//end of record
-				_stream_skipLine(host(it), it.data_char);
+				_streamSkipLine(host(it), it.data_char);
 				_streamUnget(host(it));
 				//it.data_file_pos is invalid now
 				it.data_eof = true;
@@ -236,7 +236,7 @@ SEQAN_CHECKPOINT
 	while (!_streamEOF(file))
 	{
 		clear(line);
-		_stream_appendLine(file, line, c);
+		_streamAppendLine(file, line, c);
 
 		if (c == '/')
 		{//end of record
@@ -275,7 +275,7 @@ SEQAN_CHECKPOINT
 		TValue c = _streamGet(file);
 		if (c == '/')
 		{//end of record
-			_stream_skipLine(file, c);
+			_streamSkipLine(file, c);
 			_streamUnget(file);
 			return;
 		}

@@ -41,8 +41,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.WuManber
 
-struct _WuManber;
-typedef Tag<_WuManber> WuManber;
+struct WuManber_;
+typedef Tag<WuManber_> WuManber;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -100,14 +100,14 @@ private:
 
 //forward
 template <typename TNeedle, int Q>
-struct _WuManber_Hash;
+struct WuManberHash_;
 
 
 //////////////////////////////////////////////////////////////////////////////
 //implementation kernel of WuManber 
 
 template <typename TNeedle, int Q>
-struct _WuManber_Imp
+struct WuManberImpl_
 {
 //____________________________________________________________________________
 
@@ -142,7 +142,7 @@ struct _WuManber_Imp
 	inline static unsigned short
 	hash(TValue * vals)
 	{
-		return _WuManber_Hash<TNeedle, Q>::hash(vals);
+		return WuManberHash_<TNeedle, Q>::hash(vals);
 	}
 //____________________________________________________________________________
 
@@ -175,7 +175,7 @@ struct _WuManber_Imp
 			TIterator kit = begin(*pit);
 			for (unsigned int i = 0; i <= me.lmin-Q; ++i)
 			{
-				hash = _WuManber_Hash<TNeedle, Q>::hash(kit + i);
+				hash = WuManberHash_<TNeedle, Q>::hash(kit + i);
 				if (me.shift[hash] > me.lmin-Q - i)
 				{
 					me.shift[hash] = me.lmin-Q - i;
@@ -200,7 +200,7 @@ struct _WuManber_Imp
 		for (unsigned int i = 0; pit != pit_end; ++i, ++pit)
 		{
 			unsigned short hash_plus_1;
-			hash_plus_1 = _WuManber_Hash<TNeedle, Q>::hash(begin(*pit) + me.lmin-Q) + 1;
+			hash_plus_1 = WuManberHash_<TNeedle, Q>::hash(begin(*pit) + me.lmin-Q) + 1;
 
 			//write into verify_tab
 			*(me.verify[hash_plus_1]) = i;
@@ -240,7 +240,7 @@ struct _WuManber_Imp
 //SEARCH
 		while (tit < tit_end)
 		{
-			hash = _WuManber_Hash<TNeedle, Q>::hash(tit);
+			hash = WuManberHash_<TNeedle, Q>::hash(tit);
 
 			if (me.shift[hash])
 			{
@@ -296,7 +296,7 @@ VERIFY:
 //implementation of hash function
 
 template <typename TNeedle>
-struct _WuManber_Hash<TNeedle, 1>
+struct WuManberHash_<TNeedle, 1>
 {
 	template <typename TIterator>
 	inline static unsigned short
@@ -306,33 +306,33 @@ struct _WuManber_Hash<TNeedle, 1>
 	}
 };
 template <typename TNeedle>
-struct _WuManber_Hash<TNeedle, 2>
+struct WuManberHash_<TNeedle, 2>
 {
 	template <typename TIterator>
 	inline static unsigned short
 	hash(TIterator vals)
 	{
 		return ordValue(*vals)
-			+ (ordValue(*(vals+1)) << _WuManber_Imp<TNeedle, 2>::SHIFT);
+			+ (ordValue(*(vals+1)) << WuManberImpl_<TNeedle, 2>::SHIFT);
 	}
 };
 template <typename TNeedle>
-struct _WuManber_Hash<TNeedle, 3>
+struct WuManberHash_<TNeedle, 3>
 {
 	template <typename TIterator>
 	inline static unsigned short
 	hash(TIterator vals)
 	{
 		return ordValue(*vals) 
-			+ (ordValue(*(vals+1)) << _WuManber_Imp<TNeedle, 3>::SHIFT_MIDDLE)
-			+ (ordValue(*(vals+2)) << _WuManber_Imp<TNeedle, 3>::SHIFT_LEFT);
+			+ (ordValue(*(vals+1)) << WuManberImpl_<TNeedle, 3>::SHIFT_MIDDLE)
+			+ (ordValue(*(vals+2)) << WuManberImpl_<TNeedle, 3>::SHIFT_LEFT);
 	}
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TNeedle, typename TNeedle2>
-void _setHost_WuManber(Pattern<TNeedle, WuManber> & me, 
+void _setHostWuManber(Pattern<TNeedle, WuManber> & me, 
 					   TNeedle2 const & needle_)
 {
 SEQAN_CHECKPOINT
@@ -387,17 +387,17 @@ SEQAN_ASSERT(!empty(needle_));
 		me.q = me.lmin;
 	}
 
-	//rest of preprocessing is done in _WuManber_Imp
-	if (me.q == 2) _WuManber_Imp<TNeedle, 2>::initialize(me);
-	else if (me.q == 3) _WuManber_Imp<TNeedle, 3>::initialize(me);
-	else _WuManber_Imp<TNeedle, 1>::initialize(me);
+	//rest of preprocessing is done in WuManberImpl_
+	if (me.q == 2) WuManberImpl_<TNeedle, 2>::initialize(me);
+	else if (me.q == 3) WuManberImpl_<TNeedle, 3>::initialize(me);
+	else WuManberImpl_<TNeedle, 1>::initialize(me);
 }
 
 template <typename TNeedle, typename TNeedle2>
 void setHost (Pattern<TNeedle, WuManber> & me, 
 			  TNeedle2 const & needle) 
 {
-	_setHost_WuManber(me, needle);
+	_setHostWuManber(me, needle);
 }
 
 template <typename TNeedle, typename TNeedle2>
@@ -405,7 +405,7 @@ inline void
 setHost(Pattern<TNeedle, WuManber> & me, 
 		TNeedle2 & needle)
 {
-	_setHost_WuManber(me, needle);
+	_setHostWuManber(me, needle);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -456,9 +456,9 @@ SEQAN_CHECKPOINT
 
 	if (me.lmin == 0) return false;
 
-	if (me.q == 2) return _WuManber_Imp<TNeedle, 2>::find(finder, me);
-	else if (me.q == 3) return _WuManber_Imp<TNeedle, 3>::find(finder, me);
-	else return _WuManber_Imp<TNeedle, 1>::find(finder, me);
+	if (me.q == 2) return WuManberImpl_<TNeedle, 2>::find(finder, me);
+	else if (me.q == 3) return WuManberImpl_<TNeedle, 3>::find(finder, me);
+	else return WuManberImpl_<TNeedle, 1>::find(finder, me);
 }
 
 //////////////////////////////////////////////////////////////////////////////

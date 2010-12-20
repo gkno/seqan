@@ -122,22 +122,22 @@ void Test_StringSetIdHolder() {
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	if (IsSameType<TStringSet, TSetTight>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 3u);
 	}
-	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 4u);
 	}
 	removeValueById(str,id2);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	if (IsSameType<TStringSet, TSetTight>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
-	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 4u);
 	}
@@ -151,11 +151,11 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id3);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id4), "e");
-	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	if (IsSameType<TStringSet, TSetTight>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
-	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 101u);
 	}
@@ -171,11 +171,11 @@ void Test_StringSetIdHolder() {
 	removeValueById(str,id4);
 	SEQAN_ASSERT_EQ(getValueById(str, id0), "a");
 	SEQAN_ASSERT_EQ(getValueById(str, id5), "f");
-	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	if (IsSameType<TStringSet, TSetTight>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 2u);
 	}
-	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 102u);
 	}
@@ -186,11 +186,11 @@ void Test_StringSetIdHolder() {
 	SEQAN_ASSERT_EQ(getValueById(str, id1), "b");
 	SEQAN_ASSERT_EQ(getValueById(str, id2), "c");
 	SEQAN_ASSERT_EQ(getValueById(str, id3), "d");
-	if (TYPECMP<TStringSet, TSetTight>::VALUE)
+	if (IsSameType<TStringSet, TSetTight>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 3u);
 	}
-	else if (TYPECMP<TStringSet, TSetGenerous>::VALUE)
+	else if (IsSameType<TStringSet, TSetGenerous>::VALUE)
 	{
 		SEQAN_ASSERT_EQ(length(str), 3u);
 	}

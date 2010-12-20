@@ -33,7 +33,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #ifdef MYERS_HIRSCHBERG_VERBOSE
 	template<typename TSource>
-	void write_debug_matrix(TSource s1,TSource s2)
+	void _writeDebugMatrix(TSource s1,TSource s2)
 	{
 		int l1 = length(s1);
 		int l2 = length(s2);
@@ -209,7 +209,7 @@ globalAlignment(Align<TSource, TSpec> & align_,
 #ifdef BAC_ALIGNER // see definition of BAC_ALIGNER
 	//extend the bitMasks for ambigous alphabets
 	//	possibly intergrate Tag for Alphabet-Class
-	if(_ClassIdentifier<TAlphabet>::getID() == _ClassIdentifier<EIupac>::getID())
+	if(ClassIdentifier_<TAlphabet>::getID() == ClassIdentifier_<EIupac>::getID())
 	{
 		unsigned int i,j,m;
 		unsigned int * copyMask;
@@ -456,7 +456,7 @@ SEQAN_CHECKPOINT
 
 	// extend the bitMasks for ambigous alphabets
 	//		possibly intergrate Tag for Alphabet-Class
-	if(_ClassIdentifier<TAlphabet>::getID() == _ClassIdentifier<EIupac>::getID())
+	if(ClassIdentifier_<TAlphabet>::getID() == ClassIdentifier_<EIupac>::getID())
 	{
 		unsigned int * fCopyMask;
 		unsigned int * rCopyMask;
@@ -745,7 +745,7 @@ SEQAN_CHECKPOINT
 			std::cout << "cut is in row " << mid << " symbol is " << getValue(x,mid-1) << std::endl << std::endl;
 
 			std::cout << std::endl;
-			write_debug_matrix(infix(x,_begin1(target),_end1(target)),infix(y,_begin2(target),_end2(target)));
+			_writeDebugMatrix(infix(x,_begin1(target),_end1(target)),infix(y,_begin2(target),_end2(target)));
 			std::cout << std::endl;
 #endif
 			/* compute blocks and score masks */

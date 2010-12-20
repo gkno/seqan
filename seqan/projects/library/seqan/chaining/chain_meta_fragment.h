@@ -25,15 +25,15 @@ namespace seqan{
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//			Class _MetaFragment
+//			Class MetaFragment_
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*DISABLED
-.Class._MetaFragment:
+.Class.MetaFragment_:
 ..summary:Basic data which associates fragments with prededing fragments and stores chain score informations
 ..cat:Chaining
-..signature:_MetaFragment< TFragType >
+..signature:MetaFragment_< TFragType >
 ..param.TFragType:Type of the fragment
 ..include:seqan/chaining.h
 */
@@ -41,14 +41,14 @@ namespace seqan{
 		// get/set the weight of the related fragment
 	template< typename TFragType > inline
 	typename Weight< TFragType >::Type
-	weight( _MetaFragment< TFragType > & me )
+	weight( MetaFragment_< TFragType > & me )
 	{
 		return weight( *me._frag );
 	}
 
 	template< typename TFragType, typename TWeight> inline
 	void
-	setWeight( _MetaFragment< TFragType > & me,
+	setWeight( MetaFragment_< TFragType > & me,
 				TWeight weight )
 	{
 		setWeight( *me._frag, weight );
@@ -57,14 +57,14 @@ namespace seqan{
 		// get/set the score of the chain
 	template< typename TFragType > inline
 	typename Weight< TFragType >::Type 
-	score( _MetaFragment< TFragType > & me )
+	score( MetaFragment_< TFragType > & me )
 	{
 		return me._score;
 	}
 
 	template< typename TFragType, typename TWeight > inline
 	void
-	setScore( _MetaFragment< TFragType > & me,
+	setScore( MetaFragment_< TFragType > & me,
 						TWeight score )
 	{
 		me._score = score;
@@ -73,14 +73,14 @@ namespace seqan{
 		// get/set the priority
 	template< typename TFragType > inline
 	typename Weight< TFragType >::Type 
-	priority( _MetaFragment< TFragType > & me )
+	priority( MetaFragment_< TFragType > & me )
 	{
 		return me._priority;
 	}
 
 	template< typename TFragType, typename TWeight > inline
 	void
-	setPriority( _MetaFragment< TFragType > & me,
+	setPriority( MetaFragment_< TFragType > & me,
 					TWeight prio )
 	{
 		me._priority = prio;
@@ -89,29 +89,29 @@ namespace seqan{
 		// get the associated fragment
 	template< typename TFragType > inline
 	TFragType & 
-	_getFrag( _MetaFragment< TFragType > & me )
+	_getFrag( MetaFragment_< TFragType > & me )
 	{
 		return *me._frag;
 	}
 
 	template< typename TFragType > inline
 	TFragType & 
-	_getFrag( const _MetaFragment< TFragType > & me )
+	_getFrag( const MetaFragment_< TFragType > & me )
 	{
 		return *me._frag;
 	}
 
 		// get preceding fragment
 	template< typename TFragType > inline
-	_MetaFragment< TFragType > & 
-	_getPred( _MetaFragment< TFragType > & me )
+	MetaFragment_< TFragType > & 
+	_getPred( MetaFragment_< TFragType > & me )
 	{
 		return *me._pred;
 	}
 
 	template< typename TFragType > inline 
-	_MetaFragment< TFragType > & 
-	_getPred( const _MetaFragment< TFragType > & me )
+	MetaFragment_< TFragType > & 
+	_getPred( const MetaFragment_< TFragType > & me )
 	{
 		return *me._pred;
 	}
@@ -119,23 +119,23 @@ namespace seqan{
 		// set preceding fragment
 	template< typename TFragType > inline
 	void
-	_setPred( _MetaFragment< TFragType > & me, 
-				_MetaFragment< TFragType > & pred )
+	_setPred( MetaFragment_< TFragType > & me, 
+				MetaFragment_< TFragType > & pred )
 	{
 		me._pred = &pred;
 	}
 
 	template< typename TFragType > inline
 	void
-	_setPred( const _MetaFragment< TFragType > & me, 
-				_MetaFragment< TFragType > & pred )
+	_setPred( const MetaFragment_< TFragType > & me, 
+				MetaFragment_< TFragType > & pred )
 	{
 		me._pred = &pred;
 	}
 
 	template< typename TFragType > inline
 	void 
-	dump( _MetaFragment< TFragType > & me )
+	dump( MetaFragment_< TFragType > & me )
 	{
 		if( me._frag )
 			dump( *me._frag );
@@ -144,36 +144,36 @@ namespace seqan{
 
 
 	template< typename TFragType >
-	struct _MetaFragment
+	struct MetaFragment_
 	{
 		TFragType * _frag;
 			// preceding element in a chain
 		typename Weight< TFragType >::Type _priority;
 		typename Weight< TFragType >::Type _score;
-		_MetaFragment< TFragType > * _pred;
+		MetaFragment_< TFragType > * _pred;
 
-		_MetaFragment()		
+		MetaFragment_()		
 			: _frag( NULL )
-			, _priority( infimumValue< typename Weight< TFragType >::Type >() )
-			, _score( infimumValue< typename Weight< TFragType >::Type >() )
+			, _priority( minValue< typename Weight< TFragType >::Type >() )
+			, _score( minValue< typename Weight< TFragType >::Type >() )
 			, _pred( NULL )
 		{}
 
-		_MetaFragment( TFragType & frag )
+		MetaFragment_( TFragType & frag )
 			: _frag( &frag )
-			, _priority( infimumValue< typename Weight< TFragType >::Type >() )
-			, _score( infimumValue< typename Weight< TFragType >::Type >() )
+			, _priority( minValue< typename Weight< TFragType >::Type >() )
+			, _score( minValue< typename Weight< TFragType >::Type >() )
 			, _pred( NULL )
 		{}
 
-		_MetaFragment( const _MetaFragment & old )
+		MetaFragment_( const MetaFragment_ & old )
 			: _frag( old._frag)
 			, _priority( old._priority )
 			, _score( old._score )
 			, _pred( old._pred )
 		{}
 
-		_MetaFragment & operator=( const _MetaFragment & old )
+		MetaFragment_ & operator=( const MetaFragment_ & old )
 		{
 			if ( this == &old ) 
 				return *this;

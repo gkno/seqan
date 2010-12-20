@@ -184,7 +184,7 @@ parseContig(FragmentStore<TSpec, TConfig> const& fragStore,
 	        getClrRange(fragStore, *iter_cr, begClr, endClr);        
             String<Dna5Q> ungapped_seq = fragStore.readSeqStore[iter_cr->readId];
             if(iter_cr->beginPos > iter_cr->endPos) {
-                reverseComplementInPlace(ungapped_seq);
+                reverseComplement(ungapped_seq);
                 // swap the clr's
 	            TReadPos tmp = begClr;
 	            begClr = length(ungapped_seq) - endClr;

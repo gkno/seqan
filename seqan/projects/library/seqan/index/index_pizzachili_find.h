@@ -23,7 +23,7 @@
 
 namespace SEQAN_NAMESPACE_MAIN {
 
-struct _PizzaChiliFinder;
+struct PizzaChiliFinder_;
 
 /**
 .Tag.Index Find Algorithm
@@ -34,7 +34,7 @@ struct _PizzaChiliFinder;
 ..include:seqan/index.h
 */
 
-typedef Tag<_PizzaChiliFinder> const PizzaChiliFinder;
+typedef Tag<PizzaChiliFinder_> const PizzaChiliFinder;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +49,7 @@ struct DefaultFinder<Index<TText, PizzaChili<TSpec> > > {
 // represent the search results and our search results aren't actually part of
 // a suffix array but rather a C array of ulong values.
 template <typename TText, typename TSpec>
-struct Fibre<Index<TText, PizzaChili<TSpec> >, Tag<_Fibre_SA> const> {
+struct Fibre<Index<TText, PizzaChili<TSpec> >, Tag<FibreSA_> const> {
     typedef impl::ulong_t* Type;
 };
 
@@ -93,7 +93,7 @@ namespace impl {
     inline uchar_t* getPizzaChiliString(TPattern const& pattern) {
 SEQAN_CHECKPOINT
         typedef
-            typename _RemoveConst<
+            typename RemoveConst_<
                 typename Value<TPattern>::Type
             >::Type alph_t;
 
@@ -130,7 +130,7 @@ SEQAN_CHECKPOINT
         ::std::free(finder.range.i1);
 
     TIndex& index = haystack(finder);
-    indexRequire(index, PizzaChili_Compressed());
+    indexRequire(index, PizzaChiliCompressed());
 
     impl::uchar_t* c_pattern =
         impl::getPizzaChiliString(pattern);

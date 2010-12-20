@@ -73,23 +73,23 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct
-	_SearchPath
+	SearchPath_
 	{
 			// buffer for elements on searchng path
 		SkipElement< TObject, TModus, TSpec, TStructuring > ** _searchPath;
 
-		_SearchPath( )
+		SearchPath_( )
 		{
 		}
 
 		template< typename TSize >
-		_SearchPath( TSize size )
+		SearchPath_( TSize size )
 		{
 		SEQAN_CHECKPOINT
 			allocate( this, _searchPath, size );
 		}
 
-		~_SearchPath( void )
+		~SearchPath_( void )
 		{
 		SEQAN_CHECKPOINT
 			SEQAN_CHECK( _searchPath == NULL )
@@ -101,7 +101,7 @@ namespace seqan
 		// get the search path of a skip list
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	SkipElement< TObject, TModus, TSpec, TStructuring > **
-	_getSearchPath( _SearchPath< TObject, TModus, TSpec, TStructuring > & sp )
+	_getSearchPath( SearchPath_< TObject, TModus, TSpec, TStructuring > & sp )
 	{
 	SEQAN_CHECKPOINT
 		return sp._searchPath;
@@ -109,7 +109,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TSize > inline
 	void
-	_clearSearchPath( _SearchPath< TObject, TModus, TSpec, TStructuring > & sp,
+	_clearSearchPath( SearchPath_< TObject, TModus, TSpec, TStructuring > & sp,
 						TSize size )
 	{
 	SEQAN_CHECKPOINT
@@ -327,16 +327,16 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_sort_equals(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
+	_sortEquals(	SkipList< TObject, TModus, TSpec, TStructuring > & list,
 					SkipBaseElement< TObject, TModus, TSpec, TStructuring > * elem )
 	{
 		SEQAN_CHECKPOINT
-		_sort_equals( list, elem, key( *elem ) );
+		_sortEquals( list, elem, key( *elem ) );
 	}
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TKey > inline
 	void
-	_sort_equals(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
+	_sortEquals(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 					SkipBaseElement< TObject, TModus, TSpec, TStructuring > * /*elem*/,
 					TKey /*theKey*/)
 	{	
@@ -345,7 +345,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TKey > 
 	void
-	_sort_equals(	SkipList< TObject, TModus, TSpec, Deferred > & /*list*/,
+	_sortEquals(	SkipList< TObject, TModus, TSpec, Deferred > & /*list*/,
 					SkipBaseElement< TObject, TModus, TSpec, Deferred > * elem,
 					TKey theKey)
 	{
@@ -487,7 +487,7 @@ namespace seqan
 				height = _throwCoin( list, maxHeight );
 				if( height > 0 ){
 					_add( list, buffer, height, search_path );
-					_connect_actualize( list, buffer, height, search_path, list );
+					_connectUpdate( list, buffer, height, search_path, list );
 				}
 			}
 			buffer_key= key( *buffer );
@@ -533,8 +533,8 @@ namespace seqan
 					TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( theKey < supremumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
-		SEQAN_CHECK2( theKey > infimumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
+		SEQAN_CHECK2( theKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
+		SEQAN_CHECK2( theKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
 	
 		typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type height = layer_element - &_getUp( *_getDown( *layer_element ) ) + 1;
 		SkipElement< TObject, TModus, TSpec, TStructuring > * temp_right = _getRight( *layer_element );
@@ -586,8 +586,8 @@ namespace seqan
 						TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( theKey!= supremumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
-		SEQAN_CHECK2( theKey!= infimumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
+		SEQAN_CHECK2( theKey!= maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
+		SEQAN_CHECK2( theKey!= minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
 	
 		typename Size< SkipList< TObject, TModus, TSpec, TStructuring > >::Type height = layer_element - &_getUp( *_getDown( *layer_element ) ) + 1;
 
@@ -660,7 +660,7 @@ namespace seqan
 	searchElement(	SkipList< TObject, TModus, TSpec, TStructuring > & list, 
 					TKey theKey )
 	{
-		SEQAN_CHECK( theKey < supremumValue< typename Key< TObject >::Type >() )
+		SEQAN_CHECK( theKey < maxValue< typename Key< TObject >::Type >() )
 		SEQAN_CHECKPOINT
 		if( _getInitialState( list ) )
 		{
@@ -746,7 +746,7 @@ namespace seqan
 				if( pivot_key<= theKey){
 					if( height > 0){
 						_add( list, pivot, height, search_path );
-						_connect_actualize( list, pivot, height, search_path, param );
+						_connectUpdate( list, pivot, height, search_path, param );
 					}
 					elem = pivot;
 				}
@@ -773,7 +773,7 @@ namespace seqan
 		// 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring, typename TParam, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
+	_connectUpdate(	SkipList< TObject, TModus, TSpec, TStructuring > & /*list*/,
 						SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base,
 						TSize height,
 						SkipElement< TObject, TModus, TSpec, TStructuring > ** search_path,
@@ -908,7 +908,7 @@ namespace seqan
 		allocate( _getBaseAlloc( list ), firstBase, numEntries + 2 );
 		list._baseStore = firstBase;
 
-		valueConstruct( firstBase, &list.l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		valueConstruct( firstBase, &list.l_border_obj, minValue< typename Key< TObject >::Type >() );
 
 		++firstBase;
 
@@ -919,7 +919,7 @@ namespace seqan
 			++firstData;
 		}
 		lastBase = firstBase;
-		valueConstruct( lastBase, &list.r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		valueConstruct( lastBase, &list.r_border_obj, maxValue< typename Key< TObject >::Type >() );
 		firstBase = list._baseStore;
 		_setDefConnects( lastBase, lastBase );
 		_setDefConnects( firstBase, lastBase );
@@ -938,7 +938,7 @@ namespace seqan
 		allocate( _getBaseAlloc( list ), firstBase, numEntries + 2 );
 		list._baseStore = firstBase;
 
-		valueConstruct( firstBase, &list.l_border_obj, infimumValue< typename Key< TObject >::Type >() );
+		valueConstruct( firstBase, &list.l_border_obj, minValue< typename Key< TObject >::Type >() );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * previous = firstBase;
 		++firstBase;
 
@@ -951,7 +951,7 @@ namespace seqan
 			++firstData;
 		}
 		lastBase = firstBase;
-		valueConstruct( lastBase, &list.r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		valueConstruct( lastBase, &list.r_border_obj, maxValue< typename Key< TObject >::Type >() );
 		_setDynConnects( previous, lastBase );
 		_setSucc( *lastBase, lastBase );
 		firstBase = list._baseStore;
@@ -978,7 +978,7 @@ namespace seqan
 		_setDown( *_rightBorder, &list._baseStore[ numEntries + 1 ] );
 		_setHeight( list._baseStore[ numEntries + 1 ], 1 );
 		_setRight( * _rightBorder, _rightBorder );
-		setKey( *_rightBorder, supremumValue< typename Key< TObject >::Type >() );
+		setKey( *_rightBorder, maxValue< typename Key< TObject >::Type >() );
 		_setUp( list._baseStore[ numEntries + 1 ], *_rightBorder );
 		
 				// ... left side

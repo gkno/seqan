@@ -104,10 +104,10 @@ struct IsSequence<String<TValue, TSpec> > {
 // Returns a Class that can be used to store a temporary copy of a String
 
 template <typename T>
-struct _TempCopy
+struct TempCopy_
 {
 	typedef typename Value<T>::Type TValue;
-	typedef typename _RemoveConst<TValue>::Type TValue_NotConst;
+	typedef typename RemoveConst_<TValue>::Type TValue_NotConst;
 	typedef String<TValue_NotConst, Alloc<> > Type;
 };
 
@@ -273,14 +273,14 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _ClearSpace_String_Base_
+struct ClearSpaceStringBase_
 {
 };
 
 //____________________________________________________________________________
 
 template <>
-struct _ClearSpace_String_Base_<Insist>
+struct ClearSpaceStringBase_<Insist>
 {
 	template <typename T>
 	static inline typename Size<T>::Type
@@ -395,7 +395,7 @@ SEQAN_CHECKPOINT
 
 
 template <>
-struct _ClearSpace_String_Base_<Limit>
+struct ClearSpaceStringBase_<Limit>
 {
 
 	template <typename T>
@@ -485,7 +485,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TExpand>
-struct _ClearSpace_Expand_String_Base_
+struct ClearSpaceExpandStringBase_
 {
 	template <typename T>
 	static inline typename Size<T>::Type 
@@ -654,16 +654,16 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <>
-struct _ClearSpace_String_Base_<Exact>:
-	_ClearSpace_Expand_String_Base_<Exact>
+struct ClearSpaceStringBase_<Exact>:
+	ClearSpaceExpandStringBase_<Exact>
 {
 };
 
 //____________________________________________________________________________
 
 template <>
-struct _ClearSpace_String_Base_<Generous>:
-	_ClearSpace_Expand_String_Base_<Generous>
+struct ClearSpaceStringBase_<Generous>:
+	ClearSpaceExpandStringBase_<Generous>
 {
 };
 
@@ -693,7 +693,7 @@ _clearSpace(String<TValue, TSpec> & me,
 		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size);
+	return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size);
 }
 
 template<typename TValue, typename TSpec, typename TSize, typename TExpand>
@@ -704,7 +704,7 @@ _clearSpace(String<TValue, TSpec> & me,
 		Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
+	return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, limit);
 }
 
 template<typename TValue, typename TSpec, typename TSize, typename TPosition, typename TExpand>
@@ -716,7 +716,7 @@ _clearSpace(String<TValue, TSpec> & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
+	return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end);
 }
 
 template<typename TValue, typename TSpec, typename TSize, typename TPosition, typename TExpand>
@@ -729,7 +729,7 @@ _clearSpace(String<TValue, TSpec> & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _ClearSpace_String_Base_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
+	return ClearSpaceStringBase_<Tag<TExpand> const>::_clearSpace_(me, size, pos_begin, pos_end, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -825,7 +825,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _Assign_String
+struct AssignString_
 {
 	template <typename TTarget, typename TSource>
 	static inline void 
@@ -844,7 +844,7 @@ SEQAN_CHECKPOINT
 SEQAN_CHECKPOINT
 			if ((void *) &target == (void *) &source) return;
 
-			typename _TempCopy<TSource>::Type temp(source, length(source));
+			typename TempCopy_<TSource>::Type temp(source, length(source));
 			assign(target, temp, TExpand());
 		}
 	}
@@ -870,7 +870,7 @@ SEQAN_CHECKPOINT
 			typename Size<TTarget>::Type source_length = length(source);
 			if (source_length > limit) source_length = limit;
 
-			typename _TempCopy<TSource>::Type temp(source, source_length);
+			typename TempCopy_<TSource>::Type temp(source, source_length);
 			assign(target, temp, TExpand());
 		}
 	}
@@ -885,7 +885,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Assign_String<Tag<TExpand> const>::assign_(target, source);
+	AssignString_<Tag<TExpand> const>::assign_(target, source);
 }
 template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TSize, typename TExpand>
 inline void
@@ -895,7 +895,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
+	AssignString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
 //____________________________________________________________________________
@@ -908,7 +908,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Assign_String<Tag<TExpand> const>::assign_(target, source);
+	AssignString_<Tag<TExpand> const>::assign_(target, source);
 }
 template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TSize, typename TExpand>
 inline void
@@ -918,7 +918,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   Tag<TExpand> const)
 {
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Assign_String<Tag<TExpand> const>::assign_(target, source, limit);
+	AssignString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1049,7 +1049,7 @@ valueConstructMove(TIterator it,
 ///.Function.append.param.source.type:Class.String
 
 template <typename TExpand>
-struct _Append_String
+struct AppendString_
 {
 	template <typename TTarget, typename TSource>
 	static inline void 
@@ -1066,7 +1066,7 @@ SEQAN_CHECKPOINT
 		else
 		{
 SEQAN_CHECKPOINT
-			typename _TempCopy<TSource>::Type temp(source, length(source));
+			typename TempCopy_<TSource>::Type temp(source, length(source));
 			append(target, temp, TExpand());
 		}
 	}
@@ -1101,7 +1101,7 @@ SEQAN_CHECKPOINT
 				typename Size<TTarget>::Type source_length = length(source) ;
 				if (source_length > limit) source_length = limit;
 
-				typename _TempCopy<TSource>::Type temp(source, source_length);
+				typename TempCopy_<TSource>::Type temp(source, source_length);
 				append(target, temp, TExpand());
 			}
 		}
@@ -1118,7 +1118,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Append_String<Tag<TExpand> const>::append_(target, source);
+	AppendString_<Tag<TExpand> const>::append_(target, source);
 }
 
 template<typename TTargetValue, typename TTargetSpec, typename TSource, typename TExpand>
@@ -1130,7 +1130,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Append_String<Tag<TExpand> const>::append_(target, source, limit);
+	AppendString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
 //____________________________________________________________________________
@@ -1144,7 +1144,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Append_String<Tag<TExpand> const>::append_(target, source);
+	AppendString_<Tag<TExpand> const>::append_(target, source);
 }
 
 template<typename TTargetValue, typename TTargetSpec, typename TSourceValue, typename TExpand>
@@ -1156,7 +1156,7 @@ append(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Append_String<Tag<TExpand> const>::append_(target, source, limit);
+	AppendString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
 
@@ -1166,7 +1166,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _Append_Value_2_String
+struct _AppendValueToString
 {
 	template <typename T, typename TValue>
 	static inline void 
@@ -1201,7 +1201,7 @@ appendValue(String<TTargetValue, TTargetSpec> & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Append_Value_2_String<Tag<TExpand> const>::appendValue_(me, _value);
+	_AppendValueToString<Tag<TExpand> const>::appendValue_(me, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1213,7 +1213,7 @@ SEQAN_CHECKPOINT
 */
 
 template <typename TExpand>
-struct _Insert_Value_2_String
+struct InsertValueToString_
 {
 	template <typename T, typename TPosition, typename TValue>
 	static inline void 
@@ -1241,7 +1241,7 @@ insertValue(String<TTargetValue, TTargetSpec> & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Insert_Value_2_String<Tag<TExpand> const>::insertValue_(me, pos, _value);
+	InsertValueToString_<Tag<TExpand> const>::insertValue_(me, pos, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1252,7 +1252,7 @@ SEQAN_CHECKPOINT
 ///.Function.replace.param.source.type:Class.String
 
 template <typename TExpand>
-struct _Replace_String
+struct ReplaceString_
 {
 	template <typename TTarget, typename TSource>
 	static inline void 
@@ -1270,7 +1270,7 @@ SEQAN_CHECKPOINT
 		else
 		{
 SEQAN_CHECKPOINT
-			typename _TempCopy<TSource>::Type temp(source, length(source));
+			typename TempCopy_<TSource>::Type temp(source, length(source));
 			replace(target, pos_begin, pos_end, temp, TExpand());
 		}
 	}
@@ -1304,7 +1304,7 @@ SEQAN_CHECKPOINT
 				typename Size<TTarget>::Type source_length = length(source) ;
 				if (source_length > limit) source_length = limit;
 
-				typename _TempCopy<TSource>::Type temp(source, source_length);
+				typename TempCopy_<TSource>::Type temp(source, source_length);
 				replace(target, pos_begin, pos_end, temp, limit, TExpand());
 			}
 		}
@@ -1324,7 +1324,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+	ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSource, typename TExpand>
@@ -1338,7 +1338,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+	ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
 //____________________________________________________________________________
@@ -1354,7 +1354,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+	ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template<typename TTargetValue, typename TTargetSpec, typename TPositionBegin, typename TPositionEnd, typename TSourceValue, typename TExpand>
@@ -1368,7 +1368,7 @@ replace(String<TTargetValue, TTargetSpec> & target,
 {
 SEQAN_CHECKPOINT
 	typedef String<TTargetValue, TTargetSpec> TTarget;
-	_Replace_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+	ReplaceString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1548,7 +1548,7 @@ _reserveStorage(
 	TSize old_capacity = capacity(seq);
 
 //	if (old_capacity == (TSize)new_capacity) return;
-//	if (!TYPECMP<TExpand,TagExact_>::VALUE && old_capacity > (TSize)new_capacity) return;
+//	if (!IsSameType<TExpand,TagExact_>::VALUE && old_capacity > (TSize)new_capacity) return;
 	if (old_capacity >= (TSize)new_capacity) return;
 
 	TSize seq_length = length(seq);

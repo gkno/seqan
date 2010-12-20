@@ -130,7 +130,7 @@ public:
 			while( temp != tempEnd )
 			{
 				std::cout.width(7);
-				if( key( *temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+				if( key( *temp ) == minValue< typename Key< TObject >::Type >( ) )
 					std::cout << std::left << "L";
 				else
 					std::cout << std::left << key( *temp );
@@ -158,7 +158,7 @@ public:
 					if( _getRight( *( &_getUp( *temp ) + layer - 1) ) )
 					{
 						std::stringstream s;
-						if( key( *temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+						if( key( *temp ) == minValue< typename Key< TObject >::Type >( ) )
 							s << std::left << "L";
 						else
 							s << key( *temp );

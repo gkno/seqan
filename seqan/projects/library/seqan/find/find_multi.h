@@ -26,8 +26,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-struct _MultipatternFinder;
-typedef Tag<_MultipatternFinder> MultipatternFinder;
+struct MultiPatternFinder_;
+typedef Tag<MultiPatternFinder_> MultipatternFinder;
 	
 //____________________________________________________________________________
 

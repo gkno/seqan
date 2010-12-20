@@ -191,7 +191,7 @@ getErrorDistribution(
 		else
 		{
 			genome = infix(store.contigStore[(*it).contigId].seq, right, left);
-			reverseComplementInPlace(genome);
+			reverseComplement(genome);
 		}
 		for (unsigned i = 0; i < length(posError) && i < length(read); ++i)
 			if ((options.compMask[ordValue(genome[i])] & options.compMask[ordValue(read[i])]) == 0)
@@ -244,7 +244,7 @@ getErrorDistribution(
 		else
 		{
 			assignSource(row(align, 1), infix(store.contigStore[(*it).contigId].seq, right, left));
-			reverseComplementInPlace(source(row(align, 1)));
+			reverseComplement(source(row(align, 1)));
 		}
 		globalAlignment(align, scoreType);
 		
@@ -780,7 +780,7 @@ int dumpMatches(
 					else
 					{
 						assignSource(row(align, 1), infix(store.contigStore[(*it).contigId].seq, right, left));
-						reverseComplementInPlace(source(row(align, 1)));
+						reverseComplement(source(row(align, 1)));
 					}
 					globalAlignment(align, scoreType);
 					dumpAlignment(file, align);
@@ -931,7 +931,7 @@ int dumpMatches(
 							else
 							{
 								gInf = infix(store.contigStore[(*it).contigId].seq, right, left);
-								reverseComplementInPlace(gInf);
+								reverseComplement(gInf);
 							}
 							for (unsigned i = 0; i < length(gInf); ++i)
 								if ((options.compMask[ordValue(store.readSeqStore[readNo][i])] & 
@@ -944,7 +944,7 @@ int dumpMatches(
 				}
 			}
 			break;
-/*		case 3: // GFF:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
+/*		case 3: // Gff:  printf "$chr $name_$format read $pos %ld . $dir . ID=$col[0]$unique$rest\n",$pos+$len-1;
 			unsigned curreadId = 0;
 			for (unsigned filecount = 0; filecount < length(genomeFileNameList); ++filecount)
 			{
@@ -1088,7 +1088,7 @@ int dumpMatches(
 								else
 								{
 									gInf = infix(store.contigStore[(*it).contigId].seq, right, left);
-									reverseComplementInPlace(gInf);
+									reverseComplement(gInf);
 								}
 								bool first = true;
 								file << ";cigar=" << length(store.readSeqStore[currReadNo]) << "M";
@@ -1128,7 +1128,7 @@ int dumpMatches(
 								else
 								{
 									assignSource(row(align, 1), infix(currGenome, right, left));
-									reverseComplementInPlace(source(row(align, 1)));
+									reverseComplement(source(row(align, 1)));
 								}
 								globalAlignment(align, scoreType);
 

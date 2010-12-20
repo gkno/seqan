@@ -24,8 +24,8 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 
-	struct _OpenAddressing;
-	typedef Tag<_OpenAddressing> OpenAddressing;
+	struct OpenAddressing_;
+	typedef Tag<OpenAddressing_> OpenAddressing;
 	
 	template <typename THashValue>
 	struct BucketMap 
@@ -36,9 +36,9 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// use the index value type as shape value type
 	template < typename TObject, typename TShapeSpec >
-	struct Fibre< Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >, Fibre_BucketMap>
+	struct Fibre< Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> >, FibreBucketMap>
 	{
-		typedef typename Fibre< Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >, Fibre_Shape>::Type TShape;
+		typedef typename Fibre< Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> >, FibreShape>::Type TShape;
 		typedef typename Value<TShape>::Type	THashValue;
 		typedef BucketMap<THashValue>			Type;
 	};
@@ -47,14 +47,14 @@ namespace SEQAN_NAMESPACE_MAIN
 .Spec.OpenAddressing
 ..summary:An index based on an array of sorted q-grams.
 ..cat:Index
-..general:Spec.Index_QGram
-..signature:Index<TText, Index_QGram<TShapeSpec, OpenAddressing> >
+..general:Spec.IndexQGram
+..signature:Index<TText, IndexQGram<TShapeSpec, OpenAddressing> >
 ..param.TText:The text type.
 ...type:Class.String
 ..param.TShapeSpec:The @Class.Shape@ specialization type.
 ...note:This can be either a $TSpec$ argument (e.g. $SimpleShape$) or a complete @Class.Shape@ class (e.g. Shape<Dna, SimpleShape>).
 ..remarks:This index uses a non-trivial hashing for mapping q-gram hash values to buckets.
-This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres) from |\Sigma|^q to min(\alpha*n,|\Sigma|^q), for a load factor \alpha>1.
+This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) from |\Sigma|^q to min(\alpha*n,|\Sigma|^q), for a load factor \alpha>1.
 ..include:seqan/index.h
 .Memvar.OpenAddressing#alpha
 ..summary:Load factor. Controls space/time-tradeoff and must be greater 1. Default value is 1.6.
@@ -68,18 +68,18 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 #endif  // PLATFORM_WINDOWS_VS
 
 	template < typename TObject, typename TShapeSpec >
-	class Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >
+	class Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> >
 	{
     private:
         static const double defaultAlpha;
 	public:
-		typedef typename Fibre<Index, QGram_Text>::Type			TText;
+		typedef typename Fibre<Index, QGramText>::Type			TText;
 		typedef typename Fibre<Index, QGram_SA>::Type			TSA;
-		typedef typename Fibre<Index, QGram_Dir>::Type			TDir;
-		typedef typename Fibre<Index, QGram_Counts>::Type		TCounts;
-		typedef typename Fibre<Index, QGram_CountsDir>::Type	TCountsDir;
-		typedef typename Fibre<Index, QGram_Shape>::Type		TShape;
-		typedef typename Fibre<Index, QGram_BucketMap>::Type	TBucketMap;
+		typedef typename Fibre<Index, QGramDir>::Type			TDir;
+		typedef typename Fibre<Index, QGramCounts>::Type		TCounts;
+		typedef typename Fibre<Index, QGramCountsDir>::Type	TCountsDir;
+		typedef typename Fibre<Index, QGramShape>::Type		TShape;
+		typedef typename Fibre<Index, QGramBucketMap>::Type	TBucketMap;
 		typedef typename Cargo<Index>::Type						TCargo;
 		typedef typename Size<Index>::Type						TSize;
 
@@ -154,7 +154,7 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 
 
     template < typename TObject, typename TShapeSpec >
-    const double Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >::defaultAlpha = 1.6;
+    const double Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> >::defaultAlpha = 1.6;
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Counting sort - Step 1: Clear directory
@@ -274,11 +274,11 @@ This reduces the sizes of bucket directories (QGram_Dir, QGram_CountsDir fibres)
 	}
 
 	template <typename TObject, typename TShapeSpec>
-	inline __int64 _fullDirLength(Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> > const &index) 
+	inline __int64 _fullDirLength(Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> > const &index) 
 	{
-		typedef Index<TObject, Index_QGram<TShapeSpec, OpenAddressing> >	TIndex;
-		typedef typename Fibre<TIndex, QGram_Dir>::Type						TDir;
-		typedef typename Fibre<TIndex, Fibre_Shape>::Type					TShape;
+		typedef Index<TObject, IndexQGram<TShapeSpec, OpenAddressing> >	TIndex;
+		typedef typename Fibre<TIndex, QGramDir>::Type						TDir;
+		typedef typename Fibre<TIndex, FibreShape>::Type					TShape;
 		typedef typename Host<TShape>::Type									TTextValue;
 		typedef typename Value<TDir>::Type									TDirValue;
 		typedef typename Value<TShape>::Type								THashValue;

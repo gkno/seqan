@@ -171,8 +171,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// handler that manages a simple memory buffer
-    struct _MemorySpec;
-	typedef Tag<_MemorySpec> MemorySpec;
+    struct MemorySpec_;
+	typedef Tag<MemorySpec_> MemorySpec;
 
     template < typename TPool >
     struct BufferHandler< TPool, MemorySpec >
@@ -211,8 +211,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// generic block based asynchronous read handler
-    struct _ReadFileSpec;
-	typedef Tag<_ReadFileSpec> ReadFileSpec;
+    struct ReadFileSpec_;
+	typedef Tag<ReadFileSpec_> ReadFileSpec;
 
     template < typename TPool >
     struct BufferHandler< TPool, ReadFileSpec >
@@ -329,8 +329,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
 	// generic block based asynchronous write handler
-    struct _WriteFileSpec;
-	typedef Tag<_WriteFileSpec> WriteFileSpec;
+    struct WriteFileSpec_;
+	typedef Tag<WriteFileSpec_> WriteFileSpec;
 
     template < typename TPool >
     struct BufferHandler< TPool, WriteFileSpec >
@@ -444,8 +444,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	//////////////////////////////////////////////////////////////////////////////
 	// generic buffered multiplex handler
-    struct _MultiplexSpec;
-	typedef Tag<_MultiplexSpec> MultiplexSpec;
+    struct MultiplexSpec_;
+	typedef Tag<MultiplexSpec_> MultiplexSpec;
 
 	template < typename TBufferHandler1, typename TBufferHandler2 >
     struct BufferHandler< Bundle2< TBufferHandler1, TBufferHandler2 >, MultiplexSpec >
@@ -974,7 +974,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue, typename TSpec >
     struct Difference< Pool< TValue, TSpec > > {
-		typedef typename _MakeSigned<typename Size<Pool< TValue, TSpec > >::Type>::Type Type;
+		typedef typename MakeSigned_<typename Size<Pool< TValue, TSpec > >::Type>::Type Type;
     };
 
 

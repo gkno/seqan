@@ -51,7 +51,7 @@ _localAlignment(TAlign& align,
 	unsigned char initialDir;
 
 	// Create the trace
-	maxScore = _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
+	maxScore = _alignSmithWaterman(trace, str, sc, initialDir, indexPair, forbidden);	
 
 	//// Debug code
 	//for(TSize i= 0; i<length(str[1]);++i) {
@@ -63,7 +63,7 @@ _localAlignment(TAlign& align,
 	//std::cout << std::endl;
 	
 	// Follow the trace and create the alignment
-	_align_smith_waterman_trace(align, str, trace, initialDir, indexPair, forbidden);
+	_alignSmithWatermanTrace(align, str, trace, initialDir, indexPair, forbidden);
 	
 	return maxScore;
 }

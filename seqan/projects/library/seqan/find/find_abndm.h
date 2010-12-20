@@ -91,7 +91,7 @@ struct FindBeginPatternSpec< Pattern<TNeedle, AbndmAlgo> >:
 
 template <typename TNeedle>
 class Pattern<TNeedle, AbndmAlgo>:
-	public _FindBegin<Pattern<TNeedle, AbndmAlgo> >
+	public FindBegin_<Pattern<TNeedle, AbndmAlgo> >
 {
 //////////////////////////////////////////////////////////////////////////////
 public:
@@ -238,19 +238,19 @@ host(Pattern<TNeedle, AbndmAlgo> const & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function.getScore.param.pattern.type:Spec.AbndmAlgo
+///.Function._getMatchScore.param.pattern.type:Spec.AbndmAlgo
 
 template <typename TNeedle>
-int getScore(Pattern<TNeedle, AbndmAlgo > & me) 
+int _getMatchScore(Pattern<TNeedle, AbndmAlgo > & me) 
 {
     SEQAN_CHECKPOINT
-	return getScore(me.verifier);
+	return _getMatchScore(me.verifier);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFinder, typename TNeedle>
-inline bool _findAbndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
+inline bool _findAbndmSmallNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
 {
     SEQAN_CHECKPOINT
 	typedef unsigned int TWord;
@@ -384,7 +384,7 @@ inline bool _findAbndm_SmallNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo>
 }
 
 template <typename TFinder, typename TNeedle>
-inline bool _findAbndm_LargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
+inline bool _findAbndmLargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> & me) 
 {
     SEQAN_CHECKPOINT
         typedef unsigned int TWord;
@@ -599,9 +599,9 @@ inline bool find (TFinder & finder,
 
 	bool ret;
     if (me.blockCount == 1) {
-        ret = _findAbndm_SmallNeedle(finder, me);
+        ret = _findAbndmSmallNeedle(finder, me);
     } else {
-        ret = _findAbndm_LargeNeedle(finder, me);
+        ret = _findAbndmLargeNeedle(finder, me);
     }
 	if (ret) 
 	{

@@ -18,13 +18,13 @@ namespace seqan
 	struct TMyIndex;
 
 	template <typename TText>
-	struct Cargo<Index<TText, Index_Wotd<TMyIndex> > > {
+	struct Cargo<Index<TText, IndexWotd<TMyIndex> > > {
 		typedef TMyConstraints Type;
 	};
 
 	// node predicate
 	template <typename TText, typename TSpec>
-	bool nodePredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> &it) 
+	bool nodePredicate(Iter<Index<TText, IndexWotd<TMyIndex> >, TSpec> &it) 
 	{
 		TMyConstraints &cons = cargo(container(it));
 		unsigned int delta = countSequences(container(it)) * repLength(it);
@@ -37,7 +37,7 @@ namespace seqan
 
 	// monotonic hull
 	template <typename TText, typename TSpec>
-	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TMyIndex> >, TSpec> &it) 
+	bool nodeHullPredicate(Iter<Index<TText, IndexWotd<TMyIndex> >, TSpec> &it) 
 	{
 		TMyConstraints const &cons = cargo(container(it));
 		unsigned int textLen = length(container(it));
@@ -58,7 +58,7 @@ int main ()
 
 ///Then we create our customized index which is a specialization
 ///of the deferred @Class.Index.wotd-Index@
-	typedef Index< String<char>, Index_Wotd<TMyIndex> > TMyIndex;
+	typedef Index< String<char>, IndexWotd<TMyIndex> > TMyIndex;
 	TMyIndex myIndex(myString);
 
 	cargo(myIndex).replen_max = 10;

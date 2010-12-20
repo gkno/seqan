@@ -23,14 +23,14 @@ int main() {
 	String<unsigned int> predMap;
 	String<unsigned int> distMap;
 ///DAG-Shortest path from vertex 1
-	dag_shortest_path(g,1,weightMap,predMap,distMap);
+	dagShortestPath(g,1,weightMap,predMap,distMap);
 ///Console Output
 	::std::cout << "Single-Source Shortest Paths in DAG: " << ::std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		::std::cout << "Path from 1 to " << getValue(it) << ": ";
-		_print_path(g,predMap,(TVertexDescriptor) 1, getValue(it));
+		_printPath(g,predMap,(TVertexDescriptor) 1, getValue(it));
 		::std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}

@@ -27,23 +27,23 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // QGram finders
 
-	struct _Finder_QGramLookup; //Finder that simply looks up the q-gram in the hash table
+	struct FinderQGramLookup_; //Finder that simply looks up the q-gram in the hash table
 
 /**
 .Tag.Index Find Algorithm
-..tag.QGram_FIND_Lookup:q-gram search.
-Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
+..tag.QGramFindLookup:q-gram search.
+Finds q-grams in a @Spec.IndexQGram@ index using the hash table.
 ..include:seqan/index.h
 */
 
-	typedef Tag<_Finder_QGramLookup> const QGram_FIND_Lookup;
+	typedef Tag<FinderQGramLookup_> const QGramFindLookup;
 
 //____________________________________________________________________________
 
 
 	template < typename TText, typename TShapeSpec, typename TSpec >
-	struct DefaultFinder<Index<TText, Index_QGram<TShapeSpec, TSpec> > > {
-        typedef QGram_FIND_Lookup Type;
+	struct DefaultFinder<Index<TText, IndexQGram<TShapeSpec, TSpec> > > {
+        typedef QGramFindLookup Type;
     };
 
 
@@ -54,17 +54,17 @@ Finds q-grams in a @Spec.Index_QGram@ index using the hash table.
 	inline void _findFirstIndex(
 		Finder< Index<TText, TSpec>, TSpecFinder > &finder,
 		TPattern const &pattern,
-		QGram_FIND_Lookup const)
+		QGramFindLookup const)
 	{
 		typedef Index<TText, TSpec>									TIndex;
 		typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
-		typedef typename Fibre<TIndex, QGram_Shape>::Type			TShape;
-		typedef typename Fibre<TIndex, QGram_Dir>::Type				TDir;
+		typedef typename Fibre<TIndex, QGramShape>::Type			TShape;
+		typedef typename Fibre<TIndex, QGramDir>::Type				TDir;
 		typedef typename Iterator<TSA const, Standard>::Type		TSAIterator;
 		typedef typename Iterator<TPattern const, Standard>::Type	TPatternIterator;
 
 		TIndex &index = haystack(finder);
-		indexRequire(index, QGram_SADir());
+		indexRequire(index, QGramSADir());
 
 		TSAIterator saIt = begin(indexSA(index), Standard());
 		TPatternIterator pIt = begin(pattern, Standard());

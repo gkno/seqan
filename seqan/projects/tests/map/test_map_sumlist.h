@@ -580,8 +580,8 @@ template <unsigned int DIM, typename TValue>
 void testSkipSumListIntegrity(SumList<DIM, TValue, SkipSumList< > > & ssl)
 {
 	typedef SumListValues<DIM, TValue> TValues;
-	typedef SkiplistPath<TValue, _SkipSumList<DIM> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM> > TElement;
 
 	TPath path(ssl.map);
 	for (int counter = 0; !atEnd(path); ++counter)
@@ -662,8 +662,8 @@ void Test_SkipSumListStress()
 /*
 	//_splitMiniList => is implicitly done by the assignValue test
 
-	typedef SkiplistPath<TValue, _SkipSumList<DIM> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM> > TElement;
 	typedef Pair<TValue, TElement *> TPair;
 
 	for (int i = 0; i < 100; ++i)

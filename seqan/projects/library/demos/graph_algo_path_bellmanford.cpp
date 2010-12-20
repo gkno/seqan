@@ -24,7 +24,7 @@ int main() {
 	String<unsigned int> distMap;
 ///Bellman-Ford from vertex 0
 ///Note: Bellman-Ford also detects negative cycles
-	bool noNegativeCycle = bellman_ford_algorithm(g,0,weightMap,predMap,distMap);
+	bool noNegativeCycle = bellmanFordAlgorithm(g,0,weightMap,predMap,distMap);
 ///Console Output
 	::std::cout << "Single-Source Shortest Paths: " << ::std::endl;
 	::std::cout << "Graph without negative cycles? " << noNegativeCycle << ::std::endl;
@@ -32,7 +32,7 @@ int main() {
 	TVertexIterator it(g);
 	while(!atEnd(it)) {
 		::std::cout << "Path from 0 to " << getValue(it) << ": ";
-		_print_path(g,predMap,(TVertexDescriptor) 0, getValue(it));
+		_printPath(g,predMap,(TVertexDescriptor) 0, getValue(it));
 		::std::cout << " (Distance: " << getProperty(distMap, getValue(it)) << ")" << ::std::endl;
 		goNext(it);
 	}

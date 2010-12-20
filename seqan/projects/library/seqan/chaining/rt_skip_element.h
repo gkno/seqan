@@ -31,12 +31,12 @@ namespace seqan
 
 	
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
-	struct _RangeCargo
+	struct RangeCargo_
 	{
 
 		SkipList< TObject, TModus, TSpec, TStructuring > * _assocStruct;
 
-		_RangeCargo()
+		RangeCargo_()
 			: _assocStruct( NULL )
 		{}
 
@@ -44,7 +44,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	SkipList< TObject, TModus, TSpec, TStructuring > *
-	_getAssoc( _RangeCargo< TObject, TModus, TSpec, TStructuring > & me )
+	_getAssoc( RangeCargo_< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
 		return me._assocStruct;
@@ -52,7 +52,7 @@ namespace seqan
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > inline
 	void
-	_setAssoc( _RangeCargo< TObject, TModus, TSpec, TStructuring > & me,
+	_setAssoc( RangeCargo_< TObject, TModus, TSpec, TStructuring > & me,
 				SkipList< TObject, TModus, TSpec, TStructuring > * list)
 	{
 		SEQAN_CHECKPOINT
@@ -63,7 +63,7 @@ namespace seqan
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring > 
 	struct Cargo< SkipElement< TObject, TModus, RT< TSpec >, TStructuring > >
 	{
-		typedef _RangeCargo< TObject, TModus, RT< TSpec >, TStructuring > Type;
+		typedef RangeCargo_< TObject, TModus, RT< TSpec >, TStructuring > Type;
 	};
 	
 		//  Documentation in SkipElement.h

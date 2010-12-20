@@ -29,25 +29,25 @@
 
 namespace SEQAN_NAMESPACE_MAIN {
 
-	struct _Fibre_Text;		// Original text. Can be a String or a StringSet
-	struct _Fibre_RawText;	// Concatenation of the strings above
-	struct _Fibre_SA;		// suffix array (of raw text with virtual $-delimiters) with Pair entries
-	struct _Fibre_RawSA;	// suffix array with integer entries
-	struct _Fibre_SAE;		// suffix array reordered in a b-tree
-	struct _Fibre_LCP;		// lcp table of raw text
-	struct _Fibre_LCPE;		// lcp interval tree
-	struct _Fibre_ChildTab;	// childtab (Kurtz et al.) of raw text
-	struct _Fibre_BWT;		// burrows wheeler table of raw text
+	struct FibreText_;		// Original text. Can be a String or a StringSet
+	struct FibreRawText_;	// Concatenation of the strings above
+	struct FibreSA_;		// suffix array (of raw text with virtual $-delimiters) with Pair entries
+	struct FibreRawSA_;	// suffix array with integer entries
+	struct FibreSae_;		// suffix array reordered in a b-tree
+	struct FibreLcp_;		// lcp table of raw text
+	struct FibreLcpe_;		// lcp interval tree
+	struct FibreChildtab_;	// childtab (Kurtz et al.) of raw text
+	struct FibreBwt_;		// burrows wheeler table of raw text
 
-	typedef Tag<_Fibre_Text> const		Fibre_Text;
-	typedef Tag<_Fibre_RawText> const	Fibre_RawText;
-	typedef Tag<_Fibre_SA> const		Fibre_SA;
-	typedef Tag<_Fibre_RawSA> const		Fibre_RawSA;
-	typedef Tag<_Fibre_SAE> const		Fibre_SAE;
-	typedef Tag<_Fibre_LCP> const		Fibre_LCP;
-	typedef Tag<_Fibre_LCPE> const		Fibre_LCPE;
-	typedef Tag<_Fibre_ChildTab> const	Fibre_ChildTab;
-	typedef Tag<_Fibre_BWT> const		Fibre_BWT;
+	typedef Tag<FibreText_> const		FibreText;
+	typedef Tag<FibreRawText_> const	FibreRawText;
+	typedef Tag<FibreSA_> const		FibreSA;
+	typedef Tag<FibreRawSA_> const		FibreRawSA;
+	typedef Tag<FibreSae_> const		FibreSae;
+	typedef Tag<FibreLcp_> const		FibreLcp;
+	typedef Tag<FibreLcpe_> const		FibreLcpe;
+	typedef Tag<FibreChildtab_> const	FibreChildtab;
+	typedef Tag<FibreBwt_> const		FibreBwt;
 
 }
 

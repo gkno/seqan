@@ -47,15 +47,15 @@ namespace SEQAN_NAMESPACE_MAIN
 		template <typename TId>
 		inline bool operator() (TId a, TId b) const
 		{
-			if (a != supremumValue(a))
+			if (a != maxValue(a))
 			{
-				if (b != supremumValue(b))
+				if (b != maxValue(b))
 					return (*store)[a] < (*store)[b];
 				else
 					return (*store)[a] < *name;
 			} else
 			{
-				if (b != supremumValue(b))
+				if (b != maxValue(b))
 					return *name < (*store)[b];
 				else
 					return false;
@@ -189,7 +189,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TSet const &set = context.nameSet;	
 		context.name = name;
 		
-		typename TSet::const_iterator it = set.find(supremumValue<TId>());
+		typename TSet::const_iterator it = set.find(maxValue<TId>());
 		if (it != set.end())
 		{
 			pos = *it;
@@ -420,8 +420,8 @@ public:
 
 	typedef typename Position<TReadSeq>::Type		TRSeqPos_;
 	typedef typename Position<TContigSeq>::Type     TCSeqPos_;
-	typedef typename _MakeSigned<TRSeqPos_>::Type	TReadPos;
-	typedef typename _MakeSigned<TCSeqPos_>::Type	TContigPos;
+	typedef typename MakeSigned_<TRSeqPos_>::Type	TReadPos;
+	typedef typename MakeSigned_<TCSeqPos_>::Type	TContigPos;
 	
 	typedef GapAnchor<TReadPos>						TReadGapAnchor;
 	typedef GapAnchor<TContigPos>					TContigGapAnchor;
@@ -1607,7 +1607,7 @@ void printAlignment(
 			readSeq = store.readSeqStore[align.readId];
 			if (left > right)
 			{
-				reverseComplementInPlace(readSeq);
+				reverseComplement(readSeq);
 				readSeqString = readSeq;
 				toLowerInPlace(readSeqString);
 			} else
@@ -1692,14 +1692,14 @@ void convertMatchesToGlobalAlignment(FragmentStore<TSpec, TConfig> &store, TScor
 		
 		readSeq = store.readSeqStore[(*it).readId];
 		if (left > right)
-			reverseComplementInPlace(readSeq);
+			reverseComplement(readSeq);
 				
 		// 1. Calculate pairwise alignment
 		TAlign align;
 		resize(rows(align), 2);
 		assignSource(row(align, 0), infix(store.contigStore[(*it).contigId].seq, cBegin, cEnd));
 		assignSource(row(align, 1), readSeq);
-		if (TYPECMP<TShrinkMatches, True>::VALUE)
+		if (IsSameType<TShrinkMatches, True>::VALUE)
 		    globalAlignment(align, score, AlignConfig<true, false, false, true>(), Gotoh());
         else
 		    globalAlignment(align, score);

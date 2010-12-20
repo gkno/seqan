@@ -51,7 +51,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template < typename TTextInput, typename TInvertedSAInput, typename TDest >
-	static void lcp_process(TTextInput &textIn, TInvertedSAInput &invertedSAIn, 
+	static void _lcpProcess(TTextInput &textIn, TInvertedSAInput &invertedSAIn, 
 						    TDest &dest, LcpConfig conf)
 	{
 		typedef typename Value<TTextInput>::Type			TValue;
@@ -192,16 +192,16 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template < typename TTextInput, typename TInvertedSAInput, typename TDest >
-	static inline void lcp_process(TTextInput &textIn, TInvertedSAInput &invertedSAIn, TDest &dest)
+	static inline void _lcpProcess(TTextInput &textIn, TInvertedSAInput &invertedSAIn, TDest &dest)
 	{
-		lcp_process(textIn, invertedSAIn, dest, LcpConfig());
+		_lcpProcess(textIn, invertedSAIn, dest, LcpConfig());
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 
 
 	template < typename TTextInput, typename TLimitsString, typename TInvertedSAInput, typename TDest >
-	static void lcp_process_multi(
+	static void _lcpProcessMulti(
 		TTextInput &textIn, TLimitsString const &limits, 
 		TInvertedSAInput &invertedSAIn, 
 		TDest &dest, LcpConfig conf)
@@ -360,12 +360,12 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
 	template < typename TTextInput, typename TLimitsString, typename TInvertedSAInput, typename TDest >
-	static void lcp_process_multi(
+	static void _lcpProcessMulti(
 		TTextInput &textIn, TLimitsString const &limits, 
 		TInvertedSAInput &invertedSAIn, 
 		TDest &dest)
 	{
-		lcp_process_multi(textIn, limits, invertedSAIn, dest, LcpConfig());
+		_lcpProcessMulti(textIn, limits, invertedSAIn, dest, LcpConfig());
 	}
 
 

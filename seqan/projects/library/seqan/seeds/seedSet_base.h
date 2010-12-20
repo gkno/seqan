@@ -1370,7 +1370,7 @@ _gapFill(TValue qlPos, //query sequence left
 	    Segment<String<TText> const, InfixSegment> qSeg = infix(query ,qlPos, qrPos);
 	    Segment<String<TText> const, InfixSegment> dSeg = infix(database ,dlPos, drPos);
 
-	    typedef Index< String<TText>, Index_QGram<SimpleShape > > TQGramIndex;
+	    typedef Index< String<TText>, IndexQGram<SimpleShape > > TQGramIndex;
 	  //  TValue qLastLeft = qlPos;
 	   // TValue dLastLeft = dlPos;
 	    //TValue t;
@@ -1460,7 +1460,7 @@ _gapFill(TValue qlPos, //query sequence left
 
 template<typename TValue, typename TSeedSpec, typename TQualityFactor, typename TGapCosts>
 void
-delete_everything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> &deletionTarget, 
+_deleteEverything(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> &deletionTarget, 
 				  TValue currentPos)
 {
 	typedef typename Size<SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFactor, TGapCosts, void> >, void> >::Type TSize;
@@ -1502,7 +1502,7 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 {
 
 	if(set.last != qPos){
-		delete_everything(set, qPos);
+		_deleteEverything(set, qPos);
 		set.last = qPos;
 	}
 	SEQAN_CHECKPOINT
@@ -1511,7 +1511,7 @@ _findSeedsChain(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 	TValue diag = dPos-qPos;
 	TIterator itUp=set.fragmentMap.upper_bound(diag+gapDistance);  
 	TIterator tmp = set.fragmentMap.end();
-	TValue tempDistance1 = infimumValue<TValue>();
+	TValue tempDistance1 = minValue<TValue>();
 	TValue tmpValue;
 	
 	for (TIterator it=set.fragmentMap.lower_bound(diag-gapDistance); it != itUp; it++ )
@@ -1542,7 +1542,7 @@ _findSeedsMerge(SeedSet<TValue, TSeedSpec, const Tag<Scoring_Scheme<TQualityFact
 {	
 	SEQAN_CHECKPOINT
 	if(set.last != qPos){
-		delete_everything(set, qPos);
+		_deleteEverything(set, qPos);
 		set.last = qPos;
 	}
 

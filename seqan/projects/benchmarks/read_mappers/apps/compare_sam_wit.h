@@ -260,10 +260,10 @@ int bestScoreForAligned(TFragmentStore & fragments,
     
     // No explicit alignment is required if distances are not to be weighted.
     if (!options.weightedDistances)
-        return getScore(pattern);
+        return _getMatchScore(pattern);
 
     // Otherwise, we need to build an alignment and compute the score from it.
-    ret = findBegin(finder, pattern, getScore(pattern));
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
 
     // Prepare alignment datastructures.
@@ -277,9 +277,9 @@ int bestScoreForAligned(TFragmentStore & fragments,
     StringSet<String<Dna5> > stringSet;
     appendValue(stringSet, infix(finder));
     appendValue(stringSet, read);
-    int alignmentScore = globalAlignment(align, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
+    int alignmentScore = globalAlignment(align, stringSet, scoringScheme, _getMatchScore(pattern), -_getMatchScore(pattern), BandedNeedlemanWunsch());
     (void)alignmentScore; // Supress warning in non-debug mode.
-    SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
+    SEQAN_ASSERT_EQ(alignmentScore, _getMatchScore(pattern));
 
     // Compute quality-based score of alignment.  We pass the
     // score matrix to allow for N-is-wildcard mode.
@@ -321,7 +321,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
     // Build scoring matrix that allows N to match with all.
     int gapExtensionScore = -1;
     int gapOpenScore = -1;
-    if (TYPECMP<TPatternSpec, HammingSimple>::VALUE) {
+    if (IsSameType<TPatternSpec, HammingSimple>::VALUE) {
         // No gaps for hamming distance.
         gapOpenScore = -length(fragments.readSeqStore[readId]);
         gapExtensionScore = -length(fragments.readSeqStore[readId]);
@@ -478,7 +478,7 @@ compareAlignedReadsToReferenceOnContigForOneRead(Options const & options,
                 std::cerr << "read name = " << fragments.readNameStore[it->readId] << std::endl;
                 std::cerr << "read is = " << fragments.readSeqStore[it->readId] << std::endl;
                 Dna5String rcRead(fragments.readSeqStore[it->readId]);
-                reverseComplementInPlace(rcRead);
+                reverseComplement(rcRead);
                 std::cerr << "          " << rcRead << std::endl;
                 std::cerr << "mate no is = " << static_cast<int>(getMateNo(fragments, it->readId)) << std::endl;
                 std::cerr << "on forward strand? " << isForward << std::endl;
@@ -633,7 +633,7 @@ compareAlignedReadsToReference(String<size_t> & result,
         TContigSeq & contig = fragments.contigStore[contigId].seq;
         compareAlignedReadsToReferenceOnContig(options, fragments, contigId, contig, true, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, result, TPatternSpec());
         TContigSeq rcContig(contig);
-        reverseComplementInPlace(rcContig);
+        reverseComplement(rcContig);
         compareAlignedReadsToReferenceOnContig(options, fragments, contigId, rcContig, false, alignedReadsBegin, alignedReadsEnd, witRecordsBegin, witRecordsEnd, result, TPatternSpec());
         
         // This iteration's end iterators are the next iteration's begin iterators.

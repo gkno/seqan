@@ -108,8 +108,8 @@ void crossIndices()
 
 SEQAN_DEFINE_TEST(testIndexCrossCompare)
 {
-	crossIndices<Index_ESA<>, Index_Wotd<> >();
-	crossIndices<Index_Wotd<>, Index_Wotd<DFI<> > >();
+	crossIndices<IndexEsa<>, IndexWotd<> >();
+	crossIndices<IndexWotd<>, IndexWotd<DFI<> > >();
 }
 
 //////////////////////////////////////////////////////////////////////////////

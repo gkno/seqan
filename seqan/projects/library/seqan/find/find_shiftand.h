@@ -42,8 +42,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.ShiftAnd
 
-struct _ShiftAnd;
-typedef Tag<_ShiftAnd> ShiftAnd;
+struct ShiftAnd_;
+typedef Tag<ShiftAnd_> ShiftAnd;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -195,7 +195,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle>
 inline bool 
-_findShiftAnd_SmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
+_findShiftAndSmallNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
@@ -218,7 +218,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFinder, typename TNeedle>
 inline bool 
-_findShiftAnd_LargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
+_findShiftAndLargeNeedle(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) 
 {
 SEQAN_CHECKPOINT
 	typedef typename Value<TNeedle>::Type TValue;
@@ -273,9 +273,9 @@ inline bool find(TFinder & finder, Pattern<TNeedle, ShiftAnd> & me) {
 
 	// Fast algorithm for needles < machine word?
 	if (me.blockCount == 1)
-		return _findShiftAnd_SmallNeedle(finder, me);
+		return _findShiftAndSmallNeedle(finder, me);
 	else
-		return _findShiftAnd_LargeNeedle(finder, me);
+		return _findShiftAndLargeNeedle(finder, me);
 }
 
 }// namespace SEQAN_NAMESPACE_MAIN

@@ -64,12 +64,12 @@ int getGenomeFileNameList(char const * filename, StringSet<CharString> & genomeF
 		unsigned i = 1;
 		while(!_streamEOF(file))
 		{ 
-			_parse_skipWhitespace(file, c);
-			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			_parseSkipWhitespace(file, c);
+			appendValue(genomeFileNames,_parseReadFilepath(file,c));
 			if(options._debugLevel >=2)
 				::std::cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << ::std::endl;
 			++i;
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 		}
 		if(options._debugLevel >=1)
 			::std::cout << i-1 << " genome files total." <<::std::endl;

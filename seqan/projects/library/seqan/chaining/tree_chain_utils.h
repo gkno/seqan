@@ -76,7 +76,7 @@ namespace seqan{
 				TItPerm perm,
 				TSize length )
 	{
-		TData max = infimumValue< TData>();
+		TData max = minValue< TData>();
 		TSize maxIndex = 0;
 		for( TSize i = 0; i < length; ++i )
 		{
@@ -86,12 +86,12 @@ namespace seqan{
 				{
 					max = values[ j ];
 					maxIndex = j;
-					values[ j ] = infimumValue< TData>();
+					values[ j ] = minValue< TData>();
 				}
 			}
 			assignValue( perm, maxIndex );
 			maxIndex = 0;
-			max = infimumValue< TData>();
+			max = minValue< TData>();
 			goNext( perm );
 		}		
 	}
@@ -117,8 +117,8 @@ namespace seqan{
 		// transform the coordinates of a chain point
 	template< typename FragType, typename SpecType, typename TPerm > inline
 	void
-	_chainTransformCoords( _ChainPoint< FragType, SpecType > & point_src,
-							_ChainPoint< FragType, SpecType > & point_dst,
+	_chainTransformCoords( ChainPoint_< FragType, SpecType > & point_src,
+							ChainPoint_< FragType, SpecType > & point_dst,
 							TPerm & perm )
 	{
 		typename Iterator< TPerm >::Type permIt = begin( perm );
@@ -135,8 +135,8 @@ namespace seqan{
 			// transform the coordinates of a chain point for searching
 	template< typename FragType, typename SpecType, typename TPerm > inline
 	void
-	_chainTransformCoordsSearch( _ChainPoint< FragType, SpecType > & point_src,
-									_ChainPoint< FragType, SpecType > & point_dst,
+	_chainTransformCoordsSearch( ChainPoint_< FragType, SpecType > & point_src,
+									ChainPoint_< FragType, SpecType > & point_dst,
 									TPerm & perm )
 	{
 		typename Iterator< TPerm >::Type permIt = begin( perm );
@@ -158,19 +158,19 @@ namespace seqan{
 		// calulate the score
 	template< typename FragType, typename SpecType, typename TCostModell, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_maxPriority( _MetaFragment< FragType > & last_meta,
-						_MetaFragment< FragType > & current_meta,
-						_ChainPoint< FragType, SpecType > & point,
+	_maxPriority( MetaFragment_< FragType > & last_meta,
+						MetaFragment_< FragType > & current_meta,
+						ChainPoint_< FragType, SpecType > & point,
 						TCostModell cost, 
 						TScore const & score_,
 						TSize dim );
 
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_maxPriority( _MetaFragment< FragType > & ,
-					_MetaFragment< FragType > & current_meta,
-					_ChainPoint< FragType, SpecType > & point,
-					G_0_Cost, 
+	_maxPriority( MetaFragment_< FragType > & ,
+					MetaFragment_< FragType > & current_meta,
+					ChainPoint_< FragType, SpecType > & point,
+					GZeroCost, 
 					TScore const &,
 					TSize )
 	{
@@ -181,16 +181,16 @@ namespace seqan{
 		// calculate the maximum priority
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_maxPriority( _MetaFragment< FragType > &,
-					_MetaFragment< FragType > & current_meta,
-					_ChainPoint< FragType, SpecType > & point,
-					G_1_Cost, 
+	_maxPriority( MetaFragment_< FragType > &,
+					MetaFragment_< FragType > & current_meta,
+					ChainPoint_< FragType, SpecType > & point,
+					GOneCost, 
 					TScore const & score_,
 					TSize dim )
 	{
 		typename Weight< FragType >::Type prio = weight( current_meta );
 		prio += score( _meta( point ) );
-		prio -= _costG1( current_meta, _meta( point ), score_, dim );
+		prio -= _costGOne( current_meta, _meta( point ), score_, dim );
 		return prio;
 	}
 
@@ -198,8 +198,8 @@ namespace seqan{
 		// calculate the priority for activation
 	template< typename FragType, typename SpecType, typename TCostModell, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_activatePriority( _MetaFragment< FragType > & last_meta,
-						_ChainPoint< FragType, SpecType > & point,
+	_activatePriority( MetaFragment_< FragType > & last_meta,
+						ChainPoint_< FragType, SpecType > & point,
 						TCostModell cost, 
 						TScore const & score_,
 						TSize dim );
@@ -207,9 +207,9 @@ namespace seqan{
 
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_activatePriority( _MetaFragment< FragType > &,
-						_ChainPoint< FragType, SpecType > &,
-						G_0_Cost, 
+	_activatePriority( MetaFragment_< FragType > &,
+						ChainPoint_< FragType, SpecType > &,
+						GZeroCost, 
 						TScore const &,
 						TSize )
 	{
@@ -219,21 +219,21 @@ namespace seqan{
 
 	template< typename FragType, typename SpecType, typename TScore, typename TSize > inline
 	typename Weight< FragType >::Type
-	_activatePriority( _MetaFragment< FragType > & last_meta,
-						_ChainPoint< FragType, SpecType > & point,
-						G_1_Cost, 
+	_activatePriority( MetaFragment_< FragType > & last_meta,
+						ChainPoint_< FragType, SpecType > & point,
+						GOneCost, 
 						TScore const & score_,
 						TSize dim )
 	{
-		return _costG1( last_meta, _meta( point ), score_, dim );
+		return _costGOne( last_meta, _meta( point ), score_, dim );
 	}
 
 	
 		// the cost function for manhattan metric
 	template< typename FragType, typename TScore, typename TSize >
 	typename Weight< FragType >::Type
-	_costG1( _MetaFragment< FragType > & upper,
-				_MetaFragment< FragType > & lower,
+	_costGOne( MetaFragment_< FragType > & upper,
+				MetaFragment_< FragType > & lower,
 				TScore const & score,
 				TSize dim )
 	{
@@ -250,8 +250,8 @@ namespace seqan{
 		// the cost function for SoP metric
 	template< typename FragType, typename TItPerm, typename TScoreValue, typename TScoreType, typename TSize >
 	typename Weight< FragType >::Type
-	_costGSoP( _MetaFragment< FragType > & upper,
-				_MetaFragment< FragType > & lower,
+	_costGSoP( MetaFragment_< FragType > & upper,
+				MetaFragment_< FragType > & lower,
 				Score< TScoreValue, TScoreType > const & score,
 				TItPerm permBeg,
 				TItPerm,
@@ -285,7 +285,7 @@ namespace seqan{
 		// struct for std::sort of wrapper points
 	template< typename T >
 	struct
-	_ChainSorter
+	ChainSorter_
 	{
 		inline bool
 		operator()( T & first, T & second  )
@@ -306,7 +306,7 @@ namespace seqan{
 			return false;
 		}
 
-		_ChainSorter()
+		ChainSorter_()
 		{}	
 
 	};
@@ -320,13 +320,13 @@ namespace seqan{
 		// backtracking
 	template< typename TDest, typename TMetas >
 	typename Weight< typename Value< TDest >::Type >::Type
-	_chain_trace( TDest & dest,
+	_chainTrace( TDest & dest,
 					TMetas & metas )
 	{
 		typedef typename Value< TDest >::Type FragType;
 		typename Iterator< TMetas >::Type meta = end( metas );
 		goPrevious( meta );
-		_MetaFragment< FragType > * pMeta = & value( meta );
+		MetaFragment_< FragType > * pMeta = & value( meta );
 		typename Weight< FragType >::Type chain_score = score( *pMeta );
 		//pMeta = &_getPred( *pMeta );
 		while( pMeta != &value( begin( metas ) ) )
@@ -349,7 +349,7 @@ namespace seqan{
 		// init of starting frag (the origin)
 	template< typename FragType, typename TSize > inline
 	void
-	_init_starting_frag( FragType & frag,
+	_initStartingFrag( FragType & frag,
 							TSize dim )
 	{
 		TSize dim_counter = 0;
@@ -369,7 +369,7 @@ namespace seqan{
 		// spec for G0 and G1 metric
 	template< typename FragType, typename TSource, typename TMetas, typename TWPoints, typename TCPoints, typename TSpec > inline
 	void
-	_build_chain_environment( TSource & source,  
+	_buildChainEnvironment( TSource & source,  
 								TMetas & metas, 
 								TWPoints & wPoints,
 								TCPoints & cPoints,
@@ -384,10 +384,10 @@ namespace seqan{
 		SizeType lower_dim  = dim - 1;
 				
 			// initialize starting frag
-		_init_starting_frag( startingFrag, dim );
-		appendValue( metas, _MetaFragment< FragType >( startingFrag ) );
-		wPoints.push_back( _WrapperPoint< FragType >( value( begin( metas ) ), true ) );
-		appendValue( cPoints, _ChainPoint< FragType, SpecType >( value( begin( metas ) ) ) );
+		_initStartingFrag( startingFrag, dim );
+		appendValue( metas, MetaFragment_< FragType >( startingFrag ) );
+		wPoints.push_back( WrapperPoint_< FragType >( value( begin( metas ) ), true ) );
+		appendValue( cPoints, ChainPoint_< FragType, SpecType >( value( begin( metas ) ) ) );
 
 			// buffers to find the maximal coordinates
 		KeyType * maxCoords;
@@ -403,10 +403,10 @@ namespace seqan{
 		goNext( metaIt );
 		while( sourceIt != end( source ) )
 		{
-			appendValue( metas, _MetaFragment< FragType >( value( sourceIt ) ) );
-			wPoints.push_back( _WrapperPoint< FragType >( value( metaIt ), leftPosition( value( sourceIt ), lower_dim ), false ) );
-			wPoints.push_back( _WrapperPoint< FragType >( value( metaIt ), rightPosition( value( sourceIt ), lower_dim ), true ) );
-			appendValue( cPoints, _ChainPoint< FragType, SpecType >( value( metaIt ) ) );
+			appendValue( metas, MetaFragment_< FragType >( value( sourceIt ) ) );
+			wPoints.push_back( WrapperPoint_< FragType >( value( metaIt ), leftPosition( value( sourceIt ), lower_dim ), false ) );
+			wPoints.push_back( WrapperPoint_< FragType >( value( metaIt ), rightPosition( value( sourceIt ), lower_dim ), true ) );
+			appendValue( cPoints, ChainPoint_< FragType, SpecType >( value( metaIt ) ) );
 
 			for( SizeType i = 0; i < dim; ++i )
 			{
@@ -424,17 +424,17 @@ namespace seqan{
 			_setLeftPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1 );
 			_setRightPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1 );
 		}
-		appendValue( metas, _MetaFragment< FragType >( endFrag ) );
-		wPoints.push_back( _WrapperPoint< FragType >( *metaIt, false ) );
+		appendValue( metas, MetaFragment_< FragType >( endFrag ) );
+		wPoints.push_back( WrapperPoint_< FragType >( *metaIt, false ) );
 		deallocate( maxCoords, maxCoords, dim );
-		appendValue( cPoints, _ChainPoint< FragType, SpecType >( *metaIt ) );
+		appendValue( cPoints, ChainPoint_< FragType, SpecType >( *metaIt ) );
 	}
 
 
 		// spec for G_SoP metric
 	template< typename FragType, typename TSource, typename TMetas, typename TWPoints, typename TPoints, typename TPerm, typename TSpec > inline
 	void
-	_build_chain_environment( TSource & source, 
+	_buildChainEnvironment( TSource & source, 
 								TMetas & metas, 
 								TWPoints & wPoints,
 								TPoints  & tPoints,
@@ -451,10 +451,10 @@ namespace seqan{
 		SizeType lower_dim = dim - 1;
 		SizeType dim_counter = 0;
 		
-		_init_starting_frag( startingFrag, dim );
+		_initStartingFrag( startingFrag, dim );
 
-		appendValue( metas, _MetaFragment< FragType >( startingFrag ) );
-		wPoints.push_back( _WrapperPoint< FragType >( value( begin( metas ) ), true ) );
+		appendValue( metas, MetaFragment_< FragType >( startingFrag ) );
+		wPoints.push_back( WrapperPoint_< FragType >( value( begin( metas ) ), true ) );
 		
 		KeyType * maxCoords;
 		allocate( maxCoords, maxCoords, dim );
@@ -467,9 +467,9 @@ namespace seqan{
 
 		while( sourceIt != end( source ) )
 		{
-			appendValue( metas, _MetaFragment< FragType >( value( sourceIt ) ) );
-			wPoints.push_back( _WrapperPoint< FragType >( value( metaIt ), leftPosition( value( sourceIt ), lower_dim ), false ) );
-			wPoints.push_back( _WrapperPoint< FragType >( value( metaIt ), rightPosition( value( sourceIt ), lower_dim ), true ) );
+			appendValue( metas, MetaFragment_< FragType >( value( sourceIt ) ) );
+			wPoints.push_back( WrapperPoint_< FragType >( value( metaIt ), leftPosition( value( sourceIt ), lower_dim ), false ) );
+			wPoints.push_back( WrapperPoint_< FragType >( value( metaIt ), rightPosition( value( sourceIt ), lower_dim ), true ) );
 
 			for( dim_counter = 0; dim_counter < dim; ++dim_counter )
 			{
@@ -487,9 +487,9 @@ namespace seqan{
 			_setRightPosition( endFrag, dim_counter, maxCoords[ dim_counter ] + 1 );
 			++dim_counter;
 		}
-		appendValue( metas, _MetaFragment< FragType >( endFrag ) );
+		appendValue( metas, MetaFragment_< FragType >( endFrag ) );
 		deallocate( maxCoords, maxCoords, dim );
-		wPoints.push_back( _WrapperPoint< FragType >( *metaIt, false ) );
+		wPoints.push_back( WrapperPoint_< FragType >( *metaIt, false ) );
 		metaIt = begin( metas );
 		
 			// transformate the point coordinates
@@ -504,7 +504,7 @@ namespace seqan{
 			typename Iterator< typename Value< TPoints >::Type >::Type cPointIt = begin( value( transIt ) );
 			for( SizeType pointCount = 0; pointCount < ( length( source ) + 2 ); ++pointCount )
 			{
-				_ChainPoint< FragType, SpecType > buffer( value( metaIt ), dim );
+				ChainPoint_< FragType, SpecType > buffer( value( metaIt ), dim );
 				appendValue( value( transIt ), buffer );
 				_chainTransformCoords( buffer, value( cPointIt ), perm );
 				goNext( metaIt );
@@ -519,7 +519,7 @@ namespace seqan{
 		// construct dim! range trees for gSoP metric
 	template< typename TTrees, typename TTPoints, typename TSize >
 	void
-	_build_chain_trees( TTrees & trees, 
+	_buildChainTrees( TTrees & trees, 
 						TTPoints & tPoints, 
 						TSize dim,
 						TSize facValue )
@@ -538,7 +538,7 @@ namespace seqan{
 		// delete all RMT's
 	template< typename TTrees, typename TSize >
 	void
-	_delete_chain_trees( TTrees & trees, 
+	_deleteChainTrees( TTrees & trees, 
 							TSize facValue )
 	{
 		typename Iterator< TTrees >::Type treeIt = begin( trees );

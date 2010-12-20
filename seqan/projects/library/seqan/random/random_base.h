@@ -34,36 +34,36 @@ namespace seqan {
 struct MersenneTwister;
 
 /**
-.Class.RNG:
+.Class.Rng:
 ..summary:Random Number Generator
-..signature:RNG<>
-..signature:RNG<TSpec>
+..signature:Rng<>
+..signature:Rng<TSpec>
 ..cat:Random
 ..param.TSpec:Random Number Generator specialization.
-...default:@Spec.Mersenne Twister RNG@
+...default:@Spec.Mersenne Twister Rng@
 ..include:seqan/random.h
 */
 template <typename TSpec = MersenneTwister>
-class RNG;
+class Rng;
 
 /**
-.Class.PDF:
+.Class.Pdf:
 ..summary:ProbabilityDensityFunction
-..signature:PDF<TSpec>
+..signature:Pdf<TSpec>
 ..cat:Random
 ..param.TSpec:Specialization.
 ..include:seqan/random.h
 */
 template <typename TSpec>
-class PDF;
+class Pdf;
 
 // ===========================================================================
 // Classes
 // ===========================================================================
 
 /**
-.Memfunc.RNG#operator()
-..class:Class.RNG
+.Memfunc.Rng#operator()
+..class:Class.Rng
 ..summary:Function call operator.
 ..signature:operator()
 */
@@ -72,12 +72,12 @@ class PDF;
 // Metafunctions
 // ===========================================================================
 
-///.Metafunction.Value.param.T.type:Class.PDF
+///.Metafunction.Value.param.T.type:Class.Pdf
 // specification only
 
-///.Metafunction.Value.param.T.type:Class.RNG
-///.Metafunction.InfimumValue.param.T.type:Class.RNG
-///.Metafunction.SupremumValue.param.T.type:Class.RNG
+///.Metafunction.Value.param.T.type:Class.Rng
+///.Metafunction.MinValue.param.T.type:Class.Rng
+///.Metafunction.MaxValue.param.T.type:Class.Rng
 // specification only
 
 // ===========================================================================
@@ -91,9 +91,9 @@ class PDF;
 ..include:seqan/random.h
 ..signature:pickRandomNumber(rng[, pdf])
 ..param.rng:Random number generator to use.
-...type:Class.RNG
+...type:Class.Rng
 ..param.pdf:Probability density function to use, if any.
-...type:Class.PDF
+...type:Class.Pdf
 ..returns:Random number as specified in pdf, if any, or rng.
 */
 // specification only

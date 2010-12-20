@@ -127,9 +127,9 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 	template <typename InType, typename TLimitsString, typename Result = typename Value<TLimitsString>::Type>
-	struct filter_globalizer : public ::std::unary_function<InType,Result> {
+	struct _filterGlobalizer : public ::std::unary_function<InType,Result> {
 		TLimitsString const &limits;
-		filter_globalizer(TLimitsString const &_limits) : limits(_limits) {}
+		_filterGlobalizer(TLimitsString const &_limits) : limits(_limits) {}
         inline Result operator()(const InType& x) const
         {
 			return posGlobalize(x, limits);
@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         // *** SPECIALIZATION ***
 
-										typedef filter_globalizer<_TypeOf(TSuffixArrayInput), TLimitsString, _TSizeOf(TSuffixArrayInput)> filter_globalizer_t;
+										typedef _filterGlobalizer<_TypeOf(TSuffixArrayInput), TLimitsString, _TSizeOf(TSuffixArrayInput)> filter_globalizer_t;
 		typedef Pipe< TSuffixArrayInput, Filter<filter_globalizer_t> > TGlobalizer;
         typedef Pipe< TGlobalizer, Counter > TSA;
 		                                typedef typename Size<TTextInput>::Type	TSize;

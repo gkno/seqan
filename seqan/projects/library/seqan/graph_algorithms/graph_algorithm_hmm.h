@@ -211,7 +211,7 @@ viterbiAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TForwardMatrix>
 inline TProbability
-__forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+_forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 				   TSequence const& seq,
 				   TForwardMatrix& fMat)
 {
@@ -324,14 +324,14 @@ forwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 {
 	SEQAN_CHECKPOINT
 	String<TProbability> fMat;
-	return __forwardAlgorithm(hmm, seq, fMat);
+	return _forwardAlgorithm(hmm, seq, fMat);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TBackwardMatrix>
 inline TProbability
-__backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
+_backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 					TSequence const& seq,
 					TBackwardMatrix& bMat)
 {
@@ -487,7 +487,7 @@ backwardAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 {
 	SEQAN_CHECKPOINT
 	String<TProbability> bMat;
-	return __backwardAlgorithm(hmm, seq, bMat);
+	return _backwardAlgorithm(hmm, seq, bMat);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -608,7 +608,7 @@ generateSequence(Graph<Hmm<TAlphabet, TProbability, TSpec> > const& hmm,
 
 template<typename TAlphabet, typename TProbability, typename TSpec,typename TEmissionCounter, typename TTransitionCounter>
 inline void 
-__parameterEstimator(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+_parameterEstimator(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 					 TEmissionCounter const& emission,
 					 TTransitionCounter const& transition)
 {
@@ -699,14 +699,14 @@ estimationWithStates(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 	//}
 
 	// Estimate Parameters
-	__parameterEstimator(hmm,emissionCounter, transitionCounter);
+	_parameterEstimator(hmm,emissionCounter, transitionCounter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 template<typename TAlphabet, typename TProbability, typename TSpec>
 inline void
-__fillHmmUniform(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
+_fillHmmUniform(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 {
 	SEQAN_CHECKPOINT
 	typedef Graph<Hmm<TAlphabet, TProbability, TSpec> > TGraph;
@@ -735,7 +735,7 @@ __fillHmmUniform(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm)
 
 template<typename TAlphabet, typename TProbability, typename TSpec, typename TRNG>
 inline void
-__fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
+_fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
                 TRNG & rng)
 {
 	SEQAN_CHECKPOINT
@@ -745,7 +745,7 @@ __fillHmmRandom(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
 	typedef typename Iterator<TGraph, OutEdgeIterator>::Type TOutEdgeIterator;
 	
 	// Initialization
-    PDF<Uniform<TSize> > pdf(20, 99);
+    Pdf<Uniform<TSize> > pdf(20, 99);
 	TSize alphSize = ValueSize<TAlphabet>::VALUE;
 	
 	// Iterate over all states
@@ -784,15 +784,15 @@ inline void
 randomizeHmm(Graph<Hmm<TAlphabet, TProbability, TSpec> >& hmm,
              TRNG & /*rng*/)
 {
-	//__fillHmmRandom(hmm, rng);
-	__fillHmmUniform(hmm);
+	//_fillHmmRandom(hmm, rng);
+	_fillHmmUniform(hmm);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 template <typename TAlphabet, typename TProbability, typename TSpec, typename TSequence, typename TSize>
 inline TProbability 
-__baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
+_baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 					 StringSet<TSequence> const& seqSet,
 					 TSize maxIter,
 					 TProbability epsilon)
@@ -836,12 +836,12 @@ __baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 
 			// Forward algorithm
 			String<TProbability> fMat;
-			TProbability modelLogProb = __forwardAlgorithm(hmm, value(seqSet,i), fMat);
+			TProbability modelLogProb = _forwardAlgorithm(hmm, value(seqSet,i), fMat);
 			totalModelLogProb += modelLogProb;
 			
 			// Backward algorithm
 			String<TProbability> bMat;
-			__backwardAlgorithm(hmm, value(seqSet,i), bMat);
+			_backwardAlgorithm(hmm, value(seqSet,i), bMat);
 			
 			// Use the posterior probabilities to estimate counter values
 			for (TSize j=0;j<len;++j){  
@@ -891,7 +891,7 @@ __baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 			}
 		}
 		// Expectation step
-		__parameterEstimator(hmm,emissionCounter, transitionCounter);
+		_parameterEstimator(hmm,emissionCounter, transitionCounter);
 		
 
 		// Termination?
@@ -917,7 +917,7 @@ baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 	typedef typename Size<TGraph>::Type TSize;
 	TSize maxIter = 100;
 	TProbability epsilon = 0.00001;
-	return __baumWelchAlgorithm(hmm, seqSet, maxIter, epsilon);
+	return _baumWelchAlgorithm(hmm, seqSet, maxIter, epsilon);
 }
 
 /*
@@ -930,7 +930,7 @@ baumWelchAlgorithm(Graph<Hmm<TAlphabet, TProbability, TSpec > >& hmm,
 
 template < typename TAlphabet, typename TProbability, typename TSpec, typename TMat, typename TConsensus, typename TSize>
 inline void
-__profileHmmCounter(Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
+_profileHmmCounter(Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
 					TMat const& matr,
 					TConsensus const& consensus,
 					TSize const& numRows,
@@ -1023,7 +1023,7 @@ __profileHmmCounter(Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
 		property(transitionCounter, currEdge) += 1;
 	}
 	
-	__parameterEstimator(pHmm, emissionCounter, transitionCounter);
+	_parameterEstimator(pHmm, emissionCounter, transitionCounter);
 }
 
 
@@ -1031,7 +1031,7 @@ __profileHmmCounter(Graph<Hmm<TAlphabet, TProbability, TSpec> >& pHmm,
 
 template<typename TAlphabet, typename TCargo, typename TSpec, typename TConsensus>
 inline void
-__createProfileHmm(Graph<Hmm<TAlphabet, TCargo, TSpec> >& pHmm,
+_createProfileHmm(Graph<Hmm<TAlphabet, TCargo, TSpec> >& pHmm,
 				   TConsensus const& consensus)
 {
 	SEQAN_CHECKPOINT
@@ -1132,14 +1132,14 @@ msaToProfileHmm(String<TAlignmentChar> const& matr,
 	String<unsigned int> coverage;
 	String<char> gappedConsensus;
 	String<Dna> consensusSequence;
-	consensusCalling(matr, consensusSequence, gappedConsensus, coverage, nSeq, Majority_Vote() );
+	consensusCalling(matr, consensusSequence, gappedConsensus, coverage, nSeq, MajorityVote() );
 
 	// Build the HMM topology
-	__createProfileHmm(pHmm,gappedConsensus);
+	_createProfileHmm(pHmm,gappedConsensus);
 
 	// Parameterize the pHmm
 	TSize numCols = length(matr) / nSeq;
-	__profileHmmCounter(pHmm, matr, gappedConsensus, nSeq, numCols);
+	_profileHmmCounter(pHmm, matr, gappedConsensus, nSeq, numCols);
 }
 
 */

@@ -50,7 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // pipe to enumerate the hamming 1-environment
     template < typename TInput, unsigned STEP_SIZE >
-    struct Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > >
+    struct Pipe< TInput, EditEnvironment< Tag<HammingDistance_>, STEP_SIZE > >
     {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -103,7 +103,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
     // pipe to enumerate the levenshtein 1-environment
     template < typename TInput, unsigned STEP_SIZE >
-    struct Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > >
+    struct Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > >
     {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
@@ -237,7 +237,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<HammingDistance_>, STEP_SIZE > > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -252,7 +252,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > &me, 
 		ControlBeginRead const &command) 
 	{
         if (!control(me.in, command)) return false;
@@ -281,7 +281,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > &me, 
 		ControlEof const &) 
 	{
 		return me.state == me._EOF;
@@ -290,17 +290,17 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TInput, unsigned STEP_SIZE >
 	inline bool 
 	control(
-		Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > &me, 
+		Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > &me, 
 		ControlEos const &) 
 	{
 		return me.state == me._EOF || me.state == me.INSERT_EOS;
     }
 
     template < typename TInput, unsigned STEP_SIZE >
-    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > > >::Type
-    length(Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > const &me) {
+    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<HammingDistance_>, STEP_SIZE > > > >::Type
+    length(Pipe< TInput, EditEnvironment< Tag<HammingDistance_>, STEP_SIZE > > const &me) {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type TTuple;
-		typedef typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_HammingDistance>, STEP_SIZE > > > >::Type TSize;
+		typedef typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<HammingDistance_>, STEP_SIZE > > > >::Type TSize;
 
 		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
 		/*unsigned seqs = countSequences(me.in);*/
@@ -312,8 +312,8 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TInput, unsigned STEP_SIZE >
-    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > > >::Type
-    length(Pipe< TInput, EditEnvironment< Tag<_LevenshteinDistance>, STEP_SIZE > > const &me) {
+    inline typename Size< Pipe< TInput, Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > > >::Type
+    length(Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > const &me) {
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type TTuple;
 		unsigned alphabetSize = ValueSize< typename Value<TTuple>::Type >::VALUE;
 		unsigned seqs = countSequences(me.in);

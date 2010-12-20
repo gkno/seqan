@@ -28,19 +28,19 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// compare two suffices of a given text
     template < typename TSAValue, typename TText >
-	struct _SuffixLess : 
+	struct SuffixLess_ : 
 		public ::std::binary_function < TSAValue, TSAValue, bool >
     {
 		typedef typename Iterator<TText, Standard>::Type TIter;
 		TIter _begin, _end;
 
-		_SuffixLess(TText &text): 
+		SuffixLess_(TText &text): 
 			_begin(begin(text, Standard())),
 			_end(end(text, Standard())) {}
 
 		// skip the first <offset> characters
 		template <typename TSize>
-		_SuffixLess(TText &text, TSize offset): 
+		SuffixLess_(TText &text, TSize offset): 
 			_begin(begin(text, Standard()) + offset),
 			_end(end(text, Standard())) {}
 
@@ -67,18 +67,18 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// compare two suffices of a given text
     template < typename TSAValue, typename TText, typename TSetSpec >
-	struct _SuffixLess<TSAValue, StringSet<TText, TSetSpec> > : 
+	struct SuffixLess_<TSAValue, StringSet<TText, TSetSpec> > : 
 		public ::std::binary_function < TSAValue, TSAValue, bool >
     {
 		typename Size<TText>::Type _offset;
 		TText const &_text;
 
-		_SuffixLess(TText &text): 
+		SuffixLess_(TText &text): 
 			_text(text) {}
 			
 		// skip the first <offset> characters
 		template <typename TSize>
-		_SuffixLess(TText &text, TSize offset):
+		SuffixLess_(TText &text, TSize offset):
 			_text(text),
 			_offset(offset) {}
 		
@@ -108,12 +108,12 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// compare two suffices of a given text and skip the first <lcp> characters
     template < typename TSAValue, typename TText >
-	struct _SuffixLessOffset: _SuffixLess<TSAValue, TText> 
+	struct SuffixLessOffset_: SuffixLess_<TSAValue, TText> 
 	{
 		// skip the first <offset> characters
 		template <typename TSize>
-		_SuffixLessOffset(TText &text, TSize offset): 
-			_SuffixLess<TSAValue, TText> (text, offset) {}
+		SuffixLessOffset_(TText &text, TSize offset): 
+			SuffixLess_<TSAValue, TText> (text, offset) {}
 	};
 
 		
@@ -131,7 +131,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		::std::sort(
 			begin(sa, Standard()), 
 			end(sa, Standard()), 
-			_SuffixLessOffset<typename Value<TSA>::Type, TText>(text, lcp));
+			SuffixLessOffset_<typename Value<TSA>::Type, TText>(text, lcp));
 	}
 
 	template < typename TSA,
@@ -155,7 +155,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		::std::sort(
 			begin(SA, Standard()), 
 			end(SA, Standard()), 
-			_SuffixLess<typename Value<TSA>::Type, TText const>(s));
+			SuffixLess_<typename Value<TSA>::Type, TText const>(s));
 	}
 
 	template < typename TSA,
@@ -184,7 +184,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		::std::sort(
 			begin(SA, Standard()), 
 			end(SA, Standard()), 
-			_SuffixLess<typename Value<TSA>::Type, TText const>(s));
+			SuffixLess_<typename Value<TSA>::Type, TText const>(s));
 	}
 
     //////////////////////////////////////////////////////////////////////////////

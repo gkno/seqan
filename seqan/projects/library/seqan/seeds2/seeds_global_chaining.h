@@ -39,8 +39,8 @@ namespace seqan {
     Chaining as described in (Gusfield, 1997) section 13.3.
 ..include:seqan/seeds2.h
  */
-struct _SparseChaining;
-typedef Tag<_SparseChaining> SparseChaining;
+struct SparseChaining_;
+typedef Tag<SparseChaining_> SparseChaining;
 
 // ===========================================================================
 // Metafunctions
@@ -215,7 +215,7 @@ chainSeedsGlobally(
         appendValue(target, *next);
         next = predecessor[next];
     }
-    reverseInPlace(target);
+    reverse(target);
 
     // Assert that the resulting chain is non-overlapping.
     #if SEQAN_ENABLE_DEBUG

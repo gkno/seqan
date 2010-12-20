@@ -30,13 +30,13 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Tag.Segment Match Generation.value.Overlap_Library:
+.Tag.Segment Match Generation.value.OverlapLibrary:
 	Segment matches from overlap alignments.
 ..include:seqan/consensus.h
 */
 
-struct Overlap_Library_;
-typedef Tag<Overlap_Library_> const Overlap_Library;
+struct OverlapLibrary_;
+typedef Tag<OverlapLibrary_> const OverlapLibrary;
 
 
 
@@ -52,13 +52,13 @@ typedef Tag<Overlap_Library_> const Overlap_Library;
 
 
 /**
-.Tag.Consensus Calling.value.Majority_Vote:
+.Tag.Consensus Calling.value.MajorityVote:
 	A consensus based on the most common character.
 ..include:seqan/consensus.h
 */
 
-struct Majority_Vote_;
-typedef Tag<Majority_Vote_> const Majority_Vote;
+struct MajorityVote_;
+typedef Tag<MajorityVote_> const MajorityVote;
 
 /**
 .Tag.Consensus Calling.value.Bayesian:
@@ -178,7 +178,7 @@ _loadContigReads(StringSet<TValue, Owner<TStrSpec> >& strSet,
 		lenRead = endClr - begClr;
 		if (alignIt->beginPos < alignIt->endPos) appendValue(startEndPos, TPosPair(offset, offset + lenRead), Generous());
 		else {
-			reverseComplementInPlace(strSet[numRead]);
+			reverseComplement(strSet[numRead]);
 			appendValue(startEndPos, TPosPair(offset + lenRead, offset), Generous());
 		}
 		++numRead;
@@ -258,7 +258,7 @@ convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
 		TSize lenRead = length(myRead);
 		TSize offset = alignIt->beginPos;
 		if (alignIt->beginPos > alignIt->endPos) {
-			reverseComplementInPlace(myRead);
+			reverseComplement(myRead);
 			offset = alignIt->endPos;
 		}
 		matIt = begin(mat, Standard());
@@ -440,7 +440,7 @@ consensusAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gOut,
 	TScoreValues scores;
 
 	// Compute segment matches from global pairwise alignments
-	appendSegmentMatches(seqSet, pList, diagList, begEndPos, consOpt.sc, consOpt.matchlength, consOpt.quality, consOpt.overlaps, matches, scores, pairGraph, Overlap_Library() );
+	appendSegmentMatches(seqSet, pList, diagList, begEndPos, consOpt.sc, consOpt.matchlength, consOpt.quality, consOpt.overlaps, matches, scores, pairGraph, OverlapLibrary() );
 	clear(pList);
 	clear(diagList);
 
@@ -655,7 +655,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 	// Create the new consensus
 	typedef typename Value<TString>::Type TAlphabet;
 	String<TValue> gappedCons;
-	consensusCalling(mat, gappedCons, maxCoverage, TAlphabet(), Majority_Vote());
+	consensusCalling(mat, gappedCons, maxCoverage, TAlphabet(), MajorityVote());
 
 	// Assign new consensus
 	assignGappedConsensus(fragStore, gappedCons, contigId);
@@ -718,7 +718,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 template <typename TValue, typename TSpec, typename TCounters, typename TSize, typename TAlphabet>
 inline void
-__countLetters(String<TValue, TSpec> const& mat,
+_countLetters(String<TValue, TSpec> const& mat,
 			   TCounters& counterValues,
 			   TSize alignDepth,
 			   TAlphabet)
@@ -782,7 +782,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 	typedef String<TSize> TCounter;
 	typedef String<TCounter> TCounters;
 	TCounters counterValues;
-	__countLetters(mat, counterValues, maxCoverage, TAlphabet() );
+	_countLetters(mat, counterValues, maxCoverage, TAlphabet() );
 
 
 	// Initialization
@@ -1000,7 +1000,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 				 TGappedCons& gappedConsensus,
 				 TAlignDepth maxCoverage,
 				 TAlphabet,
-				 Majority_Vote)
+				 MajorityVote)
 {
 	typedef typename Size<String<TValue, TSpec> >::Type TSize;
 	TSize alphabetSize = ValueSize<TAlphabet>::VALUE;
@@ -1010,7 +1010,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 	typedef String<TSize> TCounter;
 	typedef String<TCounter> TCounters;
 	TCounters counterValues;
-	__countLetters(mat, counterValues, maxCoverage, TAlphabet() );
+	_countLetters(mat, counterValues, maxCoverage, TAlphabet() );
 	
 	// Get the consensus
 	typedef typename Iterator<TCounters, Standard>::Type TCounterIt;
@@ -1044,7 +1044,7 @@ template <typename TFragSpec, typename TConfig, typename TContigId>
 inline void
 consensusCalling(FragmentStore<TFragSpec, TConfig>& fragStore,
 				 TContigId contigId,
-				 Majority_Vote)
+				 MajorityVote)
 {
 	typedef FragmentStore<TFragSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
@@ -1060,7 +1060,7 @@ consensusCalling(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 	// Call the consensus
 	String<TValue> gappedConsensus;
-	consensusCalling(mat, gappedConsensus, maxCoverage, TAlphabet(), Majority_Vote());
+	consensusCalling(mat, gappedConsensus, maxCoverage, TAlphabet(), MajorityVote());
 
 	// Assign the new consensus
 	assignGappedConsensus(fragStore, gappedConsensus, contigId);
@@ -1296,7 +1296,7 @@ _convertSimpleReadFile(TFile& file,
 
 	// Parse the file and convert the internal ids
 	TPos maxPos = 0;
-	TPos minPos = SupremumValue<TPos>::VALUE;
+	TPos minPos = MaxValue<TPos>::VALUE;
 	TId count = 0;
 	TValue c;
 	if ((!file) || (_streamEOF(file))) return false;
@@ -1312,13 +1312,13 @@ _convertSimpleReadFile(TFile& file,
 			TId repeatId = 0;
 			
 			c = _streamGet(file);
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 
 			// Get the layout positions
-			alignEl.beginPos = _parse_readNumber(file, c);
+			alignEl.beginPos = _parseReadNumber(file, c);
 			c = _streamGet(file);
-			_parse_skipWhitespace(file, c);
-			alignEl.endPos = _parse_readNumber(file, c);
+			_parseSkipWhitespace(file, c);
+			alignEl.endPos = _parseReadNumber(file, c);
 			
 			// Any attributes?
 			String<char> eid;
@@ -1328,18 +1328,18 @@ _convertSimpleReadFile(TFile& file,
 				String<char> fdIdentifier;
 				while (c != ']') {
 					c = _streamGet(file);
-					_parse_skipWhitespace(file, c);
+					_parseSkipWhitespace(file, c);
 					clear(fdIdentifier);
-					_parse_readIdentifier(file, fdIdentifier, c);
+					_parseReadIdentifier(file, fdIdentifier, c);
 					if (fdIdentifier == "id") {
 						c = _streamGet(file);
-						id = _parse_readNumber(file, c);
+						id = _parseReadNumber(file, c);
 					} else if (fdIdentifier == "fragId") {
 						c = _streamGet(file);
-						fragId = _parse_readNumber(file, c);
+						fragId = _parseReadNumber(file, c);
 					} else if (fdIdentifier == "repeatId") {
 						c = _streamGet(file);
-						repeatId = _parse_readNumber(file, c);
+						repeatId = _parseReadNumber(file, c);
 					} else if (fdIdentifier == "eid") {
 						c = _streamGet(file);
 						while ((c != ',') && (c != ']')) {
@@ -1361,10 +1361,10 @@ _convertSimpleReadFile(TFile& file,
 				}
 			}
 			_parse_skipLine(file, c);
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 			while ((!_streamEOF(file)) && (c != '>')) {
-				_parse_readSequenceData(file,c, seq);
-				_parse_skipWhitespace(file, c);
+				_parseReadSequenceData(file,c, seq);
+				_parseSkipWhitespace(file, c);
 			}
 			
 			// Set quality
@@ -1436,10 +1436,10 @@ _convertSimpleReadFile(TFile& file,
 					c = _streamGet(strmRef);
 				}
 				_parse_skipLine(strmRef, c);
-				_parse_skipWhitespace(strmRef, c);
+				_parseSkipWhitespace(strmRef, c);
 				while ((!_streamEOF(strmRef)) && (c != '>')) {
-					_parse_readSequenceData(strmRef,c,contigEl.seq);
-					_parse_skipWhitespace(strmRef, c);
+					_parseReadSequenceData(strmRef,c,contigEl.seq);
+					_parseSkipWhitespace(strmRef, c);
 				}
 			} else {
 				_parse_skipLine(strmRef, c);
@@ -1466,10 +1466,10 @@ _convertSimpleReadFile(TFile& file,
 			if (c == '>') {
 				TMatePairElement matePairEl;
 				c = _streamGet(strmFrag);
-				_parse_skipWhitespace(strmFrag, c);
+				_parseSkipWhitespace(strmFrag, c);
 
 				// Get the fragment id
-				TId id = _parse_readNumber(strmFrag, c);
+				TId id = _parseReadNumber(strmFrag, c);
 			
 				// Any attributes?
 				std::stringstream input;
@@ -1479,12 +1479,12 @@ _convertSimpleReadFile(TFile& file,
 					String<char> fdIdentifier;
 					while (c != ']') {
 						c = _streamGet(strmFrag);
-						_parse_skipWhitespace(strmFrag, c);
+						_parseSkipWhitespace(strmFrag, c);
 						clear(fdIdentifier);
-						_parse_readIdentifier(strmFrag, fdIdentifier, c);
+						_parseReadIdentifier(strmFrag, fdIdentifier, c);
 						if (fdIdentifier == "libId") {
 							c = _streamGet(strmFrag);
-							matePairEl.libId = _parse_readNumber(strmFrag, c);
+							matePairEl.libId = _parseReadNumber(strmFrag, c);
 						} else if (fdIdentifier == "eid") {
 							clear(eid);
 							c = _streamGet(strmFrag);
@@ -1501,13 +1501,13 @@ _convertSimpleReadFile(TFile& file,
 					}
 				}
 				_parse_skipLine(strmFrag, c);
-				_parse_skipWhitespace(strmFrag, c);
+				_parseSkipWhitespace(strmFrag, c);
 
 				// Read the two reads belonging to this mate pair
-				matePairEl.readId[0] = _parse_readNumber(strmFrag, c);
+				matePairEl.readId[0] = _parseReadNumber(strmFrag, c);
 				c = _streamGet(strmFrag);
-				_parse_skipWhitespace(strmFrag, c);
-				matePairEl.readId[1] = _parse_readNumber(strmFrag, c);
+				_parseSkipWhitespace(strmFrag, c);
+				matePairEl.readId[1] = _parseReadNumber(strmFrag, c);
 				_parse_skipLine(strmFrag, c);
 
 				// Insert mate pair
@@ -1535,10 +1535,10 @@ _convertSimpleReadFile(TFile& file,
 
 				TLibraryStoreElement libEl;
 				c = _streamGet(strmLib);
-				_parse_skipWhitespace(strmLib, c);
+				_parseSkipWhitespace(strmLib, c);
 
 				// Get the fragment id
-				TId id = _parse_readNumber(strmLib, c);
+				TId id = _parseReadNumber(strmLib, c);
 			
 				// Any attributes?
 				std::stringstream input;
@@ -1548,9 +1548,9 @@ _convertSimpleReadFile(TFile& file,
 					String<char> fdIdentifier;
 					while (c != ']') {
 						c = _streamGet(strmLib);
-						_parse_skipWhitespace(strmLib, c);
+						_parseSkipWhitespace(strmLib, c);
 						clear(fdIdentifier);
-						_parse_readIdentifier(strmLib, fdIdentifier, c);
+						_parseReadIdentifier(strmLib, fdIdentifier, c);
 						if (fdIdentifier == "eid") {
 							clear(eid);
 							c = _streamGet(strmLib);
@@ -1567,13 +1567,13 @@ _convertSimpleReadFile(TFile& file,
 					}
 				}
 				_parse_skipLine(strmLib, c);
-				_parse_skipWhitespace(strmLib, c);
+				_parseSkipWhitespace(strmLib, c);
 
 				// Read the mean and standard deviation
-				libEl.mean = _parse_readNumber(strmLib, c);
+				libEl.mean = _parseReadNumber(strmLib, c);
 				c = _streamGet(strmLib);
-				_parse_skipWhitespace(strmLib, c);
-				libEl.std = _parse_readNumber(strmLib, c);
+				_parseSkipWhitespace(strmLib, c);
+				libEl.std = _parseReadNumber(strmLib, c);
 				_parse_skipLine(strmLib, c);
 
 				// Insert mate pair

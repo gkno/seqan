@@ -31,8 +31,8 @@ namespace seqan {
 // Enums, Tags, Classes, Specializations
 // ===========================================================================
 
-struct _Unordered;
-typedef Tag<_Unordered> Unordered;
+struct Unordered_;
+typedef Tag<Unordered_> Unordered;
 
 // TODO(holtgrew): Maybe allow iterating over seeds that have reached a certain quality (length/score).
 

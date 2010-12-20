@@ -43,8 +43,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 //////////////////////////////////////////////////////////////////////////////
 
-struct _Free_Int;
-typedef Tag<_Free_Int> const FreeMemoryInt;	
+struct FreeInt_;
+typedef Tag<FreeInt_> const FreeMemoryInt;	
 
 template<typename TValue, unsigned int SPACE>
 class MemoryManager<TValue, Block<SPACE>, FreeMemoryInt> 
@@ -180,7 +180,7 @@ assign(
 	size_t tmpSource = source.pEmptySpace;
 	size_t tmpTarget = source.pEmptySpace;
 	//hmmmmmmmmmmm
-	size_t x = supremumValue<size_t>();
+	size_t x = maxValue<size_t>();
 	while (tmpSource != x){
 		tmpSource = source[tmpSource];
 		target[tmpTarget] = tmpSource;
@@ -287,7 +287,7 @@ obtainID(MemoryManager<TValue,Block<SPACE>,FreeMemoryInt > &manager)
 {
 	SEQAN_CHECKPOINT
 	manager.change = false;
-	if (manager.pEmptySpace == supremumValue<size_t>()){//-1){
+	if (manager.pEmptySpace == maxValue<size_t>()){//-1){
 		if (length(manager) == capacity(manager)){
 			typename Size< String<TValue, Block<SPACE> > >::Type last = length(manager.blocks);
 			resize(manager.blocks, last + 1, typename DefaultOverflowImplicit<String<TValue, Block<SPACE> > >::Type());

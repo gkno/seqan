@@ -7,10 +7,10 @@ using namespace seqan;
 // FRAGMENT(initialization)
 int main ()
 {
-	Index<DnaString, Index_QGram<OneGappedShape> > index("CATGATTACATA");
-//	Index<DnaString, Index_QGram<GenericShape> > index("CATGATTACATA");
+	Index<DnaString, IndexQGram<OneGappedShape> > index("CATGATTACATA");
+//	Index<DnaString, IndexQGram<GenericShape> > index("CATGATTACATA");
 	stringToShape(indexShape(index), "1101");
-//	Index<DnaString, Index_QGram<GappedShape<HardwiredShape<1,2> > > > index("CATGATTACATA");
+//	Index<DnaString, IndexQGram<GappedShape<HardwiredShape<1,2> > > > index("CATGATTACATA");
 
 // FRAGMENT(output)
 	hash(indexShape(index), "ATCA");

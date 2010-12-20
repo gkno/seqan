@@ -31,7 +31,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
 inline void
-_align_needleman_wunsch_matrix(TAlign&,
+_alignNeedlemanWunschMatrix(TAlign&,
 							  TStringSet const&,
 							  TTrace const&,
 							  TIndexPair const&)
@@ -41,7 +41,7 @@ _align_needleman_wunsch_matrix(TAlign&,
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair>
 void
-_align_needleman_wunsch_trace(TAlign& align,
+_alignNeedlemanWunschTrace(TAlign& align,
 							  TStringSet const& str,
 							  TTrace const& trace,
 							  TIndexPair const& overallMaxIndex)
@@ -52,7 +52,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 	typedef typename Value<TTrace>::Type TTraceValue;
 	
 
-	_align_needleman_wunsch_matrix(align, str, trace, overallMaxIndex);
+	_alignNeedlemanWunschMatrix(align, str, trace, overallMaxIndex);
 	
 	// TraceBack values
 	TTraceValue Diagonal = 0; TTraceValue Horizontal = 1; TTraceValue Vertical = 2;
@@ -65,8 +65,8 @@ _align_needleman_wunsch_trace(TAlign& align,
 	TSize len2 = overallMaxIndex[1];
 	TSize numCols = length(str[0]);
 	TSize numRows = length(str[1]);
-	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
-	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
+	if (len1 < numCols) _alignTracePrint(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
+	else if (len2 < numRows) _alignTracePrint(align, str, id1, len1, id2, len2, numRows - len2, Vertical);
 	
 	if ((len1 != 0) && (len2 !=0)) {
 	
@@ -87,21 +87,21 @@ _align_needleman_wunsch_trace(TAlign& align,
 				tv = tvmap[(int)trace[(len1-1)*numRows + (len2-1)]];
 				if (tv == Diagonal) {
 					if (tv != tvOld) {
-						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 						tvOld = tv; segLen = 1;
 					} else ++segLen;
 					--len1; --len2;
 				} else if (tv == Horizontal) {
 					//std::cout << '(' << ((*str)[0])[len1 - 1] << ',' << '-' << ')' << std::endl;
 					if (tv != tvOld) {
-						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 						tvOld = tv; segLen = 1;
 					} else ++segLen;
 					--len1;
 				} else if (tv == Vertical) {
 					//std::cout << '(' << '-' << ',' << ((*str)[1])[len2-1] << ')' << std::endl;
 					if (tv != tvOld) {
-						_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+						_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 						tvOld = tv; segLen = 1;
 					} else ++segLen;
 					--len2;
@@ -109,12 +109,12 @@ _align_needleman_wunsch_trace(TAlign& align,
 			} while ((len1 != 0) && (len2 !=0));
 		}
 		// Process left-overs
-		_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+		_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 	}
 
 	// Handle the remaining sequence
-	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
-	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
+	if (len1 != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
+	else if (len2 != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
 }
 
 	
@@ -123,7 +123,7 @@ _align_needleman_wunsch_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TAlignConfig>
 inline typename Value<TScore>::Type
-_align_needleman_wunsch(TTrace & trace,
+_alignNeedlemanWunsch(TTrace & trace,
 						TStringSet const & str,
 						TScore const & _sc,
 						TValPair & overallMaxValue,
@@ -150,8 +150,8 @@ _align_needleman_wunsch(TTrace & trace,
 	TString const& str2 = str[1];
 	TSize len1 = length(str1);
 	TSize len2 = length(str2);
-	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
-	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[0] = MinValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = MinValue<TScoreValue>::VALUE;
 	overallMaxIndex[0] = len1;
 	overallMaxIndex[1] = len2;
 
@@ -242,10 +242,10 @@ _globalAlignment(TAlign& align,
 	String<char> trace;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
-	TScoreValue	maxScore = _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
+	TScoreValue	maxScore = _alignNeedlemanWunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
 
 	// Follow the trace and create the graph
-	_align_needleman_wunsch_trace(align, str, trace, overallMaxIndex);	
+	_alignNeedlemanWunschTrace(align, str, trace, overallMaxIndex);	
 
 	return maxScore;
 }
@@ -267,7 +267,7 @@ _globalAlignment(TStringSet const& str,
 	String<char> trace;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
-	return _align_needleman_wunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
+	return _alignNeedlemanWunsch(trace, str, sc, overallMaxValue, overallMaxIndex, TAlignConfig());	
 }
 
 

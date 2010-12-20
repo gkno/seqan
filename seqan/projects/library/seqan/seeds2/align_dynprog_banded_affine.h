@@ -38,7 +38,7 @@ namespace seqan {
 
 template <typename TScoreValue, typename TSequence, typename TDiagonal>
 inline void
-_alignBanded_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
+_alignBandedResizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -60,7 +60,7 @@ _alignBanded_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seq
 
 template <typename TScoreValue, typename TDiagonal, bool BEGIN1_FREE, bool BEGIN0_FREE, bool END1_FREE, bool END0_FREE>
 inline void
-_alignBanded_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignBandedInitGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -75,8 +75,8 @@ _alignBanded_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simp
     TIterator horizontalIt = verticalIt;
     goNext(horizontalIt, 2);
     for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(horizontalIt, 0)) {
-        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *diagonalIt = MinValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = MinValue<TScoreValue>::VALUE / 2;
     }
     // Initialize the left gutter according to the AlignConfig.
     setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
@@ -97,8 +97,8 @@ _alignBanded_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simp
         }
     }
     for (TPosition i = 0, iend = -lowerDiagonal; i <= iend; ++i, goNext(verticalIt, 0), goPrevious(verticalIt, 1), goNext(horizontalIt, 0), goPrevious(horizontalIt, 1)) {
-        *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *verticalIt = MinValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = MinValue<TScoreValue>::VALUE / 2;
     }
     // Initialize the top gutter according to the AlignConfig.
     setPosition(diagonalIt, (1 - lowerDiagonal) * _dataFactors(matrix)[1]); // TODO(holtgrew): There should be a function that accepts two coordinates for the Matrix class.
@@ -118,20 +118,20 @@ _alignBanded_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simp
         }
     }
     for (TPosition i = 0, iend = upperDiagonal; i <= iend; ++i, goNext(verticalIt, 1), goNext(horizontalIt, 1)) {
-        *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *verticalIt = MinValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = MinValue<TScoreValue>::VALUE / 2;
     }
     // Initialize the diagonal above the upper one with infimas.
     for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(verticalIt, 0)) {
-        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *diagonalIt = MinValue<TScoreValue>::VALUE / 2;
+        *verticalIt = MinValue<TScoreValue>::VALUE / 2;
     }
 }
 
 
 template <typename TScoreValue, typename TDiagonal, typename TOverlap>
 inline void
-_alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 3> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
+_alignBandedInitGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 3> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -177,8 +177,8 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScor
     horizontalIt = verticalIt;
     goNext(horizontalIt, 2);
     for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(horizontalIt, 0)) {
-        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *horizontalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *diagonalIt = MinValue<TScoreValue>::VALUE / 2;
+        *horizontalIt = MinValue<TScoreValue>::VALUE / 2;
     }
 
     // Copy over a row from the other matrix into the top gutter.
@@ -207,15 +207,15 @@ _alignBanded_initGutterFromUnbanded(Matrix<TScoreValue, 3> & matrix, Score<TScor
 
     // Initialize the diagonal above the upper one with infimas.
     for (TPosition i = 0, iend = length(matrix, 0); i < iend; ++i, goNext(diagonalIt, 0), goNext(verticalIt, 0)) {
-        *diagonalIt = InfimumValue<TScoreValue>::VALUE / 2;
-        *verticalIt = InfimumValue<TScoreValue>::VALUE / 2;
+        *diagonalIt = MinValue<TScoreValue>::VALUE / 2;
+        *verticalIt = MinValue<TScoreValue>::VALUE / 2;
     }
 }
 
 
 template <typename TScoreValue, typename TSequence, typename TDiagonal>
 inline void
-_alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
+_alignBandedFillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -334,7 +334,7 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
                 for (unsigned j = 0; j < i; ++j)
                     std::cerr << "\t";
                 for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                    if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
                         std::cerr << "\tinf";
                     else
                         std::cerr << "\t" << value(matrix, i, j, k);
@@ -354,7 +354,7 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeLength, TOverlap lowerTriangleEdgeLength, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignBandedTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap overlap0, TOverlap overlap1, TOverlap upperTriangleEdgeLength, TOverlap lowerTriangleEdgeLength, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
     // std::cout << "banded traceback" << std::endl;

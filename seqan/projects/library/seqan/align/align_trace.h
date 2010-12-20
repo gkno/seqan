@@ -147,7 +147,7 @@ _initMembers(AlignTrace<TSize, TSpec> & me)
 
 template <typename TSize, typename TSpec, typename TCoordinates>
 inline void
-_CoordinatesToPositions(AlignTrace<TSize, TSpec> & me,
+_coordinatesToPositions(AlignTrace<TSize, TSpec> & me,
 						TCoordinates const & coordinates_,
 						TSize & position_,
 						unsigned char & bit_position)
@@ -174,7 +174,7 @@ _CoordinatesToPositions(AlignTrace<TSize, TSpec> & me,
 
 template <typename TSize, typename TSpec, typename TCoordinates>
 inline void
-_PositionsToCoordinates(AlignTrace<TSize, TSpec> & me,
+_positionsToCoordinates(AlignTrace<TSize, TSpec> & me,
 						TCoordinates & coordinates_,
 						TSize position_,
 						unsigned char bit_position = 0)

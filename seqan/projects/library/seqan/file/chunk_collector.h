@@ -27,10 +27,10 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Internal._ChunkCollector:
+.Internal.ChunkCollector_:
 ..cat:Classes
 ..summary:Reads piecewise from stream, collects pieces (chunks) in a vector.
-..signature:_ChunkCollector<Host>
+..signature:ChunkCollector_<Host>
 ..param.Host:Type of host object that is used as allocator.
 */
 
@@ -47,7 +47,7 @@ struct ChunkLength
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
-class _ChunkCollector
+class ChunkCollector_
 {
 public:
 	THost * data_host;
@@ -57,17 +57,17 @@ public:
 	Chunk_Holder data_chunks; 
 
 public:
-	static int const CHUNK_LENGTH = ChunkLength<_ChunkCollector>::VALUE;
+	static int const CHUNK_LENGTH = ChunkLength<ChunkCollector_>::VALUE;
 
 public:
-	_ChunkCollector(THost & _host):
+	ChunkCollector_(THost & _host):
 		data_host(& _host),
 		data_length(0),
 		data_chunks(typename Chunk_Holder::allocator_type(_host))
 	{
 	}
 
-	~_ChunkCollector()
+	~ChunkCollector_()
 	{
 		clear(*this);
 	}
@@ -76,9 +76,9 @@ public:
 
 template <typename THost>
 inline void
-clear(_ChunkCollector<THost> & me)
+clear(ChunkCollector_<THost> & me)
 {
-   typedef _ChunkCollector<THost> TChunkCollector;
+   typedef ChunkCollector_<THost> TChunkCollector;
    typedef typename TChunkCollector::Chunk_Holder Chunk_Holder;
       
 	typename Chunk_Holder::iterator it = me.data_chunks.begin();
@@ -95,37 +95,37 @@ clear(_ChunkCollector<THost> & me)
 
 template <typename THost>
 inline typename Size<THost>::Type
-length(_ChunkCollector<THost> const & me)
+length(ChunkCollector_<THost> const & me)
 {
 	return me.data_length;
 }
 
 template <typename THost>
 inline void
-_setLength(_ChunkCollector<THost> & me, typename Size<THost>::Type new_length)
+_setLength(ChunkCollector_<THost> & me, typename Size<THost>::Type new_length)
 {
 	me.data_length = new_length;
 }
 
 template <typename THost>
 inline int
-chunkCount(_ChunkCollector<THost> const & me)
+chunkCount(ChunkCollector_<THost> const & me)
 {
 	return me.data_chunks.size();
 }
 
 template <typename THost>
 inline typename Value<THost>::Type *
-getChunk(_ChunkCollector<THost> const & me, int chunk_number)
+getChunk(ChunkCollector_<THost> const & me, int chunk_number)
 {
 	return me.data_chunks[chunk_number];
 }
 
 template <typename THost>
 inline typename Value<THost>::Type *
-createChunk(_ChunkCollector<THost> & me)
+createChunk(ChunkCollector_<THost> & me)
 {
-   typedef _ChunkCollector<THost> TChunkCollector;
+   typedef ChunkCollector_<THost> TChunkCollector;
 	typename Value<THost>::Type * new_chunk;
 	allocate(me.data_host, new_chunk, TChunkCollector::CHUNK_LENGTH);
 	me.data_chunks.push_back(new_chunk);
@@ -135,13 +135,13 @@ createChunk(_ChunkCollector<THost> & me)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
-struct Host<_ChunkCollector<THost> >
+struct Host<ChunkCollector_<THost> >
 {
 	typedef THost Type;
 };
 
 template <typename THost>
-struct Host<_ChunkCollector<THost> const >
+struct Host<ChunkCollector_<THost> const >
 {
 	typedef THost Type;
 };
@@ -149,13 +149,13 @@ struct Host<_ChunkCollector<THost> const >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
-struct Value<_ChunkCollector<THost> >
+struct Value<ChunkCollector_<THost> >
 {
 	typedef typename Value<THost>::Type Type;
 };
 
 template <typename THost>
-struct Value<_ChunkCollector<THost> const >
+struct Value<ChunkCollector_<THost> const >
 {
 	typedef typename Value<THost>::Type Type;
 };
@@ -163,13 +163,13 @@ struct Value<_ChunkCollector<THost> const >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
-struct GetValue<_ChunkCollector<THost> >
+struct GetValue<ChunkCollector_<THost> >
 {
 	typedef typename GetValue<THost>::Type Type;
 };
 
 template <typename THost>
-struct GetValue<_ChunkCollector<THost> const >
+struct GetValue<ChunkCollector_<THost> const >
 {
 	typedef typename GetValue<THost>::Type Type;
 };
@@ -177,24 +177,24 @@ struct GetValue<_ChunkCollector<THost> const >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
-struct Size<_ChunkCollector<THost> >
+struct Size<ChunkCollector_<THost> >
 {
 	typedef typename Size<THost>::Type Type;
 };
 
 template <typename THost>
-struct Size<_ChunkCollector<THost> const >
+struct Size<ChunkCollector_<THost> const >
 {
 	typedef typename Size<THost>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
 
-struct _Assign_Stream_2_ChunkCollector
+struct AssignStreamToChunkCollector_
 {
 	template <typename THost, typename TSource>
 	static inline void 
-	assign_(_ChunkCollector<THost> & target,
+	assign_(ChunkCollector_<THost> & target,
 		TSource & source)
 	{
 		clear(target);
@@ -202,23 +202,23 @@ struct _Assign_Stream_2_ChunkCollector
 		while (!_streamEOF(source))
 		{
 			typename Value<THost>::Type * chunk = createChunk(target);
-			typename Size<THost>::Type count = _streamRead(chunk, source, ChunkLength< _ChunkCollector<THost> >::VALUE);
+			typename Size<THost>::Type count = _streamRead(chunk, source, ChunkLength< ChunkCollector_<THost> >::VALUE);
 			_setLength(target, length(target) + count);
 		}
 	}
 
 	template <typename THost, typename TSource>
 	static inline void 
-	assign_(_ChunkCollector<THost> & target,
+	assign_(ChunkCollector_<THost> & target,
 		TSource & source,
-		typename Size< _ChunkCollector<THost> >::Type limit)
+		typename Size< ChunkCollector_<THost> >::Type limit)
 	{
 		clear(target);
 
 		while (!_streamEOF(source))
 		{
 			typename Value<THost>::Type * chunk = createChunk(target);
-			typename Size<THost>::Type count = _streamRead(chunk, source, ChunkLength< _ChunkCollector<THost> >::VALUE);
+			typename Size<THost>::Type count = _streamRead(chunk, source, ChunkLength< ChunkCollector_<THost> >::VALUE);
 			_setLength(target, length(target) + count);
 
 			if (length(target) >= limit)
@@ -234,34 +234,34 @@ struct _Assign_Stream_2_ChunkCollector
 
 template <typename THost, typename TSource>
 inline void 
-assign(_ChunkCollector<THost> & target,
+assign(ChunkCollector_<THost> & target,
 	   TSource & source)
 {
-	_Assign_Stream_2_ChunkCollector::assign_(target, source);
+	AssignStreamToChunkCollector_::assign_(target, source);
 }
 template <typename THost, typename TSource>
 inline void 
-assign(_ChunkCollector<THost> & target,
+assign(ChunkCollector_<THost> & target,
 	   TSource const & source)
 {
-	_Assign_Stream_2_ChunkCollector::assign_(target, source);
+	AssignStreamToChunkCollector_::assign_(target, source);
 }
 
 template <typename THost, typename TSource, typename TSize>
 inline void 
-assign(_ChunkCollector<THost> & target,
+assign(ChunkCollector_<THost> & target,
 	   TSource & source,
 	   TSize limit)
 {
-	_Assign_Stream_2_ChunkCollector::assign_(target, source, limit);
+	AssignStreamToChunkCollector_::assign_(target, source, limit);
 }
 template <typename THost, typename TSource, typename TSize>
 inline void 
-assign(_ChunkCollector<THost> & target,
+assign(ChunkCollector_<THost> & target,
 	   TSource const & source,
 	   TSize limit)
 {
-	_Assign_Stream_2_ChunkCollector::assign_(target, source, limit);
+	AssignStreamToChunkCollector_::assign_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -319,7 +319,7 @@ struct _Assign_ChunkCollector_2_String
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
 inline void 
 assign(String<TTargetValue, TTargetSpec> & target,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const /*tag*/)
 {
 	_Assign_ChunkCollector_2_String<Tag<TExpand> const>::assign_(target, source);
@@ -327,7 +327,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
 inline void 
 assign(String<TTargetValue, TTargetSpec> & target,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const /*tag*/)
 {
@@ -338,7 +338,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _Append_ChunkCollector_2_String
+struct AppendChunkCollectorToString_
 {
 	template <typename TTarget, typename TSource>
 	static void append_(
@@ -393,25 +393,25 @@ struct _Append_ChunkCollector_2_String
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
 inline void 
 append(String<TTargetValue, TTargetSpec> & target,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const )
 {
-	_Append_ChunkCollector_2_String<Tag<TExpand> const>::append_(target, source);
+	AppendChunkCollectorToString_<Tag<TExpand> const>::append_(target, source);
 }
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
 inline void 
 append(String<TTargetValue, TTargetSpec> & target,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const )
 {
-	_Append_ChunkCollector_2_String<Tag<TExpand> const>::append_(target, source, limit);
+	AppendChunkCollectorToString_<Tag<TExpand> const>::append_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _Replace_ChunkCollector_2_String
+struct ReplaceChunkCollectorToString_
 {
 	template <typename TTarget, typename TSource>
 	static void replace_(
@@ -468,10 +468,10 @@ inline void
 replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const /*tag*/)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
@@ -479,11 +479,11 @@ inline void
 replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const /*tag*/)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -493,10 +493,10 @@ inline void
 replace(TTargetValue * target,
 		size_t pos_begin,
 		size_t pos_end,
-		_ChunkCollector<TSourceHost> const & source,
+		ChunkCollector_<TSourceHost> const & source,
 		Tag<TExpand> const /*tag*/)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template <typename TTargetValue, typename TSourceHost, typename TExpand>
@@ -504,11 +504,11 @@ inline void
 replace(TTargetValue * target,
 		size_t pos_begin,
 		size_t pos_end,
-		_ChunkCollector<TSourceHost> const & source,
+		ChunkCollector_<TSourceHost> const & source,
 		size_t limit,
 		Tag<TExpand> const /*tag*/)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 //____________________________________________________________________________
 /*
@@ -517,10 +517,10 @@ inline void
 replace(TTargetValue * target,
 		size_t pos_begin,
 		size_t pos_end,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const tag)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source);
 }
 
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
@@ -528,11 +528,11 @@ inline void
 replace(String<TTargetValue, TTargetSpec> & target,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_begin,
 		typename Size< String<TTargetValue, TTargetSpec> >::Type pos_end,
-	   _ChunkCollector<TSourceHost> const & source,
+	   ChunkCollector_<TSourceHost> const & source,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const tag)
 {
-	_Replace_ChunkCollector_2_String<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
+	ReplaceChunkCollectorToString_<Tag<TExpand> const>::replace_(target, pos_begin, pos_end, source, limit);
 }
 */
 //////////////////////////////////////////////////////////////////////////////

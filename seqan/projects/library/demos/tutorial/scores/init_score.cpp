@@ -44,7 +44,7 @@ struct AnotherUserDefinedMatrix {};
 
 // Then, we specialize the class _ScoringMatrix.
 template <>
-struct _ScoringMatrixData<int, AminoAcid, UserDefinedMatrix> {
+struct ScoringMatrixData_<int, AminoAcid, UserDefinedMatrix> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -84,7 +84,7 @@ struct _ScoringMatrixData<int, AminoAcid, UserDefinedMatrix> {
 
 // And we do this for the Dna5 alphabet.
 template <>
-struct _ScoringMatrixData<int, Dna5, AnotherUserDefinedMatrix> {
+struct ScoringMatrixData_<int, Dna5, AnotherUserDefinedMatrix> {
     enum {
         VALUE_SIZE = ValueSize<Dna5>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE
@@ -149,7 +149,7 @@ int main()
 
     // 3.1 First, fill it with BLOSUM30.
     std::cout << "BLOSUM 30" << std::endl;
-    setDefaultScoreMatrix(scoringScheme, _Blosum30());
+    setDefaultScoreMatrix(scoringScheme, Blosum30_());
     showScoringMatrix(scoringScheme);
 
     // 3.2 Now, we fill it with the product of the coordinates.

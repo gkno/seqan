@@ -18,7 +18,7 @@ int main() {
 ///Out-parameter: Closure matrix
 	String<bool> closure;
 ///Transitive-Closure 
-	transitive_closure(g,closure);
+	transitiveClosure(g,closure);
 ///Console output
 	TSize len = (TSize) ::std::sqrt((double) length(closure));
 	for (TSize row=0;row < len;++row) {

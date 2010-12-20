@@ -229,11 +229,11 @@ unsigned pickReadLength(TRNG & rng, Options<SangerReads> const & options)
         // Pick uniformly.
         double minLen = options.readLengthMean - options.readLengthError;
         double maxLen = options.readLengthMean + options.readLengthError;
-        double len = pickRandomNumber(rng, PDF<Uniform<double> >(minLen, maxLen));
+        double len = pickRandomNumber(rng, Pdf<Uniform<double> >(minLen, maxLen));
         return static_cast<unsigned>(round(len));
     } else {
         // Pick normally distributed.
-        double len = pickRandomNumber(rng, PDF<Normal>(options.readLengthMean, options.readLengthError));
+        double len = pickRandomNumber(rng, Pdf<Normal>(options.readLengthMean, options.readLengthError));
         return static_cast<unsigned>(round(len));
     }
 }
@@ -255,7 +255,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
     // Build Edit String.
     //
     for (unsigned i = 0; i < readLength; /*NOP*/) {
-        double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+        double x = pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1));
         double pos = 1.0 * i / (readLength - 1);
         double pMismatch = options.probabilityMismatchBegin + pos * (options.probabilityMismatchEnd - options.probabilityMismatchBegin);
         double pInsert   = options.probabilityInsertBegin + pos * (options.probabilityInsertEnd - options.probabilityInsertBegin);
@@ -333,7 +333,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<SangerReads> & inst, 
                 mean = options.qualityErrorStartMean + pos * (options.qualityErrorEndMean - options.qualityErrorStartMean);
                 stdDev = options.qualityErrorStartStdDev + pos * (options.qualityErrorEndStdDev - options.qualityErrorStartStdDev);
             }
-            PDF<Normal> pdf(mean, stdDev);
+            Pdf<Normal> pdf(mean, stdDev);
             appendValue(inst.qualities, static_cast<int>(pickRandomNumber(rng, pdf)));
         }
     }
@@ -365,7 +365,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_MISMATCH:
-                c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
+                c = TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
                 if (ordValue(c) >= ordValue(read[j]))
                     c = TAlphabet(ordValue(c) + 1);
@@ -376,7 +376,7 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 j += 1;
                 break;
             case ERROR_TYPE_INSERT:
-                appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
+                appendValue(tmp, TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
                 if (options.simulateQualities)
                     assignQualityValue(back(tmp), inst.qualities[k]);
                 k += 1;

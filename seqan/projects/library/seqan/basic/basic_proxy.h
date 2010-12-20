@@ -186,7 +186,7 @@ public:
 	typedef typename Value<Proxy>::Type TValue;
 	typedef typename GetValue<Proxy>::Type TAccessor;
 
-	typedef typename _RemoveConst<TAccessor>::Type TAccessor_NotConst;
+	typedef typename RemoveConst_<TAccessor>::Type TAccessor_NotConst;
 
 public:
 	TIterator data_iterator;
@@ -264,7 +264,7 @@ template <typename TSpec, typename T>
 struct CompareType <Proxy<TSpec>, T>
 {
 	typedef typename Value<Proxy<TSpec> >::Type TValue;
-	typedef typename _RemoveConst<TValue>::Type TValue_NoConst;
+	typedef typename RemoveConst_<TValue>::Type TValue_NoConst;
 	typedef typename CompareType<TValue_NoConst, T>::Type Type;
 };
 

@@ -165,9 +165,9 @@ globalAlignment(Align<TString, TAlignSpec> & align,
 {
 	SEQAN_CHECKPOINT;
     typedef typename Size<TString>::Type TSize;
-    _Align_Traceback<TSize> trace;
+    AlignTraceback<TSize> trace;
     int alignmentScore = globalAlignment(trace, stringSet, sc, diag1, diag2, BandedNeedlemanWunsch());
-    _pump_trace_2_Align(align, trace);
+    _pumpTraceToAlign(align, trace);
     return alignmentScore;
 }
 

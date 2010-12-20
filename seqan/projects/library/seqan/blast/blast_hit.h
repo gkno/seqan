@@ -158,32 +158,32 @@ _parseBlastHit(TFile & file,
 	TPosition start_pos,act_pos;
 	act_pos = _streamTellG(file);
 
-	if(_parse_untilBeginLine(file,c,'>'))
+	if(_parseUntilBeginLine(file,c,'>'))
 	{
 		start_pos = _streamTellG(file);
 		c = _streamGet(file);
-		pword = _parse_readWord(file, c);
+		pword = _parseReadWord(file, c);
 		while (!_streamEOF(file) && c != '\n' && c != '\r')
-			pword += _parse_readWord(file, c);
+			pword += _parseReadWord(file, c);
 		if(pword[length(pword)-1] == ' ')
 			resize(pword,length(pword)-1);
 		hit.name = pword;
-		_parse_skipWhitespace(file,c);
+		_parseSkipWhitespace(file,c);
 		String<char> search = "Length";
-		if(_parse_untilBeginLine(file,c,search,6))
+		if(_parseUntilBeginLine(file,c,search,6))
 		{
-			_parse_skipWhitespace(file,c);
+			_parseSkipWhitespace(file,c);
 			if(c == '=')
 				c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pint = _parse_readNumber(file, c);
+			_parseSkipWhitespace(file,c);
+			pint = _parseReadNumber(file, c);
 			hit.length = pint;
 		}
 //		TPosition temp = _streamTellG(file);
 		//foreach Hsp
-		//if(_parse_untilBeginLine(file,c,'S') && _parse_readWord(file,c)=="Score")
+		//if(_parseUntilBeginLine(file,c,'S') && _parseReadWord(file,c)=="Score")
 		search = "Score";
-		if(_parse_untilBeginLine(file,c,search,5))
+		if(_parseUntilBeginLine(file,c,search,5))
 		{
 			//c = _streamGet(file);
 			bool in_hit = true;
@@ -203,7 +203,7 @@ _parseBlastHit(TFile & file,
 			}
 			_streamSeekG(file,next_hsp_pos);
 			c = _streamGet(file);
-			if(_parse_untilBeginLine(file,c,'>'))
+			if(_parseUntilBeginLine(file,c,'>'))
 				return _streamTellG(file);
 		}
 

@@ -199,7 +199,7 @@ SEQAN_CHECKPOINT
     typedef String<TValue, PizzaChili<TSpec> > TTarget;
 
     target.owned = true;
-    _Assign_String<Tag<TExpand> const>::assign_(target, source);
+    AssignString_<Tag<TExpand> const>::assign_(target, source);
 }
 
 template<typename TValue, typename TSpec, typename TSource, typename TExpand>
@@ -213,7 +213,7 @@ SEQAN_CHECKPOINT
     typedef String<TValue, PizzaChili<TSpec> > TTarget;
 
     target.owned = true;
-    _Assign_String<Tag<TExpand> const>::assign_(target, source);
+    AssignString_<Tag<TExpand> const>::assign_(target, source);
 }
 
 template<typename TValue, typename TSpec, typename TExpand>
@@ -233,7 +233,7 @@ SEQAN_CHECKPOINT
         target.index_handle = source.index_handle;
     }
     else
-        _Assign_String<Tag<TExpand> const>::assign_(target, source);
+        AssignString_<Tag<TExpand> const>::assign_(target, source);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -281,7 +281,7 @@ SEQAN_CHECKPOINT
 }
 
 template <typename TValue, typename TSpec>
-struct _AllocHelper {
+struct AllocHelper_ {
     typedef String<TValue, PizzaChili<TSpec> > string_type;
     typedef typename Value<string_type>::Type* pointer_type;
     typedef typename Size<string_type>::Type size_type;
@@ -307,8 +307,8 @@ SEQAN_CHECKPOINT
 // This specialization is needed because the FM index requires than an
 // overshoot be reserved after each string.
 template <typename TValue>
-struct _AllocHelper<TValue, PizzaChili_FM> {
-    typedef PizzaChili_FM TSpec;
+struct AllocHelper_<TValue, PizzaChiliFM> {
+    typedef PizzaChiliFM TSpec;
     typedef String<TValue, PizzaChili<TSpec> > string_type;
     typedef typename Value<string_type>::Type* pointer_type;
     typedef typename Size<string_type>::Type size_type;
@@ -347,7 +347,7 @@ _allocateStorage(
     typename Size<String<TValue, PizzaChili<TSpec> > >::Type new_capacity
 ) {
 SEQAN_ CHECKPOINT
-    return _AllocHelper<TValue, TSpec>::allocate(me, new_capacity);
+    return AllocHelper_<TValue, TSpec>::allocate(me, new_capacity);
 }
 */
 
@@ -359,7 +359,7 @@ _reallocateStorage(
     Exact
 ) {
 SEQAN_CHECKPOINT
-    return _AllocHelper<TValue, TSpec>::reallocate(me, new_capacity);
+    return AllocHelper_<TValue, TSpec>::reallocate(me, new_capacity);
 }
 
 template <typename TValue, typename TSpec>
@@ -370,7 +370,7 @@ _deallocateStorage(
    typename Size<String<TValue, PizzaChili<TSpec> > >::Type /*count*/
 ) {
 SEQAN_CHECKPOINT
-    _AllocHelper<TValue, TSpec>::deallocate(begin);
+    AllocHelper_<TValue, TSpec>::deallocate(begin);
 }
 
 //////////////////////////////////////////////////////////////////////////////

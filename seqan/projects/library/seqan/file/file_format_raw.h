@@ -45,12 +45,12 @@ typedef Tag<TagRaw_> const Raw;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TData, typename TTag>
-struct _Read_Raw;
+struct ReadRaw_;
 
 //____________________________________________________________________________
 
 template <typename TFile, typename TData>
-struct _Read_Raw<TFile, TData, True>
+struct ReadRaw_<TFile, TData, True>
 {
 	template <typename TSize>
 	inline static void
@@ -94,7 +94,7 @@ SEQAN_CHECKPOINT
 	{
 SEQAN_CHECKPOINT
 		typedef typename Size<TData>::Type TSize;
-		read(file, data, supremumValue<TSize>());
+		read(file, data, maxValue<TSize>());
 	}
 
 };
@@ -102,7 +102,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TFile, typename TData>
-struct _Read_Raw<TFile, TData, False>
+struct ReadRaw_<TFile, TData, False>
 {
 	static void
 	read_(TFile & file,
@@ -114,7 +114,7 @@ SEQAN_CHECKPOINT
 		if (!_streamEOF(file))
 		{
 SEQAN_CHECKPOINT
-			_ChunkCollector<TData> chunk_collector(data);
+			ChunkCollector_<TData> chunk_collector(data);
 			assign(chunk_collector, file);
 			append(data, chunk_collector);
 		}
@@ -134,7 +134,7 @@ SEQAN_CHECKPOINT
 		if (!_streamEOF(file))
 		{
 SEQAN_CHECKPOINT
-			_ChunkCollector<TData> chunk_collector(data);
+			ChunkCollector_<TData> chunk_collector(data);
 			assign(chunk_collector, file, limit);
 			append(data, chunk_collector, limit);
 		}
@@ -151,7 +151,7 @@ read(TFile & file,
 	 Raw)
 {
 SEQAN_CHECKPOINT
-	_Read_Raw<TFile, TData, typename _IsTellSeekStream<TFile>::Type>::read_(file, data);
+	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data);
 }
 
 //____________________________________________________________________________
@@ -164,7 +164,7 @@ read(TFile & file,
 	 Raw)
 {
 SEQAN_CHECKPOINT
-	_Read_Raw<TFile, TData, typename _IsTellSeekStream<TFile>::Type>::read_(file, data, limit);
+	ReadRaw_<TFile, TData, typename IsTellAndSeekStream_<TFile>::Type>::read_(file, data, limit);
 }
 
 

@@ -182,7 +182,7 @@ namespace seqan
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > ** search_path = _getSearchPath( list );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * preceding_elem = _searchFrom( list, _getRoot( list ), key( obj ), search_path, list );
 		
-		_sort_equals( list, preceding_elem );
+		_sortEquals( list, preceding_elem );
 		while( key( *_getSucc( *preceding_elem ), param ) < key( obj ) )
 			goNext( preceding_elem );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * new_elem;
@@ -255,8 +255,8 @@ namespace seqan
 						TParam & param )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( theKey != supremumValue< typename Key< TObject >::Type >( ), "search key is supremum" ) 
-		SEQAN_CHECK2( theKey != infimumValue< typename Key< TObject >::Type >( ), "search key is infimum" ) 
+		SEQAN_CHECK2( theKey != maxValue< typename Key< TObject >::Type >( ), "search key is supremum" ) 
+		SEQAN_CHECK2( theKey != minValue< typename Key< TObject >::Type >( ), "search key is infimum" ) 
 		
 		if( _getInitialState( list ) )
 		{
@@ -377,7 +377,7 @@ namespace seqan
 			return false;
 		if( _getHeight( *buffer ) )
 			_deleteTower( list, search_path, buffer, _getHeight( *buffer ) );
-		_sort_equals( list, buffer, theKey );
+		_sortEquals( list, buffer, theKey );
 		while( key( *buffer ) == theKey )
 		{
 			_deleteBase( list, buffer );
@@ -404,13 +404,13 @@ namespace seqan
 			TObject & obj )
 	{
 		SEQAN_CHECKPOINT
-		if( key( obj ) == infimumValue< typename Key< TObject >::Type >() || key( obj ) == supremumValue< typename Key< TObject >::Type >() )
+		if( key( obj ) == minValue< typename Key< TObject >::Type >() || key( obj ) == maxValue< typename Key< TObject >::Type >() )
 			return false;
 		SkipElement< TObject, SkipListDynamic, TSpec, TStructuring > ** search_path = _getSearchPath( list );
 		SkipBaseElement< TObject, SkipListDynamic, TSpec, TStructuring > * buffer = _deleteSearchFrom( list, key( obj ), search_path, list );
 		if( key( *buffer, list ) != key( obj ) )
 			return false;
-		_sort_equals( list, buffer );
+		_sortEquals( list, buffer );
 
 		while( getObject( buffer ) != &obj && key( *buffer ) == key( obj ) )
 			goNext( buffer );

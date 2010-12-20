@@ -1451,7 +1451,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
     template < typename TValue, typename TConfig >
     struct Difference< String<TValue, External<TConfig> > >
     {
-		typedef typename _MakeSigned<typename String<TValue, External<TConfig> >::TSize>::Type Type;
+		typedef typename MakeSigned_<typename String<TValue, External<TConfig> >::TSize>::Type Type;
     };
 
     template < typename TValue, typename TConfig, typename TSpec >

@@ -372,7 +372,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     // Build Edit String.
     //
     for (unsigned i = 0; i < readLength; /*NOP*/) {
-        double x = pickRandomNumber(rng, PDF<Uniform<double> >(0, 1));
+        double x = pickRandomNumber(rng, Pdf<Uniform<double> >(0, 1));
         double pMismatch = parameters.mismatchProbabilities[i];
         double pInsert   = options.probabilityInsert;
         double pDelete   = options.probabilityDelete;
@@ -444,10 +444,10 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
             SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);
             if (inst.editString[i] == ERROR_TYPE_MISMATCH) {
                 // std::cout << "i == " << i << ", j == " << j << ", parameters.mismatchQualityMeans[j] == " << parameters.mismatchQualityMeans[j] << ", parameters.mismatchQualityStdDevs[j] == " << parameters.mismatchQualityStdDevs[j] << std::endl;
-                PDF<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
+                Pdf<Normal> pdf(parameters.mismatchQualityMeans[j], parameters.mismatchQualityStdDevs[j]);
                 inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
             } else {
-                PDF<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
+                Pdf<Normal> pdf(parameters.qualityMeans[j], parameters.qualityStdDevs[j]);
                 inst.qualities[i] = static_cast<int>(pickRandomNumber(rng, pdf));
             }
 
@@ -486,9 +486,9 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 break;
             case ERROR_TYPE_MISMATCH:
                 if (options.illuminaNoN) {
-                    c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 3)));  // -3, N not allowed
+                    c = TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 3)));  // -3, N not allowed
                 } else {
-                    c = TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
+                    c = TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2)));  // -2, N allowed
                 }
                 //xold = ordValue(c);
                 SEQAN_ASSERT_LT_MSG(j, length(read), "i = %u", i);
@@ -511,9 +511,9 @@ void applySimulationInstructions(TString & read, TRNG & rng, ReadSimulationInstr
                 break;
             case ERROR_TYPE_INSERT:
                 if (options.illuminaNoN)
-                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
+                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 2))));  // -2 == no N
                 else
-                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, PDF<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
+                    appendValue(tmp, TAlphabet(pickRandomNumber(rng, Pdf<Uniform<int> >(0, ValueSize<TAlphabet>::VALUE - 1))));  // -1 == N allowed
                 if (options.simulateQualities) {
                     if (options.illuminaNoN)  // Ns can be introduced through quality, too.
                         assignQualityValue(back(tmp), _max(1, inst.qualities[i]));

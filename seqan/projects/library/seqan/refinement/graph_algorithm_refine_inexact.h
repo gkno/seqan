@@ -35,7 +35,7 @@ typedef Tag<TagInexactRefinement_> const InexactRefinement;
 ///inexact refinement (cuts that would produce segments shorter than min_len are not made)
 template<typename TValue>
 inline bool
-cutIsOk(String<std::set<TValue> > & all_nodes,
+_cutIsValid(String<std::set<TValue> > & all_nodes,
 		TValue seq_i_pos,
 		TValue pos_i,
 		typename std::set<TValue>::iterator iter,
@@ -203,8 +203,8 @@ SEQAN_CHECKPOINT
 				//          |||||||-							 ---||||||  
 				//seq2 = ...r.c...rc... 					   ...r.c...rc....
 				typename Value<TScore>::Type score = 0;
-				score = getScore(score_type,seqs,*ali_it,act_pos1,act_pos2,act_end_pos1-act_pos1,cut_act_end_pos2);
-				//score *= getAnnoScore(ali_g,pm,act_knot1,act_knot2,score_type);
+				score = _getMatchScore(score_type,seqs,*ali_it,act_pos1,act_pos2,act_end_pos1-act_pos1,cut_act_end_pos2);
+				//score *= _getAnnoScore(ali_g,pm,act_knot1,act_knot2,score_type);
 				//add score for
 				//
 				//seq1 = ...-cr....x....

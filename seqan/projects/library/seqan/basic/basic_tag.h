@@ -52,12 +52,12 @@ typedef Tag<DotDrawing_> const DotDrawing;
 ..include:seqan/basic.h
 */
 
-struct _HammingDistance;
-struct _LevenshteinDistance;
+struct HammingDistance_;
+struct LevenshteinDistance_;
 
-typedef Tag<_HammingDistance>		HammingDistance;
-typedef Tag<_LevenshteinDistance>	LevenshteinDistance;
-typedef Tag<_LevenshteinDistance>	EditDistance; 
+typedef Tag<HammingDistance_>		HammingDistance;
+typedef Tag<LevenshteinDistance_>	LevenshteinDistance;
+typedef Tag<LevenshteinDistance_>	EditDistance; 
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -85,8 +85,8 @@ typedef Tag<_LevenshteinDistance>	EditDistance;
 ..include:seqan/basic.h
 */
 
-struct _NeedlemanWunsch;
-typedef Tag<_NeedlemanWunsch> NeedlemanWunsch;
+struct NeedlemanWunsch_;
+typedef Tag<NeedlemanWunsch_> NeedlemanWunsch;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -95,8 +95,8 @@ typedef Tag<_NeedlemanWunsch> NeedlemanWunsch;
 	The Needleman-Wunsch alignment algorithm in a banded version.
 ..include:seqan/basic.h
 */
-struct _BandedNeedlemanWunsch;
-typedef Tag<_BandedNeedlemanWunsch> BandedNeedlemanWunsch;
+struct BandedNeedlemanWunsch_;
+typedef Tag<BandedNeedlemanWunsch_> BandedNeedlemanWunsch;
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -106,8 +106,8 @@ typedef Tag<_BandedNeedlemanWunsch> BandedNeedlemanWunsch;
 	Gotoh's affine gap cost alignment algorithm.
 ..include:seqan/basic.h
 */
-struct _Gotoh;
-typedef Tag<_Gotoh> Gotoh;
+struct Gotoh_;
+typedef Tag<Gotoh_> Gotoh;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -116,8 +116,8 @@ typedef Tag<_Gotoh> Gotoh;
 	Gotoh's affine gap cost alignment algorithm in a banded version.
 ..include:seqan/basic.h
 */
-struct _BandedGotoh;
-typedef Tag<_BandedGotoh> BandedGotoh;
+struct BandedGotoh_;
+typedef Tag<BandedGotoh_> BandedGotoh;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -177,8 +177,8 @@ typedef Tag<Lcs_> const Lcs;
 	Triggers a Smith Waterman local alignment algorithm.
 ..include:seqan/basic.h
 */
-struct _SmithWaterman;
-typedef Tag<_SmithWaterman> const SmithWaterman;
+struct SmithWaterman_;
+typedef Tag<SmithWaterman_> const SmithWaterman;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -187,8 +187,8 @@ typedef Tag<_SmithWaterman> const SmithWaterman;
 	Triggers a banded version of the Smith Waterman local alignment algorithm.
 ..include:seqan/basic.h
 */
-struct _BandedSmithWaterman;
-typedef Tag<_BandedSmithWaterman> const BandedSmithWaterman;
+struct BandedSmithWaterman_;
+typedef Tag<BandedSmithWaterman_> const BandedSmithWaterman;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -199,9 +199,9 @@ typedef Tag<_BandedSmithWaterman> const BandedSmithWaterman;
 	Same as $WatermanEggert$.
 ..include:seqan/basic.h
 */
-struct _SmithWatermanClump;
-typedef Tag<_SmithWatermanClump> const SmithWatermanClump;
-typedef Tag<_SmithWatermanClump> const WatermanEggert;
+struct SmithWatermanClump_;
+typedef Tag<SmithWatermanClump_> const SmithWatermanClump;
+typedef Tag<SmithWatermanClump_> const WatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -212,9 +212,9 @@ typedef Tag<_SmithWatermanClump> const WatermanEggert;
 	Same as $BandedWatermanEggert$.
 ..include:seqan/basic.h
 */
-struct _BandedWatermanEggert;
-typedef Tag<_BandedWatermanEggert> const BandedSmithWatermanClump;
-typedef Tag<_BandedWatermanEggert> const BandedWatermanEggert;
+struct BandedWatermanEggert_;
+typedef Tag<BandedWatermanEggert_> const BandedSmithWatermanClump;
+typedef Tag<BandedWatermanEggert_> const BandedWatermanEggert;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -228,8 +228,8 @@ typedef Tag<Nussinov_> const Nussinov;
 
 //////////////////////////////////////////////////////////////////////////////
 
-struct TagBlat_;
-typedef Tag<TagBlat_> const Blat;
+struct Blat_;
+typedef Tag<Blat_> const Blat;
 
 
 //////////////////////////////////////////////////////////////////////////////

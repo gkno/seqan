@@ -316,11 +316,11 @@ _allocateStorage(
 	size_t new_capacity)
 {
 SEQAN_CHECKPOINT
-	size_t size = _computeSize4Capacity(me, new_capacity);
-	typename Value<String<TValue, Alloc<TSpec> > >::Type * return_value = me.data_begin;
+	size_t size = _computeSizeForCapacity(me, new_capacity);
+	typename Value<String<TValue, Alloc<TSpec> > >::Type * _returnValue = me.data_begin;
 	allocate(me, me.data_begin, size, TagAllocateStorage());
 	me.data_capacity = new_capacity;
-	return return_value;
+	return _returnValue;
 }
 
 //____________________________________________________________________________
@@ -346,7 +346,7 @@ _deallocateStorage(
 	size_t capacity)
 {
 SEQAN_CHECKPOINT
-	size_t size = _computeSize4Capacity(me, capacity);
+	size_t size = _computeSizeForCapacity(me, capacity);
 	deallocate(me, ptr, size, TagAllocateStorage());
 }
 

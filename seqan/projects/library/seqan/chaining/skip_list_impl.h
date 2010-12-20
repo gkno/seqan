@@ -127,7 +127,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 		// i.e. the left bording element with score - infinity
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	inline typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > , Standard >::Type 
-	_begin_default( SkipList< TObject, TModus, TSpec, TStructuring > & me,
+	_beginDefault( SkipList< TObject, TModus, TSpec, TStructuring > & me,
 				   Standard)
 	{
 	SEQAN_CHECKPOINT
@@ -136,7 +136,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	inline typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > , Standard >::Type 
-	_begin_default( SkipList< TObject, TModus, TSpec, TStructuring > const & me,
+	_beginDefault( SkipList< TObject, TModus, TSpec, TStructuring > const & me,
 				   Standard)
 	{
 	SEQAN_CHECKPOINT
@@ -160,13 +160,13 @@ compared to a static SkipList. Default is SkipListDynamic.
 	capacity( SkipList< TObject, SkipListDynamic, TSpec, TStructuring > & /*me*/)
 	{
 	SEQAN_CHECKPOINT
-		return supremumValue< typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type >();
+		return maxValue< typename Size< SkipList< TObject, SkipListDynamic, TSpec, TStructuring > >::Type >();
 	}
 
 
 	template < typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	inline typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring >, Standard>::Type 
-	_end_default( SkipList< TObject, TModus, TSpec, TStructuring > & me,
+	_endDefault( SkipList< TObject, TModus, TSpec, TStructuring > & me,
 					Standard)
 	{
 	SEQAN_CHECKPOINT
@@ -174,7 +174,7 @@ compared to a static SkipList. Default is SkipListDynamic.
 	}
 	template < typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	inline typename Iterator< SkipList< TObject, TModus, TSpec, TStructuring > const, Standard>::Type 
-	_end_default( SkipList< TObject, TModus, TSpec, TStructuring > const & me,
+	_endDefault( SkipList< TObject, TModus, TSpec, TStructuring > const & me,
 					Standard)
 	{
 	SEQAN_CHECKPOINT
@@ -427,7 +427,7 @@ struct SkipList
 	Allocator< ClassPool< SkipElement< TObject, TModus, TSpec, TStructuring >, Limited > > _elementAlloc;	
 	
 		// search path
-	_SearchPath< TObject, TModus, TSpec, TStructuring > _sp;
+	SearchPath_< TObject, TModus, TSpec, TStructuring > _sp;
 		
 		// border element for the right side
 	SkipBaseElement< TObject, TModus, TSpec, TStructuring > * _rightBorder;
@@ -455,8 +455,8 @@ private:
 		, _initialState( true )
 	{
 			// construct bording elements
-		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		setKey( l_border_obj, minValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, maxValue< typename Key< TObject >::Type >() );
 
 		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
 		
@@ -478,8 +478,8 @@ public:
 		mtRandInit();
 
 			// construct bording elements
-		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		setKey( l_border_obj, minValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, maxValue< typename Key< TObject >::Type >() );
 			
 	}
 
@@ -494,8 +494,8 @@ public:
 		mtRandInit();
 
 			// construct bording elements
-		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		setKey( l_border_obj, minValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, maxValue< typename Key< TObject >::Type >() );
 
 		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
 		
@@ -519,8 +519,8 @@ public:
 	{			
 		mtRandInit();
 
-		setKey( l_border_obj, infimumValue< typename Key< TObject >::Type >() );
-		setKey( r_border_obj, supremumValue< typename Key< TObject >::Type >() );
+		setKey( l_border_obj, minValue< typename Key< TObject >::Type >() );
+		setKey( r_border_obj, maxValue< typename Key< TObject >::Type >() );
 
 			// construct bording elements
 		SkipBaseElement< TObject, TModus, TSpec, TStructuring > * base_right;
@@ -561,7 +561,7 @@ private:
 			while( temp != end( me ) && temp != tempEnd )
 			{
 				std::cout.width(7);
-				if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+				if( key( temp ) == minValue< typename Key< TObject >::Type >( ) )
 					std::cout << std::left << "L";
 				else
 					std::cout << std::left << key( temp );
@@ -590,7 +590,7 @@ private:
 					if( _getRight( *( &_getUp( *hostIterator( temp ) ) + layer - 1) ) )
 					{
 						std::stringstream s;
-						if( key( temp ) == infimumValue< typename Key< TObject >::Type >( ) )
+						if( key( temp ) == minValue< typename Key< TObject >::Type >( ) )
 							s << std::left << "L";
 						else
 							s << key( temp );

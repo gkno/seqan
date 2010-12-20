@@ -181,13 +181,13 @@ void readWitHeader(TStream &stream, TChar &c) {
     CharString tmp;
     // Read "@WIT".
     c = _streamGet(stream);
-    tmp = _parse_readWordUntilWhitespace(stream, c);
+    tmp = _parseReadWordUntilWhitespace(stream, c);
     if (tmp != CharString("@WIT"))
         std::cerr << "WARNING: File did not begin with \"@WIT\", was: \"" << tmp << "\"" << std::endl;
     // Skip "\t".
-    _parse_skipWhitespace(stream, c);
+    _parseSkipWhitespace(stream, c);
     // Read "VN:1.0".
-    tmp = _parse_readWordUntilWhitespace(stream, c);
+    tmp = _parseReadWordUntilWhitespace(stream, c);
     if (tmp != CharString("VN:1.0"))
         std::cerr << "WARNING: Version is not \"VN:1.0\"" << std::endl;
     // Skip to and after end of line.
@@ -222,18 +222,18 @@ bool readWitRecord(TStream & stream, WitRecord & record, TChar & c) {
         return false;
 
     // Read line.
-    _parse_readIdentifier(stream, record.readName, c);
-    _parse_readIdentifier(stream, record.readName, c);
-    _parse_skipWhitespace(stream, c);
-    record.distance = _parse_readNumber(stream, c);
-    _parse_skipWhitespace(stream, c);
-    _parse_readIdentifier(stream, record.contigName, c);
-    _parse_skipWhitespace(stream, c);
-    record.isForward = (_parse_readChar(stream, c) == 'F');
-    _parse_skipWhitespace(stream, c);
-    record.firstPos = _parse_readNumber(stream, c);
-    _parse_skipWhitespace(stream, c);
-    record.lastPos = _parse_readNumber(stream, c);
+    _parseReadIdentifier(stream, record.readName, c);
+    _parseReadIdentifier(stream, record.readName, c);
+    _parseSkipWhitespace(stream, c);
+    record.distance = _parseReadNumber(stream, c);
+    _parseSkipWhitespace(stream, c);
+    _parseReadIdentifier(stream, record.contigName, c);
+    _parseSkipWhitespace(stream, c);
+    record.isForward = (_parseReadChar(stream, c) == 'F');
+    _parseSkipWhitespace(stream, c);
+    record.firstPos = _parseReadNumber(stream, c);
+    _parseSkipWhitespace(stream, c);
+    record.lastPos = _parseReadNumber(stream, c);
     
     // Skip to and after end of line.
     _parse_skipLine(stream, c);

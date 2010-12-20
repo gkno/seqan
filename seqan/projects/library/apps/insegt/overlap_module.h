@@ -601,7 +601,7 @@ getResults(TReadAnnoStore & readAnnoStore,
 
 
 //////////////////////////////////////////////////////////////////////////////
-/// get normalized values for annotations AND get Map for Gene orientations (necessary for annotation Output)
+/// get normalized values for annotations And get Map for Gene orientations (necessary for annotation Output)
 //////////////////////////////////////////////////////////////////////////////
 template<typename TAnnoNormStore, typename TMapO, typename TAnnoCountStore, typename TSpec, typename TConfig>
 inline void
@@ -822,12 +822,12 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	read(fileSAM, me, SAM());
 	fileSAM.close();
 
-	// readAnnotations from GFF or GTF:
+	// readAnnotations from Gff or Gtf:
 	if (gtf == 0)
 	{
 #ifdef DEBUG_OVERLAP_MODULE
 		SEQAN_PROTIMESTART(find2_time);	
-		std::cout << "load GFF..." << std::endl;
+		std::cout << "load Gff..." << std::endl;
 #endif 
 		readAnnotationsFromGFF(me, toCString(nameGFF));
 	}
@@ -835,7 +835,7 @@ ngsOverlapper(CharString const &nameSAM, CharString const &nameGFF, CharString c
 	{
 #ifdef DEBUG_OVERLAP_MODULE
 		SEQAN_PROTIMESTART(find2_time);	
-		std::cout << "load GFF..." << std::endl;
+		std::cout << "load Gff..." << std::endl;
 #endif 
 		readAnnotationsFromGTF(me, toCString(nameGFF));
 	}

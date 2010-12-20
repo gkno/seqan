@@ -25,27 +25,27 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 /**
-.Tag.File Format.tag.GFF:
-	GFF annotation file.
+.Tag.File Format.tag.Gff:
+	Gff annotation file.
 ..include:seqan/store.h
 */
-struct TagGFF_;
-typedef Tag<TagGFF_> const GFF;
+struct TagGff_;
+typedef Tag<TagGff_> const Gff;
 
 /**
-.Tag.File Format.tag.GTF:
-	GTF annotation file.
+.Tag.File Format.tag.Gtf:
+	Gtf annotation file.
 ..include:seqan/store.h
 */
-struct TagGTF_;
-typedef Tag<TagGTF_> const GTF;
+struct TagGtf_;
+typedef Tag<TagGtf_> const Gtf;
 
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readGffIdentifier
+// _parseReadGffIdentifier
     
     template<typename TFile, typename TString, typename TChar>
     inline void
-    _parse_readGffIdentifier(TFile & file, TString & str, TChar& c)
+    _parseReadGffIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
@@ -63,7 +63,7 @@ typedef Tag<TagGTF_> const GTF;
 
 	template<typename TFile, typename TChar>
 	inline bool
-	_parse_skipEntryUntilWhitespace(TFile& file, TChar& c)
+	_parseSkipEntryUntilWhitespace(TFile& file, TChar& c)
 	{
 		if (c== ' ' || c== '\t' || c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) return false;
 		
@@ -76,7 +76,7 @@ typedef Tag<TagGTF_> const GTF;
 
     template<typename TFile, typename TKeyString, typename TValueString, typename TChar>
     inline bool
-    _parse_readGFFKeyValue(TFile & file, TKeyString & key, TValueString & value, TChar& c)
+    _parseReadGffKeyValue(TFile & file, TKeyString & key, TValueString & value, TChar& c)
     {
 		if (c == ' ' || c == '\t' || c == '\n' || c == '=') return false;
         appendValue(key, c);
@@ -86,11 +86,11 @@ typedef Tag<TagGTF_> const GTF;
             if (c == ' ' || c == '\t' || c == '\n' || c == '=') break;
             appendValue(key, c);
         }
-		_parse_skipSpace(file, c);
+		_parseSkipSpace(file, c);
 		if (c == '=')
 		{
 			c = _streamGet(file);
-			_parse_skipSpace(file, c);
+			_parseSkipSpace(file, c);
 		}
 		
 		if (c == '"')
@@ -132,11 +132,11 @@ typedef Tag<TagGTF_> const GTF;
 
 
 //////////////////////////////////////////////////////////////////////////////
-// Read GFF
+// Read Gff
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec = void>
-struct _IOContextGFF
+struct _IOContextGff
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -161,7 +161,7 @@ struct _IOContextGFF
 };
 
 template <typename TFragmentStore, typename TSpec>
-inline void clear(_IOContextGFF<TFragmentStore, TSpec> &ctx)
+inline void clear(_IOContextGff<TFragmentStore, TSpec> &ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -184,14 +184,14 @@ inline void clear(_IOContextGFF<TFragmentStore, TSpec> &ctx)
 //////////////////////////////////////////////////////////////////////////////
 // _readOneAnnotation
 //
-// reads in one annotation line from a GFF file
+// reads in one annotation line from a Gff file
 
 template <typename TFile, typename TChar, typename TFragmentStore, typename TSpec>
 inline bool 
 _readOneAnnotation (
 	TFile & file,
 	TChar & c,
-	_IOContextGFF<TFragmentStore, TSpec> & ctx)
+	_IOContextGff<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
@@ -201,51 +201,51 @@ _readOneAnnotation (
 	clear(ctx);
 
 	// read fields of annotation line        
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 	
 	// read column 1: contig name
 	// The letters until the first whitespace will be read.
 	// Then, we skip until we hit the first tab character.
-	_parse_readGffIdentifier(file, ctx.contigName, c);
+	_parseReadGffIdentifier(file, ctx.contigName, c);
 	if (!empty(ctx.contigName) && ctx.contigName[0] == '#')
 	{
 		_parse_skipLine(file, c);
 		return false;
 	}
-	_parse_skipUntilChar(file, '\t', c);
+	_parseSkipUntilChar(file, '\t', c);
 	c = _streamGet(file);
 	
 	// skip column 2
-	_parse_skipEntryUntilWhitespace(file, c);
-	_parse_skipWhitespace(file, c);
+	_parseSkipEntryUntilWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 	
 	// read column 3: type
-	_parse_readGffIdentifier(file, ctx.typeName, c);
-	_parse_skipWhitespace(file, c);
+	_parseReadGffIdentifier(file, ctx.typeName, c);
+	_parseSkipWhitespace(file, c);
 	
 	// read column 4: begin position
-	if (_parse_isDigit(c))
-		ctx.annotation.beginPos = _parse_readNumber(file, c) - 1;
+	if (_parseIsDigit(c))
+		ctx.annotation.beginPos = _parseReadNumber(file, c) - 1;
 	else
 	{
 		ctx.annotation.beginPos = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// read column 5: end position
-	if (_parse_isDigit(c))
-		ctx.annotation.endPos = _parse_readNumber(file, c);
+	if (_parseIsDigit(c))
+		ctx.annotation.endPos = _parseReadNumber(file, c);
 	else 
 	{
 		ctx.annotation.endPos = TAnnotation::INVALID_POS;
-		_parse_skipEntryUntilWhitespace(file, c);
+		_parseSkipEntryUntilWhitespace(file, c);
 	}
-	_parse_skipWhitespace(file, c);	
+	_parseSkipWhitespace(file, c);	
 
 	// skip column 6
-	_parse_skipEntryUntilWhitespace(file, c);
-	_parse_skipWhitespace(file, c);
+	_parseSkipEntryUntilWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// read column 7: orientation
 	if (c == '-')
@@ -255,14 +255,14 @@ _readOneAnnotation (
 		ctx.annotation.endPos = tmp;
 	}
 	c = _streamGet(file);
-	_parse_skipWhitespace(file, c);
+	_parseSkipWhitespace(file, c);
 
 	// skip column 8
-	_parse_skipEntryUntilWhitespace(file, c);
-	_parse_skipSpace(file, c);
+	_parseSkipEntryUntilWhitespace(file, c);
+	_parseSkipSpace(file, c);
 	
 	// read column 9: name
-	while (!_streamEOF(file) &&	_parse_readGFFKeyValue(file, ctx._key, ctx._value, c))
+	while (!_streamEOF(file) &&	_parseReadGffKeyValue(file, ctx._key, ctx._value, c))
 	{
 		if (ctx._key == "ID") 
 			ctx.annotationName = ctx._value;
@@ -302,7 +302,7 @@ _readOneAnnotation (
 
 		clear(ctx._key);
 		clear(ctx._value);
-		_parse_skipSpace(file, c);
+		_parseSkipSpace(file, c);
 	}
 	return true;
 }
@@ -349,7 +349,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextGFF<TFragmentStore, TSpec> & ctx)
+	_IOContextGff<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -357,7 +357,7 @@ _storeOneAnnotation (
 	
 	TId maxId = 0;
 
-	// for lines in GTF format get/add the parent gene first
+	// for lines in Gtf format get/add the parent gene first
 	TId geneId = TAnnotation::INVALID_ID;
 	if (!empty(ctx.gtfGene))
 	{
@@ -414,7 +414,7 @@ inline void
 read (
 	TFile & file,
 	FragmentStore<TSpec, TConfig> & fragStore,
-	GFF)
+	Gff)
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	
@@ -422,7 +422,7 @@ read (
 
 	// get first character from the stream
 	char c = _streamGet(file);
-	_IOContextGFF<TFragmentStore> ctx;
+	_IOContextGff<TFragmentStore> ctx;
 	
 	refresh(fragStore.contigNameStoreCache);
 	refresh(fragStore.annotationNameStoreCache);
@@ -443,13 +443,13 @@ inline void
 read (
 	TFile & file,
 	FragmentStore<TSpec, TConfig> & fragStore,
-	GTF)
+	Gtf)
 {
-	read (file, fragStore, GFF());
+	read (file, fragStore, Gff());
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// Write GFF
+// Write Gff
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TTargetStream, typename TSpec, typename TConfig, typename TAnnotation, typename TId>
@@ -459,7 +459,7 @@ _writeOneAnnotation (
 	FragmentStore<TSpec, TConfig> & store,
 	TAnnotation &annotation,
 	TId id,
-	GFF)
+	Gff)
 {
 	typedef FragmentStore<TSpec, TConfig>       TFragmentStore;
 	typedef typename TFragmentStore::TContigPos TContigPos;
@@ -563,7 +563,7 @@ _writeOneAnnotation (
 	FragmentStore<TSpec, TConfig> & store,
 	TAnnotation &annotation,
 	TId id,
-	GTF)
+	Gtf)
 {
 	typedef FragmentStore<TSpec, TConfig>				TFragmentStore;
 	typedef typename TFragmentStore::TContigPos			TContigPos;
@@ -677,7 +677,7 @@ _writeOneAnnotation (
 
 template<typename TTargetStream, typename TSpec, typename TConfig, typename TFormat>
 inline void 
-_writeGFFGTF (
+_writeGffGtf (
 	TTargetStream & target,
 	FragmentStore<TSpec, TConfig> & store,
 	TFormat format)
@@ -700,9 +700,9 @@ inline void
 write (
 	TTargetStream & target,
 	FragmentStore<TSpec, TConfig> & store,
-	GFF format)
+	Gff format)
 {
-	_writeGFFGTF(target, store, format);
+	_writeGffGtf(target, store, format);
 }
 
 template<typename TTargetStream, typename TSpec, typename TConfig>
@@ -710,9 +710,9 @@ inline void
 write (
 	TTargetStream & target,
 	FragmentStore<TSpec, TConfig> & store,
-	GTF format)
+	Gtf format)
 {
-	_writeGFFGTF(target, store, format);
+	_writeGffGtf(target, store, format);
 }
 
 

@@ -70,7 +70,7 @@ struct DefaultFindBeginPatternSpec<EditDistanceScore, THasState>
 template <typename TPattern>
 struct FindBeginPatternSpec 
 {
-	typedef void Type; //void means: no find begin (see _FindBegin)
+	typedef void Type; //void means: no find begin (see FindBegin_)
 };
 
 //____________________________________________________________________________
@@ -89,7 +89,7 @@ struct FindBeginPattern
 // Base class for approximate finders that manages findBegin stuff
 
 template <typename TPattern, typename TFindBeginPatternSpec = typename FindBeginPatternSpec<TPattern>::Type >
-struct _FindBegin
+struct FindBegin_
 {
 	typedef typename FindBeginPattern<TPattern>::Type TFindBeginPattern_;
 
@@ -97,7 +97,7 @@ struct _FindBegin
 };
 
 template <typename TPattern>
-struct _FindBegin <TPattern, void>
+struct FindBegin_ <TPattern, void>
 {
 //need no findBegin if FindBeginPatternSpec is void
 };
@@ -106,7 +106,7 @@ struct _FindBegin <TPattern, void>
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFindBeginPatternSpec>
-struct _FindBegin_Impl
+struct FindBeginImpl_
 {
 	template <typename TPattern, typename TNeedle>
 	static inline void
@@ -175,14 +175,14 @@ struct _FindBegin_Impl
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return getScore(pattern.data_findBeginPattern);
+		return _getMatchScore(pattern.data_findBeginPattern);
 	}
 };
 
 
 // TODO(holtgrew): Copy-and-paste code from above.
 template <typename THasState>
-struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
+struct FindBeginImpl_<Myers<FindPrefix, THasState, void> >
 {
 	template <typename TPattern, typename TNeedle>
 	static inline void
@@ -251,7 +251,7 @@ struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return getScore(pattern.data_findBeginPattern);
+		return _getMatchScore(pattern.data_findBeginPattern);
 	}
 };
 
@@ -264,7 +264,7 @@ struct _FindBegin_Impl<Myers<FindPrefix, THasState, void> >
 //match length manually via "_setFinderLength" (it's the needle length)
 
 template <>
-struct _FindBegin_Impl<void>
+struct FindBeginImpl_<void>
 {
 	template <typename TPattern, typename TNeedle>
 	static inline void
@@ -294,7 +294,7 @@ struct _FindBegin_Impl<void>
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return getScore(pattern);
+		return _getMatchScore(pattern);
 	}
 };
 
@@ -307,7 +307,7 @@ inline void
 _findBeginInit(TPattern & pattern, TNeedle & needle_)
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	return _FindBegin_Impl<TFindBeginPatternSpec>::_findBeginInit(pattern, needle_);
+	return FindBeginImpl_<TFindBeginPatternSpec>::_findBeginInit(pattern, needle_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -325,7 +325,7 @@ _findBeginInit(TPattern & pattern, TNeedle & needle_)
 ...remarks:This must be a pattern for approximate string matching.
 ...type:Class.Pattern
 ..param.limit:The score limit.
-...default:The limit used during the last @Function.find@ call, see @Function.getScore@.
+...default:The limit used during the last @Function.find@ call, see @Function._getMatchScore@.
 ...remarks:All occurrences that score at least $limit$ are reported.
 ..returns:$boolean$ that indicates whether an begin position was found.
 ..remarks:The function @Function.find@ successfully called be called - that is an end position was found - before calling $findBegin$ to find a begin position.
@@ -339,7 +339,7 @@ findBegin(TFinder & finder,
 		  TPattern & pattern)
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	return _FindBegin_Impl<TFindBeginPatternSpec>::findBegin(finder, pattern);
+	return FindBeginImpl_<TFindBeginPatternSpec>::findBegin(finder, pattern);
 }
 template <typename TFinder, typename TPattern, typename TLimit>
 inline bool
@@ -348,7 +348,7 @@ findBegin(TFinder & finder,
 		  TLimit limit)
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	return _FindBegin_Impl<TFindBeginPatternSpec>::findBegin(finder, pattern, limit);
+	return FindBeginImpl_<TFindBeginPatternSpec>::findBegin(finder, pattern, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -363,7 +363,7 @@ findBegin(TFinder & finder,
 ...remarks:The value is set after a successfully call of @Function.findBegin@.
 If no match was found, the value is undefined.
 ..see:Function.findBegin
-..see:Function.getScore
+..see:Function._getMatchScore
 */
 
 template <typename TPattern>
@@ -371,7 +371,7 @@ inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 getBeginScore(TPattern & pattern)
 {
 	typedef typename FindBeginPatternSpec<TPattern>::Type TFindBeginPatternSpec;
-	return _FindBegin_Impl<TFindBeginPatternSpec>::getBeginScore(pattern);
+	return FindBeginImpl_<TFindBeginPatternSpec>::getBeginScore(pattern);
 }
 
 //////////////////////////////////////////////////////////////////////////////

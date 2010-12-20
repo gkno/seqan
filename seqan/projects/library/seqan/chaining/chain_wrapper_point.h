@@ -25,15 +25,15 @@ namespace seqan{
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//			Class _WrapperPoint
+//			Class WrapperPoint_
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-.Class._WrapperPoint:
+.Class.WrapperPoint_:
 ..summary:Data structure to represent a begin or end point of a fragment
 ..cat:Chaining
-..signature:_WrapperPoint<TBorder>
+..signature:WrapperPoint_<TBorder>
 ..param.TBorder:Type of the class that represents the limits (multidimensional point) of an fragment.
 ..include:seqan/chaining.h
 */
@@ -47,14 +47,14 @@ namespace seqan{
 			// get the Key of the bording points of the related fragment depends on _end 
 	template< typename TFragType > inline 
 	typename Key< TFragType >::Type
-	key( _WrapperPoint< TFragType > & me )
+	key( WrapperPoint_< TFragType > & me )
 	{
 		return me._key;
 	}
 
 	template< typename TFragType > inline 
 	typename Key< TFragType >::Type
-	key( const _WrapperPoint< TFragType > & me )
+	key( const WrapperPoint_< TFragType > & me )
 	{
 		return me._key;
 	}
@@ -64,7 +64,7 @@ namespace seqan{
 	
 	template< typename TFragType > inline
 	TFragType & 
-	_getFrag( _WrapperPoint< TFragType > & me )
+	_getFrag( WrapperPoint_< TFragType > & me )
 	{
 		SEQAN_CHECK( me._frag != NULL )
 		SEQAN_CHECK( me._meta != NULL )
@@ -74,7 +74,7 @@ namespace seqan{
 
 	template< typename TFragType > inline
 	TFragType & 
-	_getFrag( const _WrapperPoint< TFragType > & me )
+	_getFrag( const WrapperPoint_< TFragType > & me )
 	{
 		SEQAN_CHECK( me._frag != NULL )
 		SEQAN_CHECK( me._meta != NULL )
@@ -83,8 +83,8 @@ namespace seqan{
 	}
 
 	template< typename TFragType > inline
-	_MetaFragment< TFragType > & 
-	_meta( _WrapperPoint< TFragType > & me )
+	MetaFragment_< TFragType > & 
+	_meta( WrapperPoint_< TFragType > & me )
 	{
 		SEQAN_CHECK( me._frag != NULL )
 		SEQAN_CHECK( me._meta != NULL )
@@ -93,8 +93,8 @@ namespace seqan{
 
 	template< typename TFragType > inline
 	void
-	_setMeta( _WrapperPoint< TFragType > & me,
-				_MetaFragment< TFragType > & meta )
+	_setMeta( WrapperPoint_< TFragType > & me,
+				MetaFragment_< TFragType > & meta )
 	{
 		me._meta = &meta;
 		me._frag = _getFrag( meta );
@@ -103,49 +103,49 @@ namespace seqan{
 	
 	template< typename TFragType > inline
 	bool 
-	_isEnd( _WrapperPoint< TFragType > & me )
+	_isEnd( WrapperPoint_< TFragType > & me )
 	{
 		return me._end;
 	}
 
 	template< typename TFragType > inline 
 	bool 
-	_isEnd( const _WrapperPoint< TFragType > & me )
+	_isEnd( const WrapperPoint_< TFragType > & me )
 	{
 		return me._end;
 	}
 	
 	template< typename TFragType > inline 
 	bool
-	_isBegin( _WrapperPoint< TFragType > & me )
+	_isBegin( WrapperPoint_< TFragType > & me )
 	{
 		return !me._end;
 	}
 
 	template< typename TFragType > inline 
 	bool
-	_isBegin( const _WrapperPoint< TFragType > & me )
+	_isBegin( const WrapperPoint_< TFragType > & me )
 	{
 		return !me._end;
 	}
 
 	template< typename TFragType > inline 
 	typename Size< TFragType >::Type
-	dimension( const _WrapperPoint< TFragType > & me )
+	dimension( const WrapperPoint_< TFragType > & me )
 	{
 		return dimension( *me._frag );
 	}
 
 	
 	template< typename TFragType >
-	struct _WrapperPoint
+	struct WrapperPoint_
 	{
 			// related triple, which stores the preceding frgament, chain value...
 		TFragType * _frag;
 			// the related key
 		typename Key< TFragType >::Type _key;
 			// meta information struct for that point
-		_MetaFragment< TFragType > * _meta;
+		MetaFragment_< TFragType > * _meta;
 			// the point is either the end ( _end == true ) or the beginning of a fragment
 		bool _end;
 			
@@ -153,7 +153,7 @@ namespace seqan{
 	#ifdef _SEQAN_CHAIN_DEBUG
 		friend inline
 		void 
-		dump( _WrapperPoint< TFragType > & me )
+		dump( WrapperPoint_< TFragType > & me )
 		{
 			std::cout << "[ ";
 			typename Size< TFragType >::Type dim = 0;
@@ -175,7 +175,7 @@ namespace seqan{
 
 	#endif // _SEQAN_CHAIN_DEBUG
 
-		_WrapperPoint( )
+		WrapperPoint_( )
 			: _frag( NULL )
 			, _key( 0 )
 			, _meta( NULL )
@@ -184,7 +184,7 @@ namespace seqan{
 		}
 
 
-		_WrapperPoint( const _WrapperPoint & old )
+		WrapperPoint_( const WrapperPoint_ & old )
 			: _frag( old._frag )
 			, _key( old._key )
 			, _meta( old._meta )
@@ -193,7 +193,7 @@ namespace seqan{
 		}
 
 
-		_WrapperPoint( _MetaFragment< TFragType > & meta, 
+		WrapperPoint_( MetaFragment_< TFragType > & meta, 
 						bool end )
 			: _frag( &_getFrag( meta ) )
 			, _key( end ? rightPosition( _getFrag( meta ), dimension( _getFrag( meta ) ) - 1 ) : leftPosition( _getFrag( meta ), dimension( _getFrag( meta ) ) - 1 ) )
@@ -202,7 +202,7 @@ namespace seqan{
 		{}
 
 		template< typename TKey >
-		_WrapperPoint( _MetaFragment< TFragType > & meta,
+		WrapperPoint_( MetaFragment_< TFragType > & meta,
 						TKey key,
 						bool end )
 			: _frag( &_getFrag( meta ) )
@@ -212,7 +212,7 @@ namespace seqan{
 		{}
 
 
-		_WrapperPoint & operator=( const _WrapperPoint & old )
+		WrapperPoint_ & operator=( const WrapperPoint_ & old )
 		{
 			if ( this == &old ) 
 				return *this;

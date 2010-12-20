@@ -32,7 +32,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TIndexPair, typename TVal>
 inline void
-_align_gotoh_trace(TAlign& align,		 
+_alignGotohTrace(TAlign& align,		 
 				   TStringSet const& str,
 				   TTrace const& trace,
 				   TIndexPair const& overallMaxIndex,
@@ -54,8 +54,8 @@ _align_gotoh_trace(TAlign& align,
 	TSize len2 = overallMaxIndex[1];
 	TSize numCols = length(str[0]);
 	TSize numRows = length(str[1]);
-	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1,  Horizontal);
-	else if (len2 < numRows) _align_trace_print(align, str, id1, len1, id2, len2, numRows - len2,  Vertical);
+	if (len1 < numCols) _alignTracePrint(align, str, id1, len1, id2, len2, numCols - len1,  Horizontal);
+	else if (len2 < numRows) _alignTracePrint(align, str, id1, len1, id2, len2, numRows - len2,  Vertical);
 	numRows = (numRows >> 1) + (numRows & 1);
 
 	if ((len1 != 0) && (len2 !=0)) {
@@ -65,10 +65,10 @@ _align_gotoh_trace(TAlign& align,
 		TTraceValue tv = Diagonal;
 		if (initialDir == Diagonal) tv = (nextTraceValue & 3);
 		else if (initialDir == Horizontal) {
-			if ((nextTraceValue >> 2) & 1) _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+			if ((nextTraceValue >> 2) & 1) _alignTracePrint(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
 			else tv = Horizontal;
 		} else if (initialDir == Vertical) {
-			if ((nextTraceValue >> 3) & 1) _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+			if ((nextTraceValue >> 3) & 1) _alignTracePrint(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
 			else tv = Vertical;
 		}
 		TSize segLen = 0;
@@ -89,7 +89,7 @@ _align_gotoh_trace(TAlign& align,
 				if (tv != tvOld) {
 					if (tvOld == Vertical) --len2; 
 					else --len1;
-					_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
+					_alignTracePrint(align, str, id1, len1, id2, len2, ++segLen, tvOld);
 					tvOld = tv; segLen = 0;
 				} else {
 					++segLen;
@@ -97,9 +97,9 @@ _align_gotoh_trace(TAlign& align,
 				}
 			} else if(tv == Horizontal) {
 				if (tv != tvOld) {
-					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 					if ((nextTraceValue >> 2) & 1) {
-						_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
+						_alignTracePrint(align, str, id1, --len1, id2, len2, (TSize) 1,  Horizontal);
 						tv =  Diagonal; segLen = 0;
 					} else {
 						tvOld = tv; segLen = 1;
@@ -111,9 +111,9 @@ _align_gotoh_trace(TAlign& align,
 				}
 			} else if (tv == Vertical) {
 				if (tv != tvOld) {
-					_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+					_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 					if ((nextTraceValue >> 3) & 1) {
-						_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
+						_alignTracePrint(align, str, id1, len1, id2, --len2, (TSize) 1,  Vertical);
 						tv =  Diagonal; segLen = 0;
 					} else {
 						tvOld = tv; segLen = 1;
@@ -127,12 +127,12 @@ _align_gotoh_trace(TAlign& align,
 		} while ((len1 != 0) && (len2 !=0));
 
 		// Process left-overs
-		if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+		if (segLen) _alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 	}
 
 	// Handle the remaining sequence
-	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1,  Horizontal);
-	else if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2,  Vertical);
+	if (len1 != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1,  Horizontal);
+	else if (len2 != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2,  Vertical);
 }
 
 
@@ -141,7 +141,7 @@ _align_gotoh_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TValPair, typename TIndexPair, typename TAlignConfig>
 inline typename Value<TScore>::Type
-_align_gotoh(TTrace& trace,	     
+_alignGotoh(TTrace& trace,	     
 			 TStringSet const& str,
 			 TScore const & sc,
 			 TValPair& overallMaxValue,
@@ -180,8 +180,8 @@ _align_gotoh(TTrace& trace,
 	// Classical DP
 	typedef typename Iterator<TTrace, Standard>::Type TTraceIter;
 	TTraceIter it = begin(trace, Standard() );
-	overallMaxValue[0] = InfimumValue<TScoreValue>::VALUE;
-	overallMaxValue[1] = InfimumValue<TScoreValue>::VALUE;
+	overallMaxValue[0] = MinValue<TScoreValue>::VALUE;
+	overallMaxValue[1] = MinValue<TScoreValue>::VALUE;
 	overallMaxIndex[0] = len1;
 	overallMaxIndex[1] = len2;
 	
@@ -282,9 +282,9 @@ _globalAlignment(TAlign& align,
 	TSize overallMaxIndex[2];
 
 	// Create the trace
-	TScoreValue maxScore = _align_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());
+	TScoreValue maxScore = _alignGotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());
 	// Follow the trace and create the graph
-	_align_gotoh_trace(align, str, trace, overallMaxIndex, initialDir);
+	_alignGotohTrace(align, str, trace, overallMaxIndex, initialDir);
 
 	return maxScore;
 }
@@ -306,7 +306,7 @@ _globalAlignment(TStringSet const& str,
 	unsigned char initialDir;
 	TScoreValue overallMaxValue[2];
 	TSize overallMaxIndex[2];
-	return _align_gotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());	
+	return _alignGotoh(trace, str, sc, overallMaxValue, overallMaxIndex, initialDir, TAlignConfig());	
 }
 
 

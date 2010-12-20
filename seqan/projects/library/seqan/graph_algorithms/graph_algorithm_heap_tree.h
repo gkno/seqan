@@ -324,7 +324,7 @@ heapSort(TITBegin itBeg,
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TKey, typename TValue, typename TPredicate>
-struct __MyHeapCompare :
+struct LessPairI2WithFunctor :
 	public ::std::unary_function<Pair<TKey, TValue>, bool>
 {
 	inline bool 
@@ -345,7 +345,7 @@ public:
 	String<Pair<TKey, TValue> > data_value;
 	std::map<TKey, TSize> data_map;
 	TSize data_heap_size;
-	__MyHeapCompare<TKey, TValue, TPredicate> data_predicate;
+	LessPairI2WithFunctor<TKey, TValue, TPredicate> data_predicate;
 	
 
 	//////////////////////////////////////////////////////////////////////////////

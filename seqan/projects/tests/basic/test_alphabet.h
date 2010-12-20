@@ -429,18 +429,18 @@ void TestExtremeValuesSigned()
 
 /*
 	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
-	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (double)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
-	::std::cout << minVal << " == " << InfimumValue<T>::VALUE << "(" << (double)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+	::std::cout << maxVal << " == " << MaxValue<T>::VALUE << "(" << (double)MaxValue<T>::VALUE << ")  " << maxValue<T>() << ::std::endl;
+	::std::cout << minVal << " == " << MinValue<T>::VALUE << "(" << (double)MinValue<T>::VALUE << ")  " << minValue<T>() << ::std::endl;
 */
 
-	bool isSigned = TYPECMP< typename _MakeSigned<T>::Type, T >::VALUE;
+	bool isSigned = IsSameType< typename MakeSigned_<T>::Type, T >::VALUE;
 	SEQAN_ASSERT(isSigned);
 
-	SEQAN_ASSERT_EQ(supremumValue<T>(), SupremumValue<T>::VALUE);
-	SEQAN_ASSERT_EQ(infimumValue<T>(), InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(maxValue<T>(), MaxValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(minValue<T>(), MinValue<T>::VALUE);
 
-	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
-	long double minDelta = minVal - (long double)InfimumValue<T>::VALUE;
+	long double maxDelta = maxVal - MaxValue<T>::VALUE;
+	long double minDelta = minVal - (long double)MinValue<T>::VALUE;
 	SEQAN_ASSERT(maxDelta <= maxVal/1000);
 	SEQAN_ASSERT(-maxVal/1000 <= maxDelta);
 	SEQAN_ASSERT(minDelta <= maxVal/1000);
@@ -457,20 +457,20 @@ void TestExtremeValuesUnsigned()
 
 /*
 	::std::cout << ::std::endl << "Max/Min of " << typeid(T).name() << ::std::endl;
-	::std::cout << maxVal << " == " << SupremumValue<T>::VALUE << "(" << (double)SupremumValue<T>::VALUE << ")  " << supremumValue<T>() << ::std::endl;
-	::std::cout << 0 << " == " << InfimumValue<T>::VALUE << "(" << (double)InfimumValue<T>::VALUE << ")  " << infimumValue<T>() << ::std::endl;
+	::std::cout << maxVal << " == " << MaxValue<T>::VALUE << "(" << (double)MaxValue<T>::VALUE << ")  " << maxValue<T>() << ::std::endl;
+	::std::cout << 0 << " == " << MinValue<T>::VALUE << "(" << (double)MinValue<T>::VALUE << ")  " << minValue<T>() << ::std::endl;
 */
 
-	bool isUnsigned = TYPECMP< typename _MakeUnsigned<T>::Type, T >::VALUE;
+	bool isUnsigned = IsSameType< typename MakeUnsigned_<T>::Type, T >::VALUE;
 	SEQAN_ASSERT(isUnsigned);
 
-	SEQAN_ASSERT_EQ(supremumValue<T>(), SupremumValue<T>::VALUE);
-	SEQAN_ASSERT_EQ(infimumValue<T>(), InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(maxValue<T>(), MaxValue<T>::VALUE);
+	SEQAN_ASSERT_EQ(minValue<T>(), MinValue<T>::VALUE);
 
-	long double maxDelta = maxVal - SupremumValue<T>::VALUE;
+	long double maxDelta = maxVal - MaxValue<T>::VALUE;
 	SEQAN_ASSERT_LEQ(maxDelta, maxVal/1000);
 	SEQAN_ASSERT_LEQ(-maxVal/1000, maxDelta);
-	SEQAN_ASSERT_EQ((T)0, InfimumValue<T>::VALUE);
+	SEQAN_ASSERT_EQ((T)0, MinValue<T>::VALUE);
 }
 
 SEQAN_DEFINE_TEST(TestExtremeValues) {

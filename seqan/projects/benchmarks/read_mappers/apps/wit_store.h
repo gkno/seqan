@@ -259,22 +259,22 @@ void loadWitFile(WitStore & store,
         mateNo = -1;
 
         // Read line.
-        _parse_readIdentifier(fstrm, readName, c);
+        _parseReadIdentifier(fstrm, readName, c);
         //std::cout << "readName " << readName << ", " << mateNo << std::endl;
         if (readName[length(readName) - 2] == mateSeparator) {
           mateNo = readName[length(readName) - 1] - '0' - mateStart;
           resize(readName, length(readName) - 2);
         }
-        _parse_skipWhitespace(fstrm, c);
-        distance = _parse_readNumber(fstrm, c);
-        _parse_skipWhitespace(fstrm, c);
-        _parse_readIdentifier(fstrm, contigName, c);
-        _parse_skipWhitespace(fstrm, c);
-        isForward = (_parse_readChar(fstrm, c) == 'F');
-        _parse_skipWhitespace(fstrm, c);
-        firstPos = _parse_readNumber(fstrm, c);
-        _parse_skipWhitespace(fstrm, c);
-        lastPos = _parse_readNumber(fstrm, c);
+        _parseSkipWhitespace(fstrm, c);
+        distance = _parseReadNumber(fstrm, c);
+        _parseSkipWhitespace(fstrm, c);
+        _parseReadIdentifier(fstrm, contigName, c);
+        _parseSkipWhitespace(fstrm, c);
+        isForward = (_parseReadChar(fstrm, c) == 'F');
+        _parseSkipWhitespace(fstrm, c);
+        firstPos = _parseReadNumber(fstrm, c);
+        _parseSkipWhitespace(fstrm, c);
+        lastPos = _parseReadNumber(fstrm, c);
         _parse_skipLine(fstrm, c);
 
         // Insert record into read store.

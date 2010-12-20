@@ -393,7 +393,7 @@ void constructLaganChain(
     typedef typename Position<TSeed>::Type TPosition;
 	typedef SeedSet<Simple, Unordered, DefaultSeedSetConfigScore> TSeedSet;
     // typedef typename Value<TSeedSet>::Type TSeed;
-	typedef Index<TSequence, Index_QGram<SimpleShape > > TQGramIndex;
+	typedef Index<TSequence, IndexQGram<SimpleShape > > TQGramIndex;
 	typedef Finder<TQGramIndex> TFinder;
 
 	TSeedSet seedSet;
@@ -420,7 +420,7 @@ void constructLaganChain(
 				TPosition pos1 = beginPosition(sequence1) + position(finder);
                 TSeed seed(pos0, pos1, q);
                 setScore(seed, q * scoreMatch(scoringScheme));
-                // std::cerr << "Adding " << seed << ", score == " << getScore(seed) << std::endl;
+                // std::cerr << "Adding " << seed << ", score == " << _getMatchScore(seed) << std::endl;
                 if (addSeed(seedSet, seed, 0u, Nothing(), scoringScheme/*TODO(holtgrew): unnecessary!*/, Nothing(), Nothing(), Merge())) {
                     // std::cerr << "  by merging" << std::endl;
                     continue;

@@ -30,7 +30,7 @@ void daveSuessSauer(FragmentStore<> &store, std::ofstream &fasta_file_stream, co
 	for (unsigned i = 0; i < half; ++i)
 		append(readSeq, infix(store.contigStore[contigId].seq, read.positions[i], read.positions[i+half]));
 	if (read.strand == '-')
-		reverseComplementInPlace(readSeq);
+		reverseComplement(readSeq);
 	stringstream sstr;
 	sstr << read.readId;
 	CharString id = sstr.str();

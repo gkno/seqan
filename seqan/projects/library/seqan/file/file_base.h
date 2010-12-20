@@ -144,23 +144,23 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     //////////////////////////////////////////////////////////////////////////////
     // result type of asynch. functions
-    // you have to call release(aRequest<T>) after a finished *event based* transfer
-	struct aDummyRequest {};
+    // you have to call release(AsyncRequest<T>) after a finished *event based* transfer
+	struct AsyncDummyRequest {};
 
 /**
-.Class.aRequest:
+.Class.AsyncRequest:
 ..cat:Input/Output
 ..summary:Associated with an asynchronous I/O request.
-..signature:aRequest<TFile>
+..signature:AsyncRequest<TFile>
 ..param.TFile:A File type.
 ..remarks:This structure is used to identify asynchronous requests after their initiation.
 ..include:seqan/file.h
 */
 
     template < typename T >
-    struct aRequest
+    struct AsyncRequest
     {
-        typedef aDummyRequest Type;
+        typedef AsyncDummyRequest Type;
     };
 /*
     //////////////////////////////////////////////////////////////////////////////
@@ -478,22 +478,22 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 	{
         typename Size<File<TSpec> >::Type old_pos = tell(me);
         seek(me, new_length, SEEK_BEGIN);
-        setEOF(me);
+        setEof(me);
         seek(me, old_pos, SEEK_BEGIN);
     }
 
 /**
-.Function.setEOF:
+.Function.setEof:
 ..summary:Sets the file end to the current pointer.
 ..cat:Input/Output
-..signature:setEOF(file)
+..signature:setEof(file)
 ..param.file:A File object.
 ...type:Class.File
 ..include:seqan/file.h
 */
 
     template < typename TSpec >
-    inline bool setEOF(File<TSpec> &/*me*/) 
+    inline bool setEof(File<TSpec> &/*me*/) 
 	{ 
 		return true; 
 	}
@@ -508,8 +508,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 /*
     template < typename File, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File>::Type
-    aread(File & me, TValue *memPtr, TSize const count,
+    inline typename AsyncRequest<File>::Type
+    asyncRead(File & me, TValue *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         result = read(me, memPtr, count);
@@ -519,8 +519,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
     template < typename File, typename TValue, typename TSize,
                typename aCallback, typename aHint >
-    inline typename aRequest<File>::Type
-    awrite(File & me, TValue const *memPtr, TSize const count,
+    inline typename AsyncRequest<File>::Type
+    asyncWrite(File & me, TValue const *memPtr, TSize const count,
         aCallback* cb, aHint* hint)
     {
         write(me, memPtr, count);
@@ -530,7 +530,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File>::Type
+    inline typename AsyncRequest<File>::Type
     areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
@@ -541,7 +541,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aCallback, typename aHint >
-    inline typename aRequest<File>::Type
+    inline typename AsyncRequest<File>::Type
     awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aCallback* cb, aHint* hint)
     {
@@ -556,8 +556,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     template < typename File, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File>::Type
-    aread(File & me, TValue *memPtr, TSize const count,
+    inline typename AsyncRequest<File>::Type
+    asyncRead(File & me, TValue *memPtr, TSize const count,
         aEvent &event)
     {
         read(me, memPtr, count);
@@ -567,8 +567,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
     template < typename File, typename TValue, typename TSize,
                typename aEvent >
-    inline typename aRequest<File>::Type
-    awrite(File & me, TValue const *memPtr, TSize const count,
+    inline typename AsyncRequest<File>::Type
+    asyncWrite(File & me, TValue const *memPtr, TSize const count,
         aEvent &event)
     {
         write(me, memPtr, count);
@@ -578,7 +578,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File>::Type
+    inline typename AsyncRequest<File>::Type
     areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
@@ -589,7 +589,7 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
     
     template < typename File, typename TValue, typename TSize, typename TPos,
                typename aEvent >
-    inline typename aRequest<File>::Type
+    inline typename AsyncRequest<File>::Type
     awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
         aEvent &event)
     {
@@ -613,16 +613,16 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be read.
 ..param.fileOfs:The absolute file position in bytes measured from the beginning.
 ..param.request:Reference to a structure that will be associated with this asynchronous request.
-...type:Class.aRequest
+...type:Class.AsyncRequest
 ..returns:A $bool$ which is $true$ on success.
 ..include:seqan/file.h
 */
 
     template < typename File, typename TValue, typename TSize, typename TPos,
-               typename aRequest >
+               typename AsyncRequest >
     inline bool 
 	areadAt(File & me, TValue *memPtr, TSize const count, TPos const fileOfs,
-        aRequest &)
+        AsyncRequest &)
     {
         return readAt(me, memPtr, count, fileOfs);
     }
@@ -638,16 +638,16 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..param.count:The amount of records to be written.
 ..param.fileOfs:The absolute file position in bytes measured from the beginning.
 ..param.request:Reference to a structure that will be associated with this asynchronous request.
-...type:Class.aRequest
+...type:Class.AsyncRequest
 ..returns:A $bool$ which is $true$ on success.
 ..include:seqan/file.h
 */
 
     template < typename File, typename TValue, typename TSize, typename TPos,
-               typename aRequest >
+               typename AsyncRequest >
     inline bool
 	awriteAt(File & me, TValue const *memPtr, TSize const count, TPos const fileOfs,
-        aRequest &)
+        AsyncRequest &)
     {
         return writeAt(me, memPtr, count, fileOfs);
     }
@@ -677,8 +677,8 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..summary:Waits for an asynchronous request to complete.
 ..cat:Input/Output
 ..signature:waitFor(request[, timeout_millis])
-..param.request:Reference to an aRequest object.
-...type:Class.aRequest
+..param.request:Reference to an AsyncRequest object.
+...type:Class.AsyncRequest
 ..param.timeout_millis:Timout value in milliseconds.
 ...remarks:A value of 0 can be used to test for completion without waiting.
 ...default:Infinity.
@@ -687,20 +687,20 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..include:seqan/file.h
 */
 
-    inline bool waitFor(aDummyRequest &) 
+    inline bool waitFor(AsyncDummyRequest &) 
 	{ 
 		return true; 
 	}
 
 	template < typename TTime >
-    inline bool waitFor(aDummyRequest &, TTime) 
+    inline bool waitFor(AsyncDummyRequest &, TTime) 
 	{ 
 		return true; 
 	}
 
 	// deprecated
-	template < typename TSpec, typename aRequest >
-    inline void release(File<TSpec> &, aRequest &) 
+	template < typename TSpec, typename AsyncRequest >
+    inline void release(File<TSpec> &, AsyncRequest &) 
 	{
 	}
 
@@ -711,14 +711,14 @@ Chained Files should be used for file systems or $TFile$ types that don't suppor
 ..signature:cancel(file, request)
 ..param.file:A File object.
 ...type:Class.File
-..param.request:Reference to an aRequest object.
-...type:Class.aRequest
+..param.request:Reference to an AsyncRequest object.
+...type:Class.AsyncRequest
 ..returns:A $bool$ which is $true$ on success.
 ..include:seqan/file.h
 */
 
-    template < typename TSpec, typename aRequest >
-    inline bool cancel(File<TSpec> &, aRequest &) 
+    template < typename TSpec, typename AsyncRequest >
+    inline bool cancel(File<TSpec> &, AsyncRequest &) 
 	{
 		return true; 
 	}

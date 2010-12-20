@@ -41,8 +41,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pattern.param.TSpec.type:Spec.Horspool
 
-struct _Horspool;
-typedef Tag<_Horspool> Horspool;
+struct Horspool_;
+typedef Tag<Horspool_> Horspool;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -120,7 +120,7 @@ inline void _patternInit (Pattern<TNeedle, Horspool> &) {}
 
 template <typename TFinder, typename TNeedle2>
 bool
-find_horspool(TFinder & finder, 
+_findHorspool(TFinder & finder, 
 			  Pattern<TNeedle2, Horspool> & me,
 			  bool find_first)
 {
@@ -284,7 +284,7 @@ struct FileReader;
 
 template <typename TValue, typename TFormat, typename TFile, typename FileReaderTSpec, typename TFinderSpec, typename TNeedle2>
 bool
-find_horspool(Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > & finder, 
+_findHorspool(Finder<String<TValue, FileReader<TFormat, TFile, FileReaderTSpec> >, TFinderSpec > & finder, 
 			  Pattern<TNeedle2, Horspool> & me,
 			  bool find_first)
 {
@@ -350,7 +350,7 @@ Mit "the main loop can be 'unrolled'" ist dort naemlich
 
 template <typename TFinder, typename TNeedle2>
 bool
-find_horspool(TFinder & finder, 
+_findHorspool(TFinder & finder, 
 	Pattern<TNeedle2, Horspool> & me,
 	bool find_first)
 {
@@ -435,7 +435,7 @@ SEQAN_CHECKPOINT
 
 	SEQAN_ASSERT(length(needle(me)) > 0)
 
-	return find_horspool(finder, me, find_first);
+	return _findHorspool(finder, me, find_first);
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -54,15 +54,15 @@ SEQAN_CHECKPOINT
 
     fill(finder.forbidden, height * diagonalWidth, false);
 
-	finder.bestEndPos = infimumValue<typename TFinder::TMatrixPosition>();
-	finder.bestBeginPos = infimumValue<typename TFinder::TMatrixPosition>();
+	finder.bestEndPos = minValue<typename TFinder::TMatrixPosition>();
+	finder.bestBeginPos = minValue<typename TFinder::TMatrixPosition>();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TScoreValue, typename TStringSet, typename TScore, typename TDiagonal>
 inline Pair<Pair<TDiagonal> >
-_align_banded_sw_trace(LocalAlignmentFinder<TScoreValue> & finder,
+_alignBandedSmithWatermanTrace(LocalAlignmentFinder<TScoreValue> & finder,
                        TStringSet const& str,
                        TScore& sc,
                        TDiagonal diagL,
@@ -106,8 +106,8 @@ SEQAN_CHECKPOINT
     if ((actualCol == 0) || (actualRow == 0)) 
         return Pair<Pair<TDiagonal> >();
 
-	if (actualCol < len1) _align_trace_print(finder.trace, str, id1, actualCol, id2, actualRow, len1 - actualCol, Horizontal);
-	if (actualRow < len2) _align_trace_print(finder.trace, str, id1, actualCol, id2, actualRow, len2 - actualRow, Vertical);
+	if (actualCol < len1) _alignTracePrint(finder.trace, str, id1, actualCol, id2, actualRow, len1 - actualCol, Horizontal);
+	if (actualRow < len2) _alignTracePrint(finder.trace, str, id1, actualCol, id2, actualRow, len2 - actualRow, Vertical);
 	
     TTraceValue traceValue = Stop;
     TTraceValue nextTraceValue = Horizontal;
@@ -141,14 +141,14 @@ SEQAN_CHECKPOINT
         if (traceValue == nextTraceValue) {
             ++segLen;
         } else {
-            _align_trace_print(finder.trace, str, id1, actualCol, id2, actualRow, segLen, traceValue);
+            _alignTracePrint(finder.trace, str, id1, actualCol, id2, actualRow, segLen, traceValue);
             segLen = 1;
         }
     }
     
 	// Handle the remaining sequence
-	if (actualCol != 0) _align_trace_print(finder.trace, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol, Horizontal);
-	if (actualRow != 0) _align_trace_print(finder.trace, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow, Vertical);
+	if (actualCol != 0) _alignTracePrint(finder.trace, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) actualCol, Horizontal);
+	if (actualRow != 0) _alignTracePrint(finder.trace, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) actualRow, Vertical);
 
     goNext(matIt, 1); // assumes that each trace ends with a diagonal
     finder.bestBeginPos = position(matIt);
@@ -160,7 +160,7 @@ SEQAN_CHECKPOINT
 
 template<typename TScoreValue, typename TStringSet, typename TScore, typename TDiagonal>
 inline void
-_align_banded_sw_declump(LocalAlignmentFinder<TScoreValue>& finder,
+_alignBandedSmithWatermanDeclump(LocalAlignmentFinder<TScoreValue>& finder,
                  TStringSet const& str,
                  TScore const& sc,
                  TScoreValue const cutoff,
@@ -319,7 +319,7 @@ SEQAN_CHECKPOINT
 
 template <typename TScoreValue, typename TStringSet, typename TScore, typename TDiagonal>
 inline TScoreValue
-_align_banded_sw(LocalAlignmentFinder<TScoreValue>& finder,
+_alignBandedSmithWaterman(LocalAlignmentFinder<TScoreValue>& finder,
                  TStringSet const& str,
                  TScore const& sc,
                  TScoreValue const cutoff,
@@ -450,14 +450,14 @@ _localAlignment(LocalAlignmentFinder<TScoreValue> & finder,
                 BandedWatermanEggert) {
 SEQAN_CHECKPOINT
     // Fill the matrix
-    TScoreValue maxScore = _align_banded_sw(finder, str, sc, cutoff, diag1, diag2);
+    TScoreValue maxScore = _alignBandedSmithWaterman(finder, str, sc, cutoff, diag1, diag2);
     if (maxScore < cutoff) return 0;
 
     // Follow the matrix back from max entry and create a trace path
-    Pair<Pair<TDiagonal> > alignmentPositions = _align_banded_sw_trace(finder, str, sc, diag1, diag2);
+    Pair<Pair<TDiagonal> > alignmentPositions = _alignBandedSmithWatermanTrace(finder, str, sc, diag1, diag2);
 
     // Create the alignment following the trace path
-	_pump_trace_2_Align(align, finder.trace);
+	_pumpTraceToAlign(align, finder.trace);
     _finishAlign(align, alignmentPositions.i1.i1, alignmentPositions.i1.i2, alignmentPositions.i2.i1, alignmentPositions.i2.i2);
 
 	pop(finder.pQ);
@@ -477,19 +477,19 @@ _localAlignmentNext(LocalAlignmentFinder<TScoreValue> & finder,
                 BandedWatermanEggert) {
 SEQAN_CHECKPOINT
     // Declump the matrix and find new maximum score
-    _align_banded_sw_declump(finder, str, sc, cutoff, diag1, diag2);
+    _alignBandedSmithWatermanDeclump(finder, str, sc, cutoff, diag1, diag2);
     typename LocalAlignmentFinder<TScoreValue>::TMatrixPosition nextBestEnd;
-	nextBestEnd = _get_next_best_end_position(finder, cutoff);
+	nextBestEnd = _getNextBestEndPosition(finder, cutoff);
 	if(nextBestEnd==0)
 		return 0;
     TScoreValue maxScore = getValue(finder.matrix, nextBestEnd);
 	if(maxScore == 0) return 0;
 
     // Follow the trace matrix and create a trace path
-    Pair<Pair<TDiagonal> > alignmentPositions = _align_banded_sw_trace(finder, str, sc, diag1, diag2);
+    Pair<Pair<TDiagonal> > alignmentPositions = _alignBandedSmithWatermanTrace(finder, str, sc, diag1, diag2);
 
     // Create the alignment following the trace path
-	_pump_trace_2_Align(align, finder.trace);
+	_pumpTraceToAlign(align, finder.trace);
     _finishAlign(align, alignmentPositions.i1.i1, alignmentPositions.i1.i2, alignmentPositions.i2.i1, alignmentPositions.i2.i2);
 
     return maxScore;

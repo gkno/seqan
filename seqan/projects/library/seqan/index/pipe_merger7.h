@@ -28,25 +28,25 @@ namespace SEQAN_NAMESPACE_MAIN
 //{
 
 	template <int I, typename T = void>
-	struct _SkewShift;
+	struct SkewShift_;
 
 	template <int I, typename T = void>
-	struct _SkewNIndx;
+	struct SkewNIndex_;
 
 
 	template <typename T>
-	struct _SkewShift<7, T> {
+	struct SkewShift_<7, T> {
 		static const unsigned VALUE[7][7];
 	};
 
 	template <typename T>
-	struct _SkewNIndx<7, T> {
+	struct SkewNIndex_<7, T> {
 		static const unsigned VALUE[7][7];
 	};
 
 
 	template <typename T>
-	const unsigned _SkewShift<7, T>::VALUE[7][7] =
+	const unsigned SkewShift_<7, T>::VALUE[7][7] =
 								  {{0,6,5,6,3,3,5},
                                    {6,0,0,6,0,4,4},
                                    {5,0,0,1,0,1,5},
@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	template <typename T>
-	const unsigned _SkewNIndx<7, T>::VALUE[7][7] =
+	const unsigned SkewNIndex_<7, T>::VALUE[7][7] =
 								  {{0,0,0,0,0,1,2},
                                    {0,0,0,0,1,1,2},
                                    {0,1,1,1,1,2,2},
@@ -97,13 +97,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			                   const SkewDCStream<TValue> &b) const 
         {
             typedef typename TValue::T2::T SizeType;
-            int shft = _SkewShift<7>::VALUE[a.stream][b.stream];
+            int shft = SkewShift_<7>::VALUE[a.stream][b.stream];
             for(int i = 0; i < shft; ++i) {
                 if (a.i.i3[i] < b.i.i3[i]) return false;
                 if (a.i.i3[i] > b.i.i3[i]) return true;
             }
-            SizeType na = a.i.i2[_SkewNIndx<7>::VALUE[a.stream][shft]];
-            SizeType nb = b.i.i2[_SkewNIndx<7>::VALUE[b.stream][shft]];
+            SizeType na = a.i.i2[SkewNIndex_<7>::VALUE[a.stream][shft]];
+            SizeType nb = b.i.i2[SkewNIndex_<7>::VALUE[b.stream][shft]];
             if (na < nb) return false;
             if (na > nb) return true;
 
@@ -126,13 +126,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			                   const SkewDCStream<Triple<T1,T2,T3,Compressed> > &b) const 
         {
             typedef typename T2::T SizeType;
-            int shft = _SkewShift<7>::VALUE[a.stream][b.stream];
+            int shft = SkewShift_<7>::VALUE[a.stream][b.stream];
             typename T3::CT mask = ~((1 << ((_size - shft) * T3::bitSize)) - 1);
 
             if ((a.i.i3.i & mask) < (b.i.i3.i & mask)) return false;
             if ((a.i.i3.i & mask) > (b.i.i3.i & mask)) return true;
-            SizeType na = a.i.i2[_SkewNIndx<7>::VALUE[a.stream][shft]];
-            SizeType nb = b.i.i2[_SkewNIndx<7>::VALUE[b.stream][shft]];
+            SizeType na = a.i.i2[SkewNIndex_<7>::VALUE[a.stream][shft]];
+            SizeType nb = b.i.i2[SkewNIndex_<7>::VALUE[b.stream][shft]];
             if (na < nb) return false;
             if (na > nb) return true;
 

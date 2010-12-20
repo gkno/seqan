@@ -81,7 +81,7 @@ _isClumping(Nothing&,
 
 template <typename TAlign, typename TStringSet, typename TTrace, typename TVal, typename TIndexPair, typename TForbidden>
 inline void
-_align_smith_waterman_trace(TAlign& align,
+_alignSmithWatermanTrace(TAlign& align,
 							TStringSet const& str,
 							TTrace const& trace,
 							TVal const initialDir,
@@ -103,8 +103,8 @@ _align_smith_waterman_trace(TAlign& align,
 	if ((indexPair[0] == 0) || (indexPair[1] == 0)) return;
 	TSize numCols = length(str[0]);
 	TSize numRowsOrig = length(str[1]);
-	if (len1 < numCols) _align_trace_print(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
-	if (len2 < numRowsOrig) _align_trace_print(align, str, id1, len1, id2, len2, numRowsOrig - len2, Vertical);
+	if (len1 < numCols) _alignTracePrint(align, str, id1, len1, id2, len2, numCols - len1, Horizontal);
+	if (len2 < numRowsOrig) _alignTracePrint(align, str, id1, len1, id2, len2, numRowsOrig - len2, Vertical);
 	TSize numRows = (numRowsOrig >> 1) + (numRowsOrig & 1);
 	
 	
@@ -114,10 +114,10 @@ _align_smith_waterman_trace(TAlign& align,
 	TTraceValue tv = Diagonal;
 	if (initialDir == Diagonal) tv = (nextTraceValue & 3);
 	else if (initialDir == Horizontal) {
-		if ((nextTraceValue >> 2) & 1) _align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+		if ((nextTraceValue >> 2) & 1) _alignTracePrint(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
 		else tv = Horizontal;
 	} else if (initialDir == Vertical) {
-		if ((nextTraceValue >> 3) & 1) _align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+		if ((nextTraceValue >> 3) & 1) _alignTracePrint(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
 		else tv = Vertical;
 	}
 	TSize segLen = 0;
@@ -140,7 +140,7 @@ _align_smith_waterman_trace(TAlign& align,
 			if (tv != tvOld) {
 				if (tvOld == Vertical) --len2;
 				else --len1;
-				_align_trace_print(align, str, id1, len1, id2, len2, ++segLen, tvOld);
+				_alignTracePrint(align, str, id1, len1, id2, len2, ++segLen, tvOld);
 				tvOld = tv; segLen = 0;
 			} else {
 				++segLen;
@@ -148,9 +148,9 @@ _align_smith_waterman_trace(TAlign& align,
 			}
 		} else if (tv == Horizontal) {
 			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+				_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 				if ((nextTraceValue >> 2) & 1) {
-					_align_trace_print(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
+					_alignTracePrint(align, str, id1, --len1, id2, len2, (TSize) 1, Horizontal);
 					tv = Diagonal; segLen = 0;
 				} else {
 					tvOld = tv; segLen = 1;
@@ -162,9 +162,9 @@ _align_smith_waterman_trace(TAlign& align,
 			}
 		} else if (tv == Vertical) {
 			if (tv != tvOld) {
-				_align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+				_alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 				if ((nextTraceValue >> 3) & 1) {
-					_align_trace_print(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
+					_alignTracePrint(align, str, id1, len1, id2, --len2, (TSize) 1, Vertical);
 					tv = Diagonal; segLen = 0;
 				} else {
 					tvOld = tv; segLen = 1;
@@ -177,11 +177,11 @@ _align_smith_waterman_trace(TAlign& align,
 		}
 	} while ((len1 != 0) && (len2 !=0));
 	// Process left-overs
-	if (segLen) _align_trace_print(align, str, id1, len1, id2, len2, segLen, tvOld);
+	if (segLen) _alignTracePrint(align, str, id1, len1, id2, len2, segLen, tvOld);
 
 	// Handle the remaining sequence
-	if (len1 != 0) _align_trace_print(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
-	if (len2 != 0) _align_trace_print(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
+	if (len1 != 0) _alignTracePrint(align, str, (TId) id1, (TSize) 0, (TId) 0, (TSize) 0, (TSize) len1, Horizontal);
+	if (len2 != 0) _alignTracePrint(align, str, (TId) 0, (TSize) 0, (TId) id2, (TSize) 0, (TSize) len2, Vertical);
 }
 
 
@@ -191,7 +191,7 @@ _align_smith_waterman_trace(TAlign& align,
 
 template <typename TTrace, typename TStringSet, typename TScore, typename TIndexPair, typename TForbidden>
 inline typename Value<TScore>::Type
-_align_smith_waterman(TTrace& trace,
+_alignSmithWaterman(TTrace& trace,
 					  TStringSet const& str,
 					  TScore const & sc,
 					  typename Value<TTrace>::Type& initialDir,
@@ -344,9 +344,9 @@ _localAlignment(TAlign& align,
 	unsigned char initialDir;
 
 	// Create the trace
-	maxScore = _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
+	maxScore = _alignSmithWaterman(trace, str, sc, initialDir, indexPair, forbidden);	
 	// Follow the trace and create the graph
-	_align_smith_waterman_trace(align, str, trace, initialDir, indexPair, forbidden);
+	_alignSmithWatermanTrace(align, str, trace, initialDir, indexPair, forbidden);
 	
 	return maxScore;
 }
@@ -366,7 +366,7 @@ _localAlignment(TStringSet const& str,
 	// Trace
 	String<unsigned char> trace;
 	unsigned char initialDir;
-	return _align_smith_waterman(trace, str, sc, initialDir, indexPair, forbidden);	
+	return _alignSmithWaterman(trace, str, sc, initialDir, indexPair, forbidden);	
 }
 
 

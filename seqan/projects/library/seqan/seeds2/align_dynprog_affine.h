@@ -48,7 +48,7 @@ namespace seqan {
 
 template <typename TScoreValue, typename TSequence>
 inline void
-_align_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Gotoh const &)
+_alignResizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -61,7 +61,7 @@ _align_resizeMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0
 
 template <typename TScoreValue, bool BEGIN1_FREE, bool BEGIN0_FREE, bool END1_FREE, bool END0_FREE>
 inline void
-_align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignInitGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const scoringScheme, AlignConfig<BEGIN1_FREE, BEGIN0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -76,7 +76,7 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
     SEQAN_ASSERT_NOT_MSG(BEGIN1_FREE, "Free begin gaps are not supported in seeds align module yet.");
 
     // We do not take the real minimum here because of overflows.
-    TScoreValue inf = InfimumValue<TScoreValue>::VALUE / 2;
+    TScoreValue inf = MinValue<TScoreValue>::VALUE / 2;
     // Get shortcuts to gap related scores.
     TScoreValue gapOpenScore = scoreGapOpen(scoringScheme);
     TScoreValue gapExtendScore = scoreGapExtend(scoringScheme);
@@ -128,7 +128,7 @@ _align_initGutter(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> co
 
 template <typename TScoreValue, typename TDiagonal, typename TOverlap>
 inline void
-_align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 3> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
+_alignInitGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, Simple> const & scoringScheme, TDiagonal lowerDiagonal, TDiagonal upperDiagonal, Matrix<TScoreValue, 3> /*const*/ & otherMatrix, TOverlap overlap0, TOverlap overlap1, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -174,8 +174,8 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, 
         }
         // Init the rest of the left gutter with infima.
         for (TPosition i = overlap0 + 1, iend = length(matrix, 0); i < iend; ++i, goNext(itM, 0), goNext(itIB, 0)) {
-            *itM = InfimumValue<TScoreValue>::VALUE / 2;
-            *itIB = InfimumValue<TScoreValue>::VALUE / 2;
+            *itM = MinValue<TScoreValue>::VALUE / 2;
+            *itIB = MinValue<TScoreValue>::VALUE / 2;
         }
     }
 
@@ -195,8 +195,8 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, 
         }
         // Init the rest of the top gutter with infima.
         for (TPosition i = overlap1 + 1, iend = length(matrix, 1); i < iend; ++i, goNext(itM, 1), goNext(itIA, 1)) {
-            *itM = InfimumValue<TScoreValue>::VALUE / 2;
-            *itIA = InfimumValue<TScoreValue>::VALUE / 2;
+            *itM = MinValue<TScoreValue>::VALUE / 2;
+            *itIA = MinValue<TScoreValue>::VALUE / 2;
         }
     }
 }
@@ -204,7 +204,7 @@ _align_initGutterFromBanded(Matrix<TScoreValue, 3> & matrix, Score<TScoreValue, 
 
 template <typename TScoreValue, typename TSequence>
 inline void
-_align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, Gotoh const &)
+_alignFillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, TSequence const & sequence1, Score<TScoreValue, Simple> const & scoringScheme, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 
@@ -278,7 +278,7 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
             std::cerr << ",-- *** filled alignment matrix " << k << std::endl;
             for (unsigned i = 0; i < length(matrix, 0); ++i) {
                 for (unsigned j = 0; j < length(matrix, 1); ++j) {
-                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                    if (value(matrix, i, j, k) <= MinValue<int>::VALUE / 4)
                         std::cerr << "\tinf";
                     else
                         std::cerr << "\t" << value(matrix, i, j, k);
@@ -297,7 +297,7 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
 // best score.
 template <typename TAlignmentIterator, typename TSequenceIterator, typename TPosition, typename TScoreValue, typename TScoringScheme, typename TOverlap, bool START0_FREE, bool START1_FREE, bool END0_FREE, bool END1_FREE>
 TScoreValue
-_align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap lowerRightOverlap0, TOverlap lowerRightOverlap1, TOverlap upperLeftOverlap0, TOverlap upperLeftOverlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
+_alignTraceback(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignmentIt1, TSequenceIterator & sourceIt0, TSequenceIterator & sourceIt1, TPosition & finalPos0, TPosition & finalPos1, Matrix<TScoreValue, 3> /*const*/ & matrix, TScoringScheme const & scoringScheme, TOverlap lowerRightOverlap0, TOverlap lowerRightOverlap1, TOverlap upperLeftOverlap0, TOverlap upperLeftOverlap1, bool goToTopLeft, AlignConfig<START1_FREE, START0_FREE, END1_FREE, END0_FREE> const &, Gotoh const &)
 {
     SEQAN_CHECKPOINT;
 

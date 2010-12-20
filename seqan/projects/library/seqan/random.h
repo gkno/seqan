@@ -41,7 +41,7 @@
 // Random Number Generation
 #include <seqan/random/random_mt19937.h>
 
-// RNG With Special Distributions.
+// Rng With Special Distributions.
 #include <seqan/random/random_uniform.h>
 #include <seqan/random/random_normal.h>
 #include <seqan/random/random_lognormal.h>  // uses normal.h, uniform.h

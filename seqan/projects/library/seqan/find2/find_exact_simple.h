@@ -261,9 +261,9 @@ bool setEndPosition(Finder<THaystack, Default> & finder,
     // State of finder and pattern should be in sync.
     SEQAN_ASSERT_EQ(finder._state, pattern._state);
     // End position must not be right of the end of the haystack.
-    SEQAN_ASSERT_LEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(haystack(finder)));
+    SEQAN_ASSERT_LEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(haystack(finder)));
     // Begin position must not be left of the beginning of the haystack.
-    SEQAN_ASSERT_GEQ(static_cast<typename _MakeUnsigned<TPosition>::Type>(pos), length(needle(pattern)));
+    SEQAN_ASSERT_GEQ(static_cast<typename MakeUnsigned_<TPosition>::Type>(pos), length(needle(pattern)));
 
     // Set the end position.
     finder._endPosition = pos;

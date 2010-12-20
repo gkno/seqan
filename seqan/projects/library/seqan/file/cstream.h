@@ -60,10 +60,10 @@ struct Position<FILE *>
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct _IsTellSeekStream;
+struct IsTellAndSeekStream_;
 
 template <>
-struct _IsTellSeekStream<FILE *>
+struct IsTellAndSeekStream_<FILE *>
 {
 	typedef True Type;
 };

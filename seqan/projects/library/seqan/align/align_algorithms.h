@@ -25,12 +25,12 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// _align_trace_print: this function is called by various alignment algorithm
+// _alignTracePrint: this function is called by various alignment algorithm
 // to build up the alignment during traceback
 
 template <typename TSize, typename TStringSet, typename TId, typename TPos, typename TTraceValue>
 inline void
-_align_trace_print(_Align_Traceback<TSize> & tb,
+_alignTracePrint(AlignTraceback<TSize> & tb,
 				   TStringSet const &,
 				   TId const,
 				   TPos const,
@@ -45,11 +45,11 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// _pump_trace_2_Align: build alignment accoring to the traceback stored in trace
+// _pumpTraceToAlign: build alignment accoring to the traceback stored in trace
 // note that the traceback in trace is "reverse" (from back to front)
 template <typename TSource, typename TSpec, typename TTrace> 
 void
-_pump_trace_2_Align(Align<TSource, TSpec> & align_,
+_pumpTraceToAlign(Align<TSource, TSpec> & align_,
 					TTrace trace)
 {
 SEQAN_CHECKPOINT
@@ -218,11 +218,11 @@ SEQAN_CHECKPOINT
 	typedef Align<TSource, TSpec> TAlign;
 	typedef typename Size<TAlign>::Type TSize;
 
-	_Align_Traceback<TSize> trace;
+	AlignTraceback<TSize> trace;
 
 	TScoreValue ret_score =  _globalAlignment(trace, stringSet(align_), score_, tag_align_config, tag_algorithm);
 
-	_pump_trace_2_Align(align_, trace);
+	_pumpTraceToAlign(align_, trace);
 
 	return ret_score;
 }

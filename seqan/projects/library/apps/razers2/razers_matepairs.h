@@ -39,7 +39,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 #ifdef RAZERS_MEMOPT
 
 	template <typename TShape>
-	struct SAValue< Index<TMPReadSet, Index_QGram<TShape> > > {
+	struct SAValue< Index<TMPReadSet, IndexQGram<TShape> > > {
 		typedef Pair<
 			unsigned,				
 			unsigned,
@@ -50,7 +50,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 #else
 
 	template <typename TShape>
-	struct SAValue< Index<TMPReadSet, Index_QGram<TShape> > > {
+	struct SAValue< Index<TMPReadSet, IndexQGram<TShape> > > {
 		typedef Pair<
 			unsigned,			// many reads
 			unsigned,			// of arbitrary length
@@ -62,7 +62,7 @@ typedef StringSet<TRead const, Dependent<> >	TMPReadSet;
 
 	
 template <typename TShape, typename TSpec>
-struct Cargo< Index<TMPReadSet, Index_QGram<TShape, TSpec> > > {
+struct Cargo< Index<TMPReadSet, IndexQGram<TShape, TSpec> > > {
 	typedef struct {
 		double		abundanceCut;
 		int			_debugLevel;
@@ -74,10 +74,10 @@ struct Cargo< Index<TMPReadSet, Index_QGram<TShape, TSpec> > > {
 //////////////////////////////////////////////////////////////////////////////
 // Repeat masker
 template <typename TShape>
-inline bool _qgramDisableBuckets(Index<TMPReadSet, Index_QGram<TShape> > &index) 
+inline bool _qgramDisableBuckets(Index<TMPReadSet, IndexQGram<TShape> > &index) 
 {
-	typedef Index<TMPReadSet, Index_QGram<TShape>	>	TReadIndex;
-	typedef typename Fibre<TReadIndex, QGram_Dir>::Type	TDir;
+	typedef Index<TMPReadSet, IndexQGram<TShape>	>	TReadIndex;
+	typedef typename Fibre<TReadIndex, QGramDir>::Type	TDir;
 	typedef typename Iterator<TDir, Standard>::Type		TDirIterator;
 	typedef typename Value<TDir>::Type					TSize;
 	
@@ -267,7 +267,7 @@ void compactPairMatches(
 	unsigned matePairId = -2;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int scoreDistCutOff = InfimumValue<int>::VALUE;
+	int scoreDistCutOff = MinValue<int>::VALUE;
 
 	TIterator it = begin(store.alignedReadStore, Standard());
 	TIterator itEnd = end(store.alignedReadStore, Standard());
@@ -356,12 +356,12 @@ void mapMatePairReads(
 	typedef typename Value<TMatePairStore>::Type			TMatePair;
 	typedef typename Value<TAlignedReadStore>::Type			TAlignedRead;
 	typedef typename Value<TAlignQualityStore>::Type		TAlignQuality;
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Id<TAlignedRead>::Type					TId;
 
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Position<TGenome>::Type				TGPos;
-	typedef typename _MakeSigned<TGPos>::Type				TSignedGPos;
+	typedef typename MakeSigned_<TGPos>::Type				TSignedGPos;
 	typedef typename Infix<TGenome>::Type					TGenomeInf;
 
 	// FILTRATION
@@ -481,8 +481,8 @@ void mapMatePairReads(
 				break;
 		}
 
-		int	bestLeftScore = InfimumValue<int>::VALUE;
-		int bestLibSizeError = SupremumValue<int>::VALUE;
+		int	bestLeftScore = MinValue<int>::VALUE;
+		int bestLibSizeError = MaxValue<int>::VALUE;
 		TDequeueIterator bestLeft = TDequeueIterator();
 
 		TDequeueIterator it;
@@ -563,7 +563,7 @@ void mapMatePairReads(
 			value(fifo, lastPositive - firstNo).i1 = (__int64)-1;
 		
 		// verify right mate, if left mate matches
-		if (bestLeftScore != InfimumValue<int>::VALUE)
+		if (bestLeftScore != MinValue<int>::VALUE)
 		{
 //			if (matchVerify(
 //					mR, qR, infix(swiftFinderR, genomeInf),
@@ -679,7 +679,7 @@ int mapMatePairReads(
 	
 	typedef typename Value<TReadSeqStore>::Type			TRead;
 	typedef StringSet<TRead>							TReadSet;
-	typedef Index<TReadSet, Index_QGram<TShape> >		TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape> >		TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >			TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>				TMyersPattern;	// verifier
 
@@ -696,7 +696,7 @@ int mapMatePairReads(
 		assign(readSetL[i], store.readSeqStore[store.matePairStore[i].readId[0]]);
 		assign(readSetR[i], store.readSeqStore[store.matePairStore[i].readId[1]]);
 	}
-	reverseComplementInPlace(readSetR);
+	reverseComplement(readSetR);
 
 	// configure q-gram index
 	TIndex swiftIndexL(readSetL, shape);
@@ -792,7 +792,7 @@ int mapMatePairReads(
 
 			if (options.reverse)
 			{
-				reverseComplementInPlace(genome);
+				reverseComplement(genome);
 				mapMatePairReads(store, genome, contigId, swiftPatternL, swiftPatternR, forwardPatternsL, forwardPatternsR, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
@@ -804,7 +804,7 @@ int mapMatePairReads(
 	}
 
 	compactPairMatches(store, cnts, options, swiftPatternL, swiftPatternR);
-	reverseComplementInPlace(readSetR);
+	reverseComplement(readSetR);
 
 	if (options._debugLevel >= 1)
 		::std::cerr << ::std::endl << "Finding reads took               \t" << options.timeMapReads << " seconds" << ::std::endl;

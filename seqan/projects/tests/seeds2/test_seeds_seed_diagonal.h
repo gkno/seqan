@@ -63,20 +63,20 @@ SEQAN_DEFINE_TEST(test_seeds_seed_diagonal_metafunctions)
     {
         typedef SeedDiagonal<size_t, size_t> TSeedDiagonal;
         typedef Position<TSeedDiagonal>::Type TPosition;
-        bool b1 = TYPECMP<size_t, TPosition>::VALUE;
+        bool b1 = IsSameType<size_t, TPosition>::VALUE;
         SEQAN_ASSERT_TRUE(b1);
         typedef Size<TSeedDiagonal>::Type TSize;
-        bool b2 = TYPECMP<size_t, TSize>::VALUE;
+        bool b2 = IsSameType<size_t, TSize>::VALUE;
         SEQAN_ASSERT_TRUE(b2);
     }
     // Test another parametrization.
     {
         typedef SeedDiagonal<double, int> TSeedDiagonal;
         typedef Position<TSeedDiagonal>::Type TPosition;
-        bool b1 = TYPECMP<double, TPosition>::VALUE;
+        bool b1 = IsSameType<double, TPosition>::VALUE;
         SEQAN_ASSERT_TRUE(b1);
         typedef Size<TSeedDiagonal>::Type TSize;
-        bool b2 = TYPECMP<int, TSize>::VALUE;
+        bool b2 = IsSameType<int, TSize>::VALUE;
         SEQAN_ASSERT_TRUE(b2);
     }
 }

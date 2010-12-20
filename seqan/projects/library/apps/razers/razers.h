@@ -233,7 +233,7 @@ struct MicroRNA{};
 	template <typename _TGPos>
 	struct ReadMatch 
 	{
-		typedef typename _MakeSigned<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<_TGPos>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
@@ -338,7 +338,7 @@ struct MicroRNA{};
 	};
 
 	template <typename TShape, typename TSpec>
-	struct Size< Index<TReadSet, Index_QGram<TShape, TSpec> > >
+	struct Size< Index<TReadSet, IndexQGram<TShape, TSpec> > >
 	{
 		typedef unsigned Type;
 	};
@@ -349,10 +349,10 @@ struct MicroRNA{};
 	//////////////////////////////////////////////////////////////////////////////
 	// Repeat masker
 	template <typename TShape, typename TSpec>
-	inline bool _qgramDisableBuckets(Index<TReadSet, Index_QGram<TShape, TSpec> > &index) 
+	inline bool _qgramDisableBuckets(Index<TReadSet, IndexQGram<TShape, TSpec> > &index) 
 	{
-		typedef Index<TReadSet, Index_QGram<TShape, TSpec>	>	TReadIndex;
-		typedef typename Fibre<TReadIndex, QGram_Dir>::Type		TDir;
+		typedef Index<TReadSet, IndexQGram<TShape, TSpec>	>	TReadIndex;
+		typedef typename Fibre<TReadIndex, QGramDir>::Type		TDir;
 		typedef typename Iterator<TDir, Standard>::Type			TDirIterator;
 		typedef typename Value<TDir>::Type						TSize;
 
@@ -400,7 +400,7 @@ _clipReads(TIdString & fastaID, TSeqString & seq, TQString & qual, TOptions & op
 			{
 				i += 5;
 				String<TChar> clipStr = "";
-				while(i < length(fastaID) && _parse_isDigit(fastaID[i]))
+				while(i < length(fastaID) && _parseIsDigit(fastaID[i]))
 				{
 					append(clipStr,fastaID[i]);
 					++i;
@@ -409,7 +409,7 @@ _clipReads(TIdString & fastaID, TSeqString & seq, TQString & qual, TOptions & op
 				istr >> clipFront;
 				if(i < length(fastaID) && fastaID[i] == ',') ++i;
 				clipStr = "";
-				while(i < length(fastaID) && _parse_isDigit(fastaID[i]))
+				while(i < length(fastaID) && _parseIsDigit(fastaID[i]))
 				{
 					append(clipStr,fastaID[i]);
 					++i;
@@ -885,7 +885,7 @@ void countMatches(TMatches &matches, TCounts &cnt)
 	unsigned readNo = -1;
 	short editDist = -1;
 	__int64 count = 0;
-	__int64 maxVal = SupremumValue<TValue>::VALUE;
+	__int64 maxVal = MaxValue<TValue>::VALUE;
 
 	for (; it != itEnd; ++it) 
 	{
@@ -922,7 +922,7 @@ setMaxErrors(TSwift &swift, TReadNo readNo, TMaxErrors maxErrors)
 	int minT = _qgramLemma(swift, readNo, maxErrors);
 	if (minT > 1)
 	{
-		if (maxErrors < 0) minT = SupremumValue<int>::VALUE;
+		if (maxErrors < 0) minT = MaxValue<int>::VALUE;
 //		::std::cout<<" read:"<<readNo<<" newThresh:"<<minT;
 		setMinThreshold(swift, readNo, (unsigned)minT);
 	}
@@ -970,7 +970,7 @@ void compactMatches(TMatches &matches, TCounts &
 		++hitCountCutOff;	// we keep one more match than we actually want, so we can later decide
 							// whether the read mapped more than maxhits times 
 #endif
-	int editDistCutOff = SupremumValue<int>::VALUE;
+	int editDistCutOff = MaxValue<int>::VALUE;
 
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -1133,7 +1133,7 @@ void purgeAmbiguousRnaMatches(TMatches &matches, RazerSOptions<TSpec> &options)
 	unsigned readNo = -1;
 	unsigned hitCount = 0;
 	unsigned hitCountCutOff = options.maxHits;
-	int editDistCutOff = SupremumValue<int>::VALUE;
+	int editDistCutOff = MaxValue<int>::VALUE;
 
 	TIterator it = begin(matches, Standard());
 	TIterator itEnd = end(matches, Standard());
@@ -1374,15 +1374,15 @@ matchVerify(
 #endif
 
     unsigned ndlLength = sequenceLength(rseqNo, readSet);
-	int maxScore = InfimumValue<int>::VALUE;
+	int maxScore = MinValue<int>::VALUE;
 	int minScore = -(int)(ndlLength * options.errorRate);
 	TMyersFinder maxPos;
 
 	// find end of best semi-global alignment
 	while (find(myersFinder, myersPattern, minScore))
-		if (maxScore <= getScore(myersPattern)) 
+		if (maxScore <= _getMatchScore(myersPattern)) 
 		{
-			maxScore = getScore(myersPattern);
+			maxScore = _getMatchScore(myersPattern);
 			maxPos = myersFinder;
 		}
 	
@@ -1571,7 +1571,7 @@ void mapSingleReads(
 	char orientation,				// q-gram index of reads
 	RazerSOptions<TSpec> &options)
 {
-	typedef typename Fibre<TReadIndex, Fibre_Text>::Type	TReadSet;
+	typedef typename Fibre<TReadIndex, FibreText>::Type	TReadSet;
 	typedef typename Size<TGenome>::Type					TSize;
 	typedef typename Value<TMatches>::Type					TMatch;
 
@@ -1779,10 +1779,10 @@ void mapSingleReads(
 	void createQGramIndex(TIndex &index, TValue prefixLen, MicroRNA)
 	{
 	SEQAN_CHECKPOINT
-		typename Fibre<TIndex, QGram_Text>::Type	   &text  = indexText(index);
+		typename Fibre<TIndex, QGramText>::Type	   &text  = indexText(index);
 		typename Fibre<TIndex, QGram_SA>::Type         &sa    = indexSA(index);
-		typename Fibre<TIndex, QGram_Dir>::Type        &dir   = indexDir(index);
-		typename Fibre<TIndex, QGram_Shape>::Type      &shape = indexShape(index);
+		typename Fibre<TIndex, QGramDir>::Type        &dir   = indexDir(index);
+		typename Fibre<TIndex, QGramShape>::Type      &shape = indexShape(index);
 
 		Nothing nothing;
 		
@@ -1839,7 +1839,7 @@ int mapSingleReads(
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type							TRead;
-	typedef Index<TReadSet, Index_QGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >						TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>							TMyersPattern;	// verifier
 
@@ -1957,7 +1957,7 @@ int mapSingleReads(
 
 			if (options.reverse)
 			{
-				reverseComplementInPlace(genome);
+				reverseComplement(genome);
 				mapSingleReads(matches, genome, gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
 			}
 			++gseqNoWithinFile;
@@ -2000,7 +2000,7 @@ int mapSingleReads(
 	Swift<TSwiftSpec> const)
 {
 	typedef typename Value<TReadSet>::Type							TRead;
-	typedef Index<TReadSet, Index_QGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
+	typedef Index<TReadSet, IndexQGram<TShape, TQGramIndexSpec> >	TIndex;			// q-gram index
 	typedef Pattern<TIndex, Swift<TSwiftSpec> >						TSwiftPattern;	// filter
 	typedef Pattern<TRead, MyersUkkonen>							TMyersPattern;	// verifier
 
@@ -2056,9 +2056,9 @@ int mapSingleReads(
 
 		if (options.reverse)
 		{
-			reverseComplementInPlace(genomeSet[gseqNo]);
+			reverseComplement(genomeSet[gseqNo]);
 			mapSingleReads(matches, genomeSet[gseqNo], gseqNo, swiftPattern, forwardPatterns, cnts, 'R', options);
-			reverseComplementInPlace(genomeSet[gseqNo]);
+			reverseComplement(genomeSet[gseqNo]);
 		}
 
 	}

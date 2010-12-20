@@ -75,111 +75,111 @@ typedef ModifiedString<
 //////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.complementInPlace:
+.Function.complement:
 ..cat:Modifier
 ..summary:Complement a sequence or a @Class.StringSet@ in-place.
-..signature:complementInPlace(sequence)
+..signature:complement(sequence)
 ..param.sequence:The sequence to complement.
 ...type:Class.String
 ...type:Class.Segment
 ..include:seqan/modifier.h
-..see:Function.reverseComplementInPlace
+..see:Function.reverseComplement
 ..see:Function.toLowerInPlace
 ..see:Function.toUpperInPlace
  */
 template < typename TSequence >
-inline void complementInPlace(TSequence & sequence) 
+inline void complement(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
 template < typename TSequence >
-inline void complementInPlace(TSequence const & sequence) 
+inline void complement(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
 } 
 
 /**
-.Function.complementInPlace:
-..signature:complementInPlace(stringSet)
+.Function.complement:
+..signature:complement(stringSet)
 ..param.stringSet:The @Class.StringSet@ to complement.
 ...type:Class.StringSet
 ..include:seqan/modifier.h
  */
 template < typename TSequence, typename TSpec >
-inline void complementInPlace(StringSet<TSequence, TSpec> & stringSet)
+inline void complement(StringSet<TSequence, TSpec> & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		complementInPlace(stringSet[seqNo]);
+		complement(stringSet[seqNo]);
 }
 
 template < typename TSequence, typename TSpec >
-inline void complementInPlace(StringSet<TSequence, TSpec> const & stringSet)
+inline void complement(StringSet<TSequence, TSpec> const & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		complementInPlace(stringSet[seqNo]);
+		complement(stringSet[seqNo]);
 }
 
 /**
-.Function.reverseComplementInPlace:
+.Function.reverseComplement:
 ..cat:Modifier
 ..summary:Reverse and complement a sequence or a @Class.StringSet@ in-place.
-..signature:reverseComplementInPlace(sequence)
+..signature:reverseComplement(sequence)
 ..param.sequence:The sequence to complement.
 ...type:Class.String
 ...type:Class.Segment
 ..include:seqan/modifier.h
-..see:Function.complementInPlace
+..see:Function.complement
 ..see:Function.toLowerInPlace
 ..see:Function.toUpperInPlace
  */
 template < typename TSequence >
-inline void reverseComplementInPlace(TSequence & sequence) 
+inline void reverseComplement(TSequence & sequence) 
 {
     SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
-	reverseInPlace(sequence);
+	reverse(sequence);
 } 
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence >
-inline void reverseComplementInPlace(TSequence const & sequence) 
+inline void reverseComplement(TSequence const & sequence) 
 {
     SEQAN_CHECKPOINT;
 	convertInPlace(sequence, FunctorComplement<typename Value<TSequence>::Type>());
-	reverseInPlace(sequence);
+	reverse(sequence);
 } 
 
 /**
-.Function.reverseComplementInPlace:
-..signature:reverseComplementInPlace(stringSet)
+.Function.reverseComplement:
+..signature:reverseComplement(stringSet)
 ..param.stringSet:The @Class.StringSet@ to complement.
 ...type:Class.StringSet
 ..include:seqan/modifier.h
  */
 template < typename TSequence, typename TSpec >
-inline void reverseComplementInPlace(StringSet<TSequence, TSpec> & stringSet)
+inline void reverseComplement(StringSet<TSequence, TSpec> & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		reverseComplementInPlace(stringSet[seqNo]);
+		reverseComplement(stringSet[seqNo]);
 }
 
 // TODO(holtgrew): How is doing anything in-place on a const value possible?
 template < typename TSequence, typename TSpec >
-inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringSet)
+inline void reverseComplement(StringSet<TSequence, TSpec> const & stringSet)
 {
     SEQAN_CHECKPOINT;
 	unsigned seqCount = length(stringSet);
 	for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-		reverseComplementInPlace(stringSet[seqNo]);
+		reverseComplement(stringSet[seqNo]);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -194,8 +194,8 @@ inline void reverseComplementInPlace(StringSet<TSequence, TSpec> const & stringS
 ...type:Class.Segment
 ..include:seqan/modifier.h
 ..see:Function.toUpperInPlace
-..see:Function.reverseComplementInPlace
-..see:Function.complementInPlace
+..see:Function.reverseComplement
+..see:Function.complement
  */
 template < typename TSequence >
 inline void toLowerInPlace(TSequence & sequence) 
@@ -248,8 +248,8 @@ inline void toLowerInPlace(StringSet<TSequence, TSpec> const & stringSet)
 ...type:Class.Segment
 ..include:seqan/modifier.h
 ..see:Function.toLowerInPlace
-..see:Function.reverseComplementInPlace
-..see:Function.complementInPlace
+..see:Function.reverseComplement
+..see:Function.complement
  */
 template < typename TSequence >
 inline void toUpperInPlace(TSequence & sequence) 

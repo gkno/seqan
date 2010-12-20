@@ -24,7 +24,7 @@ int main()
 	String<unsigned int> predMap;
 	String<unsigned int> distMap;
 ///Breadth-frist search from vertex 1
-	breadth_first_search(g, 1, predMap, distMap);
+	breadthFirstSearch(g, 1, predMap, distMap);
 ///Console output
 	::std::cout << "Breadth-First search: " << ::std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;

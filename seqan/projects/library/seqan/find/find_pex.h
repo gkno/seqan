@@ -122,7 +122,7 @@ struct _PexRange{
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
 class Pattern<TNeedle, Pex<TVerification, TMultiFinder > >:
-	public _FindBegin<Pattern<TNeedle, Pex<TVerification, TMultiFinder > > >
+	public FindBegin_<Pattern<TNeedle, Pex<TVerification, TMultiFinder > > >
 {
  public:
    typedef typename Position<TNeedle>::Type TPosition;
@@ -234,13 +234,13 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function.getScore.param.pattern.type:Spec.Pex
+///.Function._getMatchScore.param.pattern.type:Spec.Pex
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
-int getScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
+int _getMatchScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
 {
 SEQAN_CHECKPOINT
-  return getScore(me.range_table[_getRoot(me)].verifier);
+  return _getMatchScore(me.range_table[_getRoot(me)].verifier);
 }
 
 //////////////////////////////////////////////////////////////////////////////

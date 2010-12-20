@@ -388,29 +388,29 @@ SEQAN_CHECKPOINT
 	float pfloat;
 
 	String<char> search = "Lambda";
-	if(_parse_untilBeginLine(file,c,search,6))
+	if(_parseUntilBeginLine(file,c,search,6))
 	{
 		_parse_skipLine(file, c);
-		_parse_skipWhitespace(file,c);
-		pfloat = _parse_readFloat(file,c);
+		_parseSkipWhitespace(file,c);
+		pfloat = _parseReadFloat(file,c);
 		blastObj.lambda = pfloat;
-		_parse_skipWhitespace(file,c);
-		pfloat = _parse_readFloat(file,c);
+		_parseSkipWhitespace(file,c);
+		pfloat = _parseReadFloat(file,c);
 		blastObj.k = pfloat;
-		_parse_skipWhitespace(file,c);
-		pfloat = _parse_readFloat(file,c);
+		_parseSkipWhitespace(file,c);
+		pfloat = _parseReadFloat(file,c);
 		blastObj.h = pfloat;
-		if(_parse_untilBeginLine(file,c,search,6,4))
+		if(_parseUntilBeginLine(file,c,search,6,4))
 		{
 			_parse_skipLine(file, c);
-			_parse_skipWhitespace(file,c);
-			pfloat = _parse_readFloat(file,c);
+			_parseSkipWhitespace(file,c);
+			pfloat = _parseReadFloat(file,c);
 			blastObj.gapped_lambda = pfloat;
-			_parse_skipWhitespace(file,c);
-			pfloat = _parse_readFloat(file,c);
+			_parseSkipWhitespace(file,c);
+			pfloat = _parseReadFloat(file,c);
 			blastObj.gapped_k = pfloat;
-			_parse_skipWhitespace(file,c);
-			pfloat = _parse_readFloat(file,c);
+			_parseSkipWhitespace(file,c);
+			pfloat = _parseReadFloat(file,c);
 			blastObj.gapped_h = pfloat;
 		
 		}
@@ -419,50 +419,50 @@ SEQAN_CHECKPOINT
 
 //	Matrix: blastn matrix:1 -3
 	search = "Matrix";
-	if(_parse_untilBeginLine(file,c,search,6))
+	if(_parseUntilBeginLine(file,c,search,6))
 	{
 		c = _streamGet(file);
-		_parse_skipWhitespace(file,c);
-		String<char> matrix_string = _parse_readWord(file, c);
+		_parseSkipWhitespace(file,c);
+		String<char> matrix_string = _parseReadWord(file, c);
 		while (!_streamEOF(file) && c != '\n' && c != '\r')
-			matrix_string += _parse_readWord(file, c);
+			matrix_string += _parseReadWord(file, c);
 		blastObj.matrix = matrix_string;
 	}
 
 
 	search = "Gap";
-	if(_parse_untilBeginLine(file,c,search,3))
+	if(_parseUntilBeginLine(file,c,search,3))
 	{
-		_parse_skipWhitespace(file,c);
-		String<char> pword = _parse_readWord(file,c);
+		_parseSkipWhitespace(file,c);
+		String<char> pword = _parseReadWord(file,c);
 		if(pword == "Penalties"){
 			blastObj.allow_gaps = true;
 			c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pword = _parse_readWord(file,c);
+			_parseSkipWhitespace(file,c);
+			pword = _parseReadWord(file,c);
 			if(pword == "Existence"){
 				c = _streamGet(file);
-				_parse_skipWhitespace(file,c);
-				pfloat = _parse_readFloat(file,c);
+				_parseSkipWhitespace(file,c);
+				pfloat = _parseReadFloat(file,c);
 				blastObj.gap_open = pfloat;
 			}
 			c = _streamGet(file);
-			_parse_skipWhitespace(file,c);
-			pword = _parse_readWord(file,c);
+			_parseSkipWhitespace(file,c);
+			pword = _parseReadWord(file,c);
 			if(pword == "Extension"){
 				c = _streamGet(file);
-				_parse_skipWhitespace(file,c);
-				pfloat = _parse_readFloat(file,c);
+				_parseSkipWhitespace(file,c);
+				pfloat = _parseReadFloat(file,c);
 				blastObj.gap_extension = pfloat;
 			}
 		}
 	}
 
 	search = "than";
-	if(_parse_until(file,c,search,4))
+	if(_parseUntil(file,c,search,4))
 	{
-		_parse_skipWhitespace(file,c);
-		blastObj.min_expect = _parse_readEValue(file,c);
+		_parseSkipWhitespace(file,c);
+		blastObj.min_expect = _parseReadEValue(file,c);
 	}
 
 
@@ -512,7 +512,7 @@ SEQAN_CHECKPOINT
 	String<char> query_name, db_name;
 
 	//get query and database names
-	_parse_readQueryAndDBName(file,c,query_name,db_name);
+	_parseReadQueryAndDBName(file,c,query_name,db_name);
 	blastObj.query_name = query_name;
 	blastObj.db_name = db_name;
 
@@ -520,7 +520,7 @@ SEQAN_CHECKPOINT
 	TPosition next_report_pos = 0;
 
 	String<char> delim = "Reference";
-	if(_parse_untilBeginLine(file,c,delim,9))
+	if(_parseUntilBeginLine(file,c,delim,9))
 	{
 		next_report_pos = _streamTellG(file);
 		blastObj.next_report = true;
@@ -529,7 +529,7 @@ SEQAN_CHECKPOINT
 	_streamSeekG(file,after_dbquery_pos);
 
 	//get all hits
-	if(_parse_untilBeginLine(file,c,'>'))
+	if(_parseUntilBeginLine(file,c,'>'))
 	{
 		if(!blastObj.next_report || _streamTellG(file) < next_report_pos)
 		{

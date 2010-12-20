@@ -27,25 +27,25 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-// _SkipSumList
+// Skipsumlist_
 //////////////////////////////////////////////////////////////////////////////
 
 //Spec for Map
 template <unsigned int DIM, typename TSpec = Default>
-struct _SkipSumList;
+struct Skipsumlist_;
 
 //////////////////////////////////////////////////////////////////////////////
-// Map<_SkipSumList>
+// Map<Skipsumlist_>
 //////////////////////////////////////////////////////////////////////////////
 
 
 
 /*
 template <typename TValue, unsigned int DIM, typename TSpec>
-struct SkipListBlockSize_<Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > >
+struct SkipListBlockSize_<Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > >
 {
 	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TMap;
 	enum
 	{
 		VALUE = sizeof(TMiniSumList) + TMap::MAX_HEIGHT * sizeof(
@@ -56,11 +56,11 @@ struct SkipListBlockSize_<Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, unsigned int DIM, typename TSpec>
-class SkiplistNext<TValue, _SkipSumList<DIM, TSpec> >
+class SkiplistNext<TValue, Skipsumlist_<DIM, TSpec> >
 {
 public:
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TMap;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef SumListValues<DIM, TValue> TValues;
 
 	TElement * data_element;
@@ -90,11 +90,11 @@ public:
 
 
 template <typename TValue, unsigned int DIM, typename TSpec>
-class SkiplistElement<TValue, _SkipSumList<DIM, TSpec> >
+class SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> >
 {
 public:
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TSkiplist;
-	typedef SkiplistNext<TValue, _SkipSumList<DIM, TSpec> > TNext;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TSkiplist;
+	typedef SkiplistNext<TValue, Skipsumlist_<DIM, TSpec> > TNext;
 	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
 	enum
@@ -109,11 +109,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TValue, unsigned int DIM, typename TSpec>
-class SkiplistPath<TValue, _SkipSumList<DIM, TSpec> >
+class SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> >
 {
 public:
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TSkiplist;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TSkiplist;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef SumListValues<DIM, TValue> TValues;
 
 	enum
@@ -140,17 +140,17 @@ public:
 //make path to a kind of iterator
 
 template <typename TValue, unsigned int DIM, typename TSpec>
-bool atEnd(SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > & path)
+bool atEnd(SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > & path)
 {
 	return (!path.data_elements[0]);
 }
 
 template <typename TValue, unsigned int DIM, typename TSpec, typename TSkiplist>
-void goNext(SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > & path,
+void goNext(SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > & path,
 			TSkiplist const & skiplist)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 
 	TElement * next = path.data_elements[0]->data_next[0].data_element;
 	for (unsigned int i = 0; i <= skiplist.data_height; ++i)
@@ -208,14 +208,14 @@ _skipsumlistFindGoNext(TNext const & _next,
 
 template <typename TValue, unsigned int DIM, typename TSpec, typename TFind>
 inline void
-_skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > & me,
+_skipsumlistFind(Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > & me,
 				 TFind const & find,
 				 unsigned int dim,
-				 /*OUT*/ SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > & path)
+				 /*OUT*/ SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > & path)
 {
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
-	typedef SkiplistNext<TValue, _SkipSumList<DIM, TSpec> > TNext;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TMap;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
+	typedef SkiplistNext<TValue, Skipsumlist_<DIM, TSpec> > TNext;
 	typedef SumListValues<DIM, TValue> TValues;
 
 	typedef typename Size<TMap>::Type TSize;
@@ -242,24 +242,24 @@ _skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > & me,
 }
 template <typename TValue, unsigned int DIM, typename TSpec, typename TFind>
 inline void
-_skipsumlistFind(Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > const & me,
+_skipsumlistFind(Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > const & me,
 				 TFind const & find,
 				 unsigned int dim,
-				 /*OUT*/ SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > & path)
+				 /*OUT*/ SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > & path)
 {//destroy const
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TMap;
 	_skipsumlistFind(const_cast<TMap &>(me), find, dim, path);
 }
 
 
 template <typename TValue, unsigned int DIM, typename TSpec>
 inline void
-assign(Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > & target,
-	   Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > const & source_)
+assign(Map<TValue, Skiplist< Skipsumlist_<DIM, TSpec> > > & target,
+	   Map<TValue, Skiplist< Skipsumlist_<DIM, TSpec> > > const & source_)
 {
-	typedef Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > TSkiplist;
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef Map<TValue, Skiplist< Skipsumlist_<DIM, TSpec> > > TSkiplist;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	//typedef typename Iterator<TSkiplist>::Type TIterator;
 	//typedef typename Value<TSkiplist>::Type TValue2;
 
@@ -320,9 +320,9 @@ assign(Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > & target,
 
 template <typename TValue, unsigned int DIM, typename TSpec>
 inline void
-clear(Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > & me)
+clear(Map<TValue, Skiplist< Skipsumlist_<DIM, TSpec> > > & me)
 {
-	typedef Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > TSkiplist;
+	typedef Map<TValue, Skiplist< Skipsumlist_<DIM, TSpec> > > TSkiplist;
 
 	me.data_mem_begin = me.data_mem_end = 0;
 	me.data_length = 0;
@@ -340,14 +340,14 @@ clear(Map<TValue, Skiplist< _SkipSumList<DIM, TSpec> > > & me)
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-// SumList<_SkipSumList>
+// SumList<Skipsumlist_>
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue, typename TSpec>
 class SumList<DIM, TValue, SkipSumList<TSpec> >
 {
 public:
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TMap;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TMap;
 	typedef typename Size<SumList>::Type TSize;
 	typedef SumListValues<DIM, TValue> TValues;
 
@@ -462,7 +462,7 @@ inline unsigned char
 _skiplistCreateHeight(SumList<DIM, TValue, SkipSumList<TSpec> > & me,
 					  SkiplistPath<TValue, TSpec2 > & path) //extend path if height is increased
 {
-	typedef Map<TValue, Skiplist<_SkipSumList<DIM, TSpec> > > TSkiplist;
+	typedef Map<TValue, Skiplist<Skipsumlist_<DIM, TSpec> > > TSkiplist;
 
 	unsigned char height = geomRand<unsigned char>();
 	if (height >= TSkiplist::MAX_HEIGHT) height = TSkiplist::MAX_HEIGHT-1;
@@ -488,8 +488,8 @@ inline void
 appendValues(SumList<DIM, TValue, SkipSumList<TSpec> > & me,
 			 TValues const & vals)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef Pair<TValue, TElement *> TPair;
 	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
@@ -561,19 +561,19 @@ appendValues(SumList<DIM, TValue, SkipSumList<TSpec> > & me,
 //Helpers for SkipSumListIterator
 
 template <typename TSumList>
-struct _SumListSkiplistElement
+struct SumlistSkipListElement_
 {//dummy implementation
 	typedef SkiplistElement<int, void> Type;
 };
 template <unsigned int DIM, typename TValue, typename TSpec>
-struct _SumListSkiplistElement< SumList<DIM, TValue, SkipSumList<TSpec> > >
+struct SumlistSkipListElement_< SumList<DIM, TValue, SkipSumList<TSpec> > >
 {
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > Type;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > Type;
 };
 template <unsigned int DIM, typename TValue, typename TSpec>
-struct _SumListSkiplistElement< SumList<DIM, TValue, SkipSumList<TSpec> > const >
+struct SumlistSkipListElement_< SumList<DIM, TValue, SkipSumList<TSpec> > const >
 {
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > const Type;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > const Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -607,10 +607,10 @@ class Iter<TSumList, SkipSumListIterator>
 public:
 	typedef typename Value<TSumList>::Type TValue;
 	typedef SumList<DIMENSION<TSumList>::VALUE, TValue, MiniSumList< > > TMiniSumList_;
-	typedef typename _CopyConst<TSumList, TMiniSumList_>::Type TMiniSumList;
+	typedef typename CopyConst_<TSumList, TMiniSumList_>::Type TMiniSumList;
 //	typedef typename _SumListSkiplistMinilist<TSumList>::Type TMiniSumList;
 	typedef typename Iterator<TMiniSumList>::Type TMiniSumListIterator;
-	typedef typename _SumListSkiplistElement<TSumList>::Type TElement;
+	typedef typename SumlistSkipListElement_<TSumList>::Type TElement;
 
 	TSumList * container;
 	mutable TMiniSumListIterator iter;
@@ -720,8 +720,8 @@ template <unsigned int DIM, typename TValue, typename TSpec>
 inline void 
 goBeforeEnd(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
 	//find end of skip list
@@ -811,7 +811,7 @@ inline void
 _splitMiniList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
 			   TPath & path)
 {
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef SumListValues<DIM, TValue> TValues;
 
 	//height for new element, adjust path if necessary (if the height of the complete skiplist increases)
@@ -904,8 +904,8 @@ assignValue(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator 
 			int dim,
 			TValue2 val)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef Pair<TValue, TElement *> TPair;
 
 	TValue val_old = getValue(it, dim);
@@ -941,8 +941,8 @@ inline void
 insertValues(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it,
 			 TValues const & vals)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef Pair<TValue, TElement *> TPair;
 
 	TPath path;
@@ -987,8 +987,8 @@ template <unsigned int DIM, typename TValue, typename TSpec>
 inline void 
 removeValues(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator > & it)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 	typedef Pair<TValue, TElement *> TPair;
 
 	TPath path;
@@ -1028,12 +1028,12 @@ removeValues(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterator
 //			  int dim)
 template <unsigned int DIM, typename TValue, typename TSpec, typename TSumList, typename TValue2>
 inline void 
-_searchSumList_Skip(Iter<TSumList, SkipSumListIterator > & it,
+_searchSumlistSkip(Iter<TSumList, SkipSumListIterator > & it,
 					TValue2 const & val,
 					int dim)
 {
-	typedef SkiplistPath<TValue, _SkipSumList<DIM, TSpec> > TPath;
-//	typedef SkiplistElement<TValue, _SkipSumList<DIM, TSpec> > TElement;
+	typedef SkiplistPath<TValue, Skipsumlist_<DIM, TSpec> > TPath;
+//	typedef SkiplistElement<TValue, Skipsumlist_<DIM, TSpec> > TElement;
 //	typedef Pair<TValue, TElement *> TPair;
 //	typedef SumList<DIM, TValue, MiniSumList< > > TMiniSumList;
 
@@ -1060,7 +1060,7 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> >, SkipSumListIterato
 			  TValue2 const & val,
 			  int dim)
 {
-	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+	_searchSumlistSkip<DIM, TValue, TSpec>(it, val, dim);
 }
 template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
 inline void 
@@ -1068,7 +1068,7 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> > const, SkipSumListI
 			  TValue2 const & val,
 			  int dim)
 {
-	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+	_searchSumlistSkip<DIM, TValue, TSpec>(it, val, dim);
 }
 //template <unsigned int DIM, typename TValue, typename TSpec, typename TValue2>
 //inline void 
@@ -1076,7 +1076,7 @@ searchSumList(Iter<SumList<DIM, TValue, SkipSumList<TSpec> > const, SkipSumListI
 //			  TValue2 const & val,
 //			  int dim)
 //{
-//	_searchSumList_Skip<DIM, TValue, TSpec>(it, val, dim);
+//	_searchSumlistSkip<DIM, TValue, TSpec>(it, val, dim);
 //}
 
 //////////////////////////////////////////////////////////////////////////////

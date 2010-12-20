@@ -228,13 +228,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef TFile							File;
 		typedef SimpleBuffer<TValue>	        TBase;
-        typedef typename aRequest<TFile>::Type  aRequest;
+        typedef typename AsyncRequest<TFile>::Type  AsyncRequest;
 
         enum Status		{ READY, READING, WRITING };
 
 		bool			dirty;		// data needs to be written to disk before freeing
 		unsigned   		pageNo;		// maps frames to pages (reverse vector mapper)
-        aRequest        request;    // request structure of the async io process
+        AsyncRequest        request;    // request structure of the async io process
 		Status			status;
         PageFrame       *next;      // next buffer in a chained list
 
@@ -262,7 +262,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct PageFrame<TValue, TFile, Fixed<_PageSize> >
 	{
 		typedef TFile								File;
-        typedef typename aRequest<TFile>::Type		aRequest;
+        typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
 		typedef	typename Size<PageFrame>::Type		TSize;
 		typedef	typename Iterator<PageFrame>::Type	TIterator;
 
@@ -274,7 +274,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		bool			dirty;		// data needs to be written to disk before freeing
 		int     		pageNo;		// maps frames to pages (reverse vector mapper)
 		TIterator		begin;	    // start address of page memory
-        aRequest        request;    // request structure of the async io process
+        AsyncRequest        request;    // request structure of the async io process
 		Status			status;
 		DataStatus		dataStatus;
 		PageLRUEntry	lruEntry;   // priority based lru
@@ -823,7 +823,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				};
             }
 			#ifdef SEQAN_VVERBOSE
-				::std::cerr << "ALL PAGES DIRTY OR IN USE (try to use const iterators) :-(" << ::std::endl;
+				::std::cerr << "ALL PAGES DIRTY Or IN USE (try to use const iterators) :-(" << ::std::endl;
 			#endif
 			return -1;
 		}

@@ -12,23 +12,23 @@ const int SEED = 42;
 int main()
 {
 // FRAGMENT(random-number-generation-raw)
-    RNG<MersenneTwister> rng(SEED);
+    Rng<MersenneTwister> rng(SEED);
     std::cout << "pickRandomNumber(rng) == " << pickRandomNumber(rng) << std::endl;
 
 // FRAGMENT(random-number-generation-pdf)
-    PDF<Uniform<double> > uniformDouble(0, 1);
+    Pdf<Uniform<double> > uniformDouble(0, 1);
     std::cout << "pickRandomNumber(rng, uniformDouble) == " << pickRandomNumber(rng, uniformDouble) << std::endl;
-    PDF<Uniform<int> > uniformInt(0, 42);
+    Pdf<Uniform<int> > uniformInt(0, 42);
     std::cout << "pickRandomNumber(rng, uniformInt) == " << pickRandomNumber(rng, uniformInt) << std::endl;
-    PDF<Normal> normal(0, 1);
+    Pdf<Normal> normal(0, 1);
     std::cout << "pickRandomNumber(rng, normal) == " << pickRandomNumber(rng, normal) << std::endl;
-    PDF<LogNormal> logNormal(0, 1);
+    Pdf<LogNormal> logNormal(0, 1);
     std::cout << "pickRandomNumber(rng, logNormal) == " << pickRandomNumber(rng, logNormal) << std::endl;
 
 // FRAGMENT(random-number-generation-log-normal)
-    PDF<LogNormal> logNormal2(0, 1, MuSigma());
+    Pdf<LogNormal> logNormal2(0, 1, MuSigma());
     std::cout << "pickRandomNumber(rng, logNormal2) == " << pickRandomNumber(rng, logNormal2) << std::endl;
-    PDF<LogNormal> logNormal3(0.1, 1, MeanStdDev());
+    Pdf<LogNormal> logNormal3(0.1, 1, MeanStdDev());
     std::cout << "pickRandomNumber(rng, logNormal3) == " << pickRandomNumber(rng, logNormal3) << std::endl;
 
 // FRAGMENT(shuffling)

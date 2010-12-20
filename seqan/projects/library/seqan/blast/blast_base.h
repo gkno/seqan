@@ -120,8 +120,8 @@ typedef Tag<TagBlast_> const Blast;
 //already defined in seeds/seedHandlingTags.h (49)
 //moved to basic_tag
 /*
-struct TagBlat_;
-typedef Tag<TagBlat_> const Blat;
+struct Blat_;
+typedef Tag<Blat_> const Blat;
 */
 //////////////////////////////////////////////////////////////////////////////
 

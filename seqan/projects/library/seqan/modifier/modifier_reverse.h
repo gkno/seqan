@@ -493,14 +493,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 	//////////////////////////////////////////////////////////////////////////////
-	// reverseInPlace
+	// reverse
 	//////////////////////////////////////////////////////////////////////////////
 
 /**
-.Function.reverseInPlace
+.Function.reverse
 ..summary:Reverse a container in-place.
 ..cat:Modifiers
-..signature:reverseInPlace(container)
+..signature:reverse(container)
 ..param.container:The container whose elements to reverse.
 ...type:Concept.Container
 ...type:Adaption.std::list
@@ -508,14 +508,14 @@ namespace SEQAN_NAMESPACE_MAIN
  */
 	template < typename TSequence >
 	inline void
-	reverseInPlace(TSequence & sequence) 
+	reverse(TSequence & sequence) 
 	{
 		typedef typename Value<TSequence>::Type					TValue;
 
 #if defined (_OPENMP) && defined (SEQAN_PARALLEL)
 		// OpenMP does not support for loop with iterators. Therefore use index variables.
 		typedef typename Position<TSequence>::Type				TPos;
-		typedef typename _MakeSigned<TPos>::Type				TSignedPos;
+		typedef typename MakeSigned_<TPos>::Type				TSignedPos;
 
 		TSignedPos pMid = length(sequence) / 2;
 
@@ -542,25 +542,25 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	template < typename TSequence, typename TSpec >
 	inline void
-	reverseInPlace(StringSet<TSequence, TSpec> & stringSet) 
+	reverse(StringSet<TSequence, TSpec> & stringSet) 
 	{
 		unsigned seqCount = length(stringSet);
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-			reverseInPlace(stringSet[seqNo]);
+			reverse(stringSet[seqNo]);
 	}
 
 	template < typename TSequence, typename TSpec >
 	inline void
-	reverseInPlace(StringSet<TSequence, TSpec> const & stringSet) 
+	reverse(StringSet<TSequence, TSpec> const & stringSet) 
 	{
 		unsigned seqCount = length(stringSet);
 		for(unsigned seqNo = 0; seqNo < seqCount; ++seqNo)
-			reverseInPlace(stringSet[seqNo]);
+			reverse(stringSet[seqNo]);
 	}
 
     template <typename TValue>
     inline void
-    reverseInPlace(std::list<TValue> & list)
+    reverse(std::list<TValue> & list)
     {
         SEQAN_CHECKPOINT;
         list.reverse();

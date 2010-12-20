@@ -122,7 +122,7 @@ parse_skipWhitespace(TFile& file, TChar& c)
 
 template<typename TFile, typename TChar, typename TString>
 void
-_parse_readWordUntilWhitespace(TFile& file, TString& str, TChar& c)
+_parseReadWordUntilWhitespace(TFile& file, TString& str, TChar& c)
 {
         append(str,c);
         if (c == '\n' || (c == '\r' && _streamPeek(file) != '\n')) {
@@ -303,7 +303,7 @@ void saveIndelInfos(
 
 
 /////////////////////////////////////////////////////////////
-// read GFF input file containing indels
+// read Gff input file containing indels
 template <
 	typename TCString,
 	typename TIndelSet,
@@ -338,13 +338,13 @@ int readGFF(
 			_parse_skipLine(file,c);	
 	
 		// skip whitespaces just in case (actually there shouldnt be a whitespace at the beginning of a line)
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 	
 		if(c == '#')
 			_parse_skipLine(file,c);	
 		// and read entry in column 1  --> genomeID
 		CharString temp_str;
-		_parse_readWordUntilWhitespace(file,temp_str,c); 
+		_parseReadWordUntilWhitespace(file,temp_str,c); 
 		if(prefix(temp_str,3)=="chr")
 			temp_str = suffix(temp_str,3);
 		
@@ -361,28 +361,28 @@ int readGFF(
 		}
 		
 		// skip whitespaces and read entry in column 2
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		clear(temp_str);
-		_parse_readWordUntilWhitespace(file,temp_str,c); 
+		_parseReadWordUntilWhitespace(file,temp_str,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 		
 		// skip whitespaces and read entry in column 3
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		clear(temp_str);
-		_parse_readWordUntilWhitespace(file,temp_str,c); 
+		_parseReadWordUntilWhitespace(file,temp_str,c); 
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\t";
 		
 		// skip whitespaces and read entry in column 4  --> genomic begin position
-		_parse_skipWhitespace(file, c);
-		indel.originalPos = (TContigPos) _parse_readNumber(file,c) - 1;
+		_parseSkipWhitespace(file, c);
+		indel.originalPos = (TContigPos) _parseReadNumber(file,c) - 1;
 		if(options._debugLevel > 1) 
 			::std::cout << indel.originalPos << "\t";
 		
 		// skip whitespaces and read entry in column 5  --> genomic end position // not needed here
-		_parse_skipWhitespace(file, c);
-		indel.indelSize = _parse_readNumber(file,c) - indel.originalPos;
+		_parseSkipWhitespace(file, c);
+		indel.indelSize = _parseReadNumber(file,c) - indel.originalPos;
 		indel.duplication = 0;
 		if(indel.originalPos + indel.indelSize > length(genomes[contigId]) )
 		{
@@ -392,27 +392,27 @@ int readGFF(
 
 		// skip whitespaces and read entry in column 6  --> score (percent identity or mapping quality) or a '.'
 		int readSupport = 1000; //  --> no information about read support (reference indel)
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		if(c=='.')
 			c = _streamGet(file);               // 
 		else 
-			readSupport = (TContigPos) _parse_readDouble(file,c); // number of supporting reads
+			readSupport = (TContigPos) _parseReadDouble(file,c); // number of supporting reads
 			
 		if(options._debugLevel > 1) 
 			::std::cout << readSupport << "\t";
 		
 		// skip whitespaces and read entry in column 7  --> strand information: '+' or '-' // not needed here
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		c = _streamGet(file);
 		
 		// skip whitespaces and read entry in column 8  --> always '.' here
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		c = _streamGet(file);
 		
 		// skip whitespaces and read entry in column 9  --> tags, extra information. first tag is always "ID"
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		clear(temp_str);
-		_parse_readIdentifier(file,temp_str,c);
+		_parseReadIdentifier(file,temp_str,c);
 		if(options._debugLevel > 1) 
 			::std::cout << temp_str << "\n";
 		if(temp_str!="ID") ::std::cout << "first feature field should be 'ID'"<<::std::endl;
@@ -424,13 +424,13 @@ int readGFF(
 		clear(temp_str);
 		clear(indel.idStr);
 		CharString indelID;
-		_parse_readIdentifier(file,indel.idStr,c);
+		_parseReadIdentifier(file,indel.idStr,c);
 		if(options._debugLevel > 1) 
 			::std::cout << "myID = "<< indel.idStr << "\n";
 		
 		// process tags in a loop
 		CharString current_tag;
-		_parse_skipWhitespace(file,c); 
+		_parseSkipWhitespace(file,c); 
 		while(!_streamEOF(file) && !(c == '\n' || (c == '\r' && _streamPeek(file) != '\n'))) // while in same line
 		{
 			// different tags are separated by ';'  
@@ -446,14 +446,14 @@ int readGFF(
 			// get the current tag
 			clear(current_tag);
 			c = _streamGet(file);
-			_parse_readIdentifier(file,current_tag,c);
+			_parseReadIdentifier(file,current_tag,c);
 			if(options._debugLevel > 1) 
 				::std::cout << current_tag << " in features\n";
 			if(current_tag=="size")
 			{
 		//		if(c == '-') 
 					c = _streamGet(file);
-				indel.indelSize = _parse_readNumber(file,c); 
+				indel.indelSize = _parseReadNumber(file,c); 
 				if(options._debugLevel > 1) 
 					::std::cout << indel.indelSize << " indel size\n";
 			}
@@ -465,7 +465,7 @@ int readGFF(
 		}
 		appendValue(indelSet,indel);
 		if(abs(indel.indelSize) > absMaxValue) absMaxValue = abs(indel.indelSize);
-		_parse_skipWhitespace(file, c);
+		_parseSkipWhitespace(file, c);
 		
 	}
 

@@ -53,7 +53,7 @@ goBegin(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it, bool skip_meta)
 	if (skip_meta && (it.data_char == '>'))
 	{
 		//skip meta line
-		_stream_skipLine(host(it), it.data_char);
+		_streamSkipLine(host(it), it.data_char);
 	}
 
 	//eliminate linebreaks
@@ -140,7 +140,7 @@ goNext(Iter<TFile, FileReader<Fasta, TFile2, TSpec> > & it)
 //count_valid and count_all are not resetted but counted up
 template <typename TFile, typename TSize>
 inline typename Value<TFile>::Type
-_fasta_scan_line(TFile & file,
+_fastaScanLine(TFile & file,
 				 TSize & count_valid,
 				 TSize & count_all)
 {
@@ -177,7 +177,7 @@ SEQAN_CHECKPOINT
 /////////////////////////////////////////////////////////////////////////
 template <typename TFile, typename TSize>
 inline void
-_read_n_chars_from_file(TFile & file, TSize count)
+_readNCharsFromFile(TFile & file, TSize count)
 {
 SEQAN_CHECKPOINT
 	for (TSize i = 0; i < count; ++i)
@@ -219,13 +219,13 @@ SEQAN_CHECKPOINT
 
 	if (c_first == '>')
 	{//there is an id line: skip it
-		c_first = _fasta_scan_line(file, count_valid, count_all);
+		c_first = _fastaScanLine(file, count_valid, count_all);
 	}
 
 	if ((c_first == '>') || _streamEOF(file)) 
 	{//another id line = empty entry
 		_streamSeekG(file, begin_pos);
-		_read_n_chars_from_file(file, count_all-1);
+		_readNCharsFromFile(file, count_all-1);
 		return;
 	}
 
@@ -238,7 +238,7 @@ SEQAN_CHECKPOINT
 	//determine length
 	while (true)
 	{
-		c = _fasta_scan_line(file, count_valid, count_all);
+		c = _fastaScanLine(file, count_valid, count_all);
 		if (_streamEOF(file)) 
 		{//end of file: stop searching
 			eof_reached = true;
@@ -283,7 +283,7 @@ SEQAN_CHECKPOINT
 	}
 
 	//move file ptr to next entry
-	_read_n_chars_from_file(file, count_all - 1);
+	_readNCharsFromFile(file, count_all - 1);
 	if(eof_reached)
 		_streamGet(file);
 }
@@ -298,7 +298,7 @@ read(TFile & file,
 {
 SEQAN_CHECKPOINT
 	typedef typename Size<TData>::Type TSize;
-	read(file, data, supremumValue<TSize>(), tag);
+	read(file, data, maxValue<TSize>(), tag);
 }
 
 
@@ -328,7 +328,7 @@ SEQAN_CHECKPOINT
 	{
 		typename Size<TString>::Type count_valid = 0;
 		typename Size<TString>::Type count_all = 0;
-		_fasta_scan_line(file, count_valid, count_all);
+		_fastaScanLine(file, count_valid, count_all);
 
 		if (! count_valid)
 		{
@@ -375,7 +375,7 @@ SEQAN_CHECKPOINT
 	{
 		typename Size<TString>::Type count_valid = 0;
 		typename Size<TString>::Type count_all = 0;
-		_fasta_scan_line(file, count_valid, count_all);
+		_fastaScanLine(file, count_valid, count_all);
 
 		if (! count_valid)
 		{
@@ -482,7 +482,7 @@ SEQAN_CHECKPOINT
 
 template <typename TFile, typename TString, typename TData>
 void
-_write_impl(TFile & file,
+_writeImpl(TFile & file,
 			TData & data,
 			TString & id,
 			Fasta)
@@ -522,7 +522,7 @@ write(TFile & file,
 	  Fasta)
 {
 SEQAN_CHECKPOINT
-	_write_impl(file, data, "", Fasta());
+	_writeImpl(file, data, "", Fasta());
 }
 
 //____________________________________________________________________________
@@ -535,7 +535,7 @@ write(TFile & file,
 	  Fasta)
 {
 SEQAN_CHECKPOINT
-	_write_impl(file, data, id, Fasta());
+	_writeImpl(file, data, id, Fasta());
 }
 
 
@@ -548,7 +548,7 @@ write(TFile & file,
 	  Fasta)
 {
 SEQAN_CHECKPOINT
-	_write_impl(file, data, id, Fasta());
+	_writeImpl(file, data, id, Fasta());
 
 }
 
@@ -563,7 +563,7 @@ write(TFile & file,
 	  Fasta)
 {
 SEQAN_CHECKPOINT
-	_write_impl(file, data, id, Fasta());
+	_writeImpl(file, data, id, Fasta());
 }
 
 

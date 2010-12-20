@@ -30,7 +30,7 @@ namespace seqan {
 // Forwards, Tags.
 // ===========================================================================
 
-// Tag for selecting the RNG functor specialization.
+// Tag for selecting the Rng functor specialization.
 template <typename TRng, typename TPdf>
 struct RngFunctor {};
     
@@ -39,29 +39,29 @@ struct RngFunctor {};
 // ===========================================================================
 
 /**
-.Spec.RNG Functor
-..general:Class.RNG
-..signature:RNG<RngFunctor<TRng, TPdf> >
+.Spec.Rng Functor
+..general:Class.Rng
+..signature:Rng<RngFunctor<TRng, TPdf> >
 ..summary:Functor wrapper for random number generation.
 ..cat:Random
 ..include:seqan/random.h
 */
 template <typename TRng, typename TPdf>
-class RNG<RngFunctor<TRng, TPdf> >
+class Rng<RngFunctor<TRng, TPdf> >
 {
 public:
     TRng & _rng;
     TPdf & _pdf;
     
 /**
-.Memfunc.RNG Functor#RNG
-..class:Spec.RNG Functor
-..summary:Constructor Functor RNG.
-..signature:RNG<RngFunctor<TRng, TPdfd> >(rng, pdf)
-..param.rng:@Class.RNG@ object to use.
-..param.pdf:@Class.PDF@ object to use.
+.Memfunc.Rng Functor#Rng
+..class:Spec.Rng Functor
+..summary:Constructor Functor Rng.
+..signature:Rng<RngFunctor<TRng, TPdfd> >(rng, pdf)
+..param.rng:@Class.Rng@ object to use.
+..param.pdf:@Class.Pdf@ object to use.
 */
-    RNG(TRng & rng, TPdf & pdf)
+    Rng(TRng & rng, TPdf & pdf)
 	    : _rng(rng), _pdf(pdf)
     {}
     
@@ -85,16 +85,16 @@ template <typename TRng, typename TPdf>
 struct Value<RngFunctor<TRng, TPdf> const> : Value<TPdf> {};
 
 template <typename TRng, typename TPdf>
-struct SupremumValue<RngFunctor<TRng, TPdf> > : SupremumValue<TPdf> {};
+struct MaxValue<RngFunctor<TRng, TPdf> > : MaxValue<TPdf> {};
 
 template <typename TRng, typename TPdf>
-struct SupremumValue<RngFunctor<TRng, TPdf> const> : SupremumValue<TPdf> {};
+struct MaxValue<RngFunctor<TRng, TPdf> const> : MaxValue<TPdf> {};
 
 template <typename TRng, typename TPdf>
-struct InfimumValue<RngFunctor<TRng, TPdf> > : InfimumValue<TPdf> {};
+struct MinValue<RngFunctor<TRng, TPdf> > : MinValue<TPdf> {};
 
 template <typename TRng, typename TPdf>
-struct InfimumValue<RngFunctor<TRng, TPdf> const> : InfimumValue<TPdf> {};
+struct MinValue<RngFunctor<TRng, TPdf> const> : MinValue<TPdf> {};
     
 // ===========================================================================
 // Functions
@@ -102,7 +102,7 @@ struct InfimumValue<RngFunctor<TRng, TPdf> const> : InfimumValue<TPdf> {};
 
 template <typename TRng, typename TPdf>
 inline unsigned
-pickRandomNumber(RNG<RngFunctor<TRng, TPdf> > & rng)
+pickRandomNumber(Rng<RngFunctor<TRng, TPdf> > & rng)
 {
     SEQAN_CHECKPOINT;
     

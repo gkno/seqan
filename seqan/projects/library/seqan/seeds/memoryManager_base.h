@@ -40,8 +40,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ...remarks: Size has to be a power of 2, e.g., 1024.
 ..include:seqan/seeds.h
 */
-struct _Free_Pointer;
-typedef Tag<_Free_Pointer> const FreeMemoryPointer;	
+struct FreePointer_;
+typedef Tag<FreePointer_> const FreeMemoryPointer;	
 
 template<typename TValue, typename TSPec, typename TFree> 
 class MemoryManager;

@@ -45,15 +45,15 @@ namespace seqan
 
 		// wrapper data structure for point in the RMT
 	template< typename T, typename TSpec >
-	struct _ChainPoint;
+	struct ChainPoint_;
 
 		// wrapper for points for the line sweep paradigma
 	template< typename T >
-	struct _WrapperPoint;
+	struct WrapperPoint_;
 
 		// structure for metainformation about fragments in chains
 	template< typename T >
-	struct _MetaFragment;
+	struct MetaFragment_;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -61,31 +61,31 @@ namespace seqan
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 		
-	struct _GenericChaining;
-	typedef Tag<_GenericChaining> const GenericChaining;
+	struct GenericChaining_;
+	typedef Tag<GenericChaining_> const GenericChaining;
 
-	struct _RangetreeChaining;
-	typedef Tag<_RangetreeChaining> const RangetreeChaining;
+	struct RangeTreeChaining_;
+	typedef Tag<RangeTreeChaining_> const RangetreeChaining;
 
 
-	struct G_0_Cost
+	struct GZeroCost
 	{};
-	//typedef Tag<ZeroCost_> const G_0_Cost;
+	//typedef Tag<ZeroCost_> const GZeroCost;
 
-	struct G_1_Cost
+	struct GOneCost
 	{};
-	//typedef Tag<G_1_Cost_> const G_1_Cost;
+	//typedef Tag<G_1_Cost_> const GOneCost;
 
-	struct G_Inf_Cost
+	struct GInftyCost
 	{};
-	//typedef Tag<G_Inf_Cost_> const G_Inf_Cost;
+	//typedef Tag<G_Inf_Cost_> const GInftyCost;
 
-	struct G_SoP_Cost
+	struct GSumOfPairCost
 	{};
-	//typedef Tag<F_SoP_Cost_> const G_Inf_Cost;
+	//typedef Tag<F_SoP_Cost_> const GInftyCost;
 
 	template< typename Spec >
-	struct _ChainSpecType
+	struct ChainSpecType_
 	{
 		typedef Spec Type;
 	};
@@ -105,19 +105,19 @@ namespace seqan
 	//};
 
 	template< typename T, typename TSpec >
-	struct Size< _ChainPoint< T, TSpec > >
+	struct Size< ChainPoint_< T, TSpec > >
 	{
 		typedef size_t Type;
 	};
 
 	template< typename T >
-	struct Size< _WrapperPoint< T > >
+	struct Size< WrapperPoint_< T > >
 	{
 		typedef size_t Type;
 	};
 
 	template< typename T >
-	struct Size< _MetaFragment< T > >
+	struct Size< MetaFragment_< T > >
 	{
 		typedef size_t Type;
 	};
@@ -133,19 +133,19 @@ namespace seqan
 	//};
 
 	template< typename T, typename TSpec >
-	struct Key< _ChainPoint< T, TSpec > >
+	struct Key< ChainPoint_< T, TSpec > >
 	{
 		typedef typename Key< T >::Type Type;
 	};
 
 	template< typename T >
-	struct Key< _WrapperPoint< T > >
+	struct Key< WrapperPoint_< T > >
 	{
 		typedef typename Key< T >::Type Type;
 	};
 
 	template< typename T >
-	struct Key< _MetaFragment< T > >
+	struct Key< MetaFragment_< T > >
 	{
 		typedef typename Key< T >::Type Type;
 	};
@@ -162,16 +162,16 @@ namespace seqan
 /*
 	template< typename TSource, typename TDest, typename TScoreValue, typename TScoreType, typename TStructuring, typename TAlgorithm >
 	TScoreValue
-	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring );
+	computeChain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring );
 
 	template< typename TSource, typename TDest, typename TCostModel, typename TScoreValue, typename TScoreType, typename TStructuring, typename TAlgorithm, typename TSpec >
 	TScoreValue
-	_compute_chain( TSource & source, TDest & dest, TCostModel type, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring, TSpec spec );
+	_computeChain( TSource & source, TDest & dest, TCostModel type, Score< TScoreValue, TScoreType > const & score_, TAlgorithm tag, TStructuring structuring, TSpec spec );
 
 */
 	template< typename TSource, typename TDest, typename TScoreValue, typename TScoreType, typename TStructuring >
 	TScoreValue
-	compute_chain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TStructuring structuring )
+	computeChain( TSource & source, TDest & dest, Score< TScoreValue, TScoreType > const & score_, TStructuring structuring )
 	{
 
 //		SEQAN_CHECK2( scoreGapOpen( score_ ) == scoreGapExtend( score_ ), "Chaining only supports linear gap costs" )
@@ -182,63 +182,63 @@ namespace seqan
 					return 0;
 			case 2: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
 					{
-						return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
+						return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 1 > >() );
 					}
 					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 1 > >() );
+							return _computeChain( source, dest, GOneCost(), score_, structuring, ChainSpecType_< Array< 1 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 2 > >() );
+							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 2 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 3: if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
+					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 2 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 2 > >() );
+							return _computeChain( source, dest, GOneCost(), score_, structuring, ChainSpecType_< Array< 2 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 3 > >() );
+							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 3 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 4:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
+					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 3 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 3 > >() );
+							return _computeChain( source, dest, GOneCost(), score_, structuring, ChainSpecType_< Array< 3 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 4 > >() );
+							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 4 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			case 5:	if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
+					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Array< 4 > >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Array< 4 > >() );
+							return _computeChain( source, dest, GOneCost(), score_, structuring, ChainSpecType_< Array< 4 > >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring,_ChainSpecType< Array< 5 > >() );
+							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring,ChainSpecType_< Array< 5 > >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 					break;
 			default:if( scoreMismatch( score_ ) == 0 && scoreGap( score_ ) == 0 )
-					return _compute_chain( source, dest, G_0_Cost(), score_, structuring, _ChainSpecType< Default >() );
+					return _computeChain( source, dest, GZeroCost(), score_, structuring, ChainSpecType_< Default >() );
 					else if( scoreMismatch( score_ ) > 0 && scoreGap( score_ ) > 0 )
 					{
 						if( scoreMismatch( score_ ) == scoreGap( score_ ) )
-							return _compute_chain( source, dest, G_1_Cost(), score_, structuring, _ChainSpecType< Default >() );
+							return _computeChain( source, dest, GOneCost(), score_, structuring, ChainSpecType_< Default >() );
 						else //if( scoreMismatch( score_ ) > 2 * scoreGapExtend( score_ ) )
-							return _compute_chain( source, dest, G_SoP_Cost(), score_, structuring, _ChainSpecType< Default >() );
+							return _computeChain( source, dest, GSumOfPairCost(), score_, structuring, ChainSpecType_< Default >() );
 					}
 					SEQAN_ASSERT2( false, "Gap/mismatch model not supported" );
 
 		}
-		return infimumValue< TScoreValue >();
+		return minValue< TScoreValue >();
 	}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,7 +266,7 @@ globalChaining(TSource & source,
 	}
 
 	//compute chain
-	typename Value<TScoring>::Type ret_value = compute_chain(source, dest, scoring, SemiDeferred()); //Deferred(), Complete()
+	typename Value<TScoring>::Type ret_value = computeChain(source, dest, scoring, SemiDeferred()); //Deferred(), Complete()
 
 	//retransform coordinates to new style ("end is behind last item")
 	for (TSourceIterator it = begin(source, Standard()); it < end(source, Standard()); ++it)

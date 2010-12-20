@@ -30,13 +30,13 @@ SEQAN_DEFINE_TEST(test_random_mt19937_constructors)
     using namespace seqan;
 
     {
-        RNG<> mt;
+        Rng<> mt;
     }
     {
-        RNG<MersenneTwister> mt;
+        Rng<MersenneTwister> mt;
     }
     {
-        RNG<MersenneTwister> mt(10);
+        Rng<MersenneTwister> mt(10);
     }
 }
 
@@ -46,7 +46,7 @@ SEQAN_DEFINE_TEST(test_random_mt19937_pick)
 {
     using namespace seqan;
 
-    RNG<MersenneTwister> mt(10);
+    Rng<MersenneTwister> mt(10);
     // Test pickRandomNumber().
     SEQAN_ASSERT_NEQ(pickRandomNumber(mt), pickRandomNumber(mt));
     // Test operator().
@@ -58,30 +58,30 @@ SEQAN_DEFINE_TEST(test_random_rng_functor_constructors)
 {
     using namespace seqan;
     
-	typedef RNG<MersenneTwister> TMersenneTwister;
-	typedef PDF<Uniform<int> > TUniformPdf;
+	typedef Rng<MersenneTwister> TMersenneTwister;
+	typedef Pdf<Uniform<int> > TUniformPdf;
     
     {
         TMersenneTwister mt;
         TUniformPdf uniformPdf(0, 10);
         
-        RNG<RngFunctor<TMersenneTwister, TUniformPdf> > rng(mt, uniformPdf);
+        Rng<RngFunctor<TMersenneTwister, TUniformPdf> > rng(mt, uniformPdf);
     }
 }
 
 // Pick random number from RngFunctor and make sure it is the same as when
-// directly using a MT and a PDF.
+// directly using a MT and a Pdf.
 SEQAN_DEFINE_TEST(test_random_rng_functor_pick)
 {
     using namespace seqan;
     
     const int SEED = 10;
 
-    typedef RNG<MersenneTwister> TMersenneTwister;
-	typedef PDF<Uniform<int> > TUniformPdf;
-    typedef RNG<RngFunctor<TMersenneTwister, TUniformPdf> > TRngFunctor;
+    typedef Rng<MersenneTwister> TMersenneTwister;
+	typedef Pdf<Uniform<int> > TUniformPdf;
+    typedef Rng<RngFunctor<TMersenneTwister, TUniformPdf> > TRngFunctor;
 
-    // Compute by using the raw MT and uniform PDF.
+    // Compute by using the raw MT and uniform Pdf.
     String<int> rawInts;
     {
 	    TMersenneTwister mt(SEED);

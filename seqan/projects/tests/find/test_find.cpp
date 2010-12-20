@@ -661,7 +661,7 @@ void Test_OnlineAlgWildcards() {
     // Test - handle needles with wildcards
     // to produce two \ in the pattern you need to escape both of them
     needle = "aa+c*[a-z]xx?aa\\\\";
-    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 9u);
+    SEQAN_ASSERT_EQ(_lengthWithoutWildcards(needle), 9u);
         
     //____________________________________________________________________________
     // Test - optional characters (?)
@@ -865,7 +865,7 @@ void Test_OnlineAlgWildcards() {
 
     needle = "a{2,5}n{2}ual";       
         
-    SEQAN_ASSERT_EQ(_length_wo_wild(needle), 10u);
+    SEQAN_ASSERT_EQ(_lengthWithoutWildcards(needle), 10u);
         
     setHost(pattern, needle);
     clear(pos);
@@ -908,13 +908,13 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(fd, pt));
     SEQAN_ASSERT_EQ(position(fd), 8u);
-    SEQAN_ASSERT_EQ(getScore(pt), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pt), -2);
     SEQAN_ASSERT_TRUE(find(fd, pt));
     SEQAN_ASSERT_EQ(position(fd), 9u);
-    SEQAN_ASSERT_EQ(getScore(pt), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pt), -1);
     SEQAN_ASSERT_TRUE(find(fd, pt));
     SEQAN_ASSERT_EQ(position(fd), 10u);
-    SEQAN_ASSERT_EQ(getScore(pt), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pt), -2);
 
     SEQAN_ASSERT_NOT(find(fd,pt));
 
@@ -933,35 +933,35 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 3u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 10u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 11u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 23u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 24u);
-    SEQAN_ASSERT_EQ(getScore(pat), 0);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), 0);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 25u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 28u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_TRUE(find(fnd, pat));
     SEQAN_ASSERT_EQ(position(fnd), 39u);
-    SEQAN_ASSERT_EQ(getScore(pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pat), -1);
 
     SEQAN_ASSERT_NOT(find(fnd, pat));
 
@@ -975,27 +975,27 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 44u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 45u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -1);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 46u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 60u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 65u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -2);
 
     SEQAN_ASSERT_TRUE(find(long_fnd,long_pat));
     SEQAN_ASSERT_EQ(position(long_fnd), 70u);
-    SEQAN_ASSERT_EQ(getScore(long_pat), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(long_pat), -2);
 
     SEQAN_ASSERT_NOT(find(long_fnd,long_pat));
 
@@ -1008,7 +1008,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 7u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXXa");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1016,7 +1016,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 8u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -1);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXab");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1030,7 +1030,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 9u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), 0);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "Xaba");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1050,7 +1050,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 10u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -1);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -1);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXabaX");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1064,7 +1064,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 11u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXXabaXX");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1072,7 +1072,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 15u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "XXX45a");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1080,7 +1080,7 @@ void Test_Approx_EditDist() {
 
     SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(endPosition(finder_1), 17u);
-    SEQAN_ASSERT_EQ(getScore(pattern_1), -2);
+    SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), -2);
     SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
     SEQAN_ASSERT_EQ(infix(finder_1), "X45aba");
     SEQAN_ASSERT_EQ(getBeginScore(pattern_1), -2);
@@ -1183,7 +1183,7 @@ void Test_Approx_Prefix_EditDist() {
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
         while (find(finder, pattern)) {
-            SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
+            SEQAN_ASSERT_EQ(-kNeedleLen, _getMatchScore(pattern));
         }
     }
 
@@ -1201,7 +1201,7 @@ void Test_Approx_Prefix_EditDist() {
         Pattern<String<char>, TPatternSpec> pattern(needle, kScoreLimit);
 
         while (find(finder, pattern)) {
-            SEQAN_ASSERT_EQ(-kNeedleLen, getScore(pattern));
+            SEQAN_ASSERT_EQ(-kNeedleLen, _getMatchScore(pattern));
         }
     }
 }
@@ -1233,12 +1233,12 @@ SEQAN_DEFINE_TEST(test_find_online_BndmAlgo) {
 
 
 SEQAN_DEFINE_TEST(test_find_online_BFAM_Oracle) {
-    Test_OnlineAlg<BFAM<Oracle> >();   
+    Test_OnlineAlg<Bfam<Oracle> >();   
 }
 
 
 SEQAN_DEFINE_TEST(test_find_online_BFAM_Trie) {
-    Test_OnlineAlg<BFAM<Trie> >();   
+    Test_OnlineAlg<Bfam<Trie> >();   
 }
 
 
@@ -1272,12 +1272,12 @@ SEQAN_DEFINE_TEST(test_find_online_multi_WuManber) {
 
 
 SEQAN_DEFINE_TEST(test_find_online_multi_MultiBFAM_Oracle) {
-    Test_OnlineAlgMulti<MultiBFAM<Oracle> >(true);
+    Test_OnlineAlgMulti<MultiBfam<Oracle> >(true);
 }
 
 
 SEQAN_DEFINE_TEST(test_find_online_multi_MultiBFAM_Trie) {
-    Test_OnlineAlgMulti<MultiBFAM<Trie> >(true);
+    Test_OnlineAlgMulti<MultiBfam<Trie> >(true);
 }
 
 
@@ -1339,7 +1339,7 @@ SEQAN_DEFINE_TEST(test_approx_edit_dist_pex_non_hierarchical_aho_corasick) {
 
 
 SEQAN_DEFINE_TEST(test_approx_edit_dist_pex_non_hierarchical_multi_bfam) {
-    Test_Approx_EditDist< Pex<NonHierarchical,MultiBFAM<> > >();
+    Test_Approx_EditDist< Pex<NonHierarchical,MultiBfam<> > >();
 }
 
 
@@ -1385,7 +1385,7 @@ SEQAN_DEFINE_TEST(test_find_hamming_simple) {
         SEQAN_ASSERT_EQ(0u, position(finder));
         SEQAN_ASSERT_EQ(2u, endPosition(finder));
         SEQAN_ASSERT_EQ(-1, score(pattern));
-        SEQAN_ASSERT_EQ(-1, getScore(pattern));
+        SEQAN_ASSERT_EQ(-1, _getMatchScore(pattern));
     }
     
     // Test for distance 0;
@@ -1473,13 +1473,13 @@ SEQAN_DEFINE_TEST(test_find_hamming_simple_regression_rmbench) {
     SEQAN_ASSERT_TRUE(res);
     SEQAN_ASSERT_EQ(0u, position(finder));
     SEQAN_ASSERT_EQ(length(needle), endPosition(finder));
-    SEQAN_ASSERT_EQ(0, getScore(pattern));
+    SEQAN_ASSERT_EQ(0, _getMatchScore(pattern));
 
     res = find(finder, pattern);
     SEQAN_ASSERT_TRUE(res);
     SEQAN_ASSERT_EQ(1u, position(finder));
     SEQAN_ASSERT_EQ(length(needle) + 1, endPosition(finder));
-    SEQAN_ASSERT_EQ(-1, getScore(pattern));
+    SEQAN_ASSERT_EQ(-1, _getMatchScore(pattern));
 }
 
 /*
@@ -1498,7 +1498,7 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_at_start) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(4u, endPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));  // TODO(holtgrew): _getMatchScore(pattern) is in book but should not be necessary
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
 
@@ -1507,7 +1507,7 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_at_start) {
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(5u, endPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));  // TODO(holtgrew): _getMatchScore(pattern) is in book but should not be necessary
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
 
@@ -1516,7 +1516,7 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_at_start) {
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));  // TODO(holtgrew): getScore(pattern) is in book but should not be necessary
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));  // TODO(holtgrew): _getMatchScore(pattern) is in book but should not be necessary
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(0u, beginPosition(finder));
 }
@@ -1533,7 +1533,7 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_within) {
     bool ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(6u, endPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));  // getScore(pattern) is in book but should not be necessary
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));  // _getMatchScore(pattern) is in book but should not be necessary
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
 
@@ -1542,7 +1542,7 @@ SEQAN_DEFINE_TEST(test_myers_find_infix_find_begin_within) {
     ret = find(finder, pattern);
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(7u, endPosition(finder));
-    ret = findBegin(finder, pattern, getScore(pattern));  // getScore(pattern) is in book but should not be necessary
+    ret = findBegin(finder, pattern, _getMatchScore(pattern));  // _getMatchScore(pattern) is in book but should not be necessary
     SEQAN_ASSERT_TRUE(ret);
     SEQAN_ASSERT_EQ(1u, beginPosition(finder));
 }
@@ -1588,7 +1588,7 @@ SEQAN_DEFINE_TEST(test_find_on_segments) {
 SEQAN_DEFINE_TEST(test_myers_trigger_bug) {
     DnaString haystackString = "TCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCCCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTCTCTTC";
     DnaString needleString = "GAGAAGAGAAGAGAAGAGAAGAGAAGAGAAGAGAAGAAGAAG";
-    reverseComplementInPlace(needleString);
+    reverseComplement(needleString);
     typedef Segment<DnaString, InfixSegment> TSegment;
     typedef ModifiedString<TSegment, ModReverse> TSegmentRev;
 //     std::cout << "haystack = " << haystackString << std::endl;
@@ -1651,7 +1651,7 @@ SEQAN_DEFINE_TEST(test_myers_find_begin) {
         Pattern<String<char>, Myers<FindInfix> > pattern_1(needle_1, 0);
         SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
         SEQAN_ASSERT_EQ(endPosition(finder_1), 5u);
-        SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
+        SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), 0);
         SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
         SEQAN_ASSERT_EQ(infix(finder_1), "ABBA");
         SEQAN_ASSERT_EQ(getBeginScore(pattern_1), 0);
@@ -1664,7 +1664,7 @@ SEQAN_DEFINE_TEST(test_myers_find_begin) {
         Pattern<String<char>, Myers<FindInfix> > pattern_1(needle_1, 0);
         SEQAN_ASSERT_TRUE(find(finder_1, pattern_1));
         SEQAN_ASSERT_EQ(endPosition(finder_1), 4u);
-        SEQAN_ASSERT_EQ(getScore(pattern_1), 0);
+        SEQAN_ASSERT_EQ(_getMatchScore(pattern_1), 0);
         SEQAN_ASSERT_TRUE(findBegin(finder_1, pattern_1));
         SEQAN_ASSERT_EQ(infix(finder_1), "BCD");
         SEQAN_ASSERT_EQ(getBeginScore(pattern_1), 0);
@@ -1698,8 +1698,8 @@ SEQAN_DEFINE_TEST(test_pattern_copycon) {
     test_pattern_copycon<ShiftOr>();
     test_pattern_copycon<HammingSimple>();
     test_pattern_copycon<WildShiftAnd>();
-    test_pattern_copycon<BFAM<Oracle> >();
-    test_pattern_copycon<BFAM<Trie> >();
+    test_pattern_copycon<Bfam<Oracle> >();
+    test_pattern_copycon<Bfam<Trie> >();
 }
 
 SEQAN_DEFINE_TEST(test_pattern_assign) {
@@ -1711,8 +1711,8 @@ SEQAN_DEFINE_TEST(test_pattern_assign) {
     test_pattern_assign<ShiftOr>();
     test_pattern_assign<HammingSimple>();
     test_pattern_assign<WildShiftAnd>();
-    test_pattern_assign<BFAM<Oracle> >();
-    test_pattern_assign<BFAM<Trie> >();
+    test_pattern_assign<Bfam<Oracle> >();
+    test_pattern_assign<Bfam<Trie> >();
 }
 
 
@@ -1773,7 +1773,7 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_myers_ukkonen.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wild_shiftand.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_horspool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/_findHorspool.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftand.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftor.h");

@@ -97,7 +97,7 @@ void printArray(TSequence const &SA) {
 template <typename TSequence>
 bool isPermutation(TSequence const &SA) {
 	typedef typename Value<TSequence>::Type		TSize;
-	typedef typename _MakeSigned<TSize>::Type	TSigned;
+	typedef typename MakeSigned_<TSize>::Type	TSigned;
 	TSize n = length(SA);
 	bool *seen = new bool[n];
 	TSize i;

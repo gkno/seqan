@@ -7,7 +7,7 @@ using namespace seqan;
 // FRAGMENT(initialization)
 int main ()
 {
-	typedef Index<DnaString, Index_QGram< UngappedShape<3> > > TIndex;
+	typedef Index<DnaString, IndexQGram< UngappedShape<3> > > TIndex;
 	TIndex index("CATGATTACATA");
 
 // FRAGMENT(output)

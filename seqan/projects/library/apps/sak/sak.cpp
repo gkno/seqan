@@ -59,7 +59,7 @@ using namespace seqan;
 // Global Parameters
 
 	int			optionSeqStart = 0;
-	int			optionSeqEnd = SupremumValue<int>::VALUE;
+	int			optionSeqEnd = MaxValue<int>::VALUE;
 	int			optionInfStart = 0;
 	int			optionInfEnd = -1;
 	bool		optionRevComp = false;
@@ -443,7 +443,7 @@ int main(int argc, const char *argv[])
 		{
 			seqsOut[i] = infix(seqsIn[i], optionInfStart, end);
 			if (optionRevComp)
-				reverseComplementInPlace(seqsOut[i]);
+				reverseComplement(seqsOut[i]);
 		}
 	}
 	seqNamesOut = seqNamesIn;

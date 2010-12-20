@@ -58,8 +58,8 @@ public:
 	typename Size< TObject >::Type _dim;
 	typename Size< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >::Type _numOfElems;
 
-	_SearchPath< TObject, TModus, RT< TSpec >, TStructuring > _sp;
-	_RTreeAllocators< TObject, TModus, RT< TSpec >, TStructuring > _allocs;
+	SearchPath_< TObject, TModus, RT< TSpec >, TStructuring > _sp;
+	RangeTreeAllocators< TObject, TModus, RT< TSpec >, TStructuring > _allocs;
 	
 	friend inline
 	typename Size< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >::Type 

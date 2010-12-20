@@ -44,8 +44,8 @@ struct Rows;
 	FASTA alignment file format for sequences.
 ..include:seqan/file.h
 */
-struct _FastaAlign;
-typedef Tag<_FastaAlign> FastaAlign;
+struct FastaAlign_;
+typedef Tag<FastaAlign_> FastaAlign;
 
 // ===========================================================================
 // Metafunctions
@@ -56,7 +56,7 @@ typedef Tag<_FastaAlign> FastaAlign;
 // ===========================================================================
 
 template <typename TFile, typename TSize>
-void _fasta_align_scan_line(TFile & file, TSize & count) {
+void _fastaAlignScanLine(TFile & file, TSize & count) {
 
 	SEQAN_CHECKPOINT;
 	SEQAN_ASSERT(!_streamEOF(file))
@@ -85,7 +85,7 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 	typedef typename Size<TSourceValue>::Type TSize;
 	typedef typename Position<TFile>::Type TFilePos;
 	typedef Triple<TFilePos, TFilePos, TSize> TTriple;
-	TSize limit = supremumValue<TSize>();
+	TSize limit = maxValue<TSize>();
 
 	//Determine begin position, end position and length of each sequence
 	String<TTriple> beg_end_length;
@@ -105,7 +105,7 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 		
 		// Skip id
 		if (c == '>') {
-			_fasta_align_scan_line(file, count);
+			_fastaAlignScanLine(file, count);
 			begin_pos = _streamTellG(file);
 			count = 0;
 		} else {  //If no id first letter belongs to sequence
@@ -114,7 +114,7 @@ void read(TFile & file, Align<TSource, TSpec> & align, FastaAlign const &) {
 
 		// Count letters
 		while (true) {
-			_fasta_align_scan_line(file, count);
+			_fastaAlignScanLine(file, count);
 
 			typename Value<TFile>::Type c = _streamGet(file);
 			if (c == '>') {
@@ -200,7 +200,7 @@ void readIDs(TFile& file, TStringContainer& ids, FastaAlign) {
 		if (!_streamEOF(file)) {
 			start_pos = _streamTellG(file);
 			typename Size<TString>::Type count = 0;
-			_fasta_align_scan_line(file, count);
+			_fastaAlignScanLine(file, count);
 			if (! count) clear(id);
 			else {
 				resize(id, count);
@@ -251,7 +251,7 @@ void goNext(TFile & file, FastaAlign) {
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
-void _write_impl(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const &) {
+void _writeImpl(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const &) {
 	SEQAN_CHECKPOINT
 
 	typedef Align<TSource, TSpec> const TAlign;
@@ -291,7 +291,7 @@ void _write_impl(TFile & file, Align<TSource, TSpec> const & align, TStringConta
 template <typename TFile, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const & align, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, String<String<char> >(), FastaAlign());
+	_writeImpl(file, align, String<String<char> >(), FastaAlign());
 }
 
 //____________________________________________________________________________
@@ -299,7 +299,7 @@ void write(TFile & file, Align<TSource, TSpec> const & align, FastaAlign const &
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, ids, FastaAlign());
+	_writeImpl(file, align, ids, FastaAlign());
 }
 
 
@@ -308,7 +308,7 @@ void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer c
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec>
 void write(TFile & file, Align<TSource, TSpec> const * align, TStringContainer const & ids, FastaAlign const & ) {
 	SEQAN_CHECKPOINT
-	_write_impl(file, align, ids, FastaAlign());
+	_writeImpl(file, align, ids, FastaAlign());
 }
 
 //____________________________________________________________________________
@@ -316,7 +316,7 @@ void write(TFile & file, Align<TSource, TSpec> const * align, TStringContainer c
 template <typename TFile, typename TStringContainer, typename TSource, typename TSpec, typename TMeta>
 void write(TFile & file, Align<TSource, TSpec> const & align, TStringContainer const & ids, TMeta &, FastaAlign const & ) {
 	SEQAN_CHECKPOINT;
-	_write_impl(file, align, ids, FastaAlign());
+	_writeImpl(file, align, ids, FastaAlign());
 }
 
 }  // namespace seqan

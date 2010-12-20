@@ -304,19 +304,19 @@ _reallocateStorage(
 	Exact)
 {
 SEQAN_CHECKPOINT
-	TValue * return_value;
+	TValue * _returnValue;
 	if (me.data_size)
 	{//dependent
-		return_value = me.data_begin;
+		_returnValue = me.data_begin;
 	}
 	else
 	{//not dependent
-		return_value = 0;
+		_returnValue = 0;
 	}
 
 	me.data_size = new_capacity + 1; //+1 for zero termination
 	allocate(me, me.data_begin, me.data_size, TagAllocateStorage());
-	return return_value;
+	return _returnValue;
 }
 //____________________________________________________________________________
 
@@ -473,12 +473,12 @@ SEQAN_CHECKPOINT
 //to use the source buffer
 
 template <typename TExpand, bool IS_CONTIGUOUS>
-struct _Assign_String_2_StringArray;
+struct AssignStringToStringArray_;
 
 //____________________________________________________________________________
 
 template <typename TExpand>
-struct _Assign_String_2_StringArray<TExpand, true>
+struct AssignStringToStringArray_<TExpand, true>
 {
 	template <typename TValue, typename TSourceSpec>
 	static inline void
@@ -499,7 +499,7 @@ SEQAN_CHECKPOINT
 	}
 
 //special treatment of char:
-//_computeSize4Capacity is specialized for char such that there
+//_computeSizeForCapacity is specialized for char such that there
 //is enough place for the zero termination
 
 	template <typename TSourceSpec>
@@ -519,7 +519,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TExpand>
-struct _Assign_String_2_StringArray<TExpand, false>
+struct AssignStringToStringArray_<TExpand, false>
 {
 	template <typename TValue, typename TSourceSpec>
 	static inline void
@@ -540,7 +540,7 @@ assign(String<TValue, CStyle> & target,
 	Tag<TExpand> const)
 {
 	typedef String<TValue, TSourceSpec> TSource;
-	_Assign_String_2_StringArray<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
+	AssignStringToStringArray_<Tag<TExpand> const, IsContiguous<TSource>::VALUE>::assign_(target, source);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -637,11 +637,11 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <typename TExpand>
-struct _Create_ArrayString;
+struct CreateArrayString_;
 //____________________________________________________________________________
 
 template <>
-struct _Create_ArrayString<Insist>
+struct CreateArrayString_<Insist>
 {
 	template <typename TTarget, typename TSource>
 	static inline void
@@ -682,7 +682,7 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 
 template <>
-struct _Create_ArrayString<Limit>
+struct CreateArrayString_<Limit>
 {
 	template <typename TTarget, typename TSource>
 	static inline void
@@ -690,7 +690,7 @@ struct _Create_ArrayString<Limit>
 		TSource & source)
 	{
 SEQAN_CHECKPOINT
-		_Create_ArrayString<Insist>::create_(target, source, capacity(target));
+		CreateArrayString_<Insist>::create_(target, source, capacity(target));
 	}
 
 	template <typename TTarget, typename TSource, typename TSize>
@@ -705,13 +705,13 @@ SEQAN_CHECKPOINT
 		{
 			copy_size = limit;
 		}
-		_Create_ArrayString<Insist>::create_(target, source, copy_size);
+		CreateArrayString_<Insist>::create_(target, source, copy_size);
 	}
 };
 //____________________________________________________________________________
 
 template <>
-struct _Create_ArrayString<Exact>:
+struct CreateArrayString_<Exact>:
 	_Create_ArrayString_Expand<Exact>
 {
 };
@@ -719,7 +719,7 @@ struct _Create_ArrayString<Exact>:
 //____________________________________________________________________________
 
 template <>
-struct _Create_ArrayString<Generous>:
+struct CreateArrayString_<Generous>:
 	_Create_ArrayString_Expand<Generous>
 {
 };
@@ -756,7 +756,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
 }
 
 template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
@@ -767,7 +767,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source, limit);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
 }
 
 template <typename TTargetValue, typename TSource, typename TExpand>
@@ -777,7 +777,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
 }
 
 template <typename TTargetValue, typename TSource, typename TSize, typename TExpand>
@@ -788,7 +788,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source, limit);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
 }
 
 //____________________________________________________________________________
@@ -801,7 +801,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source);
 }
 
 template <typename TTargetValue, typename TSourceValue, typename TSize, typename TExpand>
@@ -812,7 +812,7 @@ create(String<TTargetValue, CStyle> & target,
 	   Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_Create_ArrayString<Tag<TExpand> const>::create_(target, source, limit);
+	CreateArrayString_<Tag<TExpand> const>::create_(target, source, limit);
 }
 
 //////////////////////////////////////////////////////////////////////////////

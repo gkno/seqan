@@ -30,7 +30,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 #ifdef SEQAN_HIRSCHBERG_DEBUG_CUT
 	template<typename TSource>
-	void write_debug_matrix(TSource s1,TSource s2)
+	void _writeDebugMatrix(TSource s1,TSource s2)
 	{
 		int l1 = length(s1);
 		int l2 = length(s2);
@@ -399,7 +399,7 @@ SEQAN_CHECKPOINT
 			std::cout << "cut is in row " << mid << " symbol is " << getValue(s1,mid-1) << std::endl << std::endl;
 
 
-			write_debug_matrix(infix(s1,_begin1(target),_end1(target)),infix(s2,_begin2(target),_end2(target)));
+			_writeDebugMatrix(infix(s1,_begin1(target),_end1(target)),infix(s2,_begin2(target),_end2(target)));
 #endif
 
 			border = 0;

@@ -67,15 +67,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 2, 3, 3, 1, 1 > 
-	> ShapeIlie_9_15_1;
+	> ShapeIlieA1;
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 2, 3, 1, 3, 1, 1, 2 > 
-	> ShapeIlie_9_15_2;
+	> ShapeIlieA2;
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 4, 2, 1, 2, 1 > 
-	> ShapeIlie_9_15_3;
+	> ShapeIlieA3;
 
 
 
@@ -98,15 +98,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 1, 2, 1, 2, 3, 1, 1 > 
-	> ShapeIlie_9_1323_1;
+	> ShapeIlieB1;
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 2, 5, 1, 3, 2, 1, 1 > 
-	> ShapeIlie_9_1323_2;
+	> ShapeIlieB2;
 
 	typedef GappedShape< 
 		HardwiredShape< 1, 1, 4, 3, 5, 2, 2, 1 > 
-	> ShapeIlie_9_1323_3;
+	> ShapeIlieB3;
 
 
 }	// namespace seqan

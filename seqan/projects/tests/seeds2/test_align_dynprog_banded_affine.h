@@ -35,7 +35,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_resize_matrix)
 
     Matrix<int, 3> matrix;
 
-    _alignBanded_resizeMatrix(matrix, CharString("length   11"), CharString("length 8"), -3, 1, Gotoh());
+    _alignBandedResizeMatrix(matrix, CharString("length   11"), CharString("length 8"), -3, 1, Gotoh());
 
     SEQAN_ASSERT_EQ(12u, length(matrix, 0));
     SEQAN_ASSERT_EQ(7u, length(matrix, 1));
@@ -54,9 +54,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_init_gutter_free)
     setLength(matrix, 2, 3);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), Gotoh());
+    _alignBandedInitGutter(matrix, Score<int, Simple>(1, -1, -1, -2), -1, 1, AlignConfig<true, true, true, true>(), Gotoh());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // Test matrix M
     //
@@ -110,9 +110,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_init_gutter_not_free)
     setLength(matrix, 2, 3);
     resize(matrix);
 
-    _alignBanded_initGutter(matrix, Score<int, Simple>(1, -1, -1, -2), -1, 1, AlignConfig<false, false, true, true>(), Gotoh());
+    _alignBandedInitGutter(matrix, Score<int, Simple>(1, -1, -1, -2), -1, 1, AlignConfig<false, false, true, true>(), Gotoh());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // Test matrix M
     //
@@ -165,11 +165,11 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_fill_matrix)
     DnaString const sequence1 = "CCACCC";
     Score<int, Simple> const scoringScheme(1, -1, -1, -2);
 
-    _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -1, 1, Gotoh());
-    _alignBanded_initGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), Gotoh());
-    _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, Gotoh());
+    _alignBandedResizeMatrix(matrix, sequence0, sequence1, -1, 1, Gotoh());
+    _alignBandedInitGutter(matrix, scoringScheme, -1, 1, AlignConfig<false, false, false, false>(), Gotoh());
+    _alignBandedFillMatrix(matrix, sequence0, sequence1, scoringScheme, -1, 1, Gotoh());
 
-    int inf = InfimumValue<int>::VALUE / 2;
+    int inf = MinValue<int>::VALUE / 2;
 
     // TODO(holtgrew): Debug output, remove when not needed any more.
     // {
@@ -180,7 +180,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_fill_matrix)
     //             for (unsigned j = 0; j < i; ++j)
     //                 std::cout << "\t";
     //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) == InfimumValue<int>::VALUE / 4)
+    //                 if (value(matrix, i, j, k) == MinValue<int>::VALUE / 4)
     //                     std::cout << "\tinf";
     //                 else
     //                     std::cout << "\t" << value(matrix, i, j, k);
@@ -328,9 +328,9 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
         TString const sequence1 = "CAA";
         Score<int, Simple> const scoringScheme(1, -1, -1, -2);
         
-        _alignBanded_resizeMatrix(matrix, sequence0, sequence1, -2, 1, Gotoh());
-        _alignBanded_initGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), Gotoh());
-        _alignBanded_fillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, Gotoh());
+        _alignBandedResizeMatrix(matrix, sequence0, sequence1, -2, 1, Gotoh());
+        _alignBandedInitGutter(matrix, scoringScheme, -2, 1, AlignConfig<false, false, false, false>(), Gotoh());
+        _alignBandedFillMatrix(matrix, sequence0, sequence1, scoringScheme, -2, 1, Gotoh());
 
         // // TODO(holtgrew): Debug output, remove when not needed any more.
 		// {
@@ -341,7 +341,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
 		// 			for (unsigned j = 0; j < i; ++j)
 		// 				std::cout << "\t";
 		// 			for (unsigned j = 0; j < length(matrix, 1); ++j) {
-		// 				if (value(matrix, i, j, k) < InfimumValue<int>::VALUE / 4)
+		// 				if (value(matrix, i, j, k) < MinValue<int>::VALUE / 4)
 		// 					std::cout << "\tinf";
 		// 				else
 		// 					std::cout << "\t" << value(matrix, i, j, k);
@@ -364,7 +364,7 @@ SEQAN_DEFINE_TEST(test_align_dynprog_banded_affine_traceback)
         TStringIterator seq1It = end(sequence1) - 1;
         TAlignRowIterator align0It = end(row(alignment, 0));
         TAlignRowIterator align1It = end(row(alignment, 1));
-        int score = _alignBanded_traceBack(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), Gotoh());
+        int score = _alignBandedTraceback(align0It, align1It, seq0It, seq1It, finalPos0, finalPos1, matrix, scoringScheme, 5, 3, 2, 3, false, AlignConfig<false, false, false, false>(), Gotoh());
 
         SEQAN_ASSERT_EQ(score, -1);
         SEQAN_ASSERT_TRUE(seq0It == begin(sequence0));

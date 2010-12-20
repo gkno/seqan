@@ -83,7 +83,7 @@ namespace seqan{
 		// special for the complete case
 	template< typename TObject, typename TModus, typename TSpec, typename TSize > inline
 	void 
-	_connect_actualize(	SkipList< TObject, TModus, RT< MaxTree< TSpec > >, Complete > & list,
+	_connectUpdate(	SkipList< TObject, TModus, RT< MaxTree< TSpec > >, Complete > & list,
 						SkipBaseElement< TObject, TModus, RT< MaxTree< TSpec > >, Complete > * base,
 						TSize height,
 						SkipElement< TObject, TModus, RT< MaxTree< TSpec > >, Complete > ** search_path,
@@ -122,8 +122,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( searchKey < supremumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
-		SEQAN_CHECK2( searchKey > infimumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
+		SEQAN_CHECK2( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
+		SEQAN_CHECK2( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );
@@ -167,8 +167,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( searchKey < supremumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
-		SEQAN_CHECK2( searchKey > infimumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
+		SEQAN_CHECK2( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
+		SEQAN_CHECK2( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Complete > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, Complete > >::Type height = _getCurrentLayer( *list );
@@ -209,8 +209,8 @@ namespace seqan{
 					TObject *& maxObject )
 	{
 		SEQAN_CHECKPOINT
-		SEQAN_CHECK2( searchKey < supremumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
-		SEQAN_CHECK2( searchKey > infimumValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
+		SEQAN_CHECK2( searchKey < maxValue< typename Key< TObject >::Type >( ), "search theKeyexceeds supremum" ) 
+		SEQAN_CHECK2( searchKey > minValue< typename Key< TObject >::Type >( ), "search theKeyexceeds infimum" ) 
 	
 		SkipElement< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > * layer_element = _getRoot( *list );
 		typename Size< SkipList< TObject, SkipListStatic, RT< MaxTree< TSpec > >, TStructuring > >::Type height = _getCurrentLayer( *list );

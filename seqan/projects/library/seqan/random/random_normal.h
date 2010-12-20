@@ -38,31 +38,31 @@ struct Normal {};
 // ===========================================================================
 
 /**
-.Spec.Normal PDF
-..signature:PDF<Normal>
-..general:Class.PDF
+.Spec.Normal Pdf
+..signature:Pdf<Normal>
+..general:Class.Pdf
 ..summary:Normal probability density function.
 ..cat:Random
 ..include:seqan/random.h
 */
 template <>
-class PDF<Normal>
+class Pdf<Normal>
 {
 public:
     double _mu;
     double _sigma;
 
 /**
-.Memfunc.Normal PDF#PDF
-..class:Spec.Normal PDF
-..summary:Constructor for normal PDF.
-..signature:PDF<Normal>(mu, sigma)
+.Memfunc.Normal Pdf#Pdf
+..class:Spec.Normal Pdf
+..summary:Constructor for normal Pdf.
+..signature:Pdf<Normal>(mu, sigma)
 ..param.mu:Mean of the normal distribution.
 ...type:nolink:double
 ..param.sigma:Standard deviation of the normal distribution.
 ...type:nolink:double
 */
-    PDF(double mu, double sigma)
+    Pdf(double mu, double sigma)
             : _mu(mu), _sigma(sigma)
     {
         SEQAN_CHECKPOINT;
@@ -74,13 +74,13 @@ public:
 // ===========================================================================
 
 template <>
-struct Value<PDF<Normal> >
+struct Value<Pdf<Normal> >
 {
     typedef double Type;
 };
 
 template <>
-struct Value<const PDF<Normal> > : Value<PDF<Normal> > {};
+struct Value<const Pdf<Normal> > : Value<Pdf<Normal> > {};
 
 // ===========================================================================
 // Functions
@@ -91,8 +91,8 @@ struct Value<const PDF<Normal> > : Value<PDF<Normal> > {};
 */
 template <typename TRNG>
 inline
-typename Value<PDF<Normal> >::Type
-pickRandomNumber(TRNG & rng, PDF<Normal> const & pdf)
+typename Value<Pdf<Normal> >::Type
+pickRandomNumber(TRNG & rng, Pdf<Normal> const & pdf)
 {
     SEQAN_CHECKPOINT;
 
@@ -104,7 +104,7 @@ pickRandomNumber(TRNG & rng, PDF<Normal> const & pdf)
     // (1977), pp257-260.
 
     double z;
-    PDF<Uniform<double> > pdfUniform(0, 1);
+    Pdf<Uniform<double> > pdfUniform(0, 1);
     while (true) {
         double u1 = pickRandomNumber(rng, pdfUniform);
         double u2 = 1 - pickRandomNumber(rng, pdfUniform);

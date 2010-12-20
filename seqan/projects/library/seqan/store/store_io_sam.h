@@ -129,11 +129,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readCigar
+// _parseReadCigar
     
     template <typename TFile, typename TCigarString, typename TChar>
     inline void
-    _parse_readCigar(TFile & file, TCigarString & cigar, TChar & c)
+    _parseReadCigar(TFile & file, TCigarString & cigar, TChar & c)
     {
 		typedef typename Value<TCigarString>::Type	TCigarElement;
 		typedef typename TCigarElement::TOperation	TOperation;
@@ -150,7 +150,7 @@ namespace SEQAN_NAMESPACE_MAIN
         
         while (!_streamEOF(file)) 
 		{
-            TCount count = _parse_readNumber(file, c);
+            TCount count = _parseReadNumber(file, c);
 			if (c >= 'a' && c <= 'z')
 				c = c + 'A' - 'a';
             appendValue(cigar, TCigarElement(c, count));
@@ -161,11 +161,11 @@ namespace SEQAN_NAMESPACE_MAIN
     }
     
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readSamIdentifier
+// _parseReadSamIdentifier
     
     template<typename TFile, typename TString, typename TChar>
     inline void
-    _parse_readSamIdentifier(TFile & file, TString & str, TChar& c)
+    _parseReadSamIdentifier(TFile & file, TString & str, TChar& c)
     {
         if (c == ' ' || c == '\t' || c == '\n') return;
         appendValue(str, c);
@@ -178,52 +178,52 @@ namespace SEQAN_NAMESPACE_MAIN
     }
     
 //////////////////////////////////////////////////////////////////////////////
-// _parse_is_dna
+// _parseIsDna
     
     template<typename TChar>
     inline bool
-    _parse_is_dna(TChar const & c)
+    _parseIsDna(TChar const & c)
     {
         char x = TChar(Dna5(c));
         return (c == x) || (c + 'A' - 'a' == x);
     }
     
 //////////////////////////////////////////////////////////////////////////////
-//_parse_readDnaSeq
+//_parseReadDnaSeq
     
     template<typename TFile, typename TString, typename TChar>
     inline void
-    _parse_readDnaSeq(TFile & file, TString & str, TChar & c)
+    _parseReadDnaSeq(TFile & file, TString & str, TChar & c)
     {
 		TChar first = c;
 		if (!_streamEOF(file)) 
 			c = _streamGet(file);
 
-        if (!_parse_is_dna(first))
+        if (!_parseIsDna(first))
 			return;
         appendValue(str, first, Generous());
         
-        for (; !_streamEOF(file) && _parse_is_dna(c); c = _streamGet(file))
+        for (; !_streamEOF(file) && _parseIsDna(c); c = _streamGet(file))
             appendValue(str, c, Generous());
     }
         
 //////////////////////////////////////////////////////////////////////////////
-// _parse_is_PhredQual
+// _parseIsPhredQual
     
     template <typename TChar>
     inline bool
-    _parse_is_PhredQual(TChar c)
+    _parseIsPhredQual(TChar c)
     {
         return c >= '!' && c <= '~';
     }
     
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readSeqQual
+// _parseReadSeqQual
 //
     
     template<typename TFile, typename TQualString, typename TChar>
     inline void
-    _parse_readSeqQual(TFile & file, TQualString & str, TChar & c)
+    _parseReadSeqQual(TFile & file, TQualString & str, TChar & c)
     {
         typedef typename Size<TQualString>::Type				TSize;
         typedef typename Iterator<TQualString, Standard>::Type	TIter;
@@ -232,7 +232,7 @@ namespace SEQAN_NAMESPACE_MAIN
         TSize rest = length(str);
         
         int q = 0;
-        for (TIter it = itBegin; rest != 0 && _parse_is_PhredQual(c); --rest, ++it)
+        for (TIter it = itBegin; rest != 0 && _parseIsPhredQual(c); --rest, ++it)
         {
             q = c - '!';
 			if (!_streamEOF(file)) 
@@ -241,7 +241,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				if (rest > 1)
 					rest = 1;
 			
-			if (q == '*' - '!' && !_parse_is_PhredQual(c) && it == itBegin)
+			if (q == '*' - '!' && !_parseIsPhredQual(c) && it == itBegin)
 				return;
 			
             assignQualityValue(*it, q);
@@ -249,14 +249,14 @@ namespace SEQAN_NAMESPACE_MAIN
     }
     
 //////////////////////////////////////////////////////////////////////////////
-// _parse_readCharsTillEndOfLine
+// _parseReadCharsUntilEndOfLine
 //
 // Reads all symbols till the next '\n' and writes them in the CharString str
 // the c is the first character after the '\n'.
     
     template<typename TFile, typename TChar>
     inline void
-    _parse_readCharsTillEndOfLine(TFile & file, String<char> & str, TChar& c)
+    _parseReadCharsUntilEndOfLine(TFile & file, String<char> & str, TChar& c)
     {
         // read all chars till '\n'
         while (c != '\n')
@@ -470,7 +470,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TAlignQualityStore>::Type TAlignQuality;
 		
 		TAlignQuality q;
-		q.score = supremumValue(q.score);
+		q.score = maxValue(q.score);
         int diff = length(fragStore.alignedReadStore) - length(fragStore.alignQualityStore);
         for(int i = 0; i < diff; ++i)
             appendValue(fragStore.alignQualityStore, q, Generous());
@@ -531,42 +531,42 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Value<TMatchMateInfos>::Type								TMatchMateInfo;
         
         // read fields of alignments line        
-        _parse_skipWhitespace(file, c);
+        _parseSkipWhitespace(file, c);
 
 		// Read the query name.  The letters until the first
 		// whitespace will be read into qname.  Then, we skip until we
 		// hit the first tab character.
         String<char> qname;
-        _parse_readSamIdentifier(file, qname, c);
-        _parse_skipUntilChar(file, '\t', c);
+        _parseReadSamIdentifier(file, qname, c);
+        _parseSkipUntilChar(file, '\t', c);
 
 		// read the flag
         int flag;
-        flag = _parse_readNumber(file, c);
-        _parse_skipWhitespace(file, c);
+        flag = _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
 		bool reverse = (flag & (1 << 4)) == (1 << 4);
 
 		// Read reference name.  Same behaviour as for query name:  Read up to
         // the first whitespace character and skip to next tab char.
         String<char> rname;
-        _parse_readSamIdentifier(file, rname, c);
-        _parse_skipUntilChar(file, '\t', c);
+        _parseReadSamIdentifier(file, rname, c);
+        _parseSkipUntilChar(file, '\t', c);
 
 		// read begin position
         TContigPos beginPos;
-        beginPos = _parse_readNumber(file, c);
+        beginPos = _parseReadNumber(file, c);
         --beginPos; // SAM stores positions starting at 1 the fragment store starting at 0
-        _parse_skipWhitespace(file, c);
+        _parseSkipWhitespace(file, c);
 
         // read map quality
         TAlignQualityElement mapQ;
-        mapQ.score = _parse_readNumber(file, c);
-        _parse_skipWhitespace(file, c);
+        mapQ.score = _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
 
 		// read CIGAR
         String<CigarElement<> > cigar;
-        _parse_readCigar(file, cigar, c);
-        _parse_skipWhitespace(file, c);
+        _parseReadCigar(file, cigar, c);
+        _parseSkipWhitespace(file, c);
         
         // calculate the end position
         TContigPos endPos;
@@ -585,29 +585,29 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // read mate reference name
         String<char> mrnm;
-        _parse_readSamIdentifier(file, mrnm, c);
-        _parse_skipWhitespace(file, c);
+        _parseReadSamIdentifier(file, mrnm, c);
+        _parseSkipWhitespace(file, c);
 
 		// read mate position
         TContigPos mPos;
-        mPos = _parse_readNumber(file, c);
+        mPos = _parseReadNumber(file, c);
         --mPos; // SAM stores positions starting at 1 the fragment store starting at 0
-        _parse_skipWhitespace(file, c);
+        _parseSkipWhitespace(file, c);
 
 		// read iSize
-        _parse_readNumber(file, c);
-        _parse_skipWhitespace(file, c);
+        _parseReadNumber(file, c);
+        _parseSkipWhitespace(file, c);
 
 		// read in sequence
         TReadSeq2 readSeq;
-        _parse_readDnaSeq(file, readSeq, c);
+        _parseReadDnaSeq(file, readSeq, c);
         SEQAN_ASSERT_GT(length(readSeq), 0u);
 		if (reverse)
-			reverseComplementInPlace(readSeq);
-        _parse_skipWhitespace(file, c);
+			reverseComplement(readSeq);
+        _parseSkipWhitespace(file, c);
 
 		// and associated qualities
-        _parse_readSeqQual(file, readSeq, c);
+        _parseReadSeqQual(file, readSeq, c);
 
 		// insert alignment gaps
 		TReadGaps readGaps(readSeq, readGapAnchors);
@@ -615,8 +615,8 @@ namespace SEQAN_NAMESPACE_MAIN
         
         // read in SAM tags
         String<char> tags;
-        _parse_skipSpace(file, c);
-        _parse_readCharsTillEndOfLine(file, tags, c);
+        _parseSkipSpace(file, c);
+        _parseReadCharsUntilEndOfLine(file, tags, c);
 		
 		if (empty(qname) || empty(rname))
 			return;
@@ -853,7 +853,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				{
 					setBeginPosition(contigGaps, (*it).endPos);
 					setEndPosition(contigGaps, (*it).beginPos);
-					reverseComplementInPlace(readSeq);
+					reverseComplement(readSeq);
 				}
 			} else
 				clear(readSeq);

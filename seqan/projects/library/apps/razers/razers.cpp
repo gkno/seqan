@@ -98,15 +98,15 @@ int getGenomeFileNameList(CharString filename, StringSet<CharString> & genomeFil
 		unsigned i = 1;
 		while(!_streamEOF(file))
 		{ 
-			_parse_skipWhitespace(file, c);
-			appendValue(genomeFileNames,_parse_readFilepath(file,c));
+			_parseSkipWhitespace(file, c);
+			appendValue(genomeFileNames,_parseReadFilepath(file,c));
 			//CharString currentGenomeFile(filePrefix);
-			//append(currentGenomeFile,_parse_readFilepath(file,c));
+			//append(currentGenomeFile,_parseReadFilepath(file,c));
 			//appendValue(genomeFileNames,currentGenomeFile);
 			if(options._debugLevel >=2)
 				cout <<"Genome file #"<< i <<": " << genomeFileNames[length(genomeFileNames)-1] << endl;
 			++i;
-			_parse_skipWhitespace(file, c);
+			_parseSkipWhitespace(file, c);
 		}
 		if(options._debugLevel >=1)
 			cout << i-1 << " genome files total." <<endl;
@@ -306,7 +306,7 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = Razer format");
 	addHelpLine(parser, "1 = enhanced Fasta format");
 	addHelpLine(parser, "2 = Eland format");
-	addHelpLine(parser, "3 = GFF format");
+	addHelpLine(parser, "3 = Gff format");
 	addOption(parser, CommandLineOption("gn", "genome-naming",     "select how genomes are named", OptionType::Int | OptionType::Label, options.genomeNaming));
 	addHelpLine(parser, "0 = use Fasta id");
 	addHelpLine(parser, "1 = enumerate beginning with 1");

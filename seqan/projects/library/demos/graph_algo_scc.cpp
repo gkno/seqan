@@ -23,7 +23,7 @@ int main() {
 ///Out-parameter: Map of vertex descriptors to component
 	String<unsigned int> component;
 ///Strongly Connected Components
-	strongly_connected_components(g, component);
+	stronglyConnectedComponents(g, component);
 ///Console output
 	::std::cout << "Strongly Connected Components: " << ::std::endl;
 	typedef Iterator<TGraph, VertexIterator>::Type TVertexIterator;

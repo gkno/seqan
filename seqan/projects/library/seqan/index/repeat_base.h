@@ -52,9 +52,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	struct TRepeatFinder;
 
 	template <typename TText>
-	struct Cargo<Index<TText, Index_Wotd<TRepeatFinder> > > 
+	struct Cargo<Index<TText, IndexWotd<TRepeatFinder> > > 
 	{
-		typedef Index<TText, Index_Wotd<TRepeatFinder> >	TIndex;
+		typedef Index<TText, IndexWotd<TRepeatFinder> >	TIndex;
 		typedef typename Size<TIndex>::Type					TSize;
 		typedef RepeatFinderParams<TSize>					Type;
 	};
@@ -62,7 +62,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// node predicate
 	template <typename TText, typename TSpec>
-	bool nodePredicate(Iter<Index<TText, Index_Wotd<TRepeatFinder> >, TSpec> &it) 
+	bool nodePredicate(Iter<Index<TText, IndexWotd<TRepeatFinder> >, TSpec> &it) 
 	{
 //		return countOccurrences(it) * nodeDepth(it) >= cargo(container(it)).minRepeatLen;
 		return countOccurrences(it) * repLength(it) >= cargo(container(it)).minRepeatLen;
@@ -70,14 +70,14 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	// monotonic hull
 	template <typename TText, typename TSpec>
-	bool nodeHullPredicate(Iter<Index<TText, Index_Wotd<TRepeatFinder> >, TSpec> &it) 
+	bool nodeHullPredicate(Iter<Index<TText, IndexWotd<TRepeatFinder> >, TSpec> &it) 
 	{
 //		return nodeDepth(it) <= cargo(container(it)).maxPeriod;
 		return repLength(it) <= cargo(container(it)).maxPeriod;
 	}
 
 	template <typename TPos>
-	struct _RepeatLess : public ::std::binary_function<TPos, TPos, bool>
+	struct RepeatLess_ : public ::std::binary_function<TPos, TPos, bool>
 	{
 		// key less
 		inline bool operator() (TPos const &a, TPos const &b) {
@@ -212,17 +212,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TRepeatStore, typename TText, typename TRepeatSize, typename TPeriodSize>
 	void findRepeats(TRepeatStore &repString, TText const &text, TRepeatSize minRepeatLen, TPeriodSize maxPeriod) 
 	{
-		typedef Index<TText, Index_Wotd<TRepeatFinder> >					TIndex;
+		typedef Index<TText, IndexWotd<TRepeatFinder> >					TIndex;
 		typedef typename Size<TIndex>::Type									TSize;
 		typedef typename Iterator<TIndex, TopDown<ParentLinks<> > >::Type	TNodeIterator;
-		typedef typename Fibre<TIndex, Fibre_SA>::Type const				TSA;
+		typedef typename Fibre<TIndex, FibreSA>::Type const				TSA;
 		typedef typename Infix<TSA>::Type									TOccString;
 		typedef typename Iterator<TOccString>::Type							TOccIterator;
 
 		typedef typename Value<TRepeatStore>::Type							TRepeat;
 		typedef typename Value<TOccString>::Type							TOcc;
 
-		typedef ::std::map<TOcc,TRepeat,_RepeatLess<TOcc> >					TRepeatList;
+		typedef ::std::map<TOcc,TRepeat,RepeatLess_<TOcc> >					TRepeatList;
 
 		if (maxPeriod < 1) return;
 		if (maxPeriod == 1) 

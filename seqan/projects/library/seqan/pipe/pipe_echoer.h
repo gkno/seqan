@@ -29,21 +29,21 @@ namespace SEQAN_NAMESPACE_MAIN
 
     //////////////////////////////////////////////////////////////////////////////
 	// some metaprogramming to unrool fixed-size loops
-    struct _EchoerFillWorker {
+    struct EchoerFillWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
             arg.tmp.i2[I-1] = *(arg.in); ++(arg.in);
         }
     };
     
-    struct _EchoerClearWorker {
+    struct EchoerClearWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
 			arg.i2[I] = typename Value< typename Value<Arg, 2>::Type >::Type ();
         }
     };
     
-    struct _EchoerShiftWorker {
+    struct EchoerShiftWorker_ {
         template <typename Arg>
         static inline void body(Arg &arg, unsigned I) {
             arg.i2[I] = arg.i2[I-1];
@@ -99,7 +99,7 @@ namespace SEQAN_NAMESPACE_MAIN
         inline Pipe& operator++() {
 			++in;
             if (eof(in)) return *this;
-            LOOP_REVERSE<_EchoerShiftWorker, echoRepeats - 1>::run(this->tmp);
+            LoopReverse<EchoerShiftWorker_, echoRepeats - 1>::run(this->tmp);
 			++tmp.i1;
             tmp.i2[0] = *in;
             return *this;
@@ -113,7 +113,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	inline bool control(Pipe< TInput, Echoer< echoRepeats, omitFirst > > &me, ControlBeginRead const &command) {
         if (!control(me.in, command)) return false;
         me.tmp.i1 = 0;
-        LOOP<_EchoerClearWorker, echoRepeats - 1>::run(me.tmp);
+        Loop<EchoerClearWorker_, echoRepeats - 1>::run(me.tmp);
         if (!eof(me.in)) me.tmp.i2[0] = *me.in;
 		return true;
 	}
@@ -122,7 +122,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool control(Pipe< TInput, Echoer< echoRepeats, true > > &me, ControlBeginRead const &command) {
         if (!control(me.in, command) || size(me.in) < echoRepeats - 1) return false;
         me.tmp.i1 = 0;
-        LOOP_REVERSE<_EchoerFillWorker, echoRepeats - 1>::run(me);
+        LoopReverse<EchoerFillWorker_, echoRepeats - 1>::run(me);
         if (!eof(me.in)) me.tmp.i2[0] = *me.in;
 		return true;
     }

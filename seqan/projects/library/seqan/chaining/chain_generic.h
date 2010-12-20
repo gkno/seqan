@@ -27,7 +27,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TPos, typename TWeight>
-struct _Chain_Generic_Entry
+struct ChainGenericEntry_
 {
 	TPos me;		//position of fragment here (within Source)
 	TPos pre;		//position of precursor or -1 for top (within Frags)
@@ -37,24 +37,24 @@ struct _Chain_Generic_Entry
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TSource>
-struct _Chain_Generic_SortFragsPredFunctional
+struct ChainGenericSortFragsPredFunctional_
 {
 	TSource & source;
-	_Chain_Generic_SortFragsPredFunctional(TSource & src)
+	ChainGenericSortFragsPredFunctional_(TSource & src)
 		: source(src)
 	{
 	}
-	_Chain_Generic_SortFragsPredFunctional(_Chain_Generic_SortFragsPredFunctional const & other)
+	ChainGenericSortFragsPredFunctional_(ChainGenericSortFragsPredFunctional_ const & other)
 		: source(other.source)
 	{
 	}
-	inline _Chain_Generic_SortFragsPredFunctional &
-	operator = (_Chain_Generic_SortFragsPredFunctional const & other)
+	inline ChainGenericSortFragsPredFunctional_ &
+	operator = (ChainGenericSortFragsPredFunctional_ const & other)
 	{
 		source = other.source;
 		return *this;
 	}
-	~_Chain_Generic_SortFragsPredFunctional()
+	~ChainGenericSortFragsPredFunctional_()
 	{
 	}
 
@@ -71,7 +71,7 @@ struct _Chain_Generic_SortFragsPredFunctional
 
 template <typename TSource, typename TFrags, typename TScoring>
 inline void
-_chain_generic_initFrags(TSource & source,
+_chainGenericInitFrags(TSource & source,
 						 TFrags & frags,
 						 TScoring scoring)
 {
@@ -95,14 +95,14 @@ _chain_generic_initFrags(TSource & source,
 		frag.weight = scoreChainGap(scoring, top, source[i]) + weight(source[i]);
 	}
 
-	std::sort(begin(frags, Standard()), end(frags, Standard()), _Chain_Generic_SortFragsPredFunctional<TSource>(source));
+	std::sort(begin(frags, Standard()), end(frags, Standard()), ChainGenericSortFragsPredFunctional_<TSource>(source));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFrag>
 inline bool
-_chain_generic_chainable(TFrag & f1,
+_chainGenericChainable(TFrag & f1,
 						 TFrag & f2)
 {
 	SEQAN_ASSERT(dimension(f1) == dimension(f2))
@@ -124,7 +124,7 @@ _chain_generic_chainable(TFrag & f1,
 
 template <typename TSource, typename TFrags, typename TIterator, typename TScoring>
 inline void
-_chain_generic_findBest(TSource & source,
+_chainGenericFindBest(TSource & source,
 						TFrags & frags,
 						TIterator & it_act,
 						TScoring scoring)
@@ -139,7 +139,7 @@ _chain_generic_findBest(TSource & source,
 	for (TFragsIterator it = it_begin; it < it_act; ++it)
 	{
 		TFragRef frag = *it;
-		if (_chain_generic_chainable(source[frag.me], source[act.me]))
+		if (_chainGenericChainable(source[frag.me], source[act.me]))
 		{
 			TWeight score = frag.weight + scoreChainGap(scoring, source[frag.me], source[act.me]) + act_weight;
 			if (score > act.weight)
@@ -155,7 +155,7 @@ _chain_generic_findBest(TSource & source,
 
 template <typename TSource, typename TFrags, typename TIterator, typename TDest, typename TFragment>
 inline void
-_chain_generic_Backtrace(TSource & source,
+_chainGenericTraceback(TSource & source,
 						 TFrags & frags,
 						 TIterator & it_best,
 						 TDest & dest,
@@ -196,18 +196,18 @@ globalChaining(TSource & source,
 	typedef typename Value<TSource>::Type TFragment;
 	typedef typename Weight<TFragment>::Type TWeight;
 	typedef typename Position<TSource>::Type TSourcePosition;
-	typedef _Chain_Generic_Entry<TSourcePosition, TWeight> TFrag;
+	typedef ChainGenericEntry_<TSourcePosition, TWeight> TFrag;
 	typedef String<TFrag> TFrags;
 	typedef typename Iterator<TFrags, Standard>::Type TFragsIterator;
 
 	//initialize fragments
 	TFrags frags;
-	_chain_generic_initFrags(source, frags, scoring);
+	_chainGenericInitFrags(source, frags, scoring);
 
 	TFragsIterator it_begin = begin(frags, Standard());
 	TFragsIterator it_end = end(frags, Standard());
 	TFragsIterator it_best = it_begin;
-	TWeight weight_best = InfimumValue<TWeight>::VALUE;
+	TWeight weight_best = MinValue<TWeight>::VALUE;
 
 
 	//create bottom fragment
@@ -219,7 +219,7 @@ globalChaining(TSource & source,
 	for (TFragsIterator it = it_begin; it < it_end; ++it)
 	{
 		//find best predecessor for *it
-		_chain_generic_findBest(source, frags, it, scoring);
+		_chainGenericFindBest(source, frags, it, scoring);
 
 		//determine heaviest fragment
 		TWeight weight_it = (*it).weight + scoreChainGap(scoring, source[(*it).me], bottom);
@@ -232,7 +232,7 @@ globalChaining(TSource & source,
 	}
 
 	//follow best fragment back to the beginning of the chain
-	_chain_generic_Backtrace(source, frags, it_best, dest, bottom);
+	_chainGenericTraceback(source, frags, it_best, dest, bottom);
 
 	return weight_best;
 }

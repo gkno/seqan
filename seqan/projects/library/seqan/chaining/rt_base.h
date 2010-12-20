@@ -60,7 +60,7 @@ namespace seqan{
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct Cargo< SkipList< TObject, TModus, RT< TSpec >, TStructuring > >
 	{
-		typedef _Empty Type;
+		typedef EmptyCargo_ Type;
 	};
 
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
@@ -78,30 +78,30 @@ namespace seqan{
 		// the memory allocators of the range tree
 	template< typename TObject, typename TModus, typename TSpec, typename TStructuring >
 	struct
-	_RTreeAllocators;
+	RangeTreeAllocators;
 
 	template< typename TObject, typename TSpec, typename TStructuring >
 	struct
-	_RTreeAllocators< TObject, SkipListStatic, TSpec, TStructuring >
+	RangeTreeAllocators< TObject, SkipListStatic, TSpec, TStructuring >
 	{
 		
 		Allocator< ClassPool< SkipElement< TObject, SkipListStatic, TSpec, TStructuring >, Limited > > _elementAlloc;
 		Allocator< ClassPool< SkipList< TObject, SkipListStatic, TSpec, TStructuring >, Unlimited > > _listAlloc;
 		Allocator< SimpleAlloc<> > _baseAlloc;
 
-		_RTreeAllocators()
+		RangeTreeAllocators()
 			: _elementAlloc( NULL )
 		{}
 
 		template< typename TSize >
-		_RTreeAllocators( TSize size1, TSize size2 )
+		RangeTreeAllocators( TSize size1, TSize size2 )
 			:_elementAlloc( size1 )
 			,_listAlloc( size2 )
 		{
 			SEQAN_CHECKPOINT
 		}
 
-		~_RTreeAllocators( )
+		~RangeTreeAllocators( )
 		{
 			SEQAN_CHECKPOINT
 		}
@@ -149,7 +149,7 @@ namespace seqan{
 	{
 		SEQAN_CHECKPOINT
 		me = TObject( dim );
-		typename Key< TObject>::Type infValue = infimumValue< typename Key< TObject>::Type >();
+		typename Key< TObject>::Type infValue = minValue< typename Key< TObject>::Type >();
 		for( typename Size< TObject >::Type i = 0; i < dimension( me ); ++i )
 		{
 			setKey( me, i, infValue );
@@ -165,7 +165,7 @@ namespace seqan{
 		
 		SEQAN_CHECKPOINT
 		me = TObject( dim );
-		typename Key< TObject>::Type supValue = supremumValue< typename Key< TObject>::Type >();
+		typename Key< TObject>::Type supValue = maxValue< typename Key< TObject>::Type >();
 		for( typename Size< TObject >::Type i = 0; i < dimension( me ); ++i )
 		{
 			setKey( me, i, supValue );

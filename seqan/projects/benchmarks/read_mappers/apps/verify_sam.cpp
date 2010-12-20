@@ -71,19 +71,19 @@ void mapReadOnline(TWeightedMatches & matches,
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
                 SEQAN_ASSERT_TRUE(ret);
-                int theScore = getScore(pattern);
+                int theScore = _getMatchScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, true, endPosition(finder), theScore, beginPosition(finder)));
             }
         }
         // Find on backward strand.
         {
-            reverseComplementInPlace(readCopy);
+            reverseComplement(readCopy);
             Finder<TContigSeq> finder(contig);
             Pattern<TString, Myers<FindInfix> > pattern(readCopy, minScore);
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
                 SEQAN_ASSERT_TRUE(ret);
-                int theScore = getScore(pattern);
+                int theScore = _getMatchScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, false, endPosition(finder), theScore, beginPosition(finder)));
             }
         }
@@ -98,8 +98,8 @@ template <typename TFragmentStore>
 void intervalizeMatches(String<std::map<size_t, std::pair<size_t, bool> > > & intervalMaps,
                         TWeightedMatches & matches, TFragmentStore const & fragments) {
     typedef size_t TSize;
-    TSize previousPos = supremumValue<TSize>();
-    TSize previousContigId = supremumValue<TSize>();
+    TSize previousPos = maxValue<TSize>();
+    TSize previousContigId = maxValue<TSize>();
     typedef Iterator<TWeightedMatches>::Type TWeightedMatchesIter;
     String<ContigInterval> intervals;
     for (TWeightedMatchesIter it = begin(matches); it != end(matches); ++it) {
@@ -256,7 +256,7 @@ int main(int argc, const char *argv[]) {
     std::cout << "  read name = " << fragments.readNameStore[readId] << std::endl;
     std::cout << "  read seq =  " << fragments.readSeqStore[readId] << std::endl;
     Value<TFragmentStore::TReadSeqStore>::Type rcRead(fragments.readSeqStore[readId]);
-    reverseComplementInPlace(rcRead);
+    reverseComplement(rcRead);
     std::cout << "  rev comp =  " << rcRead << std::endl;
     TWeightedMatches matches;
     mapReadOnline(matches, fragments.readSeqStore[readId], fragments, maxErrorRate);

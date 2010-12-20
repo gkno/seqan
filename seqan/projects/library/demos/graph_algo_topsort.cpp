@@ -24,7 +24,7 @@ int main() {
 ///Out-parameter: Order of vertices
 	String<TVertexDescriptor> order;
 ///Topological sort
-	topological_sort(g, order);
+	topologicalSort(g, order);
 ///Console output
 	::std::cout << "Topological sort: " << ::std::endl;
 	typedef Iterator<String<TVertexDescriptor> >::Type TStringIterator;

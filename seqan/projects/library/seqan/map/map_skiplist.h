@@ -942,7 +942,7 @@ end(Map<TValue, Skiplist<TSpec> > &)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TCargo>
-struct _Skiplist_mapValue
+struct SkipListMapValue_
 {
 	template <typename TValue, typename TSpec, typename TKey2>
 	static inline TCargo &
@@ -954,7 +954,7 @@ struct _Skiplist_mapValue
 };
 
 template <>
-struct _Skiplist_mapValue<Nothing>
+struct SkipListMapValue_<Nothing>
 {
 	template <typename TValue, typename TSpec, typename TKey2>
 	static inline bool
@@ -972,7 +972,7 @@ mapValue(Map<TValue, Skiplist<TSpec> > & me,
 {
 	typedef Map<TValue, Skiplist<TSpec> > TSkiplist;
 	typedef typename Cargo<TSkiplist>::Type TCargo;
-	return _Skiplist_mapValue<TCargo>::mapValue_(me, _key);
+	return SkipListMapValue_<TCargo>::mapValue_(me, _key);
 }
 
 //////////////////////////////////////////////////////////////////////////////

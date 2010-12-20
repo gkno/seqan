@@ -35,18 +35,18 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////////////
 
 	template <typename T>
-	struct _SkewDC<3, T> {
+	struct SkewDC_<3, T> {
 		static const unsigned VALUE[];
 	};
 
 	template <typename T>
-	const unsigned _SkewDC<3, T>::VALUE[] = { 2,   1, 2 };
+	const unsigned SkewDC_<3, T>::VALUE[] = { 2,   1, 2 };
 
 
 	// *** COMPARATORS & MAPS ***
 
     template <typename InType, typename Result = int>
-    struct skew3_ncomp : public ::std::binary_function<InType,InType,Result> {
+    struct _skew3NComp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
 			typedef typename InType::T1 SizeType;
@@ -69,26 +69,26 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew3_nmap_linear : public ::std::unary_function<InType,Result> {
+    struct _skew3NMapLinear : public ::std::unary_function<InType,Result> {
         Result BN;
-        skew3_nmap_linear(Result _BN):BN(_BN) { }
+        _skew3NMapLinear(Result _BN):BN(_BN) { }
         inline Result operator()(const InType& x) const
         { Result i = x.i1; return BN - (i - i / 3); }
     };
 
     template <typename InType, typename Result = typename InType::T1>
-    struct skew3_nmap_sliced : public ::std::unary_function<InType,Result> {
+    struct _skew3NMapSliced : public ::std::unary_function<InType,Result> {
         Result BN, BN2;
-        skew3_nmap_sliced(Result _BN):BN(_BN-1),BN2(_BN/2-1) { }
+        _skew3NMapSliced(Result _BN):BN(_BN-1),BN2(_BN/2-1) { }
         inline Result operator()(const InType& x) const
         { return (x.i1 % 3 == 1)? BN - x.i1/3 : BN2 - x.i1/3; }
     };
 
 
     template <typename InType, typename Result = InType>
-    struct skew3_unslicer_func : public ::std::unary_function<InType,Result> {
+    struct _skew3UnslicerFunc : public ::std::unary_function<InType,Result> {
         Result o1, o2, n2;
-        skew3_unslicer_func(Result N):
+        _skew3UnslicerFunc(Result N):
             o1(N - (N + 2) % 3),
             o2(N - (N + 1) % 3),
             n2((N + 1) / 3) { }
@@ -98,13 +98,13 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
     template <typename InType, typename Result = typename InType::T2::T>
-    struct skew3_nmap_extended : public ::std::unary_function<InType,Result> {
+    struct _skew3NMapExtended : public ::std::unary_function<InType,Result> {
         inline Result operator()(const InType& x) const
         { return x.i2[0]; }
     };
 
     template <typename InType, typename Result = int>
-    struct skew3_extend_comp : public ::std::binary_function<InType,InType,Result> {
+    struct _skew3ExtendComp : public ::std::binary_function<InType,InType,Result> {
         inline Result operator()(const InType &a, const InType &b) const
         {
             return (a.i3[0] <  b.i3[0] ||
@@ -130,11 +130,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
         // step 1
 		typedef Pipe< TInput, Sampler<3> >  TSamplerDC3;
-                                        typedef skew3_ncomp<_TypeOf(TSamplerDC3)> ncomp_t;
+                                        typedef _skew3NComp<_TypeOf(TSamplerDC3)> ncomp_t;
         typedef Pool< _TypeOf(TSamplerDC3), SorterSpec< SorterConfigSize<ncomp_t, _TSizeOf(TSamplerDC3) > > > TSortTuples;
 		typedef Pipe< TSortTuples, Namer<ncomp_t> > TNamer;
-                                        typedef skew3_nmap_sliced<_TypeOf(TNamer)> nmap_sliced_t;
-                                        typedef skew3_nmap_linear<_TypeOf(TNamer)> nmap_linear_t;
+                                        typedef _skew3NMapSliced<_TypeOf(TNamer)> nmap_sliced_t;
+                                        typedef _skew3NMapLinear<_TypeOf(TNamer)> nmap_linear_t;
         typedef Pool< _TypeOf(TNamer), MapperSpec< MapperConfigSize< nmap_sliced_t, _TSizeOf(TNamer) > > > TNames_Sliced;
 
         // unique names - shortcut
@@ -143,18 +143,18 @@ namespace SEQAN_NAMESPACE_MAIN
         // non-unique names - recursion
         typedef Pipe< TNames_Sliced, Filter< filterI2<_TypeOf(TNames_Sliced)> > > TFilter;
         typedef Pipe< TFilter, Skew3 > TRecurse;
-                                        typedef skew3_unslicer_func<_TypeOf(TRecurse)> unslicer_func_t;
+                                        typedef _skew3UnslicerFunc<_TypeOf(TRecurse)> unslicer_func_t;
         typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
         typedef Pipe< TUnslicer, Counter > TRenamer;
         typedef Pool< _TypeOf(TRenamer), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TRenamer) > > > TNames_Linear;
 
         // step 2
         typedef Pipe< Bundle2< TInput, TNames_Linear >, Extender3 > TExtender;
-                                        typedef skew3_extend_comp<_TypeOf(typename TExtender::Out0)> extend_comp_t;
+                                        typedef _skew3ExtendComp<_TypeOf(typename TExtender::Out0)> extend_comp_t;
         typedef Pool< _TypeOf(typename TExtender::Out0), SorterSpec< SorterConfigSize< extend_comp_t, _TSizeOf(typename TExtender::Out0) > > > TSorterS0;
 
         // step 3
-                                        typedef skew3_nmap_extended<_TypeOf(typename TExtender::Out12)> nmap_extended_t;
+                                        typedef _skew3NMapExtended<_TypeOf(typename TExtender::Out12)> nmap_extended_t;
 		typedef Pool< _TypeOf(typename TExtender::Out12), MapperSpec< MapperConfigSize< nmap_extended_t, _TSizeOf(typename TExtender::Out12) > > > TSorterS12;
         typedef Pipe< Bundle2< TSorterS0, TSorterS12 >, Merger3 > TMerger;
 
@@ -217,7 +217,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 SEQAN_PROMARK("Mapper (10) - ISA12 konstruieren");
 
                 // step 2
-                skew3_extend(textIn, names_linear, sortedS0, sortedS12);
+                _skew3Extend(textIn, names_linear, sortedS0, sortedS12);
 
             } else {
                 // non-unique names
@@ -253,7 +253,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 #ifdef SEQAN_DEBUG_INDEX
                     ::std::cerr << "  prepare merge" << ::std::endl;
                 #endif
-				skew3_extend(textIn, names_linear, sortedS0, sortedS12);
+				_skew3Extend(textIn, names_linear, sortedS0, sortedS12);
                 SEQAN_PROMARK("Mapper (12), Sorter (13) - SA12 und SA0 verschmelzen");
             }
 
