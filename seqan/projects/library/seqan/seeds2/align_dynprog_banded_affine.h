@@ -326,24 +326,24 @@ _alignBanded_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & seque
     }
 
     // // TODO(holtgrew): Debug code, remove when working.
-    // {
-    //     for (int k = 0; k < 3; ++k) {
-    //         std::cout << ",-- *** filled banded alignment matrix " << k << std::endl;
-    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
-    //             std::cout << "| ";
-    //             for (unsigned j = 0; j < i; ++j)
-    //                 std::cout << "\t";
-    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-    //                     std::cout << "\tinf";
-    //                 else
-    //                     std::cout << "\t" << value(matrix, i, j, k);
-    //             }
-    //             std::cout << std::endl;
-    //         }
-    //         std::cout << "`--" << std::endl;
-    //     }
-    // }
+    {
+        for (int k = 0; k < 3; ++k) {
+            std::cerr << ",-- *** filled banded alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                std::cerr << "| ";
+                for (unsigned j = 0; j < i; ++j)
+                    std::cerr << "\t";
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cerr << "\tinf";
+                    else
+                        std::cerr << "\t" << value(matrix, i, j, k);
+                }
+                std::cerr << std::endl;
+            }
+            std::cerr << "`--" << std::endl;
+        }
+    }
 }
 
 
@@ -376,7 +376,7 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     // Iterators to current entries in the matrices.
     TMatrixIterator diagonalIt = begin(matrix);
     setPosition(diagonalIt, pos0 + pos1 * _dataFactors(matrix)[1]);  // TODO(holtgrew): Matrix class should have setPosition with coordinates.
-    // std::cout << "STARTING AT (" << pos0 << ", " << pos1 << ")" << std::endl;
+    std::cout << "STARTING AT (" << pos0 << ", " << pos1 << ")" << std::endl;
     TMatrixIterator verticalIt = diagonalIt;
     goNext(verticalIt, 2);
     TMatrixIterator horizontalIt = verticalIt;
@@ -409,12 +409,21 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     }
 
     // Now, perform the traceback.
-    while (pos0 > static_cast<TPosition>(1)) {
+    // std::cerr << "before loop " << __LINE__ << std::endl;
+    while (true) {
+        // std::cerr << "in loop " << __LINE__ << std::endl;
+        // std::cerr << "pos0 = " << pos0 << " pos1 = " << pos1 << std::endl;
+        // std::cerr << "upperTriangleEdgeLength = " << upperTriangleEdgeLength << std::endl;
+        if (pos0 <= static_cast<TPosition>(1))
+          break;
+        if (pos0 <= upperTriangleEdgeLength && pos1 <= static_cast<TPosition>(upperTriangleEdgeLength + 1 - pos0))
+          break;
+
         SEQAN_ASSERT_GT(pos1, static_cast<TPosition>(0));
 
         // Determine
         if (diagonal) {
-            // std::cout << "DIAGONAL" << std::endl;
+            std::cout << "DIAGONAL" << std::endl;
             // Move iterators in sequences, alignment rows and matrices.
             goPrevious(sourceIt0);  // XXX
             goPrevious(sourceIt1);  // XXX
@@ -430,6 +439,7 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             // pos1 -= 1;
 
             // Update the movement/matrix indicators.
+            // TODO(holtgrew): Do not access {diagonal,horizontal,vertical}It if invalid!
             // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
             if (*diagonalIt > *horizontalIt) {
                 if (*diagonalIt <= *verticalIt) {
@@ -444,9 +454,9 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
                     vertical = true;
             }
         } else if (vertical) {
-            // std::cout << "VERTICAL" << std::endl;
+            std::cout << "VERTICAL" << std::endl;
             // Insert gap.
-            insertGap(alignmentIt1);
+            insertGap(alignmentIt0);
 
             // Move iterators in sequence, alignment rows and matrices.,
             goPrevious(sourceIt0);
@@ -461,6 +471,7 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             pos1 += 1;
 
             // Update the movement/matrix indicators.
+            // TODO(holtgrew): Do not access {diagonal,horizontal,vertical}It if invalid!
             // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
             if (*verticalIt >= *horizontalIt) {
                 if (*diagonalIt > *verticalIt) {
@@ -476,9 +487,9 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
             }
         } else {
             SEQAN_ASSERT_TRUE(horizontal);
-            // std::cout << "HORIZONTAL" << std::endl;
+            std::cout << "HORIZONTAL" << std::endl;
             // Insert gap.
-            insertGap(alignmentIt0);
+            insertGap(alignmentIt1);
                     
             // Move iterators in sequence, alignment rows and matrices.,
             goPrevious(sourceIt1);
@@ -490,6 +501,7 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
                     
             // Move iterators in sequence, alignment rows and matrices.,
             // Update the movement/matrix indicators.
+            // TODO(holtgrew): Do not access {diagonal,horizontal,vertical}It if invalid!
             // TODO(holtgrew): This code will prefer gaps over matches, should be changed.
             if (*horizontalIt >= *verticalIt) {
                 if (*diagonalIt > *horizontalIt) {
@@ -516,9 +528,16 @@ _alignBanded_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & a
     // positioin with gutter.  Adjust for the shear of the matrix.
     // std::cout << "@and: pos0 = " << pos0 << ", pos1 = " << pos1 << std::endl;
     finalPos0 = pos0;
-    finalPos1 = pos1 - 1 - (upperTriangleEdgeLength - 1);
-    SEQAN_ASSERT_EQ_MSG(finalPos0, 1u, "Must reach top of matrix in banded alignment traceback.");
-    // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+    finalPos1 = pos1 - 1 - (upperTriangleEdgeLength - pos0);
+    //SEQAN_ASSERT_EQ_MSG(finalPos0, 1u, "Must reach top of matrix in banded alignment traceback.");
+#if SEQAN_DEBUGGING
+    if (pos0 > static_cast<TPosition>(1) &&
+        (pos0 > upperTriangleEdgeLength ||
+         pos1 > static_cast<TPosition>(upperTriangleEdgeLength + 1 - pos0)))
+        SEQAN_ASSERT_FAIL("Must reach upper left of matrix in banded alignment traceback.");
+#endif  // #if SEQAN_DEBUGGING
+    std::cout << "upper triangle length = " << upperTriangleEdgeLength << std::endl;
+    std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
 
     return result;
 }

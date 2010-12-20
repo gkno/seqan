@@ -272,22 +272,22 @@ _align_fillMatrix(Matrix<TScoreValue, 3> & matrix, TSequence const & sequence0, 
         }
     }
 
-    // // TODO(holtgrew): Debug code, remove when working.
-    // {
-    //     for (int k = 0; k < 3; ++k) {
-    //         std::cout << ",-- *** filled alignment matrix " << k << std::endl;
-    //         for (unsigned i = 0; i < length(matrix, 0); ++i) {
-    //             for (unsigned j = 0; j < length(matrix, 1); ++j) {
-    //                 if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
-    //                     std::cout << "\tinf";
-    //                 else
-    //                     std::cout << "\t" << value(matrix, i, j, k);
-    //             }
-    //             std::cout << std::endl;
-    //         }
-    //         std::cout << "`--" << std::endl;
-    //     }
-    // }
+    // TODO(holtgrew): Debug code, remove when working.
+    {
+        for (int k = 0; k < 3; ++k) {
+            std::cerr << ",-- *** filled alignment matrix " << k << std::endl;
+            for (unsigned i = 0; i < length(matrix, 0); ++i) {
+                for (unsigned j = 0; j < length(matrix, 1); ++j) {
+                    if (value(matrix, i, j, k) <= InfimumValue<int>::VALUE / 4)
+                        std::cerr << "\tinf";
+                    else
+                        std::cerr << "\t" << value(matrix, i, j, k);
+                }
+                std::cerr << std::endl;
+            }
+            std::cerr << "`--" << std::endl;
+        }
+    }
 }
 
 // Compute traceback in the given normal DP alignment matrix, starting
@@ -301,7 +301,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
 {
     SEQAN_CHECKPOINT;
 
-    // std::cout << "unbanded traceback" << std::endl;
+    std::cout << "unbanded traceback" << std::endl;
 
     // Suppress warnings about unused parameters.
     (void) scoringScheme;
@@ -320,6 +320,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // Iterators to current entries in the matrices.
     TMatrixIterator diagonalIt = begin(matrix);
     goTo(diagonalIt, pos0, pos1);
+    std::cout << "STARTING AT (" << pos0 << ", " << pos1 << ")" << std::endl;
     TMatrixIterator verticalIt = diagonalIt;
     goNext(verticalIt, 2);
     TMatrixIterator horizontalIt = verticalIt;
@@ -358,12 +359,13 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
         } else {
             // If we do not walk up to the upper left corner, we at
             // least have to move into the overlapping area.
-            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) && (pos0 < static_cast<TPosition>(upperLeftOverlap0) && pos1 < static_cast<TPosition>(upperLeftOverlap1)))
+            std::cerr << "pos0 == " << pos0 << " pos1 == " << pos1 << std::endl;
+            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) || (pos0 < static_cast<TPosition>(upperLeftOverlap0) && pos1 < static_cast<TPosition>(upperLeftOverlap1)))
                 break;
         }
 
         if (diagonal) {
-            // std::cout << "DIAGONAL" << std::endl;
+            std::cout << "DIAGONAL" << std::endl;
             // Move iterators in sequences, alignment rows and matrices.
             goPrevious(sourceIt0);
             goPrevious(sourceIt1);
@@ -375,6 +377,8 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
             goPrevious(horizontalIt, 1);
             goPrevious(verticalIt, 0);
             goPrevious(verticalIt, 1);
+            SEQAN_ASSERT_GEQ(pos0, 1u);
+            SEQAN_ASSERT_GEQ(pos1, 1u);
             pos0 -= 1;
             pos1 -= 1;
 
@@ -393,7 +397,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
                     vertical = true;
             }
         } else if (vertical) {
-            // std::cout << "VERTICAL" << std::endl;
+            std::cout << "VERTICAL" << std::endl;
             // Insert gap.
             insertGap(alignmentIt1);
 
@@ -422,7 +426,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
             }
         } else {
             SEQAN_ASSERT_TRUE(horizontal);
-            // std::cout << "HORIZONTAL" << std::endl;
+            std::cout << "HORIZONTAL" << std::endl;
             // Insert gap.
             insertGap(alignmentIt0);
                     
@@ -488,7 +492,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
     // left.
     finalPos0 = pos0;
     finalPos1 = pos1;
-    // std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
+    std::cout << "finalPos0 = " << finalPos0 << ", finalPos1 = " << finalPos1 << std::endl;
 
     return result;
 }

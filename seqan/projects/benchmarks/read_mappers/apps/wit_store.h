@@ -63,14 +63,13 @@ struct WitStore {
 
 };
 
-
 template <typename TStream>
 inline
 TStream & operator<<(TStream & stream, WitStore const & store) {
     typedef typename Iterator<typename WitStore::TIntervalStore, Standard>::Type TIterator;
     stream << ",-- WIT Store" << std::endl;
     for (TIterator it = begin(store.intervals, Standard()); it != end(store.intervals, Standard()); ++it) {
-        stream << "| " << value(store.readNames)[value(it).readId] << " read id = " << value(it).readId << "\t" << value(it).distance << "\t" << value(store.contigNames)[value(it).contigId]
+        stream << "| " << value(store.readNames)[value(it).readId] << " read id = " << value(it).readId << "\t distance=" << value(it).distance << "\t" << value(store.contigNames)[value(it).contigId]
                << "\t" << (value(it).isForward ? "F" : "R") << "\t" << value(it).firstPos << "\t" << value(it).lastPos << std::endl;
     }
     stream << "`--" << std::endl;
@@ -78,6 +77,7 @@ TStream & operator<<(TStream & stream, WitStore const & store) {
 }
 
 void move(WitStore & target, WitStore & source) {
+    target.mateSeparator = source.mateSeparator;
     move(target.readNames, source.readNames);
     move(target.contigNames, source.contigNames);
     move(target.intervals, source.intervals);
@@ -160,7 +160,13 @@ struct WitStoreLess<SortFirstPos>
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
-        return a.firstPos < b.firstPos;
+      if (a.firstPos < b.firstPos)
+        return true;
+      if (a.firstPos == b.firstPos && a.lastPos > b.lastPos)
+        return true;
+      if (a.firstPos == b.firstPos && a.lastPos == b.lastPos && a.distance > b.distance)
+        return true;
+      return false;
     }
 };
 
@@ -328,6 +334,121 @@ void loadWitFile(WitStore & store,
         /*int id = */appendValue(store, record);
         //std::cerr << "   record.id == " << id << std::endl;
     }
+}
+
+
+void
+performIntervalScoreLowering(WitStore & witStore, unsigned const maxError)
+{
+  if (empty(witStore.intervals))
+    return;
+  // TODO handle different reads
+  // TODO handle different contigs
+  //std::cout << "performINtervalScoreLowering(witStore, " << maxError << ")" << std::endl;
+  typedef WitStore::TIntervalStore TIntervalStore;
+  typedef Iterator<TIntervalStore>::Type TIterator;
+  typedef IntervalAndCargo<size_t, size_t> TInterval;
+
+  // Step 1: Adjust distances.
+  //std::cout << "Step 1" << std::endl;
+  sortWitRecords(witStore, SortFirstPos());
+  sortWitRecords(witStore, SortContigId());
+  sortWitRecords(witStore, SortReadId());
+
+  IntervalOfReadOnContig sentinel(back(witStore.intervals));
+  sentinel.firstPos = -1;
+  sentinel.lastPos = -1;
+  sentinel.id = -1;
+  appendValue(witStore.intervals, sentinel);
+
+  //std::cout << witStore;
+
+  String<TInterval> openIntervals;
+  size_t i = 0;
+  for (TIterator it = begin(witStore.intervals, Standard()), itend = end(witStore.intervals, Standard()); it != itend; ++it, ++i) {
+    //std::cout << "processing " << *it << " , length(openIntervals) == " << length(openIntervals) << std::endl;
+    // Remove non-overlapping intervals on top of openInterval stack.
+    unsigned count = 0;
+    for (unsigned j = 0; j < length(openIntervals); ++j) {
+      unsigned idx = length(openIntervals) - 1 - j;
+      //std::cout << rightBoundary(openIntervals[idx]) << " <= " << it->firstPos << std::endl;
+      IntervalOfReadOnContig const & thisInterval = witStore.intervals[cargo(openIntervals[idx])];
+      if (thisInterval.readId != it->readId || thisInterval.contigId != it->contigId || thisInterval.lastPos < it->firstPos) {
+        count += 1;
+        //std::cout << "popping " << witStore.intervals[cargo(openIntervals[idx])] << std::endl;
+      }
+    }
+    resize(openIntervals, length(openIntervals) - count);
+
+    // Perform distance lowering for containing intervals.
+    for (unsigned j = 0; j < length(openIntervals); ++j) {
+      unsigned idx = length(openIntervals) - 1 - j;
+      unsigned id = cargo(openIntervals[idx]);
+      if (witStore.intervals[id].distance <= maxError) {
+        witStore.intervals[id].distance = _min(witStore.intervals[id].distance, it->distance);
+        //std::cout << "witStore.intervals[" << id << "].distance = _min(" << witStore.intervals[id].distance << ", " << it->distance << ");" << std::endl;
+      } else {
+        //std::cout << "break;" << std::endl;
+        break;  // All containing intervals must have a greater distance.
+      }
+    }
+
+    // Add interval to the stack of intervals.
+    appendValue(openIntervals, TInterval(it->firstPos, it->lastPos + 1, i));
+    //std::cout << "pushing " << witStore.intervals[i] << std::endl;
+  }
+  //std::cout << witStore;
+
+  // Step 2: Filter out intervals that are contained in intervals of lesser/equal distance.
+  String<IntervalOfReadOnContig> filteredIntervals;
+  clear(openIntervals);
+  i = 0;
+  //std::cout << "Step 2" << std::endl;
+  for (TIterator it = begin(witStore.intervals, Standard()), itend = end(witStore.intervals, Standard()); it != itend; ++it, ++i) {
+    //std::cout << "processing " << *it << std::endl;
+    // Remove non-overlapping intervals on top of openInterval stack, appending to filtered intervals
+    unsigned count = 0;
+    for (unsigned j = 0; j < length(openIntervals); ++j) {
+      unsigned idx = length(openIntervals) - 1 - j;
+      IntervalOfReadOnContig const & thisInterval = witStore.intervals[cargo(openIntervals[idx])];
+      if (thisInterval.readId != it->readId || thisInterval.contigId != it->contigId || thisInterval.lastPos < it->firstPos) {
+        count += 1;
+        unsigned startDistance = witStore.intervals[cargo(openIntervals[idx])].distance;
+        if (!empty(filteredIntervals)) {
+          if (back(filteredIntervals).lastPos >= leftBoundary(openIntervals[idx])) {
+            if (back(filteredIntervals).readId == witStore.intervals[cargo(openIntervals[idx])].readId &&
+                back(filteredIntervals).contigId == witStore.intervals[cargo(openIntervals[idx])].contigId) {
+              // Assert current containing already written out.
+              SEQAN_ASSERT_GEQ(back(filteredIntervals).firstPos, leftBoundary(openIntervals[idx]));
+              SEQAN_ASSERT_LEQ(back(filteredIntervals).lastPos + 1, rightBoundary(openIntervals[idx]));
+              // Get start distance.
+              startDistance = back(filteredIntervals).distance + 1;
+            }
+          }
+        }
+        unsigned upperLimit = maxError;
+        if (maxError < startDistance)
+          upperLimit = startDistance;
+        //std::cout << "startDistance = " << startDistance << ", maxError = " << upperLimit << std::endl;
+        for (unsigned i = startDistance; i <= upperLimit; ++i) {
+          appendValue(filteredIntervals, witStore.intervals[cargo(openIntervals[idx])]);
+          back(filteredIntervals).id = length(filteredIntervals);
+          back(filteredIntervals).distance = i;
+          //std::cout << "appended " << back(filteredIntervals) << std::endl;
+        }
+      }
+    }
+    resize(openIntervals, length(openIntervals) - count);
+
+    // Add interval to the stack of intervals.
+    if (empty(openIntervals) || witStore.intervals[cargo(back(openIntervals))].distance > it->distance) {
+      //std::cout << "appending TInterval(" << it->firstPos << ", " << it->lastPos + 1 << ", " << i << std::endl;
+      appendValue(openIntervals, TInterval(it->firstPos, it->lastPos + 1, i));
+    }
+  }
+  move(witStore.intervals, filteredIntervals);
+
+  //std::cout << witStore;
 }
 
 

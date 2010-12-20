@@ -332,7 +332,7 @@ _align_traceBack(TAlignmentIterator & alignmentIt0, TAlignmentIterator & alignme
         } else {
             // If we do not walk up to the upper left corner, we at
             // least have to move into the overlapping area.
-            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) && (pos0 < static_cast<TPosition>(upperLeftOverlap0) && pos1 < static_cast<TPosition>(upperLeftOverlap1)))
+            if ((pos0 <= static_cast<TPosition>(1) || pos1 <= static_cast<TPosition>(1)) || (pos0 < static_cast<TPosition>(upperLeftOverlap0) && pos1 < static_cast<TPosition>(upperLeftOverlap1)))
                 break;
         }
         

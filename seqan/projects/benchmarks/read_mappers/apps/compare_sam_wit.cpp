@@ -119,7 +119,6 @@ int parseCommandLineAndCheck(Options &options,
     // Show short help on invalid arguments and long help if help
     // argument was given.
     if (not parse(parser, argc, argv)) {
-        shortHelp(parser, std::cerr);
         return kRetArgsErr;
     } else if (isSetShort(parser, 'h')) {
         exit(kRetOk);
@@ -243,6 +242,11 @@ int main(int argc, const char *argv[]) {
     WitStore witStore;
     loadWitFile(witStore, fragments, options.witFileName);
     std::cerr << "Took " << sysTime() - startTime << " s" << std::endl;
+    
+    // =================================================================
+    // Perform Interval Score Lowering.
+    // =================================================================
+    performIntervalScoreLowering(witStore, options.maxError);
 
     // =================================================================
     // Compare The SAM Hits Against WIT Intervals.

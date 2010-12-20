@@ -186,10 +186,10 @@ _alignLeadingRectangle(
     TInfix prefix1 = prefix(value(alignmentChain.sequence1_), getBeginDim1(rightSeed) + rightOverlap1);
 
     // TODO(holtgrew): Temporary debug code.
-    // std::cerr << ",-- _alignLeadingRectangle" << std::endl;
-    // std::cerr << "| prefix0: '" << prefix0 << "'" << std::endl;
-    // std::cerr << "| prefix1: '" << prefix1 << "'" << std::endl;
-    // std::cerr << "`--" << std::endl;
+    std::cerr << ",-- _alignLeadingRectangle" << std::endl;
+    std::cerr << "| prefix0: '" << prefix0 << "'" << std::endl;
+    std::cerr << "| prefix1: '" << prefix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -248,10 +248,12 @@ _alignTrailingRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cerr << ",-- _alignTrailingRectangle" << std::endl;
-    // std::cerr << "| suffix0: '" << suffix0 << "'" << std::endl;
-    // std::cerr << "| suffix1: '" << suffix1 << "'" << std::endl;
-    // std::cerr << "`--" << std::endl;
+    std::cerr << ",-- _alignTrailingRectangle" << std::endl;
+    std::cerr << "| suffix0: '" << suffix0 << "'" << std::endl;
+    std::cerr << "| suffix1: '" << suffix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
+    std::cerr << "leftOverlap0 = " << leftOverlap0 << std::endl;
+    std::cerr << "leftOverlap1 = " << leftOverlap1 << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -330,12 +332,12 @@ _alignRectangle(
     TDiagonal upperDiagonal = getUpperDiagonal(leftSeed) - getStartDiagonal(leftSeed) + alignmentChain.bandwidth_;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cout << ",-- _alignRectangle" << std::endl;
-    // std::cout << "| infix0: '" << infix0 << "'" << std::endl;
-    // std::cout << "| infix1: '" << infix1 << "'" << std::endl;
-    // std::cout << "`--" << std::endl;
-    // std::cout << "left seed = " << leftSeed << std::endl;
-    // std::cout << "right seed = " << rightSeed << std::endl;
+    std::cout << ",-- _alignRectangle" << std::endl;
+    std::cout << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cout << "| infix1: '" << infix1 << "'" << std::endl;
+    std::cout << "`--" << std::endl;
+    std::cout << "left seed = " << leftSeed << std::endl;
+    std::cout << "right seed = " << rightSeed << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -420,10 +422,10 @@ _alignSeed(
     // std::cout << "leftOverlap0 == " << leftOverlap0 << "leftOverlap1 == " << leftOverlap1 << std::endl;
 
     // // TODO(holtgrew): Temporary debug code.
-    // std::cerr << ",-- _alignSeed" << std::endl;
-    // std::cerr << "| infix0: '" << infix0 << "'" << std::endl;
-    // std::cerr << "| infix1: '" << infix1 << "'" << std::endl;
-    // std::cerr << "`--" << std::endl;
+    std::cerr << ",-- _alignSeed" << std::endl;
+    std::cerr << "| infix0: '" << infix0 << "'" << std::endl;
+    std::cerr << "| infix1: '" << infix1 << "'" << std::endl;
+    std::cerr << "`--" << std::endl;
 
     // Append a new alignment matrix to the chain.
     appendValue(alignmentChain.alignmentMatrices_, TMatrix());
@@ -511,9 +513,10 @@ _glueAlignmentChain(
     // Traceback through trailing rectangle and seed.
     TPosition finalPos0 = 1;
     TPosition finalPos1 = 1;
-    // std::cout << "trace back through trailing..." << std::endl;
+    std::cout << "trace back through trailing rectangle..." << std::endl;
     TPosition upperLeftOverlap0, upperLeftOverlap1;
     _computeLowerRightOverlap(upperLeftOverlap0, upperLeftOverlap1, value(seedChainIt), alignmentChain);
+    std::cerr << "upperLeftOverlap0 = " << upperLeftOverlap0 << " upperLeftOverlap1 = " << upperLeftOverlap1 << std::endl;
     TPosition lowerRightOverlap0 = 1;
     TPosition lowerRightOverlap1 = 1;
     TScoreValue result = _align_traceBack(alignmentIt0, alignmentIt1, sequenceIt0, sequenceIt1, finalPos0, finalPos1, value(matricesIt), alignmentChain.scoringScheme_, lowerRightOverlap0, lowerRightOverlap1, upperLeftOverlap0, upperLeftOverlap1, false, alignConfig, TAlignmentTag());
@@ -531,8 +534,8 @@ _glueAlignmentChain(
     // std::cout << "maxTriangleEdgeLength == " << maxTriangleEdgeLength << std::endl;
     lowerTriangleEdgeLength = _min(lowerTriangleEdgeLength, maxTriangleEdgeLength);
     upperTriangleEdgeLength = _min(upperTriangleEdgeLength, maxTriangleEdgeLength);
-    // std::cout << "trace back through last seed..." << std::endl;
-    // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
+    std::cout << "trace back through last seed..." << std::endl;
+    std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
     {
         if (length(seedChain) > 1u) {
             TSeedChainIterator seedChainItPrevious = seedChainIt;
@@ -550,7 +553,7 @@ _glueAlignmentChain(
     
     // Traceback through matrices in reverse order.
     for (TPosition i = 0, iend = length(seedChain) - 1; i < iend; ++i) {
-        // std::cout << "trace back through seed..." << std::endl;
+        std::cout << "trace back through rectangle..." << std::endl;
         // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
         _computeUpperLeftOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
         {
@@ -563,7 +566,7 @@ _glueAlignmentChain(
         goPrevious(seedChainIt);
         // std::cout << "Alignment so far:" << std::endl << alignment;
 
-        // std::cout << "trace back through rectangle..." << std::endl;
+        std::cout << "trace back through seed..." << std::endl;
         // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
         _computeLowerRightOverlap(lowerRightOverlap0, lowerRightOverlap1, value(seedChainIt), alignmentChain);
         upperTriangleEdgeLength = getStartDiagonal(value(seedChainIt)) - getLowerDiagonal(value(seedChainIt)) + alignmentChain.bandwidth_;
@@ -579,7 +582,7 @@ _glueAlignmentChain(
         // std::cout << "Alignment so far:" << std::endl << alignment;
     }
 
-    // std::cout << "trace back through leading..." << std::endl;
+    std::cout << "trace back through leading..." << std::endl;
     // std::cout << "finalPos0 == " << finalPos0 << ", finalPos1 == " << finalPos1 << std::endl;
     // Traceback through leading rectangle.
     upperLeftOverlap0 = 0;
