@@ -94,7 +94,7 @@ struct ToStdAllocator
 	pointer allocate(size_type count)
 	{
 		value_type * ptr;
-		call_allocate(*m_host, ptr, count);
+		seqan::allocate(*m_host, ptr, count);
 		return pointer(ptr);
 	}
 	pointer allocate(size_type count, const void *)
