@@ -60,6 +60,7 @@
 #include <seqan/sequence/string_value_expand.h>
 
 #include <seqan/sequence/std_string.h>
+#include <seqan/sequence/std_vector.h>
 
 #include <seqan/sequence/sequence_multiple.h>
 #include <seqan/sequence/sequence_shortcuts.h>
