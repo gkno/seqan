@@ -26,20 +26,6 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 //////////////////////////////////////////////////////////////////////////////
-//helper caller for calling functions that have same name as member functions
-
-template <typename TMe, typename TValue, typename TSize>
-inline void call_allocate(TMe & me, TValue * & data, TSize const count)
-{
-	allocate(me, data, count);
-}
-template <typename TMe, typename TValue, typename TSize>
-inline void call_deallocate(TMe & me, TValue * data, TSize const count)
-{
-	deallocate(me, data, count);
-}
-
-//////////////////////////////////////////////////////////////////////////////
 //Filter that adapts seqan allocator zu std allocator
 /**
 .Class.ToStdAllocator:
@@ -114,13 +100,13 @@ struct ToStdAllocator
 	pointer allocate(size_type count, const void *)
 	{
 		value_type * ptr;
-		call_allocate(*m_host, ptr, count);
+		seqan::allocate(*m_host, ptr, count);
 		return pointer(ptr);
 	}
 
 	void deallocate(pointer data, size_type count)
 	{
-		call_deallocate(*m_host, data, count);
+		seqan::deallocate(*m_host, data, count);
 	}
 
 	void construct(pointer ptr, const_reference data)
