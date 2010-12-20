@@ -464,24 +464,38 @@ def outAll(path, project):
     header_switch = "SEQAN_HEADER_" + project + "_GENERATED_FORWARDS_H"
 
     str = ""
-    str += " /*==========================================================================\n"
-    str += "                SeqAn - The Library for Sequence Analysis\n"
-    str += "                          http://www.seqan.de \n"
-    str += " ============================================================================\n"
-    str += "  Copyright (C) 2007\n"
-    str += "\n"
-    str += "  This library is free software; you can redistribute it and/or\n"
-    str += "  modify it under the terms of the GNU Lesser General Public\n"
-    str += "  License as published by the Free Software Foundation; either\n"
-    str += "  version 3 of the License, or (at your option) any later version.\n"
-    str += "\n"
-    str += "  This library is distributed in the hope that it will be useful,\n"
-    str += "  but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
-    str += "  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n"
-    str += "  Lesser General Public License for more details.\n"
-    str += "\n"
-    str += " ==========================================================================*/\n"
-    str += "\n"
+    str += '// ==========================================================================\n'
+    str += '//                 SeqAn - The Library for Sequence Analysis\n'
+    str += '// ==========================================================================\n'
+    str += '// Copyright (c) 2006-2010, Knut Reinert, FU Berlin\n'
+    str += '// All rights reserved.\n'
+    str += '//\n'
+    str += '// Redistribution and use in source and binary forms, with or without\n'
+    str += '// modification, are permitted provided that the following conditions are met:\n'
+    str += '//\n'
+    str += '//     * Redistributions of source code must retain the above copyright\n'
+    str += '//       notice, this list of conditions and the following disclaimer.\n'
+    str += '//     * Redistributions in binary form must reproduce the above copyright\n'
+    str += '//       notice, this list of conditions and the following disclaimer in the\n'
+    str += '//       documentation and/or other materials provided with the distribution.\n'
+    str += '//     * Neither the name of Knut Reinert or the FU Berlin nor the names of\n'
+    str += '//       its contributors may be used to endorse or promote products derived\n'
+    str += '//       from this software without specific prior written permission.\n'
+    str += '//\n'
+    str += '// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"\n'
+    str += '// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n'
+    str += '// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n'
+    str += '// ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY\n'
+    str += '// DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n'
+    str += '// (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n'
+    str += '// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n'
+    str += '// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\n'
+    str += '// LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY\n'
+    str += '// OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH\n'
+    str += '// DAMAGE.\n'
+    str += '//\n'
+    str += '// ==========================================================================\n'
+    str += '\n\n'
 
     str += "#ifndef " + header_switch.upper() + " \n"
     str += "#define " + header_switch.upper() + " \n\n"
