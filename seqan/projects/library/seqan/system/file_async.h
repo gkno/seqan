@@ -637,6 +637,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		File(void * = NULL): 	// to be compatible with the FILE*(NULL) constructor
 			handleAsync(-1) {}
 
+        virtual ~File() {}
+        
         bool open(char const *fileName, int openMode = DefaultOpenMode<File>::VALUE) {
             handle = ::open(fileName, Base::_getOFlag(openMode & ~OPEN_ASYNC), S_IREAD | S_IWRITE);
 			if (handle == -1) 
