@@ -30,6 +30,9 @@ VALID_IDENTIFIERS = map(
           '__u?int64(_t)?',
           '_A123456',
           '__OPTIMIZE__',
+          '__gnu_cxx',
+          '_Resize_String', # will be done manually
+          '_Fill_String',   #
           '_PARSER_H',
 	  '_POSIX_TIMERS',
           '__GNUC_MINOR__',
