@@ -625,6 +625,7 @@ replace(::std::vector<TChar, TAlloc> & target,
 	replace(target, position(pos_begin), position(pos_end), source, tag);
 }
 
+/*
 template<typename TChar, typename TAlloc, typename TSource, typename TExpand>
 inline void 
 replace(::std::vector<TChar, TAlloc> & target,
@@ -636,6 +637,7 @@ replace(::std::vector<TChar, TAlloc> & target,
 {
 	replace(target,  position(pos_begin),  position(pos_end), source, tag);
 }
+*/
 
 
 ///.Function.reserve.param.object.type:Adaption.std::vector
