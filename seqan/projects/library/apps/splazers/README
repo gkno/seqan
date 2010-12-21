@@ -57,6 +57,10 @@ with:
 If succesfull, an executable file splazers has been built and a brief usage 
 description was dumped.
 
+Another alternative is to use cmake to build SplazerS. 
+See http://trac.mi.fu-berlin.de/seqan/wiki/Tutorial/GettingStarted for 
+instructions on how to use cmake.
+
 ---------------------------------------------------------------------------
 3. Usage
 ---------------------------------------------------------------------------
@@ -79,8 +83,8 @@ the matched part of the read (excluding the potentially longer gap in the
 middle), and at most 1 error in the 23bp prefix and at most 1 error in the
 23bp suffix.
 
-By adding option -sm/--split-mapping 0, "regular" RazerS mapping is switched 
-on. However, note that default parameters are not the same as in RazerS.
+By adding option --split-mapping 0, regular RazerS mapping is switched on. 
+However, note that default parameters are not the same as in RazerS.
 
 The default behaviour can be modified by the following command line options:
 
@@ -114,7 +118,7 @@ The default behaviour can be modified by the following command line options:
   Set the percent recognition rate. NUM must be a value between 80 and 100
   (default is 100). The recognition rate controls the sensitivity of 
   SplazerS. The higher the recognition rate the more sensitive is SplazerS. 
-  The lower the recognition rate the faster runs RazerS. A value of 100 
+  The lower the recognition rate the faster runs SplazerS. A value of 100 
   corresponds to lossless read mapping. The recognition rate corresponds 
   to the expected fraction of matches SplazerS will find compared to 
   lossless mapping. Depending on the desired recogition rate, the allowed
@@ -215,7 +219,7 @@ The default behaviour can be modified by the following command line options:
 
 
 ---------------------------------------------------------------------------
-3.2.1. Output Format Options
+3.2.1. Output Format Options as in RazerS
 ---------------------------------------------------------------------------
 
 SplazerS-Specific Behaviour:
@@ -278,7 +282,7 @@ to GFF. Also -a options is currently disabled for split mapping.
   of the substring CAT are (3,6) in gap space and (4,6) in position space.
 
 ---------------------------------------------------------------------------
-3.3. Filtration Options
+3.3. Filtration Options as in RazerS
 ---------------------------------------------------------------------------
 
 SplazerS-Specific Behaviour:
@@ -317,7 +321,7 @@ must be available. (See main options: --recognition-rate)
 
   The repeat length is the minimal length a simple-repeat in the 
   genome sequence must have to be filtered out by the repeat masker of 
-  RazerS. Simple repeats are tandem repeats of only one repeated   
+  SplazerS. Simple repeats are tandem repeats of only one repeated   
   character, e.g. AAAAA. Independently of this parameter, N characters in 
   the genome are filtered out automatically. Default value is 1000.
 
@@ -328,8 +332,11 @@ must be available. (See main options: --recognition-rate)
   genome (default is 1).
   
 ---------------------------------------------------------------------------
-3.4. Verification Options
+3.4. Verification Options as in RazerS
 ---------------------------------------------------------------------------
+
+SplazerS-specific behaviour:
+Error distribution files are currently not output in split mapping mode.
 
   [ -mN ],  [ --match-N ]
   
@@ -350,7 +357,7 @@ must be available. (See main options: --recognition-rate)
 ---------------------------------------------------------------------------
 
 SplazerS currently supports the GFF output format for reporting split 
-matches. If split mapping is deactivated, it inherits RazerS' output formats
+matches. If split mapping is deactivated, it inherits SplazerS' output formats
 which are selectable via the "--output-format NUM" option. The following 
 values for NUM are then possible:
 
@@ -493,8 +500,13 @@ Note that the cigar string is given with respect to the read sequence.
 5. Split read mapping example
 ---------------------------------------------------------------------------
 
+The subfolder 'example' contains a little example. When running SplazerS
+in default mode, i.e.
 
+./splazers example/genome.fa example/reads.fa
 
+a file example/reads.fa.result containing two split read matches should be 
+generated. One should contain a 6bp insertion, the other a 10bp deletion.
 
 For examples of usage of RazerS see the RazerS README file.
 

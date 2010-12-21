@@ -385,7 +385,7 @@ void compactAndCountSplicedMatches(TMatches &matches,
 	}
 	
 	resize(matches, dit - begin(matches, Standard()));
-	std::cout << "lengthmatches = " << length(matches) << " numStates = " << length(states) << std::endl;
+//	std::cout << "lengthmatches = " << length(matches) << " numStates = " << length(states) << std::endl;
 }
 
 
