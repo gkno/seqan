@@ -542,10 +542,8 @@ replace(::std::vector<TChar, TAlloc> & target,
 			copy(source.begin(),source.begin()+target_size,target.begin()+pos_begin);
 			target.insert(target.begin()+pos_end,source.begin()+target_size,source.end());
 		}
-	//target.replace(target.begin() + pos_begin, target.begin() + pos_end, begin(source, Standard()), end(source, Standard()));
 }
 
-/*
 template <typename TChar, typename TAlloc, typename TSource>
 inline void 
 replace(::std::vector<TChar, TAlloc> & target, 
@@ -562,18 +560,19 @@ replace(::std::vector<TChar, TAlloc> & target,
 	}
 	else
 	{
-		typename Iterator<TSource const, Standard>::Type source_begin = begin(source, Standard());
 		typename Size<TSource const>::Type source_length = length(source);
 		typename Size< ::std::vector<TChar, TAlloc> >::Type pos_mid = pos_begin + source_length;
+		typename Size< ::std::vector<TChar, TAlloc> >::Type pos_limit(limit); 
 		if (pos_mid > limit)
 		{
-			target.replace(target.begin() + pos_begin, target.begin() + limit, source_begin, source_begin + limit - pos_begin);
+			target.resize(limit);
+			replace(target,pos_begin,pos_limit,source);
 			target.resize(limit);
 		}
 		else
 		{
-			target.replace(target.begin() + pos_begin, target.begin() + pos_end, source_begin, end(source, Standard()));
-			if (target.length() > limit)
+			replace(target,pos_begin,pos_end,source);
+			if (target.size() > limit)
 			{
 				target.resize(limit);
 			}
@@ -591,7 +590,7 @@ replace(::std::vector<TChar,  TAlloc> & target,
 		Limit)
 {
     SEQAN_CHECKPOINT;
-//	replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
+	replace(target, pos_begin, pos_end, source, target.capacity(), Generous());
 }
 
 template <typename TChar, typename TAlloc, typename TSource>
@@ -608,36 +607,36 @@ replace(::std::vector<TChar, TAlloc> & target,
 	{
 		limit = target.capacity();
 	}
-
-//	replace(target, pos_begin, pos_end, source, limit, Generous());
+	replace(target, pos_begin, pos_end, source, limit, Generous());
 }
+	
 
 //////////////////////////////////////////////////////////////////////////////
 // handling of iterators as begin and end
 
 template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
 inline void 
-replace(::std::vector<TChar, TCharTraits, TAlloc> & target,
-		typename Iterator< ::std::vector<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::vector<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
+replace(::std::vector<TChar, TAlloc> & target,
+		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
+		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
 		TSource & source,
 		Tag<TExpand> const tag)
 {
 	replace(target, position(pos_begin), position(pos_end), source, tag);
 }
 
-template<typename TChar, typename TCharTraits, typename TAlloc, typename TSource, typename TExpand>
+template<typename TChar, typename TAlloc, typename TSource, typename TExpand>
 inline void 
-replace(::std::vector<TChar, TCharTraits, TAlloc> & target,
-		typename Iterator< ::std::vector<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_begin,
-		typename Iterator< ::std::vector<TChar, TCharTraits, TAlloc>, Rooted>::Type pos_end,
+replace(::std::vector<TChar, TAlloc> & target,
+		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_begin,
+		typename Iterator< ::std::vector<TChar, TAlloc>, Rooted>::Type pos_end,
 		TSource & source,
-		typename Size< ::std::vector<TChar, TCharTraits, TAlloc> >::Type limit,
+		typename Size< ::std::vector<TChar, TAlloc> >::Type limit,
 		Tag<TExpand> const tag)
 {
 	replace(target,  position(pos_begin),  position(pos_end), source, tag);
 }
-*/
+
 
 ///.Function.reserve.param.object.type:Adaption.std::vector
 ///.Function.reserve.remarks:For @Adaption.std::vector|STL Adaptions@, $reserve$ is only guaranteed to have the specified behaviour with $Insist$ and $Generous$.
