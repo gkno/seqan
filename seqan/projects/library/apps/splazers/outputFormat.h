@@ -1370,9 +1370,10 @@ void dumpMatches(
 				if(mL.gEnd != mR.gBegin) indelLen = mR.gBegin - mL.gEnd;
 				
 				file << ";pairScore=" << (unsigned int) mR.pairScore;
-					
-				if(mR.traceExtension >= abs(indelLen))
-					file << ";traceExt=" << (unsigned int) mR.traceExtension;
+
+//				if(mR.traceExtension >= abs(indelLen))
+//					file << ";traceExt=" << (unsigned int) mR.traceExtension;
+
 				String<Pair<Dna5,int> > mutationsStr, mutStrMid, mutStrL, mutStrR;
 				String<Pair<char,int> > cigarStr, cigarMid, cigarL, cigarR;
 				if(indelLen < 0) 

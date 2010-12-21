@@ -29,7 +29,7 @@
 //#define NO_PARAM_CHOOSER				// disable loss-rate parameter choosing
 //#define RAZERS_PARALLEL				// parallelize using Intel's Threading Building Blocks
 #define RAZERS_MATEPAIRS				// enable paired-end matching
-#define RAZERS_DIRECT_MAQ_MAPPING
+//#define RAZERS_DIRECT_MAQ_MAPPING
 //#define SEQAN_USE_SSE2_WORDS			// use SSE2 128-bit integers for MyersBitVector
 //#define RAZERS_OPENADDRESSING
 #define RAZERS_SPLICED
@@ -331,9 +331,10 @@ int main(int argc, const char *argv[])
 	addHelpLine(parser, "0 = gap space");
 	addHelpLine(parser, "1 = position space");
 
-
+#ifdef DIRECT_MAQ_MAPPING
 	addOption(parser, CommandLineOption("mcl", "min-clipped-len",  "min. read length for read clipping", OptionType::Int | OptionType::Label, options.minClippedLen));
 	addOption(parser, CommandLineOption("qih", "quality-in-header","quality string in fasta header", OptionType::Boolean));
+#endif
 
 	addSection(parser, "Split Mapping Options:");
 	addOption(parser, CommandLineOption("sm", "split-mapping",   "min. match length for prefix/suffix mapping (to disable split mapping, set to 0)", OptionType::Int | OptionType::Label, options.minMatchLen));
@@ -420,9 +421,10 @@ int main(int argc, const char *argv[])
  	getOptionValueLong(parser, "errors-suffix", options.maxSuffixErrors);
  	getOptionValueLong(parser, "genome-len", options.specifiedGenomeLen);
 	
+#ifdef DIRECT_MAQ_MAPPING
 	getOptionValueLong(parser, "min-clipped-len", options.minClippedLen);
 	getOptionValueLong(parser, "quality-in-header", options.fastaIdQual);
-	
+#endif	
 	if (isSetLong(parser, "help") || isSetLong(parser, "version")) return 0;	// print help or version and exit
 	if (isSetLong(parser, "verbose")) options._debugLevel = max(options._debugLevel, 1);
 	if (isSetLong(parser, "vverbose")) options._debugLevel = max(options._debugLevel, 3);
@@ -440,6 +442,9 @@ int main(int argc, const char *argv[])
 	appendValue(genomeFileNames, getArgumentValue(parser, 0));
 	for (unsigned i = 1; i < argumentCount(parser) && i < maxFiles; ++i)
 		appendValue(readFileNames, getArgumentValue(parser, i), Generous());
+
+	if(argumentCount(parser)>2)
+		options.minMatchLen = 0;  //switch off split mapping if mate pairs are given
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Check options
