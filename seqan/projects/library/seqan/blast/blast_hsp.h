@@ -1475,10 +1475,10 @@ SEQAN_CHECKPOINT
 }
 
 /**
-.Function.Blast#_getMatchScore:
+.Function.Blast#getBlastMatchScore:
 ..cat:Blast
 ..summary:The Smith-Waterman score associated with a Blast HSP.
-..signature:_getMatchScore(object);
+..signature:getBlastMatchScore(object);
 ..param.object:A Blast HSP object.
 ...type:Spec.FullInfo
 ..returns:The score.
@@ -1487,7 +1487,7 @@ SEQAN_CHECKPOINT
 */
 template<typename TBlastSpec>
 inline float 
-_getMatchScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
+getBlastMatchScore(BlastHsp<TBlastSpec, FullInfo>& blastHsp)
 {
 SEQAN_CHECKPOINT
 	return blastHsp.score;

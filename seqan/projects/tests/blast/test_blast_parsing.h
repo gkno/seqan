@@ -318,7 +318,7 @@ void Test_BlastParsing(BlastN)
 				SEQAN_ASSERT_TRUE((hspcount != 3) ||(hspcount == 3 && percentIdentity(hsp)== 95 && getPercentGaps(hsp)==4));
 				SEQAN_ASSERT_TRUE((hspcount != 6) ||(hspcount == 6 && !databaseOrientationPlus(hsp)));
 				SEQAN_ASSERT_TRUE((hspcount != 7) ||(hspcount == 7 && eValue(hsp)== 0.52));
-				SEQAN_ASSERT_TRUE((hspcount != 12) ||(hspcount == 12 && _getMatchScore(hsp)== 15 && getQueryBegin(hsp)==472 && getQueryEnd(hsp)==486 && getQueryAlignmentString(hsp) == "cacctggtggcgatg" && getDatabaseAlignmentString(hsp) == "cacctggtggcgatg"));
+				SEQAN_ASSERT_TRUE((hspcount != 12) ||(hspcount == 12 && getBlastMatchScore(hsp)== 15 && getQueryBegin(hsp)==472 && getQueryEnd(hsp)==486 && getQueryAlignmentString(hsp) == "cacctggtggcgatg" && getDatabaseAlignmentString(hsp) == "cacctggtggcgatg"));
 				SEQAN_ASSERT_TRUE((hspcount != 17) ||(hspcount == 17 && getBitScore(hsp)== 28.2f && queryBegin(hsp)==476 && queryEnd(hsp)==489));
 				SEQAN_ASSERT_TRUE((hspcount != 20) ||(hspcount == 20 && eValue(hsp)== 8.1 && getDatabaseBegin(hsp)==2092 && getDatabaseEnd(hsp)==2079));
 				SEQAN_ASSERT_TRUE((hspcount != 34) ||(hspcount == 34 && databaseBegin(hsp)==5787 && databaseEnd(hsp)==5770 && !databaseOrientationPlus(hsp)));
@@ -327,7 +327,7 @@ void Test_BlastParsing(BlastN)
 				{
 					TBlastHsp hsp2;
 				    hsp2 = hsp;
-					SEQAN_ASSERT_TRUE(score(hsp) == _getMatchScore(hsp2));
+					SEQAN_ASSERT_TRUE(score(hsp) == getBlastMatchScore(hsp2));
 					SEQAN_ASSERT_TRUE(bitScore(hsp) == getBitScore(hsp2));
 					SEQAN_ASSERT_TRUE(getEValue(hsp) == eValue(hsp2));
 					SEQAN_ASSERT_TRUE(percentIdentity(hsp) == getPercentIdentity(hsp2));
@@ -429,7 +429,7 @@ void Test_BlastParsing(BlastP) {
 				SEQAN_ASSERT_TRUE((hspcount != 11) ||(hspcount == 11 && queryBegin(hsp)== 216 && databaseBegin(hsp)==151 && getNumGaps(hsp)==2));
 				SEQAN_ASSERT_TRUE((hspcount != 18) ||(hspcount == 18 && (databaseAlignmentString(hsp) == "PGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQD") && eValue(hsp) == 0.032));
 				SEQAN_ASSERT_TRUE((hspcount != 20) ||(hspcount == 20 && bitScore(hsp) == 19.6f && eValue(hsp) == 2.3));
-				SEQAN_ASSERT_TRUE((hspcount != 23) ||(hspcount == 23 && _getMatchScore(hsp)== 36 && percentPositives(hsp)==71 && getQueryBegin(hsp) == 82 && getDatabaseBegin(hsp) == 103 ));
+				SEQAN_ASSERT_TRUE((hspcount != 23) ||(hspcount == 23 && getBlastMatchScore(hsp)== 36 && percentPositives(hsp)==71 && getQueryBegin(hsp) == 82 && getDatabaseBegin(hsp) == 103 ));
 				SEQAN_ASSERT_TRUE((hspcount != 28) ||(hspcount == 28 && numGaps(hsp) == 4));
 				SEQAN_ASSERT_TRUE((hspcount != 36) ||(hspcount == 36 && (queryAlignmentString(hsp) == "MKQANQDRGTLLLALVAGLSINGTFAALFSSIVPFSVFPIISLVLTVYCLHQRYLNRTMPVGLPGLAAACFILGVLLYSTVVRAEYPDIGSNFFPAVLSVIMVFWIGAKMRNRKQEVAE") && databaseEnd(hsp) == 119 && queryEnd(hsp)== 119));
 				SEQAN_ASSERT_TRUE((hspcount != 41) ||(hspcount == 41 && percentIdentity(hsp)== 25 && score(hsp) == 37));
@@ -441,7 +441,7 @@ void Test_BlastParsing(BlastP) {
 					SEQAN_ASSERT_TRUE(percentPositives(hsp) == getPercentPositives(hsp2));
 					SEQAN_ASSERT_TRUE(databaseFrame(hsp) == getDatabaseFrame(hsp2));
 					SEQAN_ASSERT_TRUE(getQueryFrame(hsp) == queryFrame(hsp2));
-					SEQAN_ASSERT_TRUE(score(hsp) == _getMatchScore(hsp2));
+					SEQAN_ASSERT_TRUE(score(hsp) == getBlastMatchScore(hsp2));
 					SEQAN_ASSERT_TRUE(bitScore(hsp) == getBitScore(hsp2));
 					SEQAN_ASSERT_TRUE(getEValue(hsp) == eValue(hsp2));
 					SEQAN_ASSERT_TRUE(percentIdentity(hsp) == getPercentIdentity(hsp2));
