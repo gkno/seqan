@@ -691,7 +691,6 @@ resize(
 	return me.size();
 }
 
-///.Function.fill.param.object.type:Adaption.std::vector
 template <typename TChar, typename TAlloc, typename TSize, typename TExpand>
 inline typename Size< ::std::vector<TChar,  TAlloc> >::Type 
 fill(
