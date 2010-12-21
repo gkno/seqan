@@ -77,35 +77,35 @@ struct PizzaChiliCodeProvider {
 // We need to declare these explicitly instead through macro expansion in order
 // for them to be included in the forward generated declarations.
 
-struct _PizzaChili_AF;
-typedef Tag<_PizzaChili_AF> const PizzaChiliAF;
+struct PizzaChiliAF_;
+typedef Tag<PizzaChiliAF_> const PizzaChiliAF;
 
-struct _PizzaChili_CCSA;
-typedef Tag<_PizzaChili_CCSA> const PizzaChiliCcsa;
+struct PizzaChiliCcsa_;
+typedef Tag<PizzaChiliCcsa_> const PizzaChiliCcsa;
 
-struct _PizzaChili_FM;
-typedef Tag<_PizzaChili_FM> const PizzaChiliFM;
+struct PizzaChiliFM_;
+typedef Tag<PizzaChiliFM_> const PizzaChiliFM;
 
-struct _PizzaChili_LZ;
-typedef Tag<_PizzaChili_LZ> const PizzaChiliLZ;
+struct PizzaChiliLZ_;
+typedef Tag<PizzaChiliLZ_> const PizzaChiliLZ;
 
-struct _PizzaChili_RSA;
-typedef Tag<_PizzaChili_RSA> const PizzaChiliRsa;
+struct PizzaChiliRsa_;
+typedef Tag<PizzaChiliRsa_> const PizzaChiliRsa;
 
-struct _PizzaChili_RLFM;
-typedef Tag<_PizzaChili_RLFM> const PizzaChiliRlfm;
+struct PizzaChiliRlfm_;
+typedef Tag<PizzaChiliRlfm_> const PizzaChiliRlfm;
 
-struct _PizzaChili_SA;
-typedef Tag<_PizzaChili_SA> const PizzaChiliSA;
+struct PizzaChiliSA_;
+typedef Tag<PizzaChiliSA_> const PizzaChiliSA;
 
-struct _PizzaChili_SADA;
-typedef Tag<_PizzaChili_SADA> const PizzaChiliSada;
+struct PizzaChiliSada_;
+typedef Tag<PizzaChiliSada_> const PizzaChiliSada;
 
-struct _PizzaChili_SSA;
-typedef Tag<_PizzaChili_SSA> const PizzaChiliSsa;
+struct PizzaChiliSsa_;
+typedef Tag<PizzaChiliSsa_> const PizzaChiliSsa;
 
-struct _PizzaChili_Test;
-typedef Tag<_PizzaChili_Test> const PizzaChiliTest;
+struct PizzaChiliTest_;
+typedef Tag<PizzaChiliTest_> const PizzaChiliTest;
 
 #define SEQAN_MAKE_PIZZACHILI_PROVIDER(name) \
     class PizzaChiliApi##name { \

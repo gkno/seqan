@@ -55,7 +55,7 @@ struct ChunkLength
 };
 
 //////////////////////////////////////////////////////////////////////////////
-// _StreamChunkCollector class: collects content of a stream in chunks
+// StreamChunkCollector_ class: collects content of a stream in chunks
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename THost>
@@ -280,7 +280,7 @@ assign(ChunkCollector_<THost> & target,
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _Assign_ChunkCollector_2_String
+struct AssignChunkCollectorToString_
 {
 	template <typename TTarget, typename TSource>
 	static void assign_(
@@ -334,7 +334,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   ChunkCollector_<TSourceHost> const & source,
 	   Tag<TExpand> const /*tag*/)
 {
-	_Assign_ChunkCollector_2_String<Tag<TExpand> const>::assign_(target, source);
+	AssignChunkCollectorToString_<Tag<TExpand> const>::assign_(target, source);
 }
 template <typename TTargetValue, typename TTargetSpec, typename TSourceHost, typename TExpand>
 inline void 
@@ -343,7 +343,7 @@ assign(String<TTargetValue, TTargetSpec> & target,
 	   typename Size< String<TTargetValue, TTargetSpec> >::Type limit,
 	   Tag<TExpand> const /*tag*/)
 {
-	_Assign_ChunkCollector_2_String<Tag<TExpand> const>::assign_(target, source, limit);
+	AssignChunkCollectorToString_<Tag<TExpand> const>::assign_(target, source, limit);
 }
 
 

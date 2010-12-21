@@ -135,7 +135,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 	template <typename TSize>
-	struct _EnumeratorHammingModifier
+	struct EnumeratorHammingModifier_
 	{
 		TSize		errorPos;		// position of substitution
 		unsigned	character;		// replacement character 
@@ -149,7 +149,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize> TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize> TModifier;
         
 		TObject									&orig;
 //		typename RemoveConst_<TObject>::Type	tmp;
@@ -210,7 +210,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		if (empty(it.orig) || it.minDist > DISTANCE || it.minDist > length(it.orig)) {
 			goEnd(it);
@@ -268,7 +268,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
 			TModifier &mod = it.mod[i];
@@ -283,7 +283,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
 			TModifier const &mod = it.mod[i];
@@ -307,7 +307,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type			TValue;
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; true;)
 		{
@@ -398,9 +398,9 @@ namespace SEQAN_NAMESPACE_MAIN
 // enumerate the levenshtein 1-environment
 
 	template <typename TSize>
-	struct _EnumeratorLevenshteinModifier 
+	struct EnumeratorLevenshteinModifier_ 
 	{
-		enum TState { _DISABLED, _SUBST, _DELETE, _INSERT, _EOF };
+		enum TState { DISABLED_, SUBST_, DELETE_, INSERT_, Eof_ };
 		TSize		errorPosOrig;	// position of edit operation in original string
 		TSize		errorPos;		// position of edit operation in modified string
 		TSize		errorPosEnd;	// errorPos < errorPosEnd must be fulfilled
@@ -416,7 +416,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize> TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize> TModifier;
         
 		TObject									&orig;
 //		typename RemoveConst_<TObject>::Type	tmp;
@@ -456,17 +456,17 @@ namespace SEQAN_NAMESPACE_MAIN
 		{
 			tmp = orig;
 			int posOrigEnd = length(tmp);
-			typename TModifier::TState lastState = TModifier::_DISABLED;
+			typename TModifier::TState lastState = TModifier::DISABLED_;
 			// i from high to low  =  modifier from left to right
 			for(int i = currentDistance - 1; i >= 0; --i)
 			{
 				TModifier &_mod = mod[i];
 				switch (_mod.state) {
-					case TModifier::_SUBST:
+					case TModifier::SUBST_:
 						// INSERT+SUBST is SUBST+INSERT (already enumerated)
 						// DELETE+SUBST is SUBST+DELETE (already enumerated)
 						// eventually trim front SUBSTs
-						if (lastState == TModifier::_INSERT || lastState == TModifier::_DELETE ||
+						if (lastState == TModifier::INSERT_ || lastState == TModifier::DELETE_ ||
 							(trim && posOrig == 0)) 
 						{
 							++posOrig;
@@ -483,9 +483,9 @@ namespace SEQAN_NAMESPACE_MAIN
 						++posOrig;
 						break;
 
-					case TModifier::_DELETE:
+					case TModifier::DELETE_:
 						// INSERT after DELETE is one SUBST (already enumerated)
-						if (lastState == TModifier::_INSERT) {
+						if (lastState == TModifier::INSERT_) {
 							++posOrig;
 							++pos;
 						}
@@ -499,11 +499,11 @@ namespace SEQAN_NAMESPACE_MAIN
 						erase(tmp, pos);
 						break;
 
-					case TModifier::_INSERT:
+					case TModifier::INSERT_:
 					default:
 						// DELETE after INSERT is one SUBST (already enumerated)
 						// eventually trim front SUBSTs
-						if (lastState == TModifier::_DELETE || (trim && posOrig == 0)) 
+						if (lastState == TModifier::DELETE_ || (trim && posOrig == 0)) 
 						{
 							++posOrig;
 							++pos;
@@ -526,7 +526,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			for(unsigned i = 0; i < currentDistance; ++i) 
 			{
 				TModifier &_mod = mod[i];
-				if (_mod.state != TModifier::_DELETE) {
+				if (_mod.state != TModifier::DELETE_) {
 					if (cut) {
 						if (_mod.errorPos >= (TSignedSize)(pos - 1))
 							return false;
@@ -556,7 +556,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
 
 		if (empty(it.orig) || it.minDist > DISTANCE || it.minDist > length(it.orig)) {
 			goEnd(it);
@@ -569,7 +569,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			it.mod[i].errorPos = -1;
 			it.mod[i].errorPosEnd = -1;
 			it.mod[i].character = ValueSize<TValue>::VALUE - 1;
-			it.mod[i].state = TModifier::_DISABLED;
+			it.mod[i].state = TModifier::DISABLED_;
 		}
 		it.currentDistance = it.minDist;
 		if (!it._reinit(0, 0))
@@ -582,13 +582,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
 
 		for(unsigned i = 0; i < DISTANCE; ++i) {
 			TModifier &mod = it.mod[i];
 			mod.errorPos = -1;
 			mod.character = 0;
-			mod.state = TModifier::_SUBST;
+			mod.state = TModifier::SUBST_;
 		}
 	}
 
@@ -600,7 +600,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value<TObject>::Type				TValue;
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
 		typedef typename TModifier::TState					TState;
 
 		// increment characters
@@ -616,14 +616,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 			// reset counter
-			if (mod->state != mod->_DELETE) {
+			if (mod->state != mod->DELETE_) {
 				mod->character = (0 == mod->skipChar)? 1: 0;
 				assignValueAt(it.tmp, mod->errorPos, (TValue) mod->character);
 			}
 
 			// next modifier
 			++mod;
-		} while (mod->state != TModifier::_DISABLED);
+		} while (mod->state != TModifier::DISABLED_);
 
 		// increment positions
 		mod = it.mod;
@@ -634,7 +634,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				assignValueAt(it.tmp, mod->errorPos, it.orig[mod->errorPosOrig]);
 
 //					int iMax = (TSignedSize)(length(it.tmp) - i);
-//					if (mod->state == mod->_INSERT) ++iMax;
+//					if (mod->state == mod->INSERT_) ++iMax;
 
 			// next error position
 			if (++(mod->errorPos) < mod->errorPosEnd)
@@ -644,8 +644,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				// set next char
 				if (mod == it.mod)
 				{	// for the first modifier we use an optimization
-					if (mod->state != mod->_DELETE) {
-						if (mod->state == mod->_SUBST)
+					if (mod->state != mod->DELETE_) {
+						if (mod->state == mod->SUBST_)
 							mod->skipChar = (unsigned) it.orig[mod->errorPosOrig];
 						else
 							mod->skipChar = -1;
@@ -659,7 +659,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				return it;
 			}
 			++mod;
-		} while (mod->state != TModifier::_DISABLED);
+		} while (mod->state != TModifier::DISABLED_);
 
 		// increment states
 		mod = it.mod;
@@ -667,10 +667,10 @@ namespace SEQAN_NAMESPACE_MAIN
 		do 
 		{
 			// next edit state (subst->insert->delete)
-			if (mod->state != mod->_INSERT) 
+			if (mod->state != mod->INSERT_) 
 			{
 				mod->state = (TState)(mod->state + 1);
-				if (mod->state == TModifier::_SUBST)
+				if (mod->state == TModifier::SUBST_)
 					++it.currentDistance;
 			
 				if (!it._reinit(0, 0)) {
@@ -679,7 +679,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				}
 				return it;
 			} else
-				mod->state = mod->_SUBST;
+				mod->state = mod->SUBST_;
 			++mod;
 		} while (mod != modEnd);
 
@@ -687,7 +687,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		for(mod = it.mod; mod != modEnd; ++mod) {
 			mod->errorPos = -1;
 			mod->character = 0;
-			mod->state = mod->_SUBST;
+			mod->state = mod->SUBST_;
 		}
 		return it;
     }
@@ -791,7 +791,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return false;
 
@@ -813,7 +813,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return false;
 
@@ -841,7 +841,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type			TSize;
 		typedef typename MakeSigned_<TSize>::Type		TSignedSize;
-		typedef _EnumeratorHammingModifier<TSignedSize>	TModifier;
+		typedef EnumeratorHammingModifier_<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return true;
 
@@ -863,7 +863,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	{
 		typedef typename Size<TObject>::Type				TSize;
 		typedef typename MakeSigned_<TSize>::Type			TSignedSize;
-		typedef _EnumeratorLevenshteinModifier<TSignedSize>	TModifier;
+		typedef EnumeratorLevenshteinModifier_<TSignedSize>	TModifier;
 
 		if (&a.orig != &b.orig) return true;
 

@@ -26,9 +26,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // Container for storing possible end positions in extension of eps-core
-template<typename _TPos>
+template<typename TPos_>
 struct ExtensionEndPosition {
-	typedef _TPos			TPosition;
+	typedef TPos_			TPosition;
 	typedef Pair<TPosition>	TCoordinate;
 
 	TPosition length;

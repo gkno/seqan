@@ -38,8 +38,8 @@ using namespace seqan;
 // Enums, Tags, Classes.
 // ============================================================================
 
-struct _IlluminaReads;
-typedef Tag<_IlluminaReads> IlluminaReads;
+struct IlluminaReads_;
+typedef Tag<IlluminaReads_> IlluminaReads;
 
 template<>
 struct Options<IlluminaReads> : public Options<Global>

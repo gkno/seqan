@@ -69,13 +69,13 @@ struct VectorSet;
 // internal set meta-functions
 
 template <typename TCargo>
-struct _VectorSetElement
+struct VectorSetElement_
 {
 	bool data_valid;
 	TCargo data_cargo;
 };
 template <>
-struct _VectorSetElement<Nothing>
+struct VectorSetElement_<Nothing>
 {
 	bool data_valid;
 };
@@ -83,16 +83,16 @@ struct _VectorSetElement<Nothing>
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct _VectorSetElements
+struct VectorSetElements_
 {
 	typedef char * Type; //dummy implementation for VC++
 };
 template <typename TValue, typename TSpec>
-struct _VectorSetElements<Map<TValue, VectorSet<TSpec> > >
+struct VectorSetElements_<Map<TValue, VectorSet<TSpec> > >
 {
 	typedef Map<TValue, VectorSet<TSpec> > TMap_;
 	typedef typename Cargo<TMap_>::Type TCargo_;
-	typedef _VectorSetElement<TCargo_> TElement_;
+	typedef VectorSetElement_<TCargo_> TElement_;
 	typedef String<TElement_, TSpec> Type;
 };
 
@@ -105,7 +105,7 @@ class Map<TValue, VectorSet<TSpec> >
 public:
 	typedef typename Key<Map>::Type TKey;
 	typedef typename Size<Map>::Type TSize;
-	typedef typename _VectorSetElements<Map>::Type TElements;
+	typedef typename VectorSetElements_<Map>::Type TElements;
 
 	TElements	data_elements;
 	TSize		data_length;
@@ -151,7 +151,7 @@ struct Reference< Map<TValue, VectorSet<TSpec> > >
 
 template <typename TValue, typename TSpec>
 struct Size< Map<TValue, VectorSet<TSpec> > >:
-	Size<typename _VectorSetElements< Map<TValue, VectorSet<TSpec> > >::Type> {};
+	Size<typename VectorSetElements_< Map<TValue, VectorSet<TSpec> > >::Type> {};
 
 template <typename TValue, typename TSpec>
 struct Key< Map<TValue, VectorSet<TSpec> > > :
@@ -181,7 +181,7 @@ class Iter<TMap,  VectorSetIterator>
 {
 public:
 	typedef typename Size<TMap>::Type TSize;
-	typedef typename _VectorSetElements<TMap>::Type TElements;
+	typedef typename VectorSetElements_<TMap>::Type TElements;
 	typedef typename Iterator<TElements, Rooted>::Type TElementsIterator;
 	typedef typename Value<TElementsIterator>::Type TValue;
 
@@ -238,7 +238,7 @@ inline void
 clear(Map<TValue, VectorSet<TSpec> > & me) 
 {
 	typedef Map<TValue, VectorSet<TSpec> > TMap;
-	typedef typename _VectorSetElements<TMap>::Type TElements;
+	typedef typename VectorSetElements_<TMap>::Type TElements;
 	typedef typename Iterator<TElements>::Type TIterator;
 	TIterator it_end = end(me.data_elements);
 	for (TIterator it = begin(me.data_elements); it != it_end; ++it)

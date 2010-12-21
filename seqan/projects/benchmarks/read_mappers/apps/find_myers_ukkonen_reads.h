@@ -58,23 +58,23 @@ namespace seqan {
 
 ///.Class.Pattern.param.TSpec.type:Spec.MyersUkkonenReads
 
-struct _MyersUkkonenReads;
-typedef Tag<_MyersUkkonenReads> MyersUkkonenReads;
+struct MyersUkkonenReads_;
+typedef Tag<MyersUkkonenReads_> MyersUkkonenReads;
 
 template <typename TNeedle>
 class Pattern<TNeedle, MyersUkkonenReads> {
 public:
     // Shortcut to the MyersUkkonen-Pattern we will use internally.
-    typedef Pattern<Segment<TNeedle, InfixSegment>, Myers<FindInfix> > _TMyersUkkonen;
+    typedef Pattern<Segment<TNeedle, InfixSegment>, Myers<FindInfix> > TMyersUkkonen_;
 
     // The type of the needle's characters.
-    typedef typename Value<TNeedle>::Type _TAlphabet;
+    typedef typename Value<TNeedle>::Type TAlphabet_;
 
     // The wrapped pattern.
-    _TMyersUkkonen _wrappedPattern;
+    TMyersUkkonen_ _wrappedPattern;
 
     // The last character of the pattern.
-    _TAlphabet _lastCharacter;
+    TAlphabet_ _lastCharacter;
 
     // The score of the match at the current position.
     int _score;

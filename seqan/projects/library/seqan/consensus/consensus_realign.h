@@ -544,7 +544,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 
 		appendRead(fragStore, fragStore.contigStore[contigId].seq);
 		appendValue(fragStore.readNameStore, fragStore.contigNameStore[contigId], Generous());
-		fragStore.contigNameStore[contigId] += "_Consensus";
+		fragStore.contigNameStore[contigId] += "Consensus_";
 		TAlignedElement el;
 		el.readId = dummyReadId;
 		el.contigId = contigId;

@@ -57,7 +57,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         typedef LONGLONG    FilePtr;
         typedef ULONGLONG   SizeType;
-        typedef DWORD       _SizeType;
+        typedef DWORD       SizeType_;
         typedef HANDLE      Handle;
 
 		Handle              handle, handleAsync;
@@ -147,7 +147,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return result != FALSE;
         }
 
-        inline bool read(void *memPtr, _SizeType count) const {
+        inline bool read(void *memPtr, SizeType_ count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    bool result = ReadFile(handle, memPtr, count, &_transferedBytes, NULL) != 0;
@@ -155,7 +155,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return result;
         }
 
-        inline bool write(void const *memPtr, _SizeType count) const {
+        inline bool write(void const *memPtr, SizeType_ count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    bool result = WriteFile(handle, memPtr, count, &_transferedBytes, NULL) != 0;
@@ -628,7 +628,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         typedef off_t			FilePtr;
 		typedef off_t           SizeType;   // type of file size
-        typedef size_t          _SizeType;  // type of transfer size (for read or write)
+        typedef size_t          SizeType_;  // type of transfer size (for read or write)
 		typedef int				Handle;
 
         Handle handleAsync;
@@ -717,7 +717,7 @@ namespace SEQAN_NAMESPACE_MAIN
     //////////////////////////////////////////////////////////////////////
     // event based read/write
 
-//    enum { _AsyncIOSignal = SIGIO };
+//    enum { AsyncIOSignal_ = SIGIO };
 
 	inline void printRequest(aiocb &request, const char *_hint = NULL) {
 		::std::cerr << ::std::hex;
@@ -745,7 +745,7 @@ namespace SEQAN_NAMESPACE_MAIN
         request.aio_nbytes = count * sizeof(TValue);
         request.aio_sigevent.sigev_notify = SIGEV_NONE;
 /*      request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
-        request.aio_sigevent.sigev_signo = _AsyncIOSignal;
+        request.aio_sigevent.sigev_signo = AsyncIOSignal_;
         request.aio_sigevent.sigev_value.sival_ptr = &request;
 		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_read():");
@@ -784,7 +784,7 @@ namespace SEQAN_NAMESPACE_MAIN
         request.aio_nbytes = count * sizeof(TValue);
         request.aio_sigevent.sigev_notify = SIGEV_NONE;
 /*      request.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
-        request.aio_sigevent.sigev_signo = _AsyncIOSignal;
+        request.aio_sigevent.sigev_signo = AsyncIOSignal_;
         request.aio_sigevent.sigev_value.sival_ptr = &request;
 		#ifdef SEQAN_VVERBOSE
 			printRequest(request, "aio_write():");
@@ -912,11 +912,11 @@ namespace SEQAN_NAMESPACE_MAIN
 
 /*
     typedef void (*sighandler_t)(int);
-    static unsigned _AsyncIOHandlerRefCount = 0;
-    static struct sigaction _AsyncIOOldSig;
+    static unsigned AsyncIOHandlerRefCount_ = 0;
+    static struct sigaction AsyncIOOldSig_;
 
-    inline void _AsyncIOHandler(int sigNo, siginfo_t *info, void *hint) {
-        SEQAN_ASSERT(sigNo == _AsyncIOSignal);
+    inline void AsyncIOHandler_(int sigNo, siginfo_t *info, void *hint) {
+        SEQAN_ASSERT(sigNo == AsyncIOSignal_);
         // TODO: signal respective event
         // currently we don't need async IO handlers because
         // we only wait for single events
@@ -924,10 +924,10 @@ namespace SEQAN_NAMESPACE_MAIN
 
     static sighandler_t _addAsyncIOHandler() {
         struct sigaction newSig, oldSig;
-        newSig.sa_sigaction = _AsyncIOHandler;
+        newSig.sa_sigaction = AsyncIOHandler_;
         sigemptyset(&newSig.sa_mask);
         newSig.sa_flags = SA_RESTART + SA_SIGINFO;
-        if (sigaction(_AsyncIOSignal, &newSig, &oldSig) < 0)
+        if (sigaction(AsyncIOSignal_, &newSig, &oldSig) < 0)
             return SIG_ERR;
         return oldSig.sa_handler;
     }

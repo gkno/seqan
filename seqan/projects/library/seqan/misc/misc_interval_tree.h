@@ -423,8 +423,8 @@ SEQAN_CHECKPOINT
 ...remarks:center = minbegin + (maxend-minbegin)/2
  */
 //template <typename TSpec = SpecPointAndCargo>
-struct _TagComputeCenter;
-typedef Tag<_TagComputeCenter> const ComputeCenter;
+struct TagComputeCenter_;
+typedef Tag<TagComputeCenter_> const ComputeCenter;
 
 
 /**
@@ -434,8 +434,8 @@ typedef Tag<_TagComputeCenter> const ComputeCenter;
 ...remarks:center = center of random interval
  */
 //template <typename TSpec = SpecPointAndCargo>
-struct _TagRandomCenter;
-typedef Tag<_TagRandomCenter> const RandomCenter;
+struct TagRandomCenter_;
+typedef Tag<TagRandomCenter_> const RandomCenter;
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -952,7 +952,7 @@ _createIntervalTree(TGraph & g, TPropertyMap & pm,
 				   TValue, 
 				   TValue center, 
 				   typename VertexDescriptor<TGraph>::Type len,
-				   Tag<_TagComputeCenter> const tag)
+				   Tag<TagComputeCenter_> const tag)
 {
 SEQAN_CHECKPOINT
 	//  Rekursionsanker
@@ -1152,7 +1152,7 @@ SEQAN_CHECKPOINT
 //for the left child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue &, TValue &, Tag<_TagRandomCenter> const)
+_calcIntervalTreeNodeCenterLeft(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  
@@ -1164,7 +1164,7 @@ SEQAN_CHECKPOINT
 //for the right child node (during interval tree construction)
 template<typename TIntervals, typename TValue>
 TValue
-_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue &, TValue &, Tag<_TagRandomCenter> const)
+_calcIntervalTreeNodeCenterRight(TIntervals & intervals, TValue &, TValue &, Tag<TagRandomCenter_> const)
 {
 SEQAN_CHECKPOINT
 	TValue rand_index = rand()%length(intervals);  

@@ -81,11 +81,11 @@ for @Class.Index@ based substring searches.
 
 	// finder tags
     struct FinderMlr_;     // simple Suffix Array finder with mlr-heuristic
-    struct _Finder_LCPE;    // Suffix Array finder using an enhanced LCP-Table
+    struct FinderLcpe_;    // Suffix Array finder using an enhanced LCP-Table
     struct FinderSTree_;    // Suffix Array finder using an enhanced LCP-Table
 
     typedef Tag<FinderMlr_> const EsaFindMlr;
-    typedef Tag<_Finder_LCPE> const EsaFindLcpe;
+    typedef Tag<FinderLcpe_> const EsaFindLcpe;
     typedef Tag<FinderSTree_> const FinderSTree;
 
 	template <typename TSpec = void>
@@ -207,9 +207,9 @@ To get a reference or the type of a specific fibre use @Function.getFibre@ or @M
 	// less function to search in sorted list for fibre id
 	struct FibreLess: public ::std::binary_function<FibreRecord, unsigned, bool>
 	{	// functor for operator>
-		inline bool operator()(FibreRecord const & _Left, unsigned const _Right) const
+		inline bool operator()(FibreRecord const & _Left, unsigned const Right_) const
 		{	// apply operator> to operands
-			return (_Left.id < _Right);
+			return (_Left.id < Right_);
 		}
 	};
 

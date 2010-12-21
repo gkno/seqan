@@ -555,12 +555,12 @@ compareAlignedReadsToReference(String<size_t> & result,
 
 
 // Tags for selecting an evaluateFoundIntervals_compareToIntervals specialization.
-struct _CategoryAll;
-typedef Tag<_CategoryAll> CategoryAll;
-struct _CategoryAnyBest;
-typedef Tag<_CategoryAnyBest> CategoryAnyBest;
-struct _CategoryAllBest;
-typedef Tag<_CategoryAllBest> CategoryAllBest;
+struct CategoryAll_;
+typedef Tag<CategoryAll_> CategoryAll;
+struct CategoryAnyBest_;
+typedef Tag<CategoryAnyBest_> CategoryAnyBest;
+struct CategoryAllBest_;
+typedef Tag<CategoryAllBest_> CategoryAllBest;
 
 
 // result must contain all ids of the intervals in

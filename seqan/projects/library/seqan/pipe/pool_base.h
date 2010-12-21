@@ -563,14 +563,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			else			handler2->pop();
         }
 
-        inline void pop(Type &_Ref) {
-            if (handler1)	handler1->pop(_Ref);
-			else			handler2->pop(_Ref);
+        inline void pop(Type &Ref_) {
+            if (handler1)	handler1->pop(Ref_);
+			else			handler2->pop(Ref_);
         }
 
-        inline void push(Type const & _Val) {
-            if (handler1)	handler1->push(_Val);
-			else			handler2->push(_Val);
+        inline void push(Type const & Val_) {
+            if (handler1)	handler1->push(Val_);
+			else			handler2->push(Val_);
         }
 
         inline bool eof() const {
@@ -814,12 +814,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *this;
         }
 
-        inline void pop(Type &_Ref) {
-            reader->pop(_Ref);
+        inline void pop(Type &Ref_) {
+            reader->pop(Ref_);
         }
 
-        inline void push(Type const &_Val) {
-            writer->push(_Val);
+        inline void push(Type const &Val_) {
+            writer->push(Val_);
         }
 
         inline bool eof() {
@@ -869,18 +869,18 @@ namespace SEQAN_NAMESPACE_MAIN
             return _pages;
         }
 
-        inline unsigned pages(unsigned __pageSize) const {
-            return enclosingBlocks(_size, (unsigned)__pageSize);
+        inline unsigned pages(unsigned pageSize__) const {
+            return enclosingBlocks(_size, (unsigned)pageSize__);
         }
 
         // used by buffer handlers ...
-        inline unsigned dataSize(unsigned __pageNo) const {
-            return (__pageNo != _lastPageNo)? pageSize: _lastPageSize;
+        inline unsigned dataSize(unsigned pageNo__) const {
+            return (pageNo__ != _lastPageNo)? pageSize: _lastPageSize;
         }
 
         // used by buffer handlers with variable PageSize ...
-        inline unsigned dataSize(unsigned __pageNo, unsigned __pageSize) const {
-            return (__pageNo != _size / __pageSize)? __pageSize: _size % __pageSize;
+        inline unsigned dataSize(unsigned pageNo__, unsigned pageSize__) const {
+            return (pageNo__ != _size / pageSize__)? pageSize__: _size % pageSize__;
         }
 
     protected:
@@ -1041,8 +1041,8 @@ namespace SEQAN_NAMESPACE_MAIN
     }
 
     template < typename TValue, typename TSpec >
-    inline void pop(Pool<TValue, TSpec> &me, TValue &_Ref) {
-        me.pop(_Ref);
+    inline void pop(Pool<TValue, TSpec> &me, TValue &Ref_) {
+        me.pop(Ref_);
     }
 
 /**
@@ -1058,8 +1058,8 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
     template < typename TValue, typename TSpec >
-    inline void push(Pool<TValue, TSpec> &me, TValue const &_Val) {
-        me.push(_Val);
+    inline void push(Pool<TValue, TSpec> &me, TValue const &Val_) {
+        me.push(Val_);
     }
 
     template < typename TValue, typename TSpec >

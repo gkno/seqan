@@ -50,17 +50,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename Type >
 	struct VolatilePtr
 	{
-		typedef VolatilePtr		_Self;
-		typedef VolatilePtr*	_SelfPtr;
-		typedef VolatilePtr&	_SelfRef;
+		typedef VolatilePtr		Self_;
+		typedef VolatilePtr*	SelfPtr_;
+		typedef VolatilePtr&	SelfRef_;
 
 		typedef Type&			reference;
 		typedef const Type&		const_reference;
 		typedef Type*			pointer;
 
 		pointer			ptr;
-		_SelfPtr		next;			// prev == NULL means this is the master node
-		_SelfPtr		prev;			// prev == NULL means this is the master node
+		SelfPtr_		next;			// prev == NULL means this is the master node
+		SelfPtr_		prev;			// prev == NULL means this is the master node
 
         VolatilePtr() {	    // volatile pinters behave like normal pointers
             prev = this;    // and are not initialized (ptr) per default
@@ -73,13 +73,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			next = this;
         }
 
-        VolatilePtr(const _Self& _vp) {
+        VolatilePtr(const Self_& _vp) {
 			ptr = _vp.ptr;
 			prev = this;
 			next = this;
         }
 
-        VolatilePtr(_SelfRef _vp) {
+        VolatilePtr(SelfRef_ _vp) {
 			ptr = _vp.ptr;
 			prev = this;
 			next = this;
@@ -100,16 +100,16 @@ namespace SEQAN_NAMESPACE_MAIN
 			return ptr[offset];
 		}
 
-		inline _Self& operator=(_Self const &_Right) {
+		inline Self_& operator=(Self_ const &Right_) {
 			hangOff();
-			ptr = _Right.ptr;
-            if (ptr) hangOn(const_cast<_Self&>(_Right));
+			ptr = Right_.ptr;
+            if (ptr) hangOn(const_cast<Self_&>(Right_));
 			return *this;
 		}
 
-		inline _Self& operator=(pointer const _Right) {
+		inline Self_& operator=(pointer const Right_) {
 			hangOff();
-			ptr = _Right;
+			ptr = Right_;
 			return *this;
 		}
 
@@ -118,9 +118,9 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 
 		inline void nukeCopies() {
-			_SelfPtr p = next;
+			SelfPtr_ p = next;
 			while (p != this) {
-				_SelfPtr tmp = p->next;
+				SelfPtr_ tmp = p->next;
 				p->ptr = NULL;
 				p->prev = p;
 				p->next = p;
@@ -130,11 +130,11 @@ namespace SEQAN_NAMESPACE_MAIN
 			next = this;
 		}
 
-		inline bool operator== (const _Self &I) const {
+		inline bool operator== (const Self_ &I) const {
 			return ptr == I.ptr;
 		}
 
-		inline bool operator!= (const _Self &I) const {
+		inline bool operator!= (const Self_ &I) const {
 			return ptr != I.ptr;
 		}
 
@@ -144,7 +144,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 	private:
 
-		inline void hangOn(_SelfRef _prev) {
+		inline void hangOn(SelfRef_ _prev) {
 			// hang on between _prev and _prev.next
 			prev = &_prev;
 			next = _prev.next;

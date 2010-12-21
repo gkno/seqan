@@ -49,10 +49,10 @@ template <typename TValue, unsigned DIMENSION = 0/*typename TSpec = NDimensional
 class Matrix;
 
 //////////////////////////////////////////////////////////////////////////////
-template <typename T> struct _SizeArr;
+template <typename T> struct SizeArr_;
 
 template <typename TValue, unsigned DIMENSION>
-struct _SizeArr<Matrix<TValue, DIMENSION> >
+struct SizeArr_<Matrix<TValue, DIMENSION> >
 {
 	typedef Matrix<TValue, DIMENSION> TMatrix_;
 	typedef typename Size<TMatrix_>::Type TSize_;
@@ -269,28 +269,28 @@ public:
 };
 
 template <typename TValue, unsigned DIMENSION>
-inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type &
+inline typename SizeArr_<Matrix<TValue, DIMENSION> >::Type &
 _dataLengths(Matrix<TValue, DIMENSION> & me)
 {
 	return me.data_lengths;
 }
 
 template <typename TValue, unsigned DIMENSION>
-inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type const &
+inline typename SizeArr_<Matrix<TValue, DIMENSION> >::Type const &
 _dataLengths(Matrix<TValue, DIMENSION> const & me)
 {
 	return me.data_lengths;
 }
 
 template <typename TValue, unsigned DIMENSION>
-inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type &
+inline typename SizeArr_<Matrix<TValue, DIMENSION> >::Type &
 _dataFactors(Matrix<TValue, DIMENSION> & me)
 {
 	return me.data_factors;
 }
 
 template <typename TValue, unsigned DIMENSION>
-inline typename _SizeArr<Matrix<TValue, DIMENSION> >::Type &
+inline typename SizeArr_<Matrix<TValue, DIMENSION> >::Type &
 _dataFactors(Matrix<TValue, DIMENSION> const & me)
 {
 	return me.data_factors;

@@ -162,7 +162,7 @@ namespace seqan{
 		bool _end;
 			
 		
-	#ifdef _SEQAN_CHAIN_DEBUG
+	#ifdef SEQAN_CHAIN_DEBUG_
 		friend inline
 		void 
 		dump( WrapperPoint_< TFragType > & me )
@@ -185,7 +185,7 @@ namespace seqan{
 			std::cout << " ]" << std::endl;
 		}
 
-	#endif // _SEQAN_CHAIN_DEBUG
+	#endif // SEQAN_CHAIN_DEBUG_
 
 		WrapperPoint_( )
 			: _frag( NULL )

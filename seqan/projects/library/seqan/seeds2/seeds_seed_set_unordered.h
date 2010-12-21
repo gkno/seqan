@@ -56,7 +56,7 @@ class SeedSet<TSeedSpec, Unordered, TSeedSetConfig>
         : public TSeedSetConfig::TQualityThresholdMixin
 {
 public:
-    typedef typename TSeedSetConfig::TQualityThresholdMixin _TQualityThresholdMixin;
+    typedef typename TSeedSetConfig::TQualityThresholdMixin TQualityThresholdMixin_;
     typedef typename TSeedSetConfig::TSeedConfig TSeedConfig;
     typedef Seed<TSeedSpec, TSeedConfig> TSeed;
 
@@ -71,7 +71,7 @@ public:
     THighQualitySeeds _highQualitySeeds;
 
     SeedSet()
-            : _TQualityThresholdMixin()
+            : TQualityThresholdMixin_()
     { SEQAN_CHECKPOINT; }
 };
 
@@ -82,9 +82,9 @@ public:
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Position<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >
 {
-    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> _TSeedSet;
-    typedef String<typename _TSeedSet::TSeed> _TSeedString;
-    typedef typename Position<_TSeedString>::Type Type;
+    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> TSeedSet_;
+    typedef String<typename TSeedSet_::TSeed> TSeedString_;
+    typedef typename Position<TSeedString_>::Type Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
@@ -94,9 +94,9 @@ struct Position<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> const>
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Size<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >
 {
-    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> _TSeedSet;
-    typedef String<typename _TSeedSet::TSeed> _TSeedString;
-    typedef typename Size<_TSeedString>::Type Type;
+    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> TSeedSet_;
+    typedef String<typename TSeedSet_::TSeed> TSeedString_;
+    typedef typename Size<TSeedString_>::Type Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
@@ -106,57 +106,57 @@ struct Size<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> const>
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Value<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef _TSeed Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef TSeed_ Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Value<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> const>
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef _TSeed const Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef TSeed_ const Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Reference<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> >
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef _TSeed & Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef TSeed_ & Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Reference<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> const>
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef _TSeed const & Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef TSeed_ const & Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Iterator<SeedSet<TSeedSpec, Unordered, TSeedSetConfig>, Standard>
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> _TSeedSet;
-//     typedef String<_TSeed> _TSeedString;
-//     typedef typename Iterator<_TSeedString, Standard>::Type _TIterator;
-//     typedef _TIterator Type;
-    typedef Iter<_TSeedSet, Indirect<typename std::set<_TSeed *>::iterator> > Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> TSeedSet_;
+//     typedef String<TSeed_> TSeedString_;
+//     typedef typename Iterator<TSeedString_, Standard>::Type TIterator_;
+//     typedef TIterator_ Type;
+    typedef Iter<TSeedSet_, Indirect<typename std::set<TSeed_ *>::iterator> > Type;
 };
 
 template <typename TSeedSpec, typename TSeedSetConfig>
 struct Iterator<SeedSet<TSeedSpec, Unordered, TSeedSetConfig> const, Standard>
 {
-    typedef typename TSeedSetConfig::TSeedConfig _TSeedConfig;
-    typedef Seed<TSeedSpec, _TSeedConfig> _TSeed;
-    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> _TSeedSet;
-//     typedef String<_TSeed const> _TSeedString;
-//     typedef typename Iterator<_TSeedString const, Standard>::Type _TIterator;
-//     typedef _TIterator Type;
-    typedef Iter<_TSeedSet const, Indirect<typename std::set<_TSeed *>::const_iterator> > Type;
+    typedef typename TSeedSetConfig::TSeedConfig TSeedConfig_;
+    typedef Seed<TSeedSpec, TSeedConfig_> TSeed_;
+    typedef SeedSet<TSeedSpec, Unordered, TSeedSetConfig> TSeedSet_;
+//     typedef String<TSeed_ const> TSeedString_;
+//     typedef typename Iterator<TSeedString_ const, Standard>::Type TIterator_;
+//     typedef TIterator_ Type;
+    typedef Iter<TSeedSet_ const, Indirect<typename std::set<TSeed_ *>::const_iterator> > Type;
 };
 
 // ===========================================================================

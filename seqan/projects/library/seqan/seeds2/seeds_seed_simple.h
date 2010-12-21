@@ -44,8 +44,8 @@ namespace seqan {
 // ===========================================================================
 
 // Already defined in module score.
-// struct _Simple {};
-// typedef Tag<_Simple> Simple;  // Already defined in module base.
+// struct Simple_ {};
+// typedef Tag<Simple_> Simple;  // Already defined in module base.
 struct Simple {}; // .. but type is not complete yet
 
 /**

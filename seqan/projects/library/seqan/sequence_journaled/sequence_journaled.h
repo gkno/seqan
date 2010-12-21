@@ -53,14 +53,14 @@ namespace seqan {
 template <typename THostSpec, typename TJournalSpec = SortedArray, typename TBufferSpec = Alloc<void> >
 struct Journaled {};
 
-template <typename _TValue, typename _THostSpec, typename _TJournalSpec, typename _TBufferSpec>
-class String<_TValue, Journaled<_THostSpec, _TJournalSpec, _TBufferSpec> >
+template <typename TValue_, typename THostSpec_, typename TJournalSpec_, typename TBufferSpec_>
+class String<TValue_, Journaled<THostSpec_, TJournalSpec_, TBufferSpec_> >
 {
 public:
-    typedef _TValue TValue;
-    typedef _THostSpec THostSpec;
-    typedef _TJournalSpec TJournalSpec;
-    typedef _TBufferSpec TBufferSpec;
+    typedef TValue_ TValue;
+    typedef THostSpec_ THostSpec;
+    typedef TJournalSpec_ TJournalSpec;
+    typedef TBufferSpec_ TBufferSpec;
 
     typedef String<TValue, THostSpec> THost;
     typedef typename Size<THost>::Type TSize;

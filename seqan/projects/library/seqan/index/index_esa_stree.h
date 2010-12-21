@@ -188,8 +188,8 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 	{
 		Pair<TSize> range;		// current SA interval of hits
 		HistoryStackEsa_() {}
-		template <typename _TSize>
-		HistoryStackEsa_(Pair<_TSize> const &_range): range(_range) {}
+		template <typename TSize_>
+		HistoryStackEsa_(Pair<TSize_> const &_range): range(_range) {}
 	};
 
 	template < typename TIndex, typename TSpec >
@@ -2072,7 +2072,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 
 	template < typename TIndex, class TSpec >
 	inline bool isUnique(Iter<TIndex, VSTree<TSpec> > const &it) {
-		_VectorSet<
+		VectorSet_<
 			typename Size<TIndex>::Type,
 			Alloc<> 
 		> set(countSequences(container(it)));
@@ -2123,7 +2123,7 @@ If $iterator$'s container type is $TIndex$ the return type is $Infix<Fibre<TInde
 	inline typename Size<TIndex>::Type
 	getFrequency(Iter<TIndex, VSTree<TSpec> > const &it) 
 	{
-		_VectorSet<
+		VectorSet_<
 			typename Size<TIndex>::Type,
 			Alloc<> 
 		> set(countSequences(container(it)));

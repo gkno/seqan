@@ -1013,4 +1013,4 @@ namespace seqan
 	
 
 } // namespace seqan
-#endif //_SKIP_LIST_BASE_H
+#endif //SKIP_LIST_BASE_H_

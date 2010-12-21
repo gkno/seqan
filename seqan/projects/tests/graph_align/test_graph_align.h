@@ -627,7 +627,7 @@ SEQAN_DEFINE_TEST(test_graph_align_hirschberg) {
 //////////////////////////////////////////////////////////////////////////////
 
 template<bool TTop, bool TLeft, bool TRight, bool TBottom>
-void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
+void TestGotohVSBandedGotoh_(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef unsigned int TSize;
 	typedef int TScore;
 
@@ -721,22 +721,22 @@ void _Test_GotohVSBandedGotoh(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 
 
 SEQAN_DEFINE_TEST(test_graph_align_gotohVsBandedGotoh) {
-	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,false,false,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,false,true,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,false,true,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,true,false,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,true,false,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,true,true,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<false,true,true,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,false,false,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,false,false,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,false,true,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,false,true,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,true,false,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,true,false,true>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,true,true,false>() );
-	_Test_GotohVSBandedGotoh(AlignConfig<true,true,true,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,false,false,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,false,false,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,false,true,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,false,true,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,true,false,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,true,false,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,true,true,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<false,true,true,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,false,false,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,false,false,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,false,true,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,false,true,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,true,false,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,true,false,true>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,true,true,false>() );
+	TestGotohVSBandedGotoh_(AlignConfig<true,true,true,true>() );
 }
 
 
@@ -744,7 +744,7 @@ SEQAN_DEFINE_TEST(test_graph_align_gotohVsBandedGotoh) {
 
 
 template<bool TTop, bool TLeft, bool TRight, bool TBottom>
-void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
+void AllAgainstAll__(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 	typedef unsigned int TSize;
 	typedef int TScore;
 
@@ -853,22 +853,22 @@ void __AllAgainstAll(AlignConfig<TTop, TLeft, TRight, TBottom> ac) {
 //////////////////////////////////////////////////////////////////////////////
 
 SEQAN_DEFINE_TEST(test_graph_align_allAgainstAll) {
-	__AllAgainstAll(AlignConfig<false,false,false,false>() );
-	__AllAgainstAll(AlignConfig<false,false,false,true>() );
-	__AllAgainstAll(AlignConfig<false,false,true,false>() );
-	__AllAgainstAll(AlignConfig<false,false,true,true>() );
-	__AllAgainstAll(AlignConfig<false,true,false,false>() );
-	__AllAgainstAll(AlignConfig<false,true,false,true>() );
-	__AllAgainstAll(AlignConfig<false,true,true,false>() );
-	__AllAgainstAll(AlignConfig<false,true,true,true>() );
-	__AllAgainstAll(AlignConfig<true,false,false,false>() );
-	__AllAgainstAll(AlignConfig<true,false,false,true>() );
-	__AllAgainstAll(AlignConfig<true,false,true,false>() );
-	__AllAgainstAll(AlignConfig<true,false,true,true>() );
-	__AllAgainstAll(AlignConfig<true,true,false,false>() );
-	__AllAgainstAll(AlignConfig<true,true,false,true>() );
-	__AllAgainstAll(AlignConfig<true,true,true,false>() );
-	__AllAgainstAll(AlignConfig<true,true,true,true>() );
+	AllAgainstAll__(AlignConfig<false,false,false,false>() );
+	AllAgainstAll__(AlignConfig<false,false,false,true>() );
+	AllAgainstAll__(AlignConfig<false,false,true,false>() );
+	AllAgainstAll__(AlignConfig<false,false,true,true>() );
+	AllAgainstAll__(AlignConfig<false,true,false,false>() );
+	AllAgainstAll__(AlignConfig<false,true,false,true>() );
+	AllAgainstAll__(AlignConfig<false,true,true,false>() );
+	AllAgainstAll__(AlignConfig<false,true,true,true>() );
+	AllAgainstAll__(AlignConfig<true,false,false,false>() );
+	AllAgainstAll__(AlignConfig<true,false,false,true>() );
+	AllAgainstAll__(AlignConfig<true,false,true,false>() );
+	AllAgainstAll__(AlignConfig<true,false,true,true>() );
+	AllAgainstAll__(AlignConfig<true,true,false,false>() );
+	AllAgainstAll__(AlignConfig<true,true,false,true>() );
+	AllAgainstAll__(AlignConfig<true,true,true,false>() );
+	AllAgainstAll__(AlignConfig<true,true,true,true>() );
 }
 
 

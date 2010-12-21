@@ -61,8 +61,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMS1
 
-struct _PMS1;
-typedef Tag<_PMS1> const PMS1;
+struct Pms1_;
+typedef Tag<Pms1_> const PMS1;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - PMS1 Spec

@@ -173,13 +173,13 @@ namespace SEQAN_NAMESPACE_MAIN
 			sentinelBound(other.sentinelBound),
 			interSentinelNodes(other.interSentinelNodes) {}
 
-		template <typename _TText>
-		Index(_TText &_text):
+		template <typename TText_>
+		Index(TText_ &_text):
 			text(_text),
 			interSentinelNodes(false) {}
 
-		template <typename _TText>
-		Index(_TText const &_text):
+		template <typename TText_>
+		Index(TText_ const &_text):
 			text(_text),
 			interSentinelNodes(false) {}
 	};

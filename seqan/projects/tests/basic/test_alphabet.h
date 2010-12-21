@@ -250,8 +250,8 @@ SEQAN_DEFINE_TEST(TestAlphabetInterface) {
 //////////////////////////////////////////////////////////////////////////////
 //Test value array functions for some types
 
-template <typename T, typename _T>
-void TestArrayFunctions(_T const _val1, _T const _val2)
+template <typename T, typename T_>
+void TestArrayFunctions(T_ const _val1, T_ const _val2)
 {
 	T val1 = (T)_val1;
 	T val2 = (T)_val2;

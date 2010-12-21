@@ -42,11 +42,11 @@ namespace SEQAN_NAMESPACE_MAIN
 // Annotation Store
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename _TPos, typename TSpec = void>
+template <typename TPos_, typename TSpec = void>
 struct AnnotationStoreElement
 {
 	typedef typename Id<AnnotationStoreElement>::Type		TId;
-	typedef _TPos											TPos;
+	typedef TPos_											TPos;
 	typedef StringSet<CharString, Owner< ConcatDirect<> > >	TValues;
 
 	static const TId  INVALID_ID;

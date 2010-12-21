@@ -44,11 +44,11 @@ struct MultipleSimple_;
 typedef Tag<MultipleSimple_> MultipleSimple;
 
 
-template <typename _TNeedle, typename TStringSetSpec>
-struct Pattern<StringSet<_TNeedle, TStringSetSpec>, MultipleSimple> : _FindState {
-    typedef StringSet<_TNeedle, TStringSetSpec> TNeedleContainer;
+template <typename TNeedle_, typename TStringSetSpec>
+struct Pattern<StringSet<TNeedle_, TStringSetSpec>, MultipleSimple> : FindState_ {
+    typedef StringSet<TNeedle_, TStringSetSpec> TNeedleContainer;
     typedef typename Position<TNeedleContainer>::Type TNeedleIndex;
-    typedef _TNeedle TNeedle;
+    typedef TNeedle_ TNeedle;
     typedef typename Position<TNeedle>::Type TPosition;
 
     // The needle set we work on.

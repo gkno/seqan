@@ -697,5 +697,5 @@ private:
 }; // struct SkipList
 
 } // namespace seqan
-#endif //_SKIP_LIST_STATIC_H
+#endif //SKIP_LIST_STATIC_H_
 

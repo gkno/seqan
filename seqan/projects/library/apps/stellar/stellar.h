@@ -30,17 +30,17 @@
 using namespace seqan;
 
 
-struct _VerifyAllLocal;
-typedef Tag<_VerifyAllLocal> const AllLocal;
+struct VerifyAllLocal_;
+typedef Tag<VerifyAllLocal_> const AllLocal;
 
-struct _VerifyBestLocal;
-typedef Tag<_VerifyBestLocal> const BestLocal;
+struct VerifyBestLocal_;
+typedef Tag<VerifyBestLocal_> const BestLocal;
 
-struct _VerifyBandedGlobal;
-typedef Tag<_VerifyBandedGlobal> const BandedGlobal;
+struct VerifyBandedGlobal_;
+typedef Tag<VerifyBandedGlobal_> const BandedGlobal;
 
-struct _VerifyBandedGlobalExtend;
-typedef Tag<_VerifyBandedGlobalExtend> const BandedGlobalExtend;
+struct VerifyBandedGlobalExtend_;
+typedef Tag<VerifyBandedGlobalExtend_> const BandedGlobalExtend;
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -40,14 +40,14 @@ namespace SEQAN_NAMESPACE_MAIN
 		class LCPFwdIt,		// lcp table input iterator
 		class FlatOutIt >	// flat tree output iterator
 	inline FlatOutIt createLcpBinTree(
-		LCPFwdIt _First, LCPFwdIt _Last,
-		FlatOutIt _Dest)
+		LCPFwdIt First_, LCPFwdIt _Last,
+		FlatOutIt Dest_)
 	{
         typedef typename Value<LCPFwdIt>::Type  TValue;
         typedef typename Size<LCPFwdIt>::Type   TSize;
 
-        TSize size = difference(_First, _Last);
-        if (size <= 1) return _Dest;
+        TSize size = difference(First_, _Last);
+        if (size <= 1) return Dest_;
 		--size;
 
         // calculate the depth of the lcp tree
@@ -58,8 +58,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
 		for(unsigned i = treeLevels - 1; _xSize; --i, _xSize /= 2) {
-			level[i] = _Dest;
-			goFurther(_Dest, (size + _xSize - 1) / _xSize);
+			level[i] = Dest_;
+			goFurther(Dest_, (size + _xSize - 1) / _xSize);
 		}
 
 		// fields to keep track of minimum elements and state
@@ -69,8 +69,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			half[i] = false;
 
 		// it works like a binary counter of half[n]...half[1]half[0]
-		for(TSize j = 0; j < size; ++j, ++_First) {
-			*(level[0]) = minVal[0] = *_First;
+		for(TSize j = 0; j < size; ++j, ++First_) {
+			*(level[0]) = minVal[0] = *First_;
 			++(level[0]);
 			for(unsigned i = 1; i < treeLevels; ++i) {
 				if (half[i]) {
@@ -100,14 +100,14 @@ namespace SEQAN_NAMESPACE_MAIN
 			}
 
 		// trailing zero
-		*_Dest = 0;
-		++_Dest;
+		*Dest_ = 0;
+		++Dest_;
 
 		delete[] half;
 		delete[] minVal;
 		delete[] level;
 
-		return _Dest;
+		return Dest_;
     }
 
 
@@ -132,17 +132,17 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <
 		class LCPFwdIt,		// lcp table input iterator
 		typename TSize >
-	inline void sizeofLcpe(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
+	inline void sizeofLcpe(LCPFwdIt First_, LCPFwdIt _Last, TSize &Size_)
 	{
-		_Size = sizeofLcpe(difference(_First, _Last));
+		Size_ = sizeofLcpe(difference(First_, _Last));
 	}
 
 	template <
 		class LCPFwdIt,		// lcp table input iterator
 		typename TSize >
-	inline void sizeofLcph(LCPFwdIt _First, LCPFwdIt _Last, TSize &_Size)
+	inline void sizeofLcph(LCPFwdIt First_, LCPFwdIt _Last, TSize &Size_)
 	{
-		sizeofLcpe(_First, _Last, _Size);
+		sizeofLcpe(First_, _Last, Size_);
 		return;
 	}
 

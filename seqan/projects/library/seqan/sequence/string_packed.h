@@ -750,11 +750,11 @@ SEQAN_CHECKPOINT
 
 ///.Function.reserve.param.object.type:Spec.Packed String
 
-template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+template <typename TValue, typename TSpec, typename TSize_, typename TExpand>
 inline typename Size< String<TValue, Packed<TSpec> > >::Type
 reserve(
 	String<TValue, Packed<TSpec> > & seq, 
-	_TSize new_capacity,
+	TSize_ new_capacity,
 	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT

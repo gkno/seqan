@@ -146,11 +146,11 @@ struct SwiftParameters {
 
 //////////////////////////////////////////////////////////////////////////////
 
-	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
+	template <typename TSpec, typename TSize_, typename TShortSize_ = unsigned short>
 	struct SwiftBucket_ 
 	{
-		typedef _TSize			TSize;
-		typedef _TShortSize		TShortSize;
+		typedef TSize_			TSize;
+		typedef TShortSize_		TShortSize;
 
 		TSize					firstIncrement;
 		TSize					lastIncrement;
@@ -162,11 +162,11 @@ struct SwiftParameters {
 #endif
 	};
 
-	template <typename _TSpec, typename _TSize, typename _TShortSize>
-	struct SwiftBucket_<SwiftSemiGlobal_<_TSpec>, _TSize, _TShortSize>
+	template <typename TSpec_, typename TSize_, typename TShortSize_>
+	struct SwiftBucket_<SwiftSemiGlobal_<TSpec_>, TSize_, TShortSize_>
 	{
-		typedef _TSize			TSize;
-		typedef _TShortSize		TShortSize;
+		typedef TSize_			TSize;
+		typedef TShortSize_		TShortSize;
 
 		TSize					lastIncrement;
 		TShortSize				counter;		// q-gram hits
@@ -176,11 +176,11 @@ struct SwiftParameters {
 #endif
 	};
 
-	template <typename TSpec, typename _TSize, typename _TShortSize = unsigned short>
+	template <typename TSpec, typename TSize_, typename TShortSize_ = unsigned short>
 	struct SwiftBucketParams_ 
 	{
-		typedef _TSize			TSize;
-		typedef _TShortSize		TShortSize;
+		typedef TSize_			TSize;
+		typedef TShortSize_		TShortSize;
 
 		TSize			firstBucket;	// first SwiftBucket_ entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
@@ -192,11 +192,11 @@ struct SwiftParameters {
 		unsigned char	logDelta;		// log2(delta)
 	};
 
-	template <typename _TSpec, typename _TSize, typename _TShortSize>
-	struct SwiftBucketParams_< Swift<Tag<SwiftSemiGlobal_<_TSpec> > >, _TSize, _TShortSize>
+	template <typename TSpec_, typename TSize_, typename TShortSize_>
+	struct SwiftBucketParams_< Swift<Tag<SwiftSemiGlobal_<TSpec_> > >, TSize_, TShortSize_>
 	{
-		typedef _TSize			TSize;
-		typedef _TShortSize		TShortSize;
+		typedef TSize_			TSize;
+		typedef TShortSize_		TShortSize;
 
 		TSize			firstBucket;	// first SwiftBucket_ entry in pattern.buckets
 		TSize			reuseMask;		// 2^ceil(log2(x)) reuse every x-th bucket)
@@ -432,8 +432,8 @@ struct SwiftParameters {
 //____________________________________________________________________________
 
 
-template <typename _TSpec, typename TSize, typename TShortSize>
-inline void _printSwiftParams(SwiftBucketParams_<_TSpec, TSize, TShortSize > &bucketParams)
+template <typename TSpec_, typename TSize, typename TShortSize>
+inline void _printSwiftParams(SwiftBucketParams_<TSpec_, TSize, TShortSize > &bucketParams)
 {
 	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
 	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
@@ -444,8 +444,8 @@ inline void _printSwiftParams(SwiftBucketParams_<_TSpec, TSize, TShortSize > &bu
 	::std::cout << "  logDelta:    " << (int)bucketParams.logDelta << ::std::endl << ::std::endl;
 }
 
-template <typename _TSpec, typename TSize, typename TShortSize>
-inline void _printSwiftParams(SwiftBucketParams_<Tag<SwiftSemiGlobal_<_TSpec> >, TSize, TShortSize > &bucketParams)
+template <typename TSpec_, typename TSize, typename TShortSize>
+inline void _printSwiftParams(SwiftBucketParams_<Tag<SwiftSemiGlobal_<TSpec_> >, TSize, TShortSize > &bucketParams)
 {
 	::std::cout << "  firstBucket: " << bucketParams.firstBucket << ::std::endl;
 	::std::cout << "  reuseMask:   " << bucketParams.reuseMask << ::std::endl;
@@ -545,25 +545,25 @@ _resetBucket(SwiftBucket_<TSpec, TSize, TShortSize> & bkt, TPos lastIncrement, T
 	bkt.notListed = true;
 }
 
-template <typename _TSpec, typename TSize, typename TShortSize, typename TPos>
+template <typename TSpec_, typename TSize, typename TShortSize, typename TPos>
 inline void
-_resetBucket(SwiftBucket_<SwiftSemiGlobal_<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement)
+_resetBucket(SwiftBucket_<SwiftSemiGlobal_<TSpec_>, TSize, TShortSize> & bkt, TPos lastIncrement)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
 }
 
-template <typename _TSpec, typename TSize, typename TShortSize, typename TPos, typename TThresh>
+template <typename TSpec_, typename TSize, typename TShortSize, typename TPos, typename TThresh>
 inline void
-_resetBucket(SwiftBucket_<SwiftSemiGlobal_<_TSpec>, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
+_resetBucket(SwiftBucket_<SwiftSemiGlobal_<TSpec_>, TSize, TShortSize> & bkt, TPos lastIncrement, TThresh threshold)
 {
 	bkt.lastIncrement = lastIncrement;
 	bkt.counter = 0;
 	bkt.threshold = threshold;
 }
 
-template <typename TIndex, typename TFloat, typename _TSize, typename TSpec>
-inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, _TSize minLengthForAll) 
+template <typename TIndex, typename TFloat, typename TSize_, typename TSpec>
+inline void _patternInit(Pattern<TIndex, Swift<TSpec> > &pattern, TFloat errorRate, TSize_ minLengthForAll) 
 {
 	typedef Pattern<TIndex, Swift<TSpec> >						TPattern;
 	typedef typename Size<TIndex>::Type							TSize;
@@ -998,15 +998,15 @@ checkOverlap:
 template <
 	typename TFinder,
 	typename TIndex, 
-	typename _TSpec,
+	typename TSpec_,
 	typename THValue
 >
 inline bool _swiftMultiProcessQGram(
 	TFinder &finder, 
-	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > > &pattern,
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec_> > > > &pattern,
 	THValue hash)
 {
-	typedef Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > >	TPattern;
+	typedef Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec_> > > >	TPattern;
 
 	typedef typename Size<TIndex>::Type							TSize;
 	typedef typename Fibre<TIndex, QGram_SA>::Type				TSA;
@@ -1044,7 +1044,7 @@ inline bool _swiftMultiProcessQGram(
 		TBucketParams &bucketParams = _swiftBucketParams(pattern, getSeqNo(ndlPos));
 
 		__int64 diag = finder.curPos;
-		if (Swift<Tag<SwiftSemiGlobal_<_TSpec> > >::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
+		if (Swift<Tag<SwiftSemiGlobal_<TSpec_> > >::DIAGONAL == 1) diag -= getSeqOffset(ndlPos);
 		
 		unsigned bktNo = (diag >> bucketParams.logDelta) & bucketParams.reuseMask;
 		unsigned bktOfs = diag & (bucketParams.delta - 1);
@@ -1078,7 +1078,7 @@ inline bool _swiftMultiProcessQGram(
 			{
 
 				TSize height = 0;
-				if (Swift<Tag<SwiftSemiGlobal_<_TSpec> > >::DIAGONAL == 1)
+				if (Swift<Tag<SwiftSemiGlobal_<TSpec_> > >::DIAGONAL == 1)
 					height = sequenceLength(getSeqNo(ndlPos), host(pattern)) - 1;
 
 #ifdef SEQAN_DEBUG_SWIFT
@@ -1199,11 +1199,11 @@ inline bool _swiftMultiFlushBuckets(
 template <
 	typename TFinder,
 	typename TIndex, 
-	typename _TSpec
+	typename TSpec_
 >
 inline bool _swiftMultiFlushBuckets(
 	TFinder &, 
-	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<_TSpec> > > > &)
+	Pattern<TIndex, Swift<Tag<SwiftSemiGlobal_<TSpec_> > > > &)
 {
     // there is nothing to be done here as we dump matches immediately after reaching the threshold
     return false;

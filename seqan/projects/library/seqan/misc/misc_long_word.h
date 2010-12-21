@@ -65,8 +65,8 @@ struct _NativeWideWidth;
 typedef Tag<_NativeWideWidth> NativeWideWidth;
 
 
-struct _DynamicWidth;
-typedef Tag<_DynamicWidth> DynamicWidth;
+struct DynamicWidth_;
+typedef Tag<DynamicWidth_> DynamicWidth;
 
 
 template <unsigned LENGTH>

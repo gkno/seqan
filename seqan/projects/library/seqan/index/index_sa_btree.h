@@ -40,13 +40,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		class SAFwdIt,		// suffix array input iterator
 		class FlatOutIt >	// flat tree output iterator
 	inline FlatOutIt createSABTree(
-		SAFwdIt _First, SAFwdIt _Last,
-		FlatOutIt _Dest, unsigned BlockSize)
+		SAFwdIt First_, SAFwdIt _Last,
+		FlatOutIt Dest_, unsigned BlockSize)
 	{
         typedef typename Value<SAFwdIt>::Type	TSize;
 
-        TSize size = difference(_First, _Last);
-		if (!size) return _Dest;
+        TSize size = difference(First_, _Last);
+		if (!size) return Dest_;
 
         // calculate the depth of the sa b-tree
 		TSize BlockElements = BlockSize - 1;
@@ -58,8 +58,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		// get output iterators for every level in the flat tree
 		FlatOutIt *level = new FlatOutIt[treeLevels];
 		for(int i = treeLevels - 1; _xSize; --i, _xSize /= BlockSize) {
-			level[i] = _Dest;
-			goFurther(_Dest, ((size / _xSize + BlockSize - 1) / BlockSize) * BlockSize);
+			level[i] = Dest_;
+			goFurther(Dest_, ((size / _xSize + BlockSize - 1) / BlockSize) * BlockSize);
 		}
 
 		// counter for each b-tree level
@@ -68,9 +68,9 @@ namespace SEQAN_NAMESPACE_MAIN
 			cnt[i] = 0;
 
 		// distribute to responsible levels
-		for(TSize j = 0; j < size; ++j, ++_First)
+		for(TSize j = 0; j < size; ++j, ++First_)
 			for(unsigned i = 0; i < treeLevels; ++i) {
-				*(level[i]) = *_First;
+				*(level[i]) = *First_;
 				++(level[i]);
 				if (cnt[i] != BlockElements) {
 					++cnt[i];
@@ -82,7 +82,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		delete[] cnt;
 		delete[] level;
 
-		return _Dest;
+		return Dest_;
     }
 
 
@@ -98,9 +98,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <
 		class SAFwdIt,		// suffix array input iterator
 		typename TSize >
-	inline void sizeofSABTree(SAFwdIt _First, SAFwdIt _Last, TSize &_Size, unsigned BlockSize)
+	inline void sizeofSABTree(SAFwdIt First_, SAFwdIt _Last, TSize &Size_, unsigned BlockSize)
 	{
-		_Size = sizeofSABTree(difference(_First, _Last), BlockSize);
+		Size_ = sizeofSABTree(difference(First_, _Last), BlockSize);
 	}
 
 

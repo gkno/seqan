@@ -39,9 +39,9 @@
 
 namespace seqan {
 
-template <typename _THaystack>
-struct Finder<_THaystack, Default> : _FindState {
-    typedef _THaystack THaystack;
+template <typename THaystack_>
+struct Finder<THaystack_, Default> : FindState_ {
+    typedef THaystack_ THaystack;
     typedef typename Position<THaystack>::Type TPosition;
     typedef typename Iterator<THaystack>::Type TIterator;
 

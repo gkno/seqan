@@ -275,7 +275,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 		c = _streamGet(file);
 		assign(transName, _parseReadIdentifier(file, c));
 		size_t locusPos = transName.find("Locus_");
-		size_t transPos = transName.find("_Transcript_");
+		size_t transPos = transName.find("Transcript__");
 		if (locusPos == transName.npos || transPos == transName.npos)
 		{
 			std::cerr << "Error parsing: " << transName << std::endl;
@@ -653,7 +653,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		size_t posContigId = line.find("contigId=");
 		size_t posAmbig = line.find("ambiguity=");
 		size_t posErrors = line.find(",errors=");
-//		size_t posConf = line.find("_Confidence_");
+//		size_t posConf = line.find("Confidence__");
 		if (posId == line.npos || posFragId == line.npos || posContigId == line.npos || posAmbig == line.npos || posErrors == line.npos)
 		{
 			std::cerr << "Error parsing: " << line << std::endl;

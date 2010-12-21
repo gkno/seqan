@@ -67,9 +67,9 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         typedef Pipe< TSuffixArrayInput, Echoer<2,false> > TEchoer;
-                                        typedef _mapInverse<_TypeOf(TEchoer)> map_inverse_t;
+                                        typedef _mapInverse<TypeOf_(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
-		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
+		typedef Pool< TypeOf_(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
 		                                typedef Pair<TSize> TCoreType;
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
@@ -108,8 +108,8 @@ namespace SEQAN_NAMESPACE_MAIN
             process(*textIn, *suffixArrayIn);
         }
 
-		template < typename _TTextInput, typename _TSuffixArrayInput >
-        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+		template < typename TTextInput_, typename TSuffixArrayInput_ >
+        bool process(TTextInput_ &textIn, TSuffixArrayInput_ &suffixArrayIn) {
 
             // *** INSTANTIATION ***
 			
@@ -141,8 +141,8 @@ namespace SEQAN_NAMESPACE_MAIN
     // not sure which interface is more intuitive, we support both
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
-	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput >
-    inline bool operator<<(Pipe< TInput, Kasai > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_ >
+    inline bool operator<<(Pipe< TInput, Kasai > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
@@ -176,9 +176,9 @@ namespace SEQAN_NAMESPACE_MAIN
         // *** SPECIALIZATION ***
 
         typedef Pipe< TSuffixArrayInput, Echoer<2,false> > TEchoer;
-                                        typedef _mapInverseMulti<_TypeOf(TEchoer), TLimitsString, _TSizeOf(TEchoer)> map_inverse_t;
+                                        typedef _mapInverseMulti<TypeOf_(TEchoer), TLimitsString, TSizeOf_(TEchoer)> map_inverse_t;
 		                                typedef typename Size<TTextInput>::Type	TSize;
-		typedef Pool< _TypeOf(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
+		typedef Pool< TypeOf_(TEchoer), MapperSpec< MapperConfigSize< map_inverse_t, TSize> > > TInverter;
 		                                typedef Pair<TSize> TCoreType;
 		typedef Pool< TCoreType, MapperSpec< MapperConfigSize< filterI1<TCoreType>, TSize > > > TLinearMapper;
         typedef Pipe< TLinearMapper, Filter< filterI2<TCoreType> > > TFilter;
@@ -212,8 +212,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			process(_bundleIn.in1, _bundleIn.in2);
 		}
         
-		template < typename _TTextInput, typename _TSuffixArrayInput >
-        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+		template < typename TTextInput_, typename TSuffixArrayInput_ >
+        bool process(TTextInput_ &textIn, TSuffixArrayInput_ &suffixArrayIn) {
 
             // *** INSTANTIATION ***
 			
@@ -246,8 +246,8 @@ namespace SEQAN_NAMESPACE_MAIN
     // not sure which interface is more intuitive, we support both
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
-	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput, typename TPair, typename TLimitsString >
-    inline bool operator<<(Pipe< TInput, Multi<Kasai, TPair, TLimitsString> > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_, typename TPair, typename TLimitsString >
+    inline bool operator<<(Pipe< TInput, Multi<Kasai, TPair, TLimitsString> > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 

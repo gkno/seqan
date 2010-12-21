@@ -465,4 +465,4 @@ namespace seqan
 } // namespace seqan
 
 
-#endif // _SKIP_LIST_DYNAMIC_H
+#endif // SKIP_LIST_DYNAMIC_H_

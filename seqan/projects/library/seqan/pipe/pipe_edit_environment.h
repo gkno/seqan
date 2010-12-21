@@ -122,7 +122,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		typedef typename Value< typename Value<TInput>::Type, 2 >::Type	TTuple;
 		typedef typename Value<TTuple>::Type							TValue;
 
-		enum TState { _SUBST, _DELETE, _INSERT, _INSERT_LAST, _EOF, _INSERT_EOS };
+		enum TState { SUBST_, DELETE_, INSERT_, INSERT_LAST_, Eof_, INSERT_EOS_ };
 
         TInput                      &in;
         typename Value<Pipe>::Type	tmp, orig, prev;
@@ -133,7 +133,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
         Pipe(TInput& _in):
             in(_in),
-			state(_EOF) {}
+			state(Eof_) {}
 
         inline typename Value<Pipe>::Type const & operator*() const {
             return tmp;
@@ -141,8 +141,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
         inline Pipe& operator++() {
 			switch (state) {
-			case _SUBST:
-				// before _SUBST (tmp[1..] == orig[1..] and tmp[0] == 0) holds
+			case SUBST_:
+				// before SUBST_ (tmp[1..] == orig[1..] and tmp[0] == 0) holds
 				do {
 					if (++character < ValueSize<TValue>::VALUE) {
 						// next replacement value
@@ -168,7 +168,7 @@ namespace SEQAN_NAMESPACE_MAIN
 								assignValueAt(tmp.i2, 1, prev.i2[1]);
 								if (length(tmp.i2) >= 4) {
 									errorPos = 2;
-									state = _DELETE;
+									state = DELETE_;
 									//::std::cerr << ::std::endl << "_DELETIONS____" << ::std::endl;
 									return *this;
 								}
@@ -179,7 +179,7 @@ namespace SEQAN_NAMESPACE_MAIN
 								assignValueAt(tmp.i2, 1, (TValue) 0);
 								character = 0;
 								errorPos = 1;
-								state = _INSERT_LAST;
+								state = INSERT_LAST_;
 								//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 								return *this;
 							}
@@ -188,8 +188,8 @@ namespace SEQAN_NAMESPACE_MAIN
 				// output the original tuple only once
 				} while ((errorPos > 0) && (character == skipChar));
 				break;
-			case _DELETE:
-				// before _DELETE (prev=orig, ++in; tmp=orig=*in) holds
+			case DELETE_:
+				// before DELETE_ (prev=orig, ++in; tmp=orig=*in) holds
 				assignValueAt(tmp.i2, errorPos, prev.i2[errorPos]);
 				if (++errorPos >= length(tmp.i2) - 1) {
 					assignValueAt(tmp.i2, length(tmp.i2)-1, prev.i2[length(tmp.i2)-1]);
@@ -197,16 +197,16 @@ namespace SEQAN_NAMESPACE_MAIN
 					assignValueAt(tmp.i2, 1, (TValue) 0);
 					character = 0;
 					errorPos = 1;
-					state = _INSERT;
+					state = INSERT_;
 					//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 				}
 				break;
 
-			case _INSERT_EOS:
-				state = _INSERT;
-			case _INSERT:
-			case _INSERT_LAST:
-				// before _INSERT (prev=orig, ++in; tmp=prev) holds
+			case INSERT_EOS_:
+				state = INSERT_;
+			case INSERT_:
+			case INSERT_LAST_:
+				// before INSERT_ (prev=orig, ++in; tmp=prev) holds
 				if (++character < ValueSize<TValue>::VALUE)
 					// next replacement value
 					assignValueAt(tmp.i2, errorPos, (TValue) character);
@@ -214,9 +214,9 @@ namespace SEQAN_NAMESPACE_MAIN
 					// next insert position					
 					assignValueAt(tmp.i2, errorPos, orig.i2[errorPos]);
 					character = 0;
-					if (++errorPos >= length(tmp.i2) - 1 && state == _INSERT) {
+					if (++errorPos >= length(tmp.i2) - 1 && state == INSERT_) {
 						tmp = orig;
-						state = _SUBST;
+						state = SUBST_;
 						//::std::cerr << ::std::endl << "_REPLACEMENTS_" << ::std::endl;
 						errorPos = 0;
 						assignValueAt(tmp.i2, 0, (TValue) 0);
@@ -224,7 +224,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					}
 					if (errorPos >= length(tmp.i2)) {
 						if (eof(in))
-							state = _EOF;
+							state = Eof_;
 						else {
 							tmp = orig = *in;
 
@@ -232,7 +232,7 @@ namespace SEQAN_NAMESPACE_MAIN
 							shiftRight(tmp.i2);
 							assignValueAt(tmp.i2, 1, (TValue) 0);
 							errorPos = 0;
-							state = _INSERT_EOS;
+							state = INSERT_EOS_;
 							//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 						}
 						break;
@@ -272,7 +272,7 @@ namespace SEQAN_NAMESPACE_MAIN
         if (!control(me.in, command)) return false;
 
 		if (eof(me.in)) {
-			me.state = me._EOF;
+			me.state = me.Eof_;
 			return true;
 		}
 
@@ -286,7 +286,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		assignValueAt(me.tmp.i2, 0, (TValue) 0);
 		me.character = 0;
 		me.errorPos = 0;
-		me.state = me._INSERT;
+		me.state = me.INSERT_;
 		//::std::cerr << ::std::endl << "_INSERTS______" << ::std::endl;
 
 		return true;
@@ -298,7 +298,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > &me, 
 		ControlEof const &) 
 	{
-		return me.state == me._EOF;
+		return me.state == me.Eof_;
     }
 
     template < typename TInput, unsigned STEP_SIZE >
@@ -307,7 +307,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		Pipe< TInput, EditEnvironment< Tag<LevenshteinDistance_>, STEP_SIZE > > &me, 
 		ControlEos const &) 
 	{
-		return me.state == me._EOF || me.state == me.INSERT_EOS;
+		return me.state == me.Eof_ || me.state == me.INSERT_EOS;
     }
 
     template < typename TInput, unsigned STEP_SIZE >

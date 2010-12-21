@@ -82,10 +82,10 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 
 
 
-	template <typename _TGPos>
+	template <typename TGPos_>
 	struct SimplePosition
 	{
-		typedef typename MakeSigned_<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 		
 		TGPos			gBegin;			// begin position in the genome 
 		unsigned		gseqNo;
@@ -316,10 +316,10 @@ struct FragmentStoreConfig<SnpStoreGroupSpec_ >
 // Typedefs
 
 	// definition of a Read match
-	template <typename _TGPos>
+	template <typename TGPos_>
 	struct MappedReadMatch 
 	{
-		typedef typename MakeSigned_<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 		
 // 		TGPos		Batch	gBegin;			// begin position of the match in the genome			--> beginPos
 		TGPos			gEnd;			// end position of the match in the genome				--> endPos

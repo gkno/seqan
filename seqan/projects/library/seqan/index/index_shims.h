@@ -487,8 +487,8 @@ The size of $bwt$ must be at least $length(text)$ before calling this function.
 */
 
 	// default
-	template < typename TBWT, typename TText, typename TSA, typename _TTextRandom >
-    inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		_TTextRandom const)
+	template < typename TBWT, typename TText, typename TSA, typename TTextRandom_ >
+    inline void _createBWTableWrapper(TBWT &bwt, TText const &s, TSA const &sa,		TTextRandom_ const)
 	{
 	SEQAN_CHECKPOINT
 		createBWTableExt(bwt, concat(s), sa);

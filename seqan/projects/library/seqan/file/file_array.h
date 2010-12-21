@@ -45,7 +45,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//template < __int64 FILE_SIZE = 2*1024*1024*1024-1, typename TFile = File<> >
 	//struct Chained;
 
-	//template < unsigned _FileCount = 2, typename TFile = File<> >
+	//template < unsigned FileCount_ = 2, typename TFile = File<> >
 	//struct Striped;
 
 
@@ -74,33 +74,33 @@ namespace SEQAN_NAMESPACE_MAIN
     };
 
 
-    template < unsigned _FileCount, typename TFile >
-    struct Size< File< Striped<_FileCount, TFile> > >
+    template < unsigned FileCount_, typename TFile >
+    struct Size< File< Striped<FileCount_, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < unsigned _FileCount, typename TFile >
-    struct Position< File< Striped<_FileCount, TFile> > >
+    template < unsigned FileCount_, typename TFile >
+    struct Position< File< Striped<FileCount_, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < unsigned _FileCount, typename TFile >
-    struct Difference< File< Striped<_FileCount, TFile> > >
+    template < unsigned FileCount_, typename TFile >
+    struct Difference< File< Striped<FileCount_, TFile> > >
     {
         typedef __int64 Type;
     };
 
-    template < unsigned _FileCount, typename TFile >
-    struct AsyncRequest< File< Striped<_FileCount, TFile> > >
+    template < unsigned FileCount_, typename TFile >
+    struct AsyncRequest< File< Striped<FileCount_, TFile> > >
     {
 		typedef typename AsyncRequest<TFile>::Type Type;
     };
 
 
-	template < unsigned _FileCount, typename TFile >
-	class File< Striped<_FileCount, TFile> >: public Tuple< TFile, _FileCount > {
+	template < unsigned FileCount_, typename TFile >
+	class File< Striped<FileCount_, TFile> >: public Tuple< TFile, FileCount_ > {
 		File(void * /*dummy = NULL*/) {}	// to be compatible with the FILE*(NULL) constructor
 		operator bool() const { return (*this)[0]; }
 	};
@@ -297,9 +297,9 @@ namespace SEQAN_NAMESPACE_MAIN
 		return me.fileCount();
 	}
 
-    template < unsigned _FileCount, typename TFile >
-	inline unsigned length(File< Striped<_FileCount, TFile> > const &/*me*/) {
-		return _FileCount;
+    template < unsigned FileCount_, typename TFile >
+	inline unsigned length(File< Striped<FileCount_, TFile> > const &/*me*/) {
+		return FileCount_;
 	}
 
     template < __int64 FILE_SIZE, typename TFile >
@@ -318,8 +318,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		return true;
 	}
 
-    template < unsigned _FileCount, typename TFile >
-	inline bool openTemp(File< Striped<_FileCount, TFile> > &me, int openMode) {
+    template < unsigned FileCount_, typename TFile >
+	inline bool openTemp(File< Striped<FileCount_, TFile> > &me, int openMode) {
 		return _openTempFArray(me, openMode);
 	}
 
@@ -330,16 +330,16 @@ namespace SEQAN_NAMESPACE_MAIN
         return true;
     }
 
-    template < unsigned _FileCount, typename TFile >
-	inline bool close(File< Striped<_FileCount, TFile> > &me) {	return _closeFArray(me); }
+    template < unsigned FileCount_, typename TFile >
+	inline bool close(File< Striped<FileCount_, TFile> > &me) {	return _closeFArray(me); }
 
     template < __int64 FILE_SIZE, typename TFile >
 	__int64 size(File< Chained<FILE_SIZE, TFile> > &me) {
 		return _sizeFArray(me);
 	}
 
-    template < unsigned _FileCount, typename TFile >
-	__int64 size(File< Striped<_FileCount, TFile> > &me) {
+    template < unsigned FileCount_, typename TFile >
+	__int64 size(File< Striped<FileCount_, TFile> > &me) {
 		return _sizeFArray(me);
 	}
 
@@ -358,13 +358,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		deallocate(me[0], data, count);
 	}
 
-    template < unsigned _FileCount, typename TFile, typename TValue, typename TSize >
-	inline void allocate(File< Striped<_FileCount, TFile> > const &me, TValue* &data, TSize count) {
+    template < unsigned FileCount_, typename TFile, typename TValue, typename TSize >
+	inline void allocate(File< Striped<FileCount_, TFile> > const &me, TValue* &data, TSize count) {
 		allocate(me[0], data, count);
 	}
 
-    template < unsigned _FileCount, typename TFile, typename TValue, typename TSize >
-	inline void deallocate(File< Striped<_FileCount, TFile> > const &me, TValue* &data, TSize count) {
+    template < unsigned FileCount_, typename TFile, typename TValue, typename TSize >
+	inline void deallocate(File< Striped<FileCount_, TFile> > const &me, TValue* &data, TSize count) {
 		deallocate(me[0], data, count);
 	}
 

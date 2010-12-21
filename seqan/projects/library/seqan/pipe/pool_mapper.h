@@ -293,8 +293,8 @@ namespace SEQAN_NAMESPACE_MAIN
             return buffer.begin != NULL;
         }
 
-        inline void push(Type const & _Val) {
-            buffer[pool.handlerArgs(_Val)] = _Val;
+        inline void push(Type const & Val_) {
+            buffer[pool.handlerArgs(Val_)] = Val_;
         }
 
         inline void end() {
@@ -610,50 +610,50 @@ namespace SEQAN_NAMESPACE_MAIN
     template < typename TValue,
    	           typename TMap,
 		       typename TSize,
-			   __int64  _FileSize,
+			   __int64  FileSize_,
 			   typename TSpec >
-    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfigSize< TMap, TSize, File< Chained<_FileSize, File< Async<TSpec> > > > > > > >
+    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfigSize< TMap, TSize, File< Chained<FileSize_, File< Async<TSpec> > > > > > > >
     {
         typedef Handler< Bundle2<
-			Handler< BufferHandler	< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Chained<_FileSize, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
-			Handler< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Chained<_FileSize, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
+			Handler< BufferHandler	< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Chained<FileSize_, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
+			Handler< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Chained<FileSize_, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
 		>, MultiplexSpec > Type;
 	};
 
     template < typename TValue,
    	           typename TMap,
-			   __int64  _FileSize,
+			   __int64  FileSize_,
 			   typename TSpec >
-    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfig< TMap, File< Chained< _FileSize, File< Async<TSpec> > > > > > > >
+    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfig< TMap, File< Chained< FileSize_, File< Async<TSpec> > > > > > > >
     {
         typedef Handler< Bundle2<
-			Handler< BufferHandler < Pool< TValue, MapperSpec<MapperConfig< TMap, File< Chained<_FileSize, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
-			Handler< Pool< TValue, MapperSpec<MapperConfig< TMap, File< Chained<_FileSize, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
+			Handler< BufferHandler < Pool< TValue, MapperSpec<MapperConfig< TMap, File< Chained<FileSize_, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
+			Handler< Pool< TValue, MapperSpec<MapperConfig< TMap, File< Chained<FileSize_, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
 		>, MultiplexSpec > Type;
 	};
 
     template < typename TValue,
    	           typename TMap,
 		       typename TSize,
-			   unsigned _FileCount,
+			   unsigned FileCount_,
 			   typename TSpec >
-    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfigSize< TMap, TSize, File< Striped<_FileCount, File< Async<TSpec> > > > > > > >
+    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfigSize< TMap, TSize, File< Striped<FileCount_, File< Async<TSpec> > > > > > > >
     {
         typedef Handler< Bundle2<
-			Handler< BufferHandler	< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Striped<_FileCount, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
-			Handler< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Striped<_FileCount, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
+			Handler< BufferHandler	< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Striped<FileCount_, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
+			Handler< Pool< TValue, MapperSpec<MapperConfigSize< TMap, TSize, File< Striped<FileCount_, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
 		>, MultiplexSpec > Type;
 	};
 
     template < typename TValue,
    	           typename TMap,
-			   unsigned _FileCount,
+			   unsigned FileCount_,
 			   typename TSpec >
-    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfig< TMap, File< Striped<_FileCount, File< Async<TSpec> > > > > > > >
+    struct WriteHandler< Pool< TValue, MapperSpec< MapperConfig< TMap, File< Striped<FileCount_, File< Async<TSpec> > > > > > > >
     {
         typedef Handler< Bundle2<
-			Handler< BufferHandler < Pool< TValue, MapperSpec<MapperConfig< TMap, File< Striped<_FileCount, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
-			Handler< Pool< TValue, MapperSpec<MapperConfig< TMap, File< Striped<_FileCount, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
+			Handler< BufferHandler < Pool< TValue, MapperSpec<MapperConfig< TMap, File< Striped<FileCount_, File< Async<TSpec> > > > > > >, MemorySpec >, MapperMemAdapter >,
+			Handler< Pool< TValue, MapperSpec<MapperConfig< TMap, File< Striped<FileCount_, File< Async<TSpec> > > > > > >, MapperAsyncWriter >
 		>, MultiplexSpec > Type;
 	};
 

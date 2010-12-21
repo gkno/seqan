@@ -61,13 +61,13 @@ namespace SEQAN_NAMESPACE_MAIN
 
         typedef Pipe< TSuffixArrayInput, Counter > TSA;
 		                                typedef typename Size<TTextInput>::Type	TSize;
-		typedef Pool< _TypeOf(TSA), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TSA)>, TSize> > > TInverter;
-        typedef Pipe< TInverter, Filter< filterI2<_TypeOf(TInverter)> > > TCounterFilter;
+		typedef Pool< TypeOf_(TSA), MapperSpec< MapperConfigSize< filterI1<TypeOf_(TSA)>, TSize> > > TInverter;
+        typedef Pipe< TInverter, Filter< filterI2<TypeOf_(TInverter)> > > TCounterFilter;
 		typedef Pipe< TTextInput, Shifter< -1, false > > TShiftText;
 
 		typedef Pipe< Bundle2< TCounterFilter, TShiftText >, Joiner > TJoiner;
-		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
-        typedef Pipe< TLinearMapper, Filter< filterI2<_TypeOf(TLinearMapper)> > > TFilter;
+		typedef Pool< TypeOf_(TJoiner), MapperSpec< MapperConfigSize< filterI1<TypeOf_(TJoiner)>, TSize> > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<TypeOf_(TLinearMapper)> > > TFilter;
 
         TLinearMapper		mapper;
 		TFilter				in;
@@ -81,8 +81,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			process(_bundleIn.in1, _bundleIn.in2);
 		}
 
-		template < typename _TTextInput, typename _TSuffixArrayInput >
-        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+		template < typename TTextInput_, typename TSuffixArrayInput_ >
+        bool process(TTextInput_ &textIn, TSuffixArrayInput_ &suffixArrayIn) {
 
             // *** INSTANTIATION ***
 
@@ -121,8 +121,8 @@ namespace SEQAN_NAMESPACE_MAIN
     // not sure which interface is more intuitive, we support both
     // you can call "skew << pipe" or "skew_t skew(pipe); skew.process()"
     // for the first we would need no _in member
-	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput >
-    inline bool operator<<(Pipe< TInput, BWT > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_ >
+    inline bool operator<<(Pipe< TInput, BWT > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 
@@ -156,17 +156,17 @@ namespace SEQAN_NAMESPACE_MAIN
     {
         // *** SPECIALIZATION ***
 
-										typedef _filterGlobalizer<_TypeOf(TSuffixArrayInput), TLimitsString, _TSizeOf(TSuffixArrayInput)> filter_globalizer_t;
+										typedef _filterGlobalizer<TypeOf_(TSuffixArrayInput), TLimitsString, TSizeOf_(TSuffixArrayInput)> filter_globalizer_t;
 		typedef Pipe< TSuffixArrayInput, Filter<filter_globalizer_t> > TGlobalizer;
         typedef Pipe< TGlobalizer, Counter > TSA;
 		                                typedef typename Size<TTextInput>::Type	TSize;
-		typedef Pool< _TypeOf(TSA), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TSA)>, TSize> > > TInverter;
-        typedef Pipe< TInverter, Filter< filterI2<_TypeOf(TInverter)> > > TCounterFilter;
+		typedef Pool< TypeOf_(TSA), MapperSpec< MapperConfigSize< filterI1<TypeOf_(TSA)>, TSize> > > TInverter;
+        typedef Pipe< TInverter, Filter< filterI2<TypeOf_(TInverter)> > > TCounterFilter;
 		typedef Pipe< TTextInput, Shifter< -1, false > > TShiftText;
 
 		typedef Pipe< Bundle2< TCounterFilter, TShiftText >, Joiner > TJoiner;
-		typedef Pool< _TypeOf(TJoiner), MapperSpec< MapperConfigSize< filterI1<_TypeOf(TJoiner)>, TSize> > > TLinearMapper;
-        typedef Pipe< TLinearMapper, Filter< filterI2<_TypeOf(TLinearMapper)> > > TFilter;
+		typedef Pool< TypeOf_(TJoiner), MapperSpec< MapperConfigSize< filterI1<TypeOf_(TJoiner)>, TSize> > > TLinearMapper;
+        typedef Pipe< TLinearMapper, Filter< filterI2<TypeOf_(TLinearMapper)> > > TFilter;
 
 		TTextInput			*textIn;
 		TSuffixArrayInput	*suffixArrayIn;
@@ -192,8 +192,8 @@ namespace SEQAN_NAMESPACE_MAIN
             process(*textIn, *suffixArrayIn);
         }
 
-		template < typename _TTextInput, typename _TSuffixArrayInput >
-        bool process(_TTextInput &textIn, _TSuffixArrayInput &suffixArrayIn) {
+		template < typename TTextInput_, typename TSuffixArrayInput_ >
+        bool process(TTextInput_ &textIn, TSuffixArrayInput_ &suffixArrayIn) {
 
             // *** INSTANTIATION ***
 
@@ -237,8 +237,8 @@ namespace SEQAN_NAMESPACE_MAIN
     // not sure which interface is more intuitive, we support both
     // you can call "bwt << pipe" or "bwt_t bwt(pipe); bwt.process()"
     // for the first we would need no _in member
-	template < typename TInput, typename _TTextInput, typename _TSuffixArrayInput, typename TPair, typename TLimitsString >
-    inline bool operator<<(Pipe< TInput, Multi<BWT, TPair, TLimitsString> > &me, Bundle2< _TTextInput, _TSuffixArrayInput > const &bundleIn) {
+	template < typename TInput, typename TTextInput_, typename TSuffixArrayInput_, typename TPair, typename TLimitsString >
+    inline bool operator<<(Pipe< TInput, Multi<BWT, TPair, TLimitsString> > &me, Bundle2< TTextInput_, TSuffixArrayInput_ > const &bundleIn) {
  	    return me.process(bundleIn.in1, bundleIn.in2);
     }
 

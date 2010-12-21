@@ -61,15 +61,15 @@ typedef Tag<_addSeeding_Single> const Single;
 //also defined in blast_base.h (103)
 //moved to basic_tag
 /*
-struct _Chain_Blat;
-typedef Tag<_Chain_Blat> const Blat;
+struct ChainBlat_;
+typedef Tag<ChainBlat_> const Blat;
 */
 
-struct _Chain_Chaos;
-typedef Tag<_Chain_Chaos> const Chaos;
+struct ChainChaos_;
+typedef Tag<ChainChaos_> const Chaos;
 
-struct _Chain_Simple;
-typedef Tag<_Chain_Simple> const SimpleChain;
+struct ChainSimple_;
+typedef Tag<ChainSimple_> const SimpleChain;
 
 
 template <typename T>
@@ -90,24 +90,24 @@ struct BLOCK_SIZE
 
 
 
-struct _Gap_Cost_Manhatten;
-typedef Tag<_Gap_Cost_Manhatten> const Manhattan;
+struct GapCostManhatten_;
+typedef Tag<GapCostManhatten_> const Manhattan;
 
-struct _Gap_Cost_QueryDistance;
-typedef Tag<_Gap_Cost_QueryDistance> const QueryDistance;
+struct GapCostQueryDistance_;
+typedef Tag<GapCostQueryDistance_> const QueryDistance;
 
-struct _Gap_Cost_DatabaseDistance;
-typedef Tag<_Gap_Cost_DatabaseDistance> const DatabaseDistance;
+struct GapCostDatabaseDistance_;
+typedef Tag<GapCostDatabaseDistance_> const DatabaseDistance;
 
-struct _Gap_Cost_NoGapCost;
-typedef Tag<_Gap_Cost_NoGapCost> const NoGapCost;
+struct GapCostNoGapCost_;
+typedef Tag<GapCostNoGapCost_> const NoGapCost;
 
 
-struct _Good_Seed;
-typedef Tag<_Good_Seed> const SeedScore;
+struct GoodSeed_;
+typedef Tag<GoodSeed_> const SeedScore;
 
-struct _Good_Seed2;
-typedef Tag<_Good_Seed2> const SeedLength;
+struct GoodSeed2_;
+typedef Tag<GoodSeed2_> const SeedLength;
 
 
 template<typename T1, typename T2, typename T3>

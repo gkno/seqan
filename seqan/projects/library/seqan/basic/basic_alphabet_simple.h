@@ -993,12 +993,12 @@ SEQAN_CHECKPOINT
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename _T, typename TSpec> 
+template<typename T_, typename TSpec> 
 inline
-bool lexLess(SimpleType<_T, TSpec> const &_Left, SimpleType<_T, TSpec> const &_Right)
-{	// return lexicographical _Left < _Right
-	typedef typename MakeUnsigned_<_T>::Type TUnsigned;
-    return (TUnsigned)(_Left.value) < (TUnsigned)(_Right.value);
+bool lexLess(SimpleType<T_, TSpec> const &_Left, SimpleType<T_, TSpec> const &Right_)
+{	// return lexicographical _Left < Right_
+	typedef typename MakeUnsigned_<T_>::Type TUnsigned;
+    return (TUnsigned)(_Left.value) < (TUnsigned)(Right_.value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1566,7 +1566,7 @@ struct BaseAlphabet<DnaQ>
 struct Dna5Q_ {};
 typedef SimpleType <unsigned char, Dna5Q_> Dna5Q;
 
-static const unsigned char _Dna5QValueN = 252;								// value representing N
+static const unsigned char Dna5QValueN_ = 252;								// value representing N
 
 template <> struct ValueSize< Dna5Q > { enum { VALUE = 5 }; };				// considering nucleotides + N
 template <> struct InternalValueSize_< Dna5Q > { enum { VALUE = 253 }; };	// considering (nucleotides x Quality 0..62) + N
@@ -1635,7 +1635,7 @@ inline void assign(DnaQ & target, Dna5Q const & source)
     // We perform the converstion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
-	// target.value = (source.value == _Dna5QValueN)? 0: source.value;
+	// target.value = (source.value == Dna5QValueN_)? 0: source.value;
 
     static const unsigned table[] = {
           0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -1690,7 +1690,7 @@ inline void assign(Dna5 & target, Dna5Q const & source)
     // We perform the conversion from DNA5 to DNA5 with qualities by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
-	// target.value = (source.value == _Dna5QValueN)? 4: source.value & 3;
+	// target.value = (source.value == Dna5QValueN_)? 4: source.value & 3;
 
     static const unsigned table[] = {
         0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
@@ -1722,10 +1722,10 @@ inline void assign(Dna5Q & target, Dna5 const & source)
     // We perform the conversion from DNA5 with qualities to DNA5 by a simple
     // table lookup.  The lookup below is equivalent to the following line:
     //
-	// target.value = (source.value == 4)? _Dna5QValueN : source.value | (60 << 2);
+	// target.value = (source.value == 4)? Dna5QValueN_ : source.value | (60 << 2);
 
     static const unsigned table[] = {
-        (60 << 2) + 0, (60 << 2) + 1, (60 << 2) + 2, (60 << 2) + 3, _Dna5QValueN
+        (60 << 2) + 0, (60 << 2) + 1, (60 << 2) + 2, (60 << 2) + 3, Dna5QValueN_
     };
     target.value = table[source.value];
 }
@@ -2228,7 +2228,7 @@ inline int getQualityValue(Dna5Q const &c)
 {
     // We use a lookup table to extract the qualities from DNA5Q.  The lookup
     // table based code is equivalent to the following line:
-	// return (c.value == _Dna5QValueN)? 0: c.value >> 2;
+	// return (c.value == Dna5QValueN_)? 0: c.value >> 2;
 
     static const unsigned table[] = {
          0,  0,  0,  0,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  3,  3,  4,
@@ -2274,7 +2274,7 @@ void assignQualityValue(Dna5Q &c, int q)
 	if (q < 0) q = 0;
     if (q >= QualityValueSize<Dna5Q>::VALUE)
         q = QualityValueSize<Dna5Q>::VALUE - 1;
-	if (c.value != _Dna5QValueN)
+	if (c.value != Dna5QValueN_)
 		c.value = (c.value & 3) | (q << 2);
 }
 

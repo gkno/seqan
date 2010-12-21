@@ -44,9 +44,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename Type >
 	struct CountedPtr
 	{
-		typedef CountedPtr		_Self;
-		typedef CountedPtr*	    _SelfPtr;
-		typedef CountedPtr&	    _SelfRef;
+		typedef CountedPtr		Self_;
+		typedef CountedPtr*	    SelfPtr_;
+		typedef CountedPtr&	    SelfRef_;
 
 		typedef Type&			reference;
 		typedef const Type&		const_reference;
@@ -58,7 +58,7 @@ namespace SEQAN_NAMESPACE_MAIN
             if (p) itsCounter = new counter(p);
         }
 
-        CountedPtr(const _Self& r) throw() {
+        CountedPtr(const Self_& r) throw() {
             acquire(r.itsCounter);
         }
 
@@ -66,7 +66,7 @@ namespace SEQAN_NAMESPACE_MAIN
             release();
         }
 
-        CountedPtr& operator=(const _Self& r)
+        CountedPtr& operator=(const Self_& r)
         {
             if (this != &r) {
                 release();

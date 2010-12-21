@@ -32,8 +32,8 @@
 
 //SEQAN_NO_DDDOC: do not generate documentation for this file
 
-#ifndef _RANGE_TREE_H
-#define _RANGE_TREE_H
+#ifndef RANGE_TREE_H_
+#define RANGE_TREE_H_
 
 #include <seqan/basic.h>
 
@@ -55,4 +55,4 @@ namespace seqan
 } // namespace SEQAN_NAMESPACE_SKIPLIST
 
 
-#endif //_RANGE_TREE_H
+#endif //RANGE_TREE_H_

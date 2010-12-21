@@ -99,9 +99,9 @@ namespace SEQAN_NAMESPACE_MAIN
         Pipe(TInput& _in):
             in(_in) {}
         
-        Pipe(TInput& _in, const TFunctor& _F) :
+        Pipe(TInput& _in, const TFunctor& F_) :
             in(_in),
-            F(_F) {}
+            F(F_) {}
         
         inline typename Value<Pipe>::Type const operator*() const {
             return F(*in);

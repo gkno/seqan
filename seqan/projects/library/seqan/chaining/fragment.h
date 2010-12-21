@@ -69,7 +69,7 @@ public:
 	typename Weight< Seed< TBorder, TSpec > >::Type _weight;
 
 /*
-#ifdef _SEQAN_CHAIN_DEBUG // some debugging variables to identify fragments while debugging
+#ifdef SEQAN_CHAIN_DEBUG_ // some debugging variables to identify fragments while debugging
 	char _id;
 
 	friend inline 
@@ -86,12 +86,12 @@ public:
 		return me._id;
 	}
 
-#endif // _SEQAN_CHAIN_DEBUG
+#endif // SEQAN_CHAIN_DEBUG_
 
 
-#ifdef _SEQAN_CHAIN_DEBUG
+#ifdef SEQAN_CHAIN_DEBUG_
 	static int _frag_counter;
-#endif // _SEQAN_CHAIN_DEBUG
+#endif // SEQAN_CHAIN_DEBUG_
 */
 
 	Seed( )
@@ -165,7 +165,7 @@ public:
 			_left[ i ] = old._left[ i ];
 			_right[ i ] = old._right[ i ];
 		}			
-	#ifdef _SEQAN_CHAIN_DEBUG
+	#ifdef SEQAN_CHAIN_DEBUG_
 		_id = old._id;
 	#endif
 		return *this;
@@ -182,7 +182,7 @@ public:
 			_left[ i ] = old._left[ i ];
 			_right[ i ] = old._right[ i ];
 		}			
-	#ifdef _SEQAN_CHAIN_DEBUG
+	#ifdef SEQAN_CHAIN_DEBUG_
 		_id = old._id;
 	#endif
 	}
@@ -223,7 +223,7 @@ public:
 		}
 	}
 
-	#ifdef _SEQAN_CHAIN_DEBUG
+	#ifdef SEQAN_CHAIN_DEBUG_
 	friend inline
 	void 
 	dump( Seed & me, std::ostream & os )
@@ -240,7 +240,7 @@ public:
 			os << std::endl;
 		}
 	}
-	#endif // _SEQAN_CHAIN_DEBUG
+	#endif // SEQAN_CHAIN_DEBUG_
 
 };
 

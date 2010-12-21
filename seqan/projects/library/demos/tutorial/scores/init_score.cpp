@@ -36,13 +36,13 @@ using namespace seqan;
 // Extend SeqAn by a user-define scoring matrix.
 namespace seqan {
 
-// We have to create a new specialization of the _ScoringMatrix class
+// We have to create a new specialization of the ScoringMatrix_ class
 // for amino acids.  For this, we first create a new tag.
 struct UserDefinedMatrix {};
 // We also do this for the DNA alphabet.
 struct AnotherUserDefinedMatrix {};
 
-// Then, we specialize the class _ScoringMatrix.
+// Then, we specialize the class ScoringMatrix_.
 template <>
 struct ScoringMatrixData_<int, AminoAcid, UserDefinedMatrix> {
     enum {

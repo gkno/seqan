@@ -34,8 +34,8 @@ using namespace seqan;
 // Tags, Enums, Classes, Specializations
 // ===========================================================================
 
-struct _Evaluate {};
-typedef Tag<_Evaluate> Evaluate;
+struct Evaluate_ {};
+typedef Tag<Evaluate_> Evaluate;
 
 template <>
 struct Options<Evaluate> : Options<AlignmentScores>

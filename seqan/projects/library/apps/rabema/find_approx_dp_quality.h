@@ -24,9 +24,9 @@ struct QualityDpSearch {};
 
 
 // Empty find begin pattern struct with empty base class optimization trick.
-struct _EmptyBase {};
-struct _EmptyFindBegin : _EmptyBase {
-    template <typename T1, typename T2> _EmptyFindBegin(T1 const &, T2 const &) {}
+struct EmptyBase_ {};
+struct EmptyFindBegin_ : EmptyBase_ {
+    template <typename T1, typename T2> EmptyFindBegin_(T1 const &, T2 const &) {}
 };
 
 
@@ -40,7 +40,7 @@ public:
     String<TScoreValue> data_tab;
     TScoreValue data_maxscore;  // Score of the needle matching itself
 
-    typedef typename If<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, _EmptyFindBegin>::Type TFindBeginPattern;
+    typedef typename If<HasFindBeginSupport, Pattern<ModifiedString<TNeedle, ModReverse>, QualityDpSearch<FindPrefix, false> >, EmptyFindBegin_>::Type TFindBeginPattern;
     TFindBeginPattern _findBeginPattern;
 
     Pattern() {}

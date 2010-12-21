@@ -205,12 +205,12 @@ namespace SEQAN_NAMESPACE_MAIN
 			return *(top(pqueue).cur);
         }
 
-        inline void pop(Type &_Ref) 
+        inline void pop(Type &Ref_) 
 		{
             PageBucket &pb = top(pqueue);
 			SEQAN_ASSERT_LEQ(pb.cur, pb.end);
 			
-            _Ref = *pb.cur;
+            Ref_ = *pb.cur;
             if (++pb.cur == pb.end)
 			{
                 // bucket is empty, we have to fetch the next bucket

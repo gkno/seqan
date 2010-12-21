@@ -50,11 +50,11 @@ enum SegmentSource {
 };
 
 
-template <typename _TPos, typename _TSize>
+template <typename TPos_, typename TSize_>
 struct JournalEntry
 {
-    typedef _TPos TPos;
-    typedef _TSize TSize;
+    typedef TPos_ TPos;
+    typedef TSize_ TSize;
 
     // Flag for where the segment comes from.
     SegmentSource segmentSource;

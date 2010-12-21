@@ -326,7 +326,7 @@ void testAlignBasics2()
 
 
 template <typename TAlign>
-void _TestAlign()
+void TestAlign_()
 {
 	testAlignBasics<TAlign>();
 	testAlignBasics2<TAlign>();
@@ -336,22 +336,22 @@ void _TestAlign()
 
 
 SEQAN_DEFINE_TEST(test_align_align_char_string_array_gaps) {
-    _TestAlign<Align<String<char>, ArrayGaps> >();
+    TestAlign_<Align<String<char>, ArrayGaps> >();
 }
 
 
 SEQAN_DEFINE_TEST(test_align_align_dna_array_gaps) {
-    _TestAlign<Align<String<Dna>, ArrayGaps> >();
+    TestAlign_<Align<String<Dna>, ArrayGaps> >();
 }
 
 
 SEQAN_DEFINE_TEST(test_align_align_char_string_sumlist_gaps) {
-    _TestAlign<Align<String<char>, SumlistGaps> >();
+    TestAlign_<Align<String<char>, SumlistGaps> >();
 }
 
 
 SEQAN_DEFINE_TEST(test_align_align_dna_sumlist_gaps) {
-	_TestAlign<Align<String<Dna>, SumlistGaps> >();
+	TestAlign_<Align<String<Dna>, SumlistGaps> >();
 }
 
 

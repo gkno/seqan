@@ -592,18 +592,18 @@ struct SumlistSkipListElement_< SumList<DIM, TValue, SkipSumList<TSpec> > const 
 
 /*
 template <typename TSumList>
-struct _SumListSkiplistMinilist
+struct SumListSkiplistMinilist_
 {//dummy implementation
 	typedef SumList<1, int, MiniSumList< > > Type;
 };
 
 template <unsigned int DIM, typename TValue, typename TSpec>
-struct _SumListSkiplistMinilist< SumList<DIM, TValue, SkipSumList<TSpec> > >
+struct SumListSkiplistMinilist_< SumList<DIM, TValue, SkipSumList<TSpec> > >
 {
 	typedef SumList<DIM, TValue, MiniSumList< > > Type;
 };
 template <unsigned int DIM, typename TValue, typename TSpec>
-struct _SumListSkiplistMinilist< SumList<DIM, TValue, SkipSumList<TSpec> > const >
+struct SumListSkiplistMinilist_< SumList<DIM, TValue, SkipSumList<TSpec> > const >
 {
 	typedef SumList<DIM, TValue, MiniSumList< > > const Type;
 };
@@ -620,7 +620,7 @@ public:
 	typedef typename Value<TSumList>::Type TValue;
 	typedef SumList<DIMENSION<TSumList>::VALUE, TValue, MiniSumList< > > TMiniSumList_;
 	typedef typename CopyConst_<TSumList, TMiniSumList_>::Type TMiniSumList;
-//	typedef typename _SumListSkiplistMinilist<TSumList>::Type TMiniSumList;
+//	typedef typename SumListSkiplistMinilist_<TSumList>::Type TMiniSumList;
 	typedef typename Iterator<TMiniSumList>::Type TMiniSumListIterator;
 	typedef typename SumlistSkipListElement_<TSumList>::Type TElement;
 

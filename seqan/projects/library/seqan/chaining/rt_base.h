@@ -231,7 +231,7 @@ namespace seqan{
 	_getRBorderObj( RangeTree< TObject, TModus, TSpec, TStructuring > & me )
 	{
 		SEQAN_CHECKPOINT
-		return &me._RBorderObj;
+		return &me.RBorderObj_;
 	}
 
 		// skip list of the main tree

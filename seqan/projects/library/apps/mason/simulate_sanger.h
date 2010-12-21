@@ -30,8 +30,8 @@
 // Enums, Tags, Classes.
 // ============================================================================
 
-struct _SangerReads;
-typedef Tag<_SangerReads> SangerReads;
+struct SangerReads_;
+typedef Tag<SangerReads_> SangerReads;
 
 template <>
 struct Options<SangerReads> : public Options<Global>

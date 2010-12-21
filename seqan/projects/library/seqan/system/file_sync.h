@@ -71,7 +71,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef __int64			FilePtr;
 		typedef __int64         SizeType;   // type of file size
-        typedef unsigned int    _SizeType;  // type of transfer size (for read or write)
+        typedef unsigned int    SizeType_;  // type of transfer size (for read or write)
 		typedef int				Handle;
 
         Handle handle;
@@ -140,7 +140,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-		inline int read(void *buffer, _SizeType count) const 
+		inline int read(void *buffer, SizeType_ count) const 
 		{
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
@@ -149,7 +149,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return result;
 		}
 
-		inline int write(void const *buffer, _SizeType count) const 
+		inline int write(void const *buffer, SizeType_ count) const 
 		{
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
@@ -201,7 +201,7 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		typedef off_t			FilePtr;
 		typedef off_t           SizeType;   // type of file size
-        typedef size_t          _SizeType;  // type of transfer size (for read or write)
+        typedef size_t          SizeType_;  // type of transfer size (for read or write)
 		typedef int				Handle;
 
         Handle handle;
@@ -322,7 +322,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return true;
         }
 
-		inline ssize_t read(void *buffer, _SizeType count) const {
+		inline ssize_t read(void *buffer, SizeType_ count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    ssize_t result = ::read(handle, buffer, count);
@@ -330,7 +330,7 @@ namespace SEQAN_NAMESPACE_MAIN
             return result;
 		}
 
-		inline ssize_t write(void const *buffer, _SizeType count) const {
+		inline ssize_t write(void const *buffer, SizeType_ count) const {
             SEQAN_PROADD(SEQAN_PROIO, (count + SEQAN_PROPAGESIZE - 1) / SEQAN_PROPAGESIZE);
             SEQAN_PROTIMESTART(tw);
 		    ssize_t result = ::write(handle, buffer, count);

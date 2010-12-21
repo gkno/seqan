@@ -463,17 +463,17 @@ ordValue(ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > const & c)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TModExpand, typename THost, typename TRight, typename TCompareHostRight>
-struct _CompareType_ModExpand_Impl
+struct CompareTypeModExpandImpl_
 {
 	typedef TCompareHostRight Type; //fallback
 };
 template <typename TModExpand, typename THost, typename TRight>
-struct _CompareType_ModExpand_Impl<TModExpand, THost, TRight, THost>
+struct CompareTypeModExpandImpl_<TModExpand, THost, TRight, THost>
 {
 	typedef TModExpand Type;
 };
 template <typename TModExpand, typename THost, typename TRight>
-struct _CompareType_ModExpand_Impl<TModExpand, THost, TRight, TRight>
+struct CompareTypeModExpandImpl_<TModExpand, THost, TRight, TRight>
 {
 	typedef TRight Type;
 };
@@ -484,7 +484,7 @@ struct CompareType<ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> >, TRight>
 {
 	typedef ModifiedAlphabet<THost, ModExpand<CHAR, TSpec> > TModExpand;
 	typedef typename CompareType<THost, TRight>::Type TCompareHostRight;
-	typedef typename _CompareType_ModExpand_Impl<TModExpand, THost, TRight, TCompareHostRight>::Type Type;
+	typedef typename CompareTypeModExpandImpl_<TModExpand, THost, TRight, TCompareHostRight>::Type Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////

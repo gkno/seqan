@@ -150,17 +150,17 @@ To iterate the exact solution set of $TPred$, use a $Spec.TopDownHistory Iterato
 			predHull(other.predHull),
 			pred(other.pred) {}
 
-		template <typename _TText>
-		Index(_TText &_text):
+		template <typename TText_>
+		Index(TText_ &_text):
 			TBase(_text) {}
 
-		template <typename _TText>
-		Index(_TText &_text, TPredHull const &_predHull):
+		template <typename TText_>
+		Index(TText_ &_text, TPredHull const &_predHull):
 			TBase(_text),
 			predHull(_predHull) {}
 
-		template <typename _TText>
-		Index(_TText &_text, TPredHull const &_predHull, TPred const &_pred):
+		template <typename TText_>
+		Index(TText_ &_text, TPredHull const &_predHull, TPred const &_pred):
 			TBase(_text),
 			predHull(_predHull),
 			pred(_pred) {}

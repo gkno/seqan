@@ -168,11 +168,11 @@ struct Position< GapAnchor<TPos> const>:
 //////////////////////////////////////////////////////////////////////////////
 
 
-struct _SortSeqPos;
-typedef Tag<_SortSeqPos> const SortSeqPos;
+struct SortSeqPos_;
+typedef Tag<SortSeqPos_> const SortSeqPos;
 
-struct _SortGapPos;
-typedef Tag<_SortGapPos> const SortGapPos;
+struct SortGapPos_;
+typedef Tag<SortGapPos_> const SortGapPos;
 
 //////////////////////////////////////////////////////////////////////////////
 

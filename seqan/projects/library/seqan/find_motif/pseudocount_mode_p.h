@@ -56,8 +56,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.Pseudocount.param.TSpec.type:Spec.PMode
 
-struct _PMode;
-typedef Tag<_PMode> PMode;
+struct PMode_;
+typedef Tag<PMode_> PMode;
 
 
 template<typename TValue>

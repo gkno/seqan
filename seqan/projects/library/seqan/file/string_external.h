@@ -93,14 +93,14 @@ For a larger size type, use @Tag.ExternalConfigLarge@.
 */
     // standard external string
     // size is uint32
-    template < typename _TFile = File<>,				// default file type
-               unsigned _PAGE_SIZE = 4 * 1024 * 1024,	// 1MTypes per default
-			   unsigned _FRAMES = 2 >					// simultanous frames
+    template < typename TFile_ = File<>,				// default file type
+               unsigned PAGE_SIZE_ = 4 * 1024 * 1024,	// 1MTypes per default
+			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfig {
-        typedef _TFile TFile;
+        typedef TFile_ TFile;
         typedef unsigned TSize;
-        enum { PAGE_SIZE = _PAGE_SIZE };
-        enum { FRAMES = _FRAMES };
+        enum { PAGE_SIZE = PAGE_SIZE_ };
+        enum { FRAMES = FRAMES_ };
     };
 
 /**
@@ -124,19 +124,19 @@ you should think of using @Tag.ExternalConfig@.
 ..include:seqan/file.h
 */
     // the same as ExternalConfig
-    // but size type is size type of _TFile (i.e. uint64)
+    // but size type is size type of TFile_ (i.e. uint64)
     //
     // ATTENTION:
     // pipes use the size type 
     // uint64 blows up your suffix arrays, lcp-tables, ...
-    template < typename _TFile = File<>,				// default file type
-               unsigned _PAGE_SIZE = 1 * 1024 * 1024,	// 1MTypes per default
-			   unsigned _FRAMES = 2 >					// simultanous frames
+    template < typename TFile_ = File<>,				// default file type
+               unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
+			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigLarge {
-        typedef _TFile TFile;
-        typedef typename Size<_TFile>::Type TSize;
-        enum { PAGE_SIZE = _PAGE_SIZE };
-        enum { FRAMES = _FRAMES };
+        typedef TFile_ TFile;
+        typedef typename Size<TFile_>::Type TSize;
+        enum { PAGE_SIZE = PAGE_SIZE_ };
+        enum { FRAMES = FRAMES_ };
     };
 
 /**
@@ -161,15 +161,15 @@ you should think of using @Tag.ExternalConfig@.
 ..include:seqan/file.h
 */
     // custom size type
-    template < typename _TSize,
-		       typename _TFile = File<>,				// default file type
-               unsigned _PAGE_SIZE = 1 * 1024 * 1024,	// 1MTypes per default
-			   unsigned _FRAMES = 2 >					// simultanous frames
+    template < typename TSize_,
+		       typename TFile_ = File<>,				// default file type
+               unsigned PAGE_SIZE_ = 1 * 1024 * 1024,	// 1MTypes per default
+			   unsigned FRAMES_ = 2 >					// simultanous frames
     struct ExternalConfigSize {
-		typedef _TSize TSize;
-        typedef _TFile TFile;
-        enum { PAGE_SIZE = _PAGE_SIZE };
-        enum { FRAMES = _FRAMES };
+		typedef TSize_ TSize;
+        typedef TFile_ TFile;
+        enum { PAGE_SIZE = PAGE_SIZE_ };
+        enum { FRAMES = FRAMES_ };
     };
 
     template < typename TConfig = ExternalConfig<> >
@@ -448,11 +448,11 @@ you should think of using @Tag.ExternalConfig@.
             prefetch(0),
 			begin(NULL) {}
 
-		inline TIterator& operator=(TStdIterator const & _Right) {
+		inline TIterator& operator=(TStdIterator const & Right_) {
 			invalidate();
-			pageNo = _Right.offset / PAGE_SIZE;
-			pageOfs = _Right.offset % PAGE_SIZE;
-            extString = _Right.extString;
+			pageNo = Right_.offset / PAGE_SIZE;
+			pageOfs = Right_.offset % PAGE_SIZE;
+            extString = Right_.extString;
 			return *this;
 		}
 
@@ -464,12 +464,12 @@ you should think of using @Tag.ExternalConfig@.
             return TStdConstIterator(extString, (TSize)pageNo * (TSize)PAGE_SIZE + pageOfs);
         }
 
-		inline TIterator& operator=(TIterator const & _Right) {
+		inline TIterator& operator=(TIterator const & Right_) {
 			invalidate();
-			extString = _Right.extString;
-			pageNo = _Right.pageNo;
-			pageOfs = _Right.pageOfs;
-            prefetch = _Right.prefetch;
+			extString = Right_.extString;
+			pageNo = Right_.pageNo;
+			pageOfs = Right_.pageOfs;
+            prefetch = Right_.prefetch;
 			return *this;
 		}
 
@@ -694,19 +694,19 @@ you should think of using @Tag.ExternalConfig@.
             prefetch(0),
 			begin(NULL) {}
 
-		inline TIterator& operator=(TStdIterator const & _Right) {
+		inline TIterator& operator=(TStdIterator const & Right_) {
 			invalidate();
-			pageNo = _Right.offset / PAGE_SIZE;
-			pageOfs = _Right.offset % PAGE_SIZE;
-            extString = _Right.extString;
+			pageNo = Right_.offset / PAGE_SIZE;
+			pageOfs = Right_.offset % PAGE_SIZE;
+            extString = Right_.extString;
 			return *this;
 		}
 
-		inline TIterator& operator=(TStdConstIterator const & _Right) {
+		inline TIterator& operator=(TStdConstIterator const & Right_) {
 			invalidate();
-			pageNo = _Right.offset / PAGE_SIZE;
-			pageOfs = _Right.offset % PAGE_SIZE;
-            extString = _Right.extString;
+			pageNo = Right_.offset / PAGE_SIZE;
+			pageOfs = Right_.offset % PAGE_SIZE;
+            extString = Right_.extString;
 			return *this;
 		}
 
@@ -714,21 +714,21 @@ you should think of using @Tag.ExternalConfig@.
             return TStdConstIterator(extString, (TSize)pageNo * (TSize)PAGE_SIZE + pageOfs);
         }
 
-		inline TIterator& operator=(TIterator const & _Right) {
+		inline TIterator& operator=(TIterator const & Right_) {
 			invalidate();
-			extString = _Right.extString;
-			pageNo = _Right.pageNo;
-			pageOfs = _Right.pageOfs;
-            prefetch = _Right.prefetch;
+			extString = Right_.extString;
+			pageNo = Right_.pageNo;
+			pageOfs = Right_.pageOfs;
+            prefetch = Right_.prefetch;
 			return *this;
 		}
 
-		inline TIterator& operator=(TFwdIterator const & _Right) {
+		inline TIterator& operator=(TFwdIterator const & Right_) {
 			invalidate();
-			extString = _Right.extString;
-			pageNo = _Right.pageNo;
-			pageOfs = _Right.pageOfs;
-            prefetch = _Right.prefetch;
+			extString = Right_.extString;
+			pageNo = Right_.pageNo;
+			pageOfs = Right_.pageOfs;
+            prefetch = Right_.prefetch;
 			return *this;
 		}
 
@@ -1888,11 +1888,11 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 	template < typename TValue, typename TConfig, typename TExpand >
 	inline void
 	appendValue(String<TValue, External<TConfig> > &me, 
-				TValue const &_Val,
+				TValue const &Val_,
 				Tag<TExpand> const expand)
 	{
 		resize(me, me.data_size + 1, expand);
-		back(me) = _Val;
+		back(me) = Val_;
 	}
 
 //____________________________________________________________________________
@@ -1900,16 +1900,16 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 
     template < typename TValue, typename TConfig >
     inline void
-    push(String<TValue, External<TConfig> > &me, TValue const &_Val)
+    push(String<TValue, External<TConfig> > &me, TValue const &Val_)
     {
-		appendValue(me, _Val);
+		appendValue(me, Val_);
     }
 
     template < typename TValue, typename TConfig >
     inline void
-    push_back(String<TValue, External<TConfig> > &me, TValue const &_Val)
+    push_back(String<TValue, External<TConfig> > &me, TValue const &Val_)
     {
-		appendValue(me, _Val);
+		appendValue(me, Val_);
     }
 
     template < typename TValue, typename TConfig >

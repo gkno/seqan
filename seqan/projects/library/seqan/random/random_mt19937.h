@@ -106,9 +106,9 @@ struct Value<const Rng<MersenneTwister> > : Value<Rng<MersenneTwister> > {};
 template <>
 struct MaxValue<Rng<MersenneTwister> >
 {
-    typedef Rng<MersenneTwister> _TMT;
-    typedef Value<_TMT>::Type _TValue;
-    static const _TValue VALUE;
+    typedef Rng<MersenneTwister> TMT_;
+    typedef Value<TMT_>::Type TValue_;
+    static const TValue_ VALUE;
 };
 
 const Value<Rng<MersenneTwister> >::Type MaxValue<Rng<MersenneTwister> >::VALUE = MaxValue<Value<Rng<MersenneTwister> >::Type>::VALUE;
@@ -119,9 +119,9 @@ struct MaxValue<const Rng<MersenneTwister> > : MaxValue<Rng<MersenneTwister> > {
 template <>
 struct MinValue<Rng<MersenneTwister> >
 {
-    typedef Rng<MersenneTwister> _TMT;
-    typedef Value<_TMT>::Type _TValue;
-    static const _TValue VALUE;
+    typedef Rng<MersenneTwister> TMT_;
+    typedef Value<TMT_>::Type TValue_;
+    static const TValue_ VALUE;
 };
 
 const Value<Rng<MersenneTwister> >::Type MinValue<Rng<MersenneTwister> >::VALUE = MinValue<Value<Rng<MersenneTwister> >::Type>::VALUE;

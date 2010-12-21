@@ -39,9 +39,9 @@
 
 namespace seqan {
 
-template <typename _TNeedle>
-struct Pattern<_TNeedle, Simple> : _FindState {
-    typedef _TNeedle TNeedle;
+template <typename TNeedle_>
+struct Pattern<TNeedle_, Simple> : FindState_ {
+    typedef TNeedle_ TNeedle;
 
     // The pattern's state.
     TState _state;

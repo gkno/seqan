@@ -108,21 +108,21 @@ namespace SEQAN_NAMESPACE_MAIN
 			return I.rest - rest;
 		}
 		
-		bool _Equal(const iterator &I) const {
+		bool Equal_(const iterator &I) const {
 			return rest == I.rest;
 		}
 	};
     
     template <typename TInput>
-	bool operator==(const IPipeIterator<TInput>& _Left, const IPipeIterator<TInput>& _Right)
+	bool operator==(const IPipeIterator<TInput>& _Left, const IPipeIterator<TInput>& Right_)
 	{
-		return _Left._Equal(_Right);
+		return _Left.Equal_(Right_);
 	}
 
     template <typename TInput>
-	bool operator!=(const IPipeIterator<TInput>& _Left, const IPipeIterator<TInput>& _Right)
+	bool operator!=(const IPipeIterator<TInput>& _Left, const IPipeIterator<TInput>& Right_)
 	{
-		return !(_Left == _Right);
+		return !(_Left == Right_);
 	}
 
 
@@ -188,21 +188,21 @@ namespace SEQAN_NAMESPACE_MAIN
 			return I.rest - rest;
 		}
 		
-		bool _Equal(const iterator &I) const {
+		bool Equal_(const iterator &I) const {
 			return rest == I.rest;
 		}
 	};
 
     template <typename TOutput>
-	bool operator==(const OPipeIterator<TOutput>& _Left, const OPipeIterator<TOutput>& _Right)
+	bool operator==(const OPipeIterator<TOutput>& _Left, const OPipeIterator<TOutput>& Right_)
 	{
-		return _Left._Equal(_Right);
+		return _Left.Equal_(Right_);
 	}
 
     template <typename TOutput>
-	bool operator!=(const OPipeIterator<TOutput>& _Left, const OPipeIterator<TOutput>& _Right)
+	bool operator!=(const OPipeIterator<TOutput>& _Left, const OPipeIterator<TOutput>& Right_)
 	{
-		return !(_Left == _Right);
+		return !(_Left == Right_);
 	}
 
 

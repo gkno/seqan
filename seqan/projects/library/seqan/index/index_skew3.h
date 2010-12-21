@@ -83,7 +83,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename InType, typename Result = typename InType::T1>
     struct _skew3NMapLinear : public ::std::unary_function<InType,Result> {
         Result BN;
-        _skew3NMapLinear(Result _BN):BN(_BN) { }
+        _skew3NMapLinear(Result BN_):BN(BN_) { }
         inline Result operator()(const InType& x) const
         { Result i = x.i1; return BN - (i - i / 3); }
     };
@@ -91,7 +91,7 @@ namespace SEQAN_NAMESPACE_MAIN
     template <typename InType, typename Result = typename InType::T1>
     struct _skew3NMapSliced : public ::std::unary_function<InType,Result> {
         Result BN, BN2;
-        _skew3NMapSliced(Result _BN):BN(_BN-1),BN2(_BN/2-1) { }
+        _skew3NMapSliced(Result BN_):BN(BN_-1),BN2(BN_/2-1) { }
         inline Result operator()(const InType& x) const
         { return (x.i1 % 3 == 1)? BN - x.i1/3 : BN2 - x.i1/3; }
     };
@@ -142,32 +142,32 @@ namespace SEQAN_NAMESPACE_MAIN
 
         // step 1
 		typedef Pipe< TInput, Sampler<3> >  TSamplerDC3;
-                                        typedef _skew3NComp<_TypeOf(TSamplerDC3)> ncomp_t;
-        typedef Pool< _TypeOf(TSamplerDC3), SorterSpec< SorterConfigSize<ncomp_t, _TSizeOf(TSamplerDC3) > > > TSortTuples;
+                                        typedef _skew3NComp<TypeOf_(TSamplerDC3)> ncomp_t;
+        typedef Pool< TypeOf_(TSamplerDC3), SorterSpec< SorterConfigSize<ncomp_t, TSizeOf_(TSamplerDC3) > > > TSortTuples;
 		typedef Pipe< TSortTuples, Namer<ncomp_t> > TNamer;
-                                        typedef _skew3NMapSliced<_TypeOf(TNamer)> nmap_sliced_t;
-                                        typedef _skew3NMapLinear<_TypeOf(TNamer)> nmap_linear_t;
-        typedef Pool< _TypeOf(TNamer), MapperSpec< MapperConfigSize< nmap_sliced_t, _TSizeOf(TNamer) > > > TNames_Sliced;
+                                        typedef _skew3NMapSliced<TypeOf_(TNamer)> nmap_sliced_t;
+                                        typedef _skew3NMapLinear<TypeOf_(TNamer)> nmap_linear_t;
+        typedef Pool< TypeOf_(TNamer), MapperSpec< MapperConfigSize< nmap_sliced_t, TSizeOf_(TNamer) > > > TNames_Sliced;
 
         // unique names - shortcut
-        typedef Pool< _TypeOf(TNames_Sliced), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TNames_Sliced) > > > TNames_Linear_Unique;
+        typedef Pool< TypeOf_(TNames_Sliced), MapperSpec< MapperConfigSize< nmap_linear_t, TSizeOf_(TNames_Sliced) > > > TNames_Linear_Unique;
 
         // non-unique names - recursion
-        typedef Pipe< TNames_Sliced, Filter< filterI2<_TypeOf(TNames_Sliced)> > > TFilter;
+        typedef Pipe< TNames_Sliced, Filter< filterI2<TypeOf_(TNames_Sliced)> > > TFilter;
         typedef Pipe< TFilter, Skew3 > TRecurse;
-                                        typedef _skew3UnslicerFunc<_TypeOf(TRecurse)> unslicer_func_t;
+                                        typedef _skew3UnslicerFunc<TypeOf_(TRecurse)> unslicer_func_t;
         typedef Pipe< TRecurse, Filter<unslicer_func_t> > TUnslicer;
         typedef Pipe< TUnslicer, Counter > TRenamer;
-        typedef Pool< _TypeOf(TRenamer), MapperSpec< MapperConfigSize< nmap_linear_t, _TSizeOf(TRenamer) > > > TNames_Linear;
+        typedef Pool< TypeOf_(TRenamer), MapperSpec< MapperConfigSize< nmap_linear_t, TSizeOf_(TRenamer) > > > TNames_Linear;
 
         // step 2
         typedef Pipe< Bundle2< TInput, TNames_Linear >, Extender3 > TExtender;
-                                        typedef _skew3ExtendComp<_TypeOf(typename TExtender::Out0)> extend_comp_t;
-        typedef Pool< _TypeOf(typename TExtender::Out0), SorterSpec< SorterConfigSize< extend_comp_t, _TSizeOf(typename TExtender::Out0) > > > TSorterS0;
+                                        typedef _skew3ExtendComp<TypeOf_(typename TExtender::Out0)> extend_comp_t;
+        typedef Pool< TypeOf_(typename TExtender::Out0), SorterSpec< SorterConfigSize< extend_comp_t, TSizeOf_(typename TExtender::Out0) > > > TSorterS0;
 
         // step 3
-                                        typedef _skew3NMapExtended<_TypeOf(typename TExtender::Out12)> nmap_extended_t;
-		typedef Pool< _TypeOf(typename TExtender::Out12), MapperSpec< MapperConfigSize< nmap_extended_t, _TSizeOf(typename TExtender::Out12) > > > TSorterS12;
+                                        typedef _skew3NMapExtended<TypeOf_(typename TExtender::Out12)> nmap_extended_t;
+		typedef Pool< TypeOf_(typename TExtender::Out12), MapperSpec< MapperConfigSize< nmap_extended_t, TSizeOf_(typename TExtender::Out12) > > > TSorterS12;
         typedef Pipe< Bundle2< TSorterS0, TSorterS12 >, Merger3 > TMerger;
 
         TSorterS0   sortedS0;
@@ -183,8 +183,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			process(_textIn);
 		}
 
-	    template < typename _TInput >
-        bool process(_TInput &textIn) {
+	    template < typename TInput_ >
+        bool process(TInput_ &textIn) {
 
             SEQAN_PROADD(SEQAN_PRODEPTH, 1);
             SEQAN_PROMARK("Rekursionsabstieg");

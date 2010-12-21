@@ -156,8 +156,8 @@ namespace SEQAN_NAMESPACE_MAIN
 			process(_in);
 		}
 
-		template < typename _TLCPInput >
-        inline bool process(_TLCPInput &_lcpIn) {
+		template < typename TLcpInput_ >
+        inline bool process(TLcpInput_ &_lcpIn) {
 
             // *** INSTANTIATION ***
 			
@@ -175,8 +175,8 @@ namespace SEQAN_NAMESPACE_MAIN
         }
 	};
 
-	template < typename TInput, typename _TLCPInput >
-    inline bool operator<<(Pipe< TInput, ChildTab > &me, _TLCPInput const &in) {
+	template < typename TInput, typename TLcpInput_ >
+    inline bool operator<<(Pipe< TInput, ChildTab > &me, TLcpInput_ const &in) {
  	    return me.process(in);
     }
 

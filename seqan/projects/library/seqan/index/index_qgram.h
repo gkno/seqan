@@ -223,24 +223,24 @@ To efficiently create them at once use this tag for @Function.indexRequire@ or @
 			cargo(other.cargo),
 			stepSize(1) {}
 
-		template <typename _TText>
-		Index(_TText &_text):
+		template <typename TText_>
+		Index(TText_ &_text):
 			text(_text),
 			stepSize(1) {}
 
-		template <typename _TText>
-		Index(_TText const &_text):
+		template <typename TText_>
+		Index(TText_ const &_text):
 			text(_text),
 			stepSize(1) {}
 
-		template <typename _TText, typename _TShape>
-		Index(_TText &_text, _TShape const &_shape):
+		template <typename TText_, typename TShape_>
+		Index(TText_ &_text, TShape_ const &_shape):
 			text(_text),
 			shape(_shape),
 			stepSize(1) {}
 
-		template <typename _TText, typename _TShape>
-		Index(_TText const &_text, _TShape const &_shape):
+		template <typename TText_, typename TShape_>
+		Index(TText_ const &_text, TShape_ const &_shape):
 			text(_text),
 			shape(_shape),
 			stepSize(1) {}
@@ -1696,12 +1696,12 @@ The resulting tables must have appropriate size before calling this function.
 		typedef Pipe< TText, Source<> >								TSource;
         typedef Pipe< TSource, Caster<TUValue, CasterConvert> >		TUnsigner;
 		typedef Pipe< TUnsigner, Tupler<q> >						TTupler;
-						                typedef _qgramComp<_TypeOf(TTupler)> qcomp_t;
+						                typedef _qgramComp<TypeOf_(TTupler)> qcomp_t;
         typedef Pool< 
-					_TypeOf(TTupler), 
-					SorterSpec< SorterConfigSize<qcomp_t, _TSizeOf(TTupler) > > 
+					TypeOf_(TTupler), 
+					SorterSpec< SorterConfigSize<qcomp_t, TSizeOf_(TTupler) > > 
 				> TSortTuples;
-										typedef _qgramHash<_TypeOf(TTupler), typename Size<TDir>::Type> qhash_t;
+										typedef _qgramHash<TypeOf_(TTupler), typename Size<TDir>::Type> qhash_t;
 
         // *** INSTANTIATION ***
 
@@ -1790,12 +1790,12 @@ The resulting tables must have appropriate size before calling this function.
 		typedef Pipe< TConcat, Source<> >							TSource;
         typedef Pipe< TSource, Caster<TUValue, CasterConvert> >		TUnsigner;
 		typedef Pipe< TUnsigner, TTuplerSpec >						TTupler;
-						                typedef _qgramComp<_TypeOf(TTupler)> qcomp_t;
+						                typedef _qgramComp<TypeOf_(TTupler)> qcomp_t;
         typedef Pool< 
-					_TypeOf(TTupler), 
-					SorterSpec< SorterConfigSize<qcomp_t, _TSizeOf(TTupler) > > 
+					TypeOf_(TTupler), 
+					SorterSpec< SorterConfigSize<qcomp_t, TSizeOf_(TTupler) > > 
 				> TSortTuples;
-										typedef _qgramHash<_TypeOf(TTupler), typename Size<TDir>::Type> qhash_t;
+										typedef _qgramHash<TypeOf_(TTupler), typename Size<TDir>::Type> qhash_t;
 
         // *** INSTANTIATION ***
 

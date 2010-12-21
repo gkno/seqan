@@ -65,7 +65,7 @@ inline void mtRandInit();
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T = void>
-struct _MersenneBuffer
+struct MersenneBuffer_
 {
     static unsigned long buffer[SEQAN_MERSENNE_MT_LEN];
 	static int index;
@@ -75,17 +75,17 @@ struct _MersenneBuffer
 //____________________________________________________________________________
 
 template <typename T>
-unsigned long _MersenneBuffer<T>::buffer[SEQAN_MERSENNE_MT_LEN];
+unsigned long MersenneBuffer_<T>::buffer[SEQAN_MERSENNE_MT_LEN];
 
 //____________________________________________________________________________
 
 template <typename T>
-int _MersenneBuffer<T>::index = 0;
+int MersenneBuffer_<T>::index = 0;
 
 //____________________________________________________________________________
 
 template <typename T>
-bool _MersenneBuffer<T>::is_initialized = false;
+bool MersenneBuffer_<T>::is_initialized = false;
 
 //////////////////////////////////////////////////////////////////////////////
 // NOTE: mtRandInit() must have been called at least once before mtRand() is used.
@@ -113,8 +113,8 @@ mtRandInit(bool
 {
 	// test whether mtRandInit was already initialized
 	// return immediately if this is the case
-	if (_MersenneBuffer<>::is_initialized) return;
-	_MersenneBuffer<>::is_initialized = true;
+	if (MersenneBuffer_<>::is_initialized) return;
+	MersenneBuffer_<>::is_initialized = true;
 
 #ifndef SEQAN_NOSRAN
 	if (_doSRand)
@@ -123,7 +123,7 @@ mtRandInit(bool
 
 	int i;
 	for (i = 0; i < SEQAN_MERSENNE_MT_LEN; i++)
-		_MersenneBuffer<>::buffer[i] = ::std::rand();
+		MersenneBuffer_<>::buffer[i] = ::std::rand();
 
 	mtRand(); //pop the first number, since it is not as "random" as we like it
 }
@@ -154,8 +154,8 @@ mtRandInit()
 inline unsigned 
 mtRand()
 {
-	unsigned long * b = _MersenneBuffer<>::buffer;
-	int idx = _MersenneBuffer<>::index;
+	unsigned long * b = MersenneBuffer_<>::buffer;
+	int idx = MersenneBuffer_<>::index;
 	unsigned long s;
 	int i;
 	
@@ -175,7 +175,7 @@ mtRand()
 		s = SEQAN_MERSENNE_TWIST(b, SEQAN_MERSENNE_MT_LEN-1, 0);
 		b[SEQAN_MERSENNE_MT_LEN-1] = b[SEQAN_MERSENNE_MT_IA-1] ^ (s >> 1) ^ SEQAN_MERSENNE_MAGIC(s);
 	}
-	_MersenneBuffer<>::index = idx + sizeof(unsigned long);
+	MersenneBuffer_<>::index = idx + sizeof(unsigned long);
 	return *(unsigned long *)((unsigned char *)b + idx);
 }
 

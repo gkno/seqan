@@ -58,8 +58,8 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/find_motif.h
 */
 
-struct _Projection;
-typedef Tag<_Projection> const Projection;
+struct Projection_;
+typedef Tag<Projection_> const Projection;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - Projection Spec

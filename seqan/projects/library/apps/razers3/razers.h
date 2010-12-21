@@ -57,13 +57,13 @@ namespace SEQAN_NAMESPACE_MAIN
 	template <typename TSpec = Default>
 	struct RazerSQuality;
 
-    template <typename _TAlignMode, typename _TGapMode, typename _TScoreMode, typename _TMatchNPolicy>
+    template <typename TAlignMode_, typename TGapMode_, typename TScoreMode_, typename TMatchNPolicy_>
 	struct RazerSMode
 	{
-		typedef _TAlignMode	TAlignMode;
-		typedef _TGapMode	TGapMode;
-		typedef _TScoreMode	TScoreMode;
-		typedef _TMatchNPolicy	TMatchNPolicy;
+		typedef TAlignMode_	TAlignMode;
+		typedef TGapMode_	TGapMode;
+		typedef TScoreMode_	TScoreMode;
+		typedef TMatchNPolicy_	TMatchNPolicy;
 	};
 	
 	enum AlignMode			{ RAZERS_LOCAL, RAZERS_PREFIX, RAZERS_GLOBAL };
@@ -74,11 +74,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Default options
 
-	template < bool _DONT_VERIFY = false, bool _DONT_DUMP_RESULTS = false >
+	template < bool DONT_VERIFY_ = false, bool DONT_DUMP_RESULTS_ = false >
 	struct RazerSSpec 
 	{
-		enum { DONT_VERIFY = _DONT_VERIFY };				// omit verifying potential matches
-		enum { DONT_DUMP_RESULTS = _DONT_DUMP_RESULTS };	// omit dumping results
+		enum { DONT_VERIFY = DONT_VERIFY_ };				// omit verifying potential matches
+		enum { DONT_DUMP_RESULTS = DONT_DUMP_RESULTS_ };	// omit dumping results
 	};
 
 	template < typename TSpec = RazerSSpec<> >
@@ -267,10 +267,10 @@ struct MicroRNA{};
 // Typedefs
 /*
 	// definition of a Read match
-	template <typename _TGPos>
+	template <typename TGPos_>
 	struct ReadMatch 
 	{
-		typedef typename MakeSigned_<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
@@ -408,19 +408,19 @@ struct MicroRNA{};
 
 
 	template <
-		typename _TFragmentStore, 
-		typename _TRazerSOptions,
-		typename _TRazerSMode,
-		typename _TSwiftPattern,
-		typename _TCounts
+		typename TFragmentStore_, 
+		typename TRazerSOptions_,
+		typename TRazerSMode_,
+		typename TSwiftPattern_,
+		typename TCounts_
 	>
 	struct MatchVerifier
 	{
-		typedef _TFragmentStore									TFragmentStore;
-		typedef _TRazerSOptions									TOptions;
-		typedef _TRazerSMode									TRazerSMode;
-		typedef _TSwiftPattern									TSwiftPattern;
-		typedef _TCounts										TCounts;
+		typedef TFragmentStore_									TFragmentStore;
+		typedef TRazerSOptions_									TOptions;
+		typedef TRazerSMode_									TRazerSMode;
+		typedef TSwiftPattern_									TSwiftPattern;
+		typedef TCounts_										TCounts;
 
         typedef typename TRazerSMode::TMatchNPolicy             TMatchNPolicy;
 		
@@ -446,7 +446,7 @@ struct MicroRNA{};
 		
 		MatchVerifier() {}
                
-		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(TFragmentStore_ &_store, TOptions &_options, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(&_store),
 			options(&_options),
 			swiftPattern(&_swiftPattern),
@@ -1320,9 +1320,9 @@ matchVerify(
 
 
 template <typename TRazerSMode>
-struct __UseQualityValues { enum { VALUE = false }; };
+struct UseQualityValues__ { enum { VALUE = false }; };
 template <typename TAlignMode, typename TGapMode, typename TSpec, typename TMatchNPolicy>
-struct __UseQualityValues<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec>, TMatchNPolicy> > {  enum { VALUE = true }; };
+struct UseQualityValues__<RazerSMode<TAlignMode, TGapMode, RazerSQuality<TSpec>, TMatchNPolicy> > {  enum { VALUE = true }; };
 
 //////////////////////////////////////////////////////////////////////////////
 // Hamming verification
@@ -1366,7 +1366,7 @@ matchVerify(
 	int minScore;
 	if (IsSameType<TScoreMode, RazerSErrors>::VALUE)
 		minScore = -(int)(ndlLength * verifier.options->errorRate);
-	else if (__UseQualityValues<TRazerSMode>::VALUE)
+	else if (UseQualityValues__<TRazerSMode>::VALUE)
 		minScore = -verifier.options->absMaxQualSumErrors;
 	else if (IsSameType<TScoreMode, RazerSScore>::VALUE)
 	{
@@ -1400,7 +1400,7 @@ matchVerify(
 				} else
 				{
 					++errors;
-					if (__UseQualityValues<TRazerSMode>::VALUE)
+					if (UseQualityValues__<TRazerSMode>::VALUE)
 						// B. Count mismatches and mismatch qualities
 						score -= getQualityValue(*g);
 					else if (IsSameType<TScoreMode, RazerSScore>::VALUE)

@@ -64,7 +64,7 @@ class RangeTree< TObject, TModus, RT< TSpec >, TStructuring >
 public:
 	SkipList< TObject, TModus, RT< TSpec >, TStructuring > * _list;
 
-	TObject _RBorderObj;
+	TObject RBorderObj_;
 	TObject _LBorderObj;
 
 	typename Size< TObject >::Type _dim;
@@ -137,7 +137,7 @@ public:
 	{
 		SEQAN_CHECKPOINT
 		_setMinInfty( _LBorderObj, _dim );
-		_setMaxInfty( _RBorderObj, _dim );
+		_setMaxInfty( RBorderObj_, _dim );
 
 		allocate( _getListAlloc( *this ), _list, 1 );
 		valueConstruct( _list );

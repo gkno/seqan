@@ -160,20 +160,20 @@ namespace SEQAN_NAMESPACE_MAIN
 		if (map.comp(map.maxKey, key))
 			return end(map.string);
 
-		TIter _First = begin(map.string);
-		TSize _Count = end(map.string) - _First;
+		TIter First_ = begin(map.string);
+		TSize Count_ = end(map.string) - First_;
 
-		for (; 0 < _Count; )
+		for (; 0 < Count_; )
 		{	// divide and conquer, find half that contains answer
-			TSize _Count2 = _Count / 2;
-			TIter _Mid = _First + _Count2;
+			TSize Count2_ = Count_ / 2;
+			TIter Mid_ = First_ + Count2_;
 
-			if (map.comp((*_Mid).i1, key))
-				_First = ++_Mid, _Count -= _Count2 + 1;
+			if (map.comp((*Mid_).i1, key))
+				First_ = ++Mid_, Count_ -= Count2_ + 1;
 			else
-				_Count = _Count2;
+				Count_ = Count2_;
 		}
-		return (_First);
+		return (First_);
 	}
 
 	template <typename TPair, typename TString, typename TLess>

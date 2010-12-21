@@ -48,11 +48,11 @@ using namespace seqan;
 namespace seqan
 {
 
-struct _Dummy;
-struct _DummySumListIterator;
+struct Dummy_;
+struct DummySumListIterator_;
 
 template <unsigned int DIM, typename TValue>
-class SumList<DIM, TValue, _Dummy>
+class SumList<DIM, TValue, Dummy_>
 {
 public:
 	typedef SumListValues<DIM, TValue> TValues;
@@ -64,10 +64,10 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue, typename TIteratorSpec>
-struct Iterator<SumList<DIM, TValue, _Dummy>, TIteratorSpec>
+struct Iterator<SumList<DIM, TValue, Dummy_>, TIteratorSpec>
 {
-	typedef SumList<DIM, TValue, _Dummy> TSumList;
-	typedef Iter<TSumList, _DummySumListIterator> Type;
+	typedef SumList<DIM, TValue, Dummy_> TSumList;
+	typedef Iter<TSumList, DummySumListIterator_> Type;
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -76,7 +76,7 @@ template <typename T>
 struct Values;
 
 template <unsigned int DIM, typename TValue>
-struct Values<SumList<DIM, TValue, _Dummy> >
+struct Values<SumList<DIM, TValue, Dummy_> >
 {
 	typedef SumListValues<DIM, TValue> Type;
 };
@@ -85,8 +85,8 @@ struct Values<SumList<DIM, TValue, _Dummy> >
 
 
 template <unsigned int DIM, typename TValue>
-inline typename Size< SumList<DIM, TValue, _Dummy> >::Type
-length(SumList<DIM, TValue, _Dummy> & me)
+inline typename Size< SumList<DIM, TValue, Dummy_> >::Type
+length(SumList<DIM, TValue, Dummy_> & me)
 {
 	return length(me.data);
 }
@@ -94,8 +94,8 @@ length(SumList<DIM, TValue, _Dummy> & me)
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue>
-inline typename Value< SumList<DIM, TValue, _Dummy> >::Type 
-getSum(SumList<DIM, TValue, _Dummy> & me,
+inline typename Value< SumList<DIM, TValue, Dummy_> >::Type 
+getSum(SumList<DIM, TValue, Dummy_> & me,
 	   unsigned int dim)
 {
 	typedef SumListValues<DIM, TValue> TValues;
@@ -116,7 +116,7 @@ getSum(SumList<DIM, TValue, _Dummy> & me,
 
 template <unsigned int DIM, typename TValue>
 inline void
-clear(SumList<DIM, TValue, _Dummy> & me)
+clear(SumList<DIM, TValue, Dummy_> & me)
 {
 	clear(me.data);
 }
@@ -124,10 +124,10 @@ clear(SumList<DIM, TValue, _Dummy> & me)
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue>
-inline typename Iterator< SumList<DIM, TValue, _Dummy> >::Type
-begin(SumList<DIM, TValue, _Dummy> & me)
+inline typename Iterator< SumList<DIM, TValue, Dummy_> >::Type
+begin(SumList<DIM, TValue, Dummy_> & me)
 {
-	typedef SumList<DIM, TValue, _Dummy>  TMe;
+	typedef SumList<DIM, TValue, Dummy_>  TMe;
 	typedef typename Iterator<TMe>::Type TIterator;
 	return TIterator(me);
 }
@@ -135,10 +135,10 @@ begin(SumList<DIM, TValue, _Dummy> & me)
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue>
-inline typename Iterator< SumList<DIM, TValue, _Dummy> >::Type
-end(SumList<DIM, TValue, _Dummy> & me)
+inline typename Iterator< SumList<DIM, TValue, Dummy_> >::Type
+end(SumList<DIM, TValue, Dummy_> & me)
 {
-	typedef SumList<DIM, TValue, _Dummy>  TMe;
+	typedef SumList<DIM, TValue, Dummy_>  TMe;
 	typedef typename Iterator<TMe>::Type TIterator;
 	return TIterator(me, GoEnd());
 }
@@ -147,14 +147,14 @@ end(SumList<DIM, TValue, _Dummy> & me)
 
 template <unsigned int DIM, typename TValue, typename TValues>
 inline void 
-appendValues(SumList<DIM, TValue, _Dummy> & me,
+appendValues(SumList<DIM, TValue, Dummy_> & me,
 			 TValues const & new_values)
 {
 	appendValue(me.data, new_values);
 }
 template <unsigned int DIM, typename TValue, typename TValue2>
 inline void 
-appendValues(SumList<DIM, TValue, _Dummy> & me,
+appendValues(SumList<DIM, TValue, Dummy_> & me,
 			 TValue2 const * new_values)
 {
 	SumListValues<DIM, TValue> vals(new_values);
@@ -165,7 +165,7 @@ appendValues(SumList<DIM, TValue, _Dummy> & me,
 
 //template <typename TSumList, typename TValue>
 //inline void
-//searchSumList(Iter<TSumList, _DummySumListIterator> & it,
+//searchSumList(Iter<TSumList, DummySumListIterator_> & it,
 //			  TValue const & val,
 //			  int dim)
 //{
@@ -179,10 +179,10 @@ appendValues(SumList<DIM, TValue, _Dummy> & me,
 //////////////////////////////////////////////////////////////////////////////
 
 template <unsigned int DIM, typename TValue>
-class Iter<SumList<DIM, TValue, _Dummy>, _DummySumListIterator>
+class Iter<SumList<DIM, TValue, Dummy_>, DummySumListIterator_>
 {
 public:
-	typedef SumList<DIM, TValue, _Dummy> TSumList;
+	typedef SumList<DIM, TValue, Dummy_> TSumList;
 	typedef SumListValues<DIM, TValue> TValues;
 	typedef String<TValues> TString;
 	typedef typename Iterator<TString>::Type TStringIterator;
@@ -224,7 +224,7 @@ public:
 
 template <typename TSumList>
 inline void
-goNext(Iter<TSumList, _DummySumListIterator> & it)
+goNext(Iter<TSumList, DummySumListIterator_> & it)
 {
 	goNext(it.iter);
 }
@@ -233,7 +233,7 @@ goNext(Iter<TSumList, _DummySumListIterator> & it)
 
 template <typename TSumList>
 inline void
-goBegin(Iter<TSumList, _DummySumListIterator> & it)
+goBegin(Iter<TSumList, DummySumListIterator_> & it)
 {
 	it.iter = begin(it.container->data);
 }
@@ -242,7 +242,7 @@ goBegin(Iter<TSumList, _DummySumListIterator> & it)
 
 template <typename TSumList>
 inline bool
-atEnd(Iter<TSumList, _DummySumListIterator> & it)
+atEnd(Iter<TSumList, DummySumListIterator_> & it)
 {
 	return it.iter == end(it.container->data);
 }
@@ -251,7 +251,7 @@ atEnd(Iter<TSumList, _DummySumListIterator> & it)
 
 template <typename TSumList>
 inline typename Value<TSumList>::Type
-getValue(Iter<TSumList, _DummySumListIterator > & it,
+getValue(Iter<TSumList, DummySumListIterator_ > & it,
 		 int dim)
 {
 	return value(it.iter)[dim];
@@ -261,7 +261,7 @@ getValue(Iter<TSumList, _DummySumListIterator > & it,
 
 template <typename TSumList>
 inline typename Values<TSumList>::Type
-getValues(Iter<TSumList, _DummySumListIterator > & it)
+getValues(Iter<TSumList, DummySumListIterator_ > & it)
 {
 	return value(it.iter);
 }
@@ -270,7 +270,7 @@ getValues(Iter<TSumList, _DummySumListIterator > & it)
 
 template <typename TSumList>
 inline typename Value<TSumList>::Type
-getSum(Iter<TSumList, _DummySumListIterator > & it,
+getSum(Iter<TSumList, DummySumListIterator_ > & it,
 	   int dim)
 {
 	typedef typename Value<TSumList>::Type TValue;
@@ -292,7 +292,7 @@ getSum(Iter<TSumList, _DummySumListIterator > & it,
 
 template <typename TSumList, typename TValue>
 inline void
-searchSumList(Iter<TSumList, _DummySumListIterator> & it,
+searchSumList(Iter<TSumList, DummySumListIterator_> & it,
 			  TValue const & val,
 			  int dim)
 {
@@ -310,7 +310,7 @@ searchSumList(Iter<TSumList, _DummySumListIterator> & it,
 
 template <typename TSumList, typename TValue2>
 inline void 
-assignValue(Iter<TSumList, _DummySumListIterator > & it,
+assignValue(Iter<TSumList, DummySumListIterator_ > & it,
 			int dim,
 			TValue2 val)
 {
@@ -321,7 +321,7 @@ assignValue(Iter<TSumList, _DummySumListIterator > & it,
 
 template <typename TSumList, typename TValues>
 inline void 
-insertValues(Iter<TSumList, _DummySumListIterator > & it,
+insertValues(Iter<TSumList, DummySumListIterator_ > & it,
 			 TValues const & vals)
 {
 	size_t position = it.iter - begin(it.container->data);
@@ -330,7 +330,7 @@ insertValues(Iter<TSumList, _DummySumListIterator > & it,
 }
 template <typename TSumList, typename TValue>
 inline void 
-insertValues(Iter<TSumList, _DummySumListIterator > & it,
+insertValues(Iter<TSumList, DummySumListIterator_ > & it,
 			 TValue const * p_vals)
 {
 	SumListValues<DIMENSION<TSumList>::VALUE, typename Value<TSumList>::Type > vals(p_vals);
@@ -341,7 +341,7 @@ insertValues(Iter<TSumList, _DummySumListIterator > & it,
 
 template <typename TSumList>
 inline void 
-removeValues(Iter<TSumList, _DummySumListIterator > & it)
+removeValues(Iter<TSumList, DummySumListIterator_ > & it)
 {
 	arrayCopyForward(it.iter + 1, end(it.container->data, Standard()), it.iter);
 	resize(it.container->data, length(it.container->data) - 1);
@@ -351,16 +351,16 @@ removeValues(Iter<TSumList, _DummySumListIterator > & it)
 
 template <typename TSumList>
 inline bool
-operator == (Iter<TSumList, _DummySumListIterator> const & left,
-			 Iter<TSumList, _DummySumListIterator> const & right)
+operator == (Iter<TSumList, DummySumListIterator_> const & left,
+			 Iter<TSumList, DummySumListIterator_> const & right)
 {
 	return left.iter == right.iter;
 }
 
 template <typename TSumList>
 inline bool
-operator != (Iter<TSumList, _DummySumListIterator> const & left,
-			 Iter<TSumList, _DummySumListIterator> const & right)
+operator != (Iter<TSumList, DummySumListIterator_> const & left,
+			 Iter<TSumList, DummySumListIterator_> const & right)
 {
 	return left.iter != right.iter;
 }
@@ -376,7 +376,7 @@ operator != (Iter<TSumList, _DummySumListIterator> const & left,
 
 void Test_MiniSumList_Entry()
 {
-	typedef _MiniListEntry<size_t> TEntry;
+	typedef MiniListEntry_<size_t> TEntry;
 
 	unsigned char buf [1 + sizeof(size_t)];
 
@@ -638,7 +638,7 @@ template <unsigned int DIM, typename TValue>
 void Test_SkipSumListStress()
 {
 	typedef SumList<DIM, TValue, SkipSumList< > > TSkipSumList;
-	typedef SumList<DIM, TValue, _Dummy> TDummySumList;
+	typedef SumList<DIM, TValue, Dummy_> TDummySumList;
 	typedef SumListValues<DIM, TValue> TValues;
 
 	TSkipSumList ssl;

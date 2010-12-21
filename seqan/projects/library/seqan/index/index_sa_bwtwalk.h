@@ -48,11 +48,11 @@
 namespace SEQAN_NAMESPACE_MAIN
 {
 	// Public tags
-	struct _BwtWalkFast {};
-	typedef Tag<_BwtWalkFast> const BwtWalkFast;
+	struct BwtWalkFast_ {};
+	typedef Tag<BwtWalkFast_> const BwtWalkFast;
 
-	struct _BwtWalkInPlace {};
-	typedef Tag<_BwtWalkInPlace> const BwtWalkInPlace;
+	struct BwtWalkInPlace_ {};
+	typedef Tag<BwtWalkInPlace_> const BwtWalkInPlace;
 
 	template <typename TSpec = BwtWalkFast >
 	struct BwtWalk {};

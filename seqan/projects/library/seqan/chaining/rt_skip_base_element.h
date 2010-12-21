@@ -32,8 +32,8 @@
 
 //SEQAN_NO_DDDOC: do not generate documentation for this file
 
-#ifndef _RT_MAX_SKIP_BASE_ELEMENT_H
-#define _RT_MAX_SKIP_BASE_ELEMENT_H
+#ifndef RT_MAX_SKIP_BASE_ELEMENT_H_
+#define RT_MAX_SKIP_BASE_ELEMENT_H_
 
 
 namespace seqan
@@ -69,4 +69,4 @@ namespace seqan
 
 	
 } // namespace SEQAN_NAMESPACE_SKIPLIST
-#endif //_RT_SKIP_BASE_ELEMENT_H
+#endif //RT_SKIP_BASE_ELEMENT_H_

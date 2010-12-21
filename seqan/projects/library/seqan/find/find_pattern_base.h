@@ -76,12 +76,12 @@ public:
 
 	Pattern() {}
 
-	template <typename _TNeedle>
-	Pattern(_TNeedle & ndl):
+	template <typename TNeedle_>
+	Pattern(TNeedle_ & ndl):
 		data_host(ndl) {}
 
-	template <typename _TNeedle>
-	Pattern(_TNeedle const & ndl):
+	template <typename TNeedle_>
+	Pattern(TNeedle_ const & ndl):
 		data_host(ndl) {}
 
 };

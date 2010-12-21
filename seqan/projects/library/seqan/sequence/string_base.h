@@ -1178,7 +1178,7 @@ SEQAN_CHECKPOINT
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TExpand>
-struct _AppendValueToString
+struct AppendValueToString_
 {
 	template <typename T, typename TValue>
 	static inline void 
@@ -1213,7 +1213,7 @@ appendValue(String<TTargetValue, TTargetSpec> & me,
 			Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	_AppendValueToString<Tag<TExpand> const>::appendValue_(me, _value);
+	AppendValueToString_<Tag<TExpand> const>::appendValue_(me, _value);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1528,31 +1528,31 @@ _reallocateStorage(
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.reserve.param.object.type:Class.String
 
-template <typename TValue, typename TSpec, typename _TSize>
+template <typename TValue, typename TSpec, typename TSize_>
 inline void
 _reserveStorage(
 	String<TValue, TSpec> & /*seq*/, 
-	_TSize /*new_capacity*/,
+	TSize_ /*new_capacity*/,
 	Insist)
 {
 	// do nothing
 }
 
-template <typename TValue, typename TSpec, typename _TSize>
+template <typename TValue, typename TSpec, typename TSize_>
 inline void
 _reserveStorage(
 	String<TValue, TSpec> & /*seq*/, 
-	_TSize /*new_capacity*/,
+	TSize_ /*new_capacity*/,
 	Limit)
 {
 	// do nothing
 }
 
-template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+template <typename TValue, typename TSpec, typename TSize_, typename TExpand>
 inline void
 _reserveStorage(
 	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
+	TSize_ new_capacity,
 	Tag<TExpand> const tag)
 {
 	typedef typename Size< String<TValue, TSpec> >::Type TSize;
@@ -1580,11 +1580,11 @@ _reserveStorage(
 	}
 }
 
-template <typename TValue, typename TSpec, typename _TSize, typename TExpand>
+template <typename TValue, typename TSpec, typename TSize_, typename TExpand>
 inline typename Size< String<TValue, TSpec> >::Type
 reserve(
 	String<TValue, TSpec> & seq, 
-	_TSize new_capacity,
+	TSize_ new_capacity,
 	Tag<TExpand> const tag)
 {
 SEQAN_CHECKPOINT
@@ -1906,19 +1906,19 @@ struct Value<String<Convert<TTarget, TSource>, TSpec> >:
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T, typename TAccessor, typename TConverter>
-struct _AccessorConverter
+struct AccessorConverter_
 {
 	typedef T Type;
 };
 template <typename T, typename TAccessor, typename TConverter>
-struct _AccessorConverter<T, TAccessor &, typename TConverter &>
+struct AccessorConverter_<T, TAccessor &, typename TConverter &>
 {
 	typedef T & Type;
 };
 
 template <typename TTarget, typename TSource, typename TSpec>
 struct GetValue<String<Converter<TTarget, TSource>, TSpec> >:
-	_AccessorConverter<
+	AccessorConverter_<
 		TTarget, 
 		typename GetValue<String<TSource, TSpec> >::Type,
 		typename Converter<TTarget, TSource>::Type

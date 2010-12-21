@@ -150,7 +150,7 @@ typedef Tag<TagGtf_> const Gtf;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec = void>
-struct _IOContextGff
+struct IOContextGff_
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -175,7 +175,7 @@ struct _IOContextGff
 };
 
 template <typename TFragmentStore, typename TSpec>
-inline void clear(_IOContextGff<TFragmentStore, TSpec> &ctx)
+inline void clear(IOContextGff_<TFragmentStore, TSpec> &ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -205,7 +205,7 @@ inline bool
 _readOneAnnotation (
 	TFile & file,
 	TChar & c,
-	_IOContextGff<TFragmentStore, TSpec> & ctx)
+	IOContextGff_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
@@ -363,7 +363,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextGff<TFragmentStore, TSpec> & ctx)
+	IOContextGff_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -436,7 +436,7 @@ read (
 
 	// get first character from the stream
 	char c = _streamGet(file);
-	_IOContextGff<TFragmentStore> ctx;
+	IOContextGff_<TFragmentStore> ctx;
 	
 	refresh(fragStore.contigNameStoreCache);
 	refresh(fragStore.annotationNameStoreCache);

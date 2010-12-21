@@ -39,7 +39,7 @@
 // to store more information than only for the forward search.  If findBegin()
 // does not need to be supported, this information does not have to be stored.
 // For this reason, the functionality is centralized in the struct template
-// _ApproxFindBegin that is to be used as the base class for the approximate
+// ApproxFindBegin_ that is to be used as the base class for the approximate
 // search patterns.
 //
 // If the parameter HasFindBeginSupport is set to True then the class gets the
@@ -54,17 +54,17 @@ namespace seqan {
 
 // TODO(holtgrew): Add support for affine gap costs.
 template <typename TNeedle, typename TScore, typename HasFindBeginSupport>
-struct _ApproxFindBegin;
+struct ApproxFindBegin_;
 
 
 // Implementation for no findBegin() support.
 template <typename TNeedle, typename TScore>
-struct _ApproxFindBegin<TNeedle, TScore, False> {};
+struct ApproxFindBegin_<TNeedle, TScore, False> {};
 
 
 // Implementation for findBegin() support.
 template <typename TNeedle, typename TScore>
-struct _ApproxFindBegin<TNeedle, TScore, True> : public _FindState {
+struct ApproxFindBegin_<TNeedle, TScore, True> : public FindState_ {
     // We use the position of the needle for the finder, too.  This is
     // the best we can do with the split-up interface.
     typedef typename Position<TNeedle>::Type TPosition;
@@ -102,12 +102,12 @@ struct UseScoreLimit_;
 typedef Tag<UseScoreLimit_> UseScoreLimit;
 
 
-// Called to initialize a _ApproxFindBegin datastructure.
+// Called to initialize a ApproxFindBegin_ datastructure.
 template <typename TNeedle, typename TScore>
-void _initFindBegin(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
+void _initFindBegin(ApproxFindBegin_<TNeedle, TScore, True> & findBeginStruct,
                     typename Position<TNeedle>::Type const & needleLength, TScore const & scoringScheme, int scoreLimit) {
     SEQAN_CHECKPOINT;
-    typedef _ApproxFindBegin<TNeedle, TScore, True> TApproxFindBegin;
+    typedef ApproxFindBegin_<TNeedle, TScore, True> TApproxFindBegin;
     typedef typename Position<TNeedle>::Type TPosition;
     typedef typename Value<TScore>::Type TScoreValue;
     typedef String<TScoreValue> TMatrixColumn;
@@ -131,7 +131,7 @@ void _initFindBegin(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
 
 
 template <typename TNeedle, typename TScore>
-inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedle, TScore, True> const &,
+inline typename Value<TScore>::Type _findBeginScoreLimit(ApproxFindBegin_<TNeedle, TScore, True> const &,
                                                   typename Value<TScore>::Type const & findScore,
                                                   typename Value<TScore>::Type const &,
                                                   UseScore const &) {
@@ -141,7 +141,7 @@ inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedl
 
 
 template <typename TNeedle, typename TScore>
-inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedle, TScore, True> const &,
+inline typename Value<TScore>::Type _findBeginScoreLimit(ApproxFindBegin_<TNeedle, TScore, True> const &,
                                                   typename Value<TScore>::Type const &,
                                                   typename Value<TScore>::Type const & findScoreLimit,
                                                   UseScoreLimit const &) {
@@ -150,16 +150,16 @@ inline typename Value<TScore>::Type _findBeginScoreLimit(_ApproxFindBegin<TNeedl
 }
 
 
-// Actual implementation of findBegin() through _ApproxFindBegin.
+// Actual implementation of findBegin() through ApproxFindBegin_.
 template <typename TNeedle, typename TScore, typename THaystack, typename TTag>
-bool _findBeginImpl(_ApproxFindBegin<TNeedle, TScore, True> & findBeginStruct,
+bool _findBeginImpl(ApproxFindBegin_<TNeedle, TScore, True> & findBeginStruct,
                     TScore const & scoringScheme,
                     typename Value<TScore>::Type const & findScore,
                     typename Position<TNeedle>::Type const & endPosition,
                     THaystack const & haystack, TNeedle const & needle,
                     Tag<TTag> const & tag) {
     SEQAN_CHECKPOINT;
-    typedef _ApproxFindBegin<TNeedle, TScore, True> TApproxFindBegin;
+    typedef ApproxFindBegin_<TNeedle, TScore, True> TApproxFindBegin;
     typedef typename Position<TNeedle>::Type TPosition;
     typedef typename Value<TScore>::Type TScoreValue;
     SEQAN_ASSERT_EQ_MSG(scoreGapOpen(scoringScheme), scoreGapExtend(scoringScheme), "findBegin() only supports linear gap costs at the moment.");

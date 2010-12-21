@@ -168,7 +168,7 @@ bool isPermutation(Pipe<TInput, TSpec> const &SA) {
 
 
 template <typename TIt, typename ST>
-bool __sleq(TIt s1, TIt s2, ST n1, ST n2) {
+bool sleq__(TIt s1, TIt s2, ST n1, ST n2) {
 	ST n = _min(n1, n2);
 	for(ST i = 0; i < n; i++, ++s1, ++s2) {
 		if (lexLess(*s1,*s2)) return 1;
@@ -189,7 +189,7 @@ bool isSorted(TSequence const &SA, TText const &s) {
 	typedef typename Value<TSequence>::Type TSize;
 	TSize n = length(s);
 	for(TSize i = 1; i < n; ++i) {
-		if (!__sleq(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i])) {
+		if (!sleq__(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i])) {
 			printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",(int)SA[i-1],(int)(i-1),(int)SA[i],(int)i);
 /*
 		String<unsigned, External<> > safile;
@@ -208,7 +208,7 @@ bool isSorted(Pipe<TInput, TSpec> &SA, TText const &s) {
 	beginRead(SA);
 	TSize prev = *SA; ++SA;
 	for(TSize i = 1; !eof(SA); ++SA, ++i) {
-		if (!__sleq(begin(s) + prev, begin(s) + *SA, n-prev, n-*SA)) {
+		if (!sleq__(begin(s) + prev, begin(s) + *SA, n-prev, n-*SA)) {
 			printf("isSorted: sort error s_%d(SA[%d]) >= s_%d(SA[%d])\n",(int)prev,(int)(i-1),(int)*SA,(int)i);
 			endRead(SA);
 
@@ -231,7 +231,7 @@ bool isSorted(Pipe<TInput, TSpec> const &SA, TText const &s) {
 
 
 template <typename TIt, typename ST>
-bool __sleqLCP(TIt s1, TIt s2, ST n1, ST n2, ST lcp) {
+bool sleqLcp__(TIt s1, TIt s2, ST n1, ST n2, ST lcp) {
 	ST n = _min(n1, n2);
 	for(ST i = 0; i < n; i++, ++s1, ++s2) {
 		if (lexLess(*s1,*s2)) return (i == lcp);
@@ -251,7 +251,7 @@ bool __sleqLCP(TIt s1, TIt s2, ST n1, ST n2, ST lcp) {
 bool isSortedLCP(String<TSize1, TSpec1> &LCP, String<TSize2, TSpec2> &SA, TText const &s) {
 	TSize2 n = length(s);
 	for(TSize2 i = 1; i < n; ++i) {
-		if (!__sleq(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i], LCP[i-1])) {
+		if (!sleq__(begin(s) + SA[i-1], begin(s) + SA[i], n-SA[i-1], n-SA[i], LCP[i-1])) {
 			printf("isSorted: sort error s_%d(%d) >= s_%d(%d)\n",i-1,SA[i-1],i,SA[i]);
 			return false;
 		}
@@ -271,7 +271,7 @@ bool isSortedLCP(TLCP &LCP, TSA &SA, TText const &s) {
 
 	TSize prev = *sa; ++sa;
 	for(TSize i = 1; sa != end(SA); ++sa, ++lcp, ++i) {
-		if (!__sleqLCP(begin(s) + prev, begin(s) + *sa, n-prev, n-*sa, *lcp)) {
+		if (!sleqLcp__(begin(s) + prev, begin(s) + *sa, n-prev, n-*sa, *lcp)) {
 			printf("isLCP: sort error s_%d(%d) >= s_%d(%d)\n",(int)(i-1),(int)prev,(int)i,(int)*sa);
 			return false;
 		}

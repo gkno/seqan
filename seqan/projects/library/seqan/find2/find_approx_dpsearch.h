@@ -69,16 +69,16 @@ struct DPSearch;
 // TODO(holtgrew): Rename TScore to TScoringScheme?  Also: Rename Score class to ScoringScheme?
 // TODO(holtgrew): Support affine gap costs, documented in book, code does not allow this.
 // TODO(holtgrew): Add FindPrefix support.
-template <typename _TNeedle, typename TScore, typename TSpec, typename TSupportFindBegin>
-struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
-        : public _ApproxFindBegin<_TNeedle, TScore, TSupportFindBegin> {
-    typedef Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> > TPattern;
-    typedef _TNeedle TNeedle;
+template <typename TNeedle_, typename TScore, typename TSpec, typename TSupportFindBegin>
+struct Pattern<TNeedle_, DPSearch<TScore, TSpec, TSupportFindBegin> >
+        : public ApproxFindBegin_<TNeedle_, TScore, TSupportFindBegin> {
+    typedef Pattern<TNeedle_, DPSearch<TScore, TSpec, TSupportFindBegin> > TPattern;
+    typedef TNeedle_ TNeedle;
     typedef typename Value<TScore>::Type TScoreValue;
     typedef String<TScoreValue> TMatrixColumn;
 
     // The pattern's state.
-    _FindState::TState _state;
+    FindState_::TState _state;
 
     // The needle we work on.
     Holder<TNeedle> _host;
@@ -95,18 +95,18 @@ struct Pattern<_TNeedle, DPSearch<TScore, TSpec, TSupportFindBegin> >
     // The matrix column from the DP search algorithm.
     TMatrixColumn _matrixColumn;
 
-    Pattern() : _state(_FindState::STATE_EMPTY) { SEQAN_CHECKPOINT; }
+    Pattern() : _state(FindState_::STATE_EMPTY) { SEQAN_CHECKPOINT; }
 
     template <typename TNeedle2>
     Pattern(TNeedle2 & needle, int scoreLimit)
-        : _state(_FindState::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit) {
+        : _state(FindState_::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit) {
         SEQAN_CHECKPOINT;
         SEQAN_ASSERT_EQ_MSG(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
     }
 
     template <typename TNeedle2>
     Pattern(TNeedle2 & needle, int scoreLimit, TScore scoringScheme)
-        : _state(_FindState::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit),
+        : _state(FindState_::STATE_INITIAL), _host(needle), _scoreLimit(scoreLimit),
           _scoringScheme(scoringScheme) {
         SEQAN_CHECKPOINT;
         SEQAN_ASSERT_EQ_MSG(scoreGapOpen(_scoringScheme), scoreGapExtend(_scoringScheme), "The DPSearch Pattern only works with linear gap costs.");
@@ -360,7 +360,7 @@ bool find(Finder<THaystack, Default> & finder,
 
 
 // findBeginScore() only works if the Pattern object has the necessary
-// state information via _ApproxFindBegin<..., True>.
+// state information via ApproxFindBegin_<..., True>.
 template <typename TNeedle, typename TScore>
 typename Value<typename ScoringScheme<Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > >::Type>::Type
 findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > const & pattern) {
@@ -384,7 +384,7 @@ findBeginScore(Pattern<TNeedle, DPSearch<TScore, FindPrefix, TFindBeginSpec> > c
 
 
 // findBegin() only works if the Pattern object has the necessary
-// state information via _ApproxFindBegin<..., True>
+// state information via ApproxFindBegin_<..., True>
 template <typename THaystack, typename TNeedle, typename TScore, typename TFindBeginScoreLimitTag>
 bool findBegin(Finder<THaystack, Default> & finder,
                Pattern<TNeedle, DPSearch<TScore, FindInfix, True> > & pattern,

@@ -40,8 +40,8 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
 	// shortcuts to ease pipeline construction
-    #define _TypeOf(TObject)  typename Value<TObject>::Type
-    #define _TSizeOf(TObject) typename Size<TObject>::Type
+    #define TypeOf_(TObject)  typename Value<TObject>::Type
+    #define TSizeOf_(TObject) typename Size<TObject>::Type
 
 /**
 .Class.Pipe:
@@ -407,9 +407,9 @@ SEQAN_CHECKPOINT
 */
 
     template < typename TInput, typename TSpec, typename TValue >
-    inline void pop(Pipe<TInput, TSpec> &me, TValue &_Ref) {
+    inline void pop(Pipe<TInput, TSpec> &me, TValue &Ref_) {
 SEQAN_CHECKPOINT
-        _Ref = *me;
+        Ref_ = *me;
         ++me;
     }
 
@@ -625,17 +625,17 @@ SEQAN_CHECKPOINT
 			}
         }
 
-        inline void pop(Type &_Ref) {
-            _Ref = *cur;
+        inline void pop(Type &Ref_) {
+            Ref_ = *cur;
             pop();
         }
 
-        inline void push(Type const & _Val) {
+        inline void push(Type const & Val_) {
             if (cur == buffer.end) {
                 buffer = handler.next();
                 cur = buffer.begin;
             }
-            *cur = _Val;
+            *cur = Val_;
             ++cur;
         }
 

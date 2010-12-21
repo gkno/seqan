@@ -133,27 +133,27 @@ This reduces the sizes of bucket directories (QGramDir, QGramCountsDir fibres) f
 			stepSize(1),
 			alpha(defaultAlpha) {}
 
-		template <typename _TText>
-		Index(_TText &_text):
+		template <typename TText_>
+		Index(TText_ &_text):
 			text(_text),
 			stepSize(1),
 			alpha(defaultAlpha) {}
 
-		template <typename _TText>
-		Index(_TText const &_text):
+		template <typename TText_>
+		Index(TText_ const &_text):
 			text(_text),
 			stepSize(1),
 			alpha(defaultAlpha) {}
 
-		template <typename _TText, typename _TShape>
-		Index(_TText &_text, _TShape const &_shape):
+		template <typename TText_, typename TShape_>
+		Index(TText_ &_text, TShape_ const &_shape):
 			text(_text),
 			shape(_shape),
 			stepSize(1),
 			alpha(defaultAlpha) {}
 
-		template <typename _TText, typename _TShape>
-		Index(_TText const &_text, _TShape const &_shape):
+		template <typename TText_, typename TShape_>
+		Index(TText_ const &_text, TShape_ const &_shape):
 			text(_text),
 			shape(_shape),
 			stepSize(1),

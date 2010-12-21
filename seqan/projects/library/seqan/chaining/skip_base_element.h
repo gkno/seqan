@@ -883,6 +883,6 @@ public:
 
 	
 } // namespace seqan
-#endif //_SKIP_BASE_ELEMENT_H
+#endif //SKIP_BASE_ELEMENT_H_
 
 

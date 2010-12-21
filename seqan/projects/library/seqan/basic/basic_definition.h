@@ -364,26 +364,26 @@ SEQAN_CHECKPOINT
 // to avoid conflicts with non-standard macros and namespaces
 // we define our own Min/Max functions
 
-template<typename _Tx> inline
-const _Tx& _min(const _Tx& _Left, const _Tx& _Right)
-{	// return smaller of _Left and _Right
-	if (_Left < _Right)
+template<typename Tx_> inline
+const Tx_& _min(const Tx_& _Left, const Tx_& Right_)
+{	// return smaller of _Left and Right_
+	if (_Left < Right_)
 		return _Left;
 	else
-		return _Right;
+		return Right_;
 }
 
-template<typename _Tx, typename _Ty> inline
-_Tx _min(const _Tx& _Left, const _Ty& _Right)
-{	// return smaller of _Left and _Right
-    return (_Right < _Left ? _Right : _Left);
+template<typename Tx_, typename Ty_> inline
+Tx_ _min(const Tx_& _Left, const Ty_& Right_)
+{	// return smaller of _Left and Right_
+    return (Right_ < _Left ? Right_ : _Left);
 }
 
-template<typename _Ty> inline
-const _Ty& _max(const _Ty& _Left, const _Ty& _Right)
-{	// return larger of _Left and _Right
-	if (_Left < _Right)
-		return _Right;
+template<typename Ty_> inline
+const Ty_& _max(const Ty_& _Left, const Ty_& Right_)
+{	// return larger of _Left and Right_
+	if (_Left < Right_)
+		return Right_;
 	else
 		return _Left;
 }

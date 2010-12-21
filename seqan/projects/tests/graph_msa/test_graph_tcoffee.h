@@ -80,7 +80,7 @@ void Test_Distances() {
 //////////////////////////////////////////////////////////////////////////////
 
 void 
-__testquickAlign(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, unsigned int> >& g) 
+testquickAlign__(Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, unsigned int> >& g) 
 {
 	Graph<Alignment<StringSet<String<AminoAcid>, Dependent<> >, void, WithoutEdgeId> > gOut(stringSet(g));
 	tripletLibraryExtension(g);
@@ -123,35 +123,35 @@ void Test_Libraries() {
 	String<int> scores;
 	appendSegmentMatches(strSet, pList, matches, scores, LcsLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 	clear(matches);
 	clear(scores);
 	appendSegmentMatches(strSet, matches, scores, KmerLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 	clear(matches);
 	clear(scores);
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, LocalPairwiseLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 	clear(matches);
 	clear(scores);
 	Nothing noth;
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, noth, GlobalPairwiseLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 	clear(matches);
 	clear(scores);
 	String<double> distanceMatrix;
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwiseLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 	Graph<Undirected<double> > distGraph;
 	clear(matches);
 	clear(scores);
 	appendSegmentMatches(strSet, pList, score_type, matches, scores, distanceMatrix, AlignConfig<false,false,false,false>(), GlobalPairwiseLibrary() );
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
-	__testquickAlign(g);
+	testquickAlign__(g);
 }
 
 void Test_ExternalLibraries() {
@@ -193,7 +193,7 @@ void Test_ExternalLibraries() {
 	write(strm, g, nameSet, TCoffeeLib());
 	strm.close();
 	//_debugRefinedMatches(g);
-	__testquickAlign(g);
+	testquickAlign__(g);
 
 	// Reading
 	clear(seqSet);
@@ -241,7 +241,7 @@ void Test_ExternalLibraries() {
 	write(strmBlast, g, nameSet, BlastLib());
 	strmBlast.close();
 	//_debugRefinedMatches(g);
-	__testquickAlign(g);
+	testquickAlign__(g);
 	
 	// Reading
 	clear(g);
@@ -254,7 +254,7 @@ void Test_ExternalLibraries() {
 	buildAlignmentGraph(matches, scores, g, FrequencyCounting() );
 	strmBlastLib.close();
 	//_debugRefinedMatches(g);
-	__testquickAlign(g);
+	testquickAlign__(g);
 
 }
 

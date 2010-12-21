@@ -59,11 +59,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 
     
-    template <typename _TOperation = char, typename _TCount = unsigned>
+    template <typename TOperation_ = char, typename TCount_ = unsigned>
 	struct CigarElement
 	{
-		typedef _TOperation TOperation;
-		typedef _TCount		TCount;
+		typedef TOperation_ TOperation;
+		typedef TCount_		TCount;
 
 		TOperation			operation;
 		TCount				count;
@@ -319,7 +319,7 @@ namespace SEQAN_NAMESPACE_MAIN
 // _generatePairMatchIds
 //
 	template <typename TPos, typename TId>
-	struct _MatchMateInfo
+	struct MatchMateInfo_
 	{
 		TId		readId;
 		TId		contigId;
@@ -327,7 +327,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TPos	beginPos;
 	};
     
-    struct _MatchMateInfoLess
+    struct MatchMateInfoLess_
 	{
         template <typename TMInfo>
         inline bool 
@@ -365,7 +365,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // sort the aligned read store by: begin position, contig name
         sortAlignedReads(fragStore.alignedReadStore, SortBeginPos());
         sortAlignedReads(fragStore.alignedReadStore, SortContigId());
-		std::sort(mit, mitEnd, _MatchMateInfoLess());
+		std::sort(mit, mitEnd, MatchMateInfoLess_());
 
 		TMIter mitNext = mit;
 		while (mitNext != mitEnd && (*mit).beginPos == (*mitNext).beginPos)
@@ -419,7 +419,7 @@ namespace SEQAN_NAMESPACE_MAIN
         typedef typename Id<TFragmentStore>::Type TId;
         
         // data structure to temporarily store the gaps that need to be inserted in the contig sequences
-        typedef _MatchMateInfo<TContigPos, TId> TMatchMateInfo;
+        typedef MatchMateInfo_<TContigPos, TId> TMatchMateInfo;
         typedef String<TMatchMateInfo> TMatchMateInfos;
         typedef StringSet<String<typename TFragmentStore::TContigGapAnchor> > TContigAnchorGaps;
 

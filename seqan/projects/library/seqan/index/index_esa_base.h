@@ -328,12 +328,12 @@ The entries are the characters left of the corresponding suffix in the suffix ar
 			bwt(other.bwt),
 			cargo(other.cargo) {}
 
-		template <typename _TText>
-		Index(_TText &_text):
+		template <typename TText_>
+		Index(TText_ &_text):
 			text(_text) {}
 
-		template <typename _TText>
-		Index(_TText const &_text):
+		template <typename TText_>
+		Index(TText_ const &_text):
 			text(_text) {}
 	};
 

@@ -56,7 +56,7 @@
 #if SEQAN_ENABLE_PARALLELISM
 // SEQAN_MKSTRING_() comes from basic_testing.h, so include before this header.
 #define SEQAN_PRAGMA_IF_PARALLEL(arg) \
-  _Pragma(SEQAN_MKSTRING_(arg))
+  Pragma_(SEQAN_MKSTRING_(arg))
 #else  // SEQAN_ENABLE_PARALLELISM
 #define SEQAN_PRAGMA_IF_PARALLEL
 #endif  // SEQAN_ENABLE_PARALLELISM

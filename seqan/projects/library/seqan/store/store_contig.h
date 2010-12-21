@@ -105,14 +105,14 @@ namespace SEQAN_NAMESPACE_MAIN
 ..include:seqan/store.h
 */
 
-template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec = void>
+template <typename TContigSeq_, typename TGapAnchor_, typename TSpec_ = void>
 struct ContigStoreElement
 {
 	typedef typename Id<ContigStoreElement>::Type	TId;
 	
-	typedef _TContigSeq			TContigSeq;
-	typedef _TGapAnchor			TGapAnchor;
-	typedef _TSpec				TSpec;
+	typedef TContigSeq_			TContigSeq;
+	typedef TGapAnchor_			TGapAnchor;
+	typedef TSpec_				TSpec;
 	typedef __int64				TPos;
 	typedef String<TGapAnchor>	TGapAnchors;
 
@@ -132,9 +132,9 @@ struct ContigStoreElement
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename _TContigSeq, typename _TGapAnchor, typename _TSpec> 
-const typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type 
-ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = MaxValue<typename Id<ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec> >::Type>::VALUE; 
+template <typename TContigSeq_, typename TGapAnchor_, typename TSpec_> 
+const typename Id<ContigStoreElement<TContigSeq_, TGapAnchor_, TSpec_> >::Type 
+ContigStoreElement<TContigSeq_, TGapAnchor_, TSpec_>::INVALID_ID = MaxValue<typename Id<ContigStoreElement<TContigSeq_, TGapAnchor_, TSpec_> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +163,7 @@ ContigStoreElement<_TContigSeq, _TGapAnchor, _TSpec>::INVALID_ID = MaxValue<type
 ..include:seqan/store.h
 */
 
-template <typename _TSpec = void>
+template <typename TSpec_ = void>
 struct ContigFile
 {
 	typedef typename Id<ContigFile>::Type	TId;
@@ -177,9 +177,9 @@ struct ContigFile
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename _TSpec> 
-const typename Id<ContigFile<_TSpec> >::Type 
-ContigFile<_TSpec>::INVALID_ID = MaxValue<typename Id<ContigFile<_TSpec> >::Type>::VALUE; 
+template <typename TSpec_> 
+const typename Id<ContigFile<TSpec_> >::Type 
+ContigFile<TSpec_>::INVALID_ID = MaxValue<typename Id<ContigFile<TSpec_> >::Type>::VALUE; 
 
 //////////////////////////////////////////////////////////////////////////////
 

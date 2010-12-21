@@ -141,7 +141,7 @@ struct MyersUkkonenHP0_<FindPrefix> {
 };
 
 template <typename TValue>
-struct _MyersSmallAlphabet:
+struct MyersSmallAlphabet_:
 	public Eval<ValueSize<TValue>::VALUE <= 8> {};
 
 
@@ -198,7 +198,7 @@ struct MyersSmallStateBandedShift_<TNeedle, False> {
 };
 template <typename TNeedle, typename TFinderCSP, typename TPatternCSP>
 struct MyersSmallState_<TNeedle, AlignTextBanded<TFinderCSP, TPatternCSP> >:
-    public MyersSmallStateBandedShift_<TNeedle, typename _MyersSmallAlphabet<typename Value<TNeedle>::Type>::Type>
+    public MyersSmallStateBandedShift_<TNeedle, typename MyersSmallAlphabet_<typename Value<TNeedle>::Type>::Type>
 {
 #ifdef SEQAN_SSE2_INT128
 	typedef Sse2Int128 TWord;
@@ -976,7 +976,7 @@ _patternInitSmallStateBanded(
 #endif
 #endif
 
-    _myersPreInit(state, typename _MyersSmallAlphabet<TValue>::Type());
+    _myersPreInit(state, typename MyersSmallAlphabet_<TValue>::Type());
 
 	TIter ndlIter = begin(needle, Standard());
 	TIter ndlEnd = end(needle, Standard());
@@ -993,10 +993,10 @@ _patternInitSmallStateBanded(
         // PART 1: go down the parallelogram
         
         // adjust bitmask
-        _myersAdjustBitmask(state, getValue(ndlIter), shift, typename _MyersSmallAlphabet<TValue>::Type());
+        _myersAdjustBitmask(state, getValue(ndlIter), shift, typename MyersSmallAlphabet_<TValue>::Type());
         
         // diagonal Myers
-        register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename _MyersSmallAlphabet<TValue>::Type()) | VN;
+        register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename MyersSmallAlphabet_<TValue>::Type()) | VN;
         register TWord D0 = ((VP + (X & VP)) ^ VP) | X;
         register TWord HN = VP & D0;
         register TWord HP = VN | ~(VP | D0);
@@ -1055,7 +1055,7 @@ _patternInitSmallStateBanded(
     state.VP0 = VP;
     state.VN0 = VN;
     state.errors = errors;
-    _myersPostInit(state, typename _MyersSmallAlphabet<TValue>::Type());
+    _myersPostInit(state, typename MyersSmallAlphabet_<TValue>::Type());
     return true;
 }
 
@@ -1328,7 +1328,7 @@ SEQAN_CHECKPOINT
 
 		// normal Myers
 		const unsigned short shift = length(needle);
-		register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename _MyersSmallAlphabet<TValue>::Type()) | VN;
+		register TWord X = _myersGetBitmask(state, ordValue(*finder), shift, typename MyersSmallAlphabet_<TValue>::Type()) | VN;
 		register TWord D0 = ((VP + (X & VP)) ^ VP) | X;
 		register TWord HN = VP & D0;
 		register TWord HP = VN | ~(VP | D0);

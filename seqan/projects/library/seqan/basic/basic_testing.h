@@ -95,7 +95,7 @@ namespace seqan {
 // literal with this value.
 #if !defined(SEQAN_CXX_FLAGS_)
 #define SEQAN_CXX_FLAGS_ SEQAN_CXX_FLAGS_NOT_SET
-#endif //  !defined(_SEQAN_CXX_FLAGS_)
+#endif //  !defined(SEQAN_CXX_FLAGS__)
 #define SEQAN_MKSTRING_(str) # str
 #define SEQAN_MKSTRING(str) SEQAN_MKSTRING_(str)
 #define SEQAN_CXX_FLAGS SEQAN_MKSTRING(SEQAN_CXX_FLAGS_)

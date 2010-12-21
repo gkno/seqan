@@ -70,11 +70,11 @@ bool _qualityReached(TSeed const & /*seed*/, TSeedSet const & /*seedSet*/, Nothi
 }
 
 template <typename TSize>
-struct _MinSeedSizeMixin
+struct MinSeedSizeMixin_
 {
     TSize _minSeedSizeThreshold;
 
-    _MinSeedSizeMixin() : _minSeedSizeThreshold(MinValue<TSize>::VALUE) {}
+    MinSeedSizeMixin_() : _minSeedSizeThreshold(MinValue<TSize>::VALUE) {}
 };
 
 template <typename TSeedSet, typename TSize>
@@ -85,7 +85,7 @@ void setMinSeedSizeThreshold(TSeedSet & seedSet, TSize const & size)
 }
 
 template <typename TSize>
-TSize getMinSeedSizeThreshold(_MinSeedSizeMixin<TSize> const & mixin)
+TSize getMinSeedSizeThreshold(MinSeedSizeMixin_<TSize> const & mixin)
 {
     SEQAN_CHECKPOINT;
     return mixin._minSeedSizeThreshold;
@@ -102,7 +102,7 @@ struct DefaultSeedSetConfigLength
 {
     typedef DefaultSeedConfig TSeedConfig;
     typedef MinSeedSize TQualityThreshold;
-    typedef _MinSeedSizeMixin<TSeedConfig::TSize> TQualityThresholdMixin;
+    typedef MinSeedSizeMixin_<TSeedConfig::TSize> TQualityThresholdMixin;
 };
 
 template <typename TScore>

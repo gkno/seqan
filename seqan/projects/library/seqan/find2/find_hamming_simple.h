@@ -43,9 +43,9 @@ namespace seqan {
 struct HammingSimple_;
 typedef Tag<HammingSimple_> HammingSimple;
     
-template <typename _TNeedle>
-struct Pattern<_TNeedle, HammingSimple> : _FindState {
-    typedef _TNeedle TNeedle;
+template <typename TNeedle_>
+struct Pattern<TNeedle_, HammingSimple> : FindState_ {
+    typedef TNeedle_ TNeedle;
 
     // The pattern's state.
     TState _state;

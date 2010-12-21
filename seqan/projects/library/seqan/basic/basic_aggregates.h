@@ -73,18 +73,18 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T1, typename _T2 = _T1, typename TSpec = void>
+	template <typename T1_, typename T2_ = T1_, typename TSpec = void>
     struct Pair {
-        typedef _T1 T1;
-        typedef _T2 T2;
-	    _T1 i1;
-	    _T2 i2;
+        typedef T1_ T1;
+        typedef T2_ T2;
+	    T1_ i1;
+	    T2_ i2;
 		inline Pair() {}
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair(T1_ const &_i1, T2_ const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TSpec>
-		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
+		template <typename T1__, typename T2__, typename TSpec__>
+		inline Pair(Pair<T1__, T2__, TSpec__> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
     };
 
@@ -108,18 +108,18 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
 #endif
-    template <typename _T1, typename _T2>
-    struct Pair<_T1, _T2, Compressed> {
-        typedef _T1 T1;
-        typedef _T2 T2;
-        _T1 i1;
-        _T2 i2;
+    template <typename T1_, typename T2_>
+    struct Pair<T1_, T2_, Compressed> {
+        typedef T1_ T1;
+        typedef T2_ T2;
+        T1_ i1;
+        T2_ i2;
 		inline Pair() {}
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair(T1_ const &_i1, T2_ const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TSpec>
-		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
+		template <typename T1__, typename T2__, typename TSpec__>
+		inline Pair(Pair<T1__, T2__, TSpec__> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	}
 #ifndef PLATFORM_WINDOWS
@@ -149,25 +149,25 @@ namespace SEQAN_NAMESPACE_MAIN
 .Memvar.Pair#i2.class:Spec.Bit Compressed Pair
 */
 
-    template <typename _T1, typename _T2, unsigned BITSIZE1, unsigned BITSIZE2>
-    struct Pair<_T1, _T2, BitCompressed<BITSIZE1, BITSIZE2> > {
-        typedef _T1 T1;
-        typedef _T2 T2;
-	    _T1 i1:BITSIZE1;
-	    _T2 i2:BITSIZE2;
+    template <typename T1_, typename T2_, unsigned BITSIZE1, unsigned BITSIZE2>
+    struct Pair<T1_, T2_, BitCompressed<BITSIZE1, BITSIZE2> > {
+        typedef T1_ T1;
+        typedef T2_ T2;
+	    T1_ i1:BITSIZE1;
+	    T2_ i2:BITSIZE2;
 		inline Pair() {}
 		inline Pair(Pair const &_p): i1(_p.i1), i2(_p.i2) {}
-		inline Pair(_T1 const &_i1, _T2 const &_i2): i1(_i1), i2(_i2) {}
+		inline Pair(T1_ const &_i1, T2_ const &_i2): i1(_i1), i2(_i2) {}
 
-		template <typename __T1, typename __T2, typename __TSpec>
-		inline Pair(Pair<__T1, __T2, __TSpec> const &_p):
+		template <typename T1__, typename T2__, typename TSpec__>
+		inline Pair(Pair<T1__, T2__, TSpec__> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)) {}
 	};
 
 
 
-    template <typename _T1, typename _T2, typename TSpec>
-	std::ostream& operator<<(std::ostream &out, Pair<_T1,_T2,TSpec> const &p) {
+    template <typename T1_, typename T2_, typename TSpec>
+	std::ostream& operator<<(std::ostream &out, Pair<T1_,T2_,TSpec> const &p) {
 		out << "< " << getValueI1(p) << " , " << getValueI2(p) << " >";
 		return out;
 	}
@@ -238,22 +238,22 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T1, typename _T2 = _T1, typename _T3 = _T1, typename TSpec = void>
+	template <typename T1_, typename T2_ = T1_, typename T3_ = T1_, typename TSpec = void>
     struct Triple {
-        typedef _T1 T1;
-        typedef _T2 T2;
-        typedef _T3 T3;
-        _T1 i1;
-        _T2 i2;
-        _T3 i3;
+        typedef T1_ T1;
+        typedef T2_ T2;
+        typedef T3_ T3;
+        T1_ i1;
+        T2_ i2;
+        T3_ i3;
 		inline Triple() {}
 		inline Triple(Triple const &_p):
 			i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
+		inline Triple(T1_ const &_i1, T2_ const &_i2, T3_ const &_i3):
 			i1(_i1), i2(_i2), i3(_i3) {}
 
-		template <typename __T1, typename __T2, typename __T3, typename __TSpec>
-		inline Triple(Triple<__T1, __T2, __T3, __TSpec> const &_p):
+		template <typename T1__, typename T2__, typename T3__, typename TSpec__>
+		inline Triple(Triple<T1__, T2__, T3__, TSpec__> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 
         inline bool
@@ -297,22 +297,22 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
 #endif
-    template <typename _T1, typename _T2, typename _T3>
-    struct Triple<_T1, _T2, _T3, Compressed> {
-        typedef _T1 T1;
-        typedef _T2 T2;
-        typedef _T3 T3;
-        _T1 i1;
-        _T2 i2;
-        _T3 i3;
+    template <typename T1_, typename T2_, typename T3_>
+    struct Triple<T1_, T2_, T3_, Compressed> {
+        typedef T1_ T1;
+        typedef T2_ T2;
+        typedef T3_ T3;
+        T1_ i1;
+        T2_ i2;
+        T3_ i3;
 		inline Triple() {}
 		inline Triple(Triple const &_p):
 			i1(_p.i1), i2(_p.i2), i3(_p.i3) {}
-		inline Triple(_T1 const &_i1, _T2 const &_i2, _T3 const &_i3):
+		inline Triple(T1_ const &_i1, T2_ const &_i2, T3_ const &_i3):
 			i1(_i1), i2(_i2), i3(_i3) {}
 
-		template <typename __T1, typename __T2, typename __T3, typename __TSpec>
-		inline Triple(Triple<__T1, __T2, __T3, __TSpec> const &_p):
+		template <typename T1__, typename T2__, typename T3__, typename TSpec__>
+		inline Triple(Triple<T1__, T2__, T3__, TSpec__> const &_p):
 			i1(getValueI1(_p)), i2(getValueI2(_p)), i3(getValueI3(_p)) {}
 	}
 #ifndef PLATFORM_WINDOWS
@@ -323,8 +323,8 @@ namespace SEQAN_NAMESPACE_MAIN
     #pragma pack(pop)
 #endif
 
-	template <typename _T1, typename _T2, typename _T3, typename TSpec>
-	std::ostream& operator<<(std::ostream &out, Triple<_T1,_T2,_T3,TSpec> const &t) {
+	template <typename T1_, typename T2_, typename T3_, typename TSpec>
+	std::ostream& operator<<(std::ostream &out, Triple<T1_,T2_,T3_,TSpec> const &t) {
 		out << "< " << getValueI1(t) << " , " << getValueI2(t) << " , " << getValueI3(t) << " >";
 		return out;
 	}
@@ -366,26 +366,26 @@ namespace SEQAN_NAMESPACE_MAIN
 */
 
 	// standard storage 
-	template <typename _T, unsigned _size, typename TSpec = void>
+	template <typename T_, unsigned _size, typename TSpec = void>
     struct Tuple {
-        typedef _T T;
+        typedef T_ T;
         enum { size = _size };
-        _T i[_size];
+        T_ i[_size];
 
 		template <typename TPos>
-        inline _T& operator[](TPos k) {
+        inline T_& operator[](TPos k) {
             SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
 			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return i[k];
         }
 		template <typename TPos>
-        inline const _T& operator[](TPos k) const {
+        inline const T_& operator[](TPos k) const {
             SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
 			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return i[k];
         }
-		inline _T* operator&() { return i; }
-		inline const _T* operator&() const { return i; }
+		inline T_* operator&() { return i; }
+		inline const T_* operator&() const { return i; }
 
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
 		template <typename TPos, typename tmpS>
@@ -425,11 +425,11 @@ namespace SEQAN_NAMESPACE_MAIN
 #ifdef PLATFORM_WINDOWS
     #pragma pack(push,1)
 #endif
-    template <typename _T, unsigned _size>
-    struct Tuple<_T, _size, Compressed> {
-        typedef _T T;
+    template <typename T_, unsigned _size>
+    struct Tuple<T_, _size, Compressed> {
+        typedef T_ T;
         enum { size = _size };
-        enum { bitSize = BitsPerValue<_T>::VALUE };
+        enum { bitSize = BitsPerValue<T_>::VALUE };
         enum { bitMask = (1 << bitSize) - 1 };
         enum { mask = (1 << (size * bitSize)) - 1 };
         typedef typename BitVector_< bitSize * size >::Type CT;
@@ -441,13 +441,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		}
 */
 		template <typename TPos>
-        inline const _T operator[](TPos k) const {
+        inline const T_ operator[](TPos k) const {
             SEQAN_ASSERT_GEQ(static_cast<__int64>(k), 0);
 			SEQAN_ASSERT_LT(static_cast<__int64>(k), static_cast<__int64>(size));
             return (i >> (size - 1 - k) * bitSize) & bitMask;
         }
-		template <unsigned __size>
-		inline Tuple operator=(Tuple<_T, __size, Compressed> const &_right) {
+		template <unsigned size__>
+		inline Tuple operator=(Tuple<T_, size__, Compressed> const &_right) {
 			i = _right.i;
 			return *this;
 		}
@@ -481,7 +481,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// has to be inline because elements (like this tuple) of packed structs can't be arguments
 		template <typename TPos, typename tmpS>
 		inline tmpS const assignValueAt(TPos k, tmpS const source) {
-			typedef Tuple<_T, _size, Compressed> Tup;
+			typedef Tuple<T_, _size, Compressed> Tup;
 			typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * bitSize);
 			i = (i & ~mask) | ((CT)ordValue(source) << ((_size - 1 - k) * bitSize));
 			return source;
@@ -499,12 +499,12 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // length
 
-    template <typename _T, unsigned _size, typename TSpec>
-	inline unsigned length(Tuple<_T, _size, TSpec> const &) { return _size; }
+    template <typename T_, unsigned _size, typename TSpec>
+	inline unsigned length(Tuple<T_, _size, TSpec> const &) { return _size; }
 
 	///.Metafunction.LENGTH.param.T.type:Class.Tuple
-    template <typename _T, unsigned _size, typename TSpec>
-	struct LENGTH< Tuple<_T, _size, TSpec> >
+    template <typename T_, unsigned _size, typename TSpec>
+	struct LENGTH< Tuple<T_, _size, TSpec> >
 	{
 		enum { VALUE = _size };
 	};
@@ -526,22 +526,22 @@ namespace SEQAN_NAMESPACE_MAIN
 		return source;
     }
 
-    template <typename _T, unsigned _size, typename tmpS, typename TPos>
-    inline tmpS const assignValueAt(Tuple<_T, _size, void> &me, TPos k, tmpS const source) {
+    template <typename T_, unsigned _size, typename tmpS, typename TPos>
+    inline tmpS const assignValueAt(Tuple<T_, _size, void> &me, TPos k, tmpS const source) {
         return me.i[k] = source;
     }
 
-    template <typename _T, unsigned _size, typename tmpS, typename TPos>
-    inline tmpS const assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, tmpS const source) {
-        typedef Tuple<_T, _size, Compressed> Tup;
+    template <typename T_, unsigned _size, typename tmpS, typename TPos>
+    inline tmpS const assignValueAt(Tuple<T_, _size, Compressed> &me, TPos k, tmpS const source) {
+        typedef Tuple<T_, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source << ((_size - 1 - k) * me.bitSize);
         return source;
     }
 
-    template <typename _T, typename tmpS, typename _Spec, unsigned _size, typename TPos>
-    inline SimpleType<tmpS, _Spec> const & assignValueAt(Tuple<_T, _size, Compressed> &me, TPos k, SimpleType<tmpS, _Spec> const &source) {
-        typedef Tuple<_T, _size, Compressed> Tup;
+    template <typename T_, typename tmpS, typename Spec_, unsigned _size, typename TPos>
+    inline SimpleType<tmpS, Spec_> const & assignValueAt(Tuple<T_, _size, Compressed> &me, TPos k, SimpleType<tmpS, Spec_> const &source) {
+        typedef Tuple<T_, _size, Compressed> Tup;
         typename Tup::CT mask = Tup::bitMask << ((_size - 1 - k) * me.bitSize);
         me.i = (me.i & ~mask) | source.value << ((_size - 1 - k) * me.bitSize);
         return source;
@@ -550,32 +550,32 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // clear
 
-	template <typename _T, unsigned _size, typename TSpec>
-	inline void clear(Tuple<_T, _size, TSpec> &me) {
+	template <typename T_, unsigned _size, typename TSpec>
+	inline void clear(Tuple<T_, _size, TSpec> &me) {
         memset<sizeof(me.i), 0>(&(me.i));
 	}
-    template <typename _T, unsigned _size>
-	inline void clear(Tuple<_T, _size, Compressed> &me) {
+    template <typename T_, unsigned _size>
+	inline void clear(Tuple<T_, _size, Compressed> &me) {
 		me.i = 0; 
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // optimized compares
 
-	template <typename _T, unsigned _sizeL, unsigned _sizeR>
-	inline bool operator<(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+	template <typename T_, unsigned _sizeL, unsigned _sizeR>
+	inline bool operator<(Tuple<T_, _sizeL, Compressed> const &_left, Tuple<T_, _sizeR, Compressed> const &_right) {
 		return _left.i < _right.i;
 	}
-	template <typename _T, unsigned _sizeL, unsigned _sizeR>
-	inline bool operator>(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+	template <typename T_, unsigned _sizeL, unsigned _sizeR>
+	inline bool operator>(Tuple<T_, _sizeL, Compressed> const &_left, Tuple<T_, _sizeR, Compressed> const &_right) {
 		return _left.i > _right.i;
 	}
-	template <typename _T, unsigned _sizeL, unsigned _sizeR>
-	inline bool operator==(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+	template <typename T_, unsigned _sizeL, unsigned _sizeR>
+	inline bool operator==(Tuple<T_, _sizeL, Compressed> const &_left, Tuple<T_, _sizeR, Compressed> const &_right) {
 		return _left.i == _right.i;
 	}
-	template <typename _T, unsigned _sizeL, unsigned _sizeR>
-	inline bool operator!=(Tuple<_T, _sizeL, Compressed> const &_left, Tuple<_T, _sizeR, Compressed> const &_right) {
+	template <typename T_, unsigned _sizeL, unsigned _sizeR>
+	inline bool operator!=(Tuple<T_, _sizeL, Compressed> const &_left, Tuple<T_, _sizeR, Compressed> const &_right) {
 		return _left.i != _right.i;
 	}
 
@@ -596,31 +596,31 @@ namespace SEQAN_NAMESPACE_MAIN
         }
     };
 
-	template <typename _T, unsigned _size, typename TSpec>
-	inline void shiftLeft(Tuple<_T, _size, TSpec> &me) {
+	template <typename T_, unsigned _size, typename TSpec>
+	inline void shiftLeft(Tuple<T_, _size, TSpec> &me) {
 		Loop<TupleShiftLeftWorker_, _size - 1>::run(me);
 	}
 
-	template <typename _T, unsigned _size, typename TSpec>
-	inline void shiftRight(Tuple<_T, _size, TSpec> &me) {
+	template <typename T_, unsigned _size, typename TSpec>
+	inline void shiftRight(Tuple<T_, _size, TSpec> &me) {
 		LoopReverse<TupleShiftRightWorker_, _size - 1>::run(me);
 	}
 
-	template <typename _T, unsigned _size>
-	inline void shiftLeft(Tuple<_T, _size, Compressed> &me) {
+	template <typename T_, unsigned _size>
+	inline void shiftLeft(Tuple<T_, _size, Compressed> &me) {
 		me<<=1;
 	}
 
-	template <typename _T, unsigned _size>
-	inline void shiftRight(Tuple<_T, _size, Compressed> &me) {
+	template <typename T_, unsigned _size>
+	inline void shiftRight(Tuple<T_, _size, Compressed> &me) {
 		me>>=1;
 	}
 
 //////////////////////////////////////////////////////////////////////////////
 // standard output
 
-	template <typename _T, unsigned _size, typename TSpec>
-	std::ostream& operator<<(std::ostream& out, Tuple<_T,_size,TSpec> const &a) {
+	template <typename T_, unsigned _size, typename TSpec>
+	std::ostream& operator<<(std::ostream& out, Tuple<T_,_size,TSpec> const &a) {
 		out << "[";
 		if (a.size > 0)
 			out << a[0];
@@ -630,13 +630,13 @@ namespace SEQAN_NAMESPACE_MAIN
 		return out;
 	}
 
-	template <typename _T, unsigned _size, typename TSpec>
-	struct Value< Tuple<_T, _size, TSpec> > {
-		typedef _T Type;
+	template <typename T_, unsigned _size, typename TSpec>
+	struct Value< Tuple<T_, _size, TSpec> > {
+		typedef T_ Type;
 	};
 
-	template <typename _T, unsigned _size, typename TSpec>
-	struct Spec< Tuple<_T, _size, TSpec> > {
+	template <typename T_, unsigned _size, typename TSpec>
+	struct Spec< Tuple<T_, _size, TSpec> > {
 		typedef TSpec Type;
 	};
 

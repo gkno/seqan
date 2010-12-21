@@ -91,7 +91,7 @@ typedef Tag<Ucsc_<UcscKnownIsoforms_> > const UcscIsoforms;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TFragmentStore, typename TSpec = void>
-struct _IOContextUcsc
+struct IOContextUcsc_
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -110,7 +110,7 @@ struct _IOContextUcsc
 };
 
 template <typename TFragmentStore, typename TSpec>
-inline void clear(_IOContextUcsc<TFragmentStore, TSpec> &ctx)
+inline void clear(IOContextUcsc_<TFragmentStore, TSpec> &ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -133,7 +133,7 @@ inline bool
 _readOneAnnotation (
 	TFile & file,
 	TChar & c,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
@@ -271,7 +271,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotationKnownGene (
 	TFragmentStore & fragStore,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -333,7 +333,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotationKnownIsoforms (
 	TFragmentStore & fragStore,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TAnnotationStore   TAnnotationStore;
 	typedef typename Value<TAnnotationStore>::Type      TAnnotation;
@@ -375,7 +375,7 @@ template <typename TFragmentStore, typename TSpec>
 inline void 
 _storeOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
 	if (ctx.format == ctx.KNOWN_GENE)
 		_storeOneAnnotationKnownGene(fragStore, ctx);
@@ -396,7 +396,7 @@ read (
 
 	// get first character from the stream
 	char c = _streamGet(file);
-	_IOContextUcsc<TFragmentStore> ctx;
+	IOContextUcsc_<TFragmentStore> ctx;
 	
 	refresh(fragStore.contigNameStoreCache);
 	refresh(fragStore.annotationNameStoreCache);
@@ -420,7 +420,7 @@ template <typename TFragmentStore, typename TSpec, typename TAnnotation, typenam
 inline bool 
 _retrieveOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx,
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx,
 	TAnnotation &annotation,
 	TId id,
 	Ucsc)
@@ -464,7 +464,7 @@ template <typename TFragmentStore, typename TSpec, typename TAnnotation, typenam
 inline bool 
 _retrieveOneAnnotation (
 	TFragmentStore & fragStore,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx,
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx,
 	TAnnotation &annotation,
 	TId id,
 	UcscIsoforms)
@@ -482,7 +482,7 @@ template<typename TTargetStream, typename TFragmentStore, typename TSpec>
 inline void 
 _writeOneAnnotation (
 	TTargetStream & file,
-	_IOContextUcsc<TFragmentStore, TSpec> & ctx)
+	IOContextUcsc_<TFragmentStore, TSpec> & ctx)
 {
 	typedef typename TFragmentStore::TContigPos         TContigPos;	
 	
@@ -584,7 +584,7 @@ write (
 	typedef typename Iterator<TAnnotationStore, Standard>::Type		TAnnoIter;
 	typedef typename Id<TAnnotation>::Type							TId;
 
-	_IOContextUcsc<TFragmentStore> ctx;
+	IOContextUcsc_<TFragmentStore> ctx;
 
 	TAnnoIter it = begin(store.annotationStore, Standard());
 	TAnnoIter itEnd = end(store.annotationStore, Standard());

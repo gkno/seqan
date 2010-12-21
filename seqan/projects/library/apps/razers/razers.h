@@ -44,11 +44,11 @@ namespace SEQAN_NAMESPACE_MAIN
 	typedef Default	TQGramIndexSpec;
 #endif
 
-	template < bool _DONT_VERIFY = false, bool _DONT_DUMP_RESULTS = false >
+	template < bool DONT_VERIFY_ = false, bool DONT_DUMP_RESULTS_ = false >
 	struct RazerSSpec 
 	{
-		enum { DONT_VERIFY = _DONT_VERIFY };				// omit verifying potential matches
-		enum { DONT_DUMP_RESULTS = _DONT_DUMP_RESULTS };	// omit dumping results
+		enum { DONT_VERIFY = DONT_VERIFY_ };				// omit verifying potential matches
+		enum { DONT_DUMP_RESULTS = DONT_DUMP_RESULTS_ };	// omit dumping results
 	};
 
 	template < typename TSpec = RazerSSpec<> >
@@ -230,10 +230,10 @@ struct MicroRNA{};
 // Typedefs
 
 	// definition of a Read match
-	template <typename _TGPos>
+	template <typename TGPos_>
 	struct ReadMatch 
 	{
-		typedef typename MakeSigned_<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo

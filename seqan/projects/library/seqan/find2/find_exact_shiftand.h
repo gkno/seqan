@@ -46,9 +46,9 @@ struct ShiftAnd_;
 typedef Tag<ShiftAnd_> ShiftAnd;
 
 
-template <typename _TNeedle>
-struct Pattern<_TNeedle, ShiftAnd> : _FindState {
-    typedef _TNeedle TNeedle;
+template <typename TNeedle_>
+struct Pattern<TNeedle_, ShiftAnd> : FindState_ {
+    typedef TNeedle_ TNeedle;
     typedef unsigned TWord;
 
     // The pattern's state.

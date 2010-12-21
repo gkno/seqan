@@ -132,8 +132,8 @@ struct WitStoreLess<seqan::SortContigId>
 };
 
 
-struct _SortDistance {};
-typedef Tag<_SortDistance> const SortDistance;
+struct SortDistance_ {};
+typedef Tag<SortDistance_> const SortDistance;
 
 template <>
 struct WitStoreLess<SortDistance>
@@ -149,8 +149,8 @@ struct WitStoreLess<SortDistance>
 };
 
 
-struct _SortFirstPos {};
-typedef Tag<_SortFirstPos> const SortFirstPos;
+struct SortFirstPos_ {};
+typedef Tag<SortFirstPos_> const SortFirstPos;
 
 
 template <>
@@ -173,8 +173,8 @@ struct WitStoreLess<SortFirstPos>
 };
 
 
-struct _SortLastPos {};
-typedef Tag<_SortLastPos> const SortLastPos;
+struct SortLastPos_ {};
+typedef Tag<SortLastPos_> const SortLastPos;
 
 
 template <>

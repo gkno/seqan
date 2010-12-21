@@ -61,11 +61,11 @@ template <typename TNode, typename TTreeSpec>
 class JournalEntries;
 
 
-template <typename _TCargo>
-class JournalEntries<_TCargo, UnbalancedTree>
+template <typename TCargo_>
+class JournalEntries<TCargo_, UnbalancedTree>
 {
   public:
-    typedef _TCargo TCargo;
+    typedef TCargo_ TCargo;
     typedef JournalEntriesUnorderedTreeNode<TCargo> TNode;
     typedef JournalEntries<TCargo, UnbalancedTree> TJournalEntries;
     typedef typename Position<TNode>::Type TPos;

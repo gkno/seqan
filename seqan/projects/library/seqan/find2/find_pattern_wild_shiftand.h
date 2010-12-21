@@ -51,9 +51,9 @@ struct WildShiftAnd_;
 typedef Tag<WildShiftAnd_> WildShiftAnd;
 
 
-template <typename _TNeedle>
-struct Pattern<_TNeedle, WildShiftAnd> : _FindState {
-    typedef _TNeedle TNeedle;
+template <typename TNeedle_>
+struct Pattern<TNeedle_, WildShiftAnd> : FindState_ {
+    typedef TNeedle_ TNeedle;
 	typedef unsigned TWord;
 
     // The pattern's state.
@@ -315,7 +315,7 @@ inline bool _isUnsigned(CharString const & number) {
 // classes or the placeholder ".".  Each can be followed by a quantifier,
 // where quantifiers are characters from the set {*, +, ?} or explicit numbers
 // as in a{i, j}.
-enum _Find_WildShiftAnd_ParserStates {
+enum FindWildShiftAndParserStates_ {
     STATE_NO_CHAR,                    // Expecting character, character class or ".".
     STATE_CHAR,                       // Read character, character class or ".".
     STATE_ESCAPED,                    // Just read a backslash, next character is escaped.
@@ -333,7 +333,7 @@ enum _Find_WildShiftAnd_ParserStates {
 // Check whether the pattern is valid.
 //
 // We use a finite state machine for the validation with the states of
-// the enum _Find_WildShiftAnd_ParserStates.
+// the enum FindWildShiftAndParserStates_.
 inline bool _findWildShiftAndIsValid(CharString const & needle) {
     SEQAN_CHECKPOINT;
 
@@ -342,7 +342,7 @@ inline bool _findWildShiftAndIsValid(CharString const & needle) {
 
     typedef Iterator<CharString, Standard>::Type TIterator;
 
-    _Find_WildShiftAnd_ParserStates state = STATE_NO_CHAR;
+    FindWildShiftAndParserStates_ state = STATE_NO_CHAR;
 
     // TODO(holtgrew): Check i <= j in a{i, j}?
 

@@ -51,11 +51,11 @@ template <typename TNode, typename TTreeSpec>
 class JournalEntries;
 
 
-template <typename _TCargo>
-class JournalEntries<_TCargo, SortedArray>
+template <typename TCargo_>
+class JournalEntries<TCargo_, SortedArray>
 {
 public:
-    typedef _TCargo TCargo;
+    typedef TCargo_ TCargo;
     typedef typename Size<TCargo>::Type TSize;
 
     String<TCargo> _journalNodes;

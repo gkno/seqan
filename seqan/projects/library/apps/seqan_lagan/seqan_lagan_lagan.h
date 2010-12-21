@@ -48,17 +48,17 @@ enum OutputFormat
     OUTPUT_FASTA_ALIGN
 };
 
-struct _AlignmentScores {};
-typedef Tag<_AlignmentScores> AlignmentScores;
+struct AlignmentScores_ {};
+typedef Tag<AlignmentScores_> AlignmentScores;
 
-struct _PairwiseAlignment {};
-typedef Tag<_PairwiseAlignment> PairwiseAlignment;
+struct PairwiseAlignment_ {};
+typedef Tag<PairwiseAlignment_> PairwiseAlignment;
 
 struct _Lagan : PairwiseAlignment {};
 typedef Tag<_Lagan> Lagan;
 
-struct _ClassicDP : PairwiseAlignment {};
-typedef Tag<_ClassicDP> ClassicDP;
+struct ClassicDP_ : PairwiseAlignment {};
+typedef Tag<ClassicDP_> ClassicDP;
 
 template <>
 struct Options<AlignmentScores>

@@ -35,8 +35,8 @@ using namespace seqan;
 // Tags, Enums, Classes, Specializations
 // ===========================================================================
 
-struct _Global;
-typedef Tag<_Global> Global;
+struct Global_;
+typedef Tag<Global_> Global;
 
 template <typename TSpec>
 struct Options;

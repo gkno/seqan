@@ -55,15 +55,15 @@ struct DIMENSION
 	enum { VALUE = 1}; //dummy implementation to make VC++ happy
 };
 
-template <unsigned int _DIM, typename TValue, typename TSpec>
-struct DIMENSION< SumList<_DIM, TValue, TSpec> >
+template <unsigned int DIM_, typename TValue, typename TSpec>
+struct DIMENSION< SumList<DIM_, TValue, TSpec> >
 {
-	enum { VALUE = _DIM};
+	enum { VALUE = DIM_};
 };
-template <unsigned int _DIM, typename TValue, typename TSpec>
-struct DIMENSION< SumList<_DIM, TValue, TSpec> const>
+template <unsigned int DIM_, typename TValue, typename TSpec>
+struct DIMENSION< SumList<DIM_, TValue, TSpec> const>
 {
-	enum { VALUE = _DIM};
+	enum { VALUE = DIM_};
 };
 
 //////////////////////////////////////////////////////////////////////////////

@@ -42,12 +42,12 @@ namespace SEQAN_NAMESPACE_MAIN
 // Set meta-function to choose an efficient implementation
 
 template <typename TValue, size_t SIZE>
-struct _ChooseMap2
+struct ChooseMap2_
 {
 	typedef Map<TValue, Skiplist< > > Type;
 };
 template <typename TValue>
-struct _ChooseMap2<TValue, 1>
+struct ChooseMap2_<TValue, 1>
 {
 	typedef Map<TValue, VectorSet< > > Type;
 };
@@ -55,7 +55,7 @@ struct _ChooseMap2<TValue, 1>
 
 template <typename TValue>
 struct ChooseMap:
-	_ChooseMap2<TValue, sizeof(typename Key<TValue>::Type)>
+	ChooseMap2_<TValue, sizeof(typename Key<TValue>::Type)>
 {};
 
 

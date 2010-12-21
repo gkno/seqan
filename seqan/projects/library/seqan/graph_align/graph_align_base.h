@@ -82,8 +82,8 @@ The values are defined in the following way: 0=Diagonal Move, 1=Horizontal Move,
 ..see:Metafunction.ValueSize
 ..include:seqan/graph_align.h
 */
-struct _TraceBack {};
-typedef SimpleType<unsigned char, _TraceBack> TraceBack;
+struct TraceBack_ {};
+typedef SimpleType<unsigned char, TraceBack_> TraceBack;
 
 template <> struct ValueSize< TraceBack > { enum { VALUE = 3 }; };
 template <> struct BitsPerValue< TraceBack > { enum { VALUE = 2 }; };

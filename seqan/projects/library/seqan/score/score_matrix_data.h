@@ -603,12 +603,12 @@ struct ScoringMatrixData_<int, AminoAcid, Pam250_> {
 
 
 /*
-.Tag._Vtml200:
+.Tag.Vtml200_:
 ..cat:Scoring
 ..summary:Tag for Retrieving a PAM200 matrix.
 ..include:seqan/score.h
  */
-struct _Vtml200 {};
+struct Vtml200_ {};
 
 
 /**
@@ -617,14 +617,14 @@ struct _Vtml200 {};
 ..summary:Vtml200 scoring matrix.
 ..signature:Vtml200
 ..shortcutfor:Spec.Score Matrix
-...signature:Score<int, ScoreMatrix<AminoAcid, _Vtml200> >
+...signature:Score<int, ScoreMatrix<AminoAcid, Vtml200_> >
 ..include:seqan/score.h
 */
-typedef Score<int, ScoreMatrix<AminoAcid, _Vtml200> > Vtml200;
+typedef Score<int, ScoreMatrix<AminoAcid, Vtml200_> > Vtml200;
 
 
 template <>
-struct ScoringMatrixData_<int, AminoAcid, _Vtml200> {
+struct ScoringMatrixData_<int, AminoAcid, Vtml200_> {
     enum {
         VALUE_SIZE = ValueSize<AminoAcid>::VALUE,
         TAB_SIZE = VALUE_SIZE * VALUE_SIZE

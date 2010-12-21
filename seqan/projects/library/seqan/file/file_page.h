@@ -262,7 +262,7 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// page frame of static size
 
-    template < unsigned _PageSize >
+    template < unsigned PageSize_ >
     struct Fixed;
 
     typedef ::std::list<Position<String<void*> >::Type>		PageLRUList;    // least recently usage list
@@ -270,15 +270,15 @@ namespace SEQAN_NAMESPACE_MAIN
 
     template < typename TValue,
                typename TFile,
-               unsigned _PageSize >
-	struct PageFrame<TValue, TFile, Fixed<_PageSize> >
+               unsigned PageSize_ >
+	struct PageFrame<TValue, TFile, Fixed<PageSize_> >
 	{
 		typedef TFile								File;
         typedef typename AsyncRequest<TFile>::Type		AsyncRequest;
 		typedef	typename Size<PageFrame>::Type		TSize;
 		typedef	typename Iterator<PageFrame>::Type	TIterator;
 
-		enum            { PageSize = _PageSize };
+		enum            { PageSize = PageSize_ };
 		enum Status		{ READY, READING, WRITING };
 		enum DataStatus	{ ON_DISK = -1, UNINITIALIZED = -2 };
 		enum Priority	{ NORMAL_LEVEL = 0, PREFETCH_LEVEL = 1, ITERATOR_LEVEL = 2, PERMANENT_LEVEL = 3 };
@@ -307,14 +307,14 @@ namespace SEQAN_NAMESPACE_MAIN
 	//////////////////////////////////////////////////////////////////////////////
 	// meta-function interface
 
-	template < typename TValue, typename TFile, unsigned _PageSize >
-    struct Iterator< PageFrame< TValue, TFile, Fixed<_PageSize> >, Standard >
+	template < typename TValue, typename TFile, unsigned PageSize_ >
+    struct Iterator< PageFrame< TValue, TFile, Fixed<PageSize_> >, Standard >
     {
         typedef VolatilePtr<TValue> Type;
     };
 
-	template < typename TValue, typename TFile, unsigned _PageSize >
-    struct Iterator< PageFrame< TValue, TFile, Fixed<_PageSize> > const, Standard>
+	template < typename TValue, typename TFile, unsigned PageSize_ >
+    struct Iterator< PageFrame< TValue, TFile, Fixed<PageSize_> > const, Standard>
     {
         typedef VolatilePtr<TValue> const Type;
     };
@@ -328,26 +328,26 @@ namespace SEQAN_NAMESPACE_MAIN
         me.end = me.begin + size;
     }
 
-    template < typename TValue, typename TFile, unsigned _PageSize >
-    inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    size(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/) {
-        return _PageSize;
+    template < typename TValue, typename TFile, unsigned PageSize_ >
+    inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
+    size(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/) {
+        return PageSize_;
     }
 
-    template < typename TValue, typename TFile, unsigned _PageSize >
-    inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    length(PageFrame<TValue, TFile, Fixed<_PageSize> > const &/*me*/) {
-        return _PageSize;
+    template < typename TValue, typename TFile, unsigned PageSize_ >
+    inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
+    length(PageFrame<TValue, TFile, Fixed<PageSize_> > const &/*me*/) {
+        return PageSize_;
     }
 
-    template < typename TValue, typename TFile, unsigned _PageSize >
-    inline typename Size<PageFrame<TValue, TFile, Fixed<_PageSize> > >::Type
-    pageSize(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/) {
-        return _PageSize;
+    template < typename TValue, typename TFile, unsigned PageSize_ >
+    inline typename Size<PageFrame<TValue, TFile, Fixed<PageSize_> > >::Type
+    pageSize(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/) {
+        return PageSize_;
     }
 
-    template < typename TValue, typename TFile, unsigned _PageSize, typename TSize >
-    inline void resize(PageFrame<TValue, TFile, Fixed<_PageSize> > &/*me*/, TSize /*size*/) {}
+    template < typename TValue, typename TFile, unsigned PageSize_, typename TSize >
+    inline void resize(PageFrame<TValue, TFile, Fixed<PageSize_> > &/*me*/, TSize /*size*/) {}
 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -820,7 +820,7 @@ namespace SEQAN_NAMESPACE_MAIN
         // Function is a functor which is called with a PageFrame object,
         // that is dirty or not READY (in an IO transfer)
 		template <class Function>
-		inline int mru(Function _Func, unsigned maxLevel = PRIORITY_LEVELS - 1) 
+		inline int mru(Function Func_, unsigned maxLevel = PRIORITY_LEVELS - 1) 
 		{
 			for(unsigned i = 0; i <= maxLevel; ++i) {
                 PageLRUList::const_iterator I = lruList[i].end();
@@ -831,7 +831,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					if (pf.status == TPageFrame::READY && !pf.dirty)
 						return *I;
 					else
-						if (_Func(pf)) return *I;
+						if (Func_(pf)) return *I;
 				};
             }
 			#ifdef SEQAN_VVERBOSE
@@ -894,25 +894,25 @@ namespace SEQAN_NAMESPACE_MAIN
 	template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS, typename TExpand >
 	inline void reserve(
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont,
-		unsigned _Count,
+		unsigned Count_,
 		Tag<TExpand> const expand)
 	{
-		reserve(pageCont.pages, _Count, expand);
+		reserve(pageCont.pages, Count_, expand);
 	}
 
     template < typename TPageFrame, unsigned FRAMES, unsigned PRIORITY_LEVELS >
 	inline void resize(
 		PageContainer<TPageFrame, FRAMES, PRIORITY_LEVELS> &pageCont, 
-		unsigned _Count) 
+		unsigned Count_) 
 	{
-		unsigned _Size = length(pageCont.pages);
-		if (_Size < _Count) {
-			reserve(pageCont.pages, _Count);
-            for(unsigned i = _Size; i < _Count; ++i)
+		unsigned Size_ = length(pageCont.pages);
+		if (Size_ < Count_) {
+			reserve(pageCont.pages, Count_);
+            for(unsigned i = Size_; i < Count_; ++i)
                 pageCont.push_back();
 		} else 
-			if (_Size > _Count)
-				for(unsigned i = _Count; i < _Size; ++i)
+			if (Size_ > Count_)
+				for(unsigned i = Count_; i < Size_; ++i)
 					pageCont.pop_back();
 	}
 
@@ -968,7 +968,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline bool equiDistantDistribution(
         SimpleBuffer<TValue> &_clusterBuffer, unsigned _bufferSize, T const &me,
         TSize _size, unsigned _pageSize,
-        Function const &_Func)
+        Function const &Func_)
     {
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
@@ -1011,7 +1011,7 @@ namespace SEQAN_NAMESPACE_MAIN
                 }
                 pb.cur = pb.begin;
                 pb.pageOfs = 0;
-			    _Func(pb);
+			    Func_(pb);
                 pb.begin = pb.end;
             }
         }
@@ -1020,7 +1020,7 @@ namespace SEQAN_NAMESPACE_MAIN
             pb.end = pb.begin + lastPageSize;
             pb.cur = pb.begin;
             pb.pageOfs = 0;
-			_Func(pb);
+			Func_(pb);
         }
 
         return true;
@@ -1030,7 +1030,7 @@ namespace SEQAN_NAMESPACE_MAIN
     inline unsigned equiDistantAlignedDistribution(
         SimpleBuffer<TValue> &_clusterBuffer, unsigned aligning, unsigned _bufferSize, T const &me,
         TSize _size, unsigned _pageSize,
-        Function const &_Func)
+        Function const &Func_)
     {
         unsigned _pages         = enclosingBlocks(_size, (unsigned)_pageSize);
         if (!_pages) {
@@ -1072,7 +1072,7 @@ namespace SEQAN_NAMESPACE_MAIN
 					pb.end = pb.begin + aclusterSize;
 					pb.cur = pb.begin;
 					pb.pageOfs = 0;
-					_Func(pb);
+					Func_(pb);
 					pb.begin = pb.end;
 				}
 			}
@@ -1081,7 +1081,7 @@ namespace SEQAN_NAMESPACE_MAIN
 				pb.end = pb.begin + lastPageSize;
 				pb.cur = pb.begin;
 				pb.pageOfs = 0;
-				_Func(pb);
+				Func_(pb);
 			}
 		}
 

@@ -40,7 +40,7 @@
 namespace seqan {
 
 // Contains the state for finder and patterns.
-struct _FindState {
+struct FindState_ {
     enum TState {
         STATE_EMPTY,           // Finder/pattern is empty.
         STATE_INITIAL,         // Finer/pattern has just been initialized.

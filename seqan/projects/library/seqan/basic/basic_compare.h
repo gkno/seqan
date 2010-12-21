@@ -61,11 +61,11 @@ struct CompareType<TLeft const, TRight const>
 
 //////////////////////////////////////////////////////////////////////////////
 
-template<typename _T> inline
-bool lexLess(const _T& _Left, const _T& _Right)
-{	// return lexicographical _Left < _Right
-	typedef typename MakeUnsigned_<_T>::Type TUnsigned;
-    return (TUnsigned)_Left < (TUnsigned)_Right;
+template<typename T_> inline
+bool lexLess(const T_& _Left, const T_& Right_)
+{	// return lexicographical _Left < Right_
+	typedef typename MakeUnsigned_<T_>::Type TUnsigned;
+    return (TUnsigned)_Left < (TUnsigned)Right_;
 }
 
 //////////////////////////////////////////////////////////////////////////////

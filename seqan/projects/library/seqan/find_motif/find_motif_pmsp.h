@@ -57,8 +57,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.PMSP
 
-struct _PMSP;
-typedef Tag<_PMSP> const PMSP;
+struct Pmsp_;
+typedef Tag<Pmsp_> const PMSP;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - PMSP Spec

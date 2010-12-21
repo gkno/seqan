@@ -85,7 +85,7 @@ struct PexMultiFinder< Pattern<TNeedle, Pex<TVerification , TMultiFinder > > >
 //////////////////////////////////////////////////////////////////////////////
 
 template<typename TPosition,typename TScore,typename TVerifier,typename TNeedle>
-struct _PexRange{
+struct PexRange_{
   TPosition start,end;
   TScore error;
   TVerifier verifier;
@@ -156,7 +156,7 @@ class Pattern<TNeedle, Pex<TVerification, TMultiFinder > >:
    String<Segment<TNeedle> >  splitted_needles;
    
    // data store for the verification tree respectively the splitted needle
-   ::std::map<unsigned, _PexRange<TPosition,TScore,TVerifier,TNeedle> > range_table;
+   ::std::map<unsigned, PexRange_<TPosition,TScore,TVerifier,TNeedle> > range_table;
    // map leafs of the tree to parts of the needle
    ::std::map<unsigned, unsigned> leaf_map;
 
@@ -307,7 +307,7 @@ SEQAN_CHECKPOINT
   unsigned i = 0;
   while(s < me.needleLength)
   { 
-    _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+    PexRange_<TPosition,TScore,TVerifier,TNeedle> pr;
     pr.start = s;
     pr.end = (c == me.limit ? me.needleLength : s + seg_len);
     pr.error = 0;
@@ -328,7 +328,7 @@ SEQAN_CHECKPOINT
   unsigned int pos = 0;
   for (unsigned int i = 0; i < k; ++i)
   {
-    _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+    PexRange_<TPosition,TScore,TVerifier,TNeedle> pr;
     pr.start = pos;
     pr.end = (pos = me.needleLength * (i + 1) / k);
     pr.error = 0;
@@ -343,7 +343,7 @@ SEQAN_CHECKPOINT
 
   // insert complete needle in range table to use the verifier
   appendValue(me.segment_store,infix(value(me.data_host),0,me.needleLength));
-  _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+  PexRange_<TPosition,TScore,TVerifier,TNeedle> pr;
   pr.start = 0;
   pr.end = me.needleLength;
   pr.error = me.limit;
@@ -489,7 +489,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me, unsign
   typedef unsigned TScore;
   typedef Pattern<TNeedle,MyersUkkonen> TVerifier; 
 
-  _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+  PexRange_<TPosition,TScore,TVerifier,TNeedle> pr;
   pr.start = start;
   pr.end = end;
   pr.error = k;
@@ -534,7 +534,7 @@ void _createTree(Pattern<TNeedle, Pex<Hierarchical, TMultiFinder > > &me,
   typedef unsigned TScore;
   typedef Pattern<TNeedle,MyersUkkonen> TVerifier; 
 
-  _PexRange<TPosition,TScore,TVerifier,TNeedle> pr;
+  PexRange_<TPosition,TScore,TVerifier,TNeedle> pr;
   pr.start = start;
   pr.end = end;
   pr.error = k;

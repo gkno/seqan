@@ -594,7 +594,7 @@ clear(String<TValue, CStyle> & me)
 */
 
 template <typename TExpand>
-struct _Create_ArrayString_Expand
+struct CreateArrayStringExpand_
 {
 	template <typename TTarget, typename TSource>
 	static inline void
@@ -724,7 +724,7 @@ SEQAN_CHECKPOINT
 
 template <>
 struct CreateArrayString_<Exact>:
-	_Create_ArrayString_Expand<Exact>
+	CreateArrayStringExpand_<Exact>
 {
 };
 
@@ -732,7 +732,7 @@ struct CreateArrayString_<Exact>:
 
 template <>
 struct CreateArrayString_<Generous>:
-	_Create_ArrayString_Expand<Generous>
+	CreateArrayStringExpand_<Generous>
 {
 };
 

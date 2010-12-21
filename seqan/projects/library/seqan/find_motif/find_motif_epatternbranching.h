@@ -64,8 +64,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 ///.Class.MotifFinder.param.TSpec.type:Spec.EPatternBranching
 
-struct _EPatternBranching;
-typedef Tag<_EPatternBranching> const EPatternBranching;
+struct EPatternBranching_;
+typedef Tag<EPatternBranching_> const EPatternBranching;
 
 //////////////////////////////////////////////////////////////////////////////
 // MotifFinder - EPatternBranching Spec

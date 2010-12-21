@@ -357,7 +357,7 @@ void Test_Skiplist_Extra()
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TMap1, typename TMap2>
-void _CompareMaps(TMap1 & map1, TMap2 & map2)
+void CompareMaps_(TMap1 & map1, TMap2 & map2)
 {
 	typedef typename Iterator<TMap1>::Type TIter1;
 	typedef typename Iterator<TMap2>::Type TIter2;
@@ -411,7 +411,7 @@ void Test_Skiplist_Stress()
 			insert(stdmap, _key, value);
 		}
 
-		_CompareMaps(sl, stdmap);
+		CompareMaps_(sl, stdmap);
 
 		for (int i = 0; i < 100; ++i)
 		{
@@ -431,10 +431,10 @@ void Test_Skiplist_Stress()
 			}
 		}
 
-		_CompareMaps(sl, stdmap);
+		CompareMaps_(sl, stdmap);
 
 		sl2 = sl;
-		_CompareMaps(sl2, stdmap);
+		CompareMaps_(sl2, stdmap);
 	}
 	cout << "\n";
 

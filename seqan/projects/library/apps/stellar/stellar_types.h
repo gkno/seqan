@@ -80,9 +80,9 @@ struct StellarOptions {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Container for storing local alignment matches of one query sequence
-template<typename _TMatch>
+template<typename TMatch_>
 struct QueryMatches {
-	String<_TMatch> matches;
+	String<TMatch_> matches;
 	bool disabled;
 
 	QueryMatches() {
@@ -92,10 +92,10 @@ struct QueryMatches {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Container for storing a local alignment match
-template<typename _TSequence, typename _TId>
+template<typename TSequence_, typename TId_>
 struct StellarMatch {
-	typedef _TSequence							TSequence;
-	typedef _TId								TId;
+	typedef TSequence_							TSequence;
+	typedef TId_								TId;
 	typedef typename Position<TSequence>::Type	TPos;
 
 	typedef Align<TSequence>					TAlign;

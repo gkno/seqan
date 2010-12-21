@@ -115,13 +115,13 @@ If $INVALID_ID$ the read is either not paired or could not be aligned as part of
 ..include:seqan/store.h
 */
 
-template <typename _TPos, typename _TGapAnchor, typename _TSpec = void>
+template <typename TPos_, typename TGapAnchor_, typename TSpec_ = void>
 struct AlignedReadStoreElement
 {
 	typedef typename Id<AlignedReadStoreElement>::Type	TId;
-	typedef _TPos										TPos;
-	typedef _TGapAnchor									TGapAnchor;
-	typedef _TSpec										TSpec;
+	typedef TPos_										TPos;
+	typedef TGapAnchor_									TGapAnchor;
+	typedef TSpec_										TSpec;
 	typedef String<TGapAnchor>							TGapAnchors;
 
 	static const TId INVALID_ID;
@@ -243,23 +243,23 @@ struct AlignQualityStoreElement
 ..include:seqan/store.h
 */
 
-struct _SortContigId;
-typedef Tag<_SortContigId> const SortContigId;
+struct SortContigId_;
+typedef Tag<SortContigId_> const SortContigId;
 
-struct _SortId;
-typedef Tag<_SortId> const SortId;
+struct SortId_;
+typedef Tag<SortId_> const SortId;
 
-struct _SortBeginPos;
-typedef Tag<_SortBeginPos> const SortBeginPos;
+struct SortBeginPos_;
+typedef Tag<SortBeginPos_> const SortBeginPos;
 
-struct _SortEndPos;
-typedef Tag<_SortEndPos> const SortEndPos;
+struct SortEndPos_;
+typedef Tag<SortEndPos_> const SortEndPos;
 
-struct _SortPairMatchId;
-typedef Tag<_SortPairMatchId> const SortPairMatchId;
+struct SortPairMatchId_;
+typedef Tag<SortPairMatchId_> const SortPairMatchId;
 
-struct _SortReadId;
-typedef Tag<_SortReadId> const SortReadId;
+struct SortReadId_;
+typedef Tag<SortReadId_> const SortReadId;
 
 
 //////////////////////////////////////////////////////////////////////////////

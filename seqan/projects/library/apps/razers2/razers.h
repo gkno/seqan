@@ -39,11 +39,11 @@ namespace SEQAN_NAMESPACE_MAIN
 //////////////////////////////////////////////////////////////////////////////
 // Default options
 
-	template < bool _DONT_VERIFY = false, bool _DONT_DUMP_RESULTS = false >
+	template < bool DONT_VERIFY_ = false, bool DONT_DUMP_RESULTS_ = false >
 	struct RazerSSpec 
 	{
-		enum { DONT_VERIFY = _DONT_VERIFY };				// omit verifying potential matches
-		enum { DONT_DUMP_RESULTS = _DONT_DUMP_RESULTS };	// omit dumping results
+		enum { DONT_VERIFY = DONT_VERIFY_ };				// omit verifying potential matches
+		enum { DONT_DUMP_RESULTS = DONT_DUMP_RESULTS_ };	// omit dumping results
 	};
 
 	template < typename TSpec = RazerSSpec<> >
@@ -211,10 +211,10 @@ struct MicroRNA{};
 // Typedefs
 /*
 	// definition of a Read match
-	template <typename _TGPos>
+	template <typename TGPos_>
 	struct ReadMatch 
 	{
-		typedef typename MakeSigned_<_TGPos>::Type TGPos;
+		typedef typename MakeSigned_<TGPos_>::Type TGPos;
 
 		unsigned		gseqNo;			// genome seqNo
 		unsigned		rseqNo;			// read seqNo
@@ -352,19 +352,19 @@ struct MicroRNA{};
 
 
 	template <
-		typename _TFragmentStore, 
-		typename _TRazerSOptions,
-		typename _TPreprocessing,
-		typename _TSwiftPattern,
-		typename _TCounts
+		typename TFragmentStore_, 
+		typename TRazerSOptions_,
+		typename TPreprocessing_,
+		typename TSwiftPattern_,
+		typename TCounts_
 	>
 	struct MatchVerifier
 	{
-		typedef _TFragmentStore									TFragmentStore;
-		typedef _TRazerSOptions									TOptions;
-		typedef _TPreprocessing									TPreprocessing;
-		typedef _TSwiftPattern									TSwiftPattern;
-		typedef _TCounts										TCounts;
+		typedef TFragmentStore_									TFragmentStore;
+		typedef TRazerSOptions_									TOptions;
+		typedef TPreprocessing_									TPreprocessing;
+		typedef TSwiftPattern_									TSwiftPattern;
+		typedef TCounts_										TCounts;
 		
 		typedef typename TFragmentStore::TAlignedReadStore		TAlignedReadStore;
 		typedef typename TFragmentStore::TAlignQualityStore		TAlignQualityStore;
@@ -384,7 +384,7 @@ struct MicroRNA{};
 		TSize			genomeLength;
 		bool			oneMatchPerBucket;
 		
-		MatchVerifier(_TFragmentStore &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
+		MatchVerifier(TFragmentStore_ &_store, TOptions &_options, TPreprocessing &_preprocessing, TSwiftPattern &_swiftPattern, TCounts &_cnts):
 			store(_store),
 			options(_options),
 			preprocessing(_preprocessing),
@@ -1180,8 +1180,8 @@ matchVerify(
 */
 #endif
 
-struct _SemiGlobalHamming;
-struct _SemiGlobalEdit;
+struct SemiGlobalHamming_;
+struct SemiGlobalEdit_;
 
 
 //////////////////////////////////////////////////////////////////////////////

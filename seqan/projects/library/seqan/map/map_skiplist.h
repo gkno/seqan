@@ -101,13 +101,13 @@ struct Value<Map<TValue, Skiplist<TSpec> > >
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct _SkiplistElement
+struct SkiplistElement_
 {
 	typedef char Type; //dummy implementation for VC++ bug
 };
 
 template <typename TValue, typename TSpec>
-struct _SkiplistElement<Map<TValue, Skiplist<TSpec> > >
+struct SkiplistElement_<Map<TValue, Skiplist<TSpec> > >
 {
 	typedef SkiplistElement<TValue, TSpec> Type;
 };
@@ -153,9 +153,9 @@ public:
 	enum
 	{
 		MAX_HEIGHT = 28, //heights are in {0, 1, ..., MAX_HEIGHT-1}
-		_BLOCK_SIZE_1 = sizeof(TElement) * 20, //store min. 20 elements
-		_BLOCK_SIZE_2 = 0x200,	//minimal block size
-		BLOCK_SIZE = (_BLOCK_SIZE_1 > _BLOCK_SIZE_2) ? _BLOCK_SIZE_1 : _BLOCK_SIZE_2 //block size is the max out of both values
+		BLOCK_SIZE_1_ = sizeof(TElement) * 20, //store min. 20 elements
+		BLOCK_SIZE_2_ = 0x200,	//minimal block size
+		BLOCK_SIZE = (BLOCK_SIZE_1_ > BLOCK_SIZE_2_) ? BLOCK_SIZE_1_ : BLOCK_SIZE_2_ //block size is the max out of both values
 	};
 
 	Holder<TAllocator> data_allocator;
@@ -1022,7 +1022,7 @@ template <typename TSkiplist>
 class Iter< TSkiplist, SkiplistIterator>
 {
 public:
-	typedef typename _SkiplistElement<TSkiplist>::Type TElement;
+	typedef typename SkiplistElement_<TSkiplist>::Type TElement;
 	typedef typename Value<TSkiplist>::Type TValue;
 
 	TElement * data_pointer;
