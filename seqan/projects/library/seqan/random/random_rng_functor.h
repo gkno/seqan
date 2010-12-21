@@ -70,7 +70,7 @@ public:
 .Memfunc.Rng Functor#Rng
 ..class:Spec.Rng Functor
 ..summary:Constructor Functor Rng.
-..signature:Rng<RngFunctor<TRng, TPdfd> >(rng, pdf)
+..signature:Rng<RngFunctor<TRng, TPdf> >(rng, pdf)
 ..param.rng:@Class.Rng@ object to use.
 ..param.pdf:@Class.Pdf@ object to use.
 */

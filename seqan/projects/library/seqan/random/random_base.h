@@ -107,7 +107,7 @@ class Pdf;
 ...type:Class.Rng
 ..param.pdf:Probability density function to use, if any.
 ...type:Class.Pdf
-..returns:Random number as specified in pdf, if any, or rng.
+..returns:Random number as specified in pdf, if any, or rng. For more details refer to the SeqAn Tutorial.
 */
 // specification only
 
