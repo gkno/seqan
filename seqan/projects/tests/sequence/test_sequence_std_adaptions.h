@@ -226,15 +226,46 @@ SEQAN_DEFINE_TEST(test_sequence_adaptions_sequence_memory_std_vector)
 	{
 		std::vector<int> vec_target(5,100);
 		std::vector<int> vec_source(3,10);
+		std::vector<int> vec_source2(2,20);	
 		typename Position< ::std::vector<int> >::Type pos_begin = 3;
 		typename Position< ::std::vector<int> >::Type pos_end = 4;
-		
+
+		// replace with insertion
 		replace(vec_target,pos_begin,pos_end,vec_source);
 	
         SEQAN_ASSERT_EQ(vec_target[2],100);
 		SEQAN_ASSERT_EQ(vec_target[3],10);
 		SEQAN_ASSERT_EQ(vec_target[5],10);
 		SEQAN_ASSERT_EQ(vec_target[6],100);
+		
+		// replace with shrinking
+		pos_begin = 2;
+		pos_end = 5;
+		replace(vec_target,pos_begin,pos_end,vec_source2);
+		SEQAN_ASSERT_EQ(vec_target[1],100);
+		SEQAN_ASSERT_EQ(vec_target[2],20);
+		SEQAN_ASSERT_EQ(vec_target[3],20);
+		SEQAN_ASSERT_EQ(vec_target[4],10);
+
+		
+	}
+	// test replace with limits
+	{
+		std::vector<int> vec_target(6,100);
+		std::vector<int> vec_source(6,10);
+		typename Position< ::std::vector<int> >::Type pos_begin = 4;
+		typename Position< ::std::vector<int> >::Type pos_end = 8;
+		
+		
+		// replace with insertion
+		typename Size< ::std::vector<int> >::Type limit = 9;
+		
+		replace(vec_target,pos_begin,pos_end,vec_source,limit);
+		
+		SEQAN_ASSERT_EQ(vec_target[3],100);
+		SEQAN_ASSERT_EQ(vec_target[4],10);
+		SEQAN_ASSERT_EQ(length(vec_target),9);
+	
 	}
 	
 	
