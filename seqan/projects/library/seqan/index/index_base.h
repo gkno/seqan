@@ -794,7 +794,17 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 
 
 //////////////////////////////////////////////////////////////////////////////
-// unified textAt interface
+/**
+.Function.textAt:
+..summary:Shortcut for $value(indexText(..), ..)$.
+..cat:Index
+..signature:textAt(position, index)
+..param.position:A position in the array on which the value should be accessed.
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.IndexEsa
+..returns:A reference or proxy to the value.
+..include:seqan/index.h
+*/
 
 	template <typename TPos, typename TIndex>
 	inline typename Reference<typename Fibre<TIndex, FibreRawText>::Type>::Type 
@@ -876,6 +886,19 @@ should use the functions @Function.posLocalize@, @Function.posGlobalize@, @Funct
 	inline typename Reference<typename Fibre<TIndex const, FibreSA>::Type>::Type saAt(TPos i, TIndex const &index) {
 		return value(getFibre(index, FibreSA()), i);
 	}
+
+//////////////////////////////////////////////////////////////////////////////
+/**
+.Function.rawsaAt:
+..summary:Shortcut for $value(indexRawSA(..), ..)$.
+..cat:Index
+..signature:saAt(position, index)
+..param.position:A position in the array on which the value should be accessed.
+..param.index:The @Class.Index@ object holding the fibre.
+...type:Spec.IndexEsa
+..returns:A reference or proxy to the value.
+..include:seqan/index.h
+*/
 
 	template <typename TPos, typename TIndex>
 	inline typename Value<typename Fibre<TIndex const, FibreRawSA>::Type>::Type rawsaAt(TPos i, TIndex const &index) {
