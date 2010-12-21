@@ -117,7 +117,7 @@ struct WitStoreLess<SortReadId>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
@@ -131,7 +131,7 @@ struct WitStoreLess<seqan::SortId>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
@@ -145,7 +145,7 @@ struct WitStoreLess<seqan::SortContigId>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
@@ -162,7 +162,7 @@ struct WitStoreLess<SortDistance>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
@@ -180,7 +180,7 @@ struct WitStoreLess<SortFirstPos>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{
@@ -204,7 +204,7 @@ struct WitStoreLess<SortLastPos>
 {
     WitStore const & store;
 
-    WitStoreLess(WitStore const & _store) : store(_store) {};
+    WitStoreLess(WitStore const & _store) : store(_store) {}
 
     bool
     operator()(IntervalOfReadOnContig const & a, IntervalOfReadOnContig const & b)  const{

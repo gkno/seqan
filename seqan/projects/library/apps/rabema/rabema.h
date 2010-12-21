@@ -89,6 +89,17 @@ public:
 // Functions
 // ============================================================================
 
+// Ceil away from Zero.
+//
+// ceilAwayFromZero(-1.5) == -2
+// ceilAwayFromZero(1.5) == 2
+template <typename T>
+inline T ceilAwayFromZero(const T &x) {
+    if (x < 0)
+        return floor(x);
+    return ceil(x);
+}
+
 void setUpCommandLineParser(CommandLineParser & parser)
 {
     addVersionLine(parser, "0.1");

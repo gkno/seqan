@@ -32,8 +32,9 @@
 // ============================================================================
 
 template <>
-struct Options<EvaluateResults>
+class Options<EvaluateResults>
 {
+public:
     // True iff help is to be shown.
     bool showHelp;
 
