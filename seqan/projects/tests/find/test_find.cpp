@@ -1787,7 +1787,7 @@ SEQAN_BEGIN_TESTSUITE(test_find) {
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_hamming_simple.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_myers_ukkonen.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_wild_shiftand.h");
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/_findHorspool.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_horspool.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_base.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftand.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/find/find_shiftor.h");
