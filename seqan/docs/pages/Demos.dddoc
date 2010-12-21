@@ -122,7 +122,7 @@ banana matches with score -1
 ..see:Page.Searching
 ..demofor:Function.find
 ..demofor:Function.findBegin
-..demofor:Function.getScore
+..demofor:Function._getMatchScore
 ..demofor:Function.getBeginScore
 .
 
@@ -417,7 +417,7 @@ The relative probabilty to see $s$ should be at least $p_min$. $s$ should also b
 $replen_max$.
 The latter constraint is a anti-monotonic pattern predicate and can be used in conjunction with the
 first constraint to cut of the trunk of a suffix tree. Only the top of the suffix tree contains candidates
-that might fulfill both predicates, so we can use an @Class.Index@ based on a deferred suffix tree (see @Spec.Index_Wotd@).
+that might fulfill both predicates, so we can use an @Class.Index@ based on a deferred suffix tree (see @Spec.IndexWotd@).
 The following example demonstrates how to iterate over all suffix tree nodes fulfilling the constraints and output them.
 ..file:../projects/library/demos/index_node_predicate.cpp
 ..output
@@ -447,7 +447,7 @@ weese@tanne:~/seqan/demos$ ./index_node_predicate
 3x      "wo"
 2x      "wood"
 weese@tanne:~/seqan/demos$
-..demofor:Spec.Index_Wotd
+..demofor:Spec.IndexWotd
 ..demofor:Spec.TopDownHistory Iterator
 ..demofor:Function.nodePredicate
 ..demofor:Function.nodeHullPredicate
@@ -495,7 +495,7 @@ This is the best test with a bast jest.
 ..summary:Breadth-first search through a graph.
 ..file:../projects/library/demos/graph_algo_bfs.cpp
 ..demofor:Class.Graph
-..demofor:Function.breadth_first_search
+..demofor:Function.breadthFirstSearch
 .
 
 .Demo.Depth-First Search
@@ -504,7 +504,7 @@ This is the best test with a bast jest.
 ..summary: Depth-first search through a graph.
 ..file:../projects/library/demos/graph_algo_dfs.cpp
 ..demofor:Class.Graph
-..demofor:Function.depth_first_search
+..demofor:Function.depthFirstSearch
 .
 
 .Demo.Strongly Connected Components
@@ -513,7 +513,7 @@ This is the best test with a bast jest.
 ..summary:Computing all strongly-connected-components of a graph.
 ..file:../projects/library/demos/graph_algo_scc.cpp
 ..demofor:Class.Graph
-..demofor:Function.strongly_connected_components
+..demofor:Function.stronglyConnectedComponents
 .
 
 .Demo.Topological Sort
@@ -522,7 +522,7 @@ This is the best test with a bast jest.
 ..summary:Topological sort of a graph.
 ..file:../projects/library/demos/graph_algo_topsort.cpp
 ..demofor:Class.Graph
-..demofor:Function.topological_sort
+..demofor:Function.topologicalSort
 .
 
 .Demo.Prim's Algorithm
@@ -531,7 +531,7 @@ This is the best test with a bast jest.
 ..summary:Prim's algorithm for computing a minimum spanning tree.
 ..file:../projects/library/demos/graph_algo_tree_prim.cpp
 ..demofor:Class.Graph
-..demofor:Function.prims_algorithm
+..demofor:Function.primsAlgorithm
 .
 
 .Demo.Kruskal's Algorithm
@@ -540,7 +540,7 @@ This is the best test with a bast jest.
 ..summary:Kruskal's algorithm for computing a minimum spanning tree.
 ..file:../projects/library/demos/graph_algo_tree_kruskal.cpp
 ..demofor:Class.Graph
-..demofor:Function.kruskals_algorithm
+..demofor:Function.kruskalsAlgorithm
 .
 
 .Demo.Shortest Path in DAGs
@@ -549,7 +549,7 @@ This is the best test with a bast jest.
 ..summary:Computing single source shortest paths in a directed acyclic graph.
 ..file:../projects/library/demos/graph_algo_path_dag.cpp
 ..demofor:Class.Graph
-..demofor:Function.dag_shortest_path
+..demofor:Function.dagShortestPath
 .
 
 .Demo.Bellman-Ford Algorithm
@@ -558,7 +558,7 @@ This is the best test with a bast jest.
 ..summary:Computing single source shortest paths using Bellman-Ford algorithm.
 ..file:../projects/library/demos/graph_algo_path_bellmanford.cpp
 ..demofor:Class.Graph
-..demofor:Function.bellman_ford_algorithm
+..demofor:Function.bellmanFordAlgorithm
 .
 
 .Demo.Dijkstra's Algorithm
@@ -576,7 +576,7 @@ This is the best test with a bast jest.
 ..summary:Computing all-pairs shortest paths.
 ..file:../projects/library/demos/graph_algo_path_allpairs.cpp
 ..demofor:Class.Graph
-..demofor:Function.all_pairs_shortest_path
+..demofor:Function.allPairsShortestPath
 .
 
 .Demo.Floyd-Warshall Algorithm
@@ -585,7 +585,7 @@ This is the best test with a bast jest.
 ..summary:Computing all-pairs shortest paths using Floyd-Warshall algorithm.
 ..file:../projects/library/demos/graph_algo_path_floydwarshall.cpp
 ..demofor:Class.Graph
-..demofor:Function.floyd_warshall
+..demofor:Function.floydWarshallAlgorithm
 .
 
 .Demo.Transitive Closure
@@ -594,7 +594,7 @@ This is the best test with a bast jest.
 ..summary:Transitive closure code example
 ..file:../projects/library/demos/graph_algo_path_transitive.cpp
 ..demofor:Class.Graph
-..demofor:Function.transitive_closure
+..demofor:Function.transitiveClosure
 . 
 
 .Demo.Maximum Flow
@@ -603,7 +603,7 @@ This is the best test with a bast jest.
 ..summary:Ford-Fulkerson maximum flow code example
 ..file:../projects/library/demos/graph_algo_flow_fordfulkerson.cpp
 ..demofor:Class.Graph
-..demofor:Function.ford_fulkerson
+..demofor:Function.fordFulkersonAlgorithm
 .
 
 .Demo.HMM
