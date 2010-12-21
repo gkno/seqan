@@ -677,10 +677,9 @@ resize(
 	return me.length();
 }
 
-///.Function.fill.param.object.type:Adaption.std::basic_string
 template <typename TChar, typename TCharTraits, typename TAlloc, typename TSize, typename TExpand>
 inline typename Size< ::std::basic_string<TChar, TCharTraits, TAlloc> >::Type 
-fill(
+resize(
 	::std::basic_string<TChar, TCharTraits, TAlloc> & me,
 	TSize new_length,
 	TChar const & val,
