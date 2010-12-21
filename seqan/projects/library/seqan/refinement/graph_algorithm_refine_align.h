@@ -98,7 +98,7 @@ _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// 50000 _getMatchScore Functions
+// 50000 _getRefinedMatchScore Functions
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////
 //for Align<TAliSource,TAliSpec>
@@ -106,7 +106,7 @@ _getSeqBeginAndEnd(Align<TAliSource,TAliSpec> & segment,
 //and pos_j on second sequence 
 template<typename TScoreValue,typename TScoreSpec,typename TStringSet,typename TAliSource,typename TAliSpec,typename TValue>
 TScoreValue
-_getMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
+_getRefinedMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
 		 TStringSet &,
 		 Align<TAliSource,TAliSpec> & segment,
 		 TValue pos_i,
@@ -144,7 +144,7 @@ SEQAN_CHECKPOINT
 //process was stopped (the cut is not exact)
 //template<typename TScore,typename TStringSet, typename TAliSource,typename TAliSpec,typename TValue>
 //typename Value<TScore>::Type
-//_getMatchScore(TScore & score_type,
+//_getRefinedMatchScore(TScore & score_type,
 //		 TStringSet &, 
 //		 Align<TAliSource,TAliSpec> & segment,
 //		 TValue pos_i,

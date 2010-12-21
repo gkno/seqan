@@ -107,7 +107,7 @@ SEQAN_CHECKPOINT
 //vorsichtig! noch nicht richtig, bis jetzt nur ungapped exact matches...
 //template<typename TScore,typename TStringSet,typename TAlignment,typename TValue>
 //typename Value<TScore>::Type
-//_getMatchScore(TScore & score_type,
+//_getRefinedMatchScore(TScore & score_type,
 //		 TStringSet & seqs,
 //		 Graph<TAlignment> & segment,
 //		 TValue pos_i,
@@ -179,7 +179,7 @@ SEQAN_CHECKPOINT
 //only for complete refinement 
 template<typename TScoreValue,typename TScoreSpec,typename TStringSet,typename TAlignment,typename TValue>
 TScoreValue
-_getMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
+_getRefinedMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
 		 TStringSet & seqs,
 		 Graph<TAlignment> & segment,
 		 TValue pos_i,
@@ -215,7 +215,7 @@ SEQAN_CHECKPOINT
 	{
 		TValue rest = 0;
 		TVertexMapIter it = segment.data_pvMap.upper_bound(std::make_pair(seq_i_id, pos_i));
-		// vd definitely exists (unless the input parameters for _getMatchScore are wrong)	
+		// vd definitely exists (unless the input parameters for _getRefinedMatchScore are wrong)	
 		// no! falsch gedacht... nilVertex, falls pos in einem gap liegt
 		if(it->second == nilVertex)
 		{	

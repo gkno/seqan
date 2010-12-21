@@ -87,14 +87,14 @@ SEQAN_CHECKPOINT
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// 50000 _getMatchScore Functions
+// 50000 _getRefinedMatchScore Functions
 ////////////////////////////////////////////////////////////////////////////////////////
 //get score for alignment starting at pos_i on one sequence (first sequence if i_am_first==true)
 //and pos_j on other sequence (second sequence if i_am_first==true), if len1!=len2 then the refinement
 //process was stopped (the cut is not exact)
 //template<typename TScore,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec,typename TValue>
 //typename Value<TScore>::Type
-//_getMatchScore(TScore & score_type, 
+//_getRefinedMatchScore(TScore & score_type, 
 //		 TStringSet & seqs,
 //		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment, 
 //		 TValue pos_i, 
@@ -128,7 +128,7 @@ SEQAN_CHECKPOINT
 ////process was stopped (the cut is not exact)
 //template<typename TScoreValue,typename TStringSet,typename TFragId,typename TFragPos,typename TFragSize, typename TFragSpec>
 //TScoreValue
-//_getMatchScore(Score<TScoreValue, Simple> & score_type,
+//_getRefinedMatchScore(Score<TScoreValue, Simple> & score_type,
 //		 TStringSet & seqs, 
 //		 Fragment<TFragId,TFragPos,TFragSize,TFragSpec> & segment, 
 //		 TFragPos pos_i, 
@@ -160,7 +160,7 @@ SEQAN_CHECKPOINT
 //and pos_j on other sequence (second sequence if i_am_first==true)
 template<typename TScoreValue,typename TScoreSpec,typename TStringSet,typename TFragment,typename TFragPos,typename TFragSize>
 TScoreValue
-_getMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
+_getRefinedMatchScore(Score<TScoreValue,TScoreSpec> & score_type,
 		 TStringSet & seqs,
 		 TFragment& segment,
 		 TFragPos pos_i,
@@ -191,7 +191,7 @@ SEQAN_CHECKPOINT
 //and pos_j on other sequence (second sequence if i_am_first==true)
 template<typename TScoreValue,typename TStringSet,typename TFragPos,typename TFragSize, typename TSpec>
 TScoreValue
-_getMatchScore(Score<TScoreValue, Simple> & score_type,
+_getRefinedMatchScore(Score<TScoreValue, Simple> & score_type,
 		 TStringSet &,
 		 Fragment<TFragSize,ExactFragment<TSpec> > &,
 		 TFragPos,

@@ -256,7 +256,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAliGraph,typename TScore, typename TPropertyMap>
 typename Value<TScore>::Type 
-_getAnnoScore(TAliGraph &,
+_getRefinedAnnoScore(TAliGraph &,
 			 TPropertyMap & pm,
 			 typename VertexDescriptor<TAliGraph>::Type vd1,
 			 typename VertexDescriptor<TAliGraph>::Type vd2,
@@ -288,7 +288,7 @@ SEQAN_CHECKPOINT
 
 template<typename TAliGraph,typename TScore>
 typename Value<TScore>::Type 
-_getAnnoScore(TAliGraph &,
+_getRefinedAnnoScore(TAliGraph &,
 			 bool,
 			 typename VertexDescriptor<TAliGraph>::Type,
 			 typename VertexDescriptor<TAliGraph>::Type,

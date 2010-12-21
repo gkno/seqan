@@ -317,9 +317,9 @@ SEQAN_CHECKPOINT
 			TVertexDescriptor vd = findVertex(ali_g, seq_j_id, pos_j);
 		
 			SEQAN_ASSERT_TRUE(fragmentBegin(ali_g,vd)==pos_j);
-			typename Value<TScore>::Type score = _getMatchScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
+			typename Value<TScore>::Type score = _getRefinedMatchScore(score_type,seqs,*ali_it,act_pos,pos_j,fragmentLength(ali_g,act_knot),fragmentLength(ali_g,vd));//,fragmentLength(ali_g,vd));
 	//		typename Value<TScore>::Type score = fragmentLength(ali_g,vd);
-			score *= _getAnnoScore(ali_g,pm,vd,act_knot,score_type);
+			score *= _getRefinedAnnoScore(ali_g,pm,vd,act_knot,score_type);
 		//this needs to be generalized (makes sense for positive scores only)
 			if(score <= 0) score = 1;
 			if(score > 0)

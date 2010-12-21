@@ -44,7 +44,7 @@ namespace SEQAN_NAMESPACE_MAIN
 //fake score function 
 template<typename TScoreValue,typename TStringSet,typename TAlign,typename TValue, typename TSize>
 TScoreValue
-_getMatchScore(TScoreValue &,
+_getRefinedMatchScore(TScoreValue &,
 		 TStringSet &,
 		 TAlign &,
 		 TValue,
