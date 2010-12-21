@@ -99,14 +99,14 @@ else (Boost_FOUND)
   set (APP_transquant_NOBUILD TRUE)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/transquant)
 endif (Boost_FOUND)
-if (OPENMP_FOUND)
+if (OpenMP_CXX_FLAGS)
   set (APP_razers3_SOURCES ${SEQAN_LIBRARY}/apps/razers3/razers.cpp ${RAZERS3_HEADERS})
-else (OPENMP_FOUND)
+else (OpenMP_CXX_FLAGS)
   message ("WARNING OpenMP not found, not building razers3!")
   # Disable building of RazerS 3.
   set (APP_razers3_NOBUILD true)
   list (REMOVE_ITEM SEQAN_APPS ${SEQAN_LIBRARY}/apps/razers3)
-endif (OPENMP_FOUND)
+endif (OpenMP_CXX_FLAGS)
 
 # Make sure the compiler can find object files from the TBB library.
 link_directories (${SEQAN_LIBRARY}/lib)
