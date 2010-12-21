@@ -100,14 +100,14 @@ public:
 	typedef typename Value<TNeedle>::Type TAlphabet;
 	typedef typename Size<TNeedle>::Type TSize;
 	Holder<TNeedle> data_host;
-	TSize needleLength;		
+	TSize needleLength;
 	TSize haystackLength;
 	TSize step;
 	Graph<Automaton<TAlphabet, void, WithoutEdgeId> > automaton;
 
 //____________________________________________________________________________
 
-	Pattern() {	
+	Pattern() {
 	}
 
 	template <typename TNeedle2>

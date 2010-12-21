@@ -64,8 +64,8 @@ struct Value<Score<TValue, TSpec> > {
 /**
 .Function.scoreGapOpenHorizontal
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapOpenHorizontal(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for opening a horizontal gap after $pos1$ in $seq1$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -84,8 +84,8 @@ scoreGapOpenHorizontal(
 /**
 .Function.scoreGapOpenVertical
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapOpenVertical(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for opening a vertical gap after $pos2$ in $seq2$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -104,8 +104,8 @@ scoreGapOpenVertical(
 /**
 .Function.scoreGapExtendHorizontal
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapExtendHorizontal(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for extending a horizontal gap after $pos1$ in $seq1$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -124,8 +124,8 @@ scoreGapExtendHorizontal(
 /**
 .Function.scoreGapExtendVertical
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapExtendVertical(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for extending a vertical gap after $pos2$ in $seq2$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -144,8 +144,8 @@ scoreGapExtendVertical(
 /**
 .Function.scoreGapHorizontal
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapHorizontal(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for a horizontal gap after $pos1$ in $seq1$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -164,8 +164,8 @@ scoreGapHorizontal(
 /**
 .Function.scoreGapVertical
 ..cat:Scoring
-..summary:TODO(holtgrew): David wrote this, he should comment it.
 ..signature:scoreGapVertical(score, pos1, pos2, seq1, seq2)
+..summary:Returns the score for a vertical gap after $pos2$ in $seq2$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>
@@ -185,8 +185,7 @@ scoreGapVertical(
 .Function.score
 ..cat:Scoring
 ..signature:score(score, pos1, pos2, seq1, seq2)
-..remark:ATTENTION -- score(TScore, TVal1, TVal2) is deprecated.  Better use this function.
-..remark:TODO(holtgrew): David wrote this, he should comment it.
+..summary:Returns the score for aligning character $seq1[pos1]$ to $seq2[pos2]$.
 ..include:seqan/score.h
  */
 template <typename TValue, typename TSpec, typename TPos1, typename TPos2, typename TSeq1, typename TSeq2>

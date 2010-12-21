@@ -39,6 +39,17 @@ namespace SEQAN_NAMESPACE_MAIN
 {
 
 /**
+.Shortcut.MultiFasta
+..summary:A sequence file mapped in memory as a StringSet of concatenated sequence file fragments.
+..cat:Input/Output
+..signature:MultiSeqFile
+..shortcutfor:Spec.ConcatDirect
+..shortcutfor:Spec.MMap String
+...signature:StringSet<String<char, MMap<> >, Owner<ConcatDirect<> > >
+..status:deprecated, will be removed in favour of @Shortcut.MultiSeqFile@
+*/
+
+/**
 .Shortcut.MultiSeqFile
 ..summary:A sequence file mapped in memory as a StringSet of concatenated sequence file fragments.
 ..cat:Input/Output
