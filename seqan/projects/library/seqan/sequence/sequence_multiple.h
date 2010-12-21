@@ -1472,7 +1472,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 //	 a single string cannot be recognized by the stringset
 //
 //		if (_validStringSetLimits(me))
-//			fill(me.limits, new_size + 1, back(me.limits), tag);
+//			resize(me.limits, new_size + 1, back(me.limits), tag);
 
 		return resize(me.strings, new_size, tag);
     }
@@ -1486,7 +1486,7 @@ a single integer value between 0 and the sum of string lengths minus 1.
 			resize(me.concat, me.limits[new_size]);
 			return resize(me.limits, new_size + 1, tag) - 1;
 		} else
-			return fill(me.limits, new_size + 1, back(me.limits), tag) - 1;
+			return resize(me.limits, new_size + 1, back(me.limits), tag) - 1;
     }
 
 ///.Function.iter.param.object.type:Class.StringSet
@@ -1764,7 +1764,7 @@ end(StringSet< TString, TSpec > const & me,
 	SEQAN_CHECKPOINT
 		if (id >= (TId) length(me.strings)) 
 		{
-			fill(me.strings, id+1, TString());
+			resize(me.strings, id+1, TString());
 			resize(me.limits, length(me.limits) + 1, Generous());
 		}
 		assignValue(me, id, obj);
@@ -1780,7 +1780,7 @@ end(StringSet< TString, TSpec > const & me,
 	{
 	SEQAN_CHECKPOINT
 		SEQAN_ASSERT(length(stringSetLimits(me)) == length(me) + 1);
-		if (id >= (TId) length(me.strings)) fill(me.strings, id+1, (TString*) 0);
+		if (id >= (TId) length(me.strings)) resize(me.strings, id+1, (TString*) 0);
 		if ((TString*) me.strings[id] == (TString*) 0)
 			resize(me.limits, length(me.limits) + 1, Generous());
 		me.strings[id] = &obj;
@@ -2044,7 +2044,7 @@ end(StringSet< TString, TSpec > const & me,
 	//	clear(dest);
 	//	resize(dest.limits, len + 1);
 	//	dest.limitsValid = (len == 0);
-	//	fill(dest.strings, length(source.strings), (TString*) 0);
+	//	resize(dest.strings, length(source.strings), (TString*) 0);
 	//	for(TSize i = 0; i < len; ++i)
 	//		dest.strings[ids[i]] = source.strings[ids[i]];
 	//}

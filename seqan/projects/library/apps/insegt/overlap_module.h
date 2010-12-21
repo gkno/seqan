@@ -436,7 +436,7 @@ buildAnnoCountStore(TAnnoCountStore & annoCountStore, FragmentStore<TSpec, TConf
 	static const TId INVALID_READ_ID = TReadStoreElement::INVALID_ID;
 	static const TId INVALID_ANNO_ID = TAnnotationStoreElement::INVALID_ID;
 	
-	fill(annoCountStore, length(me.annotationStore), 0);
+	resize(annoCountStore, length(me.annotationStore), 0);
 	
 	TReadIter itRead = begin(readAnnoStore);
 	TReadIter itReadEnd = end(readAnnoStore);
@@ -627,7 +627,7 @@ normalizeAnnoCounts(TAnnoNormStore &annoNormStore, TMapO &mapO, TAnnoCountStore 
 	static const TId INVALID_ID = TAnnotationStoreElement::INVALID_ID;
 	static const TPos INVALID_POS = TAnnotationStoreElement::INVALID_POS;
 	
-	fill(annoNormStore, length(annoCountStore), 0);
+	resize(annoNormStore, length(annoCountStore), 0);
 	
 	TReadStoreSize readNo = length(me.readStore) - length(me.matePairStore);
 	

@@ -453,7 +453,7 @@ int loadSampleCounts(ModelParameters<TSpec> & modelParameters, TFragmentStore /*
         return 1;
     }
 
-    fill(modelParameters.sampleCounts, length(fragmentStore.contigNameStore), 0);
+    resize(modelParameters.sampleCounts, length(fragmentStore.contigNameStore), 0);
 
     char c = _streamGet(file);
     CharString contigName;
@@ -852,7 +852,7 @@ int simulateReadsMain(FragmentStore<MyFragmentStoreConfig> & fragmentStore,
     String<unsigned> contigIds;
     if (length(parameters.sampleCounts) > 0) {
         for (unsigned i = 0; i < length(fragmentStore.contigNameStore); ++i) {
-            fill(contigIds, length(contigIds) + parameters.sampleCounts[i], i);
+            resize(contigIds, length(contigIds) + parameters.sampleCounts[i], i);
             if (options.veryVerbose)
                 std::cerr << parameters.sampleCounts[i] << " reads from haplotype " << i << "..." << std::endl;
         }

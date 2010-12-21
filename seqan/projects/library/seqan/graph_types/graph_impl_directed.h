@@ -895,7 +895,7 @@ getAdjacencyMatrix(Graph<Directed<TCargo, TSpec> > const& g,
 	TIterConst it = begin(g.data_vertex, Standard());
 	TIterConst itEnd = end(g.data_vertex, Standard());
     clear(mat);
-	fill(mat, len * len, (TMatValue) 0);
+	resize(mat, len * len, (TMatValue) 0);
 	TVertexDescriptor pos = 0;
 	for(;it!=itEnd; ++it, ++pos) {
 		TEdgeStump* current = *it;

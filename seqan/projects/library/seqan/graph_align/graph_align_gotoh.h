@@ -186,7 +186,7 @@ _alignGotoh(TTrace& trace,
 	TSize len2 = length(str2);
 	resize(mat, len2 + 1, Exact());   // One column for the diagonal matrix
 	resize(horizontal, len2 + 1, Exact());   // One column for the horizontal matrix
-	fill(trace, len1 * ((len2 + 1) >> 1), 0, Exact());
+	resize(trace, len1 * ((len2 + 1) >> 1), 0, Exact());
 	TTraceValue tvMat = 0;
 	
 	// Classical DP

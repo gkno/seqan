@@ -124,7 +124,7 @@ void goOverContig(
 	__int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
 	Pair<TGPos> gPair;
 
-	fill(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
 
 	TSize gLength = length(genome);
 
@@ -513,7 +513,7 @@ int _mapMatePairReadsParallelCreatePatterns(
 	SEQAN_PROTIMESTART(find_time);
 	
 	String<RazerSOptions<TSpec> > threadOptions; 
-	fill(threadOptions, options.numberOfCores, options, Exact());
+	resize(threadOptions, options.numberOfCores, options, Exact());
 	for (TPos threadID = 0; threadID < options.numberOfCores; ++threadID)
 		threadOptions[threadID].nextPairMatchId = threadID;
 	

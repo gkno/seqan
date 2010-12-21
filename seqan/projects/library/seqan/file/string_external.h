@@ -1665,7 +1665,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
         else
             me.data_size = 0;
 
-		fill(me.pager, enclosingBlocks(me.data_size, 
+		resize(me.pager, enclosingBlocks(me.data_size, 
 			(unsigned)me.PAGE_SIZE), (me.data_size)? 
 				TPageFrame::ON_DISK: 
 				TPageFrame::UNINITIALIZED);
@@ -1700,7 +1700,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
         else
             me.data_size = 0;
 
-		fill(me.pager, enclosingBlocks(me.data_size, 
+		resize(me.pager, enclosingBlocks(me.data_size, 
 			(unsigned)me.PAGE_SIZE), (me.data_size)? 
 				TPageFrame::ON_DISK: 
 				TPageFrame::UNINITIALIZED);
@@ -1809,7 +1809,7 @@ or @Function.openTemp@ afterwards to reach the same behaviour.
 		typedef typename TString::TPageFrame		TPageFrame;
 		typedef typename Size<TString>::Type		TSize;
 
-		fill(me.pager, enclosingBlocks(new_length, (unsigned)me.PAGE_SIZE), TPageFrame::UNINITIALIZED, expand);
+		resize(me.pager, enclosingBlocks(new_length, (unsigned)me.PAGE_SIZE), TPageFrame::UNINITIALIZED, expand);
         if ((TSize)new_length < me.data_size && me.file) 
 		{
 			// wait for all pending transfers

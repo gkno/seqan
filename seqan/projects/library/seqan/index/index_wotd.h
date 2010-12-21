@@ -366,7 +366,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		TPropertyMap & pm,
 		TProperty const & prop)
 	{
-		fill(pm, length(indexDir(index)), prop, Generous());
+		resize(pm, length(indexDir(index)), prop, Generous());
 	}
 */
 	template < typename TSize >

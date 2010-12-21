@@ -337,13 +337,13 @@ SEQAN_CHECKPOINT
 	else me.blockCount=((me.character_count-1) / BitsPerValue<TWord>::VALUE)+1;
 	
 	clear(me.table);
-	fill(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+	resize(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
 	clear(me.s_table);
-	fill(me.s_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+	resize(me.s_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
 	clear(me.a_table);
-	fill(me.a_table,me.blockCount,0,Exact());
+	resize(me.a_table,me.blockCount,0,Exact());
 
 	int i = -1;
 	String <TWord> last_char; // stores the character (or characters) that were read in the last step
@@ -464,10 +464,10 @@ SEQAN_CHECKPOINT
 	}
 
 	clear(me.i_table);
-	fill(me.i_table,me.blockCount,0,Exact());
+	resize(me.i_table,me.blockCount,0,Exact());
 
 	clear(me.f_table);
-	fill(me.f_table,me.blockCount,0,Exact());
+	resize(me.f_table,me.blockCount,0,Exact());
 
 	for (unsigned int i = 0; i < me.character_count; ++i){
 SEQAN_CHECKPOINT
@@ -553,10 +553,10 @@ inline void _patternInit (Pattern<TNeedle, WildShiftAnd> & me)
 {
 SEQAN_CHECKPOINT
 	clear(me.prefSufMatch);
-	fill(me.prefSufMatch, me.blockCount, 0, Exact());
+	resize(me.prefSufMatch, me.blockCount, 0, Exact());
 
 	clear(me.df);
-	fill(me.df, me.blockCount, 0, Exact());
+	resize(me.df, me.blockCount, 0, Exact());
 
 }
 

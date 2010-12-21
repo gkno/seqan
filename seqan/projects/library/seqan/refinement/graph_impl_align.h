@@ -1629,7 +1629,7 @@ convertAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	TSize nseq = length(stringSet(g));
 	for(TComponentLength::iterator cIt=compLength.begin(); cIt != compLength.end(); ++cIt) len+=cIt->second;
 	char gapChar = gapValue<char>();
-	fill(mat, len * nseq, gapChar);
+	resize(mat, len * nseq, gapChar);
 
 	// Fill the matrix
 	TSize row = 0;
@@ -1840,7 +1840,7 @@ _heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g
 	TSize numMatches = length(positions);
 	TSize alignLength = numMatches + (n - numMatches) + (m - numMatches);
 	clear(align);
-	fill(align, alignLength, TVertexSet(), Exact() );
+	resize(align, alignLength, TVertexSet(), Exact() );
 	TSIter pointerAlign = begin(align, Standard());
 	TSIter pointerAlignEnd = end(align, Standard());
 	TStringIter pointerStr1 = begin(str1, Standard());
@@ -1963,7 +1963,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	// Remember for each vertex descriptor the position in the sequence
 	typedef String<TSize> TMapVertexPos;
 	TMapVertexPos map;
-	fill(map, getIdUpperBound(_getVertexIdManager(g)), MaxValue<TSize>::VALUE);
+	resize(map, getIdUpperBound(_getVertexIdManager(g)), MaxValue<TSize>::VALUE);
 	typedef typename Iterator<TString const, Standard>::Type TStringIterConst;
 	typedef typename Iterator<TVertexSet const, Standard>::Type TVertexSetIterConst;
 	TStringIterConst itStr1 = begin(str1, Standard());
@@ -2021,7 +2021,7 @@ heaviestCommonSubsequence(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef String<TCargo> TWeights;
 	typedef typename Iterator<TWeights>::Type TWeightsIter;
 	TWeights weights;
-	fill(weights, length(slotToPos), 0);
+	resize(weights, length(slotToPos), 0);
 	itStr2 = begin(str2, Standard());
 	posItStr2 = 0;
 	for(;itStr2 != itStrEnd2;++itStr2, ++posItStr2) {

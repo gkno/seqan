@@ -1010,7 +1010,7 @@ void Test_HeaviestIncreasingSubsequence() {
 	String<char> seq1("zeitgeist");
 	String<unsigned int> weights1;
 	String<TPosition> pos1;
-	fill(weights1, length(seq1), 1);
+	resize(weights1, length(seq1), 1);
 	unsigned int w = heaviestIncreasingSubsequence(seq1, weights1, pos1);
 	// Trace is backwards
 	SEQAN_ASSERT_TRUE(w == 5);

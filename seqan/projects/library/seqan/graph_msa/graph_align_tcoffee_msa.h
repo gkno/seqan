@@ -379,7 +379,7 @@ globalMsaAlignment(Graph<Alignment<TStringSet, TCargo, TSpec> >& gAlign,
 	typedef typename Value<TString>::Type TAlphabet;
 	TStringSet sequenceSet = stringSet(gAlign);
 	String<String<char> > sequenceNames;
-	fill(sequenceNames, length(sequenceSet), String<char>("tmpName"));
+	resize(sequenceNames, length(sequenceSet), String<char>("tmpName"));
 	MsaOptions<AminoAcid, TScore> msaOpt;
 	msaOpt.sc = scoreObject;
 	appendValue(msaOpt.method, 0);  // Global pairwise

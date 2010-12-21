@@ -493,7 +493,7 @@ SEQAN_CHECKPOINT
 	}
 
 	clear(pattern.bitMasks);
-	fill(pattern.bitMasks, (ValueSize<TValue>::VALUE + 1) * blockCount, 0, Exact());
+	resize(pattern.bitMasks, (ValueSize<TValue>::VALUE + 1) * blockCount, 0, Exact());
 
 	// encoding the letters as bit-vectors
     for (unsigned j = 0; j < pattern.needleSize; j++)
@@ -819,10 +819,10 @@ SEQAN_CHECKPOINT
 			largeState.lastBlock = pattern.largePattern->blockCount - 1;
 
 		clear(largeState.VP);
-		fill(largeState.VP, pattern.largePattern->blockCount, ~(TWord)0, Exact());
+		resize(largeState.VP, pattern.largePattern->blockCount, ~(TWord)0, Exact());
 
 		clear(largeState.VN);
-		fill(largeState.VN, pattern.largePattern->blockCount, 0, Exact());
+		resize(largeState.VN, pattern.largePattern->blockCount, 0, Exact());
 	}
     return true;
 }
@@ -1079,7 +1079,7 @@ SEQAN_CHECKPOINT
     
 #ifdef SEQAN_DEBUG_MYERSBITVECTOR
     clear(state.DPMat);
-    fill(state.DPMat, (length(container(finder)) + 1) * (length(needle) + 1), -9);
+    resize(state.DPMat, (length(container(finder)) + 1) * (length(needle) + 1), -9);
     for (unsigned i = 0; i <= length(needle); ++i)
         state.DPMat[i] = i;
     for (unsigned i = 0; i <= length(container(finder)); ++i)
@@ -1102,10 +1102,10 @@ SEQAN_CHECKPOINT
         largeState.blockCount = blockCount;
 
 		clear(largeState.VP);
-		fill(largeState.VP, blockCount, ~0, Exact());
+		resize(largeState.VP, blockCount, ~0, Exact());
 
 		clear(largeState.VN);
-		fill(largeState.VN, blockCount, 0, Exact());
+		resize(largeState.VN, blockCount, 0, Exact());
         return true;
 	}
 }

@@ -288,7 +288,7 @@ inline void _printRead(
 	line = svg.cursor.i2 * 20 + 10;
 	
 	if (length(layout.mateCoords) <= alignedRead.pairMatchId)
-		fill(layout.mateCoords, alignedRead.pairMatchId + 1, Pair<int>(-1,-1));
+		resize(layout.mateCoords, alignedRead.pairMatchId + 1, Pair<int>(-1,-1));
 	else
 	{
 		if (layout.mateCoords[alignedRead.pairMatchId].i2 != -1)

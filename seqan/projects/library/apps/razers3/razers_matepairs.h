@@ -443,7 +443,7 @@ void _mapMatePairReads(
 	__int64 firstNo = 0;				// first number over all left-mate pot. match in the queue
 	Pair<TGPos> gPair;
 
-	fill(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
 
 	TSize gLength = length(genome);
 

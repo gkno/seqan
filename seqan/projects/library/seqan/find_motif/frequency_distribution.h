@@ -72,7 +72,7 @@ public:
 	// constructor & destructor
 	FrequencyDistribution()
 	{
-        fill(frequency_list, static_cast<unsigned>(SIZE), 0);
+        resize(frequency_list, static_cast<unsigned>(SIZE), 0);
 	}
 //	FrequencyDistribution(TValue const & letter_)
 //	{

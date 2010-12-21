@@ -77,9 +77,9 @@ struct CoverageBin
 		transcripts(0) 
 	{
 #ifdef MANY_BINS
-		fill(coverage, 64, 0);
+		resize(coverage, 64, 0);
 #else
-		fill(coverage, binLength, 0);
+		resize(coverage, binLength, 0);
 #endif
 	}
 };
@@ -133,7 +133,7 @@ appendTrans(TId & locusId, TId & transId, TName const & transName)
 		resize(transToDContig, locusId + 1, Generous());		
 	transId = length(transToDContig[locusId]);
 	if (transId >= (int)length(transToDContig[locusId]))
-		fill(transToDContig[locusId], transId + 1, 0, Generous());
+		resize(transToDContig[locusId], transId + 1, 0, Generous());
 	
 	int contigId = length(transNames);
 	transToDContig[locusId][transId] = contigId;
@@ -181,7 +181,7 @@ void sumStats(TString &s)
 		prod += i*s[i];
 	}
 	if (i < histSize + 2)
-		fill(s, histSize + 2, 0);
+		resize(s, histSize + 2, 0);
 	s[histSize] = sum;
 	s[histSize + 1] = prod;
 }
@@ -311,7 +311,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 
 			// rename nodeIds
 			if (nodeId >= (int)length(nodeToMContig))
-				fill(nodeToMContig, nodeId + 1, -1, Generous());
+				resize(nodeToMContig, nodeId + 1, -1, Generous());
 #ifdef RENAME_NODES
 			if (nodeToMContig[nodeId] == -1)
 			{
@@ -321,7 +321,7 @@ loadTranscriptAnnotation(FragmentStore<TSpec, TConfig> & store, CharString const
 			nodeId = nodeToMContig[nodeId];
 #endif
 			if ((int)length(stats.contigStats) <= nodeId)
-				fill(stats.contigStats, nodeId + 1, Pair<double, int>(0, 0));
+				resize(stats.contigStats, nodeId + 1, Pair<double, int>(0, 0));
 			stats.contigStats[nodeId] = Pair<double, int>(0, endPos - beginPos);
 
 			TAnnotation a;
@@ -434,7 +434,7 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 				if (length(bins) <= binNo)
 					resize(bins, binNo + 1);
 				bins[binNo].binLength = binNo;
-				fill(bins[binNo].coverage, 64, 0);
+				resize(bins[binNo].coverage, 64, 0);
 #else
 				for (binNo = 0; binNo < (int)length(bins); ++binNo)
 					if (bins[binNo].binLength > transLen)
@@ -451,11 +451,11 @@ countSingleMatches(FragmentStore<TSpec, TConfig> &store, TMatches const &matches
 		
 		unsigned i = length(ids);
 		if (i >= length(stats.histSingleContigs))
-			fill(stats.histSingleContigs, i + 1, 0.0, Generous());
+			resize(stats.histSingleContigs, i + 1, 0.0, Generous());
 		stats.histSingleContigs[i] += 1.0 / ambig;
 	}
 	if (ambig >= length(stats.histSingleAmbig))
-		fill(stats.histSingleAmbig, ambig + 1, 0, Generous());
+		resize(stats.histSingleAmbig, ambig + 1, 0, Generous());
 	++stats.histSingleAmbig[ambig];
 }
 
@@ -603,11 +603,11 @@ countPairedMatches(FragmentStore<TSpec, TConfig> &store, TMatches const matches[
 				
 				unsigned i = length(ids);
 				if (i >= length(stats.histMPContigs))
-					fill(stats.histMPContigs, i + 1, 0.0, Generous());
+					resize(stats.histMPContigs, i + 1, 0.0, Generous());
 				stats.histMPContigs[i] += val;
 			}
 	if (ambig >= length(stats.histMPAmbig))
-		fill(stats.histMPAmbig, ambig + 1, 0, Generous());
+		resize(stats.histMPAmbig, ambig + 1, 0, Generous());
 	++stats.histMPAmbig[ambig];
 }
 
@@ -687,7 +687,7 @@ loadAlignments(FragmentStore<TSpec, TConfig> &store, CharString const &fileName)
 		std::istringstream iss4(line.substr(posErrors + 8));		// skip ",errors="
 		iss4 >> errors;
 		if (errors >= length(stats.histMatchErrors))
-		fill(stats.histMatchErrors, errors + 1, 0, Generous());
+		resize(stats.histMatchErrors, errors + 1, 0, Generous());
 		++stats.histMatchErrors[errors];
 
 		m.errors = errors;
@@ -835,7 +835,7 @@ dumpResults(FragmentStore<TSpec, TConfig> &store, CharString const &prefix)
 		file << ">" << i << "\tcvrg=" << locusCoverage << std::endl;
 #else
 		std::ostringstream ss;
-		ss.fill('0');
+		ss.resize('0');
 		ss << prefix << ".mat/" << setw(3) << (i / 1000) << "xxx/" << setw(6) << i << ".mat";
 		
 		file.open(ss.str().c_str(), ios_base::out | ios_base::binary);

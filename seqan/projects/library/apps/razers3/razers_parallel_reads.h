@@ -290,7 +290,7 @@ inline void goOverContig(
 	
 	// Number of Threads Allowed for Verification. Shared by all blocks
 	String<int> tav;
-	fill(tav, options.numberOfBlocks, 1, Exact());
+	resize(tav, options.numberOfBlocks, 1, Exact());
 	
 	#pragma omp parallel num_threads((int)options.numberOfCores)
 	{
@@ -553,7 +553,7 @@ int _mapSingleReadsParallelCreatePatterns(
 	if (options.maqMapping){
 		resize(cnts, 2);
 		for (unsigned i = 0; i < length(cnts); ++i)
-			fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
+			resize(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
 	}
 
 	// clear stats
@@ -564,7 +564,7 @@ int _mapSingleReadsParallelCreatePatterns(
 	SEQAN_PROTIMESTART(find_time);
 	
 	String<RazerSOptions<TSpec> > threadOptions; 
-	fill(threadOptions, options.numberOfBlocks, options, Exact());
+	resize(threadOptions, options.numberOfBlocks, options, Exact());
 	
 	// iterate over genome sequences
 	for (int contigId = 0; contigId < (int)length(store.contigStore); ++contigId){

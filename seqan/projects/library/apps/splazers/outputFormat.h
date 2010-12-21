@@ -281,7 +281,7 @@ countCoocurrences(TMatches & matches, TCounts & cooc, TOptions & options)
 {
 	clear(cooc);
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength) + 1;
-	fill(cooc,maxSeedErrors+1,0);
+	resize(cooc,maxSeedErrors+1,0);
 	for (int i = 0; i < maxSeedErrors+1; ++i)
 		cooc[i] = 1;
 	
@@ -734,7 +734,7 @@ void dumpMatches(
 		//if (maxErrors > 10) maxErrors = 10;
 		resize(stats, maxErrors + 1);
 		for (unsigned i = 0; i <= maxErrors; ++i)
-			fill(stats[i], length(reads), 0);
+			resize(stats[i], length(reads), 0);
 		countMatches(matches, stats);
 	}
 
@@ -1506,7 +1506,7 @@ void dumpMatches(
 			unsigned unique = 0;
 			unsigned insertions = 0;
 			unsigned deletions = 0;
-			fill(posError, maxReadLength, 0);
+			resize(posError, maxReadLength, 0);
 			
 			if (options.hammingOnly)
 				unique = getErrorDistribution(posError, matches, reads, genomes, options);

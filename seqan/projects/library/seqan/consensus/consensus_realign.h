@@ -236,7 +236,7 @@ reAlign(FragmentStore<TFragSpec, TConfig>& fragStore,
 
 		// Initialize the consensus of the band
 		clear(myRead);
-		fill(myRead, length(fragStore.readSeqStore[alignIt->readId]), TProfileChar());
+		resize(myRead, length(fragStore.readSeqStore[alignIt->readId]), TProfileChar());
 		resize(bandConsensus, 2 * bandwidth + (alignIt->endPos - alignIt->beginPos), Generous());
 		TConsIter bandConsIt = begin(bandConsensus);
 		TConsIter myReadIt = begin(myRead);
@@ -563,7 +563,7 @@ reAlign(FragmentStore<TSpec, TConfig>& fragStore,
 	typedef String<TProfile> TProfileString;
 	typedef typename Iterator<TProfileString, Standard>::Type TConsIter;
 	TProfileString consensus;
-	fill(consensus, maxPos - minPos, TProfile());
+	resize(consensus, maxPos - minPos, TProfile());
 
 	TConsIter itCons = begin(consensus, Standard() );
 	TConsIter itConsEnd = end(consensus, Standard());

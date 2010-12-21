@@ -180,7 +180,7 @@ SEQAN_CHECKPOINT
         me.blockCount = ((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
 			
     clear(me.b_table);
-    fill(me.b_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+    resize(me.b_table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
     for (TWord j = 0; j < me.needleLength; ++j) {
         // Determine character position in array table
@@ -224,7 +224,7 @@ inline void _patternInit (Pattern<TNeedle, AbndmAlgo> & me)
 {
     SEQAN_CHECKPOINT
 	clear(me.r_table);
-    fill(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
+    resize(me.r_table, me.blockCount * (me.limit + 1), 0, Exact());
     me.findNext = false;
     me.last = 0;
 	_findBeginInit(me, needle(me));
@@ -462,8 +462,8 @@ inline bool _findAbndmLargeNeedle(TFinder & finder, Pattern<TNeedle, AbndmAlgo> 
 	}
         //me.r_table[0] = me.b_table[pos];				    
         
-	fill(nR,me.blockCount,0 - 1);
-	fill(oR,me.blockCount,0);
+	resize(nR,me.blockCount,0 - 1);
+	resize(oR,me.blockCount,0);
 	// nR = 0 - 1;
 	//for(i = me.blockCount;i <= me.limit * me.blockCount;++i) me.r_table[i] = 0 - 1;//set all states in r_table to 1
 	for(i = 1;i <= me.limit;++i){

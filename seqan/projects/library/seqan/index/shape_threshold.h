@@ -76,8 +76,8 @@ int qgramThreshold(TShape const & shape, TPatternSize patternLength, TErrors err
 	CharString bitString;
 
 	// initialize coverage map and bitmap of preserved q-grams
-	fill(preserved, patternLength - length(shape) + 1, true);
-	fill(coverage, patternLength, 0);
+	resize(preserved, patternLength - length(shape) + 1, true);
+	resize(coverage, patternLength, 0);
 
 	shapeToString(bitString, shape);
 	for (unsigned i = 0; i < length(bitString); ++i)
@@ -470,7 +470,7 @@ void initPatterns(
 
 	// a modifier is a pair of position and error type
 	String<Pair<int, ErrorType> > mods;
-	fill(mods, maxErrors, Pair<int, ErrorType> (0, SEQAN_MATCH));
+	resize(mods, maxErrors, Pair<int, ErrorType> (0, SEQAN_MATCH));
 
 	TPattern pattern;
 	int span = length(bitShape);
@@ -479,14 +479,14 @@ void initPatterns(
 	// Enumerate all edit-modification patterns with up to k errors
 	if (maxErrors == 0) 
 	{
-		fill(pattern, span, (ErrorAlphabet)SEQAN_MATCH);
+		resize(pattern, span, (ErrorAlphabet)SEQAN_MATCH);
 		appendValue(patternStore, pattern, Generous());
 	}
 	else
 	do 
 	{
 		clear(pattern);
-		fill(pattern, span, (ErrorAlphabet)SEQAN_MATCH);
+		resize(pattern, span, (ErrorAlphabet)SEQAN_MATCH);
 
 		// place errors in the pattern
 		bool skip = false;
@@ -786,7 +786,7 @@ void computeExactQGramThreshold(
 	TMatrixCol col1;
 	const TThresh infty = MaxValue<TThresh>::VALUE >> 1;
 	
-	fill(col0, maxErrors * statesCount, infty);
+	resize(col0, maxErrors * statesCount, infty);
 	resize(col1, maxErrors * statesCount);
 
 	// RECURSION BEGIN
@@ -923,7 +923,7 @@ void computeQGramFilteringSensitivity(
 	// columns n-1 and n for recursion 
 	TMatrixCol col0;
 	TMatrixCol col1;
-	fill(col0, maxErrors * statesCount * maxT, (TFloat)_transform(0.0));
+	resize(col0, maxErrors * statesCount * maxT, (TFloat)_transform(0.0));
 	resize(col1, maxErrors * statesCount * maxT);
 
 #ifdef COUNT_LOSSES

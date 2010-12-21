@@ -100,7 +100,7 @@ _localAlignment(StringSet<TString, Dependent<> > const& str,
 	TSize len0 = length(str[0]);
 	TSize len1 = length(str[1]);
 	String<bool> forbidden;
-	fill(forbidden, len0 * len1, false);
+	resize(forbidden, len0 * len1, false);
 
 	// Stop looking for local alignments, if there score is too low
 	TScoreValue local_score = 0;

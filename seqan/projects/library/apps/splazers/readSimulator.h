@@ -159,10 +159,10 @@ void simulateReads(
 	srand ( time(NULL) );
 	
 	String<int> bucketCounter;
-	fill(bucketCounter,maxErrors,0);
+	resize(bucketCounter,maxErrors,0);
 	
 	String<int> kickOutCount;
-	fill(kickOutCount,maxErrors,0);
+	resize(kickOutCount,maxErrors,0);
 
 	if (verbose)
 		std::cout << "\nSimulating...";

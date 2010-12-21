@@ -1633,29 +1633,10 @@ SEQAN_CHECKPOINT
 		_setLength(me, new_length);
 		return new_length;
 	}
-};
 
-template <typename TValue, typename TSpec, typename TSize, typename TExpand>
-inline typename Size< String<TValue, TSpec> >::Type 
-resize(
-	String<TValue, TSpec> & me,
-	TSize new_length,
-	Tag<TExpand> const)
-{
-SEQAN_CHECKPOINT
-	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-///.Function.fill.param.object.type:Class.String
-
-template <typename TExpand>
-struct _Fill_String
-{
 	template <typename T, typename TValue>
 	static inline typename Size<T>::Type 
-	fill_(
+	resize_(
 		T & me,
 		typename Size<T>::Type new_length,
 		TValue const & val)
@@ -1693,15 +1674,26 @@ SEQAN_CHECKPOINT
 	}
 };
 
+template <typename TValue, typename TSpec, typename TSize, typename TExpand>
+inline typename Size< String<TValue, TSpec> >::Type 
+resize(
+	String<TValue, TSpec> & me,
+	TSize new_length,
+	Tag<TExpand> const)
+{
+SEQAN_CHECKPOINT
+	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
+}
+
 template <typename TValue, typename TSpec, typename TSize, typename TValue2, typename TExpand>
 inline TSize 
-fill(String<TValue, TSpec> & me,
+resize(String<TValue, TSpec> & me,
 	 TSize new_length,
 	 TValue2 const & val,
 	 Tag<TExpand> const)
 {
 SEQAN_CHECKPOINT
-	return _Fill_String<Tag<TExpand> const>::fill_(me, new_length, val);
+	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////

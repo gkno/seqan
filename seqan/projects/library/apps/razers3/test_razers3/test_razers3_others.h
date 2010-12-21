@@ -44,10 +44,10 @@ SEQAN_DEFINE_TEST(test_split_algorithm) {
 	using namespace seqan;
 		
 	String<int> tav;
-	fill(tav, 4, 1, Exact());
+	resize(tav, 4, 1, Exact());
 	
 	String<int> expTav;
-	fill(expTav, 4, 1, Exact());
+	resize(expTav, 4, 1, Exact());
 
 	expTav[0] = -1;
 	expTav[1] = 2;

@@ -695,7 +695,7 @@ getAdjacencyMatrix(Graph<Undirected<TCargo, TSpec> > const& g,
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TMatrix>::Type TSize;
 	TSize len = getIdUpperBound(g.data_id_managerV);
-	fill(mat, len*len, 0);
+	resize(mat, len*len, 0);
 
 	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
 	TIterConst it = begin(g.data_vertex, Standard());

@@ -181,7 +181,7 @@ TFloat _computeVariance( StringSet<String<TAlphabet> > W,  StringSet<String<TAlp
 	unsigned int n;
 
 	String <TFloat> pStar;
-	fill(pStar, sizeW, 0);
+	resize(pStar, sizeW, 0);
 
 	Shape<TAlphabet, SimpleShape> orderShape;
 	resize(orderShape, M.order);

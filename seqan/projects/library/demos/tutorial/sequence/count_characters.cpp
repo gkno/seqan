@@ -7,7 +7,7 @@ using namespace seqan;
 void countOneMers(CharString const & str) {
 	//FRAGMENT(count-one-mers-initialize-table)
 	String<int> table;
-	fill(table, 'z' - 'a' + 1, 0);
+	resize(table, 'z' - 'a' + 1, 0);
 	
 	//FRAGMENT(count-one-mers-count-chars)
 	for (unsigned int i = 0; i < length(str); ++i) {

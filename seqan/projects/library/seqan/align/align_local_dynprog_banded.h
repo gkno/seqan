@@ -64,9 +64,9 @@ SEQAN_CHECKPOINT
     setDimension(finder.matrix, 2);
     setLength(finder.matrix, 0, diagonalWidth);
     setLength(finder.matrix, 1, height);
-    fill(finder.matrix, 0);
+    resize(finder.matrix, 0);
 
-    fill(finder.forbidden, height * diagonalWidth, false);
+    resize(finder.forbidden, height * diagonalWidth, false);
 
 	finder.bestEndPos = minValue<typename TFinder::TMatrixPosition>();
 	finder.bestBeginPos = minValue<typename TFinder::TMatrixPosition>();

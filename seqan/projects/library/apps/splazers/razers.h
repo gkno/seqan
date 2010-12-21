@@ -1945,7 +1945,7 @@ int mapSingleReads(
 	{
 		resize(cnts, 2);
 		for (unsigned i = 0; i < length(cnts); ++i)
-			fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
+			resize(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
 	}
 #endif
 
@@ -2082,7 +2082,7 @@ int mapSingleReads(
  	{
 		resize(cnts, 2);
 		for (unsigned i = 0; i < length(cnts); ++i)
-			fill(cnts[i], length(readSet), 31);
+			resize(cnts[i], length(readSet), 31);
 	}
 #endif
 	

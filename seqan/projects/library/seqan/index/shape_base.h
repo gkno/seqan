@@ -730,7 +730,7 @@ The hash value corresponds to the maximal @Function.hash2@ value of a shape begi
 	SEQAN_CHECKPOINT
 
 		clear(bitmap);
-		fill(bitmap, length(me), '1');
+		resize(bitmap, length(me), '1');
 	}
 
 //____________________________________________________________________________

@@ -912,9 +912,9 @@ _extendSeedOneDirection(Seed<TPosition, TSeedSpec/*SimpleSeed*/> & seed,
     String<TScore> antiDiagonal2;
     String<TScore> antiDiagonal3;
 
-    fill(antiDiagonal1, 1, 0);
-    fill(antiDiagonal2, 2, infimum);
-    fill(antiDiagonal3, _min(3, xLength+1), infimum);
+    resize(antiDiagonal1, 1, 0);
+    resize(antiDiagonal2, 2, infimum);
+    resize(antiDiagonal3, _min(3, xLength+1), infimum);
 
     String<TScore> *antiDiag1 = &antiDiagonal1;	//smallest diagonal
 	String<TScore> *antiDiag2 = &antiDiagonal2;

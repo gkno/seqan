@@ -429,7 +429,7 @@ addVertex(Graph<Tree<TCargo, TSpec> >& g)
 	else vd = obtainId(g.data_id_managerV);
 	if (vd == length(g.data_vertex)) {
 		appendValue(g.data_vertex, (TEdgeStump*) 0);
-		fill(g.data_parent, vd + 1, nilVertex, Generous());
+		resize(g.data_parent, vd + 1, nilVertex, Generous());
 	} else {
 		g.data_vertex[vd] = (TEdgeStump*) 0;
 		g.data_parent[vd] = nilVertex;
@@ -652,7 +652,7 @@ getAdjacencyMatrix(Graph<Tree<TCargo, TSpec> > const& g,
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
 	typedef typename Size<TMatrix>::Type TSize;
 	TSize len = getIdUpperBound(g.data_id_managerV);
-	fill(mat, len*len, 0);
+	resize(mat, len*len, 0);
 	
 	typedef typename Iterator<String<TEdgeStump*> const, Standard>::Type TIterConst;
 	TIterConst it = begin(g.data_vertex, Standard());

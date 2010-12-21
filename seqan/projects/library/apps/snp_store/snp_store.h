@@ -592,7 +592,7 @@ void computeCnks(THomoTable & cnks, TDependencies & fks, TOptions & options)
 	resize(lFks,256); 
 	resize(lC, 256*256); 
 	resize(fks,256);
-	fill(cnks, 256*256*64,0.0); // n<256, k<256, q<64 
+	resize(cnks, 256*256*64,0.0); // n<256, k<256, q<64 
 	
 	
 	
@@ -715,8 +715,8 @@ getHomoProbs(THomoTable & cnks,
 #endif	
 	
 	String<double> sumE, sumF;
-	fill(sumE,4,0.0);
-	fill(sumF,4,0.0);
+	resize(sumE,4,0.0);
+	resize(sumF,4,0.0);
 
 	for(unsigned i = 0; i < 4; ++i)
 	{

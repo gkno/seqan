@@ -1380,7 +1380,7 @@ calculateMateIndices(TMateIndexString &mateIndices, FragmentStore<TSpec, TConfig
 		TId id = (*it).pairMatchId;
 		if (id == TAlignedRead::INVALID_ID) continue;
 		if (length(mateIndices) < 2*id + 2)
-			fill(mateIndices, 2*id + 2, TAlignedRead::INVALID_ID, Generous());
+			resize(mateIndices, 2*id + 2, TAlignedRead::INVALID_ID, Generous());
 		mateIndices[2*id + 1 - getMateNo(me, (*it).readId)] = idx;
 	}
 }

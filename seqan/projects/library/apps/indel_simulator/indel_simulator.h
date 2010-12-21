@@ -509,7 +509,7 @@ simulateIndelsFromRanges( ::std::map<int,IndelInfo>	&indelMap,
 	{
 		if(options._debugLevel > 0)std::cout << "No range probabilities given. Using same probability for each bucket.\n";
 		clear(options.rangeProbs);
-		fill(options.rangeProbs,length(options.ranges),0.2);
+		resize(options.rangeProbs,length(options.ranges),0.2);
 	}
 	
 	// make sure range probs add up to 1
@@ -820,7 +820,7 @@ reduceIndelSetAccordingToProbs( StringSet<TIndelInfo> & indelSet,
 	{
 		if(options._debugLevel > 0)std::cout << "No range probabilities given. Using same probability for each bucket.\n";
 		clear(options.rangeProbs);
-		fill(options.rangeProbs,length(options.ranges),0.2);
+		resize(options.rangeProbs,length(options.ranges),0.2);
 	}
 	
 	// make sure range probs add up to 1

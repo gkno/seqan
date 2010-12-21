@@ -79,7 +79,7 @@ _alignBandedResizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequ
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, upperDiagonal - lowerDiagonal + 3);
     resize(matrix);
-    // fill(matrix, -42);
+    // resize(matrix, -42);
 }
 
 

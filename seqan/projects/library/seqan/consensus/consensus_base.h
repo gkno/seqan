@@ -255,7 +255,7 @@ convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
 
 	// Fill the matrix
 	typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
-	fill(mat, coverage * numCol, '.');
+	resize(mat, coverage * numCol, '.');
 	alignIt = alignItBegin;
 	TSize readPos = 0;
 	TMatIter matIt = begin(mat, Standard());
@@ -559,7 +559,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 		typedef String<bool> TLeftOver;
 		typedef typename Iterator<TLeftOver, Standard>::Type TLeftOverIter;
 		TLeftOver leftOver;
-		fill(leftOver, nseq, true);
+		resize(leftOver, nseq, true);
 		typedef String<std::pair<TSize, TSize> > TSeqToBegin;
 		typedef typename Iterator<TSeqToBegin, Standard>::Type TSeqToBeginIter;
 		TSeqToBegin seqToBegin;
@@ -596,7 +596,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 			compOffset[order[compIndex]] = len;
 			len+=compLength[order[compIndex]];
 		}
-		fill(mat, len * maxCoverage, gapChar);
+		resize(mat, len * maxCoverage, gapChar);
 
 		// Fill in the segments
 		typedef typename Infix<TString>::Type TInfix;
@@ -623,7 +623,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 			TSize currentCompLength = compLength[order[compIndex]];
 
 			clear(active);
-			fill(active, maxCoverage, false);
+			resize(active, maxCoverage, false);
 
 			// Find the empty rows
 			for(TSize i=0;i<nseq; ++i) {
@@ -751,7 +751,7 @@ _countLetters(String<TValue, TSpec> const& mat,
 	resize(counterValues, len);
 	for(TSize i=0;i<len; ++i) {
 		TCounter counter;
-		fill(counter, alphabetSize + 1, 0);
+		resize(counter, alphabetSize + 1, 0);
 		counterValues[i] = counter;
 	}
 
@@ -800,7 +800,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 	// Initialization
 	TSize len = length(mat) / maxCoverage;
 	TProbabilityDistribution backroundDist;
-	fill(backroundDist, alphabetSize + 1, ((TProbability) 1 / (TProbability) (alphabetSize + 1)));
+	resize(backroundDist, alphabetSize + 1, ((TProbability) 1 / (TProbability) (alphabetSize + 1)));
 	
 	// Get an initial consensus
 	typedef typename Iterator<TCounters, Standard>::Type TCounterIt;
@@ -821,7 +821,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 			}
 		}
 		TProbabilityDistribution prDist;
-		fill(prDist, alphabetSize + 1, 0);
+		resize(prDist, alphabetSize + 1, 0);
 		if (c == gapChar) prDist[alphabetSize] = 1;
 		else prDist[ordValue((TAlphabet) c)] = 1;
 		appendValue(posPrDist, prDist, Generous());
@@ -839,7 +839,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 
 		// Count all letters in the consensus
 		TProbabilityDistribution nI;
-		fill(nI, alphabetSize + 1, 0);
+		resize(nI, alphabetSize + 1, 0);
 		TPosPrDistIter itPosPrDist = begin(posPrDist, Standard());
 		TPosPrDistIter itPosPrDistEnd = end(posPrDist, Standard());
 		for(;itPosPrDist!=itPosPrDistEnd; ++itPosPrDist) 
@@ -856,7 +856,7 @@ consensusCalling(String<TValue, TSpec> const& mat,
 
 		// Count all letters that agree / disagree with the consensus
 		TProbabilityDistribution nIJ;
-		fill(nIJ, (alphabetSize + 1) * (alphabetSize + 1), 0);
+		resize(nIJ, (alphabetSize + 1) * (alphabetSize + 1), 0);
 		typedef String<TValue, TSpec> TMatrix;
 		typedef typename Iterator<TMatrix, Standard>::Type TMatIter;
 		TMatIter matIt = begin(mat, Standard());
@@ -1132,7 +1132,7 @@ write(TFile & file,
 
 		// Print the alignment matrix
 		String<TSize> coverage;
-		fill(coverage, len, 0);
+		resize(coverage, len, 0);
 		typedef typename Iterator<TGappedConsensus, Standard>::Type TConsIter;
 		TConsIter itCons = begin(gappedConsensus, Standard());
 		TSize winSize = 60;

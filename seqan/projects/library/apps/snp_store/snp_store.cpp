@@ -231,7 +231,7 @@ int detectSNPs(
 	// Step 2: Load fragmentStore.readSeqStore and fragmentStore.alignedReadStore
 	// open read files and  store open file pointers
 	String<int> highestChrId;
-	fill(highestChrId,length(readFNames),0);
+	resize(highestChrId,length(readFNames),0);
 	vector< ::std::fstream* > readFileStreams;
 	readFileStreams.resize(length(readFNames)); 
 	for(unsigned i = 0; i < length(readFNames); ++i)

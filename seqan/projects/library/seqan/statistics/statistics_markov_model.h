@@ -154,7 +154,7 @@ public:
 		setLength(transition, 0, column_size);
 		setLength(transition, 1, column_size);
 
-		fill(transition,(TFloat) 0);
+		resize(transition,(TFloat) 0);
 
 		clear(stationaryDistribution);
 		resize(stationaryDistribution, column_size);
@@ -495,11 +495,11 @@ public:
 		//resize the matrices
 		setLength(I, 0, column_size);
 		setLength(I, 1, column_size);
-		fill(I, 0.0);
+		resize(I, 0.0);
 
 		setLength(Ip, 0, column_size);
 		setLength(Ip, 1, column_size);
-		fill(Ip, 0.0);
+		resize(Ip, 0.0);
 
 		for(unsigned int i=0; i<column_size; i++){
 			value(I,i,i)=1.0;
@@ -551,7 +551,7 @@ Matrix<TValue,2> _computeInverseMatrix(Matrix<TValue,2> &matrix)
 	//resize the matrix
 	setLength(result, 0, n);
 	setLength(result, 1, n);
-	fill(result, 0.0);
+	resize(result, 0.0);
 
 	//copy the matrix in result, since the procedure is in-place
 	TMatrix tmp = matrix;
@@ -566,7 +566,7 @@ Matrix<TValue,2> _computeInverseMatrix(Matrix<TValue,2> &matrix)
 	// inverse by columns
 	for (unsigned int j=0; j<n; j++)
 	{
-		fill(col,n,0);
+		resize(col,n,0);
 		if(j>0)
 		{
 			for(i=0; i<n; i++)
@@ -602,7 +602,7 @@ String<TValue> _ludcmp(Matrix<TValue,2> &result)
 	int i, imax, j, k,d;
 	double big,dum,sum,temp;
 	String<TValue> vv;
-	fill(vv, n, 1.0);
+	resize(vv, n, 1.0);
 
 
 	d = 1;

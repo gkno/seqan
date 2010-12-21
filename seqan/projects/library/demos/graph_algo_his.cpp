@@ -9,7 +9,7 @@ int main() {
 ///Creation of a simple sequence and corresponding weights
 	String<char> seq("zeitgeist");
 	String<unsigned int> weights;
-	fill(weights, length(seq), 1);
+	resize(weights, length(seq), 1);
 	assignProperty(weights, 2, 10);
 ///Out-parameter: A string of positions belonging to the heaviest increasing subsequence
 	typedef Position<String<unsigned int> >::Type TPosition;

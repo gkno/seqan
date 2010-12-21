@@ -63,7 +63,7 @@ public:
 void tally(Histogram<Dense> & histogram, size_t value, double weight)
 {
     if (value >= length(histogram.counters))
-        fill(histogram.counters, value + 1, 0);
+        resize(histogram.counters, value + 1, 0);
     histogram.counters[value] += weight;
 }
 

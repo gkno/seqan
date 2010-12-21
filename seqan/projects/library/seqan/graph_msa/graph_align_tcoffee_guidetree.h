@@ -101,7 +101,7 @@ njTree(String<TValue, TStringSpec>& mat,
 		return;
 	}
 	String<TCargo> av;    // Average branch length to a combined node
-	fill(av,nseq,0);
+	resize(av,nseq,0);
 
 	String<TVertexDescriptor> connector;   // Nodes that need to be connected
 	resize(connector, nseq);
@@ -609,7 +609,7 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<TSize> active;
-	fill(active, nseq, 1);
+	resize(active, nseq, 1);
 	// Vertex descriptor that represents that entry
 	String<TVertexDescriptor> nodes;
 	reserve(nodes, nseq);
@@ -634,7 +634,7 @@ upgmaTree(String<TStringValue, TStringSpec>& mat,
 
 	// Property map for sum of weights for each node
 	String<TCargo> weights;
-	fill(weights, nseq, (TCargo) 0);
+	resize(weights, nseq, (TCargo) 0);
 	reserve(weights, 2*nseq - 1);
 
 	// Merge groups
@@ -729,7 +729,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 
 	// Which entries in the matrix are still active and how many members belong to this group
 	String<TSize> active;
-	fill(active, nseq, 1);
+	resize(active, nseq, 1);
 	// Vertex descriptor that represents that entry
 	typedef String<TVertexDescriptor> TNodeString;
 	typedef typename Iterator<TNodeString, Standard>::Type TNodeIter;
@@ -744,7 +744,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	typedef Pair<TValue, TVD> TWeightEdgePair;
 	typedef String<TWeightEdgePair> TMinValues;
 	TMinValues minValues;
-	fill(minValues, nseq, TWeightEdgePair(maxVal, 0));
+	resize(minValues, nseq, TWeightEdgePair(maxVal, 0));
 	TEdgeI itE(pairGraph);
 	for(;!atEnd(itE);goNext(itE)) {
 		TVD s = sourceVertex(itE);
@@ -776,7 +776,7 @@ upgmaTree(Graph<Undirected<TValue, TSpec1> >& pairGraph,
 	
 	// Property map for sum of weights for each node
 	String<TCargo> weights;
-	fill(weights, nseq, (TCargo) 0);
+	resize(weights, nseq, (TCargo) 0);
 	reserve(weights, 2*nseq - 1);
 
 	// Merge groups

@@ -104,7 +104,7 @@ void setHost (Pattern<TNeedle, BndmAlgo> & me, TNeedle2 const& needle) {
 	else me.blockCount=((me.needleLength-1) / BitsPerValue<TWord>::VALUE)+1;
 			
 	clear(me.table);
-	fill(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+	resize(me.table, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
 	for (TWord j = 0; j < me.needleLength; ++j) {
 		// Determine character position in array table
@@ -146,7 +146,7 @@ inline void _patternInit (Pattern<TNeedle, BndmAlgo> & me)
 {
 SEQAN_CHECKPOINT
 	clear(me.activeFactors);
-	fill(me.activeFactors, me.blockCount, 0, Exact());
+	resize(me.activeFactors, me.blockCount, 0, Exact());
 	me.last = 0;
 }
 

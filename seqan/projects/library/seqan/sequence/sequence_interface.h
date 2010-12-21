@@ -1485,6 +1485,48 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// resize with copy-constructed values (former fill)
+//////////////////////////////////////////////////////////////////////////////
+
+/**
+.Function.resize:
+..cat:Containers
+..summary:Resizes a container. If the new length exceeds the old length the new elements are filled.
+..signature:Size resize(object, new_length, value [, resize_tag])
+..param.object: A container.
+...type:Class.String
+..param.new_length: The new length $object$ will get.
+..param.value: Value that is copied if new items are created in $object$.
+...remarks:If the $value$ argument is omitted, the default constructor is used to create
+new items in $object$.
+..param.resize_tag: Specifies the strategy that is applied if the capacity of $object$ is less than $new_length$. (optional)
+...type:Tag.Overflow Strategy
+...default:Specified by @Metafunction.DefaultOverflowExplicit@.
+..returns:The new length $length(object)$.
+...metafunction:Metafunction.Size
+..remarks:This function can be used both for expanding and for shrinking $object$.
+...text:
+	If $new_length$ is too large for $object$ (i.e. the @Function.capacity@ of $object$ is too small), then $object$ is
+	expanded as far as possible. The resulting length
+	of $object$ could be less than $new_length$, depending on the type of $object$ and the available storage.
+..see:Function.length
+..see:Function.reserve
+..see:Function.resize
+..include:seqan/sequence.h
+*/
+
+template <typename T, typename TSize, typename TValue>
+inline typename Size<T>::Type  
+resize(
+	T & me, 
+	TSize new_length,
+	TValue const & val)
+{
+SEQAN_CHECKPOINT
+	return resize(me, new_length, val, typename DefaultOverflowExplicit<T>::Type());
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // resizeSpace
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1611,49 +1653,7 @@ inline void eraseBack(T & me)
     erase(me, length(me) - 1);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// fill
-//////////////////////////////////////////////////////////////////////////////
-
-/**
-.Function.fill:
-..cat:Containers
-..summary:Resizes a container. If the new length exceeds the old length the new elements are filled.
-..signature:Size fill(object, new_length, value [, resize_tag])
-..param.object: A container.
-...type:Class.String
-..param.new_length: The new length $object$ will get.
-..param.value: Value that is copied if new items are created in $object$.
-...remarks:If the $value$ argument is omitted, the default constructor is used to create
-new items in $object$.
-..param.resize_tag: Specifies the strategy that is applied if the capacity of $object$ is less than $new_length$. (optional)
-...type:Tag.Overflow Strategy
-...default:Specified by @Metafunction.DefaultOverflowExplicit@.
-..returns:The new length $length(object)$.
-...metafunction:Metafunction.Size
-..remarks:This function can be used both for expanding and for shrinking $object$.
-...text:
-	If $new_length$ is too large for $object$ (i.e. the @Function.capacity@ of $object$ is too small), then $object$ is
-	expanded as far as possible. The resulting length
-	of $object$ could be less than $new_length$, depending on the type of $object$ and the available storage.
-..see:Function.length
-..see:Function.reserve
-..see:Function.resize
-..include:seqan/sequence.h
-*/
-
-template <typename T, typename TSize, typename TValue>
-inline typename Size<T>::Type  
-fill(
-	T & me, 
-	TSize new_length,
-	TValue const & val)
-{
-SEQAN_CHECKPOINT
-	return fill(me, new_length, val, typename DefaultOverflowExplicit<T>::Type());
-}
-
-//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // shrinkToFit
 //////////////////////////////////////////////////////////////////////////////
 

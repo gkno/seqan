@@ -743,7 +743,7 @@ Depending on the depth-first search mode the root is not the first DFS node. To 
 		TPropertyMap & pm,
 		TProperty const & prop)
 	{
-		fill(pm, 2 * length(index), prop, Generous());
+		resize(pm, 2 * length(index), prop, Generous());
 	}
 */
 	template < typename TSize >

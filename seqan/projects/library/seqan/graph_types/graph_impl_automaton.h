@@ -594,7 +594,7 @@ getAdjacencyMatrix(Graph<Automaton<TAlphabet, TCargo, TSpec> > const& g,
 	typedef typename Size<TMatrix>::Type TMatrixSize;
 	TVertexDescriptor nilVal = getNil<TVertexDescriptor>();
 	TMatrixSize len = getIdUpperBound(g.data_id_managerV);
-	fill(mat, len*len, 0);
+	resize(mat, len*len, 0);
 	typedef typename Iterator<String<AutomatonEdgeArray<TEdge, TAlphabet> > const, Standard>::Type TIterConst;
 	TIterConst it = begin(g.data_vertex, Standard());
 	TIterConst itEnd = end(g.data_vertex, Standard());

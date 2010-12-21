@@ -67,7 +67,7 @@ _alignResizeMatrix(Matrix<TScoreValue, 2> & matrix, TSequence const & sequence0,
 
     setLength(matrix, 0, length(sequence0) + 1);
     setLength(matrix, 1, length(sequence1) + 1);
-    fill(matrix, -420);
+    resize(matrix, -420);
     // resize(matrix);
 }
 

@@ -348,9 +348,9 @@ namespace SEQAN_NAMESPACE_MAIN
 	SEQAN_CHECKPOINT
 
 		clear(bitmap);
-		fill(bitmap, me.blockLen1, '1');
-		fill(bitmap, me.blockLen1 + me.gapLen, '0');
-		fill(bitmap, me.blockLen1 + me.gapLen + me.blockLen2, '1');
+		resize(bitmap, me.blockLen1, '1');
+		resize(bitmap, me.blockLen1 + me.gapLen, '0');
+		resize(bitmap, me.blockLen1 + me.gapLen + me.blockLen2, '1');
 	}
 
 //____________________________________________________________________________

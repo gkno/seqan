@@ -98,9 +98,9 @@ void _initPattern(Pattern<TNeedle, ShiftAnd> & pattern) {
     if (needleLength % BitsPerValue<TWord>::VALUE > 0)
         pattern._blockCount += 1;
     // Resize and initialize the "match/mismatch" word.
-	fill(pattern._prefSufMatch, pattern._blockCount, 0u, Exact());
+	resize(pattern._prefSufMatch, pattern._blockCount, 0u, Exact());
     // Resize and initialize the bitmask table.
-	fill(pattern._table, pattern._blockCount * ValueSize<TAlphabet>::VALUE, 0u, Exact());
+	resize(pattern._table, pattern._blockCount * ValueSize<TAlphabet>::VALUE, 0u, Exact());
 	for (TWord j = 0; j < needleLength; ++j) {
 		// Determine character position in array table.
 		TWord pos = ordValue(getValue(ndl, j));

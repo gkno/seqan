@@ -305,7 +305,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	typedef String<TCargo> TWeights;
 	typedef typename Iterator<TWeights>::Type TWeightsIter;
 	TWeights weights;
-	fill(weights, posToSlotMap.size(),0);
+	resize(weights, posToSlotMap.size(),0);
 	posItStr2 = 0;
 	for(TStringIterConst itStr2 = begin(str2);itStr2 != itStrEnd2;++itStr2, ++posItStr2) {
 		TVertexSetIterConst itVEnd = end(getValue(itStr2));
@@ -330,7 +330,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	Graph<Undirected<void> > matchGraph;
 	typedef typename VertexDescriptor<Graph<Undirected<void> > >::Type TVD;
 	String<bool> vertexMap;
-	fill(vertexMap, m + n, false);
+	resize(vertexMap, m + n, false);
 	for(TSize i = 0; i < m; ++i) addVertex(matchGraph);
 	for(TSize i = 0; i < n; ++i) value(vertexMap, addVertex(matchGraph)) = true;
 	for(typename TPositionToSlotMap::const_iterator mapIt = posToSlotMap.begin();mapIt != posToSlotMap.end(); ++mapIt) {
@@ -362,7 +362,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	clear(align);
 	// Retrieve all matches
 	String<bool> matchedVertices;
-	fill(matchedVertices, n + m, false);
+	resize(matchedVertices, n + m, false);
 	typedef typename Iterator<TEdges>::Type TEdgesIter;
 	TEdgesIter itEdges = begin(edges);
 	TEdgesIter itEdgesEnd = end(edges);
@@ -372,7 +372,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		value(matchedVertices, i) = true;
 		value(matchedVertices, m+j) = true;
 		TVertexSet tmp;
-		fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+		resize(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 		TVertexSetIter itVEnd = end(value(str1,i));
 		TSize count = 0;
 		for(TVertexSetIter itV = begin(value(str1,i));itV != itVEnd;++itV) {
@@ -393,7 +393,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		if (*itVertex < m) {
 			TSize i = *itVertex;
 			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			resize(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 			TVertexSetIter itVEnd = end(value(str1, i));
 			TSize count = 0;
 			for(TVertexSetIter itV = begin(value(str1, i));itV != itVEnd;++itV) {
@@ -404,7 +404,7 @@ heaviestMatching(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 		} else {
 			TSize j = *itVertex - m;
 			TVertexSet tmp;
-			fill(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
+			resize(tmp, (seqsInStr1 + seqsInStr2), nilVertex);
 			TVertexSetIter itVEnd = end(value(str2, j));
 			TSize count = 0;
 			for(TVertexSetIter itV = begin(value(str2, j));itV != itVEnd;++itV) {

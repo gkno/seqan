@@ -184,8 +184,8 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 
 	String<TFloat> qualitySum;
 	String<int> count;
-	fill(qualitySum,pm_options.totalN,(TFloat)0.0);
-	fill(count,pm_options.totalN,0);
+	resize(qualitySum,pm_options.totalN,(TFloat)0.0);
+	resize(count,pm_options.totalN,0);
 
 	if (_streamEOF(file)) return;
 
@@ -241,7 +241,7 @@ qualityDistributionFromPrbFile(TFile & file, TDistribution & avg, ParamChooserOp
 	::std::cout << " Readcount = " << count[0] << "\t";
 	::std::cout << " kicked out " << kickout << " low quality reads." << std::endl;
 
-	fill(avg,pm_options.totalN,(TFloat)0.0);
+	resize(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -258,8 +258,8 @@ qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooser
 	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
-	fill(qualitySum,pm_options.totalN,0);
-	fill(count,pm_options.totalN,0);
+	resize(qualitySum,pm_options.totalN,0);
+	resize(count,pm_options.totalN,0);
 
 	if (_streamEOF(file)) return;
 
@@ -284,7 +284,7 @@ qualityDistributionFromFastQFile(TFile & file, TDistribution & avg, ParamChooser
 	}
 	if(pm_options.verbose)::std::cout << " Readcount = " << count[0] << std::endl;
 
-	fill(avg,pm_options.totalN,(TFloat)0.0);
+	resize(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -301,8 +301,8 @@ qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChoo
 	typedef typename Value<TDistribution>::Type TFloat;
 
 	String<int> qualitySum, count;
-	fill(qualitySum,pm_options.totalN,0);
-	fill(count,pm_options.totalN,0);
+	resize(qualitySum,pm_options.totalN,0);
+	resize(count,pm_options.totalN,0);
 
 	if (_streamEOF(file)) return;
 
@@ -328,7 +328,7 @@ qualityDistributionFromFastQIntFile(TFile & file, TDistribution & avg, ParamChoo
 	}
 	::std::cout << " Readcount = " << count[0] << std::endl;
 
-	fill(avg,pm_options.totalN,(TFloat)0.0);
+	resize(avg,pm_options.totalN,(TFloat)0.0);
 	for(unsigned t = 0; t < pm_options.totalN; ++t)
 	{
 		TFloat f = (TFloat) qualitySum[t] / (TFloat)count[t];
@@ -347,7 +347,7 @@ getAvgFromPrbDirectory(TPath prbPath, TError & errorDistribution, ParamChooserOp
 {
 	typedef typename Value<TError>::Type TFloat;
 
-	fill(errorDistribution,pm_options.totalN,(TFloat)0.0);
+	resize(errorDistribution,pm_options.totalN,(TFloat)0.0);
 	
 	String< ::std::string > files;
 	getDir(prbPath,files);
@@ -670,7 +670,7 @@ makeSelectedStatsFile(TError & errorDistr, ParamChooserOptions & pm_options)
 	unsigned minT = 0;
 
 	String<unsigned> weights;
-	fill(weights,length(shapeStrings),0);
+	resize(weights,length(shapeStrings),0);
 	for(unsigned i = 0; i < length(shapeStrings) ; ++i)
 		for(unsigned pos = 0; pos < length(shapeStrings[i]) ; ++pos)
 			if(shapeStrings[i][pos] == '1')

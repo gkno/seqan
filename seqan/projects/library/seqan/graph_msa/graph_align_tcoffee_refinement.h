@@ -309,8 +309,8 @@ _msaRefinement(String<TValue, TSpec>& mat,
 	typedef typename Iterator<TProfileString, Standard>::Type TProfIter;
 	TProfileString prof1;
 	TProfileString prof2;
-	fill(prof1, alignLen, TProfile());
-	fill(prof2, alignLen, TProfile());
+	resize(prof1, alignLen, TProfile());
+	resize(prof2, alignLen, TProfile());
 	TMatIter itMat = begin(mat, Standard());
 	TMatIter itMatEnd = begin(mat, Standard());
 	itMatEnd += nseq1 * alignLen;

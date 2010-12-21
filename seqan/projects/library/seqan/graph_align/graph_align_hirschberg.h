@@ -211,7 +211,7 @@ _alignHirschberg(TTrace& trace,
 			
 			// The DP Matrix for gaps from the left
 			TColumn horizontal;
-			fill(horizontal, (inf_len2+1), inf); 
+			resize(horizontal, (inf_len2+1), inf); 
 			
 			// The DP Matrix for gaps from the top, a single value is enough
 			TScoreValue vert;

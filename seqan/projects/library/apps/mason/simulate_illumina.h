@@ -437,7 +437,7 @@ void buildSimulationInstructions(ReadSimulationInstruction<IlluminaReads> & inst
     SEQAN_ASSERT_GT(length(inst.editString), 0u);
     if (options.simulateQualities) {
         clear(inst.qualities);
-        fill(inst.qualities, length(inst.editString), 0, Exact());
+        resize(inst.qualities, length(inst.editString), 0, Exact());
 
         for (unsigned i = 0, j = 0; i < length(inst.editString); i++) {
             SEQAN_ASSERT_LEQ(j, inst.endPos - inst.beginPos + inst.delCount);

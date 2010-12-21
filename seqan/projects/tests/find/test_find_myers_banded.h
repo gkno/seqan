@@ -72,7 +72,7 @@ bool testMyersUkkonen(TString seq1, TString seq2, bool dump = true)
 	int delta = length(seq2) - length(seq1);
 	
 	clear(mat);
-	fill(mat, (length(seq1)+1) * (length(seq2)+1), -9, Exact());
+	resize(mat, (length(seq1)+1) * (length(seq2)+1), -9, Exact());
 
     for (unsigned i = 0; i <= length(seq1); ++i)
         mat[i] = i;

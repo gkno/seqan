@@ -450,7 +450,7 @@ connectedComponents(Graph<TSpec> const& g_source,
 	
 	// Initialization
 	String<bool> tokenMap;
-	fill(tokenMap, getIdUpperBound(_getVertexIdManager(g_source)), false);
+	resize(tokenMap, getIdUpperBound(_getVertexIdManager(g_source)), false);
 
 	// Connected components
 	TSize label = 0;
@@ -1027,7 +1027,7 @@ dijkstra(Graph<TSpec> const& g,
 
 	// S is initially empty
 	String<bool> setS;
-	fill(setS, getIdUpperBound(_getVertexIdManager(g)), false);
+	resize(setS, getIdUpperBound(_getVertexIdManager(g)), false);
 
 	// Set-up the priority queue
 	typedef Pair<TVertexDescriptor, TDistVal> TKeyValue;
@@ -1616,7 +1616,7 @@ pathGrowingAlgorithm(Graph<TSpec>& g,
 	TGraph mutant(g);
 
 	// Initialy not a single edge is selected
-	fill(edgeMap1, getIdUpperBound(_getEdgeIdManager(g)), false);
+	resize(edgeMap1, getIdUpperBound(_getEdgeIdManager(g)), false);
 	TEdgeMap edgeMap2 = edgeMap1;
 	TValue edgeMap1Sum = 0;
 	TValue edgeMap2Sum = 0;
@@ -1766,7 +1766,7 @@ _weightedBipartiteMatching(Graph<TSpec>& g,
 	typedef Graph<Directed<void> > TEqualityGraph;
 	typedef typename EdgeType<TEqualityGraph>::Type TEdgeStump;
 	TEqualityGraph equalGraph;
-	fill(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
+	resize(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
 	equalGraph.data_id_managerV = g.data_id_managerV;
 	TEdgeIterator itE(g);
 	for(;!atEnd(itE); goNext(itE)) {
@@ -1795,7 +1795,7 @@ _weightedBipartiteMatching(Graph<TSpec>& g,
 		setT.clear();
 		setNeighborS.clear();
 		clear(free);
-		fill(free, getIdUpperBound(_getVertexIdManager(g)), true);
+		resize(free, getIdUpperBound(_getVertexIdManager(g)), true);
 		clear(reverseMatchMap);
 		resizeVertexMap(g, reverseMatchMap);
 		
@@ -1868,7 +1868,7 @@ _weightedBipartiteMatching(Graph<TSpec>& g,
 
 		// Build new equal graph
 		clear(equalGraph);
-		fill(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
+		resize(equalGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
 		equalGraph.data_id_managerV = g.data_id_managerV;
 		TEdgeIterator itE(g);
 		for(;!atEnd(itE); goNext(itE)) {
@@ -1927,12 +1927,12 @@ weightedBipartiteMatching(Graph<TSpec>& g,
 	// Copy the original graph
 	TGraph fullGraph;
 	typedef typename EdgeType<TGraph>::Type TEdgeStump;
-	fill(fullGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
+	resize(fullGraph.data_vertex, length(_getVertexString(g)), (TEdgeStump*) 0);
 	fullGraph.data_id_managerV = g.data_id_managerV;
 	TVertexMap myVertexMap = vertMap;
-	fill(myVertexMap, maxN + maxN, setIdentifier);
+	resize(myVertexMap, maxN + maxN, setIdentifier);
 	String<TCargo> myWeightMap;
-	fill(myWeightMap, maxN * maxN, 0);
+	resize(myWeightMap, maxN * maxN, 0);
 	TEdgeIterator itE(g);
 	typedef std::pair<TVertexDescriptor, TVertexDescriptor> TEdge;
 	typedef std::set<TEdge> TEdgeSet;

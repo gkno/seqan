@@ -53,7 +53,7 @@ SEQAN_DEFINE_TEST(test_align_matrix)
 
 	setLength(matrix2, 0, 2);
 	setLength(matrix2, 1, 2);
-	fill(matrix2,1.0);
+	resize(matrix2,1.0);
 
 	// Basic 2D operations, A+B,A-B,A*a,A*B, A==B
 
@@ -81,7 +81,7 @@ SEQAN_DEFINE_TEST(test_align_matrix)
 	setDimension(matrixN,2);
 	setLength(matrix2, 0, 3);
 	setLength(matrix2, 1, 2);
-	fill(matrixN,1.0);
+	resize(matrixN,1.0);
 }
 
 #endif  // TESTS_ALIGN_TEST_ALIGN_MATRIX_H_

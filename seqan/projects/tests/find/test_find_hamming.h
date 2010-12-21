@@ -46,7 +46,7 @@ template <typename TString, typename TFunctor>
 void iterateOverStrings(size_t len, TString &string, TFunctor &functor) {
     typedef typename Value<TString>::Type TAlphabet;
     typedef typename Iterator<TString>::Type TIterator;
-    fill(string, len, 0);
+    resize(string, len, 0);
 
     bool done = false;  // Flag for breaking loop.
     while (!done) {

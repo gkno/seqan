@@ -395,12 +395,12 @@ appendSegmentMatches(StringSet<TString, TSpec> const& str,
 	// "Front" and "Back"-overlap counter for each read
 	String<TSize> frontOvl;
 	String<TSize> backOvl;
-	fill(frontOvl, nseq, 0);
-	fill(backOvl, nseq, 0);
+	resize(frontOvl, nseq, 0);
+	resize(backOvl, nseq, 0);
 	
 	// Pairwise alignments
 	String<bool> aligned;
-	fill(aligned, length(pList), true);
+	resize(aligned, length(pList), true);
 	typedef Iterator<String<bool>, Standard>::Type TBoolIter;
 	TBoolIter itAligned = begin(aligned, Standard());
 	TPairIter itPair = begin(pList, Standard());

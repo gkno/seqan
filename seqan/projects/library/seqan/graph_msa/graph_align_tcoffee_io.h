@@ -699,7 +699,7 @@ void write(TFile & file,
 {
 	SEQAN_CHECKPOINT
 	String<bool> edgeMap;
-	fill(edgeMap, getIdUpperBound(_getEdgeIdManager(g)), false);
+	resize(edgeMap, getIdUpperBound(_getEdgeIdManager(g)), false);
 	write(file, g, names, edgeMap, BlastLib());
 }
 

@@ -141,7 +141,7 @@ SEQAN_DEFINE_TEST(Sequence_Interface)
 	SEQAN_ASSERT_LEQ(len, length(str2));
 	SEQAN_ASSERT_LEQ(len, 100u);
 
-	len = fill(str2, 150, 'C');
+	len = resize(str2, 150, 'C');
 	SEQAN_ASSERT_LEQ(len, length(str2));
 	SEQAN_ASSERT_LEQ(len, 150u);
 
@@ -351,11 +351,11 @@ SEQAN_DEFINE_TEST(String_Base)
 	resize(str3, 200);
 	SEQAN_ASSERT_EQ(length(str3), 200u);
 
-	fill(str3, 100, 'x');
+	resize(str3, 100, 'x');
 	SEQAN_ASSERT_EQ(length(str3), 100u);
-	fill(str3, 200, 'x');
+	resize(str3, 200, 'x');
 	SEQAN_ASSERT_EQ(length(str3), 200u);
-	fill(str3, 400, 'y');
+	resize(str3, 400, 'y');
 	SEQAN_ASSERT_EQ(length(str3), 400u);
 
 //____________________________________________________________________________
@@ -451,7 +451,7 @@ void TestStringResize()
 	resize(str1, 50);
 	SEQAN_ASSERT_EQ(length(str1), 50u);
 
-	fill(str1, 100, 3);
+	resize(str1, 100, 3);
 	SEQAN_ASSERT_EQ(length(str1), 100u);
 	SEQAN_ASSERT_EQ(getValue(str1, 51), 3);
 	SEQAN_ASSERT_EQ(getValue(str1, 99), 3);
@@ -556,7 +556,7 @@ SEQAN_DEFINE_TEST(String_Pointer)
 	SEQAN_ASSERT_EQ(reserve(str1, 100, Insist()), 100u);
 	SEQAN_ASSERT_EQ(reserve(str1, 100, Limit()), capacity(str1));
 
-	fill(str1, 20, 'A');
+	resize(str1, 20, 'A');
 	SEQAN_ASSERT_TRUE(isEqual(str1, "AAAAAAAAAAAAAAAAAAAA"));
 
 	resize(str1, 10);
@@ -914,7 +914,7 @@ SEQAN_DEFINE_TEST(Std_String)
 
 	resize(str_1, 100);
 	SEQAN_ASSERT_EQ(length(str_1), 100u);
-	fill(str_1, 150, 'x');
+	resize(str_1, 150, 'x');
 	SEQAN_ASSERT_EQ(length(str_1), 150u);
 
 //____________________________________________________________________________

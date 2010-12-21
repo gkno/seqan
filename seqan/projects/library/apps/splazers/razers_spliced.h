@@ -1857,10 +1857,10 @@ void mapSplicedReads(
 	__int64 firstNo = 0;				// first number over all potential prefix matches in the queue
 	Pair<TGPos> gPair;
 	
-	fill(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
+	resize(lastPotMatchNo, length(host(swiftPatternL)), (__int64)-1, Exact());
 	
 	String<Pair<TGPos> > lastRightMatch;		// begin and end of last verified suffix match
-	fill(lastRightMatch, length(host(swiftPatternL)), Pair<TGPos>(0,0), Exact());
+	resize(lastRightMatch, length(host(swiftPatternL)), Pair<TGPos>(0,0), Exact());
 	
 	TSize gLength = length(genome);
 	TMatch mR = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

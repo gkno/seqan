@@ -25,7 +25,7 @@ void qgramCounting(TStringSet &set, TIndexSpec)
 	Matrix<int, 2> distMat;
 	setLength(distMat, 0, seqNum);
 	setLength(distMat, 1, seqNum);
-	fill(distMat, 0);
+	resize(distMat, 0);
 
 	std::cout << std::endl << "Length of the CountsDir fibre: " << length(indexCountsDir(index)) << std::endl;
 	TIterCountsDir itCountsDir = begin(indexCountsDir(index), Standard());

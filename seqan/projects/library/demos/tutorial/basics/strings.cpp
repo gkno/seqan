@@ -24,7 +24,7 @@ int main()
 	typedef String<TSize> TCounterString;
 	TCounterString counter;
 	TSize alphSize = ValueSize<AminoAcid>::VALUE;
-	fill(counter, alphSize, 0);
+	resize(counter, alphSize, 0);
 	for (TIter it = begin(sourceSeq); it != itEnd; goNext(it))
 		value(counter, ordValue(value(it))) += 1;
 // FRAGMENT(frequency-table)

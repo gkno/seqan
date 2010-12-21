@@ -234,7 +234,7 @@ _alignTracePrint(String<String<TVertexDescriptor, TSpec> >& nodeString,
 
 	if (tv == Horizontal) {
 		for (int i = pos1 + segLen - 1; i>= (int) pos1;--i) {
-			fill(value(nodeString, index), len1 + len2, nilVertex);
+			resize(value(nodeString, index), len1 + len2, nilVertex);
 			TStringIter it = begin(value(nodeString, index));
 			for(TPos all = 0;all<len1;++all) {
 				*it = getValue(getValue(getValue(str,0),i), all);
@@ -245,7 +245,7 @@ _alignTracePrint(String<String<TVertexDescriptor, TSpec> >& nodeString,
 	}
 	else if (tv == Vertical) {
 		for (int i = pos2 + segLen - 1; i>= (int) pos2;--i) {
-			fill(value(nodeString, index), len1 + len2, nilVertex);
+			resize(value(nodeString, index), len1 + len2, nilVertex);
 			TStringIter it = begin(value(nodeString, index));
 			it+=len1;
 			for(TPos all = 0;all<len2;++all) {

@@ -1816,7 +1816,7 @@ int _mapSingleReads(
 	{
 		resize(cnts, 2);
 		for (unsigned i = 0; i < length(cnts); ++i)
-			fill(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
+			resize(cnts[i], readCount, 31); //initialize with maxeditDist, 11:5 for count:dist
 	}
 
 	// clear stats

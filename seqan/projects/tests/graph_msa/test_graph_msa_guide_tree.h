@@ -46,7 +46,7 @@ void Test_GuideTree_NeighbourJoining()
 
     // Create a distance matrix
     String<double> mat;
-    fill(mat, 8*8, 0);
+    resize(mat, 8*8, 0);
     assignValue(mat, 0*8+1, 7);assignValue(mat, 0*8+2, 8);assignValue(mat, 0*8+3, 11);assignValue(mat, 0*8+4, 13);assignValue(mat, 0*8+5, 16);assignValue(mat, 0*8+6, 13);assignValue(mat, 0*8+7, 17);
     assignValue(mat, 1*8+2, 5);assignValue(mat, 1*8+3, 8);assignValue(mat, 1*8+4, 10);assignValue(mat, 1*8+5, 13);assignValue(mat, 1*8+6, 10);assignValue(mat, 1*8+7, 14);
     assignValue(mat, 2*8+3, 5);assignValue(mat, 2*8+4, 7);assignValue(mat, 2*8+5, 10);assignValue(mat, 2*8+6, 7);assignValue(mat, 2*8+7, 11);
@@ -95,7 +95,7 @@ Test_UpgmaGuideTree(int seed) {
 		TSize n = pickRandomNumber(rng, pdfN);
 		Graph<Undirected<double> > distGraph;
 		String<double> distMatrix;
-		fill(distMatrix, n * n, 0);
+		resize(distMatrix, n * n, 0);
 		TSize all = (n * (n - 1)) / 2;
 		typedef std::set<double> TDistanceSet;
 		typedef TDistanceSet::iterator TSetIt;

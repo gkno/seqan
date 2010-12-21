@@ -145,7 +145,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		// Since SA is capable of fast random access, we can temporarily use it as lexprevpos array.
 		TArray &lexprevpos = SA;
 
-		fill(lexnextpos, length(s), NIL, Exact());
+		resize(lexnextpos, length(s), NIL, Exact());
 		std::fill(begin(lexprevpos, Standard()), end(lexprevpos, Standard()), NIL);
 
 		// finally create suffix array
@@ -179,8 +179,8 @@ namespace SEQAN_NAMESPACE_MAIN
 		TArray lexnextpos;
 		TArray lexprevpos;
 
-		fill(lexnextpos, length(s), NIL, Exact());
-		fill(lexprevpos, length(s), NIL, Exact());
+		resize(lexnextpos, length(s), NIL, Exact());
+		resize(lexprevpos, length(s), NIL, Exact());
 
 		// finally create suffix array
 		//   1) first suffix is returned...
@@ -212,7 +212,7 @@ namespace SEQAN_NAMESPACE_MAIN
 		
 		TArray lexxorpos;
 		// invalid ^ invalid == 0
-		fill(lexxorpos, length(s), 0, Exact());
+		resize(lexxorpos, length(s), 0, Exact());
 
 		// finally create suffix array
 		//   1) first suffix is returned...
@@ -271,7 +271,7 @@ namespace SEQAN_NAMESPACE_MAIN
 			// If the string is too long, we cannot use the MSB of the SA entries as a flag.
 			// Instead, we allocate a separate bitvector
 			String<bool, Packed<> > visited;
-			fill(visited, length(s), false);
+			resize(visited, length(s), false);
 
 			// 2) convert into inverse suffix array
 			TValue n = 0;
@@ -384,8 +384,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TAlphabetArray lexfirstpos, lexlastpos;
 
-		fill(lexfirstpos, ALPHABETSIZE, NIL, Exact());
-		fill(lexlastpos, ALPHABETSIZE, NIL, Exact());
+		resize(lexfirstpos, ALPHABETSIZE, NIL, Exact());
+		resize(lexlastpos, ALPHABETSIZE, NIL, Exact());
 
 		// main loop
 		TTextIter it = end(s, Standard());
@@ -479,8 +479,8 @@ namespace SEQAN_NAMESPACE_MAIN
 
 		TAlphabetArray lexfirstpos;
 		TAlphabetArray lexlastpos;
-		fill(lexfirstpos, ALPHABETSIZE, NIL, Exact());
-		fill(lexlastpos, ALPHABETSIZE, NIL, Exact());
+		resize(lexfirstpos, ALPHABETSIZE, NIL, Exact());
+		resize(lexlastpos, ALPHABETSIZE, NIL, Exact());
 
 		// main loop
 		TTextIter it = end(s, Standard());

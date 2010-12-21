@@ -175,8 +175,8 @@ SEQAN_CHECKPOINT
 
     typedef String<TScoreValue> TColumn;
     TColumn mat;
-    fill(mat, diagonalWidth, 0);
-    fill(trace, height * diagonalWidth, Stop);
+    resize(mat, diagonalWidth, 0);
+    resize(trace, height * diagonalWidth, Stop);
     
     // Record the max score
     TScoreValue score_max = 0;
@@ -326,7 +326,7 @@ SEQAN_CHECKPOINT
     TSize height = hi_row - lo_row;
 
 	String<bool> forbidden;
-	fill(forbidden, (height+1) * diagonalWidth, false);//(len1+1) * (len2+1), false);
+	resize(forbidden, (height+1) * diagonalWidth, false);//(len1+1) * (len2+1), false);
 
 	// Stop looking for local alignments, if their score is too low
 	while (true) {

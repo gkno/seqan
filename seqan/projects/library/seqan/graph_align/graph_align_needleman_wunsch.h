@@ -169,7 +169,7 @@ _alignNeedlemanWunsch(TTrace & trace,
 
 	resize(column, len2 + 1);
 //	resize(trace, len1*len2);
-	fill(trace, len1*len2, 0);
+	resize(trace, len1*len2, 0);
 	typedef typename Iterator<TColumn, Standard>::Type TColIterator;
 	TColIterator coit = begin(column, Standard());
 	TColIterator col_end = end(column, Standard());

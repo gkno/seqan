@@ -436,7 +436,7 @@ _subTreeSearch(TGuideTree& guideTree,
 	// Label all internal vertices with the closest root node
 	typedef Pair<TSize, TSize> TDistGroup; // Distance, group index
 	String<TDistGroup> closestRoot;  
-	fill(closestRoot, getIdUpperBound(_getVertexIdManager(guideTree)), TDistGroup(0,0), Exact());
+	resize(closestRoot, getIdUpperBound(_getVertexIdManager(guideTree)), TDistGroup(0,0), Exact());
 	for(TSize i=0; i< (TSize) length(groupRoot); ++i) {
 		TVertexDescriptor v = groupRoot[i];
 		TSize dist = 0;
@@ -904,7 +904,7 @@ alignmentEvaluation(Graph<Alignment<TStringSet, TCargo, TSpec> > const& g,
 	bool gapOpeni = false;
 	bool gapOpenj = false;
 	TScoreValue totalScore = 0;
-	fill(numPairs, alphSize * alphSize, 0);
+	resize(numPairs, alphSize * alphSize, 0);
 	for(TSize i = 0; i<nseq-1; ++i) {
 		for(TSize j=i+1; j<nseq; ++j) {
 			for(TSize k=0;k<len; ++k) {

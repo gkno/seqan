@@ -681,30 +681,27 @@ replace(TTargetValue * target,
 //////////////////////////////////////////////////////////////////////////////
 ///.Function.resize.param.object.type:Adaption.char array
 
-template <typename TValue, typename TExpand>
+template <typename TValue, typename TSize, typename TExpand>
 inline size_t
 resize(
 	TValue * me,
-	size_t new_length,
+	TSize new_length,
 	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
 	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-///.Function.fill.param.object.type:Adaption.char array
-
-template <typename TValue, typename TExpand>
+template <typename TValue, typename TSize, typename TExpand>
 inline size_t
-fill(
+resize(
 	TValue * me,
-	size_t new_length,
+	TSize new_length,
 	TValue const & val,
 	Tag<TExpand> const &)
 {
 SEQAN_CHECKPOINT
-	return _Fill_String<Tag<TExpand> const>::fill_(me, new_length, val);
+	return _Resize_String<Tag<TExpand> const>::resize_(me, new_length, val);
 }
 
 //////////////////////////////////////////////////////////////////////////////

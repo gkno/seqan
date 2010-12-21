@@ -120,7 +120,7 @@ bool loadSeqs(TSeqSet &seqs, TQuals &quals, TIDs &ids, const char *fileName)
                 assignSeq(seqs[i], multiFasta[j], format);		// read Genome sequence
                 assignSeqId(ids[i], multiFasta[j], format);		// read Genome ids
                 assignQual(quals[i], multiFasta[j], format);	// read qualities
-                fill(quals[i], length(seqs[i]), 33 + 80);
+                resize(quals[i], length(seqs[i]), 33 + 80);
             }
         }
     }

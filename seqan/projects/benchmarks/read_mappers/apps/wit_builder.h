@@ -498,7 +498,7 @@ void matchesToErrorFunction(TFragmentStore /*const*/ & fragments,
     // In oracle SAM mode, we store the distance of the alignment from the SAM file for each read.
     String<int> readAlignmentDistances;
     if (options.oracleSamMode)
-        fill(readAlignmentDistances, length(fragments.readNameStore), -1);
+        resize(readAlignmentDistances, length(fragments.readNameStore), -1);
     
 //     for (TAlignedReadIterator it = begin(fragments.alignedReadStore, Standard()); it != end(fragments.alignedReadStore, Standard()); ++it) {
 //         fprintf(stderr, "%3u\t%3u\t%8lu\t%3s\n", it->contigId, it->readId, it->endPos, (it->endPos < it->beginPos ? "R" : "F"));

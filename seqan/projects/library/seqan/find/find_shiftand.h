@@ -107,7 +107,7 @@ setHost(Pattern<TNeedle, ShiftAnd> & me, TNeedle2 const & needle)
 		me.blockCount = (me.needleLength - 1) / BitsPerValue<TWord>::VALUE + 1;
 	
 	clear(me.bitMasks);
-	fill(me.bitMasks, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
+	resize(me.bitMasks, me.blockCount * ValueSize<TValue>::VALUE, 0, Exact());
 
 	for (TWord j = 0; j < me.needleLength; ++j)
 		me.bitMasks[
@@ -202,7 +202,7 @@ _patternInit (Pattern<TNeedle, ShiftAnd> & me)
 {
 SEQAN_CHECKPOINT
 	clear(me.prefSufMatch);
-	fill(me.prefSufMatch, me.blockCount, 0, Exact());
+	resize(me.prefSufMatch, me.blockCount, 0, Exact());
 }
 
 //____________________________________________________________________________

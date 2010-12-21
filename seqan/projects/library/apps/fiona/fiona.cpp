@@ -187,7 +187,7 @@ namespace seqan  {
 	inline bool nodePredicate(Iter<TFionaIndex, VSTree<TopDown<TSpec> > > &it)
 	{
 		FionaNodeConstraints &cons = cargo(container(it));
-		int repLen = parentRepLength(it);
+		unsigned repLen = parentRepLength(it);
 
 		/*TODO may utilise >=*/
 		return cons.replen_min < repLen && repLen < cons.replen_max;
@@ -239,13 +239,13 @@ void expectedValueTheoretical(TExpectedValues & expected, TReadSet const & readS
 	{
 		unsigned readLength = length(readSet[i]);
 		if (readLength >= length(readLengthHistogram))
-			fill(readLengthHistogram, readLength + 1, 0);
+			resize(readLengthHistogram, readLength + 1, 0);
 		++readLengthHistogram[readLength];
 	}
 
 	// a = read_length - suffix_length + 1
 	clear(expected);
-	fill(expected, length(readLengthHistogram), 0.0);
+	resize(expected, length(readLengthHistogram), 0.0);
 	for (unsigned i = 0; i < length(readLengthHistogram); ++i)
 	{
 		for (unsigned suffixLength = 0; suffixLength <= i; ++suffixLength)
@@ -429,13 +429,13 @@ void applyReadErrorCorrections(
 	}
 }
 
-template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+template <typename TObserved, typename TExpected, typename TStrictness, typename TErrorRate, typename TPrefixLen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
 	TExpected expected,
 	TStrictness strictness,
-	Terrorrate ,
-	Tprefixlen ,
+	TErrorRate,
+	TPrefixLen,
 	FionaPoisson const)
 {
 	// compare the cumulative poisson distribution with the p-value (strictness)
@@ -452,26 +452,26 @@ inline bool potentiallyErroneousNode(
 	return pValue <= strictness;
 }
 
-template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+template <typename TObserved, typename TExpected, typename TStrictness, typename TErrorRate, typename TPrefixLen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
-	TExpected ,
-	TStrictness cutoff,
-	Terrorrate	,
-	Tprefixlen  ,
+	TExpected expected,
+	TStrictness,
+	TErrorRate,
+	TPrefixLen,
 	FionaExpected const)
 {
 	// compare the weight for a node with a cutoff given by the strictness param.
-	return observed < cutoff;
+	return observed < expected;
 }
 
-template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+template <typename TObserved, typename TExpected, typename TStrictness, typename TErrorRate, typename TPrefixLen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
-	TExpected ,
+	TExpected,
 	TStrictness cutoff,
-	Terrorrate	,
-	Tprefixlen  ,
+	TErrorRate,
+	TPrefixLen,
 	FionaCount const)
 {
 	// compare the weight for a node with a fixed cutoff
@@ -480,13 +480,13 @@ inline bool potentiallyErroneousNode(
 
 
 
-template <typename TObserved, typename TExpected, typename TStrictness, typename Terrorrate, typename Tprefixlen>
+template <typename TObserved, typename TExpected, typename TStrictness, typename TErrorRate, typename TPrefixLen>
 inline bool potentiallyErroneousNode(
 	TObserved observed,
 	TExpected expected,
 	TStrictness falsenegrate,
-	Terrorrate errorrate,
-    Tprefixlen prefixlen,
+	TErrorRate errorrate,
+    TPrefixLen prefixlen,
 	FionaPoissonSens const)
 {
 	// Poisson based threshold, given a fixed percentage of missed errors (1 - min sensitivity)
@@ -856,7 +856,7 @@ void correctReads(
 	
 	String<TCorrected> corrections;
 	TCorrected zeroCorr = { 0, 0, 0, 0, 0, 0, 0 };
-	fill(corrections, readCount, zeroCorr);
+	resize(corrections, readCount, zeroCorr);
 	
 	if (IsSameType<TAlgorithm, FionaExpected_>::VALUE)
 		std::cout << std::endl << "Method with expected value for each level" << std::endl;
@@ -919,7 +919,7 @@ void correctReads(
 				{
 					unsigned posInRead = getOccurrences(it)[j].i2 + ofs + i;
 					if (length(freq) <= posInRead)
-						fill(freq, posInRead + 1, 0);
+						resize(freq, posInRead + 1, 0);
 					++freq[posInRead];
 				}
 				

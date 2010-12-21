@@ -192,7 +192,7 @@ longestCommonSubsequence(TString1 const& str1,
 	// The occurences of each letter in the second string
 	typedef String<TPos> TPositions;
 	String<TPositions> occ;
-	fill(occ, alphabet_size, TPositions());
+	resize(occ, alphabet_size, TPositions());
 	typedef typename Iterator<TString2 const, Standard>::Type TStringIter;
 	TStringIter itStr2 = begin(str2, Standard());
 	TStringIter endItStr2 = end(str2, Standard());

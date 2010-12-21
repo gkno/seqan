@@ -621,7 +621,7 @@ write(TFile & target,
 	// Get clear ranges
 	typedef Pair<typename TFragmentStore::TReadPos, typename TFragmentStore::TReadPos> TClrRange;
 	String<TClrRange> clrRange;
-	fill(clrRange, length(fragStore.readStore), TClrRange(0,0));
+	resize(clrRange, length(fragStore.readStore), TClrRange(0,0));
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore, Standard>::Type TAlignIter;
 	TAlignIter alignIt = begin(fragStore.alignedReadStore, Standard() );
 	TAlignIter alignItEnd = end(fragStore.alignedReadStore, Standard() );

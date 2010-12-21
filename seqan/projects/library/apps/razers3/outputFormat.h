@@ -327,7 +327,7 @@ countCoocurrences(
 
 	clear(cooc);
 	int maxSeedErrors = (int)(options.errorRate * options.artSeedLength) + 1;
-	fill(cooc,maxSeedErrors+1,0);
+	resize(cooc,maxSeedErrors+1,0);
 	for (int i = 0; i < maxSeedErrors+1; ++i)
 		cooc[i] = 1;
 	
@@ -1198,7 +1198,7 @@ int dumpMatches(
 			unsigned unique = 0;
 			unsigned insertions = 0;
 			unsigned deletions = 0;
-			fill(posError, maxReadLength, 0);
+			resize(posError, maxReadLength, 0);
 			
 			if (options.gapMode == RAZERS_UNGAPPED)
 				unique = getErrorDistribution(posError, store, options);

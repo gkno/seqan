@@ -207,7 +207,7 @@ SEQAN_CHECKPOINT
 
 	TPos len = length(keywords);
 	String<TVertexDescriptor> _here_v;
-	fill(_here_v, len, _root);
+	resize(_here_v, len, _root);
 	String<TIterator> _here_it;
 	resize(_here_it, len);
 	for (TPos i = 0; i < len; ++i)

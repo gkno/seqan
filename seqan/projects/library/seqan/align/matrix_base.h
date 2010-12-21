@@ -170,7 +170,7 @@ public:
 		create(data_host);
 
 		//setDimension to 2
-		fill(data_lengths, 2, 0);
+		resize(data_lengths, 2, 0);
 		resize(data_factors, 2);
 		data_factors[0] = 1;
 	}
@@ -231,7 +231,7 @@ public:
 		create(data_host);
 
 		//setDimension to 3
-		fill(data_lengths, 3, 0);
+		resize(data_lengths, 3, 0);
 		resize(data_factors, 3);
 		data_factors[0] = 1;
 	}
@@ -393,7 +393,7 @@ setDimension(Matrix<TValue, DIMENSION> & me,
 	SEQAN_ASSERT(dim_ > 0)
 //std::cout<<"\npress enter1\n";
 //std::cin.get();
-	fill(_dataLengths(me), dim_, 0);
+	resize(_dataLengths(me), dim_, 0);
 
 	resize(_dataFactors(me), dim_);
 	_dataFactors(me)[0] = 1;
@@ -466,7 +466,7 @@ resize(Matrix<TValue, DIMENSION> & me)
 
 template <typename TValue, unsigned DIMENSION, typename TFillValue>
 inline void
-fill(Matrix<TValue, DIMENSION> & me, TFillValue myValue)	//resize the matrix and fill with value
+resize(Matrix<TValue, DIMENSION> & me, TFillValue myValue)	//resize the matrix and fill with value
 {
 	typedef Matrix<TValue, DIMENSION> TMatrix;
 	typedef typename Size<TMatrix>::Type TSize;
@@ -483,9 +483,7 @@ fill(Matrix<TValue, DIMENSION> & me, TFillValue myValue)	//resize the matrix and
 	}
 
 	if (factor_ > 0)
-	{
-		fill(host(me), factor_,myValue);	//The same as resize, however we use fill for the host array
-	}
+		resize(host(me), factor_, myValue);
 }
 
 
@@ -823,7 +821,7 @@ operator * (Matrix<TValue, 2> const & matrix1, Matrix<TValue, 2> const & matrix2
 	//resize the matrix
 	setLength(result, 0, nrow1);
 	setLength(result, 1, ncol2);
-	fill(result,(TValue) 0);
+	resize(result,(TValue) 0);
 
 	//Matrix product
 	for(unsigned int row = 0; row < nrow1; row++)
@@ -1003,7 +1001,7 @@ matricialProduct(Matrix<TValue, 2> &matrix1,
 	//resize the matrix
 	setLength(result, 0, nrow1);
 	setLength(result, 1, ncol2);
-	fill(result,(TValue) 0);
+	resize(result,(TValue) 0);
 
 	//Matrix product
 	for(unsigned int row = 0; row < nrow1; row++)
@@ -1092,7 +1090,7 @@ template < typename TValue >
 // 	//read the transition matrix
 // 	setLength(matrix, 0, column_size);
 // 	setLength(matrix, 1, column_size);
-// fill(matrix,0.0);
+// resize(matrix,0.0);
 // 	for(unsigned int row=0; row<column_size; row++)
 // 	{
 // 		for(unsigned int col=0; col<column_size; col++)

@@ -236,7 +236,7 @@ _alignSmithWaterman(TTrace& trace,
 	TSize len2 = length(str2);
 	resize(mat, (len2+1));   // One column for the diagonal matrix
 	resize(horizontal, (len2+1));   // One column for the horizontal matrix
-	fill(trace, len1 * ((len2 >> 1) + (len2 & 1)), 0);
+	resize(trace, len1 * ((len2 >> 1) + (len2 & 1)), 0);
 	TTraceValue tvMat= 0;
 
 	// Record the max score

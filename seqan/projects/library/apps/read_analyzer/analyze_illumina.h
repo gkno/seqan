@@ -92,19 +92,19 @@ public:
 void setReadLength(ReadEvaluationResult<Illumina> & result, unsigned readLength)
 {
     clear(result.baseCountOverall);
-    fill(result.baseCountOverall, 5, 0);
+    resize(result.baseCountOverall, 5, 0);
 
     clear(result.baseCountPerPosition);
     resize(result.baseCountPerPosition, 5);
     for (unsigned i = 0; i < 5; ++i)
-        fill(result.baseCountPerPosition[i], readLength, 0);
+        resize(result.baseCountPerPosition[i], readLength, 0);
 
     clear(result.qualityCountsPerPositionAndBase);
     resize(result.qualityCountsPerPositionAndBase, 5);
     for (unsigned i = 0; i < 5; ++i) {
         resize(result.qualityCountsPerPositionAndBase[i], 63);
         for (unsigned j = 0; j < 63; ++j) {
-            fill(result.qualityCountsPerPositionAndBase[i][j], readLength, 0);
+            resize(result.qualityCountsPerPositionAndBase[i][j], readLength, 0);
         }
     }
 }
@@ -240,61 +240,61 @@ void printReadEvaluationResults(ReadEvaluationResult<Illumina> const & result)
 void setReadLength(AlignmentEvaluationResult<Illumina> & result, unsigned readLength, unsigned contigCount)
 {
     clear(result.insertCountsPerBase);
-    fill(result.insertCountsPerBase, 5, 0);
+    resize(result.insertCountsPerBase, 5, 0);
     clear(result.deleteCountsPerBase);
-    fill(result.deleteCountsPerBase, 5, 0);
+    resize(result.deleteCountsPerBase, 5, 0);
     clear(result.mismatchCountsPerMismatch);
-    fill(result.mismatchCountsPerMismatch, 25, 0);
+    resize(result.mismatchCountsPerMismatch, 25, 0);
 
     clear(result.qualityCountsForInsertPerBase);
     resize(result.qualityCountsForInsertPerBase, 5);
     for (int i = 0; i < 5; ++i)
-        fill(result.qualityCountsForInsertPerBase[i], 63, 0);
+        resize(result.qualityCountsForInsertPerBase[i], 63, 0);
     clear(result.qualityCountsForMismatchPerBase);
     resize(result.qualityCountsForMismatchPerBase, 25);
     for (int i = 0; i < 25; ++i)
-        fill(result.qualityCountsForMismatchPerBase[i], 63, 0);
+        resize(result.qualityCountsForMismatchPerBase[i], 63, 0);
     
     clear(result.insertCountsPerBasePerPosition);
     resize(result.insertCountsPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i)
-        fill(result.insertCountsPerBasePerPosition[i], readLength, 0);
+        resize(result.insertCountsPerBasePerPosition[i], readLength, 0);
     clear(result.deleteCountsPerBasePerPosition);
     resize(result.deleteCountsPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i)
-        fill(result.deleteCountsPerBasePerPosition[i], readLength, 0);
+        resize(result.deleteCountsPerBasePerPosition[i], readLength, 0);
     clear(result.mismatchCountsPerMismatchPerPosition);
     resize(result.mismatchCountsPerMismatchPerPosition, 25);
     for (int i = 0; i < 25; ++i)
-        fill(result.mismatchCountsPerMismatchPerPosition[i], readLength, 0);
+        resize(result.mismatchCountsPerMismatchPerPosition[i], readLength, 0);
 
     clear(result.qualityCountsBeforeDeletesPerBasePerPosition);
     resize(result.qualityCountsBeforeDeletesPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i) {
         resize(result.qualityCountsBeforeDeletesPerBasePerPosition[i], 63);
         for (int j = 0; j < 63; ++j)
-            fill(result.qualityCountsBeforeDeletesPerBasePerPosition[i][j], readLength, 0);
+            resize(result.qualityCountsBeforeDeletesPerBasePerPosition[i][j], readLength, 0);
     }
     clear(result.qualityCountsAfterDeletesPerBasePerPosition);
     resize(result.qualityCountsAfterDeletesPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i) {
         resize(result.qualityCountsAfterDeletesPerBasePerPosition[i], 63);
         for (int j = 0; j < 63; ++j)
-            fill(result.qualityCountsAfterDeletesPerBasePerPosition[i][j], readLength, 0);
+            resize(result.qualityCountsAfterDeletesPerBasePerPosition[i][j], readLength, 0);
     }
     clear(result.qualityCountsForInsertPerBasePerPosition);
     resize(result.qualityCountsForInsertPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i) {
         resize(result.qualityCountsForInsertPerBasePerPosition[i], 63);
         for (int j = 0; j < 63; ++j)
-            fill(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
+            resize(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
     }
     clear(result.qualityCountsForInsertPerBasePerPosition);
     resize(result.qualityCountsForInsertPerBasePerPosition, 5);
     for (int i = 0; i < 5; ++i) {
         resize(result.qualityCountsForInsertPerBasePerPosition[i], 63);
         for (int j = 0; j < 63; ++j)
-            fill(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
+            resize(result.qualityCountsForInsertPerBasePerPosition[i][j], readLength, 0);
     }
 
     clear(result.qualityCountsForMismatchPerMismatchPerPosition);
@@ -302,18 +302,18 @@ void setReadLength(AlignmentEvaluationResult<Illumina> & result, unsigned readLe
     for (int i = 0; i < 25; ++i) {
         resize(result.qualityCountsForMismatchPerMismatchPerPosition[i], 63);
         for (int j = 0; j < 63; ++j)
-            fill(result.qualityCountsForMismatchPerMismatchPerPosition[i][j], readLength, 0);
+            resize(result.qualityCountsForMismatchPerMismatchPerPosition[i][j], readLength, 0);
     }
 
     clear(result.readsOnContig);
-    fill(result.readsOnContig, contigCount, 0);
+    resize(result.readsOnContig, contigCount, 0);
     clear(result.alignmentsOnContig);
-    fill(result.alignmentsOnContig, contigCount, 0);
+    resize(result.alignmentsOnContig, contigCount, 0);
 
     clear(result.readsWithErrors);
-    fill(result.readsWithErrors, 2 * readLength, 0);
+    resize(result.readsWithErrors, 2 * readLength, 0);
     clear(result.alignmentsWithErrors);
-    fill(result.alignmentsWithErrors, 2 * readLength, 0);
+    resize(result.alignmentsWithErrors, 2 * readLength, 0);
 }
 
 inline void
@@ -674,7 +674,7 @@ void printAlignmentEvaluationResults(AlignmentEvaluationResult<Illumina> const &
     std::cout << std::endl << std::endl << "#--file:substitution-counts.dat" << std::endl;
     std::cout << "#          " << Dna5(0) << "     " << Dna5(0) << " %         " << Dna5(1) << "     " << Dna5(1) << " %        " << Dna5(2) << "      " << Dna5(2) << " %         " << Dna5(3) << "     " << Dna5(3) << " %         " << Dna5(4) << "     " << Dna5(4) << " %         *" << std::endl;
     String<double> sums;
-    fill(sums, 6, 0);
+    resize(sums, 6, 0);
     for (int i = 0; i < 5; ++i) {
         double sum = 0;
         std::cout << Dna5(i) << " ";
