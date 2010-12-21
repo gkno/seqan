@@ -103,7 +103,8 @@ SEQAN_BEGIN_TESTSUITE(Sequence tests)
     // -----------------------------------------------------------------------
     // Checkpoint Verification
     // -----------------------------------------------------------------------
-    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/std_string.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_string.h");
+    SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_vector.h");
     SEQAN_VERIFY_CHECKPOINTS("projects/library/seqan/sequence/adapt_std_list.h");
     // TODO(holtgrew): Add more checkpoints.
 }
