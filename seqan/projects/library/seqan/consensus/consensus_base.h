@@ -213,6 +213,7 @@ convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Value<TMatrix>::Type TValue;
+	typedef typename TFragmentStore::TContigPos TContigPos;
 
 	// Gap char
 	TValue gapChar = gapValue<TValue>();
@@ -243,7 +244,7 @@ convertAlignment(FragmentStore<TSpec, TConfig>& fragStore,
 		TPosIter itPosEnd = end(freePos, Standard());
 		pos = 0;
 		for(;itPos != itPosEnd; ++itPos, ++pos) 
-			if (*itPos < _min(alignIt->beginPos, alignIt->endPos)) break;
+			if ((TContigPos)*itPos < _min(alignIt->beginPos, alignIt->endPos)) break;
 		if (pos + 1 > length(freePos)) resize(freePos, pos+1, Generous());
 		maxTmp = _max(alignIt->beginPos, alignIt->endPos);
 		freePos[pos] = maxTmp;
@@ -352,6 +353,7 @@ getGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
 {
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Value<TGappedConsensus>::Type TValue;
+	typedef typename TFragmentStore::TContigPos TContigPos;
 	
 	TValue gapChar = gapValue<TValue>();
 	typedef typename Iterator<typename TFragmentStore::TContigSeq, Standard>::Type TContigIter;
@@ -361,7 +363,7 @@ getGappedConsensus(FragmentStore<TSpec, TConfig>& fragStore,
 	TGapsIter itGaps = begin(fragStore.contigStore[contigId].gaps, Standard());
 	TGapsIter itGapsEnd = end(fragStore.contigStore[contigId].gaps, Standard());
 	int diff = 0;
-	TSize mySeqPos = 0;
+	TContigPos mySeqPos = 0;
 	for(;itGaps != itGapsEnd; goNext(itGaps)) {
 		for(;mySeqPos < itGaps->seqPos; ++seqContigIt, ++mySeqPos) 
 			appendValue(gappedConsensus, *seqContigIt, Generous());
@@ -675,6 +677,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 	// Update all aligned reads
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename TFragmentStore::TReadPos TReadPos;
+	typedef typename TFragmentStore::TContigPos TContigPos;
 	typedef typename TFragmentStore::TContigGapAnchor TContigGapAnchor;
 	typedef typename Value<typename TFragmentStore::TAlignedReadStore>::Type TAlignedElement;
 	typedef typename Iterator<typename TFragmentStore::TAlignedReadStore>::Type TAlignIter;
@@ -707,7 +710,7 @@ updateContig(FragmentStore<TFragSpec, TConfig>& fragStore,
 		}
 		if (gapOpen) appendValue(alignIt->gaps, TContigGapAnchor(ungappedPos, gappedPos), Generous());
 		if (alignIt->beginPos < alignIt->endPos) {
-			if (endClr != lenRead) 
+			if (endClr != (TContigPos)lenRead) 
 				appendValue(alignIt->gaps, TContigGapAnchor(lenRead, lenRead + (gappedPos - ungappedPos) - (lenRead - endClr)), Generous());
 		} else {
 			if (begClr != 0) 
@@ -1109,6 +1112,7 @@ write(TFile & file,
 	// Basic types
 	typedef FragmentStore<TSpec, TConfig> TFragmentStore;
 	typedef typename Size<TFragmentStore>::Type TSize;
+	typedef typename TFragmentStore::TContigPos TContigPos;
 	typedef typename Value<TFile>::Type TValue;
 	typedef char TMultiReadChar;
 	TMultiReadChar gapChar = gapValue<TMultiReadChar>();
@@ -1249,7 +1253,7 @@ write(TFile & file,
 			std::stringstream gapCoords;
 			TSize letterCount = 0;
 			TSize gapCount = 0;
-			for(TSize column = _min(alignIt->beginPos, alignIt->endPos); column < _max(alignIt->beginPos, alignIt->endPos); ++column) {
+			for(TContigPos column = _min(alignIt->beginPos, alignIt->endPos); column < _max(alignIt->beginPos, alignIt->endPos); ++column) {
 				if (mat[idToPos[iCount].second * len + column] == gapChar) {
 					++gapCount;
 					gapCoords << letterCount << ' ';
@@ -1408,13 +1412,13 @@ _convertSimpleReadFile(TFile& file,
 			// Insert an aligned read
 			TSize readLen = length(seq);
 			if (alignEl.beginPos < alignEl.endPos) {
-				if (readLen != alignEl.endPos - alignEl.beginPos) {
+				if ((TPos)readLen != alignEl.endPos - alignEl.beginPos) {
 					alignEl.endPos = alignEl.beginPos + readLen;
 				}
 				if (alignEl.beginPos < minPos) minPos = alignEl.beginPos;
 				if (alignEl.endPos > maxPos) maxPos = alignEl.endPos;
 			} else {
-				if (readLen != alignEl.beginPos - alignEl.endPos) {
+				if ((TPos)readLen != alignEl.beginPos - alignEl.endPos) {
 					alignEl.beginPos = alignEl.endPos + readLen;
 				}
 				if (alignEl.endPos < minPos) minPos = alignEl.endPos;
