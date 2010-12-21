@@ -48,6 +48,7 @@ namespace seqan {
 ..summary:Journaled versions of arbitrary underlying string.
 ..signature:String<TValue, Journaled<THostSpec, TJournalSpec, TBufferSpec> >
 ..include:seqan/sequence_journaled.h
+..cat:Sequencess
  */
 
 template <typename THostSpec, typename TJournalSpec = SortedArray, typename TBufferSpec = Alloc<void> >

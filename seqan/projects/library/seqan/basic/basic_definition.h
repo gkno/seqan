@@ -103,6 +103,7 @@ struct TagSelector
 .Memvar.TagSelector#tagId:
 ..class:Class.TagSelector
 ..type:nolink:int
+..cat:Basic
 ..summary:Stores the index of a @Page.Glossary.Tag@ in the tag list.
 ..include:seqan/basic.h
 */

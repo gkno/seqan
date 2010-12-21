@@ -50,6 +50,7 @@ namespace SEQAN_NAMESPACE_MAIN
 the (globale) functions @Function.allocate@ and @Function.deallocate@, respectively. The globale functions
 get an allocator object as their first arguments. This allocator object is not the $ToStdAllocator$ object itself,
 but the host object that was given to the constructor. 
+..cat:Basic
 ..remarks:
 ..see:Function.allocate
 ..see:Function.deallocate

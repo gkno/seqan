@@ -63,7 +63,7 @@ public:
 
 /**
 .Shortcut.EditDistanceScore:
-..cat:scoring
+..cat:Scoring
 ..summary:Edit distance scoring scheme.
 ..signature:EditDistanceScore
 ..shortcutfor:Spec.EditDistance

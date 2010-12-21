@@ -117,7 +117,7 @@ public:
 
 /**
 .Shortcut.SimpleScore:
-..cat:scoring
+..cat:Scoring
 ..summary:Simple scoring scheme.
 ..signature:SimpleScore
 ..shortcutfor:Spec.Simple Score
