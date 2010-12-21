@@ -19,7 +19,7 @@ void doFind(THaystack &myHaystack, TNeedle &myNeedle)
   // Find!
   while (find(finder, pattern) and findBegin(finder, pattern)) {
     // nop
-    //std::cout << position(finder) << ": " << _getMatchScore(pattern) << std::endl;
+    //std::cout << position(finder) << ": " << getScore(pattern) << std::endl;
   }
 }
 

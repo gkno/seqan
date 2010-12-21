@@ -71,7 +71,7 @@ void mapReadOnline(TWeightedMatches & matches,
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
                 SEQAN_ASSERT_TRUE(ret);
-                int theScore = _getMatchScore(pattern);
+                int theScore = getScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, true, endPosition(finder), theScore, beginPosition(finder)));
             }
         }
@@ -83,7 +83,7 @@ void mapReadOnline(TWeightedMatches & matches,
             while (find(finder, pattern)) {
                 bool ret = findBegin(finder, pattern);
                 SEQAN_ASSERT_TRUE(ret);
-                int theScore = _getMatchScore(pattern);
+                int theScore = getScore(pattern);
                 appendValue(matches, WeightedMatch(contigId, false, endPosition(finder), theScore, beginPosition(finder)));
             }
         }

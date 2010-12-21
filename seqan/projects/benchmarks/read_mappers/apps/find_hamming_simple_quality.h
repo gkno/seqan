@@ -80,7 +80,7 @@ inline int score(const Pattern<TNeedle, HammingSimpleQuality> &me) {
 
 
 template <typename TNeedle>
-inline int _getMatchScore(const Pattern<TNeedle, HammingSimpleQuality> &me) {
+inline int getScore(const Pattern<TNeedle, HammingSimpleQuality> &me) {
     SEQAN_CHECKPOINT;
     return -me.distance;
 }

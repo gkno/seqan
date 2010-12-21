@@ -121,21 +121,21 @@ void testSeedsSeedBaseAssign(TSeedSpec const &)
         {
             TSeed seed2(seed);
             SEQAN_ASSERT_TRUE(seed2 == seed);
-            SEQAN_ASSERT_EQ(_getMatchScore(seed2), _getMatchScore(seed));
+            SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
         // Via operator=.
         {
             TSeed seed2;
             seed2 = seed;
             SEQAN_ASSERT_TRUE(seed2 == seed);
-            SEQAN_ASSERT_EQ(_getMatchScore(seed2), _getMatchScore(seed));
+            SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
         // Via assign().
         {
             TSeed seed2;
             assign(seed2, seed);
             SEQAN_ASSERT_TRUE(seed2 == seed);
-            SEQAN_ASSERT_EQ(_getMatchScore(seed2), _getMatchScore(seed));
+            SEQAN_ASSERT_EQ(getScore(seed2), getScore(seed));
         }
     }
     // Test without score.

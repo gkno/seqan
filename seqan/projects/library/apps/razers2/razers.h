@@ -1334,7 +1334,7 @@ matchVerify(
 	while (find(myersFinder, myersPattern, minScore))
 	{
 		TPosition pos = position(hostIterator(myersFinder));
-		int score = _getMatchScore(myersPattern);
+		int score = getScore(myersPattern);
 		
 #ifdef RAZERS_NOOUTERREADGAPS
 		// Manually align the last base of the read

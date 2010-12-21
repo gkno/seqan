@@ -427,7 +427,7 @@ _updateSeedsScoreMergeHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> c
     double fracSeed = static_cast<double>(getSeedSize(seed) - 0.5 * overlap) / static_cast<double>(total);
     double fracOther = static_cast<double>(getSeedSize(other) - 0.5 * overlap) / static_cast<double>(total);
     typedef typename SeedScore<TSeed>::Type TScoreValue;
-	TScoreValue newScore = static_cast<TScoreValue>(round(fracSeed * _getMatchScore(seed) + fracOther * _getMatchScore(other)));
+	TScoreValue newScore = static_cast<TScoreValue>(round(fracSeed * getScore(seed) + fracOther * getScore(other)));
     setScore(seed, newScore);
 }
 
@@ -482,7 +482,7 @@ _updateSeedsScoreSimpleChainHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TCon
 
     // The new score is the sum of the seed scores and the better of
     // the gap scores computed above.
-    setScore(seed, _getMatchScore(seed) + _getMatchScore(other) + gapScore);
+    setScore(seed, getScore(seed) + getScore(other) + gapScore);
 }
 
 
@@ -512,7 +512,7 @@ inline void
 _updateSeedsScoreChaosHelper(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const & other, TScoreValue const & scoreDelta, True const &)
 {
     SEQAN_CHECKPOINT;
-    setScore(seed, _getMatchScore(seed) + _getMatchScore(other) + scoreDelta);
+    setScore(seed, getScore(seed) + getScore(other) + scoreDelta);
 }
 
 
@@ -529,7 +529,7 @@ _updateSeedsScoreChaos(Seed<TSpec, TConfig> & seed, Seed<TSpec, TConfig> const &
 
 template <typename TSeed>
 inline typename SeedScore<TSeed>::Type
-_getMatchScore(TSeed const & seed)
+getScore(TSeed const & seed)
 {
     SEQAN_CHECKPOINT;
     return seed._score;

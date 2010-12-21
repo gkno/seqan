@@ -380,9 +380,9 @@ void simulateReads(
 			int minScore = -(int)countErrors;
 			TMyersFinder maxPos;
 			while (find(myersFinder, myersPattern, minScore))
-				if (maxScore < _getMatchScore(myersPattern)) 
+				if (maxScore < getScore(myersPattern)) 
 				{
-					maxScore = _getMatchScore(myersPattern);
+					maxScore = getScore(myersPattern);
 					maxPos = myersFinder;
 				}
 			

@@ -260,10 +260,10 @@ int bestScoreForAligned(TFragmentStore & fragments,
     
     // No explicit alignment is required if distances are not to be weighted.
     if (!options.weightedDistances)
-        return _getMatchScore(pattern);
+        return getScore(pattern);
 
     // Otherwise, we need to build an alignment and compute the score from it.
-    ret = findBegin(finder, pattern, _getMatchScore(pattern));
+    ret = findBegin(finder, pattern, getScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
 
     // Prepare alignment datastructures.
@@ -277,9 +277,9 @@ int bestScoreForAligned(TFragmentStore & fragments,
     StringSet<String<Dna5> > stringSet;
     appendValue(stringSet, infix(finder));
     appendValue(stringSet, read);
-    int alignmentScore = globalAlignment(align, stringSet, scoringScheme, _getMatchScore(pattern), -_getMatchScore(pattern), BandedNeedlemanWunsch());
+    int alignmentScore = globalAlignment(align, stringSet, scoringScheme, getScore(pattern), -getScore(pattern), BandedNeedlemanWunsch());
     (void)alignmentScore; // Supress warning in non-debug mode.
-    SEQAN_ASSERT_EQ(alignmentScore, _getMatchScore(pattern));
+    SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
     // Compute quality-based score of alignment.  We pass the
     // score matrix to allow for N-is-wildcard mode.

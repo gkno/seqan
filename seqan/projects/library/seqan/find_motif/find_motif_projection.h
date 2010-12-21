@@ -1242,7 +1242,7 @@ displayResult(MotifFinder<TValue, Projection> & projection)
 
 template <typename TValue>
 inline int
-_getMatchScore(MotifFinder<TValue, Projection> & me)
+getScore(MotifFinder<TValue, Projection> & me)
 {
     SEQAN_CHECKPOINT;
 	return me.score;

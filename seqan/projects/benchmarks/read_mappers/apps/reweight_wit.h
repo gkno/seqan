@@ -208,16 +208,16 @@ void reweightInterval(WitStore & store,
 
     bool ret = setEndPosition(finder, pattern, interval.firstPos);
     SEQAN_ASSERT_TRUE(ret);
-    ret = findBegin(finder, pattern, _getMatchScore(pattern));
+    ret = findBegin(finder, pattern, getScore(pattern));
     SEQAN_ASSERT_TRUE(ret);
 
     String<WeightedMatch> weightedMatches;
 
     while (find(finder, pattern) && endPosition(finder) <= interval.lastPos + 1) {
-        bool ret = findBegin(finder, pattern, _getMatchScore(pattern));
+        bool ret = findBegin(finder, pattern, getScore(pattern));
         (void)ret;  // Supress warnings in Release mode.
         SEQAN_ASSERT_TRUE(ret);
-        SEQAN_ASSERT_GEQ(static_cast<int>(1.0 * _getMatchScore(pattern) / length(read)), -static_cast<int>(interval.distance));
+        SEQAN_ASSERT_GEQ(static_cast<int>(1.0 * getScore(pattern) / length(read)), -static_cast<int>(interval.distance));
 
         // Prepare alignment datastructures.
         Align<String<Dna5>, ArrayGaps> align;
@@ -229,9 +229,9 @@ void reweightInterval(WitStore & store,
         StringSet<String<Dna5> > stringSet;
         appendValue(stringSet, infix(finder));
         appendValue(stringSet, read);
-        int alignmentScore = globalAlignment(align, stringSet, matrixScore, 2*_getMatchScore(pattern), -2*_getMatchScore(pattern), BandedNeedlemanWunsch());
+        int alignmentScore = globalAlignment(align, stringSet, matrixScore, 2*getScore(pattern), -2*getScore(pattern), BandedNeedlemanWunsch());
         (void)alignmentScore;  // Supress warnings in Release mode.
-        SEQAN_ASSERT_EQ(alignmentScore, _getMatchScore(pattern));
+        SEQAN_ASSERT_EQ(alignmentScore, getScore(pattern));
 
         // Compute quality-based score of alignment.  We pass the
         // score matrix to allow for N-is-wildcard mode.

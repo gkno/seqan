@@ -166,7 +166,7 @@ void testCSPImpl(TText &text, TNeedle &needle, int errors)
 	Finder<TText> finder(text);
     SEQAN_ASSERT_TRUE(find(finder, needle, state, -1000));
     SEQAN_ASSERT_EQ(position(finder), length(text) - 1) ;
-    SEQAN_ASSERT_EQ(_getMatchScore(state), -errors);
+    SEQAN_ASSERT_EQ(getScore(state), -errors);
 }
 
 SEQAN_DEFINE_TEST(test_myers_find_banded_csp)

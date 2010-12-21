@@ -250,13 +250,13 @@ host(Pattern<TNeedle, AbndmAlgo> const & me)
 
 //////////////////////////////////////////////////////////////////////////////
 
-///.Function._getMatchScore.param.pattern.type:Spec.AbndmAlgo
+///.Function.getScore.param.pattern.type:Spec.AbndmAlgo
 
 template <typename TNeedle>
-int _getMatchScore(Pattern<TNeedle, AbndmAlgo > & me) 
+int getScore(Pattern<TNeedle, AbndmAlgo > & me) 
 {
     SEQAN_CHECKPOINT
-	return _getMatchScore(me.verifier);
+	return getScore(me.verifier);
 }
 
 //////////////////////////////////////////////////////////////////////////////

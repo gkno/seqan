@@ -248,13 +248,13 @@ SEQAN_CHECKPOINT
 }
 
 //////////////////////////////////////////////////////////////////////////////
-///.Function._getMatchScore.param.pattern.type:Spec.Pex
+///.Function.getScore.param.pattern.type:Spec.Pex
 
 template <typename TNeedle, typename TVerification, typename TMultiFinder>
-int _getMatchScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
+int getScore(Pattern<TNeedle, Pex<TVerification,TMultiFinder > > & me) 
 {
 SEQAN_CHECKPOINT
-  return _getMatchScore(me.range_table[_getRoot(me)].verifier);
+  return getScore(me.range_table[_getRoot(me)].verifier);
 }
 
 //////////////////////////////////////////////////////////////////////////////

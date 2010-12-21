@@ -214,7 +214,7 @@ void clear(LocalAlignmentFinder<TScoreValue> & sw_finder)
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename TScoreValue>
-TScoreValue _getMatchScore(LocalAlignmentFinder<TScoreValue> & sw)
+TScoreValue getScore(LocalAlignmentFinder<TScoreValue> & sw)
 {
 	typedef LocalAlignmentFinder<TScoreValue> TFinder;
 	if(sw.bestEndPos !=  minValue<typename TFinder::TMatrixPosition>())

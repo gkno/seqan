@@ -178,7 +178,7 @@ setScoreLimit(Pattern<TNeedle, MyersUkkonenReads> & me,
 
 
 template <typename TNeedle>
-int _getMatchScore(const Pattern<TNeedle, MyersUkkonenReads> & me)  {
+int getScore(const Pattern<TNeedle, MyersUkkonenReads> & me)  {
 	return static_cast<int>(me._score);
 }
 
@@ -244,7 +244,7 @@ inline bool find(TFinder &finder, Pattern<TNeedle, MyersUkkonenReads> &me) {
         // Compute the current score.
         typedef typename Value<TNeedle>::Type TAlphabet;
         int lastCharScore = me._matchNMask[ordValue(me._lastCharacter) + ValueSize<TAlphabet>::VALUE * ordValue(haystack(finder)[endPos])];
-        me._score = _getMatchScore(me._wrappedPattern) + lastCharScore;
+        me._score = getScore(me._wrappedPattern) + lastCharScore;
     } while (me._score < scoreLimit(me));
 
     // Advance finder by one, will wind back by one before calling

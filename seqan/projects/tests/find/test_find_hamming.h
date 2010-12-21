@@ -102,7 +102,7 @@ template <typename TString> struct ForAllNeedlesFunctor {
                 SEQAN_ASSERT_EQ_MSG(position(simpleFinder) + length(needle), endPosition(simpleFinder), "i = %d", i);
                 SEQAN_ASSERT_EQ_MSG(position(simpleFinder), position(horspoolFinder), "i = %d", i);
                 SEQAN_ASSERT_EQ_MSG(endPosition(simpleFinder), endPosition(horspoolFinder), "i = %d", i);
-                SEQAN_ASSERT_EQ_MSG(_getMatchScore(simplePattern), _getMatchScore(horspoolPattern), "i = %d", i);
+                SEQAN_ASSERT_EQ_MSG(getScore(simplePattern), getScore(horspoolPattern), "i = %d", i);
                 i += 1;
             }
         }

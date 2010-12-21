@@ -27,6 +27,7 @@ CXXFLAGS += -O9 -fopenmp -march=native -DSEQAN_ENABLE_DEBUG=0
 CXXFLAGS += -pedantic -W -Wall -Wno-variadic-macros
 CXXFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CXXFLAGS += -DSEQAN_ENABLE_TESTING=0
+CXXFLAGS += -static
 CXXFLAGS += ${CXXEXTRAFLAGS}
 
 # Intel Threading Building Blocks

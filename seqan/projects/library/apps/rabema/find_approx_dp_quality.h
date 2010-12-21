@@ -138,7 +138,7 @@ setScoreLimit(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & m
 
 template <typename TNeedle, typename TSpec, bool HasFindBeginSupport>
 inline int
-_getMatchScore(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & me)
+getScore(Pattern<TNeedle, QualityDpSearch<TSpec, HasFindBeginSupport> > & me)
 {
 	return back(me.data_tab);
 }
@@ -250,7 +250,7 @@ find(TFinder & finder,
 //         }
 
         // Check whether we can report a hit.
-        if (_getMatchScore(me) >= scoreLimit(me)) {
+        if (getScore(me) >= scoreLimit(me)) {
 			_setFinderEnd(finder);
             return true;
         }
@@ -323,7 +323,7 @@ template <typename TNeedle, typename TSpec>
 inline
 int getFindBeginScore(Pattern<TNeedle, QualityDpSearch<TSpec, true> > & pattern) {
     SEQAN_CHECKPOINT;
-    return _getMatchScore(pattern._findBeginPattern);
+    return getScore(pattern._findBeginPattern);
 }
 
 

@@ -189,7 +189,7 @@ struct FindBeginImpl_
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return _getMatchScore(pattern.data_findBeginPattern);
+		return getScore(pattern.data_findBeginPattern);
 	}
 };
 
@@ -265,7 +265,7 @@ struct FindBeginImpl_<Myers<FindPrefix, THasState, void> >
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return _getMatchScore(pattern.data_findBeginPattern);
+		return getScore(pattern.data_findBeginPattern);
 	}
 };
 
@@ -308,7 +308,7 @@ struct FindBeginImpl_<void>
 	static inline typename Value<typename ScoringScheme<TPattern>::Type>::Type
 	getBeginScore(TPattern & pattern)
 	{
-		return _getMatchScore(pattern);
+		return getScore(pattern);
 	}
 };
 
@@ -339,7 +339,7 @@ _findBeginInit(TPattern & pattern, TNeedle & needle_)
 ...remarks:This must be a pattern for approximate string matching.
 ...type:Class.Pattern
 ..param.limit:The score limit.
-...default:The limit used during the last @Function.find@ call, see @Function._getMatchScore@.
+...default:The limit used during the last @Function.find@ call, see @Function.getScore@.
 ...remarks:All occurrences that score at least $limit$ are reported.
 ..returns:$boolean$ that indicates whether an begin position was found.
 ..remarks:The function @Function.find@ successfully called be called - that is an end position was found - before calling $findBegin$ to find a begin position.
@@ -377,7 +377,7 @@ findBegin(TFinder & finder,
 ...remarks:The value is set after a successfully call of @Function.findBegin@.
 If no match was found, the value is undefined.
 ..see:Function.findBegin
-..see:Function._getMatchScore
+..see:Function.getScore
 */
 
 template <typename TPattern>

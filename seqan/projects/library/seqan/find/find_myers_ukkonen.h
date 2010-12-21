@@ -769,17 +769,17 @@ SEQAN_CHECKPOINT
 
 //____________________________________________________________________________
 
-///.Function._getMatchScore.param.pattern.type:Spec.Myers
+///.Function.getScore.param.pattern.type:Spec.Myers
 
 template <typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 
-_getMatchScore(PatternState_<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
+getScore(PatternState_<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
 {
 	return -(int)state.errors;
 }
 template<typename TNeedle, typename TSpec, typename TFindBeginPatternSpec>
 inline int 
-_getMatchScore(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
+getScore(Pattern<TNeedle, Myers<TSpec, True, TFindBeginPatternSpec> > const & state)
 {
 	return -(int)state.errors;
 }

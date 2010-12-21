@@ -26,7 +26,7 @@ int main()
 	LocalAlignmentFinder<> finder(ali2);
 	Score<int> scoring(2, -1, -2, 0);
 	while (localAlignment(ali2, finder, scoring, 4, WatermanEggert())) {
-		::std::cout << "Score = " << _getMatchScore(finder) << ::std::endl;
+		::std::cout << "Score = " << getScore(finder) << ::std::endl;
 		::std::cout << ali2;
 		::std::cout << "Aligns Seq1[" << clippedBeginPosition(row(ali2, 0)) << ":" << (clippedEndPosition(row(ali2, 0))-1) << "]";
 		::std::cout << " and Seq2[" << clippedBeginPosition(row(ali2, 1)) << ":" <<  (clippedEndPosition(row(ali2, 1))-1) << "]" << ::std::endl << ::std::endl;

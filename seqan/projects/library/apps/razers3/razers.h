@@ -1538,11 +1538,11 @@ matchVerify(
 				maxScore = minScore - 1;
 			}
 		}
-		// if (_getMatchScore(myersPattern) >= maxScore)
-		if (_getMatchScore(state) >= maxScore)
+		// if (getScore(myersPattern) >= maxScore)
+		if (getScore(state) >= maxScore)
 		{
-			maxScore = _getMatchScore(state);
-			// maxScore = _getMatchScore(myersPattern);
+			maxScore = getScore(state);
+			// maxScore = getScore(myersPattern);
 			maxPos = pos;
 		}
 		lastPos = pos;

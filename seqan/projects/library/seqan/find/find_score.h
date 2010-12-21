@@ -282,10 +282,10 @@ SEQAN_CHECKPOINT
 //____________________________________________________________________________
 // returns the score of the last hit position found (note:position = end of occurrence in haystack)
 
-/**.Function._getMatchScore
+/**.Function.getScore
 ..cat:Searching
 ..summary:Score of the last found match in approximate searching.
-..signature:_getMatchScore(pattern)
+..signature:getScore(pattern)
 ..param.pattern:A @Concept.Pattern|pattern@ that can be used for approximate searching.
 ...type:Spec.DPSearch
 ..returns:The score of the last match found using $pattern$.
@@ -297,7 +297,7 @@ SEQAN_CHECKPOINT
 
 template <typename TNeedle, typename TScore, typename TSpec, typename TFindBeginPatternSpec>
 inline typename Value<TScore>::Type
-_getMatchScore(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
+getScore(Pattern<TNeedle, DPSearch<TScore, TSpec, TFindBeginPatternSpec> > & me)
 {
 	return front(me.data_tab);
 }

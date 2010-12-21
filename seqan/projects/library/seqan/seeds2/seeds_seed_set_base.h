@@ -131,7 +131,7 @@ template <typename TSeed, typename TSeedSet>
 bool _qualityReached(TSeed const & seed, TSeedSet const & seedSet, MinScore const &)
 {
     SEQAN_CHECKPOINT;
-    return _getMatchScore(seed) >= getMinScoreThreshold(seedSet);
+    return getScore(seed) >= getMinScoreThreshold(seedSet);
 }
 
 

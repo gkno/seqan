@@ -170,7 +170,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         bool ret = setEndPosition(finder, pattern, endPos);
         (void) ret; // If compiled without assertions.
         SEQAN_ASSERT_TRUE(ret);
-        maxError = -_getMatchScore(pattern);
+        maxError = -getScore(pattern);
     }
     
     // Debug-adjustments.
@@ -228,18 +228,18 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         ret = setEndPosition(finder, pattern, endPos);
         SEQAN_ASSERT_TRUE(ret);
         SEQAN_ASSERT_EQ(endPos, endPosition(finder));
-        SEQAN_ASSERT_GEQ(_getMatchScore(pattern), -maxError);
-        while (findBegin(finder, pattern, _getMatchScore(pattern)))
+        SEQAN_ASSERT_GEQ(getScore(pattern), -maxError);
+        while (findBegin(finder, pattern, getScore(pattern)))
             continue;  // Find leftmost begin position.
         SEQAN_ASSERT_GT(endPos, beginPosition(finder));
-        SEQAN_ASSERT_EQ(_getMatchScore(pattern), getBeginScore(pattern));
+        SEQAN_ASSERT_EQ(getScore(pattern), getBeginScore(pattern));
 
         // Add original hit to the error curve points.
-        int relativeScore = (int)ceilAwayFromZero(100.0 * _getMatchScore(pattern) / length(read));
+        int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
         appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
         hitBeginPosition = beginPosition(finder);
         if (ENABLE && (ALL || readId == READID)) {
-            std::cerr << __FILE__ << ":" << __LINE__ << " -- _getMatchScore(pattern) == " << _getMatchScore(pattern) << std::endl;
+            std::cerr << __FILE__ << ":" << __LINE__ << " -- getScore(pattern) == " << getScore(pattern) << std::endl;
             std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << " (FIRST HIT)" << std::endl;
             std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << " endPos = " << endPos << std::endl;
         }
@@ -247,9 +247,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         // Now extend to the first hit with too low score.
         bool foundWithTooLowScore = false;
         while (find(finder, pattern)) {
-	        while (findBegin(finder, pattern, _getMatchScore(pattern)))
+	        while (findBegin(finder, pattern, getScore(pattern)))
     	        continue;  // Find leftmost begin position.
-            if (_getMatchScore(pattern) < -maxError && beginPosition(finder) != back(tempMatches).beginPos) {
+            if (getScore(pattern) < -maxError && beginPosition(finder) != back(tempMatches).beginPos) {
                 foundWithTooLowScore = true;
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- Found too low score." << std::endl;
@@ -257,7 +257,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 break;
             }
-            int relativeScore = (int)ceilAwayFromZero(100.0 * _getMatchScore(pattern) / length(read));
+            int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
             appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
             if (ENABLE && (ALL || readId == READID)) {
                 std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -270,7 +270,7 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
         // changes.
         if (foundWithTooLowScore) {
             if (beginPosition(finder) == hitBeginPosition) {
-                relativeScore = static_cast<int>(ceilAwayFromZero(100.0 * static_cast<double>(_getMatchScore(pattern)) / static_cast<double>(length(read))));
+                relativeScore = static_cast<int>(ceilAwayFromZero(100.0 * static_cast<double>(getScore(pattern)) / static_cast<double>(length(read))));
                 appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 TPosition currentBeginPosition = beginPosition(finder);
                 // Add the rest until we hit one with a different begin position.
@@ -279,12 +279,12 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 // for the quality based DP algorithm which can suffer
                 // from "infinite inserts").
                 for (unsigned i = 0; find(finder, pattern) && i < length(read); ++i) {
-			        while (findBegin(finder, pattern, _getMatchScore(pattern)))
+			        while (findBegin(finder, pattern, getScore(pattern)))
 			            continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);
                     if (beginPosition(finder) != currentBeginPosition)
                         break;
-                    relativeScore = (int)ceilAwayFromZero(100.0 * _getMatchScore(pattern) / length(read));
+                    relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -345,9 +345,9 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 if (endPosition(finder) > oldTentativeLeft)
                     break;  // Could not set position of the finder left of old tentative left.
-			    while (findBegin(finder, pattern, _getMatchScore(pattern)))
+			    while (findBegin(finder, pattern, getScore(pattern)))
 			        continue;  // Find leftmost begin position.
-                int relativeScore = (int)ceilAwayFromZero(100.0 * _getMatchScore(pattern) / length(read));
+                int relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                 appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                 if (ENABLE && (ALL || readId == READID)) {
                     std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
@@ -355,13 +355,13 @@ size_t buildErrorCurvePoints(String<WeightedMatch> & errorCurve,
                 }
                 foundTooLowScore = foundTooLowScore || (relativeScore < relativeMinScore);
                 while (find(finder, pattern) && endPosition(finder) != oldTentativeLeft) {
-			        while (findBegin(finder, pattern, _getMatchScore(pattern)))
+			        while (findBegin(finder, pattern, getScore(pattern)))
             			continue;  // Find leftmost begin position.
                     SEQAN_ASSERT_TRUE(ret);
-                    relativeScore = (int)ceilAwayFromZero(100.0 * _getMatchScore(pattern) / length(read));
+                    relativeScore = (int)ceilAwayFromZero(100.0 * getScore(pattern) / length(read));
                     appendValue(tempMatches, WeightedMatch(contigId, isForward, endPosition(finder) - 1, relativeScore, beginPosition(finder)));
                     if (ENABLE && (ALL || readId == READID)) {
-                        std::cerr << __FILE__ << ":" << __LINE__ << " -- raw score is " << _getMatchScore(pattern) << std::endl;
+                        std::cerr << __FILE__ << ":" << __LINE__ << " -- raw score is " << getScore(pattern) << std::endl;
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- appended " << back(tempMatches) << " for read id " << readId << std::endl;
                         std::cerr << __FILE__ << ":" << __LINE__ << " -- infix " << infix(finder) << " read " << read << std::endl;
                     }

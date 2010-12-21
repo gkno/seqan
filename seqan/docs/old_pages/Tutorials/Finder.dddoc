@@ -89,7 +89,7 @@ Rather slow but can be applied to many kinds of @glos:scoring scheme@.
 ..text:
 The scoring model can be accessed by @Function.scoringScheme@ and @Function.setScoringScheme@,
 the limit by @Function.scoreLimit@ and @Function.setScoreLimit@,
-and the score of the last found match by @Function._getMatchScore@.
+and the score of the last found match by @Function.getScore@.
 All these functions are applied to the @Class.Pattern@ object that stores all information about the approximative search.
 ..text:Note: The position stored in the @Class.Finder@ is the end position, not the start position, of the last found match.
 ..text:Example: See @Demo.Approximate Searching@.
