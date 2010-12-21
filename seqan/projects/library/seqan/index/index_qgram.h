@@ -1157,7 +1157,7 @@ To take effect of changing the $stepSize$ the q-gram index should be empty or re
 ..summary:Builds a q-gram index on a sequence. 
 ..cat:Index
 ..signature:createQGramIndex(index)
-..signature:createQGramIndex(sa, dir, bucketMap, text, shape, stepSize) (DEPRECATED)
+..signature:createQGramIndex(sa, dir, bucketMap, text, shape, stepSize) [DEPRECATED]
 ..param.index:The q-gram index.
 ...type:Spec.IndexQGram
 ..param.sa:The resulting list in which all q-grams are sorted alphabetically.
