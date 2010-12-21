@@ -209,6 +209,10 @@ namespace SEQAN_NAMESPACE_MAIN
         File(void * /*dummy*/ = NULL): // to be compatible with the FILE*(NULL) constructor
             handle(-1) {}
 
+    protected:
+        ~File() {}
+    public:
+        
         inline int _getOFlag(int openMode) const {
 			int result = O_LARGEFILE;
 
